@@ -1,0 +1,7 @@
+target/
+.metadata/
+.classpath
+.project
+.settings/
+release.properties
+pom.xml.releaseBackup
