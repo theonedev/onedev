@@ -1,0 +1,77 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>parent.plugin</artifactId>
+		<groupId>com.pmease</groupId>
+		<version>1.0.0</version>
+	</parent>
+	<version>1.0.1</version>
+	
+	<artifactId>commons.jetty</artifactId>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.pmease</groupId>
+				<artifactId>plugin.maven</artifactId>
+			</plugin>
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+	
+	<dependencies>
+		<dependency>
+			<groupId>com.pmease</groupId>
+			<artifactId>commons.loader</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>8.1.0.v20120127</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlets</artifactId>
+			<version>8.1.0.v20120127</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlet</artifactId>
+			<version>8.1.0.v20120127</version>
+		</dependency>
+	</dependencies>
+	
+	<repositories>
+		<repository>
+			<id>pmeaseRepo</id>
+			<name>PMEase Repository</name>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</snapshots>
+			<url>http://artifact.pmease.com/</url>
+		</repository>
+	</repositories>
+
+	<properties>
+		<moduleClass>com.pmease.commons.jetty.JettyModule</moduleClass>
+	</properties>
+</project>
