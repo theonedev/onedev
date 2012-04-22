@@ -138,29 +138,35 @@ public class Bootstrap {
 		}
 		
 		ClassLoader appClassLoader = new URLClassLoader(urls.toArray(new URL[0]), Bootstrap.class.getClassLoader());
+		ClassLoader originClassLoader = Thread.currentThread().getContextClassLoader();
+		Thread.currentThread().setContextClassLoader(appClassLoader);
 		
-		String appLoaderClassName = System.getProperty(APP_LOADER_PROPERTY_NAME);
-		if (appLoaderClassName == null)
-			appLoaderClassName = DEFAULT_APP_LOADER;
-		
-		final Lifecycle appLoader;
 		try {
-			Class<?> appLoaderClass = appClassLoader.loadClass(appLoaderClassName);
-			appLoader = (Lifecycle) appLoaderClass.newInstance();
-			appLoader.start();
-		} catch (Exception e) {
-			throw BootstrapUtils.unchecked(e);
-		}
-		
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			public void run() {
-				try {
-					appLoader.stop();
-				} catch (Exception e) {
-					throw BootstrapUtils.unchecked(e);
-				}
+			String appLoaderClassName = System.getProperty(APP_LOADER_PROPERTY_NAME);
+			if (appLoaderClassName == null)
+				appLoaderClassName = DEFAULT_APP_LOADER;
+			
+			final Lifecycle appLoader;
+			try {
+				Class<?> appLoaderClass = appClassLoader.loadClass(appLoaderClassName);
+				appLoader = (Lifecycle) appLoaderClass.newInstance();
+				appLoader.start();
+			} catch (Exception e) {
+				throw BootstrapUtils.unchecked(e);
 			}
-		});
+			
+			Runtime.getRuntime().addShutdownHook(new Thread() {
+				public void run() {
+					try {
+						appLoader.stop();
+					} catch (Exception e) {
+						throw BootstrapUtils.unchecked(e);
+					}
+				}
+			});
+		} finally {
+			Thread.currentThread().setContextClassLoader(originClassLoader);
+		}
 	}
 	
 	private static void configureLogback() {

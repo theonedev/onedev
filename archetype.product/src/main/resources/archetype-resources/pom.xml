@@ -106,7 +106,7 @@
 		<dependency>
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.jsw</artifactId>
-			<version>3.5.14</version>
+			<version>1.0.1</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

@@ -7,7 +7,7 @@
 		<version>1.0.0</version>
 	</parent>
 	<artifactId>commons.jsw</artifactId>
-	<version>3.5.14</version>
+	<version>1.0.1</version>
 
 	<build>
 		<plugins>
@@ -54,5 +54,4 @@
 			<url>http://artifact.pmease.com/</url>
 		</repository>
 	</repositories>
-
 </project>
