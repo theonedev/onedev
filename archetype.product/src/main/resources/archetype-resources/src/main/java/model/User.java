@@ -7,7 +7,9 @@ import com.pmease.commons.hibernate.AbstractEntity;
 
 @Entity
 public class User extends AbstractEntity {
-	
+
+	private static final long serialVersionUID = 1L;
+
 	@Column(unique = true, nullable = false)
 	private String name;
 

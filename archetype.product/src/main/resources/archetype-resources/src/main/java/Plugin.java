@@ -54,7 +54,7 @@ public class Plugin extends AbstractPlugin {
 			        		.setMaxInactiveInterval(Integer.parseInt(serverProps.getProperty("sessionTimeout")));
 					context.setResourceBase(new File(Bootstrap.installDir, "resource").getAbsolutePath());
 					
-					ServletHolder servletHolder = JettyUtils.getDefaultServletHolder(context);
+					ServletHolder servletHolder = JettyUtils.createResourceServletHolder();
 					Preconditions.checkNotNull(servletHolder);
 					context.addServlet(servletHolder, "/images/*");
 					context.addServlet(servletHolder, "/scripts/*");
