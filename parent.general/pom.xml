@@ -156,7 +156,7 @@
 				<plugin>
 					<groupId>com.pmease</groupId>
 					<artifactId>plugin.maven</artifactId>
-					<version>1.0.0</version>
+					<version>1.0.1</version>
 					<executions>
 						<execution>
 							<id>check-project-dependencies</id>

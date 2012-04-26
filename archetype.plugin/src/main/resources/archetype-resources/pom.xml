@@ -5,7 +5,7 @@
 	<groupId>${groupId}</groupId>	
 #end
 	<artifactId>${artifactId}</artifactId>
-#if (${version} != "1.0.0")
+#if (${version} != "1.0.1")
 	<version>${version}</version>
 #end
 	<parent>

@@ -74,9 +74,21 @@ public class CheckProjectDependenciesMojo extends AbstractMojo {
 					dependencyKeys.add(artifact.getGroupId() + "." + artifact.getArtifactId());
 			}
 
-			for (Map.Entry<String, String> entry : projectVersions.entrySet()) {
-				if (!dependencyKeys.contains(entry.getKey()))
-					errors.add("Missed dependency to project '" + entry.getKey() + "'.");
+			Set<String> pluginKeys = new HashSet<String>();
+			for (File projectDir : workspaceDir.listFiles()) {
+				if (!projectDir.equals(project.getBasedir())) {
+					File propsFile = new File(projectDir, "target/classes/"
+							+ PluginConstants.PLUGIN_PROPERTY_FILE);
+					if (propsFile.exists()) {
+						Properties props = PluginUtils.loadProperties(propsFile);
+						pluginKeys.add(props.getProperty("id"));
+					}
+				}
+			}
+
+			for (String pluginKey: pluginKeys) {
+				if (!dependencyKeys.contains(pluginKey))
+					errors.add("Missed dependency to project '" + pluginKey + "'.");
 			}
 
 			Map<String, Set<String>> artifactVersions = new HashMap<String, Set<String>>();
