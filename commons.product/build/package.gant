@@ -1,0 +1,13 @@
+target(default:"package the product") {
+	File buildDir = new File("${buildDirectory}"); 
+	File sandboxDir = new File(buildDir, "sandbox");
+
+	// do not change this line of code	
+	chmod(dir: sandboxDir, perm: "755", includes: "${executables}")
+
+	File destFile = new File(buildDir, "${packageName}.zip");
+	zip(destfile: destFile) {
+		zipfileset(dir: sandboxDir, prefix: "${packageName}", excludes: "${executables}, bin/system.classpath")
+		zipfileset(dir: sandboxDir, prefix: "${packageName}", includes: "${executables}", filemode: "755")
+	}
+}		
