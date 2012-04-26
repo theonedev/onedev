@@ -5,7 +5,7 @@
 	<groupId>${groupId}</groupId>	
 #end
 	<artifactId>${artifactId}</artifactId>
-#if (${version} != "1.0.0")
+#if (${version} != "1.0.5")
 	<version>${version}</version>
 #end
 	<name>${artifactId.toUpperCase().charAt(0)}${artifactId.substring(1)}</name>
@@ -13,7 +13,7 @@
 	<parent>
 		<groupId>com.pmease</groupId>
 		<artifactId>parent.product</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.5</version>
 	</parent>
 
 	<build>
@@ -106,18 +106,18 @@
 		<dependency>
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.jsw</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.5</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.hibernate</artifactId>
-			<version>1.0.2</version>
+			<version>1.0.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.wicket</artifactId>
-			<version>1.0.2</version>
+			<version>1.0.5</version>
 		</dependency>
 	</dependencies>
 

@@ -5,13 +5,13 @@
 	<groupId>$groupId</groupId>	
 #end
 	<artifactId>$artifactId</artifactId>
-#if ($version != "1.0.1")
+#if ($version != "1.0.5")
 	<version>$version</version>
 #end
 	<parent>
 		<groupId>com.pmease</groupId>
 		<artifactId>parent.general</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.5</version>
 	</parent>
 
 	<build>
