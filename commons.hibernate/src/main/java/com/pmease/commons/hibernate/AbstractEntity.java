@@ -36,9 +36,8 @@ public abstract class AbstractEntity implements Serializable {
 		AbstractEntity otherEntity = (AbstractEntity) other;
 		if (getId() == null && otherEntity.getId() == null)
 			return super.equals(other);
-		else
-			return new EqualsBuilder().append(getId(), otherEntity.getId())
-					.isEquals();
+		else 
+			return new EqualsBuilder().append(getId(), otherEntity.getId()).isEquals();
 	}
 
 	public int hashCode() {

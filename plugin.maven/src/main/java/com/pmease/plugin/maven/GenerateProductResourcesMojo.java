@@ -29,7 +29,6 @@ public class GenerateProductResourcesMojo extends AbstractMojo {
 	
 	/**
 	 * @parameter default-value="${executables}"
-	 * @required
 	 */
 	private String executables;
 	
@@ -57,6 +56,9 @@ public class GenerateProductResourcesMojo extends AbstractMojo {
     private List<RemoteRepository> remoteRepos; 	
 
 	public void execute() throws MojoExecutionException {
+		if (executables == null)
+			return;
+		
 		PluginUtils.checkResolvedArtifacts(project, true);
 		
     	File binDir = new File(project.getBuild().getDirectory(), PluginConstants.SANDBOX + "/bin");

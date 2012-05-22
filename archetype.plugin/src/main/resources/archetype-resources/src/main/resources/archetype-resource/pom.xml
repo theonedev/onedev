@@ -10,7 +10,7 @@
 #end
 	<parent>
 		<groupId>com.pmease</groupId>
-		<artifactId>parent.plugin</artifactId>
+		<artifactId>parent.general</artifactId>
 		<version>1.0.5</version>
 	</parent>
 

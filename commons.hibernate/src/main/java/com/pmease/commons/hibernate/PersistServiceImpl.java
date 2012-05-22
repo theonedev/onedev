@@ -13,7 +13,6 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.hibernate.extensionpoints.ModelContribution;
 import com.pmease.commons.loader.PluginManager;
@@ -33,7 +32,7 @@ public class PersistServiceImpl implements PersistService, Provider<SessionFacto
 	
 	@Inject
 	public PersistServiceImpl(PluginManager pluginManager, NamingStrategy namingStrategy, 
-			@Named("hibernate") Properties hibernateProperties) {
+			@Hibernate Properties hibernateProperties) {
 		this.pluginManager = pluginManager;
 		this.namingStrategy = namingStrategy;
 		this.hibernateProperties = hibernateProperties;

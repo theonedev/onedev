@@ -82,8 +82,25 @@ public class PluginManagerImpl implements PluginManager {
 	}
 
 	@Override
-	public Map<String, AbstractPlugin> getPluginMap() {
-		return Collections.unmodifiableMap(pluginMap);
+	public Collection<AbstractPlugin> getPlugins() {
+		return Collections.unmodifiableCollection(pluginMap.values());
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends AbstractPlugin> T getPlugin(Class<T> pluginClass) {
+		for (AbstractPlugin plugin: pluginMap.values()) {
+			if (plugin.getClass() == pluginClass)
+				return (T) plugin;
+		}
+		throw new RuntimeException("Unable to find plugin with class '" + pluginClass + "'.");
+	}
+	
+	public AbstractPlugin getPlugin(String pluginId) {
+		if (pluginMap.containsKey(pluginId))
+			return pluginMap.get(pluginId);
+		else
+			throw new RuntimeException("Unable to find plugin with id '" + pluginId + "'.");
 	}
 
 }

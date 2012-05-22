@@ -26,7 +26,7 @@ public class AppLoader implements Lifecycle {
 
 	private static final Logger logger = LoggerFactory.getLogger(AppLoader.class);
 
-	private static Injector injector;
+	public static Injector injector;
 	
 	@Override
 	public void start() {
@@ -100,4 +100,5 @@ public class AppLoader implements Lifecycle {
 	public static <T> T getInstance(Class<T> type) {
 		return injector.getInstance(type);
 	}
+	
 }

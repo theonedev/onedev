@@ -18,6 +18,7 @@
         <module>../commons.jetty</module>  
         <module>../commons.hibernate</module>  
         <module>../commons.wicket</module> 
+        <module>../commons.tapestry</module>
     </modules>  
     <repositories> 
         <repository> 

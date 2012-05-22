@@ -1,20 +1,29 @@
 package ${package};
 
+import javax.inject.Inject;
+import javax.servlet.DispatcherType;
+import javax.servlet.http.HttpServletResponse;
+
 import java.io.File;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.Properties;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.bio.SocketConnector;
+import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.wicket.protocol.http.WicketServlet;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.hibernate.AbstractEntity;
+import com.pmease.commons.hibernate.HibernateFilter;
 import com.pmease.commons.hibernate.extensionpoints.ModelContribution;
 import com.pmease.commons.jetty.JettyUtils;
 import com.pmease.commons.jetty.extensionpoints.ServerConfigurator;
@@ -28,9 +37,16 @@ public class Plugin extends AbstractPlugin {
 
 	private static final Logger logger = LoggerFactory.getLogger(Plugin.class);
 	
-	private Properties serverProps;
+	private final Properties serverProps;
 	
-	public Plugin() {
+	private final HibernateFilter hibernateFilter;
+	
+	private final WicketServlet wicketServlet;
+	
+	@Inject
+	public Plugin(HibernateFilter hibernateFilter, WicketServlet wicketServlet) {
+		this.hibernateFilter = hibernateFilter;
+		this.wicketServlet = wicketServlet;
 		serverProps = FileUtils.loadProperties(new File(Bootstrap.getConfDir(), "server.properties"));
 	}
 	
@@ -59,6 +75,21 @@ public class Plugin extends AbstractPlugin {
 					context.addServlet(servletHolder, "/images/*");
 					context.addServlet(servletHolder, "/scripts/*");
 					context.addServlet(servletHolder, "/styles/*");
+					
+					FilterHolder filterHolder = new FilterHolder(hibernateFilter);
+					context.addFilter(filterHolder, "/*", EnumSet.of(DispatcherType.REQUEST)); 
+					
+					servletHolder = new ServletHolder(wicketServlet);
+					
+					/*
+					 * Add wicket servlet as the default servlet which will serve all requests failed to 
+					 * match a path pattern
+					 */
+					context.addServlet(servletHolder, "/");
+
+					ErrorPageErrorHandler errorHandler = new ErrorPageErrorHandler();
+					errorHandler.addErrorPage(HttpServletResponse.SC_NOT_FOUND, "/404");
+					context.setErrorHandler(errorHandler);
 				}
 				
 			}, 

@@ -8,12 +8,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class WebFilter extends WicketFilter {
+public class CustomWicketFilter extends WicketFilter {
 
 	private final WebApplication webApplication;
 	
 	@Inject
-	public WebFilter(WebApplication webApplication) {
+	public CustomWicketFilter(WebApplication webApplication) {
 		this.webApplication = webApplication;
 		setFilterPath("");
 	}

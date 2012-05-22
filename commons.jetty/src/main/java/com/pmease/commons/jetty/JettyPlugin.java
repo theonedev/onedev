@@ -29,6 +29,8 @@ public class JettyPlugin extends AbstractPlugin {
 	
 	private Server server;
 	
+	private ServletContextHandler context;
+	
 	public final PluginManager pluginManager;
 
 	@Inject
@@ -55,11 +57,15 @@ public class JettyPlugin extends AbstractPlugin {
 			throw BootstrapUtils.unchecked(e);
 		}
 	}
-
+	
+	public ServletContextHandler getContext() {
+		return context;
+	}
+	
 	private Server createServer() {
 		server = new Server();
 
-        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setClassLoader(JettyPlugin.class.getClassLoader());
         
         context.setContextPath("/");

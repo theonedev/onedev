@@ -1,0 +1,10 @@
+<html xmlns:t="http://tapestry.apache.org/schema/tapestry_5_0_0.xsd" xmlns:p="tapestry:parameter">
+	<body>
+	<t:loop source="counters" value="counter" index="var:index">
+		<t:zone t:id="zone">${counter.value}</t:zone>
+		<t:actionlink t:id="increase" t:zone="prop:zoneId" t:context="var:index">increase</t:actionlink>
+	</t:loop>
+	<img src="${asset:ok.gif}"></img>
+	<t:actionlink t:id="modify">modify</t:actionlink>
+	</body>
+</html>

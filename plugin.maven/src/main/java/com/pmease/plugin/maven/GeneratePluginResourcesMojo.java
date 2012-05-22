@@ -24,11 +24,13 @@ public class GeneratePluginResourcesMojo extends AbstractMojo {
 	
 	/**
 	 * @parameter default-value="${moduleClass}"
-	 * @required
 	 */
 	private String moduleClass;
 
 	public void execute() throws MojoExecutionException {
+		if (moduleClass == null)
+			return;
+		
 		PluginUtils.checkResolvedArtifacts(project, true);
 		
     	File outputDir = new File(project.getBuild().getOutputDirectory());

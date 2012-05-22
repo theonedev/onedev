@@ -45,7 +45,17 @@ public class CreateProductSandboxMojo extends AbstractMojo {
      */
     private RepositorySystem repoSystem;
 
-    /**
+	/**
+	 * @parameter default-value="${executables}"
+	 */
+	private String executables;
+
+	/**
+	 * @parameter default-value="${moduleClass}"
+	 */
+	private String moduleClass;
+
+	/**
      * The current repository/network configuration of Maven.
      *
      * @parameter default-value="${repositorySystemSession}"
@@ -67,6 +77,9 @@ public class CreateProductSandboxMojo extends AbstractMojo {
 	private ArchiverManager archiverManager;
 	
 	public void execute() throws MojoExecutionException {
+		if (moduleClass == null || executables != null)
+			return;
+		
 		PluginUtils.checkResolvedArtifacts(project, true);
 		
     	for (Artifact artifact: project.getArtifacts()) {

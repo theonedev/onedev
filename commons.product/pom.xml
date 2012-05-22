@@ -7,7 +7,7 @@
 
 	<parent>
 		<groupId>com.pmease</groupId>
-		<artifactId>parent.product</artifactId>
+		<artifactId>parent.general</artifactId>
 		<version>1.0.5</version>
 	</parent>
 
@@ -109,8 +109,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.pmease</groupId>
-			<artifactId>commons.wicket</artifactId>
-			<version>1.0.5</version>
+			<artifactId>commons.tapestry</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 	</dependencies>
 
@@ -136,7 +136,7 @@
 		<executables>bin/*.sh, bin/wrapper-*</executables>
 		<bootstrapClass>com.pmease.commons.bootstrap.Bootstrap</bootstrapClass>
 		<moduleClass>com.pmease.commons.product.PluginModule</moduleClass>
-		<aggregation>true</aggregation>
+		<aggregation>false</aggregation>
 	</properties>
 
 </project>

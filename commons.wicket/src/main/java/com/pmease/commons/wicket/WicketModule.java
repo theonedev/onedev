@@ -12,8 +12,8 @@ public class WicketModule extends AbstractPluginModule {
 	protected void configure() {
 		super.configure();
 		
-		bind(WicketServlet.class).to(WebServlet.class);
-		bind(WicketFilter.class).to(WebFilter.class);
+		bind(WicketServlet.class).to(WicketServlet.class);
+		bind(WicketFilter.class).to(CustomWicketFilter.class);
 	}
 
 	@Override

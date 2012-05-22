@@ -178,6 +178,27 @@
                                 <goal>package-artifact</goal> 
                             </goals> 
                         </execution> 
+                        <execution> 
+                            <id>generate-plugin-resources</id>  
+                            <phase>compile</phase>  
+                            <goals> 
+                                <goal>generate-plugin-resources</goal> 
+                            </goals> 
+                        </execution>  
+                        <execution> 
+                            <id>generate-product-resources</id>  
+                            <phase>compile</phase>  
+                            <goals> 
+                                <goal>generate-product-resources</goal> 
+                            </goals> 
+                        </execution> 
+                        <execution> 
+                            <id>create-product-sandbox</id>  
+                            <phase>compile</phase>  
+                            <goals> 
+                                <goal>create-product-sandbox</goal> 
+                            </goals> 
+                        </execution> 
                     </executions> 
                 </plugin>  
                 <plugin> 

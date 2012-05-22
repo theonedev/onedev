@@ -137,7 +137,24 @@ public class Bootstrap {
 			}
 		}
 		
-		ClassLoader appClassLoader = new URLClassLoader(urls.toArray(new URL[0]), Bootstrap.class.getClassLoader());
+		ClassLoader appClassLoader = new URLClassLoader(urls.toArray(new URL[0]), Bootstrap.class.getClassLoader()) {
+
+			@Override
+			protected Class<?> findClass(String name) throws ClassNotFoundException {
+				return super.findClass(name);
+			}
+
+			@Override
+			public Class<?> loadClass(String name) throws ClassNotFoundException {
+				return super.loadClass(name);
+			}
+
+			@Override
+			public URL findResource(String name) {
+				return super.findResource(name);
+			}
+			
+		};
 		ClassLoader originClassLoader = Thread.currentThread().getContextClassLoader();
 		Thread.currentThread().setContextClassLoader(appClassLoader);
 		
