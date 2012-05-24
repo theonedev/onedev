@@ -1,19 +1,8 @@
 package com.pmease.commons.product.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
+public class User {
 
-import com.pmease.commons.hibernate.AbstractEntity;
-
-@Entity
-public class User extends AbstractEntity {
-
-	private static final long serialVersionUID = 1L;
-
-	@Column(unique = true, nullable = false)
 	private String name;
-
-	private String fullName;
 
 	private String email;
 
@@ -23,14 +12,6 @@ public class User extends AbstractEntity {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public String getFullName() {
-		return fullName;
-	}
-
-	public void setFullName(String fullName) {
-		this.fullName = fullName;
 	}
 
 	public String getEmail() {

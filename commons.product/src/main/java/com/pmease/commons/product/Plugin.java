@@ -84,7 +84,7 @@ public class Plugin extends AbstractPlugin {
 					context.setInitParameter(InternalConstants.TAPESTRY_APP_PACKAGE_PARAM, Plugin.class.getPackage().getName());
 					context.addFilter(filterHolder, "/*", EnumSet.of(DispatcherType.REQUEST)); 
 					
-					context.addServlet(DownloadServlet.class, "/download/*");
+					context.addServlet(GitServlet.class, "*.git");
 				}
 				
 			}, 

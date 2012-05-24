@@ -1,10 +1,30 @@
 <html xmlns:t="http://tapestry.apache.org/schema/tapestry_5_0_0.xsd" xmlns:p="tapestry:parameter">
+	<head>
+		<title>Workshop</title>
+	</head>
 	<body>
-	<t:loop source="counters" value="counter" index="var:index">
-		<t:zone t:id="zone">${counter.value}</t:zone>
-		<t:actionlink t:id="increase" t:zone="prop:zoneId" t:context="var:index">increase</t:actionlink>
-	</t:loop>
-	<img src="${asset:ok.gif}"></img>
-	<t:actionlink t:id="modify">modify</t:actionlink>
+		<t:if test="user">
+			<t:if test="repository">
+				<t:delegate to="repositoryViewer"/>
+				<p:else>
+					<t:delegate to="userViewer"/>
+				</p:else>
+			</t:if>
+			<p:else>
+				<t:grid source="users" row="user">
+					<p:nameCell>
+						<t:pagelink page="index" context="user.name">${user.name}</t:pagelink>
+					</p:nameCell>
+					<p:emailCell>
+						<t:jquery.dialogajaxlink t:id="emailLink" t:dialog="myDialog" t:zone="myZone" context="user.name">open</t:jquery.dialogajaxlink> 
+					</p:emailCell>
+				</t:grid>
+			</p:else>
+		</t:if>
+		<t:jquery.dialog t:clientId="myDialog">
+			<t:zone t:id="myZone" id="myZone">
+				${user.email}
+			</t:zone>
+		</t:jquery.dialog>
 	</body>
 </html>
