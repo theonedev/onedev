@@ -5,9 +5,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.apache.tapestry5.annotations.InjectComponent;
+import org.apache.tapestry5.Block;
 import org.apache.tapestry5.annotations.Property;
-import org.apache.tapestry5.corelib.components.Zone;
 import org.apache.tapestry5.services.ComponentSource;
 
 import com.pmease.commons.product.model.Repository;
@@ -24,8 +23,11 @@ public class Index {
 	@Inject
 	private ComponentSource componentSource;
 	
-	@InjectComponent
-	private Zone myZone;
+	@Inject
+	private Block emailBlock;
+	
+	@Inject
+	private Block loginBlock;
 	
 	public List<User> getUsers() {
 		List<User> users = new ArrayList<User>();
@@ -73,6 +75,13 @@ public class Index {
 		user = new User();
 		user.setName(userName);
 		user.setEmail(userName + "@pmease.com");
-		return myZone;
+		return emailBlock;
+	}
+	
+	Object onActionFromLoginLink(String userName) {
+		user = new User();
+		user.setName(userName);
+		user.setEmail(userName + "@pmease.com");
+		return loginBlock;
 	}
 }

@@ -1,0 +1,3 @@
+<t:container xmlns:t="http://tapestry.apache.org/schema/tapestry_5_0_0.xsd" xmlns:p="tapestry:parameter">
+	<t:actionlink t:id="login">login as ${userName}</t:actionlink>
+</t:container>

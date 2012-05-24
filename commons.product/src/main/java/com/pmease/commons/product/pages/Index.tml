@@ -11,20 +11,30 @@
 				</p:else>
 			</t:if>
 			<p:else>
-				<t:grid source="users" row="user">
+				<t:grid source="users" row="user" add="action">
 					<p:nameCell>
 						<t:pagelink page="index" context="user.name">${user.name}</t:pagelink>
 					</p:nameCell>
 					<p:emailCell>
 						<t:jquery.dialogajaxlink t:id="emailLink" t:dialog="myDialog" t:zone="myZone" context="user.name">open</t:jquery.dialogajaxlink> 
 					</p:emailCell>
+					<p:actionCell>
+						<t:jquery.dialogajaxlink t:id="loginLink" t:dialog="myDialog" t:zone="myZone" context="user.name">login</t:jquery.dialogajaxlink>
+					</p:actionCell>
 				</t:grid>
 			</p:else>
 		</t:if>
 		<t:jquery.dialog t:clientId="myDialog">
-			<t:zone t:id="myZone" id="myZone">
-				${user.email}
-			</t:zone>
+			<t:zone id="myZone"></t:zone>
 		</t:jquery.dialog>
+		
+		<t:block t:id="emailBlock">
+			${user.email}
+		</t:block>
+		
+		<t:block t:id="loginBlock">
+			<t:loginForm></t:loginForm>
+		</t:block>
+		
 	</body>
 </html>
