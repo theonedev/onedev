@@ -2,19 +2,14 @@ package com.pmease.commons.product;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.Properties;
 
 import javax.inject.Inject;
-import javax.servlet.DispatcherType;
 
 import org.apache.tapestry5.TapestryFilter;
-import org.apache.tapestry5.internal.InternalConstants;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.bio.SocketConnector;
-import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,14 +32,8 @@ public class Plugin extends AbstractPlugin {
 	
 	private Properties serverProps;
 	
-	private final HibernateFilter hibernateFilter;
-	
-	private final TapestryFilter tapestryFilter;
-	
 	@Inject
 	public Plugin(HibernateFilter hibernateFilter, TapestryFilter tapestryFilter) {
-		this.hibernateFilter = hibernateFilter;
-		this.tapestryFilter = tapestryFilter;
 		serverProps = FileUtils.loadProperties(new File(Bootstrap.getConfDir(), "server.properties"));
 	}
 	
@@ -70,21 +59,7 @@ public class Plugin extends AbstractPlugin {
 			        File resourceDir = new File(Bootstrap.installDir, "resource");
 			        context.setResourceBase(resourceDir.getAbsolutePath());
 			        
-			        ServletHolder servletHolder = JettyUtils.createResourceServletHolder();
-			        for (String path: resourceDir.list()) 
-			        	context.addServlet(servletHolder, "/" + path);
-			        
 					context.addServlet(JettyUtils.createResourceServletHolder(), "/");
-
-					FilterHolder filterHolder = new FilterHolder(hibernateFilter);
-					context.addFilter(filterHolder, "/*", EnumSet.of(DispatcherType.REQUEST)); 
-					
-					filterHolder = new FilterHolder(tapestryFilter);
-					filterHolder.setName("app");
-					context.setInitParameter(InternalConstants.TAPESTRY_APP_PACKAGE_PARAM, Plugin.class.getPackage().getName());
-					context.addFilter(filterHolder, "/*", EnumSet.of(DispatcherType.REQUEST)); 
-					
-					context.addServlet(GitServlet.class, "*.git");
 				}
 				
 			}, 

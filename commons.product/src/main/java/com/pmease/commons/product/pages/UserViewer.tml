@@ -1,8 +1,0 @@
-<t:container xmlns:t="http://tapestry.apache.org/schema/tapestry_5_0_0.xsd" xmlns:p="tapestry:parameter">
-	<div>${user.name}</div>
-	<t:grid source="repositories" row="repository">
-		<p:nameCell>
-			<t:pagelink page="index" context="[user.name, repository.name]">${repository.name}</t:pagelink>
-		</p:nameCell>
-	</t:grid>
-</t:container>

@@ -27,12 +27,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.pmease</groupId>
-			<artifactId>commons.loader</artifactId>
-			<version>1.0.5</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.jetty</artifactId>
+			<artifactId>commons.hibernate</artifactId>
 			<version>1.0.5</version>
 		</dependency>
 		<dependency>
@@ -50,15 +45,10 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- dependency>
-			<groupId>org.apache.tapestry</groupId>
-			<artifactId>tapestry-hibernate</artifactId>
-			<version>5.3.3</version>
-		</dependency-->
 		<dependency>
 			<groupId>org.got5</groupId>
 			<artifactId>tapestry5-jquery</artifactId>
-			<version>3.0.0</version>
+			<version>3.2.0</version>
 		</dependency>
 	</dependencies>
 

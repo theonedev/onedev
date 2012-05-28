@@ -2,6 +2,7 @@ package com.pmease.commons.hibernate;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.ImprovedNamingStrategy;
 import org.hibernate.cfg.NamingStrategy;
 
@@ -21,8 +22,10 @@ public class HibernateModule extends AbstractPluginModule {
 		
 		bind(PersistService.class).to(PersistServiceImpl.class);
 		bind(SessionFactory.class).toProvider(PersistServiceImpl.class);
+		bind(Configuration.class).toProvider(ConfigurationProvider.class);
 		bind(UnitOfWork.class).to(UnitOfWorkImpl.class);
 		bind(Session.class).toProvider(UnitOfWorkImpl.class);
+		bind(SessionProvider.class).to(UnitOfWorkImpl.class);
 		
 		bind(GeneralDao.class).to(GeneralDaoImpl.class);
 		

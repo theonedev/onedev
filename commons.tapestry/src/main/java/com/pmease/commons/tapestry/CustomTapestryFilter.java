@@ -11,7 +11,7 @@ import org.apache.tapestry5.TapestryFilter;
 
 import com.pmease.commons.loader.PluginManager;
 import com.pmease.commons.tapestry.extensionpoints.TapestryConfiguratorProvider;
-import com.pmease.commons.tapestry.services.AppModule;
+import com.pmease.commons.tapestry.services.TapestryConfigurator;
 
 @Singleton
 public class CustomTapestryFilter extends TapestryFilter {
@@ -23,7 +23,7 @@ public class CustomTapestryFilter extends TapestryFilter {
 	protected Class<?>[] provideExtraModuleClasses(ServletContext context) {
 		List<Class<?>> moduleClasses = new ArrayList<Class<?>>();
 
-		moduleClasses.add(AppModule.class);
+		moduleClasses.add(TapestryConfigurator.class);
 		for (TapestryConfiguratorProvider each : pluginManager
 				.getExtensions(TapestryConfiguratorProvider.class))
 			moduleClasses.add(each.getTapestryConfigurator());

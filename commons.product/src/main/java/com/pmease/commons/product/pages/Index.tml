@@ -1,40 +1,10 @@
-<html xmlns:t="http://tapestry.apache.org/schema/tapestry_5_0_0.xsd" xmlns:p="tapestry:parameter">
-	<head>
-		<title>Workshop</title>
-	</head>
-	<body>
-		<t:if test="user">
-			<t:if test="repository">
-				<t:delegate to="repositoryViewer"/>
-				<p:else>
-					<t:delegate to="userViewer"/>
-				</p:else>
-			</t:if>
-			<p:else>
-				<t:grid source="users" row="user" add="action">
-					<p:nameCell>
-						<t:pagelink page="index" context="user.name">${user.name}</t:pagelink>
-					</p:nameCell>
-					<p:emailCell>
-						<t:jquery.dialogajaxlink t:id="emailLink" t:dialog="myDialog" t:zone="myZone" context="user.name">open</t:jquery.dialogajaxlink> 
-					</p:emailCell>
-					<p:actionCell>
-						<t:jquery.dialogajaxlink t:id="loginLink" t:dialog="myDialog" t:zone="myZone" context="user.name">login</t:jquery.dialogajaxlink>
-					</p:actionCell>
-				</t:grid>
-			</p:else>
-		</t:if>
-		<t:jquery.dialog t:clientId="myDialog">
-			<t:zone id="myZone"></t:zone>
-		</t:jquery.dialog>
-		
-		<t:block t:id="emailBlock">
-			${user.email}
-		</t:block>
-		
-		<t:block t:id="loginBlock">
-			<t:loginForm></t:loginForm>
-		</t:block>
-		
-	</body>
+<html xmlns:t="http://tapestry.apache.org/schema/tapestry_5_0_0.xsd"
+	xmlns:p="tapestry:parameter">
+<head>
+	<title>Hello world</title>
+</head>
+<body>
+	<t:actionlink t:id="btn">add</t:actionlink>
+	${user.name}
+</body>
 </html>
