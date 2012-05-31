@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>  
     <groupId>com.pmease</groupId>  
     <artifactId>parent.general</artifactId>  
-    <version>1.0.5</version>  
+    <version>1.0.7</version>  
     <packaging>pom</packaging>  
     <prerequisites> 
         <maven>3.0</maven> 
@@ -177,7 +177,7 @@
                             <goals> 
                                 <goal>package-artifact</goal> 
                             </goals> 
-                        </execution> 
+                        </execution>  
                         <execution> 
                             <id>generate-plugin-resources</id>  
                             <phase>compile</phase>  
@@ -191,7 +191,7 @@
                             <goals> 
                                 <goal>generate-product-resources</goal> 
                             </goals> 
-                        </execution> 
+                        </execution>  
                         <execution> 
                             <id>create-product-sandbox</id>  
                             <phase>compile</phase>  
