@@ -19,6 +19,7 @@
         <module>../commons.hibernate</module>  
         <module>../commons.wicket</module>  
         <module>../commons.tapestry</module> 
+        <module>../commons.product</module>
     </modules>  
     <repositories> 
         <repository> 
