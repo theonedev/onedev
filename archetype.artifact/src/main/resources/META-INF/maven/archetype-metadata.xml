@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<archetype-descriptor name="archetype.plugin">
+<archetype-descriptor name="archetype.artifact">
 	<fileSets>
 		<fileSet filtered="false" packaged="false">
 			<directory>src/main/java</directory>
