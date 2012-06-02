@@ -6,7 +6,7 @@
     <parent> 
         <groupId>com.pmease</groupId>  
         <artifactId>parent.general</artifactId>  
-        <version>1.0.7</version> 
+        <version>1.0.11</version> 
     </parent>  
     <packaging>pom</packaging>  
     <modules> 
@@ -18,8 +18,8 @@
         <module>../commons.jetty</module>  
         <module>../commons.hibernate</module>  
         <module>../commons.wicket</module>  
-        <module>../commons.tapestry</module> 
-        <module>../commons.product</module>
+        <module>../commons.tapestry</module>  
+        <module>../commons.product</module> 
     </modules>  
     <repositories> 
         <repository> 
