@@ -106,18 +106,18 @@
 		<dependency>
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.jsw</artifactId>
-			<version>1.0.5</version>
+			<version>1.0.7</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.hibernate</artifactId>
-			<version>1.0.5</version>
+			<version>1.0.7</version>
 		</dependency>
 		<dependency>
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.wicket</artifactId>
-			<version>1.0.5</version>
+			<version>1.0.8</version>
 		</dependency>
 	</dependencies>
 
