@@ -48,7 +48,7 @@
 	</repositories>
 
 	<properties>
-		<bootstrap>${bootstrap}</bootstrap>
+		<bootstrap>false</bootstrap>
 	</properties>
 
 </project>
