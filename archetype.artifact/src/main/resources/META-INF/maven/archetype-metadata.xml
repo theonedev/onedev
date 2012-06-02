@@ -14,9 +14,4 @@
 			<directory>src/test/resources</directory>
 		</fileSet>
 	</fileSets>
-	<requiredProperties>
-		<requiredProperty key="bootstrap">
-			<defaultValue>false</defaultValue>			
-		</requiredProperty>
-	</requiredProperties>
 </archetype-descriptor>
