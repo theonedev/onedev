@@ -3,12 +3,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">  
     <modelVersion>4.0.0</modelVersion>  
     <artifactId>commons.product</artifactId>  
-    <version>1.0.8</version>  
     <name>Commons.product</name>  
     <parent> 
         <groupId>com.pmease</groupId>  
         <artifactId>parent.general</artifactId>  
-        <version>1.0.7</version> 
+        <version>1.0.11</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -96,18 +95,18 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.jsw</artifactId>  
-            <version>1.0.7</version>  
+            <version>1.0.11</version>  
             <scope>provided</scope> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.hibernate</artifactId>  
-            <version>1.0.7</version> 
+            <version>1.0.11</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.tapestry</artifactId>  
-            <version>1.0.8</version> 
+            <version>1.0.11</version> 
         </dependency> 
     </dependencies>  
     <repositories> 
