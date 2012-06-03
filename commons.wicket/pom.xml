@@ -5,7 +5,7 @@
     <parent> 
         <artifactId>parent.general</artifactId>  
         <groupId>com.pmease</groupId>  
-        <version>1.0.11</version> 
+        <version>1.0.13</version> 
     </parent>  
     <artifactId>commons.wicket</artifactId>  
     <build> 
@@ -51,7 +51,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.jetty</artifactId>  
-            <version>1.0.11</version> 
+            <version>1.0.13</version> 
         </dependency> 
     </dependencies>  
     <properties> 

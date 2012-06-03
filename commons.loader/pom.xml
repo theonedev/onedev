@@ -6,7 +6,7 @@
     <parent> 
         <groupId>com.pmease</groupId>  
         <artifactId>parent.general</artifactId>  
-        <version>1.0.11</version> 
+        <version>1.0.13</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -31,7 +31,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.bootstrap</artifactId>  
-            <version>1.0.11</version> 
+            <version>1.0.13</version> 
         </dependency>  
         <dependency> 
             <groupId>org.slf4j</groupId>  
@@ -46,7 +46,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.util</artifactId>  
-            <version>1.0.11</version> 
+            <version>1.0.13</version> 
         </dependency> 
     </dependencies>  
     <repositories> 
