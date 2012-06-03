@@ -36,5 +36,6 @@
             </snapshots>  
             <url>http://artifact.pmease.com/</url> 
         </repository> 
-    </repositories> 
+    </repositories>  
+    <version>1.0.14</version>
 </project>

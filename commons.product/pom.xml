@@ -101,12 +101,12 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.hibernate</artifactId>  
-            <version>1.0.13</version> 
+            <version>1.0.14</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.tapestry</artifactId>  
-            <version>1.0.13</version> 
+            <version>1.0.14</version> 
         </dependency> 
     </dependencies>  
     <repositories> 
@@ -131,5 +131,6 @@
         <bootstrapClass>com.pmease.commons.bootstrap.Bootstrap</bootstrapClass>  
         <moduleClass>com.pmease.commons.product.PluginModule</moduleClass>  
         <aggregation>false</aggregation> 
-    </properties> 
+    </properties>  
+    <version>1.0.14</version>
 </project>
