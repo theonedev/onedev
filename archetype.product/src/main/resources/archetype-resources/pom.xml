@@ -5,9 +5,7 @@
 	<groupId>${groupId}</groupId>	
 #end
 	<artifactId>${artifactId}</artifactId>
-#if (${version} != "1.0.5")
 	<version>${version}</version>
-#end
 	<name>${artifactId.toUpperCase().charAt(0)}${artifactId.substring(1)}</name>
 
 	<parent>
