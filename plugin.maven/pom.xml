@@ -47,6 +47,7 @@
             </plugins> 
         </pluginManagement> 
     </build>  
+    
     <dependencies> 
         <dependency> 
             <groupId>org.apache.maven</groupId>  
