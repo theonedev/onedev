@@ -105,7 +105,7 @@
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
-            <artifactId>commons.tapestry</artifactId>  
+            <artifactId>commons.wicket</artifactId>  
             <version>1.0.14</version> 
         </dependency> 
     </dependencies>  

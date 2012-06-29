@@ -12,7 +12,7 @@ public class WicketModule extends AbstractPluginModule {
 	protected void configure() {
 		super.configure();
 		
-		bind(WicketServlet.class).to(WicketServlet.class);
+		bind(WicketServlet.class).to(CustomWicketServlet.class);
 		bind(WicketFilter.class).to(CustomWicketFilter.class);
 	}
 

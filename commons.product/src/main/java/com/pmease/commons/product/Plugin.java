@@ -2,17 +2,24 @@ package com.pmease.commons.product;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.Properties;
 
 import javax.inject.Inject;
+import javax.servlet.DispatcherType;
+import javax.servlet.http.HttpServletResponse;
 
-import org.apache.tapestry5.TapestryFilter;
+import org.apache.wicket.protocol.http.WicketServlet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.bio.SocketConnector;
+import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
+import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.hibernate.AbstractEntity;
@@ -30,10 +37,16 @@ public class Plugin extends AbstractPlugin {
 
 	private static final Logger logger = LoggerFactory.getLogger(Plugin.class);
 	
-	private Properties serverProps;
+	private final Properties serverProps;
+	
+	private final HibernateFilter hibernateFilter;
+	
+	private final WicketServlet wicketServlet;
 	
 	@Inject
-	public Plugin(HibernateFilter hibernateFilter, TapestryFilter tapestryFilter) {
+	public Plugin(HibernateFilter hibernateFilter, WicketServlet wicketServlet) {
+		this.hibernateFilter = hibernateFilter;
+		this.wicketServlet = wicketServlet;
 		serverProps = FileUtils.loadProperties(new File(Bootstrap.getConfDir(), "server.properties"));
 	}
 	
@@ -55,11 +68,28 @@ public class Plugin extends AbstractPlugin {
 				public void configure(ServletContextHandler context) {
 			        context.getSessionHandler().getSessionManager()
 			        		.setMaxInactiveInterval(Integer.parseInt(serverProps.getProperty("sessionTimeout")));
+					context.setResourceBase(new File(Bootstrap.installDir, "resource").getAbsolutePath());
+					
+					ServletHolder servletHolder = JettyUtils.createResourceServletHolder();
+					Preconditions.checkNotNull(servletHolder);
+					context.addServlet(servletHolder, "/images/*");
+					context.addServlet(servletHolder, "/scripts/*");
+					context.addServlet(servletHolder, "/styles/*");
+					
+					FilterHolder filterHolder = new FilterHolder(hibernateFilter);
+					context.addFilter(filterHolder, "/*", EnumSet.of(DispatcherType.REQUEST)); 
+					
+					servletHolder = new ServletHolder(wicketServlet);
+					
+					/*
+					 * Add wicket servlet as the default servlet which will serve all requests failed to 
+					 * match a path pattern
+					 */
+					context.addServlet(servletHolder, "/");
 
-			        File resourceDir = new File(Bootstrap.installDir, "resource");
-			        context.setResourceBase(resourceDir.getAbsolutePath());
-			        
-					context.addServlet(JettyUtils.createResourceServletHolder(), "/");
+					ErrorPageErrorHandler errorHandler = new ErrorPageErrorHandler();
+					errorHandler.addErrorPage(HttpServletResponse.SC_NOT_FOUND, "/404");
+					context.setErrorHandler(errorHandler);
 				}
 				
 			}, 
@@ -76,7 +106,7 @@ public class Plugin extends AbstractPlugin {
 
 	@Override
 	public void postStartDependents() {
-		logger.info("Commons.product has been started successfully.");
+		logger.info("Product has been started successfully.");
 	}
 
 }
