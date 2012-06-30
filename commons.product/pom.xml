@@ -106,7 +106,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.wicket</artifactId>  
-            <version>1.0.14</version> 
+            <version>1.0.15</version> 
         </dependency> 
     </dependencies>  
     <repositories> 
@@ -132,5 +132,5 @@
         <moduleClass>com.pmease.commons.product.PluginModule</moduleClass>  
         <aggregation>false</aggregation> 
     </properties>  
-    <version>1.0.14</version>
+    <version>1.0.15</version> 
 </project>
