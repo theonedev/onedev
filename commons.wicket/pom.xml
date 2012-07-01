@@ -26,28 +26,33 @@
         <dependency> 
             <groupId>org.apache.wicket</groupId>  
             <artifactId>wicket-core</artifactId>  
-            <version>1.5.5</version> 
+            <version>${wicketVersion}</version> 
         </dependency>  
         <dependency> 
             <groupId>org.apache.wicket</groupId>  
             <artifactId>wicket-extensions</artifactId>  
-            <version>1.5.5</version> 
+            <version>${wicketVersion}</version> 
         </dependency>  
         <dependency> 
             <groupId>org.apache.wicket</groupId>  
             <artifactId>wicket-request</artifactId>  
-            <version>1.5.5</version> 
+            <version>${wicketVersion}</version> 
         </dependency>  
         <dependency> 
             <groupId>org.apache.wicket</groupId>  
             <artifactId>wicket-util</artifactId>  
-            <version>1.5.5</version> 
+            <version>${wicketVersion}</version> 
         </dependency>  
         <dependency> 
             <groupId>org.apache.wicket</groupId>  
             <artifactId>wicket-velocity</artifactId>  
-            <version>1.5.5</version> 
-        </dependency>  
+            <version>${wicketVersion}</version> 
+        </dependency> 
+        <dependency>
+        	<groupId>org.apache.wicket</groupId>
+        	<artifactId>wicket-atmosphere</artifactId>
+        	<version>0.1</version>
+        </dependency> 
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.jetty</artifactId>  
@@ -56,6 +61,7 @@
     </dependencies>  
     <properties> 
         <moduleClass>com.pmease.commons.wicket.WicketModule</moduleClass> 
+        <wicketVersion>6.0.0-beta2</wicketVersion>
     </properties>  
     <repositories> 
         <repository> 
