@@ -1,5 +1,6 @@
 package com.pmease.commons.wicket;
 
+import org.apache.wicket.Page;
 import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.protocol.http.WebApplication;
 
@@ -25,6 +26,11 @@ public abstract class AbstractWicketConfig extends WebApplication {
 		getMarkupSettings().setStripWicketTags(true);
 		
 		getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
+	}
+
+	@Override
+	public Class<? extends Page> getHomePage() {
+		return null;
 	}
 
 }

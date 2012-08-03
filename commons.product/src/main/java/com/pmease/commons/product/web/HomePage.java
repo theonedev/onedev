@@ -1,34 +1,93 @@
 package com.pmease.commons.product.web;
 
-import java.util.Collection;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.model.PropertyModel;
 
-import org.apache.wicket.markup.html.WebPage;
-import org.apache.wicket.markup.html.link.Link;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Restrictions;
-
-import com.pmease.commons.hibernate.dao.GeneralDao;
-import com.pmease.commons.loader.AppLoader;
-import com.pmease.commons.product.model.User;
+import com.pmease.commons.wicket.dialog.Dialog;
+import com.pmease.commons.wicket.dialog.DialogBehavior;
+import com.pmease.commons.wicket.page.CommonPage;
 
 @SuppressWarnings("serial")
-public class HomePage extends WebPage  {
-	public HomePage() {
-		add(new Link<Void>("addUser") {
+public class HomePage extends CommonPage  {
+	
+	private String name;
+	
+	private String email;
+	
+	@Override
+	public void onInitialize() {
+		super.onInitialize();
+
+		add(newSection());
+	}
+	
+	private WebMarkupContainer newSection() {
+		WebMarkupContainer section = new WebMarkupContainer("section");
+		section.setOutputMarkupId(true);
+		
+		section.add(new WebMarkupContainer("test").add(new DialogBehavior() {
 
 			@Override
-			public void onClick() {
-				GeneralDao generalDao = AppLoader.getInstance(GeneralDao.class);
-				Collection<User> result = generalDao.search(User.class, 
-						new Criterion[]{Restrictions.eq("name", "robin")}, null, 0, 0); 
-				if (result.isEmpty()) {
-					User user = new User();
-					user.setName("robin");
-					user.setEmail("robin@example.com");
-					generalDao.save(user);
-				}
+			protected Dialog newDialog(String id) {
+				return new Dialog(id, "Hello world") {
+
+					@Override
+					protected Component newContent(String id) {
+						Fragment content = new Fragment(id, "dialogContent", HomePage.this);
+						Form<?> form = new Form<Object>("form") {
+
+							@Override
+							protected void onSubmit() {
+								super.onSubmit();
+								System.out.println(name + ":" + email);
+							}
+							
+						};
+						content.add(form);
+						form.add(new TextField<String>("name", new PropertyModel<String>(HomePage.this, "name")));
+						form.add(new TextField<String>("email", new PropertyModel<String>(HomePage.this, "email")));
+						form.add(new AjaxButton("save") {
+
+							@Override
+							protected void onAfterSubmit(AjaxRequestTarget target, Form<?> form) {
+								super.onAfterSubmit(target, form);
+								close(target);
+								WebMarkupContainer section = newSection();
+								HomePage.this.replace(section);
+								target.add(section);
+							}
+							
+						});
+						return content;
+					}
+					
+				};
 			}
-			
-		});
+		}));
+		
+		return section;
 	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+	
 }

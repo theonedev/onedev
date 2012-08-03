@@ -48,10 +48,10 @@
             <artifactId>wicket-velocity</artifactId>  
             <version>${wicketVersion}</version> 
         </dependency> 
-        <dependency>
-        	<groupId>org.apache.wicket</groupId>
-        	<artifactId>wicket-atmosphere</artifactId>
-        	<version>0.1</version>
+        <dependency> 
+            <groupId>org.apache.wicket</groupId>  
+            <artifactId>wicket-bootstrap</artifactId>  
+            <version>0.1</version> 
         </dependency> 
         <dependency> 
             <groupId>com.pmease</groupId>  
@@ -61,7 +61,7 @@
     </dependencies>  
     <properties> 
         <moduleClass>com.pmease.commons.wicket.WicketModule</moduleClass> 
-        <wicketVersion>6.0.0-beta2</wicketVersion>
+        <wicketVersion>6.0.0-beta3</wicketVersion>
     </properties>  
     <repositories> 
         <repository> 
