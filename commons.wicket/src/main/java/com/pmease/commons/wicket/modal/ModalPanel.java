@@ -1,12 +1,14 @@
-package com.pmease.commons.wicket.dialog;
+package com.pmease.commons.wicket.modal;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 
-public abstract class Dialog extends Panel {
+@SuppressWarnings("serial")
+public abstract class ModalPanel extends Panel {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -14,7 +16,7 @@ public abstract class Dialog extends Panel {
 	
 	private String width = "600px";
 	
-	public Dialog(String id, String title) {
+	public ModalPanel(String id, String title) {
 		super(id);
 		this.title= title;
 	}
@@ -26,6 +28,15 @@ public abstract class Dialog extends Panel {
 		add(new AttributeModifier("class", "modal hide"));
 		add(new Label("title", title));
 		
+		add(new AjaxLink<Void>("close") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				close(target);
+			}
+			
+		});
+		
 		add(newContent("content"));
 	}
 	
@@ -34,7 +45,7 @@ public abstract class Dialog extends Panel {
 	 * @param target
 	 */
 	public void close(AjaxRequestTarget target) {
-		target.prependJavaScript(String.format("$('#%s').modal('hide');", getMarkupId()));
+		target.prependJavaScript(String.format("hideModal('%s');", getMarkupId()));
 	}
 	
 	/**
@@ -44,7 +55,7 @@ public abstract class Dialog extends Panel {
 	 * 			Specify width of the dialog in css width format, for instance: 10em, 600px, auto, 50%
 	 * @return
 	 */
-	public Dialog width(String width) {
+	public ModalPanel width(String width) {
 		this.width = width;
 		return this;
 	}

@@ -1,6 +1,6 @@
 <wicket:extend>
 	<head>
-<title>Hello World</title>
+		<title>Hello World</title>
 	</head>
 	<body>
 		<div wicket:id="section">
@@ -27,9 +27,17 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				<a class="btn" data-dismiss="modal">Cancel</a>
+				<a wicket:id="cancel" class="btn">Cancel</a> 
 				<a wicket:id="save" class="btn btn-primary">Save</a>
+				<a wicket:id="test" class="btn">Confirm</a>
 			</div>
 		</form>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="testContent">
+		<div class="modal-body">Hello World</div>
+		<div class="modal-footer">
+			<a class="btn" data-dismiss="modal">Close</a>
+		</div>
 	</wicket:fragment>
 </wicket:extend>

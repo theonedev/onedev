@@ -2,6 +2,7 @@ package com.pmease.commons.product.web;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
@@ -9,8 +10,8 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.PropertyModel;
 
-import com.pmease.commons.wicket.dialog.Dialog;
-import com.pmease.commons.wicket.dialog.DialogBehavior;
+import com.pmease.commons.wicket.modal.ModalBehavior;
+import com.pmease.commons.wicket.modal.ModalPanel;
 import com.pmease.commons.wicket.page.CommonPage;
 
 @SuppressWarnings("serial")
@@ -31,11 +32,11 @@ public class HomePage extends CommonPage  {
 		WebMarkupContainer section = new WebMarkupContainer("section");
 		section.setOutputMarkupId(true);
 		
-		section.add(new WebMarkupContainer("test").add(new DialogBehavior() {
+		section.add(new WebMarkupContainer("test").add(new ModalBehavior() {
 
 			@Override
-			protected Dialog newDialog(String id) {
-				return new Dialog(id, "Hello world") {
+			protected ModalPanel newModal(String id) {
+				return new ModalPanel(id, "Hello world") {
 
 					@Override
 					protected Component newContent(String id) {
@@ -64,10 +65,33 @@ public class HomePage extends CommonPage  {
 							}
 							
 						});
+						form.add(new AjaxLink<Void>("cancel") {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								close(target);
+							}
+							
+						});
+						form.add(new WebMarkupContainer("test").add(new ModalBehavior() {
+
+							@Override
+							protected ModalPanel newModal(String id) {
+								return new ModalPanel(id, "Really?") {
+
+									@Override
+									protected Component newContent(String id) {
+										return new Fragment(id, "testContent", HomePage.this);
+									}
+									
+								};
+							}
+							
+						}));
 						return content;
 					}
 					
-				};
+				}.width("50%");
 			}
 		}));
 		
