@@ -1,19 +1,20 @@
-package com.pmease.commons.wicket.modal;
+package com.pmease.commons.wicket.behavior.modal;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.Markup;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.PackageResourceReference;
 
-
 @SuppressWarnings("serial")
-public abstract class ModalBehavior extends AbstractDefaultAjaxBehavior {
+public class ModalBehavior extends AbstractDefaultAjaxBehavior {
 
-	public ModalBehavior() {
+	private final ModalPanel modalPanel;
+	
+	public ModalBehavior(ModalPanel modalPanel) {
+		this.modalPanel = modalPanel;
 	}
 	
 	@Override
@@ -24,17 +25,10 @@ public abstract class ModalBehavior extends AbstractDefaultAjaxBehavior {
 
 	@Override
 	protected void respond(AjaxRequestTarget target) {
-		ModalPanel modal = newModal(getModalId());
-		getComponent().getParent().addOrReplace(modal);
-		modal.setOutputMarkupId(true);
-		modal.setMarkupId(getModalMarkupId());
-		modal.setMarkup(Markup.of(String.format("<div wicket:id='%s'></div>", getModalMarkupId())));
+		modalPanel.load(target);
+
+		String script = String.format("modalLoaded('%s', '%s')", modalPanel.getMarkupId(), modalPanel.width());
 		
-		target.add(modal);
-		
-		String script = String.format(
-				"modalLoaded('%s', '%s', '%s')", 
-				getComponent().getMarkupId(), getModalMarkupId(), modal.width());
 		target.appendJavaScript(script);
 	}
 
@@ -44,20 +38,12 @@ public abstract class ModalBehavior extends AbstractDefaultAjaxBehavior {
 		response.render(JavaScriptHeaderItem.forReference(new PackageResourceReference(ModalBehavior.class, "modal.js")));
 	}
 	
-	private String getModalMarkupId() {
-		return getComponent().getMarkupId() + "-dialog";
-	}
-	
-	private String getModalId() {
-		return getComponent().getId() + "-dialog";
-	}
-
 	@Override
 	protected void onComponentTag(ComponentTag tag) {
 		super.onComponentTag(tag);
 		String script = String.format(
-				"openModal('%s', '%s', %s)", 
-				getComponent().getMarkupId(), getModalMarkupId(), getCallbackFunction());
+				"openModal('%s', '%s', '%s', %s)", 
+				getComponent().getMarkupId(), modalPanel.getMarkupId(), modalPanel.width(), getCallbackFunction());
 		
 		tag.put("onclick", script);
 		
@@ -65,5 +51,4 @@ public abstract class ModalBehavior extends AbstractDefaultAjaxBehavior {
 			tag.put("href", "#");
 	}
 	
-	protected abstract ModalPanel newModal(String id);
 }

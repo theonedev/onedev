@@ -3,13 +3,18 @@
 		<title>Hello World</title>
 	</head>
 	<body>
-		<div wicket:id="section">
+		<div wicket:id="container">
 			<a wicket:id="test">test</a>
+			<div wicket:id="modal"></div>
 		</div>
+		<a wicket:id="delete">delete</a>
 	</body>
 
 	<wicket:fragment wicket:id="dialogContent">
 		<form wicket:id="form" class="modal-form form-horizontal">
+			<div class="modal-header">
+				<h3>Edit user profile</h3>
+			</div>
 			<div class="modal-body">
 				<div class="control-group">
 					<label class="control-label">Name</label>
@@ -29,15 +34,7 @@
 			<div class="modal-footer">
 				<a wicket:id="cancel" class="btn">Cancel</a> 
 				<a wicket:id="save" class="btn btn-primary">Save</a>
-				<a wicket:id="test" class="btn">Confirm</a>
 			</div>
 		</form>
-	</wicket:fragment>
-	
-	<wicket:fragment wicket:id="testContent">
-		<div class="modal-body">Hello World</div>
-		<div class="modal-footer">
-			<a class="btn" data-dismiss="modal">Close</a>
-		</div>
 	</wicket:fragment>
 </wicket:extend>
