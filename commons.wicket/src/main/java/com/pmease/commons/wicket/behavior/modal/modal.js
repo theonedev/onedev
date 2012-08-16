@@ -1,17 +1,26 @@
-function openModal(triggerId, modalId, modalWidth, modalLoader) {
+function setupModal(triggerId, modalId, modalWidth, modalLoader) {
 	var trigger = $("#" + triggerId);
 	var modal = $("#" + modalId);
-	modal[0].triggerId = trigger[0].id;
 
-	$("body").append(modal);
-	modal.modal({backdrop: "static", keyboard: false});
-	
-	afterShowModal(modal);
-	
-	if (!modal.find(".loaded")[0]) 
-		modalLoader();
-	else if (modalWidth != "null")
-		positionModal(modal, modalWidth);
+	// modal can associate with multiple triggers, and we should initialize it once here.
+	if (!modal.hasClass("modal")) {
+		modal.addClass("modal hide popup");
+		modal.before("<div id='" + modalId + "-placeholder'></div>");
+		
+		modal.modal({backdrop: "static", keyboard: false, show: false});
+	}
+
+	trigger.click(function() {
+		$("body").append(modal);
+		modal.modal("show");
+		
+		afterShowModal(modal);
+		
+		if (!modal.find(".modal-loaded")[0]) 
+			modalLoader();
+		else if (modalWidth != "null")
+			positionModal(modal, modalWidth);
+	});
 }
 
 function modalLoaded(modalId, modalWidth) {
@@ -27,18 +36,18 @@ function positionModal(modal, modalWidth) {
 
 function hideModal(modalId) {
 	var modal = $("#" + modalId);
-	var trigger = $("#" + modal[0].triggerId);
 	modal.modal("hide");
-	trigger.after(modal);
+	
+	$("#" + modalId + "-placeholder").after(modal);
 }
 
 function afterShowModal(modal) {
 	var backdrop = $(".modal-backdrop:last");
-	var prevModal = modal.prevAll(".modal");
+	var prevPopup = modal.prevAll(".popup:visible");
 	
-	if (prevModal[0]) {
-		var prevModalZIndex = parseInt(prevModal.css("z-index"));
-		var backdropZIndex = prevModalZIndex + 10;
+	if (prevPopup[0]) {
+		var prevPopupZIndex = parseInt(prevPopup.css("z-index"));
+		var backdropZIndex = prevPopupZIndex + 10;
 		backdrop.css("z-index", backdropZIndex);
 		modal.css("z-index", backdropZIndex + 10);
 	}

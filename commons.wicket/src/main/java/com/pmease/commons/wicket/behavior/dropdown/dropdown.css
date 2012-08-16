@@ -1,0 +1,15 @@
+.dropdown {
+    background-clip: padding-box;
+    background-color: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 5px 5px 5px 5px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    position: absolute;
+	z-index: 2000;
+}
+
+.dropdown .loading {
+	margin:8px;
+	padding-left:24px;
+	background: url("ajax-loading-indicator.gif") left center no-repeat;
+}

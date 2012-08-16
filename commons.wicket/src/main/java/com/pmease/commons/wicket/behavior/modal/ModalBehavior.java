@@ -3,9 +3,10 @@ package com.pmease.commons.wicket.behavior.modal;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.resource.PackageResourceReference;
 
 @SuppressWarnings("serial")
@@ -27,7 +28,7 @@ public class ModalBehavior extends AbstractDefaultAjaxBehavior {
 	protected void respond(AjaxRequestTarget target) {
 		modalPanel.load(target);
 
-		String script = String.format("modalLoaded('%s', '%s')", modalPanel.getMarkupId(), modalPanel.width());
+		String script = String.format("modalLoaded('%s', '%s')", modalPanel.getMarkupId(), modalPanel.getWidth());
 		
 		target.appendJavaScript(script);
 	}
@@ -36,19 +37,12 @@ public class ModalBehavior extends AbstractDefaultAjaxBehavior {
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
 		response.render(JavaScriptHeaderItem.forReference(new PackageResourceReference(ModalBehavior.class, "modal.js")));
-	}
-	
-	@Override
-	protected void onComponentTag(ComponentTag tag) {
-		super.onComponentTag(tag);
+		response.render(CssHeaderItem.forReference(new PackageResourceReference(ModalBehavior.class, "modal.css")));
 		String script = String.format(
-				"openModal('%s', '%s', '%s', %s)", 
-				getComponent().getMarkupId(), modalPanel.getMarkupId(), modalPanel.width(), getCallbackFunction());
-		
-		tag.put("onclick", script);
-		
-		if (tag.getName().equals("a"))
-			tag.put("href", "#");
+				"setupModal('%s', '%s', '%s', %s)", 
+				getComponent().getMarkupId(), modalPanel.getMarkupId(), 
+				modalPanel.getWidth(), getCallbackFunction());
+		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
-	
+		
 }

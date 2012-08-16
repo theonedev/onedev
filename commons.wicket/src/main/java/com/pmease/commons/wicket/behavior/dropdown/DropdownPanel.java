@@ -1,4 +1,4 @@
-package com.pmease.commons.wicket.behavior.modal;
+package com.pmease.commons.wicket.behavior.dropdown;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
@@ -6,13 +6,11 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 
-public abstract class ModalPanel extends Panel {
+public abstract class DropdownPanel extends Panel {
 
 	private static final long serialVersionUID = 1L;
 
-	private String width;
-	
-	public ModalPanel(String id) {
+	public DropdownPanel(String id) {
 		super(id);
 	}
 	
@@ -22,36 +20,23 @@ public abstract class ModalPanel extends Panel {
 		
 		setOutputMarkupId(true);
 		
-		add(new Fragment("content", "loadingFrag", ModalPanel.this).setOutputMarkupId(true));
+		add(new Fragment("content", "loadingFrag", DropdownPanel.this).setOutputMarkupId(true));
 	}
 	
 	/**
-	 * Close this modal.
+	 * Close this popup.
 	 * @param target
 	 */
 	public void close(AjaxRequestTarget target) {
-		target.prependJavaScript(String.format("hideModal('%s');", getMarkupId()));
+		target.prependJavaScript(String.format("hideDropdown('%s');", getMarkupId()));
 	}
 	
 	public void load(AjaxRequestTarget target) {
 		Component content = newContent("content");
-		content.add(AttributeModifier.append("class", "modal-loaded"));
+		content.add(AttributeModifier.append("class", "dropdown-loaded"));
 		replace(content);
 		target.add(content);
 	}
 	
-	public String getWidth() {
-		return width;
-	}
-
-	/**
-	 * Optionally specify width of the modal panel. For instance: 500px, 50%, etc. 
-	 * @param width
-	 */
-	public ModalPanel setWidth(String width) {
-		this.width = width;
-		return this;
-	}
-
 	protected abstract Component newContent(String id);
 }
