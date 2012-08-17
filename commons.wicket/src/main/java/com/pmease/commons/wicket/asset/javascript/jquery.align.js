@@ -1,4 +1,7 @@
 jQuery.fn.align = function(alignment) {
+	if (alignment == undefined)
+		alignment = $(this)[0].alignment;
+	
 	var borderTop = jQuery(window).scrollTop();
 	var borderBottom = borderTop + jQuery(window).height();
 	var borderLeft = jQuery(window).scrollLeft();

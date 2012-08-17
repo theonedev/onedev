@@ -111,6 +111,7 @@ function showDropdown(trigger, dropdown, alignment, dropdownLoader) {
 }
 
 function dropdownLoaded(dropdownId) {
+	//$("#" + dropdownId).align();
 }
 
 function hideDropdown(dropdownId) {

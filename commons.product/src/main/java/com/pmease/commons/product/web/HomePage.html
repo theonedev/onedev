@@ -3,51 +3,11 @@
 		<title>Hello World</title>
 	</head>
 	<body>
-		<div>
-			<a wicket:id="modalTrigger" href="#">modal</a>
-			<div wicket:id="modal"></div>
-		</div>
-		<div>
-			<div wicket:id="dropdown"></div>
-			<a wicket:id="dropdownTrigger" href="#">dropdown</a>
-		</div>
-		<a wicket:id="delete">delete</a>
+		<a wicket:id="dropdownTrigger" style="float:right;" href="#">dropdown</a>
+		<div wicket:id="dropdown"></div>
 	</body>
-
-	<wicket:fragment wicket:id="modalFrag">
-		<form wicket:id="form" class="modal-form form-horizontal">
-			<div class="modal-header">
-				<h3>Edit user profile</h3>
-			</div>
-			<div class="modal-body">
-				<div class="control-group">
-					<label class="control-label">Name</label>
-					<div class="controls">
-						<input wicket:id="name" type="text" class="input-xlarge">
-						<p class="help-block">Specify your name here</p>
-					</div>
-				</div>
-				<div class="control-group">
-					<label class="control-label">Email</label>
-					<div class="controls">
-						<input wicket:id="email" type="text" class="input-xlarge">
-						<p class="help-block">Specify your email here</p>
-					</div>
-				</div>
-			</div>
-			<div class="modal-footer">
-				<a wicket:id="cancel" class="btn">Cancel</a> 
-				<a wicket:id="save" class="btn btn-primary">Save</a>
-				<div wicket:id="dropdown"></div>
-				<a wicket:id="dropdownTrigger" href="#">dropdown</a>
-			</div>
-		</form>
-	</wicket:fragment>
 	
 	<wicket:fragment wicket:id="dropdownFrag">
-		<div class="m4p">
-			<div wicket:id="modal"></div>
-			<a wicket:id="modalTrigger" href="#">modal</a>
-		</div>
+		<div><a wicket:id="test">test</a></div>
 	</wicket:fragment>
 </wicket:extend>
