@@ -21,7 +21,6 @@ public abstract class ModalPanel extends Panel {
 		super.onInitialize();
 		
 		setOutputMarkupId(true);
-		
 		add(new Fragment("content", "loadingFrag", ModalPanel.this).setOutputMarkupId(true));
 	}
 	

@@ -19,9 +19,9 @@ function setupDropdown(triggerId, dropdownId, hoverMode, alignmentTargetId,
 
 	// dropdown can associate with multiple triggers, and we should initialize it once here.
 	if (!dropdown.hasClass("dropdown")) { 
-		dropdown.addClass("dropdown hide popup");
+		dropdown.addClass("dropdown popup hide");
 		dropdown[0].trigger = trigger[0];
-		dropdown.before("<div id='" + dropdownId + "-placeholder'></div>");
+		dropdown.before("<div id='" + dropdownId + "-placeholder' class='hide'></div>");
 	}
 
 	if (hoverMode) {

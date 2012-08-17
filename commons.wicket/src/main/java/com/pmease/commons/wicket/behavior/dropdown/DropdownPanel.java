@@ -19,7 +19,6 @@ public abstract class DropdownPanel extends Panel {
 		super.onInitialize();
 		
 		setOutputMarkupId(true);
-		
 		add(new Fragment("content", "loadingFrag", DropdownPanel.this).setOutputMarkupId(true));
 	}
 	

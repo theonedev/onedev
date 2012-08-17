@@ -1,0 +1,40 @@
+.dropdown.menu .content {
+    margin: 0;
+    padding: 4px 0;
+    min-width: 120px;
+}
+.dropdown.menu ul {
+    list-style: none outside none;
+    margin:0;
+}
+.dropdown.menu a {
+    clear: both;
+    color: #333333;
+    display: block;
+    font-weight: normal;
+    line-height: 18px;
+    padding: 3px 12px;
+    white-space: nowrap;
+}
+.dropdown.menu a:hover {
+    color: #FFFFFF;
+    text-decoration: none;
+}
+.dropdown.menu li:hover {
+    background-color: #0088CC;
+}
+.dropdown.menu li.sub-menu a {
+	background:url(arrow.gif) no-repeat right center;
+	padding-right:12px; 
+	margin-right:8px;
+}
+.dropdown.menu .divider {
+    background-color: #E5E5E5;
+    border-bottom: 1px solid #FFFFFF;
+    height: 1px;
+    margin: 8px 1px;
+    overflow: hidden;
+}
+.dropdown.menu li.divider:hover {
+    background-color: #E5E5E5;
+}

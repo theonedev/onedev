@@ -1,14 +1,17 @@
 package com.pmease.commons.product.web;
 
-import org.apache.wicket.AttributeModifier;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.panel.Fragment;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+
+import com.pmease.commons.wicket.behavior.menu.Menu;
+import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
+import com.pmease.commons.wicket.behavior.menu.MenuDivider;
+import com.pmease.commons.wicket.behavior.menu.MenuItem;
+import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.commons.wicket.page.CommonPage;
 
 @SuppressWarnings("serial")
@@ -18,26 +21,65 @@ public class HomePage extends CommonPage  {
 	public void onInitialize() {
 		super.onInitialize();
 		
-		DropdownPanel dropdownPanel = new DropdownPanel("dropdown") {
+		MenuPanel menuPanel = new MenuPanel("menu") {
 
 			@Override
-			protected Component newContent(String id) {
-				final Fragment fragment = new Fragment(id, "dropdownFrag", HomePage.this);
-				fragment.add(new AjaxLink<Void>("test") {
+			protected List<MenuItem> getMenuItems() {
+				List<MenuItem> menuItems = new ArrayList<MenuItem>();
+				menuItems.add(new MenuItem() {
 
 					@Override
-					public void onClick(AjaxRequestTarget target) {
-						fragment.get("test").add(new AttributeModifier("style", "display:block; width: 500px;"));
-						target.add(fragment.get("test"));
+					public Component newContent(String componentId) {
+						return new Label(componentId, "item");
 					}
 					
-				}.setOutputMarkupId(true));
-				return fragment;
+				});
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public Component newContent(String componentId) {
+						return new Label(componentId, "item");
+					}
+					
+				});
+				menuItems.add(new MenuDivider());
+				menuItems.add(new Menu() {
+
+					@Override
+					public Component newContent(String componentId) {
+						return new Label(componentId, "item");
+					}
+
+					@Override
+					public List<MenuItem> getItems() {
+						List<MenuItem> menuItems = new ArrayList<MenuItem>();
+						menuItems.add(new MenuItem() {
+
+							@Override
+							public Component newContent(String componentId) {
+								return new Label(componentId, "item");
+							}
+							
+						});
+						menuItems.add(new MenuItem() {
+
+							@Override
+							public Component newContent(String componentId) {
+								return new Label(componentId, "item");
+							}
+							
+						});
+						return menuItems;
+					}
+					
+				});
+				return menuItems;
 			}
 			
 		};
-		add(dropdownPanel);
 		
-		add(new WebMarkupContainer("dropdownTrigger").add(new DropdownBehavior(dropdownPanel)));
+		add(menuPanel);
+		
+		add(new WebMarkupContainer("menuTrigger").add(new MenuBehavior(menuPanel)));
 	}	
 }

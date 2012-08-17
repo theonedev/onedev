@@ -4,8 +4,8 @@ function setupModal(triggerId, modalId, modalWidth, modalLoader) {
 
 	// modal can associate with multiple triggers, and we should initialize it once here.
 	if (!modal.hasClass("modal")) {
-		modal.addClass("modal hide popup");
-		modal.before("<div id='" + modalId + "-placeholder'></div>");
+		modal.addClass("modal popup hide");
+		modal.before("<div id='" + modalId + "-placeholder' class='hide'></div>");
 		
 		modal.modal({backdrop: "static", keyboard: false, show: false});
 	}
