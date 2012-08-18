@@ -38,3 +38,39 @@
 .dropdown.menu li.divider:hover {
     background-color: #E5E5E5;
 }
+.dropdown.menu:after {
+    content: "";
+    display: inline-block;
+    position: absolute;
+}
+.dropdown.menu.align-bottom:after {
+    border-bottom: 6px solid #FFFFFF;
+    border-right: 6px solid transparent;
+    border-left: 6px solid transparent;
+    left: 10px;
+    top: -6px;
+}
+.dropdown.menu.align-top:after {
+    border-top: 6px solid #FFFFFF;
+    border-right: 6px solid transparent;
+    border-left: 6px solid transparent;
+    left: 10px;
+    top: 100%;
+}
+.dropdown.menu.align-left:after {
+    border-bottom: 6px solid transparent;
+    border-top: 6px solid transparent;
+    border-left: 6px solid #FFFFFF;
+    left: 100%;
+    top: 10px;
+}
+.dropdown.menu.align-right:after {
+    border-bottom: 6px solid transparent;
+    border-top: 6px solid transparent;
+    border-right: 6px solid #FFFFFF;
+    left: -6px;
+    top: 10px;
+}
+.dropdown.menu.sub-menu:after, .dropdown.menu.align-overlap:after {
+	content:none;
+}

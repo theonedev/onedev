@@ -6,7 +6,9 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.Fragment;
 
+import com.pmease.commons.wicket.behavior.dropdown.DropdownAlignment;
 import com.pmease.commons.wicket.behavior.menu.Menu;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuDivider;
@@ -30,7 +32,7 @@ public class HomePage extends CommonPage  {
 
 					@Override
 					public Component newContent(String componentId) {
-						return new Label(componentId, "item");
+						return new Fragment(componentId, "itemFrag", HomePage.this);
 					}
 					
 				});
@@ -80,6 +82,6 @@ public class HomePage extends CommonPage  {
 		
 		add(menuPanel);
 		
-		add(new WebMarkupContainer("menuTrigger").add(new MenuBehavior(menuPanel)));
+		add(new WebMarkupContainer("menuTrigger").add(new MenuBehavior(menuPanel).setAlignment(new DropdownAlignment(0, 0, 0, 100))));
 	}	
 }

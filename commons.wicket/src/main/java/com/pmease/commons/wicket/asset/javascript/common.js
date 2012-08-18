@@ -1,3 +1,3 @@
-function onWicketAjaxCompleted(replacedElementIds) {
+function wicketAjaxCompleted(replacedElementIds) {
 	$("body>.dropdown:visible:last").align();
 }

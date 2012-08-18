@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.Component;
-import org.apache.wicket.Page;
 import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxRequestTarget.IJavaScriptResponse;
@@ -46,14 +45,9 @@ public abstract class AbstractWicketConfig extends WebApplication {
 				List<String> quotedIds = new ArrayList<String>();
 				for (String id: map.keySet())
 					quotedIds.add("\"" + id + "\"");
-				response.addJavaScript("onWicketAjaxCompleted([" + StringUtils.join(quotedIds, ",") + "]);");
+				response.addJavaScript("wicketAjaxCompleted([" + StringUtils.join(quotedIds, ",") + "]);");
 			}
 		});
-	}
-
-	@Override
-	public Class<? extends Page> getHomePage() {
-		return null;
 	}
 
 }

@@ -6,7 +6,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,7 +32,7 @@ public class Bootstrap {
 	
 	public static File installDir;
 
-	public static Set<File> libFiles;
+	public static List<File> libFiles;
 	
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
@@ -94,7 +95,7 @@ public class Bootstrap {
 		System.setProperty("logback.configurationFile", new File(installDir, "conf/logback.xml").getAbsolutePath());
 		logger.info("Launching application from '" + installDir.getAbsolutePath() + "'...");
 
-		libFiles = new HashSet<File>();
+		libFiles = new ArrayList<File>();
 		
 		File classpathFile = new File(installDir, "bin/system.classpath");
 		if (classpathFile.exists()) {
@@ -127,8 +128,24 @@ public class Bootstrap {
 			}
 			
 		}
+
+		// load our jars first so that we can override classes in third party jars if necessary. 
+		Collections.sort(libFiles, new Comparator<File>() {
+
+			@Override
+			public int compare(File file1, File file2) {
+				if (file1.isDirectory())
+					return -1;
+				else if (file1.getName().startsWith("com.pmease"))
+					return -1;
+				else
+					return 1;
+			}
+			
+		});
 		
 		List<URL> urls = new ArrayList<URL>();
+		
 		for (File file: libFiles) {
 			try {
 				urls.add(file.toURI().toURL());
