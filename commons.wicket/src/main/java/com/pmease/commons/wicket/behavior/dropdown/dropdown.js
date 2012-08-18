@@ -111,6 +111,7 @@ function showDropdown(trigger, dropdown, alignment, dropdownLoader) {
 }
 
 function dropdownLoaded(dropdownId) {
+	//$("#" + dropdownId).align();
 }
 
 function hideDropdown(dropdownId) {
@@ -150,3 +151,16 @@ $(document).click(function(event) {
 			hideDropdown(childDropdownEl.id);
 	}
 });
+
+$(function() {
+	Wicket.Ajax.Call.prototype.dropdownSuccess = Wicket.Ajax.Call.prototype.success;
+	Wicket.Ajax.Call.prototype.success = function(steps, attrs) {
+		steps.push(function (notify) {
+			$("body>.dropdown:visible:last").align();
+			notify();
+		});
+		this.dropdownSuccess(steps, attrs);
+	};
+
+});
+
