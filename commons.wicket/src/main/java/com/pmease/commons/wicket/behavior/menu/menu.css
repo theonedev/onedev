@@ -26,7 +26,7 @@
 .dropdown.menu li.sub-menu a {
 	background:url(arrow.gif) no-repeat right center;
 	padding-right:12px; 
-	margin-right:8px;
+	margin-right:4px;
 }
 .dropdown.menu .divider {
     background-color: #E5E5E5;
