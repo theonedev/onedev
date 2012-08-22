@@ -19,7 +19,9 @@ public abstract class DropdownPanel extends Panel {
 		super.onInitialize();
 		
 		setOutputMarkupId(true);
-		add(new Fragment("content", "loadingFrag", DropdownPanel.this).setOutputMarkupId(true));
+		add(new Fragment("content", "loadingFrag", DropdownPanel.this)
+				.add(AttributeModifier.replace("class", "loading"))
+				.setOutputMarkupId(true));
 	}
 	
 	/**
@@ -32,7 +34,7 @@ public abstract class DropdownPanel extends Panel {
 	
 	public void load(AjaxRequestTarget target) {
 		Component content = newContent("content");
-		content.add(AttributeModifier.append("class", "dropdown-loaded"));
+		content.add(AttributeModifier.append("class", " content"));
 		replace(content);
 		target.add(content);
 	}

@@ -1,4 +1,4 @@
-.modal .loading {
+.modal>.loading {
 	margin:8px;
 	min-height:64px;
 	background: url("ajax-indicator.gif") center center no-repeat;

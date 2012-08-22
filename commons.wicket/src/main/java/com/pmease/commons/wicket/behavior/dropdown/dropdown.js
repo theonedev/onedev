@@ -1,4 +1,4 @@
-function setupDropdown(triggerId, dropdownId, hoverMode, alignmentTargetId, 
+function setupDropdown(triggerId, dropdownId, hoverMode, showIndicator, alignmentTargetId, 
 		alignmentTargetX, alignmentTargetY, alignmentDropdownX, alignmentDropdownY, 
 		dropdownLoader) {
 	var alignment = {};
@@ -17,6 +17,11 @@ function setupDropdown(triggerId, dropdownId, hoverMode, alignmentTargetId,
 	
 	var dropdown = $("#" + dropdownId);
 
+	if (showIndicator) {
+		dropdown.prepend("<div class='indicator'></div>");
+		dropdown.append("<div class='indicator'></div>");
+	}
+	
 	// dropdown can associate with multiple triggers, and we should initialize it once here.
 	if (!dropdown.hasClass("dropdown")) { 
 		dropdown.addClass("dropdown popup hide");
@@ -161,6 +166,6 @@ $(function() {
 		});
 		this.dropdownSuccess(steps, attrs);
 	};
-
+	
 });
 

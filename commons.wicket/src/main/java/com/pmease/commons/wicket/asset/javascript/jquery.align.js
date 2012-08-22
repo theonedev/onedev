@@ -1,25 +1,64 @@
 jQuery.fn.align = function(alignment) {
+	if (this[0] == undefined)
+		return this;
+	
 	if (alignment == undefined)
-		alignment = $(this)[0].alignment;
+		alignment = this[0].alignment;
+	
+	var indicator = this.find(">.indicator");
 	
 	var borderTop = jQuery(window).scrollTop();
 	var borderBottom = borderTop + jQuery(window).height();
 	var borderLeft = jQuery(window).scrollLeft();
 	var borderRight = borderLeft + jQuery(window).width();
+
+	var indicatorSize = 6;
+
 	var width = this.outerWidth();
 	var height = this.outerHeight();
+	
 	var left, top;
-	if (alignment.pageX) { // alignment is mouse
-		var offset = 4;
-		if (borderRight - offset >= width + alignment.pageX)
-			left = alignment.pageX + offset;
-		else
-			left = borderRight - width - offset;
-
-		if(borderTop + offset >= alignment.pageY - height)
-			top = borderTop + offset;
-		 else
-			top = alignment.pageY - height - offset;
+	if (alignment.pageX != undefined) { // align to mouse
+		if (alignment.pageX - width/2 >= borderLeft) {
+			if (alignment.pageX + width/2 <= borderRight)
+				left = alignment.pageX - width/2;
+			else
+				left = borderRight - width;
+		} else {
+			left = borderLeft;
+		} 
+		var offset = 2;
+		
+		if (indicator[0] && indicator[1]) {
+			var indicatorLeft = alignment.pageX - left - indicatorSize;
+			if (indicatorLeft < indicatorSize)
+				indicatorLeft = indicatorSize;
+			if (indicatorLeft > width - 3*indicatorSize)
+				indicatorLeft = width - 3*indicatorSize;
+			
+			$(indicator[0]).css({left: (indicatorLeft - 1) + "px"});
+			$(indicator[1]).css({left: indicatorLeft + "px"});
+			
+			indicator.removeClass("top");
+			indicator.removeClass("bottom");
+			
+			if (borderTop + offset + indicatorSize < alignment.pageY - height) {
+				top = alignment.pageY - height - offset - indicatorSize;
+				indicator.addClass("top");
+			} else if (alignment.pageY + offset * 8 + indicatorSize + height <= borderBottom){
+				top = alignment.pageY + offset * 8 + indicatorSize;
+				indicator.addClass("bottom");
+			} else {
+				top = borderTop;
+			}
+		} else {
+			if (borderTop + offset < alignment.pageY - height) 
+				top = alignment.pageY - height - offset;
+			else if (alignment.pageY + offset * 8 + height <= borderBottom)
+				top = alignment.pageY + offset * 8;
+			else 
+				top = borderTop;
+		}
 	} else {
 		var target = $(alignment.target);
 		var targetLeft = target.offset().left;
@@ -48,25 +87,61 @@ jQuery.fn.align = function(alignment) {
 				top = borderBottom-height;
 		}
 
-		this.removeClass("align-left align-right align-top align-bottom align-overlap");
-		if (left>=targetLeft+targetWidth) {
-			this.addClass("align-right");
-			var targetCenter = targetTop + targetHeight/2.0;
-			this.css({backgroundPosition:["0% " + (targetCenter-top)/height*100 + "%"]});
-		} else if (left+width<=targetLeft) {
-			this.addClass("align-left");
-			var targetCenter = targetTop + targetHeight/2.0;
-			this.css({backgroundPosition:["0% " + (targetCenter-top)/height*100 + "%"]});
-		} else if (top>=targetTop+targetHeight) {
-			this.addClass("align-bottom");
-			var targetCenter = targetLeft + targetWidth/2.0;
-			this.css({backgroundPosition:[(targetCenter-left)/width*100 + "% 0%"]});
-		} else if (top+height<=targetTop) {
-			this.addClass("align-top");
-			var targetCenter = targetLeft + targetWidth/2.0;
-			this.css({backgroundPosition:[(targetCenter-left)/width*100 + "% 0%"]});
-		} else {
-			this.addClass("align-overlap");
+		if (indicator[0] && indicator[1]) {
+			indicator.removeClass("left right top bottom");
+			if (left >= targetLeft + targetWidth) {
+				if (left + width + indicatorSize <= borderRight) {
+					indicator.addClass("right");
+					left += indicatorSize;
+					var targetCenter = targetTop + targetHeight/2.0;
+					var indicatorTop = targetCenter - top - indicatorSize;
+					if (indicatorTop < indicatorSize)
+						indicatorTop = indicatorSize;
+					if (indicatorTop > height - 3 * indicatorSize)
+						indicatorTop = height - 3 * indicatorSize;
+					$(indicator[0]).css({top: (indicatorTop - 1) + "px"});
+					$(indicator[1]).css({top: indicatorTop + "px"});
+				}
+			} else if (left + width <= targetLeft) {
+				if (left - indicatorSize >= borderLeft) {
+					indicator.addClass("left");
+					left -= indicatorSize;
+					var targetCenter = targetTop + targetHeight/2.0;
+					var indicatorTop = targetCenter - top - indicatorSize;
+					if (indicatorTop < indicatorSize)
+						indicatorTop = indicatorSize;
+					if (indicatorTop > height - 3 * indicatorSize)
+						indicatorTop = height - 3 * indicatorSize;
+					$(indicator[0]).css({top: (indicatorTop - 1) + "px"});
+					$(indicator[1]).css({top: indicatorTop + "px"});
+				}
+			} else if (top >= targetTop + targetHeight) {
+				if (top + height + indicatorSize <= borderBottom) {
+					indicator.addClass("bottom");
+					top += indicatorSize;
+					var targetCenter = targetLeft + targetWidth/2.0;
+					var indicatorLeft = targetCenter - left - indicatorSize;
+					if (indicatorLeft < indicatorSize)
+						indicatorLeft = indicatorSize;
+					if (indicatorLeft > width - 3 * indicatorSize)
+						indicatorLeft = width - 3 * indicatorSize;
+					$(indicator[0]).css({left: (indicatorLeft - 1) + "px"});
+					$(indicator[1]).css({left: indicatorLeft + "px"});
+				}
+			} else if (top + height <= targetTop) {
+				if (top - indicatorSize >= borderTop) {
+					indicator.addClass("top");
+					top -= indicatorSize;
+					var targetCenter = targetLeft + targetWidth/2.0;
+					var indicatorLeft = targetCenter - left - indicatorSize;
+					if (indicatorLeft < indicatorSize)
+						indicatorLeft = indicatorSize;
+					if (indicatorLeft > width - 3 * indicatorSize)
+						indicatorLeft = width - 3 * indicatorSize;
+					$(indicator[0]).css({left: (indicatorLeft - 1) + "px"});
+					$(indicator[1]).css({left: indicatorLeft + "px"});
+				}
+			}
 		}
 	}
 	this.css({left:left, top:top});		

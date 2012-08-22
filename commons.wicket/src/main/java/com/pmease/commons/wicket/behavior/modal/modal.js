@@ -1,4 +1,4 @@
-function setupModal(triggerId, modalId, modalWidth, modalLoader) {
+function setupModal(triggerId, modalId, modalWidth, contentLoader) {
 	var trigger = $("#" + triggerId);
 	var modal = $("#" + modalId);
 
@@ -16,8 +16,8 @@ function setupModal(triggerId, modalId, modalWidth, modalLoader) {
 		
 		afterShowModal(modal);
 		
-		if (!modal.find(".modal-loaded")[0]) 
-			modalLoader();
+		if (!modal.find(">.content")[0]) 
+			contentLoader();
 		else if (modalWidth != "null")
 			positionModal(modal, modalWidth);
 	});

@@ -3,7 +3,7 @@ package com.pmease.commons.wicket.behavior.modal;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
 
 public abstract class ModalPanel extends Panel {
@@ -21,7 +21,9 @@ public abstract class ModalPanel extends Panel {
 		super.onInitialize();
 		
 		setOutputMarkupId(true);
-		add(new Fragment("content", "loadingFrag", ModalPanel.this).setOutputMarkupId(true));
+		add(new WebMarkupContainer("content")
+				.add(AttributeModifier.replace("class", "loading"))
+				.setOutputMarkupId(true));
 	}
 	
 	/**
@@ -34,7 +36,7 @@ public abstract class ModalPanel extends Panel {
 	
 	public void load(AjaxRequestTarget target) {
 		Component content = newContent("content");
-		content.add(AttributeModifier.append("class", "modal-loaded"));
+		content.add(AttributeModifier.append("class", " content"));
 		replace(content);
 		target.add(content);
 	}

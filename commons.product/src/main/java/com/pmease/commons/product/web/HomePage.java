@@ -14,6 +14,8 @@ import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuDivider;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
+import com.pmease.commons.wicket.behavior.modal.ModalBehavior;
+import com.pmease.commons.wicket.behavior.modal.ModalPanel;
 import com.pmease.commons.wicket.page.CommonPage;
 
 @SuppressWarnings("serial")
@@ -82,6 +84,20 @@ public class HomePage extends CommonPage  {
 		
 		add(menuPanel);
 		
-		add(new WebMarkupContainer("menuTrigger").add(new MenuBehavior(menuPanel).setAlignment(new DropdownAlignment(0, 0, 0, 100))));
+		add(new WebMarkupContainer("menuTrigger").add(new MenuBehavior(menuPanel)
+				.setAlignment(new DropdownAlignment(0, 100, 0, 0))
+				.setShowIndicator(true)));
+
+		ModalPanel modalPanel = new ModalPanel("modal") {
+
+			@Override
+			protected Component newContent(String id) {
+				return new Label(id, "Some times it is better.");
+			}
+			
+		};
+		add(modalPanel);
+		
+		add(new WebMarkupContainer("modalTrigger").add(new ModalBehavior(modalPanel)));
 	}	
 }
