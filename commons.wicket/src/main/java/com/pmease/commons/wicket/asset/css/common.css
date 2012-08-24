@@ -1,5 +1,75 @@
-.modal-footer .modal {text-align:left;}
-.tac {text-align:center;}
+.tac {
+	text-align:center;
+}
 
-.m24p {margin:24px;} .m16p {margin:16px;} .m12p {margin:12px;} .m8p {margin:8px;} .m4p {margin:4px;} .m2p {margin:2px;}
-.p24p {padding:24px;} .p16p {padding:16px;} .p12p {padding:12px;} .p8p {padding:8px;} .p4p {padding:4px;} .p2p {padding:2px;}
+/* Spacings */
+.m24p {
+	margin:24px;
+}
+.m16p {
+	margin:16px;
+}
+.m12p {
+	margin:12px;
+}
+.m8p {
+	margin:8px;
+}
+.m4p {
+	margin:4px;
+}
+.m2p {
+	margin:2px;
+}
+.p24p {
+	padding:24px;
+}
+.p16p {
+	padding:16px;
+}
+.p12p {
+	padding:12px;
+}
+.p8p {
+	padding:8px;
+}
+.p4p {
+	padding:4px;
+}
+.p2p {
+	padding:2px;
+}
+
+
+/* Piped links */
+.piped { 
+	display: block; 
+	zoom: 1; 
+}
+.piped:after { 
+	content: "."; 
+	display: block; 
+	height: 0; 
+	clear: both; 
+	visibility: hidden; 
+}
+.piped>li { 
+	float: left; 
+	display: inline; 
+}
+.piped>a, .piped>em, .piped>span { 
+	border-right: 1px solid #797c80; 
+	padding-right: 0.5em; 
+	margin-right: 0.5em; 
+}
+.piped.dotted>a, .piped.dotted>em, .piped.dotted>span { 
+	border-right: 1px dotted;
+}
+.piped.noborder>a, .piped.noborder>span, .piped.noborder>em { 
+	border: none; 
+}
+.piped>a:last-child, .piped>span:last-child, .piped>em:last-child { 
+	border-right: 0; 
+	padding-right: 0; 
+	margin-right: 0; 
+}

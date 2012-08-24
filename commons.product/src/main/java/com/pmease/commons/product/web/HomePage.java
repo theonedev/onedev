@@ -6,16 +6,12 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.Fragment;
 
-import com.pmease.commons.wicket.behavior.dropdown.DropdownAlignment;
 import com.pmease.commons.wicket.behavior.menu.Menu;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuDivider;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
-import com.pmease.commons.wicket.behavior.modal.ModalBehavior;
-import com.pmease.commons.wicket.behavior.modal.ModalPanel;
 import com.pmease.commons.wicket.page.CommonPage;
 
 @SuppressWarnings("serial")
@@ -24,80 +20,83 @@ public class HomePage extends CommonPage  {
 	@Override
 	public void onInitialize() {
 		super.onInitialize();
-		
-		MenuPanel menuPanel = new MenuPanel("menu") {
+
+		MenuPanel menu = new MenuPanel("menu") {
 
 			@Override
 			protected List<MenuItem> getMenuItems() {
-				List<MenuItem> menuItems = new ArrayList<MenuItem>();
-				menuItems.add(new MenuItem() {
+				List<MenuItem> items = new ArrayList<MenuItem>();
+				items.add(new MenuItem() {
 
 					@Override
 					public Component newContent(String componentId) {
-						return new Fragment(componentId, "itemFrag", HomePage.this);
+						return new Label(componentId, "New Action 1");
 					}
 					
 				});
-				menuItems.add(new MenuItem() {
+				items.add(new MenuItem() {
 
 					@Override
 					public Component newContent(String componentId) {
-						return new Label(componentId, "item");
+						return new Label(componentId, "Some Else New Action 2");
 					}
 					
 				});
-				menuItems.add(new MenuDivider());
-				menuItems.add(new Menu() {
+				items.add(new MenuItem() {
 
 					@Override
 					public Component newContent(String componentId) {
-						return new Label(componentId, "item");
+						return new Label(componentId, "New Action 3");
 					}
+					
+				});
+				items.add(new MenuDivider());
+				items.add(new Menu() {
 
 					@Override
 					public List<MenuItem> getItems() {
-						List<MenuItem> menuItems = new ArrayList<MenuItem>();
-						menuItems.add(new MenuItem() {
+						List<MenuItem> items = new ArrayList<MenuItem>();
+						items.add(new MenuItem() {
 
 							@Override
 							public Component newContent(String componentId) {
-								return new Label(componentId, "item");
+								return new Label(componentId, "New Action 1");
 							}
 							
 						});
-						menuItems.add(new MenuItem() {
+						items.add(new MenuItem() {
 
 							@Override
 							public Component newContent(String componentId) {
-								return new Label(componentId, "item");
+								return new Label(componentId, "New Action 2");
 							}
 							
 						});
-						return menuItems;
+						items.add(new MenuItem() {
+
+							@Override
+							public Component newContent(String componentId) {
+								return new Label(componentId, "New Action 3");
+							}
+							
+						});
+						return items;
+					}
+
+					@Override
+					public Component newContent(String componentId) {
+						return new Label(componentId, "Sub Menu 1");
 					}
 					
 				});
-				return menuItems;
+				return items;
 			}
-			
+
 		};
 		
-		add(menuPanel);
+		add(menu);
 		
-		add(new WebMarkupContainer("menuTrigger").add(new MenuBehavior(menuPanel)
-				.setAlignment(new DropdownAlignment(0, 100, 0, 0))
-				.setShowIndicator(true)));
-
-		ModalPanel modalPanel = new ModalPanel("modal") {
-
-			@Override
-			protected Component newContent(String id) {
-				return new Label(id, "Some times it is better.");
-			}
-			
-		};
-		add(modalPanel);
-		
-		add(new WebMarkupContainer("modalTrigger").add(new ModalBehavior(modalPanel)));
+		add(new WebMarkupContainer("toggle1").add(new MenuBehavior(menu)));
+		add(new WebMarkupContainer("toggle2").add(new MenuBehavior(menu)));
 	}	
 }

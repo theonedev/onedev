@@ -1,40 +1,56 @@
-.dropdown.menu .content {
+.dropdown-panel.menu .content {
     margin: 0;
     padding: 4px 0;
     min-width: 120px;
 }
-.dropdown.menu ul {
+.dropdown-panel.menu ul {
     list-style: none outside none;
     margin:0;
 }
-.dropdown.menu a {
+.dropdown-panel.menu a {
     clear: both;
     color: #333333;
     display: block;
     font-weight: normal;
-    line-height: 18px;
-    padding: 3px 12px;
+    line-height: 20px;
+    padding: 3px 20px;
     white-space: nowrap;
 }
-.dropdown.menu a:hover {
+.dropdown-panel.menu li.submenu>a {
+	margin-right: 2px;
+	margin-left: 2px;
+	padding-left: 18px;
+	padding-right: 18px;
+}
+.dropdown-panel.menu li.submenu>a:after {
+    border-color: transparent transparent transparent #CCCCCC;
+    border-style: solid;
+    border-width: 5px 0 5px 5px;
+    content: " ";
+    display: block;
+    float: right;
+    height: 0;
+    margin-right: -10px;
+    margin-top: 5px;
+    width: 0;
+}
+.dropdown-panel.menu li.submenu:hover > a:after {
+    border-left-color: #FFFFFF;
+}
+.dropdown-panel.menu a:hover {
     color: #FFFFFF;
     text-decoration: none;
 }
-.dropdown.menu li:hover {
+.dropdown-panel.menu li:hover {
     background-color: #0088CC;
 }
-.dropdown.menu li.sub-menu a {
-	background:url(arrow.gif) no-repeat right center;
-	padding-right:12px; 
-	margin-right:4px;
-}
-.dropdown.menu .divider {
+.dropdown-panel.menu .divider {
     background-color: #E5E5E5;
     border-bottom: 1px solid #FFFFFF;
     height: 1px;
     margin: 8px 1px;
     overflow: hidden;
 }
-.dropdown.menu li.divider:hover {
+.dropdown-panel.menu li.divider:hover {
     background-color: #E5E5E5;
 }

@@ -7,10 +7,16 @@ import org.apache.wicket.Component;
 public class DropdownAlignment implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
+	
+	public enum INDICATOR_MODE {SHOW, HIDE, AUTO}
 
 	private Component target;
 	
 	private int targetX = 0, targetY = 100, dropdownX = 0, dropdownY = 0;
+	
+	private int gap = -1;
+	
+	private INDICATOR_MODE indicatorMode = INDICATOR_MODE.AUTO;
 
 	public DropdownAlignment() {
 	}
@@ -29,6 +35,40 @@ public class DropdownAlignment implements Serializable {
 		this.dropdownX = dropdownX; this.dropdownY = dropdownY;
 	}
 	
+	public int getGap() {
+		return gap;
+	}
+
+	public DropdownAlignment setGap(int gap) {
+		this.gap = gap;
+		return this;
+	}
+
+	public DropdownAlignment setTarget(Component target) {
+		this.target = target;
+		return this;
+	}
+
+	public DropdownAlignment setTargetX(int targetX) {
+		this.targetX = targetX;
+		return this;
+	}
+
+	public DropdownAlignment setTargetY(int targetY) {
+		this.targetY = targetY;
+		return this;
+	}
+
+	public DropdownAlignment setDropdownX(int dropdownX) {
+		this.dropdownX = dropdownX;
+		return this;
+	}
+
+	public DropdownAlignment setDropdownY(int dropdownY) {
+		this.dropdownY = dropdownY;
+		return this;
+	}
+
 	public Component getTarget() {
 		return target;
 	}
@@ -47,6 +87,15 @@ public class DropdownAlignment implements Serializable {
 
 	public int getDropdownY() {
 		return dropdownY;
+	}
+
+	public INDICATOR_MODE getIndicatorMode() {
+		return indicatorMode;
+	}
+
+	public DropdownAlignment setIndicatorMode(INDICATOR_MODE indicatorMode) {
+		this.indicatorMode = indicatorMode;
+		return this;
 	}
 
 }

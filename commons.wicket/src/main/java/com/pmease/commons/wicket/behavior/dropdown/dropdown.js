@@ -1,5 +1,5 @@
-function setupDropdown(triggerId, dropdownId, hoverMode, showIndicator, alignmentTargetId, 
-		alignmentTargetX, alignmentTargetY, alignmentDropdownX, alignmentDropdownY, 
+function setupDropdown(triggerId, dropdownId, hoverMode, alignmentIndicatorMode, alignmentTargetId, 
+		alignmentTargetX, alignmentTargetY, alignmentDropdownX, alignmentDropdownY, alignmentGap,
 		dropdownLoader) {
 	var alignment = {};
 	alignment.target = $("#" + alignmentTargetId)[0];
@@ -7,31 +7,42 @@ function setupDropdown(triggerId, dropdownId, hoverMode, showIndicator, alignmen
 	alignment.targetY = alignmentTargetY;
 	alignment.dropdownX = alignmentDropdownX;
 	alignment.dropdownY = alignmentDropdownY;
+	alignment.gap = alignmentGap;
+	alignment.indicatorMode = alignmentIndicatorMode;
 	
 	$(alignment.target).addClass("dropdown-alignment");
 	
 	var trigger = $("#" + triggerId);
-	trigger.addClass("dropdown-trigger");
+	trigger.addClass("dropdown-toggle");
 	if (hoverMode)
 		trigger.addClass("dropdown-hover");
 	
 	var dropdown = $("#" + dropdownId);
 
-	if (showIndicator) {
+	var inNavbar = trigger.parent().parent().hasClass("nav") && trigger.closest(".navbar")[0];
+	
+	if (alignment.indicatorMode == "SHOW" || alignment.indicatorMode == "AUTO" && inNavbar) {
 		dropdown.prepend("<div class='indicator'></div>");
 		dropdown.append("<div class='indicator'></div>");
 	}
 	
+	if (alignment.gap < 0) {
+		if (inNavbar)
+			alignment.gap = 2;
+		else
+			alignment.gap = 4;
+	}
+	
 	// dropdown can associate with multiple triggers, and we should initialize it once here.
-	if (!dropdown.hasClass("dropdown")) { 
-		dropdown.addClass("dropdown popup hide");
+	if (!dropdown.hasClass("dropdown-panel")) { 
+		dropdown.addClass("dropdown-panel popup hide");
 		dropdown[0].trigger = trigger[0];
 		dropdown.before("<div id='" + dropdownId + "-placeholder' class='hide'></div>");
 	}
 
 	if (hoverMode) {
 		function hide() {
-			var topmostDropdown = $("body>.dropdown:visible:last");
+			var topmostDropdown = $("body>.dropdown-panel:visible:last");
 			if (topmostDropdown[0] == dropdown[0]) 
 				hideDropdown(dropdownId);
 			trigger.hideTimer = null;
@@ -101,6 +112,7 @@ function showDropdown(trigger, dropdown, alignment, dropdownLoader) {
 	dropdown[0].alignment = alignment;
 	
 	trigger.addClass("open");
+	trigger.parent().addClass("open");
 
 	$(alignment.target).addClass("open");
 	
@@ -111,23 +123,23 @@ function showDropdown(trigger, dropdown, alignment, dropdownLoader) {
 	$("body").append(dropdown);
 	dropdown.align(alignment).show();
 
-	if (!dropdown.find(".dropdown-loaded")[0]) 
+	if (!dropdown.find(">.content")[0]) 
 		dropdownLoader();
 }
 
 function dropdownLoaded(dropdownId) {
-	//$("#" + dropdownId).align();
 }
 
 function hideDropdown(dropdownId) {
 	var dropdown = $("#" + dropdownId);
-	var childDropdown = dropdown.nextAll(".dropdown:visible");
+	var childDropdown = dropdown.nextAll(".dropdown-panel:visible");
 
 	if (childDropdown[0])
 		hideDropdown(childDropdown[0].id);
 	
 	var trigger = $(dropdown[0].trigger);
 	trigger.removeClass("open");
+	trigger.parent().removeClass("open");
 	
 	$(dropdown[0].alignment.target).removeClass("open");
 	
@@ -139,9 +151,9 @@ function hideDropdown(dropdownId) {
 $(document).click(function(event) {
 	var source = $(event.target);
 	
-	if (!source.closest(".dropdown-trigger")[0]) {
+	if (!source.closest(".dropdown-toggle")[0]) {
 		var start;
-		var dropdown = source.closest(".dropdown");
+		var dropdown = source.closest(".dropdown-panel");
 		if (dropdown[0]) {
 			start = dropdown;
 		} else {
@@ -151,7 +163,7 @@ $(document).click(function(event) {
 			else 
 				start = $("body").children(":first");
 		}		
-		var childDropdownEl = start.nextAll(".dropdown:visible")[0];
+		var childDropdownEl = start.nextAll(".dropdown-panel:visible")[0];
 		if (childDropdownEl)
 			hideDropdown(childDropdownEl.id);
 	}
@@ -161,7 +173,7 @@ $(function() {
 	Wicket.Ajax.Call.prototype.dropdownSuccess = Wicket.Ajax.Call.prototype.success;
 	Wicket.Ajax.Call.prototype.success = function(steps, attrs) {
 		steps.push(function (notify) {
-			$("body>.dropdown:visible:last").align();
+			$("body>.dropdown-panel:visible:last").align();
 			notify();
 		});
 		this.dropdownSuccess(steps, attrs);

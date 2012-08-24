@@ -49,11 +49,6 @@
             <version>${wicketVersion}</version> 
         </dependency> 
         <dependency> 
-            <groupId>org.apache.wicket</groupId>  
-            <artifactId>wicket-bootstrap</artifactId>  
-            <version>0.1</version> 
-        </dependency> 
-        <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.jetty</artifactId>  
             <version>1.0.14</version> 

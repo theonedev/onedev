@@ -17,8 +17,6 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 	
 	private boolean hoverMode;
 	
-	private boolean showIndicator;
-	
 	private DropdownAlignment alignment = new DropdownAlignment();
 	
 	public DropdownBehavior(DropdownPanel dropdownPanel) {
@@ -37,10 +35,6 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 		return this;
 	}
 
-	public DropdownBehavior setShowIndicator(boolean showIndicator) {
-		this.showIndicator = showIndicator;
-		return this;
-	}
 	
 	@Override
 	protected void onBind() {
@@ -54,11 +48,11 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 		response.render(CssHeaderItem.forReference(new PackageResourceReference(DropdownBehavior.class, "dropdown.css")));
 		response.render(JavaScriptHeaderItem.forReference(new PackageResourceReference(DropdownBehavior.class, "dropdown.js")));
 		String script = String.format(
-				"setupDropdown('%s', '%s', %s, %s, '%s', %s, %s, %s, %s, %s)", 
-				getComponent().getMarkupId(), dropdownPanel.getMarkupId(), hoverMode, showIndicator, 
+				"setupDropdown('%s', '%s', %s, '%s', '%s', %s, %s, %s, %s, %d, %s)", 
+				getComponent().getMarkupId(), dropdownPanel.getMarkupId(), hoverMode, alignment.getIndicatorMode().name(), 
 				alignment.getTarget()!=null?alignment.getTarget().getMarkupId():getComponent().getMarkupId(), 
 				alignment.getTargetX(), alignment.getTargetY(), alignment.getDropdownX(), alignment.getDropdownY(), 
-				getCallbackFunction());
+				alignment.getGap(), getCallbackFunction());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

@@ -67,32 +67,32 @@ jQuery.fn.align = function(alignment) {
 		var targetHeight = target.outerHeight();
 		var anchor = targetWidth*alignment.targetX/100.0 + targetLeft;
 		left = anchor - alignment.dropdownX*width/100.0;
-		if (left<borderLeft || left+width>borderRight) {
+		if (left < borderLeft || left + width > borderRight) {
 			anchor = targetWidth*(100-alignment.targetX)/100.0 + targetLeft;
-			left = anchor - (100-alignment.dropdownX)*width/100.0;
-			if (left<borderLeft)
+			left = anchor - (100 - alignment.dropdownX) * width / 100.0;
+			if (left < borderLeft)
 				left = borderLeft;
-			if (left+width > borderRight)
-				left = borderRight-width;
+			if (left + width > borderRight)
+				left = borderRight - width;
 		}
 		
-		anchor = targetHeight*alignment.targetY/100.0 + targetTop;
-		top = anchor - alignment.dropdownY*height/100.0;
-		if (top<borderTop || top+height>borderBottom) {
-			anchor = targetHeight*(100-alignment.targetY)/100.0 + targetTop;
-			top = anchor - (100-alignment.dropdownY)*height/100.0;
+		anchor = targetHeight * alignment.targetY / 100.0 + targetTop;
+		top = anchor - alignment.dropdownY * height / 100.0;
+		if (top < borderTop || top + height > borderBottom) {
+			anchor = targetHeight * (100 - alignment.targetY) / 100.0 + targetTop;
+			top = anchor - (100 - alignment.dropdownY) * height / 100.0;
 			if (top<borderTop)
 				top = borderTop;
 			if (top+height > borderBottom)
-				top = borderBottom-height;
+				top = borderBottom - height;
 		}
 
 		if (indicator[0] && indicator[1]) {
 			indicator.removeClass("left right top bottom");
 			if (left >= targetLeft + targetWidth) {
-				if (left + width + indicatorSize <= borderRight) {
+				if (left + width + alignment.gap <= borderRight) {
 					indicator.addClass("right");
-					left += indicatorSize;
+					left += alignment.gap;
 					var targetCenter = targetTop + targetHeight/2.0;
 					var indicatorTop = targetCenter - top - indicatorSize;
 					if (indicatorTop < indicatorSize)
@@ -103,9 +103,9 @@ jQuery.fn.align = function(alignment) {
 					$(indicator[1]).css({top: indicatorTop + "px"});
 				}
 			} else if (left + width <= targetLeft) {
-				if (left - indicatorSize >= borderLeft) {
+				if (left - alignment.gap >= borderLeft) {
 					indicator.addClass("left");
-					left -= indicatorSize;
+					left -= alignment.gap;
 					var targetCenter = targetTop + targetHeight/2.0;
 					var indicatorTop = targetCenter - top - indicatorSize;
 					if (indicatorTop < indicatorSize)
@@ -116,9 +116,9 @@ jQuery.fn.align = function(alignment) {
 					$(indicator[1]).css({top: indicatorTop + "px"});
 				}
 			} else if (top >= targetTop + targetHeight) {
-				if (top + height + indicatorSize <= borderBottom) {
+				if (top + height + alignment.gap <= borderBottom) {
 					indicator.addClass("bottom");
-					top += indicatorSize;
+					top += alignment.gap;
 					var targetCenter = targetLeft + targetWidth/2.0;
 					var indicatorLeft = targetCenter - left - indicatorSize;
 					if (indicatorLeft < indicatorSize)
@@ -129,9 +129,9 @@ jQuery.fn.align = function(alignment) {
 					$(indicator[1]).css({left: indicatorLeft + "px"});
 				}
 			} else if (top + height <= targetTop) {
-				if (top - indicatorSize >= borderTop) {
+				if (top - alignment.gap >= borderTop) {
 					indicator.addClass("top");
-					top -= indicatorSize;
+					top -= alignment.gap;
 					var targetCenter = targetLeft + targetWidth/2.0;
 					var indicatorLeft = targetCenter - left - indicatorSize;
 					if (indicatorLeft < indicatorSize)
@@ -141,6 +141,20 @@ jQuery.fn.align = function(alignment) {
 					$(indicator[0]).css({left: (indicatorLeft - 1) + "px"});
 					$(indicator[1]).css({left: indicatorLeft + "px"});
 				}
+			}
+		} else {
+			if (left >= targetLeft + targetWidth) {
+				if (left + width + alignment.gap <= borderRight)
+					left += alignment.gap;
+			} else if (left + width <= targetLeft) {
+				if (left - alignment.gap >= borderLeft)
+					left -= alignment.gap;
+			} else if (top >= targetTop + targetHeight) {
+				if (top + height + alignment.gap <= borderBottom) 
+					top += alignment.gap;
+			} else if (top + height <= targetTop) {
+				if (top - alignment.gap >= borderTop) 
+					top -= alignment.gap;
 			}
 		}
 	}

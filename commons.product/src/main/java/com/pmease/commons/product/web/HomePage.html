@@ -3,22 +3,12 @@
 		<title>Hello World</title>
 	</head>
 	<body>
-		<br/>
-		<br/>
-		<br/>
-		<br/>
-		<br/>
-		<br/>
-		<br/>
-		<br/>
-		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		<a wicket:id="menuTrigger" href="#">menu</a>
+		<div class="piped dotted">
+			<a href="#">Build</a><a wicket:id="toggle1" href="#"><b class="caret"></b></a>
+		</div>
+		<a wicket:id="toggle2" class="pill" href="#">Build <b class="caret"></b></a>
+		<a class="pill dropdown-toggle" href="#">Build <b class="caret"></b></a>
 		<div wicket:id="menu"></div>
-		<a wicket:id="modalTrigger" href="#">modal</a>
-		<div wicket:id="modal"></div>
+		<div>some other thing</div>
 	</body>
-	<wicket:fragment wicket:id="itemFrag">
-		<i class="icon-search"></i> search
-	</wicket:fragment>
 </wicket:extend>
