@@ -8,7 +8,8 @@
 	z-index: 2000;
 }
 .dropdown-panel>.content {
-	margin: 4px;
+	margin: 0;
+	padding: 4px;
 }
 .dropdown-panel>.loading {
 	margin: 4px;

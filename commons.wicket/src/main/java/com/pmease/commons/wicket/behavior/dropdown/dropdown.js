@@ -19,15 +19,8 @@ function setupDropdown(triggerId, dropdownId, hoverMode, alignmentIndicatorMode,
 	
 	var dropdown = $("#" + dropdownId);
 
-	var inNavbar = trigger.parent().parent().hasClass("nav") && trigger.closest(".navbar")[0];
-	
-	if (alignment.indicatorMode == "SHOW" || alignment.indicatorMode == "AUTO" && inNavbar) {
-		dropdown.prepend("<div class='indicator'></div>");
-		dropdown.append("<div class='indicator'></div>");
-	}
-	
 	if (alignment.gap < 0) {
-		if (inNavbar)
+		if (trigger.parent().parent().hasClass("nav") && trigger.closest(".navbar")[0])
 			alignment.gap = 2;
 		else
 			alignment.gap = 4;
@@ -107,7 +100,26 @@ function setupDropdown(triggerId, dropdownId, hoverMode, alignmentIndicatorMode,
 	return this;
 }
 
+function jqObjClicked(jqObj) {
+	var start;
+	var dropdown = jqObj.closest(".dropdown-panel");
+	if (dropdown[0]) {
+		start = dropdown;
+	} else {
+		var topmostModal = $("body>.modal:visible:last");
+		if (topmostModal[0]) 
+			start = topmostModal;
+		else 
+			start = $("body").children(":first");
+	}		
+	var childDropdownEl = start.nextAll(".dropdown-panel:visible")[0];
+	if (childDropdownEl)
+		hideDropdown(childDropdownEl.id);
+}
+
 function showDropdown(trigger, dropdown, alignment, dropdownLoader) {
+	jqObjClicked(trigger);
+	
 	dropdown[0].trigger = trigger[0];
 	dropdown[0].alignment = alignment;
 	
@@ -115,6 +127,13 @@ function showDropdown(trigger, dropdown, alignment, dropdownLoader) {
 	trigger.parent().addClass("open");
 
 	$(alignment.target).addClass("open");
+
+	var inNavbar = trigger.parent().parent().hasClass("nav") && trigger.closest(".navbar")[0];
+	
+	if (alignment.indicatorMode == "SHOW" || alignment.indicatorMode == "AUTO" && inNavbar) {
+		dropdown.prepend("<div class='indicator'></div>");
+		dropdown.append("<div class='indicator'></div>");
+	}
 	
 	var topmostPopup = $("body>.popup:visible:last");
 	if (topmostPopup[0])
@@ -142,34 +161,20 @@ function hideDropdown(dropdownId) {
 	trigger.parent().removeClass("open");
 	
 	$(dropdown[0].alignment.target).removeClass("open");
+	dropdown.find(">.indicator").remove();
 	
 	dropdown.hide();
 	
 	$("#" + dropdownId + "-placeholder").after(dropdown);
 }
 
-$(document).click(function(event) {
-	var source = $(event.target);
-	
-	if (!source.closest(".dropdown-toggle")[0]) {
-		var start;
-		var dropdown = source.closest(".dropdown-panel");
-		if (dropdown[0]) {
-			start = dropdown;
-		} else {
-			var topmostModal = $("body>.modal:visible:last");
-			if (topmostModal[0]) 
-				start = topmostModal;
-			else 
-				start = $("body").children(":first");
-		}		
-		var childDropdownEl = start.nextAll(".dropdown-panel:visible")[0];
-		if (childDropdownEl)
-			hideDropdown(childDropdownEl.id);
-	}
-});
-
 $(function() {
+	$(document).click(function(event) {
+		var source = $(event.target);
+		if (!source.closest(".dropdown-toggle")[0])
+			jqObjClicked(source);
+	});
+
 	Wicket.Ajax.Call.prototype.dropdownSuccess = Wicket.Ajax.Call.prototype.success;
 	Wicket.Ajax.Call.prototype.success = function(steps, attrs) {
 		steps.push(function (notify) {

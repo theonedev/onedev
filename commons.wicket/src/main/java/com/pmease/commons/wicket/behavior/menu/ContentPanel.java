@@ -13,7 +13,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownAlignment;
 
 @SuppressWarnings("serial")
-public abstract class ContentPanel extends Panel {
+abstract class ContentPanel extends Panel {
 
 	public ContentPanel(String id) {
 		super(id);
