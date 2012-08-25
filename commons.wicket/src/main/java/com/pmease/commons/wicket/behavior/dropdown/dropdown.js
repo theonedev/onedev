@@ -1,4 +1,4 @@
-function setupDropdown(triggerId, dropdownId, hoverMode, alignmentIndicatorMode, alignmentTargetId, 
+function setupDropdown(triggerId, dropdownInfo, hoverDelay, alignmentIndicatorMode, alignmentTargetId, 
 		alignmentTargetX, alignmentTargetY, alignmentDropdownX, alignmentDropdownY, alignmentGap,
 		dropdownLoader) {
 	var alignment = {};
@@ -14,11 +14,26 @@ function setupDropdown(triggerId, dropdownId, hoverMode, alignmentIndicatorMode,
 	
 	var trigger = $("#" + triggerId);
 	trigger.addClass("dropdown-toggle");
-	if (hoverMode)
+	if (hoverDelay >= 0)
 		trigger.addClass("dropdown-hover");
 	
-	var dropdown = $("#" + dropdownId);
-
+	var dropdown;
+	if (dropdownLoader != undefined) { 
+		/*
+		 * Otherwise, dropdownInfo represents id of the dropdown element, and its content has to be 
+		 * loaded by calling dropdownLoader.
+		 */
+		dropdown = $("#" + dropdownInfo);
+	} else {
+		/*
+		 * In case dropdownLoader is not defined, the dropdownInfo itself represents content of the
+		 * dropdown element.  
+		 */
+		dropdown = $(dropdownInfo); 
+		dropdownId = dropdown[0].id;
+		trigger.append(dropdown);
+	}
+			
 	if (alignment.gap < 0) {
 		if (trigger.parent().parent().hasClass("nav") && trigger.closest(".navbar")[0])
 			alignment.gap = 2;
@@ -33,7 +48,7 @@ function setupDropdown(triggerId, dropdownId, hoverMode, alignmentIndicatorMode,
 		dropdown.before("<div id='" + dropdownId + "-placeholder' class='hide'></div>");
 	}
 
-	if (hoverMode) {
+	if (hoverDelay >= 0) {
 		function hide() {
 			var topmostDropdown = $("body>.dropdown-panel:visible:last");
 			if (topmostDropdown[0] == dropdown[0]) 
@@ -46,7 +61,7 @@ function setupDropdown(triggerId, dropdownId, hoverMode, alignmentIndicatorMode,
 			trigger.hideTimer = setTimeout(function(){
 				if (trigger.hasClass("open"))
 					hide();
-			}, 350);
+			}, hoverDelay);
 		}
 		function cancelHide() {
 			if (trigger.hideTimer != null) {
@@ -68,7 +83,7 @@ function setupDropdown(triggerId, dropdownId, hoverMode, alignmentIndicatorMode,
 						cancelHide();
 					}
 					trigger.showTimer = null;
-				}, 350);
+				}, hoverDelay);
 			}
 		});
 		dropdown.mouseover(function() {
@@ -100,9 +115,12 @@ function setupDropdown(triggerId, dropdownId, hoverMode, alignmentIndicatorMode,
 	return this;
 }
 
-function jqObjClicked(jqObj) {
+/*
+ * Hide all dropdowns not relevant to this trigger.
+ */
+function hideDropdowns(trigger) {
 	var start;
-	var dropdown = jqObj.closest(".dropdown-panel");
+	var dropdown = trigger.closest(".dropdown-panel");
 	if (dropdown[0]) {
 		start = dropdown;
 	} else {
@@ -118,7 +136,7 @@ function jqObjClicked(jqObj) {
 }
 
 function showDropdown(trigger, dropdown, alignment, dropdownLoader) {
-	jqObjClicked(trigger);
+	hideDropdowns(trigger);
 	
 	dropdown[0].trigger = trigger[0];
 	dropdown[0].alignment = alignment;
@@ -172,7 +190,7 @@ $(function() {
 	$(document).click(function(event) {
 		var source = $(event.target);
 		if (!source.closest(".dropdown-toggle")[0])
-			jqObjClicked(source);
+			hideDropdowns(source);
 	});
 
 	Wicket.Ajax.Call.prototype.dropdownSuccess = Wicket.Ajax.Call.prototype.success;

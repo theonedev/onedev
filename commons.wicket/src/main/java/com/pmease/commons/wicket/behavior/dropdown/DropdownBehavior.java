@@ -15,7 +15,7 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 
 	private final DropdownPanel dropdownPanel;
 	
-	private boolean hoverMode;
+	private int hoverDelay;
 	
 	private DropdownAlignment alignment = new DropdownAlignment();
 	
@@ -23,11 +23,48 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 		this.dropdownPanel = dropdownPanel;
 	}
 	
-	public DropdownBehavior setHoverMode(boolean hoverMode) {
-		this.hoverMode = hoverMode;
+	/**
+	 * Set time to delay in milliseconds before displaying the dropdown panel when hover the mouse 
+	 * over the dropdown trigger. Specifically if this value is less than 0, the dropdown panel 
+	 * can only be displayed when the trigger is clicked.  
+	 *  
+	 * @param hoverDelay
+	 * 			Milliseconds to wait before displaying the dropdown panel when hover mouse over the 
+	 * 			trigger. Use negative value to display dropdown panel upon clicking the trigger.  
+	 * @return 
+	 * 			This behavior.
+	 */
+	public DropdownBehavior setHoverDelay(int hoverDelay) {
+		this.hoverDelay = hoverDelay;
 		return this;
 	}
-
+	
+	/**
+	 * Specify whether or not to display the dropdown panel by clicking the trigger element.
+	 * 
+	 * @param clickMode
+	 * 			Whether or not the dropdown panel is shown via clicking the trigger element. If 
+	 * 			set to false, the dropdown panel will be displayed by hovering the mouse over 
+	 * 			the trigger element.
+	 * @return
+	 * 			This behavior.
+	 */
+	public DropdownBehavior setClickMode(boolean clickMode) {
+		if (clickMode)
+			hoverDelay = -1;
+		else
+			hoverDelay = 350;
+		
+		return this;
+	}
+	
+	/**
+	 * Specify how the dropdown panel is aligned to the target. 
+	 * @param alignment
+	 * 			The {@link DropdownAlignment alignment} setting object. 
+	 * @return
+	 * 			This behavior.
+	 */
 	public DropdownBehavior setAlignment(DropdownAlignment alignment) {
 		this.alignment = alignment;
 		if (alignment.getTarget() != null)
@@ -35,7 +72,6 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 		return this;
 	}
 
-	
 	@Override
 	protected void onBind() {
 		super.onBind();
@@ -49,7 +85,7 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 		response.render(JavaScriptHeaderItem.forReference(new PackageResourceReference(DropdownBehavior.class, "dropdown.js")));
 		String script = String.format(
 				"setupDropdown('%s', '%s', %s, '%s', '%s', %s, %s, %s, %s, %d, %s)", 
-				getComponent().getMarkupId(), dropdownPanel.getMarkupId(), hoverMode, alignment.getIndicatorMode().name(), 
+				getComponent().getMarkupId(), dropdownPanel.getMarkupId(), hoverDelay, alignment.getIndicatorMode().name(), 
 				alignment.getTarget()!=null?alignment.getTarget().getMarkupId():getComponent().getMarkupId(), 
 				alignment.getTargetX(), alignment.getTargetY(), alignment.getDropdownX(), alignment.getDropdownY(), 
 				alignment.getGap(), getCallbackFunction());

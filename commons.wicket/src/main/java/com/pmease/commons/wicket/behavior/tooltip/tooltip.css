@@ -1,0 +1,28 @@
+.dropdown-panel.tooltip {
+    background-color: #000;
+    border: 1px solid #000;
+    box-shadow: none;
+    border-radius: 4px;
+    position: absolute;
+    opacity: 0.8;
+    filter: alpha(opacity=80);
+	color: #FFF;
+	font-size: 11px;
+	line-height: 14px;
+}
+.dropdown-panel.tooltip>.content {
+	padding:0;
+	margin:0;
+}
+.dropdown-panel.tooltip>.indicator.bottom:last-child {
+    border-bottom: 6px solid #000;
+}
+.dropdown-panel.tooltip>.indicator.top:last-child {
+    border-top: 6px solid #000;
+}
+.dropdown-panel.tooltip>.indicator.left:last-child {
+    border-left: 6px solid #000;
+}
+.dropdown-panel.tooltip>.indicator.right:last-child {
+    border-right: 6px solid #000;
+}
