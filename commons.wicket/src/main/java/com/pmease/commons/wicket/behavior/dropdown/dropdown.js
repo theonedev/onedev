@@ -158,7 +158,7 @@ function showDropdown(trigger, dropdown, alignment, dropdownLoader) {
 		dropdown.css("z-index", parseInt(topmostPopup.css("z-index")) + 10);
 
 	$("body").append(dropdown);
-	dropdown.align(alignment).show();
+	dropdown.align(alignment).fadeIn("fast");
 
 	if (!dropdown.find(">.content")[0]) 
 		dropdownLoader();
@@ -181,7 +181,7 @@ function hideDropdown(dropdownId) {
 	$(dropdown[0].alignment.target).removeClass("open");
 	dropdown.find(">.indicator").remove();
 	
-	dropdown.hide();
+	dropdown.fadeOut("fast");
 	
 	$("#" + dropdownId + "-placeholder").after(dropdown);
 }
