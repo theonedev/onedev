@@ -6,6 +6,8 @@ import org.apache.wicket.markup.html.list.ListItem;
 
 public class TabDivider implements Tab {
 
+	private static final long serialVersionUID = 1L;
+
 	@Override
 	public void populate(ListItem<Tab> item, String componentId) {
 		item.add(AttributeModifier.append("class", "divider"));

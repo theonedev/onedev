@@ -5,6 +5,8 @@ import org.apache.wicket.model.IModel;
 
 public abstract class ActionTab implements Tab {
 
+	private static final long serialVersionUID = 1L;
+
 	private IModel<String> titleModel;
 	
 	private boolean active;

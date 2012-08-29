@@ -8,6 +8,8 @@ import com.google.common.base.Preconditions;
 
 public class PageTab implements Tab {
 	
+	private static final long serialVersionUID = 1L;
+
 	private final IModel<String> titleModel;
 	
 	private final Class<? extends Page>[] pageClasses;
