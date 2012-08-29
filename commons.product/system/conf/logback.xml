@@ -21,10 +21,12 @@
 		</triggeringPolicy>
 	</appender>
 	
-	<logger name="com.pmease" level="INFO" />
+	<logger name="org.apache.wicket" level="WARN" />
+	<logger name="org.eclipse" level="WARN" />
+	<logger name="org.hibernate" level="WARN" />
 	<logger name="com.jolbox.bonecp.BoneCPConfig" level="ERROR" />
 	
-	<root level="WARN">
+	<root level="INFO">
 		<appender-ref ref="FILE" />
 		<appender-ref ref="CONSOLE" />
 	</root>
