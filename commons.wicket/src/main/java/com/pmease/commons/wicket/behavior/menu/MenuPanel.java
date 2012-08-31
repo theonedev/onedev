@@ -10,8 +10,12 @@ import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 @SuppressWarnings("serial")
 public abstract class MenuPanel extends DropdownPanel {
 
+	public MenuPanel(String id, boolean lazyLoad) {
+		super(id, lazyLoad);
+	}
+	
 	public MenuPanel(String id) {
-		super(id);
+		this(id, false);
 	}
 
 	@Override

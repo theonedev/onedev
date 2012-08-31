@@ -10,8 +10,15 @@ public abstract class DropdownPanel extends Panel {
 
 	private static final long serialVersionUID = 1L;
 
-	public DropdownPanel(String id) {
+	private final boolean lazyLoad;
+	
+	public DropdownPanel(String id, boolean lazyLoad) {
 		super(id);
+		this.lazyLoad = lazyLoad;
+	}
+	
+	public DropdownPanel(String id) {
+		this(id, true);
 	}
 	
 	@Override
@@ -19,9 +26,13 @@ public abstract class DropdownPanel extends Panel {
 		super.onInitialize();
 		
 		setOutputMarkupId(true);
-		add(new Fragment("content", "loadingFrag", DropdownPanel.this)
-				.add(AttributeModifier.replace("class", "loading"))
-				.setOutputMarkupId(true));
+		if (lazyLoad) {
+			add(new Fragment("content", "loadingFrag", DropdownPanel.this)
+					.add(AttributeModifier.replace("class", "loading"))
+					.setOutputMarkupId(true));
+		} else {
+			add(newContent("content").add(AttributeModifier.append("class", "content")));
+		}
 	}
 	
 	/**
@@ -34,7 +45,7 @@ public abstract class DropdownPanel extends Panel {
 	
 	public void load(AjaxRequestTarget target) {
 		Component content = newContent("content");
-		content.add(AttributeModifier.append("class", " content"));
+		content.add(AttributeModifier.append("class", "content"));
 		replace(content);
 		target.add(content);
 	}

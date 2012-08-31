@@ -15,7 +15,7 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 
 	private final DropdownPanel dropdownPanel;
 	
-	private int hoverDelay;
+	private int hoverDelay = -1;
 	
 	private DropdownAlignment alignment = new DropdownAlignment();
 	

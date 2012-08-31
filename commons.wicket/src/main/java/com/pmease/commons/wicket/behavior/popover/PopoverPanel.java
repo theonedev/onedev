@@ -11,9 +11,13 @@ public abstract class PopoverPanel extends DropdownPanel {
 	
 	private IModel<String> titleModel;
 	
-	public PopoverPanel(String id, IModel<String> titleModel) {
-		super(id);
+	public PopoverPanel(String id, IModel<String> titleModel, boolean lazyLoad) {
+		super(id, lazyLoad);
 		this.titleModel = titleModel;
+	}
+	
+	public PopoverPanel(String id, IModel<String> titleModel) {
+		this(id, titleModel, true);
 	}
 
 	@Override

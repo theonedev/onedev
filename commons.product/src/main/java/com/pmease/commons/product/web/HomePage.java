@@ -1,14 +1,11 @@
 package com.pmease.commons.product.web;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.Model;
 
-import com.pmease.commons.wicket.component.tabbable.ActionTab;
-import com.pmease.commons.wicket.component.tabbable.Tab;
-import com.pmease.commons.wicket.component.tabbable.Tabbable;
+import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
+import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.page.CommonPage;
 
 @SuppressWarnings("serial")
@@ -18,34 +15,16 @@ public class HomePage extends CommonPage  {
 	public void onInitialize() {
 		super.onInitialize();
 		
-		List<Tab> tabs = new ArrayList<Tab>();
-		tabs.add(new ActionTab(Model.of("panel1")) {
+		DropdownPanel dropdown = new DropdownPanel("dropdown", false) {
 
 			@Override
-			protected void tabActivated() {
-				HomePage.this.replace(new Label("content", "panel1"));
+			protected Component newContent(String id) {
+				return new Label(id, "Hello World");
 			}
 			
-		}.setActive(true));
-		tabs.add(new ActionTab(Model.of("panel2")) {
-
-			@Override
-			protected void tabActivated() {
-				HomePage.this.replace(new Label("content", "panel2"));
-			}
-			
-		});
-
-		add(new Tabbable("tabs", tabs) {
-
-			@Override
-			protected String getCssClasses() {
-				return "nav nav-tabs";
-			}
-			
-		});
-		
-		add(new Label("content", "panel1"));
+		};
+		add(dropdown);
+		add(new WebMarkupContainer("toggle").add(new DropdownBehavior(dropdown)));
 	}	
 	
 }

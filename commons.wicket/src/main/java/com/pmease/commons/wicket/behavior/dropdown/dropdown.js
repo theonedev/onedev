@@ -17,13 +17,15 @@ function setupDropdown(triggerId, dropdownInfo, hoverDelay, alignmentIndicatorMo
 	if (hoverDelay >= 0)
 		trigger.addClass("dropdown-hover");
 	
+	var dropdownId;
 	var dropdown;
 	if (dropdownLoader != undefined) { 
 		/*
 		 * Otherwise, dropdownInfo represents id of the dropdown element, and its content has to be 
 		 * loaded by calling dropdownLoader.
 		 */
-		dropdown = $("#" + dropdownInfo);
+		dropdownId = dropdownInfo;
+		dropdown = $("#" + dropdownId);
 	} else {
 		/*
 		 * In case dropdownLoader is not defined, the dropdownInfo itself represents content of the

@@ -23,7 +23,7 @@ public abstract class AbstractWicketConfig extends WebApplication {
 
 		getMarkupSettings().setStripComments(true);
 		getMarkupSettings().setStripWicketTags(true);
-		
+
 		getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
 	}
 
