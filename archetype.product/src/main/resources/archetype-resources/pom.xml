@@ -115,7 +115,7 @@
 		<dependency>
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.wicket</artifactId>
-			<version>1.0.17</version>
+			<version>1.0.19</version>
 		</dependency>
 		<dependency>
 			<groupId>com.pmease</groupId>
