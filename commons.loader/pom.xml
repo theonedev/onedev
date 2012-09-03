@@ -47,7 +47,12 @@
             <groupId>com.pmease</groupId>  
             <artifactId>commons.util</artifactId>  
             <version>1.0.16</version> 
-        </dependency> 
+        </dependency>
+        <dependency>
+        	<groupId>com.google.inject.extensions</groupId>
+        	<artifactId>guice-assistedinject</artifactId>
+        	<version>3.0</version>
+        </dependency>
     </dependencies>  
     <repositories> 
         <repository> 

@@ -45,6 +45,16 @@
         </dependency>  
         <dependency> 
             <groupId>org.apache.wicket</groupId>  
+            <artifactId>wicket-devutils</artifactId>  
+            <version>${wicketVersion}</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.apache.wicket</groupId>  
+            <artifactId>wicket-guice</artifactId>  
+            <version>${wicketVersion}</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.apache.wicket</groupId>  
             <artifactId>wicket-velocity</artifactId>  
             <version>${wicketVersion}</version> 
         </dependency>  

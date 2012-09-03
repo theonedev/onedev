@@ -51,18 +51,53 @@
         <dependency> 
             <groupId>com.google.guava</groupId>  
             <artifactId>guava</artifactId>  
-            <version>11.0.1</version> 
+            <version>12.0.1</version> 
         </dependency>  
+        <dependency>
+        	<groupId>org.quartz-scheduler</groupId>
+        	<artifactId>quartz</artifactId>
+        	<version>2.1.5</version>
+        </dependency>
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.bootstrap</artifactId>  
             <version>1.0.16</version> 
         </dependency>  
+        <dependency>
+        	<groupId>dom4j</groupId>
+        	<artifactId>dom4j</artifactId>
+        	<version>1.6</version>
+        </dependency>
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.test</artifactId>  
             <version>1.0.13</version> 
         </dependency> 
+		<dependency>
+			<groupId>org.apache.velocity</groupId>
+			<artifactId>velocity</artifactId>
+			<version>1.7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.velocity</groupId>
+			<artifactId>velocity-tools</artifactId>
+			<version>2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<version>3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.2.1</version>
+		</dependency>
     </dependencies>  
     <repositories> 
         <repository> 

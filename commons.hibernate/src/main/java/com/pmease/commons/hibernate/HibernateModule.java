@@ -1,5 +1,7 @@
 package com.pmease.commons.hibernate;
 
+import java.util.Properties;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -7,6 +9,7 @@ import org.hibernate.cfg.ImprovedNamingStrategy;
 import org.hibernate.cfg.NamingStrategy;
 
 import com.google.inject.matcher.Matchers;
+import com.google.inject.util.Providers;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.hibernate.dao.GeneralDaoImpl;
 import com.pmease.commons.loader.AbstractPlugin;
@@ -18,6 +21,9 @@ public class HibernateModule extends AbstractPluginModule {
 	protected void configure() {
 		super.configure();
 
+		// Use an optional binding here in case our client does not like to 
+		// start persist service provided by this plugin
+		bind(Properties.class).annotatedWith(Hibernate.class).toProvider(Providers.<Properties>of(null));
 		bind(NamingStrategy.class).to(ImprovedNamingStrategy.class);
 		
 		bind(PersistService.class).to(PersistServiceImpl.class);

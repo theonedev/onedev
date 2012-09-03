@@ -36,7 +36,7 @@
         <dependency> 
             <groupId>org.hibernate</groupId>  
             <artifactId>hibernate-core</artifactId>  
-            <version>3.6.10.Final</version> 
+            <version>${hibernateVersion}</version> 
         </dependency>  
         <dependency> 
             <groupId>org.hibernate</groupId>  
@@ -46,9 +46,19 @@
         <dependency> 
             <groupId>org.hibernate</groupId>  
             <artifactId>hibernate-ehcache</artifactId>  
-            <version>3.6.10.Final</version> 
+            <version>${hibernateVersion}</version> 
         </dependency>  
-        <dependency> 
+        <dependency>
+            <groupId>net.sf.ehcache</groupId>  
+        	<artifactId>ehcache-core</artifactId>
+        	<version>2.5.0</version>
+        </dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<version>${hibernateVersion}</version>
+		</dependency>        
+		<dependency> 
             <groupId>org.hsqldb</groupId>  
             <artifactId>hsqldb</artifactId>  
             <version>2.2.8</version> 
@@ -56,12 +66,12 @@
         <dependency> 
             <groupId>com.jolbox</groupId>  
             <artifactId>bonecp</artifactId>  
-            <version>0.7.1.RELEASE</version> 
+            <version>${bonecpVersion}</version> 
         </dependency>  
         <dependency> 
             <groupId>com.jolbox</groupId>  
             <artifactId>bonecp-provider</artifactId>  
-            <version>0.7.1.RELEASE</version> 
+            <version>${bonecpVersion}</version> 
         </dependency>  
         <dependency> 
             <groupId>mysql</groupId>  
@@ -98,6 +108,8 @@
     </repositories>  
     <properties> 
         <moduleClass>com.pmease.commons.hibernate.HibernateModule</moduleClass> 
+        <hibernateVersion>3.6.10.Final</hibernateVersion>
+        <bonecpVersion>0.7.1.RELEASE</bonecpVersion>
     </properties>  
     <version>1.0.16</version> 
 </project>

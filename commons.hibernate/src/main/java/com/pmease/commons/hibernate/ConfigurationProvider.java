@@ -4,6 +4,7 @@ import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Properties;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -31,7 +32,7 @@ public class ConfigurationProvider implements Provider<Configuration> {
 	
 	@Inject
 	public ConfigurationProvider(PluginManager pluginManager, NamingStrategy namingStrategy, 
-			@Hibernate Properties hibernateProperties) {
+			@Nullable @Hibernate Properties hibernateProperties) {
 		this.pluginManager = pluginManager;
 		this.namingStrategy = namingStrategy;
 		this.hibernateProperties = hibernateProperties;
@@ -39,6 +40,9 @@ public class ConfigurationProvider implements Provider<Configuration> {
 	
 	@Override
 	public synchronized Configuration get() {
+		if (hibernateProperties == null)
+			return null;
+		
 		if (configuration == null) {
 			String url = hibernateProperties.getProperty(Environment.URL);
 			hibernateProperties.setProperty(Environment.URL, 

@@ -21,7 +21,8 @@ public class PersistServiceImpl implements PersistService, Provider<SessionFacto
 	
 	public void start() {
 		Preconditions.checkState(sessionFactory == null);
-        sessionFactory = configurationProvider.get().buildSessionFactory();
+		if (configurationProvider.get() != null)
+			sessionFactory = configurationProvider.get().buildSessionFactory();
 	}
 
 	public void stop() {
@@ -34,7 +35,7 @@ public class PersistServiceImpl implements PersistService, Provider<SessionFacto
 
 	@Override
 	public SessionFactory get() {
-		Preconditions.checkNotNull(sessionFactory);
+		Preconditions.checkNotNull(sessionFactory, "Persist service is either not started or is not configured.");
 		return sessionFactory;
 	}
 
