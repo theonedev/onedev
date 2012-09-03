@@ -50,7 +50,7 @@
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
-            <artifactId>commons.jetty</artifactId>  
+            <artifactId>commons.loader</artifactId>  
             <version>1.0.16</version> 
         </dependency> 
     </dependencies>  

@@ -33,14 +33,14 @@
                         <configuration> 
                             <target> 
                                 <copy todir="${project.build.directory}/sandbox"> 
-                                    <fileset dir="system" excludes="resource/images/**"/>  
+                                    <fileset dir="system" excludes="resource/images/**, **/*.keystore"/>  
                                     <filterset> 
                                         <filter token="dbName" value="${project.artifactId}"/>  
                                         <filter token="productName" value="${project.name}"/> 
                                     </filterset> 
                                 </copy>  
                                 <copy todir="${project.build.directory}/sandbox"> 
-                                    <fileset dir="system" includes="resource/images/**"/> 
+                                    <fileset dir="system" includes="resource/images/**, **/*.keystore"/> 
                                 </copy> 
                             </target> 
                         </configuration> 
@@ -107,7 +107,12 @@
             <groupId>com.pmease</groupId>  
             <artifactId>commons.wicket</artifactId>  
             <version>1.0.16</version> 
-        </dependency> 
+        </dependency>
+        <dependency>
+        	<groupId>com.pmease</groupId>
+        	<artifactId>commons.jetty</artifactId>
+        	<version>1.0.16</version>
+        </dependency>
     </dependencies>  
     <repositories> 
         <repository> 

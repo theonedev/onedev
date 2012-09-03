@@ -8,9 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.pmease.commons.util.DependencyHelper;
@@ -18,8 +15,6 @@ import com.pmease.commons.util.DependencyHelper;
 @Singleton
 public class PluginManagerImpl implements PluginManager {
 	
-	private static final Logger logger = LoggerFactory.getLogger(PluginManagerImpl.class);
-
 	// use linked hash map here to keep plugins in order
 	private final Map<String, AbstractPlugin> pluginMap = new LinkedHashMap<String, AbstractPlugin>();
 
@@ -42,10 +37,8 @@ public class PluginManagerImpl implements PluginManager {
 	}
 
 	public void start() {
-		for (AbstractPlugin plugin: pluginMap.values()) {
-			logger.info("Starting plugin '" + plugin.getId() + "'...");
+		for (AbstractPlugin plugin: pluginMap.values())
 			plugin.preStartDependents();
-		}
 		List<AbstractPlugin> reversed = new ArrayList<AbstractPlugin>(pluginMap.values());
 		Collections.reverse(reversed);
 		for (AbstractPlugin plugin: reversed)
@@ -53,10 +46,8 @@ public class PluginManagerImpl implements PluginManager {
 	}
 
 	public void stop() {
-		for (AbstractPlugin plugin: pluginMap.values()) {
-			logger.info("Stoppping plugin '" + plugin.getId() + "'...");
+		for (AbstractPlugin plugin: pluginMap.values())
 			plugin.preStopDependents();
-		}
 		List<AbstractPlugin> reversed = new ArrayList<AbstractPlugin>(pluginMap.values());
 		Collections.reverse(reversed);
 		for (AbstractPlugin plugin: reversed)
