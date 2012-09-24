@@ -99,6 +99,7 @@ public class Plugin extends AbstractPlugin {
 			}, 
 			new ServletContextConfigurator() {
 
+				
 				@Override
 				public void configure(ServletContextHandler context) {
 			        context.getSessionHandler().getSessionManager()
