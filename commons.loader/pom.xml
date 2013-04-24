@@ -24,11 +24,6 @@
     </build>  
     <dependencies> 
         <dependency> 
-            <groupId>com.google.inject</groupId>  
-            <artifactId>guice</artifactId>  
-            <version>3.0</version> 
-        </dependency>  
-        <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.bootstrap</artifactId>  
             <version>1.0.16</version> 
@@ -39,20 +34,30 @@
             <version>1.6.4</version> 
         </dependency>  
         <dependency> 
-            <groupId>com.google.inject.extensions</groupId>  
-            <artifactId>guice-multibindings</artifactId>  
-            <version>3.0</version> 
-        </dependency>  
-        <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.util</artifactId>  
             <version>1.0.17</version> 
         </dependency>  
         <dependency> 
+            <groupId>com.google.inject</groupId>  
+            <artifactId>guice</artifactId>  
+            <version>${guiceVersion}</version> 
+        </dependency>  
+        <dependency> 
             <groupId>com.google.inject.extensions</groupId>  
             <artifactId>guice-assistedinject</artifactId>  
-            <version>3.0</version> 
-        </dependency> 
+            <version>${guiceVersion}</version> 
+        </dependency>
+        <dependency>
+        	<groupId>com.google.inject.extensions</groupId>
+        	<artifactId>guice-servlet</artifactId>
+        	<version>${guiceVersion}</version>
+        </dependency>
+        <dependency> 
+            <groupId>com.google.inject.extensions</groupId>  
+            <artifactId>guice-multibindings</artifactId>  
+            <version>${guiceVersion}</version> 
+        </dependency>  
     </dependencies>  
     <repositories> 
         <repository> 
@@ -72,4 +77,8 @@
         </repository> 
     </repositories>  
     <version>1.0.17</version> 
+    
+    <properties>
+    	<guiceVersion>3.0</guiceVersion>
+    </properties>
 </project>

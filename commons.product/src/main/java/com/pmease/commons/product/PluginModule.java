@@ -20,6 +20,9 @@ public class PluginModule extends AbstractPluginModule {
 		Properties hibernateProps = FileUtils.loadProperties(
 				new File(Bootstrap.installDir, "conf/hibernate.properties")); 
 		bind(Properties.class).annotatedWith(Hibernate.class).toInstance(hibernateProps);
+
+		bind(HelloGuice.class);
+		bind(GuicyInterface.class).to(GuicyInterfaceImpl.class);
 		
 		bind(WebApplication.class).to(WicketConfig.class);
 	}

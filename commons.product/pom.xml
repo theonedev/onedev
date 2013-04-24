@@ -112,7 +112,12 @@
             <groupId>com.pmease</groupId>  
             <artifactId>commons.jetty</artifactId>  
             <version>1.0.17</version> 
-        </dependency> 
+        </dependency>
+        <dependency>
+        	<groupId>com.pmease</groupId>
+        	<artifactId>commons.jersey</artifactId>
+        	<version>1.0.0</version>
+        </dependency>
     </dependencies>  
     <repositories> 
         <repository> 

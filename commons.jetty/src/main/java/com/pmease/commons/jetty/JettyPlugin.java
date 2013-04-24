@@ -18,6 +18,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
 import com.google.inject.Inject;
+import com.google.inject.servlet.GuiceFilter;
 import com.pmease.commons.bootstrap.BootstrapUtils;
 import com.pmease.commons.jetty.extensionpoints.ServerConfigurator;
 import com.pmease.commons.jetty.extensionpoints.ServletContextConfigurator;
@@ -71,6 +72,7 @@ public class JettyPlugin extends AbstractPlugin {
         context.setContextPath("/");
         
         context.addFilter(DisableTraceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
+        context.addFilter(GuiceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
         
         Collection<ServletContextConfigurator> servletContextConfigurators = 
         		pluginManager.getExtensions(ServletContextConfigurator.class);
