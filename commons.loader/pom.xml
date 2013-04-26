@@ -29,11 +29,6 @@
             <version>1.0.16</version> 
         </dependency>  
         <dependency> 
-            <groupId>org.slf4j</groupId>  
-            <artifactId>slf4j-api</artifactId>  
-            <version>1.6.4</version> 
-        </dependency>  
-        <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.util</artifactId>  
             <version>1.0.17</version> 

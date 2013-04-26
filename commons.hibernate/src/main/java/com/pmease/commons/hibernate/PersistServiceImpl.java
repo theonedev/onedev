@@ -19,6 +19,7 @@ public class PersistServiceImpl implements PersistService, Provider<SessionFacto
 		this.configurationProvider = configurationProvider;
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void start() {
 		Preconditions.checkState(sessionFactory == null);
 		if (configurationProvider.get() != null)

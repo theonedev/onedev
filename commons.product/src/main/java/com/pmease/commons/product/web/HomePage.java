@@ -6,6 +6,9 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 
+import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.loader.AppLoader;
+import com.pmease.commons.product.model.User;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.page.CommonPage;
@@ -21,6 +24,11 @@ public class HomePage extends CommonPage  {
 
 			@Override
 			public void onClick() {
+				GeneralDao dao = AppLoader.getInstance(GeneralDao.class);
+				User user = new User();
+				user.setEmail("robin@pmease.com");
+				user.setName("robin shen");
+				dao.save(user);
 				setResponsePage(TestPage.class);
 			}
 			

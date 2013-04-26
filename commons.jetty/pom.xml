@@ -31,17 +31,17 @@
         <dependency> 
             <groupId>org.eclipse.jetty</groupId>  
             <artifactId>jetty-server</artifactId>  
-            <version>8.1.0.v20120127</version> 
+            <version>${jettyVersion}</version> 
         </dependency>  
         <dependency> 
             <groupId>org.eclipse.jetty</groupId>  
             <artifactId>jetty-servlets</artifactId>  
-            <version>8.1.0.v20120127</version> 
+            <version>${jettyVersion}</version> 
         </dependency>  
         <dependency> 
             <groupId>org.eclipse.jetty</groupId>  
             <artifactId>jetty-servlet</artifactId>  
-            <version>8.1.0.v20120127</version> 
+            <version>${jettyVersion}</version> 
         </dependency> 
     </dependencies>  
     <repositories> 
@@ -63,6 +63,7 @@
     </repositories>  
     <properties> 
         <moduleClass>com.pmease.commons.jetty.JettyModule</moduleClass> 
+        <jettyVersion>8.1.10.v20130312</jettyVersion>
     </properties>  
     <version>1.0.17</version> 
 </project>

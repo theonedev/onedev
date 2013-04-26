@@ -10,7 +10,7 @@ package com.pmease.commons.hibernate;
 
 import org.hibernate.AssertionFailure;
 import org.hibernate.cfg.ImprovedNamingStrategy;
-import org.hibernate.util.StringHelper;
+import org.hibernate.internal.util.StringHelper;
 
 public class PrefixedNamingStrategy extends ImprovedNamingStrategy {
 	private static final long serialVersionUID = 1L;
