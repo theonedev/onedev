@@ -26,12 +26,12 @@
         <dependency> 
             <groupId>org.slf4j</groupId>  
             <artifactId>slf4j-api</artifactId>  
-            <version>1.7.5</version> 
+            <version>${slf4jVersion}</version> 
         </dependency>  
         <dependency>
         	<groupId>org.slf4j</groupId>
         	<artifactId>jul-to-slf4j</artifactId>
-        	<version>1.7.5</version>
+        	<version>${slf4jVersion}</version>
         </dependency>
         <dependency> 
             <groupId>ch.qos.logback</groupId>  
@@ -65,5 +65,6 @@
     <properties>
         <bootstrap>true</bootstrap> 
     	<logbackVersion>1.0.11</logbackVersion>
+    	<slf4jVersion>1.7.5</slf4jVersion>
     </properties>
 </project>

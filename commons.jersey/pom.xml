@@ -65,7 +65,7 @@
 	</repositories>
 
 	<properties>
-		<moduleClass>com.pmease.commons.jersey.PluginModule</moduleClass>
+		<moduleClass>com.pmease.commons.jersey.JerseyPluginModule</moduleClass>
         <jerseyVersion>1.17</jerseyVersion> 
 	</properties>
 

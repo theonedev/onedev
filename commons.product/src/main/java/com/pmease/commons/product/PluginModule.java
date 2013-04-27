@@ -7,6 +7,7 @@ import org.apache.wicket.protocol.http.WebApplication;
 
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.hibernate.Hibernate;
+import com.pmease.commons.jersey.RestServletModule;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.util.FileUtils;
@@ -21,6 +22,8 @@ public class PluginModule extends AbstractPluginModule {
 				new File(Bootstrap.installDir, "conf/hibernate.properties")); 
 		bind(Properties.class).annotatedWith(Hibernate.class).toInstance(hibernateProps);
 
+		install(new RestServletModule());
+		
 		bind(HelloGuice.class);
 		bind(GuicyInterface.class).to(GuicyInterfaceImpl.class);
 		
