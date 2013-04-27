@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<configuration>
+<configuration scan="true">
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
 			<pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
@@ -24,7 +24,9 @@
 	<logger name="org.apache.wicket" level="WARN" />
 	<logger name="org.eclipse" level="WARN" />
 	<logger name="org.hibernate" level="WARN" />
-	<logger name="com.jolbox.bonecp.BoneCPConfig" level="ERROR" />
+	<logger name="org.hibernate.cache.ehcache.AbstractEhcacheRegionFactory" level="ERROR"></logger>
+	<logger name="com.jolbox.bonecp.BoneCPConfig" level="WARN" />
+	<logger name="com.sun.jersey" level="WARN" />
 	
 	<root level="INFO">
 		<appender-ref ref="FILE" />

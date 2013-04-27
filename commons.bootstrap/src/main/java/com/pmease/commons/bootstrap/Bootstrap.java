@@ -11,9 +11,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Handler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
@@ -90,7 +92,7 @@ public class Bootstrap {
 			throw new RuntimeException(e);
 		}
 		
-		configureLogback();
+		configureLogging();
 		
 		System.setProperty("logback.configurationFile", new File(installDir, "conf/logback.xml").getAbsolutePath());
 		logger.info("Launching application from '" + installDir.getAbsolutePath() + "'...");
@@ -203,7 +205,7 @@ public class Bootstrap {
 		}
 	}
 	
-	private static void configureLogback() {
+	private static void configureLogging() {
 		System.setProperty("installDir", installDir.getAbsolutePath());
 		
 		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -220,6 +222,12 @@ public class Bootstrap {
 	       je.printStackTrace();
 	    }
 	    StatusPrinter.printInCaseOfErrorsOrWarnings(lc);	
+
+	    // Redirect JDK logging to slf4j 
+	    java.util.logging.Logger jdkLogger = java.util.logging.Logger.getLogger("");
+		for (Handler handler: jdkLogger.getHandlers())
+			jdkLogger.removeHandler(handler);
+		SLF4JBridgeHandler.install();
 	}
 
 	public static File getLibDir() {

@@ -25,11 +25,7 @@ public class HomePage extends CommonPage  {
 			@Override
 			public void onClick() {
 				GeneralDao dao = AppLoader.getInstance(GeneralDao.class);
-				User user = new User();
-				user.setEmail("robin@pmease.com");
-				user.setName("robin shen");
-				dao.save(user);
-				setResponsePage(TestPage.class);
+				dao.getReference(User.class, 1L).getName();
 			}
 			
 		});

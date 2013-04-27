@@ -5,6 +5,8 @@ import javax.persistence.Entity;
 import com.pmease.commons.hibernate.AbstractEntity;
 
 @Entity
+@org.hibernate.annotations.Cache(
+		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class User extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
