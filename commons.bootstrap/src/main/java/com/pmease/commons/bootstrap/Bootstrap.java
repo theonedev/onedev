@@ -36,6 +36,44 @@ public class Bootstrap {
 	
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
+		File sandboxDir = new File("target/sandbox");
+		if (sandboxDir.exists()) {
+			Map<String, File> systemClasspath = (Map<String, File>) BootstrapUtils
+					.readObject(new File(sandboxDir, "bin/system.classpath"));
+			Set<String> bootstrapKeys = (Set<String>) BootstrapUtils
+					.readObject(new File(sandboxDir, "bin/bootstrap.keys"));
+			
+			List<URL> urls = new ArrayList<URL>();
+			for (String key: bootstrapKeys) {				
+				File file = systemClasspath.get(key);
+				if (file == null) 
+					throw new RuntimeException("Unable to find bootstrap file for '" + key + "'.");
+				try {
+					urls.add(file.toURI().toURL());
+				} catch (MalformedURLException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			
+			URLClassLoader bootClassLoader = new URLClassLoader(
+					urls.toArray(new URL[0]), 
+					Bootstrap.class.getClassLoader().getParent());
+			Thread.currentThread().setContextClassLoader(bootClassLoader);
+			
+			try {
+				Class<?> bootstrapClass = bootClassLoader.loadClass(Bootstrap.class.getName());
+				bootstrapClass.getMethod("boot", String[].class).invoke(null, new Object[]{args});
+			} catch (Exception e) {
+				throw BootstrapUtils.unchecked(e);
+			}
+			
+		} else {
+			boot(args);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void boot(String[] args) {
 		File loadedFrom = new File(Bootstrap.class.getProtectionDomain()
 				.getCodeSource().getLocation().getFile());
 
