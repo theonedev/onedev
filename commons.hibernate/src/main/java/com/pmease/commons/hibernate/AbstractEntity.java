@@ -16,8 +16,8 @@ public abstract class AbstractEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	@Id
-	@GeneratedValue(generator="increment")
-	@GenericGenerator(name="increment", strategy="increment")
+	@GenericGenerator(name="table-hilo-generator", strategy="org.hibernate.id.TableHiLoGenerator")
+	@GeneratedValue(generator="table-hilo-generator")
 	private Long id;
 
 	public Long getId() {
