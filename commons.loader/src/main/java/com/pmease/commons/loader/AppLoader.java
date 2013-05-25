@@ -1,6 +1,7 @@
 package com.pmease.commons.loader;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 import com.google.inject.util.Modules.OverriddenModuleBuilder;
+import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.bootstrap.Lifecycle;
 import com.pmease.commons.util.DependencyHelper;
 import com.pmease.commons.util.FileUtils;
@@ -30,6 +32,20 @@ public class AppLoader implements Lifecycle {
 	
 	@Override
 	public void start() {
+        File tempDir = Bootstrap.getTempDir();
+		if (tempDir.exists()) {
+			logger.info("Cleaning temp directory...");
+			try {
+				FileUtils.cleanDirectory(tempDir);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		} else if (!tempDir.mkdir()) {
+			throw new RuntimeException("Can not create directory '" + 
+					tempDir.getAbsolutePath() + "'.");
+		}
+		System.setProperty("java.io.tmpdir", tempDir.getAbsolutePath());
+		
 		logger.info("Initializing dependency injection container...");
 		
 		OverriddenModuleBuilder builder = Modules.override(new AppLoaderModule());

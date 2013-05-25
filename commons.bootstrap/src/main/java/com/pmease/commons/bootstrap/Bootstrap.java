@@ -36,8 +36,15 @@ public class Bootstrap {
 
 	public static List<File> libFiles;
 	
+	public static boolean sandboxMode;
+	
+	public static boolean prodMode;
+	
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
+		// Avoid the problem that some sorting does not work for JDK7
+		System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
+		
 		File sandboxDir = new File("target/sandbox");
 		if (sandboxDir.exists()) {
 			Map<String, File> systemClasspath = (Map<String, File>) BootstrapUtils
@@ -76,6 +83,13 @@ public class Bootstrap {
 	
 	@SuppressWarnings("unchecked")
 	public static void boot(String[] args) {
+		/*
+		 * Sandbox mode might be checked frequently so we cache the result here to avoid 
+		 * calling File.exists() frequently. 
+		 */
+		sandboxMode = new File("target/sandbox").exists();
+		prodMode = (System.getProperty("prod") != null);
+
 		File loadedFrom = new File(Bootstrap.class.getProtectionDomain()
 				.getCodeSource().getLocation().getFile());
 
@@ -91,10 +105,9 @@ public class Bootstrap {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		
+
 		configureLogging();
 		
-		System.setProperty("logback.configurationFile", new File(installDir, "conf/logback.xml").getAbsolutePath());
 		logger.info("Launching application from '" + installDir.getAbsolutePath() + "'...");
 
 		libFiles = new ArrayList<File>();
@@ -206,7 +219,9 @@ public class Bootstrap {
 	}
 	
 	private static void configureLogging() {
+		// Set system properties so that they can be used in logback configuration file. 
 		System.setProperty("installDir", installDir.getAbsolutePath());
+		System.setProperty("logback.configurationFile", new File(installDir, "conf/logback.xml").getAbsolutePath());
 		
 		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
 	    
@@ -246,11 +261,4 @@ public class Bootstrap {
 		return new File(installDir, "conf");
 	}
 
-	public static boolean isSandboxMode() {
-		return new File("target/sandbox").exists();
-	}
-
-	public static boolean isProdMode() {
-		return System.getProperty("prod") != null;
-	}
 }

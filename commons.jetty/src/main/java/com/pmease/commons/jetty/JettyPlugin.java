@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
 import com.google.inject.Inject;
@@ -23,7 +24,6 @@ import com.pmease.commons.bootstrap.BootstrapUtils;
 import com.pmease.commons.jetty.extensionpoints.ServerConfigurator;
 import com.pmease.commons.jetty.extensionpoints.ServletContextConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
-import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.loader.PluginManager;
 
 public class JettyPlugin extends AbstractPlugin {
@@ -32,10 +32,10 @@ public class JettyPlugin extends AbstractPlugin {
 	
 	private ServletContextHandler context;
 	
-	public final PluginManager pluginManager;
-
+	private final PluginManager pluginManager;
+	
 	@Inject
-	public JettyPlugin(AppLoader appLoader, PluginManager pluginManager) {
+	public JettyPlugin(PluginManager pluginManager) {
 		this.pluginManager = pluginManager;
 	}
 	
@@ -70,6 +70,7 @@ public class JettyPlugin extends AbstractPlugin {
         context.setClassLoader(JettyPlugin.class.getClassLoader());
         
         context.setContextPath("/");
+        context.setErrorHandler(new ErrorPageErrorHandler());
         
         context.addFilter(DisableTraceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
         context.addFilter(GuiceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
@@ -78,7 +79,7 @@ public class JettyPlugin extends AbstractPlugin {
         		pluginManager.getExtensions(ServletContextConfigurator.class);
         for (ServletContextConfigurator configurator: servletContextConfigurators) 
         	configurator.configure(context);
-        
+
         server.setHandler(context);
 
         Collection<ServerConfigurator> servletContainerConfigurators = 

@@ -79,6 +79,11 @@
 			<artifactId>javassist</artifactId>
 			<version>3.17.1-GA</version>
 		</dependency>
+		<dependency>
+			<groupId>com.pmease</groupId>
+			<artifactId>commons.jetty</artifactId>
+			<version>1.0.17</version>
+		</dependency>
 	</dependencies>
 	<repositories>
 		<repository>

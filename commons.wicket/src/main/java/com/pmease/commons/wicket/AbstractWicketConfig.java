@@ -11,7 +11,7 @@ public abstract class AbstractWicketConfig extends WebApplication {
 
 	@Override
 	public RuntimeConfigurationType getConfigurationType() {
-		if (Bootstrap.isSandboxMode() && !Bootstrap.isProdMode())
+		if (Bootstrap.sandboxMode && !Bootstrap.prodMode)
 			return RuntimeConfigurationType.DEVELOPMENT;
 		else
 			return RuntimeConfigurationType.DEPLOYMENT;
@@ -24,7 +24,7 @@ public abstract class AbstractWicketConfig extends WebApplication {
 		getMarkupSettings().setStripComments(true);
 		getMarkupSettings().setStripWicketTags(true);
 
-		getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
+		//getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
 	}
 
 }

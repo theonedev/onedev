@@ -47,22 +47,17 @@
             <groupId>org.apache.wicket</groupId>  
             <artifactId>wicket-devutils</artifactId>  
             <version>${wicketVersion}</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>org.apache.wicket</groupId>  
-            <artifactId>wicket-guice</artifactId>  
-            <version>${wicketVersion}</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>org.apache.wicket</groupId>  
-            <artifactId>wicket-velocity</artifactId>  
-            <version>${wicketVersion}</version> 
-        </dependency>  
+        </dependency>      
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
             <version>1.0.17</version> 
-        </dependency> 
+        </dependency>
+        <dependency>
+        	<groupId>com.pmease</groupId>
+        	<artifactId>commons.jetty</artifactId>
+        	<version>1.0.17</version>
+        </dependency>
     </dependencies>  
     <properties> 
         <moduleClass>com.pmease.commons.wicket.WicketModule</moduleClass>  

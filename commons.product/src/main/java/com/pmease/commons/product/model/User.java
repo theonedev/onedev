@@ -14,6 +14,10 @@ public class User extends AbstractEntity {
 	private String name;
 	
 	private String email;
+	
+	private String password;
+	
+	private String sex;
 
 	public String getEmail() {
 		return email;
@@ -29,6 +33,22 @@ public class User extends AbstractEntity {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getSex() {
+		return sex;
+	}
+
+	public void setSex(String sex) {
+		this.sex = sex;
 	}
 
 }

@@ -20,7 +20,8 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
 	 * Load properties from specified file. Surrounding white spaces of property values will 
 	 * be trimmed off. And a property is considered not defined if the value is trimmed to 
 	 * empty.
-	 * @param file file to load properties from
+	 * @param file 
+	 * 			file to load properties from
 	 * @return
 	 */
 	public static Properties loadProperties(File file) {

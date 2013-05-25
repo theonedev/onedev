@@ -9,9 +9,13 @@ public class CustomWicketServlet extends WicketServlet {
 
 	private static final long serialVersionUID = 1L;
 	
-	@Inject
-	private WicketFilter wicketFilter;
+	private final WicketFilter wicketFilter;
 
+	@Inject
+	public CustomWicketServlet(WicketFilter wicketFilter) {
+		this.wicketFilter = wicketFilter;
+	}
+	
 	@Override
 	protected WicketFilter newWicketFilter() {
 		return wicketFilter;
