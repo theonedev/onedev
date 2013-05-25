@@ -2,11 +2,10 @@ package com.pmease.commons.product.web;
 
 import java.util.List;
 
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -48,13 +47,13 @@ public class TestPage extends WebPage {
 				item.add(new Label("sex", Model.of(u.getSex())));
 				item.add(new Label("nation", Model.of(u.getPassword())));
 				
-				item.add(new AjaxLink<Void>("edit") {
+				item.add(new Link<Void>("edit") {
 
 					@Override
-					public void onClick(AjaxRequestTarget target) {
+					public void onClick() {
 						Panel panel = (Panel) TestPage.this.get("panel");
 						panel.replaceWith(new Panel2(panel.getId()).setOutputMarkupId(true));
-						target.add(TestPage.this.get("panel"));
+//						target.add(TestPage.this.get("panel"));
 						try {
 							Thread.sleep(5000);
 						} catch (InterruptedException e) {

@@ -27,6 +27,7 @@
 	<logger name="org.hibernate.cache.ehcache.AbstractEhcacheRegionFactory" level="ERROR"></logger>
 	<logger name="com.jolbox.bonecp.BoneCPConfig" level="WARN" />
 	<logger name="com.sun.jersey" level="WARN" />
+	<logger name="org.hibernate.engine.jdbc.internal.JdbcCoordinatorImpl" level="ERROR"></logger>
 	
 	<root level="INFO">
 		<appender-ref ref="FILE" />
