@@ -127,8 +127,6 @@ public abstract class AssetServlet extends DefaultServlet {
 	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		System.out.println(request.getRequestURI());
-		
 		try {
 			requestHolder.set((HttpServletRequest) request);
 			super.doGet(request, response);

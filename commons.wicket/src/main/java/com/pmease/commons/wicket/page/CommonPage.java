@@ -8,6 +8,9 @@ public class CommonPage extends WebPage {
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Make sure to call super.onInitialize() at start of the method body if you override this method.
+	 */
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

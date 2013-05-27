@@ -1,3 +1,22 @@
 <wicket:extend>
-hello world
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>hello world</title>
+	</head>
+	<body>
+		<form wicket:id="form">
+			<table>
+				<tr wicket:id="persons">
+					<td><span wicket:id="name"></span></td>
+					<td><span wicket:id="age"></span></td>
+					<td><span wicket:id="sex"></span></td>
+					<td><span wicket:id="nation"></span></td>
+					<td><a wicket:id="edit">edit</a></td>
+				</tr>
+			</table>
+		</form>
+		
+		<div wicket:id="panel"></div>
+	</body>
+</html>
 </wicket:extend>

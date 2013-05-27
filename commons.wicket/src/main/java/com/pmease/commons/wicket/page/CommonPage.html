@@ -2,5 +2,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <wicket:container wicket:id="asset"></wicket:container>
+
+<!-- 
+	Below html snippet is to froze the page to prevent users from clicking anything to avoid 
+ 	the wicket ComponentNotFoundException in case an ajax request has replaced part of the 
+ 	page at server side, but the page at browser side has not been updated yet. The outer 
+ 	div is there in order to make frozen overlay works in IE.
+-->
+<div style="z-index:1;"><div class="frozen-overlay"></div></div>
+
 <wicket:child></wicket:child>
 </html>

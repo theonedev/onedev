@@ -1,3 +1,8 @@
+/**************************************************************
+ * This file defines common css styles for all pmease products. 
+ * 
+ **************************************************************/
+
 .tac {
 	text-align:center;
 }
@@ -72,4 +77,17 @@
 	border-right: 0; 
 	padding-right: 0; 
 	margin-right: 0; 
+}
+
+.frozen-overlay {
+    bottom: 0;
+    left: 0;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 1000000;
+    display: none;
+    filter:alpha(opacity=0); /* Only applies to IE */
+    background: white; /* This will be overwritten by browsers that support rgba */
+    background: rgba(255,255,255,0.0); /* IE ignores this since it's not supported */
 }

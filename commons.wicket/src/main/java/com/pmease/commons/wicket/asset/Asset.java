@@ -7,8 +7,8 @@ import org.apache.wicket.markup.head.CssReferenceHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
-import org.apache.wicket.request.resource.PackageResourceReference;
 
 /**
  * A stake holder class for asset positioning.
@@ -28,13 +28,13 @@ public class Asset extends WebMarkupContainer {
 		
 		response.render(JavaScriptHeaderItem.forReference(WicketEventJQueryResourceReference.get()));
 		response.render(JavaScriptHeaderItem.forReference(WicketAjaxJQueryResourceReference.get()));
-		response.render(CssHeaderItem.forReference(new JavaScriptResourceReference(Asset.class, "bootstrap/css/bootstrap.css")));
-		response.render(CssHeaderItem.forReference(new JavaScriptResourceReference(Asset.class, "bootstrap/css/bootstrap-responsive.css")));
-		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(Asset.class, "bootstrap/js/bootstrap.js")));
+		response.render(CssHeaderItem.forReference(new CssResourceReference(Asset.class, "bootstrap/css/bootstrap.min.css")));
+		response.render(CssHeaderItem.forReference(new CssResourceReference(Asset.class, "bootstrap/css/bootstrap-responsive.min.css")));
+		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(Asset.class, "bootstrap/js/bootstrap.min.js")));
 		
-		response.render(CssReferenceHeaderItem.forReference(new PackageResourceReference(Asset.class, "css/common.css")));
-		response.render(JavaScriptHeaderItem.forReference(new PackageResourceReference(Asset.class, "js/jquery.align.js")));
-		response.render(JavaScriptHeaderItem.forReference(new PackageResourceReference(Asset.class, "js/common.js")));
+		response.render(CssReferenceHeaderItem.forReference(new CssResourceReference(Asset.class, "css/common.css")));
+		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(Asset.class, "js/common.js")));
+		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(Asset.class, "js/jquery.align.js")));
 	}
 
 }
