@@ -14,7 +14,7 @@ import com.pmease.commons.wicket.behavior.dropdown.DropdownAlignment;
 
 @SuppressWarnings("serial")
 abstract class ContentPanel extends Panel {
-
+	
 	public ContentPanel(String id) {
 		super(id);
 	}

@@ -11,7 +11,7 @@
 	line-height: 14px;
 }
 .dropdown-panel.tooltip>.content {
-	padding:0;
+	padding:4px;
 	margin:0;
 }
 .dropdown-panel.tooltip>.indicator.bottom:last-child {

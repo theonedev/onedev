@@ -3,11 +3,9 @@ package com.pmease.commons.wicket.behavior.dropdown;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.request.resource.PackageResourceReference;
 
 public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 
@@ -81,8 +79,7 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
-		response.render(CssHeaderItem.forReference(new PackageResourceReference(DropdownBehavior.class, "dropdown.css")));
-		response.render(JavaScriptHeaderItem.forReference(new PackageResourceReference(DropdownBehavior.class, "dropdown.js")));
+		response.render(JavaScriptHeaderItem.forReference(new DropdownResourceReference()));
 		String script = String.format(
 				"setupDropdown('%s', '%s', %s, '%s', '%s', %s, %s, %s, %s, %d, %s)", 
 				getComponent().getMarkupId(), dropdownPanel.getMarkupId(), hoverDelay, alignment.getIndicatorMode().name(), 

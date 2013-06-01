@@ -1,0 +1,15 @@
+#ajax-loading-overlay {
+	z-index:1;	
+    display: none;
+}
+#ajax-loading-overlay>div {
+    bottom: 0;
+    left: 0;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 1000000;
+    filter:alpha(opacity=0); /* Only applies to IE */
+    background: white; /* This will be overwritten by browsers that support rgba */
+    background: rgba(255,255,255,0.0); /* IE ignores this since it's not supported */
+}

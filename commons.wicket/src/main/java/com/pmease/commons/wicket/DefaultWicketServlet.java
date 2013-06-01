@@ -5,14 +5,14 @@ import javax.inject.Inject;
 import org.apache.wicket.protocol.http.WicketFilter;
 import org.apache.wicket.protocol.http.WicketServlet;
 
-public class CustomWicketServlet extends WicketServlet {
+public class DefaultWicketServlet extends WicketServlet {
 
 	private static final long serialVersionUID = 1L;
 	
 	private final WicketFilter wicketFilter;
 
 	@Inject
-	public CustomWicketServlet(WicketFilter wicketFilter) {
+	public DefaultWicketServlet(WicketFilter wicketFilter) {
 		this.wicketFilter = wicketFilter;
 	}
 	

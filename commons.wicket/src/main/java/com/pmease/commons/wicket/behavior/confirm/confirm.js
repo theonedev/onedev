@@ -32,13 +32,13 @@ function setupConfirm(triggerId, message) {
 	
 	var previousClick;
 
-	var handlers = trigger.data('events').click;
+	var handlers = $._data(trigger[0], 'events').click;
 
 	$.each(handlers, function(i,f) {
 		previousClick = f.handler; 
 		return false; 
 	});
-
+	
 	trigger.unbind('click');
 
 	trigger.click(function(event){

@@ -8,11 +8,12 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.resource.PackageResourceReference;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.behavior.dropdown.DropdownAlignment;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownAlignment.INDICATOR_MODE;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
+import com.pmease.commons.wicket.behavior.dropdown.DropdownResourceReference;
 
 public class TooltipBehavior extends Behavior {
 
@@ -24,6 +25,10 @@ public class TooltipBehavior extends Behavior {
 	
 	public TooltipBehavior(IModel<String> contentModel) {
 		this.contentModel = contentModel;
+	}
+	
+	public TooltipBehavior(String content) {
+		this(Model.of(content));
 	}
 	
 	public void bind(Component component) {
@@ -48,8 +53,7 @@ public class TooltipBehavior extends Behavior {
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
-		response.render(CssHeaderItem.forReference(new PackageResourceReference(DropdownBehavior.class, "dropdown.css")));
-		response.render(JavaScriptHeaderItem.forReference(new PackageResourceReference(DropdownBehavior.class, "dropdown.js")));
+		response.render(JavaScriptHeaderItem.forReference(new DropdownResourceReference()));
 		
 		String escapedContent = StringEscapeUtils.escapeJavaScript(StringEscapeUtils.escapeHtml(contentModel.getObject()));
 		String script = String.format(
@@ -60,7 +64,7 @@ public class TooltipBehavior extends Behavior {
 				alignment.getGap());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 		
-		response.render(CssHeaderItem.forReference(new PackageResourceReference(TooltipBehavior.class, "tooltip.css")));
+		response.render(CssHeaderItem.forReference(new CssResourceReference(TooltipBehavior.class, "tooltip.css")));
 	}
 
 	@Override

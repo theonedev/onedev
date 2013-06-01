@@ -11,10 +11,10 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.resource.PackageResourceReference;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.pmease.commons.util.StringUtils;
-import com.pmease.commons.wicket.behavior.modal.ModalBehavior;
+import com.pmease.commons.wicket.behavior.modal.ModalResourceReference;
 
 @SuppressWarnings("serial")
 public class ConfirmBehavior extends Behavior {
@@ -40,8 +40,8 @@ public class ConfirmBehavior extends Behavior {
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
-		response.render(JavaScriptHeaderItem.forReference(new PackageResourceReference(ModalBehavior.class, "modal.js")));
-		response.render(JavaScriptHeaderItem.forReference(new PackageResourceReference(ConfirmBehavior.class, "confirm.js")));
+		response.render(JavaScriptHeaderItem.forReference(new ModalResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(ConfirmBehavior.class, "confirm.js")));
 	}
 	
 	@Override

@@ -1,10 +1,13 @@
 package com.pmease.commons.product;
 
+import javax.inject.Singleton;
+
 import org.apache.wicket.Page;
 
 import com.pmease.commons.product.web.HomePage;
 import com.pmease.commons.wicket.AbstractWicketConfig;
 
+@Singleton
 public class WicketConfig extends AbstractWicketConfig {
 
 	@Override

@@ -194,15 +194,10 @@ $(function() {
 		if (!source.closest(".dropdown-toggle")[0])
 			hideDropdowns(source);
 	});
-
-	Wicket.Ajax.Call.prototype.dropdownSuccess = Wicket.Ajax.Call.prototype.success;
-	Wicket.Ajax.Call.prototype.success = function(steps, attrs) {
-		steps.push(function (notify) {
-			$("body>.dropdown-panel:visible:last").align();
-			notify();
-		});
-		this.dropdownSuccess(steps, attrs);
-	};
+	
+	Wicket.Event.subscribe('/ajax/call/success', function() {
+		$("body>.dropdown-panel:visible:last").align();
+	});
 	
 });
 

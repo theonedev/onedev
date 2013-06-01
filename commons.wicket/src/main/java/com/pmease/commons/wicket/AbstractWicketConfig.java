@@ -3,10 +3,8 @@ package com.pmease.commons.wicket;
 import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.protocol.http.WebApplication;
 
-import com.google.inject.Singleton;
 import com.pmease.commons.bootstrap.Bootstrap;
 
-@Singleton
 public abstract class AbstractWicketConfig extends WebApplication {
 
 	@Override

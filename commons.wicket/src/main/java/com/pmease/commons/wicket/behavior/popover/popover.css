@@ -1,6 +1,6 @@
 .dropdown-panel.popover>.content {
-	margin:0;
-	padding:0;
+	margin: 0;
+	padding: 4px;
 }
 .dropdown-panel.popover>.content>.title {
     background-color: #F7F7F7;

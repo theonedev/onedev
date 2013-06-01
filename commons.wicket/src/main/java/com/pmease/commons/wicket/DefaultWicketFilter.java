@@ -8,13 +8,13 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class CustomWicketFilter extends WicketFilter {
+public class DefaultWicketFilter extends WicketFilter {
 
-	private final WebApplication webApplication;
+	private final AbstractWicketConfig wicketConfig;
 	
 	@Inject
-	public CustomWicketFilter(WebApplication webApplication) {
-		this.webApplication = webApplication;
+	public DefaultWicketFilter(AbstractWicketConfig wicketConfig) {
+		this.wicketConfig = wicketConfig;
 		setFilterPath("");
 	}
 	
@@ -23,7 +23,7 @@ public class CustomWicketFilter extends WicketFilter {
 		return new IWebApplicationFactory() {
 
 			public WebApplication createApplication(WicketFilter filter) {
-				return webApplication;
+				return wicketConfig;
 			}
 
 			public void destroy(WicketFilter filter) {

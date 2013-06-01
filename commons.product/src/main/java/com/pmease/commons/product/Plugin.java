@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.bio.SocketConnector;
+import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.server.ssl.SslSocketConnector;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -35,7 +35,7 @@ public class Plugin extends AbstractPlugin {
 	private static final Logger logger = LoggerFactory.getLogger(Plugin.class);
 	
 	private final Properties serverProps;
-	
+
 	public Plugin() {
 		serverProps = FileUtils.loadProperties(new File(Bootstrap.getConfDir(), "server.properties"));
 	}
@@ -48,7 +48,7 @@ public class Plugin extends AbstractPlugin {
 				@SuppressWarnings("deprecation")
 				@Override
 				public void configure(Server server) {
-					SocketConnector connector = new SocketConnector();
+					SelectChannelConnector connector = new SelectChannelConnector();
 					String httpPort = serverProps.getProperty("httpPort");
 					if (StringUtils.isNotBlank(httpPort)) {
 						connector.setPort(Integer.parseInt(httpPort));
@@ -121,6 +121,22 @@ public class Plugin extends AbstractPlugin {
 	@Override
 	public void postStartDependents() {
 		logger.info("Product has been started successfully.");
+		
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				while (true) {
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+			
+		}).start();
 	}
 
 }
