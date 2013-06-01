@@ -14,8 +14,8 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
  * the wicket ComponentNotFoundException in case an ajax request has replaced part of the 
  * page at server side, but the page at browser side has not been updated yet. 
  * To use it, overwrite updateAjaxAttributes() method of various ajax components or 
- * behaviors and add below statement:
- * &lt;code&gt;attributes.getAjaxCallListeners().add(new AjaxLoadingOverlay());&lt;/code&gt; 
+ * behaviors and add below statement:<br>
+ * <code>attributes.getAjaxCallListeners().add(new AjaxLoadingOverlay());</code> 
  * 
  * @author robin
  *

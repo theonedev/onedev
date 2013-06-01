@@ -11,8 +11,8 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 /**
  * Display an ajax loading indicator at top of the page. To use it, overwrite updateAjaxAttributes() method 
- * of various ajax components or behaviors and add below statement:
- * &lt;code&gt;attributes.getAjaxCallListeners().add(new AjaxLoadingIndicator());&lt;/code&gt;   
+ * of various ajax components or behaviors and add below statement:<br>
+ * <code>attributes.getAjaxCallListeners().add(new AjaxLoadingIndicator());</code>   
  * 
  * @author robin
  *
