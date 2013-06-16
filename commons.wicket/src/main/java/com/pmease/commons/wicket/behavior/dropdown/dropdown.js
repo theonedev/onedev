@@ -162,8 +162,10 @@ function showDropdown(trigger, dropdown, alignment, dropdownLoader) {
 	$("body").append(dropdown);
 	dropdown.align(alignment).show();
 
-	if (!dropdown.find(">.content")[0]) 
+	if (!dropdown.find(">.content")[0]) {
+		dropdown.find(">div").addClass("content");
 		dropdownLoader();
+	}
 }
 
 function dropdownLoaded(dropdownId) {

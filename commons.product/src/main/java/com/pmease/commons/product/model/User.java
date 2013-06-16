@@ -1,5 +1,8 @@
 package com.pmease.commons.product.model;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+
 import javax.persistence.Entity;
 
 import com.pmease.commons.hibernate.AbstractEntity;
@@ -51,4 +54,8 @@ public class User extends AbstractEntity {
 		this.sex = sex;
 	}
 
+	private void writeObject(ObjectOutputStream oos) throws IOException {
+    	oos.defaultWriteObject();
+    	System.out.println("writeObject");
+	}
 }

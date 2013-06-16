@@ -1,4 +1,4 @@
-package com.pmease.commons.wicket.decorator.ajaxloadingindicator;
+package com.pmease.commons.wicket.ajaxlistener.ajaxloadingoverlay;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.attributes.IAjaxCallListener;
@@ -10,22 +10,25 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 /**
- * Display an ajax loading indicator at top of the page. To use it, overwrite updateAjaxAttributes() method 
- * of various ajax components or behaviors and add below statement:<br>
- * <code>attributes.getAjaxCallListeners().add(new AjaxLoadingIndicator());</code>   
+ * Ajax loading overlay is used to froze the page to prevent users from clicking anything to avoid 
+ * the wicket ComponentNotFoundException in case an ajax request has replaced part of the 
+ * page at server side, but the page at browser side has not been updated yet. 
+ * To use it, overwrite updateAjaxAttributes() method of various ajax components or 
+ * behaviors and add below statement:<br>
+ * <code>attributes.getAjaxCallListeners().add(new AjaxLoadingOverlay());</code> 
  * 
  * @author robin
  *
  */
 @SuppressWarnings("serial")
-public class AjaxLoadingIndicator implements IAjaxCallListener, IComponentAwareHeaderContributor {
+public class AjaxLoadingOverlay implements IAjaxCallListener, IComponentAwareHeaderContributor {
 
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				AjaxLoadingIndicator.class, "ajax-loading-indicator.js")));
+				AjaxLoadingOverlay.class, "ajax-loading-overlay.js")));
 		response.render(CssHeaderItem.forReference(new CssResourceReference(
-				AjaxLoadingIndicator.class, "ajax-loading-indicator.css")));
+				AjaxLoadingOverlay.class, "ajax-loading-overlay.css")));
 	}
 
 	@Override
@@ -40,7 +43,7 @@ public class AjaxLoadingIndicator implements IAjaxCallListener, IComponentAwareH
 
 	@Override
 	public CharSequence getBeforeSendHandler(Component component) {
-		return "$('#ajax-loading-indicator').show();";
+		return "$('#ajax-loading-overlay').show();";
 	}
 
 	@Override
@@ -60,7 +63,7 @@ public class AjaxLoadingIndicator implements IAjaxCallListener, IComponentAwareH
 
 	@Override
 	public CharSequence getCompleteHandler(Component component) {
-		return "$('#ajax-loading-indicator').hide();";
+		return "$('#ajax-loading-overlay').hide();";
 	}
 
 }

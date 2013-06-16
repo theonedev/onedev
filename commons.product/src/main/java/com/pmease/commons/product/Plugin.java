@@ -121,22 +121,6 @@ public class Plugin extends AbstractPlugin {
 	@Override
 	public void postStartDependents() {
 		logger.info("Product has been started successfully.");
-		
-		new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				while (true) {
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
-			
-		}).start();
 	}
 
 }

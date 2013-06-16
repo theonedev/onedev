@@ -66,7 +66,7 @@
     </dependencies>  
     <properties> 
         <moduleClass>com.pmease.commons.wicket.WicketModule</moduleClass>  
-        <wicketVersion>6.7.0</wicketVersion> 
+        <wicketVersion>6.8.0</wicketVersion> 
     </properties>  
     <repositories> 
         <repository> 

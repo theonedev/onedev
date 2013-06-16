@@ -13,7 +13,7 @@ public class DropdownResourceReference extends JavaScriptResourceReference {
 	private static final long serialVersionUID = 1L;
 
 	public DropdownResourceReference() {
-		super(DropdownBehavior.class, "dropdown.js");
+		super(DropdownResourceReference.class, "dropdown.js");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -21,8 +21,10 @@ public class DropdownResourceReference extends JavaScriptResourceReference {
 	public Iterable<? extends HeaderItem> getDependencies() {
 		return Arrays.asList(
 				JavaScriptHeaderItem.forReference(org.apache.wicket.bootstrap.Bootstrap.responsive()),
-				JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(DropdownBehavior.class, "alignment.js")),
-				CssHeaderItem.forReference(new CssResourceReference(DropdownBehavior.class, "dropdown.css")));
+				JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
+						DropdownResourceReference.class, "alignment.js")),
+				CssHeaderItem.forReference(new CssResourceReference(
+						DropdownResourceReference.class, "dropdown.css")));
 	}
 
 }

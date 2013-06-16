@@ -9,11 +9,11 @@
 }
 .dropdown-panel>.content {
 	margin: 0;
-	padding: 4px;
+	padding: 8px;
 }
-.dropdown-panel>.loading {
+.dropdown-panel>.loading, .dropdown-panel>.loading.content {
 	margin: 4px;
-	padding-left: 20px;
+	padding: 0 0 0 20px;
 	background: url("ajax-indicator.gif") left center no-repeat;
 }
 .dropdown-panel>.indicator {
