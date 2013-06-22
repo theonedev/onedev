@@ -5,7 +5,7 @@
     <parent> 
         <groupId>com.pmease</groupId>  
         <artifactId>parent.general</artifactId>  
-        <version>1.0.13</version> 
+        <version>1.0.20</version> 
     </parent>  
     <artifactId>commons.util</artifactId>  
     <build> 
@@ -61,7 +61,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.bootstrap</artifactId>  
-            <version>1.0.16</version> 
+            <version>1.0.20</version> 
         </dependency>  
         <dependency> 
             <groupId>dom4j</groupId>  
@@ -71,13 +71,13 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.test</artifactId>  
-            <version>1.0.13</version> 
+            <version>1.0.20</version> 
         </dependency>  
         <dependency> 
             <groupId>org.apache.velocity</groupId>  
             <artifactId>velocity</artifactId>  
             <version>1.7</version> 
-        </dependency>    
+        </dependency>  
         <dependency> 
             <groupId>commons-httpclient</groupId>  
             <artifactId>commons-httpclient</artifactId>  
@@ -110,6 +110,5 @@
             </snapshots>  
             <url>http://artifact.pmease.com/</url> 
         </repository> 
-    </repositories>  
-    <version>1.0.17</version> 
+    </repositories> 
 </project>
