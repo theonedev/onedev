@@ -5,7 +5,6 @@ import javax.inject.Singleton;
 import org.apache.shiro.authc.credential.CredentialsMatcher;
 import org.apache.shiro.authc.credential.DefaultPasswordService;
 import org.apache.shiro.authc.credential.PasswordService;
-import org.apache.shiro.mgt.RememberMeManager;
 import org.apache.shiro.web.filter.mgt.FilterChainResolver;
 import org.apache.shiro.web.mgt.WebSecurityManager;
 
@@ -26,7 +25,6 @@ public class SecurityModule extends AbstractPluginModule {
 		bind(WebSecurityManager.class).to(DefaultWebSecurityManager.class);
 		bind(FilterChainResolver.class).to(DefaultFilterChainResolver.class);
 		bind(BasicAuthenticationFilter.class);
-		bind(RememberMeManager.class).to(DefaultRememberMeManager.class);
 		bind(PasswordService.class).to(DefaultPasswordService.class).in(Singleton.class);
 		bind(CredentialsMatcher.class).to(DefaultPasswordMatcher.class);
 	}

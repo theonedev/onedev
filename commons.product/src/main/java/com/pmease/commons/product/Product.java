@@ -1,7 +1,6 @@
 package com.pmease.commons.product;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Properties;
@@ -32,9 +31,6 @@ import com.pmease.commons.persistence.dao.GeneralDao;
 import com.pmease.commons.persistence.extensionpoints.ModelContribution;
 import com.pmease.commons.product.model.User;
 import com.pmease.commons.product.web.asset.AssetLocator;
-import com.pmease.commons.security.AbstractUser;
-import com.pmease.commons.security.AbstractRealm;
-import com.pmease.commons.security.extensionpoint.RealmContribution;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.StringUtils;
 
@@ -48,15 +44,12 @@ public class Product extends AbstractPlugin {
 	
 	private final Provider<GeneralDao> generalDaoProvider;
 	
-	private final UserRealm userRealm;
-	
 	private final PasswordService passwordService;
 	
 	@Inject
-	public Product(Provider<GeneralDao> generalDaoProvider, UserRealm userRealm, PasswordService passwordService) {
+	public Product(Provider<GeneralDao> generalDaoProvider, PasswordService passwordService) {
 		serverProps = FileUtils.loadProperties(new File(Bootstrap.getConfDir(), "server.properties"));
 		this.generalDaoProvider = generalDaoProvider;
-		this.userRealm = userRealm;
 		this.passwordService = passwordService;
 	}
 	
@@ -138,13 +131,6 @@ public class Product extends AbstractPlugin {
 							new HashSet<Class<? extends AbstractEntity>>();
 					modelClasses.add(User.class);
 					return modelClasses;
-				}
-			},
-			new RealmContribution() {
-				
-				@Override
-				public Collection<? extends AbstractRealm<? extends AbstractUser>> getRealms() {
-					return Arrays.asList(userRealm);
 				}
 			}
 		);

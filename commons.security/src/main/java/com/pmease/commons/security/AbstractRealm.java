@@ -72,14 +72,39 @@ public abstract class AbstractRealm<T extends AbstractUser> extends AuthorizingR
 	 */
 	protected abstract Collection<String> doGetPermissions(Long userId);
 
-	@Override
-	protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
-        UsernamePasswordToken upToken = (UsernamePasswordToken) token;
-        
-        DetachedCriteria criteria = DetachedCriteria.forClass(userClass);
-        criteria.add(Restrictions.eq("loginName", upToken.getUsername()));
+	/**
+	 * Retrieve {@link AuthenticationInfo} of specified token. 
+	 * @param token
+	 * 			The token used to retrieve associated {@link AuthenticationInfo}
+	 * @return
+	 * 			{@link AuthenticationInfo} of specified token. Specifically if {@link AuthenticationInfo#getCredentials()}
+	 * 			returns <tt>null</tt>, the credential will not be used to match against the password saved in token and 
+	 * 			the authentication is considered successful. This is typically the case when the user is already 
+	 * 			authenticated against other systems (such as LDAP) in this method. 
+	 * @throws 
+	 * 			AuthenticationException
+	 */
+	protected AuthenticationInfo doGetAuthenticationInfo(UsernamePasswordToken token) throws AuthenticationException {
+		DetachedCriteria criteria = DetachedCriteria.forClass(userClass);
+        criteria.add(Restrictions.eq("loginName", token.getUsername()));
 
-        return (AuthenticationInfo) generalDaoProvider.get().find(criteria);
+        return (AbstractUser) generalDaoProvider.get().find(criteria);
+	}
+
+	@Override
+	protected final AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
+		return doGetAuthenticationInfo((UsernamePasswordToken) token);
+	}
+
+	@Override
+	protected void assertCredentialsMatch(AuthenticationToken token, AuthenticationInfo info) throws AuthenticationException {
+		/*
+		 * A null value of credentials in AuthenticationInfo means that we should not check credentials. Typically 
+		 * this is set to null when the token has already been authenticated at the time generating the 
+		 * AuthenticationInfo, for instance, when submitting the token to third party system for authentication. 
+		 */
+		if (info.getCredentials() != null)
+			super.assertCredentialsMatch(token, info);
 	}
 
 }

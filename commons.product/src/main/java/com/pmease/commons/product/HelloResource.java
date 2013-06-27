@@ -10,7 +10,7 @@ public class HelloResource {
 	
 	@GET
 	public String whoami() {
-		SecurityUtils.getSubject().checkRole("admin");
+		SecurityUtils.getSubject().checkPermission("admin");
 		return "user: " + SecurityUtils.getSubject().getPrincipal();
 	}
 	

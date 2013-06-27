@@ -17,8 +17,8 @@ public class AbstractUser extends AbstractEntity implements AuthenticationInfo {
 	private String loginName;
 	
 	private String fullName;
-	
-	@Column(nullable=false)
+
+	@Column(length=1024)
 	private String passwordHash;
 	
 	public String getLoginName() {
