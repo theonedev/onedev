@@ -19,7 +19,7 @@ import java.util.jar.JarFile;
 
 import com.google.common.base.Preconditions;
 
-public class ClassUtils extends org.apache.commons.lang.ClassUtils {
+public class ClassUtils extends org.apache.commons.lang3.ClassUtils {
 	
 	/**
 	 * Find all sub classes inheriting from (or implementing) specified super class (or interface) in 

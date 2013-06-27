@@ -5,8 +5,7 @@ import javax.inject.Singleton;
 import org.apache.wicket.Page;
 
 import com.pmease.commons.product.web.HomePage;
-import com.pmease.commons.product.web.TestPage;
-import com.pmease.commons.wicket.AbstractWicketConfig;
+import com.pmease.commons.web.AbstractWicketConfig;
 
 @Singleton
 public class WicketConfig extends AbstractWicketConfig {
@@ -15,7 +14,7 @@ public class WicketConfig extends AbstractWicketConfig {
 	protected void init() {
 		super.init();
 		
-		mountPage("/test", TestPage.class);
+		mountPage("/test", HomePage.class);
 	}
 	
 	@Override

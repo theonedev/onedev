@@ -67,18 +67,25 @@ public class JettyPlugin extends AbstractPlugin {
 		server = new Server();
 
         context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        
         context.setClassLoader(JettyPlugin.class.getClassLoader());
         
         context.setContextPath("/");
         context.setErrorHandler(new ErrorPageErrorHandler());
         
         context.addFilter(DisableTraceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
-        context.addFilter(GuiceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
         
         Collection<ServletContextConfigurator> servletContextConfigurators = 
         		pluginManager.getExtensions(ServletContextConfigurator.class);
         for (ServletContextConfigurator configurator: servletContextConfigurators) 
         	configurator.configure(context);
+
+        /*
+         *  Add Guice filter as last filter in order to make sure that filters and servlets
+         *  configured in Guice web module can be filtered correctly by filters added to 
+         *  Jetty context directly.  
+         */
+        context.addFilter(GuiceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 
         server.setHandler(context);
 

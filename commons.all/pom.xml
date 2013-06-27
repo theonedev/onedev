@@ -16,10 +16,11 @@
         <module>../commons.util</module>  
         <module>../commons.bootstrap</module>  
         <module>../commons.jetty</module>  
-        <module>../commons.hibernate</module>  
-        <module>../commons.wicket</module>  
+        <module>../commons.persistence</module>  
+        <module>../commons.web</module>  
         <module>../commons.product</module>
-        <module>../commons.jersey</module>
+        <module>../commons.rest</module>
+        <module>../commons.security</module>
     </modules>  
     <repositories> 
         <repository> 

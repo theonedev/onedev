@@ -1,14 +1,14 @@
 package com.pmease.commons.product.web;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.wicket.markup.html.WebPage;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.AbstractReadOnlyModel;
+
+import com.pmease.commons.product.model.User;
+import com.pmease.commons.security.SecurityHelper;
 
 @SuppressWarnings("serial")
 public class HomePage extends WebPage {
@@ -16,88 +16,42 @@ public class HomePage extends WebPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		add(new Label("user", new AbstractReadOnlyModel<String>() {
 
-		add(new BookmarkablePageLink<Void>("bookmarkablePageLink", TestPage.class));
-		add(new Link<Void>("actionLink") {
+			@Override
+			public String getObject() {
+				return SecurityHelper.getUserDisplayName(User.class, "Guest");
+			}
+			
+		}));
+		
+		add(new Link<Void>("login") {
 
 			@Override
 			public void onClick() {
-				dirty();
+				SecurityUtils.getSubject().login(new UsernamePasswordToken("robin", "robin"));
 			}
 			
 		});
-		add(new Link<Void>("actionLinkToPageViaClass") {
+		
+		add(new Link<Void>("logout") {
 
 			@Override
 			public void onClick() {
-				dirty();
-				setResponsePage(TestPage.class);
+				SecurityUtils.getSubject().logout();
 			}
 			
 		});
-		add(new Link<Void>("actionLinkToPageViaNew") {
+		
+		add(new Link<Void>("check") {
 
 			@Override
 			public void onClick() {
-				dirty();
-				setResponsePage(new TestPage());
-			}
-			
-		});
-		add(new Link<Void>("actionLinkToPageViaThis") {
-
-			@Override
-			public void onClick() {
-				dirty();
-				setResponsePage(HomePage.this);
-			}
-			
-		});
-		add(new AjaxLink<Void>("ajaxLink") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				dirty();
-			}
-			
-		});
-		add(new AjaxLink<Void>("ajaxLinkToPageViaClass") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				dirty();
-				setResponsePage(TestPage.class);
-			}
-			
-		});
-		add(new AjaxLink<Void>("ajaxLinkToPageViaNew") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				dirty();
-				setResponsePage(new TestPage());
-			}
-			
-		});
-		add(new AjaxLink<Void>("ajaxLinkToPageViaThis") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				dirty();
-				setResponsePage(HomePage.this);
+				SecurityUtils.getSubject().checkPermission("bird");
 			}
 			
 		});
 	}
 	
-	private void writeObject(ObjectOutputStream oos) throws IOException {
-    	oos.defaultWriteObject();
-    	System.out.println("HomePage.writeObject: " + getPageId() + ":" + getRenderCount());
-	}
-	
-	private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-		ois.defaultReadObject();
-		System.out.println("HomePage.readObject: " + getPageId() + ":" + getRenderCount());
-	}
-
 }

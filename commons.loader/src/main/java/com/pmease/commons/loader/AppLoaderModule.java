@@ -6,7 +6,8 @@ public class AppLoaderModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		bind(PluginManager.class).to(PluginManagerImpl.class);
+		bindConstant().annotatedWith(AppName.class).to("Application");
+		bind(PluginManager.class).to(DefaultPluginManager.class);
 	}
 
 }

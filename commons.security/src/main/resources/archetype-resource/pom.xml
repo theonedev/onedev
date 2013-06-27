@@ -1,0 +1,60 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+#if (\${groupId} != "com.pmease")
+	<groupId>\${groupId}</groupId>	
+#end
+	<artifactId>\${artifactId}</artifactId>
+	<version>\${version}</version>
+	<parent>
+		<groupId>com.pmease</groupId>
+		<artifactId>parent.general</artifactId>
+		<version>1.0.13</version>
+	</parent>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.pmease</groupId>
+				<artifactId>plugin.maven</artifactId>
+			</plugin>
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>${project.artifactId}</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>pmeaseRepo</id>
+			<name>PMEase Repository</name>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</snapshots>
+			<url>http://artifact.pmease.com/</url>
+		</repository>
+	</repositories>
+
+	<properties>
+		<moduleClass>\${package}.PluginModule</moduleClass>
+	</properties>
+
+</project>

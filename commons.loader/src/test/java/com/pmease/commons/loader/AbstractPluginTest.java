@@ -56,7 +56,7 @@ public class AbstractPluginTest {
 		plugins.add(plugin1);
 		plugins.add(plugin2);
 		plugins.add(plugin3);
-		pluginManager = new PluginManagerImpl(plugins);
+		pluginManager = new DefaultPluginManager(plugins);
 	}
 	
 	@Test

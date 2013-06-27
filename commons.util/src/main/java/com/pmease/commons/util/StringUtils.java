@@ -13,7 +13,7 @@ import org.apache.commons.codec.binary.Base64;
 
 import com.pmease.commons.bootstrap.BootstrapUtils;
 
-public class StringUtils extends org.apache.commons.lang.StringUtils {
+public class StringUtils extends org.apache.commons.lang3.StringUtils {
 	private static final String ENCRYPTION_KEY = "123456789012345678901234567890";
 	
     public static String encrypt(String string) {

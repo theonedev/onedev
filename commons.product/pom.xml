@@ -100,7 +100,7 @@
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
-            <artifactId>commons.hibernate</artifactId>  
+            <artifactId>commons.persistence</artifactId>  
             <version>1.0.17</version> 
         </dependency>    
         <dependency> 
@@ -110,13 +110,18 @@
         </dependency>
         <dependency>
         	<groupId>com.pmease</groupId>
-        	<artifactId>commons.jersey</artifactId>
+        	<artifactId>commons.rest</artifactId>
         	<version>1.0.0</version>
         </dependency>
         <dependency>
         	<groupId>com.pmease</groupId>
-        	<artifactId>commons.wicket</artifactId>
+        	<artifactId>commons.web</artifactId>
         	<version>1.0.19</version>
+        </dependency>
+        <dependency>
+        	<groupId>com.pmease</groupId>
+        	<artifactId>commons.security</artifactId>
+        	<version>1.0.0</version>
         </dependency>
     </dependencies>  
     <repositories> 
@@ -139,7 +144,7 @@
     <properties> 
         <executables>bin/*.sh, bin/wrapper-*</executables>  
         <bootstrapClass>com.pmease.commons.bootstrap.Bootstrap</bootstrapClass>  
-        <moduleClass>com.pmease.commons.product.PluginModule</moduleClass>  
+        <moduleClass>com.pmease.commons.product.ProductModule</moduleClass>  
         <aggregation>false</aggregation> 
     </properties>  
     <version>1.0.19</version> 
