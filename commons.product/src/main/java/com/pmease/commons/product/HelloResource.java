@@ -3,16 +3,18 @@ package com.pmease.commons.product;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
-@Path("/whoami")
+import com.pmease.commons.product.model.User;
+import com.pmease.commons.security.SecurityHelper;
+
+@Path("/hello")
 public class HelloResource {
 	
 	@GET
-	@RequiresPermissions("view")
+	@RequiresPermissions("write")
 	public String whoami() {
-		return "user: " + SecurityUtils.getSubject().getPrincipal();
+		return "Hello " + SecurityHelper.getUserDisplayName(User.class, "Guest");
 	}
 	
 }

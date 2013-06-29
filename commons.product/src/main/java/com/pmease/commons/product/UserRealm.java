@@ -24,7 +24,7 @@ public class UserRealm extends AbstractRealm<User> {
 	@Override
 	protected Collection<String> doGetPermissions(Long userId) {
 		if (userId == 0L)
-			return Arrays.asList("view");
+			return Arrays.asList("read");
 		else
 			return Arrays.asList("*");
 	}

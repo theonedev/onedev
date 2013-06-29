@@ -30,7 +30,7 @@ public interface GeneralDao {
 	 * @throws a
 	 *             HibernateException if no matching entity is found
 	 */
-	<T extends AbstractEntity> T getReference(Class<T> entityClass, Long entityId);
+	<T extends AbstractEntity> T load(Class<T> entityClass, Long entityId);
 
 	/**
 	 * If the id of the entity is null or zero, add it to the datastore and

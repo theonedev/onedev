@@ -31,7 +31,7 @@ public class GenericDaoImpl<T extends AbstractEntity> implements GenericDao<T> {
 
 	@Override
 	public T getReference(Long entityId) {
-		return generalDao.getReference(entityClass, entityId);
+		return generalDao.load(entityClass, entityId);
 	}
 
 	@Override

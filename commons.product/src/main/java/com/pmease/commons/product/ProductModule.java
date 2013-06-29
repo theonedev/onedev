@@ -14,7 +14,7 @@ import com.pmease.commons.web.AbstractWicketConfig;
 
 public class ProductModule extends AbstractPluginModule {
 
-	@Override
+    @Override
 	protected void configure() {
 		super.configure();
 		

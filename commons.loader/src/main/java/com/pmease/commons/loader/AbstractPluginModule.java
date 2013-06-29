@@ -6,7 +6,7 @@ import java.util.Set;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
-import com.google.inject.matcher.Matchers;
+import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.TypeEncounter;
@@ -34,26 +34,31 @@ public abstract class AbstractPluginModule extends AbstractModule implements Dep
 			Multibinder<AbstractPlugin> pluginBinder = Multibinder.newSetBinder(binder(), AbstractPlugin.class);
 		    pluginBinder.addBinding().to(pluginClass).in(Singleton.class);
 		    
-		    bindListener(Matchers.any(), new TypeListener() {
+		    bindListener(new AbstractMatcher<TypeLiteral<?>>() {
+
+				@Override
+				public boolean matches(TypeLiteral<?> t) {
+					return t.getRawType() == pluginClass;
+				}
+		    	
+		    }, new TypeListener() {
 
 				@Override
 				public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
-					if (pluginClass == type.getRawType()) {
-						encounter.register(new InjectionListener<I>() {
+					encounter.register(new InjectionListener<I>() {
 
-							@Override
-							public void afterInjection(I injectee) {
-								AbstractPlugin plugin = (AbstractPlugin) injectee;
-								plugin.setId(pluginId);
-								plugin.setName(pluginName);
-								plugin.setVendor(pluginVendor);
-								plugin.setVersion(pluginVersion);
-								plugin.setDescription(pluginDescription);
-								plugin.setDependencyIds(pluginDependencies);
-							}
-							
-						});
-					}
+						@Override
+						public void afterInjection(I injectee) {
+							AbstractPlugin plugin = (AbstractPlugin) injectee;
+							plugin.setId(pluginId);
+							plugin.setName(pluginName);
+							plugin.setVendor(pluginVendor);
+							plugin.setVersion(pluginVersion);
+							plugin.setDescription(pluginDescription);
+							plugin.setDependencyIds(pluginDependencies);
+						}
+						
+					});
 				}
 		    	
 		    });

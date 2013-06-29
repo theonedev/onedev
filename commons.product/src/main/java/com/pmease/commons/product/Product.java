@@ -16,6 +16,8 @@ import org.eclipse.jetty.server.ssl.SslSocketConnector;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,10 +140,13 @@ public class Product extends AbstractPlugin {
 
 	@Override
 	public void postStartDependents() {
-		User user =  new User();
-		if (generalDaoProvider.get().find(User.class, 1L) == null) {
-			user.setLoginName("robin");
-			user.setPasswordHash(passwordService.encryptPassword("robin"));
+		DetachedCriteria criteria = DetachedCriteria.forClass(User.class);
+		criteria.add(Restrictions.eq("loginName", "admin"));
+		if (generalDaoProvider.get().find(criteria) == null) {
+			User user =  new User();
+			user.setLoginName("admin");
+			user.setPasswordHash(passwordService.encryptPassword("12345"));
+			user.setFullName("Administrator");
 			generalDaoProvider.get().save(user);
 		}
 

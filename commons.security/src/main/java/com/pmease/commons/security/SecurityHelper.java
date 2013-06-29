@@ -21,7 +21,7 @@ public class SecurityHelper extends SecurityUtils {
 		Preconditions.checkNotNull(principal);
 		Long userId = (Long) principal;
 		if (userId != 0L)
-			return (T) AppLoader.getInstance(GeneralDao.class).getReference(userClass, userId);
+			return (T) AppLoader.getInstance(GeneralDao.class).load(userClass, userId);
 		else
 			return null;
 	}

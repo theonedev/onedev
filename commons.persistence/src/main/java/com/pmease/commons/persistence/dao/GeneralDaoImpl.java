@@ -38,7 +38,7 @@ public class GeneralDaoImpl implements GeneralDao {
 
 	@Transactional
 	@Override
-	public <T extends AbstractEntity> T getReference(Class<T> entityClass, Long entityId) {
+	public <T extends AbstractEntity> T load(Class<T> entityClass, Long entityId) {
 		return (T) getSession().load(unproxy(entityClass), entityId);
 	}
 
@@ -61,7 +61,7 @@ public class GeneralDaoImpl implements GeneralDao {
 	@Transactional
 	@Override
 	public <T extends AbstractEntity> void deleteById(Class<T> entityClass, Long entityId) {
-		T entity = getReference(unproxy(entityClass), entityId);
+		T entity = load(unproxy(entityClass), entityId);
 		delete(entity);
 	}
 	

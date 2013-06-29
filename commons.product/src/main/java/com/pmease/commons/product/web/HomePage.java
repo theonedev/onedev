@@ -7,6 +7,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 
+import com.pmease.commons.product.model.User;
 import com.pmease.commons.security.SecurityHelper;
 
 @SuppressWarnings("serial")
@@ -20,8 +21,7 @@ public class HomePage extends WebPage {
 
 			@Override
 			public String getObject() {
-				SecurityHelper.getSubject().checkPermission("admin");
-				return SecurityHelper.getSubject().getPrincipal().toString();
+				return SecurityHelper.getUserDisplayName(User.class, "Guest");
 			}
 			
 		}));
@@ -30,7 +30,7 @@ public class HomePage extends WebPage {
 
 			@Override
 			public void onClick() {
-				SecurityUtils.getSubject().login(new UsernamePasswordToken("robin", "robin"));
+				SecurityUtils.getSubject().login(new UsernamePasswordToken("admin", "12345"));
 			}
 			
 		});
@@ -48,10 +48,11 @@ public class HomePage extends WebPage {
 
 			@Override
 			public void onClick() {
-				SecurityUtils.getSubject().checkPermission("bird");
+				SecurityUtils.getSubject().checkPermission("write");
 			}
 			
 		});
+		
 	}
 	
 }
