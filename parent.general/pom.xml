@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.pmease</groupId>
 	<artifactId>parent.general</artifactId>
-	<version>1.0.13</version>
+	<version>1.0.20</version>
 	<packaging>pom</packaging>
 
 	<prerequisites>

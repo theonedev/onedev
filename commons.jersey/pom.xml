@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">  
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">  
     <modelVersion>4.0.0</modelVersion>  
-    <artifactId>commons.loader</artifactId>  
+    <artifactId>commons.jersey</artifactId>  
+    <version>1.0.0</version>  
     <parent> 
         <groupId>com.pmease</groupId>  
         <artifactId>parent.general</artifactId>  
@@ -14,6 +15,10 @@
                 <groupId>com.pmease</groupId>  
                 <artifactId>plugin.maven</artifactId> 
             </plugin>  
+            <!-- Uncomment below if you'd like to publish an archetype based on your plugin -->  
+            <!--plugin>
+				<artifactId>maven-archetype-plugin</artifactId>
+			</plugin-->  
             <plugin> 
                 <artifactId>maven-source-plugin</artifactId> 
             </plugin>  
@@ -25,33 +30,23 @@
     <dependencies> 
         <dependency> 
             <groupId>com.pmease</groupId>  
-            <artifactId>commons.bootstrap</artifactId>  
-            <version>1.0.16</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.pmease</groupId>  
-            <artifactId>commons.util</artifactId>  
+            <artifactId>commons.loader</artifactId>  
             <version>1.0.20</version> 
         </dependency>  
         <dependency> 
-            <groupId>com.google.inject</groupId>  
-            <artifactId>guice</artifactId>  
-            <version>${guiceVersion}</version> 
+            <groupId>com.sun.jersey</groupId>  
+            <artifactId>jersey-server</artifactId>  
+            <version>${jerseyVersion}</version> 
         </dependency>  
         <dependency> 
-            <groupId>com.google.inject.extensions</groupId>  
-            <artifactId>guice-assistedinject</artifactId>  
-            <version>${guiceVersion}</version> 
+            <groupId>com.sun.jersey</groupId>  
+            <artifactId>jersey-json</artifactId>  
+            <version>${jerseyVersion}</version> 
         </dependency>  
         <dependency> 
-            <groupId>com.google.inject.extensions</groupId>  
-            <artifactId>guice-servlet</artifactId>  
-            <version>${guiceVersion}</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.google.inject.extensions</groupId>  
-            <artifactId>guice-multibindings</artifactId>  
-            <version>${guiceVersion}</version> 
+            <groupId>com.sun.jersey.contribs</groupId>  
+            <artifactId>jersey-guice</artifactId>  
+            <version>${jerseyVersion}</version> 
         </dependency> 
     </dependencies>  
     <repositories> 
@@ -72,6 +67,7 @@
         </repository> 
     </repositories>  
     <properties> 
-        <guiceVersion>3.0</guiceVersion> 
+        <moduleClass>com.pmease.commons.jersey.JerseyPluginModule</moduleClass>  
+        <jerseyVersion>1.17</jerseyVersion> 
     </properties> 
 </project>

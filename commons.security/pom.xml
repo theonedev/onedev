@@ -32,7 +32,7 @@
 		<dependency>
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.loader</artifactId>
-			<version>1.0.17</version>
+			<version>1.0.20</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.shiro</groupId>
@@ -47,7 +47,7 @@
 		<dependency>
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.jetty</artifactId>
-			<version>1.0.17</version>
+			<version>1.0.20</version>
 		</dependency>
 		<dependency>
 			<groupId>com.pmease</groupId>

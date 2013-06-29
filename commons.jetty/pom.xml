@@ -5,7 +5,7 @@
     <parent> 
         <artifactId>parent.general</artifactId>  
         <groupId>com.pmease</groupId>  
-        <version>1.0.13</version> 
+        <version>1.0.20</version> 
     </parent>  
     <artifactId>commons.jetty</artifactId>  
     <build> 
@@ -26,7 +26,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.17</version> 
+            <version>1.0.20</version> 
         </dependency>  
         <dependency> 
             <groupId>org.eclipse.jetty</groupId>  
@@ -42,12 +42,12 @@
             <groupId>org.eclipse.jetty</groupId>  
             <artifactId>jetty-servlet</artifactId>  
             <version>${jettyVersion}</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.eclipse.jetty</groupId>  
+            <artifactId>jetty-websocket</artifactId>  
+            <version>${jettyVersion}</version> 
         </dependency> 
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-websocket</artifactId>
-			<version>${jettyVersion}</version>
-		</dependency>        
     </dependencies>  
     <repositories> 
         <repository> 
@@ -67,8 +67,7 @@
         </repository> 
     </repositories>  
     <properties> 
-        <moduleClass>com.pmease.commons.jetty.JettyModule</moduleClass> 
-        <jettyVersion>8.1.10.v20130312</jettyVersion>
-    </properties>  
-    <version>1.0.17</version> 
+        <moduleClass>com.pmease.commons.jetty.JettyModule</moduleClass>  
+        <jettyVersion>8.1.10.v20130312</jettyVersion> 
+    </properties> 
 </project>
