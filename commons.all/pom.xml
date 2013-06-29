@@ -6,7 +6,7 @@
     <parent> 
         <groupId>com.pmease</groupId>  
         <artifactId>parent.general</artifactId>  
-        <version>1.0.20</version> 
+        <version>1.0.21</version> 
     </parent>  
     <packaging>pom</packaging>  
     <modules> 
@@ -18,9 +18,9 @@
         <module>../commons.jetty</module>  
         <module>../commons.persistence</module>  
         <module>../commons.web</module>  
-        <module>../commons.security</module>
-        <module>../commons.rest</module>
-        <module>../gitop</module>
+        <module>../commons.security</module>  
+        <module>../commons.rest</module>  
+        <module>../gitop</module> 
     </modules>  
     <repositories> 
         <repository> 

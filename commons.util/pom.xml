@@ -5,7 +5,7 @@
     <parent> 
         <groupId>com.pmease</groupId>  
         <artifactId>parent.general</artifactId>  
-        <version>1.0.20</version> 
+        <version>1.0.21</version> 
     </parent>  
     <artifactId>commons.util</artifactId>  
     <build> 
@@ -25,31 +25,31 @@
     <dependencies> 
         <dependency> 
             <groupId>org.apache.commons</groupId>  
-            <artifactId>commons-lang3</artifactId>  
+            <artifactId>commons-lang3</artifactId> 
         </dependency>  
         <dependency> 
             <groupId>commons-codec</groupId>  
-            <artifactId>commons-codec</artifactId>  
+            <artifactId>commons-codec</artifactId> 
         </dependency>  
         <dependency> 
             <groupId>javax.servlet</groupId>  
-            <artifactId>javax.servlet-api</artifactId>  
+            <artifactId>javax.servlet-api</artifactId> 
         </dependency>  
         <dependency> 
             <groupId>commons-io</groupId>  
-            <artifactId>commons-io</artifactId>  
+            <artifactId>commons-io</artifactId> 
         </dependency>  
         <dependency> 
             <groupId>com.google.code.findbugs</groupId>  
-            <artifactId>jsr305</artifactId>  
+            <artifactId>jsr305</artifactId> 
         </dependency>  
         <dependency> 
             <groupId>com.google.guava</groupId>  
-            <artifactId>guava</artifactId>  
+            <artifactId>guava</artifactId> 
         </dependency>  
         <dependency> 
             <groupId>org.quartz-scheduler</groupId>  
-            <artifactId>quartz</artifactId>  
+            <artifactId>quartz</artifactId> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
@@ -58,28 +58,28 @@
         </dependency>  
         <dependency> 
             <groupId>dom4j</groupId>  
-            <artifactId>dom4j</artifactId>  
+            <artifactId>dom4j</artifactId> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.test</artifactId>  
-            <version>1.0.20</version> 
+            <version>1.0.21</version> 
         </dependency>  
         <dependency> 
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-        </dependency>    
+            <groupId>org.apache.commons</groupId>  
+            <artifactId>commons-lang3</artifactId> 
+        </dependency>  
         <dependency> 
             <groupId>commons-httpclient</groupId>  
-            <artifactId>commons-httpclient</artifactId>  
+            <artifactId>commons-httpclient</artifactId> 
         </dependency>  
         <dependency> 
             <groupId>joda-time</groupId>  
-            <artifactId>joda-time</artifactId>  
+            <artifactId>joda-time</artifactId> 
         </dependency>  
         <dependency> 
             <groupId>commons-collections</groupId>  
-            <artifactId>commons-collections</artifactId>  
+            <artifactId>commons-collections</artifactId> 
         </dependency> 
     </dependencies>  
     <repositories> 

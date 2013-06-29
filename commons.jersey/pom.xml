@@ -3,11 +3,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">  
     <modelVersion>4.0.0</modelVersion>  
     <artifactId>commons.jersey</artifactId>  
-    <version>1.0.0</version>  
     <parent> 
         <groupId>com.pmease</groupId>  
         <artifactId>parent.general</artifactId>  
-        <version>1.0.20</version> 
+        <version>1.0.21</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -31,7 +30,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.20</version> 
+            <version>1.0.21</version> 
         </dependency>  
         <dependency> 
             <groupId>com.sun.jersey</groupId>  

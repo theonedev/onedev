@@ -5,7 +5,7 @@
     <parent> 
         <artifactId>parent.general</artifactId>  
         <groupId>com.pmease</groupId>  
-        <version>1.0.20</version> 
+        <version>1.0.21</version> 
     </parent>  
     <artifactId>commons.web</artifactId>  
     <build> 
@@ -47,22 +47,22 @@
             <groupId>org.apache.wicket</groupId>  
             <artifactId>wicket-devutils</artifactId>  
             <version>${wicketVersion}</version> 
-        </dependency>      
+        </dependency>  
         <dependency> 
             <groupId>org.apache.wicket</groupId>  
             <artifactId>wicket-bootstrap</artifactId>  
             <version>0.9</version> 
-        </dependency>      
+        </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.20</version> 
-        </dependency>
-        <dependency>
-        	<groupId>com.pmease</groupId>
-        	<artifactId>commons.jetty</artifactId>
-        	<version>1.0.20</version>
-        </dependency>
+            <version>1.0.21</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>com.pmease</groupId>  
+            <artifactId>commons.jetty</artifactId>  
+            <version>1.0.21</version> 
+        </dependency> 
     </dependencies>  
     <properties> 
         <moduleClass>com.pmease.commons.web.WebModule</moduleClass>  
