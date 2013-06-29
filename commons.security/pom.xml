@@ -54,6 +54,11 @@
 			<artifactId>commons.persistence</artifactId>
 			<version>1.0.17</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.shiro</groupId>
+			<artifactId>shiro-guice</artifactId>
+			<version>${shiroVersion}</version>
+		</dependency>
 	</dependencies>
 
 	<repositories>

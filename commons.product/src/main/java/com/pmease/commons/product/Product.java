@@ -144,7 +144,7 @@ public class Product extends AbstractPlugin {
 			user.setPasswordHash(passwordService.encryptPassword("robin"));
 			generalDaoProvider.get().save(user);
 		}
-		
+
 		logger.info(PRODUCT_NAME + " has been started successfully.");
 	}
 

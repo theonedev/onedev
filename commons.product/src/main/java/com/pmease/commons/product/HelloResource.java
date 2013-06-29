@@ -4,13 +4,14 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 @Path("/whoami")
 public class HelloResource {
 	
 	@GET
+	@RequiresPermissions("view")
 	public String whoami() {
-		SecurityUtils.getSubject().checkPermission("admin");
 		return "user: " + SecurityUtils.getSubject().getPrincipal();
 	}
 	

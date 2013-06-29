@@ -5,6 +5,7 @@ import javax.inject.Singleton;
 import org.apache.shiro.authc.credential.CredentialsMatcher;
 import org.apache.shiro.authc.credential.DefaultPasswordService;
 import org.apache.shiro.authc.credential.PasswordService;
+import org.apache.shiro.guice.aop.ShiroAopModule;
 import org.apache.shiro.web.filter.mgt.FilterChainResolver;
 import org.apache.shiro.web.mgt.WebSecurityManager;
 
@@ -27,6 +28,8 @@ public class SecurityModule extends AbstractPluginModule {
 		bind(BasicAuthenticationFilter.class);
 		bind(PasswordService.class).to(DefaultPasswordService.class).in(Singleton.class);
 		bind(CredentialsMatcher.class).to(DefaultPasswordMatcher.class);
+		
+		install(new ShiroAopModule());
 	}
 
 	@Override
