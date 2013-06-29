@@ -1,0 +1,20 @@
+<ehcache updateCheck="false">
+
+	<diskStore path="java.io.tmpdir/ehcache" />
+
+	<defaultCache maxElementsInMemory="10000" eternal="false"
+		timeToIdleSeconds="120" timeToLiveSeconds="120" overflowToDisk="true"
+		maxElementsOnDisk="1000000" diskPersistent="false"
+		diskExpiryThreadIntervalSeconds="120" memoryStoreEvictionPolicy="LRU" />
+		
+	<cache name="org.hibernate.cache.spi.UpdateTimestampsCache"
+		maxElementsInMemory="5000" eternal="true" timeToIdleSeconds="0"
+		timeToLiveSeconds="0" overflowToDisk="true" diskPersistent="false"
+		diskExpiryThreadIntervalSeconds="300" memoryStoreEvictionPolicy="LRU" />
+
+	<cache name="org.hibernate.cache.internal.StandardQueryCache"
+		maxElementsInMemory="10000" eternal="false" timeToIdleSeconds="300"
+		timeToLiveSeconds="300" overflowToDisk="true" diskPersistent="false"
+		diskExpiryThreadIntervalSeconds="300" memoryStoreEvictionPolicy="LRU" />
+
+</ehcache>
