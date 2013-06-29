@@ -120,7 +120,7 @@
 		<dependency>
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.jetty</artifactId>
-			<version>1.0.21</version>
+			<version>1.0.22</version>
 		</dependency>
 	</dependencies>
 

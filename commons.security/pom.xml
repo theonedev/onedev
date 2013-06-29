@@ -3,7 +3,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">  
     <modelVersion>4.0.0</modelVersion>  
     <artifactId>commons.security</artifactId>  
-    <version>1.0.0</version>  
+    <version>1.0.22</version>  
     <parent> 
         <groupId>com.pmease</groupId>  
         <artifactId>parent.general</artifactId>  
@@ -31,7 +31,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.21</version> 
+            <version>1.0.22</version> 
         </dependency>  
         <dependency> 
             <groupId>org.apache.shiro</groupId>  
@@ -46,12 +46,12 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.jetty</artifactId>  
-            <version>1.0.21</version> 
+            <version>1.0.22</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.persistence</artifactId>  
-            <version>1.0.17</version> 
+            <version>1.0.22</version> 
         </dependency>  
         <dependency> 
             <groupId>org.apache.shiro</groupId>  

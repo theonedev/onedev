@@ -26,7 +26,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.21</version> 
+            <version>1.0.22</version> 
         </dependency>  
         <dependency> 
             <groupId>org.hibernate.javax.persistence</groupId>  
@@ -81,7 +81,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.jetty</artifactId>  
-            <version>1.0.21</version> 
+            <version>1.0.22</version> 
         </dependency> 
     </dependencies>  
     <repositories> 
@@ -106,5 +106,5 @@
         <hibernateVersion>4.2.0.Final</hibernateVersion>  
         <bonecpVersion>0.8.0-rc1</bonecpVersion> 
     </properties>  
-    <version>1.0.17</version> 
+    <version>1.0.22</version> 
 </project>
