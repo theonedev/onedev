@@ -54,7 +54,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.bootstrap</artifactId>  
-            <version>1.0.23</version> 
+            <version>1.0.24</version> 
         </dependency>  
         <dependency> 
             <groupId>dom4j</groupId>  
@@ -99,5 +99,5 @@
             <url>http://artifact.pmease.com/</url> 
         </repository> 
     </repositories>  
-    <version>1.0.23</version>
+    <version>1.0.24</version> 
 </project>
