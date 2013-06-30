@@ -26,12 +26,12 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.bootstrap</artifactId>  
-            <version>1.0.17</version> 
+            <version>1.0.23</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.util</artifactId>  
-            <version>1.0.22</version> 
+            <version>1.0.23</version> 
         </dependency>  
         <dependency> 
             <groupId>com.google.inject</groupId>  
@@ -74,4 +74,5 @@
     <properties> 
         <guiceVersion>3.0</guiceVersion> 
     </properties>  
+    <version>1.0.23</version>
 </project>
