@@ -14,10 +14,6 @@
                 <groupId>com.pmease</groupId>  
                 <artifactId>plugin.maven</artifactId> 
             </plugin>  
-            <!-- Uncomment below if you'd like to publish an archetype based on your plugin -->  
-            <!--plugin>
-				<artifactId>maven-archetype-plugin</artifactId>
-			</plugin-->  
             <plugin> 
                 <artifactId>maven-source-plugin</artifactId> 
             </plugin>  
