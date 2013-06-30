@@ -42,6 +42,7 @@ public class Bootstrap {
 	
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
+		
 		// Avoid the problem that some sorting does not work for JDK7
 		System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
 		
