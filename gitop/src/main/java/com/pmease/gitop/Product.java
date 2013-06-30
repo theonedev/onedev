@@ -42,7 +42,7 @@ public class Product extends AbstractPlugin {
 	
 	private final Properties serverProps;
 
-	public static final String PRODUCT_NAME = "Product";
+	public static final String PRODUCT_NAME = "Gitop";
 	
 	private final Provider<GeneralDao> generalDaoProvider;
 	
