@@ -5,7 +5,7 @@
     <parent> 
         <artifactId>parent.general</artifactId>  
         <groupId>com.pmease</groupId>  
-        <version>1.0.21</version> 
+        <version>1.0.22</version> 
     </parent>  
     <artifactId>commons.persistence</artifactId>  
     <build> 
@@ -106,5 +106,4 @@
         <hibernateVersion>4.2.0.Final</hibernateVersion>  
         <bonecpVersion>0.8.0-rc1</bonecpVersion> 
     </properties>  
-    <version>1.0.22</version> 
 </project>

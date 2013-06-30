@@ -5,7 +5,7 @@
     <parent> 
         <artifactId>parent.general</artifactId>  
         <groupId>com.pmease</groupId>  
-        <version>1.0.21</version> 
+        <version>1.0.22</version> 
     </parent>  
     <artifactId>commons.jetty</artifactId>  
     <build> 
@@ -70,5 +70,4 @@
         <moduleClass>com.pmease.commons.jetty.JettyModule</moduleClass>  
         <jettyVersion>8.1.10.v20130312</jettyVersion> 
     </properties>  
-    <version>1.0.22</version>
 </project>

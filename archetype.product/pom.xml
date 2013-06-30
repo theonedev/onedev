@@ -5,7 +5,7 @@
     <parent> 
         <groupId>com.pmease</groupId>  
         <artifactId>parent.general</artifactId>  
-        <version>1.0.21</version> 
+        <version>1.0.22</version> 
     </parent>  
     <artifactId>archetype.product</artifactId>  
     <name>PMEase Product Archetype</name>  
@@ -37,5 +37,4 @@
             <url>http://artifact.pmease.com/</url> 
         </repository> 
     </repositories>  
-    <version>1.0.22</version>
 </project>
