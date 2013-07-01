@@ -6,7 +6,7 @@
     <parent> 
         <groupId>com.pmease</groupId>  
         <artifactId>parent.general</artifactId>  
-        <version>1.0.22</version> 
+        <version>1.0.25</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -26,12 +26,12 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.bootstrap</artifactId>  
-            <version>1.0.24</version> 
+            <version>1.0.25</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.util</artifactId>  
-            <version>1.0.24</version> 
+            <version>1.0.25</version> 
         </dependency>  
         <dependency> 
             <groupId>com.google.inject</groupId>  
@@ -73,6 +73,5 @@
     </repositories>  
     <properties> 
         <guiceVersion>3.0</guiceVersion> 
-    </properties>  
-    <version>1.0.24</version> 
+    </properties> 
 </project>

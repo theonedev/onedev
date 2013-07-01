@@ -5,7 +5,7 @@
     <parent> 
         <artifactId>parent.general</artifactId>  
         <groupId>com.pmease</groupId>  
-        <version>1.0.22</version> 
+        <version>1.0.25</version> 
     </parent>  
     <artifactId>commons.jetty</artifactId>  
     <build> 
@@ -26,7 +26,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.24</version> 
+            <version>1.0.25</version> 
         </dependency>  
         <dependency> 
             <groupId>org.eclipse.jetty</groupId>  
@@ -69,6 +69,5 @@
     <properties> 
         <moduleClass>com.pmease.commons.jetty.JettyModule</moduleClass>  
         <jettyVersion>8.1.10.v20130312</jettyVersion> 
-    </properties>  
-    <version>1.0.24</version> 
+    </properties> 
 </project>
