@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>com.pmease</groupId>
 		<artifactId>parent.general</artifactId>
-		<version>1.0.26</version>
+		<version>1.0.28</version>
 	</parent>
 
 	<build>
@@ -35,7 +35,7 @@
 		<dependency>
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.loader</artifactId>
-			<version>1.0.26</version>
+			<version>1.0.28</version>
 		</dependency>
 	</dependencies>
 

@@ -5,7 +5,7 @@
     <parent> 
         <groupId>com.pmease</groupId>  
         <artifactId>parent.general</artifactId>  
-        <version>1.0.26</version> 
+        <version>1.0.28</version> 
     </parent>  
     <artifactId>commons.util</artifactId>  
     <build> 
@@ -54,7 +54,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.bootstrap</artifactId>  
-            <version>1.0.26</version> 
+            <version>1.0.28</version> 
         </dependency>  
         <dependency> 
             <groupId>dom4j</groupId>  
@@ -63,7 +63,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.test</artifactId>  
-            <version>1.0.26</version> 
+            <version>1.0.28</version> 
         </dependency>  
         <dependency> 
             <groupId>org.apache.commons</groupId>  
@@ -80,11 +80,11 @@
         <dependency> 
             <groupId>commons-collections</groupId>  
             <artifactId>commons-collections</artifactId> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.apache.ant</groupId>  
+            <artifactId>ant</artifactId> 
         </dependency> 
-        <dependency>
-        	<groupId>org.apache.ant</groupId>
-        	<artifactId>ant</artifactId>
-        </dependency>
     </dependencies>  
     <repositories> 
         <repository> 

@@ -6,7 +6,7 @@
     <parent> 
         <groupId>com.pmease</groupId>  
         <artifactId>parent.general</artifactId>  
-        <version>1.0.26</version> 
+        <version>1.0.28</version> 
     </parent>  
     <packaging>pom</packaging>  
     <modules> 
@@ -39,6 +39,5 @@
             </snapshots>  
             <url>http://artifact.pmease.com/</url> 
         </repository> 
-    </repositories>  
-    <version>1.0.27</version>
+    </repositories> 
 </project>

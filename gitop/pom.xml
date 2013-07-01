@@ -7,7 +7,7 @@
     <parent> 
         <groupId>com.pmease</groupId>  
         <artifactId>parent.general</artifactId>  
-        <version>1.0.26</version> 
+        <version>1.0.28</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -95,13 +95,13 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.jsw</artifactId>  
-            <version>1.0.26</version>  
+            <version>1.0.28</version>  
             <scope>provided</scope> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>gitop.core</artifactId>  
-            <version>1.0.0</version> 
+            <version>1.0.28</version> 
         </dependency> 
     </dependencies>  
     <repositories> 
@@ -126,6 +126,5 @@
         <bootstrapClass>com.pmease.commons.bootstrap.Bootstrap</bootstrapClass>  
         <moduleClass>com.pmease.gitop.ProductModule</moduleClass>  
         <aggregation>false</aggregation> 
-    </properties>  
-    <version>1.0.27</version>
+    </properties> 
 </project>
