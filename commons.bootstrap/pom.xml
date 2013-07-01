@@ -5,7 +5,7 @@
     <parent> 
         <artifactId>parent.general</artifactId>  
         <groupId>com.pmease</groupId>  
-        <version>1.0.22</version> 
+        <version>1.0.25</version> 
     </parent>  
     <artifactId>commons.bootstrap</artifactId>  
     <build> 
@@ -57,7 +57,6 @@
             <url>http://artifact.pmease.com/</url> 
         </repository> 
     </repositories>  
-    <version>1.0.24</version>  
     <properties> 
         <bootstrap>true</bootstrap> 
     </properties> 

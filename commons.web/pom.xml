@@ -5,7 +5,7 @@
     <parent> 
         <artifactId>parent.general</artifactId>  
         <groupId>com.pmease</groupId>  
-        <version>1.0.22</version> 
+        <version>1.0.25</version> 
     </parent>  
     <artifactId>commons.web</artifactId>  
     <build> 
@@ -56,12 +56,12 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.24</version> 
+            <version>1.0.25</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.jetty</artifactId>  
-            <version>1.0.24</version> 
+            <version>1.0.25</version> 
         </dependency> 
     </dependencies>  
     <properties> 
@@ -84,6 +84,5 @@
             </snapshots>  
             <url>http://artifact.pmease.com/</url> 
         </repository> 
-    </repositories>  
-    <version>1.0.24</version> 
+    </repositories> 
 </project>
