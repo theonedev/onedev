@@ -474,7 +474,8 @@ public class PluginUtils {
 		if (file.isDirectory())
 			entryName += "/";
 
-		if (entryName.startsWith(PluginConstants.ARCHETYPE_RESOURCES) && !includeArchetypeResources)
+		System.out.println(entryName);
+		if ((entryName.startsWith(PluginConstants.ARCHETYPE_RESOURCES) || entryName.equals("META-INF/maven/archetype-metadata.xml")) && !includeArchetypeResources)
 			return;
 		
 		try {
