@@ -1,11 +1,11 @@
-package com.pmease.gitop;
+package com.pmease.gitop.core;
 
 import javax.inject.Singleton;
 
 import org.apache.wicket.Page;
 
 import com.pmease.commons.web.AbstractWicketConfig;
-import com.pmease.gitop.web.HomePage;
+import com.pmease.gitop.core.web.HomePage;
 
 @Singleton
 public class WicketConfig extends AbstractWicketConfig {

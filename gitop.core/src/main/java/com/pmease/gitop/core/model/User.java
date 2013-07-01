@@ -1,4 +1,4 @@
-package com.pmease.gitop.model;
+package com.pmease.gitop.core.model;
 
 import javax.persistence.Entity;
 

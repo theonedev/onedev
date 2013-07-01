@@ -1,4 +1,4 @@
-package com.pmease.gitop.web;
+package com.pmease.gitop.core.web;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -8,7 +8,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 
 import com.pmease.commons.security.SecurityHelper;
-import com.pmease.gitop.model.User;
+import com.pmease.gitop.core.model.User;
 
 @SuppressWarnings("serial")
 public class HomePage extends WebPage {

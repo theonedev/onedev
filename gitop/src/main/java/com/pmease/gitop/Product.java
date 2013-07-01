@@ -2,18 +2,15 @@ package com.pmease.gitop;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Properties;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.shiro.authc.credential.PasswordService;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.bio.SocketConnector;
 import org.eclipse.jetty.server.ssl.SslSocketConnector;
-import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hibernate.criterion.DetachedCriteria;
@@ -23,18 +20,14 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 import com.pmease.commons.bootstrap.Bootstrap;
-import com.pmease.commons.jetty.ClasspathAssetServlet;
 import com.pmease.commons.jetty.FileAssetServlet;
 import com.pmease.commons.jetty.extensionpoints.ServerConfigurator;
 import com.pmease.commons.jetty.extensionpoints.ServletContextConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
-import com.pmease.commons.persistence.AbstractEntity;
 import com.pmease.commons.persistence.dao.GeneralDao;
-import com.pmease.commons.persistence.extensionpoints.ModelContribution;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.asset.AssetLocator;
+import com.pmease.gitop.core.model.User;
 
 public class Product extends AbstractPlugin {
 
@@ -115,25 +108,8 @@ public class Product extends AbstractPlugin {
 					ServletHolder servletHolder = new ServletHolder(new FileAssetServlet(siteDir));
 					context.addServlet(servletHolder, "/site/*");
 					context.addServlet(servletHolder, "/robots.txt");
-					
-					servletHolder = new ServletHolder(new ClasspathAssetServlet(AssetLocator.class));
-					context.addServlet(servletHolder, "/asset/*");
-					context.addServlet(servletHolder, "/favicon.ico");
-					
-					ErrorPageErrorHandler errorHandler = (ErrorPageErrorHandler) context.getErrorHandler();
-					errorHandler.addErrorPage(HttpServletResponse.SC_NOT_FOUND, "/asset/404.html");
 				}
 				
-			},
-			new ModelContribution() {
-				
-				@Override
-				public Collection<Class<? extends AbstractEntity>> getModelClasses() {
-					Collection<Class<? extends AbstractEntity>> modelClasses = 
-							new HashSet<Class<? extends AbstractEntity>>();
-					modelClasses.add(User.class);
-					return modelClasses;
-				}
 			}
 		);
 	}

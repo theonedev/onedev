@@ -97,32 +97,12 @@
             <artifactId>commons.jsw</artifactId>  
             <version>1.0.26</version>  
             <scope>provided</scope> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.pmease</groupId>  
-            <artifactId>commons.persistence</artifactId>  
-            <version>1.0.26</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.pmease</groupId>  
-            <artifactId>commons.jetty</artifactId>  
-            <version>1.0.26</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.pmease</groupId>  
-            <artifactId>commons.rest</artifactId>  
-            <version>1.0.26</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.pmease</groupId>  
-            <artifactId>commons.web</artifactId>  
-            <version>1.0.26</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.pmease</groupId>  
-            <artifactId>commons.security</artifactId>  
-            <version>1.0.26</version> 
-        </dependency> 
+        </dependency>          
+        <dependency>
+        	<groupId>com.pmease</groupId>
+        	<artifactId>gitop.core</artifactId>
+        	<version>1.0.0</version>
+        </dependency>
     </dependencies>  
     <repositories> 
         <repository> 
@@ -144,7 +124,7 @@
     <properties> 
         <executables>bin/*.sh, bin/wrapper-*</executables>  
         <bootstrapClass>com.pmease.commons.bootstrap.Bootstrap</bootstrapClass>  
-        <moduleClass>com.pmease.commons.product.ProductModule</moduleClass>  
+        <moduleClass>com.pmease.gitop.ProductModule</moduleClass>  
         <aggregation>false</aggregation> 
     </properties> 
 </project>
