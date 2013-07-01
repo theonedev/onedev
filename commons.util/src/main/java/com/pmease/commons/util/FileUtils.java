@@ -1,14 +1,16 @@
 package com.pmease.commons.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
 
@@ -111,4 +113,13 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
 			return null;
 		}
 	}
+
+    /**
+     * Get default file encoding of underlying OS
+     * @return
+     */
+    public static String getDefaultEncoding() {
+    	return new InputStreamReader(new ByteArrayInputStream(new byte[0])).getEncoding();
+    }
+    
 }

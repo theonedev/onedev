@@ -1,8 +1,13 @@
 package com.pmease.commons.util;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StreamTokenizer;
+import java.io.StringReader;
 import java.security.spec.KeySpec;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -68,4 +73,48 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
 		return fields;
 	}
 
+	/**
+	 * Parse specified string into tokens. Content surrounded with &quot; character
+	 * is considered as a single token. For example: echo "hello world" will be parsed 
+	 * into two tokens, respectively [echo], and [hello world]. The quote character 
+	 * itself can be quoted and escaped in order to return as ordinary character. For 
+	 * example: echo "hello \" world" will be parsed into two tokens: [echo] and 
+	 * [hello " world].
+	 * @param string
+	 * @return
+	 */
+    public static String[] parseQuoteTokens(String string) {
+    	List<String> commandTokens = new ArrayList<String>();
+    	
+		StreamTokenizer st = new StreamTokenizer(
+				new BufferedReader(new StringReader(string)));
+		st.resetSyntax();
+		st.wordChars(0, 255);
+		st.ordinaryChar(' ');
+		st.ordinaryChar('\n');
+		st.ordinaryChar('\t');
+		st.ordinaryChar('\r');
+		st.quoteChar('"');
+		
+		try {
+			String token = null;
+			while (st.nextToken() != StreamTokenizer.TT_EOF) {
+				if (st.ttype == '"' || st.ttype == StreamTokenizer.TT_WORD) {
+					if (token == null)
+						token = st.sval;
+					else
+						token += st.sval;
+				} else if (token != null) {
+					commandTokens.add(token);
+					token = null;
+				}
+			}
+			if (token != null)
+				commandTokens.add(token);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		
+		return commandTokens.toArray(new String[commandTokens.size()]);
+    }	
 }

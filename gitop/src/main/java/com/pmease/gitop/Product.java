@@ -27,6 +27,8 @@ import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.persistence.dao.GeneralDao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.util.execution.Commandline;
+import com.pmease.commons.util.execution.LineConsumer;
 import com.pmease.gitop.core.model.User;
 
 public class Product extends AbstractPlugin {
@@ -126,6 +128,7 @@ public class Product extends AbstractPlugin {
 			generalDaoProvider.get().save(user);
 		}
 
+		new Commandline("cmd /c dir w:\\").execute(new LineConsumer.InfoLogger(), new LineConsumer.ErrorLogger());
 		logger.info(PRODUCT_NAME + " has been started successfully.");
 	}
 

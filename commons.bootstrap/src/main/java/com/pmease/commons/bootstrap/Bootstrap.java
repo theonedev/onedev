@@ -246,6 +246,10 @@ public class Bootstrap {
 		SLF4JBridgeHandler.install();
 	}
 
+	public static File getBinDir() {
+		return new File(installDir, "bin");
+	}
+	
 	public static File getLibDir() {
 		return new File(installDir, "lib");
 	}
