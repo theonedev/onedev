@@ -20,8 +20,8 @@
         <module>../commons.web</module>  
         <module>../commons.security</module>  
         <module>../commons.rest</module>  
-        <module>../gitop</module>
-        <module>../gitop.core</module>
+        <module>../gitop</module>  
+        <module>../gitop.core</module> 
     </modules>  
     <repositories> 
         <repository> 
@@ -39,5 +39,6 @@
             </snapshots>  
             <url>http://artifact.pmease.com/</url> 
         </repository> 
-    </repositories> 
+    </repositories>  
+    <version>1.0.27</version>
 </project>
