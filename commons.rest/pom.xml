@@ -6,7 +6,7 @@
     <parent> 
         <groupId>com.pmease</groupId>  
         <artifactId>parent.general</artifactId>  
-        <version>1.0.25</version> 
+        <version>1.0.26</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -26,7 +26,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.25</version> 
+            <version>1.0.26</version> 
         </dependency>  
         <dependency> 
             <groupId>com.sun.jersey</groupId>  
@@ -46,7 +46,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.security</artifactId>  
-            <version>1.0.25</version> 
+            <version>1.0.26</version> 
         </dependency> 
     </dependencies>  
     <repositories> 

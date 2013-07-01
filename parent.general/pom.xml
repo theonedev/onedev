@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>  
     <groupId>com.pmease</groupId>  
     <artifactId>parent.general</artifactId>  
-    <version>1.0.25</version>  
+    <version>1.0.26</version>  
     <packaging>pom</packaging>  
     <prerequisites> 
         <maven>3.0</maven> 
@@ -155,7 +155,7 @@
                 <plugin> 
                     <groupId>com.pmease</groupId>  
                     <artifactId>plugin.maven</artifactId>  
-                    <version>1.0.25</version>  
+                    <version>1.0.26</version>  
                     <executions> 
                         <execution> 
                             <id>check-project-dependencies</id>  

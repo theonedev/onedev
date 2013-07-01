@@ -5,7 +5,7 @@
     <parent> 
         <artifactId>parent.general</artifactId>  
         <groupId>com.pmease</groupId>  
-        <version>1.0.25</version> 
+        <version>1.0.26</version> 
     </parent>  
     <artifactId>commons.jsw</artifactId>  
     <build> 

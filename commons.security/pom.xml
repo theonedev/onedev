@@ -6,7 +6,7 @@
     <parent> 
         <groupId>com.pmease</groupId>  
         <artifactId>parent.general</artifactId>  
-        <version>1.0.25</version> 
+        <version>1.0.26</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -26,7 +26,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.25</version> 
+            <version>1.0.26</version> 
         </dependency>  
         <dependency> 
             <groupId>org.apache.shiro</groupId>  
@@ -41,12 +41,12 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.jetty</artifactId>  
-            <version>1.0.25</version> 
+            <version>1.0.26</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.persistence</artifactId>  
-            <version>1.0.25</version> 
+            <version>1.0.26</version> 
         </dependency>  
         <dependency> 
             <groupId>org.apache.shiro</groupId>  
