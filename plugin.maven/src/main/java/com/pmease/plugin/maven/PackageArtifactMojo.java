@@ -87,8 +87,11 @@ public class PackageArtifactMojo extends AbstractMojo {
 			List<File> files = new ArrayList<File>();
 			PluginUtils.listFiles(new File(project.getBuild().getOutputDirectory()), files);
 
-			for (File file : files) 
-				PluginUtils.zipFile(zos, file, project.getBuild().getOutputDirectory().length());
+			boolean includeArchetypeResources = (project.getPlugin("org.apache.maven.plugins:maven-archetype-plugin")!=null);
+
+			for (File file : files) { 
+				PluginUtils.zipFile(zos, file, project.getBuild().getOutputDirectory().length(), includeArchetypeResources);
+			}
 			
 			if (new File(project.getBuild().getOutputDirectory(), PluginConstants.PRODUCT_PROPERTY_FILE).exists()) {
 				files.clear();
@@ -99,10 +102,10 @@ public class PackageArtifactMojo extends AbstractMojo {
 					excluded.add(PluginUtils.getArtifactKey(artifact));
 				excluded.add(PluginConstants.SYSTEM_CLASSPATH);
 				excluded.add(jarFile.getName());
-				
+
 				for (File file: files) {
 					if (!excluded.contains(file.getName())) 
-						PluginUtils.zipFile(zos, file, sandboxDir.getParent().length());
+						PluginUtils.zipFile(zos, file, sandboxDir.getParent().length(), includeArchetypeResources);
 				}
 			}
 		} catch (IOException e) {

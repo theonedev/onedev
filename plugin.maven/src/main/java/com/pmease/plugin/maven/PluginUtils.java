@@ -451,7 +451,7 @@ public class PluginUtils {
 		}
 	}
 
-	public static void zipFile(ZipOutputStream zos, File file, int offset) {
+	public static void zipFile(ZipOutputStream zos, File file, int offset, boolean includeArchetypeResources) {
 		String entryName = file.getAbsolutePath().substring(offset + 1);
 		
 		if (File.separatorChar != '/')
@@ -474,6 +474,9 @@ public class PluginUtils {
 		if (file.isDirectory())
 			entryName += "/";
 
+		if (entryName.startsWith(PluginConstants.ARCHETYPE_RESOURCES) && !includeArchetypeResources)
+			return;
+		
 		try {
 			zos.putNextEntry(new ZipEntry(entryName));
 		} catch (IOException e) {
