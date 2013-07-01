@@ -97,12 +97,12 @@
             <artifactId>commons.jsw</artifactId>  
             <version>1.0.26</version>  
             <scope>provided</scope> 
-        </dependency>          
-        <dependency>
-        	<groupId>com.pmease</groupId>
-        	<artifactId>gitop.core</artifactId>
-        	<version>1.0.0</version>
-        </dependency>
+        </dependency>  
+        <dependency> 
+            <groupId>com.pmease</groupId>  
+            <artifactId>gitop.core</artifactId>  
+            <version>1.0.0</version> 
+        </dependency> 
     </dependencies>  
     <repositories> 
         <repository> 
@@ -126,5 +126,6 @@
         <bootstrapClass>com.pmease.commons.bootstrap.Bootstrap</bootstrapClass>  
         <moduleClass>com.pmease.gitop.ProductModule</moduleClass>  
         <aggregation>false</aggregation> 
-    </properties> 
+    </properties>  
+    <version>1.0.27</version>
 </project>
