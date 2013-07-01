@@ -20,7 +20,8 @@
         <module>../commons.web</module>  
         <module>../commons.security</module>  
         <module>../commons.rest</module>  
-        <module>../gitop</module> 
+        <module>../gitop</module>
+        <module>../gitop.core</module>
     </modules>  
     <repositories> 
         <repository> 
