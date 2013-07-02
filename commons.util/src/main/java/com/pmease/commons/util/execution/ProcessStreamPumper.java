@@ -5,53 +5,47 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.Future;
 
+import javax.annotation.Nullable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class ProcessStreamPumper {
+public class ProcessStreamPumper {
 
     private static final int BUFFER_SIZE = 64000;
     
     private static final Logger logger = LoggerFactory.getLogger(ProcessStreamPumper.class);
     
-    private Future<?> stdoutPumper;
+    private final Future<?> stdoutPumper;
 
-    private Future<?> stderrPumper;
+    private final Future<?> stderrPumper;
     
-    private Future<?> stdinPumper;
+    private final Future<?> stdinPumper;
 
-    private OutputStream stdoutStream;
+    private final OutputStream stdoutStream;
     
-    private OutputStream stderrStream;
+    private final OutputStream stderrStream;
     
-    private InputStream stdinStream;
-    
-    private Process process;
-    
-    /**
-     * @param process not null
-     * @param stdoutStream might be null
-     * @param stderrStream might be null
-     * @param stdinStream might be null
-     */
-    public ProcessStreamPumper(Process process, OutputStream stdoutStream, OutputStream stderrStream, 
-    		InputStream stdinStream) {
-    	this.process = process;
-    	
+    private ProcessStreamPumper(Process process, @Nullable OutputStream stdoutStream, 
+    		@Nullable OutputStream stderrStream, @Nullable InputStream stdinStream) {
         this.stdoutStream = stdoutStream;
         this.stderrStream = stderrStream;
-        this.stdinStream = stdinStream;
-    }
-
-    public void start() {
+        
         stdoutPumper = createPump(process.getInputStream(), stdoutStream, false);
         stderrPumper = createPump(process.getErrorStream(), stderrStream, false);
         
         if (stdinStream != null)
             stdinPumper = createPump(stdinStream, process.getOutputStream(), true);
+        else
+        	stdinPumper = null;
     }
-
-	public void join() {
+    
+    public static ProcessStreamPumper pump(Process process, @Nullable OutputStream stdoutStream, 
+    		@Nullable OutputStream stderrStream, @Nullable InputStream stdinStream) {
+    	return new ProcessStreamPumper(process, stdoutStream, stderrStream, stdinStream); 
+    }
+    
+	public void waitFor() {
     	while (!stdoutPumper.isDone() || !stderrPumper.isDone() || 
     			(stdinPumper != null && !stdinPumper.isDone())) {
 			try {
@@ -59,16 +53,20 @@ class ProcessStreamPumper {
 			} catch (InterruptedException e) {
 			}
     	}
-        try {
-        	if (stderrStream != null)
-        		stderrStream.flush();
-        } catch (IOException e) {
-        }
-        try {
-        	if (stdoutStream != null)
-        		stdoutStream.flush();
-        } catch (IOException e) {
-        }
+    	if (stdoutStream != null) {
+    		try {
+				stdoutStream.flush();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+    	}
+    	if (stderrStream != null) {
+    		try {
+				stderrStream.flush();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+    	}
     }
 
     private Future<?> createPump(final InputStream input, final OutputStream output, 
@@ -85,18 +83,14 @@ class ProcessStreamPumper {
 		            	if (output != null)
 		            		output.write(buf, 0, length);
 		            }
+
+		            if (closeWhenExhausted && output!=null) {
+		            	output.close();
+		            }
+		            
 		        } catch (Exception e) {
 		        	logger.error("Error pumping stream.", e);
-		        	process.destroy();
-		        } finally {
-		            if (closeWhenExhausted && output!=null) {
-		                try {
-		                    output.close();
-		                } catch (IOException e) {
-		                }
-		            }
 		        }
-				
 			}
     		
     	});
