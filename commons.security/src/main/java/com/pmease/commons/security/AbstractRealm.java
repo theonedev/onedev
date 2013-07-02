@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.inject.Provider;
-
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -25,14 +23,14 @@ import com.pmease.commons.util.ClassUtils;
 
 public abstract class AbstractRealm<T extends AbstractUser> extends AuthorizingRealm {
 
-	private Provider<GeneralDao> generalDaoProvider;
+	private GeneralDao generalDao;
 	
 	protected final Class<T> userClass;
 
 	@SuppressWarnings("unchecked")
 	@Inject
-	public AbstractRealm(Provider<GeneralDao> generalDaoProvider, CredentialsMatcher credentialsMatcher) {
-		this.generalDaoProvider = generalDaoProvider;
+	public AbstractRealm(GeneralDao generalDao, CredentialsMatcher credentialsMatcher) {
+		this.generalDao = generalDao;
 		List<Class<?>> typeArguments = ClassUtils.getTypeArguments(AbstractRealm.class, getClass());
 		userClass = ((Class<T>) typeArguments.get(0));
 
@@ -88,7 +86,7 @@ public abstract class AbstractRealm<T extends AbstractUser> extends AuthorizingR
 		DetachedCriteria criteria = DetachedCriteria.forClass(userClass);
         criteria.add(Restrictions.eq("loginName", token.getUsername()));
 
-        return (AbstractUser) generalDaoProvider.get().find(criteria);
+        return (AbstractUser) generalDao.find(criteria);
 	}
 
 	@Override

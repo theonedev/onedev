@@ -20,13 +20,13 @@ import com.pmease.commons.persistence.Transactional;
 @SuppressWarnings("unchecked")
 public class GeneralDaoImpl implements GeneralDao {
 
-	private final SessionFactory sessionFactory;
+	private final Provider<SessionFactory> sessionFactoryProvider;
 	
 	private final Provider<Session> sessionProvider;
 	
 	@Inject
-	public GeneralDaoImpl(SessionFactory sessionFactory, Provider<Session> sessionProvider) {
-		this.sessionFactory = sessionFactory;
+	public GeneralDaoImpl(Provider<SessionFactory> sessionFactoryProvider, Provider<Session> sessionProvider) {
+		this.sessionFactoryProvider = sessionFactoryProvider;
 		this.sessionProvider = sessionProvider;
 	}
 	
@@ -70,7 +70,7 @@ public class GeneralDaoImpl implements GeneralDao {
 		//it is a Hibernate proxy class (e.x. test.googlecode.genericdao.model.Person_$$_javassist_5).
 		//So if a class is not recognized, we will look at superclasses to see if
 		//it is a proxy.
-		while (sessionFactory.getClassMetadata(entityClass) == null) {
+		while (sessionFactoryProvider.get().getClassMetadata(entityClass) == null) {
 			entityClass = (Class<T>) entityClass.getSuperclass();
 			if (Object.class.equals(entityClass))
 				return null;
@@ -127,4 +127,5 @@ public class GeneralDaoImpl implements GeneralDao {
 		criteria.setProjection(Projections.rowCount());
 		return (Integer) criteria.uniqueResult();
 	}
+	
 }

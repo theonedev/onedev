@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.apache.shiro.authc.credential.CredentialsMatcher;
@@ -17,8 +16,8 @@ import com.pmease.gitop.core.model.User;
 public class UserRealm extends AbstractRealm<User> {
 
 	@Inject
-	public UserRealm(Provider<GeneralDao> generalDaoProvider, CredentialsMatcher credentialsMatcher) {
-		super(generalDaoProvider, credentialsMatcher);
+	public UserRealm(GeneralDao generalDao, CredentialsMatcher credentialsMatcher) {
+		super(generalDao, credentialsMatcher);
 	}
 
 	@Override
