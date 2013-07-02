@@ -46,7 +46,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.persistence</artifactId>  
-            <version>1.0.29</version> 
+            <version>1.0.30</version> 
         </dependency>  
         <dependency> 
             <groupId>org.apache.shiro</groupId>  
@@ -75,5 +75,5 @@
         <moduleClass>com.pmease.commons.security.SecurityModule</moduleClass>  
         <shiroVersion>1.2.2</shiroVersion> 
     </properties>  
-    <version>1.0.29</version>
+    <version>1.0.30</version> 
 </project>

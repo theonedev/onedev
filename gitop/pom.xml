@@ -101,7 +101,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>gitop.core</artifactId>  
-            <version>1.0.29</version> 
+            <version>1.0.30</version> 
         </dependency> 
     </dependencies>  
     <repositories> 
@@ -127,5 +127,5 @@
         <moduleClass>com.pmease.gitop.ProductModule</moduleClass>  
         <aggregation>false</aggregation> 
     </properties>  
-    <version>1.0.29</version>
+    <version>1.0.30</version> 
 </project>
