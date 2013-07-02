@@ -56,12 +56,12 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.28</version> 
+            <version>1.0.29</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.jetty</artifactId>  
-            <version>1.0.28</version> 
+            <version>1.0.29</version> 
         </dependency> 
     </dependencies>  
     <properties> 
@@ -84,5 +84,6 @@
             </snapshots>  
             <url>http://artifact.pmease.com/</url> 
         </repository> 
-    </repositories> 
+    </repositories>  
+    <version>1.0.29</version>
 </project>

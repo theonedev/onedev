@@ -29,22 +29,22 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.28</version> 
+            <version>1.0.29</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.web</artifactId>  
-            <version>1.0.28</version> 
+            <version>1.0.29</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.security</artifactId>  
-            <version>1.0.28</version> 
+            <version>1.0.29</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.rest</artifactId>  
-            <version>1.0.28</version> 
+            <version>1.0.29</version> 
         </dependency> 
     </dependencies>  
     <repositories> 
@@ -66,5 +66,6 @@
     </repositories>  
     <properties> 
         <moduleClass>com.pmease.gitop.core.CoreModule</moduleClass> 
-    </properties> 
+    </properties>  
+    <version>1.0.29</version>
 </project>

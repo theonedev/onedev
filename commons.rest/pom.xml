@@ -26,7 +26,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.28</version> 
+            <version>1.0.29</version> 
         </dependency>  
         <dependency> 
             <groupId>com.sun.jersey</groupId>  
@@ -46,7 +46,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.security</artifactId>  
-            <version>1.0.28</version> 
+            <version>1.0.29</version> 
         </dependency> 
     </dependencies>  
     <repositories> 
@@ -69,5 +69,6 @@
     <properties> 
         <moduleClass>com.pmease.commons.rest.RestModule</moduleClass>  
         <jerseyVersion>1.17</jerseyVersion> 
-    </properties> 
+    </properties>  
+    <version>1.0.29</version>
 </project>
