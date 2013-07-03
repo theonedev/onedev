@@ -2,7 +2,6 @@ package com.pmease.commons.web.component.datatablesupport;
 
 import java.util.List;
 
-import org.apache.wicket.bootstrap.Bootstrap;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.ISortableDataProvider;
@@ -12,6 +11,8 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.OddEvenItem;
 import org.apache.wicket.model.IModel;
+
+import com.pmease.commons.web.asset.bootstrap.BootstrapResourceReference;
 
 @SuppressWarnings("serial")
 public class CustomDataTable<T, S> extends DataTable<T, S> {
@@ -34,8 +35,7 @@ public class CustomDataTable<T, S> extends DataTable<T, S> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 
-		response.render(JavaScriptHeaderItem.forReference(Bootstrap
-				.responsive()));
+		response.render(JavaScriptHeaderItem.forReference(new BootstrapResourceReference()));
 	}
 
 }

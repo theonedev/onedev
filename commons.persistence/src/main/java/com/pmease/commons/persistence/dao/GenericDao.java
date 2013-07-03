@@ -20,7 +20,7 @@ public interface GenericDao<T extends AbstractEntity> {
 	/**
 	 * Get a reference to the entity with the specified type and id from the
 	 * datastore.
-	 * 
+	 * <p>
 	 * This does not require a call to the datastore and does not populate any
 	 * of the entity's values. Values may be fetched lazily at a later time.
 	 * This increases performance if a another entity is being saved that should
@@ -36,7 +36,7 @@ public interface GenericDao<T extends AbstractEntity> {
 	 * assign it an id; otherwise, update the corresponding entity in the
 	 * datastore with the properties of this entity. In either case the entity
 	 * passed to this method will be attached to the session.
-	 * 
+	 * <p>
 	 * If an entity to update is already attached to the session, this method
 	 * will have no effect. If an entity to update has the same id as another
 	 * instance already attached to the session, an error will be thrown.
@@ -66,13 +66,13 @@ public interface GenericDao<T extends AbstractEntity> {
 	 * @param criterions
 	 * 			Hibernate criterions to be used for search. Use null if no criterions.
 	 * @param orders
-	 * 			Orders to be used for search. Use null for default order.
+	 * 			orders to be used for search. Use null for default order.
 	 * @param firstResult
-	 * 			First result of the query. Set to 0 if this value should be ignored.
+	 * 			first result of the query. Set to 0 if this value should be ignored.
 	 * @param maxResults
-	 * 			Max number of returned results. Set to 0 if no limit of the max results should be set. 
+	 * 			max number of returned results. Set to 0 if no limit of the max results should be set. 
 	 * @return
-	 * 			List of entity matching specified criterions in specified orders.
+	 * 			list of entity matching specified criterions in specified orders.
 	 */
 	List<T> search(@Nullable Criterion[] criterions, @Nullable Order[] orders, int firstResult, int maxResults);
 	
@@ -80,12 +80,12 @@ public interface GenericDao<T extends AbstractEntity> {
 	 * Count entity matching specified hibernate criterions. 
 	 * 
 	 * @param entityClass
-	 * 			Class of entity to count.
+	 * 			class of entity to count
 	 * @param criterias
 	 * 			Hibernate criterions to restrict entities to be counted. No retrictions will be 
-	 * 			set if pass a null value or empty array.
+	 * 			set if pass a null value or empty array
 	 * @return
-	 * 			Number of entities matching specified criterions.
+	 * 			number of entities matching specified criterions
 	 */
 	int count(@Nullable Criterion[] criterions);
 }
