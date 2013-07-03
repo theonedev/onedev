@@ -5,9 +5,7 @@ import java.util.List;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 
 import com.google.inject.Inject;
@@ -98,32 +96,8 @@ public class GeneralDaoImpl implements GeneralDao {
 	}
 
 	@Override
-	public <T extends AbstractEntity> List<T> search(Class<T> entityClass, Criterion[] criterions, 
-			Order[] orders, int firstResult, int maxResults) {
-		Criteria criteria = getSession().createCriteria(entityClass);
-		if (criterions != null) {
-			for (int i=0; i<criterions.length; i++)
-				criteria.add(criterions[i]);
-		}
-		if (orders != null) {
-			for (int i=0; i<orders.length; i++)
-				criteria.addOrder(orders[i]);
-		}
-		if (firstResult != 0)
-			criteria.setFirstResult(firstResult);
-		if (maxResults != 0)
-			criteria.setMaxResults(maxResults);
-		
-		return criteria.list();
-	}
-
-	@Override
-	public <T extends AbstractEntity> int count(Class<T> entityClass, Criterion[] criterions) {
-		Criteria criteria = getSession().createCriteria(entityClass);
-		if (criterions != null) {
-			for (int i=0; i<criterions.length; i++)
-				criteria.add(criterions[i]);
-		}
+	public <T extends AbstractEntity> int count(DetachedCriteria detachedCriteria) {
+		Criteria criteria = detachedCriteria.getExecutableCriteria(getSession());
 		criteria.setProjection(Projections.rowCount());
 		return (Integer) criteria.uniqueResult();
 	}

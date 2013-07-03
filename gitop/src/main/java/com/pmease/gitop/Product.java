@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Properties;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 import org.apache.shiro.authc.credential.PasswordService;
 import org.eclipse.jetty.server.Server;
@@ -37,14 +36,14 @@ public class Product extends AbstractPlugin {
 
 	public static final String PRODUCT_NAME = "Gitop";
 	
-	private final Provider<GeneralDao> generalDaoProvider;
+	private final GeneralDao generalDao;
 	
 	private final PasswordService passwordService;
 	
 	@Inject
-	public Product(Provider<GeneralDao> generalDaoProvider, PasswordService passwordService) {
+	public Product(GeneralDao generalDao, PasswordService passwordService) {
 		serverProps = FileUtils.loadProperties(new File(Bootstrap.getConfDir(), "server.properties"));
-		this.generalDaoProvider = generalDaoProvider;
+		this.generalDao = generalDao;
 		this.passwordService = passwordService;
 	}
 	
@@ -118,12 +117,12 @@ public class Product extends AbstractPlugin {
 	public void postStartDependents() {
 		DetachedCriteria criteria = DetachedCriteria.forClass(User.class);
 		criteria.add(Restrictions.eq("loginName", "admin"));
-		if (generalDaoProvider.get().find(criteria) == null) {
+		if (generalDao.find(criteria) == null) {
 			User user =  new User();
 			user.setLoginName("admin");
 			user.setPasswordHash(passwordService.encryptPassword("12345"));
 			user.setFullName("Administrator");
-			generalDaoProvider.get().save(user);
+			generalDao.save(user);
 		}
 
 		logger.info(PRODUCT_NAME + " has been started successfully.");

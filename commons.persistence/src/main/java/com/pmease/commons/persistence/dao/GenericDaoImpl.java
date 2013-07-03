@@ -3,8 +3,8 @@ package com.pmease.commons.persistence.dao;
 import java.util.List;
 
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Order;
-
 
 import com.google.inject.Inject;
 import com.pmease.commons.persistence.AbstractEntity;
@@ -30,7 +30,7 @@ public class GenericDaoImpl<T extends AbstractEntity> implements GenericDao<T> {
 	}
 
 	@Override
-	public T getReference(Long entityId) {
+	public T load(Long entityId) {
 		return generalDao.load(entityClass, entityId);
 	}
 
@@ -50,13 +50,31 @@ public class GenericDaoImpl<T extends AbstractEntity> implements GenericDao<T> {
 	}
 
 	@Override
-	public List<T> search(Criterion[] criterions, Order[] orders, int firstResult, int maxResults) {
-		return generalDao.search(entityClass, criterions, orders, firstResult, maxResults);
+	public int count(Criterion[] criterions) {
+		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(entityClass);
+		if (criterions != null) {
+			for (Criterion criterion: criterions)
+				detachedCriteria.add(criterion);
+		}
+		return generalDao.count(detachedCriteria);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public int count(Criterion[] criterions) {
-		return generalDao.count(entityClass, criterions);
+	public List<T> search(Criterion[] criterions, Order[] orders, int firstResult, int maxResults) {
+		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(entityClass);
+		
+		if (criterions != null) {
+			for (Criterion criterion: criterions)
+				detachedCriteria.add(criterion);
+		}
+		
+		if (orders != null) {
+			for (Order order: orders)
+				detachedCriteria.addOrder(order);
+		}
+		
+		return (List<T>) generalDao.search(detachedCriteria, firstResult, maxResults);
 	}
 
 }

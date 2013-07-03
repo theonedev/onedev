@@ -29,7 +29,7 @@ public interface GenericDao<T extends AbstractEntity> {
 	 * @throws a
 	 *             HibernateException if no matching entity is found
 	 */
-	public T getReference(Long entityId);
+	public T load(Long entityId);
 
 	/**
 	 * If the id of the entity is null or zero, add it to the datastore and
@@ -52,6 +52,7 @@ public interface GenericDao<T extends AbstractEntity> {
 	
 	/**
 	 * Delete entity of specified identifier without actually loading the entity.
+	 * 
 	 * @param entityClass
 	 * 			class of the entity
 	 * @param entityId
@@ -60,25 +61,24 @@ public interface GenericDao<T extends AbstractEntity> {
 	void deleteById(Long entityId);
 
 	/**
-	 * Search entity with specified hibernate criterions and orders. 
+	 * Search entity with specified criterions and orders.
+	 * 
 	 * @param criterions
-	 * 			Hibernate criterions to restrict search result. No restrictions will be set 
-	 * 			if pass a null value or empty array.
+	 * 			Hibernate criterions to be used for search. Use null if no criterions.
 	 * @param orders
-	 * 			Hibernate orders to order search result. No orders will be set if pass a 
-	 * 			null value or empty array.
+	 * 			Orders to be used for search. Use null for default order.
 	 * @param firstResult
 	 * 			First result of the query. Set to 0 if this value should be ignored.
 	 * @param maxResults
-	 * 			Max number of returned entities. Set to 0 if no limit of number of returned 
-	 * 			entities should be set.
+	 * 			Max number of returned results. Set to 0 if no limit of the max results should be set. 
 	 * @return
-	 * 			List of matched entities.
+	 * 			List of entity matching specified criterions in specified orders.
 	 */
 	List<T> search(@Nullable Criterion[] criterions, @Nullable Order[] orders, int firstResult, int maxResults);
 	
 	/**
 	 * Count entity matching specified hibernate criterions. 
+	 * 
 	 * @param entityClass
 	 * 			Class of entity to count.
 	 * @param criterias

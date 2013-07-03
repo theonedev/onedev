@@ -2,12 +2,8 @@ package com.pmease.commons.persistence.dao;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import org.hibernate.HibernateException;
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Order;
 
 import com.pmease.commons.persistence.AbstractEntity;
 
@@ -85,35 +81,9 @@ public interface GeneralDao {
 	Object find(DetachedCriteria detachedCriteria);
 	
 	/**
-	 * Search specified entity with specified hibernate criterions and orders. 
-	 * @param entityClass
-	 * 			Class of the entity to search.
-	 * @param criterions
-	 * 			Hibernate criterions to restrict search result. No restrictions will be set 
-	 * 			if pass a null value or empty array.
-	 * @param orders
-	 * 			Hibernate orders to order search result. No orders will be set if pass a 
-	 * 			null value or empty array.
-	 * @param firstResult
-	 * 			First result of the query. Set to 0 if this value should be ignored.
-	 * @param maxResults
-	 * 			Max number of returned entities. Set to 0 if no limit of number of returned 
-	 * 			entities should be set.
+	 * Count entities of specified class matching specified {@link DetachedCriteria} 
 	 * @return
-	 * 			List of matched entities.
+	 * 			Number of entities matching specified {@link DetachedCriteria}
 	 */
-	<T extends AbstractEntity> List<T> search(Class<T> entityClass, @Nullable Criterion[] criterions, 
-			@Nullable Order[] orders, int firstResult, int maxResults);
-	
-	/**
-	 * Count entities of specified class matching specified hibernate criterions. 
-	 * @param entityClass
-	 * 			Class of entity to count.
-	 * @param criterias
-	 * 			Hibernate criterions to restrict entities to be counted. No retrictions will be 
-	 * 			set if pass a null value or empty array.
-	 * @return
-	 * 			Number of entities matching specified criterions.
-	 */
-	<T extends AbstractEntity> int count(Class<T> entityClass, @Nullable Criterion[] criterias);
+	<T extends AbstractEntity> int count(DetachedCriteria detachedCriteria);
 }
