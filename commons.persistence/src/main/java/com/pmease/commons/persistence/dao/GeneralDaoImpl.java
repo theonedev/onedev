@@ -8,6 +8,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Projections;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -30,8 +31,8 @@ public class GeneralDaoImpl implements GeneralDao {
 	
 	@Transactional
 	@Override
-	public <T extends AbstractEntity> T find(Class<T> entityClass, Long entityId) {
-		return (T) getSession().get(unproxy(entityClass), entityId);
+	public <T extends AbstractEntity> Optional<T> find(Class<T> entityClass, Long entityId) {
+		return Optional.fromNullable((T) getSession().get(unproxy(entityClass), entityId));
 	}
 
 	@Transactional

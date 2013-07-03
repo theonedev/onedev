@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 
+import com.google.common.base.Optional;
 import com.pmease.commons.persistence.AbstractEntity;
 
 
@@ -15,7 +16,7 @@ public interface GenericDao<T extends AbstractEntity> {
 	 * Get the entity with the specified type and id from the datastore.
 	 * If none is found, return null.
 	 */
-	public T find(Long entityId);
+	public Optional<T> find(Long entityId);
 
 	/**
 	 * Get a reference to the entity with the specified type and id from the
