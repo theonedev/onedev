@@ -47,9 +47,6 @@ public class ConfigurationProvider implements Provider<Configuration> {
 			String url = hibernateProperties.getProperty(Environment.URL);
 			hibernateProperties.setProperty(Environment.URL, 
 					StringUtils.replace(url, "${installDir}", Bootstrap.installDir.getAbsolutePath()));
-			String encryptedPassword = hibernateProperties.getProperty("hibernate.connection.encrypted_password");
-			if (StringUtils.isNotBlank(encryptedPassword))
-				hibernateProperties.setProperty(Environment.PASS, StringUtils.decrypt(encryptedPassword.trim()));
 			
 			configuration = new Configuration();
 			configuration.setNamingStrategy(namingStrategy);
