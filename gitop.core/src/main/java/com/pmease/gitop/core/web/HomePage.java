@@ -2,12 +2,15 @@ package com.pmease.gitop.core.web;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 
 import com.pmease.commons.security.SecurityHelper;
+import com.pmease.commons.web.asset.bootstrap.BootstrapResourceReference;
 import com.pmease.gitop.core.model.User;
 
 @SuppressWarnings("serial")
@@ -53,6 +56,13 @@ public class HomePage extends WebPage {
 			
 		});
 		
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		
+		response.render(JavaScriptHeaderItem.forReference(new BootstrapResourceReference()));
 	}
 	
 }

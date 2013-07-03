@@ -47,12 +47,7 @@
             <groupId>org.apache.wicket</groupId>  
             <artifactId>wicket-devutils</artifactId>  
             <version>${wicketVersion}</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>org.apache.wicket</groupId>  
-            <artifactId>wicket-bootstrap</artifactId>  
-            <version>0.9</version> 
-        </dependency>  
+        </dependency>    
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
