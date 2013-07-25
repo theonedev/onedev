@@ -80,7 +80,7 @@ public class Team extends AbstractEntity {
 	 * Check whether or not a specified branch operation is permitted. 
 	 * <p>
 	 * Supplied repository name, branch name and the operation will be matched against permission list 
-	 * to find the first matching entry. If found, the <i>allow</i> flag of that entry will be returned 
+	 * to find the first matching entry. If found, the <code>allow</code> flag of that entry will be returned 
 	 * to indicate whether or not the operation is permitted. If no permission entry matches supplied 
 	 * parameters, a null value will be returned to indicate that this team can not determine whether 
 	 * or not the operation should be permitted.

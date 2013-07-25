@@ -45,7 +45,7 @@ public class BranchPermission {
 		this.allow = allow;
 	}
 
-	public Boolean permits(String repositoryName, String branchName, BranchOperation branchOperation) {
+	Boolean permits(String repositoryName, String branchName, BranchOperation branchOperation) {
 		if (StringUtils.wildcardMatch(getRepositoryNamePattern(), repositoryName) 
 				&& PathUtils.match(getBranchNamePattern(), branchName)
 				&& getBranchOperation().implies(branchOperation)) {
