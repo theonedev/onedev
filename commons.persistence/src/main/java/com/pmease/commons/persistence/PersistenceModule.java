@@ -13,7 +13,7 @@ import com.google.inject.util.Providers;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.persistence.dao.GeneralDao;
-import com.pmease.commons.persistence.dao.GeneralDaoImpl;
+import com.pmease.commons.persistence.dao.DefaultGeneralDao;
 
 public class PersistenceModule extends AbstractPluginModule {
 
@@ -33,7 +33,7 @@ public class PersistenceModule extends AbstractPluginModule {
 		bind(Session.class).toProvider(UnitOfWorkImpl.class);
 		bind(SessionProvider.class).to(UnitOfWorkImpl.class);
 		
-		bind(GeneralDao.class).to(GeneralDaoImpl.class);
+		bind(GeneralDao.class).to(DefaultGeneralDao.class);
 		
 	    TransactionInterceptor transactionInterceptor = new TransactionInterceptor();
 	    requestInjection(transactionInterceptor);

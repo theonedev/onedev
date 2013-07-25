@@ -101,4 +101,5 @@ public interface GeneralDao {
 	 * 			number of entities matching specified {@link DetachedCriteria}
 	 */
 	<T extends AbstractEntity> int count(DetachedCriteria detachedCriteria);
+	
 }

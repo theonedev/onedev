@@ -10,4 +10,19 @@ import com.pmease.commons.security.AbstractUser;
 		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class User extends AbstractUser {
 	
+	private boolean project;
+
+	/**
+	 * Whether or not this user represents a project. 
+	 * 
+	 * @return
+	 */
+	public boolean isProject() {
+		return project;
+	}
+
+	public void setProject(boolean project) {
+		this.project = project;
+	}
+	
 }

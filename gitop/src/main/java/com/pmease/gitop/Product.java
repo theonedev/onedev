@@ -119,7 +119,7 @@ public class Product extends AbstractPlugin {
 		criteria.add(Restrictions.eq("loginName", "admin"));
 		if (generalDao.find(criteria) == null) {
 			User user =  new User();
-			user.setLoginName("admin");
+			user.setName("admin");
 			user.setPasswordHash(passwordService.encryptPassword("12345"));
 			user.setFullName("Administrator");
 			generalDao.save(user);

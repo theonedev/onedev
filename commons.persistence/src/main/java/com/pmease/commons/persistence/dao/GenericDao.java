@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.hibernate.HibernateException;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 
@@ -77,6 +78,18 @@ public interface GenericDao<T extends AbstractEntity> {
 	 */
 	List<T> search(@Nullable Criterion[] criterions, @Nullable Order[] orders, int firstResult, int maxResults);
 	
+	/**
+	 * This method expects to find a single entity with specified criteria
+	 * 
+	 * @param criterions
+	 * 			Hibernate criterions used to find the object
+	 * @return
+	 * 			the single entity. null if not found
+	 * @throws 
+	 * 			HibernateException if there is more than one matching result
+	 */
+	Object find(@Nullable Criterion[] criterions);
+
 	/**
 	 * Count entity matching specified hibernate criterions. 
 	 * 

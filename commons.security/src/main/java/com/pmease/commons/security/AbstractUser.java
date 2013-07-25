@@ -14,19 +14,19 @@ import com.pmease.commons.persistence.AbstractEntity;
 public class AbstractUser extends AbstractEntity implements AuthenticationInfo {
 
 	@Column(unique=true, nullable=false)
-	private String loginName;
+	private String name;
 	
 	private String fullName;
-
+	
 	@Column(length=1024)
 	private String passwordHash;
 	
-	public String getLoginName() {
-		return loginName;
+	public String getName() {
+		return name;
 	}
 
-	public void setLoginName(String loginName) {
-		this.loginName = loginName;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getFullName() {

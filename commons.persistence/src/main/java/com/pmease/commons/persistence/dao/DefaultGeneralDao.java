@@ -17,14 +17,14 @@ import com.pmease.commons.persistence.Transactional;
 
 @Singleton
 @SuppressWarnings("unchecked")
-public class GeneralDaoImpl implements GeneralDao {
+public class DefaultGeneralDao implements GeneralDao {
 
 	private final Provider<SessionFactory> sessionFactoryProvider;
 	
 	private final Provider<Session> sessionProvider;
 	
 	@Inject
-	public GeneralDaoImpl(Provider<SessionFactory> sessionFactoryProvider, Provider<Session> sessionProvider) {
+	public DefaultGeneralDao(Provider<SessionFactory> sessionFactoryProvider, Provider<Session> sessionProvider) {
 		this.sessionFactoryProvider = sessionFactoryProvider;
 		this.sessionProvider = sessionProvider;
 	}

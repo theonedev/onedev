@@ -41,7 +41,7 @@ public class SecurityHelper extends SecurityUtils {
 			if (user.getFullName() != null)
 				return user.getFullName();
 			else
-				return user.getLoginName();
+				return user.getName();
 		} else {
 			return anonymousName;
 		}
