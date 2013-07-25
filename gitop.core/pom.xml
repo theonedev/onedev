@@ -45,7 +45,12 @@
             <groupId>com.pmease</groupId>  
             <artifactId>commons.rest</artifactId>  
             <version>1.0.30</version> 
-        </dependency> 
+        </dependency>
+        <dependency>
+        	<groupId>org.eclipse.jgit</groupId>
+        	<artifactId>org.eclipse.jgit</artifactId>
+        	<version>3.0.0.201306101825-r</version>
+        </dependency>
     </dependencies>  
     <repositories> 
         <repository> 

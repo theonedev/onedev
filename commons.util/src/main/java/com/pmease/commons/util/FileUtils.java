@@ -6,6 +6,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -13,6 +15,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.tools.ant.DirectoryScanner;
 
 import com.pmease.commons.bootstrap.BootstrapUtils;
 
@@ -122,4 +125,27 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
     	return new InputStreamReader(new ByteArrayInputStream(new byte[0])).getEncoding();
     }
     
+    /**
+     * List all files matching specified patterns under specified base directory.
+     * 
+     * @param baseDir 
+     * 			Base directory to scan files in
+     * @param pathPattern 
+     * 			Pattern of file path to be used for search
+     * @return
+     * 			Collection of files matching specified path pattern. Directories will not be included even 
+     * 			if its path matches the pattern
+     */
+    public static Collection<File> listFiles(File baseDir, String pathPattern) {
+    	Collection<File> files = new ArrayList<File>();
+    	
+    	DirectoryScanner scanner = new DirectoryScanner();
+    	scanner.setBasedir(baseDir);
+    	scanner.setIncludes(new String[]{pathPattern});
+    	scanner.scan();
+    	
+    	for (String path: scanner.getIncludedFiles()) 
+    		files.add(new File(baseDir, path));
+    	return files;
+    }
 }

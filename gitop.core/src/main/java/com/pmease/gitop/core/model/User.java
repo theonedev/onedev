@@ -6,6 +6,8 @@ import com.pmease.commons.security.AbstractUser;
 
 @SuppressWarnings("serial")
 @Entity
+@org.hibernate.annotations.Cache(
+		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class User extends AbstractUser {
-
+	
 }

@@ -78,5 +78,20 @@ public class PathUtils {
     	
     	return matchedBasePath;
     }
+
+    /**
+     * Tests whether or not a given path matches a given pattern.
+     *
+     * @param pattern 
+     * 			the pattern to match against. Must not be null
+     * @param str     
+     * 			the path to match, as a String. Must not be null
+     *
+     * @return 
+     * 			true if the pattern matches against the string, or false otherwise
+     */
+    public static boolean match(String pathPattern, String path) {
+    	return new AntPathMatcher().match(pathPattern, path);
+    }
     
 }
