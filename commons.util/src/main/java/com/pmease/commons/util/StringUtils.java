@@ -15,20 +15,34 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
 
     /**
      * Split specified string with specified separator and trim the result fields. 
+     * 
      * @param str 
      * @param separator
      * @return 
-     * 			Modifiable collection of splitted fields. Leading and trailing white spaces will be trimmed 
+     * 			modifiable collection of split fields. Leading and trailing white spaces will be trimmed 
      * 			from these fields. Element of the resulting collection will never be null or 
-     * 			empty string.   
+     * 			empty string
      */
-	public static Collection<String> splitAndTrim(String str, String separator) {
-		Collection<String> fields = new ArrayList<String>();
+	public static List<String> splitAndTrim(String str, String separator) {
+		List<String> fields = new ArrayList<String>();
 		for (String each: StringUtils.split(str, separator)) {
 			if (each != null && each.trim().length() != 0)
 				fields.add(each.trim());
 		}
 		return fields;
+	}
+	
+	/**
+	 * Split specified string with comma and line separator.
+	 * 
+	 * @param str
+	 * 			string to be split
+	 * @return
+	 * 			modifiable collection of split fields. Leading and trailing white spaces will be trimmed
+	 * 			from these fields. Element of resulting collection will never be null or empty string
+	 */
+	public static List<String> splitAndTrim(String str) {
+		return splitAndTrim(str, ",\n");
 	}
 
 	/**
@@ -77,10 +91,29 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
     }	
     
     /**
-     * Tests whether or not a string matches against a pattern.
-     * The pattern may contain two special characters:<br>
+     * Tests whether or not a string matches against specified patterns. 
+     * <p>
+     * Patterns are separated with comma or line separator, with each pattern may contain 
+     * two special characters:<br>
      * '*' means zero or more characters<br>
      * '?' means one and only one character
+     * <p>
+     * If a pattern is prefixed with <code>-</code>, it is considered as a negative pattern; 
+     * if a pattern is prefixed with <code>+</code>, or is not prefixed with both signs, 
+     * it is considered as positive pattern.  
+     * <p>
+     * When determine if a string matches the patterns, the string will be matched against 
+     * each pattern in order, until finding a matching negative or positive pattern. If a 
+     * negative pattern is matched first, the string is considered not matched for the whole
+     * patterns, and if a positive pattern is matched first, the string is considered matched 
+     * for the whole patterns. If no any pattern is matched, the string is considered not 
+     * matched for the whole patterns.  
+     * <p>
+     * Some examples:
+     * <ul>
+     * <li>assert(wildcardMatch("-Core.java, &#42;.java", "Core.java") == false);
+     * <li>assert(wildcardMatch("-Core.java, &#42;.java", "Client.java") == true);
+     * </ul> 
      *
      * @param pattern 
      * 			the pattern to match against. Must not be null.
@@ -89,8 +122,20 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
      * @return 
      * 			true if the string matches against the pattern, or false otherwise.
      */
-    public static boolean wildcardMatch(String pattern, String str) {
-    	return SelectorUtils.match(pattern, str);
+    public static boolean wildcardMatch(String patterns, String str) {
+    	for (String pattern: splitAndTrim(patterns)) {
+    		if (pattern.startsWith("+"))
+    			pattern = pattern.substring(1);
+    		if (pattern.startsWith("-")) {
+    			pattern = pattern.substring(1);
+    			if (SelectorUtils.match(pattern, str))
+    				return false;
+    		} else {
+    			if (SelectorUtils.match(pattern, str))
+    				return true;
+    		}
+    	}
+    	return false;
     }
     
     /**
