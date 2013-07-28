@@ -18,18 +18,18 @@ import com.pmease.commons.persistence.AbstractEntity;
 })
 @org.hibernate.annotations.Cache(
 		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
-public class TeamMembership extends AbstractEntity {
+public class Membership extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	@org.hibernate.annotations.ForeignKey(name="FK_TMEM_USER")
+	@org.hibernate.annotations.ForeignKey(name="FK_MEM_USER")
 	private User user;
 	
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	@org.hibernate.annotations.ForeignKey(name="FK_TMEM_TEAM")
+	@org.hibernate.annotations.ForeignKey(name="FK_MEM_TEAM")
 	private Team team;
 
 	public User getUser() {

@@ -25,7 +25,7 @@ public abstract class AbstractRealm<T extends AbstractUser> extends AuthorizingR
 
 	private GeneralDao generalDao;
 	
-	protected final Class<T> userClass;
+	private final Class<T> userClass;
 
 	@SuppressWarnings("unchecked")
 	@Inject
@@ -46,7 +46,7 @@ public abstract class AbstractRealm<T extends AbstractUser> extends AuthorizingR
 			
 			@Override
 			public Collection<String> getStringPermissions() {
-				return doGetPermissions(userId);
+				return new HashSet<String>();
 			}
 			
 			@Override
@@ -56,7 +56,7 @@ public abstract class AbstractRealm<T extends AbstractUser> extends AuthorizingR
 			
 			@Override
 			public Collection<Permission> getObjectPermissions() {
-				return new HashSet<Permission>();
+				return permissionsOf(userId);
 			}
 		};
 	}
@@ -68,7 +68,7 @@ public abstract class AbstractRealm<T extends AbstractUser> extends AuthorizingR
 	 * @return
 	 * 			Collection of {@link WildcardPermission} string
 	 */
-	protected abstract Collection<String> doGetPermissions(Long userId);
+	protected abstract Collection<Permission> permissionsOf(Long userId);
 
 	/**
 	 * Retrieve {@link AuthenticationInfo} of specified token. 
@@ -82,16 +82,16 @@ public abstract class AbstractRealm<T extends AbstractUser> extends AuthorizingR
 	 * @throws 
 	 * 			AuthenticationException
 	 */
-	protected AuthenticationInfo doGetAuthenticationInfo(UsernamePasswordToken token) throws AuthenticationException {
+	protected AuthenticationInfo authenticationInfoOf(UsernamePasswordToken token) throws AuthenticationException {
 		DetachedCriteria criteria = DetachedCriteria.forClass(userClass);
-        criteria.add(Restrictions.eq("loginName", token.getUsername()));
+        criteria.add(Restrictions.eq("name", token.getUsername()));
 
         return (AbstractUser) generalDao.find(criteria);
 	}
 
 	@Override
 	protected final AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
-		return doGetAuthenticationInfo((UsernamePasswordToken) token);
+		return authenticationInfoOf((UsernamePasswordToken) token);
 	}
 
 	@Override

@@ -11,9 +11,17 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.shiro.authz.Permission;
 import org.hibernate.annotations.FetchMode;
 
+import com.google.common.base.Optional;
 import com.pmease.commons.persistence.AbstractEntity;
+import com.pmease.gitop.core.model.projectpermission.OperationOfRepositorySet;
+import com.pmease.gitop.core.model.projectpermission.PrivilegedOperation;
+import com.pmease.gitop.core.model.projectpermission.ProjectOperation;
+import com.pmease.gitop.core.model.projectpermission.ProjectPermission;
+import com.pmease.gitop.core.model.projectpermission.PullFromProject;
+import com.pmease.gitop.core.model.projectpermission.WholeProjectOperation;
 
 /**
  * Every user can define its teams to authorize permissions to his/her repositories. 
@@ -26,23 +34,25 @@ import com.pmease.commons.persistence.AbstractEntity;
 @org.hibernate.annotations.Cache(
 		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"owner", "name"})
+		@UniqueConstraint(columnNames={"project", "name"})
 })
 @SuppressWarnings("serial")
-public class Team extends AbstractEntity {
+public class Team extends AbstractEntity implements Permission {
 
 	@Column(nullable=false)
 	private String name;
 	
 	private String description;
 	
-	private List<BranchPermission> branchPermissions = new ArrayList<BranchPermission>();
+	private Optional<? extends WholeProjectOperation> authorizedWholeProjectAction = Optional.of(new PullFromProject());
+	
+	private List<OperationOfRepositorySet> authorizedRepositoryActions = new ArrayList<OperationOfRepositorySet>();
 	
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	@org.hibernate.annotations.ForeignKey(name="FK_TEAM_OWNER")
-	private User owner;
+	@org.hibernate.annotations.ForeignKey(name="FK_TEAM_PROJ")
+	private User project;
 
 	public String getName() {
 		return name;
@@ -60,53 +70,54 @@ public class Team extends AbstractEntity {
 		this.description = description;
 	}
 
-	public User getOwner() {
-		return owner;
+	public User getProject() {
+		return project;
 	}
 
-	public void setOwner(User owner) {
-		this.owner = owner;
+	public void setProject(User project) {
+		this.project = project;
 	}
 
-	public List<BranchPermission> getBranchPermissions() {
-		return branchPermissions;
+	public Optional<? extends WholeProjectOperation> getAuthorizedWholeProjectAction() {
+		return authorizedWholeProjectAction;
 	}
 
-	public void setBranchPermissions(List<BranchPermission> branchPermissions) {
-		this.branchPermissions = branchPermissions;
+	public void setAuthorizedWholeProjectAction(
+			Optional<? extends WholeProjectOperation> authorizedWholeProjectAction) {
+		this.authorizedWholeProjectAction = authorizedWholeProjectAction;
 	}
 
-	/**
-	 * Check whether or not a specified branch operation is permitted. 
-	 * <p>
-	 * Supplied repository name, branch name and the operation will be matched against permission list 
-	 * to find the first matching entry. If found, the <code>allow</code> flag of that entry will be returned 
-	 * to indicate whether or not the operation is permitted. If no permission entry matches supplied 
-	 * parameters, a null value will be returned to indicate that this team can not determine whether 
-	 * or not the operation should be permitted.
-	 * 
-	 * @param repositoryName
-	 * 			name of the repository name to operate against
-	 * @param branchName
-	 *			name of the branch to operate against 		
-	 * @param branchOperation
-	 * 			operation to be checked
-	 * @return
-	 * 			true if the operation matches a permissive permission entry,  false if the operation 
-	 * 			matches a prohibitory permission entry, null if no permission entry can be matched. 
-	 * 			In case of returning null, caller should determine the permission through other means, 
-	 * 			such as continue to check other teams, or resort to default permission 
-	 */
-	public Boolean permits(String repositoryName, String branchName, BranchOperation branchOperation) {
-		Boolean permits = null;
-		
-		for (BranchPermission permission: getBranchPermissions()) {
-			permits = permission.permits(repositoryName, branchName, branchOperation);
-			if (permits != null)
-				return permits;
+	public List<OperationOfRepositorySet> getAuthorizedRepositoryActions() {
+		return authorizedRepositoryActions;
+	}
+
+	public void setAuthorizedRepositoryActions(
+			List<OperationOfRepositorySet> authorizedRepositoryActions) {
+		this.authorizedRepositoryActions = authorizedRepositoryActions;
+	}
+
+	@Override
+	public boolean implies(Permission permission) {
+		if (permission instanceof ProjectPermission) {
+			ProjectPermission projectPermission = (ProjectPermission) permission;
+			if (projectPermission.getProject().getId().equals(getProject().getId())) {
+				if (getAuthorizedWholeProjectAction().isPresent()) {
+					ProjectOperation projectAction = getAuthorizedWholeProjectAction().get();
+					if (projectAction.can(projectPermission.getOperation()))
+						return true;
+				}
+				for (PrivilegedOperation action: getAuthorizedRepositoryActions()) {
+					if (action.can(projectPermission.getOperation()))
+						return true;
+				}
+				
+				return false;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
 		}
-		
-		return permits;
 	}
-	
+
 }
