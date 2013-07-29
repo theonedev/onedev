@@ -15,7 +15,7 @@ import com.pmease.commons.jetty.extensionpoints.ServletContextConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.persistence.AbstractEntity;
 import com.pmease.commons.persistence.extensionpoints.ModelContribution;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.core.model.Account;
 import com.pmease.gitop.core.web.asset.AssetLocator;
 
 public class CorePlugin extends AbstractPlugin {
@@ -42,7 +42,7 @@ public class CorePlugin extends AbstractPlugin {
 					public Collection<Class<? extends AbstractEntity>> getModelClasses() {
 						Collection<Class<? extends AbstractEntity>> modelClasses = 
 								new HashSet<Class<? extends AbstractEntity>>();
-						modelClasses.add(User.class);
+						modelClasses.add(Account.class);
 						return modelClasses;
 					}
 		});

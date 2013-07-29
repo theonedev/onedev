@@ -1,4 +1,4 @@
-package com.pmease.gitop.core.model.projectpermission;
+package com.pmease.gitop.core.model.permission.account;
 
 public class RepositoryAdministration implements RepositoryOperation {
 

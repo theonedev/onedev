@@ -1,9 +1,9 @@
-package com.pmease.gitop.core.model.role;
+package com.pmease.gitop.core.model.permission.system;
 
 import org.apache.shiro.authz.Permission;
 
 @SuppressWarnings("serial")
-public class SystemAdministrator implements Role {
+public class SystemAdministration implements SystemPermission {
 
 	@Override
 	public boolean implies(Permission p) {

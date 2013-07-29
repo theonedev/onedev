@@ -3,33 +3,41 @@ package com.pmease.gitop.core.model;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.FetchMode;
 
 import com.pmease.commons.persistence.AbstractEntity;
-import com.pmease.gitop.core.model.role.Role;
 
 @SuppressWarnings("serial")
 @Entity
+@Table(uniqueConstraints={
+		@UniqueConstraint(columnNames={"account", "role"})
+})
 @org.hibernate.annotations.Cache(
 		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class Authorization extends AbstractEntity {
 
-	@OneToOne(fetch=FetchType.EAGER)
+	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	@org.hibernate.annotations.ForeignKey(name="FK_AUTH_USER")
-	private User user;
+	@org.hibernate.annotations.ForeignKey(name="FK_AUTH_ACC")
+	private Account account;
 	
+	@ManyToOne(fetch=FetchType.EAGER)
+	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
+	@JoinColumn(nullable=false)
+	@org.hibernate.annotations.ForeignKey(name="FK_AUTH_ROLE")
 	private Role role;
 
-	public User getUser() {
-		return user;
+	public Account getAccount() {
+		return account;
 	}
 
-	public void setUser(User user) {
-		this.user = user;
+	public void setAccount(Account account) {
+		this.account = account;
 	}
 
 	public Role getRole() {

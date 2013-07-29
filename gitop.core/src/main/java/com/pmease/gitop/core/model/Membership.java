@@ -14,7 +14,7 @@ import com.pmease.commons.persistence.AbstractEntity;
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"user", "team"})
+		@UniqueConstraint(columnNames={"account", "team"})
 })
 @org.hibernate.annotations.Cache(
 		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
@@ -23,8 +23,8 @@ public class Membership extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	@org.hibernate.annotations.ForeignKey(name="FK_MEM_USER")
-	private User user;
+	@org.hibernate.annotations.ForeignKey(name="FK_MEM_ACC")
+	private Account account;
 	
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
@@ -32,12 +32,12 @@ public class Membership extends AbstractEntity {
 	@org.hibernate.annotations.ForeignKey(name="FK_MEM_TEAM")
 	private Team team;
 
-	public User getUser() {
-		return user;
+	public Account getAccount() {
+		return account;
 	}
 
-	public void setUser(User user) {
-		this.user = user;
+	public void setAccount(Account account) {
+		this.account = account;
 	}
 
 	public Team getTeam() {

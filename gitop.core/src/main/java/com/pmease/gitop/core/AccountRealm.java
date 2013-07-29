@@ -11,33 +11,33 @@ import org.apache.shiro.authz.Permission;
 
 import com.pmease.commons.persistence.dao.GeneralDao;
 import com.pmease.commons.security.AbstractRealm;
+import com.pmease.gitop.core.entitymanager.RoleManager;
 import com.pmease.gitop.core.entitymanager.TeamManager;
-import com.pmease.gitop.core.entitymanager.UserManager;
-import com.pmease.gitop.core.model.Team;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.core.model.Account;
 
 @Singleton
-public class UserRealm extends AbstractRealm<User> {
+public class AccountRealm extends AbstractRealm<Account> {
 
 	private final TeamManager teamManager;
-	
-	private final UserManager userManager;
+
+	private final RoleManager roleManager;
 	
 	@Inject
-	public UserRealm(GeneralDao generalDao, CredentialsMatcher credentialsMatcher, 
-			TeamManager teamManager, UserManager userManager) {
+	public AccountRealm(GeneralDao generalDao, CredentialsMatcher credentialsMatcher, 
+			TeamManager teamManager, RoleManager roleManager) {
 		super(generalDao, credentialsMatcher);
+		
 		this.teamManager = teamManager;
-		this.userManager = userManager;
+		this.roleManager = roleManager;
 	}
 
 	@Override
-	protected Collection<Permission> permissionsOf(Long userId) {
+	protected Collection<Permission> permissionsOf(Long accountId) {
 		Collection<Permission> permissions = new ArrayList<Permission>();
 		
-		permissions.add(userManager.load(userId).getAuthorization().getRole());
-		for (Team team: teamManager.getTeams(userId))
-			permissions.add(team);
+		permissions.addAll(roleManager.getRoles(accountId));
+		permissions.addAll(teamManager.getTeams(accountId));
+
 		return permissions;
 	}
 
