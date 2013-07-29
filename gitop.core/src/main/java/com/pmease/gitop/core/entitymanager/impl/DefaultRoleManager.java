@@ -11,29 +11,29 @@ import org.hibernate.Session;
 import com.pmease.commons.persistence.Transactional;
 import com.pmease.commons.persistence.dao.DefaultGenericDao;
 import com.pmease.commons.persistence.dao.GeneralDao;
-import com.pmease.gitop.core.entitymanager.TeamManager;
+import com.pmease.gitop.core.entitymanager.RoleManager;
 import com.pmease.gitop.core.entitymanager.AccountManager;
-import com.pmease.gitop.core.model.Team;
-import com.pmease.gitop.core.model.Membership;
+import com.pmease.gitop.core.model.Authorization;
+import com.pmease.gitop.core.model.Role;
 
 @Singleton
-public class DefaultTeamManager extends DefaultGenericDao<Team> implements TeamManager {
+public class DefaultRoleManager extends DefaultGenericDao<Role> implements RoleManager {
 
 	private final AccountManager accountManager;
 	
-	public DefaultTeamManager(GeneralDao generalDao, Provider<Session> sessionProvider, AccountManager accountManager) {
+	public DefaultRoleManager(GeneralDao generalDao, Provider<Session> sessionProvider, AccountManager accountManager) {
 		super(generalDao, sessionProvider);
 		this.accountManager = accountManager;
 	}
 
 	@Transactional
 	@Override
-	public Collection<Team> getTeams(Long accountId) {
-		Collection<Team> teams = new ArrayList<Team>();
-		for (Membership membership: accountManager.load(accountId).getMemberships())
-			teams.add(membership.getTeam());
+	public Collection<Role> getRoles(Long accountId) {
+		Collection<Role> roles = new ArrayList<Role>();
+		for (Authorization authorization: accountManager.load(accountId).getAuthorizations())
+			roles.add(authorization.getRole());
 		
-		return teams;
+		return roles;
 	}
 
 }

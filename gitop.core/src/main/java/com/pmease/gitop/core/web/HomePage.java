@@ -11,7 +11,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 
 import com.pmease.commons.security.SecurityHelper;
 import com.pmease.commons.web.asset.bootstrap.BootstrapResourceReference;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.core.model.Account;
 
 @SuppressWarnings("serial")
 public class HomePage extends WebPage {
@@ -24,7 +24,7 @@ public class HomePage extends WebPage {
 
 			@Override
 			public String getObject() {
-				return SecurityHelper.getUserDisplayName(User.class, "Guest");
+				return SecurityHelper.getUserDisplayName(Account.class, "Guest");
 			}
 			
 		}));

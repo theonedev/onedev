@@ -5,7 +5,8 @@ import org.junit.Test;
 public class PermissionTest {
 
 	@Test
-	public void shouldOnlyPermitAuthorizedOperations() {
+	public void shouldPermitPullIfAllowedAnyPush() {
+		Team team = new Team();
 	}
 
 }

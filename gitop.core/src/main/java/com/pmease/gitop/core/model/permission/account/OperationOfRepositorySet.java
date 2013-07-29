@@ -1,8 +1,8 @@
-package com.pmease.gitop.core.model.projectpermission;
+package com.pmease.gitop.core.model.permission.account;
 
 import com.pmease.commons.util.StringUtils;
 
-public class OperationOfRepositorySet implements PrivilegedOperation {
+public class OperationOfRepositorySet implements AccountOperation {
 
 	private String repositoryNames;
 	

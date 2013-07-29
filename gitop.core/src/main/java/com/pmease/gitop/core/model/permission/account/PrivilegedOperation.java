@@ -1,4 +1,4 @@
-package com.pmease.gitop.core.model.projectpermission;
+package com.pmease.gitop.core.model.permission.account;
 
 /**
  * This interface stands for an operation requires permissions. 
@@ -6,7 +6,7 @@ package com.pmease.gitop.core.model.projectpermission;
  */
 public interface PrivilegedOperation {
 	/**
-	 * Whether or not users with permission to perform current operation can perform 
+	 * Whether or not accounts with permission to perform current operation can perform 
 	 * specified operation.  
 	 */
 	boolean can(PrivilegedOperation operation);

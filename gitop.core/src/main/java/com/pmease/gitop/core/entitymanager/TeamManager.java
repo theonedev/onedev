@@ -10,6 +10,6 @@ import com.pmease.gitop.core.model.Team;
 @ImplementedBy(DefaultTeamManager.class)
 public interface TeamManager extends GenericDao<Team> {
 
-	Collection<Team> getTeams(Long userId);
+	Collection<Team> getTeams(Long accountId);
 	
 }

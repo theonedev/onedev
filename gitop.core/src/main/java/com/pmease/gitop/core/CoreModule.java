@@ -19,7 +19,7 @@ public class CoreModule extends AbstractPluginModule {
 		super.configure();
 		
 		bind(AbstractWicketConfig.class).to(WicketConfig.class);		
-		bind(AbstractRealm.class).to(UserRealm.class);
+		bind(AbstractRealm.class).to(AccountRealm.class);
 		
 		bindConstant().annotatedWith(AppName.class).to(PRODUCT_NAME);
 		

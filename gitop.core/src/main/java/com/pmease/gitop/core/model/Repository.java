@@ -16,7 +16,7 @@ import com.pmease.commons.persistence.AbstractEntity;
 @org.hibernate.annotations.Cache(
 		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"owner", "name"})
+		@UniqueConstraint(columnNames={"account", "name"})
 })
 @SuppressWarnings("serial")
 public class Repository extends AbstractEntity {
@@ -29,8 +29,8 @@ public class Repository extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	@org.hibernate.annotations.ForeignKey(name="FK_REPO_OWNER")
-	private User owner;
+	@org.hibernate.annotations.ForeignKey(name="FK_REPO_ACC")
+	private Account account;
 
 	public String getName() {
 		return name;
@@ -48,12 +48,12 @@ public class Repository extends AbstractEntity {
 		this.description = description;
 	}
 
-	public User getOwner() {
-		return owner;
+	public Account getAccount() {
+		return account;
 	}
 
-	public void setOwner(User owner) {
-		this.owner = owner;
+	public void setAccount(Account account) {
+		this.account = account;
 	}
 	
 }

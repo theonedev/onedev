@@ -3,12 +3,7 @@ package com.pmease.gitop.core.model;
 import java.util.Collection;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-
-import org.hibernate.annotations.FetchMode;
 
 import com.pmease.commons.security.AbstractUser;
 
@@ -25,16 +20,13 @@ import com.pmease.commons.security.AbstractUser;
 @Entity
 @org.hibernate.annotations.Cache(
 		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
-public class User extends AbstractUser {
+public class Account extends AbstractUser {
 
-	@OneToMany(mappedBy="user")
+	@OneToMany(mappedBy="account")
 	private Collection<Membership> memberships;
 	
-	@OneToOne(fetch=FetchType.EAGER)
-	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
-	@JoinColumn(nullable=false)
-	@org.hibernate.annotations.ForeignKey(name="FK_USER_AUTH")
-	private Authorization authorization;
+	@OneToMany(mappedBy="account")
+	private Collection<Authorization> authorizations;
 
 	public Collection<Membership> getMemberships() {
 		return memberships;
@@ -44,12 +36,12 @@ public class User extends AbstractUser {
 		this.memberships = memberships;
 	}
 
-	public Authorization getAuthorization() {
-		return authorization;
+	public Collection<Authorization> getAuthorizations() {
+		return authorizations;
 	}
 
-	public void setAuthorization(Authorization authorization) {
-		this.authorization = authorization;
+	public void setAuthorizations(Collection<Authorization> authorizations) {
+		this.authorizations = authorizations;
 	}
 
 }
