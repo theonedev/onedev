@@ -12,7 +12,8 @@ public class AccountAdministration implements AccountWideOperation {
 	@Override
 	public boolean can(PrivilegedOperation operation) {
 		return operation instanceof AccountAdministration 
-				|| new WriteToAccount().can(operation);
+				|| new WriteToAccount().can(operation)
+				|| OperationOfRepositorySet.ofRepositoryAdmin("**").can(operation);
 	}
 
 }

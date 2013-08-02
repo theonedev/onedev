@@ -9,7 +9,6 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Order;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.pmease.commons.persistence.AbstractEntity;
 import com.pmease.commons.util.ClassUtils;
@@ -32,7 +31,7 @@ public class DefaultGenericDao<T extends AbstractEntity> implements GenericDao<T
 	}
 	
 	@Override
-	public Optional<T> find(Long entityId) {
+	public T find(Long entityId) {
 		return generalDao.find(entityClass, entityId);
 	}
 

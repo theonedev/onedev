@@ -8,11 +8,12 @@ import javax.persistence.OneToMany;
 import com.pmease.commons.security.AbstractUser;
 
 /**
- * This class represents an user (or project) in the system. In Gitop, users and projects
- * are the same thing. To create a project, one can register a new user account representing 
- * the project itself, and then under that user account, create repositories and organize 
- * teams to do project cooperation. 
- * 
+ * This class represents either a project or an user in the system. 
+ * <p>
+ * In Gitop, users and projects are the same thing. 
+ * If necessary, you can always treat an user account as a project account. 
+ * {@link Repository} and {@link Team} are always created under a specific account.  
+ *  
  * @author robin
  *
  */

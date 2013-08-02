@@ -5,7 +5,6 @@ import java.util.List;
 import org.hibernate.HibernateException;
 import org.hibernate.criterion.DetachedCriteria;
 
-import com.google.common.base.Optional;
 import com.pmease.commons.persistence.AbstractEntity;
 
 public interface GeneralDao {
@@ -20,7 +19,7 @@ public interface GeneralDao {
 	 * @return
 	 *			found entity object, null if not found 			
 	 */
-	<T extends AbstractEntity> Optional<T> find(Class<T> entityClass, Long entityId);
+	<T extends AbstractEntity> T find(Class<T> entityClass, Long entityId);
 
 	/**
 	 * Get a reference to the entity with the specified type and id from data store.

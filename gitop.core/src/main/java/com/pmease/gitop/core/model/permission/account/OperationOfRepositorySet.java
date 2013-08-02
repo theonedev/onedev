@@ -43,4 +43,32 @@ public class OperationOfRepositorySet implements AccountOperation {
 		}
 	}
 	
+	public static OperationOfRepositorySet ofRepositoryAdmin(String repositoryName) {
+		return new OperationOfRepositorySet(repositoryName, new RepositoryAdministration());
+	}
+
+	public static OperationOfRepositorySet ofRepositoryRead(String repositoryName) {
+		return new OperationOfRepositorySet(repositoryName, new ReadFromRepository());
+	}
+
+	public static OperationOfRepositorySet ofRepositoryWrite(String repositoryName) {
+		return new OperationOfRepositorySet(repositoryName, new WriteToRepository());
+	}
+
+	public static OperationOfRepositorySet ofBranchAdmin(String repositoryName, String branchName) {
+		return new OperationOfRepositorySet(repositoryName, new OperationOfBranchSet(branchName, new BranchAdministration()));
+	}
+
+	public static OperationOfRepositorySet ofBranchRead(String repositoryName, String branchName) {
+		return new OperationOfRepositorySet(repositoryName, new OperationOfBranchSet(branchName, new ReadFromBranch()));
+	}
+
+	public static OperationOfRepositorySet ofBranchWrite(String repositoryName, String branchName) {
+		return new OperationOfRepositorySet(repositoryName, new OperationOfBranchSet(branchName, new WriteToBranch("**")));
+	}
+
+	public static OperationOfRepositorySet ofBranchWrite(String repositoryName, String branchName, String filePath) {
+		return new OperationOfRepositorySet(repositoryName, new OperationOfBranchSet(branchName, new WriteToBranch(filePath)));
+	}
+
 }
