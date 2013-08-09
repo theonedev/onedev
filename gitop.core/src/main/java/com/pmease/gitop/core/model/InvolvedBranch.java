@@ -11,30 +11,24 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.FetchMode;
 
 import com.pmease.commons.persistence.AbstractEntity;
-import com.pmease.gitop.core.model.gatekeeper.GateKeeper;
 
 @Entity
 @org.hibernate.annotations.Cache(
 		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"account", "name"})
+		@UniqueConstraint(columnNames={"repository", "name"})
 })
 @SuppressWarnings("serial")
-public class Repository extends AbstractEntity {
-	
+public class InvolvedBranch extends AbstractEntity {
+
 	@Column(nullable=false)
 	private String name;
 	
-	private String description;
-
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	@org.hibernate.annotations.ForeignKey(name="FK_REPO_ACC")
-	private Account account;
-	
-	@Column(nullable=true)
-	private GateKeeper gateKeeper;
+	@org.hibernate.annotations.ForeignKey(name="FK_BRCH_REPO")
+	private Repository repository;
 
 	public String getName() {
 		return name;
@@ -44,28 +38,12 @@ public class Repository extends AbstractEntity {
 		this.name = name;
 	}
 
-	public String getDescription() {
-		return description;
+	public Repository getRepository() {
+		return repository;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public Account getAccount() {
-		return account;
-	}
-
-	public void setAccount(Account account) {
-		this.account = account;
-	}
-
-	public GateKeeper getGateKeeper() {
-		return gateKeeper;
-	}
-
-	public void setGateKeeper(GateKeeper gateKeeper) {
-		this.gateKeeper = gateKeeper;
+	public void setRepository(Repository repository) {
+		this.repository = repository;
 	}
 
 }

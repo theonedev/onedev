@@ -46,6 +46,7 @@ public class Team extends AbstractEntity implements Permission {
 	
 	private AccountWideOperation authorizedAccountWideOperation = new ReadFromAccount();
 	
+	@Column(nullable=false)
 	private List<OperationOfRepositorySet> authorizedRepositoryOperations = new ArrayList<OperationOfRepositorySet>();
 	
 	@ManyToOne(fetch=FetchType.EAGER)
