@@ -1,10 +1,11 @@
 package com.pmease.gitop.core.model.gatekeeper;
 
-import com.pmease.gitop.core.model.InvolvedCommit;
+import com.pmease.gitop.core.model.MergeRequest;
 
 public interface GateKeeper {
 	
-	public enum CHECK_RESULT {ACCEPT, REJECT, UNDETERMINED}
+	public enum CheckResult {ACCEPT, REJECT, UNDETERMINED};
 	
-	CHECK_RESULT check(InvolvedCommit commit);
+	CheckResult check(MergeRequest mergeRequest);
+
 }

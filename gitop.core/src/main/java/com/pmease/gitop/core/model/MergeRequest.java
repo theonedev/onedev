@@ -1,10 +1,13 @@
 package com.pmease.gitop.core.model;
 
+import java.util.Collection;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.FetchMode;
 
@@ -12,7 +15,7 @@ import com.pmease.commons.persistence.AbstractEntity;
 
 @SuppressWarnings("serial")
 @Entity
-public class PullRequest extends AbstractEntity {
+public class MergeRequest extends AbstractEntity {
 
 	@Column(nullable=false)
 	private String title;
@@ -25,9 +28,12 @@ public class PullRequest extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
-	@JoinColumn(nullable=true)
+	@JoinColumn(nullable=false)
 	@org.hibernate.annotations.ForeignKey(name="FK_PR_SBRCH")
 	private InvolvedBranch sourceBranch;
+
+	@OneToMany(mappedBy="request")
+	private Collection<MergeRequestUpdate> updates;
 
 	public String getTitle() {
 		return title;
@@ -51,6 +57,14 @@ public class PullRequest extends AbstractEntity {
 
 	public void setSourceBranch(InvolvedBranch sourceBranch) {
 		this.sourceBranch = sourceBranch;
+	}
+
+	public Collection<MergeRequestUpdate> getUpdates() {
+		return updates;
+	}
+
+	public void setUpdates(Collection<MergeRequestUpdate> updates) {
+		this.updates = updates;
 	}
 
 }

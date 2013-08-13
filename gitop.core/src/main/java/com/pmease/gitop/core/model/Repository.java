@@ -1,5 +1,8 @@
 package com.pmease.gitop.core.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -12,6 +15,7 @@ import org.hibernate.annotations.FetchMode;
 
 import com.pmease.commons.persistence.AbstractEntity;
 import com.pmease.gitop.core.model.gatekeeper.GateKeeper;
+import com.pmease.gitop.core.model.gatekeeper.GateKeeper.CheckResult;
 
 @Entity
 @org.hibernate.annotations.Cache(
@@ -33,8 +37,8 @@ public class Repository extends AbstractEntity {
 	@org.hibernate.annotations.ForeignKey(name="FK_REPO_ACC")
 	private Account account;
 	
-	@Column(nullable=true)
-	private GateKeeper gateKeeper;
+	@Column(nullable=false)
+	private List<GateKeeper> gateKeepers = new ArrayList<GateKeeper>();
 
 	public String getName() {
 		return name;
@@ -60,12 +64,29 @@ public class Repository extends AbstractEntity {
 		this.account = account;
 	}
 
-	public GateKeeper getGateKeeper() {
-		return gateKeeper;
+	public List<GateKeeper> getGateKeepers() {
+		return gateKeepers;
 	}
 
-	public void setGateKeeper(GateKeeper gateKeeper) {
-		this.gateKeeper = gateKeeper;
+	public void setGateKeepers(List<GateKeeper> gateKeepers) {
+		this.gateKeepers = gateKeepers;
 	}
 
+	public CheckResult checkMerge(MergeRequest request) {
+		boolean undetermined = false;
+		
+		for (GateKeeper each: getGateKeepers()) {
+			CheckResult result = each.check(request);
+			if (result == CheckResult.REJECT)
+				return CheckResult.REJECT;
+			else if (result == CheckResult.UNDETERMINED)
+				undetermined = true;
+		}
+		
+		if (undetermined)
+			return CheckResult.UNDETERMINED;
+		else
+			return CheckResult.ACCEPT;
+	}
+	
 }
