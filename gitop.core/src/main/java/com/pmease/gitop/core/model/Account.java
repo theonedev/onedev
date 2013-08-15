@@ -29,6 +29,9 @@ public class Account extends AbstractUser {
 	@OneToMany(mappedBy="account")
 	private Collection<Authorization> authorizations;
 
+	@OneToMany(mappedBy="account")
+	private Collection<Authorization> mergeRequests;
+
 	public Collection<Membership> getMemberships() {
 		return memberships;
 	}
@@ -43,6 +46,14 @@ public class Account extends AbstractUser {
 
 	public void setAuthorizations(Collection<Authorization> authorizations) {
 		this.authorizations = authorizations;
+	}
+
+	public Collection<Authorization> getMergeRequests() {
+		return mergeRequests;
+	}
+
+	public void setMergeRequests(Collection<Authorization> mergeRequests) {
+		this.mergeRequests = mergeRequests;
 	}
 
 }

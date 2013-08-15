@@ -1,4 +1,4 @@
-package com.pmease.commons.util;
+package com.pmease.commons.util.dependency;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -13,6 +13,9 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.pmease.commons.util.dependency.Dependency;
+import com.pmease.commons.util.dependency.DependencyException;
+import com.pmease.commons.util.dependency.DependencyHelper;
 
 public class DependencyHelperTest {
 

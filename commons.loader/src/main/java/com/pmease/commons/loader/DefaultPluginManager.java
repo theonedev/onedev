@@ -10,7 +10,7 @@ import java.util.Set;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.pmease.commons.util.DependencyHelper;
+import com.pmease.commons.util.dependency.DependencyHelper;
 
 @Singleton
 public class DefaultPluginManager implements PluginManager {

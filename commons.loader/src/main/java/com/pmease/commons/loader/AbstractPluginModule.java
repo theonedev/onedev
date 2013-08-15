@@ -11,7 +11,7 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
-import com.pmease.commons.util.Dependency;
+import com.pmease.commons.util.dependency.Dependency;
 
 public abstract class AbstractPluginModule extends AbstractModule implements Dependency {
 

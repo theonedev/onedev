@@ -16,7 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.pmease.commons.util;
+package com.pmease.commons.util.pattern;
+
+import com.pmease.commons.util.StringUtils;
 
 /**
  * <p>PathMatcher implementation for Ant-style path patterns.
@@ -57,7 +59,7 @@ package com.pmease.commons.util;
  *
  * @since 16.07.2003
  */
-public class AntPathMatcher {
+public class WildcardPathMatcher implements PatternMatcher {
 
     //TODO - complete JavaDoc
 
@@ -82,8 +84,8 @@ public class AntPathMatcher {
         return (path.indexOf('*') != -1 || path.indexOf('?') != -1);
     }
 
-    public boolean matches(String pattern, String source) {
-        return match(pattern, source);
+    public boolean matches(String pattern, String input) {
+        return match(pattern, input);
     }
 
     public boolean match(String pattern, String path) {

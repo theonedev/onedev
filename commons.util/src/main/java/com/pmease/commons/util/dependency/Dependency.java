@@ -1,4 +1,4 @@
-package com.pmease.commons.util;
+package com.pmease.commons.util.dependency;
 
 import java.util.Set;
 

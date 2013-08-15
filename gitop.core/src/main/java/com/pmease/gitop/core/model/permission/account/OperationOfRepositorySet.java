@@ -1,24 +1,24 @@
 package com.pmease.gitop.core.model.permission.account;
 
-import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.util.pattern.WildcardUtils;
 
 public class OperationOfRepositorySet implements AccountOperation {
 
-	private String repositoryNames;
+	private String repositoryPatterns;
 	
 	private RepositoryOperation repositoryOperation;
 	
-	public OperationOfRepositorySet(String repositoryNames, RepositoryOperation repositoryOperation) {
-		this.repositoryNames = repositoryNames;
+	public OperationOfRepositorySet(String repositoryPatterns, RepositoryOperation repositoryOperation) {
+		this.repositoryPatterns = repositoryPatterns;
 		this.repositoryOperation = repositoryOperation;
 	}
 	
-	public String getRepositoryNames() {
-		return repositoryNames;
+	public String getRepositoryPatterns() {
+		return repositoryPatterns;
 	}
 
-	public void setRepositoryNames(String repositoryNames) {
-		this.repositoryNames = repositoryNames;
+	public void setRepositoryPatterns(String repositoryPatterns) {
+		this.repositoryPatterns = repositoryPatterns;
 	}
 
 	public RepositoryOperation getRepositoryOperation() {
@@ -33,7 +33,7 @@ public class OperationOfRepositorySet implements AccountOperation {
 	public boolean can(PrivilegedOperation operation) {
 		if (operation instanceof OperationOfRepositorySet) {
 			OperationOfRepositorySet operationOfRepositorySet = (OperationOfRepositorySet) operation;
-			if (StringUtils.wildcardMatch(getRepositoryNames(), operationOfRepositorySet.getRepositoryNames())) {
+			if (WildcardUtils.matchString(getRepositoryPatterns(), operationOfRepositorySet.getRepositoryPatterns())) {
 				return getRepositoryOperation().can(operationOfRepositorySet.getRepositoryOperation());
 			} else {
 				return false;

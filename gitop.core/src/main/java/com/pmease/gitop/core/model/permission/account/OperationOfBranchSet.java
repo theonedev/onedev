@@ -1,24 +1,24 @@
 package com.pmease.gitop.core.model.permission.account;
 
-import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.util.pattern.WildcardUtils;
 
 public class OperationOfBranchSet implements RepositoryOperation {
 	
-	private String branchNames; 
+	private String branchPatterns; 
 
 	private BranchOperation branchOperation;
 
-	public OperationOfBranchSet(String branchNames, BranchOperation branchOperation) {
-		this.branchNames = branchNames;
+	public OperationOfBranchSet(String branchPatterns, BranchOperation branchOperation) {
+		this.branchPatterns = branchPatterns;
 		this.branchOperation = branchOperation;
 	}
 	
-	public String getBranchNames() {
-		return branchNames;
+	public String getBranchPatterns() {
+		return branchPatterns;
 	}
 
-	public void setBranchNames(String branchNames) {
-		this.branchNames = branchNames;
+	public void setBranchPatterns(String branchPatterns) {
+		this.branchPatterns = branchPatterns;
 	}
 
 	public BranchOperation getBranchOperation() {
@@ -33,7 +33,7 @@ public class OperationOfBranchSet implements RepositoryOperation {
 	public boolean can(PrivilegedOperation operation) {
 		if (operation instanceof OperationOfBranchSet) {
 			OperationOfBranchSet operationOfBranchSet = (OperationOfBranchSet) operation;
-			if (StringUtils.wildcardMatch(getBranchNames(), operationOfBranchSet.getBranchNames())) {
+			if (WildcardUtils.matchString(getBranchPatterns(), operationOfBranchSet.getBranchPatterns())) {
 				return branchOperation.can(operationOfBranchSet.getBranchOperation());
 			} else {
 				return false;

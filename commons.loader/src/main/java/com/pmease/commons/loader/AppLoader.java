@@ -20,9 +20,9 @@ import com.google.inject.util.Modules;
 import com.google.inject.util.Modules.OverriddenModuleBuilder;
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.bootstrap.Lifecycle;
-import com.pmease.commons.util.DependencyHelper;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.util.dependency.DependencyHelper;
 
 public class AppLoader implements Lifecycle {
 

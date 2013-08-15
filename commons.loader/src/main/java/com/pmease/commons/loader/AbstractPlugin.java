@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.pmease.commons.util.Dependency;
+import com.pmease.commons.util.dependency.Dependency;
 
 public abstract class AbstractPlugin implements Dependency {
 	

@@ -1,6 +1,6 @@
 package com.pmease.gitop.core.model.permission.account;
 
-import com.pmease.commons.util.PathUtils;
+import com.pmease.commons.util.pattern.WildcardUtils;
 
 public class WriteToBranch implements BranchOperation {
 	
@@ -24,7 +24,7 @@ public class WriteToBranch implements BranchOperation {
 			return true;
 		} else if (operation instanceof WriteToBranch) {
 			WriteToBranch writeOperation = (WriteToBranch) operation;
-			return PathUtils.match(filePaths, writeOperation.getFilePaths());
+			return WildcardUtils.matchPath(filePaths, writeOperation.getFilePaths());
 		} else {
 			return false;
 		}
