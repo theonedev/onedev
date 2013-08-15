@@ -27,7 +27,6 @@ public class InvolvedBranch extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	@org.hibernate.annotations.ForeignKey(name="FK_BRCH_REPO")
 	private Repository repository;
 
 	public String getName() {

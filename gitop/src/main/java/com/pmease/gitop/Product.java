@@ -26,7 +26,7 @@ import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.persistence.dao.GeneralDao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.gitop.core.model.Account;
+import com.pmease.gitop.core.model.User;
 
 public class Product extends AbstractPlugin {
 
@@ -115,10 +115,10 @@ public class Product extends AbstractPlugin {
 
 	@Override
 	public void postStartDependents() {
-		DetachedCriteria criteria = DetachedCriteria.forClass(Account.class);
+		DetachedCriteria criteria = DetachedCriteria.forClass(User.class);
 		criteria.add(Restrictions.eq("loginName", "admin"));
 		if (generalDao.find(criteria) == null) {
-			Account user =  new Account();
+			User user =  new User();
 			user.setName("admin");
 			user.setPasswordHash(passwordService.encryptPassword("12345"));
 			user.setFullName("Administrator");

@@ -23,19 +23,16 @@ public class MergeRequest extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	@org.hibernate.annotations.ForeignKey(name="FK_MR_ACC")
-	private Account account;
+	private User user;
 	
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	@org.hibernate.annotations.ForeignKey(name="FK_MR_TBRCH")
 	private InvolvedBranch targetBranch;
 
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	@org.hibernate.annotations.ForeignKey(name="FK_MR_SBRCH")
 	private InvolvedBranch sourceBranch;
 
 	@OneToMany(mappedBy="request")
@@ -49,12 +46,12 @@ public class MergeRequest extends AbstractEntity {
 		this.title = title;
 	}
 
-	public Account getAccount() {
-		return account;
+	public User getUser() {
+		return user;
 	}
 
-	public void setAccount(Account account) {
-		this.account = account;
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 	public InvolvedBranch getTargetBranch() {

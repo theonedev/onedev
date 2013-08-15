@@ -17,7 +17,7 @@ import com.pmease.gitop.core.model.gatekeeper.GateKeeper;
 @org.hibernate.annotations.Cache(
 		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"account", "name"})
+		@UniqueConstraint(columnNames={"user", "name"})
 })
 @SuppressWarnings("serial")
 public class Repository extends AbstractEntity {
@@ -30,8 +30,7 @@ public class Repository extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	@org.hibernate.annotations.ForeignKey(name="FK_REPO_ACC")
-	private Account account;
+	private User user;
 	
 	@Column(nullable=true)
 	private GateKeeper gateKeeper;
@@ -52,12 +51,12 @@ public class Repository extends AbstractEntity {
 		this.description = description;
 	}
 
-	public Account getAccount() {
-		return account;
+	public User getUser() {
+		return user;
 	}
 
-	public void setAccount(Account account) {
-		this.account = account;
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 	public GateKeeper getGateKeeper() {

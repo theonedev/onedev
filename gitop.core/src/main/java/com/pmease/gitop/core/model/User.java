@@ -21,16 +21,13 @@ import com.pmease.commons.security.AbstractUser;
 @Entity
 @org.hibernate.annotations.Cache(
 		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
-public class Account extends AbstractUser {
+public class User extends AbstractUser {
 
-	@OneToMany(mappedBy="account")
+	@OneToMany(mappedBy="user")
 	private Collection<Membership> memberships;
 	
-	@OneToMany(mappedBy="account")
-	private Collection<Authorization> authorizations;
-
-	@OneToMany(mappedBy="account")
-	private Collection<Authorization> mergeRequests;
+	@OneToMany(mappedBy="user")
+	private Collection<Membership> mergeRequests;
 
 	public Collection<Membership> getMemberships() {
 		return memberships;
@@ -40,19 +37,11 @@ public class Account extends AbstractUser {
 		this.memberships = memberships;
 	}
 
-	public Collection<Authorization> getAuthorizations() {
-		return authorizations;
-	}
-
-	public void setAuthorizations(Collection<Authorization> authorizations) {
-		this.authorizations = authorizations;
-	}
-
-	public Collection<Authorization> getMergeRequests() {
+	public Collection<Membership> getMergeRequests() {
 		return mergeRequests;
 	}
 
-	public void setMergeRequests(Collection<Authorization> mergeRequests) {
+	public void setMergeRequests(Collection<Membership> mergeRequests) {
 		this.mergeRequests = mergeRequests;
 	}
 

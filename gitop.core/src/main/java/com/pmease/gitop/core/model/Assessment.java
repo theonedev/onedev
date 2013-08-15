@@ -14,30 +14,28 @@ import com.pmease.commons.persistence.AbstractEntity;
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"account", "commit"})
+		@UniqueConstraint(columnNames={"user", "commit"})
 })
-public class Assess extends AbstractEntity {
+public class Assessment extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	@org.hibernate.annotations.ForeignKey(name="FK_ASS_ACC")
-	private Account account;
+	private User user;
 	
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	@org.hibernate.annotations.ForeignKey(name="FK_ASS_COM")
 	private InvolvedCommit commit;
 	
 	private boolean approved;
 
-	public Account getAccount() {
-		return account;
+	public User getUser() {
+		return user;
 	}
 
-	public void setAccount(Account account) {
-		this.account = account;
+	public void setUser(User user) {
+		this.user = user;
 	}
 	
 	public InvolvedCommit getCommit() {
@@ -49,7 +47,7 @@ public class Assess extends AbstractEntity {
 	}
 
 	/**
-	 * Whether the account accepts or rejects the commit.
+	 * Whether the user accepts or rejects the commit.
 	 * <p>
 	 * @return 
 	 * 			true if approved; false if rejected
