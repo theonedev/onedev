@@ -1,5 +1,6 @@
 package com.pmease.gitop.core.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -10,40 +11,52 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.FetchMode;
 
 import com.pmease.commons.persistence.AbstractEntity;
+import com.pmease.gitop.core.model.permission.RepositoryOperation;
 
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"who", "what"})
+		@UniqueConstraint(columnNames={"subject", "object"})
 })
 @org.hibernate.annotations.Cache(
 		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
-public class RepositoryLevelPermissionByUser extends AbstractEntity {
+public class RepositoryAuthorization extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	private User who;	
+	private Team subject;	
 
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	private Repository what;
+	private Repository object;
 	
-	public User getWho() {
-		return who;
+	@Column(nullable=false)
+	private RepositoryOperation operation;
+
+	public Team getSubject() {
+		return subject;
 	}
 
-	public void setWho(User who) {
-		this.who = who;
+	public void setSubject(Team subject) {
+		this.subject = subject;
 	}
 	
-	public Repository getWhat() {
-		return what;
+	public Repository getObject() {
+		return object;
 	}
 
-	public void setWhat(Repository what) {
-		this.what = what;
+	public void setObject(Repository object) {
+		this.object = object;
+	}
+
+	public RepositoryOperation getOperation() {
+		return operation;
+	}
+
+	public void setOperation(RepositoryOperation operation) {
+		this.operation = operation;
 	}
 
 }

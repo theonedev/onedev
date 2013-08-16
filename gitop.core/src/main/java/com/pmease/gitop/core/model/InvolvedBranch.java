@@ -21,13 +21,21 @@ import com.pmease.commons.persistence.AbstractEntity;
 @SuppressWarnings("serial")
 public class InvolvedBranch extends AbstractEntity {
 
-	@Column(nullable=false)
-	private String name;
-	
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
 	private Repository repository;
+
+	@Column(nullable=false)
+	private String name;
+	
+	public Repository getRepository() {
+		return repository;
+	}
+
+	public void setRepository(Repository repository) {
+		this.repository = repository;
+	}
 
 	public String getName() {
 		return name;
@@ -35,14 +43,6 @@ public class InvolvedBranch extends AbstractEntity {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public Repository getRepository() {
-		return repository;
-	}
-
-	public void setRepository(Repository repository) {
-		this.repository = repository;
 	}
 
 }

@@ -14,36 +14,36 @@ import com.pmease.commons.persistence.AbstractEntity;
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"who", "what"})
+		@UniqueConstraint(columnNames={"user", "role"})
 })
 @org.hibernate.annotations.Cache(
 		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
-public class UserLevelPermissionByUser extends AbstractEntity {
+public class RoleMembership extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	private User who;	
-
-	@ManyToOne(fetch=FetchType.EAGER)
-	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
-	@JoinColumn(nullable=false)
-	private User what;
+	private User user;
 	
-	public User getWhat() {
-		return what;
+	@ManyToOne(fetch=FetchType.EAGER)
+	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
+	@JoinColumn(nullable=false)
+	private Role role;
+
+	public User getUser() {
+		return user;
 	}
 
-	public void setWhat(User what) {
-		this.what = what;
+	public void setUser(User user) {
+		this.user = user;
 	}
 
-	public User getWho() {
-		return who;
+	public Role getRole() {
+		return role;
 	}
 
-	public void setWho(User who) {
-		this.who = who;
+	public void setRole(Role role) {
+		this.role = role;
 	}
 	
 }

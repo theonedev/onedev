@@ -13,11 +13,11 @@ import com.pmease.commons.persistence.dao.DefaultGenericDao;
 import com.pmease.commons.persistence.dao.GeneralDao;
 import com.pmease.gitop.core.entitymanager.GroupManager;
 import com.pmease.gitop.core.entitymanager.UserManager;
-import com.pmease.gitop.core.model.Group;
-import com.pmease.gitop.core.model.Membership;
+import com.pmease.gitop.core.model.Team;
+import com.pmease.gitop.core.model.TeamMembership;
 
 @Singleton
-public class DefaultGroupManager extends DefaultGenericDao<Group> implements GroupManager {
+public class DefaultGroupManager extends DefaultGenericDao<Team> implements GroupManager {
 
 	private final UserManager userManager;
 	
@@ -28,9 +28,9 @@ public class DefaultGroupManager extends DefaultGenericDao<Group> implements Gro
 
 	@Transactional
 	@Override
-	public Collection<Group> getGroups(Long userId) {
-		Collection<Group> groups = new ArrayList<Group>();
-		for (Membership membership: userManager.load(userId).getMemberships())
+	public Collection<Team> getGroups(Long userId) {
+		Collection<Team> groups = new ArrayList<Team>();
+		for (TeamMembership membership: userManager.load(userId).getMemberships())
 			groups.add(membership.getGroup());
 		
 		return groups;

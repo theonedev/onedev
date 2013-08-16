@@ -12,28 +12,40 @@ import org.hibernate.annotations.FetchMode;
 
 import com.pmease.commons.persistence.AbstractEntity;
 import com.pmease.gitop.core.model.gatekeeper.GateKeeper;
+import com.pmease.gitop.core.model.permission.object.ProtectedObject;
+import com.pmease.gitop.core.model.permission.object.RepositoryBelonging;
+import com.pmease.gitop.core.model.permission.object.UserBelonging;
 
 @Entity
 @org.hibernate.annotations.Cache(
 		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"user", "name"})
+		@UniqueConstraint(columnNames={"owner", "name"})
 })
 @SuppressWarnings("serial")
-public class Repository extends AbstractEntity {
+public class Repository extends AbstractEntity implements UserBelonging {
 	
+	@ManyToOne(fetch=FetchType.EAGER)
+	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
+	@JoinColumn(nullable=false)
+	private User owner;
+
 	@Column(nullable=false)
 	private String name;
 	
 	private String description;
 
-	@ManyToOne(fetch=FetchType.EAGER)
-	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
-	@JoinColumn(nullable=false)
-	private User user;
-	
 	@Column(nullable=true)
 	private GateKeeper gateKeeper;
+
+	@Override
+	public User getOwner() {
+		return owner;
+	}
+
+	public void setOwner(User owner) {
+		this.owner = owner;
+	}
 
 	public String getName() {
 		return name;
@@ -51,20 +63,25 @@ public class Repository extends AbstractEntity {
 		this.description = description;
 	}
 
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
-
 	public GateKeeper getGateKeeper() {
 		return gateKeeper;
 	}
 
 	public void setGateKeeper(GateKeeper gateKeeper) {
 		this.gateKeeper = gateKeeper;
+	}
+
+	@Override
+	public boolean has(ProtectedObject object) {
+		if (object instanceof Repository) {
+			Repository repository = (Repository) object;
+			return repository.getId().equals(getId());
+		} else if (object instanceof RepositoryBelonging) {
+			RepositoryBelonging repositoryBelonging = (RepositoryBelonging) object;
+			return repositoryBelonging.getOwner().getId().equals(getId());
+		} else {
+			return false;
+		}
 	}
 
 }
