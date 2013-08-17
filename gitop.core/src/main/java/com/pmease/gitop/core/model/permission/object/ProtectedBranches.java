@@ -2,6 +2,7 @@ package com.pmease.gitop.core.model.permission.object;
 
 import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.gitop.core.model.Repository;
+import com.pmease.gitop.core.model.User;
 
 public class ProtectedBranches implements RepositoryBelonging {
 
@@ -22,15 +23,21 @@ public class ProtectedBranches implements RepositoryBelonging {
 	public boolean has(ProtectedObject object) {
 		if (object instanceof ProtectedBranches) {
 			ProtectedBranches branches = (ProtectedBranches) object;
-			return WildcardUtils.matchPath(getBranchNames(), branches.getBranchNames());
+			return getRepository().getId().equals(branches.getRepository().getId()) 
+					&& WildcardUtils.matchPath(getBranchNames(), branches.getBranchNames());
 		} else {
 			return false;
 		}
 	}
 
 	@Override
-	public Repository getOwner() {
+	public Repository getRepository() {
 		return repository;
 	}
 
+	@Override
+	public User getUser() {
+		return getRepository().getUser();
+	}
+	
 }

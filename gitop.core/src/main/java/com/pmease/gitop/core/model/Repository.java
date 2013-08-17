@@ -38,7 +38,6 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	@Column(nullable=true)
 	private GateKeeper gateKeeper;
 
-	@Override
 	public User getOwner() {
 		return owner;
 	}
@@ -70,6 +69,11 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	public void setGateKeeper(GateKeeper gateKeeper) {
 		this.gateKeeper = gateKeeper;
 	}
+	
+	@Override
+	public User getUser() {
+		return getOwner();
+	}
 
 	@Override
 	public boolean has(ProtectedObject object) {
@@ -78,7 +82,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 			return repository.getId().equals(getId());
 		} else if (object instanceof RepositoryBelonging) {
 			RepositoryBelonging repositoryBelonging = (RepositoryBelonging) object;
-			return repositoryBelonging.getOwner().getId().equals(getId());
+			return repositoryBelonging.getRepository().getId().equals(getId());
 		} else {
 			return false;
 		}

@@ -1,6 +1,8 @@
 package com.pmease.gitop.core.model;
 
-import javax.persistence.Column;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -11,7 +13,11 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.FetchMode;
 
 import com.pmease.commons.persistence.AbstractEntity;
-import com.pmease.gitop.core.model.permission.RepositoryOperation;
+import com.pmease.gitop.core.model.permission.BranchPermission;
+import com.pmease.gitop.core.model.permission.object.ProtectedBranches;
+import com.pmease.gitop.core.model.permission.object.ProtectedObject;
+import com.pmease.gitop.core.model.permission.operation.PrivilegedOperation;
+import com.pmease.gitop.core.model.permission.operation.Read;
 
 @SuppressWarnings("serial")
 @Entity
@@ -25,38 +31,59 @@ public class RepositoryAuthorization extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	private Team subject;	
+	private Team team;	
 
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	private Repository object;
+	private Repository repository;
 	
-	@Column(nullable=false)
-	private RepositoryOperation operation;
-
-	public Team getSubject() {
-		return subject;
-	}
-
-	public void setSubject(Team subject) {
-		this.subject = subject;
-	}
+	private PrivilegedOperation operation = new Read();
 	
-	public Repository getObject() {
-		return object;
-	}
+	private List<BranchPermission> branchPermissions = new ArrayList<BranchPermission>();
 
-	public void setObject(Repository object) {
-		this.object = object;
-	}
-
-	public RepositoryOperation getOperation() {
+	public PrivilegedOperation getOperation() {
 		return operation;
 	}
 
-	public void setOperation(RepositoryOperation operation) {
+	public void setOperation(PrivilegedOperation operation) {
 		this.operation = operation;
+	}
+
+	public List<BranchPermission> getBranchPermissions() {
+		return branchPermissions;
+	}
+
+	public void setBranchPermissions(List<BranchPermission> branchPermissions) {
+		this.branchPermissions = branchPermissions;
+	}
+
+	public PrivilegedOperation operationOf(ProtectedObject object) {
+		for (BranchPermission each: getBranchPermissions()) {
+			if (new ProtectedBranches(repository, each.getBranchNames()).has(object))
+				return each.getBranchOperation();
+		}
+		
+		if (getRepository().has(object))
+			return getOperation();
+		else
+			return null;
+	}
+
+	public Team getTeam() {
+		return team;
+	}
+
+	public void setTeam(Team team) {
+		this.team = team;
+	}
+	
+	public Repository getRepository() {
+		return repository;
+	}
+
+	public void setRepository(Repository repository) {
+		this.repository = repository;
 	}
 
 }

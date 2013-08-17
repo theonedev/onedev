@@ -1,11 +1,10 @@
 package com.pmease.gitop.core.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
-
-import org.apache.shiro.authz.Permission;
 
 import com.pmease.commons.security.AbstractUser;
 import com.pmease.gitop.core.model.permission.object.ProtectedObject;
@@ -25,26 +24,37 @@ import com.pmease.gitop.core.model.permission.object.UserBelonging;
 @Entity
 @org.hibernate.annotations.Cache(
 		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
-public class User extends AbstractUser implements ProtectedObject, Permission {
+public class User extends AbstractUser implements ProtectedObject {
 
 	@OneToMany(mappedBy="user")
-	private Collection<TeamMembership> memberships;
+	private Collection<TeamMembership> teamMemberships = new ArrayList<TeamMembership>();
 	
 	@OneToMany(mappedBy="user")
-	private Collection<MergeRequest> mergeRequests;
+	private Collection<RoleMembership> roleMemberships = new ArrayList<RoleMembership>();
+	
+	@OneToMany(mappedBy="user")
+	private Collection<MergeRequest> mergeRequests = new ArrayList<MergeRequest>();
 	
 	@OneToMany(mappedBy="owner")
-	private Collection<Repository> repositories;
+	private Collection<Repository> repositories = new ArrayList<Repository>();
 
 	@OneToMany(mappedBy="owner")
-	private Collection<Team> teams;
+	private Collection<Team> teams = new ArrayList<Team>();
 
-	public Collection<TeamMembership> getMemberships() {
-		return memberships;
+	public Collection<TeamMembership> getTeamMemberships() {
+		return teamMemberships;
 	}
 
-	public void setMemberships(Collection<TeamMembership> memberships) {
-		this.memberships = memberships;
+	public void setTeamMemberships(Collection<TeamMembership> teamMemberships) {
+		this.teamMemberships = teamMemberships;
+	}
+
+	public Collection<RoleMembership> getRoleMemberships() {
+		return roleMemberships;
+	}
+
+	public void setRoleMemberships(Collection<RoleMembership> roleMemberships) {
+		this.roleMemberships = roleMemberships;
 	}
 
 	public Collection<Repository> getRepositories() {
@@ -78,20 +88,10 @@ public class User extends AbstractUser implements ProtectedObject, Permission {
 			return user.getId().equals(getId());
 		} else if (object instanceof UserBelonging) {
 			UserBelonging userBelonging = (UserBelonging) object;
-			return userBelonging.getOwner().getId().equals(getId());
+			return userBelonging.getUser().getId().equals(getId());
 		} else {
 			return false;
 		}
-	}
-
-	@Override
-	public boolean implies(Permission permission) {
-		for (TeamMembership each: getMemberships()) {
-			if (each.getGroup().implies(permission))
-				return true;
-		}
-		
-		return false;
 	}
 
 }

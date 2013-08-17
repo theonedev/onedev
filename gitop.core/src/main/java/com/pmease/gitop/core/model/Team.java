@@ -1,5 +1,6 @@
 package com.pmease.gitop.core.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.persistence.Column;
@@ -13,6 +14,7 @@ import org.apache.shiro.authz.Permission;
 import com.pmease.commons.persistence.AbstractEntity;
 import com.pmease.gitop.core.model.permission.ObjectPermission;
 import com.pmease.gitop.core.model.permission.operation.PrivilegedOperation;
+import com.pmease.gitop.core.model.permission.operation.Read;
 
 @Entity
 @org.hibernate.annotations.Cache(
@@ -30,13 +32,17 @@ public class Team extends AbstractEntity implements Permission {
 	
 	private String description;
 	
-	private PrivilegedOperation operation;
+	private boolean anonymous;
+	
+	private boolean register;
+	
+	private PrivilegedOperation operation = new Read();
 	
 	@OneToMany(mappedBy="team")
-	private Collection<TeamMembership> memberships;
+	private Collection<TeamMembership> memberships = new ArrayList<TeamMembership>();
 	
 	@OneToMany(mappedBy="subject")
-	private Collection<RepositoryAuthorization> repositoryAuthorizations;
+	private Collection<RepositoryAuthorization> repositoryAuthorizations = new ArrayList<RepositoryAuthorization>();
 
 	public User getOwner() {
 		return owner;
@@ -60,6 +66,22 @@ public class Team extends AbstractEntity implements Permission {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public boolean isAnonymous() {
+		return anonymous;
+	}
+
+	public void setAnonymous(boolean anonymous) {
+		this.anonymous = anonymous;
+	}
+
+	public boolean isRegister() {
+		return register;
+	}
+
+	public void setRegister(boolean register) {
+		this.register = register;
 	}
 
 	public PrivilegedOperation getOperation() {
@@ -93,8 +115,7 @@ public class Team extends AbstractEntity implements Permission {
 			ObjectPermission objectPermission = (ObjectPermission) permission;
 			
 			for (RepositoryAuthorization each: getRepositoryAuthorizations()) {
-				PrivilegedOperation operation = each.getOperation().operationOf(
-						objectPermission.getObject(), each.getObject());
+				PrivilegedOperation operation = each.operationOf(objectPermission.getObject());
 				
 				if (operation != null)
 					return operation.can(objectPermission.getOperation());

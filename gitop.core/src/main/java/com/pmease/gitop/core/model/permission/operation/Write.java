@@ -4,7 +4,7 @@ public class Write implements PrivilegedOperation{
 
 	@Override
 	public boolean can(PrivilegedOperation operation) {
-		return operation instanceof Write || new Read().can(operation);
+		return operation instanceof Write || new WriteToBranch("**").can(operation) || new Read().can(operation);
 	}
 
 }

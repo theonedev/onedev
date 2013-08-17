@@ -4,24 +4,21 @@ import com.pmease.gitop.core.model.permission.operation.PrivilegedOperation;
 
 public class BranchPermission {
 	
-	private String branchNames;
+	private final String branchNames;
 	
-	private PrivilegedOperation branchOperation;
+	private final PrivilegedOperation branchOperation;
+	
+	public BranchPermission(String branchNames, PrivilegedOperation branchOperation) {
+		this.branchNames = branchNames;
+		this.branchOperation = branchOperation;
+	}
 
 	public String getBranchNames() {
 		return branchNames;
 	}
 
-	public void setBranchNames(String branchNames) {
-		this.branchNames = branchNames;
-	}
-
 	public PrivilegedOperation getBranchOperation() {
 		return branchOperation;
-	}
-
-	public void setBranchOperation(PrivilegedOperation branchOperation) {
-		this.branchOperation = branchOperation;
 	}
 
 }

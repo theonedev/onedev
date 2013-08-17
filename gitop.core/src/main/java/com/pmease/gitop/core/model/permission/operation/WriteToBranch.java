@@ -4,14 +4,14 @@ import com.pmease.commons.util.pattern.WildcardUtils;
 
 public class WriteToBranch implements PrivilegedOperation {
 
-	private String filePaths = "**";
+	private final String filePaths;
+	
+	public WriteToBranch(String filePaths) {
+		this.filePaths = filePaths;
+	}
 	
 	public String getFilePaths() {
 		return filePaths;
-	}
-
-	public void setFilePaths(String filePaths) {
-		this.filePaths = filePaths;
 	}
 
 	@Override

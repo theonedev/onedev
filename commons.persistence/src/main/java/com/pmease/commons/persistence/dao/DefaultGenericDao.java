@@ -82,6 +82,11 @@ public class DefaultGenericDao<T extends AbstractEntity> implements GenericDao<T
 		
 		return (List<T>) generalDao.search(detachedCriteria, firstResult, maxResults);
 	}
+	
+	@Override
+	public List<T> search(Criterion[] criterions) {
+		return search(criterions, null, 0, 0);
+	}
 
 	@Override
 	public Object find(Criterion[] criterions) {

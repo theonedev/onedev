@@ -63,6 +63,7 @@ public abstract class AbstractRealm<T extends AbstractUser> extends AuthorizingR
 	
 	/**
 	 * Get assigned permissions of user of specified identifier.
+	 * <p>
 	 * @param userId
 	 * 			Identifier of user to get permissions of. Value of <tt>0</tt> means anonymous user 
 	 * @return
@@ -72,6 +73,7 @@ public abstract class AbstractRealm<T extends AbstractUser> extends AuthorizingR
 
 	/**
 	 * Retrieve {@link AuthenticationInfo} of specified token. 
+	 * <p>
 	 * @param token
 	 * 			The token used to retrieve associated {@link AuthenticationInfo}
 	 * @return

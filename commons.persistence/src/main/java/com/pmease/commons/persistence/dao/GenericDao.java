@@ -78,6 +78,16 @@ public interface GenericDao<T extends AbstractEntity> {
 	List<T> search(@Nullable Criterion[] criterions, @Nullable Order[] orders, int firstResult, int maxResults);
 	
 	/**
+	 * Search entity with specified criterions.
+	 * 
+	 * @param criterions
+	 * 			Hibernate criterions to be used for search. Use null if no criterions.
+	 * @return
+	 * 			list of entity matching specified criterions.
+	 */
+	List<T> search(@Nullable Criterion[] criterions);
+
+	/**
 	 * This method expects to find a single entity with specified criteria
 	 * 
 	 * @param criterions

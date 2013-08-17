@@ -26,11 +26,15 @@ public class Role extends AbstractEntity implements Permission {
 	
 	private String description;
 	
+	private boolean anonymous;
+	
+	private boolean register;
+
 	@Column(nullable=false)
 	private List<PrivilegedOperation> operations = new ArrayList<PrivilegedOperation>();
 	
 	@OneToMany(mappedBy="role")
-	private Collection<RoleMembership> memberships;
+	private Collection<RoleMembership> memberships = new ArrayList<RoleMembership>();
 
 	public String getName() {
 		return name;
@@ -46,6 +50,22 @@ public class Role extends AbstractEntity implements Permission {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public boolean isAnonymous() {
+		return anonymous;
+	}
+
+	public void setAnonymous(boolean anonymous) {
+		this.anonymous = anonymous;
+	}
+
+	public boolean isRegister() {
+		return register;
+	}
+
+	public void setRegister(boolean register) {
+		this.register = register;
 	}
 
 	public Collection<RoleMembership> getMemberships() {
