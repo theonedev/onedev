@@ -42,7 +42,7 @@ public class OrGateKeeper implements GateKeeper {
 	}
 
 	@Override
-	public Trimmable trim() {
+	public Object trim(Object context) {
 		return TrimUtils.trim(new AndOrConstruct() {
 			
 			@Override
@@ -54,7 +54,8 @@ public class OrGateKeeper implements GateKeeper {
 			public List<? extends Trimmable> getMembers() {
 				return getGateKeepers();
 			}
-		});
+			
+		}, context);
 	}
 
 }

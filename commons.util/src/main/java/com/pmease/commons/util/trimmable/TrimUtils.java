@@ -5,26 +5,31 @@ import java.util.List;
 
 public class TrimUtils {
 	
-	public static void trim(List<Trimmable> list) {
+	@SuppressWarnings("unchecked")
+	public static void trim(List<?> list, Object context) {
 		int index = 0;
-		for (Iterator<Trimmable> it = list.iterator(); it.hasNext();) {
-			Trimmable trimmable = it.next();
-			Trimmable trimmed = trimmable.trim();
-			if (trimmed == null) {
-				it.remove();
+		for (Iterator<?> it = list.iterator(); it.hasNext();) {
+			Object entry = it.next();
+			if (entry instanceof Trimmable) {
+				Trimmable trimmable = (Trimmable) entry;
+				Object trimmed = trimmable.trim(context);
+				if (trimmed == null) {
+					it.remove();
+				} else {
+					if (trimmed != trimmable)
+						((List<Object>)list).set(index, trimmed);
+					index ++;
+				}
 			} else {
-				if (trimmed != trimmable)
-					list.set(index, trimmed);
 				index ++;
 			}
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static Trimmable trim(AndOrConstruct andOr) {
-		List<? extends Trimmable> members = andOr.getMembers();
+	public static Object trim(AndOrConstruct andOr, Object context) {
+		List<?> members = andOr.getMembers();
 		
-		trim((List<Trimmable>) members);
+		trim(members, context);
 		
 		if (members.size() == 1)
 			return members.iterator().next();

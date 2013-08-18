@@ -12,21 +12,21 @@ public class TrimUtilsTest {
 
 	@Test
 	public void shouldTrimList() {
-		List<Trimmable> list = new ArrayList<Trimmable>();
+		List<Object> list = new ArrayList<Object>();
 		list.add(new SimpleTrimmable(null));
 		list.add(new SimpleTrimmable("1"));
 		list.add(new SimpleTrimmable(null));
 		list.add(new Trimmable() {
 
 			@Override
-			public Trimmable trim() {
+			public Trimmable trim(Object context) {
 				return new SimpleTrimmable("2");
 			}
 			
 		});
 		list.add(new SimpleTrimmable("3"));
 		
-		TrimUtils.trim(list);
+		TrimUtils.trim(list, null);
 		
 		assertEquals(list.size(), 3);
 		assertTrue(list.get(0) instanceof SimpleTrimmable);
@@ -46,7 +46,7 @@ public class TrimUtilsTest {
 						new SimpleTrimmable("2")),
 				new SimpleAndOrConstruct());
 		
-		Trimmable result = TrimUtils.trim(construct);
+		Object result = TrimUtils.trim(construct, null);
 		
 		assertTrue(result instanceof AndOrConstruct);
 		assertEquals(((AndOrConstruct)result).getMembers().size(), 2);
@@ -59,7 +59,7 @@ public class TrimUtilsTest {
 						new SimpleTrimmable("2")),
 				new SimpleAndOrConstruct());
 		
-		result = TrimUtils.trim(construct);
+		result = TrimUtils.trim(construct, null);
 		
 		assertTrue(result instanceof SimpleTrimmable);
 		assertEquals(((SimpleTrimmable)result).getValue(), "2");
@@ -67,7 +67,7 @@ public class TrimUtilsTest {
 	
 	private static class SimpleAndOrConstruct implements AndOrConstruct, Trimmable {
 
-		private List<Trimmable> members = new ArrayList<Trimmable>();
+		private List<Object> members = new ArrayList<Object>();
 		
 		public SimpleAndOrConstruct(Trimmable...members) {
 			for (Trimmable each: members)
@@ -75,17 +75,17 @@ public class TrimUtilsTest {
 		}
 		
 		@Override
-		public Trimmable trim() {
-			return TrimUtils.trim(this);
+		public Object trim(Object context) {
+			return TrimUtils.trim(this, null);
 		}
 		
 		@Override
-		public Trimmable getSelf() {
+		public Object getSelf() {
 			return this;
 		}
 
 		@Override
-		public List<? extends Trimmable> getMembers() {
+		public List<Object> getMembers() {
 			return members;
 		}
 
@@ -104,7 +104,7 @@ public class TrimUtilsTest {
 		}
 		
 		@Override
-		public Trimmable trim() {
+		public Trimmable trim(Object context) {
 			if (value == null)
 				return null;
 			else

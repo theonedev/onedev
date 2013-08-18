@@ -1,5 +1,7 @@
 package com.pmease.gitop.core.model.permission;
 
+import javax.annotation.Nullable;
+
 import org.apache.shiro.authz.Permission;
 
 import com.pmease.gitop.core.model.Repository;
@@ -89,11 +91,34 @@ public class ObjectPermission implements Permission {
 		return new ObjectPermission(new ProtectedBranches(repository, branchName), new Read());
 	}
 
+	/**
+	 * Construct the permission to write anything in a branch.
+	 * <p>
+	 * @param repository
+	 * 			repository of the branch
+	 * @param branchName
+	 * 			name of the branch
+	 * @return
+	 * 			permission object
+	 */
 	public static ObjectPermission ofBranchWrite(Repository repository, String branchName) {
 		return new ObjectPermission(new ProtectedBranches(repository, branchName), new WriteToBranch("**"));
 	}
 
-	public static ObjectPermission ofBranchWrite(Repository repository, String branchName, String filePath) {
+	/**
+	 * Construct the permission to write a branch with specified files.
+	 * <p>
+	 * @param repository
+	 * 			repository of the branch
+	 * @param branchName
+	 * 			name of the branch
+	 * @param filePath
+	 * 			path of file in the branch to be written. <i>null<i> to construct a branch write permission 
+	 * 			only allowed to modify commit comment (commit amend) without touching any files. 
+	 * @return
+	 * 			permission object
+	 */
+	public static ObjectPermission ofBranchWrite(Repository repository, String branchName, @Nullable String filePath) {
 		return new ObjectPermission(new ProtectedBranches(repository, branchName), new WriteToBranch(filePath));
 	}
 

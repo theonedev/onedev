@@ -1,5 +1,6 @@
 package com.pmease.gitop.core.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.persistence.Column;
@@ -78,4 +79,8 @@ public class MergeRequest extends AbstractEntity {
 		this.updates = updates;
 	}
 
+	public Collection<String> getTouchedFiles() {
+		return new ArrayList<String>();
+	}
+	
 }

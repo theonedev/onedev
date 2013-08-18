@@ -26,6 +26,8 @@ import com.pmease.gitop.core.model.permission.object.UserBelonging;
 		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class User extends AbstractUser implements ProtectedObject {
 
+	private String description;
+	
 	@OneToMany(mappedBy="user")
 	private Collection<TeamMembership> teamMemberships = new ArrayList<TeamMembership>();
 	
@@ -40,6 +42,14 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	@OneToMany(mappedBy="owner")
 	private Collection<Team> teams = new ArrayList<Team>();
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
 	public Collection<TeamMembership> getTeamMemberships() {
 		return teamMemberships;
@@ -93,5 +103,5 @@ public class User extends AbstractUser implements ProtectedObject {
 			return false;
 		}
 	}
-
+	
 }

@@ -16,8 +16,6 @@ public class AbstractUser extends AbstractEntity implements AuthenticationInfo {
 	@Column(unique=true, nullable=false)
 	private String name;
 	
-	private String fullName;
-	
 	@Column(length=1024)
 	private String passwordHash;
 	
@@ -29,14 +27,6 @@ public class AbstractUser extends AbstractEntity implements AuthenticationInfo {
 		this.name = name;
 	}
 
-	public String getFullName() {
-		return fullName;
-	}
-
-	public void setFullName(String fullName) {
-		this.fullName = fullName;
-	}
-	
 	public String getPasswordHash() {
 		return passwordHash;
 	}

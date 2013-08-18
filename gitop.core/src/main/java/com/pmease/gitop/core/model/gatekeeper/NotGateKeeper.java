@@ -2,7 +2,6 @@ package com.pmease.gitop.core.model.gatekeeper;
 
 import javax.validation.constraints.NotNull;
 
-import com.pmease.commons.util.trimmable.Trimmable;
 import com.pmease.gitop.core.model.MergeRequest;
 
 public class NotGateKeeper implements GateKeeper {
@@ -31,8 +30,8 @@ public class NotGateKeeper implements GateKeeper {
 	}
 
 	@Override
-	public Trimmable trim() {
-		return gateKeeper.trim();
+	public Object trim(Object context) {
+		return gateKeeper.trim(context);
 	}
 
 }

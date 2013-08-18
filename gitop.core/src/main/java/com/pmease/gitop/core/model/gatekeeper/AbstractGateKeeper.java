@@ -5,7 +5,7 @@ import com.pmease.commons.util.trimmable.Trimmable;
 public abstract class AbstractGateKeeper implements GateKeeper {
 
 	@Override
-	public Trimmable trim() {
+	public Trimmable trim(Object context) {
 		return this;
 	}
 

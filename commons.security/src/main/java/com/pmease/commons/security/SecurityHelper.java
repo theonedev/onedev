@@ -26,24 +26,4 @@ public class SecurityHelper extends SecurityUtils {
 			return null;
 	}
 	
-	/**
-	 * Get display name of current user.
-	 * @param userClass
-	 * 			Class of the user
-	 * @param anonymousName
-	 * 			Display name of anonymous user
-	 * @return
-	 * 			Display name of current user or specified anonymous name for anonymous user 
-	 */
-	public static <T extends AbstractUser> String getUserDisplayName(Class<T> userClass, String anonymousName) {
-		T user = getUser(userClass);
-		if (user != null) {
-			if (user.getFullName() != null)
-				return user.getFullName();
-			else
-				return user.getName();
-		} else {
-			return anonymousName;
-		}
-	}
 }

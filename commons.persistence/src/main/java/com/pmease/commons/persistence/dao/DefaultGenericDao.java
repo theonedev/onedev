@@ -88,8 +88,9 @@ public class DefaultGenericDao<T extends AbstractEntity> implements GenericDao<T
 		return search(criterions, null, 0, 0);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object find(Criterion[] criterions) {
+	public T find(Criterion[] criterions) {
 		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(entityClass);
 		
 		if (criterions != null) {
@@ -97,7 +98,7 @@ public class DefaultGenericDao<T extends AbstractEntity> implements GenericDao<T
 				detachedCriteria.add(criterion);
 		}
 		
-		return generalDao.find(detachedCriteria);
+		return (T) generalDao.find(detachedCriteria);
 	}
 
 	protected Session getSession() {

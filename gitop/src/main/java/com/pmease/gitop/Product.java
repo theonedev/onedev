@@ -6,14 +6,11 @@ import java.util.Properties;
 
 import javax.inject.Inject;
 
-import org.apache.shiro.authc.credential.PasswordService;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.bio.SocketConnector;
 import org.eclipse.jetty.server.ssl.SslSocketConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,10 +20,8 @@ import com.pmease.commons.jetty.FileAssetServlet;
 import com.pmease.commons.jetty.extensionpoints.ServerConfigurator;
 import com.pmease.commons.jetty.extensionpoints.ServletContextConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
-import com.pmease.commons.persistence.dao.GeneralDao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.gitop.core.model.User;
 
 public class Product extends AbstractPlugin {
 
@@ -36,15 +31,9 @@ public class Product extends AbstractPlugin {
 
 	public static final String PRODUCT_NAME = "Gitop";
 	
-	private final GeneralDao generalDao;
-	
-	private final PasswordService passwordService;
-	
 	@Inject
-	public Product(GeneralDao generalDao, PasswordService passwordService) {
+	public Product() {
 		serverProps = FileUtils.loadProperties(new File(Bootstrap.getConfDir(), "server.properties"));
-		this.generalDao = generalDao;
-		this.passwordService = passwordService;
 	}
 	
 	@Override
@@ -115,16 +104,6 @@ public class Product extends AbstractPlugin {
 
 	@Override
 	public void postStartDependents() {
-		DetachedCriteria criteria = DetachedCriteria.forClass(User.class);
-		criteria.add(Restrictions.eq("loginName", "admin"));
-		if (generalDao.find(criteria) == null) {
-			User user =  new User();
-			user.setName("admin");
-			user.setPasswordHash(passwordService.encryptPassword("12345"));
-			user.setFullName("Administrator");
-			generalDao.save(user);
-		}
-
 		logger.info(PRODUCT_NAME + " has been started successfully.");
 	}
 

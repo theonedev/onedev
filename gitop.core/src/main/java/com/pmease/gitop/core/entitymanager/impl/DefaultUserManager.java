@@ -5,12 +5,16 @@ import javax.inject.Singleton;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.persistence.Transactional;
 import com.pmease.commons.persistence.dao.DefaultGenericDao;
 import com.pmease.commons.persistence.dao.GeneralDao;
+import com.pmease.commons.util.namedentity.EntityLoader;
+import com.pmease.commons.util.namedentity.NamedEntity;
 import com.pmease.gitop.core.entitymanager.UserManager;
 import com.pmease.gitop.core.model.User;
 
@@ -36,6 +40,63 @@ public class DefaultUserManager extends DefaultGenericDao<User> implements UserM
 			Preconditions.checkNotNull(rootUser);
 		}
 		return rootUser;
+	}
+	
+	@Transactional
+	@Override
+	public User find(String name) {
+		return (User) find(new Criterion[]{Restrictions.eq("name", name)});
+	}
+
+	@Override
+	public EntityLoader asEntityLoader() {
+		return new EntityLoader() {
+
+			@Override
+			public NamedEntity get(final Long id) {
+				final User user = DefaultUserManager.this.find(id);
+				if (user != null) {
+					return new NamedEntity() {
+
+						@Override
+						public Long getId() {
+							return id;
+						}
+
+						@Override
+						public String getName() {
+							return user.getName();
+						}
+						
+					};
+				} else {
+					return null;
+				}
+			}
+
+			@Override
+			public NamedEntity get(String name) {
+				final User user = find(name);
+				if (user != null) {
+					return new NamedEntity() {
+
+						@Override
+						public Long getId() {
+							return user.getId();
+						}
+
+						@Override
+						public String getName() {
+							return user.getName();
+						}
+						
+					};
+				} else {
+					return null;
+				}
+			}
+			
+		};
 	}
 
 }

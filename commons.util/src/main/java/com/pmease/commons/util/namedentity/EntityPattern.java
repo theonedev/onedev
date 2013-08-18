@@ -3,6 +3,19 @@ package com.pmease.commons.util.namedentity;
 import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.commons.util.trimmable.Trimmable;
 
+/**
+ * An entity pattern refers to a string matching one or more database entities. 
+ * <p>
+ * When refer to only one entity, the string should represent id of the entity. 
+ * This is necessary as entity name can be changed while id will never. In case 
+ * the entity is deleted, the data structure can implement {@link Trimmable} to 
+ * trim the pattern. 
+ * <p>
+ * Example entity patterns of stored form: <i>100, qa*, 5.0.?</i>
+ * <p>
+ * @author robin
+ *
+ */
 public class EntityPattern implements Trimmable {
 	
 	private final String stored;
@@ -46,7 +59,7 @@ public class EntityPattern implements Trimmable {
 	}
 	
 	@Override
-	public Trimmable trim() {
+	public Object trim(Object context) {
 		if (asId() == null || asEntity() != null) 
 			return this;
 		else

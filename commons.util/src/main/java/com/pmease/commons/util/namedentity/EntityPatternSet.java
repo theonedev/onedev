@@ -8,6 +8,14 @@ import com.pmease.commons.util.pattern.ExclusiveAwarePattern;
 import com.pmease.commons.util.pattern.PatternSet;
 import com.pmease.commons.util.trimmable.Trimmable;
 
+/**
+ * Entity pattern set represents a set of entity patterns. 
+ * 
+ * @see EntityPattern
+ * 
+ * @author robin
+ *
+ */
 public class EntityPatternSet extends PatternSet implements Trimmable {
 
 	private final EntityLoader entityLoader;
@@ -22,10 +30,18 @@ public class EntityPatternSet extends PatternSet implements Trimmable {
 		return getPatterns();
 	}
 	
+	/**
+	 * Trim stored patterns of this pattern set. 
+	 * <p>
+	 * Invalid pattern entries of current instance will be removed.
+	 * <p>
+	 * @return
+	 * 			trimmed instance, or <i>null</i> if no longer contains any patterns
+	 */
 	@Override
-	public Trimmable trim() {
+	public Object trim(Object context) {
 		for (Iterator<ExclusiveAwarePattern> it = getStored().iterator(); it.hasNext();) {
-			if (EntityPattern.fromStored(it.next().getPattern(), entityLoader).trim() == null)
+			if (EntityPattern.fromStored(it.next().getPattern(), entityLoader).trim(context) == null)
 				it.remove();
 		}
 		
