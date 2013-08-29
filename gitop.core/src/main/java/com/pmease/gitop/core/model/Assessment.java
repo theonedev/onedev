@@ -14,7 +14,7 @@ import com.pmease.commons.persistence.AbstractEntity;
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"user", "commit"})
+		@UniqueConstraint(columnNames={"user", "update"})
 })
 public class Assessment extends AbstractEntity {
 
@@ -26,7 +26,7 @@ public class Assessment extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	private InvolvedCommit commit;
+	private MergeRequestUpdate update;
 	
 	private boolean approved;
 
@@ -38,16 +38,16 @@ public class Assessment extends AbstractEntity {
 		this.user = user;
 	}
 	
-	public InvolvedCommit getCommit() {
-		return commit;
+	public MergeRequestUpdate getUpdate() {
+		return update;
 	}
 
-	public void setCommit(InvolvedCommit commit) {
-		this.commit = commit;
+	public void setUpdate(MergeRequestUpdate update) {
+		this.update = update;
 	}
 
 	/**
-	 * Whether the user accepts or rejects the commit.
+	 * Whether the user accepts or rejects this update.
 	 * <p>
 	 * @return 
 	 * 			true if approved; false if rejected

@@ -47,9 +47,9 @@
             <version>1.0.30</version> 
         </dependency>
         <dependency>
-        	<groupId>org.eclipse.jgit</groupId>
-        	<artifactId>org.eclipse.jgit</artifactId>
-        	<version>3.0.0.201306101825-r</version>
+        	<groupId>com.pmease</groupId>
+        	<artifactId>commons.git</artifactId>
+        	<version>1.0.0</version>
         </dependency>
     </dependencies>  
     <repositories> 

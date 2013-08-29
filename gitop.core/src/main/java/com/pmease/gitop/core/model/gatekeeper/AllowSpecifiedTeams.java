@@ -26,7 +26,7 @@ public class AllowSpecifiedTeams implements GateKeeper {
 
 	@Override
 	public CheckResult check(MergeRequest mergeRequest) {
-		Repository repository = mergeRequest.getTargetBranch().getRepository();
+		Repository repository = mergeRequest.getTargetRepository();
 		EntityMatcher entityMatcher = new EntityMatcher(getEntityLoader(repository), new WildcardStringMatcher());
 		PatternSetMatcher patternSetMatcher = new PatternSetMatcher(entityMatcher);
 		

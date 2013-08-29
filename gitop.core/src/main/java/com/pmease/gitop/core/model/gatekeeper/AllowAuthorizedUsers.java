@@ -15,8 +15,8 @@ public class AllowAuthorizedUsers extends AbstractGateKeeper {
 		if (!touchedFiles.isEmpty()) {
 			for (String filePath: touchedFiles) {
 				ObjectPermission requiredPermission = ObjectPermission.ofBranchWrite(
-						mergeRequest.getTargetBranch().getRepository(), 
-						mergeRequest.getTargetBranch().getName(),
+						mergeRequest.getTargetRepository(), 
+						mergeRequest.getTargetBranch(),
 						filePath);
 				if (!SecurityUtils.getSubject().isPermitted(requiredPermission))
 					return CheckResult.REJECT;
@@ -25,7 +25,7 @@ public class AllowAuthorizedUsers extends AbstractGateKeeper {
 			return CheckResult.ACCEPT;
 		} else {
 			ObjectPermission requiredPermission = ObjectPermission.ofBranchWrite(
-					mergeRequest.getTargetBranch().getRepository(), mergeRequest.getTargetBranch().getName(), null);
+					mergeRequest.getTargetRepository(), mergeRequest.getTargetBranch(), null);
 			if (SecurityUtils.getSubject().isPermitted(requiredPermission))
 				return CheckResult.ACCEPT;
 			else

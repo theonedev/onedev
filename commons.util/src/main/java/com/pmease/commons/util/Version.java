@@ -99,6 +99,18 @@ public class Version implements Comparable<Version> {
 		}
 	}
 	
+	public Version(int major, int minor, int patch) {
+		this(major, minor, patch, "", -1);
+	}
+	
+	public Version(int major, int minor) {
+		this(major, minor, -1);
+	}
+	
+	public Version(int major) {
+		this(major, -1);
+	}
+	
 	public boolean isCompatible(Version version) {
 		return major == version.getMajor() && (minor<0?0:minor) == (version.getMinor()<0?0:version.getMinor());
 	}

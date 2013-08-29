@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.util.StringUtils;
 
 public class Commandline  {
@@ -57,13 +56,8 @@ public class Commandline  {
     	return this;
     }
     
-    public Commandline addArgValue(String argValue) {
-    	arguments.add(argValue);
-    	return this;
-    }
-    
-    public Commandline addArgLine(String argLine) {
-    	for (String each: StringUtils.parseQuoteTokens(argLine))
+    public Commandline addArgs(String... args) {
+    	for (String each: args)
     		arguments.add(each);
     	return this;
     }
@@ -118,7 +112,7 @@ public class Commandline  {
 	private ProcessBuilder createProcessBuilder() {
 		File workingDir = this.workingDir;
 		if (workingDir == null)
-			workingDir = Bootstrap.getTempDir();
+			workingDir = new File(".");
 		
 		String executable = this.executable;
 		

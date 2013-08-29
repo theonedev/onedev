@@ -18,17 +18,12 @@ import com.pmease.commons.persistence.AbstractEntity;
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"request", "commit"})
 })
-public class MergeRequestUpdate extends AbstractEntity {
+public class MergeRequestUpdate extends AbstractEntity implements Comparable<MergeRequestUpdate> {
 
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
 	private MergeRequest request;
-	
-	@ManyToOne(fetch=FetchType.EAGER)
-	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
-	@JoinColumn(nullable=false)
-	private InvolvedCommit commit;
 	
 	private Date date;
 
@@ -40,20 +35,21 @@ public class MergeRequestUpdate extends AbstractEntity {
 		this.request = request;
 	}
 
-	public InvolvedCommit getCommit() {
-		return commit;
-	}
-
-	public void setCommit(InvolvedCommit commit) {
-		this.commit = commit;
-	}
-
 	public Date getDate() {
 		return date;
 	}
 
 	public void setDate(Date date) {
 		this.date = date;
+	}
+
+	public String getBranchName() {
+		return "refs/updates/" + getId();
+	}
+	
+	@Override
+	public int compareTo(MergeRequestUpdate update) {
+		return getDate().compareTo(update.getDate());
 	}
 
 }

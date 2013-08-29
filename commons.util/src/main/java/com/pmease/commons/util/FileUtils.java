@@ -148,4 +148,58 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
     		files.add(new File(baseDir, path));
     	return files;
     }
+
+    public static File createTempDir(String prefix) {
+        File temp;
+
+        try {
+			temp = File.createTempFile(prefix, "");
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+        if (!temp.delete())
+            throw new RuntimeException("Could not delete temp file: " + temp.getAbsolutePath());
+
+        if (!temp.mkdir())
+            throw new RuntimeException("Could not create temp directory: " + temp.getAbsolutePath());
+
+        return temp;    
+    }
+    
+    public static File createTempDir() {
+    	return createTempDir("temp");
+    }
+    
+    public static void deleteDir(File dir) {
+    	try {
+			deleteDirectory(dir);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+    }
+    
+	public static void writeFile(File file, String content, String encoding) {
+		try {
+			org.apache.commons.io.FileUtils.writeStringToFile(file, content, encoding);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+    
+	public static void writeFile(File file, String content) {
+		try {
+			org.apache.commons.io.FileUtils.writeStringToFile(file, content);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static void touchFile(File file) {
+		try {
+			org.apache.commons.io.FileUtils.touch(file);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 }
