@@ -22,6 +22,8 @@ public class CoreModule extends AbstractPluginModule {
 		bind(AbstractRealm.class).to(UserRealm.class);
 		
 		bindConstant().annotatedWith(AppName.class).to(PRODUCT_NAME);
+		
+		bind(Gitop.class);
 	}
 
 	@Override

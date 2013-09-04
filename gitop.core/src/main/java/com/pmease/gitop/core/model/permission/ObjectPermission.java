@@ -1,19 +1,15 @@
 package com.pmease.gitop.core.model.permission;
 
-import javax.annotation.Nullable;
-
 import org.apache.shiro.authz.Permission;
 
 import com.pmease.gitop.core.model.Repository;
 import com.pmease.gitop.core.model.User;
-import com.pmease.gitop.core.model.permission.object.ProtectedBranches;
 import com.pmease.gitop.core.model.permission.object.ProtectedObject;
 import com.pmease.gitop.core.model.permission.object.SystemObject;
 import com.pmease.gitop.core.model.permission.operation.Administration;
 import com.pmease.gitop.core.model.permission.operation.PrivilegedOperation;
 import com.pmease.gitop.core.model.permission.operation.Read;
 import com.pmease.gitop.core.model.permission.operation.Write;
-import com.pmease.gitop.core.model.permission.operation.WriteToBranch;
 
 /**
  * This class represents permissions to operate an account and its belongings.
@@ -81,45 +77,6 @@ public class ObjectPermission implements Permission {
 
 	public static ObjectPermission ofRepositoryWrite(Repository repository) {
 		return new ObjectPermission(repository, new Write());
-	}
-
-	public static ObjectPermission ofBranchAdmin(Repository repository, String branchName) {
-		return new ObjectPermission(new ProtectedBranches(repository, branchName), new Administration());
-	}
-
-	public static ObjectPermission ofBranchRead(Repository repository, String branchName) {
-		return new ObjectPermission(new ProtectedBranches(repository, branchName), new Read());
-	}
-
-	/**
-	 * Construct the permission to write anything in a branch.
-	 * <p>
-	 * @param repository
-	 * 			repository of the branch
-	 * @param branchName
-	 * 			name of the branch
-	 * @return
-	 * 			permission object
-	 */
-	public static ObjectPermission ofBranchWrite(Repository repository, String branchName) {
-		return new ObjectPermission(new ProtectedBranches(repository, branchName), new WriteToBranch("**"));
-	}
-
-	/**
-	 * Construct the permission to write a branch with specified files.
-	 * <p>
-	 * @param repository
-	 * 			repository of the branch
-	 * @param branchName
-	 * 			name of the branch
-	 * @param filePath
-	 * 			path of file in the branch to be written. <i>null<i> to construct a branch write permission 
-	 * 			only allowed to modify commit comment (commit amend) without touching any files. 
-	 * @return
-	 * 			permission object
-	 */
-	public static ObjectPermission ofBranchWrite(Repository repository, String branchName, @Nullable String filePath) {
-		return new ObjectPermission(new ProtectedBranches(repository, branchName), new WriteToBranch(filePath));
 	}
 
 	public static ObjectPermission ofSystem(PrivilegedOperation operation) {

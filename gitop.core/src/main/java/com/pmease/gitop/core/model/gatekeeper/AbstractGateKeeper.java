@@ -1,11 +1,11 @@
 package com.pmease.gitop.core.model.gatekeeper;
 
-import com.pmease.commons.util.trimmable.Trimmable;
+import javax.annotation.Nullable;
 
 public abstract class AbstractGateKeeper implements GateKeeper {
 
 	@Override
-	public Trimmable trim(Object context) {
+	public Object trim(@Nullable Object context) {
 		return this;
 	}
 

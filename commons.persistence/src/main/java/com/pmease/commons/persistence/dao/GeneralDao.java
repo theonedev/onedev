@@ -10,7 +10,7 @@ import com.pmease.commons.persistence.AbstractEntity;
 public interface GeneralDao {
 	
 	/**
-	 * Find the entity with the specified type and id from data store.
+	 * Lookup the entity with the specified type and id from data store.
 	 * 
 	 * @param entityClass 
 	 * 			class of the entity to be found
@@ -19,7 +19,7 @@ public interface GeneralDao {
 	 * @return
 	 *			found entity object, null if not found 			
 	 */
-	<T extends AbstractEntity> T find(Class<T> entityClass, Long entityId);
+	<T extends AbstractEntity> T lookup(Class<T> entityClass, Long entityId);
 
 	/**
 	 * Get a reference to the entity with the specified type and id from data store.
@@ -82,7 +82,7 @@ public interface GeneralDao {
 	List<?> search(DetachedCriteria criteria, int firstResult, int maxResults);
 
 	/**
-	 * This method expects to find a single entity with specified criteria
+	 * This method expects to lookup a single entity with specified criteria
 	 * 
 	 * @param detachedCriteria
 	 * 			Hibernate {@link DetachedCriteria}
@@ -91,7 +91,7 @@ public interface GeneralDao {
 	 * @throws 
 	 * 			HibernateException if there is more than one matching result
 	 */
-	Object find(DetachedCriteria detachedCriteria);
+	Object lookup(DetachedCriteria detachedCriteria);
 	
 	/**
 	 * Count entities of specified class matching specified criteria. 

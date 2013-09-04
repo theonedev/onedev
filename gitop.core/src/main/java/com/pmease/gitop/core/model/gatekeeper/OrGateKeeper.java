@@ -3,8 +3,6 @@ package com.pmease.gitop.core.model.gatekeeper;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.constraints.Size;
-
 import com.pmease.commons.util.trimmable.AndOrConstruct;
 import com.pmease.commons.util.trimmable.TrimUtils;
 import com.pmease.commons.util.trimmable.Trimmable;
@@ -14,29 +12,28 @@ public class OrGateKeeper implements GateKeeper {
 
 	private List<GateKeeper> gateKeepers = new ArrayList<GateKeeper>();
 	
-	@Size(min=1)
 	public List<GateKeeper> getGateKeepers() {
 		return gateKeepers;
 	}
-
+	
 	public void setGateKeepers(List<GateKeeper> gateKeepers) {
 		this.gateKeepers = gateKeepers;
 	}
 
 	@Override
-	public CheckResult check(MergeRequest mergeRequest) {
-		boolean undetermined = false;
+	public CheckResult check(MergeRequest request) {
+		boolean pending = false;
 		
 		for (GateKeeper each: getGateKeepers()) {
-			CheckResult result = each.check(mergeRequest);
-			if (result == CheckResult.ACCEPT)
-				return CheckResult.ACCEPT;
-			else if (result == CheckResult.UNDETERMINED)
-				undetermined = true;
+			CheckResult result = each.check(request);
+			if (result == CheckResult.ACCEPT || result == CheckResult.PENDING_BLOCK)
+				return result;
+			else if (result == CheckResult.PENDING)
+				pending = true;
 		}
 		
-		if (undetermined)
-			return CheckResult.UNDETERMINED;
+		if (pending)
+			return CheckResult.PENDING;
 		else
 			return CheckResult.REJECT;
 	}

@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
 import com.pmease.commons.security.AbstractUser;
+import com.pmease.gitop.core.model.gatekeeper.GateKeeper.CheckResult;
 import com.pmease.gitop.core.model.permission.object.ProtectedObject;
 import com.pmease.gitop.core.model.permission.object.UserBelonging;
 
@@ -42,6 +43,12 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	@OneToMany(mappedBy="owner")
 	private Collection<Team> teams = new ArrayList<Team>();
+	
+	@OneToMany(mappedBy="reviewer")
+	private Collection<Vote> votes = new ArrayList<Vote>();
+	
+	@OneToMany(mappedBy="reviewer")
+	private Collection<PendingVote> pendingVotes = new ArrayList<PendingVote>();
 
 	public String getDescription() {
 		return description;
@@ -91,6 +98,22 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.mergeRequests = mergeRequests;
 	}
 
+	public Collection<Vote> getVotes() {
+		return votes;
+	}
+
+	public void setVotes(Collection<Vote> votes) {
+		this.votes = votes;
+	}
+
+	public Collection<PendingVote> getPendingVotes() {
+		return pendingVotes;
+	}
+
+	public void setPendingVotes(Collection<PendingVote> pendingVotes) {
+		this.pendingVotes = pendingVotes;
+	}
+
 	@Override
 	public boolean has(ProtectedObject object) {
 		if (object instanceof User) {
@@ -104,4 +127,20 @@ public class User extends AbstractUser implements ProtectedObject {
 		}
 	}
 	
+	public CheckResult checkApprovalSince(MergeRequestUpdate update) {
+		if (update.getRequest().getSubmitter().getId().equals(getId()))
+			return CheckResult.ACCEPT;
+		
+		for (Vote vote: update.findVotesOnwards()) {
+			if (vote.getReviewer().getId().equals(getId())) {
+				if (vote.getResult() == Vote.Result.ACCEPT)
+					return CheckResult.ACCEPT;
+				else
+					return CheckResult.REJECT;
+			}
+		}
+		
+		return CheckResult.PENDING;
+	}
+
 }

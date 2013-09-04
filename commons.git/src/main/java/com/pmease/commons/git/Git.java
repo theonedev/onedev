@@ -31,8 +31,16 @@ public class Git {
 		return new CommitCommand(this);
 	}
 	
-	public ListChangedFilesCommand listChangedFiles() {
-		return new ListChangedFilesCommand(this);
+	public FindChangedFilesCommand findChangedFiles() {
+		return new FindChangedFilesCommand(this);
+	}
+	
+	public CheckAncestorCommand checkAncestor() {
+		return new CheckAncestorCommand(this);
+	}
+	
+	public CalcMergeBaseCommand calcMergeBase() {
+		return new CalcMergeBaseCommand(this);
 	}
 	
 	/**

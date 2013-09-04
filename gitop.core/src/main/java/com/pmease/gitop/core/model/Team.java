@@ -41,8 +41,8 @@ public class Team extends AbstractEntity implements Permission {
 	@OneToMany(mappedBy="team")
 	private Collection<TeamMembership> memberships = new ArrayList<TeamMembership>();
 	
-	@OneToMany(mappedBy="subject")
-	private Collection<RepositoryAuthorization> repositoryAuthorizations = new ArrayList<RepositoryAuthorization>();
+	@OneToMany(mappedBy="team")
+	private Collection<Authorization> authorizations = new ArrayList<Authorization>();
 
 	public User getOwner() {
 		return owner;
@@ -100,13 +100,12 @@ public class Team extends AbstractEntity implements Permission {
 		this.memberships = memberships;
 	}
 
-	public Collection<RepositoryAuthorization> getRepositoryAuthorizations() {
-		return repositoryAuthorizations;
+	public Collection<Authorization> getAuthorizations() {
+		return authorizations;
 	}
 
-	public void setRepositoryAuthorizations(
-			Collection<RepositoryAuthorization> repositoryAuthorizations) {
-		this.repositoryAuthorizations = repositoryAuthorizations;
+	public void setAuthorizations(Collection<Authorization> authorizations) {
+		this.authorizations = authorizations;
 	}
 
 	@Override
@@ -114,11 +113,9 @@ public class Team extends AbstractEntity implements Permission {
 		if (permission instanceof ObjectPermission) {
 			ObjectPermission objectPermission = (ObjectPermission) permission;
 			
-			for (RepositoryAuthorization each: getRepositoryAuthorizations()) {
-				PrivilegedOperation operation = each.operationOf(objectPermission.getObject());
-				
-				if (operation != null)
-					return operation.can(objectPermission.getOperation());
+			for (Authorization each: getAuthorizations()) {
+				if (each.getRepository().has(objectPermission.getObject()))
+					return each.getOperation().can(objectPermission.getOperation());
 			}
 
 			if (getOwner().has(objectPermission.getObject()))

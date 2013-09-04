@@ -1,5 +1,6 @@
 package com.pmease.gitop.core.model;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -14,7 +15,13 @@ import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.FetchMode;
 
+import com.google.common.base.Preconditions;
+import com.pmease.commons.git.CheckAncestorCommand;
+import com.pmease.commons.git.FindChangedFilesCommand;
+import com.pmease.commons.git.Git;
 import com.pmease.commons.persistence.AbstractEntity;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.RepositoryManager;
 
 @SuppressWarnings("serial")
 @Entity
@@ -23,33 +30,32 @@ public class MergeRequest extends AbstractEntity {
 	public enum Status {OPEN, MERGED, CLOSED}
 	
 	private String title;
-
-	@ManyToOne(fetch=FetchType.EAGER)
-	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
-	@JoinColumn(nullable=false)
-	private User user;
 	
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	private Repository targetRepository;
+	private User submitter;
 	
-	@Column(nullable=false)
-	private String targetBranch;
-
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
 	@JoinColumn(nullable=false)
-	private Repository sourceRepository;
+	private Branch destination;
 	
-	@Column(nullable=false)
-	private String sourceBranch;
+	@ManyToOne(fetch=FetchType.EAGER)
+	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
+	@JoinColumn(nullable=true)
+	private Branch source;
 	
 	@Column(nullable=false)
 	private Status status = Status.OPEN;
+	
+	private transient MergeRequestUpdate baseUpdate;
 
 	@OneToMany(mappedBy="request")
 	private Collection<MergeRequestUpdate> updates = new ArrayList<MergeRequestUpdate>();
+	
+	@OneToMany(mappedBy="request")
+	private Collection<PendingVote> pendingVotes = new ArrayList<PendingVote>();
 	
 	public String getTitle() {
 		return title;
@@ -59,44 +65,32 @@ public class MergeRequest extends AbstractEntity {
 		this.title = title;
 	}
 
-	public User getUser() {
-		return user;
+	public boolean isAutoCreated() {
+		return getTitle() == null;
+	}
+	
+	public User getSubmitter() {
+		return submitter;
 	}
 
-	public void setUser(User user) {
-		this.user = user;
+	public void setSubmitter(User submitter) {
+		this.submitter = submitter;
 	}
 
-	public Repository getTargetRepository() {
-		return targetRepository;
+	public Branch getDestination() {
+		return destination;
 	}
 
-	public void setTargetRepository(Repository targetRepository) {
-		this.targetRepository = targetRepository;
+	public void setDestination(Branch destination) {
+		this.destination = destination;
 	}
 
-	public String getTargetBranch() {
-		return targetBranch;
+	public Branch getSource() {
+		return source;
 	}
 
-	public void setTargetBranch(String targetBranch) {
-		this.targetBranch = targetBranch;
-	}
-
-	public Repository getSourceRepository() {
-		return sourceRepository;
-	}
-
-	public void setSourceRepository(Repository sourceRepository) {
-		this.sourceRepository = sourceRepository;
-	}
-
-	public String getSourceBranch() {
-		return sourceBranch;
-	}
-
-	public void setSourceBranch(String sourceBranch) {
-		this.sourceBranch = sourceBranch;
+	public void setSource(Branch source) {
+		this.source = source;
 	}
 
 	public Collection<MergeRequestUpdate> getUpdates() {
@@ -107,6 +101,14 @@ public class MergeRequest extends AbstractEntity {
 		this.updates = updates;
 	}
 
+	public Collection<PendingVote> getPendingVotes() {
+		return pendingVotes;
+	}
+
+	public void setPendingVotes(Collection<PendingVote> pendingVotes) {
+		this.pendingVotes = pendingVotes;
+	}
+
 	public Status getStatus() {
 		return status;
 	}
@@ -114,24 +116,57 @@ public class MergeRequest extends AbstractEntity {
 	public void setStatus(Status status) {
 		this.status = status;
 	}
-
-	public Collection<String> getTouchedFiles() {
-		Collection<String> touchedFiles = new ArrayList<String>();
-		MergeRequestUpdate update = getLatestUpdate();
-		if (update != null) {
-			
-		} 
-		return touchedFiles;
-	}
 	
+	public MergeRequestUpdate getBaseUpdate() {
+		if (baseUpdate != null) {
+			return baseUpdate;
+		} else {
+			baseUpdate = getFirstUpdate();
+			return baseUpdate;
+		}
+	}
+
+	public void setBaseUpdate(MergeRequestUpdate baseUpdate) {
+		this.baseUpdate = baseUpdate;
+	}
+
 	public MergeRequestUpdate getLatestUpdate() {
+		Preconditions.checkState(!getUpdates().isEmpty());
+		
 		List<MergeRequestUpdate> updates = new ArrayList<MergeRequestUpdate>(getUpdates());
 		Collections.sort(updates);
 		Collections.reverse(updates);
-		if (updates.isEmpty())
-			return null;
-		else
-			return updates.iterator().next();
+		return updates.iterator().next();
 	}
 	
+	public MergeRequestUpdate getFirstUpdate() {
+		Preconditions.checkState(!getUpdates().isEmpty());
+		
+		List<MergeRequestUpdate> updates = new ArrayList<MergeRequestUpdate>(getUpdates());
+		Collections.sort(updates);
+		return updates.iterator().next();
+	}
+
+	public boolean isFastForward() {
+		File repoDir = Gitop.getInstance(RepositoryManager.class).locateStorage(getDestination().getRepository());
+		CheckAncestorCommand command = new Git(repoDir).checkAncestor();
+		command.ancestor(getDestination().getName());
+		command.descendant(getLatestUpdate().getRefName());
+		return command.call();
+	}
+	
+	public Collection<String> findTouchedFiles() {
+		RepositoryManager repositoryManager = Gitop.getInstance(RepositoryManager.class);
+		File repoDir = repositoryManager.locateStorage(getDestination().getRepository());
+		MergeRequestUpdate update = getLatestUpdate();
+		if (update != null) {
+			FindChangedFilesCommand command = new Git(repoDir).findChangedFiles();
+			command.fromRev(getDestination().getName());
+			command.toRev(update.getRefName());
+			return command.call();
+		} else {
+			return new ArrayList<String>();
+		}
+	}
+
 }

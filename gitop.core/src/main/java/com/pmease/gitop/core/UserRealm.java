@@ -11,9 +11,9 @@ import org.apache.shiro.authz.Permission;
 
 import com.pmease.commons.persistence.dao.GeneralDao;
 import com.pmease.commons.security.AbstractRealm;
-import com.pmease.gitop.core.entitymanager.RoleManager;
-import com.pmease.gitop.core.entitymanager.TeamManager;
-import com.pmease.gitop.core.entitymanager.UserManager;
+import com.pmease.gitop.core.manager.RoleManager;
+import com.pmease.gitop.core.manager.TeamManager;
+import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.model.RoleMembership;
 import com.pmease.gitop.core.model.TeamMembership;
 import com.pmease.gitop.core.model.User;

@@ -1,10 +1,17 @@
 package com.pmease.gitop.core.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -13,8 +20,8 @@ import org.hibernate.annotations.FetchMode;
 import com.pmease.commons.persistence.AbstractEntity;
 import com.pmease.gitop.core.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.core.model.permission.object.ProtectedObject;
-import com.pmease.gitop.core.model.permission.object.RepositoryBelonging;
 import com.pmease.gitop.core.model.permission.object.UserBelonging;
+import com.pmease.gitop.core.model.permission.operation.PrivilegedOperation;
 
 @Entity
 @org.hibernate.annotations.Cache(
@@ -35,8 +42,10 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	
 	private String description;
 
-	@Column(nullable=true)
 	private GateKeeper gateKeeper;
+
+	@OneToMany(mappedBy="repository")
+	private Collection<Authorization> authorizations = new ArrayList<Authorization>();
 
 	public User getOwner() {
 		return owner;
@@ -69,10 +78,18 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	public void setGateKeeper(GateKeeper gateKeeper) {
 		this.gateKeeper = gateKeeper;
 	}
-	
+
 	@Override
 	public User getUser() {
 		return getOwner();
+	}
+
+	public Collection<Authorization> getAuthorizations() {
+		return authorizations;
+	}
+
+	public void setAuthorizations(Collection<Authorization> authorizations) {
+		this.authorizations = authorizations;
 	}
 
 	@Override
@@ -80,12 +97,38 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		if (object instanceof Repository) {
 			Repository repository = (Repository) object;
 			return repository.getId().equals(getId());
-		} else if (object instanceof RepositoryBelonging) {
-			RepositoryBelonging repositoryBelonging = (RepositoryBelonging) object;
-			return repositoryBelonging.getRepository().getId().equals(getId());
 		} else {
 			return false;
 		}
 	}
 
+	public Collection<User> findAuthorizedUsers(PrivilegedOperation operation) {
+		Map<Long, Boolean> authorizationMap = new HashMap<Long, Boolean>();
+		for (Authorization authorization: getAuthorizations()) {
+			authorizationMap.put(authorization.getTeam().getId(), authorization.getOperation().can(operation));
+		}
+		
+		Collection<Team> teams = new HashSet<Team>();
+		for (Team team: getOwner().getTeams()) {
+			Boolean authorized = authorizationMap.get(team.getId());
+			if (authorized != null) {
+				if (authorized)
+					teams.add(team);
+				else
+					continue;
+			} else {
+				if (team.getOperation().can(operation))
+					teams.add(team);
+			}
+		}
+		
+		Collection<User> users = new HashSet<User>();
+		for (Team team: teams) {
+			for (TeamMembership membership: team.getMemberships())
+				users.add(membership.getUser());
+		}
+		
+		return users;
+	}
+	
 }

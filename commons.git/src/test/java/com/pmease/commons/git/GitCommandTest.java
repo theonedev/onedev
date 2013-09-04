@@ -8,7 +8,7 @@ import org.junit.Before;
 
 import com.pmease.commons.util.FileUtils;
 
-public class GitCommandTest {
+public abstract class GitCommandTest {
 
 	protected File repoDir;
 	

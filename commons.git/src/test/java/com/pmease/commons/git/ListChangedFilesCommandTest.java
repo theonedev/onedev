@@ -1,13 +1,13 @@
 package com.pmease.commons.git;
 
 import java.io.File;
-import java.util.List;
+import java.util.Collection;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.pmease.commons.util.EasySet;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.commons.util.StringUtils;
 
 public class ListChangedFilesCommandTest extends GitCommandTest {
 
@@ -35,9 +35,9 @@ public class ListChangedFilesCommandTest extends GitCommandTest {
 		git.add().addPath("a").call();
 		git.commit().message("commit").call();
 		
-		List<String> changedFiles = git.listChangedFiles().fromRev("HEAD~4").toRev("HEAD").call();
+		Collection<String> changedFiles = git.findChangedFiles().fromRev("HEAD~4").toRev("HEAD").call();
 		
-		Assert.assertEquals(StringUtils.join(changedFiles, ","), "a,b,c,d");
+		Assert.assertTrue(changedFiles.containsAll(EasySet.of("a", "b", "c", "d")));
 	}
 
 }

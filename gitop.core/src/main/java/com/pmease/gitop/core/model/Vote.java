@@ -1,0 +1,61 @@
+package com.pmease.gitop.core.model;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
+import org.hibernate.annotations.FetchMode;
+
+import com.pmease.commons.persistence.AbstractEntity;
+
+@SuppressWarnings("serial")
+@Entity
+@Table(uniqueConstraints={
+		@UniqueConstraint(columnNames={"reviewer", "update"})
+})
+public class Vote extends AbstractEntity {
+
+	public static enum Result {ACCEPT, REJECT};
+	
+	@ManyToOne(fetch=FetchType.EAGER)
+	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
+	@JoinColumn(nullable=false)
+	private User reviewer;
+	
+	@ManyToOne(fetch=FetchType.EAGER)
+	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
+	@JoinColumn(nullable=false)
+	private MergeRequestUpdate update;
+	
+	@Column(nullable=false)
+	private Result result;
+
+	public User getReviewer() {
+		return reviewer;
+	}
+
+	public void setReviewer(User reviewer) {
+		this.reviewer = reviewer;
+	}
+	
+	public MergeRequestUpdate getUpdate() {
+		return update;
+	}
+
+	public void setUpdate(MergeRequestUpdate update) {
+		this.update = update;
+	}
+
+	public Result getResult() {
+		return result;
+	}
+
+	public void setResult(Result result) {
+		this.result = result;
+	}
+
+}

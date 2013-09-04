@@ -1,27 +1,24 @@
 package com.pmease.gitop.core.model.gatekeeper;
 
-import javax.validation.constraints.NotNull;
-
 import com.pmease.gitop.core.model.MergeRequest;
 
 public class NotGateKeeper implements GateKeeper {
 
 	private GateKeeper gateKeeper;
-
-	@NotNull
+	
 	public GateKeeper getGateKeeper() {
 		return gateKeeper;
 	}
-
+	
 	public void setGateKeeper(GateKeeper gateKeeper) {
 		this.gateKeeper = gateKeeper;
 	}
-
+	
 	@Override
-	public CheckResult check(MergeRequest mergeRequest) {
-		CheckResult result = gateKeeper.check(mergeRequest);
+	public CheckResult check(MergeRequest request) {
+		CheckResult result = getGateKeeper().check(request);
 		
-		if (result == CheckResult.UNDETERMINED)
+		if (result == CheckResult.PENDING)
 			return result;
 		else if (result == CheckResult.ACCEPT)
 			return CheckResult.REJECT;
@@ -31,7 +28,7 @@ public class NotGateKeeper implements GateKeeper {
 
 	@Override
 	public Object trim(Object context) {
-		return gateKeeper.trim(context);
+		return getGateKeeper().trim(context);
 	}
 
 }

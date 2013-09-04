@@ -31,8 +31,8 @@ public class DefaultGenericDao<T extends AbstractEntity> implements GenericDao<T
 	}
 	
 	@Override
-	public T find(Long entityId) {
-		return generalDao.find(entityClass, entityId);
+	public T lookup(Long entityId) {
+		return generalDao.lookup(entityClass, entityId);
 	}
 
 	@Override
@@ -90,7 +90,7 @@ public class DefaultGenericDao<T extends AbstractEntity> implements GenericDao<T
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public T find(Criterion[] criterions) {
+	public T lookup(Criterion[] criterions) {
 		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(entityClass);
 		
 		if (criterions != null) {
@@ -98,7 +98,7 @@ public class DefaultGenericDao<T extends AbstractEntity> implements GenericDao<T
 				detachedCriteria.add(criterion);
 		}
 		
-		return (T) generalDao.find(detachedCriteria);
+		return (T) generalDao.lookup(detachedCriteria);
 	}
 
 	protected Session getSession() {
