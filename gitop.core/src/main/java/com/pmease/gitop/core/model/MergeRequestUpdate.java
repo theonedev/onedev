@@ -1,10 +1,9 @@
 package com.pmease.gitop.core.model;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -17,19 +16,14 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.FetchMode;
 
-import com.google.common.base.Preconditions;
-import com.pmease.commons.git.FindChangedFilesCommand;
-import com.pmease.commons.git.Git;
 import com.pmease.commons.persistence.AbstractEntity;
-import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.RepositoryManager;
 
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"request", "commit"})
 })
-public class MergeRequestUpdate extends AbstractEntity implements Comparable<MergeRequestUpdate> {
+public class MergeRequestUpdate extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
@@ -69,53 +63,25 @@ public class MergeRequestUpdate extends AbstractEntity implements Comparable<Mer
 		return "refs/updates/" + getId();
 	}
 	
-	@Override
-	public int compareTo(MergeRequestUpdate update) {
-		return getId().compareTo(update.getId());
-	}
-
-	public Collection<Vote> findVotesOnwards() {
-		List<MergeRequestUpdate> updates = new ArrayList<MergeRequestUpdate>(getRequest().getUpdates());
-		Collections.sort(updates);
-		int index = 0;
-		for (int i=0; i<updates.size(); i++) {
-			if (updates.get(i).getId().equals(getId())) {
-				index = i;
+	/**
+	 * List votes against this update and all subsequent updates.
+	 * <p>
+	 * @return
+	 * 			list of found votes, ordered by associated updates reversely
+	 */
+	public List<Vote> listVotesOnwards() {
+		List<Vote> votes = new ArrayList<Vote>();
+		
+		List<MergeRequestUpdate> updates = getRequest().getEffectiveUpdates();
+		for (Iterator<MergeRequestUpdate> it = updates.iterator(); it.hasNext();) {
+			MergeRequestUpdate update = it.next();
+			votes.addAll(update.getVotes());
+			if (update.equals(this)) {
 				break;
 			}
-		}
-		
-		Collection<Vote> votes = new ArrayList<Vote>();
-		
-		for (int i=index; i<updates.size(); i++) {
-			votes.addAll(updates.get(i).getVotes());
 		}
 		
 		return votes;
 	}
 
-	public Collection<String> findTouchedFiles() {
-		RepositoryManager repositoryManager = Gitop.getInstance(RepositoryManager.class);
-		File repoDir = repositoryManager.locateStorage(getRequest().getDestination().getRepository());
-		List<MergeRequestUpdate> updates = new ArrayList<MergeRequestUpdate>(getRequest().getUpdates());
-		Collections.sort(updates);
-		int index = -1;
-		for (int i=0; i<updates.size(); i++) {
-			if (updates.get(i).equals(this)) {
-				index = i;
-				break;
-			}
-		}
-
-		Preconditions.checkState(index != -1);
-		
-		if (index == 0)
-			return new ArrayList<String>();
-		
-		FindChangedFilesCommand command = new Git(repoDir).findChangedFiles();
-		command.toRev(getRefName());
-		command.fromRev(updates.get(index-1).getRefName());
-		return command.call();
-	}
-	
 }

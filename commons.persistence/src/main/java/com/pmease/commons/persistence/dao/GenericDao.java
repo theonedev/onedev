@@ -16,7 +16,7 @@ public interface GenericDao<T extends AbstractEntity> {
 	 * Get the entity with the specified type and id from the datastore.
 	 * If none is found, return null.
 	 */
-	public T lookup(Long entityId);
+	public T get(Long entityId);
 
 	/**
 	 * Get a reference to the entity with the specified type and id from the
@@ -75,7 +75,7 @@ public interface GenericDao<T extends AbstractEntity> {
 	 * @return
 	 * 			list of entity matching specified criterions in specified orders.
 	 */
-	List<T> search(@Nullable Criterion[] criterions, @Nullable Order[] orders, int firstResult, int maxResults);
+	List<T> query(@Nullable Criterion[] criterions, @Nullable Order[] orders, int firstResult, int maxResults);
 	
 	/**
 	 * Search entity with specified criterions.
@@ -85,7 +85,7 @@ public interface GenericDao<T extends AbstractEntity> {
 	 * @return
 	 * 			list of entity matching specified criterions.
 	 */
-	List<T> search(@Nullable Criterion[] criterions);
+	List<T> query(@Nullable Criterion[] criterions);
 
 	/**
 	 * This method expects to lookup a single entity with specified criteria
@@ -97,7 +97,7 @@ public interface GenericDao<T extends AbstractEntity> {
 	 * @throws 
 	 * 			HibernateException if there is more than one matching result
 	 */
-	Object lookup(@Nullable Criterion[] criterions);
+	Object find(@Nullable Criterion[] criterions);
 
 	/**
 	 * Count entity matching specified hibernate criterions. 

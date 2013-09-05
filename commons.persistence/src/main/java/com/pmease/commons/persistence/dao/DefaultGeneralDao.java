@@ -30,7 +30,7 @@ public class DefaultGeneralDao implements GeneralDao {
 	
 	@Transactional
 	@Override
-	public <T extends AbstractEntity> T lookup(Class<T> entityClass, Long entityId) {
+	public <T extends AbstractEntity> T get(Class<T> entityClass, Long entityId) {
 		return (T) getSession().get(unproxy(entityClass), entityId);
 	}
 
@@ -79,7 +79,7 @@ public class DefaultGeneralDao implements GeneralDao {
 
 	@Transactional
 	@Override
-	public List<?> search(DetachedCriteria detachedCriteria, int firstResult, int maxResults) {
+	public List<?> query(DetachedCriteria detachedCriteria, int firstResult, int maxResults) {
 		Criteria criteria = detachedCriteria.getExecutableCriteria(getSession());
 		if (firstResult != 0)
 			criteria.setFirstResult(firstResult);
@@ -90,7 +90,7 @@ public class DefaultGeneralDao implements GeneralDao {
 
 	@Transactional
 	@Override
-	public Object lookup(DetachedCriteria detachedCriteria) {
+	public Object find(DetachedCriteria detachedCriteria) {
 		Criteria criteria = detachedCriteria.getExecutableCriteria(getSession());
 		return criteria.uniqueResult();
 	}

@@ -28,8 +28,8 @@ public class DefaultBranchManager extends DefaultGenericDao<Branch> implements B
 	
 	@Transactional
 	@Override
-	public Branch lookupBranch(Repository repository, String name) {
-		return lookup(new Criterion[]{Restrictions.eq("repository", repository), Restrictions.eq("name", name)});
+	public Branch find(Repository repository, String name) {
+		return find(new Criterion[]{Restrictions.eq("repository", repository), Restrictions.eq("name", name)});
 	}
 
 	@Override
@@ -38,7 +38,7 @@ public class DefaultBranchManager extends DefaultGenericDao<Branch> implements B
 
 			@Override
 			public NamedEntity get(final Long id) {
-				final Branch branch = DefaultBranchManager.this.lookup(id);
+				final Branch branch = DefaultBranchManager.this.get(id);
 				if (branch != null) {
 					return new NamedEntity() {
 
@@ -60,7 +60,7 @@ public class DefaultBranchManager extends DefaultGenericDao<Branch> implements B
 
 			@Override
 			public NamedEntity get(String name) {
-				final Branch branch = lookupBranch(repository, name);
+				final Branch branch = find(repository, name);
 				if (branch != null) {
 					return new NamedEntity() {
 

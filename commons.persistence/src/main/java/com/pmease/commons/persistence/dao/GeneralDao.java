@@ -10,7 +10,7 @@ import com.pmease.commons.persistence.AbstractEntity;
 public interface GeneralDao {
 	
 	/**
-	 * Lookup the entity with the specified type and id from data store.
+	 * Get the entity with the specified type and id from data store.
 	 * 
 	 * @param entityClass 
 	 * 			class of the entity to be found
@@ -19,7 +19,7 @@ public interface GeneralDao {
 	 * @return
 	 *			found entity object, null if not found 			
 	 */
-	<T extends AbstractEntity> T lookup(Class<T> entityClass, Long entityId);
+	<T extends AbstractEntity> T get(Class<T> entityClass, Long entityId);
 
 	/**
 	 * Get a reference to the entity with the specified type and id from data store.
@@ -68,7 +68,7 @@ public interface GeneralDao {
 	<T extends AbstractEntity> void deleteById(Class<T> entityClass, Long entityId);
 
 	/**
-	 * Search with specified criteria.
+	 * Query with specified criteria.
 	 * 
 	 * @param criteria
 	 * 			hibernate {@link DetachedCriteria}
@@ -79,7 +79,7 @@ public interface GeneralDao {
 	 * @return
 	 * 			a list of execution result of the detached criteria
 	 */
-	List<?> search(DetachedCriteria criteria, int firstResult, int maxResults);
+	List<?> query(DetachedCriteria criteria, int firstResult, int maxResults);
 
 	/**
 	 * This method expects to lookup a single entity with specified criteria
@@ -91,7 +91,7 @@ public interface GeneralDao {
 	 * @throws 
 	 * 			HibernateException if there is more than one matching result
 	 */
-	Object lookup(DetachedCriteria detachedCriteria);
+	Object find(DetachedCriteria detachedCriteria);
 	
 	/**
 	 * Count entities of specified class matching specified criteria. 

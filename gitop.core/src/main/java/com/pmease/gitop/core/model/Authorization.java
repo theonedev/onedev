@@ -10,8 +10,8 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.FetchMode;
 
 import com.pmease.commons.persistence.AbstractEntity;
-import com.pmease.gitop.core.model.permission.operation.PrivilegedOperation;
-import com.pmease.gitop.core.model.permission.operation.Read;
+import com.pmease.gitop.core.permission.operation.PrivilegedOperation;
+import com.pmease.gitop.core.permission.operation.Read;
 
 @SuppressWarnings("serial")
 @Entity

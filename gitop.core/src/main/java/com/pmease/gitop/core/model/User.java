@@ -7,9 +7,9 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
 import com.pmease.commons.security.AbstractUser;
-import com.pmease.gitop.core.model.gatekeeper.GateKeeper.CheckResult;
-import com.pmease.gitop.core.model.permission.object.ProtectedObject;
-import com.pmease.gitop.core.model.permission.object.UserBelonging;
+import com.pmease.gitop.core.gatekeeper.GateKeeper.CheckResult;
+import com.pmease.gitop.core.permission.object.ProtectedObject;
+import com.pmease.gitop.core.permission.object.UserBelonging;
 
 /**
  * This class represents either a project or an user in the system. 
@@ -131,8 +131,8 @@ public class User extends AbstractUser implements ProtectedObject {
 		if (update.getRequest().getSubmitter().getId().equals(getId()))
 			return CheckResult.ACCEPT;
 		
-		for (Vote vote: update.findVotesOnwards()) {
-			if (vote.getReviewer().getId().equals(getId())) {
+		for (Vote vote: update.listVotesOnwards()) {
+			if (vote.getReviewer().equals(this)) {
 				if (vote.getResult() == Vote.Result.ACCEPT)
 					return CheckResult.ACCEPT;
 				else

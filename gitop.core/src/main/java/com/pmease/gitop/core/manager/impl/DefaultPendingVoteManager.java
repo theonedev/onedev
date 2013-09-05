@@ -24,21 +24,18 @@ public class DefaultPendingVoteManager extends DefaultGenericDao<PendingVote> im
 
 	@Transactional
 	@Override
-	public PendingVote lookupPendingVote(User reviewer, MergeRequest request) {
-		return lookup(new Criterion[]{Restrictions.eq("reviewer", reviewer), Restrictions.eq("request", request)});
+	public PendingVote find(User reviewer, MergeRequest request) {
+		return find(new Criterion[]{Restrictions.eq("reviewer", reviewer), Restrictions.eq("request", request)});
 	}
 
 	@Transactional
 	@Override
-	public PendingVote requestVote(User reviewer, MergeRequest request) {
-		PendingVote pendingVote = lookupPendingVote(reviewer, request);
-		if (pendingVote == null) {
-			pendingVote = new PendingVote();
-			pendingVote.setRequest(request);
-			pendingVote.setReviewer(reviewer);
-			save(pendingVote);
+	public void save(PendingVote pendingVote) {
+		if (pendingVote.getId() == null) {
+			pendingVote.getRequest().getPendingVotes().add(pendingVote);
+			pendingVote.getReviewer().getPendingVotes().add(pendingVote);
 		}
-		return pendingVote;
+		super.save(pendingVote);
 	}
 
 }

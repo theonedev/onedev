@@ -24,7 +24,7 @@ public interface UserManager extends GenericDao<User> {
 	 * @return
 	 * 			matching user, or <i>null</i> if not found 
 	 */
-	User lookupUser(String userName);
+	User find(String userName);
 	
 	EntityLoader asEntityLoader();
 }

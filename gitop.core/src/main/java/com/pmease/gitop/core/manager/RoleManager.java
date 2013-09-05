@@ -10,7 +10,7 @@ import com.pmease.gitop.core.model.Role;
 @ImplementedBy(DefaultRoleManager.class)
 public interface RoleManager extends GenericDao<Role> {
 	
-	Collection<Role> getAnonymousRoles();
+	Collection<Role> findAnonymousRoles();
 	
-	Collection<Role> getRegisterRoles();
+	Collection<Role> findRegisterRoles();
 }

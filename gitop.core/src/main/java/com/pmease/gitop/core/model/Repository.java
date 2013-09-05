@@ -18,10 +18,10 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.FetchMode;
 
 import com.pmease.commons.persistence.AbstractEntity;
-import com.pmease.gitop.core.model.gatekeeper.GateKeeper;
-import com.pmease.gitop.core.model.permission.object.ProtectedObject;
-import com.pmease.gitop.core.model.permission.object.UserBelonging;
-import com.pmease.gitop.core.model.permission.operation.PrivilegedOperation;
+import com.pmease.gitop.core.gatekeeper.GateKeeper;
+import com.pmease.gitop.core.permission.object.ProtectedObject;
+import com.pmease.gitop.core.permission.object.UserBelonging;
+import com.pmease.gitop.core.permission.operation.PrivilegedOperation;
 
 @Entity
 @org.hibernate.annotations.Cache(

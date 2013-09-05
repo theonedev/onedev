@@ -17,7 +17,7 @@ import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.model.RoleMembership;
 import com.pmease.gitop.core.model.TeamMembership;
 import com.pmease.gitop.core.model.User;
-import com.pmease.gitop.core.model.permission.ObjectPermission;
+import com.pmease.gitop.core.permission.ObjectPermission;
 
 @Singleton
 public class UserRealm extends AbstractRealm<User> {
@@ -54,8 +54,8 @@ public class UserRealm extends AbstractRealm<User> {
 			/* an user is administrator of its own account */
 			permissions.add(ObjectPermission.ofUserAdmin(user));
 		} else {
-			permissions.addAll(roleManager.getAnonymousRoles());
-			permissions.addAll(teamManager.getAnonymousTeams());
+			permissions.addAll(roleManager.findAnonymousRoles());
+			permissions.addAll(teamManager.findAnonymousTeams());
 		}
 
 		return permissions;

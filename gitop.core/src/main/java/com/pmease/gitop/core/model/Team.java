@@ -12,9 +12,9 @@ import javax.persistence.UniqueConstraint;
 import org.apache.shiro.authz.Permission;
 
 import com.pmease.commons.persistence.AbstractEntity;
-import com.pmease.gitop.core.model.permission.ObjectPermission;
-import com.pmease.gitop.core.model.permission.operation.PrivilegedOperation;
-import com.pmease.gitop.core.model.permission.operation.Read;
+import com.pmease.gitop.core.permission.ObjectPermission;
+import com.pmease.gitop.core.permission.operation.PrivilegedOperation;
+import com.pmease.gitop.core.permission.operation.Read;
 
 @Entity
 @org.hibernate.annotations.Cache(

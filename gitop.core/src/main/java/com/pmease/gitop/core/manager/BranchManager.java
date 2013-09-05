@@ -10,7 +10,7 @@ import com.pmease.gitop.core.model.Repository;
 @ImplementedBy(DefaultBranchManager.class)
 public interface BranchManager extends GenericDao<Branch> {
 
-	public Branch lookupBranch(Repository repository, String branchName);
+	public Branch find(Repository repository, String branchName);
 	
 	public EntityLoader asEntityLoader(Repository repository);
 	

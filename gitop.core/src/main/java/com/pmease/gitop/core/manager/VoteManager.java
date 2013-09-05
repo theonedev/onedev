@@ -10,6 +10,6 @@ import com.pmease.gitop.core.model.Vote;
 @ImplementedBy(DefaultVoteManager.class)
 public interface VoteManager extends GenericDao<Vote> {
 
-	Vote lookupVote(User reviewer, MergeRequestUpdate update);
+	Vote find(User reviewer, MergeRequestUpdate update);
 
 }

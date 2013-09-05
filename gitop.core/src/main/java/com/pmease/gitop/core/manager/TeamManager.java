@@ -12,9 +12,9 @@ import com.pmease.gitop.core.model.User;
 @ImplementedBy(DefaultTeamManager.class)
 public interface TeamManager extends GenericDao<Team> {
 
-	Collection<Team> getAnonymousTeams();
+	Collection<Team> findAnonymousTeams();
 	
-	Collection<Team> getRegisterTeams();
+	Collection<Team> findRegisterTeams();
 
 	/**
 	 * Find team of specified name belonging to specified owner.
@@ -26,7 +26,7 @@ public interface TeamManager extends GenericDao<Team> {
 	 * @return
 	 * 			matching team, or <i>null</i> if not found 
 	 */
-	Team lookupTeam(User owner, String teamName);
+	Team find(User owner, String teamName);
 	
 	EntityLoader asEntityLoader(User owner);
 	

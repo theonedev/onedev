@@ -44,8 +44,8 @@ public class DefaultUserManager extends DefaultGenericDao<User> implements UserM
 	
 	@Transactional
 	@Override
-	public User lookupUser(String userName) {
-		return (User) lookup(new Criterion[]{Restrictions.eq("name", userName)});
+	public User find(String userName) {
+		return find(new Criterion[]{Restrictions.eq("name", userName)});
 	}
 
 	@Override
@@ -54,7 +54,7 @@ public class DefaultUserManager extends DefaultGenericDao<User> implements UserM
 
 			@Override
 			public NamedEntity get(final Long id) {
-				final User user = DefaultUserManager.this.lookup(id);
+				final User user = DefaultUserManager.this.get(id);
 				if (user != null) {
 					return new NamedEntity() {
 
@@ -76,7 +76,7 @@ public class DefaultUserManager extends DefaultGenericDao<User> implements UserM
 
 			@Override
 			public NamedEntity get(String name) {
-				final User user = lookupUser(name);
+				final User user = find(name);
 				if (user != null) {
 					return new NamedEntity() {
 

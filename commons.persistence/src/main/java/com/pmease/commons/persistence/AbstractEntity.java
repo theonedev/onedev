@@ -11,7 +11,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.GenericGenerator;
 
 @MappedSuperclass
-public abstract class AbstractEntity implements Serializable {
+public abstract class AbstractEntity implements Serializable, Comparable<AbstractEntity> {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -49,6 +49,11 @@ public abstract class AbstractEntity implements Serializable {
 			return super.hashCode();
 		else
 			return new HashCodeBuilder(17, 37).append(getId()).toHashCode();
+	}
+
+	@Override
+	public int compareTo(AbstractEntity entity) {
+		return getId().compareTo(entity.getId());
 	}
 
 }

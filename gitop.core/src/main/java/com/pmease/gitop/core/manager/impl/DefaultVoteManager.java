@@ -24,8 +24,8 @@ public class DefaultVoteManager extends DefaultGenericDao<Vote> implements VoteM
 
 	@Transactional
 	@Override
-	public Vote lookupVote(User reviewer, MergeRequestUpdate update) {
-		return lookup(new Criterion[]{Restrictions.eq("reviewer", reviewer), Restrictions.eq("update", update)});
+	public Vote find(User reviewer, MergeRequestUpdate update) {
+		return find(new Criterion[]{Restrictions.eq("reviewer", reviewer), Restrictions.eq("update", update)});
 	}
 
 }

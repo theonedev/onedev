@@ -9,6 +9,7 @@ import com.pmease.gitop.core.model.Repository;
 
 @ImplementedBy(DefaultRepositoryManager.class)
 public interface RepositoryManager extends GenericDao<Repository> {
+	
 	File locateStorage(Repository repository);
 	
 }

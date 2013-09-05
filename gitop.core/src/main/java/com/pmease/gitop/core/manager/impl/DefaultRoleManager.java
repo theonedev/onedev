@@ -24,14 +24,14 @@ public class DefaultRoleManager extends DefaultGenericDao<Role> implements RoleM
 
 	@Transactional
 	@Override
-	public Collection<Role> getAnonymousRoles() {
-		return search(new Criterion[]{Restrictions.eq("anonymous", true)});
+	public Collection<Role> findAnonymousRoles() {
+		return query(new Criterion[]{Restrictions.eq("anonymous", true)});
 	}
 
 	@Transactional
 	@Override
-	public Collection<Role> getRegisterRoles() {
-		return search(new Criterion[]{Restrictions.eq("register", true)});
+	public Collection<Role> findRegisterRoles() {
+		return query(new Criterion[]{Restrictions.eq("register", true)});
 	}
 
 }

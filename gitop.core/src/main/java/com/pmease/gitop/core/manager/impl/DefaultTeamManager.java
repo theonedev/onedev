@@ -27,20 +27,20 @@ public class DefaultTeamManager extends DefaultGenericDao<Team> implements TeamM
 
 	@Transactional
 	@Override
-	public Collection<Team> getAnonymousTeams() {
-		return search(new Criterion[]{Restrictions.eq("anonymous", true)});
+	public Collection<Team> findAnonymousTeams() {
+		return query(new Criterion[]{Restrictions.eq("anonymous", true)});
 	}
 
 	@Transactional
 	@Override
-	public Collection<Team> getRegisterTeams() {
-		return search(new Criterion[]{Restrictions.eq("register", true)});
+	public Collection<Team> findRegisterTeams() {
+		return query(new Criterion[]{Restrictions.eq("register", true)});
 	}
 	
 	@Transactional
 	@Override
-	public Team lookupTeam(User owner, String teamName) {
-		return lookup(new Criterion[]{Restrictions.eq("owner", owner), Restrictions.eq("name", teamName)});
+	public Team find(User owner, String teamName) {
+		return find(new Criterion[]{Restrictions.eq("owner", owner), Restrictions.eq("name", teamName)});
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class DefaultTeamManager extends DefaultGenericDao<Team> implements TeamM
 
 			@Override
 			public NamedEntity get(final Long id) {
-				final Team team = DefaultTeamManager.this.lookup(id);
+				final Team team = DefaultTeamManager.this.get(id);
 				if (team != null) {
 					return new NamedEntity() {
 
@@ -71,7 +71,7 @@ public class DefaultTeamManager extends DefaultGenericDao<Team> implements TeamM
 
 			@Override
 			public NamedEntity get(String name) {
-				final Team team = lookupTeam(owner, name);
+				final Team team = find(owner, name);
 				if (team != null) {
 					return new NamedEntity() {
 

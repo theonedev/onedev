@@ -10,7 +10,6 @@ import com.pmease.gitop.core.model.User;
 @ImplementedBy(DefaultPendingVoteManager.class)
 public interface PendingVoteManager extends GenericDao<PendingVote> {
 	
-	PendingVote lookupPendingVote(User reviewer, MergeRequest request);
-	
-	PendingVote requestVote(User reviewer, MergeRequest request);
+	PendingVote find(User reviewer, MergeRequest request);
+
 }

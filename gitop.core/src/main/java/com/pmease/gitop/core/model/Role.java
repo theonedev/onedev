@@ -11,9 +11,9 @@ import javax.persistence.OneToMany;
 import org.apache.shiro.authz.Permission;
 
 import com.pmease.commons.persistence.AbstractEntity;
-import com.pmease.gitop.core.model.permission.ObjectPermission;
-import com.pmease.gitop.core.model.permission.object.SystemObject;
-import com.pmease.gitop.core.model.permission.operation.PrivilegedOperation;
+import com.pmease.gitop.core.permission.ObjectPermission;
+import com.pmease.gitop.core.permission.object.SystemObject;
+import com.pmease.gitop.core.permission.operation.PrivilegedOperation;
 
 @Entity
 @org.hibernate.annotations.Cache(

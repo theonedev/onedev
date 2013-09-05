@@ -88,7 +88,7 @@ public abstract class AbstractRealm<T extends AbstractUser> extends AuthorizingR
 		DetachedCriteria criteria = DetachedCriteria.forClass(userClass);
         criteria.add(Restrictions.eq("name", token.getUsername()));
 
-        return (AbstractUser) generalDao.lookup(criteria);
+        return (AbstractUser) generalDao.find(criteria);
 	}
 
 	@Override
