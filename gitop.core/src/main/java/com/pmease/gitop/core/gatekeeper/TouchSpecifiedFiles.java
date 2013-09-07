@@ -46,12 +46,12 @@ public class TouchSpecifiedFiles extends AbstractGateKeeper {
 			for (String file: touchedFiles) {
 				if (WildcardUtils.matchPath(getFilePaths(), file)) {
 					request.setBaseUpdate(update);
-					return CheckResult.ACCEPT;
+					return accept("Touched files match pattern '" + getFilePaths() + "'.");
 				}
 			}
 		}
 
-		return CheckResult.REJECT;
+		return reject("No touched files match pattern '" + getFilePaths() + "'.");
 	}
 
 }

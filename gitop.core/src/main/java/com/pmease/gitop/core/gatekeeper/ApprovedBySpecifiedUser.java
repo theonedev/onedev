@@ -5,8 +5,9 @@ import com.pmease.commons.util.EasySet;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.model.MergeRequest;
 import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.core.model.Vote;
 
-public class ApprovedBySpecifiedUser implements GateKeeper {
+public class ApprovedBySpecifiedUser extends AbstractGateKeeper {
 
 	private Long userId;
 	
@@ -23,11 +24,15 @@ public class ApprovedBySpecifiedUser implements GateKeeper {
 		UserManager userManager = AppLoader.getInstance(UserManager.class);
 		User user = userManager.load(getUserId());
 
-		CheckResult result = user.checkApprovalSince(request.getBaseUpdate());
-		if (result.isPending())
-			request.requestVote(EasySet.of(user));
-		return result;
-		
+		Vote.Result result = user.checkVoteSince(request.getBaseUpdate());
+		if (result == null) {
+			request.inviteToVote(EasySet.of(user), 1);
+			return pending("To be approved by user '" + user.getName() + "'.");
+		} else if (result.isAccept()) {
+			return accept("Approved by user '" + user.getName() + "'.");
+		} else {
+			return reject("Rejected by user '" + user.getName() + "'.");
+		}
 	}
 
 	@Override

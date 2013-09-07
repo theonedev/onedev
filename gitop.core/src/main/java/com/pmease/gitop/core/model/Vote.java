@@ -19,7 +19,34 @@ import com.pmease.commons.persistence.AbstractEntity;
 })
 public class Vote extends AbstractEntity {
 
-	public static enum Result {ACCEPT, REJECT};
+	public static enum Result {
+		ACCEPT {
+			@Override
+			public boolean isAccept() {
+				return true;
+			}
+
+			@Override
+			public boolean isReject() {
+				return false;
+			}
+		}, 
+		REJECT {
+			@Override
+			public boolean isAccept() {
+				return false;
+			}
+
+			@Override
+			public boolean isReject() {
+				return true;
+			}
+		};
+		
+		public abstract boolean isAccept();
+		
+		public abstract boolean isReject();
+	};
 	
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)

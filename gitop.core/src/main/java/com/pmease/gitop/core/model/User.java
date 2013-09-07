@@ -7,7 +7,6 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
 import com.pmease.commons.security.AbstractUser;
-import com.pmease.gitop.core.gatekeeper.GateKeeper.CheckResult;
 import com.pmease.gitop.core.permission.object.ProtectedObject;
 import com.pmease.gitop.core.permission.object.UserBelonging;
 
@@ -48,7 +47,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	private Collection<Vote> votes = new ArrayList<Vote>();
 	
 	@OneToMany(mappedBy="reviewer")
-	private Collection<PendingVote> pendingVotes = new ArrayList<PendingVote>();
+	private Collection<VoteInvitation> voteVitations = new ArrayList<VoteInvitation>();
 
 	public String getDescription() {
 		return description;
@@ -106,41 +105,38 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.votes = votes;
 	}
 
-	public Collection<PendingVote> getPendingVotes() {
-		return pendingVotes;
+	public Collection<VoteInvitation> getVoteInvitations() {
+		return voteVitations;
 	}
 
-	public void setPendingVotes(Collection<PendingVote> pendingVotes) {
-		this.pendingVotes = pendingVotes;
+	public void setVoteInvitations(Collection<VoteInvitation> voteInvitations) {
+		this.voteVitations = voteInvitations;
 	}
 
 	@Override
 	public boolean has(ProtectedObject object) {
 		if (object instanceof User) {
 			User user = (User) object;
-			return user.getId().equals(getId());
+			return user.equals(this);
 		} else if (object instanceof UserBelonging) {
 			UserBelonging userBelonging = (UserBelonging) object;
-			return userBelonging.getUser().getId().equals(getId());
+			return userBelonging.getUser().equals(this);
 		} else {
 			return false;
 		}
 	}
 	
-	public CheckResult checkApprovalSince(MergeRequestUpdate update) {
-		if (update.getRequest().getSubmitter().getId().equals(getId()))
-			return CheckResult.ACCEPT;
+	public Vote.Result checkVoteSince(MergeRequestUpdate update) {
+		if (update.getRequest().getSubmitter().equals(this))
+			return Vote.Result.ACCEPT;
 		
 		for (Vote vote: update.listVotesOnwards()) {
 			if (vote.getReviewer().equals(this)) {
-				if (vote.getResult() == Vote.Result.ACCEPT)
-					return CheckResult.ACCEPT;
-				else
-					return CheckResult.REJECT;
+				return vote.getResult();
 			}
 		}
 		
-		return CheckResult.PENDING;
+		return null;
 	}
 
 }

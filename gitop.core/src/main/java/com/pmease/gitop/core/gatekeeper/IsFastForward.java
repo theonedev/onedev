@@ -7,9 +7,9 @@ public class IsFastForward extends AbstractGateKeeper {
 	@Override
 	public CheckResult check(MergeRequest request) {
 		if (request.isFastForward())
-			return CheckResult.ACCEPT;
+			return accept("Is fast-forward.");
 		else
-			return CheckResult.REJECT;
+			return reject("None fast-forward.");
 	}
 
 }

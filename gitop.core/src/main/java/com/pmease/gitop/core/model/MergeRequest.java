@@ -19,6 +19,7 @@ import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.FetchMode;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.CalcMergeBaseCommand;
 import com.pmease.commons.git.CheckAncestorCommand;
@@ -26,7 +27,9 @@ import com.pmease.commons.git.FindChangedFilesCommand;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.persistence.AbstractEntity;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.PendingVoteManager;
+import com.pmease.gitop.core.gatekeeper.CheckResult;
+import com.pmease.gitop.core.gatekeeper.GateKeeper;
+import com.pmease.gitop.core.manager.VoteInvitationManager;
 import com.pmease.gitop.core.manager.RepositoryManager;
 
 @SuppressWarnings("serial")
@@ -54,6 +57,8 @@ public class MergeRequest extends AbstractEntity {
 	
 	@Column(nullable=false)
 	private Status status = Status.OPEN;
+
+	private transient Optional<CheckResult> checkResult;
 	
 	private transient Boolean merged;
 	
@@ -64,12 +69,14 @@ public class MergeRequest extends AbstractEntity {
 	private transient List<MergeRequestUpdate> effectiveUpdates;
 	
 	private transient MergeRequestUpdate baseUpdate;
-
+	
+	private transient Collection<User> potentialVoters;
+	
 	@OneToMany(mappedBy="request")
 	private Collection<MergeRequestUpdate> updates = new ArrayList<MergeRequestUpdate>();
 	
 	@OneToMany(mappedBy="request")
-	private Collection<PendingVote> pendingVotes = new ArrayList<PendingVote>();
+	private Collection<VoteInvitation> voteInvitations = new ArrayList<VoteInvitation>();
 	
 	public String getTitle() {
 		return title;
@@ -115,12 +122,12 @@ public class MergeRequest extends AbstractEntity {
 		this.updates = updates;
 	}
 
-	public Collection<PendingVote> getPendingVotes() {
-		return pendingVotes;
+	public Collection<VoteInvitation> getVoteInvitations() {
+		return voteInvitations;
 	}
 
-	public void setPendingVotes(Collection<PendingVote> pendingVotes) {
-		this.pendingVotes = pendingVotes;
+	public void setVoteInvitations(Collection<VoteInvitation> voteInvitations) {
+		this.voteInvitations = voteInvitations;
 	}
 
 	public Status getStatus() {
@@ -238,15 +245,61 @@ public class MergeRequest extends AbstractEntity {
 		}
 		return mergeBase;
 	}
-	
-	public void requestVote(Collection<User> candidates) {
-		Set<User> pendingUsers = new HashSet<User>();
-		for (PendingVote each: getPendingVotes())
-			pendingUsers.add(each.getReviewer());
 
-		pendingUsers.retainAll(candidates);
+	/**
+	 * Find potential voters for this request. Potential voters will be 
+	 * presented with the vote/reject button when they review the request.
+	 * However they may not receive vote invitation.
+	 * <p>
+	 * @return
+	 * 			a collection of potential voters
+	 */
+	public Collection<User> findPotentialVoters() {
+		check(false);
+		return getPotentialVoters();
+	}
+	
+	private Collection<User> getPotentialVoters() {
+		if (potentialVoters == null) 
+			potentialVoters = new HashSet<User>();
+		return potentialVoters;
+	}
+	
+	/**
+	 * Invite specified number of users to vote for this request.
+	 * <p>
+	 * @param users
+	 * 			a collection of users to invite users from
+	 * @param count
+	 * 			number of users to invite
+	 */
+	public void inviteToVote(final Collection<User> users, int count) {
+		Collection<User> candidates = new HashSet<User>(users);
+
+		// submitter is not allowed to vote for this request 
+		candidates.remove(getSubmitter());
 		
-		if (pendingUsers.isEmpty()) {
+		// users already voted for latest update should be excluded
+		for (Vote vote: getLatestUpdate().getVotes())
+			candidates.remove(vote.getReviewer());
+		
+		getPotentialVoters().addAll(candidates);
+		
+		/* 
+		 * users already voted since base update should be excluded from
+		 * invitation list as their votes are still valid 
+		 */
+		for (Vote vote: getBaseUpdate().listVotesOnwards()) {
+			candidates.remove(vote.getReviewer());
+		}
+		
+		Set<User> invited = new HashSet<User>();
+		for (VoteInvitation each: getVoteInvitations())
+			invited.add(each.getReviewer());
+
+		invited.retainAll(candidates);
+		
+		for (int i=0; i<count-invited.size(); i++) {
 			User selected = Collections.min(candidates, new Comparator<User>() {
 
 				@Override
@@ -255,14 +308,49 @@ public class MergeRequest extends AbstractEntity {
 				}
 				
 			});
+
+			candidates.remove(selected);
 			
-			PendingVote pendingVote = new PendingVote();
-			pendingVote.setRequest(this);
-			pendingVote.setReviewer(selected);
-	
-			Gitop.getInstance(PendingVoteManager.class).save(pendingVote);
+			VoteInvitation invitation = new VoteInvitation();
+			invitation.setRequest(this);
+			invitation.setReviewer(selected);
+			
+			Gitop.getInstance(VoteInvitationManager.class).save(invitation);
 		}
-		
+
+	}
+
+	/**
+	 * Check this request with gate keeper of target repository.
+	 * <p>
+	 * @param force
+	 * 			whether or not to force the check. Since the check might be time-consuming, Gitop
+	 * 			caches the check result, and returns the cached result for subsequent checks if 
+	 * 			force flag is not set.
+	 * @return
+	 * 			check result of gate keeper, or Optional.absent() if no gate keeper is defined
+	 */
+	public Optional<CheckResult> check(boolean force) {
+		if (checkResult == null || force) {
+			GateKeeper gateKeeper = getDestination().getRepository().getGateKeeper();
+			if (gateKeeper != null) {
+				checkResult = Optional.of(gateKeeper.check(this));
+				
+				Collection<VoteInvitation> withdraws = new HashSet<VoteInvitation>();
+				for (VoteInvitation invitation: getVoteInvitations()) {
+					if (!getPotentialVoters().contains(invitation.getReviewer())) {
+						withdraws.add(invitation);
+					}
+				}
+				
+				for (VoteInvitation invitation: withdraws) {
+					Gitop.getInstance(VoteInvitationManager.class).delete(invitation);
+				}
+			} else {
+				checkResult = Optional.absent();
+			}
+		}
+		return checkResult;
 	}
 	
 }

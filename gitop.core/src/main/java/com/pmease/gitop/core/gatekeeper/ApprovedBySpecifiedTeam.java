@@ -5,12 +5,10 @@ import java.util.HashSet;
 
 import javax.validation.constraints.Min;
 
-import com.pmease.commons.loader.AppLoader;
-import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.model.MergeRequest;
-import com.pmease.gitop.core.model.Team;
 import com.pmease.gitop.core.model.TeamMembership;
 import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.core.model.Vote;
 
 public class ApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
 
@@ -27,41 +25,31 @@ public class ApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
 
 	@Override
 	public CheckResult check(MergeRequest request) {
-		TeamManager teamManager = AppLoader.getInstance(TeamManager.class);
-		Team team = teamManager.load(getTeamId());
-
 		Collection<User> members = new HashSet<User>();
-		for (TeamMembership membership: team.getMemberships())
+		for (TeamMembership membership: getTeam().getMemberships())
 			members.add(membership.getUser());
-		
-		boolean pendingBlock = false;
 		
 		int approvals = 0;
 		int pendings = 0;
 		for (User member: members) {
-			CheckResult result = member.checkApprovalSince(request.getBaseUpdate());
-			if (result == CheckResult.ACCEPT) {
+			Vote.Result result = member.checkVoteSince(request.getBaseUpdate());
+			if (result == null) {
+				pendings++;
+			} else if (result.isAccept()) {
 				approvals++;
-			} else if (result == CheckResult.PENDING_BLOCK) {
-				pendingBlock = true;
-				pendings++;
-			} else if (result == CheckResult.PENDING) {
-				pendings++;
 			}
 		}
 		
 		if (approvals >= getLeastApprovals()) {
-			return CheckResult.ACCEPT;
+			return accept("Get at least " + getLeastApprovals() + " approvals from team '" + getTeam().getName() + "'.");
 		} else if (getLeastApprovals() - approvals > pendings) {
-			return CheckResult.REJECT;
+			return reject("Can not get at least " + getLeastApprovals() + " approvals from team '" + getTeam().getName() + "'.");
 		} else {
-			for (int i=0; i<getLeastApprovals()-approvals; i++)
-				request.requestVote(members);
+			int lackApprovals = getLeastApprovals() - approvals;
+
+			request.inviteToVote(members, lackApprovals);
 			
-			if (pendingBlock)
-				return CheckResult.PENDING_BLOCK;
-			else
-				return CheckResult.PENDING;
+			return pending("To be approved by " + lackApprovals + " user(s) from team '" + getTeam().getName() + "'.");
 		}
 	}
 

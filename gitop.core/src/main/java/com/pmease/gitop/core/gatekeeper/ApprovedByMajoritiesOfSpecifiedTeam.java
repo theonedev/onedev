@@ -11,7 +11,14 @@ public class ApprovedByMajoritiesOfSpecifiedTeam extends TeamAwareGateKeeper {
 		gateKeeper.setRequireVoteOfAllMembers(true);
 		gateKeeper.setTeamId(getTeamId());
 		
-		return gateKeeper.check(request);
+		CheckResult result = gateKeeper.check(request);
+		
+		if (result.isAccept())
+			result = accept("Approved by majorities of team '" + getTeam().getName() + "'.");
+		else if (result.isReject())
+			result = reject("Not approved by majorities of team '" + getTeam().getName() + "'.");
+		
+		return result;
 	}
 
 }

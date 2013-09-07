@@ -6,7 +6,7 @@ public class AlwaysAccept extends AbstractGateKeeper {
 
 	@Override
 	public CheckResult check(MergeRequest request) {
-		return CheckResult.ACCEPT;
+		return accept("always");
 	}
 
 }

@@ -8,7 +8,7 @@ import com.pmease.commons.util.trimmable.TrimUtils;
 import com.pmease.commons.util.trimmable.Trimmable;
 import com.pmease.gitop.core.model.MergeRequest;
 
-public class OrGateKeeper implements GateKeeper {
+public class OrGateKeeper extends AbstractGateKeeper {
 
 	private List<GateKeeper> gateKeepers = new ArrayList<GateKeeper>();
 	
@@ -22,20 +22,27 @@ public class OrGateKeeper implements GateKeeper {
 
 	@Override
 	public CheckResult check(MergeRequest request) {
-		boolean pending = false;
+		List<String> pendingReasons = new ArrayList<String>();
+		List<String> rejectReasons = new ArrayList<String>();
 		
 		for (GateKeeper each: getGateKeepers()) {
 			CheckResult result = each.check(request);
-			if (result == CheckResult.ACCEPT || result == CheckResult.PENDING_BLOCK)
+			if (result.isReject()) {
+				rejectReasons.addAll(result.getReasons());
+			} else if (result.isAccept()) {
 				return result;
-			else if (result == CheckResult.PENDING)
-				pending = true;
+			} else if (result.isBlock()) {
+				result.getReasons().addAll(pendingReasons);
+				return result;
+			} else {
+				pendingReasons.addAll(result.getReasons());
+			}
 		}
 		
-		if (pending)
-			return CheckResult.PENDING;
+		if (!pendingReasons.isEmpty())
+			return pending(pendingReasons);
 		else
-			return CheckResult.REJECT;
+			return reject(rejectReasons);
 	}
 
 	@Override

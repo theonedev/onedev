@@ -7,9 +7,9 @@ public class HasSourceBranch extends AbstractGateKeeper {
 	@Override
 	public CheckResult check(MergeRequest request) {
 		if (request.getSource() != null)
-			return CheckResult.ACCEPT;
+			return accept("Associated with source branch.");
 		else
-			return CheckResult.REJECT;
+			return reject("Not associated with source branch.");
 	}
 
 }

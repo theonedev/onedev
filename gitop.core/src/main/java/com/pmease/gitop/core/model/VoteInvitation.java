@@ -16,7 +16,7 @@ import com.pmease.commons.persistence.AbstractEntity;
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"reviewer", "request"})
 })
-public class PendingVote extends AbstractEntity {
+public class VoteInvitation extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.EAGER)
 	@org.hibernate.annotations.Fetch(FetchMode.SELECT)

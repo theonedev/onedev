@@ -6,7 +6,7 @@ public class NeverAccept extends AbstractGateKeeper {
 
 	@Override
 	public CheckResult check(MergeRequest request) {
-		return CheckResult.REJECT;
+		return reject("never");
 	}
 
 }

@@ -64,6 +64,11 @@ public class EntityPatternSet extends PatternSet implements Trimmable {
 		return input;
 	}
 
+	@Override
+	public String toString() {
+		return new PatternSet(asInput()).toString();
+	}
+
 	public static EntityPatternSet fromInput(List<ExclusiveAwarePattern> input, EntityLoader entityLoader) {
 		List<ExclusiveAwarePattern> stored = new ArrayList<ExclusiveAwarePattern>();
 		for (ExclusiveAwarePattern eachInput: input) {

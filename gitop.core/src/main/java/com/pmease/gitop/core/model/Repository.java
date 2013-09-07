@@ -72,6 +72,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 
 	public GateKeeper getGateKeeper() {
+		if (gateKeeper != null)
+			gateKeeper = (GateKeeper) gateKeeper.trim(this);
 		return gateKeeper;
 	}
 

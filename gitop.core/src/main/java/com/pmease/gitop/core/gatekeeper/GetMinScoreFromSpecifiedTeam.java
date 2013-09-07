@@ -5,12 +5,10 @@ import java.util.HashSet;
 
 import javax.validation.constraints.Min;
 
-import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.model.MergeRequest;
-import com.pmease.gitop.core.model.Team;
 import com.pmease.gitop.core.model.TeamMembership;
 import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.core.model.Vote;
 
 public class GetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
 
@@ -37,56 +35,46 @@ public class GetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
 
 	@Override
 	public CheckResult check(MergeRequest request) {
-		TeamManager teamManager = Gitop.getInstance(TeamManager.class);
-		Team team = teamManager.load(getTeamId());
 		Collection<User> members = new HashSet<User>();
-		for (TeamMembership membership: team.getMemberships())
+		for (TeamMembership membership: getTeam().getMemberships())
 			members.add(membership.getUser());
 		
-		boolean pendingBlock = false;
-		
 		int score = 0;
-		int pending = 0;
+		int pendings = 0;
+		
 		for (User member: members) {
-			CheckResult result = member.checkApprovalSince(request.getBaseUpdate());
-			if (result == CheckResult.ACCEPT) {
+			Vote.Result result = member.checkVoteSince(request.getBaseUpdate());
+			if (result == null) {
+				pendings++;
+			} else if (result.isAccept()) {
 				score++;
-			} else if (result == CheckResult.REJECT) {
-				score--;
-			} else if (result == CheckResult.PENDING_BLOCK) {
-				pendingBlock = true;
-				pending++;
 			} else {
-				pending++;
+				score--;
 			}
 		}
 
-		if (score + pending < getMinScore()) {
-			return CheckResult.REJECT;
+		if (score + pendings < getMinScore()) {
+			return reject("Can not get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
 		} else {
 			int lackApprovals;
 			if (isRequireVoteOfAllMembers()) {
-				if (score - pending >= getMinScore())
-					return CheckResult.ACCEPT;
-				int temp = getMinScore() + pending - score;
+				if (score - pendings >= getMinScore())
+					return accept("Get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
+				int temp = getMinScore() + pendings - score;
 				lackApprovals = temp / 2;
 				if (temp % 2 != 0)
 					lackApprovals++;
-				if (lackApprovals > pending)
-					lackApprovals = pending;
+				if (lackApprovals > pendings)
+					lackApprovals = pendings;
 			} else {
 				if (score >= getMinScore())
-					return CheckResult.ACCEPT;
+					return accept("Get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
 				lackApprovals = getMinScore() - score;
 			}
 
-			for (int i=0; i<lackApprovals; i++)
-				request.requestVote(members);
+			request.inviteToVote(members, lackApprovals);
 			
-			if (pendingBlock)
-				return CheckResult.PENDING_BLOCK;
-			else
-				return CheckResult.PENDING;
+			return pending("To be approved by " + lackApprovals + " users from team '" + getTeam().getName() + ".");
 		}
 	}
 

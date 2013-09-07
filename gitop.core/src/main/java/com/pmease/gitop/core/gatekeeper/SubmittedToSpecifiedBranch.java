@@ -11,7 +11,7 @@ import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.model.MergeRequest;
 import com.pmease.gitop.core.model.Repository;
 
-public class SubmittedToSpecifiedBranch implements GateKeeper {
+public class SubmittedToSpecifiedBranch extends AbstractGateKeeper {
 
 	private String branchPatterns;
 	
@@ -31,10 +31,12 @@ public class SubmittedToSpecifiedBranch implements GateKeeper {
 		EntityMatcher entityMatcher = new EntityMatcher(entityLoader, new WildcardPathMatcher());
 		PatternSetMatcher patternSetMatcher = new PatternSetMatcher(entityMatcher);
 
+		EntityPatternSet patternSet = EntityPatternSet.fromStored(getBranchPatterns(), entityLoader);
+
 		if (patternSetMatcher.matches(getBranchPatterns(), request.getDestination().getName()))
-			return CheckResult.ACCEPT;
+			return accept("Target branch matches pattern '" + patternSet + "'.");
 		else
-			return CheckResult.REJECT;
+			return reject("Target branch does not match pattern '" + patternSet + "'.");
 	}
 
 	@Override

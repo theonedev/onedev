@@ -31,18 +31,18 @@ public class IfThenGateKeeper extends AbstractGateKeeper {
 	@Override
 	public CheckResult check(MergeRequest request) {
 		CheckResult ifResult = getIfGate().check(request);
-		if (ifResult == CheckResult.ACCEPT) {
+		if (ifResult.isAccept()) {
 			return getThenGate().check(request);
-		} else if (ifResult == CheckResult.REJECT) {
-			return CheckResult.ACCEPT;
-		} else if (ifResult == CheckResult.PENDING_BLOCK) {
-			return CheckResult.PENDING_BLOCK;
+		} else if (ifResult.isReject()) {
+			return accept(ifResult.getReasons());
+		} else if (ifResult.isBlock()) {
+			return ifResult;
 		} else {
 			CheckResult thenResult = getThenGate().check(request);
-			if (thenResult == CheckResult.ACCEPT)
-				return CheckResult.ACCEPT;
+			if (thenResult.isAccept())
+				return thenResult;
 			else 
-				return CheckResult.PENDING;
+				return ifResult;
 		}
 	}
 

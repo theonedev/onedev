@@ -20,8 +20,14 @@ public class ApprovedByAuthorizedUsers extends AbstractGateKeeper {
 
 		CheckResult result = or.check(request);
 		
-		if (result.isPending()) {
-			request.requestVote(authorizedUsers);
+		if (result.isAccept()) { 
+			result = accept("Approved by user with push permission.");
+		} else if (result.isReject()) {
+			result = reject("Not approved by any users with push permission.");
+		} else if (result.isPending()) {
+			result = pending("To be approved by someone with push permission.");
+		} else {
+			result = block("To be approved by someone with push permission.");
 		}
 		return result;
 	}

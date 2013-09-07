@@ -2,6 +2,7 @@ package com.pmease.gitop.core.gatekeeper;
 
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.TeamManager;
+import com.pmease.gitop.core.model.Team;
 
 public abstract class TeamAwareGateKeeper extends AbstractGateKeeper {
 	
@@ -13,6 +14,10 @@ public abstract class TeamAwareGateKeeper extends AbstractGateKeeper {
 
 	public void setTeamId(Long teamId) {
 		this.teamId = teamId;
+	}
+	
+	public Team getTeam() {
+		return Gitop.getInstance(TeamManager.class).load(getTeamId());
 	}
 
 	@Override

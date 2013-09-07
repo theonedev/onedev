@@ -2,7 +2,7 @@ package com.pmease.gitop.core.gatekeeper;
 
 import com.pmease.gitop.core.model.MergeRequest;
 
-public class NotGateKeeper implements GateKeeper {
+public class NotGateKeeper extends AbstractGateKeeper {
 
 	private GateKeeper gateKeeper;
 	
@@ -18,12 +18,12 @@ public class NotGateKeeper implements GateKeeper {
 	public CheckResult check(MergeRequest request) {
 		CheckResult result = getGateKeeper().check(request);
 		
-		if (result == CheckResult.PENDING)
-			return result;
-		else if (result == CheckResult.ACCEPT)
-			return CheckResult.REJECT;
+		if (result.isAccept())
+			return reject(result.getReasons());
+		else if (result.isReject())
+			return accept(result.getReasons());
 		else
-			return CheckResult.ACCEPT;
+			return result;
 	}
 
 	@Override

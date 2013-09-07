@@ -34,7 +34,7 @@ public class MergeRequestUpdate extends AbstractEntity {
 
 	@OneToMany(mappedBy="update")
 	private Collection<Vote> votes = new ArrayList<Vote>();
-
+	
 	public MergeRequest getRequest() {
 		return request;
 	}

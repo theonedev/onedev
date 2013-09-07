@@ -1,26 +1,22 @@
 package com.pmease.gitop.core.gatekeeper;
 
-import com.pmease.commons.loader.AppLoader;
-import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.model.MergeRequest;
-import com.pmease.gitop.core.model.Team;
 import com.pmease.gitop.core.model.TeamMembership;
+import com.pmease.gitop.core.model.Vote;
 
 public class NoRejectionBySpecifiedTeam extends TeamAwareGateKeeper {
 
 	@Override
 	public CheckResult check(MergeRequest request) {
-		TeamManager teamManager = AppLoader.getInstance(TeamManager.class);
-		Team team = teamManager.load(getTeamId());
-
-		for (TeamMembership membership: team.getMemberships()) {
-			CheckResult result = membership.getUser().checkApprovalSince(request.getBaseUpdate());
-			if (result == CheckResult.REJECT) {
-				return CheckResult.REJECT;
+		
+		for (TeamMembership membership: getTeam().getMemberships()) {
+			Vote.Result result = membership.getUser().checkVoteSince(request.getBaseUpdate());
+			if (result.isReject()) {
+				return reject("Rejected by user '" + membership.getUser().getName() + "'.");
 			}
 		}
 		
-		return CheckResult.ACCEPT;
+		return accept("Not rejected by anyone from team '" + getTeam().getName() + ".");
 	}
 
 }

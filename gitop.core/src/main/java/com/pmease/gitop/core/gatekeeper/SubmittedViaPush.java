@@ -7,9 +7,9 @@ public class SubmittedViaPush extends AbstractGateKeeper {
 	@Override
 	public CheckResult check(MergeRequest request) {
 		if (request.isAutoCreated())
-			return CheckResult.ACCEPT;
+			return accept("Submitted via push.");
 		else
-			return CheckResult.REJECT;
+			return reject("Not submitted via push.");
 	}
 
 }
