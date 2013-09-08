@@ -14,7 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.pmease.commons.persistence.AbstractEntity;
+import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitop.core.gatekeeper.GateKeeper;
 import com.pmease.gitop.core.permission.object.ProtectedObject;
 import com.pmease.gitop.core.permission.object.UserBelonging;

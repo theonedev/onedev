@@ -7,9 +7,9 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.persistence.Transactional;
-import com.pmease.commons.persistence.dao.DefaultGenericDao;
-import com.pmease.commons.persistence.dao.GeneralDao;
+import com.pmease.commons.hibernate.Transactional;
+import com.pmease.commons.hibernate.dao.DefaultGenericDao;
+import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.core.model.Config;
 import com.pmease.gitop.core.model.Config.Key;

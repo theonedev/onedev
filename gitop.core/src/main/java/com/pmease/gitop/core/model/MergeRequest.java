@@ -22,7 +22,7 @@ import com.pmease.commons.git.CalcMergeBaseCommand;
 import com.pmease.commons.git.CheckAncestorCommand;
 import com.pmease.commons.git.FindChangedFilesCommand;
 import com.pmease.commons.git.Git;
-import com.pmease.commons.persistence.AbstractEntity;
+import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.gatekeeper.CheckResult;
 import com.pmease.gitop.core.gatekeeper.GateKeeper;

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">  
+    <modelVersion>4.0.0</modelVersion>  
+    <artifactId>gitop</artifactId>  
+    <name>Gitop</name>  
+    <parent> 
+        <groupId>com.pmease</groupId>  
+        <artifactId>parent.general</artifactId>  
+        <version>1.0.28</version> 
+    </parent>  
+    <build> 
+        <plugins> 
+            <plugin> 
+                <artifactId>maven-archetype-plugin</artifactId> 
+            </plugin>  
+            <plugin> 
+                <artifactId>maven-source-plugin</artifactId> 
+            </plugin>  
+            <plugin> 
+                <artifactId>maven-javadoc-plugin</artifactId> 
+            </plugin>  
+            <plugin> 
+                <groupId>com.pmease</groupId>  
+                <artifactId>plugin.maven</artifactId>  
+                <executions> 
+                    <execution> 
+                        <id>copy-product-resources</id>  
+                        <phase>compile</phase>  
+                        <goals> 
+                            <goal>run-ant</goal> 
+                        </goals>  
+                        <configuration> 
+                            <target> 
+                                <copy todir="${project.build.directory}/sandbox"> 
+                                    <fileset dir="system" excludes="site/images/**, **/*.keystore"/>  
+                                    <filterset> 
+                                        <filter token="dbName" value="${project.artifactId}"/>  
+                                        <filter token="productName" value="${project.name}"/> 
+                                    </filterset> 
+                                </copy>  
+                                <copy todir="${project.build.directory}/sandbox"> 
+                                    <fileset dir="system" includes="site/images/**, **/*.keystore"/> 
+                                </copy> 
+                            </target> 
+                        </configuration> 
+                    </execution> 
+                </executions> 
+            </plugin>  
+            <plugin> 
+                <artifactId>maven-antrun-plugin</artifactId>  
+                <executions> 
+                    <execution> 
+                        <id>prepare-package</id>  
+                        <phase>prepare-package</phase>  
+                        <goals> 
+                            <goal>run</goal> 
+                        </goals>  
+                        <configuration> 
+                            <target> 
+                                <taskdef name="gant" classname="org.codehaus.gant.ant.Gant"/>  
+                                <gant file="build/prepare_package.gant"> 
+                                    <definition name="buildDirectory" value="${project.build.directory}"/>  
+                                    <definition name="outputDirectory" value="${project.build.outputDirectory}"/>  
+                                    <definition name="jswPath" value="${com.pmease:commons.jsw:jar}"/>  
+                                    <definition name="productId" value="${project.artifactId}"/>  
+                                    <definition name="productName" value="${project.name}"/>  
+                                    <definition name="bootstrapClass" value="${bootstrapClass}"/> 
+                                </gant> 
+                            </target> 
+                        </configuration> 
+                    </execution>  
+                    <execution> 
+                        <id>package</id>  
+                        <phase>package</phase>  
+                        <goals> 
+                            <goal>run</goal> 
+                        </goals>  
+                        <configuration> 
+                            <target> 
+                                <taskdef name="gant" classname="org.codehaus.gant.ant.Gant"/>  
+                                <gant file="build/package.gant"> 
+                                    <definition name="buildDirectory" value="${project.build.directory}"/>  
+                                    <definition name="executables" value="${executables}"/>  
+                                    <definition name="packageName" value="${project.artifactId}-${project.version}"/> 
+                                </gant> 
+                            </target> 
+                        </configuration> 
+                    </execution> 
+                </executions> 
+            </plugin> 
+        </plugins> 
+    </build>  
+    <dependencies> 
+        <dependency> 
+            <groupId>com.pmease</groupId>  
+            <artifactId>commons.jsw</artifactId>  
+            <version>1.0.28</version>  
+            <scope>provided</scope> 
+        </dependency>  
+        <dependency> 
+            <groupId>com.pmease</groupId>  
+            <artifactId>gitop.core</artifactId>  
+            <version>1.0.30</version> 
+        </dependency>
+        <dependency>
+        	<groupId>com.pmease</groupId>
+        	<artifactId>gitop.web</artifactId>
+        	<version>1.0.0</version>
+        </dependency>
+        <dependency>
+        	<groupId>com.pmease</groupId>
+        	<artifactId>commons.jersey</artifactId>
+        	<version>1.0.30</version>
+        </dependency>
+    </dependencies>  
+    <repositories> 
+        <repository> 
+            <id>pmeaseRepo</id>  
+            <name>PMEase Repository</name>  
+            <releases> 
+                <enabled>true</enabled>  
+                <updatePolicy>never</updatePolicy>  
+                <checksumPolicy>fail</checksumPolicy> 
+            </releases>  
+            <snapshots> 
+                <enabled>true</enabled>  
+                <updatePolicy>always</updatePolicy>  
+                <checksumPolicy>fail</checksumPolicy> 
+            </snapshots>  
+            <url>http://artifact.pmease.com/</url> 
+        </repository> 
+    </repositories>  
+    <properties> 
+        <executables>bin/*.sh, bin/wrapper-*</executables>  
+        <bootstrapClass>com.pmease.commons.bootstrap.Bootstrap</bootstrapClass>  
+        <moduleClass>com.pmease.gitop.product.ProductModule</moduleClass>  
+        <aggregation>true</aggregation> 
+    </properties>  
+    <version>1.0.30</version> 
+</project>

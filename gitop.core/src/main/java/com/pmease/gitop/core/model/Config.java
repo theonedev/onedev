@@ -5,7 +5,7 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
-import com.pmease.commons.persistence.AbstractEntity;
+import com.pmease.commons.hibernate.AbstractEntity;
 
 /**
  * This entity stores object in serialized form, with one entity 

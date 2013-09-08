@@ -6,7 +6,7 @@ import java.util.Collection;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
-import com.pmease.commons.security.AbstractUser;
+import com.pmease.commons.shiro.AbstractUser;
 import com.pmease.gitop.core.permission.object.ProtectedObject;
 import com.pmease.gitop.core.permission.object.UserBelonging;
 

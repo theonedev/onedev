@@ -13,7 +13,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.shiro.authz.Permission;
 
-import com.pmease.commons.persistence.AbstractEntity;
+import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.core.permission.operation.PrivilegedOperation;
 import com.pmease.gitop.core.permission.operation.Read;

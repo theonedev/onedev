@@ -3,7 +3,7 @@ package com.pmease.gitop.core.manager;
 import java.util.Collection;
 
 import com.google.inject.ImplementedBy;
-import com.pmease.commons.persistence.dao.GenericDao;
+import com.pmease.commons.hibernate.dao.GenericDao;
 import com.pmease.commons.util.namedentity.EntityLoader;
 import com.pmease.gitop.core.manager.impl.DefaultTeamManager;
 import com.pmease.gitop.core.model.Team;

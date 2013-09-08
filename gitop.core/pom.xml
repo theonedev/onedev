@@ -33,19 +33,9 @@
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
-            <artifactId>commons.web</artifactId>  
-            <version>1.0.29</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.pmease</groupId>  
-            <artifactId>commons.security</artifactId>  
+            <artifactId>commons.shiro</artifactId>  
             <version>1.0.30</version> 
         </dependency>  
-        <dependency> 
-            <groupId>com.pmease</groupId>  
-            <artifactId>commons.rest</artifactId>  
-            <version>1.0.30</version> 
-        </dependency>
         <dependency>
         	<groupId>com.pmease</groupId>
         	<artifactId>commons.git</artifactId>
@@ -70,7 +60,7 @@
         </repository> 
     </repositories>  
     <properties> 
-        <moduleClass>com.pmease.gitop.core.CoreModule</moduleClass> 
+        <moduleClass>com.pmease.gitop.core.GitopModule</moduleClass> 
     </properties>  
     <version>1.0.30</version> 
 </project>

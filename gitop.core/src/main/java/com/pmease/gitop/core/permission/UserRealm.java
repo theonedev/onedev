@@ -9,8 +9,8 @@ import javax.inject.Singleton;
 import org.apache.shiro.authc.credential.CredentialsMatcher;
 import org.apache.shiro.authz.Permission;
 
-import com.pmease.commons.persistence.dao.GeneralDao;
-import com.pmease.commons.security.AbstractRealm;
+import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.gitop.core.manager.RoleManager;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.manager.UserManager;

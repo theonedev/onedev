@@ -2,7 +2,8 @@ package com.pmease.gitop.core;
 
 import java.io.Serializable;
 
-public abstract class ManualConfig {
+@SuppressWarnings("serial")
+public abstract class ManualConfig implements Serializable {
 
 	private final Serializable setting;
 	

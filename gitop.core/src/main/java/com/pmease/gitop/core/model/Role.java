@@ -9,7 +9,7 @@ import javax.persistence.OneToMany;
 
 import org.apache.shiro.authz.Permission;
 
-import com.pmease.commons.persistence.AbstractEntity;
+import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.core.permission.object.SystemObject;
 import com.pmease.gitop.core.permission.operation.PrivilegedOperation;

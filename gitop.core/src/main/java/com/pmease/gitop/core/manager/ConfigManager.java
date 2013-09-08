@@ -3,7 +3,7 @@ package com.pmease.gitop.core.manager;
 import javax.annotation.Nullable;
 
 import com.google.inject.ImplementedBy;
-import com.pmease.commons.persistence.dao.GenericDao;
+import com.pmease.commons.hibernate.dao.GenericDao;
 import com.pmease.gitop.core.manager.impl.DefaultConfigManager;
 import com.pmease.gitop.core.model.Config;
 import com.pmease.gitop.core.setting.MailSetting;

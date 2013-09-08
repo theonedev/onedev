@@ -6,7 +6,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.pmease.commons.persistence.AbstractEntity;
+import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitop.core.permission.operation.PrivilegedOperation;
 import com.pmease.gitop.core.permission.operation.Read;
 

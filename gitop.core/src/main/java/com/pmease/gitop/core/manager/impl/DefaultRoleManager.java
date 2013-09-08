@@ -10,9 +10,9 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
-import com.pmease.commons.persistence.Transactional;
-import com.pmease.commons.persistence.dao.DefaultGenericDao;
-import com.pmease.commons.persistence.dao.GeneralDao;
+import com.pmease.commons.hibernate.Transactional;
+import com.pmease.commons.hibernate.dao.DefaultGenericDao;
+import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.RoleManager;
 import com.pmease.gitop.core.model.Role;
 

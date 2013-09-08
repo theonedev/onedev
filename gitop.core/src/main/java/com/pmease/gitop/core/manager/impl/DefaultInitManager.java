@@ -8,7 +8,7 @@ import javax.inject.Singleton;
 
 import org.hibernate.criterion.Order;
 
-import com.pmease.commons.persistence.Transactional;
+import com.pmease.commons.hibernate.Transactional;
 import com.pmease.gitop.core.ManualConfig;
 import com.pmease.gitop.core.Skippable;
 import com.pmease.gitop.core.manager.ConfigManager;
@@ -33,6 +33,7 @@ public class DefaultInitManager implements InitManager {
 		this.configManager = configManager;
 	}
 	
+	@SuppressWarnings("serial")
 	@Transactional
 	@Override
 	public List<ManualConfig> init() {
