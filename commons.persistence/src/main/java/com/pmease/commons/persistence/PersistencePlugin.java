@@ -26,12 +26,12 @@ public class PersistencePlugin extends AbstractPlugin {
 	}
 
 	@Override
-	public void preStartDependents() {
+	public void start() {
 		persistService.start();
 	}
 
 	@Override
-	public void postStopDependents() {
+	public void stop() {
 		persistService.stop();
 	}
 

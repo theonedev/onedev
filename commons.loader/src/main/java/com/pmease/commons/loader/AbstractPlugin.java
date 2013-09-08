@@ -5,9 +5,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.pmease.commons.bootstrap.Lifecycle;
 import com.pmease.commons.util.dependency.Dependency;
 
-public abstract class AbstractPlugin implements Dependency {
+public abstract class AbstractPlugin implements Dependency, Lifecycle {
 	
 	private String id;
 	
@@ -77,25 +78,25 @@ public abstract class AbstractPlugin implements Dependency {
 	/**
 	 * This function will be called before starting other plugins depending on this plugin.
 	 */
-	public void preStartDependents() {
+	public void start() {
 	}
 	
 	/**
 	 * This function will be called after other plugins depending on this plugin have been started.
 	 */
-	public void postStartDependents() {
+	public void postStart() {
 	}
 	
 	/**
 	 * This function will be called before stopping other plugins depending on this plugin.
 	 */
-	public void preStopDependents() {
+	public void preStop() {
 	}
 	
 	/**
 	 * This function will be called after other plugins depending on this plugin have been stopped.
 	 */
-	public void postStopDependents() {
+	public void stop() {
 	}
 
 	public abstract Collection<?> getExtensions();

@@ -50,7 +50,7 @@ public class CorePlugin extends AbstractPlugin {
 	}
 
 	@Override
-	public void postStartDependents() {
+	public void postStart() {
 	}
 
 }

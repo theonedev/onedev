@@ -38,20 +38,20 @@ public class DefaultPluginManager implements PluginManager {
 
 	public void start() {
 		for (AbstractPlugin plugin: pluginMap.values())
-			plugin.preStartDependents();
+			plugin.start();
 		List<AbstractPlugin> reversed = new ArrayList<AbstractPlugin>(pluginMap.values());
 		Collections.reverse(reversed);
 		for (AbstractPlugin plugin: reversed)
-			plugin.postStartDependents();
+			plugin.postStart();
 	}
 
 	public void stop() {
 		for (AbstractPlugin plugin: pluginMap.values())
-			plugin.preStopDependents();
+			plugin.preStop();
 		List<AbstractPlugin> reversed = new ArrayList<AbstractPlugin>(pluginMap.values());
 		Collections.reverse(reversed);
 		for (AbstractPlugin plugin: reversed)
-			plugin.postStopDependents();
+			plugin.stop();
 	}
 
 	public <T> Collection<T> getExtensions(Class<T> extensionPoint) {

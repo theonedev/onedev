@@ -29,7 +29,7 @@ public class Product extends AbstractPlugin {
 	
 	private final Properties serverProps;
 
-	public static final String PRODUCT_NAME = "Gitop";
+	public static final String NAME = "Gitop";
 	
 	@Inject
 	public Product() {
@@ -103,8 +103,8 @@ public class Product extends AbstractPlugin {
 	}
 
 	@Override
-	public void postStartDependents() {
-		logger.info(PRODUCT_NAME + " has been started successfully.");
+	public void postStart() {
+		logger.info(NAME + " has been started successfully.");
 	}
 
 }

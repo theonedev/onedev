@@ -4,7 +4,6 @@ import org.hibernate.cfg.NamingStrategy;
 
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
-import com.pmease.commons.loader.AppName;
 import com.pmease.commons.persistence.PrefixedNamingStrategy;
 import com.pmease.commons.security.AbstractRealm;
 import com.pmease.commons.web.AbstractWicketConfig;
@@ -16,8 +15,6 @@ import com.pmease.gitop.core.permission.UserRealm;
  */
 public class CoreModule extends AbstractPluginModule {
 
-	public static final String PRODUCT_NAME = "Gitop";
-	
 	@Override
 	protected void configure() {
 		super.configure();
@@ -25,7 +22,6 @@ public class CoreModule extends AbstractPluginModule {
 		bind(AbstractWicketConfig.class).to(WicketConfig.class);		
 		bind(AbstractRealm.class).to(UserRealm.class);
 		
-		bindConstant().annotatedWith(AppName.class).to(PRODUCT_NAME);
 		bind(NamingStrategy.class).toInstance(new PrefixedNamingStrategy("G"));
 		
 		bind(Gitop.class);

@@ -65,13 +65,13 @@ public class AbstractPluginTest {
 		
 		InOrder inOrder = inOrder(plugin1, plugin2, plugin3);
 		
-		inOrder.verify(plugin3).preStartDependents();
-		inOrder.verify(plugin2).preStartDependents();
-		inOrder.verify(plugin1).preStartDependents();
+		inOrder.verify(plugin3).start();
+		inOrder.verify(plugin2).start();
+		inOrder.verify(plugin1).start();
 
-		inOrder.verify(plugin1).postStartDependents();
-		inOrder.verify(plugin2).postStartDependents();
-		inOrder.verify(plugin3).postStartDependents();
+		inOrder.verify(plugin1).postStart();
+		inOrder.verify(plugin2).postStart();
+		inOrder.verify(plugin3).postStart();
 	}
 
 	@Test
@@ -80,12 +80,12 @@ public class AbstractPluginTest {
 		
 		InOrder inOrder = inOrder(plugin1, plugin2, plugin3);
 		
-		inOrder.verify(plugin3).preStopDependents();
-		inOrder.verify(plugin2).preStopDependents();
-		inOrder.verify(plugin1).preStopDependents();
+		inOrder.verify(plugin3).preStop();
+		inOrder.verify(plugin2).preStop();
+		inOrder.verify(plugin1).preStop();
 
-		inOrder.verify(plugin1).postStopDependents();
-		inOrder.verify(plugin2).postStopDependents();
-		inOrder.verify(plugin3).postStopDependents();
+		inOrder.verify(plugin1).stop();
+		inOrder.verify(plugin2).stop();
+		inOrder.verify(plugin3).stop();
 	}
 }

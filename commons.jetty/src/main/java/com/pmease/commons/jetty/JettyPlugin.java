@@ -40,7 +40,7 @@ public class JettyPlugin extends AbstractPlugin {
 	}
 	
 	@Override
-	public void preStartDependents() {
+	public void start() {
 		server = createServer();
 		
 		try {
@@ -51,7 +51,7 @@ public class JettyPlugin extends AbstractPlugin {
 	}
 
 	@Override
-	public void postStopDependents() {
+	public void stop() {
 		try {
 			server.stop();
 		} catch (Exception e) {
