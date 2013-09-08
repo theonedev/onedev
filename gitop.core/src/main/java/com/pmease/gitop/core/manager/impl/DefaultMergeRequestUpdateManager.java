@@ -1,10 +1,7 @@
 package com.pmease.gitop.core.manager.impl;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
-
-import org.hibernate.Session;
 
 import com.pmease.commons.persistence.dao.DefaultGenericDao;
 import com.pmease.commons.persistence.dao.GeneralDao;
@@ -16,8 +13,8 @@ public class DefaultMergeRequestUpdateManager extends DefaultGenericDao<MergeReq
 		implements MergeRequestUpdateManager {
 
 	@Inject
-	public DefaultMergeRequestUpdateManager(GeneralDao generalDao, Provider<Session> sessionProvider) {
-		super(generalDao, sessionProvider);
+	public DefaultMergeRequestUpdateManager(GeneralDao generalDao) {
+		super(generalDao);
 	}
 
 }

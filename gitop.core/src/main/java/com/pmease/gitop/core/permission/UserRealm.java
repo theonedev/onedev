@@ -1,4 +1,4 @@
-package com.pmease.gitop.core;
+package com.pmease.gitop.core.permission;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,7 +17,6 @@ import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.model.RoleMembership;
 import com.pmease.gitop.core.model.TeamMembership;
 import com.pmease.gitop.core.model.User;
-import com.pmease.gitop.core.permission.ObjectPermission;
 
 @Singleton
 public class UserRealm extends AbstractRealm<User> {

@@ -21,7 +21,7 @@ public class DefaultRoleManager extends DefaultGenericDao<Role> implements RoleM
 
 	@Inject
 	public DefaultRoleManager(GeneralDao generalDao, Provider<Session> sessionProvider) {
-		super(generalDao, sessionProvider);
+		super(generalDao);
 	}
 
 	@Transactional

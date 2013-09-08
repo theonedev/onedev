@@ -1,9 +1,7 @@
 package com.pmease.gitop.core.manager.impl;
 
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
@@ -12,14 +10,14 @@ import com.pmease.commons.persistence.dao.DefaultGenericDao;
 import com.pmease.commons.persistence.dao.GeneralDao;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
 import com.pmease.gitop.core.model.MergeRequest;
-import com.pmease.gitop.core.model.VoteInvitation;
 import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.core.model.VoteInvitation;
 
 @Singleton
 public class DefaultVoteInvitationManager extends DefaultGenericDao<VoteInvitation> implements VoteInvitationManager {
 
-	public DefaultVoteInvitationManager(GeneralDao generalDao, Provider<Session> sessionProvider) {
-		super(generalDao, sessionProvider);
+	public DefaultVoteInvitationManager(GeneralDao generalDao) {
+		super(generalDao);
 	}
 
 	@Transactional

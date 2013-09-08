@@ -12,7 +12,7 @@ public interface UserManager extends GenericDao<User> {
 	 * Find root account in the system. 
 	 * 
 	 * @return
-	 * 			root account of the system, or null if root account has not been populated
+	 * 			root account of the system. Never be <i>null</i>
 	 */
 	User getRootUser();
 

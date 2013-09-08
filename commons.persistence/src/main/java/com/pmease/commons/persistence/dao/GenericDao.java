@@ -4,14 +4,13 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.hibernate.HibernateException;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 
 import com.pmease.commons.persistence.AbstractEntity;
 
-
 public interface GenericDao<T extends AbstractEntity> {
+	
 	/**
 	 * Get the entity with the specified type and id from the datastore.
 	 * If none is found, return null.
@@ -88,16 +87,28 @@ public interface GenericDao<T extends AbstractEntity> {
 	List<T> query(@Nullable Criterion[] criterions);
 
 	/**
-	 * This method expects to lookup a single entity with specified criteria
+	 * This method expects to lookup a single entity with specified criteria.
 	 * 
 	 * @param criterions
-	 * 			Hibernate criterions used to find the object
+	 * 			Hibernate criterions used to find the object, use <i>null</i> if 
+	 * 			criterions are not interested
 	 * @return
-	 * 			the single entity. null if not found
-	 * @throws 
-	 * 			HibernateException if there is more than one matching result
+	 * 			any matching entity. null if not found
 	 */
-	Object find(@Nullable Criterion[] criterions);
+	T find(@Nullable Criterion[] criterions);
+	
+	/**
+	 * This method expects to find the first matching entity. 
+	 * 
+	 * @param criterions
+	 * 			Hibernate criterions used to find the object, use <i>null</i> if 
+	 * 			criterions are not interested
+	 * @param orders
+	 * 			orders to search by, use <i>null</i> if order is not interested
+	 * @return
+	 * 			the first matching entity. null if not found
+	 */
+	T find(@Nullable Criterion[] criterions, @Nullable Order[] orders);
 
 	/**
 	 * Count entity matching specified hibernate criterions. 
@@ -111,4 +122,5 @@ public interface GenericDao<T extends AbstractEntity> {
 	 * 			number of entities matching specified criterions
 	 */
 	int count(@Nullable Criterion[] criterions);
+	
 }

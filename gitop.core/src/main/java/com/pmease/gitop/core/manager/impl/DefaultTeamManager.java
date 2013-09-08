@@ -3,10 +3,8 @@ package com.pmease.gitop.core.manager.impl;
 import java.util.Collection;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
@@ -23,8 +21,8 @@ import com.pmease.gitop.core.model.User;
 public class DefaultTeamManager extends DefaultGenericDao<Team> implements TeamManager {
 
 	@Inject
-	public DefaultTeamManager(GeneralDao generalDao, Provider<Session> sessionProvider) {
-		super(generalDao, sessionProvider);
+	public DefaultTeamManager(GeneralDao generalDao) {
+		super(generalDao);
 	}
 
 	@Transactional

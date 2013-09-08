@@ -2,9 +2,6 @@ package com.pmease.commons.persistence.dao;
 
 import java.util.List;
 
-import javax.inject.Provider;
-
-import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Order;
@@ -17,15 +14,12 @@ public class DefaultGenericDao<T extends AbstractEntity> implements GenericDao<T
 
 	private GeneralDao generalDao;
 	
-	private Provider<Session> sessionProvider;
-	
 	protected final Class<T> entityClass;
 
 	@SuppressWarnings("unchecked")
 	@Inject
-	public DefaultGenericDao(GeneralDao generalDao, Provider<Session> sessionProvider) {
+	public DefaultGenericDao(GeneralDao generalDao) {
 		this.generalDao = generalDao;
-		this.sessionProvider = sessionProvider;
 		List<Class<?>> typeArguments = ClassUtils.getTypeArguments(DefaultGenericDao.class, getClass());
 		entityClass = ((Class<T>) typeArguments.get(0));
 	}
@@ -88,9 +82,14 @@ public class DefaultGenericDao<T extends AbstractEntity> implements GenericDao<T
 		return query(criterions, null, 0, 0);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public T find(Criterion[] criterions) {
+		return find(criterions, null);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public T find(Criterion[] criterions, Order[] orders) {
 		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(entityClass);
 		
 		if (criterions != null) {
@@ -98,10 +97,12 @@ public class DefaultGenericDao<T extends AbstractEntity> implements GenericDao<T
 				detachedCriteria.add(criterion);
 		}
 		
+		if (orders != null) {
+			for (Order order: orders)
+				detachedCriteria.addOrder(order);
+		}
+		
 		return (T) generalDao.find(detachedCriteria);
 	}
 
-	protected Session getSession() {
-		return sessionProvider.get();
-	}
 }

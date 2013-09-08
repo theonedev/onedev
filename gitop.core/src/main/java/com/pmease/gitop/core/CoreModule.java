@@ -8,6 +8,7 @@ import com.pmease.commons.loader.AppName;
 import com.pmease.commons.persistence.PrefixedNamingStrategy;
 import com.pmease.commons.security.AbstractRealm;
 import com.pmease.commons.web.AbstractWicketConfig;
+import com.pmease.gitop.core.permission.UserRealm;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.

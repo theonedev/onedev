@@ -1,11 +1,8 @@
 package com.pmease.gitop.core.manager.impl;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import org.hibernate.Criteria;
-import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -22,24 +19,24 @@ import com.pmease.gitop.core.model.User;
 @Singleton
 public class DefaultUserManager extends DefaultGenericDao<User> implements UserManager {
 
-	private volatile User rootUser;
+	private volatile Long rootUserId;
 	
 	@Inject
-	public DefaultUserManager(GeneralDao generalDao, Provider<Session> sessionProvider) {
-		super(generalDao, sessionProvider);
+	public DefaultUserManager(GeneralDao generalDao) {
+		super(generalDao);
 	}
 
 	@Transactional
 	@Override
 	public User getRootUser() {
-		if (rootUser == null) {
-			Criteria criteria = getSession().createCriteria(User.class).addOrder(Order.asc("id"));
-			
-			/* the first created user should be root user */
-			criteria.setFirstResult(0);
-			criteria.setMaxResults(1);
-			rootUser = (User) criteria.uniqueResult();
+		User rootUser;
+		if (rootUserId == null) {
+			// The first created user should be root user 
+			rootUser = find(null, new Order[]{Order.asc("id")});
 			Preconditions.checkNotNull(rootUser);
+			rootUserId = rootUser.getId();
+		} else {
+			rootUser = load(rootUserId);
 		}
 		return rootUser;
 	}

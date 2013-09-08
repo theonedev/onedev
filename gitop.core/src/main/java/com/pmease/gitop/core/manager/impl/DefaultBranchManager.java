@@ -1,10 +1,8 @@
 package com.pmease.gitop.core.manager.impl;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
@@ -21,8 +19,8 @@ import com.pmease.gitop.core.model.Repository;
 public class DefaultBranchManager extends DefaultGenericDao<Branch> implements BranchManager {
 
 	@Inject
-	public DefaultBranchManager(GeneralDao generalDao, Provider<Session> sessionProvider) {
-		super(generalDao, sessionProvider);
+	public DefaultBranchManager(GeneralDao generalDao) {
+		super(generalDao);
 	}
 
 	

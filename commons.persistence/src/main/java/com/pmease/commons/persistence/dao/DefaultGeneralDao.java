@@ -52,7 +52,7 @@ public class DefaultGeneralDao implements GeneralDao {
 		getSession().delete(entity);
 	}
 
-	protected Session getSession() {
+	private Session getSession() {
 		return sessionProvider.get();
 	}
 
@@ -92,6 +92,8 @@ public class DefaultGeneralDao implements GeneralDao {
 	@Override
 	public Object find(DetachedCriteria detachedCriteria) {
 		Criteria criteria = detachedCriteria.getExecutableCriteria(getSession());
+		criteria.setFirstResult(0);
+		criteria.setMaxResults(1);
 		return criteria.uniqueResult();
 	}
 

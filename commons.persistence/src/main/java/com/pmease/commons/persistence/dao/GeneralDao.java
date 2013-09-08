@@ -87,9 +87,7 @@ public interface GeneralDao {
 	 * @param detachedCriteria
 	 * 			Hibernate {@link DetachedCriteria}
 	 * @return
-	 * 			the single entity. null if not found
-	 * @throws 
-	 * 			HibernateException if there is more than one matching result
+	 * 			the first matching entity, or null if not found 
 	 */
 	Object find(DetachedCriteria detachedCriteria);
 	

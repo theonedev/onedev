@@ -1,9 +1,7 @@
 package com.pmease.gitop.core.manager.impl;
 
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
@@ -18,8 +16,8 @@ import com.pmease.gitop.core.model.Vote;
 @Singleton
 public class DefaultVoteManager extends DefaultGenericDao<Vote> implements VoteManager {
 
-	public DefaultVoteManager(GeneralDao generalDao, Provider<Session> sessionProvider) {
-		super(generalDao, sessionProvider);
+	public DefaultVoteManager(GeneralDao generalDao) {
+		super(generalDao);
 	}
 
 	@Transactional
