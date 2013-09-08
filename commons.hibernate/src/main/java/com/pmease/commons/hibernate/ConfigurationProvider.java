@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.hibernate.cfg.Configuration;
@@ -32,7 +33,7 @@ public class ConfigurationProvider implements Provider<Configuration> {
 	
 	@Inject
 	public ConfigurationProvider(PluginManager pluginManager, NamingStrategy namingStrategy, 
-			@Nullable @Hibernate Properties hibernateProperties) {
+			@Nullable @Named("hibernate") Properties hibernateProperties) {
 		this.pluginManager = pluginManager;
 		this.namingStrategy = namingStrategy;
 		this.hibernateProperties = hibernateProperties;

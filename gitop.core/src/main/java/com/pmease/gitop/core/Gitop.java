@@ -1,10 +1,14 @@
 package com.pmease.gitop.core;
 
 import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.slf4j.Logger;
@@ -17,6 +21,7 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.gitop.core.manager.InitManager;
 import com.pmease.gitop.core.model.ModelLocator;
+import com.pmease.gitop.core.setting.ServerConfig;
 
 public class Gitop extends AbstractPlugin {
 
@@ -24,10 +29,14 @@ public class Gitop extends AbstractPlugin {
 	
 	private final InitManager initManager;
 	
+	private final ServerConfig serverConfig;
+	
 	private List<ManualConfig> manualConfigs;
 	
-	public Gitop(InitManager initManager) {
+	@Inject
+	public Gitop(ServerConfig serverConfig, InitManager initManager) {
 		this.initManager = initManager;
+		this.serverConfig = serverConfig;
 	}
 	
 	@Override
@@ -86,8 +95,18 @@ public class Gitop extends AbstractPlugin {
 		}
 	}
 	
-	private String guessServerUrl() {
-		return "http://localhost:8080";
+	public String guessServerUrl() {
+		String hostName;
+		try {
+			hostName = InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			throw new RuntimeException(e);
+		}
+		
+		if (serverConfig.getHttpPort() != 0)
+			return "http://" + hostName + ":" + serverConfig.getHttpPort();
+		else 
+			return "https://" + hostName + ":" + serverConfig.getSslConfig().getPort();
 	}
 	
 	/**

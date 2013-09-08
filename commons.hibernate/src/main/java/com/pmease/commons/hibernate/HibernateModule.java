@@ -9,6 +9,7 @@ import org.hibernate.cfg.ImprovedNamingStrategy;
 import org.hibernate.cfg.NamingStrategy;
 
 import com.google.inject.matcher.Matchers;
+import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
 import com.pmease.commons.hibernate.dao.DefaultGeneralDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
@@ -23,7 +24,7 @@ public class HibernateModule extends AbstractPluginModule {
 
 		// Use an optional binding here in case our client does not like to 
 		// start persist service provided by this plugin
-		bind(Properties.class).annotatedWith(Hibernate.class).toProvider(Providers.<Properties>of(null));
+		bind(Properties.class).annotatedWith(Names.named("hibernate")).toProvider(Providers.<Properties>of(null));
 		bind(NamingStrategy.class).to(ImprovedNamingStrategy.class);
 		
 		bind(PersistService.class).to(PersistServiceImpl.class);

@@ -2,7 +2,6 @@ package com.pmease.gitop.product;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.Properties;
 
 import javax.inject.Inject;
 
@@ -20,20 +19,20 @@ import com.pmease.commons.jetty.FileAssetServlet;
 import com.pmease.commons.jetty.extensionpoints.ServerConfigurator;
 import com.pmease.commons.jetty.extensionpoints.ServletContextConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
-import com.pmease.commons.util.FileUtils;
-import com.pmease.commons.util.StringUtils;
+import com.pmease.gitop.core.setting.ServerConfig;
+import com.pmease.gitop.core.setting.SslConfig;
 
 public class Product extends AbstractPlugin {
 
 	private static final Logger logger = LoggerFactory.getLogger(Product.class);
 	
-	private final Properties serverProps;
+	private final ServerConfig serverConfig;
 
 	public static final String NAME = "Gitop";
 	
 	@Inject
-	public Product() {
-		serverProps = FileUtils.loadProperties(new File(Bootstrap.getConfDir(), "server.properties"));
+	public Product(ServerConfig serverConfig) {
+		this.serverConfig = serverConfig;
 	}
 	
 	@Override
@@ -44,49 +43,30 @@ public class Product extends AbstractPlugin {
 				@SuppressWarnings("deprecation")
 				@Override
 				public void configure(Server server) {
-					SocketConnector connector = new SocketConnector();
-					String httpPort = serverProps.getProperty("httpPort");
-					if (StringUtils.isNotBlank(httpPort)) {
-						connector.setPort(Integer.parseInt(httpPort));
+					if (serverConfig.getHttpPort() != 0) {
+						SocketConnector connector = new SocketConnector();
+						connector.setPort(serverConfig.getHttpPort());
 						server.addConnector(connector);
 					}
-					
-					String httpsPort = serverProps.getProperty("httpsPort");
-					if (StringUtils.isNotBlank(httpsPort)) {
+
+					SslConfig sslConfig = serverConfig.getSslConfig();
+					if (sslConfig != null) {
 						SslSocketConnector sslConnector = new SslSocketConnector();
-						sslConnector.setPort(Integer.parseInt(httpsPort));
+						sslConnector.setPort(sslConfig.getPort());
 						
-						String keystorePath = serverProps.getProperty("sslKeystorePath");
-						if (StringUtils.isBlank(keystorePath))
-							keystorePath = "sample.keystore";
-						String keystorePassword = serverProps.getProperty("sslKeystorePassword");
-						if (StringUtils.isBlank(keystorePassword))
-							keystorePassword = "123456";
-						String keystoreKeyPassword = serverProps.getProperty("sslKeystoreKeyPassword");
-						if (StringUtils.isBlank(keystoreKeyPassword))
-							keystoreKeyPassword = "123456";
-						
-						File keystoreFile = new File(keystorePath);
-						if (!keystoreFile.isAbsolute())
-							keystoreFile = new File(Bootstrap.getConfDir(), keystorePath);
-						
-						sslConnector.setKeystore(keystoreFile.getAbsolutePath());
-						sslConnector.setPassword(keystorePassword);
-						sslConnector.setKeyPassword(keystoreKeyPassword);
+						sslConnector.setKeystore(sslConfig.getKeystorePath());
+						sslConnector.setPassword(sslConfig.getKeystorePassword());
+						sslConnector.setKeyPassword(sslConfig.getKeystoreKeyPassword());
 						
 						server.addConnector(sslConnector);
 					}
-					
-					if (StringUtils.isBlank(httpPort) && StringUtils.isBlank(httpsPort))
-						throw new RuntimeException("Either httpPort or httpsPort or both should be enabled.");
 				}
 			}, 
 			new ServletContextConfigurator() {
 
 				@Override
 				public void configure(ServletContextHandler context) {
-					int sessionTimeout = Integer.valueOf(serverProps.getProperty("sessionTimeout"));
-					context.getSessionHandler().getSessionManager().setMaxInactiveInterval(sessionTimeout);
+					context.getSessionHandler().getSessionManager().setMaxInactiveInterval(serverConfig.getSessionTimeout());
 					
 					/*
 					 * Configure a servlet to serve contents under site folder. Site folder can be used 
