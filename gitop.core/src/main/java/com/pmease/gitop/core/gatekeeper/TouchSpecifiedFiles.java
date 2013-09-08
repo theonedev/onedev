@@ -13,6 +13,7 @@ import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.core.model.MergeRequest;
 import com.pmease.gitop.core.model.MergeRequestUpdate;
 
+@SuppressWarnings("serial")
 public class TouchSpecifiedFiles extends AbstractGateKeeper {
 
 	private String filePaths;

@@ -4,11 +4,8 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-
-import org.hibernate.annotations.FetchMode;
 
 import com.pmease.commons.persistence.AbstractEntity;
 
@@ -16,13 +13,11 @@ import com.pmease.commons.persistence.AbstractEntity;
 @Entity
 public class FileComment extends AbstractEntity {
 
-	@ManyToOne(fetch=FetchType.EAGER)
-	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
+	@ManyToOne
 	@JoinColumn(nullable=false)
 	private User user;
 	
-	@ManyToOne(fetch=FetchType.EAGER)
-	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
+	@ManyToOne
 	@JoinColumn(nullable=false)
 	private Commit commit;
 

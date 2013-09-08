@@ -1,5 +1,7 @@
 package com.pmease.gitop.core.permission.operation;
 
-public interface PrivilegedOperation {
+import java.io.Serializable;
+
+public interface PrivilegedOperation extends Serializable {
 	boolean can(PrivilegedOperation operation);
 }

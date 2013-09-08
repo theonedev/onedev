@@ -22,8 +22,6 @@ import com.pmease.gitop.core.permission.object.UserBelonging;
  */
 @SuppressWarnings("serial")
 @Entity
-@org.hibernate.annotations.Cache(
-		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class User extends AbstractUser implements ProtectedObject {
 
 	private String description;
@@ -34,7 +32,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="user")
 	private Collection<RoleMembership> roleMemberships = new ArrayList<RoleMembership>();
 	
-	@OneToMany(mappedBy="user")
+	@OneToMany(mappedBy="submitter")
 	private Collection<MergeRequest> mergeRequests = new ArrayList<MergeRequest>();
 	
 	@OneToMany(mappedBy="owner")

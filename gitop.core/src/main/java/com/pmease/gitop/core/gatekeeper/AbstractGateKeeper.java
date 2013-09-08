@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("serial")
 public abstract class AbstractGateKeeper implements GateKeeper {
 
 	@Override

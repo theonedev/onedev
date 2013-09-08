@@ -1,13 +1,10 @@
 package com.pmease.gitop.core.model;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
-import org.hibernate.annotations.FetchMode;
 
 import com.pmease.commons.persistence.AbstractEntity;
 import com.pmease.gitop.core.permission.operation.PrivilegedOperation;
@@ -16,19 +13,15 @@ import com.pmease.gitop.core.permission.operation.Read;
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"subject", "object"})
+		@UniqueConstraint(columnNames={"team", "repository"})
 })
-@org.hibernate.annotations.Cache(
-		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class Authorization extends AbstractEntity {
 
-	@ManyToOne(fetch=FetchType.EAGER)
-	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
+	@ManyToOne
 	@JoinColumn(nullable=false)
 	private Team team;	
 
-	@ManyToOne(fetch=FetchType.EAGER)
-	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
+	@ManyToOne
 	@JoinColumn(nullable=false)
 	private Repository repository;
 	

@@ -1,5 +1,6 @@
 package com.pmease.gitop.core.permission.operation;
 
+@SuppressWarnings("serial")
 public class NoAccess implements PrivilegedOperation {
 
 	@Override

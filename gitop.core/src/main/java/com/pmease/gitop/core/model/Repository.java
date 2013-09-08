@@ -8,14 +8,11 @@ import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
-import org.hibernate.annotations.FetchMode;
 
 import com.pmease.commons.persistence.AbstractEntity;
 import com.pmease.gitop.core.gatekeeper.GateKeeper;
@@ -24,16 +21,13 @@ import com.pmease.gitop.core.permission.object.UserBelonging;
 import com.pmease.gitop.core.permission.operation.PrivilegedOperation;
 
 @Entity
-@org.hibernate.annotations.Cache(
-		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"owner", "name"})
 })
 @SuppressWarnings("serial")
 public class Repository extends AbstractEntity implements UserBelonging {
 	
-	@ManyToOne(fetch=FetchType.EAGER)
-	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
+	@ManyToOne
 	@JoinColumn(nullable=false)
 	private User owner;
 

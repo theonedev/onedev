@@ -12,12 +12,9 @@ import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-
-import org.hibernate.annotations.FetchMode;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -29,8 +26,8 @@ import com.pmease.commons.persistence.AbstractEntity;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.gatekeeper.CheckResult;
 import com.pmease.gitop.core.gatekeeper.GateKeeper;
-import com.pmease.gitop.core.manager.VoteInvitationManager;
 import com.pmease.gitop.core.manager.RepositoryManager;
+import com.pmease.gitop.core.manager.VoteInvitationManager;
 
 @SuppressWarnings("serial")
 @Entity
@@ -40,18 +37,15 @@ public class MergeRequest extends AbstractEntity {
 	
 	private String title;
 	
-	@ManyToOne(fetch=FetchType.EAGER)
-	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
+	@ManyToOne
 	@JoinColumn(nullable=false)
 	private User submitter;
 	
-	@ManyToOne(fetch=FetchType.EAGER)
-	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
+	@ManyToOne
 	@JoinColumn(nullable=false)
 	private Branch destination;
 	
-	@ManyToOne(fetch=FetchType.EAGER)
-	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
+	@ManyToOne
 	@JoinColumn(nullable=true)
 	private Branch source;
 	

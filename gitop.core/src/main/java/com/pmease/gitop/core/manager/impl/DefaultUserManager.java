@@ -1,5 +1,6 @@
 package com.pmease.gitop.core.manager.impl;
 
+import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
@@ -23,6 +24,7 @@ public class DefaultUserManager extends DefaultGenericDao<User> implements UserM
 
 	private volatile User rootUser;
 	
+	@Inject
 	public DefaultUserManager(GeneralDao generalDao, Provider<Session> sessionProvider) {
 		super(generalDao, sessionProvider);
 	}

@@ -1,8 +1,11 @@
 package com.pmease.gitop.core;
 
+import org.hibernate.cfg.NamingStrategy;
+
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.loader.AppName;
+import com.pmease.commons.persistence.PrefixedNamingStrategy;
 import com.pmease.commons.security.AbstractRealm;
 import com.pmease.commons.web.AbstractWicketConfig;
 
@@ -22,6 +25,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(AbstractRealm.class).to(UserRealm.class);
 		
 		bindConstant().annotatedWith(AppName.class).to(PRODUCT_NAME);
+		bind(NamingStrategy.class).toInstance(new PrefixedNamingStrategy("G"));
 		
 		bind(Gitop.class);
 	}

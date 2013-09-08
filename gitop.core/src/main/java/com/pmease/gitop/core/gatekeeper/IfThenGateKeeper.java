@@ -4,6 +4,7 @@ import javax.validation.constraints.NotNull;
 
 import com.pmease.gitop.core.model.MergeRequest;
 
+@SuppressWarnings("serial")
 public class IfThenGateKeeper extends AbstractGateKeeper {
 
 	private GateKeeper ifGate;

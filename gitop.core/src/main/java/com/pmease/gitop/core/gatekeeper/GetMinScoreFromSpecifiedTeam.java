@@ -10,6 +10,7 @@ import com.pmease.gitop.core.model.TeamMembership;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.model.Vote;
 
+@SuppressWarnings("serial")
 public class GetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
 
 	private int minScore = 1;

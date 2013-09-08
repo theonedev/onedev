@@ -24,6 +24,7 @@
 	<logger name="org.apache.wicket" level="WARN" />
 	<logger name="org.eclipse" level="WARN" />
 	<logger name="org.hibernate" level="WARN" />
+	<logger name="java.sql.DatabaseMetaData" level="WARN"></logger>
 	<logger name="org.hibernate.cache.ehcache.AbstractEhcacheRegionFactory" level="ERROR"></logger>
 	<logger name="com.jolbox.bonecp.BoneCPConfig" level="WARN" />
 	<logger name="com.sun.jersey" level="WARN" />

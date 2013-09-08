@@ -5,6 +5,8 @@ import java.util.Collection;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -17,17 +19,17 @@ import com.pmease.gitop.core.permission.operation.PrivilegedOperation;
 import com.pmease.gitop.core.permission.operation.Read;
 
 @Entity
-@org.hibernate.annotations.Cache(
-		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"owner", "name"})
 })
 @SuppressWarnings("serial")
 public class Team extends AbstractEntity implements Permission {
 
+	@ManyToOne
+	@JoinColumn(nullable=false)
 	private User owner;
 
-	@Column(nullable=false, unique=true)
+	@Column(nullable=false)
 	private String name;
 	
 	private String description;
@@ -35,7 +37,8 @@ public class Team extends AbstractEntity implements Permission {
 	private boolean anonymous;
 	
 	private boolean register;
-	
+
+	@Column(nullable=false)
 	private PrivilegedOperation operation = new Read();
 	
 	@OneToMany(mappedBy="team")

@@ -2,7 +2,6 @@ package com.pmease.gitop.core.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,8 +15,6 @@ import com.pmease.gitop.core.permission.object.SystemObject;
 import com.pmease.gitop.core.permission.operation.PrivilegedOperation;
 
 @Entity
-@org.hibernate.annotations.Cache(
-		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 @SuppressWarnings("serial")
 public class Role extends AbstractEntity implements Permission {
 
@@ -31,7 +28,7 @@ public class Role extends AbstractEntity implements Permission {
 	private boolean register;
 
 	@Column(nullable=false)
-	private List<PrivilegedOperation> operations = new ArrayList<PrivilegedOperation>();
+	private ArrayList<PrivilegedOperation> operations = new ArrayList<PrivilegedOperation>();
 	
 	@OneToMany(mappedBy="role")
 	private Collection<RoleMembership> memberships = new ArrayList<RoleMembership>();
@@ -76,11 +73,11 @@ public class Role extends AbstractEntity implements Permission {
 		this.memberships = memberships;
 	}
 
-	public List<PrivilegedOperation> getOperations() {
+	public ArrayList<PrivilegedOperation> getOperations() {
 		return operations;
 	}
 
-	public void setOperations(List<PrivilegedOperation> operations) {
+	public void setOperations(ArrayList<PrivilegedOperation> operations) {
 		this.operations = operations;
 	}
 

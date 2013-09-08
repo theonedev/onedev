@@ -4,6 +4,7 @@ import com.pmease.gitop.core.model.MergeRequest;
 import com.pmease.gitop.core.model.TeamMembership;
 import com.pmease.gitop.core.model.Vote;
 
+@SuppressWarnings("serial")
 public class NoRejectionBySpecifiedTeam extends TeamAwareGateKeeper {
 
 	@Override

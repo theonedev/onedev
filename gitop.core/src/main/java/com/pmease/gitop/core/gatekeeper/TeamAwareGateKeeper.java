@@ -4,6 +4,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.model.Team;
 
+@SuppressWarnings("serial")
 public abstract class TeamAwareGateKeeper extends AbstractGateKeeper {
 	
 	private Long teamId;

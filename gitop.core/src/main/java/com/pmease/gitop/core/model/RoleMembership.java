@@ -1,13 +1,10 @@
 package com.pmease.gitop.core.model;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
-import org.hibernate.annotations.FetchMode;
 
 import com.pmease.commons.persistence.AbstractEntity;
 
@@ -16,17 +13,13 @@ import com.pmease.commons.persistence.AbstractEntity;
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"user", "role"})
 })
-@org.hibernate.annotations.Cache(
-		usage=org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class RoleMembership extends AbstractEntity {
 
-	@ManyToOne(fetch=FetchType.EAGER)
-	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
+	@ManyToOne
 	@JoinColumn(nullable=false)
 	private User user;
 	
-	@ManyToOne(fetch=FetchType.EAGER)
-	@org.hibernate.annotations.Fetch(FetchMode.SELECT)
+	@ManyToOne
 	@JoinColumn(nullable=false)
 	private Role role;
 

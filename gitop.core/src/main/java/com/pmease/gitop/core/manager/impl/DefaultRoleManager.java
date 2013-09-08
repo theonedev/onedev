@@ -2,6 +2,7 @@ package com.pmease.gitop.core.manager.impl;
 
 import java.util.Collection;
 
+import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
@@ -18,6 +19,7 @@ import com.pmease.gitop.core.model.Role;
 @Singleton
 public class DefaultRoleManager extends DefaultGenericDao<Role> implements RoleManager {
 
+	@Inject
 	public DefaultRoleManager(GeneralDao generalDao, Provider<Session> sessionProvider) {
 		super(generalDao, sessionProvider);
 	}

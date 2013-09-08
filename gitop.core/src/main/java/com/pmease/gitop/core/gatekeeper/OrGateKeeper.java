@@ -8,6 +8,7 @@ import com.pmease.commons.util.trimmable.TrimUtils;
 import com.pmease.commons.util.trimmable.Trimmable;
 import com.pmease.gitop.core.model.MergeRequest;
 
+@SuppressWarnings("serial")
 public class OrGateKeeper extends AbstractGateKeeper {
 
 	private List<GateKeeper> gateKeepers = new ArrayList<GateKeeper>();

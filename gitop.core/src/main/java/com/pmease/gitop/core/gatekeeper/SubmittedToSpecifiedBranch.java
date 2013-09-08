@@ -11,6 +11,7 @@ import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.model.MergeRequest;
 import com.pmease.gitop.core.model.Repository;
 
+@SuppressWarnings("serial")
 public class SubmittedToSpecifiedBranch extends AbstractGateKeeper {
 
 	private String branchPatterns;

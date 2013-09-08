@@ -7,6 +7,7 @@ import com.pmease.gitop.core.model.MergeRequest;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.model.Vote;
 
+@SuppressWarnings("serial")
 public class ApprovedBySpecifiedUser extends AbstractGateKeeper {
 
 	private Long userId;
