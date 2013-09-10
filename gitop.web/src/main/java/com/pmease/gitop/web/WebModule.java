@@ -1,5 +1,6 @@
 package com.pmease.gitop.web;
 
+import com.pmease.commons.jetty.extensionpoints.ServletContextConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.wicket.AbstractWicketConfig;
@@ -16,6 +17,8 @@ public class WebModule extends AbstractPluginModule {
 		
 		// put your guice bindings here
 		bind(AbstractWicketConfig.class).to(WicketConfig.class);		
+		
+		addExtension(ServletContextConfigurator.class, WebServletContextConfigurator.class);
 	}
 
 	@Override

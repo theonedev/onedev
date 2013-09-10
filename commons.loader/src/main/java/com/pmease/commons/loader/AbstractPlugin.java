@@ -1,6 +1,5 @@
 package com.pmease.commons.loader;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -99,5 +98,4 @@ public abstract class AbstractPlugin implements Dependency, Lifecycle {
 	public void stop() {
 	}
 
-	public abstract Collection<?> getExtensions();
 }

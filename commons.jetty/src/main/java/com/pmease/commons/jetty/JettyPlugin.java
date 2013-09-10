@@ -1,7 +1,6 @@
 package com.pmease.commons.jetty;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -96,11 +95,6 @@ public class JettyPlugin extends AbstractPlugin {
         	configurator.configure(server);
 		
         return server;
-	}
-
-	@Override
-	public Collection<?> getExtensions() {
-		return null;
 	}
 
 	public static class DisableTraceFilter implements Filter {

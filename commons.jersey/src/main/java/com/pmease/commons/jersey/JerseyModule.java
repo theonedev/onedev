@@ -2,6 +2,7 @@ package com.pmease.commons.jersey;
 
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
+import com.pmease.commons.shiro.extensionpoint.FilterChainConfigurator;
 import com.pmease.commons.util.EasyMap;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
@@ -34,6 +35,8 @@ public class JerseyModule extends AbstractPluginModule {
 			}
 			
 		});
+		
+		addExtension(FilterChainConfigurator.class, JerseyFilterChainConfigurator.class);
 	}
 
 	@Override

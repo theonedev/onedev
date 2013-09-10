@@ -3,8 +3,8 @@ package com.pmease.gitop.core;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AppLoader;
+import com.pmease.commons.loader.AppName;
 import com.pmease.gitop.core.manager.InitManager;
 import com.pmease.gitop.core.setting.ServerConfig;
 
@@ -24,20 +25,18 @@ public class Gitop extends AbstractPlugin {
 	private final InitManager initManager;
 	
 	private final ServerConfig serverConfig;
+
+	private final String appName;
 	
 	private List<ManualConfig> manualConfigs;
 	
 	@Inject
-	public Gitop(ServerConfig serverConfig, InitManager initManager) {
+	public Gitop(ServerConfig serverConfig, InitManager initManager, @AppName String appName) {
 		this.initManager = initManager;
 		this.serverConfig = serverConfig;
+		this.appName = appName;
 	}
 	
-	@Override
-	public Collection<?> getExtensions() {
-		return null;
-	}
-
 	@SuppressWarnings("serial")
 	@Override
 	public void start() {
@@ -92,6 +91,10 @@ public class Gitop extends AbstractPlugin {
 			return "https://" + hostName + ":" + serverConfig.getSslConfig().getPort();
 	}
 	
+	public String getAppName() {
+		return appName;
+	}
+	
 	/**
 	 * This method can be called from different UI threads, so we clone manual configs to 
 	 * make it thread-safe.
@@ -114,4 +117,8 @@ public class Gitop extends AbstractPlugin {
 		return AppLoader.getInstance(type);
 	}
 
+	public static <T> Set<T> getExtensions(Class<T> extensionPoint) {
+		return AppLoader.getExtensions(extensionPoint);
+	}
+	
 }

@@ -9,6 +9,7 @@ import org.apache.shiro.guice.aop.ShiroAopModule;
 import org.apache.shiro.web.filter.mgt.FilterChainResolver;
 import org.apache.shiro.web.mgt.WebSecurityManager;
 
+import com.pmease.commons.jetty.extensionpoints.ServletContextConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
 
@@ -30,6 +31,8 @@ public class ShiroModule extends AbstractPluginModule {
 		bind(CredentialsMatcher.class).to(DefaultPasswordMatcher.class);
 		
 		install(new ShiroAopModule());
+		
+		addExtension(ServletContextConfigurator.class, ShiroServletContextConfigurator.class);
 	}
 
 	@Override

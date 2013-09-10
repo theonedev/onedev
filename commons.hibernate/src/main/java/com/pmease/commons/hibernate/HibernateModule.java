@@ -13,6 +13,7 @@ import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
 import com.pmease.commons.hibernate.dao.DefaultGeneralDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.jetty.extensionpoints.ServletContextConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
 
@@ -42,6 +43,8 @@ public class HibernateModule extends AbstractPluginModule {
 	    		Matchers.any(), 
 	    		Matchers.annotatedWith(Transactional.class), 
 	    		transactionInterceptor);
+	    
+	    addExtension(ServletContextConfigurator.class, HibernateServletContextConfigurator.class);
 	}
 
 	@Override

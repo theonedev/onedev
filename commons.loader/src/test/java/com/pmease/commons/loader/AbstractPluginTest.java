@@ -1,8 +1,8 @@
 package com.pmease.commons.loader;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.spy;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,34 +21,16 @@ public class AbstractPluginTest {
 	@Before
 	public void before() {
 		plugin1 = spy(new AbstractPlugin() {
-
-			@Override
-			public Collection<?> getExtensions() {
-				return null;
-			}
-			
 		});
 		plugin1.setId("plugin1");
 		plugin1.setDependencyIds(ImmutableSet.of("plugin2", "plugin3"));
 		
 		plugin2 = spy(new AbstractPlugin() {
-
-			@Override
-			public Collection<?> getExtensions() {
-				return null;
-			}
-			
 		});
 		plugin2.setId("plugin2");
 		plugin2.setDependencyIds(ImmutableSet.of("plugin3"));
 
 		plugin3 = spy(new AbstractPlugin() {
-
-			@Override
-			public Collection<?> getExtensions() {
-				return null;
-			}
-			
 		});
 		plugin3.setId("plugin3");
 		
