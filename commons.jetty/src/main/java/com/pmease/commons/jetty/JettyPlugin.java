@@ -3,6 +3,7 @@ package com.pmease.commons.jetty;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.Set;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
@@ -24,7 +25,6 @@ import com.pmease.commons.bootstrap.BootstrapUtils;
 import com.pmease.commons.jetty.extensionpoints.ServerConfigurator;
 import com.pmease.commons.jetty.extensionpoints.ServletContextConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
-import com.pmease.commons.loader.PluginManager;
 
 public class JettyPlugin extends AbstractPlugin {
 	
@@ -32,11 +32,16 @@ public class JettyPlugin extends AbstractPlugin {
 	
 	private ServletContextHandler context;
 	
-	private final PluginManager pluginManager;
+	private final Set<ServerConfigurator> serverConfigurators;
+	
+	private final Set<ServletContextConfigurator> servletContextConfigurators;
 	
 	@Inject
-	public JettyPlugin(PluginManager pluginManager) {
-		this.pluginManager = pluginManager;
+	public JettyPlugin(
+			Set<ServerConfigurator> serverConfigurators, 
+			Set<ServletContextConfigurator> servletContextConfigurators) {
+		this.serverConfigurators = serverConfigurators;
+		this.servletContextConfigurators = servletContextConfigurators;
 	}
 	
 	@Override
@@ -75,8 +80,6 @@ public class JettyPlugin extends AbstractPlugin {
         
         context.addFilter(DisableTraceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
         
-        Collection<ServletContextConfigurator> servletContextConfigurators = 
-        		pluginManager.getExtensions(ServletContextConfigurator.class);
         for (ServletContextConfigurator configurator: servletContextConfigurators) 
         	configurator.configure(context);
 
@@ -89,9 +92,7 @@ public class JettyPlugin extends AbstractPlugin {
 
         server.setHandler(context);
 
-        Collection<ServerConfigurator> servletContainerConfigurators = 
-        		pluginManager.getExtensions(ServerConfigurator.class);
-        for (ServerConfigurator configurator: servletContainerConfigurators) 
+        for (ServerConfigurator configurator: serverConfigurators) 
         	configurator.configure(server);
 		
         return server;

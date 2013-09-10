@@ -1,12 +1,13 @@
 package com.pmease.commons.shiro;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.shiro.web.filter.mgt.FilterChainManager;
 import org.apache.shiro.web.filter.mgt.PathMatchingFilterChainResolver;
 
-import com.pmease.commons.loader.PluginManager;
 import com.pmease.commons.shiro.extensionpoint.FilterChainConfigurator;
 
 @Singleton
@@ -14,7 +15,7 @@ public class DefaultFilterChainResolver extends PathMatchingFilterChainResolver 
 
 	@Inject
 	public DefaultFilterChainResolver(
-			PluginManager pluginManager, 
+			Set<FilterChainConfigurator> filterChainConfigurators, 
 			BasicAuthenticationFilter basicAuthenticationFilter) {
 		
 		super();
@@ -23,7 +24,7 @@ public class DefaultFilterChainResolver extends PathMatchingFilterChainResolver 
 		
 		filterChainManager.addFilter("authcBasic", basicAuthenticationFilter);
 		
-		for (FilterChainConfigurator configurator: pluginManager.getExtensions(FilterChainConfigurator.class)) {
+		for (FilterChainConfigurator configurator: filterChainConfigurators) {
 			configurator.configure(filterChainManager);
 		}
 		

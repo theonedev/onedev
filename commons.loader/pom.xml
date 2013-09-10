@@ -52,7 +52,11 @@
             <groupId>com.google.inject.extensions</groupId>  
             <artifactId>guice-multibindings</artifactId>  
             <version>${guiceVersion}</version> 
-        </dependency> 
+        </dependency>
+        <dependency>
+        	<groupId>org.javassist</groupId>
+        	<artifactId>javassist</artifactId>
+        </dependency>
     </dependencies>  
     <repositories> 
         <repository> 
@@ -72,7 +76,7 @@
         </repository> 
     </repositories>  
     <properties> 
-        <guiceVersion>3.0</guiceVersion> 
+        <guiceVersion>4.0-beta</guiceVersion> 
     </properties>  
     <version>1.0.29</version>
 </project>

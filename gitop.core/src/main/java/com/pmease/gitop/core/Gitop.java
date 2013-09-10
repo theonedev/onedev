@@ -3,9 +3,7 @@ package com.pmease.gitop.core;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -14,13 +12,9 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.commons.hibernate.extensionpoints.ModelContribution;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AppLoader;
-import com.pmease.commons.util.ClassUtils;
 import com.pmease.gitop.core.manager.InitManager;
-import com.pmease.gitop.core.model.ModelLocator;
 import com.pmease.gitop.core.setting.ServerConfig;
 
 public class Gitop extends AbstractPlugin {
@@ -41,18 +35,7 @@ public class Gitop extends AbstractPlugin {
 	
 	@Override
 	public Collection<?> getExtensions() {
-		return Arrays.asList(
-				new ModelContribution() {
-			
-					@Override
-					public Collection<Class<? extends AbstractEntity>> getModelClasses() {
-						Collection<Class<? extends AbstractEntity>> modelClasses = 
-								new HashSet<Class<? extends AbstractEntity>>();
-						modelClasses.addAll(ClassUtils.findSubClasses(AbstractEntity.class, ModelLocator.class));
-						return modelClasses;
-					}
-				}
-			);
+		return null;
 	}
 
 	@SuppressWarnings("serial")

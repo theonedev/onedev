@@ -11,7 +11,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
-public class UnitOfWorkImpl implements UnitOfWork, Provider<Session>, SessionProvider {
+public class UnitOfWorkImpl implements UnitOfWork, Provider<Session> {
 	
 	private final Provider<SessionFactory> sessionFactoryProvider;
 	

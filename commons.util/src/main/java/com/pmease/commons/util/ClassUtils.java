@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -27,21 +28,21 @@ public class ClassUtils extends org.apache.commons.lang3.ClassUtils {
 	 * 
 	 * @param superClass 
 	 * 			super class (or interface) to match. 
-	 * @param packageClass 
+	 * @param packageLocatorClass 
 	 * 			find sub classes in the same package as this class. Package will not be searched recursively.
 	 * @return collection of sub classes (not include the super class)
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> Collection<Class<T>> findSubClasses(Class<T> superClass, Class<?> packageClass) {
+	public static <T> Collection<Class<? extends T>> findSubClasses(Class<T> superClass, Class<?> packageLocatorClass) {
 		Preconditions.checkNotNull(superClass);
-		Preconditions.checkNotNull(packageClass);
+		Preconditions.checkNotNull(packageLocatorClass);
 		
-		Collection<Class<T>> classes = new HashSet<Class<T>>();
+		Collection<Class<? extends T>> classes = new HashSet<Class<? extends T>>();
 		
-		File location = new File(packageClass.getProtectionDomain()
+		File location = new File(packageLocatorClass.getProtectionDomain()
 				.getCodeSource().getLocation().getFile());
 		if (location.isFile()) {
-			String packagePath = packageClass.getPackage().getName().replace('.', '/') + "/";
+			String packagePath = packageLocatorClass.getPackage().getName().replace('.', '/') + "/";
 			JarFile jarFile;
 			try {
 				jarFile = new JarFile(location);
@@ -68,14 +69,14 @@ public class ClassUtils extends org.apache.commons.lang3.ClassUtils {
 				}
 			}
 		} else {
-			String packagePath = packageClass.getPackage().getName().replace('.', File.separatorChar);
+			String packagePath = packageLocatorClass.getPackage().getName().replace('.', File.separatorChar);
 			File packageDir = new File(location, packagePath);
 			if (packageDir.exists()) {
 				for (File file: packageDir.listFiles()) {
 					if (file.getName().endsWith(".class")) {
 						Class<T> clazz;
 						try {
-							String className = packageClass.getPackage().getName() + "." + 
+							String className = packageLocatorClass.getPackage().getName() + "." + 
 									StringUtils.substringBeforeLast(file.getName(), ".");
 							clazz = (Class<T>) superClass.getClassLoader().loadClass(className);
 						} catch (ClassNotFoundException e) {
@@ -180,6 +181,10 @@ public class ClassUtils extends org.apache.commons.lang3.ClassUtils {
 		} else {
 			return null;
 		}
+	}
+
+	public static boolean isConcrete(Class<?> clazz) {
+		return !clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers());		
 	}
 	
 }

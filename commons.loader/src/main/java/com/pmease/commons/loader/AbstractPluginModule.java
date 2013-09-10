@@ -11,6 +11,7 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
+import com.pmease.commons.util.ClassUtils;
 import com.pmease.commons.util.dependency.Dependency;
 
 public abstract class AbstractPluginModule extends AbstractModule implements Dependency {
@@ -31,8 +32,7 @@ public abstract class AbstractPluginModule extends AbstractModule implements Dep
 	protected void configure() {
 		final Class<? extends AbstractPlugin> pluginClass = getPluginClass();
 		if (pluginClass != null) {
-			Multibinder<AbstractPlugin> pluginBinder = Multibinder.newSetBinder(binder(), AbstractPlugin.class);
-		    pluginBinder.addBinding().to(pluginClass).in(Singleton.class);
+			addExtension(AbstractPlugin.class, pluginClass);
 		    
 		    bindListener(new AbstractMatcher<TypeLiteral<?>>() {
 
@@ -101,4 +101,16 @@ public abstract class AbstractPluginModule extends AbstractModule implements Dep
 		return pluginDependencies;
 	}
 	
+	protected <T> void addExtension(Class<T> extensionPoint, Class<? extends T> extensionClass) {
+		Multibinder<T> pluginBinder = Multibinder.newSetBinder(binder(), extensionPoint);
+	    pluginBinder.addBinding().to(extensionClass).in(Singleton.class);
+	}
+	
+	protected <T> void addExtensionsFromPackage(Class<T> extensionPoint, Class<?> packageLocator) {
+		for (Class<? extends T> subClass: ClassUtils.findSubClasses(extensionPoint, packageLocator)) {
+			if (ClassUtils.isConcrete(subClass))
+				addExtension(extensionPoint, subClass);
+		}
+	}
+		
 }

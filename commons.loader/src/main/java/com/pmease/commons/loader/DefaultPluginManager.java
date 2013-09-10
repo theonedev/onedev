@@ -54,24 +54,6 @@ public class DefaultPluginManager implements PluginManager {
 			plugin.stop();
 	}
 
-	public <T> Collection<T> getExtensions(Class<T> extensionPoint) {
-		List<T> extensions = new ArrayList<T>();
-		for (AbstractPlugin plugin: pluginMap.values()) {
-			if (plugin.isEnabled()) {
-				Collection<?> pluginExtensions = plugin.getExtensions();
-				if (pluginExtensions != null) {
-					for (Object extension: pluginExtensions) {
-						if (extension != null && extensionPoint.isAssignableFrom(
-								extension.getClass())) {
-							extensions.add(extensionPoint.cast(extension));
-						}
-					}
-				}
-			}
-		}
-		return extensions;
-	}
-
 	@Override
 	public Collection<AbstractPlugin> getPlugins() {
 		return Collections.unmodifiableCollection(pluginMap.values());

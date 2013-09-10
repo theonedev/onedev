@@ -1,6 +1,7 @@
 package com.pmease.commons.util;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.google.common.base.Preconditions;
@@ -28,4 +29,16 @@ public class EasyMap {
 		return map;
 	}
 	
+	public static Map<Object, Object> ofOrdered(Object...objects) {
+		Map<Object, Object> map = new LinkedHashMap<Object, Object>();
+		fill(map, objects);
+		return map;
+	}
+
+	public static Map<String, String> ofOrdered(String...strings) {
+		Map<String, String> map = new LinkedHashMap<String, String>();
+		fill(map, (Object[])strings);
+		return map;
+	}
+
 }

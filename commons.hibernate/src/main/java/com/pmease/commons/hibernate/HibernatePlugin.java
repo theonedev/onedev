@@ -1,5 +1,7 @@
 package com.pmease.commons.hibernate;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.EnumSet;
 
@@ -10,14 +12,31 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
+import com.google.inject.TypeLiteral;
 import com.pmease.commons.jetty.extensionpoints.ServletContextConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
+import com.pmease.commons.util.ExceptionUtils;
 
 public class HibernatePlugin extends AbstractPlugin {
 
 	private final PersistService persistService;
 	
 	private final HibernateFilter hibernateFilter;
+
+	private static Field typeLiteralTypeField;
+	
+	static {
+		try {
+			typeLiteralTypeField = TypeLiteral.class.getDeclaredField("type");
+			typeLiteralTypeField.setAccessible(true);
+			Field modifiersField = Field.class.getDeclaredField("modifiers");
+			modifiersField.setAccessible(true);
+			modifiersField.setInt(typeLiteralTypeField, Modifier.PROTECTED);
+		} catch (Exception e) {
+			throw ExceptionUtils.unchecked(e);
+		}
+		
+	}
 
 	@Inject
 	public HibernatePlugin(PersistService persistService, HibernateFilter hibernateFilter) {

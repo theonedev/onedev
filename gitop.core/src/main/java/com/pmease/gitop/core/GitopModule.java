@@ -2,6 +2,7 @@ package com.pmease.gitop.core;
 
 import org.hibernate.cfg.NamingStrategy;
 
+import com.pmease.commons.hibernate.ModelProvider;
 import com.pmease.commons.hibernate.PrefixedNamingStrategy;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
@@ -20,6 +21,7 @@ public class GitopModule extends AbstractPluginModule {
 		
 		bind(AbstractRealm.class).to(UserRealm.class);
 		
+		addExtension(ModelProvider.class, CoreModelProvider.class);
 		bind(NamingStrategy.class).toInstance(new PrefixedNamingStrategy("G"));
 		
 		bind(Gitop.class);

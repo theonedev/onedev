@@ -16,12 +16,20 @@
         <module>../commons.util</module>  
         <module>../commons.bootstrap</module>  
         <module>../commons.jetty</module>  
-        <module>../commons.persistence</module>  
-        <module>../commons.web</module>  
-        <module>../commons.security</module>  
-        <module>../commons.rest</module>  
-        <module>../gitop</module>  
-        <module>../gitop.core</module> 
+          
+          
+          
+          
+          
+        <module>../gitop.core</module>
+        <module>../commons.editable</module>
+        <module>../commons.git</module>
+        <module>../commons.hibernate</module>
+        <module>../commons.jersey</module>
+        <module>../commons.shiro</module>
+        <module>../commons.wicket</module>
+        <module>../gitop.product</module>
+        <module>../gitop.web</module>
     </modules>  
     <repositories> 
         <repository> 

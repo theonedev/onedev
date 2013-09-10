@@ -1,6 +1,11 @@
 package com.pmease.commons.util;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.pmease.commons.bootstrap.BootstrapUtils;
@@ -31,4 +36,24 @@ public class ExceptionUtils extends org.apache.commons.lang3.exception.Exception
 		return BootstrapUtils.unchecked(e);
 	}
 	
+	public static String buildMessage(String cause, Object...factors) {
+		return buildMessage(cause, EasyMap.ofOrdered(factors));
+	}
+	
+	public static String buildMessage(String cause, Map<String, String> factors) {
+		String message = cause;
+		message += " (";
+		
+		List<String> factorMessages = new ArrayList<String>();
+		for (Iterator<Map.Entry<String, String>> it = factors.entrySet().iterator(); it.hasNext();) {
+			Map.Entry<String, String> entry = (Entry<String, String>) it.next();
+			factorMessages.add(entry.getKey().toString() + ":" + entry.getValue().toString());
+		}
+		
+		message += StringUtils.join(factorMessages.iterator(), ", ");
+		message += ")";
+		
+		return message;		
+	}
+
 }
