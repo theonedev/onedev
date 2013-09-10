@@ -4,7 +4,6 @@ import org.apache.wicket.protocol.http.WicketFilter;
 import org.apache.wicket.protocol.http.WicketServlet;
 
 import com.pmease.commons.jetty.extensionpoints.ServletContextConfigurator;
-import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
 
 public class WicketModule extends AbstractPluginModule {
@@ -17,11 +16,6 @@ public class WicketModule extends AbstractPluginModule {
 		bind(WicketFilter.class).to(DefaultWicketFilter.class);
 		
 		addExtension(ServletContextConfigurator.class, WicketServletContextConfigurator.class);
-	}
-
-	@Override
-	protected Class<? extends AbstractPlugin> getPluginClass() {
-		return WicketPlugin.class;
 	}
 
 }

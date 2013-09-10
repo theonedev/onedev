@@ -1,6 +1,5 @@
 package com.pmease.commons.git;
 
-import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
 
 /**
@@ -14,11 +13,6 @@ public class GitModule extends AbstractPluginModule {
 		super.configure();
 		
 		// put your guice bindings here
-	}
-
-	@Override
-	protected Class<? extends AbstractPlugin> getPluginClass() {
-		return GitPlugin.class;
 	}
 
 }

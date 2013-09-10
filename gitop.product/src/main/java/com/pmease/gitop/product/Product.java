@@ -16,4 +16,12 @@ public class Product extends AbstractPlugin {
 		logger.info(NAME + " has been started successfully.");
 	}
 
+	@Override
+	public void start() {
+	}
+
+	@Override
+	public void stop() {
+	}
+
 }

@@ -1,12 +1,18 @@
 package com.pmease.gitop.core;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 import org.hibernate.cfg.NamingStrategy;
 
+import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.ModelProvider;
 import com.pmease.commons.hibernate.PrefixedNamingStrategy;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.shiro.AbstractRealm;
+import com.pmease.commons.util.ClassUtils;
+import com.pmease.gitop.core.model.ModelLocator;
 import com.pmease.gitop.core.permission.UserRealm;
 
 /**
@@ -21,10 +27,21 @@ public class GitopModule extends AbstractPluginModule {
 		
 		bind(AbstractRealm.class).to(UserRealm.class);
 		
-		addExtension(ModelProvider.class, CoreModelProvider.class);
 		bind(NamingStrategy.class).toInstance(new PrefixedNamingStrategy("G"));
 		
 		bind(Gitop.class);
+
+		addExtension(ModelProvider.class, new ModelProvider() {
+
+			@Override
+			public Collection<Class<? extends AbstractEntity>> getModelClasses() {
+				Collection<Class<? extends AbstractEntity>> modelClasses = 
+						new HashSet<Class<? extends AbstractEntity>>();
+				modelClasses.addAll(ClassUtils.findSubClasses(AbstractEntity.class, ModelLocator.class));
+				return modelClasses;
+			}
+			
+		});
 	}
 
 	@Override

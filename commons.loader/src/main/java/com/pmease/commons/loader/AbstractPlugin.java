@@ -4,10 +4,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.pmease.commons.bootstrap.Lifecycle;
-import com.pmease.commons.util.dependency.Dependency;
-
-public abstract class AbstractPlugin implements Dependency, Lifecycle {
+public abstract class AbstractPlugin implements Plugin {
 	
 	private String id;
 	
@@ -57,10 +54,6 @@ public abstract class AbstractPlugin implements Dependency, Lifecycle {
 		return description;
 	}
 
-	public boolean isEnabled() {
-		return true;
-	}
-
 	public final void setDescription(String description) {
 		this.description = description;
 	}
@@ -73,29 +66,13 @@ public abstract class AbstractPlugin implements Dependency, Lifecycle {
 	public final void setDependencyIds(Set<String> dependencyIds) {
 		this.dependencyIds = new HashSet<String>(dependencyIds);
 	}
-	
-	/**
-	 * This function will be called before starting other plugins depending on this plugin.
-	 */
-	public void start() {
-	}
-	
-	/**
-	 * This function will be called after other plugins depending on this plugin have been started.
-	 */
+
+	@Override
 	public void postStart() {
 	}
-	
-	/**
-	 * This function will be called before stopping other plugins depending on this plugin.
-	 */
+
+	@Override
 	public void preStop() {
 	}
 	
-	/**
-	 * This function will be called after other plugins depending on this plugin have been stopped.
-	 */
-	public void stop() {
-	}
-
 }

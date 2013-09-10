@@ -6,9 +6,9 @@ import com.pmease.commons.bootstrap.Lifecycle;
 
 public interface PluginManager extends Lifecycle {
 
-	Collection<AbstractPlugin> getPlugins();
+	Collection<Plugin> getPlugins();
 	
-	<T extends AbstractPlugin> T getPlugin(Class<T> pluginClass);
+	<T extends Plugin> T getPlugin(Class<T> pluginClass);
 	
-	AbstractPlugin getPlugin(String pluginId);
+	Plugin getPlugin(String pluginId);
 }

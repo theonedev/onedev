@@ -1,5 +1,7 @@
 package com.pmease.commons.wicket;
 
+import javax.inject.Inject;
+
 import org.apache.wicket.protocol.http.WicketServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -10,6 +12,7 @@ public class WicketServletContextConfigurator implements ServletContextConfigura
 
 	private final WicketServlet wicketServlet;
 	
+	@Inject
 	public WicketServletContextConfigurator(WicketServlet wicketServlet) {
 		this.wicketServlet = wicketServlet;
 	}

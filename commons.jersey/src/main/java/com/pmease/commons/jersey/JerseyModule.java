@@ -1,6 +1,7 @@
 package com.pmease.commons.jersey;
 
-import com.pmease.commons.loader.AbstractPlugin;
+import org.apache.shiro.web.filter.mgt.FilterChainManager;
+
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.shiro.extensionpoint.FilterChainConfigurator;
 import com.pmease.commons.util.EasyMap;
@@ -13,6 +14,8 @@ import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
  * 
  */
 public class JerseyModule extends AbstractPluginModule {
+
+	public static final String REST_PATH = "rest";
 
 	@Override
 	protected void configure() {
@@ -31,17 +34,19 @@ public class JerseyModule extends AbstractPluginModule {
 			}
 			
 			protected String getRestPath() {
-				return "/" + JerseyPlugin.REST_PATH + "/*";
+				return "/" + REST_PATH + "/*";
 			}
 			
 		});
 		
-		addExtension(FilterChainConfigurator.class, JerseyFilterChainConfigurator.class);
-	}
+		addExtension(FilterChainConfigurator.class, new FilterChainConfigurator() {
 
-	@Override
-	protected Class<? extends AbstractPlugin> getPluginClass() {
-		return JerseyPlugin.class;
+			@Override
+			public void configure(FilterChainManager filterChainManager) {
+				filterChainManager.createChain("/" + REST_PATH + "/**", "noSessionCreation, authcBasic");
+			}
+			
+		});
 	}
 
 }

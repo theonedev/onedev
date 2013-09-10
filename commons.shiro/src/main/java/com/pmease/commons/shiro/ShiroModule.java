@@ -1,16 +1,23 @@
 package com.pmease.commons.shiro;
 
+import java.util.EnumSet;
+
 import javax.inject.Singleton;
+import javax.servlet.DispatcherType;
 
 import org.apache.shiro.authc.credential.CredentialsMatcher;
 import org.apache.shiro.authc.credential.DefaultPasswordService;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.guice.aop.ShiroAopModule;
+import org.apache.shiro.web.env.EnvironmentLoader;
+import org.apache.shiro.web.env.EnvironmentLoaderListener;
 import org.apache.shiro.web.filter.mgt.FilterChainResolver;
 import org.apache.shiro.web.mgt.WebSecurityManager;
+import org.apache.shiro.web.servlet.ShiroFilter;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 
 import com.pmease.commons.jetty.extensionpoints.ServletContextConfigurator;
-import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
 
 /**
@@ -32,12 +39,20 @@ public class ShiroModule extends AbstractPluginModule {
 		
 		install(new ShiroAopModule());
 		
-		addExtension(ServletContextConfigurator.class, ShiroServletContextConfigurator.class);
-	}
+		addExtension(ServletContextConfigurator.class, new ServletContextConfigurator() {
 
-	@Override
-	protected Class<? extends AbstractPlugin> getPluginClass() {
-		return ShiroPlugin.class;
+			@Override
+			public void configure(ServletContextHandler context) {
+				context.setInitParameter(
+						EnvironmentLoader.ENVIRONMENT_CLASS_PARAM, 
+						DefaultWebEnvironment.class.getName());
+				
+				context.addEventListener(new EnvironmentLoaderListener());
+
+				context.addFilter(new FilterHolder(new ShiroFilter()), "/*", EnumSet.allOf(DispatcherType.class));
+			}
+			
+		});
 	}
 
 }

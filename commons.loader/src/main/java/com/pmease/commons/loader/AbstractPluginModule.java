@@ -30,9 +30,9 @@ public abstract class AbstractPluginModule extends AbstractModule implements Dep
 
 	@Override
 	protected void configure() {
-		final Class<? extends AbstractPlugin> pluginClass = getPluginClass();
+		final Class<? extends Plugin> pluginClass = getPluginClass();
 		if (pluginClass != null) {
-			addExtension(AbstractPlugin.class, pluginClass);
+			addExtension(Plugin.class, pluginClass);
 		    
 		    bindListener(new AbstractMatcher<TypeLiteral<?>>() {
 
@@ -62,10 +62,62 @@ public abstract class AbstractPluginModule extends AbstractModule implements Dep
 				}
 		    	
 		    });
+		} else {
+			addExtension(Plugin.class, new Plugin() {
+
+				@Override
+				public String getId() {
+					return pluginId;
+				}
+
+				@Override
+				public String getName() {
+					return pluginName;
+				}
+
+				@Override
+				public String getVendor() {
+					return pluginVendor;
+				}
+
+				@Override
+				public String getVersion() {
+					return pluginVersion;
+				}
+
+				@Override
+				public String getDescription() {
+					return pluginDescription;
+				}
+
+				@Override
+				public Set<String> getDependencyIds() {
+					return pluginDependencies;
+				}
+
+				@Override
+				public void start() {
+				}
+
+				@Override
+				public void postStart() {
+				}
+
+				@Override
+				public void preStop() {
+				}
+
+				@Override
+				public void stop() {
+				}
+				
+			});
 		}
 	}
 
-	protected abstract Class<? extends AbstractPlugin> getPluginClass();
+	protected Class<? extends AbstractPlugin> getPluginClass() {
+		return null;
+	}
 
 	public void setPluginId(String pluginId) {
 		this.pluginId = pluginId;
@@ -106,6 +158,11 @@ public abstract class AbstractPluginModule extends AbstractModule implements Dep
 	    pluginBinder.addBinding().to(extensionClass).in(Singleton.class);
 	}
 	
+	protected <T> void addExtension(Class<T> extensionPoint, T extension) {
+		Multibinder<T> pluginBinder = Multibinder.newSetBinder(binder(), extensionPoint);
+	    pluginBinder.addBinding().toInstance(extension);
+	}
+
 	protected <T> void addExtensionsFromPackage(Class<T> extensionPoint, Class<?> packageLocator) {
 		for (Class<? extends T> subClass: ClassUtils.findSubClasses(extensionPoint, packageLocator)) {
 			if (ClassUtils.isConcrete(subClass))

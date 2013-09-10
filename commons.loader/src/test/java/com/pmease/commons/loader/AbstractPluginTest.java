@@ -21,20 +21,44 @@ public class AbstractPluginTest {
 	@Before
 	public void before() {
 		plugin1 = spy(new AbstractPlugin() {
+
+			@Override
+			public void start() {
+			}
+
+			@Override
+			public void stop() {
+			}
 		});
 		plugin1.setId("plugin1");
 		plugin1.setDependencyIds(ImmutableSet.of("plugin2", "plugin3"));
 		
 		plugin2 = spy(new AbstractPlugin() {
+
+			@Override
+			public void start() {
+			}
+
+			@Override
+			public void stop() {
+			}
 		});
 		plugin2.setId("plugin2");
 		plugin2.setDependencyIds(ImmutableSet.of("plugin3"));
 
 		plugin3 = spy(new AbstractPlugin() {
+
+			@Override
+			public void start() {
+			}
+
+			@Override
+			public void stop() {
+			}
 		});
 		plugin3.setId("plugin3");
 		
-		Set<AbstractPlugin> plugins = new HashSet<AbstractPlugin>();
+		Set<Plugin> plugins = new HashSet<Plugin>();
 		plugins.add(plugin1);
 		plugins.add(plugin2);
 		plugins.add(plugin3);

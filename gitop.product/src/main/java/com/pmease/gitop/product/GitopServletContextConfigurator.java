@@ -2,6 +2,8 @@ package com.pmease.gitop.product;
 
 import java.io.File;
 
+import javax.inject.Inject;
+
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
@@ -14,6 +16,7 @@ public class GitopServletContextConfigurator implements ServletContextConfigurat
 
 	private final ServerConfig serverConfig;
 	
+	@Inject
 	public GitopServletContextConfigurator(ServerConfig serverConfig) {
 		this.serverConfig = serverConfig;
 	}

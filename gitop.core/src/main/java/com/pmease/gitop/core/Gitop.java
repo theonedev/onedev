@@ -40,8 +40,6 @@ public class Gitop extends AbstractPlugin {
 	@SuppressWarnings("serial")
 	@Override
 	public void start() {
-		super.start();
-		
 		manualConfigs = initManager.init();
 
 		if (!manualConfigs.isEmpty()) synchronized (manualConfigs) {
@@ -119,6 +117,10 @@ public class Gitop extends AbstractPlugin {
 
 	public static <T> Set<T> getExtensions(Class<T> extensionPoint) {
 		return AppLoader.getExtensions(extensionPoint);
+	}
+
+	@Override
+	public void stop() {
 	}
 	
 }
