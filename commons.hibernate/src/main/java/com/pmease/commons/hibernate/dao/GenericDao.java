@@ -90,7 +90,7 @@ public interface GenericDao<T extends AbstractEntity> {
 	 * This method expects to lookup a single entity with specified criteria.
 	 * 
 	 * @param criterions
-	 * 			Hibernate criterions used to find the object, use <i>null</i> if 
+	 * 			Hibernate criterions used to find the object, use <tt>null</tt> if 
 	 * 			criterions are not interested
 	 * @return
 	 * 			any matching entity. null if not found
@@ -101,10 +101,10 @@ public interface GenericDao<T extends AbstractEntity> {
 	 * This method expects to find the first matching entity. 
 	 * 
 	 * @param criterions
-	 * 			Hibernate criterions used to find the object, use <i>null</i> if 
+	 * 			Hibernate criterions used to find the object, use <tt>null</tt> if 
 	 * 			criterions are not interested
 	 * @param orders
-	 * 			orders to search by, use <i>null</i> if order is not interested
+	 * 			orders to search by, use <tt>null</tt> if order is not interested
 	 * @return
 	 * 			the first matching entity. null if not found
 	 */

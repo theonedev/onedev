@@ -9,7 +9,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.jetty.FileAssetServlet;
-import com.pmease.commons.jetty.extensionpoints.ServletContextConfigurator;
+import com.pmease.commons.jetty.ServletContextConfigurator;
 import com.pmease.gitop.core.setting.ServerConfig;
 
 public class GitopServletContextConfigurator implements ServletContextConfigurator {

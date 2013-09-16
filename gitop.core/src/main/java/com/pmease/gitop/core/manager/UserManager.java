@@ -12,7 +12,7 @@ public interface UserManager extends GenericDao<User> {
 	 * Find root account in the system. 
 	 * 
 	 * @return
-	 * 			root account of the system. Never be <i>null</i>
+	 * 			root account of the system. Never be <tt>null</tt>
 	 */
 	User getRootUser();
 
@@ -22,7 +22,7 @@ public interface UserManager extends GenericDao<User> {
 	 * @param userName
 	 * 			name of the user
 	 * @return
-	 * 			matching user, or <i>null</i> if not found 
+	 * 			matching user, or <tt>null</tt> if not found 
 	 */
 	User find(String userName);
 	

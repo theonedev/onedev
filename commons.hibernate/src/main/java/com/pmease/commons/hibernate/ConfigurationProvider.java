@@ -1,7 +1,5 @@
 package com.pmease.commons.hibernate;
 
-import java.lang.reflect.Modifier;
-import java.util.Collection;
 import java.util.Properties;
 import java.util.Set;
 
@@ -50,11 +48,8 @@ public class ConfigurationProvider implements Provider<Configuration> {
 			
 			configuration = new Configuration();
 			configuration.setNamingStrategy(namingStrategy);
-			Collection<Class<? extends AbstractEntity>> modelClasses = 
-					ClassUtils.findSubClasses(AbstractEntity.class, AbstractEntity.class);
-			for (Class<? extends AbstractEntity> model: modelClasses) {
-				if (!Modifier.isAbstract(model.getModifiers()))
-					configuration.addAnnotatedClass(model);
+			for (Class<? extends AbstractEntity> each: ClassUtils.findImplementations(AbstractEntity.class, AbstractEntity.class)) {
+				configuration.addAnnotatedClass(each);
 			}
 			
 			for (ModelProvider provider: modelProviders) {

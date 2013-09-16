@@ -19,7 +19,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.google.inject.Inject;
 import com.pmease.commons.hibernate.dao.GeneralDao;
-import com.pmease.commons.util.ClassUtils;
+import com.pmease.commons.util.ReflectionUtils;
 
 public abstract class AbstractRealm<T extends AbstractUser> extends AuthorizingRealm {
 
@@ -31,7 +31,7 @@ public abstract class AbstractRealm<T extends AbstractUser> extends AuthorizingR
 	@Inject
 	public AbstractRealm(GeneralDao generalDao, CredentialsMatcher credentialsMatcher) {
 		this.generalDao = generalDao;
-		List<Class<?>> typeArguments = ClassUtils.getTypeArguments(AbstractRealm.class, getClass());
+		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(AbstractRealm.class, getClass());
 		userClass = ((Class<T>) typeArguments.get(0));
 
 		setCredentialsMatcher(credentialsMatcher);
@@ -63,7 +63,7 @@ public abstract class AbstractRealm<T extends AbstractUser> extends AuthorizingR
 	
 	/**
 	 * Get assigned permissions of user of specified identifier.
-	 * <p>
+	 * 
 	 * @param userId
 	 * 			Identifier of user to get permissions of. Value of <tt>0</tt> means anonymous user 
 	 * @return
@@ -73,7 +73,7 @@ public abstract class AbstractRealm<T extends AbstractUser> extends AuthorizingR
 
 	/**
 	 * Retrieve {@link AuthenticationInfo} of specified token. 
-	 * <p>
+	 * 
 	 * @param token
 	 * 			The token used to retrieve associated {@link AuthenticationInfo}
 	 * @return

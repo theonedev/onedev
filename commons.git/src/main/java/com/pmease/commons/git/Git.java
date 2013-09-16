@@ -45,7 +45,7 @@ public class Git {
 	
 	/**
 	 * Check if there are any errors with git command line. 
-	 * <p> 
+	 *
 	 * @return
 	 * 			error message if failed to check git command line, 
 	 * 			or <code>null</code> otherwise

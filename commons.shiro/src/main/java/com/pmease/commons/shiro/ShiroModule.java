@@ -17,7 +17,7 @@ import org.apache.shiro.web.servlet.ShiroFilter;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
-import com.pmease.commons.jetty.extensionpoints.ServletContextConfigurator;
+import com.pmease.commons.jetty.ServletContextConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
 
 /**
@@ -39,7 +39,7 @@ public class ShiroModule extends AbstractPluginModule {
 		
 		install(new ShiroAopModule());
 		
-		addExtension(ServletContextConfigurator.class, new ServletContextConfigurator() {
+		contribute(ServletContextConfigurator.class, new ServletContextConfigurator() {
 
 			@Override
 			public void configure(ServletContextHandler context) {

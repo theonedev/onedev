@@ -166,5 +166,5 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
         }
         return (String[]) collection.toArray(new String[collection.size()]);
     }
-    
+
 }

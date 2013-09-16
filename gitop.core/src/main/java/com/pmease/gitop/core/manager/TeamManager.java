@@ -24,7 +24,7 @@ public interface TeamManager extends GenericDao<Team> {
 	 * @param teamName
 	 * 			name of the team
 	 * @return
-	 * 			matching team, or <i>null</i> if not found 
+	 * 			matching team, or <tt>null</tt> if not found 
 	 */
 	Team find(User owner, String teamName);
 	

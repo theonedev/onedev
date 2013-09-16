@@ -8,7 +8,7 @@ public interface ServerConfig {
 	 * @return
 	 * 			http port of the server, or <i>0</i> if http port is not defined. 
 	 * 			In case http port is not defined, {@link #getSslConfig()} must 
-	 * 			not return <i>null</i>
+	 * 			not return <tt>null</tt>
 	 */
 	int getHttpPort();
 	
@@ -16,7 +16,7 @@ public interface ServerConfig {
 	 * Get ssl config of the server.
 	 * <p>
 	 * @return
-	 * 			ssl config of the server, or <i>null</i> if ssl setting is not defined. 
+	 * 			ssl config of the server, or <tt>null</tt> if ssl setting is not defined. 
 	 * 			In case ssl setting is not defined, {@link #getHttpPort()} must not 
 	 * 			return <i>0</i>
 	 */

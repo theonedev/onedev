@@ -6,7 +6,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.bio.SocketConnector;
 import org.eclipse.jetty.server.ssl.SslSocketConnector;
 
-import com.pmease.commons.jetty.extensionpoints.ServerConfigurator;
+import com.pmease.commons.jetty.ServerConfigurator;
 import com.pmease.gitop.core.setting.ServerConfig;
 import com.pmease.gitop.core.setting.SslConfig;
 

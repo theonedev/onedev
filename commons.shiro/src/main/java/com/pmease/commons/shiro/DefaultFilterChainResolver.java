@@ -8,8 +8,6 @@ import javax.inject.Singleton;
 import org.apache.shiro.web.filter.mgt.FilterChainManager;
 import org.apache.shiro.web.filter.mgt.PathMatchingFilterChainResolver;
 
-import com.pmease.commons.shiro.extensionpoint.FilterChainConfigurator;
-
 @Singleton
 public class DefaultFilterChainResolver extends PathMatchingFilterChainResolver {
 

@@ -13,5 +13,4 @@ public @interface Editable {
 	int order() default 0;
 	
 	String description() default "";
-	
 }

@@ -31,17 +31,18 @@ public class GitopModule extends AbstractPluginModule {
 		
 		bind(Gitop.class);
 
-		addExtension(ModelProvider.class, new ModelProvider() {
+		contribute(ModelProvider.class, new ModelProvider() {
 
 			@Override
 			public Collection<Class<? extends AbstractEntity>> getModelClasses() {
 				Collection<Class<? extends AbstractEntity>> modelClasses = 
 						new HashSet<Class<? extends AbstractEntity>>();
-				modelClasses.addAll(ClassUtils.findSubClasses(AbstractEntity.class, ModelLocator.class));
+				modelClasses.addAll(ClassUtils.findImplementations(AbstractEntity.class, ModelLocator.class));
 				return modelClasses;
 			}
 			
 		});
+		
 	}
 
 	@Override

@@ -32,7 +32,7 @@ public abstract class AbstractPluginModule extends AbstractModule implements Dep
 	protected void configure() {
 		final Class<? extends Plugin> pluginClass = getPluginClass();
 		if (pluginClass != null) {
-			addExtension(Plugin.class, pluginClass);
+			contribute(Plugin.class, pluginClass);
 		    
 		    bindListener(new AbstractMatcher<TypeLiteral<?>>() {
 
@@ -63,7 +63,7 @@ public abstract class AbstractPluginModule extends AbstractModule implements Dep
 		    	
 		    });
 		} else {
-			addExtension(Plugin.class, new Plugin() {
+			contribute(Plugin.class, new Plugin() {
 
 				@Override
 				public String getId() {
@@ -153,20 +153,19 @@ public abstract class AbstractPluginModule extends AbstractModule implements Dep
 		return pluginDependencies;
 	}
 	
-	protected <T> void addExtension(Class<T> extensionPoint, Class<? extends T> extensionClass) {
+	protected <T> void contribute(Class<T> extensionPoint, Class<? extends T> extensionClass) {
 		Multibinder<T> pluginBinder = Multibinder.newSetBinder(binder(), extensionPoint);
 	    pluginBinder.addBinding().to(extensionClass).in(Singleton.class);
 	}
 	
-	protected <T> void addExtension(Class<T> extensionPoint, T extension) {
+	protected <T> void contribute(Class<T> extensionPoint, T extension) {
 		Multibinder<T> pluginBinder = Multibinder.newSetBinder(binder(), extensionPoint);
 	    pluginBinder.addBinding().toInstance(extension);
 	}
 
-	protected <T> void addExtensionsFromPackage(Class<T> extensionPoint, Class<?> packageLocator) {
-		for (Class<? extends T> subClass: ClassUtils.findSubClasses(extensionPoint, packageLocator)) {
-			if (ClassUtils.isConcrete(subClass))
-				addExtension(extensionPoint, subClass);
+	protected <T> void contributeFromPackage(Class<T> extensionPoint, Class<?> packageLocator) {
+		for (Class<? extends T> subClass: ClassUtils.findImplementations(extensionPoint, packageLocator)) {
+			contribute(extensionPoint, subClass);
 		}
 	}
 		

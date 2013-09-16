@@ -1,0 +1,18 @@
+table.reflection {
+}
+table.reflection td {
+	vertical-align: top;
+}
+table.reflection td {
+	padding: 8px;
+}
+table.reflection td.name {
+	background: #EDEDED;
+	text-align: right;
+}
+table.reflection td input.enable, table.reflection td select.type {
+	margin-bottom: 8px;
+}
+ul.validation-errors li span {
+	color: #FF5555;
+}

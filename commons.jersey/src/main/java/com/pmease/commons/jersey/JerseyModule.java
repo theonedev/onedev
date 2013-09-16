@@ -3,7 +3,7 @@ package com.pmease.commons.jersey;
 import org.apache.shiro.web.filter.mgt.FilterChainManager;
 
 import com.pmease.commons.loader.AbstractPluginModule;
-import com.pmease.commons.shiro.extensionpoint.FilterChainConfigurator;
+import com.pmease.commons.shiro.FilterChainConfigurator;
 import com.pmease.commons.util.EasyMap;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
@@ -39,7 +39,7 @@ public class JerseyModule extends AbstractPluginModule {
 			
 		});
 		
-		addExtension(FilterChainConfigurator.class, new FilterChainConfigurator() {
+		contribute(FilterChainConfigurator.class, new FilterChainConfigurator() {
 
 			@Override
 			public void configure(FilterChainManager filterChainManager) {

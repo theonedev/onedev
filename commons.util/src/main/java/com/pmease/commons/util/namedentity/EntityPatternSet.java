@@ -34,9 +34,9 @@ public class EntityPatternSet extends PatternSet implements Trimmable {
 	 * Trim stored patterns of this pattern set. 
 	 * <p>
 	 * Invalid pattern entries of current instance will be removed.
-	 * <p>
+	 * 
 	 * @return
-	 * 			trimmed instance, or <i>null</i> if no longer contains any patterns
+	 * 			trimmed instance, or <tt>null</tt> if no longer contains any patterns
 	 */
 	@Override
 	public Object trim(Object context) {

@@ -6,7 +6,7 @@ import org.apache.wicket.protocol.http.WicketServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
-import com.pmease.commons.jetty.extensionpoints.ServletContextConfigurator;
+import com.pmease.commons.jetty.ServletContextConfigurator;
 
 public class WicketServletContextConfigurator implements ServletContextConfigurator {
 

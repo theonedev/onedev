@@ -5,8 +5,8 @@ import java.util.Properties;
 
 import com.google.inject.name.Names;
 import com.pmease.commons.bootstrap.Bootstrap;
-import com.pmease.commons.jetty.extensionpoints.ServerConfigurator;
-import com.pmease.commons.jetty.extensionpoints.ServletContextConfigurator;
+import com.pmease.commons.jetty.ServerConfigurator;
+import com.pmease.commons.jetty.ServletContextConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.loader.AppName;
@@ -31,8 +31,8 @@ public class ProductModule extends AbstractPluginModule {
 		
 		bind(ServerConfig.class).to(DefaultServerConfig.class);
 		
-		addExtension(ServerConfigurator.class, GitopServerConfigurator.class);
-		addExtension(ServletContextConfigurator.class, GitopServletContextConfigurator.class);
+		contribute(ServerConfigurator.class, GitopServerConfigurator.class);
+		contribute(ServletContextConfigurator.class, GitopServletContextConfigurator.class);
 	}
 
 	@Override

@@ -18,7 +18,7 @@ public interface ConfigManager extends GenericDao<Config> {
 	 * @param key
 	 *			key of the config
 	 * @return
-	 * 			config associated with specified key, or <i>null</i> if 
+	 * 			config associated with specified key, or <tt>null</tt> if 
 	 * 			no config record found for the key
 	 */
 	Config getConfig(Config.Key key);
@@ -27,7 +27,7 @@ public interface ConfigManager extends GenericDao<Config> {
 	 * Get storage setting.
 	 * <p>
 	 * @return
-	 *			storage setting, never <i>null</i>
+	 *			storage setting, never <tt>null</tt>
 	 * @throws
 	 * 			RuntimeException if storage setting record is not found
 	 * @throws
@@ -47,7 +47,7 @@ public interface ConfigManager extends GenericDao<Config> {
 	 * Get mail setting.
 	 * <p>
 	 * @return
-	 * 			mail setting, or <i>null</i> if mail setting record exists but value is 
+	 * 			mail setting, or <tt>null</tt> if mail setting record exists but value is 
 	 * 			null.
 	 * @throws 
 	 * 			RuntimeException if mail setting record is not found
@@ -58,7 +58,7 @@ public interface ConfigManager extends GenericDao<Config> {
 	 * Save specified mail setting.
 	 * <p>
 	 * @param mailSetting
-	 * 			mail setting to be saved. Use <i>null</i> to clear the setting (but 
+	 * 			mail setting to be saved. Use <tt>null</tt> to clear the setting (but 
 	 * 			setting record will still be remained in database)
 	 */
 	void saveMailSetting(@Nullable MailSetting mailSetting);

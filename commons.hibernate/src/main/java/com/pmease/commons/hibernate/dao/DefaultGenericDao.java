@@ -8,7 +8,7 @@ import org.hibernate.criterion.Order;
 
 import com.google.inject.Inject;
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.commons.util.ClassUtils;
+import com.pmease.commons.util.ReflectionUtils;
 
 public class DefaultGenericDao<T extends AbstractEntity> implements GenericDao<T> {
 
@@ -20,7 +20,7 @@ public class DefaultGenericDao<T extends AbstractEntity> implements GenericDao<T
 	@Inject
 	public DefaultGenericDao(GeneralDao generalDao) {
 		this.generalDao = generalDao;
-		List<Class<?>> typeArguments = ClassUtils.getTypeArguments(DefaultGenericDao.class, getClass());
+		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(DefaultGenericDao.class, getClass());
 		entityClass = ((Class<T>) typeArguments.get(0));
 	}
 	

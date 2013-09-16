@@ -1,6 +1,8 @@
 package com.pmease.commons.editable;
 
-import com.pmease.commons.editable.typeconverter.TypeConverter;
+import javax.validation.Validation;
+import javax.validation.Validator;
+
 import com.pmease.commons.loader.AbstractPluginModule;
 
 /**
@@ -13,8 +15,9 @@ public class EditableModule extends AbstractPluginModule {
 	protected void configure() {
 		super.configure();
 		
+		bind(Validator.class).toInstance(Validation.buildDefaultValidatorFactory().getValidator());
+		
 		// put your guice bindings here
-		addExtensionsFromPackage(TypeConverter.class, TypeConverter.class);
 	}
 
 }

@@ -1,0 +1,26 @@
+<wicket:panel>
+	<table class="reflection editor">
+		<tr wicket:id="properties">
+			<td class="name">
+				<span wicket:id="name"></span>
+			</td>
+			<td class="value">
+				<div wicket:id="value"></div>
+				<wicket:enclosure child="propertyValidationErrors">
+					<ul class="validation-errors">
+						<li wicket:id="propertyValidationErrors">
+							<span wicket:id="propertyValidationError"></span>
+						</li>
+					</ul>
+				</wicket:enclosure>
+			</td>
+		</tr>
+	</table>
+	<wicket:enclosure child="beanValidationErrors">
+		<ul class="validation-errors">
+			<li wicket:id="beanValidationErrors">
+				<span wicket:id="beanValidationError"></span>
+			</li>
+		</ul>
+	</wicket:enclosure>
+</wicket:panel>

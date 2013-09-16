@@ -7,7 +7,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
 import com.pmease.commons.jetty.ClasspathAssetServlet;
-import com.pmease.commons.jetty.extensionpoints.ServletContextConfigurator;
+import com.pmease.commons.jetty.ServletContextConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.gitop.web.asset.AssetLocator;
@@ -25,7 +25,7 @@ public class WebModule extends AbstractPluginModule {
 		// put your guice bindings here
 		bind(AbstractWicketConfig.class).to(WicketConfig.class);		
 		
-		addExtension(ServletContextConfigurator.class, new ServletContextConfigurator() {
+		contribute(ServletContextConfigurator.class, new ServletContextConfigurator() {
 			
 			@Override
 			public void configure(ServletContextHandler context) {
@@ -38,6 +38,7 @@ public class WebModule extends AbstractPluginModule {
 			}
 			
 		});
+
 	}
 
 }

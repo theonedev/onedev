@@ -12,7 +12,7 @@ import com.pmease.commons.util.trimmable.Trimmable;
  * trim the pattern. 
  * <p>
  * Example entity patterns of stored form: <i>100, qa*, 5.0.?</i>
- * <p>
+ * 
  * @author robin
  *
  */

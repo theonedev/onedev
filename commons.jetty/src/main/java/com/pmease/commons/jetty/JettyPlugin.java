@@ -21,8 +21,6 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import com.google.inject.Inject;
 import com.google.inject.servlet.GuiceFilter;
 import com.pmease.commons.bootstrap.BootstrapUtils;
-import com.pmease.commons.jetty.extensionpoints.ServerConfigurator;
-import com.pmease.commons.jetty.extensionpoints.ServletContextConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
 
 public class JettyPlugin extends AbstractPlugin {
