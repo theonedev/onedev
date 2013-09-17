@@ -114,7 +114,7 @@ public class EditableUtils {
 	public static void validate(Serializable bean) {
 		EditContext context = AppLoader.getInstance(EditSupportRegistry.class).getBeanEditContext(bean);
 		context.validate();
-		List<ValidationError> errors = context.findValidationErrors();
+		List<ValidationError> errors = context.getValidationErrors(true);
 		if (!errors.isEmpty()) {
 			StringBuffer buffer = new StringBuffer();
 			

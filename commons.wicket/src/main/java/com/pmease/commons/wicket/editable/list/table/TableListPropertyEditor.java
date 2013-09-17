@@ -122,7 +122,7 @@ public class TableListPropertyEditor extends Panel {
 						final PropertyEditContext<RenderContext> elementPropertyContext = columnItem.getModelObject();
 						elementPropertyContext.renderForEdit(new RenderContext(columnItem, "elementPropertyEditor"));
 						
-						columnItem.add(new ListView<ValidationError>("propertyValidationErrors", elementPropertyContext.getValidationErrors()) {
+						columnItem.add(new ListView<ValidationError>("propertyValidationErrors", elementPropertyContext.getValidationErrors(false)) {
 
 							@Override
 							protected void populateItem(ListItem<ValidationError> item) {
@@ -134,11 +134,13 @@ public class TableListPropertyEditor extends Panel {
 							protected void onConfigure() {
 								super.onConfigure();
 								
-								setVisible(!elementPropertyContext.getValidationErrors().isEmpty());
+								setVisible(!elementPropertyContext.getValidationErrors(false).isEmpty());
 							}
 							
 						});
 						
+						if (!elementPropertyContext.getValidationErrors(false).isEmpty())
+							columnItem.add(AttributeModifier.append("class", "has-error"));
 					}
 					
 				});
@@ -158,8 +160,20 @@ public class TableListPropertyEditor extends Panel {
 			
 		});
 		
+		WebMarkupContainer noElements = new WebMarkupContainer("noElements") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(editContext.getElementContexts().isEmpty());
+			}
+			
+		};
+		noElements.add(AttributeModifier.append("colspan", editContext.getElementPropertyGetters().size() + 1));
+		table.add(noElements);
+		
 		WebMarkupContainer newRow = new WebMarkupContainer("addElement");
-		newRow.add(AttributeModifier.append("colspan", editContext.getElementPropertyGetters().size()));
+		newRow.add(AttributeModifier.append("colspan", editContext.getElementPropertyGetters().size() + 1));
 		newRow.add(new AjaxButton("addElement") {
 
 			@Override

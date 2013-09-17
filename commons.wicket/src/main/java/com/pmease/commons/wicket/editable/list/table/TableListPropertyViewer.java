@@ -3,6 +3,7 @@ package com.pmease.commons.wicket.editable.list.table;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -69,6 +70,18 @@ public class TableListPropertyViewer extends Panel {
 			}
 			
 		});
+		WebMarkupContainer noElements = new WebMarkupContainer("noElements") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(editContext.getElementContexts().isEmpty());
+			}
+			
+		};
+		noElements.add(AttributeModifier.append("colspan", editContext.getElementPropertyGetters().size()));
+		table.add(noElements);
+
 		add(table);
 	}
 

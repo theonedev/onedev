@@ -3,9 +3,9 @@ package com.pmease.commons.editable;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.loader.AppLoader;
@@ -36,42 +36,12 @@ public abstract class AbstractReflectionBeanEditContext<T> extends BeanEditConte
 	}
 
 	@Override
-	public void doValidation() {
-		Set<String> propertyNames = new HashSet<String>();
+	public Map<Serializable, EditContext<T>> getChildContexts() {
+		Map<Serializable, EditContext<T>> childContexts = new LinkedHashMap<Serializable, EditContext<T>>();
 		for (PropertyEditContext<T> each: propertyContexts) {
-			each.validate();
-			if (each.findValidationErrors().isEmpty())
-				propertyNames.add(each.getPropertyName());
+			childContexts.put(each.getPropertyName(), each);
 		}
-		
-		if (getBean() instanceof Validatable) {
-			((Validatable)getBean()).validate(propertyNames, new ErrorContext() {
-
-				@Override
-				public void error(String propertyPath, String errorMessage) {
-					AbstractReflectionBeanEditContext.this.error(propertyPath, errorMessage);
-				}
-
-				@Override
-				public void error(String errorMessage) {
-					AbstractReflectionBeanEditContext.this.error(errorMessage);
-				}
-				
-			});
-		}
-	}
-
-	@Override
-	public List<ValidationError> findValidationErrors() {
-		List<ValidationError> validationErrors = new ArrayList<ValidationError>();
-		validationErrors.addAll(getValidationErrors());
-
-		for (PropertyEditContext<T> eachContext: propertyContexts) {
-			for (ValidationError eachError: eachContext.findValidationErrors()) {
-				validationErrors.add(new ValidationError(eachContext.getPropertyName(), eachError));
-			}
-		}
-		return validationErrors;
+		return childContexts;
 	}
 
 }

@@ -1,18 +1,28 @@
 table.reflection {
+	width: 100%;
+	margin-bottom: 20px;
 }
-table.reflection td {
+table.reflection>tbody>tr>td {
 	vertical-align: top;
 }
-table.reflection td {
-	padding: 8px;
+table.reflection>tbody>tr>td {
+	padding: 10px;
 }
-table.reflection td.name {
+table.reflection>tbody>tr>td.name {
+	font-weight: bold;
 	background: #EDEDED;
 	text-align: right;
 }
 table.reflection td input.enable, table.reflection td select.type {
 	margin-bottom: 8px;
 }
-ul.validation-errors li span {
-	color: #FF5555;
+
+table.list.editor {
+	margin-bottom: 0;
+}
+table.list.editor input, table.list.editor select {
+	margin-bottom: 0;
+}
+td.no-elements {
+	font-style: italic;
 }

@@ -1,13 +1,13 @@
 package com.pmease.commons.wicket.editable.nuemric;
 
 import java.io.Serializable;
+import java.util.Map;
 
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
+import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.wicket.editable.RenderContext;
 
@@ -24,19 +24,14 @@ public class NumericPropertyEditContext extends PropertyEditContext<RenderContex
 		else
 			inputModel = new Model<String>("");
 	}
+	
+	public IModel<String> getInputModel() {
+		return inputModel;
+	}
 
 	@Override
 	public void renderForEdit(RenderContext renderContext) {
-		renderContext.getContainer().add(new TextField<String>(renderContext.getComponentId(), inputModel) {
-
-			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				tag.setName("input");
-				tag.put("type", "text");
-				super.onComponentTag(tag);
-			}
-
-		});
+		renderContext.getContainer().add(new NumericPropertyEditor(renderContext.getComponentId(), this));
 	}
 
 	@Override
@@ -66,6 +61,11 @@ public class NumericPropertyEditContext extends PropertyEditContext<RenderContex
 		}
 		
 		super.doValidation();
+	}
+
+	@Override
+	public Map<Serializable, EditContext<RenderContext>> getChildContexts() {
+		return null;
 	}
 
 }

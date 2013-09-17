@@ -7,45 +7,6 @@
 	text-align:center;
 }
 
-/* Spacings */
-.m24p {
-	margin:24px;
-}
-.m16p {
-	margin:16px;
-}
-.m12p {
-	margin:12px;
-}
-.m8p {
-	margin:8px;
-}
-.m4p {
-	margin:4px;
-}
-.m2p {
-	margin:2px;
-}
-.p24p {
-	padding:24px;
-}
-.p16p {
-	padding:16px;
-}
-.p12p {
-	padding:12px;
-}
-.p8p {
-	padding:8px;
-}
-.p4p {
-	padding:4px;
-}
-.p2p {
-	padding:2px;
-}
-
-
 /* Piped links */
 .piped { 
 	display: block; 
@@ -145,4 +106,8 @@ table .row-selector {
 }
 table td, table th {
 	text-align: left;
+}
+
+.required {
+	color: #B94A48;
 }

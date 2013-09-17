@@ -5,29 +5,20 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class ValidationError implements Serializable {
 	
-	private final String propertyPath;
+	private final PropertyPath propertyPath;
 	
 	private final String errorMessage;
 
-	public ValidationError(String propertyPath, ValidationError error) {
-		if (error.getPropertyPath() != null) {
-			if (error.getPropertyPath().startsWith("["))
-				this.propertyPath = propertyPath + error.getPropertyPath();
-			else
-				this.propertyPath = propertyPath + "." + error.getPropertyPath();
-		}
-		else
-			this.propertyPath = propertyPath;
-		
-		this.errorMessage = error.getErrorMessage();
-	}
-	
-	public ValidationError(String propertyPath, String errorMessage) {
+	public ValidationError(PropertyPath propertyPath, String errorMessage) {
 		this.propertyPath = propertyPath;
 		this.errorMessage = errorMessage;
 	}
 	
-	public String getPropertyPath() {
+	public ValidationError(String errorMessage) {
+		this(new PropertyPath(), errorMessage);
+	}
+	
+	public PropertyPath getPropertyPath() {
 		return propertyPath;
 	}
 
@@ -37,7 +28,7 @@ public class ValidationError implements Serializable {
 
 	@Override
 	public String toString() {
-		if (propertyPath != null)
+		if (!propertyPath.getElements().isEmpty())
 			return propertyPath + ": " + errorMessage;
 		else
 			return errorMessage;

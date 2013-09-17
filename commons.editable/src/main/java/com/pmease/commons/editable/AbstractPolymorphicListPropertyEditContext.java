@@ -2,7 +2,9 @@ package com.pmease.commons.editable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.loader.AppLoader;
@@ -76,31 +78,15 @@ public abstract class AbstractPolymorphicListPropertyEditContext<T> extends Prop
 		propertyValue.remove(index);
 		elementContexts.remove(index);
 	}
-	
-	@Override
-	protected void doValidation() {
-		super.doValidation();
-		
-		if (elementContexts != null) {
-			for (BeanEditContext<T> each: elementContexts)
-				each.validate();
-		}
-	}
 
 	@Override
-	public List<ValidationError> findValidationErrors() {
-		List<ValidationError> validationErrors = new ArrayList<ValidationError>();
-		validationErrors.addAll(getValidationErrors());
+	public Map<Serializable, EditContext<T>> getChildContexts() {
+		Map<Serializable, EditContext<T>> childContexts = new LinkedHashMap<Serializable, EditContext<T>>();
 		if (elementContexts != null) {
-			for (int i=0; i<elementContexts.size(); i++) {
-				BeanEditContext<T> elementContext = elementContexts.get(i);
-				for (ValidationError eachError: elementContext.findValidationErrors()) {
-					validationErrors.add(new ValidationError("[" + i + "]", eachError));
-				}
-			}
+			for (int i=0; i<elementContexts.size(); i++)
+				childContexts.put(i, elementContexts.get(i));
 		}
-		
-		return validationErrors;
+		return childContexts;
 	}
-		
+	
 }

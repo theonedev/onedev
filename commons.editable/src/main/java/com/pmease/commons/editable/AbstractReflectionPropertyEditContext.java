@@ -1,8 +1,7 @@
 package com.pmease.commons.editable;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 import com.pmease.commons.loader.AppLoader;
 
@@ -39,22 +38,23 @@ public abstract class AbstractReflectionPropertyEditContext<T> extends PropertyE
 	}
 
 	@Override
-	protected void doValidation() {
-		super.doValidation();
-		
+	public Map<Serializable, EditContext<T>> getChildContexts() {
 		if (valueContext != null)
-			valueContext.validate();
+			return valueContext.getChildContexts();
+		else
+			return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public List<ValidationError> findValidationErrors() {
-		List<ValidationError> validationErrors = new ArrayList<ValidationError>();
-		validationErrors.addAll(getValidationErrors());
-		
-		if (valueContext != null) {
-			validationErrors.addAll(valueContext.findValidationErrors());
+	protected void doValidation() {
+		super.doValidation();
+
+		// redirect error message of bean level of the property value to be directly 
+		// under this property
+		if (valueContext != null && valueContext.getBean() instanceof Validatable) {
+			((Validatable<T>)valueContext.getBean()).validate(this);
 		}
-		return validationErrors;
 	}
 	
 }

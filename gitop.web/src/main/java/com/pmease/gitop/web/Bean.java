@@ -3,11 +3,17 @@ package com.pmease.gitop.web;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.validation.constraints.Size;
+
+import org.hibernate.validator.constraints.NotEmpty;
+
+import com.pmease.commons.editable.EditContext;
+import com.pmease.commons.editable.Validatable;
 import com.pmease.commons.editable.annotation.Editable;
 
 @SuppressWarnings("serial")
 @Editable
-public class Bean implements Serializable {
+public class Bean implements Serializable, Validatable<Void> {
 	
 	private String name;
 	
@@ -15,8 +21,10 @@ public class Bean implements Serializable {
 	
 	private List<ChildBean> childs;
 	
-	private int age;
+	private Integer age;
 
+	@Editable(description="This is something interesting.")
+	@NotEmpty
 	public String getName() {
 		return name;
 	}
@@ -25,6 +33,7 @@ public class Bean implements Serializable {
 		this.name = name;
 	}
 
+	@Editable
 	public boolean isMarried() {
 		return married;
 	}
@@ -34,6 +43,7 @@ public class Bean implements Serializable {
 	}
 
 	@Editable
+	@Size(min=5)
 	public List<ChildBean> getChilds() {
 		return childs;
 	}
@@ -42,12 +52,18 @@ public class Bean implements Serializable {
 		this.childs = childs;
 	}
 
-	public int getAge() {
+	@Editable
+	public Integer getAge() {
 		return age;
 	}
 
-	public void setAge(int age) {
+	public void setAge(Integer age) {
 		this.age = age;
+	}
+
+	@Override
+	public void validate(EditContext<Void> editContext) {
+		editContext.error("tananade");
 	}
 	
 }

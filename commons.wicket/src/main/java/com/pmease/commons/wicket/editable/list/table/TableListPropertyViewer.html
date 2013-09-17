@@ -1,9 +1,9 @@
 <wicket:panel>
-	<table wicket:id="table" class="list viewer">
+	<table wicket:id="table" class="list viewer table table-condensed">
 		<thead>
-			<td wicket:id="headers">
+			<th wicket:id="headers">
 				<span wicket:id="header"></span>
-			</td>
+			</th>
 		</thead>
 		<tbody>
 			<tr wicket:id="rows">
@@ -11,6 +11,11 @@
 					<div wicket:id="cell"></div>
 				</td>
 			</tr>
+			<wicket:enclosure>
+				<tr>
+					<td wicket:id="noElements" class="no-elements">No Elements Defined</td>
+				</tr>
+			</wicket:enclosure>
 		</tbody>
 	</table>
 </wicket:panel>

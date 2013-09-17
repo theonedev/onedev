@@ -9,4 +9,12 @@ public abstract class BeanEditContext<T> extends AbstractEditContext<T> {
 		super(bean);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	protected void doValidation() {
+		if (getBean() instanceof Validatable) {
+			((Validatable<T>)getBean()).validate(this);
+		}
+	}
+
 }

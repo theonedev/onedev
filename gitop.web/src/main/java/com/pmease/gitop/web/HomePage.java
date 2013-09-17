@@ -1,5 +1,7 @@
 package com.pmease.gitop.web;
 
+import java.util.ArrayList;
+
 import org.apache.wicket.feedback.ContainerFeedbackMessageFilter;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -9,7 +11,7 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.ValidationError;
-import com.pmease.commons.wicket.asset.bootstrap.BootstrapResourceReference;
+import com.pmease.commons.wicket.asset.CommonResourceReference;
 import com.pmease.commons.wicket.editable.EditHelper;
 import com.pmease.commons.wicket.editable.RenderContext;
 
@@ -17,6 +19,10 @@ import com.pmease.commons.wicket.editable.RenderContext;
 public class HomePage extends WebPage {
 
 	private static Bean bean = new Bean();
+	
+	static {
+		bean.setChilds(new ArrayList<ChildBean>());
+	}
 	
 	@Override
 	protected void onInitialize() {
@@ -30,7 +36,7 @@ public class HomePage extends WebPage {
 			protected void onSubmit() {
 				editContext.validate();
 				
-				for (ValidationError each: editContext.findValidationErrors()) {
+				for (ValidationError each: editContext.getValidationErrors(true)) {
 					System.out.println(each);
 				}
 			}
@@ -38,7 +44,7 @@ public class HomePage extends WebPage {
 		};
 		add(new FeedbackPanel("feedback", new ContainerFeedbackMessageFilter(form)));
 		
-		editContext.renderForEdit(new RenderContext(form, "editor"));
+		editContext.renderForView(new RenderContext(form, "editor"));
 		
 		add(form);
 	}
@@ -47,7 +53,7 @@ public class HomePage extends WebPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(new BootstrapResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new CommonResourceReference()));
 	}
 	
 }

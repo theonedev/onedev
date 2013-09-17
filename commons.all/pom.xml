@@ -12,15 +12,9 @@
     <modules> 
         <module>../commons.jsw</module>  
         <module>../commons.loader</module>  
-        <module>../commons.test</module>  
         <module>../commons.util</module>  
         <module>../commons.bootstrap</module>  
         <module>../commons.jetty</module>  
-          
-          
-          
-          
-          
         <module>../gitop.core</module>
         <module>../commons.editable</module>
         <module>../commons.git</module>

@@ -1,17 +1,16 @@
 package com.pmease.gitop.web;
 
 import java.io.Serializable;
-import java.util.Set;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.pmease.commons.editable.ErrorContext;
+import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.Validatable;
 import com.pmease.commons.editable.annotation.Editable;
 
 @SuppressWarnings("serial")
 @Editable
-public class ChildBean implements Serializable, Validatable {
+public class ChildBean implements Serializable, Validatable<Void> {
 	private String childName;
 	
 	private Boolean childMarried;
@@ -36,11 +35,11 @@ public class ChildBean implements Serializable, Validatable {
 	}
 
 	@Override
-	public void validate(Set<String> propertyNames, ErrorContext errorContext) {
-		if (propertyNames.contains("childName")) {
+	public void validate(EditContext<Void> editContext) {
+		if (!editContext.hasError("childName", true)) {
 			if (childName.startsWith("child") && childMarried) {
-				errorContext.error("childName", "child can not marry.");
-				errorContext.error("childMarried", "child can not marry.");
+				editContext.error("child can not marry.");
+				editContext.getChildContext("childMarried").error("child can not marry.");
 			}
 		}
 	}

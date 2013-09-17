@@ -22,9 +22,9 @@ public class BootstrapResourceReference extends JavaScriptResourceReference {
 		HeaderItem jquery = JavaScriptHeaderItem.forReference(WicketEventJQueryResourceReference.get());
 		HeaderItem stylesheet = CssHeaderItem.forReference(
 				new CssResourceReference(BootstrapResourceReference.class, "css/bootstrap.css"));
-		HeaderItem responsiveStylesheet = CssHeaderItem.forReference(
-				new CssResourceReference(BootstrapResourceReference.class, "css/bootstrap-responsive.css"));
+		HeaderItem themeStylesheet = CssHeaderItem.forReference(
+				new CssResourceReference(BootstrapResourceReference.class, "css/bootstrap-theme.css"));
 
-		return Arrays.asList(jquery, stylesheet, responsiveStylesheet);
+		return Arrays.asList(jquery, stylesheet, themeStylesheet);
 	}
 }

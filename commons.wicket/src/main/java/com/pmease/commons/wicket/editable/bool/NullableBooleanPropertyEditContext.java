@@ -1,12 +1,14 @@
 package com.pmease.commons.wicket.editable.bool;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.model.IModel;
 
+import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.util.EasyList;
 import com.pmease.commons.wicket.editable.RenderContext;
@@ -52,6 +54,7 @@ public class NullableBooleanPropertyEditContext extends PropertyEditContext<Rend
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				tag.setName("select");
+				tag.put("class", "form-control");
 				super.onComponentTag(tag);
 			}
 			
@@ -73,6 +76,11 @@ public class NullableBooleanPropertyEditContext extends PropertyEditContext<Rend
 		} else {
 			renderContext.getContainer().add(new Label(renderContext.getComponentId()));
 		}
+	}
+
+	@Override
+	public Map<Serializable, EditContext<RenderContext>> getChildContexts() {
+		return null;
 	}
 
 }

@@ -1,9 +1,7 @@
 package com.pmease.commons.editable;
 
-import java.util.Set;
+public interface Validatable<T> {
 
-public interface Validatable {
-
-	void validate(Set<String> propertyNames, ErrorContext errorContext);
+	void validate(EditContext<T> editContext);
 
 }
