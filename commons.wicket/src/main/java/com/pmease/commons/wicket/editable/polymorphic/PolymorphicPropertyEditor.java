@@ -12,13 +12,16 @@ import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
+import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.EditableUtils;
-import com.pmease.commons.wicket.editable.RenderableEditContext;
+import com.pmease.commons.wicket.editable.RenderContext;
 
 @SuppressWarnings("serial")
 public class PolymorphicPropertyEditor extends Panel {
 
 	private final PolymorphicPropertyEditContext editContext;
+	
+	private static final String VALUE_EDITOR_ID = "valueEditor";
 	
 	public PolymorphicPropertyEditor(String id, PolymorphicPropertyEditContext editContext) {
 		super(id);
@@ -68,27 +71,29 @@ public class PolymorphicPropertyEditor extends Panel {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				Component editor = newPropertyValueEditor();
-				replace(editor);
-				target.add(editor);
+				remove(VALUE_EDITOR_ID);
+				renderValueEditor();
+				
+				Component valueEditor = get(VALUE_EDITOR_ID);
+				replace(valueEditor);
+				target.add(valueEditor);
 			}
 			
 		}));
 
-		add(newPropertyValueEditor());
+		renderValueEditor();
 	}
 	
-	private Component newPropertyValueEditor() {
-		Component editor;
-		RenderableEditContext valueContext = (RenderableEditContext) editContext.getValueContext();
+	private void renderValueEditor() {
+		EditContext<RenderContext> valueContext = editContext.getValueContext();
 		if (valueContext != null) {
-			editor = valueContext.renderForEdit("valueEditor");
+			valueContext.renderForEdit(new RenderContext(this, VALUE_EDITOR_ID));
 		} else {
-			editor = new WebMarkupContainer("valueEditor").setVisible(false);
+			add(new WebMarkupContainer(VALUE_EDITOR_ID).setVisible(false));
 		}
-		editor.setOutputMarkupId(true);
-		editor.setOutputMarkupPlaceholderTag(true);
-		return editor;
+		Component valueEditor = get(VALUE_EDITOR_ID);
+		valueEditor.setOutputMarkupId(true);
+		valueEditor.setOutputMarkupPlaceholderTag(true);
 	}
 
 }

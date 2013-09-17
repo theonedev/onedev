@@ -10,7 +10,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.wicket.editable.EditableResourceReference;
-import com.pmease.commons.wicket.editable.RenderableEditContext;
+import com.pmease.commons.wicket.editable.RenderContext;
 
 @SuppressWarnings("serial")
 public class ReflectionBeanViewer extends Panel {
@@ -27,13 +27,13 @@ public class ReflectionBeanViewer extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ListView<PropertyEditContext>("properties", editContext.getPropertyContexts()) {
+		add(new ListView<PropertyEditContext<RenderContext>>("properties", editContext.getPropertyContexts()) {
 
 			@Override
-			protected void populateItem(ListItem<PropertyEditContext> item) {
+			protected void populateItem(ListItem<PropertyEditContext<RenderContext>> item) {
 				item.add(new Label("name", EditableUtils.getName(item.getModelObject().getPropertyGetter())));
 				
-				item.add(((RenderableEditContext)item.getModelObject()).renderForView("value"));
+				item.getModelObject().renderForView(new RenderContext(item, "value"));
 			}
 
 		});

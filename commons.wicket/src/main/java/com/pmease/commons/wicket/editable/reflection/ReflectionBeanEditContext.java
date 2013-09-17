@@ -2,26 +2,24 @@ package com.pmease.commons.wicket.editable.reflection;
 
 import java.io.Serializable;
 
-import org.apache.wicket.Component;
-
 import com.pmease.commons.editable.AbstractReflectionBeanEditContext;
-import com.pmease.commons.wicket.editable.RenderableEditContext;
+import com.pmease.commons.wicket.editable.RenderContext;
 
 @SuppressWarnings("serial")
-public class ReflectionBeanEditContext extends AbstractReflectionBeanEditContext implements RenderableEditContext {
+public class ReflectionBeanEditContext extends AbstractReflectionBeanEditContext<RenderContext> {
 
 	public ReflectionBeanEditContext(Serializable bean) {
 		super(bean);
 	}
 
 	@Override
-	public Component renderForEdit(String componentId) {
-		return new ReflectionBeanEditor(componentId, this);
+	public void renderForEdit(RenderContext renderContext) {
+		renderContext.getContainer().add(new ReflectionBeanEditor(renderContext.getComponentId(), this));
 	}
 
 	@Override
-	public Component renderForView(String componentId) {
-		return new ReflectionBeanViewer(componentId, this);
+	public void renderForView(RenderContext renderContext) {
+		renderContext.getContainer().add(new ReflectionBeanViewer(renderContext.getComponentId(), this));
 	}
 
 }

@@ -7,23 +7,22 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 
+import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.ValidationError;
 import com.pmease.commons.wicket.asset.bootstrap.BootstrapResourceReference;
 import com.pmease.commons.wicket.editable.EditHelper;
-import com.pmease.commons.wicket.editable.RenderableEditContext;
+import com.pmease.commons.wicket.editable.RenderContext;
 
 @SuppressWarnings("serial")
 public class HomePage extends WebPage {
 
 	private static Bean bean = new Bean();
 	
-	private RenderableEditContext editContext;
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		editContext = EditHelper.getContext(bean);
+		final EditContext<RenderContext> editContext = EditHelper.getContext(bean);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -39,7 +38,7 @@ public class HomePage extends WebPage {
 		};
 		add(new FeedbackPanel("feedback", new ContainerFeedbackMessageFilter(form)));
 		
-		form.add(editContext.renderForEdit("editor"));
+		editContext.renderForEdit(new RenderContext(form, "editor"));
 		
 		add(form);
 	}

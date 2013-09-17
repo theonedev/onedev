@@ -4,11 +4,12 @@ import java.io.Serializable;
 
 import com.pmease.commons.editable.AbstractPolymorphicEditSupport;
 import com.pmease.commons.editable.AbstractPolymorphicPropertyEditContext;
+import com.pmease.commons.wicket.editable.RenderContext;
 
-public class PolymorphicEditSuport extends AbstractPolymorphicEditSupport {
+public class PolymorphicEditSuport extends AbstractPolymorphicEditSupport<RenderContext> {
 
 	@Override
-	protected AbstractPolymorphicPropertyEditContext newPolymorphicPropertyEditContext(
+	protected AbstractPolymorphicPropertyEditContext<RenderContext> newPolymorphicPropertyEditContext(
 			Serializable bean, String propertyName) {
 		return new PolymorphicPropertyEditContext(bean, propertyName);
 	}

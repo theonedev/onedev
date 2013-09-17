@@ -8,10 +8,11 @@ import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
+import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -21,7 +22,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.editable.ValidationError;
-import com.pmease.commons.wicket.editable.RenderableEditContext;
+import com.pmease.commons.wicket.WicketUtils;
+import com.pmease.commons.wicket.editable.RenderContext;
 
 @SuppressWarnings("serial")
 public class TableListPropertyEditor extends Panel {
@@ -109,16 +111,16 @@ public class TableListPropertyEditor extends Panel {
 			}
 			
 		});
-		table.add(new ListView<List<PropertyEditContext>>("elements", editContext.getElementContexts()) {
+		table.add(new ListView<List<PropertyEditContext<RenderContext>>>("elements", editContext.getElementContexts()) {
 
 			@Override
-			protected void populateItem(final ListItem<List<PropertyEditContext>> rowItem) {
-				rowItem.add(new ListView<PropertyEditContext>("elementProperties", rowItem.getModelObject()) {
+			protected void populateItem(final ListItem<List<PropertyEditContext<RenderContext>>> rowItem) {
+				rowItem.add(new ListView<PropertyEditContext<RenderContext>>("elementProperties", rowItem.getModelObject()) {
 
 					@Override
-					protected void populateItem(ListItem<PropertyEditContext> columnItem) {
-						final PropertyEditContext elementPropertyContext = columnItem.getModelObject();
-						columnItem.add(((RenderableEditContext)elementPropertyContext).renderForEdit("elementPropertyEditor"));
+					protected void populateItem(ListItem<PropertyEditContext<RenderContext>> columnItem) {
+						final PropertyEditContext<RenderContext> elementPropertyContext = columnItem.getModelObject();
+						elementPropertyContext.renderForEdit(new RenderContext(columnItem, "elementPropertyEditor"));
 						
 						columnItem.add(new ListView<ValidationError>("propertyValidationErrors", elementPropertyContext.getValidationErrors()) {
 
@@ -140,31 +142,37 @@ public class TableListPropertyEditor extends Panel {
 					}
 					
 				});
-				rowItem.add(new AjaxLink<Void>("deleteElement") {
+				rowItem.add(new AjaxButton("deleteElement") {
 
 					@Override
-					public void onClick(AjaxRequestTarget target) {
+					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+						super.onSubmit(target, form);
+
+						WicketUtils.updateFormModels(form);
 						editContext.removeElement(rowItem.getIndex());
 						target.add(table);
 					}
-					
-				});
+
+				}.setDefaultFormProcessing(false));
 			}
 			
 		});
 		
 		WebMarkupContainer newRow = new WebMarkupContainer("addElement");
 		newRow.add(AttributeModifier.append("colspan", editContext.getElementPropertyGetters().size()));
-		newRow.add(new AjaxLink<Void>("addElement") {
+		newRow.add(new AjaxButton("addElement") {
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
+			public void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				super.onSubmit(target, form);
+
+				WicketUtils.updateFormModels(form);
 				editContext.addElement(editContext.getElementContexts().size(), 
 						editContext.instantiate(editContext.getElementClass()));
 				target.add(table);
 			}
 			
-		});
+		}.setDefaultFormProcessing(false));
 		
 		table.add(newRow);
 		

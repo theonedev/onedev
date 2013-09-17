@@ -12,10 +12,11 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.BeanUtils;
 
 @SuppressWarnings("serial")
-public abstract class AbstractReflectionBeanEditContext extends BeanEditContext {
+public abstract class AbstractReflectionBeanEditContext<T> extends BeanEditContext<T> {
 
-	private List<PropertyEditContext> propertyContexts = new ArrayList<PropertyEditContext>();
+	private List<PropertyEditContext<T>> propertyContexts = new ArrayList<PropertyEditContext<T>>();
 	
+	@SuppressWarnings("unchecked")
 	public AbstractReflectionBeanEditContext(Serializable bean) {
 		super(bean);
 
@@ -30,14 +31,14 @@ public abstract class AbstractReflectionBeanEditContext extends BeanEditContext 
 		}
 	}
 
-	public List<PropertyEditContext> getPropertyContexts() {
+	public List<PropertyEditContext<T>> getPropertyContexts() {
 		return propertyContexts;
 	}
 
 	@Override
 	public void doValidation() {
 		Set<String> propertyNames = new HashSet<String>();
-		for (PropertyEditContext each: propertyContexts) {
+		for (PropertyEditContext<T> each: propertyContexts) {
 			each.validate();
 			if (each.findValidationErrors().isEmpty())
 				propertyNames.add(each.getPropertyName());
@@ -65,7 +66,7 @@ public abstract class AbstractReflectionBeanEditContext extends BeanEditContext 
 		List<ValidationError> validationErrors = new ArrayList<ValidationError>();
 		validationErrors.addAll(getValidationErrors());
 
-		for (PropertyEditContext eachContext: propertyContexts) {
+		for (PropertyEditContext<T> eachContext: propertyContexts) {
 			for (ValidationError eachError: eachContext.findValidationErrors()) {
 				validationErrors.add(new ValidationError(eachContext.getPropertyName(), eachError));
 			}

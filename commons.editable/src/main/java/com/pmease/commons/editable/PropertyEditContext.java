@@ -16,7 +16,7 @@ import com.pmease.commons.util.ExceptionUtils;
 import com.pmease.commons.util.ReflectionUtils;
 
 @SuppressWarnings("serial")
-public abstract class PropertyEditContext extends AbstractEditContext {
+public abstract class PropertyEditContext<T> extends AbstractEditContext<T> {
 	
 	private final String propertyName;
 	

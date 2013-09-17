@@ -7,16 +7,17 @@ import com.pmease.commons.editable.BeanEditContext;
 import com.pmease.commons.editable.EditSupport;
 import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.util.BeanUtils;
+import com.pmease.commons.wicket.editable.RenderContext;
 
-public class NumericEditSupport implements EditSupport {
+public class NumericEditSupport implements EditSupport<RenderContext> {
 
 	@Override
-	public BeanEditContext getBeanEditContext(Serializable bean) {
+	public BeanEditContext<RenderContext> getBeanEditContext(Serializable bean) {
 		return null;
 	}
 
 	@Override
-	public PropertyEditContext getPropertyEditContext(Serializable bean, String propertyName) {
+	public PropertyEditContext<RenderContext> getPropertyEditContext(Serializable bean, String propertyName) {
 		Method propertyGetter = BeanUtils.getGetter(bean.getClass(), propertyName);
 		Class<?> propertyClass = propertyGetter.getReturnType();
 		if (propertyClass == int.class || propertyClass == long.class 

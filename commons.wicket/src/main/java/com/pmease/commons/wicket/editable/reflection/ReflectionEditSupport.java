@@ -3,8 +3,9 @@ package com.pmease.commons.wicket.editable.reflection;
 import java.io.Serializable;
 
 import com.pmease.commons.editable.AbstractReflectionEditSupport;
+import com.pmease.commons.wicket.editable.RenderContext;
 
-public class ReflectionEditSupport extends AbstractReflectionEditSupport {
+public class ReflectionEditSupport extends AbstractReflectionEditSupport<RenderContext> {
 
 	@Override
 	protected ReflectionBeanEditContext newReflectionBeanEditContext(Serializable bean) {

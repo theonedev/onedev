@@ -9,11 +9,11 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.loader.ImplementationRegistry;
 
 @SuppressWarnings("serial")
-public abstract class AbstractPolymorphicListPropertyEditContext extends PropertyEditContext {
+public abstract class AbstractPolymorphicListPropertyEditContext<T> extends PropertyEditContext<T> {
 
 	private final List<Class<?>> implementations = new ArrayList<Class<?>>();
 
-	private List<BeanEditContext> elementContexts;
+	private List<BeanEditContext<T>> elementContexts;
 
 	public AbstractPolymorphicListPropertyEditContext(Serializable bean, String propertyName) {
 		super(bean, propertyName);
@@ -31,10 +31,11 @@ public abstract class AbstractPolymorphicListPropertyEditContext extends Propert
 		propertyValueChanged(getPropertyValue());
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void propertyValueChanged(Serializable propertyValue) {
 		if (propertyValue != null) {
 			EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
-			elementContexts = new ArrayList<BeanEditContext>();
+			elementContexts = new ArrayList<BeanEditContext<T>>();
 			for (Serializable element: getPropertyValue()) {
 				elementContexts.add(registry.getBeanEditContext(element));
 			}
@@ -49,7 +50,7 @@ public abstract class AbstractPolymorphicListPropertyEditContext extends Propert
 		propertyValueChanged(propertyValue);
 	}
 
-	public List<BeanEditContext> getElementContexts() {
+	public List<BeanEditContext<T>> getElementContexts() {
 		return elementContexts;
 	}
 	
@@ -59,6 +60,7 @@ public abstract class AbstractPolymorphicListPropertyEditContext extends Propert
 		return (ArrayList<Serializable>) super.getPropertyValue();
 	}
 
+	@SuppressWarnings("unchecked")
 	public void addElement(int index, Serializable element) {
 		List<Serializable> propertyValue = getPropertyValue();
 		Preconditions.checkNotNull(propertyValue);
@@ -80,7 +82,7 @@ public abstract class AbstractPolymorphicListPropertyEditContext extends Propert
 		super.doValidation();
 		
 		if (elementContexts != null) {
-			for (BeanEditContext each: elementContexts)
+			for (BeanEditContext<T> each: elementContexts)
 				each.validate();
 		}
 	}
@@ -91,7 +93,7 @@ public abstract class AbstractPolymorphicListPropertyEditContext extends Propert
 		validationErrors.addAll(getValidationErrors());
 		if (elementContexts != null) {
 			for (int i=0; i<elementContexts.size(); i++) {
-				BeanEditContext elementContext = elementContexts.get(i);
+				BeanEditContext<T> elementContext = elementContexts.get(i);
 				for (ValidationError eachError: elementContext.findValidationErrors()) {
 					validationErrors.add(new ValidationError("[" + i + "]", eachError));
 				}

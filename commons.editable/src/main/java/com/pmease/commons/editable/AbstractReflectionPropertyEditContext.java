@@ -7,9 +7,9 @@ import java.util.List;
 import com.pmease.commons.loader.AppLoader;
 
 @SuppressWarnings("serial")
-public abstract class AbstractReflectionPropertyEditContext extends PropertyEditContext {
+public abstract class AbstractReflectionPropertyEditContext<T> extends PropertyEditContext<T> {
 
-	private BeanEditContext valueContext;
+	private BeanEditContext<T> valueContext;
 	
 	public AbstractReflectionPropertyEditContext(Serializable bean, String propertyName) {
 		super(bean, propertyName);
@@ -17,10 +17,11 @@ public abstract class AbstractReflectionPropertyEditContext extends PropertyEdit
 		propertyValueChanged(getPropertyValue());
 	}
 
-	public BeanEditContext getValueContext() {
+	public BeanEditContext<T> getValueContext() {
 		return valueContext;
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void propertyValueChanged(Serializable propertyValue) {
 		if (propertyValue != null) {
 			EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);

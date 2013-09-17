@@ -2,7 +2,6 @@ package com.pmease.commons.wicket.editable.nuemric;
 
 import java.io.Serializable;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
@@ -10,10 +9,10 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.commons.editable.PropertyEditContext;
-import com.pmease.commons.wicket.editable.RenderableEditContext;
+import com.pmease.commons.wicket.editable.RenderContext;
 
 @SuppressWarnings("serial")
-public class NumericPropertyEditContext extends PropertyEditContext implements RenderableEditContext {
+public class NumericPropertyEditContext extends PropertyEditContext<RenderContext> {
 
 	private final IModel<String> inputModel;
 	
@@ -27,8 +26,8 @@ public class NumericPropertyEditContext extends PropertyEditContext implements R
 	}
 
 	@Override
-	public Component renderForEdit(String componentId) {
-		return new TextField<String>(componentId, inputModel) {
+	public void renderForEdit(RenderContext renderContext) {
+		renderContext.getContainer().add(new TextField<String>(renderContext.getComponentId(), inputModel) {
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
@@ -37,16 +36,16 @@ public class NumericPropertyEditContext extends PropertyEditContext implements R
 				super.onComponentTag(tag);
 			}
 
-		};
+		});
 	}
 
 	@Override
-	public Component renderForView(String componentId) {
+	public void renderForView(RenderContext renderContext) {
 		Object propertyValue = getPropertyValue();
 		if (propertyValue != null)
-			return new Label(componentId, propertyValue.toString());
+			renderContext.getContainer().add(new Label(renderContext.getComponentId(), propertyValue.toString()));
 		else
-			return new Label(componentId);
+			renderContext.getContainer().add(new Label(renderContext.getComponentId()));
 	}
 
 	@Override

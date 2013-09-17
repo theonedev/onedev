@@ -9,11 +9,11 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.loader.ImplementationRegistry;
 
 @SuppressWarnings("serial")
-public abstract class AbstractPolymorphicPropertyEditContext extends PropertyEditContext {
+public abstract class AbstractPolymorphicPropertyEditContext<T> extends PropertyEditContext<T> {
 
 	private final List<Class<?>> implementations = new ArrayList<Class<?>>();
 	
-	private BeanEditContext valueContext;
+	private BeanEditContext<T> valueContext;
 
 	public AbstractPolymorphicPropertyEditContext(Serializable bean, String propertyName) {
 		super(bean, propertyName);
@@ -35,6 +35,7 @@ public abstract class AbstractPolymorphicPropertyEditContext extends PropertyEdi
 		return implementations;
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected void propertyValueChanged(Serializable propertyValue) {
 		if (propertyValue != null) {
 			EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
@@ -51,7 +52,7 @@ public abstract class AbstractPolymorphicPropertyEditContext extends PropertyEdi
 		propertyValueChanged(propertyValue);
 	}
 
-	public BeanEditContext getValueContext() {
+	public BeanEditContext<T> getValueContext() {
 		return valueContext;
 	}
 

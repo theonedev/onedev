@@ -110,6 +110,7 @@ public class EditableUtils {
 		return null;
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static void validate(Serializable bean) {
 		EditContext context = AppLoader.getInstance(EditSupportRegistry.class).getBeanEditContext(bean);
 		context.validate();
@@ -124,5 +125,5 @@ public class EditableUtils {
 			throw new ValidationException(buffer.toString());
 		}
 	}
-	
+
 }

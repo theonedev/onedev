@@ -7,7 +7,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 @SuppressWarnings("serial")
-public abstract class AbstractEditContext implements EditContext {
+public abstract class AbstractEditContext<T> implements EditContext<T> {
 
 	private List<ValidationError> validationErrors = new ArrayList<ValidationError>();
 	

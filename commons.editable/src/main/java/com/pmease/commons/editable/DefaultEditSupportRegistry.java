@@ -9,6 +9,7 @@ import javax.inject.Singleton;
 import com.pmease.commons.util.GeneralException;
 
 @Singleton
+@SuppressWarnings("rawtypes")
 public class DefaultEditSupportRegistry implements EditSupportRegistry {
 
 	private final Set<EditSupport> editSupports;

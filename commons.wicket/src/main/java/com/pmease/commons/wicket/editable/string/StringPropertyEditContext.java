@@ -2,25 +2,24 @@ package com.pmease.commons.wicket.editable.string;
 
 import java.io.Serializable;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.editable.PropertyEditContext;
-import com.pmease.commons.wicket.editable.RenderableEditContext;
+import com.pmease.commons.wicket.editable.RenderContext;
 
 @SuppressWarnings("serial")
-public class StringPropertyEditContext extends PropertyEditContext implements RenderableEditContext {
+public class StringPropertyEditContext extends PropertyEditContext<RenderContext> {
 
 	public StringPropertyEditContext(Serializable bean, String propertyName) {
 		super(bean, propertyName);
 	}
 
 	@Override
-	public Component renderForEdit(String componentId) {
-		return new TextField<String>(componentId, new IModel<String>() {
+	public void renderForEdit(RenderContext renderContext) {
+		renderContext.getContainer().add(new TextField<String>(renderContext.getComponentId(), new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -45,12 +44,12 @@ public class StringPropertyEditContext extends PropertyEditContext implements Re
 				super.onComponentTag(tag);
 			}
 			
-		};
+		});
 	}
 
 	@Override
-	public Component renderForView(String componentId) {
-		return new Label(componentId, (String) getPropertyValue());
+	public void renderForView(RenderContext renderContext) {
+		renderContext.getContainer().add(new Label(renderContext.getComponentId(), (String) getPropertyValue()));
 	}
 
 }

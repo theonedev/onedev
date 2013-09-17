@@ -7,10 +7,10 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.BeanUtils;
 import com.pmease.commons.util.ClassUtils;
 
-public abstract class AbstractReflectionEditSupport implements EditSupport {
+public abstract class AbstractReflectionEditSupport<T> implements EditSupport<T> {
 	
 	@Override
-	public BeanEditContext getBeanEditContext(Serializable bean) {
+	public BeanEditContext<T> getBeanEditContext(Serializable bean) {
 		if (bean.getClass().getAnnotation(Editable.class) != null && ClassUtils.isConcrete(bean.getClass()))
 			return newReflectionBeanEditContext(bean);
 		else
@@ -18,7 +18,7 @@ public abstract class AbstractReflectionEditSupport implements EditSupport {
 	}
 
 	@Override
-	public PropertyEditContext getPropertyEditContext(Serializable bean, String propertyName) {
+	public PropertyEditContext<T> getPropertyEditContext(Serializable bean, String propertyName) {
 		Method propertyGetter = BeanUtils.getGetter(bean.getClass(), propertyName);
 		Class<?> propertyClass = propertyGetter.getReturnType();
 		if (propertyClass.getAnnotation(Editable.class) != null && ClassUtils.isConcrete(propertyClass)) {
@@ -28,8 +28,8 @@ public abstract class AbstractReflectionEditSupport implements EditSupport {
 		}
 	}
 
-	protected abstract AbstractReflectionBeanEditContext newReflectionBeanEditContext(Serializable bean);
+	protected abstract AbstractReflectionBeanEditContext<T> newReflectionBeanEditContext(Serializable bean);
 	
-	protected abstract AbstractReflectionPropertyEditContext newReflectionPropertyEditContext(Serializable bean, String propertyName);
+	protected abstract AbstractReflectionPropertyEditContext<T> newReflectionPropertyEditContext(Serializable bean, String propertyName);
 
 }

@@ -11,7 +11,7 @@ import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.editable.ValidationError;
 import com.pmease.commons.wicket.editable.EditableResourceReference;
-import com.pmease.commons.wicket.editable.RenderableEditContext;
+import com.pmease.commons.wicket.editable.RenderContext;
 
 @SuppressWarnings("serial")
 public class ReflectionBeanEditor extends Panel {
@@ -28,13 +28,13 @@ public class ReflectionBeanEditor extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ListView<PropertyEditContext>("properties", editContext.getPropertyContexts()) {
+		add(new ListView<PropertyEditContext<RenderContext>>("properties", editContext.getPropertyContexts()) {
 
 			@Override
-			protected void populateItem(ListItem<PropertyEditContext> item) {
-				final PropertyEditContext propertyContext = item.getModelObject();
+			protected void populateItem(ListItem<PropertyEditContext<RenderContext>> item) {
+				final PropertyEditContext<RenderContext> propertyContext = item.getModelObject();
 				item.add(new Label("name", EditableUtils.getName(propertyContext.getPropertyGetter())));
-				item.add(((RenderableEditContext)propertyContext).renderForEdit("value"));
+				propertyContext.renderForEdit(new RenderContext(item, "value"));
 				
 				item.add(new ListView<ValidationError>("propertyValidationErrors", propertyContext.getValidationErrors()) {
 

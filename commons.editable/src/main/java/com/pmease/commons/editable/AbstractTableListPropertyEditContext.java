@@ -13,11 +13,11 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.BeanUtils;
 
 @SuppressWarnings("serial")
-public abstract class AbstractTableListPropertyEditContext extends PropertyEditContext {
+public abstract class AbstractTableListPropertyEditContext<T> extends PropertyEditContext<T> {
 
 	private Class<?> elementClass;
 	
-	private List<List<PropertyEditContext>> elementContexts;
+	private List<List<PropertyEditContext<T>>> elementContexts;
 	
 	private transient List<Method> elementPropertyGetters;
 	
@@ -50,7 +50,7 @@ public abstract class AbstractTableListPropertyEditContext extends PropertyEditC
 	
 	protected void propertyValueChanged(Serializable propertyValue) {
 		if (propertyValue != null) {
-			elementContexts = new ArrayList<List<PropertyEditContext>>();
+			elementContexts = new ArrayList<List<PropertyEditContext<T>>>();
 			for (Serializable element: getPropertyValue()) {
 				elementContexts.add(createElementPropertyContexts(element));
 			}
@@ -65,13 +65,14 @@ public abstract class AbstractTableListPropertyEditContext extends PropertyEditC
 		propertyValueChanged(propertyValue);
 	}
 
-	public List<List<PropertyEditContext>> getElementContexts() {
+	public List<List<PropertyEditContext<T>>> getElementContexts() {
 		return elementContexts;
 	}
 	
-	private List<PropertyEditContext> createElementPropertyContexts(Serializable element) {
+	@SuppressWarnings("unchecked")
+	private List<PropertyEditContext<T>> createElementPropertyContexts(Serializable element) {
 		EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
-		List<PropertyEditContext> propertyContexts = new ArrayList<PropertyEditContext>();
+		List<PropertyEditContext<T>> propertyContexts = new ArrayList<PropertyEditContext<T>>();
 		for (Method elementPropertyGetter: getElementPropertyGetters()) {
 			String elementPropertyName = BeanUtils.getPropertyName(elementPropertyGetter);
 			propertyContexts.add(registry.getPropertyEditContext(element, elementPropertyName));
@@ -106,9 +107,9 @@ public abstract class AbstractTableListPropertyEditContext extends PropertyEditC
 		
 		if (elementContexts != null) {
 			for (int i=0; i<elementContexts.size(); i++) {
-				List<PropertyEditContext> elementPropertyContexts = elementContexts.get(i);
+				List<PropertyEditContext<T>> elementPropertyContexts = elementContexts.get(i);
 				Set<String> propertyNames = new HashSet<String>();
-				for (PropertyEditContext elementPropertyContext: elementPropertyContexts) {
+				for (PropertyEditContext<T> elementPropertyContext: elementPropertyContexts) {
 					elementPropertyContext.validate();
 					if (elementPropertyContext.findValidationErrors().isEmpty())
 						propertyNames.add(elementPropertyContext.getPropertyName());
@@ -144,8 +145,8 @@ public abstract class AbstractTableListPropertyEditContext extends PropertyEditC
 		
 		if (elementContexts != null) {
 			for (int i=0; i<elementContexts.size(); i++) {
-				List<PropertyEditContext> elementPropertyContexts = elementContexts.get(i);
-				for (PropertyEditContext elementPropertyContext: elementPropertyContexts) {
+				List<PropertyEditContext<T>> elementPropertyContexts = elementContexts.get(i);
+				for (PropertyEditContext<T> elementPropertyContext: elementPropertyContexts) {
 					for (ValidationError eachError: elementPropertyContext.findValidationErrors()) {
 						String propertyPath = "[" + i + "]." + elementPropertyContext.getPropertyName();
 						validationErrors.add(new ValidationError(propertyPath, eachError));

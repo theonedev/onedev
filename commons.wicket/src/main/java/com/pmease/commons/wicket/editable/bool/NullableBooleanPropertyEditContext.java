@@ -2,7 +2,6 @@ package com.pmease.commons.wicket.editable.bool;
 
 import java.io.Serializable;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -10,19 +9,19 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.util.EasyList;
-import com.pmease.commons.wicket.editable.RenderableEditContext;
+import com.pmease.commons.wicket.editable.RenderContext;
 
 @SuppressWarnings("serial")
-public class NullableBooleanPropertyEditContext extends PropertyEditContext implements RenderableEditContext {
+public class NullableBooleanPropertyEditContext extends PropertyEditContext<RenderContext> {
 
 	public NullableBooleanPropertyEditContext(Serializable bean, String propertyName) {
 		super(bean, propertyName);
 	}
 
 	@Override
-	public Component renderForEdit(String componentId) {
+	public void renderForEdit(RenderContext renderContext) {
 		
-		DropDownChoice<String> dropDownChoice = new DropDownChoice<String>(componentId, new IModel<String>() {
+		DropDownChoice<String> dropDownChoice = new DropDownChoice<String>(renderContext.getComponentId(), new IModel<String>() {
 
 			public void detach() {
 			}
@@ -60,19 +59,19 @@ public class NullableBooleanPropertyEditContext extends PropertyEditContext impl
 		
 		dropDownChoice.setNullValid(true);
 		
-		return dropDownChoice;
+		renderContext.getContainer().add(dropDownChoice);
 	}
 
 	@Override
-	public Component renderForView(String componentId) {
+	public void renderForView(RenderContext renderContext) {
 		Boolean propertyValue = (Boolean) getPropertyValue();
 		if (propertyValue != null) {
 			if (propertyValue)
-				return new Label(componentId, "yes");
+				renderContext.getContainer().add(new Label(renderContext.getComponentId(), "yes"));
 			else
-				return new Label(componentId, "no");
+				renderContext.getContainer().add(new Label(renderContext.getComponentId(), "no"));
 		} else {
-			return new Label(componentId);
+			renderContext.getContainer().add(new Label(renderContext.getComponentId()));
 		}
 	}
 
