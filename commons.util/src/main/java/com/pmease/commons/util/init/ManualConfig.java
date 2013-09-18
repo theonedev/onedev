@@ -1,4 +1,4 @@
-package com.pmease.gitop.core;
+package com.pmease.commons.util.init;
 
 import java.io.Serializable;
 

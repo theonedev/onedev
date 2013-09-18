@@ -1,5 +1,7 @@
 package com.pmease.gitop.core.manager.impl;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,10 +11,11 @@ import javax.inject.Singleton;
 import org.hibernate.criterion.Order;
 
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.gitop.core.ManualConfig;
-import com.pmease.gitop.core.Skippable;
+import com.pmease.commons.loader.ManagedSerializedForm;
+import com.pmease.commons.util.init.ManualConfig;
+import com.pmease.commons.util.init.Skippable;
 import com.pmease.gitop.core.manager.ConfigManager;
-import com.pmease.gitop.core.manager.InitManager;
+import com.pmease.gitop.core.manager.DataManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.model.Config;
 import com.pmease.gitop.core.model.Config.Key;
@@ -21,14 +24,14 @@ import com.pmease.gitop.core.setting.MailSetting;
 import com.pmease.gitop.core.setting.StorageSetting;
 
 @Singleton
-public class DefaultInitManager implements InitManager {
+public class DefaultDataManager implements DataManager, Serializable {
 
 	private final UserManager userManager;
 	
 	private final ConfigManager configManager;
 	
 	@Inject
-	public DefaultInitManager(UserManager userManager, ConfigManager configManager) {
+	public DefaultDataManager(UserManager userManager, ConfigManager configManager) {
 		this.userManager = userManager;
 		this.configManager = configManager;
 	}
@@ -98,5 +101,9 @@ public class DefaultInitManager implements InitManager {
 		
 		return manualConfigs;
 	}
+
+	public Object writeReplace() throws ObjectStreamException {
+		return new ManagedSerializedForm(DataManager.class);
+	}	
 	
 }

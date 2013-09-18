@@ -1,5 +1,7 @@
 package com.pmease.commons.hibernate.dao;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.List;
 
 import org.hibernate.Criteria;
@@ -13,10 +15,11 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.Transactional;
+import com.pmease.commons.loader.ManagedSerializedForm;
 
 @Singleton
 @SuppressWarnings("unchecked")
-public class DefaultGeneralDao implements GeneralDao {
+public class DefaultGeneralDao implements GeneralDao, Serializable {
 
 	private final Provider<SessionFactory> sessionFactoryProvider;
 	
@@ -104,4 +107,8 @@ public class DefaultGeneralDao implements GeneralDao {
 		return (Integer) criteria.uniqueResult();
 	}
 	
+	public Object writeReplace() throws ObjectStreamException {
+		return new ManagedSerializedForm(GeneralDao.class);
+	}	
+
 }

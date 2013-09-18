@@ -1,4 +1,4 @@
-package com.pmease.gitop.core;
+package com.pmease.commons.util.init;
 
 public interface Skippable {
 	void skip();

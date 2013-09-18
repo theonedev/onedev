@@ -7,7 +7,6 @@ import com.google.inject.name.Names;
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.jetty.ServerConfigurator;
 import com.pmease.commons.jetty.ServletContextConfigurator;
-import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.loader.AppName;
 import com.pmease.commons.util.FileUtils;
@@ -19,7 +18,7 @@ public class ProductModule extends AbstractPluginModule {
 	protected void configure() {
 		super.configure();
 		
-		bindConstant().annotatedWith(AppName.class).to(Product.NAME);
+		bindConstant().annotatedWith(AppName.class).to("Gitop");
 		
 		Properties hibernateProps = FileUtils.loadProperties(
 				new File(Bootstrap.installDir, "conf/hibernate.properties")); 
@@ -33,11 +32,6 @@ public class ProductModule extends AbstractPluginModule {
 		
 		contribute(ServerConfigurator.class, GitopServerConfigurator.class);
 		contribute(ServletContextConfigurator.class, GitopServletContextConfigurator.class);
-	}
-
-	@Override
-	protected Class<? extends AbstractPlugin> getPluginClass() {
-		return Product.class;
 	}
 
 }

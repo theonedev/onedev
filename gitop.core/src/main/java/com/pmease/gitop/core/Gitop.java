@@ -1,80 +1,64 @@
 package com.pmease.gitop.core;
 
-import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.loader.AppName;
-import com.pmease.gitop.core.manager.InitManager;
+import com.pmease.commons.util.init.InitStage;
+import com.pmease.commons.util.init.ManualConfig;
+import com.pmease.gitop.core.manager.DataManager;
 import com.pmease.gitop.core.setting.ServerConfig;
 
 public class Gitop extends AbstractPlugin {
 
 	private static final Logger logger = LoggerFactory.getLogger(Gitop.class);
 	
-	private final InitManager initManager;
+	private final DataManager dataManager;
 	
 	private final ServerConfig serverConfig;
 
 	private final String appName;
 	
-	private List<ManualConfig> manualConfigs;
+	private volatile InitStage initStage;
 	
 	@Inject
-	public Gitop(ServerConfig serverConfig, InitManager initManager, @AppName String appName) {
-		this.initManager = initManager;
+	public Gitop(ServerConfig serverConfig, DataManager dataManager, @AppName String appName) {
+		this.dataManager = dataManager;
 		this.serverConfig = serverConfig;
 		this.appName = appName;
+		
+		initStage = new InitStage("Server is Starting...");
 	}
 	
-	@SuppressWarnings("serial")
 	@Override
 	public void start() {
-		manualConfigs = initManager.init();
-
-		if (!manualConfigs.isEmpty()) synchronized (manualConfigs) {
-
-			final ManualConfig lastConfig = manualConfigs.remove(manualConfigs.size()-1);
+		List<ManualConfig> manualConfigs = dataManager.init();
+		
+		if (!manualConfigs.isEmpty()) {
+			logger.warn("Please set up the server at " + Gitop.getInstance().guessServerUrl() + ".");
+			initStage = new InitStage("Server Setup", manualConfigs);
 			
-			manualConfigs.add(new ManualConfig(lastConfig.getSetting()) {
-
-				@Override
-				public Skippable getSkippable() {
-					return lastConfig.getSkippable();
-				}
-
-				@Override
-				public void complete() {
-					lastConfig.complete();
-					synchronized (manualConfigs) {
-						manualConfigs.notify();
-					}
-				}
-				
-			});
-			
-			logger.warn("Please point your browser to '" + guessServerUrl() + "' to set up the server.");
-			
-			try {
-				manualConfigs.wait();
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}
-			
-			manualConfigs.clear();
+			initStage.waitFor();
 		}
 	}
 	
+	@Override
+	public void postStart() {
+		initStage = null;
+		
+		logger.info("Server is ready at " + guessServerUrl() + ".");
+	}
+
 	public String guessServerUrl() {
 		String hostName;
 		try {
@@ -94,17 +78,22 @@ public class Gitop extends AbstractPlugin {
 	}
 	
 	/**
-	 * This method can be called from different UI threads, so we clone manual configs to 
+	 * This method can be called from different UI threads, so we clone initStage to 
 	 * make it thread-safe.
 	 * <p>
 	 * @return
-	 * 			cloned list of manual configs
+	 * 			cloned initStage, or <tt>null</tt> if system initialization is completed
 	 */
-	@SuppressWarnings("unchecked")
-	public List<ManualConfig> getManualConfigs() {
-		synchronized (manualConfigs) {
-			return (List<ManualConfig>) SerializationUtils.clone((Serializable) manualConfigs);
+	public @Nullable InitStage getInitStage() {
+		if (initStage != null) {
+			return initStage.clone();
+		} else {
+			return null;
 		}
+	}
+	
+	public boolean isReady() {
+		return initStage == null;
 	}
 	
 	public static Gitop getInstance() {
