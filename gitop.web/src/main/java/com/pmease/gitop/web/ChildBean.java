@@ -10,7 +10,7 @@ import com.pmease.commons.editable.annotation.Editable;
 
 @SuppressWarnings("serial")
 @Editable
-public class ChildBean implements Serializable, Validatable<Void> {
+public abstract class ChildBean implements Serializable, Validatable {
 	private String childName;
 	
 	private Boolean childMarried;
@@ -35,7 +35,7 @@ public class ChildBean implements Serializable, Validatable<Void> {
 	}
 
 	@Override
-	public void validate(EditContext<Void> editContext) {
+	public void validate(EditContext editContext) {
 		if (!editContext.hasError("childName", true)) {
 			if (childName.startsWith("child") && childMarried) {
 				editContext.error("child can not marry.");

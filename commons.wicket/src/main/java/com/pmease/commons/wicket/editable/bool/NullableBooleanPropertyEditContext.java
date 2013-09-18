@@ -11,19 +11,17 @@ import org.apache.wicket.model.IModel;
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.util.EasyList;
-import com.pmease.commons.wicket.editable.RenderContext;
 
 @SuppressWarnings("serial")
-public class NullableBooleanPropertyEditContext extends PropertyEditContext<RenderContext> {
+public class NullableBooleanPropertyEditContext extends PropertyEditContext {
 
 	public NullableBooleanPropertyEditContext(Serializable bean, String propertyName) {
 		super(bean, propertyName);
 	}
 
 	@Override
-	public void renderForEdit(RenderContext renderContext) {
-		
-		DropDownChoice<String> dropDownChoice = new DropDownChoice<String>(renderContext.getComponentId(), new IModel<String>() {
+	public Object renderForEdit(Object renderParam) {
+		DropDownChoice<String> dropDownChoice = new DropDownChoice<String>((String) renderParam, new IModel<String>() {
 
 			public void detach() {
 			}
@@ -62,24 +60,24 @@ public class NullableBooleanPropertyEditContext extends PropertyEditContext<Rend
 		
 		dropDownChoice.setNullValid(true);
 		
-		renderContext.getContainer().add(dropDownChoice);
+		return dropDownChoice;
 	}
 
 	@Override
-	public void renderForView(RenderContext renderContext) {
+	public Object renderForView(Object renderParam) {
 		Boolean propertyValue = (Boolean) getPropertyValue();
 		if (propertyValue != null) {
 			if (propertyValue)
-				renderContext.getContainer().add(new Label(renderContext.getComponentId(), "yes"));
+				return new Label((String) renderParam, "yes");
 			else
-				renderContext.getContainer().add(new Label(renderContext.getComponentId(), "no"));
+				return new Label((String) renderParam, "no");
 		} else {
-			renderContext.getContainer().add(new Label(renderContext.getComponentId()));
+			return new Label((String) renderParam, "<i>Not Defined</i>").setEscapeModelStrings(false);
 		}
 	}
 
 	@Override
-	public Map<Serializable, EditContext<RenderContext>> getChildContexts() {
+	public Map<Serializable, EditContext> getChildContexts() {
 		return null;
 	}
 

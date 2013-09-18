@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -14,7 +15,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyEditContext;
-import com.pmease.commons.wicket.editable.RenderContext;
 
 @SuppressWarnings("serial")
 public class TableListPropertyViewer extends Panel {
@@ -30,16 +30,7 @@ public class TableListPropertyViewer extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		WebMarkupContainer table = new WebMarkupContainer("table") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(editContext.getElementContexts() != null);
-			}
-			
-		};
-		table.add(new ListView<Method>("headers", new LoadableDetachableModel<List<Method>>() {
+		add(new ListView<Method>("headers", new LoadableDetachableModel<List<Method>>() {
 
 			@Override
 			protected List<Method> load() {
@@ -54,16 +45,16 @@ public class TableListPropertyViewer extends Panel {
 			}
 			
 		});
-		table.add(new ListView<List<PropertyEditContext<RenderContext>>>("rows", editContext.getElementContexts()) {
+		add(new ListView<List<PropertyEditContext>>("rows", editContext.getElementContexts()) {
 
 			@Override
-			protected void populateItem(ListItem<List<PropertyEditContext<RenderContext>>> rowItem) {
-				rowItem.add(new ListView<PropertyEditContext<RenderContext>>("columns", rowItem.getModelObject()) {
+			protected void populateItem(ListItem<List<PropertyEditContext>> rowItem) {
+				rowItem.add(new ListView<PropertyEditContext>("columns", rowItem.getModelObject()) {
 
 					@Override
-					protected void populateItem(ListItem<PropertyEditContext<RenderContext>> columnItem) {
-						EditContext<RenderContext> elementPropertyContext = columnItem.getModelObject();
-						elementPropertyContext.renderForView(new RenderContext(columnItem, "cell"));
+					protected void populateItem(ListItem<PropertyEditContext> columnItem) {
+						EditContext elementPropertyContext = columnItem.getModelObject();
+						columnItem.add((Component)elementPropertyContext.renderForView("cell"));
 					}
 					
 				});
@@ -80,9 +71,7 @@ public class TableListPropertyViewer extends Panel {
 			
 		};
 		noElements.add(AttributeModifier.append("colspan", editContext.getElementPropertyGetters().size()));
-		table.add(noElements);
-
-		add(table);
+		add(noElements);
 	}
 
 }

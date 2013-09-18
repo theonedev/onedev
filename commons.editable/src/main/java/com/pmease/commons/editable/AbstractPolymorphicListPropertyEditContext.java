@@ -11,16 +11,18 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.loader.ImplementationRegistry;
 
 @SuppressWarnings("serial")
-public abstract class AbstractPolymorphicListPropertyEditContext<T> extends PropertyEditContext<T> {
+public abstract class AbstractPolymorphicListPropertyEditContext extends PropertyEditContext {
 
 	private final List<Class<?>> implementations = new ArrayList<Class<?>>();
 
-	private List<BeanEditContext<T>> elementContexts;
+	private List<BeanEditContext> elementContexts;
 
 	public AbstractPolymorphicListPropertyEditContext(Serializable bean, String propertyName) {
 		super(bean, propertyName);
 
-		Class<?> elementBaseClass = getPropertyGetter().getReturnType();
+		Class<?> elementBaseClass = EditableUtils.getElementClass(getPropertyGetter().getGenericReturnType());
+		Preconditions.checkNotNull(elementBaseClass);
+		
 		ImplementationRegistry registry = AppLoader.getInstance(ImplementationRegistry.class);
 		implementations.addAll(registry.getImplementations(elementBaseClass));
 
@@ -33,17 +35,20 @@ public abstract class AbstractPolymorphicListPropertyEditContext<T> extends Prop
 		propertyValueChanged(getPropertyValue());
 	}
 
-	@SuppressWarnings("unchecked")
 	protected void propertyValueChanged(Serializable propertyValue) {
 		if (propertyValue != null) {
 			EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
-			elementContexts = new ArrayList<BeanEditContext<T>>();
+			elementContexts = new ArrayList<BeanEditContext>();
 			for (Serializable element: getPropertyValue()) {
 				elementContexts.add(registry.getBeanEditContext(element));
 			}
 		} else {
 			elementContexts = null;
 		}
+	}
+	
+	public List<Class<?>> getImplementations() {
+		return implementations;
 	}
 
 	@Override
@@ -52,7 +57,7 @@ public abstract class AbstractPolymorphicListPropertyEditContext<T> extends Prop
 		propertyValueChanged(propertyValue);
 	}
 
-	public List<BeanEditContext<T>> getElementContexts() {
+	public List<BeanEditContext> getElementContexts() {
 		return elementContexts;
 	}
 	
@@ -62,7 +67,6 @@ public abstract class AbstractPolymorphicListPropertyEditContext<T> extends Prop
 		return (ArrayList<Serializable>) super.getPropertyValue();
 	}
 
-	@SuppressWarnings("unchecked")
 	public void addElement(int index, Serializable element) {
 		List<Serializable> propertyValue = getPropertyValue();
 		Preconditions.checkNotNull(propertyValue);
@@ -80,8 +84,8 @@ public abstract class AbstractPolymorphicListPropertyEditContext<T> extends Prop
 	}
 
 	@Override
-	public Map<Serializable, EditContext<T>> getChildContexts() {
-		Map<Serializable, EditContext<T>> childContexts = new LinkedHashMap<Serializable, EditContext<T>>();
+	public Map<Serializable, EditContext> getChildContexts() {
+		Map<Serializable, EditContext> childContexts = new LinkedHashMap<Serializable, EditContext>();
 		if (elementContexts != null) {
 			for (int i=0; i<elementContexts.size(); i++)
 				childContexts.put(i, elementContexts.get(i));

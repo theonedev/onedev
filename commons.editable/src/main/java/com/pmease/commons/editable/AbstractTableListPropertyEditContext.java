@@ -15,11 +15,11 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.BeanUtils;
 
 @SuppressWarnings("serial")
-public abstract class AbstractTableListPropertyEditContext<T> extends PropertyEditContext<T> {
+public abstract class AbstractTableListPropertyEditContext extends PropertyEditContext {
 
 	private Class<?> elementClass;
 	
-	private List<List<PropertyEditContext<T>>> elementContexts;
+	private List<List<PropertyEditContext>> elementContexts;
 	
 	private transient List<Method> elementPropertyGetters;
 	
@@ -52,7 +52,7 @@ public abstract class AbstractTableListPropertyEditContext<T> extends PropertyEd
 	
 	protected void propertyValueChanged(Serializable propertyValue) {
 		if (propertyValue != null) {
-			elementContexts = new ArrayList<List<PropertyEditContext<T>>>();
+			elementContexts = new ArrayList<List<PropertyEditContext>>();
 			for (Serializable element: getPropertyValue()) {
 				elementContexts.add(createElementPropertyContexts(element));
 			}
@@ -67,14 +67,13 @@ public abstract class AbstractTableListPropertyEditContext<T> extends PropertyEd
 		propertyValueChanged(propertyValue);
 	}
 
-	public List<List<PropertyEditContext<T>>> getElementContexts() {
+	public List<List<PropertyEditContext>> getElementContexts() {
 		return elementContexts;
 	}
 	
-	@SuppressWarnings("unchecked")
-	private List<PropertyEditContext<T>> createElementPropertyContexts(Serializable element) {
+	private List<PropertyEditContext> createElementPropertyContexts(Serializable element) {
 		EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
-		List<PropertyEditContext<T>> propertyContexts = new ArrayList<PropertyEditContext<T>>();
+		List<PropertyEditContext> propertyContexts = new ArrayList<PropertyEditContext>();
 		for (Method elementPropertyGetter: getElementPropertyGetters()) {
 			String elementPropertyName = BeanUtils.getPropertyName(elementPropertyGetter);
 			propertyContexts.add(registry.getPropertyEditContext(element, elementPropertyName));
@@ -104,30 +103,30 @@ public abstract class AbstractTableListPropertyEditContext<T> extends PropertyEd
 	}
 
 	@Override
-	public Map<Serializable, EditContext<T>> getChildContexts() {
-		Map<Serializable, EditContext<T>> childContexts = new LinkedHashMap<Serializable, EditContext<T>>();
+	public Map<Serializable, EditContext> getChildContexts() {
+		Map<Serializable, EditContext> childContexts = new LinkedHashMap<Serializable, EditContext>();
 		if (elementContexts != null) {
 			for (int i=0; i<elementContexts.size(); i++) {
 				final String errorMessagePrefix = "row " + (i+1) + ": ";
-				final List<PropertyEditContext<T>> elementPropertyContexts = elementContexts.get(i);
+				final List<PropertyEditContext> elementPropertyContexts = elementContexts.get(i);
 				
-				EditContext<T> elementContext = new AbstractEditContext<T>(getPropertyValue().get(i)) {
+				EditContext elementContext = new AbstractEditContext(getPropertyValue().get(i)) {
 
 					@Override
-					public Map<Serializable, EditContext<T>> getChildContexts() {
-						Map<Serializable, EditContext<T>> childContexts = new LinkedHashMap<Serializable, EditContext<T>>();
-						for (PropertyEditContext<T> each: elementPropertyContexts)
+					public Map<Serializable, EditContext> getChildContexts() {
+						Map<Serializable, EditContext> childContexts = new LinkedHashMap<Serializable, EditContext>();
+						for (PropertyEditContext each: elementPropertyContexts)
 							childContexts.put(each.getPropertyName(), each);
 						return childContexts;
 					}
 
 					@Override
-					public void renderForEdit(T renderContext) {
+					public Object renderForEdit(Object renderParam) {
 						throw new UnsupportedOperationException();
 					}
 
 					@Override
-					public void renderForView(T renderContext) {
+					public Object renderForView(Object renderParam) {
 						throw new UnsupportedOperationException();
 					}
 
@@ -140,7 +139,7 @@ public abstract class AbstractTableListPropertyEditContext<T> extends PropertyEd
 						}
 						
 						if (recursive) {
-							for (Map.Entry<Serializable, EditContext<T>> eachEntry: getChildContexts().entrySet()) {
+							for (Map.Entry<Serializable, EditContext> eachEntry: getChildContexts().entrySet()) {
 								for (ValidationError eachError: eachEntry.getValue().getValidationErrors(true)) {
 									PropertyPath newPath = eachError.getPropertyPath().prepend(eachEntry.getKey());
 									validationErrors.add(new ValidationError(newPath, eachError.getErrorMessage()));
@@ -155,7 +154,6 @@ public abstract class AbstractTableListPropertyEditContext<T> extends PropertyEd
 						AbstractTableListPropertyEditContext.this.error(errorMessagePrefix + errorMessage);
 					}
 
-					@SuppressWarnings("unchecked")
 					@Override
 					public void doValidation() {
 						for (Iterator<String> it = AbstractTableListPropertyEditContext.this.validationErrorMessages.iterator(); it.hasNext();) {
@@ -164,7 +162,7 @@ public abstract class AbstractTableListPropertyEditContext<T> extends PropertyEd
 						}
 						
 						if (getBean() instanceof Validatable) {
-							((Validatable<T>)getBean()).validate(this);
+							((Validatable)getBean()).validate(this);
 						}
 					}
 

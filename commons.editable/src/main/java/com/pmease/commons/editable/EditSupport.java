@@ -5,10 +5,10 @@ import java.io.Serializable;
 import com.pmease.commons.loader.ExtensionPoint;
 
 @ExtensionPoint
-public interface EditSupport<T> {
+public interface EditSupport {
 
-	BeanEditContext<T> getBeanEditContext(Serializable bean);
+	BeanEditContext getBeanEditContext(Serializable bean);
 
-	PropertyEditContext<T> getPropertyEditContext(Serializable bean, String propertyName);
+	PropertyEditContext getPropertyEditContext(Serializable bean, String propertyName);
 
 }

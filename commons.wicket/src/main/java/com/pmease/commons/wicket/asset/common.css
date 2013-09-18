@@ -111,3 +111,19 @@ table td, table th {
 .required {
 	color: #B94A48;
 }
+
+.left-spacing {
+	margin-left: 10px;
+}
+.right-spacing {
+	margin-right: 10px;
+}
+.top-spacing {
+	margin-top: 10px;
+}
+.bottom-spacing {
+	margin-bottom: 10px;
+}
+.spacing {
+	margin: 10px;
+}

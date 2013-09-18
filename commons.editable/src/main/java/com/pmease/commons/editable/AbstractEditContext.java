@@ -9,7 +9,7 @@ import java.util.Map;
 import com.pmease.commons.util.GeneralException;
 
 @SuppressWarnings("serial")
-public abstract class AbstractEditContext<T> implements EditContext<T> {
+public abstract class AbstractEditContext implements EditContext {
 
 	protected List<String> validationErrorMessages = new ArrayList<String>();
 	
@@ -31,7 +31,7 @@ public abstract class AbstractEditContext<T> implements EditContext<T> {
 		}
 		
 		if (recursive && getChildContexts() != null) {
-			for (Map.Entry<Serializable, EditContext<T>> eachEntry: getChildContexts().entrySet()) {
+			for (Map.Entry<Serializable, EditContext> eachEntry: getChildContexts().entrySet()) {
 				for (ValidationError eachError: eachEntry.getValue().getValidationErrors(true)) {
 					PropertyPath newPath = eachError.getPropertyPath().prepend(eachEntry.getKey());
 					validationErrors.add(new ValidationError(newPath, eachError.getErrorMessage()));
@@ -45,7 +45,7 @@ public abstract class AbstractEditContext<T> implements EditContext<T> {
 	public void validate() {
 		validationErrorMessages.clear();
 		if (getChildContexts() != null) {
-			for (EditContext<T> each: getChildContexts().values())
+			for (EditContext each: getChildContexts().values())
 				each.validate();
 		}
 		
@@ -60,9 +60,9 @@ public abstract class AbstractEditContext<T> implements EditContext<T> {
 	}
 
 	@Override
-	public EditContext<T> getChildContext(Serializable propertyName) {
+	public EditContext getChildContext(Serializable propertyName) {
 		if (getChildContexts() != null) {
-			EditContext<T> childContext = getChildContexts().get(propertyName);
+			EditContext childContext = getChildContexts().get(propertyName);
 			if (childContext != null)
 				return childContext;
 		}
@@ -72,7 +72,7 @@ public abstract class AbstractEditContext<T> implements EditContext<T> {
 
 	@Override
 	public boolean hasError(Serializable propertyName, boolean recursive) {
-		EditContext<T> childContext = getChildContext(propertyName);
+		EditContext childContext = getChildContext(propertyName);
 		return !childContext.getValidationErrors(recursive).isEmpty();
 	}
 

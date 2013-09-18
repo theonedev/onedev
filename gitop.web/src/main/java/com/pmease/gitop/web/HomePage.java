@@ -2,6 +2,7 @@ package com.pmease.gitop.web;
 
 import java.util.ArrayList;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.feedback.ContainerFeedbackMessageFilter;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -13,7 +14,6 @@ import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.ValidationError;
 import com.pmease.commons.wicket.asset.CommonResourceReference;
 import com.pmease.commons.wicket.editable.EditHelper;
-import com.pmease.commons.wicket.editable.RenderContext;
 
 @SuppressWarnings("serial")
 public class HomePage extends WebPage {
@@ -22,13 +22,15 @@ public class HomePage extends WebPage {
 	
 	static {
 		bean.setChilds(new ArrayList<ChildBean>());
+		bean.getChilds().add(new TimBean());
+		bean.getChilds().add(new TinaBean());
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		final EditContext<RenderContext> editContext = EditHelper.getContext(bean);
+		final EditContext editContext = EditHelper.getContext(bean);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -44,7 +46,7 @@ public class HomePage extends WebPage {
 		};
 		add(new FeedbackPanel("feedback", new ContainerFeedbackMessageFilter(form)));
 		
-		editContext.renderForView(new RenderContext(form, "editor"));
+		form.add((Component)editContext.renderForView("editor"));
 		
 		add(form);
 	}

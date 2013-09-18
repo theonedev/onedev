@@ -4,15 +4,15 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-public interface EditContext<T> extends Serializable {
+public interface EditContext extends Serializable {
 	
 	void validate();
 	
 	List<ValidationError> getValidationErrors(boolean recursive);
 	
-	Map<Serializable, EditContext<T>> getChildContexts();
+	Map<Serializable, EditContext> getChildContexts();
 	
-	EditContext<T> getChildContext(Serializable propertyName);
+	EditContext getChildContext(Serializable propertyName);
 	
 	boolean hasError(Serializable propertyName, boolean recursive);
 	
@@ -20,8 +20,8 @@ public interface EditContext<T> extends Serializable {
 	
 	void error(String errorMessage);
 	
-	void renderForEdit(T renderContext);
+	Object renderForEdit(Object renderParam);
 	
-	void renderForView(T renderContext);
+	Object renderForView(Object renderParam);
 	
 }

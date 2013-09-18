@@ -1,7 +1,7 @@
 package com.pmease.commons.editable;
 
-public interface Validatable<T> {
+public interface Validatable {
 
-	void validate(EditContext<T> editContext);
+	void validate(EditContext editContext);
 
 }

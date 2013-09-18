@@ -9,7 +9,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.editable.EditContext;
-import com.pmease.commons.wicket.editable.RenderContext;
 
 @SuppressWarnings("serial")
 public class ReflectionPropertyEditor extends Panel {
@@ -58,28 +57,29 @@ public class ReflectionPropertyEditor extends Panel {
 
 				@Override
 				protected void onUpdate(AjaxRequestTarget target) {
-					remove(VALUE_EDITOR_ID);
-					renderValueEditor();
-					target.add(get(VALUE_EDITOR_ID));
+					Component valueEditor = newValueEditor();
+					replace(valueEditor);
+					target.add(valueEditor);
 				}
 				
 			}));
 			
 		}
 
-		renderValueEditor();
+		add(newValueEditor());
 	}
 	
-	private void renderValueEditor() {
-		EditContext<RenderContext> valueContext = editContext.getValueContext();
+	private Component newValueEditor() {
+		EditContext valueContext = editContext.getValueContext();
+		Component valueEditor;
 		if (valueContext != null) {
-			valueContext.renderForEdit(new RenderContext(this, VALUE_EDITOR_ID));
+			valueEditor = (Component)valueContext.renderForEdit(VALUE_EDITOR_ID);
 		} else {
-			add(new WebMarkupContainer(VALUE_EDITOR_ID).setVisible(false));
+			valueEditor = new WebMarkupContainer(VALUE_EDITOR_ID).setVisible(false);
 		}
-		Component valueEditor = get(VALUE_EDITOR_ID);
 		valueEditor.setOutputMarkupId(true);
 		valueEditor.setOutputMarkupPlaceholderTag(true);
+		return valueEditor;
 	}
 
 }

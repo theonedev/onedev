@@ -13,13 +13,15 @@ import com.pmease.commons.editable.annotation.Editable;
 
 @SuppressWarnings("serial")
 @Editable
-public class Bean implements Serializable, Validatable<Void> {
+public class Bean implements Serializable, Validatable {
 	
 	private String name;
 	
 	private boolean married;
 	
 	private List<ChildBean> childs;
+	
+	private ChildBean child;
 	
 	private Integer age;
 
@@ -61,8 +63,17 @@ public class Bean implements Serializable, Validatable<Void> {
 		this.age = age;
 	}
 
+	@Editable
+	public ChildBean getChild() {
+		return child;
+	}
+
+	public void setChild(ChildBean child) {
+		this.child = child;
+	}
+
 	@Override
-	public void validate(EditContext<Void> editContext) {
+	public void validate(EditContext editContext) {
 		editContext.error("tananade");
 	}
 	

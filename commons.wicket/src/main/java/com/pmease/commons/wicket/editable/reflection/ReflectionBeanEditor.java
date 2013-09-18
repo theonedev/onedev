@@ -3,6 +3,7 @@ package com.pmease.commons.wicket.editable.reflection;
 import java.util.List;
 
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
@@ -15,7 +16,6 @@ import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.editable.ValidationError;
 import com.pmease.commons.wicket.editable.EditableResourceReference;
-import com.pmease.commons.wicket.editable.RenderContext;
 
 @SuppressWarnings("serial")
 public class ReflectionBeanEditor extends Panel {
@@ -56,13 +56,13 @@ public class ReflectionBeanEditor extends Panel {
 			
 		});
 
-		add(new ListView<PropertyEditContext<RenderContext>>("properties", editContext.getPropertyContexts()) {
+		add(new ListView<PropertyEditContext>("properties", editContext.getPropertyContexts()) {
 
 			@Override
-			protected void populateItem(ListItem<PropertyEditContext<RenderContext>> item) {
-				final PropertyEditContext<RenderContext> propertyContext = item.getModelObject();
+			protected void populateItem(ListItem<PropertyEditContext> item) {
+				final PropertyEditContext propertyContext = item.getModelObject();
 				item.add(new Label("name", EditableUtils.getName(propertyContext.getPropertyGetter())));
-				propertyContext.renderForEdit(new RenderContext(item, "value"));
+				item.add((Component)propertyContext.renderForEdit("value"));
 				
 				String description = EditableUtils.getDescription(propertyContext.getPropertyGetter());
 				if (description != null)

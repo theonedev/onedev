@@ -9,10 +9,9 @@ import org.apache.wicket.model.Model;
 
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.PropertyEditContext;
-import com.pmease.commons.wicket.editable.RenderContext;
 
 @SuppressWarnings("serial")
-public class NumericPropertyEditContext extends PropertyEditContext<RenderContext> {
+public class NumericPropertyEditContext extends PropertyEditContext {
 
 	private final IModel<String> inputModel;
 	
@@ -30,17 +29,17 @@ public class NumericPropertyEditContext extends PropertyEditContext<RenderContex
 	}
 
 	@Override
-	public void renderForEdit(RenderContext renderContext) {
-		renderContext.getContainer().add(new NumericPropertyEditor(renderContext.getComponentId(), this));
+	public Object renderForEdit(Object renderParam) {
+		return new NumericPropertyEditor((String) renderParam, this);
 	}
 
 	@Override
-	public void renderForView(RenderContext renderContext) {
+	public Object renderForView(Object renderParam) {
 		Object propertyValue = getPropertyValue();
 		if (propertyValue != null)
-			renderContext.getContainer().add(new Label(renderContext.getComponentId(), propertyValue.toString()));
+			return new Label((String) renderParam, propertyValue.toString());
 		else
-			renderContext.getContainer().add(new Label(renderContext.getComponentId()));
+			return new Label((String) renderParam, "<i>Not Defined</i>").setEscapeModelStrings(false);
 	}
 
 	@Override
@@ -64,7 +63,7 @@ public class NumericPropertyEditContext extends PropertyEditContext<RenderContex
 	}
 
 	@Override
-	public Map<Serializable, EditContext<RenderContext>> getChildContexts() {
+	public Map<Serializable, EditContext> getChildContexts() {
 		return null;
 	}
 

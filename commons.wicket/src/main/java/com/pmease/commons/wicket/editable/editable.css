@@ -12,6 +12,11 @@ table.reflection>tbody>tr>td.name {
 	font-weight: bold;
 	background: #EDEDED;
 	text-align: right;
+	white-space: nowrap;
+	width: 20%;
+}
+table.reflection td.value {
+	font-size: 13px;
 }
 table.reflection td input.enable, table.reflection td select.type {
 	margin-bottom: 8px;
@@ -26,3 +31,15 @@ table.list.editor input, table.list.editor select {
 td.no-elements {
 	font-style: italic;
 }
+
+table.polymorphic {
+	width: 100%;
+}
+table.reflection table.reflection {
+	margin-bottom: 10px;
+}
+table.reflection input[type="text"], table.reflection select {
+	width: 100%;
+	height: 32px;
+	font-size: 13px;
+} 

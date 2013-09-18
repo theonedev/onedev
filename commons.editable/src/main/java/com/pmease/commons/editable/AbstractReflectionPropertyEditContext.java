@@ -6,9 +6,9 @@ import java.util.Map;
 import com.pmease.commons.loader.AppLoader;
 
 @SuppressWarnings("serial")
-public abstract class AbstractReflectionPropertyEditContext<T> extends PropertyEditContext<T> {
+public abstract class AbstractReflectionPropertyEditContext extends PropertyEditContext {
 
-	private BeanEditContext<T> valueContext;
+	private BeanEditContext valueContext;
 	
 	public AbstractReflectionPropertyEditContext(Serializable bean, String propertyName) {
 		super(bean, propertyName);
@@ -16,11 +16,10 @@ public abstract class AbstractReflectionPropertyEditContext<T> extends PropertyE
 		propertyValueChanged(getPropertyValue());
 	}
 
-	public BeanEditContext<T> getValueContext() {
+	public BeanEditContext getValueContext() {
 		return valueContext;
 	}
 
-	@SuppressWarnings("unchecked")
 	protected void propertyValueChanged(Serializable propertyValue) {
 		if (propertyValue != null) {
 			EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
@@ -38,14 +37,13 @@ public abstract class AbstractReflectionPropertyEditContext<T> extends PropertyE
 	}
 
 	@Override
-	public Map<Serializable, EditContext<T>> getChildContexts() {
+	public Map<Serializable, EditContext> getChildContexts() {
 		if (valueContext != null)
 			return valueContext.getChildContexts();
 		else
 			return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void doValidation() {
 		super.doValidation();
@@ -53,7 +51,7 @@ public abstract class AbstractReflectionPropertyEditContext<T> extends PropertyE
 		// redirect error message of bean level of the property value to be directly 
 		// under this property
 		if (valueContext != null && valueContext.getBean() instanceof Validatable) {
-			((Validatable<T>)valueContext.getBean()).validate(this);
+			((Validatable)valueContext.getBean()).validate(this);
 		}
 	}
 	

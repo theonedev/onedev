@@ -10,11 +10,11 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.loader.ImplementationRegistry;
 
 @SuppressWarnings("serial")
-public abstract class AbstractPolymorphicPropertyEditContext<T> extends PropertyEditContext<T> {
+public abstract class AbstractPolymorphicPropertyEditContext extends PropertyEditContext {
 
 	private final List<Class<?>> implementations = new ArrayList<Class<?>>();
 	
-	private BeanEditContext<T> valueContext;
+	private BeanEditContext valueContext;
 
 	public AbstractPolymorphicPropertyEditContext(Serializable bean, String propertyName) {
 		super(bean, propertyName);
@@ -36,7 +36,6 @@ public abstract class AbstractPolymorphicPropertyEditContext<T> extends Property
 		return implementations;
 	}
 	
-	@SuppressWarnings("unchecked")
 	protected void propertyValueChanged(Serializable propertyValue) {
 		if (propertyValue != null) {
 			EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
@@ -53,19 +52,18 @@ public abstract class AbstractPolymorphicPropertyEditContext<T> extends Property
 		propertyValueChanged(propertyValue);
 	}
 
-	public BeanEditContext<T> getValueContext() {
+	public BeanEditContext getValueContext() {
 		return valueContext;
 	}
 
 	@Override
-	public Map<Serializable, EditContext<T>> getChildContexts() {
+	public Map<Serializable, EditContext> getChildContexts() {
 		if (valueContext != null)
 			return valueContext.getChildContexts();
 		else
 			return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void doValidation() {
 		super.doValidation();
@@ -73,7 +71,7 @@ public abstract class AbstractPolymorphicPropertyEditContext<T> extends Property
 		// redirect error message of bean level of the property value to be directly 
 		// under this property
 		if (valueContext != null && valueContext.getBean() instanceof Validatable) {
-			((Validatable<T>)valueContext.getBean()).validate(this);
+			((Validatable)valueContext.getBean()).validate(this);
 		}
 	}
 

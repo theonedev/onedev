@@ -1,6 +1,6 @@
-package com.pmease.commons.wicket.editable.list.table;
+package com.pmease.commons.wicket.editable.list.polymorphic;
 
-import java.lang.reflect.Method;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,24 +12,26 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
+import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 
+import com.pmease.commons.editable.BeanEditContext;
 import com.pmease.commons.editable.EditableUtils;
-import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.editable.ValidationError;
 import com.pmease.commons.wicket.WicketUtils;
 
 @SuppressWarnings("serial")
-public class TableListPropertyEditor extends Panel {
+public class PolymorphicListPropertyEditor extends Panel {
 
-	private final TableListPropertyEditContext editContext;
+	private static final String ELEMENT_EDITOR_ID = "elementEditor";
+
+	private final PolymorphicListPropertyEditConext editContext;
 	
-	public TableListPropertyEditor(String id, TableListPropertyEditContext editContext) {
+	public PolymorphicListPropertyEditor(String id, PolymorphicListPropertyEditConext editContext) {
 		super(id);
 		this.editContext = editContext;
 	}
@@ -95,71 +97,90 @@ public class TableListPropertyEditor extends Panel {
 		table.setOutputMarkupId(true);
 		table.setOutputMarkupPlaceholderTag(true);
 		
-		table.add(new ListView<Method>("headers", new LoadableDetachableModel<List<Method>>() {
+		table.add(new ListView<BeanEditContext>("elements", editContext.getElementContexts()) {
 
 			@Override
-			protected List<Method> load() {
-				return editContext.getElementPropertyGetters();
-			}
-			
-		}) {
-
-			@Override
-			protected void populateItem(ListItem<Method> item) {
-				item.add(new Label("header", EditableUtils.getName(item.getModelObject())));
-			}
-			
-		});
-		table.add(new ListView<List<PropertyEditContext>>("elements", editContext.getElementContexts()) {
-
-			@Override
-			protected void populateItem(final ListItem<List<PropertyEditContext>> rowItem) {
-				rowItem.add(new ListView<PropertyEditContext>("elementProperties", rowItem.getModelObject()) {
+			protected void populateItem(final ListItem<BeanEditContext> item) {
+				List<String> implementationNames = new ArrayList<String>();
+				for (Class<?> each: editContext.getImplementations())
+					implementationNames.add(EditableUtils.getName(each));
+						
+				item.add(new DropDownChoice<String>("elementTypeSelector", new IModel<String>() {
+					
+					@Override
+					public void detach() {
+					}
 
 					@Override
-					protected void populateItem(ListItem<PropertyEditContext> columnItem) {
-						final PropertyEditContext elementPropertyContext = columnItem.getModelObject();
-						columnItem.add((Component)elementPropertyContext.renderForEdit("elementPropertyEditor"));
-						
-						columnItem.add(new ListView<ValidationError>("propertyValidationErrors", elementPropertyContext.getValidationErrors(false)) {
+					public String getObject() {
+						return EditableUtils.getName(item.getModelObject().getBean().getClass());
+					}
 
-							@Override
-							protected void populateItem(ListItem<ValidationError> item) {
-								ValidationError error = item.getModelObject();
-								item.add(new Label("propertyValidationError", error.toString()));
+					@Override
+					public void setObject(String object) {
+						for (Class<?> each: editContext.getImplementations()) {
+							if (EditableUtils.getName(each).equals(object)) {
+								Serializable newElementValue = editContext.instantiate(each);
+								editContext.removeElement(item.getIndex());
+								editContext.addElement(item.getIndex(), newElementValue);
+								item.setModelObject(editContext.getElementContexts().get(item.getIndex()));
+								return;
 							}
-
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								
-								setVisible(!elementPropertyContext.getValidationErrors(false).isEmpty());
-							}
-							
-						});
+						}
 						
-						if (!elementPropertyContext.getValidationErrors(false).isEmpty())
-							columnItem.add(AttributeModifier.append("class", "has-error"));
+						throw new IllegalStateException("Unable to find implementation with name: " + object);
 					}
 					
-				});
-				rowItem.add(new AjaxButton("deleteElement") {
+				}, implementationNames).setNullValid(false).add(new AjaxFormComponentUpdatingBehavior("onclick"){
+
+					@Override
+					protected void onUpdate(AjaxRequestTarget target) {
+						Component elementEditor = newElementEditor(item.getModelObject());
+						item.replace(elementEditor);
+						target.add(elementEditor);
+					}
+					
+				}));
+
+				item.add(new AjaxButton("deleteElement") {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
 
 						WicketUtils.updateFormModels(form);
-						editContext.removeElement(rowItem.getIndex());
+						editContext.removeElement(item.getIndex());
 						target.add(table);
 					}
 
 				}.setDefaultFormProcessing(false));
+
+				if (!item.getModelObject().getValidationErrors(false).isEmpty())
+					item.add(AttributeModifier.append("class", "has-error"));
+
+				item.add(new ListView<ValidationError>("elementValidationErrors", item.getModelObject().getValidationErrors(false)) {
+
+					@Override
+					protected void populateItem(ListItem<ValidationError> item) {
+						ValidationError error = item.getModelObject();
+						item.add(new Label("propertyValidationError", error.toString()));
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						
+						setVisible(!item.getModelObject().getValidationErrors(false).isEmpty());
+					}
+					
+				});
+
+				item.add(newElementEditor(item.getModelObject()));
 			}
 			
 		});
 		
-		WebMarkupContainer noElements = new WebMarkupContainer("noElements") {
+		table.add(new WebMarkupContainer("noElements") {
 
 			@Override
 			protected void onConfigure() {
@@ -167,12 +188,9 @@ public class TableListPropertyEditor extends Panel {
 				setVisible(editContext.getElementContexts().isEmpty());
 			}
 			
-		};
-		noElements.add(AttributeModifier.append("colspan", editContext.getElementPropertyGetters().size() + 1));
-		table.add(noElements);
+		});
 		
 		WebMarkupContainer newRow = new WebMarkupContainer("addElement");
-		newRow.add(AttributeModifier.append("colspan", editContext.getElementPropertyGetters().size() + 1));
 		newRow.add(new AjaxButton("addElement") {
 
 			@Override
@@ -181,7 +199,7 @@ public class TableListPropertyEditor extends Panel {
 
 				WicketUtils.updateFormModels(form);
 				editContext.addElement(editContext.getElementContexts().size(), 
-						editContext.instantiate(editContext.getElementClass()));
+						editContext.instantiate(editContext.getImplementations().get(0)));
 				target.add(table);
 			}
 			
@@ -191,4 +209,12 @@ public class TableListPropertyEditor extends Panel {
 		
 		return table;		
 	}
+
+	private Component newElementEditor(BeanEditContext elementContext) {
+		Component elementEditor = (Component)elementContext.renderForEdit(ELEMENT_EDITOR_ID);
+		elementEditor.setOutputMarkupId(true);
+		elementEditor.setOutputMarkupPlaceholderTag(true);
+		return elementEditor;
+	}
+
 }

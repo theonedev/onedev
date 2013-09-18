@@ -12,11 +12,10 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.BeanUtils;
 
 @SuppressWarnings("serial")
-public abstract class AbstractReflectionBeanEditContext<T> extends BeanEditContext<T> {
+public abstract class AbstractReflectionBeanEditContext extends BeanEditContext {
 
-	private List<PropertyEditContext<T>> propertyContexts = new ArrayList<PropertyEditContext<T>>();
+	private List<PropertyEditContext> propertyContexts = new ArrayList<PropertyEditContext>();
 	
-	@SuppressWarnings("unchecked")
 	public AbstractReflectionBeanEditContext(Serializable bean) {
 		super(bean);
 
@@ -31,14 +30,14 @@ public abstract class AbstractReflectionBeanEditContext<T> extends BeanEditConte
 		}
 	}
 
-	public List<PropertyEditContext<T>> getPropertyContexts() {
+	public List<PropertyEditContext> getPropertyContexts() {
 		return propertyContexts;
 	}
 
 	@Override
-	public Map<Serializable, EditContext<T>> getChildContexts() {
-		Map<Serializable, EditContext<T>> childContexts = new LinkedHashMap<Serializable, EditContext<T>>();
-		for (PropertyEditContext<T> each: propertyContexts) {
+	public Map<Serializable, EditContext> getChildContexts() {
+		Map<Serializable, EditContext> childContexts = new LinkedHashMap<Serializable, EditContext>();
+		for (PropertyEditContext each: propertyContexts) {
 			childContexts.put(each.getPropertyName(), each);
 		}
 		return childContexts;

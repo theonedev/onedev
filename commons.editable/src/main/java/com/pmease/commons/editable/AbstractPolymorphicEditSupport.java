@@ -7,15 +7,15 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.BeanUtils;
 import com.pmease.commons.util.ClassUtils;
 
-public abstract class AbstractPolymorphicEditSupport<T> implements EditSupport<T> {
+public abstract class AbstractPolymorphicEditSupport implements EditSupport {
 
 	@Override
-	public BeanEditContext<T> getBeanEditContext(Serializable bean) {
+	public BeanEditContext getBeanEditContext(Serializable bean) {
 		return null;
 	}
 
 	@Override
-	public PropertyEditContext<T> getPropertyEditContext(Serializable bean, String propertyName) {
+	public PropertyEditContext getPropertyEditContext(Serializable bean, String propertyName) {
 		Method propertyGetter = BeanUtils.getGetter(bean.getClass(), propertyName);
 		Class<?> propertyClass = propertyGetter.getReturnType();
 		if (propertyClass.getAnnotation(Editable.class) != null 
@@ -26,6 +26,6 @@ public abstract class AbstractPolymorphicEditSupport<T> implements EditSupport<T
 		}
 	}
 
-	protected abstract AbstractPolymorphicPropertyEditContext<T> newPolymorphicPropertyEditContext(Serializable bean, String propertyName);
+	protected abstract AbstractPolymorphicPropertyEditContext newPolymorphicPropertyEditContext(Serializable bean, String propertyName);
 
 }

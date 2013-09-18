@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Handler;
 
 import org.slf4j.Logger;
@@ -172,6 +173,8 @@ public class Bootstrap {
 		
 		ClassLoader appClassLoader = new URLClassLoader(urls.toArray(new URL[0]), Bootstrap.class.getClassLoader()) {
 
+			private Map<String, CachedUrl> resourceCache = new ConcurrentHashMap<String, CachedUrl>();
+			
 			@Override
 			protected Class<?> findClass(String name) throws ClassNotFoundException {
 				return super.findClass(name);
@@ -184,7 +187,15 @@ public class Bootstrap {
 
 			@Override
 			public URL findResource(String name) {
-				return super.findResource(name);
+				URL url;
+				CachedUrl cachedUrl = resourceCache.get(name);
+				if (cachedUrl == null) {
+					url = super.findResource(name);
+					resourceCache.put(name, new CachedUrl(url));
+				} else {
+					url = cachedUrl.getUrl();
+				}
+				return url;
 			}
 			
 		};
@@ -266,4 +277,15 @@ public class Bootstrap {
 		return new File(installDir, "conf");
 	}
 
+	private static class CachedUrl {
+		private final URL url;
+		
+		public CachedUrl(URL url) {
+			this.url = url;
+		}
+		
+		public URL getUrl() {
+			return url;
+		}
+	}
 }
