@@ -10,6 +10,7 @@ package com.pmease.commons.hibernate;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -24,10 +25,12 @@ public class TransactionInterceptor implements MethodInterceptor {
 		unitOfWork.begin();
 		try {
 			Session session = unitOfWork.getSession();
-
 			if (session.getTransaction().isActive()) {
 				return mi.proceed();
 			} else {
+				FlushMode previousMode = session.getFlushMode();
+				session.setFlushMode(FlushMode.COMMIT);
+
 				Transaction tx = session.beginTransaction();
 				try {
 					Object result = mi.proceed();
@@ -36,6 +39,8 @@ public class TransactionInterceptor implements MethodInterceptor {
 				} catch (Throwable t) {
 					tx.rollback();
 					throw t;
+				} finally {
+					session.setFlushMode(previousMode);
 				}
 			}
 			

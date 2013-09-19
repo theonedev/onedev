@@ -8,7 +8,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.hibernate.Transactional;
+import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.dao.DefaultGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.util.namedentity.EntityLoader;
@@ -26,7 +26,7 @@ public class DefaultUserManager extends DefaultGenericDao<User> implements UserM
 		super(generalDao);
 	}
 
-	@Transactional
+	@Sessional
 	@Override
 	public User getRootUser() {
 		User rootUser;
@@ -41,7 +41,7 @@ public class DefaultUserManager extends DefaultGenericDao<User> implements UserM
 		return rootUser;
 	}
 	
-	@Transactional
+	@Sessional
 	@Override
 	public User find(String userName) {
 		return find(new Criterion[]{Restrictions.eq("name", userName)});

@@ -5,7 +5,7 @@ import javax.inject.Singleton;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
-import com.pmease.commons.hibernate.Transactional;
+import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.dao.DefaultGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.VoteManager;
@@ -20,7 +20,7 @@ public class DefaultVoteManager extends DefaultGenericDao<Vote> implements VoteM
 		super(generalDao);
 	}
 
-	@Transactional
+	@Sessional
 	@Override
 	public Vote find(User reviewer, MergeRequestUpdate update) {
 		return find(new Criterion[]{Restrictions.eq("reviewer", reviewer), Restrictions.eq("update", update)});

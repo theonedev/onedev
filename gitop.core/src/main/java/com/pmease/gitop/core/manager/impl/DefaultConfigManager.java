@@ -7,6 +7,7 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.DefaultGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
@@ -24,7 +25,7 @@ public class DefaultConfigManager extends DefaultGenericDao<Config> implements C
 		super(generalDao);
 	}
 
-	@Transactional
+	@Sessional
 	@Override
 	public StorageSetting getStorageSetting() {
 		Config config = getConfig(Key.STORAGE);
@@ -51,13 +52,13 @@ public class DefaultConfigManager extends DefaultGenericDao<Config> implements C
 		save(config);
 	}
 
-	@Transactional
+	@Sessional
 	@Override
 	public Config getConfig(Key key) {
 		return find(new Criterion[]{Restrictions.eq("key", key)});
 	}
 
-	@Transactional
+	@Sessional
 	@Override
 	public MailSetting getMailSetting() {
 		Config config = getConfig(Key.STORAGE);

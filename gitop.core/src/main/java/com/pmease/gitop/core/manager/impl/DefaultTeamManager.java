@@ -8,7 +8,7 @@ import javax.inject.Singleton;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
-import com.pmease.commons.hibernate.Transactional;
+import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.dao.DefaultGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.util.namedentity.EntityLoader;
@@ -25,19 +25,19 @@ public class DefaultTeamManager extends DefaultGenericDao<Team> implements TeamM
 		super(generalDao);
 	}
 
-	@Transactional
+	@Sessional
 	@Override
 	public Collection<Team> findAnonymousTeams() {
 		return query(new Criterion[]{Restrictions.eq("anonymous", true)});
 	}
 
-	@Transactional
+	@Sessional
 	@Override
 	public Collection<Team> findRegisterTeams() {
 		return query(new Criterion[]{Restrictions.eq("register", true)});
 	}
 	
-	@Transactional
+	@Sessional
 	@Override
 	public Team find(User owner, String teamName) {
 		return find(new Criterion[]{Restrictions.eq("owner", owner), Restrictions.eq("name", teamName)});

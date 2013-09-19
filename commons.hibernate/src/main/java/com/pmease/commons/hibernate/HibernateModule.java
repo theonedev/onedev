@@ -28,11 +28,11 @@ public class HibernateModule extends AbstractPluginModule {
 		bind(Properties.class).annotatedWith(Names.named("hibernate")).toProvider(Providers.<Properties>of(null));
 		bind(NamingStrategy.class).to(ImprovedNamingStrategy.class);
 		
-		bind(PersistService.class).to(PersistServiceImpl.class);
-		bind(SessionFactory.class).toProvider(PersistServiceImpl.class);
+		bind(PersistService.class).to(DefaultPersistService.class);
+		bind(SessionFactory.class).toProvider(DefaultPersistService.class);
 		bind(Configuration.class).toProvider(ConfigurationProvider.class);
-		bind(UnitOfWork.class).to(UnitOfWorkImpl.class);
-		bind(Session.class).toProvider(UnitOfWorkImpl.class);
+		bind(UnitOfWork.class).to(DefaultUnitOfWork.class);
+		bind(Session.class).toProvider(DefaultUnitOfWork.class);
 		
 		bind(GeneralDao.class).to(DefaultGeneralDao.class);
 		
@@ -44,6 +44,14 @@ public class HibernateModule extends AbstractPluginModule {
 	    		Matchers.annotatedWith(Transactional.class), 
 	    		transactionInterceptor);
 	    
+	    SessionInterceptor sessionInterceptor = new SessionInterceptor();
+	    requestInjection(sessionInterceptor);
+	    
+	    bindInterceptor(
+	    		Matchers.any(), 
+	    		Matchers.annotatedWith(Sessional.class), 
+	    		sessionInterceptor);
+
 	    contribute(ServletContextConfigurator.class, HibernateServletContextConfigurator.class);
 	}
 

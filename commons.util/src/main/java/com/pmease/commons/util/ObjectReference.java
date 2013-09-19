@@ -11,14 +11,16 @@ public abstract class ObjectReference<T> {
 	protected abstract T openObject();
 	
 	public synchronized T getObject() {
-		Preconditions.checkState(count > 0, "Reference count has to be increased first.");
-		
-		if (object == null) {
+		if (object != null) {
+			return object;
+		} else if (count > 0) {
 			object = openObject();
-			Preconditions.checkState(object != null);
+			Preconditions.checkNotNull(object);
+			return object;
+		} else {
+			return null;
 		}
 		
-		return object;
 	}
 	
 	public synchronized void increase() {

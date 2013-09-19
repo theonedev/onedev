@@ -1,5 +1,6 @@
 package com.pmease.commons.hibernate;
 
+import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
@@ -9,7 +10,7 @@ import com.google.inject.Singleton;
 import com.pmease.commons.util.ObjectReference;
 
 @Singleton
-public class UnitOfWorkImpl implements UnitOfWork, Provider<Session> {
+public class DefaultUnitOfWork implements UnitOfWork, Provider<Session> {
 	
 	private final Provider<SessionFactory> sessionFactoryProvider;
 	
@@ -21,7 +22,12 @@ public class UnitOfWorkImpl implements UnitOfWork, Provider<Session> {
 
 				@Override
 				protected Session openObject() {
-					return sessionFactoryProvider.get().openSession();
+					Session session = sessionFactoryProvider.get().openSession();
+					
+					// Session is supposed to be able to write only in transactional methods
+					session.setFlushMode(FlushMode.MANUAL);
+					
+					return session;
 				}
 
 				@Override
@@ -35,7 +41,7 @@ public class UnitOfWorkImpl implements UnitOfWork, Provider<Session> {
 	};
 	
 	@Inject
-	public UnitOfWorkImpl(Provider<SessionFactory> sessionFactoryProvider) {
+	public DefaultUnitOfWork(Provider<SessionFactory> sessionFactoryProvider) {
 		this.sessionFactoryProvider = sessionFactoryProvider;
 	}
 

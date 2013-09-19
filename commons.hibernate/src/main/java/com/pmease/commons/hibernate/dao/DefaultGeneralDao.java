@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.pmease.commons.hibernate.AbstractEntity;
+import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.loader.ManagedSerializedForm;
 
@@ -31,13 +32,13 @@ public class DefaultGeneralDao implements GeneralDao, Serializable {
 		this.sessionProvider = sessionProvider;
 	}
 	
-	@Transactional
+	@Sessional
 	@Override
 	public <T extends AbstractEntity> T get(Class<T> entityClass, Long entityId) {
 		return (T) getSession().get(unproxy(entityClass), entityId);
 	}
 
-	@Transactional
+	@Sessional
 	@Override
 	public <T extends AbstractEntity> T load(Class<T> entityClass, Long entityId) {
 		return (T) getSession().load(unproxy(entityClass), entityId);
@@ -80,7 +81,7 @@ public class DefaultGeneralDao implements GeneralDao, Serializable {
 		return (Class<T>) entityClass;
 	}
 
-	@Transactional
+	@Sessional
 	@Override
 	public List<?> query(DetachedCriteria detachedCriteria, int firstResult, int maxResults) {
 		Criteria criteria = detachedCriteria.getExecutableCriteria(getSession());
@@ -91,7 +92,7 @@ public class DefaultGeneralDao implements GeneralDao, Serializable {
 		return criteria.list();
 	}
 
-	@Transactional
+	@Sessional
 	@Override
 	public Object find(DetachedCriteria detachedCriteria) {
 		Criteria criteria = detachedCriteria.getExecutableCriteria(getSession());

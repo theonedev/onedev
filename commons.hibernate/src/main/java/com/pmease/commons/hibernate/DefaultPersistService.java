@@ -8,14 +8,14 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
-public class PersistServiceImpl implements PersistService, Provider<SessionFactory> {
+public class DefaultPersistService implements PersistService, Provider<SessionFactory> {
 
 	private final ConfigurationProvider configurationProvider;
 	
 	private volatile SessionFactory sessionFactory;
 	
 	@Inject
-	public PersistServiceImpl(ConfigurationProvider configurationProvider) {
+	public DefaultPersistService(ConfigurationProvider configurationProvider) {
 		this.configurationProvider = configurationProvider;
 	}
 	

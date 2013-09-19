@@ -5,6 +5,7 @@ import javax.inject.Singleton;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
+import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.DefaultGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
@@ -20,7 +21,7 @@ public class DefaultVoteInvitationManager extends DefaultGenericDao<VoteInvitati
 		super(generalDao);
 	}
 
-	@Transactional
+	@Sessional
 	@Override
 	public VoteInvitation find(User reviewer, MergeRequest request) {
 		return find(new Criterion[]{Restrictions.eq("reviewer", reviewer), Restrictions.eq("request", request)});
