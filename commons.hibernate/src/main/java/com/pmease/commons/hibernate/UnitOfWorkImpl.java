@@ -1,25 +1,35 @@
 package com.pmease.commons.hibernate;
 
-import java.util.Stack;
-
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
-import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.pmease.commons.util.ObjectReference;
 
 @Singleton
 public class UnitOfWorkImpl implements UnitOfWork, Provider<Session> {
 	
 	private final Provider<SessionFactory> sessionFactoryProvider;
 	
-	private final ThreadLocal<Stack<Session>> sessionStack = new ThreadLocal<Stack<Session>>() {
+	private final ThreadLocal<ObjectReference<Session>> sessionReferenceHolder = new ThreadLocal<ObjectReference<Session>>() {
 
 		@Override
-		protected Stack<Session> initialValue() {
-			return new Stack<Session>();
+		protected ObjectReference<Session> initialValue() {
+			return new ObjectReference<Session>() {
+
+				@Override
+				protected Session openObject() {
+					return sessionFactoryProvider.get().openSession();
+				}
+
+				@Override
+				protected void closeObject(Session session) {
+					session.close();
+				}
+				
+			};
 		}
 		
 	};
@@ -30,20 +40,11 @@ public class UnitOfWorkImpl implements UnitOfWork, Provider<Session> {
 	}
 
 	public void begin() {
-		Session session;
-		if (sessionStack.get().isEmpty())
-			session = sessionFactoryProvider.get().openSession();
-		else
-			session = sessionStack.get().peek();
-		sessionStack.get().push(session);
+		sessionReferenceHolder.get().increase();
 	}
 
 	public void end() {
-		Preconditions.checkState(!sessionStack.get().isEmpty(), 
-				"Not balanced calls to UnitOfWork.begin() and UnitOfWork.end()");
-		Session session = sessionStack.get().pop();
-		if (sessionStack.get().isEmpty())
-			session.close();
+		sessionReferenceHolder.get().decrease();
 	}
 
 	public Session get() {
@@ -51,9 +52,7 @@ public class UnitOfWorkImpl implements UnitOfWork, Provider<Session> {
 	}
 
 	public Session getSession() {
-		Preconditions.checkState(!sessionStack.get().isEmpty(), 
-				"Make sure to begin a work first by calling UnitOfWork.begin().");
-		return sessionStack.get().peek();
+		return sessionReferenceHolder.get().getObject();
 	}
 	
 	public SessionFactory getSessionFactory() {
