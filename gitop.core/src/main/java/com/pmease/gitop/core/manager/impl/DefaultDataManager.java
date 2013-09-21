@@ -43,7 +43,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		List<ManualConfig> manualConfigs = new ArrayList<ManualConfig>();
 		User rootUser = userManager.find(null, new Order[]{Order.asc("id")});		
 		if (rootUser == null) {
-			manualConfigs.add(new ManualConfig(new User()) {
+			manualConfigs.add(new ManualConfig("Create Administator Account", new User()) {
 
 				@Override
 				public Skippable getSkippable() {
@@ -60,7 +60,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		
 		Config storageConfig = configManager.getConfig(Key.STORAGE);
 		if (storageConfig == null || storageConfig.getSetting() == null) {
-			manualConfigs.add(new ManualConfig(new StorageSetting()) {
+			manualConfigs.add(new ManualConfig("Specify Storage Setting", new StorageSetting()) {
 
 				@Override
 				public Skippable getSkippable() {
@@ -77,7 +77,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		
 		Config mailConfig = configManager.getConfig(Key.MAIL);
 		if (mailConfig == null) {
-			manualConfigs.add(new ManualConfig(new MailSetting()) {
+			manualConfigs.add(new ManualConfig("Specify Mail Setting", new MailSetting()) {
 
 				@Override
 				public Skippable getSkippable() {

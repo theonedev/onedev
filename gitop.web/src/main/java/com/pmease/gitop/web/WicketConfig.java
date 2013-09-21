@@ -12,6 +12,9 @@ public class WicketConfig extends AbstractWicketConfig {
 	@Override
 	protected void init() {
 		super.init();
+		
+		mountPage("/", HomePage.class);
+		mountPage("/init", ServerInitPage.class);
 	}
 	
 	@Override

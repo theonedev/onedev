@@ -1,0 +1,16 @@
+.wizard table.reflection td.name {
+	background: none;
+	font-weight: normal;
+}
+.wizard .panel-heading {
+	font-size: 16px;
+}
+.wizard .buttons {
+	margin: 0 auto;
+}
+.wizard .buttons span em {
+	font-style: normal;
+}
+.wizard .buttons .previous, .wizard .buttons .skip {
+	margin-right: 20px;
+}

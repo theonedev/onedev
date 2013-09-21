@@ -28,4 +28,9 @@ public class BooleanEditSupport implements EditSupport {
 		}
 	}
 
+	@Override
+	public int getPriorty() {
+		return 1;
+	}
+
 }

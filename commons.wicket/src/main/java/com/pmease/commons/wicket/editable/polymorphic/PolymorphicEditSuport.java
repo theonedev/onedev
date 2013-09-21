@@ -13,4 +13,9 @@ public class PolymorphicEditSuport extends AbstractPolymorphicEditSupport {
 		return new PolymorphicPropertyEditContext(bean, propertyName);
 	}
 
+	@Override
+	public int getPriorty() {
+		return 1;
+	}
+
 }

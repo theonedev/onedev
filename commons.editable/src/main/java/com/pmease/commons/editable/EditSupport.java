@@ -11,4 +11,5 @@ public interface EditSupport {
 
 	PropertyEditContext getPropertyEditContext(Serializable bean, String propertyName);
 
+	int getPriorty();
 }

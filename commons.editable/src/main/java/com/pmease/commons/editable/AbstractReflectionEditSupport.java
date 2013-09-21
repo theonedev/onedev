@@ -28,6 +28,11 @@ public abstract class AbstractReflectionEditSupport implements EditSupport {
 		}
 	}
 
+	@Override
+	public int getPriorty() {
+		return 1;
+	}
+
 	protected abstract AbstractReflectionBeanEditContext newReflectionBeanEditContext(Serializable bean);
 	
 	protected abstract AbstractReflectionPropertyEditContext newReflectionPropertyEditContext(Serializable bean, String propertyName);

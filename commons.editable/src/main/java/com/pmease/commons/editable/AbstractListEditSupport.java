@@ -33,6 +33,11 @@ public abstract class AbstractListEditSupport implements EditSupport {
 		return null;
 	}
 
+	@Override
+	public int getPriorty() {
+		return 1;
+	}
+
 	protected abstract AbstractPolymorphicListPropertyEditContext newPolymorphicListEditContext(Serializable bean, String propertyName);
 
 	protected abstract AbstractTableListPropertyEditContext newTableListEditContext(Serializable bean, String propertyName);

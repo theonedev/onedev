@@ -61,7 +61,7 @@ public class DefaultConfigManager extends DefaultGenericDao<Config> implements C
 	@Sessional
 	@Override
 	public MailSetting getMailSetting() {
-		Config config = getConfig(Key.STORAGE);
+		Config config = getConfig(Key.MAIL);
 		if (config != null) {
 			MailSetting mailSetting = (MailSetting) config.getSetting();
 			return mailSetting;
@@ -73,10 +73,10 @@ public class DefaultConfigManager extends DefaultGenericDao<Config> implements C
 	@Transactional
 	@Override
 	public void saveMailSetting(MailSetting mailSetting) {
-		Config config = getConfig(Key.STORAGE);
+		Config config = getConfig(Key.MAIL);
 		if (config == null) {
 			config = new Config();
-			config.setKey(Key.STORAGE);
+			config.setKey(Key.MAIL);
 		}
 		config.setSetting(mailSetting);
 		save(config);

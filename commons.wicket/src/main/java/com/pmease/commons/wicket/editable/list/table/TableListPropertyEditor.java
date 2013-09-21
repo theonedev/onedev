@@ -1,8 +1,10 @@
 package com.pmease.commons.wicket.editable.list.table;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
@@ -19,6 +21,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.editable.ValidationError;
@@ -138,7 +141,8 @@ public class TableListPropertyEditor extends Panel {
 							
 						});
 						
-						if (!elementPropertyContext.getValidationErrors(false).isEmpty())
+						Map<Serializable, EditContext> childContexts = elementPropertyContext.getChildContexts();
+						if ((childContexts == null || childContexts.isEmpty()) && !elementPropertyContext.getValidationErrors(false).isEmpty())
 							columnItem.add(AttributeModifier.append("class", "has-error"));
 					}
 					

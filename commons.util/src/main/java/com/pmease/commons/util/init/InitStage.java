@@ -26,6 +26,10 @@ public class InitStage implements Serializable, Cloneable {
 		return message;
 	}
 	
+	public List<ManualConfig> getManualConfigs() {
+		return manualConfigs;
+	}
+	
 	public synchronized void waitFor() {
 		if (!manualConfigs.isEmpty()) {
 			try {
@@ -33,7 +37,6 @@ public class InitStage implements Serializable, Cloneable {
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
 			}
-			manualConfigs.clear();
 		}
 	}
 
@@ -46,19 +49,37 @@ public class InitStage implements Serializable, Cloneable {
 			
 			final ManualConfig lastConfig = clonedConfigs.remove(clonedConfigs.size()-1);
 			
-			clonedConfigs.add(new ManualConfig(lastConfig.getSetting()) {
+			clonedConfigs.add(new ManualConfig(lastConfig.getMessage(), lastConfig.getSetting()) {
 	
 				@Override
 				public Skippable getSkippable() {
-					return lastConfig.getSkippable();
+					final Skippable skippable = lastConfig.getSkippable();
+					if (skippable != null) {
+						return new Skippable() {
+
+							@Override
+							public void skip() {
+								skippable.skip();
+								synchronized (InitStage.this) {
+									message = "Please wait...";
+									InitStage.this.manualConfigs.clear();
+									InitStage.this.notify();
+								}
+							}
+							
+						};
+					} else {
+						return null;
+					}
 				}
 	
 				@Override
 				public void complete() {
 					lastConfig.complete();
 					synchronized (InitStage.this) {
-						InitStage.this.notify();
 						message = "Please wait...";
+						InitStage.this.manualConfigs.clear();
+						InitStage.this.notify();
 					}
 				}
 				

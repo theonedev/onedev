@@ -2,7 +2,12 @@ package com.pmease.gitop.core.setting;
 
 import java.io.Serializable;
 
+import org.hibernate.validator.constraints.NotEmpty;
+
+import com.pmease.commons.editable.annotation.Editable;
+
 @SuppressWarnings("serial")
+@Editable
 public class MailSetting implements Serializable {
 	
 	private String smtpHost;
@@ -15,6 +20,8 @@ public class MailSetting implements Serializable {
 	
 	private String senderAddress;
 
+	@Editable
+	@NotEmpty
 	public String getSmtpHost() {
 		return smtpHost;
 	}
@@ -23,6 +30,7 @@ public class MailSetting implements Serializable {
 		this.smtpHost = smtpHost;
 	}
 
+	@Editable
 	public int getSmtpPort() {
 		return smtpPort;
 	}
@@ -31,6 +39,7 @@ public class MailSetting implements Serializable {
 		this.smtpPort = smtpPort;
 	}
 
+	@Editable
 	public String getSmtpUser() {
 		return smtpUser;
 	}
@@ -39,6 +48,7 @@ public class MailSetting implements Serializable {
 		this.smtpUser = smtpUser;
 	}
 
+	@Editable
 	public String getSmtpPassword() {
 		return smtpPassword;
 	}
@@ -47,6 +57,7 @@ public class MailSetting implements Serializable {
 		this.smtpPassword = smtpPassword;
 	}
 
+	@Editable
 	public String getSenderAddress() {
 		return senderAddress;
 	}

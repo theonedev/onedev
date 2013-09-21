@@ -3,9 +3,15 @@ package com.pmease.gitop.core.model;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.annotation.Password;
 import com.pmease.commons.shiro.AbstractUser;
 import com.pmease.gitop.core.permission.object.ProtectedObject;
 import com.pmease.gitop.core.permission.object.UserBelonging;
@@ -22,8 +28,12 @@ import com.pmease.gitop.core.permission.object.UserBelonging;
  */
 @SuppressWarnings("serial")
 @Entity
+@Editable
 public class User extends AbstractUser implements ProtectedObject {
 
+	@Column(nullable=false)
+	private String email;
+	
 	private String description;
 	
 	@OneToMany(mappedBy="user")
@@ -47,6 +57,32 @@ public class User extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="reviewer")
 	private Collection<VoteInvitation> voteVitations = new ArrayList<VoteInvitation>();
 
+	@Editable
+	@NotEmpty
+	@Override
+	public String getName() {
+		return super.getName();
+	}
+
+	@Editable
+	@NotEmpty
+	@Email
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	@Editable(name="Password")
+	@Password(confirmative=true)
+	@Override
+	public String getPasswordHash() {
+		return super.getPasswordHash();
+	}
+
+	@Editable
 	public String getDescription() {
 		return description;
 	}

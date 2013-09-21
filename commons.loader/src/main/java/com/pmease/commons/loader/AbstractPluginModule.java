@@ -155,7 +155,8 @@ public abstract class AbstractPluginModule extends AbstractModule implements Dep
 	
 	protected <T> void contribute(Class<T> extensionPoint, Class<? extends T> extensionClass) {
 		Multibinder<T> pluginBinder = Multibinder.newSetBinder(binder(), extensionPoint);
-	    pluginBinder.addBinding().to(extensionClass).in(Singleton.class);
+	    pluginBinder.addBinding().to(extensionClass);
+	    bind(extensionClass).in(Singleton.class);
 	}
 	
 	protected <T> void contribute(Class<T> extensionPoint, T extension) {

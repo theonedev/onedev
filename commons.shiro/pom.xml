@@ -52,7 +52,7 @@
             <groupId>org.apache.shiro</groupId>  
             <artifactId>shiro-guice</artifactId>  
             <version>${shiroVersion}</version> 
-        </dependency> 
+        </dependency>
     </dependencies>  
     <repositories> 
         <repository> 

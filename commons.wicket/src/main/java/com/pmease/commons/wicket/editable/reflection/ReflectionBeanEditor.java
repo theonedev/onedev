@@ -1,6 +1,8 @@
 package com.pmease.commons.wicket.editable.reflection;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
@@ -12,6 +14,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.editable.ValidationError;
@@ -87,7 +90,8 @@ public class ReflectionBeanEditor extends Panel {
 					
 				});
 				
-				if (!propertyContext.getValidationErrors(false).isEmpty())
+				Map<Serializable, EditContext> childContexts = propertyContext.getChildContexts();
+				if ((childContexts == null || childContexts.isEmpty()) && !propertyContext.getValidationErrors(false).isEmpty())
 					item.add(AttributeModifier.append("class", "has-error"));
 			}
 

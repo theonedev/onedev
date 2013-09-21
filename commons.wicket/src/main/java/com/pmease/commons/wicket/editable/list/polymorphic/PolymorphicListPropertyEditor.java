@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -154,9 +153,6 @@ public class PolymorphicListPropertyEditor extends Panel {
 					}
 
 				}.setDefaultFormProcessing(false));
-
-				if (!item.getModelObject().getValidationErrors(false).isEmpty())
-					item.add(AttributeModifier.append("class", "has-error"));
 
 				item.add(new ListView<ValidationError>("elementValidationErrors", item.getModelObject().getValidationErrors(false)) {
 

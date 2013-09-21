@@ -104,7 +104,7 @@ public class Gitop extends AbstractPlugin {
 		return AppLoader.getInstance(type);
 	}
 
-	public static <T> Set<T> getExtensions(Class<T> extensionPoint) {
+	public <T> Set<T> getExtensions(Class<T> extensionPoint) {
 		return AppLoader.getExtensions(extensionPoint);
 	}
 

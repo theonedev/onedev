@@ -25,4 +25,9 @@ public class StringEditSupport implements EditSupport {
 		}
 	}
 
+	@Override
+	public int getPriorty() {
+		return 1;
+	}
+
 }

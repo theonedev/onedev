@@ -29,8 +29,6 @@ public class GitopModule extends AbstractPluginModule {
 		
 		bind(NamingStrategy.class).toInstance(new PrefixedNamingStrategy("G"));
 		
-		bind(Gitop.class);
-
 		contribute(ModelProvider.class, new ModelProvider() {
 
 			@Override
