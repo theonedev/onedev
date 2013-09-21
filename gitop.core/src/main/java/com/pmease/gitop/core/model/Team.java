@@ -44,7 +44,7 @@ public class Team extends AbstractEntity implements Permission {
 	private Collection<TeamMembership> memberships = new ArrayList<TeamMembership>();
 	
 	@OneToMany(mappedBy="team")
-	private Collection<RepositoryAuthorization> repositoryAuthorizations = new ArrayList<RepositoryAuthorization>();
+	private Collection<RepositoryAuthorizationByTeam> repositoryAuthorizations = new ArrayList<RepositoryAuthorizationByTeam>();
 
 	public User getOwner() {
 		return owner;
@@ -102,11 +102,11 @@ public class Team extends AbstractEntity implements Permission {
 		this.memberships = memberships;
 	}
 
-	public Collection<RepositoryAuthorization> getRepositoryAuthorizations() {
+	public Collection<RepositoryAuthorizationByTeam> getRepositoryAuthorizations() {
 		return repositoryAuthorizations;
 	}
 
-	public void setAuthorizations(Collection<RepositoryAuthorization> repositoryAuthorizations) {
+	public void setRepositoryAuthorizations(Collection<RepositoryAuthorizationByTeam> repositoryAuthorizations) {
 		this.repositoryAuthorizations = repositoryAuthorizations;
 	}
 
@@ -114,16 +114,17 @@ public class Team extends AbstractEntity implements Permission {
 	public boolean implies(Permission permission) {
 		if (permission instanceof ObjectPermission) {
 			ObjectPermission objectPermission = (ObjectPermission) permission;
+			Permission userPermission = new ObjectPermission(getOwner(), getAuthorizedOperation());
+			if (userPermission.implies(objectPermission))
+				return true;
 			
-			for (RepositoryAuthorization each: getRepositoryAuthorizations()) {
-				if (each.getRepository().has(objectPermission.getObject()))
-					return each.getAuthorizedOperation().can(objectPermission.getOperation());
+			for (RepositoryAuthorizationByTeam authorization: getRepositoryAuthorizations()) {
+				Permission repositoryPermission = new ObjectPermission(
+						authorization.getRepository(), authorization.getAuthorizedOperation());
+				if (repositoryPermission.implies(objectPermission))
+					return true;
 			}
-
-			if (getOwner().has(objectPermission.getObject()))
-				return getAuthorizedOperation().can(objectPermission.getOperation());
-		} 
-		
+		}
 		return false;
 	}
 

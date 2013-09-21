@@ -1,14 +1,6 @@
 package com.pmease.gitop.core.permission.operation;
 
 public enum RepositoryOperation implements PrivilegedOperation {
-	NO_ACCESS {
-
-		@Override
-		public boolean can(PrivilegedOperation operation) {
-			return false;
-		}
-		
-	},
 	READ {
 
 		@Override

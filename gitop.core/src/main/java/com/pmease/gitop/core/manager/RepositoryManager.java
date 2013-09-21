@@ -1,6 +1,7 @@
 package com.pmease.gitop.core.manager;
 
 import java.io.File;
+import java.util.Collection;
 
 import com.google.inject.ImplementedBy;
 import com.pmease.commons.hibernate.dao.GenericDao;
@@ -12,4 +13,5 @@ public interface RepositoryManager extends GenericDao<Repository> {
 	
 	File locateStorage(Repository repository);
 	
+	Collection<Repository> findPublic();
 }

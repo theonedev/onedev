@@ -11,24 +11,24 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"reviewer", "request"})
+		@UniqueConstraint(columnNames={"voter", "request"})
 })
 public class VoteInvitation extends AbstractEntity {
 
 	@ManyToOne
 	@JoinColumn(nullable=false)
-	private User reviewer;
+	private User voter;
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private MergeRequest request;
 	
-	public User getReviewer() {
-		return reviewer;
+	public User getVoter() {
+		return voter;
 	}
 
-	public void setReviewer(User reviewer) {
-		this.reviewer = reviewer;
+	public void setVoter(User voter) {
+		this.voter = voter;
 	}
 	
 	public MergeRequest getRequest() {

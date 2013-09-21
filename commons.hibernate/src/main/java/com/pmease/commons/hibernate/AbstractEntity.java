@@ -55,5 +55,8 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 	public int compareTo(AbstractEntity entity) {
 		return getId().compareTo(entity.getId());
 	}
-
+	
+	public boolean isNew() {
+		return getId() == null;
+	}
 }

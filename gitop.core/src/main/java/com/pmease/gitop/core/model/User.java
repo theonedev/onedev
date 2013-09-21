@@ -7,14 +7,20 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
+import org.apache.shiro.authz.Permission;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.Password;
 import com.pmease.commons.shiro.AbstractUser;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.RepositoryManager;
+import com.pmease.gitop.core.manager.UserManager;
+import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.core.permission.object.ProtectedObject;
 import com.pmease.gitop.core.permission.object.UserBelonging;
+import com.pmease.gitop.core.permission.operation.RepositoryOperation;
 
 /**
  * This class represents either a project or an user in the system. 
@@ -51,11 +57,23 @@ public class User extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="owner")
 	private Collection<Team> teams = new ArrayList<Team>();
 	
-	@OneToMany(mappedBy="reviewer")
+	@OneToMany(mappedBy="voter")
 	private Collection<Vote> votes = new ArrayList<Vote>();
 	
-	@OneToMany(mappedBy="reviewer")
+	@OneToMany(mappedBy="voter")
 	private Collection<VoteInvitation> voteVitations = new ArrayList<VoteInvitation>();
+
+	@OneToMany(mappedBy="individual")
+	private Collection<RepositoryAuthorizationByIndividual> repositoryAuthorizations = 
+			new ArrayList<RepositoryAuthorizationByIndividual>();
+
+	@OneToMany(mappedBy="individual")
+	private Collection<UserAuthorizationByIndividual> userAuthorizations = 
+			new ArrayList<UserAuthorizationByIndividual>();
+
+	@OneToMany(mappedBy="user")
+	private Collection<UserAuthorizationByIndividual> authorizationsByIndividual = 
+			new ArrayList<UserAuthorizationByIndividual>();
 
 	@Editable
 	@NotEmpty
@@ -147,6 +165,41 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.voteVitations = voteInvitations;
 	}
 
+	public Collection<VoteInvitation> getVoteVitations() {
+		return voteVitations;
+	}
+
+	public void setVoteVitations(Collection<VoteInvitation> voteVitations) {
+		this.voteVitations = voteVitations;
+	}
+
+	public Collection<RepositoryAuthorizationByIndividual> getRepositoryAuthorizations() {
+		return repositoryAuthorizations;
+	}
+
+	public void setRepositoryAuthorizations(
+			Collection<RepositoryAuthorizationByIndividual> repositoryAuthorizations) {
+		this.repositoryAuthorizations = repositoryAuthorizations;
+	}
+
+	public Collection<UserAuthorizationByIndividual> getUserAuthorizations() {
+		return userAuthorizations;
+	}
+
+	public void setUserAuthorizations(
+			Collection<UserAuthorizationByIndividual> userAuthorizations) {
+		this.userAuthorizations = userAuthorizations;
+	}
+
+	public Collection<UserAuthorizationByIndividual> getAuthorizationsByIndividual() {
+		return authorizationsByIndividual;
+	}
+
+	public void setAuthorizationsByIndividual(
+			Collection<UserAuthorizationByIndividual> authorizationsByIndividual) {
+		this.authorizationsByIndividual = authorizationsByIndividual;
+	}
+
 	@Override
 	public boolean has(ProtectedObject object) {
 		if (object instanceof User) {
@@ -165,7 +218,7 @@ public class User extends AbstractUser implements ProtectedObject {
 			return Vote.Result.ACCEPT;
 		
 		for (Vote vote: update.listVotesOnwards()) {
-			if (vote.getReviewer().equals(this)) {
+			if (vote.getVoter().equals(this)) {
 				return vote.getResult();
 			}
 		}
@@ -173,4 +226,68 @@ public class User extends AbstractUser implements ProtectedObject {
 		return null;
 	}
 
+	public static User getCurrent() {
+		return (User) AbstractUser.getCurrent();
+	}
+
+	@Override
+	public boolean implies(Permission permission) {
+		// Root user can do anything
+		if (isRoot()) 
+			return true;
+		
+		if (permission instanceof ObjectPermission) {
+			ObjectPermission objectPermission = (ObjectPermission) permission;
+			if (!isAnonymous()) {
+				// One can do anything against its belongings
+				if (has(objectPermission.getObject()))
+					return true;
+				
+				for (RepositoryAuthorizationByIndividual authorization: getRepositoryAuthorizations()) {
+					ObjectPermission repositoryPermission = new ObjectPermission(
+							authorization.getRepository(), authorization.getAuthorizedOperation());
+					if (repositoryPermission.implies(objectPermission))
+						return true;
+				}
+				
+				for (UserAuthorizationByIndividual each: getUserAuthorizations()) {
+					ObjectPermission userPermission = new ObjectPermission(each.getUser(), each.getAuthorizedOperation());
+					if (userPermission.implies(objectPermission))
+						return true;
+				}
+				
+				for (Team team: getTeams()) {
+					if (team.implies(objectPermission))
+						return true;
+				}
+	
+				for (RoleMembership each: getRoleMemberships()) {
+					if (each.getRole().implies(objectPermission))
+						return true;
+				}
+				
+				for (Repository each: Gitop.getInstance(RepositoryManager.class).query(null)) {
+					ObjectPermission repositoryPermission = new ObjectPermission(each, each.getDefaultAuthorizedOperation());
+					if (repositoryPermission.implies(objectPermission))
+						return true;
+				}
+			} else {
+				for (Repository each: Gitop.getInstance(RepositoryManager.class).findPublic()) {
+					ObjectPermission repositoryPermission = new ObjectPermission(each, RepositoryOperation.READ);
+					if (repositoryPermission.implies(objectPermission))
+						return true;
+				}
+			}
+		} 
+		return false;
+	}
+	
+	public boolean isRoot() {
+		return Gitop.getInstance(UserManager.class).getRootUser().equals(this);
+	}
+
+	public boolean isAnonymous() {
+		return getId() == 0L;
+	}
+	
 }

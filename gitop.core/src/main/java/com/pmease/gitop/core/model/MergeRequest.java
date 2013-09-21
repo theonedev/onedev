@@ -275,7 +275,7 @@ public class MergeRequest extends AbstractEntity {
 		
 		// users already voted for latest update should be excluded
 		for (Vote vote: getLatestUpdate().getVotes())
-			candidates.remove(vote.getReviewer());
+			candidates.remove(vote.getVoter());
 		
 		getPotentialVoters().addAll(candidates);
 		
@@ -284,12 +284,12 @@ public class MergeRequest extends AbstractEntity {
 		 * invitation list as their votes are still valid 
 		 */
 		for (Vote vote: getBaseUpdate().listVotesOnwards()) {
-			candidates.remove(vote.getReviewer());
+			candidates.remove(vote.getVoter());
 		}
 		
 		Set<User> invited = new HashSet<User>();
 		for (VoteInvitation each: getVoteInvitations())
-			invited.add(each.getReviewer());
+			invited.add(each.getVoter());
 
 		invited.retainAll(candidates);
 		
@@ -307,7 +307,7 @@ public class MergeRequest extends AbstractEntity {
 			
 			VoteInvitation invitation = new VoteInvitation();
 			invitation.setRequest(this);
-			invitation.setReviewer(selected);
+			invitation.setVoter(selected);
 			
 			Gitop.getInstance(VoteInvitationManager.class).save(invitation);
 		}
@@ -332,7 +332,7 @@ public class MergeRequest extends AbstractEntity {
 				
 				Collection<VoteInvitation> withdraws = new HashSet<VoteInvitation>();
 				for (VoteInvitation invitation: getVoteInvitations()) {
-					if (!getPotentialVoters().contains(invitation.getReviewer())) {
+					if (!getPotentialVoters().contains(invitation.getVoter())) {
 						withdraws.add(invitation);
 					}
 				}

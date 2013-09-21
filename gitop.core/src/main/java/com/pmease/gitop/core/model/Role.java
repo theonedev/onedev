@@ -11,7 +11,6 @@ import org.apache.shiro.authz.Permission;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitop.core.permission.ObjectPermission;
-import com.pmease.gitop.core.permission.object.SystemObject;
 import com.pmease.gitop.core.permission.operation.PrivilegedOperation;
 
 @Entity
@@ -23,10 +22,6 @@ public class Role extends AbstractEntity implements Permission {
 	
 	private String description;
 	
-	private boolean anonymous;
-	
-	private boolean register;
-
 	@Column(nullable=false)
 	private ArrayList<PrivilegedOperation> operations = new ArrayList<PrivilegedOperation>();
 	
@@ -49,22 +44,6 @@ public class Role extends AbstractEntity implements Permission {
 		this.description = description;
 	}
 
-	public boolean isAnonymous() {
-		return anonymous;
-	}
-
-	public void setAnonymous(boolean anonymous) {
-		this.anonymous = anonymous;
-	}
-
-	public boolean isRegister() {
-		return register;
-	}
-
-	public void setRegister(boolean register) {
-		this.register = register;
-	}
-
 	public Collection<RoleMembership> getMemberships() {
 		return memberships;
 	}
@@ -85,11 +64,9 @@ public class Role extends AbstractEntity implements Permission {
 	public boolean implies(Permission permission) {
 		if (permission instanceof ObjectPermission) {
 			ObjectPermission objectPermission = (ObjectPermission) permission;
-			if (new SystemObject().has(objectPermission.getObject())) {
-				for (PrivilegedOperation each: getOperations()) {
-					if (each.can(objectPermission.getOperation()))
-						return true;
-				}
+			for (PrivilegedOperation each: getOperations()) {
+				if (each.can(objectPermission.getOperation()))
+					return true;
 			}
 		}
 		return false;

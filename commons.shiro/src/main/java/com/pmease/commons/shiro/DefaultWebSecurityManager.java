@@ -20,7 +20,6 @@ import com.pmease.commons.loader.PluginManager;
 @Singleton
 public class DefaultWebSecurityManager extends org.apache.shiro.web.mgt.DefaultWebSecurityManager {
 
-	@SuppressWarnings("rawtypes")
 	@Inject
 	public DefaultWebSecurityManager(PluginManager pluginManager, AbstractRealm userRealm) {
 		

@@ -14,7 +14,7 @@ import com.pmease.gitop.core.permission.operation.RepositoryOperation;
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"team", "repository"})
 })
-public class RepositoryAuthorization extends AbstractEntity {
+public class RepositoryAuthorizationByTeam extends AbstractEntity {
 
 	@ManyToOne
 	@JoinColumn(nullable=false)

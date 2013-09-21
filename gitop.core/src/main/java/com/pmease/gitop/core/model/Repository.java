@@ -2,9 +2,8 @@ package com.pmease.gitop.core.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,7 +14,10 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.pmease.commons.hibernate.AbstractEntity;
+import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.gatekeeper.GateKeeper;
+import com.pmease.gitop.core.manager.UserManager;
+import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.core.permission.object.ProtectedObject;
 import com.pmease.gitop.core.permission.object.UserBelonging;
 import com.pmease.gitop.core.permission.operation.RepositoryOperation;
@@ -36,10 +38,20 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	
 	private String description;
 
+	private boolean publiclyAccessible;
+	
+	@Column(nullable=false)
+	private RepositoryOperation defaultAuthorizedOperation;
+	
 	private GateKeeper gateKeeper;
 
 	@OneToMany(mappedBy="repository")
-	private Collection<RepositoryAuthorization> authorizations = new ArrayList<RepositoryAuthorization>();
+	private Collection<RepositoryAuthorizationByTeam> authorizationsByTeam = 
+			new ArrayList<RepositoryAuthorizationByTeam>();
+
+	@OneToMany(mappedBy="repository")
+	private Collection<RepositoryAuthorizationByIndividual> authorizationsByIndividual = 
+			new ArrayList<RepositoryAuthorizationByIndividual>();
 
 	public User getOwner() {
 		return owner;
@@ -65,6 +77,23 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		this.description = description;
 	}
 
+	public boolean isPubliclyAccessible() {
+		return publiclyAccessible;
+	}
+
+	public void setPubliclyAccessible(boolean publiclyAccessible) {
+		this.publiclyAccessible = publiclyAccessible;
+	}
+
+	public RepositoryOperation getDefaultAuthorizedOperation() {
+		return defaultAuthorizedOperation;
+	}
+
+	public void setDefaultAuthorizedOperation(
+			RepositoryOperation defaultAuthorizedOperation) {
+		this.defaultAuthorizedOperation = defaultAuthorizedOperation;
+	}
+
 	public GateKeeper getGateKeeper() {
 		if (gateKeeper != null)
 			gateKeeper = (GateKeeper) gateKeeper.trim(this);
@@ -80,12 +109,22 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		return getOwner();
 	}
 
-	public Collection<RepositoryAuthorization> getAuthorizations() {
-		return authorizations;
+	public Collection<RepositoryAuthorizationByTeam> getAuthorizationsByTeam() {
+		return authorizationsByTeam;
 	}
 
-	public void setAuthorizations(Collection<RepositoryAuthorization> authorizations) {
-		this.authorizations = authorizations;
+	public void setAuthorizationsByTeam(
+			Collection<RepositoryAuthorizationByTeam> authorizationsByTeam) {
+		this.authorizationsByTeam = authorizationsByTeam;
+	}
+
+	public Collection<RepositoryAuthorizationByIndividual> getAuthorizationsByIndividual() {
+		return authorizationsByIndividual;
+	}
+
+	public void setAuthorizationsByIndividual(
+			Collection<RepositoryAuthorizationByIndividual> authorizationsByIndividual) {
+		this.authorizationsByIndividual = authorizationsByIndividual;
 	}
 
 	@Override
@@ -99,32 +138,12 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 
 	public Collection<User> findAuthorizedUsers(RepositoryOperation operation) {
-		Map<Long, Boolean> authorizationMap = new HashMap<Long, Boolean>();
-		for (RepositoryAuthorization authorization: getAuthorizations()) {
-			authorizationMap.put(authorization.getTeam().getId(), authorization.getAuthorizedOperation().can(operation));
+		Set<User> authorizedUsers = new HashSet<User>();
+		for (User user: Gitop.getInstance(UserManager.class).query(null)) {
+			if (user.asSubject().isPermitted(new ObjectPermission(this, operation)))
+				authorizedUsers.add(user);
 		}
-		
-		Collection<Team> teams = new HashSet<Team>();
-		for (Team team: getOwner().getTeams()) {
-			Boolean authorized = authorizationMap.get(team.getId());
-			if (authorized != null) {
-				if (authorized)
-					teams.add(team);
-				else
-					continue;
-			} else {
-				if (team.getAuthorizedOperation().can(operation))
-					teams.add(team);
-			}
-		}
-		
-		Collection<User> users = new HashSet<User>();
-		for (Team team: teams) {
-			for (TeamMembership membership: team.getMemberships())
-				users.add(membership.getUser());
-		}
-		
-		return users;
+		return authorizedUsers;
 	}
 	
 }

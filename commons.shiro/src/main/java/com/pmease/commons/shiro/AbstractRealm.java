@@ -2,7 +2,8 @@ package com.pmease.commons.shiro;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
+
+import javax.annotation.Nullable;
 
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -11,29 +12,16 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authc.credential.CredentialsMatcher;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.Permission;
-import org.apache.shiro.authz.permission.WildcardPermission;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Restrictions;
 
 import com.google.inject.Inject;
-import com.pmease.commons.hibernate.dao.GeneralDao;
-import com.pmease.commons.util.ReflectionUtils;
+import com.pmease.commons.util.EasySet;
 
-public abstract class AbstractRealm<T extends AbstractUser> extends AuthorizingRealm {
+public abstract class AbstractRealm extends AuthorizingRealm {
 
-	private GeneralDao generalDao;
-	
-	private final Class<T> userClass;
-
-	@SuppressWarnings("unchecked")
 	@Inject
-	public AbstractRealm(GeneralDao generalDao, CredentialsMatcher credentialsMatcher) {
-		this.generalDao = generalDao;
-		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(AbstractRealm.class, getClass());
-		userClass = ((Class<T>) typeArguments.get(0));
-
+	public AbstractRealm(CredentialsMatcher credentialsMatcher) {
 		setCredentialsMatcher(credentialsMatcher);
 	}
 	
@@ -56,21 +44,11 @@ public abstract class AbstractRealm<T extends AbstractUser> extends AuthorizingR
 			
 			@Override
 			public Collection<Permission> getObjectPermissions() {
-				return permissionsOf(userId);
+				return EasySet.of((Permission)getUserById(userId));
 			}
 		};
 	}
 	
-	/**
-	 * Get assigned permissions of user of specified identifier.
-	 * 
-	 * @param userId
-	 * 			Identifier of user to get permissions of. Value of <tt>0</tt> means anonymous user 
-	 * @return
-	 * 			Collection of {@link WildcardPermission} string
-	 */
-	protected abstract Collection<Permission> permissionsOf(Long userId);
-
 	/**
 	 * Retrieve {@link AuthenticationInfo} of specified token. 
 	 * 
@@ -85,16 +63,33 @@ public abstract class AbstractRealm<T extends AbstractUser> extends AuthorizingR
 	 * 			AuthenticationException
 	 */
 	protected AuthenticationInfo authenticationInfoOf(UsernamePasswordToken token) throws AuthenticationException {
-		DetachedCriteria criteria = DetachedCriteria.forClass(userClass);
-        criteria.add(Restrictions.eq("name", token.getUsername()));
-
-        return (AbstractUser) generalDao.find(criteria);
+		return getUserByName(token.getUsername());
 	}
 
 	@Override
 	protected final AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
 		return authenticationInfoOf((UsernamePasswordToken) token);
 	}
+	
+	/**
+	 * Get user by identifier.
+	 * 
+	 * @param userId
+	 * 			identifier of the user, <tt>0</tt> represents anonymous user
+	 * @return
+	 * 			user with specified identifier, not allowed to return null
+	 */
+	protected abstract AbstractUser getUserById(Long userId);
+	
+	/**
+	 * Get user by name.
+	 * 
+	 * @param userName
+	 * 			name of the user
+	 * @return
+	 * 			user with specified name, or <tt>null</tt> if not found
+	 */
+	protected abstract @Nullable AbstractUser getUserByName(String userName);
 
 	@Override
 	protected void assertCredentialsMatch(AuthenticationToken token, AuthenticationInfo info) throws AuthenticationException {

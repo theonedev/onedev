@@ -32,7 +32,7 @@ public class DefaultVoteInvitationManager extends DefaultGenericDao<VoteInvitati
 	public void save(VoteInvitation voteInvitation) {
 		if (voteInvitation.getId() == null) {
 			voteInvitation.getRequest().getVoteInvitations().add(voteInvitation);
-			voteInvitation.getReviewer().getVoteInvitations().add(voteInvitation);
+			voteInvitation.getVoter().getVoteInvitations().add(voteInvitation);
 		}
 		super.save(voteInvitation);
 	}
@@ -41,7 +41,7 @@ public class DefaultVoteInvitationManager extends DefaultGenericDao<VoteInvitati
 	@Override
 	public void delete(VoteInvitation voteInvitation) {
 		voteInvitation.getRequest().getVoteInvitations().remove(voteInvitation);
-		voteInvitation.getReviewer().getVoteInvitations().remove(voteInvitation);
+		voteInvitation.getVoter().getVoteInvitations().remove(voteInvitation);
 		super.delete(voteInvitation);
 	}
 

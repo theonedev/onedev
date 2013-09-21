@@ -1,7 +1,5 @@
 package com.pmease.gitop.core.manager.impl;
 
-import java.util.Collection;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -25,18 +23,6 @@ public class DefaultTeamManager extends DefaultGenericDao<Team> implements TeamM
 		super(generalDao);
 	}
 
-	@Sessional
-	@Override
-	public Collection<Team> findAnonymousTeams() {
-		return query(new Criterion[]{Restrictions.eq("anonymous", true)});
-	}
-
-	@Sessional
-	@Override
-	public Collection<Team> findRegisterTeams() {
-		return query(new Criterion[]{Restrictions.eq("register", true)});
-	}
-	
 	@Sessional
 	@Override
 	public Team find(User owner, String teamName) {
