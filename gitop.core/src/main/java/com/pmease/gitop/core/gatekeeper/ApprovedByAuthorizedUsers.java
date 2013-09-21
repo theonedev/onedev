@@ -4,14 +4,14 @@ import java.util.Collection;
 
 import com.pmease.gitop.core.model.MergeRequest;
 import com.pmease.gitop.core.model.User;
-import com.pmease.gitop.core.permission.operation.Write;
+import com.pmease.gitop.core.permission.operation.RepositoryOperation;
 
 @SuppressWarnings("serial")
 public class ApprovedByAuthorizedUsers extends AbstractGateKeeper {
 
 	@Override
 	public CheckResult check(MergeRequest request) {
-		Collection<User> authorizedUsers = request.getDestination().getRepository().findAuthorizedUsers(new Write());
+		Collection<User> authorizedUsers = request.getDestination().getRepository().findAuthorizedUsers(RepositoryOperation.WRITE);
 		OrGateKeeper or = new OrGateKeeper();
 		for (User user: authorizedUsers) {
 			ApprovedBySpecifiedUser entry = new ApprovedBySpecifiedUser();

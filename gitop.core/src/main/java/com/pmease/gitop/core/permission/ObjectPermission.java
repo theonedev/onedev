@@ -6,10 +6,10 @@ import com.pmease.gitop.core.model.Repository;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.permission.object.ProtectedObject;
 import com.pmease.gitop.core.permission.object.SystemObject;
-import com.pmease.gitop.core.permission.operation.Administration;
 import com.pmease.gitop.core.permission.operation.PrivilegedOperation;
-import com.pmease.gitop.core.permission.operation.Read;
-import com.pmease.gitop.core.permission.operation.Write;
+import com.pmease.gitop.core.permission.operation.RepositoryOperation;
+import com.pmease.gitop.core.permission.operation.SystemOperation;
+import com.pmease.gitop.core.permission.operation.UserOperation;
 
 /**
  * This class represents permissions to operate an account and its belongings.
@@ -56,30 +56,30 @@ public class ObjectPermission implements Permission {
 	}
 
 	public static ObjectPermission ofUserAdmin(User user) {
-		return new ObjectPermission(user, new Administration());
+		return new ObjectPermission(user, UserOperation.ADMINISTRATION);
 	}
 	
 	public static ObjectPermission ofUserRead(User user) {
-		return new ObjectPermission(user, new Read());
+		return new ObjectPermission(user, UserOperation.READ);
 	}
 
 	public static ObjectPermission ofUserWrite(User user) {
-		return new ObjectPermission(user, new Write());
+		return new ObjectPermission(user, UserOperation.WRITE);
 	}
 
 	public static ObjectPermission ofRepositoryAdmin(Repository repository) {
-		return new ObjectPermission(repository, new Administration());
+		return new ObjectPermission(repository, RepositoryOperation.ADMINISTRATION);
 	}
 
 	public static ObjectPermission ofRepositoryRead(Repository repository) {
-		return new ObjectPermission(repository, new Read());
+		return new ObjectPermission(repository, RepositoryOperation.READ);
 	}
 
 	public static ObjectPermission ofRepositoryWrite(Repository repository) {
-		return new ObjectPermission(repository, new Write());
+		return new ObjectPermission(repository, RepositoryOperation.WRITE);
 	}
 
-	public static ObjectPermission ofSystem(PrivilegedOperation operation) {
+	public static ObjectPermission ofSystem(SystemOperation operation) {
 		return new ObjectPermission(new SystemObject(), operation);
 	}
 	

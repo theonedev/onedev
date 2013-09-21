@@ -18,7 +18,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitop.core.gatekeeper.GateKeeper;
 import com.pmease.gitop.core.permission.object.ProtectedObject;
 import com.pmease.gitop.core.permission.object.UserBelonging;
-import com.pmease.gitop.core.permission.operation.PrivilegedOperation;
+import com.pmease.gitop.core.permission.operation.RepositoryOperation;
 
 @Entity
 @Table(uniqueConstraints={
@@ -39,7 +39,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	private GateKeeper gateKeeper;
 
 	@OneToMany(mappedBy="repository")
-	private Collection<Authorization> authorizations = new ArrayList<Authorization>();
+	private Collection<RepositoryAuthorization> authorizations = new ArrayList<RepositoryAuthorization>();
 
 	public User getOwner() {
 		return owner;
@@ -80,11 +80,11 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		return getOwner();
 	}
 
-	public Collection<Authorization> getAuthorizations() {
+	public Collection<RepositoryAuthorization> getAuthorizations() {
 		return authorizations;
 	}
 
-	public void setAuthorizations(Collection<Authorization> authorizations) {
+	public void setAuthorizations(Collection<RepositoryAuthorization> authorizations) {
 		this.authorizations = authorizations;
 	}
 
@@ -98,10 +98,10 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		}
 	}
 
-	public Collection<User> findAuthorizedUsers(PrivilegedOperation operation) {
+	public Collection<User> findAuthorizedUsers(RepositoryOperation operation) {
 		Map<Long, Boolean> authorizationMap = new HashMap<Long, Boolean>();
-		for (Authorization authorization: getAuthorizations()) {
-			authorizationMap.put(authorization.getTeam().getId(), authorization.getOperation().can(operation));
+		for (RepositoryAuthorization authorization: getAuthorizations()) {
+			authorizationMap.put(authorization.getTeam().getId(), authorization.getAuthorizedOperation().can(operation));
 		}
 		
 		Collection<Team> teams = new HashSet<Team>();
@@ -113,7 +113,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 				else
 					continue;
 			} else {
-				if (team.getOperation().can(operation))
+				if (team.getAuthorizedOperation().can(operation))
 					teams.add(team);
 			}
 		}

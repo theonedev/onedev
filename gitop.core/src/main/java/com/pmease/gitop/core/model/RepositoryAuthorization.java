@@ -7,15 +7,14 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.gitop.core.permission.operation.PrivilegedOperation;
-import com.pmease.gitop.core.permission.operation.Read;
+import com.pmease.gitop.core.permission.operation.RepositoryOperation;
 
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"team", "repository"})
 })
-public class Authorization extends AbstractEntity {
+public class RepositoryAuthorization extends AbstractEntity {
 
 	@ManyToOne
 	@JoinColumn(nullable=false)
@@ -25,14 +24,14 @@ public class Authorization extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private Repository repository;
 	
-	private PrivilegedOperation operation = new Read();
+	private RepositoryOperation authorizedOperation = RepositoryOperation.READ;
 	
-	public PrivilegedOperation getOperation() {
-		return operation;
+	public RepositoryOperation getAuthorizedOperation() {
+		return authorizedOperation;
 	}
 
-	public void setOperation(PrivilegedOperation operation) {
-		this.operation = operation;
+	public void setAuthorizedOperation(RepositoryOperation authorizedOperation) {
+		this.authorizedOperation = authorizedOperation;
 	}
 
 	public Team getTeam() {

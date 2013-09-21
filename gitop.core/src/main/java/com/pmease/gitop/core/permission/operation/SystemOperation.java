@@ -9,19 +9,19 @@ public enum SystemOperation implements PrivilegedOperation {
 		}
 		
 	},
-	CREATE_ASSESSMENT {
+	VOTE {
 
 		@Override
 		public boolean can(PrivilegedOperation operation) {
-			return operation == CREATE_ASSESSMENT;
+			return operation == VOTE;
 		}
 		
 	},
-	CREATE_COMMENT {
+	ADD_COMMENT {
 
 		@Override
 		public boolean can(PrivilegedOperation operation) {
-			return operation == CREATE_COMMENT;
+			return operation == ADD_COMMENT;
 		}
 		
 	},
@@ -45,7 +45,7 @@ public enum SystemOperation implements PrivilegedOperation {
 
 		@Override
 		public boolean can(PrivilegedOperation operation) {
-			return operation == READ_ALL_REPOSITORIES;
+			return operation == READ_ALL_REPOSITORIES || RepositoryOperation.READ.can(operation);
 		}
 		
 	},
@@ -53,7 +53,9 @@ public enum SystemOperation implements PrivilegedOperation {
 
 		@Override
 		public boolean can(PrivilegedOperation operation) {
-			return READ_ALL_REPOSITORIES.can(operation);
+			return operation == WRITE_ALL_REPOSITORIES 
+					|| READ_ALL_REPOSITORIES.can(operation) 
+					|| RepositoryOperation.WRITE.can(operation);
 		}
 		
 	}
