@@ -10,6 +10,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.validator.constraints.NotEmpty;
+
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.GeneralException;
@@ -125,4 +129,14 @@ public class EditableUtils {
 		}
 	}
 
+	public static boolean isPropertyRequired(Method propertyGetter) {
+		if (propertyGetter.getReturnType().isPrimitive() && propertyGetter.getReturnType() != boolean.class
+				|| propertyGetter.getAnnotation(NotNull.class) != null 
+				|| propertyGetter.getAnnotation(NotEmpty.class) != null) { 
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 }

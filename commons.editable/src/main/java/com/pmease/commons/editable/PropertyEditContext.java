@@ -6,9 +6,6 @@ import java.lang.reflect.Method;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.BeanUtils;
@@ -81,13 +78,7 @@ public abstract class PropertyEditContext extends AbstractEditContext {
 	}
 	
 	public boolean isPropertyRequired() {
-		if (getPropertyGetter().getReturnType().isPrimitive() 
-				|| getPropertyGetter().getAnnotation(NotNull.class) != null 
-				|| getPropertyGetter().getAnnotation(NotEmpty.class) != null) { 
-			return true;
-		} else {
-			return false;
-		}
+		return EditableUtils.isPropertyRequired(getPropertyGetter());
 	}
 	
 }

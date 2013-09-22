@@ -110,6 +110,14 @@ public class TableListPropertyEditor extends Panel {
 			@Override
 			protected void populateItem(ListItem<Method> item) {
 				item.add(new Label("header", EditableUtils.getName(item.getModelObject())));
+				
+				String required;
+				if (EditableUtils.isPropertyRequired(item.getModelObject()))
+					required = "*";
+				else
+					required = "&nbsp;";
+				
+				item.add(new Label("required", required).setEscapeModelStrings(false));
 			}
 			
 		});

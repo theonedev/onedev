@@ -109,6 +109,7 @@ table td, table th {
 }
 
 .required {
+	font-size: 18px;
 	color: #B94A48;
 }
 

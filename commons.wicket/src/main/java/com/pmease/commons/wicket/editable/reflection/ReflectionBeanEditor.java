@@ -65,6 +65,15 @@ public class ReflectionBeanEditor extends Panel {
 			protected void populateItem(ListItem<PropertyEditContext> item) {
 				final PropertyEditContext propertyContext = item.getModelObject();
 				item.add(new Label("name", EditableUtils.getName(propertyContext.getPropertyGetter())));
+
+				String required;
+				if (propertyContext.isPropertyRequired())
+					required = "*";
+				else
+					required = "&nbsp;";
+				
+				item.add(new Label("required", required).setEscapeModelStrings(false));
+				
 				item.add((Component)propertyContext.renderForEdit("value"));
 				
 				String description = EditableUtils.getDescription(propertyContext.getPropertyGetter());

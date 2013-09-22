@@ -3,7 +3,9 @@ package com.pmease.commons.wicket.editable.nuemric;
 import java.io.Serializable;
 import java.util.Map;
 
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
@@ -30,7 +32,18 @@ public class NumericPropertyEditContext extends PropertyEditContext {
 
 	@Override
 	public Object renderForEdit(Object renderParam) {
-		return new NumericPropertyEditor((String) renderParam, this);
+		return new TextField<String>((String) renderParam, getInputModel()) {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				tag.setName("input");
+				tag.put("type", "text");
+				tag.put("class", "form-control");
+
+				super.onComponentTag(tag);
+			}
+			
+		};
 	}
 
 	@Override
