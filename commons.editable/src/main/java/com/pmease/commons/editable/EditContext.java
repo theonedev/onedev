@@ -14,9 +14,9 @@ public interface EditContext extends Serializable {
 	
 	EditContext getChildContext(Serializable propertyName);
 	
-	boolean hasError(Serializable propertyName, boolean recursive);
+	boolean hasValidationError(Serializable propertyName, boolean recursive);
 	
-	boolean hasError(boolean recursive);
+	boolean hasValidationError(boolean recursive);
 	
 	void error(String errorMessage);
 	

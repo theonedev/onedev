@@ -44,6 +44,7 @@ public abstract class AbstractEditContext implements EditContext {
 	@Override
 	public void validate() {
 		validationErrorMessages.clear();
+		
 		if (getChildContexts() != null) {
 			for (EditContext each: getChildContexts().values())
 				each.validate();
@@ -71,13 +72,13 @@ public abstract class AbstractEditContext implements EditContext {
 	}
 
 	@Override
-	public boolean hasError(Serializable propertyName, boolean recursive) {
+	public boolean hasValidationError(Serializable propertyName, boolean recursive) {
 		EditContext childContext = getChildContext(propertyName);
 		return !childContext.getValidationErrors(recursive).isEmpty();
 	}
 
 	@Override
-	public boolean hasError(boolean recursive) {
+	public boolean hasValidationError(boolean recursive) {
 		return !getValidationErrors(recursive).isEmpty();
 	}
 

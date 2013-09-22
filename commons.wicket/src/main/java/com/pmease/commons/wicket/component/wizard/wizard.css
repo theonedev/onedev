@@ -1,12 +1,8 @@
-.wizard table.reflection td.name {
-	background: none;
-	font-weight: normal;
+.wizard {
+	text-align: left;	
 }
 .wizard .panel-heading {
 	font-size: 16px;
-}
-.wizard .buttons {
-	margin: 0 auto;
 }
 .wizard .buttons span em {
 	font-style: normal;

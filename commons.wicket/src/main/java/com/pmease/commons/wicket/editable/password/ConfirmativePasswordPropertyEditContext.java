@@ -36,8 +36,6 @@ public class ConfirmativePasswordPropertyEditContext extends PropertyEditContext
 
 	@Override
 	protected void doValidation() {
-		super.doValidation();
-		
 		if (password == null)
 			error("Please specify the password.");
 		else if (confirmedPassword == null)
@@ -46,6 +44,9 @@ public class ConfirmativePasswordPropertyEditContext extends PropertyEditContext
 			error("Password and its confirmation should be identical.");
 		else
 			setPropertyValue(AppLoader.getInstance(PasswordService.class).encryptPassword(password));
+		
+		if (!hasValidationError(true))
+			super.doValidation();
 	}
 
 	@Override

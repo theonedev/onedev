@@ -42,7 +42,7 @@ public class ManualConfigStep implements WizardStep {
 	@Override
 	public boolean complete() {
 		editContext.validate();
-		if (editContext.hasError(true)) {
+		if (editContext.hasValidationError(true)) {
 			return false;
 		} else {
 			config.complete();

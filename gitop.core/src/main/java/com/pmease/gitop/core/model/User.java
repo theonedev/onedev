@@ -95,6 +95,7 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	@Editable(name="Password")
 	@Password(confirmative=true)
+	@NotEmpty
 	@Override
 	public String getPasswordHash() {
 		return super.getPasswordHash();

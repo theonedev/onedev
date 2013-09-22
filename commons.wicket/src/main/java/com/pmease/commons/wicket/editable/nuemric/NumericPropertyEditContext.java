@@ -77,7 +77,8 @@ public class NumericPropertyEditContext extends PropertyEditContext {
 			error("Please specify a number here.");
 		}
 		
-		super.doValidation();
+		if (!hasValidationError(true))
+			super.doValidation();
 	}
 
 	@Override

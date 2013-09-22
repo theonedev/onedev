@@ -25,7 +25,7 @@ public class HomePage extends BasePage {
 			protected void onSubmit() {
 				super.onSubmit();
 				editContext.validate();
-				if (!editContext.hasError(true))
+				if (!editContext.hasValidationError(true))
 					repository = cloned;
 			}
 			
