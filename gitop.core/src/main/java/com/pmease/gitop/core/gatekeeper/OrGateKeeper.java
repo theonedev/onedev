@@ -7,13 +7,15 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.annotation.TableLayout;
 import com.pmease.commons.util.trimmable.AndOrConstruct;
 import com.pmease.commons.util.trimmable.TrimUtils;
 import com.pmease.commons.util.trimmable.Trimmable;
 import com.pmease.gitop.core.model.MergeRequest;
 
 @SuppressWarnings("serial")
-@Editable(name="Any sub gate keeper accepts")
+@Editable(name="Any Of Below Sub Gate Keeper Accepts")
+@TableLayout
 public class OrGateKeeper extends AbstractGateKeeper {
 
 	private List<GateKeeper> gateKeepers = new ArrayList<GateKeeper>();

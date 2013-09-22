@@ -30,6 +30,7 @@ table.list.editor input, table.list.editor select {
 }
 td.no-elements {
 	font-style: italic;
+	padding-bottom: 10px;
 }
 
 table.polymorphic {
@@ -43,3 +44,10 @@ table.reflection input[type="text"], table.reflection select {
 	height: 32px;
 	font-size: 13px;
 } 
+
+div.reflection div.name {
+	font-weight: bold;
+}
+div.reflection select.type, div.reflectio input.enable {
+	margin-bottom: 15px;
+}

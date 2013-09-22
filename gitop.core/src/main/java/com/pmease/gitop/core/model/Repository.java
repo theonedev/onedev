@@ -13,6 +13,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.validator.constraints.NotEmpty;
+
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitop.core.Gitop;
@@ -63,7 +65,9 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		this.owner = owner;
 	}
 
-	@Editable
+	@Editable(description=
+			"Specify name of the repository. It will be used to identify the repository when accessing via Git.")
+	@NotEmpty
 	public String getName() {
 		return name;
 	}
@@ -72,7 +76,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		this.name = name;
 	}
 
-	@Editable
+	@Editable(description="Specify description of the repository.")
 	public String getDescription() {
 		return description;
 	}
@@ -81,7 +85,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		this.description = description;
 	}
 
-	@Editable
+	@Editable(name="Public", description=
+			"If a repository is made public, it will be able to be browsed/pulled by anonymous users.")
 	public boolean isPubliclyAccessible() {
 		return publiclyAccessible;
 	}
@@ -99,7 +104,9 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		this.defaultAuthorizedOperation = defaultAuthorizedOperation;
 	}
 
-	@Editable
+	@Editable(
+			name="Accept Merge Requests If", 
+			description="Optionally define gate keeper to accept merge requests under certain condition.")
 	public GateKeeper getGateKeeper() {
 		return gateKeeper;
 	}

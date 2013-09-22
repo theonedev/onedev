@@ -6,7 +6,7 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.model.MergeRequest;
 
 @SuppressWarnings("serial")
-@Editable
+@Editable(name="Rejected By Below Gate Keeper")
 public class NotGateKeeper extends AbstractGateKeeper {
 
 	private GateKeeper gateKeeper;

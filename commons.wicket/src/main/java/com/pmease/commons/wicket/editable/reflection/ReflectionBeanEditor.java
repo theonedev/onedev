@@ -11,6 +11,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
@@ -18,6 +19,7 @@ import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.editable.ValidationError;
+import com.pmease.commons.editable.annotation.TableLayout;
 import com.pmease.commons.wicket.editable.EditableResourceReference;
 
 @SuppressWarnings("serial")
@@ -59,11 +61,20 @@ public class ReflectionBeanEditor extends Panel {
 			
 		});
 
-		add(new ListView<PropertyEditContext>("properties", editContext.getPropertyContexts()) {
+		Fragment fragment;
+		if (editContext.getBean().getClass().getAnnotation(TableLayout.class) == null)
+			fragment = new Fragment("beanEditor", "default", ReflectionBeanEditor.this);
+		else
+			fragment = new Fragment("beanEditor", "table", ReflectionBeanEditor.this);
+		
+		add(fragment);
+		
+		fragment.add(new ListView<PropertyEditContext>("properties", editContext.getPropertyContexts()) {
 
 			@Override
 			protected void populateItem(ListItem<PropertyEditContext> item) {
 				final PropertyEditContext propertyContext = item.getModelObject();
+				
 				item.add(new Label("name", EditableUtils.getName(propertyContext.getPropertyGetter())));
 
 				String required;
