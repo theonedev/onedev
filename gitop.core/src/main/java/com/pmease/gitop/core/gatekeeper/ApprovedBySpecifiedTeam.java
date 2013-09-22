@@ -5,17 +5,20 @@ import java.util.HashSet;
 
 import javax.validation.constraints.Min;
 
+import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.model.MergeRequest;
 import com.pmease.gitop.core.model.TeamMembership;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.model.Vote;
 
 @SuppressWarnings("serial")
+@Editable
 public class ApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
 
 	private int leastApprovals = 1;
-	
-	@Min(1)
+
+	@Editable
+	@Min(value=1, message="Least approvals should not be less than 1.")
 	public int getLeastApprovals() {
 		return leastApprovals;
 	}

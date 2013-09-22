@@ -17,7 +17,7 @@ public class NumericPropertyEditContext extends PropertyEditContext {
 	
 	public NumericPropertyEditContext(Serializable bean, String propertyName) {
 		super(bean, propertyName);
-		Integer propertyValue = (Integer) getPropertyValue();
+		Serializable propertyValue = getPropertyValue();
 		if (propertyValue != null)
 			inputModel = new Model<String>(propertyValue.toString());
 		else
@@ -45,10 +45,15 @@ public class NumericPropertyEditContext extends PropertyEditContext {
 	@Override
 	protected void doValidation() {
 		String input = inputModel.getObject();
-		Integer convertedInput;
+
+		Serializable convertedInput;
+		
 		try {
 			if (input != null) {
-				convertedInput = Integer.valueOf(input);
+				if (getPropertyGetter().getReturnType() == int.class || getPropertyGetter().getReturnType() == Integer.class)
+					convertedInput = Integer.valueOf(input);
+				else
+					convertedInput = Long.valueOf(input);
 			} else {
 				convertedInput = null;
 			}

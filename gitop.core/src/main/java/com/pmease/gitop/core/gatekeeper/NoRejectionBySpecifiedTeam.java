@@ -1,10 +1,12 @@
 package com.pmease.gitop.core.gatekeeper;
 
+import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.model.MergeRequest;
 import com.pmease.gitop.core.model.TeamMembership;
 import com.pmease.gitop.core.model.Vote;
 
 @SuppressWarnings("serial")
+@Editable
 public class NoRejectionBySpecifiedTeam extends TeamAwareGateKeeper {
 
 	@Override

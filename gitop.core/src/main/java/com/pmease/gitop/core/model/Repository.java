@@ -13,6 +13,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.gatekeeper.GateKeeper;
@@ -27,6 +28,7 @@ import com.pmease.gitop.core.permission.operation.RepositoryOperation;
 		@UniqueConstraint(columnNames={"owner", "name"})
 })
 @SuppressWarnings("serial")
+@Editable
 public class Repository extends AbstractEntity implements UserBelonging {
 	
 	@ManyToOne
@@ -61,6 +63,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		this.owner = owner;
 	}
 
+	@Editable
 	public String getName() {
 		return name;
 	}
@@ -69,6 +72,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		this.name = name;
 	}
 
+	@Editable
 	public String getDescription() {
 		return description;
 	}
@@ -77,6 +81,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		this.description = description;
 	}
 
+	@Editable
 	public boolean isPubliclyAccessible() {
 		return publiclyAccessible;
 	}
@@ -94,9 +99,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		this.defaultAuthorizedOperation = defaultAuthorizedOperation;
 	}
 
+	@Editable
 	public GateKeeper getGateKeeper() {
-		if (gateKeeper != null)
-			gateKeeper = (GateKeeper) gateKeeper.trim(this);
 		return gateKeeper;
 	}
 

@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.FindChangedFilesCommand;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.loader.AppLoader;
@@ -14,10 +15,12 @@ import com.pmease.gitop.core.model.MergeRequest;
 import com.pmease.gitop.core.model.MergeRequestUpdate;
 
 @SuppressWarnings("serial")
+@Editable
 public class TouchSpecifiedFiles extends AbstractGateKeeper {
 
 	private String filePaths;
 	
+	@Editable
 	@NotEmpty
 	public String getFilePaths() {
 		return filePaths;

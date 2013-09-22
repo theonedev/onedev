@@ -4,7 +4,10 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import com.pmease.commons.editable.annotation.Editable;
+
 @SuppressWarnings("serial")
+@Editable
 public abstract class AbstractGateKeeper implements GateKeeper {
 
 	@Override

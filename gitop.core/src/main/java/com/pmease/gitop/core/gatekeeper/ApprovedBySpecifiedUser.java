@@ -1,5 +1,8 @@
 package com.pmease.gitop.core.gatekeeper;
 
+import javax.validation.constraints.NotNull;
+
+import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.EasySet;
 import com.pmease.gitop.core.manager.UserManager;
@@ -8,10 +11,13 @@ import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.model.Vote;
 
 @SuppressWarnings("serial")
+@Editable
 public class ApprovedBySpecifiedUser extends AbstractGateKeeper {
 
 	private Long userId;
 	
+	@Editable
+	@NotNull
 	public Long getUserId() {
 		return userId;
 	}

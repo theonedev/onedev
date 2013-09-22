@@ -1,6 +1,9 @@
 package com.pmease.gitop.core.gatekeeper;
 
+import javax.validation.constraints.NotNull;
+
 import com.google.common.base.Preconditions;
+import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.namedentity.EntityLoader;
 import com.pmease.commons.util.namedentity.EntityMatcher;
@@ -12,10 +15,13 @@ import com.pmease.gitop.core.model.MergeRequest;
 import com.pmease.gitop.core.model.Repository;
 
 @SuppressWarnings("serial")
+@Editable
 public class SubmittedToSpecifiedBranch extends AbstractGateKeeper {
 
 	private String branchPatterns;
 	
+	@Editable
+	@NotNull
 	public String getBranchPatterns() {
 		return branchPatterns;
 	}
