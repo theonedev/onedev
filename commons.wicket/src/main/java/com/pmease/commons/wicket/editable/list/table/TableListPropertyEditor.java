@@ -26,6 +26,7 @@ import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.editable.ValidationError;
 import com.pmease.commons.wicket.WicketUtils;
+import com.pmease.commons.wicket.editable.EditableResourceBehavior;
 
 @SuppressWarnings("serial")
 public class TableListPropertyEditor extends Panel {
@@ -40,6 +41,8 @@ public class TableListPropertyEditor extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		add(new EditableResourceBehavior());
 		
 		if (editContext.isPropertyRequired()) {
 			add(new WebMarkupContainer("enable").setVisible(false));

@@ -7,12 +7,11 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.ISortableDataProvider;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.OddEvenItem;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.commons.wicket.asset.bootstrap.BootstrapResourceReference;
+import com.pmease.commons.wicket.asset.bootstrap.BootstrapHeaderItem;
 
 @SuppressWarnings("serial")
 public class CustomDataTable<T, S> extends DataTable<T, S> {
@@ -35,7 +34,7 @@ public class CustomDataTable<T, S> extends DataTable<T, S> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 
-		response.render(JavaScriptHeaderItem.forReference(new BootstrapResourceReference()));
+		response.render(BootstrapHeaderItem.get());
 	}
 
 }

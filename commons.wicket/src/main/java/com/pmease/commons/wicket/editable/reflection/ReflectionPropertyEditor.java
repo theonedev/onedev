@@ -9,6 +9,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.editable.EditContext;
+import com.pmease.commons.wicket.editable.EditableResourceBehavior;
 
 @SuppressWarnings("serial")
 public class ReflectionPropertyEditor extends Panel {
@@ -26,6 +27,8 @@ public class ReflectionPropertyEditor extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		add(new EditableResourceBehavior());
+		
 		if (editContext.isPropertyRequired()) {
 			add(new WebMarkupContainer("enable").setVisible(false));
 			if (editContext.getPropertyValue() == null) {

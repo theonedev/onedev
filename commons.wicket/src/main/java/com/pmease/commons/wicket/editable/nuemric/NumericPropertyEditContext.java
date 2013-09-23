@@ -11,6 +11,7 @@ import org.apache.wicket.model.Model;
 
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.PropertyEditContext;
+import com.pmease.commons.wicket.editable.EditableResourceBehavior;
 
 @SuppressWarnings("serial")
 public class NumericPropertyEditContext extends PropertyEditContext {
@@ -43,16 +44,17 @@ public class NumericPropertyEditContext extends PropertyEditContext {
 				super.onComponentTag(tag);
 			}
 			
-		};
+		}.add(new EditableResourceBehavior());
 	}
 
 	@Override
 	public Object renderForView(Object renderParam) {
 		Object propertyValue = getPropertyValue();
-		if (propertyValue != null)
+		if (propertyValue != null) {
 			return new Label((String) renderParam, propertyValue.toString());
-		else
+		} else {
 			return new Label((String) renderParam, "<i>Not Defined</i>").setEscapeModelStrings(false);
+		}
 	}
 
 	@Override

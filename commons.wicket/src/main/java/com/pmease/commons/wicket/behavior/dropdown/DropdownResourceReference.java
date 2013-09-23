@@ -8,21 +8,26 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import com.pmease.commons.wicket.asset.bootstrap.BootstrapResourceReference;
+import com.pmease.commons.wicket.asset.bootstrap.BootstrapHeaderItem;
 
 public class DropdownResourceReference extends JavaScriptResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
-	public DropdownResourceReference() {
+	public static DropdownResourceReference get() {
+		return INSTANCE;
+	}
+	
+	private static DropdownResourceReference INSTANCE = new DropdownResourceReference();
+	
+	private DropdownResourceReference() {
 		super(DropdownResourceReference.class, "dropdown.js");
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Iterable<? extends HeaderItem> getDependencies() {
 		return Arrays.asList(
-				JavaScriptHeaderItem.forReference(new BootstrapResourceReference()),
+				BootstrapHeaderItem.get(),
 				JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
 						DropdownResourceReference.class, "alignment.js")),
 				CssHeaderItem.forReference(new CssResourceReference(

@@ -1,28 +1,38 @@
 package com.pmease.commons.wicket.asset;
 
-import java.util.Arrays;
-
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import com.pmease.commons.wicket.asset.bootstrap.BootstrapResourceReference;
+import com.pmease.commons.util.EasyList;
+import com.pmease.commons.wicket.asset.bootstrap.BootstrapHeaderItem;
 
+/**
+ * Common resource is intended to provide a common look&feel for all products using 
+ * commons.wicket 
+ * 
+ * @author robin
+ *
+ */
 public class CommonResourceReference extends JavaScriptResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
-	public CommonResourceReference() {
+	public static CommonResourceReference get() {
+		return INSTANCE;
+	}
+	
+	private static CommonResourceReference INSTANCE = new CommonResourceReference();
+	
+	private CommonResourceReference() {
 		super(CommonResourceReference.class, "common.js");
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Iterable<? extends HeaderItem> getDependencies() {
-		return Arrays.asList(
-				JavaScriptHeaderItem.forReference(new BootstrapResourceReference()),
+		return EasyList.of(
+				BootstrapHeaderItem.get(),
 				CssHeaderItem.forReference(new CssResourceReference(CommonResourceReference.class, "common.css")));
 	}
 

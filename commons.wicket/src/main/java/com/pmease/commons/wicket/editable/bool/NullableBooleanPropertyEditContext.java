@@ -11,6 +11,7 @@ import org.apache.wicket.model.IModel;
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.util.EasyList;
+import com.pmease.commons.wicket.editable.EditableResourceBehavior;
 
 @SuppressWarnings("serial")
 public class NullableBooleanPropertyEditContext extends PropertyEditContext {
@@ -58,7 +59,7 @@ public class NullableBooleanPropertyEditContext extends PropertyEditContext {
 			
 		};
 		
-		dropDownChoice.setNullValid(true);
+		dropDownChoice.setNullValid(true).add(new EditableResourceBehavior());
 		
 		return dropDownChoice;
 	}

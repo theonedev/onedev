@@ -40,7 +40,7 @@ public class ConfirmBehavior extends Behavior {
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
-		response.render(JavaScriptHeaderItem.forReference(new ModalResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(ModalResourceReference.get()));
 		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(ConfirmBehavior.class, "confirm.js")));
 	}
 	

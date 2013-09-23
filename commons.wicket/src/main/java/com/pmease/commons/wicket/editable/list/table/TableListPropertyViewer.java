@@ -15,6 +15,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyEditContext;
+import com.pmease.commons.wicket.editable.EditableResourceBehavior;
 
 @SuppressWarnings("serial")
 public class TableListPropertyViewer extends Panel {
@@ -29,6 +30,8 @@ public class TableListPropertyViewer extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		add(new EditableResourceBehavior());
 		
 		add(new ListView<Method>("headers", new LoadableDetachableModel<List<Method>>() {
 

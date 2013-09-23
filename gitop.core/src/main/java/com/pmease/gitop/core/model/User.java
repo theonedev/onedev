@@ -272,12 +272,13 @@ public class User extends AbstractUser implements ProtectedObject {
 					if (repositoryPermission.implies(objectPermission))
 						return true;
 				}
-			} else {
-				for (Repository each: Gitop.getInstance(RepositoryManager.class).findPublic()) {
-					ObjectPermission repositoryPermission = new ObjectPermission(each, RepositoryOperation.READ);
-					if (repositoryPermission.implies(objectPermission))
-						return true;
-				}
+			} 
+			
+			// check if is public access
+			for (Repository each: Gitop.getInstance(RepositoryManager.class).findPublic()) {
+				ObjectPermission repositoryPermission = new ObjectPermission(each, RepositoryOperation.READ);
+				if (repositoryPermission.implies(objectPermission))
+					return true;
 			}
 		} 
 		return false;

@@ -15,7 +15,6 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.SubmitLink;
@@ -25,7 +24,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.wicket.asset.bootstrap.BootstrapResourceReference;
+import com.pmease.commons.wicket.asset.bootstrap.BootstrapHeaderItem;
 
 @SuppressWarnings("serial")
 public abstract class Wizard extends Panel {
@@ -150,7 +149,7 @@ public abstract class Wizard extends Panel {
 
 			@Override
 			public Iterable<? extends HeaderItem> getDependencies() {
-				return Arrays.asList(JavaScriptHeaderItem.forReference(new BootstrapResourceReference()));
+				return Arrays.asList(BootstrapHeaderItem.get());
 			}
 			
 		}));

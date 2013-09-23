@@ -10,6 +10,7 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.PropertyEditContext;
+import com.pmease.commons.wicket.editable.EditableResourceBehavior;
 
 @SuppressWarnings("serial")
 public class PasswordPropertyEditContext extends PropertyEditContext {
@@ -50,15 +51,18 @@ public class PasswordPropertyEditContext extends PropertyEditContext {
 		};
 		editor.setRequired(false);
 		editor.setResetPassword(false);
+		editor.add(new EditableResourceBehavior());
+		
 		return editor;
 	}
 
 	@Override
 	public Object renderForView(Object renderParam) {
-		if (getPropertyValue() != null)
+		if (getPropertyValue() != null) {
 			return new Label((String) renderParam, "******");
-		else
+		} else {
 			return new Label((String) renderParam, "<i>Not Defined</i>").setEscapeModelStrings(false);
+		}
 	}
 
 	@Override

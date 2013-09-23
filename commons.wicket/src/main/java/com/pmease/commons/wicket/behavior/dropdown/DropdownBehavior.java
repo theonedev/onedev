@@ -79,7 +79,7 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
-		response.render(JavaScriptHeaderItem.forReference(new DropdownResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(DropdownResourceReference.get()));
 		String script = String.format(
 				"setupDropdown('%s', '%s', %s, '%s', '%s', %s, %s, %s, %s, %d, %s)", 
 				getComponent().getMarkupId(), dropdownPanel.getMarkupId(), hoverDelay, alignment.getIndicatorMode().name(), 

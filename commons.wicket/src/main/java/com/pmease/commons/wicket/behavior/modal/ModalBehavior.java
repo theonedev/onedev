@@ -34,7 +34,7 @@ public class ModalBehavior extends AbstractDefaultAjaxBehavior {
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
-		response.render(JavaScriptHeaderItem.forReference(new ModalResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(ModalResourceReference.get()));
 		String script = String.format(
 				"setupModal('%s', '%s', '%s', %s)", 
 				getComponent().getMarkupId(), modalPanel.getMarkupId(), 

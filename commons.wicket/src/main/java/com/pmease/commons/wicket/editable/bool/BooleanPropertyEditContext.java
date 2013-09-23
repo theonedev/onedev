@@ -11,6 +11,7 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.PropertyEditContext;
+import com.pmease.commons.wicket.editable.EditableResourceBehavior;
 
 @SuppressWarnings("serial")
 public class BooleanPropertyEditContext extends PropertyEditContext {
@@ -46,7 +47,7 @@ public class BooleanPropertyEditContext extends PropertyEditContext {
 				super.onComponentTag(tag);
 			}
 			
-		};
+		}.add(new EditableResourceBehavior());
 	}
 
 	@Override

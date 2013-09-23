@@ -14,6 +14,7 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.EditableUtils;
+import com.pmease.commons.wicket.editable.EditableResourceBehavior;
 
 @SuppressWarnings("serial")
 public class PolymorphicPropertyEditor extends Panel {
@@ -31,6 +32,8 @@ public class PolymorphicPropertyEditor extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		add(new EditableResourceBehavior());
+		
 		List<String> implementationNames = new ArrayList<String>();
 		for (Class<?> each: editContext.getImplementations())
 			implementationNames.add(EditableUtils.getName(each));

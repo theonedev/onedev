@@ -4,6 +4,8 @@ import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
+import com.pmease.commons.wicket.editable.EditableResourceBehavior;
+
 @SuppressWarnings("serial")
 public class ConfirmativePasswordPropertyEditor extends Panel {
 	
@@ -17,6 +19,8 @@ public class ConfirmativePasswordPropertyEditor extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		add(new EditableResourceBehavior());
 		
 		add(new PasswordTextField("input", new IModel<String>() {
 

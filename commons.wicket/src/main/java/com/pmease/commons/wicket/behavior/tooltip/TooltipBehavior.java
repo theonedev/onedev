@@ -53,7 +53,7 @@ public class TooltipBehavior extends Behavior {
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
-		response.render(JavaScriptHeaderItem.forReference(new DropdownResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(DropdownResourceReference.get()));
 		
 		String escapedContent = StringEscapeUtils.escapeEcmaScript(StringEscapeUtils.escapeHtml4(contentModel.getObject()));
 		String script = String.format(

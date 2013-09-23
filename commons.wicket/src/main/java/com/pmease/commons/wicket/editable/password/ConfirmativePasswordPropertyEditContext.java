@@ -28,10 +28,11 @@ public class ConfirmativePasswordPropertyEditContext extends PropertyEditContext
 
 	@Override
 	public Object renderForView(Object renderParam) {
-		if (getPropertyValue() != null)
+		if (getPropertyValue() != null) {
 			return new Label((String) renderParam, "******");
-		else
+		} else {
 			return new Label((String) renderParam, "<i>Not Defined</i>").setEscapeModelStrings(false);
+		}
 	}
 
 	@Override

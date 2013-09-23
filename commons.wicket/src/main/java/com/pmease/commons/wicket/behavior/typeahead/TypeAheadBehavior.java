@@ -11,12 +11,11 @@ import org.apache.wicket.ajax.attributes.IAjaxCallListener;
 import org.apache.wicket.ajax.json.JSONArray;
 import org.apache.wicket.ajax.json.JsonFunction;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.handler.TextRequestHandler;
 
-import com.pmease.commons.wicket.asset.bootstrap.BootstrapResourceReference;
+import com.pmease.commons.wicket.asset.bootstrap.BootstrapHeaderItem;
 
 @SuppressWarnings("serial")
 public abstract class TypeAheadBehavior extends AbstractDefaultAjaxBehavior {
@@ -47,7 +46,7 @@ public abstract class TypeAheadBehavior extends AbstractDefaultAjaxBehavior {
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
 		
-		response.render(JavaScriptHeaderItem.forReference(new BootstrapResourceReference()));
+		response.render(BootstrapHeaderItem.get());
 		
 		String template = 
 				"$('#%s').typeahead({\n" + 
