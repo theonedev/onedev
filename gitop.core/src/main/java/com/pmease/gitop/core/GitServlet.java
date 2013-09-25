@@ -25,7 +25,7 @@ public class GitServlet extends HttpServlet {
 	
 	private static final Logger logger = LoggerFactory.getLogger(GitServlet.class);
 
-	private static final String INFO_REFS = "/info/refs";
+	private static final String INFO_REFS = "info/refs";
 	
 	private final RepositoryManager repositoryManager;
 	
@@ -34,13 +34,17 @@ public class GitServlet extends HttpServlet {
 		this.repositoryManager = repositoryManager;
 	}
 	
-	private Repository getRepository(HttpServletRequest request, HttpServletResponse response, String repoInfo) throws IOException {
+	private Repository getRepository(HttpServletRequest request, HttpServletResponse response, String repoInfo) 
+			throws IOException {
+		
+		repoInfo = StringUtils.stripStart(StringUtils.stripEnd(repoInfo, "/"), "/");
+		
 		String ownerName = StringUtils.substringBefore(repoInfo, "/");
 		String repositoryName = StringUtils.substringAfter(repoInfo, "/");
 
 		if (StringUtils.isBlank(ownerName) || StringUtils.isBlank(repositoryName)) {
-			String urlRoot = StringUtils.substringBeforeLast(request.getRequestURL().toString(), "?");
-			urlRoot = StringUtils.substringBeforeLast(urlRoot, "/");
+			String url = request.getRequestURL().toString();
+			String urlRoot = url.substring(0, url.length()-request.getPathInfo().length());
 			String message = "Expecting url of format " + urlRoot + "/<owner name>/<repository name>";
 			logger.error("Error serving git request: " + message);
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, message);
