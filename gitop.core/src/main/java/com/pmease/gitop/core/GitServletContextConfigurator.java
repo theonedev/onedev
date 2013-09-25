@@ -20,11 +20,6 @@ public class GitServletContextConfigurator implements ServletContextConfigurator
 	public void configure(ServletContextHandler context) {
 		ServletHolder servletHolder = new ServletHolder(gitServlet);
 		context.addServlet(servletHolder, "/git/*");
-		
-		servletHolder = new ServletHolder(new org.eclipse.jgit.http.server.GitServlet());
-		servletHolder.setInitParameter("base-path", "w:/temp/git");
-		servletHolder.setInitParameter("export-all", "1");
-		context.addServlet(servletHolder, "/jgit/*");
 	}
 
 }
