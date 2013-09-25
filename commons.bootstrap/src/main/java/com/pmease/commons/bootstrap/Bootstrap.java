@@ -44,9 +44,6 @@ public class Bootstrap {
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		
-		// Avoid the problem that some sorting does not work for JDK7
-		System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
-		
 		File sandboxDir = new File("target/sandbox");
 		if (sandboxDir.exists()) {
 			Map<String, File> systemClasspath = (Map<String, File>) BootstrapUtils
@@ -151,12 +148,10 @@ public class Bootstrap {
 
 			@Override
 			public int compare(File file1, File file2) {
-				if (file1.isDirectory())
-					return -1;
-				else if (file1.getName().startsWith("com.pmease"))
-					return -1;
-				else
-					return 1;
+				Boolean result1 = file1.isDirectory() || file1.getName().startsWith("com.pmease");
+				Boolean result2 = file2.isDirectory() || file2.getName().startsWith("com.pmease");
+
+				return result2.compareTo(result1);
 			}
 			
 		});
