@@ -7,7 +7,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.DefaultGenericDao;
+import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
 import com.pmease.gitop.core.model.MergeRequest;
@@ -15,7 +15,7 @@ import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.model.VoteInvitation;
 
 @Singleton
-public class DefaultVoteInvitationManager extends DefaultGenericDao<VoteInvitation> implements VoteInvitationManager {
+public class DefaultVoteInvitationManager extends AbstractGenericDao<VoteInvitation> implements VoteInvitationManager {
 
 	public DefaultVoteInvitationManager(GeneralDao generalDao) {
 		super(generalDao);

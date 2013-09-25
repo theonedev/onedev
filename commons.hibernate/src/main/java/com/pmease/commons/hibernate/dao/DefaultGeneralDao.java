@@ -56,19 +56,13 @@ public class DefaultGeneralDao implements GeneralDao, Serializable {
 		getSession().delete(entity);
 	}
 
-	private Session getSession() {
+	@Override
+	public Session getSession() {
 		return sessionProvider.get();
 	}
 
-	@Transactional
-	@Override
-	public <T extends AbstractEntity> void deleteById(Class<T> entityClass, Long entityId) {
-		T entity = load(unproxy(entityClass), entityId);
-		delete(entity);
-	}
-	
 	protected <T extends AbstractEntity> Class<T> unproxy(Class<T> entityClass) {
-		//cm will be null if entityClass is not registered with Hibernate or when
+		//class meta data will be null if entityClass is not registered with Hibernate or when
 		//it is a Hibernate proxy class (e.x. test.googlecode.genericdao.model.Person_$$_javassist_5).
 		//So if a class is not recognized, we will look at superclasses to see if
 		//it is a proxy.

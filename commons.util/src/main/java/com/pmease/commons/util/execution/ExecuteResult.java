@@ -1,5 +1,7 @@
 package com.pmease.commons.util.execution;
 
+import com.pmease.commons.util.GeneralException;
+
 public class ExecuteResult {
 
 	private int returnCode;
@@ -34,11 +36,11 @@ public class ExecuteResult {
 	 */
 	public RuntimeException buildException() {
     	if (errorMessage != null) {
-            throw new RuntimeException("Failed to run command: " + commandDescription  + 
+            throw new GeneralException("Failed to run command: " + commandDescription  + 
             		"\nCommand return code: " + getReturnCode() + 
                     "\nCommand error output: " + errorMessage);
     	} else {
-            throw new RuntimeException("Failed to run command: " + commandDescription + 
+            throw new GeneralException("Failed to run command: " + commandDescription + 
             		"\nCommand return code: " + getReturnCode());
     	}
 		

@@ -3,6 +3,7 @@ package com.pmease.commons.util.execution;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +33,7 @@ public class Commandline  {
     private File workingDir;
     
     private Map<String, String> environment = new HashMap<String, String>();
-
+    
     public Commandline(String command) {
         String[] parts = StringUtils.parseQuoteTokens(command);
         Preconditions.checkArgument(parts.length != 0, "Argument 'command' is invalid.");
@@ -105,8 +106,8 @@ public class Commandline  {
         return this;
     }
     
-    public ExecuteResult execute(OutputStream stdoutConsumer, LineConsumer stderrConsumer) {
-    	return execute(stdoutConsumer, stderrConsumer, null);
+    public ExecuteResult execute(OutputStream stdout, LineConsumer stderr) {
+    	return execute(stdout, stderr, null);
     }
     
 	private ProcessBuilder createProcessBuilder() {
@@ -148,39 +149,34 @@ public class Commandline  {
     	return processBuilder;
     }
     
-	public ExecuteResult execute(OutputStream stdoutConsumer, final LineConsumer stderrConsumer, 
-			@Nullable byte[] stdinBytes) {
+	public ExecuteResult execute(OutputStream stdout, final LineConsumer stderr, @Nullable InputStream stdin) {
 		
     	Process process;
         try {
         	ProcessBuilder processBuilder = createProcessBuilder();
-        	process = processBuilder.redirectErrorStream(stderrConsumer == null).start();
+        	process = processBuilder.redirectErrorStream(stderr == null).start();
         } catch (IOException e) {
         	throw new RuntimeException(e);
         }
 
-    	ByteArrayInputStream inputStream = null;
-    	if (stdinBytes != null && stdinBytes.length != 0) 
-    		inputStream = new ByteArrayInputStream(stdinBytes);
-    	
     	final StringBuffer errorMessage = new StringBuffer();
 		OutputStream errorMessageCollector = null;
-		if (stderrConsumer != null) {
-			errorMessageCollector = new LineConsumer(stderrConsumer.getEncoding()) {
+		if (stderr != null) {
+			errorMessageCollector = new LineConsumer(stderr.getEncoding()) {
 
 				@Override
 				public void consume(String line) {
 					if (errorMessage.length() != 0)
 						errorMessage.append("\n");
 					errorMessage.append(line);
-					stderrConsumer.consume(line);
+					stderr.consume(line);
 				}
 				
 			};
 		}
     	
-        ProcessStreamPumper streamPumper = ProcessStreamPumper.pump(process, stdoutConsumer, 
-        		errorMessageCollector, inputStream);
+        ProcessStreamPumper streamPumper = ProcessStreamPumper.pump(process, stdout, 
+        		errorMessageCollector, stdin);
         
         ExecuteResult result = new ExecuteResult(this);
         

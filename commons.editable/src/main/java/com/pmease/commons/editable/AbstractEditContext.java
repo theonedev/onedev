@@ -19,6 +19,7 @@ public abstract class AbstractEditContext implements EditContext {
 		this.bean = bean;
 	}
 	
+	@Override
 	public Serializable getBean() {
 		return bean;
 	}

@@ -7,7 +7,7 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.Sessional;
-import com.pmease.commons.hibernate.dao.DefaultGenericDao;
+import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.util.namedentity.EntityLoader;
 import com.pmease.commons.util.namedentity.NamedEntity;
@@ -16,7 +16,7 @@ import com.pmease.gitop.core.model.Branch;
 import com.pmease.gitop.core.model.Repository;
 
 @Singleton
-public class DefaultBranchManager extends DefaultGenericDao<Branch> implements BranchManager {
+public class DefaultBranchManager extends AbstractGenericDao<Branch> implements BranchManager {
 
 	@Inject
 	public DefaultBranchManager(GeneralDao generalDao) {

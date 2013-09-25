@@ -44,7 +44,6 @@ public class Repository extends AbstractEntity implements UserBelonging {
 
 	private boolean publiclyAccessible;
 	
-	@Column(nullable=false)
 	private RepositoryOperation defaultAuthorizedOperation;
 	
 	private GateKeeper gateKeeper;

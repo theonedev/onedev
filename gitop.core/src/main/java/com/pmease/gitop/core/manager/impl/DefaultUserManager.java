@@ -9,7 +9,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.Sessional;
-import com.pmease.commons.hibernate.dao.DefaultGenericDao;
+import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.util.namedentity.EntityLoader;
 import com.pmease.commons.util.namedentity.NamedEntity;
@@ -17,7 +17,7 @@ import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.model.User;
 
 @Singleton
-public class DefaultUserManager extends DefaultGenericDao<User> implements UserManager {
+public class DefaultUserManager extends AbstractGenericDao<User> implements UserManager {
 
 	private volatile Long rootUserId;
 	

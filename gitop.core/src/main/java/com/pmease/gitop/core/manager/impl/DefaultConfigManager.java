@@ -9,7 +9,7 @@ import org.hibernate.criterion.Restrictions;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.DefaultGenericDao;
+import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.core.model.Config;
@@ -18,7 +18,7 @@ import com.pmease.gitop.core.setting.MailSetting;
 import com.pmease.gitop.core.setting.StorageSetting;
 
 @Singleton
-public class DefaultConfigManager extends DefaultGenericDao<Config> implements ConfigManager {
+public class DefaultConfigManager extends AbstractGenericDao<Config> implements ConfigManager {
 
 	@Inject
 	public DefaultConfigManager(GeneralDao generalDao) {
