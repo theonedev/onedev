@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.git.Git;
 import com.pmease.gitop.core.manager.RepositoryManager;
-import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.model.Repository;
 
 @Singleton
@@ -31,16 +30,18 @@ public class GitServlet extends HttpServlet {
 	private final RepositoryManager repositoryManager;
 	
 	@Inject
-	public GitServlet(UserManager userManager, RepositoryManager repositoryManager) {
+	public GitServlet(RepositoryManager repositoryManager) {
 		this.repositoryManager = repositoryManager;
 	}
 	
-	private Repository getRepository(HttpServletResponse response, String repoInfo) throws IOException {
+	private Repository getRepository(HttpServletRequest request, HttpServletResponse response, String repoInfo) throws IOException {
 		String ownerName = StringUtils.substringBefore(repoInfo, "/");
 		String repositoryName = StringUtils.substringAfter(repoInfo, "/");
 
 		if (StringUtils.isBlank(ownerName) || StringUtils.isBlank(repositoryName)) {
-			String message = "Expecting url of format http(s)://<server>:<port>/<owner name>/<repository name>";
+			String urlRoot = StringUtils.substringBeforeLast(request.getRequestURL().toString(), "?");
+			urlRoot = StringUtils.substringBeforeLast(urlRoot, "/");
+			String message = "Expecting url of format " + urlRoot + "/<owner name>/<repository name>";
 			logger.error("Error serving git request: " + message);
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, message);
 			return null;
@@ -69,7 +70,7 @@ public class GitServlet extends HttpServlet {
 		String service = StringUtils.substringAfterLast(pathInfo, "/");
 
 		String repoInfo = StringUtils.substringBeforeLast(pathInfo, "/");
-		Repository repository = getRepository(resp, repoInfo);
+		Repository repository = getRepository(req, resp, repoInfo);
 		
 		if (repository != null) {
 			doNotCache(resp);
@@ -106,7 +107,7 @@ public class GitServlet extends HttpServlet {
 		}
 		
 		String repoInfo = pathInfo.substring(0, pathInfo.length() - INFO_REFS.length());
-		Repository repository = getRepository(resp, repoInfo);
+		Repository repository = getRepository(req, resp, repoInfo);
 		if (repository != null) {
 			doNotCache(resp);
 			String service = req.getParameter("service");

@@ -6,7 +6,7 @@ import java.util.Collection;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.pmease.commons.util.EasySet;
+import com.google.common.collect.Sets;
 import com.pmease.commons.util.FileUtils;
 
 public class ListChangedFilesCommandTest extends GitCommandTest {
@@ -37,7 +37,7 @@ public class ListChangedFilesCommandTest extends GitCommandTest {
 		
 		Collection<String> changedFiles = git.findChangedFiles().fromRev("HEAD~4").toRev("HEAD").call();
 		
-		Assert.assertTrue(changedFiles.containsAll(EasySet.of("a", "b", "c", "d")));
+		Assert.assertTrue(changedFiles.containsAll(Sets.newHashSet("a", "b", "c", "d")));
 	}
 
 }

@@ -9,6 +9,8 @@ import java.util.Collection;
 
 import org.junit.Test;
 
+import com.google.common.collect.Lists;
+
 public class PathUtilsTest {
 
 	@Test
@@ -23,15 +25,15 @@ public class PathUtilsTest {
 
 	@Test
 	public void shouldMatchLongest() {
-		Collection<String> basePaths = EasyList.of("/path1/path2", "/path1/path2/path3");
+		Collection<String> basePaths = Lists.newArrayList("/path1/path2", "/path1/path2/path3");
 		assertEquals(matchLongest(basePaths, "/path1/path2/path3/path4"), "/path1/path2/path3");
 		assertNull(matchLongest(basePaths, "/path1/path23"));
 		assertNull(matchLongest(basePaths, "/path1/path3"));
 		
-		basePaths = EasyList.of("/path1/path2", "/path1\\");
+		basePaths = Lists.newArrayList("/path1/path2", "/path1\\");
 		assertEquals(matchLongest(basePaths, "path1\\path234"), "/path1\\");
 		
-		basePaths = EasyList.of("/asset1/asset2", "/asset1");
+		basePaths = Lists.newArrayList("/asset1/asset2", "/asset1");
 		assertEquals(matchLongest(basePaths, "/asset1/asset2/test.html"), "/asset1/asset2");
 	}
 	

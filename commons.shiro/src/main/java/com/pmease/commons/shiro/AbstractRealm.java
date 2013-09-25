@@ -15,8 +15,8 @@ import org.apache.shiro.authz.Permission;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
-import com.pmease.commons.util.EasySet;
 
 public abstract class AbstractRealm extends AuthorizingRealm {
 
@@ -44,7 +44,7 @@ public abstract class AbstractRealm extends AuthorizingRealm {
 			
 			@Override
 			public Collection<Permission> getObjectPermissions() {
-				return EasySet.of((Permission)getUserById(userId));
+				return Sets.newHashSet((Permission)getUserById(userId));
 			}
 		};
 	}

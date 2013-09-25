@@ -5,7 +5,7 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import com.pmease.commons.util.EasyList;
+import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.asset.bootstrap.BootstrapHeaderItem;
 
 /**
@@ -31,7 +31,7 @@ public class CommonResourceReference extends JavaScriptResourceReference {
 
 	@Override
 	public Iterable<? extends HeaderItem> getDependencies() {
-		return EasyList.of(
+		return Lists.newArrayList(
 				BootstrapHeaderItem.get(),
 				CssHeaderItem.forReference(new CssResourceReference(CommonResourceReference.class, "common.css")));
 	}

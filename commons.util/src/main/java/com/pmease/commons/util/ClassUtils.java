@@ -34,26 +34,33 @@ public class ClassUtils extends org.apache.commons.lang3.ClassUtils {
 				.getCodeSource().getLocation().getFile());
 		if (location.isFile()) {
 			String packagePath = packageLocator.getPackage().getName().replace('.', '/') + "/";
-			JarFile jarFile;
+			JarFile jarFile = null;
 			try {
 				jarFile = new JarFile(location);
+				Enumeration<JarEntry> entries = jarFile.entries();
+				while (entries.hasMoreElements()) {
+					JarEntry entry = entries.nextElement();
+					if (entry.getName().startsWith(packagePath) && entry.getName().endsWith(".class")) {
+						String className = entry.getName().replace('/', '.');
+						className = StringUtils.substringBeforeLast(className, ".");
+						Class<T> clazz;
+						try {
+							clazz = (Class<T>) superClass.getClassLoader().loadClass(className);
+						} catch (ClassNotFoundException e) {
+							throw new RuntimeException(e);
+						}
+						if (superClass.isAssignableFrom(clazz) && clazz != superClass)
+							classes.add(clazz);
+					}
+				}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
-			}
-			Enumeration<JarEntry> entries = jarFile.entries();
-			while (entries.hasMoreElements()) {
-				JarEntry entry = entries.nextElement();
-				if (entry.getName().startsWith(packagePath) && entry.getName().endsWith(".class")) {
-					String className = entry.getName().replace('/', '.');
-					className = StringUtils.substringBeforeLast(className, ".");
-					Class<T> clazz;
+			} finally {
+				if (jarFile != null) {
 					try {
-						clazz = (Class<T>) superClass.getClassLoader().loadClass(className);
-					} catch (ClassNotFoundException e) {
-						throw new RuntimeException(e);
+						jarFile.close();
+					} catch (IOException e) {
 					}
-					if (superClass.isAssignableFrom(clazz) && clazz != superClass)
-						classes.add(clazz);
 				}
 			}
 		} else {

@@ -5,7 +5,7 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import com.pmease.commons.util.EasyList;
+import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.asset.JQueryHeaderItem;
 
 public class BootstrapResourceReference extends JavaScriptResourceReference {
@@ -28,6 +28,6 @@ public class BootstrapResourceReference extends JavaScriptResourceReference {
 		HeaderItem stylesheet = CssHeaderItem.forReference(
 				new CssResourceReference(BootstrapResourceReference.class, "css/bootstrap.css"));
 
-		return EasyList.of(jquery, stylesheet);
+		return Lists.newArrayList(jquery, stylesheet);
 	}
 }
