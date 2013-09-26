@@ -1,0 +1,51 @@
+<html xmlns:wicket>
+<wicket:extend>
+	<div id="top"></div>
+	<header id="globalheader">
+		<nav class="navbar navbar-default" role="navigation">
+			<div class="navbar-left">
+				<a class="navbar-brand" wicket:id="homeLink"><img src="assets/img/gitop.png" /></a>
+				<form class="navbar-form navbar-left search-form" role="search">
+				    <div class="form-group">
+				      <input type="text" class="form-control text-field" placeholder="Search">
+				    </div>
+				</form>
+			</div>
+			
+			<div class="navbar-right">
+				<ul class="user-links inline-list">
+				  	<wicket:enclosure child="loginLink">
+				  		<li><a wicket:id="registerLink">Sign up</a></li>
+				  		<li class="separator"></li>
+				  		<li><a href="#" wicket:id="loginLink">Log in</a></li>
+					</wicket:enclosure>
+					
+					<wicket:enclosure child="logoutLink">
+						<li><a href="#" data-toggle="tooltip" title="Create a new repository"><i class="icon-plus icon-fixed-width"></i></a></li>
+				  		<li><a href="#" data-toggle="tooltip" title="Account settings"><i class="icon-cog"></i></a></li>
+				  		<li><a href="#" data-toggle="tooltip" title="Sign out" wicket:id="logoutLink"><i class="icon-signout"></i></a></li>
+				  		<li class="separator"></li>
+						<li class="avatar-user"><a href="#"><span class="avatar avatar-circle" wicket:id="useravatar"></span> <span wicket:id="username"></span></a></li>
+				  	</wicket:enclosure>
+				</ul>
+			</div>
+		</nav>
+	</header>
+	
+	<div id="main">
+		<wicket:child></wicket:child>
+	</div>
+	
+	<footer id="globalfooter">
+		<p class="pull-left">
+			<a href="http://www.pmease.com">PMEase Gitop</a>, <span>1.0.0</span>, 
+			<span>2013-03-05</span>,
+			<span class="license-info">Commercial License for Site 'PMEase Inc.'</span> 
+		</p>
+		<ul class="pull-right piped">
+			<li><a href="http://www.pmease.com/support" target="_blank" class="first">Support</a></li>
+			<li><a target="_blank" href="http://track.pmease.com">Report Bug or Enhancement</a></li>
+		</ul>
+	</footer>
+</wicket:extend>
+</html>

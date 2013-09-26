@@ -1,0 +1,27 @@
+<html xmlns:wicket>
+<wicket:extend>
+	<div id="login-form">
+		<h1>Sign in</h1>
+		
+		<div wicket:id="feedback" class="form-feedback"></div>
+		<form wicket:id="login" method="post">
+			<div class="input-group user-group">
+			  <span class="input-group-addon"><i class="icon-user icon-fixed-width"></i></span>
+			  <input wicket:id="username" type="text" class="form-control input-lg focusable" placeholder="User name"/>
+			</div>
+			<div class="input-group password-group">
+			  <span class="input-group-addon"><i class="icon-lock icon-fixed-width"></i></span>
+			  <input wicket:id="password" type="password" class="form-control input-lg" placeholder="Password"/>
+			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<div wicket:id="rememberme"></div>
+				</div>
+				<div class="col-sm-6">
+					<button class="btn btn-primary" type="submit">Sign in</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</wicket:extend>
+</html>
