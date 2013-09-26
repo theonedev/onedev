@@ -63,7 +63,7 @@ public class RegisterPage extends AbstractLayoutPage {
 		
 		form.add(new TextFieldElement<String>(
 							"displayname", "Display Name",
-							new PropertyModel<String>(model, "fullName"))
+							new PropertyModel<String>(model, "displayName"))
 				.add(new PropertyValidator<String>()));
 		
 		PasswordFieldElement passField = (PasswordFieldElement) 

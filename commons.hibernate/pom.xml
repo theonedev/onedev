@@ -101,7 +101,7 @@
 	</repositories>
 	<properties>
 		<moduleClass>com.pmease.commons.hibernate.HibernateModule</moduleClass>
-		<hibernateVersion>4.2.0.Final</hibernateVersion>
+		<hibernateVersion>4.2.5.Final</hibernateVersion>
 		<bonecpVersion>0.8.0-rc1</bonecpVersion>
 	</properties>
 	<version>1.0.30</version>

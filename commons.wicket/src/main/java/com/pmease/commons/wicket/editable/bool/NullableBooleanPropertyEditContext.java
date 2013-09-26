@@ -8,9 +8,9 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.model.IModel;
 
+import com.google.common.collect.Lists;
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.PropertyEditContext;
-import com.pmease.commons.util.EasyList;
 import com.pmease.commons.wicket.editable.EditableResourceBehavior;
 
 @SuppressWarnings("serial")
@@ -48,7 +48,7 @@ public class NullableBooleanPropertyEditContext extends PropertyEditContext {
 					setPropertyValue(null);
 			}
 			
-		}, EasyList.of("yes", "no")) {
+		}, Lists.newArrayList("yes", "no")) {
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {

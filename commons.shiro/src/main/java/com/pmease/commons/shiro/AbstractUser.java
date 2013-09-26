@@ -12,7 +12,6 @@ import org.apache.shiro.subject.Subject;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.commons.loader.AppLoader;
 
 @SuppressWarnings("serial")
 @MappedSuperclass
@@ -55,14 +54,10 @@ public abstract class AbstractUser extends AbstractEntity implements Authenticat
 		return new Subject.Builder().principals(principals).buildSubject();		
 	}
 
-	public static AbstractUser getCurrent() {
+	public static Long getCurrentId() {
 		Object principal = SecurityUtils.getSubject().getPrincipal();
 		Preconditions.checkNotNull(principal);
-		Long userId = (Long) principal;
-		if (userId != 0L)
-			return AppLoader.getInstance(AbstractRealm.class).getUserById(userId);
-		else
-			return null;
+		return (Long) principal;
 	}
 	
 }

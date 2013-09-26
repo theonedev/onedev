@@ -6,6 +6,8 @@ import java.util.Map;
 
 public interface EditContext extends Serializable {
 	
+	Serializable getBean();
+	
 	void validate();
 	
 	List<ValidationError> getValidationErrors(boolean recursive);

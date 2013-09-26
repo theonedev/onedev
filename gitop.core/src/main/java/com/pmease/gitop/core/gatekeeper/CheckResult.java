@@ -2,7 +2,7 @@ package com.pmease.gitop.core.gatekeeper;
 
 import java.util.List;
 
-import com.pmease.commons.util.EasyList;
+import com.google.common.collect.Lists;
 
 public abstract class CheckResult {
 	
@@ -13,7 +13,7 @@ public abstract class CheckResult {
 	}
 	
 	public CheckResult(String reason) {
-		this.reasons = EasyList.of(reason);
+		this.reasons = Lists.newArrayList(reason);
 	}
 
 	public List<String> getReasons() {

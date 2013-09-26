@@ -33,14 +33,19 @@
 			<artifactId>commons.loader</artifactId>
 			<version>1.0.29</version>
 		</dependency>
-		<!-- dependency>
+		<dependency>
 			<groupId>org.eclipse.jgit</groupId>
-			<artifactId>org.eclipse.jgit</artifactId>
+			<artifactId>org.eclipse.jgit.http.server</artifactId>
 			<version>3.0.0.201306101825-r</version>
-		</dependency-->
+		</dependency>
 		<dependency>
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.util</artifactId>
+			<version>1.0.29</version>
+		</dependency>
+		<dependency>
+			<groupId>com.pmease</groupId>
+			<artifactId>commons.jetty</artifactId>
 			<version>1.0.29</version>
 		</dependency>
 	</dependencies>

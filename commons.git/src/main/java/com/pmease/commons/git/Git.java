@@ -19,6 +19,22 @@ public class Git {
 		this.repoDir = repoDir;
 	}
 	
+	public UploadCommand upload() {
+		return new UploadCommand(this);
+	}
+	
+	public ReceiveCommand receive() {
+		return new ReceiveCommand(this);
+	}
+
+	public AdvertiseUploadRefsCommand advertiseUploadRefs() {
+		return new AdvertiseUploadRefsCommand(this);
+	}
+	
+	public AdvertiseReceiveRefsCommand advertiseReceiveRefs() {
+		return new AdvertiseReceiveRefsCommand(this);
+	}
+	
 	public InitCommand init() {
 		return new InitCommand(this);
 	}

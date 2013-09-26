@@ -1,6 +1,5 @@
 package com.pmease.commons.wicket.component.tabbable;
 
-import org.apache.wicket.Page;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.model.IModel;
 
@@ -12,9 +11,9 @@ public class PageTab implements Tab {
 
 	private final IModel<String> titleModel;
 	
-	private final Class<? extends Page>[] pageClasses;
+	private final Class<?>[] pageClasses;
 	
-	public PageTab(IModel<String> titleModel, Class<? extends Page>...pageClasses) {
+	public PageTab(IModel<String> titleModel, Class<?>...pageClasses) {
 		Preconditions.checkArgument(pageClasses.length > 0, "At least one page class has to be provided.");
 		
 		this.titleModel = titleModel;
@@ -25,7 +24,7 @@ public class PageTab implements Tab {
 		return titleModel;
 	}
 	
-	protected final Class<? extends Page>[] getPageClasses() {
+	protected final Class<?>[] getPageClasses() {
 		return pageClasses;
 	}
 	
@@ -44,7 +43,7 @@ public class PageTab implements Tab {
 
 	@Override
 	public boolean isActive(ListItem<Tab> item) {
-		for (Class<? extends Page> pageClass: pageClasses) {
+		for (Class<?> pageClass: pageClasses) {
 			if (pageClass.isAssignableFrom(item.getPage().getClass())) 
 				return true;
 		}

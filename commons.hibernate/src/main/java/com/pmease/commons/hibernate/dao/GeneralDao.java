@@ -3,6 +3,7 @@ package com.pmease.commons.hibernate.dao;
 import java.util.List;
 
 import org.hibernate.HibernateException;
+import org.hibernate.Session;
 import org.hibernate.criterion.DetachedCriteria;
 
 import com.pmease.commons.hibernate.AbstractEntity;
@@ -56,16 +57,6 @@ public interface GeneralDao {
 	 * 			the entity to be deleted
 	 */
 	void delete(AbstractEntity entity);
-	
-	/**
-	 * Delete entity of specified class and identifier without actually loading the entity.
-	 * 
-	 * @param entityClass
-	 * 			class of the entity
-	 * @param entityId
-	 * 			identifier of the entity
-	 */
-	<T extends AbstractEntity> void deleteById(Class<T> entityClass, Long entityId);
 
 	/**
 	 * Query with specified criteria.
@@ -98,5 +89,6 @@ public interface GeneralDao {
 	 * 			number of entities matching specified {@link DetachedCriteria}
 	 */
 	<T extends AbstractEntity> int count(DetachedCriteria detachedCriteria);
-	
+
+	Session getSession();
 }

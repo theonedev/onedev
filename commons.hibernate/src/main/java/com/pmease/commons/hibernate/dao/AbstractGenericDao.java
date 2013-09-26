@@ -2,6 +2,8 @@ package com.pmease.commons.hibernate.dao;
 
 import java.util.List;
 
+import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Order;
@@ -10,7 +12,7 @@ import com.google.inject.Inject;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.util.ReflectionUtils;
 
-public class DefaultGenericDao<T extends AbstractEntity> implements GenericDao<T> {
+public abstract class AbstractGenericDao<T extends AbstractEntity> implements GenericDao<T> {
 
 	private GeneralDao generalDao;
 	
@@ -18,9 +20,9 @@ public class DefaultGenericDao<T extends AbstractEntity> implements GenericDao<T
 
 	@SuppressWarnings("unchecked")
 	@Inject
-	public DefaultGenericDao(GeneralDao generalDao) {
+	public AbstractGenericDao(GeneralDao generalDao) {
 		this.generalDao = generalDao;
-		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(DefaultGenericDao.class, getClass());
+		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(AbstractGenericDao.class, getClass());
 		entityClass = ((Class<T>) typeArguments.get(0));
 	}
 	
@@ -42,11 +44,6 @@ public class DefaultGenericDao<T extends AbstractEntity> implements GenericDao<T
 	@Override
 	public void delete(T entity) {
 		generalDao.delete(entity);
-	}
-
-	@Override
-	public void deleteById(Long entityId) {
-		generalDao.deleteById(entityClass, entityId);
 	}
 
 	@Override
@@ -105,4 +102,14 @@ public class DefaultGenericDao<T extends AbstractEntity> implements GenericDao<T
 		return (T) generalDao.find(detachedCriteria);
 	}
 
+	@Override
+	public Session getSession() {
+		return generalDao.getSession();
+	}
+
+	@Override
+	public Criteria createCriteria() {
+		return getSession().createCriteria(entityClass);
+	}
+	
 }

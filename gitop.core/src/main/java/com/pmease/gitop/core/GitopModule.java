@@ -8,6 +8,7 @@ import org.hibernate.cfg.NamingStrategy;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.ModelProvider;
 import com.pmease.commons.hibernate.PrefixedNamingStrategy;
+import com.pmease.commons.jetty.ServletContextConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.shiro.AbstractRealm;
@@ -41,6 +42,7 @@ public class GitopModule extends AbstractPluginModule {
 			
 		});
 		
+	    contribute(ServletContextConfigurator.class, GitServletContextConfigurator.class);
 	}
 
 	@Override

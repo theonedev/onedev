@@ -10,10 +10,11 @@ public class PageTabComponent extends Panel {
 
 	private static final long serialVersionUID = 1L;
 	
+	@SuppressWarnings("unchecked")
 	public PageTabComponent(String id, PageTab tab) {
 		super(id);
 		
-		Link<?> pageLink = newLink("link", tab.getPageClasses()[0]);
+		Link<?> pageLink = newLink("link", (Class<? extends Page>) tab.getPageClasses()[0]);
 		add(pageLink);
 		pageLink.add(new Label("label", tab.getTitleModel()));
 	}

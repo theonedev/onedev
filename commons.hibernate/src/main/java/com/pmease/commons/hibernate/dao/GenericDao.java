@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 
@@ -50,16 +52,6 @@ public interface GenericDao<T extends AbstractEntity> {
 	 */
 	public void delete(T entity);
 	
-	/**
-	 * Delete entity of specified identifier without actually loading the entity.
-	 * 
-	 * @param entityClass
-	 * 			class of the entity
-	 * @param entityId
-	 * 			identifier of the entity
-	 */
-	void deleteById(Long entityId);
-
 	/**
 	 * Search entity with specified criterions and orders.
 	 * 
@@ -122,5 +114,9 @@ public interface GenericDao<T extends AbstractEntity> {
 	 * 			number of entities matching specified criterions
 	 */
 	int count(@Nullable Criterion[] criterions);
+
+	Session getSession();
+	
+	Criteria createCriteria();
 	
 }

@@ -202,4 +202,23 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
 			throw new RuntimeException(e);
 		}
 	}
+	
+	public static void createDir(File dir) {
+		if (!dir.exists()) {
+			if (!dir.mkdirs())
+				throw new GeneralException("Unable to create directory: " + dir.getAbsolutePath());
+		}
+	}
+	
+	public static void cleanDir(File dir) {
+		if (dir.exists()) {
+			try {
+				org.apache.commons.io.FileUtils.cleanDirectory(dir);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			createDir(dir);
+		}
+	}
 }

@@ -13,5 +13,7 @@ public interface RepositoryManager extends GenericDao<Repository> {
 	
 	File locateStorage(Repository repository);
 	
+	Repository find(String ownerName, String repositoryName);
+	
 	Collection<Repository> findPublic();
 }

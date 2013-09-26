@@ -13,6 +13,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.Password;
+import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.shiro.AbstractUser;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.RepositoryManager;
@@ -40,7 +41,11 @@ public class User extends AbstractUser implements ProtectedObject {
 	@Column(nullable=false)
 	private String email;
 	
-	private String description;
+	@Column
+	private String displayName;
+	
+	@Column
+	private String avatarUrl;
 	
 	@OneToMany(mappedBy="user")
 	private Collection<TeamMembership> teamMemberships = new ArrayList<TeamMembership>();
@@ -102,12 +107,20 @@ public class User extends AbstractUser implements ProtectedObject {
 	}
 
 	@Editable
-	public String getDescription() {
-		return description;
+	public String getDisplayName() {
+		return displayName;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	public String getAvatarUrl() {
+		return avatarUrl;
+	}
+
+	public void setAvatarUrl(String avatarUrl) {
+		this.avatarUrl = avatarUrl;
 	}
 
 	public Collection<TeamMembership> getTeamMemberships() {
@@ -228,7 +241,15 @@ public class User extends AbstractUser implements ProtectedObject {
 	}
 
 	public static User getCurrent() {
-		return (User) AbstractUser.getCurrent();
+		Long userId = getCurrentId();
+		if (userId != 0L) {
+			return AppLoader.getInstance(UserManager.class).load(userId);
+		} else {
+			User user = new User();
+			user.setId(userId);
+			user.setName("Anonymous");
+			return user;
+		}
 	}
 
 	@Override
