@@ -16,8 +16,8 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.SubmitLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -99,7 +99,7 @@ public abstract class Wizard extends Panel {
 			}
 
 		});
-		form.add(new SubmitLink("next") {
+		form.add(new Button("next") {
 
 			@Override
 			public void onSubmit() {
@@ -116,7 +116,7 @@ public abstract class Wizard extends Panel {
 			}
 
 		});
-		form.add(new SubmitLink("finish") {
+		form.add(new Button("finish") {
 
 			@Override
 			public void onSubmit() {

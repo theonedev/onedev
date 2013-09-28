@@ -76,14 +76,23 @@ public class User extends AbstractUser implements ProtectedObject {
 	private Collection<UserAuthorizationByIndividual> authorizationsByIndividual = 
 			new ArrayList<UserAuthorizationByIndividual>();
 
-	@Editable
+	@Editable(order=100)
 	@NotEmpty
 	@Override
 	public String getName() {
 		return super.getName();
 	}
 
-	@Editable
+	@Editable(order=200)
+	public String getFullName() {
+		return fullName;
+	}
+
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
+	}
+
+	@Editable(order=300)
 	@NotEmpty
 	@Email
 	public String getEmail() {
@@ -94,21 +103,12 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.email = email;
 	}
 
-	@Editable(name="Password")
+	@Editable(name="Password", order=400)
 	@Password(confirmative=true)
 	@NotEmpty
 	@Override
 	public String getPasswordHash() {
 		return super.getPasswordHash();
-	}
-
-	@Editable
-	public String getFullName() {
-		return fullName;
-	}
-
-	public void setFullName(String fullName) {
-		this.fullName = fullName;
 	}
 
 	public Collection<TeamMembership> getTeamMemberships() {
