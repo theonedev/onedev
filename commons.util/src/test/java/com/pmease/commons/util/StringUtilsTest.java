@@ -8,7 +8,7 @@ import org.junit.Test;
 
 public class StringUtilsTest {
 
-	@Test public void testCameCaseToLowerCaseWithUnderscore() {
+	@Test public void shouldConvertCameCaseToLowerCaseWithUnderscore() {
 		String input = null;
 		assertTrue(StringUtils.camelCaseToLowerCaseWithUnderscore(input) == null);
 		
@@ -19,7 +19,7 @@ public class StringUtilsTest {
 		assertEquals(StringUtils.camelCaseToLowerCaseWithUnderscore(input), "ilove_you");
 	}
 
-	@Test public void testCamelCaseToLowerCaseWithHyphen() {
+	@Test public void shouldConvertCamelCaseToLowerCaseWithHyphen() {
 		String input = null;
 		assertTrue(StringUtils.camelCaseToLowerCaseWithHyphen(input) == null);
 		
