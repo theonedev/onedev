@@ -15,6 +15,7 @@ public class AssetLocator {
 	public static final ResourceReference PAGE_CSS = newCssResourceReference("css/page.css");
 	
 	public static final ResourceReference MODERNIZR_JS = newJavaScriptResourceReference("js/vendor/modernizr-2.6.2.js");
+	public static final ResourceReference PAGE_JS = newJavaScriptResourceReference("js/page.js");
 	public static final ResourceReference JQUERY_JS = newJavaScriptResourceReference("js/vendor/jquery.min.js");
 	public static final ResourceReference JQUERY_UI_WIDGET_JS = newJavaScriptResourceReference("js/vendor/jquery.ui.widget.js");
 	public static final ResourceReference BOOTSTAP_JS = newJavaScriptResourceReference("js/vendor/bootstrap.js");

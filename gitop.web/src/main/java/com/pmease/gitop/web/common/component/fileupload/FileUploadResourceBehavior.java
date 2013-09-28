@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.common.component.fileuploader;
+package com.pmease.gitop.web.common.component.fileupload;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,17 +21,17 @@ public class FileUploadResourceBehavior extends Behavior {
 	private static final ResourceReference FILEUPLOAD_JS = 
 			new JavaScriptResourceReference(
 					AssetLocator.class, 
-					"js/vendor/jquery-file-upload/jquery.file.upload.js");
+					"res/js/jquery.file.upload.js");
 	
 	private static final ResourceReference IFRAME_TRANSPORT_JS =
 			new JavaScriptResourceReference(
 					AssetLocator.class,
-					"js/vendor/jquery-file-upload/jquery.iframe-transport.js");
+					"res/js/jquery.iframe-transport.js");
 	
 	private static final ResourceReference FILEUPLOAD_UI_JS =
 			new JavaScriptResourceReference(
 					AssetLocator.class,
-					"js/vendor/jquery-file-upload/jquery.fileupload-ui.js");
+					"res/js/jquery.fileupload-ui.js");
 	
 	/**
      * The name of the request parameter used for the multipart

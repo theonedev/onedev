@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.common.component.fileuploader;
+package com.pmease.gitop.web.common.component.fileupload;
 
 import java.io.IOException;
 
