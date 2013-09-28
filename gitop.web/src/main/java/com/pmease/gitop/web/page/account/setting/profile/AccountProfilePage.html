@@ -2,18 +2,28 @@
 <wicket:extend>
 	<section>
 		<div class="head">
-			<h3>Edit Your Profile</h3>
+			<h3>Edit your profile</h3>
 		</div>
-		<form wicket:id="form" class="form-md">
-			<div wicket:id="feedback" class="form-feedback"></div>
-			<div wicket:id="fullName"></div>
-			<div wicket:id="email"></div>
-			<div wicket:id="bio"></div>
-			<div class="submits text-left">
-				<button type="submit" wicket:id="submit" class="btn btn-primary">Update profile</button>
-			</div>
-		</form>
+		<div class="padder">
+			<form wicket:id="form" class="form-md">
+				<div wicket:id="feedback" class="form-feedback"></div>
+				<div wicket:id="displayName"></div>
+				<div wicket:id="email"></div>
+				<div class="submits text-left">
+					<button type="submit" wicket:id="submit" class="btn btn-primary">Update profile</button>
+				</div>
+			</form>
+		</div>
 	</section>
-	
+	<section>
+		<div class="head">
+			<h3>Change your avatar</h3>
+		</div>
+		<div class="padder">
+			<p>
+				Here is your avatar?
+			</p>
+		</div>
+	</section>
 </wicket:extend>
 </html>

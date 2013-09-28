@@ -11,6 +11,7 @@ import org.apache.shiro.authz.Permission;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.google.common.base.Objects;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.Password;
 import com.pmease.commons.loader.AppLoader;
@@ -38,6 +39,8 @@ import com.pmease.gitop.core.permission.operation.RepositoryOperation;
 @Editable
 public class User extends AbstractUser implements ProtectedObject {
 
+	public static final User ANONYMOUS = new User(0L, "Anonymous");
+	
 	@Column(nullable=false)
 	private String email;
 	
@@ -80,6 +83,14 @@ public class User extends AbstractUser implements ProtectedObject {
 	private Collection<UserAuthorizationByIndividual> authorizationsByIndividual = 
 			new ArrayList<UserAuthorizationByIndividual>();
 
+	public User() {
+	}
+	
+	private User(Long id, String name) {
+		setId(id);
+		setName(name);
+	}
+	
 	@Editable
 	@NotEmpty
 	@Override
@@ -245,10 +256,7 @@ public class User extends AbstractUser implements ProtectedObject {
 		if (userId != 0L) {
 			return AppLoader.getInstance(UserManager.class).load(userId);
 		} else {
-			User user = new User();
-			user.setId(userId);
-			user.setName("Anonymous");
-			return user;
+			return User.ANONYMOUS;
 		}
 	}
 
@@ -312,5 +320,11 @@ public class User extends AbstractUser implements ProtectedObject {
 	public boolean isAnonymous() {
 		return getId() == 0L;
 	}
-	
+
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this)
+				.add("name", getName())
+				.toString();
+	}
 }

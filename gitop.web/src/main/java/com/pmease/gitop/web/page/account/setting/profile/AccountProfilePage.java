@@ -51,6 +51,7 @@ public class AccountProfilePage extends AccountSettingPage {
 			add(new FeedbackPanel("feedback", this));
 			add(new TextFieldElement<String>("displayName", "Display Name",
 					new PropertyModel<String>(model, "displayName"))
+					.setRequired(false)
 					.add(new PropertyValidator<String>()));
 			add(new TextFieldElement<String>("email", "Email Address",
 					new PropertyModel<String>(model, "email"))

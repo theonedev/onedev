@@ -1,5 +1,6 @@
 package com.pmease.gitop.web.page.home;
 
+import com.pmease.gitop.web.common.component.fileuploader.FileUploadBar;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
 
 public class HomePage extends AbstractLayoutPage {
@@ -11,4 +12,10 @@ public class HomePage extends AbstractLayoutPage {
 		return "Gitop - Home";
 	}
 
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
+		add(new FileUploadBar("upload"));
+	}
 }

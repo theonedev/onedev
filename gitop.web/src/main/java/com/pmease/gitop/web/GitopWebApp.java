@@ -27,6 +27,9 @@ import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.web.assets.AssetLocator;
 import com.pmease.gitop.web.common.component.avatar.AvatarImageResource;
 import com.pmease.gitop.web.common.component.avatar.AvatarImageResourceReference;
+import com.pmease.gitop.web.common.component.fileuploader.FileManagerResourceReference;
+import com.pmease.gitop.web.common.component.fileuploader.FileUploadResourceReference;
+import com.pmease.gitop.web.page.account.AccountHomePage;
 import com.pmease.gitop.web.page.account.RegisterPage;
 import com.pmease.gitop.web.page.account.setting.password.AccountPasswordPage;
 import com.pmease.gitop.web.page.account.setting.permission.AccountPermissionPage;
@@ -111,16 +114,29 @@ public class GitopWebApp extends AbstractWicketConfig {
 		mountPage("init", ServerInitPage.class);
 		mountPage("register", RegisterPage.class);
 		
+		// account related pages
+		// --------------------------------------------------------
+		
+		// account dashboard
+		mountPage("account/${user}", AccountHomePage.class);
+		
 		// account settings
 		mountPage("settings/profile", AccountProfilePage.class);
 		mountPage("settings/password", AccountPasswordPage.class);
 		mountPage("settings/permission", AccountPermissionPage.class);
 		mountPage("settings/repos", AccountReposPage.class);
+		
+		// repository pages
+		// --------------------------------------------------------
+		
 	}
 
 	private void mountResources() {
 		getSharedResources().add(AvatarImageResourceReference.AVATAR_RESOURCE, new AvatarImageResource());
 		mountResource("avatars/${type}/${id}", new AvatarImageResourceReference());
+		
+		mountResource("fileManager", new FileManagerResourceReference(getUploadsDir().getAbsolutePath()));
+		mountResource("fileUpload", new FileUploadResourceReference(getUploadsDir().getAbsolutePath()));
 	}
 	
 	public boolean isGravatarEnabled() {

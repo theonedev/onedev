@@ -2,34 +2,7 @@
 <wicket:extend>
 	<div id="top"></div>
 	<header id="globalheader">
-		<nav class="navbar navbar-default" role="navigation">
-			<div class="navbar-left">
-				<a class="navbar-brand" wicket:id="homeLink"><img src="assets/img/gitop.png" /></a>
-				<form class="navbar-form navbar-left search-form" role="search">
-				    <div class="form-group">
-				      <input type="text" class="form-control text-field" placeholder="Search">
-				    </div>
-				</form>
-			</div>
-			
-			<div class="navbar-right">
-				<ul class="user-links inline-list">
-				  	<wicket:enclosure child="loginLink">
-				  		<li><a wicket:id="registerLink">Sign up</a></li>
-				  		<li class="separator"></li>
-				  		<li><a href="#" wicket:id="loginLink">Log in</a></li>
-					</wicket:enclosure>
-					
-					<wicket:enclosure child="logoutLink">
-						<li><a href="#" data-toggle="tooltip" title="Create a new repository"><i class="icon-plus icon-fixed-width"></i></a></li>
-				  		<li><a href="#" data-toggle="tooltip" title="Account settings"><i class="icon-cog"></i></a></li>
-				  		<li><a href="#" data-toggle="tooltip" title="Sign out" wicket:id="logoutLink"><i class="icon-signout"></i></a></li>
-				  		<li class="separator"></li>
-						<li class="avatar-user"><a href="#"><span class="avatar avatar-circle" wicket:id="useravatar"></span> <span wicket:id="username"></span></a></li>
-				  	</wicket:enclosure>
-				</ul>
-			</div>
-		</nav>
+		<wicket:container wicket:id="header"></wicket:container>
 	</header>
 	
 	<div id="main">

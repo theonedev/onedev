@@ -14,7 +14,9 @@ import com.pmease.gitop.web.GitopSession;
 import com.pmease.gitop.web.common.form.FeedbackPanel;
 import com.pmease.gitop.web.common.form.checkbox.CheckBoxElement;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
+import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.AccountHomePage;
+import com.pmease.gitop.web.util.WicketUtils;
 
 @SuppressWarnings("serial")
 public class LoginPage extends AbstractLayoutPage {
@@ -76,7 +78,7 @@ public class LoginPage extends AbstractLayoutPage {
 
 			if (loginShiro(username, password, remember())) {
 				continueToOriginalDestination();
-				setResponsePage(AccountHomePage.class);
+				setResponsePage(AccountHomePage.class, WicketUtils.newPageParams(PageSpec.USER, username));
 			}
 		}
 
