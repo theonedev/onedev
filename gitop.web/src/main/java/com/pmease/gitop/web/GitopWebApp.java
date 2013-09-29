@@ -22,8 +22,6 @@ import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.gitop.web.assets.AssetLocator;
 import com.pmease.gitop.web.common.component.avatar.AvatarImageResource;
 import com.pmease.gitop.web.common.component.avatar.AvatarImageResourceReference;
-import com.pmease.gitop.web.common.component.fileupload.FileManagerResourceReference;
-import com.pmease.gitop.web.common.component.fileupload.FileUploadResourceReference;
 import com.pmease.gitop.web.page.account.AccountHomePage;
 import com.pmease.gitop.web.page.account.RegisterPage;
 import com.pmease.gitop.web.page.account.setting.password.AccountPasswordPage;
@@ -130,8 +128,8 @@ public class GitopWebApp extends AbstractWicketConfig {
 		getSharedResources().add(AvatarImageResourceReference.AVATAR_RESOURCE, new AvatarImageResource());
 		mountResource("avatars/${type}/${id}", new AvatarImageResourceReference());
 		
-		mountResource("fileManager", new FileManagerResourceReference(SitePaths.get().uploadsDir().getAbsolutePath()));
-		mountResource("fileUpload", new FileUploadResourceReference(SitePaths.get().uploadsDir().getAbsolutePath()));
+//		mountResource("fileManager", new FileManagerResourceReference(SitePaths.get().uploadsDir().getAbsolutePath()));
+//		mountResource("fileUpload", new FileUploadResourceReference(SitePaths.get().uploadsDir().getAbsolutePath()));
 	}
 	
 	public boolean isGravatarEnabled() {
