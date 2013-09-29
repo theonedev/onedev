@@ -11,6 +11,7 @@ import org.apache.shiro.authz.Permission;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.google.common.base.Objects;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.Password;
 import com.pmease.commons.loader.AppLoader;
@@ -38,10 +39,21 @@ import com.pmease.gitop.core.permission.operation.GeneralOperation;
 @Editable
 public class User extends AbstractUser implements ProtectedObject {
 
+	public static final User ANONYMOUS = new User();
+	
+	static {
+		ANONYMOUS.setId(0L);
+		ANONYMOUS.setName("Guest");
+	}
+	
 	@Column(nullable=false)
 	private String email;
 	
-	private String fullName;
+	@Column
+	private String displayName;
+	
+	@Column
+	private String avatarUrl;
 	
 	private boolean admin;
 	
@@ -71,12 +83,12 @@ public class User extends AbstractUser implements ProtectedObject {
 	}
 
 	@Editable(order=200)
-	public String getFullName() {
-		return fullName;
+	public String getDisplayName() {
+		return displayName;
 	}
 
-	public void setFullName(String fullName) {
-		this.fullName = fullName;
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
 	}
 
 	@Editable(order=300)
@@ -104,6 +116,14 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	public void setAdmin(boolean admin) {
 		this.admin = admin;
+	}
+
+	public String getAvatarUrl() {
+		return avatarUrl;
+	}
+
+	public void setAvatarUrl(String avatarUrl) {
+		this.avatarUrl = avatarUrl;
 	}
 
 	public Collection<Membership> getMemberships() {
@@ -193,7 +213,7 @@ public class User extends AbstractUser implements ProtectedObject {
 		if (userId != 0L) {
 			return AppLoader.getInstance(UserManager.class).load(userId);
 		} else {
-			return anonymous();
+			return User.ANONYMOUS;
 		}
 	}
 	
@@ -246,12 +266,11 @@ public class User extends AbstractUser implements ProtectedObject {
 	public boolean isAnonymous() {
 		return getId() == 0L;
 	}
-	
-	public String getDisplayName() {
-		if (getFullName() == null)
-			return getName();
-		else
-			return getFullName();
+
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this)
+				.add("name", getName())
+				.toString();
 	}
-	
 }

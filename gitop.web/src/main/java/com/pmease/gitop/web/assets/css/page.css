@@ -1,0 +1,21 @@
+.server-init {
+	text-align: center;
+	width: 50%;
+	margin: 0 auto;
+}
+
+.server-init .message {
+	margin: 40px;
+}
+
+/* LOGIN PAGE */
+#register-form, #login-form { padding: 50px 0; width: 500px; margin: 0 auto; }
+#login-form h1, #register-form h1 { font-size: 32px; margin: 0 0 30px; font-weight: 300; }
+#login-form .input-group-addon { font-size: 18px; color: #666; }
+#login-form .user-group .input-group-addon { border-bottom-left-radius: 0; }
+#login-form .user-group input.form-control { border-bottom-right-radius: 0; }
+#login-form .password-group .input-group-addon { border-top-left-radius: 0; }
+#login-form .password-group input.form-control { border-top-right-radius: 0; }
+#login-form .row { margin-top: 18px; }
+#login-form .btn { width: 100%;}
+

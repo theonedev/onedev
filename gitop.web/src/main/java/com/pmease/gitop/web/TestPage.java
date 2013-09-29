@@ -8,6 +8,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.web.page.BasePage;
 
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
@@ -39,7 +40,7 @@ public class TestPage extends BasePage {
 	}
 
 	@Override
-	protected String getTitle() {
+	protected String getPageTitle() {
 		return "Test page used by Robin";
 	}
 

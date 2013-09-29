@@ -164,7 +164,62 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
         if (collection == null) {
             return null;
         }
-        return (String[]) collection.toArray(new String[collection.size()]);
+        return collection.toArray(new String[collection.size()]);
     }
 
+    /**
+     * Convert camel case string into lower case with underscore, for example:
+     * input: FirstSecondThird
+     * output: first_second_third
+     * 
+     * @param input
+     * @return lower case string with underscore
+     */
+    public static String camelCaseToLowerCaseWithUnderscore(String input) {
+    	return camelCaseToLowerCaseWithConnector(input, '_');
+    }
+    
+    /**
+     * Convert camel case string into lower case with hyphen, for example:
+     * input: FirstSecondThird
+     * output: first-second-third
+     * 
+     * @param input
+     * @return lower case string with hyphen
+     */
+    public static String camelCaseToLowerCaseWithHyphen(String input) {
+    	return camelCaseToLowerCaseWithConnector(input, '-');
+    }
+    
+    private static String camelCaseToLowerCaseWithConnector(String input, char connector) {
+    	if (input == null) return input; // garbage in, garbage out
+        int length = input.length();
+        StringBuilder result = new StringBuilder(length * 2);
+        int resultLength = 0;
+        boolean wasPrevTranslated = false;
+        for (int i = 0; i < length; i++)
+        {
+            char c = input.charAt(i);
+            if (i > 0 || c != connector) // skip first starting underscore
+            {
+                if (Character.isUpperCase(c))
+                {
+                    if (!wasPrevTranslated && resultLength > 0 && result.charAt(resultLength - 1) != connector)
+                    {
+                        result.append(connector);
+                        resultLength++;
+                    }
+                    c = Character.toLowerCase(c);
+                    wasPrevTranslated = true;
+                }
+                else
+                {
+                    wasPrevTranslated = false;
+                }
+                result.append(c);
+                resultLength++;
+            }
+        }
+        return resultLength > 0 ? result.toString() : input;
+    }
 }
