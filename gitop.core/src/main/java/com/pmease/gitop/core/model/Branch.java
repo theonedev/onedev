@@ -12,23 +12,23 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"repository", "name"})
+		@UniqueConstraint(columnNames={"project", "name"})
 })
 public class Branch extends AbstractEntity {
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
-	private Repository repository;
+	private Project project;
 
 	@Column(nullable=false)
 	private String name;
 
-	public Repository getRepository() {
-		return repository;
+	public Project getProject() {
+		return project;
 	}
 
-	public void setRepository(Repository repository) {
-		this.repository = repository;
+	public void setProject(Project project) {
+		this.project = project;
 	}
 
 	public String getName() {

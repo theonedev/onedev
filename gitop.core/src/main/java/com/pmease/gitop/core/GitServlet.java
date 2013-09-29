@@ -16,8 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.git.Git;
-import com.pmease.gitop.core.manager.RepositoryManager;
-import com.pmease.gitop.core.model.Repository;
+import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.core.model.Project;
 
 @Singleton
 @SuppressWarnings("serial")
@@ -27,39 +27,39 @@ public class GitServlet extends HttpServlet {
 
 	private static final String INFO_REFS = "info/refs";
 	
-	private final RepositoryManager repositoryManager;
+	private final ProjectManager projectManager;
 	
 	@Inject
-	public GitServlet(RepositoryManager repositoryManager) {
-		this.repositoryManager = repositoryManager;
+	public GitServlet(ProjectManager projectManager) {
+		this.projectManager = projectManager;
 	}
 	
-	private Repository getRepository(HttpServletRequest request, HttpServletResponse response, String repoInfo) 
+	private Project getProject(HttpServletRequest request, HttpServletResponse response, String repoInfo) 
 			throws IOException {
 		
 		repoInfo = StringUtils.stripStart(StringUtils.stripEnd(repoInfo, "/"), "/");
 		
 		String ownerName = StringUtils.substringBefore(repoInfo, "/");
-		String repositoryName = StringUtils.substringAfter(repoInfo, "/");
+		String projectName = StringUtils.substringAfter(repoInfo, "/");
 
-		if (StringUtils.isBlank(ownerName) || StringUtils.isBlank(repositoryName)) {
+		if (StringUtils.isBlank(ownerName) || StringUtils.isBlank(projectName)) {
 			String url = request.getRequestURL().toString();
 			String urlRoot = url.substring(0, url.length()-request.getPathInfo().length());
-			String message = "Expecting url of format " + urlRoot + "/<owner name>/<repository name>";
+			String message = "Expecting url of format " + urlRoot + "/<owner name>/<project name>";
 			logger.error("Error serving git request: " + message);
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, message);
 			return null;
 		} 
 		
-		Repository repository = repositoryManager.find(ownerName, repositoryName);
-		if (repository == null) {
-			String message = "Unable to find repository '" + repositoryName + "' owned by '" + ownerName + "'.";
+		Project project = projectManager.find(ownerName, projectName);
+		if (project == null) {
+			String message = "Unable to find project '" + projectName + "' owned by '" + ownerName + "'.";
 			logger.error("Error serving git request: " + message);
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, message);
 			return null;
 		}
 		
-		return repository;
+		return project;
 	}
 	
 	private void doNotCache(HttpServletResponse response) {
@@ -74,13 +74,13 @@ public class GitServlet extends HttpServlet {
 		String service = StringUtils.substringAfterLast(pathInfo, "/");
 
 		String repoInfo = StringUtils.substringBeforeLast(pathInfo, "/");
-		Repository repository = getRepository(req, resp, repoInfo);
+		Project project = getProject(req, resp, repoInfo);
 		
-		if (repository != null) {
+		if (project != null) {
 			doNotCache(resp);
 			resp.setHeader("Content-Type", "application/x-" + service + "-result");			
 
-			Git git = new Git(repositoryManager.locateStorage(repository));
+			Git git = new Git(projectManager.locateStorage(project).ofCode());
 
 			try {
 				if (service.contains("upload")) {
@@ -111,8 +111,8 @@ public class GitServlet extends HttpServlet {
 		}
 		
 		String repoInfo = pathInfo.substring(0, pathInfo.length() - INFO_REFS.length());
-		Repository repository = getRepository(req, resp, repoInfo);
-		if (repository != null) {
+		Project project = getProject(req, resp, repoInfo);
+		if (project != null) {
 			doNotCache(resp);
 			String service = req.getParameter("service");
 			resp.setHeader("Content-Type", "application/x-" + service + "-advertisement");			
@@ -122,7 +122,7 @@ public class GitServlet extends HttpServlet {
 			pack.writeString("# service=" + service + "\n");
 			pack.end();
 			
-			Git git = new Git(repositoryManager.locateStorage(repository));
+			Git git = new Git(projectManager.locateStorage(project).ofCode());
 
 			try {
 				if (service.contains("upload")) {

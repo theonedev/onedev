@@ -23,7 +23,7 @@ import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.core.permission.object.ProtectedObject;
 import com.pmease.gitop.core.permission.object.UserBelonging;
-import com.pmease.gitop.core.permission.operation.RepositoryOperation;
+import com.pmease.gitop.core.permission.operation.GeneralOperation;
 
 @Entity
 @Table(uniqueConstraints={
@@ -31,7 +31,7 @@ import com.pmease.gitop.core.permission.operation.RepositoryOperation;
 })
 @SuppressWarnings("serial")
 @Editable
-public class Repository extends AbstractEntity implements UserBelonging {
+public class Project extends AbstractEntity implements UserBelonging {
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
@@ -44,17 +44,13 @@ public class Repository extends AbstractEntity implements UserBelonging {
 
 	private boolean publiclyAccessible;
 	
-	private RepositoryOperation defaultAuthorizedOperation;
+	@Column(nullable=false)
+	private GeneralOperation defaultAuthorizedOperation = GeneralOperation.NO_ACCESS;
 	
 	private GateKeeper gateKeeper;
 
-	@OneToMany(mappedBy="repository")
-	private Collection<RepositoryAuthorizationByTeam> authorizationsByTeam = 
-			new ArrayList<RepositoryAuthorizationByTeam>();
-
-	@OneToMany(mappedBy="repository")
-	private Collection<RepositoryAuthorizationByIndividual> authorizationsByIndividual = 
-			new ArrayList<RepositoryAuthorizationByIndividual>();
+	@OneToMany(mappedBy="project")
+	private Collection<Authorization> authorizations = new ArrayList<Authorization>();
 
 	public User getOwner() {
 		return owner;
@@ -65,7 +61,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 
 	@Editable(description=
-			"Specify name of the repository. It will be used to identify the repository when accessing via Git.")
+			"Specify name of the project. It will be used to identify the project when accessing via Git.")
 	@NotEmpty
 	public String getName() {
 		return name;
@@ -75,7 +71,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		this.name = name;
 	}
 
-	@Editable(description="Specify description of the repository.")
+	@Editable(description="Specify description of the project.")
 	public String getDescription() {
 		return description;
 	}
@@ -85,7 +81,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 
 	@Editable(name="Public", description=
-			"If a repository is made public, it will be able to be browsed/pulled by anonymous users.")
+			"If a project is made public, it will be able to be browsed/pulled by anonymous users.")
 	public boolean isPubliclyAccessible() {
 		return publiclyAccessible;
 	}
@@ -94,12 +90,12 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		this.publiclyAccessible = publiclyAccessible;
 	}
 
-	public RepositoryOperation getDefaultAuthorizedOperation() {
+	public GeneralOperation getDefaultAuthorizedOperation() {
 		return defaultAuthorizedOperation;
 	}
 
 	public void setDefaultAuthorizedOperation(
-			RepositoryOperation defaultAuthorizedOperation) {
+			GeneralOperation defaultAuthorizedOperation) {
 		this.defaultAuthorizedOperation = defaultAuthorizedOperation;
 	}
 
@@ -119,35 +115,25 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		return getOwner();
 	}
 
-	public Collection<RepositoryAuthorizationByTeam> getAuthorizationsByTeam() {
-		return authorizationsByTeam;
+	public Collection<Authorization> getAuthorizations() {
+		return authorizations;
 	}
 
-	public void setAuthorizationsByTeam(
-			Collection<RepositoryAuthorizationByTeam> authorizationsByTeam) {
-		this.authorizationsByTeam = authorizationsByTeam;
-	}
-
-	public Collection<RepositoryAuthorizationByIndividual> getAuthorizationsByIndividual() {
-		return authorizationsByIndividual;
-	}
-
-	public void setAuthorizationsByIndividual(
-			Collection<RepositoryAuthorizationByIndividual> authorizationsByIndividual) {
-		this.authorizationsByIndividual = authorizationsByIndividual;
+	public void setAuthorizations(Collection<Authorization> authorizations) {
+		this.authorizations = authorizations;
 	}
 
 	@Override
 	public boolean has(ProtectedObject object) {
-		if (object instanceof Repository) {
-			Repository repository = (Repository) object;
-			return repository.getId().equals(getId());
+		if (object instanceof Project) {
+			Project project = (Project) object;
+			return project.getId().equals(getId());
 		} else {
 			return false;
 		}
 	}
 
-	public Collection<User> findAuthorizedUsers(RepositoryOperation operation) {
+	public Collection<User> findAuthorizedUsers(GeneralOperation operation) {
 		Set<User> authorizedUsers = new HashSet<User>();
 		for (User user: Gitop.getInstance(UserManager.class).query(null)) {
 			if (user.asSubject().isPermitted(new ObjectPermission(this, operation)))

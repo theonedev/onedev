@@ -271,6 +271,10 @@ public class Bootstrap {
 	public static File getConfDir() {
 		return new File(installDir, "conf");
 	}
+	
+	public static File getSiteDir() {
+		return new File(installDir, "site");
+	}
 
 	private static class CachedUrl {
 		private final URL url;

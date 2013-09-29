@@ -6,9 +6,9 @@ import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.head.CssReferenceHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.JavaScriptReferenceHeaderItem;
 
+import com.pmease.commons.wicket.asset.JQueryHeaderItem;
 import com.pmease.commons.wicket.asset.bootstrap.BootstrapHeaderItem;
 
 public class BaseResourceBehavior extends Behavior {
@@ -29,7 +29,7 @@ public class BaseResourceBehavior extends Behavior {
 		response.render(JavaScriptReferenceHeaderItem.forReference(AssetLocator.MODERNIZR_JS));
 		
 		// render jquery
-		response.render(JavaScriptHeaderItem.forReference(Application.get().getJavaScriptLibrarySettings().getJQueryReference()));
+		response.render(JQueryHeaderItem.get());
 
 		// render bootstrap
 		response.render(BootstrapHeaderItem.get());

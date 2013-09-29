@@ -11,7 +11,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Strings;
-import com.pmease.gitop.core.model.Repository;
+import com.pmease.gitop.core.model.Project;
 import com.pmease.gitop.core.model.User;
 
 @StatelessComponent
@@ -55,7 +55,7 @@ public class AvatarImage extends Panel {
 				return (new StatelessAvatarImage("avatar", params));
 			}
 		} else {
-			Repository project = (Repository) getDefaultModelObject();
+			Project project = (Project) getDefaultModelObject();
 			PageParameters params = new PageParameters();
 			params.set("type", AvatarImageType.REPOSITORY.name().toLowerCase());
 			params.set("id", project.getId());

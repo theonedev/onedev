@@ -10,16 +10,16 @@ import com.pmease.commons.editable.annotation.Editable;
 @Editable
 public class StorageSetting implements Serializable {
 	
-	private String repoStorageDir;
+	private String storageDir;
 
 	@Editable
 	@NotEmpty
-	public String getRepoStorageDir() {
-		return repoStorageDir;
+	public String getStorageDir() {
+		return storageDir;
 	}
 
-	public void setRepoStorageDir(String repoStorageDir) {
-		this.repoStorageDir = repoStorageDir;
+	public void setStorageDir(String storageDir) {
+		this.storageDir = storageDir;
 	}
 	
 }

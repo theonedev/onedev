@@ -12,7 +12,7 @@ import com.pmease.commons.util.pattern.PatternSetMatcher;
 import com.pmease.commons.util.pattern.WildcardPathMatcher;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.model.MergeRequest;
-import com.pmease.gitop.core.model.Repository;
+import com.pmease.gitop.core.model.Project;
 
 @SuppressWarnings("serial")
 @Editable
@@ -32,9 +32,9 @@ public class SubmittedToSpecifiedBranch extends AbstractGateKeeper {
 
 	@Override
 	public CheckResult check(MergeRequest request) {
-		Repository repository = request.getDestination().getRepository();
+		Project project = request.getDestination().getProject();
 		BranchManager branchManager = AppLoader.getInstance(BranchManager.class);
-		EntityLoader entityLoader = branchManager.asEntityLoader(repository);
+		EntityLoader entityLoader = branchManager.asEntityLoader(project);
 		EntityMatcher entityMatcher = new EntityMatcher(entityLoader, new WildcardPathMatcher());
 		PatternSetMatcher patternSetMatcher = new PatternSetMatcher(entityMatcher);
 
@@ -48,13 +48,13 @@ public class SubmittedToSpecifiedBranch extends AbstractGateKeeper {
 
 	@Override
 	public Object trim(Object context) {
-		Preconditions.checkArgument(context instanceof Repository);
+		Preconditions.checkArgument(context instanceof Project);
 		
-		Repository repository = (Repository) context;
+		Project project = (Project) context;
 		BranchManager branchManager = AppLoader.getInstance(BranchManager.class);
-		EntityLoader entityLoader = branchManager.asEntityLoader(repository);
+		EntityLoader entityLoader = branchManager.asEntityLoader(project);
 		EntityPatternSet patternSet = EntityPatternSet.fromStored(getBranchPatterns(), entityLoader);
-		patternSet.trim(repository);
+		patternSet.trim(project);
 		
 		if (patternSet.getStored().isEmpty()) {
 			return null;

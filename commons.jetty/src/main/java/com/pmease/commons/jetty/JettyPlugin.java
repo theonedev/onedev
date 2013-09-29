@@ -72,7 +72,6 @@ public class JettyPlugin extends AbstractPlugin {
         
         context.setClassLoader(JettyPlugin.class.getClassLoader());
         
-        context.setContextPath("/");
         context.setErrorHandler(new ErrorPageErrorHandler());
         
         context.addFilter(DisableTraceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));

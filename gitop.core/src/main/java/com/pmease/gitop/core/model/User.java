@@ -17,19 +17,19 @@ import com.pmease.commons.editable.annotation.Password;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.shiro.AbstractUser;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.RepositoryManager;
+import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.core.permission.object.ProtectedObject;
 import com.pmease.gitop.core.permission.object.UserBelonging;
-import com.pmease.gitop.core.permission.operation.RepositoryOperation;
+import com.pmease.gitop.core.permission.operation.GeneralOperation;
 
 /**
  * This class represents either a project or an user in the system. 
  * <p>
  * In Gitop, users and projects are the same thing. 
  * If necessary, you can always treat an user account as a project account. 
- * {@link Repository} and {@link Team} are always created under a specific account.  
+ * {@link Project} and {@link Team} are always created under a specific account.  
  *  
  * @author robin
  *
@@ -39,7 +39,12 @@ import com.pmease.gitop.core.permission.operation.RepositoryOperation;
 @Editable
 public class User extends AbstractUser implements ProtectedObject {
 
-	public static final User ANONYMOUS = new User(0L, "Anonymous");
+	public static final User ANONYMOUS = new User();
+	
+	static {
+		ANONYMOUS.setId(0L);
+		ANONYMOUS.setName("Guest");
+	}
 	
 	@Column(nullable=false)
 	private String email;
@@ -50,17 +55,16 @@ public class User extends AbstractUser implements ProtectedObject {
 	@Column
 	private String avatarUrl;
 	
-	@OneToMany(mappedBy="user")
-	private Collection<TeamMembership> teamMemberships = new ArrayList<TeamMembership>();
+	private boolean admin;
 	
 	@OneToMany(mappedBy="user")
-	private Collection<RoleMembership> roleMemberships = new ArrayList<RoleMembership>();
+	private Collection<Membership> memberships = new ArrayList<Membership>();
 	
 	@OneToMany(mappedBy="submitter")
 	private Collection<MergeRequest> mergeRequests = new ArrayList<MergeRequest>();
 	
 	@OneToMany(mappedBy="owner")
-	private Collection<Repository> repositories = new ArrayList<Repository>();
+	private Collection<Project> repositories = new ArrayList<Project>();
 
 	@OneToMany(mappedBy="owner")
 	private Collection<Team> teams = new ArrayList<Team>();
@@ -71,34 +75,23 @@ public class User extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="voter")
 	private Collection<VoteInvitation> voteVitations = new ArrayList<VoteInvitation>();
 
-	@OneToMany(mappedBy="individual")
-	private Collection<RepositoryAuthorizationByIndividual> repositoryAuthorizations = 
-			new ArrayList<RepositoryAuthorizationByIndividual>();
-
-	@OneToMany(mappedBy="individual")
-	private Collection<UserAuthorizationByIndividual> userAuthorizations = 
-			new ArrayList<UserAuthorizationByIndividual>();
-
-	@OneToMany(mappedBy="user")
-	private Collection<UserAuthorizationByIndividual> authorizationsByIndividual = 
-			new ArrayList<UserAuthorizationByIndividual>();
-
-	public User() {
-	}
-	
-	private User(Long id, String name) {
-		setId(id);
-		setName(name);
-	}
-	
-	@Editable
+	@Editable(order=100)
 	@NotEmpty
 	@Override
 	public String getName() {
 		return super.getName();
 	}
 
-	@Editable
+	@Editable(order=200)
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	@Editable(order=300)
 	@NotEmpty
 	@Email
 	public String getEmail() {
@@ -109,7 +102,7 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.email = email;
 	}
 
-	@Editable(name="Password")
+	@Editable(name="Password", order=400)
 	@Password(confirmative=true)
 	@NotEmpty
 	@Override
@@ -117,13 +110,12 @@ public class User extends AbstractUser implements ProtectedObject {
 		return super.getPasswordHash();
 	}
 
-	@Editable
-	public String getDisplayName() {
-		return displayName;
+	public boolean isAdmin() {
+		return admin;
 	}
 
-	public void setDisplayName(String displayName) {
-		this.displayName = displayName;
+	public void setAdmin(boolean admin) {
+		this.admin = admin;
 	}
 
 	public String getAvatarUrl() {
@@ -134,27 +126,19 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.avatarUrl = avatarUrl;
 	}
 
-	public Collection<TeamMembership> getTeamMemberships() {
-		return teamMemberships;
+	public Collection<Membership> getMemberships() {
+		return memberships;
 	}
 
-	public void setTeamMemberships(Collection<TeamMembership> teamMemberships) {
-		this.teamMemberships = teamMemberships;
+	public void setMemberships(Collection<Membership> memberships) {
+		this.memberships = memberships;
 	}
 
-	public Collection<RoleMembership> getRoleMemberships() {
-		return roleMemberships;
-	}
-
-	public void setRoleMemberships(Collection<RoleMembership> roleMemberships) {
-		this.roleMemberships = roleMemberships;
-	}
-
-	public Collection<Repository> getRepositories() {
+	public Collection<Project> getRepositories() {
 		return repositories;
 	}
 
-	public void setRepositories(Collection<Repository> repositories) {
+	public void setRepositories(Collection<Project> repositories) {
 		this.repositories = repositories;
 	}
 
@@ -198,33 +182,6 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.voteVitations = voteVitations;
 	}
 
-	public Collection<RepositoryAuthorizationByIndividual> getRepositoryAuthorizations() {
-		return repositoryAuthorizations;
-	}
-
-	public void setRepositoryAuthorizations(
-			Collection<RepositoryAuthorizationByIndividual> repositoryAuthorizations) {
-		this.repositoryAuthorizations = repositoryAuthorizations;
-	}
-
-	public Collection<UserAuthorizationByIndividual> getUserAuthorizations() {
-		return userAuthorizations;
-	}
-
-	public void setUserAuthorizations(
-			Collection<UserAuthorizationByIndividual> userAuthorizations) {
-		this.userAuthorizations = userAuthorizations;
-	}
-
-	public Collection<UserAuthorizationByIndividual> getAuthorizationsByIndividual() {
-		return authorizationsByIndividual;
-	}
-
-	public void setAuthorizationsByIndividual(
-			Collection<UserAuthorizationByIndividual> authorizationsByIndividual) {
-		this.authorizationsByIndividual = authorizationsByIndividual;
-	}
-
 	@Override
 	public boolean has(ProtectedObject object) {
 		if (object instanceof User) {
@@ -259,11 +216,18 @@ public class User extends AbstractUser implements ProtectedObject {
 			return User.ANONYMOUS;
 		}
 	}
+	
+	public static User anonymous() {
+		User user = new User();
+		user.setId(0L);
+		user.setName("Guest");
+		return user;
+	}
 
 	@Override
 	public boolean implies(Permission permission) {
-		// Root user can do anything
-		if (isRoot()) 
+		// Administrator can do anything
+		if (isRoot() || isAdmin()) 
 			return true;
 		
 		if (permission instanceof ObjectPermission) {
@@ -273,40 +237,22 @@ public class User extends AbstractUser implements ProtectedObject {
 				if (has(objectPermission.getObject()))
 					return true;
 				
-				for (RepositoryAuthorizationByIndividual authorization: getRepositoryAuthorizations()) {
-					ObjectPermission repositoryPermission = new ObjectPermission(
-							authorization.getRepository(), authorization.getAuthorizedOperation());
-					if (repositoryPermission.implies(objectPermission))
-						return true;
-				}
-				
-				for (UserAuthorizationByIndividual each: getUserAuthorizations()) {
-					ObjectPermission userPermission = new ObjectPermission(each.getUser(), each.getAuthorizedOperation());
-					if (userPermission.implies(objectPermission))
-						return true;
-				}
-				
 				for (Team team: getTeams()) {
 					if (team.implies(objectPermission))
 						return true;
 				}
 	
-				for (RoleMembership each: getRoleMemberships()) {
-					if (each.getRole().implies(objectPermission))
-						return true;
-				}
-				
-				for (Repository each: Gitop.getInstance(RepositoryManager.class).query(null)) {
-					ObjectPermission repositoryPermission = new ObjectPermission(each, each.getDefaultAuthorizedOperation());
-					if (repositoryPermission.implies(objectPermission))
+				for (Project each: Gitop.getInstance(ProjectManager.class).query(null)) {
+					ObjectPermission projectPermission = new ObjectPermission(each, each.getDefaultAuthorizedOperation());
+					if (projectPermission.implies(objectPermission))
 						return true;
 				}
 			} 
 			
 			// check if is public access
-			for (Repository each: Gitop.getInstance(RepositoryManager.class).findPublic()) {
-				ObjectPermission repositoryPermission = new ObjectPermission(each, RepositoryOperation.READ);
-				if (repositoryPermission.implies(objectPermission))
+			for (Project each: Gitop.getInstance(ProjectManager.class).findPublic()) {
+				ObjectPermission projectPermission = new ObjectPermission(each, GeneralOperation.READ);
+				if (projectPermission.implies(objectPermission))
 					return true;
 			}
 		} 

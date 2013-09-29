@@ -14,18 +14,18 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
-import com.pmease.commons.util.FileUtils;
 import com.pmease.gitop.core.manager.ConfigManager;
-import com.pmease.gitop.core.manager.RepositoryManager;
-import com.pmease.gitop.core.model.Repository;
+import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.core.storage.ProjectStorage;
 
 @Singleton
-public class DefaultRepositoryManager extends AbstractGenericDao<Repository> implements RepositoryManager {
+public class DefaultProjectManager extends AbstractGenericDao<Project> implements ProjectManager {
 
 	private ConfigManager configManager;
 	
 	@Inject
-	public DefaultRepositoryManager(GeneralDao generalDao, ConfigManager configManager) {
+	public DefaultProjectManager(GeneralDao generalDao, ConfigManager configManager) {
 		super(generalDao);
 		
 		this.configManager = configManager;
@@ -33,14 +33,14 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
 
 	@Transactional
 	@Override
-	public void save(Repository entity) {
+	public void save(Project entity) {
 		if (entity.isNew()) {
 			super.save(entity);
 			
-			File gitDir = locateStorage(entity);
-			FileUtils.cleanDir(gitDir);
+			ProjectStorage storage = locateStorage(entity);
+			storage.clean();
 			
-			new Git(gitDir).init().bare(true).call();
+			new Git(storage.ofCode()).init().bare(true).call();
 		} else {
 			super.save(entity);
 		}
@@ -48,31 +48,31 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
 	
 	@Transactional
 	@Override
-	public void delete(Repository entity) {
+	public void delete(Project entity) {
 		super.delete(entity);
 		
-		FileUtils.deleteDir(locateStorage(entity));
+		locateStorage(entity).delete();
 	}
 
 	@Override
-	public File locateStorage(Repository repository) {
-		return new File(configManager.getStorageSetting().getRepoStorageDir(), repository.getId().toString()); 
+	public ProjectStorage locateStorage(Project project) {
+		return new ProjectStorage(new File(configManager.getStorageSetting().getStorageDir(), project.getId().toString())); 
 	}
 
 	@Override
-	public Collection<Repository> findPublic() {
+	public Collection<Project> findPublic() {
 		return query(new Criterion[]{Restrictions.eq("publiclyAccessible", true)});
 	}
 
 	@Override
-	public Repository find(String ownerName, String repositoryName) {
+	public Project find(String ownerName, String projectName) {
 		Criteria criteria = createCriteria();
-		criteria.add(Restrictions.eq("name", repositoryName));
+		criteria.add(Restrictions.eq("name", projectName));
 		criteria.createAlias("owner", "owner");
 		criteria.add(Restrictions.eq("owner.name", ownerName));
 		
 		criteria.setMaxResults(1);
-		return (Repository) criteria.uniqueResult();
+		return (Project) criteria.uniqueResult();
 	}
 
 }

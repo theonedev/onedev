@@ -13,6 +13,14 @@ public interface ServerConfig {
 	int getHttpPort();
 	
 	/**
+	 * Get servlet context path for QuickBuild UI.
+	 * 
+	 * @return
+	 * 			context path to serve QuickBuild UI
+	 */
+	String getContextPath();
+	
+	/**
 	 * Get ssl config of the server.
 	 * <p>
 	 * @return
