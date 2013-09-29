@@ -16,7 +16,7 @@ public class WicketConfig extends AbstractWicketConfig {
 		mountPage("/", HomePage.class);
 		mountPage("/init", ServerInitPage.class);
 		
-		mountPage("/test", TestPage.class);
+		mountPage("/test/dudu", TestPage.class);
 	}
 	
 	@Override

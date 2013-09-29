@@ -23,6 +23,8 @@ public class GitopServletContextConfigurator implements ServletContextConfigurat
 	
 	@Override
 	public void configure(ServletContextHandler context) {
+		context.setContextPath(serverConfig.getContextPath());
+		
 		context.getSessionHandler().getSessionManager().setMaxInactiveInterval(serverConfig.getSessionTimeout());
 		
 		/*

@@ -80,7 +80,7 @@ public class GitServlet extends HttpServlet {
 			doNotCache(resp);
 			resp.setHeader("Content-Type", "application/x-" + service + "-result");			
 
-			Git git = new Git(repositoryManager.locateStorage(repository));
+			Git git = new Git(repositoryManager.locateStorage(repository).ofCode());
 
 			try {
 				if (service.contains("upload")) {
@@ -122,7 +122,7 @@ public class GitServlet extends HttpServlet {
 			pack.writeString("# service=" + service + "\n");
 			pack.end();
 			
-			Git git = new Git(repositoryManager.locateStorage(repository));
+			Git git = new Git(repositoryManager.locateStorage(repository).ofCode());
 
 			try {
 				if (service.contains("upload")) {

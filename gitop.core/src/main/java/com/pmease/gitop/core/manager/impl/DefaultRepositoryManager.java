@@ -14,10 +14,10 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
-import com.pmease.commons.util.FileUtils;
 import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.core.model.Repository;
+import com.pmease.gitop.core.storage.RepositoryStorage;
 
 @Singleton
 public class DefaultRepositoryManager extends AbstractGenericDao<Repository> implements RepositoryManager {
@@ -37,10 +37,10 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
 		if (entity.isNew()) {
 			super.save(entity);
 			
-			File gitDir = locateStorage(entity);
-			FileUtils.cleanDir(gitDir);
+			RepositoryStorage storage = locateStorage(entity);
+			storage.clean();
 			
-			new Git(gitDir).init().bare(true).call();
+			new Git(storage.ofCode()).init().bare(true).call();
 		} else {
 			super.save(entity);
 		}
@@ -51,12 +51,12 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
 	public void delete(Repository entity) {
 		super.delete(entity);
 		
-		FileUtils.deleteDir(locateStorage(entity));
+		locateStorage(entity).delete();
 	}
 
 	@Override
-	public File locateStorage(Repository repository) {
-		return new File(configManager.getStorageSetting().getRepoStorageDir(), repository.getId().toString()); 
+	public RepositoryStorage locateStorage(Repository repository) {
+		return new RepositoryStorage(new File(configManager.getStorageSetting().getRepoStorageDir(), repository.getId().toString())); 
 	}
 
 	@Override

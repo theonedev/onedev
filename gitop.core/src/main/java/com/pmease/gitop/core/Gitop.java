@@ -8,6 +8,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,10 +68,34 @@ public class Gitop extends AbstractPlugin {
 			throw new RuntimeException(e);
 		}
 		
+		String serverUrl;
 		if (serverConfig.getHttpPort() != 0)
-			return "http://" + hostName + ":" + serverConfig.getHttpPort();
+			serverUrl = "http://" + hostName + ":" + serverConfig.getHttpPort();
 		else 
-			return "https://" + hostName + ":" + serverConfig.getSslConfig().getPort();
+			serverUrl = "https://" + hostName + ":" + serverConfig.getSslConfig().getPort();
+
+		return serverUrl + serverConfig.getContextPath();
+	}
+	
+	/**
+	 * Get context aware servlet request path given path inside context. For instance if 
+	 * pathInContext is &quot;/images/ok.png&quot;, this method will return 
+	 * &quot;/gitop/images/ok.png&quot; if Gitop web UI is configured to run under 
+	 * context path &quot;/gitop&quot;
+	 *  
+	 * @param pathInContext
+	 * 			servlet request path inside servlet context. It does not matter whether or 
+	 * 			not this path starts with slash 
+	 * @return
+	 * 			absolute path prepending servlet context path
+	 */
+	public String getContextAwarePath(String pathInContext) {
+		String contextAwarePath = serverConfig.getContextPath();
+		contextAwarePath = StringUtils.stripEnd(contextAwarePath, "/");
+		if (pathInContext.startsWith("/"))
+			return contextAwarePath + pathInContext;
+		else
+			return contextAwarePath + "/" + pathInContext;
 	}
 	
 	public String getAppName() {

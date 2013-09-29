@@ -33,7 +33,7 @@ public class TouchSpecifiedFiles extends AbstractGateKeeper {
 	@Override
 	public CheckResult check(MergeRequest request) {
 		RepositoryManager repositoryManager = AppLoader.getInstance(RepositoryManager.class);
-		File repoDir = repositoryManager.locateStorage(request.getDestination().getRepository());
+		File repoDir = repositoryManager.locateStorage(request.getDestination().getRepository()).ofCode();
 
 		FindChangedFilesCommand command = new Git(repoDir).findChangedFiles();
 		

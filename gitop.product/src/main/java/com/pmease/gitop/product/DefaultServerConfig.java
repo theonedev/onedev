@@ -18,6 +18,8 @@ public class DefaultServerConfig implements ServerConfig {
 	private int httpPort;
 	
 	private int sessionTimeout;
+
+	private String contextPath;
 	
 	private SslConfig sslConfig;
 	
@@ -25,24 +27,32 @@ public class DefaultServerConfig implements ServerConfig {
 	public DefaultServerConfig(@Named("server") Properties props) {
 		String httpPortStr = props.getProperty("httpPort");
 		if (StringUtils.isNotBlank(httpPortStr)) {
-			httpPort = Integer.parseInt(httpPortStr);
+			httpPort = Integer.parseInt(httpPortStr.trim());
 		}
 		
 		String httpsPortStr = props.getProperty("httpsPort");
 		
 		if (StringUtils.isNotBlank(httpsPortStr)) {
 			SslConfigBean sslConfigBean = new SslConfigBean();
-			sslConfigBean.setPort(Integer.parseInt(httpsPortStr));
+			sslConfigBean.setPort(Integer.parseInt(httpsPortStr.trim()));
 			
 			String keystorePath = props.getProperty("sslKeystorePath");
 			if (StringUtils.isBlank(keystorePath))
 				keystorePath = "sample.keystore";
+			else
+				keystorePath = keystorePath.trim();
+			
 			String keystorePassword = props.getProperty("sslKeystorePassword");
 			if (StringUtils.isBlank(keystorePassword))
 				keystorePassword = "123456";
+			else
+				keystorePassword = keystorePassword.trim();
+			
 			String keystoreKeyPassword = props.getProperty("sslKeystoreKeyPassword");
 			if (StringUtils.isBlank(keystoreKeyPassword))
 				keystoreKeyPassword = "123456";
+			else
+				keystoreKeyPassword = keystoreKeyPassword.trim();
 			
 			File keystoreFile = new File(keystorePath);
 			if (!keystoreFile.isAbsolute())
@@ -58,11 +68,21 @@ public class DefaultServerConfig implements ServerConfig {
 		if (httpPort == 0 && sslConfig == null)
 			throw new RuntimeException("Either httpPort or httpsPort or both should be enabled.");
 		
-		String sessionTimeout = props.getProperty("sessionTimeout");
-		if (StringUtils.isNotBlank(sessionTimeout))
-			this.sessionTimeout = Integer.parseInt(sessionTimeout);
+		String sessionTimeoutStr = props.getProperty("sessionTimeout");
+		if (StringUtils.isNotBlank(sessionTimeoutStr))
+			this.sessionTimeout = Integer.parseInt(sessionTimeoutStr.trim());
 		else
 			throw new RuntimeException("sessionTimeout is not specified.");
+		
+		contextPath = props.getProperty("contextPath");
+		if (StringUtils.isNotBlank(contextPath)) {
+			contextPath = StringUtils.stripStart(contextPath.trim(), "/ ");
+			contextPath = StringUtils.stripEnd(contextPath, "/ ");
+			contextPath = "/" + contextPath;
+		} else {
+			contextPath = "/";
+		}
+		
 	}
 	
 	@Override
@@ -78,5 +98,10 @@ public class DefaultServerConfig implements ServerConfig {
 	@Override
 	public int getSessionTimeout() {
 		return sessionTimeout;
+	}
+
+	@Override
+	public String getContextPath() {
+		return contextPath;
 	}
 }
