@@ -15,7 +15,7 @@ import org.apache.shiro.authz.Permission;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitop.core.permission.ObjectPermission;
-import com.pmease.gitop.core.permission.operation.UserOperation;
+import com.pmease.gitop.core.permission.operation.GeneralOperation;
 
 @Entity
 @Table(uniqueConstraints={
@@ -33,18 +33,14 @@ public class Team extends AbstractEntity implements Permission {
 	
 	private String description;
 	
-	private boolean anonymous;
-	
-	private boolean register;
-
 	@Column(nullable=false)
-	private UserOperation authorizedOperation = UserOperation.READ;
+	private GeneralOperation authorizedOperation = GeneralOperation.READ;
 	
 	@OneToMany(mappedBy="team")
-	private Collection<TeamMembership> memberships = new ArrayList<TeamMembership>();
+	private Collection<Membership> memberships = new ArrayList<Membership>();
 	
 	@OneToMany(mappedBy="team")
-	private Collection<RepositoryAuthorizationByTeam> repositoryAuthorizations = new ArrayList<RepositoryAuthorizationByTeam>();
+	private Collection<Authorization> authorizations = new ArrayList<Authorization>();
 
 	public User getOwner() {
 		return owner;
@@ -70,44 +66,28 @@ public class Team extends AbstractEntity implements Permission {
 		this.description = description;
 	}
 
-	public boolean isAnonymous() {
-		return anonymous;
-	}
-
-	public void setAnonymous(boolean anonymous) {
-		this.anonymous = anonymous;
-	}
-
-	public boolean isRegister() {
-		return register;
-	}
-
-	public void setRegister(boolean register) {
-		this.register = register;
-	}
-
-	public UserOperation getAuthorizedOperation() {
+	public GeneralOperation getAuthorizedOperation() {
 		return authorizedOperation;
 	}
 
-	public void setAuthorizedOperation(UserOperation authorizedOeration) {
+	public void setAuthorizedOperation(GeneralOperation authorizedOeration) {
 		this.authorizedOperation = authorizedOeration;
 	}
 
-	public Collection<TeamMembership> getMemberships() {
+	public Collection<Membership> getMemberships() {
 		return memberships;
 	}
 
-	public void setMemberships(Collection<TeamMembership> memberships) {
+	public void setMemberships(Collection<Membership> memberships) {
 		this.memberships = memberships;
 	}
 
-	public Collection<RepositoryAuthorizationByTeam> getRepositoryAuthorizations() {
-		return repositoryAuthorizations;
+	public Collection<Authorization> getAuthorizations() {
+		return authorizations;
 	}
 
-	public void setRepositoryAuthorizations(Collection<RepositoryAuthorizationByTeam> repositoryAuthorizations) {
-		this.repositoryAuthorizations = repositoryAuthorizations;
+	public void setAuthorizations(Collection<Authorization> authorizations) {
+		this.authorizations = authorizations;
 	}
 
 	@Override
@@ -118,10 +98,10 @@ public class Team extends AbstractEntity implements Permission {
 			if (userPermission.implies(objectPermission))
 				return true;
 			
-			for (RepositoryAuthorizationByTeam authorization: getRepositoryAuthorizations()) {
-				Permission repositoryPermission = new ObjectPermission(
-						authorization.getRepository(), authorization.getAuthorizedOperation());
-				if (repositoryPermission.implies(objectPermission))
+			for (Authorization authorization: getAuthorizations()) {
+				Permission projectPermission = new ObjectPermission(
+						authorization.getProject(), authorization.getAuthorizedOperation());
+				if (projectPermission.implies(objectPermission))
 					return true;
 			}
 		}

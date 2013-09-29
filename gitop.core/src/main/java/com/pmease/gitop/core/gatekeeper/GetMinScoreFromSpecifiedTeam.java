@@ -7,7 +7,7 @@ import javax.validation.constraints.Min;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.model.MergeRequest;
-import com.pmease.gitop.core.model.TeamMembership;
+import com.pmease.gitop.core.model.Membership;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.model.Vote;
 
@@ -40,7 +40,7 @@ public class GetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
 	@Override
 	public CheckResult check(MergeRequest request) {
 		Collection<User> members = new HashSet<User>();
-		for (TeamMembership membership: getTeam().getMemberships())
+		for (Membership membership: getTeam().getMemberships())
 			members.add(membership.getUser());
 		
 		int score = 0;

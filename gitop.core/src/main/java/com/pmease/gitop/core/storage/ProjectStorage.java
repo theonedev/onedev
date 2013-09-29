@@ -4,11 +4,11 @@ import java.io.File;
 
 import com.pmease.commons.util.FileUtils;
 
-public class RepositoryStorage {
+public class ProjectStorage {
 	
 	private final File storageDir;
 	
-	public RepositoryStorage(File storageDir) {
+	public ProjectStorage(File storageDir) {
 		this.storageDir = storageDir;
 	}
 	

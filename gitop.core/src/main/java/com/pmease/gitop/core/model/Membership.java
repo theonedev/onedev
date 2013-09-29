@@ -13,7 +13,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"user", "team"})
 })
-public class TeamMembership extends AbstractEntity {
+public class Membership extends AbstractEntity {
 
 	@ManyToOne
 	@JoinColumn(nullable=false)

@@ -13,7 +13,7 @@ import com.pmease.commons.util.namedentity.EntityLoader;
 import com.pmease.commons.util.namedentity.NamedEntity;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.model.Branch;
-import com.pmease.gitop.core.model.Repository;
+import com.pmease.gitop.core.model.Project;
 
 @Singleton
 public class DefaultBranchManager extends AbstractGenericDao<Branch> implements BranchManager {
@@ -26,12 +26,12 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 	
 	@Sessional
 	@Override
-	public Branch find(Repository repository, String name) {
-		return find(new Criterion[]{Restrictions.eq("repository", repository), Restrictions.eq("name", name)});
+	public Branch find(Project project, String name) {
+		return find(new Criterion[]{Restrictions.eq("project", project), Restrictions.eq("name", name)});
 	}
 
 	@Override
-	public EntityLoader asEntityLoader(final Repository repository) {
+	public EntityLoader asEntityLoader(final Project project) {
 		return new EntityLoader() {
 
 			@Override
@@ -58,7 +58,7 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 
 			@Override
 			public NamedEntity get(String name) {
-				final Branch branch = find(repository, name);
+				final Branch branch = find(project, name);
 				if (branch != null) {
 					return new NamedEntity() {
 

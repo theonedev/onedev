@@ -8,7 +8,6 @@ import org.apache.shiro.authc.credential.CredentialsMatcher;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.shiro.AbstractUser;
-import com.pmease.gitop.core.manager.RoleManager;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.model.User;
@@ -20,7 +19,7 @@ public class UserRealm extends AbstractRealm {
 	
 	@Inject
 	public UserRealm(GeneralDao generalDao, CredentialsMatcher credentialsMatcher, 
-			UserManager userManager, RoleManager roleManager, TeamManager teamManager) {
+			UserManager userManager, TeamManager teamManager) {
 		super(credentialsMatcher);
 
 		this.userManager = userManager;
@@ -31,9 +30,7 @@ public class UserRealm extends AbstractRealm {
 		if (userId != 0L) {
 			return userManager.load(userId);
 		} else { 
-			User user = new User();
-			user.setId(0L);
-			return user;
+			return User.anonymous();
 		}
 	}
 
