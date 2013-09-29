@@ -13,6 +13,7 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.web.GitopWebApp;
+import com.pmease.gitop.web.SitePaths;
 import com.pmease.gitop.web.common.component.avatar.AvatarImage.AvatarImageType;
 
 public class AvatarImageResource extends DynamicImageResource {
@@ -30,7 +31,7 @@ public class AvatarImageResource extends DynamicImageResource {
       User user = AppLoader.getInstance(UserManager.class).get(id);
       
       if (!Strings.isNullOrEmpty(user.getAvatarUrl())) {
-        avatarFile = new File(GitopWebApp.get().getUserAvatarDir(id), user.getAvatarUrl());
+        avatarFile = new File(SitePaths.get().userAvatarDir(id), user.getAvatarUrl());
       }
     } else {
 //      Repository project = AppLoader.getInstance(RepositoryManager.class).get(id);

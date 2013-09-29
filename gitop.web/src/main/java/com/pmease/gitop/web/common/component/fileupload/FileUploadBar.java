@@ -1,5 +1,6 @@
 package com.pmease.gitop.web.common.component.fileupload;
 
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
 
 /**
@@ -13,6 +14,8 @@ public class FileUploadBar extends Panel {
 	public FileUploadBar(String id) {
         super(id);
 
-        add(new FileUploadResourceBehavior());
+        WebMarkupContainer form = new WebMarkupContainer("form");
+        add(form);
+        form.add(new FileUploadResourceBehavior());
     }
 }

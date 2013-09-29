@@ -13,7 +13,7 @@ import org.apache.wicket.request.resource.IResource;
 import org.apache.wicket.request.resource.ResourceReference;
 import org.apache.wicket.util.upload.FileItem;
 
-import com.pmease.gitop.web.GitopWebApp;
+import com.pmease.gitop.web.SitePaths;
 
 /**
  * A resource reference provides default implementation of
@@ -81,7 +81,7 @@ public class FileUploadResourceReference extends ResourceReference {
 		PageParameters params = new PageParameters();
 		params.set("filename", fileItem.getName());
 		CharSequence url = RequestCycle.get().urlFor(
-				new FileManagerResourceReference(GitopWebApp.get().getUploadsDir().getAbsolutePath()),
+				new FileManagerResourceReference(SitePaths.get().uploadsDir().getAbsolutePath()),
 				params);
 		return url;
 	}
@@ -91,7 +91,7 @@ public class FileUploadResourceReference extends ResourceReference {
 		params.set("filename", fileItem.getName());
 		params.set("delete", true);
 		CharSequence url = RequestCycle.get().urlFor(
-				new FileManagerResourceReference(GitopWebApp.get().getUploadsDir().getAbsolutePath()),
+				new FileManagerResourceReference(SitePaths.get().uploadsDir().getAbsolutePath()),
 				params);
 		return url;
 	}

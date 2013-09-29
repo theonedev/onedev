@@ -1,5 +1,6 @@
 package com.pmease.gitop.web;
 
+import javax.inject.Singleton;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
@@ -11,6 +12,8 @@ import com.pmease.commons.jetty.ServletContextConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.gitop.web.assets.AssetLocator;
+import com.pmease.gitop.web.common.component.fileupload.FileUploadServlet;
+import com.pmease.gitop.web.resource.RestResourceModule;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -24,6 +27,7 @@ public class WebModule extends AbstractPluginModule {
 		
 		// put your guice bindings here
 		bind(AbstractWicketConfig.class).to(GitopWebApp.class);		
+		bind(SitePaths.class).in(Singleton.class);
 		
 		contribute(ServletContextConfigurator.class, new ServletContextConfigurator() {
 			
@@ -35,10 +39,13 @@ public class WebModule extends AbstractPluginModule {
 				
 				ErrorPageErrorHandler errorHandler = (ErrorPageErrorHandler) context.getErrorHandler();
 				errorHandler.addErrorPage(HttpServletResponse.SC_NOT_FOUND, "/assets/404.html");
+				
+				servletHolder = context.addServlet(FileUploadServlet.class, "/uploads/*");
 			}
 			
 		});
 
+		install(new RestResourceModule());
 	}
 
 }

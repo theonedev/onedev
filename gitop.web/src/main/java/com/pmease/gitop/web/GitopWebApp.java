@@ -1,6 +1,5 @@
 package com.pmease.gitop.web;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -17,13 +16,9 @@ import org.apache.wicket.request.Response;
 import org.apache.wicket.util.time.Duration;
 import org.apache.wicket.util.time.Time;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.io.ByteStreams;
-import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.wicket.AbstractWicketConfig;
-import com.pmease.gitop.core.manager.ConfigManager;
-import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.web.assets.AssetLocator;
 import com.pmease.gitop.web.common.component.avatar.AvatarImageResource;
 import com.pmease.gitop.web.common.component.avatar.AvatarImageResourceReference;
@@ -135,8 +130,8 @@ public class GitopWebApp extends AbstractWicketConfig {
 		getSharedResources().add(AvatarImageResourceReference.AVATAR_RESOURCE, new AvatarImageResource());
 		mountResource("avatars/${type}/${id}", new AvatarImageResourceReference());
 		
-		mountResource("fileManager", new FileManagerResourceReference(getUploadsDir().getAbsolutePath()));
-		mountResource("fileUpload", new FileUploadResourceReference(getUploadsDir().getAbsolutePath()));
+		mountResource("fileManager", new FileManagerResourceReference(SitePaths.get().uploadsDir().getAbsolutePath()));
+		mountResource("fileUpload", new FileUploadResourceReference(SitePaths.get().uploadsDir().getAbsolutePath()));
 	}
 	
 	public boolean isGravatarEnabled() {
@@ -146,27 +141,4 @@ public class GitopWebApp extends AbstractWicketConfig {
 	public boolean isPublicSignupEnabled() {
 		return true;
 	}
-
-	public File getDataDir() {
-		String str = AppLoader.getInstance(ConfigManager.class).getStorageSetting().getRepoStorageDir();
-		return new File(str);
-	}
-
-	public File getSystemAvatarDir() {
-		return new File(getDataDir(), "avatars");
-	}
-
-	public File getUserAvatarDir(Long id) {
-		Preconditions.checkNotNull(id, "user id");
-		return new File(getSystemAvatarDir(), "users/" + id.toString());
-	}
-
-	public File getUserAvatarDir(User user) {
-		return getUserAvatarDir(user.getId());
-	}
-
-	public File getUploadsDir() {
-		return new File(getDataDir(), "uploads");
-	}
-
 }
