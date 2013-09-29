@@ -28,7 +28,9 @@ import com.pmease.gitop.web.SitePaths;
 @Path("/file")
 public class TestResource {
 
+	@SuppressWarnings("unused")
 	private static final String SUCCESS_RESPONSE = "Successful";
+	@SuppressWarnings("unused")
 	private static final String FAILED_RESPONSE = "Failed";
 
 	@POST
