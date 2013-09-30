@@ -65,4 +65,9 @@ public class DefaultUnitOfWork implements UnitOfWork, Provider<Session> {
 		return sessionFactoryProvider.get();
 	}
 
+	@Override
+	public void reset() {
+		sessionReferenceHolder.get().reset();
+	}
+
 }

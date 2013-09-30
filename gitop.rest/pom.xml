@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>commons.git</artifactId>
+	<artifactId>gitop.rest</artifactId>
 	<version>1.0.0</version>
 	<parent>
 		<groupId>com.pmease</groupId>
@@ -15,9 +15,6 @@
 				<groupId>com.pmease</groupId>
 				<artifactId>plugin.maven</artifactId>
 			</plugin>
-			<!-- Uncomment below if you'd like to publish an archetype based on your 
-				plugin -->
-			<!--plugin> <artifactId>maven-archetype-plugin</artifactId> </plugin -->
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
 			</plugin>
@@ -30,18 +27,8 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.pmease</groupId>
-			<artifactId>commons.loader</artifactId>
-			<version>1.0.29</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jgit</groupId>
-			<artifactId>org.eclipse.jgit.http.server</artifactId>
-			<version>3.0.0.201306101825-r</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.util</artifactId>
-			<version>1.0.29</version>
+			<artifactId>gitop.core</artifactId>
+			<version>1.0.30</version>
 		</dependency>
 	</dependencies>
 
@@ -64,7 +51,7 @@
 	</repositories>
 
 	<properties>
-		<moduleClass>com.pmease.commons.git.GitModule</moduleClass>
+		<moduleClass>com.pmease.gitop.rest.RestModule</moduleClass>
 	</properties>
 
 </project>

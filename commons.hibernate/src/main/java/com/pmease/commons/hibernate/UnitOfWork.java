@@ -25,6 +25,8 @@ public interface UnitOfWork {
 
 	void end();
 	
+	void reset();
+	
 	Session getSession();
 	
 	SessionFactory getSessionFactory();

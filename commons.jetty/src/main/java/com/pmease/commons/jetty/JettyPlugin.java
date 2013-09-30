@@ -31,12 +31,12 @@ public class JettyPlugin extends AbstractPlugin {
 	
 	private final Set<ServerConfigurator> serverConfigurators;
 	
-	private final Set<ServletContextConfigurator> servletContextConfigurators;
+	private final Set<ServletConfigurator> servletContextConfigurators;
 	
 	@Inject
 	public JettyPlugin(
 			Set<ServerConfigurator> serverConfigurators, 
-			Set<ServletContextConfigurator> servletContextConfigurators) {
+			Set<ServletConfigurator> servletContextConfigurators) {
 		this.serverConfigurators = serverConfigurators;
 		this.servletContextConfigurators = servletContextConfigurators;
 	}
@@ -76,7 +76,7 @@ public class JettyPlugin extends AbstractPlugin {
         
         context.addFilter(DisableTraceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
         
-        for (ServletContextConfigurator configurator: servletContextConfigurators) 
+        for (ServletConfigurator configurator: servletContextConfigurators) 
         	configurator.configure(context);
 
         /*

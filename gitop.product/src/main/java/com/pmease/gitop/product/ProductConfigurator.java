@@ -10,12 +10,12 @@ import com.pmease.commons.jetty.ServerConfigurator;
 import com.pmease.gitop.core.setting.ServerConfig;
 import com.pmease.gitop.core.setting.SslConfig;
 
-public class GitopServerConfigurator implements ServerConfigurator {
+public class ProductConfigurator implements ServerConfigurator {
 
 	private ServerConfig serverConfig;
 	
 	@Inject
-	public GitopServerConfigurator(ServerConfig serverConfig) {
+	public ProductConfigurator(ServerConfig serverConfig) {
 		this.serverConfig = serverConfig;
 	}
 	
