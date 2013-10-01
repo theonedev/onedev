@@ -3,8 +3,8 @@ package com.pmease.commons.wicket.component.wizard;
 import org.apache.wicket.Component;
 
 import com.pmease.commons.editable.EditContext;
+import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.util.init.ManualConfig;
-import com.pmease.commons.wicket.editable.EditHelper;
 
 @SuppressWarnings("serial")
 public class ManualConfigStep implements WizardStep {
@@ -15,12 +15,12 @@ public class ManualConfigStep implements WizardStep {
 	
 	public ManualConfigStep(ManualConfig config) {
 		this.config = config;
-		editContext = EditHelper.getContext(config.getSetting());
+		editContext = EditableUtils.getContext(config.getSetting());
 	}
 	
 	@Override
 	public Component render(String componentId) {
-		return EditHelper.renderForEdit(editContext, componentId);
+		return (Component) editContext.renderForEdit(componentId);
 	}
 
 	@Override

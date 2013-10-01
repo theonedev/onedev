@@ -5,6 +5,6 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import com.pmease.commons.loader.ExtensionPoint;
 
 @ExtensionPoint
-public interface ServletContextConfigurator {
+public interface ServletConfigurator {
 	void configure(ServletContextHandler context);
 }

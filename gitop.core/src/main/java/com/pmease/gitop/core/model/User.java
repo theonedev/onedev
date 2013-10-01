@@ -23,17 +23,8 @@ import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.core.permission.object.ProtectedObject;
 import com.pmease.gitop.core.permission.object.UserBelonging;
 import com.pmease.gitop.core.permission.operation.GeneralOperation;
+import com.pmease.gitop.core.validation.UserName;
 
-/**
- * This class represents either a project or an user in the system. 
- * <p>
- * In Gitop, users and projects are the same thing. 
- * If necessary, you can always treat an user account as a project account. 
- * {@link Project} and {@link Team} are always created under a specific account.  
- *  
- * @author robin
- *
- */
 @SuppressWarnings("serial")
 @Entity
 @Editable
@@ -49,10 +40,8 @@ public class User extends AbstractUser implements ProtectedObject {
 	@Column(nullable=false)
 	private String email;
 	
-	@Column
 	private String displayName;
 	
-	@Column
 	private String avatarUrl;
 	
 	private boolean admin;
@@ -76,7 +65,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	private Collection<VoteInvitation> voteVitations = new ArrayList<VoteInvitation>();
 
 	@Editable(order=100)
-	@NotEmpty
+	@UserName
 	@Override
 	public String getName() {
 		return super.getName();
@@ -217,13 +206,6 @@ public class User extends AbstractUser implements ProtectedObject {
 		}
 	}
 	
-	public static User anonymous() {
-		User user = new User();
-		user.setId(0L);
-		user.setName("Guest");
-		return user;
-	}
-
 	@Override
 	public boolean implies(Permission permission) {
 		// Administrator can do anything
@@ -242,7 +224,7 @@ public class User extends AbstractUser implements ProtectedObject {
 						return true;
 				}
 	
-				for (Project each: Gitop.getInstance(ProjectManager.class).query(null)) {
+				for (Project each: Gitop.getInstance(ProjectManager.class).query()) {
 					ObjectPermission projectPermission = new ObjectPermission(each, each.getDefaultAuthorizedOperation());
 					if (projectPermission.implies(objectPermission))
 						return true;

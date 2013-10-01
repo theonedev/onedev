@@ -42,12 +42,7 @@
             <groupId>com.sun.jersey.contribs</groupId>  
             <artifactId>jersey-guice</artifactId>  
             <version>${jerseyVersion}</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.pmease</groupId>  
-            <artifactId>commons.shiro</artifactId>  
-            <version>1.0.30</version> 
-        </dependency> 
+        </dependency>   
     </dependencies>  
     <repositories> 
         <repository> 

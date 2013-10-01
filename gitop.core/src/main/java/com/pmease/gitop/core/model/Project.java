@@ -135,7 +135,7 @@ public class Project extends AbstractEntity implements UserBelonging {
 
 	public Collection<User> findAuthorizedUsers(GeneralOperation operation) {
 		Set<User> authorizedUsers = new HashSet<User>();
-		for (User user: Gitop.getInstance(UserManager.class).query(null)) {
+		for (User user: Gitop.getInstance(UserManager.class).query()) {
 			if (user.asSubject().isPermitted(new ObjectPermission(this, operation)))
 				authorizedUsers.add(user);
 		}

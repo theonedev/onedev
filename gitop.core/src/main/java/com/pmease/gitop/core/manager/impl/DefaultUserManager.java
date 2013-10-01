@@ -1,5 +1,8 @@
 package com.pmease.gitop.core.manager.impl;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -15,15 +18,20 @@ import com.pmease.commons.util.namedentity.EntityLoader;
 import com.pmease.commons.util.namedentity.NamedEntity;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.core.validation.UserNameReservation;
 
 @Singleton
 public class DefaultUserManager extends AbstractGenericDao<User> implements UserManager {
 
 	private volatile Long rootUserId;
 	
+	private final Set<UserNameReservation> nameReservations;
+	
 	@Inject
-	public DefaultUserManager(GeneralDao generalDao) {
+	public DefaultUserManager(GeneralDao generalDao, Set<UserNameReservation> nameReservations) {
 		super(generalDao);
+		
+		this.nameReservations = nameReservations;
 	}
 
 	@Sessional
@@ -96,6 +104,15 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 			}
 			
 		};
+	}
+
+	@Override
+	public Set<String> getReservedNames() {
+		Set<String> reservedNames = new HashSet<String>();
+		for (UserNameReservation each: nameReservations)
+			reservedNames.addAll(each.getReserved());
+		
+		return reservedNames;
 	}
 
 }

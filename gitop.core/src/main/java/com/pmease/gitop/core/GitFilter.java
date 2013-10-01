@@ -4,8 +4,12 @@ import java.io.IOException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -20,17 +24,16 @@ import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.model.Project;
 
 @Singleton
-@SuppressWarnings("serial")
-public class GitServlet extends HttpServlet {
+public class GitFilter implements Filter {
 	
-	private static final Logger logger = LoggerFactory.getLogger(GitServlet.class);
+	private static final Logger logger = LoggerFactory.getLogger(GitFilter.class);
 
 	private static final String INFO_REFS = "info/refs";
 	
 	private final ProjectManager projectManager;
 	
 	@Inject
-	public GitServlet(ProjectManager projectManager) {
+	public GitFilter(ProjectManager projectManager) {
 		this.projectManager = projectManager;
 	}
 	
@@ -51,6 +54,9 @@ public class GitServlet extends HttpServlet {
 			return null;
 		} 
 		
+		if (projectName.endsWith(".git"))
+			projectName = projectName.substring(0, projectName.length()-".git".length());
+		
 		Project project = projectManager.find(ownerName, projectName);
 		if (project == null) {
 			String message = "Unable to find project '" + projectName + "' owned by '" + ownerName + "'.";
@@ -68,9 +74,7 @@ public class GitServlet extends HttpServlet {
 		response.setHeader("Cache-Control", "no-cache, max-age=0, must-revalidate");
 	}
 	
-	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String pathInfo = StringUtils.stripStart(req.getPathInfo(), "/");
+	protected void processPacks(HttpServletRequest req, HttpServletResponse resp, String pathInfo) throws ServletException, IOException {
 		String service = StringUtils.substringAfterLast(pathInfo, "/");
 
 		String repoInfo = StringUtils.substringBeforeLast(pathInfo, "/");
@@ -99,10 +103,7 @@ public class GitServlet extends HttpServlet {
 		}
 	}
 
-	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String pathInfo = StringUtils.stripStart(req.getPathInfo(), "/");
-		
+	protected void processRefs(HttpServletRequest req, HttpServletResponse resp, String pathInfo) throws ServletException, IOException {
 		if (!pathInfo.endsWith(INFO_REFS)) {
 			String message = "Invalid refs request url: " + req.getRequestURL();
 			logger.error("Error serving git request: " + message);
@@ -140,5 +141,32 @@ public class GitServlet extends HttpServlet {
 			}
 		}
 	}
+
+	@Override
+	public void init(FilterConfig filterConfig) throws ServletException {
+	}
+
+	@Override
+	public void doFilter(ServletRequest request, ServletResponse response,
+			FilterChain chain) throws IOException, ServletException {
+		HttpServletRequest httpRequest = (HttpServletRequest) request;
+		HttpServletResponse httpResponse = (HttpServletResponse) response;
+		
+		String pathInfo = httpRequest.getRequestURI().substring(httpRequest.getContextPath().length());
+		pathInfo = StringUtils.stripStart(pathInfo, "/");
+		
+		if (pathInfo.endsWith(INFO_REFS)) {
+			processRefs(httpRequest, httpResponse, pathInfo);
+		} else if (pathInfo.endsWith("git-receive-pack") || pathInfo.endsWith("git-upload-pack")) {
+			processPacks(httpRequest, httpResponse, pathInfo);
+		} else {
+			chain.doFilter(request, response);
+		}
+	}
+
+	@Override
+	public void destroy() {
+	}
 	
 }
+ 

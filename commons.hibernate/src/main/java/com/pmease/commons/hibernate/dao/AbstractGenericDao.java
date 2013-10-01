@@ -75,13 +75,23 @@ public abstract class AbstractGenericDao<T extends AbstractEntity> implements Ge
 	}
 	
 	@Override
-	public List<T> query(Criterion[] criterions) {
+	public List<T> query(Criterion... criterions) {
 		return query(criterions, null, 0, 0);
 	}
 
 	@Override
-	public T find(Criterion[] criterions) {
+	public List<T> query() {
+		return query(new Criterion[0]);
+	}
+
+	@Override
+	public T find(Criterion... criterions) {
 		return find(criterions, null);
+	}
+
+	@Override
+	public T find() {
+		return find(new Criterion[0]);
 	}
 
 	@SuppressWarnings("unchecked")

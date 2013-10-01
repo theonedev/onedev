@@ -1,13 +1,14 @@
 package com.pmease.gitop.web.page.home;
 
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 
-import com.pmease.commons.wicket.behavior.confirm.ConfirmBehavior;
-import com.pmease.gitop.web.common.component.fileupload.FileUploadResourceBehavior;
-import com.pmease.gitop.web.common.component.messenger.MessengerBehavior;
-import com.pmease.gitop.web.common.component.vex.VexBehavior;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.core.manager.UserManager;
+import com.pmease.gitop.web.common.component.fileupload.FileUploadBar;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
+import com.pmease.gitop.web.page.account.AccountHomePage;
+import com.pmease.gitop.web.page.project.ProjectHomePage;
 
 public class HomePage extends AbstractLayoutPage {
 
@@ -18,23 +19,13 @@ public class HomePage extends AbstractLayoutPage {
 		return "Gitop - Home";
 	}
 
-	@SuppressWarnings("serial")
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new MessengerBehavior());
-		add(new VexBehavior());
-		add(new FileUploadResourceBehavior());
-//		add(new FileUploadBar("upload"));
+		add(new FileUploadBar("upload"));
 		
-		add(new AjaxLink<Void>("vex") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				System.out.println("xxx");
-			}
-			
-		}.add(new ConfirmBehavior("Are you sure?")));
+		add(new BookmarkablePageLink<>("accountLink", AccountHomePage.class, AccountHomePage.paramsOf(Gitop.getInstance(UserManager.class).getRootUser())));
+		add(new BookmarkablePageLink<>("projectLink", ProjectHomePage.class, ProjectHomePage.paramsOf(Gitop.getInstance(ProjectManager.class).load(1L))));
 	}
 }

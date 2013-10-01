@@ -30,7 +30,7 @@ public class UserRealm extends AbstractRealm {
 		if (userId != 0L) {
 			return userManager.load(userId);
 		} else { 
-			return User.anonymous();
+			return User.ANONYMOUS;
 		}
 	}
 

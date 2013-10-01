@@ -139,4 +139,12 @@ public class EditableUtils {
 		}
 	}
 	
+	public static EditContext getContext(Serializable bean) {
+		return AppLoader.getInstance(EditSupportRegistry.class).getBeanEditContext(bean);
+	}
+	
+	public static EditContext getContext(Serializable bean, String propertyName) {
+		return AppLoader.getInstance(EditSupportRegistry.class).getPropertyEditContext(bean, propertyName);
+	}
+
 }

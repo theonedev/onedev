@@ -76,7 +76,9 @@ public interface GenericDao<T extends AbstractEntity> {
 	 * @return
 	 * 			list of entity matching specified criterions.
 	 */
-	List<T> query(@Nullable Criterion[] criterions);
+	List<T> query(Criterion... criterions);
+	
+	List<T> query();
 
 	/**
 	 * This method expects to lookup a single entity with specified criteria.
@@ -87,7 +89,9 @@ public interface GenericDao<T extends AbstractEntity> {
 	 * @return
 	 * 			any matching entity. null if not found
 	 */
-	T find(@Nullable Criterion[] criterions);
+	T find(Criterion... criterions);
+	
+	T find();
 	
 	/**
 	 * This method expects to find the first matching entity. 

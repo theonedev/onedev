@@ -35,6 +35,14 @@ public abstract class ObjectReference<T> {
 			object = null;
 		}
 	}
+	
+	public synchronized void reset() {
+		count = 0;
+		if (object != null) {
+			closeObject(object);
+			object = null;
+		}
+	}
 
 	protected abstract void closeObject(T object);
 }

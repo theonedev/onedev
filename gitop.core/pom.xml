@@ -46,6 +46,11 @@
         	<artifactId>commons.editable</artifactId>
         	<version>1.0.0</version>
         </dependency>
+        <dependency>
+        	<groupId>com.pmease</groupId>
+        	<artifactId>commons.jetty</artifactId>
+        	<version>1.0.29</version>
+        </dependency>
     </dependencies>  
     <repositories> 
         <repository> 
@@ -65,7 +70,7 @@
         </repository> 
     </repositories>  
     <properties> 
-        <moduleClass>com.pmease.gitop.core.GitopModule</moduleClass> 
+        <moduleClass>com.pmease.gitop.core.CoreModule</moduleClass> 
     </properties>  
     <version>1.0.30</version> 
 </project>

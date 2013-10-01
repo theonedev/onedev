@@ -1,9 +1,10 @@
 package com.pmease.gitop.web.page.test;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.form.Form;
 
 import com.pmease.commons.editable.EditContext;
-import com.pmease.commons.wicket.editable.EditHelper;
+import com.pmease.commons.editable.EditableUtils;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.UserManager;
@@ -17,7 +18,7 @@ public class TestPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		final EditContext editContext = EditHelper.getContext(new Project());
+		final EditContext editContext = EditableUtils.getContext(new Project());
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -34,7 +35,7 @@ public class TestPage extends BasePage {
 			
 		};
 		
-		form.add(EditHelper.renderForEdit(editContext, "editor"));
+		form.add((Component) editContext.renderForEdit("editor"));
 		
 		add(form);
 	}
