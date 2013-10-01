@@ -4,8 +4,10 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
@@ -22,15 +24,31 @@ import com.codahale.dropwizard.jackson.Jackson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.web.SitePaths;
 
 @Path("/file")
 public class TestResource {
 
-	private static final String SUCCESS_RESPONSE = "Successful";
-	private static final String FAILED_RESPONSE = "Failed";
-
+	@Inject ObjectMapper objectMapper;
+	
+	@GET
+	public String getResult() throws JsonProcessingException {
+		Result result = new Result();
+		UploadFile file = new UploadFile();
+		file.name = "abc.png";
+		file.size = 1234L;
+		result.files.add(file);
+		
+		file = new UploadFile();
+		file.name = "def.png";
+		file.size = 1234L;
+		result.files.add(file);
+		
+		return objectMapper.writeValueAsString(Optional.<Result>of(result));
+	}
+	
 	@POST
 	@Path("/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)

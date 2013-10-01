@@ -83,7 +83,6 @@
 			<artifactId>dropwizard-jackson</artifactId>
 			<version>0.7.0-SNAPSHOT</version>
 		</dependency>
-
 	</dependencies>
 
 	<repositories>
@@ -114,6 +113,24 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
+        
+        <repository>
+			<id>nexus-owsi-core</id>
+			<name>Nexus OWSI Core</name>
+			<url>https://projects.openwide.fr/services/nexus/content/repositories/owsi-core</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+
+		<repository>
+			<id>nexus-owsi-core-snapshots</id>
+			<name>Nexus OWSI Core Snapshots</name>
+			<url>https://projects.openwide.fr/services/nexus/content/repositories/owsi-core-snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+		</repository>
 	</repositories>
 
 	<properties>

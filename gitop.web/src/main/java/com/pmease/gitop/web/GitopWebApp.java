@@ -13,6 +13,8 @@ import org.apache.wicket.Session;
 import org.apache.wicket.bean.validation.BeanValidationConfiguration;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
+import org.apache.wicket.request.resource.caching.FilenameWithVersionResourceCachingStrategy;
+import org.apache.wicket.request.resource.caching.version.LastModifiedResourceVersion;
 import org.apache.wicket.util.time.Duration;
 import org.apache.wicket.util.time.Time;
 
@@ -36,6 +38,9 @@ import com.pmease.gitop.web.shiro.ShiroWicketPlugin;
 
 @Singleton
 public class GitopWebApp extends AbstractWicketConfig {
+	
+	private static final Duration DEFAULT_TIMEOUT = Duration.minutes(10);
+	
 	private Date startupDate;
 	private byte[] defaultUserAvatar;
 
@@ -74,6 +79,10 @@ public class GitopWebApp extends AbstractWicketConfig {
 
 		getMarkupSettings().setDefaultMarkupEncoding("UTF-8");
 
+		getRequestCycleSettings().setTimeout(DEFAULT_TIMEOUT);
+		
+		getResourceSettings().setCachingStrategy(new FilenameWithVersionResourceCachingStrategy(new LastModifiedResourceVersion()));
+		
 		// wicket bean validation
 		new BeanValidationConfiguration().configure(this);
 

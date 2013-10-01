@@ -7,12 +7,14 @@ import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
+import com.codahale.dropwizard.jackson.Jackson;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Provides;
 import com.pmease.commons.jetty.ClasspathAssetServlet;
 import com.pmease.commons.jetty.ServletContextConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.gitop.web.assets.AssetLocator;
-import com.pmease.gitop.web.common.component.fileupload.FileUploadServlet;
 import com.pmease.gitop.web.resource.RestResourceModule;
 
 /**
@@ -39,8 +41,6 @@ public class WebModule extends AbstractPluginModule {
 				
 				ErrorPageErrorHandler errorHandler = (ErrorPageErrorHandler) context.getErrorHandler();
 				errorHandler.addErrorPage(HttpServletResponse.SC_NOT_FOUND, "/assets/404.html");
-				
-				servletHolder = context.addServlet(FileUploadServlet.class, "/uploads/*");
 			}
 			
 		});
@@ -48,4 +48,9 @@ public class WebModule extends AbstractPluginModule {
 		install(new RestResourceModule());
 	}
 
+	@Provides
+	@Singleton
+	public ObjectMapper objectMapper() {
+		return Jackson.newObjectMapper();
+	}
 }

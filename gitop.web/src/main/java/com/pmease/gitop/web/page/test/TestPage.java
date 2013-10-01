@@ -1,4 +1,4 @@
-package com.pmease.gitop.web;
+package com.pmease.gitop.web.page.test;
 
 import org.apache.wicket.markup.html.form.Form;
 

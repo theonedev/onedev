@@ -1,8 +1,5 @@
 package com.pmease.gitop.web.common.component.fileupload;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -11,8 +8,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
-import org.apache.wicket.util.io.IOUtils;
-import org.apache.wicket.util.template.PackageTextTemplate;
 
 import com.pmease.gitop.web.assets.AssetLocator;
 
@@ -59,7 +54,7 @@ public class FileUploadResourceBehavior extends Behavior {
 		response.render(CssHeaderItem.forReference(new CssResourceReference(FileUploadResourceBehavior.class, "res/css/jquery.fileupload-ui.css")));
 		
 		response.render(JavaScriptHeaderItem.forReference(AssetLocator.JQUERY_UI_WIDGET_JS));
-		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(FileUploadResourceBehavior.class, "res/js/tmpl.min.js")));
+//		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(FileUploadResourceBehavior.class, "res/js/tmpl.min.js")));
 		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(FileUploadResourceBehavior.class, "res/js/load-image.min.js")));
 		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(FileUploadResourceBehavior.class, "res/js/jquery.blueimp-gallery.min.js")));
 		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(FileUploadResourceBehavior.class, "res/js/canvas-to-blob.min.js")));
@@ -74,19 +69,19 @@ public class FileUploadResourceBehavior extends Behavior {
 		response.render(JavaScriptHeaderItem.forReference(FILEUPLOAD_UI_JS));
 		
 		
-		PackageTextTemplate jsTmpl = new PackageTextTemplate(FileUploadResourceBehavior.class, 
-				"res/js/main.js");
-		try {
-	        Map<String, Object> variables = new HashMap<String, Object>();
-	
-	        variables.put("componentId", component.getMarkupId());
-	        variables.put("url", "/rest/file/upload");
-	        variables.put("paramName", PARAM_NAME);
-	
-	        String s = jsTmpl.asString(variables);
-	        response.render(JavaScriptHeaderItem.forScript(s, "fileupload"));
-		} finally {
-			IOUtils.closeQuietly(jsTmpl);
-		}
+//		PackageTextTemplate jsTmpl = new PackageTextTemplate(FileUploadResourceBehavior.class, 
+//				"res/js/main.js");
+//		try {
+//	        Map<String, Object> variables = new HashMap<String, Object>();
+//	
+//	        variables.put("componentId", component.getMarkupId());
+//	        variables.put("url", "/rest/file/upload");
+//	        variables.put("paramName", PARAM_NAME);
+//	
+//	        String s = jsTmpl.asString(variables);
+//	        response.render(JavaScriptHeaderItem.forScript(s, "fileupload"));
+//		} finally {
+//			IOUtils.closeQuietly(jsTmpl);
+//		}
 	}
 }
