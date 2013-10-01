@@ -27,7 +27,7 @@ public class JettyPlugin extends AbstractPlugin {
 	
 	private Server server;
 	
-	private ServletContextHandler context;
+	private ServletContextHandler contextHandler;
 	
 	private final Set<ServerConfigurator> serverConfigurators;
 	
@@ -61,32 +61,36 @@ public class JettyPlugin extends AbstractPlugin {
 		}
 	}
 	
-	public ServletContextHandler getContext() {
-		return context;
+	public ServletContextHandler getContextHandler() {
+		return contextHandler;
+	}
+	
+	public Server getServer() {
+		return server;
 	}
 	
 	private Server createServer() {
 		server = new Server();
 
-        context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         
-        context.setClassLoader(JettyPlugin.class.getClassLoader());
+        contextHandler.setClassLoader(JettyPlugin.class.getClassLoader());
         
-        context.setErrorHandler(new ErrorPageErrorHandler());
+        contextHandler.setErrorHandler(new ErrorPageErrorHandler());
         
-        context.addFilter(DisableTraceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
+        contextHandler.addFilter(DisableTraceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
         
         for (ServletConfigurator configurator: servletContextConfigurators) 
-        	configurator.configure(context);
+        	configurator.configure(contextHandler);
 
         /*
          *  Add Guice filter as last filter in order to make sure that filters and servlets
          *  configured in Guice web module can be filtered correctly by filters added to 
          *  Jetty context directly.  
          */
-        context.addFilter(GuiceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
+        contextHandler.addFilter(GuiceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 
-        server.setHandler(context);
+        server.setHandler(contextHandler);
 
         for (ServerConfigurator configurator: serverConfigurators) 
         	configurator.configure(server);

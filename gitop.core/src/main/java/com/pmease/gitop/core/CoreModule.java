@@ -2,9 +2,11 @@ package com.pmease.gitop.core;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.hibernate.cfg.NamingStrategy;
 
+import com.google.common.collect.Sets;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.ModelProvider;
 import com.pmease.commons.hibernate.PrefixedNamingStrategy;
@@ -15,6 +17,8 @@ import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.gitop.core.model.ModelLocator;
 import com.pmease.gitop.core.permission.UserRealm;
+import com.pmease.gitop.core.validation.ProjectNameReservation;
+import com.pmease.gitop.core.validation.UserNameReservation;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -43,6 +47,28 @@ public class CoreModule extends AbstractPluginModule {
 		});
 		
 		contribute(ServletConfigurator.class, CoreServletConfigurator.class);
+		
+		/*
+		 * Contribute empty reservations to avoid Guice complain 
+		 */
+		contribute(UserNameReservation.class, new UserNameReservation() {
+			
+			@Override
+			public Set<String> getReserved() {
+				return Sets.newHashSet();
+			}
+		});
+
+		/*
+		 * Contribute empty reservations to avoid Guice complain 
+		 */
+		contribute(ProjectNameReservation.class, new ProjectNameReservation() {
+			
+			@Override
+			public Set<String> getReserved() {
+				return Sets.newHashSet();
+			}
+		});
 	}
 
 	@Override

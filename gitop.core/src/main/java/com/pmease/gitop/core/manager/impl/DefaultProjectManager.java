@@ -2,6 +2,8 @@ package com.pmease.gitop.core.manager.impl;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -11,24 +13,31 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.git.Git;
+import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.util.FileUtils;
 import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.storage.ProjectStorage;
+import com.pmease.gitop.core.validation.ProjectNameReservation;
 
 @Singleton
 public class DefaultProjectManager extends AbstractGenericDao<Project> implements ProjectManager {
 
-	private ConfigManager configManager;
+	private final ConfigManager configManager;
+	
+	private final Set<ProjectNameReservation> nameReservations;
 	
 	@Inject
-	public DefaultProjectManager(GeneralDao generalDao, ConfigManager configManager) {
+	public DefaultProjectManager(GeneralDao generalDao, ConfigManager configManager, Set<ProjectNameReservation> nameReservations) {
 		super(generalDao);
 		
 		this.configManager = configManager;
+		this.nameReservations = nameReservations;
 	}
 
 	@Transactional
@@ -40,8 +49,15 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
 			ProjectStorage storage = locateStorage(entity);
 			storage.clean();
 			
-			new Git(storage.ofCode()).init().bare(true).call();
+			File codeDir = storage.ofCode();
+			FileUtils.createDir(codeDir);
+			new Git(codeDir).init().bare(true).call();
 		} else {
+			File codeDir = locateStorage(entity).ofCode();
+			if (!codeDir.exists()) {
+				FileUtils.createDir(codeDir);
+				new Git(codeDir).init().bare(true).call();
+			}
 			super.save(entity);
 		}
 	}
@@ -64,6 +80,7 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
 		return query(new Criterion[]{Restrictions.eq("publiclyAccessible", true)});
 	}
 
+	@Sessional
 	@Override
 	public Project find(String ownerName, String projectName) {
 		Criteria criteria = createCriteria();
@@ -73,6 +90,21 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
 		
 		criteria.setMaxResults(1);
 		return (Project) criteria.uniqueResult();
+	}
+
+	@Override
+	public Set<String> getReservedNames() {
+		Set<String> reservedNames = new HashSet<String>();
+		for (ProjectNameReservation each: nameReservations)
+			reservedNames.addAll(each.getReserved());
+		
+		return reservedNames;
+	}
+
+	@Sessional
+	@Override
+	public Project find(User owner, String projectName) {
+		return find(Restrictions.eq("owner.id", owner.getId()), Restrictions.eq("name", projectName));
 	}
 
 }

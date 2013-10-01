@@ -1,5 +1,9 @@
 package com.pmease.gitop.core.manager;
 
+import java.util.Set;
+
+import javax.annotation.Nullable;
+
 import com.google.inject.ImplementedBy;
 import com.pmease.commons.hibernate.dao.GenericDao;
 import com.pmease.commons.util.namedentity.EntityLoader;
@@ -24,7 +28,9 @@ public interface UserManager extends GenericDao<User> {
 	 * @return
 	 * 			matching user, or <tt>null</tt> if not found 
 	 */
-	User find(String userName);
+	@Nullable User find(String userName);
+	
+	Set<String> getReservedNames();
 	
 	EntityLoader asEntityLoader();
 }

@@ -5,7 +5,7 @@ import org.apache.wicket.protocol.http.WicketServlet;
 
 import com.pmease.commons.editable.EditSupport;
 import com.pmease.commons.loader.AbstractPluginModule;
-import com.pmease.commons.wicket.editable.EditHelper;
+import com.pmease.commons.wicket.editable.EditableResourceReference;
 
 public class WicketModule extends AbstractPluginModule {
 
@@ -16,7 +16,7 @@ public class WicketModule extends AbstractPluginModule {
 		bind(WicketServlet.class).to(DefaultWicketServlet.class);
 		bind(WicketFilter.class).to(DefaultWicketFilter.class);
 		
-		contributeFromPackage(EditSupport.class, EditHelper.class);
+		contributeFromPackage(EditSupport.class, EditableResourceReference.class);
 	}
 
 }

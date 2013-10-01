@@ -25,13 +25,13 @@ public class PropertyPath implements Serializable {
 	public PropertyPath prepend(Serializable element) {
 		PropertyPath newPath = new PropertyPath(elements);
 		newPath.elements.add(0, element);
-		return this;
+		return newPath;
 	}
 	
 	public PropertyPath append(Serializable element) {
 		PropertyPath newPath = new PropertyPath(elements);
 		newPath.elements.add(element);
-		return this;
+		return newPath;
 	}
 
 	@Override

@@ -25,5 +25,5 @@ public interface EditContext extends Serializable {
 	Object renderForEdit(Object renderParam);
 	
 	Object renderForView(Object renderParam);
-	
+
 }

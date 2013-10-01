@@ -23,6 +23,7 @@ import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.core.permission.object.ProtectedObject;
 import com.pmease.gitop.core.permission.object.UserBelonging;
 import com.pmease.gitop.core.permission.operation.GeneralOperation;
+import com.pmease.gitop.core.validation.UserName;
 
 @SuppressWarnings("serial")
 @Entity
@@ -64,7 +65,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	private Collection<VoteInvitation> voteVitations = new ArrayList<VoteInvitation>();
 
 	@Editable(order=100)
-	@NotEmpty
+	@UserName
 	@Override
 	public String getName() {
 		return super.getName();
@@ -223,7 +224,7 @@ public class User extends AbstractUser implements ProtectedObject {
 						return true;
 				}
 	
-				for (Project each: Gitop.getInstance(ProjectManager.class).query(null)) {
+				for (Project each: Gitop.getInstance(ProjectManager.class).query()) {
 					ObjectPermission projectPermission = new ObjectPermission(each, each.getDefaultAuthorizedOperation());
 					if (projectPermission.implies(objectPermission))
 						return true;

@@ -5,6 +5,7 @@ import javax.inject.Singleton;
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.wicket.AbstractWicketConfig;
+import com.pmease.gitop.core.validation.UserNameReservation;
 import com.pmease.gitop.web.resource.RestResourceModule;
 
 /**
@@ -22,6 +23,7 @@ public class WebModule extends AbstractPluginModule {
 		bind(SitePaths.class).in(Singleton.class);
 		
 		contribute(ServletConfigurator.class, WebServletConfigurator.class);
+		contribute(UserNameReservation.class, WebUserNameReservation.class);
 
 		install(new RestResourceModule());
 	}
