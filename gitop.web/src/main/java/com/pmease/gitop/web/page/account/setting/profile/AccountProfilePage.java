@@ -27,14 +27,11 @@ public class AccountProfilePage extends AccountSettingPage {
 	protected Category getSettingCategory() {
 		return Category.PROFILE;
 	}
-
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
+	
+	public AccountProfilePage() {
 		add(new ProfileForm("form", new UserModel(getAccount())));
 	}
-	
+
 	private class ProfileForm extends Form<User> {
 
 		public ProfileForm(String id, IModel<User> model) {

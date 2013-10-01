@@ -25,33 +25,26 @@ public class ServerInitPage extends BasePage {
 			continueToOriginalDestination();
 			throw new RestartResponseException(getApplication().getHomePage());
 		}
-	}
-	
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
 
-		if (initStage != null) {
-			add(new Label("message", initStage.getMessage()));
-			
-			if (!initStage.getManualConfigs().isEmpty()) {
-				List<ManualConfigStep> configSteps = new ArrayList<ManualConfigStep>();
-				for (ManualConfig each: initStage.getManualConfigs())
-					configSteps.add(new ManualConfigStep(each));
-				add(new Wizard("wizard", configSteps) {
-	
-					@Override
-					protected void finished() {
-						setResponsePage(ServerInitPage.class);
-					}
-					
-				});
-			} else {
-				add(new WebMarkupContainer("wizard").setVisible(false));
-			}
+		add(new Label("message", initStage.getMessage()));
+		
+		if (!initStage.getManualConfigs().isEmpty()) {
+			List<ManualConfigStep> configSteps = new ArrayList<ManualConfigStep>();
+			for (ManualConfig each: initStage.getManualConfigs())
+				configSteps.add(new ManualConfigStep(each));
+			add(new Wizard("wizard", configSteps) {
+
+				@Override
+				protected void finished() {
+					setResponsePage(ServerInitPage.class);
+				}
+				
+			});
+		} else {
+			add(new WebMarkupContainer("wizard").setVisible(false));
 		}
 	}
-
+	
 	@Override
 	protected String getPageTitle() {
 		return "Server Initialization";

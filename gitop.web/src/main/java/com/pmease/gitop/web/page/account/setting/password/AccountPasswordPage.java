@@ -34,10 +34,7 @@ public class AccountPasswordPage extends AccountSettingPage {
 		return Category.PASSWORD;
 	}
 
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
+	public AccountPasswordPage() {
 		Form<User> form = new Form<User>("form", new UserModel(getAccount()));
 		add(form);
 		form.add(new PasswordFieldElement("oldPass", "Current Password", 

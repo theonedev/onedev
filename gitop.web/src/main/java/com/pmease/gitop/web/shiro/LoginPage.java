@@ -26,16 +26,10 @@ public class LoginPage extends AbstractLayoutPage {
 		if (isSignedIn()) {
 			throw new RestartResponseException(getApplication().getHomePage());
 		}
-	}
-	
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
 		add(new LoginForm("login"));
 		FeedbackPanel feedback = new FeedbackPanel("feedback");
 		add(feedback);
 	}
-	
 	
 	private class LoginForm extends StatelessForm<Void> {
 

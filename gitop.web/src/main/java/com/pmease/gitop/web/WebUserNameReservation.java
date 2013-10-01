@@ -42,6 +42,7 @@ public class WebUserNameReservation implements UserNameReservation {
 		}
 		
 		reserved.add("wicket");
+		reserved.add("rest");
 		
 		for (IRequestMapper mapper: webApp.getRequestMappers()) {
 			if (mapper instanceof MountedMapper || mapper instanceof ResourceMapper) {

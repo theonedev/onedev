@@ -48,24 +48,10 @@ public abstract class BasePage extends WebPage {
 				return Strings.isNullOrEmpty(css) ? "" : css;
 			}
 		}));
-		
-		if (!Gitop.getInstance().isReady() && getClass() != ServerInitPage.class) {
+
+		if (!isServerReady() && getClass() != ServerInitPage.class) {
 			throw new RestartResponseAtInterceptPageException(ServerInitPage.class);
 		}
-	}
-	
-	protected String getPageCssClass() {
-		String name = getClass().getSimpleName();
-		return StringUtils.camelCaseToLowerCaseWithHyphen(name);
-	}
-
-	protected boolean isPermitted() {
-		return true;
-	}
-	
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
 		
 		if (!isPermitted()) {
 			throw new AccessDeniedException();
@@ -98,6 +84,31 @@ public abstract class BasePage extends WebPage {
 		 *   
 		 */
 		add(new WebMarkupContainer("globalResourceBinder").add(new BaseResourceBehavior()));
+	}
+	
+	protected String getPageCssClass() {
+		String name = getClass().getSimpleName();
+		return StringUtils.camelCaseToLowerCaseWithHyphen(name);
+	}
+
+	protected boolean isPermitted() {
+		return true;
+	}
+	
+	protected boolean isServerReady() {
+		return Gitop.getInstance().isReady();
+	}
+	
+	/*
+	 * For pages, we make this final to prevent sub classes from putting page initialization 
+	 * logics here. Instead, one should put all page initialization logic in page 
+	 * constructor to avoid the situation that if page constructor throws an exception 
+	 * intentionally (such as RestartResponseException) to by pass initialization logic 
+	 * but onInitialize will still be called to cause undesired behavior.  
+	 */
+	@Override
+	protected final void onInitialize() {
+		super.onInitialize();
 	}
 	
 	protected abstract String getPageTitle();

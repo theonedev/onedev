@@ -1,7 +1,6 @@
 package com.pmease.gitop.web.page.project;
 
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -45,24 +44,10 @@ public class ProjectHomePage extends AbstractLayoutPage {
 			
 		};
 		
-		add(new Link<Void>("link") {
-
-			@Override
-			public void onClick() {
-				
-			}
-			
-		});
-	}
-	
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
 		add(new Label("accountName", getProject().getOwner().getName()));
 		add(new Label("projectName", getProject().getName()));
 	}
-
+	
 	public Project getProject() {
 		return projectModel.getObject();
 	}

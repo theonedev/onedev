@@ -36,12 +36,7 @@ public class AccountHomePage extends AbstractLayoutPage {
 			}
 			
 		};
-	}
-	
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
+
 		add(new Label("accountName", getAccount().getName()));
 		
 		add(new Link<Void>("link") {
@@ -53,7 +48,7 @@ public class AccountHomePage extends AbstractLayoutPage {
 			
 		});
 	}
-
+	
 	@Override
 	protected String getPageTitle() {
 		return "Gitop";
