@@ -1,10 +1,34 @@
 <html xmlns:wicket>
 <wicket:extend>
 	<div class="container">
-		<h1>Hello, Gitop!</h1>
 		<h3>Upload Test</h3>
-		<div wicket:id="upload"></div>
+		
+		<form>
+			<div id="dropzone" class="fade well">Drop files here</div>
+			<input type="file" name="file" id="fileupload" />
+		</form>
+		
+		<a id="sub" class="btn btn-default">Click me</a>
+		
+		<script>
+			$(document).ready(function() {
+				Messenger.options = {
+				    extraClasses: 'messenger-fixed messenger-on-top messenger-on-right',
+				    theme: 'flat'
+				}
+				
+				$('#sub').click(function() {
+					Messenger().post({
+						message: "Your request has passed",
+						type: 'success',
+						showCloseButton: true
+					});
+				});
+				
+				vex.defaultOptions.className = 'vex-theme-wireframe';
+			});
+		</script>
+		
 	</div>
-	<a wicket:id="accountLink">account</a>
 </wicket:extend>
 </html>

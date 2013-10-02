@@ -2,6 +2,9 @@ package com.pmease.gitop.web;
 
 import javax.inject.Singleton;
 
+import com.codahale.dropwizard.jackson.Jackson;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Provides;
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.wicket.AbstractWicketConfig;
@@ -28,4 +31,9 @@ public class WebModule extends AbstractPluginModule {
 		install(new RestResourceModule());
 	}
 
+	@Provides
+	@Singleton
+	public ObjectMapper objectMapper() {
+		return Jackson.newObjectMapper();
+	}
 }

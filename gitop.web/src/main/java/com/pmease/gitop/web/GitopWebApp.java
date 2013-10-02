@@ -19,6 +19,8 @@ import org.apache.wicket.request.IRequestMapper;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 import org.apache.wicket.request.Url;
+import org.apache.wicket.request.resource.caching.FilenameWithVersionResourceCachingStrategy;
+import org.apache.wicket.request.resource.caching.version.LastModifiedResourceVersion;
 import org.apache.wicket.util.time.Duration;
 import org.apache.wicket.util.time.Time;
 
@@ -40,12 +42,16 @@ import com.pmease.gitop.web.page.account.setting.repos.AccountReposPage;
 import com.pmease.gitop.web.page.home.HomePage;
 import com.pmease.gitop.web.page.init.ServerInitPage;
 import com.pmease.gitop.web.page.project.ProjectHomePage;
+import com.pmease.gitop.web.page.test.TestPage;
 import com.pmease.gitop.web.shiro.LoginPage;
 import com.pmease.gitop.web.shiro.LogoutPage;
 import com.pmease.gitop.web.shiro.ShiroWicketPlugin;
 
 @Singleton
 public class GitopWebApp extends AbstractWicketConfig {
+	
+	private static final Duration DEFAULT_TIMEOUT = Duration.minutes(10);
+	
 	private Date startupDate;
 	private byte[] defaultUserAvatar;
 
@@ -84,6 +90,10 @@ public class GitopWebApp extends AbstractWicketConfig {
 
 		getMarkupSettings().setDefaultMarkupEncoding("UTF-8");
 
+		getRequestCycleSettings().setTimeout(DEFAULT_TIMEOUT);
+		
+		getResourceSettings().setCachingStrategy(new FilenameWithVersionResourceCachingStrategy(new LastModifiedResourceVersion()));
+		
 		// wicket bean validation
 		new BeanValidationConfiguration().configure(this);
 
@@ -178,9 +188,6 @@ public class GitopWebApp extends AbstractWicketConfig {
 	private void mountResources() {
 		getSharedResources().add(AvatarImageResourceReference.AVATAR_RESOURCE, new AvatarImageResource());
 		mountResource("avatars/${type}/${id}", new AvatarImageResourceReference());
-		
-//		mountResource("fileManager", new FileManagerResourceReference(SitePaths.get().uploadsDir().getAbsolutePath()));
-//		mountResource("fileUpload", new FileUploadResourceReference(SitePaths.get().uploadsDir().getAbsolutePath()));
 	}
 	
 	public boolean isGravatarEnabled() {

@@ -12,7 +12,6 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import com.pmease.commons.jetty.ClasspathAssetServlet;
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.gitop.web.assets.AssetLocator;
-import com.pmease.gitop.web.common.component.fileupload.FileUploadServlet;
 
 @Singleton
 public class WebServletConfigurator implements ServletConfigurator {
@@ -40,8 +39,6 @@ public class WebServletConfigurator implements ServletConfigurator {
 		
 		ErrorPageErrorHandler errorHandler = (ErrorPageErrorHandler) context.getErrorHandler();
 		errorHandler.addErrorPage(HttpServletResponse.SC_NOT_FOUND, "/assets/404.html");
-		
-		servletHolder = context.addServlet(FileUploadServlet.class, "/uploads/*");
 	}
 
 }

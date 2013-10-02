@@ -290,9 +290,9 @@ a > .icon-null, .icon-null { display: inline-block; width: 10px; }
 .faux { display: table; width: 100%; border-collapse: collapse; table-layout: fixed; border-spacing: 0; }
 .faux-row { display: table-row; }
 .faux-cell { display: table-cell; vertical-align: top; margin: 0; padding: 0; }
-.faux-cell.sidebar { width: 220px; position: relative; }
-.sidebar-inner { position: relative; width: 220px; overflow-x: hidden; }
-.content { border-left: 1px solid #ccc; }
+.faux-cell.sidebar { width: 240px; position: relative; border-right: 1px solid #ccc; }
+.sidebar-inner { position: relative; width: 240px; overflow-x: hidden; }
+.faux .content { }
 
 .sidebar .head, .content .head { padding: 15px 20px; white-space: nowrap; overflow: hidden; border-bottom: 1px solid #ddd; margin-bottom: 20px; }
 .sidebar .head a { color: #666; font-weight:bold; line-height: 24px; }

@@ -78,7 +78,6 @@
 			<artifactId>dropwizard-jackson</artifactId>
 			<version>0.7.0-SNAPSHOT</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.jetty</artifactId>
