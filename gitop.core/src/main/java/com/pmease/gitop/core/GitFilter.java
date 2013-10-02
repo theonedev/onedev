@@ -16,12 +16,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
+import org.eclipse.jgit.http.server.GitSmartHttpTools;
 import org.eclipse.jgit.http.server.ServletUtils;
 import org.eclipse.jgit.transport.PacketLineOut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.git.Git;
+import com.pmease.commons.util.GeneralException;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.model.Project;
 import com.pmease.gitop.core.permission.ObjectPermission;
@@ -40,9 +42,13 @@ public class GitFilter implements Filter {
 		this.projectManager = projectManager;
 	}
 	
-	private Project getProject(HttpServletRequest request, HttpServletResponse response, String pathInfo, String repoInfo) 
+	private String getPathInfo(HttpServletRequest request) {
+		String pathInfo = request.getRequestURI().substring(request.getContextPath().length());
+		return StringUtils.stripStart(pathInfo, "/");
+	}
+	
+	private Project getProject(HttpServletRequest request, HttpServletResponse response, String repoInfo) 
 			throws IOException {
-		
 		repoInfo = StringUtils.stripStart(StringUtils.stripEnd(repoInfo, "/"), "/");
 		
 		String ownerName = StringUtils.substringBefore(repoInfo, "/");
@@ -50,11 +56,8 @@ public class GitFilter implements Filter {
 
 		if (StringUtils.isBlank(ownerName) || StringUtils.isBlank(projectName)) {
 			String url = request.getRequestURL().toString();
-			String urlRoot = url.substring(0, url.length()-pathInfo.length());
-			String message = "Expecting url of format " + urlRoot + "<owner name>/<project name>";
-			logger.error("Error serving git request: " + message);
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, message);
-			return null;
+			String urlRoot = url.substring(0, url.length()-getPathInfo(request).length());
+			throw new GeneralException("Expecting url of format %s<owner name>/<project name>", urlRoot);
 		} 
 		
 		if (projectName.endsWith(".git"))
@@ -62,10 +65,7 @@ public class GitFilter implements Filter {
 		
 		Project project = projectManager.find(ownerName, projectName);
 		if (project == null) {
-			String message = "Unable to find project '" + projectName + "' owned by '" + ownerName + "'.";
-			logger.error("Error serving git request: " + message);
-			response.sendError(HttpServletResponse.SC_NOT_FOUND, message);
-			return null;
+			throw new GeneralException("Unable to find project %s owned by %s.", projectName, ownerName);
 		}
 		
 		return project;
@@ -77,77 +77,64 @@ public class GitFilter implements Filter {
 		response.setHeader("Cache-Control", "no-cache, max-age=0, must-revalidate");
 	}
 	
-	protected void processPacks(HttpServletRequest req, HttpServletResponse resp, String pathInfo) throws ServletException, IOException {
+	protected void processPacks(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String pathInfo = getPathInfo(request);
+		
 		String service = StringUtils.substringAfterLast(pathInfo, "/");
 
 		String repoInfo = StringUtils.substringBeforeLast(pathInfo, "/");
-		Project project = getProject(req, resp, pathInfo, repoInfo);
+		Project project = getProject(request, response, repoInfo);
 		
-		if (project != null) {
-			doNotCache(resp);
-			resp.setHeader("Content-Type", "application/x-" + service + "-result");			
+		doNotCache(response);
+		response.setHeader("Content-Type", "application/x-" + service + "-result");			
 
-			Git git = new Git(projectManager.locateStorage(project).ofCode());
+		Git git = new Git(projectManager.locateStorage(project).ofCode());
 
-			if (service.contains("upload")) {
-				if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(project))) {
-					throw new UnauthorizedException("You do not have permission to pull from this project.");
-				}
-				git.upload().input(ServletUtils.getInputStream(req)).output(resp.getOutputStream()).call();
-			} else if (service.contains("receive")) {
-				if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectWrite(project))) {
-					throw new UnauthorizedException("You do not have permission to push to this project.");
-				}
-				git.receive().input(ServletUtils.getInputStream(req)).output(resp.getOutputStream()).call();
-			} else {
-				String message = "Invalid service name '" + service + "'.";
-				logger.error("Error serving git request: " + message);
-				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, message);
+		if (GitSmartHttpTools.isUploadPack(request)) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(project))) {
+				throw new UnauthorizedException("You do not have permission to pull from this project.");
 			}
+			git.upload().input(ServletUtils.getInputStream(request)).output(response.getOutputStream()).call();
+		} else {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectWrite(project))) {
+				throw new UnauthorizedException("You do not have permission to push to this project.");
+			}
+			git.receive().input(ServletUtils.getInputStream(request)).output(response.getOutputStream()).call();
 		}
 	}
 	
-	private void writeInitial(HttpServletResponse resp, String service) throws IOException {
-		doNotCache(resp);
-		resp.setHeader("Content-Type", "application/x-" + service + "-advertisement");			
+	private void writeInitial(HttpServletResponse response, String service) throws IOException {
+		doNotCache(response);
+		response.setHeader("Content-Type", "application/x-" + service + "-advertisement");			
 		
-		PacketLineOut pack = new PacketLineOut(resp.getOutputStream());
+		PacketLineOut pack = new PacketLineOut(response.getOutputStream());
 		pack.setFlushOnEnd(false);
 		pack.writeString("# service=" + service + "\n");
 		pack.end();
 	}
 	
-	protected void processRefs(HttpServletRequest req, HttpServletResponse resp, String pathInfo) throws ServletException, IOException {
-		if (!pathInfo.endsWith(INFO_REFS)) {
-			String message = "Invalid refs request url: " + req.getRequestURL();
-			logger.error("Error serving git request: " + message);
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, message);			
-			return;
-		}
-		
-		String repoInfo = pathInfo.substring(0, pathInfo.length() - INFO_REFS.length());
-		Project project = getProject(req, resp, pathInfo, repoInfo);
-		if (project != null) {
-			String service = req.getParameter("service");
-			Git git = new Git(projectManager.locateStorage(project).ofCode());
+	protected void processRefs(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String pathInfo = request.getRequestURI().substring(request.getContextPath().length());
+		pathInfo = StringUtils.stripStart(pathInfo, "/");
 
-			if (service.contains("upload")) {
-				if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(project))) {
-					throw new UnauthorizedException("You do not have permission to pull from this project.");
-				}
-				writeInitial(resp, service);
-				git.advertiseUploadRefs().output(resp.getOutputStream()).call();
-			} else if (service.contains("receive")) {
-				if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectWrite(project))) {
-					throw new UnauthorizedException("You do not have permission to push to this project.");
-				}
-				writeInitial(resp, service);
-				git.advertiseReceiveRefs().output(resp.getOutputStream()).call();
-			} else {
-				String message = "Invalid service name '" + service + "'.";
-				logger.error("Error serving git request: " + message);
-				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, message);
+		String repoInfo = pathInfo.substring(0, pathInfo.length() - INFO_REFS.length());
+		Project project = getProject(request, response, repoInfo);
+		String service = request.getParameter("service");
+		
+		Git git = new Git(projectManager.locateStorage(project).ofCode());
+
+		if (service.contains("upload")) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(project))) {
+				throw new UnauthorizedException("You do not have permission to pull from this project.");
 			}
+			writeInitial(response, service);
+			git.advertiseUploadRefs().output(response.getOutputStream()).call();
+		} else {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectWrite(project))) {
+				throw new UnauthorizedException("You do not have permission to push to this project.");
+			}
+			writeInitial(response, service);
+			git.advertiseReceiveRefs().output(response.getOutputStream()).call();
 		}
 	}
 
@@ -160,15 +147,17 @@ public class GitFilter implements Filter {
 			FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
-		String pathInfo = httpRequest.getRequestURI().substring(httpRequest.getContextPath().length());
-		pathInfo = StringUtils.stripStart(pathInfo, "/");
-		
-		if (pathInfo.endsWith(INFO_REFS)) {
-			processRefs(httpRequest, httpResponse, pathInfo);
-		} else if (pathInfo.endsWith("git-receive-pack") || pathInfo.endsWith("git-upload-pack")) {
-			processPacks(httpRequest, httpResponse, pathInfo);
-		} else {
-			chain.doFilter(request, response);
+		try {
+			if (GitSmartHttpTools.isInfoRefs(httpRequest)) {
+				processRefs(httpRequest, httpResponse);
+			} else if (GitSmartHttpTools.isReceivePack(httpRequest) || GitSmartHttpTools.isUploadPack(httpRequest)) {
+				processPacks(httpRequest, httpResponse);
+			} else {
+				chain.doFilter(request, response);
+			}
+		} catch (GeneralException e) {
+			logger.error("Error serving git request", e);
+			GitSmartHttpTools.sendError(httpRequest, httpResponse, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
 		}
 	}
 

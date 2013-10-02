@@ -60,7 +60,8 @@ public class AccountHomePage extends AbstractLayoutPage {
 	
 	@Override
 	public void detachModels() {
-		accountModel.detach();
+		if (accountModel != null)
+			accountModel.detach();
 		
 		super.detachModels();
 	}

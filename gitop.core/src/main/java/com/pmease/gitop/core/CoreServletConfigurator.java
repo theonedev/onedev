@@ -48,6 +48,13 @@ public class CoreServletConfigurator implements ServletConfigurator {
 		
 		filterHolder = new FilterHolder(gitFilter);
 		context.addFilter(filterHolder, "/*", EnumSet.allOf(DispatcherType.class));
+		
+		/*
+		ServletHolder servletHolder = new ServletHolder(new GitServlet());
+		servletHolder.setInitParameter("export-all", "1");
+		servletHolder.setInitParameter("base-path", "w:\\temp\\storage\\1");
+		context.addServlet(servletHolder, "/git/*");
+		*/
 	}
 
 }
