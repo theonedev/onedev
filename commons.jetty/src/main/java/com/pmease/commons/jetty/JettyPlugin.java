@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Set;
 
+import javax.inject.Provider;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -29,16 +30,19 @@ public class JettyPlugin extends AbstractPlugin {
 	
 	private ServletContextHandler contextHandler;
 	
-	private final Set<ServerConfigurator> serverConfigurators;
+	private final Provider<Set<ServerConfigurator>> serverConfiguratorsProvider;
 	
-	private final Set<ServletConfigurator> servletContextConfigurators;
+	private final Provider<Set<ServletConfigurator>> servletConfiguratorsProvider;
 	
+	/*
+	 * Inject providers here to avoid circurlar dependencies when dependency graph gets complicated
+	 */
 	@Inject
 	public JettyPlugin(
-			Set<ServerConfigurator> serverConfigurators, 
-			Set<ServletConfigurator> servletContextConfigurators) {
-		this.serverConfigurators = serverConfigurators;
-		this.servletContextConfigurators = servletContextConfigurators;
+			Provider<Set<ServerConfigurator>> serverConfiguratorsProvider, 
+			Provider<Set<ServletConfigurator>> servletConfiguratorsProvider) {
+		this.serverConfiguratorsProvider = serverConfiguratorsProvider;
+		this.servletConfiguratorsProvider = servletConfiguratorsProvider;
 	}
 	
 	@Override
@@ -80,7 +84,7 @@ public class JettyPlugin extends AbstractPlugin {
         
         contextHandler.addFilter(DisableTraceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
         
-        for (ServletConfigurator configurator: servletContextConfigurators) 
+        for (ServletConfigurator configurator: servletConfiguratorsProvider.get()) 
         	configurator.configure(contextHandler);
 
         /*
@@ -92,7 +96,7 @@ public class JettyPlugin extends AbstractPlugin {
 
         server.setHandler(contextHandler);
 
-        for (ServerConfigurator configurator: serverConfigurators) 
+        for (ServerConfigurator configurator: serverConfiguratorsProvider.get()) 
         	configurator.configure(server);
 		
         return server;

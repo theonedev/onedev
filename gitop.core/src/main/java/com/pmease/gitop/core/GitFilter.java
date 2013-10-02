@@ -35,10 +35,13 @@ public class GitFilter implements Filter {
 
 	private static final String INFO_REFS = "info/refs";
 	
+	private final Gitop gitop;
+	
 	private final ProjectManager projectManager;
 	
 	@Inject
-	public GitFilter(ProjectManager projectManager) {
+	public GitFilter(Gitop gitop, ProjectManager projectManager) {
+		this.gitop = gitop;
 		this.projectManager = projectManager;
 	}
 	
@@ -147,17 +150,22 @@ public class GitFilter implements Filter {
 			FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
-		try {
-			if (GitSmartHttpTools.isInfoRefs(httpRequest)) {
-				processRefs(httpRequest, httpResponse);
-			} else if (GitSmartHttpTools.isReceivePack(httpRequest) || GitSmartHttpTools.isUploadPack(httpRequest)) {
-				processPacks(httpRequest, httpResponse);
-			} else {
-				chain.doFilter(request, response);
+
+		if (gitop.isReady()) {
+			try {
+				if (GitSmartHttpTools.isInfoRefs(httpRequest)) {
+					processRefs(httpRequest, httpResponse);
+				} else if (GitSmartHttpTools.isReceivePack(httpRequest) || GitSmartHttpTools.isUploadPack(httpRequest)) {
+					processPacks(httpRequest, httpResponse);
+				} else {
+					chain.doFilter(request, response);
+				}
+			} catch (GeneralException e) {
+				logger.error("Error serving git request", e);
+				GitSmartHttpTools.sendError(httpRequest, httpResponse, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
 			}
-		} catch (GeneralException e) {
-			logger.error("Error serving git request", e);
-			GitSmartHttpTools.sendError(httpRequest, httpResponse, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+		} else {
+			GitSmartHttpTools.sendError(httpRequest, httpResponse, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server is not ready.");
 		}
 	}
 
