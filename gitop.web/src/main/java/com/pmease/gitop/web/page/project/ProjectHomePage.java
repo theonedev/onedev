@@ -1,5 +1,6 @@
 package com.pmease.gitop.web.page.project;
 
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -12,6 +13,7 @@ import com.pmease.gitop.core.model.Project;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
 
 @SuppressWarnings("serial")
+@RequiresAuthentication
 public class ProjectHomePage extends AbstractLayoutPage {
 
 	private final IModel<Project> projectModel;
@@ -43,6 +45,11 @@ public class ProjectHomePage extends AbstractLayoutPage {
 			}
 			
 		};
+	}
+	
+	@Override
+	protected void onPageInitialize() {
+		super.onPageInitialize();
 		
 		add(new Label("accountName", getProject().getOwner().getName()));
 		add(new Label("projectName", getProject().getName()));

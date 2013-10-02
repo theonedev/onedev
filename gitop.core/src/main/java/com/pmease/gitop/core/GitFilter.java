@@ -151,21 +151,23 @@ public class GitFilter implements Filter {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-		if (gitop.isReady()) {
-			try {
-				if (GitSmartHttpTools.isInfoRefs(httpRequest)) {
+		try {
+			if (GitSmartHttpTools.isInfoRefs(httpRequest)) {
+				if (gitop.isReady())
 					processRefs(httpRequest, httpResponse);
-				} else if (GitSmartHttpTools.isReceivePack(httpRequest) || GitSmartHttpTools.isUploadPack(httpRequest)) {
+				else
+					throw new GeneralException("Server is not ready");
+			} else if (GitSmartHttpTools.isReceivePack(httpRequest) || GitSmartHttpTools.isUploadPack(httpRequest)) {
+				if (gitop.isReady())
 					processPacks(httpRequest, httpResponse);
-				} else {
-					chain.doFilter(request, response);
-				}
-			} catch (GeneralException e) {
-				logger.error("Error serving git request", e);
-				GitSmartHttpTools.sendError(httpRequest, httpResponse, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+				else
+					throw new GeneralException("Server is not ready");
+			} else {
+				chain.doFilter(request, response);
 			}
-		} else {
-			GitSmartHttpTools.sendError(httpRequest, httpResponse, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server is not ready.");
+		} catch (GeneralException e) {
+			logger.error("Error serving git request", e);
+			GitSmartHttpTools.sendError(httpRequest, httpResponse, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
 		}
 	}
 

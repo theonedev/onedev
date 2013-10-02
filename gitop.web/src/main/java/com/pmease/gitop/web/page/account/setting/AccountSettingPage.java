@@ -10,8 +10,6 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.ImmutableList;
 import com.pmease.gitop.core.model.User;
@@ -50,21 +48,10 @@ public abstract class AccountSettingPage extends AbstractLayoutPage {
 		}
 	}
 
-	public AccountSettingPage() {
-		commonInit();
-	}
-	
-	public AccountSettingPage(PageParameters params) {
-		super(params);
-		commonInit();
-	}
-	
-	public AccountSettingPage(IModel<?> model) {
-		super(model);
-		commonInit();
-	}
+	@Override
+	protected void onPageInitialize() {
+		super.onPageInitialize();
 
-	private void commonInit() {
 		add(new UserAvatarLink("userlink", new UserModel(getAccount())));
 		
 		add(new ListView<Category>("setting", ImmutableList.<Category>copyOf(Category.values())) {

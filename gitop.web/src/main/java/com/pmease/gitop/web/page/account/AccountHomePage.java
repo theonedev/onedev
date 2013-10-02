@@ -36,6 +36,11 @@ public class AccountHomePage extends AbstractLayoutPage {
 			}
 			
 		};
+	}
+	
+	@Override
+	protected void onPageInitialize() {
+		super.onPageInitialize();
 
 		add(new Label("accountName", getAccount().getName()));
 		

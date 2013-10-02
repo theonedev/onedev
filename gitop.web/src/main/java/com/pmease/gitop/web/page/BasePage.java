@@ -31,6 +31,8 @@ import com.pmease.gitop.web.page.init.ServerInitPage;
 public abstract class BasePage extends WebPage {
 
 	private WebMarkupContainer body;
+	
+	private boolean shouldInitialize = true;
 
 	public BasePage() {
 		commonInit();
@@ -47,23 +49,11 @@ public abstract class BasePage extends WebPage {
 	}
 
 	private void commonInit() {
-		body = new TransparentWebMarkupContainer("body");
-		add(body);
-		body.add(AttributeAppender.append("class",
-				new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						String css = getPageCssClass();
-						return Strings.isNullOrEmpty(css) ? "" : css;
-					}
-				}));
-
-		if (!Gitop.getInstance().isReady()
-				&& getClass() != ServerInitPage.class) {
-			throw new RestartResponseAtInterceptPageException(
-					ServerInitPage.class);
+		if (!Gitop.getInstance().isReady() && getClass() != ServerInitPage.class) {
+			redirect(ServerInitPage.class);
 		}
+		
+		shouldInitialize = true;
 	}
 
 	@Override
@@ -119,23 +109,47 @@ public abstract class BasePage extends WebPage {
 		}
 	}
 
+	public final void redirectWithIntercept(final Class<? extends Page> clazz) {
+		shouldInitialize = true;
+		throw new RestartResponseAtInterceptPageException(clazz);
+	}
+	
+	public final void redirectWithIntercept(final Class<? extends Page> clazz, final PageParameters pageParams) {
+		shouldInitialize = true;
+		throw new RestartResponseAtInterceptPageException(clazz, pageParams);
+	}
+
+	public final void redirectWithIntercept(final Page page) {
+		shouldInitialize = true;
+		throw new RestartResponseAtInterceptPageException(page);
+	}
+
 	public final void redirect(final Class<? extends Page> clazz) {
+		shouldInitialize = false;
 		throw new RestartResponseException(clazz);
 	}
 
 	public final void redirect(final Class<? extends Page> clazz,
 			PageParameters parameters) {
+		shouldInitialize = false;
 		throw new RestartResponseException(clazz, parameters);
 	}
 
 	public final void redirect(final Page page) {
+		shouldInitialize = false;
 		throw new RestartResponseException(page);
 	}
 
 	public final void redirect(String url) {
+		shouldInitialize = false;
 		throw new RedirectToUrlException(url);
 	}
-
+	
+	public final void redirectToOriginal() {
+		shouldInitialize = false;
+		continueToOriginalDestination();		
+	}
+	
 	protected String getPageCssClass() {
 		String name = getClass().getSimpleName();
 		return StringUtils.camelCaseToLowerCaseWithHyphen(name);
@@ -144,10 +158,19 @@ public abstract class BasePage extends WebPage {
 	protected boolean isPermitted() {
 		return true;
 	}
+	
+	protected void onPageInitialize() {
+		body = new TransparentWebMarkupContainer("body");
+		add(body);
+		body.add(AttributeAppender.append("class",
+				new AbstractReadOnlyModel<String>() {
 
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
+					@Override
+					public String getObject() {
+						String css = getPageCssClass();
+						return Strings.isNullOrEmpty(css) ? "" : css;
+					}
+				}));
 
 		if (!isPermitted()) {
 			throw new AccessDeniedException();
@@ -179,8 +202,16 @@ public abstract class BasePage extends WebPage {
 		 * cause components with resources using global resources not working
 		 * properly.
 		 */
-		add(new WebMarkupContainer("globalResourceBinder")
-				.add(new BaseResourceBehavior()));
+		add(new WebMarkupContainer("globalResourceBinder").add(new BaseResourceBehavior()));
+	}
+	
+	@Override
+	protected final void onInitialize() {
+		super.onInitialize();
+
+		if (shouldInitialize) {
+			onPageInitialize();
+		}
 	}
 
 	protected abstract String getPageTitle();

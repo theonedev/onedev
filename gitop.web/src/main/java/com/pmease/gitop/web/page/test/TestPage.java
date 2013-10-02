@@ -14,7 +14,10 @@ import com.pmease.gitop.web.page.BasePage;
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
 
-	public TestPage() {
+	@Override
+	protected void onPageInitialize() {
+		super.onPageInitialize();
+		
 		final EditContext editContext = EditableUtils.getContext(new Project());
 		
 		Form<?> form = new Form<Void>("form") {
