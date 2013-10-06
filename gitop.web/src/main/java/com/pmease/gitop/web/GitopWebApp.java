@@ -12,9 +12,13 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Application;
 import org.apache.wicket.Page;
+import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.Session;
 import org.apache.wicket.bean.validation.BeanValidationConfiguration;
 import org.apache.wicket.core.request.mapper.MountedMapper;
+import org.apache.wicket.devutils.stateless.StatelessChecker;
+import org.apache.wicket.markup.html.IPackageResourceGuard;
+import org.apache.wicket.markup.html.SecurePackageResourceGuard;
 import org.apache.wicket.request.IRequestMapper;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
@@ -31,8 +35,8 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.web.assets.AssetLocator;
-import com.pmease.gitop.web.common.component.avatar.AvatarImageResource;
-import com.pmease.gitop.web.common.component.avatar.AvatarImageResourceReference;
+import com.pmease.gitop.web.component.avatar.AvatarImageResource;
+import com.pmease.gitop.web.component.avatar.AvatarImageResourceReference;
 import com.pmease.gitop.web.page.account.AccountHomePage;
 import com.pmease.gitop.web.page.account.RegisterPage;
 import com.pmease.gitop.web.page.account.setting.password.AccountPasswordPage;
@@ -103,8 +107,11 @@ public class GitopWebApp extends AbstractWicketConfig {
 				.mountLogoutPage("logout", LogoutPage.class).install(this);
 
 		mountPages();
+		configureResources();
 		
-		mountResources();
+		if (getConfigurationType() == RuntimeConfigurationType.DEVELOPMENT) {
+			getComponentPreOnBeforeRenderListeners().add(new StatelessChecker());
+		}
 	}
 
 	public byte[] getDefaultUserAvatar() {
@@ -185,6 +192,20 @@ public class GitopWebApp extends AbstractWicketConfig {
 		return normalized;
 	}
 
+	private void configureResources() {
+		final IPackageResourceGuard packageResourceGuard = getResourceSettings().getPackageResourceGuard();
+
+        if (packageResourceGuard instanceof SecurePackageResourceGuard) {
+            SecurePackageResourceGuard guard = (SecurePackageResourceGuard) packageResourceGuard;
+            guard.addPattern("+*.woff");
+            guard.addPattern("+*.eot");
+            guard.addPattern("+*.svg");
+            guard.addPattern("+*.ttf");
+        }
+        
+        mountResources();
+	}
+	
 	private void mountResources() {
 		getSharedResources().add(AvatarImageResourceReference.AVATAR_RESOURCE, new AvatarImageResource());
 		mountResource("avatars/${type}/${id}", new AvatarImageResourceReference());

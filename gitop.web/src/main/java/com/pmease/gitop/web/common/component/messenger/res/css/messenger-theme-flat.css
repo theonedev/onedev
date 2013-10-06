@@ -354,11 +354,11 @@ ul.messenger-theme-flat .messenger-message.alert-success .messenger-message-inne
 }
 /* line 98, ../../src/sass/messenger-theme-flat.sass */
 ul.messenger-theme-flat .messenger-message.alert-info .messenger-message-inner:before {
-  background: #61c4b8;
+  background: #00B5AD;
 }
 /* line 103, ../../src/sass/messenger-theme-flat.sass */
 ul.messenger-theme-flat .messenger-message.alert-error .messenger-message-inner:before {
-  background: #dd6a45;
+  background: #ff2a68;
 }
 /* line 32, ../../src/sass/messenger-spinner.scss */
 ul.messenger-theme-flat .messenger-message.alert-error.messenger-retry-soon .messenger-spinner {

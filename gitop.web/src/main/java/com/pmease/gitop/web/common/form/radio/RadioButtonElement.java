@@ -16,9 +16,10 @@ public class RadioButtonElement<T> extends AbstractInputElement<T> {
 
   private static final long serialVersionUID = 1L;
 
-  private final IModel<T> radioModel;
-  private Radio<T> radio;
-  private Panel radioContainer;
+  protected final IModel<T> radioModel;
+  protected Radio<T> radio;
+  protected Panel radioContainer;
+
   public RadioButtonElement(String id, IModel<T> model, String label) {
     super(id, label);
     this.radioModel = model;

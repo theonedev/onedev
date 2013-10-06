@@ -14,7 +14,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import com.google.common.collect.ImmutableList;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.permission.ObjectPermission;
-import com.pmease.gitop.web.common.component.link.UserAvatarLink;
+import com.pmease.gitop.web.component.link.UserAvatarLink;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
 import com.pmease.gitop.web.page.account.setting.password.AccountPasswordPage;

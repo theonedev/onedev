@@ -2,6 +2,8 @@ html, body { background: #f0f2f4; }
 
 a { color: #09f; }
 
+body.modal-open { margin-right: 0; }
+
 /**
  * MISC COMPONENTS
  */
@@ -119,7 +121,7 @@ a > .icon-null, .icon-null { display: inline-block; width: 10px; }
 .btn-warning.btn-colorful-text { color: #ff9500; border-color: #ff9500;}
 .btn-success.btn-colorful-text { color: #64da38; border-color: #64da38;}
 .btn-primary.btn-colorful-text { color: #1aadf8; border-color: #1aadf8; }
-.btn-info.btn-colorful-text { color: #2ba6cb; border-color:#2ba6cb;}
+.btn-info.btn-colorful-text { color: #00B5AD; border-color:#00B5AD;}
 
 .btn-group > .btn-colorful-text { border-color: #ccc; }
 
@@ -213,6 +215,22 @@ a > .icon-null, .icon-null { display: inline-block; width: 10px; }
 .radio-group .btn.active { background: #8e8e93; color: white; }
 .radio-group .btn > .icon-circle:before { content: "\f10c"; }
 .radio-group .btn.active > .icon-circle:before { content: "\f111"; }
+
+.checkbox-flat { padding-left: 0; margin-top: 6px; margin-bottom: 6px; }
+.checkbox-flat input[type="checkbox"] { display: none; }
+.checkbox-flat .icon-checkbox:before { content: "\f096"; width: 16px; }
+.checkbox-flat.checked .icon-checkbox:before { content: "\f046"; width: 16px; }
+.checkbox-flat.disabled { color: #888; }
+
+.radio-flat { padding-left: 0; cursor: pointer; }
+.radio-flat input[type="radio"] { display: none; }
+.radio-flat .icon-radio:before { content: "\f10c"; width: 16px; }
+.radio-flat:hover .icon-radio:before,
+.radio-flat.checked .icon-radio:before { content: "\f111"; }
+.radio-flat:hover .icon-radio { color: #888; }
+.radio-flat.checked:hover .icon-radio { color: #333; }
+
+.radio-flat.disabled { color: #888; cursor: default; }
 
 /**
  * AVATAR
@@ -316,3 +334,4 @@ section:first-child .head { border-top: none; }
 .content .head h3 { margin: 0; font-size: 18px; line-height: 24px; color: #888; font-weight: 300; }
 .content .padder { padding: 0px 20px 20px; margin-bottom: 18px; }
 .content .padder:nth-child(1) { padding-top: 0; }
+

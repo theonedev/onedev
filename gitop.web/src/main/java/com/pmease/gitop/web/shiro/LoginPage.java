@@ -1,5 +1,6 @@
 package com.pmease.gitop.web.shiro;
 
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.pmease.gitop.web.GitopSession;
 import com.pmease.gitop.web.common.form.FeedbackPanel;
 import com.pmease.gitop.web.common.form.checkbox.CheckBoxElement;
+import com.pmease.gitop.web.common.form.flatcheckbox.FlatCheckBoxElement;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.AccountHomePage;
@@ -23,7 +25,7 @@ public class LoginPage extends AbstractLayoutPage {
 	private static final Logger logger = LoggerFactory.getLogger(LoginPage.class);
 	
 	public LoginPage() {
-		if (isSignedIn()) {
+		if (SecurityUtils.getSubject().isAuthenticated()) {
 			throw new RestartResponseException(getApplication().getHomePage());
 		}
 	}
@@ -35,7 +37,6 @@ public class LoginPage extends AbstractLayoutPage {
 		FeedbackPanel feedback = new FeedbackPanel("feedback");
 		add(feedback);
 	}
-	
 	
 	private class LoginForm extends StatelessForm<Void> {
 
@@ -49,7 +50,8 @@ public class LoginPage extends AbstractLayoutPage {
 			
 			add(new TextField<String>("username", new Model<String>()).setRequired(true));
 			add(new PasswordTextField("password", new Model<String>()).setResetPassword(false));
-			add(new CheckBoxElement("rememberme", Model.of(false), "Remember me on this computer"));
+			add(new FlatCheckBoxElement("rememberme", Model.of(false),
+					Model.of("Remember me on this computer")));
 		}
 		
 		private Component getUsernameField() {
@@ -100,8 +102,7 @@ public class LoginPage extends AbstractLayoutPage {
 		 */
 		protected void onAuthenticationException(AuthenticationException ae) {
 			logger.debug("Shiro Subject.login() failed", ae);
-			getUsernameField()
-					.error(getString("loginFailed", null, "Invalid user name and/or password."));
+			getUsernameField().error(getString("loginFailed", null, "Invalid user name and/or password."));
 		}
 
 		/**
@@ -110,7 +111,9 @@ public class LoginPage extends AbstractLayoutPage {
 		 */
 		protected boolean remember() {
 			CheckBoxElement c = (CheckBoxElement) get("rememberme");
-			return (Boolean) c.getFormComponent().getDefaultModelObject();
+			Boolean b = (Boolean) c.getFormComponent().getDefaultModelObject();
+			System.out.println(b);
+			return b;
 		}
 	}
 

@@ -1,34 +1,26 @@
 <html xmlns:wicket>
 <wicket:extend>
 	<div class="container">
-		<h3>Upload Test</h3>
+		<h2>Messenger Test</h2>
+		<div class="btn btn-group">
+			<a class="btn btn-info" wicket:id="ajaxinfo">ajax info</a>
+			<a class="btn btn-danger" wicket:id="ajaxerror">ajax error</a>
+			<a class="btn btn-success" wicket:id="ajaxsuccess">ajax success</a>
+		</div>
+		<p></p>
 		
-		<form>
-			<div id="dropzone" class="fade well">Drop files here</div>
-			<input type="file" name="file" id="fileupload" />
-		</form>
-		
-		<a id="sub" class="btn btn-default">Click me</a>
-		
-		<script>
-			$(document).ready(function() {
-				Messenger.options = {
-				    extraClasses: 'messenger-fixed messenger-on-top messenger-on-right',
-				    theme: 'flat'
-				}
-				
-				$('#sub').click(function() {
-					Messenger().post({
-						message: "Your request has passed",
-						type: 'success',
-						showCloseButton: true
-					});
-				});
-				
-				vex.defaultOptions.className = 'vex-theme-wireframe';
-			});
-		</script>
-		
-	</div>
+  		<h3>Flat UI Form</h3>
+  		<form class="custom-form" wicket:id="form">
+  			<div wicket:id="check"></div>
+  			
+  			<wicket:container wicket:id="group">
+  				<wicket:container wicket:id="radio">
+  					<wicket:container wicket:id="element"></wicket:container>
+  				</wicket:container>
+  			</wicket:container>
+  			
+			<button class="btn btn-primary" wicket:id="btn">Submit</button>
+  		</form>
+    </div>
 </wicket:extend>
 </html>

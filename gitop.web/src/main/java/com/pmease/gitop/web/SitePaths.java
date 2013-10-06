@@ -30,7 +30,6 @@ public class SitePaths {
 	}
 	
 	public File dataDir() {
-		// TODO: this is not correct, should change repo storage dir to data dir
 		return new File(configManager.getStorageSetting().getStorageDir());
 	}
 	

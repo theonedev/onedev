@@ -16,15 +16,15 @@ public class CheckBoxElement extends AbstractInputElement<Boolean> {
 
   private static final long serialVersionUID = 1L;
 
-  private String description;
-  private IModel<Boolean> model;
-  private CheckBox checkbox;
+  protected IModel<String> description;
+  protected IModel<Boolean> model;
+  protected CheckBox checkbox;
 
-  public CheckBoxElement(String id, IModel<Boolean> inputModel, String description) {
+  public CheckBoxElement(String id, IModel<Boolean> inputModel, IModel<String> description) {
     this(id, "", inputModel, description);
   }
 
-  public CheckBoxElement(String id, String label, IModel<Boolean> inputModel, String description) {
+  public CheckBoxElement(String id, String label, IModel<Boolean> inputModel, IModel<String> description) {
     super(id, label);
     this.model = inputModel;
     this.description = description;
@@ -48,14 +48,19 @@ public class CheckBoxElement extends AbstractInputElement<Boolean> {
 
     checkbox = new CheckBox("check", model);
     panel.add(checkbox);
-    Label label =
-        (Label) new Label("description", description).setVisibilityAllowed(
-            !Strings.isNullOrEmpty(description)).setEscapeModelStrings(isEscapeDescriptionString());
+    Label label = (Label) createDescriptionLabel("description");
 
     panel.add(label);
     return panel;
   }
 
+  protected Component createDescriptionLabel(String id) {
+	  return new Label(id, description).setVisibilityAllowed(
+	            description != null &&
+	            !Strings.isNullOrEmpty(description.getObject()))
+	            .setEscapeModelStrings(isEscapeDescriptionString());
+  }
+  
   protected boolean isEscapeDescriptionString() {
     return false;
   }

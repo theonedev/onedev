@@ -49,7 +49,7 @@ ul.messenger.messenger-fixed .message .messenger-actions {
 }
 /* line 42, ../../src/sass/messenger.sass */
 ul.messenger.messenger-fixed.messenger-on-top {
-  top: 0px;
+  top: 10px;
 }
 /* line 45, ../../src/sass/messenger.sass */
 ul.messenger.messenger-fixed.messenger-on-bottom {

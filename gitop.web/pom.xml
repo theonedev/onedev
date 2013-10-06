@@ -83,6 +83,14 @@
 			<artifactId>commons.jetty</artifactId>
 			<version>1.0.29</version>
 		</dependency>
+		
+		<!-- OWSI Core -->
+		<dependency>
+			<groupId>fr.openwide.core.packages</groupId>
+			<artifactId>owsi-core-package-web-wicket-app</artifactId>
+			<version>${owsi-core.version}</version>
+			<type>pom</type>
+		</dependency>
 	</dependencies>
 
 	<repositories>
@@ -113,10 +121,29 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
+        
+        <repository>
+			<id>nexus-owsi-core</id>
+			<name>Nexus OWSI Core</name>
+			<url>https://projects.openwide.fr/services/nexus/content/repositories/owsi-core</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+
+		<repository>
+			<id>nexus-owsi-core-snapshots</id>
+			<name>Nexus OWSI Core Snapshots</name>
+			<url>https://projects.openwide.fr/services/nexus/content/repositories/owsi-core-snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+		</repository>
 	</repositories>
 
 	<properties>
 		<moduleClass>com.pmease.gitop.web.WebModule</moduleClass>
+		<owsi-core.version>0.8.6-SNAPSHOT</owsi-core.version>
 	</properties>
 
 </project>

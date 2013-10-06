@@ -7,7 +7,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import com.google.common.base.Optional;
 import com.pmease.gitop.core.model.User;
-import com.pmease.gitop.web.common.component.link.UserAvatarLink;
+import com.pmease.gitop.web.component.link.UserAvatarLink;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.account.RegisterPage;
 import com.pmease.gitop.web.page.account.setting.profile.AccountProfilePage;

@@ -23,7 +23,10 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.base.Strings;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.web.assets.BaseResourceBehavior;
+import com.pmease.gitop.web.assets.BaseResourcesBehavior;
+import com.pmease.gitop.web.assets.PageResourcesBehavior;
+import com.pmease.gitop.web.common.component.messenger.MessengerResourcesBehavior;
+import com.pmease.gitop.web.common.component.modal.Modal;
 import com.pmease.gitop.web.exception.AccessDeniedException;
 import com.pmease.gitop.web.page.init.ServerInitPage;
 
@@ -32,6 +35,8 @@ public abstract class BasePage extends WebPage {
 
 	private WebMarkupContainer body;
 
+	private Modal modal;
+	
 	public BasePage() {
 		commonInit();
 	}
@@ -59,6 +64,9 @@ public abstract class BasePage extends WebPage {
 					}
 				}));
 
+		modal = new Modal("modal");
+		add(modal);
+		
 		if (!Gitop.getInstance().isReady()
 				&& getClass() != ServerInitPage.class) {
 			throw new RestartResponseAtInterceptPageException(
@@ -179,13 +187,20 @@ public abstract class BasePage extends WebPage {
 		 * cause components with resources using global resources not working
 		 * properly.
 		 */
-		add(new WebMarkupContainer("globalResourceBinder")
-				.add(new BaseResourceBehavior()));
+		add(new BaseResourcesBehavior());
+		add(new WebMarkupContainer("globalResourceBinder"));
+//				.add(new BaseResourcesBehavior())
+				add(MessengerResourcesBehavior.get());
+				add(PageResourcesBehavior.get());
 	}
 
 	protected abstract String getPageTitle();
 
 	protected int getPageRefreshInterval() {
 		return 0;
+	}
+	
+	public Modal getModal() {
+		return modal;
 	}
 }
