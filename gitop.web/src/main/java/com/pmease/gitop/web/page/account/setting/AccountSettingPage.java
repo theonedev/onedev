@@ -1,7 +1,6 @@
 package com.pmease.gitop.web.page.account.setting;
 
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
@@ -23,7 +22,6 @@ import com.pmease.gitop.web.page.account.setting.profile.AccountProfilePage;
 import com.pmease.gitop.web.page.account.setting.repos.AccountReposPage;
 
 @SuppressWarnings("serial")
-@RequiresAuthentication
 public abstract class AccountSettingPage extends AbstractLayoutPage {
 
 	public static enum Category {

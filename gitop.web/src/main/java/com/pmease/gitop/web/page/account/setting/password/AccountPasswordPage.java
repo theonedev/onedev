@@ -13,6 +13,7 @@ import org.apache.wicket.validation.ValidationError;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.web.common.component.messenger.Messenger;
 import com.pmease.gitop.web.common.form.passwordfield.PasswordFieldElement;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
@@ -76,9 +77,12 @@ public class AccountPasswordPage extends AccountSettingPage {
 				User account = getAccount();
 				account.setPasswordHash(ps.encryptPassword(newPass));
 				AppLoader.getInstance(UserManager.class).save(account);
-				form.success("The password was changed successfully.");
 				if (target != null) {
+					oldPass = null;
+					newPass = null;
+					confirmPass = null;
 					target.add(form);
+					Messenger.success("Your password has been changed successfully.").execute(target);
 				}
 			}
 			

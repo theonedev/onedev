@@ -4,7 +4,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.model.IComponentAssignedModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -44,8 +44,10 @@ public class VexLinkBehavior extends Behavior {
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
 		
-		response.render(JavaScriptHeaderItem.forReference(VexConfirmJavaScriptResourceReference.get()));
-		response.render(JavaScriptHeaderItem.forScript("vex.defaultOptions.className = 'vex-theme-wireframe'", "vex-theme-options"));
+		String markupId = component.getMarkupId(true);
+		response.render(OnDomReadyHeaderItem.forScript(String.format(
+				"$('#%s').on('click', function(e){e.preventDefault(); $(this).confirm(); });", 
+				markupId)));
 	}
 
 	@Override

@@ -31,7 +31,6 @@ public class FeedbackPanel extends org.apache.wicket.markup.html.panel.FeedbackP
         super.onInitialize();
         
         this.setOutputMarkupId(true);
-        
         add(AttributeModifier.append("class", new AbstractReadOnlyModel<String>() {
 
             private static final long serialVersionUID = 1L;

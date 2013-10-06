@@ -41,10 +41,4 @@
 		});
 	}
 	
-	$(document).ready(function() {
-		$('.confirm-link').click(function(e) {
-			e.preventDefault();
-			$(this).confirm();
-		})
-	});
 }(window.jQuery, window, document);

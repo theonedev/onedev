@@ -251,6 +251,8 @@ a > .icon-null, .icon-null { display: inline-block; width: 10px; }
 .avatar-circle { border-radius: 50%; }
 .avatar-circle > img { border-radius: 50%; }
 
+.avatar-xlarge { width: 128px; height: 128px; }
+
 /**
  * LAYOUT
  */

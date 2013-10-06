@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableList;
 import com.pmease.gitop.web.common.component.messenger.Messenger;
 import com.pmease.gitop.web.common.component.vex.AjaxConfirmButton;
 import com.pmease.gitop.web.common.component.vex.VexLinkBehavior.VexIcon;
+import com.pmease.gitop.web.common.form.FeedbackPanel;
 import com.pmease.gitop.web.common.form.flatcheckbox.FlatCheckBoxElement;
 import com.pmease.gitop.web.common.form.flatradio.FlatRadioElement;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
@@ -60,12 +61,20 @@ public class HomePage extends AbstractLayoutPage {
 	
 		Form<?> form = new Form<Void>("form");
 		add(form);
+		form.add(new FeedbackPanel("feedback"));
 		form.add(new FlatCheckBoxElement("check", new PropertyModel<Boolean>(this, "displayed"), 
 				Model.of("Displayed screen")));
 		form.add(new AjaxConfirmButton("btn", form, Model.of("Are you want to save this form?")) {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				if (displayed) {
+					form.info("yes");
+					target.add(form);
+					return;
+				}
+				
 				System.out.println("Here is " + vexIcon);
+				target.add(form);
 			}
 		});
 		

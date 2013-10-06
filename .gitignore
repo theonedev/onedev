@@ -5,3 +5,16 @@ target/
 .settings/
 release.properties
 pom.xml.releaseBackup
+
+.loadpath
+*.class
+*~
+*.lock
+*.swp
+*.out
+*.tmp
+*.bak
+*.swp
+*~.nib
+*.DS_Store
+*.log

@@ -1,6 +1,5 @@
 package com.pmease.gitop.web.page;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -40,7 +39,7 @@ public class GlobalHeaderPanel extends Panel {
 	}
 	
 	protected boolean isSignedIn() {
-		return SecurityUtils.getSubject().isAuthenticated();
+		return currentUser().isPresent();
 	}
 	
 	protected Optional<User> currentUser() {

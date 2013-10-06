@@ -42,7 +42,7 @@ public class SitePaths {
 	}
 	
 	public File userAvatarDir(User user) {
-		return userAvatarDir(checkNotNull(user));
+		return userAvatarDir(checkNotNull(user).getId());
 	}
 	
 	public File tempDir() {

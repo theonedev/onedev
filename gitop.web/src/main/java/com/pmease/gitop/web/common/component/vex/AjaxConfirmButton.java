@@ -5,6 +5,8 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
 
@@ -47,5 +49,13 @@ public class AjaxConfirmButton extends AjaxButton {
 				AjaxConfirmButton.this.onError(target, AjaxConfirmButton.this.getForm());
 			}
 		};
+	}
+	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		
+		response.render(JavaScriptHeaderItem.forReference(VexConfirmJavaScriptResourceReference.get()));
+		response.render(JavaScriptHeaderItem.forScript("vex.defaultOptions.className = 'vex-theme-wireframe'", "vex-theme-options"));
 	}
 }
