@@ -16,7 +16,7 @@ public class Messenger {
 		this.jsFunc = jsFunc;
 	}
 	
-	public void execute(AjaxRequestTarget target) {
+	public void run(AjaxRequestTarget target) {
 		target.appendJavaScript(jsFunc);
 	}
 	

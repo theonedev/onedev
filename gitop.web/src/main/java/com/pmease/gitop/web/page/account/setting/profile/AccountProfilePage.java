@@ -87,7 +87,7 @@ public class AccountProfilePage extends AccountSettingPage {
 					User user = model.getObject();
 					AppLoader.getInstance(UserManager.class).save(user);
 					Messenger.success("Account profile has been updated.")
-							.execute(target);
+							.run(target);
 				}
 			});
 		}
@@ -164,7 +164,7 @@ public class AccountProfilePage extends AccountSettingPage {
 
 						send(getPage(), Broadcast.BREADTH, new AvatarChanged(target));
 						target.add(form);
-						Messenger.success("Your avatar has been changed!").execute(target);;
+						Messenger.success("Your avatar has been changed!").run(target);;
 					}
 				}
 			});
@@ -179,7 +179,7 @@ public class AccountProfilePage extends AccountSettingPage {
 			        AppLoader.getInstance(UserManager.class).save(user);
 			        
 			        send(getPage(), Broadcast.BREADTH, new AvatarChanged(target));
-			        Messenger.success("Your avatar has been reset to the default.").execute(target);
+			        Messenger.success("Your avatar has been reset to the default.").run(target);
 			        target.add(form);
 				}
 			});

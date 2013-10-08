@@ -8,7 +8,6 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Radio;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 
 import com.pmease.gitop.web.common.form.radio.RadioButtonElement;
 
@@ -18,9 +17,9 @@ public class FlatRadioElement<T> extends RadioButtonElement<T> {
 
 	private IModel<String> descriptionModel;
 	
-	public FlatRadioElement(String id, IModel<T> model, String description) {
+	public FlatRadioElement(String id, IModel<T> model, IModel<String> description) {
 		super(id, model, "");
-		this.descriptionModel = Model.of(description);
+		this.descriptionModel = description;
 	}
 
 	@SuppressWarnings("serial")

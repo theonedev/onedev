@@ -82,7 +82,7 @@ public class AccountPasswordPage extends AccountSettingPage {
 					newPass = null;
 					confirmPass = null;
 					target.add(form);
-					Messenger.success("Your password has been changed successfully.").execute(target);
+					Messenger.success("Your password has been changed successfully.").run(target);
 				}
 			}
 			

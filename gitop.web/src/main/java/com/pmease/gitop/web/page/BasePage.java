@@ -26,6 +26,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.web.assets.BaseResourcesBehavior;
 import com.pmease.gitop.web.assets.PageResourcesBehavior;
 import com.pmease.gitop.web.common.component.messenger.MessengerResourcesBehavior;
+import com.pmease.gitop.web.common.component.modal.Modal;
 import com.pmease.gitop.web.exception.AccessDeniedException;
 import com.pmease.gitop.web.page.init.ServerInitPage;
 
@@ -36,7 +37,7 @@ public abstract class BasePage extends WebPage {
 	
 	private boolean shouldInitialize = true;
 
-//	private Modal modal;
+	private Modal modal;
 	
 	public BasePage() {
 		commonInit();
@@ -65,8 +66,8 @@ public abstract class BasePage extends WebPage {
 					}
 				}));
 
-//		modal = new Modal("modal");
-//		add(modal);
+		modal = new Modal("modal");
+		add(modal);
 		
 		if (!Gitop.getInstance().isReady()
 				&& getClass() != ServerInitPage.class) {
@@ -221,10 +222,9 @@ public abstract class BasePage extends WebPage {
 	protected final void onInitialize() {
 		super.onInitialize();
 
-		System.out.println("Still invoke onInitialize " + getClass());
-//		if (shouldInitialize) {
+		if (shouldInitialize) {
 			onPageInitialize();
-//		}
+		}
 	}
 
 	protected abstract String getPageTitle();
