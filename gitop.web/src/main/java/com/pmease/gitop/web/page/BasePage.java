@@ -129,17 +129,17 @@ public abstract class BasePage extends WebPage {
 		}
 	}
 
-	public final void redirectWithIntercept(final Class<? extends Page> clazz) {
+	public final void redirectWithInterception(final Class<? extends Page> clazz) {
 		shouldInitialize = true;
 		throw new RestartResponseAtInterceptPageException(clazz);
 	}
 	
-	public final void redirectWithIntercept(final Class<? extends Page> clazz, final PageParameters pageParams) {
+	public final void redirectWithInterception(final Class<? extends Page> clazz, final PageParameters pageParams) {
 		shouldInitialize = true;
 		throw new RestartResponseAtInterceptPageException(clazz, pageParams);
 	}
 
-	public final void redirectWithIntercept(final Page page) {
+	public final void redirectWithInterception(final Page page) {
 		shouldInitialize = true;
 		throw new RestartResponseAtInterceptPageException(page);
 	}
@@ -168,6 +168,7 @@ public abstract class BasePage extends WebPage {
 	public final void redirectToOriginal() {
 		shouldInitialize = false;
 		continueToOriginalDestination();		
+		shouldInitialize = true;
 	}
 	
 	protected String getPageCssClass() {

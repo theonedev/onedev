@@ -1,7 +1,5 @@
 package com.pmease.commons.wicket;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.wicket.DefaultPageManagerProvider;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.RuntimeConfigurationType;
@@ -11,7 +9,6 @@ import org.apache.wicket.pageStore.DefaultPageStore;
 import org.apache.wicket.pageStore.IDataStore;
 import org.apache.wicket.pageStore.IPageStore;
 import org.apache.wicket.protocol.http.WebApplication;
-import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Url;
@@ -40,27 +37,6 @@ public abstract class AbstractWicketConfig extends WebApplication {
 			return RuntimeConfigurationType.DEVELOPMENT;
 		else
 			return RuntimeConfigurationType.DEPLOYMENT;
-	}
-
-	@Override
-	public WebRequest newWebRequest(HttpServletRequest servletRequest, String filterPath) {
-		return new ServletWebRequest(servletRequest, filterPath) {
-
-			@Override
-			public boolean shouldPreserveClientUrl() {
-				boolean preserve = super.shouldPreserveClientUrl();
-				if (preserve) {
-					return true;
-				} else {
-					/*
-					 * This snippet code tells Wicket not to append page instance number after the url 
-					 * for bookmarkable pages. 
-					 */
-					return RequestCycle.get().getMetaData(PAGE_RENDERING_RESOLVED);
-				}
-			}
-			
-		};
 	}
 
 	@Override
