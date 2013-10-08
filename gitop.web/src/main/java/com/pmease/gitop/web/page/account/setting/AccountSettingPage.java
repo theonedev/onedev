@@ -47,9 +47,9 @@ public abstract class AccountSettingPage extends AbstractLayoutPage {
 	}
 
 	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
+	protected void onPageInitialize() {
+		super.onPageInitialize();
+
 		add(new UserAvatarLink("userlink", new UserModel(getAccount())));
 		
 		add(new ListView<Category>("setting", ImmutableList.<Category>copyOf(Category.values())) {

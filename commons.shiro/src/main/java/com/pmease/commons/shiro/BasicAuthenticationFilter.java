@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.IncorrectCredentialsException;
+import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -73,31 +75,30 @@ public class BasicAuthenticationFilter extends PathMatchingFilter {
 	protected void cleanup(ServletRequest request, ServletResponse response, Exception existing) 
 			throws ServletException, IOException {
 
-		boolean sendChallenge = false;
+        HttpServletResponse httpResponse = WebUtils.toHttp(response);
 		if (existing != null) {
 			if (ExceptionUtils.find(existing, UnauthenticatedException.class) != null) {
-				sendChallenge = true;
+				httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+		        String authcHeader = HttpServletRequest.BASIC_AUTH + " realm=\"" + appName + "\"";
+		        httpResponse.setHeader(AUTHENTICATE_HEADER, authcHeader);
+				existing = null;
 			} else if (ExceptionUtils.find(existing, UnauthorizedException.class) != null) {
 				if (!SecurityUtils.getSubject().isAuthenticated()) {
-					sendChallenge = true;
+					httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			        String authcHeader = HttpServletRequest.BASIC_AUTH + " realm=\"" + appName + "\"";
+			        httpResponse.setHeader(AUTHENTICATE_HEADER, authcHeader);
+					existing = null;
 				}
+			} else if (ExceptionUtils.find(existing, IncorrectCredentialsException.class) != null) {
+				httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Incorrect credentials.");
+				existing = null;
+			} else if (ExceptionUtils.find(existing, UnknownAccountException.class) != null) {
+				httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unknown user name.");
+				existing = null;
 			}
-		}
-		
-		if (sendChallenge) {
-			existing = null;
-			sendChallenge(request, response);
 		}
 		
 		super.cleanup(request, response, existing);
 	}
-
-    protected boolean sendChallenge(ServletRequest request, ServletResponse response) {
-        HttpServletResponse httpResponse = WebUtils.toHttp(response);
-        httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        String authcHeader = HttpServletRequest.BASIC_AUTH + " realm=\"" + appName + "\"";
-        httpResponse.setHeader(AUTHENTICATE_HEADER, authcHeader);
-        return false;
-    }
 
 }

@@ -12,11 +12,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Application;
 import org.apache.wicket.Page;
-import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.Session;
 import org.apache.wicket.bean.validation.BeanValidationConfiguration;
 import org.apache.wicket.core.request.mapper.MountedMapper;
-import org.apache.wicket.devutils.stateless.StatelessChecker;
 import org.apache.wicket.markup.html.IPackageResourceGuard;
 import org.apache.wicket.markup.html.SecurePackageResourceGuard;
 import org.apache.wicket.request.IRequestMapper;
@@ -109,9 +107,9 @@ public class GitopWebApp extends AbstractWicketConfig {
 		mountPages();
 		configureResources();
 		
-		if (getConfigurationType() == RuntimeConfigurationType.DEVELOPMENT) {
-			getComponentPreOnBeforeRenderListeners().add(new StatelessChecker());
-		}
+//		if (getConfigurationType() == RuntimeConfigurationType.DEVELOPMENT) {
+//			getComponentPreOnBeforeRenderListeners().add(new StatelessChecker());
+//		}
 	}
 
 	public byte[] getDefaultUserAvatar() {

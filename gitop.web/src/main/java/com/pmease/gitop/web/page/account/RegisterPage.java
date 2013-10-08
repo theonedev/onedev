@@ -40,13 +40,21 @@ public class RegisterPage extends AbstractLayoutPage {
 	protected String getPageTitle() {
 		return "Gitop - Sign Up";
 	}
-
+	
 	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-
+	protected void onPageInitialize() {
+		super.onPageInitialize();
+		
 		final IModel<User> model = Model.<User>of(new User());
-		Form<User> form = new Form<User>("form", model);
+		Form<User> form = new Form<User>("form", model) {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				
+			}
+			
+		};
 		add(form);
 
 		form.add(new FeedbackPanel("feedback", form));

@@ -9,13 +9,9 @@ import com.pmease.gitop.core.model.User;
 public abstract class AbstractLayoutPage extends BasePage {
 
 	@Override
-	protected void onInitialize() {
-		super.onInitialize();
+	protected void onPageInitialize() {
+		super.onPageInitialize();
 		add(new GlobalHeaderPanel("header"));
-	}
-	
-	protected boolean isSignedIn() {
-		return SecurityUtils.getSubject().isAuthenticated();
 	}
 	
 	protected Optional<User> currentUser() {
@@ -25,5 +21,17 @@ public abstract class AbstractLayoutPage extends BasePage {
 		} else {
 			return Optional.of(user);
 		}
+	}
+	
+	protected boolean isLoggedIn() {
+		return currentUser().isPresent();
+	}
+	
+	protected boolean isRemembered() {
+		return SecurityUtils.getSubject().isRemembered();
+	}
+	
+	protected boolean isAuthenticated() {
+		return SecurityUtils.getSubject().isAuthenticated();
 	}
 }

@@ -36,9 +36,9 @@ public class AccountPasswordPage extends AccountSettingPage {
 	}
 
 	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
+	protected void onPageInitialize() {
+		super.onPageInitialize();
+
 		Form<User> form = new Form<User>("form", new UserModel(getAccount()));
 		add(form);
 		form.add(new PasswordFieldElement("oldPass", "Current Password", 

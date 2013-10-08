@@ -15,8 +15,8 @@ import com.pmease.gitop.web.page.BasePage;
 public class TestPage extends BasePage {
 
 	@Override
-	protected void onInitialize() {
-		super.onInitialize();
+	protected void onPageInitialize() {
+		super.onPageInitialize();
 		
 		final EditContext editContext = EditableUtils.getContext(new Project());
 		
@@ -39,7 +39,7 @@ public class TestPage extends BasePage {
 		
 		add(form);
 	}
-
+	
 	@Override
 	protected String getPageTitle() {
 		return "Test page used by Robin";

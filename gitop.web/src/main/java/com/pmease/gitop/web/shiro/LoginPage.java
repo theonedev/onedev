@@ -28,11 +28,6 @@ public class LoginPage extends AbstractLayoutPage {
 		if (SecurityUtils.getSubject().isAuthenticated()) {
 			throw new RestartResponseException(getApplication().getHomePage());
 		}
-	}
-	
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
 		add(new LoginForm("login"));
 		FeedbackPanel feedback = new FeedbackPanel("feedback");
 		add(feedback);

@@ -26,7 +26,6 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.web.assets.BaseResourcesBehavior;
 import com.pmease.gitop.web.assets.PageResourcesBehavior;
 import com.pmease.gitop.web.common.component.messenger.MessengerResourcesBehavior;
-import com.pmease.gitop.web.common.component.modal.Modal;
 import com.pmease.gitop.web.exception.AccessDeniedException;
 import com.pmease.gitop.web.page.init.ServerInitPage;
 
@@ -34,8 +33,10 @@ import com.pmease.gitop.web.page.init.ServerInitPage;
 public abstract class BasePage extends WebPage {
 
 	private WebMarkupContainer body;
+	
+	private boolean shouldInitialize = true;
 
-	private Modal modal;
+//	private Modal modal;
 	
 	public BasePage() {
 		commonInit();
@@ -64,14 +65,15 @@ public abstract class BasePage extends WebPage {
 					}
 				}));
 
-		modal = new Modal("modal");
-		add(modal);
+//		modal = new Modal("modal");
+//		add(modal);
 		
 		if (!Gitop.getInstance().isReady()
 				&& getClass() != ServerInitPage.class) {
-			throw new RestartResponseAtInterceptPageException(
-					ServerInitPage.class);
+			redirect(ServerInitPage.class);
 		}
+		
+		shouldInitialize = true;
 	}
 
 	@Override
@@ -127,23 +129,47 @@ public abstract class BasePage extends WebPage {
 		}
 	}
 
+	public final void redirectWithIntercept(final Class<? extends Page> clazz) {
+		shouldInitialize = true;
+		throw new RestartResponseAtInterceptPageException(clazz);
+	}
+	
+	public final void redirectWithIntercept(final Class<? extends Page> clazz, final PageParameters pageParams) {
+		shouldInitialize = true;
+		throw new RestartResponseAtInterceptPageException(clazz, pageParams);
+	}
+
+	public final void redirectWithIntercept(final Page page) {
+		shouldInitialize = true;
+		throw new RestartResponseAtInterceptPageException(page);
+	}
+
 	public final void redirect(final Class<? extends Page> clazz) {
+		shouldInitialize = false;
 		throw new RestartResponseException(clazz);
 	}
 
 	public final void redirect(final Class<? extends Page> clazz,
 			PageParameters parameters) {
+		shouldInitialize = false;
 		throw new RestartResponseException(clazz, parameters);
 	}
 
 	public final void redirect(final Page page) {
+		shouldInitialize = false;
 		throw new RestartResponseException(page);
 	}
 
 	public final void redirect(String url) {
+		shouldInitialize = false;
 		throw new RedirectToUrlException(url);
 	}
-
+	
+	public final void redirectToOriginal() {
+		shouldInitialize = false;
+		continueToOriginalDestination();		
+	}
+	
 	protected String getPageCssClass() {
 		String name = getClass().getSimpleName();
 		return StringUtils.camelCaseToLowerCaseWithHyphen(name);
@@ -152,11 +178,8 @@ public abstract class BasePage extends WebPage {
 	protected boolean isPermitted() {
 		return true;
 	}
-
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-
+	
+	protected void onPageInitialize() {
 		if (!isPermitted()) {
 			throw new AccessDeniedException();
 		}
@@ -187,11 +210,20 @@ public abstract class BasePage extends WebPage {
 		 * cause components with resources using global resources not working
 		 * properly.
 		 */
-		add(new BaseResourcesBehavior());
-		add(new WebMarkupContainer("globalResourceBinder"));
-//				.add(new BaseResourcesBehavior())
-				add(MessengerResourcesBehavior.get());
-				add(PageResourcesBehavior.get());
+		add(new WebMarkupContainer("globalResourceBinder")
+				.add(new BaseResourcesBehavior())
+				.add(MessengerResourcesBehavior.get())
+				.add(PageResourcesBehavior.get()));
+	}
+	
+	@Override
+	protected final void onInitialize() {
+		super.onInitialize();
+
+		System.out.println("Still invoke onInitialize " + getClass());
+//		if (shouldInitialize) {
+			onPageInitialize();
+//		}
 	}
 
 	protected abstract String getPageTitle();
@@ -200,7 +232,7 @@ public abstract class BasePage extends WebPage {
 		return 0;
 	}
 	
-	public Modal getModal() {
-		return modal;
-	}
+//	public Modal getModal() {
+//		return modal;
+//	}
 }
