@@ -1,13 +1,17 @@
 package com.pmease.gitop.web;
 
+import java.util.Set;
+
 import javax.inject.Singleton;
 
 import com.codahale.dropwizard.jackson.Jackson;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Provides;
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.wicket.AbstractWicketConfig;
+import com.pmease.gitop.core.validation.ProjectNameReservation;
 import com.pmease.gitop.core.validation.UserNameReservation;
 import com.pmease.gitop.web.resource.RestResourceModule;
 
@@ -29,8 +33,32 @@ public class WebModule extends AbstractPluginModule {
 		contribute(UserNameReservation.class, WebUserNameReservation.class);
 
 		install(new RestResourceModule());
+
+		contribute(ProjectNameReservation.class, DefaultProjectNameReservation.class);
+		contribute(UserNameReservation.class, DefaultUserNameReservation.class);
 	}
 
+	public static class DefaultProjectNameReservation implements ProjectNameReservation {
+
+		@Override
+		public Set<String> getReserved() {
+			return ImmutableSet.<String>of(
+			);
+		}
+	}
+	
+	public static class DefaultUserNameReservation implements UserNameReservation {
+
+		@Override
+		public Set<String> getReserved() {
+			return ImmutableSet.<String>of(
+					"rest",
+					"assets"
+			);
+		}
+	}
+	
+	
 	@Provides
 	@Singleton
 	public ObjectMapper objectMapper() {

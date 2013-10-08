@@ -1,27 +1,11 @@
 <html xmlns:wicket>
 <wicket:extend>
 	<div class="container">
-		<h2>Messenger Test</h2>
-		<div class="btn-group">
-			<a class="btn btn-info" wicket:id="ajaxinfo">ajax info</a>
-			<a class="btn btn-danger" wicket:id="ajaxerror">ajax error</a>
-			<a class="btn btn-success" wicket:id="ajaxsuccess">ajax success</a>
-		</div>
-		<p></p>
-		
-  		<h3>Flat UI Form</h3>
-  		<form class="custom-form" wicket:id="form">
-  			<div wicket:id="feedback" class="form-feedback"></div>
-  			<div wicket:id="check"></div>
-  			
-  			<wicket:container wicket:id="group">
-  				<wicket:container wicket:id="radio">
-  					<wicket:container wicket:id="element"></wicket:container>
-  				</wicket:container>
-  			</wicket:container>
-  			
-			<button class="btn btn-primary" wicket:id="btn">Submit</button>
-  		</form>
+		<form class="dropzone" enctype="multipart/form-data" action="/rest/file/upload">
+			<div class="fallback">
+				<input name="file" type="file" multiple />
+			</div>
+		</form>
     </div>
 </wicket:extend>
 </html>

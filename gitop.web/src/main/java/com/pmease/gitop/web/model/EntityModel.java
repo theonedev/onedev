@@ -4,18 +4,24 @@ package com.pmease.gitop.web.model;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.commons.hibernate.dao.GenericDao;
+import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.loader.AppLoader;
 
-public abstract class EntityModel<T extends AbstractEntity> extends LoadableDetachableModel<T> {
+public class EntityModel<T extends AbstractEntity> extends LoadableDetachableModel<T> {
 
   private static final long serialVersionUID = 1L;
   
   protected T entity;
+  private final Class<T> entityClass;
   
-  abstract protected GenericDao<T> getDao();
+  protected GeneralDao getDao() {
+	  return AppLoader.getInstance(GeneralDao.class);
+  }
   
-  public EntityModel(T entity) {
+  @SuppressWarnings("unchecked")
+public EntityModel(T entity) {
     this.entity = entity;
+    this.entityClass = (Class<T>) entity.getClass();
   }
   
   @Override
@@ -23,7 +29,7 @@ public abstract class EntityModel<T extends AbstractEntity> extends LoadableDeta
     if (entity.isNew()) {
       return entity;
     } else {
-      return getDao().get(entity.getId());
+      return getDao().get(entityClass, entity.getId());
     }
   }
 

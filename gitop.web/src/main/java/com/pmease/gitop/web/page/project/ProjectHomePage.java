@@ -69,7 +69,9 @@ public class ProjectHomePage extends AbstractLayoutPage {
 	
 	@Override
 	public void detachModels() {
-		projectModel.detach();
+		if (projectModel != null)
+			projectModel.detach();
+		
 		super.detachModels();
 	}
 

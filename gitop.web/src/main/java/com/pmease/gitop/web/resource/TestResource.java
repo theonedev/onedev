@@ -34,6 +34,12 @@ public class TestResource {
 	@Inject ObjectMapper objectMapper;
 	
 	@GET
+	@Path("test")
+	public String test() {
+		return "Hello, Jersey";
+	}
+	
+	@GET
 	public String getResult() throws JsonProcessingException {
 		Result result = new Result();
 		UploadFile file = new UploadFile();

@@ -1,0 +1,35 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<tr class="search-nav-tr">
+		<td wicket:id="td" class="search-nav-td">
+			<div class="clearfix">
+				<div class="pull-left" wicket:id="search"></div>
+				<div class="pull-right" wicket:id="nav"></div>
+			</div>
+		</td>
+	</tr>
+	
+	<wicket:fragment wicket:id="searchFrag">
+		<form class="form-inline search-form" wicket:id="searchForm">
+			<input type="text" class="form-control input-sm" wicket:id="input" />
+			<button type="button" class="search-icon" wicket:id="submit"><i class="icon-search"></i></button>
+		</form>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="navFrag">
+		<form class="form-inline navigation-form" wicket:id="form">
+			<span>Show rows:</span>
+			<select class="form-control input-sm" wicket:id="rowsSelector"></select>
+			<span>Go to:</span>
+			<input class="form-control input-sm" type="text" value="1" autocomplete="off" wicket:id="pageInput" />
+			<span wicket:id="navlabel"></span>
+			<div class="btn-group">
+				<a class="btn btn-default btn-xs" wicket:id="previousLink"><i class="icon-chevron-left"></i></a>
+				<a class="btn btn-default btn-xs" wicket:id="nextLink"><i class="icon-chevron-right"></i></a>
+			</div>
+			
+			<input type="hidden" value="go" wicket:id="submit" />
+		</form>
+	</wicket:fragment>
+</wicket:panel>
+</html>
