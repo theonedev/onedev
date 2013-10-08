@@ -326,6 +326,11 @@ public class WebPageRenderer extends PageRenderer
 	
 					redirectTo(afterRenderUrl, requestCycle);
 				}
+				/*
+				storeBufferedResponse(afterRenderUrl, response);
+				
+				redirectTo(afterRenderUrl, requestCycle);
+				*/
 			}
 		}
 	}
