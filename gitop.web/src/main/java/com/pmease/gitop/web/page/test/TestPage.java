@@ -53,7 +53,7 @@ public class TestPage extends BasePage {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				ready = false;
-				setResponsePage(TestPage.class);
+				setResponsePage(new TestPage());
 			}
 			
 		});
