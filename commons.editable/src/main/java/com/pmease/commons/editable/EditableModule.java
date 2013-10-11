@@ -1,8 +1,5 @@
 package com.pmease.commons.editable;
 
-import javax.validation.Validation;
-import javax.validation.Validator;
-
 import com.pmease.commons.loader.AbstractPluginModule;
 
 /**
@@ -14,8 +11,6 @@ public class EditableModule extends AbstractPluginModule {
 	@Override
 	protected void configure() {
 		super.configure();
-		
-		bind(Validator.class).toInstance(Validation.buildDefaultValidatorFactory().getValidator());
 		
 		// put your guice bindings here
 	}

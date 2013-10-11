@@ -2,8 +2,12 @@ package com.pmease.gitop.rest;
 
 import org.apache.shiro.web.filter.mgt.FilterChainManager;
 
+import com.pmease.commons.jersey.JerseyConfigurator;
+import com.pmease.commons.jersey.JerseyEnvironment;
+import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.shiro.FilterChainConfigurator;
+import com.pmease.gitop.rest.resource.UserResource;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -11,19 +15,31 @@ import com.pmease.commons.shiro.FilterChainConfigurator;
  */
 public class RestModule extends AbstractPluginModule {
 
+	public static final String SERVLET_PATH = "/rest";
+	
 	@Override
 	protected void configure() {
 		super.configure();
 		
-		// put your guice bindings here
+		contribute(ServletConfigurator.class, RestServletConfigurator.class);
+		contribute(JerseyConfigurator.class, new JerseyConfigurator() {
+			
+			@Override
+			public void configure(JerseyEnvironment environment) {
+				environment.addComponentFromPackage(UserResource.class);
+			}
+			
+		});
+		
 		contribute(FilterChainConfigurator.class, new FilterChainConfigurator() {
 
 			@Override
 			public void configure(FilterChainManager filterChainManager) {
-				filterChainManager.createChain("/rest/**", "noSessionCreation, authcBasic");
+				filterChainManager.createChain(SERVLET_PATH + "/**", "noSessionCreation, authcBasic");
 			}
 			
 		});
+		
 	}
 
 }

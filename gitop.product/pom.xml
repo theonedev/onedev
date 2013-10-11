@@ -110,11 +110,6 @@
         </dependency>
         <dependency>
         	<groupId>com.pmease</groupId>
-        	<artifactId>commons.jersey</artifactId>
-        	<version>1.0.30</version>
-        </dependency>
-        <dependency>
-        	<groupId>com.pmease</groupId>
         	<artifactId>gitop.rest</artifactId>
         	<version>1.0.0</version>
         </dependency>

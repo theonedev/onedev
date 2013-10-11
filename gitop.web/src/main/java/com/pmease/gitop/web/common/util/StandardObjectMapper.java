@@ -1,10 +1,10 @@
 package com.pmease.gitop.web.common.util;
 
-import com.codahale.dropwizard.jackson.AnnotationSensitivePropertyNamingStrategy;
-import com.codahale.dropwizard.jackson.DiscoverableSubtypeResolver;
-import com.codahale.dropwizard.jackson.FuzzyEnumModule;
-import com.codahale.dropwizard.jackson.GuavaExtrasModule;
-import com.codahale.dropwizard.jackson.LogbackModule;
+import io.dropwizard.jackson.AnnotationSensitivePropertyNamingStrategy;
+import io.dropwizard.jackson.DiscoverableSubtypeResolver;
+import io.dropwizard.jackson.FuzzyEnumModule;
+import io.dropwizard.jackson.GuavaExtrasModule;
+import io.dropwizard.jackson.LogbackModule;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;

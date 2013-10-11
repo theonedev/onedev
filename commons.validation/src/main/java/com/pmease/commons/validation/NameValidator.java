@@ -1,9 +1,8 @@
-package com.pmease.commons.editable;
+package com.pmease.commons.validation;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.pmease.commons.editable.annotation.Name;
 import com.pmease.commons.util.StringUtils;
 
 public class NameValidator implements ConstraintValidator<Name, String> {

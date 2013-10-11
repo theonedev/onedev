@@ -24,6 +24,10 @@
         <module>../commons.wicket</module>
         <module>../gitop.product</module>
         <module>../gitop.web</module>
+        <module>../commons.jackson</module>
+        <module>../commons.metrics</module>
+        <module>../commons.validation</module>
+        <module>../gitop.rest</module>
     </modules>  
     <repositories> 
         <repository> 

@@ -62,7 +62,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	private Collection<Vote> votes = new ArrayList<Vote>();
 	
 	@OneToMany(mappedBy="voter")
-	private Collection<VoteInvitation> voteVitations = new ArrayList<VoteInvitation>();
+	private Collection<VoteInvitation> voteInvitations = new ArrayList<VoteInvitation>();
 
 	@Editable(order=100)
 	@UserName
@@ -156,19 +156,11 @@ public class User extends AbstractUser implements ProtectedObject {
 	}
 
 	public Collection<VoteInvitation> getVoteInvitations() {
-		return voteVitations;
+		return voteInvitations;
 	}
 
 	public void setVoteInvitations(Collection<VoteInvitation> voteInvitations) {
-		this.voteVitations = voteInvitations;
-	}
-
-	public Collection<VoteInvitation> getVoteVitations() {
-		return voteVitations;
-	}
-
-	public void setVoteVitations(Collection<VoteInvitation> voteVitations) {
-		this.voteVitations = voteVitations;
+		this.voteInvitations = voteInvitations;
 	}
 
 	@Override

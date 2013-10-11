@@ -5,7 +5,7 @@
  *
  * Revision: $Id: PathElement.java 1209 2008-07-28 00:16:18Z robin $
  */
-package com.pmease.commons.editable.annotation;
+package com.pmease.commons.validation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -16,8 +16,6 @@ import javax.validation.Constraint;
 import javax.validation.Payload;
 
 import org.hibernate.validator.constraints.NotEmpty;
-
-import com.pmease.commons.editable.NameValidator;
 
 /**
  * @author robin

@@ -74,7 +74,11 @@ public class ClassUtils extends org.apache.commons.lang3.ClassUtils {
 								packageDir.getAbsolutePath());
 						String className = packageLocator.getPackage().getName() + 
 								StringUtils.substringBeforeLast(relativePath.replace('/', '.'), ".");
-						clazz = (Class<T>) superClass.getClassLoader().loadClass(className);
+						ClassLoader classLoader = superClass.getClassLoader();
+						if (classLoader == null)
+							classLoader = packageLocator.getClassLoader();
+						Preconditions.checkNotNull(classLoader);
+						clazz = (Class<T>) classLoader.loadClass(className);
 					} catch (ClassNotFoundException e) {
 						throw new RuntimeException(e);
 					}

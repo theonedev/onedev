@@ -34,19 +34,9 @@
 			<version>1.0.29</version>
 		</dependency>
 		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-validator</artifactId>
-			<version>5.0.1.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.el</groupId>
-			<artifactId>el-api</artifactId>
-			<version>2.2.1-b04</version>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish.web</groupId>
-			<artifactId>el-impl</artifactId>
-			<version>2.2.1-b05</version>
+			<groupId>com.pmease</groupId>
+			<artifactId>commons.validation</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 	</dependencies>
 

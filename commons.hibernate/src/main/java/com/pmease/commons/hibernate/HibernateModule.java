@@ -13,6 +13,7 @@ import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
 import com.pmease.commons.hibernate.dao.DefaultGeneralDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.jackson.ObjectMapperConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
 
@@ -38,18 +39,15 @@ public class HibernateModule extends AbstractPluginModule {
 	    TransactionInterceptor transactionInterceptor = new TransactionInterceptor();
 	    requestInjection(transactionInterceptor);
 	    
-	    bindInterceptor(
-	    		Matchers.any(), 
-	    		Matchers.annotatedWith(Transactional.class), 
-	    		transactionInterceptor);
+	    bindInterceptor(Matchers.any(), Matchers.annotatedWith(Transactional.class), transactionInterceptor);
 	    
 	    SessionInterceptor sessionInterceptor = new SessionInterceptor();
 	    requestInjection(sessionInterceptor);
 	    
-	    bindInterceptor(
-	    		Matchers.any(), 
-	    		Matchers.annotatedWith(Sessional.class), 
-	    		sessionInterceptor);
+	    bindInterceptor(Matchers.any(), Matchers.annotatedWith(Sessional.class), sessionInterceptor);
+	    
+	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);
+	    
 	}
 
 	@Override

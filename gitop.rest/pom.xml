@@ -30,6 +30,11 @@
 			<artifactId>gitop.core</artifactId>
 			<version>1.0.30</version>
 		</dependency>
+		<dependency>
+			<groupId>com.pmease</groupId>
+			<artifactId>commons.jersey</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 	</dependencies>
 
 	<repositories>
@@ -52,6 +57,7 @@
 
 	<properties>
 		<moduleClass>com.pmease.gitop.rest.RestModule</moduleClass>
+		<jerseyVersion>1.17</jerseyVersion>
 	</properties>
 
 </project>
