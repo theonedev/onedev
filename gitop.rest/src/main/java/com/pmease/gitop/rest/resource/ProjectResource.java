@@ -3,6 +3,7 @@ package com.pmease.gitop.rest.resource;
 import io.dropwizard.jersey.params.LongParam;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -36,7 +37,7 @@ public class ProjectResource {
     }
     
     @POST
-    public Long save(Project project) {
+    public Long save(@Valid Project project) {
     	projectManager.save(project);
     	return project.getId();
     }

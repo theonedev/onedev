@@ -3,6 +3,7 @@ package com.pmease.gitop.rest.resource;
 import io.dropwizard.jersey.params.LongParam;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -35,7 +36,7 @@ public class UserResource {
     }
     
     @POST
-    public Long save(User user) {
+    public Long save(@Valid User user) {
     	userManager.save(user);
     	return user.getId();
     }
