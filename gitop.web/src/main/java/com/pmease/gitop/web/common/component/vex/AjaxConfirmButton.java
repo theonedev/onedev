@@ -4,7 +4,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.form.Form;
@@ -20,13 +19,11 @@ public class AjaxConfirmButton extends AjaxButton {
 	}
 	
 	public AjaxConfirmButton(String id, Form<?> form, IModel<String> textModel,
-			IModel<VexIcon> iconModel, IModel<String> yesLabelModel,
+			final IModel<VexIcon> iconModel, IModel<String> yesLabelModel,
 			IModel<String> noLabelModel, IModel<String> confirmCssClassModel) {
 		super(id, form);
 		add(new VexLinkBehavior(textModel, iconModel, yesLabelModel,
 				noLabelModel, confirmCssClassModel));
-
-		add(AttributeAppender.append("class", "confirm-link"));
 	}
 
 	@Override

@@ -6,11 +6,19 @@
 		</div>
 		<div class="body">
 			<h4>Anonymous Users</h4>
-			<p><a>Anonymous users can browse and pull any repositories under this account </a></p>
+			<p><a class="checkable-link" wicket:id="anonymouslink"><i class="icon-checkbox"></i> Anonymous users can browse and pull any repositories under this account </a></p>
 			<hr/>
 			
 			<h4>Logged-in Users</h4>
-			<p class="text-muted">Logged-in users can access any repositories under this account with permission:</p>
+			<p>Logged-in users can access any repositories under this account with permission:</p>
+			<div class="btn-group btn-group-justified btn-radio-group" wicket:id="loggedInPermissions">
+				<wicket:container wicket:id="permissions">
+					<a wicket:id="permission" class="btn">
+						<span class="icon-ok"></span>
+						<span wicket:id="name"></span>
+					</a>
+				</wicket:container>
+			</div>
 			<hr/>
 			
 			<h4>Teams</h4>

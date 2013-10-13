@@ -1,0 +1,52 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<form class="form-inline" wicket:id="infoForm">
+		<div wicket:id="feedback" class="form-feedback"></div>
+		<input class="form-control focusable" type="text" placeholder="Team Name" wicket:id="name" />
+		<div class="btn-group btn-radio-group btn-group-permissions" wicket:id="permissionContainer">
+			<wicket:container wicket:id="permissions">
+				<a wicket:id="link" class="btn btn-default">
+					<span class="icon-ok"></span>
+					<span wicket:id="name"></span>
+				</a>
+			</wicket:container>
+		</div>
+		<button type="submit" class="btn btn-primary" wicket:id="submit">Save Team</button>
+	</form>
+	
+	<hr />
+	
+	<h4>Members</h4>
+	<form class="form-inline" wicket:id="memberForm">
+		<div class="form-feedback" wicket:id="feedback"></div>
+		<input wicket:id="userchoice" class="user-choice" type="hidden" style="width: 300px"></input>
+		<button type="submit" class="btn btn-default" wicket:id="submit">Add</button>
+	</form>
+	<hr/>
+	<div>
+		<h4 class="text-muted"><b wicket:id="total"></b> members total</h4>
+		<div class="member-list clearfix">
+			<div class="members first" wicket:id="oddlist">
+			</div>
+			<div class="members last" wicket:id="evenlist">
+			</div>
+		</div>
+	</div>
+	
+	<wicket:fragment wicket:id="membersview">
+		<ul class="list-group list-view list-group-hoverable">
+			<li class="list-group-item" wicket:id="member">
+				<span wicket:id="avatar"></span>
+				<a class="name" wicket:id="link">
+					<span wicket:id="name"></span>
+					(<em wicket:id="fullname"></em>)
+				</a>
+				<div class="item-actions">
+					<a class="img-link" wicket:id="remove"><i class="icon-remove-sign"></i></a>
+				</div>
+			</li>
+		</ul>
+	</wicket:fragment>
+	
+</wicket:panel>
+</html>

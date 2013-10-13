@@ -13,6 +13,7 @@ import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.util.lang.Bytes;
 
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
@@ -106,8 +107,13 @@ public class AccountProfilePage extends AccountSettingPage {
 		protected void onInitialize() {
 			super.onInitialize();
 
+			// limit avatar size to 2M bytes
+			setMaxSize(Bytes.megabytes(2));
+			setMultiPart(true);
+			
 			final FileUploadField uploadField = new FileUploadField("fileInput");
 			uploadField.setRequired(false);
+			
 			add(uploadField);
 
 			add(new FeedbackPanel("feedback"));

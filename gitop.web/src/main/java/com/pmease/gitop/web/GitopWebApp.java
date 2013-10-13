@@ -12,9 +12,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Application;
 import org.apache.wicket.Page;
+import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.Session;
 import org.apache.wicket.bean.validation.BeanValidationConfiguration;
 import org.apache.wicket.core.request.mapper.MountedMapper;
+import org.apache.wicket.devutils.stateless.StatelessChecker;
 import org.apache.wicket.markup.html.IPackageResourceGuard;
 import org.apache.wicket.markup.html.SecurePackageResourceGuard;
 import org.apache.wicket.request.IRequestMapper;
@@ -39,6 +41,8 @@ import com.pmease.gitop.web.page.account.AccountHomePage;
 import com.pmease.gitop.web.page.account.RegisterPage;
 import com.pmease.gitop.web.page.account.setting.password.AccountPasswordPage;
 import com.pmease.gitop.web.page.account.setting.permission.AccountPermissionPage;
+import com.pmease.gitop.web.page.account.setting.permission.AddTeamPage;
+import com.pmease.gitop.web.page.account.setting.permission.EditTeamPage;
 import com.pmease.gitop.web.page.account.setting.profile.AccountProfilePage;
 import com.pmease.gitop.web.page.account.setting.repos.AccountReposPage;
 import com.pmease.gitop.web.page.home.HomePage;
@@ -102,15 +106,17 @@ public class GitopWebApp extends AbstractWicketConfig {
 
 		loadDefaultUserAvatarData();
 		
-		new ShiroWicketPlugin().mountLoginPage("login", LoginPage.class)
-				.mountLogoutPage("logout", LogoutPage.class).install(this);
+		new ShiroWicketPlugin()
+				.mountLoginPage("login", LoginPage.class)
+				.mountLogoutPage("logout", LogoutPage.class)
+				.install(this);
 
 		mountPages();
 		configureResources();
 		
-//		if (getConfigurationType() == RuntimeConfigurationType.DEVELOPMENT) {
-//			getComponentPreOnBeforeRenderListeners().add(new StatelessChecker());
-//		}
+		if (getConfigurationType() == RuntimeConfigurationType.DEVELOPMENT) {
+			getComponentPreOnBeforeRenderListeners().add(new StatelessChecker());
+		}
 	}
 
 	public byte[] getDefaultUserAvatar() {
@@ -173,6 +179,8 @@ public class GitopWebApp extends AbstractWicketConfig {
 		mountPage("settings/password", AccountPasswordPage.class);
 		mountPage("settings/permission", AccountPermissionPage.class);
 		mountPage("settings/repos", AccountReposPage.class);
+		mountPage("teams/add", AddTeamPage.class);
+		mountPage("teams/edit/${teamId}", EditTeamPage.class);
 
 		mountPage("/test", TestPage.class);
 		mountPage("test2", TestPage2.class);

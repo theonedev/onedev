@@ -38,6 +38,14 @@ ul.disc { list-style:disc outside; }
 .piped:after { clear: both; }
 ul.piped, ol.piped { margin: 0; padding: 0; }
 
+/* LINKS */
+.checkable-link { color: #333; cursor: pointer; }
+.checkable-link:hover { text-decoration: none; }
+.checkable-link > .icon-checkbox:before { content: "\f096"; width: 16px; }
+.checkable-link.checked > .icon-checkbox:before { content: "\f046"; width: 16px; }
+.checkable-link.disabled { color: #888; }
+em.checkable-link { color: #888 !important; }
+
 /** LIST GROUP */
 .list-navs > .list-group-item { border-width: 1px 0; }
 .list-navs > .list-group-item:first-child,
@@ -173,6 +181,9 @@ a > .icon-null, .icon-null { display: inline-block; width: 10px; }
 	background: #2ba6cb;
 }
 
+.btn-radio-group .btn .icon-ok { display: none; }
+.btn-radio-group .btn.active { background: #999; color: white; }
+.btn-radio-group .btn.active .icon-ok, .btn-radio-group .btn:hover .icon-ok { display: inline-block; }
 /**
  * TABLE
  */
