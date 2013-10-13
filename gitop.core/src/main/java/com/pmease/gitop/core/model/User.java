@@ -46,6 +46,11 @@ public class User extends AbstractUser implements ProtectedObject {
 	
 	private boolean admin;
 	
+	private boolean publiclyAccessible;
+	
+	@Column(nullable=false)
+	private GeneralOperation defaultAuthorizedOperation = GeneralOperation.NO_ACCESS;
+	
 	@OneToMany(mappedBy="user")
 	private Collection<Membership> memberships = new ArrayList<Membership>();
 	
@@ -221,18 +226,48 @@ public class User extends AbstractUser implements ProtectedObject {
 					if (projectPermission.implies(objectPermission))
 						return true;
 				}
+
+				for (User each: Gitop.getInstance(UserManager.class).query()) {
+					ObjectPermission userPermission = new ObjectPermission(each, each.getDefaultAuthorizedOperation());
+					if (userPermission.implies(objectPermission))
+						return true;
+				}
 			} 
 			
-			// check if is public access
+			// check if is public access to projects
 			for (Project each: Gitop.getInstance(ProjectManager.class).findPublic()) {
 				ObjectPermission projectPermission = new ObjectPermission(each, GeneralOperation.READ);
 				if (projectPermission.implies(objectPermission))
+					return true;
+			}
+
+			// check if is public access to accounts
+			for (User each: Gitop.getInstance(UserManager.class).findPublic()) {
+				ObjectPermission userPermission = new ObjectPermission(each, GeneralOperation.READ);
+				if (userPermission.implies(objectPermission))
 					return true;
 			}
 		} 
 		return false;
 	}
 	
+	public boolean isPubliclyAccessible() {
+		return publiclyAccessible;
+	}
+
+	public void setPubliclyAccessible(boolean publiclyAccessible) {
+		this.publiclyAccessible = publiclyAccessible;
+	}
+
+	public GeneralOperation getDefaultAuthorizedOperation() {
+		return defaultAuthorizedOperation;
+	}
+
+	public void setDefaultAuthorizedOperation(
+			GeneralOperation defaultAuthorizedOperation) {
+		this.defaultAuthorizedOperation = defaultAuthorizedOperation;
+	}
+
 	public boolean isRoot() {
 		return Gitop.getInstance(UserManager.class).getRootUser().equals(this);
 	}

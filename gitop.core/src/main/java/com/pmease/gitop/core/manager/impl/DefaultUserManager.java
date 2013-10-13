@@ -1,5 +1,6 @@
 package com.pmease.gitop.core.manager.impl;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -53,6 +54,11 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 	@Override
 	public User find(String userName) {
 		return find(new Criterion[]{Restrictions.eq("name", userName)});
+	}
+
+	@Override
+	public Collection<User> findPublic() {
+		return query(new Criterion[]{Restrictions.eq("publiclyAccessible", true)});
 	}
 
 	@Override

@@ -53,7 +53,7 @@ public class ObjectPermission implements Permission {
 	}
 
 	public static ObjectPermission ofUserAdmin(User user) {
-		return new ObjectPermission(user, GeneralOperation.ADMINISTRATION);
+		return new ObjectPermission(user, GeneralOperation.ADMIN);
 	}
 	
 	public static ObjectPermission ofUserRead(User user) {
@@ -65,7 +65,7 @@ public class ObjectPermission implements Permission {
 	}
 
 	public static ObjectPermission ofProjectAdmin(Project project) {
-		return new ObjectPermission(project, GeneralOperation.ADMINISTRATION);
+		return new ObjectPermission(project, GeneralOperation.ADMIN);
 	}
 
 	public static ObjectPermission ofProjectRead(Project project) {

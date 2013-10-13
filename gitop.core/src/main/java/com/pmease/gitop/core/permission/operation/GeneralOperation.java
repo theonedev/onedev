@@ -26,7 +26,7 @@ public enum GeneralOperation implements PrivilegedOperation {
 		}
 		
 	},
-	ADMINISTRATION("Administration") {
+	ADMIN("Admin") {
 
 		@Override
 		public boolean can(PrivilegedOperation operation) {
