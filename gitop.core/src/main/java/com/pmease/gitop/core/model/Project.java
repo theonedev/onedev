@@ -2,6 +2,7 @@ package com.pmease.gitop.core.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -50,6 +51,9 @@ public class Project extends AbstractEntity implements UserBelonging {
 	private GeneralOperation defaultAuthorizedOperation = GeneralOperation.NO_ACCESS;
 	
 	private GateKeeper gateKeeper;
+	
+	@Column(nullable=false)
+	private Date createdAt = new Date();
 
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Authorization> authorizations = new ArrayList<Authorization>();
@@ -110,6 +114,14 @@ public class Project extends AbstractEntity implements UserBelonging {
 
 	public void setGateKeeper(GateKeeper gateKeeper) {
 		this.gateKeeper = gateKeeper;
+	}
+
+	public Date getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(Date createdAt) {
+		this.createdAt = createdAt;
 	}
 
 	@Override
