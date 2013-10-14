@@ -384,7 +384,7 @@
         <slf4jVersion>1.7.5</slf4jVersion>  
         <logbackVersion>1.0.11</logbackVersion> 
         <dropwizardVersion>0.7.0-SNAPSHOT</dropwizardVersion>
-        <jerseyVersion>1.17</jerseyVersion>
+        <jerseyVersion>1.17.1</jerseyVersion>
         <jacksonVersion>2.2.3</jacksonVersion>
     </properties> 
 </project>
