@@ -5,6 +5,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.RadioGroup;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
@@ -60,7 +61,14 @@ public class HomePage extends AbstractLayoutPage {
 		
 		form.add(new AjaxConfirmButton("submit", form,
 				Model.of("Are you sure you want to submit the form?"),
-				Model.of(VexIcon.ERROR),
+				new AbstractReadOnlyModel<VexIcon>() {
+
+					@Override
+					public VexIcon getObject() {
+						return vexIcon;
+					}
+			
+				},
 				Model.of("Yes"),
 				Model.of("No"),
 				null) {

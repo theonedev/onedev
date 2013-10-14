@@ -28,15 +28,15 @@ public abstract class HibernateDataProvider<T extends AbstractEntity> extends So
 	public Iterator<? extends T> iterator(long first, long count) {
 		GeneralDao dao = getDao();
 		DetachedCriteria criteria = getCriteria();
+		
 		SortParam<String> param = getSort();
 		if (param != null) {
-			DetachedCriteria crit = getCriteria();
 			Iterable<String> it = Splitter.on(",").trimResults().split(param.getProperty());
 			for (String each : it) {
 				if (param.isAscending())
-					crit.addOrder(Order.asc(each));
+					criteria.addOrder(Order.asc(each));
 				else
-					crit.addOrder(Order.desc(each));
+					criteria.addOrder(Order.desc(each));
 			}
 		}
 		

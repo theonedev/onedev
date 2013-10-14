@@ -183,7 +183,7 @@ public abstract class BasePage extends WebPage {
 	
 	protected void onPageInitialize() {
 		if (!isPermitted()) {
-			throw new AccessDeniedException();
+			throw new AccessDeniedException("Access denied");
 		}
 
 		add(new Label("title", getPageTitle()));

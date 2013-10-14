@@ -36,7 +36,13 @@
 			<version>1.0.29</version>
 		</dependency>
 
-
+		<!-- JERSEY CLIENT -->
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>1.17.1</version>
+		</dependency>
+		
 		<!-- WICKET -->
 		<dependency>
 			<groupId>com.vaynberg.wicket.select2</groupId>
@@ -66,7 +72,7 @@
 			<artifactId>imgscalr-lib</artifactId>
 			<version>4.2</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.jetty</artifactId>

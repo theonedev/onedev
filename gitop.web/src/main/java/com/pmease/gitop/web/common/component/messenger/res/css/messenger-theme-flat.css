@@ -356,6 +356,9 @@ ul.messenger-theme-flat .messenger-message.alert-success .messenger-message-inne
 ul.messenger-theme-flat .messenger-message.alert-info .messenger-message-inner:before {
   background: #00B5AD;
 }
+ul.messenger-theme-flat .messenger-message.alert-warning .messenger-message-inner:before {
+  background: #ff9500;
+}
 /* line 103, ../../src/sass/messenger-theme-flat.sass */
 ul.messenger-theme-flat .messenger-message.alert-error .messenger-message-inner:before {
   background: #ff2a68;
