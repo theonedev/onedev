@@ -3,6 +3,7 @@ package com.pmease.gitop.core.model;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -13,6 +14,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.shiro.authz.Permission;
 
+import com.google.common.base.Objects;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.core.permission.operation.GeneralOperation;
@@ -36,10 +38,10 @@ public class Team extends AbstractEntity implements Permission {
 	@Column(nullable=false)
 	private GeneralOperation authorizedOperation = GeneralOperation.READ;
 	
-	@OneToMany(mappedBy="team")
+	@OneToMany(mappedBy="team", cascade=CascadeType.REMOVE)
 	private Collection<Membership> memberships = new ArrayList<Membership>();
 	
-	@OneToMany(mappedBy="team")
+	@OneToMany(mappedBy="team", cascade=CascadeType.REMOVE)
 	private Collection<Authorization> authorizations = new ArrayList<Authorization>();
 
 	public User getOwner() {
@@ -106,6 +108,14 @@ public class Team extends AbstractEntity implements Permission {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this)
+				.add("name", getName())
+				.add("owner", getOwner().getName())
+				.toString();
 	}
 
 }
