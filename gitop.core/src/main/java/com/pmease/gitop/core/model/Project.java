@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -15,6 +16,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.google.common.base.Objects;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitop.core.Gitop;
@@ -49,7 +51,7 @@ public class Project extends AbstractEntity implements UserBelonging {
 	
 	private GateKeeper gateKeeper;
 
-	@OneToMany(mappedBy="project")
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Authorization> authorizations = new ArrayList<Authorization>();
 
 	public User getOwner() {
@@ -142,4 +144,11 @@ public class Project extends AbstractEntity implements UserBelonging {
 		return authorizedUsers;
 	}
 	
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this)
+				.add("name", getName())
+				.add("owner", getOwner().getName())
+				.toString();
+	}
 }

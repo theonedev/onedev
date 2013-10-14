@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -66,10 +67,10 @@ public class MergeRequest extends AbstractEntity {
 	
 	private transient Collection<User> potentialVoters;
 	
-	@OneToMany(mappedBy="request")
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<MergeRequestUpdate> updates = new ArrayList<MergeRequestUpdate>();
 	
-	@OneToMany(mappedBy="request")
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<VoteInvitation> voteInvitations = new ArrayList<VoteInvitation>();
 	
 	public String getTitle() {

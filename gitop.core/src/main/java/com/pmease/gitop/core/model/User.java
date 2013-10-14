@@ -3,6 +3,7 @@ package com.pmease.gitop.core.model;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
@@ -51,22 +52,22 @@ public class User extends AbstractUser implements ProtectedObject {
 	@Column(nullable=false)
 	private GeneralOperation defaultAuthorizedOperation = GeneralOperation.NO_ACCESS;
 	
-	@OneToMany(mappedBy="user")
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<Membership> memberships = new ArrayList<Membership>();
 	
-	@OneToMany(mappedBy="submitter")
+	@OneToMany(mappedBy="submitter", cascade=CascadeType.REMOVE)
 	private Collection<MergeRequest> mergeRequests = new ArrayList<MergeRequest>();
 	
-	@OneToMany(mappedBy="owner")
+	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
 	private Collection<Project> repositories = new ArrayList<Project>();
 
-	@OneToMany(mappedBy="owner")
+	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
 	private Collection<Team> teams = new ArrayList<Team>();
 	
-	@OneToMany(mappedBy="voter")
+	@OneToMany(mappedBy="voter", cascade=CascadeType.REMOVE)
 	private Collection<Vote> votes = new ArrayList<Vote>();
 	
-	@OneToMany(mappedBy="voter")
+	@OneToMany(mappedBy="voter", cascade=CascadeType.REMOVE)
 	private Collection<VoteInvitation> voteInvitations = new ArrayList<VoteInvitation>();
 
 	@Editable(order=100)
