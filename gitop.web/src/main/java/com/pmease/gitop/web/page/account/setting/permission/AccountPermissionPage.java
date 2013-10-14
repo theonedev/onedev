@@ -14,6 +14,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.permission.operation.GeneralOperation;
+import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
 
 @SuppressWarnings("serial")
@@ -72,6 +73,8 @@ public class AccountPermissionPage extends AccountSettingPage {
 					}
 			
 		});
+		
+		add(new TeamsPanel("teams", new UserModel(getAccount())));
 	}
 	
 	class PermissionLink extends AjaxLink<Void> {

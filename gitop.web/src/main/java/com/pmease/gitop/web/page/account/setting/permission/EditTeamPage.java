@@ -1,25 +1,27 @@
 package com.pmease.gitop.web.page.account.setting.permission;
 
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.model.Team;
 import com.pmease.gitop.web.model.TeamModel;
+import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
 
 @SuppressWarnings("serial")
 public class EditTeamPage extends AccountSettingPage {
 
-	private final Long teamId;
+	protected final Long teamId;
 	
-	protected EditTeamPage() {
-		teamId = null;
+	public EditTeamPage() {
+		this.teamId = null;
 	}
 	
 	public EditTeamPage(PageParameters params) {
-		Long teamId = params.get("teamId").toLongObject();
-		this.teamId = teamId;
+		this.teamId = params.get("teamId").toLongObject();
 	}
 	
 	@Override
@@ -36,7 +38,15 @@ public class EditTeamPage extends AccountSettingPage {
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 		
-		add(new TeamEditor("editor", new TeamModel(getTeam())));
+		add(new TeamEditor("editor", new UserModel(getAccount()), new TeamModel(getTeam())));
+		add(new Label("head", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getTeam().isNew() ? "Create Team" : "Edit Team";
+			}
+			
+		}));
 	}
 	
 	protected Team getTeam() {

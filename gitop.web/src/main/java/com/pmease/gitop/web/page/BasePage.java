@@ -1,16 +1,26 @@
 package com.pmease.gitop.web.page;
 
+import java.util.Iterator;
+
+import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.IMarkupFragment;
+import org.apache.wicket.markup.MarkupElement;
+import org.apache.wicket.markup.MarkupResourceStream;
+import org.apache.wicket.markup.html.TransparentWebMarkupContainer;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.base.Strings;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.web.assets.BaseResourcesBehavior;
@@ -23,7 +33,7 @@ import com.pmease.gitop.web.page.init.ServerInitPage;
 @SuppressWarnings("serial")
 public abstract class BasePage extends WebPage {
 
-//	private WebMarkupContainer body;
+	private WebMarkupContainer body;
 	
 	private boolean shouldInitialize = true;
 
@@ -44,17 +54,17 @@ public abstract class BasePage extends WebPage {
 	}
 
 	private void commonInit() {
-//		body = new TransparentWebMarkupContainer("body");
-//		add(body);
-//		body.add(AttributeAppender.append("class",
-//				new AbstractReadOnlyModel<String>() {
-//
-//					@Override
-//					public String getObject() {
-//						String css = getPageCssClass();
-//						return Strings.isNullOrEmpty(css) ? "" : css;
-//					}
-//				}));
+		body = new TransparentWebMarkupContainer("body");
+		add(body);
+		body.add(AttributeAppender.append("class",
+				new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						String css = getPageCssClass();
+						return Strings.isNullOrEmpty(css) ? "" : css;
+					}
+				}));
 
 		modal = new Modal("modal");
 		add(modal);
@@ -67,58 +77,58 @@ public abstract class BasePage extends WebPage {
 		shouldInitialize = true;
 	}
 
-//	@Override
-//	public IMarkupFragment getMarkup(Component child) {
-//		if (child != null) {
-//			IMarkupFragment markup = super.getMarkup(child);
-//			if (markup != null)
-//				return markup;
-//			else if (body != null)
-//				return body.getMarkup(child);
-//			else
-//				return null;
-//		} else {
-//			final IMarkupFragment markup = super.getMarkup(child);
-//			return new IMarkupFragment() {
-//
-//				@Override
-//				public String toString(boolean markupOnly) {
-//					return markup.toString();
-//				}
-//
-//				@Override
-//				public int size() {
-//					return markup.size();
-//				}
-//
-//				@Override
-//				public MarkupResourceStream getMarkupResourceStream() {
-//					return markup.getMarkupResourceStream();
-//				}
-//
-//				@Override
-//				public MarkupElement get(int index) {
-//					return markup.get(index);
-//				}
-//
-//				@Override
-//				public IMarkupFragment find(String id) {
-//					IMarkupFragment found = markup.find(id);
-//					if (found != null)
-//						return found;
-//					else if (body != null)
-//						return body.getMarkup().find(id);
-//					else
-//						return null;
-//				}
-//
-//				@Override
-//				public Iterator<MarkupElement> iterator() {
-//					return markup.iterator();
-//				}
-//			};
-//		}
-//	}
+	@Override
+	public IMarkupFragment getMarkup(Component child) {
+		if (child != null) {
+			IMarkupFragment markup = super.getMarkup(child);
+			if (markup != null)
+				return markup;
+			else if (body != null)
+				return body.getMarkup(child);
+			else
+				return null;
+		} else {
+			final IMarkupFragment markup = super.getMarkup(child);
+			return new IMarkupFragment() {
+
+				@Override
+				public String toString(boolean markupOnly) {
+					return markup.toString();
+				}
+
+				@Override
+				public int size() {
+					return markup.size();
+				}
+
+				@Override
+				public MarkupResourceStream getMarkupResourceStream() {
+					return markup.getMarkupResourceStream();
+				}
+
+				@Override
+				public MarkupElement get(int index) {
+					return markup.get(index);
+				}
+
+				@Override
+				public IMarkupFragment find(String id) {
+					IMarkupFragment found = markup.find(id);
+					if (found != null)
+						return found;
+					else if (body != null)
+						return body.getMarkup().find(id);
+					else
+						return null;
+				}
+
+				@Override
+				public Iterator<MarkupElement> iterator() {
+					return markup.iterator();
+				}
+			};
+		}
+	}
 
 	public final void redirectWithInterception(final Class<? extends Page> clazz) {
 		shouldInitialize = true;

@@ -72,7 +72,7 @@ public class DefaultGeneralDao implements GeneralDao, Serializable {
 				return null;
 		}
 		
-		return (Class<T>) entityClass;
+		return entityClass;
 	}
 
 	@Sessional
@@ -99,7 +99,7 @@ public class DefaultGeneralDao implements GeneralDao, Serializable {
 	public <T extends AbstractEntity> int count(DetachedCriteria detachedCriteria) {
 		Criteria criteria = detachedCriteria.getExecutableCriteria(getSession());
 		criteria.setProjection(Projections.rowCount());
-		return (Integer) criteria.uniqueResult();
+		return ((Long) criteria.uniqueResult()).intValue();
 	}
 	
 	public Object writeReplace() throws ObjectStreamException {

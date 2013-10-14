@@ -51,9 +51,7 @@ public class RegisterPage extends AbstractLayoutPage {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				
 			}
-			
 		};
 		add(form);
 

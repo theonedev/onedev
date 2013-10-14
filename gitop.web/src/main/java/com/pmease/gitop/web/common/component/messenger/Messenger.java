@@ -7,7 +7,7 @@ import com.pmease.gitop.web.common.util.Options;
 public class Messenger {
 
 	static enum Type {
-		INFO, SUCCESS, ERROR
+		INFO, SUCCESS, WARNING, ERROR
 	}
 
 	private final String jsFunc;
@@ -30,6 +30,10 @@ public class Messenger {
 
 	public static Messenger error(String message) {
 		return message(message, Type.ERROR);
+	}
+	
+	public static Messenger warn(String message) {
+		return message(message, Type.WARNING);
 	}
 
 	private static Messenger message(String message, Type type) {
