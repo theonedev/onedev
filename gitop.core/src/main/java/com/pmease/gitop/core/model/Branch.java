@@ -1,9 +1,14 @@
 package com.pmease.gitop.core.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -24,6 +29,12 @@ public class Branch extends AbstractEntity {
 	@Column(nullable=false)
 	private String name;
 
+	@OneToMany(mappedBy="to", cascade=CascadeType.REMOVE)
+	private Collection<AutoPull> autoPulls = new ArrayList<AutoPull>();
+
+	@OneToMany(mappedBy="from", cascade=CascadeType.REMOVE)
+	private Collection<AutoPush> autoPushes = new ArrayList<AutoPush>();
+
 	public Project getProject() {
 		return project;
 	}
@@ -40,6 +51,22 @@ public class Branch extends AbstractEntity {
 		this.name = name;
 	}
 	
+	public Collection<AutoPull> getAutoPulls() {
+		return autoPulls;
+	}
+
+	public void setAutoPulls(Collection<AutoPull> autoPulls) {
+		this.autoPulls = autoPulls;
+	}
+
+	public Collection<AutoPush> getAutoPushes() {
+		return autoPushes;
+	}
+
+	public void setAutoPushes(Collection<AutoPush> autoPushes) {
+		this.autoPushes = autoPushes;
+	}
+
 	@Override
 	public String toString() {
 		return Objects.toStringHelper(this)
