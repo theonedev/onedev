@@ -13,9 +13,11 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.shiro.authz.Permission;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Objects;
 import com.pmease.commons.hibernate.AbstractEntity;
+import com.pmease.commons.validation.Name;
 import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.core.permission.operation.GeneralOperation;
 
@@ -52,6 +54,8 @@ public class Team extends AbstractEntity implements Permission {
 		this.owner = owner;
 	}
 
+	@Name
+	@NotEmpty
 	public String getName() {
 		return name;
 	}

@@ -27,6 +27,7 @@ import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.core.permission.object.ProtectedObject;
 import com.pmease.gitop.core.permission.object.UserBelonging;
 import com.pmease.gitop.core.permission.operation.GeneralOperation;
+import com.pmease.gitop.core.validation.ProjectName;
 
 @Entity
 @Table(uniqueConstraints={
@@ -69,6 +70,7 @@ public class Project extends AbstractEntity implements UserBelonging {
 	@Editable(description=
 			"Specify name of the project. It will be used to identify the project when accessing via Git.")
 	@NotEmpty
+	@ProjectName
 	public String getName() {
 		return name;
 	}
