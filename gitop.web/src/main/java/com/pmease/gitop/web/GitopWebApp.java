@@ -37,8 +37,8 @@ import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.web.assets.AssetLocator;
 import com.pmease.gitop.web.component.avatar.AvatarImageResource;
 import com.pmease.gitop.web.component.avatar.AvatarImageResourceReference;
-import com.pmease.gitop.web.page.account.AccountHomePage;
 import com.pmease.gitop.web.page.account.RegisterPage;
+import com.pmease.gitop.web.page.account.home.AccountHomePage;
 import com.pmease.gitop.web.page.account.setting.password.AccountPasswordPage;
 import com.pmease.gitop.web.page.account.setting.permission.AccountPermissionPage;
 import com.pmease.gitop.web.page.account.setting.permission.AddTeamPage;
@@ -47,6 +47,7 @@ import com.pmease.gitop.web.page.account.setting.profile.AccountProfilePage;
 import com.pmease.gitop.web.page.account.setting.repos.AccountReposPage;
 import com.pmease.gitop.web.page.home.HomePage;
 import com.pmease.gitop.web.page.init.ServerInitPage;
+import com.pmease.gitop.web.page.project.CreateProjectPage;
 import com.pmease.gitop.web.page.project.ProjectHomePage;
 import com.pmease.gitop.web.page.test.TestPage;
 import com.pmease.gitop.web.page.test.TestPage2;
@@ -181,6 +182,9 @@ public class GitopWebApp extends AbstractWicketConfig {
 		mountPage("settings/repos", AccountReposPage.class);
 		mountPage("teams/add", AddTeamPage.class);
 		mountPage("teams/edit/${teamId}", EditTeamPage.class);
+		
+		// project related
+		mountPage("new", CreateProjectPage.class);
 
 		mountPage("/test", TestPage.class);
 		mountPage("test2", TestPage2.class);

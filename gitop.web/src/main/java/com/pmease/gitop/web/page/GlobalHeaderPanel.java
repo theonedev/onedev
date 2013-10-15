@@ -10,6 +10,7 @@ import com.pmease.gitop.web.component.link.UserAvatarLink;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.account.RegisterPage;
 import com.pmease.gitop.web.page.account.setting.profile.AccountProfilePage;
+import com.pmease.gitop.web.page.project.CreateProjectPage;
 import com.pmease.gitop.web.shiro.LoginPage;
 import com.pmease.gitop.web.shiro.LogoutPage;
 
@@ -28,6 +29,7 @@ public class GlobalHeaderPanel extends Panel {
 		if (isSignedIn()) {
 			add(new UserAvatarLink("userlink", new UserModel(currentUser().get())));
 			add(new BookmarkablePageLink<Void>("profileLink", AccountProfilePage.class));
+			add(new BookmarkablePageLink<Void>("newlink", CreateProjectPage.class));
 		} else {
 			add(new WebMarkupContainer("userlink").setVisibilityAllowed(false));
 		}

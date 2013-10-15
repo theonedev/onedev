@@ -11,7 +11,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.web.component.avatar.AvatarImage;
 import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.account.AccountHomePage;
+import com.pmease.gitop.web.page.account.home.AccountHomePage;
 import com.pmease.gitop.web.util.WicketUtils;
 
 @SuppressWarnings("serial")

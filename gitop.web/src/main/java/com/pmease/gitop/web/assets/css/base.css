@@ -194,6 +194,47 @@ a > .icon-null, .icon-null { display: inline-block; width: 10px; }
 	background: #2ba6cb;
 }
 
+.btn-gray {
+  color: #333333;
+  background-color: #eaeaea;
+  border-color: #cccccc;
+}
+
+.btn-gray:hover,
+.btn-gray:focus,
+.btn-gray:active,
+.btn-gray.active,
+.open .dropdown-toggle.btn-gray {
+  color: #333333;
+  background-color: #d5d5d5;
+  border-color: #adadad;
+}
+
+.btn-gray:active,
+.btn-gray.active,
+.open .dropdown-toggle.btn-gray {
+  background-image: none;
+}
+
+.btn-gray.disabled,
+.btn-gray[disabled],
+fieldset[disabled] .btn-gray,
+.btn-gray.disabled:hover,
+.btn-gray[disabled]:hover,
+fieldset[disabled] .btn-gray:hover,
+.btn-gray.disabled:focus,
+.btn-gray[disabled]:focus,
+fieldset[disabled] .btn-gray:focus,
+.btn-gray.disabled:active,
+.btn-gray[disabled]:active,
+fieldset[disabled] .btn-gray:active,
+.btn-gray.disabled.active,
+.btn-gray[disabled].active,
+fieldset[disabled] .btn-gray.active {
+  background-color: #eaeaea;
+  border-color: #cccccc;
+}
+
 .btn-radio-group .btn .icon-ok { display: none; }
 .btn-radio-group .btn.active { background: #999; color: white; }
 .btn-radio-group .btn.active .icon-ok, .btn-radio-group .btn:hover .icon-ok { display: inline-block; }

@@ -1,6 +1,6 @@
 package com.pmease.gitop.web.page.project;
 
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -10,10 +10,11 @@ import com.pmease.commons.util.GeneralException;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
+import com.pmease.gitop.web.page.PageSpec;
 
 @SuppressWarnings("serial")
-@RequiresAuthentication
 public class ProjectHomePage extends AbstractLayoutPage {
 
 	private final IModel<Project> projectModel;
@@ -24,8 +25,8 @@ public class ProjectHomePage extends AbstractLayoutPage {
 	}
 
 	public ProjectHomePage(PageParameters params) {
-		String userName = params.get("user").toString();
-		String projectName = params.get("project").toString();
+		String userName = params.get(PageSpec.USER).toString();
+		String projectName = params.get(PageSpec.PROJECT).toString();
 		
 		if (projectName.endsWith(".git"))
 			projectName = projectName.substring(0, projectName.length() - ".git".length());
@@ -48,6 +49,11 @@ public class ProjectHomePage extends AbstractLayoutPage {
 	}
 	
 	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(getProject()));
+	}
+	
+	@Override
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 		
@@ -65,13 +71,4 @@ public class ProjectHomePage extends AbstractLayoutPage {
 			projectModel.detach();
 		super.detachModels();
 	}
-
-	public static PageParameters paramsOf(Project project) {
-		PageParameters params = new PageParameters();
-		params.set("user", project.getOwner().getName());
-		params.set("project", project.getName());
-		
-		return params;
-	}
-
 }
