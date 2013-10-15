@@ -40,6 +40,10 @@ public class Project extends AbstractEntity implements UserBelonging {
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private User owner;
+	
+	@ManyToOne
+	@JoinColumn(nullable=true)
+	private Project forkedFrom;
 
 	@Column(nullable=false)
 	private String name;
@@ -58,6 +62,9 @@ public class Project extends AbstractEntity implements UserBelonging {
 
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Authorization> authorizations = new ArrayList<Authorization>();
+
+	@OneToMany(mappedBy="forkedFrom", cascade=CascadeType.REMOVE)
+	private Collection<Project> forks = new ArrayList<Project>();
 
 	public User getOwner() {
 		return owner;
@@ -137,6 +144,22 @@ public class Project extends AbstractEntity implements UserBelonging {
 
 	public void setAuthorizations(Collection<Authorization> authorizations) {
 		this.authorizations = authorizations;
+	}
+
+	public Project getForkedFrom() {
+		return forkedFrom;
+	}
+
+	public void setForkedFrom(Project forkedFrom) {
+		this.forkedFrom = forkedFrom;
+	}
+
+	public Collection<Project> getForks() {
+		return forks;
+	}
+
+	public void setForks(Collection<Project> forks) {
+		this.forks = forks;
 	}
 
 	@Override

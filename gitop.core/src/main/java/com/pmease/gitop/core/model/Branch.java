@@ -7,6 +7,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.google.common.base.Objects;
 import com.pmease.commons.hibernate.AbstractEntity;
 
 @SuppressWarnings("serial")
@@ -39,4 +40,11 @@ public class Branch extends AbstractEntity {
 		this.name = name;
 	}
 	
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this)
+				.add("name", getName())
+				.add("project", getProject())
+				.toString();
+	}
 }
