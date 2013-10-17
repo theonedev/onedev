@@ -9,11 +9,4 @@ public abstract class BeanEditContext extends AbstractEditContext {
 		super(bean);
 	}
 
-	@Override
-	protected void doValidation() {
-		if (getBean() instanceof Validatable) {
-			((Validatable)getBean()).validate(this);
-		}
-	}
-
 }

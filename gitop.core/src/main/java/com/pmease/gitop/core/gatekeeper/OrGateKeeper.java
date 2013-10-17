@@ -3,6 +3,7 @@ package com.pmease.gitop.core.gatekeeper;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -21,6 +22,7 @@ public class OrGateKeeper extends AbstractGateKeeper {
 	private List<GateKeeper> gateKeepers = new ArrayList<GateKeeper>();
 
 	@Editable(name="Sub Gate Keepers")
+	@Valid
 	@NotNull
 	@Size(min=1, message="At least one element has to be added.")
 	public List<GateKeeper> getGateKeepers() {

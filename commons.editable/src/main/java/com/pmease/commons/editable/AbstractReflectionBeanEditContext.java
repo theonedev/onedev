@@ -36,7 +36,7 @@ public abstract class AbstractReflectionBeanEditContext extends BeanEditContext 
 
 	@Override
 	public Map<Serializable, EditContext> getChildContexts() {
-		Map<Serializable, EditContext> childContexts = new LinkedHashMap<Serializable, EditContext>();
+		Map<Serializable, EditContext> childContexts = new LinkedHashMap<>();
 		for (PropertyEditContext each: propertyContexts) {
 			childContexts.put(each.getPropertyName(), each);
 		}

@@ -14,8 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.Valid;
 
 import com.google.common.base.Objects;
 import com.pmease.commons.editable.annotation.Editable;
@@ -76,7 +75,6 @@ public class Project extends AbstractEntity implements UserBelonging {
 
 	@Editable(description=
 			"Specify name of the project. It will be used to identify the project when accessing via Git.")
-	@NotEmpty
 	@ProjectName
 	public String getName() {
 		return name;
@@ -117,6 +115,7 @@ public class Project extends AbstractEntity implements UserBelonging {
 	@Editable(
 			name="Accept Merge Requests If", 
 			description="Optionally define gate keeper to accept merge requests under certain condition.")
+	@Valid
 	public GateKeeper getGateKeeper() {
 		return gateKeeper;
 	}

@@ -2,6 +2,7 @@ package com.pmease.commons.editable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,18 +62,7 @@ public abstract class AbstractPolymorphicPropertyEditContext extends PropertyEdi
 		if (valueContext != null)
 			return valueContext.getChildContexts();
 		else
-			return null;
-	}
-
-	@Override
-	protected void doValidation() {
-		super.doValidation();
-
-		// redirect error message of bean level of the property value to be directly 
-		// under this property
-		if (valueContext != null && valueContext.getBean() instanceof Validatable) {
-			((Validatable)valueContext.getBean()).validate(this);
-		}
+			return new HashMap<>();
 	}
 
 }

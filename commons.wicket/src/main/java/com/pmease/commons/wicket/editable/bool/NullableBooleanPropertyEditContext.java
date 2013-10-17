@@ -1,7 +1,6 @@
 package com.pmease.commons.wicket.editable.bool;
 
 import java.io.Serializable;
-import java.util.Map;
 
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
@@ -9,7 +8,6 @@ import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.model.IModel;
 
 import com.google.common.collect.Lists;
-import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.wicket.editable.EditableResourceBehavior;
 
@@ -75,11 +73,6 @@ public class NullableBooleanPropertyEditContext extends PropertyEditContext {
 		} else {
 			return new Label((String) renderParam, "<i>Not Defined</i>").setEscapeModelStrings(false);
 		}
-	}
-
-	@Override
-	public Map<Serializable, EditContext> getChildContexts() {
-		return null;
 	}
 
 }

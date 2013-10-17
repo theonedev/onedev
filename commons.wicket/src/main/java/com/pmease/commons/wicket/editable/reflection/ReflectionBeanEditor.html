@@ -13,20 +13,22 @@
 	<wicket:fragment wicket:id="default">
 		<div class="reflection editor">
 			<div wicket:id="properties" class="form-group">
-				<div class="name control-label">
+				<label class="name control-label">
 					<span wicket:id="name"></span>
 					<span wicket:id="required" class="required"></span>
-				</div>
+				</label>
 				<div class="value">
 					<div wicket:id="value"></div>
-					<span wicket:id="description" class="help-block"></span>
-					<wicket:enclosure child="propertyValidationErrors">
-						<ul class="help-block">
-							<li wicket:id="propertyValidationErrors">
-								<span wicket:id="propertyValidationError"></span>
-							</li>
-						</ul>
-					</wicket:enclosure>
+					<div wicket:id="hint">
+						<span wicket:id="description" class="help-block"></span>
+						<wicket:enclosure child="propertyValidationErrors">
+							<ul class="help-block">
+								<li wicket:id="propertyValidationErrors">
+									<span wicket:id="propertyValidationError"></span>
+								</li>
+							</ul>
+						</wicket:enclosure>
+					</div>
 				</div>
 		</div>
 		</div>
@@ -41,14 +43,16 @@
 				</td>
 				<td class="value">
 					<div wicket:id="value"></div>
-					<span wicket:id="description" class="help-block"></span>
-					<wicket:enclosure child="propertyValidationErrors">
-						<ul class="help-block">
-							<li wicket:id="propertyValidationErrors">
-								<span wicket:id="propertyValidationError"></span>
-							</li>
-						</ul>
-					</wicket:enclosure>
+					<div wicket:id="hint">
+						<span wicket:id="description" class="help-block"></span>
+						<wicket:enclosure child="propertyValidationErrors">
+							<ul class="help-block">
+								<li wicket:id="propertyValidationErrors">
+									<span wicket:id="propertyValidationError"></span>
+								</li>
+							</ul>
+						</wicket:enclosure>
+					</div>
 				</td>
 			</tr>
 		</table>

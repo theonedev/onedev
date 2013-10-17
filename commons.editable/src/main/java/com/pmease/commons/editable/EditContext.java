@@ -8,19 +8,21 @@ public interface EditContext extends Serializable {
 	
 	Serializable getBean();
 	
+	void updateBean();
+	
 	void validate();
 	
-	List<ValidationError> getValidationErrors(boolean recursive);
+	List<String> getValidationErrors();
+	
+	void clearValidationErrors();
+	
+	boolean hasValidationError();
 	
 	Map<Serializable, EditContext> getChildContexts();
 	
-	EditContext getChildContext(Serializable propertyName);
+	EditContext findChildContext(List<Serializable> contextPath, boolean exactMatch);
 	
-	boolean hasValidationError(Serializable propertyName, boolean recursive);
-	
-	boolean hasValidationError(boolean recursive);
-	
-	void error(String errorMessage);
+	void addValidationError(String errorMessage);
 	
 	Object renderForEdit(Object renderParam);
 	

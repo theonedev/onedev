@@ -1,5 +1,6 @@
 package com.pmease.gitop.core.gatekeeper;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
@@ -15,6 +16,7 @@ public class IfThenGateKeeper extends AbstractGateKeeper {
 	
 	@Editable
 	@NotNull
+	@Valid
 	public GateKeeper getIfGate() {
 		return ifGate;
 	}
@@ -25,6 +27,7 @@ public class IfThenGateKeeper extends AbstractGateKeeper {
 
 	@Editable
 	@NotNull
+	@Valid
 	public GateKeeper getThenGate() {
 		return thenGate;
 	}

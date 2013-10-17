@@ -1,7 +1,6 @@
 package com.pmease.commons.wicket.editable.nuemric;
 
 import java.io.Serializable;
-import java.util.Map;
 
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
@@ -9,7 +8,6 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.wicket.editable.EditableResourceBehavior;
 
@@ -58,14 +56,16 @@ public class NumericPropertyEditContext extends PropertyEditContext {
 	}
 
 	@Override
-	protected void doValidation() {
+	public void updateBean() {
 		String input = inputModel.getObject();
 
 		Serializable convertedInput;
 		
+		boolean isInt = getPropertyGetter().getReturnType() == int.class || getPropertyGetter().getReturnType() == Integer.class;
+		
 		try {
 			if (input != null) {
-				if (getPropertyGetter().getReturnType() == int.class || getPropertyGetter().getReturnType() == Integer.class)
+				if (isInt)
 					convertedInput = Integer.valueOf(input);
 				else
 					convertedInput = Long.valueOf(input);
@@ -73,19 +73,16 @@ public class NumericPropertyEditContext extends PropertyEditContext {
 				convertedInput = null;
 			}
 			setPropertyValue(convertedInput);
-		} catch (NumberFormatException e) {
-			error("Expects a number here.");
 		} catch (IllegalArgumentException e) {
-			error("Please specify a number here.");
+			addValidationError("Expects a number here.");
+			
+			if (isInt)
+				setPropertyValue(Integer.MIN_VALUE);
+			else
+				setPropertyValue(Long.MIN_VALUE);
 		}
 		
-		if (!hasValidationError(true))
-			super.doValidation();
-	}
-
-	@Override
-	public Map<Serializable, EditContext> getChildContexts() {
-		return null;
+		super.updateBean();
 	}
 
 }

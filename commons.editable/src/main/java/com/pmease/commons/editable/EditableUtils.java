@@ -114,21 +114,6 @@ public class EditableUtils {
 		return null;
 	}
 	
-	public static void validate(Serializable bean) {
-		EditContext context = AppLoader.getInstance(EditSupportRegistry.class).getBeanEditContext(bean);
-		context.validate();
-		List<ValidationError> errors = context.getValidationErrors(true);
-		if (!errors.isEmpty()) {
-			StringBuffer buffer = new StringBuffer();
-			
-			for (ValidationError error: errors) {
-				buffer.append(error.toString()).append("\n");
-			}
-			
-			throw new ValidationException(buffer.toString());
-		}
-	}
-
 	public static boolean isPropertyRequired(Method propertyGetter) {
 		if (propertyGetter.getReturnType().isPrimitive() && propertyGetter.getReturnType() != boolean.class
 				|| propertyGetter.getAnnotation(NotNull.class) != null 

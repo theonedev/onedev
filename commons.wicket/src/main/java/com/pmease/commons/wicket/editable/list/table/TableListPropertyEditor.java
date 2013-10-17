@@ -24,7 +24,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyEditContext;
-import com.pmease.commons.editable.ValidationError;
 import com.pmease.commons.wicket.WicketUtils;
 import com.pmease.commons.wicket.editable.EditableResourceBehavior;
 
@@ -135,25 +134,24 @@ public class TableListPropertyEditor extends Panel {
 						final PropertyEditContext elementPropertyContext = columnItem.getModelObject();
 						columnItem.add((Component)elementPropertyContext.renderForEdit("elementPropertyEditor"));
 						
-						columnItem.add(new ListView<ValidationError>("propertyValidationErrors", elementPropertyContext.getValidationErrors(false)) {
+						columnItem.add(new ListView<String>("propertyValidationErrors", elementPropertyContext.getValidationErrors()) {
 
 							@Override
-							protected void populateItem(ListItem<ValidationError> item) {
-								ValidationError error = item.getModelObject();
-								item.add(new Label("propertyValidationError", error.toString()));
+							protected void populateItem(ListItem<String> item) {
+								item.add(new Label("propertyValidationError", item.getModelObject()));
 							}
 
 							@Override
 							protected void onConfigure() {
 								super.onConfigure();
 								
-								setVisible(!elementPropertyContext.getValidationErrors(false).isEmpty());
+								setVisible(!elementPropertyContext.getValidationErrors().isEmpty());
 							}
 							
 						});
 						
 						Map<Serializable, EditContext> childContexts = elementPropertyContext.getChildContexts();
-						if ((childContexts == null || childContexts.isEmpty()) && !elementPropertyContext.getValidationErrors(false).isEmpty())
+						if (childContexts.isEmpty() && !elementPropertyContext.getValidationErrors().isEmpty())
 							columnItem.add(AttributeModifier.append("class", "has-error"));
 					}
 					

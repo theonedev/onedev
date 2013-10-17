@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -16,7 +17,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyEditContext;
-import com.pmease.commons.editable.ValidationError;
 import com.pmease.commons.editable.annotation.TableLayout;
 import com.pmease.commons.wicket.editable.EditableResourceBehavior;
 
@@ -37,19 +37,18 @@ public class ReflectionBeanEditor extends Panel {
 		
 		add(new EditableResourceBehavior());
 		
-		add(new ListView<ValidationError>("beanValidationErrors", new LoadableDetachableModel<List<ValidationError>>() {
+		add(new ListView<String>("beanValidationErrors", new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected List<ValidationError> load() {
-				return editContext.getValidationErrors(false);
+			protected List<String> load() {
+				return editContext.getValidationErrors();
 			}
 			
 		}) {
 
 			@Override
-			protected void populateItem(ListItem<ValidationError> item) {
-				ValidationError error = item.getModelObject();
-				item.add(new Label("beanValidationError", error.toString()));
+			protected void populateItem(ListItem<String> item) {
+				item.add(new Label("beanValidationError", item.getModelObject()));
 			}
 
 			@Override
@@ -87,32 +86,36 @@ public class ReflectionBeanEditor extends Panel {
 				
 				item.add((Component)propertyContext.renderForEdit("value"));
 				
+				WebMarkupContainer hint = new WebMarkupContainer("hint");
 				String description = EditableUtils.getDescription(propertyContext.getPropertyGetter());
 				if (description != null)
-					item.add(new Label("description", description).setEscapeModelStrings(false));
+					hint.add(new Label("description", description).setEscapeModelStrings(false));
 				else
-					item.add(new Label("description").setVisible(false));
+					hint.add(new Label("description").setVisible(false));
 				
-				item.add(new ListView<ValidationError>("propertyValidationErrors", propertyContext.getValidationErrors(false)) {
+				hint.add(new ListView<String>("propertyValidationErrors", propertyContext.getValidationErrors()) {
 
 					@Override
-					protected void populateItem(ListItem<ValidationError> item) {
-						ValidationError error = item.getModelObject();
-						item.add(new Label("propertyValidationError", error.toString()));
+					protected void populateItem(ListItem<String> item) {
+						item.add(new Label("propertyValidationError", item.getModelObject()));
 					}
 
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
 						
-						setVisible(!propertyContext.getValidationErrors(false).isEmpty());
+						setVisible(!propertyContext.getValidationErrors().isEmpty());
 					}
 					
 				});
 				
+				item.add(hint);
+				
 				Map<Serializable, EditContext> childContexts = propertyContext.getChildContexts();
-				if ((childContexts == null || childContexts.isEmpty()) && !propertyContext.getValidationErrors(false).isEmpty())
+				if (childContexts.isEmpty() && !propertyContext.getValidationErrors().isEmpty())
 					item.add(AttributeModifier.append("class", "has-error"));
+				else
+					hint.add(AttributeModifier.append("class", "has-error"));
 			}
 
 		});

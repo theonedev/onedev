@@ -1,5 +1,6 @@
 package com.pmease.gitop.core.gatekeeper;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
@@ -13,6 +14,7 @@ public class NotGateKeeper extends AbstractGateKeeper {
 	
 	@Editable
 	@NotNull
+	@Valid
 	public GateKeeper getGateKeeper() {
 		return gateKeeper;
 	}

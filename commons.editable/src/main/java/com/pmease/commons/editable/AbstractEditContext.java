@@ -2,16 +2,20 @@ package com.pmease.commons.editable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.pmease.commons.util.GeneralException;
+import javax.validation.ConstraintViolation;
+import javax.validation.Path;
+import javax.validation.Validator;
+
+import com.pmease.commons.loader.AppLoader;
 
 @SuppressWarnings("serial")
 public abstract class AbstractEditContext implements EditContext {
 
-	protected List<String> validationErrorMessages = new ArrayList<String>();
+	protected List<String> validationErrors = new ArrayList<String>();
 	
 	private final Serializable bean;
 	
@@ -25,62 +29,77 @@ public abstract class AbstractEditContext implements EditContext {
 	}
 	
 	@Override
-	public List<ValidationError> getValidationErrors(boolean recursive) {
-		List<ValidationError> validationErrors = new ArrayList<ValidationError>();
-		for (String each: validationErrorMessages) {
-			validationErrors.add(new ValidationError(each));
+	public List<String> getValidationErrors() {
+		return validationErrors;
+	}
+	
+	public boolean hasValidationError() {
+		if (!validationErrors.isEmpty())
+			return true;
+
+		for (EditContext each: getChildContexts().values()) {
+			if (each.hasValidationError())
+				return true;
 		}
 		
-		if (recursive && getChildContexts() != null) {
-			for (Map.Entry<Serializable, EditContext> eachEntry: getChildContexts().entrySet()) {
-				for (ValidationError eachError: eachEntry.getValue().getValidationErrors(true)) {
-					PropertyPath newPath = eachError.getPropertyPath().prepend(eachEntry.getKey());
-					validationErrors.add(new ValidationError(newPath, eachError.getErrorMessage()));
-				}
-			}
-		}
-		return Collections.unmodifiableList(validationErrors);
+		return false;
 	}
 	
 	@Override
 	public void validate() {
-		validationErrorMessages.clear();
+		clearValidationErrors();
 		
-		if (getChildContexts() != null) {
-			for (EditContext each: getChildContexts().values())
-				each.validate();
+		updateBean();
+		
+		for (ConstraintViolation<Serializable> violation: AppLoader.getInstance(Validator.class).validate(bean)) {
+			List<Serializable> contextPath = new ArrayList<Serializable>();
+			for (Path.Node node: violation.getPropertyPath()) {
+				if (node.getIndex() != null)
+					contextPath.add(node.getIndex());
+				if (node.getName() != null)
+					contextPath.add(node.getName());
+			}
+			findChildContext(contextPath, false).addValidationError(violation.getMessage());
 		}
 		
-		doValidation();
 	}
 	
-	protected abstract void doValidation();
-
 	@Override
-	public void error(String errorMessage) {
-		validationErrorMessages.add(errorMessage);
+	public void clearValidationErrors() {
+		validationErrors.clear();
+		for (EditContext each: getChildContexts().values())
+			each.clearValidationErrors();
+	}
+	
+	@Override
+	public void updateBean() {
+		for (EditContext each: getChildContexts().values())
+			each.updateBean();
+	}
+	
+	@Override
+	public void addValidationError(String errorMessage) {
+		validationErrors.add(errorMessage);
 	}
 
 	@Override
-	public EditContext getChildContext(Serializable propertyName) {
-		if (getChildContexts() != null) {
-			EditContext childContext = getChildContexts().get(propertyName);
-			if (childContext != null)
-				return childContext;
-		}
-
-		throw new GeneralException("Unable to find child context of property '%s'", propertyName);
+	public EditContext findChildContext(List<Serializable> contextPath, boolean exactMatch) {
+		if (contextPath.size() == 0)
+			return this;
+		
+		contextPath = new ArrayList<>(contextPath);
+		Serializable pathElement = contextPath.remove(0);
+		EditContext childContext = getChildContexts().get(pathElement);
+		if (childContext != null)
+			return childContext.findChildContext(contextPath, exactMatch);
+		else if (!exactMatch)
+			return this;
+		else
+			return null;
 	}
 
 	@Override
-	public boolean hasValidationError(Serializable propertyName, boolean recursive) {
-		EditContext childContext = getChildContext(propertyName);
-		return !childContext.getValidationErrors(recursive).isEmpty();
+	public Map<Serializable, EditContext> getChildContexts() {
+		return new HashMap<>();
 	}
-
-	@Override
-	public boolean hasValidationError(boolean recursive) {
-		return !getValidationErrors(recursive).isEmpty();
-	}
-
 }

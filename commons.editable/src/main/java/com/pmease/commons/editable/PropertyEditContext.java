@@ -4,10 +4,6 @@ import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
-
-import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.BeanUtils;
 import com.pmease.commons.util.ExceptionUtils;
 import com.pmease.commons.util.ReflectionUtils;
@@ -56,13 +52,6 @@ public abstract class PropertyEditContext extends AbstractEditContext {
 		} catch (Exception e) {
 			throw ExceptionUtils.unchecked(e);
 		}
-	}
-	
-	protected void doValidation() {
-		Validator validator = AppLoader.getInstance(Validator.class);
-		for (ConstraintViolation<Serializable> violation: validator.validateProperty(getBean(), getPropertyName())) {
-			error(violation.getMessage());
-		} 
 	}
 	
 	public Serializable instantiate(Class<?> clazz) {

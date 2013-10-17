@@ -20,7 +20,6 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.editable.BeanEditContext;
 import com.pmease.commons.editable.EditableUtils;
-import com.pmease.commons.editable.ValidationError;
 import com.pmease.commons.wicket.WicketUtils;
 import com.pmease.commons.wicket.editable.EditableResourceBehavior;
 
@@ -157,19 +156,18 @@ public class PolymorphicListPropertyEditor extends Panel {
 
 				}.setDefaultFormProcessing(false));
 
-				item.add(new ListView<ValidationError>("elementValidationErrors", item.getModelObject().getValidationErrors(false)) {
+				item.add(new ListView<String>("elementValidationErrors", item.getModelObject().getValidationErrors()) {
 
 					@Override
-					protected void populateItem(ListItem<ValidationError> item) {
-						ValidationError error = item.getModelObject();
-						item.add(new Label("propertyValidationError", error.toString()));
+					protected void populateItem(ListItem<String> item) {
+						item.add(new Label("propertyValidationError", item.getModelObject()));
 					}
 
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
 						
-						setVisible(!item.getModelObject().getValidationErrors(false).isEmpty());
+						setVisible(!item.getModelObject().getValidationErrors().isEmpty());
 					}
 					
 				});

@@ -7,9 +7,6 @@ import org.apache.wicket.markup.html.form.Form;
 
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.EditableUtils;
-import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.model.Project;
 import com.pmease.gitop.web.page.BasePage;
 
@@ -35,10 +32,7 @@ public class TestPage extends BasePage {
 			protected void onSubmit() {
 				super.onSubmit();
 				editContext.validate();
-				if (!editContext.hasValidationError(true)) {
-					Project project = (Project) editContext.getBean();
-					project.setOwner(Gitop.getInstance(UserManager.class).getRootUser());
-					Gitop.getInstance(ProjectManager.class).save(project);
+				if (!editContext.hasValidationError()) {
 				}
 			}
 			

@@ -43,11 +43,14 @@ table.reflection input[type="text"], table.reflection select {
 	width: 100%;
 	height: 32px;
 	font-size: 13px;
-} 
+}
 
 div.reflection div.name {
 	font-weight: bold;
 }
 div.reflection select.type, div.reflectio input.enable {
 	margin-bottom: 15px;
+}
+table.reflection .right-spacing {
+	margin-right: 8px;
 }

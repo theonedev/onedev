@@ -1,6 +1,7 @@
 package com.pmease.commons.editable;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.pmease.commons.loader.AppLoader;
@@ -41,18 +42,7 @@ public abstract class AbstractReflectionPropertyEditContext extends PropertyEdit
 		if (valueContext != null)
 			return valueContext.getChildContexts();
 		else
-			return null;
+			return new HashMap<>();
 	}
 
-	@Override
-	protected void doValidation() {
-		super.doValidation();
-
-		// redirect error message of bean level of the property value to be directly 
-		// under this property
-		if (valueContext != null && valueContext.getBean() instanceof Validatable) {
-			((Validatable)valueContext.getBean()).validate(this);
-		}
-	}
-	
 }

@@ -3,8 +3,6 @@ package com.pmease.commons.editable;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,17 +102,18 @@ public abstract class AbstractTableListPropertyEditContext extends PropertyEditC
 
 	@Override
 	public Map<Serializable, EditContext> getChildContexts() {
-		Map<Serializable, EditContext> childContexts = new LinkedHashMap<Serializable, EditContext>();
+		Map<Serializable, EditContext> childContexts = new LinkedHashMap<>();
 		if (elementContexts != null) {
 			for (int i=0; i<elementContexts.size(); i++) {
-				final String errorMessagePrefix = "row " + (i+1) + ": ";
+				final String errorMessagePrefix = "Row " + (i+1) + ": ";
+				
 				final List<PropertyEditContext> elementPropertyContexts = elementContexts.get(i);
 				
 				EditContext elementContext = new AbstractEditContext(getPropertyValue().get(i)) {
 
 					@Override
 					public Map<Serializable, EditContext> getChildContexts() {
-						Map<Serializable, EditContext> childContexts = new LinkedHashMap<Serializable, EditContext>();
+						Map<Serializable, EditContext> childContexts = new LinkedHashMap<>();
 						for (PropertyEditContext each: elementPropertyContexts)
 							childContexts.put(each.getPropertyName(), each);
 						return childContexts;
@@ -131,39 +130,8 @@ public abstract class AbstractTableListPropertyEditContext extends PropertyEditC
 					}
 
 					@Override
-					public List<ValidationError> getValidationErrors(boolean recursive) {
-						List<ValidationError> validationErrors = new ArrayList<ValidationError>();
-						for (String each: AbstractTableListPropertyEditContext.this.validationErrorMessages) {
-							if (each.startsWith(errorMessagePrefix))
-								validationErrors.add(new ValidationError(each.substring(errorMessagePrefix.length())));
-						}
-						
-						if (recursive) {
-							for (Map.Entry<Serializable, EditContext> eachEntry: getChildContexts().entrySet()) {
-								for (ValidationError eachError: eachEntry.getValue().getValidationErrors(true)) {
-									PropertyPath newPath = eachError.getPropertyPath().prepend(eachEntry.getKey());
-									validationErrors.add(new ValidationError(newPath, eachError.getErrorMessage()));
-								}
-							}
-						}
-						return Collections.unmodifiableList(validationErrors);
-					}
-
-					@Override
-					public void error(String errorMessage) {
-						AbstractTableListPropertyEditContext.this.error(errorMessagePrefix + errorMessage);
-					}
-
-					@Override
-					public void doValidation() {
-						for (Iterator<String> it = AbstractTableListPropertyEditContext.this.validationErrorMessages.iterator(); it.hasNext();) {
-							if (it.next().startsWith(errorMessagePrefix))
-								it.remove();
-						}
-						
-						if (getBean() instanceof Validatable) {
-							((Validatable)getBean()).validate(this);
-						}
+					public void addValidationError(String errorMessage) {
+						AbstractTableListPropertyEditContext.this.addValidationError(errorMessagePrefix + errorMessage);
 					}
 
 				};

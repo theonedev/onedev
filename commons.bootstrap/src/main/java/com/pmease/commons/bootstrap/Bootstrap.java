@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,6 +44,7 @@ public class Bootstrap {
 	
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
+		Locale.setDefault(Locale.US);
 		
 		File sandboxDir = new File("target/sandbox");
 		if (sandboxDir.exists()) {
