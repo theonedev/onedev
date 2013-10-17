@@ -7,7 +7,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.pmease.gitop.core.model.Project;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.web.component.avatar.AvatarImage.AvatarImageType;
-import com.pmease.gitop.web.page.account.AccountHomePage;
+import com.pmease.gitop.web.page.account.home.AccountHomePage;
 import com.pmease.gitop.web.page.project.ProjectHomePage;
 import com.pmease.gitop.web.util.WicketUtils;
 

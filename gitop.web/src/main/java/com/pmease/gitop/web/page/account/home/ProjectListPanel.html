@@ -1,0 +1,30 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<div class="clearfix">
+		<div class="pull-left">
+			<form class="form-inline form-search">
+				<div class="form-group">
+					<input type="search" class="form-control" placeholder="Find a project ..." />
+				</div>
+				<button class="btn btn-gray">Search</button>
+			</form>
+		</div>
+		
+		<div class="pull-right">
+			<a class="btn btn-info btn-colorful-text"><i class="icon-repo-plus"></i> New</a>
+		</div>
+	</div>
+	<p></p>
+	<ul class="list-group list-view project-list">
+		<li class="list-group-item" wicket:id="project">
+			<i class="icon-repo-book"></i>
+			<h4><a wicket:id="projectlink"><span wicket:id="name"></span></a></h4>
+			<wicket:enclosure>
+				forked from <span wicket:id="forklink"></span>
+			</wicket:enclosure>
+			<p wicket:id="description"></p>
+			<p class="last-updated">Last updated 6 hours ago</p>
+		</li>
+	</ul>
+</wicket:panel>
+</html>

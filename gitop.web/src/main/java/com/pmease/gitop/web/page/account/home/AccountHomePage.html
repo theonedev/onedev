@@ -1,0 +1,39 @@
+<html xmlns:wicket>
+<wicket:extend>
+	<div class="faux">
+		<div class="faux-row">
+			<div class="faux-cell sidebar">
+				<div class="sidebar-inner">
+					<div class="vcard-column">
+						<div wicket:id="avatar" class="avatar"></div>
+						<h1 class="vcard-name">
+							<b wicket:id="fullname"></b>
+							<em wicket:id="username"></em>
+						</h1>
+						<div class="vcard-stats">
+							<a href="#"><b>12</b> repos</a>
+							<a href="#"><b>188</b> members</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="faux-cell content">
+				<div class="content-inner">
+					<div class="page-nav clearfix">
+						<ul class="nav nav-piped pull-left">
+							<li wicket:id="category"><a wicket:id="link"><wicket:container wicket:id="name"></wicket:container></a></li>
+						</ul>
+						<ul class="btn-list pull-right">
+							<li><a class="btn btn-sm btn-gray"><i class="icon-pencil"></i> Edit your profile</a></li>
+						</ul>
+					</div>
+					
+					<div class="padder">
+						<wicket:container wicket:id="content"></wicket:container>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</wicket:extend>
+</html>

@@ -51,6 +51,8 @@
  */
 #main { background: white; }
 
+.padder { padding: 20px; }
+
 .sidebar .head, .content .head { padding: 15px 20px; white-space: nowrap; overflow: hidden; border-bottom: 1px solid #ddd; margin-bottom: 20px; }
 .sidebar .head a { color: #666; font-weight:bold; line-height: 24px; }
 .sidebar .head a:hover { text-decoration: none; color: #09F; }
@@ -106,8 +108,8 @@ th.wicket_orderUp a, th.wicket_orderDown a { padding-left: 20px; }
 }
 
 /* LOGIN PAGE */
-#register-form, #login-form { padding: 50px 0; width: 500px; margin: 0 auto; }
-#login-form h1, #register-form h1 { font-size: 32px; margin: 0 0 30px; font-weight: 300; }
+.small-section, #register-form, #login-form { padding: 50px 0; width: 500px; margin: 0 auto; }
+.small-section h1, #login-form h1, #register-form h1 { font-size: 32px; margin: 0 0 30px; font-weight: 300; }
 #login-form .input-group-addon { font-size: 18px; color: #666; }
 #login-form .user-group .input-group-addon { border-bottom-left-radius: 0; }
 #login-form .user-group input.form-control { border-bottom-right-radius: 0; }
@@ -125,7 +127,7 @@ th.wicket_orderUp a, th.wicket_orderDown a { padding-left: 20px; }
 .members .list-group-item:hover a { color: #333; }
 .members .item-actions {top: 12px;}
 .members .item-actions .img-link { color: #ddd; font-size: 20px; }
-.members .list-group-item:hover .img-link, .members .item-actions .img-link:hover { color: #990000; }
+.members .list-group-item:hover .remove-link, .members .item-actions .remove-link:hover { color: #990000; }
 .members .avatar { width: 32px; height: 32px; margin-right: 8px; }
 
 .permission-link { color: #666; }
@@ -134,5 +136,63 @@ a.permission-link:hover { color: #333; text-decoration: none; }
 .user-choice-row .img-thumbnail { float: left; }
 .user-choice-row p { margin-left: 44px; margin-bottom: 0; }
 .user-choice-row p.text-muted { font-size: 0.85em; }
+.select2-container.user-choice .select2-choice { height: 34px; line-height: 34px;}
 
 .btn-group-permissions > a { width: 80px; }
+
+.link-item a.confirm-link:hover { color: #990000; }
+
+/* ACCOUNT HOME */
+.vcard-column { padding: 20px; }
+.vcard-column .avatar { width: 200px; height: 200px; margin-bottom: 18px; }
+.vcard-column .avatar > img { border-radius: 8px; }
+.vcard-name { margin: 0 0 18px; }
+.vcard-name b, .vcard-name em { display: block; white-space: nowrap; overflow: hidden; }
+.vcard-name b { font-size: 26px; }
+.vcard-name em { font-size: 24px; color: #888; font-style: normal; font-weight: 300; }
+.vcard-stats { padding: 20px 0; border-top: 1px solid #ddd; overflow: hidden; }
+.vcard-stats a { display: inline-block; color: #999; font-size: 12px; line-height: 1.123; width: 66px; overflow: hidden; text-align: center; }
+.vcard-stats a > b { display: block; color: #333; font-size: 28px; }
+.vcard-stats a:hover { text-decoration: none; color: #09f; }
+.vcard-stats a:hover > b { color: #09f; }
+
+.nav-piped > li { float: left; }
+
+.page-nav { border-bottom: 1px solid #ddd;  padding: 10px 20px 0; }
+.page-nav ul { margin: 0; padding: 0; list-style: none; }
+
+.page-nav .nav-piped > li > a { color: #999; padding: 12px 15px;}
+.page-nav .nav-piped > li > a:hover { background: transparent; color: #09f; }
+.page-nav .nav-piped > li.active > a { color: #333; font-weight: bold; }
+.page-nav .nav-piped > li.active > a:after{
+	position: absolute;
+	bottom: -1px;
+	right: 50%;
+	margin-right: -6px;
+	display: inline-block;
+  	width: 0;
+  	height: 0;
+	border-bottom: 6px solid #333;
+	border-right: 6px solid transparent;
+	border-top: 0 dotted;
+	border-left: 6px solid transparent;
+	content: "";
+}
+
+ul.btn-list { list-style: none; margin: 0; }
+.btn-list > li { float: left; list-style: none; padding: 0; margin: 0 6px;}
+.page-nav .btn-list > li { padding: 7px 0; }
+.page-nav .btn-list .btn { font-weight: bold; }
+
+.project-list .list-group-item { position: relative; padding-left: 44px; }
+.project-list .list-group-item i { position: absolute; left: 0; top: 10px; font-size: 32px; width: 32px; color: #bbb; }
+.project-list h4 { margin: 0 0 9px; }
+.project-list p { margin: 0 0 6px; font-size: 12px;}
+.project-list .last-updated { color: #999; }
+
+ul.members-list { list-style: none; margin: 0; padding: 0; }
+.members-list > li.member { width: 220px; display: inline-block; list-style: none; padding-left: 60px; margin-right: 18px; margin-bottom: 18px; position: relative; font-size: 18px; white-space: nowrap; overflow: hidden;}
+.member > .avatar { width: 48px; height: 48px; position: absolute; left: 0; top: 0; }
+.member > .avatar > img { border-radius: 50%; }
+.member > h4 { margin-top: 0; }
+.member > em { font-style: normal; display: block;  color: #999; } 
