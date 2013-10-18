@@ -184,6 +184,13 @@ public class User extends AbstractUser implements ProtectedObject {
 		return null;
 	}
 
+	/**
+	 * Get current authenticated user in Shiro context, or <tt>null</tt> if not 
+	 * authenticated. 
+	 * 
+	 * @return 
+	 *         current authenticated user, or <tt>null</tt> for anonymous access
+	 */
 	public static User getCurrent() {
 		Long userId = getCurrentId();
 		if (userId != 0L) {

@@ -74,6 +74,15 @@ public abstract class AbstractRealm extends AuthorizingRealm {
 		return authenticationInfoOf((UsernamePasswordToken) token);
 	}
 	
+	/**
+	 * Get collection of permissions for specified user identifier.
+	 * 
+	 * @param userId
+	 *         identifier of user to get permissions for. Specifically, value <tt>0</tt> stands for 
+	 *         anonymous user
+	 * @return
+	 *         collection of permissions associated with specified user identifier
+	 */
 	protected abstract Collection<Permission> permissionsOf(Long userId);
 	
 	/**
