@@ -8,7 +8,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
-import org.apache.shiro.authz.Permission;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -18,9 +17,7 @@ import com.pmease.commons.editable.annotation.Password;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.shiro.AbstractUser;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.core.permission.object.ProtectedObject;
 import com.pmease.gitop.core.permission.object.UserBelonging;
 import com.pmease.gitop.core.permission.operation.GeneralOperation;
@@ -31,13 +28,6 @@ import com.pmease.gitop.core.validation.UserName;
 @Editable
 public class User extends AbstractUser implements ProtectedObject {
 
-	public static final User ANONYMOUS = new User();
-	
-	static {
-		ANONYMOUS.setId(0L);
-		ANONYMOUS.setName("Guest");
-	}
-	
 	@Column(nullable=false)
 	private String email;
 	
@@ -97,12 +87,11 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.email = email;
 	}
 
-	@Editable(name="Password", order=400)
+	@Editable(order=400)
 	@Password(confirmative=true)
 	@NotEmpty
-	@Override
-	public String getPasswordHash() {
-		return super.getPasswordHash();
+	public String getPassword() {
+		return getPasswordHash();
 	}
 
 	public boolean isAdmin() {
@@ -200,56 +189,8 @@ public class User extends AbstractUser implements ProtectedObject {
 		if (userId != 0L) {
 			return AppLoader.getInstance(UserManager.class).load(userId);
 		} else {
-			return User.ANONYMOUS;
+			return null;
 		}
-	}
-	
-	@Override
-	public boolean implies(Permission permission) {
-		// Administrator can do anything
-		if (isRoot() || isAdmin()) 
-			return true;
-		
-		if (permission instanceof ObjectPermission) {
-			ObjectPermission objectPermission = (ObjectPermission) permission;
-			if (!isAnonymous()) {
-				// One can do anything against its belongings
-				if (has(objectPermission.getObject()))
-					return true;
-				
-				for (Team team: getTeams()) {
-					if (team.implies(objectPermission))
-						return true;
-				}
-	
-				for (Project each: Gitop.getInstance(ProjectManager.class).query()) {
-					ObjectPermission projectPermission = new ObjectPermission(each, each.getDefaultAuthorizedOperation());
-					if (projectPermission.implies(objectPermission))
-						return true;
-				}
-
-				for (User each: Gitop.getInstance(UserManager.class).query()) {
-					ObjectPermission userPermission = new ObjectPermission(each, each.getDefaultAuthorizedOperation());
-					if (userPermission.implies(objectPermission))
-						return true;
-				}
-			} 
-			
-			// check if is public access to projects
-			for (Project each: Gitop.getInstance(ProjectManager.class).findPublic()) {
-				ObjectPermission projectPermission = new ObjectPermission(each, GeneralOperation.READ);
-				if (projectPermission.implies(objectPermission))
-					return true;
-			}
-
-			// check if is public access to accounts
-			for (User each: Gitop.getInstance(UserManager.class).findPublic()) {
-				ObjectPermission userPermission = new ObjectPermission(each, GeneralOperation.READ);
-				if (userPermission.implies(objectPermission))
-					return true;
-			}
-		} 
-		return false;
 	}
 	
 	public boolean isPubliclyAccessible() {
@@ -271,10 +212,6 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	public boolean isRoot() {
 		return Gitop.getInstance(UserManager.class).getRootUser().equals(this);
-	}
-
-	public boolean isAnonymous() {
-		return getId() == 0L;
 	}
 
 	@Override

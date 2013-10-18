@@ -15,12 +15,7 @@ public abstract class AbstractLayoutPage extends BasePage {
 	}
 	
 	protected Optional<User> currentUser() {
-		User user = User.getCurrent();
-		if (user.isAnonymous()) {
-			return Optional.<User>absent();
-		} else {
-			return Optional.of(user);
-		}
+	    return Optional.<User>fromNullable(User.getCurrent());
 	}
 	
 	protected boolean isLoggedIn() {

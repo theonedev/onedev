@@ -75,7 +75,7 @@ public class GitHubUserResource {
 					user.setEmail(u.email);
 				}
 
-				user.setPasswordHash(passwordService.encryptPassword("12345"));
+				user.setPassword("12345");
 				userManager.save(user);
 				System.out.println(user.getId() + " " + user);
 			} catch (Exception e) {

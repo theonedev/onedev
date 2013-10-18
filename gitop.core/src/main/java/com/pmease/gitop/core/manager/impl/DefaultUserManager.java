@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.shiro.authz.Permission;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -17,8 +18,13 @@ import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.util.namedentity.EntityLoader;
 import com.pmease.commons.util.namedentity.NamedEntity;
+import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.UserManager;
+import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.core.model.Team;
 import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.core.permission.ObjectPermission;
+import com.pmease.gitop.core.permission.operation.GeneralOperation;
 import com.pmease.gitop.core.validation.UserNameReservation;
 
 @Singleton
@@ -28,10 +34,14 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 	
 	private final Set<UserNameReservation> nameReservations;
 	
+	private final ProjectManager projectManager;
+	
 	@Inject
-	public DefaultUserManager(GeneralDao generalDao, Set<UserNameReservation> nameReservations) {
+	public DefaultUserManager(GeneralDao generalDao, ProjectManager projectManager, 
+	        Set<UserNameReservation> nameReservations) {
 		super(generalDao);
 		
+		this.projectManager = projectManager;
 		this.nameReservations = nameReservations;
 	}
 
@@ -120,5 +130,45 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 		
 		return reservedNames;
 	}
+
+    @Override
+    public Collection<Permission> permissionsOf(User user) {
+        Collection<Permission> permissions = new HashSet<Permission>();
+        
+        if (user != null) {
+            // Administrator can do anything
+            if (user.isRoot() || user.isAdmin()) { 
+                permissions.add(ObjectPermission.ofSystemAdmin());
+                return permissions;
+            } 
+
+            // One can do anything against its belongings
+            permissions.add(ObjectPermission.ofUserAdmin(user));
+            
+            for (Team team: user.getTeams()) {
+                permissions.add(team);
+            }
+    
+            for (Project each: projectManager.query()) {
+                permissions.add(new ObjectPermission(each, each.getDefaultAuthorizedOperation()));
+            }
+
+            for (User each: query()) {
+                permissions.add(new ObjectPermission(each, each.getDefaultAuthorizedOperation()));
+            }
+        }
+        
+        // check if is public access to projects
+        for (Project each: projectManager.findPublic()) {
+            permissions.add(new ObjectPermission(each, GeneralOperation.READ));
+        }
+
+        // check if is public access to accounts
+        for (User each: findPublic()) {
+            permissions.add(new ObjectPermission(each, GeneralOperation.READ));
+        }
+        
+        return permissions;
+    }
 
 }

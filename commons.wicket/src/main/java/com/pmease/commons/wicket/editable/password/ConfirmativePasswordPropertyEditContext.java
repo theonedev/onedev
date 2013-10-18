@@ -2,11 +2,9 @@ package com.pmease.commons.wicket.editable.password;
 
 import java.io.Serializable;
 
-import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.markup.html.basic.Label;
 
 import com.pmease.commons.editable.PropertyEditContext;
-import com.pmease.commons.loader.AppLoader;
 
 @SuppressWarnings("serial")
 public class ConfirmativePasswordPropertyEditContext extends PropertyEditContext {
@@ -42,7 +40,7 @@ public class ConfirmativePasswordPropertyEditContext extends PropertyEditContext
 		else if (!password.equals(confirmedPassword))
 			addValidationError("Password and its confirmation should be identical.");
 		else
-			setPropertyValue(AppLoader.getInstance(PasswordService.class).encryptPassword(password));
+			setPropertyValue(password);
 		
 		super.updateBean();
 	}

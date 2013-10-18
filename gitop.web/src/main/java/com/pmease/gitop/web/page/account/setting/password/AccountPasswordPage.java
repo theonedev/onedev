@@ -73,12 +73,11 @@ public class AccountPasswordPage extends AccountSettingPage {
 		form.add(new AjaxFallbackButton("submit", form) {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				PasswordService ps = AppLoader.getInstance(PasswordService.class);
 				User account = getAccount();
-				account.setPasswordHash(ps.encryptPassword(newPass));
+				account.setPassword(newPass);
 				AppLoader.getInstance(UserManager.class).save(account);
 				if (target != null) {
-					oldPass = null;
+			        oldPass = null;
 					newPass = null;
 					confirmPass = null;
 					target.add(form);

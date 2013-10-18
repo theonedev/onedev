@@ -5,6 +5,8 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import org.apache.shiro.authz.Permission;
+
 import com.google.inject.ImplementedBy;
 import com.pmease.commons.hibernate.dao.GenericDao;
 import com.pmease.commons.util.namedentity.EntityLoader;
@@ -30,6 +32,8 @@ public interface UserManager extends GenericDao<User> {
 	 * 			matching user, or <tt>null</tt> if not found 
 	 */
 	@Nullable User find(String userName);
+	
+	Collection<Permission> permissionsOf(User user);
 	
 	Collection<User> findPublic();
 
