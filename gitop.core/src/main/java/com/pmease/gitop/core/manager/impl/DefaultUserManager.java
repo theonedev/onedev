@@ -147,10 +147,10 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 
             @Override
             public boolean implies(Permission permission) {
-                // Administrator can do anything
-                if (user.isRoot() || user.isAdmin()) return true;
-
                 if (user != null) {
+                    // Administrator can do anything
+                    if (user.isRoot() || user.isAdmin()) return true;
+
                     // One can do anything against its belongings
                     if (ObjectPermission.ofUserAdmin(user).implies(permission)) return true;
 
