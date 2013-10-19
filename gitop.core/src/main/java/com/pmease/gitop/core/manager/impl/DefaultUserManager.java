@@ -1,6 +1,5 @@
 package com.pmease.gitop.core.manager.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -8,7 +7,6 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.shiro.authz.Permission;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -19,13 +17,8 @@ import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.util.namedentity.EntityLoader;
 import com.pmease.commons.util.namedentity.NamedEntity;
-import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.core.model.Project;
-import com.pmease.gitop.core.model.Team;
 import com.pmease.gitop.core.model.User;
-import com.pmease.gitop.core.permission.ObjectPermission;
-import com.pmease.gitop.core.permission.operation.GeneralOperation;
 import com.pmease.gitop.core.validation.UserNameReservation;
 
 @Singleton
@@ -35,14 +28,10 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 
     private final Set<UserNameReservation> nameReservations;
 
-    private final ProjectManager projectManager;
-
     @Inject
-    public DefaultUserManager(GeneralDao generalDao, ProjectManager projectManager,
-            Set<UserNameReservation> nameReservations) {
+    public DefaultUserManager(GeneralDao generalDao, Set<UserNameReservation> nameReservations) {
         super(generalDao);
 
-        this.projectManager = projectManager;
         this.nameReservations = nameReservations;
     }
 
@@ -130,67 +119,6 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
             reservedNames.addAll(each.getReserved());
 
         return reservedNames;
-    }
-
-    @Override
-    public Collection<Permission> permissionsOf(final User user) {
-        Collection<Permission> permissions = new ArrayList<Permission>();
-
-        /*
-         * Instead of returning all permissions of the user, we return a customized
-         * permission object so that we can control the authorization procedure for 
-         * optimization purpose. For instance, we may check information contained 
-         * in the permission being checked and if it means authorization of certain 
-         * object, we can then only load authorization information of that object.
-         */
-        permissions.add(new Permission() {
-
-            @Override
-            public boolean implies(Permission permission) {
-                if (user != null) {
-                    // Administrator can do anything
-                    if (user.isRoot() || user.isAdmin()) return true;
-
-                    // One can do anything against its belongings
-                    if (ObjectPermission.ofUserAdmin(user).implies(permission)) return true;
-
-                    for (Team team : user.getTeams()) {
-                        if (team.implies(permission)) return true;
-                    }
-
-                    for (Project each : projectManager.query()) {
-                        ObjectPermission projectPermission =
-                                new ObjectPermission(each, each.getDefaultAuthorizedOperation());
-                        if (projectPermission.implies(permission)) return true;
-                    }
-
-                    for (User each : query()) {
-                        ObjectPermission userPermission =
-                                new ObjectPermission(each, each.getDefaultAuthorizedOperation());
-                        if (userPermission.implies(permission)) return true;
-                    }
-                }
-
-                // check if is public access to projects
-                for (Project each : projectManager.findPublic()) {
-                    ObjectPermission projectPermission =
-                            new ObjectPermission(each, GeneralOperation.READ);
-                    if (projectPermission.implies(permission)) return true;
-                }
-
-                // check if is public access to accounts
-                for (User each : findPublic()) {
-                    ObjectPermission userPermission =
-                            new ObjectPermission(each, GeneralOperation.READ);
-                    if (userPermission.implies(permission)) return true;
-                }
-
-                return false;
-            }
-
-        });
-
-        return permissions;
     }
 
 }

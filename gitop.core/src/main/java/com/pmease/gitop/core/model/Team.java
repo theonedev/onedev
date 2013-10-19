@@ -12,13 +12,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.apache.shiro.authz.Permission;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Objects;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.validation.Name;
-import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.core.permission.operation.GeneralOperation;
 
 @Entity
@@ -26,7 +24,7 @@ import com.pmease.gitop.core.permission.operation.GeneralOperation;
 		@UniqueConstraint(columnNames={"owner", "name"})
 })
 @SuppressWarnings("serial")
-public class Team extends AbstractEntity implements Permission {
+public class Team extends AbstractEntity {
 
 	@ManyToOne
 	@JoinColumn(nullable=false)
@@ -94,24 +92,6 @@ public class Team extends AbstractEntity implements Permission {
 
 	public void setAuthorizations(Collection<Authorization> authorizations) {
 		this.authorizations = authorizations;
-	}
-
-	@Override
-	public boolean implies(Permission permission) {
-		if (permission instanceof ObjectPermission) {
-			ObjectPermission objectPermission = (ObjectPermission) permission;
-			Permission userPermission = new ObjectPermission(getOwner(), getAuthorizedOperation());
-			if (userPermission.implies(objectPermission))
-				return true;
-			
-			for (Authorization authorization: getAuthorizations()) {
-				Permission projectPermission = new ObjectPermission(
-						authorization.getProject(), authorization.getAuthorizedOperation());
-				if (projectPermission.implies(objectPermission))
-					return true;
-			}
-		}
-		return false;
 	}
 
 	@Override

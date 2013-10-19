@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.shiro.web.filter.mgt.FilterChainManager;
 import org.hibernate.cfg.NamingStrategy;
 
 import com.google.common.collect.Sets;
@@ -14,11 +13,8 @@ import com.pmease.commons.hibernate.PrefixedNamingStrategy;
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
-import com.pmease.commons.shiro.AbstractRealm;
-import com.pmease.commons.shiro.FilterChainConfigurator;
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.gitop.core.model.ModelLocator;
-import com.pmease.gitop.core.permission.UserRealm;
 import com.pmease.gitop.core.validation.ProjectNameReservation;
 import com.pmease.gitop.core.validation.UserNameReservation;
 
@@ -31,8 +27,6 @@ public class CoreModule extends AbstractPluginModule {
 	@Override
 	protected void configure() {
 		super.configure();
-		
-		bind(AbstractRealm.class).to(UserRealm.class);
 		
 		bind(NamingStrategy.class).toInstance(new PrefixedNamingStrategy("G"));
 		
@@ -72,17 +66,6 @@ public class CoreModule extends AbstractPluginModule {
 			}
 		});
 
-		contribute(FilterChainConfigurator.class, new FilterChainConfigurator() {
-
-			@Override
-			public void configure(FilterChainManager filterChainManager) {
-				filterChainManager.createChain("/**/info/refs", "noSessionCreation, authcBasic");
-				filterChainManager.createChain("/**/git-upload-pack", "noSessionCreation, authcBasic");
-				filterChainManager.createChain("/**/git-receive-pack", "noSessionCreation, authcBasic");
-			}
-			
-		});
-		
 	}
 
 	@Override

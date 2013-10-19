@@ -113,6 +113,16 @@
         	<artifactId>gitop.rest</artifactId>
         	<version>1.0.0</version>
         </dependency>
+        <dependency>
+        	<groupId>com.pmease</groupId>
+        	<artifactId>gitop.http</artifactId>
+        	<version>1.0.0</version>
+        </dependency>
+        <dependency>
+        	<groupId>com.pmease</groupId>
+        	<artifactId>gitop.security</artifactId>
+        	<version>1.0.0</version>
+        </dependency>
     </dependencies>  
     <repositories> 
         <repository> 

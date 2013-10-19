@@ -1,4 +1,4 @@
-package com.pmease.gitop.core;
+package com.pmease.gitop.http;
 
 import java.io.IOException;
 
@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.git.Git;
 import com.pmease.commons.util.GeneralException;
+import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.model.Project;
 import com.pmease.gitop.core.permission.ObjectPermission;
