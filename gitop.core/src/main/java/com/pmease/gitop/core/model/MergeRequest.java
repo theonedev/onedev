@@ -27,7 +27,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.gatekeeper.CheckResult;
 import com.pmease.gitop.core.gatekeeper.GateKeeper;
-import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.core.manager.StorageManager;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
 
 @SuppressWarnings("serial")
@@ -173,7 +173,8 @@ public class MergeRequest extends AbstractEntity {
 		if (effectiveUpdates == null) {
 			effectiveUpdates = new ArrayList<MergeRequestUpdate>();
 						
-			File repoDir = Gitop.getInstance(ProjectManager.class).locateStorage(getDestination().getProject()).ofCode();
+			File repoDir = Gitop.getInstance(StorageManager.class)
+			        .getStorage(getDestination().getProject()).ofCode();
 			Git git = new Git(repoDir);
 			CheckAncestorCommand command = git.checkAncestor();
 			command.ancestor(getMergeBase());
@@ -196,7 +197,8 @@ public class MergeRequest extends AbstractEntity {
 	}
 	
 	public boolean isFastForward() {
-		File repoDir = Gitop.getInstance(ProjectManager.class).locateStorage(getDestination().getProject()).ofCode();
+		File repoDir = Gitop.getInstance(StorageManager.class)
+		        .getStorage(getDestination().getProject()).ofCode();
 		CheckAncestorCommand command = new Git(repoDir).checkAncestor();
 		command.ancestor(getDestination().getName());
 		command.descendant(getLatestUpdate().getRefName());
@@ -204,8 +206,8 @@ public class MergeRequest extends AbstractEntity {
 	}
 	
 	public Collection<String> findTouchedFiles() {
-		ProjectManager projectManager = Gitop.getInstance(ProjectManager.class);
-		File repoDir = projectManager.locateStorage(getDestination().getProject()).ofCode();
+		StorageManager storageManager = Gitop.getInstance(StorageManager.class);
+		File repoDir = storageManager.getStorage(getDestination().getProject()).ofCode();
 		MergeRequestUpdate update = getLatestUpdate();
 		if (update != null) {
 			FindChangedFilesCommand command = new Git(repoDir).findChangedFiles();
@@ -219,8 +221,8 @@ public class MergeRequest extends AbstractEntity {
 
 	public boolean isMerged() {
 		if (merged == null) {
-			ProjectManager projectManager = Gitop.getInstance(ProjectManager.class);
-			File repoDir = projectManager.locateStorage(getDestination().getProject()).ofCode();
+			StorageManager storageManager = Gitop.getInstance(StorageManager.class);
+			File repoDir = storageManager.getStorage(getDestination().getProject()).ofCode();
 			CheckAncestorCommand command = new Git(repoDir).checkAncestor();
 			command.ancestor(getLatestUpdate().getRefName());
 			command.descendant(getDestination().getName());
@@ -231,8 +233,8 @@ public class MergeRequest extends AbstractEntity {
 	
 	public String getMergeBase() {
 		if (mergeBase == null) {
-			ProjectManager projectManager = Gitop.getInstance(ProjectManager.class);
-			File repoDir = projectManager.locateStorage(getDestination().getProject()).ofCode();
+			StorageManager storageManager = Gitop.getInstance(StorageManager.class);
+			File repoDir = storageManager.getStorage(getDestination().getProject()).ofCode();
 			CalcMergeBaseCommand command = new Git(repoDir).calcMergeBase();
 			command.rev1(getLatestUpdate().getRefName());
 			command.rev2(getDestination().getName());

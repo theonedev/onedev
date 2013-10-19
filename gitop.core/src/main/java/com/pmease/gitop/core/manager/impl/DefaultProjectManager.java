@@ -18,8 +18,8 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.core.manager.StorageManager;
 import com.pmease.gitop.core.model.Project;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.storage.ProjectStorage;
@@ -28,15 +28,16 @@ import com.pmease.gitop.core.validation.ProjectNameReservation;
 @Singleton
 public class DefaultProjectManager extends AbstractGenericDao<Project> implements ProjectManager {
 
-	private final ConfigManager configManager;
-	
 	private final Set<ProjectNameReservation> nameReservations;
 	
+	private final StorageManager storageManager;
+	
 	@Inject
-	public DefaultProjectManager(GeneralDao generalDao, ConfigManager configManager, Set<ProjectNameReservation> nameReservations) {
+	public DefaultProjectManager(GeneralDao generalDao, StorageManager storageManager, 
+	        Set<ProjectNameReservation> nameReservations) {
 		super(generalDao);
 		
-		this.configManager = configManager;
+		this.storageManager = storageManager;
 		this.nameReservations = nameReservations;
 	}
 
@@ -46,14 +47,14 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
 		if (entity.isNew()) {
 			super.save(entity);
 			
-			ProjectStorage storage = locateStorage(entity);
+			ProjectStorage storage = storageManager.getStorage(entity);
 			storage.clean();
 			
 			File codeDir = storage.ofCode();
 			FileUtils.createDir(codeDir);
 			new Git(codeDir).init().bare(true).call();
 		} else {
-			File codeDir = locateStorage(entity).ofCode();
+			File codeDir = storageManager.getStorage(entity).ofCode();
 			if (!codeDir.exists()) {
 				FileUtils.createDir(codeDir);
 				new Git(codeDir).init().bare(true).call();
@@ -67,12 +68,7 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
 	public void delete(Project entity) {
 		super.delete(entity);
 		
-		locateStorage(entity).delete();
-	}
-
-	@Override
-	public ProjectStorage locateStorage(Project project) {
-		return new ProjectStorage(new File(configManager.getStorageSetting().getStorageDir(), project.getId().toString())); 
+		storageManager.getStorage(entity).delete();
 	}
 
 	@Override
