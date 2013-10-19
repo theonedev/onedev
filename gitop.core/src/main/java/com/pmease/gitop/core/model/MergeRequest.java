@@ -165,7 +165,7 @@ public class MergeRequest extends AbstractEntity {
 	/**
 	 * Get list of effective updates in reverse order. Update is considered effective 
 	 * if it is descendant of merge base of latest update and target branch head.  
-	 * <p>
+	 * 
 	 * @return
 	 * 			list of effective updates in reverse order.
 	 */
