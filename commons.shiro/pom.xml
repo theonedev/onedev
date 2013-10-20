@@ -6,7 +6,7 @@
     <parent> 
         <groupId>com.pmease</groupId>  
         <artifactId>parent.general</artifactId>  
-        <version>1.0.28</version> 
+        <version>1.0.31</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -26,7 +26,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.29</version> 
+            <version>1.0.31</version> 
         </dependency>  
         <dependency> 
             <groupId>org.apache.shiro</groupId>  
@@ -37,7 +37,7 @@
             <groupId>org.apache.shiro</groupId>  
             <artifactId>shiro-web</artifactId>  
             <version>${shiroVersion}</version> 
-        </dependency>    
+        </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.hibernate</artifactId>  
@@ -47,7 +47,7 @@
             <groupId>org.apache.shiro</groupId>  
             <artifactId>shiro-guice</artifactId>  
             <version>${shiroVersion}</version> 
-        </dependency>
+        </dependency> 
     </dependencies>  
     <repositories> 
         <repository> 
