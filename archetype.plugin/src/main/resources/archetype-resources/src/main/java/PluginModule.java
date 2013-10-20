@@ -16,9 +16,4 @@ public class PluginModule extends AbstractPluginModule {
 		// put your guice bindings here
 	}
 
-	@Override
-	protected Class<? extends AbstractPlugin> getPluginClass() {
-		return Plugin.class;
-	}
-
 }
