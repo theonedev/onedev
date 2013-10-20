@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
@@ -17,6 +18,12 @@ public class Git {
 	
 	public Git(final File repoDir) {
 		this.repoDir = repoDir;
+		if (!repoDir.exists())
+		    FileUtils.createDir(repoDir);
+	}
+	
+	public File repoDir() {
+	    return repoDir;
 	}
 	
 	public UploadCommand upload() {
@@ -39,6 +46,10 @@ public class Git {
 		return new InitCommand(this);
 	}
 	
+	public MergeCommand merge() {
+	    return new MergeCommand(this);
+	}
+	
 	public AddCommand add() {
 		return new AddCommand(this);
 	}
@@ -59,12 +70,28 @@ public class Git {
 		return new CalcMergeBaseCommand(this);
 	}
 	
-	/**
+	public UpdateRefCommand updateRef() {
+	    return new UpdateRefCommand(this);
+	}
+	
+    public DeleteRefCommand deleteRef() {
+        return new DeleteRefCommand(this);
+    }
+    
+    public CheckoutCommand checkout() {
+        return new CheckoutCommand(this);
+    }
+    
+    public BranchCommand branch() {
+        return new BranchCommand(this);
+    }
+
+    /**
 	 * Check if there are any errors with git command line. 
 	 *
 	 * @return
 	 * 			error message if failed to check git command line, 
-	 * 			or <code>null</code> otherwise
+	 * 			or <tt>null</tt> otherwise
 	 * 			
 	 */
 	public static String checkError() {
