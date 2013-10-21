@@ -92,7 +92,7 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
             
             File postReceiveHook = new File(hooksDir, "post-receive");
             FileUtils.writeFile(postReceiveHook, 
-                    String.format(hookTemplate, urlRoot, PostReceiveServlet.PATH));
+                    String.format(hookTemplate, urlRoot + PostReceiveServlet.PATH));
             postReceiveHook.setExecutable(true);
         } else {
             File codeDir = storageManager.getStorage(entity).ofCode();

@@ -12,7 +12,6 @@ public class PreReceiveServlet extends CallbackServlet {
     protected void callback(String callbackData, Output output) {
         output.writeLine("hello world");
         output.writeLine("just do it");
-        output.markError();
     }
     
 }
