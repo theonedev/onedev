@@ -120,7 +120,7 @@ public class GitopWebApp extends AbstractWicketConfig {
 				if (ExceptionUtils.find(e, EntityNotFoundException.class) != null) {
 					return new RenderPageRequestHandler(new PageProvider(PageNotFoundPage.class));
 				} else if (ExceptionUtils.find(e, AccessDeniedException.class) != null) {
-					if (User.getCurrent().isAnonymous()) {
+					if (User.getCurrent() == null) {
 						return new RenderPageRequestHandler(new PageProvider(LoginPage.class));
 					} else {
 						return new RenderPageRequestHandler(new PageProvider(AccessDeniedPage.class));

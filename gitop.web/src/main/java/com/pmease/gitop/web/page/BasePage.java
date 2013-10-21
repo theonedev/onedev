@@ -185,7 +185,7 @@ public abstract class BasePage extends WebPage {
 	
 	protected void onPageInitialize() {
 		if (!isPermitted()) {
-			if (User.getCurrent().isAnonymous()) {
+			if (User.getCurrent() == null) {
 				throw new RestartResponseAtInterceptPageException(LoginPage.class);
 			} else {
 				throw new AccessDeniedException("Access denied");
