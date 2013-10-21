@@ -55,7 +55,7 @@ em.checkable-link { color: #888 !important; }
 .list-navs > .list-group-item:first-child,
 .list-navs > .list-group-item:last-child { border-radius: 0; }
 
-.list-group.list-group-hoverable .list-group-item:hover { background: #ffe; }
+.list-group.list-group-hover .list-group-item:hover { background: #ffe; }
 .list-group-item .item-actions { position: absolute; right: 30px; top: 10px; }
 .list-group-item .item-actions a { color: #999; }
 .list-group-item .item-actions a:hover { color: #333; text-decoration: none; }

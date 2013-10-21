@@ -16,7 +16,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.Valid;
 
-import com.google.common.base.Objects;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitop.core.Gitop;
@@ -182,9 +181,6 @@ public class Project extends AbstractEntity implements UserBelonging {
 	
 	@Override
 	public String toString() {
-		return Objects.toStringHelper(this)
-				.add("name", getName())
-				.add("owner", getOwner().getName())
-				.toString();
+		return getOwner() + "/" + getName();
 	}
 }

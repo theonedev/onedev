@@ -12,7 +12,6 @@ import org.apache.shiro.authz.Permission;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.google.common.base.Objects;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.Password;
 import com.pmease.commons.loader.AppLoader;
@@ -279,8 +278,6 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	@Override
 	public String toString() {
-		return Objects.toStringHelper(this)
-				.add("name", getName())
-				.toString();
+		return getName();
 	}
 }

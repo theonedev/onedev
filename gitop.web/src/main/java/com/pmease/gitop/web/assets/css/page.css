@@ -1,3 +1,7 @@
+/* MISC */
+.img-link:hover { text-decoration: none; }
+
+
 /**
  * LAYOUT
  */
@@ -45,6 +49,15 @@
  * GLOBAL FOOTER
  */
 #globalfooter { padding: 20px; border-top: 1px solid #ddd; font-size: 11.9px; }
+
+/**
+ * OVERRIDES
+ */
+
+/* SELECT2 */
+.select2-container-multi .select2-choices .select2-search-choice { background: #e5e5e5; }
+.select2-container-multi .select2-choices { border-color: #ccc; }
+
 
 /**
  * MAIN
@@ -120,16 +133,6 @@ th.wicket_orderUp a, th.wicket_orderDown a { padding-left: 20px; }
 
 
 /* TEAM EDIT PAGE */
-.member-list .members { width: 48%; }
-.member-list .members.first { float: left; }
-.member-list .members.last { float: right; }
-.members a { color: #999; font-size: 16px; }
-.members .list-group-item:hover a { color: #333; }
-.members .item-actions {top: 12px;}
-.members .item-actions .img-link { color: #ddd; font-size: 20px; }
-.members .list-group-item:hover .remove-link, .members .item-actions .remove-link:hover { color: #990000; }
-.members .avatar { width: 32px; height: 32px; margin-right: 8px; }
-
 .permission-link { color: #666; }
 a.permission-link:hover { color: #333; text-decoration: none; }
 
@@ -151,7 +154,7 @@ a.permission-link:hover { color: #333; text-decoration: none; }
 .vcard-name b { font-size: 26px; }
 .vcard-name em { font-size: 24px; color: #888; font-style: normal; font-weight: 300; }
 .vcard-stats { padding: 20px 0; border-top: 1px solid #ddd; overflow: hidden; }
-.vcard-stats a { display: inline-block; color: #999; font-size: 12px; line-height: 1.123; width: 66px; overflow: hidden; text-align: center; }
+.vcard-stats a { display: inline-block; color: #999; font-size: 12px; line-height: 1.123; width: 64px; overflow: hidden; text-align: center; }
 .vcard-stats a > b { display: block; color: #333; font-size: 28px; }
 .vcard-stats a:hover { text-decoration: none; color: #09f; }
 .vcard-stats a:hover > b { color: #09f; }
@@ -188,11 +191,37 @@ ul.btn-list { list-style: none; margin: 0; }
 .project-list .list-group-item i { position: absolute; left: 0; top: 10px; font-size: 32px; width: 32px; color: #bbb; }
 .project-list h4 { margin: 0 0 9px; }
 .project-list p { margin: 0 0 6px; font-size: 12px;}
-.project-list .last-updated { color: #999; }
+.project-list .age { color: #999; }
 
-ul.members-list { list-style: none; margin: 0; padding: 0; }
-.members-list > li.member { width: 220px; display: inline-block; list-style: none; padding-left: 60px; margin-right: 18px; margin-bottom: 18px; position: relative; font-size: 18px; white-space: nowrap; overflow: hidden;}
-.member > .avatar { width: 48px; height: 48px; position: absolute; left: 0; top: 0; }
-.member > .avatar > img { border-radius: 50%; }
-.member > h4 { margin-top: 0; }
-.member > em { font-style: normal; display: block;  color: #999; } 
+.project-info .age { color: #999; font-size: 12px; }
+.project-info .fork-info { color: #999; margin: 0 0 0 1em; font-size: 12px; }
+
+.members-summary { border-bottom: 1px solid #ddd; margin: 0; padding-bottom: 10px; }
+.members-summary > b { color: #333; }
+.list-members { list-style: none; margin: 0; padding: 0; }
+.list-members > li.member { width: 380px; float: left; list-style: none; margin: 0 20px 0 0; 
+	position: relative;  border-bottom: 1px solid #ddd; }
+.member > .avatar { width: 48px; height: 48px; position: absolute; left: 0; top: 10px; background: transparent; padding: 0; box-shadow: none; }
+.member > .avatar > img { border-radius: 50%; background: transparent; }
+.member .name { padding: 10px 0px 10px 60px; font-size: 18px; white-space: nowrap; overflow: hidden; min-height: 48px; }
+.member .name > h4 { margin:0;}
+.member .name > em { font-style: normal; display: block;  color: #999; } 
+.member > .item-actions { position: absolute; z-index: 10; right: 10px; top: 10px; line-height: 48px; white-space: nowrap; }
+.member > .item-actions > .img-link { color: #eee; font-size: 18px; }
+.member > .item-actions > .img-link:hover { color: #990000; }
+.member:hover { background: #ffe; }
+.member:hover > .item-actions > a { color: #990000; }
+ 
+/**
+ * PROJECT PAGE
+ */
+.page-nav.repo-head {padding-bottom: 10px; }
+h1.repo-info { margin: 0; padding-left:60px; font-size: 20px; position: relative; font-weight: normal; min-height: 48px;}
+.repo-info > .avatar { position: absolute; left: 0; top: 0; color: #ddd; width: 48px; height: 48px; padding: 2px; border: 1px solid #ddd; }
+.repo-info > .name { display: block; padding-top: 12px; margin-bottom: 6px;}
+.repo-info .fork-info { display: block; color: #999; font-size: 12px; line-height: 1; font-weight: normal; }
+
+.repo-sidenav  { padding-top: 20px; padding-bottom: 20px; }
+.repo-sidenav .padder { padding: 20px; }
+ul.repo-actions { margin: 8px 4px 8px 0; padding: 0; list-style: none; }
+.repo-actions > li { float: left; list-style: none; margin: 0 5px; } 
