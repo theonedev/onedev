@@ -25,8 +25,7 @@ public class GitopSession extends WebSession {
 	}
 
 	public Optional<User> getCurrentUser() {
-		User user = User.getCurrent();
-		return Optional.<User> of(user);
+		return Optional.<User> fromNullable(User.getCurrent());
 	}
 
 	/**

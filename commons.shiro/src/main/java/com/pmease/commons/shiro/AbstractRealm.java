@@ -9,20 +9,23 @@ import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.authc.credential.CredentialsMatcher;
+import org.apache.shiro.authc.credential.PasswordMatcher;
+import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.Permission;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import com.pmease.commons.loader.AppLoader;
 
 public abstract class AbstractRealm extends AuthorizingRealm {
 
 	@Inject
-	public AbstractRealm(CredentialsMatcher credentialsMatcher) {
-		setCredentialsMatcher(credentialsMatcher);
+	public AbstractRealm() {
+	    PasswordMatcher passwordMatcher = new PasswordMatcher();
+	    passwordMatcher.setPasswordService(AppLoader.getInstance(PasswordService.class));
+		setCredentialsMatcher(passwordMatcher);
 	}
 	
 	@SuppressWarnings("serial")
@@ -34,17 +37,17 @@ public abstract class AbstractRealm extends AuthorizingRealm {
 			
 			@Override
 			public Collection<String> getStringPermissions() {
-				return new HashSet<String>();
+				return new HashSet<>();
 			}
 			
 			@Override
 			public Collection<String> getRoles() {
-				return new HashSet<String>();
+				return new HashSet<>();
 			}
 			
 			@Override
 			public Collection<Permission> getObjectPermissions() {
-				return Sets.newHashSet((Permission)getUserById(userId));
+				return permissionsOf(userId);
 			}
 		};
 	}
@@ -72,14 +75,15 @@ public abstract class AbstractRealm extends AuthorizingRealm {
 	}
 	
 	/**
-	 * Get user by identifier.
+	 * Get collection of permissions for specified user identifier.
 	 * 
 	 * @param userId
-	 * 			identifier of the user, <tt>0</tt> represents anonymous user
+	 *         identifier of user to get permissions for. Specifically, value <tt>0</tt> stands for 
+	 *         anonymous user
 	 * @return
-	 * 			user with specified identifier, not allowed to return null
+	 *         collection of permissions associated with specified user identifier
 	 */
-	protected abstract AbstractUser getUserById(Long userId);
+	protected abstract Collection<Permission> permissionsOf(Long userId);
 	
 	/**
 	 * Get user by name.

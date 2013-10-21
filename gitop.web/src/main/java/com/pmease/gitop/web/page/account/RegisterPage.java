@@ -2,7 +2,6 @@ package com.pmease.gitop.web.page.account;
 
 import javax.validation.constraints.Size;
 
-import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
 import org.apache.wicket.bean.validation.PropertyValidator;
@@ -100,8 +99,7 @@ public class RegisterPage extends AbstractLayoutPage {
 			@Override
 			protected void onSubmit(final AjaxRequestTarget target, final Form<?> form) {
 				User user = model.getObject();
-				String pass = AppLoader.getInstance(PasswordService.class).encryptPassword(password);
-				user.setPasswordHash(pass);
+				user.setPassword(password);
 				UserManager um = AppLoader.getInstance(UserManager.class);
 				um.save(user);
 				GitopSession.get().login(user.getName(), password, false);

@@ -7,7 +7,7 @@
     <parent> 
         <groupId>com.pmease</groupId>  
         <artifactId>parent.general</artifactId>  
-        <version>1.0.28</version> 
+        <version>1.0.31</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -95,24 +95,34 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.jsw</artifactId>  
-            <version>1.0.28</version>  
+            <version>1.0.31</version>  
             <scope>provided</scope> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>gitop.core</artifactId>  
-            <version>1.0.30</version> 
-        </dependency>
-        <dependency>
-        	<groupId>com.pmease</groupId>
-        	<artifactId>gitop.web</artifactId>
-        	<version>1.0.0</version>
-        </dependency>
-        <dependency>
-        	<groupId>com.pmease</groupId>
-        	<artifactId>gitop.rest</artifactId>
-        	<version>1.0.0</version>
-        </dependency>
+            <version>1.0.31</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>com.pmease</groupId>  
+            <artifactId>gitop.web</artifactId>  
+            <version>1.0.0</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>com.pmease</groupId>  
+            <artifactId>gitop.rest</artifactId>  
+            <version>1.0.0</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>com.pmease</groupId>  
+            <artifactId>gitop.http</artifactId>  
+            <version>1.0.0</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>com.pmease</groupId>  
+            <artifactId>gitop.security</artifactId>  
+            <version>1.0.0</version> 
+        </dependency> 
     </dependencies>  
     <repositories> 
         <repository> 
@@ -136,6 +146,5 @@
         <bootstrapClass>com.pmease.commons.bootstrap.Bootstrap</bootstrapClass>  
         <moduleClass>com.pmease.gitop.product.ProductModule</moduleClass>  
         <aggregation>true</aggregation> 
-    </properties>  
-    <version>1.0.30</version> 
+    </properties> 
 </project>

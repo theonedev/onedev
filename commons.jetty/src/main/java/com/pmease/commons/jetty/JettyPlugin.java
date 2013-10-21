@@ -1,7 +1,10 @@
 package com.pmease.commons.jetty;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Provider;
@@ -84,7 +87,13 @@ public class JettyPlugin extends AbstractPlugin {
         
         contextHandler.addFilter(DisableTraceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
         
-        for (ServletConfigurator configurator: servletConfiguratorsProvider.get()) 
+        /*
+         * By default contributions is in reverse dependency order. We reverse the order so that 
+         * servlet and filter contributions in dependency plugins comes first. 
+         */
+        List<ServletConfigurator> servletConfigurators = new ArrayList<>(servletConfiguratorsProvider.get());
+        Collections.reverse(servletConfigurators);
+        for (ServletConfigurator configurator: servletConfigurators) 
         	configurator.configure(contextHandler);
 
         /*

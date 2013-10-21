@@ -1,4 +1,4 @@
-package com.pmease.gitop.core;
+package com.pmease.gitop.http;
 
 import java.io.IOException;
 
@@ -24,7 +24,9 @@ import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.git.Git;
 import com.pmease.commons.util.GeneralException;
+import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.core.manager.StorageManager;
 import com.pmease.gitop.core.model.Project;
 import com.pmease.gitop.core.permission.ObjectPermission;
 
@@ -37,11 +39,14 @@ public class GitFilter implements Filter {
 	
 	private final Gitop gitop;
 	
+	private final StorageManager storageManager;
+	
 	private final ProjectManager projectManager;
 	
 	@Inject
-	public GitFilter(Gitop gitop, ProjectManager projectManager) {
+	public GitFilter(Gitop gitop, StorageManager storageManager, ProjectManager projectManager) {
 		this.gitop = gitop;
+		this.storageManager = storageManager;
 		this.projectManager = projectManager;
 	}
 	
@@ -91,7 +96,7 @@ public class GitFilter implements Filter {
 		doNotCache(response);
 		response.setHeader("Content-Type", "application/x-" + service + "-result");			
 
-		Git git = new Git(projectManager.locateStorage(project).ofCode());
+		Git git = new Git(storageManager.getStorage(project).ofCode());
 
 		if (GitSmartHttpTools.isUploadPack(request)) {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(project))) {
@@ -124,7 +129,7 @@ public class GitFilter implements Filter {
 		Project project = getProject(request, response, repoInfo);
 		String service = request.getParameter("service");
 		
-		Git git = new Git(projectManager.locateStorage(project).ofCode());
+		Git git = new Git(storageManager.getStorage(project).ofCode());
 
 		if (service.contains("upload")) {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(project))) {

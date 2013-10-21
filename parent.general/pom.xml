@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>  
     <groupId>com.pmease</groupId>  
     <artifactId>parent.general</artifactId>  
-    <version>1.0.28</version>  
+    <version>1.0.31</version>  
     <packaging>pom</packaging>  
     <prerequisites> 
         <maven>3.0</maven> 
@@ -155,7 +155,7 @@
                 <plugin> 
                     <groupId>com.pmease</groupId>  
                     <artifactId>plugin.maven</artifactId>  
-                    <version>1.0.26</version>  
+                    <version>1.0.31</version>  
                     <executions> 
                         <execution> 
                             <id>check-project-dependencies</id>  
@@ -312,11 +312,11 @@
                 <artifactId>commons-collections</artifactId>  
                 <version>3.2.1</version> 
             </dependency>  
-            <dependency>
-            	<groupId>org.javassist</groupId>
-            	<artifactId>javassist</artifactId>
-            	<version>3.18.0-GA</version>
-            </dependency>
+            <dependency> 
+                <groupId>org.javassist</groupId>  
+                <artifactId>javassist</artifactId>  
+                <version>3.18.0-GA</version> 
+            </dependency>  
             <dependency> 
                 <groupId>org.apache.ant</groupId>  
                 <artifactId>ant</artifactId>  
@@ -335,6 +335,18 @@
             <groupId>org.mockito</groupId>  
             <artifactId>mockito-all</artifactId>  
             <version>1.9.5</version>  
+            <scope>test</scope> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.powermock</groupId>  
+            <artifactId>powermock-module-junit4</artifactId>  
+            <version>${powermockVersion}</version>  
+            <scope>test</scope> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.powermock</groupId>  
+            <artifactId>powermock-api-mockito</artifactId>  
+            <version>${powermockVersion}</version>  
             <scope>test</scope> 
         </dependency> 
     </dependencies>  
@@ -382,9 +394,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>  
         <slf4jVersion>1.7.5</slf4jVersion>  
-        <logbackVersion>1.0.11</logbackVersion> 
-        <dropwizardVersion>0.7.0-SNAPSHOT</dropwizardVersion>
-        <jerseyVersion>1.17.1</jerseyVersion>
-        <jacksonVersion>2.2.3</jacksonVersion>
+        <logbackVersion>1.0.11</logbackVersion>  
+        <dropwizardVersion>0.7.0-SNAPSHOT</dropwizardVersion>  
+        <jerseyVersion>1.17.1</jerseyVersion>  
+        <jacksonVersion>2.2.3</jacksonVersion>  
+        <powermockVersion>1.5.1</powermockVersion> 
     </properties> 
 </project>

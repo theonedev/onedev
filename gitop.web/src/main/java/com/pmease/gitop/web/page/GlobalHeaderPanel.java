@@ -45,11 +45,6 @@ public class GlobalHeaderPanel extends Panel {
 	}
 	
 	protected Optional<User> currentUser() {
-		User user = User.getCurrent();
-		if (user.isAnonymous()) {
-			return Optional.<User>absent();
-		} else {
-			return Optional.of(user);
-		}
+        return Optional.<User>fromNullable(User.getCurrent());
 	}
 }

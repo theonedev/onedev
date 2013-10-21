@@ -5,8 +5,10 @@ import org.apache.shiro.authz.Permission;
 import com.pmease.gitop.core.model.Project;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.permission.object.ProtectedObject;
+import com.pmease.gitop.core.permission.object.SystemObject;
 import com.pmease.gitop.core.permission.operation.GeneralOperation;
 import com.pmease.gitop.core.permission.operation.PrivilegedOperation;
+import com.pmease.gitop.core.permission.operation.SystemOperation;
 
 /**
  * This class represents permissions to operate an account and its belongings.
@@ -76,4 +78,7 @@ public class ObjectPermission implements Permission {
 		return new ObjectPermission(project, GeneralOperation.WRITE);
 	}
 
+	public static ObjectPermission ofSystemAdmin() {
+	    return new ObjectPermission(new SystemObject(), SystemOperation.ADMINISTRATION);
+	}
 }

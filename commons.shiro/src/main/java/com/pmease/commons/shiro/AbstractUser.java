@@ -5,59 +5,62 @@ import javax.persistence.MappedSuperclass;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationInfo;
-import org.apache.shiro.authz.Permission;
+import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.AbstractEntity;
+import com.pmease.commons.loader.AppLoader;
 
 @SuppressWarnings("serial")
 @MappedSuperclass
-public abstract class AbstractUser extends AbstractEntity implements AuthenticationInfo, Permission {
+public abstract class AbstractUser extends AbstractEntity implements AuthenticationInfo {
 
-	@Column(unique=true, nullable=false)
-	private String name;
-	
-	@Column(length=1024)
-	private String passwordHash;
-	
-	public String getName() {
-		return name;
-	}
+    @Column(unique = true, nullable = false)
+    private String name;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    @Column(length = 1024)
+    private String passwordHash;
 
-	public String getPasswordHash() {
-		return passwordHash;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setPasswordHash(String passwordHash) {
-		this.passwordHash = passwordHash;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	@Override
-	public PrincipalCollection getPrincipals() {
-		return new SimplePrincipalCollection(getId(), "");
-	}
+    public String getPasswordHash() {
+        return passwordHash;
+    }
 
-	@Override
-	public Object getCredentials() {
-		return passwordHash;
-	}
+    public void setPassword(String password) {
+        passwordHash = AppLoader.getInstance(PasswordService.class)
+                .encryptPassword(password);
+    }
 
-	public Subject asSubject() {
-		PrincipalCollection principals = new SimplePrincipalCollection(getId(), "");
-		return new Subject.Builder().principals(principals).buildSubject();		
-	}
+    @Override
+    public PrincipalCollection getPrincipals() {
+        return new SimplePrincipalCollection(getId(), "");
+    }
 
-	public static Long getCurrentId() {
-		Object principal = SecurityUtils.getSubject().getPrincipal();
-		Preconditions.checkNotNull(principal);
-		return (Long) principal;
-	}
-	
+    @Override
+    public Object getCredentials() {
+        return passwordHash;
+    }
+
+    public Subject asSubject() {
+        PrincipalCollection principals =
+                new SimplePrincipalCollection(getId(), "");
+        return new Subject.Builder().principals(principals).buildSubject();
+    }
+
+    public static Long getCurrentId() {
+        Object principal = SecurityUtils.getSubject().getPrincipal();
+        Preconditions.checkNotNull(principal);
+        return (Long) principal;
+    }
+
 }

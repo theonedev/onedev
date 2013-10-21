@@ -10,7 +10,7 @@ import com.pmease.commons.git.FindChangedFilesCommand;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.pattern.WildcardUtils;
-import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.core.manager.StorageManager;
 import com.pmease.gitop.core.model.MergeRequest;
 import com.pmease.gitop.core.model.MergeRequestUpdate;
 
@@ -32,8 +32,8 @@ public class TouchSpecifiedFiles extends AbstractGateKeeper {
 
 	@Override
 	public CheckResult check(MergeRequest request) {
-		ProjectManager projectManager = AppLoader.getInstance(ProjectManager.class);
-		File repoDir = projectManager.locateStorage(request.getDestination().getProject()).ofCode();
+		StorageManager storageManager = AppLoader.getInstance(StorageManager.class);
+		File repoDir = storageManager.getStorage(request.getDestination().getProject()).ofCode();
 
 		FindChangedFilesCommand command = new Git(repoDir).findChangedFiles();
 		
