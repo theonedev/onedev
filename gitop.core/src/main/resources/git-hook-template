@@ -1,0 +1,15 @@
+#!/bin/sh
+output=$(curl -s -S -f -X POST -d @- %s)
+IFS='|'
+lines=($output)
+returnCode=0
+for i in ${lines[@]}
+do
+  if [ "$i" = "ERROR" ]; then 
+    returnCode=1
+  else
+    echo "$i"
+  fi;
+done
+
+exit $returnCode

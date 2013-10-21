@@ -2,27 +2,19 @@ package com.pmease.gitop.core.model;
 
 import java.io.File;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.pmease.commons.git.Git;
 import com.pmease.commons.loader.AppLoader;
+import com.pmease.commons.loader.AppLoaderMocker;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitop.core.manager.StorageManager;
 import com.pmease.gitop.core.storage.ProjectStorage;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(AppLoader.class)
-public class MergeRequestTest {
+public class MergeRequestTest extends AppLoaderMocker {
 
     private File projectDir;
     
@@ -31,18 +23,16 @@ public class MergeRequestTest {
     @Mock
     private StorageManager storageManager;
     
-    @Before
-    public void before() {
+    @Override
+    public void setup() {
         Assert.assertTrue(Git.checkError() == null);
         projectDir = FileUtils.createTempDir();
         
         git = new Git(new File(projectDir, "code")).init().call();
-        
-        MockitoAnnotations.initMocks(this);
     }
     
-    @After
-    public void after() {
+    @Override
+    public void teardown() {
         FileUtils.deleteDir(projectDir);
     }
 
@@ -66,7 +56,6 @@ public class MergeRequestTest {
         
         git.updateRef().refName("refs/updates/2").revision("HEAD").call();
 
-        PowerMockito.mockStatic(AppLoader.class);
         Mockito.when(AppLoader.getInstance(StorageManager.class)).thenReturn(storageManager);
         
         Mockito.when(storageManager.getStorage(Mockito.any(Project.class)))
@@ -125,7 +114,6 @@ public class MergeRequestTest {
         
         git.merge().revision("refs/updates/2").call();
 
-        PowerMockito.mockStatic(AppLoader.class);
         Mockito.when(AppLoader.getInstance(StorageManager.class)).thenReturn(storageManager);
         
         Mockito.when(storageManager.getStorage(Mockito.any(Project.class)))
