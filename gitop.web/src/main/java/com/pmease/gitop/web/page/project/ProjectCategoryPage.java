@@ -112,7 +112,7 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 			
 			container.add(link);
 			WebMarkupContainer icon = new WebMarkupContainer("icon");
-			icon.add(AttributeAppender.append("class", Model.of(icon)));
+			icon.add(AttributeAppender.append("class", Model.of(this.icon)));
 			link.add(icon);
 			link.add(new Label("label", Model.of(displayName)));
 			link.add(createBadge("badge", project));

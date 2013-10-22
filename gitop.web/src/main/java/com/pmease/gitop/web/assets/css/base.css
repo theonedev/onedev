@@ -51,7 +51,7 @@ ul.piped, ol.piped { margin: 0; padding: 0; }
 em.checkable-link { color: #888 !important; }
 
 /** LIST GROUP */
-.list-navs > .list-group-item { border-width: 1px 0; positioin: relative; }
+.list-navs > .list-group-item { border-width: 1px 0; position: relative; }
 .list-navs > .list-group-item:first-child,
 .list-navs > .list-group-item:last-child { border-radius: 0; }
 

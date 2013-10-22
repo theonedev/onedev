@@ -72,17 +72,26 @@
 
 .sidebar .list-navs > .list-group-item,
 .sidebar .list-navs > .list-group-item.active  { 
-	padding: 0; margin: 0; border-top-width: 0; background: transparent;
+	padding: 0; margin: 0; /* border-top-width: 0; */ background: transparent; border: none;
 }
-.sidebar .list-navs > .list-group-item.active { border-color: #ccc; }
+.sidebar .list-navs > .list-group-item.active { border-color: #ccc; border-width: 1px 0; border-style: solid; }
 
-.sidebar .list-navs > .list-group-item:first-child { border-top-width: 1px; }
-.sidebar .list-navs > .list-group-item a { padding: 10px 20px; display: block; color: #888; }
+.sidebar .list-navs > .list-group-item:first-child { /* border-top-width: 1px; */ }
+.sidebar .list-navs > .list-group-item a { padding: 10px 20px; display: block; }
 .sidebar .list-navs > .list-group-item a:hover { color: #333; text-decoration: none; background: #f2f2f2; }
 .sidebar .list-navs > .list-group-item.active a,
 .sidebar .list-navs > .list-group-item.active a:hover { color: #222; background: #e5e5e5; font-weight: bold; }
 
 .list-navs > .list-group-item a .badge { float: right; }
+.sidebar .list-navs > .list-group-item [class^="icon"] {
+	width: 1.1428571428571428em;
+  	text-align: center;
+  	padding-right: 0.2857142857142857em;
+  	font-size: 18px;
+  	color: #888; 
+}
+
+.sidebar .list-navs > .list-group-item.active [class^="icon"] { color: #222; } 
 
 .sidebar .list-navs.first {margin-top: 20px; }
 
@@ -221,6 +230,9 @@ ul.btn-list { list-style: none; margin: 0; }
  * PROJECT PAGE
  */
 .page-nav.repo-head {padding-bottom: 10px; }
+
+a > .ind { font-weight: 300; color: #888; }
+
 h1.repo-info { margin: 0; padding-left:60px; font-size: 20px; position: relative; font-weight: normal; min-height: 48px;}
 .repo-info > .avatar { position: absolute; left: 0; top: 0; color: #ddd; width: 48px; height: 48px; padding: 2px; border: 1px solid #ddd; }
 .repo-info > .name { display: block; padding-top: 12px; margin-bottom: 6px;}
@@ -251,12 +263,4 @@ ul.repo-actions { margin: 8px 4px 8px 0; padding: 0; list-style: none; }
 
 .repo-sidenav .list-navs { margin-bottom: 20px; }
 .repo-sidenav .list-navs > .list-group-item a { color: #09f; }
-.sidebar .list-navs > .list-group-item [class^="icon"] {
-	width: 1.1428571428571428em;
-  	text-align: center;
-  	padding-right: 0.2857142857142857em;
-  	font-size: 18px;
-  	color: #888; 
-}
-
 .repo-sidenav .list-navs > .list-group-item a .badge { }

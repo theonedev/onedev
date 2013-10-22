@@ -3,7 +3,9 @@
 	<a wicket:id="link">
 		<i wicket:id="icon"></i> 
 		<wicket:container wicket:id="label"></wicket:container>
-		<span class="badge" wicket:id="badge"></span>
+		<wicket:enclosure>
+		<b class="ind">(<wicket:container wicket:id="badge"></wicket:container>)</b>
+		</wicket:enclosure>
 	</a>
 </wicket:panel>
 </html>

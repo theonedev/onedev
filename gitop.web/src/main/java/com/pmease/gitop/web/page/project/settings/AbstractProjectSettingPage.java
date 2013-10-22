@@ -23,8 +23,8 @@ public abstract class AbstractProjectSettingPage extends AbstractProjectPage {
 		OPTIONS("Options"),
 		HOOKS("Hooks"),
 		MERGE_REQUESTS("Merge Requests"),
-		AUDIT_LOG("Audit Log"),
-		PERMISSIONS("Permissions");
+		PERMISSIONS("Permissions"),
+		AUDIT_LOG("Audit Log");
 		
 		final String displayName;
 		
