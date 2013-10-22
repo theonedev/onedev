@@ -82,6 +82,8 @@
 .sidebar .list-navs > .list-group-item.active a,
 .sidebar .list-navs > .list-group-item.active a:hover { color: #222; background: #e5e5e5; font-weight: bold; }
 
+.list-navs > .list-group-item a .badge { float: right; }
+
 section .head { border-style: solid; border-width: 1px 0; border-color: #ddd; }
 section:first-child .head { border-top: none; }
 section .head h2, section .head h3 { margin: 0; font-size: 18px; line-height: 24px; color: #888; font-weight: 300; }
@@ -160,6 +162,7 @@ a.permission-link:hover { color: #333; text-decoration: none; }
 .vcard-stats a:hover > b { color: #09f; }
 
 .nav-piped > li { float: left; }
+.nav-piped.nav-justified > li { float: none; }
 
 .page-nav { border-bottom: 1px solid #ddd;  padding: 10px 20px 0; }
 .page-nav ul { margin: 0; padding: 0; list-style: none; }
@@ -225,3 +228,32 @@ h1.repo-info { margin: 0; padding-left:60px; font-size: 20px; position: relative
 .repo-sidenav .padder { padding: 20px; }
 ul.repo-actions { margin: 8px 4px 8px 0; padding: 0; list-style: none; }
 .repo-actions > li { float: left; list-style: none; margin: 0 5px; } 
+
+.nav-piped li > .btn { border-right-width: 0; }
+.nav-piped li:not(:first-child):not(:last-child):not(.dropdown-toggle) > .btn {
+  border-radius: 0;
+}
+
+.nav-piped li:first-child:not(:last-child):not(.dropdown-toggle) > .btn {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.nav-piped li:last-child:not(:first-child) > .btn {
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+  border-right-width: 1px;
+}
+
+.nav-head { font-weight: bold; font-size: 14px; color: #888; padding: 0 20px; margin: 0 0 8px 0; }
+.repo-sidenav .list-navs { margin-bottom: 20px; }
+.repo-sidenav .list-navs > .list-group-item a { color: #09f; }
+.sidebar .list-navs > .list-group-item [class^="icon"] {
+	width: 1.1428571428571428em;
+  	text-align: center;
+  	padding-right: 0.2857142857142857em;
+  	font-size: 18px;
+  	color: #888; 
+}
+
+.repo-sidenav .list-navs > .list-group-item a .badge { }
