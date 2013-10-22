@@ -242,25 +242,8 @@ h1.repo-info { margin: 0; padding-left:60px; font-size: 20px; position: relative
 .repo-sidenav .padder { padding: 20px; }
 ul.repo-actions { margin: 8px 4px 8px 0; padding: 0; list-style: none; }
 .repo-actions > li { float: left; list-style: none; margin: 0 5px; } 
-
-.nav-piped li > .btn { border-right-width: 0; }
-.nav-piped li:not(:first-child):not(:last-child):not(.dropdown-toggle) > .btn {
-  border-radius: 0;
-}
-
-.nav-piped li:first-child:not(:last-child):not(.dropdown-toggle) > .btn {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.nav-piped li:last-child:not(:first-child) > .btn {
-  border-bottom-left-radius: 0;
-  border-top-left-radius: 0;
-  border-right-width: 1px;
-}
-
 .nav-head { font-weight: bold; font-size: 14px; color: #888; padding: 0 20px; margin: 0 0 8px 0; text-transform: uppercase; }
 
 .repo-sidenav .list-navs { margin-bottom: 20px; }
-.repo-sidenav .list-navs > .list-group-item a { color: #09f; }
+.repo-sidenav .list-navs > .list-group-item a { color: #09f; padding-left: 30px; }
 .repo-sidenav .list-navs > .list-group-item a .badge { }
