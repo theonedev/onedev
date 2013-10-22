@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.project;
+package com.pmease.gitop.web.page.project.settings;
 
 import org.apache.shiro.authz.annotation.RequiresUser;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -22,6 +22,7 @@ import com.pmease.gitop.web.common.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.model.ProjectModel;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
 import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.project.source.ProjectHomePage;
 
 @SuppressWarnings("serial")
 @RequiresUser

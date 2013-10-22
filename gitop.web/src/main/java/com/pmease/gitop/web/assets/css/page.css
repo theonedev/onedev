@@ -84,9 +84,11 @@
 
 .list-navs > .list-group-item a .badge { float: right; }
 
+.sidebar .list-navs.first {margin-top: 20px; }
+
 section .head { border-style: solid; border-width: 1px 0; border-color: #ddd; }
 section:first-child .head { border-top: none; }
-section .head h2, section .head h3 { margin: 0; font-size: 18px; line-height: 24px; color: #888; font-weight: 300; }
+section .head h2, section .head h3 { margin: 0; font-size: 18px; line-height: 24px; color: #888; font-weight: 300; text-transform: uppercase; }
 section .padder, section > .body { padding: 0px 20px 20px; margin-bottom: 18px; }
 
 /** TABLE */
@@ -245,7 +247,8 @@ ul.repo-actions { margin: 8px 4px 8px 0; padding: 0; list-style: none; }
   border-right-width: 1px;
 }
 
-.nav-head { font-weight: bold; font-size: 14px; color: #888; padding: 0 20px; margin: 0 0 8px 0; }
+.nav-head { font-weight: bold; font-size: 14px; color: #888; padding: 0 20px; margin: 0 0 8px 0; text-transform: uppercase; }
+
 .repo-sidenav .list-navs { margin-bottom: 20px; }
 .repo-sidenav .list-navs > .list-group-item a { color: #09f; }
 .sidebar .list-navs > .list-group-item [class^="icon"] {

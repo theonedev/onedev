@@ -43,6 +43,7 @@ import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.web.assets.AssetLocator;
+import com.pmease.gitop.web.common.mapper.PageParameterAwareMountedMapper;
 import com.pmease.gitop.web.component.avatar.AvatarImageResource;
 import com.pmease.gitop.web.component.avatar.AvatarImageResourceReference;
 import com.pmease.gitop.web.exception.AccessDeniedException;
@@ -59,8 +60,23 @@ import com.pmease.gitop.web.page.error.InternalErrorPage;
 import com.pmease.gitop.web.page.error.PageNotFoundPage;
 import com.pmease.gitop.web.page.home.HomePage;
 import com.pmease.gitop.web.page.init.ServerInitPage;
-import com.pmease.gitop.web.page.project.CreateProjectPage;
-import com.pmease.gitop.web.page.project.ProjectHomePage;
+import com.pmease.gitop.web.page.project.issue.ProjectMergeRequestsPage;
+import com.pmease.gitop.web.page.project.settings.CreateProjectPage;
+import com.pmease.gitop.web.page.project.settings.MergeRequestSettingsPage;
+import com.pmease.gitop.web.page.project.settings.ProjectAuditLogPage;
+import com.pmease.gitop.web.page.project.settings.ProjectHooksPage;
+import com.pmease.gitop.web.page.project.settings.ProjectOptionsPage;
+import com.pmease.gitop.web.page.project.settings.ProjectPermissionsPage;
+import com.pmease.gitop.web.page.project.source.ProjectHomePage;
+import com.pmease.gitop.web.page.project.source.RepositoryBlobPage;
+import com.pmease.gitop.web.page.project.source.RepositoryBranchesPage;
+import com.pmease.gitop.web.page.project.source.RepositoryCommitsPage;
+import com.pmease.gitop.web.page.project.source.RepositoryContributorsPage;
+import com.pmease.gitop.web.page.project.source.RepositoryTagsPage;
+import com.pmease.gitop.web.page.project.source.RepositoryTreePage;
+import com.pmease.gitop.web.page.project.stats.ProjectForksPage;
+import com.pmease.gitop.web.page.project.stats.ProjectGraphsPage;
+import com.pmease.gitop.web.page.project.wiki.ProjectWikiPage;
 import com.pmease.gitop.web.page.test.TestPage;
 import com.pmease.gitop.web.page.test.TestPage2;
 import com.pmease.gitop.web.shiro.LoginPage;
@@ -194,7 +210,24 @@ public class GitopWebApp extends AbstractWicketConfig {
 			}
 
 		});
+		
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/tree/${objectId}", RepositoryTreePage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/blob/${objectId}", RepositoryBlobPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/commits", RepositoryCommitsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/branches", RepositoryBranchesPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/tags", RepositoryTagsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/contributors", RepositoryContributorsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/wiki", ProjectWikiPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/merges", ProjectMergeRequestsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/graphs", ProjectGraphsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/forks", ProjectForksPage.class));
 
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings", ProjectOptionsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/hooks", ProjectHooksPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/merge-requests", MergeRequestSettingsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/audits", ProjectAuditLogPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/permissions", ProjectPermissionsPage.class));
+		
 		// account dashboard
 		mount(new MountedMapper("/${user}", AccountHomePage.class) {
 

@@ -1,0 +1,23 @@
+<html xmlns:wicket>
+<wicket:extend>
+	<div class="faux">
+		<div class="faux-row">
+			<div class="faux-cell sidebar">
+				<div class="sidebar-inner">
+					<ul class="list-group list-navs first">
+						<li class="list-group-item" wicket:id="nav">
+							<a wicket:id="link"><wicket:container wicket:id="name"></wicket:container></a>
+						</li>
+					</ul>
+				</div>
+			</div>
+			
+			<div class="faux-cell content">
+				<div class="content-inner">
+					<wicket:child></wicket:child>
+				</div>
+			</div>
+		</div>
+	</div>
+</wicket:extend>
+</html>

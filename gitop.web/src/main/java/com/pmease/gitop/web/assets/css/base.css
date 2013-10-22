@@ -303,6 +303,11 @@ fieldset[disabled] .btn-gray.active {
 
 .radio-flat.disabled { color: #888; cursor: default; }
 
+.form-horizontal .form-group {  }
+.form-horizontal .control-label,
+.form-horizontal .field-controls { position: relative; min-height: 1px; padding-right: 15px; padding-left: 15px; float: left; }
+.form-horizontal .control-label { width: 25%; }
+.form-horizontal .field-controls { width: 74.884%; }
 /**
  * AVATAR
  */
@@ -329,7 +334,7 @@ fieldset[disabled] .btn-gray.active {
 .faux { display: table; width: 100%; border-collapse: collapse; table-layout: fixed; border-spacing: 0; }
 .faux-row { display: table-row; }
 .faux-cell { display: table-cell; vertical-align: top; margin: 0; padding: 0; }
-.faux-cell.sidebar { width: 240px; position: relative; border-right: 1px solid #ccc; }
+.faux-cell.sidebar { width: 240px; position: relative; border-right: 1px solid #ddd; }
 .sidebar-inner { position: relative; width: 240px; overflow-x: hidden; }
 .faux .content { }
 

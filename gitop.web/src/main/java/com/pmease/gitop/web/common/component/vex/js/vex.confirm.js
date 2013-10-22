@@ -8,8 +8,8 @@
 				var icon = $this.data('confirm-icon')
 						|| 'question';
 				var messageLabel = $this.data('confirm-message') || 'Confirm';
-				var yesLabel = $this.data('confirm-yes-label') || 'OK';
-				var noLabel = $this.data('confirm-no-label') || 'Cancel';
+				var yesLabel = $this.data('confirm-yes-label') || 'Yes';
+				var noLabel = $this.data('confirm-no-label') || 'No';
 				var cssClassName = $this.data('confirm-css-class') || '';
 
 				vex.dialog.confirm({
