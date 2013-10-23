@@ -65,7 +65,7 @@ public class MergeRequestTest extends AppLoaderMocker {
         Branch destBranch = new Branch();
         destBranch.setName("master");
         destBranch.setProject(new Project());
-        mergeRequest.setDestination(destBranch);
+        mergeRequest.setTarget(destBranch);
         
         MergeRequestUpdate update = new MergeRequestUpdate();
         update.setId(1L);
@@ -123,7 +123,7 @@ public class MergeRequestTest extends AppLoaderMocker {
         Branch destBranch = new Branch();
         destBranch.setName("master");
         destBranch.setProject(new Project());
-        mergeRequest.setDestination(destBranch);
+        mergeRequest.setTarget(destBranch);
         
         MergeRequestUpdate update = new MergeRequestUpdate();
         update.setId(1L);

@@ -7,6 +7,7 @@ import java.util.List;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.BeanUtils;
 import com.pmease.commons.util.ClassUtils;
+import com.pmease.commons.util.JavassistUtils;
 
 public abstract class AbstractListEditSupport implements EditSupport {
 	
@@ -17,7 +18,7 @@ public abstract class AbstractListEditSupport implements EditSupport {
 
 	@Override
 	public PropertyEditContext getPropertyEditContext(Serializable bean, String propertyName) {
-		Method propertyGetter = BeanUtils.getGetter(bean.getClass(), propertyName);
+		Method propertyGetter = BeanUtils.getGetter(JavassistUtils.unproxy(bean.getClass()), propertyName);
 		if (propertyGetter.getReturnType() == List.class) {
 			Class<?> elementClass = EditableUtils.getElementClass(propertyGetter.getGenericReturnType());
 			if (elementClass != null) {

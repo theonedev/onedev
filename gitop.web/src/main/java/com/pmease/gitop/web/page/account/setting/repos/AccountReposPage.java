@@ -36,7 +36,7 @@ public class AccountReposPage extends AccountSettingPage {
 
 			@Override
 			protected List<Project> load() {
-				return Lists.newArrayList(getAccount().getRepositories());
+				return Lists.newArrayList(getAccount().getProjects());
 			}
 			
 		};

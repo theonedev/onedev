@@ -38,10 +38,10 @@ public class CoreServletConfigurator implements ServletConfigurator {
 		context.addFilter(filterHolder, "/*", EnumSet.of(DispatcherType.REQUEST));
 		
 		ServletHolder servletHolder = new ServletHolder(preReceiveServlet);
-		context.addServlet(servletHolder, PreReceiveServlet.PATH);
+		context.addServlet(servletHolder, PreReceiveServlet.PATH + "/*");
         
 		servletHolder = new ServletHolder(postReceiveServlet);
-        context.addServlet(servletHolder, PostReceiveServlet.PATH);
+        context.addServlet(servletHolder, PostReceiveServlet.PATH + "/*");
 	}
 
 }

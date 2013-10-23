@@ -1,30 +1,28 @@
 package com.pmease.gitop.web.page.test;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.form.Form;
 
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.EditableUtils;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.model.Project;
-import com.pmease.gitop.web.page.BasePage;
+import com.pmease.gitop.web.page.AbstractLayoutPage;
 
 @SuppressWarnings("serial")
-public class TestPage extends BasePage {
+public class ProjectPage extends AbstractLayoutPage {
 
-	public static boolean ready = false;
-	
-	public TestPage() {
-		if (!ready)
-			redirectWithInterception(TestPage2.class);
+	public ProjectPage() {
 	}
 	
 	@Override
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 
-		final EditContext editContext = EditableUtils.getContext(new Project());
+		final Project project = Gitop.getInstance(ProjectManager.class).load(1L);
+		
+		final EditContext editContext = EditableUtils.getContext(project);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -33,6 +31,9 @@ public class TestPage extends BasePage {
 				super.onSubmit();
 				editContext.validate();
 				if (!editContext.hasValidationError()) {
+				    Project reloaded = Gitop.getInstance(ProjectManager.class).load(1L);
+				    EditableUtils.copyProperties(project, reloaded);
+				    Gitop.getInstance(ProjectManager.class).save(reloaded);
 				}
 			}
 			
@@ -41,16 +42,6 @@ public class TestPage extends BasePage {
 		form.add((Component) editContext.renderForEdit("editor"));
 		
 		add(form);
-		
-		add(new AjaxLink<Void>("reset") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				ready = false;
-				setResponsePage(new TestPage());
-			}
-			
-		});
 	}
 	
 	@Override

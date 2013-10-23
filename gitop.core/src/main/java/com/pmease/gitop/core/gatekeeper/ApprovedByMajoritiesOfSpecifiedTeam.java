@@ -1,6 +1,9 @@
 package com.pmease.gitop.core.gatekeeper;
 
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.gitop.core.gatekeeper.checkresult.Accepted;
+import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitop.core.gatekeeper.checkresult.Rejected;
 import com.pmease.gitop.core.model.MergeRequest;
 
 @SuppressWarnings("serial")
@@ -16,10 +19,10 @@ public class ApprovedByMajoritiesOfSpecifiedTeam extends TeamAwareGateKeeper {
 		
 		CheckResult result = gateKeeper.check(request);
 		
-		if (result.isAccept())
-			result = accept("Approved by majorities of team '" + getTeam().getName() + "'.");
-		else if (result.isReject())
-			result = reject("Not approved by majorities of team '" + getTeam().getName() + "'.");
+		if (result instanceof Accepted)
+			result = accepted("Approved by majorities of team '" + getTeam().getName() + "'.");
+		else if (result instanceof Rejected)
+			result = rejected("Not approved by majorities of team '" + getTeam().getName() + "'.");
 		
 		return result;
 	}

@@ -17,9 +17,8 @@ public class FileComment extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private User user;
 	
-	@ManyToOne
-	@JoinColumn(nullable=false)
-	private Commit commit;
+	@Column(nullable=false)
+	private String commit;
 
 	@Column(nullable=false)
 	private Date date;
@@ -40,11 +39,11 @@ public class FileComment extends AbstractEntity {
 		this.user = user;
 	}
 
-	public Commit getCommit() {
+	public String getCommit() {
 		return commit;
 	}
 
-	public void setCommit(Commit commit) {
+	public void setCommit(String commit) {
 		this.commit = commit;
 	}
 

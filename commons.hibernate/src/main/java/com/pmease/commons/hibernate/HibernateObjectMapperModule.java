@@ -13,6 +13,10 @@ import com.fasterxml.jackson.datatype.hibernate4.Hibernate4Module;
 @Singleton
 public class HibernateObjectMapperModule extends Hibernate4Module {
 
+    public HibernateObjectMapperModule() {
+        enable(Feature.FORCE_LAZY_LOADING);
+    }
+    
 	@SuppressWarnings("serial")
 	@Override
 	protected AnnotationIntrospector annotationIntrospector() {

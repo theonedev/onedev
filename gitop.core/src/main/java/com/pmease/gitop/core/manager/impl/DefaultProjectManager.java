@@ -66,11 +66,11 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
     
     @Transactional
     @Override
-    public void save(Project entity) {
-        if (entity.isNew()) {
-            super.save(entity);
+    public void save(Project project) {
+        if (project.isNew()) {
+            super.save(project);
 
-            ProjectStorage storage = storageManager.getStorage(entity);
+            ProjectStorage storage = storageManager.getStorage(project);
             storage.clean();
 
             File codeDir = storage.ofCode();
@@ -87,20 +87,20 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
 
             File preReceiveHook = new File(hooksDir, "pre-receive");
             FileUtils.writeFile(preReceiveHook, 
-                    String.format(hookTemplate, urlRoot + PreReceiveServlet.PATH));
+                    String.format(hookTemplate, urlRoot + PreReceiveServlet.PATH + "/" + project.getId()));
             preReceiveHook.setExecutable(true);
             
             File postReceiveHook = new File(hooksDir, "post-receive");
             FileUtils.writeFile(postReceiveHook, 
-                    String.format(hookTemplate, urlRoot + PostReceiveServlet.PATH));
+                    String.format(hookTemplate, urlRoot + PostReceiveServlet.PATH + "/" + project.getId()));
             postReceiveHook.setExecutable(true);
         } else {
-            File codeDir = storageManager.getStorage(entity).ofCode();
+            File codeDir = storageManager.getStorage(project).ofCode();
             if (!codeDir.exists()) {
                 FileUtils.createDir(codeDir);
                 new Git(codeDir).init().bare(true).call();
             }
-            super.save(entity);
+            super.save(project);
         }
     }
 

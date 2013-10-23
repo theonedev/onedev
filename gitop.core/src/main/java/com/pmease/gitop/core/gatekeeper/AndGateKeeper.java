@@ -1,6 +1,7 @@
 package com.pmease.gitop.core.gatekeeper;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -11,6 +12,11 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.TableLayout;
 import com.pmease.commons.util.trimmable.AndOrConstruct;
 import com.pmease.commons.util.trimmable.TrimUtils;
+import com.pmease.gitop.core.gatekeeper.checkresult.Accepted;
+import com.pmease.gitop.core.gatekeeper.checkresult.Blocked;
+import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitop.core.gatekeeper.checkresult.Rejected;
+import com.pmease.gitop.core.gatekeeper.voteeligibility.VoteEligibility;
 import com.pmease.gitop.core.model.MergeRequest;
 
 @SuppressWarnings("serial")
@@ -37,24 +43,28 @@ public class AndGateKeeper extends AbstractGateKeeper {
 		List<String> pendingReasons = new ArrayList<String>();
 		List<String> acceptReasons = new ArrayList<String>();
 		
+		Collection<VoteEligibility> voteEligibilities = new ArrayList<>();
+		
 		for (GateKeeper each: getGateKeepers()) {
 			CheckResult result = each.check(request);
-			if (result.isAccept()) {
+			if (result instanceof Accepted) {
 				acceptReasons.addAll(result.getReasons());
-			} else if (result.isReject()) {
+			} else if (result instanceof Rejected) {
 				return result;
-			} else if (result.isBlock()) {
+			} else if (result instanceof Blocked) {
 				result.getReasons().addAll(pendingReasons);
+				result.getVoteEligibilities().addAll(voteEligibilities);
 				return result;
 			} else {
 				pendingReasons.addAll(result.getReasons());
+				voteEligibilities.addAll(result.getVoteEligibilities());
 			}
 		}
 		
 		if (!pendingReasons.isEmpty())
-			return pending(pendingReasons);
+			return pending(pendingReasons, voteEligibilities);
 		else
-			return accept(acceptReasons);
+			return accepted(acceptReasons);
 	}
 
 	@Override

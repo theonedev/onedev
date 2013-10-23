@@ -114,7 +114,7 @@ public class PolymorphicListPropertyEditor extends Panel {
 
 					@Override
 					public String getObject() {
-						return EditableUtils.getName(item.getModelObject().getBean().getClass());
+						return EditableUtils.getName(item.getModelObject().getBeanClass());
 					}
 
 					@Override

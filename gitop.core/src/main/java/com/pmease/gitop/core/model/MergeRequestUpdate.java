@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -22,7 +23,13 @@ public class MergeRequestUpdate extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private MergeRequest request;
 	
-	private Date date;
+	@Column(nullable=false)
+	private String subject;
+	
+	private Date date = new Date();
+	
+	@Column(nullable=false)
+	private String commitHash;
 
 	@OneToMany(mappedBy="update", cascade=CascadeType.REMOVE)
 	private Collection<Vote> votes = new ArrayList<Vote>();
@@ -35,7 +42,15 @@ public class MergeRequestUpdate extends AbstractEntity {
 		this.request = request;
 	}
 
-	public Date getDate() {
+	public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public Date getDate() {
 		return date;
 	}
 
@@ -43,7 +58,15 @@ public class MergeRequestUpdate extends AbstractEntity {
 		this.date = date;
 	}
 
-	public Collection<Vote> getVotes() {
+	public String getCommitHash() {
+        return commitHash;
+    }
+
+    public void setCommitHash(String commitHash) {
+        this.commitHash = commitHash;
+    }
+
+    public Collection<Vote> getVotes() {
 		return votes;
 	}
 

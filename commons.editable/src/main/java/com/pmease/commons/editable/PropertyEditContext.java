@@ -28,7 +28,7 @@ public abstract class PropertyEditContext extends AbstractEditContext {
 	
 	public Method getPropertyGetter() {
 		if (propertyGetter == null)
-			propertyGetter = BeanUtils.getGetter(getBean().getClass(), propertyName);
+			propertyGetter = BeanUtils.getGetter(getBeanClass(), propertyName);
 		return propertyGetter;
 	}
 	
@@ -56,7 +56,7 @@ public abstract class PropertyEditContext extends AbstractEditContext {
 	
 	public Serializable instantiate(Class<?> clazz) {
 		try {
-			Constructor<?> constructor = ReflectionUtils.findConstructor(clazz, getBean().getClass());
+			Constructor<?> constructor = ReflectionUtils.findConstructor(clazz, getBeanClass());
 			if (constructor != null)
 				return (Serializable) constructor.newInstance(getBean());
 			else

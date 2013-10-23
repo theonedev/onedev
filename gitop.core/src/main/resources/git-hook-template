@@ -1,5 +1,5 @@
 #!/bin/sh
-output=$(curl -s -S -f -X POST -d @- %s)
+output=$(curl -s -S -f -X POST -d @- %s/${userId})
 IFS='|'
 lines=($output)
 returnCode=0

@@ -11,6 +11,7 @@ import javax.validation.Path;
 import javax.validation.Validator;
 
 import com.pmease.commons.loader.AppLoader;
+import com.pmease.commons.util.JavassistUtils;
 
 @SuppressWarnings("serial")
 public abstract class AbstractEditContext implements EditContext {
@@ -19,13 +20,21 @@ public abstract class AbstractEditContext implements EditContext {
 	
 	private final Serializable bean;
 	
+	private final Class<?> beanClass;
+	
 	public AbstractEditContext(Serializable bean) {
 		this.bean = bean;
+		this.beanClass = JavassistUtils.unproxy(bean.getClass());
 	}
 	
 	@Override
 	public Serializable getBean() {
 		return bean;
+	}
+	
+	@Override
+	public Class<?> getBeanClass() {
+	    return beanClass;
 	}
 	
 	@Override

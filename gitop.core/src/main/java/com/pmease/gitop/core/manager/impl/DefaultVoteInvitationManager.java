@@ -6,7 +6,6 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.Sessional;
-import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
@@ -23,26 +22,8 @@ public class DefaultVoteInvitationManager extends AbstractGenericDao<VoteInvitat
 
 	@Sessional
 	@Override
-	public VoteInvitation find(User reviewer, MergeRequest request) {
-		return find(new Criterion[]{Restrictions.eq("reviewer", reviewer), Restrictions.eq("request", request)});
-	}
-
-	@Transactional
-	@Override
-	public void save(VoteInvitation voteInvitation) {
-		if (voteInvitation.getId() == null) {
-			voteInvitation.getRequest().getVoteInvitations().add(voteInvitation);
-			voteInvitation.getVoter().getVoteInvitations().add(voteInvitation);
-		}
-		super.save(voteInvitation);
-	}
-
-	@Transactional
-	@Override
-	public void delete(VoteInvitation voteInvitation) {
-		voteInvitation.getRequest().getVoteInvitations().remove(voteInvitation);
-		voteInvitation.getVoter().getVoteInvitations().remove(voteInvitation);
-		super.delete(voteInvitation);
+	public VoteInvitation find(User voter, MergeRequest request) {
+		return find(new Criterion[]{Restrictions.eq("voter", voter), Restrictions.eq("request", request)});
 	}
 
 }

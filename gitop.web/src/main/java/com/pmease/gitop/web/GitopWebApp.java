@@ -49,8 +49,8 @@ import com.pmease.gitop.web.page.home.HomePage;
 import com.pmease.gitop.web.page.init.ServerInitPage;
 import com.pmease.gitop.web.page.project.CreateProjectPage;
 import com.pmease.gitop.web.page.project.ProjectHomePage;
-import com.pmease.gitop.web.page.test.TestPage;
-import com.pmease.gitop.web.page.test.TestPage2;
+import com.pmease.gitop.web.page.test.MergeRequestsPage;
+import com.pmease.gitop.web.page.test.ProjectPage;
 import com.pmease.gitop.web.shiro.LoginPage;
 import com.pmease.gitop.web.shiro.LogoutPage;
 import com.pmease.gitop.web.shiro.ShiroWicketPlugin;
@@ -186,8 +186,8 @@ public class GitopWebApp extends AbstractWicketConfig {
 		// project related
 		mountPage("new", CreateProjectPage.class);
 
-		mountPage("/test", TestPage.class);
-		mountPage("test2", TestPage2.class);
+		mountPage("/test/project", ProjectPage.class);
+		mountPage("/test/merge_requests", MergeRequestsPage.class);
 		
 		// repository pages
 		// --------------------------------------------------------

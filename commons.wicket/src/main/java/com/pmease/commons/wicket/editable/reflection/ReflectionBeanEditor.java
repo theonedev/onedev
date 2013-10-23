@@ -61,7 +61,7 @@ public class ReflectionBeanEditor extends Panel {
 		});
 
 		Fragment fragment;
-		if (editContext.getBean().getClass().getAnnotation(TableLayout.class) == null)
+		if (editContext.getBeanClass().getAnnotation(TableLayout.class) == null)
 			fragment = new Fragment("beanEditor", "default", ReflectionBeanEditor.this);
 		else
 			fragment = new Fragment("beanEditor", "table", ReflectionBeanEditor.this);
@@ -112,10 +112,12 @@ public class ReflectionBeanEditor extends Panel {
 				item.add(hint);
 				
 				Map<Serializable, EditContext> childContexts = propertyContext.getChildContexts();
-				if (childContexts.isEmpty() && !propertyContext.getValidationErrors().isEmpty())
-					item.add(AttributeModifier.append("class", "has-error"));
-				else
-					hint.add(AttributeModifier.append("class", "has-error"));
+				if (!propertyContext.getValidationErrors().isEmpty()) {
+	                if (childContexts.isEmpty())
+	                    item.add(AttributeModifier.append("class", "has-error"));
+	                else
+	                    hint.add(AttributeModifier.append("class", "has-error"));
+				}
 			}
 
 		});

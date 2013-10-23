@@ -3,6 +3,7 @@ package com.pmease.commons.editable;
 import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -16,7 +17,9 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.loader.AppLoader;
+import com.pmease.commons.util.BeanUtils;
 import com.pmease.commons.util.GeneralException;
+import com.pmease.commons.util.JavassistUtils;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.WordUtils;
 
@@ -132,4 +135,18 @@ public class EditableUtils {
 		return AppLoader.getInstance(EditSupportRegistry.class).getPropertyEditContext(bean, propertyName);
 	}
 
+	public static void copyProperties(Serializable from, Serializable to) {
+	    for (Method getter: BeanUtils.findGetters(JavassistUtils.unproxy(from.getClass()))) {
+	        Method setter = BeanUtils.findSetter(getter);
+	        if (setter != null && getter.getAnnotation(Editable.class) != null) {
+	            try {
+                    setter.invoke(to, getter.invoke(from));
+                } catch (IllegalAccessException | IllegalArgumentException
+                        | InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+	        }
+	    }
+	}
+	
 }
