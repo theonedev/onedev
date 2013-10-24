@@ -20,7 +20,7 @@ import javax.validation.constraints.NotNull;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.gatekeeper.AlwaysAccept;
+import com.pmease.gitop.core.gatekeeper.ApprovedByAuthorizedUsers;
 import com.pmease.gitop.core.gatekeeper.GateKeeper;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.UserManager;
@@ -62,7 +62,7 @@ public class Project extends AbstractEntity implements UserBelonging {
 	private GeneralOperation defaultAuthorizedOperation = GeneralOperation.NO_ACCESS;
 	
 	@Column(nullable=false)
-	private GateKeeper gateKeeper = new AlwaysAccept();
+	private GateKeeper gateKeeper = new ApprovedByAuthorizedUsers();
 	
 	@Column(nullable=false)
 	private Date createdAt = new Date();
