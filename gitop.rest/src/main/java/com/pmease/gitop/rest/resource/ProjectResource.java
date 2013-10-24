@@ -11,7 +11,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.codahale.metrics.annotation.Timed;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.model.Project;
 
@@ -28,12 +27,8 @@ public class ProjectResource {
 	
 	@Path("/{projectId}")
     @GET
-    @Timed
     public Project get(@PathParam("projectId") LongParam projectId) {
-    	Project project = projectManager.load(projectId.get());
-    	project.getName();
-    	project.getOwner().getRepositories().size();
-    	return project;
+    	return projectManager.load(projectId.get());
     }
     
     @POST

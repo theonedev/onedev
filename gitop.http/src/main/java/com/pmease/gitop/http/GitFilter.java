@@ -1,6 +1,8 @@
 package com.pmease.gitop.http;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -28,6 +30,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.StorageManager;
 import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.permission.ObjectPermission;
 
 @Singleton
@@ -96,7 +99,9 @@ public class GitFilter implements Filter {
 		doNotCache(response);
 		response.setHeader("Content-Type", "application/x-" + service + "-result");			
 
-		Git git = new Git(storageManager.getStorage(project).ofCode());
+		Map<String, String> environments = new HashMap<>();
+		environments.put("userId", User.getCurrentId().toString());
+		Git git = new Git(storageManager.getStorage(project).ofCode(), environments);
 
 		if (GitSmartHttpTools.isUploadPack(request)) {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(project))) {
@@ -104,7 +109,11 @@ public class GitFilter implements Filter {
 			}
 			git.upload().input(ServletUtils.getInputStream(request)).output(response.getOutputStream()).call();
 		} else {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectWrite(project))) {
+			/*
+			 * We intentionally use read permission here for write operation so that gate keeper gets the 
+			 * chance to run to possibly create a merge request for non-permitted user.
+			 */
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(project))) {
 				throw new UnauthorizedException("You do not have permission to push to this project.");
 			}
 			git.receive().input(ServletUtils.getInputStream(request)).output(response.getOutputStream()).call();
@@ -138,7 +147,11 @@ public class GitFilter implements Filter {
 			writeInitial(response, service);
 			git.advertiseUploadRefs().output(response.getOutputStream()).call();
 		} else {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectWrite(project))) {
+			/*
+			 * We intentionally use read permission here for write operation so that gate keeper gets the 
+			 * chance to run to possibly create a merge request for non-permitted user.
+			 */
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(project))) {
 				throw new UnauthorizedException("You do not have permission to push to this project.");
 			}
 			writeInitial(response, service);

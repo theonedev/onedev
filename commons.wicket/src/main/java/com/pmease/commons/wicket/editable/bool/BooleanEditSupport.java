@@ -7,6 +7,7 @@ import com.pmease.commons.editable.BeanEditContext;
 import com.pmease.commons.editable.EditSupport;
 import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.util.BeanUtils;
+import com.pmease.commons.util.JavassistUtils;
 
 public class BooleanEditSupport implements EditSupport {
 
@@ -17,7 +18,7 @@ public class BooleanEditSupport implements EditSupport {
 
 	@Override
 	public PropertyEditContext getPropertyEditContext(Serializable bean, String propertyName) {
-		Method propertyGetter = BeanUtils.getGetter(bean.getClass(), propertyName);
+		Method propertyGetter = BeanUtils.getGetter(JavassistUtils.unproxy(bean.getClass()), propertyName);
 		Class<?> propertyClass = propertyGetter.getReturnType();
 		if (propertyClass == boolean.class) {
 			return new BooleanPropertyEditContext(bean, propertyName);

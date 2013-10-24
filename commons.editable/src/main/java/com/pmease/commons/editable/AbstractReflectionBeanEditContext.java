@@ -19,7 +19,7 @@ public abstract class AbstractReflectionBeanEditContext extends BeanEditContext 
 	public AbstractReflectionBeanEditContext(Serializable bean) {
 		super(bean);
 
-		List<Method> propertyGetters = BeanUtils.findGetters(getBean().getClass());
+		List<Method> propertyGetters = BeanUtils.findGetters(getBeanClass());
 		EditableUtils.sortAnnotatedElements(propertyGetters);
 		
 		EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);

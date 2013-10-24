@@ -17,12 +17,11 @@ public class CommitComment extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private User user;
 	
-	@ManyToOne
-	@JoinColumn(nullable=false)
-	private Commit commit;
+	@Column(nullable=false)
+	private String commit;
 	
 	@Column(nullable=false)
-	private Date date;
+	private Date date = new Date();
 	
 	@Column(nullable=false)
 	private String content;
@@ -35,15 +34,15 @@ public class CommitComment extends AbstractEntity {
 		this.user = user;
 	}
 
-	public Commit getCommit() {
-		return commit;
-	}
+	public String getCommit() {
+        return commit;
+    }
 
-	public void setCommit(Commit commit) {
-		this.commit = commit;
-	}
+    public void setCommit(String commit) {
+        this.commit = commit;
+    }
 
-	public Date getDate() {
+    public Date getDate() {
 		return date;
 	}
 

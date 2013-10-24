@@ -11,7 +11,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.codahale.metrics.annotation.Timed;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.model.User;
 
@@ -28,11 +27,8 @@ public class UserResource {
 	
     @GET
     @Path("/{userId}")
-    @Timed
     public User get(@PathParam("userId") LongParam userId) {
-    	User user = userManager.load(userId.get());
-    	user.getName();
-    	return user;
+    	return userManager.load(userId.get());
     }
     
     @POST

@@ -4,6 +4,10 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.gitop.core.gatekeeper.checkresult.Accepted;
+import com.pmease.gitop.core.gatekeeper.checkresult.Blocked;
+import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitop.core.gatekeeper.checkresult.Rejected;
 import com.pmease.gitop.core.model.MergeRequest;
 
 @SuppressWarnings("serial")
@@ -39,15 +43,15 @@ public class IfThenGateKeeper extends AbstractGateKeeper {
 	@Override
 	public CheckResult check(MergeRequest request) {
 		CheckResult ifResult = getIfGate().check(request);
-		if (ifResult.isAccept()) {
+		if (ifResult instanceof Accepted) {
 			return getThenGate().check(request);
-		} else if (ifResult.isReject()) {
-			return accept(ifResult.getReasons());
-		} else if (ifResult.isBlock()) {
+		} else if (ifResult instanceof Rejected) {
+			return accepted(ifResult.getReasons());
+		} else if (ifResult instanceof Blocked) {
 			return ifResult;
 		} else {
 			CheckResult thenResult = getThenGate().check(request);
-			if (thenResult.isAccept())
+			if (thenResult instanceof Accepted)
 				return thenResult;
 			else 
 				return ifResult;

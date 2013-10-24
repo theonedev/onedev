@@ -52,9 +52,7 @@ public abstract class AbstractUser extends AbstractEntity implements Authenticat
     }
 
     public Subject asSubject() {
-        PrincipalCollection principals =
-                new SimplePrincipalCollection(getId(), "");
-        return new Subject.Builder().principals(principals).buildSubject();
+        return new Subject.Builder().principals(asPrincipal(getId())).buildSubject();
     }
 
     public static Long getCurrentId() {
@@ -63,4 +61,7 @@ public abstract class AbstractUser extends AbstractEntity implements Authenticat
         return (Long) principal;
     }
 
+    public static PrincipalCollection asPrincipal(Long userId) {
+        return new SimplePrincipalCollection(userId, "");
+    }
 }

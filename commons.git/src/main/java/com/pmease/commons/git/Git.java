@@ -1,6 +1,9 @@
 package com.pmease.commons.git;
 
 import java.io.File;
+import java.util.Map;
+
+import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -16,10 +19,18 @@ public class Git {
 	
 	private final File repoDir;
 	
-	public Git(final File repoDir) {
+	private Map<String, String> environments;
+	
+	public Git(final File repoDir, @Nullable final Map<String, String> environments) {
 		this.repoDir = repoDir;
 		if (!repoDir.exists())
 		    FileUtils.createDir(repoDir);
+		
+		this.environments = environments;
+	}
+	
+	public Git(final File repoDir) {
+		this(repoDir, null);
 	}
 	
 	public File repoDir() {
@@ -44,6 +55,14 @@ public class Git {
 	
 	public InitCommand init() {
 		return new InitCommand(this);
+	}
+	
+	public ListBranchCommand listBranch() {
+	    return new ListBranchCommand(this);
+	}
+	
+	public GetCommitCommand getCommit() {
+	    return new GetCommitCommand(this);
 	}
 	
 	public MergeCommand merge() {
@@ -124,7 +143,10 @@ public class Git {
 	}
 	
 	public Commandline cmd() {
-		return new Commandline(GIT_EXE).workingDir(repoDir);
+		Commandline cmd = new Commandline(GIT_EXE).workingDir(repoDir);
+		if (environments != null)
+			cmd.environment(environments);
+		return cmd;
 	}
 
 }

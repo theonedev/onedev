@@ -27,7 +27,9 @@
         <module>../commons.jackson</module>  
         <module>../commons.metrics</module>  
         <module>../commons.validation</module>  
-        <module>../gitop.rest</module> 
+        <module>../gitop.rest</module>
+        <module>../gitop.http</module>
+        <module>../gitop.security</module>
     </modules>  
     <repositories> 
         <repository> 

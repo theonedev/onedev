@@ -4,6 +4,9 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.gitop.core.gatekeeper.checkresult.Accepted;
+import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitop.core.gatekeeper.checkresult.Rejected;
 import com.pmease.gitop.core.model.MergeRequest;
 
 @SuppressWarnings("serial")
@@ -27,10 +30,10 @@ public class NotGateKeeper extends AbstractGateKeeper {
 	public CheckResult check(MergeRequest request) {
 		CheckResult result = getGateKeeper().check(request);
 		
-		if (result.isAccept())
-			return reject(result.getReasons());
-		else if (result.isReject())
-			return accept(result.getReasons());
+		if (result instanceof Accepted)
+			return rejected(result.getReasons());
+		else if (result instanceof Rejected)
+			return accepted(result.getReasons());
 		else
 			return result;
 	}

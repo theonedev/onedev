@@ -10,6 +10,7 @@ import com.pmease.commons.git.FindChangedFilesCommand;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.pattern.WildcardUtils;
+import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.core.manager.StorageManager;
 import com.pmease.gitop.core.model.MergeRequest;
 import com.pmease.gitop.core.model.MergeRequestUpdate;
@@ -33,7 +34,7 @@ public class TouchSpecifiedFiles extends AbstractGateKeeper {
 	@Override
 	public CheckResult check(MergeRequest request) {
 		StorageManager storageManager = AppLoader.getInstance(StorageManager.class);
-		File repoDir = storageManager.getStorage(request.getDestination().getProject()).ofCode();
+		File repoDir = storageManager.getStorage(request.getTarget().getProject()).ofCode();
 
 		FindChangedFilesCommand command = new Git(repoDir).findChangedFiles();
 		
@@ -50,12 +51,12 @@ public class TouchSpecifiedFiles extends AbstractGateKeeper {
 			for (String file: touchedFiles) {
 				if (WildcardUtils.matchPath(getFilePaths(), file)) {
 					request.setBaseUpdate(update);
-					return accept("Touched files match pattern '" + getFilePaths() + "'.");
+					return accepted("Touched files match pattern '" + getFilePaths() + "'.");
 				}
 			}
 		}
 
-		return reject("No touched files match pattern '" + getFilePaths() + "'.");
+		return rejected("No touched files match pattern '" + getFilePaths() + "'.");
 	}
 
 }

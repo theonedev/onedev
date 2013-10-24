@@ -48,7 +48,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	private Collection<MergeRequest> mergeRequests = new ArrayList<MergeRequest>();
 	
 	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
-	private Collection<Project> repositories = new ArrayList<Project>();
+	private Collection<Project> projects = new ArrayList<Project>();
 
 	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
 	private Collection<Team> teams = new ArrayList<Team>();
@@ -117,12 +117,12 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.memberships = memberships;
 	}
 
-	public Collection<Project> getRepositories() {
-		return repositories;
+	public Collection<Project> getProjects() {
+		return projects;
 	}
 
-	public void setRepositories(Collection<Project> repositories) {
-		this.repositories = repositories;
+	public void setProjects(Collection<Project> repositories) {
+		this.projects = repositories;
 	}
 
 	public Collection<Team> getTeams() {
@@ -131,14 +131,6 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	public void setTeams(Collection<Team> teams) {
 		this.teams = teams;
-	}
-
-	public Collection<MergeRequest> getMergeRequests() {
-		return mergeRequests;
-	}
-
-	public void setMergeRequests(Collection<MergeRequest> mergeRequests) {
-		this.mergeRequests = mergeRequests;
 	}
 
 	public Collection<Vote> getVotes() {
@@ -157,7 +149,15 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.voteInvitations = voteInvitations;
 	}
 
-	@Override
+	public Collection<MergeRequest> getMergeRequests() {
+        return mergeRequests;
+    }
+
+    public void setMergeRequests(Collection<MergeRequest> mergeRequests) {
+        this.mergeRequests = mergeRequests;
+    }
+
+    @Override
 	public boolean has(ProtectedObject object) {
 		if (object instanceof User) {
 			User user = (User) object;

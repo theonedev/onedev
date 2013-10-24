@@ -10,6 +10,7 @@ import com.pmease.commons.util.namedentity.EntityMatcher;
 import com.pmease.commons.util.namedentity.EntityPatternSet;
 import com.pmease.commons.util.pattern.PatternSetMatcher;
 import com.pmease.commons.util.pattern.WildcardPathMatcher;
+import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.model.MergeRequest;
 import com.pmease.gitop.core.model.Project;
@@ -32,7 +33,7 @@ public class SubmittedToSpecifiedBranch extends AbstractGateKeeper {
 
 	@Override
 	public CheckResult check(MergeRequest request) {
-		Project project = request.getDestination().getProject();
+		Project project = request.getTarget().getProject();
 		BranchManager branchManager = AppLoader.getInstance(BranchManager.class);
 		EntityLoader entityLoader = branchManager.asEntityLoader(project);
 		EntityMatcher entityMatcher = new EntityMatcher(entityLoader, new WildcardPathMatcher());
@@ -40,10 +41,10 @@ public class SubmittedToSpecifiedBranch extends AbstractGateKeeper {
 
 		EntityPatternSet patternSet = EntityPatternSet.fromStored(getBranchPatterns(), entityLoader);
 
-		if (patternSetMatcher.matches(getBranchPatterns(), request.getDestination().getName()))
-			return accept("Target branch matches pattern '" + patternSet + "'.");
+		if (patternSetMatcher.matches(getBranchPatterns(), request.getTarget().getName()))
+			return accepted("Target branch matches pattern '" + patternSet + "'.");
 		else
-			return reject("Target branch does not match pattern '" + patternSet + "'.");
+			return rejected("Target branch does not match pattern '" + patternSet + "'.");
 	}
 
 	@Override

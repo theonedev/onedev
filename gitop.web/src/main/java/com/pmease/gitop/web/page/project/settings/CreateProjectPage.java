@@ -52,7 +52,7 @@ public class CreateProjectPage extends AbstractLayoutPage {
 						String name = validatable.getValue();
 						User owner = User.getCurrent();
 						
-						for (Project each : owner.getRepositories()) {
+						for (Project each : owner.getProjects()) {
 							if (each.getName().equalsIgnoreCase(name)) {
 								validatable.error(new ValidationError().setMessage("This project already exists"));
 								return;

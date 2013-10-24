@@ -36,7 +36,7 @@ public class ProjectListPanel extends Panel {
 			protected List<Project> load() {
 				User account = getThisAccount();
 				List<Project> projects = Lists.newArrayList();
-				for (Project each : account.getRepositories()) {
+				for (Project each : account.getProjects()) {
 					if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(each))) {
 						projects.add(each);
 					}

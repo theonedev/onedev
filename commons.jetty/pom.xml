@@ -31,22 +31,18 @@
         <dependency> 
             <groupId>org.eclipse.jetty</groupId>  
             <artifactId>jetty-server</artifactId>  
-            <version>${jettyVersion}</version> 
         </dependency>  
         <dependency> 
             <groupId>org.eclipse.jetty</groupId>  
             <artifactId>jetty-servlets</artifactId>  
-            <version>${jettyVersion}</version> 
         </dependency>  
         <dependency> 
             <groupId>org.eclipse.jetty</groupId>  
             <artifactId>jetty-servlet</artifactId>  
-            <version>${jettyVersion}</version> 
         </dependency>  
         <dependency> 
             <groupId>org.eclipse.jetty</groupId>  
             <artifactId>jetty-websocket</artifactId>  
-            <version>${jettyVersion}</version> 
         </dependency> 
     </dependencies>  
     <repositories> 
@@ -68,6 +64,5 @@
     </repositories>  
     <properties> 
         <moduleClass>com.pmease.commons.jetty.JettyModule</moduleClass>  
-        <jettyVersion>8.1.10.v20130312</jettyVersion> 
     </properties> 
 </project>

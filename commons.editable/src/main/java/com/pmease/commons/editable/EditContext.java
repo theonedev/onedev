@@ -8,6 +8,8 @@ public interface EditContext extends Serializable {
 	
 	Serializable getBean();
 	
+	Class<?> getBeanClass();
+	
 	void updateBean();
 	
 	void validate();
