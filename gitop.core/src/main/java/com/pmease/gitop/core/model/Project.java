@@ -45,7 +45,7 @@ public class Project extends AbstractEntity implements UserBelonging {
 	private boolean forkable;
 	
 	@Column(nullable=false)
-	private String defaultBranchName;
+	private String defaultBranchName = "master";
 	
 	@ManyToOne
 	@JoinColumn(nullable=true)

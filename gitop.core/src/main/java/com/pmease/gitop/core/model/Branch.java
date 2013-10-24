@@ -35,7 +35,7 @@ public class Branch extends AbstractEntity {
 	@OneToMany(mappedBy="from", cascade=CascadeType.REMOVE)
 	private Collection<AutoPush> autoPushes = new ArrayList<AutoPush>();
 
-    @OneToMany(mappedBy="destination", cascade=CascadeType.REMOVE)
+    @OneToMany(mappedBy="target", cascade=CascadeType.REMOVE)
     private Collection<MergeRequest> ingoingRequests = new ArrayList<MergeRequest>();
 
     @OneToMany(mappedBy="source", cascade=CascadeType.REMOVE)
