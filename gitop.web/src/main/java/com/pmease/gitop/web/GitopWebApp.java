@@ -49,12 +49,14 @@ import com.pmease.gitop.web.component.avatar.AvatarImageResourceReference;
 import com.pmease.gitop.web.exception.AccessDeniedException;
 import com.pmease.gitop.web.page.account.RegisterPage;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
+import com.pmease.gitop.web.page.account.setting.members.AccountMembersPage;
 import com.pmease.gitop.web.page.account.setting.password.AccountPasswordPage;
-import com.pmease.gitop.web.page.account.setting.permission.AccountPermissionPage;
-import com.pmease.gitop.web.page.account.setting.permission.AddTeamPage;
-import com.pmease.gitop.web.page.account.setting.permission.EditTeamPage;
+import com.pmease.gitop.web.page.account.setting.permissions.AccountPermissionsPage;
 import com.pmease.gitop.web.page.account.setting.profile.AccountProfilePage;
 import com.pmease.gitop.web.page.account.setting.repos.AccountReposPage;
+import com.pmease.gitop.web.page.account.setting.teams.AccountTeamsPage;
+import com.pmease.gitop.web.page.account.setting.teams.AddTeamPage;
+import com.pmease.gitop.web.page.account.setting.teams.EditTeamPage;
 import com.pmease.gitop.web.page.error.AccessDeniedPage;
 import com.pmease.gitop.web.page.error.InternalErrorPage;
 import com.pmease.gitop.web.page.error.PageNotFoundPage;
@@ -66,7 +68,7 @@ import com.pmease.gitop.web.page.project.settings.MergeRequestSettingsPage;
 import com.pmease.gitop.web.page.project.settings.ProjectAuditLogPage;
 import com.pmease.gitop.web.page.project.settings.ProjectHooksPage;
 import com.pmease.gitop.web.page.project.settings.ProjectOptionsPage;
-import com.pmease.gitop.web.page.project.settings.ProjectPermissionsPage;
+import com.pmease.gitop.web.page.project.settings.ProjectPermissionPage;
 import com.pmease.gitop.web.page.project.source.ProjectHomePage;
 import com.pmease.gitop.web.page.project.source.RepositoryBlobPage;
 import com.pmease.gitop.web.page.project.source.RepositoryBranchesPage;
@@ -226,7 +228,7 @@ public class GitopWebApp extends AbstractWicketConfig {
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/hooks", ProjectHooksPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/merge-requests", MergeRequestSettingsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/audits", ProjectAuditLogPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/permissions", ProjectPermissionsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/permissions", ProjectPermissionPage.class));
 		
 		// account dashboard
 		mount(new MountedMapper("/${user}", AccountHomePage.class) {
@@ -245,10 +247,12 @@ public class GitopWebApp extends AbstractWicketConfig {
 		// account settings
 		mountPage("settings/profile", AccountProfilePage.class);
 		mountPage("settings/password", AccountPasswordPage.class);
-		mountPage("settings/permission", AccountPermissionPage.class);
+		mountPage("settings/permission", AccountPermissionsPage.class);
 		mountPage("settings/repos", AccountReposPage.class);
-		mountPage("teams/add", AddTeamPage.class);
-		mountPage("teams/edit/${teamId}", EditTeamPage.class);
+		mountPage("settings/members", AccountMembersPage.class);
+		mountPage("settings/teams", AccountTeamsPage.class);
+		mountPage("settings/teams/new", AddTeamPage.class);
+		mountPage("settings/teams/edit/${teamId}", EditTeamPage.class);
 		
 		// project related
 		mountPage("new", CreateProjectPage.class);

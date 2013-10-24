@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.account.setting.permission;
+package com.pmease.gitop.web.page.account.setting.teams;
 
 import java.util.List;
 

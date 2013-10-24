@@ -1,10 +1,11 @@
-package com.pmease.gitop.web.page.account.setting.permission;
+package com.pmease.gitop.web.page.account.setting.permissions;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -14,11 +15,11 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.permission.operation.GeneralOperation;
-import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
+import com.pmease.gitop.web.page.account.setting.teams.AccountTeamsPage;
 
 @SuppressWarnings("serial")
-public class AccountPermissionPage extends AccountSettingPage {
+public class AccountPermissionsPage extends AccountSettingPage {
 
 	@Override
 	protected String getPageTitle() {
@@ -27,7 +28,7 @@ public class AccountPermissionPage extends AccountSettingPage {
 
 	@Override
 	protected Category getSettingCategory() {
-		return Category.PERMISSION;
+		return Category.PERMISSIONS;
 	}
 
 	@Override
@@ -74,7 +75,7 @@ public class AccountPermissionPage extends AccountSettingPage {
 			
 		});
 		
-		add(new TeamsPanel("teams", new UserModel(getAccount())));
+		add(new BookmarkablePageLink<Void>("teamslink", AccountTeamsPage.class));
 	}
 	
 	class PermissionLink extends AjaxLink<Void> {
@@ -104,7 +105,7 @@ public class AccountPermissionPage extends AccountSettingPage {
 			account.setDefaultAuthorizedOperation(permssion);
 			Gitop.getInstance(UserManager.class).save(account);
 			
-			target.add(AccountPermissionPage.this.get("loggedInPermissions"));
+			target.add(AccountPermissionsPage.this.get("loggedInPermissions"));
 		}
 	}
 }

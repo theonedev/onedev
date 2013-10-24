@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.account.setting.permission;
+package com.pmease.gitop.web.page.account.setting.teams;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -26,7 +26,7 @@ public class EditTeamPage extends AccountSettingPage {
 	
 	@Override
 	protected Category getSettingCategory() {
-		return Category.PERMISSION;
+		return Category.TEAMS;
 	}
 
 	@Override

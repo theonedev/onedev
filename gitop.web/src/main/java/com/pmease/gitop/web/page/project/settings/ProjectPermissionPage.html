@@ -1,0 +1,31 @@
+<html xmlns:wicket>
+<wicket:extend>
+	<section>
+		<div class="head"><h2>Project Permissions</h2></div>
+		<div class="body">
+			<h4>Anonymous Users</h4>
+			<p><a class="checkable-link" wicket:id="anonymouslink"><i class="icon-checkbox"></i> Anonymous users can browse and pull this repository.</a></p>
+			<hr />
+			
+			<h4>Logged-in Users</h4>
+			<p>Logged-in users can access this project with permission:</p>
+			<div class="btn-group btn-group-justified btn-radio-group" wicket:id="loggedInPermissions">
+				<wicket:container wicket:id="permissions">
+					<a wicket:id="permission" class="btn">
+						<span class="icon-ok"></span>
+						<span wicket:id="name"></span>
+					</a>
+				</wicket:container>
+			</div>
+			<p></p>
+			<ul class="text-muted">
+				<li>Permission granted to logged-in users on account level is <span class="label label-info"><wicket:container wicket:id="userlevelpermission"></wicket:container></span></li>
+			</ul>
+			<hr/>
+			
+			<h4>Teams</h4>
+			
+		</div>
+	</section>
+</wicket:extend>
+</html>

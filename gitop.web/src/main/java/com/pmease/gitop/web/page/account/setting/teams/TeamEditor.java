@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.account.setting.permission;
+package com.pmease.gitop.web.page.account.setting.teams;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,6 +22,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.util.WildcardListModel;
 import org.apache.wicket.validation.IValidatable;
@@ -73,10 +74,10 @@ public class TeamEditor extends Panel {
 		super.onInitialize();
 
 		this.name = getTeam().getName();
-		this.operation = getTeam().getAuthorizedOperation();
+		this.currentPermission = getTeam().getAuthorizedOperation();
 		
 		add(createInfoForm());
-		
+		add(createPermissionContainer());
 		membersContainer = new WebMarkupContainer("span") {
 			@Override
 			protected void onConfigure() {
@@ -159,11 +160,10 @@ public class TeamEditor extends Panel {
 		}.setOutputMarkupId(true));
 	}
 
-	private GeneralOperation operation;
+	private GeneralOperation currentPermission;
 	private String name;
 	
 	private Form<?> createInfoForm() {
-		operation = getTeam().getAuthorizedOperation();
 		Form<?> infoForm = new Form<Void>("infoForm");
 		add(infoForm);
 		infoForm.add(new FeedbackPanel("feedback"));
@@ -181,26 +181,7 @@ public class TeamEditor extends Panel {
 				}
 			}
 		}).setRequired(true));
-		WebMarkupContainer permissionContainer = new WebMarkupContainer(
-				"permissionContainer");
-		permissionContainer.setOutputMarkupId(true);
-		infoForm.add(permissionContainer);
-		permissionContainer.add(new ListView<GeneralOperation>("permissions",
-				ImmutableList.<GeneralOperation> of(
-						GeneralOperation.READ,
-						GeneralOperation.WRITE, 
-						GeneralOperation.ADMIN)) {
-
-			@Override
-			protected void populateItem(ListItem<GeneralOperation> item) {
-				GeneralOperation permission = item.getModelObject();
-				AjaxLink<?> link = new PermissionLink("permission", permission);
-				link.add(new Label("name", permission.toString()));
-				item.add(link);
-			}
-
-		});
-
+		
 		AjaxButton btn = new AjaxButton("submit", infoForm) {
 			@Override
 			protected void onError(AjaxRequestTarget target, Form<?> form) {
@@ -215,7 +196,7 @@ public class TeamEditor extends Panel {
 				Preconditions.checkNotNull(owner, "owner");
 
 				team.setName(name);
-				team.setAuthorizedOperation(operation);
+				team.setAuthorizedOperation(currentPermission);
 				team.setOwner(owner);
 
 				Gitop.getInstance(TeamManager.class).save(team);
@@ -241,19 +222,16 @@ public class TeamEditor extends Panel {
 		return infoForm;
 	}
 
-	class PermissionLink extends AjaxLink<Void> {
-		final GeneralOperation permission;
-
-		PermissionLink(String id, final GeneralOperation permission) {
-			super(id);
-			this.permission = permission;
-
+	class PermissionLink extends AjaxLink<GeneralOperation> {
+		
+		PermissionLink(String id, IModel<GeneralOperation> permission) {
+			super(id, permission);
 			add(AttributeAppender.append("class",
 					new AbstractReadOnlyModel<String>() {
 
 						@Override
 						public String getObject() {
-							return Objects.equal(operation, permission) ? 
+							return Objects.equal(currentPermission, getPermission()) ? 
 									"active" : "";
 						}
 					}));
@@ -261,12 +239,22 @@ public class TeamEditor extends Panel {
 
 		@Override
 		public void onClick(AjaxRequestTarget target) {
-			if (Objects.equal(operation, permission)) {
+			if (Objects.equal(currentPermission, getPermission())) {
 				return;
 			}
 
-			operation = permission;
-			target.add(TeamEditor.this.get("infoForm").get("permissionContainer"));
+			currentPermission = getPermission();
+			Team team = getTeam();
+			team.setAuthorizedOperation(currentPermission);
+			if (!team.isNew()) {
+				Gitop.getInstance(TeamManager.class).save(team);
+			}
+			
+			target.add(TeamEditor.this.get("permissionContainer"));
+		}
+		
+		GeneralOperation getPermission() {
+			return (GeneralOperation) getDefaultModelObject();
 		}
 	}
 
@@ -320,6 +308,24 @@ public class TeamEditor extends Panel {
 		return form;
 	}
 
+	private Component createPermissionContainer() {
+		WebMarkupContainer permissionContainer = new WebMarkupContainer("permissionContainer");
+		permissionContainer.setOutputMarkupId(true);
+		permissionContainer.add(new ListView<GeneralOperation>("permissions",
+				ImmutableList.<GeneralOperation>copyOf(GeneralOperation.values())) {
+
+			@Override
+			protected void populateItem(ListItem<GeneralOperation> item) {
+				GeneralOperation permission = item.getModelObject();
+				AjaxLink<?> link = new PermissionLink("permission", Model.of(permission));
+				link.add(new Label("name", permission.toString()));
+				item.add(link);
+			}
+
+		});
+		return permissionContainer;
+	}
+	
 	private void onMembersChanged(AjaxRequestTarget target) {
 		target.add(membersContainer.get("members"));
 		target.add(membersContainer.get("total"));

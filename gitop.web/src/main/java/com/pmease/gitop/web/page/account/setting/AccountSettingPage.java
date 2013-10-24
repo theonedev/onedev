@@ -16,10 +16,12 @@ import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.web.component.link.UserAvatarLink;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
+import com.pmease.gitop.web.page.account.setting.members.AccountMembersPage;
 import com.pmease.gitop.web.page.account.setting.password.AccountPasswordPage;
-import com.pmease.gitop.web.page.account.setting.permission.AccountPermissionPage;
+import com.pmease.gitop.web.page.account.setting.permissions.AccountPermissionsPage;
 import com.pmease.gitop.web.page.account.setting.profile.AccountProfilePage;
 import com.pmease.gitop.web.page.account.setting.repos.AccountReposPage;
+import com.pmease.gitop.web.page.account.setting.teams.AccountTeamsPage;
 
 @SuppressWarnings("serial")
 public abstract class AccountSettingPage extends AbstractLayoutPage {
@@ -28,7 +30,9 @@ public abstract class AccountSettingPage extends AbstractLayoutPage {
 		PROFILE(AccountProfilePage.class, "Profile"),
 		PASSWORD(AccountPasswordPage.class, "Change Password"),
 		REPOS(AccountReposPage.class, "Repositories"),
-		PERMISSION(AccountPermissionPage.class, "Permissions");
+		PERMISSIONS(AccountPermissionsPage.class, "Permissions"),
+		TEAMS(AccountTeamsPage.class, "Teams"),
+		MEMBERS(AccountMembersPage.class, "Members");
 		
 		final Class<? extends WebPage> pageClass;
 		final String name;

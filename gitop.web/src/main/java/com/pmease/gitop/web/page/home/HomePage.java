@@ -1,6 +1,7 @@
 package com.pmease.gitop.web.page.home;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.RadioGroup;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -11,6 +12,7 @@ import org.apache.wicket.model.PropertyModel;
 
 import com.google.common.collect.ImmutableList;
 import com.pmease.gitop.web.common.component.dropzone.DropZoneBehavior;
+import com.pmease.gitop.web.common.component.foundation.FoundationDropDownBehavior;
 import com.pmease.gitop.web.common.component.messenger.Messenger;
 import com.pmease.gitop.web.common.component.vex.AjaxConfirmButton;
 import com.pmease.gitop.web.common.component.vex.VexLinkBehavior.VexIcon;
@@ -37,6 +39,7 @@ public class HomePage extends AbstractLayoutPage {
 		super.onPageInitialize();
 		
 		add(new DropZoneBehavior());
+		add(new FoundationDropDownBehavior());
 		
 		Form<?> form = new Form<Void>("testForm");
 		add(form);
@@ -80,6 +83,11 @@ public class HomePage extends AbstractLayoutPage {
 		});
 	}
 
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+	}
+	
 	VexIcon vexIcon = VexIcon.INFO;
 	boolean displayed = true;
 }

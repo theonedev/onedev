@@ -95,7 +95,7 @@ public abstract class AbstractProjectSettingPage extends AbstractProjectPage {
 			break;
 			
 		case PERMISSIONS:
-			pageClass = ProjectPermissionsPage.class;
+			pageClass = ProjectPermissionPage.class;
 			break;
 			
 		default:

@@ -1,0 +1,19 @@
+<html xmlns:wicket>
+<wicket:extend>
+	<section>
+		<div class="head">
+			<h2>Members</h2>
+		</div>
+		<div class="body">
+				<p>Manage your members/collaborators with teams. <a class="btn btn-xs btn-info btn-colorful-text" wicket:id="teamlink">Manage Teams</a></p>
+			<h3><span wicket:id="num"></span> <small>members total</small></h3>
+			<hr/>
+			<div wicket:id="members"></div>
+		</div>
+	</section>
+	
+	<wicket:fragment wicket:id="memberactionfrag">
+		<a class="img-link remove-link" wicket:id="remove"><i class="icon-remove-sign"></i></a>
+	</wicket:fragment>
+</wicket:extend>
+</html>

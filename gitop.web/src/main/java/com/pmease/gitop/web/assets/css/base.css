@@ -45,10 +45,10 @@ ul.piped, ol.piped { margin: 0; padding: 0; }
 /* LINKS */
 .checkable-link { color: #333; cursor: pointer; }
 .checkable-link:hover { text-decoration: none; }
-.checkable-link > .icon-checkbox:before { content: "\f096"; width: 16px; }
-.checkable-link.checked > .icon-checkbox:before { content: "\f046"; width: 16px; }
-.checkable-link.disabled { color: #888; }
-em.checkable-link { color: #888 !important; }
+.checkable-link .icon-checkbox:before { content: "\f096"; width: 16px; }
+.checkable-link.checked .icon-checkbox:before { content: "\f046"; width: 16px; }
+.checkable-link.disabled,
+.checkable-link > em { color: #999; font-style: normal; cursor: not-allowed;}
 
 /** LIST GROUP */
 .list-navs > .list-group-item { border-width: 1px 0; position: relative; }
@@ -235,6 +235,44 @@ fieldset[disabled] .btn-gray.active {
   border-color: #cccccc;
 }
 
+.btn-inverse {
+  color: #ffffff;
+  background-color: #34495e;
+}
+.btn-inverse:hover,
+.btn-inverse:focus,
+.btn-inverse:active,
+.btn-inverse.active,
+.open .dropdown-toggle.btn-inverse {
+  color: #ffffff;
+  background-color: #415b76;
+  border-color: #415b76;
+}
+.btn-inverse:active,
+.btn-inverse.active,
+.open .dropdown-toggle.btn-inverse {
+  background: #2c3e50;
+}
+.btn-inverse.disabled,
+.btn-inverse[disabled],
+fieldset[disabled] .btn-inverse,
+.btn-inverse.disabled:hover,
+.btn-inverse[disabled]:hover,
+fieldset[disabled] .btn-inverse:hover,
+.btn-inverse.disabled:focus,
+.btn-inverse[disabled]:focus,
+fieldset[disabled] .btn-inverse:focus,
+.btn-inverse.disabled:active,
+.btn-inverse[disabled]:active,
+fieldset[disabled] .btn-inverse:active,
+.btn-inverse.disabled.active,
+.btn-inverse[disabled].active,
+fieldset[disabled] .btn-inverse.active {
+  background-color: #34495e;
+}
+
+.btn-inverse .caret { border-top-color: #fff; }
+
 .btn-radio-group .btn .icon-ok { display: none; }
 .btn-radio-group .btn.active { background: #999; color: white; }
 .btn-radio-group .btn.active .icon-ok, .btn-radio-group .btn:hover .icon-ok { display: inline-block; }
@@ -308,6 +346,8 @@ fieldset[disabled] .btn-gray.active {
 .form-horizontal .field-controls { position: relative; min-height: 1px; padding-right: 15px; padding-left: 15px; float: left; }
 .form-horizontal .control-label { width: 25%; }
 .form-horizontal .field-controls { width: 74.884%; }
+.form-horizontal .field-controls .message { margin: 0; padding-top: 7px; }
+
 /**
  * AVATAR
  */
