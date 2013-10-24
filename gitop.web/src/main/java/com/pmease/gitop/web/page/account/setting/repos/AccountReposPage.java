@@ -13,7 +13,7 @@ import com.pmease.gitop.core.model.Project;
 import com.pmease.gitop.web.model.ProjectModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
-import com.pmease.gitop.web.page.project.ProjectAdminPage;
+import com.pmease.gitop.web.page.project.settings.ProjectOptionsPage;
 
 @SuppressWarnings("serial")
 public class AccountReposPage extends AccountSettingPage {
@@ -47,7 +47,7 @@ public class AccountReposPage extends AccountSettingPage {
 			protected void populateItem(ListItem<Project> item) {
 				Project project = item.getModelObject();
 				item.add(new SimpleProjectInfo("info", new ProjectModel(project)));
-				item.add(new BookmarkablePageLink<Void>("admin", ProjectAdminPage.class,
+				item.add(new BookmarkablePageLink<Void>("admin", ProjectOptionsPage.class,
 						PageSpec.forProject(project)));
 			}
 			

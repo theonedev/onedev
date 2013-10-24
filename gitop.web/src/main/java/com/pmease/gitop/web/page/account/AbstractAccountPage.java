@@ -40,7 +40,7 @@ public abstract class AbstractAccountPage extends AbstractLayoutPage {
 		super.onDetach();
 	}
 	
-	protected User getAccount() {
+	public User getAccount() {
 		return accountModel.getObject();
 	}
 }

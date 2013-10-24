@@ -1,5 +1,10 @@
 package com.pmease.gitop.web.page.account.home;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -8,13 +13,20 @@ import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.pmease.gitop.core.model.Membership;
+import com.pmease.gitop.core.model.Team;
+import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.web.component.avatar.AvatarImage;
+import com.pmease.gitop.web.component.members.MemberListView;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.AbstractAccountPage;
 
@@ -76,7 +88,27 @@ public class AccountHomePage extends AbstractAccountPage {
 			return new ProjectListPanel(id, accountModel);
 			
 		case MEMBERS:
-			return new MemberListPanel(id, accountModel);
+			IModel<List<User>> model = new LoadableDetachableModel<List<User>>() {
+
+				@Override
+				protected List<User> load() {
+					User account = getAccount();
+					Collection<Team> teams = account.getTeams();
+					Set<User> users = Sets.newHashSet();
+					
+					for (Team each : teams) {
+						for (Membership membership : each.getMemberships()) {
+							users.add(membership.getUser());
+						}
+					}
+					
+					List<User> result = Lists.newArrayList(users);
+					Collections.sort(result);
+					return result;
+				}
+				
+			};
+			return new MemberListView(id, model);
 			
 		default:
 			throw new IllegalArgumentException("tab " + category);

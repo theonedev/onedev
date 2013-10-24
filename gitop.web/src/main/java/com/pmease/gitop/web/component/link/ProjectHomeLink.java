@@ -20,7 +20,7 @@ public class ProjectHomeLink extends LinkPanel {
 			@Override
 			public String getObject() {
 				Project project = projectModel.getObject();
-				return project.getOwner().getName() + " / " + project.getName();
+				return project.getOwner().getName() + "/" + project.getName();
 			}
 			
 		});

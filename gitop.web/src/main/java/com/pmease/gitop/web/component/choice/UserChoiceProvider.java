@@ -38,7 +38,7 @@ public class UserChoiceProvider extends ChoiceProvider<User> {
 		List<User> users = um.query(new Criterion[] {
 				Restrictions.ilike("name", term, MatchMode.START),
 				Restrictions.ilike("displayName", term, MatchMode.START)
-		}, new Order[0], first, 10);
+		}, new Order[0], first, 25);
 
 		response.addAll(users);
 	}

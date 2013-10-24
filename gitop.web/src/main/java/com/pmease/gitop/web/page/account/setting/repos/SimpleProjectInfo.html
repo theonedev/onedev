@@ -1,5 +1,15 @@
 <html xmlns:wicket>
 <wicket:panel>
-	<a>steve/repo</a>
+	<span wicket:id="project"></span> 
+	<span class="age"><i class="icon-time"></i> <span wicket:id="age"></span></span>
+	<wicket:enclosure>
+	<p class="fork-info">
+		Forked from <span wicket:id="forkedFrom"></span>
+	</p>
+	</wicket:enclosure>
+	<p class="fork-info">
+		Forked from <a>abc/def</a>
+	</p>
+	
 </wicket:panel>
 </html>

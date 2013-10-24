@@ -5,7 +5,7 @@
     <parent> 
         <artifactId>parent.general</artifactId>  
         <groupId>com.pmease</groupId>  
-        <version>1.0.28</version> 
+        <version>1.0.31</version> 
     </parent>  
     <artifactId>commons.wicket</artifactId>  
     <build> 
@@ -47,22 +47,22 @@
             <groupId>org.apache.wicket</groupId>  
             <artifactId>wicket-devutils</artifactId>  
             <version>${wicketVersion}</version> 
-        </dependency>    
+        </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.29</version> 
+            <version>1.0.31</version> 
         </dependency>  
-        <dependency>
-        	<groupId>com.pmease</groupId>
-        	<artifactId>commons.editable</artifactId>
-        	<version>1.0.0</version>
-        </dependency>
-        <dependency>
-        	<groupId>com.pmease</groupId>
-        	<artifactId>commons.shiro</artifactId>
-        	<version>1.0.30</version>
-        </dependency>
+        <dependency> 
+            <groupId>com.pmease</groupId>  
+            <artifactId>commons.editable</artifactId>  
+            <version>1.0.0</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>com.pmease</groupId>  
+            <artifactId>commons.shiro</artifactId>  
+            <version>1.0.30</version> 
+        </dependency> 
     </dependencies>  
     <properties> 
         <moduleClass>com.pmease.commons.wicket.WicketModule</moduleClass>  
@@ -85,5 +85,5 @@
             <url>http://artifact.pmease.com/</url> 
         </repository> 
     </repositories>  
-    <version>1.0.29</version>
+    <version>1.0.29</version> 
 </project>

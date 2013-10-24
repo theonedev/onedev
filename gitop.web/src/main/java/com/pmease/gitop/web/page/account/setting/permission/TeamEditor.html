@@ -20,34 +20,18 @@
 	<h4>Members</h4>
 	<form class="form-inline" wicket:id="membersForm">
 		<div class="form-feedback" wicket:id="feedback"></div>
-		<input wicket:id="userchoice" class="user-choice" type="hidden" style="width: 300px"></input>
+		<input wicket:id="userchoice" class="team-users-choice" type="hidden" style="width: 420px"></input>
 		<button type="submit" class="btn btn-success btn-colorful-text" wicket:id="submit"><i class="icon-plus"></i> Add</button>
 	</form>
 	<hr/>
 	<div>
-		<h4 class="text-muted"><b wicket:id="total"></b> members total</h4>
-		<div class="member-list clearfix">
-			<div class="members first" wicket:id="oddlist">
-			</div>
-			<div class="members last" wicket:id="evenlist">
-			</div>
-		</div>
+		<h4 class="text-muted members-summary"><b wicket:id="total"></b> members total</h4>
+		<div wicket:id="members"></div>
 	</div>
 	</wicket:container>
 	
-	<wicket:fragment wicket:id="membersview">
-		<ul class="list-group list-view list-group-hoverable">
-			<li class="list-group-item" wicket:id="member">
-				<span class="avatar" wicket:id="avatar"></span>
-				<a class="name" wicket:id="link">
-					<span wicket:id="name"></span>
-					(<em wicket:id="fullname"></em>)
-				</a>
-				<div class="item-actions">
-					<a class="img-link remove-link" wicket:id="remove"><i class="icon-remove-sign"></i></a>
-				</div>
-			</li>
-		</ul>
+	<wicket:fragment wicket:id="memberactionfrag">
+		<a class="img-link remove-link" wicket:id="remove"><i class="icon-remove-sign"></i></a>
 	</wicket:fragment>
 	
 </wicket:panel>

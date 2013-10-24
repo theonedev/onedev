@@ -1,7 +1,10 @@
 package com.pmease.gitop.web.page.account.setting.permission;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -12,7 +15,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -21,6 +23,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.model.util.WildcardListModel;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
@@ -29,6 +32,8 @@ import org.hibernate.criterion.Restrictions;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.MembershipManager;
 import com.pmease.gitop.core.manager.TeamManager;
@@ -38,10 +43,9 @@ import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.permission.operation.GeneralOperation;
 import com.pmease.gitop.web.common.component.messenger.Messenger;
 import com.pmease.gitop.web.common.form.FeedbackPanel;
-import com.pmease.gitop.web.component.avatar.AvatarImage;
-import com.pmease.gitop.web.component.choice.SingleUserChoice;
+import com.pmease.gitop.web.component.choice.MultipleUserChoice;
+import com.pmease.gitop.web.component.members.MemberListView;
 import com.pmease.gitop.web.model.UserModel;
-import com.pmease.gitop.web.page.PageSpec;
 
 @SuppressWarnings("serial")
 public class TeamEditor extends Panel {
@@ -50,8 +54,8 @@ public class TeamEditor extends Panel {
 
 	private WebMarkupContainer membersContainer;
 	
-	public TeamEditor(String id, IModel<User> userModel, IModel<Team> model) {
-		super(id, model);
+	public TeamEditor(String id, IModel<User> userModel, IModel<Team> teamModel) {
+		super(id, teamModel);
 		this.userModel = userModel;
 		this.setOutputMarkupId(true);
 	}
@@ -85,40 +89,74 @@ public class TeamEditor extends Panel {
 		
 		membersContainer.add(createMembersForm());
 
-		final IModel<List<Membership>> relationModel = new LoadableDetachableModel<List<Membership>>() {
+		final IModel<List<User>> membersModel = new LoadableDetachableModel<List<User>>() {
 
 			@Override
-			protected List<Membership> load() {
+			protected List<User> load() {
 				Team team = getTeam();
 				if (team.isNew()) {
 					return Collections.emptyList();
 				}
 
-				List<Membership> r = Gitop.getInstance(MembershipManager.class)
-						.query(Restrictions.eq("team", getTeam()));
+				List<User> users = Lists.newArrayList();
+				List<Membership> memberships = Gitop.getInstance(MembershipManager.class)
+						.query(Restrictions.eq("team", team));
+				for (Membership each : memberships) {
+					users.add(each.getUser());
+				}
 
-				Collections.sort(r, new java.util.Comparator<Membership>() {
+				Collections.sort(users, new java.util.Comparator<User>() {
 
 					@Override
-					public int compare(Membership o1, Membership o2) {
-						return o1.getUser().getName()
-								.compareTo(o2.getUser().getName());
+					public int compare(User o1, User o2) {
+						return o1.getName()
+								.compareTo(o2.getName());
 					}
 				});
 
-				return r;
+				return users;
 			}
 		};
 
-		membersContainer.add(createMemberList("oddlist", relationModel, true));
-		membersContainer.add(createMemberList("evenlist", relationModel, false));
+//		membersContainer.add(createMemberList("oddlist", relationModel));
+//		membersContainer.add(createMemberList("evenlist", relationModel, false));
 		membersContainer.add(new Label("total", new AbstractReadOnlyModel<Integer>() {
 
 			@Override
 			public Integer getObject() {
-				return relationModel.getObject().size();
+				return membersModel.getObject().size();
 			}
 		}).setOutputMarkupId(true));
+		
+		membersContainer.add(new MemberListView("members", membersModel){
+			@Override
+			protected Component createActionsPanel(String id, IModel<User> model) {
+				Fragment frag = new Fragment(id, "memberactionfrag", TeamEditor.this);
+				final IModel<User> userModel = new UserModel(model.getObject());
+				frag.add(new AjaxLink<Void>("remove") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						MembershipManager mm = Gitop.getInstance(MembershipManager.class);
+						User user = userModel.getObject();
+						Team team = getTeam();
+						Membership membership = mm.find(
+								Restrictions.eq("user", user),
+								Restrictions.eq("team", team));
+						if (membership != null) {
+							Gitop.getInstance(MembershipManager.class).delete(membership);
+							Messenger.warn(String.format("User [%s] is removed from team [%s]", 
+									user.getName(), 
+									team.getName()))
+									.run(target);
+							
+							onMembersChanged(target);
+						}
+					}
+				});
+				return frag;
+			}
+		}.setOutputMarkupId(true));
 	}
 
 	private GeneralOperation operation;
@@ -232,13 +270,13 @@ public class TeamEditor extends Panel {
 		}
 	}
 
-	User userToAdd;
-
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Form<?> createMembersForm() {
 		Form<?> form = new Form<Void>("membersForm");
 		form.add(new FeedbackPanel("feedback"));
-		form.add(new SingleUserChoice("userchoice", new PropertyModel<User>(
-				this, "userToAdd")));
+		final IModel<Collection<User>> usersModel = new WildcardListModel(new ArrayList<User>());
+		
+		form.add(new MultipleUserChoice("userchoice", usersModel));
 
 		form.add(new AjaxButton("submit", form) {
 			@Override
@@ -248,32 +286,32 @@ public class TeamEditor extends Panel {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				if (userToAdd == null) {
-					form.error("Please select an user first");
+				Set<User> users = Sets.newHashSet(usersModel.getObject());
+				
+				if (users.isEmpty()) {
+					form.error("Please add an user first");
 					target.add(form);
 					return;
 				}
 
 				Team team = getTeam();
+				for (Membership each : team.getMemberships()) {
+					if (users.contains(each.getUser())) {
+						users.remove(each.getUser());
+					}
+				}
+				
 				MembershipManager mm = Gitop
 						.getInstance(MembershipManager.class);
-				Membership m = mm.find(Restrictions.eq("team", team),
-						Restrictions.eq("user", userToAdd));
-				if (m != null) {
-					form.warn("User has been added already");
-					target.add(form);
-					return;
+				
+				for (User each : users) {
+					Membership m = new Membership();
+					m.setTeam(team);
+					m.setUser(each);
+					mm.save(m);
 				}
-
-				m = new Membership();
-				m.setUser(userToAdd);
-				m.setTeam(team);
-				mm.save(m);
-
-				Messenger.success(String.format("User [%s] is added to team [%s]", 
-									userToAdd.getName(), team.getName()))
-						.run(target);
-				userToAdd = null;
+				
+				usersModel.setObject(new ArrayList<User>());
 				target.add(form);
 				onMembersChanged(target);
 			}
@@ -283,54 +321,8 @@ public class TeamEditor extends Panel {
 	}
 
 	private void onMembersChanged(AjaxRequestTarget target) {
-		target.add(membersContainer.get("oddlist"));
-		target.add(membersContainer.get("evenlist"));
+		target.add(membersContainer.get("members"));
 		target.add(membersContainer.get("total"));
-	}
-
-	private Component createMemberList(String id,
-			IModel<List<Membership>> model, final boolean expected) {
-		Fragment frag = new Fragment(id, "membersview", this);
-		frag.setOutputMarkupId(true);
-		frag.add(new ListView<Membership>("member", model) {
-
-			@Override
-			protected void populateItem(ListItem<Membership> item) {
-				int index = item.getIndex();
-				boolean odd = index % 2 == 0;
-				if (odd != expected) {
-					item.setVisibilityAllowed(false);
-					return;
-				}
-
-				Membership membership = item.getModelObject();
-				User user = membership.getUser();
-				item.add(new AvatarImage("avatar", new UserModel(user)));
-				Link<?> link = PageSpec.newUserHomeLink("link", user);
-				link.add(new Label("name", user.getName()));
-				link.add(new Label("fullname", user.getDisplayName()));
-				item.add(link);
-
-				final Long id = membership.getId();
-				item.add(new AjaxLink<Void>("remove") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						MembershipManager mm = Gitop.getInstance(MembershipManager.class);
-						Membership membership = mm.get(id);
-						Gitop.getInstance(MembershipManager.class).delete(membership);
-						Messenger.warn(String.format("User [%s] is removed from team [%s]", 
-								membership.getUser().getName(), 
-								membership.getTeam().getName()))
-								.run(target);
-						
-						onMembersChanged(target);
-					}
-				});
-			}
-		});
-
-		return frag;
 	}
 
 	@Override
