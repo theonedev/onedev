@@ -25,7 +25,11 @@ public abstract class AjaxConfirmLink<T> extends AjaxLink<T> {
 //	private final IModel<String> confirmCssClassModel;
 	
 	public AjaxConfirmLink(String id, IModel<String> textModel) {
-		this(id, null, textModel, null, null, null, null);
+		this(id, null, textModel);
+	}
+	
+	public AjaxConfirmLink(String id, IModel<T> model, IModel<String> textModel) {
+		this(id, model, textModel, null, null, null, null);
 	}
 	
 	public AjaxConfirmLink(

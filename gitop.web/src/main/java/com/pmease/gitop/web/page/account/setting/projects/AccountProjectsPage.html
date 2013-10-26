@@ -1,0 +1,31 @@
+<html xmlns:wicket>
+<wicket:extend>
+	<section>
+		<div class="head">
+			<h2>Repositories</h2>
+		</div>
+		<div class="body">
+			<p>
+				<a class="btn btn-info btn-colorful-text" wicket:id="newlink">New Project</a>
+			</p>
+			
+			<ul class="list-group list-view list-group-hover">
+				<li class="list-group-item" wicket:id="projects">
+					<h4 class="list-group-item-heading">
+						<span wicket:id="project"></span>
+						<small class="age"><i class="icon-time"></i> <span wicket:id="age"></span></small>
+					</h4>
+					<wicket:enclosure>
+						<p class="list-group-item-text text-muted">
+							Forked from <span wicket:id="forkedFrom"></span>
+						</p>
+					</wicket:enclosure>
+					<div class="list-group-item-actions">
+						<a class="first" wicket:id="admin"><i class="icon-cog"></i> Settings</a>
+					</div>
+				</li>
+			</ul>
+		</div>
+	</section>
+</wicket:extend>
+</html>

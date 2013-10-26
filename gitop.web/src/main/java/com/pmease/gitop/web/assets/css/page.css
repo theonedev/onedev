@@ -3,6 +3,16 @@
 
 ul.f-dropdown { padding: 0; }
 
+.v-middle { vertical-align: middle; }
+.table thead > tr > th.v-middle, 
+.table tbody > tr > th.v-middle, 
+.table tfoot > tr > th.v-middle, 
+.table thead > tr > td.v-middle, 
+.table tbody > tr > td.v-middle, 
+.table tfoot > tr > td.v-middle {
+	vertical-align: middle;
+}
+
 /**
  * LAYOUT
  */
@@ -154,9 +164,20 @@ a.permission-link:hover { color: #333; text-decoration: none; }
 .user-choice-row p.text-muted { font-size: 0.85em; }
 .select2-container.user-choice .select2-choice { height: 34px; line-height: 34px;}
 
-.btn-group-permissions > a { width: 120px; }
+.btn-group-permissions > a { width: 80px; }
 
 .link-item a.confirm-link:hover { color: #990000; }
+
+.list-group-item-actions a { color: #999; }
+.list-group-item:hover .list-group-item-actions a { color: #09F; }
+
+.list-group-item .remove-link { color: #999; }
+.list-group-item:hover .list-group-item-actions .remove-link { color: #990000;} 
+
+.table-teams strong a { font-size: 18px; }
+.table-teams .remove-link > i { font-size: 18px; color: #999; }
+.table-teams > tbody > tr:hover .remove-link,
+.table-teams > tbody > tr:hover .remove-link i { color: #990000; }
 
 /* ACCOUNT HOME */
 .vcard-column { padding: 20px; }
@@ -210,21 +231,36 @@ ul.btn-list { list-style: none; margin: 0; }
 .project-info .age { color: #999; font-size: 12px; }
 .project-info .fork-info { color: #999; margin: 0 0 0 1em; font-size: 12px; }
 
-.members-summary { border-bottom: 1px solid #ddd; margin: 0; padding-bottom: 10px; }
-.members-summary > b { color: #333; }
-.list-members { list-style: none; margin: 0; padding: 0; }
-.list-members > li.member { width: 380px; float: left; list-style: none; margin: 0 20px 0 0; 
-	position: relative;  border-bottom: 1px solid #ddd; }
-.member > .avatar { width: 48px; height: 48px; position: absolute; left: 0; top: 10px; background: transparent; padding: 0; box-shadow: none; }
-.member > .avatar > img { border-radius: 50%; background: transparent; }
-.member .name { padding: 10px 0px 10px 60px; font-size: 18px; white-space: nowrap; overflow: hidden; min-height: 48px; }
-.member .name > h4 { margin:0;}
-.member .name > em { font-style: normal; display: block;  color: #999; } 
-.member > .item-actions { position: absolute; z-index: 10; right: 10px; top: 10px; line-height: 48px; white-space: nowrap; }
-.member > .item-actions > .img-link { color: #eee; font-size: 18px; }
-.member > .item-actions > .img-link:hover { color: #990000; }
-.member:hover { background: #ffe; }
-.member:hover > .item-actions > a { color: #990000; }
+.members-summary, .repos-summary { border-bottom: 1px solid #ddd; margin: 0; padding-bottom: 10px; }
+.members-summary > b, .repos-summary > b { color: #333; }
+
+.list-group-heading h3 { margin: 0; }
+.list-group-heading { padding-bottom: 12px; border-bottom: 1px solid #ddd; }
+
+.member-item { float: left; width: 330px; padding: 10px 0; margin: 0 20px 0 0; border: none; border-bottom: 1px solid #eee; }
+.member-item .avatar { width: 75px; height: 75px; float: left; box-shadow: none; }
+.member-item .avatar > img { background: transparent; border-radius: 50%;}
+.member-item .member-content { vertical-align: middle; margin-left: 90px;  }
+.member-item .list-group-item-heading { margin-bottom: 9px; }
+.member-content .list-group-item-heading a,
+.member-content .list-group-item-heading em { display: block; overflow: hidden; white-space: nowrap;}
+.member-content .list-group-item-heading em { font-style: normal; color: #999; font-weight: normal; } 
+.member-content .list-item-teams { overflow: hidden; white-space: nowrap; margin-right: 10px; }
+.member-content .list-item-teams .btn { position: relative; }
+.member-content .list-item-teams .btn > i { position: absolute;left: 50%;margin-left: -6px;top: 50%;margin-top: -8px;font-size: 16px; display: none; }
+.member-content .list-item-teams .btn:hover { background: #ff2a68; border-color: #ff2a68; }
+.member-content .list-item-teams .btn:hover > i { display: block; }
+.member-content .list-item-teams .btn:hover > span { color: #ff2a68; }
+
+.list-repos > li.list-group-item.repo {width: 380px; float: left; padding: 0; list-style: none; margin: 0 20px 0 0;  position: relative;  border-width: 0; border-bottom: 1px solid #ddd;  }
+.list-repos > li.list-group-item.repo { min-height: 48px; padding: 15px 0 ; }
+
+
+.list-group-item-actions { position: absolute; z-index: 10; right: 10px; top: 50%; margin-top: -10px; white-space: nowrap; }
+.list-group-item-actions > .img-link { color: #eee; font-size: 18px; }
+.list-group-item-actions > .img-link:hover { color: #990000; }
+
+.list-group-item.repo:hover > .list-group-item-actions > .img-link { color: #990000; }
  
 /**
  * PROJECT PAGE
@@ -236,6 +272,8 @@ a > .ind { font-weight: 300; color: #888; }
 h1.repo-info { margin: 0; padding-left:60px; font-size: 20px; position: relative; font-weight: normal; min-height: 48px;}
 .repo-info > .avatar { position: absolute; left: 0; top: 0; color: #ddd; width: 48px; height: 48px; padding: 2px; border: 1px solid #ddd; }
 .repo-info > .name { display: block; padding-top: 12px; margin-bottom: 6px;}
+.repo-info > .name .label { font-size: 11px; margin-left: 6px; text-transform: uppercase; }
+
 .repo-info .fork-info { display: block; color: #999; font-size: 12px; line-height: 1; font-weight: normal; }
 
 .repo-sidenav  { padding-top: 20px; padding-bottom: 20px; }

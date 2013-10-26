@@ -1,6 +1,10 @@
 package com.pmease.gitop.web.resource;
 
+import io.dropwizard.jackson.Jackson;
+
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
 
@@ -19,27 +23,54 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.IOUtils;
 
-import io.dropwizard.jackson.Jackson;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.pmease.gitop.core.manager.UserManager;
+import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.web.SitePaths;
 
-@Path("/file")
+@Path("/test")
 public class TestResource {
 
 	@Inject ObjectMapper objectMapper;
+	@Inject UserManager userManager;
 	
 	@GET
-	@Path("test")
-	public String test() {
-		return "Hello, Jersey";
+	@Path("/users")
+	public String populateUsers() {
+		InputStream in = TestResource.class.getResourceAsStream("users.json");
+		int count = 0;
+		try {
+			List<User> users = objectMapper.readValue(in, new TypeReference<List<User>>(){});
+			count = users.size();
+			for (User each : users) {
+				each.setId(null);
+				each.setPassword("12345");
+				userManager.save(each);
+			}
+		} catch (JsonParseException e) {
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			IOUtils.closeQuietly(in);
+		}
+		
+		return count + " users saved";
 	}
 	
 	@GET
+	@Path("/files")
 	public String getResult() throws JsonProcessingException {
 		Result result = new Result();
 		UploadFile file = new UploadFile();

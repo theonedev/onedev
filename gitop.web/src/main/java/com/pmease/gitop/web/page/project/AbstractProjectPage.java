@@ -3,9 +3,12 @@ package com.pmease.gitop.web.page.project;
 import javax.persistence.EntityNotFoundException;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -65,11 +68,38 @@ public abstract class AbstractProjectPage extends AbstractAccountPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				this.setVisibilityAllowed(SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectAdmin(getProject())));
+				setVisibilityAllowed(SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectAdmin(getProject())));
 			}
 		};
 		
 		add(adminLink);
+		
+		Label publicLabel = new Label("public-label", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getProject().isPubliclyAccessible() ? "public" : "private";
+			}
+		});
+		
+		publicLabel.setOutputMarkupId(true);
+		publicLabel.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getProject().isPubliclyAccessible() ? "" : "hidden";
+			}
+			
+		}));
+		add(publicLabel);
+	}
+	
+	@Override
+	public void onEvent(IEvent<?> event) {
+		if (event.getPayload() instanceof ProjectPubliclyAccessibleChanged) {
+			ProjectPubliclyAccessibleChanged e = (ProjectPubliclyAccessibleChanged) event.getPayload();
+			e.getTarget().add(get("public-label"));
+		}
 	}
 	
 	@Override

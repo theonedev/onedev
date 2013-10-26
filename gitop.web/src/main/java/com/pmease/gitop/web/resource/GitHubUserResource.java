@@ -6,6 +6,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authc.credential.PasswordService;
@@ -35,9 +36,10 @@ public class GitHubUserResource {
 	@Inject PasswordService passwordService;
 	
 	@GET
-	public Response get() {
+	@Path("{org}")
+	public Response get(@PathParam("org") String org) {
 		try {
-			updateDatabase("github");
+			updateDatabase(org);
 		} catch (Exception e) {
 			throw Throwables.propagate(e);
 		}

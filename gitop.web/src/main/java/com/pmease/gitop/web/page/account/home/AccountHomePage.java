@@ -26,9 +26,10 @@ import com.pmease.gitop.core.model.Team;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.web.component.avatar.AvatarImage;
-import com.pmease.gitop.web.component.members.MemberListView;
+import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.AbstractAccountPage;
+import com.pmease.gitop.web.page.account.setting.members.MemberListView;
 
 @SuppressWarnings("serial")
 public class AccountHomePage extends AbstractAccountPage {
@@ -108,7 +109,7 @@ public class AccountHomePage extends AbstractAccountPage {
 				}
 				
 			};
-			return new MemberListView(id, model);
+			return new MemberListView(id, new UserModel(getAccount()), model);
 			
 		default:
 			throw new IllegalArgumentException("tab " + category);

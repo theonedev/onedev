@@ -10,6 +10,8 @@ public class AddTeamPage extends EditTeamPage {
 	
 	@Override
 	protected Team getTeam() {
-		return new Team();
+		Team team = new Team();
+		team.setOwner(getAccount());
+		return team;
 	}
 }

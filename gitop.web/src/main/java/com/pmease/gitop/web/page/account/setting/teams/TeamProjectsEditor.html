@@ -1,0 +1,25 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<form class="form-inline" wicket:id="reposForm">
+		<div class="form-feedback" wicket:id="feedback"></div>
+		<input wicket:id="repochoice" class="team-repos-choice" type="hidden" style="width: 300px;"/>
+		<button type="submit" class="btn btn-success btn-colorful-text" wicket:id="submit">Add</button>
+	</form>
+	<hr />
+	<div wicket:id="projects">
+		<h4 class="text-muted repos-summary"><b wicket:id="total"></b> projects</h4>
+		<ul class="list-group list-group-hover list-repos clearfix">
+			<li class="list-group-item repo" wicket:id="repo">
+				<h4 class="list-group-item-heading">
+					<wicket:container wicket:id="link"></wicket:container>
+				</h4>
+				<div class="list-group-item-actions">
+					<a class="img-link remove-link" wicket:id="removelink">
+						<i class="icon-remove-sign"></i>
+					</a>
+				</div>
+			</li>
+		</ul>
+	</div>
+</wicket:panel>
+</html>

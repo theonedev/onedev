@@ -4,17 +4,24 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.base.Preconditions;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.model.Team;
 import com.pmease.gitop.web.model.TeamModel;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
+import com.pmease.gitop.web.util.WicketUtils;
 
 @SuppressWarnings("serial")
 public class EditTeamPage extends AccountSettingPage {
 
 	protected final Long teamId;
+	
+	public static PageParameters newParams(Team team) {
+		Preconditions.checkNotNull(team);
+		return WicketUtils.newPageParams("teamId", team.getId());
+	}
 	
 	public EditTeamPage() {
 		this.teamId = null;

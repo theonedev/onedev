@@ -11,7 +11,8 @@ public class EntityModel<T extends AbstractEntity> extends LoadableDetachableMod
 
 	private static final long serialVersionUID = 1L;
 
-	protected T entity;
+	private transient T entity;
+	private Long id;
 	private final Class<T> entityClass;
 
 	protected GeneralDao getDao() {
@@ -21,16 +22,22 @@ public class EntityModel<T extends AbstractEntity> extends LoadableDetachableMod
 	@SuppressWarnings("unchecked")
 	public EntityModel(T entity) {
 		Preconditions.checkNotNull(entity, "entity");
-		this.entity = entity;
+		
+		if (entity.isNew()) {
+			this.entity = entity;
+		} else {
+			this.id = entity.getId();
+		}
+		
 		this.entityClass = (Class<T>) entity.getClass();
 	}
 
 	@Override
 	protected T load() {
-		if (entity.isNew()) {
-			return entity;
+		if (id != null) {
+			return getDao().get(entityClass, id);
 		} else {
-			return getDao().get(entityClass, entity.getId());
+			return entity;
 		}
 	}
 

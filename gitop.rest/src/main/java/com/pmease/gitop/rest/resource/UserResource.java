@@ -2,6 +2,8 @@ package com.pmease.gitop.rest.resource;
 
 import io.dropwizard.jersey.params.LongParam;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.GET;
@@ -23,6 +25,11 @@ public class UserResource {
 	@Inject
 	public UserResource(UserManager userManager) {
 		this.userManager = userManager;
+	}
+	
+	@GET
+	public List<User> get() {
+		return userManager.query();
 	}
 	
     @GET

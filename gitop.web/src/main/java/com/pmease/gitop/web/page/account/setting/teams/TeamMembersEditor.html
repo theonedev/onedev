@@ -1,0 +1,17 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<form class="form-inline" wicket:id="form">
+		<div class="form-feedback" wicket:id="feedback"></div>
+		<input wicket:id="userchoice" class="team-users-choice" type="hidden" style="width: 300px"></input>
+		<button type="submit" class="btn btn-success btn-colorful-text" wicket:id="submit">Add</button>
+	</form>
+	<hr/>
+	<div wicket:id="membersview">
+		<div wicket:id="members"></div>
+	</div>
+	
+	<wicket:fragment wicket:id="memberactionfrag">
+		<a class="img-link remove-link" wicket:id="remove"><i class="icon-remove-sign"></i></a>
+	</wicket:fragment>
+</wicket:panel>
+</html>

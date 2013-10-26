@@ -41,7 +41,6 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 		return Category.OPTIONS;
 	}
 	
-	private boolean forkable = true;
 	private String defaultBranch;
 	private String projectName;
 	
@@ -80,13 +79,14 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 				.setRequired(false));
 		
 		form.add(new FlatCheckBoxElement("forkable", "Allow Forks",
-				new PropertyModel<Boolean>(this, "forkable"),
+				new PropertyModel<Boolean>(projectModel, "forkable"),
 				Model.of("Enable/Disable whether this repository can be forked by others")));
 		
 		IModel<List<? extends String>> branchesModel = new AbstractReadOnlyModel<List<? extends String>>() {
 
 			@Override
 			public List<String> getObject() {
+				// TODO: get branches from projectManager
 				return ImmutableList.<String>of();
 			}
 		};
@@ -133,14 +133,6 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 				setResponsePage(AccountHomePage.class, PageSpec.forUser(getAccount()));
 			}
 		});
-	}
-
-	public boolean isForkable() {
-		return forkable;
-	}
-
-	public void setForkable(boolean forkable) {
-		this.forkable = forkable;
 	}
 
 	public String getDefaultBranch() {

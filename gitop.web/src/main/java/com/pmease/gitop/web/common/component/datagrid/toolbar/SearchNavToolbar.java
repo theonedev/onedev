@@ -136,6 +136,9 @@ public class SearchNavToolbar extends AbstractToolbar {
 		protected void onInitialize() {
 			super.onInitialize();
 
+			rowsPerPage = (int) getTable().getItemsPerPage();
+			currentPage = (int) getTable().getCurrentPage() + 1;
+			
 			DropDownChoice<Integer> rowsSelector = new DropDownChoice<Integer>(
 					"rowsSelector", new PropertyModel<Integer>(this,
 							"rowsPerPage"), ROWS_PER_PAGE);

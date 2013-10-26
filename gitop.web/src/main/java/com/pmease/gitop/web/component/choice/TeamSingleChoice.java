@@ -11,9 +11,9 @@ import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Select2Choice;
 
 @SuppressWarnings("serial")
-public class SingleTeamChoice extends Select2Choice<Team> {
+public class TeamSingleChoice extends Select2Choice<Team> {
 
-	public SingleTeamChoice(String id, IModel<Team> model,
+	public TeamSingleChoice(String id, IModel<Team> model,
 			ChoiceProvider<Team> teamsProvider) {
 		super(id, model, teamsProvider);
 	}
@@ -29,7 +29,7 @@ public class SingleTeamChoice extends Select2Choice<Team> {
 	}
 
 	private ResourceReference teamChoiceReference = 
-			new JavaScriptResourceReference(SingleUserChoice.class, "teamchoice.js");
+			new JavaScriptResourceReference(UserSingleChoice.class, "teamchoice.js");
 
 	@Override
 	public void renderHead(IHeaderResponse response) {
