@@ -39,7 +39,7 @@ public abstract class BasePage extends WebPage {
 	
 	private boolean shouldInitialize = true;
 
-	private Modal modal;
+	protected Modal modal;
 	
 	public BasePage() {
 		commonInit();
@@ -240,7 +240,7 @@ public abstract class BasePage extends WebPage {
 		return 0;
 	}
 	
-//	public Modal getModal() {
-//		return modal;
-//	}
+	public Modal getModal() {
+		return modal;
+	}
 }

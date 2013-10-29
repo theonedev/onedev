@@ -1,7 +1,9 @@
 package com.pmease.gitop.web.page.home;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.RadioGroup;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -15,6 +17,7 @@ import com.pmease.gitop.web.common.component.dropzone.DropZoneBehavior;
 import com.pmease.gitop.web.common.component.foundation.FoundationDropDownBehavior;
 import com.pmease.gitop.web.common.component.messenger.Messenger;
 import com.pmease.gitop.web.common.component.vex.AjaxConfirmButton;
+import com.pmease.gitop.web.common.component.vex.VexAjaxLink;
 import com.pmease.gitop.web.common.component.vex.VexLinkBehavior.VexIcon;
 import com.pmease.gitop.web.common.form.flatcheckbox.FlatCheckBoxElement;
 import com.pmease.gitop.web.common.form.flatradio.FlatRadioElement;
@@ -80,6 +83,36 @@ public class HomePage extends AbstractLayoutPage {
 				Messenger.success("Yes, your form is submitted").run(target);
 				target.add(form);
 			}
+		});
+		
+		final WebMarkupContainer c = new WebMarkupContainer("modalContent");
+		c.setOutputMarkupId(true);
+		add(c);
+		
+		add(new VexAjaxLink<Void>("prompt") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				System.out.println("received");
+			}
+
+			@Override
+			protected String getContentMarkupId() {
+				return c.getMarkupId(true);
+			}
+			
+		});
+		
+		add(new AjaxLink<Void>("vexlink") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				target.appendJavaScript("vex.open({"
+						+ "content: '<div>content</div>',"
+						+ "afterOpen: function($vexContent){$vexContent.append($('<div>yes</div>')); }, "
+						+ "afterClose: function() { console.log('vex closed'); } })");
+			}
+			
 		});
 	}
 
