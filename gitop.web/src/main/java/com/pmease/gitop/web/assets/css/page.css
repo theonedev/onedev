@@ -183,15 +183,22 @@ a.permission-link:hover { color: #333; text-decoration: none; }
 .vcard-column { padding: 20px; }
 .vcard-column .avatar { width: 200px; height: 200px; margin-bottom: 18px; }
 .vcard-column .avatar > img { border-radius: 8px; }
-.vcard-name { margin: 0 0 18px; }
-.vcard-name b, .vcard-name em { display: block; white-space: nowrap; overflow: hidden; }
-.vcard-name b { font-size: 26px; }
+.vcard-name { margin: 0; }
+.vcard-name b, .vcard-name em { white-space: nowrap; overflow: hidden; }
+.vcard-name b { font-size: 26px; display: block; }
 .vcard-name em { font-size: 24px; color: #888; font-style: normal; font-weight: 300; }
+.vcard-name a.img-link { font-size: 18px; color: #999; }
+.vcard-name a.img-link:hover { color: #09f; }
+
 .vcard-stats { padding: 20px 0; border-top: 1px solid #ddd; overflow: hidden; }
 .vcard-stats a { display: inline-block; color: #999; font-size: 12px; line-height: 1.123; width: 64px; overflow: hidden; text-align: center; }
 .vcard-stats a > b { display: block; color: #333; font-size: 28px; }
 .vcard-stats a:hover { text-decoration: none; color: #09f; }
 .vcard-stats a:hover > b { color: #09f; }
+
+.account-actions { padding: 10px 20px; font-size: 20px; margin-bottom: 18px; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; }
+.account-actions a { color: #999; }
+.account-actions a:hover { color: #333; text-decoration: none; }
 
 .nav-piped > li { float: left; }
 .nav-piped.nav-justified > li { float: none; }
@@ -267,7 +274,7 @@ ul.btn-list { list-style: none; margin: 0; }
  */
 .page-nav.repo-head {padding-bottom: 10px; }
 
-a > .ind { font-weight: 300; color: #888; }
+a > .ind { font-weight: 300; color: #888; float: right; }
 
 h1.repo-info { margin: 0; padding-left:60px; font-size: 20px; position: relative; font-weight: normal; min-height: 48px;}
 .repo-info > .avatar { position: absolute; left: 0; top: 0; color: #ddd; width: 48px; height: 48px; padding: 2px; border: 1px solid #ddd; }

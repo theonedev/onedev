@@ -38,6 +38,7 @@ ul.disc { list-style:disc outside; }
 .piped:after { clear: both; }
 ul.piped, ol.piped { margin: 0; padding: 0; }
 
+.piped.noborder a, .piped.noborder em { border: none; }
 .action-links { white-space: nowrap; }
 .action-links > .link-item { display: inline-block; margin-left: 12px; }
 .action-links > .link-item:first-child { margin-left: 0;}
