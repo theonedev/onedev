@@ -268,7 +268,7 @@
 .vex-icon.icon-type-success:before { content: "\f058"; color: #64da38; }
 
 .vex-dialog-buttons { text-align: left;  white-space: nowrap; overflow: hidden; }
-.vex.vex-theme-wireframe .vex-dialog-button { margin: 0; width: 50%; font-size: 0.8em; padding: 10px 0; }
+.vex.vex-theme-wireframe .vex-dialog-button { margin: 0; width: 50%; font-size: 0.8em; padding: 10px 0; border-radius: 0; }
 .vex.vex-theme-wireframe .vex-dialog-button.vex-dialog-button-primary {
 	background: #666; color: #fff; border-width: 1px 0 0 1px; border-color: #666; border-style: solid;
 }
