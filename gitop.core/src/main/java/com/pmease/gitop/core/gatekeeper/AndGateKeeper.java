@@ -20,7 +20,7 @@ import com.pmease.gitop.core.gatekeeper.voteeligibility.VoteEligibility;
 import com.pmease.gitop.core.model.MergeRequest;
 
 @SuppressWarnings("serial")
-@Editable(name="All Of Below Sub Gate Keepers Accept")
+@Editable(name="All Of Below Sub Gate Keepers Accept", order=100)
 @TableLayout
 public class AndGateKeeper extends AbstractGateKeeper {
 

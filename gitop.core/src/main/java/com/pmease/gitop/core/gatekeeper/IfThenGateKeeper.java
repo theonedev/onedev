@@ -4,6 +4,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.annotation.TableLayout;
 import com.pmease.gitop.core.gatekeeper.checkresult.Accepted;
 import com.pmease.gitop.core.gatekeeper.checkresult.Blocked;
 import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
@@ -12,13 +13,14 @@ import com.pmease.gitop.core.model.MergeRequest;
 
 @SuppressWarnings("serial")
 @Editable
+@TableLayout
 public class IfThenGateKeeper extends AbstractGateKeeper {
 
 	private GateKeeper ifGate;
 	
 	private GateKeeper thenGate;
 	
-	@Editable
+	@Editable(order=100)
 	@NotNull
 	@Valid
 	public GateKeeper getIfGate() {
@@ -29,7 +31,7 @@ public class IfThenGateKeeper extends AbstractGateKeeper {
 		this.ifGate = ifGate;
 	}
 
-	@Editable
+	@Editable(order=200)
 	@NotNull
 	@Valid
 	public GateKeeper getThenGate() {

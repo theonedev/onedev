@@ -100,7 +100,7 @@ public class GitFilter implements Filter {
 		response.setHeader("Content-Type", "application/x-" + service + "-result");			
 
 		Map<String, String> environments = new HashMap<>();
-		environments.put("userId", User.getCurrentId().toString());
+		environments.put("GITOP_USER_ID", User.getCurrentId().toString());
 		Git git = new Git(storageManager.getStorage(project).ofCode(), environments);
 
 		if (GitSmartHttpTools.isUploadPack(request)) {
@@ -109,11 +109,7 @@ public class GitFilter implements Filter {
 			}
 			git.upload().input(ServletUtils.getInputStream(request)).output(response.getOutputStream()).call();
 		} else {
-			/*
-			 * We intentionally use read permission here for write operation so that gate keeper gets the 
-			 * chance to run to possibly create a merge request for non-permitted user.
-			 */
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(project))) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectWrite(project))) {
 				throw new UnauthorizedException("You do not have permission to push to this project.");
 			}
 			git.receive().input(ServletUtils.getInputStream(request)).output(response.getOutputStream()).call();
@@ -147,11 +143,7 @@ public class GitFilter implements Filter {
 			writeInitial(response, service);
 			git.advertiseUploadRefs().output(response.getOutputStream()).call();
 		} else {
-			/*
-			 * We intentionally use read permission here for write operation so that gate keeper gets the 
-			 * chance to run to possibly create a merge request for non-permitted user.
-			 */
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(project))) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectWrite(project))) {
 				throw new UnauthorizedException("You do not have permission to push to this project.");
 			}
 			writeInitial(response, service);

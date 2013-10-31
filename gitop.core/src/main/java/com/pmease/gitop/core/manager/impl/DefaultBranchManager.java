@@ -129,7 +129,7 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
         for (Branch branch: project.getBranches()) {
             branchNamesInDB.add(branch.getName());
             
-            if (!branchNamesInRepo.contains(branch)) {
+            if (!branchNamesInRepo.contains(branch.getName())) {
                 delete(branch);
                 deletedBranches.add(branch);
             }

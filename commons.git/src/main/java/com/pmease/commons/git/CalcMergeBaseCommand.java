@@ -1,7 +1,10 @@
 package com.pmease.commons.git;
 
+import javax.annotation.Nullable;
+
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
+import com.pmease.commons.util.execution.ExecuteResult;
 import com.pmease.commons.util.execution.LineConsumer;
 
 public class CalcMergeBaseCommand extends GitCommand<String> {
@@ -25,7 +28,7 @@ public class CalcMergeBaseCommand extends GitCommand<String> {
 	}
 	
 	@Override
-	public String call() {
+	public @Nullable String call() {
 		Preconditions.checkNotNull(rev1, "rev1 has to be specified.");
 		Preconditions.checkNotNull(rev2, "rev2 has to be specified.");
 		
@@ -35,7 +38,8 @@ public class CalcMergeBaseCommand extends GitCommand<String> {
 		
 		cmd.addArgs("merge-base", rev1, rev2);
 		
-		cmd.execute(new LineConsumer() {
+		final boolean[] revExists = new boolean[]{true};
+		ExecuteResult result = cmd.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
@@ -43,7 +47,22 @@ public class CalcMergeBaseCommand extends GitCommand<String> {
 					commonAncestor[0] = line.trim();
 			}
 			
-		}, errorLogger()).checkReturnCode();
+		}, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				if (line.contains("Not a valid object name"))
+					revExists[0] = false;
+				else
+					LineConsumer.logger.error(line);
+			}
+			
+		});
+
+		if (!revExists[0])
+			return null;
+		else 
+			result.checkReturnCode();
 		
 		return commonAncestor[0];
 	}

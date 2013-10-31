@@ -1,5 +1,6 @@
 package com.pmease.gitop.core.manager.impl;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.hibernate.criterion.Criterion;
@@ -16,6 +17,7 @@ import com.pmease.gitop.core.model.VoteInvitation;
 @Singleton
 public class DefaultVoteInvitationManager extends AbstractGenericDao<VoteInvitation> implements VoteInvitationManager {
 
+	@Inject
 	public DefaultVoteInvitationManager(GeneralDao generalDao) {
 		super(generalDao);
 	}
