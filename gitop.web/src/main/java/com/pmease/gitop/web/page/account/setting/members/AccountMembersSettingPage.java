@@ -51,7 +51,6 @@ public class AccountMembersSettingPage extends AccountSettingPage {
 				User account = getAccount();
 				Collection<Team> teams = account.getTeams();
 				Set<User> users = Sets.newHashSet();
-				
 				for (Team each : teams) {
 					for (Membership membership : each.getMemberships()) {
 						users.add(membership.getUser());

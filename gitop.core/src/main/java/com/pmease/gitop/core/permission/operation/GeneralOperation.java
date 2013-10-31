@@ -2,7 +2,7 @@ package com.pmease.gitop.core.permission.operation;
 
 public enum GeneralOperation implements PrivilegedOperation {
 	
-	NO_ACCESS("No Access") {
+	NO_ACCESS("No Access", 100) {
 
 		@Override
 		public boolean can(PrivilegedOperation operation) {
@@ -10,7 +10,7 @@ public enum GeneralOperation implements PrivilegedOperation {
 		}
 		
 	},
-	READ("Read") {
+	READ("Read", 1000) {
 
 		@Override
 		public boolean can(PrivilegedOperation operation) {
@@ -18,7 +18,7 @@ public enum GeneralOperation implements PrivilegedOperation {
 		}
 		
 	},
-	WRITE("Write") {
+	WRITE("Write", 3000) {
 
 		@Override
 		public boolean can(PrivilegedOperation operation) {
@@ -26,7 +26,7 @@ public enum GeneralOperation implements PrivilegedOperation {
 		}
 		
 	},
-	ADMIN("Admin") {
+	ADMIN("Admin", 5000) {
 
 		@Override
 		public boolean can(PrivilegedOperation operation) {
@@ -36,9 +36,11 @@ public enum GeneralOperation implements PrivilegedOperation {
 	};
 
 	private final String displayName;
+	private final int weight;
 	
-	GeneralOperation(String displayName) {
+	GeneralOperation(String displayName, int weight) {
 		this.displayName = displayName;
+		this.weight = weight;
 	}
 
 	@Override
@@ -46,4 +48,15 @@ public enum GeneralOperation implements PrivilegedOperation {
 		return displayName;
 	}
 	
+	public static GeneralOperation higher(GeneralOperation op1, GeneralOperation op2) {
+		if (op1 == null) {
+			return op2;
+		}
+		
+		if (op2 == null) {
+			return op1;
+		}
+		
+		return op1.weight > op2.weight ? op1 : op2;
+	}
 }

@@ -19,6 +19,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.util.WildcardListModel;
 import org.hibernate.criterion.Restrictions;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.pmease.gitop.core.Gitop;
@@ -58,6 +59,10 @@ public class TeamMembersEditor extends Panel {
 				}
 
 				List<User> users = Lists.newArrayList();
+				if (team.isOwnersTeam()) {
+					users.add(team.getOwner());
+				}
+				
 				List<Membership> memberships = Gitop.getInstance(MembershipManager.class)
 						.query(Restrictions.eq("team", team));
 				for (Membership each : memberships) {
@@ -155,7 +160,7 @@ public class TeamMembersEditor extends Panel {
 							onMembersChanged(target);
 						}
 					}
-				});
+				}.setVisibilityAllowed(!Objects.equal(getTeam().getOwner(), model.getObject())));
 				return frag;
 			}
 		}.setOutputMarkupId(true);

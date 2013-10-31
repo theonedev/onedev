@@ -297,6 +297,7 @@ fieldset[disabled] .btn-inverse.active {
 .form-inline.navigation-form .btn-group { margin-left: 6px; }
 .search-form button { position: absolute; right: 2px; top: 1px; border: none; height: 22px; background: transparent; color: #888; }
 
+.form-inline .field-controls { display: block; }
 
 /* FORM COMPONENT */
 .select2-container .select2-choice { padding-top: 4px; padding-bottom: 4px; height: auto; }
@@ -315,7 +316,7 @@ fieldset[disabled] .btn-inverse.active {
 .submits:before, .submits:after { display: table; content: " "; }
 .submits:after { clear: both; }
 .submits .btn + .btn { margin-bottom: 0; margin-left: 5px; }
-.form-inline input[type="text"], .form-inline input[type="password"] { width: 180px; }
+
 
 .form-sm { width: 400px; }
 .form-md { width: 600px; }

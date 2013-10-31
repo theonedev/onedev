@@ -3,49 +3,23 @@
 	<section>
 		<div class="head"><h2>Project Permissions</h2></div>
 		<div class="body">
-			<h4>Public Accessible</h4>
-			<p><a class="checkable-link" wicket:id="publiclink"><i class="icon-checkbox"></i> Anyone can browse and pull this repository.</a></p>
-			<hr />
-			
-			<h4>Logged-in Users</h4>
-			<p>Logged-in users can access this project with permission:</p>
-			<div class="btn-group btn-group-justified btn-radio-group" wicket:id="loggedInPermissions">
-				<wicket:container wicket:id="permissions">
-					<a wicket:id="permission" class="btn">
-						<span class="icon-ok"></span>
-						<span wicket:id="name"></span>
-					</a>
-				</wicket:container>
-			</div>
-			<hr/>
-			
-			<h4>Teams</h4>
-			<p>Add teams below so all members in the team can access this repository.</p>
-			<form class="form-inline" wicket:id="form">
-				<div wicket:id="feedback" class="form-feedback"></div>
-				<input wicket:id="teamchoice" type="hidden" style="width: 380px;" />
-				<button type="submit" wicket:id="submit" class="btn btn-success">Add</button>
-			</form>
-			<p></p>
-			<div wicket:id="teams">
-				<ul class="list-group list-group-hover list-view">
-					<li class="list-group-item" wicket:id="team">
-						<h4 class="list-group-item-heading"><a wicket:id="editlink"><span wicket:id="name"></span> <i class="icon-pencil"></i></a></h4>
-						<p class="list-group-item-text">
-							<b wicket:id="members"></b> members can access this project with <span class="label label-info" wicket:id="permission"></span> permission.
-						</p>
-						
-						<div class="list-group-item-actions">
-							<a wicket:id="removelink" class="remove-link"><i class="icon-remove-sign"></i> Remove</a>
-						</div>
-					</li>
-				</ul>
-			</div>
+			<table class="table teams-table table-hover" wicket:id="teamstable">
+			</table>
 		</div>
 	</section>
 	
+	<wicket:fragment wicket:id="permissionop">
+		<a wicket:id="link"><i wicket:id="icon"></i></a>
+	</wicket:fragment>
+	
 	<wicket:fragment wicket:id="namefrag">
-		<a wicket:id="editlink"><span wicket:id="name"></span> <i class="icon-pencil"></i></a> <span class="text-muted">(<b wicket:id="members"></b> members)</span>
+		<div class="name">
+			<a wicket:id="editlink"><span wicket:id="name"></span> <i class="icon-pencil" wicket:id="icon"></i></a>
+		</div>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="operationfrag">
+		<a class="btn btn-warning btn-colorful-text btn-xs" wicket:id="btn">Use default</a>
 	</wicket:fragment>
 </wicket:extend>
 </html>

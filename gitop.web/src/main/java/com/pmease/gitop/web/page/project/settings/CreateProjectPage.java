@@ -6,7 +6,6 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.bean.validation.PropertyValidator;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
@@ -16,9 +15,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.model.Project;
 import com.pmease.gitop.core.model.User;
-import com.pmease.gitop.core.permission.operation.GeneralOperation;
 import com.pmease.gitop.web.common.form.FeedbackPanel;
-import com.pmease.gitop.web.common.form.flatcheckbox.FlatCheckBoxElement;
 import com.pmease.gitop.web.common.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.model.ProjectModel;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
@@ -73,10 +70,6 @@ public class CreateProjectPage extends AbstractLayoutPage {
 				.add(new PropertyValidator<String>())
 				.setRequired(false));
 		
-		form.add(new FlatCheckBoxElement("public", "Public Accessible", 
-				new PropertyModel<Boolean>(projectModel, "publiclyAccessible"),
-				Model.of("Anyone can browse and pull this repository")));
-		
 		form.add(new AjaxButton("submit", form) {
 			@Override
 			protected void onError(AjaxRequestTarget target, Form<?> form) {
@@ -87,9 +80,6 @@ public class CreateProjectPage extends AbstractLayoutPage {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				Project project = projectModel.getObject();
 				project.setOwner(User.getCurrent());
-				if (project.isPubliclyAccessible()) {
-					project.setDefaultAuthorizedOperation(GeneralOperation.READ);
-				}
 				Gitop.getInstance(ProjectManager.class).save(project);
 				setResponsePage(ProjectHomePage.class, PageSpec.forProject(project));
 			}

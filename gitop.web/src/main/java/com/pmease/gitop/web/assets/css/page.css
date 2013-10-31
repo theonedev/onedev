@@ -12,6 +12,9 @@ ul.f-dropdown { padding: 0; }
 .table tfoot > tr > td.v-middle {
 	vertical-align: middle;
 }
+.table td.operations { width: 1%; white-space: nowrap; }
+.table-auto { width: auto; border-collapse: collapse !important; }
+.table-auto th, .table-auto td { padding: 3px 6px; }
 
 /**
  * LAYOUT
@@ -109,6 +112,7 @@ ul.f-dropdown { padding: 0; }
 section:first-child > .head { border-top: none; }
 section>.head h2, section>.head h3 { margin: 0; font-size: 18px; line-height: 24px; color: #6f6f6f; font-weight: 300; text-transform: uppercase; }
 section .padder, section > .body { padding: 20px 20px; }
+section > .well { border-radius: 0; border-width: 0 0 1px 0; margin: 0; }
 
 /** TABLE */
 
@@ -174,10 +178,17 @@ a.permission-link:hover { color: #333; text-decoration: none; }
 .list-group-item .remove-link { color: #999; }
 .list-group-item:hover .list-group-item-actions .remove-link { color: #990000;} 
 
-.table-teams strong a { font-size: 18px; }
-.table-teams .remove-link > i { font-size: 18px; color: #999; }
-.table-teams > tbody > tr:hover .remove-link,
-.table-teams > tbody > tr:hover .remove-link i { color: #990000; }
+.teams-table .label-builtin { border: 1px solid #ddd; color: #666; background: #f2f2f2; }
+.teams-table .remove-link { color: #ccc; }
+.teams-table .remove-link:hover { text-decoration: none; color: #990000; }
+.teams-table > tbody > tr:hover .remove-link,
+.teams-table > tbody > tr:hover .remove-link i { color: #990000; }
+
+.teams-table .name { margin: 0; font-weight: bold; }
+
+.permission-col em { color: #999; }
+.permission-col a { color: #333; }
+.permission-col a:hover { text-decoration: none; color: #09F; }
 
 /* ACCOUNT HOME */
 .vcard-column { padding: 20px; }

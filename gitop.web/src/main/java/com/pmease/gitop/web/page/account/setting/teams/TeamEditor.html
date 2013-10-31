@@ -2,33 +2,24 @@
 <wicket:panel>
 	<form class="form-inline form-md" wicket:id="infoForm">
 		<div wicket:id="feedback" class="form-feedback"></div>
-		<p><b>Name <span class="required">*</span></b></p>
-		<input class="form-control focusable" type="text" placeholder="Team Name" wicket:id="name" />
-		<div class="btn-group btn-radio-group btn-group-permissions" wicket:id="permissionContainer">
-			<wicket:container wicket:id="permissions">
-				<a wicket:id="permission" class="btn btn-default">
-					<span class="icon-ok"></span>
-					<span wicket:id="name"></span>
-				</a>
-			</wicket:container>
+		<div class="form-group">
+			<label class="control-label">Name <span class="required">*</span></label>
+			<input type="text" class="form-control focusable" placeholder="Name" wicket:id="name" />
 		</div>
-		<button type="submit" class="btn btn-primary" wicket:id="submit"><span wicket:id="label"></span></button>
+		<div class="form-group">
+			<label class="control-label">Permission</label>
+			<select class="form-control" wicket:id="permission"></select>
+		</div>
+		<div class="form-group">
+			<label class="control-label">&nbsp;</label>
+			<button type="submit" class="btn btn-primary form-control" wicket:id="submit">Save Team</button>
+		</div>
+		<hr />
 	</form>
 	
-	<wicket:container wicket:id="more">
-		<hr />
-		<div class="row">
-			<div class="col-lg-5">
-				<h4>Members</h4>
-				<div wicket:id="teammembers"></div>
-			</div>
-			<div class="col-lg-2"></div>
-			<div class="col-lg-5">
-				<h4>Projects</h4>
-				<div wicket:id="teamprojects"></div>
-			</div>
-		</div>
-	</wicket:container>
-	
+	<div wicket:id="members">
+		<h4>Members</h4>
+		<div wicket:id="teammembers"></div>
+	</div>
 </wicket:panel>
 </html>

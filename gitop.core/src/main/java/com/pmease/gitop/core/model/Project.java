@@ -15,7 +15,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.hibernate.AbstractEntity;
@@ -44,8 +43,8 @@ public class Project extends AbstractEntity implements UserBelonging {
 	
 	private boolean forkable;
 	
-	@Column(nullable=false)
-	private String defaultBranchName = "master";
+	@Column()
+	private String defaultBranchName;
 	
 	@ManyToOne
 	@JoinColumn(nullable=true)
@@ -56,11 +55,6 @@ public class Project extends AbstractEntity implements UserBelonging {
 	
 	private String description;
 
-	private boolean publiclyAccessible;
-	
-	@Column(nullable=false)
-	private GeneralOperation defaultAuthorizedOperation = GeneralOperation.NO_ACCESS;
-	
 	@Column(nullable=false)
 	private GateKeeper gateKeeper = new ApprovedByAuthorizedUsers();
 	
@@ -102,28 +96,6 @@ public class Project extends AbstractEntity implements UserBelonging {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-    @Editable(name="Default Permission", order=300, 
-            description="All login users will be able to access this project with default permissions.")
-    @NotNull
-    public GeneralOperation getDefaultAuthorizedOperation() {
-        return defaultAuthorizedOperation;
-    }
-
-    public void setDefaultAuthorizedOperation(
-            GeneralOperation defaultAuthorizedOperation) {
-        this.defaultAuthorizedOperation = defaultAuthorizedOperation;
-    }
-
-	@Editable(name="Is Public", order=400, description=
-			"If a project is made public, it will be able to be browsed/pulled by anonymous users.")
-	public boolean isPubliclyAccessible() {
-		return publiclyAccessible;
-	}
-
-	public void setPubliclyAccessible(boolean publiclyAccessible) {
-		this.publiclyAccessible = publiclyAccessible;
 	}
 
     @Editable(order=450, description="Whether or not this project can be forked.")

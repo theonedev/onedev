@@ -17,8 +17,12 @@ import org.eclipse.jgit.lib.Constants;
 import com.google.common.base.Preconditions;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.core.manager.TeamManager;
+import com.pmease.gitop.core.model.Authorization;
 import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.core.model.Team;
 import com.pmease.gitop.core.permission.ObjectPermission;
+import com.pmease.gitop.core.permission.operation.GeneralOperation;
 import com.pmease.gitop.web.model.ProjectModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.AbstractAccountPage;
@@ -78,28 +82,44 @@ public abstract class AbstractProjectPage extends AbstractAccountPage {
 
 			@Override
 			public String getObject() {
-				return getProject().isPubliclyAccessible() ? "public" : "private";
+				return isPubliclyAccessible() ? "public" : "private";
 			}
-		});
+		}) {
+			@Override
+			public void onEvent(IEvent<?> event) {
+				if (event.getPayload() instanceof ProjectPubliclyAccessibleChanged) {
+					ProjectPubliclyAccessibleChanged e = (ProjectPubliclyAccessibleChanged) event.getPayload();
+					e.getTarget().add(this);
+				}
+			}
+		};
 		
 		publicLabel.setOutputMarkupId(true);
 		publicLabel.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return getProject().isPubliclyAccessible() ? "" : "hidden";
+				return isPubliclyAccessible() ? "" : "hidden";
 			}
 			
 		}));
 		add(publicLabel);
 	}
 	
-	@Override
-	public void onEvent(IEvent<?> event) {
-		if (event.getPayload() instanceof ProjectPubliclyAccessibleChanged) {
-			ProjectPubliclyAccessibleChanged e = (ProjectPubliclyAccessibleChanged) event.getPayload();
-			e.getTarget().add(get("public-label"));
+	// TODO: here can be slow?
+	private boolean isPubliclyAccessible() {
+		Team anonymous = Gitop.getInstance(TeamManager.class).getAnonymousTeam(getAccount());
+		if (anonymous.getAuthorizedOperation().can(GeneralOperation.READ)) {
+			return true;
 		}
+		
+		for (Authorization each : getProject().getAuthorizations()) {
+			if (each.getTeam().isAnonymousTeam()) {
+				return each.getRepoPermission().can(GeneralOperation.READ);
+			}
+		}
+		
+		return false;
 	}
 	
 	@Override

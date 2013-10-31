@@ -5,36 +5,35 @@
 			<h2>Teams</h2>
 		</div>
 		<div class="body">
+			<div class="alert alert-warning">
+				All permissions specified here can be overridden in the projects.
+			</div>
+			
 			<p>
 		    	<a class="btn btn-info btn-colorful-text" wicket:id="addTeam"><i class="icon-plus"></i> Create a team</a>
 		    </p>
-		    <div wicket:id="teams">
-			    <ul class="list-group list-group-hover list-view">
-			    	<li class="list-group-item" wicket:id="team">
-			    		<h4 class="list-group-item-heading"><a wicket:id="link"><span wicket:id="name"></span> <i class="icon-pencil"></i></a></h4>
-			    		<p class="list-group-item-text text-muted"><b wicket:id="members"></b> members can access <b wicket:id="repos"></b> projects with <span wicket:id="permission" class="label label-info"></span> permission.</p>
-			    		<div class="list-group-item-actions">
-			    			<ul class="piped">
-			    				<li><a class="first" wicket:id="copylink"><i class="icon-copy"></i> Duplicate</a></li>
-			    				<li><a wicket:id="removelink" class="remove-link"><i class="icon-remove-sign"></i> Remove</a></li>
-			    			</ul>
-			    		</div>
-			    	</li>
-			    </ul>
-			</div>
+		    
+		    <table class="table table-hover teams-table" wicket:id="teams">
+		    </table>
+		    
 		</div>
 	</section>
 	
 	<wicket:fragment wicket:id="ops">
     	<div class="action-links">
-    		<a wicket:id="remove" class="remove-link"><i class="icon-remove-sign"></i> Remove</a>
+    		<a wicket:id="removelink" class="remove-link"><i class="icon-remove-sign"></i> Remove</a>
     	</div>
     </wicket:fragment>
     
+    <wicket:fragment wicket:id="permissionop">
+    	<a wicket:id="link"><i wicket:id="icon"></i></a>
+    </wicket:fragment>
+    
     <wicket:fragment wicket:id="namefrag">
-    	<strong><a wicket:id="link"><span wicket:id="name"></span> <i class="icon-pencil"></i></a></strong>
-    	<br/>
-    	<div class="text-muted"><b wicket:id="members"></b> members can access <b wicket:id="repos"></b> repos with <span wicket:id="permission" class="label label-info"></span> permission.</div>
+    	<div class="name">
+    		<a wicket:id="link"><span wicket:id="name"></span> <i class="icon-pencil" wicket:id="icon"></i></a>
+    		<b class="label label-builtin" wicket:id="builtin">built-in</b>
+    	</div>
     </wicket:fragment>
 </wicket:extend>
 </html>

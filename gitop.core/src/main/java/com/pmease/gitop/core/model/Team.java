@@ -26,14 +26,16 @@ import com.pmease.gitop.core.permission.operation.GeneralOperation;
 @SuppressWarnings("serial")
 public class Team extends AbstractEntity {
 
+	public static final String ANONYMOUS = "Anonymous";
+	public static final String OWNERS = "Owners";
+	public static final String LOGGEDIN = "Logged-In";
+	
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private User owner;
 
 	@Column(nullable=false)
 	private String name;
-	
-	private String description;
 	
 	@Column(nullable=false)
 	private GeneralOperation authorizedOperation = GeneralOperation.READ;
@@ -62,14 +64,6 @@ public class Team extends AbstractEntity {
 		this.name = name;
 	}
 
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
 	public GeneralOperation getAuthorizedOperation() {
 		return authorizedOperation;
 	}
@@ -94,6 +88,22 @@ public class Team extends AbstractEntity {
 		this.authorizations = authorizations;
 	}
 
+	public boolean isAnonymousTeam() {
+		return ANONYMOUS.equalsIgnoreCase(getName());
+	}
+	
+	public boolean isOwnersTeam() {
+		return OWNERS.equalsIgnoreCase(getName());
+	}
+	
+	public boolean isLoggedInTeam() {
+		return LOGGEDIN.equalsIgnoreCase(getName());
+	}
+	
+	public boolean isBuiltIn() {
+		return isAnonymousTeam() || isOwnersTeam() || isLoggedInTeam();
+	}
+	
 	@Override
 	public String toString() {
 		return Objects.toStringHelper(this)

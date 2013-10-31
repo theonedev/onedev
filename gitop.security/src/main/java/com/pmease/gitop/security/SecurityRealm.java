@@ -67,17 +67,17 @@ public class SecurityRealm extends AbstractRealm {
                         
                         for (Authorization authorization: team.getAuthorizations()) {
                             Permission projectPermission = new ObjectPermission(
-                                    authorization.getProject(), authorization.getAuthorizedOperation());
+                                    authorization.getProject(), authorization.getRepoPermission());
                             if (projectPermission.implies(permission))
                                 return true;
                         }
                     }
 
-                    for (Project each : projectManager.query()) {
-                        ObjectPermission projectPermission =
-                                new ObjectPermission(each, each.getDefaultAuthorizedOperation());
-                        if (projectPermission.implies(permission)) return true;
-                    }
+//                    for (Project each : projectManager.query()) {
+//                        ObjectPermission projectPermission =
+//                                new ObjectPermission(each, each.getDefaultAuthorizedOperation());
+//                        if (projectPermission.implies(permission)) return true;
+//                    }
 
                     for (User each : userManager.query()) {
                         ObjectPermission userPermission =
