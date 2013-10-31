@@ -1,5 +1,7 @@
 package com.pmease.gitop.web.page.project.settings;
 
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.shiro.SecurityUtils;
@@ -42,6 +44,7 @@ import com.pmease.gitop.web.common.bootstrap.Icon;
 import com.pmease.gitop.web.common.bootstrap.IconType;
 import com.pmease.gitop.web.common.component.datagrid.DataGrid;
 import com.pmease.gitop.web.common.component.datagrid.hibernate.EntityListProvider;
+import com.pmease.gitop.web.page.account.setting.teams.AccountTeamsPage;
 import com.pmease.gitop.web.page.account.setting.teams.EditTeamPage;
 import com.pmease.gitop.web.page.project.ProjectPubliclyAccessibleChanged;
 import com.pmease.gitop.web.util.EnumUtils;
@@ -63,6 +66,26 @@ public class ProjectPermissionsPage extends AbstractProjectSettingPage {
 		super.onPageInitialize();
 		
 		add(newTeamsTable());
+		add(new AjaxLink<Void>("resetlink") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				Project project = getProject();
+				Collection<Authorization> list = project.getAuthorizations();
+				AuthorizationManager am = Gitop.getInstance(AuthorizationManager.class);
+				for (Iterator<Authorization> it = list.iterator(); it.hasNext();) {
+					Authorization auth = it.next();
+					am.delete(auth);
+					it.remove();
+				}
+				
+				Gitop.getInstance(ProjectManager.class).save(project);
+				onPermissionChanged(null, target);
+			}
+			
+		});
+		add(new BookmarkablePageLink<Void>("teamslink", AccountTeamsPage.class)
+				.setVisibilityAllowed(SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserAdmin(getAccount()))));
 	}
 	
 	private Authorization getAuthorization(Team team) {
@@ -170,7 +193,7 @@ public class ProjectPermissionsPage extends AbstractProjectSettingPage {
 						super.onConfigure();
 						
 						boolean enabled = getDefaultModelObject() != null;
-						this.setVisibilityAllowed(enabled);
+						this.setEnabled(enabled);
 					}
 				});
 				
@@ -262,6 +285,8 @@ public class ProjectPermissionsPage extends AbstractProjectSettingPage {
 					GeneralOperation permission = getTeamPermission(rowModel.getObject());
 					if (Objects.equal(operation, permission)) {
 						permission = EnumUtils.dec(permission);
+					} else if (operation.ordinal() < permission.ordinal()) {
+						permission = EnumUtils.dec(operation);
 					} else {
 						permission = operation;
 					}
@@ -312,7 +337,7 @@ public class ProjectPermissionsPage extends AbstractProjectSettingPage {
 	}
 	
 	private void onPermissionChanged(Team team, AjaxRequestTarget target) {
-		if (team.isAnonymousTeam()) {
+		if (team == null || team.isAnonymousTeam()) {
 			send(this, Broadcast.BREADTH, new ProjectPubliclyAccessibleChanged(target));
 		}
 		

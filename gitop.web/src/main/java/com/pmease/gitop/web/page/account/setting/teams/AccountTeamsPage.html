@@ -1,18 +1,13 @@
 <html xmlns:wicket>
 <wicket:extend>
 	<section>
-		<div class="head">
+		<div class="head clearfix">
 			<h2>Teams</h2>
+			<div class="actions">
+				<a class="btn btn-info btn-colorful-text" wicket:id="addTeam"><i class="icon-plus"></i> Create a team</a>
+			</div>
 		</div>
 		<div class="body">
-			<div class="alert alert-warning">
-				All permissions specified here can be overridden in the projects.
-			</div>
-			
-			<p>
-		    	<a class="btn btn-info btn-colorful-text" wicket:id="addTeam"><i class="icon-plus"></i> Create a team</a>
-		    </p>
-		    
 		    <table class="table table-hover teams-table" wicket:id="teams">
 		    </table>
 		    
@@ -20,9 +15,9 @@
 	</section>
 	
 	<wicket:fragment wicket:id="ops">
-    	<div class="action-links">
-    		<a wicket:id="removelink" class="remove-link"><i class="icon-remove-sign"></i> Remove</a>
-    	</div>
+    	<ul class="piped">
+    		<li><a wicket:id="removelink" class="remove-link first" title="remove"><i class="icon-remove-sign"></i> remove</a></li>
+    	</ul>
     </wicket:fragment>
     
     <wicket:fragment wicket:id="permissionop">

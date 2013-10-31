@@ -108,11 +108,12 @@ ul.f-dropdown { padding: 0; }
 
 .sidebar .list-navs.first {margin-top: 20px; }
 
-.content section > .head { border-style: solid; border-width: 1px 0; border-color: #ddd; margin-bottom: 0; }
+.content section > .head { border-style: solid; border-width: 1px 0; border-color: #ddd; margin-bottom: 0; position: relative; z-index: 10; overflow: visible; }
 section:first-child > .head { border-top: none; }
 section>.head h2, section>.head h3 { margin: 0; font-size: 18px; line-height: 24px; color: #6f6f6f; font-weight: 300; text-transform: uppercase; }
 section .padder, section > .body { padding: 20px 20px; }
 section > .well { border-radius: 0; border-width: 0 0 1px 0; margin: 0; }
+section>.head .actions { position: absolute; right: 20px; top: 10px; }
 
 /** TABLE */
 
@@ -181,14 +182,18 @@ a.permission-link:hover { color: #333; text-decoration: none; }
 .teams-table .label-builtin { border: 1px solid #ddd; color: #666; background: #f2f2f2; }
 .teams-table .remove-link { color: #ccc; }
 .teams-table .remove-link:hover { text-decoration: none; color: #990000; }
-.teams-table > tbody > tr:hover .remove-link,
-.teams-table > tbody > tr:hover .remove-link i { color: #990000; }
+.teams-table > tbody > tr:hover a.remove-link,
+.teams-table > tbody > tr:hover a.remove-link i { color: #990000; }
 
 .teams-table .name { margin: 0; font-weight: bold; }
 
 .permission-col em { color: #999; }
 .permission-col a { color: #333; }
 .permission-col a:hover { text-decoration: none; color: #09F; }
+
+.teams-table .operations .piped { white-space: nowrap; visibility: hidden; }
+.teams-table tr:hover .piped { visibility: visible; }
+
 
 /* ACCOUNT HOME */
 .vcard-column { padding: 20px; }

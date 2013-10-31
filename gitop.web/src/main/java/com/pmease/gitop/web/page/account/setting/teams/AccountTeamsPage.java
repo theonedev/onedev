@@ -45,6 +45,10 @@ import com.pmease.gitop.web.util.EnumUtils;
 @SuppressWarnings("serial")
 public class AccountTeamsPage extends AccountSettingPage {
 
+//	public static PageParameters newParams(User account) {
+//		return PageSpec.forUser(account);
+//	}
+	
 	@Override
 	protected Category getSettingCategory() {
 		return Category.TEAMS;
@@ -240,7 +244,9 @@ public class AccountTeamsPage extends AccountSettingPage {
 				@Override
 				public void onClick(AjaxRequestTarget target) {
 					Team team = Gitop.getInstance(TeamManager.class).get(teamId);
-					if (Objects.equal(operation, team.getAuthorizedOperation())) {
+					GeneralOperation permission = team.getAuthorizedOperation();
+					if (Objects.equal(operation, permission)
+							|| operation.ordinal() < permission.ordinal()) {
 						team.setAuthorizedOperation(EnumUtils.dec(operation));
 					} else {
 						team.setAuthorizedOperation(operation);
