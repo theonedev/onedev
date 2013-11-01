@@ -81,6 +81,10 @@ public class Git {
 		return new FindChangedFilesCommand(this);
 	}
 	
+	public FindFilesCommand findFiles() {
+		return new FindFilesCommand(this);
+	}
+	
 	public CheckAncestorCommand checkAncestor() {
 		return new CheckAncestorCommand(this);
 	}

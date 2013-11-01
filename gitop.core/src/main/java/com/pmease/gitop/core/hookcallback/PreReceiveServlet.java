@@ -60,11 +60,14 @@ public class PreReceiveServlet extends CallbackServlet {
 
 	@Override
 	protected void callback(Project project, String callbackData, Output output) {
-		List<String> splitted = StringUtils.splitAndTrim(callbackData);
+		List<String> splitted = StringUtils.splitAndTrim(callbackData, " ");
 
-		// String oldCommitHash = splitted.get(0);
+//		String oldCommitHash = splitted.get(0);
 		String newCommitHash = splitted.get(1);
 		String branchName = splitted.get(2);
+		
+		if (branchName.startsWith("refs/heads/"))
+			branchName = branchName.substring("refs/heads/".length());
 
 		logger.info("Executing pre-receive hook against branch {}...", branchName);
 
@@ -80,18 +83,26 @@ public class PreReceiveServlet extends CallbackServlet {
 			request.setAutoMerge(true);
 			request.setTarget(branch);
 			request.setSubmitter(user);
+
+			mergeRequestManager.save(request);
+		} 
+
+		if (request.getLatestUpdate() == null 
+				|| !request.getLatestUpdate().getCommitHash().equals(newCommitHash)) {
+			
+			Git git = new Git(storageManager.getStorage(project).ofCode());
+	
+			MergeRequestUpdate update = new MergeRequestUpdate();
+			update.setCommitHash(newCommitHash);
+			update.setRequest(request);
+			Commit commit = git.getCommit().revision(newCommitHash).call();
+			update.setSubject(commit.getSubject());
+			request.getUpdates().add(update);
+			
+			request.updatesChanged();
+	
+			mergeRequestUpdateManager.save(update);
 		}
-		
-		Git git = new Git(storageManager.getStorage(project).ofCode());
-
-		MergeRequestUpdate update = new MergeRequestUpdate();
-		update.setCommitHash(newCommitHash);
-		update.setRequest(request);
-		Commit commit = git.getCommit().revision(newCommitHash).call();
-		update.setSubject(commit.getSubject());
-		request.getUpdates().add(update);
-
-		git.updateRef().refName(update.getRefName()).revision(newCommitHash).call();
 
 		CheckResult checkResult = request.check();
 
@@ -101,23 +112,14 @@ public class PreReceiveServlet extends CallbackServlet {
 				output.writeLine(each);
 			}
 			
-			if (!request.isNew()) {
-				mergeRequestUpdateManager.save(update);
-				mergeRequestManager.save(request);
+			if (request.getUpdates().size() == 1) {
+				mergeRequestManager.delete(request);
 			}
 		} else if (checkResult instanceof Pending || checkResult instanceof Blocked) {
-			mergeRequestUpdateManager.save(update);
-			mergeRequestManager.save(request);
-
 			output.markError();
 			output.writeLine("!!!! Your pushed commit is subject to review before accepted. "
 					+ "For details, please visit: !!!!");
 			output.writeLine(gitop.guessServerUrl() + "/mr/" + request.getId());
-		} else {
-			if (!request.isNew()) {
-				mergeRequestUpdateManager.save(update);
-				mergeRequestManager.save(request);
-			}
 		}
 	}
 

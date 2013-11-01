@@ -35,7 +35,8 @@ import org.slf4j.LoggerFactory;
  *
  */
 public abstract class LineConsumer extends OutputStream {
-	private static final Logger logger = LoggerFactory.getLogger(LineConsumer.class);
+	
+	public static final Logger logger = LoggerFactory.getLogger(LineConsumer.class);
 	
 	/**
 	 * If this property is not empty, output will be re-directed to this stream

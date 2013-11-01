@@ -15,6 +15,7 @@ import com.pmease.gitop.core.manager.MergeRequestManager;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.model.Branch;
 import com.pmease.gitop.core.model.MergeRequest;
+import com.pmease.gitop.core.model.MergeRequestUpdate;
 import com.pmease.gitop.core.model.Project;
 import com.pmease.gitop.core.model.User;
 
@@ -41,10 +42,12 @@ public class PostReceiveServlet extends CallbackServlet {
 
     @Override
     protected void callback(Project project, String callbackData, Output output) {
-		List<String> splitted = StringUtils.splitAndTrim(callbackData);
+		List<String> splitted = StringUtils.splitAndTrim(callbackData, " ");
 
 		// String oldCommitHash = splitted.get(0);
 		String branchName = splitted.get(2);
+		if (branchName.startsWith("refs/heads/"))
+			branchName = branchName.substring("refs/heads/".length());
 
 		logger.info("Executing post-receive hook against branch {}...", branchName);
 
@@ -55,8 +58,19 @@ public class PostReceiveServlet extends CallbackServlet {
 
 		MergeRequest request = mergeRequestManager.findOpened(branch, null, user);
 		if (request != null) {
-			request.setStatus(MergeRequest.Status.MERGED);
-			mergeRequestManager.save(request);
+			boolean voted = false;
+			for (MergeRequestUpdate update: request.getUpdates()) {
+				if (!update.getVotes().isEmpty())
+					voted = true;
+			}
+			if (voted) {
+				request.setStatus(MergeRequest.Status.MERGED);
+				mergeRequestManager.save(request);
+			} else {
+				// Delete merged request without votes to reduce number of merge requests
+				// in system
+				mergeRequestManager.delete(request);
+			}
 		}
     	
     }

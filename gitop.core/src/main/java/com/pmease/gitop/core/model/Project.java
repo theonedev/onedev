@@ -10,6 +10,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -19,7 +20,7 @@ import javax.validation.Valid;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.gatekeeper.ApprovedByAuthorizedUsers;
+import com.pmease.gitop.core.gatekeeper.AlwaysAccept;
 import com.pmease.gitop.core.gatekeeper.GateKeeper;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.UserManager;
@@ -56,7 +57,8 @@ public class Project extends AbstractEntity implements UserBelonging {
 	private String description;
 
 	@Column(nullable=false)
-	private GateKeeper gateKeeper = new ApprovedByAuthorizedUsers();
+	@Lob
+	private GateKeeper gateKeeper = new AlwaysAccept();
 	
 	@Column(nullable=false)
 	private Date createdAt = new Date();

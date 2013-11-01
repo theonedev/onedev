@@ -50,10 +50,7 @@ public abstract class CallbackServlet extends HttpServlet {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         IOUtils.copy(request.getInputStream(), baos);
 
-        Output output = new Output();
-        callback(project, new String(baos.toByteArray()), output);
-        
-        response.getOutputStream().print(StringUtils.join(output.toString()));
+        callback(project, new String(baos.toByteArray()), new Output(response.getOutputStream()));
     }
 
     protected abstract void callback(Project project, String callbackData, Output output);

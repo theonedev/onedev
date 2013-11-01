@@ -2,8 +2,11 @@ package com.pmease.gitop.web.page.test;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -23,6 +26,7 @@ import com.pmease.gitop.core.model.MergeRequestUpdate;
 import com.pmease.gitop.core.model.Project;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.model.Vote;
+import com.pmease.gitop.core.model.VoteInvitation;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
 
 @SuppressWarnings("serial")
@@ -37,8 +41,13 @@ public class MergeRequestsPage extends AbstractLayoutPage {
             @Override
             protected List<MergeRequest> load() {
                 List<MergeRequest> mergeRequests = new ArrayList<MergeRequest>();
-                for (Branch branch: Gitop.getInstance(BranchManager.class).findBranches(getProject()))
-                    mergeRequests.addAll(branch.getIngoingRequests());
+                for (Branch branch: Gitop.getInstance(BranchManager.class).findBranches(getProject())) {
+                	for (MergeRequest request: branch.getIngoingRequests()) {
+                		if (request.getStatus() != MergeRequest.Status.CLOSED && request.getLastCheckResult() != null)
+                			mergeRequests.add(request);
+                	}
+                }
+                
                 return mergeRequests;
             }
 		    
@@ -60,15 +69,21 @@ public class MergeRequestsPage extends AbstractLayoutPage {
                     
                 });
                 
-                requestItem.add(new Link<Void>("merge") {
+                Link<Void> mergeLink = new Link<Void>("merge") {
 
 					@Override
 					public void onClick() {
 						MergeRequest request = requestItem.getModelObject();
 						request.merge();
 					}
-                	
-                });
+
+                };
+                
+                if (request.getStatus() != MergeRequest.Status.PENDING_MERGE)
+                	mergeLink.add(new AttributeAppender("class", " disabled"));
+                
+                requestItem.add(mergeLink);
+                
                 requestItem.add(new Link<Void>("close") {
 
 					@Override
@@ -167,6 +182,11 @@ public class MergeRequestsPage extends AbstractLayoutPage {
                     }
                     
                 });
+                
+                Set<String> invitedUserNames = new HashSet<>();
+                for (VoteInvitation invitation: request.getVoteInvitations())
+                	invitedUserNames.add(invitation.getVoter().getName());
+                requestItem.add(new Label("invitedUsers", StringUtils.join(invitedUserNames, ",")));
             }
 		    
 		});

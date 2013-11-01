@@ -1,13 +1,17 @@
 #!/bin/sh
-output=$(curl -s -S -f -X POST -d @- %s/${userId})
-IFS='|'
-lines=($output)
-returnCode=0
+IFS=$'\r\n'; 
+lines=($(curl -s -S -f -X POST -d @- %s/${GITOP_USER_ID} 2>&1))
+
+returnCode=0;
+
 for i in ${lines[@]}
 do
   if [ "$i" = "ERROR" ]; then 
     returnCode=1
   else
+    if [[ $i == curl:* ]]; then
+      returnCode=1
+    fi;
     echo "$i"
   fi;
 done
