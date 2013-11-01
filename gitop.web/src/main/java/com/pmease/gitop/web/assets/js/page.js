@@ -1,5 +1,6 @@
 $(document).ready(function() {
 	$('#globalheader a').tooltip({placement: 'bottom'});
+	$('#main [data-toggle="tooltip"]').tooltip();
 	$('.focusable:first').focus();
 	$('.has-error:first .focusable').focus();
 	$('body').on('click', function (e) {

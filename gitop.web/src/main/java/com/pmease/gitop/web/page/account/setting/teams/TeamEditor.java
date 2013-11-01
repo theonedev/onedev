@@ -1,27 +1,23 @@
 package com.pmease.gitop.web.page.account.setting.teams;
 
-import org.apache.wicket.Component;
+import java.util.List;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.bean.validation.PropertyValidator;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
+import org.hibernate.criterion.Restrictions;
 
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.TeamManager;
@@ -35,8 +31,8 @@ import com.pmease.gitop.web.common.form.FeedbackPanel;
 public class TeamEditor extends Panel {
 
 	private final IModel<User> userModel;
-	private GeneralOperation currentPermission;
-	private String name;
+//	private GeneralOperation currentPermission;
+//	private String name;
 	
 	public TeamEditor(String id, IModel<User> userModel, IModel<Team> teamModel) {
 		super(id, teamModel);
@@ -52,145 +48,239 @@ public class TeamEditor extends Panel {
 		return (Team) getDefaultModelObject();
 	}
 
+	private WebMarkupContainer membersDiv;
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		this.name = getTeam().getName();
-		this.currentPermission = getTeam().getAuthorizedOperation();
+//		this.name = getTeam().getName();
+//		this.currentPermission = getTeam().getDefaultRepoPermission();
 		
-		add(createInfoForm());
+//		add(createInfoForm());
 		
-		WebMarkupContainer moreDiv = new WebMarkupContainer("more") {
+		IModel<Team> teamModel = (IModel<Team>) getDefaultModel();
+		add(new TeamPropForm("infoForm", teamModel));
+		membersDiv = new WebMarkupContainer("members") {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				this.setVisibilityAllowed(!getTeam().isNew());
-			}
-		};
-		moreDiv.setOutputMarkupId(true);
-		add(moreDiv);
-		
-		IModel<Team> teamModel = (IModel<Team>) getDefaultModel();
-		moreDiv.add(new TeamMembersEditor("teammembers", teamModel));
-		moreDiv.add(new TeamProjectsEditor("teamprojects", teamModel));
-	}
-
-	private Form<?> createInfoForm() {
-		Form<?> infoForm = new Form<Void>("infoForm");
-		add(infoForm);
-		infoForm.add(new FeedbackPanel("feedback"));
-		infoForm.add(new TextField<String>("name", new PropertyModel<String>(
-				this, "name")).add(new IValidator<String>() {
-
-			@Override
-			public void validate(IValidatable<String> validatable) {
-				TeamManager tm = Gitop.getInstance(TeamManager.class);
-				Team team = tm.find(getAccount(), validatable.getValue());
-				Team current = getTeam();
-				if (team != null && !Objects.equal(team, current)) {
-					validatable.error(new ValidationError()
-							.setMessage("The team is already exist."));
-				}
-			}
-		}).setRequired(true));
-		
-		infoForm.add(createPermissionContainer());
-		AjaxButton btn = new AjaxButton("submit", infoForm) {
-			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				target.add(form);
-			}
-
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				Team team = getTeam();
-				boolean isNew = team.isNew();
-				User owner = getAccount();
-				Preconditions.checkNotNull(owner, "owner");
-
-				team.setName(name);
-				team.setAuthorizedOperation(currentPermission);
-				team.setOwner(owner);
-
-				Gitop.getInstance(TeamManager.class).save(team);
-				target.add(TeamEditor.this);
 				
-				Messenger.success(
-						String.format("Team has been %s successfully.",
-								isNew ? "created" : "updated")).run(target);
+				Team team = getTeam();
+				setVisibilityAllowed(!team.isNew() && !team.isAnonymousTeam() && !team.isLoggedInTeam());
 			}
 		};
-
-		btn.add(new Label("label", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return getTeam().isNew() ? "Create Team" : "Update Team";
-			}
-			
-		}));
 		
-		infoForm.add(btn);
+		membersDiv.setOutputMarkupId(true);
+		add(membersDiv);
 		
-		return infoForm;
+		
+		membersDiv.add(new TeamMembersEditor("teammembers", teamModel));
+//		moreDiv.add(new TeamProjectsEditor("teamprojects", teamModel));
 	}
 
-	class PermissionLink extends AjaxLink<GeneralOperation> {
-		
-		PermissionLink(String id, IModel<GeneralOperation> permission) {
-			super(id, permission);
-			add(AttributeAppender.append("class",
-					new AbstractReadOnlyModel<String>() {
+	private class TeamPropForm extends Form<Team> {
 
-						@Override
-						public String getObject() {
-							return Objects.equal(currentPermission, getPermission()) ? 
-									"active" : "";
-						}
-					}));
+		public TeamPropForm(String id, IModel<Team> model) {
+			super(id, model);
 		}
 
 		@Override
-		public void onClick(AjaxRequestTarget target) {
-			if (Objects.equal(currentPermission, getPermission())) {
-				return;
-			}
-
-			currentPermission = getPermission();
-			Team team = getTeam();
-			team.setAuthorizedOperation(currentPermission);
-			if (!team.isNew()) {
-				Gitop.getInstance(TeamManager.class).save(team);
-			}
+		protected void onInitialize() {
+			super.onInitialize();
 			
-			target.add(TeamEditor.this.get("infoForm:permissionContainer"));
+			Team team = getTeam();
+			add(new FeedbackPanel("feedback"));
+			add(new TextField<String>("name", new PropertyModel<String>(getDefaultModel(), "name"))
+					.add(new IValidator<String>() {
+
+						@Override
+						public void validate(IValidatable<String> validatable) {
+							String name = validatable.getValue();
+							
+							if (Team.ANONYMOUS.equalsIgnoreCase(name)
+									|| Team.LOGGEDIN.equalsIgnoreCase(name)
+									|| Team.OWNERS.equalsIgnoreCase(name)) {
+								validatable.error(new ValidationError().setMessage("The name is already exist"));
+								return;
+							}
+							TeamManager tm = Gitop.getInstance(TeamManager.class);
+							boolean b = tm.find(Restrictions.eq("owner", getAccount()),
+									Restrictions.eq("name", name).ignoreCase()) != null;
+							if (b) {
+								validatable.error(new ValidationError().setMessage("The name is already exist"));
+								return;
+							}
+						}
+						
+					})
+					.add(new PropertyValidator<String>())
+					.setRequired(true)
+					.setEnabled(!team.isBuiltIn()));
+			
+			IModel<List<? extends GeneralOperation>> listModel = new AbstractReadOnlyModel<List<? extends GeneralOperation>>() {
+
+						@Override
+						public List<GeneralOperation> getObject() {
+							Team team = getTeam();
+							if (team.isAnonymousTeam()) {
+								return ImmutableList.<GeneralOperation>of(
+										GeneralOperation.NO_ACCESS,
+										GeneralOperation.READ);
+							} else if (team.isLoggedInTeam()){
+								return ImmutableList.<GeneralOperation>of(
+										GeneralOperation.NO_ACCESS,
+										GeneralOperation.READ,
+										GeneralOperation.WRITE);
+							} else if (team.isOwnersTeam()) {
+								return ImmutableList.of(GeneralOperation.ADMIN);
+							} else {
+								return ImmutableList.<GeneralOperation>copyOf(
+										GeneralOperation.values());
+							}
+						}
+				
+			};
+			
+			add(new DropDownChoice<GeneralOperation>("permission",
+					new PropertyModel<GeneralOperation>(getDefaultModel(), "authorizedOperation"),
+					listModel));
+			
+			add(new AjaxButton("submit", this) {
+				@Override
+				protected void onError(AjaxRequestTarget target, Form<?> form) {
+					target.add(form);
+				}
+				
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+					Team team = getTeam();
+					boolean isNew = team.isNew();
+					Gitop.getInstance(TeamManager.class).save(team);
+					target.add(TeamEditor.this);
+					Messenger.success(
+							String.format("Team has been %s successfully.",
+									isNew ? "created" : "updated")).run(target);
+				}
+			});
 		}
-		
-		GeneralOperation getPermission() {
-			return (GeneralOperation) getDefaultModelObject();
-		}
-	}
-
-	private Component createPermissionContainer() {
-		WebMarkupContainer permissionContainer = new WebMarkupContainer("permissionContainer");
-		permissionContainer.setOutputMarkupId(true);
-		permissionContainer.add(new ListView<GeneralOperation>("permissions",
-				ImmutableList.<GeneralOperation>of(GeneralOperation.READ, GeneralOperation.WRITE, GeneralOperation.ADMIN)) {
-
-			@Override
-			protected void populateItem(ListItem<GeneralOperation> item) {
-				GeneralOperation permission = item.getModelObject();
-				AjaxLink<?> link = new PermissionLink("permission", Model.of(permission));
-				link.add(new Label("name", permission.toString()));
-				item.add(link);
-			}
-
-		});
-		return permissionContainer;
 	}
 	
+//	private Form<?> createInfoForm() {
+//		Form<?> infoForm = new Form<Void>("infoForm");
+//		add(infoForm);
+//		infoForm.add(new FeedbackPanel("feedback"));
+//		infoForm.add(new TextField<String>("name", new PropertyModel<String>(
+//				this, "name")).add(new IValidator<String>() {
+//
+//			@Override
+//			public void validate(IValidatable<String> validatable) {
+//				TeamManager tm = Gitop.getInstance(TeamManager.class);
+//				Team team = tm.find(getAccount(), validatable.getValue());
+//				Team current = getTeam();
+//				if (team != null && !Objects.equal(team, current)) {
+//					validatable.error(new ValidationError()
+//							.setMessage("The team is already exist."));
+//				}
+//			}
+//		}).setRequired(true));
+//		
+//		infoForm.add(createPermissionContainer());
+//		AjaxButton btn = new AjaxButton("submit", infoForm) {
+//			@Override
+//			protected void onError(AjaxRequestTarget target, Form<?> form) {
+//				target.add(form);
+//			}
+//
+//			@Override
+//			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+//				Team team = getTeam();
+//				boolean isNew = team.isNew();
+//				User owner = getAccount();
+//				Preconditions.checkNotNull(owner, "owner");
+//
+//				team.setName(name);
+//				team.setAuthorizedOperation(currentPermission);
+//				team.setOwner(owner);
+//
+//				Gitop.getInstance(TeamManager.class).save(team);
+//				target.add(TeamEditor.this);
+//				
+//				Messenger.success(
+//						String.format("Team has been %s successfully.",
+//								isNew ? "created" : "updated")).run(target);
+//			}
+//		};
+//
+//		btn.add(new Label("label", new AbstractReadOnlyModel<String>() {
+//
+//			@Override
+//			public String getObject() {
+//				return getTeam().isNew() ? "Create Team" : "Update Team";
+//			}
+//			
+//		}));
+//		
+//		infoForm.add(btn);
+//		
+//		return infoForm;
+//	}
+//
+//	class PermissionLink extends AjaxLink<GeneralOperation> {
+//		
+//		PermissionLink(String id, IModel<GeneralOperation> permission) {
+//			super(id, permission);
+//			add(AttributeAppender.append("class",
+//					new AbstractReadOnlyModel<String>() {
+//
+//						@Override
+//						public String getObject() {
+//							return Objects.equal(currentPermission, getPermission()) ? 
+//									"active" : "";
+//						}
+//					}));
+//		}
+//
+//		@Override
+//		public void onClick(AjaxRequestTarget target) {
+//			if (Objects.equal(currentPermission, getPermission())) {
+//				return;
+//			}
+//
+//			currentPermission = getPermission();
+//			Team team = getTeam();
+//			team.setAuthorizedOperation(currentPermission);
+//			if (!team.isNew()) {
+//				Gitop.getInstance(TeamManager.class).save(team);
+//			}
+//			
+//			target.add(TeamEditor.this.get("infoForm:permissionContainer"));
+//		}
+//		
+//		GeneralOperation getPermission() {
+//			return (GeneralOperation) getDefaultModelObject();
+//		}
+//	}
+//
+//	private Component createPermissionContainer() {
+//		WebMarkupContainer permissionContainer = new WebMarkupContainer("permissionContainer");
+//		permissionContainer.setOutputMarkupId(true);
+//		permissionContainer.add(new ListView<GeneralOperation>("permissions",
+//				ImmutableList.<GeneralOperation>of(GeneralOperation.READ, GeneralOperation.WRITE, GeneralOperation.ADMIN)) {
+//
+//			@Override
+//			protected void populateItem(ListItem<GeneralOperation> item) {
+//				GeneralOperation permission = item.getModelObject();
+//				AjaxLink<?> link = new PermissionLink("permission", Model.of(permission));
+//				link.add(new Label("name", permission.toString()));
+//				item.add(link);
+//			}
+//
+//		});
+//		return permissionContainer;
+//	}
+//	
 	@Override
 	public void onDetach() {
 		if (userModel != null) {

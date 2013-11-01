@@ -7,7 +7,8 @@ import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.shiro.authc.credential.PasswordService;
 
@@ -37,21 +38,20 @@ public class GitHubUserResource {
 	
 	@GET
 	@Path("{org}")
-	public Response get(@PathParam("org") String org) {
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<User> get(@PathParam("org") String org) {
 		try {
-			updateDatabase(org);
+			return updateDatabase(org);
 		} catch (Exception e) {
 			throw Throwables.propagate(e);
 		}
-		
-		return Response.ok("Everything is ok").build();
 	}
 	
-	private void updateDatabase(String org) throws JsonParseException,
+	private List<User> updateDatabase(String org) throws JsonParseException,
 			JsonMappingException, UniformInterfaceException,
 			ClientHandlerException, IOException {
 		Client client = Client.create();
-		client.addFilter(new HTTPBasicAuthFilter("zhenyuluo", "hongmei9"));
+		client.addFilter(new HTTPBasicAuthFilter("steveluo", "hongmei9"));
 		WebResource r = client.resource("https://api.github.com/orgs/" + org
 				+ "/public_members");
 		String content = r.get(String.class);
@@ -60,7 +60,9 @@ public class GitHubUserResource {
 		List<HubUser> users = objectMapper.readValue(content,
 				new TypeReference<List<HubUser>>() {
 				});
-		users = users.subList(102, users.size());
+		
+		List<User> result = Lists.newArrayList();
+		
 		for (HubUser each : users) {
 			try {
 				r = client.resource("https://api.github.com/users/"
@@ -77,13 +79,17 @@ public class GitHubUserResource {
 					user.setEmail(u.email);
 				}
 
-				user.setPassword("12345");
-				userManager.save(user);
-				System.out.println(user.getId() + " " + user);
+				System.out.println(user);
+				result.add(user);
+//				user.setPassword("12345");
+//				userManager.save(user);
+//				System.out.println(user.getId() + " " + user);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+		
+		return result;
 	}
 
 	public static class HubUsers {

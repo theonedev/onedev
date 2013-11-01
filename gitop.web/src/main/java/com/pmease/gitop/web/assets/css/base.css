@@ -31,16 +31,19 @@ ul.disc { list-style:disc outside; }
 
 /* PIPED LINKS */
 .piped { *zoom: 1; }
-.piped li { float: left; display: inline; }
-.piped a { border-left: 1px solid #797c80; padding: 0 0 0 0.75em; margin-left: 0.75em; }
-.piped li:first-child > a { border-left: 0 !important; padding-left: 0; margin-left: 0 !important; }
+.piped li { display: inline-block; }
+.piped li > * { border-left: 1px solid #797c80; padding: 0 0 0 0.75em; margin-left: 0.75em; }
+.piped li:first-child > * { border-left: 0 !important; padding-left: 0; margin-left: 0 !important; }
 .piped:before, .piped:after { display: table; line-height: 0; content: ""; }
 .piped:after { clear: both; }
 ul.piped, ol.piped { margin: 0; padding: 0; }
+.piped li em { font-style: normal; color: #999; cursor: not-allowed;}
 
+.piped.noborder a, .piped.noborder em { border: none; }
 .action-links { white-space: nowrap; }
 .action-links > .link-item { display: inline-block; margin-left: 12px; }
 .action-links > .link-item:first-child { margin-left: 0;}
+
 
 /* LINKS */
 .checkable-link { color: #333; cursor: pointer; }
@@ -144,7 +147,7 @@ a > .icon-null, .icon-null { display: inline-block; width: 10px; }
 .btn-primary.btn-colorful-text { color: #1aadf8; border-color: #1aadf8; }
 .btn-info.btn-colorful-text { color: #00B5AD; border-color:#00B5AD;}
 
-.btn-group > .btn-colorful-text { border-color: #ccc; }
+.btn-group > .btn-colorful-text { }
 
 .btn.btn-colorful-text:hover,
 .btn.btn-colorful-text:focus,
@@ -296,6 +299,7 @@ fieldset[disabled] .btn-inverse.active {
 .form-inline.navigation-form .btn-group { margin-left: 6px; }
 .search-form button { position: absolute; right: 2px; top: 1px; border: none; height: 22px; background: transparent; color: #888; }
 
+.form-inline .field-controls { display: block; }
 
 /* FORM COMPONENT */
 .select2-container .select2-choice { padding-top: 4px; padding-bottom: 4px; height: auto; }
@@ -314,7 +318,7 @@ fieldset[disabled] .btn-inverse.active {
 .submits:before, .submits:after { display: table; content: " "; }
 .submits:after { clear: both; }
 .submits .btn + .btn { margin-bottom: 0; margin-left: 5px; }
-.form-inline input[type="text"], .form-inline input[type="password"] { width: 180px; }
+
 
 .form-sm { width: 400px; }
 .form-md { width: 600px; }

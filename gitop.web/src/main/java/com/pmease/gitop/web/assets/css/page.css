@@ -12,6 +12,9 @@ ul.f-dropdown { padding: 0; }
 .table tfoot > tr > td.v-middle {
 	vertical-align: middle;
 }
+.table td.operations { width: 1%; white-space: nowrap; }
+.table-auto { width: auto; border-collapse: collapse !important; }
+.table-auto th, .table-auto td { padding: 3px 6px; }
 
 /**
  * LAYOUT
@@ -105,10 +108,12 @@ ul.f-dropdown { padding: 0; }
 
 .sidebar .list-navs.first {margin-top: 20px; }
 
-.content section > .head { border-style: solid; border-width: 1px 0; border-color: #ddd; margin-bottom: 0; }
+.content section > .head { border-style: solid; border-width: 1px 0; border-color: #ddd; margin-bottom: 0; position: relative; z-index: 10; overflow: visible; }
 section:first-child > .head { border-top: none; }
 section>.head h2, section>.head h3 { margin: 0; font-size: 18px; line-height: 24px; color: #6f6f6f; font-weight: 300; text-transform: uppercase; }
 section .padder, section > .body { padding: 20px 20px; }
+section > .well { border-radius: 0; border-width: 0 0 1px 0; margin: 0; }
+section>.head .actions { position: absolute; right: 20px; top: 10px; }
 
 /** TABLE */
 
@@ -174,24 +179,42 @@ a.permission-link:hover { color: #333; text-decoration: none; }
 .list-group-item .remove-link { color: #999; }
 .list-group-item:hover .list-group-item-actions .remove-link { color: #990000;} 
 
-.table-teams strong a { font-size: 18px; }
-.table-teams .remove-link > i { font-size: 18px; color: #999; }
-.table-teams > tbody > tr:hover .remove-link,
-.table-teams > tbody > tr:hover .remove-link i { color: #990000; }
+.teams-table .label-builtin { border: 1px solid #ddd; color: #666; background: #f2f2f2; }
+.teams-table .remove-link { color: #ccc; }
+.teams-table .remove-link:hover { text-decoration: none; color: #990000; }
+.teams-table > tbody > tr:hover a.remove-link,
+.teams-table > tbody > tr:hover a.remove-link i { color: #990000; }
+
+.teams-table .name { margin: 0; font-weight: bold; }
+
+.permission-col em { color: #999; }
+.permission-col a { color: #333; }
+.permission-col a:hover { text-decoration: none; color: #09F; }
+
+.teams-table .operations .piped { white-space: nowrap; visibility: hidden; }
+.teams-table tr:hover .piped { visibility: visible; }
+
 
 /* ACCOUNT HOME */
 .vcard-column { padding: 20px; }
 .vcard-column .avatar { width: 200px; height: 200px; margin-bottom: 18px; }
 .vcard-column .avatar > img { border-radius: 8px; }
-.vcard-name { margin: 0 0 18px; }
-.vcard-name b, .vcard-name em { display: block; white-space: nowrap; overflow: hidden; }
-.vcard-name b { font-size: 26px; }
+.vcard-name { margin: 0; }
+.vcard-name b, .vcard-name em { white-space: nowrap; overflow: hidden; }
+.vcard-name b { font-size: 26px; display: block; }
 .vcard-name em { font-size: 24px; color: #888; font-style: normal; font-weight: 300; }
+.vcard-name a.img-link { font-size: 18px; color: #999; }
+.vcard-name a.img-link:hover { color: #09f; }
+
 .vcard-stats { padding: 20px 0; border-top: 1px solid #ddd; overflow: hidden; }
 .vcard-stats a { display: inline-block; color: #999; font-size: 12px; line-height: 1.123; width: 64px; overflow: hidden; text-align: center; }
 .vcard-stats a > b { display: block; color: #333; font-size: 28px; }
 .vcard-stats a:hover { text-decoration: none; color: #09f; }
 .vcard-stats a:hover > b { color: #09f; }
+
+.account-actions { padding: 10px 20px; font-size: 20px; margin-bottom: 18px; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; }
+.account-actions a { color: #999; }
+.account-actions a:hover { color: #333; text-decoration: none; }
 
 .nav-piped > li { float: left; }
 .nav-piped.nav-justified > li { float: none; }
@@ -267,7 +290,7 @@ ul.btn-list { list-style: none; margin: 0; }
  */
 .page-nav.repo-head {padding-bottom: 10px; }
 
-a > .ind { font-weight: 300; color: #888; }
+a > .ind { font-weight: 300; color: #888; float: right; }
 
 h1.repo-info { margin: 0; padding-left:60px; font-size: 20px; position: relative; font-weight: normal; min-height: 48px;}
 .repo-info > .avatar { position: absolute; left: 0; top: 0; color: #ddd; width: 48px; height: 48px; padding: 2px; border: 1px solid #ddd; }

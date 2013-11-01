@@ -6,6 +6,7 @@ import com.pmease.commons.util.namedentity.EntityLoader;
 import com.pmease.gitop.core.manager.impl.DefaultTeamManager;
 import com.pmease.gitop.core.model.Team;
 import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.core.permission.operation.GeneralOperation;
 
 @ImplementedBy(DefaultTeamManager.class)
 public interface TeamManager extends GenericDao<Team> {
@@ -23,5 +24,12 @@ public interface TeamManager extends GenericDao<Team> {
 	Team find(User owner, String teamName);
 	
 	EntityLoader asEntityLoader(User owner);
+
+	Team getAnonymousTeam(User user);
 	
+	Team getLoggedInTeam(User user);
+	
+	Team getOwnersTeam(User user);
+
+	GeneralOperation getTeamPermission(Team team);
 }

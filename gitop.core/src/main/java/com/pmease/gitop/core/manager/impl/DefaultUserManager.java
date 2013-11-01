@@ -17,8 +17,13 @@ import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.util.namedentity.EntityLoader;
 import com.pmease.commons.util.namedentity.NamedEntity;
+import com.pmease.gitop.core.manager.MembershipManager;
+import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.manager.UserManager;
+import com.pmease.gitop.core.model.Membership;
+import com.pmease.gitop.core.model.Team;
 import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.core.permission.operation.GeneralOperation;
 import com.pmease.gitop.core.validation.UserNameReservation;
 
 @Singleton
@@ -28,13 +33,61 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 
     private final Set<UserNameReservation> nameReservations;
 
+    private final TeamManager teamManager;
+    private final MembershipManager membershipManager;
+    
     @Inject
-    public DefaultUserManager(GeneralDao generalDao, Set<UserNameReservation> nameReservations) {
+    public DefaultUserManager(GeneralDao generalDao, 
+    		Set<UserNameReservation> nameReservations,
+    		TeamManager teamManager,
+    		MembershipManager membershipManager) {
         super(generalDao);
 
         this.nameReservations = nameReservations;
+        this.teamManager = teamManager;
+        this.membershipManager = membershipManager;
     }
 
+    @Override
+	public void save(User user) {
+    	boolean isNew = user.isNew();
+    	super.save(user);
+    	
+    	if (isNew) {
+	    	onUserCreated(user);
+    	} else {
+    		onUserUpdated(user);
+    	}
+    }
+    
+    private void onUserCreated(User user) {
+    	Team team = new Team();
+    	team.setOwner(user);
+    	team.setAuthorizedOperation(GeneralOperation.NO_ACCESS);
+    	team.setName(Team.ANONYMOUS);
+    	teamManager.save(team);
+    	
+    	team = new Team();
+    	team.setOwner(user);
+    	team.setName(Team.LOGGEDIN);
+    	team.setAuthorizedOperation(GeneralOperation.NO_ACCESS);
+    	teamManager.save(team);
+    	
+    	team = new Team();
+    	team.setOwner(user);
+    	team.setName(Team.OWNERS);
+    	team.setAuthorizedOperation(GeneralOperation.ADMIN);
+    	teamManager.save(team);
+    	
+    	Membership membership = new Membership();
+    	membership.setTeam(team);
+    	membership.setUser(user);
+    	membershipManager.save(membership);
+    }
+    
+    private void onUserUpdated(User user) {
+    }
+    
     @Sessional
     @Override
     public User getRootUser() {

@@ -46,4 +46,15 @@ public enum GeneralOperation implements PrivilegedOperation {
 		return displayName;
 	}
 	
+	public static GeneralOperation higher(GeneralOperation op1, GeneralOperation op2) {
+		if (op1 == null) {
+			return op2;
+		}
+		
+		if (op2 == null) {
+			return op1;
+		}
+		
+		return op1.ordinal() > op2.ordinal() ? op1 : op2;
+	}
 }
