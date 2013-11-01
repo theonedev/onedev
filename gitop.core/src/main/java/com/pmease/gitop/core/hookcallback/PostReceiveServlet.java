@@ -51,7 +51,7 @@ public class PostReceiveServlet extends CallbackServlet {
 
 		logger.info("Executing post-receive hook against branch {}...", branchName);
 
-		Branch branch = branchManager.find(project, branchName, true);
+		Branch branch = branchManager.find(project, branchName);
 
 		User user = User.getCurrent();
 		Preconditions.checkNotNull(user, "User pushing commits is unknown.");

@@ -57,10 +57,14 @@ public class Git {
 		return new InitCommand(this);
 	}
 	
-	public ListBranchCommand listBranch() {
-	    return new ListBranchCommand(this);
+	public ListBranchesCommand listBranches() {
+	    return new ListBranchesCommand(this);
 	}
 	
+	public ListTagsCommand listTags() {
+	    return new ListTagsCommand(this);
+	}
+
 	public GetCommitCommand getCommit() {
 	    return new GetCommitCommand(this);
 	}
@@ -77,12 +81,12 @@ public class Git {
 		return new CommitCommand(this);
 	}
 	
-	public FindChangedFilesCommand findChangedFiles() {
-		return new FindChangedFilesCommand(this);
+	public ListChangedFilesCommand listChangedFiles() {
+		return new ListChangedFilesCommand(this);
 	}
 	
-	public FindFilesCommand findFiles() {
-		return new FindFilesCommand(this);
+	public ListFilesCommand listFiles() {
+		return new ListFilesCommand(this);
 	}
 	
 	public CheckAncestorCommand checkAncestor() {

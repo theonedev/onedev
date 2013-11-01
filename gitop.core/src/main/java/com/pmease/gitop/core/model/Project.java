@@ -1,5 +1,6 @@
 package com.pmease.gitop.core.model;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -19,11 +20,16 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.git.Git;
+import com.pmease.commons.git.ListBranchesCommand;
+import com.pmease.commons.git.ListTagsCommand;
 import com.pmease.commons.hibernate.AbstractEntity;
+import com.pmease.commons.util.GeneralException;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.gatekeeper.AlwaysAccept;
 import com.pmease.gitop.core.gatekeeper.GateKeeper;
 import com.pmease.gitop.core.manager.BranchManager;
+import com.pmease.gitop.core.manager.StorageManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.core.permission.object.ProtectedObject;
@@ -197,7 +203,7 @@ public class Project extends AbstractEntity implements UserBelonging {
 	/**
 	 * Get branches for this project from database. The result might be 
 	 * different from actual branches in repository. To get actual 
-	 * branches in repository, call {@link BranchManager#findBranches(Project)} 
+	 * branches in repository, call {@link BranchManager#listBranches(Project)} 
 	 * instead.
 	 * 
 	 * @return
@@ -221,7 +227,7 @@ public class Project extends AbstractEntity implements UserBelonging {
 		}
 	}
 
-	public Collection<User> findAuthorizedUsers(GeneralOperation operation) {
+	public Collection<User> listAuthorizedUsers(GeneralOperation operation) {
 		Set<User> authorizedUsers = new HashSet<User>();
 		for (User user: Gitop.getInstance(UserManager.class).query()) {
 			if (user.asSubject().isPermitted(new ObjectPermission(this, operation)))
@@ -230,8 +236,53 @@ public class Project extends AbstractEntity implements UserBelonging {
 		return authorizedUsers;
 	}
 	
+	public Collection<String> listBranches() {
+        File codeDir = Gitop.getInstance(StorageManager.class).getStorage(this).ofCode();
+        ListBranchesCommand cmd = new ListBranchesCommand(new Git(codeDir));
+        
+        return cmd.call();
+	}
+	
+	public Collection<String> listTags() {
+        File codeDir = Gitop.getInstance(StorageManager.class).getStorage(this).ofCode();
+        ListTagsCommand cmd = new ListTagsCommand(new Git(codeDir));
+        
+        return cmd.call();
+	}
+	
+	public void createBranch(String branchName, String commitHash) {
+        File codeDir = Gitop.getInstance(StorageManager.class).getStorage(this).ofCode();
+        Git git = new Git(codeDir);
+        if (git.listBranches().call().contains(branchName))
+        	throw new GeneralException("Branch %s already exists.", branchName);
+        
+        git.updateRef().refName("refs/heads/" + branchName).revision(commitHash).call();
+	}
+	
+	public void deleteBranch(String branchName) {
+        File codeDir = Gitop.getInstance(StorageManager.class).getStorage(this).ofCode();
+        Git git = new Git(codeDir);
+        git.deleteRef().refName("refs/heads/" + branchName).call();
+	}
+
+	public void createTag(String tagName, String commitHash) {
+        File codeDir = Gitop.getInstance(StorageManager.class).getStorage(this).ofCode();
+        Git git = new Git(codeDir);
+        if (git.listTags().call().contains(tagName))
+        	throw new GeneralException("Tag %s already exists.", tagName);
+        
+        git.updateRef().refName("refs/tags/" + tagName).revision(commitHash).call();
+	}
+	
+	public void deleteTag(String tagName) {
+        File codeDir = Gitop.getInstance(StorageManager.class).getStorage(this).ofCode();
+        Git git = new Git(codeDir);
+        git.deleteRef().refName("refs/tags/" + tagName).call();
+	}
+
 	@Override
 	public String toString() {
 		return getOwner() + "/" + getName();
 	}
+	
 }

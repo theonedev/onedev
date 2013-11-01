@@ -6,8 +6,8 @@ import java.util.Collection;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.git.FindChangedFilesCommand;
-import com.pmease.commons.git.FindFilesCommand;
+import com.pmease.commons.git.ListChangedFilesCommand;
+import com.pmease.commons.git.ListFilesCommand;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.pattern.WildcardUtils;
@@ -42,17 +42,17 @@ public class TouchSpecifiedFiles extends AbstractGateKeeper {
 			Collection<String> touchedFiles;
 			if (i == request.getEffectiveUpdates().size()-1) {
 				if (request.getMergeBase() == null) {
-					FindFilesCommand command = new Git(repoDir).findFiles();
+					ListFilesCommand command = new Git(repoDir).listFiles();
 					command.revision(update.getRefName());
 					touchedFiles = command.call();
 				} else {
-					FindChangedFilesCommand command = new Git(repoDir).findChangedFiles();
+					ListChangedFilesCommand command = new Git(repoDir).listChangedFiles();
 					command.fromRev(request.getMergeBase());
 					command.toRev(update.getRefName());
 					touchedFiles = command.call();
 				}
 			} else {
-				FindChangedFilesCommand command = new Git(repoDir).findChangedFiles();
+				ListChangedFilesCommand command = new Git(repoDir).listChangedFiles();
 				command.fromRev(request.getEffectiveUpdates().get(i+1).getRefName());
 				command.toRev(update.getRefName());
 				touchedFiles = command.call();

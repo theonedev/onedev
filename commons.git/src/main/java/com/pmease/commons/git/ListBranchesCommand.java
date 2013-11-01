@@ -8,9 +8,9 @@ import org.apache.commons.lang3.StringUtils;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
-public class ListBranchCommand extends GitCommand<Collection<String>> {
+public class ListBranchesCommand extends GitCommand<Collection<String>> {
 
-    public ListBranchCommand(Git git) {
+    public ListBranchesCommand(Git git) {
         super(git);
     }
 

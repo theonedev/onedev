@@ -37,7 +37,7 @@ public class ListChangedFilesCommandTest {
     		git.add().addPath("a").call();
     		git.commit().message("commit").call();
     		
-    		Collection<String> changedFiles = git.findChangedFiles().fromRev("HEAD~4").toRev("HEAD").call();
+    		Collection<String> changedFiles = git.listChangedFiles().fromRev("HEAD~4").toRev("HEAD").call();
     		
     		Assert.assertTrue(changedFiles.containsAll(Sets.newHashSet("a", "b", "c", "d")));
 	    } finally {

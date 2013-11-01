@@ -8,28 +8,36 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
-public class FindFilesCommand extends GitCommand<Collection<String>> {
+public class ListChangedFilesCommand extends GitCommand<Collection<String>> {
 
-	private String revision;
+	private String fromRev;
 	
-	public FindFilesCommand(final Git git) {
+	private String toRev;
+	
+	public ListChangedFilesCommand(final Git git) {
 		super(git);
 	}
 	
-	public FindFilesCommand revision(final String revision) {
-		this.revision = revision;
+	public ListChangedFilesCommand fromRev(final String fromRev) {
+		this.fromRev = fromRev;
+		return this;
+	}
+	
+	public ListChangedFilesCommand toRev(final String toRev) {
+		this.toRev = toRev;
 		return this;
 	}
 	
 	@Override
 	public Collection<String> call() {
-		Preconditions.checkNotNull(revision, "revision has to be specified.");
+		Preconditions.checkNotNull(toRev, "toRev has to be specified.");
+		Preconditions.checkNotNull(fromRev, "fromRev has to be specified.");
 		
 		final Set<String> changedFiles = new HashSet<String>();
 		
 		Commandline cmd = git().cmd();
 		
-		cmd.addArgs("ls-tree", "--name-only", "-r", revision);
+		cmd.addArgs("diff", "--name-only", fromRev + ".." + toRev);
 		
 		cmd.execute(new LineConsumer() {
 

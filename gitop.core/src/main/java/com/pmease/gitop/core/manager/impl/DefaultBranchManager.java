@@ -1,20 +1,11 @@
 package com.pmease.gitop.core.manager.impl;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
-import com.pmease.commons.git.Git;
-import com.pmease.commons.git.ListBranchCommand;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
@@ -22,19 +13,15 @@ import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.util.namedentity.EntityLoader;
 import com.pmease.commons.util.namedentity.NamedEntity;
 import com.pmease.gitop.core.manager.BranchManager;
-import com.pmease.gitop.core.manager.StorageManager;
 import com.pmease.gitop.core.model.Branch;
 import com.pmease.gitop.core.model.Project;
 
 @Singleton
 public class DefaultBranchManager extends AbstractGenericDao<Branch> implements BranchManager {
 
-    private final StorageManager storageManager;
-    
 	@Inject
-	public DefaultBranchManager(GeneralDao generalDao, StorageManager storageManager) {
+	public DefaultBranchManager(GeneralDao generalDao) {
 		super(generalDao);
-		this.storageManager = storageManager;
 	}
 
 	@Sessional
@@ -56,7 +43,7 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
         return branch;
     }
 
-    @Override
+	@Override
 	public EntityLoader asEntityLoader(final Project project) {
 		return new EntityLoader() {
 
@@ -107,42 +94,4 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 		};
 	}
     
-    private void addBranch(Project project, String branchName) {
-        Branch branch = new Branch();
-        branch.setName(branchName);
-        branch.setProject(project);
-        project.getBranches().add(branch);
-        save(branch);
-    }
-
-    @Transactional
-    @Override
-    public Collection<Branch> findBranches(Project project) {
-        File codeDir = storageManager.getStorage(project).ofCode();
-        ListBranchCommand cmd = new ListBranchCommand(new Git(codeDir));
-        
-        Collection<String> branchNamesInRepo = cmd.call();
-        
-        Set<String> branchNamesInDB = new HashSet<String>();
-        
-        List<Branch> deletedBranches = new ArrayList<Branch>();
-        for (Branch branch: project.getBranches()) {
-            branchNamesInDB.add(branch.getName());
-            
-            if (!branchNamesInRepo.contains(branch.getName())) {
-                delete(branch);
-                deletedBranches.add(branch);
-            }
-        }
-        
-        project.getBranches().removeAll(deletedBranches);
-        
-        for (String branchName: branchNamesInRepo) {
-            if (!branchNamesInDB.contains(branchName)) {
-                addBranch(project, branchName);
-            }
-        }
-        
-        return project.getBranches();
-    }
 }

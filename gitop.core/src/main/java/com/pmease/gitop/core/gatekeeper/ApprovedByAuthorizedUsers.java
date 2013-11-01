@@ -30,7 +30,7 @@ public class ApprovedByAuthorizedUsers extends AbstractGateKeeper {
 
 	@Override
 	public CheckResult check(MergeRequest request) {
-		Collection<User> authorizedUsers = request.getTarget().getProject().findAuthorizedUsers(GeneralOperation.WRITE);
+		Collection<User> authorizedUsers = request.getTarget().getProject().listAuthorizedUsers(GeneralOperation.WRITE);
 
         int approvals = 0;
         int pendings = 0;

@@ -22,7 +22,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.CalcMergeBaseCommand;
 import com.pmease.commons.git.CheckAncestorCommand;
-import com.pmease.commons.git.FindChangedFilesCommand;
+import com.pmease.commons.git.ListChangedFilesCommand;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitop.core.Gitop;
@@ -290,7 +290,7 @@ public class MergeRequest extends AbstractEntity {
 		File repoDir = storageManager.getStorage(getTarget().getProject()).ofCode();
 		MergeRequestUpdate update = getLatestUpdate();
 		if (update != null) {
-			FindChangedFilesCommand command = new Git(repoDir).findChangedFiles();
+			ListChangedFilesCommand command = new Git(repoDir).listChangedFiles();
 			command.fromRev(getTarget().getName());
 			command.toRev(update.getRefName());
 			return command.call();

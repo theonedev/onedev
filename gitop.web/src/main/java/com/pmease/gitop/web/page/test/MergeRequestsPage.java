@@ -41,7 +41,8 @@ public class MergeRequestsPage extends AbstractLayoutPage {
             @Override
             protected List<MergeRequest> load() {
                 List<MergeRequest> mergeRequests = new ArrayList<MergeRequest>();
-                for (Branch branch: Gitop.getInstance(BranchManager.class).findBranches(getProject())) {
+                for (String branchName: getProject().listBranches()) {
+                	Branch branch = Gitop.getInstance(BranchManager.class).find(getProject(), branchName, true);
                 	for (MergeRequest request: branch.getIngoingRequests()) {
                 		if (request.getStatus() != MergeRequest.Status.CLOSED && request.getLastCheckResult() != null)
                 			mergeRequests.add(request);
