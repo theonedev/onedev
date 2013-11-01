@@ -24,6 +24,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
+import org.apache.shiro.authc.credential.PasswordService;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -33,14 +34,16 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.web.SitePaths;
+import com.pmease.gitop.web.common.util.StandardObjectMapper;
 
 @Path("/test")
 public class TestResource {
 
-	@Inject ObjectMapper objectMapper;
+	ObjectMapper objectMapper = StandardObjectMapper.getInstance();
 	@Inject UserManager userManager;
 	
 	@GET
@@ -51,8 +54,11 @@ public class TestResource {
 		try {
 			List<User> users = objectMapper.readValue(in, new TypeReference<List<User>>(){});
 			count = users.size();
+			String passwordHash = Gitop.getInstance(PasswordService.class).encryptPassword("12345");
+			
 			for (User each : users) {
 				each.setId(null);
+				each.setPasswordHash(passwordHash);
 				userManager.save(each);
 			}
 		} catch (JsonParseException e) {

@@ -59,10 +59,6 @@ public class TeamMembersEditor extends Panel {
 				}
 
 				List<User> users = Lists.newArrayList();
-				if (team.isOwners()) {
-					users.add(team.getOwner());
-				}
-				
 				List<Membership> memberships = Gitop.getInstance(MembershipManager.class)
 						.query(Restrictions.eq("team", team));
 				for (Membership each : memberships) {

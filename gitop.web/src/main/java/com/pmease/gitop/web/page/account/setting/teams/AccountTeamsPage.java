@@ -88,19 +88,20 @@ public class AccountTeamsPage extends AccountSettingPage {
 		}
 	}
 	
-	@SuppressWarnings("unused")
 	private String formatTeamDescription(Team team) {
+		TeamManager tm = Gitop.getInstance(TeamManager.class);
+		GeneralOperation operation = tm.getActualAuthorizedOperation(team);
 		if (team.isAnonymous()) {
 			return String.format("Users %s any repositories within this account without logging in",
-					getPermissionMessage(team.getAuthorizedOperation())); 
+					getPermissionMessage(operation)); 
 		} else if (team.isLoggedIn()) {
 			return String.format("Logged-in users %s any repositories within this account",
-					getPermissionMessage(team.getAuthorizedOperation()));
+					getPermissionMessage(operation));
 		} else if (team.isOwners()) {
-			return (team.getMemberships().size() + 1) + " members have full access to all repositories and this account";
+			return team.getMemberships().size() + " members have full access to all repositories and this account";
 		} else {
-			return String.format(team.getMemberships().size() + " members can %s any repositories within this account",
-					getPermissionMessage(team.getAuthorizedOperation()));
+			return String.format(team.getMemberships().size() + " members %s any repositories within this account",
+					getPermissionMessage(operation));
 		}
 	}
 	
@@ -119,7 +120,7 @@ public class AccountTeamsPage extends AccountSettingPage {
 				link.add(new Label("name", Model.of(team.getName())));
 				link.add(new Icon("icon", IconType.PENCIL));
 				frag.add(link);
-//				frag.add(new Label("description", formatTeamDescription(team)));
+				frag.add(new Label("summary", formatTeamDescription(team)));
 				frag.add(new Label("builtin", "built-in").setVisibilityAllowed(team.isBuiltIn()));
 				cellItem.add(frag);
 			}
@@ -156,7 +157,7 @@ public class AccountTeamsPage extends AccountSettingPage {
 			
 			@Override
 			public String getCssClass() {
-				return "operations v-middle";
+				return "operations";
 			}
 		};
 		

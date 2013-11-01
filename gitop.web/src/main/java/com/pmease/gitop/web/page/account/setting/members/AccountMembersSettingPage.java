@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
@@ -15,6 +16,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.hibernate.criterion.Restrictions;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.pmease.gitop.core.Gitop;
@@ -78,24 +80,29 @@ public class AccountMembersSettingPage extends AccountSettingPage {
 			protected Component createActionsPanel(String id, IModel<User> model) {
 				Fragment frag = new Fragment(id, "memberactionfrag", AccountMembersSettingPage.this);
 				User user = model.getObject();
-				final IModel<User> userModel = new UserModel(user);
-				frag.add(new AjaxConfirmLink<Void>("remove",
-						Model.of("<p>Are you sure you want to remove below user? "
-								+ "Remove this user will remove her/him from <b>all teams</b></p>"
-								+ "<p><b>" + user.getName() + "</b> (" + user.getDisplayName() + ")</p>")) {
+				if (Objects.equal(user, getAccount())) {
+					frag.add(new WebMarkupContainer("remove").setVisibilityAllowed(false));
+				} else {
+					frag.add(new AjaxConfirmLink<User>("remove",
+							new UserModel(user),
+							Model.of("<p>Are you sure you want to remove below user? "
+									+ "Remove this user will remove her/him from <b>all teams</b></p>"
+									+ "<p><b>" + user.getName() + "</b> (" + user.getDisplayName() + ")</p>")) {
 
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						MembershipManager mm = Gitop.getInstance(MembershipManager.class);
-						User user = userModel.getObject();
-						List<Membership> memberships = mm.query(Restrictions.eq("user", user));
-						for (Membership each : memberships) {
-							mm.delete(each);
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							MembershipManager mm = Gitop.getInstance(MembershipManager.class);
+							User user = (User) getDefaultModelObject();
+							List<Membership> memberships = mm.query(Restrictions.eq("user", user));
+							for (Membership each : memberships) {
+								mm.delete(each);
+							}
+							
+							target.add(AccountMembersSettingPage.this.get("members"));
 						}
-						
-						target.add(AccountMembersSettingPage.this.get("members"));
-					}
-				});
+					});
+				}
+				
 				return frag;
 			}
 		}.setOutputMarkupId(true));

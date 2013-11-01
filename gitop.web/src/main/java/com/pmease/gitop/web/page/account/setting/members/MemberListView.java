@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
@@ -121,20 +122,29 @@ public class MemberListView extends Panel {
 				Membership membership = item.getModelObject();
 				final Long membershipId = membership.getId();
 				final int size = getList().size();
-				AjaxConfirmLink<Void> link = new AjaxConfirmLink<Void>("removelink",
-						Model.of("Are you sure you want to remove the user from team " + membership.getTeam().getName() + "?")) {
-
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								MembershipManager mm = Gitop.getInstance(MembershipManager.class);
-								mm.delete(mm.get(membershipId));
-								if (size > 1) {
-									target.add(teamsDiv);
-								} else {
-									target.add(MemberListView.this);
+				
+				WebMarkupContainer link;
+				if (membership.getTeam().isOwners() && 
+						Objects.equal(membership.getUser(), accountModel.getObject())) {
+					// owner
+					link = new WebMarkupContainer("removelink");
+					link.add(AttributeAppender.append("class", "owners disabled"));
+				} else {
+					link = new AjaxConfirmLink<Void>("removelink",
+							Model.of("Are you sure you want to remove the user from team " + membership.getTeam().getName() + "?")) {
+	
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									MembershipManager mm = Gitop.getInstance(MembershipManager.class);
+									mm.delete(mm.get(membershipId));
+									if (size > 1) {
+										target.add(teamsDiv);
+									} else {
+										target.add(MemberListView.this);
+									}
 								}
-							}
-				};
+					};
+				}
 				
 				link.add(new Label("teamname", Model.of(membership.getTeam().getName())));
 				item.add(link);

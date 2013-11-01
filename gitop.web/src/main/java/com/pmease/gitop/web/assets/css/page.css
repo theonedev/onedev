@@ -270,10 +270,12 @@ ul.btn-list { list-style: none; margin: 0; }
 .member-content .list-group-item-heading em { font-style: normal; color: #999; font-weight: normal; } 
 .member-content .list-item-teams { overflow: hidden; white-space: nowrap; margin-right: 10px; }
 .member-content .list-item-teams .btn { position: relative; }
-.member-content .list-item-teams .btn > i { position: absolute;left: 50%;margin-left: -6px;top: 50%;margin-top: -8px;font-size: 16px; display: none; }
-.member-content .list-item-teams .btn:hover { background: #ff2a68; border-color: #ff2a68; }
-.member-content .list-item-teams .btn:hover > i { display: block; }
-.member-content .list-item-teams .btn:hover > span { color: #ff2a68; }
+.member-content .list-item-teams a.btn > i { position: absolute;left: 50%;margin-left: -6px;top: 50%;margin-top: -8px;font-size: 16px; display: none; }
+.member-content .list-item-teams a.btn:hover { background: #ff2a68; border-color: #ff2a68; }
+.member-content .list-item-teams a.btn:hover > i { display: block; }
+.member-content .list-item-teams a.btn:hover > span { color: #ff2a68; }
+.member-content .list-item-teams a.btn.owners { background: #468847; border-color: #468847; color: white; }
+.member-content .list-item-teams a.btn.owners:hover > i { display: none; }
 
 .list-repos > li.list-group-item.repo {width: 380px; float: left; padding: 0; list-style: none; margin: 0 20px 0 0;  position: relative;  border-width: 0; border-bottom: 1px solid #ddd;  }
 .list-repos > li.list-group-item.repo { min-height: 48px; padding: 15px 0 ; }

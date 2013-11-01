@@ -61,7 +61,7 @@ public class TeamEditor extends Panel {
 //		add(createInfoForm());
 		
 		IModel<Team> teamModel = (IModel<Team>) getDefaultModel();
-		add(new TeamPropForm("infoForm", teamModel));
+		add(new TeamPropForm("infoForm", teamModel).setVisibilityAllowed(!getTeam().isOwners()));
 		membersDiv = new WebMarkupContainer("members") {
 			@Override
 			protected void onConfigure() {
