@@ -5,9 +5,7 @@
   "email" : "kevinoliver@github.com",
   "displayName" : "Kevin Oliver",
   "avatarUrl" : null,
-  "admin" : false,
-  "publiclyAccessible" : false,
-  "defaultAuthorizedOperation" : "NO_ACCESS"
+  "admin" : false
 }, {
   "id" : 3,
   "name" : "kevinweil",
@@ -15,9 +13,7 @@
   "email" : "kevinweil@github.com",
   "displayName" : "Kevin Weil",
   "avatarUrl" : null,
-  "admin" : false,
-  "publiclyAccessible" : false,
-  "defaultAuthorizedOperation" : "NO_ACCESS"
+  "admin" : false
 }, {
   "id" : 4,
   "name" : "klingerf",
@@ -25,9 +21,7 @@
   "email" : "klingerf@gmail.com",
   "displayName" : "Kevin Lingerfelt",
   "avatarUrl" : null,
-  "admin" : false,
-  "publiclyAccessible" : false,
-  "defaultAuthorizedOperation" : "NO_ACCESS"
+  "admin" : false
 }, {
   "id" : 5,
   "name" : "kloots",
@@ -35,9 +29,7 @@
   "email" : "kloots@github.com",
   "displayName" : "Todd Kloots",
   "avatarUrl" : null,
-  "admin" : false,
-  "publiclyAccessible" : false,
-  "defaultAuthorizedOperation" : "NO_ACCESS"
+  "admin" : false
 }, {
   "id" : 6,
   "name" : "kmonkeyjam",
@@ -45,9 +37,7 @@
   "email" : "kmonkeyjam@github.com",
   "displayName" : null,
   "avatarUrl" : null,
-  "admin" : false,
-  "publiclyAccessible" : false,
-  "defaultAuthorizedOperation" : "NO_ACCESS"
+  "admin" : false
 }, {
   "id" : 7,
   "name" : "krishnanraman",
@@ -55,9 +45,7 @@
   "email" : "kraman@twitter.com",
   "displayName" : "Krishnan Raman",
   "avatarUrl" : null,
-  "admin" : false,
-  "publiclyAccessible" : false,
-  "defaultAuthorizedOperation" : "NO_ACCESS"
+  "admin" : false
 }, {
   "id" : 8,
   "name" : "kurrik",

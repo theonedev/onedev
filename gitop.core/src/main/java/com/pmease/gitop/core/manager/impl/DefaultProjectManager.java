@@ -3,7 +3,6 @@ package com.pmease.gitop.core.manager.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,7 +11,6 @@ import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
@@ -110,11 +108,6 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
         super.delete(entity);
 
         storageManager.getStorage(entity).delete();
-    }
-
-    @Override
-    public Collection<Project> findPublic() {
-        return query(new Criterion[] {Restrictions.eq("publiclyAccessible", true)});
     }
 
     @Sessional

@@ -108,10 +108,10 @@ public abstract class AbstractProjectPage extends AbstractAccountPage {
 	
 	// TODO: here can be slow?
 	private boolean isPubliclyAccessible() {
-		Team anonymous = Gitop.getInstance(TeamManager.class).getAnonymousTeam(getAccount());
+		Team anonymous = Gitop.getInstance(TeamManager.class).getAnonymous(getAccount());
 		for (Authorization each : getProject().getAuthorizations()) {
-			if (each.getTeam().isAnonymousTeam()) {
-				return each.getRepoPermission().can(GeneralOperation.READ);
+			if (each.getTeam().isAnonymous()) {
+				return each.getOperation().can(GeneralOperation.READ);
 			}
 		}
 		

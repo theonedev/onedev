@@ -1,6 +1,5 @@
 package com.pmease.gitop.core.manager.impl;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,6 +12,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.Sessional;
+import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.util.namedentity.EntityLoader;
@@ -29,7 +29,7 @@ import com.pmease.gitop.core.validation.UserNameReservation;
 @Singleton
 public class DefaultUserManager extends AbstractGenericDao<User> implements UserManager {
 
-    private volatile Long rootUserId;
+    private volatile Long rootId;
 
     private final Set<UserNameReservation> nameReservations;
 
@@ -37,10 +37,8 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
     private final MembershipManager membershipManager;
     
     @Inject
-    public DefaultUserManager(GeneralDao generalDao, 
-    		Set<UserNameReservation> nameReservations,
-    		TeamManager teamManager,
-    		MembershipManager membershipManager) {
+    public DefaultUserManager(GeneralDao generalDao, Set<UserNameReservation> nameReservations,
+    		TeamManager teamManager, MembershipManager membershipManager) {
         super(generalDao);
 
         this.nameReservations = nameReservations;
@@ -48,70 +46,57 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
         this.membershipManager = membershipManager;
     }
 
+    @Transactional
     @Override
 	public void save(User user) {
     	boolean isNew = user.isNew();
     	super.save(user);
     	
     	if (isNew) {
-	    	onUserCreated(user);
-    	} else {
-    		onUserUpdated(user);
+        	Team team = new Team();
+        	team.setOwner(user);
+        	team.setAuthorizedOperation(GeneralOperation.NO_ACCESS);
+        	team.setName(Team.ANONYMOUS);
+        	teamManager.save(team);
+        	
+        	team = new Team();
+        	team.setOwner(user);
+        	team.setName(Team.LOGGEDIN);
+        	team.setAuthorizedOperation(GeneralOperation.NO_ACCESS);
+        	teamManager.save(team);
+        	
+        	team = new Team();
+        	team.setOwner(user);
+        	team.setName(Team.OWNERS);
+        	team.setAuthorizedOperation(GeneralOperation.ADMIN);
+        	teamManager.save(team);
+        	
+        	Membership membership = new Membership();
+        	membership.setTeam(team);
+        	membership.setUser(user);
+        	membershipManager.save(membership);
     	}
-    }
-    
-    private void onUserCreated(User user) {
-    	Team team = new Team();
-    	team.setOwner(user);
-    	team.setAuthorizedOperation(GeneralOperation.NO_ACCESS);
-    	team.setName(Team.ANONYMOUS);
-    	teamManager.save(team);
-    	
-    	team = new Team();
-    	team.setOwner(user);
-    	team.setName(Team.LOGGEDIN);
-    	team.setAuthorizedOperation(GeneralOperation.NO_ACCESS);
-    	teamManager.save(team);
-    	
-    	team = new Team();
-    	team.setOwner(user);
-    	team.setName(Team.OWNERS);
-    	team.setAuthorizedOperation(GeneralOperation.ADMIN);
-    	teamManager.save(team);
-    	
-    	Membership membership = new Membership();
-    	membership.setTeam(team);
-    	membership.setUser(user);
-    	membershipManager.save(membership);
-    }
-    
-    private void onUserUpdated(User user) {
     }
     
     @Sessional
     @Override
-    public User getRootUser() {
-        User rootUser;
-        if (rootUserId == null) {
+    public User getRoot() {
+        User root;
+        if (rootId == null) {
             // The first created user should be root user
-            rootUser = find(null, new Order[] {Order.asc("id")});
-            Preconditions.checkNotNull(rootUser);
-            rootUserId = rootUser.getId();
+            root = find(null, new Order[] {Order.asc("id")});
+            Preconditions.checkNotNull(root);
+            rootId = root.getId();
         } else {
-            rootUser = load(rootUserId);
+            root = load(rootId);
         }
-        return rootUser;
+        return root;
     }
 
     @Sessional
     @Override
     public User find(String userName) {
         return find(new Criterion[] {Restrictions.eq("name", userName)});
-    }
-
-    @Override
-    public Collection<User> findPublic() {
-        return query(new Criterion[] {Restrictions.eq("publiclyAccessible", true)});
     }
 
     @Override

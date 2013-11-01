@@ -1,6 +1,5 @@
 package com.pmease.gitop.core.manager;
 
-import java.util.Collection;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -20,5 +19,4 @@ public interface ProjectManager extends GenericDao<Project> {
 	
 	Set<String> getReservedNames();
 
-	Collection<Project> findPublic();
 }

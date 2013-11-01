@@ -68,7 +68,7 @@ public class TeamEditor extends Panel {
 				super.onConfigure();
 				
 				Team team = getTeam();
-				setVisibilityAllowed(!team.isNew() && !team.isAnonymousTeam() && !team.isLoggedInTeam());
+				setVisibilityAllowed(!team.isNew() && !team.isAnonymous() && !team.isLoggedIn());
 			}
 		};
 		
@@ -124,16 +124,16 @@ public class TeamEditor extends Panel {
 						@Override
 						public List<GeneralOperation> getObject() {
 							Team team = getTeam();
-							if (team.isAnonymousTeam()) {
+							if (team.isAnonymous()) {
 								return ImmutableList.<GeneralOperation>of(
 										GeneralOperation.NO_ACCESS,
 										GeneralOperation.READ);
-							} else if (team.isLoggedInTeam()){
+							} else if (team.isLoggedIn()){
 								return ImmutableList.<GeneralOperation>of(
 										GeneralOperation.NO_ACCESS,
 										GeneralOperation.READ,
 										GeneralOperation.WRITE);
-							} else if (team.isOwnersTeam()) {
+							} else if (team.isOwners()) {
 								return ImmutableList.of(GeneralOperation.ADMIN);
 							} else {
 								return ImmutableList.<GeneralOperation>copyOf(

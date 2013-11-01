@@ -24,14 +24,14 @@ public class Authorization extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private Project project;
 	
-	private GeneralOperation repoPermission = GeneralOperation.READ;
+	private GeneralOperation operation = GeneralOperation.READ;
 	
-	public GeneralOperation getRepoPermission() {
-		return repoPermission;
+	public GeneralOperation getOperation() {
+		return operation;
 	}
 
-	public void setRepoPermission(GeneralOperation repoPermission) {
-		this.repoPermission = repoPermission;
+	public void setOperation(GeneralOperation operation) {
+		this.operation = operation;
 	}
 
 	public Team getTeam() {

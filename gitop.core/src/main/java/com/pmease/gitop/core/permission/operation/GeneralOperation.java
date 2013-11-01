@@ -1,5 +1,9 @@
 package com.pmease.gitop.core.permission.operation;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+
 public enum GeneralOperation implements PrivilegedOperation {
 	
 	NO_ACCESS("No Access") {
@@ -40,21 +44,25 @@ public enum GeneralOperation implements PrivilegedOperation {
 	GeneralOperation(String displayName) {
 		this.displayName = displayName;
 	}
-
+	
 	@Override
 	public String toString() {
 		return displayName;
 	}
 	
-	public static GeneralOperation higher(GeneralOperation op1, GeneralOperation op2) {
-		if (op1 == null) {
-			return op2;
-		}
-		
-		if (op2 == null) {
-			return op1;
-		}
-		
-		return op1.ordinal() > op2.ordinal() ? op1 : op2;
+	public static GeneralOperation mostPermissive(GeneralOperation... operations) {
+		return Collections.max(Arrays.asList(operations), new Comparator<GeneralOperation>() {
+
+			@Override
+			public int compare(GeneralOperation operation1, GeneralOperation operation2) {
+				if (operation1.can(operation2))
+					return 1;
+				else if (operation2.can(operation1))
+					return -1;
+				else
+					return 0;
+			}
+			
+		});
 	}
 }

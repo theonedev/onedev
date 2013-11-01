@@ -10,26 +10,26 @@ import org.apache.shiro.authz.Permission;
 
 import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.shiro.AbstractUser;
-import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.model.Authorization;
 import com.pmease.gitop.core.model.Project;
 import com.pmease.gitop.core.model.Team;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.permission.ObjectPermission;
-import com.pmease.gitop.core.permission.operation.GeneralOperation;
+import com.pmease.gitop.core.permission.operation.PrivilegedOperation;
 
 @Singleton
 public class SecurityRealm extends AbstractRealm {
 
     private final UserManager userManager;
     
-    private final ProjectManager projectManager;
+    private final TeamManager teamManager;
 
     @Inject
-    public SecurityRealm(UserManager userManager, ProjectManager projectManager) {
+    public SecurityRealm(UserManager userManager, TeamManager teamManager) {
         this.userManager = userManager;
-        this.projectManager = projectManager;
+        this.teamManager = teamManager;
     }
 
     @Override
@@ -52,60 +52,56 @@ public class SecurityRealm extends AbstractRealm {
 
             @Override
             public boolean implies(Permission permission) {
-                if (userId != 0L) {
-                    User user = userManager.load(userId);
-                    // Administrator can do anything
-                    if (user.isRoot() || user.isAdmin()) return true;
+            	if (permission instanceof ObjectPermission) {
+            		ObjectPermission objectPermission = (ObjectPermission) permission;
+            		Collection<Team> teams = new ArrayList<>();
+	                if (userId != 0L) {
+	                    User user = userManager.load(userId);
+	                    // Administrator can do anything
+	                    if (user.isRoot() || user.isAdmin()) return true;
+	
+	                    teams.addAll(user.getTeams());
+	                    
+	                    if (getUser(objectPermission) != null)
+	                    	teams.add(teamManager.getLoggedIn(getUser(objectPermission)));
+	                }
 
-                    // One can do anything against its belongings
-                    if (ObjectPermission.ofUserAdmin(user).implies(permission)) return true;
+                    if (getUser(objectPermission) != null)
+                    	teams.add(teamManager.getAnonymous(getUser(objectPermission)));
 
-                    for (Team team : user.getTeams()) {
-                        Permission userPermission = new ObjectPermission(team.getOwner(), team.getAuthorizedOperation());
-                        if (userPermission.implies(permission))
-                            return true;
-                        
-                        for (Authorization authorization: team.getAuthorizations()) {
-                            Permission projectPermission = new ObjectPermission(
-                                    authorization.getProject(), authorization.getRepoPermission());
-                            if (projectPermission.implies(permission))
-                                return true;
-                        }
+                    for (Team team: teams) {
+                    	PrivilegedOperation operation = null;
+                    	for (Authorization authorization: team.getAuthorizations()) {
+                    		if (authorization.getProject().has(objectPermission.getObject())) {
+                    			operation = authorization.getOperation();
+                    			break;
+                    		}
+                    	}
+                    	if (operation == null && team.getOwner().has(objectPermission.getObject())) {
+                    		operation = team.getAuthorizedOperation();
+                    	}
+                    	
+                    	if (operation != null && operation.can(objectPermission.getOperation()))
+                    		return true;
                     }
-
-//                    for (Project each : projectManager.query()) {
-//                        ObjectPermission projectPermission =
-//                                new ObjectPermission(each, each.getDefaultAuthorizedOperation());
-//                        if (projectPermission.implies(permission)) return true;
-//                    }
-
-                    for (User each : userManager.query()) {
-                        ObjectPermission userPermission =
-                                new ObjectPermission(each, each.getDefaultAuthorizedOperation());
-                        if (userPermission.implies(permission)) return true;
-                    }
-                }
-
-                // check if is public access to projects
-                for (Project each : projectManager.findPublic()) {
-                    ObjectPermission projectPermission =
-                            new ObjectPermission(each, GeneralOperation.READ);
-                    if (projectPermission.implies(permission)) return true;
-                }
-
-                // check if is public access to accounts
-                for (User each : userManager.findPublic()) {
-                    ObjectPermission userPermission =
-                            new ObjectPermission(each, GeneralOperation.READ);
-                    if (userPermission.implies(permission)) return true;
-                }
-
-                return false;
+                    
+            	} 
+            	return false;
             }
-
         });
 
         return permissions;        
+    }
+    
+    private User getUser(ObjectPermission permission) {
+        if (permission.getObject() instanceof Project) {
+        	Project project = (Project) permission.getObject();
+        	return project.getOwner();
+        } else if (permission.getObject() instanceof User) {
+        	return (User) permission.getObject();
+        } else {
+        	return null;
+        }
     }
 
 }

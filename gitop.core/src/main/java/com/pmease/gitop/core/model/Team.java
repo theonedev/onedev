@@ -16,8 +16,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Objects;
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.commons.validation.Name;
 import com.pmease.gitop.core.permission.operation.GeneralOperation;
+import com.pmease.gitop.core.validation.TeamName;
 
 @Entity
 @Table(uniqueConstraints={
@@ -38,7 +38,7 @@ public class Team extends AbstractEntity {
 	private String name;
 	
 	@Column(nullable=false)
-	private GeneralOperation authorizedOperation = GeneralOperation.READ;
+	private GeneralOperation authorizedOperation = GeneralOperation.NO_ACCESS;
 	
 	@OneToMany(mappedBy="team", cascade=CascadeType.REMOVE)
 	private Collection<Membership> memberships = new ArrayList<Membership>();
@@ -54,7 +54,7 @@ public class Team extends AbstractEntity {
 		this.owner = owner;
 	}
 
-	@Name
+	@TeamName
 	@NotEmpty
 	public String getName() {
 		return name;
@@ -88,20 +88,20 @@ public class Team extends AbstractEntity {
 		this.authorizations = authorizations;
 	}
 
-	public boolean isAnonymousTeam() {
+	public boolean isAnonymous() {
 		return ANONYMOUS.equalsIgnoreCase(getName());
 	}
 	
-	public boolean isOwnersTeam() {
+	public boolean isOwners() {
 		return OWNERS.equalsIgnoreCase(getName());
 	}
 	
-	public boolean isLoggedInTeam() {
+	public boolean isLoggedIn() {
 		return LOGGEDIN.equalsIgnoreCase(getName());
 	}
 	
 	public boolean isBuiltIn() {
-		return isAnonymousTeam() || isOwnersTeam() || isLoggedInTeam();
+		return isAnonymous() || isOwners() || isLoggedIn();
 	}
 	
 	@Override

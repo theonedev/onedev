@@ -19,7 +19,6 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.permission.object.ProtectedObject;
 import com.pmease.gitop.core.permission.object.UserBelonging;
-import com.pmease.gitop.core.permission.operation.GeneralOperation;
 import com.pmease.gitop.core.validation.UserName;
 
 @SuppressWarnings("serial")
@@ -35,11 +34,6 @@ public class User extends AbstractUser implements ProtectedObject {
 	private String avatarUrl;
 	
 	private boolean admin;
-	
-	private boolean publiclyAccessible;
-	
-	@Column(nullable=false)
-	private GeneralOperation defaultAuthorizedOperation = GeneralOperation.NO_ACCESS;
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<Membership> memberships = new ArrayList<Membership>();
@@ -199,25 +193,8 @@ public class User extends AbstractUser implements ProtectedObject {
 		}
 	}
 	
-	public boolean isPubliclyAccessible() {
-		return publiclyAccessible;
-	}
-
-	public void setPubliclyAccessible(boolean publiclyAccessible) {
-		this.publiclyAccessible = publiclyAccessible;
-	}
-
-	public GeneralOperation getDefaultAuthorizedOperation() {
-		return defaultAuthorizedOperation;
-	}
-
-	public void setDefaultAuthorizedOperation(
-			GeneralOperation defaultAuthorizedOperation) {
-		this.defaultAuthorizedOperation = defaultAuthorizedOperation;
-	}
-
 	public boolean isRoot() {
-		return Gitop.getInstance(UserManager.class).getRootUser().equals(this);
+		return Gitop.getInstance(UserManager.class).getRoot().equals(this);
 	}
 
 	@Override

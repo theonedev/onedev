@@ -90,13 +90,13 @@ public class AccountTeamsPage extends AccountSettingPage {
 	
 	@SuppressWarnings("unused")
 	private String formatTeamDescription(Team team) {
-		if (team.isAnonymousTeam()) {
+		if (team.isAnonymous()) {
 			return String.format("Users %s any repositories within this account without logging in",
 					getPermissionMessage(team.getAuthorizedOperation())); 
-		} else if (team.isLoggedInTeam()) {
+		} else if (team.isLoggedIn()) {
 			return String.format("Logged-in users %s any repositories within this account",
 					getPermissionMessage(team.getAuthorizedOperation()));
-		} else if (team.isOwnersTeam()) {
+		} else if (team.isOwners()) {
 			return (team.getMemberships().size() + 1) + " members have full access to all repositories and this account";
 		} else {
 			return String.format(team.getMemberships().size() + " members can %s any repositories within this account",
@@ -186,7 +186,7 @@ public class AccountTeamsPage extends AccountSettingPage {
 	
 	private GeneralOperation getTeamPermission(Team team) {
 		TeamManager tm = Gitop.getInstance(TeamManager.class);
-		return tm.getTeamPermission(team);
+		return tm.getActualAuthorizedOperation(team);
 	}
 	
 	private class PermissionColumn extends AbstractColumn<Team, String> {
@@ -204,9 +204,9 @@ public class AccountTeamsPage extends AccountSettingPage {
 			Fragment frag = new Fragment(componentId, "permissionop", AccountTeamsPage.this);
 			Team team = rowModel.getObject();
 			boolean displayed = true;
-			if (team.isAnonymousTeam()) {
+			if (team.isAnonymous()) {
 				displayed = operation == GeneralOperation.READ;
-			} else if (team.isLoggedInTeam()) {
+			} else if (team.isLoggedIn()) {
 				displayed = operation != GeneralOperation.ADMIN;
 			}
 			
@@ -217,24 +217,24 @@ public class AccountTeamsPage extends AccountSettingPage {
 
 			boolean enabled = true;
 			
-			if (team.isOwnersTeam()) {
+			if (team.isOwners()) {
 				enabled = false; // cannot edit owners team permission
-			} else if (team.isAnonymousTeam() || operation == GeneralOperation.ADMIN) {
+			} else if (team.isAnonymous() || operation == GeneralOperation.ADMIN) {
 				enabled = true; // can always edit anonymous and admin column
 			} else {
 				TeamManager tm = Gitop.getInstance(TeamManager.class);
 				if (operation == GeneralOperation.READ) {
-					GeneralOperation op = tm.getAnonymousTeam(getAccount()).getAuthorizedOperation();
+					GeneralOperation op = tm.getAnonymous(getAccount()).getAuthorizedOperation();
 					if (op == operation) {
 						// READ
 						enabled = false;
 					} else {
-						op = tm.getLoggedInTeam(getAccount()).getAuthorizedOperation();
-						enabled = team.isLoggedInTeam() ? true : !op.can(GeneralOperation.READ);
+						op = tm.getLoggedIn(getAccount()).getAuthorizedOperation();
+						enabled = team.isLoggedIn() ? true : !op.can(GeneralOperation.READ);
 					}
 				} else if (operation == GeneralOperation.WRITE) {
-					GeneralOperation op = tm.getLoggedInTeam(getAccount()).getAuthorizedOperation();
-					enabled = team.isLoggedInTeam() ? true : !op.can(GeneralOperation.WRITE);
+					GeneralOperation op = tm.getLoggedIn(getAccount()).getAuthorizedOperation();
+					enabled = team.isLoggedIn() ? true : !op.can(GeneralOperation.WRITE);
 				}
 			}
 			

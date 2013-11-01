@@ -1,6 +1,5 @@
 package com.pmease.gitop.core.manager;
 
-import java.util.Collection;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -19,7 +18,7 @@ public interface UserManager extends GenericDao<User> {
 	 * @return
 	 * 			root account of the system. Never be <tt>null</tt>
 	 */
-	User getRootUser();
+	User getRoot();
 
 	/**
 	 * Find user of specified name.
@@ -31,8 +30,6 @@ public interface UserManager extends GenericDao<User> {
 	 */
 	@Nullable User find(String userName);
 	
-	Collection<User> findPublic();
-
 	Set<String> getReservedNames();
 	
 	EntityLoader asEntityLoader();

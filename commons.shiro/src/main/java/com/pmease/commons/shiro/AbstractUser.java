@@ -35,7 +35,11 @@ public abstract class AbstractUser extends AbstractEntity implements Authenticat
     public String getPasswordHash() {
         return passwordHash;
     }
-
+    
+    public void setPasswordHash(String passwordHash) {
+    	this.passwordHash = passwordHash;
+    }
+    
     public void setPassword(String password) {
         passwordHash = AppLoader.getInstance(PasswordService.class)
                 .encryptPassword(password);

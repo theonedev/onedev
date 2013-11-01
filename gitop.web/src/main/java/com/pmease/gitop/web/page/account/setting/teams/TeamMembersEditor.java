@@ -59,7 +59,7 @@ public class TeamMembersEditor extends Panel {
 				}
 
 				List<User> users = Lists.newArrayList();
-				if (team.isOwnersTeam()) {
+				if (team.isOwners()) {
 					users.add(team.getOwner());
 				}
 				

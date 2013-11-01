@@ -30,7 +30,7 @@ public class ObjectPermission implements Permission {
 	public ProtectedObject getObject() {
 		return object;
 	}
-
+	
 	public PrivilegedOperation getOperation() {
 		return operation;
 	}

@@ -99,34 +99,34 @@ public class ProjectPermissionsPage extends AbstractProjectSettingPage {
 	}
 	
 	private GeneralOperation getOriginalPermission(Team team) {
-		if (team.isOwnersTeam()) {
+		if (team.isOwners()) {
 			return GeneralOperation.ADMIN;
 		}
 		
 		Authorization auth = getAuthorization(team);
 		if (auth != null) {
-			return auth.getRepoPermission();
+			return auth.getOperation();
 		} else {
-			return Gitop.getInstance(TeamManager.class).getTeamPermission(team); 
+			return Gitop.getInstance(TeamManager.class).getActualAuthorizedOperation(team); 
 		}
 	}
 
 	private GeneralOperation getTeamPermission(Team team) {
 		GeneralOperation permission = getOriginalPermission(team);
-		if (team.isOwnersTeam() || team.isAnonymousTeam()) {
+		if (team.isOwners() || team.isAnonymous()) {
 			return permission;
 		}
 		
 		TeamManager tm = Gitop.getInstance(TeamManager.class);
-		Team anonymous = tm.getAnonymousTeam(getAccount());
+		Team anonymous = tm.getAnonymous(getAccount());
 		GeneralOperation anonymousPermission = getOriginalPermission(anonymous);
-		if (team.isLoggedInTeam()) {
-			return GeneralOperation.higher(permission, anonymousPermission);
+		if (team.isLoggedIn()) {
+			return GeneralOperation.mostPermissive(permission, anonymousPermission);
 		}
 		
-		Team loggedIn = tm.getLoggedInTeam(getAccount());
-		GeneralOperation op = GeneralOperation.higher(anonymousPermission, getOriginalPermission(loggedIn));
-		return GeneralOperation.higher(permission, op);
+		Team loggedIn = tm.getLoggedIn(getAccount());
+		GeneralOperation op = GeneralOperation.mostPermissive(anonymousPermission, getOriginalPermission(loggedIn));
+		return GeneralOperation.mostPermissive(permission, op);
 	}
 	
 	private Component newTeamsTable() {
@@ -241,9 +241,9 @@ public class ProjectPermissionsPage extends AbstractProjectSettingPage {
 				String componentId, final IModel<Team> rowModel) {
 			Team team = rowModel.getObject();
 			boolean displayed = true;
-			if (team.isAnonymousTeam()) {
+			if (team.isAnonymous()) {
 				displayed = operation == GeneralOperation.READ;
-			} else if (team.isLoggedInTeam()) {
+			} else if (team.isLoggedIn()) {
 				displayed = operation != GeneralOperation.ADMIN;
 			}
 
@@ -256,24 +256,24 @@ public class ProjectPermissionsPage extends AbstractProjectSettingPage {
 			cellItem.add(frag);
 
 			boolean enabled = true;
-			if (team.isOwnersTeam()) {
+			if (team.isOwners()) {
 				enabled = false; // cannot edit owners team permission
-			} else if (team.isAnonymousTeam() || operation == GeneralOperation.ADMIN) {
+			} else if (team.isAnonymous() || operation == GeneralOperation.ADMIN) {
 				enabled = true; // can always edit anonymous and admin column
 			} else {
 				TeamManager tm = Gitop.getInstance(TeamManager.class);
 				if (operation == GeneralOperation.READ) {
-					GeneralOperation op = getTeamPermission(tm.getAnonymousTeam(getAccount()));
+					GeneralOperation op = getTeamPermission(tm.getAnonymous(getAccount()));
 					if (op == GeneralOperation.READ) {
 						enabled = false;
 					} else {
 						// operation is NO_ACCESS
-						op = getTeamPermission(tm.getLoggedInTeam(getAccount()));
-						enabled = team.isLoggedInTeam() ? true : !op.can(GeneralOperation.READ);
+						op = getTeamPermission(tm.getLoggedIn(getAccount()));
+						enabled = team.isLoggedIn() ? true : !op.can(GeneralOperation.READ);
 					}
 				} else if (operation == GeneralOperation.WRITE) {
-					GeneralOperation op = getTeamPermission(tm.getLoggedInTeam(getAccount()));
-					enabled = team.isLoggedInTeam() ? true : !op.can(GeneralOperation.WRITE);
+					GeneralOperation op = getTeamPermission(tm.getLoggedIn(getAccount()));
+					enabled = team.isLoggedIn() ? true : !op.can(GeneralOperation.WRITE);
 				}
 			}
 			
@@ -302,14 +302,14 @@ public class ProjectPermissionsPage extends AbstractProjectSettingPage {
 						auth.setProject(getProject());
 					}
 					
-					auth.setRepoPermission(permission);
+					auth.setOperation(permission);
 					am.save(auth);
 					Project project = getProject();
 					project.getAuthorizations().add(auth);
 					Gitop.getInstance(ProjectManager.class).save(project);
 					onPermissionChanged(team, target);
 					
-					if (team.isAnonymousTeam()) {
+					if (team.isAnonymous()) {
 						send(getPage(), Broadcast.BREADTH, new ProjectPubliclyAccessibleChanged(target));
 					}
 				}
@@ -337,7 +337,7 @@ public class ProjectPermissionsPage extends AbstractProjectSettingPage {
 	}
 	
 	private void onPermissionChanged(Team team, AjaxRequestTarget target) {
-		if (team == null || team.isAnonymousTeam()) {
+		if (team == null || team.isAnonymous()) {
 			send(this, Broadcast.BREADTH, new ProjectPubliclyAccessibleChanged(target));
 		}
 		

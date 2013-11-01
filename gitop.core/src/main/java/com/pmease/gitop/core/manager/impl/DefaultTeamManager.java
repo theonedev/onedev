@@ -6,7 +6,9 @@ import javax.inject.Singleton;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.Sessional;
+import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.util.namedentity.EntityLoader;
@@ -19,6 +21,12 @@ import com.pmease.gitop.core.permission.operation.GeneralOperation;
 @Singleton
 public class DefaultTeamManager extends AbstractGenericDao<Team> implements TeamManager {
 
+	private volatile Long anonymousId;
+	
+	private volatile Long ownersId;
+	
+	private volatile Long loggedInId;
+	
 	@Inject
 	public DefaultTeamManager(GeneralDao generalDao) {
 		super(generalDao);
@@ -81,43 +89,59 @@ public class DefaultTeamManager extends AbstractGenericDao<Team> implements Team
 		};
 	}
 
+	@Transactional
 	@Override
-	public Team getAnonymousTeam(User user) {
-		return find(Restrictions.eq("owner", user),
-					Restrictions.eq("name", Team.ANONYMOUS));
-	}
-
-	@Override
-	public Team getLoggedInTeam(User user) {
-		return find(Restrictions.eq("owner", user),
-				Restrictions.eq("name", Team.LOGGEDIN));
-	}
-
-	@Override
-	public Team getOwnersTeam(User user) {
-		return find(Restrictions.eq("owner", user),
-				Restrictions.eq("name", Team.OWNERS));
-	}
-
-	@Override
-	public GeneralOperation getTeamPermission(Team team) {
-		if (team.isAnonymousTeam()) {
-			return team.getAuthorizedOperation();
+	public Team getAnonymous(User user) {
+		Team anonymous;
+		if (anonymousId == null) {
+			anonymous = find(user, Team.ANONYMOUS);
+			Preconditions.checkNotNull(anonymous);
+			anonymousId = anonymous.getId();
+		} else {
+			anonymous = load(anonymousId);
 		}
-		
-		if (team.isOwnersTeam()) {
+		return anonymous;
+	}
+
+	@Override
+	public Team getLoggedIn(User user) {
+		Team loggedIn;
+		if (loggedInId == null) {
+			loggedIn = find(user, Team.LOGGEDIN);
+			Preconditions.checkNotNull(loggedIn);
+			loggedInId = loggedIn.getId();
+		} else {
+			loggedIn = load(loggedInId);
+		}
+		return loggedIn;
+	}
+
+	@Override
+	public Team getOwners(User user) {
+		Team owners;
+		if (ownersId == null) {
+			owners = find(user, Team.OWNERS);
+			Preconditions.checkNotNull(owners);
+			ownersId = owners.getId();
+		} else {
+			owners = load(ownersId);
+		}
+		return owners;
+	}
+
+	@Override
+	public GeneralOperation getActualAuthorizedOperation(Team team) {
+		if (team.isOwners()) {
 			return GeneralOperation.ADMIN;
+		} else if (team.isAnonymous()) {
+			return team.getAuthorizedOperation();
+		} else if (team.isLoggedIn()) {
+			return GeneralOperation.mostPermissive(team.getAuthorizedOperation(), 
+					getAnonymous(team.getOwner()).getAuthorizedOperation());
+		} else {
+			return GeneralOperation.mostPermissive(team.getAuthorizedOperation(), 
+					getAnonymous(team.getOwner()).getAuthorizedOperation(), 
+					getLoggedIn(team.getOwner()).getAuthorizedOperation());
 		}
-		
-		Team anonymous = getAnonymousTeam(team.getOwner());
-		
-		GeneralOperation permission = anonymous.getAuthorizedOperation();
-		if (team.isLoggedInTeam()) {
-			return GeneralOperation.higher(team.getAuthorizedOperation(), permission);
-		}
-		
-		Team loggedIn = getLoggedInTeam(team.getOwner());
-		permission = GeneralOperation.higher(permission, loggedIn.getAuthorizedOperation());
-		return GeneralOperation.higher(team.getAuthorizedOperation(), permission);
 	}
 }

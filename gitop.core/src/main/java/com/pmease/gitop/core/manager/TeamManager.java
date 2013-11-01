@@ -25,11 +25,11 @@ public interface TeamManager extends GenericDao<Team> {
 	
 	EntityLoader asEntityLoader(User owner);
 
-	Team getAnonymousTeam(User user);
+	Team getAnonymous(User user);
 	
-	Team getLoggedInTeam(User user);
+	Team getLoggedIn(User user);
 	
-	Team getOwnersTeam(User user);
+	Team getOwners(User user);
 
-	GeneralOperation getTeamPermission(Team team);
+	GeneralOperation getActualAuthorizedOperation(Team team);
 }

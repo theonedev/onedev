@@ -53,7 +53,6 @@ public class TestResource {
 			count = users.size();
 			for (User each : users) {
 				each.setId(null);
-				each.setPassword("12345");
 				userManager.save(each);
 			}
 		} catch (JsonParseException e) {
