@@ -10,7 +10,7 @@ public enum GeneralOperation implements PrivilegedOperation {
 
 		@Override
 		public boolean can(PrivilegedOperation operation) {
-			return false;
+			return operation == NO_ACCESS;
 		}
 		
 	},
@@ -18,7 +18,7 @@ public enum GeneralOperation implements PrivilegedOperation {
 
 		@Override
 		public boolean can(PrivilegedOperation operation) {
-			return operation == READ;
+			return operation == READ || NO_ACCESS.can(operation);
 		}
 		
 	},
@@ -55,7 +55,9 @@ public enum GeneralOperation implements PrivilegedOperation {
 
 			@Override
 			public int compare(GeneralOperation operation1, GeneralOperation operation2) {
-				if (operation1.can(operation2))
+				if (operation1 == operation2)
+					return 0;
+				else if (operation1.can(operation2))
 					return 1;
 				else if (operation2.can(operation1))
 					return -1;
