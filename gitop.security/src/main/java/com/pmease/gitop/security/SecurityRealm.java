@@ -13,6 +13,7 @@ import com.pmease.commons.shiro.AbstractUser;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.model.Authorization;
+import com.pmease.gitop.core.model.Membership;
 import com.pmease.gitop.core.model.Project;
 import com.pmease.gitop.core.model.Team;
 import com.pmease.gitop.core.model.User;
@@ -60,7 +61,8 @@ public class SecurityRealm extends AbstractRealm {
 	                    // Administrator can do anything
 	                    if (user.isRoot() || user.isAdmin()) return true;
 	
-	                    teams.addAll(user.getTeams());
+	                    for (Membership membership: user.getMemberships())
+	                    	teams.add(membership.getTeam());
 	                    
 	                    if (getUser(objectPermission) != null)
 	                    	teams.add(teamManager.getLoggedIn(getUser(objectPermission)));
