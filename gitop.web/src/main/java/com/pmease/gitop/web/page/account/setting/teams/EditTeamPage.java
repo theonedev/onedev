@@ -1,5 +1,6 @@
 package com.pmease.gitop.web.page.account.setting.teams;
 
+import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -8,6 +9,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.model.Team;
+import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.web.model.TeamModel;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
@@ -29,6 +31,16 @@ public class EditTeamPage extends AccountSettingPage {
 	
 	public EditTeamPage(PageParameters params) {
 		this.teamId = params.get("teamId").toLongObject();
+	}
+	
+	@Override
+	public boolean isPermitted() {
+		if (teamId == null) {
+			return super.isPermitted();
+		} else {
+			Team team = getTeam();
+			return SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserAdmin(team.getOwner()));
+		}
 	}
 	
 	@Override

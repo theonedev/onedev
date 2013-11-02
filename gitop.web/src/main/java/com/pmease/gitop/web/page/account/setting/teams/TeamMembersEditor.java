@@ -135,13 +135,12 @@ public class TeamMembersEditor extends Panel {
 			@Override
 			protected Component createActionsPanel(String id, IModel<User> model) {
 				Fragment frag = new Fragment(id, "memberactionfrag", TeamMembersEditor.this);
-				final IModel<User> userModel = new UserModel(model.getObject());
-				frag.add(new AjaxLink<Void>("remove") {
+				frag.add(new AjaxLink<User>("remove", new UserModel(model.getObject())) {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						MembershipManager mm = Gitop.getInstance(MembershipManager.class);
-						User user = userModel.getObject();
+						User user = (User) getDefaultModelObject();
 						Team team = getTeam();
 						Membership membership = mm.find(
 								Restrictions.eq("user", user),
