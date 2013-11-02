@@ -1,16 +1,18 @@
-package com.pmease.commons.git;
+package com.pmease.commons.git.command;
+
+import java.io.File;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
 
-public class CommitCommand extends GitCommand<Git> {
+public class CommitCommand extends GitCommand<Void> {
 
 	private String message;
 	
 	private boolean amend;
 	
-	public CommitCommand(final Git git) {
-		super(git);
+	public CommitCommand(final File repoDir) {
+		super(repoDir);
 	}
 	
 	public CommitCommand message(final String message) {
@@ -24,10 +26,10 @@ public class CommitCommand extends GitCommand<Git> {
 	}
 
 	@Override
-	public Git call() {
+	public Void call() {
 		Preconditions.checkNotNull(message, "Commit message has to be specified.");
 		
-		Commandline cmd = git().cmd().addArgs("commit");
+		Commandline cmd = cmd().addArgs("commit");
 		
 		cmd.addArgs("-m", message);
 		if (amend) 
@@ -35,7 +37,7 @@ public class CommitCommand extends GitCommand<Git> {
 		
 		cmd.execute(debugLogger(), errorLogger()).checkReturnCode();
 		
-		return git();
+		return null;
 	}
 
 }

@@ -1,9 +1,11 @@
-package com.pmease.commons.git;
+package com.pmease.commons.git.command;
+
+import java.io.File;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
 
-public class DeleteRefCommand extends GitCommand<Git> {
+public class DeleteRefCommand extends GitCommand<Void> {
 
     private String refName;
     
@@ -11,8 +13,8 @@ public class DeleteRefCommand extends GitCommand<Git> {
     
     private String reason;
     
-	public DeleteRefCommand(Git git) {
-		super(git);
+	public DeleteRefCommand(File repoDir) {
+		super(repoDir);
 	}
 	
 	public DeleteRefCommand refName(String refName) {
@@ -31,10 +33,10 @@ public class DeleteRefCommand extends GitCommand<Git> {
 	}
 
 	@Override
-	public Git call() {
+	public Void call() {
         Preconditions.checkNotNull(refName, "refName has to be specified.");
 
-        Commandline cmd = git().cmd().addArgs("update-ref", "-d", refName);
+        Commandline cmd = cmd().addArgs("update-ref", "-d", refName);
 		if (oldRevision != null)
 		    cmd.addArgs(oldRevision);
 		
@@ -43,7 +45,7 @@ public class DeleteRefCommand extends GitCommand<Git> {
 		
 		cmd.execute(debugLogger(), errorLogger()).checkReturnCode();
 		
-		return git();
+		return null;
 	}
 
 }

@@ -1,6 +1,5 @@
 package com.pmease.gitop.core.model;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,9 +19,6 @@ import javax.persistence.OneToMany;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.pmease.commons.git.CalcMergeBaseCommand;
-import com.pmease.commons.git.CheckAncestorCommand;
-import com.pmease.commons.git.ListChangedFilesCommand;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitop.core.Gitop;
@@ -33,7 +29,6 @@ import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitop.core.gatekeeper.checkresult.Rejected;
 import com.pmease.gitop.core.manager.MergeRequestManager;
-import com.pmease.gitop.core.manager.StorageManager;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
 
 @SuppressWarnings("serial")
@@ -238,16 +233,9 @@ public class MergeRequest extends AbstractEntity {
 			effectiveUpdates = new ArrayList<MergeRequestUpdate>();
 
 			if (getMergeBase() != null) {
-				File repoDir =
-						Gitop.getInstance(StorageManager.class)
-								.getStorage(getTarget().getProject()).ofCode();
-				Git git = new Git(repoDir);
-				CheckAncestorCommand command = git.checkAncestor();
-				command.ancestor(getMergeBase());
-
+				Git git = getTarget().getProject().getCodeRepo();
 				for (MergeRequestUpdate update : getSortedUpdates()) {
-					command.descendant(update.getRefName());
-					if (command.call()) {
+					if (git.checkAncestor(getMergeBase(), update.getRefName())) {
 						effectiveUpdates.add(update);
 					} else {
 						break;
@@ -276,37 +264,24 @@ public class MergeRequest extends AbstractEntity {
 	}
 
 	public boolean isFastForward() {
-		File repoDir =
-				Gitop.getInstance(StorageManager.class).getStorage(getTarget().getProject())
-						.ofCode();
-		CheckAncestorCommand command = new Git(repoDir).checkAncestor();
-		command.ancestor(getTarget().getName());
-		command.descendant(getLatestUpdate().getRefName());
-		return command.call();
+		Git git = getTarget().getProject().getCodeRepo();
+		return git.checkAncestor(getTarget().getName(), getLatestUpdate().getRefName());
 	}
 
 	public Collection<String> findTouchedFiles() {
-		StorageManager storageManager = Gitop.getInstance(StorageManager.class);
-		File repoDir = storageManager.getStorage(getTarget().getProject()).ofCode();
+		Git git = getTarget().getProject().getCodeRepo();
 		MergeRequestUpdate update = getLatestUpdate();
 		if (update != null) {
-			ListChangedFilesCommand command = new Git(repoDir).listChangedFiles();
-			command.fromRev(getTarget().getName());
-			command.toRev(update.getRefName());
-			return command.call();
+			return git.listChangedFiles(getTarget().getName(), update.getRefName());
 		} else {
-			return new ArrayList<String>();
+			return new ArrayList<>();
 		}
 	}
 
 	public boolean isMerged() {
 		if (merged == null) {
-			StorageManager storageManager = Gitop.getInstance(StorageManager.class);
-			File repoDir = storageManager.getStorage(getTarget().getProject()).ofCode();
-			CheckAncestorCommand command = new Git(repoDir).checkAncestor();
-			command.ancestor(getLatestUpdate().getRefName());
-			command.descendant(getTarget().getName());
-			merged = command.call();
+			Git git = getTarget().getProject().getCodeRepo();
+			merged = git.checkAncestor(getLatestUpdate().getRefName(), getTarget().getName());
 		}
 		return merged;
 	}
@@ -314,12 +289,8 @@ public class MergeRequest extends AbstractEntity {
 	public @Nullable
 	String getMergeBase() {
 		if (mergeBase == null) {
-			StorageManager storageManager = Gitop.getInstance(StorageManager.class);
-			File repoDir = storageManager.getStorage(getTarget().getProject()).ofCode();
-			CalcMergeBaseCommand command = new Git(repoDir).calcMergeBase();
-			command.rev1(getLatestUpdate().getRefName());
-			command.rev2(getTarget().getName());
-			mergeBase = Optional.fromNullable(command.call());
+			mergeBase = Optional.fromNullable(getTarget().getProject().getCodeRepo()
+					.calcMergeBase(getLatestUpdate().getRefName(), getTarget().getName()));
 		}
 		return mergeBase.orNull();
 	}
@@ -409,13 +380,9 @@ public class MergeRequest extends AbstractEntity {
 
 		// TODO: implement this
 
-		Git git =
-				new Git(Gitop.getInstance(StorageManager.class)
-						.getStorage(getTarget().getProject()).ofCode());
-		git.updateRef()
-				.refName("refs/heads/" + getTarget().getName())
-				.revision(getLatestUpdate().getCommitHash())
-				.call();
+		Git git = getTarget().getProject().getCodeRepo();
+		git.updateRef("refs/heads/" + getTarget().getName(), 
+				getLatestUpdate().getCommitHash(), null, null);
 
 		setStatus(Status.MERGED);
 		Gitop.getInstance(MergeRequestManager.class).save(this);

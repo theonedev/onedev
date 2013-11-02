@@ -1,9 +1,11 @@
-package com.pmease.commons.git;
+package com.pmease.commons.git.command;
+
+import java.io.File;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
 
-public class UpdateRefCommand extends GitCommand<Git> {
+public class UpdateRefCommand extends GitCommand<Void> {
 
     private String refName;
     
@@ -13,8 +15,8 @@ public class UpdateRefCommand extends GitCommand<Git> {
     
     private String reason;
     
-	public UpdateRefCommand(Git git) {
-		super(git);
+	public UpdateRefCommand(File repoDir) {
+		super(repoDir);
 	}
 	
 	public UpdateRefCommand refName(String refName) {
@@ -38,11 +40,11 @@ public class UpdateRefCommand extends GitCommand<Git> {
 	}
 
 	@Override
-	public Git call() {
+	public Void call() {
 	    Preconditions.checkNotNull(refName, "refName has to be specified.");
 	    Preconditions.checkNotNull(revision, "revision has to be specified.");
 	    
-		Commandline cmd = git().cmd().addArgs("update-ref", refName, revision);
+		Commandline cmd = cmd().addArgs("update-ref", refName, revision);
 		if (oldRevision != null)
 		    cmd.addArgs(oldRevision);
 
@@ -51,7 +53,7 @@ public class UpdateRefCommand extends GitCommand<Git> {
 		
 		cmd.execute(debugLogger(), errorLogger()).checkReturnCode();
 		
-		return git();
+		return null;
 	}
 
 }

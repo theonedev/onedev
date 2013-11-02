@@ -1,16 +1,17 @@
-package com.pmease.commons.git;
+package com.pmease.commons.git.command;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.pmease.commons.util.execution.Commandline;
 
-public class AddCommand extends GitCommand<Git> {
+public class AddCommand extends GitCommand<Void> {
 
 	private List<String> paths = new ArrayList<String>();
 	
-	public AddCommand(Git git) {
-		super(git);
+	public AddCommand(File repoDir) {
+		super(repoDir);
 	}
 	
 	public AddCommand addPath(String path) {
@@ -19,8 +20,8 @@ public class AddCommand extends GitCommand<Git> {
 	}
 
 	@Override
-	public Git call() {
-		Commandline cmd = git().cmd().addArgs("add");
+	public Void call() {
+		Commandline cmd = cmd().addArgs("add");
 		
 		for (String path: paths) {
 			cmd.addArgs(path);
@@ -28,7 +29,7 @@ public class AddCommand extends GitCommand<Git> {
 		
 		cmd.execute(debugLogger(), errorLogger()).checkReturnCode();
 		
-		return git();
+		return null;
 	}
 
 }

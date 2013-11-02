@@ -8,19 +8,15 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.MergeRequestUpdateManager;
-import com.pmease.gitop.core.manager.StorageManager;
 import com.pmease.gitop.core.model.MergeRequestUpdate;
 
 @Singleton
 public class DefaultMergeRequestUpdateManager extends AbstractGenericDao<MergeRequestUpdate>
 		implements MergeRequestUpdateManager {
 
-	private final StorageManager storageManager;
-
 	@Inject
-	public DefaultMergeRequestUpdateManager(GeneralDao generalDao, StorageManager storageManager) {
+	public DefaultMergeRequestUpdateManager(GeneralDao generalDao) {
 		super(generalDao);
-		this.storageManager = storageManager;
 	}
 
 	@Transactional
@@ -28,10 +24,8 @@ public class DefaultMergeRequestUpdateManager extends AbstractGenericDao<MergeRe
 	public void save(MergeRequestUpdate update) {
 		super.save(update);
 
-		Git git =
-				new Git(storageManager.getStorage(update.getRequest().getTarget().getProject())
-						.ofCode());
-		git.updateRef().refName(update.getRefName()).revision(update.getCommitHash()).call();
+		Git git = update.getRequest().getTarget().getProject().getCodeRepo();
+		git.updateRef(update.getRefName(), update.getCommitHash(), null, null);
 	}
 
 	@Transactional
@@ -39,10 +33,8 @@ public class DefaultMergeRequestUpdateManager extends AbstractGenericDao<MergeRe
 	public void delete(MergeRequestUpdate update) {
 		super.delete(update);
 
-		Git git =
-				new Git(storageManager.getStorage(update.getRequest().getTarget().getProject())
-						.ofCode());
-		git.deleteRef().refName(update.getRefName()).call();
+		Git git = update.getRequest().getTarget().getProject().getCodeRepo();
+		git.deleteRef(update.getRefName());
 	}
 
 }

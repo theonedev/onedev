@@ -1,4 +1,6 @@
-package com.pmease.commons.git;
+package com.pmease.commons.git.command;
+
+import java.io.File;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
@@ -10,8 +12,8 @@ public class CheckAncestorCommand extends GitCommand<Boolean> {
 	
 	private String descendant;
 	
-	public CheckAncestorCommand(final Git git) {
-		super(git);
+	public CheckAncestorCommand(final File repoDir) {
+		super(repoDir);
 	}
 	
 	public CheckAncestorCommand ancestor(final String ancestor) {
@@ -29,7 +31,7 @@ public class CheckAncestorCommand extends GitCommand<Boolean> {
 		Preconditions.checkNotNull(ancestor, "ancestor has to be specified.");
 		Preconditions.checkNotNull(descendant, "descendant has to be specified.");
 		
-		Commandline cmd = git().cmd();
+		Commandline cmd = cmd();
 		
 		cmd.addArgs("merge-base", "--is-ancestor", ancestor, descendant);
 		

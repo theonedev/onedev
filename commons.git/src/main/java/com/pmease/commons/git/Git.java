@@ -1,160 +1,123 @@
 package com.pmease.commons.git;
 
 import java.io.File;
-import java.util.Map;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
-
+import com.pmease.commons.git.command.AddCommand;
+import com.pmease.commons.git.command.ListTreeCommand;
+import com.pmease.commons.git.command.CalcMergeBaseCommand;
+import com.pmease.commons.git.command.CheckAncestorCommand;
+import com.pmease.commons.git.command.CheckoutCommand;
+import com.pmease.commons.git.command.CommitCommand;
+import com.pmease.commons.git.command.DeleteRefCommand;
+import com.pmease.commons.git.command.GetCommitCommand;
+import com.pmease.commons.git.command.InitCommand;
+import com.pmease.commons.git.command.ListBranchesCommand;
+import com.pmease.commons.git.command.ListChangedFilesCommand;
+import com.pmease.commons.git.command.ListTagsCommand;
+import com.pmease.commons.git.command.MergeCommand;
+import com.pmease.commons.git.command.UpdateRefCommand;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.commons.util.execution.Commandline;
-import com.pmease.commons.util.execution.LineConsumer;
+import com.pmease.commons.util.GeneralException;
 
-public class Git {
-	
-	private static final String GIT_EXE = "git";
-	
-	private static final String MIN_VERSION = "1.0.0";
-	
+@SuppressWarnings("serial")
+public class Git implements Serializable {
+
 	private final File repoDir;
-	
-	private Map<String, String> environments;
-	
-	public Git(final File repoDir, @Nullable final Map<String, String> environments) {
+
+	public Git(File repoDir) {
 		this.repoDir = repoDir;
+
 		if (!repoDir.exists())
 		    FileUtils.createDir(repoDir);
-		
-		this.environments = environments;
 	}
-	
-	public Git(final File repoDir) {
-		this(repoDir, null);
-	}
-	
+
 	public File repoDir() {
-	    return repoDir;
-	}
-	
-	public UploadCommand upload() {
-		return new UploadCommand(this);
-	}
-	
-	public ReceiveCommand receive() {
-		return new ReceiveCommand(this);
+		return repoDir;
 	}
 
-	public AdvertiseUploadRefsCommand advertiseUploadRefs() {
-		return new AdvertiseUploadRefsCommand(this);
-	}
-	
-	public AdvertiseReceiveRefsCommand advertiseReceiveRefs() {
-		return new AdvertiseReceiveRefsCommand(this);
-	}
-	
-	public InitCommand init() {
-		return new InitCommand(this);
-	}
-	
-	public ListBranchesCommand listBranches() {
-	    return new ListBranchesCommand(this);
-	}
-	
-	public ListTagsCommand listTags() {
-	    return new ListTagsCommand(this);
+	public void createBranch(String branchName, String commitHash) {
+		if (new ListBranchesCommand(repoDir).call().contains(branchName))
+			throw new GeneralException("Branch %s already exists.", branchName);
+
+		new UpdateRefCommand(repoDir).refName("refs/heads/" + branchName).revision(commitHash)
+				.call();
 	}
 
-	public GetCommitCommand getCommit() {
-	    return new GetCommitCommand(this);
-	}
-	
-	public MergeCommand merge() {
-	    return new MergeCommand(this);
-	}
-	
-	public AddCommand add() {
-		return new AddCommand(this);
-	}
-	
-	public CommitCommand commit() {
-		return new CommitCommand(this);
-	}
-	
-	public ListChangedFilesCommand listChangedFiles() {
-		return new ListChangedFilesCommand(this);
-	}
-	
-	public ListFilesCommand listFiles() {
-		return new ListFilesCommand(this);
-	}
-	
-	public CheckAncestorCommand checkAncestor() {
-		return new CheckAncestorCommand(this);
-	}
-	
-	public CalcMergeBaseCommand calcMergeBase() {
-		return new CalcMergeBaseCommand(this);
-	}
-	
-	public UpdateRefCommand updateRef() {
-	    return new UpdateRefCommand(this);
-	}
-	
-    public DeleteRefCommand deleteRef() {
-        return new DeleteRefCommand(this);
-    }
-    
-    public CheckoutCommand checkout() {
-        return new CheckoutCommand(this);
-    }
-    
-    public BranchCommand branch() {
-        return new BranchCommand(this);
-    }
-
-    /**
-	 * Check if there are any errors with git command line. 
-	 *
-	 * @return
-	 * 			error message if failed to check git command line, 
-	 * 			or <tt>null</tt> otherwise
-	 * 			
-	 */
-	public static String checkError() {
-		try {
-			final String[] version = new String[]{null};
-			
-			new Commandline(GIT_EXE).addArgs("--version").execute(new LineConsumer() {
-	
-				@Override
-				public void consume(String line) {
-					if (line.trim().length() != 0)
-						version[0] = line.trim();
-				}
-				
-			}, new LineConsumer.ErrorLogger()).checkReturnCode();
-	
-			if (version[0] == null)
-				throw new RuntimeException("Unable to determine git version.");
-			
-			GitVersion gitVersion = new GitVersion(version[0]);
-			
-			if (gitVersion.isOlderThan(new GitVersion(MIN_VERSION)))
-				throw new RuntimeException("Git version should be at least " + MIN_VERSION);
-			
-			return null;
-			
-		} catch (Exception e) {
-			return ExceptionUtils.getMessage(e);
-		}
-	}
-	
-	public Commandline cmd() {
-		Commandline cmd = new Commandline(GIT_EXE).workingDir(repoDir);
-		if (environments != null)
-			cmd.environment(environments);
-		return cmd;
+	public void deleteBranch(String branchName) {
+		new DeleteRefCommand(repoDir).refName("refs/heads/" + branchName).call();
 	}
 
+	public void createTag(String tagName, String commitHash) {
+		if (new ListTagsCommand(repoDir).call().contains(tagName))
+			throw new GeneralException("Tag %s already exists.", tagName);
+
+		new UpdateRefCommand(repoDir).refName("refs/tags/" + tagName).revision(commitHash).call();
+	}
+
+	public void deleteTag(String tagName) {
+		new DeleteRefCommand(repoDir).refName("refs/tags/" + tagName).call();
+	}
+
+	public Commit getCommit(String revision) {
+		return new GetCommitCommand(repoDir).revision(revision).call();
+	}
+
+	public List<TreeNode> listTree(String revision, @Nullable String path, boolean recursive) {
+		return new ListTreeCommand(repoDir).revision(revision).path(path).recursive(recursive).call();
+	}
+
+	public void init(boolean bare) {
+		new InitCommand(repoDir).bare(bare).call();
+	}
+
+	public void add(String path) {
+		new AddCommand(repoDir).addPath(path).call();
+	}
+
+	public void commit(String message, boolean amend) {
+		new CommitCommand(repoDir).message(message).amend(amend).call();
+	}
+
+	public Collection<String> listChangedFiles(String fromRev, String toRev) {
+		return new ListChangedFilesCommand(repoDir).fromRev(fromRev).toRev(toRev).call();
+	}
+
+	public void checkout(String revision, boolean newBranch) {
+		new CheckoutCommand(repoDir).revision(revision).newBranch(newBranch).call();
+	}
+
+	public void updateRef(String refName, String revision, 
+			@Nullable String oldRevision, @Nullable String reason) {
+		new UpdateRefCommand(repoDir).refName(refName).revision(revision).oldRevision(oldRevision)
+				.reason(reason).call();
+	}
+	
+	public void deleteRef(String refName) {
+		new DeleteRefCommand(repoDir).refName(refName).call();
+	}
+
+	public void merge(String revision) {
+		new MergeCommand(repoDir).revision(revision).call();
+	}
+
+	public String calcMergeBase(String rev1, String rev2) {
+		return new CalcMergeBaseCommand(repoDir).rev1(rev1).rev2(rev2).call();
+	}
+	
+	public boolean checkAncestor(String ancestor, String descendant) {
+		return new CheckAncestorCommand(repoDir).ancestor(ancestor).descendant(descendant).call();
+	}
+	
+	public Collection<String> listBranches() {
+		return new ListBranchesCommand(repoDir).call();
+	}
+	
+	public Collection<String> listTags() {
+		return new ListTagsCommand(repoDir).call();
+	}
 }

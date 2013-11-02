@@ -1,14 +1,18 @@
-package com.pmease.commons.git;
+package com.pmease.commons.git.command;
+
+import java.io.File;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
 
-public class CheckoutCommand extends GitCommand<Git> {
+public class CheckoutCommand extends GitCommand<Void> {
 
     private String revision;
     
-	public CheckoutCommand(final Git git) {
-		super(git);
+    private boolean newBranch;
+    
+	public CheckoutCommand(final File repoDir) {
+		super(repoDir);
 	}
 
 	/**
@@ -24,16 +28,24 @@ public class CheckoutCommand extends GitCommand<Git> {
 	    return this;
 	}
 	
+	public CheckoutCommand newBranch(boolean newBranch) {
+		this.newBranch = newBranch;
+		return this;
+	}
+	
 	@Override
-	public Git call() {
+	public Void call() {
 	    Preconditions.checkNotNull(revision, "revision has to be specified.");
 	    
-		Commandline cmd = git().cmd().addArgs("checkout");
+		Commandline cmd = cmd().addArgs("checkout");
+		if (newBranch)
+			cmd.addArgs("-b");
+		
 		cmd.addArgs(revision);
 		
 		cmd.execute(debugLogger(), errorLogger()).checkReturnCode();
 		
-		return git();
+		return null;
 	}
 
 }

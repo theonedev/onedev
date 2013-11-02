@@ -95,7 +95,7 @@ public class PreReceiveServlet extends CallbackServlet {
 			MergeRequestUpdate update = new MergeRequestUpdate();
 			update.setCommitHash(newCommitHash);
 			update.setRequest(request);
-			Commit commit = git.getCommit().revision(newCommitHash).call();
+			Commit commit = git.getCommit(newCommitHash);
 			update.setSubject(commit.getSubject());
 			request.getUpdates().add(update);
 			

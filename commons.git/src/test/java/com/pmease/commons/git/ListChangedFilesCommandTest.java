@@ -7,37 +7,39 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.common.collect.Sets;
+import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.util.FileUtils;
 
 public class ListChangedFilesCommandTest {
 
 	@Test
 	public void shouldListChangedFiles() {
-	    Assert.assertTrue(Git.checkError() == null);
-	    Git git = new Git(FileUtils.createTempDir()).init().call();
+	    Assert.assertTrue(GitCommand.checkError() == null);
+	    Git git = new Git(FileUtils.createTempDir());
+	    git.init(false);
 	        
 	    try {
     		FileUtils.touchFile(new File(git.repoDir(), "a"));
-    		git.add().addPath("a").call();
-    		git.commit().message("commit").call();
+    		git.add("a");
+    		git.commit("commit", false);
     		
     		FileUtils.touchFile(new File(git.repoDir(), "b"));
-    		git.add().addPath("b").call();
-    		git.commit().message("commit").call();
+    		git.add("b");
+    		git.commit("commit", false);
     		
     		FileUtils.touchFile(new File(git.repoDir(), "c"));
-    		git.add().addPath("c").call();
-    		git.commit().message("commit").call();
+    		git.add("c");
+    		git.commit("commit", false);
     		
     		FileUtils.touchFile(new File(git.repoDir(), "d"));
-    		git.add().addPath("d").call();
-    		git.commit().message("commit").call();
+    		git.add("d");
+    		git.commit("commit", false);
     		
     		FileUtils.writeFile(new File(git.repoDir(), "a"), "a");
-    		git.add().addPath("a").call();
-    		git.commit().message("commit").call();
+    		git.add("a");
+    		git.commit("commit", false);
     		
-    		Collection<String> changedFiles = git.listChangedFiles().fromRev("HEAD~4").toRev("HEAD").call();
+    		Collection<String> changedFiles = git.listChangedFiles("HEAD~4", "HEAD");
     		
     		Assert.assertTrue(changedFiles.containsAll(Sets.newHashSet("a", "b", "c", "d")));
 	    } finally {

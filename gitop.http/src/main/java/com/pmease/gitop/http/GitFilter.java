@@ -1,5 +1,6 @@
 package com.pmease.gitop.http;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +25,10 @@ import org.eclipse.jgit.transport.PacketLineOut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pmease.commons.git.Git;
+import com.pmease.commons.git.command.AdvertiseReceiveRefsCommand;
+import com.pmease.commons.git.command.AdvertiseUploadRefsCommand;
+import com.pmease.commons.git.command.ReceiveCommand;
+import com.pmease.commons.git.command.UploadCommand;
 import com.pmease.commons.util.GeneralException;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
@@ -101,18 +105,18 @@ public class GitFilter implements Filter {
 
 		Map<String, String> environments = new HashMap<>();
 		environments.put("GITOP_USER_ID", User.getCurrentId().toString());
-		Git git = new Git(storageManager.getStorage(project).ofCode(), environments);
+		File gitDir = storageManager.getStorage(project).ofCode();
 
 		if (GitSmartHttpTools.isUploadPack(request)) {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(project))) {
 				throw new UnauthorizedException("You do not have permission to pull from this project.");
 			}
-			git.upload().input(ServletUtils.getInputStream(request)).output(response.getOutputStream()).call();
+			new UploadCommand(gitDir, environments).input(ServletUtils.getInputStream(request)).output(response.getOutputStream()).call();
 		} else {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectWrite(project))) {
 				throw new UnauthorizedException("You do not have permission to push to this project.");
 			}
-			git.receive().input(ServletUtils.getInputStream(request)).output(response.getOutputStream()).call();
+			new ReceiveCommand(gitDir, environments).input(ServletUtils.getInputStream(request)).output(response.getOutputStream()).call();
 		}
 	}
 	
@@ -134,20 +138,20 @@ public class GitFilter implements Filter {
 		Project project = getProject(request, response, repoInfo);
 		String service = request.getParameter("service");
 		
-		Git git = new Git(storageManager.getStorage(project).ofCode());
+		File gitDir = storageManager.getStorage(project).ofCode();
 
 		if (service.contains("upload")) {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(project))) {
 				throw new UnauthorizedException("You do not have permission to pull from this project.");
 			}
 			writeInitial(response, service);
-			git.advertiseUploadRefs().output(response.getOutputStream()).call();
+			new AdvertiseUploadRefsCommand(gitDir).output(response.getOutputStream()).call();
 		} else {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectWrite(project))) {
 				throw new UnauthorizedException("You do not have permission to push to this project.");
 			}
 			writeInitial(response, service);
-			git.advertiseReceiveRefs().output(response.getOutputStream()).call();
+			new AdvertiseReceiveRefsCommand(gitDir).output(response.getOutputStream()).call();
 		}
 	}
 

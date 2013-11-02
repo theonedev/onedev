@@ -1,5 +1,6 @@
-package com.pmease.commons.git;
+package com.pmease.commons.git.command;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,8 +15,8 @@ public class ListChangedFilesCommand extends GitCommand<Collection<String>> {
 	
 	private String toRev;
 	
-	public ListChangedFilesCommand(final Git git) {
-		super(git);
+	public ListChangedFilesCommand(final File repoDir) {
+		super(repoDir);
 	}
 	
 	public ListChangedFilesCommand fromRev(final String fromRev) {
@@ -35,7 +36,7 @@ public class ListChangedFilesCommand extends GitCommand<Collection<String>> {
 		
 		final Set<String> changedFiles = new HashSet<String>();
 		
-		Commandline cmd = git().cmd();
+		Commandline cmd = cmd();
 		
 		cmd.addArgs("diff", "--name-only", fromRev + ".." + toRev);
 		

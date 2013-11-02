@@ -1,42 +1,44 @@
-package com.pmease.commons.git;
+package com.pmease.commons.git.command;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Map;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
-public class UploadCommand extends GitCommand<Git> {
+public class ReceiveCommand extends GitCommand<Void> {
 
 	private InputStream input;
 	
 	private OutputStream output;
 	
-	public UploadCommand(Git git) {
-		super(git);
+	public ReceiveCommand(File repoDir, Map<String, String> environments) {
+		super(repoDir, environments);
 	}
 	
-	public UploadCommand input(InputStream input) {
+	public ReceiveCommand input(InputStream input) {
 		this.input = input;
 		return this;
 	}
 	
-	public UploadCommand output(OutputStream output) {
+	public ReceiveCommand output(OutputStream output) {
 		this.output = output;
 		return this;
 	}
 	
 	@Override
-	public Git call() {
+	public Void call() {
 		Preconditions.checkNotNull(input);
 		Preconditions.checkNotNull(output);
 		
-		Commandline cmd = git().cmd();
-		cmd.addArgs("upload-pack", "--stateless-rpc", ".");
+		Commandline cmd = cmd();
+		cmd.addArgs("receive-pack", "--stateless-rpc", ".");
 		
 		cmd.execute(output, new LineConsumer.ErrorLogger(), input).checkReturnCode();
-		return git();
+		return null;
 	}
 
 }

@@ -1,4 +1,6 @@
-package com.pmease.commons.git;
+package com.pmease.commons.git.command;
+
+import java.io.File;
 
 import javax.annotation.Nullable;
 
@@ -13,8 +15,8 @@ public class CalcMergeBaseCommand extends GitCommand<String> {
 	
 	private String rev2;
 	
-	public CalcMergeBaseCommand(final Git git) {
-		super(git);
+	public CalcMergeBaseCommand(final File repoDir) {
+		super(repoDir);
 	}
 	
 	public CalcMergeBaseCommand rev1(final String rev1) {
@@ -34,7 +36,7 @@ public class CalcMergeBaseCommand extends GitCommand<String> {
 		
 		final String commonAncestor[] = new String[]{null};
 		
-		Commandline cmd = git().cmd();
+		Commandline cmd = cmd();
 		
 		cmd.addArgs("merge-base", rev1, rev2);
 		

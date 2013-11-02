@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import com.pmease.commons.git.Git;
+import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.loader.AppLoaderMocker;
 import com.pmease.commons.util.FileUtils;
@@ -25,10 +26,11 @@ public class MergeRequestTest extends AppLoaderMocker {
     
     @Override
     public void setup() {
-        Assert.assertTrue(Git.checkError() == null);
+        Assert.assertTrue(GitCommand.checkError() == null);
         projectDir = FileUtils.createTempDir();
         
-        git = new Git(new File(projectDir, "code")).init().call();
+        git = new Git(new File(projectDir, "code"));
+        git.init(false);
     }
     
     @Override
@@ -39,22 +41,22 @@ public class MergeRequestTest extends AppLoaderMocker {
     @Test
     public void shouldReturnAllUpdatesAsEffectiveIfTheyAreFastForward() {
         FileUtils.touchFile(new File(git.repoDir(), "a"));
-        git.add().addPath("a").call();
-        git.commit().message("commit").call();
+        git.add("a");
+        git.commit("commit", false);
         
-        git.branch().branchName("dev").call();
+        git.checkout("dev", true);
         
         FileUtils.touchFile(new File(git.repoDir(), "b"));
-        git.add().addPath("b").call();
-        git.commit().message("commit").call();
+        git.add("b");
+        git.commit("commit", false);
         
-        git.updateRef().refName("refs/updates/1").revision("HEAD").call();
+        git.updateRef("refs/updates/1", "HEAD", null, null);
         
         FileUtils.touchFile(new File(git.repoDir(), "c"));
-        git.add().addPath("c").call();
-        git.commit().message("commit").call();
+        git.add("c");
+        git.commit("commit", false);
         
-        git.updateRef().refName("refs/updates/2").revision("HEAD").call();
+        git.updateRef("refs/updates/2", "HEAD", null, null);
 
         Mockito.when(AppLoader.getInstance(StorageManager.class)).thenReturn(storageManager);
         
@@ -83,36 +85,36 @@ public class MergeRequestTest extends AppLoaderMocker {
     @Test
     public void shouldReturnLatestUpdateAsEffectiveIfAllOthersHaveBeenMerged() {
         FileUtils.touchFile(new File(git.repoDir(), "a"));
-        git.add().addPath("a").call();
-        git.commit().message("commit").call();
+        git.add("a");
+        git.commit("commit", false);
         
-        git.branch().branchName("dev").call();
+        git.checkout("dev", true);
         
         FileUtils.touchFile(new File(git.repoDir(), "b"));
-        git.add().addPath("b").call();
-        git.commit().message("commit").call();
+        git.add("b");
+        git.commit("commit", false);
         
-        git.updateRef().refName("refs/updates/1").revision("HEAD").call();
+        git.updateRef("refs/updates/1", "HEAD", null, null);
         
         FileUtils.touchFile(new File(git.repoDir(), "c"));
-        git.add().addPath("c").call();
-        git.commit().message("commit").call();
+        git.add("c");
+        git.commit("commit", false);
         
-        git.updateRef().refName("refs/updates/2").revision("HEAD").call();
+        git.updateRef("refs/updates/2", "HEAD", null, null);
 
         FileUtils.touchFile(new File(git.repoDir(), "d"));
-        git.add().addPath("d").call();
-        git.commit().message("commit").call();
+        git.add("d");
+        git.commit("commit", false);
         
-        git.updateRef().refName("refs/updates/3").revision("HEAD").call();
+        git.updateRef("refs/updates/3", "HEAD", null, null);
         
-        git.checkout().revision("master").call();
+        git.checkout("master", false);
         
         FileUtils.touchFile(new File(git.repoDir(), "e"));
-        git.add().addPath("e").call();
-        git.commit().message("commit").call();
+        git.add("e");
+        git.commit("commit", false);
         
-        git.merge().revision("refs/updates/2").call();
+        git.merge("refs/updates/2");
 
         Mockito.when(AppLoader.getInstance(StorageManager.class)).thenReturn(storageManager);
         

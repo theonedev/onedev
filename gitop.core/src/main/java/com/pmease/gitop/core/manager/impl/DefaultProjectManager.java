@@ -73,7 +73,7 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
 
             File codeDir = storage.ofCode();
             FileUtils.createDir(codeDir);
-            new Git(codeDir).init().bare(true).call();
+            new Git(codeDir).init(true);
             File hooksDir = new File(codeDir, "hooks");
             FileUtils.createDir(hooksDir);
 
@@ -96,7 +96,7 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
             File codeDir = storageManager.getStorage(project).ofCode();
             if (!codeDir.exists()) {
                 FileUtils.createDir(codeDir);
-                new Git(codeDir).init().bare(true).call();
+                new Git(codeDir).init(true);
             }
             super.save(project);
         }

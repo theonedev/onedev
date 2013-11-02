@@ -13,6 +13,8 @@ public class Commit {
     private String hash;
     
     private String subject;
+    
+    private String body;
 
     public Date getDate() {
         return date;
@@ -53,5 +55,13 @@ public class Commit {
     public void setSubject(String subject) {
         this.subject = subject;
     }
+
+	public String getBody() {
+		return body;
+	}
+
+	public void setBody(String body) {
+		this.body = body;
+	}
     
 }

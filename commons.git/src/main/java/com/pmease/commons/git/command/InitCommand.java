@@ -1,13 +1,15 @@
-package com.pmease.commons.git;
+package com.pmease.commons.git.command;
+
+import java.io.File;
 
 import com.pmease.commons.util.execution.Commandline;
 
-public class InitCommand extends GitCommand<Git> {
+public class InitCommand extends GitCommand<Void> {
 
 	private boolean bare;
 	
-	public InitCommand(Git git) {
-		super(git);
+	public InitCommand(File repoDir) {
+		super(repoDir);
 	}
 	
 	public InitCommand bare(boolean bare) {
@@ -16,15 +18,15 @@ public class InitCommand extends GitCommand<Git> {
 	}
 
 	@Override
-	public Git call() {
-		Commandline cmd = git().cmd().addArgs("init");
+	public Void call() {
+		Commandline cmd = cmd().addArgs("init");
 		
 		if (bare)
 			cmd.addArgs("--bare");
 		
 		cmd.execute(debugLogger(), errorLogger()).checkReturnCode();
 		
-		return git();
+		return null;
 	}
 
 }
