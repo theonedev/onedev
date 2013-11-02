@@ -8,17 +8,19 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.pmease.commons.git.command.AddCommand;
-import com.pmease.commons.git.command.ListTreeCommand;
 import com.pmease.commons.git.command.CalcMergeBaseCommand;
 import com.pmease.commons.git.command.CheckAncestorCommand;
 import com.pmease.commons.git.command.CheckoutCommand;
 import com.pmease.commons.git.command.CommitCommand;
 import com.pmease.commons.git.command.DeleteRefCommand;
-import com.pmease.commons.git.command.GetCommitCommand;
+import com.pmease.commons.git.command.ReadFileCommand;
+import com.pmease.commons.git.command.ResolveCommitCommand;
 import com.pmease.commons.git.command.InitCommand;
 import com.pmease.commons.git.command.ListBranchesCommand;
 import com.pmease.commons.git.command.ListChangedFilesCommand;
 import com.pmease.commons.git.command.ListTagsCommand;
+import com.pmease.commons.git.command.ListTreeCommand;
+import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.git.command.MergeCommand;
 import com.pmease.commons.git.command.UpdateRefCommand;
 import com.pmease.commons.util.FileUtils;
@@ -63,8 +65,8 @@ public class Git implements Serializable {
 		new DeleteRefCommand(repoDir).refName("refs/tags/" + tagName).call();
 	}
 
-	public Commit getCommit(String revision) {
-		return new GetCommitCommand(repoDir).revision(revision).call();
+	public Commit resolveCommit(String revision) {
+		return new ResolveCommitCommand(repoDir).revision(revision).call();
 	}
 
 	public List<TreeNode> listTree(String revision, @Nullable String path, boolean recursive) {
@@ -119,5 +121,19 @@ public class Git implements Serializable {
 	
 	public Collection<String> listTags() {
 		return new ListTagsCommand(repoDir).call();
+	}
+	
+	public byte[] readFile(String revision, String path) {
+		return new ReadFileCommand(repoDir).revision(revision).path(path).call();
+	}
+	
+	public List<Commit> log(@Nullable String fromRev, @Nullable String toRev, 
+			@Nullable String path, int maxCommits) {
+		return new LogCommand(repoDir).fromRevision(fromRev).toRevision(toRev)
+				.path(path).maxCommits(maxCommits).call();
+	}
+	
+	public Commit retrieveLastCommmit(String revision, @Nullable String path) {
+		return log(null, revision, path, 1).get(0);
 	}
 }

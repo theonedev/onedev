@@ -1,67 +1,64 @@
 package com.pmease.commons.git;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+
+import javax.annotation.Nullable;
 
 public class Commit {
     
-    private Date date;
+    private final Date date;
     
-    private String author;
+    private final String author;
     
-    private String committer;
+    private final String committer;
     
-    private String hash;
+    private final String hash;
     
-    private String subject;
+    private final String subject;
     
-    private String body;
+    private final String body;
+    
+    private final Collection<String> parentHashes;
 
+    public Commit(Date date, String author, String committer, String hash, String subject, 
+    		String body, Collection<String> parentHashes) {
+    	this.date = date;
+    	this.author = author;
+    	this.committer = committer;
+    	this.hash = hash;
+    	this.subject = subject;
+    	this.body = body;
+    	this.parentHashes = new HashSet<>(parentHashes);
+    }
+    
     public Date getDate() {
         return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
     }
 
     public String getAuthor() {
         return author;
     }
 
-    public void setAuthor(String author) {
-        this.author = author;
-    }
-
     public String getCommitter() {
         return committer;
-    }
-
-    public void setCommitter(String committer) {
-        this.committer = committer;
     }
 
     public String getHash() {
         return hash;
     }
 
-    public void setHash(String hash) {
-        this.hash = hash;
-    }
-
     public String getSubject() {
         return subject;
     }
 
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-
-	public String getBody() {
+	public @Nullable String getBody() {
 		return body;
 	}
 
-	public void setBody(String body) {
-		this.body = body;
+	public Collection<String> getParentHashes() {
+		return Collections.unmodifiableCollection(parentHashes);
 	}
-    
 }

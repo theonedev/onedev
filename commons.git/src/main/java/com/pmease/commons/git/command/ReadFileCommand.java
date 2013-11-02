@@ -7,22 +7,22 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
 
-public class ShowCommand extends GitCommand<byte[]> {
+public class ReadFileCommand extends GitCommand<byte[]> {
 
 	private String revision;
 	
 	private String path;
 	
-	public ShowCommand(final File repoDir) {
+	public ReadFileCommand(final File repoDir) {
 		super(repoDir);
 	}
 
-	public ShowCommand revision(String revision) {
+	public ReadFileCommand revision(String revision) {
 		this.revision = revision;
 		return this;
 	}
 	
-	public ShowCommand path(String path) {
+	public ReadFileCommand path(String path) {
 		this.path = path;
 		return this;
 	}
