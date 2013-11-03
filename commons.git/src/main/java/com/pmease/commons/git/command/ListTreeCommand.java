@@ -63,8 +63,8 @@ public class ListTreeCommand extends GitCommand<List<TreeNode>> {
 				line = StringUtils.substringAfter(line, " ");
 				String hash = StringUtils.substringBefore(line, " ");
 				line = StringUtils.substringAfter(line, " ");
-				String size = StringUtils.substringBefore(line, " ");
-				String path = StringUtils.substringAfter(line, " ");
+				String size = StringUtils.substringBefore(line.trim(), "\t");
+				String path = StringUtils.substringAfter(line.trim(), "\t");
 				
 				TreeNode treeNode;
 				if (type.equals("tree")) {
@@ -77,7 +77,7 @@ public class ListTreeCommand extends GitCommand<List<TreeNode>> {
 			}
 			
 		}, errorLogger()).checkReturnCode();
-		
+
 		return treeNodes;
 	}
 

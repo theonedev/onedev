@@ -11,10 +11,9 @@ import com.pmease.commons.git.command.AddCommand;
 import com.pmease.commons.git.command.CalcMergeBaseCommand;
 import com.pmease.commons.git.command.CheckAncestorCommand;
 import com.pmease.commons.git.command.CheckoutCommand;
+import com.pmease.commons.git.command.CloneCommand;
 import com.pmease.commons.git.command.CommitCommand;
 import com.pmease.commons.git.command.DeleteRefCommand;
-import com.pmease.commons.git.command.ReadFileCommand;
-import com.pmease.commons.git.command.ResolveCommitCommand;
 import com.pmease.commons.git.command.InitCommand;
 import com.pmease.commons.git.command.ListBranchesCommand;
 import com.pmease.commons.git.command.ListChangedFilesCommand;
@@ -22,6 +21,9 @@ import com.pmease.commons.git.command.ListTagsCommand;
 import com.pmease.commons.git.command.ListTreeCommand;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.git.command.MergeCommand;
+import com.pmease.commons.git.command.ReadFileCommand;
+import com.pmease.commons.git.command.RemoveCommand;
+import com.pmease.commons.git.command.ResolveCommitCommand;
 import com.pmease.commons.git.command.UpdateRefCommand;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.GeneralException;
@@ -42,27 +44,32 @@ public class Git implements Serializable {
 		return repoDir;
 	}
 
-	public void createBranch(String branchName, String commitHash) {
+	public Git createBranch(String branchName, String commitHash) {
 		if (new ListBranchesCommand(repoDir).call().contains(branchName))
 			throw new GeneralException("Branch %s already exists.", branchName);
 
 		new UpdateRefCommand(repoDir).refName("refs/heads/" + branchName).revision(commitHash)
 				.call();
+		
+		return this;
 	}
 
-	public void deleteBranch(String branchName) {
+	public Git deleteBranch(String branchName) {
 		new DeleteRefCommand(repoDir).refName("refs/heads/" + branchName).call();
+		return this;
 	}
 
-	public void createTag(String tagName, String commitHash) {
+	public Git createTag(String tagName, String commitHash) {
 		if (new ListTagsCommand(repoDir).call().contains(tagName))
 			throw new GeneralException("Tag %s already exists.", tagName);
 
 		new UpdateRefCommand(repoDir).refName("refs/tags/" + tagName).revision(commitHash).call();
+		return this;
 	}
 
-	public void deleteTag(String tagName) {
+	public Git deleteTag(String tagName) {
 		new DeleteRefCommand(repoDir).refName("refs/tags/" + tagName).call();
+		return this;
 	}
 
 	public Commit resolveCommit(String revision) {
@@ -73,38 +80,55 @@ public class Git implements Serializable {
 		return new ListTreeCommand(repoDir).revision(revision).path(path).recursive(recursive).call();
 	}
 
-	public void init(boolean bare) {
+	public Git init(boolean bare) {
 		new InitCommand(repoDir).bare(bare).call();
+		return this;
 	}
 
-	public void add(String path) {
+	public Git add(String path) {
 		new AddCommand(repoDir).addPath(path).call();
+		return this;
+	}
+	
+	public Git remove(String path) {
+		new RemoveCommand(repoDir).removePath(path).call();
+		return this;
+	}
+	
+	public Git clone(String from, boolean bare) {
+		new CloneCommand(repoDir).from(from).bare(bare).call();
+		return this;
 	}
 
-	public void commit(String message, boolean amend) {
+	public Git commit(String message, boolean amend) {
 		new CommitCommand(repoDir).message(message).amend(amend).call();
+		return this;
 	}
 
 	public Collection<String> listChangedFiles(String fromRev, String toRev) {
 		return new ListChangedFilesCommand(repoDir).fromRev(fromRev).toRev(toRev).call();
 	}
 
-	public void checkout(String revision, boolean newBranch) {
+	public Git checkout(String revision, boolean newBranch) {
 		new CheckoutCommand(repoDir).revision(revision).newBranch(newBranch).call();
+		return this;
 	}
 
-	public void updateRef(String refName, String revision, 
+	public Git updateRef(String refName, String revision, 
 			@Nullable String oldRevision, @Nullable String reason) {
 		new UpdateRefCommand(repoDir).refName(refName).revision(revision).oldRevision(oldRevision)
 				.reason(reason).call();
+		return this;
 	}
 	
-	public void deleteRef(String refName) {
+	public Git deleteRef(String refName) {
 		new DeleteRefCommand(repoDir).refName(refName).call();
+		return this;
 	}
 
-	public void merge(String revision) {
+	public Git merge(String revision) {
 		new MergeCommand(repoDir).revision(revision).call();
+		return this;
 	}
 
 	public String calcMergeBase(String rev1, String rev2) {

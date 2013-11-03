@@ -52,7 +52,7 @@ public class LogCommand extends GitCommand<List<Commit>> {
     public List<Commit> call() {
         Commandline cmd = cmd();
         cmd.addArgs("log",
-                        "--format=\"%B%n*** commit_message_end ***%nhash:%H%nauthor:%an%ncommitter:%cn%nparents:%P%ndate:%cd %n*** commit_end ***\"",
+                        "--format=%B%n*** commit_message_end ***%nhash:%H%nauthor:%an%ncommitter:%cn%nparents:%P%ndate:%cd %n*** commit_end ***",
                         "--quiet", "--date=iso");
         if (fromRevision != null) {
         	if (toRevision != null)
@@ -84,6 +84,8 @@ public class LogCommand extends GitCommand<List<Commit>> {
             		commitBuilder.setSubject(null);
             		commitBuilder.setBody(null);
             		commitMessageBlock[0] = true;
+            	} else if (line.equals("*** commit_message_end ***")) {
+            		commitMessageBlock[0] = false;
             	} else if (commitMessageBlock[0]) {
             		if (commitBuilder.getSubject() == null)
             			commitBuilder.setSubject(line);
@@ -91,19 +93,17 @@ public class LogCommand extends GitCommand<List<Commit>> {
             			commitBuilder.setBody(line);
             		else 
             			commitBuilder.setBody(commitBuilder.getBody() + "\n" + line);
-            	} else if (line.equals("*** commit_message_end ***"))
-            		commitMessageBlock[0] = false;
-            	else if (line.startsWith("subject:"))
+            	} else if (line.startsWith("subject:")) {
             		commitBuilder.setSubject(line.substring("subject:".length()));
-                else if (line.startsWith("hash:"))
+            	} else if (line.startsWith("hash:")) {
                 	commitBuilder.setHash(line.substring("hash:".length()));
-                else if (line.startsWith("author:"))
+            	} else if (line.startsWith("author:")) {
                 	commitBuilder.setAuthor(line.substring("author:".length()));
-                else if (line.startsWith("committer:"))
+            	} else if (line.startsWith("committer:")) {
                 	commitBuilder.setCommitter(line.substring("committer:".length()));
-                else if (line.startsWith("date:"))
-                	commitBuilder.setDate(dateFormatter.parseDateTime(line.substring("date:".length())).toDate());
-                else if (line.startsWith("parents:")) {
+            	} else if (line.startsWith("date:")) {
+                	commitBuilder.setDate(dateFormatter.parseDateTime(line.substring("date:".length()).trim()).toDate());
+            	} else if (line.startsWith("parents:")) {
                 	for (String each: StringUtils.split(line.substring("parents:".length()), " "))
                 		commitBuilder.getParentHashes().add(each);
                 }

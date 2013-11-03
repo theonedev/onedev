@@ -75,4 +75,10 @@ public class TreeNode implements Serializable {
 	public void setParent(@Nullable DirNode parent) {
 		this.parentNode = Optional.fromNullable(parent);
 	}
+
+	@Override
+	public String toString() {
+		return getPath();
+	}
+	
 }

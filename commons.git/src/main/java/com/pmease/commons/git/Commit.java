@@ -7,6 +7,8 @@ import java.util.HashSet;
 
 import javax.annotation.Nullable;
 
+import com.google.common.base.Objects;
+
 public class Commit {
     
     private final Date date;
@@ -61,4 +63,13 @@ public class Commit {
 	public Collection<String> getParentHashes() {
 		return Collections.unmodifiableCollection(parentHashes);
 	}
+	
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this)
+				.add("hash", getHash())
+				.add("subject", getSubject())
+				.toString();
+	}
+	
 }

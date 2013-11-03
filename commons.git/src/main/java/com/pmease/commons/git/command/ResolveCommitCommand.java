@@ -31,7 +31,7 @@ public class ResolveCommitCommand extends GitCommand<Commit> {
         Preconditions.checkNotNull(revision, "revision has to be specified.");
 
         Commandline cmd = cmd().addArgs("show",
-                        "--format=\"%B%n*** commit_message_end ***%nhash:%H%nauthor:%an%ncommitter:%cn%nparents:%P%ndate:%cd\"",
+                        "--format=%B%n*** commit_message_end ***%nhash:%H%nauthor:%an%ncommitter:%cn%nparents:%P%ndate:%cd",
                         "--quiet", "--date=iso");
         cmd.addArgs(revision);
 
