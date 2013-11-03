@@ -4,9 +4,11 @@ import java.io.File;
 import java.util.List;
 
 import static org.junit.Assert.*;
+
 import org.junit.Test;
 
 import com.pmease.commons.git.Commit;
+import com.pmease.commons.git.FileChange;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.util.FileUtils;
 
@@ -43,7 +45,9 @@ public class LogCommandTest {
     		
     		FileUtils.createDir(new File(workGit.repoDir(), "dir"));
     		FileUtils.writeFile(new File(workGit.repoDir(), "dir/file"), "hello world");
+    		FileUtils.writeFile(new File(workGit.repoDir(), "dir/file2"), "hello world");
     		workGit.add("dir/file");
+    		workGit.add("dir/file2");
     		workGit.commit("add dir/file\nadd dir/file to test files under a directory", false);
     		
     		workGit.checkout("dev", true);
@@ -57,6 +61,9 @@ public class LogCommandTest {
     		assertEquals(commits.size(), 6);
     		assertEquals(commits.get(0).getSubject(), "add dir/file");
     		assertEquals(commits.get(0).getBody(), "add dir/file to test files under a directory");
+    		assertEquals(commits.get(0).getFileChanges().size(), 2);
+    		assertEquals(commits.get(0).getFileChanges().get(0).getPath(), "dir/file");
+    		assertEquals(commits.get(0).getFileChanges().get(0).getAction(), FileChange.Action.ADD);
     		
     		assertEquals(commits.get(0).getParentHashes().size(), 1);
     		assertEquals(commits.get(0).getParentHashes().iterator().next(), commits.get(1).getHash());

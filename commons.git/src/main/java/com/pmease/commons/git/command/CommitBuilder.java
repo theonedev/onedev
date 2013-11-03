@@ -1,10 +1,12 @@
 package com.pmease.commons.git.command;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.List;
 
 import com.pmease.commons.git.Commit;
+import com.pmease.commons.git.FileChange;
 
 class CommitBuilder {
     
@@ -20,7 +22,9 @@ class CommitBuilder {
     
     private String body;
     
-    private Collection<String> parentHashes = new HashSet<>();
+    private List<String> parentHashes = new ArrayList<>();
+    
+    private List<FileChange> fileChanges = new ArrayList<>();
 
     public Date getDate() {
         return date;
@@ -74,8 +78,12 @@ class CommitBuilder {
 		return parentHashes;
 	}
 	
+	public List<FileChange> getFileChanges() {
+		return fileChanges;
+	}
+	
 	public Commit build() {
 		return new Commit(date, author, committer, hash, subject.trim(), 
-				body!=null?body.trim():null, parentHashes);
+				body!=null?body.trim():null, parentHashes, fileChanges);
 	}
 }

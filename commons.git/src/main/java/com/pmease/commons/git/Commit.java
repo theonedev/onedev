@@ -1,9 +1,9 @@
 package com.pmease.commons.git;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -23,17 +23,20 @@ public class Commit {
     
     private final String body;
     
-    private final Collection<String> parentHashes;
+    private final List<String> parentHashes;
+    
+    private final List<FileChange> fileChanges;
 
     public Commit(Date date, String author, String committer, String hash, String subject, 
-    		String body, Collection<String> parentHashes) {
+    		String body, List<String> parentHashes, List<FileChange> fileChanges) {
     	this.date = date;
     	this.author = author;
     	this.committer = committer;
     	this.hash = hash;
     	this.subject = subject;
     	this.body = body;
-    	this.parentHashes = new HashSet<>(parentHashes);
+    	this.parentHashes = new ArrayList<>(parentHashes);
+    	this.fileChanges = new ArrayList<>(fileChanges);
     }
     
     public Date getDate() {
@@ -60,8 +63,12 @@ public class Commit {
 		return body;
 	}
 
-	public Collection<String> getParentHashes() {
-		return Collections.unmodifiableCollection(parentHashes);
+	public List<String> getParentHashes() {
+		return Collections.unmodifiableList(parentHashes);
+	}
+	
+	public List<FileChange> getFileChanges() {
+		return Collections.unmodifiableList(fileChanges);
 	}
 	
 	@Override
