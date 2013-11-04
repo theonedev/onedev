@@ -7,4 +7,8 @@ public class GeneralException extends RuntimeException {
 		super(String.format(format, args));
 	}
 	
+	public GeneralException(String message) {
+		super(message);
+	}
+	
 }

@@ -1,4 +1,4 @@
-package com.pmease.commons.git;
+package com.pmease.commons.git.command;
 
 import java.io.File;
 import java.util.Collection;
@@ -7,6 +7,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.common.collect.Sets;
+import com.pmease.commons.git.Git;
 import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.util.FileUtils;
 

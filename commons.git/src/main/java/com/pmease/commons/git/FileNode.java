@@ -2,7 +2,7 @@ package com.pmease.commons.git;
 
 import java.io.File;
 
-import com.pmease.commons.git.command.ShowCommand;
+import com.pmease.commons.git.command.ReadFileCommand;
 
 @SuppressWarnings("serial")
 public class FileNode extends TreeNode {
@@ -18,8 +18,8 @@ public class FileNode extends TreeNode {
 		return size;
 	}
 
-	public byte[] getContent() {
-		return new ShowCommand(gitDir).revision(getRevision()).path(getPath()).call();
+	public byte[] read() {
+		return new ReadFileCommand(gitDir).revision(getRevision()).path(getPath()).call();
 	}
 	
 }
