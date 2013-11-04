@@ -79,7 +79,7 @@ ul.f-dropdown { padding: 0; }
 
 .padder { padding: 20px; }
 
-.sidebar .head, .content .head { padding: 15px 20px; white-space: nowrap; overflow: hidden; border-bottom: 1px solid #ddd; margin-bottom: 20px; }
+.sidebar .head, .content .head { padding: 15px 20px; white-space: nowrap; overflow: hidden;  }
 .sidebar .head a { color: #666; font-weight:bold; line-height: 24px; }
 .sidebar .head a:hover { text-decoration: none; color: #09F; }
 
