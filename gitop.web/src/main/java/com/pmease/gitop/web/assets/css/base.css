@@ -347,7 +347,7 @@ fieldset[disabled] .btn-inverse.active {
 .radio-flat input[type="radio"] { display: none; }
 .radio-flat .icon-radio:before { content: "\f10c"; width: 16px; }
 .radio-flat:hover .icon-radio:before,
-.radio-flat.checked .icon-radio:before { content: "\f111"; }
+.radio-flat.checked .icon-radio:before { content: "\f192"; }
 .radio-flat:hover .icon-radio { color: #888; }
 .radio-flat.checked:hover .icon-radio { color: #333; }
 
