@@ -246,7 +246,7 @@ ul.btn-list { list-style: none; margin: 0; }
 .page-nav .btn-list .btn { font-weight: bold; }
 
 .project-list .list-group-item { position: relative; padding-left: 44px; }
-.project-list .list-group-item i { position: absolute; left: 0; top: 10px; font-size: 32px; width: 32px; color: #bbb; }
+.project-list .list-group-item i { position: absolute; left: 0; top: 10px; font-size: 32px; width: 32px; color: #ccc; }
 .project-list h4 { margin: 0 0 9px; }
 .project-list p { margin: 0 0 6px; font-size: 12px;}
 .project-list .age { color: #999; }
