@@ -19,10 +19,10 @@ public class LogCommandTest {
 	    assertTrue(GitCommand.checkError() == null);
 	    File tempDir = FileUtils.createTempDir();
 	    
-	    Git workGit = new Git(new File(tempDir, "work"));
-	    workGit.init(false);
-	        
 	    try {
+		    Git workGit = new Git(new File(tempDir, "work"));
+		    workGit.init(false);
+		        
     		FileUtils.touchFile(new File(workGit.repoDir(), "a"));
     		workGit.add("a");
     		workGit.commit("add a", false);
@@ -83,6 +83,8 @@ public class LogCommandTest {
     		commits = workGit.log("dev", "master", "dir", 0);
     		assertEquals(commits.size(), 2);
 
+    		assertEquals(workGit.resolveCommit(commits.get(0).getHash()).getHash(), commits.get(0).getHash()); 
+    		assertEquals(workGit.resolveCommit(commits.get(1).getHash()).getHash(), commits.get(1).getHash()); 
 	    } finally {
 	        FileUtils.deleteDir(tempDir);
 	    }

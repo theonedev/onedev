@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.git.command.AddCommand;
 import com.pmease.commons.git.command.CalcMergeBaseCommand;
 import com.pmease.commons.git.command.CheckAncestorCommand;
@@ -14,6 +15,7 @@ import com.pmease.commons.git.command.CheckoutCommand;
 import com.pmease.commons.git.command.CloneCommand;
 import com.pmease.commons.git.command.CommitCommand;
 import com.pmease.commons.git.command.DeleteRefCommand;
+import com.pmease.commons.git.command.DiffCommand;
 import com.pmease.commons.git.command.InitCommand;
 import com.pmease.commons.git.command.ListBranchesCommand;
 import com.pmease.commons.git.command.ListChangedFilesCommand;
@@ -23,7 +25,6 @@ import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.git.command.MergeCommand;
 import com.pmease.commons.git.command.ReadFileCommand;
 import com.pmease.commons.git.command.RemoveCommand;
-import com.pmease.commons.git.command.ResolveCommitCommand;
 import com.pmease.commons.git.command.UpdateRefCommand;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.GeneralException;
@@ -73,7 +74,9 @@ public class Git implements Serializable {
 	}
 
 	public Commit resolveCommit(String revision) {
-		return new ResolveCommitCommand(repoDir).revision(revision).call();
+		List<Commit> commits = new LogCommand(repoDir).toRev(revision).maxCommits(1).call();
+		Preconditions.checkState(commits.size() == 1);
+		return commits.get(0);
 	}
 
 	public List<TreeNode> listTree(String revision, @Nullable String path, boolean recursive) {
@@ -153,11 +156,16 @@ public class Git implements Serializable {
 	
 	public List<Commit> log(@Nullable String fromRev, @Nullable String toRev, 
 			@Nullable String path, int maxCommits) {
-		return new LogCommand(repoDir).fromRevision(fromRev).toRevision(toRev)
+		return new LogCommand(repoDir).fromRev(fromRev).toRev(toRev)
 				.path(path).maxCommits(maxCommits).call();
 	}
 	
 	public Commit retrieveLastCommmit(String revision, @Nullable String path) {
 		return log(null, revision, path, 1).get(0);
 	}
+	
+	public List<FileChangeWithDiffs> diff(String fromRev, String toRev, @Nullable String path) {
+		return new DiffCommand(repoDir).fromRev(fromRev).toRev(toRev).path(path).call();
+	}
+	
 }
