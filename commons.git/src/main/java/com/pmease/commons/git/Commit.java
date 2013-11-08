@@ -11,11 +11,17 @@ import com.google.common.base.Objects;
 
 public class Commit {
     
-    private final Date date;
+    private final Date committerDate;
+    
+    private final Date authorDate;
     
     private final String author;
     
     private final String committer;
+    
+    private final String committerEmail;
+    
+    private final String authorEmail;
     
     private final String hash;
     
@@ -23,44 +29,68 @@ public class Commit {
     
     private final String body;
     
+    private final String note;
+    
     private final List<String> parentHashes;
     
     private final List<FileChange> fileChanges;
 
-    public Commit(Date date, String author, String committer, String hash, String subject, 
-    		String body, List<String> parentHashes, List<FileChange> fileChanges) {
-    	this.date = date;
+    public Commit(Date committerDate, Date authorDate, String author, String committer,
+    		String authorEmail, String committerEmail, String hash, String subject, 
+    		@Nullable String body, String note, List<String> parentHashes, 
+    		List<FileChange> fileChanges) {
+    	this.committerDate = committerDate;
+    	this.authorDate = authorDate;
     	this.author = author;
     	this.committer = committer;
+    	this.authorEmail = authorEmail;
+    	this.committerEmail = committerEmail;
     	this.hash = hash;
     	this.subject = subject;
     	this.body = body;
+    	this.note = note;
     	this.parentHashes = new ArrayList<>(parentHashes);
     	this.fileChanges = new ArrayList<>(fileChanges);
     }
     
-    public Date getDate() {
-        return date;
-    }
+	public Date getCommitterDate() {
+		return committerDate;
+	}
 
-    public String getAuthor() {
-        return author;
-    }
+	public Date getAuthorDate() {
+		return authorDate;
+	}
 
-    public String getCommitter() {
-        return committer;
-    }
+	public String getAuthor() {
+		return author;
+	}
 
-    public String getHash() {
-        return hash;
-    }
+	public String getCommitter() {
+		return committer;
+	}
 
-    public String getSubject() {
-        return subject;
-    }
+	public String getCommitterEmail() {
+		return committerEmail;
+	}
+
+	public String getAuthorEmail() {
+		return authorEmail;
+	}
+
+	public String getHash() {
+		return hash;
+	}
+
+	public String getSubject() {
+		return subject;
+	}
 
 	public @Nullable String getBody() {
 		return body;
+	}
+
+	public @Nullable String getNote() {
+		return note;
 	}
 
 	public List<String> getParentHashes() {

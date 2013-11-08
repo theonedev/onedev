@@ -57,16 +57,20 @@ public class LogCommandTest {
     		Git bareGit = new Git(new File(tempDir, "bare"));
     		bareGit.clone(workGit.repoDir().getAbsolutePath(), true);
 
+    		bareGit.addNote("master", "hello\nworld");
+
     		List<Commit> commits = bareGit.log(null, "master", null, 0);
     		assertEquals(commits.size(), 6);
     		assertEquals(commits.get(0).getSubject(), "add dir/file");
     		assertEquals(commits.get(0).getBody(), "add dir/file to test files under a directory");
+    		assertEquals("hello\nworld", commits.get(0).getNote());
     		assertEquals(commits.get(0).getFileChanges().size(), 2);
     		assertEquals(commits.get(0).getFileChanges().get(0).getPath(), "dir/file");
     		assertEquals(commits.get(0).getFileChanges().get(0).getAction(), FileChange.Action.ADD);
-    		
     		assertEquals(commits.get(0).getParentHashes().size(), 1);
     		assertEquals(commits.get(0).getParentHashes().iterator().next(), commits.get(1).getHash());
+    		
+    		assertEquals(null, commits.get(1).getNote());
     		
     		workGit.checkout("master", false).remove("a").commit("remove a", false);
     		FileUtils.writeFile(new File(workGit.repoDir(), "dir/file2"), "file2");

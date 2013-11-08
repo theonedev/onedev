@@ -22,6 +22,8 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 	
 	private String path;
 	
+	private int contextLines;
+	
 	public DiffCommand(File repoDir) {
 		super(repoDir);
 	}
@@ -40,6 +42,11 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 		this.path = path;
 		return this;
 	}
+	
+	public DiffCommand contextLines(int contextLines) {
+		this.contextLines = contextLines;
+		return this;
+	}
 
 	@Override
 	public List<FileChangeWithDiffs> call() {
@@ -47,7 +54,9 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 		Preconditions.checkNotNull(toRev, "toRev has to be specified.");
 		
 		Commandline cmd = cmd();
-		cmd.addArgs("diff", fromRev + ".." + toRev);
+		cmd.addArgs("diff", fromRev + ".." + toRev, "--full-index");
+		if (contextLines != 0)
+			cmd.addArgs("--unified=" + contextLines);
 		if (path != null)
 			cmd.addArgs("--", path);
 		
@@ -73,6 +82,11 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 					changeBuilder.action = FileChange.Action.ADD;
 				} else if (line.startsWith("Binary files")) {
 					changeBuilder.binary = true;
+				} else if (line.startsWith("index ")) {
+					line = line.substring("index ".length());
+					changeBuilder.commitHash1 = StringUtils.substringBefore(line, "..");
+					changeBuilder.commitHash2 = StringUtils.substringAfter(line, "..");
+					changeBuilder.commitHash2 = StringUtils.substringBefore(changeBuilder.commitHash2, " ");
 				} else if (line.startsWith("@@") || line.startsWith("+") || line.startsWith("-") 
 						|| line.startsWith(" ") || line.startsWith("\\")) {
 					changeBuilder.diffLines.add(line);
@@ -95,10 +109,15 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 		
 		private boolean binary;
 		
+		private String commitHash1;
+		
+		private String commitHash2;
+		
 		private List<String> diffLines = new ArrayList<>();
 		
 		private FileChangeWithDiffs buildFileChange() {
-			return new FileChangeWithDiffs(path, action, binary, DiffUtils.parseUnifiedDiff(diffLines));
+			return new FileChangeWithDiffs(action, path, binary, commitHash1, commitHash2, 
+					DiffUtils.parseUnifiedDiff(diffLines));
 		}
 	}
 }

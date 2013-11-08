@@ -54,7 +54,10 @@ public class LogCommand extends GitCommand<List<Commit>> {
     public List<Commit> call() {
         Commandline cmd = cmd();
         cmd.addArgs("log",
-                        "--format=*** commit_begin ***%n%B%n*** commit_message_end ***%nhash:%H%nauthor:%an%ncommitter:%cn%nparents:%P%ndate:%cd %n*** commit_info_end ***",
+                        "--format=*** commit_begin ***%n%B%n*** commit_message_end ***%n%N"
+                        + "*** commit_note_end ***%nhash:%H%nauthor:%aN%nauthorEmail:%aE%n"
+                        + "committerEmail:%cE%ncommitter:%cN%nparents:%P%ncommitterDate:%cd %n"
+                        + "authorDate:%ad %n*** commit_info_end ***",
                         "--name-status", "--no-renames", "--date=iso");
         if (fromRev != null) {
         	if (toRev != null)
@@ -75,6 +78,7 @@ public class LogCommand extends GitCommand<List<Commit>> {
         
         final CommitBuilder commitBuilder = new CommitBuilder();
         
+        final boolean[] commitNoteBlock = new boolean[1];
         final boolean[] commitMessageBlock = new boolean[1];
         final boolean[] fileChangesBlock = new boolean[1];
         
@@ -89,11 +93,15 @@ public class LogCommand extends GitCommand<List<Commit>> {
 	            		commitBuilder.fileChanges.clear();
 	            		commitBuilder.subject = null;
 	            		commitBuilder.body = null;
+	            		commitBuilder.note = null;
             		}
             		commitMessageBlock[0] = true;
             		fileChangesBlock[0] = false;
             	} else if (line.equals("*** commit_message_end ***")) {
             		commitMessageBlock[0] = false;
+            		commitNoteBlock[0] = true;
+            	} else if (line.equals("*** commit_note_end ***")) {
+            		commitNoteBlock[0] = false;
             	} else if (line.equals("*** commit_info_end ***")) {
             		fileChangesBlock[0] = true;
             	} else if (commitMessageBlock[0]) {
@@ -102,7 +110,12 @@ public class LogCommand extends GitCommand<List<Commit>> {
             		else if (commitBuilder.body == null)
             			commitBuilder.body = line;
             		else 
-            			commitBuilder.body = commitBuilder.body + "\n" + line;
+            			commitBuilder.body += "\n" + line;
+            	} else if (commitNoteBlock[0]) {
+            		if (commitBuilder.note == null)
+            			commitBuilder.note = line;
+            		else
+            			commitBuilder.note += "\n" + line;
             	} else if (fileChangesBlock[0]) {
             		FileChange.Action action = null;
             		if (line.startsWith("A")) 
@@ -114,7 +127,7 @@ public class LogCommand extends GitCommand<List<Commit>> {
             		
             		if (action != null) {
             			String path = StringUtils.substringAfter(line, "\t").trim();
-            			FileChange fileChange = new FileChange(path, action);
+            			FileChange fileChange = new FileChange(action, path);
             			commitBuilder.fileChanges.add(fileChange);
             		}
             	} else if (line.startsWith("subject:")) {
@@ -125,8 +138,14 @@ public class LogCommand extends GitCommand<List<Commit>> {
                 	commitBuilder.author = line.substring("author:".length());
             	} else if (line.startsWith("committer:")) {
                 	commitBuilder.committer = line.substring("committer:".length());
-            	} else if (line.startsWith("date:")) {
-                	commitBuilder.date = dateFormatter.parseDateTime(line.substring("date:".length()).trim()).toDate();
+            	} else if (line.startsWith("authorDate:")) {
+                	commitBuilder.authorDate = dateFormatter.parseDateTime(line.substring("authorDate:".length()).trim()).toDate();
+            	} else if (line.startsWith("committerDate:")) {
+                	commitBuilder.committerDate = dateFormatter.parseDateTime(line.substring("committerDate:".length()).trim()).toDate();
+            	} else if (line.startsWith("authorEmail:")) {
+                	commitBuilder.authorEmail = line.substring("authorEmail:".length());
+            	} else if (line.startsWith("committerEmail:")) {
+                	commitBuilder.committerEmail = line.substring("committerEmail:".length());
             	} else if (line.startsWith("parents:")) {
                 	for (String each: StringUtils.split(line.substring("parents:".length()), " "))
                 		commitBuilder.parentHashes.add(each);
@@ -143,11 +162,17 @@ public class LogCommand extends GitCommand<List<Commit>> {
 
     private static class CommitBuilder {
         
-        private Date date;
+    	private Date committerDate;
+    	
+        private Date authorDate;
         
         private String author;
         
         private String committer;
+        
+        private String authorEmail;
+        
+        private String committerEmail;
         
         private String hash;
         
@@ -155,13 +180,16 @@ public class LogCommand extends GitCommand<List<Commit>> {
         
         private String body;
         
+        private String note;
+        
         private List<String> parentHashes = new ArrayList<>();
         
         private List<FileChange> fileChanges = new ArrayList<>();
 
     	private Commit build() {
-    		return new Commit(date, author, committer, hash, subject.trim(), 
-    				body!=null?body.trim():null, parentHashes, fileChanges);
+    		return new Commit(committerDate, authorDate, author, committer, authorEmail, 
+    				committerEmail, hash, subject.trim(), StringUtils.isNotBlank(body)?body.trim():null, 
+    						StringUtils.isNotBlank(note)?note.trim():null, parentHashes, fileChanges);
     	}
     }
 }

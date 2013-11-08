@@ -79,13 +79,15 @@ public class DiffCommandTest {
     		Git bareGit = new Git(new File(tempDir, "bare"));
     		bareGit.clone(workGit.repoDir().getAbsolutePath(), true);
     		
-    		List<FileChangeWithDiffs> fileChanges = bareGit.diff("master", "dev", null);
+    		List<FileChangeWithDiffs> fileChanges = bareGit.diff("master", "dev", null, 3);
     		assertEquals(fileChanges.size(), 4);
     		
-    		fileChanges = bareGit.diff("master", "dev", "dir");
+    		fileChanges = bareGit.diff("master", "dev", "dir", 3);
     		assertEquals(fileChanges.size(), 3);
     		
     		for (FileChangeWithDiffs fileChange: fileChanges) {
+    			assertEquals(40, fileChange.getCommitHash1().length());
+    			assertEquals(40, fileChange.getCommitHash2().length());
     			if (fileChange.getAction() == FileChangeWithDiffs.Action.MODIFY) {
     				assertEquals(fileChange.getPath(), "dir/file1");
     				assertEquals(fileChange.getDiffChunks().get(0).toString(), 

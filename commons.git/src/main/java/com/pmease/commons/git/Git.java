@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.command.AddCommand;
+import com.pmease.commons.git.command.AddNoteCommand;
 import com.pmease.commons.git.command.CalcMergeBaseCommand;
 import com.pmease.commons.git.command.CheckAncestorCommand;
 import com.pmease.commons.git.command.CheckoutCommand;
@@ -164,8 +165,13 @@ public class Git implements Serializable {
 		return log(null, revision, path, 1).get(0);
 	}
 	
-	public List<FileChangeWithDiffs> diff(String fromRev, String toRev, @Nullable String path) {
-		return new DiffCommand(repoDir).fromRev(fromRev).toRev(toRev).path(path).call();
+	public List<FileChangeWithDiffs> diff(String fromRev, String toRev, @Nullable String path, int contextLines) {
+		return new DiffCommand(repoDir).fromRev(fromRev).toRev(toRev).contextLines(contextLines).path(path).call();
+	}
+
+	public Git addNote(String object, String message) {
+		new AddNoteCommand(repoDir).object(object).message(message).call();
+		return this;
 	}
 	
 }
