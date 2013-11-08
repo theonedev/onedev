@@ -2,41 +2,17 @@
 <wicket:extend>
 	<div class="container">
 		<h3>DropZone Test</h3>
-		<form class="dropzone" enctype="multipart/form-data" action="/rest/file/upload">
-			<div class="fallback">
-				<input name="file" type="file" multiple />
-			</div>
-		</form>
 		
-		<h3>Flat CheckBox RadioBox</h3>
-		<form wicket:id="testForm">
-			<div wicket:id="check1"></div>
-			<div wicket:id="check2"></div>
-			
-			<wicket:container wicket:id="radiogroup">
-				<wicket:container wicket:id="radios">
-					<wicket:container wicket:id="radio"></wicket:container>
-				</wicket:container>
-			</wicket:container>
-			
-			<button class="btn btn-default" wicket:id="submit">Submit</button>
-		</form>
+		<h2>Icon Test</h2>
 		
-		<h3>DropDown</h3>
-		<a href="#" data-dropdown="drop1" data-options="is_hover:true">Has Dropdown</a>
-		<ul id="drop1" class="f-dropdown" data-dropdown-content>
-		  <li><a href="#">This is a link</a></li>
-		  <li><a href="#">This is another</a></li>
-		  <li><a href="#">Yet another</a></li>
+		<ul class="fa-ul">
+			<li><i class="fa gicon gicon-repo"></i></li>
+			<li><i class="fa gicon gicon-empty"></i></li>
+			<li><i class="fa gicon gicon-repo-forked"></i></li>
+			<li><i class="fa gicon gicon-repo-new"></i></li>
+			<li><i class="fa gicon gicon-repo-lock"></i></li>
+			<li><i class="fa gicon gicon-repo-unlock"></i></li>
 		</ul>
-		
-		<h3>Prompt Link</h3>
-		<a class="btn btn-info" wicket:id="prompt">Prompt</a>
-		<a class="btn btn-success" wicket:id="vexlink">Vex Dialog</a>
-		
-		<div wicket:id="modalContent">
-			<h1>This is modal content</h1>
-		</div>
     </div>
 </wicket:extend>
 </html>

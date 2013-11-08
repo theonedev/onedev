@@ -1,5 +1,7 @@
 package com.pmease.gitop.web.page.account.setting;
 
+import java.util.List;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebPage;
@@ -9,10 +11,13 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.google.common.collect.ImmutableList;
+import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.permission.ObjectPermission;
+import com.pmease.gitop.web.GitopFacade;
 import com.pmease.gitop.web.component.link.UserAvatarLink;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
@@ -72,6 +77,22 @@ public abstract class AccountSettingPage extends AbstractLayoutPage {
 					}
 					
 				}));
+			}
+			
+		});
+		
+		add(new ListView<User>("usernav", new LoadableDetachableModel<List<User>>() {
+
+			@Override
+			protected List<User> load() {
+				return Gitop.getInstance(GitopFacade.class).getManagableUsers(getAccount());
+			}
+			
+		}) {
+
+			@Override
+			protected void populateItem(ListItem<User> item) {
+				item.add(new UserAvatarLink("name", new UserModel(item.getModelObject())));
 			}
 			
 		});
