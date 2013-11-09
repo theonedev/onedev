@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.command.AddCommand;
 import com.pmease.commons.git.command.AddNoteCommand;
+import com.pmease.commons.git.command.AddSubModuleCommand;
 import com.pmease.commons.git.command.BlameCommand;
 import com.pmease.commons.git.command.CalcMergeBaseCommand;
 import com.pmease.commons.git.command.CheckAncestorCommand;
@@ -19,14 +21,16 @@ import com.pmease.commons.git.command.CommitCommand;
 import com.pmease.commons.git.command.DeleteRefCommand;
 import com.pmease.commons.git.command.DiffCommand;
 import com.pmease.commons.git.command.InitCommand;
+import com.pmease.commons.git.command.IsBinaryCommand;
 import com.pmease.commons.git.command.ListBranchesCommand;
 import com.pmease.commons.git.command.ListChangedFilesCommand;
+import com.pmease.commons.git.command.ListSubModulesCommand;
 import com.pmease.commons.git.command.ListTagsCommand;
 import com.pmease.commons.git.command.ListTreeCommand;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.git.command.MergeCommand;
-import com.pmease.commons.git.command.ReadFileCommand;
 import com.pmease.commons.git.command.RemoveCommand;
+import com.pmease.commons.git.command.ShowCommand;
 import com.pmease.commons.git.command.UpdateRefCommand;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.GeneralException;
@@ -152,8 +156,8 @@ public class Git implements Serializable {
 		return new ListTagsCommand(repoDir).call();
 	}
 	
-	public byte[] readFile(String revision, String path) {
-		return new ReadFileCommand(repoDir).revision(revision).path(path).call();
+	public byte[] show(String revision, String path) {
+		return new ShowCommand(repoDir).revision(revision).path(path).call();
 	}
 	
 	public List<Commit> log(@Nullable String fromRev, @Nullable String toRev, 
@@ -177,6 +181,19 @@ public class Git implements Serializable {
 	
 	public List<Blame> blame(String file, String revision) {
 		return new BlameCommand(repoDir).file(file).revision(revision).call();
+	}
+
+	public boolean isBinary(String file, String revision) {
+		return new IsBinaryCommand(repoDir).file(file).revision(revision).call();
+	}
+	
+	public Git addSubModule(String url, String path) {
+		new AddSubModuleCommand(repoDir).url(url).path(path).call();
+		return this;
+	}
+	
+	public Map<String, String> listSubModules(String revision) {
+		return new ListSubModulesCommand(repoDir).revision(revision).call();
 	}
 	
 }

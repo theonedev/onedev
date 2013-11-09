@@ -5,10 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.git.DirNode;
-import com.pmease.commons.git.FileNode;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
@@ -59,21 +58,16 @@ public class ListTreeCommand extends GitCommand<List<TreeNode>> {
 			public void consume(String line) {
 				String mode = StringUtils.substringBefore(line, " ");
 				line = StringUtils.substringAfter(line, " ");
-				String type = StringUtils.substringBefore(line, " ");
 				line = StringUtils.substringAfter(line, " ");
 				String hash = StringUtils.substringBefore(line, " ");
 				line = StringUtils.substringAfter(line, " ");
-				String size = StringUtils.substringBefore(line.trim(), "\t");
+				int size = 0;
+				String sizeStr = StringUtils.substringBefore(line.trim(), "\t");
+				if (NumberUtils.isNumber(sizeStr))
+					size = Integer.parseInt(sizeStr);
 				String path = StringUtils.substringAfter(line.trim(), "\t");
 				
-				TreeNode treeNode;
-				if (type.equals("tree")) {
-					treeNode = new DirNode(repoDir, path, revision, hash, mode);
-				} else {
-					treeNode = new FileNode(repoDir, path, revision, hash, mode, Long.parseLong(size));
-				}
-				
-				treeNodes.add(treeNode);
+				treeNodes.add(new TreeNode(repoDir, TreeNode.Type.fromMode(mode), path, revision, hash, size));
 			}
 			
 		}, errorLogger()).checkReturnCode();

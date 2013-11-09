@@ -3,7 +3,9 @@ package com.pmease.commons.git.command;
 import java.io.File;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 import com.pmease.commons.git.Blame;
@@ -14,7 +16,9 @@ public class BlameCommandTest {
 
 	@Test
 	public void test() {
-		File tempDir = FileUtils.createTempDir();
+	    Assert.assertTrue(GitCommand.checkError() == null);
+
+	    File tempDir = FileUtils.createTempDir();
 		
 		try {
 			Git workGit = new Git(new File(tempDir, "work"));

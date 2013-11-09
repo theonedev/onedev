@@ -17,6 +17,7 @@ public class DiffCommandTest {
 	@Test
 	public void shouldGenerateDiffCorrectly() {
 	    assertTrue(GitCommand.checkError() == null);
+	    
 	    File tempDir = FileUtils.createTempDir();
 	    
 	    try {
