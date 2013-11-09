@@ -61,8 +61,8 @@ public class LogCommandTest {
 
     		List<Commit> commits = bareGit.log(null, "master", null, 0);
     		assertEquals(commits.size(), 6);
-    		assertEquals(commits.get(0).getSubject(), "add dir/file");
-    		assertEquals(commits.get(0).getBody(), "add dir/file to test files under a directory");
+    		assertEquals(commits.get(0).getSummary(), "add dir/file");
+    		assertEquals(commits.get(0).getMessage(), "add dir/file to test files under a directory");
     		assertEquals("hello\nworld", commits.get(0).getNote());
     		assertEquals(commits.get(0).getFileChanges().size(), 2);
     		assertEquals(commits.get(0).getFileChanges().get(0).getPath(), "dir/file");

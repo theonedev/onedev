@@ -96,7 +96,7 @@ public class PreReceiveServlet extends CallbackServlet {
 			update.setCommitHash(newCommitHash);
 			update.setRequest(request);
 			Commit commit = git.resolveCommit(newCommitHash);
-			update.setSubject(commit.getSubject());
+			update.setSubject(commit.getSummary());
 			request.getUpdates().add(update);
 			
 			request.updatesChanged();

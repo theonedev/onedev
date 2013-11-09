@@ -91,8 +91,8 @@ public class LogCommand extends GitCommand<List<Commit>> {
 	            		commits.add(commitBuilder.build());
 	            		commitBuilder.parentHashes.clear();
 	            		commitBuilder.fileChanges.clear();
-	            		commitBuilder.subject = null;
-	            		commitBuilder.body = null;
+	            		commitBuilder.summary = null;
+	            		commitBuilder.message = null;
 	            		commitBuilder.note = null;
             		}
             		commitMessageBlock[0] = true;
@@ -105,12 +105,12 @@ public class LogCommand extends GitCommand<List<Commit>> {
             	} else if (line.equals("*** commit_info_end ***")) {
             		fileChangesBlock[0] = true;
             	} else if (commitMessageBlock[0]) {
-            		if (commitBuilder.subject == null)
-            			commitBuilder.subject = line;
-            		else if (commitBuilder.body == null)
-            			commitBuilder.body = line;
+            		if (commitBuilder.summary == null)
+            			commitBuilder.summary = line;
+            		else if (commitBuilder.message == null)
+            			commitBuilder.message = line;
             		else 
-            			commitBuilder.body += "\n" + line;
+            			commitBuilder.message += "\n" + line;
             	} else if (commitNoteBlock[0]) {
             		if (commitBuilder.note == null)
             			commitBuilder.note = line;
@@ -131,7 +131,7 @@ public class LogCommand extends GitCommand<List<Commit>> {
             			commitBuilder.fileChanges.add(fileChange);
             		}
             	} else if (line.startsWith("subject:")) {
-            		commitBuilder.subject = line.substring("subject:".length());
+            		commitBuilder.summary = line.substring("subject:".length());
             	} else if (line.startsWith("hash:")) {
                 	commitBuilder.hash = line.substring("hash:".length());
             	} else if (line.startsWith("author:")) {
@@ -176,9 +176,9 @@ public class LogCommand extends GitCommand<List<Commit>> {
         
         private String hash;
         
-        private String subject;
+        private String summary;
         
-        private String body;
+        private String message;
         
         private String note;
         
@@ -187,9 +187,11 @@ public class LogCommand extends GitCommand<List<Commit>> {
         private List<FileChange> fileChanges = new ArrayList<>();
 
     	private Commit build() {
-    		return new Commit(committerDate, authorDate, author, committer, authorEmail, 
-    				committerEmail, hash, subject.trim(), StringUtils.isNotBlank(body)?body.trim():null, 
-    						StringUtils.isNotBlank(note)?note.trim():null, parentHashes, fileChanges);
+    		return new Commit(hash, committer, committerEmail, committerDate, 
+    				author, authorEmail, authorDate, summary.trim(), 
+    				StringUtils.isNotBlank(message)?message.trim():null, 
+    				StringUtils.isNotBlank(note)?note.trim():null, 
+    				parentHashes, fileChanges);
     	}
     }
 }

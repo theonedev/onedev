@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.command.AddCommand;
 import com.pmease.commons.git.command.AddNoteCommand;
+import com.pmease.commons.git.command.BlameCommand;
 import com.pmease.commons.git.command.CalcMergeBaseCommand;
 import com.pmease.commons.git.command.CheckAncestorCommand;
 import com.pmease.commons.git.command.CheckoutCommand;
@@ -172,6 +173,10 @@ public class Git implements Serializable {
 	public Git addNote(String object, String message) {
 		new AddNoteCommand(repoDir).object(object).message(message).call();
 		return this;
+	}
+	
+	public List<Blame> blame(String file, String revision) {
+		return new BlameCommand(repoDir).file(file).revision(revision).call();
 	}
 	
 }
