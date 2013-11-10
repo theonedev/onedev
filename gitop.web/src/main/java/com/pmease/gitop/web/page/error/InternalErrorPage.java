@@ -1,8 +1,6 @@
 package com.pmease.gitop.web.page.error;
 
-import com.pmease.gitop.web.page.BasePage;
-
-public class InternalErrorPage extends BasePage {
+public class InternalErrorPage extends ErrorPage {
 
 	private static final long serialVersionUID = 1L;
 

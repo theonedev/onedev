@@ -2,10 +2,8 @@ package com.pmease.gitop.web;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.wicket.protocol.http.WicketServlet;
-import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
@@ -36,9 +34,6 @@ public class WebServletConfigurator implements ServletConfigurator {
 		servletHolder = new ServletHolder(new ClasspathAssetServlet(AssetLocator.class));
 		context.addServlet(servletHolder, "/assets/*");
 		context.addServlet(servletHolder, "/favicon.ico");
-		
-		ErrorPageErrorHandler errorHandler = (ErrorPageErrorHandler) context.getErrorHandler();
-		errorHandler.addErrorPage(HttpServletResponse.SC_NOT_FOUND, "/assets/404.html");
 	}
 
 }

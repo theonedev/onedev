@@ -107,7 +107,7 @@ public class LoginPage extends AbstractLayoutPage {
 		protected boolean remember() {
 			CheckBoxElement c = (CheckBoxElement) get("rememberme");
 			Boolean b = (Boolean) c.getFormComponent().getDefaultModelObject();
-			System.out.println(b);
+//			System.out.println(b);
 			return b;
 		}
 	}
