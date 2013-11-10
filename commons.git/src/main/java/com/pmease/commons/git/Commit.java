@@ -9,6 +9,8 @@ import javax.annotation.Nullable;
 
 public class Commit extends BriefCommit {
     
+	public static final String ZERO_HASH = "0000000000000000000000000000000000000000"; 
+	
     private final String message;
     
     private final String note;
