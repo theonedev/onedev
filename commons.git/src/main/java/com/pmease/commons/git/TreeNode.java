@@ -82,6 +82,13 @@ public class TreeNode implements Serializable {
 		return size;
 	}
 
+	/**
+	 * Get parent node of current node. 
+	 *  
+	 * @return
+	 * 			parent node of current node, or <tt>null</tt> if current node locates directly 
+	 * 			under the repository root
+	 */
 	public @Nullable TreeNode getParent() {
 		if (parentNode == null) {
 			if (path.contains("/")) {
@@ -105,6 +112,13 @@ public class TreeNode implements Serializable {
 		return getPath();
 	}
 	
+	/**
+	 * List child nodes of current node. 
+	 * 
+	 * @return
+	 * 			child nodes of current node, or <tt>null</tt> if current node does not represent a 
+	 * 			directory. 
+	 */
 	public @Nullable List<TreeNode> listChildren() {
 		if (type == Type.DIRECTORY) {
 			List<TreeNode> children = new ListTreeCommand(gitDir).revision(getRevision()).path(getPath() + "/").call();
@@ -117,6 +131,15 @@ public class TreeNode implements Serializable {
 		}
 	}
 	
+	/**
+	 * Show content of current node. 
+	 * 
+	 * @return
+	 * 			content of the file if current node is a file, or URL of the submodule if 
+	 * 			current node represents a submodule, or target path if current node 
+	 * 			represents a symbol link, or contents of the directory if current node 
+	 * 			represents a directory
+	 */
 	public byte[] show() {
 		if (type == Type.SUBMODULE) {
 			return new Git(gitDir).listSubModules(revision).get(path).getBytes();
