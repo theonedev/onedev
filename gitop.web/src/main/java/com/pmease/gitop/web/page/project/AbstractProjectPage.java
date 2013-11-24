@@ -7,7 +7,6 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -26,7 +25,6 @@ import com.pmease.gitop.core.permission.operation.GeneralOperation;
 import com.pmease.gitop.web.model.ProjectModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.AbstractAccountPage;
-import com.pmease.gitop.web.page.project.settings.ProjectOptionsPage;
 
 @SuppressWarnings("serial")
 public abstract class AbstractProjectPage extends AbstractAccountPage {
@@ -66,17 +64,6 @@ public abstract class AbstractProjectPage extends AbstractAccountPage {
 		AbstractLink projectLink = PageSpec.newProjectHomeLink("projectlink", project);
 		add(projectLink);
 		projectLink.add(new Label("name", Model.of(project.getName())));
-		
-		AbstractLink adminLink = new BookmarkablePageLink<Void>("adminlink", 
-				ProjectOptionsPage.class, PageSpec.forProject(getProject())) {
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisibilityAllowed(SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectAdmin(getProject())));
-			}
-		};
-		
-		add(adminLink);
 		
 		Label publicLabel = new Label("public-label", new AbstractReadOnlyModel<String>() {
 

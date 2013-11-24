@@ -1569,15 +1569,21 @@
   content: "\F743";
 }
 
+.fa-git-tag:before,
 .fa-tag-o:before {
   content: "\F744";
 }
+.fa-git-tags:before,
 .fa-tags-o:before {
   content: "\F745";
 }
 
 .fa-gitop:before {
   content: "\F746";
+}
+
+.fa-wiki:before {
+	content: "\f02d";
 }
 
 .fa-checkbox-checked:before {
@@ -1592,3 +1598,4 @@
 .fa-radio-unchecked:before {
 	content: "\f10c";
 }
+.fa { font-size: 16px; }

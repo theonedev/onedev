@@ -2,11 +2,13 @@ package com.pmease.gitop.web.page.project;
 
 import java.util.List;
 
+import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -18,10 +20,12 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Lists;
 import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.api.ProjectTabContribution;
 import com.pmease.gitop.web.page.project.api.ProjectTabGroup;
 import com.pmease.gitop.web.page.project.issue.ProjectMergeRequestsPage;
+import com.pmease.gitop.web.page.project.settings.ProjectOptionsPage;
 import com.pmease.gitop.web.page.project.source.ProjectHomePage;
 import com.pmease.gitop.web.page.project.source.RepositoryBranchesPage;
 import com.pmease.gitop.web.page.project.source.RepositoryCommitsPage;
@@ -35,34 +39,34 @@ import com.pmease.gitop.web.page.project.wiki.ProjectWikiPage;
 public abstract class ProjectCategoryPage extends AbstractProjectPage {
 
 	public static enum Category implements ProjectTabContribution {
-		CODE(ProjectTabGroup.SOURCE, "Code", ProjectHomePage.class, "icon-code") {
+		CODE(ProjectTabGroup.SOURCE, "Code", ProjectHomePage.class, "fa-code") {
 			@Override
 			Component createBadge(String id, IModel<Project> project) {
 				return new WebMarkupContainer(id).setVisibilityAllowed(false);
 			}
 		},
 		
-		COMMITS(ProjectTabGroup.SOURCE, "Commits", RepositoryCommitsPage.class, "icon-time"),
-		BRANCHES(ProjectTabGroup.SOURCE, "Branches", RepositoryBranchesPage.class, "icon-code-fork"),
-		TAGS(ProjectTabGroup.SOURCE, "Tags", RepositoryTagsPage.class, "icon-tag"),
-		CONTRIBUTORS(ProjectTabGroup.SOURCE, "Contributors", RepositoryContributorsPage.class, "icon-group"),
-		WIKI(ProjectTabGroup.WIKI, "Wiki", ProjectWikiPage.class, "icon-wiki") {
+		COMMITS(ProjectTabGroup.SOURCE, "Commits", RepositoryCommitsPage.class, "fa-commits"),
+		BRANCHES(ProjectTabGroup.SOURCE, "Branches", RepositoryBranchesPage.class, "fa-git-branch"),
+		TAGS(ProjectTabGroup.SOURCE, "Tags", RepositoryTagsPage.class, "fa-git-tags"),
+		CONTRIBUTORS(ProjectTabGroup.SOURCE, "Contributors", RepositoryContributorsPage.class, "fa-group-o"),
+		WIKI(ProjectTabGroup.WIKI, "Wiki", ProjectWikiPage.class, "fa-wiki") {
 			@Override
 			Component createBadge(String id, IModel<Project> project) {
 				return new WebMarkupContainer(id).setVisibilityAllowed(false);
 			}
 		},
 		
-		MERGE_REQUESTS(ProjectTabGroup.ISSUES, "Merge Requests", ProjectMergeRequestsPage.class, "icon-repo-merge"),
+		MERGE_REQUESTS(ProjectTabGroup.ISSUES, "Merge Requests", ProjectMergeRequestsPage.class, "fa-pull-request"),
 		
-		GRAPHS(ProjectTabGroup.STATISTICS, "Graphs", ProjectGraphsPage.class, "icon-chart-area") {
+		GRAPHS(ProjectTabGroup.STATISTICS, "Graphs", ProjectGraphsPage.class, "fa-chart-bar") {
 			@Override
 			Component createBadge(String id, IModel<Project> project) {
 				return new WebMarkupContainer(id).setVisibilityAllowed(false);
 			}
 		},
 		
-		FORKS(ProjectTabGroup.STATISTICS, "Forks", ProjectForksPage.class, "icon-network") {
+		FORKS(ProjectTabGroup.STATISTICS, "Forks", ProjectForksPage.class, "fa-network") {
 			@Override
 			Component createBadge(String id, IModel<Project> project) {
 				return new WebMarkupContainer(id).setVisibilityAllowed(false);
@@ -150,6 +154,17 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 			container.add(new Label("name", Model.of(each.name())));
 			container.add(newGroupNavs(each, "nav"));
 		}
+		
+		AbstractLink adminLink = new BookmarkablePageLink<Void>("settinglink", 
+				ProjectOptionsPage.class, PageSpec.forProject(getProject())) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisibilityAllowed(SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectAdmin(getProject())));
+			}
+		};
+		
+		add(adminLink);
 	}
 	
 	private Component newGroupNavs(final ProjectTabGroup group, String id) {
