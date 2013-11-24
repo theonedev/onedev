@@ -1,19 +1,23 @@
-/*!
+/* BASED ON FONTAWESOME
+ *!
  *  Font Awesome 4.0.3 by @davegandy - http://fontawesome.io - @fontawesome
  *  License - http://fontawesome.io/license (Font: SIL OFL 1.1, CSS: MIT License)
  */
 /* FONT PATH
  * -------------------------- */
 @font-face {
-  font-family: 'FontAwesome';
-  src: url('../fonts/fontawesome-webfont.eot?v=4.0.3');
-  src: url('../fonts/fontawesome-webfont.eot?#iefix&v=4.0.3') format('embedded-opentype'), url('../fonts/fontawesome-webfont.woff?v=4.0.3') format('woff'), url('../fonts/fontawesome-webfont.ttf?v=4.0.3') format('truetype'), url('../fonts/fontawesome-webfont.svg?v=4.0.3#fontawesomeregular') format('svg');
+  font-family: 'gitop-icons';
+  src: url('../fonts/pui-icons-regular-webfont.eot?v=1.0.6.5');
+  src: url('../fonts/pui-icons-regular-webfont.eot?#iefix&v=1.0.6.5') format('embedded-opentype'), 
+  	   url('../fonts/pui-icons-regular-webfont.woff?v=1.0.6.5') format('woff'), 
+  	   url('../fonts/pui-icons-regular-webfont.ttf?v=1.0.6.5') format('truetype'), 
+  	   url('../fonts/pui-icons-regular-webfont.svg?v=1.0.6.5#pui-iconsregular') format('svg');
   font-weight: normal;
   font-style: normal;
 }
 .fa {
   display: inline-block;
-  font-family: FontAwesome;
+  font-family: gitop-icons;
   font-style: normal;
   font-weight: normal;
   line-height: 1;
@@ -1335,4 +1339,256 @@
 }
 .fa-plus-square-o:before {
   content: "\f196";
+}
+
+
+.fa-keyboard-o:before {
+  content: "\2328";
+}
+
+
+
+/* MODIFIED ICONS */
+.fa-pencil:before {
+  content: "\270F";
+}
+.fa-mail-o:before {
+  content: "\2709";
+}
+.fa-cloud:before {
+  content: "\2601";
+}
+.fa-smile-o:before {
+  content: "\2323";
+}
+.fa-frown-o:before {
+  content: "\2322";
+}
+.fa-ticket:before {
+  content: "\1F3AB";
+}
+.fa-microphone:before {
+  content: "\1F3A4";
+}
+.fa-trophy:before {
+  content: "\1F3C6";
+}
+.fa-bug:before {
+  content: "\1F41B";
+}
+.fa-briefcase:before {
+  content: "\1F4BC";
+}
+.fa-calendar:before {
+  content: "\1F4C5";
+}
+.fa-pushpin:before {
+  content: "\1F4CC";
+}
+.fa-camera:before {
+  content: "\1F4F7";
+}
+.fa-key:before {
+  content: "\1F511";
+}
+.fa-lock:before {
+  content: "\1F512";
+}
+.fa-bell-o:before {
+  content: "\1F514";
+}
+.fa-bookmark:before {
+  content: "\1F516";
+}
+.fa-wrench:before {
+  content: "\1F527";
+}
+.fa-rocket:before {
+  content: "\1F680";
+}
+
+
+/** EXTRA ICONS **/
+.fa-login:before {
+  content: "\F700";
+}
+.fa-logout:before {
+  content: "\F701";
+}
+.fa-console:before {
+  content: "\F702";
+}
+.fa-watch:before {
+  content: "\F703";
+}
+.fa-watch-none:before {
+  content: "\F704";
+}
+.fa-watch-add:before {
+  content: "\F705";
+}
+.fa-watch-delete:before {
+  content: "\F706";
+}
+
+.fa-git-branch:before {
+  content: "\F707";
+}
+.fa-git-branch-add:before {
+  content: "\F708";
+}
+.fa-git-branch-delete:before {
+  content: "\F709";
+}
+.fa-git-branch-merge:before {
+  content: "\F70a";
+}
+.fa-pull-request:before {
+  content: "\F70B";
+}
+.fa-git-branch-compare:before {
+  content: "\F70C";
+}
+.fa-git-pull-request-abandon:before {
+  content: "\F70D";
+}
+.fa-repo:before {
+  content: "\F70E";
+}
+.fa-repo-add:before {
+  content: "\F70F";
+}
+.fa-repo-delete:before {
+  content: "\F710";
+}
+.fa-repo-forked:before {
+  content: "\F711";
+}
+.fa-repo-pull:before {
+  content: "\F712";
+}
+
+.fa-project:before {
+  content: "\F71E";
+}
+.fa-project-add:before {
+  content: "\F71F";
+}
+.fa-project-delete:before {
+  content: "\F720";
+}
+.fa-project-lock:before {
+  content: "\F721";
+}
+.fa-project-unlock:before {
+  content: "\F722";
+}
+.fa-project-forked:before {
+  content: "\F723";
+}
+
+.fa-user-o:before {
+  content: "\F724";
+}
+.fa-group-o:before {
+  content: "\F725";
+}
+
+.fa-tools:before {
+  content: "\F726";
+}
+
+.fa-dashboard:before {
+  content: "\F727";
+}
+
+.fa-commits:before,
+.fa-history:before {
+  content: "\F728";
+}
+
+.fa-diff:before {
+  content: "\F730";
+}
+.fa-diff-added:before {
+  content: "\F731";
+}
+.fa-diff-removed:before {
+  content: "\F732";
+}
+.fa-diff-modified:before {
+  content: "\F733";
+}
+.fa-diff-ignored:before {
+  content: "\F734";
+}
+.fa-diff-renamed:before {
+  content: "\F735";
+}
+.fa-commit:before {
+  content: "\F736";
+}
+.fa-file-add:before {
+  content: "\F737";
+}
+.fa-control-settings:before {
+  content: "\F738";
+}
+.fa-control-settings-h:before {
+  content: "\F739";
+}
+.fa-pulse:before {
+  content: "\F73A";
+}
+.fa-star:before {
+  content: "\F73B";
+}
+.fa-star-o:before {
+  content: "\F73C";
+}
+.fa-clippy:before {
+  content: "\F73D";
+}
+.fa-support:before {
+  content: "\F73E";
+}
+
+.fa-chart-table:before {
+  content: "\F73F";
+}
+.fa-chart-area:before {
+  content: "\F740";
+}
+.fa-chart-pie:before {
+  content: "\F741";
+}
+.fa-chart-bar:before {
+  content: "\F742";
+}
+.fa-chart-line:before {
+  content: "\F743";
+}
+
+.fa-tag-o:before {
+  content: "\F744";
+}
+.fa-tags-o:before {
+  content: "\F745";
+}
+
+.fa-gitop:before {
+  content: "\F746";
+}
+
+.fa-checkbox-checked:before {
+	content: "\F046";
+}
+.fa-checkbox-unchecked:before {
+	content: "\F096";	
+}
+.fa-radio-checked:before {
+	content: "\f192";	
+}
+.fa-radio-unchecked:before {
+	content: "\f10c";
 }

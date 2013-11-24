@@ -45,7 +45,7 @@ function setupDropdown(triggerId, dropdownInfo, hoverDelay, alignmentIndicatorMo
 	
 	// dropdown can associate with multiple triggers, and we should initialize it once here.
 	if (!dropdown.hasClass("dropdown-panel")) { 
-		dropdown.addClass("dropdown-panel popup hide");
+		dropdown.addClass("dropdown-panel popup");
 		dropdown[0].trigger = trigger[0];
 		dropdown.before("<div id='" + dropdownId + "-placeholder' class='hide'></div>");
 	}

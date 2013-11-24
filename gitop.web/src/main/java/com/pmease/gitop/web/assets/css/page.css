@@ -79,9 +79,10 @@ ul.f-dropdown { padding: 0; }
 
 .padder { padding: 20px; }
 
-.sidebar .head, .content .head { padding: 15px 20px; white-space: nowrap; overflow: hidden;  }
-.sidebar .head a { color: #666; font-weight:bold; line-height: 24px; }
-.sidebar .head a:hover { text-decoration: none; color: #09F; }
+.sidebar .head, .content .head { padding: 15px 20px; white-space: nowrap; }
+.sidebar .head { border-bottom: 1px solid #ddd; }
+.sidebar .head > a { color: #666; font-weight:bold; line-height: 24px; }
+.sidebar .head > a:hover { text-decoration: none; color: #09F; }
 
 .sidebar .list-navs > .list-group-item,
 .sidebar .list-navs > .list-group-item.active  { 
@@ -94,6 +95,10 @@ ul.f-dropdown { padding: 0; }
 .sidebar .list-navs > .list-group-item a:hover { color: #333; text-decoration: none; background: #f2f2f2; }
 .sidebar .list-navs > .list-group-item.active a,
 .sidebar .list-navs > .list-group-item.active a:hover { color: #222; background: #e5e5e5; font-weight: bold; }
+
+.sidebar .list-head {
+	padding: 0 20px; color: #999; font-size: 1em;
+}
 
 .list-navs > .list-group-item a .badge { float: right; }
 .sidebar .list-navs > .list-group-item [class^="icon"] {
@@ -108,12 +113,21 @@ ul.f-dropdown { padding: 0; }
 
 .sidebar .list-navs.first {margin-top: 20px; }
 
+.head:before, .head:after {
+  display: table;
+  content: " ";
+}
+
+.head:after {
+  clear: both;
+}
+
 .content section > .head { border-style: solid; border-width: 1px 0; border-color: #ddd; margin-bottom: 0; position: relative; z-index: 10; overflow: visible; }
 section:first-child > .head { border-top: none; }
-section>.head h2, section>.head h3 { margin: 0; font-size: 18px; line-height: 24px; color: #6f6f6f; font-weight: 300; text-transform: uppercase; }
+section>.head h2, section>.head h3 { margin: 0; font-size: 18px; line-height: 24px; color: #6f6f6f; font-weight: 300; text-transform: uppercase; float: left; }
 section .padder, section > .body { padding: 20px 20px; }
 section > .well { border-radius: 0; border-width: 0 0 1px 0; margin: 0; }
-section>.head .actions { position: absolute; right: 20px; top: 10px; }
+section>.head .actions { float: left; }
 
 /** TABLE */
 
@@ -159,6 +173,8 @@ th.wicket_orderUp a, th.wicket_orderDown a { padding-left: 20px; }
 #login-form .row { margin-top: 18px; }
 #login-form .btn { width: 100%;}
 
+/* ACCOUNT SETTINGS PAGE */
+.owners-list > li > a { color: #666;  }
 
 /* TEAM EDIT PAGE */
 .permission-link { color: #666; }

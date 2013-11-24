@@ -22,7 +22,6 @@ import com.google.common.collect.ImmutableList;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.model.Team;
-import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.permission.operation.GeneralOperation;
 import com.pmease.gitop.web.common.component.messenger.Messenger;
 import com.pmease.gitop.web.common.form.FeedbackPanel;
@@ -30,19 +29,18 @@ import com.pmease.gitop.web.common.form.FeedbackPanel;
 @SuppressWarnings("serial")
 public class TeamEditor extends Panel {
 
-	private final IModel<User> userModel;
 //	private GeneralOperation currentPermission;
 //	private String name;
 	
-	public TeamEditor(String id, IModel<User> userModel, IModel<Team> teamModel) {
+	public TeamEditor(String id, IModel<Team> teamModel) {
 		super(id, teamModel);
-		this.userModel = userModel;
+//		this.userModel = userModel;
 		this.setOutputMarkupId(true);
 	}
 
-	private User getAccount() {
-		return userModel.getObject();
-	}
+//	private User getAccount() {
+//		return userModel.getObject();
+//	}
 
 	private Team getTeam() {
 		return (Team) getDefaultModelObject();
@@ -91,6 +89,7 @@ public class TeamEditor extends Panel {
 			super.onInitialize();
 			
 			Team team = getTeam();
+			final String oldName = team.getName();
 			add(new FeedbackPanel("feedback"));
 			add(new TextField<String>("name", new PropertyModel<String>(getDefaultModel(), "name"))
 					.add(new IValidator<String>() {
@@ -105,8 +104,13 @@ public class TeamEditor extends Panel {
 								validatable.error(new ValidationError().setMessage("The name is already exist"));
 								return;
 							}
+							
+							if (!getTeam().isNew() && name.equalsIgnoreCase(oldName)) {
+								return; // name not change
+							}
+							
 							TeamManager tm = Gitop.getInstance(TeamManager.class);
-							boolean b = tm.find(Restrictions.eq("owner", getAccount()),
+							boolean b = tm.find(Restrictions.eq("owner", getTeam().getOwner()),
 									Restrictions.eq("name", name).ignoreCase()) != null;
 							if (b) {
 								validatable.error(new ValidationError().setMessage("The name is already exist"));
@@ -283,10 +287,6 @@ public class TeamEditor extends Panel {
 //	
 	@Override
 	public void onDetach() {
-		if (userModel != null) {
-			userModel.detach();
-		}
-
 		super.onDetach();
 	}
 }

@@ -23,6 +23,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -34,7 +35,6 @@ import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.model.Team;
 import com.pmease.gitop.core.permission.operation.GeneralOperation;
 import com.pmease.gitop.web.common.bootstrap.Icon;
-import com.pmease.gitop.web.common.bootstrap.IconType;
 import com.pmease.gitop.web.common.component.datagrid.DataGrid;
 import com.pmease.gitop.web.common.component.datagrid.hibernate.EntityListProvider;
 import com.pmease.gitop.web.common.component.vex.AjaxConfirmLink;
@@ -45,10 +45,10 @@ import com.pmease.gitop.web.util.EnumUtils;
 @SuppressWarnings("serial")
 public class AccountTeamsPage extends AccountSettingPage {
 
-//	public static PageParameters newParams(User account) {
-//		return PageSpec.forUser(account);
-//	}
-	
+	public AccountTeamsPage(PageParameters params) {
+		super(params);
+	}
+
 	@Override
 	protected Category getSettingCategory() {
 		return Category.TEAMS;
@@ -63,9 +63,7 @@ public class AccountTeamsPage extends AccountSettingPage {
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 		
-		add(new BookmarkablePageLink<Void>("addTeam", AddTeamPage.class));
-//		add(newTeamsView());
-		
+		add(new BookmarkablePageLink<Void>("addTeam", AddTeamPage.class, newAccountParams()));
 		add(createTeamTable());
 	}
 	
@@ -118,7 +116,7 @@ public class AccountTeamsPage extends AccountSettingPage {
 																	EditTeamPage.class,
 																	EditTeamPage.newParams(team));
 				link.add(new Label("name", Model.of(team.getName())));
-				link.add(new Icon("icon", IconType.PENCIL));
+				link.add(new Icon("icon", "pencil"));
 				frag.add(link);
 				frag.add(new Label("summary", formatTeamDescription(team)));
 				frag.add(new Label("builtin", "built-in").setVisibilityAllowed(team.isBuiltIn()));
@@ -259,13 +257,13 @@ public class AccountTeamsPage extends AccountSettingPage {
 			};
 			
 			link.setEnabled(enabled);
-			link.add(new Icon("icon", new AbstractReadOnlyModel<IconType>() {
+			link.add(new Icon("icon", new AbstractReadOnlyModel<String>() {
 
 				@Override
-				public IconType getObject() {
+				public String getObject() {
 					Team team = Gitop.getInstance(TeamManager.class).get(teamId);
 					return getTeamPermission(team).can(operation) ?
-							IconType.CHECK : IconType.UNCHECKED;
+							"checkbox-checked" : "checkbox-unchecked";
 				}
 				
 			}));

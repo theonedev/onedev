@@ -3,15 +3,13 @@
 	<section>
 		<div class="head">
 			<h2>Project Permissions</h2>
-			<div class="actions">
-				<div class="btn-group">
-					<a class="btn btn-info btn-colorful-text" wicket:id="teamslink">Manage Teams</a>
-					<a wicket:id="resetlink" class="btn btn-info btn-colorful-text">Use default permissions</a>
-				</div>
-			</div>
 		</div>
 		<div class="body">
-			
+			<div class="btn-group">
+				<a class="btn btn-default" wicket:id="teamslink"><i class="fa fa-group-o"></i> Manage Teams</a>
+				<a wicket:id="resetlink" class="btn btn-default">Reset to default permissions</a>
+			</div>
+			<hr />
 			<table class="table teams-table table-hover" wicket:id="teamstable">
 			</table>
 		</div>

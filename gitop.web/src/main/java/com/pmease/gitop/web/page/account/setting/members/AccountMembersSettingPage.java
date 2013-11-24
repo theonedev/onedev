@@ -14,6 +14,7 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Objects;
@@ -31,6 +32,10 @@ import com.pmease.gitop.web.page.account.setting.teams.AccountTeamsPage;
 
 @SuppressWarnings("serial")
 public class AccountMembersSettingPage extends AccountSettingPage {
+
+	public AccountMembersSettingPage(PageParameters params) {
+		super(params);
+	}
 
 	@Override
 	protected Category getSettingCategory() {
@@ -73,7 +78,7 @@ public class AccountMembersSettingPage extends AccountSettingPage {
 			
 		};
 		
-		add(new BookmarkablePageLink<Void>("teamlink", AccountTeamsPage.class));
+		add(new BookmarkablePageLink<Void>("teamlink", AccountTeamsPage.class, newAccountParams()));
 		
 		add(new MemberListView("members", new UserModel(getAccount()), model){
 			@Override

@@ -41,9 +41,9 @@ import com.pmease.gitop.core.model.Team;
 import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.core.permission.operation.GeneralOperation;
 import com.pmease.gitop.web.common.bootstrap.Icon;
-import com.pmease.gitop.web.common.bootstrap.IconType;
 import com.pmease.gitop.web.common.component.datagrid.DataGrid;
 import com.pmease.gitop.web.common.component.datagrid.hibernate.EntityListProvider;
+import com.pmease.gitop.web.common.component.vex.AjaxConfirmLink;
 import com.pmease.gitop.web.page.account.setting.teams.AccountTeamsPage;
 import com.pmease.gitop.web.page.account.setting.teams.EditTeamPage;
 import com.pmease.gitop.web.page.project.ProjectPubliclyAccessibleChanged;
@@ -66,7 +66,7 @@ public class ProjectPermissionsPage extends AbstractProjectSettingPage {
 		super.onPageInitialize();
 		
 		add(newTeamsTable());
-		add(new AjaxLink<Void>("resetlink") {
+		add(new AjaxConfirmLink<Void>("resetlink", Model.of("Are you sure you want to reset to the default permissions?")) {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -316,12 +316,12 @@ public class ProjectPermissionsPage extends AbstractProjectSettingPage {
 				
 			};
 			
-			link.add(new Icon("icon", new AbstractReadOnlyModel<IconType>() {
+			link.add(new Icon("icon", new AbstractReadOnlyModel<String>() {
 
 				@Override
-				public IconType getObject() {
+				public String getObject() {
 					return operation.ordinal() > getTeamPermission(rowModel.getObject()).ordinal() ?
-							IconType.UNCHECKED : IconType.CHECK;
+							"checkbox-unchecked" : "checkbox-checked";
 				}
 				
 			}));

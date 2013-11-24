@@ -8,8 +8,11 @@ public class AssetLocator {
 
 	public static final ResourceReference BOOTSTRAP_CSS = newCssResourceReference("css/bootstrap.css");
 	public static final ResourceReference BOOTSTRAP_MIN_CSS = newCssResourceReference("css/bootstrap.min.css");
-	public static final ResourceReference FONT_AWESOME_CSS = newCssResourceReference("css/font-awesome.css");
-	public static final ResourceReference FONT_AWESOME_MIN_CSS = newCssResourceReference("css/font-awesome.min.css");
+
+//	public static final ResourceReference FONT_AWESOME_CSS = newCssResourceReference("css/font-awesome.css");
+//	public static final ResourceReference FONT_AWESOME_MIN_CSS = newCssResourceReference("css/font-awesome.min.css");
+	
+	public static final ResourceReference ICONS_CSS = newCssResourceReference("css/icons.css");
 	
 	public static final ResourceReference MODERNIZR_JS = newJavaScriptResourceReference("js/vendor/modernizr-2.6.2.js");
 	public static final ResourceReference JQUERY_JS = newJavaScriptResourceReference("js/vendor/jquery.min.js");

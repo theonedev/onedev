@@ -1,8 +1,6 @@
 package com.pmease.gitop.web.assets;
 
-import org.apache.wicket.Application;
 import org.apache.wicket.Component;
-import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.head.CssReferenceHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -36,11 +34,7 @@ public class BaseResourcesBehavior extends Behavior {
 		response.render(new PriorityHeaderItem(BootstrapHeaderItem.get()));
 		
 		// render font-awesome
-		if (Application.get().getConfigurationType() == RuntimeConfigurationType.DEPLOYMENT) {
-			response.render(new PriorityHeaderItem(CssReferenceHeaderItem.forReference(AssetLocator.FONT_AWESOME_MIN_CSS)));
-		} else {
-			response.render(new PriorityHeaderItem(CssReferenceHeaderItem.forReference(AssetLocator.FONT_AWESOME_CSS)));
-		}
+		response.render(new PriorityHeaderItem(CssReferenceHeaderItem.forReference(AssetLocator.ICONS_CSS)));
 		
 		response.render(new PriorityHeaderItem(CssReferenceHeaderItem.forReference(AssetLocator.BASE_CSS)));
 	}

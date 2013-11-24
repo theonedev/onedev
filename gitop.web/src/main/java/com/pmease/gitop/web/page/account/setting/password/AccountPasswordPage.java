@@ -6,6 +6,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.validation.EqualPasswordInputValidator;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
@@ -20,11 +21,14 @@ import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
 
 @SuppressWarnings("serial")
 public class AccountPasswordPage extends AccountSettingPage {
-
 	private String oldPass;
 	private String newPass;
 	private String confirmPass;
-	
+
+	public AccountPasswordPage(PageParameters params) {
+		super(params);
+	}
+
 	@Override
 	protected String getPageTitle() {
 		return "Change Password";

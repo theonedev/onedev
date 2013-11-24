@@ -13,8 +13,10 @@ import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.lang.Bytes;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.io.Files;
@@ -30,11 +32,25 @@ import com.pmease.gitop.web.common.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.component.avatar.AvatarChanged;
 import com.pmease.gitop.web.component.avatar.AvatarImage;
 import com.pmease.gitop.web.model.UserModel;
+import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
 
 @SuppressWarnings("serial")
 public class AccountProfilePage extends AccountSettingPage {
 
+	public static PageParameters newParams(User user) {
+		Preconditions.checkNotNull(user);
+		return PageSpec.forUser(user); 
+	}
+	
+	public static PageParameters newParams() {
+		return newParams(User.getCurrent());
+	}
+	
+	public AccountProfilePage(PageParameters params) {
+		super(params);
+	}
+	
 	@Override
 	protected String getPageTitle() {
 		return "Your Profile";

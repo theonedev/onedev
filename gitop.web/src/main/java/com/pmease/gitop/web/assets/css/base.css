@@ -68,72 +68,6 @@ ul.piped, ol.piped { margin: 0; padding: 0; }
 .list-view .list-group-item:last-child { border-radius: 0; }
 
 
-/* ADDITIONAL ICONS */
-@font-face {
-    font-family: 'pmease-icons';
-    src: url('../fonts/pui-icons-regular-webfont.eot?1.0.1.8');
-    src: url('../fonts/pui-icons-regular-webfont.eot?1.0.1.8#iefix') format('embedded-opentype'),
-         url('../fonts/pui-icons-regular-webfont.woff?1.0.1.8') format('woff'),
-         url('../fonts/pui-icons-regular-webfont.ttf?1.0.1.8') format('truetype'),
-         url('../fonts/pui-icons-regular-webfont.svg?1.0.1.8#pui-iconsregular') format('svg');
-    font-weight: normal;
-    font-style: normal;
-}
-
-.gicon { font-family: 'pmease-icons'; }
-.gicon-control-center:before {content: "\F700";}
-.gicon-flow-cascade:before {content: "\F701"; }
-.gicon-flow-line:before {content:"\F702";}
-.gicon-flow-parallel:before {content:"\F703";}
-.gicon-flow-branch:before {content:"\F704";}
-.gicon-flow-tree:before {content: "\F705"; }
-.gicon-flow-plus:before {content:"\F706";}
-.gicon-flow-star:before {content:"\F707"; }
-.gicon-notification-center:before {content: "\F708"; }
-.gicon-tag-o:before {content: "\F709";}
-.gicon-tags-o:before {content: "\F70A"; }
-.gicon-pull-request:before {content: "\F70B"; }
-.gicon-branch-compare:before {content:"\F70C";}
-.gicon-network:before {content: "\F712";}
-.gicon-history {content: "\F713"; }
-.gicon-book:before { content: "\F714"; }
-.gicon-keyboard:before {content: "\F717"; }
-.gicon-backspace:before {content: "\F718"; }
-.gicon-archive:before {content: "\F719";}
-.gicon-clipboard:before {content: "\F71A"; }
-.gicon-vcard:before {content: "\F71B"; }
-.gicon-branch-new:before {content: "\F71C"; }
-.gicon-terminal:before {content: "\F71D"; }
-.gicon-chart-line:before {content: "\F71E"; }
-.gicon-chart-bar:before {content: "\F71F"; }
-.gicon-chart-area:before {content: "\F720"; }
-.gicon-lock:before {content: "\F721"; }
-.gicon-unlock:before {content: "\F722"; }
-.gicon-layout:before {content: "\F723"; }
-
-.gicon-repo:before {content: "\F724";}
-.gicon-repo-new:before {content: "\F725"; }
-.gicon-repo-forked:before {content: "\F726";}
-.gicon-repo-lock:before {content: "\F727"; }
-.gicon-repo-unlock:before {content: "\F728"; }
-
-.gicon-clock:before {content: "\F729"; }
-.gicon-clock-o:before {content: "\F72A"; }
-
-.gicon-calendar-month:before { content: "\F72B";}
-.gicon-calendar-day:before {conten: "\F72C"; }
-.gicon-dashboard:before {content: "\F72D"; }
-.gicon-checklist:before {content: "\F72E"; }
-.gicon-code:before {content: "\F72F"; }
-.gicon-gears:before {content: "\F730"; }
-.gicon-user-o:before {content: "\F731";}
-.gicon-group-o:before {content: "\F732"; }
-.gicon-tab:before {content: "\F733"; }
-.gicon-empty:before { content: " "; }
-
-a > .icon-null, .icon-null { display: inline-block; width: 10px; }
-.icon-null:before { content: ' ';}
-
 .left { float: left; }
 .right { float: right; }
 .inline { display:-moz-inline-stack; display:inline-block; zoom:1; *display:inline;}
@@ -387,6 +321,6 @@ fieldset[disabled] .btn-inverse.active {
 .faux-row { display: table-row; }
 .faux-cell { display: table-cell; vertical-align: top; margin: 0; padding: 0; }
 .faux-cell.sidebar { width: 240px; position: relative; border-right: 1px solid #ddd; }
-.sidebar-inner { position: relative; width: 240px; overflow-x: hidden; }
+.sidebar-inner { position: relative; width: 240px; }
 .faux .content { }
 

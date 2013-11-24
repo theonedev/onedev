@@ -1,17 +1,19 @@
 package com.pmease.gitop.web.page.account.setting.teams;
 
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import com.pmease.gitop.core.model.Team;
+import com.pmease.gitop.web.model.TeamModel;
 
 @SuppressWarnings("serial")
 public class AddTeamPage extends EditTeamPage {
 
-	public AddTeamPage() {
-	}
-	
-	@Override
-	protected Team getTeam() {
+	public AddTeamPage(PageParameters params) {
+		super(params);
+		
+		this.accountModel = newAccountModel(params);
 		Team team = new Team();
-		team.setOwner(getAccount());
-		return team;
+		team.setOwner(accountModel.getObject());
+		this.teamModel = new TeamModel(team);
 	}
 }

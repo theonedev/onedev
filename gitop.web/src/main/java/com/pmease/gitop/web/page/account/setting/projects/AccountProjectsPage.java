@@ -11,6 +11,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Lists;
 import com.pmease.gitop.core.model.Project;
@@ -27,6 +28,10 @@ import com.pmease.gitop.web.util.DateUtils;
 @SuppressWarnings("serial")
 public class AccountProjectsPage extends AccountSettingPage {
 
+	public AccountProjectsPage(PageParameters params) {
+		super(params);
+	}
+
 	@Override
 	protected String getPageTitle() {
 		return "Your Repositories";
@@ -41,7 +46,7 @@ public class AccountProjectsPage extends AccountSettingPage {
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 		
-		add(new BookmarkablePageLink<Void>("newlink", CreateProjectPage.class));
+		add(new BookmarkablePageLink<Void>("newlink", CreateProjectPage.class, newAccountParams()));
 		
 		IModel<List<Project>> model = new LoadableDetachableModel<List<Project>>() {
 

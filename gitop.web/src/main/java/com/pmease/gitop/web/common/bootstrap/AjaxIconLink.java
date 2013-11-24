@@ -10,14 +10,14 @@ public abstract class AjaxIconLink extends Panel {
 
 	private static final long serialVersionUID = 1L;
 
-	private final IModel<IconType> iconModel;
+	private final IModel<String> iconModel;
 	private final IModel<String> labelModel;
 
-	public AjaxIconLink(String id, IModel<IconType> iconModel) {
+	public AjaxIconLink(String id, IModel<String> iconModel) {
 		this(id, iconModel, Model.of(""));
 	}
 
-	public AjaxIconLink(String id, IModel<IconType> iconModel,
+	public AjaxIconLink(String id, IModel<String> iconModel,
 			IModel<String> labelModel) {
 		super(id);
 		this.iconModel = iconModel;
