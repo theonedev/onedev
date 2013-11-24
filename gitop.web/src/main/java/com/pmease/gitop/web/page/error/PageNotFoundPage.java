@@ -1,9 +1,7 @@
 package com.pmease.gitop.web.page.error;
 
-import com.pmease.gitop.web.page.BasePage;
-
 @SuppressWarnings("serial")
-public class PageNotFoundPage extends BasePage {
+public class PageNotFoundPage extends ErrorPage {
 
 	@Override
 	protected String getPageTitle() {

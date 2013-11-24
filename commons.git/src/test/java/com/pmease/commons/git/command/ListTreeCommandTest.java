@@ -1,16 +1,14 @@
 package com.pmease.commons.git.command;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.pmease.commons.git.DirNode;
-import com.pmease.commons.git.FileNode;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.commons.util.FileUtils;
@@ -18,14 +16,14 @@ import com.pmease.commons.util.FileUtils;
 public class ListTreeCommandTest {
 
 	@Test
-	public void shouldListTreeAndReadFileCorrectly() {
+	public void shouldListTreeAndReadFileCorrectly() throws IOException {
 	    Assert.assertTrue(GitCommand.checkError() == null);
 	    File tempDir = FileUtils.createTempDir();
 	    
-	    Git workGit = new Git(new File(tempDir, "work"));
-	    workGit.init(false);
-	        
 	    try {
+		    Git workGit = new Git(new File(tempDir, "work"));
+		    workGit.init(false);
+		        
     		FileUtils.touchFile(new File(workGit.repoDir(), "a"));
     		workGit.add("a");
     		workGit.commit("commit", false);
@@ -51,30 +49,40 @@ public class ListTreeCommandTest {
     		workGit.add("dir/file");
     		workGit.commit("commit", false);
     		
+			Git moduleGit = new Git(new File(tempDir, "module"));
+			moduleGit.init(false);
+			FileUtils.writeFile(new File(moduleGit.repoDir(), "readme"), "readme");
+			moduleGit.add("readme").commit("commit", false);
+			
+			workGit.addSubModule(moduleGit.repoDir().getAbsolutePath(), "module");
+			workGit.commit("commit", false);
+
     		workGit.checkout("dev", true);
     		workGit.remove("dir/file");
     		workGit.commit("commit", false);
     		
-    		Git bareGit = new Git(new File(tempDir, "bare"));
+			Git bareGit = new Git(new File(tempDir, "bare"));
     		bareGit.clone(workGit.repoDir().getAbsolutePath(), true);
 
     		List<TreeNode> treeNodes = bareGit.listTree("master", null, false);
 
-    		assertEquals(treeNodes.size(), 5);
-    		assertEquals(treeNodes.get(4).getPath(), "dir");
-    		assertEquals(treeNodes.get(4).getName(), "dir");
-    		assertTrue(treeNodes.get(4) instanceof DirNode);
+    		assertEquals(7, treeNodes.size());
+    		assertEquals("dir", treeNodes.get(5).getPath());
+    		assertEquals("dir", treeNodes.get(5).getName());
+    		assertEquals(TreeNode.Type.DIRECTORY, treeNodes.get(5).getType());
+    		assertEquals(moduleGit.repoDir().getAbsolutePath(), 
+    				new File(new String(treeNodes.get(6).show())).getCanonicalPath());
     		
-    		DirNode dirNode = (DirNode) treeNodes.get(4);
+    		TreeNode dirNode = treeNodes.get(5);
     		treeNodes = dirNode.listChildren();
     		
-    		assertEquals(treeNodes.size(), 1);
-    		assertEquals(treeNodes.get(0).getPath(), "dir/file");
-    		assertEquals(treeNodes.get(0).getName(), "file");
+    		assertEquals(1, treeNodes.size());
+    		assertEquals("dir/file", treeNodes.get(0).getPath());
+    		assertEquals("file", treeNodes.get(0).getName());
     		
-    		FileNode fileNode = (FileNode) treeNodes.get(0);
-    		assertEquals(new String(fileNode.read()), "hello world");
-    		assertEquals(fileNode.getParent().getName(), "dir");
+    		TreeNode fileNode = treeNodes.get(0);
+    		assertEquals("hello world", new String(fileNode.show()));
+    		assertEquals("dir", fileNode.getParent().getName());
     		
 	    } finally {
 	        FileUtils.deleteDir(tempDir);

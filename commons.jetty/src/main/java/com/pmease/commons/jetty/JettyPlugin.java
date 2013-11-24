@@ -93,8 +93,9 @@ public class JettyPlugin extends AbstractPlugin {
          */
         List<ServletConfigurator> servletConfigurators = new ArrayList<>(servletConfiguratorsProvider.get());
         Collections.reverse(servletConfigurators);
-        for (ServletConfigurator configurator: servletConfigurators) 
+        for (ServletConfigurator configurator: servletConfigurators) {
         	configurator.configure(contextHandler);
+        }
 
         /*
          *  Add Guice filter as last filter in order to make sure that filters and servlets

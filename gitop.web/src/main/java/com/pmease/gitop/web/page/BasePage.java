@@ -132,6 +132,11 @@ public abstract class BasePage extends WebPage {
 		}
 	}
 
+	public final void onException(RuntimeException e) {
+		shouldInitialize = false;
+		throw e;
+	}
+	
 	public final void redirectWithInterception(final Class<? extends Page> clazz) {
 		shouldInitialize = true;
 		throw new RestartResponseAtInterceptPageException(clazz);

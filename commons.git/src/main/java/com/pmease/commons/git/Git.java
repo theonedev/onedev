@@ -4,26 +4,33 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.git.command.AddCommand;
+import com.pmease.commons.git.command.AddNoteCommand;
+import com.pmease.commons.git.command.AddSubModuleCommand;
+import com.pmease.commons.git.command.BlameCommand;
 import com.pmease.commons.git.command.CalcMergeBaseCommand;
 import com.pmease.commons.git.command.CheckAncestorCommand;
 import com.pmease.commons.git.command.CheckoutCommand;
 import com.pmease.commons.git.command.CloneCommand;
 import com.pmease.commons.git.command.CommitCommand;
 import com.pmease.commons.git.command.DeleteRefCommand;
+import com.pmease.commons.git.command.DiffCommand;
 import com.pmease.commons.git.command.InitCommand;
+import com.pmease.commons.git.command.IsBinaryCommand;
 import com.pmease.commons.git.command.ListBranchesCommand;
 import com.pmease.commons.git.command.ListChangedFilesCommand;
+import com.pmease.commons.git.command.ListSubModulesCommand;
 import com.pmease.commons.git.command.ListTagsCommand;
 import com.pmease.commons.git.command.ListTreeCommand;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.git.command.MergeCommand;
-import com.pmease.commons.git.command.ReadFileCommand;
 import com.pmease.commons.git.command.RemoveCommand;
-import com.pmease.commons.git.command.ResolveCommitCommand;
+import com.pmease.commons.git.command.ShowCommand;
 import com.pmease.commons.git.command.UpdateRefCommand;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.GeneralException;
@@ -73,7 +80,9 @@ public class Git implements Serializable {
 	}
 
 	public Commit resolveCommit(String revision) {
-		return new ResolveCommitCommand(repoDir).revision(revision).call();
+		List<Commit> commits = new LogCommand(repoDir).toRev(revision).maxCommits(1).call();
+		Preconditions.checkState(commits.size() == 1);
+		return commits.get(0);
 	}
 
 	public List<TreeNode> listTree(String revision, @Nullable String path, boolean recursive) {
@@ -147,17 +156,44 @@ public class Git implements Serializable {
 		return new ListTagsCommand(repoDir).call();
 	}
 	
-	public byte[] readFile(String revision, String path) {
-		return new ReadFileCommand(repoDir).revision(revision).path(path).call();
+	public byte[] show(String revision, String path) {
+		return new ShowCommand(repoDir).revision(revision).path(path).call();
 	}
 	
 	public List<Commit> log(@Nullable String fromRev, @Nullable String toRev, 
 			@Nullable String path, int maxCommits) {
-		return new LogCommand(repoDir).fromRevision(fromRev).toRevision(toRev)
+		return new LogCommand(repoDir).fromRev(fromRev).toRev(toRev)
 				.path(path).maxCommits(maxCommits).call();
 	}
 	
 	public Commit retrieveLastCommmit(String revision, @Nullable String path) {
 		return log(null, revision, path, 1).get(0);
 	}
+	
+	public List<FileChangeWithDiffs> diff(String fromRev, String toRev, @Nullable String path, int contextLines) {
+		return new DiffCommand(repoDir).fromRev(fromRev).toRev(toRev).contextLines(contextLines).path(path).call();
+	}
+
+	public Git addNote(String object, String message) {
+		new AddNoteCommand(repoDir).object(object).message(message).call();
+		return this;
+	}
+	
+	public List<Blame> blame(String file, String revision) {
+		return new BlameCommand(repoDir).file(file).revision(revision).call();
+	}
+
+	public boolean isBinary(String file, String revision) {
+		return new IsBinaryCommand(repoDir).file(file).revision(revision).call();
+	}
+	
+	public Git addSubModule(String url, String path) {
+		new AddSubModuleCommand(repoDir).url(url).path(path).call();
+		return this;
+	}
+	
+	public Map<String, String> listSubModules(String revision) {
+		return new ListSubModulesCommand(repoDir).revision(revision).call();
+	}
+	
 }

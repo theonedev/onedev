@@ -7,7 +7,6 @@ import java.util.Collection;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.git.FileNode;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.commons.loader.AppLoader;
@@ -45,7 +44,7 @@ public class TouchSpecifiedFiles extends AbstractGateKeeper {
 				if (request.getMergeBase() == null) {
 					touchedFiles = new ArrayList<>();
 					for (TreeNode each: new Git(repoDir).listTree(update.getRefName(), null, true)) {
-						if (each instanceof FileNode)
+						if (each.getType() == TreeNode.Type.FILE)
 							touchedFiles.add(each.getPath());
 					}
 				} else {

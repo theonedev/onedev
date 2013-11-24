@@ -17,13 +17,11 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.BranchManager;
-import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.manager.VoteManager;
 import com.pmease.gitop.core.model.Branch;
 import com.pmease.gitop.core.model.MergeRequest;
 import com.pmease.gitop.core.model.MergeRequestUpdate;
-import com.pmease.gitop.core.model.Project;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.model.Vote;
 import com.pmease.gitop.core.model.VoteInvitation;
@@ -41,8 +39,7 @@ public class MergeRequestsPage extends AbstractLayoutPage {
             @Override
             protected List<MergeRequest> load() {
                 List<MergeRequest> mergeRequests = new ArrayList<MergeRequest>();
-                for (String branchName: getProject().getCodeRepo().listBranches()) {
-                	Branch branch = Gitop.getInstance(BranchManager.class).find(getProject(), branchName, true);
+                for (Branch branch: Gitop.getInstance(BranchManager.class).query()) {
                 	for (MergeRequest request: branch.getIngoingRequests()) {
                 		if (request.getStatus() != MergeRequest.Status.CLOSED && request.getLastCheckResult() != null)
                 			mergeRequests.add(request);
@@ -193,10 +190,6 @@ public class MergeRequestsPage extends AbstractLayoutPage {
 		});
 	}
 	
-	private Project getProject() {
-	    return Gitop.getInstance(ProjectManager.class).load(1L);
-	}
-
     @Override
     protected String getPageTitle() {
         return "test";

@@ -19,10 +19,10 @@ public class LogCommandTest {
 	    assertTrue(GitCommand.checkError() == null);
 	    File tempDir = FileUtils.createTempDir();
 	    
-	    Git workGit = new Git(new File(tempDir, "work"));
-	    workGit.init(false);
-	        
 	    try {
+		    Git workGit = new Git(new File(tempDir, "work"));
+		    workGit.init(false);
+		        
     		FileUtils.touchFile(new File(workGit.repoDir(), "a"));
     		workGit.add("a");
     		workGit.commit("add a", false);
@@ -57,16 +57,20 @@ public class LogCommandTest {
     		Git bareGit = new Git(new File(tempDir, "bare"));
     		bareGit.clone(workGit.repoDir().getAbsolutePath(), true);
 
+    		bareGit.addNote("master", "hello\nworld");
+
     		List<Commit> commits = bareGit.log(null, "master", null, 0);
     		assertEquals(commits.size(), 6);
-    		assertEquals(commits.get(0).getSubject(), "add dir/file");
-    		assertEquals(commits.get(0).getBody(), "add dir/file to test files under a directory");
+    		assertEquals(commits.get(0).getSummary(), "add dir/file");
+    		assertEquals(commits.get(0).getMessage(), "add dir/file to test files under a directory");
+    		assertEquals("hello\nworld", commits.get(0).getNote());
     		assertEquals(commits.get(0).getFileChanges().size(), 2);
     		assertEquals(commits.get(0).getFileChanges().get(0).getPath(), "dir/file");
     		assertEquals(commits.get(0).getFileChanges().get(0).getAction(), FileChange.Action.ADD);
-    		
     		assertEquals(commits.get(0).getParentHashes().size(), 1);
     		assertEquals(commits.get(0).getParentHashes().iterator().next(), commits.get(1).getHash());
+    		
+    		assertEquals(null, commits.get(1).getNote());
     		
     		workGit.checkout("master", false).remove("a").commit("remove a", false);
     		FileUtils.writeFile(new File(workGit.repoDir(), "dir/file2"), "file2");
@@ -83,6 +87,8 @@ public class LogCommandTest {
     		commits = workGit.log("dev", "master", "dir", 0);
     		assertEquals(commits.size(), 2);
 
+    		assertEquals(workGit.resolveCommit(commits.get(0).getHash()).getHash(), commits.get(0).getHash()); 
+    		assertEquals(workGit.resolveCommit(commits.get(1).getHash()).getHash(), commits.get(1).getHash()); 
 	    } finally {
 	        FileUtils.deleteDir(tempDir);
 	    }

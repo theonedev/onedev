@@ -10,9 +10,9 @@ public class FileChange implements Serializable {
 	
 	private final Action action;
 	
-	public FileChange(String path, Action action) {
-		this.path = path;
+	public FileChange(Action action, String path) {
 		this.action = action;
+		this.path = path;
 	}
 
 	public String getPath() {

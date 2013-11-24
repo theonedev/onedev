@@ -88,6 +88,9 @@ public class BasicAuthenticationFilter extends PathMatchingFilter {
 			        String authcHeader = HttpServletRequest.BASIC_AUTH + " realm=\"" + appName + "\"";
 			        httpResponse.setHeader(AUTHENTICATE_HEADER, authcHeader);
 					existing = null;
+				} else {
+					httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied.");
+					existing = null;
 				}
 			} else if (ExceptionUtils.find(existing, IncorrectCredentialsException.class) != null) {
 				httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Incorrect credentials.");

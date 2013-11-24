@@ -7,60 +7,38 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.google.common.base.Objects;
-
-public class Commit {
+public class Commit extends BriefCommit {
     
-    private final Date date;
+	public static final String ZERO_HASH = "0000000000000000000000000000000000000000"; 
+	
+    private final String message;
     
-    private final String author;
-    
-    private final String committer;
-    
-    private final String hash;
-    
-    private final String subject;
-    
-    private final String body;
+    private final String note;
     
     private final List<String> parentHashes;
     
     private final List<FileChange> fileChanges;
 
-    public Commit(Date date, String author, String committer, String hash, String subject, 
-    		String body, List<String> parentHashes, List<FileChange> fileChanges) {
-    	this.date = date;
-    	this.author = author;
-    	this.committer = committer;
-    	this.hash = hash;
-    	this.subject = subject;
-    	this.body = body;
+    public Commit(String hash, String committer, String committerEmail, 
+    		Date committerDate, String author, String authorEmail, 
+    		Date authorDate, String summary, @Nullable String message, 
+    		@Nullable String note, List<String> parentHashes, 
+    		List<FileChange> fileChanges) {
+    	super(hash, committer, committerEmail, committerDate, author, 
+    			authorEmail, authorDate, summary);
+    	
+    	this.message = message;
+    	this.note = note;
     	this.parentHashes = new ArrayList<>(parentHashes);
     	this.fileChanges = new ArrayList<>(fileChanges);
     }
     
-    public Date getDate() {
-        return date;
-    }
+	public @Nullable String getMessage() {
+		return message;
+	}
 
-    public String getAuthor() {
-        return author;
-    }
-
-    public String getCommitter() {
-        return committer;
-    }
-
-    public String getHash() {
-        return hash;
-    }
-
-    public String getSubject() {
-        return subject;
-    }
-
-	public @Nullable String getBody() {
-		return body;
+	public @Nullable String getNote() {
+		return note;
 	}
 
 	public List<String> getParentHashes() {
@@ -69,14 +47,6 @@ public class Commit {
 	
 	public List<FileChange> getFileChanges() {
 		return Collections.unmodifiableList(fileChanges);
-	}
-	
-	@Override
-	public String toString() {
-		return Objects.toStringHelper(this)
-				.add("hash", getHash())
-				.add("subject", getSubject())
-				.toString();
 	}
 	
 }
