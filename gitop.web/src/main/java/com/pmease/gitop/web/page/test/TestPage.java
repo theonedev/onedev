@@ -3,6 +3,7 @@ package com.pmease.gitop.web.page.test;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.Fragment;
 
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
@@ -19,7 +20,9 @@ public class TestPage extends AbstractLayoutPage {
 
 			@Override
 			protected Component newContent(String id) {
-				return new Label(id, "hello world");
+				Fragment frag = new Fragment(id, "test", TestPage.this);
+				frag.add(new Label("label", "Hello, I'm in a lazy load panel"));
+				return frag;
 			}
 			
 		};

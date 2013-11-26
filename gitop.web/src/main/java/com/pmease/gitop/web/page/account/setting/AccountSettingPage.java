@@ -164,6 +164,13 @@ public abstract class AccountSettingPage extends AbstractLayoutPage {
 				item.add(link);
 				link.add(new Label("name", user.getName()));
 			}
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				this.setVisibilityAllowed(!getList().isEmpty());
+			}
 		};
 		
 		add(listView);

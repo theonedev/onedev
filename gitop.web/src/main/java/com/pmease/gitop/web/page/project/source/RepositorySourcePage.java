@@ -18,21 +18,25 @@ import com.pmease.gitop.web.page.project.source.component.SourceTreePanel;
 @SuppressWarnings("serial")
 public abstract class RepositorySourcePage extends ProjectCategoryPage {
 
-	protected IModel<String> objectIdModel;
+	protected IModel<String> revisionModel;
 	protected IModel<List<String>> pathModel;
 	
 	public RepositorySourcePage(PageParameters params) {
 		super(params);
 		
-		objectIdModel = new AbstractReadOnlyModel<String>() {
+		revisionModel = new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
 				PageParameters params = RepositorySourcePage.this.getPageParameters();
 				String objectId = params.get(PageSpec.OBJECT_ID).toString();
 				if (Strings.isNullOrEmpty(objectId)) {
-					// TODO: change this to project.getDefaultBranch()
-					return "master";
+					String branchName = getProject().getDefaultBranchName();
+					if (!Strings.isNullOrEmpty(branchName)) {
+						return "master";
+					} else {
+						return branchName;
+					}
 				} else {
 					return objectId;
 				}
@@ -74,7 +78,7 @@ public abstract class RepositorySourcePage extends ProjectCategoryPage {
 		};
 		
 		add(new ProjectDescriptionPanel("description", projectModel));
-		add(new SourceTreePanel("files", projectModel, pathModel));
+		add(new SourceTreePanel("files", projectModel, revisionModel, pathModel));
 		add(new ReadmePanel("readme", projectModel, pathModel));
 	}
 	
@@ -90,6 +94,14 @@ public abstract class RepositorySourcePage extends ProjectCategoryPage {
 	
 	@Override
 	public void onDetach() {
+		if (revisionModel != null) {
+			revisionModel.detach();
+		}
+		
+		if (pathModel != null) {
+			pathModel.detach();
+		}
+		
 		super.onDetach();
 	}
 }

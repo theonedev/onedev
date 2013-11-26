@@ -19,14 +19,14 @@ public class RepositoryTreePage extends RepositorySourcePage {
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 		
-		System.out.println(objectIdModel.getObject());
+		System.out.println(revisionModel.getObject());
 		System.out.println(pathModel.getObject());
 	}
 	
 	@Override
 	public void onDetach() {
-		if (objectIdModel != null) {
-			objectIdModel.detach();
+		if (revisionModel != null) {
+			revisionModel.detach();
 		}
 		
 		if (pathModel != null) {

@@ -1,12 +1,18 @@
 <html xmlns:wicket>
 <wicket:panel>
 	<div class="well">
-		The JIRA FishEye Plugin connects your JIRA instance to any Subversion, Git, Perforce, Mercurial or 
-		CVS repository which are linked to your FishEye instance. This allows you to view commits for a 
-		JIRA issue right within JIRA. This plugin also provides a Reviews tab to each issue showing which 
-		Code Reviews were done for each issue if you are running Crucible.
-		
-		<a>edit</a> <i class="icon-pencil"></i> 
+		<span wicket:id="description"></span>
+		<a wicket:id="editlink" href="javascript:void()">- Edit <i class="fa fa-pencil"></i></a>
+		<div wicket:id="dropdown"></div>
 	</div>
+	
+	<wicket:fragment wicket:id="descriptionEditor">
+		<form wicket:id="form" class="form-inline" role="form">
+			<div class="form-group">
+				<input placeholder="Description" class="form-control" wicket:id="input" />
+			</div>
+			<button class="btn btn-default" wicket:id="save">Save</button> or <a wicket:id="cancel">cancel</a>
+		</form>
+	</wicket:fragment>
 </wicket:panel>
 </html>
