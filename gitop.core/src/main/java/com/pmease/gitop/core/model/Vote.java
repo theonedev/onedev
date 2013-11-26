@@ -51,7 +51,7 @@ public class Vote extends AbstractEntity {
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
-	private MergeRequestUpdate update;
+	private PullRequestUpdate update;
 	
 	@Column(nullable=false)
 	private Result result;
@@ -64,11 +64,11 @@ public class Vote extends AbstractEntity {
 		this.voter = voter;
 	}
 	
-	public MergeRequestUpdate getUpdate() {
+	public PullRequestUpdate getUpdate() {
 		return update;
 	}
 
-	public void setUpdate(MergeRequestUpdate update) {
+	public void setUpdate(PullRequestUpdate update) {
 		this.update = update;
 	}
 

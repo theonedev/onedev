@@ -7,21 +7,21 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
-import com.pmease.gitop.core.manager.MergeRequestUpdateManager;
-import com.pmease.gitop.core.model.MergeRequestUpdate;
+import com.pmease.gitop.core.manager.PullRequestUpdateManager;
+import com.pmease.gitop.core.model.PullRequestUpdate;
 
 @Singleton
-public class DefaultMergeRequestUpdateManager extends AbstractGenericDao<MergeRequestUpdate>
-		implements MergeRequestUpdateManager {
+public class DefaultPullRequestUpdateManager extends AbstractGenericDao<PullRequestUpdate>
+		implements PullRequestUpdateManager {
 
 	@Inject
-	public DefaultMergeRequestUpdateManager(GeneralDao generalDao) {
+	public DefaultPullRequestUpdateManager(GeneralDao generalDao) {
 		super(generalDao);
 	}
 
 	@Transactional
 	@Override
-	public void save(MergeRequestUpdate update) {
+	public void save(PullRequestUpdate update) {
 		super.save(update);
 
 		Git git = update.getRequest().getTarget().getProject().getCodeRepo();
@@ -30,7 +30,7 @@ public class DefaultMergeRequestUpdateManager extends AbstractGenericDao<MergeRe
 
 	@Transactional
 	@Override
-	public void delete(MergeRequestUpdate update) {
+	public void delete(PullRequestUpdate update) {
 		super.delete(update);
 
 		Git git = update.getRequest().getTarget().getProject().getCodeRepo();

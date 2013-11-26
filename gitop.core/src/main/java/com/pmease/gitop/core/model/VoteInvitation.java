@@ -21,7 +21,7 @@ public class VoteInvitation extends AbstractEntity {
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
-	private MergeRequest request;
+	private PullRequest request;
 	
 	public User getVoter() {
 		return voter;
@@ -31,11 +31,11 @@ public class VoteInvitation extends AbstractEntity {
 		this.voter = voter;
 	}
 	
-	public MergeRequest getRequest() {
+	public PullRequest getRequest() {
 		return request;
 	}
 
-	public void setRequest(MergeRequest request) {
+	public void setRequest(PullRequest request) {
 		this.request = request;
 	}
 

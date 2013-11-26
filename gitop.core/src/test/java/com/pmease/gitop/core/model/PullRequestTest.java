@@ -15,7 +15,7 @@ import com.pmease.commons.util.FileUtils;
 import com.pmease.gitop.core.manager.StorageManager;
 import com.pmease.gitop.core.storage.ProjectStorage;
 
-public class MergeRequestTest extends AppLoaderMocker {
+public class PullRequestTest extends AppLoaderMocker {
 
     private File projectDir;
     
@@ -63,23 +63,23 @@ public class MergeRequestTest extends AppLoaderMocker {
         Mockito.when(storageManager.getStorage(Mockito.any(Project.class)))
                 .thenReturn(new ProjectStorage(projectDir));
         
-        MergeRequest mergeRequest = new MergeRequest();
+        PullRequest pullRequest = new PullRequest();
         Branch destBranch = new Branch();
         destBranch.setName("master");
         destBranch.setProject(new Project());
-        mergeRequest.setTarget(destBranch);
+        pullRequest.setTarget(destBranch);
         
-        MergeRequestUpdate update = new MergeRequestUpdate();
+        PullRequestUpdate update = new PullRequestUpdate();
         update.setId(1L);
-        update.setRequest(mergeRequest);
-        mergeRequest.getUpdates().add(update);
+        update.setRequest(pullRequest);
+        pullRequest.getUpdates().add(update);
 
-        update = new MergeRequestUpdate();
+        update = new PullRequestUpdate();
         update.setId(2L);
-        update.setRequest(mergeRequest);
-        mergeRequest.getUpdates().add(update);
+        update.setRequest(pullRequest);
+        pullRequest.getUpdates().add(update);
         
-        Assert.assertEquals(mergeRequest.getEffectiveUpdates().size(), 2);
+        Assert.assertEquals(pullRequest.getEffectiveUpdates().size(), 2);
     }
 
     @Test
@@ -114,36 +114,36 @@ public class MergeRequestTest extends AppLoaderMocker {
         git.add("e");
         git.commit("commit", false);
         
-        git.merge("refs/updates/2");
+        git.merge("refs/updates/2", null);
 
         Mockito.when(AppLoader.getInstance(StorageManager.class)).thenReturn(storageManager);
         
         Mockito.when(storageManager.getStorage(Mockito.any(Project.class)))
                 .thenReturn(new ProjectStorage(projectDir));
         
-        MergeRequest mergeRequest = new MergeRequest();
+        PullRequest pullRequest = new PullRequest();
         Branch destBranch = new Branch();
         destBranch.setName("master");
         destBranch.setProject(new Project());
-        mergeRequest.setTarget(destBranch);
+        pullRequest.setTarget(destBranch);
         
-        MergeRequestUpdate update = new MergeRequestUpdate();
+        PullRequestUpdate update = new PullRequestUpdate();
         update.setId(1L);
-        update.setRequest(mergeRequest);
-        mergeRequest.getUpdates().add(update);
+        update.setRequest(pullRequest);
+        pullRequest.getUpdates().add(update);
 
-        update = new MergeRequestUpdate();
+        update = new PullRequestUpdate();
         update.setId(2L);
-        update.setRequest(mergeRequest);
-        mergeRequest.getUpdates().add(update);
+        update.setRequest(pullRequest);
+        pullRequest.getUpdates().add(update);
         
-        update = new MergeRequestUpdate();
+        update = new PullRequestUpdate();
         update.setId(3L);
-        update.setRequest(mergeRequest);
-        mergeRequest.getUpdates().add(update);
+        update.setRequest(pullRequest);
+        pullRequest.getUpdates().add(update);
 
-        Assert.assertEquals(mergeRequest.getEffectiveUpdates().size(), 2);
-        Assert.assertEquals(mergeRequest.getEffectiveUpdates().get(0).getId().longValue(), 3L);
+        Assert.assertEquals(pullRequest.getEffectiveUpdates().size(), 2);
+        Assert.assertEquals(pullRequest.getEffectiveUpdates().get(0).getId().longValue(), 3L);
     }
 
 }

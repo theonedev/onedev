@@ -9,7 +9,7 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.core.gatekeeper.voteeligibility.CanVoteBySpecifiedTeam;
 import com.pmease.gitop.core.model.Membership;
-import com.pmease.gitop.core.model.MergeRequest;
+import com.pmease.gitop.core.model.PullRequest;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.model.Vote;
 
@@ -40,7 +40,7 @@ public class GetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
     }
 
     @Override
-    public CheckResult check(MergeRequest request) {
+    public CheckResult check(PullRequest request) {
         Collection<User> members = new HashSet<User>();
         for (Membership membership : getTeam().getMemberships())
             members.add(membership.getUser());

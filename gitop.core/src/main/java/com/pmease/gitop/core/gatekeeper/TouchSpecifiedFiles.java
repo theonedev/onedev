@@ -13,8 +13,8 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.core.manager.StorageManager;
-import com.pmease.gitop.core.model.MergeRequest;
-import com.pmease.gitop.core.model.MergeRequestUpdate;
+import com.pmease.gitop.core.model.PullRequest;
+import com.pmease.gitop.core.model.PullRequestUpdate;
 
 @SuppressWarnings("serial")
 @Editable
@@ -33,12 +33,12 @@ public class TouchSpecifiedFiles extends AbstractGateKeeper {
 	}
 
 	@Override
-	public CheckResult check(MergeRequest request) {
+	public CheckResult check(PullRequest request) {
 		StorageManager storageManager = AppLoader.getInstance(StorageManager.class);
 		File repoDir = storageManager.getStorage(request.getTarget().getProject()).ofCode();
 
 		for (int i=0; i<request.getEffectiveUpdates().size(); i++) {
-			MergeRequestUpdate update = request.getEffectiveUpdates().get(i);
+			PullRequestUpdate update = request.getEffectiveUpdates().get(i);
 			Collection<String> touchedFiles;
 			if (i == request.getEffectiveUpdates().size()-1) {
 				if (request.getMergeBase() == null) {

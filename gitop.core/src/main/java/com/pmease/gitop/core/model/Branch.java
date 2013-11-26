@@ -36,10 +36,10 @@ public class Branch extends AbstractEntity {
 	private Collection<AutoPush> autoPushes = new ArrayList<AutoPush>();
 
     @OneToMany(mappedBy="target", cascade=CascadeType.REMOVE)
-    private Collection<MergeRequest> ingoingRequests = new ArrayList<MergeRequest>();
+    private Collection<PullRequest> ingoingRequests = new ArrayList<PullRequest>();
 
     @OneToMany(mappedBy="source", cascade=CascadeType.REMOVE)
-    private Collection<MergeRequest> outgoingRequests = new ArrayList<MergeRequest>();
+    private Collection<PullRequest> outgoingRequests = new ArrayList<PullRequest>();
 
     public Project getProject() {
 		return project;
@@ -73,19 +73,19 @@ public class Branch extends AbstractEntity {
 		this.autoPushes = autoPushes;
 	}
 
-	public Collection<MergeRequest> getIngoingRequests() {
+	public Collection<PullRequest> getIngoingRequests() {
         return ingoingRequests;
     }
 
-    public void setIngoingRequests(Collection<MergeRequest> ingoingRequests) {
+    public void setIngoingRequests(Collection<PullRequest> ingoingRequests) {
         this.ingoingRequests = ingoingRequests;
     }
 
-    public Collection<MergeRequest> getOutgoingRequests() {
+    public Collection<PullRequest> getOutgoingRequests() {
         return outgoingRequests;
     }
 
-    public void setOutgoingRequests(Collection<MergeRequest> outgoingRequests) {
+    public void setOutgoingRequests(Collection<PullRequest> outgoingRequests) {
         this.outgoingRequests = outgoingRequests;
     }
 

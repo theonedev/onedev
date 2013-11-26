@@ -8,7 +8,7 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.core.gatekeeper.voteeligibility.CanVoteBySpecifiedUser;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.core.model.MergeRequest;
+import com.pmease.gitop.core.model.PullRequest;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.model.Vote;
 
@@ -29,7 +29,7 @@ public class ApprovedBySpecifiedUser extends AbstractGateKeeper {
     }
 
     @Override
-    public CheckResult check(MergeRequest request) {
+    public CheckResult check(PullRequest request) {
         UserManager userManager = AppLoader.getInstance(UserManager.class);
         User user = userManager.load(getUserId());
 

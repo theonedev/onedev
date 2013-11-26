@@ -17,11 +17,11 @@ import com.pmease.commons.hibernate.AbstractEntity;
 
 @SuppressWarnings("serial")
 @Entity
-public class MergeRequestUpdate extends AbstractEntity {
+public class PullRequestUpdate extends AbstractEntity {
 
 	@ManyToOne
 	@JoinColumn(nullable=false)
-	private MergeRequest request;
+	private PullRequest request;
 	
 	@Column(nullable=false)
 	private String subject;
@@ -34,11 +34,11 @@ public class MergeRequestUpdate extends AbstractEntity {
 	@OneToMany(mappedBy="update", cascade=CascadeType.REMOVE)
 	private Collection<Vote> votes = new ArrayList<Vote>();
 	
-	public MergeRequest getRequest() {
+	public PullRequest getRequest() {
 		return request;
 	}
 
-	public void setRequest(MergeRequest request) {
+	public void setRequest(PullRequest request) {
 		this.request = request;
 	}
 
@@ -75,7 +75,7 @@ public class MergeRequestUpdate extends AbstractEntity {
 	}
 
 	public String getRefName() {
-		return "refs/updates/" + getId();
+		return "refs/gitop/updates/" + getId();
 	}
 	
 	/**
@@ -87,9 +87,9 @@ public class MergeRequestUpdate extends AbstractEntity {
 	public List<Vote> listVotesOnwards() {
 		List<Vote> votes = new ArrayList<Vote>();
 		
-		List<MergeRequestUpdate> updates = getRequest().getEffectiveUpdates();
-		for (Iterator<MergeRequestUpdate> it = updates.iterator(); it.hasNext();) {
-			MergeRequestUpdate update = it.next();
+		List<PullRequestUpdate> updates = getRequest().getEffectiveUpdates();
+		for (Iterator<PullRequestUpdate> it = updates.iterator(); it.hasNext();) {
+			PullRequestUpdate update = it.next();
 			votes.addAll(update.getVotes());
 			if (update.equals(this)) {
 				break;

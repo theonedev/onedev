@@ -12,7 +12,7 @@ import com.pmease.commons.util.pattern.PatternSetMatcher;
 import com.pmease.commons.util.pattern.WildcardPathMatcher;
 import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.core.manager.BranchManager;
-import com.pmease.gitop.core.model.MergeRequest;
+import com.pmease.gitop.core.model.PullRequest;
 import com.pmease.gitop.core.model.Project;
 
 @SuppressWarnings("serial")
@@ -32,7 +32,7 @@ public class SubmittedToSpecifiedBranch extends AbstractGateKeeper {
 	}
 
 	@Override
-	public CheckResult check(MergeRequest request) {
+	public CheckResult check(PullRequest request) {
 		Project project = request.getTarget().getProject();
 		BranchManager branchManager = AppLoader.getInstance(BranchManager.class);
 		EntityLoader entityLoader = branchManager.asEntityLoader(project);

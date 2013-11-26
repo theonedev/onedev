@@ -7,7 +7,7 @@ import java.util.List;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.core.gatekeeper.voteeligibility.NoneCanVote;
 import com.pmease.gitop.core.gatekeeper.voteeligibility.VoteEligibility;
-import com.pmease.gitop.core.model.MergeRequest;
+import com.pmease.gitop.core.model.PullRequest;
 import com.pmease.gitop.core.model.User;
 
 @SuppressWarnings("serial")
@@ -46,7 +46,7 @@ public abstract class CheckResult implements Serializable {
         return voteEligibilities;
     }
 
-    public boolean canVote(User user, MergeRequest request) {
+    public boolean canVote(User user, PullRequest request) {
         if (user.equals(request.getSubmitter()))
             return false;
         

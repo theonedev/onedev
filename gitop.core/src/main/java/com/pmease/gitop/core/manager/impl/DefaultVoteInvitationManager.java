@@ -10,7 +10,7 @@ import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
-import com.pmease.gitop.core.model.MergeRequest;
+import com.pmease.gitop.core.model.PullRequest;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.model.VoteInvitation;
 
@@ -24,7 +24,7 @@ public class DefaultVoteInvitationManager extends AbstractGenericDao<VoteInvitat
 
 	@Sessional
 	@Override
-	public VoteInvitation find(User voter, MergeRequest request) {
+	public VoteInvitation find(User voter, PullRequest request) {
 		return find(new Criterion[]{Restrictions.eq("voter", voter), Restrictions.eq("request", request)});
 	}
 

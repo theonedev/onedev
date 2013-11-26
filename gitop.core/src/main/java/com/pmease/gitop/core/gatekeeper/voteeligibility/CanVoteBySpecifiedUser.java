@@ -1,6 +1,6 @@
 package com.pmease.gitop.core.gatekeeper.voteeligibility;
 
-import com.pmease.gitop.core.model.MergeRequest;
+import com.pmease.gitop.core.model.PullRequest;
 import com.pmease.gitop.core.model.User;
 
 @SuppressWarnings("serial")
@@ -13,7 +13,7 @@ public class CanVoteBySpecifiedUser implements VoteEligibility {
     }
     
     @Override
-    public boolean canVote(User user, MergeRequest request) {
+    public boolean canVote(User user, PullRequest request) {
         return user.getId().equals(userId);
     }
 

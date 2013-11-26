@@ -1,6 +1,6 @@
 package com.pmease.gitop.core.gatekeeper.voteeligibility;
 
-import com.pmease.gitop.core.model.MergeRequest;
+import com.pmease.gitop.core.model.PullRequest;
 import com.pmease.gitop.core.model.Team;
 import com.pmease.gitop.core.model.User;
 
@@ -14,7 +14,7 @@ public class CanVoteBySpecifiedTeam implements VoteEligibility {
     }
     
     @Override
-    public boolean canVote(User user, MergeRequest request) {
+    public boolean canVote(User user, PullRequest request) {
         for (Team team: user.getTeams()) {
             if (team.getId().equals(teamId))
                 return true;

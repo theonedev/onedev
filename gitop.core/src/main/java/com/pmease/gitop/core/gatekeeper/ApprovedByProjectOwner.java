@@ -4,7 +4,7 @@ import com.google.common.collect.Sets;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.core.gatekeeper.voteeligibility.CanVoteBySpecifiedUser;
-import com.pmease.gitop.core.model.MergeRequest;
+import com.pmease.gitop.core.model.PullRequest;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.model.Vote;
 
@@ -13,7 +13,7 @@ import com.pmease.gitop.core.model.Vote;
 public class ApprovedByProjectOwner extends AbstractGateKeeper {
 
     @Override
-    public CheckResult check(MergeRequest request) {
+    public CheckResult check(PullRequest request) {
         User projectOwner = request.getTarget().getProject().getOwner();
 
         Vote.Result result = projectOwner.checkVoteSince(request.getBaseUpdate());

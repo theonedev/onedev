@@ -28,12 +28,12 @@ import com.pmease.gitop.core.gatekeeper.checkresult.Blocked;
 import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitop.core.gatekeeper.checkresult.Rejected;
-import com.pmease.gitop.core.manager.MergeRequestManager;
+import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
 
 @SuppressWarnings("serial")
 @Entity
-public class MergeRequest extends AbstractEntity {
+public class PullRequest extends AbstractEntity {
 
 	public enum Status {
 		PENDING_CHECK("Pending Check"), PENDING_APPROVAL("Pending Approval"), 
@@ -80,14 +80,14 @@ public class MergeRequest extends AbstractEntity {
 
 	private transient Optional<String> mergeBase;
 
-	private transient List<MergeRequestUpdate> sortedUpdates;
+	private transient List<PullRequestUpdate> sortedUpdates;
 
-	private transient List<MergeRequestUpdate> effectiveUpdates;
+	private transient List<PullRequestUpdate> effectiveUpdates;
 
-	private transient MergeRequestUpdate baseUpdate;
+	private transient PullRequestUpdate baseUpdate;
 
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
-	private Collection<MergeRequestUpdate> updates = new ArrayList<MergeRequestUpdate>();
+	private Collection<PullRequestUpdate> updates = new ArrayList<PullRequestUpdate>();
 
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
 	private Collection<VoteInvitation> voteInvitations = new ArrayList<VoteInvitation>();
@@ -114,7 +114,7 @@ public class MergeRequest extends AbstractEntity {
 	public void setAutoMerge(boolean autoMerge) {
 		this.autoMerge = autoMerge;
 	}
-
+	
 	/**
 	 * Get title of this merge request, and use title of latest merge request
 	 * update for auto-created merge request.
@@ -165,11 +165,11 @@ public class MergeRequest extends AbstractEntity {
 		this.lastCheckResult = lastCheckResult;
 	}
 
-	public Collection<MergeRequestUpdate> getUpdates() {
+	public Collection<PullRequestUpdate> getUpdates() {
 		return updates;
 	}
 
-	public void setUpdates(Collection<MergeRequestUpdate> updates) {
+	public void setUpdates(Collection<PullRequestUpdate> updates) {
 		this.updates = updates;
 	}
 
@@ -189,7 +189,7 @@ public class MergeRequest extends AbstractEntity {
 		this.status = status;
 	}
 
-	public MergeRequestUpdate getBaseUpdate() {
+	public PullRequestUpdate getBaseUpdate() {
 		if (baseUpdate != null) {
 			return baseUpdate;
 		} else {
@@ -197,12 +197,16 @@ public class MergeRequest extends AbstractEntity {
 		}
 	}
 
-	public void setBaseUpdate(MergeRequestUpdate baseUpdate) {
+	public void setBaseUpdate(PullRequestUpdate baseUpdate) {
 		this.baseUpdate = baseUpdate;
 	}
 
 	public CheckResult getLastCheckResult() {
 		return lastCheckResult;
+	}
+
+	public String getMergeRefName() {
+		return "refs/gitop/pulls/" + getId();
 	}
 
 	/**
@@ -211,9 +215,9 @@ public class MergeRequest extends AbstractEntity {
 	 * 
 	 * @return list of sorted updates ordered by update id reversely
 	 */
-	public List<MergeRequestUpdate> getSortedUpdates() {
+	public List<PullRequestUpdate> getSortedUpdates() {
 		if (sortedUpdates == null) {
-			sortedUpdates = new ArrayList<MergeRequestUpdate>(getUpdates());
+			sortedUpdates = new ArrayList<PullRequestUpdate>(getUpdates());
 
 			Collections.sort(sortedUpdates);
 			Collections.reverse(sortedUpdates);
@@ -228,13 +232,13 @@ public class MergeRequest extends AbstractEntity {
 	 * 
 	 * @return list of effective updates in reverse order.
 	 */
-	public List<MergeRequestUpdate> getEffectiveUpdates() {
+	public List<PullRequestUpdate> getEffectiveUpdates() {
 		if (effectiveUpdates == null) {
-			effectiveUpdates = new ArrayList<MergeRequestUpdate>();
+			effectiveUpdates = new ArrayList<PullRequestUpdate>();
 
 			if (getMergeBase() != null) {
 				Git git = getTarget().getProject().getCodeRepo();
-				for (MergeRequestUpdate update : getSortedUpdates()) {
+				for (PullRequestUpdate update : getSortedUpdates()) {
 					if (git.checkAncestor(getMergeBase(), update.getRefName())) {
 						effectiveUpdates.add(update);
 					} else {
@@ -248,7 +252,7 @@ public class MergeRequest extends AbstractEntity {
 		return effectiveUpdates;
 	}
 
-	public @Nullable MergeRequestUpdate getLatestUpdate() {
+	public @Nullable PullRequestUpdate getLatestUpdate() {
 		if (getSortedUpdates().isEmpty())
 			return null;
 		else
@@ -270,7 +274,7 @@ public class MergeRequest extends AbstractEntity {
 
 	public Collection<String> findTouchedFiles() {
 		Git git = getTarget().getProject().getCodeRepo();
-		MergeRequestUpdate update = getLatestUpdate();
+		PullRequestUpdate update = getLatestUpdate();
 		if (update != null) {
 			return git.listChangedFiles(getTarget().getName(), update.getRefName());
 		} else {
@@ -364,14 +368,14 @@ public class MergeRequest extends AbstractEntity {
 			setStatus(Status.PENDING_MERGE);
 		}
 
-		Gitop.getInstance(MergeRequestManager.class).save(this);
+		Gitop.getInstance(PullRequestManager.class).save(this);
 
 		return lastCheckResult;
 	}
 
 	public void close() {
 		setStatus(Status.CLOSED);
-		Gitop.getInstance(MergeRequestManager.class).save(this);
+		Gitop.getInstance(PullRequestManager.class).save(this);
 	}
 
 	public void merge() {
@@ -385,7 +389,7 @@ public class MergeRequest extends AbstractEntity {
 				getLatestUpdate().getCommitHash(), null, null);
 
 		setStatus(Status.MERGED);
-		Gitop.getInstance(MergeRequestManager.class).save(this);
+		Gitop.getInstance(PullRequestManager.class).save(this);
 	}
 
 	public boolean canMergeWithoutConflicts() {

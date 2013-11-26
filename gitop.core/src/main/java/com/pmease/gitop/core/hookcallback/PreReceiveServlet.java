@@ -18,13 +18,13 @@ import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitop.core.gatekeeper.checkresult.Rejected;
 import com.pmease.gitop.core.manager.BranchManager;
-import com.pmease.gitop.core.manager.MergeRequestManager;
-import com.pmease.gitop.core.manager.MergeRequestUpdateManager;
+import com.pmease.gitop.core.manager.PullRequestManager;
+import com.pmease.gitop.core.manager.PullRequestUpdateManager;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.StorageManager;
 import com.pmease.gitop.core.model.Branch;
-import com.pmease.gitop.core.model.MergeRequest;
-import com.pmease.gitop.core.model.MergeRequestUpdate;
+import com.pmease.gitop.core.model.PullRequest;
+import com.pmease.gitop.core.model.PullRequestUpdate;
 import com.pmease.gitop.core.model.Project;
 import com.pmease.gitop.core.model.User;
 
@@ -40,21 +40,21 @@ public class PreReceiveServlet extends CallbackServlet {
 
 	private final StorageManager storageManager;
 
-	private final MergeRequestManager mergeRequestManager;
+	private final PullRequestManager pullRequestManager;
 
-	private final MergeRequestUpdateManager mergeRequestUpdateManager;
+	private final PullRequestUpdateManager pullRequestUpdateManager;
 
 	private final Gitop gitop;
 
 	@Inject
 	public PreReceiveServlet(ProjectManager projectManager, BranchManager branchManager,
-			StorageManager storageManager, MergeRequestManager mergeRequestManager,
-			MergeRequestUpdateManager mergeRequestUpdateManager, Gitop gitop) {
+			StorageManager storageManager, PullRequestManager pullRequestManager,
+			PullRequestUpdateManager pullRequestUpdateManager, Gitop gitop) {
 		super(projectManager);
 		this.branchManager = branchManager;
 		this.storageManager = storageManager;
-		this.mergeRequestManager = mergeRequestManager;
-		this.mergeRequestUpdateManager = mergeRequestUpdateManager;
+		this.pullRequestManager = pullRequestManager;
+		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.gitop = gitop;
 	}
 
@@ -76,15 +76,15 @@ public class PreReceiveServlet extends CallbackServlet {
 		User user = User.getCurrent();
 		Preconditions.checkNotNull(user, "User pushing commits is unknown.");
 
-		MergeRequest request = mergeRequestManager.findOpened(branch, null, user);
+		PullRequest request = pullRequestManager.findOpened(branch, null, user);
 		if (request == null) {
-			request = new MergeRequest();
+			request = new PullRequest();
 			request.setAutoCreated(true);
 			request.setAutoMerge(true);
 			request.setTarget(branch);
 			request.setSubmitter(user);
 
-			mergeRequestManager.save(request);
+			pullRequestManager.save(request);
 		} 
 
 		if (request.getLatestUpdate() == null 
@@ -92,7 +92,7 @@ public class PreReceiveServlet extends CallbackServlet {
 			
 			Git git = new Git(storageManager.getStorage(project).ofCode());
 	
-			MergeRequestUpdate update = new MergeRequestUpdate();
+			PullRequestUpdate update = new PullRequestUpdate();
 			update.setCommitHash(newCommitHash);
 			update.setRequest(request);
 			Commit commit = git.resolveCommit(newCommitHash);
@@ -101,7 +101,7 @@ public class PreReceiveServlet extends CallbackServlet {
 			
 			request.updatesChanged();
 	
-			mergeRequestUpdateManager.save(update);
+			pullRequestUpdateManager.save(update);
 		}
 
 		CheckResult checkResult = request.check();
@@ -113,7 +113,7 @@ public class PreReceiveServlet extends CallbackServlet {
 			}
 			
 			if (request.getUpdates().size() == 1) {
-				mergeRequestManager.delete(request);
+				pullRequestManager.delete(request);
 			}
 		} else if (checkResult instanceof Pending || checkResult instanceof Blocked) {
 			output.markError();

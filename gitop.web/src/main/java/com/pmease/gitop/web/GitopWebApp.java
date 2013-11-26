@@ -66,13 +66,13 @@ import com.pmease.gitop.web.page.error.PageExpiredPage;
 import com.pmease.gitop.web.page.error.PageNotFoundPage;
 import com.pmease.gitop.web.page.home.HomePage;
 import com.pmease.gitop.web.page.init.ServerInitPage;
-import com.pmease.gitop.web.page.project.issue.ProjectMergeRequestsPage;
+import com.pmease.gitop.web.page.project.issue.ProjectPullRequestsPage;
 import com.pmease.gitop.web.page.project.settings.CreateProjectPage;
-import com.pmease.gitop.web.page.project.settings.MergeRequestSettingsPage;
 import com.pmease.gitop.web.page.project.settings.ProjectAuditLogPage;
 import com.pmease.gitop.web.page.project.settings.ProjectHooksPage;
 import com.pmease.gitop.web.page.project.settings.ProjectOptionsPage;
 import com.pmease.gitop.web.page.project.settings.ProjectPermissionsPage;
+import com.pmease.gitop.web.page.project.settings.PullRequestSettingsPage;
 import com.pmease.gitop.web.page.project.source.ProjectHomePage;
 import com.pmease.gitop.web.page.project.source.RepositoryBlobPage;
 import com.pmease.gitop.web.page.project.source.RepositoryBranchesPage;
@@ -83,8 +83,9 @@ import com.pmease.gitop.web.page.project.source.RepositoryTreePage;
 import com.pmease.gitop.web.page.project.stats.ProjectForksPage;
 import com.pmease.gitop.web.page.project.stats.ProjectGraphsPage;
 import com.pmease.gitop.web.page.project.wiki.ProjectWikiPage;
-import com.pmease.gitop.web.page.test.MergeRequestsPage;
 import com.pmease.gitop.web.page.test.ProjectPage;
+import com.pmease.gitop.web.page.test.PullRequestsPage;
+import com.pmease.gitop.web.page.test.TestPage;
 import com.pmease.gitop.web.shiro.LoginPage;
 import com.pmease.gitop.web.shiro.LogoutPage;
 import com.pmease.gitop.web.shiro.ShiroWicketPlugin;
@@ -250,13 +251,13 @@ public class GitopWebApp extends AbstractWicketConfig {
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/tags", RepositoryTagsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/contributors", RepositoryContributorsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/wiki", ProjectWikiPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/merges", ProjectMergeRequestsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/merges", ProjectPullRequestsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/graphs", ProjectGraphsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/forks", ProjectForksPage.class));
 
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings", ProjectOptionsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/hooks", ProjectHooksPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/merge-requests", MergeRequestSettingsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/merge-requests", PullRequestSettingsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/audits", ProjectAuditLogPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/permissions", ProjectPermissionsPage.class));
 		
@@ -286,8 +287,9 @@ public class GitopWebApp extends AbstractWicketConfig {
 		// project related
 		mountPage("new", CreateProjectPage.class);
 
+		mountPage("/test", TestPage.class);
 		mountPage("/test/project", ProjectPage.class);
-		mountPage("/test/merge_requests", MergeRequestsPage.class);
+		mountPage("/test/merge_requests", PullRequestsPage.class);
 		
 		// repository pages
 		// --------------------------------------------------------

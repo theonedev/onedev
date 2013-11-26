@@ -24,7 +24,7 @@ import com.pmease.gitop.core.permission.ObjectPermission;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.api.ProjectTabContribution;
 import com.pmease.gitop.web.page.project.api.ProjectTabGroup;
-import com.pmease.gitop.web.page.project.issue.ProjectMergeRequestsPage;
+import com.pmease.gitop.web.page.project.issue.ProjectPullRequestsPage;
 import com.pmease.gitop.web.page.project.settings.ProjectOptionsPage;
 import com.pmease.gitop.web.page.project.source.ProjectHomePage;
 import com.pmease.gitop.web.page.project.source.RepositoryBranchesPage;
@@ -57,7 +57,7 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 			}
 		},
 		
-		MERGE_REQUESTS(ProjectTabGroup.ISSUES, "Merge Requests", ProjectMergeRequestsPage.class, "fa-pull-request"),
+		PULL_REQUESTS(ProjectTabGroup.ISSUES, "Pull Requests", ProjectPullRequestsPage.class, "fa-pull-request"),
 		
 		GRAPHS(ProjectTabGroup.STATISTICS, "Graphs", ProjectGraphsPage.class, "fa-chart-bar") {
 			@Override

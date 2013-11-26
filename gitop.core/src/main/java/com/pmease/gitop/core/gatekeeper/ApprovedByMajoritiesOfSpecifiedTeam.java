@@ -4,14 +4,14 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.gatekeeper.checkresult.Accepted;
 import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.core.gatekeeper.checkresult.Rejected;
-import com.pmease.gitop.core.model.MergeRequest;
+import com.pmease.gitop.core.model.PullRequest;
 
 @SuppressWarnings("serial")
 @Editable
 public class ApprovedByMajoritiesOfSpecifiedTeam extends TeamAwareGateKeeper {
 
 	@Override
-	public CheckResult check(MergeRequest request) {
+	public CheckResult check(PullRequest request) {
 		GetMinScoreFromSpecifiedTeam gateKeeper = new GetMinScoreFromSpecifiedTeam();
 		gateKeeper.setMinScore(1);
 		gateKeeper.setRequireVoteOfAllMembers(true);

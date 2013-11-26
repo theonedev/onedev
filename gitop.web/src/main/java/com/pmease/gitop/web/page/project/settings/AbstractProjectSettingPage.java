@@ -22,7 +22,7 @@ public abstract class AbstractProjectSettingPage extends AbstractProjectPage {
 	public static enum Category {
 		OPTIONS("Options"),
 		HOOKS("Hooks"),
-		MERGE_REQUESTS("Merge Requests"),
+		PULL_REQUESTS("Pull Requests"),
 		PERMISSIONS("Permissions"),
 		AUDIT_LOG("Audit Log");
 		
@@ -86,8 +86,8 @@ public abstract class AbstractProjectSettingPage extends AbstractProjectPage {
 			pageClass = ProjectHooksPage.class;
 			break;
 			
-		case MERGE_REQUESTS:
-			pageClass = MergeRequestSettingsPage.class;
+		case PULL_REQUESTS:
+			pageClass = PullRequestSettingsPage.class;
 			break;
 			
 		case AUDIT_LOG:

@@ -9,7 +9,7 @@ import com.pmease.gitop.core.gatekeeper.checkresult.Accepted;
 import com.pmease.gitop.core.gatekeeper.checkresult.Blocked;
 import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.core.gatekeeper.checkresult.Rejected;
-import com.pmease.gitop.core.model.MergeRequest;
+import com.pmease.gitop.core.model.PullRequest;
 
 @SuppressWarnings("serial")
 @Editable
@@ -43,7 +43,7 @@ public class IfThenGateKeeper extends AbstractGateKeeper {
 	}
 
 	@Override
-	public CheckResult check(MergeRequest request) {
+	public CheckResult check(PullRequest request) {
 		CheckResult ifResult = getIfGate().check(request);
 		if (ifResult instanceof Accepted) {
 			return getThenGate().check(request);

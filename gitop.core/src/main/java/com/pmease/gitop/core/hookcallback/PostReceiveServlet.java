@@ -11,11 +11,11 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.manager.BranchManager;
-import com.pmease.gitop.core.manager.MergeRequestManager;
+import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.model.Branch;
-import com.pmease.gitop.core.model.MergeRequest;
-import com.pmease.gitop.core.model.MergeRequestUpdate;
+import com.pmease.gitop.core.model.PullRequest;
+import com.pmease.gitop.core.model.PullRequestUpdate;
 import com.pmease.gitop.core.model.Project;
 import com.pmease.gitop.core.model.User;
 
@@ -29,15 +29,15 @@ public class PostReceiveServlet extends CallbackServlet {
 
     private final BranchManager branchManager;
     
-    private final MergeRequestManager mergeRequestManager;
+    private final PullRequestManager pullRequestManager;
     
     @Inject
     public PostReceiveServlet(ProjectManager projectManager, BranchManager branchManager, 
-    		MergeRequestManager mergeRequestManager) {
+    		PullRequestManager pullRequestManager) {
         super(projectManager);
         
         this.branchManager = branchManager;
-        this.mergeRequestManager = mergeRequestManager;
+        this.pullRequestManager = pullRequestManager;
     }
 
     @Override
@@ -56,20 +56,20 @@ public class PostReceiveServlet extends CallbackServlet {
 		User user = User.getCurrent();
 		Preconditions.checkNotNull(user, "User pushing commits is unknown.");
 
-		MergeRequest request = mergeRequestManager.findOpened(branch, null, user);
+		PullRequest request = pullRequestManager.findOpened(branch, null, user);
 		if (request != null) {
 			boolean voted = false;
-			for (MergeRequestUpdate update: request.getUpdates()) {
+			for (PullRequestUpdate update: request.getUpdates()) {
 				if (!update.getVotes().isEmpty())
 					voted = true;
 			}
 			if (voted) {
-				request.setStatus(MergeRequest.Status.MERGED);
-				mergeRequestManager.save(request);
+				request.setStatus(PullRequest.Status.MERGED);
+				pullRequestManager.save(request);
 			} else {
 				// Delete merged request without votes to reduce number of merge requests
 				// in system
-				mergeRequestManager.delete(request);
+				pullRequestManager.delete(request);
 			}
 		}
     	

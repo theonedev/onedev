@@ -20,6 +20,7 @@ import com.pmease.commons.git.command.CloneCommand;
 import com.pmease.commons.git.command.CommitCommand;
 import com.pmease.commons.git.command.DeleteRefCommand;
 import com.pmease.commons.git.command.DiffCommand;
+import com.pmease.commons.git.command.FetchCommand;
 import com.pmease.commons.git.command.InitCommand;
 import com.pmease.commons.git.command.IsBinaryCommand;
 import com.pmease.commons.git.command.ListBranchesCommand;
@@ -30,6 +31,7 @@ import com.pmease.commons.git.command.ListTreeCommand;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.git.command.MergeCommand;
 import com.pmease.commons.git.command.RemoveCommand;
+import com.pmease.commons.git.command.ResetCommand;
 import com.pmease.commons.git.command.ShowCommand;
 import com.pmease.commons.git.command.UpdateRefCommand;
 import com.pmease.commons.util.FileUtils;
@@ -104,8 +106,17 @@ public class Git implements Serializable {
 		return this;
 	}
 	
-	public Git clone(String from, boolean bare) {
+	public Git clone(String from, boolean bare, boolean shared, boolean noCheckout, @Nullable String branch) {
 		new CloneCommand(repoDir).from(from).bare(bare).call();
+		return this;
+	}
+
+	public Git clone(String from, boolean bare) {
+		return clone(from, bare, false, false, null);
+	}
+	
+	public Git reset(@Nullable String mode, @Nullable String commit) {
+		new ResetCommand(repoDir).mode(mode).commit(commit).call();
 		return this;
 	}
 
@@ -135,8 +146,13 @@ public class Git implements Serializable {
 		return this;
 	}
 
-	public Git merge(String revision) {
-		new MergeCommand(repoDir).revision(revision).call();
+	public Git merge(String revision, @Nullable String message) {
+		new MergeCommand(repoDir).revision(revision).message(message).call();
+		return this;
+	}
+
+	public Git fetch(String from, String refspec) {
+		new FetchCommand(repoDir).from(from).refspec(refspec).call();
 		return this;
 	}
 

@@ -75,7 +75,7 @@ public class LogCommandTest {
     		workGit.checkout("master", false).remove("a").commit("remove a", false);
     		FileUtils.writeFile(new File(workGit.repoDir(), "dir/file2"), "file2");
     		workGit.add("dir/file2").commit("add dir/file2", false);
-    		workGit.merge("dev");
+    		workGit.merge("dev", null);
     		
     		commits = workGit.log(null, "master", null, 0);
     		

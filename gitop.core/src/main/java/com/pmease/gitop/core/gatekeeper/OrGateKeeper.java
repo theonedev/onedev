@@ -18,7 +18,7 @@ import com.pmease.gitop.core.gatekeeper.checkresult.Blocked;
 import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.core.gatekeeper.checkresult.Rejected;
 import com.pmease.gitop.core.gatekeeper.voteeligibility.VoteEligibility;
-import com.pmease.gitop.core.model.MergeRequest;
+import com.pmease.gitop.core.model.PullRequest;
 
 @SuppressWarnings("serial")
 @Editable(name="Any Of Below Sub Gate Keeper Accepts", order=200)
@@ -40,7 +40,7 @@ public class OrGateKeeper extends AbstractGateKeeper {
 	}
 
 	@Override
-	public CheckResult check(MergeRequest request) {
+	public CheckResult check(PullRequest request) {
 		List<String> pendingReasons = new ArrayList<String>();
 		List<String> rejectReasons = new ArrayList<String>();
 		Collection<VoteEligibility> voteEligibilities = new ArrayList<>();

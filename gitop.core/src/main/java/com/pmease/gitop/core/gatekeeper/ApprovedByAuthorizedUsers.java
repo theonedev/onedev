@@ -7,7 +7,7 @@ import javax.validation.constraints.Min;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.core.gatekeeper.voteeligibility.CanVoteByAuthorizedUser;
-import com.pmease.gitop.core.model.MergeRequest;
+import com.pmease.gitop.core.model.PullRequest;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.model.Vote;
 import com.pmease.gitop.core.permission.operation.GeneralOperation;
@@ -29,7 +29,7 @@ public class ApprovedByAuthorizedUsers extends AbstractGateKeeper {
     }
 
 	@Override
-	public CheckResult check(MergeRequest request) {
+	public CheckResult check(PullRequest request) {
 		Collection<User> authorizedUsers = request.getTarget().getProject().listAuthorizedUsers(GeneralOperation.WRITE);
 
         int approvals = 0;

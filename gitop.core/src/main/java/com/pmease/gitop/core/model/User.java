@@ -39,7 +39,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	private Collection<Membership> memberships = new ArrayList<Membership>();
 	
 	@OneToMany(mappedBy="submitter", cascade=CascadeType.REMOVE)
-	private Collection<MergeRequest> mergeRequests = new ArrayList<MergeRequest>();
+	private Collection<PullRequest> pullRequests = new ArrayList<PullRequest>();
 	
 	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
 	private Collection<Project> projects = new ArrayList<Project>();
@@ -143,12 +143,12 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.voteInvitations = voteInvitations;
 	}
 
-	public Collection<MergeRequest> getMergeRequests() {
-        return mergeRequests;
+	public Collection<PullRequest> getPullRequests() {
+        return pullRequests;
     }
 
-    public void setMergeRequests(Collection<MergeRequest> mergeRequests) {
-        this.mergeRequests = mergeRequests;
+    public void setPullRequests(Collection<PullRequest> pullRequests) {
+        this.pullRequests = pullRequests;
     }
 
     @Override
@@ -164,7 +164,7 @@ public class User extends AbstractUser implements ProtectedObject {
 		}
 	}
 	
-	public Vote.Result checkVoteSince(MergeRequestUpdate update) {
+	public Vote.Result checkVoteSince(PullRequestUpdate update) {
 		if (update.getRequest().getSubmitter().equals(this))
 			return Vote.Result.ACCEPT;
 		

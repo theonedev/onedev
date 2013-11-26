@@ -11,6 +11,12 @@ public class CloneCommand extends GitCommand<Void> {
 	
 	private boolean bare;
 	
+	private boolean shared;
+	
+	private boolean noCheckout;
+	
+	private String branch;
+	
 	public CloneCommand(File repoDir) {
 		super(repoDir);
 	}
@@ -25,6 +31,21 @@ public class CloneCommand extends GitCommand<Void> {
 		return this;
 	}
 	
+	public CloneCommand shared(boolean shared) {
+		this.shared = shared;
+		return this;
+	}
+	
+	public CloneCommand noCheckout(boolean noCheckout) {
+		this.noCheckout = noCheckout;
+		return this;
+	}
+	
+	public CloneCommand branch(String branch) {
+		this.branch = branch;
+		return this;
+	}
+	
 	@Override
 	public Void call() {
 		Preconditions.checkNotNull(from, "from has to be specified.");
@@ -32,6 +53,13 @@ public class CloneCommand extends GitCommand<Void> {
 		Commandline cmd = cmd().addArgs("clone");
 		if (bare)
 			cmd.addArgs("--bare");
+		if (shared) 
+			cmd.addArgs("--shared");
+		if (noCheckout) 
+			cmd.addArgs("--no-checkout");
+		if (branch != null)
+			cmd.addArgs("-b", branch);
+		
 		cmd.addArgs(from);
 		cmd.addArgs(".");
 		

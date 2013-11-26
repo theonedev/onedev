@@ -5,20 +5,20 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.pmease.gitop.web.page.project.ProjectCategoryPage;
 
 @SuppressWarnings("serial")
-public class ProjectMergeRequestsPage extends ProjectCategoryPage {
+public class ProjectPullRequestsPage extends ProjectCategoryPage {
 
-	public ProjectMergeRequestsPage(PageParameters params) {
+	public ProjectPullRequestsPage(PageParameters params) {
 		super(params);
 	}
 
 	@Override
 	protected Category getCategory() {
-		return Category.MERGE_REQUESTS;
+		return Category.PULL_REQUESTS;
 	}
 
 	@Override
 	protected String getPageTitle() {
-		return getProject() + " - merge requests";
+		return getProject() + " - pull requests";
 	}
 
 }

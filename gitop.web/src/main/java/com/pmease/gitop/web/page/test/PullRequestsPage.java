@@ -20,40 +20,40 @@ import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.manager.VoteManager;
 import com.pmease.gitop.core.model.Branch;
-import com.pmease.gitop.core.model.MergeRequest;
-import com.pmease.gitop.core.model.MergeRequestUpdate;
+import com.pmease.gitop.core.model.PullRequest;
+import com.pmease.gitop.core.model.PullRequestUpdate;
 import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.model.Vote;
 import com.pmease.gitop.core.model.VoteInvitation;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
 
 @SuppressWarnings("serial")
-public class MergeRequestsPage extends AbstractLayoutPage {
+public class PullRequestsPage extends AbstractLayoutPage {
 
 	@Override
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 		
-		add(new ListView<MergeRequest>("mergeRequests", new LoadableDetachableModel<List<MergeRequest>>() {
+		add(new ListView<PullRequest>("pullRequests", new LoadableDetachableModel<List<PullRequest>>() {
 
             @Override
-            protected List<MergeRequest> load() {
-                List<MergeRequest> mergeRequests = new ArrayList<MergeRequest>();
+            protected List<PullRequest> load() {
+                List<PullRequest> pullRequests = new ArrayList<PullRequest>();
                 for (Branch branch: Gitop.getInstance(BranchManager.class).query()) {
-                	for (MergeRequest request: branch.getIngoingRequests()) {
-                		if (request.getStatus() != MergeRequest.Status.CLOSED && request.getLastCheckResult() != null)
-                			mergeRequests.add(request);
+                	for (PullRequest request: branch.getIngoingRequests()) {
+                		if (request.getStatus() != PullRequest.Status.CLOSED && request.getLastCheckResult() != null)
+                			pullRequests.add(request);
                 	}
                 }
                 
-                return mergeRequests;
+                return pullRequests;
             }
 		    
 		}) {
 
             @Override
-            protected void populateItem(final ListItem<MergeRequest> requestItem) {
-                MergeRequest request = requestItem.getModelObject();
+            protected void populateItem(final ListItem<PullRequest> requestItem) {
+                PullRequest request = requestItem.getModelObject();
                 requestItem.add(new Label("title", request.findTitle()));
 
                 requestItem.add(new Label("status", request.getStatus().toString()));
@@ -71,13 +71,13 @@ public class MergeRequestsPage extends AbstractLayoutPage {
 
 					@Override
 					public void onClick() {
-						MergeRequest request = requestItem.getModelObject();
+						PullRequest request = requestItem.getModelObject();
 						request.merge();
 					}
 
                 };
                 
-                if (request.getStatus() != MergeRequest.Status.PENDING_MERGE)
+                if (request.getStatus() != PullRequest.Status.PENDING_MERGE)
                 	mergeLink.add(new AttributeAppender("class", " disabled"));
                 
                 requestItem.add(mergeLink);
@@ -86,24 +86,24 @@ public class MergeRequestsPage extends AbstractLayoutPage {
 
 					@Override
 					public void onClick() {
-						MergeRequest request = requestItem.getModelObject();
+						PullRequest request = requestItem.getModelObject();
 						request.close();
 					}
                 	
                 });
                 
-                requestItem.add(new ListView<MergeRequestUpdate>("updates", new AbstractReadOnlyModel<List<MergeRequestUpdate>>() {
+                requestItem.add(new ListView<PullRequestUpdate>("updates", new AbstractReadOnlyModel<List<PullRequestUpdate>>() {
 
                     @Override
-                    public List<MergeRequestUpdate> getObject() {
-                        return (List<MergeRequestUpdate>) requestItem.getModelObject().getUpdates();
+                    public List<PullRequestUpdate> getObject() {
+                        return (List<PullRequestUpdate>) requestItem.getModelObject().getUpdates();
                     }
                     
                 }) {
 
                     @Override
-                    protected void populateItem(final ListItem<MergeRequestUpdate> updateItem) {
-                        MergeRequestUpdate update = updateItem.getModelObject();
+                    protected void populateItem(final ListItem<PullRequestUpdate> updateItem) {
+                        PullRequestUpdate update = updateItem.getModelObject();
                         updateItem.add(new Label("title", update.getSubject()));
                         
                         updateItem.add(new Label("commitHash", update.getCommitHash()));
@@ -129,7 +129,7 @@ public class MergeRequestsPage extends AbstractLayoutPage {
                     @Override
                     public List<User> load() {
                     	List<User> usersCanVote = new ArrayList<>();
-                    	MergeRequest request = requestItem.getModelObject();
+                    	PullRequest request = requestItem.getModelObject();
                     	for (User user: Gitop.getInstance(UserManager.class).query()) {
                     		if (request.getLastCheckResult().canVote(user, request))
                     			usersCanVote.add(user);
