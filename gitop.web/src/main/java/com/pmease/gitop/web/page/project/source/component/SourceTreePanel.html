@@ -1,27 +1,9 @@
 <html xmlns:wicket>
 <wicket:panel>
-	<p>
-		<a class="btn btn-success" title="compare and review"><i class="fa fa-git-branch-compare"></i></a>
-		<a class="btn btn-default" wicket:id="revselector" href="javascript:void(0)"><i class="fa fa-git-branch"></i> <span wicket:id="rev"></span> <span class="caret"></span></a>
-		<div wicket:id="dropdown"></div>
-	</p>
-	<hr />
 	<table class="table table-condense sourcetree">
 		<tr>
 			<td>source files</td>
 		</tr>
 	</table>
-	
-	<wicket:fragment wicket:id="dropdownfrag">
-		<div class="popup-content">
-			<div class=""></div>
-			<form>
-				<input type="search" class="form-control focusable input-md" placeholder="Filter branches or create a branch ..." />
-			</form>
-			<p></p>
-			
-
-		</div>
-	</wicket:fragment>
 </wicket:panel>
 </html>

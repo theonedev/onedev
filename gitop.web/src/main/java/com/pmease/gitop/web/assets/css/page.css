@@ -1,6 +1,15 @@
 /* MISC */
 .img-link:hover { text-decoration: none; }
 
+/* MENU */
+.menu-ul { list-style: none; margin: 0; padding: 0; }
+.menu-item { display: block; padding: 5px 10px; color: #666; }
+.menu-item:hover { color: #333; background: #f2f2f2; text-decoration: none; }
+.menu-item.unchecked i.fa-check { visibility: hidden; }
+.menu-item.unchecked:hover i.fa-check { visibility: visible; color: #666; }
+
+.tab-pane > .menu-ul { margin: 10px 0; }
+
 ul.f-dropdown { padding: 0; }
 .popup-content { width: 300px; }
 
@@ -105,15 +114,15 @@ ul.f-dropdown { padding: 0; }
 }
 
 .list-navs > .list-group-item a .badge { float: right; }
-.sidebar .list-navs > .list-group-item [class^="icon"] {
+/* .sidebar .list-navs > .list-group-item [class^="icon"] {
 	width: 1.1428571428571428em;
   	text-align: center;
   	padding-right: 0.2857142857142857em;
   	font-size: 18px;
   	color: #888; 
 }
-
 .sidebar .list-navs > .list-group-item.active [class^="icon"] { color: #222; } 
+*/
 
 .sidebar .list-navs.first {margin-top: 20px; }
 
@@ -331,5 +340,13 @@ ul.repo-actions { margin: 8px 4px 8px 0; padding: 0; list-style: none; }
 .repo-sidenav .list-navs { margin-bottom: 20px; }
 .repo-sidenav .list-navs > .list-group-item a { color: #09f; padding-left: 30px; }
 .repo-sidenav .list-navs > .list-group-item a .badge { }
-.repo-sidenav a > i.fa { font-size: 16px; }
+.repo-sidenav a > i.fa { font-size: 16px; color: #999; }
+.repo-sidenav .list-group-item.active a > i.fa { color: #333; }
 
+.description-editor input.form-control { width: 300px; }
+
+.breadcrumb-paths { font-size: 16px; background: transparent; }
+.breadcrumb-paths em { font-style: normal; font-weight: bold; color: #333; }
+.breadcrumb-paths > li+li:before {
+  color: #999; font-weight: bold;
+}

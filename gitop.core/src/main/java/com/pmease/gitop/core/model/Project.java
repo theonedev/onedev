@@ -204,9 +204,13 @@ public class Project extends AbstractEntity implements UserBelonging {
 		return authorizedUsers;
 	}
 	
+	public String getPathName() {
+		return getOwner().getName() + "/" + getName();
+	}
+	
 	@Override
 	public String toString() {
-		return getOwner() + "/" + getName();
+		return getPathName();
 	}
 	
 	public Git getCodeRepo() {

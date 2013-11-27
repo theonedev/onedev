@@ -5,20 +5,20 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.pmease.gitop.web.page.project.ProjectCategoryPage;
 
 @SuppressWarnings("serial")
-public class RepositoryTagsPage extends ProjectCategoryPage {
+public class CommitsPage extends ProjectCategoryPage {
 
-	public RepositoryTagsPage(PageParameters params) {
+	public CommitsPage(PageParameters params) {
 		super(params);
 	}
 
 	@Override
 	protected Category getCategory() {
-		return Category.TAGS;
+		return Category.COMMITS;
 	}
 
 	@Override
 	protected String getPageTitle() {
-		return getProject() + " - tags";
+		return getProject() + " - commits";
 	}
 
 }

@@ -1,6 +1,5 @@
 package com.pmease.gitop.web.page.project.source;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -11,24 +10,21 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.ProjectCategoryPage;
-import com.pmease.gitop.web.page.project.source.component.ProjectDescriptionPanel;
-import com.pmease.gitop.web.page.project.source.component.ReadmePanel;
-import com.pmease.gitop.web.page.project.source.component.SourceTreePanel;
 
 @SuppressWarnings("serial")
-public abstract class RepositorySourcePage extends ProjectCategoryPage {
+public abstract class AbstractFilePage extends ProjectCategoryPage {
 
-	protected IModel<String> revisionModel;
-	protected IModel<List<String>> pathModel;
+	protected final IModel<String> revisionModel;
+	protected final IModel<List<String>> pathsModel;
 	
-	public RepositorySourcePage(PageParameters params) {
+	public AbstractFilePage(PageParameters params) {
 		super(params);
 		
 		revisionModel = new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				PageParameters params = RepositorySourcePage.this.getPageParameters();
+				PageParameters params = AbstractFilePage.this.getPageParameters();
 				String objectId = params.get(PageSpec.OBJECT_ID).toString();
 				if (Strings.isNullOrEmpty(objectId)) {
 					String branchName = getProject().getDefaultBranchName();
@@ -44,11 +40,11 @@ public abstract class RepositorySourcePage extends ProjectCategoryPage {
 			
 		};
 		
-		pathModel = new AbstractReadOnlyModel<List<String>>() {
+		pathsModel = new AbstractReadOnlyModel<List<String>>() {
 
 			@Override
 			public List<String> getObject() {
-				PageParameters params = RepositorySourcePage.this.getPageParameters();
+				PageParameters params = AbstractFilePage.this.getPageParameters();
 				int count = params.getIndexedCount();
 				List<String> paths = Lists.newArrayList();
 				for (int i = 0; i < count; i++) {
@@ -60,26 +56,15 @@ public abstract class RepositorySourcePage extends ProjectCategoryPage {
 				
 				return paths;
 			}
-			
 		};
 	}
 
-	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
-
-		IModel<List<String>> pathModel = new AbstractReadOnlyModel<List<String>>() {
-
-			@Override
-			public List<String> getObject() {
-				return new ArrayList<String>();
-			}
-			
-		};
-		
-		add(new ProjectDescriptionPanel("description", projectModel));
-		add(new SourceTreePanel("files", projectModel, revisionModel, pathModel));
-		add(new ReadmePanel("readme", projectModel, pathModel));
+	protected String getRevision() {
+		return revisionModel.getObject();
+	}
+	
+	protected List<String> getPaths() {
+		return pathsModel.getObject();
 	}
 	
 	@Override
@@ -88,18 +73,13 @@ public abstract class RepositorySourcePage extends ProjectCategoryPage {
 	}
 
 	@Override
-	protected String getPageTitle() {
-		return getProject().toString();
-	}
-	
-	@Override
 	public void onDetach() {
 		if (revisionModel != null) {
 			revisionModel.detach();
 		}
 		
-		if (pathModel != null) {
-			pathModel.detach();
+		if (pathsModel != null) {
+			pathsModel.detach();
 		}
 		
 		super.onDetach();

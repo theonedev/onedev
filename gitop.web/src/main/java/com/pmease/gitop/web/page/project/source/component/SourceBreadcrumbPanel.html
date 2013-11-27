@@ -1,0 +1,41 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<div class="file-navigator">
+		<a class="btn btn-success" data-toggle="tooltip" title="compare and review"><i class="fa fa-git-branch-compare"></i></a>
+		<a class="btn btn-default" wicket:id="revselector" href="javascript:void(0)"><i class="fa fa-git-branch"></i> <span wicket:id="rev"></span> <span class="caret"></span></a>
+		<div wicket:id="dropdown"></div>
+		<ol class="breadcrumb inline breadcrumb-paths">
+			<li>
+				<a wicket:id="home"><b wicket:id="name"></b></a>
+			</li>
+			<li wicket:id="paths"><a wicket:id="link"><span wicket:id="name"></span></a></li>
+			<li>
+				<a data-toggle="tooltip" title="Fork this repository and add a new file"><i class="fa fa-file-add"></i></a>
+			</li>
+		</ol>
+	</div>
+	
+	<wicket:fragment wicket:id="dropdownfrag">
+		<div class="popup-content">
+			<div class=""></div>
+			<form>
+				<input type="search" class="form-control focusable input-md" placeholder="Filter branches or create a branch ..." />
+			</form>
+			<p></p>
+			<div wicket:id="tabs"></div>
+		</div>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="revfrag">
+		<ul class="menu-ul">
+			<li wicket:id="revs">
+				<a wicket:id="link" class="menu-item checkable"><i class="fa fa-check"></i> <span wicket:id="name"></span></a>
+			</li>
+		</ul>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="norev">
+		<p wicket:id="label"></p>
+	</wicket:fragment>
+</wicket:panel>
+</html>
