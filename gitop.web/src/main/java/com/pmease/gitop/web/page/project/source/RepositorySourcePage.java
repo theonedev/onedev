@@ -32,7 +32,7 @@ public abstract class RepositorySourcePage extends ProjectCategoryPage {
 				String objectId = params.get(PageSpec.OBJECT_ID).toString();
 				if (Strings.isNullOrEmpty(objectId)) {
 					String branchName = getProject().getDefaultBranchName();
-					if (!Strings.isNullOrEmpty(branchName)) {
+					if (Strings.isNullOrEmpty(branchName)) {
 						return "master";
 					} else {
 						return branchName;

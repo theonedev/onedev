@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import com.pmease.gitop.web.GitopSession;
 import com.pmease.gitop.web.common.form.FeedbackPanel;
 import com.pmease.gitop.web.common.form.checkbox.CheckBoxElement;
-import com.pmease.gitop.web.common.form.flatcheckbox.FlatCheckBoxElement;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
@@ -45,7 +44,7 @@ public class LoginPage extends AbstractLayoutPage {
 			
 			add(new TextField<String>("username", new Model<String>()).setRequired(true));
 			add(new PasswordTextField("password", new Model<String>()).setResetPassword(false));
-			add(new FlatCheckBoxElement("rememberme", Model.of(false),
+			add(new CheckBoxElement("rememberme", Model.of(false),
 					Model.of("Remember me on this computer")));
 		}
 		

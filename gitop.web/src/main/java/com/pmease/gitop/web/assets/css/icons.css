@@ -1609,3 +1609,5 @@
 .fa-radio-unchecked:before {
 	content: "\f10c";
 }
+
+.fa { font-size: 16px; }

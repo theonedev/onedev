@@ -53,6 +53,9 @@ ul.piped, ol.piped { margin: 0; padding: 0; }
 .checkable-link.disabled,
 .checkable-link > em { color: #999; font-style: normal; cursor: not-allowed;}
 
+.light-link { color: #aaa; }
+.light-link:hover { color: #08F; }
+
 /** LIST GROUP */
 .list-navs > .list-group-item { border-width: 1px 0; position: relative; }
 .list-navs > .list-group-item:first-child,

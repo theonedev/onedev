@@ -2,16 +2,16 @@
 <wicket:panel>
 	<div class="well">
 		<span wicket:id="description"></span>
-		<a wicket:id="editlink" href="javascript:void()">- Edit <i class="fa fa-pencil"></i></a>
+		<a wicket:id="editlink" href="javascript:void()" class="light-link">- Edit <i class="fa fa-pencil"></i></a>
 		<div wicket:id="dropdown"></div>
 	</div>
 	
 	<wicket:fragment wicket:id="descriptionEditor">
 		<form wicket:id="form" class="form-inline" role="form">
 			<div class="form-group">
-				<input placeholder="Description" class="form-control" wicket:id="input" />
+				<input placeholder="Description" class="form-control focusable" wicket:id="input" />
 			</div>
-			<button class="btn btn-default" wicket:id="save">Save</button> or <a wicket:id="cancel">cancel</a>
+			<button class="btn btn-gray" wicket:id="save">Save</button> or <a wicket:id="cancel">cancel</a>
 		</form>
 	</wicket:fragment>
 </wicket:panel>
