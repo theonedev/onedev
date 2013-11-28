@@ -6,6 +6,8 @@ import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.tabs.ITab;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.Loop;
@@ -15,6 +17,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.lang.Args;
+
+import com.google.common.base.Strings;
 
 public class BootstrapTabbedPanel<T extends ITab> extends Panel {
 	private static final long serialVersionUID = 1L;
@@ -27,8 +31,8 @@ public class BootstrapTabbedPanel<T extends ITab> extends Panel {
 	}
 	
 	@SuppressWarnings("serial")
-	public BootstrapTabbedPanel(String id, List<T> tabs, IModel<Integer> model) {
-		super(id, model);
+	public BootstrapTabbedPanel(String id, List<T> tabs, IModel<Integer> activeTab) {
+		super(id, activeTab);
 		
 		this.tabs = Args.notNull(tabs, "tabs");
 
@@ -98,11 +102,32 @@ public class BootstrapTabbedPanel<T extends ITab> extends Panel {
 		return frag;
 	}
 	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		
+		String onShownScript = getOnShownScript();
+		if (!Strings.isNullOrEmpty(onShownScript)) {
+			StringBuffer sb = new StringBuffer();
+			sb.append("$('#" + getMarkupId(true) + " a[data-toggle=\"tab\"]')")
+				.append(".on('shown.bs.tab', ")
+				.append(onShownScript)
+				.append(")");
+			
+			response.render(OnDomReadyHeaderItem.forScript(sb.toString()));
+		}
+		
+	}
+	
+	protected String getOnShownScript() {
+		return null;
+	}
+	
 	protected final boolean isTabSelected(int index) {
-		if (getActiveIndex() == null) {
+		if (getActiveTab() == null) {
 			return index == 0;
 		} else {
-			return index == getActiveIndex();
+			return index == getActiveTab();
 		}
 	}
 	
@@ -111,7 +136,7 @@ public class BootstrapTabbedPanel<T extends ITab> extends Panel {
 		return tab.getPanel(id);
 	}
 	
-	Integer getActiveIndex() {
+	public Integer getActiveTab() {
 		return (Integer) getDefaultModelObject();
 	}
 }

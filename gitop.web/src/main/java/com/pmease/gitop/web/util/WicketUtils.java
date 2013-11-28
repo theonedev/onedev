@@ -45,6 +45,10 @@ public final class WicketUtils {
 		return Optional.fromNullable(params);
 	}
 	
+	public static CharSequence urlFor(Class<? extends Page> pageClass, PageParameters parameters) {
+		return RequestCycle.get().urlFor(pageClass, parameters);
+	}
+	
 	public static boolean isCurrentRequestAjax() {
 		return RequestCycle.get() != null
 			? RequestCycle.get().find(AjaxRequestTarget.class) != null : false;

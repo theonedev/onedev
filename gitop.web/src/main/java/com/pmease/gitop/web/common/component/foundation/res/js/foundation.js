@@ -6,41 +6,57 @@
  * http://www.opensource.org/licenses/mit-license.php
 */
 
-/*jslint unparam: true, browser: true, indent: 2 */
-
-// Accommodate running jQuery or Zepto in noConflict() mode by
-// using an anonymous function to redefine the $ shorthand name.
-// See http://docs.jquery.com/Using_jQuery_with_Other_Libraries
-// and http://zeptojs.com/
-var libFuncName = null;
-
-if (typeof jQuery === "undefined" &&
-    typeof Zepto === "undefined" &&
-    typeof $ === "function") {
-  libFuncName = $;
-} else if (typeof jQuery === "function") {
-  libFuncName = jQuery;
-} else if (typeof Zepto === "function") {
-  libFuncName = Zepto;
-} else {
-  throw new TypeError();
-}
-
 (function ($, window, document, undefined) {
   'use strict';
 
-  /*
-    matchMedia() polyfill - Test a CSS media 
-    type/query in JS. Authors & copyright (c) 2012: 
-    Scott Jehl, Paul Irish, Nicholas Zakas. 
-    Dual MIT/BSD license
+  // Used to retrieve Foundation media queries from CSS.
+  if($('head').has('.foundation-mq-small').length === 0) {
+    $('head').append('<meta class="foundation-mq-small">');
+  }
 
+  if($('head').has('.foundation-mq-medium').length === 0) {
+    $('head').append('<meta class="foundation-mq-medium">');
+  }
+
+  if($('head').has('.foundation-mq-large').length === 0) {
+    $('head').append('<meta class="foundation-mq-large">');
+  }
+
+  if($('head').has('.foundation-mq-xlarge').length === 0) {
+    $('head').append('<meta class="foundation-mq-xlarge">');
+  }
+
+  if($('head').has('.foundation-mq-xxlarge').length === 0) {
+    $('head').append('<meta class="foundation-mq-xxlarge">');
+  }
+
+  // Embed FastClick (this should be removed later)
+  function FastClick(layer){'use strict';var oldOnClick,self=this;this.trackingClick=false;this.trackingClickStart=0;this.targetElement=null;this.touchStartX=0;this.touchStartY=0;this.lastTouchIdentifier=0;this.touchBoundary=10;this.layer=layer;if(!layer||!layer.nodeType){throw new TypeError('Layer must be a document node');}this.onClick=function(){return FastClick.prototype.onClick.apply(self,arguments)};this.onMouse=function(){return FastClick.prototype.onMouse.apply(self,arguments)};this.onTouchStart=function(){return FastClick.prototype.onTouchStart.apply(self,arguments)};this.onTouchMove=function(){return FastClick.prototype.onTouchMove.apply(self,arguments)};this.onTouchEnd=function(){return FastClick.prototype.onTouchEnd.apply(self,arguments)};this.onTouchCancel=function(){return FastClick.prototype.onTouchCancel.apply(self,arguments)};if(FastClick.notNeeded(layer)){return}if(this.deviceIsAndroid){layer.addEventListener('mouseover',this.onMouse,true);layer.addEventListener('mousedown',this.onMouse,true);layer.addEventListener('mouseup',this.onMouse,true)}layer.addEventListener('click',this.onClick,true);layer.addEventListener('touchstart',this.onTouchStart,false);layer.addEventListener('touchmove',this.onTouchMove,false);layer.addEventListener('touchend',this.onTouchEnd,false);layer.addEventListener('touchcancel',this.onTouchCancel,false);if(!Event.prototype.stopImmediatePropagation){layer.removeEventListener=function(type,callback,capture){var rmv=Node.prototype.removeEventListener;if(type==='click'){rmv.call(layer,type,callback.hijacked||callback,capture)}else{rmv.call(layer,type,callback,capture)}};layer.addEventListener=function(type,callback,capture){var adv=Node.prototype.addEventListener;if(type==='click'){adv.call(layer,type,callback.hijacked||(callback.hijacked=function(event){if(!event.propagationStopped){callback(event)}}),capture)}else{adv.call(layer,type,callback,capture)}}}if(typeof layer.onclick==='function'){oldOnClick=layer.onclick;layer.addEventListener('click',function(event){oldOnClick(event)},false);layer.onclick=null}}FastClick.prototype.deviceIsAndroid=navigator.userAgent.indexOf('Android')>0;FastClick.prototype.deviceIsIOS=/iP(ad|hone|od)/.test(navigator.userAgent);FastClick.prototype.deviceIsIOS4=FastClick.prototype.deviceIsIOS&&(/OS 4_\d(_\d)?/).test(navigator.userAgent);FastClick.prototype.deviceIsIOSWithBadTarget=FastClick.prototype.deviceIsIOS&&(/OS ([6-9]|\d{2})_\d/).test(navigator.userAgent);FastClick.prototype.needsClick=function(target){'use strict';switch(target.nodeName.toLowerCase()){case'button':case'select':case'textarea':if(target.disabled){return true}break;case'input':if((this.deviceIsIOS&&target.type==='file')||target.disabled){return true}break;case'label':case'video':return true}return(/\bneedsclick\b/).test(target.className)};FastClick.prototype.needsFocus=function(target){'use strict';switch(target.nodeName.toLowerCase()){case'textarea':case'select':return true;case'input':switch(target.type){case'button':case'checkbox':case'file':case'image':case'radio':case'submit':return false}return!target.disabled&&!target.readOnly;default:return(/\bneedsfocus\b/).test(target.className)}};FastClick.prototype.sendClick=function(targetElement,event){'use strict';var clickEvent,touch;if(document.activeElement&&document.activeElement!==targetElement){document.activeElement.blur()}touch=event.changedTouches[0];clickEvent=document.createEvent('MouseEvents');clickEvent.initMouseEvent('click',true,true,window,1,touch.screenX,touch.screenY,touch.clientX,touch.clientY,false,false,false,false,0,null);clickEvent.forwardedTouchEvent=true;targetElement.dispatchEvent(clickEvent)};FastClick.prototype.focus=function(targetElement){'use strict';var length;if(this.deviceIsIOS&&targetElement.setSelectionRange){length=targetElement.value.length;targetElement.setSelectionRange(length,length)}else{targetElement.focus()}};FastClick.prototype.updateScrollParent=function(targetElement){'use strict';var scrollParent,parentElement;scrollParent=targetElement.fastClickScrollParent;if(!scrollParent||!scrollParent.contains(targetElement)){parentElement=targetElement;do{if(parentElement.scrollHeight>parentElement.offsetHeight){scrollParent=parentElement;targetElement.fastClickScrollParent=parentElement;break}parentElement=parentElement.parentElement}while(parentElement)}if(scrollParent){scrollParent.fastClickLastScrollTop=scrollParent.scrollTop}};FastClick.prototype.getTargetElementFromEventTarget=function(eventTarget){'use strict';if(eventTarget.nodeType===Node.TEXT_NODE){return eventTarget.parentNode}return eventTarget};FastClick.prototype.onTouchStart=function(event){'use strict';var targetElement,touch,selection;if(event.targetTouches.length>1){return true}targetElement=this.getTargetElementFromEventTarget(event.target);touch=event.targetTouches[0];if(this.deviceIsIOS){selection=window.getSelection();if(selection.rangeCount&&!selection.isCollapsed){return true}if(!this.deviceIsIOS4){if(touch.identifier===this.lastTouchIdentifier){event.preventDefault();return false}this.lastTouchIdentifier=touch.identifier;this.updateScrollParent(targetElement)}}this.trackingClick=true;this.trackingClickStart=event.timeStamp;this.targetElement=targetElement;this.touchStartX=touch.pageX;this.touchStartY=touch.pageY;if((event.timeStamp-this.lastClickTime)<200){event.preventDefault()}return true};FastClick.prototype.touchHasMoved=function(event){'use strict';var touch=event.changedTouches[0],boundary=this.touchBoundary;if(Math.abs(touch.pageX-this.touchStartX)>boundary||Math.abs(touch.pageY-this.touchStartY)>boundary){return true}return false};FastClick.prototype.onTouchMove=function(event){'use strict';if(!this.trackingClick){return true}if(this.targetElement!==this.getTargetElementFromEventTarget(event.target)||this.touchHasMoved(event)){this.trackingClick=false;this.targetElement=null}return true};FastClick.prototype.findControl=function(labelElement){'use strict';if(labelElement.control!==undefined){return labelElement.control}if(labelElement.htmlFor){return document.getElementById(labelElement.htmlFor)}return labelElement.querySelector('button, input:not([type=hidden]), keygen, meter, output, progress, select, textarea')};FastClick.prototype.onTouchEnd=function(event){'use strict';var forElement,trackingClickStart,targetTagName,scrollParent,touch,targetElement=this.targetElement;if(!this.trackingClick){return true}if((event.timeStamp-this.lastClickTime)<200){this.cancelNextClick=true;return true}this.lastClickTime=event.timeStamp;trackingClickStart=this.trackingClickStart;this.trackingClick=false;this.trackingClickStart=0;if(this.deviceIsIOSWithBadTarget){touch=event.changedTouches[0];targetElement=document.elementFromPoint(touch.pageX-window.pageXOffset,touch.pageY-window.pageYOffset)||targetElement;targetElement.fastClickScrollParent=this.targetElement.fastClickScrollParent}targetTagName=targetElement.tagName.toLowerCase();if(targetTagName==='label'){forElement=this.findControl(targetElement);if(forElement){this.focus(targetElement);if(this.deviceIsAndroid){return false}targetElement=forElement}}else if(this.needsFocus(targetElement)){if((event.timeStamp-trackingClickStart)>100||(this.deviceIsIOS&&window.top!==window&&targetTagName==='input')){this.targetElement=null;return false}this.focus(targetElement);if(!this.deviceIsIOS4||targetTagName!=='select'){this.targetElement=null;event.preventDefault()}return false}if(this.deviceIsIOS&&!this.deviceIsIOS4){scrollParent=targetElement.fastClickScrollParent;if(scrollParent&&scrollParent.fastClickLastScrollTop!==scrollParent.scrollTop){return true}}if(!this.needsClick(targetElement)){event.preventDefault();this.sendClick(targetElement,event)}return false};FastClick.prototype.onTouchCancel=function(){'use strict';this.trackingClick=false;this.targetElement=null};FastClick.prototype.onMouse=function(event){'use strict';if(!this.targetElement){return true}if(event.forwardedTouchEvent){return true}if(!event.cancelable){return true}if(!this.needsClick(this.targetElement)||this.cancelNextClick){if(event.stopImmediatePropagation){event.stopImmediatePropagation()}else{event.propagationStopped=true}event.stopPropagation();event.preventDefault();return false}return true};FastClick.prototype.onClick=function(event){'use strict';var permitted;if(this.trackingClick){this.targetElement=null;this.trackingClick=false;return true}if(event.target.type==='submit'&&event.detail===0){return true}permitted=this.onMouse(event);if(!permitted){this.targetElement=null}return permitted};FastClick.prototype.destroy=function(){'use strict';var layer=this.layer;if(this.deviceIsAndroid){layer.removeEventListener('mouseover',this.onMouse,true);layer.removeEventListener('mousedown',this.onMouse,true);layer.removeEventListener('mouseup',this.onMouse,true)}layer.removeEventListener('click',this.onClick,true);layer.removeEventListener('touchstart',this.onTouchStart,false);layer.removeEventListener('touchmove',this.onTouchMove,false);layer.removeEventListener('touchend',this.onTouchEnd,false);layer.removeEventListener('touchcancel',this.onTouchCancel,false)};FastClick.notNeeded=function(layer){'use strict';var metaViewport;if(typeof window.ontouchstart==='undefined'){return true}if((/Chrome\/[0-9]+/).test(navigator.userAgent)){if(FastClick.prototype.deviceIsAndroid){metaViewport=document.querySelector('meta[name=viewport]');if(metaViewport&&metaViewport.content.indexOf('user-scalable=no')!==-1){return true}}else{return true}}if(layer.style.msTouchAction==='none'){return true}return false};FastClick.attach=function(layer){'use strict';return new FastClick(layer)};if(typeof define!=='undefined'&&define.amd){define(function(){'use strict';return FastClick})}else if(typeof module!=='undefined'&&module.exports){module.exports=FastClick.attach;module.exports.FastClick=FastClick}else{window.FastClick=FastClick}
+
+
+  // Enable FastClick
+  if(typeof FastClick !== 'undefined') {
+    FastClick.attach(document.body);
+  }
+
+  // private Fast Selector wrapper,
+  // returns jQuery object. Only use where
+  // getElementById is not available.
+  var S = function (selector, context) {
+    if (typeof selector === 'string') {
+      if (context) {
+        return $(context.querySelectorAll(selector));
+      }
+
+      return $(document.querySelectorAll(selector));
+    }
+
+    return $(selector, context);
+  };
+
+  /*
     https://github.com/paulirish/matchMedia.js
   */
-
-   $('head').append('<meta class="foundation-mq-small">');
-   $('head').append('<meta class="foundation-mq-medium">');
-   $('head').append('<meta class="foundation-mq-large">');
 
   window.matchMedia = window.matchMedia || (function( doc, undefined ) {
 
@@ -75,195 +91,144 @@ if (typeof jQuery === "undefined" &&
 
   }( document ));
 
-  // add dusty browser stuff
-  if (!Array.prototype.filter) {
-    Array.prototype.filter = function(fun /*, thisp */) {
-      "use strict";
-   
-      if (this == null) {
-        throw new TypeError();
-      }
+  /*
+   * jquery.requestAnimationFrame
+   * https://github.com/gnarf37/jquery-requestAnimationFrame
+   * Requires jQuery 1.8+
+   *
+   * Copyright (c) 2012 Corey Frang
+   * Licensed under the MIT license.
+   */
 
-      var t = Object(this),
-          len = t.length >>> 0;
-      if (typeof fun !== "function") {
-          return;
-      }
+  (function( $ ) {
 
-      var res = [],
-          thisp = arguments[1];
-      for (var i = 0; i < len; i++) {
-        if (i in t) {
-          var val = t[i]; // in case fun mutates this
-          if (fun && fun.call(thisp, val, i, t)) {
-            res.push(val);
-          }
-        }
-      }
+  // requestAnimationFrame polyfill adapted from Erik Möller
+  // fixes from Paul Irish and Tino Zijdel
+  // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+  // http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
 
-      return res;
+
+  var animating,
+    lastTime = 0,
+    vendors = ['webkit', 'moz'],
+    requestAnimationFrame = window.requestAnimationFrame,
+    cancelAnimationFrame = window.cancelAnimationFrame;
+
+  for(; lastTime < vendors.length && !requestAnimationFrame; lastTime++) {
+    requestAnimationFrame = window[ vendors[lastTime] + "RequestAnimationFrame" ];
+    cancelAnimationFrame = cancelAnimationFrame ||
+      window[ vendors[lastTime] + "CancelAnimationFrame" ] || 
+      window[ vendors[lastTime] + "CancelRequestAnimationFrame" ];
+  }
+
+  function raf() {
+    if ( animating ) {
+      requestAnimationFrame( raf );
+      jQuery.fx.tick();
     }
   }
 
-  if (!Function.prototype.bind) {
-    Function.prototype.bind = function (oThis) {
-      if (typeof this !== "function") {
-        // closest thing possible to the ECMAScript 5 internal IsCallable function
-        throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+  if ( requestAnimationFrame ) {
+    // use rAF
+    window.requestAnimationFrame = requestAnimationFrame;
+    window.cancelAnimationFrame = cancelAnimationFrame;
+    jQuery.fx.timer = function( timer ) {
+      if ( timer() && jQuery.timers.push( timer ) && !animating ) {
+        animating = true;
+        raf();
       }
-   
-      var aArgs = Array.prototype.slice.call(arguments, 1), 
-          fToBind = this, 
-          fNOP = function () {},
-          fBound = function () {
-            return fToBind.apply(this instanceof fNOP && oThis
-               ? this
-               : oThis,
-             aArgs.concat(Array.prototype.slice.call(arguments)));
-          };
-   
-      fNOP.prototype = this.prototype;
-      fBound.prototype = new fNOP();
-   
-      return fBound;
     };
+
+    jQuery.fx.stop = function() {
+      animating = false;
+    };
+  } else {
+    // polyfill
+    window.requestAnimationFrame = function( callback, element ) {
+      var currTime = new Date().getTime(),
+        timeToCall = Math.max( 0, 16 - ( currTime - lastTime ) ),
+        id = window.setTimeout( function() {
+          callback( currTime + timeToCall );
+        }, timeToCall );
+      lastTime = currTime + timeToCall;
+      return id;
+    };
+
+    window.cancelAnimationFrame = function(id) {
+      clearTimeout(id);
+    };
+      
   }
 
-  if (!Array.prototype.indexOf) {
-    Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
-      "use strict";
-      if (this == null) {
-        throw new TypeError();
-      }
-      var t = Object(this);
-      var len = t.length >>> 0;
-      if (len === 0) {
-        return -1;
-      }
-      var n = 0;
-      if (arguments.length > 1) {
-        n = Number(arguments[1]);
-        if (n != n) { // shortcut for verifying if it's NaN
-          n = 0;
-        } else if (n != 0 && n != Infinity && n != -Infinity) {
-          n = (n > 0 || -1) * Math.floor(Math.abs(n));
-        }
-      }
-      if (n >= len) {
-          return -1;
-      }
-      var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
-      for (; k < len; k++) {
-        if (k in t && t[k] === searchElement) {
-          return k;
-        }
-      }
-      return -1;
+  }( jQuery ));
+
+
+  function removeQuotes (string) {
+    if (typeof string === 'string' || string instanceof String) {
+      string = string.replace(/^[\\/'"]+|(;\s?})+|[\\/'"]+$/g, '');
     }
-  }
 
-  // fake stop() for zepto.
-  $.fn.stop = $.fn.stop || function() {
-    return this;
-  };
+    return string;
+  }
 
   window.Foundation = {
     name : 'Foundation',
 
-    version : '4.3.2',
-
-    cache : {},
+    version : '5.0.0',
 
     media_queries : {
-      small : $('.foundation-mq-small').css('font-family').replace(/\'/g, ''),
-      medium : $('.foundation-mq-medium').css('font-family').replace(/\'/g, ''),
-      large : $('.foundation-mq-large').css('font-family').replace(/\'/g, '')
+      small : S('.foundation-mq-small').css('font-family').replace(/^[\/\\'"]+|(;\s?})+|[\/\\'"]+$/g, ''),
+      medium : S('.foundation-mq-medium').css('font-family').replace(/^[\/\\'"]+|(;\s?})+|[\/\\'"]+$/g, ''),
+      large : S('.foundation-mq-large').css('font-family').replace(/^[\/\\'"]+|(;\s?})+|[\/\\'"]+$/g, ''),
+      xlarge: S('.foundation-mq-xlarge').css('font-family').replace(/^[\/\\'"]+|(;\s?})+|[\/\\'"]+$/g, ''),
+      xxlarge: S('.foundation-mq-xxlarge').css('font-family').replace(/^[\/\\'"]+|(;\s?})+|[\/\\'"]+$/g, '')
     },
 
     stylesheet : $('<style></style>').appendTo('head')[0].sheet,
 
-    init : function (scope, libraries, method, options, response, /* internal */ nc) {
+    init : function (scope, libraries, method, options, response) {
       var library_arr,
           args = [scope, method, options, response],
-          responses = [],
-          nc = nc || false;
-
-      // disable library error catching,
-      // used for development only
-      if (nc) this.nc = nc;
+          responses = [];
 
       // check RTL
-      this.rtl = /rtl/i.test($('html').attr('dir'));
+      this.rtl = /rtl/i.test(S('html').attr('dir'));
 
       // set foundation global scope
       this.scope = scope || this.scope;
 
       if (libraries && typeof libraries === 'string' && !/reflow/i.test(libraries)) {
-        if (/off/i.test(libraries)) return this.off();
-
-        library_arr = libraries.split(' ');
-
-        if (library_arr.length > 0) {
-          for (var i = library_arr.length - 1; i >= 0; i--) {
-            responses.push(this.init_lib(library_arr[i], args));
-          }
+        if (this.libs.hasOwnProperty(libraries)) {
+          responses.push(this.init_lib(libraries, args));
         }
       } else {
-        if (/reflow/i.test(libraries)) args[1] = 'reflow';
-
         for (var lib in this.libs) {
-          responses.push(this.init_lib(lib, args));
+          responses.push(this.init_lib(lib, libraries));
         }
       }
 
-      // if first argument is callback, add to args
-      if (typeof libraries === 'function') {
-        args.unshift(libraries);
-      }
-
-      return this.response_obj(responses, args);
-    },
-
-    response_obj : function (response_arr, args) {
-      for (var i = 0, len = args.length; i < len; i++) {
-        if (typeof args[i] === 'function') {
-          return args[i]({
-            errors: response_arr.filter(function (s) {
-              if (typeof s === 'string') return s;
-            })
-          });
-        }
-      }
-
-      return response_arr;
+      return scope;
     },
 
     init_lib : function (lib, args) {
-      return this.trap(function () {
-        if (this.libs.hasOwnProperty(lib)) {
-          this.patch(this.libs[lib]);
-          return this.libs[lib].init.apply(this.libs[lib], args);
-        } else {
-          return function () {};
-        }
-      }.bind(this), lib);
-    },
+      if (this.libs.hasOwnProperty(lib)) {
+        this.patch(this.libs[lib]);
 
-    trap : function (fun, lib) {
-      if (!this.nc) {
-        try {
-          return fun();
-        } catch (e) {
-          return this.error({name: lib, message: 'could not be initialized', more: e.name + ' ' + e.message});
+        if (args && args.hasOwnProperty(lib)) {
+          return this.libs[lib].init.apply(this.libs[lib], [this.scope, args[lib]]);
         }
+
+        return this.libs[lib].init.apply(this.libs[lib], args);
       }
 
-      return fun();
+      return function () {};
     },
 
     patch : function (lib) {
-      this.fix_outer(lib);
       lib.scope = this.scope;
+      lib['data_options'] = this.lib_methods.data_options;
+      lib['bindings'] = this.lib_methods.bindings;
+      lib['S'] = S;
       lib.rtl = this.rtl;
     },
 
@@ -295,35 +260,12 @@ if (typeof jQuery === "undefined" &&
 
     // methods that can be inherited in libraries
     lib_methods : {
-      set_data : function (node, data) {
-        // this.name references the name of the library calling this method
-        var id = [this.name,+new Date(),Foundation.random_str(5)].join('-');
-
-        Foundation.cache[id] = data;
-        node.attr('data-' + this.name + '-id', id);
-        return data;
-      },
-
-      get_data : function (node) {
-        return Foundation.cache[node.attr('data-' + this.name + '-id')];
-      },
-
-      remove_data : function (node) {
-        if (node) {
-          delete Foundation.cache[node.attr('data-' + this.name + '-id')];
-          node.attr('data-' + this.name + '-id', '');
-        } else {
-          $('[data-' + this.name + '-id]').each(function () {
-            delete Foundation.cache[$(this).attr('data-' + this.name + '-id')];
-            $(this).attr('data-' + this.name + '-id', '');
-          });
-        }
-      },
-
       throttle : function(fun, delay) {
         var timer = null;
+
         return function () {
           var context = this, args = arguments;
+
           clearTimeout(timer);
           timer = setTimeout(function () {
             fun.apply(context, args);
@@ -331,12 +273,17 @@ if (typeof jQuery === "undefined" &&
         };
       },
 
-      // parses data-options attribute on nodes and turns
-      // them into an object
+      // parses data-options attribute
       data_options : function (el) {
-        var opts = {}, ii, p,
-            opts_arr = (el.attr('data-options') || ':').split(';'),
-            opts_len = opts_arr.length;
+        var opts = {}, ii, p, opts_arr, opts_len,
+            data_options = el.data('options');
+
+        if (typeof data_options === 'object') {
+          return data_options;
+        }
+
+        opts_arr = (data_options || ':').split(';'),
+        opts_len = opts_arr.length;
 
         function isNumber (o) {
           return ! isNaN (o-0) && o !== null && o !== "" && o !== false && o !== true;
@@ -367,26 +314,6 @@ if (typeof jQuery === "undefined" &&
         return setTimeout(fun, delay);
       },
 
-      // animated scrolling
-      scrollTo : function (el, to, duration) {
-        if (duration < 0) return;
-        var difference = to - $(window).scrollTop();
-        var perTick = difference / duration * 10;
-
-        this.scrollToTimerCache = setTimeout(function() {
-          if (!isNaN(parseInt(perTick, 10))) {
-            window.scrollTo(0, $(window).scrollTop() + perTick);
-            this.scrollTo(el, to, duration - 10);
-          }
-        }.bind(this), 10);
-      },
-
-      // not supported in core Zepto
-      scrollLeft : function (el) {
-        if (!el.length) return;
-        return ('scrollLeft' in el[0]) ? el[0].scrollLeft : el[0].pageXOffset;
-      },
-
       // test for empty object or array
       empty : function (obj) {
         if (obj.length && obj.length > 0)    return false;
@@ -399,6 +326,13 @@ if (typeof jQuery === "undefined" &&
         return true;
       },
 
+      register_media : function(media, media_class) {
+        if(Foundation.media_queries[media] === undefined) {
+          $('head').append('<meta class="' + media_class + '">');
+          Foundation.media_queries[media] = removeQuotes($('.' + media_class).css('font-family'));
+        }
+      },
+
       addCustomRule : function(rule, media) {
         if(media === undefined) {
           Foundation.stylesheet.insertRule(rule, Foundation.stylesheet.cssRules.length);
@@ -409,47 +343,65 @@ if (typeof jQuery === "undefined" &&
               Foundation.media_queries[media] + '{ ' + rule + ' }');
           }
         }
+      },
+
+      loaded : function (image, callback) {
+        function loaded () {
+          callback(image[0]);
+        }
+
+        function bindLoad () {
+          this.one('load', loaded);
+
+          if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+            var src = this.attr( 'src' ),
+                param = src.match( /\?/ ) ? '&' : '?';
+
+            param += 'random=' + (new Date()).getTime();
+            this.attr('src', src + param);
+          }
+        }
+
+        if (!image.attr('src')) {
+          loaded();
+          return;
+        }
+
+        if (image[0].complete || image[0].readyState === 4) {
+          loaded();
+        } else {
+          bindLoad.call(image);
+        }
+      },
+
+      bindings : function (method, options) {
+        var self = this,
+            should_bind_events = !S(this).data(this.name + '-init');
+
+        if (typeof method === 'string') {
+          return this[method].call(this);
+        }
+
+        if (S(this.scope).is('[data-' + this.name +']')) {
+          S(this.scope).data(this.name + '-init', $.extend({}, this.settings, (options || method), this.data_options(S(this.scope))));
+
+          if (should_bind_events) {
+            this.events(this.scope);
+          }
+
+        } else {
+          S('[data-' + this.name + ']', this.scope).each(function () {
+            var should_bind_events = !S(this).data(self.name + '-init');
+
+            S(this).data(self.name + '-init', $.extend({}, self.settings, (options || method), self.data_options(S(this))));
+
+            if (should_bind_events) {
+              self.events(this);
+            }
+          });
+        }
       }
-    },
-
-    fix_outer : function (lib) {
-      lib.outerHeight = function (el, bool) {
-        if (typeof Zepto === 'function') {
-          return el.height();
-        }
-
-        if (typeof bool !== 'undefined') {
-          return el.outerHeight(bool);
-        }
-
-        return el.outerHeight();
-      };
-
-      lib.outerWidth = function (el, bool) {
-        if (typeof Zepto === 'function') {
-          return el.width();
-        }
-
-        if (typeof bool !== 'undefined') {
-          return el.outerWidth(bool);
-        }
-
-        return el.outerWidth();
-      };
-    },
-
-    error : function (error) {
-      return error.name + ' ' + error.message + '; ' + error.more;
-    },
-
-    // remove all foundation events.
-    off: function () {
-      $(this.scope).off('.fndtn');
-      $(window).off('.fndtn');
-      return true;
-    },
-
-    zj : $
+    }
   };
 
   $.fn.foundation = function () {
@@ -461,4 +413,4 @@ if (typeof jQuery === "undefined" &&
     });
   };
 
-}(libFuncName, this, this.document));
+}(jQuery, this, this.document));

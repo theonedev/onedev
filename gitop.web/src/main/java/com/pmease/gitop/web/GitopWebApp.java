@@ -73,13 +73,14 @@ import com.pmease.gitop.web.page.project.settings.ProjectHooksPage;
 import com.pmease.gitop.web.page.project.settings.ProjectOptionsPage;
 import com.pmease.gitop.web.page.project.settings.ProjectPermissionsPage;
 import com.pmease.gitop.web.page.project.settings.PullRequestSettingsPage;
-import com.pmease.gitop.web.page.project.source.SourceBlobPage;
-import com.pmease.gitop.web.page.project.source.ProjectHomePage;
 import com.pmease.gitop.web.page.project.source.BranchesPage;
 import com.pmease.gitop.web.page.project.source.CommitsPage;
 import com.pmease.gitop.web.page.project.source.ContributorsPage;
-import com.pmease.gitop.web.page.project.source.TagsPage;
+import com.pmease.gitop.web.page.project.source.ProjectHomePage;
+import com.pmease.gitop.web.page.project.source.SourceBlobPage;
+import com.pmease.gitop.web.page.project.source.SourceCommitPage;
 import com.pmease.gitop.web.page.project.source.SourceTreePage;
+import com.pmease.gitop.web.page.project.source.TagsPage;
 import com.pmease.gitop.web.page.project.stats.ProjectForksPage;
 import com.pmease.gitop.web.page.project.stats.ProjectGraphsPage;
 import com.pmease.gitop.web.page.project.wiki.ProjectWikiPage;
@@ -246,6 +247,7 @@ public class GitopWebApp extends AbstractWicketConfig {
 		
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/tree/${objectId}", SourceTreePage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/blob/${objectId}", SourceBlobPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/commit/${objectId}", SourceCommitPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/commits", CommitsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/branches", BranchesPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/tags", TagsPage.class));

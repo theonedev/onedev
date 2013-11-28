@@ -3,7 +3,6 @@ package com.pmease.gitop.web.common.component.foundation;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
@@ -24,10 +23,9 @@ public class FoundationDropDownResourceReference extends JavaScriptResourceRefer
 	@Override
 	public Iterable<? extends HeaderItem> getDependencies() {
 		return Iterables.concat(super.getDependencies(),
-				ImmutableList.of(
+				ImmutableList.<HeaderItem>of(
 						JavaScriptHeaderItem.forReference(FoundationResourceReference.get()),
-						CssHeaderItem.forReference(CSS),
-						OnDomReadyHeaderItem.forScript("$(document).foundation()")));
+						CssHeaderItem.forReference(CSS)));
 	}
 	
 	private static FoundationDropDownResourceReference instance =

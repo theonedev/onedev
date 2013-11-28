@@ -1,25 +1,26 @@
-/*jslint unparam: true, browser: true, indent: 2 */
-
 ;(function ($, window, document, undefined) {
   'use strict';
 
   Foundation.libs.interchange = {
     name : 'interchange',
 
-    version : '4.3.3',
+    version : '5.0.0',
 
     cache : {},
 
     images_loaded : false,
+    nodes_loaded : false,
 
     settings : {
       load_attr : 'interchange',
 
       named_queries : {
-        'default' : 'only screen and (min-width: 1px)',
-        small : 'only screen and (min-width: 768px)',
-        medium : 'only screen and (min-width: 1280px)',
-        large : 'only screen and (min-width: 1440px)',
+        'default' : Foundation.media_queries.small,
+        small : Foundation.media_queries.small,
+        medium : Foundation.media_queries.medium,
+        large : Foundation.media_queries.large,
+        xlarge : Foundation.media_queries.xlarge,
+        xxlarge: Foundation.media_queries.xxlarge,
         landscape : 'only screen and (orientation: landscape)',
         portrait : 'only screen and (orientation: portrait)',
         retina : 'only screen and (-webkit-min-device-pixel-ratio: 2),' + 
@@ -31,7 +32,18 @@
       },
 
       directives : {
-        replace: function (el, path) {
+        replace: function (el, path, trigger) {
+          // The trigger argument, if called within the directive, fires
+          // an event named after the directive on the element, passing
+          // any parameters along to the event that you pass to trigger.
+          //
+          // ex. trigger(), trigger([a, b, c]), or trigger(a, b, c)
+          //
+          // This allows you to bind a callback like so:
+          // $('#interchangeContainer').on('replace', function (e, a, b, c) {
+          //   console.log($(this).html(), a, b, c);
+          // });
+
           if (/IMG/.test(el[0].nodeName)) {
             var orig_path = el[0].src;
 
@@ -39,8 +51,18 @@
 
             el[0].src = path;
 
-            return el.trigger('replace', [el[0].src, orig_path]);
+            return trigger(el[0].src);
           }
+          var last_path = el.data('interchange-last-path');
+
+          if (last_path == path) return;
+
+          return $.get(path, function (response) {
+            el.html(response);
+            el.data('interchange-last-path', path);
+            trigger();
+          });
+
         }
       }
     },
@@ -48,32 +70,29 @@
     init : function (scope, method, options) {
       Foundation.inherit(this, 'throttle');
 
-      if (typeof method === 'object') {
-        $.extend(true, this.settings, method);
-      }
+      this.data_attr = 'data-' + this.settings.load_attr;
 
-      this.events();
-      this.images();
-
-      if (typeof method !== 'string') {
-        return this.settings.init;
-      } else {
-        return this[method].call(this, options);
-      }
+      this.bindings(method, options);
+      this.load('images');
+      this.load('nodes');
     },
 
     events : function () {
       var self = this;
 
-      $(window).on('resize.fndtn.interchange', self.throttle(function () {
-        self.resize.call(self);
-      }, 50));
+      $(window)
+        .off('.interchange')
+        .on('resize.fndtn.interchange', self.throttle(function () {
+          self.resize.call(self);
+        }, 50));
+
+      return this;
     },
 
     resize : function () {
       var cache = this.cache;
 
-      if(!this.images_loaded) {
+      if(!this.images_loaded || !this.nodes_loaded) {
         setTimeout($.proxy(this.resize, this), 50);
         return;
       }
@@ -84,7 +103,15 @@
 
           if (passed) {
             this.settings.directives[passed
-              .scenario[1]](passed.el, passed.scenario[0]);
+              .scenario[1]](passed.el, passed.scenario[0], function () {
+                if (arguments[0] instanceof Array) { 
+                  var args = arguments[0];
+                } else { 
+                  var args = Array.prototype.slice.call(arguments, 0);
+                }
+
+                passed.el.trigger(passed.scenario[1], args);
+              });
           }
         }
       }
@@ -95,7 +122,7 @@
       var count = scenarios.length;
 
       if (count > 0) {
-        var el = $('[data-uuid="' + uuid + '"]');
+        var el = this.S('[data-uuid="' + uuid + '"]');
 
         for (var i = count - 1; i >= 0; i--) {
           var mq, rule = scenarios[i][2];
@@ -113,22 +140,23 @@
       return false;
     },
 
-    images : function (force_update) {
-      if (typeof this.cached_images === 'undefined' || force_update) {
-        return this.update_images();
+    load : function (type, force_update) {
+      if (typeof this['cached_' + type] === 'undefined' || force_update) {
+        this['update_' + type]();
       }
 
-      return this.cached_images;
+      return this['cached_' + type];
     },
 
     update_images : function () {
-      var images = document.getElementsByTagName('img'),
+      var images = this.S('img[' + this.data_attr + ']'),
           count = images.length,
           loaded_count = 0,
-          data_attr = 'data-' + this.settings.load_attr;
+          data_attr = this.data_attr;
 
+      this.cache = {};
       this.cached_images = [];
-      this.images_loaded = false;
+      this.images_loaded = (count === 0);
 
       for (var i = count - 1; i >= 0; i--) {
         loaded_count++;
@@ -142,18 +170,47 @@
 
         if(loaded_count === count) {
           this.images_loaded = true;
-          this.enhance();
+          this.enhance('images');
         }
       }
 
-      return 'deferred';
+      return this;
     },
 
-    enhance : function () {
-      var count = this.images().length;
+    update_nodes : function () {
+      var nodes = this.S('[' + this.data_attr + ']:not(img)'),
+          count = nodes.length,
+          loaded_count = 0,
+          data_attr = this.data_attr;
+
+      this.cached_nodes = [];
+      // Set nodes_loaded to true if there are no nodes
+      // this.nodes_loaded = false;
+      this.nodes_loaded = (count === 0);
+
 
       for (var i = count - 1; i >= 0; i--) {
-        this.object($(this.images()[i]));
+        loaded_count++;
+        var str = nodes[i].getAttribute(data_attr) || '';
+
+        if (str.length > 0) {
+          this.cached_nodes.push(nodes[i]);
+        }
+
+        if(loaded_count === count) {
+          this.nodes_loaded = true;
+          this.enhance('nodes');
+        }
+      }
+
+      return this;
+    },
+
+    enhance : function (type) {
+      var count = this['cached_' + type].length;
+
+      for (var i = count - 1; i >= 0; i--) {
+        this.object($(this['cached_' + type][i]));
       }
 
       return $(window).trigger('resize');
@@ -238,9 +295,10 @@
     },
 
     reflow : function () {
-      this.images(true);
+      this.load('images', true);
+      this.load('nodes', true);
     }
 
   };
 
-}(Foundation.zj, this, this.document));
+}(jQuery, this, this.document));

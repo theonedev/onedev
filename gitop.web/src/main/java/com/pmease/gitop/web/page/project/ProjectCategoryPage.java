@@ -26,10 +26,10 @@ import com.pmease.gitop.web.page.project.api.ProjectTabContribution;
 import com.pmease.gitop.web.page.project.api.ProjectTabGroup;
 import com.pmease.gitop.web.page.project.issue.ProjectPullRequestsPage;
 import com.pmease.gitop.web.page.project.settings.ProjectOptionsPage;
-import com.pmease.gitop.web.page.project.source.ProjectHomePage;
 import com.pmease.gitop.web.page.project.source.BranchesPage;
 import com.pmease.gitop.web.page.project.source.CommitsPage;
 import com.pmease.gitop.web.page.project.source.ContributorsPage;
+import com.pmease.gitop.web.page.project.source.ProjectHomePage;
 import com.pmease.gitop.web.page.project.source.TagsPage;
 import com.pmease.gitop.web.page.project.stats.ProjectForksPage;
 import com.pmease.gitop.web.page.project.stats.ProjectGraphsPage;
@@ -59,7 +59,7 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 		
 		PULL_REQUESTS(ProjectTabGroup.ISSUES, "Pull Requests", ProjectPullRequestsPage.class, "fa-pull-request"),
 		
-		GRAPHS(ProjectTabGroup.STATISTICS, "Graphs", ProjectGraphsPage.class, "fa-chart-bar") {
+		GRAPHS(ProjectTabGroup.STATISTICS, "Graphs", ProjectGraphsPage.class, "fa-chart-area") {
 			@Override
 			Component createBadge(String id, IModel<Project> project) {
 				return new WebMarkupContainer(id).setVisibilityAllowed(false);

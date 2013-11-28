@@ -1,6 +1,7 @@
 package com.pmease.gitop.web.page.project.source.component;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -8,6 +9,9 @@ import org.apache.wicket.Page;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.tabs.AbstractTab;
 import org.apache.wicket.extensions.markup.html.tabs.ITab;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -21,6 +25,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
@@ -33,11 +38,25 @@ import com.pmease.gitop.web.page.project.source.SourceTreePage;
 @SuppressWarnings("serial")
 public class SourceBreadcrumbPanel extends AbstractSourcePagePanel {
 
+	private final IModel<Map<RefType, List<String>>> refsModel;
+	
 	public SourceBreadcrumbPanel(String id, 
 			IModel<Project> projectModel, 
 			IModel<String> revisionModel, 
 			IModel<List<String>> pathsModel) {
 		super(id, projectModel, revisionModel, pathsModel);
+		
+		this.refsModel = new LoadableDetachableModel<Map<RefType, List<String>>>() {
+
+			@Override
+			protected Map<RefType, List<String>> load() {
+				Git git = getProject().getCodeRepo();
+				Map<RefType, List<String>> map = Maps.newHashMapWithExpectedSize(RefType.values().length);
+				map.put(RefType.BRANCH, Lists.newArrayList(git.listBranches()));
+				map.put(RefType.TAG, Lists.newArrayList(git.listTags()));
+				return map;
+			}
+		};
 	}
 	
 	@Override
@@ -53,15 +72,21 @@ public class SourceBreadcrumbPanel extends AbstractSourcePagePanel {
 
 			@Override
 			protected Component newContent(String id) {
-				Fragment frag = new Fragment(id, "dropdownfrag", SourceBreadcrumbPanel.this);
+				Fragment frag = new Fragment(id, "dropdownfrag", SourceBreadcrumbPanel.this) {
+					@Override
+					public void renderHead(IHeaderResponse response) {
+						super.renderHead(response);
+						
+						response.render(OnDomReadyHeaderItem.forScript("$('.commitish-list').liveFilter('.commitish-filter-field', 'li', {filterChildSelector: 'a.menu-item'})"));
+					}
+				};
+				
 				List<ITab> tabs = Lists.newArrayList();
 				tabs.add(new AbstractTab(Model.of("Branches")) {
 
 					@Override
 					public WebMarkupContainer getPanel(String panelId) {
-						Fragment frag = new Fragment(panelId, "revfrag", SourceBreadcrumbPanel.this);
-						frag.add(createRefList("revs", RefType.BRANCH));
-						return frag;
+						return createRefList(panelId, RefType.BRANCH);
 					}
 					
 				});
@@ -70,14 +95,30 @@ public class SourceBreadcrumbPanel extends AbstractSourcePagePanel {
 
 					@Override
 					public WebMarkupContainer getPanel(String panelId) {
-						Fragment frag = new Fragment(panelId, "revfrag", SourceBreadcrumbPanel.this);
-						frag.add(createRefList("revs", RefType.TAG));
-						return frag;
+						return createRefList(panelId, RefType.TAG);
 					}
 					
 				});
 
-				frag.add(new BootstrapTabbedPanel<ITab>("tabs", tabs));
+				frag.add(new BootstrapTabbedPanel<ITab>("tabs", tabs, new AbstractReadOnlyModel<Integer>() {
+
+					@Override
+					public Integer getObject() {
+						String revision = getRevision();
+						Map<RefType, List<String>> map = refsModel.getObject();
+						for (RefType each : RefType.values()) {
+							List<String> refs = map.get(each);
+							for (String ref : refs) {
+								if (ref.equalsIgnoreCase(revision)) {
+									return each.ordinal();
+								}
+							}
+						}
+						
+						return 0;
+					}
+					
+				}));
 				
 				return frag;
 			}
@@ -130,21 +171,17 @@ public class SourceBreadcrumbPanel extends AbstractSourcePagePanel {
 		BRANCH, TAG
 	}
 	
-	private Component createRefList(String id, final RefType type) {
+	private Fragment createRefList(String id, final RefType type) {
+		Fragment frag = new Fragment(id, "revfrag", SourceBreadcrumbPanel.this);
 		IModel<List<String>> refs = new LoadableDetachableModel<List<String>>() {
 
 			@Override
 			protected List<String> load() {
-				Git git = getProject().getCodeRepo();
-				if (type == RefType.BRANCH) {
-					return Lists.newArrayList(git.listBranches());
-				} else {
-					return Lists.newArrayList(git.listTags());
-				}
+				return refsModel.getObject().get(type);
 			}
 		};
 		
-		ListView<String> view = new ListView<String>(id, refs) {
+		ListView<String> view = new ListView<String>("revs", refs) {
 			@Override
 			protected void populateItem(ListItem<String> item) {
 				final String ref = item.getModelObject();
@@ -177,9 +214,16 @@ public class SourceBreadcrumbPanel extends AbstractSourcePagePanel {
 			}
 		};
 		
-		return view;
+		frag.add(view);
+		return frag;
 	}
 
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(JavaScriptHeaderItem.forReference(LiveFilterResourceReference.get()));
+	}
+	
 	private Class<? extends Page> getPageClass() {
 		Page page = getPage();
 		if (page instanceof ProjectHomePage) {
@@ -187,5 +231,14 @@ public class SourceBreadcrumbPanel extends AbstractSourcePagePanel {
 		} else {
 			return page.getClass();
 		}
+	}
+	
+	@Override
+	public void onDetach() {
+		if (refsModel != null) {
+			refsModel.detach();
+		}
+		
+		super.onDetach();
 	}
 }

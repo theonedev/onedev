@@ -1,8 +1,8 @@
-/* FOUNDATIOIN DROPDOWN */
-@media only screen and (max-width: 767px) {
+@media only screen and (max-width: 40em) {
   .f-dropdown {
     max-width: 100%;
     left: 0; } }
+
 /* Foundation Dropdowns */
 .f-dropdown {
   position: absolute;
@@ -14,7 +14,7 @@
   height: auto;
   background: white;
   border: solid 1px #cccccc;
-  font-size: 16;
+  font-size: 16px;
   z-index: 99;
   margin-top: 2px;
   max-width: 200px; }
@@ -53,28 +53,28 @@
     left: auto;
     right: 9px; }
   .f-dropdown li {
-    font-size: 0.875em;
+    font-size: 0.875rem;
     cursor: pointer;
-    line-height: 1.125em;
+    line-height: 1.125rem;
     margin: 0; }
     .f-dropdown li:hover, .f-dropdown li:focus {
       background: #eeeeee; }
     .f-dropdown li a {
       display: block;
-      padding: 0.3125em 0.625em;
+      padding: 0.5rem;
       color: #555555; }
   .f-dropdown.content {
     position: absolute;
     top: -9999px;
     list-style: none;
     margin-left: 0;
-    padding: 1.25em;
+    padding: 1.25rem;
     width: 100%;
     height: auto;
     max-height: none;
     background: white;
     border: solid 1px #cccccc;
-    font-size: 16;
+    font-size: 16px;
     z-index: 99;
     max-width: 200px; }
     .f-dropdown.content > *:first-child {

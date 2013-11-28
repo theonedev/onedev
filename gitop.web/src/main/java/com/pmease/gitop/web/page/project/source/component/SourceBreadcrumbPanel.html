@@ -19,7 +19,7 @@
 		<div class="popup-content">
 			<div class=""></div>
 			<form>
-				<input type="search" class="form-control focusable input-md" placeholder="Filter branches or create a branch ..." />
+				<input type="search" class="form-control focusable input-md commitish-filter-field" placeholder="Filter branches ..." />
 			</form>
 			<p></p>
 			<div wicket:id="tabs"></div>
@@ -27,7 +27,7 @@
 	</wicket:fragment>
 	
 	<wicket:fragment wicket:id="revfrag">
-		<ul class="menu-ul">
+		<ul class="menu-ul commitish-list">
 			<li wicket:id="revs">
 				<a wicket:id="link" class="menu-item checkable"><i class="fa fa-check"></i> <span wicket:id="name"></span></a>
 			</li>

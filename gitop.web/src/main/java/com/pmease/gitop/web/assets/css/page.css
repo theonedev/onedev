@@ -350,3 +350,5 @@ ul.repo-actions { margin: 8px 4px 8px 0; padding: 0; list-style: none; }
 .breadcrumb-paths > li+li:before {
   color: #999; font-weight: bold;
 }
+
+table.files td.file-icon { width: 18px; padding-right: 2px; }
