@@ -1,16 +1,23 @@
 package com.pmease.gitop.web.page.project.source;
 
+import java.io.File;
 import java.util.List;
 
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Joiner;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.StorageManager;
 import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.web.model.ProjectModel;
 import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.project.source.component.EmptyRepositoryPanel;
 import com.pmease.gitop.web.page.project.source.component.ProjectDescriptionPanel;
 import com.pmease.gitop.web.page.project.source.component.ReadmePanel;
 import com.pmease.gitop.web.page.project.source.component.SourceBreadcrumbPanel;
 import com.pmease.gitop.web.page.project.source.component.SourceTreePanel;
+import com.pmease.gitop.web.util.GitUtils;
 
 @SuppressWarnings("serial")
 public class SourceTreePage extends AbstractFilePage {
@@ -35,10 +42,18 @@ public class SourceTreePage extends AbstractFilePage {
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 		
-		add(new ProjectDescriptionPanel("description", projectModel).setVisibilityAllowed(getPaths().isEmpty()));
-		add(new SourceBreadcrumbPanel("breadcrumb", projectModel, revisionModel, pathsModel));
-		add(new SourceTreePanel("tree", projectModel, revisionModel, pathsModel));
-		add(new ReadmePanel("readme", projectModel, revisionModel, pathsModel));
+		File gitDir = Gitop.getInstance(StorageManager.class).getStorage(getProject()).ofCode();
+		
+		if (GitUtils.hasCommits(gitDir)) {
+			add(new ProjectDescriptionPanel("description", projectModel).setVisibilityAllowed(getPaths().isEmpty()));
+			add(new SourceBreadcrumbPanel("breadcrumb", projectModel, revisionModel, pathsModel));
+			add(new SourceTreePanel("tree", projectModel, revisionModel, pathsModel));
+			add(new ReadmePanel("readme", projectModel, revisionModel, pathsModel));
+			add(new WebMarkupContainer("empty").setVisibilityAllowed(false));
+		} else {
+			add(new EmptyRepositoryPanel("empty", new ProjectModel(getProject())));
+			add(new WebMarkupContainer("tree").setVisibilityAllowed(false));
+		}
 	}
 	
 	@Override

@@ -2,6 +2,8 @@ package com.pmease.gitop.web.page.project.source;
 
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.pmease.gitop.web.page.project.source.component.SourceBreadcrumbPanel;
+
 @SuppressWarnings("serial")
 public class SourceBlobPage extends AbstractFilePage {
 
@@ -10,7 +12,14 @@ public class SourceBlobPage extends AbstractFilePage {
 	}
 
 	@Override
+	public void onPageInitialize() {
+		super.onPageInitialize();
+		
+		add(new SourceBreadcrumbPanel("breadcrumb", projectModel, revisionModel, pathsModel));
+	}
+	
+	@Override
 	protected String getPageTitle() {
-		return null;
+		return "";
 	}
 }

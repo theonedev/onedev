@@ -1,5 +1,6 @@
 package com.pmease.gitop.web.util;
 
+import java.io.File;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
@@ -27,5 +28,14 @@ public class GitUtils {
 	
 	public static String getCommitSummary(Commit commit) {
 		return commit.getSummary();
+	}
+	
+	public static boolean hasCommits(File gitDir) {
+		if (gitDir.exists()) {
+			return new File(gitDir, "objects").list().length > 2
+					|| new File(gitDir, "objects/pack").list().length > 0;
+		}
+		
+		return false;
 	}
 }

@@ -83,7 +83,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 		BookmarkablePageLink<Void> commitLink = new BookmarkablePageLink<Void>(
 				"commitlink",
 				SourceCommitPage.class,
-				SourceCommitPage.newParams(getProject(), getRevision()));
+				SourceCommitPage.newParams(getProject(), getLastCommit().getHash()));
 		add(commitLink);
 		commitLink.add(new Label("sha", new AbstractReadOnlyModel<String>() {
 
