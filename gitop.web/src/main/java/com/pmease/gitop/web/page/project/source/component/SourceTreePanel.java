@@ -67,7 +67,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 		add(new CommitUserLink("author", new AbstractReadOnlyModel<String>() {
 			@Override
 			public String getObject() {
-				return getLastCommit().getAuthor();
+				return getLastCommit().getAuthor().getName();
 			}
 		}));
 
@@ -75,7 +75,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 
 			@Override
 			public String getObject() {
-				return DateUtils.formatAge(getLastCommit().getAuthorDate());
+				return DateUtils.formatAge(getLastCommit().getAuthor().getDate());
 			}
 			
 		}));
