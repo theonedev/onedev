@@ -1,15 +1,12 @@
-/*jslint unparam: true, browser: true, indent: 2 */
-
 ;(function ($, window, document, undefined) {
   'use strict';
 
   Foundation.libs.abide = {
     name : 'abide',
 
-    version : '4.3.3',
+    version : '5.0.0',
 
     settings : {
-      live_validate : true,
       focus_on_invalid : true,
       timeout : 1000,
       patterns : {
@@ -49,43 +46,32 @@
     timer : null,
 
     init : function (scope, method, options) {
-      if (typeof method === 'object') {
-        $.extend(true, this.settings, method);
-      }
-
-      if (typeof method !== 'string') {
-        if (!this.settings.init) { this.events(); }
-
-      } else {
-        return this[method].call(this, options);
-      }
+      this.bindings(method, options);
     },
 
-    events : function () {
+    events : function (scope) {
       var self = this,
-          forms = $('form[data-abide]', this.scope).attr('novalidate', 'novalidate');
+          form = $(scope).attr('novalidate', 'novalidate'),
+          settings = form.data('abide-init');
 
-      forms
-        .on('submit validate', function (e) {
+      form
+        .off('.abide')
+        .on('submit.fndtn.abide validate.fndtn.abide', function (e) {
           var is_ajax = /ajax/i.test($(this).attr('data-abide'));
           return self.validate($(this).find('input, textarea, select').get(), e, is_ajax);
-        });
-
-      this.settings.init = true;
-
-      if (!this.settings.live_validate) return;
-
-      forms
-        .find('input, textarea, select')
-        .on('blur change', function (e) {
-          self.validate([this], e);
         })
-        .on('keydown', function (e) {
-          clearTimeout(self.timer);
-          self.timer = setTimeout(function () {
+        .find('input, textarea, select')
+          .off('.abide')
+          .on('blur.fndtn.abide change.fndtn.abide', function (e) {
             self.validate([this], e);
-          }.bind(this), self.settings.timeout);
-        });
+          })
+          .on('keydown.fndtn.abide', function (e) {
+            var settings = $(this).closest('form').data('abide-init');
+            clearTimeout(self.timer);
+            self.timer = setTimeout(function () {
+              self.validate([this], e);
+            }.bind(this), settings.timeout);
+          });
     },
 
     validate : function (els, e, is_ajax) {
@@ -154,11 +140,14 @@
         var el = el_patterns[i][0],
             required = el_patterns[i][2],
             value = el.value,
+            is_equal = el.getAttribute('data-equalto'),
             is_radio = el.type === "radio",
             valid_length = (required) ? (el.value.length > 0) : true;
 
         if (is_radio && required) {
           validations.push(this.valid_radio(el, required));
+        } else if (is_equal && required) {
+          validations.push(this.valid_equal(el, required));
         } else {
           if (el_patterns[i][1].test(value) && valid_length ||
             !required && el.value.length < 1) {
@@ -193,6 +182,20 @@
       }
 
       return valid;
+    },
+
+    valid_equal: function(el, required) {
+      var from  = document.getElementById(el.getAttribute('data-equalto')).value,
+          to    = el.value,
+          valid = (from === to);
+
+      if (valid) {
+        $(el).removeAttr('data-invalid').parent().removeClass('error');
+      } else {
+        $(el).attr('data-invalid', '').parent().addClass('error');
+      }
+
+      return valid;
     }
   };
-}(Foundation.zj, this, this.document));
+}(jQuery, this, this.document));

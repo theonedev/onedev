@@ -1,9 +1,25 @@
 <html xmlns:wicket>
 <wicket:panel>
-	<table class="table table-condense sourcetree">
-		<tr>
-			<td>source files</td>
-		</tr>
-	</table>
+	<section class="source-tree">
+		<div class="commit">
+			<pre class="short-message" wicket:id="shortMessage"></pre>
+			<div class="commit-meta">
+				<div class="commit-author">
+					<span wicket:id="author"></span> authored <time class="age" wicket:id="author-date"></time>
+				</div>
+				<div class="commit-hash">
+					<a wicket:id="commitlink">latest commit <span wicket:id="sha" class="sha"></span></a>
+				</div>
+			</div>
+		</div>
+		<table class="table table-condense files">
+			<tr wicket:id="files">
+				<td class="file-icon"><i class="" wicket:id="icon"></i></td>
+				<td class="file-name"><a wicket:id="file"><span wicket:id="name"></span></a></td>
+				<td class="message">[TODO] Retrieve the last commit message</td>
+				<td class="age">[TODO] 24 days ago</td>
+			</tr>
+		</table>
+	</section>
 </wicket:panel>
 </html>

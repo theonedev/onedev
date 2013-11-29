@@ -24,6 +24,8 @@ ul.square { list-style: square outside; }
 ul.circle { list-style: circle outside; }
 ul.disc { list-style:disc outside; }
 
+.text-nowrap { white-space: nowrap; }
+
 /* Inline Lists */
 .inline-list { margin: 0 auto 1.0625em auto; margin-left: -1.375em; margin-right: 0; padding: 0; list-style: none; overflow: hidden; }
 .inline-list > li { list-style: none; float: left; margin-left: 1.375em; display: block; }
@@ -52,6 +54,9 @@ ul.piped, ol.piped { margin: 0; padding: 0; }
 .checkable-link.checked .icon-checkbox:before { content: "\f046"; width: 16px; }
 .checkable-link.disabled,
 .checkable-link > em { color: #999; font-style: normal; cursor: not-allowed;}
+
+.light-link { color: #aaa; }
+.light-link:hover { color: #08F; }
 
 /** LIST GROUP */
 .list-navs > .list-group-item { border-width: 1px 0; position: relative; }

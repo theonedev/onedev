@@ -1,7 +1,17 @@
 /* MISC */
 .img-link:hover { text-decoration: none; }
 
+/* MENU */
+.menu-ul { list-style: none; margin: 0; padding: 0; }
+.menu-item { display: block; padding: 5px 10px; color: #666; }
+.menu-item:hover { color: #333; background: #f2f2f2; text-decoration: none; }
+.menu-item.unchecked i.fa-check { visibility: hidden; }
+.menu-item.unchecked:hover i.fa-check { visibility: visible; color: #666; }
+
+.tab-pane > .menu-ul { margin: 10px 0; }
+
 ul.f-dropdown { padding: 0; }
+.popup-content { width: 300px; }
 
 .v-middle { vertical-align: middle; }
 .table thead > tr > th.v-middle, 
@@ -97,22 +107,22 @@ ul.f-dropdown { padding: 0; }
 .sidebar .list-navs > .list-group-item a { padding: 10px 20px; display: block; }
 .sidebar .list-navs > .list-group-item a:hover { color: #333; text-decoration: none; background: #f2f2f2; }
 .sidebar .list-navs > .list-group-item.active a,
-.sidebar .list-navs > .list-group-item.active a:hover { color: #222; background: #e5e5e5; font-weight: bold; }
+.sidebar .list-navs > .list-group-item.active a:hover { color: #222; background: #e5e5e5;  }
 
 .sidebar .list-head {
 	padding: 0 20px; color: #999; font-size: 1em;
 }
 
 .list-navs > .list-group-item a .badge { float: right; }
-.sidebar .list-navs > .list-group-item [class^="icon"] {
+/* .sidebar .list-navs > .list-group-item [class^="icon"] {
 	width: 1.1428571428571428em;
   	text-align: center;
   	padding-right: 0.2857142857142857em;
   	font-size: 18px;
   	color: #888; 
 }
-
 .sidebar .list-navs > .list-group-item.active [class^="icon"] { color: #222; } 
+*/
 
 .sidebar .list-navs.first {margin-top: 20px; }
 
@@ -265,7 +275,7 @@ ul.btn-list { list-style: none; margin: 0; }
 .page-nav .btn-list .btn { font-weight: bold; }
 
 .project-list .list-group-item { position: relative; padding-left: 48px; }
-.project-list .list-group-item i { position: absolute; left: 0; top: 10px; font-size: 48px; width: 48px; color: #ccc; }
+.project-list .list-group-item i { position: absolute; left: 0; top: 10px; font-size: 48px; width: 48px; color: #ddd; }
 .project-list h4 { margin: 0 0 9px; }
 .project-list p { margin: 0 0 6px; font-size: 12px;}
 .project-list .age { color: #999; }
@@ -314,7 +324,8 @@ ul.btn-list { list-style: none; margin: 0; }
 a > .ind { font-weight: 300; color: #888; float: right; }
 
 h1.repo-info { margin: 0; padding-left:60px; font-size: 20px; position: relative; font-weight: normal; min-height: 48px;}
-.repo-info > .avatar { position: absolute; left: 0; top: 0; color: #ddd; width: 48px; height: 48px; padding: 2px; border: 1px solid #ddd; }
+.repo-info > .repo-avatar { position: absolute; left: 0; top: 0; color: #ddd; width: 48px; height: 48px; padding: 2px; display: block; text-align: center; }
+.repo-info > .repo-avatar > .fa { font-size: 48px; }
 .repo-info > .name { display: block; padding-top: 12px; margin-bottom: 6px;}
 .repo-info > .name .label { font-size: 11px; margin-left: 6px; text-transform: uppercase; }
 
@@ -324,8 +335,20 @@ h1.repo-info { margin: 0; padding-left:60px; font-size: 20px; position: relative
 .repo-sidenav .padder { padding: 20px; }
 ul.repo-actions { margin: 8px 4px 8px 0; padding: 0; list-style: none; }
 .repo-actions > li { float: left; list-style: none; margin: 0 5px; } 
-.nav-head { font-weight: bold; font-size: 14px; color: #888; padding: 0 20px; margin: 0 0 8px 0; text-transform: uppercase; }
+.nav-head { font-size: 12px; color: #999; padding: 0 20px; margin: 0 0 8px 0; text-transform: uppercase; }
 
 .repo-sidenav .list-navs { margin-bottom: 20px; }
 .repo-sidenav .list-navs > .list-group-item a { color: #09f; padding-left: 30px; }
 .repo-sidenav .list-navs > .list-group-item a .badge { }
+.repo-sidenav a > i.fa { font-size: 16px; color: #999; }
+.repo-sidenav .list-group-item.active a > i.fa { color: #333; }
+
+.description-editor input.form-control { width: 300px; }
+
+.breadcrumb-paths { font-size: 16px; background: transparent; }
+.breadcrumb-paths em { font-style: normal; font-weight: bold; color: #333; }
+.breadcrumb-paths > li+li:before {
+  color: #999; font-weight: bold;
+}
+
+table.files td.file-icon { width: 18px; padding-right: 2px; }

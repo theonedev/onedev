@@ -29,6 +29,7 @@
 	<logger name="com.jolbox.bonecp.BoneCPConfig" level="WARN" />
 	<logger name="com.sun.jersey" level="WARN" />
 	<logger name="org.hibernate.engine.jdbc.internal.JdbcCoordinatorImpl" level="ERROR"></logger>
+	<logger name="org.reflections" level="WARN"></logger>
 	
 	<root level="INFO">
 		<appender-ref ref="FILE" />

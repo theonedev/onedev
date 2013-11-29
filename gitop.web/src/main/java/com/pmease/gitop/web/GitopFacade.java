@@ -12,6 +12,7 @@ import com.pmease.gitop.core.model.User;
 
 @Singleton
 public class GitopFacade {
+	
 	@Inject
 	GitopFacade() {
 	}

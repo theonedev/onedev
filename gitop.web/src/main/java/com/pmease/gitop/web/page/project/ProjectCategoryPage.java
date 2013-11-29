@@ -26,11 +26,11 @@ import com.pmease.gitop.web.page.project.api.ProjectTabContribution;
 import com.pmease.gitop.web.page.project.api.ProjectTabGroup;
 import com.pmease.gitop.web.page.project.issue.ProjectPullRequestsPage;
 import com.pmease.gitop.web.page.project.settings.ProjectOptionsPage;
+import com.pmease.gitop.web.page.project.source.BranchesPage;
+import com.pmease.gitop.web.page.project.source.CommitsPage;
+import com.pmease.gitop.web.page.project.source.ContributorsPage;
 import com.pmease.gitop.web.page.project.source.ProjectHomePage;
-import com.pmease.gitop.web.page.project.source.RepositoryBranchesPage;
-import com.pmease.gitop.web.page.project.source.RepositoryCommitsPage;
-import com.pmease.gitop.web.page.project.source.RepositoryContributorsPage;
-import com.pmease.gitop.web.page.project.source.RepositoryTagsPage;
+import com.pmease.gitop.web.page.project.source.TagsPage;
 import com.pmease.gitop.web.page.project.stats.ProjectForksPage;
 import com.pmease.gitop.web.page.project.stats.ProjectGraphsPage;
 import com.pmease.gitop.web.page.project.wiki.ProjectWikiPage;
@@ -46,10 +46,10 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 			}
 		},
 		
-		COMMITS(ProjectTabGroup.SOURCE, "Commits", RepositoryCommitsPage.class, "fa-commits"),
-		BRANCHES(ProjectTabGroup.SOURCE, "Branches", RepositoryBranchesPage.class, "fa-git-branch"),
-		TAGS(ProjectTabGroup.SOURCE, "Tags", RepositoryTagsPage.class, "fa-git-tags"),
-		CONTRIBUTORS(ProjectTabGroup.SOURCE, "Contributors", RepositoryContributorsPage.class, "fa-group-o"),
+		COMMITS(ProjectTabGroup.SOURCE, "Commits", CommitsPage.class, "fa-commits"),
+		BRANCHES(ProjectTabGroup.SOURCE, "Branches", BranchesPage.class, "fa-git-branch"),
+		TAGS(ProjectTabGroup.SOURCE, "Tags", TagsPage.class, "fa-git-tags"),
+		CONTRIBUTORS(ProjectTabGroup.SOURCE, "Contributors", ContributorsPage.class, "fa-group-o"),
 		WIKI(ProjectTabGroup.WIKI, "Wiki", ProjectWikiPage.class, "fa-wiki") {
 			@Override
 			Component createBadge(String id, IModel<Project> project) {
@@ -59,7 +59,7 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 		
 		PULL_REQUESTS(ProjectTabGroup.ISSUES, "Pull Requests", ProjectPullRequestsPage.class, "fa-pull-request"),
 		
-		GRAPHS(ProjectTabGroup.STATISTICS, "Graphs", ProjectGraphsPage.class, "fa-chart-bar") {
+		GRAPHS(ProjectTabGroup.STATISTICS, "Graphs", ProjectGraphsPage.class, "fa-chart-area") {
 			@Override
 			Component createBadge(String id, IModel<Project> project) {
 				return new WebMarkupContainer(id).setVisibilityAllowed(false);

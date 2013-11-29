@@ -2,13 +2,15 @@
 <wicket:extend>
 	<div class="page-nav repo-head clearfix">
 		<h1 class="repo-info pull-left">
-			<span class="avatar avatar-circle"><img src="assets/img/twitter.png" /></span>
+			<span class="repo-avatar"><i class="fa fa-project"></i></span>
 			<span class="name">
 				<a wicket:id="userlink"><wicket:container wicket:id="name"></wicket:container></a> / 
 				<b><a wicket:id="projectlink"><wicket:container wicket:id="name"></wicket:container></a></b>
+				<wicket:enclosure>
 				<span class="status">
 					<span class="label label-info" wicket:id="public-label"></span>
 				</span>
+				</wicket:enclosure>
 			</span>
 		</h1>
 		<ul class="pull-right repo-actions">
