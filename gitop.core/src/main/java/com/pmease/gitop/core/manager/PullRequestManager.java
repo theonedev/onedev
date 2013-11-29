@@ -12,6 +12,6 @@ import com.pmease.gitop.core.model.User;
 @ImplementedBy(DefaultPullRequestManager.class)
 public interface PullRequestManager extends GenericDao<PullRequest> {
     
-    @Nullable PullRequest findOpened(Branch target, @Nullable Branch source, User user);
+    @Nullable PullRequest findOpen(Branch target, @Nullable Branch source, User user);
     
 }

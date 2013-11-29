@@ -6,7 +6,6 @@ import javax.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
-import com.pmease.commons.util.execution.ExecuteResult;
 import com.pmease.commons.util.execution.LineConsumer;
 
 public class CalcMergeBaseCommand extends GitCommand<String> {
@@ -40,8 +39,7 @@ public class CalcMergeBaseCommand extends GitCommand<String> {
 		
 		cmd.addArgs("merge-base", rev1, rev2);
 		
-		final boolean[] revExists = new boolean[]{true};
-		ExecuteResult result = cmd.execute(new LineConsumer() {
+		cmd.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
@@ -53,18 +51,10 @@ public class CalcMergeBaseCommand extends GitCommand<String> {
 
 			@Override
 			public void consume(String line) {
-				if (line.contains("Not a valid object name"))
-					revExists[0] = false;
-				else
-					LineConsumer.logger.error(line);
+				LineConsumer.logger.error(line);
 			}
 			
-		});
-
-		if (!revExists[0])
-			return null;
-		else 
-			result.checkReturnCode();
+		}).checkReturnCode();
 		
 		return commonAncestor[0];
 	}

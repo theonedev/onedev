@@ -6,22 +6,22 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.ExecuteResult;
 
-public class CheckAncestorCommand extends GitCommand<Boolean> {
+public class IsAncestorCommand extends GitCommand<Boolean> {
 
 	private String ancestor;
 	
 	private String descendant;
 	
-	public CheckAncestorCommand(final File repoDir) {
+	public IsAncestorCommand(final File repoDir) {
 		super(repoDir);
 	}
 	
-	public CheckAncestorCommand ancestor(final String ancestor) {
+	public IsAncestorCommand ancestor(final String ancestor) {
 		this.ancestor = ancestor;
 		return this;
 	}
 	
-	public CheckAncestorCommand descendant(final String descendant) {
+	public IsAncestorCommand descendant(final String descendant) {
 		this.descendant = descendant;
 		return this;
 	}

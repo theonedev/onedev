@@ -7,4 +7,5 @@ import com.pmease.gitop.core.model.PullRequestUpdate;
 
 @ImplementedBy(DefaultPullRequestUpdateManager.class)
 public interface PullRequestUpdateManager extends GenericDao<PullRequestUpdate> {
+	
 }

@@ -32,13 +32,12 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 
 	@Sessional
 	@Override
-	public PullRequest findOpened(Branch target, Branch source, User submitter) {
+	public PullRequest findOpen(Branch target, Branch source, User submitter) {
 		Criterion statusCriterion =
-				Restrictions.or(
-						Restrictions.eq("status", PullRequest.Status.PENDING_CHECK),
-						Restrictions.eq("status", PullRequest.Status.PENDING_APPROVAL),
-						Restrictions.eq("status", PullRequest.Status.PENDING_UPDATE),
-						Restrictions.eq("status", PullRequest.Status.PENDING_MERGE));
+				Restrictions.and(
+						Restrictions.not(Restrictions.eq("status", PullRequest.Status.MERGED)),
+						Restrictions.not(Restrictions.eq("status", PullRequest.Status.DECLINED))
+					);
 
 		return find(Restrictions.eq("target", target), Restrictions.eqOrIsNull("source", source),
 				Restrictions.eq("submitter", submitter), statusCriterion);

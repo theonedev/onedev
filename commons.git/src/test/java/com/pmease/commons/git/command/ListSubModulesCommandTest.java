@@ -28,14 +28,14 @@ public class ListSubModulesCommandTest {
 			module2.init(false);
 			
 			FileUtils.writeFile(new File(work.repoDir(), "readme"), "readme");
-			work.add("readme").commit("initial commit", false);
+			work.add("readme").commit("initial commit", false, false);
 			FileUtils.writeFile(new File(module1.repoDir(), "readme"), "readme");
-			module1.add("readme").commit("initial commit", false);
+			module1.add("readme").commit("initial commit", false, false);
 			FileUtils.writeFile(new File(module2.repoDir(), "readme"), "readme");
-			module2.add("readme").commit("initial commit", false);
+			module2.add("readme").commit("initial commit", false, false);
 			
 			work.addSubModule(module1.repoDir().getAbsolutePath(), "module1");
-			work.commit("add submodule1", false);
+			work.commit("add submodule1", false, false);
 			
 			Map<String, String> subModules = work.listSubModules("master");
 			assertEquals(module1.repoDir().getCanonicalPath(), 
@@ -45,7 +45,7 @@ public class ListSubModulesCommandTest {
 			FileUtils.createDir(dir);
 			
 			work.addSubModule(module2.repoDir().getAbsolutePath(), "dir/module2");
-			work.commit("add submodule2", false);
+			work.commit("add submodule2", false, false);
 			subModules = work.listSubModules("master");
 			assertEquals(module1.repoDir().getCanonicalPath(), 
 					new File(subModules.get("module1")).getCanonicalPath());

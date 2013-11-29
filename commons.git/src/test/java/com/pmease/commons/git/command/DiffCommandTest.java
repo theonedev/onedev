@@ -46,7 +46,7 @@ public class DiffCommandTest {
 		    File file2 = new File(dir, "file2");
 		    FileUtils.writeFile(file2, "file2");
 		    
-		    workGit.add("dir").commit("add readme, dir/file1 and dir/file2", false);
+		    workGit.add("dir").commit("add readme, dir/file1 and dir/file2", false, false);
 		    
 		    workGit.checkout("dev", true);
 
@@ -75,7 +75,7 @@ public class DiffCommandTest {
 		    
 		    workGit.add("dir/file3");
 		    
-		    workGit.commit("modify readme, modify dir/file1, remove dir/file2, and add dir/file3", false);
+		    workGit.commit("modify readme, modify dir/file1, remove dir/file2, and add dir/file3", false, false);
 		    
     		Git bareGit = new Git(new File(tempDir, "bare"));
     		bareGit.clone(workGit.repoDir().getAbsolutePath(), true);

@@ -1,5 +1,7 @@
 package com.pmease.gitop.core.model;
 
+import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,13 +19,12 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
+import com.pmease.commons.util.FileUtils;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.gatekeeper.GateKeeper;
-import com.pmease.gitop.core.gatekeeper.checkresult.Accepted;
 import com.pmease.gitop.core.gatekeeper.checkresult.Blocked;
 import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.core.gatekeeper.checkresult.Pending;
@@ -36,21 +37,8 @@ import com.pmease.gitop.core.manager.VoteInvitationManager;
 public class PullRequest extends AbstractEntity {
 
 	public enum Status {
-		PENDING_CHECK("Pending Check"), PENDING_APPROVAL("Pending Approval"), 
-		PENDING_UPDATE("Pending Update"), PENDING_MERGE("Pending Merge"), 
-		MERGED("Merged"), CLOSED("Closed");
-
-		private final String displayName;
-
-		Status(String displayName) {
-			this.displayName = displayName;
-		}
-
-		@Override
-		public String toString() {
-			return displayName;
-		}
-
+		PENDING_CHECK, PENDING_APPROVAL, PENDING_UPDATE, 
+		PENDING_MERGE, MERGED, DECLINED;
 	}
 
 	private String title;
@@ -68,24 +56,24 @@ public class PullRequest extends AbstractEntity {
 	private Branch target;
 
 	@ManyToOne
+	@JoinColumn(nullable = false)
 	private Branch source;
 
 	@Lob
-	private CheckResult lastCheckResult;
+	private CheckResult checkResult;
 
 	@Column(nullable = false)
 	private Status status = Status.PENDING_CHECK;
-
-	private transient Boolean merged;
-
-	private transient Optional<String> mergeBase;
+	
+	@Lob
+	private MergeResult mergeResult;
 
 	private transient List<PullRequestUpdate> sortedUpdates;
 
 	private transient List<PullRequestUpdate> effectiveUpdates;
 
 	private transient PullRequestUpdate baseUpdate;
-
+	
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
 	private Collection<PullRequestUpdate> updates = new ArrayList<PullRequestUpdate>();
 
@@ -161,10 +149,6 @@ public class PullRequest extends AbstractEntity {
 		this.source = source;
 	}
 
-	public void setLastCheckResult(CheckResult lastCheckResult) {
-		this.lastCheckResult = lastCheckResult;
-	}
-
 	public Collection<PullRequestUpdate> getUpdates() {
 		return updates;
 	}
@@ -185,10 +169,10 @@ public class PullRequest extends AbstractEntity {
 		return status;
 	}
 
-	public void setStatus(Status status) {
-		this.status = status;
+	public boolean isOpen() {
+		return status != Status.MERGED && status != Status.DECLINED;
 	}
-
+	
 	public PullRequestUpdate getBaseUpdate() {
 		if (baseUpdate != null) {
 			return baseUpdate;
@@ -201,12 +185,12 @@ public class PullRequest extends AbstractEntity {
 		this.baseUpdate = baseUpdate;
 	}
 
-	public CheckResult getLastCheckResult() {
-		return lastCheckResult;
+	public CheckResult getCheckResult() {
+		return checkResult;
 	}
-
-	public String getMergeRefName() {
-		return "refs/gitop/pulls/" + getId();
+	
+	public MergeResult getMergeResult() {
+		return mergeResult;
 	}
 
 	/**
@@ -217,6 +201,7 @@ public class PullRequest extends AbstractEntity {
 	 */
 	public List<PullRequestUpdate> getSortedUpdates() {
 		if (sortedUpdates == null) {
+			Preconditions.checkState(!getUpdates().isEmpty());
 			sortedUpdates = new ArrayList<PullRequestUpdate>(getUpdates());
 
 			Collections.sort(sortedUpdates);
@@ -227,8 +212,7 @@ public class PullRequest extends AbstractEntity {
 
 	/**
 	 * Get list of effective updates in reverse order. Update is considered
-	 * effective if it is descendant of merge base of latest update and target
-	 * branch head.
+	 * effective if it is not ancestor of target branch head.
 	 * 
 	 * @return list of effective updates in reverse order.
 	 */
@@ -236,67 +220,27 @@ public class PullRequest extends AbstractEntity {
 		if (effectiveUpdates == null) {
 			effectiveUpdates = new ArrayList<PullRequestUpdate>();
 
-			if (getMergeBase() != null) {
-				Git git = getTarget().getProject().getCodeRepo();
-				for (PullRequestUpdate update : getSortedUpdates()) {
-					if (git.checkAncestor(getMergeBase(), update.getRefName())) {
-						effectiveUpdates.add(update);
-					} else {
-						break;
-					}
+			Git git = getTarget().getProject().getCodeRepo();
+			for (PullRequestUpdate update : getSortedUpdates()) {
+				if (!git.isAncestor(update.getHeadCommit(), getTarget().getHeadCommit())) {
+					effectiveUpdates.add(update);
+				} else {
+					break;
 				}
-			} else {
-				effectiveUpdates = getSortedUpdates();
 			}
+			
+			Preconditions.checkState(!effectiveUpdates.isEmpty());
 		}
 		return effectiveUpdates;
 	}
 
-	public @Nullable PullRequestUpdate getLatestUpdate() {
-		if (getSortedUpdates().isEmpty())
-			return null;
-		else
-			return getSortedUpdates().iterator().next();
+	public PullRequestUpdate getLatestUpdate() {
+		return getSortedUpdates().iterator().next();
 	}
 	
-	public void updatesChanged() {
-		merged = null;
-		mergeBase = null;
-		sortedUpdates = null;
-		effectiveUpdates = null;
-		baseUpdate = null;
-	}
-
-	public boolean isFastForward() {
-		Git git = getTarget().getProject().getCodeRepo();
-		return git.checkAncestor(getTarget().getName(), getLatestUpdate().getRefName());
-	}
-
 	public Collection<String> findTouchedFiles() {
 		Git git = getTarget().getProject().getCodeRepo();
-		PullRequestUpdate update = getLatestUpdate();
-		if (update != null) {
-			return git.listChangedFiles(getTarget().getName(), update.getRefName());
-		} else {
-			return new ArrayList<>();
-		}
-	}
-
-	public boolean isMerged() {
-		if (merged == null) {
-			Git git = getTarget().getProject().getCodeRepo();
-			merged = git.checkAncestor(getLatestUpdate().getRefName(), getTarget().getName());
-		}
-		return merged;
-	}
-
-	public @Nullable
-	String getMergeBase() {
-		if (mergeBase == null) {
-			mergeBase = Optional.fromNullable(getTarget().getProject().getCodeRepo()
-					.calcMergeBase(getLatestUpdate().getRefName(), getTarget().getName()));
-		}
-		return mergeBase.orNull();
+		return git.listChangedFiles(getTarget().getHeadCommit(), getLatestUpdate().getHeadCommit());
 	}
 
 	/**
@@ -348,53 +292,147 @@ public class PullRequest extends AbstractEntity {
 		}
 
 	}
-
-	public CheckResult check() {
-		GateKeeper gateKeeper = getTarget().getProject().getGateKeeper();
-		lastCheckResult = gateKeeper.check(this);
-
-		VoteInvitationManager voteInvitationManager =
-				Gitop.getInstance(VoteInvitationManager.class);
-		for (VoteInvitation invitation : getVoteInvitations()) {
-			if (!lastCheckResult.canVote(invitation.getVoter(), this))
-				voteInvitationManager.delete(invitation);
-		}
-
-		if (lastCheckResult instanceof Pending || lastCheckResult instanceof Blocked) {
-			setStatus(Status.PENDING_APPROVAL);
-		} else if (lastCheckResult instanceof Rejected) {
-			setStatus(Status.PENDING_UPDATE);
-		} else {
-			setStatus(Status.PENDING_MERGE);
-		}
-
-		Gitop.getInstance(PullRequestManager.class).save(this);
-
-		return lastCheckResult;
+	
+	private String getMergeRef() {
+		return "refs/gitop/pulls/" + getId() + "/merge";
 	}
-
-	public void close() {
-		setStatus(Status.CLOSED);
-		Gitop.getInstance(PullRequestManager.class).save(this);
-	}
-
-	public void merge() {
-		Preconditions.checkState(getLastCheckResult() instanceof Accepted,
-				"Can only merge when gate keeper check is passed.");
-
-		// TODO: implement this
-
+	
+	/**
+	 * Refresh internal state of this pull request. Pull request should be refreshed when:
+	 * <li> It is updated 
+	 * <li> Head of target branch changes
+	 * <li> Some one vote against it
+	 * <li> CI system reports completion of build against relevant commits 
+	 */
+	public void refresh() {
 		Git git = getTarget().getProject().getCodeRepo();
-		git.updateRef("refs/heads/" + getTarget().getName(), 
-				getLatestUpdate().getCommitHash(), null, null);
+		String branchHead = getTarget().getHeadCommit();
+		String requestHead = getLatestUpdate().getHeadCommit();
+				
+		if (git.isAncestor(requestHead, branchHead)) {
+			status = Status.MERGED;
+		} else {
+			if (git.isAncestor(branchHead, requestHead)) {
+				mergeResult = new MergeResult(branchHead, requestHead, requestHead);
+				git.updateRef(getMergeRef(), requestHead, null, null);
+			} else {
+				if (mergeResult != null 
+						&& (!mergeResult.getBranchHead().equals(branchHead) 
+								|| !mergeResult.getRequestHead().equals(requestHead))) {
+					 // Commits for merging have been changed since last merge, we have to
+					 // re-merge 
+					mergeResult = null;
+				}
+				if (mergeResult != null && mergeResult.getMerged() != null 
+						&& !mergeResult.getMerged().equals(git.resolveRef(getMergeRef(), false))) {
+					 // Commits for merging have not been changed since last merge, but recorded 
+					 // merge is incorrect in repository, so we have to re-merge 
+					mergeResult = null;
+				}
+				if (mergeResult == null) {
+					File tempDir = FileUtils.createTempDir();
+					try {
+						Git tempGit = new Git(tempDir);
+						
+						 // Branch name here is not significant, we just use an existing branch
+						 // in cloned repository to hold mergeBase, so that we can merge with 
+						 // previousUpdate 
+						String branchName = getTarget().getName();
+						tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, branchName);
+						tempGit.updateRef("HEAD", requestHead, null, null);
+						tempGit.reset(null, null);
+						if (tempGit.merge(branchHead, null, null, null)) {
+							git.fetch(tempGit.repoDir().getAbsolutePath(), "+HEAD:" + getMergeRef());
+							mergeResult = new MergeResult(branchHead, requestHead, git.resolveRef(getMergeRef(), true));
+						} else {
+							mergeResult = new MergeResult(branchHead, requestHead, null);
+						}
+					} finally {
+						FileUtils.deleteDir(tempDir);
+					}
+				}
+			}
+			
+			GateKeeper gateKeeper = getTarget().getProject().getGateKeeper();
+			checkResult = gateKeeper.check(this);
+	
+			VoteInvitationManager voteInvitationManager =
+					Gitop.getInstance(VoteInvitationManager.class);
+			for (VoteInvitation invitation : getVoteInvitations()) {
+				if (!checkResult.canVote(invitation.getVoter(), this))
+					voteInvitationManager.delete(invitation);
+			}
+	
+			Preconditions.checkNotNull(mergeResult);
+			
+			if (checkResult instanceof Pending || checkResult instanceof Blocked) {
+				status = Status.PENDING_APPROVAL;
+			} else if (checkResult instanceof Rejected) {
+				status = Status.PENDING_UPDATE;
+			} else if (mergeResult.getMerged() == null) {
+				status = Status.PENDING_UPDATE;
+			} else {
+				status = Status.PENDING_MERGE;
+			}
+		}
 
-		setStatus(Status.MERGED);
 		Gitop.getInstance(PullRequestManager.class).save(this);
 	}
 
-	public boolean canMergeWithoutConflicts() {
-		// TODO: implement this
-		return true;
+	public void decline() {
+		status = Status.DECLINED;
+		Gitop.getInstance(PullRequestManager.class).save(this);
 	}
+	
+	public boolean merge() {
+		refresh();
+
+		if (status == Status.PENDING_MERGE) {
+			Git git = getTarget().getProject().getCodeRepo();
+			git.updateRef(getTarget().getHeadRef(), mergeResult.getMerged(), 
+					getTarget().getHeadCommit(), "merge pull request");
+			status = Status.MERGED;
+			Gitop.getInstance(PullRequestManager.class).save(this);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static class MergeResult implements Serializable {
+		
+		private final String branchHead;
+		
+		private final String requestHead;
+		
+		private final String merged;
+
+		public MergeResult(final String branchHead, final String requestHead, final String merged) {
+			this.branchHead = branchHead;
+			this.requestHead = requestHead;
+			this.merged = merged;
+		}
+
+		public String getBranchHead() {
+			return branchHead;
+		}
+
+		public String getRequestHead() {
+			return requestHead;
+		}
+
+		public String getMerged() {
+			return merged;
+		}
+		
+		public boolean isConflict() {
+			return merged == null;
+		}
+		
+		public boolean isFastForward() {
+			return requestHead.equals(merged);
+		}
+		
+	};
 
 }

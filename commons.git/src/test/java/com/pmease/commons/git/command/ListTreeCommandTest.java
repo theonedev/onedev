@@ -26,40 +26,40 @@ public class ListTreeCommandTest {
 		        
     		FileUtils.touchFile(new File(workGit.repoDir(), "a"));
     		workGit.add("a");
-    		workGit.commit("commit", false);
+    		workGit.commit("commit", false, false);
     		
     		FileUtils.touchFile(new File(workGit.repoDir(), "b"));
     		workGit.add("b");
-    		workGit.commit("commit", false);
+    		workGit.commit("commit", false, false);
     		
     		FileUtils.touchFile(new File(workGit.repoDir(), "c"));
     		workGit.add("c");
-    		workGit.commit("commit", false);
+    		workGit.commit("commit", false, false);
     		
     		FileUtils.touchFile(new File(workGit.repoDir(), "d"));
     		workGit.add("d");
-    		workGit.commit("commit", false);
+    		workGit.commit("commit", false, false);
     		
     		FileUtils.writeFile(new File(workGit.repoDir(), "a"), "a");
     		workGit.add("a");
-    		workGit.commit("commit", false);
+    		workGit.commit("commit", false, false);
     		
     		FileUtils.createDir(new File(workGit.repoDir(), "dir"));
     		FileUtils.writeFile(new File(workGit.repoDir(), "dir/file"), "hello world");
     		workGit.add("dir/file");
-    		workGit.commit("commit", false);
+    		workGit.commit("commit", false, false);
     		
 			Git moduleGit = new Git(new File(tempDir, "module"));
 			moduleGit.init(false);
 			FileUtils.writeFile(new File(moduleGit.repoDir(), "readme"), "readme");
-			moduleGit.add("readme").commit("commit", false);
+			moduleGit.add("readme").commit("commit", false, false);
 			
 			workGit.addSubModule(moduleGit.repoDir().getAbsolutePath(), "module");
-			workGit.commit("commit", false);
+			workGit.commit("commit", false, false);
 
     		workGit.checkout("dev", true);
     		workGit.remove("dir/file");
-    		workGit.commit("commit", false);
+    		workGit.commit("commit", false, false);
     		
 			Git bareGit = new Git(new File(tempDir, "bare"));
     		bareGit.clone(workGit.repoDir().getAbsolutePath(), true);

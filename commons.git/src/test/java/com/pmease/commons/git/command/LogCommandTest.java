@@ -25,34 +25,34 @@ public class LogCommandTest {
 		        
     		FileUtils.touchFile(new File(workGit.repoDir(), "a"));
     		workGit.add("a");
-    		workGit.commit("add a", false);
+    		workGit.commit("add a", false, false);
     		
     		FileUtils.touchFile(new File(workGit.repoDir(), "b"));
     		workGit.add("b");
-    		workGit.commit("add b", false);
+    		workGit.commit("add b", false, false);
     		
     		FileUtils.touchFile(new File(workGit.repoDir(), "c"));
     		workGit.add("c");
-    		workGit.commit("add c", false);
+    		workGit.commit("add c", false, false);
     		
     		FileUtils.touchFile(new File(workGit.repoDir(), "d"));
     		workGit.add("d");
-    		workGit.commit("add d", false);
+    		workGit.commit("add d", false, false);
     		
     		FileUtils.writeFile(new File(workGit.repoDir(), "a"), "a");
     		workGit.add("a");
-    		workGit.commit("modify a", false);
+    		workGit.commit("modify a", false, false);
     		
     		FileUtils.createDir(new File(workGit.repoDir(), "dir"));
     		FileUtils.writeFile(new File(workGit.repoDir(), "dir/file"), "hello world");
     		FileUtils.writeFile(new File(workGit.repoDir(), "dir/file2"), "hello world");
     		workGit.add("dir/file");
     		workGit.add("dir/file2");
-    		workGit.commit("add dir/file\nadd dir/file to test files under a directory", false);
+    		workGit.commit("add dir/file\nadd dir/file to test files under a directory", false, false);
     		
     		workGit.checkout("dev", true);
     		workGit.remove("dir/file");
-    		workGit.commit("remove dir/file", false);
+    		workGit.commit("remove dir/file", false, false);
     		
     		Git bareGit = new Git(new File(tempDir, "bare"));
     		bareGit.clone(workGit.repoDir().getAbsolutePath(), true);
@@ -72,10 +72,10 @@ public class LogCommandTest {
     		
     		assertEquals(null, commits.get(1).getNote());
     		
-    		workGit.checkout("master", false).remove("a").commit("remove a", false);
+    		workGit.checkout("master", false).remove("a").commit("remove a", false, false);
     		FileUtils.writeFile(new File(workGit.repoDir(), "dir/file2"), "file2");
-    		workGit.add("dir/file2").commit("add dir/file2", false);
-    		workGit.merge("dev", null);
+    		workGit.add("dir/file2").commit("add dir/file2", false, false);
+    		workGit.merge("dev", null, null, null);
     		
     		commits = workGit.log(null, "master", null, 0);
     		
@@ -87,8 +87,8 @@ public class LogCommandTest {
     		commits = workGit.log("dev", "master", "dir", 0);
     		assertEquals(commits.size(), 2);
 
-    		assertEquals(workGit.resolveCommit(commits.get(0).getHash()).getHash(), commits.get(0).getHash()); 
-    		assertEquals(workGit.resolveCommit(commits.get(1).getHash()).getHash(), commits.get(1).getHash()); 
+    		assertEquals(workGit.resolveRevision(commits.get(0).getHash()).getHash(), commits.get(0).getHash()); 
+    		assertEquals(workGit.resolveRevision(commits.get(1).getHash()).getHash(), commits.get(1).getHash()); 
 	    } finally {
 	        FileUtils.deleteDir(tempDir);
 	    }

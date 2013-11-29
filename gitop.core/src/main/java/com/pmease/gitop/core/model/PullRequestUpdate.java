@@ -1,5 +1,6 @@
 package com.pmease.gitop.core.model;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -13,7 +14,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import com.google.common.base.Preconditions;
+import com.pmease.commons.git.Commit;
+import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
+import com.pmease.commons.util.FileUtils;
 
 @SuppressWarnings("serial")
 @Entity
@@ -28,11 +33,12 @@ public class PullRequestUpdate extends AbstractEntity {
 	
 	private Date date = new Date();
 	
-	@Column(nullable=false)
-	private String commitHash;
-
 	@OneToMany(mappedBy="update", cascade=CascadeType.REMOVE)
 	private Collection<Vote> votes = new ArrayList<Vote>();
+	
+	private transient String headCommit;
+	
+	private transient String baseCommit;
 	
 	public PullRequest getRequest() {
 		return request;
@@ -58,14 +64,6 @@ public class PullRequestUpdate extends AbstractEntity {
 		this.date = date;
 	}
 
-	public String getCommitHash() {
-        return commitHash;
-    }
-
-    public void setCommitHash(String commitHash) {
-        this.commitHash = commitHash;
-    }
-
     public Collection<Vote> getVotes() {
 		return votes;
 	}
@@ -74,8 +72,81 @@ public class PullRequestUpdate extends AbstractEntity {
 		this.votes = votes;
 	}
 
-	public String getRefName() {
-		return "refs/gitop/updates/" + getId();
+	public String getHeadRef() {
+		return "refs/gitop/updates/" + getId() + "/head";
+	}
+	
+	public String getHeadCommit() {
+		if (headCommit == null) 
+			headCommit = getRequest().getTarget().getProject().getCodeRepo().resolveRef(getHeadRef(), true);
+		return headCommit;
+	}
+	
+	/**
+	 * Calculate base commit for change calculation of this update. Base commit is merged 
+	 * commit of:
+	 * <li> merge base of head ref and target branch head
+	 * <li> head ref of previous update
+	 * Changed files of this update will be calculated between change base and head ref
+	 * and this effectively represents changes made since previous update with merged 
+	 * changes from target branch excluded if there is any.  
+	 *  
+	 * @return
+	 * 			base commit used for change calculation of current update
+	 */
+	public String getBaseCommit() {
+		if (baseCommit == null) {
+			Git git = getRequest().getTarget().getProject().getCodeRepo();
+			String mergeBase = git.calcMergeBase(getHeadCommit(), getRequest().getTarget().getHeadCommit());
+			int index = getRequest().getSortedUpdates().indexOf(this);
+			Preconditions.checkState(index != -1);
+			
+			String previousUpdate;
+			if (index == 0) {
+				previousUpdate = mergeBase;
+			} else {
+				previousUpdate = getRequest().getSortedUpdates().get(index-1).getHeadCommit();
+			}
+	
+			if (git.isAncestor(previousUpdate, mergeBase)) { 
+				baseCommit = mergeBase;
+			} else if (git.isAncestor(mergeBase, previousUpdate)) {
+				baseCommit = previousUpdate;
+			} else {
+				String baseRef = "refs/gitop/updates/" + getId() + "/base";
+				baseCommit = git.resolveRef(baseRef, false);
+
+				if (baseCommit != null) {
+					Commit commit = git.resolveRevision(baseCommit);
+					if (!commit.getParentHashes().contains(mergeBase) || !commit.getParentHashes().contains(previousUpdate)) 
+						baseCommit = null;
+				} 
+				
+				if (baseCommit == null) {
+					File tempDir = FileUtils.createTempDir();
+					try {
+						Git tempGit = new Git(tempDir);
+						
+						/*
+						 * Branch name here is not significant, we just use an existing branch
+						 * in cloned repository to hold mergeBase, so that we can merge with 
+						 * previousUpdate 
+						 */
+						String branchName = getRequest().getTarget().getName();
+						tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, branchName);
+						tempGit.updateRef("HEAD", mergeBase, null, null);
+						tempGit.reset(null, null);
+						Preconditions.checkState(tempGit.merge(previousUpdate, null, "ours", null));
+						git.fetch(tempGit.repoDir().getAbsolutePath(), "+HEAD:" + baseRef);
+						baseCommit = git.resolveRef(baseRef, true);
+					} finally {
+						FileUtils.deleteDir(tempDir);
+					}
+				}
+			}
+		}
+		
+		return baseCommit;
 	}
 	
 	/**

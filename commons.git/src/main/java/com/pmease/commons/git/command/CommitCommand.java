@@ -11,6 +11,8 @@ public class CommitCommand extends GitCommand<Void> {
 	
 	private boolean amend;
 	
+	private boolean add;
+	
 	public CommitCommand(final File repoDir) {
 		super(repoDir);
 	}
@@ -24,6 +26,11 @@ public class CommitCommand extends GitCommand<Void> {
 		this.amend = amend;
 		return this;
 	}
+	
+	public CommitCommand add(final boolean add) {
+		this.add = add;
+		return this;
+	}
 
 	@Override
 	public Void call() {
@@ -32,6 +39,8 @@ public class CommitCommand extends GitCommand<Void> {
 		Commandline cmd = cmd().addArgs("commit");
 		
 		cmd.addArgs("-m", message);
+		if (add)
+			cmd.addArgs("-a");
 		if (amend) 
 			cmd.addArgs("--amend");
 		

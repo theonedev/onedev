@@ -14,7 +14,6 @@ import com.pmease.commons.git.command.AddNoteCommand;
 import com.pmease.commons.git.command.AddSubModuleCommand;
 import com.pmease.commons.git.command.BlameCommand;
 import com.pmease.commons.git.command.CalcMergeBaseCommand;
-import com.pmease.commons.git.command.CheckAncestorCommand;
 import com.pmease.commons.git.command.CheckoutCommand;
 import com.pmease.commons.git.command.CloneCommand;
 import com.pmease.commons.git.command.CommitCommand;
@@ -22,6 +21,7 @@ import com.pmease.commons.git.command.DeleteRefCommand;
 import com.pmease.commons.git.command.DiffCommand;
 import com.pmease.commons.git.command.FetchCommand;
 import com.pmease.commons.git.command.InitCommand;
+import com.pmease.commons.git.command.IsAncestorCommand;
 import com.pmease.commons.git.command.IsBinaryCommand;
 import com.pmease.commons.git.command.ListBranchesCommand;
 import com.pmease.commons.git.command.ListChangedFilesCommand;
@@ -33,6 +33,7 @@ import com.pmease.commons.git.command.MergeCommand;
 import com.pmease.commons.git.command.RemoveCommand;
 import com.pmease.commons.git.command.ResetCommand;
 import com.pmease.commons.git.command.ShowCommand;
+import com.pmease.commons.git.command.ShowRefCommand;
 import com.pmease.commons.git.command.UpdateRefCommand;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.GeneralException;
@@ -81,7 +82,7 @@ public class Git implements Serializable {
 		return this;
 	}
 
-	public Commit resolveCommit(String revision) {
+	public Commit resolveRevision(String revision) {
 		List<Commit> commits = new LogCommand(repoDir).toRev(revision).maxCommits(1).call();
 		Preconditions.checkState(commits.size() == 1);
 		return commits.get(0);
@@ -120,7 +121,7 @@ public class Git implements Serializable {
 		return this;
 	}
 
-	public Git commit(String message, boolean amend) {
+	public Git commit(String message, boolean add, boolean amend) {
 		new CommitCommand(repoDir).message(message).amend(amend).call();
 		return this;
 	}
@@ -146,22 +147,56 @@ public class Git implements Serializable {
 		return this;
 	}
 
-	public Git merge(String revision, @Nullable String message) {
-		new MergeCommand(repoDir).revision(revision).message(message).call();
-		return this;
+	public boolean merge(String revision, @Nullable String strategy, 
+			@Nullable String strategyOption, @Nullable String message) {
+		return new MergeCommand(repoDir).revision(revision).message(message).call();
 	}
 
 	public Git fetch(String from, String refspec) {
 		new FetchCommand(repoDir).from(from).refspec(refspec).call();
 		return this;
 	}
+	
+	public List<RefInfo> showRefs(String pattern) {
+		return new ShowRefCommand(repoDir).pattern(pattern).call();
+	}
+	
+	/**
+	 * Resolve commit hash of specified ref name. 
+	 * 
+	 * @param refName
+	 * 			ref name to be resolved
+	 * @param shouldExist
+	 * 			indicate whether or not the ref should already exist
+	 * @return
+	 * 			commit hash of specified ref name, or <tt>null</tt> if ref name 
+	 * 			does not exist, and <tt>shouldExist</tt> is specified as 
+	 * 			<tt>false</tt>
+	 * @throws
+	 * 			IllegalStateException if multiple refs matching specified ref 
+	 * 			name, or specified ref does not exist while <tt>shouldExist<tt>
+	 * 			is specified as <tt>true</tt>
+	 */
+	public @Nullable String resolveRef(String refName, boolean shouldExist) {
+		List<RefInfo> refs = showRefs(refName);
+		if (refs.isEmpty()) {
+			if (shouldExist)
+				throw new IllegalStateException();
+			else
+				return null;
+		} else if (refs.size() == 1) {
+			return refs.get(0).getCommitHash();
+		} else {
+			throw new IllegalStateException();
+		}
+	}
 
 	public String calcMergeBase(String rev1, String rev2) {
 		return new CalcMergeBaseCommand(repoDir).rev1(rev1).rev2(rev2).call();
 	}
 	
-	public boolean checkAncestor(String ancestor, String descendant) {
-		return new CheckAncestorCommand(repoDir).ancestor(ancestor).descendant(descendant).call();
+	public boolean isAncestor(String ancestor, String descendant) {
+		return new IsAncestorCommand(repoDir).ancestor(ancestor).descendant(descendant).call();
 	}
 	
 	public Collection<String> listBranches() {

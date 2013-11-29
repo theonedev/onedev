@@ -41,7 +41,7 @@ public class PullRequestsPage extends AbstractLayoutPage {
                 List<PullRequest> pullRequests = new ArrayList<PullRequest>();
                 for (Branch branch: Gitop.getInstance(BranchManager.class).query()) {
                 	for (PullRequest request: branch.getIngoingRequests()) {
-                		if (request.getStatus() != PullRequest.Status.CLOSED && request.getLastCheckResult() != null)
+                		if (request.getStatus() != PullRequest.Status.DECLINED && request.getCheckResult() != null)
                 			pullRequests.add(request);
                 	}
                 }
@@ -58,7 +58,7 @@ public class PullRequestsPage extends AbstractLayoutPage {
 
                 requestItem.add(new Label("status", request.getStatus().toString()));
                 
-                requestItem.add(new ListView<String>("reasons", request.getLastCheckResult().getReasons()) {
+                requestItem.add(new ListView<String>("reasons", request.getCheckResult().getReasons()) {
 
                     @Override
                     protected void populateItem(ListItem<String> item) {
@@ -87,7 +87,7 @@ public class PullRequestsPage extends AbstractLayoutPage {
 					@Override
 					public void onClick() {
 						PullRequest request = requestItem.getModelObject();
-						request.close();
+						request.decline();
 					}
                 	
                 });
@@ -106,7 +106,7 @@ public class PullRequestsPage extends AbstractLayoutPage {
                         PullRequestUpdate update = updateItem.getModelObject();
                         updateItem.add(new Label("title", update.getSubject()));
                         
-                        updateItem.add(new Label("commitHash", update.getCommitHash()));
+                        updateItem.add(new Label("commitHash", update.getHeadCommit()));
 
                         Collection<String> approvedUsers = new ArrayList<>();
                         Collection<String> rejectedUsers = new ArrayList<>();
@@ -131,7 +131,7 @@ public class PullRequestsPage extends AbstractLayoutPage {
                     	List<User> usersCanVote = new ArrayList<>();
                     	PullRequest request = requestItem.getModelObject();
                     	for (User user: Gitop.getInstance(UserManager.class).query()) {
-                    		if (request.getLastCheckResult().canVote(user, request))
+                    		if (request.getCheckResult().canVote(user, request))
                     			usersCanVote.add(user);
                     	}
                     	
@@ -157,7 +157,7 @@ public class PullRequestsPage extends AbstractLayoutPage {
                                 vote.getVoter().getVotes().add(vote);
                                 Gitop.getInstance(VoteManager.class).save(vote);
                                 
-                                requestItem.getModelObject().check();
+                                requestItem.getModelObject().refresh();
                             }
                             
                         });
@@ -173,7 +173,7 @@ public class PullRequestsPage extends AbstractLayoutPage {
                                 vote.getVoter().getVotes().add(vote);
                                 Gitop.getInstance(VoteManager.class).save(vote);
 
-                                requestItem.getModelObject().check();
+                                requestItem.getModelObject().refresh();
                             }
                             
                         });

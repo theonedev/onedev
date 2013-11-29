@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.google.common.base.Objects;
+import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
 
 @SuppressWarnings("serial")
@@ -40,6 +41,8 @@ public class Branch extends AbstractEntity {
 
     @OneToMany(mappedBy="source", cascade=CascadeType.REMOVE)
     private Collection<PullRequest> outgoingRequests = new ArrayList<PullRequest>();
+    
+    private transient String headCommit;
 
     public Project getProject() {
 		return project;
@@ -87,6 +90,18 @@ public class Branch extends AbstractEntity {
 
     public void setOutgoingRequests(Collection<PullRequest> outgoingRequests) {
         this.outgoingRequests = outgoingRequests;
+    }
+    
+    public String getHeadCommit() {
+    	if (headCommit == null) {
+	    	Git git = getProject().getCodeRepo();
+	    	headCommit = git.resolveRef(getHeadRef(), true);
+    	} 
+    	return headCommit;
+    }
+    
+    public String getHeadRef() {
+    	return "refs/heads/" + name; 
     }
 
     @Override

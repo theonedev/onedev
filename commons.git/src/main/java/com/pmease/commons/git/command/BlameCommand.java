@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blame;
 import com.pmease.commons.git.BriefCommit;
+import com.pmease.commons.git.UserInfo;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
@@ -122,8 +123,11 @@ public class BlameCommand extends GitCommand<List<Blame>> {
         private String summary;
         
     	private BriefCommit build() {
-    		return new BriefCommit(hash, committer, committerEmail, committerDate, 
-    				author, authorEmail, authorDate, summary.trim());
+    		return new BriefCommit(
+    				hash, 
+    				new UserInfo(committer, committerEmail, committerDate), 
+    				new UserInfo(author, authorEmail, authorDate), 
+    				summary.trim());
     	}
     }
 }

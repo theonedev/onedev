@@ -18,14 +18,14 @@ import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitop.core.gatekeeper.checkresult.Rejected;
 import com.pmease.gitop.core.manager.BranchManager;
+import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.core.manager.PullRequestUpdateManager;
-import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.StorageManager;
 import com.pmease.gitop.core.model.Branch;
+import com.pmease.gitop.core.model.Project;
 import com.pmease.gitop.core.model.PullRequest;
 import com.pmease.gitop.core.model.PullRequestUpdate;
-import com.pmease.gitop.core.model.Project;
 import com.pmease.gitop.core.model.User;
 
 @SuppressWarnings("serial")
@@ -62,7 +62,12 @@ public class PreReceiveServlet extends CallbackServlet {
 	protected void callback(Project project, String callbackData, Output output) {
 		List<String> splitted = StringUtils.splitAndTrim(callbackData, " ");
 
-//		String oldCommitHash = splitted.get(0);
+		String oldCommitHash = splitted.get(0);
+		
+		// User with write permission can create new branch
+		if (oldCommitHash.equals(Commit.ZERO_HASH))
+			return;
+		
 		String newCommitHash = splitted.get(1);
 		String branchName = splitted.get(2);
 		
@@ -76,7 +81,7 @@ public class PreReceiveServlet extends CallbackServlet {
 		User user = User.getCurrent();
 		Preconditions.checkNotNull(user, "User pushing commits is unknown.");
 
-		PullRequest request = pullRequestManager.findOpened(branch, null, user);
+		PullRequest request = pullRequestManager.findOpen(branch, null, user);
 		if (request == null) {
 			request = new PullRequest();
 			request.setAutoCreated(true);
@@ -87,24 +92,21 @@ public class PreReceiveServlet extends CallbackServlet {
 			pullRequestManager.save(request);
 		} 
 
-		if (request.getLatestUpdate() == null 
-				|| !request.getLatestUpdate().getCommitHash().equals(newCommitHash)) {
+		if (!request.getLatestUpdate().getHeadCommit().equals(newCommitHash)) {
 			
 			Git git = new Git(storageManager.getStorage(project).ofCode());
 	
 			PullRequestUpdate update = new PullRequestUpdate();
-			update.setCommitHash(newCommitHash);
 			update.setRequest(request);
-			Commit commit = git.resolveCommit(newCommitHash);
+			Commit commit = git.resolveRevision(newCommitHash);
 			update.setSubject(commit.getSummary());
 			request.getUpdates().add(update);
 			
-			request.updatesChanged();
-	
 			pullRequestUpdateManager.save(update);
 		}
-
-		CheckResult checkResult = request.check();
+		
+		request.refresh();
+		CheckResult checkResult = request.getCheckResult(); 
 
 		if (checkResult instanceof Rejected) {
 			output.markError();
