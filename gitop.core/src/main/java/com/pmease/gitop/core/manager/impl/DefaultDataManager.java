@@ -17,11 +17,11 @@ import com.pmease.commons.util.init.Skippable;
 import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.core.manager.DataManager;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.core.model.Config;
-import com.pmease.gitop.core.model.Config.Key;
-import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.setting.MailSetting;
 import com.pmease.gitop.core.setting.StorageSetting;
+import com.pmease.gitop.model.Config;
+import com.pmease.gitop.model.Config.Key;
+import com.pmease.gitop.model.User;
 
 @Singleton
 public class DefaultDataManager implements DataManager, Serializable {

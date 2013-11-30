@@ -1,22 +1,24 @@
 package com.pmease.gitop.core;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 
 import org.hibernate.cfg.NamingStrategy;
 
-import com.google.common.collect.Sets;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.ModelProvider;
 import com.pmease.commons.hibernate.PrefixedNamingStrategy;
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
+import com.pmease.commons.loader.ImplementationProvider;
 import com.pmease.commons.util.ClassUtils;
-import com.pmease.gitop.core.model.ModelLocator;
-import com.pmease.gitop.core.validation.ProjectNameReservation;
-import com.pmease.gitop.core.validation.UserNameReservation;
+import com.pmease.gitop.core.gatekeeper.MoreGateKeepers;
+import com.pmease.gitop.core.manager.impl.DefaultStorageManager;
+import com.pmease.gitop.model.ModelLocator;
+import com.pmease.gitop.model.gatekeeper.GateKeeper;
+import com.pmease.gitop.model.storage.StorageManager;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -44,28 +46,23 @@ public class CoreModule extends AbstractPluginModule {
 		
 		contribute(ServletConfigurator.class, CoreServletConfigurator.class);
 		
-		/*
-		 * Contribute empty reservations to avoid Guice complain 
-		 */
-		contribute(UserNameReservation.class, new UserNameReservation() {
+		contribute(ImplementationProvider.class, new ImplementationProvider() {
 			
 			@Override
-			public Set<String> getReserved() {
-				return Sets.newHashSet();
+			public Collection<Class<?>> getImplementations() {
+				Collection<Class<?>> implementations = new ArrayList<>();
+				for (Class<?> each: ClassUtils.findImplementations(GateKeeper.class, MoreGateKeepers.class)) 
+					implementations.add(each);
+				return implementations;
+			}
+			
+			@Override
+			public Class<?> getAbstractClass() {
+				return GateKeeper.class;
 			}
 		});
 
-		/*
-		 * Contribute empty reservations to avoid Guice complain 
-		 */
-		contribute(ProjectNameReservation.class, new ProjectNameReservation() {
-			
-			@Override
-			public Set<String> getReserved() {
-				return Sets.newHashSet();
-			}
-		});
-
+		bind(StorageManager.class).to(DefaultStorageManager.class);
 	}
 
 	@Override

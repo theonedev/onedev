@@ -3,7 +3,9 @@ package com.pmease.gitop.web.page;
 import org.apache.shiro.SecurityUtils;
 
 import com.google.common.base.Optional;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.UserManager;
+import com.pmease.gitop.model.User;
 
 @SuppressWarnings("serial")
 public abstract class AbstractLayoutPage extends BasePage {
@@ -15,7 +17,7 @@ public abstract class AbstractLayoutPage extends BasePage {
 	}
 	
 	protected Optional<User> currentUser() {
-	    return Optional.<User>fromNullable(User.getCurrent());
+	    return Optional.<User>fromNullable(Gitop.getInstance(UserManager.class).getCurrent());
 	}
 	
 	protected boolean isLoggedIn() {

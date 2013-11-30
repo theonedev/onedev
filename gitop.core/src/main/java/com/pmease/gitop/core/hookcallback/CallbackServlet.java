@@ -16,8 +16,8 @@ import org.apache.shiro.SecurityUtils;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.core.model.Project;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.User;
 
 @SuppressWarnings("serial")
 public abstract class CallbackServlet extends HttpServlet {

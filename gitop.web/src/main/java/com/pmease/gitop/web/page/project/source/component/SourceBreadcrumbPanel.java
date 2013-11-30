@@ -29,7 +29,7 @@ import com.google.common.collect.Maps;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
-import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.component.tab.BootstrapTabbedPanel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.source.ProjectHomePage;
@@ -50,7 +50,7 @@ public class SourceBreadcrumbPanel extends AbstractSourcePagePanel {
 
 			@Override
 			protected Map<RefType, List<String>> load() {
-				Git git = getProject().getCodeRepo();
+				Git git = getProject().code();
 				Map<RefType, List<String>> map = Maps.newHashMapWithExpectedSize(RefType.values().length);
 				map.put(RefType.BRANCH, Lists.newArrayList(git.listBranches()));
 				map.put(RefType.TAG, Lists.newArrayList(git.listTags()));

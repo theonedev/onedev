@@ -11,14 +11,16 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.BranchManager;
-import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.core.model.Branch;
-import com.pmease.gitop.core.model.PullRequest;
-import com.pmease.gitop.core.model.PullRequestUpdate;
-import com.pmease.gitop.core.model.Project;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.core.manager.PullRequestManager;
+import com.pmease.gitop.core.manager.UserManager;
+import com.pmease.gitop.model.Branch;
+import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.PullRequestUpdate;
+import com.pmease.gitop.model.User;
 
 @SuppressWarnings("serial")
 @Singleton
@@ -64,7 +66,7 @@ public class PostReceiveServlet extends CallbackServlet {
 
 		Branch branch = branchManager.find(project, branchName, true);
 
-		User user = User.getCurrent();
+		User user = Gitop.getInstance(UserManager.class).getCurrent();
 		Preconditions.checkNotNull(user, "User pushing commits is unknown.");
 
 		PullRequest request = pullRequestManager.findOpen(branch, null, user);

@@ -17,14 +17,15 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.BranchManager;
+import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.manager.VoteManager;
-import com.pmease.gitop.core.model.Branch;
-import com.pmease.gitop.core.model.PullRequest;
-import com.pmease.gitop.core.model.PullRequestUpdate;
-import com.pmease.gitop.core.model.User;
-import com.pmease.gitop.core.model.Vote;
-import com.pmease.gitop.core.model.VoteInvitation;
+import com.pmease.gitop.model.Branch;
+import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.PullRequestUpdate;
+import com.pmease.gitop.model.User;
+import com.pmease.gitop.model.Vote;
+import com.pmease.gitop.model.VoteInvitation;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
 
 @SuppressWarnings("serial")
@@ -72,7 +73,7 @@ public class PullRequestsPage extends AbstractLayoutPage {
 					@Override
 					public void onClick() {
 						PullRequest request = requestItem.getModelObject();
-						request.merge();
+						Gitop.getInstance(PullRequestManager.class).merge(request);
 					}
 
                 };
@@ -87,7 +88,7 @@ public class PullRequestsPage extends AbstractLayoutPage {
 					@Override
 					public void onClick() {
 						PullRequest request = requestItem.getModelObject();
-						request.decline();
+						Gitop.getInstance(PullRequestManager.class).decline(request);
 					}
                 	
                 });
@@ -157,7 +158,7 @@ public class PullRequestsPage extends AbstractLayoutPage {
                                 vote.getVoter().getVotes().add(vote);
                                 Gitop.getInstance(VoteManager.class).save(vote);
                                 
-                                requestItem.getModelObject().refresh();
+                                Gitop.getInstance(PullRequestManager.class).refresh(requestItem.getModelObject());
                             }
                             
                         });
@@ -172,8 +173,7 @@ public class PullRequestsPage extends AbstractLayoutPage {
                                 vote.setVoter(userItem.getModelObject());
                                 vote.getVoter().getVotes().add(vote);
                                 Gitop.getInstance(VoteManager.class).save(vote);
-
-                                requestItem.getModelObject().refresh();
+                                Gitop.getInstance(PullRequestManager.class).refresh(requestItem.getModelObject());
                             }
                             
                         });

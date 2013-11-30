@@ -9,10 +9,11 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.pattern.WildcardUtils;
-import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitop.core.manager.StorageManager;
-import com.pmease.gitop.core.model.PullRequest;
-import com.pmease.gitop.core.model.PullRequestUpdate;
+import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.PullRequestUpdate;
+import com.pmease.gitop.model.gatekeeper.AbstractGateKeeper;
+import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitop.model.storage.StorageManager;
 
 @SuppressWarnings("serial")
 @Editable

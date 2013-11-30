@@ -15,7 +15,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.GitopWebApp;
 import com.pmease.gitop.web.component.avatar.AvatarImageResourceReference;
 import com.pmease.gitop.web.util.Gravatar;

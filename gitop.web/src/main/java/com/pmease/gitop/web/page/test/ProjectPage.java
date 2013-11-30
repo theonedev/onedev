@@ -7,7 +7,7 @@ import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
 
 @SuppressWarnings("serial")

@@ -10,7 +10,7 @@ import javax.inject.Singleton;
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitop.core.manager.ConfigManager;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.model.User;
 
 @Singleton
 public class SitePaths {

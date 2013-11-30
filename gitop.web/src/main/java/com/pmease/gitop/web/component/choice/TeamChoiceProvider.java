@@ -15,7 +15,7 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.TeamManager;
-import com.pmease.gitop.core.model.Team;
+import com.pmease.gitop.model.Team;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 

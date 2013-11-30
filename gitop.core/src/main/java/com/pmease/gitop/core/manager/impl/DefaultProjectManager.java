@@ -3,8 +3,6 @@ package com.pmease.gitop.core.manager.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -24,17 +22,14 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.hookcallback.PostReceiveServlet;
 import com.pmease.gitop.core.hookcallback.PreReceiveServlet;
 import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.core.manager.StorageManager;
-import com.pmease.gitop.core.model.Project;
-import com.pmease.gitop.core.model.User;
 import com.pmease.gitop.core.setting.ServerConfig;
-import com.pmease.gitop.core.storage.ProjectStorage;
-import com.pmease.gitop.core.validation.ProjectNameReservation;
+import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.User;
+import com.pmease.gitop.model.storage.ProjectStorage;
+import com.pmease.gitop.model.storage.StorageManager;
 
 @Singleton
 public class DefaultProjectManager extends AbstractGenericDao<Project> implements ProjectManager {
-
-    private final Set<ProjectNameReservation> nameReservations;
 
     private final StorageManager storageManager;
     
@@ -43,13 +38,11 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
     private final String hookTemplate;
 
     @Inject
-    public DefaultProjectManager(GeneralDao generalDao, StorageManager storageManager,
-            ServerConfig serverConfig, Set<ProjectNameReservation> nameReservations) {
+    public DefaultProjectManager(GeneralDao generalDao, StorageManager storageManager, ServerConfig serverConfig) {
         super(generalDao);
 
         this.storageManager = storageManager;
         this.serverConfig = serverConfig;
-        this.nameReservations = nameReservations;
         
         InputStream is = getClass().getClassLoader().getResourceAsStream("git-hook-template");
         Preconditions.checkNotNull(is);
@@ -120,15 +113,6 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
 
         criteria.setMaxResults(1);
         return (Project) criteria.uniqueResult();
-    }
-
-    @Override
-    public Set<String> getReservedNames() {
-        Set<String> reservedNames = new HashSet<String>();
-        for (ProjectNameReservation each : nameReservations)
-            reservedNames.addAll(each.getReserved());
-
-        return reservedNames;
     }
 
     @Sessional

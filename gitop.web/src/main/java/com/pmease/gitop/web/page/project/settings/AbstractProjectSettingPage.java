@@ -12,7 +12,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.ImmutableList;
-import com.pmease.gitop.core.permission.ObjectPermission;
+import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.AbstractProjectPage;
 

@@ -5,7 +5,7 @@ import org.apache.wicket.markup.html.image.NonCachingImage;
 import org.apache.wicket.model.IModel;
 
 import com.google.common.base.Preconditions;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.GitopWebApp;
 import com.pmease.gitop.web.util.Gravatar;
 

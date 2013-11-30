@@ -34,17 +34,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.pmease</groupId>
-			<artifactId>commons.shiro</artifactId>
-			<version>1.0.30</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
 			<artifactId>commons.git</artifactId>
-			<version>1.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.editable</artifactId>
 			<version>1.0.0</version>
 		</dependency>
 		<dependency>
@@ -58,6 +48,11 @@
 			<version>1.0.31</version>
 			<type>test-jar</type>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.pmease</groupId>
+			<artifactId>gitop.model</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 	</dependencies>
 	<repositories>

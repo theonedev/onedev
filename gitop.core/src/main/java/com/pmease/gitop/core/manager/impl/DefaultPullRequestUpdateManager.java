@@ -6,7 +6,7 @@ import javax.inject.Singleton;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.PullRequestUpdateManager;
-import com.pmease.gitop.core.model.PullRequestUpdate;
+import com.pmease.gitop.model.PullRequestUpdate;
 
 @Singleton
 public class DefaultPullRequestUpdateManager extends AbstractGenericDao<PullRequestUpdate>

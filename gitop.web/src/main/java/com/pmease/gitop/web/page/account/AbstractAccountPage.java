@@ -9,7 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
 import com.pmease.gitop.web.page.PageSpec;

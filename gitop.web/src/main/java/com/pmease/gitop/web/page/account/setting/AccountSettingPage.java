@@ -24,8 +24,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.core.model.User;
-import com.pmease.gitop.core.permission.ObjectPermission;
+import com.pmease.gitop.model.User;
+import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.GitopFacade;
 import com.pmease.gitop.web.component.avatar.AvatarImage;
 import com.pmease.gitop.web.component.link.UserAvatarLink;
@@ -75,7 +75,7 @@ public abstract class AccountSettingPage extends AbstractLayoutPage {
 		String name = params.get(PageSpec.USER).toString();
 		User user = null;
 		if (Strings.isNullOrEmpty(name)) {
-			user = User.getCurrent();
+			user = Gitop.getInstance(UserManager.class).getCurrent();
 			if (user == null) {
 				throw new AccessDeniedException();
 			}
@@ -90,7 +90,7 @@ public abstract class AccountSettingPage extends AbstractLayoutPage {
 	}
 	
 	protected PageParameters newAccountParams() {
-		if (Objects.equal(getAccount(), User.getCurrent())) {
+		if (Objects.equal(getAccount(), Gitop.getInstance(UserManager.class).getCurrent())) {
 			return new PageParameters();
 		} else {
 			return PageSpec.forUser(getAccount());
@@ -129,7 +129,7 @@ public abstract class AccountSettingPage extends AbstractLayoutPage {
 
 			@Override
 			protected List<User> load() {
-				List<User> users = Gitop.getInstance(GitopFacade.class).getManagableUsers(User.getCurrent());
+				List<User> users = Gitop.getInstance(GitopFacade.class).getManagableUsers(Gitop.getInstance(UserManager.class).getCurrent());
 				List<User> result = Lists.newArrayList();
 				
 				for (User each : users) {
@@ -151,7 +151,7 @@ public abstract class AccountSettingPage extends AbstractLayoutPage {
 				
 				PageParameters params;
 				
-				if (Objects.equal(user, User.getCurrent())) {
+				if (Objects.equal(user, Gitop.getInstance(UserManager.class).getCurrent())) {
 					params = new PageParameters();
 				} else {
 					params = PageSpec.forUser(user);

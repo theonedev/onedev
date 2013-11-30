@@ -18,7 +18,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.google.common.base.Objects;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.GitopSession;
 import com.pmease.gitop.web.common.form.FeedbackPanel;
 import com.pmease.gitop.web.common.form.passwordfield.PasswordFieldElement;

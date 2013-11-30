@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.wicket.model.IModel;
 
-import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.model.Project;
 
 @SuppressWarnings("serial")
 public class ReadmePanel extends AbstractSourcePagePanel {

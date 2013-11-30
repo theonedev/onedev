@@ -33,7 +33,12 @@
             <groupId>com.pmease</groupId>  
             <artifactId>gitop.security</artifactId>  
             <version>1.0.0</version> 
-        </dependency> 
+        </dependency>
+        <dependency>
+        	<groupId>com.pmease</groupId>
+        	<artifactId>gitop.model</artifactId>
+        	<version>1.0.0</version>
+        </dependency>
     </dependencies>  
     <repositories> 
         <repository> 

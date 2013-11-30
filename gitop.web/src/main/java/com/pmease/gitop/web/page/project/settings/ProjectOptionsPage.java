@@ -19,7 +19,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.component.messenger.Messenger;
 import com.pmease.gitop.web.common.component.vex.AjaxConfirmLink;
 import com.pmease.gitop.web.common.form.FeedbackPanel;

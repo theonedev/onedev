@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.pmease.gitop.core.permission.operation.GeneralOperation;
+import com.pmease.gitop.model.permission.operation.GeneralOperation;
 
 public class EnumUtilsTest {
 

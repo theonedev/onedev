@@ -19,8 +19,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Lists;
-import com.pmease.gitop.core.model.Project;
-import com.pmease.gitop.core.permission.ObjectPermission;
+import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.api.ProjectTabContribution;
 import com.pmease.gitop.web.page.project.api.ProjectTabGroup;

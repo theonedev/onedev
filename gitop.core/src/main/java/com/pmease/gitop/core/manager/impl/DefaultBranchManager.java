@@ -13,8 +13,8 @@ import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.util.namedentity.EntityLoader;
 import com.pmease.commons.util.namedentity.NamedEntity;
 import com.pmease.gitop.core.manager.BranchManager;
-import com.pmease.gitop.core.model.Branch;
-import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.model.Branch;
+import com.pmease.gitop.model.Project;
 
 @Singleton
 public class DefaultBranchManager extends AbstractGenericDao<Branch> implements BranchManager {

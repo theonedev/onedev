@@ -12,9 +12,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.google.common.collect.Lists;
-import com.pmease.gitop.core.model.Project;
-import com.pmease.gitop.core.model.User;
-import com.pmease.gitop.core.permission.ObjectPermission;
+import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.User;
+import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.component.link.ProjectHomeLink;
 import com.pmease.gitop.web.model.ProjectModel;
 import com.pmease.gitop.web.page.PageSpec;

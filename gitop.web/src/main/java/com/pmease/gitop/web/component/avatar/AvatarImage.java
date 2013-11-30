@@ -11,8 +11,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Strings;
-import com.pmease.gitop.core.model.Project;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.User;
 
 @StatelessComponent
 public class AvatarImage extends Panel {

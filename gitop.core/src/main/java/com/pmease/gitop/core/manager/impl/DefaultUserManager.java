@@ -1,8 +1,5 @@
 package com.pmease.gitop.core.manager.impl;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -20,28 +17,24 @@ import com.pmease.commons.util.namedentity.NamedEntity;
 import com.pmease.gitop.core.manager.MembershipManager;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.core.model.Membership;
-import com.pmease.gitop.core.model.Team;
-import com.pmease.gitop.core.model.User;
-import com.pmease.gitop.core.permission.operation.GeneralOperation;
-import com.pmease.gitop.core.validation.UserNameReservation;
+import com.pmease.gitop.model.Membership;
+import com.pmease.gitop.model.Team;
+import com.pmease.gitop.model.User;
+import com.pmease.gitop.model.permission.operation.GeneralOperation;
 
 @Singleton
 public class DefaultUserManager extends AbstractGenericDao<User> implements UserManager {
 
     private volatile Long rootId;
 
-    private final Set<UserNameReservation> nameReservations;
-
     private final TeamManager teamManager;
     private final MembershipManager membershipManager;
     
     @Inject
-    public DefaultUserManager(GeneralDao generalDao, Set<UserNameReservation> nameReservations,
-    		TeamManager teamManager, MembershipManager membershipManager) {
+    public DefaultUserManager(GeneralDao generalDao, TeamManager teamManager, 
+    		MembershipManager membershipManager) {
         super(generalDao);
 
-        this.nameReservations = nameReservations;
         this.teamManager = teamManager;
         this.membershipManager = membershipManager;
     }
@@ -151,12 +144,13 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
     }
 
     @Override
-    public Set<String> getReservedNames() {
-        Set<String> reservedNames = new HashSet<String>();
-        for (UserNameReservation each : nameReservations)
-            reservedNames.addAll(each.getReserved());
-
-        return reservedNames;
-    }
+	public User getCurrent() {
+		Long userId = User.getCurrentId();
+		if (userId != 0L) {
+			return load(userId);
+		} else {
+			return null;
+		}
+	}
 
 }

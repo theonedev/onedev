@@ -14,8 +14,8 @@ import org.json.JSONWriter;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.core.model.Project;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.User;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 

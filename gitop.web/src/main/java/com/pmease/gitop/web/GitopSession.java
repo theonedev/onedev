@@ -8,7 +8,9 @@ import org.apache.wicket.protocol.http.WebSession;
 import org.apache.wicket.request.Request;
 
 import com.google.common.base.Optional;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.UserManager;
+import com.pmease.gitop.model.User;
 
 public class GitopSession extends WebSession {
 
@@ -25,7 +27,7 @@ public class GitopSession extends WebSession {
 	}
 
 	public Optional<User> getCurrentUser() {
-		return Optional.<User> fromNullable(User.getCurrent());
+		return Optional.<User> fromNullable(Gitop.getInstance(UserManager.class).getCurrent());
 	}
 
 	/**

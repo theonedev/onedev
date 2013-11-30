@@ -12,8 +12,12 @@ import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.loader.AppLoaderMocker;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.gitop.core.manager.StorageManager;
-import com.pmease.gitop.core.storage.ProjectStorage;
+import com.pmease.gitop.model.Branch;
+import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.PullRequestUpdate;
+import com.pmease.gitop.model.storage.ProjectStorage;
+import com.pmease.gitop.model.storage.StorageManager;
 
 public class PullRequestTest extends AppLoaderMocker {
 

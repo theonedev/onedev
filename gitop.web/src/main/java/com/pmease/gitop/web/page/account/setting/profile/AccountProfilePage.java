@@ -22,8 +22,9 @@ import com.google.common.base.Throwables;
 import com.google.common.io.Files;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.SitePaths;
 import com.pmease.gitop.web.common.component.messenger.Messenger;
 import com.pmease.gitop.web.common.component.vex.AjaxConfirmButton;
@@ -44,7 +45,7 @@ public class AccountProfilePage extends AccountSettingPage {
 	}
 	
 	public static PageParameters newParams() {
-		return newParams(User.getCurrent());
+		return newParams(Gitop.getInstance(UserManager.class).getCurrent());
 	}
 	
 	public AccountProfilePage(PageParameters params) {

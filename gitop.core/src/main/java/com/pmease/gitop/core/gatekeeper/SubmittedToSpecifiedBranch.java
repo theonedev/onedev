@@ -10,10 +10,11 @@ import com.pmease.commons.util.namedentity.EntityMatcher;
 import com.pmease.commons.util.namedentity.EntityPatternSet;
 import com.pmease.commons.util.pattern.PatternSetMatcher;
 import com.pmease.commons.util.pattern.WildcardPathMatcher;
-import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.core.manager.BranchManager;
-import com.pmease.gitop.core.model.PullRequest;
-import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.gatekeeper.AbstractGateKeeper;
+import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 
 @SuppressWarnings("serial")
 @Editable

@@ -14,9 +14,9 @@ import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.util.namedentity.EntityLoader;
 import com.pmease.commons.util.namedentity.NamedEntity;
 import com.pmease.gitop.core.manager.TeamManager;
-import com.pmease.gitop.core.model.Team;
-import com.pmease.gitop.core.model.User;
-import com.pmease.gitop.core.permission.operation.GeneralOperation;
+import com.pmease.gitop.model.Team;
+import com.pmease.gitop.model.User;
+import com.pmease.gitop.model.permission.operation.GeneralOperation;
 
 @Singleton
 public class DefaultTeamManager extends AbstractGenericDao<Team> implements TeamManager {

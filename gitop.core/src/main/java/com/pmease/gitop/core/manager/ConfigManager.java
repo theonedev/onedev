@@ -5,9 +5,9 @@ import javax.annotation.Nullable;
 import com.google.inject.ImplementedBy;
 import com.pmease.commons.hibernate.dao.GenericDao;
 import com.pmease.gitop.core.manager.impl.DefaultConfigManager;
-import com.pmease.gitop.core.model.Config;
 import com.pmease.gitop.core.setting.MailSetting;
 import com.pmease.gitop.core.setting.StorageSetting;
+import com.pmease.gitop.model.Config;
 
 @ImplementedBy(DefaultConfigManager.class)
 public interface ConfigManager extends GenericDao<Config> {

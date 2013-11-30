@@ -1,14 +1,12 @@
 package com.pmease.gitop.core.manager;
 
-import java.util.Set;
-
 import javax.annotation.Nullable;
 
 import com.google.inject.ImplementedBy;
 import com.pmease.commons.hibernate.dao.GenericDao;
 import com.pmease.commons.util.namedentity.EntityLoader;
 import com.pmease.gitop.core.manager.impl.DefaultUserManager;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.model.User;
 
 @ImplementedBy(DefaultUserManager.class)
 public interface UserManager extends GenericDao<User> {
@@ -30,7 +28,14 @@ public interface UserManager extends GenericDao<User> {
 	 */
 	@Nullable User find(String userName);
 	
-	Set<String> getReservedNames();
+	/**
+	 * Get current authenticated user in Shiro context, or <tt>null</tt> if not 
+	 * authenticated. 
+	 * 
+	 * @return 
+	 *         current authenticated user, or <tt>null</tt> for anonymous access
+	 */
+	@Nullable User getCurrent();
 	
 	EntityLoader asEntityLoader();
 }
