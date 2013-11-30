@@ -351,4 +351,18 @@ ul.repo-actions { margin: 8px 4px 8px 0; padding: 0; list-style: none; }
   color: #999; font-weight: bold;
 }
 
-table.files td.file-icon { width: 18px; padding-right: 2px; }
+.source-tree { border: 1px solid #ddd; border-radius: 4px; }
+.source-tree .commit { background: #f2f2f2; border-radius: 4px 4px 0 0; }
+pre.short-message { background: transparent; border: none; margin: 0; padding: 8px 15px; }
+.commit-meta { background: #fff; padding: 8px 15px; border-top: 1px solid #ddd; font-size: 0.857143em; }
+.commit-meta > .commit-author { float: left; color: #999; }
+.commit-meta > .commit-author .author-name, 
+.commit-meta > .commit-author .author-name a { color: #666; font-weight: bold; }
+
+.commit-hash { float: right; border-radius: 0 0 4px 4px; font-family: monospace, serif;  }
+.commit-hash > a { color: #999; }
+.commit-hash > a .sha { color: #555; }
+
+table.files { margin: 0; }
+table.files td.file-icon { width: 18px; padding-right: 2px; padding-left: 15px; color: #888; }
+

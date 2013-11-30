@@ -1,7 +1,10 @@
 package com.pmease.gitop.web.page.project.source.component;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -13,6 +16,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.Commit;
@@ -27,6 +31,7 @@ import com.pmease.gitop.web.page.project.source.SourceCommitPage;
 import com.pmease.gitop.web.page.project.source.SourceTreePage;
 import com.pmease.gitop.web.util.DateUtils;
 import com.pmease.gitop.web.util.GitUtils;
+import com.pmease.gitop.web.util.UrlUtils;
 
 @SuppressWarnings("serial")
 public class SourceTreePanel extends AbstractSourcePagePanel {
@@ -63,7 +68,6 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 			}
 		}));
 		
-		
 		add(new CommitUserLink("author", new AbstractReadOnlyModel<String>() {
 			@Override
 			public String getObject() {
@@ -93,6 +97,17 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 			}
 		}));
 		
+		List<String> paths = getPaths();
+		if (paths.isEmpty()) {
+			add(new WebMarkupContainer("parent").setVisibilityAllowed(false));
+		} else {
+			BookmarkablePageLink<Void> link = new BookmarkablePageLink<Void>("parent",
+					SourceTreePage.class,
+					SourceTreePage.newParams(getProject(), getRevision(), paths.subList(0, paths.size() - 1)));
+			
+			add(link);
+		}
+		
 		IModel<List<TreeNode>> nodes = new LoadableDetachableModel<List<TreeNode>>() {
 
 			@Override
@@ -100,7 +115,30 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 				Git git = getProject().code();
 				List<String> paths = getPaths();
 				String path = Joiner.on("/").join(paths);
-				return git.listTree(getRevision(), path, false);
+				if (!Strings.isNullOrEmpty(path)) {
+					path = UrlUtils.removeRedundantSlashes(path + "/");
+				}
+				
+				List<TreeNode> nodes = Lists.newArrayList(git.listTree(getRevision(), path, false));
+				
+				Collections.sort(nodes, new Comparator<TreeNode>() {
+
+					@Override
+					public int compare(TreeNode o1, TreeNode o2) {
+						if (o1.getType() == o2.getType()) {
+							return o1.getName().compareTo(o2.getName());
+						} else if (o1.getType() == TreeNode.Type.DIRECTORY) {
+							return -1;
+						} else if (o2.getType() == TreeNode.Type.DIRECTORY) {
+							return 1;
+						} else {
+							return o1.getName().compareTo(o2.getName());
+						}
+					}
+					
+				});
+				
+				return nodes;
 			}
 		};
 		
@@ -116,16 +154,16 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 					public String getObject() {
 						switch (type) {
 						case DIRECTORY:
-							return "folder-o";
+							return "folder";
 							
 						case FILE:
-							return "file-text-o";
+							return "file";
 							
 						case SUBMODULE:
-							return "plus-square"; // FIXME: add submodule icon
+							return "submodule";
 							
 						case SYMBOLLINK:
-							return "folder-open-o"; // FIXME: add symbol link icon
+							return "symbollink-folder";
 						}
 						
 						return "";
@@ -147,10 +185,10 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 				}
 				
 				AbstractLink link;
-				if (type == TreeNode.Type.FILE) {
-					link = new BookmarkablePageLink<Void>("file", SourceBlobPage.class, params);
-				} else {
+				if (type == TreeNode.Type.DIRECTORY) {
 					link = new BookmarkablePageLink<Void>("file", SourceTreePage.class, params);
+				} else {
+					link = new BookmarkablePageLink<Void>("file", SourceBlobPage.class, params);					
 				}
 				
 				link.add(new Label("name", node.getName()));
