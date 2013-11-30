@@ -8,8 +8,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Joiner;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.StorageManager;
-import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.storage.StorageManager;
 import com.pmease.gitop.web.model.ProjectModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.source.component.EmptyRepositoryPanel;

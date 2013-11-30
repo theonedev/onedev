@@ -30,6 +30,7 @@
         <module>../gitop.rest</module>
         <module>../gitop.http</module>
         <module>../gitop.security</module>
+        <module>../gitop.model</module>
     </modules>  
     <repositories> 
         <repository> 

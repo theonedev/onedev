@@ -13,7 +13,7 @@ import org.apache.wicket.validation.ValidationError;
 
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.common.component.messenger.Messenger;
 import com.pmease.gitop.web.common.form.passwordfield.PasswordFieldElement;
 import com.pmease.gitop.web.model.UserModel;

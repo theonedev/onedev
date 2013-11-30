@@ -12,10 +12,10 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.ConfigManager;
-import com.pmease.gitop.core.model.Config;
-import com.pmease.gitop.core.model.Config.Key;
 import com.pmease.gitop.core.setting.MailSetting;
 import com.pmease.gitop.core.setting.StorageSetting;
+import com.pmease.gitop.model.Config;
+import com.pmease.gitop.model.Config.Key;
 
 @Singleton
 public class DefaultConfigManager extends AbstractGenericDao<Config> implements ConfigManager {

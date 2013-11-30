@@ -1,10 +1,10 @@
 package com.pmease.gitop.core.gatekeeper;
 
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitop.core.model.PullRequest;
-import com.pmease.gitop.core.model.Membership;
-import com.pmease.gitop.core.model.Vote;
+import com.pmease.gitop.model.Membership;
+import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.Vote;
+import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 
 @SuppressWarnings("serial")
 @Editable

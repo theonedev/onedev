@@ -1,6 +1,6 @@
 package com.pmease.gitop.web.model;
 
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.model.User;
 
 /** shortcut to {@link EntityModel}<User> */
 public class UserModel extends EntityModel<User> {

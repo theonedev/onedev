@@ -8,7 +8,7 @@ public class DropdownAlignment implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public enum INDICATOR_MODE {SHOW, HIDE, AUTO}
+	public enum IndicatorMode {SHOW, HIDE, AUTO}
 
 	private Component target;
 	
@@ -16,7 +16,7 @@ public class DropdownAlignment implements Serializable {
 	
 	private int gap = -1;
 	
-	private INDICATOR_MODE indicatorMode = INDICATOR_MODE.AUTO;
+	private IndicatorMode indicatorMode = IndicatorMode.AUTO;
 
 	public DropdownAlignment() {
 	}
@@ -89,11 +89,11 @@ public class DropdownAlignment implements Serializable {
 		return dropdownY;
 	}
 
-	public INDICATOR_MODE getIndicatorMode() {
+	public IndicatorMode getIndicatorMode() {
 		return indicatorMode;
 	}
 
-	public DropdownAlignment setIndicatorMode(INDICATOR_MODE indicatorMode) {
+	public DropdownAlignment setIndicatorMode(IndicatorMode indicatorMode) {
 		this.indicatorMode = indicatorMode;
 		return this;
 	}

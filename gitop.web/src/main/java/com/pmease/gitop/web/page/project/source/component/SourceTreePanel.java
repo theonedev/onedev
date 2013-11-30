@@ -22,7 +22,7 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.TreeNode;
-import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.bootstrap.Icon;
 import com.pmease.gitop.web.component.link.CommitUserLink;
 import com.pmease.gitop.web.page.PageSpec;
@@ -48,7 +48,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 
 			@Override
 			protected Commit load() {
-				Git git = getProject().getCodeRepo();
+				Git git = getProject().code();
 				List<String> paths = getPaths();
 				List<Commit> commits = git.log(null, getRevision(), Joiner.on("/").join(paths), 1);
 				return Iterables.getFirst(commits, null);
@@ -71,7 +71,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 		add(new CommitUserLink("author", new AbstractReadOnlyModel<String>() {
 			@Override
 			public String getObject() {
-				return getLastCommit().getAuthor();
+				return getLastCommit().getAuthor().getName();
 			}
 		}));
 
@@ -79,7 +79,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 
 			@Override
 			public String getObject() {
-				return DateUtils.formatAge(getLastCommit().getAuthorDate());
+				return DateUtils.formatAge(getLastCommit().getAuthor().getDate());
 			}
 			
 		}));
@@ -112,7 +112,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 
 			@Override
 			protected List<TreeNode> load() {
-				Git git = getProject().getCodeRepo();
+				Git git = getProject().code();
 				List<String> paths = getPaths();
 				String path = Joiner.on("/").join(paths);
 				if (!Strings.isNullOrEmpty(path)) {

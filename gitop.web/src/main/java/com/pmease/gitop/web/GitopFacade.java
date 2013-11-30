@@ -7,8 +7,8 @@ import javax.inject.Inject;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
-import com.pmease.gitop.core.model.Membership;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.model.Membership;
+import com.pmease.gitop.model.User;
 
 @Singleton
 public class GitopFacade {

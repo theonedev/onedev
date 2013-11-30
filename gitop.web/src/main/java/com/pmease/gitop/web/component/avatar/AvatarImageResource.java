@@ -11,7 +11,7 @@ import com.google.common.base.Throwables;
 import com.google.common.io.Files;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.GitopWebApp;
 import com.pmease.gitop.web.SitePaths;
 import com.pmease.gitop.web.component.avatar.AvatarImage.AvatarImageType;

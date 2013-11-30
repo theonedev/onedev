@@ -12,8 +12,12 @@ import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.loader.AppLoaderMocker;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.gitop.core.manager.StorageManager;
-import com.pmease.gitop.core.storage.ProjectStorage;
+import com.pmease.gitop.model.Branch;
+import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.PullRequestUpdate;
+import com.pmease.gitop.model.storage.ProjectStorage;
+import com.pmease.gitop.model.storage.StorageManager;
 
 public class PullRequestTest extends AppLoaderMocker {
 
@@ -42,19 +46,19 @@ public class PullRequestTest extends AppLoaderMocker {
     public void shouldReturnAllUpdatesAsEffectiveIfTheyAreFastForward() {
         FileUtils.touchFile(new File(git.repoDir(), "a"));
         git.add("a");
-        git.commit("commit", false);
+        git.commit("commit", false, false);
         
         git.checkout("dev", true);
         
         FileUtils.touchFile(new File(git.repoDir(), "b"));
         git.add("b");
-        git.commit("commit", false);
+        git.commit("commit", false, false);
         
         git.updateRef("refs/updates/1", "HEAD", null, null);
         
         FileUtils.touchFile(new File(git.repoDir(), "c"));
         git.add("c");
-        git.commit("commit", false);
+        git.commit("commit", false, false);
         
         git.updateRef("refs/updates/2", "HEAD", null, null);
 
@@ -86,25 +90,25 @@ public class PullRequestTest extends AppLoaderMocker {
     public void shouldReturnLatestUpdateAsEffectiveIfAllOthersHaveBeenMerged() {
         FileUtils.touchFile(new File(git.repoDir(), "a"));
         git.add("a");
-        git.commit("commit", false);
+        git.commit("commit", false, false);
         
         git.checkout("dev", true);
         
         FileUtils.touchFile(new File(git.repoDir(), "b"));
         git.add("b");
-        git.commit("commit", false);
+        git.commit("commit", false, false);
         
         git.updateRef("refs/updates/1", "HEAD", null, null);
         
         FileUtils.touchFile(new File(git.repoDir(), "c"));
         git.add("c");
-        git.commit("commit", false);
+        git.commit("commit", false, false);
         
         git.updateRef("refs/updates/2", "HEAD", null, null);
 
         FileUtils.touchFile(new File(git.repoDir(), "d"));
         git.add("d");
-        git.commit("commit", false);
+        git.commit("commit", false, false);
         
         git.updateRef("refs/updates/3", "HEAD", null, null);
         
@@ -112,9 +116,9 @@ public class PullRequestTest extends AppLoaderMocker {
         
         FileUtils.touchFile(new File(git.repoDir(), "e"));
         git.add("e");
-        git.commit("commit", false);
+        git.commit("commit", false, false);
         
-        git.merge("refs/updates/2", null);
+        git.merge("refs/updates/2", null, null, null);
 
         Mockito.when(AppLoader.getInstance(StorageManager.class)).thenReturn(storageManager);
         

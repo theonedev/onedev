@@ -4,10 +4,16 @@ import java.io.File;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
+import com.pmease.commons.util.execution.ExecuteResult;
+import com.pmease.commons.util.execution.LineConsumer;
 
-public class MergeCommand extends GitCommand<Void> {
+public class MergeCommand extends GitCommand<Boolean> {
 
     private String revision;
+    
+    private String strategy;
+    
+    private String strategyOption;
     
     private String message;
     
@@ -20,25 +26,55 @@ public class MergeCommand extends GitCommand<Void> {
 	    return this;
 	}
 	
+	public MergeCommand strategy(String strategy) {
+		this.strategy = strategy;
+		return this;
+	}
+	
+	public MergeCommand strategyOption(String strategyOption) {
+		this.strategyOption = strategyOption;
+		return this;
+	}
+	
 	public MergeCommand message(String message) {
 		this.message = message;
 		return this;
 	}
 	
 	@Override
-	public Void call() {
+	public Boolean call() {
 	    Preconditions.checkNotNull(revision, "revision has to be specified.");
 	    
 		Commandline cmd = cmd().addArgs("merge");
+		if (strategy != null)
+			cmd.addArgs("-s", strategy);
+		if (strategyOption != null)
+			cmd.addArgs("-X", strategyOption);
+		
 		cmd.addArgs("--no-edit", "--log", "--quiet");
 		if (message != null)
 			cmd.addArgs("-m", message);
 		
 		cmd.addArgs(revision);
+
+		final boolean conflict[] = new boolean[]{false};
+
+		ExecuteResult result = cmd.execute(new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				if (line.startsWith("CONFLICT"))
+					conflict[0] = true;
+			}
+			
+		}, errorLogger());
 		
-		cmd.execute(debugLogger(), errorLogger()).checkReturnCode();
+		if (conflict[0])
+			return false;
 		
-		return null;
+		result.checkReturnCode();
+		
+		return true;
 	}
 
 }

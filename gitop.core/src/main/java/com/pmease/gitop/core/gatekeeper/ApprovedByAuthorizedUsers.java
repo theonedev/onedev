@@ -5,12 +5,16 @@ import java.util.Collection;
 import javax.validation.constraints.Min;
 
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitop.core.gatekeeper.voteeligibility.CanVoteByAuthorizedUser;
-import com.pmease.gitop.core.model.PullRequest;
-import com.pmease.gitop.core.model.User;
-import com.pmease.gitop.core.model.Vote;
-import com.pmease.gitop.core.permission.operation.GeneralOperation;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.AuthorizationManager;
+import com.pmease.gitop.core.manager.VoteInvitationManager;
+import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.User;
+import com.pmease.gitop.model.Vote;
+import com.pmease.gitop.model.gatekeeper.AbstractGateKeeper;
+import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitop.model.gatekeeper.voteeligibility.CanVoteByAuthorizedUser;
+import com.pmease.gitop.model.permission.operation.GeneralOperation;
 
 @SuppressWarnings("serial")
 @Editable
@@ -30,7 +34,9 @@ public class ApprovedByAuthorizedUsers extends AbstractGateKeeper {
 
 	@Override
 	public CheckResult check(PullRequest request) {
-		Collection<User> authorizedUsers = request.getTarget().getProject().listAuthorizedUsers(GeneralOperation.WRITE);
+		AuthorizationManager authorizationManager = Gitop.getInstance(AuthorizationManager.class);
+		Collection<User> authorizedUsers = authorizationManager.listAuthorizedUsers(
+				request.getTarget().getProject(), GeneralOperation.WRITE);
 
         int approvals = 0;
         int pendings = 0;
@@ -51,7 +57,7 @@ public class ApprovedByAuthorizedUsers extends AbstractGateKeeper {
         } else {
             int lackApprovals = getLeastApprovals() - approvals;
 
-            request.inviteToVote(authorizedUsers, lackApprovals);
+            Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, authorizedUsers, lackApprovals);
 
             return pending("To be approved by " + lackApprovals + " authorized user(s).", 
             		new CanVoteByAuthorizedUser());

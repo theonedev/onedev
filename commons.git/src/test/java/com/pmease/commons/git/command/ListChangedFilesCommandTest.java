@@ -22,23 +22,23 @@ public class ListChangedFilesCommandTest {
 	    try {
     		FileUtils.touchFile(new File(git.repoDir(), "a"));
     		git.add("a");
-    		git.commit("commit", false);
+    		git.commit("commit", false, false);
     		
     		FileUtils.touchFile(new File(git.repoDir(), "b"));
     		git.add("b");
-    		git.commit("commit", false);
+    		git.commit("commit", false, false);
     		
     		FileUtils.touchFile(new File(git.repoDir(), "c"));
     		git.add("c");
-    		git.commit("commit", false);
+    		git.commit("commit", false, false);
     		
     		FileUtils.touchFile(new File(git.repoDir(), "d"));
     		git.add("d");
-    		git.commit("commit", false);
+    		git.commit("commit", false, false);
     		
     		FileUtils.writeFile(new File(git.repoDir(), "a"), "a");
     		git.add("a");
-    		git.commit("commit", false);
+    		git.commit("commit", false, false);
     		
     		Collection<String> changedFiles = git.listChangedFiles("HEAD~4", "HEAD");
     		

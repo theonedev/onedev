@@ -6,10 +6,10 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.pmease.gitop.core.manager.ConfigManager;
-import com.pmease.gitop.core.manager.StorageManager;
-import com.pmease.gitop.core.model.Project;
-import com.pmease.gitop.core.model.User;
-import com.pmease.gitop.core.storage.ProjectStorage;
+import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.User;
+import com.pmease.gitop.model.storage.ProjectStorage;
+import com.pmease.gitop.model.storage.StorageManager;
 
 @Singleton
 public class DefaultStorageManager implements StorageManager {

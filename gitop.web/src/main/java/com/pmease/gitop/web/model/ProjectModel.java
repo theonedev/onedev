@@ -1,6 +1,6 @@
 package com.pmease.gitop.web.model;
 
-import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.model.Project;
 
 /** Shortcut for {@link EntityModel}<Project> */
 public class ProjectModel extends EntityModel<Project> {

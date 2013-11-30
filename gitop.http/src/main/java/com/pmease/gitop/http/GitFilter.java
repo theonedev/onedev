@@ -32,10 +32,10 @@ import com.pmease.commons.git.command.UploadCommand;
 import com.pmease.commons.util.GeneralException;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.core.manager.StorageManager;
-import com.pmease.gitop.core.model.Project;
-import com.pmease.gitop.core.model.User;
-import com.pmease.gitop.core.permission.ObjectPermission;
+import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.User;
+import com.pmease.gitop.model.permission.ObjectPermission;
+import com.pmease.gitop.model.storage.StorageManager;
 
 @Singleton
 public class GitFilter implements Filter {

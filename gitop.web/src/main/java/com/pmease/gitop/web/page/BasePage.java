@@ -23,7 +23,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.base.Strings;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.web.assets.BaseResourcesBehavior;
 import com.pmease.gitop.web.assets.PageResourcesBehavior;
 import com.pmease.gitop.web.common.component.messenger.MessengerResourcesBehavior;
@@ -190,7 +190,7 @@ public abstract class BasePage extends WebPage {
 	
 	protected void onPageInitialize() {
 		if (!isPermitted()) {
-			if (User.getCurrent() == null) {
+			if (Gitop.getInstance(UserManager.class).getCurrent() == null) {
 				throw new RestartResponseAtInterceptPageException(LoginPage.class);
 			} else {
 				throw new AccessDeniedException("Access denied");

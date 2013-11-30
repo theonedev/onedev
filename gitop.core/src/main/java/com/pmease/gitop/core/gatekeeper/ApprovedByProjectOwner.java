@@ -2,11 +2,14 @@ package com.pmease.gitop.core.gatekeeper;
 
 import com.google.common.collect.Sets;
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitop.core.gatekeeper.voteeligibility.CanVoteBySpecifiedUser;
-import com.pmease.gitop.core.model.PullRequest;
-import com.pmease.gitop.core.model.User;
-import com.pmease.gitop.core.model.Vote;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.VoteInvitationManager;
+import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.User;
+import com.pmease.gitop.model.Vote;
+import com.pmease.gitop.model.gatekeeper.AbstractGateKeeper;
+import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitop.model.gatekeeper.voteeligibility.CanVoteBySpecifiedUser;
 
 @SuppressWarnings("serial")
 @Editable
@@ -19,7 +22,7 @@ public class ApprovedByProjectOwner extends AbstractGateKeeper {
         Vote.Result result = projectOwner.checkVoteSince(request.getBaseUpdate());
 
         if (result == null) {
-            request.inviteToVote(Sets.newHashSet(projectOwner), 1);
+        	Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, Sets.newHashSet(projectOwner), 1);
             return pending("To be approved by user '" + projectOwner.getName() + "'.",
                     new CanVoteBySpecifiedUser(projectOwner));
         } else if (result.isAccept()) {

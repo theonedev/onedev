@@ -10,15 +10,16 @@ import org.apache.shiro.authz.Permission;
 
 import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.shiro.AbstractUser;
+import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.core.model.Authorization;
-import com.pmease.gitop.core.model.Membership;
-import com.pmease.gitop.core.model.Project;
-import com.pmease.gitop.core.model.Team;
-import com.pmease.gitop.core.model.User;
-import com.pmease.gitop.core.permission.ObjectPermission;
-import com.pmease.gitop.core.permission.operation.PrivilegedOperation;
+import com.pmease.gitop.model.Authorization;
+import com.pmease.gitop.model.Membership;
+import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Team;
+import com.pmease.gitop.model.User;
+import com.pmease.gitop.model.permission.ObjectPermission;
+import com.pmease.gitop.model.permission.operation.PrivilegedOperation;
 
 @Singleton
 public class SecurityRealm extends AbstractRealm {
@@ -59,7 +60,7 @@ public class SecurityRealm extends AbstractRealm {
 	                if (userId != 0L) {
 	                    User user = userManager.load(userId);
 	                    // Administrator can do anything
-	                    if (user.isRoot() || user.isAdmin()) return true;
+	                    if (user.equals(Gitop.getInstance(UserManager.class).getRoot()) || user.isAdmin()) return true;
 	
 	                    for (Membership membership: user.getMemberships())
 	                    	teams.add(membership.getTeam());

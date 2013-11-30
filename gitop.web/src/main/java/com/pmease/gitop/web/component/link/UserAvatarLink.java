@@ -8,7 +8,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import com.google.common.base.Preconditions;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.component.avatar.AvatarImage;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;

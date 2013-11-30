@@ -2,7 +2,6 @@ package com.pmease.commons.git;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -19,13 +18,11 @@ public class Commit extends BriefCommit {
     
     private final List<FileChange> fileChanges;
 
-    public Commit(String hash, String committer, String committerEmail, 
-    		Date committerDate, String author, String authorEmail, 
-    		Date authorDate, String summary, @Nullable String message, 
+    public Commit(String hash, UserInfo committer, UserInfo author, 
+    		String summary, @Nullable String message, 
     		@Nullable String note, List<String> parentHashes, 
     		List<FileChange> fileChanges) {
-    	super(hash, committer, committerEmail, committerDate, author, 
-    			authorEmail, authorDate, summary);
+    	super(hash, committer, author, summary);
     	
     	this.message = message;
     	this.note = note;

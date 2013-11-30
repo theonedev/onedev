@@ -10,9 +10,9 @@ import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.VoteManager;
-import com.pmease.gitop.core.model.PullRequestUpdate;
-import com.pmease.gitop.core.model.User;
-import com.pmease.gitop.core.model.Vote;
+import com.pmease.gitop.model.PullRequestUpdate;
+import com.pmease.gitop.model.User;
+import com.pmease.gitop.model.Vote;
 
 @Singleton
 public class DefaultVoteManager extends AbstractGenericDao<Vote> implements VoteManager {

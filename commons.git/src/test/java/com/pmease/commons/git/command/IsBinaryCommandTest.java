@@ -25,14 +25,14 @@ public class IsBinaryCommandTest {
 			git.init(false);
 			File file = new File(git.repoDir(), "file");
 			FileUtils.writeFile(file, "hello world");
-			git.add("file").commit("initial commit", false);
+			git.add("file").commit("initial commit", false, false);
 
 			byte[] bytes = new byte[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 			OutputStream os = new FileOutputStream(file);
 			os.write(bytes);
 			os.close();
 			
-			git.add("file").commit("second commit", false);
+			git.add("file").commit("second commit", false, false);
 			
 			assertFalse(git.isBinary("file", "master~1"));
 			assertTrue(git.isBinary("file", "master"));

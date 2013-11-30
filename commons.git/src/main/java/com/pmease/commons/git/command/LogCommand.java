@@ -11,6 +11,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.FileChange;
+import com.pmease.commons.git.UserInfo;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
@@ -71,8 +72,9 @@ public class LogCommand extends GitCommand<List<Commit>> {
         if (maxCommits != 0)
         	cmd.addArgs("-" + maxCommits);
         
+        cmd.addArgs("--");
         if (path != null)
-        	cmd.addArgs("--", path);
+        	cmd.addArgs(path);
 
         final List<Commit> commits = new ArrayList<>();
         
@@ -187,8 +189,11 @@ public class LogCommand extends GitCommand<List<Commit>> {
         private List<FileChange> fileChanges = new ArrayList<>();
 
     	private Commit build() {
-    		return new Commit(hash, committer, committerEmail, committerDate, 
-    				author, authorEmail, authorDate, summary.trim(), 
+    		return new Commit(
+    				hash, 
+    				new UserInfo(committer, committerEmail, committerDate), 
+    				new UserInfo(author, authorEmail, authorDate),
+    				summary.trim(), 
     				StringUtils.isNotBlank(message)?message.trim():null, 
     				StringUtils.isNotBlank(note)?note.trim():null, 
     				parentHashes, fileChanges);

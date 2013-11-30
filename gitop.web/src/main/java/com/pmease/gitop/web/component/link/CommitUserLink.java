@@ -6,7 +6,7 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.model.UserModel;
 
 public class CommitUserLink extends Panel {

@@ -12,7 +12,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.model.Project;
 
 @Path("/projects")
 @Produces(MediaType.APPLICATION_JSON)

@@ -13,7 +13,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.behavior.dropdown.DropdownAlignment;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownResourceReference;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownAlignment.INDICATOR_MODE;
+import com.pmease.commons.wicket.behavior.dropdown.DropdownAlignment.IndicatorMode;
 
 public class TooltipBehavior extends Behavior {
 
@@ -21,7 +21,7 @@ public class TooltipBehavior extends Behavior {
 
 	private final IModel<String> contentModel;
 	
-	private DropdownAlignment alignment = new DropdownAlignment(50, 0, 50, 100).setIndicatorMode(INDICATOR_MODE.SHOW);
+	private DropdownAlignment alignment = new DropdownAlignment(50, 0, 50, 100).setIndicatorMode(IndicatorMode.SHOW);
 	
 	public TooltipBehavior(IModel<String> contentModel) {
 		this.contentModel = contentModel;

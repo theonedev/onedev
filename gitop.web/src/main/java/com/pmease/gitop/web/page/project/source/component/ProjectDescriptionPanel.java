@@ -13,7 +13,7 @@ import org.apache.wicket.model.PropertyModel;
 
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.model.Project;
 
 public class ProjectDescriptionPanel extends ProjectPanel {
 	private static final long serialVersionUID = 1L;

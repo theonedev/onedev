@@ -36,7 +36,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.SitePaths;
 import com.pmease.gitop.web.common.util.StandardObjectMapper;
 

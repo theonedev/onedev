@@ -22,7 +22,7 @@ import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.model.User;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.UniformInterfaceException;

@@ -15,7 +15,7 @@ import org.eclipse.jetty.servlet.ServletMapping;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.jetty.JettyPlugin;
 import com.pmease.commons.util.ReflectionUtils;
-import com.pmease.gitop.core.validation.UserNameReservation;
+import com.pmease.gitop.model.validation.UserNameReservation;
 
 public class WebUserNameReservation implements UserNameReservation {
 

@@ -22,8 +22,8 @@ import com.google.common.collect.Lists;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.core.model.Project;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.GitopFacade;
 import com.pmease.gitop.web.common.form.FeedbackPanel;
 import com.pmease.gitop.web.common.form.select.DropDownChoiceElement;
@@ -53,7 +53,7 @@ public class CreateProjectPage extends AbstractLayoutPage {
 
 	@Override
 	public boolean isPermitted() {
-		return User.getCurrent() != null;
+		return Gitop.getInstance(UserManager.class).getCurrent() != null;
 	}
 	
 	@Override
@@ -61,7 +61,7 @@ public class CreateProjectPage extends AbstractLayoutPage {
 		super.onPageInitialize();
 		
 		if (Strings.isNullOrEmpty(owner)) {
-			this.owner = User.getCurrent().getName();
+			this.owner = Gitop.getInstance(UserManager.class).getCurrent().getName();
 		}
 		
 		final IModel<Project> projectModel = new ProjectModel(new Project());
@@ -75,7 +75,7 @@ public class CreateProjectPage extends AbstractLayoutPage {
 
 					@Override
 					public List<String> getObject() {
-						List<User> users = Gitop.getInstance(GitopFacade.class).getManagableUsers(User.getCurrent());
+						List<User> users = Gitop.getInstance(GitopFacade.class).getManagableUsers(Gitop.getInstance(UserManager.class).getCurrent());
 						List<String> names = Lists.newArrayList();
 						for (User each : users) {
 							names.add(each.getName());

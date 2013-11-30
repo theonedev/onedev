@@ -21,8 +21,8 @@ import org.hibernate.criterion.Restrictions;
 import com.google.common.collect.ImmutableList;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.TeamManager;
-import com.pmease.gitop.core.model.Team;
-import com.pmease.gitop.core.permission.operation.GeneralOperation;
+import com.pmease.gitop.model.Team;
+import com.pmease.gitop.model.permission.operation.GeneralOperation;
 import com.pmease.gitop.web.common.component.messenger.Messenger;
 import com.pmease.gitop.web.common.form.FeedbackPanel;
 

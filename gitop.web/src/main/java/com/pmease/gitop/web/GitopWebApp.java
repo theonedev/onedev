@@ -42,9 +42,9 @@ import com.google.common.io.ByteStreams;
 import com.pmease.commons.util.ExceptionUtils;
 import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.core.model.User;
+import com.pmease.gitop.model.validation.ProjectNameValidator;
+import com.pmease.gitop.model.validation.UserNameValidator;
 import com.pmease.gitop.web.assets.AssetLocator;
 import com.pmease.gitop.web.common.mapper.PageParameterAwareMountedMapper;
 import com.pmease.gitop.web.component.avatar.AvatarImageResource;
@@ -168,7 +168,7 @@ public class GitopWebApp extends AbstractWicketConfig {
 				if (ExceptionUtils.find(e, EntityNotFoundException.class) != null) {
 					return new RenderPageRequestHandler(new PageProvider(PageNotFoundPage.class));
 				} else if (ExceptionUtils.find(e, AccessDeniedException.class) != null) {
-					if (User.getCurrent() == null) {
+					if (Gitop.getInstance(UserManager.class).getCurrent() == null) {
 						return new RenderPageRequestHandler(new PageProvider(LoginPage.class));
 					} else {
 						return new RenderPageRequestHandler(new PageProvider(AccessDeniedPage.class));
@@ -236,11 +236,11 @@ public class GitopWebApp extends AbstractWicketConfig {
 				if (normalizedSegments.size() < 2)
 					return false;
 				String userName = normalizedSegments.get(0);
-				if (Gitop.getInstance(UserManager.class).getReservedNames().contains(userName))
+				if (UserNameValidator.getReservedNames().contains(userName))
 					return false;
 				
 				String projectName = normalizedSegments.get(1);
-				return !Gitop.getInstance(ProjectManager.class).getReservedNames().contains(projectName);
+				return !ProjectNameValidator.getReservedNames().contains(projectName);
 			}
 
 		});
@@ -272,7 +272,7 @@ public class GitopWebApp extends AbstractWicketConfig {
 				if (normalizedSegments.size() < 1)
 					return false;
 				String userName = normalizedSegments.get(0);
-				return !Gitop.getInstance(UserManager.class).getReservedNames().contains(userName);
+				return !UserNameValidator.getReservedNames().contains(userName);
 			}
 
 		});

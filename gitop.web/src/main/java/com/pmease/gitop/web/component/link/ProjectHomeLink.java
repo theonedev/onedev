@@ -4,7 +4,7 @@ import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.component.link.LinkPanel;
 import com.pmease.gitop.web.page.PageSpec;
 

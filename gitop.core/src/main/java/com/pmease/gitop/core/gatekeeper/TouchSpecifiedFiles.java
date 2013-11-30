@@ -1,20 +1,19 @@
 package com.pmease.gitop.core.gatekeeper;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.Git;
-import com.pmease.commons.git.TreeNode;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.pattern.WildcardUtils;
-import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitop.core.manager.StorageManager;
-import com.pmease.gitop.core.model.PullRequest;
-import com.pmease.gitop.core.model.PullRequestUpdate;
+import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.PullRequestUpdate;
+import com.pmease.gitop.model.gatekeeper.AbstractGateKeeper;
+import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitop.model.storage.StorageManager;
 
 @SuppressWarnings("serial")
 @Editable
@@ -39,22 +38,8 @@ public class TouchSpecifiedFiles extends AbstractGateKeeper {
 
 		for (int i=0; i<request.getEffectiveUpdates().size(); i++) {
 			PullRequestUpdate update = request.getEffectiveUpdates().get(i);
-			Collection<String> touchedFiles;
-			if (i == request.getEffectiveUpdates().size()-1) {
-				if (request.getMergeBase() == null) {
-					touchedFiles = new ArrayList<>();
-					for (TreeNode each: new Git(repoDir).listTree(update.getRefName(), null, true)) {
-						if (each.getType() == TreeNode.Type.FILE)
-							touchedFiles.add(each.getPath());
-					}
-				} else {
-					touchedFiles = new Git(repoDir).listChangedFiles(request.getMergeBase(), update.getRefName());
-				}
-			} else {
-				touchedFiles = new Git(repoDir).listChangedFiles(
-						request.getEffectiveUpdates().get(i+1).getRefName(), 
-						update.getRefName());
-			}
+			Collection<String> touchedFiles = new Git(repoDir).listChangedFiles(
+					update.getBaseCommit(), update.getHeadCommit());
 			
 			for (String file: touchedFiles) {
 				if (WildcardUtils.matchPath(getFilePaths(), file)) {

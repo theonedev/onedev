@@ -8,7 +8,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
-import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.model.Project;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Select2MultiChoice;
 

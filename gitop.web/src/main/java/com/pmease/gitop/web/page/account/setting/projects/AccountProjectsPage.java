@@ -14,7 +14,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Lists;
-import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.Constants;
 import com.pmease.gitop.web.common.datatype.DataTypes;
 import com.pmease.gitop.web.component.link.ProjectHomeLink;

@@ -6,12 +6,14 @@ import java.util.HashSet;
 import javax.validation.constraints.Min;
 
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.gitop.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitop.core.gatekeeper.voteeligibility.CanVoteBySpecifiedTeam;
-import com.pmease.gitop.core.model.Membership;
-import com.pmease.gitop.core.model.PullRequest;
-import com.pmease.gitop.core.model.User;
-import com.pmease.gitop.core.model.Vote;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.VoteInvitationManager;
+import com.pmease.gitop.model.Membership;
+import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.User;
+import com.pmease.gitop.model.Vote;
+import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitop.model.gatekeeper.voteeligibility.CanVoteBySpecifiedTeam;
 
 @SuppressWarnings("serial")
 @Editable
@@ -79,7 +81,7 @@ public class GetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
                 lackApprovals = getMinScore() - score;
             }
 
-            request.inviteToVote(members, lackApprovals);
+            Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, members, lackApprovals);
 
             return pending("To be approved by " + lackApprovals + " users from team '"
                     + getTeam().getName() + ".", new CanVoteBySpecifiedTeam(getTeam()));

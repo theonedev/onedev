@@ -12,7 +12,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.pmease.gitop.core.manager.BranchManager;
-import com.pmease.gitop.core.model.Branch;
+import com.pmease.gitop.model.Branch;
 
 @Path("/branches")
 @Produces(MediaType.APPLICATION_JSON)

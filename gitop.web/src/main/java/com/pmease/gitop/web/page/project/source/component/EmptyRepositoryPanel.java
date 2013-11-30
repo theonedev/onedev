@@ -5,7 +5,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.model.Project;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.util.UrlUtils;
 
 @SuppressWarnings("serial")

@@ -5,7 +5,8 @@ import javax.validation.constraints.NotNull;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.TeamManager;
-import com.pmease.gitop.core.model.Team;
+import com.pmease.gitop.model.Team;
+import com.pmease.gitop.model.gatekeeper.AbstractGateKeeper;
 
 @SuppressWarnings("serial")
 public abstract class TeamAwareGateKeeper extends AbstractGateKeeper {

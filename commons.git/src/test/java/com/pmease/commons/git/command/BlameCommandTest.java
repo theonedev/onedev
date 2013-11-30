@@ -35,7 +35,7 @@ public class BlameCommandTest {
 					+ "7th line\n"
 					+ "8th line\n"
 					+ "9th line\n");
-			workGit.add("file").commit("initial commit", false);
+			workGit.add("file").commit("initial commit", false, false);
 			
 			List<Blame> blames = workGit.blame("file", "master");
 			assertEquals(1, blames.size());
@@ -50,7 +50,7 @@ public class BlameCommandTest {
 					+ "7th line\n"
 					+ "8th line\n"
 					+ "nineth line\n");
-			workGit.add("file").commit("second commit", false);
+			workGit.add("file").commit("second commit", false, false);
 			
 			blames = workGit.blame("file", "master");
 			assertEquals(3, blames.size());
@@ -62,7 +62,7 @@ public class BlameCommandTest {
 			FileUtils.writeFile(file, 
 					  "first line\n"
 					+ "nineth line\n");
-			workGit.add("file").commit("third commit", false);
+			workGit.add("file").commit("third commit", false, false);
 			
 			Git bareGit = new Git(new File(tempDir, "bare"));
 			bareGit.clone(workGit.repoDir().getAbsolutePath(), true);
