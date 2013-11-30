@@ -22,8 +22,14 @@ public class ApprovedByProjectOwner extends AbstractGateKeeper {
         Vote.Result result = projectOwner.checkVoteSince(request.getBaseUpdate());
 
         if (result == null) {
-        	Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, Sets.newHashSet(projectOwner), 1);
-            return pending("To be approved by user '" + projectOwner.getName() + "'.",
+            if (request.getId() != null)
+            	Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, Sets.newHashSet(projectOwner), 1);
+    		String prefix;
+    		if (request.getId() == null)
+    			prefix = "Not ";
+    		else
+    			prefix = "To be ";
+            return pending(prefix + "approved by user '" + projectOwner.getName() + "'.",
                     new CanVoteBySpecifiedUser(projectOwner));
         } else if (result.isAccept()) {
             return accepted("Approved by user '" + projectOwner.getName() + "'.");

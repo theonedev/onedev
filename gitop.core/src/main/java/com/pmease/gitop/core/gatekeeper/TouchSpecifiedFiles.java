@@ -1,19 +1,15 @@
 package com.pmease.gitop.core.gatekeeper;
 
-import java.io.File;
 import java.util.Collection;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.git.Git;
-import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.gatekeeper.AbstractGateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitop.model.storage.StorageManager;
 
 @SuppressWarnings("serial")
 @Editable
@@ -33,12 +29,9 @@ public class TouchSpecifiedFiles extends AbstractGateKeeper {
 
 	@Override
 	public CheckResult check(PullRequest request) {
-		StorageManager storageManager = AppLoader.getInstance(StorageManager.class);
-		File repoDir = storageManager.getStorage(request.getTarget().getProject()).ofCode();
-
 		for (int i=0; i<request.getEffectiveUpdates().size(); i++) {
 			PullRequestUpdate update = request.getEffectiveUpdates().get(i);
-			Collection<String> touchedFiles = new Git(repoDir).listChangedFiles(
+			Collection<String> touchedFiles = request.getTarget().getProject().code().listChangedFiles(
 					update.getBaseCommit(), update.getHeadCommit());
 			
 			for (String file: touchedFiles) {

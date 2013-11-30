@@ -10,7 +10,7 @@ public class SubmittedViaPush extends AbstractGateKeeper {
 
 	@Override
 	public CheckResult check(PullRequest request) {
-		if (request.isAutoCreated())
+		if (request.getId() == null)
 			return accepted("Submitted via push.");
 		else
 			return rejected("Not submitted via push.");

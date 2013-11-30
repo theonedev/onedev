@@ -10,24 +10,20 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Commit;
-import com.pmease.commons.git.Git;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.core.manager.PullRequestManager;
-import com.pmease.gitop.core.manager.PullRequestUpdateManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.PullRequest.MergeResult;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.model.gatekeeper.checkresult.Blocked;
+import com.pmease.gitop.model.gatekeeper.GateKeeper;
+import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
 import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
-import com.pmease.gitop.model.storage.StorageManager;
 
 @SuppressWarnings("serial")
 @Singleton
@@ -39,24 +35,14 @@ public class PreReceiveServlet extends CallbackServlet {
 
 	private final BranchManager branchManager;
 
-	private final StorageManager storageManager;
-
-	private final PullRequestManager pullRequestManager;
-
-	private final PullRequestUpdateManager pullRequestUpdateManager;
-
-	private final Gitop gitop;
-
+	private final UserManager userManager;
+	
 	@Inject
-	public PreReceiveServlet(ProjectManager projectManager, BranchManager branchManager,
-			StorageManager storageManager, PullRequestManager pullRequestManager,
-			PullRequestUpdateManager pullRequestUpdateManager, Gitop gitop) {
+	public PreReceiveServlet(ProjectManager projectManager, 
+			BranchManager branchManager, UserManager userManager) {
 		super(projectManager);
 		this.branchManager = branchManager;
-		this.storageManager = storageManager;
-		this.pullRequestManager = pullRequestManager;
-		this.pullRequestUpdateManager = pullRequestUpdateManager;
-		this.gitop = gitop;
+		this.userManager = userManager;
 	}
 
 	@Override
@@ -77,52 +63,41 @@ public class PreReceiveServlet extends CallbackServlet {
 
 		logger.info("Executing pre-receive hook against branch {}...", branchName);
 
-		Branch branch = branchManager.find(project, branchName, true);
+		Branch branch = branchManager.findBy(project, branchName, true);
 
-		User user = Gitop.getInstance(UserManager.class).getCurrent();
+		User user = userManager.getCurrent();
 		Preconditions.checkNotNull(user, "User pushing commits is unknown.");
 
-		PullRequest request = pullRequestManager.findOpen(branch, null, user);
-		if (request == null) {
-			request = new PullRequest();
-			request.setAutoCreated(true);
-			request.setAutoMerge(true);
-			request.setTarget(branch);
-			request.setSubmitter(user);
-
-			pullRequestManager.save(request);
-		} 
-
-		if (!request.getLatestUpdate().getHeadCommit().equals(newCommitHash)) {
-			
-			Git git = new Git(storageManager.getStorage(project).ofCode());
-	
-			PullRequestUpdate update = new PullRequestUpdate();
-			update.setRequest(request);
-			Commit commit = git.resolveRevision(newCommitHash);
-			update.setSubject(commit.getSummary());
-			request.getUpdates().add(update);
-			
-			pullRequestUpdateManager.save(update);
-		}
+		PullRequest request = new PullRequest();
+		request.setTarget(branch);
+		request.setSubmitter(user);
+		request.setTitle("Faked pull request to check against push gatekeeper");
+		request.setMergeResult(new MergeResult(oldCommitHash, newCommitHash, newCommitHash));
 		
-		pullRequestManager.refresh(request);
-		CheckResult checkResult = request.getCheckResult(); 
+		PullRequestUpdate update = new PullRequestUpdate();
+		update.setRequest(request);
+		update.setHeadCommit(newCommitHash);
+		request.getUpdates().add(update);
 
-		if (checkResult instanceof Rejected) {
+		GateKeeper gateKeeper = project.getGateKeeper();
+		CheckResult checkResult = gateKeeper.check(request);
+
+		if (!(checkResult instanceof Accepted)) {
 			output.markError();
-			for (String each : checkResult.getReasons()) {
-				output.writeLine(each);
+			output.writeLine();
+			output.writeLine("*******************************************************");
+			output.writeLine("*");
+			for (String each: checkResult.getReasons()) {
+				output.writeLine("*  " + each);
 			}
-			
-			if (request.getUpdates().size() == 1) {
-				pullRequestManager.delete(request);
+			if (!(checkResult instanceof Rejected)) {
+				output.writeLine("*");
+				output.writeLine("*  ----------------------------------------------------");
+				output.writeLine("*  You may submit a pull request instead.");
 			}
-		} else if (checkResult instanceof Pending || checkResult instanceof Blocked) {
-			output.markError();
-			output.writeLine("!!!! Your pushed commit is subject to review before accepted. "
-					+ "For details, please visit: !!!!");
-			output.writeLine(gitop.guessServerUrl() + "/mr/" + request.getId());
+			output.writeLine("*");
+			output.writeLine("*******************************************************");
+			output.writeLine();
 		}
 	}
 

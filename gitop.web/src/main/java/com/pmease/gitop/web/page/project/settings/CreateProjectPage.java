@@ -93,7 +93,7 @@ public class CreateProjectPage extends AbstractLayoutPage {
 					@Override
 					public void validate(IValidatable<String> validatable) {
 						String name = validatable.getValue();
-						User o = Gitop.getInstance(UserManager.class).find(owner);
+						User o = Gitop.getInstance(UserManager.class).findBy(owner);
 						
 						for (Project each : o.getProjects()) {
 							if (each.getName().equalsIgnoreCase(name)) {
@@ -119,7 +119,7 @@ public class CreateProjectPage extends AbstractLayoutPage {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				Project project = projectModel.getObject();
-				User o = Gitop.getInstance(UserManager.class).find(owner);
+				User o = Gitop.getInstance(UserManager.class).findBy(owner);
 				Preconditions.checkNotNull(o);
 				project.setOwner(o);
 				Gitop.getInstance(ProjectManager.class).save(project);

@@ -29,11 +29,10 @@ public class PullRequest extends AbstractEntity {
 		PENDING_MERGE, MERGED, DECLINED;
 	}
 
+	@JoinColumn(nullable = false)
 	private String title;
 
 	private boolean autoMerge;
-
-	private boolean autoCreated;
 
 	@ManyToOne
 	@JoinColumn(nullable = false)
@@ -74,8 +73,7 @@ public class PullRequest extends AbstractEntity {
 	 * @return user specified title of this merge request, <tt>null</tt> for
 	 *         auto-created merge request.
 	 */
-	public @Nullable
-	String getTitle() {
+	public @Nullable String getTitle() {
 		return title;
 	}
 
@@ -91,28 +89,6 @@ public class PullRequest extends AbstractEntity {
 		this.autoMerge = autoMerge;
 	}
 	
-	/**
-	 * Get title of this merge request, and use title of latest merge request
-	 * update for auto-created merge request.
-	 * 
-	 * @return title of this merge request, or title of latest merge request
-	 *         update for auto-created merge request.
-	 */
-	public String findTitle() {
-		if (getTitle() != null)
-			return getTitle();
-		else
-			return getLatestUpdate().getSubject();
-	}
-
-	public boolean isAutoCreated() {
-		return autoCreated;
-	}
-
-	public void setAutoCreated(boolean autoCreated) {
-		this.autoCreated = autoCreated;
-	}
-
 	public User getSubmitter() {
 		return submitter;
 	}
@@ -204,8 +180,10 @@ public class PullRequest extends AbstractEntity {
 			Preconditions.checkState(!getUpdates().isEmpty());
 			sortedUpdates = new ArrayList<PullRequestUpdate>(getUpdates());
 
-			Collections.sort(sortedUpdates);
-			Collections.reverse(sortedUpdates);
+			if (sortedUpdates.size() > 1) {
+				Collections.sort(sortedUpdates);
+				Collections.reverse(sortedUpdates);
+			}
 		}
 		return sortedUpdates;
 	}
@@ -243,6 +221,10 @@ public class PullRequest extends AbstractEntity {
 		return git.listChangedFiles(getTarget().getHeadCommit(), getLatestUpdate().getHeadCommit());
 	}
 
+	public String getHeadRef() {
+		return "refs/gitop/pulls/" + getId() + "/head";
+	}
+	
 	public String getMergeRef() {
 		return "refs/gitop/pulls/" + getId() + "/merge";
 	}

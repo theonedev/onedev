@@ -29,14 +29,13 @@ public class PullRequestUpdate extends AbstractEntity {
 	private PullRequest request;
 	
 	@Column(nullable=false)
-	private String subject;
-	
+	private String headCommit;
+
 	private Date date = new Date();
 	
 	@OneToMany(mappedBy="update", cascade=CascadeType.REMOVE)
 	private Collection<Vote> votes = new ArrayList<Vote>();
 	
-	private transient String headCommit;
 	
 	private transient String baseCommit;
 	
@@ -48,14 +47,14 @@ public class PullRequestUpdate extends AbstractEntity {
 		this.request = request;
 	}
 
-	public String getSubject() {
-        return subject;
-    }
-
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-
+	public String getHeadCommit() {
+		return headCommit;
+	}
+	
+	public void setHeadCommit(String headCommit) {
+		this.headCommit = headCommit;
+	}
+	
     public Date getDate() {
 		return date;
 	}
@@ -71,17 +70,15 @@ public class PullRequestUpdate extends AbstractEntity {
 	public void setVotes(Collection<Vote> votes) {
 		this.votes = votes;
 	}
-
+	
+	public String getBaseRef() {
+		return "refs/gitop/updates/" + getId() + "/base";
+	}
+	
 	public String getHeadRef() {
 		return "refs/gitop/updates/" + getId() + "/head";
 	}
-	
-	public String getHeadCommit() {
-		if (headCommit == null) 
-			headCommit = getRequest().getTarget().getProject().code().resolveRef(getHeadRef(), true);
-		return headCommit;
-	}
-	
+
 	/**
 	 * Calculate base commit for change calculation of this update. Base commit is merged 
 	 * commit of:
@@ -113,7 +110,7 @@ public class PullRequestUpdate extends AbstractEntity {
 			} else if (git.isAncestor(mergeBase, previousUpdate)) {
 				baseCommit = previousUpdate;
 			} else {
-				String baseRef = "refs/gitop/updates/" + getId() + "/base";
+				String baseRef = getBaseRef();
 				baseCommit = git.resolveRef(baseRef, false);
 
 				if (baseCommit != null) {

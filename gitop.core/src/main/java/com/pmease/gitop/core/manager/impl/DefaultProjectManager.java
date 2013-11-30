@@ -105,7 +105,7 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
 
     @Sessional
     @Override
-    public Project find(String ownerName, String projectName) {
+    public Project findBy(String ownerName, String projectName) {
         Criteria criteria = createCriteria();
         criteria.add(Restrictions.eq("name", projectName));
         criteria.createAlias("owner", "owner");
@@ -117,7 +117,7 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
 
     @Sessional
     @Override
-    public Project find(User owner, String projectName) {
+    public Project findBy(User owner, String projectName) {
         return find(Restrictions.eq("owner.id", owner.getId()),
                 Restrictions.eq("name", projectName));
     }

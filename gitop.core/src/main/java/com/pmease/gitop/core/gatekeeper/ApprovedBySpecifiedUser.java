@@ -38,8 +38,15 @@ public class ApprovedBySpecifiedUser extends AbstractGateKeeper {
 
         Vote.Result result = user.checkVoteSince(request.getBaseUpdate());
         if (result == null) {
-        	Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, Sets.newHashSet(user), 1);
-            return pending("To be approved by user '" + user.getName() + "'.",
+            if (request.getId() != null)
+            	Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, Sets.newHashSet(user), 1);
+
+            String prefix;
+    		if (request.getId() == null)
+    			prefix = "Not ";
+    		else
+    			prefix = "To be ";
+            return pending(prefix + "approved by user '" + user.getName() + "'.",
                     new CanVoteBySpecifiedUser(user));
         } else if (result.isAccept()) {
             return accepted("Approved by user '" + user.getName() + "'.");

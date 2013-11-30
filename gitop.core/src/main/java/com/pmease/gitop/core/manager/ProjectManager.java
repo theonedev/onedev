@@ -11,8 +11,8 @@ import com.pmease.gitop.model.User;
 @ImplementedBy(DefaultProjectManager.class)
 public interface ProjectManager extends GenericDao<Project> {
 	
-	@Nullable Project find(String ownerName, String projectName);
+	@Nullable Project findBy(String ownerName, String projectName);
 	
-	@Nullable Project find(User owner, String projectName);
+	@Nullable Project findBy(User owner, String projectName);
 	
 }

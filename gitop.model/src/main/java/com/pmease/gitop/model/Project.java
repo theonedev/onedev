@@ -14,6 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.Git;
@@ -108,6 +109,7 @@ public class Project extends AbstractEntity implements UserBelonging {
     @Editable(
 			name="Accept Merge Requests If", order=500,
 			description="Optionally define gate keeper to accept merge requests under certain condition.")
+    @NotNull
 	@Valid
 	public GateKeeper getGateKeeper() {
 		return gateKeeper;

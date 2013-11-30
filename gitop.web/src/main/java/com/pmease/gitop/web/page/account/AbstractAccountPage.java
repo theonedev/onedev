@@ -23,7 +23,7 @@ public abstract class AbstractAccountPage extends AbstractLayoutPage {
 		String name = params.get(PageSpec.USER).toString();
 		Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
 		
-		User user = Gitop.getInstance(UserManager.class).find(name);
+		User user = Gitop.getInstance(UserManager.class).findBy(name);
 		if (user == null) {
 			onException(new EntityNotFoundException("User " + name + " not found"));
 		}
