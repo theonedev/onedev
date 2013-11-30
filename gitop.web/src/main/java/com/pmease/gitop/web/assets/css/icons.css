@@ -7,11 +7,11 @@
  * -------------------------- */
 @font-face {
   font-family: 'gitop-icons';
-  src: url('../fonts/pui-icons-regular-webfont.eot?v=1.0.6.6');
-  src: url('../fonts/pui-icons-regular-webfont.eot?#iefix&v=1.0.6.6') format('embedded-opentype'), 
-  	   url('../fonts/pui-icons-regular-webfont.woff?v=1.0.6.6') format('woff'), 
-  	   url('../fonts/pui-icons-regular-webfont.ttf?v=1.0.6.6') format('truetype'), 
-  	   url('../fonts/pui-icons-regular-webfont.svg?v=1.0.6.6#pui-iconsregular') format('svg');
+  src: url('../fonts/pui-icons-regular-webfont.eot?v=1.0.6.7');
+  src: url('../fonts/pui-icons-regular-webfont.eot?#iefix&v=1.0.6.7') format('embedded-opentype'), 
+  	   url('../fonts/pui-icons-regular-webfont.woff?v=1.0.6.7') format('woff'), 
+  	   url('../fonts/pui-icons-regular-webfont.ttf?v=1.0.6.7') format('truetype'), 
+  	   url('../fonts/pui-icons-regular-webfont.svg?v=1.0.6.7#pui-iconsregular') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -1468,15 +1468,33 @@
   content: "\F712";
 }
 
+.fa-readme:before,
+.fa-book-open:before {
+  content: "\713";
+}
 .fa-network:before {
   content: "\F715";
 }
 .fa-server-stack:before {
   content: "\F716";
 }
-.fa-readme:before,
-.fa-book-open:before {
-  content: "\718";
+.fa-file:before {
+	content: "\F717";
+}
+.fa-symbollink-file:before {
+	content: "\F718";
+}
+.fa-folder:before {
+	content: "\F719";
+}
+.fa-symbollink-folder:before {
+	content: "\F71a";
+}
+.fa-submodule:before {
+	content: "\F71B";
+}
+.fa-folder-add:before {
+	content: "\F71C";
 }
 
 .fa-project:before {

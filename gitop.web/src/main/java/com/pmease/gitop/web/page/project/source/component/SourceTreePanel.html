@@ -3,9 +3,9 @@
 	<section class="source-tree">
 		<div class="commit">
 			<pre class="short-message" wicket:id="shortMessage"></pre>
-			<div class="commit-meta">
+			<div class="commit-meta clearfix">
 				<div class="commit-author">
-					<span wicket:id="author"></span> authored <time class="age" wicket:id="author-date"></time>
+					<span class="author-name" wicket:id="author"></span> authored <time class="age" wicket:id="author-date"></time>
 				</div>
 				<div class="commit-hash">
 					<a wicket:id="commitlink">latest commit <span wicket:id="sha" class="sha"></span></a>
@@ -13,6 +13,14 @@
 			</div>
 		</div>
 		<table class="table table-condense files">
+			<wicket:enclosure>
+			<tr>
+				<td class="file-icon"></td>
+				<td class="file-name"><a wicket:id="parent">..</a></td>
+				<td class="message"></td>
+				<td class="age"></td>
+			</tr>
+			</wicket:enclosure>
 			<tr wicket:id="files">
 				<td class="file-icon"><i class="" wicket:id="icon"></i></td>
 				<td class="file-name"><a wicket:id="file"><span wicket:id="name"></span></a></td>
