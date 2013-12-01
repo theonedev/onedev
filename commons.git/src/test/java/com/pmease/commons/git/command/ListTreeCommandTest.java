@@ -57,7 +57,7 @@ public class ListTreeCommandTest {
 			workGit.addSubModule(moduleGit.repoDir().getAbsolutePath(), "module");
 			workGit.commit("commit", false, false);
 
-    		workGit.checkout("dev", true);
+    		workGit.checkout("head", "dev");
     		workGit.remove("dir/file");
     		workGit.commit("commit", false, false);
     		

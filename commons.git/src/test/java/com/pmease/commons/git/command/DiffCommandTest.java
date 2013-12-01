@@ -48,7 +48,7 @@ public class DiffCommandTest {
 		    
 		    workGit.add("dir").commit("add readme, dir/file1 and dir/file2", false, false);
 		    
-		    workGit.checkout("dev", true);
+		    workGit.checkout("head", "dev");
 
 		    FileUtils.writeFile(readme, "reame for dev");
 		    workGit.add("readme");

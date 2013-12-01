@@ -192,7 +192,8 @@ public class PullRequest extends AbstractEntity {
 	 * Get list of effective updates in reverse order. Update is considered
 	 * effective if it is not ancestor of target branch head.
 	 * 
-	 * @return list of effective updates in reverse order.
+	 * @return 
+	 * 			list of effective updates in reverse order.
 	 */
 	public List<PullRequestUpdate> getEffectiveUpdates() {
 		if (effectiveUpdates == null) {

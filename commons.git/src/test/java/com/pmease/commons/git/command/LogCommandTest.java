@@ -50,7 +50,7 @@ public class LogCommandTest {
     		workGit.add("dir/file2");
     		workGit.commit("add dir/file\nadd dir/file to test files under a directory", false, false);
     		
-    		workGit.checkout("dev", true);
+    		workGit.checkout("head", "dev");
     		workGit.remove("dir/file");
     		workGit.commit("remove dir/file", false, false);
     		
@@ -61,7 +61,7 @@ public class LogCommandTest {
 
     		List<Commit> commits = bareGit.log(null, "master", null, 0);
     		assertEquals(commits.size(), 6);
-    		assertEquals(commits.get(0).getSummary(), "add dir/file");
+    		assertEquals(commits.get(0).getSubject(), "add dir/file");
     		assertEquals(commits.get(0).getMessage(), "add dir/file to test files under a directory");
     		assertEquals("hello\nworld", commits.get(0).getNote());
     		assertEquals(commits.get(0).getFileChanges().size(), 2);
@@ -72,7 +72,7 @@ public class LogCommandTest {
     		
     		assertEquals(null, commits.get(1).getNote());
     		
-    		workGit.checkout("master", false).remove("a").commit("remove a", false, false);
+    		workGit.checkout("master", null).remove("a").commit("remove a", false, false);
     		FileUtils.writeFile(new File(workGit.repoDir(), "dir/file2"), "file2");
     		workGit.add("dir/file2").commit("add dir/file2", false, false);
     		workGit.merge("dev", null, null, null);

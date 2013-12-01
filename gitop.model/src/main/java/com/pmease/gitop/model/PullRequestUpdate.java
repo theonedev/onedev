@@ -82,8 +82,10 @@ public class PullRequestUpdate extends AbstractEntity {
 	/**
 	 * Calculate base commit for change calculation of this update. Base commit is merged 
 	 * commit of:
+	 * 
 	 * <li> merge base of head ref and target branch head
 	 * <li> head ref of previous update
+	 * 
 	 * Changed files of this update will be calculated between change base and head ref
 	 * and this effectively represents changes made since previous update with merged 
 	 * changes from target branch excluded if there is any.  
@@ -99,10 +101,10 @@ public class PullRequestUpdate extends AbstractEntity {
 			Preconditions.checkState(index != -1);
 			
 			String previousUpdate;
-			if (index == 0) {
+			if (index >= getRequest().getSortedUpdates().size()-1) {
 				previousUpdate = mergeBase;
 			} else {
-				previousUpdate = getRequest().getSortedUpdates().get(index-1).getHeadCommit();
+				previousUpdate = getRequest().getSortedUpdates().get(index+1).getHeadCommit();
 			}
 	
 			if (git.isAncestor(previousUpdate, mergeBase)) { 

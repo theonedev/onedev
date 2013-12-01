@@ -27,7 +27,7 @@ public class GitUtils {
 	}
 	
 	public static String getCommitSummary(Commit commit) {
-		return commit.getSummary();
+		return commit.getSubject();
 	}
 	
 	public static boolean hasCommits(File gitDir) {

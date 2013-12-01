@@ -30,6 +30,7 @@ import com.pmease.commons.git.command.ListTagsCommand;
 import com.pmease.commons.git.command.ListTreeCommand;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.git.command.MergeCommand;
+import com.pmease.commons.git.command.PushCommand;
 import com.pmease.commons.git.command.RemoveCommand;
 import com.pmease.commons.git.command.ResetCommand;
 import com.pmease.commons.git.command.ShowCommand;
@@ -130,7 +131,7 @@ public class Git implements Serializable {
 		return new ListChangedFilesCommand(repoDir).fromRev(fromRev).toRev(toRev).call();
 	}
 
-	public Git checkout(String revision, boolean newBranch) {
+	public Git checkout(String revision, @Nullable String newBranch) {
 		new CheckoutCommand(repoDir).revision(revision).newBranch(newBranch).call();
 		return this;
 	}
@@ -157,6 +158,11 @@ public class Git implements Serializable {
 		return this;
 	}
 	
+	public Git push(String to, String refspec) {
+		new PushCommand(repoDir).to(to).refspec(refspec).call();
+		return this;
+	}
+
 	public List<RefInfo> showRefs(String pattern) {
 		return new ShowRefCommand(repoDir).pattern(pattern).call();
 	}
@@ -246,5 +252,10 @@ public class Git implements Serializable {
 	public Map<String, String> listSubModules(String revision) {
 		return new ListSubModulesCommand(repoDir).revision(revision).call();
 	}
-	
+
+	@Override
+	public String toString() {
+		return repoDir.toString();
+	}
+
 }

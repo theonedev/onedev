@@ -101,7 +101,27 @@ public abstract class LineConsumer extends OutputStream {
 	 */
 	public abstract void consume(String line);
 	
-    @Override
+	protected void debug(String line) {
+		logger.debug(line);
+	}
+	
+	protected void trace(String line) {
+		logger.trace(line);
+	}
+
+	protected void info(String line) {
+		logger.info(line);
+	}
+
+	protected void warn(String line) {
+		logger.warn(line);
+	}
+
+	protected void error(String line) {
+		logger.error(line);
+	}
+
+	@Override
 	public void flush() throws IOException {
         if (buffer.size() > 0) {
             processBuffer();
