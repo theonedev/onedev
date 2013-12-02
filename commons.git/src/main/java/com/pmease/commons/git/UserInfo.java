@@ -2,6 +2,8 @@ package com.pmease.commons.git;
 
 import java.util.Date;
 
+import com.google.common.base.Objects;
+
 public class UserInfo {
 	
 	private final String name;
@@ -26,6 +28,29 @@ public class UserInfo {
 
 	public Date getDate() {
 		return date;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(name, email, date);
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (!(other instanceof UserInfo))
+			return false;
+		if (this == other)
+			return true;
+		UserInfo otherUser = (UserInfo) other;
+		return Objects.equal(name, otherUser.name) 
+				&& Objects.equal(email, otherUser.email)
+				&& Objects.equal(date, otherUser.date);
+	}
+
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this)
+				.add("name", name).toString();
 	}
 	
 }
