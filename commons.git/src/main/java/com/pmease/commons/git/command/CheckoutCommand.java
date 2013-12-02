@@ -44,7 +44,7 @@ public class CheckoutCommand extends GitCommand<Void> {
 		
 		cmd.addArgs(revision);
 		
-		cmd.execute(debugLogger(), new LineConsumer() {
+		cmd.execute(debugLogger, new LineConsumer() {
 
 			@Override
 			public void consume(String line) {

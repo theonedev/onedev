@@ -111,7 +111,7 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 					
 			}
 			
-		}, errorLogger()).checkReturnCode();
+		}, errorLogger).checkReturnCode();
 
 		if (changeBuilder.newPath != null)
 			fileChanges.add(changeBuilder.buildFileChange());

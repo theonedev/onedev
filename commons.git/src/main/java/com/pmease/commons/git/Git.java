@@ -23,6 +23,7 @@ import com.pmease.commons.git.command.FetchCommand;
 import com.pmease.commons.git.command.InitCommand;
 import com.pmease.commons.git.command.IsAncestorCommand;
 import com.pmease.commons.git.command.IsBinaryCommand;
+import com.pmease.commons.git.command.IsTreeLinkCommand;
 import com.pmease.commons.git.command.ListBranchesCommand;
 import com.pmease.commons.git.command.ListChangedFilesCommand;
 import com.pmease.commons.git.command.ListSubModulesCommand;
@@ -287,6 +288,10 @@ public class Git implements Serializable {
 
 	public boolean isBinary(String file, String revision) {
 		return new IsBinaryCommand(repoDir).file(file).revision(revision).call();
+	}
+	
+	public boolean isTreeLink(String symlink, String revision) {
+		return new IsTreeLinkCommand(repoDir).symlink(symlink).revision(revision).call();
 	}
 	
 	public Git addSubModule(String url, String path) {

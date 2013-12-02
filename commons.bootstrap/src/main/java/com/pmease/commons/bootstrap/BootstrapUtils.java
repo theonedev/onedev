@@ -6,11 +6,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class BootstrapUtils {
+	
+	private static final int BUFFER_SIZE = 64*1024;
 	
 	public static Object readObject(File file) {
     	ObjectInputStream ois = null;
@@ -48,8 +51,22 @@ public class BootstrapUtils {
 		else
 			throw new RuntimeException(e);
 	}
+	
+	public static void createDir(File dir) {
+		if (dir.exists()) {
+            if (dir.isFile()) {
+                throw new RuntimeException("Unable to create directory since the path " +
+                		"is already used by a file: " + dir.getAbsolutePath());
+            } 
+		} else if (!dir.mkdirs()) {
+            if (!dir.exists())
+                throw new RuntimeException("Unable to create directory: " + dir.getAbsolutePath());
+		}
+	}
 
 	/**
+	 * Unzip files matching specified matcher from specified file to specified directory.
+	 * 
 	 * @param srcFile 
 	 * 		zip file to extract from
 	 * @param 
@@ -59,42 +76,48 @@ public class BootstrapUtils {
 	 * 		Use null if you want to extract all entries from the zip file.  
 	 */
 	public static void unzip(File srcFile, File destDir, StringMatcher matcher) {
-		int BUFFER = 8192;
-		
-	    ZipInputStream zis = null;
+	    try (InputStream is = new FileInputStream(srcFile);) {
+	    	unzip(is, destDir, matcher);
+	    } catch (Exception e) {
+	    	throw unchecked(e);
+	    }
+	} 	
+	
+	/**
+	 * Unzip files matching specified matcher from input stream to specified directory.
+	 * 
+	 * @param is
+	 * 			input stream to unzip files from. This method will not close the stream 
+	 * 			after using it. Caller should be responsible for closing
+	 * @param destDir
+	 * 			destination directory to extract files to
+	 * @param matcher
+	 * 			matcher to select matched files for extracting
+	 */
+	public static void unzip(InputStream is, File destDir, StringMatcher matcher) {
+		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(is, BUFFER_SIZE));		
 	    try {
-		    zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(srcFile)));
 		    ZipEntry entry;
 		    while((entry = zis.getNextEntry()) != null) {
 		    	if (matcher == null || matcher.matches(entry.getName())) {
-				    BufferedOutputStream bos = null;
-				    try {
-				        bos = new BufferedOutputStream(new FileOutputStream(new File(destDir, entry.getName())));
-	
-				        int count;
-				        byte data[] = new byte[BUFFER];
-				        while ((count = zis.read(data, 0, BUFFER)) != -1) 
-				        	bos.write(data, 0, count);
-				        bos.flush();
-				    } finally {
-				    	if (bos != null)
-				    		bos.close();
-				    }
+					if (entry.getName().endsWith("/")) {
+						createDir(new File(destDir, entry.getName()));
+					} else {		    		
+					    try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(destDir, entry.getName())), BUFFER_SIZE);) {
+					        int count;
+					        byte data[] = new byte[BUFFER_SIZE];
+					        while ((count = zis.read(data, 0, BUFFER_SIZE)) != -1) 
+					        	bos.write(data, 0, count);
+					        bos.flush();
+					    }
+					}
 		    	}
 		    }
 	    } catch (Exception e) {
 	    	throw unchecked(e);
-	    } finally {
-	    	if (zis != null) {
-				try {
-					zis.close();
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-	    	}
 	    }
 	} 	
-	
+
 	public static boolean visitDir(File dir, FileVisitor visitor) {
 		if (!dir.exists())
 			throw new RuntimeException("Directory '" + dir.getAbsolutePath() + "' does not exist.");

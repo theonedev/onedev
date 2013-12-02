@@ -86,7 +86,7 @@ public class BlameCommand extends GitCommand<List<Blame>> {
 				} 
 			}
 			
-		}, errorLogger()).checkReturnCode();
+		}, errorLogger).checkReturnCode();
 		
 		if (!blameBuilder.lines.isEmpty())
 			blames.add(blameBuilder.build());

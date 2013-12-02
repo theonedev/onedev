@@ -236,10 +236,7 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
 	}
 	
 	public static void createDir(File dir) {
-		if (!dir.exists()) {
-			if (!dir.mkdirs())
-				throw new GeneralException("Unable to create directory: " + dir.getAbsolutePath());
-		}
+		BootstrapUtils.createDir(dir);
 	}
 	
 	public static void cleanDir(File dir) {

@@ -44,14 +44,11 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
         this.storageManager = storageManager;
         this.serverConfig = serverConfig;
         
-        InputStream is = getClass().getClassLoader().getResourceAsStream("git-hook-template");
-        Preconditions.checkNotNull(is);
-        try {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-hook-template")) {
+        	Preconditions.checkNotNull(is);
             hookTemplate = StringUtils.join(IOUtils.readLines(is), "\n");
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } finally {
-            IOUtils.closeQuietly(is);
         }
     }
     

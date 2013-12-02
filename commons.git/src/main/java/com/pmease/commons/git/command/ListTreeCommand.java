@@ -71,7 +71,7 @@ public class ListTreeCommand extends GitCommand<List<TreeNode>> {
 				treeNodes.add(new TreeNode(repoDir, FileMode.fromBits(Integer.parseInt(mode, 8)), path, revision, hash, size));
 			}
 			
-		}, errorLogger()).checkReturnCode();
+		}, errorLogger).checkReturnCode();
 
 		return treeNodes;
 	}

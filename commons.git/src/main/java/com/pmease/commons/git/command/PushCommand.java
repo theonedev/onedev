@@ -33,7 +33,7 @@ public class PushCommand extends GitCommand<Void> {
 		Commandline cmd = cmd().addArgs("push");
 		cmd.addArgs(to, refspec);
 		
-		cmd.execute(debugLogger(), errorLogger()).checkReturnCode();
+		cmd.execute(debugLogger, errorLogger).checkReturnCode();
 		
 		return null;
 	}

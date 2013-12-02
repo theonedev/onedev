@@ -44,7 +44,7 @@ public class IsBinaryCommand extends GitCommand<Boolean> {
 					isBinary[0] = true;
 			}
 			
-		}, errorLogger()).checkReturnCode();
+		}, errorLogger).checkReturnCode();
 		
 		return isBinary[0];
 	}

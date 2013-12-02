@@ -33,7 +33,7 @@ public class ResetCommand extends GitCommand<Void> {
 		if (commit != null)
 			cmd.addArgs(commit);
 		
-		cmd.execute(debugLogger(), errorLogger()).checkReturnCode();
+		cmd.execute(debugLogger, errorLogger).checkReturnCode();
 		
 		return null;
 	}

@@ -48,7 +48,7 @@ public class ListChangedFilesCommand extends GitCommand<Collection<String>> {
 					changedFiles.add(line);
 			}
 			
-		}, errorLogger()).checkReturnCode();
+		}, errorLogger).checkReturnCode();
 		
 		return changedFiles;
 	}

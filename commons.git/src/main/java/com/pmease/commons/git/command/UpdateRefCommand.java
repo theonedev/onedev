@@ -51,7 +51,7 @@ public class UpdateRefCommand extends GitCommand<Void> {
 		if (reason != null)
             cmd.addArgs(reason);
 		
-		cmd.execute(debugLogger(), errorLogger()).checkReturnCode();
+		cmd.execute(debugLogger, errorLogger).checkReturnCode();
 		
 		return null;
 	}

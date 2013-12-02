@@ -168,7 +168,7 @@ public class LogCommand extends GitCommand<List<Commit>> {
                 }
             }
             
-        }, errorLogger()).checkReturnCode();
+        }, errorLogger).checkReturnCode();
 
         if (commitBuilder.hash != null)
         	commits.add(commitBuilder.build());

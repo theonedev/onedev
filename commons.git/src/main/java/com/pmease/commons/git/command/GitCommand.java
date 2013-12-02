@@ -7,6 +7,8 @@ import java.util.concurrent.Callable;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.git.GitVersion;
 import com.pmease.commons.util.FileUtils;
@@ -15,23 +17,60 @@ import com.pmease.commons.util.execution.LineConsumer;
 
 public abstract class GitCommand<V> implements Callable<V> {
 
+	protected static final Logger logger = LoggerFactory.getLogger(GitCommand.class);
+
 	private static final String GIT_EXE = "git";
 	
-	private static final String MIN_VERSION = "1.0.0";
+	private static final String MIN_VERSION = "1.8.0";
 	
 	protected final File repoDir;
 	
 	private final Map<String, String> environments;
 	
-	private final LineConsumer debugLogger = new LineConsumer.DebugLogger();
+	protected static final LineConsumer debugLogger = new LineConsumer() {
+
+		@Override
+		public void consume(String line) {
+			logger.debug(line);
+		}
+		
+	};
 	
-	private final LineConsumer infoLogger = new LineConsumer.InfoLogger();
+	protected static final LineConsumer infoLogger = new LineConsumer() {
+
+		@Override
+		public void consume(String line) {
+			logger.info(line);
+		}
+		
+	};
 	
-	private final LineConsumer warnLogger = new LineConsumer.WarnLogger();
+	protected static final LineConsumer warnLogger = new LineConsumer() {
+
+		@Override
+		public void consume(String line) {
+			logger.warn(line);
+		}
+		
+	};
 	
-	private final LineConsumer errorLogger = new LineConsumer.ErrorLogger();
+	protected static final LineConsumer errorLogger = new LineConsumer() {
+
+		@Override
+		public void consume(String line) {
+			logger.error(line);
+		}
+		
+	};
 	
-	private final LineConsumer traceLogger = new LineConsumer.TraceLogger();
+	protected static final LineConsumer traceLogger = new LineConsumer() {
+
+		@Override
+		public void consume(String line) {
+			logger.trace(line);
+		}
+		
+	};
 	
 	public GitCommand(File repoDir, @Nullable Map<String, String> environments) {
 		this.repoDir = repoDir;
@@ -82,26 +121,6 @@ public abstract class GitCommand<V> implements Callable<V> {
 		}
 	}
 	
-	protected LineConsumer debugLogger() {
-		return debugLogger;
-	}
-	
-	protected LineConsumer infoLogger() {
-		return infoLogger;
-	}
-	
-	protected LineConsumer warnLogger() {
-		return warnLogger;
-	}
-	
-	protected LineConsumer errorLogger() {
-		return errorLogger;
-	}
-	
-	protected LineConsumer traceLogger() {
-		return traceLogger;
-	}
-	
 	public Commandline cmd() {
 		Commandline cmd = new Commandline(GIT_EXE).workingDir(repoDir);
 		if (environments != null)
@@ -111,4 +130,25 @@ public abstract class GitCommand<V> implements Callable<V> {
 
 	@Override
 	public abstract V call();
+	
+	protected void debug(String line) {
+		logger.debug(line);
+	}
+	
+	protected void trace(String line) {
+		logger.trace(line);
+	}
+
+	protected void info(String line) {
+		logger.info(line);
+	}
+
+	protected void warn(String line) {
+		logger.warn(line);
+	}
+
+	protected void error(String line) {
+		logger.error(line);
+	}
+	
 }

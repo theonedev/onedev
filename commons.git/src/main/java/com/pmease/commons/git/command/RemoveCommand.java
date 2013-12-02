@@ -28,7 +28,7 @@ public class RemoveCommand extends GitCommand<Void> {
 			cmd.addArgs(path);
 		}
 		
-		cmd.execute(debugLogger(), errorLogger()).checkReturnCode();
+		cmd.execute(debugLogger, errorLogger).checkReturnCode();
 		
 		return null;
 	}

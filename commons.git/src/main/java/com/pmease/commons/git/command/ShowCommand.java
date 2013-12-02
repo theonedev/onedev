@@ -35,7 +35,7 @@ public class ShowCommand extends GitCommand<byte[]> {
 		Commandline cmd = cmd().addArgs("show", revision + ":" + path);
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		cmd.execute(baos, errorLogger()).checkReturnCode();
+		cmd.execute(baos, errorLogger).checkReturnCode();
 		return baos.toByteArray();
 	}
 
