@@ -35,65 +35,65 @@ public class DropdownAlignment implements Serializable {
 		this.dropdownX = dropdownX; this.dropdownY = dropdownY;
 	}
 	
-	public int getGap() {
+	public int gap() {
 		return gap;
 	}
 
-	public DropdownAlignment setGap(int gap) {
+	public DropdownAlignment gap(int gap) {
 		this.gap = gap;
 		return this;
 	}
 
-	public DropdownAlignment setTarget(Component target) {
+	public DropdownAlignment target(Component target) {
 		this.target = target;
 		return this;
 	}
 
-	public DropdownAlignment setTargetX(int targetX) {
+	public DropdownAlignment targetX(int targetX) {
 		this.targetX = targetX;
 		return this;
 	}
 
-	public DropdownAlignment setTargetY(int targetY) {
+	public DropdownAlignment targetY(int targetY) {
 		this.targetY = targetY;
 		return this;
 	}
 
-	public DropdownAlignment setDropdownX(int dropdownX) {
+	public DropdownAlignment dropdownX(int dropdownX) {
 		this.dropdownX = dropdownX;
 		return this;
 	}
 
-	public DropdownAlignment setDropdownY(int dropdownY) {
+	public DropdownAlignment dropdownY(int dropdownY) {
 		this.dropdownY = dropdownY;
 		return this;
 	}
 
-	public Component getTarget() {
+	public Component target() {
 		return target;
 	}
 
-	public int getTargetX() {
+	public int targetX() {
 		return targetX;
 	}
 
-	public int getTargetY() {
+	public int targetY() {
 		return targetY;
 	}
 
-	public int getDropdownX() {
+	public int dropdownX() {
 		return dropdownX;
 	}
 
-	public int getDropdownY() {
+	public int dropdownY() {
 		return dropdownY;
 	}
 
-	public IndicatorMode getIndicatorMode() {
+	public IndicatorMode indicatorMode() {
 		return indicatorMode;
 	}
 
-	public DropdownAlignment setIndicatorMode(IndicatorMode indicatorMode) {
+	public DropdownAlignment indicatorMode(IndicatorMode indicatorMode) {
 		this.indicatorMode = indicatorMode;
 		return this;
 	}

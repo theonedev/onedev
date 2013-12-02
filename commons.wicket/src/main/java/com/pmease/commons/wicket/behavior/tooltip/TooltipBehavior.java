@@ -21,7 +21,7 @@ public class TooltipBehavior extends Behavior {
 
 	private final IModel<String> contentModel;
 	
-	private DropdownAlignment alignment = new DropdownAlignment(50, 0, 50, 100).setIndicatorMode(IndicatorMode.SHOW);
+	private DropdownAlignment alignment = new DropdownAlignment(50, 0, 50, 100).indicatorMode(IndicatorMode.SHOW);
 	
 	public TooltipBehavior(IModel<String> contentModel) {
 		this.contentModel = contentModel;
@@ -45,8 +45,8 @@ public class TooltipBehavior extends Behavior {
 	 */
 	public TooltipBehavior setAlignment(DropdownAlignment alignment) {
 		this.alignment = alignment;
-		if (alignment.getTarget() != null)
-			alignment.getTarget().setOutputMarkupId(true);
+		if (alignment.target() != null)
+			alignment.target().setOutputMarkupId(true);
 		return this;
 	}
 
@@ -58,10 +58,10 @@ public class TooltipBehavior extends Behavior {
 		String escapedContent = StringEscapeUtils.escapeEcmaScript(StringEscapeUtils.escapeHtml4(contentModel.getObject()));
 		String script = String.format(
 				"setupDropdown('%s', '<div class=\\'tooltip\\' id=\\'%s-dropdown\\'><div class=\\'content\\'>%s</div></div>', 0, '%s', '%s', %s, %s, %s, %s, %d, undefined)", 
-				component.getMarkupId(), component.getMarkupId(), escapedContent, alignment.getIndicatorMode().name(), 
-				alignment.getTarget()!=null?alignment.getTarget().getMarkupId():component.getMarkupId(), 
-				alignment.getTargetX(), alignment.getTargetY(), alignment.getDropdownX(), alignment.getDropdownY(), 
-				alignment.getGap());
+				component.getMarkupId(), component.getMarkupId(), escapedContent, alignment.indicatorMode().name(), 
+				alignment.target()!=null?alignment.target().getMarkupId():component.getMarkupId(), 
+				alignment.targetX(), alignment.targetY(), alignment.dropdownX(), alignment.dropdownY(), 
+				alignment.gap());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 		
 		response.render(CssHeaderItem.forReference(new CssResourceReference(TooltipBehavior.class, "tooltip.css")));

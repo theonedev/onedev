@@ -5,6 +5,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 
+import com.pmease.commons.wicket.behavior.dropdown.DropdownAlignment;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
@@ -27,7 +28,9 @@ public class TestPage extends AbstractLayoutPage {
 			
 		};
 		add(dropdownPanel);
-		add(new WebMarkupContainer("dropdownTrigger").add(new DropdownBehavior(dropdownPanel)));
+		DropdownBehavior dropdownBehavior = new DropdownBehavior(dropdownPanel);
+		dropdownBehavior.alignment().indicatorMode(DropdownAlignment.IndicatorMode.SHOW);
+		add(new WebMarkupContainer("dropdownTrigger").add(dropdownBehavior));
 	}
 	
 	@Override

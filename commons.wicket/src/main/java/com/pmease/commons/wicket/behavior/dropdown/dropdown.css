@@ -10,7 +10,7 @@
 }
 .dropdown-panel>.content {
 	margin: 0;
-	padding: 8px;
+	padding: 0;
 }
 .dropdown-panel>.loading, .dropdown-panel>.loading.content {
 	margin: 4px;
