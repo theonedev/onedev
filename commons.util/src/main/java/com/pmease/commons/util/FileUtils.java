@@ -179,6 +179,38 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
 		}
     }
     
+	public static void deleteFile(File file) {
+		/*
+		 * Do not test existence of file here as broken symbol link will report file as non-existent  
+		if (!file.exists())
+			return;
+		*/
+
+		int maxTries = 10;
+    	int numTries = 1;
+
+    	while (true) {
+    		if (file.delete())
+    			break;
+    		
+    		if (file.exists()) {
+            	if (numTries == maxTries) {
+            		throw new GeneralException("Failed to delete file '" + 
+            				file.getAbsolutePath() + "'.");
+            	} else {
+                    System.gc();
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e2) {
+                    }
+                    numTries++;
+            	}
+    		} else {
+    			break;
+    		}
+        }
+	}    
+    
 	public static void writeFile(File file, String content, String encoding) {
 		try {
 			org.apache.commons.io.FileUtils.writeStringToFile(file, content, encoding);

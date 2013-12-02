@@ -14,8 +14,9 @@ public class AddCommand extends GitCommand<Void> {
 		super(repoDir);
 	}
 	
-	public AddCommand addPath(String path) {
-		paths.add(path);
+	public AddCommand addPaths(String... paths) {
+		for (String path: paths)
+			this.paths.add(path);
 		return this;
 	}
 

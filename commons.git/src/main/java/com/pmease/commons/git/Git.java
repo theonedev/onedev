@@ -55,6 +55,16 @@ public class Git implements Serializable {
 		return repoDir;
 	}
 
+	/**
+	 * Create branch even in a bare repository.
+	 * 
+	 * @param branchName
+	 * 			name of the branch to create
+	 * @param commitHash
+	 * 			commit hash of the branch 
+	 * @return
+	 * 			this git object
+	 */
 	public Git createBranch(String branchName, String commitHash) {
 		if (new ListBranchesCommand(repoDir).call().contains(branchName))
 			throw new GeneralException("Branch %s already exists.", branchName);
@@ -65,6 +75,14 @@ public class Git implements Serializable {
 		return this;
 	}
 
+	/**
+	 * delete branch even in a bare repository.
+	 * 
+	 * @param branchName
+	 * 			name of the branch to delete
+	 * @return
+	 * 			this git object
+	 */
 	public Git deleteBranch(String branchName) {
 		new DeleteRefCommand(repoDir).refName("refs/heads/" + branchName).call();
 		return this;
@@ -98,13 +116,13 @@ public class Git implements Serializable {
 		return this;
 	}
 
-	public Git add(String path) {
-		new AddCommand(repoDir).addPath(path).call();
+	public Git add(String... paths) {
+		new AddCommand(repoDir).addPaths(paths).call();
 		return this;
 	}
 	
-	public Git remove(String path) {
-		new RemoveCommand(repoDir).removePath(path).call();
+	public Git remove(String... paths) {
+		new RemoveCommand(repoDir).removePaths(paths).call();
 		return this;
 	}
 	
@@ -227,6 +245,21 @@ public class Git implements Serializable {
 		return log(null, revision, path, 1).get(0);
 	}
 	
+	/**
+	 * General diff between specified revisions for specified path.
+	 *  
+	 * @param fromRev
+	 * 			calculate diffs since this revision (not include changes of this revision)
+	 * @param toRev
+	 * 			calculate diffs till this revision (include changes of this revision)
+	 * @param path
+	 * 			optionally specify directory or file for diff. Use <tt>null</tt> to diff 
+	 * 			all files in the repository
+	 * @param contextLines
+	 * 			number of not changed lines before and after the difference lines
+	 * @return
+	 * 			list of file changes with diff information included
+	 */
 	public List<FileChangeWithDiffs> diff(String fromRev, String toRev, @Nullable String path, int contextLines) {
 		return new DiffCommand(repoDir).fromRev(fromRev).toRev(toRev).contextLines(contextLines).path(path).call();
 	}
@@ -236,6 +269,18 @@ public class Git implements Serializable {
 		return this;
 	}
 	
+	/**
+	 * Display commit information for every region of specified file and revision. 
+	 * 
+	 * @param file
+	 * 			file for blame
+	 * @param revision
+	 * 			revision of the file for blame
+	 * @return
+	 * 			list of blame objects. The blame object consists of commit information 
+	 * 			and lines associated with this commit. All lines of all blame objects
+	 * 			consist the whole file. 
+	 */
 	public List<Blame> blame(String file, String revision) {
 		return new BlameCommand(repoDir).file(file).revision(revision).call();
 	}

@@ -62,10 +62,10 @@ public class LogCommandTest {
     		List<Commit> commits = bareGit.log(null, "master", null, 0);
     		assertEquals(commits.size(), 6);
     		assertEquals(commits.get(0).getSubject(), "add dir/file");
-    		assertEquals(commits.get(0).getMessage(), "add dir/file to test files under a directory");
+    		assertEquals(commits.get(0).getMessage(), "add dir/file\n\nadd dir/file to test files under a directory");
     		assertEquals("hello\nworld", commits.get(0).getNote());
     		assertEquals(commits.get(0).getFileChanges().size(), 2);
-    		assertEquals(commits.get(0).getFileChanges().get(0).getPath(), "dir/file");
+    		assertEquals(commits.get(0).getFileChanges().get(0).getNewPath(), "dir/file");
     		assertEquals(commits.get(0).getFileChanges().get(0).getAction(), FileChange.Action.ADD);
     		assertEquals(commits.get(0).getParentHashes().size(), 1);
     		assertEquals(commits.get(0).getParentHashes().iterator().next(), commits.get(1).getHash());
@@ -94,4 +94,40 @@ public class LogCommandTest {
 	    }
 	}
 
+	@Test
+	public void shouldHandleRenameAndCopyCorrectly() {
+	    assertTrue(GitCommand.checkError() == null);
+	    File tempDir = FileUtils.createTempDir();
+	    
+	    try {
+		    Git git = new Git(tempDir);
+		    git.init(false);
+
+		    FileUtils.writeFile(new File(tempDir, "a"), "1111\n2222\n3333\n");
+		    git.add("a");
+		    git.commit("add a", false, false);
+		    
+		    FileUtils.writeFile(new File(tempDir, "a"), "1111\n2222\n3333\n4444\n");
+		    FileUtils.writeFile(new File(tempDir, "a2"), "1111\n2222\n3333\n4444\n");
+		    git.add("a", "a2");
+		    git.commit("copy a to a2", false, false);
+		    
+		    FileUtils.writeFile(new File(tempDir, "b"), "1111\n2222\n3333\n4444\n");
+		    git.add("b");
+		    git.commit("add b", false, false);
+
+		    FileUtils.writeFile(new File(tempDir, "b2"), "1111\n2222\n3333\n4444\n");
+		    git.remove("b");
+		    git.add("b2");
+		    git.commit("move b to b2", false, false);
+
+		    List<Commit> commits = git.log("master~3", "master", null, 0);
+		    FileChange change = commits.get(0).getFileChanges().get(0);
+		    assertEquals("RENAME\tb->b2", change.toString());
+		    change = commits.get(2).getFileChanges().get(1);
+		    assertEquals("COPY\ta->a2", change.toString());
+	    } finally {
+	        FileUtils.deleteDir(tempDir);
+	    }
+	}
 }

@@ -59,7 +59,7 @@ public class LogCommand extends GitCommand<List<Commit>> {
                         + "*** commit_note_end ***%nhash:%H%nauthor:%aN%nauthorEmail:%aE%n"
                         + "committerEmail:%cE%ncommitter:%cN%nparents:%P%ncommitterDate:%cd %n"
                         + "authorDate:%ad %n*** commit_info_end ***",
-                        "--name-status", "--no-renames", "--date=iso");
+                        "--name-status", "--find-renames", "--find-copies", "--date=iso");
         if (fromRev != null) {
         	if (toRev != null)
         		cmd.addArgs(fromRev + ".." + toRev);
@@ -126,10 +126,24 @@ public class LogCommand extends GitCommand<List<Commit>> {
             			action = FileChange.Action.MODIFY;
             		else if (line.startsWith("D"))
             			action = FileChange.Action.DELETE;
+            		else if (line.startsWith("C"))
+            			action = FileChange.Action.COPY;
+            		else if (line.startsWith("R"))
+            			action = FileChange.Action.RENAME;
+            		else if (line.startsWith("T"))
+            			action = FileChange.Action.TYPE;
             		
             		if (action != null) {
             			String path = StringUtils.substringAfter(line, "\t").trim();
-            			FileChange fileChange = new FileChange(action, path);
+            			String path1;
+            			String path2;
+            			if (path.indexOf('\t') != -1) {
+            				path1 = StringUtils.substringBefore(path, "\t").trim();
+            				path2 = StringUtils.substringAfter(path, "\t").trim();
+            			} else {
+            				path1 = path2 = path;
+            			}
+            			FileChange fileChange = new FileChange(action, path1, path2);
             			commitBuilder.fileChanges.add(fileChange);
             		}
             	} else if (line.startsWith("subject:")) {

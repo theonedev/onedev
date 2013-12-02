@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.FileChange;
+import com.pmease.commons.git.TreeNode;
 import com.pmease.commons.git.FileChange.Action;
 import com.pmease.commons.git.FileChangeWithDiffs;
 import com.pmease.commons.util.diff.DiffUtils;
@@ -54,7 +55,8 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 		Preconditions.checkNotNull(toRev, "toRev has to be specified.");
 		
 		Commandline cmd = cmd();
-		cmd.addArgs("diff", fromRev + ".." + toRev, "--full-index");
+		cmd.addArgs("diff", fromRev + ".." + toRev, "--full-index", "--no-color", "--find-renames", 
+				"--find-copies", "--src-prefix=#gitop_old/", "--dst-prefix=#gitop_new/");
 		if (contextLines != 0)
 			cmd.addArgs("--unified=" + contextLines);
 		if (path != null)
@@ -68,25 +70,40 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 			@Override
 			public void consume(String line) {
 				if (line.startsWith("diff --git")) {
-					if (changeBuilder.path != null) 
+					if (changeBuilder.newPath != null) 
 						fileChanges.add(changeBuilder.buildFileChange());
 
 					changeBuilder.action = FileChange.Action.MODIFY;
 					changeBuilder.binary = false;
+					changeBuilder.type = null;
+					changeBuilder.oldCommit = null;
+					changeBuilder.newCommit = null;
 					changeBuilder.diffLines.clear();
 					
-					changeBuilder.path = StringUtils.substringBefore(line.substring("diff --git a/".length()), " ");
-				} else if (line.startsWith("deleted file")) {
+					line = line.substring("diff --git #gitop_old/".length());
+					
+					changeBuilder.oldPath = StringUtils.substringBefore(line, " #gitop_new/");
+					changeBuilder.newPath = StringUtils.substringAfter(line, " #gitop_new/");
+				} else if (line.startsWith("deleted file mode ")) {
 					changeBuilder.action = FileChange.Action.DELETE;
-				} else if (line.startsWith("new file")) {
+					changeBuilder.type = TreeNode.Type.fromMode(line.substring("deleted file mode ".length()));
+				} else if (line.startsWith("new file mode ")) {
 					changeBuilder.action = FileChange.Action.ADD;
+					changeBuilder.type = TreeNode.Type.fromMode(line.substring("new file mode ".length()));
 				} else if (line.startsWith("Binary files")) {
 					changeBuilder.binary = true;
+				} else if (line.startsWith("rename from ") || line.startsWith("rename to ")) {
+					changeBuilder.action = FileChange.Action.RENAME;
+				} else if (line.startsWith("copy from ") || line.startsWith("copy to ")) {
+					changeBuilder.action = FileChange.Action.COPY;
 				} else if (line.startsWith("index ")) {
 					line = line.substring("index ".length());
-					changeBuilder.commitHash1 = StringUtils.substringBefore(line, "..");
-					changeBuilder.commitHash2 = StringUtils.substringAfter(line, "..");
-					changeBuilder.commitHash2 = StringUtils.substringBefore(changeBuilder.commitHash2, " ");
+					changeBuilder.oldCommit = StringUtils.substringBefore(line, "..");
+					changeBuilder.newCommit = StringUtils.substringAfter(line, "..");
+					if (changeBuilder.newCommit.indexOf(' ') != -1) {
+						changeBuilder.newCommit = StringUtils.substringBefore(changeBuilder.newCommit, " ");
+						changeBuilder.type = TreeNode.Type.fromMode(StringUtils.substringAfterLast(line, " "));
+					}
 				} else if (line.startsWith("@@") || line.startsWith("+") || line.startsWith("-") 
 						|| line.startsWith(" ") || line.startsWith("\\")) {
 					changeBuilder.diffLines.add(line);
@@ -96,7 +113,7 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 			
 		}, errorLogger()).checkReturnCode();
 
-		if (changeBuilder.path != null)
+		if (changeBuilder.newPath != null)
 			fileChanges.add(changeBuilder.buildFileChange());
 		
 		return fileChanges;
@@ -105,19 +122,23 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 	private static class ChangeBuilder {
 		private Action action;
 		
-		private String path;
+		private String oldPath;
+		
+		private String newPath;
 		
 		private boolean binary;
 		
-		private String commitHash1;
+		private TreeNode.Type type;
 		
-		private String commitHash2;
+		private String oldCommit;
+		
+		private String newCommit;
 		
 		private List<String> diffLines = new ArrayList<>();
 		
 		private FileChangeWithDiffs buildFileChange() {
-			return new FileChangeWithDiffs(action, path, binary, commitHash1, commitHash2, 
-					DiffUtils.parseUnifiedDiff(diffLines));
+			return new FileChangeWithDiffs(action, oldPath, newPath, type, binary, 
+					oldCommit, newCommit, DiffUtils.parseUnifiedDiff(diffLines));
 		}
 	}
 }
