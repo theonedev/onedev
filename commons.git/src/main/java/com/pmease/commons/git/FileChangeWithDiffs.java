@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.eclipse.jgit.lib.FileMode;
+
 import com.pmease.commons.util.diff.DiffChunk;
 
 @SuppressWarnings("serial")
@@ -12,7 +14,7 @@ public class FileChangeWithDiffs extends FileChange {
 
 	private final boolean binary;
 	
-	private final TreeNode.Type type;
+	private final FileMode mode;
 	
 	private final String oldCommit;
 	
@@ -21,19 +23,19 @@ public class FileChangeWithDiffs extends FileChange {
 	private final List<DiffChunk> diffChunks;
 	
 	public FileChangeWithDiffs(Action action, String oldPath, String newPath, 
-			@Nullable TreeNode.Type type, boolean binary, @Nullable String oldCommit, 
+			FileMode mode, boolean binary, @Nullable String oldCommit, 
 			@Nullable String newCommit, List<DiffChunk> diffChunks) {
 		super(action, oldPath, newPath);
 		
-		this.type = type;
+		this.mode = mode;
 		this.binary = binary;
 		this.oldCommit = oldCommit;
 		this.newCommit = newCommit;
 		this.diffChunks = new ArrayList<>(diffChunks);
 	}
 
-	public @Nullable TreeNode.Type getType() {
-		return type;
+	public FileMode getMode() {
+		return mode;
 	}
 
 	public boolean isBinary() {

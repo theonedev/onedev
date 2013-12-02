@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.FileChange;
-import com.pmease.commons.git.TreeNode;
 import com.pmease.commons.git.FileChange.Action;
 import com.pmease.commons.git.FileChangeWithDiffs;
 import com.pmease.commons.util.diff.DiffUtils;
@@ -75,7 +75,7 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 
 					changeBuilder.action = FileChange.Action.MODIFY;
 					changeBuilder.binary = false;
-					changeBuilder.type = null;
+					changeBuilder.mode = FileMode.MISSING;
 					changeBuilder.oldCommit = null;
 					changeBuilder.newCommit = null;
 					changeBuilder.diffLines.clear();
@@ -86,10 +86,10 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 					changeBuilder.newPath = StringUtils.substringAfter(line, " #gitop_new/");
 				} else if (line.startsWith("deleted file mode ")) {
 					changeBuilder.action = FileChange.Action.DELETE;
-					changeBuilder.type = TreeNode.Type.fromMode(line.substring("deleted file mode ".length()));
+					changeBuilder.mode = FileMode.fromBits(Integer.parseInt(line.substring("deleted file mode ".length()), 8));
 				} else if (line.startsWith("new file mode ")) {
 					changeBuilder.action = FileChange.Action.ADD;
-					changeBuilder.type = TreeNode.Type.fromMode(line.substring("new file mode ".length()));
+					changeBuilder.mode = FileMode.fromBits(Integer.parseInt(line.substring("new file mode ".length()), 8));
 				} else if (line.startsWith("Binary files")) {
 					changeBuilder.binary = true;
 				} else if (line.startsWith("rename from ") || line.startsWith("rename to ")) {
@@ -102,7 +102,7 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 					changeBuilder.newCommit = StringUtils.substringAfter(line, "..");
 					if (changeBuilder.newCommit.indexOf(' ') != -1) {
 						changeBuilder.newCommit = StringUtils.substringBefore(changeBuilder.newCommit, " ");
-						changeBuilder.type = TreeNode.Type.fromMode(StringUtils.substringAfterLast(line, " "));
+						changeBuilder.mode = FileMode.fromBits(Integer.parseInt(StringUtils.substringAfterLast(line, " "), 8));
 					}
 				} else if (line.startsWith("@@") || line.startsWith("+") || line.startsWith("-") 
 						|| line.startsWith(" ") || line.startsWith("\\")) {
@@ -128,7 +128,7 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 		
 		private boolean binary;
 		
-		private TreeNode.Type type;
+		private FileMode mode;
 		
 		private String oldCommit;
 		
@@ -137,7 +137,7 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 		private List<String> diffLines = new ArrayList<>();
 		
 		private FileChangeWithDiffs buildFileChange() {
-			return new FileChangeWithDiffs(action, oldPath, newPath, type, binary, 
+			return new FileChangeWithDiffs(action, oldPath, newPath, mode, binary, 
 					oldCommit, newCommit, DiffUtils.parseUnifiedDiff(diffLines));
 		}
 	}

@@ -7,6 +7,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -16,25 +17,9 @@ import com.pmease.commons.git.command.ShowCommand;
 @SuppressWarnings("serial")
 public class TreeNode implements Serializable {
 
-	public enum Type {
-		DIRECTORY, FILE, SUBMODULE, SYMBOLLINK;
-		
-		public static Type fromMode(String mode) {
-			if (mode.startsWith("040"))
-				return DIRECTORY;
-			else if (mode.startsWith("160"))
-				return SUBMODULE;
-			else if (mode.startsWith("120"))
-				return SYMBOLLINK;
-			else 
-				return FILE;
-		}
-		
-	}
-	
 	protected final File gitDir;
 	
-	private final Type type;
+	private final FileMode mode;
 	
 	private final String path;
 	
@@ -46,12 +31,12 @@ public class TreeNode implements Serializable {
 	
 	private Optional<TreeNode> parentNode;
 	
-	public TreeNode(File gitDir, Type type, String path, String revision, String hash, int size) {
+	public TreeNode(File gitDir, FileMode mode, String path, String revision, String hash, int size) {
 		this.gitDir = gitDir;
 		this.path = path;
 		this.revision = revision;
 		this.hash = hash;
-		this.type = type;
+		this.mode = mode;
 		this.size = size;
 	}
 	
@@ -74,8 +59,8 @@ public class TreeNode implements Serializable {
 		return hash;
 	}
 	
-	public Type getType() {
-		return type;
+	public FileMode getMode() {
+		return mode;
 	}
 
 	public int getSize() {
@@ -120,7 +105,7 @@ public class TreeNode implements Serializable {
 	 * 			directory. 
 	 */
 	public @Nullable List<TreeNode> listChildren() {
-		if (type == Type.DIRECTORY) {
+		if (mode == FileMode.TREE) {
 			List<TreeNode> children = new ListTreeCommand(gitDir).revision(getRevision()).path(getPath() + "/").call();
 			for (TreeNode each: children) {
 				each.setParent(this);
@@ -141,7 +126,7 @@ public class TreeNode implements Serializable {
 	 * 			represents a directory
 	 */
 	public byte[] show() {
-		if (type == Type.SUBMODULE) {
+		if (mode == FileMode.GITLINK) {
 			return new Git(gitDir).listSubModules(revision).get(path).getBytes();
 		} else {
 			return new ShowCommand(gitDir).revision(getRevision()).path(getPath()).call();

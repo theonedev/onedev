@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.TreeNode;
@@ -67,7 +68,7 @@ public class ListTreeCommand extends GitCommand<List<TreeNode>> {
 					size = Integer.parseInt(sizeStr);
 				String path = StringUtils.substringAfter(line.trim(), "\t");
 				
-				treeNodes.add(new TreeNode(repoDir, TreeNode.Type.fromMode(mode), path, revision, hash, size));
+				treeNodes.add(new TreeNode(repoDir, FileMode.fromBits(Integer.parseInt(mode, 8)), path, revision, hash, size));
 			}
 			
 		}, errorLogger()).checkReturnCode();
