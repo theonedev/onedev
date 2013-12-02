@@ -166,6 +166,7 @@ function showDropdown(trigger, dropdown, alignment, dropdownLoader) {
 		dropdown.find(">div").addClass("content");
 		dropdownLoader();
 	}
+	dropdown.trigger("show");
 }
 
 function dropdownLoaded(dropdownId) {
@@ -173,6 +174,8 @@ function dropdownLoaded(dropdownId) {
 
 function hideDropdown(dropdownId) {
 	var dropdown = $("#" + dropdownId);
+	dropdown.trigger("hide");
+	
 	var childDropdown = dropdown.nextAll(".dropdown-panel:visible");
 
 	if (childDropdown[0])

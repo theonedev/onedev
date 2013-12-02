@@ -37,7 +37,9 @@ public abstract class DropdownPanel extends Panel {
 	
 	/**
 	 * Close this popup.
+	 * 
 	 * @param target
+	 * 			target of this ajax request
 	 */
 	public void close(AjaxRequestTarget target) {
 		target.prependJavaScript(String.format("hideDropdown('%s');", getMarkupId()));
