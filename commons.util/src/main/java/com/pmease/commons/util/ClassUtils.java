@@ -2,12 +2,15 @@ package com.pmease.commons.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
+import javax.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
 
@@ -107,4 +110,11 @@ public class ClassUtils extends org.apache.commons.lang3.ClassUtils {
 		return implementations;
 	}
 	
+	public static @Nullable InputStream getResourceAsStream(@Nullable Class<?> locator, String path) {
+		path = StringUtils.stripStart(path, "/");
+		if (locator == null)
+			return ClassUtils.class.getClassLoader().getResourceAsStream(path);
+		else
+			return locator.getClassLoader().getResourceAsStream(locator.getPackage().getName().replace(".", "/") + "/" + path);
+	}
 }

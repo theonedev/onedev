@@ -15,7 +15,7 @@ public class PopoverBehavior extends DropdownBehavior {
 	public PopoverBehavior(PopoverPanel popoverPanel) {
 		super(popoverPanel);
 		
-		setAlignment(new DropdownAlignment(100, 50, 0, 50).setIndicatorMode(IndicatorMode.SHOW));
+		alignment(new DropdownAlignment(100, 50, 0, 50).indicatorMode(IndicatorMode.SHOW));
 	}
 
 	@Override

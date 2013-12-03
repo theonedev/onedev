@@ -44,7 +44,7 @@ public class CommitCommand extends GitCommand<Void> {
 		if (amend) 
 			cmd.addArgs("--amend");
 		
-		cmd.execute(debugLogger(), errorLogger()).checkReturnCode();
+		cmd.execute(debugLogger, errorLogger).checkReturnCode();
 		
 		return null;
 	}

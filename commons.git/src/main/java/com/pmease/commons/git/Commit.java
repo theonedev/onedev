@@ -19,18 +19,21 @@ public class Commit extends BriefCommit {
     private final List<FileChange> fileChanges;
 
     public Commit(String hash, UserInfo committer, UserInfo author, 
-    		String summary, @Nullable String message, 
+    		String subject, @Nullable String messageBody, 
     		@Nullable String note, List<String> parentHashes, 
     		List<FileChange> fileChanges) {
-    	super(hash, committer, author, summary);
+    	super(hash, committer, author, subject);
     	
-    	this.message = message;
+    	if (messageBody != null)
+    		message = subject + "\n\n" + messageBody;
+    	else
+    		message = subject;
     	this.note = note;
     	this.parentHashes = new ArrayList<>(parentHashes);
     	this.fileChanges = new ArrayList<>(fileChanges);
     }
     
-	public @Nullable String getMessage() {
+	public String getMessage() {
 		return message;
 	}
 

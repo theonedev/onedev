@@ -24,7 +24,7 @@ public class InitCommand extends GitCommand<Void> {
 		if (bare)
 			cmd.addArgs("--bare");
 		
-		cmd.execute(debugLogger(), errorLogger()).checkReturnCode();
+		cmd.execute(debugLogger, errorLogger).checkReturnCode();
 		
 		return null;
 	}

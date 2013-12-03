@@ -44,14 +44,11 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
         this.storageManager = storageManager;
         this.serverConfig = serverConfig;
         
-        InputStream is = getClass().getClassLoader().getResourceAsStream("git-hook-template");
-        Preconditions.checkNotNull(is);
-        try {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-hook-template")) {
+        	Preconditions.checkNotNull(is);
             hookTemplate = StringUtils.join(IOUtils.readLines(is), "\n");
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } finally {
-            IOUtils.closeQuietly(is);
         }
     }
     
@@ -105,7 +102,7 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
 
     @Sessional
     @Override
-    public Project find(String ownerName, String projectName) {
+    public Project findBy(String ownerName, String projectName) {
         Criteria criteria = createCriteria();
         criteria.add(Restrictions.eq("name", projectName));
         criteria.createAlias("owner", "owner");
@@ -117,7 +114,7 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
 
     @Sessional
     @Override
-    public Project find(User owner, String projectName) {
+    public Project findBy(User owner, String projectName) {
         return find(Restrictions.eq("owner.id", owner.getId()),
                 Restrictions.eq("name", projectName));
     }

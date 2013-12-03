@@ -10,9 +10,9 @@ import com.pmease.gitop.model.Project;
 @ImplementedBy(DefaultBranchManager.class)
 public interface BranchManager extends GenericDao<Branch> {
 
-	public Branch find(Project project, String branchName);
+	public Branch findBy(Project project, String branchName);
 	
-    public Branch find(Project project, String branchName, boolean createIfNotExist);
+    public Branch findBy(Project project, String branchName, boolean createIfNotExist);
     
     public EntityLoader asEntityLoader(Project project);
 	

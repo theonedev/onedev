@@ -67,7 +67,7 @@ public class MergeCommand extends GitCommand<Boolean> {
 					conflict[0] = true;
 			}
 			
-		}, errorLogger());
+		}, errorLogger);
 		
 		if (conflict[0])
 			return false;

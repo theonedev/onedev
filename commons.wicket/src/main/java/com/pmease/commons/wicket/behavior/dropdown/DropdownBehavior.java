@@ -32,7 +32,7 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 	 * @return 
 	 * 			This behavior.
 	 */
-	public DropdownBehavior setHoverDelay(int hoverDelay) {
+	public DropdownBehavior hoverDelay(int hoverDelay) {
 		this.hoverDelay = hoverDelay;
 		return this;
 	}
@@ -47,7 +47,7 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 	 * @return
 	 * 			This behavior.
 	 */
-	public DropdownBehavior setClickMode(boolean clickMode) {
+	public DropdownBehavior clickMode(boolean clickMode) {
 		if (clickMode)
 			hoverDelay = -1;
 		else
@@ -63,11 +63,15 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 	 * @return
 	 * 			This behavior.
 	 */
-	public DropdownBehavior setAlignment(DropdownAlignment alignment) {
+	public DropdownBehavior alignment(DropdownAlignment alignment) {
 		this.alignment = alignment;
-		if (alignment.getTarget() != null)
-			alignment.getTarget().setOutputMarkupId(true);
+		if (alignment.target() != null)
+			alignment.target().setOutputMarkupId(true);
 		return this;
+	}
+	
+	public DropdownAlignment alignment() {
+		return alignment;
 	}
 
 	@Override
@@ -82,10 +86,10 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 		response.render(JavaScriptHeaderItem.forReference(DropdownResourceReference.get()));
 		String script = String.format(
 				"setupDropdown('%s', '%s', %s, '%s', '%s', %s, %s, %s, %s, %d, %s)", 
-				getComponent().getMarkupId(), dropdownPanel.getMarkupId(), hoverDelay, alignment.getIndicatorMode().name(), 
-				alignment.getTarget()!=null?alignment.getTarget().getMarkupId():getComponent().getMarkupId(), 
-				alignment.getTargetX(), alignment.getTargetY(), alignment.getDropdownX(), alignment.getDropdownY(), 
-				alignment.getGap(), getCallbackFunction());
+				getComponent().getMarkupId(), dropdownPanel.getMarkupId(), hoverDelay, alignment.indicatorMode().name(), 
+				alignment.target()!=null?alignment.target().getMarkupId():getComponent().getMarkupId(), 
+				alignment.targetX(), alignment.targetY(), alignment.dropdownX(), alignment.dropdownY(), 
+				alignment.gap(), getCallbackFunction());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

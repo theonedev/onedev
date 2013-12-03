@@ -31,7 +31,7 @@ public class AddNoteCommand extends GitCommand<Void> {
 		Preconditions.checkNotNull(message, "message should be specified.");
 		Commandline cmd = cmd().addArgs("notes", "add", "-m", message, object);
 		
-		cmd.execute(debugLogger(), errorLogger()).checkReturnCode();
+		cmd.execute(debugLogger, errorLogger).checkReturnCode();
 		
 		return null;
 	}

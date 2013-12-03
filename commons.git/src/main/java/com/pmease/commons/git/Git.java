@@ -23,6 +23,7 @@ import com.pmease.commons.git.command.FetchCommand;
 import com.pmease.commons.git.command.InitCommand;
 import com.pmease.commons.git.command.IsAncestorCommand;
 import com.pmease.commons.git.command.IsBinaryCommand;
+import com.pmease.commons.git.command.IsTreeLinkCommand;
 import com.pmease.commons.git.command.ListBranchesCommand;
 import com.pmease.commons.git.command.ListChangedFilesCommand;
 import com.pmease.commons.git.command.ListSubModulesCommand;
@@ -30,6 +31,7 @@ import com.pmease.commons.git.command.ListTagsCommand;
 import com.pmease.commons.git.command.ListTreeCommand;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.git.command.MergeCommand;
+import com.pmease.commons.git.command.PushCommand;
 import com.pmease.commons.git.command.RemoveCommand;
 import com.pmease.commons.git.command.ResetCommand;
 import com.pmease.commons.git.command.ShowCommand;
@@ -54,6 +56,16 @@ public class Git implements Serializable {
 		return repoDir;
 	}
 
+	/**
+	 * Create branch even in a bare repository.
+	 * 
+	 * @param branchName
+	 * 			name of the branch to create
+	 * @param commitHash
+	 * 			commit hash of the branch 
+	 * @return
+	 * 			this git object
+	 */
 	public Git createBranch(String branchName, String commitHash) {
 		if (new ListBranchesCommand(repoDir).call().contains(branchName))
 			throw new GeneralException("Branch %s already exists.", branchName);
@@ -64,6 +76,14 @@ public class Git implements Serializable {
 		return this;
 	}
 
+	/**
+	 * delete branch even in a bare repository.
+	 * 
+	 * @param branchName
+	 * 			name of the branch to delete
+	 * @return
+	 * 			this git object
+	 */
 	public Git deleteBranch(String branchName) {
 		new DeleteRefCommand(repoDir).refName("refs/heads/" + branchName).call();
 		return this;
@@ -97,13 +117,13 @@ public class Git implements Serializable {
 		return this;
 	}
 
-	public Git add(String path) {
-		new AddCommand(repoDir).addPath(path).call();
+	public Git add(String... paths) {
+		new AddCommand(repoDir).addPaths(paths).call();
 		return this;
 	}
 	
-	public Git remove(String path) {
-		new RemoveCommand(repoDir).removePath(path).call();
+	public Git remove(String... paths) {
+		new RemoveCommand(repoDir).removePaths(paths).call();
 		return this;
 	}
 	
@@ -130,7 +150,7 @@ public class Git implements Serializable {
 		return new ListChangedFilesCommand(repoDir).fromRev(fromRev).toRev(toRev).call();
 	}
 
-	public Git checkout(String revision, boolean newBranch) {
+	public Git checkout(String revision, @Nullable String newBranch) {
 		new CheckoutCommand(repoDir).revision(revision).newBranch(newBranch).call();
 		return this;
 	}
@@ -157,6 +177,11 @@ public class Git implements Serializable {
 		return this;
 	}
 	
+	public Git push(String to, String refspec) {
+		new PushCommand(repoDir).to(to).refspec(refspec).call();
+		return this;
+	}
+
 	public List<RefInfo> showRefs(String pattern) {
 		return new ShowRefCommand(repoDir).pattern(pattern).call();
 	}
@@ -221,6 +246,21 @@ public class Git implements Serializable {
 		return log(null, revision, path, 1).get(0);
 	}
 	
+	/**
+	 * General diff between specified revisions for specified path.
+	 *  
+	 * @param fromRev
+	 * 			calculate diffs since this revision (not include changes of this revision)
+	 * @param toRev
+	 * 			calculate diffs till this revision (include changes of this revision)
+	 * @param path
+	 * 			optionally specify directory or file for diff. Use <tt>null</tt> to diff 
+	 * 			all files in the repository
+	 * @param contextLines
+	 * 			number of not changed lines before and after the difference lines
+	 * @return
+	 * 			list of file changes with diff information included
+	 */
 	public List<FileChangeWithDiffs> diff(String fromRev, String toRev, @Nullable String path, int contextLines) {
 		return new DiffCommand(repoDir).fromRev(fromRev).toRev(toRev).contextLines(contextLines).path(path).call();
 	}
@@ -230,12 +270,28 @@ public class Git implements Serializable {
 		return this;
 	}
 	
+	/**
+	 * Display commit information for every region of specified file and revision. 
+	 * 
+	 * @param file
+	 * 			file for blame
+	 * @param revision
+	 * 			revision of the file for blame
+	 * @return
+	 * 			list of blame objects. The blame object consists of commit information 
+	 * 			and lines associated with this commit. All lines of all blame objects
+	 * 			consist the whole file. 
+	 */
 	public List<Blame> blame(String file, String revision) {
 		return new BlameCommand(repoDir).file(file).revision(revision).call();
 	}
 
 	public boolean isBinary(String file, String revision) {
 		return new IsBinaryCommand(repoDir).file(file).revision(revision).call();
+	}
+	
+	public boolean isTreeLink(String symlink, String revision) {
+		return new IsTreeLinkCommand(repoDir).symlink(symlink).revision(revision).call();
 	}
 	
 	public Git addSubModule(String url, String path) {
@@ -246,5 +302,10 @@ public class Git implements Serializable {
 	public Map<String, String> listSubModules(String revision) {
 		return new ListSubModulesCommand(repoDir).revision(revision).call();
 	}
-	
+
+	@Override
+	public String toString() {
+		return repoDir.toString();
+	}
+
 }

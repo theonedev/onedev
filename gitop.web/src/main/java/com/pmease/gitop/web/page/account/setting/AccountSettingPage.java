@@ -80,7 +80,7 @@ public abstract class AccountSettingPage extends AbstractLayoutPage {
 				throw new AccessDeniedException();
 			}
 		} else {
-			user = Gitop.getInstance(UserManager.class).find(name);
+			user = Gitop.getInstance(UserManager.class).findBy(name);
 			if (user == null) {
 				throw new EntityNotFoundException("Unable find user with name " + name);
 			}

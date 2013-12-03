@@ -41,7 +41,7 @@ public abstract class AbstractProjectPage extends AbstractAccountPage {
 			projectName = projectName.substring(0, 
 					projectName.length() - Constants.DOT_GIT_EXT.length());
 		
-		Project project = Gitop.getInstance(ProjectManager.class).find(
+		Project project = Gitop.getInstance(ProjectManager.class).findBy(
 				getAccount(), projectName);
 		
 		if (project == null) {

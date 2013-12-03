@@ -34,7 +34,7 @@ public class DefaultTeamManager extends AbstractGenericDao<Team> implements Team
 
 	@Sessional
 	@Override
-	public Team find(User owner, String teamName) {
+	public Team findBy(User owner, String teamName) {
 		return find(new Criterion[]{Restrictions.eq("owner", owner), Restrictions.eq("name", teamName)});
 	}
 
@@ -66,7 +66,7 @@ public class DefaultTeamManager extends AbstractGenericDao<Team> implements Team
 
 			@Override
 			public NamedEntity get(String name) {
-				final Team team = find(owner, name);
+				final Team team = findBy(owner, name);
 				if (team != null) {
 					return new NamedEntity() {
 
@@ -94,7 +94,7 @@ public class DefaultTeamManager extends AbstractGenericDao<Team> implements Team
 	public Team getAnonymous(User user) {
 		Team anonymous;
 		if (anonymousId == null) {
-			anonymous = find(user, Team.ANONYMOUS);
+			anonymous = findBy(user, Team.ANONYMOUS);
 			Preconditions.checkNotNull(anonymous);
 			anonymousId = anonymous.getId();
 		} else {
@@ -107,7 +107,7 @@ public class DefaultTeamManager extends AbstractGenericDao<Team> implements Team
 	public Team getLoggedIn(User user) {
 		Team loggedIn;
 		if (loggedInId == null) {
-			loggedIn = find(user, Team.LOGGEDIN);
+			loggedIn = findBy(user, Team.LOGGEDIN);
 			Preconditions.checkNotNull(loggedIn);
 			loggedInId = loggedIn.getId();
 		} else {
@@ -120,7 +120,7 @@ public class DefaultTeamManager extends AbstractGenericDao<Team> implements Team
 	public Team getOwners(User user) {
 		Team owners;
 		if (ownersId == null) {
-			owners = find(user, Team.OWNERS);
+			owners = findBy(user, Team.OWNERS);
 			Preconditions.checkNotNull(owners);
 			ownersId = owners.getId();
 		} else {

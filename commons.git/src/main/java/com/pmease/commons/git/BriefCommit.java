@@ -10,13 +10,13 @@ public class BriefCommit {
     
     private final UserInfo author;
     
-    private final String summary;
+    private final String subject;
 
-    public BriefCommit(String hash, UserInfo committer, UserInfo author, String summary) {
+    public BriefCommit(String hash, UserInfo committer, UserInfo author, String subject) {
     	this.hash = hash;
     	this.committer = committer;
     	this.author = author;
-    	this.summary = summary;
+    	this.subject = subject;
     }
 
 	public String getHash() {
@@ -31,8 +31,8 @@ public class BriefCommit {
 		return author;
 	}
 
-	public String getSummary() {
-		return summary;
+	public String getSubject() {
+		return subject;
 	}
 
 	@Override
@@ -41,7 +41,7 @@ public class BriefCommit {
 				.add("hash", hash)
 				.add("committer", committer.getName())
 				.add("date", committer.getDate())
-				.add("summary", summary)
+				.add("subject", subject)
 				.toString();
 	}
     

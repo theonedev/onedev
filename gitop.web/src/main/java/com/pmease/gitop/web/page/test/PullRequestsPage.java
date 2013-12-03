@@ -55,7 +55,7 @@ public class PullRequestsPage extends AbstractLayoutPage {
             @Override
             protected void populateItem(final ListItem<PullRequest> requestItem) {
                 PullRequest request = requestItem.getModelObject();
-                requestItem.add(new Label("title", request.findTitle()));
+                requestItem.add(new Label("title", request.getTitle()));
 
                 requestItem.add(new Label("status", request.getStatus().toString()));
                 
@@ -105,8 +105,6 @@ public class PullRequestsPage extends AbstractLayoutPage {
                     @Override
                     protected void populateItem(final ListItem<PullRequestUpdate> updateItem) {
                         PullRequestUpdate update = updateItem.getModelObject();
-                        updateItem.add(new Label("title", update.getSubject()));
-                        
                         updateItem.add(new Label("commitHash", update.getHeadCommit()));
 
                         Collection<String> approvedUsers = new ArrayList<>();

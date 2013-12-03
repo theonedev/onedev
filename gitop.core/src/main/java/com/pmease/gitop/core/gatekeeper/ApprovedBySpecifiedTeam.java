@@ -57,9 +57,15 @@ public class ApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
         } else {
             int lackApprovals = getLeastApprovals() - approvals;
 
-            Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, members, lackApprovals);
+            if (request.getId() != null)
+            	Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, members, lackApprovals);
 
-            return pending("To be approved by " + lackApprovals + " user(s) from team '"
+    		String prefix;
+    		if (request.getId() == null)
+    			prefix = "Not ";
+    		else
+    			prefix = "To be ";
+            return pending(prefix + "approved by " + lackApprovals + " user(s) from team '"
                     + getTeam().getName() + "'.", new CanVoteBySpecifiedTeam(getTeam()));
         }
     }

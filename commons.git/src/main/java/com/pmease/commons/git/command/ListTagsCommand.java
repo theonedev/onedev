@@ -29,7 +29,7 @@ public class ListTagsCommand extends GitCommand<Collection<String>> {
                 branches.add(StringUtils.stripStart(line, "*").trim());
             }
             
-        }, errorLogger());
+        }, errorLogger);
         
         return branches;
     }

@@ -21,7 +21,7 @@ public interface TeamManager extends GenericDao<Team> {
 	 * @return
 	 * 			matching team, or <tt>null</tt> if not found 
 	 */
-	Team find(User owner, String teamName);
+	Team findBy(User owner, String teamName);
 	
 	EntityLoader asEntityLoader(User owner);
 

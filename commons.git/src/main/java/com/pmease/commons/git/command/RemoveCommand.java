@@ -14,8 +14,9 @@ public class RemoveCommand extends GitCommand<Void> {
 		super(repoDir);
 	}
 	
-	public RemoveCommand removePath(String path) {
-		paths.add(path);
+	public RemoveCommand removePaths(String... paths) {
+		for (String path: paths)
+			this.paths.add(path);
 		return this;
 	}
 
@@ -27,7 +28,7 @@ public class RemoveCommand extends GitCommand<Void> {
 			cmd.addArgs(path);
 		}
 		
-		cmd.execute(debugLogger(), errorLogger()).checkReturnCode();
+		cmd.execute(debugLogger, errorLogger).checkReturnCode();
 		
 		return null;
 	}

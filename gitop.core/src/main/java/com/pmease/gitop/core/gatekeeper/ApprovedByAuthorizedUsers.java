@@ -57,9 +57,15 @@ public class ApprovedByAuthorizedUsers extends AbstractGateKeeper {
         } else {
             int lackApprovals = getLeastApprovals() - approvals;
 
-            Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, authorizedUsers, lackApprovals);
+            if (request.getId() != null)
+            	Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, authorizedUsers, lackApprovals);
 
-            return pending("To be approved by " + lackApprovals + " authorized user(s).", 
+    		String prefix;
+    		if (request.getId() == null)
+    			prefix = "Not ";
+    		else
+    			prefix = "To be ";
+            return pending(prefix + "approved by " + lackApprovals + " authorized user(s).", 
             		new CanVoteByAuthorizedUser());
         }
 	}

@@ -31,7 +31,7 @@ public class AddSubModuleCommand extends GitCommand<Void> {
 		Preconditions.checkNotNull(path, "path should be specified.");
 		
 		Commandline cmd = cmd().addArgs("submodule", "add", url, path);
-		cmd.execute(debugLogger(), errorLogger()).checkReturnCode();
+		cmd.execute(debugLogger, errorLogger).checkReturnCode();
 		
 		return null;
 	}

@@ -53,16 +53,23 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 						Restrictions.not(Restrictions.eq("status", PullRequest.Status.DECLINED))
 					);
 
-		return find(Restrictions.eq("target", target), Restrictions.eqOrIsNull("source", source),
+		return find(Restrictions.eq("target", target), Restrictions.eq("source", source),
 				Restrictions.eq("submitter", submitter), statusCriterion);
 	}
 
 	@Transactional
 	@Override
 	public void delete(PullRequest request) {
-		for (PullRequestUpdate update : request.getUpdates())
+		for (PullRequestUpdate update : request.getUpdates()) {
+			// Call delete against every update to remove update refs
 			pullRequestUpdateManager.delete(update);
+		}
+		
 		super.delete(request);
+		
+		Git git = request.getTarget().getProject().code();
+		git.deleteRef(request.getHeadRef());
+		git.deleteRef(request.getMergeRef());
 	}
 
 	/**
@@ -87,6 +94,9 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 		if (git.isAncestor(requestHead, branchHead)) {
 			status = Status.MERGED;
 		} else {
+			// Update head ref so that it can be pulled by CI system
+			git.updateRef(request.getHeadRef(), requestHead, null, null);
+			
 			if (git.isAncestor(branchHead, requestHead)) {
 				mergeResult = new MergeResult(branchHead, requestHead, requestHead);
 				git.updateRef(mergeRef, requestHead, null, null);

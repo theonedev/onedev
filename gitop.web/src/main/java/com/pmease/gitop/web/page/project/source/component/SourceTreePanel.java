@@ -14,6 +14,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
@@ -154,11 +155,11 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 
 					@Override
 					public int compare(TreeNode o1, TreeNode o2) {
-						if (o1.getType() == o2.getType()) {
+						if (o1.getMode() == o2.getMode()) {
 							return o1.getName().compareTo(o2.getName());
-						} else if (o1.getType() == TreeNode.Type.DIRECTORY) {
+						} else if (o1.getMode() == FileMode.TREE) {
 							return -1;
-						} else if (o2.getType() == TreeNode.Type.DIRECTORY) {
+						} else if (o2.getMode() == FileMode.TREE) {
 							return 1;
 						} else {
 							return o1.getName().compareTo(o2.getName());
@@ -176,26 +177,21 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 			@Override
 			protected void populateItem(ListItem<TreeNode> item) {
 				TreeNode node = item.getModelObject();
-				final TreeNode.Type type = node.getType();
+				final FileMode mode = node.getMode();
 				Icon icon = new Icon("icon", new AbstractReadOnlyModel<String>() {
 
 					@Override
 					public String getObject() {
-						switch (type) {
-						case DIRECTORY:
+						if (mode == FileMode.TREE) 
 							return "icon-folder";
-							
-						case FILE:
+						else if (mode == FileMode.REGULAR_FILE)
 							return "icon-file-general";
-							
-						case SUBMODULE:
+						else if (mode == FileMode.GITLINK)
 							return "icon-folder-submodule";
-							
-						case SYMBOLLINK:
+						else if (mode == FileMode.SYMLINK)
 							return "icon-folder-symlink";
-						}
-						
-						return "";
+						else
+							return "";
 					}
 				});
 				
@@ -214,7 +210,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 				}
 				
 				AbstractLink link;
-				if (type == TreeNode.Type.DIRECTORY) {
+				if (mode == FileMode.TREE) {
 					link = new BookmarkablePageLink<Void>("file", SourceTreePage.class, params);
 				} else {
 					link = new BookmarkablePageLink<Void>("file", SourceBlobPage.class, params);					

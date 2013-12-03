@@ -78,7 +78,7 @@ public class GitFilter implements Filter {
 		if (projectName.endsWith(".git"))
 			projectName = projectName.substring(0, projectName.length()-".git".length());
 		
-		Project project = projectManager.find(ownerName, projectName);
+		Project project = projectManager.findBy(ownerName, projectName);
 		if (project == null) {
 			throw new GeneralException("Unable to find project %s owned by %s.", projectName, ownerName);
 		}

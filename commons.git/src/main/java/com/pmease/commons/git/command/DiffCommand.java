@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.FileChange;
@@ -54,7 +55,8 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 		Preconditions.checkNotNull(toRev, "toRev has to be specified.");
 		
 		Commandline cmd = cmd();
-		cmd.addArgs("diff", fromRev + ".." + toRev, "--full-index");
+		cmd.addArgs("diff", fromRev + ".." + toRev, "--full-index", "--no-color", "--find-renames", 
+				"--find-copies", "--src-prefix=#gitop_old/", "--dst-prefix=#gitop_new/");
 		if (contextLines != 0)
 			cmd.addArgs("--unified=" + contextLines);
 		if (path != null)
@@ -68,25 +70,40 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 			@Override
 			public void consume(String line) {
 				if (line.startsWith("diff --git")) {
-					if (changeBuilder.path != null) 
+					if (changeBuilder.newPath != null) 
 						fileChanges.add(changeBuilder.buildFileChange());
 
 					changeBuilder.action = FileChange.Action.MODIFY;
 					changeBuilder.binary = false;
+					changeBuilder.mode = FileMode.MISSING;
+					changeBuilder.oldCommit = null;
+					changeBuilder.newCommit = null;
 					changeBuilder.diffLines.clear();
 					
-					changeBuilder.path = StringUtils.substringBefore(line.substring("diff --git a/".length()), " ");
-				} else if (line.startsWith("deleted file")) {
+					line = line.substring("diff --git #gitop_old/".length());
+					
+					changeBuilder.oldPath = StringUtils.substringBefore(line, " #gitop_new/");
+					changeBuilder.newPath = StringUtils.substringAfter(line, " #gitop_new/");
+				} else if (line.startsWith("deleted file mode ")) {
 					changeBuilder.action = FileChange.Action.DELETE;
-				} else if (line.startsWith("new file")) {
+					changeBuilder.mode = FileMode.fromBits(Integer.parseInt(line.substring("deleted file mode ".length()), 8));
+				} else if (line.startsWith("new file mode ")) {
 					changeBuilder.action = FileChange.Action.ADD;
+					changeBuilder.mode = FileMode.fromBits(Integer.parseInt(line.substring("new file mode ".length()), 8));
 				} else if (line.startsWith("Binary files")) {
 					changeBuilder.binary = true;
+				} else if (line.startsWith("rename from ") || line.startsWith("rename to ")) {
+					changeBuilder.action = FileChange.Action.RENAME;
+				} else if (line.startsWith("copy from ") || line.startsWith("copy to ")) {
+					changeBuilder.action = FileChange.Action.COPY;
 				} else if (line.startsWith("index ")) {
 					line = line.substring("index ".length());
-					changeBuilder.commitHash1 = StringUtils.substringBefore(line, "..");
-					changeBuilder.commitHash2 = StringUtils.substringAfter(line, "..");
-					changeBuilder.commitHash2 = StringUtils.substringBefore(changeBuilder.commitHash2, " ");
+					changeBuilder.oldCommit = StringUtils.substringBefore(line, "..");
+					changeBuilder.newCommit = StringUtils.substringAfter(line, "..");
+					if (changeBuilder.newCommit.indexOf(' ') != -1) {
+						changeBuilder.newCommit = StringUtils.substringBefore(changeBuilder.newCommit, " ");
+						changeBuilder.mode = FileMode.fromBits(Integer.parseInt(StringUtils.substringAfterLast(line, " "), 8));
+					}
 				} else if (line.startsWith("@@") || line.startsWith("+") || line.startsWith("-") 
 						|| line.startsWith(" ") || line.startsWith("\\")) {
 					changeBuilder.diffLines.add(line);
@@ -94,9 +111,9 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 					
 			}
 			
-		}, errorLogger()).checkReturnCode();
+		}, errorLogger).checkReturnCode();
 
-		if (changeBuilder.path != null)
+		if (changeBuilder.newPath != null)
 			fileChanges.add(changeBuilder.buildFileChange());
 		
 		return fileChanges;
@@ -105,19 +122,23 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 	private static class ChangeBuilder {
 		private Action action;
 		
-		private String path;
+		private String oldPath;
+		
+		private String newPath;
 		
 		private boolean binary;
 		
-		private String commitHash1;
+		private FileMode mode;
 		
-		private String commitHash2;
+		private String oldCommit;
+		
+		private String newCommit;
 		
 		private List<String> diffLines = new ArrayList<>();
 		
 		private FileChangeWithDiffs buildFileChange() {
-			return new FileChangeWithDiffs(action, path, binary, commitHash1, commitHash2, 
-					DiffUtils.parseUnifiedDiff(diffLines));
+			return new FileChangeWithDiffs(action, oldPath, newPath, mode, binary, 
+					oldCommit, newCommit, DiffUtils.parseUnifiedDiff(diffLines));
 		}
 	}
 }

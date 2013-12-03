@@ -26,13 +26,13 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 
 	@Sessional
 	@Override
-	public Branch find(Project project, String name) {
-		return find(project, name, false);
+	public Branch findBy(Project project, String name) {
+		return findBy(project, name, false);
 	}
 
     @Transactional
     @Override
-    public Branch find(Project project, String name, boolean createIfNotExist) {
+    public Branch findBy(Project project, String name, boolean createIfNotExist) {
         Branch branch = find(new Criterion[]{Restrictions.eq("project", project), Restrictions.eq("name", name)});
         if (branch == null && createIfNotExist) {
             branch = new Branch();
@@ -71,7 +71,7 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 
 			@Override
 			public NamedEntity get(String name) {
-				final Branch branch = find(project, name);
+				final Branch branch = findBy(project, name);
 				if (branch != null) {
 					return new NamedEntity() {
 

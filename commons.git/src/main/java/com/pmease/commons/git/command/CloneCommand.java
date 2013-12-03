@@ -63,7 +63,7 @@ public class CloneCommand extends GitCommand<Void> {
 		cmd.addArgs(from);
 		cmd.addArgs(".");
 		
-		cmd.execute(debugLogger(), errorLogger()).checkReturnCode();
+		cmd.execute(debugLogger, errorLogger).checkReturnCode();
 		
 		return null;
 	}

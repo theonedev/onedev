@@ -48,7 +48,7 @@ public class DiffCommandTest {
 		    
 		    workGit.add("dir").commit("add readme, dir/file1 and dir/file2", false, false);
 		    
-		    workGit.checkout("dev", true);
+		    workGit.checkout("head", "dev");
 
 		    FileUtils.writeFile(readme, "reame for dev");
 		    workGit.add("readme");
@@ -87,10 +87,10 @@ public class DiffCommandTest {
     		assertEquals(fileChanges.size(), 3);
     		
     		for (FileChangeWithDiffs fileChange: fileChanges) {
-    			assertEquals(40, fileChange.getCommitHash1().length());
-    			assertEquals(40, fileChange.getCommitHash2().length());
+    			assertEquals(40, fileChange.getOldCommit().length());
+    			assertEquals(40, fileChange.getNewCommit().length());
     			if (fileChange.getAction() == FileChangeWithDiffs.Action.MODIFY) {
-    				assertEquals(fileChange.getPath(), "dir/file1");
+    				assertEquals(fileChange.getNewPath(), "dir/file1");
     				assertEquals(fileChange.getDiffChunks().get(0).toString(), 
     						  "@@ -1 +1 @@\n"
     						+ "-1st line of file1\n"
@@ -108,6 +108,45 @@ public class DiffCommandTest {
     			}
     		}
 
+	    } finally {
+	        FileUtils.deleteDir(tempDir);
+	    }
+	}
+
+	@Test
+	public void shouldHandleRenameAndCopyCorrectly() {
+	    assertTrue(GitCommand.checkError() == null);
+	    File tempDir = FileUtils.createTempDir();
+	    
+	    try {
+		    Git git = new Git(tempDir);
+		    git.init(false);
+
+		    FileUtils.writeFile(new File(tempDir, "a"), "1111\n2222\n3333\n");
+		    git.add("a");
+		    git.commit("add a", false, false);
+		    
+		    FileUtils.writeFile(new File(tempDir, "a"), "1111\n2222\n3333\n4444\n");
+		    FileUtils.writeFile(new File(tempDir, "a2"), "1111\n2222\n3333\n4444\n");
+		    git.add("a", "a2");
+		    git.commit("copy a to a2", false, false);
+		    
+		    FileUtils.writeFile(new File(tempDir, "b"), "1111\n2222\n3333\n4444\n");
+		    git.add("b");
+		    git.commit("add b", false, false);
+
+		    FileUtils.writeFile(new File(tempDir, "b2"), "1111\n2222\n3333\n4444\n");
+		    git.remove("b");
+		    git.add("b2");
+		    git.commit("move b to b2", false, false);
+
+		    List<FileChangeWithDiffs> changes = git.diff("master~3", "master", null, 4);
+		    assertEquals("COPY\ta->a2", changes.get(1).toString());
+		    assertEquals("COPY\ta->b2", changes.get(2).toString());
+		    
+		    changes = git.diff("master~1", "master", null, 4);
+		    assertEquals("RENAME\tb->b2", changes.get(0).toString());
+		    
 	    } finally {
 	        FileUtils.deleteDir(tempDir);
 	    }

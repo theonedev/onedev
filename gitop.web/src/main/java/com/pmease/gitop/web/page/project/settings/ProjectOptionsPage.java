@@ -70,7 +70,7 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 						}
 						
 						ProjectManager pm = Gitop.getInstance(ProjectManager.class);
-						if (pm.find(project.getOwner(), name) != null) {
+						if (pm.findBy(project.getOwner(), name) != null) {
 							validatable.error(new ValidationError().setMessage("Project name is already exist"));
 						}
 					}

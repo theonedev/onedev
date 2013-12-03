@@ -123,7 +123,7 @@ public class RegisterPage extends AbstractLayoutPage {
 		public void validate(IValidatable<String> validatable) {
 			String username = validatable.getValue();
 			UserManager userManager = AppLoader.getInstance(UserManager.class);
-			User user = userManager.find(username);
+			User user = userManager.findBy(username);
 			if (user != null) {
 				validatable.error(new ValidationError()
 						.setMessage("The username is already registered."));

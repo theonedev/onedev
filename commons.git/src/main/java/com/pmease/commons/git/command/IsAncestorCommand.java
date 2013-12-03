@@ -35,7 +35,7 @@ public class IsAncestorCommand extends GitCommand<Boolean> {
 		
 		cmd.addArgs("merge-base", "--is-ancestor", ancestor, descendant);
 		
-		ExecuteResult result = cmd.execute(infoLogger(), errorLogger());
+		ExecuteResult result = cmd.execute(infoLogger, errorLogger);
 		
 		if (result.getReturnCode() == 0)
 			return true;

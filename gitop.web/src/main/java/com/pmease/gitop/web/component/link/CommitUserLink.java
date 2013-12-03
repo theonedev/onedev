@@ -20,8 +20,7 @@ public class CommitUserLink extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		// TODO: to render a user, do we need find by name or email?
-		User user = Gitop.getInstance(UserManager.class).find(getName());
+		User user = Gitop.getInstance(UserManager.class).findBy(getName());
 		if (user != null) {
 			add(new UserAvatarLink("link", new UserModel(user)));
 		} else {

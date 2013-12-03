@@ -81,9 +81,15 @@ public class GetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
                 lackApprovals = getMinScore() - score;
             }
 
-            Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, members, lackApprovals);
+            if (request.getId() != null)
+            	Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, members, lackApprovals);
 
-            return pending("To be approved by " + lackApprovals + " users from team '"
+    		String prefix;
+    		if (request.getId() == null)
+    			prefix = "Not ";
+    		else
+    			prefix = "To be ";
+            return pending(prefix + "approved by " + lackApprovals + " users from team '"
                     + getTeam().getName() + ".", new CanVoteBySpecifiedTeam(getTeam()));
         }
     }

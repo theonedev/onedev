@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class LineConsumer extends OutputStream {
 	
-	public static final Logger logger = LoggerFactory.getLogger(LineConsumer.class);
+	private static final Logger logger = LoggerFactory.getLogger(LineConsumer.class);
 	
 	/**
 	 * If this property is not empty, output will be re-directed to this stream
@@ -101,7 +101,7 @@ public abstract class LineConsumer extends OutputStream {
 	 */
 	public abstract void consume(String line);
 	
-    @Override
+	@Override
 	public void flush() throws IOException {
         if (buffer.size() > 0) {
             processBuffer();

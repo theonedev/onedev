@@ -51,7 +51,7 @@ public class CalcMergeBaseCommand extends GitCommand<String> {
 
 			@Override
 			public void consume(String line) {
-				LineConsumer.logger.error(line);
+				error(line);
 			}
 			
 		}).checkReturnCode();

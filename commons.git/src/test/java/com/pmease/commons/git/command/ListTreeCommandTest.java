@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import org.eclipse.jgit.lib.FileMode;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -57,7 +58,7 @@ public class ListTreeCommandTest {
 			workGit.addSubModule(moduleGit.repoDir().getAbsolutePath(), "module");
 			workGit.commit("commit", false, false);
 
-    		workGit.checkout("dev", true);
+    		workGit.checkout("head", "dev");
     		workGit.remove("dir/file");
     		workGit.commit("commit", false, false);
     		
@@ -69,7 +70,7 @@ public class ListTreeCommandTest {
     		assertEquals(7, treeNodes.size());
     		assertEquals("dir", treeNodes.get(5).getPath());
     		assertEquals("dir", treeNodes.get(5).getName());
-    		assertEquals(TreeNode.Type.DIRECTORY, treeNodes.get(5).getType());
+    		assertEquals(FileMode.TREE, treeNodes.get(5).getMode());
     		assertEquals(moduleGit.repoDir().getAbsolutePath(), 
     				new File(new String(treeNodes.get(6).show())).getCanonicalPath());
     		

@@ -52,8 +52,8 @@ abstract class ContentPanel extends Panel {
 						menuPanel.add(AttributeModifier.append("class", "submenu"));
 						item.add(menuPanel);
 						DropdownAlignment alignment = new DropdownAlignment(menuItemComponent, 100, 0, 0, 0);
-						alignment.setGap(0);
-						item.add(new MenuBehavior(menuPanel).setHoverDelay(0).setAlignment(alignment));
+						alignment.gap(0);
+						item.add(new MenuBehavior(menuPanel).hoverDelay(0).alignment(alignment));
 					} else {
 						item.add(new WebMarkupContainer("itemMenu"));
 					}
