@@ -50,8 +50,8 @@ ul.piped, ol.piped { margin: 0; padding: 0; }
 /* LINKS */
 .checkable-link { color: #333; cursor: pointer; }
 .checkable-link:hover { text-decoration: none; }
-.checkable-link .icon-checkbox:before { content: "\f096"; width: 16px; }
-.checkable-link.checked .icon-checkbox:before { content: "\f046"; width: 16px; }
+.checkable-link .icon-checkbox:before { content: "\f070"; }
+.checkable-link.checked .icon-checkbox:before { content: "\f071"; }
 .checkable-link.disabled,
 .checkable-link > em { color: #999; font-style: normal; cursor: not-allowed;}
 
@@ -278,15 +278,15 @@ fieldset[disabled] .btn-inverse.active {
 
 .checkbox-flat { padding-left: 0; margin-top: 6px; margin-bottom: 6px; }
 .checkbox-flat input[type="checkbox"] { display: none; }
-.checkbox-flat .icon-checkbox:before { content: "\f096"; width: 16px; }
-.checkbox-flat.checked .icon-checkbox:before { content: "\f046"; width: 16px; }
+.checkbox-flat .icon-checkbox:before { content: "\f070"; }
+.checkbox-flat.checked .icon-checkbox:before { content: "\f071"; }
 .checkbox-flat.disabled { color: #888; }
 
 .radio-flat { padding-left: 0; cursor: pointer; }
 .radio-flat input[type="radio"] { display: none; }
-.radio-flat .icon-radio:before { content: "\f10c"; width: 16px; }
+.radio-flat .icon-radio:before { content: "\f072"; }
 .radio-flat:hover .icon-radio:before,
-.radio-flat.checked .icon-radio:before { content: "\f192"; }
+.radio-flat.checked .icon-radio:before { content: "\f073"; }
 .radio-flat:hover .icon-radio { color: #888; }
 .radio-flat.checked:hover .icon-radio { color: #333; }
 

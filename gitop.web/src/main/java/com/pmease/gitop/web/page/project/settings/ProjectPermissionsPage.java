@@ -321,7 +321,7 @@ public class ProjectPermissionsPage extends AbstractProjectSettingPage {
 				@Override
 				public String getObject() {
 					return operation.ordinal() > getTeamPermission(rowModel.getObject()).ordinal() ?
-							"checkbox-unchecked" : "checkbox-checked";
+							"icon-checkbox-unchecked" : "icon-checkbox-checked";
 				}
 				
 			}));

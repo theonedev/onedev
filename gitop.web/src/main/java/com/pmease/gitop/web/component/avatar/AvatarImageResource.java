@@ -52,7 +52,7 @@ public class AvatarImageResource extends DynamicImageResource {
 				throw Throwables.propagate(e);
 			}
 		} else {
-			setFormat("image/png");
+			setFormat("image/jpg");
 			return GitopWebApp.get().getDefaultUserAvatar();
 		}
 	}

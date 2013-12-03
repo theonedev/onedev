@@ -16,12 +16,14 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.TreeNode;
+import com.pmease.commons.git.UserInfo;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.bootstrap.Icon;
 import com.pmease.gitop.web.component.link.CommitUserLink;
@@ -84,6 +86,33 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 			
 		}));
 		
+		add(new CommitUserLink("committer", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getLastCommit().getCommitter().getName();
+			}
+		}) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				Commit commit = getLastCommit();
+				UserInfo author = commit.getAuthor();
+				UserInfo committer = commit.getCommitter();
+				this.setVisibilityAllowed(!Objects.equal(author, committer));
+			}
+		});
+		
+		add(new Label("committer-date", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return DateUtils.formatAge(getLastCommit().getCommitter().getDate());
+			}
+			
+		}));
+		
 		BookmarkablePageLink<Void> commitLink = new BookmarkablePageLink<Void>(
 				"commitlink",
 				SourceCommitPage.class,
@@ -93,7 +122,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 
 			@Override
 			public String getObject() {
-				return GitUtils.getShortSha(getLastCommit().getHash());
+				return GitUtils.abbreviateSHA(getLastCommit().getHash());
 			}
 		}));
 		
@@ -154,16 +183,16 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 					public String getObject() {
 						switch (type) {
 						case DIRECTORY:
-							return "folder";
+							return "icon-folder";
 							
 						case FILE:
-							return "file";
+							return "icon-file-general";
 							
 						case SUBMODULE:
-							return "submodule";
+							return "icon-folder-submodule";
 							
 						case SYMBOLLINK:
-							return "symbollink-folder";
+							return "icon-folder-symlink";
 						}
 						
 						return "";

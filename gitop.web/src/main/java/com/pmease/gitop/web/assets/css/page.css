@@ -5,10 +5,8 @@
 .menu-ul { list-style: none; margin: 0; padding: 0; }
 .menu-item { display: block; padding: 5px 10px; color: #666; }
 .menu-item:hover { color: #333; background: #f2f2f2; text-decoration: none; }
-.menu-item.unchecked i.fa-check { visibility: hidden; }
-.menu-item.unchecked:hover i.fa-check { visibility: visible; color: #666; }
-
-.tab-pane > .menu-ul { margin: 10px 0; }
+.menu-item.unchecked i.icon-check { visibility: hidden; }
+.menu-item.unchecked:hover i.icon-check { visibility: visible; color: #666; }
 
 ul.f-dropdown { padding: 0; }
 .popup-content { width: 300px; }
@@ -36,8 +34,8 @@ ul.f-dropdown { padding: 0; }
 }
 #globalheader:after, #main:after, #globalfooter:after { clear: both; }
 
-.navbar-brand .fa { font-size: 32px; color: #333; }
-.navbar-brand:hover .fa { color: #08f;}
+.navbar-brand .icon { font-size: 32px; color: #333; }
+.navbar-brand:hover .icon { color: #08f;}
 
 /**
  * GLOBAL HEADER
@@ -325,7 +323,7 @@ a > .ind { font-weight: 300; color: #888; float: right; }
 
 h1.repo-info { margin: 0; padding-left:60px; font-size: 20px; position: relative; font-weight: normal; min-height: 48px;}
 .repo-info > .repo-avatar { position: absolute; left: 0; top: 0; color: #ddd; width: 48px; height: 48px; padding: 2px; display: block; text-align: center; }
-.repo-info > .repo-avatar > .fa { font-size: 48px; }
+.repo-info > .repo-avatar > .icon { font-size: 48px; }
 .repo-info > .name { display: block; padding-top: 12px; margin-bottom: 6px;}
 .repo-info > .name .label { font-size: 11px; margin-left: 6px; text-transform: uppercase; }
 
@@ -340,8 +338,8 @@ ul.repo-actions { margin: 8px 4px 8px 0; padding: 0; list-style: none; }
 .repo-sidenav .list-navs { margin-bottom: 20px; }
 .repo-sidenav .list-navs > .list-group-item a { color: #09f; padding-left: 30px; }
 .repo-sidenav .list-navs > .list-group-item a .badge { }
-.repo-sidenav a > i.fa { font-size: 16px; color: #999; }
-.repo-sidenav .list-group-item.active a > i.fa { color: #333; }
+.repo-sidenav a > i.icon { color: #999; }
+.repo-sidenav .list-group-item.active a > i.icon { color: #333; }
 
 .description-editor input.form-control { width: 300px; }
 
@@ -355,13 +353,14 @@ ul.repo-actions { margin: 8px 4px 8px 0; padding: 0; list-style: none; }
 .source-tree .commit { background: #f2f2f2; border-radius: 4px 4px 0 0; }
 pre.short-message { background: transparent; border: none; margin: 0; padding: 8px 15px; }
 .commit-meta { background: #fff; padding: 8px 15px; border-top: 1px solid #ddd; font-size: 0.857143em; }
-.commit-meta > .commit-author { float: left; color: #999; }
-.commit-meta > .commit-author .author-name, 
-.commit-meta > .commit-author .author-name a { color: #666; font-weight: bold; }
+.commit-meta .persons .name { color: #666; font-weight: bold;}
+.commit-meta .persons .committer { padding-left: 30px; }
 
-.commit-hash { float: right; border-radius: 0 0 4px 4px; font-family: monospace, serif;  }
+.commit-hash { font-family: monospace, serif;  }
 .commit-hash > a { color: #999; }
 .commit-hash > a .sha { color: #555; }
+
+.commitish-list { max-height: 400px; padding: 10px 0; overflow: auto; }
 
 table.files { margin: 0; }
 table.files td.file-icon { width: 18px; padding-right: 2px; padding-left: 15px; color: #888; }

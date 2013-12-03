@@ -39,34 +39,34 @@ import com.pmease.gitop.web.page.project.wiki.ProjectWikiPage;
 public abstract class ProjectCategoryPage extends AbstractProjectPage {
 
 	public static enum Category implements ProjectTabContribution {
-		CODE(ProjectTabGroup.SOURCE, "Code", ProjectHomePage.class, "fa-code") {
+		CODE(ProjectTabGroup.SOURCE, "Code", ProjectHomePage.class, "icon-code") {
 			@Override
 			Component createBadge(String id, IModel<Project> project) {
 				return new WebMarkupContainer(id).setVisibilityAllowed(false);
 			}
 		},
 		
-		COMMITS(ProjectTabGroup.SOURCE, "Commits", CommitsPage.class, "fa-commits"),
-		BRANCHES(ProjectTabGroup.SOURCE, "Branches", BranchesPage.class, "fa-git-branch"),
-		TAGS(ProjectTabGroup.SOURCE, "Tags", TagsPage.class, "fa-git-tags"),
-		CONTRIBUTORS(ProjectTabGroup.SOURCE, "Contributors", ContributorsPage.class, "fa-group-o"),
-		WIKI(ProjectTabGroup.WIKI, "Wiki", ProjectWikiPage.class, "fa-wiki") {
+		COMMITS(ProjectTabGroup.SOURCE, "Commits", CommitsPage.class, "icon-commits"),
+		BRANCHES(ProjectTabGroup.SOURCE, "Branches", BranchesPage.class, "icon-git-branch"),
+		TAGS(ProjectTabGroup.SOURCE, "Tags", TagsPage.class, "icon-git-tags"),
+		CONTRIBUTORS(ProjectTabGroup.SOURCE, "Contributors", ContributorsPage.class, "icon-group-o"),
+		WIKI(ProjectTabGroup.WIKI, "Wiki", ProjectWikiPage.class, "icon-wiki") {
 			@Override
 			Component createBadge(String id, IModel<Project> project) {
 				return new WebMarkupContainer(id).setVisibilityAllowed(false);
 			}
 		},
 		
-		PULL_REQUESTS(ProjectTabGroup.ISSUES, "Pull Requests", ProjectPullRequestsPage.class, "fa-pull-request"),
+		PULL_REQUESTS(ProjectTabGroup.ISSUES, "Pull Requests", ProjectPullRequestsPage.class, "icon-pull-request"),
 		
-		GRAPHS(ProjectTabGroup.STATISTICS, "Graphs", ProjectGraphsPage.class, "fa-chart-area") {
+		GRAPHS(ProjectTabGroup.STATISTICS, "Graphs", ProjectGraphsPage.class, "icon-chart-area") {
 			@Override
 			Component createBadge(String id, IModel<Project> project) {
 				return new WebMarkupContainer(id).setVisibilityAllowed(false);
 			}
 		},
 		
-		FORKS(ProjectTabGroup.STATISTICS, "Forks", ProjectForksPage.class, "fa-network") {
+		FORKS(ProjectTabGroup.STATISTICS, "Forks", ProjectForksPage.class, "icon-network") {
 			@Override
 			Component createBadge(String id, IModel<Project> project) {
 				return new WebMarkupContainer(id).setVisibilityAllowed(false);

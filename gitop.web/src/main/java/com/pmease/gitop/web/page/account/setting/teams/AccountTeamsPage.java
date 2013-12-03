@@ -116,7 +116,7 @@ public class AccountTeamsPage extends AccountSettingPage {
 																	EditTeamPage.class,
 																	EditTeamPage.newParams(team));
 				link.add(new Label("name", Model.of(team.getName())));
-				link.add(new Icon("icon", "pencil"));
+				link.add(new Icon("icon", "icon-pencil"));
 				frag.add(link);
 				frag.add(new Label("summary", formatTeamDescription(team)));
 				frag.add(new Label("builtin", "built-in").setVisibilityAllowed(team.isBuiltIn()));
@@ -263,7 +263,7 @@ public class AccountTeamsPage extends AccountSettingPage {
 				public String getObject() {
 					Team team = Gitop.getInstance(TeamManager.class).get(teamId);
 					return getTeamPermission(team).can(operation) ?
-							"checkbox-checked" : "checkbox-unchecked";
+							"icon-checkbox-checked" : "icon-checkbox-unchecked";
 				}
 				
 			}));

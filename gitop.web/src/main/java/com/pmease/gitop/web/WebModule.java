@@ -25,7 +25,7 @@ public class WebModule extends AbstractPluginModule {
 		// put your guice bindings here
 		bind(AbstractWicketConfig.class).to(GitopWebApp.class);		
 		bind(SitePaths.class).in(Singleton.class);
-		bind(GitopFacade.class);
+		bind(GitopHelper.class);
 		contribute(ServletConfigurator.class, WebServletConfigurator.class);
 		contribute(UserNameReservation.class, WebUserNameReservation.class);
 		

@@ -2,12 +2,15 @@ package com.pmease.gitop.web.page.project.source;
 
 import java.util.List;
 
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import javax.persistence.EntityNotFoundException;
+
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.pmease.commons.git.Git;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.ProjectCategoryPage;
 
@@ -20,30 +23,38 @@ public abstract class AbstractFilePage extends ProjectCategoryPage {
 	public AbstractFilePage(PageParameters params) {
 		super(params);
 		
-		revisionModel = new AbstractReadOnlyModel<String>() {
+		revisionModel = new LoadableDetachableModel<String>() {
 
 			@Override
-			public String getObject() {
+			public String load() {
 				PageParameters params = AbstractFilePage.this.getPageParameters();
 				String objectId = params.get(PageSpec.OBJECT_ID).toString();
+				String rev;
 				if (Strings.isNullOrEmpty(objectId)) {
 					String branchName = getProject().getDefaultBranchName();
 					if (Strings.isNullOrEmpty(branchName)) {
-						return "master";
+						rev = "master";
 					} else {
-						return branchName;
+						rev = branchName;
 					}
 				} else {
-					return objectId;
+					rev = objectId;
+				}
+				
+				Git git = getProject().code();
+				String hash = git.resolveRef(rev, false);
+				if (hash == null) {
+					throw new EntityNotFoundException("Ref " + rev + " doesn't exist");
+				} else {
+					return rev;
 				}
 			}
-			
 		};
 		
-		pathsModel = new AbstractReadOnlyModel<List<String>>() {
+		pathsModel = new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			public List<String> getObject() {
+			public List<String> load() {
 				PageParameters params = AbstractFilePage.this.getPageParameters();
 				int count = params.getIndexedCount();
 				List<String> paths = Lists.newArrayList();
