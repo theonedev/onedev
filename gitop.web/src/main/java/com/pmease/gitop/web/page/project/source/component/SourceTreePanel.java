@@ -177,11 +177,12 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 			@Override
 			protected void populateItem(ListItem<TreeNode> item) {
 				TreeNode node = item.getModelObject();
-				final FileMode mode = node.getMode();
+				final int bits = node.getMode().getBits();
 				Icon icon = new Icon("icon", new AbstractReadOnlyModel<String>() {
 
 					@Override
 					public String getObject() {
+						FileMode mode = FileMode.fromBits(bits);
 						if (mode == FileMode.TREE) 
 							return "icon-folder";
 						else if (mode == FileMode.REGULAR_FILE)
@@ -210,6 +211,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 				}
 				
 				AbstractLink link;
+				FileMode mode = node.getMode();
 				if (mode == FileMode.TREE) {
 					link = new BookmarkablePageLink<Void>("file", SourceTreePage.class, params);
 				} else {
