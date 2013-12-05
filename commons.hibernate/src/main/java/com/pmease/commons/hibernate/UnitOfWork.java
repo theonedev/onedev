@@ -16,6 +16,8 @@
 
 package com.pmease.commons.hibernate;
 
+import java.util.concurrent.Callable;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
@@ -24,6 +26,8 @@ public interface UnitOfWork {
 	void begin();
 
 	void end();
+
+	<T> T call(Callable<T> callable);
 	
 	void reset();
 	

@@ -169,4 +169,9 @@ public class PullRequestUpdate extends AbstractEntity {
 		return votes;
 	}
 
+	public void deleteRefs() {
+		Git git = getRequest().getTarget().getProject().code();
+		git.deleteRef(getHeadRef());
+		git.deleteRef(getBaseRef());
+	}
 }

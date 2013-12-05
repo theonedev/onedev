@@ -21,21 +21,18 @@ public class DefaultPullRequestUpdateManager extends AbstractGenericDao<PullRequ
 
 	@Transactional
 	@Override
-	public void save(PullRequestUpdate entity) {
-		super.save(entity);
+	public void save(PullRequestUpdate update) {
+		super.save(update);
 
-		Git git = entity.getRequest().getTarget().getProject().code();
-		git.updateRef(entity.getHeadRef(), entity.getHeadCommit(), null, null);
+		Git git = update.getRequest().getTarget().getProject().code();
+		git.updateRef(update.getHeadRef(), update.getHeadCommit(), null, null);
 	}
 
 	@Transactional
 	@Override
-	public void delete(PullRequestUpdate entity) {
-		super.delete(entity);
-
-		Git git = entity.getRequest().getTarget().getProject().code();
-		git.deleteRef(entity.getBaseRef());
-		git.deleteRef(entity.getHeadRef());
+	public void delete(PullRequestUpdate update) {
+		update.deleteRefs();
+		super.delete(update);
 	}
 
 }

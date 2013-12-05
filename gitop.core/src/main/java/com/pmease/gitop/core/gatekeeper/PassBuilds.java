@@ -57,11 +57,11 @@ public class PassBuilds extends AbstractGateKeeper {
 	public CheckResult check(PullRequest request) {
 		BuildResultManager verificationManager = Gitop.getInstance(BuildResultManager.class);
 
-		Preconditions.checkNotNull(request.getMergeResult());
+		Preconditions.checkNotNull(request.getMergePrediction());
 		
 		String commit;
 		if (isCheckMerged()) {
-			commit = request.getMergeResult().getMerged();
+			commit = request.getMergePrediction().getMerged();
 			if (commit == null) 
 				return rejected("Can not build against merged result due to conflicts.");
 		} else {

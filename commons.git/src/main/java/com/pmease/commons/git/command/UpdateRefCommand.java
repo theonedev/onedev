@@ -4,8 +4,10 @@ import java.io.File;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
+import com.pmease.commons.util.execution.ExecuteResult;
+import com.pmease.commons.util.execution.LineConsumer;
 
-public class UpdateRefCommand extends GitCommand<Void> {
+public class UpdateRefCommand extends GitCommand<Boolean> {
 
     private String refName;
     
@@ -40,7 +42,7 @@ public class UpdateRefCommand extends GitCommand<Void> {
 	}
 
 	@Override
-	public Void call() {
+	public Boolean call() {
 	    Preconditions.checkNotNull(refName, "refName has to be specified.");
 	    Preconditions.checkNotNull(revision, "revision has to be specified.");
 	    
@@ -51,9 +53,24 @@ public class UpdateRefCommand extends GitCommand<Void> {
 		if (reason != null)
             cmd.addArgs(reason);
 		
-		cmd.execute(debugLogger, errorLogger).checkReturnCode();
+		final boolean refLockError[] = new boolean[]{false};
+		ExecuteResult result = cmd.execute(debugLogger, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				error(line);
+				if (line.startsWith("fatal: Cannot lock the ref")) 
+					refLockError[0] = true;
+			} 
+			
+		});
 		
-		return null;
+		if (refLockError[0])
+			return false;
+		
+		result.checkReturnCode();
+		
+		return true;
 	}
 
 }

@@ -155,11 +155,26 @@ public class Git implements Serializable {
 		return this;
 	}
 
-	public Git updateRef(String refName, String revision, 
+	/**
+	 * Update specified ref with specified revision.
+	 * 
+	 * @param refName
+	 * 			reference to be updated
+	 * @param revision
+	 * 			new revision of the reference
+	 * @param oldRevision
+	 * 			optional old revision of the reference
+	 * @param reason
+	 * 			reason to update the ref
+	 * @return
+	 * 			<tt>true</tt> if success, or <tt>false</tt> if the reference 
+	 * 			can not be locked due to old revision not matching
+	 */
+	public boolean updateRef(String refName, String revision, 
 			@Nullable String oldRevision, @Nullable String reason) {
-		new UpdateRefCommand(repoDir).refName(refName).revision(revision).oldRevision(oldRevision)
+		return new UpdateRefCommand(repoDir).refName(refName)
+				.revision(revision).oldRevision(oldRevision)
 				.reason(reason).call();
-		return this;
 	}
 	
 	public Git deleteRef(String refName) {

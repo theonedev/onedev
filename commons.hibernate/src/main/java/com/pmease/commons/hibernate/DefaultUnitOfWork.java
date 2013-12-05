@@ -1,5 +1,7 @@
 package com.pmease.commons.hibernate;
 
+import java.util.concurrent.Callable;
+
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -68,6 +70,18 @@ public class DefaultUnitOfWork implements UnitOfWork, Provider<Session> {
 	@Override
 	public void reset() {
 		sessionReferenceHolder.get().reset();
+	}
+
+	@Override
+	public <T> T call(Callable<T> callable) {
+		begin();
+		try {
+			return callable.call();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		} finally {
+			end();
+		}
 	}
 
 }
