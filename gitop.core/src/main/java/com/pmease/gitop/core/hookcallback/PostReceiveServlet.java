@@ -8,8 +8,10 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.EventBus;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.gitop.core.event.BranchRefUpdateEvent;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.model.Branch;
@@ -25,11 +27,14 @@ public class PostReceiveServlet extends CallbackServlet {
 
     private final BranchManager branchManager;
     
+    private final EventBus eventBus;
+    
     @Inject
-    public PostReceiveServlet(ProjectManager projectManager, BranchManager branchManager) {
+    public PostReceiveServlet(ProjectManager projectManager, BranchManager branchManager, EventBus eventBus) {
         super(projectManager);
         
         this.branchManager = branchManager;
+        this.eventBus = eventBus;
     }
 
     @Override
@@ -45,10 +50,13 @@ public class PostReceiveServlet extends CallbackServlet {
 			branch.setProject(project);
 			branch.setName(branchName);
 			branchManager.save(branch);
-			return;
+		} else {
+			logger.info("Executing post-receive hook against branch {}...", branchName);
+			
+			Branch branch = branchManager.findBy(project, branchName, true);
+			eventBus.post(new BranchRefUpdateEvent(branch));
 		}
 		
-		logger.info("Executing post-receive hook against branch {}...", branchName);
     }
     
 }

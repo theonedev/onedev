@@ -1,5 +1,7 @@
 package com.pmease.gitop.core.manager;
 
+import java.util.List;
+
 import javax.annotation.Nullable;
 
 import com.google.inject.ImplementedBy;
@@ -19,4 +21,16 @@ public interface PullRequestManager extends GenericDao<PullRequest> {
     boolean merge(PullRequest request);
     
     void decline(PullRequest request);
+    
+    void reopen(PullRequest request);
+    
+    /**
+     * Find pull requests whose head commit or merge commit equals to specified commit.
+     * 
+     * @param commit
+     * 			head commit or merge commit to match
+     * @return
+     * 			collection of matching pull requests
+     */
+    List<PullRequest> findByCommit(String commit);
 }

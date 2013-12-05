@@ -1,6 +1,5 @@
 package com.pmease.gitop.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -9,6 +8,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
@@ -25,10 +25,9 @@ import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 public class PullRequest extends AbstractEntity {
 
 	public enum Status {
-		PENDING_CHECK, PENDING_APPROVAL, PENDING_UPDATE, 
-		PENDING_MERGE, MERGED, DECLINED;
+		PENDING_CHECK, PENDING_APPROVAL, PENDING_UPDATE, PENDING_MERGE, MERGED, DECLINED;
 	}
-
+	
 	@JoinColumn(nullable = false)
 	private String title;
 
@@ -52,8 +51,8 @@ public class PullRequest extends AbstractEntity {
 	@Column(nullable = false)
 	private Status status = Status.PENDING_CHECK;
 	
-	@Lob
-	private MergeResult mergeResult;
+	@Embedded
+	private MergePrediction mergePrediction;
 
 	private transient List<PullRequestUpdate> sortedUpdates;
 
@@ -153,7 +152,13 @@ public class PullRequest extends AbstractEntity {
 		this.baseUpdate = baseUpdate;
 	}
 
-	public CheckResult getCheckResult() {
+	/**
+	 * Get gate keeper check result.
+	 *  
+	 * @return
+	 * 			<tt>null</tt> if this pull request has not been refreshed yet
+	 */
+	public @Nullable CheckResult getCheckResult() {
 		return checkResult;
 	}
 	
@@ -161,12 +166,18 @@ public class PullRequest extends AbstractEntity {
 		this.checkResult = checkResult;
 	}
 	
-	public MergeResult getMergeResult() {
-		return mergeResult;
+	/**
+	 * Get merge prediction of this pull request.
+	 *  
+	 * @return
+	 * 			<tt>null</tt> if this pull request has not been refreshed yet
+	 */
+	public MergePrediction getMergePrediction() {
+		return mergePrediction;
 	}
 	
-	public void setMergeResult(MergeResult mergeResult) {
-		this.mergeResult = mergeResult;
+	public void setMergePrediction(MergePrediction mergePrediction) {
+		this.mergePrediction = mergePrediction;
 	}
 
 	/**
@@ -228,42 +239,15 @@ public class PullRequest extends AbstractEntity {
 	
 	public String getMergeRef() {
 		return "refs/gitop/pulls/" + getId() + "/merge";
-	}
-	
-	public static class MergeResult implements Serializable {
-		
-		private final String branchHead;
-		
-		private final String requestHead;
-		
-		private final String merged;
-
-		public MergeResult(final String branchHead, final String requestHead, final String merged) {
-			this.branchHead = branchHead;
-			this.requestHead = requestHead;
-			this.merged = merged;
-		}
-
-		public String getBranchHead() {
-			return branchHead;
-		}
-
-		public String getRequestHead() {
-			return requestHead;
-		}
-
-		public String getMerged() {
-			return merged;
-		}
-		
-		public boolean isConflict() {
-			return merged == null;
-		}
-		
-		public boolean isFastForward() {
-			return requestHead.equals(merged);
-		}
-		
 	};
 
+	public void deleteRefs() {
+		Git git = getTarget().getProject().code();
+		git.deleteRef(getHeadRef());
+		git.deleteRef(getMergeRef());
+	}
+	
+	public String getLockName() {
+		return "pull request: " + getId();
+	}
 }

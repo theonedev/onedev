@@ -15,9 +15,9 @@ import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Branch;
+import com.pmease.gitop.model.MergePrediction;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
-import com.pmease.gitop.model.PullRequest.MergeResult;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
@@ -72,7 +72,7 @@ public class PreReceiveServlet extends CallbackServlet {
 		request.setTarget(branch);
 		request.setSubmitter(user);
 		request.setTitle("Faked pull request to check against push gatekeeper");
-		request.setMergeResult(new MergeResult(oldCommitHash, newCommitHash, newCommitHash));
+		request.setMergePrediction(new MergePrediction(oldCommitHash, newCommitHash, newCommitHash));
 		
 		PullRequestUpdate update = new PullRequestUpdate();
 		update.setRequest(request);

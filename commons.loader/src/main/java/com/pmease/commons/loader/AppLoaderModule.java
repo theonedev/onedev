@@ -1,9 +1,17 @@
 package com.pmease.commons.loader;
 
 import java.util.Collection;
+import java.util.concurrent.Executor;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import javax.inject.Singleton;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
+import com.google.inject.Provider;
 import com.google.inject.multibindings.Multibinder;
 
 public class AppLoaderModule extends AbstractModule {
@@ -30,6 +38,26 @@ public class AppLoaderModule extends AbstractModule {
 			}
 			
 		});
+	    
+	    bind(EventBus.class).toProvider(new Provider<EventBus>() {
+
+			@Override
+			public EventBus get() {
+				return new EventBus();
+			}
+	    	
+	    }).in(Singleton.class);
+
+	    bind(Executor.class).toProvider(new Provider<Executor>() {
+
+			@Override
+			public Executor get() {
+				return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+			            300L, TimeUnit.SECONDS,
+			            new SynchronousQueue<Runnable>());
+			}
+	    	
+	    }).in(Singleton.class);
 	}
 
 	private static abstract interface DummyInterface {
