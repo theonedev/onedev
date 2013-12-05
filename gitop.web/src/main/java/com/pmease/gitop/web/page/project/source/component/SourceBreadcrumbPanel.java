@@ -3,7 +3,6 @@ package com.pmease.gitop.web.page.project.source.component;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -24,6 +23,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.pmease.commons.git.Git;
@@ -68,7 +68,7 @@ public class SourceBreadcrumbPanel extends AbstractSourcePagePanel {
 		add(revSelector);
 		revSelector.add(new Label("rev", Model.of(getRevision())));
 		
-		DropdownPanel dropdown = new DropdownPanel("dropdown", false) {
+		DropdownPanel dropdown = new DropdownPanel("dropdown", true) {
 
 			@Override
 			protected Component newContent(String id) {
@@ -205,7 +205,7 @@ public class SourceBreadcrumbPanel extends AbstractSourcePagePanel {
 
 					@Override
 					public String getObject() {
-						return StringUtils.equalsIgnoreCase(getRevision(), ref) ? "checked" : "unchecked";
+						return Objects.equal(getRevision(), ref) ? "checked" : "unchecked";
 					}
 				}));
 				

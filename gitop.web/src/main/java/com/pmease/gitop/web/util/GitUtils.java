@@ -21,9 +21,13 @@ public class GitUtils {
     	return PATTERN_HASH.matcher(sha).matches();
     }
     
-	public static String getShortSha(String sha) {
-		Preconditions.checkArgument(isHash(sha));
-		return sha.substring(0, SHORT_SHA_LENGTH);
+    public static String abbreviateSHA(String sha, int length) {
+        Preconditions.checkArgument(isHash(sha));
+        return sha.substring(0, length);
+    }
+
+	public static String abbreviateSHA(String sha) {
+		return abbreviateSHA(sha, SHORT_SHA_LENGTH);
 	}
 	
 	public static String getCommitSummary(Commit commit) {

@@ -4,10 +4,15 @@
 		<div class="commit">
 			<pre class="short-message" wicket:id="shortMessage"></pre>
 			<div class="commit-meta clearfix">
-				<div class="commit-author">
-					<span class="author-name" wicket:id="author"></span> authored <time class="age" wicket:id="author-date"></time>
+				<div class="persons text-muted left">
+					<div class="author"><span class="name" wicket:id="author"></span> authored <time class="age" wicket:id="author-date"></time></div>
+					<wicket:enclosure child="committer">
+					<div class="committer">
+						<i class="icon icon-long-arrow-right"></i> <span class="name" wicket:id="committer"></span> committed <time class="age" wicket:id="committer-date"></time>
+					</div>
+					</wicket:enclosure>
 				</div>
-				<div class="commit-hash">
+				<div class="commit-hash right">
 					<a wicket:id="commitlink">latest commit <span wicket:id="sha" class="sha"></span></a>
 				</div>
 			</div>

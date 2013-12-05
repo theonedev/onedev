@@ -1,5 +1,6 @@
 package com.pmease.gitop.web.page.project.settings;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -16,18 +17,20 @@ import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.pmease.commons.git.Git;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.component.messenger.Messenger;
 import com.pmease.gitop.web.common.component.vex.AjaxConfirmLink;
 import com.pmease.gitop.web.common.form.FeedbackPanel;
-import com.pmease.gitop.web.common.form.flatcheckbox.FlatCheckBoxElement;
+import com.pmease.gitop.web.common.form.checkbox.CheckBoxElement;
 import com.pmease.gitop.web.common.form.select.DropDownChoiceElement;
 import com.pmease.gitop.web.common.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
+import com.pmease.gitop.web.util.GitUtils;
 
 @SuppressWarnings("serial")
 public class ProjectOptionsPage extends AbstractProjectSettingPage {
@@ -41,7 +44,6 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 		return Category.OPTIONS;
 	}
 	
-	private String defaultBranch;
 	private String projectName;
 	
 	@Override
@@ -78,7 +80,7 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 				.add(new PropertyValidator<String>())
 				.setRequired(false));
 		
-		form.add(new FlatCheckBoxElement("forkable", "Allow Forks",
+		form.add(new CheckBoxElement("forkable", "Allow Forks",
 				new PropertyModel<Boolean>(projectModel, "forkable"),
 				Model.of("Enable/Disable whether this repository can be forked by others")));
 		
@@ -86,16 +88,22 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 
 			@Override
 			public List<String> getObject() {
-				// TODO: get branches from projectManager
-				return ImmutableList.<String>of();
+				Project project = getProject();
+				Git git = project.code();
+				if (GitUtils.hasCommits(git.repoDir())) {
+					return Lists.newArrayList(git.listBranches());
+				} else {
+					return Collections.emptyList();
+				}
 			}
 		};
 		
 		form.add(new DropDownChoiceElement<String>(
 				"defaultBranch", 
 				"Default Branch",
-				new PropertyModel<String>(this, "defaultBranch"),
-				branchesModel));
+				new PropertyModel<String>(projectModel, "defaultBranchName"),
+				branchesModel)
+				.setHelp("Set default branch which will be displayed when " ));
 		
 		form.add(new AjaxButton("submit", form) {
 			@Override
@@ -110,6 +118,8 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 				if (nameChanged) {
 					project.setName(projectName);
 				}
+//				project.setDefaultBranchName(defaultBranch);
+				
 				Gitop.getInstance(ProjectManager.class).save(project);
 				
 				if (nameChanged) {
@@ -133,13 +143,5 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 				setResponsePage(AccountHomePage.class, PageSpec.forUser(getAccount()));
 			}
 		});
-	}
-
-	public String getDefaultBranch() {
-		return defaultBranch;
-	}
-
-	public void setDefaultBranch(String defaultBranch) {
-		this.defaultBranch = defaultBranch;
 	}
 }

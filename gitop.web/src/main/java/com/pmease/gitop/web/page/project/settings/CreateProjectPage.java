@@ -24,7 +24,7 @@ import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.GitopFacade;
+import com.pmease.gitop.web.GitopHelper;
 import com.pmease.gitop.web.common.form.FeedbackPanel;
 import com.pmease.gitop.web.common.form.select.DropDownChoiceElement;
 import com.pmease.gitop.web.common.form.textfield.TextFieldElement;
@@ -75,7 +75,10 @@ public class CreateProjectPage extends AbstractLayoutPage {
 
 					@Override
 					public List<String> getObject() {
-						List<User> users = Gitop.getInstance(GitopFacade.class).getManagableUsers(Gitop.getInstance(UserManager.class).getCurrent());
+						List<User> users = 
+								GitopHelper.getInstance()
+									.getManagableAccounts(Gitop.getInstance(UserManager.class).getCurrent());
+						
 						List<String> names = Lists.newArrayList();
 						for (User each : users) {
 							names.add(each.getName());

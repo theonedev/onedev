@@ -17,12 +17,14 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.TreeNode;
+import com.pmease.commons.git.UserInfo;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.bootstrap.Icon;
 import com.pmease.gitop.web.component.link.CommitUserLink;
@@ -85,6 +87,33 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 			
 		}));
 		
+		add(new CommitUserLink("committer", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getLastCommit().getCommitter().getName();
+			}
+		}) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				Commit commit = getLastCommit();
+				UserInfo author = commit.getAuthor();
+				UserInfo committer = commit.getCommitter();
+				this.setVisibilityAllowed(!Objects.equal(author, committer));
+			}
+		});
+		
+		add(new Label("committer-date", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return DateUtils.formatAge(getLastCommit().getCommitter().getDate());
+			}
+			
+		}));
+		
 		BookmarkablePageLink<Void> commitLink = new BookmarkablePageLink<Void>(
 				"commitlink",
 				SourceCommitPage.class,
@@ -94,7 +123,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 
 			@Override
 			public String getObject() {
-				return GitUtils.getShortSha(getLastCommit().getHash());
+				return GitUtils.abbreviateSHA(getLastCommit().getHash());
 			}
 		}));
 		
@@ -148,19 +177,20 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 			@Override
 			protected void populateItem(ListItem<TreeNode> item) {
 				TreeNode node = item.getModelObject();
-				final FileMode mode = node.getMode();
+				final int bits = node.getMode().getBits();
 				Icon icon = new Icon("icon", new AbstractReadOnlyModel<String>() {
 
 					@Override
 					public String getObject() {
+						FileMode mode = FileMode.fromBits(bits);
 						if (mode == FileMode.TREE) 
-							return "folder";
+							return "icon-folder";
 						else if (mode == FileMode.REGULAR_FILE)
-							return "file";
+							return "icon-file-general";
 						else if (mode == FileMode.GITLINK)
-							return "submodule";
+							return "icon-folder-submodule";
 						else if (mode == FileMode.SYMLINK)
-							return "symbollink-folder";
+							return "icon-folder-symlink";
 						else
 							return "";
 					}
@@ -181,6 +211,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 				}
 				
 				AbstractLink link;
+				FileMode mode = node.getMode();
 				if (mode == FileMode.TREE) {
 					link = new BookmarkablePageLink<Void>("file", SourceTreePage.class, params);
 				} else {

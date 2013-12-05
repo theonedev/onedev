@@ -13,6 +13,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.base.Strings;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.User;
+import com.pmease.gitop.web.GitopWebApp;
 
 @StatelessComponent
 public class AvatarImage extends Panel {
@@ -46,7 +47,7 @@ public class AvatarImage extends Panel {
 	private Component createAvatarImage() {
 		if (imageType == AvatarImageType.USER) {
 			User user = (User) getDefaultModelObject();
-			if (Strings.isNullOrEmpty(user.getAvatarUrl())) {
+			if (GitopWebApp.get().isGravatarEnabled() && Strings.isNullOrEmpty(user.getAvatarUrl())) {
 				return (new GravatarImage("avatar", Model.of(user)));
 			} else {
 				PageParameters params = new PageParameters();
