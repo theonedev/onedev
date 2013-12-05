@@ -100,9 +100,6 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 
 			@Override
 			public Void call() throws Exception {
-				if (!request.isOpen())
-					return null;
-				
 				Git git = request.getTarget().getProject().code();
 				String branchHead = request.getTarget().getHeadCommit();
 				String requestHead = request.getLatestUpdate().getHeadCommit();
@@ -194,10 +191,8 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 
 			@Override
 			public Void call() throws Exception {
-				if (request.isOpen()) {
-					request.setStatus(Status.DECLINED);
-					save(request);
-				} 
+				request.setStatus(Status.DECLINED);
+				save(request);
 				return null;
 			}
 			
@@ -209,11 +204,11 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 
 			@Override
 			public Void call() throws Exception {
-				if (!request.isOpen()) {
-					request.setAutoMerge(false);
-					request.setStatus(Status.PENDING_MERGE);
-					save(request);
-				}
+				request.setStatus(Status.PENDING_CHECK);
+				request.setMergePrediction(null);
+				request.setCheckResult(null);
+				save(request);
+				
 				return null;
 			}
 		});
@@ -253,7 +248,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 	}
 	
 	@Subscribe
-	public void checkUpon(EntityEvent entityEvent) {
+	public void refreshUpon(EntityEvent entityEvent) {
 		if (entityEvent.getEntity() instanceof Vote) {
 			Vote vote = (Vote) entityEvent.getEntity();
 			if (vote.getUpdate().getRequest().isOpen())
@@ -272,7 +267,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 	}
 	
 	@Subscribe
-	public void checkUpon(BranchRefUpdateEvent event) {
+	public void refreshUpon(BranchRefUpdateEvent event) {
 		for (final PullRequest request: event.getBranch().getIngoingRequests()) {
 			if (request.isOpen()) {
 				executor.execute(new Runnable() {
