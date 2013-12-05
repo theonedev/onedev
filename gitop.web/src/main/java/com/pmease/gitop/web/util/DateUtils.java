@@ -25,7 +25,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
     public static final String AGE = "age";
 
     static enum DurationUnit {
-        year, month, week, day, hour, minute, second
+        YEAR, MONTH, WEEK, DAY, HOUR, MINUTE, SECOND
     }
 
     static String formatAge(DateTime dtBefore, DateTime dtNow) {
@@ -44,12 +44,24 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         int days = Days.daysBetween(dtBefore.toDateMidnight(),
                 dtNow.toDateMidnight()).getDays();
 
-        if (years > 0 || months > 0 || weeks > 0 || days > 6) {
-            return DateUtils.formatDate(dtBefore.toDate(), fullDateFormat);
-        }
+//        if (years > 0 || months > 0 || weeks > 0 || days > 6) {
+//            return DateUtils.formatDate(dtBefore.toDate(), fullDateFormat);
+//        }
 
+        if (years > 0) {
+        	return formatDurationPart(years, DurationUnit.YEAR);
+        }
+        
+        if (months > 0) {
+        	return formatDurationPart(months, DurationUnit.MONTH);
+        }
+        
+        if (weeks > 0) {
+        	return formatDurationPart(weeks, DurationUnit.WEEK);
+        }
+        
         if (days > 1) {
-            return formatDurationPart(days, DurationUnit.day);
+            return formatDurationPart(days, DurationUnit.DAY);
         }
 
         // acutal hours
@@ -59,28 +71,39 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 
         if ((hours >= DateTimeConstants.HOURS_PER_DAY)
                 || (days == 1 && hours > 12)) {
-            return formatDurationPart(days, DurationUnit.day);
+            return formatDurationPart(days, DurationUnit.DAY);
         }
 
         if (hours > 0) {
-            return formatDurationPart(hours, DurationUnit.hour);
+            return formatDurationPart(hours, DurationUnit.HOUR);
         }
 
         int minutes = period.getMinutes();
         if (minutes > 0) {
-            return formatDurationPart(minutes, DurationUnit.minute);
+            return formatDurationPart(minutes, DurationUnit.MINUTE);
         }
-        return formatDurationPart(period.getSeconds(), DurationUnit.second);
+        return formatDurationPart(period.getSeconds(), DurationUnit.SECOND);
     }
 
     private static String formatDurationPart(int dur, DurationUnit unit) {
-        if (unit == DurationUnit.second && dur < 5) { // < 30 seconds
+        if (unit == DurationUnit.SECOND && dur < 30) { // < 30 seconds
             return "just now";
         }
 
         StringBuffer sb = new StringBuffer();
-        sb.append("about ").append(dur).append(" ").append(unit);
-        ;
+        
+        if (dur == 1) {
+        	if (unit == DurationUnit.HOUR) {
+        		sb.append("an");
+        	} else {
+        		sb.append("a");
+        	}
+        } else {
+        	sb.append(dur);
+        }
+        
+        sb.append(" ").append(unit.name().toLowerCase());
+        
         if (dur > 1) {
             sb.append("s");
         }

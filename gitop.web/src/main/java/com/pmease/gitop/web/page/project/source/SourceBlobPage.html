@@ -2,7 +2,39 @@
 <wicket:extend>
 	<div class="padder">
 		<div wicket:id="breadcrumb"></div>
-		<h2>This is the file content</h2>
+		
+		<section class="source-blob">
+			<div class="last-commit">
+				<div class="commit-message">
+					<pre wicket:id="shortMessage"></pre>
+				</div>
+				<div class="persons text-muted">
+					<div class="author">
+						<span class="name" wicket:id="author"></span> authored <time class="age" wicket:id="author-date"></time>
+					</div>
+				</div>
+				<div class="participants rounded-bottom">
+					<b wicket:id="contributorStat">2</b> contributors
+					<wicket:container wicket:id="contributors">
+						<span wicket:id="link"></span>
+					</wicket:container>
+					<wicket:enclosure child="more">
+						and more <a wicket:id="more" href="javascript:void(0)"><i class="icon icon-arrow-slim-right"></i></a>
+						<div wicket:id="moreDropdown"></div>
+					</wicket:enclosure>
+				</div>
+			</div>
+			
+			<h2>This is the file content</h2>
+		</section>
 	</div>
+	
+	<wicket:fragment wicket:id="committers-dropdown">
+		<div class="popup-content">
+			<ul class="committer-list menu-ul">
+				<li class="menu-item" wicket:id="committers"><span wicket:id="committer"></span></li>
+			</ul>
+		</div>
+	</wicket:fragment>
 </wicket:extend>
 </html>

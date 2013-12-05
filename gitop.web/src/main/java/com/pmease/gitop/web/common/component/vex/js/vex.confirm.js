@@ -13,7 +13,7 @@
 				var cssClassName = $this.data('confirm-css-class') || '';
 
 				vex.dialog.confirm({
-					message : "<div class='vex-dialog-icon'><i class='fa vex-icon icon-type-" + icon + "'></i></div> " + messageLabel,
+					message : "<div class='vex-dialog-icon'><i class='icon vex-icon icon-type-" + icon + "'></i></div> " + messageLabel,
 					callback : function(data) {
 						if (data)
 							$this.trigger('vex.confirm');

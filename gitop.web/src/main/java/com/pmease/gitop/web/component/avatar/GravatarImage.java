@@ -4,8 +4,6 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.image.NonCachingImage;
 import org.apache.wicket.model.IModel;
 
-import com.google.common.base.Preconditions;
-import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.GitopWebApp;
 import com.pmease.gitop.web.util.Gravatar;
 
@@ -13,16 +11,17 @@ public class GravatarImage extends NonCachingImage {
 
   private static final long serialVersionUID = 1L;
 
-  public GravatarImage(String id, IModel<User> model) {
-    super(id, model);
+  public GravatarImage(String id, IModel<String> emailModel) {
+    super(id, emailModel);
   }
 
+  static final int GRAVAR_IMAGE_SIZE = 256; 
+  
   @Override
   protected void onComponentTag(ComponentTag tag) {
-    User user = (User) getDefaultModelObject();
-    Preconditions.checkNotNull(user);
-    if (GitopWebApp.get().isGravatarEnabled()) {
-      tag.put("src", Gravatar.getURL(user.getEmail(), 256));
+    String email = (String) getDefaultModelObject();
+    if (email != null && GitopWebApp.get().isGravatarEnabled()) {
+      tag.put("src", Gravatar.getURL(email, GRAVAR_IMAGE_SIZE));
     } else {
       tag.put("src", "assets/img/empty-avatar.jpg");
     }

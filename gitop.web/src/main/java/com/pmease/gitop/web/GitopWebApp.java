@@ -327,7 +327,7 @@ public class GitopWebApp extends AbstractWicketConfig {
 	}
 	
 	public boolean isGravatarEnabled() {
-		return false;
+		return true;
 	}
 
 	public boolean isPublicSignupEnabled() {

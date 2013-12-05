@@ -1,8 +1,10 @@
 <html xmlns:wicket>
 <wicket:panel>
 	<section class="source-tree">
-		<div class="commit">
-			<pre class="short-message" wicket:id="shortMessage"></pre>
+		<div class="last-commit">
+			<div class="commit-message">
+				<pre wicket:id="shortMessage"></pre>
+			</div>
 			<div class="commit-meta clearfix">
 				<div class="persons text-muted left">
 					<div class="author"><span class="name" wicket:id="author"></span> authored <time class="age" wicket:id="author-date"></time></div>
