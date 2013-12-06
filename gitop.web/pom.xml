@@ -125,6 +125,12 @@
 			<artifactId>reflections</artifactId>
 			<version>0.9.8</version>
 		</dependency>
+		
+		<dependency>
+		    <groupId>org.apache.tika</groupId>
+		    <artifactId>tika-core</artifactId>
+		    <version>${tika.version}</version>
+		</dependency>
     </dependencies>
       
     <repositories> 
@@ -159,6 +165,7 @@
     </repositories>  
     <properties> 
         <moduleClass>com.pmease.gitop.web.WebModule</moduleClass>  
-        <owsi-core.version>0.8.6-SNAPSHOT</owsi-core.version> 
+        <owsi-core.version>0.8.6-SNAPSHOT</owsi-core.version>
+        <tika.version>1.4</tika.version> 
     </properties> 
 </project>

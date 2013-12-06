@@ -2,6 +2,7 @@ package com.pmease.gitop.web.page.project.source.component;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -27,12 +28,13 @@ import com.pmease.commons.git.TreeNode;
 import com.pmease.commons.git.UserInfo;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.bootstrap.Icon;
-import com.pmease.gitop.web.component.link.CommitUserLink;
+import com.pmease.gitop.web.component.label.AgeLabel;
+import com.pmease.gitop.web.component.link.GitUserLink;
 import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.project.api.GitPerson;
 import com.pmease.gitop.web.page.project.source.SourceBlobPage;
 import com.pmease.gitop.web.page.project.source.SourceCommitPage;
 import com.pmease.gitop.web.page.project.source.SourceTreePage;
-import com.pmease.gitop.web.util.DateUtils;
 import com.pmease.gitop.web.util.GitUtils;
 import com.pmease.gitop.web.util.UrlUtils;
 
@@ -71,27 +73,27 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 			}
 		}));
 		
-		add(new CommitUserLink("author", new AbstractReadOnlyModel<String>() {
+		add(new GitUserLink("author", new AbstractReadOnlyModel<GitPerson>() {
 			@Override
-			public String getObject() {
-				return getLastCommit().getAuthor().getName();
+			public GitPerson getObject() {
+				return GitPerson.of(getLastCommit().getAuthor());
 			}
 		}));
 
-		add(new Label("author-date", new AbstractReadOnlyModel<String>() {
+		add(new AgeLabel("author-date", new AbstractReadOnlyModel<Date>() {
 
 			@Override
-			public String getObject() {
-				return DateUtils.formatAge(getLastCommit().getAuthor().getDate());
+			public Date getObject() {
+				return getLastCommit().getAuthor().getDate();
 			}
 			
 		}));
 		
-		add(new CommitUserLink("committer", new AbstractReadOnlyModel<String>() {
+		add(new GitUserLink("committer", new AbstractReadOnlyModel<GitPerson>() {
 
 			@Override
-			public String getObject() {
-				return getLastCommit().getCommitter().getName();
+			public GitPerson getObject() {
+				return GitPerson.of(getLastCommit().getCommitter());
 			}
 		}) {
 			@Override
@@ -105,11 +107,11 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 			}
 		});
 		
-		add(new Label("committer-date", new AbstractReadOnlyModel<String>() {
+		add(new AgeLabel("committer-date", new AbstractReadOnlyModel<Date>() {
 
 			@Override
-			public String getObject() {
-				return DateUtils.formatAge(getLastCommit().getCommitter().getDate());
+			public Date getObject() {
+				return getLastCommit().getCommitter().getDate();
 			}
 			
 		}));
@@ -178,6 +180,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 			protected void populateItem(ListItem<TreeNode> item) {
 				TreeNode node = item.getModelObject();
 				final int bits = node.getMode().getBits();
+				final String path = node.getPath();
 				Icon icon = new Icon("icon", new AbstractReadOnlyModel<String>() {
 
 					@Override
@@ -189,8 +192,13 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 							return "icon-file-general";
 						else if (mode == FileMode.GITLINK)
 							return "icon-folder-submodule";
-						else if (mode == FileMode.SYMLINK)
-							return "icon-folder-symlink";
+						else if (mode == FileMode.SYMLINK) {
+							Git git = getProject().code();
+							if (git.isTreeLink(path, getRevision()))
+								return "icon-folder-symlink";
+							else
+								return "icon-file-symlink";
+						}
 						else
 							return "";
 					}

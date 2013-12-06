@@ -1,5 +1,6 @@
 package com.pmease.gitop.web.page.project.source.component;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -30,10 +31,12 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitop.model.Project;
+import com.pmease.gitop.web.common.bootstrap.Icon;
 import com.pmease.gitop.web.common.component.tab.BootstrapTabbedPanel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.source.ProjectHomePage;
 import com.pmease.gitop.web.page.project.source.SourceTreePage;
+import com.pmease.gitop.web.util.GitUtils;
 
 @SuppressWarnings("serial")
 public class SourceBreadcrumbPanel extends AbstractSourcePagePanel {
@@ -53,10 +56,26 @@ public class SourceBreadcrumbPanel extends AbstractSourcePagePanel {
 				Git git = getProject().code();
 				Map<RefType, List<String>> map = Maps.newHashMapWithExpectedSize(RefType.values().length);
 				map.put(RefType.BRANCH, Lists.newArrayList(git.listBranches()));
-				map.put(RefType.TAG, Lists.newArrayList(git.listTags()));
+				List<String> tags = Lists.newArrayList(git.listTags());
+				Collections.reverse(tags);
+				map.put(RefType.TAG, tags);
 				return map;
 			}
 		};
+	}
+	
+	private RefType getRevisionType(String revision) {
+		Map<RefType, List<String>> map = refsModel.getObject();
+		for (RefType each : RefType.values()) {
+			List<String> list = map.get(each);
+			for (String ref : list) {
+				if (ref.equalsIgnoreCase(revision)) {
+					return each;
+				}
+			}
+		}
+		
+		return null;
 	}
 	
 	@Override
@@ -66,7 +85,36 @@ public class SourceBreadcrumbPanel extends AbstractSourcePagePanel {
 		WebMarkupContainer revSelector = new WebMarkupContainer("revselector");
 		revSelector.setOutputMarkupId(true);
 		add(revSelector);
-		revSelector.add(new Label("rev", Model.of(getRevision())));
+		revSelector.add(new Label("rev", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				String revision = getRevision();
+				RefType type = getRevisionType(revision);
+				if (type == null) {
+					return GitUtils.abbreviateSHA(revision);
+				} else {
+					return revision;
+				}
+			}
+			
+		}));
+		revSelector.add(new Icon("reftype", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				String revision = getRevision();
+				RefType type = getRevisionType(revision);
+				if (type == null) {
+					return "icon-commit";
+				} else if (type == RefType.BRANCH) {
+					return "icon-git-branch";
+				} else {
+					return "icon-git-tag";
+				}
+			}
+			
+		}));
 		
 		DropdownPanel dropdown = new DropdownPanel("dropdown", true) {
 

@@ -9,7 +9,7 @@
 .menu-item.unchecked:hover i.icon-check { visibility: visible; color: #666; }
 
 ul.f-dropdown { padding: 0; }
-.popup-content { width: 300px; }
+.popup-content { width: 300px; padding: 10px; }
 
 .v-middle { vertical-align: middle; }
 .table thead > tr > th.v-middle, 
@@ -343,25 +343,32 @@ ul.repo-actions { margin: 8px 4px 8px 0; padding: 0; list-style: none; }
 
 .description-editor input.form-control { width: 300px; }
 
-.breadcrumb-paths { font-size: 16px; background: transparent; }
+.file-navigator { margin-bottom: 18px; }
+.breadcrumb-paths { font-size: 16px; background: transparent; margin: 0; }
 .breadcrumb-paths em { font-style: normal; font-weight: bold; color: #333; }
 .breadcrumb-paths > li+li:before {
   color: #999; font-weight: bold;
 }
 
 .source-tree { border: 1px solid #ddd; border-radius: 4px; }
-.source-tree .commit { background: #f2f2f2; border-radius: 4px 4px 0 0; }
-pre.short-message { background: transparent; border: none; margin: 0; padding: 8px 15px; }
+.source-tree .last-commit { background: #f2f2f2; border-radius: 4px 4px 0 0; }
+.source-tree .commit-message { padding: 8px 15px; }
+.commit-message > pre { background: transparent; border: none; margin: 0; padding: 0; }
 .commit-meta { background: #fff; padding: 8px 15px; border-top: 1px solid #ddd; font-size: 0.857143em; }
-.commit-meta .persons .name { color: #666; font-weight: bold;}
-.commit-meta .persons .committer { padding-left: 30px; }
+.persons .name { color: #666; font-weight: bold;}
+.source-tree .persons .committer { padding-left: 20px; }
 
 .commit-hash { font-family: monospace, serif;  }
 .commit-hash > a { color: #999; }
 .commit-hash > a .sha { color: #555; }
 
-.commitish-list { max-height: 400px; padding: 10px 0; overflow: auto; }
+.commitish-list, .menu-ul { max-height: 400px; padding: 10px 0; overflow: auto; }
 
 table.files { margin: 0; }
 table.files td.file-icon { width: 18px; padding-right: 2px; padding-left: 15px; color: #888; }
 
+.source-blob .last-commit { background: #f2f2f2; border-radius: 4px; border: 1px solid #ddd; }
+.source-blob .commit-message { border: none; margin: 0; padding: 8px 15px; background: transparent; }
+.source-blob .persons { padding: 8px 15px;}
+.source-blob .participants { padding: 8px 15px; background: white; border-radius: 0 0 4px 4px; border-top: 1px solid #ddd; }
+.participants .avatar { margin-left: 4px; }

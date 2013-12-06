@@ -7,11 +7,11 @@
  * -------------------------- */
 @font-face {
   font-family: 'gitop-icons';
-  src: url('../fonts/gitop-icons-regular-webfont.eot?v=1.0.6.10');
-  src: url('../fonts/gitop-icons-regular-webfont.eot?#iefix&v=1.0.6.10') format('embedded-opentype'), 
-  	   url('../fonts/gitop-icons-regular-webfont.woff?v=1.0.6.10') format('woff'), 
-  	   url('../fonts/gitop-icons-regular-webfont.ttf?v=1.0.6.10') format('truetype'), 
-  	   url('../fonts/gitop-icons-regular-webfont.svg?v=1.0.6.10#gitop-iconsregular') format('svg');
+  src: url('../fonts/gitop-icons-regular-webfont.eot?v=1.0.6.11');
+  src: url('../fonts/gitop-icons-regular-webfont.eot?#iefix&v=1.0.6.11') format('embedded-opentype'), 
+  	   url('../fonts/gitop-icons-regular-webfont.woff?v=1.0.6.11') format('woff'), 
+  	   url('../fonts/gitop-icons-regular-webfont.ttf?v=1.0.6.11') format('truetype'), 
+  	   url('../fonts/gitop-icons-regular-webfont.svg?v=1.0.6.11#gitop-iconsregular') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -100,9 +100,11 @@
 .icon-refresh:before { content: "\F042"; }
 
 .icon-repeat:before { content: "\F043"; }
+.icon-reset:before,
+.icon-undo:before { content: "\F044"; }
 
-.icon-login:before { content: "\F044"; }
-.icon-logout:before { content: "\F045"; }
+.icon-login:before { content: "\F045"; }
+.icon-logout:before { content: "\F046"; }
 
 .icon-full-size:before { content: "\F047"; }
 .icon-normal-size:before { content: "\F048"; }
@@ -163,7 +165,6 @@
 .icon-check-mark:before { content: "\F075"; }
 
 .icon-attachment:before { content: "\F077"; }
-.icon-reset:before { content: "\F078"; }
 .icon-rss:before { content: "\F080"; }
 
 .icon-add-circle:before,
@@ -222,6 +223,7 @@
 
 .icon-commit:before { content: "\F107"; }
 .icon-news:before { content: "\F108"; }
+.icon-more:before,
 .icon-ellipse:before { content: "\F109"; }
 
 .icon-wiki:before,
@@ -244,8 +246,12 @@
 .icon-os-linux:before { content: "\F122"; }
 .icon-os-android:before { content: "\F123"; }
 
-.icon-slim-plus-round-o:before { content: "\F130"; }
-.icon-slim-remove-round-o:before { content: "\F131"; }
+.icon-slim-plus-round-o:before,
+.icon-expand-o:before { content: "\F130"; }
+.icon-slim-remove-round-o:before,
+.icon-collapse:before { content: "\F131"; }
+
+.icon-flag:before { content: "\F135"; }
 
 .icon-git-branch:before { content: "\F200"; }
 .icon-git-branch-add:before { content: "\F201"; }
@@ -265,9 +271,9 @@
 .icon-repo-unlock:before { content: "\F215"; }
 .icon-repo-pull:before { content: "\F216"; }
 .icon-repo-push:before { content: "\F217"; }
-.icon-repo-sync:before { content: "\F218"; }
-.icon-repo-force-push:before { content: "\F219"; }
-.icon-repo-clone:before { content: "\F21A"; }
+.icon-repo-force-push:before { content: "\F218"; }
+.icon-repo-clone:before { content: "\F219"; }
+.icon-repo-sync:before { content: "\F21A"; }
 
 .icon-file-add:before { content: "\F220"; }
 .icon-file-binary:before { content: "\F221"; }

@@ -8,7 +8,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.Git;
 import com.pmease.gitop.web.page.PageSpec;
@@ -33,13 +35,21 @@ public abstract class AbstractFilePage extends ProjectCategoryPage {
 				if (Strings.isNullOrEmpty(objectId)) {
 					String branchName = getProject().getDefaultBranchName();
 					if (Strings.isNullOrEmpty(branchName)) {
-						rev = "master";
+						Git git = getProject().code();
+						List<String> branches = Lists.newArrayList(git.listBranches());
+						if (branches.contains("master")) {
+							rev = "master";
+						} else {
+							rev = Iterables.getFirst(branches, null);
+						}
 					} else {
 						rev = branchName;
 					}
 				} else {
 					rev = objectId;
 				}
+
+				Preconditions.checkState(rev != null);
 				
 				Git git = getProject().code();
 				String hash = git.resolveRef(rev, false);

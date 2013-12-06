@@ -260,12 +260,13 @@
 .vex.vex-theme-wireframe .vex-content { border: 4px solid #666; border-radius: 4px; padding: 0; background: white; max-width: 90%; min-width: 500px; }
 .vex-dialog-form { position: relative; padding: 0; }
 .vex-dialog-message { positon: relative; padding: 24px 1em 1em 80px; min-height: 80px; }
-.vex-dialog-icon { position: absolute; left: 24px; top: 12px; font-size: 48px; }
-.vex-icon.icon-type-question:before { color: #008bee;  content: "\f059"; }
-.vex-icon.icon-type-info:before { color: #008bee; content: "\f05a"; }
-.vex-icon.icon-type-warning:before { content: "\f06a"; color: #ff9500; }
-.vex-icon.icon-type-error:before { content: "\f057"; color: #ff2a68; }
-.vex-icon.icon-type-success:before { content: "\f058"; color: #64da38; }
+.vex-dialog-icon { position: absolute; left: 24px; top: 12px; }
+.vex-dialog-icon > .vex-icon { font-size: 48px; }
+.vex-icon.icon-type-question:before { color: #008bee;  content: "\f08C"; }
+.vex-icon.icon-type-info:before { color: #008bee; content: "\f08B"; }
+.vex-icon.icon-type-warning:before { content: "\f08F"; color: #ff9500; }
+.vex-icon.icon-type-error:before { content: "\f082"; color: #ff2a68; }
+.vex-icon.icon-type-success:before { content: "\f08A"; color: #64da38; }
 
 .vex-dialog-buttons { text-align: left;  white-space: nowrap; overflow: hidden; }
 .vex.vex-theme-wireframe .vex-dialog-button { margin: 0; width: 50%; font-size: 0.8em; padding: 10px 0; border-radius: 0; }

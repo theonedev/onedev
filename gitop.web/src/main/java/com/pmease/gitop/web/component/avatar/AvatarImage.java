@@ -48,7 +48,7 @@ public class AvatarImage extends Panel {
 		if (imageType == AvatarImageType.USER) {
 			User user = (User) getDefaultModelObject();
 			if (GitopWebApp.get().isGravatarEnabled() && Strings.isNullOrEmpty(user.getAvatarUrl())) {
-				return (new GravatarImage("avatar", Model.of(user)));
+				return (new GravatarImage("avatar", Model.of(user.getEmail())));
 			} else {
 				PageParameters params = new PageParameters();
 				params.set("type", AvatarImageType.USER.name().toLowerCase());
