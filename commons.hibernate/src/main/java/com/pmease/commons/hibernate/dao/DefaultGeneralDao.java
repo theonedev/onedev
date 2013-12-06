@@ -13,7 +13,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Projections;
 
-import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -36,8 +35,7 @@ public class DefaultGeneralDao implements GeneralDao, Serializable {
 	
 	@Inject
 	public DefaultGeneralDao(Provider<SessionFactory> sessionFactoryProvider, 
-			Provider<Session> sessionProvider, EventBus eventBus, 
-			AsyncEventBus asyncEventBus) {
+			Provider<Session> sessionProvider, EventBus eventBus) {
 		this.sessionFactoryProvider = sessionFactoryProvider;
 		this.sessionProvider = sessionProvider;
 		this.eventBus = eventBus;

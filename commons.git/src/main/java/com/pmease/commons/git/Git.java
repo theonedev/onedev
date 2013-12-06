@@ -128,12 +128,12 @@ public class Git implements Serializable {
 	}
 	
 	public Git clone(String from, boolean bare, boolean shared, boolean noCheckout, @Nullable String branch) {
-		new CloneCommand(repoDir).from(from).bare(bare).call();
+		new CloneCommand(repoDir).from(from).bare(bare).noCheckout(noCheckout).branch(branch).call();
 		return this;
 	}
 
 	public Git clone(String from, boolean bare) {
-		return clone(from, bare, false, false, null);
+		return clone(from, bare, false, true, null);
 	}
 	
 	public Git reset(@Nullable String mode, @Nullable String commit) {
@@ -235,6 +235,18 @@ public class Git implements Serializable {
 		return new CalcMergeBaseCommand(repoDir).rev1(rev1).rev2(rev2).call();
 	}
 	
+	/**
+	 * Check if specified param <tt>ancestor</tt> is ancestor of specified param <tt>descendant</tt>.
+	 * 
+	 * @param ancestor
+	 * 			ancestor to be checked
+	 * @param descendant
+	 * 			descendant to be checked 
+	 * @return
+	 * 			<tt>true</tt> if first param is ancestor of second param, <tt>false</tt> if either 
+	 * 			revision does not exist in repository, or if first param is not ancestor of second 
+	 * 			param
+	 */
 	public boolean isAncestor(String ancestor, String descendant) {
 		return new IsAncestorCommand(repoDir).ancestor(ancestor).descendant(descendant).call();
 	}

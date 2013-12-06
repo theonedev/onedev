@@ -14,7 +14,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 		@UniqueConstraint(columnNames={"from", "to"})
 })
 @SuppressWarnings("serial")
-public class AutoPush extends AbstractEntity {
+public class BranchSync extends AbstractEntity {
 
 	@ManyToOne
 	@JoinColumn(nullable=false)
@@ -23,6 +23,12 @@ public class AutoPush extends AbstractEntity {
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private Branch to;
+	
+	@ManyToOne
+	private User pusher;
+	
+	@ManyToOne
+	private User puller;
 	
 	public Branch getFrom() {
 		return from;
@@ -36,10 +42,26 @@ public class AutoPush extends AbstractEntity {
 		return to;
 	}
 
-	public void setBranch(Branch to) {
+	public void setTo(Branch to) {
 		this.to = to;
 	}
 	
+	public User getPusher() {
+		return pusher;
+	}
+
+	public void setPusher(User pusher) {
+		this.pusher = pusher;
+	}
+
+	public User getPuller() {
+		return puller;
+	}
+
+	public void setPuller(User puller) {
+		this.puller = puller;
+	}
+
 	@Override
 	public String toString() {
 		return Objects.toStringHelper(this)

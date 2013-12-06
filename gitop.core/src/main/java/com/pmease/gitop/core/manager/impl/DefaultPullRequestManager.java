@@ -1,7 +1,9 @@
 package com.pmease.gitop.core.manager.impl;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 
@@ -9,6 +11,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
@@ -25,6 +28,7 @@ import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.LockUtils;
 import com.pmease.gitop.core.event.BranchRefUpdateEvent;
 import com.pmease.gitop.core.manager.PullRequestManager;
+import com.pmease.gitop.core.manager.PullRequestUpdateManager;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.BuildResult;
@@ -46,6 +50,8 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 
 	private final VoteInvitationManager voteInvitationManager;
 	
+	private final PullRequestUpdateManager pullRequestUpdateManager;
+	
 	private final UnitOfWork unitOfWork;
 	
 	private final EventBus eventBus;
@@ -54,9 +60,11 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 	
 	@Inject
 	public DefaultPullRequestManager(GeneralDao generalDao, VoteInvitationManager voteInvitationManager,
-			UnitOfWork unitOfWork, EventBus eventBus, Executor executor) {
+			PullRequestUpdateManager pullRequestUpdateManager, UnitOfWork unitOfWork, EventBus eventBus, 
+			Executor executor) {
 		super(generalDao);
 		this.voteInvitationManager = voteInvitationManager;
+		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.unitOfWork = unitOfWork;
 		this.eventBus = eventBus;
 		this.executor = executor;
@@ -65,15 +73,19 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 
 	@Sessional
 	@Override
-	public PullRequest findOpen(Branch target, Branch source, User submitter) {
+	public PullRequest findOpen(Branch target, Branch source) {
 		Criterion statusCriterion =
 				Restrictions.and(
 						Restrictions.not(Restrictions.eq("status", PullRequest.Status.MERGED)),
 						Restrictions.not(Restrictions.eq("status", PullRequest.Status.DECLINED))
 					);
 
-		return find(Restrictions.eq("target", target), Restrictions.eq("source", source),
-				Restrictions.eq("submitter", submitter), statusCriterion);
+		Criterion[] criterions = new Criterion[]{
+				Restrictions.eq("target", target), 
+				Restrictions.eq("source", source),
+				statusCriterion};
+		
+		return find(criterions, new Order[]{Order.desc("id")});
 	}
 
 	@Transactional
@@ -289,8 +301,49 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 				});
 			}
 		}
-	}
 
+		// Calculates most recent open pull request for each branch. Note that although 
+		// we do not allow multiple opened requests for a single branch, there still 
+		// exist some chances multiple requests are opening for same branch, so we need 
+		// to handle this case here.
+		Map<Branch, PullRequest> branchRequests = new HashMap<Branch, PullRequest>();
+		for (PullRequest request: event.getBranch().getOutgoingRequests()) {
+			if (request.isOpen()) {
+				PullRequest branchRequest = branchRequests.get(request.getTarget());
+				if (branchRequest == null)
+					branchRequests.put(request.getTarget(), request);
+				else if (request.getId() > branchRequest.getId())
+					branchRequests.put(request.getTarget(), request);
+			}
+		}
+		
+		for (final PullRequest request: branchRequests.values()) {
+			executor.execute(new Runnable() {
+
+				@Override
+				public void run() {
+					unitOfWork.call(new Callable<Void>() {
+
+						@Override
+						public Void call() throws Exception {
+							// Reload request to avoid Hibernate LazyInitializationException
+							pullRequestUpdateManager.update(request);
+							return null;
+						}
+						
+					});
+				}
+				
+			});
+		}
+
+		/*
+		for (BranchSync sync: event.getBranch().getSyncTos()) {
+			
+		}
+		*/
+	}
+	
 	@Sessional
 	@Override
 	public List<PullRequest> findByCommit(String commit) {
@@ -298,5 +351,25 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 				Restrictions.eq("mergeResult.requestHead", commit), 
 				Restrictions.eq("mergeResult.merged", commit)));
 	}
+
+	@Transactional
+	@Override
+	public void create(String title, Branch target, Branch source, User submitter, boolean autoMerge) {
+		if (!target.equals(source)) {
+			PullRequest request = new PullRequest();
+			request.setAutoMerge(autoMerge);
+			request.setSource(source);
+			request.setTarget(target);
+			request.setSubmitter(submitter);
+			request.setTitle(title);
 	
+			save(request);
+			
+			pullRequestUpdateManager.update(request);
+			
+			if (request.getUpdates().isEmpty())
+				delete(request);
+		}
+	}
+
 }

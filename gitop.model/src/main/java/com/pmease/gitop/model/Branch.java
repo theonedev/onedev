@@ -31,10 +31,10 @@ public class Branch extends AbstractEntity {
 	private String name;
 
 	@OneToMany(mappedBy="to", cascade=CascadeType.REMOVE)
-	private Collection<AutoPull> autoPulls = new ArrayList<AutoPull>();
+	private Collection<BranchSync> syncFroms = new ArrayList<BranchSync>();
 
 	@OneToMany(mappedBy="from", cascade=CascadeType.REMOVE)
-	private Collection<AutoPush> autoPushes = new ArrayList<AutoPush>();
+	private Collection<BranchSync> syncTos = new ArrayList<BranchSync>();
 
     @OneToMany(mappedBy="target", cascade=CascadeType.REMOVE)
     private Collection<PullRequest> ingoingRequests = new ArrayList<PullRequest>();
@@ -60,20 +60,20 @@ public class Branch extends AbstractEntity {
 		this.name = name;
 	}
 	
-	public Collection<AutoPull> getAutoPulls() {
-		return autoPulls;
+	public Collection<BranchSync> getSyncFroms() {
+		return syncFroms;
 	}
 
-	public void setAutoPulls(Collection<AutoPull> autoPulls) {
-		this.autoPulls = autoPulls;
+	public void setSyncFroms(Collection<BranchSync> syncFroms) {
+		this.syncFroms = syncFroms;
 	}
 
-	public Collection<AutoPush> getAutoPushes() {
-		return autoPushes;
+	public Collection<BranchSync> getSyncTos() {
+		return syncTos;
 	}
 
-	public void setAutoPushes(Collection<AutoPush> autoPushes) {
-		this.autoPushes = autoPushes;
+	public void setSyncTos(Collection<BranchSync> syncTos) {
+		this.syncTos = syncTos;
 	}
 
 	public Collection<PullRequest> getIngoingRequests() {

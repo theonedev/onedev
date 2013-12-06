@@ -36,7 +36,6 @@ public class PullRequestUpdate extends AbstractEntity {
 	@OneToMany(mappedBy="update", cascade=CascadeType.REMOVE)
 	private Collection<Vote> votes = new ArrayList<Vote>();
 	
-	
 	private transient String baseCommit;
 	
 	public PullRequest getRequest() {

@@ -14,7 +14,7 @@ import com.pmease.gitop.model.User;
 @ImplementedBy(DefaultPullRequestManager.class)
 public interface PullRequestManager extends GenericDao<PullRequest> {
     
-    @Nullable PullRequest findOpen(Branch target, Branch source, User user);
+    @Nullable PullRequest findOpen(Branch target, Branch source);
     
     void refresh(PullRequest request);
     
@@ -33,4 +33,6 @@ public interface PullRequestManager extends GenericDao<PullRequest> {
      * 			collection of matching pull requests
      */
     List<PullRequest> findByCommit(String commit);
+    
+    void create(String title, Branch target, Branch source, User user, boolean autoMerge);
 }
