@@ -35,10 +35,6 @@ public class PullRequest extends AbstractEntity {
 
 	@ManyToOne
 	@JoinColumn(nullable = false)
-	private User submitter;
-
-	@ManyToOne
-	@JoinColumn(nullable = false)
 	private Branch target;
 
 	@ManyToOne
@@ -89,11 +85,7 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	public User getSubmitter() {
-		return submitter;
-	}
-
-	public void setSubmitter(User submitter) {
-		this.submitter = submitter;
+		return getSource().getProject().getOwner();
 	}
 
 	public Branch getTarget() {

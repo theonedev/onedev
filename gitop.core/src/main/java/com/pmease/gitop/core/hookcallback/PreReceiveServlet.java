@@ -70,7 +70,9 @@ public class PreReceiveServlet extends CallbackServlet {
 
 		PullRequest request = new PullRequest();
 		request.setTarget(branch);
-		request.setSubmitter(user);
+		request.setSource(new Branch());
+		request.getSource().setProject(new Project());
+		request.getSource().getProject().setOwner(user);
 		request.setTitle("Faked pull request to check against push gatekeeper");
 		request.setMergePrediction(new MergePrediction(oldCommitHash, newCommitHash, newCommitHash));
 		

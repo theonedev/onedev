@@ -30,11 +30,17 @@ public class Branch extends AbstractEntity {
 	@Column(nullable=false)
 	private String name;
 
-	@OneToMany(mappedBy="to", cascade=CascadeType.REMOVE)
-	private Collection<BranchSync> syncFroms = new ArrayList<BranchSync>();
+	@OneToMany(mappedBy="target", cascade=CascadeType.REMOVE)
+	private Collection<AutoPull> autoPullSources = new ArrayList<AutoPull>();
 
-	@OneToMany(mappedBy="from", cascade=CascadeType.REMOVE)
-	private Collection<BranchSync> syncTos = new ArrayList<BranchSync>();
+	@OneToMany(mappedBy="source", cascade=CascadeType.REMOVE)
+	private Collection<AutoPull> autoPullTargets = new ArrayList<AutoPull>();
+
+	@OneToMany(mappedBy="target", cascade=CascadeType.REMOVE)
+	private Collection<AutoPush> autoPushSources = new ArrayList<AutoPush>();
+
+	@OneToMany(mappedBy="source", cascade=CascadeType.REMOVE)
+	private Collection<AutoPush> autoPushTargets = new ArrayList<AutoPush>();
 
     @OneToMany(mappedBy="target", cascade=CascadeType.REMOVE)
     private Collection<PullRequest> ingoingRequests = new ArrayList<PullRequest>();
@@ -60,20 +66,36 @@ public class Branch extends AbstractEntity {
 		this.name = name;
 	}
 	
-	public Collection<BranchSync> getSyncFroms() {
-		return syncFroms;
+	public Collection<AutoPull> getAutoPullSources() {
+		return autoPullSources;
 	}
 
-	public void setSyncFroms(Collection<BranchSync> syncFroms) {
-		this.syncFroms = syncFroms;
+	public void setAutoPullSources(Collection<AutoPull> autoPullSources) {
+		this.autoPullSources = autoPullSources;
 	}
 
-	public Collection<BranchSync> getSyncTos() {
-		return syncTos;
+	public Collection<AutoPull> getAutoPullTargets() {
+		return autoPullTargets;
 	}
 
-	public void setSyncTos(Collection<BranchSync> syncTos) {
-		this.syncTos = syncTos;
+	public void setAutoPullTargets(Collection<AutoPull> autoPullTargets) {
+		this.autoPullTargets = autoPullTargets;
+	}
+
+	public Collection<AutoPush> getAutoPushSources() {
+		return autoPushSources;
+	}
+
+	public void setAutoPushSources(Collection<AutoPush> autoPushSources) {
+		this.autoPushSources = autoPushSources;
+	}
+
+	public Collection<AutoPush> getAutoPushTargets() {
+		return autoPushTargets;
+	}
+
+	public void setAutoPushTargets(Collection<AutoPush> autoPushTargets) {
+		this.autoPushTargets = autoPushTargets;
 	}
 
 	public Collection<PullRequest> getIngoingRequests() {
