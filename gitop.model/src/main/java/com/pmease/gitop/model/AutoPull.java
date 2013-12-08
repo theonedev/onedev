@@ -9,6 +9,13 @@ import javax.persistence.UniqueConstraint;
 import com.google.common.base.Objects;
 import com.pmease.commons.hibernate.AbstractEntity;
 
+/**
+ * Auto-pull is set up by owner of target branch project to sync target branch
+ * head with source branch whenever there is new commit in source branch. 
+ * Unlike git pull command, it will override target branch head even if source 
+ * branch is not fast-forward of target branch.
+ *  
+ */
 @Entity
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"source", "target"})

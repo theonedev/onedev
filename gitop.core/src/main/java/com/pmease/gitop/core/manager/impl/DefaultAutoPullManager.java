@@ -6,6 +6,7 @@ import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +22,7 @@ import com.pmease.gitop.core.event.BranchRefUpdateEvent;
 import com.pmease.gitop.core.manager.AutoPullManager;
 import com.pmease.gitop.model.AutoPull;
 import com.pmease.gitop.model.Branch;
+import com.pmease.gitop.model.permission.ObjectPermission;
 
 @Singleton
 public class DefaultAutoPullManager extends AbstractGenericDao<AutoPull> 
@@ -47,36 +49,41 @@ public class DefaultAutoPullManager extends AbstractGenericDao<AutoPull>
 	@Subscribe
 	public void pullUpon(BranchRefUpdateEvent event) {
 		for (final AutoPull autoPull: event.getBranch().getAutoPullTargets()) {
-			executor.execute(new Runnable() {
-
-				@Override
-				public void run() {
-					try {
-						unitOfWork.call(new Callable<Void>() {
+			Subject subject = autoPull.getTarget().getProject().getUser().asSubject();
+			if (subject.isPermitted(ObjectPermission.ofProjectRead(autoPull.getSource().getProject()))) {
+				executor.execute(new Runnable() {
 	
-							@Override
-							public Void call() throws Exception {
-								// Reload to avoid Hibernate LazyInitializationException
-								AutoPull reloaded = load(autoPull.getId());
-								Branch source = reloaded.getSource();
-								Branch target = reloaded.getTarget();
-								Git git = target.getProject().code();
-								String commit = source.getProject().code().parseRevision(source.getHeadRef(), true);
-								git.updateRef(target.getHeadRef(), commit, null, "Auto pull");
+					@Override
+					public void run() {
+						try {
+							unitOfWork.call(new Callable<Void>() {
+		
+								@Override
+								public Void call() throws Exception {
+									// Reload to avoid Hibernate LazyInitializationException
+									AutoPull reloaded = load(autoPull.getId());
+									Branch source = reloaded.getSource();
+									Branch target = reloaded.getTarget();
+									Git git = target.getProject().code();
+									String commit = source.getProject().code().parseRevision(source.getHeadRef(), true);
+									git.updateRef(target.getHeadRef(), commit, null, "Branch sync");
+									
+									eventBus.post(new BranchRefUpdateEvent(target));
+									
+									return null;
+								}
 								
-								eventBus.post(new BranchRefUpdateEvent(target));
-								
-								return null;
-							}
-							
-						});
-					} catch(Exception e) {
-						logger.error("Error performing auto-pull.", e);
-						throw ExceptionUtils.unchecked(e);
+							});
+						} catch(Exception e) {
+							logger.error("Error performing branch sync.", e);
+							throw ExceptionUtils.unchecked(e);
+						}
 					}
-				}
-				
-			});
+					
+				});
+			} else {
+				logger.error("Permission denied syncing from " + autoPull.getSource() + " to " + autoPull.getTarget());
+			}
 		}
 	}
 }

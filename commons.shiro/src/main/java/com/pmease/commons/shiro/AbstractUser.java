@@ -9,6 +9,7 @@ import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
+import org.apache.shiro.web.mgt.WebSecurityManager;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.AbstractEntity;
@@ -49,14 +50,15 @@ public abstract class AbstractUser extends AbstractEntity implements Authenticat
     public PrincipalCollection getPrincipals() {
         return new SimplePrincipalCollection(getId(), "");
     }
-
+    
     @Override
     public Object getCredentials() {
         return passwordHash;
     }
 
     public Subject asSubject() {
-        return new Subject.Builder().principals(asPrincipal(getId())).buildSubject();
+    	WebSecurityManager securityManager = AppLoader.getInstance(WebSecurityManager.class);
+        return new Subject.Builder(securityManager).principals(asPrincipal(getId())).buildSubject();
     }
 
     public static Long getCurrentId() {

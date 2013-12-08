@@ -9,6 +9,11 @@ import javax.persistence.UniqueConstraint;
 import com.google.common.base.Objects;
 import com.pmease.commons.hibernate.AbstractEntity;
 
+/**
+ * Auto-push is set up by owner of source branch project to push source branch
+ * changes to target branch in form of pull requests.
+ *
+ */
 @Entity
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"source", "target"})
