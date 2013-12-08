@@ -24,7 +24,7 @@ public class ParseRevisionCommand extends GitCommand<String> {
 	public String call() {
         Preconditions.checkNotNull(revision, "revision has to be specified.");
 
-        Commandline cmd = cmd().addArgs("parse-rev", "--revs-only", revision);
+        Commandline cmd = cmd().addArgs("rev-parse", "--revs-only", revision);
 		
         final String[] commit = new String[]{null};
 		cmd.execute(new LineConsumer() {
