@@ -52,7 +52,7 @@ public abstract class AbstractFilePage extends ProjectCategoryPage {
 				Preconditions.checkState(rev != null);
 				
 				Git git = getProject().code();
-				String hash = git.resolveRef(rev, false);
+				String hash = git.parseRevision(rev, false);
 				if (hash == null) {
 					throw new EntityNotFoundException("Ref " + rev + " doesn't exist");
 				} else {

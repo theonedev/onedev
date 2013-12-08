@@ -45,7 +45,7 @@ public class GitPerson implements Serializable {
 
 	public Optional<User> asUser() {
 		// TODO: find user by name or by email ?
-		User user = Gitop.getInstance(UserManager.class).findBy(getName());
+		User user = Gitop.getInstance(UserManager.class).findByName(getName());
 		return Optional.fromNullable(user);
 		//Gitop.getInstance(UserManager.class).find(Restrictions.eq("email", emailAddress));
 	}

@@ -61,7 +61,7 @@ public class DefaultAutoPullManager extends AbstractGenericDao<AutoPull>
 								Branch source = reloaded.getSource();
 								Branch target = reloaded.getTarget();
 								Git git = target.getProject().code();
-								String commit = source.getProject().code().resolveRef(source.getHeadRef(), true);
+								String commit = source.getProject().code().parseRevision(source.getHeadRef(), true);
 								git.updateRef(target.getHeadRef(), commit, null, "Auto pull");
 								
 								eventBus.post(new BranchRefUpdateEvent(target));

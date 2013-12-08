@@ -67,9 +67,9 @@ public class DefaultPullRequestUpdateManager extends AbstractGenericDao<PullRequ
 	@Override
 	public void update(PullRequest request) {
 		Git sourceGit = request.getSource().getProject().code();
-		String sourceHead = sourceGit.resolveRef(request.getSource().getHeadRef(), true);
+		String sourceHead = sourceGit.parseRevision(request.getSource().getHeadRef(), true);
 		Git targetGit = request.getTarget().getProject().code();
-		String targetHead = targetGit.resolveRef(request.getTarget().getHeadRef(), true);
+		String targetHead = targetGit.parseRevision(request.getTarget().getHeadRef(), true);
 		
 		if (!targetGit.isAncestor(sourceHead, targetHead)) {
 			PullRequestUpdate update = new PullRequestUpdate();

@@ -68,7 +68,7 @@ public class DefaultAutoPushManager extends AbstractGenericDao<AutoPush>
 								public Void call() throws Exception {
 									AutoPush reloaded = load(autoPush.getId());
 									Branch source = reloaded.getSource();
-									Commit commit = source.getProject().code().resolveRevision(source.getHeadRef());
+									Commit commit = source.getProject().code().showRevision(source.getHeadRef());
 									PullRequest request = pullRequestManager.create(
 											commit.getSubject(), reloaded.getTarget(), source, true);
 									if (request != null)

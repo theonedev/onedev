@@ -4,6 +4,7 @@ import java.io.File;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
+import com.pmease.commons.util.execution.LineConsumer;
 
 public class CommitCommand extends GitCommand<Void> {
 
@@ -44,7 +45,19 @@ public class CommitCommand extends GitCommand<Void> {
 		if (amend) 
 			cmd.addArgs("--amend");
 		
-		cmd.execute(debugLogger, errorLogger).checkReturnCode();
+		cmd.execute(debugLogger, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				if (line.startsWith("warning: "))
+					warn(line.substring("warning: ".length()));
+				else if (line.startsWith("The file will have its original line endings"))
+					warn(line);
+				else
+					error(line);
+			}
+			
+		}).checkReturnCode();
 		
 		return null;
 	}

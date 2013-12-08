@@ -77,19 +77,19 @@ public class PullRequestUpdateTest {
         PullRequestUpdate update = new PullRequestUpdate();
         update.setId(1L);
         update.setRequest(request);
-        update.setHeadCommit(bareGit.resolveRevision("dev~1").getHash());
+        update.setHeadCommit(bareGit.showRevision("dev~1").getHash());
         bareGit.updateRef(update.getHeadRef(), update.getHeadCommit(), null, null);
         request.getUpdates().add(update);
         
         update = new PullRequestUpdate();
         update.setId(2L);
         update.setRequest(request);
-        update.setHeadCommit(bareGit.resolveRevision("dev").getHash());
+        update.setHeadCommit(bareGit.showRevision("dev").getHash());
         bareGit.updateRef(update.getHeadRef(), update.getHeadCommit(), null, null);
         request.getUpdates().add(update);
 
-        Assert.assertEquals(bareGit.resolveRevision("dev~1").getHash(), request.getLatestUpdate().getBaseCommit());
-        Assert.assertEquals(bareGit.resolveRevision("master~1").getHash(), request.getSortedUpdates().get(1).getBaseCommit());
+        Assert.assertEquals(bareGit.showRevision("dev~1").getHash(), request.getLatestUpdate().getBaseCommit());
+        Assert.assertEquals(bareGit.showRevision("master~1").getHash(), request.getSortedUpdates().get(1).getBaseCommit());
     }
 
     @Test
@@ -126,21 +126,21 @@ public class PullRequestUpdateTest {
         PullRequestUpdate update = new PullRequestUpdate();
         update.setId(1L);
         update.setRequest(request);
-        update.setHeadCommit(bareGit.resolveRevision("dev~2").getHash());
+        update.setHeadCommit(bareGit.showRevision("dev~2").getHash());
         bareGit.updateRef(update.getHeadRef(), update.getHeadCommit(), null, null);
         request.getUpdates().add(update);
         
         update = new PullRequestUpdate();
         update.setId(2L);
         update.setRequest(request);
-        update.setHeadCommit(bareGit.resolveRevision("dev").getHash());
+        update.setHeadCommit(bareGit.showRevision("dev").getHash());
         bareGit.updateRef(update.getHeadRef(), update.getHeadCommit(), null, null);
         request.getUpdates().add(update);
 
-        Commit baseCommit = bareGit.resolveRevision(request.getLatestUpdate().getBaseCommit());
-        Assert.assertTrue(baseCommit.getParentHashes().contains(bareGit.resolveRevision("master").getHash()));
-        Assert.assertTrue(baseCommit.getParentHashes().contains(bareGit.resolveRevision("dev~2").getHash()));
-        Assert.assertEquals(bareGit.resolveRevision("master~1").getHash(), request.getSortedUpdates().get(1).getBaseCommit());
+        Commit baseCommit = bareGit.showRevision(request.getLatestUpdate().getBaseCommit());
+        Assert.assertTrue(baseCommit.getParentHashes().contains(bareGit.showRevision("master").getHash()));
+        Assert.assertTrue(baseCommit.getParentHashes().contains(bareGit.showRevision("dev~2").getHash()));
+        Assert.assertEquals(bareGit.showRevision("master~1").getHash(), request.getSortedUpdates().get(1).getBaseCommit());
     }
 
 }

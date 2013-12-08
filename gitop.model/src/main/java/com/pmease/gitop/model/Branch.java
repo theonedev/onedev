@@ -117,7 +117,7 @@ public class Branch extends AbstractEntity {
     public String getHeadCommit() {
     	if (headCommit == null) {
 	    	Git git = getProject().code();
-	    	headCommit = git.resolveRef(getHeadRef(), true);
+	    	headCommit = git.parseRevision(getHeadRef(), true);
     	} 
     	return headCommit;
     }

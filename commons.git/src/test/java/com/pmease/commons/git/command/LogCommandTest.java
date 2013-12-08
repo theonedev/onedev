@@ -87,8 +87,8 @@ public class LogCommandTest {
     		commits = workGit.log("dev", "master", "dir", 0);
     		assertEquals(commits.size(), 2);
 
-    		assertEquals(workGit.resolveRevision(commits.get(0).getHash()).getHash(), commits.get(0).getHash()); 
-    		assertEquals(workGit.resolveRevision(commits.get(1).getHash()).getHash(), commits.get(1).getHash()); 
+    		assertEquals(workGit.showRevision(commits.get(0).getHash()).getHash(), commits.get(0).getHash()); 
+    		assertEquals(workGit.showRevision(commits.get(1).getHash()).getHash(), commits.get(1).getHash()); 
 	    } finally {
 	        FileUtils.deleteDir(tempDir);
 	    }

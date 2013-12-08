@@ -139,7 +139,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 							request.setMergePrediction(null);
 						}
 						if (request.getMergePrediction() != null && request.getMergePrediction().getMerged() != null 
-								&& !request.getMergePrediction().getMerged().equals(git.resolveRef(mergeRef, false))) {
+								&& !request.getMergePrediction().getMerged().equals(git.parseRevision(mergeRef, false))) {
 							 // Commits for merging have not been changed since last merge, but recorded 
 							 // merge is incorrect in repository, so we have to re-merge 
 							request.setMergePrediction(null);
@@ -159,7 +159,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 								
 								if (tempGit.merge(branchHead, null, null, null)) {
 									git.fetch(tempGit.repoDir().getAbsolutePath(), "+HEAD:" + mergeRef);
-									request.setMergePrediction(new MergePrediction(branchHead, requestHead, git.resolveRef(mergeRef, true)));
+									request.setMergePrediction(new MergePrediction(branchHead, requestHead, git.parseRevision(mergeRef, true)));
 								} else {
 									request.setMergePrediction(new MergePrediction(branchHead, requestHead, null));
 								}

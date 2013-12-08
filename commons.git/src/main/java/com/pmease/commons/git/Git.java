@@ -31,6 +31,7 @@ import com.pmease.commons.git.command.ListTagsCommand;
 import com.pmease.commons.git.command.ListTreeCommand;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.git.command.MergeCommand;
+import com.pmease.commons.git.command.ParseRevisionCommand;
 import com.pmease.commons.git.command.PushCommand;
 import com.pmease.commons.git.command.RemoveCommand;
 import com.pmease.commons.git.command.ResetCommand;
@@ -102,7 +103,7 @@ public class Git implements Serializable {
 		return this;
 	}
 
-	public Commit resolveRevision(String revision) {
+	public Commit showRevision(String revision) {
 		List<Commit> commits = new LogCommand(repoDir).toRev(revision).maxCommits(1).call();
 		Preconditions.checkState(commits.size() == 1);
 		return commits.get(0);
@@ -202,32 +203,29 @@ public class Git implements Serializable {
 	}
 	
 	/**
-	 * Resolve commit hash of specified ref name. 
+	 * Parse commit hash of specified revision. 
 	 * 
-	 * @param refName
-	 * 			ref name to be resolved
+	 * @param revision
+	 * 			revision to be parsed
 	 * @param shouldExist
-	 * 			indicate whether or not the ref should already exist
+	 * 			indicate whether or not the revision should already exist
 	 * @return
-	 * 			commit hash of specified ref name, or <tt>null</tt> if ref name 
+	 * 			commit hash of specified revision, or <tt>null</tt> if revision 
 	 * 			does not exist, and <tt>shouldExist</tt> is specified as 
 	 * 			<tt>false</tt>
 	 * @throws
-	 * 			IllegalStateException if multiple refs matching specified ref 
-	 * 			name, or specified ref does not exist while <tt>shouldExist<tt>
-	 * 			is specified as <tt>true</tt>
+	 * 			IllegalStateException if specified revision does not exist 
+	 * 			while <tt>shouldExist<tt> is specified as <tt>true</tt>
 	 */
-	public @Nullable String resolveRef(String refName, boolean shouldExist) {
-		List<RefInfo> refs = showRefs(refName);
-		if (refs.isEmpty()) {
+	public @Nullable String parseRevision(String revision, boolean shouldExist) {
+		String commit = new ParseRevisionCommand(repoDir).revision(revision).call();
+		if (commit == null) {
 			if (shouldExist)
 				throw new IllegalStateException();
 			else
 				return null;
-		} else if (refs.size() == 1) {
-			return refs.get(0).getCommitHash();
 		} else {
-			throw new IllegalStateException();
+			return commit;
 		}
 	}
 
@@ -304,13 +302,19 @@ public class Git implements Serializable {
 	 * 			file for blame
 	 * @param revision
 	 * 			revision of the file for blame
+	 * @param start
+	 * 			specify start line to be included in the blame. Use <tt>-1</tt> 
+	 * 			to blame from start of the file
+	 * @param end
+	 * 			specify end line to be included in the blame. Use <tt>-1</tt> to 
+	 * 			blame to the end of file  
 	 * @return
 	 * 			list of blame objects. The blame object consists of commit information 
 	 * 			and lines associated with this commit. All lines of all blame objects
 	 * 			consist the whole file. 
 	 */
-	public List<Blame> blame(String file, String revision) {
-		return new BlameCommand(repoDir).file(file).revision(revision).call();
+	public List<Blame> blame(String file, String revision, int start, int end) {
+		return new BlameCommand(repoDir).file(file).revision(revision).start(start).end(end).call();
 	}
 
 	public boolean isBinary(String file, String revision) {
@@ -330,6 +334,11 @@ public class Git implements Serializable {
 		return new ListSubModulesCommand(repoDir).revision(revision).call();
 	}
 
+	public boolean hasCommit() {
+		return new File(repoDir, "objects").list().length > 2
+				|| new File(repoDir, "objects/pack").list().length > 0;
+	}
+	
 	@Override
 	public String toString() {
 		return repoDir.toString();

@@ -59,7 +59,7 @@ public class PullRequestTest {
         update.setId(1L);
         update.setRequest(request);
         git.updateRef(update.getHeadRef(), "HEAD", null, null);
-        update.setHeadCommit(git.resolveRef(update.getHeadRef(), true));
+        update.setHeadCommit(git.parseRevision(update.getHeadRef(), true));
         request.getUpdates().add(update);
 
         FileUtils.touchFile(new File(git.repoDir(), "c"));
@@ -70,7 +70,7 @@ public class PullRequestTest {
         update.setId(2L);
         update.setRequest(request);
         git.updateRef(update.getHeadRef(), "HEAD", null, null);
-        update.setHeadCommit(git.resolveRef(update.getHeadRef(), true));
+        update.setHeadCommit(git.parseRevision(update.getHeadRef(), true));
         request.getUpdates().add(update);
         
         Assert.assertEquals(request.getEffectiveUpdates().size(), 2);
@@ -98,7 +98,7 @@ public class PullRequestTest {
         update.setId(1L);
         update.setRequest(request);
         git.updateRef(update.getHeadRef(), "HEAD", null, null);
-        update.setHeadCommit(git.resolveRef(update.getHeadRef(), true));
+        update.setHeadCommit(git.parseRevision(update.getHeadRef(), true));
         request.getUpdates().add(update);
         
         FileUtils.touchFile(new File(git.repoDir(), "c"));
@@ -109,7 +109,7 @@ public class PullRequestTest {
         update.setId(2L);
         update.setRequest(request);
         git.updateRef(update.getHeadRef(), "HEAD", null, null);
-        update.setHeadCommit(git.resolveRef(update.getHeadRef(), true));
+        update.setHeadCommit(git.parseRevision(update.getHeadRef(), true));
         String secondRef = update.getHeadRef();
         request.getUpdates().add(update);
 
@@ -121,7 +121,7 @@ public class PullRequestTest {
         update.setId(3L);
         update.setRequest(request);
         git.updateRef(update.getHeadRef(), "HEAD", null, null);
-        update.setHeadCommit(git.resolveRef(update.getHeadRef(), true));
+        update.setHeadCommit(git.parseRevision(update.getHeadRef(), true));
         request.getUpdates().add(update);
         
         git.checkout("master", null);

@@ -36,7 +36,7 @@ public class SecurityRealm extends AbstractRealm {
 
     @Override
     protected AbstractUser getUserByName(String userName) {
-        return userManager.findBy(userName);
+        return userManager.findByName(userName);
     }
 
     @Override
