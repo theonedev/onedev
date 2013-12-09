@@ -35,9 +35,6 @@ public class User extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<Membership> memberships = new ArrayList<Membership>();
 	
-	@OneToMany(mappedBy="submitter", cascade=CascadeType.REMOVE)
-	private Collection<PullRequest> pullRequests = new ArrayList<PullRequest>();
-	
 	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
 	private Collection<Project> projects = new ArrayList<Project>();
 
@@ -139,14 +136,6 @@ public class User extends AbstractUser implements ProtectedObject {
 	public void setVoteInvitations(Collection<VoteInvitation> voteInvitations) {
 		this.voteInvitations = voteInvitations;
 	}
-
-	public Collection<PullRequest> getPullRequests() {
-        return pullRequests;
-    }
-
-    public void setPullRequests(Collection<PullRequest> pullRequests) {
-        this.pullRequests = pullRequests;
-    }
 
     @Override
 	public boolean has(ProtectedObject object) {

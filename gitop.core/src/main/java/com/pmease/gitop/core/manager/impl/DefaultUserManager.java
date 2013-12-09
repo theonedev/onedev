@@ -88,8 +88,14 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 
     @Sessional
     @Override
-    public User findBy(String userName) {
+    public User findByName(String userName) {
         return find(new Criterion[] {Restrictions.eq("name", userName)});
+    }
+
+    @Sessional
+    @Override
+    public User findByEmail(String email) {
+        return find(new Criterion[] {Restrictions.eq("email", email)});
     }
 
     @Override
@@ -120,7 +126,7 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 
             @Override
             public NamedEntity get(String name) {
-                final User user = findBy(name);
+                final User user = findByName(name);
                 if (user != null) {
                     return new NamedEntity() {
 

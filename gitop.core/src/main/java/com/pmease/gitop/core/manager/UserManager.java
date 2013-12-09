@@ -26,7 +26,17 @@ public interface UserManager extends GenericDao<User> {
 	 * @return
 	 * 			matching user, or <tt>null</tt> if not found 
 	 */
-	@Nullable User findBy(String userName);
+	@Nullable User findByName(String userName);
+	
+	/**
+	 * Find user of specified email.
+	 * <p>
+	 * @param email
+	 * 			email of the user
+	 * @return
+	 * 			matching user, or <tt>null</tt> if not found 
+	 */
+	@Nullable User findByEmail(String email);
 	
 	/**
 	 * Get current authenticated user in Shiro context, or <tt>null</tt> if not 

@@ -112,10 +112,10 @@ public class PullRequestUpdate extends AbstractEntity {
 				baseCommit = previousUpdate;
 			} else {
 				String baseRef = getBaseRef();
-				baseCommit = git.resolveRef(baseRef, false);
+				baseCommit = git.parseRevision(baseRef, false);
 
 				if (baseCommit != null) {
-					Commit commit = git.resolveRevision(baseCommit);
+					Commit commit = git.showRevision(baseCommit);
 					if (!commit.getParentHashes().contains(mergeBase) || !commit.getParentHashes().contains(previousUpdate)) 
 						baseCommit = null;
 				} 
@@ -136,7 +136,7 @@ public class PullRequestUpdate extends AbstractEntity {
 						tempGit.reset(null, null);
 						Preconditions.checkState(tempGit.merge(previousUpdate, null, "ours", null));
 						git.fetch(tempGit.repoDir().getAbsolutePath(), "+HEAD:" + baseRef);
-						baseCommit = git.resolveRef(baseRef, true);
+						baseCommit = git.parseRevision(baseRef, true);
 					} finally {
 						FileUtils.deleteDir(tempDir);
 					}

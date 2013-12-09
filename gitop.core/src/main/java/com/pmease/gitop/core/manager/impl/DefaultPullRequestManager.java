@@ -1,9 +1,7 @@
 package com.pmease.gitop.core.manager.impl;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 
@@ -13,6 +11,8 @@ import javax.inject.Singleton;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.eventbus.EventBus;
@@ -24,6 +24,7 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.util.ExceptionUtils;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.LockUtils;
 import com.pmease.gitop.core.event.BranchRefUpdateEvent;
@@ -36,7 +37,6 @@ import com.pmease.gitop.model.MergePrediction;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequest.Status;
 import com.pmease.gitop.model.PullRequestUpdate;
-import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.VoteInvitation;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
@@ -48,6 +48,8 @@ import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
 public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> implements
 		PullRequestManager {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestManager.class);
+	
 	private final VoteInvitationManager voteInvitationManager;
 	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
@@ -107,6 +109,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 	 * <li> Some one vote against it
 	 * <li> CI system reports completion of build against relevant commits
 	 */
+	@Sessional
 	public void refresh(final PullRequest request) {
 		LockUtils.call(request.getLockName(), new Callable<Void>() {
 
@@ -136,7 +139,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 							request.setMergePrediction(null);
 						}
 						if (request.getMergePrediction() != null && request.getMergePrediction().getMerged() != null 
-								&& !request.getMergePrediction().getMerged().equals(git.resolveRef(mergeRef, false))) {
+								&& !request.getMergePrediction().getMerged().equals(git.parseRevision(mergeRef, false))) {
 							 // Commits for merging have not been changed since last merge, but recorded 
 							 // merge is incorrect in repository, so we have to re-merge 
 							request.setMergePrediction(null);
@@ -156,7 +159,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 								
 								if (tempGit.merge(branchHead, null, null, null)) {
 									git.fetch(tempGit.repoDir().getAbsolutePath(), "+HEAD:" + mergeRef);
-									request.setMergePrediction(new MergePrediction(branchHead, requestHead, git.resolveRef(mergeRef, true)));
+									request.setMergePrediction(new MergePrediction(branchHead, requestHead, git.parseRevision(mergeRef, true)));
 								} else {
 									request.setMergePrediction(new MergePrediction(branchHead, requestHead, null));
 								}
@@ -198,6 +201,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 		});
 	}
 
+	@Sessional
 	public void decline(final PullRequest request) {
 		LockUtils.call(request.getLockName(), new Callable<Void>() {
 
@@ -211,6 +215,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 		});
 	}
 	
+	@Sessional
 	public void reopen(final PullRequest request) {
 		LockUtils.call(request.getLockName(), new Callable<Void>() {
 
@@ -238,6 +243,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 	 * 			<li> branch ref has just been updated in some other threads and this thread 
 	 * 				is unable to lock the reference.
 	 */
+	@Sessional
 	public boolean merge(final PullRequest request) {
 		return LockUtils.call(request.getLockName(), new Callable<Boolean>() {
 
@@ -259,6 +265,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 		});
 	}
 	
+	@Sessional
 	@Subscribe
 	public void refreshUpon(EntityEvent entityEvent) {
 		if (entityEvent.getEntity() instanceof Vote) {
@@ -278,6 +285,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 		}
 	}
 	
+	@Sessional
 	@Subscribe
 	public void refreshUpon(BranchRefUpdateEvent event) {
 		for (final PullRequest request: event.getBranch().getIngoingRequests()) {
@@ -286,62 +294,26 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 
 					@Override
 					public void run() {
-						unitOfWork.call(new Callable<Void>() {
-
-							@Override
-							public Void call() throws Exception {
-								// Reload request to avoid Hibernate LazyInitializationException
-								refresh(load(request.getId()));
-								return null;
-							}
-							
-						});
+						try {
+							unitOfWork.call(new Callable<Void>() {
+	
+								@Override
+								public Void call() throws Exception {
+										// Reload request to avoid Hibernate LazyInitializationException
+										refresh(load(request.getId()));
+										return null;
+								}
+								
+							});
+						} catch (Exception e) {
+							logger.error("Error refreshing pull request.", e);
+							throw ExceptionUtils.unchecked(e);
+						}
 					}
 					
 				});
 			}
 		}
-
-		// Calculates most recent open pull request for each branch. Note that although 
-		// we do not allow multiple opened requests for a single branch, there still 
-		// exist some chances multiple requests are opening for same branch, so we need 
-		// to handle this case here.
-		Map<Branch, PullRequest> branchRequests = new HashMap<Branch, PullRequest>();
-		for (PullRequest request: event.getBranch().getOutgoingRequests()) {
-			if (request.isOpen()) {
-				PullRequest branchRequest = branchRequests.get(request.getTarget());
-				if (branchRequest == null)
-					branchRequests.put(request.getTarget(), request);
-				else if (request.getId() > branchRequest.getId())
-					branchRequests.put(request.getTarget(), request);
-			}
-		}
-		
-		for (final PullRequest request: branchRequests.values()) {
-			executor.execute(new Runnable() {
-
-				@Override
-				public void run() {
-					unitOfWork.call(new Callable<Void>() {
-
-						@Override
-						public Void call() throws Exception {
-							// Reload request to avoid Hibernate LazyInitializationException
-							pullRequestUpdateManager.update(request);
-							return null;
-						}
-						
-					});
-				}
-				
-			});
-		}
-
-		/*
-		for (BranchSync sync: event.getBranch().getSyncTos()) {
-			
-		}
-		*/
 	}
 	
 	@Sessional
@@ -354,21 +326,26 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 
 	@Transactional
 	@Override
-	public void create(String title, Branch target, Branch source, User submitter, boolean autoMerge) {
+	public PullRequest create(String title, Branch target, Branch source, boolean autoMerge) {
 		if (!target.equals(source)) {
 			PullRequest request = new PullRequest();
 			request.setAutoMerge(autoMerge);
 			request.setSource(source);
 			request.setTarget(target);
-			request.setSubmitter(submitter);
 			request.setTitle(title);
 	
 			save(request);
 			
 			pullRequestUpdateManager.update(request);
 			
-			if (request.getUpdates().isEmpty())
+			if (request.getUpdates().isEmpty()) {
 				delete(request);
+				return null;
+			} else {
+				return request;
+			}
+		} else {
+			return null;
 		}
 	}
 

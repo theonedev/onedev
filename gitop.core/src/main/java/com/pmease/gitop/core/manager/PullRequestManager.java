@@ -9,7 +9,6 @@ import com.pmease.commons.hibernate.dao.GenericDao;
 import com.pmease.gitop.core.manager.impl.DefaultPullRequestManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.PullRequest;
-import com.pmease.gitop.model.User;
 
 @ImplementedBy(DefaultPullRequestManager.class)
 public interface PullRequestManager extends GenericDao<PullRequest> {
@@ -34,5 +33,5 @@ public interface PullRequestManager extends GenericDao<PullRequest> {
      */
     List<PullRequest> findByCommit(String commit);
     
-    void create(String title, Branch target, Branch source, User user, boolean autoMerge);
+    PullRequest create(String title, Branch target, Branch source, boolean autoMerge);
 }
