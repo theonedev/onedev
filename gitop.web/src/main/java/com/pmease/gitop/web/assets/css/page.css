@@ -353,16 +353,22 @@ ul.repo-actions { margin: 8px 4px 8px 0; padding: 0; list-style: none; }
 .source-tree { border: 1px solid #ddd; border-radius: 4px; }
 .source-tree .last-commit { background: #f2f2f2; border-radius: 4px 4px 0 0; }
 .source-tree .commit-message { padding: 8px 15px; }
-.commit-message > pre { background: transparent; border: none; margin: 0; padding: 0; }
+
+.commit-message > pre {  }
+.commit-message .title-message { display: inline-block; margin-right: 6px; background: transparent; border: none; margin: 0; padding: 0;}
+.commit-message .detailed-message {font-size: 12px; color: #666;  background: white; margin-top: 8px; }
+
 .commit-meta { background: #fff; padding: 8px 15px; border-top: 1px solid #ddd; font-size: 0.857143em; }
 .persons .name { color: #666; font-weight: bold;}
 .source-tree .persons .committer { padding-left: 20px; }
+.source-tree td.message,
+.source-tree td.age { color: #999; }
 
 .commit-hash { font-family: monospace, serif;  }
 .commit-hash > a { color: #999; }
 .commit-hash > a .sha { color: #555; }
 
-.commitish-list, .menu-ul { max-height: 400px; padding: 10px 0; overflow: auto; }
+.commitish-list .menu-ul { max-height: 400px; padding: 10px 0; overflow: auto; }
 
 table.files { margin: 0; }
 table.files td.file-icon { width: 18px; padding-right: 2px; padding-left: 15px; color: #888; }

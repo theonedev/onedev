@@ -5,6 +5,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.EntityNotFoundException;
+
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
@@ -27,6 +29,7 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.commons.git.UserInfo;
 import com.pmease.gitop.model.Project;
+import com.pmease.gitop.web.common.bootstrap.CollapseBehavior;
 import com.pmease.gitop.web.common.bootstrap.Icon;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.GitUserLink;
@@ -56,7 +59,12 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 				Git git = getProject().code();
 				List<String> paths = getPaths();
 				List<Commit> commits = git.log(null, getRevision(), Joiner.on("/").join(paths), 1);
-				return Iterables.getFirst(commits, null);
+				Commit c = Iterables.getFirst(commits, null);
+				if (c == null) {
+					throw new EntityNotFoundException("Unable to get commit for revision " + getRevision());
+				} else {
+					return c;
+				}
 			}
 		};
 	}
@@ -69,9 +77,32 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 
 			@Override
 			public String getObject() {
-				return GitUtils.getCommitSummary(getLastCommit());
+				return getLastCommit().getSubject();
 			}
 		}));
+		
+		Label detailedMsg = new Label("detailedMessage", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getLastCommit().getMessage();
+			}
+		}) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				if (Objects.equal(getLastCommit().getSubject(), getLastCommit().getMessage())) {
+					this.setVisibilityAllowed(false);
+				}
+			}
+		};
+		
+		add(detailedMsg);
+		
+		WebMarkupContainer detailedToggle = new WebMarkupContainer("detailed-toggle");
+		detailedToggle.add(new CollapseBehavior(detailedMsg));
+		add(detailedToggle);
 		
 		add(new GitUserLink("author", new AbstractReadOnlyModel<GitPerson>() {
 			@Override

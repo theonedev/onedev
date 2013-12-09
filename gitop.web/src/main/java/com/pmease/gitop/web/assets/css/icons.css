@@ -95,6 +95,7 @@
 .icon-fast-backward-circle:before { content: "\F038"; }
 .icon-fast-forward-circle:before { content: "\F039"; }
 
+.icon-back:before,
 .icon-reply:before { content: "\F040"; }
 .icon-forward:before { content: "\F041"; }
 .icon-refresh:before { content: "\F042"; }
@@ -323,6 +324,10 @@
   font-size: 1.3333333333333333em;
   line-height: 0.75em;
   vertical-align: -15%;
+}
+
+.icon-sm {
+	font-size: 0.857143em;
 }
 
 .icon-2x { font-size: 2em; }

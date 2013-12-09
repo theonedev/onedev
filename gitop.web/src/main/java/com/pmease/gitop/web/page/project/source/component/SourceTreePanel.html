@@ -3,7 +3,11 @@
 	<section class="source-tree">
 		<div class="last-commit">
 			<div class="commit-message">
-				<pre wicket:id="shortMessage"></pre>
+				<pre class="title-message inline" wicket:id="shortMessage"></pre>
+				<wicket:enclosure child="detailedMessage">
+				<a class="btn btn-mini btn-gray" href="#" wicket:id="detailed-toggle"><i class="icon icon-more"></i></a>
+				<pre class="detailed-message collapse" wicket:id="detailedMessage"></pre>
+				</wicket:enclosure>
 			</div>
 			<div class="commit-meta clearfix">
 				<div class="persons text-muted left">
@@ -23,7 +27,7 @@
 			<wicket:enclosure>
 			<tr>
 				<td class="file-icon"></td>
-				<td class="file-name"><a wicket:id="parent">..</a></td>
+				<td class="file-name"><a wicket:id="parent" title="go to up level"><i class="icon icon-back"></i> ..</a></td>
 				<td class="message"></td>
 				<td class="age"></td>
 			</tr>
