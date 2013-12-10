@@ -20,9 +20,9 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.GitopSession;
-import com.pmease.gitop.web.common.form.FeedbackPanel;
-import com.pmease.gitop.web.common.form.passwordfield.PasswordFieldElement;
-import com.pmease.gitop.web.common.form.textfield.TextFieldElement;
+import com.pmease.gitop.web.common.wicket.form.FeedbackPanel;
+import com.pmease.gitop.web.common.wicket.form.passwordfield.PasswordFieldElement;
+import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
 
 @SuppressWarnings("serial")

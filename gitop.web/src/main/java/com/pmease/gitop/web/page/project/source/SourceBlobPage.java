@@ -25,11 +25,12 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
-import com.pmease.gitop.web.common.bootstrap.CollapseBehavior;
+import com.pmease.gitop.web.common.wicket.bootstrap.CollapseBehavior;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.GitUserAvatarLink;
 import com.pmease.gitop.web.component.link.GitUserLink;
 import com.pmease.gitop.web.page.project.api.GitPerson;
+import com.pmease.gitop.web.page.project.source.component.SourceBlobPanel;
 import com.pmease.gitop.web.page.project.source.component.SourceBreadcrumbPanel;
 import com.pmease.gitop.web.util.UrlUtils;
 
@@ -71,6 +72,8 @@ public class SourceBlobPage extends AbstractFilePage {
 			}
 			
 		};
+		
+		add(new SourceBlobPanel("source", projectModel, revisionModel, pathsModel));
 	}
 
 	@Override
@@ -176,7 +179,7 @@ public class SourceBlobPage extends AbstractFilePage {
 		};
 		
 		add(moreContainer);
-		DropdownPanel panel = new DropdownPanel("moreDropdown", false) {
+		DropdownPanel panel = new DropdownPanel("moreDropdown", true) {
 
 			@Override
 			protected Component newContent(String id) {

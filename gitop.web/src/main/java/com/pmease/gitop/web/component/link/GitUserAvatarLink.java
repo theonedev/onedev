@@ -3,6 +3,7 @@ package com.pmease.gitop.web.component.link;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -62,7 +63,9 @@ public class GitUserAvatarLink extends Panel {
 				
 			}));
 			
-			link.add(new GravatarImage("avatar", Model.of(getPerson().getEmailAddress())));
+			Fragment frag = new Fragment("avatar", "avatarfrag", this);
+			frag.add(new GravatarImage("avatar", Model.of(getPerson().getEmailAddress())));
+			link.add(frag);
 		}
 	}
 	

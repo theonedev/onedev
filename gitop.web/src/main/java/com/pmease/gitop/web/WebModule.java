@@ -10,7 +10,9 @@ import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.gitop.model.validation.UserNameReservation;
 import com.pmease.gitop.web.common.soy.impl.SoyTemplateModule;
+import com.pmease.gitop.web.page.project.source.renderer.BlobRendererFactory;
 import com.pmease.gitop.web.resource.TestResource;
+import com.pmease.gitop.web.service.impl.TikaFileTypeRegistry;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -39,6 +41,10 @@ public class WebModule extends AbstractPluginModule {
 		});
 		
 		install(new SoyTemplateModule(ImmutableSet.<String>of(GitopWebApp.class.getPackage().getName())));
+		
+		install(new TikaFileTypeRegistry.Module());
+		
+		bind(BlobRendererFactory.class);
 	}
 
 }

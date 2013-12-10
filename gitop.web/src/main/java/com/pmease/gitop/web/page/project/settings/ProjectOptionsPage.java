@@ -3,9 +3,11 @@ package com.pmease.gitop.web.page.project.settings;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.bean.validation.PropertyValidator;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -22,12 +24,13 @@ import com.pmease.commons.git.Git;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.model.Project;
-import com.pmease.gitop.web.common.component.messenger.Messenger;
-import com.pmease.gitop.web.common.component.vex.AjaxConfirmLink;
-import com.pmease.gitop.web.common.form.FeedbackPanel;
-import com.pmease.gitop.web.common.form.checkbox.CheckBoxElement;
-import com.pmease.gitop.web.common.form.select.DropDownChoiceElement;
-import com.pmease.gitop.web.common.form.textfield.TextFieldElement;
+import com.pmease.gitop.web.common.quantity.Data;
+import com.pmease.gitop.web.common.wicket.component.messenger.Messenger;
+import com.pmease.gitop.web.common.wicket.component.vex.AjaxConfirmLink;
+import com.pmease.gitop.web.common.wicket.form.FeedbackPanel;
+import com.pmease.gitop.web.common.wicket.form.checkbox.CheckBoxElement;
+import com.pmease.gitop.web.common.wicket.form.select.DropDownChoiceElement;
+import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
 import com.pmease.gitop.web.util.GitUtils;
@@ -49,6 +52,25 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 	@Override
 	protected void onPageInitialize() {
 		super.onPageInitialize();
+		
+		add(new Label("location", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getProject().code().repoDir().toString();
+			}
+			
+		}));
+		
+		add(new Label("size", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				long size = FileUtils.sizeOf(getProject().code().repoDir());
+				return Data.formatBytes(size);
+			}
+			
+		}));
 		
 		projectName = getProject().getName();
 		

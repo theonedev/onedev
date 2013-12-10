@@ -368,13 +368,22 @@ ul.repo-actions { margin: 8px 4px 8px 0; padding: 0; list-style: none; }
 .commit-hash > a { color: #999; }
 .commit-hash > a .sha { color: #555; }
 
-.commitish-list .menu-ul { max-height: 400px; padding: 10px 0; overflow: auto; }
+.commitish-list .menu-ul,
+.committer-list.menu-ul { max-height: 400px; padding: 10px 0; overflow: auto; }
 
 table.files { margin: 0; }
 table.files td.file-icon { width: 18px; padding-right: 2px; padding-left: 15px; color: #888; }
 
-.source-blob .last-commit { background: #f2f2f2; border-radius: 4px; border: 1px solid #ddd; }
+/*
+ * SOURCE BLOB PAGE
+ */
+.source-blob .last-commit { background: #f2f2f2; border-radius: 4px; border: 1px solid #ddd; margin-bottom: 18px; }
 .source-blob .commit-message { border: none; margin: 0; padding: 8px 15px; background: transparent; }
 .source-blob .persons { padding: 8px 15px;}
 .source-blob .participants { padding: 8px 15px; background: white; border-radius: 0 0 4px 4px; border-top: 1px solid #ddd; }
 .participants .avatar { margin-left: 4px; }
+.blob {  border: 1px solid #ddd; border-radius: 4px; }
+.blob-head {padding: 8px 15px; border-radius: 4px 4px 0 0; background: #f4f7f9; border-bottom: 1px solid #ddd; }
+.blob-head .blob-meta { line-height: 30px; }
+.blob-meta > span + span { border-left: 1px solid #ddd; padding-left: 10px; margin-left: 5px; box-shadow: inset 1px 0 0 #fff; }
+.blob-meta > span > .icon { padding: 3px; background: white; border: 1px solid #ccc; border-right-color: #e5e5e5; border-bottom-color: #e5e5e5; border-radius: 3px;}

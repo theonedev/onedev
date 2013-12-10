@@ -6,6 +6,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.gitop.model.Project;
+import com.pmease.gitop.web.util.UrlUtils;
 
 public class AbstractSourcePagePanel extends Panel {
 	private static final long serialVersionUID = 1L;
@@ -33,6 +34,14 @@ public class AbstractSourcePagePanel extends Panel {
 	
 	protected List<String> getPaths() {
 		return pathsModel.getObject();
+	}
+	
+	protected String getJoinedPath() {
+		if (getPaths().isEmpty()) {
+			return null;
+		} else {
+			return UrlUtils.concatSegments(getPaths());
+		}
 	}
 	
 	@Override
