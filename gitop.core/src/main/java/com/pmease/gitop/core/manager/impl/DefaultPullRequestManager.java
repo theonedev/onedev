@@ -39,7 +39,6 @@ import com.pmease.gitop.model.PullRequest.Status;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.VoteInvitation;
-import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.Blocked;
 import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
 import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
@@ -169,8 +168,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 						}
 					}
 					
-					GateKeeper gateKeeper = request.getTarget().getProject().getGateKeeper();
-					request.setCheckResult(gateKeeper.check(request));
+					request.setCheckResult(request.getTarget().getProject().getGateKeeper().check(request));
 			
 					for (VoteInvitation invitation : request.getVoteInvitations()) {
 						if (!request.getCheckResult().canVote(invitation.getVoter(), request))

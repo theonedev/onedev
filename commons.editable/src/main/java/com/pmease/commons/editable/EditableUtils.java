@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -26,7 +27,7 @@ import com.pmease.commons.util.WordUtils;
 public class EditableUtils {
 	
 	/**
-	 * Get display name of specified element from description parameter of {@link Editable} annotation. 
+	 * Get display name of specified element from name parameter of {@link Editable} annotation. 
 	 * If the annotation is not defined or name parameter is not available in the annotation, the 
 	 * element name itself will be transferred to non-camel case and returned.
 	 *
@@ -52,6 +53,38 @@ public class EditableUtils {
 	}
 	
 	/**
+	 * Get category of specified element from category parameter of {@link Editable} annotation.
+	 *
+	 * @param element
+	 * 			annotated element to get category from
+	 * @return
+	 * 			category name of specified element, or <tt>null</tt> if not defined
+	 */
+	public static @Nullable String getCategory(AnnotatedElement element) {
+		Editable editable = element.getAnnotation(Editable.class);
+		if (editable != null && editable.category().trim().length() != 0)
+			return editable.category();
+		else
+			return null;
+	}
+
+	/**
+	 * Get icon of specified element from icon parameter of {@link Editable} annotation.
+	 *
+	 * @param element
+	 * 			annotated element to get icon from
+	 * @return
+	 * 			icon name of specified element, or <tt>null</tt> if not defined
+	 */
+	public static @Nullable String getIcon(AnnotatedElement element) {
+		Editable editable = element.getAnnotation(Editable.class);
+		if (editable != null && editable.icon().trim().length() != 0)
+			return editable.icon();
+		else
+			return null;
+	}
+
+	/**
 	 * Get description of specified element from description parameter of {@link Editable} annotation
 	 *
 	 * @param element
@@ -59,7 +92,7 @@ public class EditableUtils {
 	 * @return
 	 * 			defined description, or <tt>null</tt> if description can not be found
 	 */
-	public static String getDescription(AnnotatedElement element) {
+	public static @Nullable String getDescription(AnnotatedElement element) {
 		Editable editable = element.getAnnotation(Editable.class);
 		if (editable != null && editable.description().trim().length() != 0) {
 			return editable.description().trim();

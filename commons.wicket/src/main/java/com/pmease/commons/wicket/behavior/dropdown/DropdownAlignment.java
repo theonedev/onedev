@@ -1,101 +1,82 @@
 package com.pmease.commons.wicket.behavior.dropdown;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pmease.commons.loader.AppLoader;
 
 public class DropdownAlignment implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public enum IndicatorMode {SHOW, HIDE, AUTO}
+	private final AlignmentTarget target;
+	
+	private final int x, y; 
+	
+	private final int offset;
+	
+	private final boolean showIndicator;
 
-	private Component target;
-	
-	private int targetX = 0, targetY = 100, dropdownX = 0, dropdownY = 0;
-	
-	private int gap = -1;
-	
-	private IndicatorMode indicatorMode = IndicatorMode.AUTO;
-
-	public DropdownAlignment() {
-	}
-	
-	public DropdownAlignment(Component target) {
+	public DropdownAlignment(@Nullable AlignmentTarget target, int x, int y, int offset, boolean showIndicator) {
 		this.target = target;
-	}
-	
-	public DropdownAlignment(int targetX, int targetY, int dropdownX, int dropdownY) {
-		this(null, targetX, targetY, dropdownX, dropdownY);
-	}
-	
-	public DropdownAlignment(Component target, int targetX, int targetY, int dropdownX, int dropdownY) {
-		this.target = target;
-		this.targetX = targetX; this.targetY = targetY;
-		this.dropdownX = dropdownX; this.dropdownY = dropdownY;
-	}
-	
-	public int gap() {
-		return gap;
+		this.x = x;
+		this.y = y;
+		this.offset = offset;
+		this.showIndicator = showIndicator;
 	}
 
-	public DropdownAlignment gap(int gap) {
-		this.gap = gap;
-		return this;
-	}
-
-	public DropdownAlignment target(Component target) {
-		this.target = target;
-		return this;
-	}
-
-	public DropdownAlignment targetX(int targetX) {
-		this.targetX = targetX;
-		return this;
-	}
-
-	public DropdownAlignment targetY(int targetY) {
-		this.targetY = targetY;
-		return this;
-	}
-
-	public DropdownAlignment dropdownX(int dropdownX) {
-		this.dropdownX = dropdownX;
-		return this;
-	}
-
-	public DropdownAlignment dropdownY(int dropdownY) {
-		this.dropdownY = dropdownY;
-		return this;
-	}
-
-	public Component target() {
+	public AlignmentTarget getTarget() {
 		return target;
 	}
 
-	public int targetX() {
-		return targetX;
+	public int getX() {
+		return x;
 	}
 
-	public int targetY() {
-		return targetY;
+	public int getY() {
+		return y;
 	}
 
-	public int dropdownX() {
-		return dropdownX;
+	public int getOffset() {
+		return offset;
 	}
-
-	public int dropdownY() {
-		return dropdownY;
+	
+	public boolean isShowIndicator() {
+		return showIndicator;
 	}
+	
+	public String toJSON(Component trigger) {
+		ObjectMapper objectMapper = AppLoader.getInstance(ObjectMapper.class);
+		
+		Map<String, Object> alignmentSettings = new HashMap<>();
+		
+		alignmentSettings.put("offset", getOffset());
+		alignmentSettings.put("showIndicator", showIndicator);
+		if (getTarget() != null) {
+			Map<String, String> target = new HashMap<>();
+			target.put("x", String.valueOf(getTarget().getX()));
+			target.put("y", String.valueOf(getTarget().getY()));
+			if (getTarget().getComponent() != null)
+				target.put("id", getTarget().getComponent().getMarkupId());
+			else
+				target.put("id", trigger.getMarkupId());
+			alignmentSettings.put("target", target);
+		}
+		alignmentSettings.put("x", String.valueOf(getX()));
+		alignmentSettings.put("y", String.valueOf(getY()));
+		
+		try {
+			return objectMapper.writeValueAsString(alignmentSettings);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
 
-	public IndicatorMode indicatorMode() {
-		return indicatorMode;
 	}
-
-	public DropdownAlignment indicatorMode(IndicatorMode indicatorMode) {
-		this.indicatorMode = indicatorMode;
-		return this;
-	}
-
 }

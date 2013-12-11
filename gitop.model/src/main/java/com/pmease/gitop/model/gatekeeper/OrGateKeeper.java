@@ -6,10 +6,8 @@ import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.editable.annotation.TableLayout;
 import com.pmease.commons.util.trimmable.AndOrConstruct;
 import com.pmease.commons.util.trimmable.TrimUtils;
 import com.pmease.commons.util.trimmable.Trimmable;
@@ -21,8 +19,8 @@ import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
 
 @SuppressWarnings("serial")
-@Editable(name="Any Of Below Sub Gate Keeper Accepts", order=200)
-@TableLayout
+@Editable(name="Any Of Contained Conditions Are Satisfied", category=GateKeeper.CATEGORY_COMPOSITE, order=200, 
+		description="This condition will be satisfied if any of the contained conditions is satisfied.")
 public class OrGateKeeper extends AbstractGateKeeper {
 
 	private List<GateKeeper> gateKeepers = new ArrayList<GateKeeper>();
@@ -30,7 +28,6 @@ public class OrGateKeeper extends AbstractGateKeeper {
 	@Editable(name="Sub Gate Keepers")
 	@Valid
 	@NotNull
-	@Size(min=1, message="At least one element has to be added.")
 	public List<GateKeeper> getGateKeepers() {
 		return gateKeepers;
 	}

@@ -372,3 +372,18 @@ table.files td.file-icon { width: 18px; padding-right: 2px; padding-left: 15px; 
 .source-blob .persons { padding: 8px 15px;}
 .source-blob .participants { padding: 8px 15px; background: white; border-radius: 0 0 4px 4px; border-top: 1px solid #ddd; }
 .participants .avatar { margin-left: 4px; }
+
+/**
+ * GATE KEEPER SETTING PAGE
+ */
+.gate-keeper-add.well {font-size:16px;}
+.gate-keeper-add:hover, .gate-keeper-add:focus {background-color: #EBEBEB; cursor: pointer; border-color: #ADADAD;}
+.gate-keeper-selector {max-width: 600px; max-height: 600px; overflow: scroll; padding: 16px;}
+.gate-keeper-selector .icon {width: 20px; margin-right: 8px;}
+.gate-keeper-category-name {font-size: 18px; margin-bottom: 4px; border-bottom: 1px solid #CCCCCC;}
+.gate-keeper-description {font-size: 13px; color: #888888;}
+.gate-keeper-category-body {margin-bottom: 12px;}
+.gate-keeper-item {margin-bottom: 6px; padding: 4px; border: 1px solid white;}
+.gate-keeper-item:hover, .gate-keeper-item:focus {background-color: #EBEBEB; cursor: pointer; 
+		border: 1px solid #ADADAD; border-radius: 4px;}
+.gate-keeper-name {font-size: 15px; margin-top: -4px;}

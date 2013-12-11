@@ -25,6 +25,7 @@ public class AppLoaderModule extends AbstractModule {
 		 * not bound when injecting Set<ImplementationProvider>
 		 */
 		Multibinder<ImplementationProvider> binder = Multibinder.newSetBinder(binder(), ImplementationProvider.class);
+		
 	    binder.addBinding().toInstance(new ImplementationProvider() {
 			
 			@Override

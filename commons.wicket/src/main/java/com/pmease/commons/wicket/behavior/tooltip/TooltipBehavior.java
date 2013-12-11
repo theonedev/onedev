@@ -11,9 +11,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
 
+import com.pmease.commons.wicket.behavior.dropdown.AlignmentTarget;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownAlignment;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownResourceReference;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownAlignment.IndicatorMode;
 
 public class TooltipBehavior extends Behavior {
 
@@ -21,7 +21,8 @@ public class TooltipBehavior extends Behavior {
 
 	private final IModel<String> contentModel;
 	
-	private DropdownAlignment alignment = new DropdownAlignment(50, 0, 50, 100).indicatorMode(IndicatorMode.SHOW);
+	private DropdownAlignment alignment = new DropdownAlignment(
+			new AlignmentTarget(null, 50, 0), 50, 100, -1, true);
 	
 	public TooltipBehavior(IModel<String> contentModel) {
 		this.contentModel = contentModel;
@@ -37,16 +38,20 @@ public class TooltipBehavior extends Behavior {
 	}
 
 	/**
-	 * Specify how the dropdown panel is aligned to the target. 
+	 * Specify how the tooltip is aligned to the target. 
+	 * 
 	 * @param alignment
 	 * 			The {@link DropdownAlignment alignment} setting object. 
 	 * @return
 	 * 			This behavior.
 	 */
-	public TooltipBehavior setAlignment(DropdownAlignment alignment) {
+	public TooltipBehavior alignment(DropdownAlignment alignment) {
 		this.alignment = alignment;
-		if (alignment.target() != null)
-			alignment.target().setOutputMarkupId(true);
+		if (alignment != null 
+				&& alignment.getTarget() != null 
+				&& alignment.getTarget().getComponent() != null) {
+			alignment.getTarget().getComponent().setOutputMarkupId(true);
+		}
 		return this;
 	}
 
@@ -57,11 +62,8 @@ public class TooltipBehavior extends Behavior {
 		
 		String escapedContent = StringEscapeUtils.escapeEcmaScript(StringEscapeUtils.escapeHtml4(contentModel.getObject()));
 		String script = String.format(
-				"setupDropdown('%s', '<div class=\\'tooltip\\' id=\\'%s-dropdown\\'><div class=\\'content\\'>%s</div></div>', 0, '%s', '%s', %s, %s, %s, %s, %d, undefined)", 
-				component.getMarkupId(), component.getMarkupId(), escapedContent, alignment.indicatorMode().name(), 
-				alignment.target()!=null?alignment.target().getMarkupId():component.getMarkupId(), 
-				alignment.targetX(), alignment.targetY(), alignment.dropdownX(), alignment.dropdownY(), 
-				alignment.gap());
+				"setupDropdown('%s', '<div class=\\'tooltip\\' id=\\'%s-dropdown\\'><div class=\\'content\\'>%s</div></div>', 0, %s, undefined)", 
+				component.getMarkupId(), component.getMarkupId(), escapedContent, alignment.toJSON(component));
 		response.render(OnDomReadyHeaderItem.forScript(script));
 		
 		response.render(CssHeaderItem.forReference(new CssResourceReference(TooltipBehavior.class, "tooltip.css")));
