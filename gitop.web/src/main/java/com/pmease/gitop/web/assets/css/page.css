@@ -387,3 +387,15 @@ table.files td.file-icon { width: 18px; padding-right: 2px; padding-left: 15px; 
 .blob-head .blob-meta { line-height: 30px; }
 .blob-meta > span + span { border-left: 1px solid #ddd; padding-left: 10px; margin-left: 5px; box-shadow: inset 1px 0 0 #fff; }
 .blob-meta > span > .icon { padding: 3px; background: white; border: 1px solid #ccc; border-right-color: #e5e5e5; border-bottom-color: #e5e5e5; border-radius: 3px;}
+
+.blob-body { border-top: 1px solid #bbb; }
+.blob-image, .blob-general { background: #eee; text-align: center; padding: 30px; }
+.blob-image img { border: 1px solid #666; background: #fff; }
+
+.blob-body { width: 100%; overflow: auto; }
+.table-blob td { vertical-align: top; line-height: 18px; }
+.table-blob pre { padding: 0; background: transparent; border: none; margin: 0; }
+.blob-code pre code {background: transparent; padding: 0; font-family: Consolas, "Liberation Mono", Courier, monospace; font-size: 12px; line-height: 18px; } 
+.table-blob td.blob-lineno { padding: 9px 5px 9px 15px; border-right: 1px solid #ddd; font-size: 12px; font-family: Consolas, "Liberation Mono", Courier, monospace; line-height: 18px; }
+.table-blob td.blob-code { padding: 9px 9px 9px 12px; }
+.blob-lineno a { display: block; color: #999; text-align: right; }

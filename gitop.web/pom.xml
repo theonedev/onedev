@@ -152,9 +152,15 @@
 			<exclusions>
 				<exclusion>
 					<groupId>org.eclipse.jgit</groupId>
-                    <artifactId>org.eclipse.jgit</artifactId>
+					<artifactId>org.eclipse.jgit</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-yaml</artifactId>
+			<version>2.2.3</version>
 		</dependency>
 
 	</dependencies>

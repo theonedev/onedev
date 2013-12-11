@@ -83,6 +83,8 @@ import com.pmease.gitop.web.page.project.source.SourceTreePage;
 import com.pmease.gitop.web.page.project.source.TagsPage;
 import com.pmease.gitop.web.page.project.source.renderer.ImageBlobResource;
 import com.pmease.gitop.web.page.project.source.renderer.ImageBlobResourceReference;
+import com.pmease.gitop.web.page.project.source.renderer.RawBlobResource;
+import com.pmease.gitop.web.page.project.source.renderer.RawBlobResourceReference;
 import com.pmease.gitop.web.page.project.stats.ProjectForksPage;
 import com.pmease.gitop.web.page.project.stats.ProjectGraphsPage;
 import com.pmease.gitop.web.page.project.wiki.ProjectWikiPage;
@@ -329,6 +331,9 @@ public class GitopWebApp extends AbstractWicketConfig {
 		
 		getSharedResources().add(ImageBlobResourceReference.IMAGE_BLOB_RESOURCE, new ImageBlobResource());
 		mountResource("imageblob/${project}/${objectId}", new ImageBlobResourceReference());
+		
+		getSharedResources().add(RawBlobResourceReference.RAW_BLOB_RESOURCE, new RawBlobResource());
+		mountResource("rawblob/${project}/${objectId}", new RawBlobResourceReference());
 	}
 	
 	public boolean isGravatarEnabled() {

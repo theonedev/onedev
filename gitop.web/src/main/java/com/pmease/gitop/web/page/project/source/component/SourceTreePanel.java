@@ -219,8 +219,6 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 						FileMode mode = FileMode.fromBits(bits);
 						if (mode == FileMode.TREE) 
 							return "icon-folder";
-						else if (mode == FileMode.REGULAR_FILE)
-							return "icon-file-general";
 						else if (mode == FileMode.GITLINK)
 							return "icon-folder-submodule";
 						else if (mode == FileMode.SYMLINK) {
@@ -229,9 +227,8 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 								return "icon-folder-symlink";
 							else
 								return "icon-file-symlink";
-						}
-						else
-							return "";
+						} else 
+							return "icon-file-general";
 					}
 				});
 				
