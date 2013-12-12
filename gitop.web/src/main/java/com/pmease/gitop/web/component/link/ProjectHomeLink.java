@@ -5,7 +5,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.gitop.model.Project;
-import com.pmease.gitop.web.common.component.link.LinkPanel;
+import com.pmease.gitop.web.common.wicket.component.link.LinkPanel;
 import com.pmease.gitop.web.page.PageSpec;
 
 public class ProjectHomeLink extends LinkPanel {

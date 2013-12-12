@@ -1,5 +1,10 @@
 <html xmlns:wicket>
 <wicket:panel>
-	<a wicket:id="link" data-toggle="tooltip"><span class="avatar"><img wicket:id="avatar" /></span></a>
+	<a wicket:id="link" data-toggle="tooltip"><span class="avatar"><wicket:container wicket:id="avatar"></wicket:container></span></a>
+	
+	<wicket:fragment wicket:id="avatarfrag">
+		<img wicket:id="avatar" />
+	</wicket:fragment>
+	
 </wicket:panel>
 </html>

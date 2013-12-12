@@ -17,6 +17,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -24,10 +25,12 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.gitop.web.common.wicket.bootstrap.CollapseBehavior;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.GitUserAvatarLink;
 import com.pmease.gitop.web.component.link.GitUserLink;
 import com.pmease.gitop.web.page.project.api.GitPerson;
+import com.pmease.gitop.web.page.project.source.component.SourceBlobPanel;
 import com.pmease.gitop.web.page.project.source.component.SourceBreadcrumbPanel;
 import com.pmease.gitop.web.util.UrlUtils;
 
@@ -37,7 +40,7 @@ public class SourceBlobPage extends AbstractFilePage {
 	private final IModel<Commit> lastCommitModel;
 	private final IModel<List<GitPerson>> committersModel;
 	
-	private final static int MAX_DISPLAYED_COMMITTERS = 25;
+	private final static int MAX_DISPLAYED_COMMITTERS = 20;
 	
 	public SourceBlobPage(PageParameters params) {
 		super(params);
@@ -69,6 +72,8 @@ public class SourceBlobPage extends AbstractFilePage {
 			}
 			
 		};
+		
+		add(new SourceBlobPanel("source", projectModel, revisionModel, pathsModel));
 	}
 
 	@Override
@@ -85,21 +90,28 @@ public class SourceBlobPage extends AbstractFilePage {
 			}
 		}));
 		
-//		add(new CommitUserLink("author", new AbstractReadOnlyModel<String>() {
-//			@Override
-//			public String getObject() {
-//				return getLastCommit().getAuthor().getName();
-//			}
-//		}));
-//
-//		add(new Label("author-date", new AbstractReadOnlyModel<String>() {
-//
-//			@Override
-//			public String getObject() {
-//				return DateUtils.formatAge(getLastCommit().getAuthor().getDate());
-//			}
-//			
-//		}));
+		Label detailedMsg = new Label("detailedMessage", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getLastCommit().getMessage();
+			}
+		}) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				if (Objects.equal(getLastCommit().getSubject(), getLastCommit().getMessage())) {
+					this.setVisibilityAllowed(false);
+				}
+			}
+		};
+		
+		add(detailedMsg);
+		
+		WebMarkupContainer detailedToggle = new WebMarkupContainer("detailed-toggle");
+		detailedToggle.add(new CollapseBehavior(detailedMsg));
+		add(detailedToggle);
 		
 		add(new GitUserLink("author", new AbstractReadOnlyModel<GitPerson>() {
 
@@ -167,7 +179,7 @@ public class SourceBlobPage extends AbstractFilePage {
 		};
 		
 		add(moreContainer);
-		DropdownPanel panel = new DropdownPanel("moreDropdown", false) {
+		DropdownPanel panel = new DropdownPanel("moreDropdown", true) {
 
 			@Override
 			protected Component newContent(String id) {

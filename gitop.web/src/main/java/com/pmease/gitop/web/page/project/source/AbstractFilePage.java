@@ -13,6 +13,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.Git;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.ProjectCategoryPage;
 
@@ -32,16 +33,13 @@ public abstract class AbstractFilePage extends ProjectCategoryPage {
 				PageParameters params = AbstractFilePage.this.getPageParameters();
 				String objectId = params.get(PageSpec.OBJECT_ID).toString();
 				String rev;
+				Project project = getProject();
 				if (Strings.isNullOrEmpty(objectId)) {
-					String branchName = getProject().getDefaultBranchName();
+					String branchName = project.getDefaultBranchName();
 					if (Strings.isNullOrEmpty(branchName)) {
-						Git git = getProject().code();
+						Git git = project.code();
 						List<String> branches = Lists.newArrayList(git.listBranches());
-						if (branches.contains("master")) {
-							rev = "master";
-						} else {
-							rev = Iterables.getFirst(branches, null);
-						}
+						rev = Iterables.getFirst(branches, null);
 					} else {
 						rev = branchName;
 					}

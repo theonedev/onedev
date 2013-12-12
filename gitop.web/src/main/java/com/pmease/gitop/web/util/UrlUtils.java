@@ -114,6 +114,10 @@ public class UrlUtils {
 		return sb.toString();
 	}
 
+	public static String concatSegments(List<String> segments) {
+		return concatSegments(Iterables.toArray(segments, String.class));
+	}
+	
 	public static String concatSegments(String base, String... segments) {
 		List<String> list = Lists.newArrayList();
 		list.add(base);

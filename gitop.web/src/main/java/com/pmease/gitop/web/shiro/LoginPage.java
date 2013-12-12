@@ -12,8 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pmease.gitop.web.GitopSession;
-import com.pmease.gitop.web.common.form.FeedbackPanel;
-import com.pmease.gitop.web.common.form.checkbox.CheckBoxElement;
+import com.pmease.gitop.web.common.wicket.form.FeedbackPanel;
+import com.pmease.gitop.web.common.wicket.form.checkbox.CheckBoxElement;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;

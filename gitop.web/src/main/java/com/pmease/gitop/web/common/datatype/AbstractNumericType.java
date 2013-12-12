@@ -26,7 +26,8 @@ public abstract class AbstractNumericType extends AbstractDataType {
         return Double.NaN;
       }
       
-      return BigDecimalValidator.getInstance().validate(s, null, Locale.getDefault());
+      Number n = BigDecimalValidator.getInstance().validate(s, null, Locale.getDefault());
+      return n == null ? 0 : n;
     }
     
     if (from instanceof Boolean) {

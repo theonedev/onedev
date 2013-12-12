@@ -25,7 +25,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.MembershipManager;
 import com.pmease.gitop.model.Membership;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.common.component.vex.AjaxConfirmLink;
+import com.pmease.gitop.web.common.wicket.component.vex.AjaxConfirmLink;
 import com.pmease.gitop.web.component.avatar.AvatarImage;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.PageSpec;

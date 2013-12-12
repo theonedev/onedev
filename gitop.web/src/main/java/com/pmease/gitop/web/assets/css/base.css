@@ -85,6 +85,8 @@ ul.piped, ol.piped { margin: 0; padding: 0; }
 .btn-danger { background: #ff2a68; border-color: #ff2a68; }
 .btn-success { background: #64da38; border-color: #64da38; }
 
+.btn-mini { line-height: 1; padding: 2px 6px; font-size: 12px; font-weight: normal; }
+.btn-mini > .icon, .btn-xs > .icon { font-size: 12px; }
 
 .btn-colorful-text { background: transparent; border-color: #cccccc; }
 
