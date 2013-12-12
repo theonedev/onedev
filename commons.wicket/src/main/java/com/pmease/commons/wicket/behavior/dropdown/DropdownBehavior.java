@@ -15,7 +15,7 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 	
 	private int hoverDelay = -1;
 	
-	private DropdownAlignment alignment = new DropdownAlignment();
+	private DropdownAlignment alignment = new DropdownAlignment(new AlignmentTarget(null, 0, 100), 0, 0, -1, false);
 	
 	public DropdownBehavior(DropdownPanel dropdownPanel) {
 		this.dropdownPanel = dropdownPanel;
@@ -58,20 +58,149 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 	
 	/**
 	 * Specify how the dropdown panel is aligned to the target. 
+	 * 
 	 * @param alignment
-	 * 			The {@link DropdownAlignment alignment} setting object. 
+	 * 			the {@link DropdownAlignment alignment} setting object
 	 * @return
-	 * 			This behavior.
+	 * 			this behavior
 	 */
 	public DropdownBehavior alignment(DropdownAlignment alignment) {
 		this.alignment = alignment;
-		if (alignment.target() != null)
-			alignment.target().setOutputMarkupId(true);
+		if (alignment != null 
+				&& alignment.getTarget() != null 
+				&& alignment.getTarget().getComponent() != null) {
+			alignment.getTarget().getComponent().setOutputMarkupId(true);
+		}
 		return this;
 	}
+
+	/**
+	 * Align dropdown with cursor. 
+	 * 
+	 * @param dropdownX
+	 * 			dropdown horizontal position in range of <tt>0</tt> to <tt>100</tt>
+	 * @param dropdownY
+	 * 			dropdown vertical position in range of <tt>0</tt> to <tt>100</tt>
+	 * @param offset
+	 * 			offset of the dropdown from target
+	 * @param showIndicator
+	 * 			whether or not to display the triangle indicator nearby target of 
+	 * 			the dropdown
+	 * @return
+	 * 			this behavior
+	 */
+	public DropdownBehavior alignWithCursor(int dropdownX, int dropdownY, int offset, boolean showIndicator) {
+		return alignment(new DropdownAlignment(null, dropdownX, dropdownY, offset, showIndicator));
+	}
 	
-	public DropdownAlignment alignment() {
-		return alignment;
+	/**
+	 * Align dropdown with cursor without displaying indicator. 
+	 * 
+	 * @param dropdownX
+	 * 			dropdown horizontal position in range of <tt>0</tt> to <tt>100</tt>
+	 * @param dropdownY
+	 * 			dropdown vertical position in range of <tt>0</tt> to <tt>100</tt>
+	 * @return
+	 * 			this behavior
+	 */
+	public DropdownBehavior alignWithCursor(int dropdownX, int dropdownY) {
+		return alignment(new DropdownAlignment(null, dropdownX, dropdownY, -1, false));
+	}
+
+	/**
+	 * Align dropdown with specified component. 
+	 * 
+	 * @param component
+	 * 			component to align with
+	 * @param componentX
+	 * 			component horizontal position in range of <tt>0</tt> to <tt>100</tt>
+	 * @param componentY
+	 * 			component vertical position in range of <tt>0</tt> to <tt>100</tt>
+	 * @param dropdownX
+	 * 			dropdown horizontal position in range of <tt>0</tt> to <tt>100</tt>
+	 * @param dropdownY
+	 * 			dropdown vertical position in range of <tt>0</tt> to <tt>100</tt>
+	 * @param offset
+	 * 			offset of the dropdown from target
+	 * @param showIndicator
+	 * 			whether or not to display the triangle indicator nearby target of 
+	 * 			the dropdown
+	 * @return
+	 * 			this behavior
+	 */
+	public DropdownBehavior alignWithComponent(Component component, int componentX, int componentY, 
+			int dropdownX, int dropdownY, int offset, boolean showIndicator) {
+		AlignmentTarget target = new AlignmentTarget(component, componentX, componentY);
+		return alignment(new DropdownAlignment(target, dropdownX, dropdownY, 
+				offset, showIndicator));
+	}
+
+	/**
+	 * Align dropdown with the component triggering this dropdown. 
+	 * 
+	 * @param triggerX
+	 * 			trigger horizontal position in range of <tt>0</tt> to <tt>100</tt>
+	 * @param triggerY
+	 * 			trigger vertical position in range of <tt>0</tt> to <tt>100</tt>
+	 * @param dropdownX
+	 * 			dropdown horizontal position in range of <tt>0</tt> to <tt>100</tt>
+	 * @param dropdownY
+	 * 			dropdown vertical position in range of <tt>0</tt> to <tt>100</tt>
+	 * @param offset
+	 * 			offset of the dropdown from target
+	 * @param showIndicator
+	 * 			whether or not to display the triangle indicator nearby target of 
+	 * 			the dropdown
+	 * @return
+	 * 			this behavior
+	 */
+	public DropdownBehavior alignWithTrigger(int triggerX, int triggerY, 
+			int dropdownX, int dropdownY, int offset, boolean showIndicator) {
+		AlignmentTarget target = new AlignmentTarget(null, triggerX, triggerY);
+		return alignment(new DropdownAlignment(target, dropdownX, dropdownY, 
+				offset, showIndicator));
+	}
+
+	/**
+	 * Align dropdown with specified component without displaying the indicator. 
+	 * 
+	 * @param component
+	 * 			component to align with
+	 * @param componentX
+	 * 			component horizontal position in range of <tt>0</tt> to <tt>100</tt>
+	 * @param componentY
+	 * 			component vertical position in range of <tt>0</tt> to <tt>100</tt>
+	 * @param dropdownX
+	 * 			dropdown horizontal position in range of <tt>0</tt> to <tt>100</tt>
+	 * @param dropdownY
+	 * 			dropdown vertical position in range of <tt>0</tt> to <tt>100</tt>
+	 * @return
+	 * 			this behavior
+	 */
+	public DropdownBehavior alignWithComponent(Component component, 
+			int targetX, int targetY, int dropdownX, int dropdownY) {
+		AlignmentTarget target = new AlignmentTarget(component, targetX, targetY);
+		return alignment(new DropdownAlignment(target, dropdownX, dropdownY, -1, false));
+	}
+
+	/**
+	 * Align dropdown with the component triggering this dropdown without displaying 
+	 * the indicator. 
+	 * 
+	 * @param triggerX
+	 * 			trigger horizontal position in range of <tt>0</tt> to <tt>100</tt>
+	 * @param triggerY
+	 * 			trigger vertical position in range of <tt>0</tt> to <tt>100</tt>
+	 * @param dropdownX
+	 * 			dropdown horizontal position in range of <tt>0</tt> to <tt>100</tt>
+	 * @param dropdownY
+	 * 			dropdown vertical position in range of <tt>0</tt> to <tt>100</tt>
+	 * @return
+	 * 			this behavior
+	 */
+	public DropdownBehavior alignWithTrigger(int targetX, int targetY, int dropdownX, int dropdownY) {
+		AlignmentTarget target = new AlignmentTarget(null, targetX, targetY);
+		return alignment(new DropdownAlignment(target, dropdownX, dropdownY, -1, false));
 	}
 
 	@Override
@@ -84,12 +213,11 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
 		response.render(JavaScriptHeaderItem.forReference(DropdownResourceReference.get()));
+		
 		String script = String.format(
-				"setupDropdown('%s', '%s', %s, '%s', '%s', %s, %s, %s, %s, %d, %s)", 
-				getComponent().getMarkupId(), dropdownPanel.getMarkupId(), hoverDelay, alignment.indicatorMode().name(), 
-				alignment.target()!=null?alignment.target().getMarkupId():getComponent().getMarkupId(), 
-				alignment.targetX(), alignment.targetY(), alignment.dropdownX(), alignment.dropdownY(), 
-				alignment.gap(), getCallbackFunction());
+				"setupDropdown('%s', '%s', %s, %s, %s)", 
+				component.getMarkupId(), dropdownPanel.getMarkupId(), hoverDelay, 
+				alignment.toJSON(component), getCallbackFunction());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

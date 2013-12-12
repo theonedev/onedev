@@ -10,6 +10,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import com.pmease.commons.wicket.behavior.dropdown.AlignmentTarget;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownAlignment;
 
 @SuppressWarnings("serial")
@@ -51,8 +52,8 @@ abstract class ContentPanel extends Panel {
 						};
 						menuPanel.add(AttributeModifier.append("class", "submenu"));
 						item.add(menuPanel);
-						DropdownAlignment alignment = new DropdownAlignment(menuItemComponent, 100, 0, 0, 0);
-						alignment.gap(0);
+						AlignmentTarget target = new AlignmentTarget(menuItemComponent, 100, 0);
+						DropdownAlignment alignment = new DropdownAlignment(target, 0, 0, -1, false);
 						item.add(new MenuBehavior(menuPanel).hoverDelay(0).alignment(alignment));
 					} else {
 						item.add(new WebMarkupContainer("itemMenu"));

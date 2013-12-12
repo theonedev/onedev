@@ -400,3 +400,19 @@ table.table-blob { width: 100%; }
 .table-blob td.blob-lineno { width: 1%; padding: 9px 5px 9px 15px; border-right: 1px solid #ddd; font-size: 12px; font-family: Consolas, "Liberation Mono", Courier, monospace; line-height: 18px; }
 .table-blob td.blob-code { padding: 9px 9px 9px 12px; }
 .blob-lineno a { display: block; color: #999; text-align: right; }
+.blob-meta > span > .icon { padding: 3px; background: white; border: 1px solid #ccc; border-right-color: #e5e5e5; border-bottom-color: #e5e5e5; border-radius: 3px;}
+
+/**
+ * GATE KEEPER SETTING PAGE
+ */
+.gate-keeper-add.well {font-size:16px;}
+.gate-keeper-add:hover, .gate-keeper-add:focus {background-color: #EBEBEB; cursor: pointer; border-color: #ADADAD;}
+.gate-keeper-selector {max-width: 600px; max-height: 600px; overflow: scroll; padding: 16px;}
+.gate-keeper-selector .icon {width: 20px; margin-right: 8px;}
+.gate-keeper-category-name {font-size: 18px; margin-bottom: 4px; border-bottom: 1px solid #CCCCCC;}
+.gate-keeper-description {font-size: 13px; color: #888888;}
+.gate-keeper-category-body {margin-bottom: 12px;}
+.gate-keeper-item {margin-bottom: 6px; padding: 4px; border: 1px solid white;}
+.gate-keeper-item:hover, .gate-keeper-item:focus {background-color: #EBEBEB; cursor: pointer; 
+		border: 1px solid #ADADAD; border-radius: 4px;}
+.gate-keeper-name {font-size: 15px; margin-top: -4px;}

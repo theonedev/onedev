@@ -20,8 +20,8 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.loader.AppLoader;
-import com.pmease.gitop.model.gatekeeper.AlwaysAccept;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
+import com.pmease.gitop.model.gatekeeper.DefaultGateKeeper;
 import com.pmease.gitop.model.permission.object.ProtectedObject;
 import com.pmease.gitop.model.permission.object.UserBelonging;
 import com.pmease.gitop.model.storage.StorageManager;
@@ -53,9 +53,9 @@ public class Project extends AbstractEntity implements UserBelonging {
 	
 	private String description;
 
-	@Column(nullable=false)
 	@Lob
-	private GateKeeper gateKeeper = new AlwaysAccept();
+	@Column(nullable=false)
+	private GateKeeper gateKeeper = new DefaultGateKeeper();
 	
 	@Column(nullable=false)
 	private Date createdAt = new Date();

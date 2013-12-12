@@ -9,10 +9,12 @@ import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.gatekeeper.AbstractGateKeeper;
+import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 
 @SuppressWarnings("serial")
-@Editable
+@Editable(category=GateKeeper.CATEGORY_FILE, order=100, description=
+		"This condition will be satisified if commit files contains any of specified files.")
 public class TouchSpecifiedFiles extends AbstractGateKeeper {
 
 	private String filePaths;

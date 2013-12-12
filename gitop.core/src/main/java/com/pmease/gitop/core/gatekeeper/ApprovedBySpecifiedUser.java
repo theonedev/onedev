@@ -12,11 +12,13 @@ import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.gatekeeper.AbstractGateKeeper;
+import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.CanVoteBySpecifiedUser;
 
 @SuppressWarnings("serial")
-@Editable
+@Editable(category=GateKeeper.CATEGORY_APPROVAL, order=200, icon="icon-user", description=
+		"This condition will be satisfied if specified user approves the commit.")
 public class ApprovedBySpecifiedUser extends AbstractGateKeeper {
 
     private Long userId;

@@ -12,12 +12,15 @@ import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.gatekeeper.AbstractGateKeeper;
+import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.CanVoteByAuthorizedUser;
 import com.pmease.gitop.model.permission.operation.GeneralOperation;
 
 @SuppressWarnings("serial")
-@Editable
+@Editable(category=GateKeeper.CATEGORY_APPROVAL, order=50, description=
+		"This condition will be satisfied if specified number of users with writing permission "
+		+ "approves the commit.")
 public class ApprovedByAuthorizedUsers extends AbstractGateKeeper {
 
     private int leastApprovals = 1;

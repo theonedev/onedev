@@ -8,6 +8,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface Editable {
+	String category() default "";
+	
+	String icon() default "";
+	
 	String name() default "";
 	
 	int order() default 0;

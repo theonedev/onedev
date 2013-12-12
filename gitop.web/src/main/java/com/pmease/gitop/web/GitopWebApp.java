@@ -68,6 +68,7 @@ import com.pmease.gitop.web.page.home.HomePage;
 import com.pmease.gitop.web.page.init.ServerInitPage;
 import com.pmease.gitop.web.page.project.issue.ProjectPullRequestsPage;
 import com.pmease.gitop.web.page.project.settings.CreateProjectPage;
+import com.pmease.gitop.web.page.project.settings.GateKeeperSettingPage;
 import com.pmease.gitop.web.page.project.settings.ProjectAuditLogPage;
 import com.pmease.gitop.web.page.project.settings.ProjectHooksPage;
 import com.pmease.gitop.web.page.project.settings.ProjectOptionsPage;
@@ -262,8 +263,9 @@ public class GitopWebApp extends AbstractWicketConfig {
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/forks", ProjectForksPage.class));
 
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings", ProjectOptionsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/gate-keepers", GateKeeperSettingPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/hooks", ProjectHooksPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/merge-requests", PullRequestSettingsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/pull-requests", PullRequestSettingsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/audits", ProjectAuditLogPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/permissions", ProjectPermissionsPage.class));
 		

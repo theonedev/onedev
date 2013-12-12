@@ -1,16 +1,8 @@
-function setupDropdown(triggerId, dropdownInfo, hoverDelay, alignmentIndicatorMode, alignmentTargetId, 
-		alignmentTargetX, alignmentTargetY, alignmentDropdownX, alignmentDropdownY, alignmentGap,
-		dropdownLoader) {
-	var alignment = {};
-	alignment.target = $("#" + alignmentTargetId)[0];
-	alignment.targetX = alignmentTargetX;
-	alignment.targetY = alignmentTargetY;
-	alignment.dropdownX = alignmentDropdownX;
-	alignment.dropdownY = alignmentDropdownY;
-	alignment.gap = alignmentGap;
-	alignment.indicatorMode = alignmentIndicatorMode;
-	
-	$(alignment.target).addClass("dropdown-alignment");
+function setupDropdown(triggerId, dropdownInfo, hoverDelay, alignment, dropdownLoader) {
+	if (alignment.target) {
+		alignment.target.element = $("#" + alignment.target.id)[0];
+		$(alignment.target.element).addClass("dropdown-alignment");
+	}
 	
 	var trigger = $("#" + triggerId);
 	trigger.addClass("dropdown-toggle");
@@ -36,13 +28,6 @@ function setupDropdown(triggerId, dropdownInfo, hoverDelay, alignmentIndicatorMo
 		trigger.append(dropdown);
 	}
 			
-	if (alignment.gap < 0) {
-		if (trigger.parent().parent().hasClass("nav") && trigger.closest(".navbar")[0])
-			alignment.gap = 2;
-		else
-			alignment.gap = 4;
-	}
-	
 	// dropdown can associate with multiple triggers, and we should initialize it once here.
 	if (!dropdown.hasClass("dropdown-panel")) { 
 		dropdown.addClass("dropdown-panel popup");
@@ -81,6 +66,8 @@ function setupDropdown(triggerId, dropdownInfo, hoverDelay, alignmentIndicatorMo
 			if (!trigger.showTimer) {
 				trigger.showTimer = setTimeout(function() {
 					if (!trigger.hasClass("open")) {
+						if (alignment.target == undefined || alignment.target.id == undefined)
+							alignment.target = mouse;
 						showDropdown(trigger, dropdown, alignment, dropdownLoader);
 						cancelHide();
 					}
@@ -106,10 +93,13 @@ function setupDropdown(triggerId, dropdownInfo, hoverDelay, alignmentIndicatorMo
 		});
 	} else {
 		trigger.click(function(mouse) {
-			if (!trigger.hasClass("open")) 
+			if (!trigger.hasClass("open")) {
+				if (alignment.target == undefined || alignment.target.id == undefined)
+					alignment.target = mouse;
 				showDropdown(trigger, dropdown, alignment, dropdownLoader);
-			else 
+			} else {
 				hideDropdown(dropdownId);
+			} 
 			return false;
 		});
 	}
@@ -146,11 +136,10 @@ function showDropdown(trigger, dropdown, alignment, dropdownLoader) {
 	trigger.addClass("open");
 	trigger.parent().addClass("open");
 
-	$(alignment.target).addClass("open");
+	if (alignment.target.element)
+		$(alignment.target.element).addClass("open");
 
-	var inNavbar = trigger.parent().parent().hasClass("nav") && trigger.closest(".navbar")[0];
-	
-	if (alignment.indicatorMode == "SHOW" || alignment.indicatorMode == "AUTO" && inNavbar) {
+	if (alignment.showIndicator) {
 		dropdown.prepend("<div class='indicator'></div>");
 		dropdown.append("<div class='indicator'></div>");
 	}
@@ -185,7 +174,8 @@ function hideDropdown(dropdownId) {
 	trigger.removeClass("open");
 	trigger.parent().removeClass("open");
 	
-	$(dropdown[0].alignment.target).removeClass("open");
+	if ($(dropdown[0].alignment.target.element))
+		$(dropdown[0].alignment.target.element).removeClass("open");
 	dropdown.find(">.indicator").remove();
 	
 	dropdown.hide();

@@ -2,12 +2,14 @@ package com.pmease.gitop.core.gatekeeper;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
 
 @SuppressWarnings("serial")
-@Editable
+@Editable(category=GateKeeper.CATEGORY_APPROVAL, order=400, description=
+		"This condition will be satisified if majorities of specified team approves the commit.")
 public class ApprovedByMajoritiesOfSpecifiedTeam extends TeamAwareGateKeeper {
 
 	@Override

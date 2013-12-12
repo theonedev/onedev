@@ -383,6 +383,11 @@
 				<artifactId>jetty-util</artifactId>
 				<version>${jettyVersion}</version>
 			</dependency>
+			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>javax.servlet-api</artifactId>
+				<version>${servletVersion}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
@@ -461,5 +466,6 @@
         <jettyVersion>8.1.10.v20130312</jettyVersion> 
 		<jacksonVersion>2.2.3</jacksonVersion>
 		<powermockVersion>1.5.1</powermockVersion>
+		<servletVersion>3.1-b09</servletVersion>
 	</properties>
 </project>
