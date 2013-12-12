@@ -1,5 +1,14 @@
 <html xmlns:wicket>
 <wicket:panel>
-	<pre><code wicket:id="code"></code></pre>
+	<table class="table-blob">
+		<tr>
+			<td class="blob-lineno">
+				<wicket:container wicket:id="lineno"></wicket:container>
+			</td>
+			<td class="blob-code">
+				<pre><code wicket:id="code"></code></pre>
+			</td>
+		</tr>
+	</table>
 </wicket:panel>
 </html>

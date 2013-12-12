@@ -1,5 +1,6 @@
 package com.pmease.gitop.web.page.project.source.renderer;
 
+import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
@@ -12,4 +13,13 @@ public class GeneralBlobPanel extends Panel {
 		super(id, model);
 	}
 
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
+		GitBlob blob = (GitBlob) getDefaultModelObject();
+		
+		add(new ResourceLink<Void>("link", new RawBlobResourceReference(),
+				RawBlobResourceReference.newParams(blob.getProjectId(), blob.getRevision(), blob.getPath())));
+	}
 }

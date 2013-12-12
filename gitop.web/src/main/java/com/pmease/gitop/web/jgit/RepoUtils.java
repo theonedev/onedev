@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.util.jgit;
+package com.pmease.gitop.web.jgit;
 
 import java.io.File;
 import java.io.IOException;

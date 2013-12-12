@@ -22,16 +22,17 @@ import com.pmease.gitop.web.util.MimeTypeUtils;
 @Singleton
 public class TikaFileTypeRegistry implements FileTypeRegistry {
 	
-	private final Tika tika;
-	private final MimeTypes mimeTypes;
-	
 	public static class Module extends AbstractModule {
 
 		@Override
 		protected void configure() {
+//			bind(Languages.class).in(Singleton.class);
 			bind(FileTypeRegistry.class).to(TikaFileTypeRegistry.class);
 		}
 	}
+	
+	private final Tika tika;
+	private final MimeTypes mimeTypes;
 	
 	@Inject
 	TikaFileTypeRegistry() {
