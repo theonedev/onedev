@@ -28,7 +28,7 @@ function setupDropdown(triggerId, dropdownInfo, hoverDelay, alignment, dropdownL
 		trigger.append(dropdown);
 	}
 			
-	// dropdown can associate with multiple triggers, and we should initialize it once here.
+	// Dropdown can associate with multiple triggers, and we should initialize it only once.
 	if (!dropdown.hasClass("dropdown-panel")) { 
 		dropdown.addClass("dropdown-panel popup");
 		dropdown[0].trigger = trigger[0];
