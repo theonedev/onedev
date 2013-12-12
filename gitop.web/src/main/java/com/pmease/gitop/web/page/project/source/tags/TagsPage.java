@@ -1,24 +1,24 @@
-package com.pmease.gitop.web.page.project.source;
+package com.pmease.gitop.web.page.project.source.tags;
 
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitop.web.page.project.ProjectCategoryPage;
 
 @SuppressWarnings("serial")
-public class ContributorsPage extends ProjectCategoryPage {
+public class TagsPage extends ProjectCategoryPage {
 
-	public ContributorsPage(PageParameters params) {
+	public TagsPage(PageParameters params) {
 		super(params);
 	}
 
 	@Override
 	protected Category getCategory() {
-		return Category.CONTRIBUTORS;
+		return Category.TAGS;
 	}
 
 	@Override
 	protected String getPageTitle() {
-		return getProject() + " - contributors";
+		return getProject() + " - tags";
 	}
 
 }

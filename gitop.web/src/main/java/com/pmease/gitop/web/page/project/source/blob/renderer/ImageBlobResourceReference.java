@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.project.source.renderer;
+package com.pmease.gitop.web.page.project.source.blob.renderer;
 
 import org.apache.wicket.request.resource.IResource;
 import org.apache.wicket.request.resource.SharedResourceReference;

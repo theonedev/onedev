@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.project.source.renderer;
+package com.pmease.gitop.web.page.project.source.blob.renderer;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
@@ -9,14 +9,14 @@ import org.apache.wicket.util.string.Strings;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
-import com.pmease.gitop.web.page.project.source.GitBlob;
+import com.pmease.gitop.web.page.project.source.blob.FileBlob;
 import com.pmease.gitop.web.service.impl.Language;
 import com.pmease.gitop.web.util.MimeTypeUtils;
 
 @SuppressWarnings("serial")
 public class TextBlobPanel extends Panel {
 
-	public TextBlobPanel(String id, IModel<GitBlob> model) {
+	public TextBlobPanel(String id, IModel<FileBlob> model) {
 		super(id, model);
 	}
 	
@@ -58,7 +58,7 @@ public class TextBlobPanel extends Panel {
 
 				@Override
 				public String getObject() {
-					GitBlob blob = getBlob();
+					FileBlob blob = getBlob();
 					if (blob.getSize() == 0) {
 						return "no-highlight";
 					}
@@ -74,7 +74,7 @@ public class TextBlobPanel extends Panel {
 						}
 					}
 					
-					String type = MimeTypeUtils.guessSourceType(getBlob().getMime());
+					String type = MimeTypeUtils.guessSourceType(getBlob().getMimeType());
 					return type == null ? "no-highlight" : type;
 				}
 				
@@ -83,8 +83,8 @@ public class TextBlobPanel extends Panel {
 		
 	}
 	
-	private GitBlob getBlob() {
-		return (GitBlob) getDefaultModelObject();
+	private FileBlob getBlob() {
+		return (FileBlob) getDefaultModelObject();
 	}
 	
 	

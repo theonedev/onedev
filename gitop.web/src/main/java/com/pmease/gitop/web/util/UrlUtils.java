@@ -8,19 +8,21 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.StringUtils;
-
+import com.google.common.base.Joiner;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 public class UrlUtils {
 
@@ -95,6 +97,14 @@ public class UrlUtils {
 		}
 	}
 	
+	public static String decodeUrl(final String value) {
+		try {
+			return URLDecoder.decode(value, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+
 	/**
 	 * Concatenate url segments into one
 	 *  
@@ -102,16 +112,8 @@ public class UrlUtils {
 	 * @return 
 	 */
 	public static String concatSegments(String[] segments) {
-		StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < segments.length; i++) {
-			if (i > 0) {
-				sb.append("/");
-			}
-			
-			sb.append(StringUtils.stripEnd(segments[i], "/"));
-		}
-		
-		return sb.toString();
+		String url = Joiner.on("/").skipNulls().join(segments);
+		return UrlUtils.removeRedundantSlashes(url);
 	}
 
 	public static String concatSegments(List<String> segments) {
@@ -119,11 +121,7 @@ public class UrlUtils {
 	}
 	
 	public static String concatSegments(String base, String... segments) {
-		List<String> list = Lists.newArrayList();
-		list.add(base);
-		for (String each : segments) {
-			list.add(each);
-		}
+		List<String> list = ImmutableList.<String>builder().add(base).add(segments).build();
 		return concatSegments(Iterables.toArray(list, String.class));
 	}
 	
@@ -165,5 +163,59 @@ public class UrlUtils {
 		}
 		
 		return uri;
+	}
+	
+	
+	/**
+	 * Add encoded parameter to URI
+	 *
+	 * @param name
+	 * @param value
+	 * @param uri
+	 */
+	public static void addParam(final String name, final String value,
+			final StringBuilder uri) {
+		if (uri.length() > 0)
+			uri.append('&');
+		uri.append(encodeUrl(name)).append('=');
+		if (value != null)
+			uri.append(encodeUrl(value));
+	}
+
+	/**
+	 * Add request parameters to URI
+	 *
+	 * @param params
+	 * @param uri
+	 */
+	public static void addParams(final Map<String, String> params,
+			final StringBuilder uri) {
+		if (params == null || params.isEmpty())
+			return;
+		for (Entry<String, String> param : params.entrySet())
+			addParam(param.getKey(), param.getValue(), uri);
+	}
+
+	/**
+	 * Get parameter value with name
+	 *
+	 * @param uri
+	 * @param name
+	 * @return value or null if not found in URI query
+	 */
+	public static String getParam(final URI uri, final String name) {
+		final String query = uri.getRawQuery();
+		if (query == null || query.length() == 0)
+			return null;
+		final String[] params = query.split("&"); //$NON-NLS-1$
+		for (String param : params) {
+			final String[] parts = param.split("="); //$NON-NLS-1$
+			if (parts.length != 2)
+				continue;
+			if (!name.equals(parts[0]))
+				continue;
+			return decodeUrl(parts[1]);
+		}
+		return null;
 	}
 }

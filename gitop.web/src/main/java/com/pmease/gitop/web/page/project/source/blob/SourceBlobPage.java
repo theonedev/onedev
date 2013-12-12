@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.project.source;
+package com.pmease.gitop.web.page.project.source.blob;
 
 import java.util.Date;
 import java.util.List;
@@ -30,7 +30,7 @@ import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.GitUserAvatarLink;
 import com.pmease.gitop.web.component.link.GitUserLink;
 import com.pmease.gitop.web.page.project.api.GitPerson;
-import com.pmease.gitop.web.page.project.source.component.SourceBlobPanel;
+import com.pmease.gitop.web.page.project.source.AbstractFilePage;
 import com.pmease.gitop.web.page.project.source.component.SourceBreadcrumbPanel;
 import com.pmease.gitop.web.util.UrlUtils;
 

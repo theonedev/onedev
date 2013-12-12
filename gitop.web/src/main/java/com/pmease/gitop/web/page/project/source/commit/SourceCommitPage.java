@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.project.source;
+package com.pmease.gitop.web.page.project.source.commit;
 
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;

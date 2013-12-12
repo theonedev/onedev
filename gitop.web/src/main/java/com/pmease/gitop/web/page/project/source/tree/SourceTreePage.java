@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.project.source;
+package com.pmease.gitop.web.page.project.source.tree;
 
 import java.io.File;
 import java.util.List;
@@ -12,6 +12,7 @@ import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.storage.StorageManager;
 import com.pmease.gitop.web.model.ProjectModel;
 import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.project.source.AbstractFilePage;
 import com.pmease.gitop.web.page.project.source.component.EmptyRepositoryPanel;
 import com.pmease.gitop.web.page.project.source.component.ProjectDescriptionPanel;
 import com.pmease.gitop.web.page.project.source.component.ReadmePanel;

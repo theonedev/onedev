@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.project.source.renderer;
+package com.pmease.gitop.web.page.project.source.blob.renderer;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -11,7 +11,7 @@ import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.exception.AccessDeniedException;
-import com.pmease.gitop.web.page.project.source.GitBlob;
+import com.pmease.gitop.web.page.project.source.blob.FileBlob;
 
 public class ImageBlobResource extends DynamicImageResource {
 
@@ -34,7 +34,7 @@ public class ImageBlobResource extends DynamicImageResource {
 			throw new AccessDeniedException("Permission denied to access " + project.getPathName() + " for user " + SecurityUtils.getSubject());
 		}
 		
-		GitBlob blob = GitBlob.of(project, revision, path);
-		return blob.getContent();
+		FileBlob blob = FileBlob.of(project, revision, path);
+		return blob.getData();
 	}
 }

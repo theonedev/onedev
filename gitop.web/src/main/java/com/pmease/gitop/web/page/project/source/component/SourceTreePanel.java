@@ -35,9 +35,9 @@ import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.GitUserLink;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.api.GitPerson;
-import com.pmease.gitop.web.page.project.source.SourceBlobPage;
-import com.pmease.gitop.web.page.project.source.SourceCommitPage;
-import com.pmease.gitop.web.page.project.source.SourceTreePage;
+import com.pmease.gitop.web.page.project.source.blob.SourceBlobPage;
+import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
+import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
 import com.pmease.gitop.web.util.GitUtils;
 import com.pmease.gitop.web.util.UrlUtils;
 

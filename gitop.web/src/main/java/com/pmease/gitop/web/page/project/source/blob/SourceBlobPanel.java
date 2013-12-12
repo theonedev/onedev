@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.project.source.component;
+package com.pmease.gitop.web.page.project.source.blob;
 
 import java.util.List;
 
@@ -12,24 +12,24 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.quantity.Data;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
-import com.pmease.gitop.web.page.project.source.GitBlob;
-import com.pmease.gitop.web.page.project.source.renderer.BlobRenderer;
-import com.pmease.gitop.web.page.project.source.renderer.BlobRendererFactory;
+import com.pmease.gitop.web.page.project.source.blob.renderer.BlobRenderer;
+import com.pmease.gitop.web.page.project.source.blob.renderer.BlobRendererFactory;
+import com.pmease.gitop.web.page.project.source.component.AbstractSourcePagePanel;
 
 @SuppressWarnings("serial")
 public class SourceBlobPanel extends AbstractSourcePagePanel {
 
-	private final IModel<GitBlob> blobModel;
+	private final IModel<FileBlob> blobModel;
 	
 	public SourceBlobPanel(String id, IModel<Project> projectModel,
 			IModel<String> revisionModel, IModel<List<String>> pathsModel) {
 		super(id, projectModel, revisionModel, pathsModel);
 		
-		blobModel = new LoadableDetachableModel<GitBlob>() {
+		blobModel = new LoadableDetachableModel<FileBlob>() {
 
 			@Override
-			protected GitBlob load() {
-				return GitBlob.of(getProject(), getRevision(), getJoinedPath());
+			protected FileBlob load() {
+				return FileBlob.of(getProject(), getRevision(), getJoinedPath());
 			}
 		};
 	}
@@ -76,10 +76,10 @@ public class SourceBlobPanel extends AbstractSourcePagePanel {
 	}
 	
 	private BlobRenderer getRenderer() {
-		return Gitop.getInstance(BlobRendererFactory.class).create(getBlob());
+		return Gitop.getInstance(BlobRendererFactory.class).newRenderer(getBlob());
 	}
 	
-	private GitBlob getBlob() {
+	private FileBlob getBlob() {
 		return blobModel.getObject();
 	}
 	

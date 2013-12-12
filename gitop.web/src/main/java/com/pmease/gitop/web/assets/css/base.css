@@ -185,6 +185,7 @@ fieldset[disabled] .btn-gray:active,
 fieldset[disabled] .btn-gray.active {
   background-color: #eaeaea;
   border-color: #cccccc;
+  color: #999;
 }
 
 .btn-inverse {

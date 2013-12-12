@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import org.apache.tika.mime.MimeType;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 
 public class MimeTypeUtils {
@@ -13,9 +14,14 @@ public class MimeTypeUtils {
 	private MimeTypeUtils() {}
 	
 	public static boolean isTextType(MimeType type) {
+		String sourceType = guessSourceType(type);
+		if (!Strings.isNullOrEmpty(sourceType)) {
+			return true;
+		}
+		
 		return type.getType().getType().equalsIgnoreCase("text")
                 || type.getType().getSubtype().equalsIgnoreCase("text")
-                || type.getType().getSubtype().equalsIgnoreCase("x-sh");
+                || isXMLType(type);
 	}
 	
 	public static boolean isXMLType(final MimeType type) {
@@ -102,11 +108,13 @@ public class MimeTypeUtils {
 			.put("text/x-web-markdown", "markdown")
 			.put("text/x-yacc", "yacc")
 			.put("text/x-yaml", "yaml")
+			.put("text/xml", "xml")
 			
 			.put("application/json", "json")
 			.put("application/javascript", "javascript")
 			.put("application/x-sh", "sh")
 			.put("application/x-httpd-jsp", "jsp")
+			.put("application/xml", "xml")
 			.build();
 	
 	public static @Nullable String guessSourceType(MimeType mime) {

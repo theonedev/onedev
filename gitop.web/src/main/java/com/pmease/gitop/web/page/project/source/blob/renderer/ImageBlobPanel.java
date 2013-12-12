@@ -1,14 +1,14 @@
-package com.pmease.gitop.web.page.project.source.renderer;
+package com.pmease.gitop.web.page.project.source.blob.renderer;
 
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.gitop.web.page.project.source.GitBlob;
+import com.pmease.gitop.web.page.project.source.blob.FileBlob;
 
 @SuppressWarnings("serial")
 public class ImageBlobPanel extends Panel {
 
-	public ImageBlobPanel(String id, IModel<GitBlob> model) {
+	public ImageBlobPanel(String id, IModel<FileBlob> model) {
 		super(id, model);
 	}
 
@@ -16,14 +16,14 @@ public class ImageBlobPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		GitBlob blob = getBlob();
+		FileBlob blob = getBlob();
 		add(new ImageBlobImage("image", ImageBlobImage.newParams(
 				blob.getProjectId(), 
 				blob.getRevision(), 
 				blob.getPath())));
 	}
 	
-	private GitBlob getBlob() {
-		return (GitBlob) getDefaultModelObject();
+	private FileBlob getBlob() {
+		return (FileBlob) getDefaultModelObject();
 	}
 }

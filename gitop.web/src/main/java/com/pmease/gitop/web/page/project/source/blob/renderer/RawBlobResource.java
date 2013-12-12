@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.project.source.renderer;
+package com.pmease.gitop.web.page.project.source.blob.renderer;
 
 import java.io.IOException;
 
@@ -19,7 +19,7 @@ import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.exception.AccessDeniedException;
-import com.pmease.gitop.web.page.project.source.GitBlob;
+import com.pmease.gitop.web.page.project.source.blob.FileBlob;
 
 public class RawBlobResource extends AbstractResource {
 	private static final long serialVersionUID = 1L;
@@ -48,11 +48,11 @@ public class RawBlobResource extends AbstractResource {
 		ResourceResponse response = new ResourceResponse();
 		
 		if (response.dataNeedsToBeWritten(attributes)) {
-			final GitBlob blob = GitBlob.of(project, revision, path);
+			final FileBlob blob = FileBlob.of(project, revision, path);
 			response.setContentLength(blob.getSize());
 			String fileName = FilenameUtils.getName(blob.getPath());
 			response.setFileName(fileName);
-			response.setContentType(blob.getMime().getType().toString());
+			response.setContentType(blob.getMimeType().getType().toString());
 			response.setContentDisposition(ContentDisposition.ATTACHMENT);
 			
 			response.setWriteCallback(new WriteCallback() {

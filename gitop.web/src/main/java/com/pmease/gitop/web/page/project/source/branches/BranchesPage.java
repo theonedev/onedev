@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.project.source;
+package com.pmease.gitop.web.page.project.source.branches;
 
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
