@@ -2,6 +2,7 @@ package com.pmease.gitop.web.page.project.source.blob;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -67,6 +68,32 @@ public class SourceBlobPanel extends AbstractSourcePagePanel {
 			@Override
 			public String getObject() {
 				return Data.formatBytes(getBlob().getSize(), Data.KB);
+			}
+			
+		}));
+		
+		add(new Label("loc", new AbstractReadOnlyModel<Integer>() {
+
+			@Override
+			public Integer getObject() {
+				return getBlob().getLines().size();
+			}
+			
+		}));
+		
+		add(new Label("sloc", new AbstractReadOnlyModel<Integer>() {
+
+			@Override
+			public Integer getObject() {
+				List<String> lines = getBlob().getLines();
+				int sloc = 0;
+				for (String each : lines) {
+					if (!StringUtils.isEmpty(each)) {
+						sloc++;
+					}
+				}
+				
+				return sloc;
 			}
 			
 		}));

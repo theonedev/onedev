@@ -3,6 +3,7 @@ package com.pmease.gitop.web.page.project.source.blob;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -25,6 +26,8 @@ import org.gitective.core.CommitUtils;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
+import com.google.common.io.CharStreams;
 import com.ibm.icu.text.CharsetDetector;
 import com.ibm.icu.text.CharsetMatch;
 import com.pmease.commons.git.Git;
@@ -206,6 +209,21 @@ public class FileBlob {
 	
 	public boolean isExecutable() {
 		return mode == FileMode.EXECUTABLE_FILE;
+	}
+	
+//	private static final Splitter LINE_SPLITTER = Splitter.on(Pattern.compile("\r\n|\n|\r"));
+	
+	public List<String> getLines() {
+		if (isLarge() || !isText() || data == null) {
+			Collections.emptyList();
+		}
+		
+		try {
+			return CharStreams.readLines(
+					CharStreams.newReaderSupplier(getStringContent()));
+		} catch (IOException e) {
+			throw Throwables.propagate(e);
+		}
 	}
 	
 	public String getObjectId() {

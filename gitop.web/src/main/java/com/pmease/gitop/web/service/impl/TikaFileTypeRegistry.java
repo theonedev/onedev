@@ -84,9 +84,7 @@ public class TikaFileTypeRegistry implements FileTypeRegistry {
             "image/bmp",
             "image/png",
             "image/jpeg",
-            "image/gif",
-            "image/x-xbitmap", // xbm
-            "image/x-xpixmap"  // xpm
+            "image/gif"
             );
     
 

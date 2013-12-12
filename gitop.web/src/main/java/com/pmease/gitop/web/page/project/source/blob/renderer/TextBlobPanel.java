@@ -1,5 +1,7 @@
 package com.pmease.gitop.web.page.project.source.blob.renderer;
 
+import java.util.List;
+
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -7,8 +9,6 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.string.Strings;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
 import com.pmease.gitop.web.page.project.source.blob.FileBlob;
 import com.pmease.gitop.web.service.impl.Language;
 import com.pmease.gitop.web.util.MimeTypeUtils;
@@ -28,9 +28,8 @@ public class TextBlobPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				String content = getBlob().getStringContent();
-				Iterable<String> it = Splitter.on("\n").split(content);
-				int size = Iterables.size(it);
+				List<String> lines = getBlob().getLines();
+				int size = lines.size();
 				StringBuffer sb = new StringBuffer();
 				for (int i = 0; i < size; i++) {
 					int lineno = i + 1;
