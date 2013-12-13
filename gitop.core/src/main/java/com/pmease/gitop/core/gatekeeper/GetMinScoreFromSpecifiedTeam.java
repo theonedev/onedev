@@ -17,7 +17,7 @@ import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.CanVoteBySpecifiedTeam;
 
 @SuppressWarnings("serial")
-@Editable(category=GateKeeper.CATEGORY_APPROVAL, order=500, description=
+@Editable(category=GateKeeper.CATEGORY_APPROVAL, order=500, icon="icon-group", description=
 		"This condition will be satisfied if specified score can be get from specified team, the score "
 		+ "starts at zero, and will increase by one for each approval, and decrease by one for each "
 		+ "rejection.")

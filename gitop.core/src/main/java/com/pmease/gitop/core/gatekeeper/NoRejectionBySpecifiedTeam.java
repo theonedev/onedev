@@ -8,7 +8,7 @@ import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 
 @SuppressWarnings("serial")
-@Editable(category=GateKeeper.CATEGORY_APPROVAL, order=600, description=
+@Editable(category=GateKeeper.CATEGORY_APPROVAL, order=600, icon="icon-group", description=
 		"This condition will be satisfied if specified team did not reject the commit.")
 public class NoRejectionBySpecifiedTeam extends TeamAwareGateKeeper {
 

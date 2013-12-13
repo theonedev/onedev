@@ -11,7 +11,8 @@ import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
 
 @SuppressWarnings("serial")
-@Editable(name="Check Second Condition If First Condition Is Satisfied", category=GateKeeper.CATEGORY_COMPOSITE, order=300, 
+@Editable(name="Check Second Condition If First Condition Is Satisfied", category=GateKeeper.CATEGORY_COMPOSITE, 
+		order=300, icon="icon-servers",  
 		description="If first condition matches, this condition checks result of second condition. "
 				+ "Note that this differs from <b>AND</b> container as when first condition is "
 				+ "not matched, the whole condition is considered matched.")

@@ -18,7 +18,7 @@ import com.pmease.gitop.model.gatekeeper.voteeligibility.CanVoteByAuthorizedUser
 import com.pmease.gitop.model.permission.operation.GeneralOperation;
 
 @SuppressWarnings("serial")
-@Editable(category=GateKeeper.CATEGORY_APPROVAL, order=50, description=
+@Editable(category=GateKeeper.CATEGORY_APPROVAL, order=50, icon="icon-group", description=
 		"This condition will be satisfied if specified number of users with writing permission "
 		+ "approves the commit.")
 public class ApprovedByAuthorizedUsers extends AbstractGateKeeper {

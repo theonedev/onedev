@@ -18,7 +18,7 @@ import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 
 @SuppressWarnings("serial")
-@Editable(category=GateKeeper.CATEGORY_BRANCH, order=100, description=
+@Editable(category=GateKeeper.CATEGORY_BRANCH, order=100, icon="icon-git-branch", description=
 		"This condition will be satisified if commit is submitted to specified branches.")
 public class SubmittedToSpecifiedBranch extends AbstractGateKeeper {
 

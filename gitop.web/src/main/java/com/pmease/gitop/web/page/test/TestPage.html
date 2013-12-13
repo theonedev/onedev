@@ -1,10 +1,28 @@
-<wicket:extend>
-	<div style="margin: 20px 300px;">
-		<i class="icon icon-mail"></i> <span
-			class="glyphicon glyphicon-search"></span>
-		<div class="input-group input-group-lg">
-			<span class="input-group-addon"><i class="icon icon-mail-o"></i></span> <input type="text"
-				class="form-control" placeholder="Username">
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+</head>
+<body>
+	<div id="dialog" class="modal">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title">Modal title</h4>
+				</div>
+				<div class="modal-body">
+					<p>One fine body&hellip;</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary">Save changes</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
 		</div>
+		<!-- /.modal-dialog -->
 	</div>
-</wicket:extend>
+	<a onclick="$('#dialog').modal('show');">show</a>
+</body>
+</html>

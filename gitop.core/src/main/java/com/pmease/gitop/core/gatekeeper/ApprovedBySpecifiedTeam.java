@@ -17,7 +17,7 @@ import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.CanVoteBySpecifiedTeam;
 
 @SuppressWarnings("serial")
-@Editable(category=GateKeeper.CATEGORY_APPROVAL, order=100, description=
+@Editable(category=GateKeeper.CATEGORY_APPROVAL, order=100, icon="icon-group", description=
 		"This condition will be satisified if specified number of users from specified team "
 		+ "approves the commit.")
 public class ApprovedBySpecifiedTeam extends TeamAwareGateKeeper {

@@ -150,7 +150,6 @@ public class Commandline  {
     }
     
 	public ExecuteResult execute(OutputStream stdout, final LineConsumer stderr, @Nullable InputStream stdin) {
-		
     	Process process;
         try {
         	ProcessBuilder processBuilder = createProcessBuilder();

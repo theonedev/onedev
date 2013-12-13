@@ -10,7 +10,8 @@ import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
 
 @SuppressWarnings("serial")
-@Editable(name="Rejected By Specified Condition", category=GateKeeper.CATEGORY_COMPOSITE, order=400, 
+@Editable(name="Rejected By Specified Condition", category=GateKeeper.CATEGORY_COMPOSITE, 
+		order=400, icon="icon-servers",  
 		description="This condition will be satisified if contained condition is not satisfied.")
 public class NotGateKeeper extends AbstractGateKeeper {
 

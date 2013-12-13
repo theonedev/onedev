@@ -13,7 +13,7 @@ import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 
 @SuppressWarnings("serial")
-@Editable(category=GateKeeper.CATEGORY_FILE, order=100, description=
+@Editable(category=GateKeeper.CATEGORY_FILE, order=100, icon="icon-folder-submodule", description=
 		"This condition will be satisified if commit files contains any of specified files.")
 public class TouchSpecifiedFiles extends AbstractGateKeeper {
 

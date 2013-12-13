@@ -21,6 +21,7 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.BeanUtils;
 import com.pmease.commons.util.GeneralException;
 import com.pmease.commons.util.JavassistUtils;
+import com.pmease.commons.util.ReflectionUtils;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.WordUtils;
 
@@ -180,6 +181,13 @@ public class EditableUtils {
                 }
 	        }
 	    }
+	}
+
+	public static boolean isDefaultInstanceValid(Class<? extends Serializable> beanClass) {
+		Serializable bean = ReflectionUtils.instantiateClass(beanClass);
+		EditContext editContext = getContext(bean);
+		editContext.validate();
+		return !editContext.hasValidationError();
 	}
 	
 }

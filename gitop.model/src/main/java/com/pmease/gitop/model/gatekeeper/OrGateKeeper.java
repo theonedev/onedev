@@ -19,7 +19,8 @@ import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
 
 @SuppressWarnings("serial")
-@Editable(name="Any Of Contained Conditions Are Satisfied", category=GateKeeper.CATEGORY_COMPOSITE, order=200, 
+@Editable(name="Any Of Contained Conditions Are Satisfied", category=GateKeeper.CATEGORY_COMPOSITE, 
+		order=200, icon="icon-servers",  
 		description="This condition will be satisfied if any of the contained conditions is satisfied.")
 public class OrGateKeeper extends AbstractGateKeeper {
 

@@ -11,7 +11,7 @@ import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 public interface GateKeeper extends Trimmable, Serializable {
 	
 	public static final String CATEGORY_COMPOSITE = "Composite Conditions";
-	
+
 	public static final String CATEGORY_BRANCH = "Branch Related Conditions";
 	
 	public static final String CATEGORY_FILE = "File Related Conditions";

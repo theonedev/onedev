@@ -1,17 +1,21 @@
 <wicket:extend>
-	<div class="gate-keeper padder">
+	<div wicket:id="content" class="padder">
 		<div wicket:id="gateKeeperDropdownTrigger" class="well gate-keeper-add">Define the gate keeper <i class="icon icon-lg icon-arrow-slim-right-circle"></i></div>
 		<div wicket:id="gateKeeperDropdown"></div>
-
-		<div class="well">Gate keeper defines a set of conditions to be satisfied to accept a 
-		push operation or pull request. Gate keeper plays an important role in Gitop, for 
-		instance, you may use it to:
-		<ul>
-			<li>Control write access to certain branches or directories.</li>
-			<li>Require different parties to review different parts of the system.</li>
-			<li>Have continuous integration system verifying the code before accepting 
-			the push or pull request.</li>
-		</ul> 
+		<div wicket:id="gateKeeperModal"></div>
+		<div wicket:id="gateKeeperPanel"></div>
+	</div>
+	<div class="gate-keeper-tip">
+		<div class="well">
+			Gate keeper defines a set of conditions to be satisfied to accept a 
+			push operation or pull request. Gate keeper plays an important role in Gitop, for 
+			instance, you may use it to:
+			<ul>
+				<li>Control write access to certain branches or directories.</li>
+				<li>Require different parties to review different parts of the system.</li>
+				<li>Have continuous integration system verifying the code before accepting 
+				the push or pull request.</li>
+			</ul> 
 		</div>
 	</div>
 </wicket:extend>

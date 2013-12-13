@@ -1,0 +1,24 @@
+<wicket:panel>
+	<div class="gate-keeper panel panel-default">
+		<div class="panel-heading clearfix">
+			<h4 wicket:id="title" class="panel-title pull-left"></h4>
+			<div wicket:id="edit" class="icon icon-edit icon-lg pull-left" data-toggle="tooltip" title="Edit this condition"></div>
+			<div wicket:id="delete" class="icon icon-trash icon-lg pull-left" data-toggle="tooltip" title="Delete this condition"></div>
+			<div wicket:id="editorModal"></div>
+		</div>
+		<div class="panel-body">
+			<div wicket:id="content"></div>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="andFrag">
+	</wicket:fragment>
+	<wicket:fragment wicket:id="orFrag">
+	</wicket:fragment>
+	<wicket:fragment wicket:id="ifThenFrag">
+	</wicket:fragment>
+	<wicket:fragment wicket:id="notFrag">
+	</wicket:fragment>
+	<wicket:fragment wicket:id="otherFrag">
+		<div wicket:id="viewer"></div>
+	</wicket:fragment>
+</wicket:panel>

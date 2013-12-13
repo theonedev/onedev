@@ -1,47 +1,27 @@
-function setupModal(triggerId, modalId, modalWidth, contentLoader) {
-	var trigger = $("#" + triggerId);
-	var modal = $("#" + modalId);
-
-	// modal can associate with multiple triggers, and we should initialize it once here.
-	if (!modal.hasClass("modal")) {
-		modal.addClass("modal popup hide");
-		modal.before("<div id='" + modalId + "-placeholder' class='hide'></div>");
-		
-		modal.modal({backdrop: "static", keyboard: false, show: false});
-	}
-
-	trigger.click(function() {
-		$("body").append(modal);
-		modal.modal("show");
-		
-		afterShowModal(modal);
-		
-		if (!modal.find(">.content")[0]) 
-			contentLoader();
-		else if (modalWidth != "null")
-			positionModal(modal, modalWidth);
+function setupModalTrigger(triggerId, modalId, contentLoader) {
+	$("#" + triggerId).click(function() {
+		showModal(modalId, contentLoader);
 	});
 }
 
-function modalLoaded(modalId, modalWidth) {
-	if (modalWidth != "null") {
-		var modal = $("#" + modalId);
-		positionModal(modal, modalWidth);
-	}
-}
-
-function positionModal(modal, modalWidth) {
-	modal.css({"width": modalWidth, "margin-left": function() {return -($(this).width() / 2);}});
-}
-
-function hideModal(modalId) {
+function setupModal(modalId, modalWidth, showImmediately) {
 	var modal = $("#" + modalId);
-	modal.modal("hide");
-	
-	$("#" + modalId + "-placeholder").after(modal);
+
+	modal.addClass("modal popup");
+	modal.before("<div id='" + modalId + "-placeholder' class='hide'></div>");
+	modal.modal({backdrop: "static", keyboard: false, show: false});
+	if (modalWidth)
+		modal.find(".modal-dialog").css({"width": modalWidth});
+	if (showImmediately)
+		showModal(modalId, undefined);
 }
 
-function afterShowModal(modal) {
+function showModal(modalId, contentLoader) {
+	var modal = $("#" + modalId);
+	$("body").append(modal);
+	
+	modal.modal("show");
+	
 	var backdrop = $(".modal-backdrop:last");
 	var prevPopup = modal.prevAll(".popup:visible");
 	
@@ -51,4 +31,17 @@ function afterShowModal(modal) {
 		backdrop.css("z-index", backdropZIndex);
 		modal.css("z-index", backdropZIndex + 10);
 	}
+	
+	if (!modal.find(">.modal-dialog>.content")[0])
+		contentLoader();
+}
+
+function modalLoaded(modalId) {
+}
+
+function hideModal(modalId) {
+	var modal = $("#" + modalId);
+	modal.modal("hide");
+	
+	$("#" + modalId + "-placeholder").after(modal);
 }

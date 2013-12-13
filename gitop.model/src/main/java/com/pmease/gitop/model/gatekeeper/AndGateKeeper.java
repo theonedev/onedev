@@ -18,7 +18,8 @@ import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
 
 @SuppressWarnings("serial")
-@Editable(name="All Of Contained Conditions Are Satisfied", category=GateKeeper.CATEGORY_COMPOSITE, order=100, 
+@Editable(name="All Of Contained Conditions Are Satisfied", category=GateKeeper.CATEGORY_COMPOSITE, 
+		icon="icon-servers", order=100, 
 		description="This condition will be satisified if all of its contained conditions are satisfied.")
 public class AndGateKeeper extends AbstractGateKeeper {
 

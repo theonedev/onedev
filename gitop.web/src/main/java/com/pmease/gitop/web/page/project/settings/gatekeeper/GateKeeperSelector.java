@@ -128,7 +128,7 @@ public abstract class GateKeeperSelector extends Panel {
 						gateKeeperItem.add(link);
 						String icon = EditableUtils.getIcon(gateKeeperClass);
 						if (icon == null)
-							icon = getIcon(category);
+							icon = "icon-lock";
 						link.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", icon)));
 						link.add(new Label("name", EditableUtils.getName(gateKeeperClass)));
 						link.add(new Label("description", EditableUtils.getDescription(gateKeeperClass)).setEscapeModelStrings(false));
@@ -138,23 +138,6 @@ public abstract class GateKeeperSelector extends Panel {
 			}
 			
 		});
-	}
-	
-	private String getIcon(String category) {
-		switch (category) {
-			case GateKeeper.CATEGORY_APPROVAL: 
-				return "icon-group";
-			case GateKeeper.CATEGORY_BRANCH:
-				return "icon-git-branch";
-			case GateKeeper.CATEGORY_BUILD:
-				return "icon-checkbox-checked";
-			case GateKeeper.CATEGORY_COMPOSITE:
-				return "icon-servers";
-			case GateKeeper.CATEGORY_FILE:
-				return "icon-folder-submodule";
-			default:
-				return "icon-lock";
-		}
 	}
 	
 	protected abstract void onSelect(AjaxRequestTarget target, Class<? extends GateKeeper> gateKeeperClass);
