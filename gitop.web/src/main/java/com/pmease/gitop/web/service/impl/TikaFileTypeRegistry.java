@@ -28,6 +28,8 @@ public class TikaFileTypeRegistry implements FileTypeRegistry {
 		@Override
 		protected void configure() {
 //			bind(Languages.class).in(Singleton.class);
+			
+			bind(MimeTypes.class).toInstance(MimeTypes.getDefaultMimeTypes());
 			bind(FileTypeRegistry.class).to(TikaFileTypeRegistry.class);
 		}
 	}
@@ -36,10 +38,10 @@ public class TikaFileTypeRegistry implements FileTypeRegistry {
 	private final MimeTypes mimeTypes;
 	
 	@Inject
-	TikaFileTypeRegistry() {
+	TikaFileTypeRegistry(MimeTypes mimeTypes) {
 		this.tika = new Tika();
 		tika.setMaxStringLength(Amount.of(10, Data.MB).as(Data.BYTES));
-		this.mimeTypes = MimeTypes.getDefaultMimeTypes();
+		this.mimeTypes = mimeTypes;
 	}
 	
 	@Override

@@ -201,8 +201,7 @@ public class SourceBlobPage extends AbstractFilePage {
 	}
 
 	protected String getFilePath() {
-		List<String> paths = getPaths();
-		return UrlUtils.removeRedundantSlashes(Joiner.on("/").join(paths));
+		return UrlUtils.concatSegments(getPaths());
 	}
 	
 	@Override

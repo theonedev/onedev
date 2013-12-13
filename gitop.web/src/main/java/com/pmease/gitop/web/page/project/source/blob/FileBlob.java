@@ -1,5 +1,6 @@
 package com.pmease.gitop.web.page.project.source.blob;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -9,33 +10,30 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MimeType;
+import org.apache.tika.mime.MimeTypes;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
-import org.eclipse.jgit.lib.ObjectStream;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.RepositoryCache;
-import org.eclipse.jgit.lib.RepositoryCache.FileKey;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.treewalk.TreeWalk;
-import org.eclipse.jgit.util.FS;
 import org.gitective.core.BlobUtils;
 import org.gitective.core.CommitUtils;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
-import com.ibm.icu.text.CharsetDetector;
-import com.ibm.icu.text.CharsetMatch;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.model.Project;
-import com.pmease.gitop.web.common.quantity.Amount;
 import com.pmease.gitop.web.common.quantity.Data;
 import com.pmease.gitop.web.jgit.RepoUtils;
 import com.pmease.gitop.web.jgit.RepositoryException;
@@ -43,6 +41,7 @@ import com.pmease.gitop.web.service.FileTypeRegistry;
 import com.pmease.gitop.web.service.impl.Language;
 import com.pmease.gitop.web.service.impl.Languages;
 import com.pmease.gitop.web.util.MimeTypeUtils;
+import com.pmease.gitop.web.util.UniversalEncodingDetector;
 
 /**
  * A FileBlob is a wrapper around the blob object in git to make it easy to 
@@ -79,7 +78,7 @@ public class FileBlob {
 	}
 	
 	// TODO: change this to be configurable
-	private static final int MAX_SIZE = Amount.of(5, Data.MB).as(Data.BYTES);
+	private static final long MAX_SIZE = 5 * Data.ONE_MB;
 	
 	static FileBlob initWithJGit(Project project, String revision,
 			String path, FileTypeRegistry registry) {
@@ -94,7 +93,7 @@ public class FileBlob {
 		File gitDir = project.code().repoDir();
 		Repository repo = null;
 		try {
-			repo = RepositoryCache.open(FileKey.lenient(gitDir, FS.DETECTED));
+			repo = RepoUtils.open(gitDir);
 			RevCommit commit = CommitUtils.getCommit(repo, revision);
 			TreeWalk tw = TreeWalk.forPath(repo, path, commit.getTree());
 			if (tw == null) {
@@ -107,32 +106,28 @@ public class FileBlob {
 			ObjectLoader ol = repo.open(blobId, Constants.OBJ_BLOB);
 			blob.size = ol.getSize();
 			
-			ObjectStream os = null;
-			try {
-				os = ol.openStream();
-				blob.mimeType = registry.getMimeType(path, os);
-				
-				if (!blob.isLarge() && (
-						language.isPresent() 
-						|| registry.isSafeInline(blob.mimeType))) {
-					
-					CharsetDetector detector = new CharsetDetector();
-					detector.setText(os);
-					CharsetMatch match = detector.detect();
-					if (match != null) {
-						blob.charset = Charset.forName(match.getName());
-					}
-				}
-			} finally {
-				IOUtils.closeQuietly(os);
-			}
+			if (blob.size > 0) {
+				BufferedInputStream stream = null;
+				try {
+					stream = new BufferedInputStream(ol.openStream());
+					blob.mimeType = registry.getMimeType(path, stream);
 
-			// read blob content to memory only when blob is not large (1MB),
-			// and safe to embed to html
-			if (!blob.isLarge() && (
-					language.isPresent() 
-					|| registry.isSafeInline(blob.mimeType))) {
-				blob.data = ol.getCachedBytes(MAX_SIZE);
+					if (Objects.equal(blob.mimeType.getType(), MediaType.OCTET_STREAM)
+							&& !UniversalEncodingDetector.isBinary(stream)) {
+						blob.mimeType = MimeTypeUtils.getMimeType(MimeTypes.PLAIN_TEXT);
+					}
+					
+					if (!blob.isLarge() && (
+							language.isPresent() 
+							|| registry.isSafeInline(blob.mimeType))) {
+						blob.charset = UniversalEncodingDetector.detect(stream);
+						blob.data = ByteStreams.toByteArray(stream);
+					}
+				} finally {
+					IOUtils.closeQuietly(stream);
+				}
+			} else {
+				blob.mimeType = MimeTypeUtils.getMimeType(MimeTypes.PLAIN_TEXT);
 			}
 			
 			return blob;
@@ -174,6 +169,10 @@ public class FileBlob {
 		return size > MAX_SIZE;
 	}
 
+	public boolean isEmpty() {
+		return size == 0;
+	}
+	
 	public String getStringContent() {
 		if (data == null) {
 			return null;
@@ -186,12 +185,19 @@ public class FileBlob {
 		}
 	}
 	
-	public ObjectStream openStream() {
+	public boolean canHighlight() {
+		return getSize() < Data.ONE_MB 
+				&& isText() 
+				&& language != null 
+				&& language.getLanguageType() != Language.Type.DATA;
+	}
+	
+	public BufferedInputStream openStream() {
 		Project project = Gitop.getInstance(ProjectManager.class).get(projectId);
 		Repository db = RepoUtils.open(project.code().repoDir());
 		try {
 			ObjectId id = BlobUtils.getId(db, revision, getPath());
-			return db.open(id, Constants.OBJ_BLOB).openStream();
+			return new BufferedInputStream(db.open(id, Constants.OBJ_BLOB).openStream());
 		} catch (IOException e) {
 			throw new RepositoryException(e);
 		} finally {
@@ -214,8 +220,8 @@ public class FileBlob {
 //	private static final Splitter LINE_SPLITTER = Splitter.on(Pattern.compile("\r\n|\n|\r"));
 	
 	public List<String> getLines() {
-		if (isLarge() || !isText() || data == null) {
-			Collections.emptyList();
+		if (isEmpty() || isLarge() || !isText() || data == null) {
+			return Collections.emptyList();
 		}
 		
 		try {

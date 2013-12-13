@@ -7,11 +7,10 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.util.string.Strings;
 
 import com.pmease.gitop.web.page.project.source.blob.FileBlob;
+import com.pmease.gitop.web.page.project.source.blob.renderer.syntax.HighlightBehavior;
 import com.pmease.gitop.web.service.impl.Language;
-import com.pmease.gitop.web.util.MimeTypeUtils;
 
 @SuppressWarnings("serial")
 public class TextBlobPanel extends Panel {
@@ -33,52 +32,75 @@ public class TextBlobPanel extends Panel {
 				StringBuffer sb = new StringBuffer();
 				for (int i = 0; i < size; i++) {
 					int lineno = i + 1;
-					sb.append("<a href='#L" + lineno + "' id='L" + lineno + "'>" + lineno + "</a>").append("\n");
+					sb.append("<span id='L" + lineno + "'>" + lineno + "</span>").append("\n");
 				}
 				return sb.toString();
 			}
 			
 		}).setEscapeModelStrings(false));
 		
-		add(new Label("code", new AbstractReadOnlyModel<String>() {
+		IModel<String> langModel = new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				String s = getBlob().getStringContent();
-				if (Strings.isEmpty(s)) {
-					return "This file is empty";
-				} else {
-					return s;
-				}
-			}
-			
-		}).setOutputMarkupId(true)
-			.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
-
-				@Override
-				public String getObject() {
-					FileBlob blob = getBlob();
-					if (blob.getSize() == 0) {
-						return "no-highlight";
-					}
-					
-					Language language = blob.getLanguage();
-					if (language != null) {
-						if (language.getLanguageType() != null && language.getLanguageType() == Language.Type.DATA) {
-							return "no-highlight";
-						} else {
-							return language.getHighlightCss() != null ?
-									language.getHighlightCss() 
-									: language.getId().toLowerCase();
-						}
-					}
-					
-					String type = MimeTypeUtils.guessSourceType(getBlob().getMimeType());
-					return type == null ? "no-highlight" : type;
+				Language lang = getBlob().getLanguage();
+				if (lang == null) {
+					return "no-highlight";
 				}
 				
-			}))
-			.add(new HighlightBehavior()));
+				return lang.getHighlightType();
+			}
+			
+		};
+		
+		IModel<String> textModel = new AbstractReadOnlyModel<String>() {
+			@Override
+			public String getObject() {
+				if (getBlob().isEmpty()) {
+					return "This file is empty";
+				}
+				
+//				Language language = getBlob().getLanguage();
+//				String type = language == null ? "text" : language.getHighlightType();
+//				
+//				Renderer r = XhtmlRendererFactory.getRenderer(type);
+//				if (r == null) {
+//					return "<pre>" + getBlob().getStringContent() + "</pre>";
+//				}
+//				
+//				InputStream in = null;
+//				ByteArrayOutputStream out = null;
+//				try {
+//					Charset charset = getBlob().getCharset();
+//					in = new ByteArrayInputStream(getBlob().getStringContent().getBytes(charset));
+//					out = new ByteArrayOutputStream();
+//					
+//					r.highlight("",
+//							in,
+//							out,
+//							charset.name(),
+//							true);
+//					return out.toString(charset.name());
+//				} catch (IOException e) {
+//					throw Throwables.propagate(e);
+//				} finally {
+//					IOUtils.closeQuietly(in);
+//					IOUtils.closeQuietly(out);
+//				}
+				
+				return getBlob().getStringContent();
+			}
+		};
+		
+		Label code = new Label("code", textModel);
+		code.setOutputMarkupId(true);
+
+		code.add(AttributeAppender.append("class", langModel));
+		if (getBlob().canHighlight()) {
+			code.add(new HighlightBehavior(langModel));
+		}
+		
+		add(code);
 		
 	}
 	

@@ -1,5 +1,6 @@
 package com.pmease.gitop.web.page.project.source.blob.renderer;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 
 import org.apache.commons.io.FilenameUtils;
@@ -8,7 +9,6 @@ import org.apache.tika.io.IOUtils;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 import org.apache.wicket.request.resource.ContentDisposition;
-import org.eclipse.jgit.lib.ObjectStream;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -58,7 +58,7 @@ public class RawBlobResource extends AbstractResource {
 			response.setWriteCallback(new WriteCallback() {
 				@Override
 				public void writeData(final Attributes attributes) {
-					ObjectStream os = blob.openStream();
+					BufferedInputStream os = blob.openStream();
 					try {
 						ByteStreams.copy(os, attributes.getResponse().getOutputStream());
 					} catch (IOException e) {

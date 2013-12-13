@@ -109,10 +109,18 @@
 			<version>1.0</version>
 		</dependency>
 
+		<!--
 		<dependency>
 			<groupId>com.ibm.icu</groupId>
 			<artifactId>icu4j</artifactId>
 			<version>52.1</version>
+		</dependency>
+		 -->
+
+		<dependency>
+			<groupId>com.googlecode.juniversalchardet</groupId>
+			<artifactId>juniversalchardet</artifactId>
+			<version>1.0.3</version>
 		</dependency>
 
 		<dependency>
@@ -132,25 +140,12 @@
 			<artifactId>tika-core</artifactId>
 			<version>${tika.version}</version>
 		</dependency>
-
-		<dependency>
-			<groupId>com.uwyn</groupId>
-			<artifactId>jhighlight</artifactId>
-			<version>1.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.servlet</groupId>
-					<artifactId>servlet-api</artifactId>
-				</exclusion>
-			</exclusions>
+<!-- 		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-parsers</artifactId>
+			<version>${tika.version}</version>
 		</dependency>
-
-		<dependency>
-			<groupId>com.sun.jna</groupId>
-			<artifactId>jna</artifactId>
-			<version>3.0.9</version>
-		</dependency>
-
+ -->
 		<dependency>
 			<groupId>org.gitective</groupId>
 			<artifactId>gitective-core</artifactId>
@@ -161,6 +156,11 @@
 					<artifactId>org.eclipse.jgit</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.jna</groupId>
+			<artifactId>jna</artifactId>
+			<version>3.0.9</version>
 		</dependency>
 
 		<dependency>

@@ -79,7 +79,7 @@ public class SourceBlobPanel extends AbstractSourcePagePanel {
 				return getBlob().getLines().size();
 			}
 			
-		}));
+		}).setVisibilityAllowed(getBlob().isText()));
 		
 		add(new Label("sloc", new AbstractReadOnlyModel<Integer>() {
 
@@ -88,7 +88,7 @@ public class SourceBlobPanel extends AbstractSourcePagePanel {
 				List<String> lines = getBlob().getLines();
 				int sloc = 0;
 				for (String each : lines) {
-					if (!StringUtils.isEmpty(each)) {
+					if (!StringUtils.isEmpty(each.trim())) {
 						sloc++;
 					}
 				}

@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.project.source.component;
+package com.pmease.gitop.web.page.project.source.tree;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -37,7 +37,7 @@ import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.api.GitPerson;
 import com.pmease.gitop.web.page.project.source.blob.SourceBlobPage;
 import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
-import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
+import com.pmease.gitop.web.page.project.source.component.AbstractSourcePagePanel;
 import com.pmease.gitop.web.util.GitUtils;
 import com.pmease.gitop.web.util.UrlUtils;
 

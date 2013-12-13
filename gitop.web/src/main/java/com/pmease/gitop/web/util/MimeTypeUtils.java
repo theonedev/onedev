@@ -5,9 +5,13 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import org.apache.tika.mime.MimeType;
+import org.apache.tika.mime.MimeTypeException;
+import org.apache.tika.mime.MimeTypes;
 
 import com.google.common.base.Strings;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
+import com.pmease.gitop.core.Gitop;
 
 public class MimeTypeUtils {
 
@@ -21,7 +25,8 @@ public class MimeTypeUtils {
 		
 		return type.getType().getType().equalsIgnoreCase("text")
                 || type.getType().getSubtype().equalsIgnoreCase("text")
-                || isXMLType(type);
+                || isXMLType(type)
+                || isJsonType(type);
 	}
 	
 	public static boolean isXMLType(final MimeType type) {
@@ -29,11 +34,23 @@ public class MimeTypeUtils {
                 || type.getType().getSubtype().endsWith("xml");
     }
 	
+	public static boolean isJsonType(final MimeType type) {
+		return type.getType().getSubtype().endsWith("json");
+	}
+	
 	public static boolean isImageType(final MimeType type) {
     	return type.getType().getType().equalsIgnoreCase("image")
     			|| type.getType().getSubtype().endsWith("image");
     			
     }
+	
+	public static MimeType getMimeType(String name) {
+		try {
+			return Gitop.getInstance(MimeTypes.class).getRegisteredMimeType(name);
+		} catch (MimeTypeException e) {
+			throw Throwables.propagate(e);
+		}
+	}
 	
 	static Map<String, String> sourceTypes = ImmutableMap.<String, String>builder()
 			.put("text/x-actionscript", "actionscript")

@@ -17,7 +17,6 @@ import com.pmease.gitop.web.page.project.source.component.EmptyRepositoryPanel;
 import com.pmease.gitop.web.page.project.source.component.ProjectDescriptionPanel;
 import com.pmease.gitop.web.page.project.source.component.ReadmePanel;
 import com.pmease.gitop.web.page.project.source.component.SourceBreadcrumbPanel;
-import com.pmease.gitop.web.page.project.source.component.SourceTreePanel;
 import com.pmease.gitop.web.util.GitUtils;
 
 @SuppressWarnings("serial")
