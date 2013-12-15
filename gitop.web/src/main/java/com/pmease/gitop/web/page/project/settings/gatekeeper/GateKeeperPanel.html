@@ -1,22 +1,60 @@
 <wicket:panel>
-	<div class="gate-keeper panel panel-default">
+	<div wicket:id="container" class="gate-keeper panel panel-default ">
 		<div class="panel-heading clearfix">
-			<h4 wicket:id="title" class="panel-title pull-left"></h4>
-			<div wicket:id="edit" class="icon icon-edit icon-lg pull-left" data-toggle="tooltip" title="Edit this condition"></div>
-			<div wicket:id="delete" class="icon icon-trash icon-lg pull-left" data-toggle="tooltip" title="Delete this condition"></div>
-			<div wicket:id="editorModal"></div>
+			<div wicket:id="title" class="panel-title pull-left"></div>
+			<div wicket:id="edit" class="icon icon-edit pull-left" data-toggle="tooltip" title="Edit this gate keeper"></div>
+			<div wicket:id="delete" class="icon icon-trash pull-left" data-toggle="tooltip" title="Delete this gate keeper"></div>
+			<div wicket:id="enable" class="icon pull-left " data-toggle="tooltip"></div>
+			<div wicket:id="editor"></div>
 		</div>
 		<div class="panel-body">
 			<div wicket:id="content"></div>
 		</div>
 	</div>
 	<wicket:fragment wicket:id="andFrag">
+		<div wicket:id="children">
+			<div wicket:id="child"></div>
+		</div>
+		<div wicket:id="childTypeSelectorTrigger" class="well gate-keeper-add">Add Child Condition<i class="icon icon-add-circle"></i></div>
+		<div wicket:id="childTypeSelector"></div>
+		<div wicket:id="childEditor"></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="orFrag">
+		<table class="children">
+			<tr>
+				<td wicket:id="children" class="child">
+					<div wicket:id="child"></div>
+				</td>
+			</tr>
+		</table>
+		<div wicket:id="childTypeSelectorTrigger" class="well gate-keeper-add">Add Child Condition<i class="icon icon-add-circle"></i></div>
+		<div wicket:id="childTypeSelector"></div>
+		<div wicket:id="childEditor"></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="ifThenFrag">
+		<table class="ifthen">
+			<tr>
+				<td class="ifthen if">
+					<div wicket:id="if"></div>
+					<div wicket:id="ifTypeSelectorTrigger" class="well gate-keeper-add">Define First Condition<i class="icon icon-add-circle"></i></div>
+					<div wicket:id="ifTypeSelector"></div>
+					<div wicket:id="ifEditor"></div>
+				</td>
+				<td class="ifthen connector"><div class="icon icon-arrow-slim-right"></div></td>
+				<td class="ifthen then">
+					<div wicket:id="then"></div>
+					<div wicket:id="thenTypeSelectorTrigger" class="well gate-keeper-add">Define Second Condition<i class="icon icon-add-circle"></i></div>
+					<div wicket:id="thenTypeSelector"></div>
+					<div wicket:id="thenEditor"></div>
+				</td>
+			</tr>
+		</table>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="notFrag">
+		<div wicket:id="gateKeeper"></div>
+		<div wicket:id="gateKeeperTypeSelectorTrigger" class="well gate-keeper-add">Define Contained Condition<i class="icon icon-add-circle"></i></div>
+		<div wicket:id="gateKeeperTypeSelector"></div>
+		<div wicket:id="gateKeeperEditor"></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="otherFrag">
 		<div wicket:id="viewer"></div>

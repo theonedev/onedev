@@ -3,6 +3,7 @@ package com.pmease.gitop.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -20,8 +21,8 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.loader.AppLoader;
+import com.pmease.gitop.model.gatekeeper.AndGateKeeper;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
-import com.pmease.gitop.model.gatekeeper.DefaultGateKeeper;
 import com.pmease.gitop.model.permission.object.ProtectedObject;
 import com.pmease.gitop.model.permission.object.UserBelonging;
 import com.pmease.gitop.model.storage.StorageManager;
@@ -55,7 +56,7 @@ public class Project extends AbstractEntity implements UserBelonging {
 
 	@Lob
 	@Column(nullable=false)
-	private GateKeeper gateKeeper = new DefaultGateKeeper();
+	private ArrayList<GateKeeper> gateKeepers = new ArrayList<GateKeeper>();
 	
 	@Column(nullable=false)
 	private Date createdAt = new Date();
@@ -106,17 +107,16 @@ public class Project extends AbstractEntity implements UserBelonging {
         this.forkable = forkable;
     }
 
-    @Editable(
-			name="Accept Merge Requests If", order=500,
+    @Editable(name="Accept Merge Requests If", order=500,
 			description="Optionally define gate keeper to accept merge requests under certain condition.")
     @NotNull
 	@Valid
-	public GateKeeper getGateKeeper() {
-		return gateKeeper;
+	public List<GateKeeper> getGateKeepers() {
+		return gateKeepers;
 	}
 
-	public void setGateKeeper(GateKeeper gateKeeper) {
-		this.gateKeeper = gateKeeper;
+	public void setGateKeepers(ArrayList<GateKeeper> gateKeepers) {
+		this.gateKeepers = gateKeepers;
 	}
 
 	public Date getCreatedAt() {
@@ -203,5 +203,11 @@ public class Project extends AbstractEntity implements UserBelonging {
 	public Git code() {
 		return new Git(AppLoader.getInstance(StorageManager.class).getStorage(this).ofCode());
 	}
-	
+
+	public GateKeeper getCompositeGateKeeper() {
+		AndGateKeeper andGateKeeper = new AndGateKeeper();
+		for (GateKeeper each: getGateKeepers())
+			andGateKeeper.getGateKeepers().add(each);
+		return andGateKeeper;
+	}
 }

@@ -12,7 +12,7 @@
 	padding: 0;
 }
 .dropdown-panel>.loading, .dropdown-panel>.loading.content {
-	margin: 4px;
+	margin: 8px;
 	padding: 0 0 0 20px;
 	background: url("ajax-indicator.gif") left center no-repeat;
 }

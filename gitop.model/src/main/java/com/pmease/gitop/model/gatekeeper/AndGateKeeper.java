@@ -4,12 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.util.trimmable.AndOrConstruct;
-import com.pmease.commons.util.trimmable.TrimUtils;
+import com.pmease.commons.editable.annotation.TableLayout;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
 import com.pmease.gitop.model.gatekeeper.checkresult.Blocked;
@@ -18,26 +14,13 @@ import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
 
 @SuppressWarnings("serial")
-@Editable(name="All Of Contained Conditions Are Satisfied", category=GateKeeper.CATEGORY_COMPOSITE, 
-		icon="icon-servers", order=100, 
-		description="This condition will be satisified if all of its contained conditions are satisfied.")
-public class AndGateKeeper extends AbstractGateKeeper {
-
-	private List<GateKeeper> gateKeepers = new ArrayList<GateKeeper>();
-	
-	public void setGateKeepers(List<GateKeeper> gateKeepers) {
-		this.gateKeepers = gateKeepers;
-	}
-
-	@Editable(name="Sub Gate Keepers")
-	@Valid
-	@NotNull
-	public List<GateKeeper> getGateKeepers() {
-		return gateKeepers;
-	}
+@Editable(name="If All Contained Gate Keepers Are Passed", icon="icon-servers", order=100, 
+		description="This gate keeper will be passed if all contained gate keepers are passed.")
+@TableLayout
+public class AndGateKeeper extends AndOrGateKeeper {
 
 	@Override
-	public CheckResult check(PullRequest request) {
+	public CheckResult doCheck(PullRequest request) {
 		List<String> pendingReasons = new ArrayList<String>();
 		List<String> acceptReasons = new ArrayList<String>();
 		
@@ -63,23 +46,6 @@ public class AndGateKeeper extends AbstractGateKeeper {
 			return pending(pendingReasons, voteEligibilities);
 		else
 			return accepted(acceptReasons);
-	}
-
-	@Override
-	public Object trim(Object context) {
-		return TrimUtils.trim(new AndOrConstruct() {
-			
-			@Override
-			public Object getSelf() {
-				return AndGateKeeper.this;
-			}
-			
-			@Override
-			public List<?> getMembers() {
-				return getGateKeepers();
-			}
-			
-		}, context);
 	}
 
 }

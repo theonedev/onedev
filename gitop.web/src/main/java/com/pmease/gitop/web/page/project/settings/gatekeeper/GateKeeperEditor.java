@@ -28,7 +28,10 @@ public abstract class GateKeeperEditor extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", EditableUtils.getIcon(gateKeeper.getClass()))));
+		String iconClass = EditableUtils.getIcon(gateKeeper.getClass());
+		if (iconClass == null)
+			iconClass = "icon-lock";
+		add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", iconClass)));
 		add(new Label("name", EditableUtils.getName(gateKeeper.getClass())));
 		add(new Label("description", EditableUtils.getDescription(gateKeeper.getClass())).setEscapeModelStrings(false));
 		

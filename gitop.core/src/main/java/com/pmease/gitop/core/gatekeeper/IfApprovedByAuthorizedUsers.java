@@ -1,26 +1,26 @@
 package com.pmease.gitop.core.gatekeeper;
 
 import java.util.Collection;
-import java.util.HashSet;
 
 import javax.validation.constraints.Min;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.AuthorizationManager;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
-import com.pmease.gitop.model.Membership;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
-import com.pmease.gitop.model.gatekeeper.GateKeeper;
+import com.pmease.gitop.model.gatekeeper.ApprovalGateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitop.model.gatekeeper.voteeligibility.CanVoteBySpecifiedTeam;
+import com.pmease.gitop.model.gatekeeper.voteeligibility.CanVoteByAuthorizedUser;
+import com.pmease.gitop.model.permission.operation.GeneralOperation;
 
 @SuppressWarnings("serial")
-@Editable(category=GateKeeper.CATEGORY_APPROVAL, order=100, icon="icon-group", description=
-		"This condition will be satisified if specified number of users from specified team "
-		+ "approves the commit.")
-public class ApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
+@Editable(order=50, icon="icon-group", description=
+		"This gate keeper will be passed if the commit is approved by specified number of users with "
+		+ "writing permission.")
+public class IfApprovedByAuthorizedUsers extends ApprovalGateKeeper {
 
     private int leastApprovals = 1;
 
@@ -34,16 +34,16 @@ public class ApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
         this.leastApprovals = leastApprovals;
     }
 
-    @Override
-    public CheckResult check(PullRequest request) {
-        Collection<User> members = new HashSet<User>();
-        for (Membership membership : getTeam().getMemberships())
-            members.add(membership.getUser());
+	@Override
+	public CheckResult doCheck(PullRequest request) {
+		AuthorizationManager authorizationManager = Gitop.getInstance(AuthorizationManager.class);
+		Collection<User> authorizedUsers = authorizationManager.listAuthorizedUsers(
+				request.getTarget().getProject(), GeneralOperation.WRITE);
 
         int approvals = 0;
         int pendings = 0;
-        for (User member : members) {
-            Vote.Result result = member.checkVoteSince(request.getBaseUpdate());
+        for (User user: authorizedUsers) {
+            Vote.Result result = user.checkVoteSince(request.getBaseUpdate());
             if (result == null) {
                 pendings++;
             } else if (result.isAccept()) {
@@ -52,25 +52,24 @@ public class ApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
         }
 
         if (approvals >= getLeastApprovals()) {
-            return accepted("Get at least " + getLeastApprovals() + " approvals from team '"
-                    + getTeam().getName() + "'.");
+            return accepted("Get at least " + getLeastApprovals() + " approvals from authorized users.");
         } else if (getLeastApprovals() - approvals > pendings) {
             return rejected("Can not get at least " + getLeastApprovals()
-                    + " approvals from team '" + getTeam().getName() + "'.");
+                    + " approvals from authorized users.");
         } else {
             int lackApprovals = getLeastApprovals() - approvals;
 
             if (request.getId() != null)
-            	Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, members, lackApprovals);
+            	Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, authorizedUsers, lackApprovals);
 
     		String prefix;
     		if (request.getId() == null)
     			prefix = "Not ";
     		else
     			prefix = "To be ";
-            return pending(prefix + "approved by " + lackApprovals + " user(s) from team '"
-                    + getTeam().getName() + "'.", new CanVoteBySpecifiedTeam(getTeam()));
+            return pending(prefix + "approved by " + lackApprovals + " authorized user(s).", 
+            		new CanVoteByAuthorizedUser());
         }
-    }
+	}
 
 }

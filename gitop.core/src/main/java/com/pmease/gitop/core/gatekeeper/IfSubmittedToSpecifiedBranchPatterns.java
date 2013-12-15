@@ -13,14 +13,13 @@ import com.pmease.commons.util.pattern.WildcardPathMatcher;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
-import com.pmease.gitop.model.gatekeeper.AbstractGateKeeper;
-import com.pmease.gitop.model.gatekeeper.GateKeeper;
+import com.pmease.gitop.model.gatekeeper.BranchGateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 
 @SuppressWarnings("serial")
-@Editable(category=GateKeeper.CATEGORY_BRANCH, order=200, icon="icon-git-branch-pattern", description=
-		"This condition will be satisified if commit is submitted to specified branch pattern.")
-public class SubmittedToSpecifiedBranchPattern extends AbstractGateKeeper {
+@Editable(order=200, icon="icon-git-branch-pattern", description=
+		"This gate keeper will be passed if the commit is submitted to specified branch pattern.")
+public class IfSubmittedToSpecifiedBranchPatterns extends BranchGateKeeper {
 
 	private String branchPatterns;
 	
@@ -35,7 +34,7 @@ public class SubmittedToSpecifiedBranchPattern extends AbstractGateKeeper {
 	}
 
 	@Override
-	public CheckResult check(PullRequest request) {
+	public CheckResult doCheck(PullRequest request) {
 		Project project = request.getTarget().getProject();
 		BranchManager branchManager = AppLoader.getInstance(BranchManager.class);
 		EntityLoader entityLoader = branchManager.asEntityLoader(project);

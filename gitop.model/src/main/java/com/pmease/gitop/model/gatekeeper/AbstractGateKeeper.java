@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
 import com.pmease.gitop.model.gatekeeper.checkresult.Blocked;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
@@ -16,6 +17,34 @@ import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
 @SuppressWarnings("serial")
 @Editable
 public abstract class AbstractGateKeeper implements GateKeeper {
+
+	private boolean enabled = true;
+	
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+	
+	@Override
+	public CheckResult check(PullRequest request) {
+		if (enabled)
+			return doCheck(request);
+		else
+			return accepted("Gate keeper is disabled.");
+	}
+	
+	/**
+	 * Check the gate keeper without considering enable flag. 
+	 * 
+	 * @param request
+	 *			pull request to be checked 		
+	 * @return
+	 * 			result of the check
+	 */
+	protected abstract CheckResult doCheck(PullRequest request);
 
 	@Override
 	public Object trim(@Nullable Object context) {

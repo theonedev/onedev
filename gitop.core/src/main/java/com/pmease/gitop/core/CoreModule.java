@@ -17,6 +17,9 @@ import com.pmease.commons.util.ClassUtils;
 import com.pmease.gitop.core.gatekeeper.MoreGateKeepers;
 import com.pmease.gitop.core.manager.impl.DefaultStorageManager;
 import com.pmease.gitop.model.ModelLocator;
+import com.pmease.gitop.model.gatekeeper.ApprovalGateKeeper;
+import com.pmease.gitop.model.gatekeeper.BranchGateKeeper;
+import com.pmease.gitop.model.gatekeeper.FileGateKeeper;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.storage.StorageManager;
 
@@ -59,6 +62,54 @@ public class CoreModule extends AbstractPluginModule {
 			@Override
 			public Class<?> getAbstractClass() {
 				return GateKeeper.class;
+			}
+		});
+
+		contribute(ImplementationProvider.class, new ImplementationProvider() {
+			
+			@Override
+			public Collection<Class<?>> getImplementations() {
+				Collection<Class<?>> implementations = new ArrayList<>();
+				for (Class<?> each: ClassUtils.findImplementations(BranchGateKeeper.class, MoreGateKeepers.class)) 
+					implementations.add(each);
+				return implementations;
+			}
+			
+			@Override
+			public Class<?> getAbstractClass() {
+				return BranchGateKeeper.class;
+			}
+		});
+
+		contribute(ImplementationProvider.class, new ImplementationProvider() {
+			
+			@Override
+			public Collection<Class<?>> getImplementations() {
+				Collection<Class<?>> implementations = new ArrayList<>();
+				for (Class<?> each: ClassUtils.findImplementations(FileGateKeeper.class, MoreGateKeepers.class)) 
+					implementations.add(each);
+				return implementations;
+			}
+			
+			@Override
+			public Class<?> getAbstractClass() {
+				return FileGateKeeper.class;
+			}
+		});
+
+		contribute(ImplementationProvider.class, new ImplementationProvider() {
+			
+			@Override
+			public Collection<Class<?>> getImplementations() {
+				Collection<Class<?>> implementations = new ArrayList<>();
+				for (Class<?> each: ClassUtils.findImplementations(ApprovalGateKeeper.class, MoreGateKeepers.class)) 
+					implementations.add(each);
+				return implementations;
+			}
+			
+			@Override
+			public Class<?> getAbstractClass() {
+				return ApprovalGateKeeper.class;
 			}
 		});
 
