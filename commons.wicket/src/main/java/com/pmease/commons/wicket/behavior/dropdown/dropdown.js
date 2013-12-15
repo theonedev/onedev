@@ -29,9 +29,8 @@ function setupDropdown(triggerId, dropdownInfo, hoverDelay, alignment, dropdownL
 	}
 			
 	// Dropdown can associate with multiple triggers, and we should initialize it only once.
-	if (!dropdown.hasClass("dropdown-panel")) { 
-		dropdown.addClass("dropdown-panel popup");
-		dropdown[0].trigger = trigger[0];
+	if (!dropdown.hasClass("popup")) { 
+		dropdown.addClass("popup");
 		dropdown.before("<div id='" + dropdownId + "-placeholder' class='hide'></div>");
 	}
 
@@ -191,6 +190,10 @@ $(function() {
 	});
 	
 	Wicket.Event.subscribe('/ajax/call/success', function() {
+		$("body>.dropdown-panel:visible").each(function() {
+			if (!$("#" + this.id + "-placeholder")[0])
+				$(this).remove();
+		});
 		$("body>.dropdown-panel:visible:last").align();
 	});
 	

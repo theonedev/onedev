@@ -3,7 +3,7 @@ package com.pmease.commons.wicket.behavior.dropdown;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 
@@ -30,16 +30,11 @@ public abstract class DropdownPanel extends Panel {
 	}
 	
 	@Override
-	protected void onComponentTag(ComponentTag tag) {
-		super.onComponentTag(tag);
-		tag.put("style", "display:none;");
-	}
-
-	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
 		setOutputMarkupId(true);
+		add(AttributeAppender.append("class", "dropdown-panel"));
 		if (lazyLoad) {
 			add(new Fragment("content", "loadingFrag", DropdownPanel.this)
 					.add(AttributeModifier.append("class", "loading"))

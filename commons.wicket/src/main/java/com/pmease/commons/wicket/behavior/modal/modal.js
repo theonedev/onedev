@@ -45,3 +45,13 @@ function hideModal(modalId) {
 	
 	$("#" + modalId + "-placeholder").after(modal);
 }
+
+$(function() {
+	Wicket.Event.subscribe('/ajax/call/success', function() {
+		$("body>.modal:visible").each(function() {
+			if (!$("#" + this.id + "-placeholder")[0])
+				$(this).remove();
+		});
+	});
+	
+});

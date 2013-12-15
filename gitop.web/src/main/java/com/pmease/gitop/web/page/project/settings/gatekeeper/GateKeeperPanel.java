@@ -15,6 +15,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.util.ReflectionUtils;
+import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.modal.ModalPanel;
 import com.pmease.gitop.model.gatekeeper.AbstractGateKeeper;
@@ -83,7 +84,7 @@ public abstract class GateKeeperPanel extends Panel {
 				target.add(modalPanel);
 			}
 			
-		});
+		}.add(new TooltipBehavior("Edit settings of this gate keeper")));
 		container.add(new AjaxLink<Void>("delete") {
 
 			@Override
@@ -91,7 +92,7 @@ public abstract class GateKeeperPanel extends Panel {
 				onDelete(target);
 			}
 			
-		});
+		}.add(new TooltipBehavior("Delete this gate keeper")));
 		container.add(new AjaxLink<Void>("enable") {
 
 			@Override
@@ -105,14 +106,12 @@ public abstract class GateKeeperPanel extends Panel {
 				super.onComponentTag(tag);
 				if (gateKeeper.isEnabled()) {
 					tag.append("class", "icon-checkbox-checked", " ");
-					tag.put("title", "Disable this gate keeper");
 				} else {
 					tag.append("class", "icon-checkbox-unchecked", " ");
-					tag.put("title", "Enable this gate keeper");
 				}
 			}
 			
-		});
+		}.add(new TooltipBehavior(gateKeeper.isEnabled()?"Disable this gate keeper":"Enable this gate keeper")));
 		container.add(new WebMarkupContainer("editor").setOutputMarkupPlaceholderTag(true).setVisible(false));
 		
 		if (AndOrGateKeeper.class.isAssignableFrom(clazz)) {

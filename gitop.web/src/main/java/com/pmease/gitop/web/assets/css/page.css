@@ -411,8 +411,9 @@ table.table-blob { width: 100%; }
  */
 .gate-keeper-tip {margin: 0 20px 20px 20px;}
 .gate-keeper-add.well {font-size:16px;}
+.gate-keeper-add .icon {margin-left: 8px;}
 .gate-keeper-add:hover, .gate-keeper-add:focus {background-color: #EBEBEB; border-color: #ADADAD; cursor: pointer;}
-.gate-keeper-selector {max-width: 600px; max-height: 600px; overflow: auto; padding: 16px;}
+.gate-keeper-selector {width: 600px; max-height: 600px; overflow: auto; padding: 16px;}
 .gate-keeper-selector .icon {width: 20px; margin-right: 8px;}
 .gate-keeper-category-name {font-size: 18px; margin-bottom: 4px; border-bottom: 1px solid #CCCCCC;}
 .gate-keeper-description {font-size: 13px; color: #888888;}

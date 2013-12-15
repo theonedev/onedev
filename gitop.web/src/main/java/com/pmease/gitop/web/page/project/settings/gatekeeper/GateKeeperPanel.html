@@ -2,9 +2,9 @@
 	<div wicket:id="container" class="gate-keeper panel panel-default ">
 		<div class="panel-heading clearfix">
 			<div wicket:id="title" class="panel-title pull-left"></div>
-			<div wicket:id="edit" class="icon icon-edit pull-left" data-toggle="tooltip" title="Edit this gate keeper"></div>
-			<div wicket:id="delete" class="icon icon-trash pull-left" data-toggle="tooltip" title="Delete this gate keeper"></div>
-			<div wicket:id="enable" class="icon pull-left " data-toggle="tooltip"></div>
+			<div wicket:id="edit" class="icon icon-edit pull-left" title="Edit this gate keeper"></div>
+			<div wicket:id="delete" class="icon icon-trash pull-left" title="Delete this gate keeper"></div>
+			<div wicket:id="enable" class="icon pull-left "></div>
 			<div wicket:id="editor"></div>
 		</div>
 		<div class="panel-body">
@@ -15,7 +15,7 @@
 		<div wicket:id="children">
 			<div wicket:id="child"></div>
 		</div>
-		<div wicket:id="childTypeSelectorTrigger" class="well gate-keeper-add">Add Child Condition<i class="icon icon-add-circle"></i></div>
+		<div wicket:id="childTypeSelectorTrigger" class="well gate-keeper-add">Add Child Gate Keeper<i class="icon icon-add-circle"></i></div>
 		<div wicket:id="childTypeSelector"></div>
 		<div wicket:id="childEditor"></div>
 	</wicket:fragment>
@@ -27,7 +27,7 @@
 				</td>
 			</tr>
 		</table>
-		<div wicket:id="childTypeSelectorTrigger" class="well gate-keeper-add">Add Child Condition<i class="icon icon-add-circle"></i></div>
+		<div wicket:id="childTypeSelectorTrigger" class="well gate-keeper-add">Add Child Gate Keeper<i class="icon icon-add-circle"></i></div>
 		<div wicket:id="childTypeSelector"></div>
 		<div wicket:id="childEditor"></div>
 	</wicket:fragment>
