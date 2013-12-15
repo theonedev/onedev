@@ -5,17 +5,28 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import org.apache.tika.mime.MimeType;
+import org.apache.tika.mime.MimeTypeException;
+import org.apache.tika.mime.MimeTypes;
 
+import com.google.common.base.Strings;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
+import com.pmease.gitop.core.Gitop;
 
 public class MimeTypeUtils {
 
 	private MimeTypeUtils() {}
 	
 	public static boolean isTextType(MimeType type) {
+		String sourceType = guessSourceType(type);
+		if (!Strings.isNullOrEmpty(sourceType)) {
+			return true;
+		}
+		
 		return type.getType().getType().equalsIgnoreCase("text")
                 || type.getType().getSubtype().equalsIgnoreCase("text")
-                || type.getType().getSubtype().equalsIgnoreCase("x-sh");
+                || isXMLType(type)
+                || isJsonType(type);
 	}
 	
 	public static boolean isXMLType(final MimeType type) {
@@ -23,11 +34,23 @@ public class MimeTypeUtils {
                 || type.getType().getSubtype().endsWith("xml");
     }
 	
+	public static boolean isJsonType(final MimeType type) {
+		return type.getType().getSubtype().endsWith("json");
+	}
+	
 	public static boolean isImageType(final MimeType type) {
     	return type.getType().getType().equalsIgnoreCase("image")
     			|| type.getType().getSubtype().endsWith("image");
     			
     }
+	
+	public static MimeType getMimeType(String name) {
+		try {
+			return Gitop.getInstance(MimeTypes.class).getRegisteredMimeType(name);
+		} catch (MimeTypeException e) {
+			throw Throwables.propagate(e);
+		}
+	}
 	
 	static Map<String, String> sourceTypes = ImmutableMap.<String, String>builder()
 			.put("text/x-actionscript", "actionscript")
@@ -102,11 +125,13 @@ public class MimeTypeUtils {
 			.put("text/x-web-markdown", "markdown")
 			.put("text/x-yacc", "yacc")
 			.put("text/x-yaml", "yaml")
+			.put("text/xml", "xml")
 			
 			.put("application/json", "json")
 			.put("application/javascript", "javascript")
 			.put("application/x-sh", "sh")
 			.put("application/x-httpd-jsp", "jsp")
+			.put("application/xml", "xml")
 			.build();
 	
 	public static @Nullable String guessSourceType(MimeType mime) {

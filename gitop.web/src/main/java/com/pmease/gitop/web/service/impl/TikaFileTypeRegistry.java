@@ -11,11 +11,12 @@ import org.apache.tika.Tika;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
-import org.apache.wicket.util.lang.Bytes;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
+import com.pmease.gitop.web.common.quantity.Amount;
+import com.pmease.gitop.web.common.quantity.Data;
 import com.pmease.gitop.web.service.FileTypeRegistry;
 import com.pmease.gitop.web.util.MimeTypeUtils;
 
@@ -27,6 +28,8 @@ public class TikaFileTypeRegistry implements FileTypeRegistry {
 		@Override
 		protected void configure() {
 //			bind(Languages.class).in(Singleton.class);
+			
+			bind(MimeTypes.class).toInstance(MimeTypes.getDefaultMimeTypes());
 			bind(FileTypeRegistry.class).to(TikaFileTypeRegistry.class);
 		}
 	}
@@ -35,10 +38,10 @@ public class TikaFileTypeRegistry implements FileTypeRegistry {
 	private final MimeTypes mimeTypes;
 	
 	@Inject
-	TikaFileTypeRegistry() {
+	TikaFileTypeRegistry(MimeTypes mimeTypes) {
 		this.tika = new Tika();
-		tika.setMaxStringLength((int) Bytes.megabytes(10).bytes());
-		this.mimeTypes = MimeTypes.getDefaultMimeTypes();
+		tika.setMaxStringLength(Amount.of(10, Data.MB).as(Data.BYTES));
+		this.mimeTypes = mimeTypes;
 	}
 	
 	@Override
@@ -83,21 +86,13 @@ public class TikaFileTypeRegistry implements FileTypeRegistry {
             "image/bmp",
             "image/png",
             "image/jpeg",
-            "image/x-xbitmap", // xbm
-            "image/x-xpixmap"  // xpm
+            "image/gif"
             );
     
 
 	@Override
     public boolean isSafeInline(final MimeType type) {
         return MimeTypeUtils.isTextType(type)
-        		|| MimeTypeUtils.isXMLType(type)
                 || DEFAULT_SAFE_TYPES.contains(type.getName());
     }
-
-//    boolean isSafe(Config cfg, MimeType type, boolean def) {
-//        return isTextType(type) ||
-//                isXMLType(type) ||
-//                cfg.getBoolean(SECTION_MIMETYPE, type.getName(), KEY_SAFE, def);
-//    }
 }

@@ -25,6 +25,13 @@ public enum Data implements Unit<Data> {
 	TB(1024, GB), 
 	PB(1024, TB);
 
+	public static long ONE_KB = Amount.of(1, KB).as(BYTES);
+	public static long ONE_MB = Amount.of(1, MB).as(BYTES);
+	public static long ONE_GB = Amount.of(1, GB).as(BYTES);
+	public static long ONE_TB = Amount.of(1, TB).as(BYTES);
+	public static long ONE_PB = Amount.of(1, PB).as(BYTES);
+	
+	
 	private final double multiplier;
 
 	private Data(double multiplier) {

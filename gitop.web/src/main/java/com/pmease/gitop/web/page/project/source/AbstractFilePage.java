@@ -7,6 +7,7 @@ import javax.persistence.EntityNotFoundException;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.Constants;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -39,7 +40,11 @@ public abstract class AbstractFilePage extends ProjectCategoryPage {
 					if (Strings.isNullOrEmpty(branchName)) {
 						Git git = project.code();
 						List<String> branches = Lists.newArrayList(git.listBranches());
-						rev = Iterables.getFirst(branches, null);
+						if (branches.contains(Constants.MASTER)) {
+							rev = Constants.MASTER;
+						} else {
+							rev = Iterables.getFirst(branches, null);
+						}
 					} else {
 						rev = branchName;
 					}

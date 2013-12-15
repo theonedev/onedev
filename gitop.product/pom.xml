@@ -146,5 +146,5 @@
         <bootstrapClass>com.pmease.commons.bootstrap.Bootstrap</bootstrapClass>  
         <moduleClass>com.pmease.gitop.product.ProductModule</moduleClass>  
         <aggregation>true</aggregation> 
-    </properties> 
+    </properties>
 </project>

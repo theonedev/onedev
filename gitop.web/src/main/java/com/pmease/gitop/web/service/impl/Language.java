@@ -1,5 +1,7 @@
 package com.pmease.gitop.web.service.impl;
 
+import javax.annotation.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
 
@@ -173,7 +175,7 @@ public class Language {
 		this.filenames = filenames;
 	}
 
-	public String getHighlightCss() {
+	public @Nullable String getHighlightCss() {
 		return highlightCss;
 	}
 
@@ -181,6 +183,10 @@ public class Language {
 		this.highlightCss = highlightCss;
 	}
 
+	public String getHighlightType() {
+		return highlightCss == null ? id.toLowerCase() : highlightCss;
+	}
+	
 	@Override
 	public int hashCode() {
 		return Objects.hashCode(id);

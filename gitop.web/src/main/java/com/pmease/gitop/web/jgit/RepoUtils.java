@@ -15,6 +15,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.RepositoryBuilder;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryCache.FileKey;
 import org.eclipse.jgit.lib.StoredConfig;
@@ -36,7 +37,13 @@ public class RepoUtils {
 	
 	public static Repository open(File dir) {
 		try {
-			return RepositoryCache.open(FileKey.lenient(dir, FS.DETECTED));
+			RepositoryCache.FileKey key;
+			key = RepositoryCache.FileKey.lenient(dir, FS.DETECTED);
+			
+			return new RepositoryBuilder()
+						.setFS(FS.DETECTED)
+						.setGitDir(key.getFile())
+						.setMustExist(true).build();
 		} catch (RepositoryNotFoundException e) {
 			throw new RepositoryException(e);
 		} catch (IOException e) {

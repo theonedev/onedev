@@ -35,7 +35,7 @@ import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.common.wicket.component.tab.BootstrapTabbedPanel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.source.ProjectHomePage;
-import com.pmease.gitop.web.page.project.source.SourceTreePage;
+import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
 import com.pmease.gitop.web.util.GitUtils;
 
 @SuppressWarnings("serial")

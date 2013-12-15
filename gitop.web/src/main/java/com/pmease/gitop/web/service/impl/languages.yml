@@ -218,6 +218,8 @@ C:
   highlight_css: cpp
   extensions:
   - .w
+  - .c
+  - .h
 
 C#:
   type: programming
@@ -243,6 +245,7 @@ C++:
   extensions:
   - .C
   - .c++
+  - .cc
   - .cxx
   - .H
   - .h++
@@ -464,6 +467,8 @@ DCPU-16 ASM:
 
 Diff:
   primary_extension: .diff
+  extensions:
+  - .patch
 
 Dylan:
   type: programming
