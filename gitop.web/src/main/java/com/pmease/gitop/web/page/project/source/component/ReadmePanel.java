@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.tika.mime.MimeType;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
@@ -47,6 +49,21 @@ public class ReadmePanel extends AbstractSourcePagePanel {
 	protected void onConfigure() {
 		super.onConfigure();
 		
+		this.setVisibilityAllowed(getReadmeNode() != null);
+	}
+	
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
+		add(new Label("name", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getReadmeNode().getName();
+			}
+		}));
+		
 		add(new WikiTextPanel("readme", new LoadableDetachableModel<String>() {
 
 			@Override
@@ -72,14 +89,6 @@ public class ReadmePanel extends AbstractSourcePagePanel {
 			}
 			
 		}));
-		
-	}
-	
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
-		this.setVisibilityAllowed(getReadmeNode() != null);
 	}
 	
 	static Set<String> README_FILES = ImmutableSet.of(
