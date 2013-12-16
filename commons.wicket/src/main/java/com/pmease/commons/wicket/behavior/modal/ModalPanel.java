@@ -3,10 +3,11 @@ package com.pmease.commons.wicket.behavior.modal;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.head.PriorityHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
 
@@ -18,9 +19,8 @@ import org.apache.wicket.markup.html.panel.Panel;
  * @author robin
  *
  */
+@SuppressWarnings("serial")
 public abstract class ModalPanel extends Panel {
-
-	private static final long serialVersionUID = 1L;
 
 	private String width;
 	
@@ -36,6 +36,8 @@ public abstract class ModalPanel extends Panel {
 		
 		setOutputMarkupId(true);
 		
+		add(AttributeAppender.append("class", "modal popup"));
+		
 		add(new WebMarkupContainer("content")
 				.add(AttributeModifier.append("class", "loading"))
 				.setOutputMarkupId(true));
@@ -47,12 +49,6 @@ public abstract class ModalPanel extends Panel {
 			replace(newContent("content").add(AttributeModifier.append("class", "content")));
 		
 		super.onBeforeRender();
-	}
-
-	@Override
-	protected void onComponentTag(ComponentTag tag) {
-		super.onComponentTag(tag);
-		tag.put("style", "display: none;");
 	}
 
 	/**
@@ -95,14 +91,14 @@ public abstract class ModalPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		
-		response.render(JavaScriptHeaderItem.forReference(ModalResourceReference.get()));
+
+		response.render(new PriorityHeaderItem(JavaScriptHeaderItem.forReference(ModalResourceReference.get())));
 		String script;
 		if (width != null)
 			script = String.format("setupModal('%s', '%s', %s);", getMarkupId(), width, showImmediately);
 		else
 			script = String.format("setupModal('%s', undefined, %s);", getMarkupId(), showImmediately);
-		response.render(OnDomReadyHeaderItem.forScript(script));
+		response.render(new PriorityHeaderItem(OnDomReadyHeaderItem.forScript(script)));
 	}
-	
+
 }

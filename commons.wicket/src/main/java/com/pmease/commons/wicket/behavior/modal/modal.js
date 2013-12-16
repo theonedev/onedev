@@ -6,8 +6,6 @@ function setupModalTrigger(triggerId, modalId, contentLoader) {
 
 function setupModal(modalId, modalWidth, showImmediately) {
 	var modal = $("#" + modalId);
-
-	modal.addClass("modal popup");
 	modal.before("<div id='" + modalId + "-placeholder' class='hide'></div>");
 	modal.modal({backdrop: "static", keyboard: false, show: false});
 	if (modalWidth)
@@ -49,8 +47,10 @@ function hideModal(modalId) {
 $(function() {
 	Wicket.Event.subscribe('/ajax/call/success', function() {
 		$("body>.modal:visible").each(function() {
-			if (!$("#" + this.id + "-placeholder")[0])
+			if (!$("#" + this.id + "-placeholder")[0]) {
+				$(this).modal("hide");
 				$(this).remove();
+			}
 		});
 	});
 	

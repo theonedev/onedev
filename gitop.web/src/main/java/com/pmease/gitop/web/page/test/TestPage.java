@@ -10,35 +10,45 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 
 import com.pmease.commons.wicket.asset.bootstrap.BootstrapHeaderItem;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.commons.wicket.behavior.modal.ModalPanel;
 
 @SuppressWarnings("serial")
 public class TestPage extends WebPage {
 
 	public TestPage() {
-		add(new AjaxLink<Void>("link") {
+		add(new AjaxLink<Void>("test") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment("content", "contentFrag", TestPage.this);
-				DropdownPanel dropdown = new DropdownPanel("dropdown") {
-
-					@Override
-					protected Component newContent(String id) {
-						return new Label(id, "hello world");
-					}
-					
-				};
-				fragment.add(dropdown);
-				fragment.add(new WebMarkupContainer("trigger").add(new DropdownBehavior(dropdown)));
-				TestPage.this.replace(fragment);
-				target.add(TestPage.this.get("content"));
+				WebMarkupContainer content = new WebMarkupContainer("content");
+				content.add(new WebMarkupContainer("modal"));
+				System.out.println("hello");
+				TestPage.this.replace(content);
+				target.add(content);
 			}
 			
 		});
+		WebMarkupContainer content = new WebMarkupContainer("content");
+		add(content);
+		content.setOutputMarkupId(true);
 		
-		add(new WebMarkupContainer("content").setOutputMarkupId(true));
+		content.add(new ModalPanel("modal") {
+
+			@Override
+			protected Component newContent(String id) {
+				Fragment frag = new Fragment(id, "frag", TestPage.this);
+				frag.add(new ModalPanel("modal") {
+
+					@Override
+					protected Component newContent(String id) {
+						return new Label(id, "hello");
+					}
+					
+				});
+				return frag;
+			}
+			
+		});
 	}
 	
 	@Override

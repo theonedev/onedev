@@ -3,13 +3,14 @@
 <head>
 </head>
 <body>
-	<div style="padding: 100px;">
-		<a wicket:id="link">link</a>
-		<div wicket:id="content"></div>
+	<a wicket:id="test">test</a>
+	<div wicket:id="content">
+		<div wicket:id="modal">modal</div>
 	</div>
 </body>
-</html>
-<wicket:fragment wicket:id="contentFrag">
-	<div wicket:id="dropdown"></div>
-	<div wicket:id="trigger">trigger</div>
+<wicket:fragment wicket:id="frag">
+	<div style="padding: 40px; border:1px solid red;">
+	<div wicket:id="modal"></div>
+	</div>
 </wicket:fragment>
+</html>

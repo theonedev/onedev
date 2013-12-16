@@ -34,7 +34,7 @@ public abstract class DropdownPanel extends Panel {
 		super.onInitialize();
 		
 		setOutputMarkupId(true);
-		add(AttributeAppender.append("class", "dropdown-panel"));
+		add(AttributeAppender.append("class", "dropdown-panel popup"));
 		if (lazyLoad) {
 			add(new Fragment("content", "loadingFrag", DropdownPanel.this)
 					.add(AttributeModifier.append("class", "loading"))

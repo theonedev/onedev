@@ -6,6 +6,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.head.PriorityHeaderItem;
 
 @SuppressWarnings("serial")
 public class ModalBehavior extends AbstractDefaultAjaxBehavior {
@@ -25,11 +26,11 @@ public class ModalBehavior extends AbstractDefaultAjaxBehavior {
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
-		response.render(JavaScriptHeaderItem.forReference(ModalResourceReference.get()));
+		response.render(new PriorityHeaderItem(JavaScriptHeaderItem.forReference(ModalResourceReference.get())));
 		String script = String.format(
 				"setupModalTrigger('%s', '%s', %s)", 
 				getComponent().getMarkupId(), modalPanel.getMarkupId(), getCallbackFunction());
-		response.render(OnDomReadyHeaderItem.forScript(script));
+		response.render(new PriorityHeaderItem(OnDomReadyHeaderItem.forScript(script)));
 	}
 		
 }

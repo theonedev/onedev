@@ -28,8 +28,8 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.commons.git.UserInfo;
+import com.pmease.commons.wicket.behavior.CollapseBehavior;
 import com.pmease.gitop.model.Project;
-import com.pmease.gitop.web.common.wicket.bootstrap.CollapseBehavior;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.GitUserLink;
@@ -101,7 +101,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 		add(detailedMsg);
 		
 		WebMarkupContainer detailedToggle = new WebMarkupContainer("detailed-toggle");
-		detailedToggle.add(new CollapseBehavior(detailedMsg));
+		detailedToggle.add(new CollapseBehavior(detailedMsg, false));
 		add(detailedToggle);
 		
 		add(new GitUserLink("author", new AbstractReadOnlyModel<GitPerson>() {

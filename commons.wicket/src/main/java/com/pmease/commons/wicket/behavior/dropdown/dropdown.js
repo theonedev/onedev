@@ -1,4 +1,4 @@
-function setupDropdown(triggerId, dropdownInfo, hoverDelay, alignment, dropdownLoader) {
+function setupDropdown(triggerId, dropdownId, hoverDelay, alignment, dropdownLoader) {
 	if (alignment.target) {
 		alignment.target.element = $("#" + alignment.target.id)[0];
 		$(alignment.target.element).addClass("dropdown-alignment");
@@ -9,30 +9,11 @@ function setupDropdown(triggerId, dropdownInfo, hoverDelay, alignment, dropdownL
 	if (hoverDelay >= 0)
 		trigger.addClass("dropdown-hover");
 	
-	var dropdownId;
-	var dropdown;
-	if (dropdownLoader != undefined) { 
-		/*
-		 * Otherwise, dropdownInfo represents id of the dropdown element, and its content has to be 
-		 * loaded by calling dropdownLoader.
-		 */
-		dropdownId = dropdownInfo;
-		dropdown = $("#" + dropdownId);
-	} else {
-		/*
-		 * In case dropdownLoader is not defined, the dropdownInfo itself represents content of the
-		 * dropdown element.  
-		 */
-		dropdown = $(dropdownInfo); 
-		dropdownId = dropdown[0].id;
-		trigger.append(dropdown);
-	}
+	var dropdown = $("#" + dropdownId);
 			
 	// Dropdown can associate with multiple triggers, and we should initialize it only once.
-	if (!dropdown.hasClass("popup")) { 
-		dropdown.addClass("popup");
+	if (!$("#" + dropdownId + "-placeholder")[0]) 
 		dropdown.before("<div id='" + dropdownId + "-placeholder' class='hide'></div>");
-	}
 
 	if (hoverDelay >= 0) {
 		function hide() {

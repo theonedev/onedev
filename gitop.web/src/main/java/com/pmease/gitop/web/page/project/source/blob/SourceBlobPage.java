@@ -23,9 +23,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
+import com.pmease.commons.wicket.behavior.CollapseBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
-import com.pmease.gitop.web.common.wicket.bootstrap.CollapseBehavior;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.GitUserAvatarLink;
 import com.pmease.gitop.web.component.link.GitUserLink;
@@ -110,7 +110,7 @@ public class SourceBlobPage extends AbstractFilePage {
 		add(detailedMsg);
 		
 		WebMarkupContainer detailedToggle = new WebMarkupContainer("detailed-toggle");
-		detailedToggle.add(new CollapseBehavior(detailedMsg));
+		detailedToggle.add(new CollapseBehavior(detailedMsg, false));
 		add(detailedToggle);
 		
 		add(new GitUserLink("author", new AbstractReadOnlyModel<GitPerson>() {
