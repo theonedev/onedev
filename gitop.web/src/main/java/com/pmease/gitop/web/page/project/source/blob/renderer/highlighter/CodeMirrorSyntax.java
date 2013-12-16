@@ -19,7 +19,7 @@ import com.google.common.collect.Sets;
  * Language mappings to CodeMirror modes and mime types
  *
  */
-public enum Syntax {
+public enum CodeMirrorSyntax {
 	APL("text/apl", "apl"),
 	ASTERISK("text/x-asterisk", "asterisk"),
 	C(new String[] {"text/x-csrc", "text/x-c", "text/x-chdr"}, "clike"),
@@ -116,16 +116,16 @@ public enum Syntax {
 	Z80("text/x-z80", "z80"),
 	
 	HTMLMIXED(new String[] {"text/html"}, "htmlmixed", null, 
-			Syntax.XML,
-			Syntax.CSS,
-			Syntax.JAVASCRIPT),
+			CodeMirrorSyntax.XML,
+			CodeMirrorSyntax.CSS,
+			CodeMirrorSyntax.JAVASCRIPT),
 	HTMLEMBEDDED(new String[] {"application/x-ejs", 
 			"application/x-aspx", 
 			"application/x-jsp", 
 			"application/x-erb"}, 
 			"htmlembedded",
 			null,
-			Syntax.HTMLMIXED)
+			CodeMirrorSyntax.HTMLMIXED)
 	;
 
 	
@@ -133,24 +133,24 @@ public enum Syntax {
 	private final String[] mimes;
 	private final String mode;
 	private final String group;
-	private final Syntax[] dependencies;
+	private final CodeMirrorSyntax[] dependencies;
 	private final JavaScriptResourceReference resourceReference;
 	
-	Syntax(String[] mimes, String mode) {
+	CodeMirrorSyntax(String[] mimes, String mode) {
 		this(mimes, mode, null);
 	}
 
-	Syntax(String mime, String mode) {
+	CodeMirrorSyntax(String mime, String mode) {
 		this(new String[] {mime}, mode);
 	}
 	
-	Syntax(String[] mimes, String mode, String group, Syntax... dependencies) {
+	CodeMirrorSyntax(String[] mimes, String mode, String group, CodeMirrorSyntax... dependencies) {
 		this.mimes = mimes;
 		this.mode = mode;
 		this.group = group;
 		this.dependencies = dependencies;
 		
-		this.resourceReference = new JavaScriptResourceReference(Syntax.class, 
+		this.resourceReference = new JavaScriptResourceReference(CodeMirrorSyntax.class, 
 				"res/codemirror/mode/" + getJsFilePath());
 	}
 
@@ -177,18 +177,18 @@ public enum Syntax {
 		return sb.toString();
 	}
 	
-	public Syntax[] getDependencies() {
+	public CodeMirrorSyntax[] getDependencies() {
 		if (dependencies == null || dependencies.length == 0) {
-			return new Syntax[0];
+			return new CodeMirrorSyntax[0];
 		}
 		
-		Set<Syntax> list = Sets.newLinkedHashSet();
-		for (Syntax each : dependencies) {
+		Set<CodeMirrorSyntax> list = Sets.newLinkedHashSet();
+		for (CodeMirrorSyntax each : dependencies) {
 			list.addAll(Lists.newArrayList(each.getDependencies()));
 			list.add(each);
 		}
 		
-		return Iterables.toArray(list, Syntax.class);
+		return Iterables.toArray(list, CodeMirrorSyntax.class);
 	}
 
 	public JavaScriptResourceReference getResourceReference() {
@@ -198,12 +198,12 @@ public enum Syntax {
 
 
 	static Set<String> modes;
-	static Map<String, Syntax> mimeSyntaxMap;
+	static Map<String, CodeMirrorSyntax> mimeSyntaxMap;
 	
 	static {
 		Set<String> set = Sets.newHashSet();
-		Map<String, Syntax> map = Maps.newHashMap();
-		for (Syntax each : Syntax.values()) {
+		Map<String, CodeMirrorSyntax> map = Maps.newHashMap();
+		for (CodeMirrorSyntax each : CodeMirrorSyntax.values()) {
 			set.add(each.getMode());
 			for (String mime : each.mimes) {
 				map.put(mime, each);
@@ -211,18 +211,18 @@ public enum Syntax {
 		}
 		
 		modes = ImmutableSet.<String>copyOf(set);
-		mimeSyntaxMap = ImmutableMap.<String, Syntax>copyOf(map);
+		mimeSyntaxMap = ImmutableMap.<String, CodeMirrorSyntax>copyOf(map);
 	}
 	
 	public static Set<String> getAllModes() {
 		return modes;
 	}
 	
-	public static @Nullable Syntax findByMime(String mime) {
+	public static @Nullable CodeMirrorSyntax findByMime(String mime) {
 		return mimeSyntaxMap.get(mime);
 	}
 	
-	public static @Nullable Syntax findByMime(MimeType mime) {
+	public static @Nullable CodeMirrorSyntax findByMime(MimeType mime) {
 		return findByMime(mime.getType().toString());
 	}
 }
