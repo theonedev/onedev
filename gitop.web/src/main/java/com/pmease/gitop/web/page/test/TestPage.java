@@ -1,19 +1,17 @@
 package com.pmease.gitop.web.page.test;
 
-import com.pmease.gitop.web.page.AbstractLayoutPage;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebPage;
+
+import com.pmease.commons.wicket.asset.bootstrap.BootstrapHeaderItem;
 
 @SuppressWarnings("serial")
-public class TestPage extends AbstractLayoutPage {
+public class TestPage extends WebPage {
 
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
-
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(BootstrapHeaderItem.get());
 	}
 	
-	@Override
-	protected String getPageTitle() {
-		return "Test Page";
-	}
-
 }

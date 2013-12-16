@@ -1,8 +1,5 @@
-.modal>.loading {
+.modal>.modal-dialog>.loading {
 	margin:8px;
 	min-height:64px;
-	background: url("ajax-indicator.gif") center center no-repeat;
-}
-.modal-footer .modal {
-	text-align:left;
+	background: url("ajax-indicator.gif") center center no-repeat white;
 }

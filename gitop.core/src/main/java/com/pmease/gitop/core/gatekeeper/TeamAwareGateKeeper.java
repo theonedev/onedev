@@ -6,10 +6,10 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Team;
-import com.pmease.gitop.model.gatekeeper.AbstractGateKeeper;
+import com.pmease.gitop.model.gatekeeper.ApprovalGateKeeper;
 
 @SuppressWarnings("serial")
-public abstract class TeamAwareGateKeeper extends AbstractGateKeeper {
+public abstract class TeamAwareGateKeeper extends ApprovalGateKeeper {
 	
 	private Long teamId;
 	

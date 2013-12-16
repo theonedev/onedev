@@ -1,11 +1,13 @@
 package com.pmease.gitop.model.gatekeeper;
 
+import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 
 @SuppressWarnings("serial")
-public class DefaultGateKeeper implements GateKeeper {
+@Editable
+public class DefaultGateKeeper extends AbstractGateKeeper {
 
 	@Override
 	public Object trim(Object context) {
@@ -13,7 +15,7 @@ public class DefaultGateKeeper implements GateKeeper {
 	}
 
 	@Override
-	public CheckResult check(PullRequest request) {
+	public CheckResult doCheck(PullRequest request) {
 		return new Accepted("Not defined.");
 	}
 

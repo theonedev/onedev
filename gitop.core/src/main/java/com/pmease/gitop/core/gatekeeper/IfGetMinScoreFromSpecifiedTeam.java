@@ -12,16 +12,15 @@ import com.pmease.gitop.model.Membership;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
-import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.CanVoteBySpecifiedTeam;
 
 @SuppressWarnings("serial")
-@Editable(category=GateKeeper.CATEGORY_APPROVAL, order=500, description=
-		"This condition will be satisfied if specified score can be get from specified team, the score "
+@Editable(order=500, icon="icon-group", description=
+		"This gate keeper will be passed if specified score can be get from specified team, the score "
 		+ "starts at zero, and will increase by one for each approval, and decrease by one for each "
 		+ "rejection.")
-public class GetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
+public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
 
     private int minScore = 1;
 
@@ -46,7 +45,7 @@ public class GetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
     }
 
     @Override
-    public CheckResult check(PullRequest request) {
+    public CheckResult doCheck(PullRequest request) {
         Collection<User> members = new HashSet<User>();
         for (Membership membership : getTeam().getMemberships())
             members.add(membership.getUser());

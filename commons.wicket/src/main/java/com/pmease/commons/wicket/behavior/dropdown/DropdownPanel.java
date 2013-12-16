@@ -3,9 +3,17 @@ package com.pmease.commons.wicket.behavior.dropdown;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 
+/**
+ * This panel can not be used separately. It should be used together with DropdownBehavior. 
+ * 
+ * @see DropdownBehavior
+ * @author robin
+ *
+ */
 public abstract class DropdownPanel extends Panel {
 
 	private static final long serialVersionUID = 1L;
@@ -22,13 +30,19 @@ public abstract class DropdownPanel extends Panel {
 	}
 	
 	@Override
+	protected void onComponentTag(ComponentTag tag) {
+		super.onComponentTag(tag);
+		tag.put("style", "display:none;");
+	}
+
+	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
 		setOutputMarkupId(true);
 		if (lazyLoad) {
 			add(new Fragment("content", "loadingFrag", DropdownPanel.this)
-					.add(AttributeModifier.replace("class", "loading"))
+					.add(AttributeModifier.append("class", "loading"))
 					.setOutputMarkupId(true));
 		} else {
 			add(newContent("content").add(AttributeModifier.append("class", "content")));
@@ -45,7 +59,7 @@ public abstract class DropdownPanel extends Panel {
 		target.prependJavaScript(String.format("hideDropdown('%s');", getMarkupId()));
 	}
 	
-	public void load(AjaxRequestTarget target) {
+	void load(AjaxRequestTarget target) {
 		Component content = newContent("content");
 		content.add(AttributeModifier.append("class", "content"));
 		replace(content);

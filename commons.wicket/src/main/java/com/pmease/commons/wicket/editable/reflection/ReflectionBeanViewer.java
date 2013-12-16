@@ -8,6 +8,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyEditContext;
+import com.pmease.commons.editable.annotation.OmitNames;
 import com.pmease.commons.wicket.editable.EditableResourceBehavior;
 
 @SuppressWarnings("serial")
@@ -31,7 +32,8 @@ public class ReflectionBeanViewer extends Panel {
 
 			@Override
 			protected void populateItem(ListItem<PropertyEditContext> item) {
-				item.add(new Label("name", EditableUtils.getName(item.getModelObject().getPropertyGetter())));
+				item.add(new Label("name", EditableUtils.getName(item.getModelObject().getPropertyGetter()))
+						.setVisible(editContext.getBeanClass().getAnnotation(OmitNames.class) == null));
 				
 				item.add((Component)item.getModelObject().renderForView("value"));
 			}

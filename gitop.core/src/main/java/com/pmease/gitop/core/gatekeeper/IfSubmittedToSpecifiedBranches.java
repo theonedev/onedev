@@ -13,38 +13,37 @@ import com.pmease.commons.util.pattern.WildcardPathMatcher;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
-import com.pmease.gitop.model.gatekeeper.AbstractGateKeeper;
-import com.pmease.gitop.model.gatekeeper.GateKeeper;
+import com.pmease.gitop.model.gatekeeper.BranchGateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 
 @SuppressWarnings("serial")
-@Editable(category=GateKeeper.CATEGORY_BRANCH, order=100, description=
-		"This condition will be satisified if commit is submitted to specified branches.")
-public class SubmittedToSpecifiedBranch extends AbstractGateKeeper {
+@Editable(order=100, icon="icon-git-branch", description=
+		"This gate keeper will be passed if the commit is submitted to specified branches.")
+public class IfSubmittedToSpecifiedBranches extends BranchGateKeeper {
 
-	private String branchPatterns;
+	private String branchIds;
 	
 	@Editable
 	@NotNull
-	public String getBranchPatterns() {
-		return branchPatterns;
+	public String getBranchIds() {
+		return branchIds;
 	}
 
-	public void setBranchPatterns(String branchPatterns) {
-		this.branchPatterns = branchPatterns;
+	public void setBranchIds(String branchIds) {
+		this.branchIds = branchIds;
 	}
 
 	@Override
-	public CheckResult check(PullRequest request) {
+	public CheckResult doCheck(PullRequest request) {
 		Project project = request.getTarget().getProject();
 		BranchManager branchManager = AppLoader.getInstance(BranchManager.class);
 		EntityLoader entityLoader = branchManager.asEntityLoader(project);
 		EntityMatcher entityMatcher = new EntityMatcher(entityLoader, new WildcardPathMatcher());
 		PatternSetMatcher patternSetMatcher = new PatternSetMatcher(entityMatcher);
 
-		EntityPatternSet patternSet = EntityPatternSet.fromStored(getBranchPatterns(), entityLoader);
+		EntityPatternSet patternSet = EntityPatternSet.fromStored(getBranchIds(), entityLoader);
 
-		if (patternSetMatcher.matches(getBranchPatterns(), request.getTarget().getName()))
+		if (patternSetMatcher.matches(getBranchIds(), request.getTarget().getName()))
 			return accepted("Target branch matches pattern '" + patternSet + "'.");
 		else
 			return rejected("Target branch does not match pattern '" + patternSet + "'.");
@@ -57,13 +56,13 @@ public class SubmittedToSpecifiedBranch extends AbstractGateKeeper {
 		Project project = (Project) context;
 		BranchManager branchManager = AppLoader.getInstance(BranchManager.class);
 		EntityLoader entityLoader = branchManager.asEntityLoader(project);
-		EntityPatternSet patternSet = EntityPatternSet.fromStored(getBranchPatterns(), entityLoader);
+		EntityPatternSet patternSet = EntityPatternSet.fromStored(getBranchIds(), entityLoader);
 		patternSet.trim(project);
 		
 		if (patternSet.getStored().isEmpty()) {
 			return null;
 		} else {
-			setBranchPatterns(patternSet.toString());
+			setBranchIds(patternSet.toString());
 			return this;
 		}
 	}

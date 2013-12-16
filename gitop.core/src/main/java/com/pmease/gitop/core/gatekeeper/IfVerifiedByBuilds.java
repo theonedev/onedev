@@ -10,17 +10,16 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.BuildResultManager;
 import com.pmease.gitop.model.BuildResult;
 import com.pmease.gitop.model.PullRequest;
-import com.pmease.gitop.model.gatekeeper.AbstractGateKeeper;
-import com.pmease.gitop.model.gatekeeper.GateKeeper;
+import com.pmease.gitop.model.gatekeeper.CommonGateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.NoneCanVote;
 
-@Editable(name="Pass Specified Number of Builds", category=GateKeeper.CATEGORY_BUILD, order=100, 
-		description="This condition will be satisfied if relevant commit is verified successfully "
+@Editable(icon="icon-checkbox-checked", order=1000, 
+		description="This gate keeper will be satisfied if commit is verified successfully "
 				+ "by specified number of builds. To make this working, your CI system has to "
 				+ "be configured to build against Gitop pull requests.")
 @SuppressWarnings("serial")
-public class PassBuilds extends AbstractGateKeeper {
+public class IfVerifiedByBuilds extends CommonGateKeeper {
 	
 	private int buildCount = 1;
 	
@@ -58,7 +57,7 @@ public class PassBuilds extends AbstractGateKeeper {
 		this.blockMode = blockMode;
 	}
 
-	public CheckResult check(PullRequest request) {
+	public CheckResult doCheck(PullRequest request) {
 		BuildResultManager verificationManager = Gitop.getInstance(BuildResultManager.class);
 
 		Preconditions.checkNotNull(request.getMergePrediction());

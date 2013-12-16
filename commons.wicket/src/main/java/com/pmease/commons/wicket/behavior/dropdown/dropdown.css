@@ -6,14 +6,13 @@
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
     position: absolute;
 	z-index: 2000;
-	display: none;
 }
 .dropdown-panel>.content {
 	margin: 0;
 	padding: 0;
 }
 .dropdown-panel>.loading, .dropdown-panel>.loading.content {
-	margin: 4px;
+	margin: 8px;
 	padding: 0 0 0 20px;
 	background: url("ajax-indicator.gif") left center no-repeat;
 }

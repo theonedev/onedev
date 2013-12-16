@@ -13,10 +13,12 @@
 	<wicket:fragment wicket:id="default">
 		<div class="reflection editor">
 			<div wicket:id="properties" class="form-group">
+				<wicket:enclosure child="name">
 				<label class="name control-label">
 					<span wicket:id="name"></span>
 					<span wicket:id="required" class="required"></span>
 				</label>
+				</wicket:enclosure>
 				<div class="value">
 					<div wicket:id="value"></div>
 					<div wicket:id="hint">
@@ -37,10 +39,12 @@
 	<wicket:fragment wicket:id="table">
 		<table class="reflection editor">
 			<tr wicket:id="properties">
+				<wicket:enclosure child="name">
 				<td class="name control-label">
 					<span wicket:id="name"></span>
 					<span wicket:id="required" class="required"></span>
 				</td>
+				</wicket:enclosure>
 				<td class="value">
 					<div wicket:id="value"></div>
 					<div wicket:id="hint">

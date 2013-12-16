@@ -21,7 +21,7 @@ public abstract class AbstractProjectSettingPage extends AbstractProjectPage {
 
 	public static enum Category {
 		OPTIONS("Options"),
-		GATE_KEEPER("Gate Keeper"),
+		GATE_KEEPERS("Gate Keepers"),
 		HOOKS("Hooks"),
 		PULL_REQUESTS("Pull Requests"),
 		PERMISSIONS("Permissions"),
@@ -82,7 +82,7 @@ public abstract class AbstractProjectSettingPage extends AbstractProjectPage {
 		case OPTIONS:
 			pageClass = ProjectOptionsPage.class;
 			break;
-		case GATE_KEEPER:
+		case GATE_KEEPERS:
 			pageClass = GateKeeperSettingPage.class;
 			break;
 		case HOOKS:

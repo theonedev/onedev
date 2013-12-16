@@ -20,10 +20,10 @@ public abstract class GateKeeperDropdown extends DropdownPanel {
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Class<? extends GateKeeper> gateKeeperClass) {
 				close(target);
-				GateKeeperDropdown.this.onSelect(gateKeeperClass);
+				GateKeeperDropdown.this.onSelect(target, gateKeeperClass);
 			}
 		};
 	}
 
-	protected abstract void onSelect(Class<? extends GateKeeper> gateKeeperClass);
+	protected abstract void onSelect(AjaxRequestTarget target, Class<? extends GateKeeper> gateKeeperClass);
 }

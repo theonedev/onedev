@@ -81,7 +81,7 @@ public class PreReceiveServlet extends CallbackServlet {
 		update.setHeadCommit(newCommitHash);
 		request.getUpdates().add(update);
 
-		GateKeeper gateKeeper = project.getGateKeeper();
+		GateKeeper gateKeeper = project.getCompositeGateKeeper();
 		CheckResult checkResult = gateKeeper.check(request);
 
 		if (!(checkResult instanceof Accepted)) {

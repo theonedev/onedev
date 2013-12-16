@@ -14,21 +14,12 @@ public class ModalBehavior extends AbstractDefaultAjaxBehavior {
 	
 	public ModalBehavior(ModalPanel modalPanel) {
 		this.modalPanel = modalPanel;
+		this.modalPanel.showImmediately = false;
 	}
 	
 	@Override
-	protected void onBind() {
-		super.onBind();
-		getComponent().setOutputMarkupId(true);
-	}
-
-	@Override
 	protected void respond(AjaxRequestTarget target) {
 		modalPanel.load(target);
-
-		String script = String.format("modalLoaded('%s', '%s')", modalPanel.getMarkupId(), modalPanel.getWidth());
-		
-		target.appendJavaScript(script);
 	}
 
 	@Override
@@ -36,9 +27,8 @@ public class ModalBehavior extends AbstractDefaultAjaxBehavior {
 		super.renderHead(component, response);
 		response.render(JavaScriptHeaderItem.forReference(ModalResourceReference.get()));
 		String script = String.format(
-				"setupModal('%s', '%s', '%s', %s)", 
-				getComponent().getMarkupId(), modalPanel.getMarkupId(), 
-				modalPanel.getWidth(), getCallbackFunction());
+				"setupModalTrigger('%s', '%s', %s)", 
+				getComponent().getMarkupId(), modalPanel.getMarkupId(), getCallbackFunction());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 		

@@ -1,10 +1,13 @@
 package com.pmease.commons.wicket.behavior.dropdown;
 
+import java.io.Serializable;
+
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 
-public class AlignmentTarget {
+@SuppressWarnings("serial")
+public class AlignmentTarget implements Serializable {
 	
 	private final Component component;
 	
