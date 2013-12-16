@@ -24,7 +24,6 @@ import org.gitective.core.BlobUtils;
 import org.gitective.core.CommitUtils;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.io.ByteStreams;
@@ -37,9 +36,9 @@ import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.quantity.Data;
 import com.pmease.gitop.web.jgit.RepoUtils;
 import com.pmease.gitop.web.jgit.RepositoryException;
+import com.pmease.gitop.web.page.project.source.blob.language.Language;
+import com.pmease.gitop.web.page.project.source.blob.language.Languages;
 import com.pmease.gitop.web.service.FileTypeRegistry;
-import com.pmease.gitop.web.service.impl.Language;
-import com.pmease.gitop.web.service.impl.Languages;
 import com.pmease.gitop.web.util.MimeTypeUtils;
 import com.pmease.gitop.web.util.UniversalEncodingDetector;
 
@@ -57,7 +56,7 @@ public class FileBlob {
 	private String objectId;
 	private FileMode mode;
 	private MimeType mimeType;
-	private Language language;
+//	private Language language;
 	private byte[] data;
 	private long size;
 	private Charset charset;
@@ -78,17 +77,17 @@ public class FileBlob {
 	}
 	
 	// TODO: change this to be configurable
-	private static final long MAX_SIZE = 5 * Data.ONE_MB;
+	private static final long MAX_TEXT_SIZE = 2 * Data.ONE_MB;
 	
 	static FileBlob initWithJGit(Project project, String revision,
 			String path, FileTypeRegistry registry) {
 
 		FileBlob blob = new FileBlob(project.getId(), revision, path);
 
-		Optional<Language> language = Languages.INSTANCE.guessLanguage(path);
-		if (language.isPresent()) {
-			blob.language = language.get();
-		}
+//		Optional<Language> language = Languages.INSTANCE.guessLanguage(path);
+//		if (language.isPresent()) {
+//			blob.language = language.get();
+//		}
 		
 		File gitDir = project.code().repoDir();
 		Repository repo = null;
@@ -117,9 +116,7 @@ public class FileBlob {
 						blob.mimeType = MimeTypeUtils.getMimeType(MimeTypes.PLAIN_TEXT);
 					}
 					
-					if (!blob.isLarge() && (
-							language.isPresent() 
-							|| registry.isSafeInline(blob.mimeType))) {
+					if (!blob.isLarge() && registry.isSafeInline(blob.mimeType)) {
 						blob.charset = UniversalEncodingDetector.detect(stream);
 						blob.data = ByteStreams.toByteArray(stream);
 					}
@@ -152,11 +149,6 @@ public class FileBlob {
 		blob.mode = node.getMode();
 		blob.size = node.getSize();
 		
-		Optional<Language> language = Languages.INSTANCE.guessLanguage(path);
-		if (language.isPresent()) {
-			blob.language = language.get();
-		}
-		
 		byte[] data = git.show(revision, path);
 		blob.data = data;
 		
@@ -166,7 +158,7 @@ public class FileBlob {
 	}
 	
 	public boolean isLarge() {
-		return size > MAX_SIZE;
+		return size > MAX_TEXT_SIZE;
 	}
 
 	public boolean isEmpty() {
@@ -185,11 +177,19 @@ public class FileBlob {
 		}
 	}
 	
+	public Language getLanguage() {
+		Language lang = Languages.INSTANCE.findByMime(mimeType);
+		if ((lang == null) && (MimeTypeUtils.isXMLType(mimeType))) {
+			return Languages.INSTANCE.findByMime("text/xml");
+		}
+		
+		return lang;
+	}
+	
 	public boolean canHighlight() {
-		return getSize() < Data.ONE_MB 
+		return getSize() < MAX_TEXT_SIZE 
 				&& isText() 
-				&& language != null 
-				&& language.getLanguageType() != Language.Type.DATA;
+				&& getLanguage() != null; 
 	}
 	
 	public BufferedInputStream openStream() {
@@ -244,9 +244,9 @@ public class FileBlob {
 		return mimeType;
 	}
 
-	public @Nullable Language getLanguage() {
-		return language;
-	}
+//	public @Nullable Language getLanguage() {
+//		return language;
+//	}
 
 	public @Nullable byte[] getData() {
 		return data;
