@@ -1,7 +1,5 @@
 package com.pmease.gitop.web.page.project.source.tree;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -21,7 +19,6 @@ import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
-import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.Commit;
@@ -39,17 +36,18 @@ import com.pmease.gitop.web.page.project.source.blob.SourceBlobPage;
 import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
 import com.pmease.gitop.web.page.project.source.component.AbstractSourcePagePanel;
 import com.pmease.gitop.web.util.GitUtils;
-import com.pmease.gitop.web.util.UrlUtils;
 
 @SuppressWarnings("serial")
 public class SourceTreePanel extends AbstractSourcePagePanel {
 	
 	private final IModel<Commit> lastCommitModel;
+	private final IModel<List<TreeNode>> nodesModel;
 	
 	public SourceTreePanel(String id, 
 			IModel<Project> project,
 			IModel<String> revisionModel,
-			IModel<List<String>> pathsModel) {
+			IModel<List<String>> pathsModel,
+			IModel<List<TreeNode>> nodesModel) {
 		super(id, project, revisionModel, pathsModel);
 		
 		lastCommitModel = new LoadableDetachableModel<Commit>() {
@@ -67,6 +65,8 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 				}
 			}
 		};
+		
+		this.nodesModel = nodesModel;
 	}
 	
 	@Override
@@ -171,41 +171,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 			add(link);
 		}
 		
-		IModel<List<TreeNode>> nodes = new LoadableDetachableModel<List<TreeNode>>() {
-
-			@Override
-			protected List<TreeNode> load() {
-				Git git = getProject().code();
-				List<String> paths = getPaths();
-				String path = Joiner.on("/").join(paths);
-				if (!Strings.isNullOrEmpty(path)) {
-					path = UrlUtils.removeRedundantSlashes(path + "/");
-				}
-				
-				List<TreeNode> nodes = Lists.newArrayList(git.listTree(getRevision(), path, false));
-				
-				Collections.sort(nodes, new Comparator<TreeNode>() {
-
-					@Override
-					public int compare(TreeNode o1, TreeNode o2) {
-						if (o1.getMode() == o2.getMode()) {
-							return o1.getName().compareTo(o2.getName());
-						} else if (o1.getMode() == FileMode.TREE) {
-							return -1;
-						} else if (o2.getMode() == FileMode.TREE) {
-							return 1;
-						} else {
-							return o1.getName().compareTo(o2.getName());
-						}
-					}
-					
-				});
-				
-				return nodes;
-			}
-		};
-		
-		ListView<TreeNode> fileTree = new ListView<TreeNode>("files", nodes) {
+		ListView<TreeNode> fileTree = new ListView<TreeNode>("files", nodesModel) {
 
 			@Override
 			protected void populateItem(ListItem<TreeNode> item) {
@@ -270,6 +236,10 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 	public void onDetach() {
 		if (lastCommitModel != null) {
 			lastCommitModel.detach();
+		}
+		
+		if (nodesModel != null) {
+			nodesModel.detach();
 		}
 		
 		super.onDetach();
