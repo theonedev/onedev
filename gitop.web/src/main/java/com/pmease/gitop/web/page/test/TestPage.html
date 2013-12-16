@@ -3,14 +3,25 @@
 <head>
 </head>
 <body>
+	<div wicket:id="accordion">
+		<div><a wicket:id="link1">link1</a></div>
+		<div wicket:id="content1">
+			<div>begin content1</div>
+			<a wicket:id="show">show</a>
+			<div wicket:id="content"></div>
+			<div>end content1</div>
+		</div>
+		<div><a wicket:id="link2">link2</a></div>
+		<div wicket:id="content2">content2</div>
+	</div>
 	<a wicket:id="test">test</a>
-	<div wicket:id="content">
-		<div wicket:id="modal">modal</div>
-	</div>
 </body>
-<wicket:fragment wicket:id="frag">
-	<div style="padding: 40px; border:1px solid red;">
-	<div wicket:id="modal"></div>
-	</div>
+<wicket:fragment wicket:id="content">
+<div wicket:id="accordion">
+	<div><a wicket:id="link11">link11</a></div>
+	<div wicket:id="content11">content11</div>
+	<div><a wicket:id="link12">link12</a></div>
+	<div wicket:id="content12">content12</div>
+</div>
 </wicket:fragment>
 </html>
