@@ -169,6 +169,32 @@
 			<version>2.2.3</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.eclipse.mylyn.wikitext</groupId>
+			<artifactId>core</artifactId>
+			<version>${wikitext.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.mylyn.wikitext</groupId>
+			<artifactId>markdown.core</artifactId>
+			<version>${wikitext.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.mylyn.wikitext</groupId>
+			<artifactId>confluence.core</artifactId>
+			<version>${wikitext.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.mylyn.wikitext</groupId>
+			<artifactId>textile.core</artifactId>
+			<version>${wikitext.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.mylyn.wikitext</groupId>
+			<artifactId>html.core</artifactId>
+			<version>${wikitext.version}</version>
+		</dependency>
+		
 	</dependencies>
 
 	<repositories>
@@ -205,5 +231,6 @@
 		<moduleClass>com.pmease.gitop.web.WebModule</moduleClass>
 		<owsi-core.version>0.8.6-SNAPSHOT</owsi-core.version>
 		<tika.version>1.4</tika.version>
+		<wikitext.version>2.0.0</wikitext.version>
 	</properties>
 </project>

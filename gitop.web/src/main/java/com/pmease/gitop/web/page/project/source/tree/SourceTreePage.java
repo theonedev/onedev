@@ -1,12 +1,21 @@
 package com.pmease.gitop.web.page.project.source.tree;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.pmease.commons.git.Git;
+import com.pmease.commons.git.TreeNode;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.storage.StorageManager;
@@ -18,6 +27,7 @@ import com.pmease.gitop.web.page.project.source.component.ProjectDescriptionPane
 import com.pmease.gitop.web.page.project.source.component.ReadmePanel;
 import com.pmease.gitop.web.page.project.source.component.SourceBreadcrumbPanel;
 import com.pmease.gitop.web.util.GitUtils;
+import com.pmease.gitop.web.util.UrlUtils;
 
 @SuppressWarnings("serial")
 public class SourceTreePage extends AbstractFilePage {
@@ -44,11 +54,45 @@ public class SourceTreePage extends AbstractFilePage {
 		
 		File gitDir = Gitop.getInstance(StorageManager.class).getStorage(getProject()).ofCode();
 		
+		IModel<List<TreeNode>> nodesModel = new LoadableDetachableModel<List<TreeNode>>() {
+
+			@Override
+			protected List<TreeNode> load() {
+				Git git = getProject().code();
+				List<String> paths = getPaths();
+				String path = Joiner.on("/").join(paths);
+				if (!Strings.isNullOrEmpty(path)) {
+					path = UrlUtils.removeRedundantSlashes(path + "/");
+				}
+				
+				List<TreeNode> nodes = Lists.newArrayList(git.listTree(getRevision(), path, false));
+				
+				Collections.sort(nodes, new Comparator<TreeNode>() {
+
+					@Override
+					public int compare(TreeNode o1, TreeNode o2) {
+						if (o1.getMode() == o2.getMode()) {
+							return o1.getName().compareTo(o2.getName());
+						} else if (o1.getMode() == FileMode.TREE) {
+							return -1;
+						} else if (o2.getMode() == FileMode.TREE) {
+							return 1;
+						} else {
+							return o1.getName().compareTo(o2.getName());
+						}
+					}
+					
+				});
+				
+				return nodes;
+			}
+		};
+		
 		if (GitUtils.hasCommits(gitDir)) {
 			add(new ProjectDescriptionPanel("description", projectModel).setVisibilityAllowed(getPaths().isEmpty()));
 			add(new SourceBreadcrumbPanel("breadcrumb", projectModel, revisionModel, pathsModel));
-			add(new SourceTreePanel("tree", projectModel, revisionModel, pathsModel));
-			add(new ReadmePanel("readme", projectModel, revisionModel, pathsModel));
+			add(new SourceTreePanel("tree", projectModel, revisionModel, pathsModel, nodesModel));
+			add(new ReadmePanel("readme", projectModel, revisionModel, pathsModel, nodesModel));
 			add(new WebMarkupContainer("empty").setVisibilityAllowed(false));
 		} else {
 			add(new EmptyRepositoryPanel("empty", new ProjectModel(getProject())));

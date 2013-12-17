@@ -9,8 +9,10 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.gitop.web.page.project.source.blob.FileBlob;
-import com.pmease.gitop.web.page.project.source.blob.renderer.syntax.HighlightBehavior;
-import com.pmease.gitop.web.service.impl.Language;
+import com.pmease.gitop.web.page.project.source.blob.language.Language;
+import com.pmease.gitop.web.page.project.source.blob.language.Languages;
+import com.pmease.gitop.web.page.project.source.blob.renderer.highlighter.AceHighlighter;
+import com.pmease.gitop.web.util.MimeTypeUtils;
 
 @SuppressWarnings("serial")
 public class TextBlobPanel extends Panel {
@@ -39,55 +41,12 @@ public class TextBlobPanel extends Panel {
 			
 		}).setEscapeModelStrings(false));
 		
-		IModel<String> langModel = new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				Language lang = getBlob().getLanguage();
-				if (lang == null) {
-					return "no-highlight";
-				}
-				
-				return lang.getHighlightType();
-			}
-			
-		};
-		
 		IModel<String> textModel = new AbstractReadOnlyModel<String>() {
 			@Override
 			public String getObject() {
 				if (getBlob().isEmpty()) {
 					return "This file is empty";
 				}
-				
-//				Language language = getBlob().getLanguage();
-//				String type = language == null ? "text" : language.getHighlightType();
-//				
-//				Renderer r = XhtmlRendererFactory.getRenderer(type);
-//				if (r == null) {
-//					return "<pre>" + getBlob().getStringContent() + "</pre>";
-//				}
-//				
-//				InputStream in = null;
-//				ByteArrayOutputStream out = null;
-//				try {
-//					Charset charset = getBlob().getCharset();
-//					in = new ByteArrayInputStream(getBlob().getStringContent().getBytes(charset));
-//					out = new ByteArrayOutputStream();
-//					
-//					r.highlight("",
-//							in,
-//							out,
-//							charset.name(),
-//							true);
-//					return out.toString(charset.name());
-//				} catch (IOException e) {
-//					throw Throwables.propagate(e);
-//				} finally {
-//					IOUtils.closeQuietly(in);
-//					IOUtils.closeQuietly(out);
-//				}
-				
 				return getBlob().getStringContent();
 			}
 		};
@@ -95,10 +54,36 @@ public class TextBlobPanel extends Panel {
 		Label code = new Label("code", textModel);
 		code.setOutputMarkupId(true);
 
-		code.add(AttributeAppender.append("class", langModel));
-		if (getBlob().canHighlight()) {
-			code.add(new HighlightBehavior(langModel));
-		}
+		IModel<String> cssModel = new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				Language lang = Languages.INSTANCE.findByMime(getBlob().getMimeType());
+				if (lang == null) {
+					if (MimeTypeUtils.isXMLType(getBlob().getMimeType())) {
+						return "xml";
+					} else {
+						return "no-highlight";
+					}
+				} else {
+					return lang.getMode();
+				}
+			}
+		};
+		
+		code.add(AttributeAppender.append("class", cssModel));
+		
+		IModel<String> modeModel = new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				Language language = getBlob().getLanguage();
+				return language == null ? "text" : language.getAceMode(); 
+			}
+			
+		};
+		
+		code.add(new AceHighlighter(modeModel));
 		
 		add(code);
 		

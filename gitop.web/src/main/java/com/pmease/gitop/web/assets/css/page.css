@@ -388,23 +388,36 @@ table.files td.file-icon { width: 18px; padding-right: 2px; padding-left: 15px; 
 .blob-meta > span + span { border-left: 1px solid #ddd; padding-left: 10px; margin-left: 5px; box-shadow: inset 1px 0 0 #fff; }
 .blob-meta > span > .icon { padding: 3px; background: white; border: 1px solid #ccc; border-right-color: #e5e5e5; border-bottom-color: #e5e5e5; border-radius: 3px;}
 
-.blob-body { border-top: 1px solid #bbb; }
 .blob-image, .blob-general { background: #eee; text-align: center; padding: 30px; }
 .blob-image img { border: 1px solid #666; background: #fff; }
 
 table.table-blob { width: 100%; }
-.blob-body { width: 100%; overflow: auto; }
-.table-blob td { vertical-align: top; line-height: 18px; font-size: 12px; font-family: Consolas, "Liberation Mono", Courier, monospace; }
-.table-blob td.blob-lineno { width: 1%; padding: 9px 5px 9px 15px; border-right: 1px solid #ddd;}
+.blob-body { width: 100%; overflow: auto; overflow-x: auto; overflow-y: hidden; border-top: 1px solid #bbb; }
+.table-blob td { vertical-align: top; line-height: 18px; font-size: 12px; font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', 'Droid Sans Mono', monospace; }
+.table-blob td.blob-lineno { width: 1%; padding: 0; border-right: 1px solid #ddd; padding: 9px 0;}
+.blob-lineno span { display: block; color: #999; text-align: right; line-height: 18px; padding: 0 5px 0 15px; cursor: pointer; }
+.blob-lineno span.active { background: #08F; color: white; }
+
 .table-blob td.blob-code { padding: 0; }
 
-.blob-code pre,
-.blob-code code { background: white; border-radius: 0; margin: 0; border: none; white-space: pre; overflow-x: auto; font-family: Consolas, "Liberation Mono", Courier, monospace; font-size: 12px; line-height: 18px; }
-.blob-code pre { padding: 9px 9px 9px 12px; }
-.blob-code code { padding: 0; }
+.code-highlight { padding: 9px 9px 9px 12px; line-height: 18px; position: relative; }
+.code-highlight pre,
+.code-highlight code { 
+	background: white; border-radius: 0; padding: 0; margin: 0; border: none; 
+	white-space: pre; word-break: normal; word-wrap: normal; 
+	font-size: 12px; line-height: 18px; 
+	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', 'Droid Sans Mono', monospace;
+}
 
-.blob-lineno span { display: block; color: #999; text-align: right; line-height: 18px; }
+.code-highlight pre {
+	overflow: auto; overflow-x: auto; overflow-y: hidden;
+}
+
 .blob-meta > span > .icon { padding: 3px; background: white; border: 1px solid #ccc; border-right-color: #e5e5e5; border-bottom-color: #e5e5e5; border-radius: 3px;}
+
+.readme { border: 1px solid #ddd; margin: 18px 0; border-radius: 4px; }
+.readme > .head { padding: 8px 15px; border-radius: 4px 4px 0 0; background: #e5e5e5; border-bottom: 1px solid #ddd; font-size: 16px; font-weight: bold; }
+.readme > .body { padding: 15px; }
 
 /**
  * GATE KEEPER SETTING PAGE
