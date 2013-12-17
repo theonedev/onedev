@@ -4,11 +4,9 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.eclipse.mylyn.wikitext.core.parser.MarkupParser;
-import org.eclipse.mylyn.wikitext.core.parser.markup.MarkupLanguage;
-import org.eclipse.mylyn.wikitext.core.util.ServiceLocator;
 
 import com.google.common.base.Strings;
+import com.pmease.gitop.web.util.MarkdownUtils;
 
 public class WikiTextPanel extends Panel {
 	private static final long serialVersionUID = 1L;
@@ -39,10 +37,12 @@ public class WikiTextPanel extends Panel {
 					return original;
 				}
 				
-				MarkupLanguage l = ServiceLocator.getInstance().getMarkupLanguage(lang);
-				MarkupParser parser = new MarkupParser(l);
-				
-				return parser.parseToHtml(original);
+				String html = MarkdownUtils.transformMarkdown(original);
+				return html;
+//				MarkupLanguage l = ServiceLocator.getInstance().getMarkupLanguage(lang);
+//				MarkupParser parser = new MarkupParser(l);
+//				
+//				return parser.parseToHtml(original);
 			}
 		}).setEscapeModelStrings(false));
 	}
