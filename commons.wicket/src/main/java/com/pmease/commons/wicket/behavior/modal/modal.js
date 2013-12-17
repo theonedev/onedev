@@ -45,6 +45,14 @@ function hideModal(modalId) {
 }
 
 $(function() {
+	$(document).keyup(function(e) {
+		if (e.keyCode == 27) { // esc
+			var topmostPopup = $("body>.popup:visible:last");
+			if (topmostPopup.hasClass("modal"))
+				hideModal(topmostPopup[0].id);
+		}
+	});
+
 	Wicket.Event.subscribe('/ajax/call/success', function() {
 		$("body>.modal:visible").each(function() {
 			if (!$("#" + this.id + "-placeholder")[0]) {
