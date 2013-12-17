@@ -428,8 +428,8 @@ table.table-blob { width: 100%; }
 .gate-keeper-add:hover, .gate-keeper-add:focus {background-color: #EBEBEB; border-color: #ADADAD; cursor: pointer;}
 .gate-keeper-selector {width: 600px; max-height: 600px; overflow: auto;}
 .gate-keeper-selector .panel {border: none; border-radius: 0;}
-.gate-keeper-selector .panel-heading {border-top: 2px solid #CCCCCC; border-radius: 0;}
-.gate-keeper-selector .panel-group>.panel:first-child>.panel-heading {border-width: 1px;}
+.gate-keeper-selector .panel-heading {border-top: 1px solid #CCCCCC; border-radius: 0;}
+.gate-keeper-selector .panel-group>.panel:first-child>.panel-heading {border-top: none;}
 .gate-keeper-selector .panel-heading.collapsed:hover, .gate-keeper-selector .panel-heading.collapsed:focus {
 	border-color: #999999; background-color: #E0E0E0; cursor: pointer;}
 .gate-keeper-selector .panel-group .panel + .panel {margin-top: 0px;}
@@ -441,7 +441,7 @@ table.table-blob { width: 100%; }
 .gate-keeper-name {font-size: 15px; margin-top: -4px;}
 .gate-keeper-editor {max-height: 600px; overflow: auto;}
 .gate-keeper-editor .gate-keeper-name {font-weight: bold; font-size: 16px; margin-top: 0; margin-bottom: 4px;}
-.gate-keeper-editor .icon {width: 20px; margin-right: 8px;}
+.gate-keeper-editor .icon {width: 20px; margin-right: 8px; margin-top: 4px;}
 .gate-keeper .panel-title {font-size: 14px;}
 .gate-keeper .panel-heading {padding: 8px;}
 .gate-keeper .icon {margin-left: 8px; cursor: pointer;}
