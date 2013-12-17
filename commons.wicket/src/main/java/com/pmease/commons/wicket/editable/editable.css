@@ -10,10 +10,19 @@ table.reflection>tbody>tr>td {
 }
 table.reflection>tbody>tr>td.name {
 	font-weight: bold;
-	background: #EDEDED;
+	background: #F0F0F0;
 	text-align: right;
 	white-space: nowrap;
 	width: 20%;
+}
+table.reflection>tbody>tr:first-child>td.name {
+	border-radius: 4px 4px 0 0;
+}
+table.reflection>tbody>tr:last-child>td.name {
+	border-radius: 0 0 4px 4px;
+}
+table.reflection>tbody>tr:first-child:last-child>td.name {
+	border-radius: 4px;
 }
 table.reflection td.value {
 	font-size: 13px;

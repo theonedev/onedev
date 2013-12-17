@@ -33,11 +33,11 @@ function showModal(modalId, contentLoader) {
 	if (!modal.find(">.modal-dialog>.content")[0])
 		contentLoader();
 	else
-		modal.find("input:visible:first").focus();
+		modal.find("input[type=text], input[type=textarea]").filter(":visible:first").focus();
 }
 
 function modalLoaded(modalId) {
-	$("#" + modalId).find("input:visible:first").focus();
+	$("#" + modalId).find("input[type=text], input[type=textarea]").filter(":visible:first").focus();
 }
 
 function hideModal(modalId) {

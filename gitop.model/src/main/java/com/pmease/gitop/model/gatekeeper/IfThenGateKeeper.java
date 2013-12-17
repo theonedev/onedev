@@ -1,6 +1,10 @@
 package com.pmease.gitop.model.gatekeeper;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.annotation.TableLayout;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
 import com.pmease.gitop.model.gatekeeper.checkresult.Blocked;
@@ -11,12 +15,15 @@ import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
 @Editable(name="Check Second Gate Keeper If First Gate Keeper Is Passed", order=300, icon="icon-servers",  
 		description="If first gate keeper is passed, go ahead to check second gate keeper; otherwise, consider "
 				+ "the whole gate keeper as passed.")
+@TableLayout
 public class IfThenGateKeeper extends CompositeGateKeeper {
 
 	private GateKeeper ifGate = new DefaultGateKeeper();
 	
 	private GateKeeper thenGate = new DefaultGateKeeper();
 	
+	@Valid
+	@NotNull
 	public GateKeeper getIfGate() {
 		return ifGate;
 	}
@@ -25,6 +32,8 @@ public class IfThenGateKeeper extends CompositeGateKeeper {
 		this.ifGate = ifGate;
 	}
 
+	@Valid
+	@NotNull
 	public GateKeeper getThenGate() {
 		return thenGate;
 	}
