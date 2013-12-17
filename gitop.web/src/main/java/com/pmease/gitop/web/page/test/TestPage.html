@@ -3,21 +3,23 @@
 <head>
 </head>
 <body>
-	<div wicket:id="accordion">
-		<div><a wicket:id="link1">link1</a></div>
-		<div wicket:id="content1">
+	<div wicket:id="accordion" class="accordion1">
+		<div style="border:1px solid blue;"><a wicket:id="link1">link1</a></div>
+		<div wicket:id="content1" style="border:1px solid red;">
 			<div>begin content1</div>
 			<a wicket:id="show">show</a>
 			<div wicket:id="content"></div>
 			<div>end content1</div>
 		</div>
-		<div><a wicket:id="link2">link2</a></div>
-		<div wicket:id="content2">content2</div>
+		<div style="border:1px solid blue;"><a wicket:id="link2">link2</a></div>
+		<div wicket:id="content2" style="border:1px solid red;">content2</div>
+		<div style="border:1px solid blue;"><a wicket:id="link3">link3</a></div>
+		<div wicket:id="content3" style="border:1px solid red;">content3</div>
 	</div>
 	<a wicket:id="test">test</a>
 </body>
 <wicket:fragment wicket:id="content">
-<div wicket:id="accordion">
+<div wicket:id="accordion" class="accordion2">
 	<div><a wicket:id="link11">link11</a></div>
 	<div wicket:id="content11">content11</div>
 	<div><a wicket:id="link12">link12</a></div>

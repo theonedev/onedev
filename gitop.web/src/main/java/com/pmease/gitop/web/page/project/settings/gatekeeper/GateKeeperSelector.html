@@ -1,9 +1,9 @@
 <wicket:panel>
 	<div class="gate-keeper-selector">
-		<div class="gate-keeper-categories">
+		<div wicket:id="accordion" class="gate-keeper-categories">
 			<div wicket:id="categories">
 				<div wicket:id="name" class="gate-keeper-category-name"></div>
-				<div class="gate-keeper-category-body">
+				<div wicket:id="collapsible" class="gate-keeper-category-body">
 					<div wicket:id="gateKeepers" class="gate-keeper-item">
 						<div wicket:id="gateKeeper">
 							<div class="clearfix">
@@ -12,7 +12,7 @@
 							</div>
 							<div wicket:id="description" class="gate-keeper-description"></div>
 						</div>
-					</div>
+					'</div>
 				</div>
 			</div>
 		</div>

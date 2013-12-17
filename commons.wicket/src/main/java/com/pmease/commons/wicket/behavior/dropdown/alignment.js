@@ -2,7 +2,7 @@ jQuery.fn.align = function(alignment) {
 	if (this[0] == undefined)
 		return this;
 	
-	if (alignment == undefined)
+	if (alignment == undefined) 
 		alignment = this[0].alignment;
 	
 	var indicator = this.find(">.indicator");

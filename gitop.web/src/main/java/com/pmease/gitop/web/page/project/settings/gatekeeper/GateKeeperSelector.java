@@ -20,6 +20,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.loader.ImplementationRegistry;
+import com.pmease.commons.wicket.behavior.collapse.AccordionPanel;
+import com.pmease.commons.wicket.behavior.collapse.CollapseBehavior;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.gatekeeper.ApprovalGateKeeper;
 import com.pmease.gitop.model.gatekeeper.BranchGateKeeper;
@@ -76,17 +78,20 @@ public abstract class GateKeeperSelector extends Panel {
 				it.remove();
 		}
 		
-		add(new ListView<Class<?>>("categories", new ArrayList<Class<?>>(gateKeeperClasses.keySet())) {
+		AccordionPanel accordion = new AccordionPanel("accordion");
+		add(accordion);
+		accordion.add(new ListView<Class<?>>("categories", new ArrayList<Class<?>>(gateKeeperClasses.keySet())) {
 
 			@Override
 			protected void populateItem(ListItem<Class<?>> categoryItem) {
 				final Class<?> category = categoryItem.getModelObject();
-				categoryItem.add(new Label("name", EditableUtils.getName(category)));
-				
+
 				List<Class<?>> gateKeepersOfCategory = gateKeeperClasses.get(category);
 				Preconditions.checkNotNull(gateKeepersOfCategory);
 				
-				categoryItem.add(new ListView<Class<?>>("gateKeepers", gateKeepersOfCategory) {
+				WebMarkupContainer collapsible = new WebMarkupContainer("collapsible");
+				categoryItem.add(collapsible);
+				collapsible.add(new ListView<Class<?>>("gateKeepers", gateKeepersOfCategory) {
 
 					@Override
 					protected void populateItem(ListItem<Class<?>> gateKeeperItem) {
@@ -110,6 +115,8 @@ public abstract class GateKeeperSelector extends Panel {
 					}
 					
 				});
+
+				categoryItem.add(new Label("name", EditableUtils.getName(category)).add(new CollapseBehavior(collapsible)));
 			}
 			
 		});

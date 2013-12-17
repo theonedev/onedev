@@ -4,7 +4,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 
 import com.pmease.commons.wicket.behavior.collapse.AccordionPanel;
@@ -14,7 +13,7 @@ import com.pmease.commons.wicket.behavior.collapse.CollapseBehavior;
 public class TestPage extends WebPage {
 
 	public TestPage() {
-		WebMarkupContainer accordion = new AccordionPanel("accordion");
+		final WebMarkupContainer accordion = new AccordionPanel("accordion");
 		add(accordion);
 		
 		final WebMarkupContainer content1 = new WebMarkupContainer("content1");
@@ -24,6 +23,10 @@ public class TestPage extends WebPage {
 		WebMarkupContainer content2 = new WebMarkupContainer("content2");
 		accordion.add(content2);
 		accordion.add(new WebMarkupContainer("link2").add(new CollapseBehavior(content2)));
+
+		WebMarkupContainer content3 = new WebMarkupContainer("content3");
+		accordion.add(content3);
+		accordion.add(new WebMarkupContainer("link3").add(new CollapseBehavior(content3)));
 
 		content1.add(new AjaxLink<Void>("show") {
 
@@ -47,13 +50,13 @@ public class TestPage extends WebPage {
 		});
 		content1.add(new WebMarkupContainer("content").setOutputMarkupId(true));
 		
-		add(new Link<Void>("test") {
+		add(new AjaxLink<Void>("test") {
 
 			@Override
-			public void onClick() {
-				
+			public void onClick(AjaxRequestTarget target) {
+				target.add(accordion);
 			}
-			
+
 		});
 	}
 	
