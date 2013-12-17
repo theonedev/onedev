@@ -116,7 +116,9 @@ public abstract class GateKeeperSelector extends Panel {
 					
 				});
 
-				categoryItem.add(new Label("name", EditableUtils.getName(category)).add(new CollapseBehavior(collapsible)));
+				WebMarkupContainer collapseTrigger = new WebMarkupContainer("collapseTrigger");
+				categoryItem.add(collapseTrigger);
+				collapseTrigger.add(new Label("name", EditableUtils.getName(category))).add(new CollapseBehavior(collapsible));
 			}
 			
 		});

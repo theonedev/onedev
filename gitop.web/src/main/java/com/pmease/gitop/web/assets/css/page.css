@@ -413,11 +413,15 @@ table.table-blob { width: 100%; }
 .gate-keeper-add.well {font-size:16px;}
 .gate-keeper-add .icon {margin-left: 8px;}
 .gate-keeper-add:hover, .gate-keeper-add:focus {background-color: #EBEBEB; border-color: #ADADAD; cursor: pointer;}
-.gate-keeper-selector {width: 600px; max-height: 600px; overflow: auto; padding: 16px;}
+.gate-keeper-selector {width: 600px; max-height: 600px; overflow: auto;}
+.gate-keeper-selector .panel {border: none; border-radius: 0;}
+.gate-keeper-selector .panel-heading {border-top: 2px solid #CCCCCC; border-radius: 0;}
+.gate-keeper-selector .panel-group>.panel:first-child>.panel-heading {border-width: 1px;}
+.gate-keeper-selector .panel-heading.collapsed:hover, .gate-keeper-selector .panel-heading.collapsed:focus {
+	border-color: #999999; background-color: #E0E0E0; cursor: pointer;}
+.gate-keeper-selector .panel-group .panel + .panel {margin-top: 0px;}
 .gate-keeper-selector .icon {width: 20px; margin-right: 8px;}
-.gate-keeper-category-name {font-size: 18px; margin-bottom: 4px; border-bottom: 1px solid #CCCCCC;}
 .gate-keeper-description {font-size: 13px; color: #888888;}
-.gate-keeper-category-body {margin-bottom: 12px;}
 .gate-keeper-item {margin-bottom: 6px; padding: 4px; border: 1px solid white;}
 .gate-keeper-item:hover, .gate-keeper-item:focus {background-color: #EBEBEB; cursor: pointer; 
 		border: 1px solid #ADADAD; border-radius: 4px;}
