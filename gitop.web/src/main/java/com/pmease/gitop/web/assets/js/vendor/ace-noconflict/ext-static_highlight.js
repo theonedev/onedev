@@ -34,7 +34,7 @@ ace.define('ace/ext/static_highlight', ['require', 'exports', 'module' , 'ace/ed
 var EditSession = require("../edit_session").EditSession;
 var TextLayer = require("../layer/text").Text;
 var baseStyles = ".ace_static_highlight {\
-font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', 'Droid Sans Mono', monospace;\
+font-family:  Consolas, 'Liberation Mono', Courier, monospace;\
 font-size: 12px;\
 }\
 .ace_static_highlight .ace_gutter {\

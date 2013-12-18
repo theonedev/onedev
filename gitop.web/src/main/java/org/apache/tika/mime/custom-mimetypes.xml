@@ -18,9 +18,9 @@
 		<sub-class-of type="text/css" />
 	</mime-type>
 	
-	<mime-type type="text/x-apache-conf">
+	<mime-type type="text/x-apache">
 		<_comment>Apache conf file</_comment>
-		<glob pattern="*.htaccess"></glob>
+		<glob pattern="*.htaccess" />
 		<glob pattern="apache2.conf" />
 		<glob pattern="httpd.conf" />
 		<sub-class-of type="text/plain" />
@@ -91,6 +91,12 @@
 		<glob pattern="*.nginxconf" />
 	</mime-type>
 
+	<mime-type type="text/x-dart">
+		<_comment>Dart lang</_comment>
+		<glob pattern="*.dart" />
+		<sub-class-of type="text/plain" />
+	</mime-type>
+	
 	<mime-type type="text/x-clojure">
 		<_comment>Clojure source code</_comment>
 		<glob pattern="*.clj" />
