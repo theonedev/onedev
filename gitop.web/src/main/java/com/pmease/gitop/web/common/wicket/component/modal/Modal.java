@@ -9,7 +9,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.pmease.gitop.web.common.util.Options;
+import com.pmease.gitop.web.util.JsOptions;
 
 @SuppressWarnings("serial")
 public class Modal extends Panel {
@@ -72,10 +72,10 @@ public class Modal extends Panel {
 	}
 	
 	public void show(AjaxRequestTarget target) {
-		show(target, new Options());
+		show(target, new JsOptions());
 	}
 	
-	public void show(AjaxRequestTarget target, Options options) {
+	public void show(AjaxRequestTarget target, JsOptions options) {
 		Preconditions.checkNotNull(options, "options");
 		target.add(modal);
 		target.appendJavaScript(String.format("$('#%s').modal(%s).modal('show')", 

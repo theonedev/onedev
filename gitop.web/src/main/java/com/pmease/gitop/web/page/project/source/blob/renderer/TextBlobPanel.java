@@ -34,7 +34,9 @@ public class TextBlobPanel extends Panel {
 				StringBuffer sb = new StringBuffer();
 				for (int i = 0; i < size; i++) {
 					int lineno = i + 1;
-					sb.append("<span id='L" + lineno + "'>" + lineno + "</span>").append("\n");
+					sb.append("<a id='LL" + lineno + "'>")
+						.append(lineno)
+						.append("</a>").append("\n");
 				}
 				return sb.toString();
 			}

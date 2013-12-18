@@ -10,7 +10,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
 import com.google.common.collect.ImmutableMap;
-import com.pmease.gitop.web.common.util.JsUtil;
+import com.pmease.gitop.web.util.JsUtil;
 
 @SuppressWarnings("serial")
 public class MessengerResourcesBehavior extends Behavior {

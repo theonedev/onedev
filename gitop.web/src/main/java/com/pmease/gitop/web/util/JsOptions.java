@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.common.util;
+package com.pmease.gitop.web.util;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -11,7 +11,7 @@ import org.apache.wicket.util.io.IClusterable;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
-public class Options implements IClusterable {
+public class JsOptions implements IClusterable {
 	private static final long serialVersionUID = 1L;
 
 	private Map<String, Serializable> options = Maps.newLinkedHashMap();
@@ -26,7 +26,7 @@ public class Options implements IClusterable {
 		return options.get(key.toString());
 	}
 	
-	public Options set(Object key, Serializable value) {
+	public JsOptions set(Object key, Serializable value) {
 		Preconditions.checkNotNull(key, "key");
 		if (value != null) {
 			options.put(key.toString(), value);

@@ -5,15 +5,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Joiner;
@@ -24,10 +21,7 @@ import com.google.common.collect.Sets;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.behavior.collapse.CollapseBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitop.web.component.label.AgeLabel;
-import com.pmease.gitop.web.component.link.GitUserAvatarLink;
 import com.pmease.gitop.web.component.link.GitUserLink;
 import com.pmease.gitop.web.page.project.api.GitPerson;
 import com.pmease.gitop.web.page.project.source.AbstractFilePage;
@@ -40,7 +34,6 @@ public class SourceBlobPage extends AbstractFilePage {
 	private final IModel<Commit> lastCommitModel;
 	private final IModel<List<GitPerson>> committersModel;
 	
-	private final static int MAX_DISPLAYED_COMMITTERS = 20;
 	
 	public SourceBlobPage(PageParameters params) {
 		super(params);
@@ -135,69 +128,13 @@ public class SourceBlobPage extends AbstractFilePage {
 			
 		}));
 		
-		
-		add(new Label("contributorStat", new AbstractReadOnlyModel<Integer>() {
+		add(new AjaxLazyLoadPanel("paticipants") {
 
 			@Override
-			public Integer getObject() {
-				return committersModel.getObject().size();
+			public Component getLazyLoadComponent(String markupId) {
+				return new ContributorsPanel(markupId, committersModel);
 			}
-			
-		}));
-		
-		ListView<GitPerson> contributorsView = new ListView<GitPerson>("contributors", 
-				new AbstractReadOnlyModel<List<GitPerson>>() {
-
-			@Override
-			public List<GitPerson> getObject() {
-				List<GitPerson> committers = committersModel.getObject();
-				if (committers.size() > MAX_DISPLAYED_COMMITTERS) {
-					return Lists.newArrayList(committers.subList(0, MAX_DISPLAYED_COMMITTERS));
-				} else {
-					return committers;
-				}
-			}
-			
-		}) {
-
-			@Override
-			protected void populateItem(ListItem<GitPerson> item) {
-				GitPerson person = item.getModelObject();
-				item.add(new GitUserAvatarLink("link", Model.of(person)));
-			}
-		};
-		
-		add(contributorsView);
-		
-		WebMarkupContainer moreContainer = new WebMarkupContainer("more") {
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				this.setVisibilityAllowed(committersModel.getObject().size() > MAX_DISPLAYED_COMMITTERS);
-			}
-		};
-		
-		add(moreContainer);
-		DropdownPanel panel = new DropdownPanel("moreDropdown", true) {
-
-			@Override
-			protected Component newContent(String id) {
-				Fragment frag = new Fragment(id, "committers-dropdown", SourceBlobPage.this);
-				frag.add(new ListView<GitPerson>("committers", committersModel) {
-
-					@Override
-					protected void populateItem(ListItem<GitPerson> item) {
-						item.add(new GitUserLink("committer", item.getModel()));
-					}
-				});
-				
-				return frag;
-			}
-		};
-		
-		add(panel);
-		moreContainer.add(new DropdownBehavior(panel).clickMode(true));
+		});
 	}
 
 	protected String getFilePath() {

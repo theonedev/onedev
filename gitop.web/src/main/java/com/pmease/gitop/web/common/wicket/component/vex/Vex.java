@@ -2,17 +2,17 @@ package com.pmease.gitop.web.common.wicket.component.vex;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
-import com.pmease.gitop.web.common.util.Options;
+import com.pmease.gitop.web.util.JsOptions;
 
 public class Vex {
 
-	private final Options options = new Options();
+	private final JsOptions options = new JsOptions();
 	
 	public void open(AjaxRequestTarget target) {
 		target.appendJavaScript(String.format("vex.open(%s)", options.toString()));
 	}
 	
-	public Options getOptions() {
+	public JsOptions getOptions() {
 		return options;
 	}
 }

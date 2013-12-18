@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.common.util;
+package com.pmease.gitop.web.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Throwables;

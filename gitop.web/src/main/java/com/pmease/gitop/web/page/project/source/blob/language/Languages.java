@@ -18,8 +18,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
-import com.pmease.gitop.web.common.util.StandardObjectMapper;
 import com.pmease.gitop.web.util.MimeTypeUtils;
+import com.pmease.gitop.web.util.StandardObjectMapper;
 
 public enum Languages {
 	INSTANCE;
