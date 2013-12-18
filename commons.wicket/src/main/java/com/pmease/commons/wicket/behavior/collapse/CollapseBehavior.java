@@ -29,6 +29,12 @@ public class CollapseBehavior extends Behavior {
 	}
 
 	@Override
+	public void bind(Component component) {
+		super.bind(component);
+		component.setOutputMarkupId(true);
+	}
+
+	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
 

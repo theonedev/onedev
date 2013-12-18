@@ -1,4 +1,13 @@
 function setupModalTrigger(triggerId, modalId, contentLoader) {
+	var trigger = $("#" + triggerId);
+	var modal = $("#" + modalId);
+
+	// This script can still be called if CollapseBehavior is added to a 
+	// a component enclosed in an invisible wicket:enclosure. So we 
+	// should check if relevant element exists.
+	if (!trigger[0] || !modal[0])
+		return;
+	
 	$("#" + triggerId).click(function() {
 		showModal(modalId, contentLoader);
 	});
@@ -6,6 +15,13 @@ function setupModalTrigger(triggerId, modalId, contentLoader) {
 
 function setupModal(modalId, modalWidth, showImmediately) {
 	var modal = $("#" + modalId);
+	
+	// This script can still be called if CollapseBehavior is added to a 
+	// a component enclosed in an invisible wicket:enclosure. So we 
+	// should check if relevant element exists.
+	if (!modal[0])
+		return;
+	
 	modal.before("<div id='" + modalId + "-placeholder' class='hide'></div>");
 	modal.modal({backdrop: "static", keyboard: false, show: false});
 	if (modalWidth)

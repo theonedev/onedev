@@ -1,15 +1,28 @@
 function setupDropdown(triggerId, dropdownId, hoverDelay, alignment, dropdownLoader) {
 	if (alignment.target) {
-		alignment.target.element = $("#" + alignment.target.id)[0];
+		var target = $("#" + alignment.target.id);
+		if (!target[0])
+			return;
+		alignment.target.element = target[0];
 		$(alignment.target.element).addClass("dropdown-alignment");
 	}
 	
 	var trigger = $("#" + triggerId);
+	
+	// This script can still be called if CollapseBehavior is added to a 
+	// a component enclosed in an invisible wicket:enclosure. So we 
+	// should check if relevant element exists.
+	if (!trigger[0])
+		return;
+	
 	trigger.addClass("dropdown-toggle");
 	if (hoverDelay >= 0)
 		trigger.addClass("dropdown-hover");
 	
 	var dropdown = $("#" + dropdownId);
+
+	if (!dropdown[0])
+		return;
 			
 	// Dropdown can associate with multiple triggers, and we should initialize it only once.
 	if (!$("#" + dropdownId + "-placeholder")[0]) 

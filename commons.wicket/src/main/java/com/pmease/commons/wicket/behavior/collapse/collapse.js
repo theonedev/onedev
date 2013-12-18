@@ -1,6 +1,13 @@
 function setupCollapse(triggerId, targetId) {
 	var trigger = $("#" + triggerId);
 	var target = $("#" + targetId);
+
+	// This script can still be called if CollapseBehavior is added to a 
+	// a component enclosed in an invisible wicket:enclosure. So we 
+	// should check if relevant element exists.
+	if (!trigger[0] || !target[0])
+		return;
+	
 	target[0].trigger = trigger[0];
 
 	target.on("shown.bs.collapse hidden.bs.collapse", function() {
