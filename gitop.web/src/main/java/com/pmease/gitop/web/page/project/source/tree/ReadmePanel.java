@@ -79,7 +79,7 @@ public class ReadmePanel extends AbstractSourcePagePanel {
 		}));
 		
 		Language lang = blob.getLanguage();
-		if (lang.getName().equals("Markdown")) {
+		if (lang != null && lang.getName().equals("Markdown")) {
 			add(new WikiTextPanel("readme", new LoadableDetachableModel<String>() {
 
 				@Override

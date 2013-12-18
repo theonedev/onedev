@@ -45,8 +45,6 @@ public class ContributorsPanel extends Panel {
 			
 		}));
 		
-
-		
 		ListView<GitPerson> contributorsView = new ListView<GitPerson>("contributors", 
 				new AbstractReadOnlyModel<List<GitPerson>>() {
 
