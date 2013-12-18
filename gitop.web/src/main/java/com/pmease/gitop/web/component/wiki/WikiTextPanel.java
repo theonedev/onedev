@@ -1,12 +1,9 @@
 package com.pmease.gitop.web.component.wiki;
 
-import java.io.IOException;
-
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.markdown4j.Markdown4jProcessor;
 
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
