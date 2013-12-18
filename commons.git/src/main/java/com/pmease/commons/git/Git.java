@@ -36,10 +36,12 @@ import com.pmease.commons.git.command.PushCommand;
 import com.pmease.commons.git.command.RemoveCommand;
 import com.pmease.commons.git.command.ResetCommand;
 import com.pmease.commons.git.command.ShowCommand;
+import com.pmease.commons.git.command.ShowForConsumeCommand;
 import com.pmease.commons.git.command.ShowRefCommand;
 import com.pmease.commons.git.command.UpdateRefCommand;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.GeneralException;
+import com.pmease.commons.util.execution.StreamConsumer;
 
 @SuppressWarnings("serial")
 public class Git implements Serializable {
@@ -257,10 +259,26 @@ public class Git implements Serializable {
 		return new ListTagsCommand(repoDir).call();
 	}
 	
+	/**
+	 * Show content of specified path of specified revision.
+	 * 
+	 * @param revision
+	 * 			revision of the path
+	 * @param path
+	 * 			path to show content
+	 * @param consumer
+	 * 			consumer to absorb content of specified path and revision
+	 *
+	 */
+	public Git show(String revision, String path, StreamConsumer consumer) {
+		new ShowForConsumeCommand(repoDir).revision(revision).path(path).consumer(consumer).call();
+		return this;
+	}
+	
 	public byte[] show(String revision, String path) {
 		return new ShowCommand(repoDir).revision(revision).path(path).call();
 	}
-	
+
 	public List<Commit> log(@Nullable String fromRev, @Nullable String toRev, 
 			@Nullable String path, int maxCommits) {
 		return new LogCommand(repoDir).fromRev(fromRev).toRev(toRev)

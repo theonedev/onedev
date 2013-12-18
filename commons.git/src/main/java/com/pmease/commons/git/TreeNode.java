@@ -12,7 +12,6 @@ import org.eclipse.jgit.lib.FileMode;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.command.ListTreeCommand;
-import com.pmease.commons.git.command.ShowCommand;
 
 @SuppressWarnings("serial")
 public class TreeNode implements Serializable {
@@ -126,10 +125,11 @@ public class TreeNode implements Serializable {
 	 * 			represents a directory
 	 */
 	public byte[] show() {
+		Git git = new Git(gitDir);
 		if (mode == FileMode.GITLINK) {
-			return new Git(gitDir).listSubModules(revision).get(path).getBytes();
+			return git.listSubModules(revision).get(path).getBytes();
 		} else {
-			return new ShowCommand(gitDir).revision(getRevision()).path(getPath()).call();
+			return git.show(getRevision(), getPath());
 		}
 	}
 

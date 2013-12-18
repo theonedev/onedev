@@ -1,8 +1,7 @@
 package com.pmease.commons.git.command;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-
-import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;

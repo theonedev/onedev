@@ -1,63 +1,31 @@
 package com.pmease.gitop.web.page.test;
 
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
-import org.apache.wicket.markup.html.panel.Fragment;
-
-import com.pmease.commons.wicket.behavior.collapse.AccordionPanel;
-import com.pmease.commons.wicket.behavior.collapse.CollapseBehavior;
+import org.apache.wicket.markup.html.basic.EnclosureContainer;
 
 @SuppressWarnings("serial")
 public class TestPage extends WebPage {
 
 	public TestPage() {
-		final WebMarkupContainer accordion = new AccordionPanel("accordion");
-		add(accordion);
+		WebMarkupContainer control = new WebMarkupContainer("control");
+		control.setVisible(false);
 		
-		final WebMarkupContainer content1 = new WebMarkupContainer("content1");
-		accordion.add(content1);
-		accordion.add(new WebMarkupContainer("link1").add(new CollapseBehavior(content1)));
-
-		WebMarkupContainer content2 = new WebMarkupContainer("content2");
-		accordion.add(content2);
-		accordion.add(new WebMarkupContainer("link2").add(new CollapseBehavior(content2)));
-
-		WebMarkupContainer content3 = new WebMarkupContainer("content3");
-		accordion.add(content3);
-		accordion.add(new WebMarkupContainer("link3").add(new CollapseBehavior(content3)));
-
-		content1.add(new AjaxLink<Void>("show") {
+		EnclosureContainer container = new EnclosureContainer("container", control);
+		add(container);
+		container.add(control);
+		container.add(new WebMarkupContainer("content") {
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment("content", "content", TestPage.this);
-				AccordionPanel accordion = new AccordionPanel("accordion");
-				fragment.add(accordion);
-				WebMarkupContainer content11 = new WebMarkupContainer("content11");
-				accordion.add(content11);
-				accordion.add(new WebMarkupContainer("link11").add(new CollapseBehavior(content11)));
-				
-				WebMarkupContainer content12 = new WebMarkupContainer("content12");
-				accordion.add(content12);
-				accordion.add(new WebMarkupContainer("link12").add(new CollapseBehavior(content12)));
-				fragment.setOutputMarkupId(true);
-				target.add(fragment);
-				content1.replace(fragment);
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				String script = String.format("document.getElementById('%s').className += ' someCssClass';", getMarkupId());
+				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			
-		});
-		content1.add(new WebMarkupContainer("content").setOutputMarkupId(true));
-		
-		add(new AjaxLink<Void>("test") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				target.add(accordion);
-			}
-
-		});
+		}.setOutputMarkupId(true));
 	}
 	
 }
