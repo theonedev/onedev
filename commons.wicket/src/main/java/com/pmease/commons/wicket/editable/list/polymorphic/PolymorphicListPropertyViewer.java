@@ -1,13 +1,14 @@
 package com.pmease.commons.wicket.editable.list.polymorphic;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import com.pmease.commons.editable.BeanEditContext;
-import com.pmease.commons.wicket.editable.EditableResourceBehavior;
+import com.pmease.commons.wicket.editable.EditableHeaderItem;
 
 @SuppressWarnings("serial")
 public class PolymorphicListPropertyViewer extends Panel {
@@ -23,8 +24,6 @@ public class PolymorphicListPropertyViewer extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new EditableResourceBehavior());
-
 		add(new ListView<BeanEditContext>("elements", editContext.getElementContexts()) {
 
 			@Override
@@ -42,6 +41,12 @@ public class PolymorphicListPropertyViewer extends Panel {
 			}
 			
 		});
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(EditableHeaderItem.get());
 	}
 
 }

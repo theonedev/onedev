@@ -3,12 +3,13 @@ package com.pmease.commons.wicket.editable.string;
 import java.io.Serializable;
 
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.editable.PropertyEditContext;
-import com.pmease.commons.wicket.editable.EditableResourceBehavior;
+import com.pmease.commons.wicket.editable.EditableHeaderItem;
 
 @SuppressWarnings("serial")
 public class StringPropertyEditContext extends PropertyEditContext {
@@ -46,7 +47,13 @@ public class StringPropertyEditContext extends PropertyEditContext {
 				super.onComponentTag(tag);
 			}
 			
-		}.add(new EditableResourceBehavior());
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				response.render(EditableHeaderItem.get());
+			}
+
+		};
 	}
 
 	@Override

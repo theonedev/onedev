@@ -1,6 +1,7 @@
 package com.pmease.commons.wicket.editable.reflection;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -9,7 +10,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.editable.annotation.OmitNames;
-import com.pmease.commons.wicket.editable.EditableResourceBehavior;
+import com.pmease.commons.wicket.editable.EditableHeaderItem;
 
 @SuppressWarnings("serial")
 public class ReflectionBeanViewer extends Panel {
@@ -26,8 +27,6 @@ public class ReflectionBeanViewer extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new EditableResourceBehavior());
-		
 		add(new ListView<PropertyEditContext>("properties", editContext.getPropertyContexts()) {
 
 			@Override
@@ -39,6 +38,12 @@ public class ReflectionBeanViewer extends Panel {
 			}
 
 		});
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(EditableHeaderItem.get());
 	}
 
 }

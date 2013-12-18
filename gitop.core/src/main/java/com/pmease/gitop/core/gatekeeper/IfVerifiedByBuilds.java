@@ -26,7 +26,7 @@ public class IfVerifiedByBuilds extends CommonGateKeeper {
 	private boolean checkMerged = true;
 	
 	private boolean blockMode = true;
-
+	
 	@Editable(order=100, description="Specify number of passed builds required by this gate keeper.")
 	@Min(1)
 	public int getBuildCount() {
@@ -98,5 +98,5 @@ public class IfVerifiedByBuilds extends CommonGateKeeper {
 			return accepted("Builds passed");
 		}
 	}
-	
+
 }

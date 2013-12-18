@@ -1,10 +1,11 @@
 package com.pmease.commons.wicket.editable.password;
 
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.commons.wicket.editable.EditableResourceBehavior;
+import com.pmease.commons.wicket.editable.EditableHeaderItem;
 
 @SuppressWarnings("serial")
 public class ConfirmativePasswordPropertyEditor extends Panel {
@@ -19,8 +20,6 @@ public class ConfirmativePasswordPropertyEditor extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		add(new EditableResourceBehavior());
 		
 		add(new PasswordTextField("input", new IModel<String>() {
 
@@ -57,6 +56,12 @@ public class ConfirmativePasswordPropertyEditor extends Panel {
 			}
 			
 		}).setResetPassword(true).setRequired(false));
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(EditableHeaderItem.get());
 	}
 
 }

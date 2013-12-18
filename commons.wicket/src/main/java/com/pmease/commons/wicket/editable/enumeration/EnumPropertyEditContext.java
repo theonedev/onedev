@@ -7,13 +7,14 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyEditContext;
-import com.pmease.commons.wicket.editable.EditableResourceBehavior;
+import com.pmease.commons.wicket.editable.EditableHeaderItem;
 
 @SuppressWarnings("serial")
 public class EnumPropertyEditContext extends PropertyEditContext {
@@ -69,10 +70,15 @@ public class EnumPropertyEditContext extends PropertyEditContext {
                         super.onComponentTag(tag);
                     }
 
-                };
+        			@Override
+        			public void renderHead(IHeaderResponse response) {
+        				super.renderHead(response);
+        				response.render(EditableHeaderItem.get());
+        			}
 
-        dropDownChoice.setNullValid(!EditableUtils.isPropertyRequired(getPropertyGetter())).add(
-                new EditableResourceBehavior());
+        	};
+
+        dropDownChoice.setNullValid(!EditableUtils.isPropertyRequired(getPropertyGetter()));
 
         return dropDownChoice;
     }
