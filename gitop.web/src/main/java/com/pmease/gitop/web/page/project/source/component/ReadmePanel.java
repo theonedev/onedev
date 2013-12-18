@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.tika.mime.MimeType;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -15,6 +18,7 @@ import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.component.wiki.WikiTextPanel;
 import com.pmease.gitop.web.component.wiki.WikiType;
 import com.pmease.gitop.web.page.project.source.blob.FileBlob;
+import com.pmease.gitop.web.page.project.source.blob.renderer.highlighter.HighlightJsResourceReference;
 
 @SuppressWarnings("serial")
 public class ReadmePanel extends AbstractSourcePagePanel {
@@ -89,6 +93,14 @@ public class ReadmePanel extends AbstractSourcePagePanel {
 			}
 			
 		}));
+	}
+	
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		
+		response.render(JavaScriptHeaderItem.forReference(HighlightJsResourceReference.getInstance()));
+		response.render(OnDomReadyHeaderItem.forScript(
+				("$('.readme .body pre code').each(function(i, e) { hljs.highlightBlock(e)});")));
 	}
 	
 	static Set<String> README_FILES = ImmutableSet.of(
