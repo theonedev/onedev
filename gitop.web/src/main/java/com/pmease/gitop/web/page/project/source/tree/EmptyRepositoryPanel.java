@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.project.source.component;
+package com.pmease.gitop.web.page.project.source.tree;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
@@ -6,6 +6,7 @@ import org.apache.wicket.model.Model;
 
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.Project;
+import com.pmease.gitop.web.page.project.source.component.ProjectPanel;
 import com.pmease.gitop.web.util.UrlUtils;
 
 @SuppressWarnings("serial")

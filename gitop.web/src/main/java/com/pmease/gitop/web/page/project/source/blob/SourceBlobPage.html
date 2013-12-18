@@ -7,10 +7,10 @@
 			<div class="last-commit">
 				<div class="commit-message">
 					<pre class="title-message inline" wicket:id="shortMessage"></pre>
-					<wicket:enclosure child="detailedMessage">
+					<wicket:container wicket:id="detailedMessageContainer">
 					<a class="btn btn-mini btn-gray" href="#" wicket:id="detailed-toggle"><i class="icon icon-more"></i></a>
 					<pre class="detailed-message collapse" wicket:id="detailedMessage"></pre>
-					</wicket:enclosure>
+					</wicket:container>
 				</div>
 				<div class="persons text-muted">
 					<div class="author">

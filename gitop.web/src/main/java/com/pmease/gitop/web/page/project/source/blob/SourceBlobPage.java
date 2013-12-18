@@ -7,6 +7,7 @@ import java.util.Set;
 import org.apache.wicket.Component;
 import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.EnclosureContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -99,12 +100,14 @@ public class SourceBlobPage extends AbstractFilePage {
 				}
 			}
 		};
-		
-		add(detailedMsg);
+
+		EnclosureContainer detailedContainer = new EnclosureContainer("detailedMessageContainer", detailedMsg);
+		add(detailedContainer);
+		detailedContainer.add(detailedMsg);
 		
 		WebMarkupContainer detailedToggle = new WebMarkupContainer("detailed-toggle");
 		detailedToggle.add(new CollapseBehavior(detailedMsg));
-		add(detailedToggle);
+		detailedContainer.add(detailedToggle);
 		
 		add(new GitUserLink("author", new AbstractReadOnlyModel<GitPerson>() {
 

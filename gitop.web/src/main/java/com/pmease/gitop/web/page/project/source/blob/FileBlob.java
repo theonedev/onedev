@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MimeType;
@@ -177,7 +178,7 @@ public class FileBlob {
 		}
 	}
 	
-	public Language getLanguage() {
+	public @Nullable Language getLanguage() {
 		Language lang = Languages.INSTANCE.findByMime(mimeType);
 		if ((lang == null) && (MimeTypeUtils.isXMLType(mimeType))) {
 			return Languages.INSTANCE.findByMime("text/xml");
@@ -244,10 +245,6 @@ public class FileBlob {
 		return mimeType;
 	}
 
-//	public @Nullable Language getLanguage() {
-//		return language;
-//	}
-
 	public @Nullable byte[] getData() {
 		return data;
 	}
@@ -270,5 +267,19 @@ public class FileBlob {
 
 	public String getPath() {
 		return path;
+	}
+	
+	public String getName() {
+		return FilenameUtils.getName(getPath());
+	}
+	
+	/**
+	 * Example:
+	 * /a/b/c.txt -> /a/b/
+	 * 
+	 * @return
+	 */
+	public String getFullPath() {
+		return FilenameUtils.getFullPath(getPath());
 	}
 }
