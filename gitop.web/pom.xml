@@ -109,13 +109,8 @@
 			<version>1.0</version>
 		</dependency>
 
-		<!--
-		<dependency>
-			<groupId>com.ibm.icu</groupId>
-			<artifactId>icu4j</artifactId>
-			<version>52.1</version>
-		</dependency>
-		 -->
+		<!-- <dependency> <groupId>com.ibm.icu</groupId> <artifactId>icu4j</artifactId> 
+			<version>52.1</version> </dependency> -->
 
 		<dependency>
 			<groupId>com.googlecode.juniversalchardet</groupId>
@@ -140,12 +135,8 @@
 			<artifactId>tika-core</artifactId>
 			<version>${tika.version}</version>
 		</dependency>
-<!-- 		<dependency>
-			<groupId>org.apache.tika</groupId>
-			<artifactId>tika-parsers</artifactId>
-			<version>${tika.version}</version>
-		</dependency>
- -->
+		<!-- <dependency> <groupId>org.apache.tika</groupId> <artifactId>tika-parsers</artifactId> 
+			<version>${tika.version}</version> </dependency> -->
 		<dependency>
 			<groupId>org.gitective</groupId>
 			<artifactId>gitective-core</artifactId>
@@ -194,7 +185,13 @@
 			<artifactId>html.core</artifactId>
 			<version>${wikitext.version}</version>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>org.pegdown</groupId>
+			<artifactId>pegdown</artifactId>
+			<version>1.4.2</version>
+		</dependency>
+
 	</dependencies>
 
 	<repositories>
