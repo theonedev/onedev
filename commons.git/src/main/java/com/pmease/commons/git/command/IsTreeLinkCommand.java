@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.git.Git;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.ExecuteResult;
 import com.pmease.commons.util.execution.LineConsumer;
@@ -33,10 +34,9 @@ public class IsTreeLinkCommand extends GitCommand<Boolean> {
 		Preconditions.checkNotNull(revision, "revision has to be specified.");
 		Preconditions.checkNotNull(symlink, "symlink has to be specified.");
 		
-		ShowCommand show = new ShowCommand(repoDir).path(symlink).revision(revision);
 		String targetPath;
 		try {
-			targetPath = new String(show.call(), "UTF8");
+			targetPath = new String(new Git(repoDir).show(revision, symlink), "UTF8");
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}

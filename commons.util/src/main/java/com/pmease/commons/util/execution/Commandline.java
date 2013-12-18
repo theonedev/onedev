@@ -106,10 +106,6 @@ public class Commandline  {
         return this;
     }
     
-    public ExecuteResult execute(OutputStream stdout, LineConsumer stderr) {
-    	return execute(stdout, stderr, null);
-    }
-    
 	private ProcessBuilder createProcessBuilder() {
 		File workingDir = this.workingDir;
 		if (workingDir == null)
@@ -149,6 +145,18 @@ public class Commandline  {
     	return processBuilder;
     }
     
+	/**
+	 * Execute the command.
+	 * 
+	 * @param stdout
+	 * 			output stream to write standard output, caller is responsible for closing the stream
+	 * @param stderr
+	 * 			line consumer to handle standard error
+	 * @param stdin
+	 * 			input stream to read standard input from, caller is responsible for closing the stream
+	 * @return
+	 * 			execution result
+	 */
 	public ExecuteResult execute(OutputStream stdout, final LineConsumer stderr, @Nullable InputStream stdin) {
     	Process process;
         try {
@@ -194,7 +202,28 @@ public class Commandline  {
         return result;
     }
     
-	public void executeWithoutWait(@Nullable byte[] stdinBytes) {
+    
+	/**
+	 * Execute the command.
+	 * 
+	 * @param stdout
+	 * 			output stream to write standard output, caller is responsible for closing the stream
+	 * @param stderr
+	 * 			line consumer to handle standard error
+	 * @return
+	 * 			execution result
+	 */
+    public ExecuteResult execute(OutputStream stdout, LineConsumer stderr) {
+    	return execute(stdout, stderr, null);
+    }
+
+    /**
+     * Execute the command without waiting for command completion.
+     * 
+     * @param stdinBytes
+     * 			standard input bytes to feed into command
+     */
+    public void executeWithoutWait(@Nullable byte[] stdinBytes) {
     	ByteArrayInputStream stdinStream = null;
     	if (stdinBytes != null && stdinBytes.length != 0) 
     		stdinStream = new ByteArrayInputStream(stdinBytes);
