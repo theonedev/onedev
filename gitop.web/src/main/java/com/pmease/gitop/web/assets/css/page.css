@@ -394,13 +394,13 @@ table.files td.file-icon { width: 18px; padding-right: 2px; padding-left: 15px; 
 table.table-blob { width: 100%; }
 .blob-body { width: 100%; overflow: auto; overflow-x: auto; overflow-y: hidden; border-top: 1px solid #bbb; }
 .table-blob td { vertical-align: top; line-height: 18px; font-size: 12px; font-family:  Consolas, 'Liberation Mono', Courier, monospace; }
-.table-blob td.blob-lineno { width: 1%; padding: 0; border-right: 1px solid #ddd; padding: 9px 0;}
-.blob-lineno span { display: block; color: #999; text-align: right; line-height: 18px; padding: 0 5px 0 15px; cursor: pointer; }
-.blob-lineno span.active { background: #08F; color: white; }
+.table-blob td.blob-lineno { width: 1%; border-right: 1px solid #ddd; padding: 9px 0;}
+.blob-lineno span,
+.blob-lineno a { display: block; color: #999; text-align: right; line-height: 18px; padding: 0 5px 0 15px; cursor: pointer; }
 
 .table-blob td.blob-code { padding: 0; }
 
-.code-highlight { padding: 9px 9px 9px 12px; line-height: 18px; position: relative; }
+.code-highlight { padding: 9px 0; line-height: 18px; position: relative; }
 .code-highlight pre,
 .code-highlight code { 
 	background: white; border-radius: 0; padding: 0; margin: 0; border: none; 
@@ -421,7 +421,9 @@ table.table-blob { width: 100%; }
 
 .wiki pre { }
 
-.ace_static_highlight {  font-family: Consolas, 'Liberation Mono', Courier, monospace; }
+.code-highlight .ace_line { padding-left: 12px; }
+.code-highlight .ace_line.selected { background: #ffffaa; }
+
 /**
  * GATE KEEPER SETTING PAGE
  */

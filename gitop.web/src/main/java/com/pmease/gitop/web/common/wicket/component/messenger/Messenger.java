@@ -2,7 +2,7 @@ package com.pmease.gitop.web.common.wicket.component.messenger;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
-import com.pmease.gitop.web.common.util.Options;
+import com.pmease.gitop.web.util.JsOptions;
 
 public class Messenger {
 
@@ -37,23 +37,23 @@ public class Messenger {
 	}
 
 	private static Messenger message(String message, Type type) {
-		return post(new Options()
+		return post(new JsOptions()
 						.set("message", message)
 						.set("type", type.name().toLowerCase())
 						.set("showCloseButton", true));
 	}
 
-	public static Messenger post(Options options) {
+	public static Messenger post(JsOptions options) {
 		return new Messenger(String.format("Messenger().post(%s);",
 				options.toString()));
 	}
 
-	public static Messenger run(Options options) {
+	public static Messenger run(JsOptions options) {
 		return new Messenger(String.format("Messenger().run(%s);",
 				options.toString()));
 	}
 
-	public static Messenger update(Options options) {
+	public static Messenger update(JsOptions options) {
 		return new Messenger(String.format("Messenger().update(%s);",
 				options.toString()));
 	}

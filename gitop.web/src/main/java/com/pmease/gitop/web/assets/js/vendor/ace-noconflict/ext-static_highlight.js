@@ -144,7 +144,7 @@ highlight.renderSync = function(input, mode, theme, lineStart, disableGutter) {
     var length =  session.getLength();
 
     for(var ix = 0; ix < length; ix++) {
-        stringBuilder.push("<div class='ace_line'>");
+        stringBuilder.push("<div class='ace_line' id='LC" + (ix + 1) + "'>");
         if (!disableGutter)
             stringBuilder.push("<span class='ace_gutter ace_gutter-cell' unselectable='on'>" + (ix + lineStart) + "</span>");
         textLayer.$renderLine(stringBuilder, ix, true, false);

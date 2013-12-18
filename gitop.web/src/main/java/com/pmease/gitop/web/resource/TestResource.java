@@ -38,7 +38,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.SitePaths;
-import com.pmease.gitop.web.common.util.StandardObjectMapper;
+import com.pmease.gitop.web.util.StandardObjectMapper;
 
 @Path("/test")
 public class TestResource {

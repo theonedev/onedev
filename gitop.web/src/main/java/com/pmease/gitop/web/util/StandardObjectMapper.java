@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.common.util;
+package com.pmease.gitop.web.util;
 
 import io.dropwizard.jackson.AnnotationSensitivePropertyNamingStrategy;
 import io.dropwizard.jackson.DiscoverableSubtypeResolver;
