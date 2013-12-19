@@ -20,10 +20,10 @@ import javax.validation.Payload;
  */
 @Target({ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy=NameValidator.class) 
-public @interface Name {
-	String message() default "Name can not contain any of below characters:\n" + 
-			NameValidator.invalidChars;
+@Constraint(validatedBy=DirectoryValidator.class) 
+public @interface Directory {
+	String message() default "Make sure the OS user running this program has permission to "
+			+ "write files into this directory.";
 
 	Class<?>[] groups() default {};
 

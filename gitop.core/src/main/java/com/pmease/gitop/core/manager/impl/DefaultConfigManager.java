@@ -13,7 +13,7 @@ import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.core.setting.MailSetting;
-import com.pmease.gitop.core.setting.StorageSetting;
+import com.pmease.gitop.core.setting.SystemSetting;
 import com.pmease.gitop.model.Config;
 import com.pmease.gitop.model.Config.Key;
 
@@ -27,10 +27,10 @@ public class DefaultConfigManager extends AbstractGenericDao<Config> implements 
 
 	@Sessional
 	@Override
-	public StorageSetting getStorageSetting() {
+	public SystemSetting getStorageSetting() {
 		Config config = getConfig(Key.STORAGE);
 		if (config != null) {
-			StorageSetting storageSetting = (StorageSetting) config.getSetting();
+			SystemSetting storageSetting = (SystemSetting) config.getSetting();
 			Preconditions.checkNotNull(storageSetting);
 			return storageSetting;
 		} else {
@@ -40,7 +40,7 @@ public class DefaultConfigManager extends AbstractGenericDao<Config> implements 
 
 	@Transactional
 	@Override
-	public void saveStorageSetting(StorageSetting storageSetting) {
+	public void saveStorageSetting(SystemSetting storageSetting) {
 		Preconditions.checkNotNull(storageSetting);
 		
 		Config config = getConfig(Key.STORAGE);

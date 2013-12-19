@@ -1,12 +1,6 @@
-.wizard {
-	text-align: left;	
-}
-.wizard .panel-heading {
-	font-size: 16px;
-}
-.wizard .buttons span em {
-	font-style: normal;
-}
-.wizard .buttons .previous, .wizard .buttons .skip {
-	margin-right: 20px;
-}
+.wizard {text-align: left;}
+.wizard .panel-heading {font-size: 16px;}
+.wizard .panel-body {padding: 24px;}
+.wizard .panel-body .content {margin-bottom: 24px;}
+.wizard .buttons span em {font-style: normal;}
+.wizard .buttons .previous, .wizard .buttons .skip {margin-right: 20px;}

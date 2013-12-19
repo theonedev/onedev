@@ -6,7 +6,7 @@ import com.google.inject.ImplementedBy;
 import com.pmease.commons.hibernate.dao.GenericDao;
 import com.pmease.gitop.core.manager.impl.DefaultConfigManager;
 import com.pmease.gitop.core.setting.MailSetting;
-import com.pmease.gitop.core.setting.StorageSetting;
+import com.pmease.gitop.core.setting.SystemSetting;
 import com.pmease.gitop.model.Config;
 
 @ImplementedBy(DefaultConfigManager.class)
@@ -33,7 +33,7 @@ public interface ConfigManager extends GenericDao<Config> {
 	 * @throws
 	 * 			NullPointerException if storage setting record exists but value is null
 	 */
-	StorageSetting getStorageSetting();
+	SystemSetting getStorageSetting();
 	
 	/**
 	 * Save specified storage setting.
@@ -41,7 +41,7 @@ public interface ConfigManager extends GenericDao<Config> {
 	 * @param storageSetting
 	 * 			storage setting to be saved
 	 */
-	void saveStorageSetting(StorageSetting storageSetting);
+	void saveStorageSetting(SystemSetting storageSetting);
 	
 	/**
 	 * Get mail setting.

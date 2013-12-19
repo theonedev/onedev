@@ -8,18 +8,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.junit.Assert;
 import org.junit.Test;
 
+import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.util.FileUtils;
 
-public class IsBinaryCommandTest {
+public class IsBinaryCommandTest extends AbstractGitTest {
 
 	@Test
 	public void test() throws IOException {
-	    Assert.assertTrue(GitCommand.checkError() == null);
-		
 		Git git = new Git(FileUtils.createTempDir());
 		try {
 			git.init(false);

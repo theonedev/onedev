@@ -20,7 +20,7 @@ public class MailSetting implements Serializable {
 	
 	private String senderAddress;
 
-	@Editable
+	@Editable(order=100)
 	@NotEmpty
 	public String getSmtpHost() {
 		return smtpHost;
@@ -30,7 +30,7 @@ public class MailSetting implements Serializable {
 		this.smtpHost = smtpHost;
 	}
 
-	@Editable
+	@Editable(order=200)
 	public int getSmtpPort() {
 		return smtpPort;
 	}
@@ -39,7 +39,7 @@ public class MailSetting implements Serializable {
 		this.smtpPort = smtpPort;
 	}
 
-	@Editable
+	@Editable(order=300)
 	public String getSmtpUser() {
 		return smtpUser;
 	}
@@ -48,7 +48,7 @@ public class MailSetting implements Serializable {
 		this.smtpUser = smtpUser;
 	}
 
-	@Editable
+	@Editable(order=400)
 	public String getSmtpPassword() {
 		return smtpPassword;
 	}
@@ -57,7 +57,7 @@ public class MailSetting implements Serializable {
 		this.smtpPassword = smtpPassword;
 	}
 
-	@Editable
+	@Editable(order=500)
 	public String getSenderAddress() {
 		return senderAddress;
 	}

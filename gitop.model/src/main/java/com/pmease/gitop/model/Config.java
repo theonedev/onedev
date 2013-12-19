@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Lob;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 
@@ -28,6 +29,7 @@ public class Config extends AbstractEntity {
 	 * skipped the setting), so we can not use existence of record to indicate
 	 * a null setting.
 	 */
+	@Lob
 	private Serializable setting;
 
 	public Key getKey() {

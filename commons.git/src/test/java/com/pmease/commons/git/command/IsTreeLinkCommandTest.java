@@ -7,17 +7,16 @@ import java.io.InputStream;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.ZipUtils;
 
-public class IsTreeLinkCommandTest {
+public class IsTreeLinkCommandTest extends AbstractGitTest {
 
 	@Test
 	public void test() throws IOException {
-	    Assert.assertTrue(GitCommand.checkError() == null);
-
 	    File tempDir = FileUtils.createTempDir();
 	    try {
 	    	// Use a pre-built repo to test symbol link behaviors as Windows does not 

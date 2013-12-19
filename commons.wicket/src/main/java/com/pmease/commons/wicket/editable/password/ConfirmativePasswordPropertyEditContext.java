@@ -24,23 +24,18 @@ public class ConfirmativePasswordPropertyEditContext extends PropertyEditContext
 
 	@Override
 	public Object renderForView(Object renderParam) {
-		if (getPropertyValue() != null) {
-			return new Label((String) renderParam, "******");
-		} else {
-			return new Label((String) renderParam, "<i>Not Defined</i>").setEscapeModelStrings(false);
-		}
+		return new Label((String) renderParam, "******");
 	}
 
 	@Override
 	public void updateBean() {
-		if (password == null)
-			addValidationError("Please specify the password.");
-		else if (confirmedPassword == null)
-			addValidationError("Please confirm the password.");
-		else if (!password.equals(confirmedPassword))
-			addValidationError("Password and its confirmation should be identical.");
-		else
-			setPropertyValue(password);
+		if (password != null) {
+			if (confirmedPassword == null)
+				addValidationError("Please confirm the password.");
+			else if (!password.equals(confirmedPassword))
+				addValidationError("Password and its confirmation should be identical.");
+		} 
+		setPropertyValue(password);
 		
 		super.updateBean();
 	}

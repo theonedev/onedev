@@ -19,6 +19,8 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.validator.constraints.NotEmpty;
+
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
@@ -84,6 +86,7 @@ public class Project extends AbstractEntity implements UserBelonging {
 	@Editable(order=100, description=
 			"Specify name of the project. It will be used to identify the project when accessing via Git.")
 	@ProjectName
+	@NotEmpty
 	public String getName() {
 		return name;
 	}

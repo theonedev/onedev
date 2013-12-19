@@ -7,15 +7,14 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.common.collect.Sets;
+import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.Git;
-import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.util.FileUtils;
 
-public class ListChangedFilesCommandTest {
+public class ListChangedFilesCommandTest extends AbstractGitTest {
 
 	@Test
 	public void shouldListChangedFiles() {
-	    Assert.assertTrue(GitCommand.checkError() == null);
 	    Git git = new Git(FileUtils.createTempDir());
 	    git.init(false);
 	        

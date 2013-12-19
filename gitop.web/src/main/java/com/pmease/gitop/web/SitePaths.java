@@ -30,7 +30,7 @@ public class SitePaths {
 	}
 	
 	public File dataDir() {
-		return new File(configManager.getStorageSetting().getStorageDir());
+		return new File(configManager.getStorageSetting().getDataPath());
 	}
 	
 	public File avatarsDir() {

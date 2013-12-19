@@ -1,23 +1,21 @@
 package com.pmease.commons.git.command;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.List;
 
 import org.junit.Test;
 
+import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.FileChangeWithDiffs;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.util.FileUtils;
 
-public class DiffCommandTest {
+public class DiffCommandTest extends AbstractGitTest {
 
 	@Test
 	public void shouldGenerateDiffCorrectly() {
-	    assertTrue(GitCommand.checkError() == null);
-	    
 	    File tempDir = FileUtils.createTempDir();
 	    
 	    try {
@@ -115,7 +113,6 @@ public class DiffCommandTest {
 
 	@Test
 	public void shouldHandleRenameAndCopyCorrectly() {
-	    assertTrue(GitCommand.checkError() == null);
 	    File tempDir = FileUtils.createTempDir();
 	    
 	    try {
