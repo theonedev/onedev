@@ -33,7 +33,6 @@ import com.pmease.gitop.web.common.wicket.form.select.DropDownChoiceElement;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
-import com.pmease.gitop.web.util.GitUtils;
 
 @SuppressWarnings("serial")
 public class ProjectOptionsPage extends AbstractProjectSettingPage {
@@ -112,7 +111,7 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 			public List<String> getObject() {
 				Project project = getProject();
 				Git git = project.code();
-				if (GitUtils.hasCommits(git.repoDir())) {
+				if (git.hasCommits()) {
 					return Lists.newArrayList(git.listBranches());
 				} else {
 					return Collections.emptyList();
