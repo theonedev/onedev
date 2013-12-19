@@ -222,6 +222,11 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 				
 				link.add(new Label("name", node.getName()));
 				item.add(link);
+				
+//				Git git = getProject().code();
+//				Commit commit = GitUtils.getLastCommit(git, getRevision(), path);
+//				item.add(new Label("message", Model.of(commit.getSubject())));
+//				item.add(new AgeLabel("age", Model.of(commit.getAuthor().getDate())));
 			}
 		};
 		

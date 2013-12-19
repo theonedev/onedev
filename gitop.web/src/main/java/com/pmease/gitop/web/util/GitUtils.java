@@ -65,4 +65,9 @@ public class GitUtils {
 			return ref.getName().substring(Constants.R_HEADS.length());
 		}
 	}
+	
+	public static @Nullable Commit getLastCommit(Git git, String revision, String path) {
+		List<Commit> commits = git.log(null, revision, path, 1);
+		return Iterables.getFirst(commits, null);
+	}
 }

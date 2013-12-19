@@ -88,7 +88,7 @@ public class SourceBlobPanel extends AbstractSourcePagePanel {
 				List<String> lines = getBlob().getLines();
 				int sloc = 0;
 				for (String each : lines) {
-					if (!StringUtils.isEmpty(each.trim())) {
+					if (!StringUtils.isBlank(each)) {
 						sloc++;
 					}
 				}
