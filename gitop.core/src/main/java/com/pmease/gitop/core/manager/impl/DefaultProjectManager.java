@@ -18,6 +18,7 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.commons.util.GeneralException;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.hookcallback.PostReceiveServlet;
 import com.pmease.gitop.core.hookcallback.PreReceiveServlet;
@@ -59,35 +60,35 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
             super.save(project);
 
             ProjectStorage storage = storageManager.getStorage(project);
-            storage.clean();
 
             File codeDir = storage.ofCode();
-            FileUtils.createDir(codeDir);
-            new Git(codeDir).init(true);
-            File hooksDir = new File(codeDir, "hooks");
-            FileUtils.createDir(hooksDir);
-
-            String urlRoot;
-            if (serverConfig.getHttpPort() != 0)
-                urlRoot = "http://localhost:" + serverConfig.getHttpPort();
-            else 
-                urlRoot = "https://localhost:" + serverConfig.getSslConfig().getPort();
-
-            File preReceiveHook = new File(hooksDir, "pre-receive");
-            FileUtils.writeFile(preReceiveHook, 
-                    String.format(hookTemplate, urlRoot + PreReceiveServlet.PATH + "/" + project.getId()));
-            preReceiveHook.setExecutable(true);
-            
-            File postReceiveHook = new File(hooksDir, "post-receive");
-            FileUtils.writeFile(postReceiveHook, 
-                    String.format(hookTemplate, urlRoot + PostReceiveServlet.PATH + "/" + project.getId()));
-            postReceiveHook.setExecutable(true);
-        } else {
-            File codeDir = storageManager.getStorage(project).ofCode();
-            if (!codeDir.exists()) {
+            if (codeDir.exists() && codeDir.list().length != 0) {
+            	if (!project.isCodeValid()) {
+            		throw new GeneralException("Unable to initialize project: code repository '" 
+	                			+ codeDir + "' is occupied by some other files.");
+            	}
+            } else {
                 FileUtils.createDir(codeDir);
                 new Git(codeDir).init(true);
+                File hooksDir = new File(codeDir, "hooks");
+                String urlRoot;
+                if (serverConfig.getHttpPort() != 0)
+                    urlRoot = "http://localhost:" + serverConfig.getHttpPort();
+                else 
+                    urlRoot = "https://localhost:" + serverConfig.getSslConfig().getPort();
+
+                File preReceiveHook = new File(hooksDir, "pre-receive");
+                FileUtils.writeFile(preReceiveHook, 
+                        String.format(hookTemplate, urlRoot + PreReceiveServlet.PATH + "/" + project.getId()));
+                preReceiveHook.setExecutable(true);
+                
+                File postReceiveHook = new File(hooksDir, "post-receive");
+                FileUtils.writeFile(postReceiveHook, 
+                        String.format(hookTemplate, urlRoot + PostReceiveServlet.PATH + "/" + project.getId()));
+                postReceiveHook.setExecutable(true);
             }
+
+        } else {
             super.save(project);
         }
     }

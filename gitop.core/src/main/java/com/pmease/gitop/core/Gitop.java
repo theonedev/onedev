@@ -51,6 +51,7 @@ public class Gitop extends AbstractPlugin {
 			
 			initStage.waitFor();
 		}
+		
 	}
 	
 	@Override

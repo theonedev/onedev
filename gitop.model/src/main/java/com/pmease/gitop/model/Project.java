@@ -1,5 +1,7 @@
 package com.pmease.gitop.model;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -21,6 +23,7 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.loader.AppLoader;
+import com.pmease.commons.util.FileUtils;
 import com.pmease.gitop.model.gatekeeper.AndGateKeeper;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.permission.object.ProtectedObject;
@@ -204,10 +207,32 @@ public class Project extends AbstractEntity implements UserBelonging {
 		return new Git(AppLoader.getInstance(StorageManager.class).getStorage(this).ofCode());
 	}
 
+	/**
+	 * Whether or not the code repository is valid. This can be used to tell apart a Gitop 
+	 * repository from some other Git repositories.
+	 * 
+	 * @return
+	 * 			<tt>true</tt> if valid; <tt>false</tt> otherwise
+	 */
+	public boolean isCodeValid() {
+        File preReceiveHook = new File(code().repoDir(), "hooks/pre-receive");
+        if (!preReceiveHook.exists()) 
+        	return false;
+        
+        try {
+			String content = FileUtils.readFileToString(preReceiveHook);
+			return content.contains("GITOP_USER_ID");
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		
+	}
+	
 	public GateKeeper getCompositeGateKeeper() {
 		AndGateKeeper andGateKeeper = new AndGateKeeper();
 		for (GateKeeper each: getGateKeepers())
 			andGateKeeper.getGateKeepers().add(each);
 		return andGateKeeper;
 	}
+	
 }
