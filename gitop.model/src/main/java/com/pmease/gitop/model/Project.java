@@ -214,8 +214,8 @@ public class Project extends AbstractEntity implements UserBelonging {
 	 * @return
 	 * 			<tt>true</tt> if valid; <tt>false</tt> otherwise
 	 */
-	public boolean isCodeValid() {
-        File preReceiveHook = new File(code().repoDir(), "hooks/pre-receive");
+	public static boolean isCode(Git git) {
+        File preReceiveHook = new File(git.repoDir(), "hooks/pre-receive");
         if (!preReceiveHook.exists()) 
         	return false;
         

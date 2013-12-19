@@ -10,6 +10,8 @@ import javax.inject.Singleton;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Git;
@@ -18,7 +20,6 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.commons.util.GeneralException;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.hookcallback.PostReceiveServlet;
 import com.pmease.gitop.core.hookcallback.PreReceiveServlet;
@@ -32,6 +33,8 @@ import com.pmease.gitop.model.storage.StorageManager;
 @Singleton
 public class DefaultProjectManager extends AbstractGenericDao<Project> implements ProjectManager {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultProjectManager.class);
+	
     private final StorageManager storageManager;
     
     private final ServerConfig serverConfig;
@@ -62,12 +65,12 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
             ProjectStorage storage = storageManager.getStorage(project);
 
             File codeDir = storage.ofCode();
-            if (codeDir.exists() && codeDir.list().length != 0) {
-            	if (!project.isCodeValid()) {
-            		throw new GeneralException("Unable to initialize project: code repository '" 
-	                			+ codeDir + "' is occupied by some other files.");
-            	}
-            } else {
+            if (codeDir.exists() && !Project.isCode(new Git(codeDir))) {
+            	logger.warn("Deleting existing directory '" + codeDir + "' before initializing project code repo...");
+            	FileUtils.deleteDir(codeDir);
+            }
+            
+            if (!codeDir.exists()) {
                 FileUtils.createDir(codeDir);
                 new Git(codeDir).init(true);
                 File hooksDir = new File(codeDir, "hooks");
@@ -87,7 +90,6 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
                         String.format(hookTemplate, urlRoot + PostReceiveServlet.PATH + "/" + project.getId()));
                 postReceiveHook.setExecutable(true);
             }
-
         } else {
             super.save(project);
         }
