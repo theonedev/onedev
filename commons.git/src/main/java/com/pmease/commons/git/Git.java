@@ -352,9 +352,13 @@ public class Git implements Serializable {
 		return new ListSubModulesCommand(repoDir).revision(revision).call();
 	}
 
-	public boolean hasCommit() {
-		return new File(repoDir, "objects").list().length > 2
-				|| new File(repoDir, "objects/pack").list().length > 0;
+	public boolean hasCommits() {
+		File headsDir = new File(repoDir, "refs/heads");
+		return headsDir.exists() && headsDir.list().length != 0;
+	}
+	
+	public boolean isValid() {
+		return new File(repoDir, "objects").exists();
 	}
 	
 	@Override

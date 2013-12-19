@@ -11,6 +11,7 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.Model;
 
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.EditableUtils;
@@ -84,7 +85,7 @@ public abstract class GateKeeperPanel extends Panel {
 				target.add(modalPanel);
 			}
 			
-		}.add(new TooltipBehavior("Edit settings of this gate keeper")));
+		}.add(new TooltipBehavior()));
 		container.add(new AjaxLink<Void>("delete") {
 
 			@Override
@@ -92,7 +93,7 @@ public abstract class GateKeeperPanel extends Panel {
 				onDelete(target);
 			}
 			
-		}.add(new TooltipBehavior("Delete this gate keeper")));
+		}.add(new TooltipBehavior()));
 		container.add(new AjaxLink<Void>("enable") {
 
 			@Override
@@ -111,7 +112,8 @@ public abstract class GateKeeperPanel extends Panel {
 				}
 			}
 			
-		}.add(new TooltipBehavior(gateKeeper.isEnabled()?"Disable this gate keeper":"Enable this gate keeper")));
+		}.add(new TooltipBehavior(Model.of(gateKeeper.isEnabled()?"Disable this gate keeper":"Enable this gate keeper"))));
+		
 		container.add(new WebMarkupContainer("editor").setOutputMarkupPlaceholderTag(true).setVisible(false));
 		
 		if (AndOrGateKeeper.class.isAssignableFrom(clazz)) {

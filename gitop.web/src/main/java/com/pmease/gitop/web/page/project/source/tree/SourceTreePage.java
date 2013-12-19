@@ -1,6 +1,5 @@
 package com.pmease.gitop.web.page.project.source.tree;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -16,14 +15,11 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.TreeNode;
-import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.Project;
-import com.pmease.gitop.model.storage.StorageManager;
 import com.pmease.gitop.web.model.ProjectModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.source.AbstractFilePage;
 import com.pmease.gitop.web.page.project.source.component.SourceBreadcrumbPanel;
-import com.pmease.gitop.web.util.GitUtils;
 import com.pmease.gitop.web.util.UrlUtils;
 
 @SuppressWarnings("serial")
@@ -49,7 +45,7 @@ public class SourceTreePage extends AbstractFilePage {
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 		
-		File gitDir = Gitop.getInstance(StorageManager.class).getStorage(getProject()).ofCode();
+		Git git = getProject().code();
 		
 		IModel<List<TreeNode>> nodesModel = new LoadableDetachableModel<List<TreeNode>>() {
 
@@ -85,7 +81,7 @@ public class SourceTreePage extends AbstractFilePage {
 			}
 		};
 		
-		if (GitUtils.hasCommits(gitDir)) {
+		if (git.hasCommits()) {
 			add(new ProjectDescriptionPanel("description", projectModel).setVisibilityAllowed(getPaths().isEmpty()));
 			add(new SourceBreadcrumbPanel("breadcrumb", projectModel, revisionModel, pathsModel));
 			add(new SourceTreePanel("tree", projectModel, revisionModel, pathsModel, nodesModel));

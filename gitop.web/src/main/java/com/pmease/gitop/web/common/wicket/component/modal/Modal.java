@@ -9,7 +9,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.pmease.gitop.web.util.JsOptions;
+import com.pmease.commons.jackson.JsOptions;
 
 @SuppressWarnings("serial")
 public class Modal extends Panel {
