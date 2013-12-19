@@ -263,6 +263,26 @@ public class SourceBreadcrumbPanel extends AbstractSourcePagePanel {
 		};
 		
 		frag.add(view);
+		
+		frag.add(new Label("norev", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				if (type == RefType.BRANCH) {
+					return "No branches found";
+				} else {
+					return "No tags found";
+				}
+			}
+			
+		}) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisibilityAllowed(refsModel.getObject().get(type).isEmpty());
+			}
+		});
 		return frag;
 	}
 

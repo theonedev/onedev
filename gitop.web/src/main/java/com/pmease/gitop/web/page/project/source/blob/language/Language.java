@@ -24,6 +24,9 @@ public class Language implements Serializable {
 	Language() {
 	}
 	
+	public static final Language PLAIN_TEXT =
+			new Language("Plain Text", "no-highlight", "text", new String[] { "text/plain"});
+	
 	public Language(final String name, final String mode, final String aceMode, final String[] mimeTypes) {
 		this.name = name;
 		this.mode = mode;

@@ -1,5 +1,8 @@
 package com.pmease.gitop.web.component.wiki;
 
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
@@ -7,14 +10,15 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
+import com.pmease.gitop.web.page.project.source.blob.renderer.highlighter.HighlightJsResourceReference;
 import com.pmease.gitop.web.util.MarkdownUtils;
 
 public class WikiTextPanel extends Panel {
 	private static final long serialVersionUID = 1L;
 
-	private final IModel<String> langModel;
+	private final IModel<WikiType> langModel;
 	
-	public WikiTextPanel(String id, IModel<String> model, IModel<String> lang) {
+	public WikiTextPanel(String id, IModel<String> model, IModel<WikiType> lang) {
 		super(id, model);
 		this.langModel = lang;
 	}
@@ -33,8 +37,8 @@ public class WikiTextPanel extends Panel {
 					return "";
 				}
 				
-				String lang = langModel.getObject();
-				if (Strings.isNullOrEmpty(lang)) {
+				WikiType lang = langModel.getObject();
+				if (lang == null) {
 					return original;
 				}
 				
@@ -45,17 +49,21 @@ public class WikiTextPanel extends Panel {
 				} catch (Exception e) {
 					throw Throwables.propagate(e);
 				} 
-				
-//				MarkupLanguage l = ServiceLocator.getInstance().getMarkupLanguage(lang);
-//				MarkupParser parser = new MarkupParser(l);
-//				
-//				return parser.parseToHtml(original);
 			}
 		}).setEscapeModelStrings(false));
 	}
 	
 	private String getOriginalContent() {
 		return (String) getDefaultModelObject();
+	}
+	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(JavaScriptHeaderItem.forReference(HighlightJsResourceReference.getInstance()));
+		response.render(OnDomReadyHeaderItem.forScript(
+				("$('.wiki pre code').each(function(i, e) { hljs.highlightBlock(e)});")));
+
 	}
 	
 	@Override

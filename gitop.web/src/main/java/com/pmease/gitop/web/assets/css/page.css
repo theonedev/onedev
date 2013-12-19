@@ -418,6 +418,7 @@ table.table-blob { width: 100%; }
 .readme { margin: 18px 0; border-radius: 4px; }
 .readme > .head { padding: 8px 4px; border-bottom: 1px solid #ddd; font-size: 16px; font-weight: bold; }
 .readme > .body { padding: 15px 4px; }
+.readme .plain pre { background: white; border-width: 0; }
 
 .wiki pre { }
 

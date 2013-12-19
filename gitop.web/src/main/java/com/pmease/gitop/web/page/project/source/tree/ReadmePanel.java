@@ -1,16 +1,15 @@
-package com.pmease.gitop.web.page.project.source.component;
+package com.pmease.gitop.web.page.project.source.tree;
 
 import java.util.List;
 import java.util.Set;
 
-import org.apache.tika.mime.MimeType;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 
 import com.google.common.collect.ImmutableSet;
 import com.pmease.commons.git.TreeNode;
@@ -18,7 +17,8 @@ import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.component.wiki.WikiTextPanel;
 import com.pmease.gitop.web.component.wiki.WikiType;
 import com.pmease.gitop.web.page.project.source.blob.FileBlob;
-import com.pmease.gitop.web.page.project.source.blob.renderer.highlighter.HighlightJsResourceReference;
+import com.pmease.gitop.web.page.project.source.blob.language.Language;
+import com.pmease.gitop.web.page.project.source.component.AbstractSourcePagePanel;
 
 @SuppressWarnings("serial")
 public class ReadmePanel extends AbstractSourcePagePanel {
@@ -53,54 +53,63 @@ public class ReadmePanel extends AbstractSourcePagePanel {
 	protected void onConfigure() {
 		super.onConfigure();
 		
-		this.setVisibilityAllowed(getReadmeNode() != null);
+		FileBlob blob = blobModel.getObject();
+		this.setVisibilityAllowed(
+				blob != null 
+				&& blob.isText() 
+				&& !blob.isEmpty() 
+				&& !blob.isLarge());
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		FileBlob blob = blobModel.getObject();
+		if (blob == null) {
+			return;
+		}
+		
 		add(new Label("name", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return getReadmeNode().getName();
+				return blobModel.getObject().getName();
 			}
 		}));
 		
-		add(new WikiTextPanel("readme", new LoadableDetachableModel<String>() {
+		Language lang = blob.getLanguage();
+		if (lang != null && lang.getName().equals("Markdown")) {
+			add(new WikiTextPanel("readme", new LoadableDetachableModel<String>() {
 
-			@Override
-			protected String load() {
-				FileBlob blob = blobModel.getObject();
-				if (blob == null) {
-					return "";
+				@Override
+				protected String load() {
+					FileBlob blob = blobModel.getObject();
+					if (blob == null) {
+						return "";
+					}
+					
+					return blob.getStringContent(); 
+				}
+			}, Model.of(WikiType.MARKDOWN)));
+		} else {
+			Fragment frag = new Fragment("readme", "rawfrag", this);
+			frag.add(new Label("text", new LoadableDetachableModel<String>() {
+
+				@Override
+				protected String load() {
+					return blobModel.getObject().getStringContent();
 				}
 				
-				return blob.getStringContent(); 
-			}
-		}, new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				FileBlob blob = blobModel.getObject();
-				MimeType mime = blob.getMimeType();
-				if (mime.getType().toString().contains("markdown")) {
-					return WikiType.MARKDOWN.getLanguage();
-				} else {
-					return null;
-				}
-			}
+			}));
 			
-		}));
+			add(frag);
+		}
 	}
 	
+	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		
-		response.render(JavaScriptHeaderItem.forReference(HighlightJsResourceReference.getInstance()));
-		response.render(OnDomReadyHeaderItem.forScript(
-				("$('.readme .body pre code').each(function(i, e) { hljs.highlightBlock(e)});")));
 	}
 	
 	static Set<String> README_FILES = ImmutableSet.of(

@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.project.source.component;
+package com.pmease.gitop.web.page.project.source.tree;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -14,6 +14,7 @@ import org.apache.wicket.model.PropertyModel;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.model.Project;
+import com.pmease.gitop.web.page.project.source.component.ProjectPanel;
 
 public class ProjectDescriptionPanel extends ProjectPanel {
 	private static final long serialVersionUID = 1L;
