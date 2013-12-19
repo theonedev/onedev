@@ -2,7 +2,7 @@ package com.pmease.gitop.web.common.wicket.component.vex;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
-import com.pmease.gitop.web.util.JsOptions;
+import com.pmease.commons.jackson.JsOptions;
 
 public class Vex {
 

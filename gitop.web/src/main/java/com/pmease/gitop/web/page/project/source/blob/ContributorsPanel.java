@@ -16,9 +16,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.google.common.collect.Lists;
+import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
-import com.pmease.gitop.web.common.wicket.bootstrap.TooltipBehavior;
 import com.pmease.gitop.web.component.link.GitUserAvatarLink;
 import com.pmease.gitop.web.component.link.GitUserLink;
 import com.pmease.gitop.web.page.project.api.GitPerson;
@@ -106,12 +106,7 @@ public class ContributorsPanel extends Panel {
 		
 		add(moreContainer);
 		
-		add(new TooltipBehavior(null, Model.of("bottom")) {
-			@Override
-			protected String getSelector(Component component) {
-				return String.format("$(\"#%s a[data-toggle='tooltip']\")", component.getMarkupId(true));
-			}
-		});
+		add(new TooltipBehavior("a[data-toggle='tooltip']", null, "bottom"));
 	}
 	
 	@SuppressWarnings("unchecked")
