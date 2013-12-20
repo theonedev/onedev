@@ -1,22 +1,22 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>gitop.core</artifactId>
+#if (\${groupId} != "com.pmease")
+	<groupId>\${groupId}</groupId>	
+#end
+	<artifactId>\${artifactId}</artifactId>
+	<version>\${version}</version>
 	<parent>
 		<groupId>com.pmease</groupId>
 		<artifactId>parent.general</artifactId>
 		<version>1.0.31</version>
 	</parent>
+
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>com.pmease</groupId>
 				<artifactId>plugin.maven</artifactId>
-			</plugin>
-			<plugin>
-				<artifactId>maven-archetype-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
@@ -26,40 +26,15 @@
 			</plugin>
 		</plugins>
 	</build>
+
 	<dependencies>
 		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.loader</artifactId>
-			<version>1.0.31</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.git</artifactId>
-			<version>1.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.jetty</artifactId>
-			<version>1.0.31</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.loader</artifactId>
-			<version>1.0.31</version>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>gitop.model</artifactId>
-			<version>1.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.schedule</artifactId>
-			<version>1.0.0</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>${project.artifactId}</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
+
 	<repositories>
 		<repository>
 			<id>pmeaseRepo</id>
@@ -77,7 +52,9 @@
 			<url>http://artifact.pmease.com/</url>
 		</repository>
 	</repositories>
+
 	<properties>
-		<moduleClass>com.pmease.gitop.core.CoreModule</moduleClass>
+		<moduleClass>\${package}.PluginModule</moduleClass>
 	</properties>
+
 </project>
