@@ -131,6 +131,8 @@ public class CoreModule extends AbstractPluginModule {
 				return GitConfig.class;
 			}
 		});
+		
+		bind(GitConfig.class).toProvider(GitConfigProvider.class);
 
 		bind(StorageManager.class).to(DefaultStorageManager.class);
 	}

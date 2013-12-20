@@ -19,7 +19,11 @@ import com.pmease.gitop.model.Config.Key;
 
 @Singleton
 public class DefaultConfigManager extends AbstractGenericDao<Config> implements ConfigManager {
-
+	
+	private volatile Long systemSettingConfigId;
+	
+	private volatile Long mailSettingConfigId;
+	
 	@Inject
 	public DefaultConfigManager(GeneralDao generalDao) {
 		super(generalDao);
@@ -28,14 +32,17 @@ public class DefaultConfigManager extends AbstractGenericDao<Config> implements 
 	@Sessional
 	@Override
 	public SystemSetting getSystemSetting() {
-		Config config = getConfig(Key.SYSTEM);
-		if (config != null) {
-			SystemSetting systemSetting = (SystemSetting) config.getSetting();
-			Preconditions.checkNotNull(systemSetting);
-			return systemSetting;
-		} else {
-			throw new RuntimeException("Unable to find system setting record.");
-		}
+        Config config;
+        if (systemSettingConfigId == null) {
+    		config = getConfig(Key.SYSTEM);
+    		Preconditions.checkNotNull(config);
+            systemSettingConfigId = config.getId();
+        } else {
+            config = load(systemSettingConfigId);
+        }
+        SystemSetting setting = (SystemSetting) config.getSetting();
+        Preconditions.checkNotNull(setting);
+        return setting;
 	}
 
 	@Transactional
@@ -61,13 +68,15 @@ public class DefaultConfigManager extends AbstractGenericDao<Config> implements 
 	@Sessional
 	@Override
 	public MailSetting getMailSetting() {
-		Config config = getConfig(Key.MAIL);
-		if (config != null) {
-			MailSetting mailSetting = (MailSetting) config.getSetting();
-			return mailSetting;
-		} else {
-			throw new RuntimeException("Unable to find mail setting record.");
-		}
+        Config config;
+        if (mailSettingConfigId == null) {
+    		config = getConfig(Key.MAIL);
+    		Preconditions.checkNotNull(config);
+    		mailSettingConfigId = config.getId();
+        } else {
+            config = load(mailSettingConfigId);
+        }
+        return (MailSetting) config.getSetting();
 	}
 
 	@Transactional

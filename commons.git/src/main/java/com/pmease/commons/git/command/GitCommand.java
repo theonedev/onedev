@@ -100,7 +100,7 @@ public abstract class GitCommand<V> implements Callable<V> {
 	
 				@Override
 				public void consume(String line) {
-					if (line.startsWith("git version "));
+					if (line.startsWith("git version "))
 						version[0] = line.substring("git version ".length());
 				}
 				
@@ -117,10 +117,13 @@ public abstract class GitCommand<V> implements Callable<V> {
 			return null;
 			
 		} catch (Exception e) {
-			if (e.getMessage() != null && e.getMessage().contains("CreateProcess error=2"))
+			String message = ExceptionUtils.getMessage(e);
+			if (message.contains("CreateProcess error=2"))
 				return "Unable to find git command: " + gitExe;
+			else if (message.contains("error launching git"))
+				return "Unable to launch git command: " + gitExe;
 			else
-				return ExceptionUtils.getMessage(e);
+				return message;
 		}
 	}
 	

@@ -36,6 +36,8 @@ ul.f-dropdown { padding: 0; }
 
 .navbar-brand .icon { font-size: 32px; color: #333; }
 .navbar-brand:hover .icon { color: #08f;}
+.git-error.alert {margin-bottom: 0;}
+.git-error>* {margin-right: 8px;}
 
 /**
  * GLOBAL HEADER
