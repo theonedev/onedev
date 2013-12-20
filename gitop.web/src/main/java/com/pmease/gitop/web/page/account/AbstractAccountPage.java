@@ -25,7 +25,7 @@ public abstract class AbstractAccountPage extends AbstractLayoutPage {
 		
 		User user = Gitop.getInstance(UserManager.class).findByName(name);
 		if (user == null) {
-			onException(new EntityNotFoundException("User " + name + " not found"));
+			throw (new EntityNotFoundException("User " + name + " not found"));
 		}
 		
 		this.accountModel = new UserModel(user);

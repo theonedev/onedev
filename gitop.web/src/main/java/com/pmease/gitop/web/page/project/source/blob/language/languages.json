@@ -1,250 +1,250 @@
 [
   {
     name: "ABAP",
-    mimeTypes: ["text/x-abap"],
+    mediaTypes: ["text/x-abap"],
     mode: "abap",
     aceMode: "abap"
   },
   { 
     name: "ActionScript",
-    mimeTypes: ["text/x-actionscript"],
+    mediaTypes: ["text/x-actionscript"],
     mode: "actionscript",
     aceMode: "actionscript"
   },
   {
     name: "Ada",
-    mimeTypes: ["text/x-ada"],
+    mediaTypes: ["text/x-ada"],
     mode: "ada",
     aceMode: "ada"
   },
   {
     name: "Apache Conf",
-    mimeTypes: ["text/x-apache-conf", "text/x-apache"],
+    mediaTypes: ["text/x-apache-conf", "text/x-apache"],
     mode: "apache"
   },
   {
     name: "AppleScript",
-    mimeTypes: ["text/x-applescript"],
+    mediaTypes: ["text/x-applescript"],
     mode: "applescript"
   },
   {
     name: "ASCII Doc",
-    mimeTypes: ["text/x-asciidoc"],
+    mediaTypes: ["text/x-asciidoc"],
     mode: "asciidoc",
     aceMode: "asciidoc"
   },
   {
     name: "Assembly",
-    mimeTypes: ["text/x-assembly"],
+    mediaTypes: ["text/x-assembly"],
     aceMode: "assembly"
   },
   {
     name: "Autohotkey",
-    mimeTypes: ["text/x-autohotkey"],
+    mediaTypes: ["text/x-autohotkey"],
     aceMode: "autohotkey"
   },
   {
     name: "Avr ASM",
-    mimeTypes: ["text/x-avrasm"],
+    mediaTypes: ["text/x-avrasm"],
     mode: "avrasm"
   },
   {
     name: "Axapta",
-    mimeTypes: ["text/x-axapta"],
+    mediaTypes: ["text/x-axapta"],
     mode: "axapta"
   },
   {
     name: "Bash",
-    mimeTypes: ["text/x-sh"],
+    mediaTypes: ["text/x-sh"],
     mode: "bash",
     aceMode: "sh"
   },
   {
     name: "BrainFuck",
-    mimeTypes: ["text/x-brainfuck"],
+    mediaTypes: ["text/x-brainfuck"],
     mode: "brainfuck"
   },
   {
     name: "Clojure",
-    mimeTypes: ["text/x-clojure"],
+    mediaTypes: ["text/x-clojure"],
     mode: "clojure",
     aceMode: "clojure"
   },
   {
     name: "Cobol",
-    mimeTypes: ["text/x-cobol"],
+    mediaTypes: ["text/x-cobol"],
     aceMode: "cobol"
   },
   {
     name: "CMake",
-    mimeTypes: ["text/x-cmake"],
+    mediaTypes: ["text/x-cmake"],
     mode: "cmake"
   },
   {
     name: "Coffee Script",
-    mimeTypes: ["text/x-coffeescript"],
+    mediaTypes: ["text/x-coffeescript"],
     mode: "coffeescript",
     aceMode: "coffee"
   },
   {
     name: "C",
-    mimeTypes: ["text/x-c", "text/x-csrc", "text/x-chdr"],
+    mediaTypes: ["text/x-c", "text/x-csrc", "text/x-chdr"],
     mode: "cpp",
     aceMode: "c_cpp"
   },
   {
     name: "CPP",
-    mimeTypes: ["text/x-c++src", "text-x-c++hdr"],
+    mediaTypes: ["text/x-c++src", "text-x-c++hdr"],
     mode: "cpp",
     aceMode: "c_cpp"
   },
   {
     name: "C#",
-    mimeTypes: ["text/x-csharp"],
+    mediaTypes: ["text/x-csharp"],
     mode: "cs",
     aceMode: "csharp"
   },
   {
     name: "CSS",
-    mimeTypes: ["text/x-css", "text/css"],
+    mediaTypes: ["text/x-css", "text/css"],
     mode: "css",
     aceMode: "css"
   },
   {
     name: "Coldfusion",
-    mimeTypes: ["text/x-coldfusion"],
+    mediaTypes: ["text/x-coldfusion"],
     aceMode: "coldfusion"
   },
   {
     name: "Curly",
-    mimeTypes: ["text/x-curly"],
+    mediaTypes: ["text/x-curly"],
     aceMode: "curly"
   },
   {
     name: "D",
-    mimeTypes: ["text/x-d"],
+    mediaTypes: ["text/x-d"],
     mode: "d",
     aceMode: "d"
   },
   {
     name: "Dart",
-    mimeTypes: ["text/x-dart"],
+    mediaTypes: ["text/x-dart"],
     aceMode: "dart"
   },
   {
     name: "Delphi",
-    mimeTypes: ["text/x-pascal", "text/x-delphi"],
+    mediaTypes: ["text/x-pascal", "text/x-delphi"],
     mode: "delphi"
   },
   {
     name: "Diff",
-    mimeTypes: ["text/x-diff"],
+    mediaTypes: ["text/x-diff"],
     mode: "diff",
     aceMode: "diff"
   },
   {
     name: "Django",
-    mimeTypes: ["text/x-django"],
+    mediaTypes: ["text/x-django"],
     mode: "django",
     aceMode: "django"
   },
   {
     name: "DOS BAT",
-    mimeTypes: ["text/x-dosbat"],
+    mediaTypes: ["text/x-dosbat"],
     mode: "dos",
     aceMode: "batchfile"
   },
   {
     name: "Erlang",
-    mimeTypes: ["text/x-erlang"],
+    mediaTypes: ["text/x-erlang"],
     mode: "erlang",
     aceMode: "erlang"
   },
   {
     name: "F#",
-    mimeTypes: ["text/x-fsharp"],
+    mediaTypes: ["text/x-fsharp"],
     mode: "fsharp"
   },
   {
     name: "Forth",
-    mimeTypes: ["text/x-forth"],
+    mediaTypes: ["text/x-forth"],
     aceMode: "forth"
   },
   {
     name: "FTL",
-    mimeTypes: ["text/x-ftl"],
+    mediaTypes: ["text/x-ftl"],
     aceMode: "ftl"
   },
   {
     name: "GLSL",
-    mimeTypes: ["text/x-glsl"],
+    mediaTypes: ["text/x-glsl"],
     mode: "glsl",
     aceMode: "glsl"
   },
   {
     name: "Go",
-    mimeTypes: ["text/x-go"],
+    mediaTypes: ["text/x-go"],
     aceMode: "go"
   },
   {
     name: "Groovy",
-    mimeTypes: ["text/x-groovy"],
+    mediaTypes: ["text/x-groovy"],
     aceMode: "groovy"
   },
   {
     name: "HAML",
-    mimeTypes: ["text/x-haml"],
+    mediaTypes: ["text/x-haml"],
     mode: "haml",
     aceMode: "haml"
   },
   {
     name: "Handlebars",
-    mimeTypes: ["text/x-handlebars"],
+    mediaTypes: ["text/x-handlebars"],
     mode: "handlebars",
     aceMode: "handlebars"
   },
   {
     name: "Haskell",
-    mimeTypes: ["text/x-haskell"],
+    mediaTypes: ["text/x-haskell"],
     mode: "haskell",
     aceMode: "haskell"
   },
   {
     name: "HTTP Headers",
-    mimeTypes: ["text/x-http-headers"],
+    mediaTypes: ["text/x-http-headers"],
     mode: "http"
   },
   {
     name: "HTML",
-    mimeTypes: ["text/html"],
+    mediaTypes: ["text/html"],
     mode: "xml",
     aceMode: "html"
   },
   {
     name: "INI",
-    mimeTypes: ["text/x-ini", "text/x-properties"],
+    mediaTypes: ["text/x-ini", "text/x-properties"],
     mode: "ini",
     aceMode: "ini"
   },
   {
     name: "Jade",
-    mimeTypes: ["text/x-jade"],
+    mediaTypes: ["text/x-jade"],
     aceMode: "jade"
   },
   {
     name: "Jack",
-    mimeTypes: ["text/x-jack"],
+    mediaTypes: ["text/x-jack"],
     aceMode: "jack"
   },
   {
     name: "Java",
-    mimeTypes: ["text/x-java", "text/x-java-source"],
+    mediaTypes: ["text/x-java", "text/x-java-source"],
     mode: "java",
     aceMode: "java"
   },
   {
     name: "JavaScript",
-    mimeTypes: [
+    mediaTypes: [
             "text/javascript",
             "text/x-javascript",
             "application/javascript",
@@ -255,280 +255,280 @@
   },
   {
     name: "ECMAScript",
-    mimeTypes: [ "text/x-ecmascript", "application/x-ecmascript" ],
+    mediaTypes: [ "text/x-ecmascript", "application/x-ecmascript" ],
     mode: "javascript",
     aceMode: "javascript"
   },
   {
     name: "TypeScript",
-    mimeTypes: [ "text/typescript", "application/typescript", "application/x-typescript" ],
+    mediaTypes: [ "text/typescript", "application/typescript", "application/x-typescript" ],
     mode: "javascript",
     aceMode: "typescript"
   },
   {
     name: "JSON",
-    mimeTypes: [ "text/x-json", "application/x-json", "application/json" ],
+    mediaTypes: [ "text/x-json", "application/x-json", "application/json" ],
     mode: "javascript",
     aceMode: "json"
   },
   {
     name: "JSP",
-    mimeTypes: ["text/x-jsp"],
+    mediaTypes: ["text/x-jsp"],
     aceMode: "jsp"
   },
   {
     name: "JSX",
-    mimeTypes: ["text/x-jsx"],
+    mediaTypes: ["text/x-jsx"],
     aceMode: "jsx"
   },
   {
     name: "Lasso",
-    mimeTypes: [ "text/x-lasso" ],
+    mediaTypes: [ "text/x-lasso" ],
     mode: "lasso"
   },
   {
     name: "LISP",
-    mimeTypes: [ "text/x-common-lisp", "text/x-emacs-lisp"],
+    mediaTypes: [ "text/x-common-lisp", "text/x-emacs-lisp"],
     mode: "lisp",
     aceMode: "lisp"
   },
   {
     name: "LiveCode Server and revIgniter",
-    mimeTypes: [ "text/x-livecode-server"]
+    mediaTypes: [ "text/x-livecode-server"]
     , mode: "livecodeserver"
   },
   {
     name: "LUA",
-    mimeTypes: ["text/x-lua"],
+    mediaTypes: ["text/x-lua"],
     mode: "lua",
     aceMode: "lua"
   },
   {
     name: "Makefile",
-    mimeTypes: ["text/x-makefile"],
+    mediaTypes: ["text/x-makefile"],
     mode: "makefile",
     aceMode: "makefile"
   },
   {
     name: "Markdown",
-    mimeTypes: ["text/x-markdown", "text/x-web-markdown"],
+    mediaTypes: ["text/x-markdown", "text/x-web-markdown"],
     mode: "markdown",
     aceMode: "markdown"
   },
   {
     name: "Mathematica",
-    mimeTypes: ["text/x-mathematica"],
+    mediaTypes: ["text/x-mathematica"],
     mode: "mathematica"
   },
   {
     name: "MatLab",
-    mimeTypes: ["text/x-matlab"],
+    mediaTypes: ["text/x-matlab"],
     mode: "matlab",
     aceMode: "matlab"
   },
   {
     name: "MEL",
-    mimeTypes: ["text/x-mel"],
+    mediaTypes: ["text/x-mel"],
     mode: "mel"
   },
   {
     name: "Mizar",
-    mimeTypes: ["text/x-mizar"],
+    mediaTypes: ["text/x-mizar"],
     mode: "mizar"
   },
   {
     name: "Nginx",
-    mimeTypes: ["text/x-nginx", "text/x-nginx-conf", "text/nginx"],
+    mediaTypes: ["text/x-nginx", "text/x-nginx-conf", "text/nginx"],
     mode: "nginx"
   },
   {
     name: "Objective C",
-    mimeTypes: ["text/x-objcsrc"],
+    mediaTypes: ["text/x-objcsrc"],
     mode: "objectivec",
     aceMode: "objectivec"
   },
   {
     name: "OCaml",
-    mimeTypes: ["text/x-ocaml"],
+    mediaTypes: ["text/x-ocaml"],
     mode: "ocaml",
     aceMode: "ocaml"
   },
   {
     name: "Oxygene",
-    mimeTypes: ["text/x-oxygene"],
+    mediaTypes: ["text/x-oxygene"],
     mode: "oxygene"
   },
   {
     name: "Pascal",
-    mimeTypes: ["text/x-pascal"],
+    mediaTypes: ["text/x-pascal"],
     aceMode: "pascal"
   },
   {
     name: "Parser3",
-    mimeTypes: ["text/x-parser3"],
+    mediaTypes: ["text/x-parser3"],
     mode: "parser3"
   },
   {
     name: "Perl",
-    mimeTypes: ["text/x-perl"],
+    mediaTypes: ["text/x-perl"],
     mode: "perl",
     aceMode: "perl"
   },
   {
     name: "PHP",
-    mimeTypes: ["text/x-php", "application/x-httpd-php", "application/x-httpd-php-open"],
+    mediaTypes: ["text/x-php", "application/x-httpd-php", "application/x-httpd-php-open"],
     mode: "php",
     aceMode: "php"
   },
   {
     name: "Python Profile",
-    mimeTypes: ["text/x-profile"],
+    mediaTypes: ["text/x-profile"],
     mode: "profile"
   },
   {
     name: "Python",
-    mimeTypes: ["text/x-python"],
+    mediaTypes: ["text/x-python"],
     mode: "python",
     aceMode: "python"
   },
   {
     name: "Protocol buffer",
-    mimeTypes: ["text/x-protobuf"],
+    mediaTypes: ["text/x-protobuf"],
     aceMode: "protobuf"
   },
   {
     name: "R",
-    mimeTypes: ["text/x-rsrc"],
+    mediaTypes: ["text/x-rsrc"],
     mode: "r",
     aceMode: "r"
   },
   {
     name: "RIB",
-    mimeTypes: ["text/x-rib"],
+    mediaTypes: ["text/x-rib"],
     mode: "rib"
   },
   {
     name: "RSL",
-    mimeTypes: ["text/x-rsl"],
+    mediaTypes: ["text/x-rsl"],
     mode: "rsl"
   },
   {
     name: "Ruby",
-    mimeTypes: ["text/x-ruby"],
+    mediaTypes: ["text/x-ruby"],
     mode: "ruby",
     aceMode: "ruby"
   },
   {
     name: "Oracle Rules Language",
-    mimeTypes: ["text/x-rules-language"],
+    mediaTypes: ["text/x-rules-language"],
     mode: "ruleslanguage"
   },
   {
     name: "Rust",
-    mimeTypes: ["text/x-rust"],
+    mediaTypes: ["text/x-rust"],
     mode: "rust",
     aceMode: "rust"
   },
   {
     name: "Scala",
-    mimeTypes: ["text/x-scala"],
+    mediaTypes: ["text/x-scala"],
     mode: "scala",
     aceMode: "scala"
   },
   {
     name: "Scilab",
-    mimeTypes: ["text/x-scilab"],
+    mediaTypes: ["text/x-scilab"],
     mode: "scilab"
   },
   {
     name: "SASS",
-    mimeTypes: ["text/x-sass"],
+    mediaTypes: ["text/x-sass"],
     aceMode: "sass"
   },
   {
     name: "SCSS",
-    mimeTypes: ["text/x-scss"],
+    mediaTypes: ["text/x-scss"],
     mode: "scss"
   },
   {
     name: "SOY Templates",
-    mimeTypes: ["text/x-soy"],
+    mediaTypes: ["text/x-soy"],
     mode: "soy_template"
   },
   {
     name: "Smalltalk",
-    mimeTypes: ["text/x-smalltalk", "text/x-stsrc"],
+    mediaTypes: ["text/x-smalltalk", "text/x-stsrc"],
     mode: "smalltalk"
   },
   {
     name: "SQL",
-    mimeTypes: ["text/x-sql"],
+    mediaTypes: ["text/x-sql"],
     mode: "sql",
     aceMode: "sql"
   },
   {
     name: "SVG Image",
-    mimeTypes: ["image/svg+xml"],
+    mediaTypes: ["image/svg+xml"],
     aceMode: "svg"
   },
   {
     name: "TCL/TK",
-    mimeTypes: ["text/x-tcl"],
+    mediaTypes: ["text/x-tcl"],
     aceMode: "tcl"
   },
   {
     name: "TEX",
-    mimeTypes: ["text/x-stex", "text/x-latex"],
+    mediaTypes: ["text/x-stex", "text/x-latex"],
     mode: "tex",
     aceMode: "tex"
   },
   {
     name: "Textile",
-    mimeTypes: ["text/x-textile"],
+    mediaTypes: ["text/x-textile"],
     aceMode: "textile"
   },
   {
     name: "VALA",
-    mimeTypes: ["text/x-vala"],
+    mediaTypes: ["text/x-vala"],
     mode: "vala"
   },
   {
     name: "VB.NET",
-    mimeTypes: ["text/x-vbdotnet", "text/x-vb", "text/x-basic", "text/x-vbasic"],
+    mediaTypes: ["text/x-vbdotnet", "text/x-vb", "text/x-basic", "text/x-vbasic"],
     mode: "vbnet",
     aceMode: "vbscript"
   },
   {
     name: "VBScript",
-    mimeTypes: ["text/x-vbscript"],
+    mediaTypes: ["text/x-vbscript"],
     mode: "vbscript",
     aceMode: "vbscript"
   },
   {
     name: "Velocity Template",
-    mimeTypes: ["text/x-velocity"],
+    mediaTypes: ["text/x-velocity"],
     aceMode: "velocity"
   },
   {
     name: "VHDL",
-    mimeTypes: ["text/x-vhdl"],
+    mediaTypes: ["text/x-vhdl"],
     mode: "vhdl",
     aceMode: "vhdl"
   },
   {
     name: "XML",
-    mimeTypes: ["text/xml", "application/xml"],
+    mediaTypes: ["text/xml", "application/xml"],
     mode: "xml",
     aceMode: "xml"
   },
   {
     name: "YAML",
-    mimeTypes: ["text/x-yaml"],
+    mediaTypes: ["text/x-yaml"],
     aceMode: "yaml"
   },
   {
     name: "XQuery",
-    mimeTypes: ["text/x-xquery"],
+    mediaTypes: ["text/x-xquery"],
     aceMode: "xquery"
   }
 ]

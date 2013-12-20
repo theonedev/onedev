@@ -22,11 +22,14 @@ import com.google.common.collect.Sets;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.behavior.collapse.CollapseBehavior;
+import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.GitUserLink;
 import com.pmease.gitop.web.page.project.api.GitPerson;
 import com.pmease.gitop.web.page.project.source.AbstractFilePage;
 import com.pmease.gitop.web.page.project.source.component.SourceBreadcrumbPanel;
+import com.pmease.gitop.web.service.FileBlob;
+import com.pmease.gitop.web.service.FileBlobService;
 import com.pmease.gitop.web.util.UrlUtils;
 
 @SuppressWarnings("serial")
@@ -66,8 +69,6 @@ public class SourceBlobPage extends AbstractFilePage {
 			}
 			
 		};
-		
-		add(new SourceBlobPanel("source", projectModel, revisionModel, pathsModel));
 	}
 
 	@Override
@@ -138,6 +139,15 @@ public class SourceBlobPage extends AbstractFilePage {
 				return new ContributorsPanel(markupId, committersModel);
 			}
 		});
+		
+		add(new SourceBlobPanel("source", new LoadableDetachableModel<FileBlob>() {
+
+			@Override
+			protected FileBlob load() {
+				return Gitop.getInstance(FileBlobService.class)
+						.get(getProject(), getRevision(), getFilePath());
+			}
+		}));
 	}
 
 	protected String getFilePath() {

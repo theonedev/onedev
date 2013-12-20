@@ -8,11 +8,11 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.gitop.web.page.project.source.blob.FileBlob;
 import com.pmease.gitop.web.page.project.source.blob.language.Language;
 import com.pmease.gitop.web.page.project.source.blob.language.Languages;
 import com.pmease.gitop.web.page.project.source.blob.renderer.highlighter.AceHighlighter;
-import com.pmease.gitop.web.util.MimeTypeUtils;
+import com.pmease.gitop.web.service.FileBlob;
+import com.pmease.gitop.web.util.MediaTypeUtils;
 
 @SuppressWarnings("serial")
 public class TextBlobPanel extends Panel {
@@ -60,9 +60,9 @@ public class TextBlobPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				Language lang = Languages.INSTANCE.findByMime(getBlob().getMimeType());
+				Language lang = Languages.INSTANCE.findByMediaType(getBlob().getMediaType());
 				if (lang == null) {
-					if (MimeTypeUtils.isXMLType(getBlob().getMimeType())) {
+					if (MediaTypeUtils.isXMLType(getBlob().getMediaType())) {
 						return "xml";
 					} else {
 						return "no-highlight";

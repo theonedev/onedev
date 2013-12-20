@@ -12,7 +12,7 @@ import com.pmease.gitop.model.validation.UserNameReservation;
 import com.pmease.gitop.web.common.soy.impl.SoyTemplateModule;
 import com.pmease.gitop.web.page.project.source.blob.renderer.BlobRendererFactory;
 import com.pmease.gitop.web.resource.TestResource;
-import com.pmease.gitop.web.service.impl.TikaFileTypeRegistry;
+import com.pmease.gitop.web.service.ServiceModule;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -42,7 +42,7 @@ public class WebModule extends AbstractPluginModule {
 		
 		install(new SoyTemplateModule(ImmutableSet.<String>of(GitopWebApp.class.getPackage().getName())));
 		
-		install(new TikaFileTypeRegistry.Module());
+		install(new ServiceModule());
 		
 		bind(BlobRendererFactory.class);
 	}

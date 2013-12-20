@@ -3,8 +3,8 @@ package com.pmease.gitop.web.page.project.source.blob.renderer;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.pmease.gitop.web.page.project.source.blob.FileBlob;
-import com.pmease.gitop.web.service.FileTypeRegistry;
+import com.pmease.gitop.web.service.FileBlob;
+import com.pmease.gitop.web.service.FileTypes;
 
 @Singleton
 public class BlobRendererFactory {
@@ -12,7 +12,7 @@ public class BlobRendererFactory {
 	private static enum Registry {
 		TEXT(new TextBlobRenderer()), 
 		IMAGE(new ImageBlobRenderer()), 
-		GENERAL(new GeneralBlobRenderer());
+		RAW(new RawBlobRenderer());
 		
 		final BlobRenderer renderer;
 		Registry(BlobRenderer renderer) {
@@ -20,26 +20,22 @@ public class BlobRendererFactory {
 		}
 	}
 	
-	private final FileTypeRegistry fileTypeRegistry;
+	private final FileTypes fileTypes;
 	
 	@Inject
-	BlobRendererFactory(FileTypeRegistry fileTypeRegistry) {
-		this.fileTypeRegistry = fileTypeRegistry;
+	BlobRendererFactory(FileTypes fileTypes) {
+		this.fileTypes = fileTypes;
 	}
 	
 	public BlobRenderer newRenderer(FileBlob blob) {
-		if (!blob.isLarge()
-				&& fileTypeRegistry.isSafeInline(blob.getMimeType())) {
-			
-			if (blob.isText()) {
-				return Registry.TEXT.renderer;
-			} else if (blob.isImage()) {
+		if (fileTypes.isSafeInline(blob.getMediaType())) {
+			if (blob.isImage()) {
 				return Registry.IMAGE.renderer;
-			} else {
-				throw new UnsupportedOperationException("Mime " + blob.getMimeType());
+			} else if (blob.isText() && !blob.isLarge()) {
+				return Registry.TEXT.renderer;
 			}
-		} else {
-			return Registry.GENERAL.renderer;
 		}
+		
+		return Registry.RAW.renderer;
 	}
 }

@@ -1,8 +1,7 @@
 package com.pmease.gitop.web.page.project.source.blob.renderer;
 
+import org.apache.wicket.markup.html.image.NonCachingImage;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.IResource;
-import org.apache.wicket.request.resource.ResourceReference;
 
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
@@ -10,11 +9,9 @@ import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.service.FileBlob;
 
-@SuppressWarnings("serial")
-public class RawBlobResourceReference extends ResourceReference {
+public class FileBlobImage extends NonCachingImage {
+	private static final long serialVersionUID = 1L;
 
-	public static final String RAW_BLOB_RESOURCE = "gitop-raw-blob";
-	
 	public static PageParameters newParams(FileBlob blob) {
 		PageParameters params = new PageParameters();
 		Long projectId = blob.getProjectId();
@@ -23,19 +20,17 @@ public class RawBlobResourceReference extends ResourceReference {
 		params.set(PageSpec.USER, project.getOwner().getName());
 		params.set(PageSpec.PROJECT, project.getName());
 		params.set("objectId", blob.getRevision());
-		
 		PageSpec.addPathToParameters(blob.getPath(), params);
 		
 		return params;
 	}
 	
-	public RawBlobResourceReference() {
-		super(RAW_BLOB_RESOURCE);
+	public FileBlobImage(String id, PageParameters params) {
+		super(id, new ImageBlobResourceReference(), params);
 	}
 
 	@Override
-	public IResource getResource() {
-		return new RawBlobResource();
+	protected boolean getStatelessHint() {
+		return true;
 	}
-
 }

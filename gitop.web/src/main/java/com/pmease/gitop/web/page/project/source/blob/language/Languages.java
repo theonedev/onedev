@@ -9,16 +9,14 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.tika.mime.MimeType;
-import org.apache.tika.mime.MimeTypeException;
-import org.apache.tika.mime.MimeTypes;
+import org.apache.tika.mime.MediaType;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
-import com.pmease.gitop.web.util.MimeTypeUtils;
+import com.pmease.gitop.web.util.MediaTypeUtils;
 import com.pmease.gitop.web.util.StandardObjectMapper;
 
 public enum Languages {
@@ -29,7 +27,7 @@ public enum Languages {
 	}
 	
 	private Map<String, Language> languages;
-	private Map<String, Language> mimesIndex = Maps.newHashMap();
+	private Map<String, Language> mediaTypeIndex = Maps.newHashMap();
 	
 	private void init() {
 		InputStream in = Languages.class.getResourceAsStream("languages.json");
@@ -38,20 +36,10 @@ public enum Languages {
 			languages = Maps.newHashMap();
 			for (Language each : list) {
 				languages.put(each.getName(), each);
-				for (String mime : each.getMimeTypes()) {
-					mimesIndex.put(mime.toLowerCase(), each);
+				for (String mime : each.getMediaTypes()) {
+					mediaTypeIndex.put(mime.toLowerCase(), each);
 				}
 			}
-//			ObjectMapper mapper = getObjectMapper();
-//			this.languages = mapper.readValue(in, new TypeReference<Map<String, Language>>() {});
-//			for (Entry<String, Language> entry : languages.entrySet()) {
-//				Language lang = entry.getValue();
-//				lang.name = entry.getKey();
-//				
-//				for (String mime : lang.getMimeTypes()) {
-//					mimesIndex.put(mime.toLowerCase(), lang);
-//				}
-//			}
 		} catch (JsonParseException e) {
 			throw Throwables.propagate(e);
 		} catch (JsonMappingException e) {
@@ -67,25 +55,17 @@ public enum Languages {
 		return languages.values();
 	}
 	
-	public @Nullable Language findByMime(String mime) {
-		try {
-			MimeType m = MimeTypes.getDefaultMimeTypes().forName(mime);
-			return findByMime(m);
-		} catch (MimeTypeException e) {
-			throw Throwables.propagate(e);
-		}
+	public @Nullable Language findByMediaType(String mime) {
+		MediaType m = MediaType.parse(mime);
+		return findByMediaType(m);
 	}
 	
-	public @Nullable Language findByMime(MimeType mime) {
-		Language lang = mimesIndex.get(mime.getType().toString());
-		if (lang == null && MimeTypeUtils.isXMLType(mime)) {
+	public @Nullable Language findByMediaType(MediaType mime) {
+		Language lang = mediaTypeIndex.get(mime.toString());
+		if (lang == null && MediaTypeUtils.isXMLType(mime)) {
 			return languages.get("xml");
 		}
 		
 		return lang;
-	}
-	
-	public static void main(String[] args) {
-		System.out.println(Languages.INSTANCE.getLanguages());
 	}
 }

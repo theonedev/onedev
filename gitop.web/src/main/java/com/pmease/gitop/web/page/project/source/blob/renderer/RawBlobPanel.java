@@ -4,12 +4,12 @@ import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.gitop.web.page.project.source.blob.FileBlob;
+import com.pmease.gitop.web.service.FileBlob;
 
 @SuppressWarnings("serial")
-public class GeneralBlobPanel extends Panel {
+public class RawBlobPanel extends Panel {
 
-	public GeneralBlobPanel(String id, IModel<FileBlob> model) {
+	public RawBlobPanel(String id, IModel<FileBlob> model) {
 		super(id, model);
 	}
 
@@ -19,9 +19,8 @@ public class GeneralBlobPanel extends Panel {
 		
 		FileBlob blob = (FileBlob) getDefaultModelObject();
 		
-		add(new ResourceLink<Void>("link", new RawBlobResourceReference(),
-				RawBlobResourceReference.newParams(blob.getProjectId(), 
-												   blob.getRevision(), 
-												   blob.getPath())));
+		add(new ResourceLink<Void>("link", 
+				new RawBlobResourceReference(),
+				RawBlobResourceReference.newParams(blob)));
 	}
 }

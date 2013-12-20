@@ -7,12 +7,15 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.component.avatar.AvatarImage.AvatarImageType;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
 import com.pmease.gitop.web.page.project.source.ProjectHomePage;
+import com.pmease.gitop.web.util.UrlUtils;
 import com.pmease.gitop.web.util.WicketUtils;
 
 public class PageSpec {
@@ -50,6 +53,28 @@ public class PageSpec {
 		}
 		
 		return params;
+	}
+
+	public static String getPathFromParams(PageParameters params) {
+		List<String> list = Lists.newArrayList();
+		for (int i = 0; i < params.getIndexedCount(); i++) {
+			list.add(Preconditions.checkNotNull(params.get(i).toString()));
+		}
+		
+		return UrlUtils.concatSegments(list);
+	}
+	
+	public static void addPathToParameters(String path, PageParameters params) {
+		Iterable<String> paths = Splitter.on("/").omitEmptyStrings().split(path);
+		addPathToParameters(paths, params);
+	}
+	
+	public static void addPathToParameters(Iterable<String> paths, PageParameters params) {
+		int i = 0;
+		for (String each : paths) {
+			params.set(i, each);
+			i++;
+		}
 	}
 	
 	public static Link<?> newUserHomeLink(String id, User user) {

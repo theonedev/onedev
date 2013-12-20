@@ -1,5 +1,7 @@
 package com.pmease.gitop.web.page.project.source.blob.renderer;
 
+import javax.persistence.EntityNotFoundException;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.DynamicImageResource;
@@ -11,7 +13,8 @@ import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.exception.AccessDeniedException;
-import com.pmease.gitop.web.page.project.source.blob.FileBlob;
+import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.service.FileBlob;
 
 public class ImageBlobResource extends DynamicImageResource {
 
@@ -20,14 +23,18 @@ public class ImageBlobResource extends DynamicImageResource {
 	@Override
 	protected byte[] getImageData(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
-		String projectId = params.get("project").toString();
-		String revision = params.get("objectId").toString();
-		String path = params.get("path").toString();
+		final String username = params.get(PageSpec.USER).toString();
+		final String projectName = params.get(PageSpec.PROJECT).toString();
+		final String revision = params.get("objectId").toString();
 		
-		Long pid = Long.valueOf(projectId);
-		Project project = Gitop.getInstance(ProjectManager.class).get(pid);
-		Preconditions.checkState(project != null);
+		Project project = Gitop.getInstance(ProjectManager.class).findBy(username, projectName);
+		if (project == null) {
+			throw new EntityNotFoundException("Project " + username + "/" + projectName + " doesn't exist");
+		}
+
 		Preconditions.checkState(!Strings.isNullOrEmpty(revision));
+		
+		String path = PageSpec.getPathFromParams(params);
 		Preconditions.checkState(!Strings.isNullOrEmpty(path));
 		
 		if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(project))) {

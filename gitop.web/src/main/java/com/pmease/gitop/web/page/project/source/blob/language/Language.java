@@ -13,7 +13,7 @@ public class Language implements Serializable {
 	String name;
 	
 	@JsonProperty
-	private String[] mimeTypes;
+	private String[] mediaTypes;
 	
 	@JsonProperty
 	private String mode;
@@ -27,19 +27,19 @@ public class Language implements Serializable {
 	public static final Language PLAIN_TEXT =
 			new Language("Plain Text", "no-highlight", "text", new String[] { "text/plain"});
 	
-	public Language(final String name, final String mode, final String aceMode, final String[] mimeTypes) {
+	public Language(final String name, final String mode, final String aceMode, final String[] mediaTypes) {
 		this.name = name;
 		this.mode = mode;
 		this.aceMode = aceMode;
-		this.mimeTypes = mimeTypes;
+		this.mediaTypes = mediaTypes;
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public String[] getMimeTypes() {
-		return mimeTypes;
+	public String[] getMediaTypes() {
+		return mediaTypes;
 	}
 
 	public String getMode() {
@@ -60,7 +60,7 @@ public class Language implements Serializable {
 		return Objects.toStringHelper(this)
 				.add("name", name)
 				.add("mode", mode)
-				.add("mimeTypes", mimeTypes)
+				.add("mimeTypes", mediaTypes)
 				.toString();
 	}
 	

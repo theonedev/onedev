@@ -24,19 +24,19 @@ public class AbstractSourcePagePanel extends Panel {
 		this.pathsModel = pathsModel;
 	}
 
-	protected Project getProject() {
+	public Project getProject() {
 		return (Project) getDefaultModelObject();
 	}
 	
-	protected String getRevision() {
+	public String getRevision() {
 		return revisionModel.getObject();
 	}
 	
-	protected List<String> getPaths() {
+	public List<String> getPaths() {
 		return pathsModel.getObject();
 	}
 	
-	protected String getJoinedPath() {
+	public String getFilePath() {
 		if (getPaths().isEmpty()) {
 			return null;
 		} else {

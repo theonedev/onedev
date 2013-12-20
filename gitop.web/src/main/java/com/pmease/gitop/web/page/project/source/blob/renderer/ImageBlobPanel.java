@@ -3,7 +3,7 @@ package com.pmease.gitop.web.page.project.source.blob.renderer;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.gitop.web.page.project.source.blob.FileBlob;
+import com.pmease.gitop.web.service.FileBlob;
 
 @SuppressWarnings("serial")
 public class ImageBlobPanel extends Panel {
@@ -17,10 +17,7 @@ public class ImageBlobPanel extends Panel {
 		super.onInitialize();
 		
 		FileBlob blob = getBlob();
-		add(new ImageBlobImage("image", ImageBlobImage.newParams(
-				blob.getProjectId(), 
-				blob.getRevision(), 
-				blob.getPath())));
+		add(new FileBlobImage("image", FileBlobImage.newParams(blob)));
 	}
 	
 	private FileBlob getBlob() {

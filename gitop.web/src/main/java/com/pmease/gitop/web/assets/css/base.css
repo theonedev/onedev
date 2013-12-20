@@ -250,6 +250,7 @@ fieldset[disabled] .btn-inverse.active {
 .search-form button { position: absolute; right: 2px; top: 1px; border: none; height: 22px; background: transparent; color: #888; }
 
 .form-inline .field-controls { display: block; }
+.form-inline select.form-control { width: 100%; }
 
 /* FORM COMPONENT */
 .select2-container .select2-choice { padding-top: 4px; padding-bottom: 4px; height: auto; }

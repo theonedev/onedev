@@ -16,9 +16,9 @@ import com.pmease.commons.git.TreeNode;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.component.wiki.WikiTextPanel;
 import com.pmease.gitop.web.component.wiki.WikiType;
-import com.pmease.gitop.web.page.project.source.blob.FileBlob;
 import com.pmease.gitop.web.page.project.source.blob.language.Language;
 import com.pmease.gitop.web.page.project.source.component.AbstractSourcePagePanel;
+import com.pmease.gitop.web.service.FileBlob;
 
 @SuppressWarnings("serial")
 public class ReadmePanel extends AbstractSourcePagePanel {

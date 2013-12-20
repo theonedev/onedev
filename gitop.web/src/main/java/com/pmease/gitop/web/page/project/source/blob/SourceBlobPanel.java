@@ -4,37 +4,26 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.eclipse.jgit.lib.FileMode;
 
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.quantity.Data;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.page.project.source.blob.renderer.BlobRenderer;
 import com.pmease.gitop.web.page.project.source.blob.renderer.BlobRendererFactory;
-import com.pmease.gitop.web.page.project.source.component.AbstractSourcePagePanel;
+import com.pmease.gitop.web.service.FileBlob;
 
 @SuppressWarnings("serial")
-public class SourceBlobPanel extends AbstractSourcePagePanel {
+public class SourceBlobPanel extends Panel {
 
-	private final IModel<FileBlob> blobModel;
-	
-	public SourceBlobPanel(String id, IModel<Project> projectModel,
-			IModel<String> revisionModel, IModel<List<String>> pathsModel) {
-		super(id, projectModel, revisionModel, pathsModel);
-		
-		blobModel = new LoadableDetachableModel<FileBlob>() {
-
-			@Override
-			protected FileBlob load() {
-				return FileBlob.of(getProject(), getRevision(), getJoinedPath());
-			}
-		};
+	public SourceBlobPanel(String id, IModel<FileBlob> blobModel) {
+		super(id, blobModel);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -99,7 +88,7 @@ public class SourceBlobPanel extends AbstractSourcePagePanel {
 		}));
 		
 		BlobRenderer renderer = getRenderer();
-		add(renderer.render("body", blobModel));
+		add(renderer.render("body", (IModel<FileBlob>) getDefaultModel()));
 	}
 	
 	private BlobRenderer getRenderer() {
@@ -107,15 +96,11 @@ public class SourceBlobPanel extends AbstractSourcePagePanel {
 	}
 	
 	private FileBlob getBlob() {
-		return blobModel.getObject();
+		return (FileBlob) getDefaultModelObject();
 	}
 	
 	@Override
 	public void onDetach() {
-		if (blobModel != null) {
-			blobModel.detach();
-		}
-		
 		super.onDetach();
 	}
 	
