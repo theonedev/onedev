@@ -25,7 +25,7 @@ public class MessengerResourcesBehavior extends Behavior {
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
 		
-		response.render(JavaScriptHeaderItem.forReference(newJsReference("res/js/messenger.js")));
+		response.render(JavaScriptHeaderItem.forReference(newJsReference("res/js/messenger.min.js")));
 		response.render(JavaScriptHeaderItem.forReference(newJsReference("res/js/messenger-theme-flat.js")));
 		
 		response.render(CssHeaderItem.forReference(newCssReference("res/css/messenger.css")));
@@ -37,7 +37,7 @@ public class MessengerResourcesBehavior extends Behavior {
 	}
 	
 	protected String getMessengerOptions() {
-		return 
+		return
 				JsUtil.formatOptions(ImmutableMap.<String, Object>builder()
 				.put("theme", "flat")
 				.put("extraClasses", "messenger-fixed messenger-on-top messenger-on-right")

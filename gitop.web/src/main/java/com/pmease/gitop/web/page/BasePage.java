@@ -12,7 +12,7 @@ import org.apache.wicket.markup.IMarkupFragment;
 import org.apache.wicket.markup.MarkupElement;
 import org.apache.wicket.markup.MarkupResourceStream;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.PriorityHeaderItem;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.TransparentWebMarkupContainer;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
@@ -26,7 +26,7 @@ import com.google.common.base.Strings;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.web.assets.PageHeaderItem;
+import com.pmease.gitop.web.assets.PageBaseResourceReference;
 import com.pmease.gitop.web.common.wicket.component.messenger.MessengerResourcesBehavior;
 import com.pmease.gitop.web.common.wicket.component.modal.Modal;
 import com.pmease.gitop.web.exception.AccessDeniedException;
@@ -238,7 +238,8 @@ public abstract class BasePage extends WebPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(new PriorityHeaderItem(PageHeaderItem.get()));
+		
+		response.render(JavaScriptHeaderItem.forReference(PageBaseResourceReference.getInstance()));
 	}
 
 	public Modal getModal() {

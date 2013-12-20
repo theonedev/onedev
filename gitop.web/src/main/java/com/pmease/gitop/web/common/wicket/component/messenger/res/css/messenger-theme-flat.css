@@ -271,12 +271,11 @@ ul.messenger-theme-flat .messenger-message {
   padding: 10px 30px 13px 65px;
 }
 /* line 35, ../../src/sass/messenger-theme-flat.sass */
-ul.messenger-theme-flat .messenger-message .close {
+ul.messenger-theme-flat .messenger-message .messenger-close {
   position: absolute;
   top: 0px;
   right: 0px;
-  color: #bbb;
-  text-shadow: none;
+  color: #888888;
   opacity: 1;
   font-weight: bold;
   display: block;
@@ -289,12 +288,12 @@ ul.messenger-theme-flat .messenger-message .close {
   -webkit-appearance: none;
 }
 /* line 51, ../../src/sass/messenger-theme-flat.sass */
-ul.messenger-theme-flat .messenger-message .close:hover {
-  color: #fff;
+ul.messenger-theme-flat .messenger-message .messenger-close:hover {
+  color: #bbbbbb;
 }
 /* line 54, ../../src/sass/messenger-theme-flat.sass */
-ul.messenger-theme-flat .messenger-message .close:active {
-  color: #fff;
+ul.messenger-theme-flat .messenger-message .messenger-close:active {
+  color: #777777;
 }
 /* line 57, ../../src/sass/messenger-theme-flat.sass */
 ul.messenger-theme-flat .messenger-message .messenger-actions {
@@ -350,18 +349,15 @@ ul.messenger-theme-flat .messenger-message .messenger-message-inner:before {
 }
 /* line 95, ../../src/sass/messenger-theme-flat.sass */
 ul.messenger-theme-flat .messenger-message.alert-success .messenger-message-inner:before {
-  background: #64da38;
+  background: #5fca4a;
 }
 /* line 98, ../../src/sass/messenger-theme-flat.sass */
 ul.messenger-theme-flat .messenger-message.alert-info .messenger-message-inner:before {
-  background: #00B5AD;
-}
-ul.messenger-theme-flat .messenger-message.alert-warning .messenger-message-inner:before {
-  background: #ff9500;
+  background: #61c4b8;
 }
 /* line 103, ../../src/sass/messenger-theme-flat.sass */
 ul.messenger-theme-flat .messenger-message.alert-error .messenger-message-inner:before {
-  background: #ff2a68;
+  background: #dd6a45;
 }
 /* line 32, ../../src/sass/messenger-spinner.scss */
 ul.messenger-theme-flat .messenger-message.alert-error.messenger-retry-soon .messenger-spinner {
