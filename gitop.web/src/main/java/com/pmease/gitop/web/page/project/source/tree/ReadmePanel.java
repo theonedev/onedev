@@ -115,7 +115,8 @@ public class ReadmePanel extends AbstractSourcePagePanel {
 	static Set<String> README_FILES = ImmutableSet.of(
 			"README",
 			"README.md",
-			"README.markdown"
+			"README.markdown",
+			"README.txt"
 			);
 	
 	private TreeNode getReadmeNode() {

@@ -42,19 +42,16 @@ public class TooltipBehavior extends Behavior {
 		response.render(BootstrapHeaderItem.get());
 		JsOptions options = new JsOptions();
 		if (titleModel != null)
-			options.add("title", StringEscapeUtils.escapeEcmaScript(titleModel.getObject()));
+			options.put("title", StringEscapeUtils.escapeEcmaScript(titleModel.getObject()));
 		if (placement != null) {
-			if (placement.contains("auto"))
-				options.add("placement", placement);
-			else
-				options.add("placement", placement + " auto");
+			options.put("placement", placement);
 		} else {
-			options.add("placement", "top auto");
+			options.put("placement", "top auto");
 		}
 		
 		String script;
 		if (selector != null)
-			script = String.format("$('#%s').find(\"%s\").tooltip(%s)", component.getMarkupId(true), selector, options.toString());
+			script = String.format("$('#%s %s').tooltip(%s)", component.getMarkupId(true), selector, options.toString());
 		else
 			script = String.format("$('#%s').tooltip(%s)", component.getMarkupId(true), options.toString());
 		

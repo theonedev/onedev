@@ -6,27 +6,39 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import com.pmease.commons.loader.AppLoader;
 
 public class JsOptions implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private Map<String, Object> map = new LinkedHashMap<>();
+	private Map<String, Serializable> map = new LinkedHashMap<>();
 
 	@Override
 	public String toString() {
 		ObjectMapper objectMapper = AppLoader.getInstance(ObjectMapper.class);
 		try {
-			return objectMapper.writeValueAsString(this);
+			return objectMapper.writeValueAsString(map);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
-	public JsOptions add(String key, Object value) {
-		map.put(key, value);
+	public JsOptions put(String key, Serializable value) {
+		Preconditions.checkNotNull(key, "key");
+		if (value != null) {
+			map.put(key, value);
+		} else {
+			map.remove(key);
+		}
+		
 		return this;
+	}
+
+	public Serializable get(String key) {
+		Preconditions.checkNotNull(key, "key");
+		return map.get(key);
 	}
 	
 	public JsOptions remove(String key) {

@@ -104,7 +104,7 @@ public class ContributorsPanel extends Panel {
 		
 		add(moreContainer);
 		
-		add(new TooltipBehavior("a[data-toggle='tooltip']", null, "bottom"));
+		add(new TooltipBehavior("a[data-toggle=\"tooltip\"]", null, "bottom"));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -115,7 +115,5 @@ public class ContributorsPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-//		response.render(OnDomReadyHeaderItem.forScript(
-//				String.format("$(\"#%s a[data-toggle='tooltip']\").tooltip({placement: 'bottom'})", getMarkupId(true))));
 	}
 }

@@ -38,9 +38,9 @@ public class Messenger {
 
 	private static Messenger message(String message, Type type) {
 		return post(new JsOptions()
-						.add("message", message)
-						.add("type", type.name().toLowerCase())
-						.add("showCloseButton", true));
+						.put("message", message)
+						.put("type", type.name().toLowerCase())
+						.put("showCloseButton", true));
 	}
 
 	public static Messenger post(JsOptions options) {
