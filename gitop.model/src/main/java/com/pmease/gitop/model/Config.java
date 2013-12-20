@@ -17,7 +17,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @Entity
 public class Config extends AbstractEntity {
 
-	public enum Key {STORAGE, MAIL};
+	public enum Key {SYSTEM, MAIL};
 	
 	@Column(nullable=false, unique=true)
 	private Key key;

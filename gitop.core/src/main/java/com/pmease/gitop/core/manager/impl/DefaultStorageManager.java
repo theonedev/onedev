@@ -23,13 +23,13 @@ public class DefaultStorageManager implements StorageManager {
 
     @Override
     public ProjectStorage getStorage(Project project) {
-        return new ProjectStorage(new File(configManager.getStorageSetting().getDataPath(),
+        return new ProjectStorage(new File(configManager.getSystemSetting().getDataPath(),
                 "projects/" + project.getId().toString()));
     }
 
     @Override
     public File getStorage(User user) {
-        return new File(configManager.getStorageSetting().getDataPath(),
+        return new File(configManager.getSystemSetting().getDataPath(),
                 "users/" + user.getId().toString());
     }
 

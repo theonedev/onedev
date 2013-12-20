@@ -27,28 +27,28 @@ public class DefaultConfigManager extends AbstractGenericDao<Config> implements 
 
 	@Sessional
 	@Override
-	public SystemSetting getStorageSetting() {
-		Config config = getConfig(Key.STORAGE);
+	public SystemSetting getSystemSetting() {
+		Config config = getConfig(Key.SYSTEM);
 		if (config != null) {
-			SystemSetting storageSetting = (SystemSetting) config.getSetting();
-			Preconditions.checkNotNull(storageSetting);
-			return storageSetting;
+			SystemSetting systemSetting = (SystemSetting) config.getSetting();
+			Preconditions.checkNotNull(systemSetting);
+			return systemSetting;
 		} else {
-			throw new RuntimeException("Unable to find storage setting record.");
+			throw new RuntimeException("Unable to find system setting record.");
 		}
 	}
 
 	@Transactional
 	@Override
-	public void saveStorageSetting(SystemSetting storageSetting) {
-		Preconditions.checkNotNull(storageSetting);
+	public void saveSystemSetting(SystemSetting systemSetting) {
+		Preconditions.checkNotNull(systemSetting);
 		
-		Config config = getConfig(Key.STORAGE);
+		Config config = getConfig(Key.SYSTEM);
 		if (config == null) {
 			config = new Config();
-			config.setKey(Key.STORAGE);
+			config.setKey(Key.SYSTEM);
 		}
-		config.setSetting(storageSetting);
+		config.setSetting(systemSetting);
 		save(config);
 	}
 

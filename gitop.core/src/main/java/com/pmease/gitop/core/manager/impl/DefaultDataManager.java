@@ -58,8 +58,8 @@ public class DefaultDataManager implements DataManager, Serializable {
 			});
 		}
 		
-		Config storageConfig = configManager.getConfig(Key.STORAGE);
-		if (storageConfig == null || storageConfig.getSetting() == null) {
+		Config systemConfig = configManager.getConfig(Key.SYSTEM);
+		if (systemConfig == null || systemConfig.getSetting() == null) {
 			manualConfigs.add(new ManualConfig("Specify System Setting", new SystemSetting()) {
 
 				@Override
@@ -69,7 +69,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 
 				@Override
 				public void complete() {
-					configManager.saveStorageSetting((SystemSetting) getSetting());
+					configManager.saveSystemSetting((SystemSetting) getSetting());
 				}
 				
 			});
