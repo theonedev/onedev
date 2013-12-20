@@ -18,7 +18,7 @@ import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.core.manager.DataManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.setting.MailSetting;
-import com.pmease.gitop.core.setting.StorageSetting;
+import com.pmease.gitop.core.setting.SystemSetting;
 import com.pmease.gitop.model.Config;
 import com.pmease.gitop.model.Config.Key;
 import com.pmease.gitop.model.User;
@@ -58,9 +58,9 @@ public class DefaultDataManager implements DataManager, Serializable {
 			});
 		}
 		
-		Config storageConfig = configManager.getConfig(Key.STORAGE);
-		if (storageConfig == null || storageConfig.getSetting() == null) {
-			manualConfigs.add(new ManualConfig("Specify Storage Setting", new StorageSetting()) {
+		Config systemConfig = configManager.getConfig(Key.SYSTEM);
+		if (systemConfig == null || systemConfig.getSetting() == null) {
+			manualConfigs.add(new ManualConfig("Specify System Setting", new SystemSetting()) {
 
 				@Override
 				public Skippable getSkippable() {
@@ -69,7 +69,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 
 				@Override
 				public void complete() {
-					configManager.saveStorageSetting((StorageSetting) getSetting());
+					configManager.saveSystemSetting((SystemSetting) getSetting());
 				}
 				
 			});

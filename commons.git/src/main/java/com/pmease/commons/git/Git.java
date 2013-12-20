@@ -354,7 +354,7 @@ public class Git implements Serializable {
 
 	public boolean hasCommits() {
 		File headsDir = new File(repoDir, "refs/heads");
-		return headsDir.exists() && headsDir.list().length != 0;
+		return headsDir.exists() && headsDir.list().length != 0 || new File(repoDir, "packed-refs").exists();
 	}
 	
 	public boolean isValid() {

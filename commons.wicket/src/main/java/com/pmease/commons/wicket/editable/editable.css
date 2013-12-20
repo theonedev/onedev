@@ -63,3 +63,6 @@ div.reflection select.type, div.reflectio input.enable {
 table.reflection .right-spacing {
 	margin-right: 8px;
 }
+.editor .has-error .help-block {color: #737373;}
+.editor .has-error .control-label {color: #333333;}
+.editor .has-error .error-message {color: #A94442;}

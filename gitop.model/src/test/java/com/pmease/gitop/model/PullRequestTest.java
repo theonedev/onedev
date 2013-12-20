@@ -2,27 +2,26 @@ package com.pmease.gitop.model;
 
 import java.io.File;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.Git;
-import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.util.FileUtils;
 
-public class PullRequestTest {
+public class PullRequestTest extends AbstractGitTest {
 
     private File projectDir;
     
     private Git git;
     
     private Project project;
-    
-    @Before
+
+    @Override
     public void setup() {
-        Assert.assertTrue(GitCommand.checkError() == null);
+    	super.setup();
+    	
         projectDir = FileUtils.createTempDir();
         
         git = new Git(new File(projectDir, "code"));
@@ -31,10 +30,11 @@ public class PullRequestTest {
         project = Mockito.mock(Project.class);
         Mockito.when(project.code()).thenReturn(git);
     }
-    
-    @After
+
+    @Override
     public void teardown() {
         FileUtils.deleteDir(projectDir);
+        super.teardown();
     }
 
     @Test

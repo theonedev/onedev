@@ -11,6 +11,8 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.IMarkupFragment;
 import org.apache.wicket.markup.MarkupElement;
 import org.apache.wicket.markup.MarkupResourceStream;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.PriorityHeaderItem;
 import org.apache.wicket.markup.html.TransparentWebMarkupContainer;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
@@ -24,8 +26,7 @@ import com.google.common.base.Strings;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.web.assets.BaseResourcesBehavior;
-import com.pmease.gitop.web.assets.PageResourcesBehavior;
+import com.pmease.gitop.web.assets.PageHeaderItem;
 import com.pmease.gitop.web.common.wicket.component.messenger.MessengerResourcesBehavior;
 import com.pmease.gitop.web.common.wicket.component.modal.Modal;
 import com.pmease.gitop.web.exception.AccessDeniedException;
@@ -75,6 +76,8 @@ public abstract class BasePage extends WebPage {
 				&& getClass() != ServerInitPage.class) {
 			redirect(ServerInitPage.class);
 		}
+		
+		add(new WebMarkupContainer("messenger").add(MessengerResourcesBehavior.get()));
 		
 		shouldInitialize = true;
 	}
@@ -215,19 +218,6 @@ public abstract class BasePage extends WebPage {
 
 		});
 
-		/*
-		 * Bind global resources here so that they can appear in page header
-		 * before any other resources. Simply rendering the resource in
-		 * renderHead method of base page will not work as renderHead method of
-		 * container will be called after contained components, and this will
-		 * cause components with resources using global resources not working
-		 * properly.
-		 */
-		add(new WebMarkupContainer("globalResourceBinder")
-				.add(new BaseResourcesBehavior())
-				.add(MessengerResourcesBehavior.get()));
-		
-		add(PageResourcesBehavior.get());
 	}
 	
 	@Override
@@ -245,6 +235,12 @@ public abstract class BasePage extends WebPage {
 		return 0;
 	}
 	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(new PriorityHeaderItem(PageHeaderItem.get()));
+	}
+
 	public Modal getModal() {
 		return modal;
 	}

@@ -10,7 +10,9 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pmease.commons.git.GitConfig;
 import com.pmease.commons.git.GitVersion;
+import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
@@ -19,8 +21,6 @@ public abstract class GitCommand<V> implements Callable<V> {
 
 	protected static final Logger logger = LoggerFactory.getLogger(GitCommand.class);
 
-	private static final String GIT_EXE = "git";
-	
 	private static final String MIN_VERSION = "1.8.0";
 	
 	protected final File repoDir;
@@ -92,42 +92,49 @@ public abstract class GitCommand<V> implements Callable<V> {
 	 * 			or <tt>null</tt> otherwise
 	 * 			
 	 */
-	public static String checkError() {
+	public static String checkError(String gitExe) {
 		try {
 			final String[] version = new String[]{null};
 			
-			new Commandline(GIT_EXE).addArgs("--version").execute(new LineConsumer() {
+			new Commandline(gitExe).addArgs("--version").execute(new LineConsumer() {
 	
 				@Override
 				public void consume(String line) {
-					if (line.trim().length() != 0)
-						version[0] = line.trim();
+					if (line.startsWith("git version "))
+						version[0] = line.substring("git version ".length());
 				}
 				
 			}, new LineConsumer.ErrorLogger()).checkReturnCode();
-	
+
 			if (version[0] == null)
-				throw new RuntimeException("Unable to determine git version.");
+				return "Unable to determine git version of '" + gitExe + "'";
 			
 			GitVersion gitVersion = new GitVersion(version[0]);
 			
 			if (gitVersion.isOlderThan(new GitVersion(MIN_VERSION)))
-				throw new RuntimeException("Git version should be at least " + MIN_VERSION);
+				return "Git version of '" + gitExe + "' is " + gitVersion + ". Gitop requires at least " + MIN_VERSION;
 			
 			return null;
 			
 		} catch (Exception e) {
-			return ExceptionUtils.getMessage(e);
+			String message = ExceptionUtils.getMessage(e);
+			if (message.contains("CreateProcess error=2"))
+				return "Unable to find git command: " + gitExe;
+			else if (message.contains("error launching git"))
+				return "Unable to launch git command: " + gitExe;
+			else
+				return message;
 		}
 	}
 	
 	public Commandline cmd() {
-		Commandline cmd = new Commandline(GIT_EXE).workingDir(repoDir);
+		String gitExe = AppLoader.getInstance(GitConfig.class).getExecutable();
+		Commandline cmd = new Commandline(gitExe).workingDir(repoDir);
 		if (environments != null)
 			cmd.environment(environments);
 		return cmd;
 	}
-
+	
 	@Override
 	public abstract V call();
 	

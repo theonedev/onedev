@@ -7,14 +7,21 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import org.apache.commons.lang3.StringUtils;
+import org.quartz.ScheduleBuilder;
+import org.quartz.SimpleScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pmease.commons.git.GitConfig;
+import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.loader.AppName;
+import com.pmease.commons.schedule.SchedulableTask;
+import com.pmease.commons.schedule.TaskScheduler;
 import com.pmease.commons.util.init.InitStage;
 import com.pmease.commons.util.init.ManualConfig;
 import com.pmease.gitop.core.manager.DataManager;
@@ -32,10 +39,22 @@ public class Gitop extends AbstractPlugin {
 	
 	private volatile InitStage initStage;
 	
+	private final TaskScheduler taskScheduler;
+	
+	private final Provider<GitConfig> gitConfigProvider;
+	
+	private volatile String gitError;
+	
+	private String gitCheckTaskId;
+	
 	@Inject
-	public Gitop(ServerConfig serverConfig, DataManager dataManager, @AppName String appName) {
+	public Gitop(ServerConfig serverConfig, DataManager dataManager, TaskScheduler taskScheduler, 
+			Provider<GitConfig> gitConfigProvider, @AppName String appName) {
 		this.dataManager = dataManager;
 		this.serverConfig = serverConfig;
+		this.taskScheduler = taskScheduler;
+		this.gitConfigProvider = gitConfigProvider;
+		
 		this.appName = appName;
 		
 		initStage = new InitStage("Server is Starting...");
@@ -51,6 +70,24 @@ public class Gitop extends AbstractPlugin {
 			
 			initStage.waitFor();
 		}
+		
+		gitCheckTaskId = taskScheduler.schedule(new SchedulableTask() {
+			
+			@Override
+			public ScheduleBuilder<?> getScheduleBuilder() {
+				return SimpleScheduleBuilder.repeatMinutelyForever();
+			}
+			
+			@Override
+			public void execute() {
+				checkGit();
+			}
+			
+		});
+	}
+	
+	public void checkGit() {
+		gitError = GitCommand.checkError(gitConfigProvider.get().getExecutable());
 	}
 	
 	@Override
@@ -135,6 +172,11 @@ public class Gitop extends AbstractPlugin {
 
 	@Override
 	public void stop() {
+		taskScheduler.unschedule(gitCheckTaskId);
+	}
+	
+	public String getGitError() {
+		return gitError;
 	}
 	
 }

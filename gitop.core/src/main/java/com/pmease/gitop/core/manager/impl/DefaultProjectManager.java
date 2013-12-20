@@ -10,6 +10,8 @@ import javax.inject.Singleton;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Git;
@@ -31,6 +33,8 @@ import com.pmease.gitop.model.storage.StorageManager;
 @Singleton
 public class DefaultProjectManager extends AbstractGenericDao<Project> implements ProjectManager {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultProjectManager.class);
+	
     private final StorageManager storageManager;
     
     private final ServerConfig serverConfig;
@@ -59,35 +63,34 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
             super.save(project);
 
             ProjectStorage storage = storageManager.getStorage(project);
-            storage.clean();
 
             File codeDir = storage.ofCode();
-            FileUtils.createDir(codeDir);
-            new Git(codeDir).init(true);
-            File hooksDir = new File(codeDir, "hooks");
-            FileUtils.createDir(hooksDir);
-
-            String urlRoot;
-            if (serverConfig.getHttpPort() != 0)
-                urlRoot = "http://localhost:" + serverConfig.getHttpPort();
-            else 
-                urlRoot = "https://localhost:" + serverConfig.getSslConfig().getPort();
-
-            File preReceiveHook = new File(hooksDir, "pre-receive");
-            FileUtils.writeFile(preReceiveHook, 
-                    String.format(hookTemplate, urlRoot + PreReceiveServlet.PATH + "/" + project.getId()));
-            preReceiveHook.setExecutable(true);
+            if (codeDir.exists() && !Project.isCode(new Git(codeDir))) {
+            	logger.warn("Deleting existing directory '" + codeDir + "' before initializing project code repo...");
+            	FileUtils.deleteDir(codeDir);
+            }
             
-            File postReceiveHook = new File(hooksDir, "post-receive");
-            FileUtils.writeFile(postReceiveHook, 
-                    String.format(hookTemplate, urlRoot + PostReceiveServlet.PATH + "/" + project.getId()));
-            postReceiveHook.setExecutable(true);
-        } else {
-            File codeDir = storageManager.getStorage(project).ofCode();
             if (!codeDir.exists()) {
                 FileUtils.createDir(codeDir);
                 new Git(codeDir).init(true);
+                File hooksDir = new File(codeDir, "hooks");
+                String urlRoot;
+                if (serverConfig.getHttpPort() != 0)
+                    urlRoot = "http://localhost:" + serverConfig.getHttpPort();
+                else 
+                    urlRoot = "https://localhost:" + serverConfig.getSslConfig().getPort();
+
+                File preReceiveHook = new File(hooksDir, "pre-receive");
+                FileUtils.writeFile(preReceiveHook, 
+                        String.format(hookTemplate, urlRoot + PreReceiveServlet.PATH + "/" + project.getId()));
+                preReceiveHook.setExecutable(true);
+                
+                File postReceiveHook = new File(hooksDir, "post-receive");
+                FileUtils.writeFile(postReceiveHook, 
+                        String.format(hookTemplate, urlRoot + PostReceiveServlet.PATH + "/" + project.getId()));
+                postReceiveHook.setExecutable(true);
             }
+        } else {
             super.save(project);
         }
     }

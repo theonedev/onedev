@@ -171,6 +171,13 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
     	return createTempDir("temp");
     }
     
+    /**
+     * Delete directory if specified directory exists, or do nothing if the 
+     * directory does not exist. 
+     * 
+     * @param dir
+     * 			directory to be deleted. Does not have to be exist
+     */
     public static void deleteDir(File dir) {
     	try {
 			deleteDirectory(dir);
@@ -235,10 +242,24 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
 		}
 	}
 	
+	/**
+	 * Create the directory if it does not exist, or do nothing if it 
+	 * already exists. 
+	 * 
+	 * @param dir
+	 * 			directory to be created. Does not have to be non-existent
+	 */
 	public static void createDir(File dir) {
 		BootstrapUtils.createDir(dir);
 	}
 	
+	/**
+	 * Delete all files/sub directories under specified directory. If the directory 
+	 * does not exist, create the directory. 
+	 * 
+	 * @param dir
+	 *			directory to be cleaned up 
+	 */
 	public static void cleanDir(File dir) {
 		if (dir.exists()) {
 			try {

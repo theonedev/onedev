@@ -29,5 +29,5 @@ public class GitVersionTest {
 		assertEquals(new GitVersion("1.8.3.msysgit.0").toString(), "1.8.3.0");
 		assertEquals(new GitVersion("1.8.3.05").toString(), "1.8.3.5");
 	}
-	
+
 }

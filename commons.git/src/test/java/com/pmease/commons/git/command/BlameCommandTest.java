@@ -5,19 +5,17 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.util.List;
 
-import org.junit.Assert;
 import org.junit.Test;
 
+import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.Blame;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.util.FileUtils;
 
-public class BlameCommandTest {
+public class BlameCommandTest extends AbstractGitTest {
 
 	@Test
 	public void test() {
-	    Assert.assertTrue(GitCommand.checkError() == null);
-
 	    File tempDir = FileUtils.createTempDir();
 		
 		try {

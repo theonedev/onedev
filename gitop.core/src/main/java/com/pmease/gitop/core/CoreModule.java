@@ -6,6 +6,7 @@ import java.util.HashSet;
 
 import org.hibernate.cfg.NamingStrategy;
 
+import com.pmease.commons.git.GitConfig;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.ModelProvider;
 import com.pmease.commons.hibernate.PrefixedNamingStrategy;
@@ -16,6 +17,8 @@ import com.pmease.commons.loader.ImplementationProvider;
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.gitop.core.gatekeeper.MoreGateKeepers;
 import com.pmease.gitop.core.manager.impl.DefaultStorageManager;
+import com.pmease.gitop.core.setting.SpecifiedGit;
+import com.pmease.gitop.core.setting.SystemGit;
 import com.pmease.gitop.model.ModelLocator;
 import com.pmease.gitop.model.gatekeeper.ApprovalGateKeeper;
 import com.pmease.gitop.model.gatekeeper.BranchGateKeeper;
@@ -112,6 +115,24 @@ public class CoreModule extends AbstractPluginModule {
 				return ApprovalGateKeeper.class;
 			}
 		});
+		
+		contribute(ImplementationProvider.class, new ImplementationProvider() {
+			
+			@Override
+			public Collection<Class<?>> getImplementations() {
+				Collection<Class<?>> implementations = new HashSet<Class<?>>();
+				implementations.add(SystemGit.class);
+				implementations.add(SpecifiedGit.class);
+				return implementations;
+			}
+			
+			@Override
+			public Class<?> getAbstractClass() {
+				return GitConfig.class;
+			}
+		});
+		
+		bind(GitConfig.class).toProvider(GitConfigProvider.class);
 
 		bind(StorageManager.class).to(DefaultStorageManager.class);
 	}

@@ -2,26 +2,22 @@ package com.pmease.commons.git.command;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 import org.eclipse.jgit.lib.FileMode;
-import org.junit.Assert;
 import org.junit.Test;
 
+import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.commons.util.execution.StreamConsumer;
 
-public class ListTreeCommandTest {
+public class ListTreeCommandTest extends AbstractGitTest {
 
 	@Test
 	public void shouldListTreeAndReadFileCorrectly() throws IOException {
-	    Assert.assertTrue(GitCommand.checkError() == null);
 	    File tempDir = FileUtils.createTempDir();
 	    
 	    try {
@@ -93,17 +89,4 @@ public class ListTreeCommandTest {
 	    }
 	}
 
-	@Test
-	public void test() {
-		Git git = new Git(new File("w:\\temp\\test"));
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		git.show("master", "large.rar", new StreamConsumer() {
-
-			@Override
-			protected void consume(InputStream input) {
-			}
-			
-		});
-		System.out.println(baos.toByteArray().length);
-	}
 }

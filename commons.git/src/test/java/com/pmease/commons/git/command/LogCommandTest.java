@@ -1,22 +1,22 @@
 package com.pmease.commons.git.command;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.util.List;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
+import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.FileChange;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.util.FileUtils;
 
-public class LogCommandTest {
+public class LogCommandTest extends AbstractGitTest {
 
 	@Test
 	public void shouldParseLogCorrectly() {
-	    assertTrue(GitCommand.checkError() == null);
 	    File tempDir = FileUtils.createTempDir();
 	    
 	    try {
@@ -96,7 +96,6 @@ public class LogCommandTest {
 
 	@Test
 	public void shouldHandleRenameAndCopyCorrectly() {
-	    assertTrue(GitCommand.checkError() == null);
 	    File tempDir = FileUtils.createTempDir();
 	    
 	    try {

@@ -15,14 +15,11 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-import org.hibernate.validator.constraints.NotEmpty;
-
 /**
  * @author robin
  */
 @Target({ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@NotEmpty
 @Constraint(validatedBy=NameValidator.class) 
 public @interface Name {
 	String message() default "Name can not contain any of below characters:\n" + 

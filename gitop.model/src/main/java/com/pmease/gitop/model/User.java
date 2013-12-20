@@ -49,6 +49,7 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	@Editable(order=100)
 	@UserName
+	@NotEmpty
 	@Override
 	public String getName() {
 		return super.getName();

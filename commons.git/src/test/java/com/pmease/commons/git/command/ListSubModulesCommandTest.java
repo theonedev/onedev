@@ -6,17 +6,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.Test;
 
+import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.util.FileUtils;
 
-public class ListSubModulesCommandTest {
+public class ListSubModulesCommandTest extends AbstractGitTest {
 
 	@Test
 	public void test() throws IOException {
-	    Assert.assertTrue(GitCommand.checkError() == null);
 		File tempDir = FileUtils.createTempDir();
 		try {
 			Git work = new Git(new File(tempDir, "work"));

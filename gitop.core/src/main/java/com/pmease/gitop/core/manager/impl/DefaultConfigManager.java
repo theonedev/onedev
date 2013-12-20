@@ -13,13 +13,17 @@ import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.core.setting.MailSetting;
-import com.pmease.gitop.core.setting.StorageSetting;
+import com.pmease.gitop.core.setting.SystemSetting;
 import com.pmease.gitop.model.Config;
 import com.pmease.gitop.model.Config.Key;
 
 @Singleton
 public class DefaultConfigManager extends AbstractGenericDao<Config> implements ConfigManager {
-
+	
+	private volatile Long systemSettingConfigId;
+	
+	private volatile Long mailSettingConfigId;
+	
 	@Inject
 	public DefaultConfigManager(GeneralDao generalDao) {
 		super(generalDao);
@@ -27,28 +31,31 @@ public class DefaultConfigManager extends AbstractGenericDao<Config> implements 
 
 	@Sessional
 	@Override
-	public StorageSetting getStorageSetting() {
-		Config config = getConfig(Key.STORAGE);
-		if (config != null) {
-			StorageSetting storageSetting = (StorageSetting) config.getSetting();
-			Preconditions.checkNotNull(storageSetting);
-			return storageSetting;
-		} else {
-			throw new RuntimeException("Unable to find storage setting record.");
-		}
+	public SystemSetting getSystemSetting() {
+        Config config;
+        if (systemSettingConfigId == null) {
+    		config = getConfig(Key.SYSTEM);
+    		Preconditions.checkNotNull(config);
+            systemSettingConfigId = config.getId();
+        } else {
+            config = load(systemSettingConfigId);
+        }
+        SystemSetting setting = (SystemSetting) config.getSetting();
+        Preconditions.checkNotNull(setting);
+        return setting;
 	}
 
 	@Transactional
 	@Override
-	public void saveStorageSetting(StorageSetting storageSetting) {
-		Preconditions.checkNotNull(storageSetting);
+	public void saveSystemSetting(SystemSetting systemSetting) {
+		Preconditions.checkNotNull(systemSetting);
 		
-		Config config = getConfig(Key.STORAGE);
+		Config config = getConfig(Key.SYSTEM);
 		if (config == null) {
 			config = new Config();
-			config.setKey(Key.STORAGE);
+			config.setKey(Key.SYSTEM);
 		}
-		config.setSetting(storageSetting);
+		config.setSetting(systemSetting);
 		save(config);
 	}
 
@@ -61,13 +68,15 @@ public class DefaultConfigManager extends AbstractGenericDao<Config> implements 
 	@Sessional
 	@Override
 	public MailSetting getMailSetting() {
-		Config config = getConfig(Key.MAIL);
-		if (config != null) {
-			MailSetting mailSetting = (MailSetting) config.getSetting();
-			return mailSetting;
-		} else {
-			throw new RuntimeException("Unable to find mail setting record.");
-		}
+        Config config;
+        if (mailSettingConfigId == null) {
+    		config = getConfig(Key.MAIL);
+    		Preconditions.checkNotNull(config);
+    		mailSettingConfigId = config.getId();
+        } else {
+            config = load(mailSettingConfigId);
+        }
+        return (MailSetting) config.getSetting();
 	}
 
 	@Transactional

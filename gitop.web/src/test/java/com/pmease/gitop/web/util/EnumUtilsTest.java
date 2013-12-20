@@ -25,4 +25,5 @@ public class EnumUtilsTest {
 		op = GeneralOperation.NO_ACCESS;
 		assertEquals(EnumUtils.dec(op), GeneralOperation.NO_ACCESS);
 	}
+	
 }

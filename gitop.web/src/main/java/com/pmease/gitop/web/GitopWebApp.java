@@ -59,6 +59,8 @@ import com.pmease.gitop.web.page.account.setting.projects.AccountProjectsPage;
 import com.pmease.gitop.web.page.account.setting.teams.AccountTeamsPage;
 import com.pmease.gitop.web.page.account.setting.teams.AddTeamPage;
 import com.pmease.gitop.web.page.account.setting.teams.EditTeamPage;
+import com.pmease.gitop.web.page.admin.MailSettingEdit;
+import com.pmease.gitop.web.page.admin.SystemSettingEdit;
 import com.pmease.gitop.web.page.error.AccessDeniedPage;
 import com.pmease.gitop.web.page.error.ErrorPage;
 import com.pmease.gitop.web.page.error.InternalErrorPage;
@@ -292,6 +294,10 @@ public class GitopWebApp extends AbstractWicketConfig {
 		
 		// project related
 		mountPage("new", CreateProjectPage.class);
+		
+		// administration related
+		mountPage("administration/system", SystemSettingEdit.class);
+		mountPage("administration/mail", MailSettingEdit.class);
 
 		mountPage("/test", TestPage.class);
 		mountPage("/test/project", ProjectPage.class);
