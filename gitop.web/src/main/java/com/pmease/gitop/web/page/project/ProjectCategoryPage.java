@@ -186,7 +186,7 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 
 					@Override
 					public String getObject() {
-						return category == getCategory() ? "active" : "";
+						return getCategory() == category ? "active" : "";
 					}
 					
 				}));

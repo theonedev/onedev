@@ -12,6 +12,7 @@ import com.pmease.gitop.web.component.link.UserAvatarLink;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.account.RegisterPage;
 import com.pmease.gitop.web.page.account.setting.profile.AccountProfilePage;
+import com.pmease.gitop.web.page.admin.AdministrationPage;
 import com.pmease.gitop.web.page.project.settings.CreateProjectPage;
 import com.pmease.gitop.web.shiro.LoginPage;
 import com.pmease.gitop.web.shiro.LogoutPage;
@@ -32,6 +33,7 @@ public class GlobalHeaderPanel extends Panel {
 			add(new UserAvatarLink("userlink", new UserModel(currentUser().get())));
 			add(new BookmarkablePageLink<Void>("profileLink", AccountProfilePage.class));
 			add(new BookmarkablePageLink<Void>("newlink", CreateProjectPage.class));
+			add(new BookmarkablePageLink<Void>("adminlink", AdministrationPage.class));
 		} else {
 			add(new WebMarkupContainer("userlink").setVisibilityAllowed(false));
 		}

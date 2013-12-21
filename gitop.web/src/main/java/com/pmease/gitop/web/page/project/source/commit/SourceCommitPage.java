@@ -53,6 +53,15 @@ public class SourceCommitPage extends ProjectCategoryPage {
 	}
 	
 	@Override
+	public void onDetach() {
+		if (revisionModel != null) {
+			revisionModel.detach();
+		}
+		
+		super.onDetach();
+	}
+	
+	@Override
 	protected String getPageTitle() {
 		return getRevision() + " - " + getProject().getPathName();
 	}

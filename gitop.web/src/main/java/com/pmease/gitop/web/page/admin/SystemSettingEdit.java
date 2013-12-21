@@ -2,20 +2,24 @@ package com.pmease.gitop.web.page.admin;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.panel.Panel;
 
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.core.setting.SystemSetting;
-import com.pmease.gitop.web.page.AbstractLayoutPage;
 
 @SuppressWarnings("serial")
-public class SystemSettingEdit extends AbstractLayoutPage {
+public class SystemSettingEdit extends Panel {
+
+	public SystemSettingEdit(String id) {
+		super(id);
+	}
 
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		SystemSetting systemSetting = Gitop.getInstance(ConfigManager.class).getSystemSetting();
 
@@ -29,7 +33,7 @@ public class SystemSettingEdit extends AbstractLayoutPage {
 				if (!editContext.hasValidationError()) {
 					Gitop.getInstance(ConfigManager.class).saveSystemSetting((SystemSetting) editContext.getBean());
 					getSession().info("System setting has been updated.");
-					setResponsePage(SystemSettingEdit.class);
+//					setResponsePage(SystemSettingEdit.class);
 				}
 			}
 			
@@ -38,10 +42,4 @@ public class SystemSettingEdit extends AbstractLayoutPage {
 		
 		add(form);
 	}
-
-	@Override
-	protected String getPageTitle() {
-		return "System Setting";
-	}
-	
 }

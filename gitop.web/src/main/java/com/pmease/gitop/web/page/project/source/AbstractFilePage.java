@@ -83,6 +83,11 @@ public abstract class AbstractFilePage extends ProjectCategoryPage {
 		};
 	}
 
+	@Override
+	protected Category getCategory() {
+		return Category.CODE;
+	}
+	
 	protected String getRevision() {
 		return revisionModel.getObject();
 	}
@@ -91,11 +96,6 @@ public abstract class AbstractFilePage extends ProjectCategoryPage {
 		return pathsModel.getObject();
 	}
 	
-	@Override
-	protected Category getCategory() {
-		return Category.CODE;
-	}
-
 	@Override
 	public void onDetach() {
 		if (revisionModel != null) {
