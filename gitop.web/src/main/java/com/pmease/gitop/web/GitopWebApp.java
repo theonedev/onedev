@@ -294,8 +294,9 @@ public class GitopWebApp extends AbstractWicketConfig {
 		// project related
 		mountPage("new", CreateProjectPage.class);
 		
-		// administration related
-		mountPage("admin/#{tabId}", AdministrationPage.class);
+		// system administration related
+		// TODO: is it suitable to mount to sys?
+		mountPage("sys/#{tabId}", AdministrationPage.class);
 
 		mountPage("/test", TestPage.class);
 		mountPage("/test/project", ProjectPage.class);
