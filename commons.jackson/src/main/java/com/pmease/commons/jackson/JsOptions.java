@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
@@ -25,7 +27,7 @@ public class JsOptions implements Serializable {
 		}
 	}
 	
-	public JsOptions put(String key, Serializable value) {
+	public JsOptions put(String key, @Nullable Serializable value) {
 		Preconditions.checkNotNull(key, "key");
 		if (value != null) {
 			map.put(key, value);
