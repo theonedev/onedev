@@ -22,10 +22,12 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.assets.PageBaseResourceReference;
 import com.pmease.gitop.web.common.wicket.component.messenger.MessengerResourcesBehavior;
 import com.pmease.gitop.web.common.wicket.component.modal.Modal;
@@ -191,12 +193,16 @@ public abstract class BasePage extends WebPage {
 		return true;
 	}
 	
+	protected Optional<User> currentUser() {
+		return Optional.fromNullable(Gitop.getInstance(UserManager.class).getCurrent());
+	}
+	
 	protected void onPageInitialize() {
 		if (!isPermitted()) {
-			if (Gitop.getInstance(UserManager.class).getCurrent() == null) {
-				throw new RestartResponseAtInterceptPageException(LoginPage.class);
-			} else {
+			if (currentUser().isPresent()) {
 				throw new AccessDeniedException("Access denied");
+			} else {
+				throw new RestartResponseAtInterceptPageException(LoginPage.class);
 			}
 		}
 

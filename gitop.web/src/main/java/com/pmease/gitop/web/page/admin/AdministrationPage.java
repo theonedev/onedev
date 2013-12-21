@@ -41,6 +41,10 @@ public class AdministrationPage extends AbstractLayoutPage {
 		activeTab = findTab(tabId);
 	}
 	
+	@Override
+	protected boolean isPermitted() {
+		return currentUser().isPresent() && currentUser().get().isAdmin();
+	}
 	
 	private IAdministrationTab findTab(String tabId) {
 		if (Strings.isNullOrEmpty(tabId)) {
@@ -129,7 +133,7 @@ public class AdministrationPage extends AbstractLayoutPage {
 		List<IAdministrationTab> result = Lists.newArrayList();
 
 		for (IAdministrationTab each : tabs) {
-			if (Objects.equal(each.getCategory(), category)) {
+			if (Objects.equal(each.getCategory(), category) && each.isVisible()) {
 				result.add(each);
 			}
 		}

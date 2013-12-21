@@ -33,7 +33,14 @@ public class GlobalHeaderPanel extends Panel {
 			add(new UserAvatarLink("userlink", new UserModel(currentUser().get())));
 			add(new BookmarkablePageLink<Void>("profileLink", AccountProfilePage.class));
 			add(new BookmarkablePageLink<Void>("newlink", CreateProjectPage.class));
-			add(new BookmarkablePageLink<Void>("adminlink", AdministrationPage.class));
+			add(new BookmarkablePageLink<Void>("adminlink", AdministrationPage.class) {
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					User u = currentUser().get();
+					setVisibilityAllowed(currentUser().isPresent() && u.isAdmin());
+				}
+			});
 		} else {
 			add(new WebMarkupContainer("userlink").setVisibilityAllowed(false));
 		}
