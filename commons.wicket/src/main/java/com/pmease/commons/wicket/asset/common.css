@@ -3,42 +3,28 @@
  * 
  **************************************************************/
 
+/* Alignments */
 .tac {text-align: center;}
 .tal {text-align: left;}
 .tar {text-align: right;}
 
-/* Piped links */
-.piped { 
-	display: block; 
-	zoom: 1; 
+/* spacings */
+.left-spacing {
+	margin-left: 10px;
 }
-.piped:after { 
-	content: "."; 
-	display: block; 
-	height: 0; 
-	clear: both; 
-	visibility: hidden; 
+.right-spacing {
+	margin-right: 10px;
 }
-.piped>li { 
-	float: left; 
-	display: inline; 
+.top-spacing {
+	margin-top: 10px;
 }
-.piped>a, .piped>em, .piped>span { 
-	border-right: 1px solid #797c80; 
-	padding-right: 0.5em; 
-	margin-right: 0.5em; 
+.bottom-spacing {
+	margin-bottom: 10px;
 }
-.piped.dotted>a, .piped.dotted>em, .piped.dotted>span { 
-	border-right: 1px dotted;
+.spacing {
+	margin: 10px;
 }
-.piped.noborder>a, .piped.noborder>span, .piped.noborder>em { 
-	border: none; 
-}
-.piped>a:last-child, .piped>span:last-child, .piped>em:last-child { 
-	border-right: 0; 
-	padding-right: 0; 
-	margin-right: 0; 
-}
+
 
 /* Bootstrap style for wicket components */
 table .navigator {
@@ -82,18 +68,13 @@ table .navigator>div .last em, table .navigator>div a.last {
     border-bottom-right-radius: 4px;
     border-top-right-radius: 4px;
 }
-table .navigator>div em {
-	font-style: normal;
-	cursor: default;
-}
+table .navigator>div em {font-style: normal; cursor: default;}
 table .navigator>div .first, table .navigator>div .last, table .navigator>div .prev, table .navigator>div .next {
 	font-family: monospace inherit;
 } 
 table .navigator>div a:hover, table .navigator>div a:focus, 
 table .navigator>div em:hover, table .navigator>div em:focus, 
-table .navigator>div .goto em {
-	background-color: #F5F5F5;
-}
+table .navigator>div .goto em {background-color: #F5F5F5;}
 table .navigator>div .goto em, table .navigator>div>span>em {
     color: #999999;
     cursor: default;
@@ -101,30 +82,7 @@ table .navigator>div .goto em, table .navigator>div>span>em {
 table .navigator>div>span>em, table .navigator>div>span>em:hover, table .navigator>div>span>em:focus {
 	background-color: transparent;
 }
-table .row-selector {
-	width: 24px;
-}
+table .row-selector {width: 24px;}
 table td, table th {
 	text-align: left;
-}
-
-.required {
-	font-size: 18px;
-	color: #B94A48;
-}
-
-.left-spacing {
-	margin-left: 10px;
-}
-.right-spacing {
-	margin-right: 10px;
-}
-.top-spacing {
-	margin-top: 10px;
-}
-.bottom-spacing {
-	margin-bottom: 10px;
-}
-.spacing {
-	margin: 10px;
 }
