@@ -26,7 +26,7 @@
 }
 
 
-/* Bootstrap style for wicket components */
+/* Default style of Wicket table */
 table .navigator {
     border-radius: 4px 4px 4px 4px;
     margin-bottom: 0px;
@@ -83,6 +83,7 @@ table .navigator>div>span>em, table .navigator>div>span>em:hover, table .navigat
 	background-color: transparent;
 }
 table .row-selector {width: 24px;}
-table td, table th {
-	text-align: left;
-}
+table td, table th {text-align: left;}
+
+/* Feedback panel*/
+.alert ul.feedbackPanel {margin: 0; padding-left: 20px;}
