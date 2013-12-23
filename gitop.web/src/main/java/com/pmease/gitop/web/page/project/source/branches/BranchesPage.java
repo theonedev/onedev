@@ -12,11 +12,6 @@ public class BranchesPage extends ProjectCategoryPage {
 	}
 
 	@Override
-	protected Category getCategory() {
-		return Category.BRANCHES;
-	}
-
-	@Override
 	protected String getPageTitle() {
 		return getProject() + " - branches";
 	}

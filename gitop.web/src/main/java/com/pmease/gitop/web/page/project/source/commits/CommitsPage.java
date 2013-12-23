@@ -12,11 +12,6 @@ public class CommitsPage extends ProjectCategoryPage {
 	}
 
 	@Override
-	protected Category getCategory() {
-		return Category.COMMITS;
-	}
-
-	@Override
 	protected String getPageTitle() {
 		return getProject() + " - commits";
 	}

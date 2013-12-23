@@ -12,11 +12,6 @@ public class ProjectPullRequestsPage extends ProjectCategoryPage {
 	}
 
 	@Override
-	protected Category getCategory() {
-		return Category.PULL_REQUESTS;
-	}
-
-	@Override
 	protected String getPageTitle() {
 		return getProject() + " - pull requests";
 	}

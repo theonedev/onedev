@@ -50,7 +50,7 @@ public class AdministrationTab extends AbstractGroupTab implements IAdministrati
 
 	@SuppressWarnings("serial")
 	@Override
-	public Component newTabLink(String id) {
+	public Component newTabLink(String id, Object... objects) {
 		return new LinkPanel(id, getTitle()) {
 
 			@Override

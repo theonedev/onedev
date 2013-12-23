@@ -12,11 +12,6 @@ public class ProjectGraphsPage extends ProjectCategoryPage {
 	}
 
 	@Override
-	protected Category getCategory() {
-		return Category.GRAPHS;
-	}
-
-	@Override
 	protected String getPageTitle() {
 		return getProject() + " - graphs";
 	}

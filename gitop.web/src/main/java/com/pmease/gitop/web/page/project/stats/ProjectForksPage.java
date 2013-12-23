@@ -12,11 +12,6 @@ public class ProjectForksPage extends ProjectCategoryPage {
 	}
 
 	@Override
-	protected Category getCategory() {
-		return Category.FORKS;
-	}
-
-	@Override
 	protected String getPageTitle() {
 		return getProject() + " - forks";
 	}

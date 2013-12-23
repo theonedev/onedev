@@ -7,7 +7,7 @@ public interface ITabEx extends ITab, IGroupable {
 	
 	String getTabId();
 	
-	Component newTabLink(String id);
+	Component newTabLink(String id, Object... params);
 	
 	boolean isSelected(ITabEx activeTab);
 }

@@ -12,11 +12,6 @@ public class ProjectWikiPage extends ProjectCategoryPage {
 	}
 
 	@Override
-	protected Category getCategory() {
-		return Category.WIKI;
-	}
-
-	@Override
 	protected String getPageTitle() {
 		return getProject() + " - wiki";
 	}

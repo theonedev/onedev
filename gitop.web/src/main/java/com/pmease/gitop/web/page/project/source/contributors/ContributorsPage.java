@@ -12,11 +12,6 @@ public class ContributorsPage extends ProjectCategoryPage {
 	}
 
 	@Override
-	protected Category getCategory() {
-		return Category.CONTRIBUTORS;
-	}
-
-	@Override
 	protected String getPageTitle() {
 		return getProject() + " - contributors";
 	}

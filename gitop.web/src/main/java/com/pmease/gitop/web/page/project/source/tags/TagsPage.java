@@ -12,11 +12,6 @@ public class TagsPage extends ProjectCategoryPage {
 	}
 
 	@Override
-	protected Category getCategory() {
-		return Category.TAGS;
-	}
-
-	@Override
 	protected String getPageTitle() {
 		return getProject() + " - tags";
 	}
