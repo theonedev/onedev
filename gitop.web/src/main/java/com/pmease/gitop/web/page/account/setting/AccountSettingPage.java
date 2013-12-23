@@ -6,21 +6,19 @@ import javax.persistence.EntityNotFoundException;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
@@ -33,37 +31,16 @@ import com.pmease.gitop.web.exception.AccessDeniedException;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
 import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.account.setting.api.AccountSettingTab;
 import com.pmease.gitop.web.page.account.setting.members.AccountMembersSettingPage;
 import com.pmease.gitop.web.page.account.setting.password.AccountPasswordPage;
 import com.pmease.gitop.web.page.account.setting.profile.AccountProfilePage;
 import com.pmease.gitop.web.page.account.setting.projects.AccountProjectsPage;
 import com.pmease.gitop.web.page.account.setting.teams.AccountTeamsPage;
+import com.pmease.gitop.web.page.account.setting.teams.EditTeamPage;
 
 @SuppressWarnings("serial")
 public abstract class AccountSettingPage extends AbstractLayoutPage {
-
-	public static enum Category {
-		PROFILE(AccountProfilePage.class, "Profile"),
-		PASSWORD(AccountPasswordPage.class, "Change Password"),
-		PROJECTS(AccountProjectsPage.class, "Projects"),
-		TEAMS(AccountTeamsPage.class, "Teams"),
-		MEMBERS(AccountMembersSettingPage.class, "Members");
-		
-		final Class<? extends WebPage> pageClass;
-		final String name;
-		Category(Class<? extends WebPage> pageClass, String name) {
-			this.pageClass = pageClass;
-			this.name = name;
-		}
-		
-		public Class<? extends WebPage> getPageClass() {
-			return pageClass;
-		}
-
-		public String getName() {
-			return name;
-		}
-	}
 
 	protected IModel<User> accountModel;
 	
@@ -97,29 +74,37 @@ public abstract class AccountSettingPage extends AbstractLayoutPage {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
+	private List<AccountSettingTab> getAllTabs() {
+		List<AccountSettingTab> tabs = Lists.newArrayList();
+		tabs.add(new AccountSettingTab(Model.of("Profile"), AccountProfilePage.class));
+		tabs.add(new AccountSettingTab(Model.of("Change Password"), AccountPasswordPage.class));
+		tabs.add(new AccountSettingTab(Model.of("Projects"), AccountProjectsPage.class));
+		tabs.add(new AccountSettingTab(Model.of("Teams"), new Class[] { AccountTeamsPage.class, EditTeamPage.class }));
+		tabs.add(new AccountSettingTab(Model.of("Members"), AccountMembersSettingPage.class));
+		
+		return tabs;
+	}
+	
 	@Override
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 
 		add(new UserAvatarLink("userlink", new UserModel(getAccount())));
 		
-		add(new ListView<Category>("setting", ImmutableList.<Category>copyOf(Category.values())) {
+		add(new ListView<AccountSettingTab>("setting", getAllTabs()) {
 
 			@Override
-			protected void populateItem(ListItem<Category> item) {
-				final Category category = item.getModelObject();
-				Link<?> link = new BookmarkablePageLink<Void>("link", category.getPageClass(), newAccountParams());
-				item.add(link);
-				link.add(new Label("label", category.getName()));
+			protected void populateItem(ListItem<AccountSettingTab> item) {
+				final AccountSettingTab tab = item.getModelObject();
+				item.add(tab.newTabLink("link", newAccountParams()));
 				
 				item.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
 					@Override
 					public String getObject() {
-						return category == getSettingCategory() ?
-								"active" : "";
+						return tab.isSelected(getPage()) ? "active" : "";
 					}
-					
 				}));
 			}
 			
@@ -171,7 +156,6 @@ public abstract class AccountSettingPage extends AbstractLayoutPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				
 				this.setVisibilityAllowed(!getList().isEmpty());
 			}
 		};
@@ -179,13 +163,9 @@ public abstract class AccountSettingPage extends AbstractLayoutPage {
 		add(listView);
 	}
 
-	abstract protected Category getSettingCategory();
-	
 	@Override
 	protected boolean isPermitted() {
-		User user = getAccount();
-		return user != null &&
-				SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserAdmin(user));
+		return SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserAdmin(getAccount()));
 	}
 	
 	protected User getAccount() {

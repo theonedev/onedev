@@ -10,8 +10,8 @@ public class PullRequestSettingsPage extends AbstractProjectSettingPage {
 	}
 
 	@Override
-	protected Category getCategory() {
-		return Category.PULL_REQUESTS;
+	protected String getPageTitle() {
+		return "Pull Request Settings - " + getProject();
 	}
 
 }

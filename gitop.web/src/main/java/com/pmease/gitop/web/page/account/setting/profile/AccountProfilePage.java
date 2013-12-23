@@ -58,11 +58,6 @@ public class AccountProfilePage extends AccountSettingPage {
 	}
 
 	@Override
-	protected Category getSettingCategory() {
-		return Category.PROFILE;
-	}
-
-	@Override
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 

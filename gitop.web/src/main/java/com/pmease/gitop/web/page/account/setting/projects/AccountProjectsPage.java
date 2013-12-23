@@ -38,11 +38,6 @@ public class AccountProjectsPage extends AccountSettingPage {
 	}
 
 	@Override
-	protected Category getSettingCategory() {
-		return Category.PROJECTS;
-	}
-	
-	@Override
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 		

@@ -38,11 +38,6 @@ public class AccountMembersSettingPage extends AccountSettingPage {
 	}
 
 	@Override
-	protected Category getSettingCategory() {
-		return Category.MEMBERS;
-	}
-
-	@Override
 	protected String getPageTitle() {
 		return "Members - " + getAccount();
 	}

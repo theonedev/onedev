@@ -22,8 +22,7 @@ import com.google.common.collect.Lists;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
 import com.pmease.gitop.web.page.admin.api.AdministrationTab;
-import com.pmease.gitop.web.page.admin.api.IAdministrationTab;
-import com.pmease.gitop.web.page.admin.api.IAdministrationTab.Category;
+import com.pmease.gitop.web.page.admin.api.AdministrationTab.Category;
 
 @SuppressWarnings("serial")
 public abstract class AdministrationLayoutPage extends AbstractLayoutPage {
@@ -47,20 +46,20 @@ public abstract class AdministrationLayoutPage extends AbstractLayoutPage {
 			protected void populateItem(LoopItem item) {
 				final Category category = Category.values()[item.getIndex()];
 				item.add(new Label("name", category.name()));
-				IModel<List<IAdministrationTab>> model = new LoadableDetachableModel<List<IAdministrationTab>>() {
+				IModel<List<AdministrationTab>> model = new LoadableDetachableModel<List<AdministrationTab>>() {
 
 					@Override
-					protected List<IAdministrationTab> load() {
+					protected List<AdministrationTab> load() {
 						return getTabs(category);
 					}
 					
 				};
 				
-				ListView<IAdministrationTab> navs = new ListView<IAdministrationTab>("nav", model) {
+				ListView<AdministrationTab> navs = new ListView<AdministrationTab>("nav", model) {
 
 					@Override
-					protected void populateItem(ListItem<IAdministrationTab> item) {
-						final IAdministrationTab tab = item.getModelObject();
+					protected void populateItem(ListItem<AdministrationTab> item) {
+						final AdministrationTab tab = item.getModelObject();
 						item.add(tab.newTabLink("link"));
 						item.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
@@ -80,15 +79,15 @@ public abstract class AdministrationLayoutPage extends AbstractLayoutPage {
 		return loop;
 	}
 
-	private List<IAdministrationTab> getTabs(Category category) {
+	private List<AdministrationTab> getTabs(Category category) {
 		if (category == null) {
 			return Collections.emptyList();
 		}
 
-		List<IAdministrationTab> tabs = getAllTabs();
-		List<IAdministrationTab> result = Lists.newArrayList();
+		List<AdministrationTab> tabs = getAllTabs();
+		List<AdministrationTab> result = Lists.newArrayList();
 
-		for (IAdministrationTab each : tabs) {
+		for (AdministrationTab each : tabs) {
 			if (Objects.equal(each.getGroupName(), category.name()) && each.isVisible()) {
 				result.add(each);
 			}
@@ -97,8 +96,8 @@ public abstract class AdministrationLayoutPage extends AbstractLayoutPage {
 		return result;
 	}
 	
-	private List<IAdministrationTab> getAllTabs() {
-		List<IAdministrationTab> tabs = Lists.newArrayList();
+	private List<AdministrationTab> getAllTabs() {
+		List<AdministrationTab> tabs = Lists.newArrayList();
 		
 		// ACCOUNTS CATEGORY
 		//

@@ -35,11 +35,6 @@ public class AccountPasswordPage extends AccountSettingPage {
 	}
 
 	@Override
-	protected Category getSettingCategory() {
-		return Category.PASSWORD;
-	}
-
-	@Override
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 

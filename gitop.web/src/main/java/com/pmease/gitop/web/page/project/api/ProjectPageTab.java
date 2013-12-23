@@ -7,6 +7,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
@@ -55,7 +56,8 @@ public class ProjectPageTab extends AbstractPageTab {
 	public Component newTabLink(String id, IModel<Project> projectModel) {
 		ProjectCategoryPageLink container = new ProjectCategoryPageLink(id);
 		BookmarkablePageLink<Void> link = 
-				new BookmarkablePageLink<Void>("link", pageClasses[0], PageSpec.forProject(projectModel.getObject()));
+				new BookmarkablePageLink<Void>("link", getBookmarkablePageClass(), 
+						PageSpec.forProject(projectModel.getObject()));
 		
 		container.add(link);
 		link.add(new Icon("icon", Model.of(icon)));
@@ -71,9 +73,9 @@ public class ProjectPageTab extends AbstractPageTab {
 		
 		return container;
 	}
-	
+
 	@Override
-	public final Component newTabLink(String id, Object... objects) {
+	public final Component newTabLink(String id, PageParameters params) {
 		throw new UnsupportedOperationException();
 	}
 	

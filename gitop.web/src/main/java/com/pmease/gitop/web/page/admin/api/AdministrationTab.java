@@ -7,16 +7,22 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
-import org.parboiled.common.Preconditions;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.pmease.gitop.web.common.wicket.component.link.LinkPanel;
-import com.pmease.gitop.web.common.wicket.component.tab.AbstractGroupTab;
+import com.pmease.gitop.web.common.wicket.component.tab.AbstractPageTab;
 
-public class AdministrationTab extends AbstractGroupTab implements IAdministrationTab {
+public class AdministrationTab extends AbstractPageTab  {
 	private static final long serialVersionUID = 1L;
 	
+	public static enum Category {
+		ACCOUNTS,
+		SETTINGS,
+		SUPPORT
+	}
+
 	private final Category category;
 	private final Class<? extends WebPage>[] pageClasses;
 	
@@ -36,10 +42,9 @@ public class AdministrationTab extends AbstractGroupTab implements IAdministrati
 	public AdministrationTab(IModel<String> title, 
 			Category category,
 			Class<? extends WebPage>[] pageClasses) {
-		super(title);
-		this.category = category;
+		super(title, pageClasses);
 		
-		Preconditions.checkArgument(pageClasses != null && pageClasses.length > 0);
+		this.category = category;
 		this.pageClasses = pageClasses;
 	}
 
@@ -50,7 +55,7 @@ public class AdministrationTab extends AbstractGroupTab implements IAdministrati
 
 	@SuppressWarnings("serial")
 	@Override
-	public Component newTabLink(String id, Object... objects) {
+	public Component newTabLink(String id, PageParameters params) {
 		return new LinkPanel(id, getTitle()) {
 
 			@Override

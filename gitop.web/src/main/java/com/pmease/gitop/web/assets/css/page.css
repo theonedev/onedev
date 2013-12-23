@@ -124,8 +124,6 @@ ul.f-dropdown { padding: 0; }
 .sidebar .list-navs > .list-group-item.active [class^="icon"] { color: #222; } 
 */
 
-.sidebar .list-navs.first {margin-top: 20px; }
-
 .head:before, .head:after {
   display: table;
   content: " ";
