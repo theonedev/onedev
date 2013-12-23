@@ -66,3 +66,4 @@ table.reflection .right-spacing {
 .editor .has-error .help-block {color: #737373;}
 .editor .has-error .control-label {color: #333333;}
 .editor .has-error .error-message {color: #A94442;}
+.editor .required {font-size: 16px; color: #B94A48;}
