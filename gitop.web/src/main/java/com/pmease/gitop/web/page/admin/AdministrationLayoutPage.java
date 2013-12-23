@@ -3,9 +3,9 @@ package com.pmease.gitop.web.page.admin;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -16,67 +16,28 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
+import com.pmease.gitop.web.page.admin.api.AdministrationTab;
 import com.pmease.gitop.web.page.admin.api.IAdministrationTab;
 import com.pmease.gitop.web.page.admin.api.IAdministrationTab.Category;
 
 @SuppressWarnings("serial")
-public class AdministrationPage extends AbstractLayoutPage {
-
-	private static final String OVERVIEW = "OVERVIEW";
-	
-	final IAdministrationTab activeTab;
-	
-	public AdministrationPage(PageParameters params) {
-		String tabId = params.get("tabId").toString();
-		if (tabId == null) {
-			tabId = OVERVIEW;
-		}
-		
-		activeTab = findTab(tabId);
-	}
-	
+public abstract class AdministrationLayoutPage extends AbstractLayoutPage {
 	@Override
 	protected boolean isPermitted() {
-		return currentUser().isPresent() && currentUser().get().isAdmin();
-	}
-	
-	private IAdministrationTab findTab(String tabId) {
-		if (Strings.isNullOrEmpty(tabId)) {
-			return null;
-		}
-		
-		List<IAdministrationTab> tabs = getAllTabs();
-		for (IAdministrationTab each : tabs) {
-			if (Objects.equal(each.getTabId(), tabId.toLowerCase())) {
-				return each;
-			}
-		}
-		
-		return null;
+		return SecurityUtils.getSubject().isPermitted(ObjectPermission.ofSystemAdmin());
 	}
 	
 	@Override
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 		
-		add(new BookmarkablePageLink<Void>("overviewlink", AdministrationPage.class));
-		
+		add(new BookmarkablePageLink<Void>("overviewlink", AdministrationOverviewPage.class));
 		add(createSidebarNavs());
-		add(createContentPanel());
-	}
-	
-	private Component createContentPanel() {
-		if (activeTab == null) {
-			return new OverviewPanel("panel");
-		} else {
-			return activeTab.getPanel("panel");
-		}
 	}
 	
 	private Component createSidebarNavs() {
@@ -105,12 +66,7 @@ public class AdministrationPage extends AbstractLayoutPage {
 
 							@Override
 							public String getObject() {
-								if (activeTab == null) {
-									return "";
-								}
-								
-								return Objects.equal(activeTab.getTitle().getObject(), tab.getTitle().getObject())
-										? "active" : "";
+								return tab.isSelected(getPage()) ? "active" : "";
 							}
 							
 						}));
@@ -123,7 +79,7 @@ public class AdministrationPage extends AbstractLayoutPage {
 		
 		return loop;
 	}
-	
+
 	private List<IAdministrationTab> getTabs(Category category) {
 		if (category == null) {
 			return Collections.emptyList();
@@ -133,7 +89,7 @@ public class AdministrationPage extends AbstractLayoutPage {
 		List<IAdministrationTab> result = Lists.newArrayList();
 
 		for (IAdministrationTab each : tabs) {
-			if (Objects.equal(each.getCategory(), category) && each.isVisible()) {
+			if (Objects.equal(each.getGroupName(), category.name()) && each.isVisible()) {
 				result.add(each);
 			}
 		}
@@ -146,50 +102,16 @@ public class AdministrationPage extends AbstractLayoutPage {
 		
 		// ACCOUNTS CATEGORY
 		//
-		tabs.add(new AbstractAdministrationTab(Model.of("Users"), Category.ACCOUNTS) {
-
-			@Override
-			public WebMarkupContainer getPanel(String panelId) {
-				return new UserAdministrationPanel(panelId);
-			}
-		});
+		tabs.add(new AdministrationTab(Model.of("Users"), Category.ACCOUNTS, UserAdministrationPage.class));
 		
 		// SETTINGS CATEGORY
 		//
-		tabs.add(new AbstractAdministrationTab(Model.of("System Settings"), Category.SETTINGS) {
-
-			@Override
-			public WebMarkupContainer getPanel(String panelId) {
-				return new SystemSettingEdit(panelId);
-			}
-			
-		});
-		
-		tabs.add(new AbstractAdministrationTab(Model.of("Mail Server"), Category.SETTINGS) {
-
-			@Override
-			public WebMarkupContainer getPanel(String panelId) {
-				return new MailSettingEdit(panelId);
-			}
-		});
-		
+		tabs.add(new AdministrationTab(Model.of("System Settings"), Category.SETTINGS, SystemSettingEdit.class));		
+		tabs.add(new AdministrationTab(Model.of("Mail Server"), Category.SETTINGS, MailSettingEdit.class));		
 		// SUPPORT CATEGORY
 		//
-		tabs.add(new AbstractAdministrationTab(Model.of("Support Request"), Category.SUPPORT) {
-
-			@Override
-			public WebMarkupContainer getPanel(String panelId) {
-				return new SupportPanel(panelId);
-			}
-		});
-		
-		tabs.add(new AbstractAdministrationTab(Model.of("Licensing"), Category.SUPPORT) {
-
-			@Override
-			public WebMarkupContainer getPanel(String panelId) {
-				return new LicensingPanel(panelId);
-			}
-		});
+		tabs.add(new AdministrationTab(Model.of("Support Request"), Category.SUPPORT, SupportPage.class));		
+		tabs.add(new AdministrationTab(Model.of("Licensing"), Category.SUPPORT, LicensingPage.class));
 		
 		// Add more tabs from IAdministrationTab extension
 		//
@@ -197,8 +119,4 @@ public class AdministrationPage extends AbstractLayoutPage {
 		return tabs;
 	}
 	
-	@Override
-	protected String getPageTitle() {
-		return "Administration - " + (activeTab == null ? "Overview" : activeTab.getTitle().getObject());
-	}
 }
