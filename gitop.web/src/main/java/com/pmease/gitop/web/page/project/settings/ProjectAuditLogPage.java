@@ -10,8 +10,7 @@ public class ProjectAuditLogPage extends AbstractProjectSettingPage {
 	}
 
 	@Override
-	protected Category getCategory() {
-		return Category.AUDIT_LOG;
+	protected String getPageTitle() {
+		return "Audit Log - " + getProject();
 	}
-
 }

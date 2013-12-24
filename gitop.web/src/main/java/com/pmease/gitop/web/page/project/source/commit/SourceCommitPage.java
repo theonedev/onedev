@@ -43,11 +43,6 @@ public class SourceCommitPage extends ProjectCategoryPage {
 		};
 	}
 
-	@Override
-	protected Category getCategory() {
-		return Category.CODE;
-	}
-
 	protected String getRevision() {
 		return revisionModel.getObject();
 	}

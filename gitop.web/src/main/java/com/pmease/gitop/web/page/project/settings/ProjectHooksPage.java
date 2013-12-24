@@ -10,8 +10,8 @@ public class ProjectHooksPage extends AbstractProjectSettingPage {
 	}
 
 	@Override
-	protected Category getCategory() {
-		return Category.HOOKS;
+	protected String getPageTitle() {
+		return "Hooks - " + getProject();
 	}
 
 }

@@ -41,11 +41,6 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 		super(params);
 	}
 
-	@Override
-	protected Category getCategory() {
-		return Category.OPTIONS;
-	}
-	
 	private String projectName;
 	
 	@Override
@@ -164,5 +159,10 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 				setResponsePage(AccountHomePage.class, PageSpec.forUser(getAccount()));
 			}
 		});
+	}
+
+	@Override
+	protected String getPageTitle() {
+		return "Options - " + getProject();
 	}
 }

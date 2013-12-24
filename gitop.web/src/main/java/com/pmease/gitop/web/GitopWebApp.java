@@ -59,7 +59,12 @@ import com.pmease.gitop.web.page.account.setting.projects.AccountProjectsPage;
 import com.pmease.gitop.web.page.account.setting.teams.AccountTeamsPage;
 import com.pmease.gitop.web.page.account.setting.teams.AddTeamPage;
 import com.pmease.gitop.web.page.account.setting.teams.EditTeamPage;
-import com.pmease.gitop.web.page.admin.AdministrationPage;
+import com.pmease.gitop.web.page.admin.AdministrationOverviewPage;
+import com.pmease.gitop.web.page.admin.LicensingPage;
+import com.pmease.gitop.web.page.admin.MailSettingEdit;
+import com.pmease.gitop.web.page.admin.SupportPage;
+import com.pmease.gitop.web.page.admin.SystemSettingEdit;
+import com.pmease.gitop.web.page.admin.UserAdministrationPage;
 import com.pmease.gitop.web.page.error.AccessDeniedPage;
 import com.pmease.gitop.web.page.error.ErrorPage;
 import com.pmease.gitop.web.page.error.InternalErrorPage;
@@ -232,7 +237,7 @@ public class GitopWebApp extends AbstractWicketConfig {
 		// --------------------------------------------------------
 		
 		// project dashboard
-		mount(new MountedMapper("/${user}/${project}", ProjectHomePage.class) {
+		mount(new MountedMapper("${user}/${project}", ProjectHomePage.class) {
 
 			@Override
 			protected boolean urlStartsWith(Url url, String... segments) {
@@ -295,8 +300,12 @@ public class GitopWebApp extends AbstractWicketConfig {
 		mountPage("new", CreateProjectPage.class);
 		
 		// system administration related
-		// TODO: is it suitable to mount to sys?
-		mountPage("sys/#{tabId}", AdministrationPage.class);
+		mountPage("admin", AdministrationOverviewPage.class);
+		mountPage("admin/users", UserAdministrationPage.class);
+		mountPage("admin/mail-settings", MailSettingEdit.class);
+		mountPage("admin/system-settings", SystemSettingEdit.class);
+		mountPage("admin/support", SupportPage.class);
+		mountPage("admin/licensing", LicensingPage.class);
 
 		mountPage("/test", TestPage.class);
 		mountPage("/test/project", ProjectPage.class);

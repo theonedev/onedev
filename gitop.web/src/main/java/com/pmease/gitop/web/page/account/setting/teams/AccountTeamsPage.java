@@ -50,11 +50,6 @@ public class AccountTeamsPage extends AccountSettingPage {
 	}
 
 	@Override
-	protected Category getSettingCategory() {
-		return Category.TEAMS;
-	}
-
-	@Override
 	protected String getPageTitle() {
 		return "Teams - " + getAccount();
 	}

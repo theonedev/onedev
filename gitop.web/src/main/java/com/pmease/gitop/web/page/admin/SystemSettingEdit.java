@@ -4,7 +4,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.panel.Panel;
 
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.EditableUtils;
@@ -14,15 +13,11 @@ import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.core.setting.SystemSetting;
 
 @SuppressWarnings("serial")
-public class SystemSettingEdit extends Panel {
-
-	public SystemSettingEdit(String id) {
-		super(id);
-	}
+public class SystemSettingEdit extends AdministrationLayoutPage {
 
 	@Override
-	protected void onInitialize() {
-		super.onInitialize();
+	protected void onPageInitialize() {
+		super.onPageInitialize();
 		
 		setOutputMarkupId(true);
 		
@@ -57,5 +52,10 @@ public class SystemSettingEdit extends Panel {
 		});
 		
 		add(form);
+	}
+
+	@Override
+	protected String getPageTitle() {
+		return "Administration - System Settings";
 	}
 }

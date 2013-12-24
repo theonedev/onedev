@@ -57,11 +57,6 @@ public class ProjectPermissionsPage extends AbstractProjectSettingPage {
 	}
 
 	@Override
-	protected Category getCategory() {
-		return Category.PERMISSIONS;
-	}
-
-	@Override
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 		
@@ -347,5 +342,10 @@ public class ProjectPermissionsPage extends AbstractProjectSettingPage {
 	@Override
 	public void onDetach() {
 		super.onDetach();
+	}
+
+	@Override
+	protected String getPageTitle() {
+		return "Permissions - " + getProject();
 	}
 }

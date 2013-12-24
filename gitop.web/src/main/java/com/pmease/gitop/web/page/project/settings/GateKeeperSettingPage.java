@@ -111,8 +111,9 @@ public class GateKeeperSettingPage extends AbstractProjectSettingPage {
 	}
 
 	@Override
-	protected Category getCategory() {
-		return Category.GATE_KEEPERS;
+	protected String getPageTitle() {
+		return "Gate Keeper - " + getProject();
 	}
+
 
 }

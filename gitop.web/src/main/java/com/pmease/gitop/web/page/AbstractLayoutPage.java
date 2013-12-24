@@ -12,8 +12,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
-import com.pmease.gitop.web.page.admin.AdministrationPage;
-import com.pmease.gitop.web.util.WicketUtils;
+import com.pmease.gitop.web.page.admin.SystemSettingEdit;
 
 @SuppressWarnings("serial")
 public abstract class AbstractLayoutPage extends BasePage {
@@ -49,7 +48,7 @@ public abstract class AbstractLayoutPage extends BasePage {
 			
 		}.add(new TooltipBehavior()));
 		
-		add(new BookmarkablePageLink<Void>("configureGit", AdministrationPage.class, WicketUtils.newPageParams("tabId", "system-settings")) {
+		add(new BookmarkablePageLink<Void>("configureGit", SystemSettingEdit.class) {
 
 			@Override
 			protected void onConfigure() {
@@ -60,6 +59,7 @@ public abstract class AbstractLayoutPage extends BasePage {
 		}.add(new TooltipBehavior()));
 	}
 	
+	@Override
 	protected Optional<User> currentUser() {
 	    return Optional.<User>fromNullable(Gitop.getInstance(UserManager.class).getCurrent());
 	}

@@ -58,11 +58,6 @@ public class EditTeamPage extends AccountSettingPage {
 	}
 	
 	@Override
-	protected Category getSettingCategory() {
-		return Category.TEAMS;
-	}
-
-	@Override
 	protected String getPageTitle() {
 		return "Edit Team";
 	}
