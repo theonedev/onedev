@@ -1,10 +1,12 @@
-package com.pmease.commons.wicket.behavior.collapse;
+package com.pmease.commons.wicket.component;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+
+import com.pmease.commons.wicket.asset.CommonHeaderItem;
+import com.pmease.commons.wicket.behavior.CollapseBehavior;
 
 /**
  * Put collapsible components inside this accordion panel to have them behaving like 
@@ -34,8 +36,8 @@ public class AccordionPanel extends WebMarkupContainer {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(CollapseResourceReference.get()));
-		String script = String.format("setupAccordion('%s')", getMarkupId());
+		response.render(CommonHeaderItem.get());
+		String script = String.format("pmease.commons.setupAccordion('%s')", getMarkupId());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

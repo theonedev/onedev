@@ -1,11 +1,13 @@
-package com.pmease.commons.wicket.behavior.collapse;
+package com.pmease.commons.wicket.behavior;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+
+import com.pmease.commons.wicket.asset.CommonHeaderItem;
+import com.pmease.commons.wicket.component.AccordionPanel;
 
 /**
  * Add this behavior to a component to have it able to show/hide another component 
@@ -38,8 +40,8 @@ public class CollapseBehavior extends Behavior {
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
 
-		response.render(JavaScriptHeaderItem.forReference(CollapseResourceReference.get()));
-		String script = String.format("setupCollapse('%s', '%s')", component.getMarkupId(), target.getMarkupId());
+		response.render(CommonHeaderItem.get());
+		String script = String.format("pmease.commons.setupCollapse('%s', '%s')", component.getMarkupId(), target.getMarkupId());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	

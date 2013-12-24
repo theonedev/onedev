@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -32,6 +33,7 @@ public class DirectoryProtection extends CommonGateKeeper {
 	}
 	
 	@Editable(name="Protected Branches", order=100)
+	@Valid
 	@Size(min=1)
 	@NotNull
 	public List<Entry> getEntries() {

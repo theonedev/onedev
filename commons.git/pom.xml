@@ -20,6 +20,16 @@
 				plugin -->
 			<!--plugin> <artifactId>maven-archetype-plugin</artifactId> </plugin -->
 			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
 			</plugin>
 			<plugin>

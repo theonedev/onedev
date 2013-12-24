@@ -10,7 +10,7 @@ import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.editable.PropertyEditContext;
-import com.pmease.commons.wicket.editable.EditableHeaderItem;
+import com.pmease.commons.wicket.asset.CommonHeaderItem;
 
 @SuppressWarnings("serial")
 public class BooleanPropertyEditContext extends PropertyEditContext {
@@ -49,7 +49,7 @@ public class BooleanPropertyEditContext extends PropertyEditContext {
 			@Override
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
-				response.render(EditableHeaderItem.get());
+				response.render(CommonHeaderItem.get());
 			}
 
 		};

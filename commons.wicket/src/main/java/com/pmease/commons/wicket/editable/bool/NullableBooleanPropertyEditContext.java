@@ -10,7 +10,7 @@ import org.apache.wicket.model.IModel;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.editable.PropertyEditContext;
-import com.pmease.commons.wicket.editable.EditableHeaderItem;
+import com.pmease.commons.wicket.asset.CommonHeaderItem;
 
 @SuppressWarnings("serial")
 public class NullableBooleanPropertyEditContext extends PropertyEditContext {
@@ -59,7 +59,7 @@ public class NullableBooleanPropertyEditContext extends PropertyEditContext {
 			@Override
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
-				response.render(EditableHeaderItem.get());
+				response.render(CommonHeaderItem.get());
 			}
 
 		};

@@ -15,7 +15,7 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.EditableUtils;
-import com.pmease.commons.wicket.editable.EditableHeaderItem;
+import com.pmease.commons.wicket.asset.CommonHeaderItem;
 
 @SuppressWarnings("serial")
 public class PolymorphicPropertyEditor extends Panel {
@@ -85,7 +85,7 @@ public class PolymorphicPropertyEditor extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(EditableHeaderItem.get());
+		response.render(CommonHeaderItem.get());
 	}
 
 	private Component newValueEditor() {

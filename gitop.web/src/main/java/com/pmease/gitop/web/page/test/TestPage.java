@@ -1,31 +1,39 @@
 package com.pmease.gitop.web.page.test;
 
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
-import org.apache.wicket.markup.html.basic.EnclosureContainer;
+
+import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 
 @SuppressWarnings("serial")
 public class TestPage extends WebPage {
 
 	public TestPage() {
-		WebMarkupContainer control = new WebMarkupContainer("control");
-		control.setVisible(false);
-		
-		EnclosureContainer container = new EnclosureContainer("container", control);
+		WebMarkupContainer container = new WebMarkupContainer("container");
 		add(container);
-		container.add(control);
-		container.add(new WebMarkupContainer("content") {
+		container.setOutputMarkupId(true);
+		container.add(new WebMarkupContainer("test"));
+		
+		add(new AjaxLink<Void>("show") {
 
 			@Override
-			public void renderHead(IHeaderResponse response) {
-				super.renderHead(response);
-				String script = String.format("document.getElementById('%s').className += ' someCssClass';", getMarkupId());
-				response.render(OnDomReadyHeaderItem.forScript(script));
+			public void onClick(AjaxRequestTarget target) {
+				WebMarkupContainer container = new WebMarkupContainer("container");
+				TestPage.this.replace(container);
+				container.add(new AjaxLink<Void>("test") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						System.out.println("hello");
+					}
+					
+				}.add(new ConfirmBehavior("really?")));
+				target.add(container);
 			}
 			
-		}.setOutputMarkupId(true));
+		});
 	}
 	
 }

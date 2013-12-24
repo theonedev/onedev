@@ -4,8 +4,9 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+
+import com.pmease.commons.wicket.asset.CommonHeaderItem;
 
 public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 
@@ -212,10 +213,10 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
-		response.render(JavaScriptHeaderItem.forReference(DropdownResourceReference.get()));
+		response.render(CommonHeaderItem.get());
 		
 		String script = String.format(
-				"setupDropdown('%s', '%s', %s, %s, %s)", 
+				"pmease.commons.dropdown.setup('%s', '%s', %s, %s, %s)", 
 				component.getMarkupId(), dropdownPanel.getMarkupId(), hoverDelay, 
 				alignment.toJSON(component), getCallbackFunction());
 		response.render(OnDomReadyHeaderItem.forScript(script));
@@ -225,7 +226,7 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 	protected void respond(AjaxRequestTarget target) {
 		dropdownPanel.load(target);
 
-		String script = String.format("dropdownLoaded('%s')", dropdownPanel.getMarkupId());
+		String script = String.format("pmease.commons.dropdown.loaded('%s')", dropdownPanel.getMarkupId());
 		
 		target.appendJavaScript(script);
 	}

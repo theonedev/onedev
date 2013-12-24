@@ -1,4 +1,4 @@
-package com.pmease.commons.wicket.behavior.typeahead;
+package com.pmease.commons.wicket.behavior;
 
 import java.util.Collection;
 

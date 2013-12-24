@@ -8,12 +8,9 @@
  */
 package com.pmease.commons.wicket.component.wizard;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
@@ -21,10 +18,9 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.wicket.asset.bootstrap.BootstrapHeaderItem;
+import com.pmease.commons.wicket.asset.CommonHeaderItem;
 
 @SuppressWarnings("serial")
 public abstract class Wizard extends Panel {
@@ -145,14 +141,7 @@ public abstract class Wizard extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 
-		response.render(CssHeaderItem.forReference(new CssResourceReference(Wizard.class, "wizard.css") {
-
-			@Override
-			public Iterable<? extends HeaderItem> getDependencies() {
-				return Arrays.asList(BootstrapHeaderItem.get());
-			}
-			
-		}));
+		response.render(CommonHeaderItem.get());
 	}
 	
 }

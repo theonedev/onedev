@@ -5,11 +5,12 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.head.PriorityHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
+
+import com.pmease.commons.wicket.asset.CommonHeaderItem;
 
 /**
  * This panel can be used together with ModalBehavior, or can be used separately.
@@ -58,7 +59,7 @@ public abstract class ModalPanel extends Panel {
 	 * 			Wicket ajax request target 
 	 */
 	public void close(AjaxRequestTarget target) {
-		target.prependJavaScript(String.format("hideModal('%s');", getMarkupId()));
+		target.prependJavaScript(String.format("pmease.commons.modal.hide('%s');", getMarkupId()));
 	}
 	
 	void load(AjaxRequestTarget target) {
@@ -67,7 +68,7 @@ public abstract class ModalPanel extends Panel {
 		replace(content);
 		target.add(content);
 
-		String script = String.format("modalLoaded('%s')", getMarkupId());
+		String script = String.format("pmease.commons.modal.loaded('%s')", getMarkupId());
 		target.appendJavaScript(script);
 	}
 	
@@ -92,12 +93,12 @@ public abstract class ModalPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 
-		response.render(new PriorityHeaderItem(JavaScriptHeaderItem.forReference(ModalResourceReference.get())));
+		response.render(new PriorityHeaderItem(CommonHeaderItem.get()));
 		String script;
 		if (width != null)
-			script = String.format("setupModal('%s', '%s', %s);", getMarkupId(), width, showImmediately);
+			script = String.format("pmease.commons.modal.setup('%s', '%s', %s);", getMarkupId(), width, showImmediately);
 		else
-			script = String.format("setupModal('%s', undefined, %s);", getMarkupId(), showImmediately);
+			script = String.format("pmease.commons.modal.setup('%s', undefined, %s);", getMarkupId(), showImmediately);
 		response.render(new PriorityHeaderItem(OnDomReadyHeaderItem.forScript(script)));
 	}
 

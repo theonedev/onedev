@@ -21,7 +21,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
-import com.pmease.commons.wicket.behavior.collapse.CollapseBehavior;
+import com.pmease.commons.wicket.behavior.CollapseBehavior;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.GitUserLink;

@@ -22,7 +22,7 @@ import org.apache.wicket.model.IModel;
 import com.pmease.commons.editable.BeanEditContext;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.wicket.WicketUtils;
-import com.pmease.commons.wicket.editable.EditableHeaderItem;
+import com.pmease.commons.wicket.asset.CommonHeaderItem;
 
 @SuppressWarnings("serial")
 public class PolymorphicListPropertyEditor extends Panel {
@@ -86,7 +86,7 @@ public class PolymorphicListPropertyEditor extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(EditableHeaderItem.get());
+		response.render(CommonHeaderItem.get());
 	}
 
 	private Component newPropertyValueEditor() {
