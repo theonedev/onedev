@@ -8,10 +8,10 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.hibernate.validator.constraints.NotEmpty;
-
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.OmitNames;
+import com.pmease.gitop.core.editable.BranchChoice;
+import com.pmease.gitop.core.editable.TeamChoice;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.gatekeeper.AndGateKeeper;
 import com.pmease.gitop.model.gatekeeper.CommonGateKeeper;
@@ -20,8 +20,8 @@ import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 
 @SuppressWarnings("serial")
 @Editable(order=100, icon="icon-lock", description="By default, users with write permission of "
-		+ "the project can write to all directories of all branches. Use this gate keeper to "
-		+ "restrict write access of certain branches to certain users.")
+		+ "the project can push code to all branches. Use this gate keeper to restrict write "
+		+ "access of certain branches to certain teams.")
 @OmitNames
 public class BranchProtection extends CommonGateKeeper {
 	
@@ -32,7 +32,7 @@ public class BranchProtection extends CommonGateKeeper {
 		entries.add(entry);
 	}
 	
-	@Editable(name="Protected Branches", order=100)
+	@Editable
 	@Size(min=1)
 	@Valid
 	@NotNull
@@ -46,21 +46,24 @@ public class BranchProtection extends CommonGateKeeper {
 
 	@Editable
 	public static class Entry implements Serializable {
-		private String branches;
+		
+		private Long branchId;
 		
 		private Long teamId;
 
-		@Editable(order=100)
-		@NotEmpty
-		public String getBranches() {
-			return branches;
+		@Editable(name="Branch To Protect", order=100)
+		@BranchChoice
+		@NotNull
+		public Long getBranchId() {
+			return branchId;
 		}
 
-		public void setBranches(String branches) {
-			this.branches = branches;
+		public void setBranchId(Long branchId) {
+			this.branchId = branchId;
 		}
 
 		@Editable(name="Team Can Write", order=200)
+		@TeamChoice
 		@NotNull
 		public Long getTeamId() {
 			return teamId;
@@ -78,7 +81,7 @@ public class BranchProtection extends CommonGateKeeper {
 		for (Entry entry: entries) {
 			IfThenGateKeeper ifThenGateKeeper = new IfThenGateKeeper();
 			IfSubmittedToSpecifiedBranches ifGate = new IfSubmittedToSpecifiedBranches();
-			ifGate.setBranchIds(entry.getBranches());
+			ifGate.setBranchIds(entry.getBranchId().toString());
 			ifThenGateKeeper.setIfGate(ifGate);
 			
 			IfApprovedBySpecifiedTeam thenGate = new IfApprovedBySpecifiedTeam();
