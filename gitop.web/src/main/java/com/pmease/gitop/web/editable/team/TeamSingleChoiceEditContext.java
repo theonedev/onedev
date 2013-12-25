@@ -23,9 +23,9 @@ public class TeamSingleChoiceEditContext extends PropertyEditContext {
 
     @Override
     public Object renderForView(Object renderParam) {
-        Enum<?> propertyValue = (Enum<?>) getPropertyValue();
-        if (propertyValue != null) {
-        	Team team = Gitop.getInstance(TeamManager.class).load((Long) getPropertyValue());
+        Long teamId = (Long) getPropertyValue();
+        if (teamId != null) {
+        	Team team = Gitop.getInstance(TeamManager.class).load(teamId);
             return new Label((String) renderParam, team.getName());
         } else {
             return new Label((String) renderParam, "<i>Not Defined</i>")

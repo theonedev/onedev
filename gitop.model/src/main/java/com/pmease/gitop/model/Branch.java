@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
 
@@ -124,6 +125,19 @@ public class Branch extends AbstractEntity {
     
     public String getHeadRef() {
     	return "refs/heads/" + name; 
+    }
+    
+    /**
+     * Convert a git reference name to branch name.
+     * 
+     * @param refName
+     *			name of the git reference 	
+     * @return
+     * 			name of the branch
+     */ 
+    public static String getName(String refName) {
+		Preconditions.checkArgument(refName.startsWith("refs/heads/"));
+		return refName.substring("refs/heads/".length());
     }
 
     @Override

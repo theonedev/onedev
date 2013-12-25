@@ -42,7 +42,7 @@ public class PostReceiveServlet extends CallbackServlet {
 		List<String> splitted = StringUtils.splitAndTrim(callbackData, " ");
 
 		String oldCommitHash = splitted.get(0);
-		String branchName = splitted.get(2);
+		String branchName = Branch.getName(splitted.get(2));
 
 		// User with write permission can create new branch
 		if (oldCommitHash.equals(Commit.ZERO_HASH)) {
