@@ -7,8 +7,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.head.PriorityHeaderItem;
 
-import com.pmease.commons.wicket.asset.CommonHeaderItem;
-
 @SuppressWarnings("serial")
 public class ModalBehavior extends AbstractDefaultAjaxBehavior {
 
@@ -27,7 +25,6 @@ public class ModalBehavior extends AbstractDefaultAjaxBehavior {
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
-		response.render(CommonHeaderItem.get());
 		String script = String.format(
 				"pmease.commons.modal.setupTrigger('%s', '%s', %s)", 
 				getComponent().getMarkupId(), modalPanel.getMarkupId(), getCallbackFunction());

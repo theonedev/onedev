@@ -10,8 +10,6 @@ import org.apache.wicket.markup.head.PriorityHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.pmease.commons.wicket.asset.CommonHeaderItem;
-
 /**
  * This panel can be used together with ModalBehavior, or can be used separately.
  * If used separately, the modal panel will be shown up immediately.  
@@ -93,7 +91,6 @@ public abstract class ModalPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 
-		response.render(new PriorityHeaderItem(CommonHeaderItem.get()));
 		String script;
 		if (width != null)
 			script = String.format("pmease.commons.modal.setup('%s', '%s', %s);", getMarkupId(), width, showImmediately);

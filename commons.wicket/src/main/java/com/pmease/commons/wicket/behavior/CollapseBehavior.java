@@ -6,7 +6,6 @@ import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 
-import com.pmease.commons.wicket.asset.CommonHeaderItem;
 import com.pmease.commons.wicket.component.AccordionPanel;
 
 /**
@@ -40,7 +39,6 @@ public class CollapseBehavior extends Behavior {
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
 
-		response.render(CommonHeaderItem.get());
 		String script = String.format("pmease.commons.setupCollapse('%s', '%s')", component.getMarkupId(), target.getMarkupId());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}

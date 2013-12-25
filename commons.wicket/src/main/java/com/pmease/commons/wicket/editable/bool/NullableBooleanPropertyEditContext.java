@@ -3,14 +3,12 @@ package com.pmease.commons.wicket.editable.bool;
 import java.io.Serializable;
 
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.model.IModel;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.editable.PropertyEditContext;
-import com.pmease.commons.wicket.asset.CommonHeaderItem;
 
 @SuppressWarnings("serial")
 public class NullableBooleanPropertyEditContext extends PropertyEditContext {
@@ -56,12 +54,6 @@ public class NullableBooleanPropertyEditContext extends PropertyEditContext {
 				super.onComponentTag(tag);
 			}
 			
-			@Override
-			public void renderHead(IHeaderResponse response) {
-				super.renderHead(response);
-				response.render(CommonHeaderItem.get());
-			}
-
 		};
 		
 		dropDownChoice.setNullValid(true);

@@ -6,8 +6,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 
-import com.pmease.commons.wicket.asset.CommonHeaderItem;
-
 public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 
 	private static final long serialVersionUID = 1L;
@@ -213,7 +211,6 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
-		response.render(CommonHeaderItem.get());
 		
 		String script = String.format(
 				"pmease.commons.dropdown.setup('%s', '%s', %s, %s, %s)", 

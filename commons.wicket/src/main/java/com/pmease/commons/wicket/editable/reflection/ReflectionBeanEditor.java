@@ -21,7 +21,6 @@ import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.editable.annotation.OmitNames;
 import com.pmease.commons.editable.annotation.TableLayout;
-import com.pmease.commons.wicket.asset.CommonHeaderItem;
 
 @SuppressWarnings("serial")
 public class ReflectionBeanEditor extends Panel {
@@ -130,7 +129,6 @@ public class ReflectionBeanEditor extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CommonHeaderItem.get());
 		
 		response.render(OnDomReadyHeaderItem.forScript(String.format("pmease.commons.editable.adjustReflectionEditor('%s')", getMarkupId())));
 	}

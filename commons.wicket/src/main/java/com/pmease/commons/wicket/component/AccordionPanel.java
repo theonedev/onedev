@@ -5,7 +5,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 
-import com.pmease.commons.wicket.asset.CommonHeaderItem;
 import com.pmease.commons.wicket.behavior.CollapseBehavior;
 
 /**
@@ -36,7 +35,6 @@ public class AccordionPanel extends WebMarkupContainer {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(CommonHeaderItem.get());
 		String script = String.format("pmease.commons.setupAccordion('%s')", getMarkupId());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}

@@ -11,7 +11,6 @@ package com.pmease.commons.wicket.component.wizard;
 import java.util.List;
 
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
@@ -20,7 +19,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.wicket.asset.CommonHeaderItem;
 
 @SuppressWarnings("serial")
 public abstract class Wizard extends Panel {
@@ -137,11 +135,4 @@ public abstract class Wizard extends Panel {
 
 	protected abstract void finished();
 
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-
-		response.render(CommonHeaderItem.get());
-	}
-	
 }

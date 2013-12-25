@@ -8,12 +8,10 @@ import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.head.PriorityHeaderItem;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.commons.util.StringUtils;
-import com.pmease.commons.wicket.asset.CommonHeaderItem;
 
 @SuppressWarnings("serial")
 public class ConfirmBehavior extends Behavior {
@@ -36,12 +34,6 @@ public class ConfirmBehavior extends Behavior {
 		component.setOutputMarkupId(true);
 	}
 
-	@Override
-	public void renderHead(Component component, IHeaderResponse response) {
-		super.renderHead(component, response);
-		response.render(new PriorityHeaderItem(CommonHeaderItem.get()));
-	}
-	
 	@Override
 	public void onConfigure(Component component) {
 		super.onConfigure(component);
