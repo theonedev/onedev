@@ -21,7 +21,7 @@ public class TeamEditSupport implements EditSupport {
     public PropertyEditContext getPropertyEditContext(Serializable bean, String propertyName) {
         Method propertyGetter = BeanUtils.getGetter(JavassistUtils.unproxy(bean.getClass()), propertyName);
         if (propertyGetter.getAnnotation(TeamChoice.class) != null) {
-            return new TeamChoiceEditContext(bean, propertyName);
+            return new TeamSingleChoiceEditContext(bean, propertyName);
         } else {
             return null;
         }
