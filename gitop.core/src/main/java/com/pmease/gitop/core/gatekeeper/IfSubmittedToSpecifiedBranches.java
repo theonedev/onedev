@@ -1,19 +1,20 @@
 package com.pmease.gitop.core.gatekeeper;
 
-import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-import com.google.common.base.Preconditions;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.loader.AppLoader;
-import com.pmease.commons.util.namedentity.EntityLoader;
-import com.pmease.commons.util.namedentity.EntityMatcher;
-import com.pmease.commons.util.namedentity.EntityPatternSet;
-import com.pmease.commons.util.pattern.PatternSetMatcher;
-import com.pmease.commons.util.pattern.WildcardPathMatcher;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.editable.BranchChoice;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.gatekeeper.BranchGateKeeper;
+import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 
 @SuppressWarnings("serial")
@@ -21,50 +22,40 @@ import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 		"This gate keeper will be passed if the commit is submitted to specified branches.")
 public class IfSubmittedToSpecifiedBranches extends BranchGateKeeper {
 
-	private String branchIds;
+	private List<Long> branchIds = new ArrayList<>();
 	
-	@Editable
+	@Editable(name="Branches", description="Select branches to check.")
+	@BranchChoice
 	@NotNull
-	public String getBranchIds() {
+	@Size(min=1)
+	public List<Long> getBranchIds() {
 		return branchIds;
 	}
 
-	public void setBranchIds(String branchIds) {
+	public void setBranchIds(List<Long> branchIds) {
 		this.branchIds = branchIds;
 	}
 
 	@Override
 	public CheckResult doCheck(PullRequest request) {
-		Project project = request.getTarget().getProject();
-		BranchManager branchManager = AppLoader.getInstance(BranchManager.class);
-		EntityLoader entityLoader = branchManager.asEntityLoader(project);
-		EntityMatcher entityMatcher = new EntityMatcher(entityLoader, new WildcardPathMatcher());
-		PatternSetMatcher patternSetMatcher = new PatternSetMatcher(entityMatcher);
-
-		EntityPatternSet patternSet = EntityPatternSet.fromStored(getBranchIds(), entityLoader);
-
-		if (patternSetMatcher.matches(getBranchIds(), request.getTarget().getName()))
-			return accepted("Target branch matches pattern '" + patternSet + "'.");
+		String reason = "Submitted to branch '" + request.getTarget().getName() + "'.";
+		if (branchIds.contains(request.getTarget().getId()))
+			return accepted(reason);
 		else
-			return rejected("Target branch does not match pattern '" + patternSet + "'.");
+			return rejected(reason);
 	}
 
 	@Override
-	public Object trim(Object context) {
-		Preconditions.checkArgument(context instanceof Project);
-		
-		Project project = (Project) context;
-		BranchManager branchManager = AppLoader.getInstance(BranchManager.class);
-		EntityLoader entityLoader = branchManager.asEntityLoader(project);
-		EntityPatternSet patternSet = EntityPatternSet.fromStored(getBranchIds(), entityLoader);
-		patternSet.trim(project);
-		
-		if (patternSet.getStored().isEmpty()) {
-			return null;
-		} else {
-			setBranchIds(patternSet.toString());
-			return this;
+	protected GateKeeper trim(Project project) {
+		BranchManager branchManager = Gitop.getInstance(BranchManager.class);
+		for (Iterator<Long> it = branchIds.iterator(); it.hasNext();) {
+			if (branchManager.get(it.next()) == null)
+				it.remove();
 		}
+		if (branchIds.isEmpty())
+			return null;
+		else
+			return this;
 	}
 
 }

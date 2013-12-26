@@ -12,12 +12,18 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.OmitNames;
+import com.pmease.commons.util.trimmable.TrimUtils;
+import com.pmease.commons.util.trimmable.Trimmable;
+import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.editable.DirectoryChoice;
 import com.pmease.gitop.core.editable.TeamChoice;
+import com.pmease.gitop.core.manager.TeamManager;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.gatekeeper.AndGateKeeper;
 import com.pmease.gitop.model.gatekeeper.CommonGateKeeper;
+import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.gatekeeper.IfThenGateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 
@@ -48,7 +54,8 @@ public class DirectoryProtection extends CommonGateKeeper {
 	}
 
 	@Editable
-	public static class Entry implements Serializable {
+	public static class Entry implements Trimmable, Serializable {
+		
 		private String directory;
 		
 		private Long teamId;
@@ -75,6 +82,14 @@ public class DirectoryProtection extends CommonGateKeeper {
 			this.teamId = teamId;
 		}
 
+		@Override
+		public Object trim(Object context) {
+			if (Gitop.getInstance(TeamManager.class).get(teamId) == null)
+				return null;
+			else
+				return this;
+		}
+
 	}
 
 	@Override
@@ -93,6 +108,16 @@ public class DirectoryProtection extends CommonGateKeeper {
 			andGateKeeper.getGateKeepers().add(ifThenGateKeeper);
 		}
 		return andGateKeeper.doCheck(request);
+	}
+
+	@Override
+	protected GateKeeper trim(Project project) {
+		TrimUtils.trim(entries, project);
+
+		if (entries.isEmpty())
+			return null;
+		else
+			return this;
 	}
 
 }

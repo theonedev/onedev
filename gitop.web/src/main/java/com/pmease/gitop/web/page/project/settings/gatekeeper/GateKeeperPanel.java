@@ -72,7 +72,7 @@ public abstract class GateKeeperPanel extends Panel {
 							}
 
 							@Override
-							protected void onSave(AjaxRequestTarget target) {
+							protected void onSave(AjaxRequestTarget target, GateKeeper gateKeeper) {
 								close(target);
 								GateKeeperPanel.this.onChange(target, gateKeeper);
 							}
@@ -167,7 +167,7 @@ public abstract class GateKeeperPanel extends Panel {
 									}
 
 									@Override
-									protected void onSave(AjaxRequestTarget target) {
+									protected void onSave(AjaxRequestTarget target, GateKeeper gatekeeper) {
 										close(target);
 										fragment.replace(new WebMarkupContainer("childEditor").setOutputMarkupPlaceholderTag(true).setVisible(true));
 										andOrGateKeeper.getGateKeepers().add(gateKeeper);
@@ -219,7 +219,7 @@ public abstract class GateKeeperPanel extends Panel {
 										}
 
 										@Override
-										protected void onSave(AjaxRequestTarget target) {
+										protected void onSave(AjaxRequestTarget target, GateKeeper gatekeeper) {
 											close(target);
 											fragment.replace(new WebMarkupContainer("gateKeeperEditor").setOutputMarkupPlaceholderTag(true).setVisible(true));
 											notGateKeeper.setGateKeeper(gateKeeper);
@@ -293,7 +293,7 @@ public abstract class GateKeeperPanel extends Panel {
 										}
 
 										@Override
-										protected void onSave(AjaxRequestTarget target) {
+										protected void onSave(AjaxRequestTarget target, GateKeeper gatekeeper) {
 											close(target);
 											fragment.replace(new WebMarkupContainer("ifEditor").setOutputMarkupPlaceholderTag(true).setVisible(true));
 											ifThenGateKeeper.setIfGate(gateKeeper);
@@ -363,7 +363,7 @@ public abstract class GateKeeperPanel extends Panel {
 										}
 
 										@Override
-										protected void onSave(AjaxRequestTarget target) {
+										protected void onSave(AjaxRequestTarget target, GateKeeper gatekeeper) {
 											close(target);
 											fragment.replace(new WebMarkupContainer("thenEditor").setOutputMarkupPlaceholderTag(true).setVisible(true));
 											ifThenGateKeeper.setThenGate(gateKeeper);

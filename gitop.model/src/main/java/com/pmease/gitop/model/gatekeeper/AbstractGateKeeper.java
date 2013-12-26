@@ -5,7 +5,9 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
 import com.pmease.gitop.model.gatekeeper.checkresult.Blocked;
@@ -47,7 +49,12 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	protected abstract CheckResult doCheck(PullRequest request);
 
 	@Override
-	public Object trim(@Nullable Object context) {
+	public final Object trim(@Nullable Object context) {
+		Preconditions.checkArgument(context instanceof Project);
+		return trim((Project)context);
+	}
+	
+	protected GateKeeper trim(Project project) {
 		return this;
 	}
 

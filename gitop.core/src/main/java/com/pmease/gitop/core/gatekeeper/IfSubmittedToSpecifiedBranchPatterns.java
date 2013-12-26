@@ -2,7 +2,6 @@ package com.pmease.gitop.core.gatekeeper;
 
 import javax.validation.constraints.NotNull;
 
-import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.namedentity.EntityLoader;
@@ -14,6 +13,7 @@ import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.gatekeeper.BranchGateKeeper;
+import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 
 @SuppressWarnings("serial")
@@ -50,10 +50,7 @@ public class IfSubmittedToSpecifiedBranchPatterns extends BranchGateKeeper {
 	}
 
 	@Override
-	public Object trim(Object context) {
-		Preconditions.checkArgument(context instanceof Project);
-		
-		Project project = (Project) context;
+	protected GateKeeper trim(Project project) {
 		BranchManager branchManager = AppLoader.getInstance(BranchManager.class);
 		EntityLoader entityLoader = branchManager.asEntityLoader(project);
 		EntityPatternSet patternSet = EntityPatternSet.fromStored(getBranchPatterns(), entityLoader);

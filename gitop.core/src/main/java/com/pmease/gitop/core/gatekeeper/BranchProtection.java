@@ -10,12 +10,19 @@ import javax.validation.constraints.Size;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.OmitNames;
+import com.pmease.commons.util.trimmable.TrimUtils;
+import com.pmease.commons.util.trimmable.Trimmable;
+import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.editable.BranchChoice;
 import com.pmease.gitop.core.editable.TeamChoice;
+import com.pmease.gitop.core.manager.BranchManager;
+import com.pmease.gitop.core.manager.TeamManager;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.gatekeeper.AndGateKeeper;
 import com.pmease.gitop.model.gatekeeper.CommonGateKeeper;
+import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.gatekeeper.IfThenGateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 
@@ -46,7 +53,7 @@ public class BranchProtection extends CommonGateKeeper {
 	}
 
 	@Editable
-	public static class Entry implements Serializable {
+	public static class Entry implements Trimmable, Serializable {
 		
 		private Long branchId;
 		
@@ -74,6 +81,15 @@ public class BranchProtection extends CommonGateKeeper {
 			this.teamId = teamId;
 		}
 
+		@Override
+		public Object trim(Object context) {
+			if (Gitop.getInstance(BranchManager.class).get(branchId) == null)
+				return null;
+			if (Gitop.getInstance(TeamManager.class).get(teamId) == null)
+				return null;
+			return this;
+		}
+
 	}
 
 	@Override
@@ -82,7 +98,7 @@ public class BranchProtection extends CommonGateKeeper {
 		for (Entry entry: entries) {
 			IfThenGateKeeper ifThenGateKeeper = new IfThenGateKeeper();
 			IfSubmittedToSpecifiedBranches ifGate = new IfSubmittedToSpecifiedBranches();
-			ifGate.setBranchIds(entry.getBranchId().toString());
+			ifGate.getBranchIds().add(entry.getBranchId());
 			ifThenGateKeeper.setIfGate(ifGate);
 			
 			IfApprovedBySpecifiedTeam thenGate = new IfApprovedBySpecifiedTeam();
@@ -92,6 +108,16 @@ public class BranchProtection extends CommonGateKeeper {
 			andGateKeeper.getGateKeepers().add(ifThenGateKeeper);
 		}
 		return andGateKeeper.doCheck(request);
+	}
+
+	@Override
+	protected GateKeeper trim(Project project) {
+		TrimUtils.trim(entries, project);
+
+		if (entries.isEmpty())
+			return null;
+		else
+			return this;
 	}
 
 }

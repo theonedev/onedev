@@ -137,4 +137,4 @@ table.reflection .right-spacing {margin-right: 8px;}
 .viewer .table {margin-bottom: 0;}
 
 /* Select2 */
-.select2-container {min-width: 160px;}
+.editor .select2-container {width: 100%;}

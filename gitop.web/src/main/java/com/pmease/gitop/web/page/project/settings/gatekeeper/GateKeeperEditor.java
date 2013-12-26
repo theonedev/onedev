@@ -1,5 +1,6 @@
 package com.pmease.gitop.web.page.project.settings.gatekeeper;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -21,7 +22,7 @@ public abstract class GateKeeperEditor extends Panel {
 	
 	public GateKeeperEditor(String id, GateKeeper gateKeeper) {
 		super(id);
-		this.gateKeeper = gateKeeper;
+		this.gateKeeper = SerializationUtils.clone(gateKeeper);
 	}
 
 	@Override
@@ -57,15 +58,15 @@ public abstract class GateKeeperEditor extends Panel {
 				
 				editContext.validate();
 				if (!editContext.hasValidationError())
-					onSave(target);
+					onSave(target, gateKeeper);
 				else
 					target.add(GateKeeperEditor.this);
 			}
 			
 		});
 	}
-
+	
 	protected abstract void onCancel(AjaxRequestTarget target);
 	
-	protected abstract void onSave(AjaxRequestTarget target);
+	protected abstract void onSave(AjaxRequestTarget target, GateKeeper gateKeeper);
 }
