@@ -35,7 +35,9 @@
 	font-size: 16px;
 }
 
-
+.btn .icon { font-size: 1em; }
+.btn-sm .icon, .btn-xs .icon { font-size: 12px; }
+.btn-lg .icon { font-size: 18px; }
 
 .icon-gitop:before { content: "\F000"; font-size: 32px; }
 .icon-search:before { content: "\F001";}

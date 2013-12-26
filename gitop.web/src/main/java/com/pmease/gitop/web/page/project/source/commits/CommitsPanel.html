@@ -5,12 +5,18 @@
 		<ul>
 			<li wicket:id="commits">
 				<wicket:container wicket:id="authoravatar"></wicket:container>
-				<div class="commitish right">
-					<p><a class="btn btn-default" wicket:id="commitlink"><span wicket:id="sha"></span></a></p>
-					<p><a wicket:id="treelink">Browse code</a></p>
+				<div class="right">
+					<div class="commitish">
+						<a class="btn btn-default btn-xs" wicket:id="commitlink"><span class="sha" wicket:id="sha"></span></a>
+						<a class="browse-link" wicket:id="treelink">Browse code</a>
+					</div>
 				</div>
 				
-				<span class="short-message"><span wicket:id="shortmessage"></span></span>
+				<div class="short-message">
+					<span class="detailed-toggle collapsed" wicket:id="detailedToggle"><i class="icon icon-toggle"></i></span>
+					<span wicket:id="shortmessage"></span>
+				</div>
+				
 				<pre class="detailed-message" wicket:id="detailedmessage"></pre>
 				
 				<div class="commit-meta">
