@@ -29,7 +29,8 @@ import com.pmease.commons.wicket.behavior.CollapseBehavior;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.component.label.AgeLabel;
-import com.pmease.gitop.web.component.link.GitUserLink;
+import com.pmease.gitop.web.component.link.GitPersonLink;
+import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.api.GitPerson;
 import com.pmease.gitop.web.page.project.source.blob.SourceBlobPage;
@@ -104,12 +105,12 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 		detailedToggle.add(new CollapseBehavior(detailedMsg));
 		add(detailedToggle);
 		
-		add(new GitUserLink("author", new AbstractReadOnlyModel<GitPerson>() {
+		add(new GitPersonLink("author", new AbstractReadOnlyModel<GitPerson>() {
 			@Override
 			public GitPerson getObject() {
 				return GitPerson.of(getLastCommit().getAuthor());
 			}
-		}));
+		},  Mode.FULL));
 
 		add(new AgeLabel("author-date", new AbstractReadOnlyModel<Date>() {
 
@@ -120,13 +121,13 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 			
 		}));
 		
-		add(new GitUserLink("committer", new AbstractReadOnlyModel<GitPerson>() {
+		add(new GitPersonLink("committer", new AbstractReadOnlyModel<GitPerson>() {
 
 			@Override
 			public GitPerson getObject() {
 				return GitPerson.of(getLastCommit().getCommitter());
 			}
-		}) {
+		},  Mode.NAME_ONLY) {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();

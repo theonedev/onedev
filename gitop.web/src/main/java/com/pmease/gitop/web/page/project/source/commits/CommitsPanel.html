@@ -1,0 +1,33 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<section class="commit-group" wicket:id="groups">
+		<h3 class="commit-group-head"><span wicket:id="date"></span></h3>
+		<ul>
+			<li wicket:id="commits">
+				<wicket:container wicket:id="authoravatar"></wicket:container>
+				<div class="commitish right">
+					<p><a class="btn btn-default" wicket:id="commitlink"><span wicket:id="sha"></span></a></p>
+					<p><a wicket:id="treelink">Browse code</a></p>
+				</div>
+				
+				<span class="short-message"><span wicket:id="shortmessage"></span></span>
+				<pre class="detailed-message" wicket:id="detailedmessage"></pre>
+				
+				<div class="commit-meta">
+					<div class="author-info">
+						<wicket:container wicket:id="author"></wicket:container>
+						authored <span class="age" wicket:id="authordate"></span>
+					</div>
+					<wicket:enclosure child="committer">
+					<div class="committer-info">
+						<i class="icon icon-arrow-right"></i>
+						<wicket:container wicket:id="committer"></wicket:container>
+						committed <span class="age" wicket:id="committerdate"></span>
+					</div>
+					</wicket:enclosure>
+				</div>
+			</li>
+		</ul>
+	</section>
+</wicket:panel>
+</html>

@@ -80,6 +80,17 @@ ul.piped, ol.piped { margin: 0; padding: 0; }
 
 /* BUTTONS */
 .btn { font-weight: normal; }
+span.btn { color: #999; }
+span.btn > em { font-style: normal; }
+span.btn:hover, span.btn:active, span.btn:focus {   
+  opacity: 0.65;
+  filter: alpha(opacity=65);
+  -webkit-box-shadow: none;
+          box-shadow: none;
+  background-color: #ffffff;
+  border-color: #cccccc;
+}
+
 .btn-primary { background: #1aadf8; border-color: #1aadf8; }
 .btn-warning { background: #ff9500; border-color: #ff9500; }
 .btn-danger { background: #ff2a68; border-color: #ff2a68; }

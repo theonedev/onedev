@@ -43,7 +43,8 @@ public class RepoUtils {
 			return new RepositoryBuilder()
 						.setFS(FS.DETECTED)
 						.setGitDir(key.getFile())
-						.setMustExist(true).build();
+						.setMustExist(true)
+						.build();
 		} catch (RepositoryNotFoundException e) {
 			throw new RepositoryException(e);
 		} catch (IOException e) {
@@ -52,8 +53,9 @@ public class RepoUtils {
 	}
 	
 	public static void close(Repository db) {
+		RepositoryCache.close(db);
 		if (db != null) {
-			RepositoryCache.close(db);
+			db.close();
 		}
 	}
 	

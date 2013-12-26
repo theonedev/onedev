@@ -36,6 +36,7 @@ import org.apache.wicket.request.resource.caching.FilenameWithVersionResourceCac
 import org.apache.wicket.request.resource.caching.version.LastModifiedResourceVersion;
 import org.apache.wicket.util.time.Duration;
 import org.apache.wicket.util.time.Time;
+import org.eclipse.jgit.storage.file.WindowCacheConfig;
 
 import com.google.common.base.Throwables;
 import com.google.common.io.ByteStreams;
@@ -46,6 +47,7 @@ import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.validation.ProjectNameValidator;
 import com.pmease.gitop.model.validation.UserNameValidator;
 import com.pmease.gitop.web.assets.AssetLocator;
+import com.pmease.gitop.web.common.quantity.Data;
 import com.pmease.gitop.web.common.wicket.mapper.PageParameterAwareMountedMapper;
 import com.pmease.gitop.web.component.avatar.AvatarImageResource;
 import com.pmease.gitop.web.component.avatar.AvatarImageResourceReference;
@@ -102,7 +104,6 @@ import com.pmease.gitop.web.shiro.ShiroWicketPlugin;
 
 @Singleton
 public class GitopWebApp extends AbstractWicketConfig {
-	
 	private static final Duration DEFAULT_TIMEOUT = Duration.minutes(10);
 	
 	private Date startupDate;
@@ -206,8 +207,16 @@ public class GitopWebApp extends AbstractWicketConfig {
 		if (getConfigurationType() == RuntimeConfigurationType.DEVELOPMENT) {
 			getComponentPreOnBeforeRenderListeners().add(new StatelessChecker());
 		}
+		
+		initGitConfig();
 	}
 
+	private void initGitConfig() {
+		WindowCacheConfig cfg = new WindowCacheConfig();
+        cfg.setStreamFileThreshold((int) Data.ONE_MB * 10);
+        cfg.install();
+	}
+	
 	public byte[] getDefaultUserAvatar() {
 		return defaultUserAvatar;
 	}
@@ -257,7 +266,7 @@ public class GitopWebApp extends AbstractWicketConfig {
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/tree/${objectId}", SourceTreePage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/blob/${objectId}", SourceBlobPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/commit/${objectId}", SourceCommitPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/commits", CommitsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/commits/#{objectId}", CommitsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/branches", BranchesPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/tags", TagsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/contributors", ContributorsPage.class));

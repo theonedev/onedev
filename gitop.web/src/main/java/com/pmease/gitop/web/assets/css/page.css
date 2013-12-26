@@ -425,6 +425,22 @@ table.table-blob { width: 100%; }
 .code-highlight .ace_line { padding-left: 12px; }
 .code-highlight .ace_line.selected { background: #ffffaa; }
 
+/*
+ * COMMITS PAGE
+ */
+.commit-group { margin-bottom: 18px; }
+.commit-group h3 { font-size: 14px; font-weight: bold; margin: 0; padding: 12px; background: #e6e9ee; border-radius: 4px 4px 0 0; border-width: 1px 1px 0; border-style:solid; border-color: #ddd; }
+.commit-group ul { margin: 0; padding: 0; list-style: none; border-radius: 0 0 4px 4px; border-width: 1px; border-style: solid; border-color: #ddd; }
+.commit-group li { padding: 6px 12px; border-top: 1px solid #ddd; }
+.commit-group li:hover { background: #f5f5e5; }
+.commit-group .short-message { font-weight: bold; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; display: inline-block; display: block; border: none; margin: 0 120px 0 64px; padding: 0; background: transparent; }
+.commit-group .detailed-message {display: none;  margin: 0 120px 18px 64px; color: #666; border-width: 0 0 0 1px; background: transparent; }
+.commit-group .avatar { float: left; width: 48px; height: 48px; background: transparent; box-shadow: none; }
+.commit-group .avatar > img { border-radius: 100%; }
+.commit-group .commit-meta { margin-left: 64px; padding: 8px 0; margin-right: 120px; background: transparent; border: none; }
+.committer-info .icon { color: #999; font-size: 12px; }
+.commitish p { margin:0; text-align: right;  }
+
 /**
  * GATE KEEPER SETTING PAGE
  */
