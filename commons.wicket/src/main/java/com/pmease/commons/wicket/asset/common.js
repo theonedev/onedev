@@ -576,17 +576,19 @@ $(function() {
 	});	
 	pmease.commons.decorateElements(document);
 	
-	$(document).keyup(function(e) {
+	$(document).keypress(function(e) {
 		if (e.keyCode == 27) { // esc
-			var topmostPopup = $("body>.popup:visible:last");
-			if (topmostPopup.hasClass("modal")) {
-				if (!topmostPopup[0].confirm)
-					pmease.commons.modal.hide(topmostPopup[0].id);
-				else
-					topmostPopup.modal("hide").remove();
+			if ($(".select2-drop:visible").length == 0) {
+				var topmostPopup = $("body>.popup:visible:last");
+				if (topmostPopup.hasClass("modal")) {
+					if (!topmostPopup[0].confirm)
+						pmease.commons.modal.hide(topmostPopup[0].id);
+					else
+						topmostPopup.modal("hide").remove();
+				}
+				if (topmostPopup.hasClass("dropdown-panel"))
+					pmease.commons.dropdown.hide(topmostPopup[0].id);
 			}
-			if (topmostPopup.hasClass("dropdown-panel"))
-				pmease.commons.dropdown.hide(topmostPopup[0].id);
 		} else if (e.keyCode == 13) {
 			var topmostPopup = $("body>.popup:visible:last");
 			if (topmostPopup[0].confirm) {
