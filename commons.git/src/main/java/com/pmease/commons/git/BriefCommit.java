@@ -1,8 +1,11 @@
 package com.pmease.commons.git;
 
+import java.io.Serializable;
+
 import com.google.common.base.Objects;
 
-public class BriefCommit {
+@SuppressWarnings("serial")
+public class BriefCommit implements Serializable {
 
     private final String hash;
     

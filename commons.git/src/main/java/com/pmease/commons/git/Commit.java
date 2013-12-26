@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("serial")
 public class Commit extends BriefCommit {
     
 	public static final String ZERO_HASH = "0000000000000000000000000000000000000000"; 

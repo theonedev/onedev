@@ -15,13 +15,14 @@ public class IfSubmittedToSpecifiedBranchPatterns extends BranchGateKeeper {
 
 	private String branchPatterns;
 	
-	@Editable(name="Specify branch patterns to match. Below is some examples:"
+	@Editable(name="Specify Branch Patterns", description="Specify branch patterns to match. Below is some examples:"
 			+ "<ul>"
 			+ "<li><i>dev/*</i>: matches all branches directly under dev."
 			+ "<li><i>dev/**</i>: matches all branches under dev recursively."
 			+ "<li><i>**</i>: matches all branches."
 			+ "<li><i>**/bugfix</i>: matches all branches whose last segment is bugfix."
-			+ "<li><i>-dev/**, **</i>: matches all branches except those under dev.")
+			+ "<li><i>-dev/**, **</i>: matches all branches except those under dev."
+			+ "</ul>")
 	@NotEmpty
 	public String getBranchPatterns() {
 		return branchPatterns;
