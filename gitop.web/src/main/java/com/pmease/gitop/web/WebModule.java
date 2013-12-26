@@ -3,6 +3,7 @@ package com.pmease.gitop.web;
 import javax.inject.Singleton;
 
 import com.google.common.collect.ImmutableSet;
+import com.pmease.commons.editable.EditSupport;
 import com.pmease.commons.jersey.JerseyConfigurator;
 import com.pmease.commons.jersey.JerseyEnvironment;
 import com.pmease.commons.jetty.ServletConfigurator;
@@ -10,6 +11,7 @@ import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.gitop.model.validation.UserNameReservation;
 import com.pmease.gitop.web.common.soy.impl.SoyTemplateModule;
+import com.pmease.gitop.web.editable.EditSupportLocator;
 import com.pmease.gitop.web.page.project.source.blob.renderer.BlobRendererFactory;
 import com.pmease.gitop.web.resource.TestResource;
 import com.pmease.gitop.web.service.ServiceModule;
@@ -40,6 +42,8 @@ public class WebModule extends AbstractPluginModule {
 			
 		});
 		
+		contributeFromPackage(EditSupport.class, EditSupportLocator.class);
+
 		install(new SoyTemplateModule(ImmutableSet.<String>of(GitopWebApp.class.getPackage().getName())));
 		
 		install(new ServiceModule());

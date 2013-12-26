@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.util.trimmable.AndOrConstruct;
 import com.pmease.commons.util.trimmable.TrimUtils;
+import com.pmease.gitop.model.Project;
 
 @SuppressWarnings("serial")
 public abstract class AndOrGateKeeper extends CompositeGateKeeper {
@@ -25,8 +26,8 @@ public abstract class AndOrGateKeeper extends CompositeGateKeeper {
 	}
 
 	@Override
-	public Object trim(Object context) {
-		return TrimUtils.trim(new AndOrConstruct() {
+	protected GateKeeper trim(Project project) {
+		return (GateKeeper) TrimUtils.trim(new AndOrConstruct() {
 			
 			@Override
 			public Object getSelf() {
@@ -38,7 +39,7 @@ public abstract class AndOrGateKeeper extends CompositeGateKeeper {
 				return getGateKeepers();
 			}
 			
-		}, context);
+		}, project);
 	}
 
 }

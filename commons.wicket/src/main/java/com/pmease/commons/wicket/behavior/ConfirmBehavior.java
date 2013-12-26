@@ -1,4 +1,4 @@
-package com.pmease.commons.wicket.behavior.confirm;
+package com.pmease.commons.wicket.behavior;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.Component;
@@ -7,14 +7,11 @@ import org.apache.wicket.behavior.AbstractAjaxBehavior;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.pmease.commons.util.StringUtils;
-import com.pmease.commons.wicket.behavior.modal.ModalResourceReference;
 
 @SuppressWarnings("serial")
 public class ConfirmBehavior extends Behavior {
@@ -37,13 +34,6 @@ public class ConfirmBehavior extends Behavior {
 		component.setOutputMarkupId(true);
 	}
 
-	@Override
-	public void renderHead(Component component, IHeaderResponse response) {
-		super.renderHead(component, response);
-		response.render(JavaScriptHeaderItem.forReference(ModalResourceReference.get()));
-		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(ConfirmBehavior.class, "confirm.js")));
-	}
-	
 	@Override
 	public void onConfigure(Component component) {
 		super.onConfigure(component);
@@ -72,7 +62,7 @@ public class ConfirmBehavior extends Behavior {
 						}
 		
 						String decoratedScript = String.format(
-								"confirmModal('%s', function() {%s}); return false;",
+								"pmease.commons.confirm.show('%s', function() {%s}); return false;",
 								message, script);
 						decoratedScript = StringUtils.replace(decoratedScript, 
 								"this.", "document.getElementById('" + component.getMarkupId() + "').");
@@ -89,7 +79,7 @@ public class ConfirmBehavior extends Behavior {
 
 						String message = StringEscapeUtils.escapeEcmaScript(messageModel.getObject());
 
-						String script = String.format("setupConfirm('%s', '%s')", component.getMarkupId(), message);
+						String script = String.format("pmease.commons.confirm.setup('%s', '%s')", component.getMarkupId(), message);
 
 						AjaxRequestTarget target = component.getRequestCycle().find(AjaxRequestTarget.class);
 						if (target == null) 

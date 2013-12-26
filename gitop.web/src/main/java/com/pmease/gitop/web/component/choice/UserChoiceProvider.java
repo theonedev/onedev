@@ -58,7 +58,7 @@ public class UserChoiceProvider extends ChoiceProvider<User> {
 		UserManager um = Gitop.getInstance(UserManager.class);
 		for (String each : ids) {
 			Long id = Long.valueOf(each);
-			users.add(um.get(id));
+			users.add(um.load(id));
 		}
 
 		return users;

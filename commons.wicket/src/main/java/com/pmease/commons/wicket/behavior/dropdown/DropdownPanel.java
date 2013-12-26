@@ -51,7 +51,7 @@ public abstract class DropdownPanel extends Panel {
 	 * 			target of this ajax request
 	 */
 	public void close(AjaxRequestTarget target) {
-		target.prependJavaScript(String.format("hideDropdown('%s');", getMarkupId()));
+		target.prependJavaScript(String.format("pmease.commons.dropdown.hide('%s');", getMarkupId()));
 	}
 	
 	void load(AjaxRequestTarget target) {

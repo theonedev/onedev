@@ -1,10 +1,12 @@
 package com.pmease.commons.git;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import com.google.common.base.Objects;
 
-public class UserInfo {
+@SuppressWarnings("serial")
+public class UserInfo implements Serializable {
 	
 	private final String name;
 	

@@ -1,31 +1,52 @@
 package com.pmease.gitop.web.page.test;
 
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.WebPage;
-import org.apache.wicket.markup.html.basic.EnclosureContainer;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.resource.CssResourceReference;
+
+import com.pmease.gitop.model.Team;
+import com.pmease.gitop.web.component.choice.TeamChoiceProvider;
+import com.pmease.gitop.web.component.choice.TeamSingleChoice;
+import com.pmease.gitop.web.page.BasePage;
 
 @SuppressWarnings("serial")
-public class TestPage extends WebPage {
+public class TestPage extends BasePage {
 
-	public TestPage() {
-		WebMarkupContainer control = new WebMarkupContainer("control");
-		control.setVisible(false);
+	@Override
+	protected void onPageInitialize() {
+		super.onPageInitialize();
 		
-		EnclosureContainer container = new EnclosureContainer("container", control);
-		add(container);
-		container.add(control);
-		container.add(new WebMarkupContainer("content") {
+		add(new WebMarkupContainer("container") {
 
 			@Override
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
-				String script = String.format("document.getElementById('%s').className += ' someCssClass';", getMarkupId());
-				response.render(OnDomReadyHeaderItem.forScript(script));
+				response.render(CssHeaderItem.forReference(new CssResourceReference(TestPage.class, "test.css")));
 			}
 			
-		}.setOutputMarkupId(true));
+		});
+		
+		add(new TeamSingleChoice("chooser", new IModel<Team>() {
+
+			@Override
+			public void detach() {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public Team getObject() {
+				return null;
+			}
+
+			@Override
+			public void setObject(Team object) {
+				
+			}
+			
+		}, new TeamChoiceProvider(null)));
 	}
-	
+
 }

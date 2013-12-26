@@ -485,3 +485,8 @@ table.table-blob { width: 100%; }
 .gate-keeper td.ifthen {vertical-align: top;}
 .gate-keeper td.ifthen.connector {width:1px;}
 .gate-keeper td.ifthen.connector .icon {margin: 0; color: #666666; font-size: 36px;}
+
+/* Components */
+.dropdown-panel .directory-chooser {max-height: 650px; overflow: auto; padding: 12px 24px 12px 12px;}
+.dropdown-panel .directory-chooser .title {font-weight: bold; border-bottom: 1px solid #888888;}
+

@@ -8,10 +8,12 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.gatekeeper.ApprovalGateKeeper;
+import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.CanVoteBySpecifiedUser;
 
@@ -57,7 +59,7 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
     }
 
     @Override
-    public Object trim(Object context) {
+    protected GateKeeper trim(Project project) {
         UserManager userManager = AppLoader.getInstance(UserManager.class);
         if (userManager.get(getUserId()) == null)
             return null;

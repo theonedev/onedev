@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -11,9 +12,18 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.OmitNames;
+import com.pmease.commons.util.trimmable.TrimUtils;
+import com.pmease.commons.util.trimmable.Trimmable;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.editable.DirectoryChoice;
+import com.pmease.gitop.core.editable.TeamChoice;
+import com.pmease.gitop.core.manager.TeamManager;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.gatekeeper.AndGateKeeper;
 import com.pmease.gitop.model.gatekeeper.CommonGateKeeper;
+import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.gatekeeper.IfThenGateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 
@@ -31,7 +41,8 @@ public class DirectoryProtection extends CommonGateKeeper {
 		entries.add(entry);
 	}
 	
-	@Editable(name="Protected Branches", order=100)
+	@Editable(name="Protected Directories", order=100)
+	@Valid
 	@Size(min=1)
 	@NotNull
 	public List<Entry> getEntries() {
@@ -43,22 +54,25 @@ public class DirectoryProtection extends CommonGateKeeper {
 	}
 
 	@Editable
-	public static class Entry implements Serializable {
-		private String directories;
+	public static class Entry implements Trimmable, Serializable {
+		
+		private String directory;
 		
 		private Long teamId;
 
-		@Editable(order=100)
+		@Editable(name="Directory to Protect", order=100)
+		@DirectoryChoice
 		@NotEmpty
-		public String getDirectories() {
-			return directories;
+		public String getDirectory() {
+			return directory;
 		}
 
-		public void setDirectories(String directories) {
-			this.directories = directories;
+		public void setDirectory(String directory) {
+			this.directory = directory;
 		}
 
 		@Editable(name="Team Can Write", order=200)
+		@TeamChoice(excludes={Team.ANONYMOUS, Team.LOGGEDIN})
 		@NotNull
 		public Long getTeamId() {
 			return teamId;
@@ -66,6 +80,14 @@ public class DirectoryProtection extends CommonGateKeeper {
 
 		public void setTeamId(Long teamId) {
 			this.teamId = teamId;
+		}
+
+		@Override
+		public Object trim(Object context) {
+			if (Gitop.getInstance(TeamManager.class).get(teamId) == null)
+				return null;
+			else
+				return this;
 		}
 
 	}
@@ -76,7 +98,7 @@ public class DirectoryProtection extends CommonGateKeeper {
 		for (Entry entry: entries) {
 			IfThenGateKeeper ifThenGateKeeper = new IfThenGateKeeper();
 			IfTouchesSpecifiedDirectory ifGate = new IfTouchesSpecifiedDirectory();
-			ifGate.setDirectories(entry.getDirectories());
+			ifGate.setDirectories(entry.getDirectory());
 			ifThenGateKeeper.setIfGate(ifGate);
 			
 			IfApprovedBySpecifiedTeam thenGate = new IfApprovedBySpecifiedTeam();
@@ -86,6 +108,16 @@ public class DirectoryProtection extends CommonGateKeeper {
 			andGateKeeper.getGateKeepers().add(ifThenGateKeeper);
 		}
 		return andGateKeeper.doCheck(request);
+	}
+
+	@Override
+	protected GateKeeper trim(Project project) {
+		TrimUtils.trim(entries, project);
+
+		if (entries.isEmpty())
+			return null;
+		else
+			return this;
 	}
 
 }

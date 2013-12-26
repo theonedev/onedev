@@ -57,7 +57,7 @@ public class ProjectChoiceProvider extends ChoiceProvider<Project> {
 		ProjectManager pm = Gitop.getInstance(ProjectManager.class);
 		for (String each : ids) {
 			Long id = Long.valueOf(each);
-			list.add(pm.get(id));
+			list.add(pm.load(id));
 		}
 		
 		return list;

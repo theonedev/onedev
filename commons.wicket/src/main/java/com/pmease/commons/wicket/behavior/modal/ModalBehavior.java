@@ -4,7 +4,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.head.PriorityHeaderItem;
 
@@ -26,9 +25,8 @@ public class ModalBehavior extends AbstractDefaultAjaxBehavior {
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
-		response.render(new PriorityHeaderItem(JavaScriptHeaderItem.forReference(ModalResourceReference.get())));
 		String script = String.format(
-				"setupModalTrigger('%s', '%s', %s)", 
+				"pmease.commons.modal.setupTrigger('%s', '%s', %s)", 
 				getComponent().getMarkupId(), modalPanel.getMarkupId(), getCallbackFunction());
 		response.render(new PriorityHeaderItem(OnDomReadyHeaderItem.forScript(script)));
 	}

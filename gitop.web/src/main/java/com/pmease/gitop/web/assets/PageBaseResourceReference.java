@@ -25,7 +25,6 @@ public class PageBaseResourceReference extends JavaScriptResourceReference {
 						new PriorityHeaderItem(CommonHeaderItem.get()),
 						new PriorityHeaderItem(CssHeaderItem.forReference(AssetLocator.ICONS_CSS)),
 						new PriorityHeaderItem(CssHeaderItem.forReference(AssetLocator.BASE_CSS)),
-						
 						CssHeaderItem.forReference(AssetLocator.PAGE_CSS)));
 	}
 	

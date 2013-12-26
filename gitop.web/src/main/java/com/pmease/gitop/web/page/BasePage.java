@@ -235,7 +235,9 @@ public abstract class BasePage extends WebPage {
 		}
 	}
 
-	protected abstract String getPageTitle();
+	protected String getPageTitle() {
+		return "Gitop - Enterprise Git Management System";
+	};
 
 	protected int getPageRefreshInterval() {
 		return 0;

@@ -264,7 +264,9 @@ fieldset[disabled] .btn-inverse.active {
 .form-inline select.form-control { width: 100%; }
 
 /* FORM COMPONENT */
+/* Comment out since rendering is correct after applying bootstrap3 style to select2
 .select2-container .select2-choice { padding-top: 4px; padding-bottom: 4px; height: auto; }
+*/
 .select2-highlighted .user-choice-row p.text-muted { color: #ccc; }
 
 .required { color: #a00; margin-left: 3px; line-height: 1;}

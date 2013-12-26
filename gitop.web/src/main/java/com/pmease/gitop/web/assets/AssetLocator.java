@@ -12,10 +12,10 @@ public class AssetLocator {
 	
 	public static final JavaScriptResourceReference MODERNIZR_JS = newJavaScriptResourceReference("js/vendor/modernizr-2.6.2.js");
 	public static final JavaScriptResourceReference JQUERY_UI_WIDGET_JS = newJavaScriptResourceReference("js/vendor/jquery.ui.widget.js");
+	public static final JavaScriptResourceReference PAGE_JS = newJavaScriptResourceReference("js/page.js");
 
 	public static final CssResourceReference BASE_CSS = newCssResourceReference("css/base.css");
 	public static final CssResourceReference PAGE_CSS = newCssResourceReference("css/page.css");
-	public static final JavaScriptResourceReference PAGE_JS = newJavaScriptResourceReference("js/page.js");
 
 	private static CssResourceReference newCssResourceReference(String url) {
 		return new CssResourceReference(AssetLocator.class, url);

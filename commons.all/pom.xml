@@ -31,6 +31,7 @@
         <module>../gitop.http</module>
         <module>../gitop.security</module>
         <module>../gitop.model</module>
+        <module>../commons.schedule</module>
     </modules>  
     <repositories> 
         <repository> 

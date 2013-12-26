@@ -1,0 +1,14 @@
+var BranchChoice = BranchChoice || {};
+BranchChoice.formatter = {
+	formatSelection: function(branch) {
+		return branch.name;
+	},
+	
+	formatResult: function(branch) {
+		return branch.name;
+	},
+	
+	escapeMarkup: function(m) {
+		return m;
+	}
+};

@@ -72,7 +72,7 @@ public class CommitsPage extends ProjectCategoryPage implements IRevisionAware {
 				List<Commit> commits = new LogCommand(git.repoDir())
 										.toRev(getRevision())
 										.skip((page - 1) * 35)
-										.maxCommits(35)
+										.maxCount(35)
 										.call();
 				return commits;
 			}
@@ -91,7 +91,7 @@ public class CommitsPage extends ProjectCategoryPage implements IRevisionAware {
 				List<Commit> commits = new LogCommand(git.repoDir())
 										.toRev(getRevision())
 										.skip(page * 35)
-										.maxCommits(1)
+										.maxCount(1)
 										.call();
 				this.setEnabled(!commits.isEmpty());
 			}

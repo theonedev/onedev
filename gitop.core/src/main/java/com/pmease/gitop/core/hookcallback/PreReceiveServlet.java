@@ -56,13 +56,10 @@ public class PreReceiveServlet extends CallbackServlet {
 			return;
 		
 		String newCommitHash = splitted.get(1);
-		String branchName = splitted.get(2);
+		String branchName = Branch.getName(splitted.get(2));
 		
-		if (branchName.startsWith("refs/heads/"))
-			branchName = branchName.substring("refs/heads/".length());
-
 		logger.info("Executing pre-receive hook against branch {}...", branchName);
-
+		
 		Branch branch = branchManager.findBy(project, branchName, true);
 
 		User user = userManager.getCurrent();

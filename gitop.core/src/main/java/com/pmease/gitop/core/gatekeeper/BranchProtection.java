@@ -8,20 +8,28 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.hibernate.validator.constraints.NotEmpty;
-
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.OmitNames;
+import com.pmease.commons.util.trimmable.TrimUtils;
+import com.pmease.commons.util.trimmable.Trimmable;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.editable.BranchChoice;
+import com.pmease.gitop.core.editable.TeamChoice;
+import com.pmease.gitop.core.manager.BranchManager;
+import com.pmease.gitop.core.manager.TeamManager;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.gatekeeper.AndGateKeeper;
 import com.pmease.gitop.model.gatekeeper.CommonGateKeeper;
+import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.gatekeeper.IfThenGateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 
 @SuppressWarnings("serial")
 @Editable(order=100, icon="icon-lock", description="By default, users with write permission of "
-		+ "the project can write to all directories of all branches. Use this gate keeper to "
-		+ "restrict write access of certain branches to certain users.")
+		+ "the project can push code to all branches. Use this gate keeper to restrict write "
+		+ "access of certain branches to certain teams.")
 @OmitNames
 public class BranchProtection extends CommonGateKeeper {
 	
@@ -32,7 +40,7 @@ public class BranchProtection extends CommonGateKeeper {
 		entries.add(entry);
 	}
 	
-	@Editable(name="Protected Branches", order=100)
+	@Editable
 	@Size(min=1)
 	@Valid
 	@NotNull
@@ -45,22 +53,25 @@ public class BranchProtection extends CommonGateKeeper {
 	}
 
 	@Editable
-	public static class Entry implements Serializable {
-		private String branches;
+	public static class Entry implements Trimmable, Serializable {
+		
+		private Long branchId;
 		
 		private Long teamId;
 
-		@Editable(order=100)
-		@NotEmpty
-		public String getBranches() {
-			return branches;
+		@Editable(name="Branch To Protect", order=100)
+		@BranchChoice
+		@NotNull
+		public Long getBranchId() {
+			return branchId;
 		}
 
-		public void setBranches(String branches) {
-			this.branches = branches;
+		public void setBranchId(Long branchId) {
+			this.branchId = branchId;
 		}
 
 		@Editable(name="Team Can Write", order=200)
+		@TeamChoice(excludes={Team.ANONYMOUS, Team.LOGGEDIN})
 		@NotNull
 		public Long getTeamId() {
 			return teamId;
@@ -68,6 +79,15 @@ public class BranchProtection extends CommonGateKeeper {
 
 		public void setTeamId(Long teamId) {
 			this.teamId = teamId;
+		}
+
+		@Override
+		public Object trim(Object context) {
+			if (Gitop.getInstance(BranchManager.class).get(branchId) == null)
+				return null;
+			if (Gitop.getInstance(TeamManager.class).get(teamId) == null)
+				return null;
+			return this;
 		}
 
 	}
@@ -78,7 +98,7 @@ public class BranchProtection extends CommonGateKeeper {
 		for (Entry entry: entries) {
 			IfThenGateKeeper ifThenGateKeeper = new IfThenGateKeeper();
 			IfSubmittedToSpecifiedBranches ifGate = new IfSubmittedToSpecifiedBranches();
-			ifGate.setBranchIds(entry.getBranches());
+			ifGate.getBranchIds().add(entry.getBranchId());
 			ifThenGateKeeper.setIfGate(ifGate);
 			
 			IfApprovedBySpecifiedTeam thenGate = new IfApprovedBySpecifiedTeam();
@@ -88,6 +108,16 @@ public class BranchProtection extends CommonGateKeeper {
 			andGateKeeper.getGateKeepers().add(ifThenGateKeeper);
 		}
 		return andGateKeeper.doCheck(request);
+	}
+
+	@Override
+	protected GateKeeper trim(Project project) {
+		TrimUtils.trim(entries, project);
+
+		if (entries.isEmpty())
+			return null;
+		else
+			return this;
 	}
 
 }

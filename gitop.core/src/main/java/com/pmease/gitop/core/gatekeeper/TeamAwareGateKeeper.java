@@ -5,8 +5,10 @@ import javax.validation.constraints.NotNull;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.TeamManager;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.gatekeeper.ApprovalGateKeeper;
+import com.pmease.gitop.model.gatekeeper.GateKeeper;
 
 @SuppressWarnings("serial")
 public abstract class TeamAwareGateKeeper extends ApprovalGateKeeper {
@@ -28,7 +30,7 @@ public abstract class TeamAwareGateKeeper extends ApprovalGateKeeper {
 	}
 
 	@Override
-	public Object trim(Object context) {
+	protected GateKeeper trim(Project project) {
 		TeamManager teamManager = Gitop.getInstance(TeamManager.class);
 		if (teamManager.get(getTeamId()) == null)
 			return null;

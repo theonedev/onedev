@@ -72,7 +72,7 @@ public class GateKeeperSettingPage extends AbstractProjectSettingPage {
 								}
 
 								@Override
-								protected void onSave(AjaxRequestTarget target) {
+								protected void onSave(AjaxRequestTarget target, GateKeeper gatekeeper) {
 									close(target);
 									getProject().getGateKeepers().add(gateKeeper);
 									onGateKeeperChanged(target);
