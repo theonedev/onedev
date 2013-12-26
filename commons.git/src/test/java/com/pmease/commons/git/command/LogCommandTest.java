@@ -59,7 +59,7 @@ public class LogCommandTest extends AbstractGitTest {
 
     		bareGit.addNote("master", "hello\nworld");
 
-    		List<Commit> commits = bareGit.log(null, "master", null, 0);
+    		List<Commit> commits = bareGit.log(null, "master", null, 0, 0);
     		assertEquals(commits.size(), 6);
     		assertEquals(commits.get(0).getSubject(), "add dir/file");
     		assertEquals(commits.get(0).getMessage(), "add dir/file\n\nadd dir/file to test files under a directory");
@@ -77,14 +77,14 @@ public class LogCommandTest extends AbstractGitTest {
     		workGit.add("dir/file2").commit("add dir/file2", false, false);
     		workGit.merge("dev", null, null, null);
     		
-    		commits = workGit.log(null, "master", null, 0);
+    		commits = workGit.log(null, "master", null, 0, 0);
     		
     		assertEquals(commits.get(0).getParentHashes().size(), 2);
     		
-    		commits = workGit.log(null, "master", "a", 0);
+    		commits = workGit.log(null, "master", "a", 0, 0);
     		assertEquals(commits.size(), 3);
     		
-    		commits = workGit.log("dev", "master", "dir", 0);
+    		commits = workGit.log("dev", "master", "dir", 0, 0);
     		assertEquals(commits.size(), 2);
 
     		assertEquals(workGit.showRevision(commits.get(0).getHash()).getHash(), commits.get(0).getHash()); 
@@ -120,7 +120,7 @@ public class LogCommandTest extends AbstractGitTest {
 		    git.add("b2");
 		    git.commit("move b to b2", false, false);
 
-		    List<Commit> commits = git.log("master~3", "master", null, 0);
+		    List<Commit> commits = git.log("master~3", "master", null, 0, 0);
 		    FileChange change = commits.get(0).getFileChanges().get(0);
 		    assertEquals("RENAME\tb->b2", change.toString());
 		    change = commits.get(2).getFileChanges().get(1);

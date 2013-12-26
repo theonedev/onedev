@@ -7,6 +7,8 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.editable.BranchChoice;
@@ -38,11 +40,15 @@ public class IfSubmittedToSpecifiedBranches extends BranchGateKeeper {
 
 	@Override
 	public CheckResult doCheck(PullRequest request) {
-		String reason = "Submitted to branch '" + request.getTarget().getName() + "'.";
+		List<String> branchNames = new ArrayList<>();
+		BranchManager branchManager = Gitop.getInstance(BranchManager.class);
+		for (Long branchId: branchIds)
+			branchNames.add(branchManager.load(branchId).getName());
+		
 		if (branchIds.contains(request.getTarget().getId()))
-			return accepted(reason);
+			return accepted("Target branch is one of '" + StringUtils.join(branchNames, ", ") + "'.");
 		else
-			return rejected(reason);
+			return rejected("Target branch is not one of '" + StringUtils.join(branchNames, ", ") + "'.");
 	}
 
 	@Override

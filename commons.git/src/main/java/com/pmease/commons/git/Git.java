@@ -106,7 +106,7 @@ public class Git implements Serializable {
 	}
 
 	public Commit showRevision(String revision) {
-		List<Commit> commits = new LogCommand(repoDir).toRev(revision).maxCommits(1).call();
+		List<Commit> commits = new LogCommand(repoDir).toRev(revision).maxCount(1).call();
 		Preconditions.checkState(commits.size() == 1);
 		return commits.get(0);
 	}
@@ -280,13 +280,13 @@ public class Git implements Serializable {
 	}
 
 	public List<Commit> log(@Nullable String fromRev, @Nullable String toRev, 
-			@Nullable String path, int maxCommits) {
+			@Nullable String path, int maxCount, int skip) {
 		return new LogCommand(repoDir).fromRev(fromRev).toRev(toRev)
-				.path(path).maxCommits(maxCommits).call();
+				.path(path).maxCount(maxCount).skip(skip).call();
 	}
 	
 	public Commit retrieveLastCommmit(String revision, @Nullable String path) {
-		return log(null, revision, path, 1).get(0);
+		return log(null, revision, path, 1, 0).get(0);
 	}
 	
 	/**

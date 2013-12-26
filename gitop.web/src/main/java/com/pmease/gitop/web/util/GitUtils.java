@@ -57,7 +57,7 @@ public class GitUtils {
 	}
 	
 	public static @Nullable Commit getLastCommit(Git git, String revision, String path) {
-		List<Commit> commits = git.log(null, revision, path, 1);
+		List<Commit> commits = git.log(null, revision, path, 1, 0);
 		return Iterables.getFirst(commits, null);
 	}
 }

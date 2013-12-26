@@ -25,7 +25,9 @@ public class LogCommand extends GitCommand<List<Commit>> {
     
     private String path;
     
-    private int maxCommits;
+    private int maxCount;
+    
+    private int skip;
 
     public LogCommand(File repoDir) {
         super(repoDir);
@@ -46,11 +48,16 @@ public class LogCommand extends GitCommand<List<Commit>> {
     	return this;
     }
     
-    public LogCommand maxCommits(int maxCommits) {
-    	this.maxCommits = maxCommits;
+    public LogCommand maxCount(int maxCount) {
+    	this.maxCount = maxCount;
     	return this;
     }
 
+    public LogCommand skip(int skip) {
+    	this.skip = skip;
+    	return this;
+    }
+    
     @Override
     public List<Commit> call() {
         Commandline cmd = cmd();
@@ -69,8 +76,10 @@ public class LogCommand extends GitCommand<List<Commit>> {
         	cmd.addArgs(toRev);
         }
         
-        if (maxCommits != 0)
-        	cmd.addArgs("-" + maxCommits);
+        if (maxCount != 0)
+        	cmd.addArgs("-" + maxCount);
+        if (skip != 0)
+        	cmd.addArgs("--skip=" + skip);
         
         cmd.addArgs("--");
         if (path != null)

@@ -56,7 +56,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 			protected Commit load() {
 				Git git = getProject().code();
 				List<String> paths = getPaths();
-				List<Commit> commits = git.log(null, getRevision(), Joiner.on("/").join(paths), 1);
+				List<Commit> commits = git.log(null, getRevision(), Joiner.on("/").join(paths), 1, 0);
 				Commit c = Iterables.getFirst(commits, null);
 				if (c == null) {
 					throw new EntityNotFoundException("Unable to get commit for revision " + getRevision());
