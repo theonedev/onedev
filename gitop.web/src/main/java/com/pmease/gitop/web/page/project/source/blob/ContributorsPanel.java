@@ -19,8 +19,8 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
-import com.pmease.gitop.web.component.link.GitUserAvatarLink;
-import com.pmease.gitop.web.component.link.GitUserLink;
+import com.pmease.gitop.web.component.link.GitPersonLink;
+import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
 import com.pmease.gitop.web.page.project.api.GitPerson;
 
 @SuppressWarnings("serial")
@@ -63,7 +63,7 @@ public class ContributorsPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<GitPerson> item) {
 				GitPerson person = item.getModelObject();
-				item.add(new GitUserAvatarLink("link", Model.of(person)));
+				item.add(new GitPersonLink("link", Model.of(person), Mode.AVATAR_ONLY));
 			}
 		};
 		
@@ -89,7 +89,7 @@ public class ContributorsPanel extends Panel {
 
 					@Override
 					protected void populateItem(ListItem<GitPerson> item) {
-						item.add(new GitUserLink("committer", item.getModel()));
+						item.add(new GitPersonLink("committer", item.getModel(), Mode.AVATAR_ONLY));
 					}
 				});
 				
@@ -104,7 +104,7 @@ public class ContributorsPanel extends Panel {
 		
 		add(moreContainer);
 		
-		add(new TooltipBehavior("a[data-toggle=\"tooltip\"]", null, "bottom"));
+		add(new TooltipBehavior("[data-toggle=\"tooltip\"]", null, "bottom"));
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -53,11 +53,18 @@ public class ProjectPageTab extends AbstractPageTab {
 		return category;
 	}
 	
-	public Component newTabLink(String id, IModel<Project> projectModel) {
+	public Component newTabLink(String id, IModel<Project> projectModel, IModel<String> revisionModel) {
 		ProjectCategoryPageLink container = new ProjectCategoryPageLink(id);
+		Class<? extends Page> pageClass = getBookmarkablePageClass();
+		
+		PageParameters params = PageSpec.forProject(projectModel.getObject()); 
+		if (IRevisionAware.class.isAssignableFrom(pageClass)) {
+			params.set(PageSpec.OBJECT_ID, revisionModel.getObject());
+		}
+		
 		BookmarkablePageLink<Void> link = 
 				new BookmarkablePageLink<Void>("link", getBookmarkablePageClass(), 
-						PageSpec.forProject(projectModel.getObject()));
+						params);
 		
 		container.add(link);
 		link.add(new Icon("icon", Model.of(icon)));

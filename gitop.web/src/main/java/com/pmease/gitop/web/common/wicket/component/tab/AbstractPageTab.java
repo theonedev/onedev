@@ -36,12 +36,6 @@ public abstract class AbstractPageTab extends AbstractGroupTab implements IPageT
 		return false;
 	}
 
-	@Override
-	public Component newTabLink(String id) {
-		return newTabLink(id, new PageParameters());
-	}
-	
-	@Override
 	public Component newTabLink(String id, final PageParameters params) {
 		return new LinkPanel(id, getTitle()) {
 			private static final long serialVersionUID = 1L;

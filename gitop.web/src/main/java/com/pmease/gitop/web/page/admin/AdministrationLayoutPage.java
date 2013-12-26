@@ -16,6 +16,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
@@ -60,7 +61,7 @@ public abstract class AdministrationLayoutPage extends AbstractLayoutPage {
 					@Override
 					protected void populateItem(ListItem<AdministrationTab> item) {
 						final AdministrationTab tab = item.getModelObject();
-						item.add(tab.newTabLink("link"));
+						item.add(tab.newTabLink("link", new PageParameters()));
 						item.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
 							@Override

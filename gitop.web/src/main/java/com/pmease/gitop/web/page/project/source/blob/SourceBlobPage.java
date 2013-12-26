@@ -22,14 +22,13 @@ import com.google.common.collect.Sets;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.behavior.collapse.CollapseBehavior;
-import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.web.component.label.AgeLabel;
-import com.pmease.gitop.web.component.link.GitUserLink;
+import com.pmease.gitop.web.component.link.GitPersonLink;
+import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
 import com.pmease.gitop.web.page.project.api.GitPerson;
 import com.pmease.gitop.web.page.project.source.AbstractFilePage;
 import com.pmease.gitop.web.page.project.source.component.SourceBreadcrumbPanel;
 import com.pmease.gitop.web.service.FileBlob;
-import com.pmease.gitop.web.service.FileBlobService;
 import com.pmease.gitop.web.util.UrlUtils;
 
 @SuppressWarnings("serial")
@@ -110,18 +109,13 @@ public class SourceBlobPage extends AbstractFilePage {
 		detailedToggle.add(new CollapseBehavior(detailedMsg));
 		detailedContainer.add(detailedToggle);
 		
-		add(new GitUserLink("author", new AbstractReadOnlyModel<GitPerson>() {
+		add(new GitPersonLink("author", new AbstractReadOnlyModel<GitPerson>() {
 
 			@Override
 			public GitPerson getObject() {
 				return GitPerson.of(getLastCommit().getAuthor());
 			}
-		}) {
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-			}
-		});
+		},  Mode.FULL));
 		
 		add(new AgeLabel("author-date", new AbstractReadOnlyModel<Date>() {
 
@@ -144,8 +138,7 @@ public class SourceBlobPage extends AbstractFilePage {
 
 			@Override
 			protected FileBlob load() {
-				return Gitop.getInstance(FileBlobService.class)
-						.get(getProject(), getRevision(), getFilePath());
+				return FileBlob.of(getProject(), getRevision(), getFilePath());
 			}
 		}));
 	}

@@ -1,5 +1,21 @@
 <html xmlns:wicket>
 <wicket:extend>
-	<h1>Commits</h1>
+	<div class="padder">
+		<div class="file-navigator">
+			<wicket:container wicket:id="revselector"></wicket:container>
+			<ol class="breadcrumb inline breadcrumb-paths">
+				<li><a wicket:id="home"><b wicket:id="name"></b></a></li>
+				<li><b class="text-muted">Commits</b></li>
+			</ol>
+		</div>
+		
+		<div class="commits-view">
+			<div wicket:id="commits"></div>
+			<div class="btn-group">
+				<a class="btn btn-default" wicket:id="newer"><i class="icon icon-long-arrow-left"></i> Newer</a>
+				<a class="btn btn-default" wicket:id="older">Older <i class="icon icon-long-arrow-right"></i></a>
+			</div>
+		</div>
+	</div>
 </wicket:extend>
 </html>

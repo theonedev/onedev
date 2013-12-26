@@ -63,7 +63,7 @@ public class DefaultFileBlobService implements FileBlobService {
 			blob.setSize(ol.getSize());
 
 			if (blob.isEmpty()) {
-				blob.setMediaType(MediaType.OCTET_STREAM);
+				blob.setMediaType(MediaType.TEXT_PLAIN);
 			} else {
 				BufferedInputStream stream = null;
 				try {
