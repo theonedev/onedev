@@ -24,6 +24,8 @@ import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
 @SuppressWarnings("serial")
 public class CommitsPage extends ProjectCategoryPage implements IRevisionAware {
 
+	public static final int COMMITS_PER_PAGE = 30;
+	
 	public static PageParameters newParams(Project project, String revision, int page) {
 		Preconditions.checkNotNull(project);
 		PageParameters params = PageSpec.forProject(project);
@@ -63,7 +65,7 @@ public class CommitsPage extends ProjectCategoryPage implements IRevisionAware {
 			}
 		}));
 		
-		IModel<List<Commit>> model = new LoadableDetachableModel<List<Commit>>() {
+		final IModel<List<Commit>> model = new LoadableDetachableModel<List<Commit>>() {
 
 			@Override
 			protected List<Commit> load() {
@@ -71,8 +73,8 @@ public class CommitsPage extends ProjectCategoryPage implements IRevisionAware {
 				
 				List<Commit> commits = new LogCommand(git.repoDir())
 										.toRev(getRevision())
-										.skip((page - 1) * 35)
-										.maxCount(35)
+										.skip((page - 1) * COMMITS_PER_PAGE)
+										.maxCount(COMMITS_PER_PAGE + 1) // load additional one commit to see whether there is still more page
 										.call();
 				return commits;
 			}
@@ -86,14 +88,7 @@ public class CommitsPage extends ProjectCategoryPage implements IRevisionAware {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				
-				Git git = getProject().code();
-				List<Commit> commits = new LogCommand(git.repoDir())
-										.toRev(getRevision())
-										.skip(page * 35)
-										.maxCount(1)
-										.call();
-				this.setEnabled(!commits.isEmpty());
+				this.setEnabled(model.getObject().size() > COMMITS_PER_PAGE);
 			}
 		});
 	}

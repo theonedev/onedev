@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -59,7 +60,9 @@ public class CommitsPanel extends Panel {
 			protected List<CommitGroup> load() {
 				List<CommitGroup> groups = Lists.newArrayList();
 				CommitGroup current = null;
-				for (Commit each : getCommits()) {
+				List<Commit> commits = getCommits();
+				for (int i = 0; i < commits.size() && i < CommitsPage.COMMITS_PER_PAGE; i++) {
+					Commit each = commits.get(i);
 					if (current == null ||
 							!DateUtils.isSameDay(current.date, each.getCommitter().getDate())) {
 						current = new CommitGroup(each.getCommitter().getDate());
@@ -95,6 +98,10 @@ public class CommitsPanel extends Panel {
 						item.add(new AgeLabel("authordate", Model.of(commit.getAuthor().getDate())));
 						item.add(new Label("detailedmessage", commit.getMessage()).setVisibilityAllowed(!Objects.equal(commit.getSubject(), commit.getMessage())));
 						
+						WebMarkupContainer detailedToggle = new WebMarkupContainer("detailedToggle");
+						item.add(detailedToggle);
+						detailedToggle.setVisibilityAllowed(!Objects.equal(commit.getSubject(), commit.getMessage()));
+						
 						GitPerson committer = new GitPerson(
 								commit.getCommitter().getName(), 
 								commit.getCommitter().getEmail());
@@ -122,7 +129,7 @@ public class CommitsPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(OnDomReadyHeaderItem.forScript("$('.short-message').click(function(e) { \nvar $self = $(this); \n$self.siblings('.detailed-message').toggle(); });"));
+		response.render(OnDomReadyHeaderItem.forScript("$('.short-message .detailed-toggle').click(function(e) { \nvar $self = $(this); $self.toggleClass('collapsed'); \n$self.parent().siblings('.detailed-message').toggle(); });"));
 				
 	}
 	
