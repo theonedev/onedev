@@ -13,6 +13,7 @@ import com.pmease.commons.editable.annotation.OmitNames;
 import com.pmease.gitop.core.editable.BranchChoice;
 import com.pmease.gitop.core.editable.TeamChoice;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.gatekeeper.AndGateKeeper;
 import com.pmease.gitop.model.gatekeeper.CommonGateKeeper;
 import com.pmease.gitop.model.gatekeeper.IfThenGateKeeper;
@@ -63,7 +64,7 @@ public class BranchProtection extends CommonGateKeeper {
 		}
 
 		@Editable(name="Team Can Write", order=200)
-		@TeamChoice
+		@TeamChoice(excludes={Team.ANONYMOUS, Team.LOGGEDIN})
 		@NotNull
 		public Long getTeamId() {
 			return teamId;

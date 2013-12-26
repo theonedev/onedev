@@ -18,7 +18,7 @@ public class TreeNode implements Serializable {
 
 	protected final File gitDir;
 	
-	private final FileMode mode;
+	private final int modeBits;
 	
 	private final String path;
 	
@@ -28,14 +28,16 @@ public class TreeNode implements Serializable {
 	
 	private final int size;
 	
+	private transient FileMode mode;
+	
 	private Optional<TreeNode> parentNode;
 	
-	public TreeNode(File gitDir, FileMode mode, String path, String revision, String hash, int size) {
+	public TreeNode(File gitDir, int modeBits, String path, String revision, String hash, int size) {
 		this.gitDir = gitDir;
 		this.path = path;
 		this.revision = revision;
 		this.hash = hash;
-		this.mode = mode;
+		this.modeBits = modeBits;
 		this.size = size;
 	}
 	
@@ -58,10 +60,16 @@ public class TreeNode implements Serializable {
 		return hash;
 	}
 	
-	public FileMode getMode() {
-		return mode;
+	public int getModeBits() {
+		return modeBits;
 	}
 
+	public FileMode getMode() {
+		if (mode == null)
+			mode = FileMode.fromBits(modeBits);
+		return mode;
+	}
+	
 	public int getSize() {
 		return size;
 	}
@@ -104,7 +112,7 @@ public class TreeNode implements Serializable {
 	 * 			directory. 
 	 */
 	public @Nullable List<TreeNode> listChildren() {
-		if (mode == FileMode.TREE) {
+		if (getMode() == FileMode.TREE) {
 			List<TreeNode> children = new ListTreeCommand(gitDir).revision(getRevision()).path(getPath() + "/").call();
 			for (TreeNode each: children) {
 				each.setParent(this);
@@ -126,7 +134,7 @@ public class TreeNode implements Serializable {
 	 */
 	public byte[] show() {
 		Git git = new Git(gitDir);
-		if (mode == FileMode.GITLINK) {
+		if (getMode() == FileMode.GITLINK) {
 			return git.listSubModules(revision).get(path).getBytes();
 		} else {
 			return git.show(getRevision(), getPath());

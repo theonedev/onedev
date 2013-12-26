@@ -12,7 +12,10 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.OmitNames;
+import com.pmease.gitop.core.editable.DirectoryChoice;
+import com.pmease.gitop.core.editable.TeamChoice;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.gatekeeper.AndGateKeeper;
 import com.pmease.gitop.model.gatekeeper.CommonGateKeeper;
 import com.pmease.gitop.model.gatekeeper.IfThenGateKeeper;
@@ -32,7 +35,7 @@ public class DirectoryProtection extends CommonGateKeeper {
 		entries.add(entry);
 	}
 	
-	@Editable(name="Protected Branches", order=100)
+	@Editable(name="Protected Directories", order=100)
 	@Valid
 	@Size(min=1)
 	@NotNull
@@ -46,21 +49,23 @@ public class DirectoryProtection extends CommonGateKeeper {
 
 	@Editable
 	public static class Entry implements Serializable {
-		private String directories;
+		private String directory;
 		
 		private Long teamId;
 
-		@Editable(order=100)
+		@Editable(name="Directory to Protect", order=100)
+		@DirectoryChoice
 		@NotEmpty
-		public String getDirectories() {
-			return directories;
+		public String getDirectory() {
+			return directory;
 		}
 
-		public void setDirectories(String directories) {
-			this.directories = directories;
+		public void setDirectory(String directory) {
+			this.directory = directory;
 		}
 
 		@Editable(name="Team Can Write", order=200)
+		@TeamChoice(excludes={Team.ANONYMOUS, Team.LOGGEDIN})
 		@NotNull
 		public Long getTeamId() {
 			return teamId;
@@ -78,7 +83,7 @@ public class DirectoryProtection extends CommonGateKeeper {
 		for (Entry entry: entries) {
 			IfThenGateKeeper ifThenGateKeeper = new IfThenGateKeeper();
 			IfTouchesSpecifiedDirectory ifGate = new IfTouchesSpecifiedDirectory();
-			ifGate.setDirectories(entry.getDirectories());
+			ifGate.setDirectories(entry.getDirectory());
 			ifThenGateKeeper.setIfGate(ifGate);
 			
 			IfApprovedBySpecifiedTeam thenGate = new IfApprovedBySpecifiedTeam();

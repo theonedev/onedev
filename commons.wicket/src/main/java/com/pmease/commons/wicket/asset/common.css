@@ -16,7 +16,7 @@
 .spacing {margin: 10px;}
 
 
-/* Default style of Wicket table */
+/* Table */
 table .navigator {border-radius: 4px 4px 4px 4px; margin-bottom: 0px; margin-left: 0; float: right;}
 table tfoot .navigatorLabel {padding-top: 2px; padding-right: 8px; float: left;}
 table tfoot tr.navigation td {vertical-align: middle; padding-top: 12px; text-align: right; min-width: 500px;}
@@ -37,6 +37,10 @@ table .navigator>div .goto em, table .navigator>div>span>em {color: #999999; cur
 table .navigator>div>span>em, table .navigator>div>span>em:hover, table .navigator>div>span>em:focus {background-color: transparent;}
 table .row-selector {width: 24px;}
 table td, table th {text-align: left;}
+
+/* Tree */
+.tree-theme-windows .tree-node span.tree-content a {color: #444444;}
+.tree-content {white-space: nowrap;}
 
 /* Feedback panel */
 .alert ul.feedbackPanel {margin: 0; padding-left: 20px;}
