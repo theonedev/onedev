@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.editable.UserChoice;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
 import com.pmease.gitop.model.Project;
@@ -24,7 +25,8 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
 
     private Long userId;
 
-    @Editable
+    @Editable(name="Select User Below")
+    @UserChoice
     @NotNull
     public Long getUserId() {
         return userId;

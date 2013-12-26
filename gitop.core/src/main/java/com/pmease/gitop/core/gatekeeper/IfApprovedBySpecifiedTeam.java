@@ -23,7 +23,7 @@ public class IfApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
 
     private int leastApprovals = 1;
 
-    @Editable
+    @Editable(name="Least Approvals Required", order=1000)
     @Min(value = 1, message = "Least approvals should not be less than 1.")
     public int getLeastApprovals() {
         return leastApprovals;

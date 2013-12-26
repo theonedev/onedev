@@ -43,7 +43,7 @@ public class DirectoryProtection extends CommonGateKeeper {
 	
 	@Editable(name="Protected Directories", order=100)
 	@Valid
-	@Size(min=1)
+	@Size(min=1, message="At least one entry has to be added.")
 	@NotNull
 	public List<Entry> getEntries() {
 		return entries;
@@ -97,8 +97,8 @@ public class DirectoryProtection extends CommonGateKeeper {
 		AndGateKeeper andGateKeeper = new AndGateKeeper();
 		for (Entry entry: entries) {
 			IfThenGateKeeper ifThenGateKeeper = new IfThenGateKeeper();
-			IfTouchesSpecifiedDirectory ifGate = new IfTouchesSpecifiedDirectory();
-			ifGate.setDirectories(entry.getDirectory());
+			IfTouchesSpecifiedDirectories ifGate = new IfTouchesSpecifiedDirectories();
+			ifGate.getDirectories().add(entry.getDirectory());
 			ifThenGateKeeper.setIfGate(ifGate);
 			
 			IfApprovedBySpecifiedTeam thenGate = new IfApprovedBySpecifiedTeam();

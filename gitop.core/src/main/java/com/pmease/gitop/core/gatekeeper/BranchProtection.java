@@ -41,7 +41,7 @@ public class BranchProtection extends CommonGateKeeper {
 	}
 	
 	@Editable
-	@Size(min=1)
+	@Size(min=1, message="At least one entry has to be specified.")
 	@Valid
 	@NotNull
 	public List<Entry> getEntries() {

@@ -1,5 +1,8 @@
 package com.pmease.gitop.web.editable.directory;
 
+import java.io.Serializable;
+import java.util.List;
+
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
@@ -11,6 +14,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.commons.git.TreeNode;
+import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitop.core.Gitop;
@@ -20,11 +24,11 @@ import com.pmease.gitop.web.component.directory.DirectoryChooser;
 import com.pmease.gitop.web.page.project.AbstractProjectPage;
 
 @SuppressWarnings("serial")
-public class DirectorySingleChoiceEditor extends Panel {
+public class DirectoryMultiChoiceEditor extends Panel {
 	
-	private final DirectorySingleChoiceEditContext editContext;
+	private final DirectoryMultiChoiceEditContext editContext;
 
-	public DirectorySingleChoiceEditor(String id, DirectorySingleChoiceEditContext editContext) {
+	public DirectoryMultiChoiceEditor(String id, DirectoryMultiChoiceEditContext editContext) {
 		super(id);
 		this.editContext = editContext;
 	}
@@ -41,14 +45,23 @@ public class DirectorySingleChoiceEditor extends Panel {
 			public void detach() {
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public String getObject() {
-				return (String) editContext.getPropertyValue();
+				List<String> paths = (List<String>) editContext.getPropertyValue();
+				if (paths != null)
+					return StringUtils.join(paths, ", ");
+				else
+					return null;
 			}
 
 			@Override
 			public void setObject(String object) {
-				editContext.setPropertyValue(object);
+				if (object != null) {
+					editContext.setPropertyValue((Serializable) StringUtils.splitAndTrim(object));
+				} else {
+					editContext.setPropertyValue(null);
+				}
 			}
 			
 		}));
@@ -76,7 +89,7 @@ public class DirectorySingleChoiceEditor extends Panel {
 							@Override
 							protected void onComponentTag(ComponentTag tag) {
 								super.onComponentTag(tag);
-								String script = String.format("gitop.selectDirectory('%s', '%s', '%s', false);", 
+								String script = String.format("gitop.selectDirectory('%s', '%s', '%s', true);", 
 										input.getMarkupId(), getMarkupId(), path);
 								tag.put("onclick", script);
 								tag.put("href", "javascript:void(0);");

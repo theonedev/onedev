@@ -18,7 +18,14 @@ public class IfTouchesSpecifiedFilePatterns extends FileGateKeeper {
 
 	private String filePatterns;
 	
-	@Editable
+	@Editable(name="Specify File Patterns", description="Specify file patterns to match. Below is some examples:"
+			+ "<ul>"
+			+ "<li><i>src/*</i>: matches all files directly under src."
+			+ "<li><i>src/**</i>: matches all files under src recursively."
+			+ "<li><i>**</i>: matches all files."
+			+ "<li><i>**/*.c, **/*.java</i>: matches all C and Java files."
+			+ "<li><i>-src/**, **</i>: matches all files except those under src."
+			+ "</ul>")
 	@NotEmpty
 	public String getFilePatterns() {
 		return filePatterns;

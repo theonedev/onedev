@@ -35,10 +35,10 @@ public class UserChoiceProvider extends ChoiceProvider<User> {
 
 		UserManager um = Gitop.getInstance(UserManager.class);
 		int first = page * 25;
-		List<User> users = um.query(new Criterion[] {
+		Criterion criterion = Restrictions.or(
 				Restrictions.ilike("name", term, MatchMode.START),
-				Restrictions.ilike("displayName", term, MatchMode.START)
-		}, new Order[0], first, 25);
+				Restrictions.ilike("displayName", term, MatchMode.START));
+		List<User> users = um.query(new Criterion[] {criterion}, new Order[0], first, 25);
 
 		response.addAll(users);
 	}

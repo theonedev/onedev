@@ -24,7 +24,7 @@ public class IfApprovedByAuthorizedUsers extends ApprovalGateKeeper {
 
     private int leastApprovals = 1;
 
-    @Editable
+    @Editable(name="Least Approvals Required")
     @Min(value = 1, message = "Least approvals should not be less than 1.")
     public int getLeastApprovals() {
         return leastApprovals;

@@ -4,6 +4,7 @@ import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.editable.TeamChoice;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.Team;
@@ -15,7 +16,8 @@ public abstract class TeamAwareGateKeeper extends ApprovalGateKeeper {
 	
 	private Long teamId;
 	
-	@Editable
+	@Editable(name="Choose Team")
+	@TeamChoice(excludes={Team.ANONYMOUS, Team.LOGGEDIN})
 	@NotNull
 	public Long getTeamId() {
 		return teamId;
