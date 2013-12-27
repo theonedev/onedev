@@ -38,6 +38,7 @@ import com.pmease.gitop.web.page.project.issue.ProjectPullRequestsPage;
 import com.pmease.gitop.web.page.project.settings.ProjectOptionsPage;
 import com.pmease.gitop.web.page.project.source.AbstractFilePage;
 import com.pmease.gitop.web.page.project.source.branches.BranchesPage;
+import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
 import com.pmease.gitop.web.page.project.source.commits.CommitsPage;
 import com.pmease.gitop.web.page.project.source.contributors.ContributorsPage;
 import com.pmease.gitop.web.page.project.source.tags.TagsPage;
@@ -147,7 +148,7 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 		// SOURCE TABS
 		//
 		tabs.add(new ProjectPageTab(Model.of("Code"), Category.SOURCE, "icon-code", new Class[] { SourceTreePage.class, AbstractFilePage.class }));
-		tabs.add(new ProjectPageTab(Model.of("Commits"), Category.SOURCE, "icon-commits", CommitsPage.class));
+		tabs.add(new ProjectPageTab(Model.of("Commits"), Category.SOURCE, "icon-commits", new Class[] { CommitsPage.class, SourceCommitPage.class }));
 		tabs.add(new ProjectPageTab(Model.of("Branches"), Category.SOURCE, "icon-git-branch", BranchesPage.class));
 		tabs.add(new ProjectPageTab(Model.of("Tags"), Category.SOURCE, "icon-tags", TagsPage.class));
 		tabs.add(new ProjectPageTab(Model.of("Contributors"), Category.SOURCE, "icon-group-o", ContributorsPage.class));

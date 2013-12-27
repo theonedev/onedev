@@ -42,10 +42,27 @@ public class CommitsPage extends ProjectCategoryPage implements IRevisionAware {
 	
 	private int page;
 	
+	private final IModel<List<Commit>> commitsModel;
+	
 	public CommitsPage(PageParameters params) {
 		super(params);
 		
 		page = params.get("page").toInt(1);
+		
+		commitsModel = new LoadableDetachableModel<List<Commit>>() {
+
+			@Override
+			protected List<Commit> load() {
+				Git git = getProject().code();
+				
+				List<Commit> commits = new LogCommand(git.repoDir())
+										.toRev(getRevision())
+										.skip((page - 1) * COMMITS_PER_PAGE)
+										.maxCount(COMMITS_PER_PAGE + 1) // load additional one commit to see whether there is still more page
+										.call();
+				return commits;
+			}
+		};
 	}
 
 	@Override
@@ -65,22 +82,7 @@ public class CommitsPage extends ProjectCategoryPage implements IRevisionAware {
 			}
 		}));
 		
-		final IModel<List<Commit>> model = new LoadableDetachableModel<List<Commit>>() {
-
-			@Override
-			protected List<Commit> load() {
-				Git git = getProject().code();
-				
-				List<Commit> commits = new LogCommand(git.repoDir())
-										.toRev(getRevision())
-										.skip((page - 1) * COMMITS_PER_PAGE)
-										.maxCount(COMMITS_PER_PAGE + 1) // load additional one commit to see whether there is still more page
-										.call();
-				return commits;
-			}
-		};
-		
-		add(new CommitsPanel("commits", model, projectModel));
+		add(new CommitsPanel("commits", commitsModel, projectModel));
 		add(new BookmarkablePageLink<Void>("newer", CommitsPage.class,
 				newParams(getProject(), getRevision(), page - 1)).setEnabled(page > 1));
 		add(new BookmarkablePageLink<Void>("older", CommitsPage.class,
@@ -88,8 +90,9 @@ public class CommitsPage extends ProjectCategoryPage implements IRevisionAware {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				this.setEnabled(model.getObject().size() > COMMITS_PER_PAGE);
+				setEnabled(commitsModel.getObject().size() > COMMITS_PER_PAGE);
 			}
+			
 		});
 	}
 	
@@ -98,4 +101,12 @@ public class CommitsPage extends ProjectCategoryPage implements IRevisionAware {
 		return "Commits - " + getProject();
 	}
 
+	@Override
+	public void onDetach() {
+		if (commitsModel != null) {
+			commitsModel.detach();
+		}
+		
+		super.onDetach();
+	}
 }
