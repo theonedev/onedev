@@ -26,7 +26,9 @@ public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
 
     private boolean requireVoteOfAllMembers;
 
-    @Editable
+    @Editable(name="Minimum Score Required", order=100, description=
+    		"Score is calculated by increasing by one for each approval, and decreasing by one for "
+    		+ "each rejection.")
     @Min(value = 1, message = "Min score should not be less than 1.")
     public int getMinScore() {
         return minScore;
@@ -36,6 +38,8 @@ public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
         this.minScore = minScore;
     }
 
+    @Editable(name="Require Vote of All Members", order=200, description=
+    		"Whether or not to require vote of all members in the team before checking score.")
     public boolean isRequireVoteOfAllMembers() {
         return requireVoteOfAllMembers;
     }

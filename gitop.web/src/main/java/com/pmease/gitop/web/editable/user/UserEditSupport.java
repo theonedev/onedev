@@ -1,17 +1,16 @@
-package com.pmease.gitop.web.editable.directory;
+package com.pmease.gitop.web.editable.user;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.List;
 
 import com.pmease.commons.editable.BeanEditContext;
 import com.pmease.commons.editable.EditSupport;
 import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.util.BeanUtils;
 import com.pmease.commons.util.JavassistUtils;
-import com.pmease.gitop.core.editable.DirectoryChoice;
+import com.pmease.gitop.core.editable.UserChoice;
 
-public class DirectoryEditSupport implements EditSupport {
+public class UserEditSupport implements EditSupport {
 
     @Override
     public BeanEditContext getBeanEditContext(Serializable bean) {
@@ -21,11 +20,8 @@ public class DirectoryEditSupport implements EditSupport {
     @Override
     public PropertyEditContext getPropertyEditContext(Serializable bean, String propertyName) {
         Method propertyGetter = BeanUtils.getGetter(JavassistUtils.unproxy(bean.getClass()), propertyName);
-        if (propertyGetter.getAnnotation(DirectoryChoice.class) != null) {
-        	if (List.class.isAssignableFrom(propertyGetter.getReturnType()))
-        		return new DirectoryMultiChoiceEditContext(bean, propertyName);
-        	else
-        		return new DirectorySingleChoiceEditContext(bean, propertyName);
+        if (propertyGetter.getAnnotation(UserChoice.class) != null) {
+            return new UserSingleChoiceEditContext(bean, propertyName);
         } else {
             return null;
         }
