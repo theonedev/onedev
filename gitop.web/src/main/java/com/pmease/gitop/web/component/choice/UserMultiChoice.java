@@ -25,8 +25,7 @@ public class UserMultiChoice extends Select2MultiChoice<User> {
 		// getSettings().setMinimumInputLength(1);
 		getSettings().setPlaceholder("Start typing to find users ...");
 		getSettings().setFormatResult("UserChoice.formatter.formatResult");
-		getSettings()
-				.setFormatSelection("UserChoice.formatter.formatSelection");
+		getSettings().setFormatSelection("UserChoice.formatter.formatSelection");
 		getSettings().setEscapeMarkup("UserChoice.formatter.escapeMarkup");
 	}
 

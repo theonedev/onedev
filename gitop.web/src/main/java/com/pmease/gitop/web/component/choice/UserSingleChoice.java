@@ -22,8 +22,7 @@ public class UserSingleChoice extends Select2Choice<User> {
 		// getSettings().setMinimumInputLength(1);
 		getSettings().setPlaceholder("Typing to find an user ...");
 		getSettings().setFormatResult("UserChoice.formatter.formatResult");
-		getSettings()
-				.setFormatSelection("UserChoice.formatter.formatSelection");
+		getSettings().setFormatSelection("UserChoice.formatter.formatSelection");
 		getSettings().setEscapeMarkup("UserChoice.formatter.escapeMarkup");
 	}
 

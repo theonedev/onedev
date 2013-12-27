@@ -26,30 +26,33 @@ import com.vaynberg.wicket.select2.Response;
 public class UserChoiceProvider extends ChoiceProvider<User> {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static final int PAGE_SIZE = 25;
 
 	@Override
 	public void query(String term, int page, Response<User> response) {
-		if (Strings.isNullOrEmpty(term)) {
-			return;
-		}
-
 		UserManager um = Gitop.getInstance(UserManager.class);
-		int first = page * 25;
+		int first = page * PAGE_SIZE;
 		Criterion criterion = Restrictions.or(
 				Restrictions.ilike("name", term, MatchMode.START),
 				Restrictions.ilike("displayName", term, MatchMode.START));
-		List<User> users = um.query(new Criterion[] {criterion}, new Order[0], first, 25);
+		List<User> users = um.query(new Criterion[] {criterion}, new Order[]{Order.asc("name")}, first, PAGE_SIZE + 1);
 
-		response.addAll(users);
+		if (users.size() <= PAGE_SIZE) {
+			response.addAll(users);
+		} else {
+			response.addAll(users.subList(0, PAGE_SIZE));
+			response.setHasMore(true);
+		}
 	}
 
 	@Override
 	public void toJson(User choice, JSONWriter writer) throws JSONException {
-		writer.key("id").value(choice.getId())
-				.key("name").value(choice.getName())
-				.key("displayName").value(choice.getDisplayName())
-				.key("email").value(choice.getEmail())
-				.key("avatar").value(getAvatarUrl(choice));
+		writer.key("id").value(choice.getId()).key("name").value(choice.getName());
+		if (choice.getDisplayName() != null)
+			writer.key("displayName").value(choice.getDisplayName());
+		writer.key("email").value(choice.getEmail());
+		writer.key("avatar").value(getAvatarUrl(choice));
 	}
 
 	@Override

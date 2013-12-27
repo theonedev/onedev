@@ -6,7 +6,7 @@ UserChoice.formatter = {
 	
 	formatResult: function(user) {
 		return "<div class='user-choice-row'><img class='img-thumbnail avatar avatar-big' src='" + user.avatar + "' />" 
-				+ "<p>"+ user.name + " (" + user.displayName + ")" + "</p>"
+				+ "<p>"+ user.name + (user.displayName?" (" + user.displayName + ")": "") + "</p>"
 				+ "<p class='text-muted'>" + user.email + "</p>"
 				+ "</div>";
 	},
