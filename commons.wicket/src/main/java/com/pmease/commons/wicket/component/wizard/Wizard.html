@@ -2,7 +2,10 @@
 	<div class="wizard panel panel-default">
 		<div class="panel-heading"><div wicket:id="title" class="panel-title"></div></div>
 		<form wicket:id="form">
-			<div wicket:id="content" class="panel-body"></div>
+			<div class="panel-body">
+				<div wicket:id="feedback"></div>
+				<div wicket:id="content"></div>
+			</div>
 			<div class="panel-footer">
 				<a wicket:id="previous" class="btn btn-default previous">Previous</a> 
 				<a wicket:id="skip" class="btn btn-default skip">Skip</a> 

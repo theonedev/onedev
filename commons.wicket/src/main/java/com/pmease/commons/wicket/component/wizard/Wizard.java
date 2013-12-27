@@ -19,6 +19,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.wicket.component.FeedbackPanel;
 
 @SuppressWarnings("serial")
 public abstract class Wizard extends Panel {
@@ -51,6 +52,7 @@ public abstract class Wizard extends Panel {
 		}));
 		
 		final Form<?> form = new Form<Void>("form");
+		form.add(new FeedbackPanel("feedback", form));
 		form.add(getActiveStep().render(STEP_CONTENT_ID));
 		form.add(new Link<Void>("previous") {
 
@@ -100,6 +102,8 @@ public abstract class Wizard extends Panel {
 				if (getActiveStep().complete()) {
 					activeStepIndex++;
 					form.replace(getActiveStep().render(STEP_CONTENT_ID));
+				} else {
+					form.error("Fix errors below");
 				}
 			}
 			
@@ -116,6 +120,8 @@ public abstract class Wizard extends Panel {
 			public void onSubmit() {
 				if (getActiveStep().complete()) {
 					finished();
+				} else {
+					form.error("Fix errors below");
 				}
 			}
 			
