@@ -1,0 +1,34 @@
+<html xmlns:wicket>
+<wicket:extend>
+	<div class="padder">
+		<div class="commit">
+			<wicket:container wicket:id="authoravatar"></wicket:container>
+			<div class="commit-meta">
+				<p class="author-info"><wicket:container wicket:id="author"></wicket:container> authored <span class="age" wicket:id="authorday"></span></p>
+				<wicket:enclosure child="committer">
+					<p class="committer-info">
+						<i class="icon icon-arrow-right"></i> 
+						<wicket:container wicket:id="committer"></wicket:container> 
+						committed <span class="age" wicket:id="committerday"></span>
+					</p>
+				</wicket:enclosure>
+				
+				<div class="right">
+					<p><span class="sha" wicket:id="commitsha"></span></p>
+					<p>parents 
+						<wicket:container wicket:id="parents">
+							<span wicket:id="connector">+</span>
+							<a class="sha" wicket:id="link"><span wicket:id="sha"></span></a>
+						</wicket:container>
+					</p>
+				</div>
+			</div>
+			
+			<div class="commit-message">
+				<p class="short-message" wicket:id="shortmessage"></p>
+				<pre class="detailed-message" wicket:id="detailedmessage"></pre>
+			</div>
+		</div>
+	</div>
+</wicket:extend>
+</html>

@@ -434,7 +434,7 @@ table.table-blob { width: 100%; }
 .commit-group h3 { font-size: 14px; font-weight: bold; margin: 0; padding: 12px; background: #e6e9ee; border-radius: 4px 4px 0 0; border-width: 1px 1px 0; border-style:solid; border-color: #ddd; }
 .commit-group ul { margin: 0; padding: 0; list-style: none; border-radius: 0 0 4px 4px; border-width: 1px; border-style: solid; border-color: #ddd; }
 .commit-group li { padding: 8px 12px; border-top: 1px solid #ddd; min-height: 60px; }
-.commit-group li:hover { background: #f5f5e5; }
+.commit-group li:hover { background: #fcfce5; }
 .commit-group .short-message { font-weight: bold; border: none; margin: 0 120px 0 64px; padding: 0; background: transparent; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
 .commit-group .detailed-message {display: none;  margin: 0 120px 18px 80px; color: #666; border-width: 0 0 0 1px; background: transparent; }
 .commit-group .avatar { float: left; width: 48px; height: 48px; background: transparent; box-shadow: none; }
@@ -449,6 +449,21 @@ table.table-blob { width: 100%; }
 .commit-group .detailed-toggle { cursor: pointer; }
 .commit-group .detailed-toggle.collapsed .icon-toggle:before { content: "\F02B"; }
 .commit-group .detailed-toggle .icon-toggle:before { content: "\F029"; }
+
+/*
+ * COMMIT PAGE
+ */
+.commit { padding-left: 60px; position: relative; }
+.commit .avatar { width: 48px; height: 48px; position: absolute; left: 0; top: 0; }
+.commit .commit-meta p { margin-bottom: 0; }
+.commit .committer-info { color: #999; }
+.commit .author-info .name,
+.commit .committer-info .name { font-weight: bold; }
+.commit .commit-meta { border-bottom: 1px solid #ddd; border-top: none; padding: 8px 0; position: relative; margin-bottom: 9px; min-height: 48px; }
+.commit .commit-meta .right { position: absolute; top: 8px; right: 15px; }
+.commit .commit-meta .right p { text-align: right; }
+.commit .short-message { font-weight: bold; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+.commit .detailed-message { color: #666; border-width: 0 0 0 1px; background: transparent; border-width: 0; padding: 0; }
 
 /**
  * GATE KEEPER SETTING PAGE

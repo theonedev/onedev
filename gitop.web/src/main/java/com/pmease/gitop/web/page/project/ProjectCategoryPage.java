@@ -7,6 +7,7 @@ import javax.persistence.EntityNotFoundException;
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -38,6 +39,7 @@ import com.pmease.gitop.web.page.project.issue.ProjectPullRequestsPage;
 import com.pmease.gitop.web.page.project.settings.ProjectOptionsPage;
 import com.pmease.gitop.web.page.project.source.AbstractFilePage;
 import com.pmease.gitop.web.page.project.source.branches.BranchesPage;
+import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
 import com.pmease.gitop.web.page.project.source.commits.CommitsPage;
 import com.pmease.gitop.web.page.project.source.contributors.ContributorsPage;
 import com.pmease.gitop.web.page.project.source.tags.TagsPage;
@@ -66,6 +68,13 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 	@Override
 	protected void onPageInitialize() {
 		super.onPageInitialize();
+
+		add(createSidebar("sidebar"));
+	}
+	
+	protected Component createSidebar(String id) {
+		WebMarkupContainer sidebar = new WebMarkupContainer(id);
+		sidebar.setVisibilityAllowed(getProject().code().hasCommits());
 		
 		Loop groups = new Loop("groups", Category.values().length) {
 
@@ -77,7 +86,7 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 			}
 		};
 		
-		add(groups);
+		sidebar.add(groups);
 		
 		AbstractLink adminLink = new BookmarkablePageLink<Void>("settinglink", 
 				ProjectOptionsPage.class, PageSpec.forProject(getProject())) {
@@ -88,7 +97,8 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 			}
 		};
 		
-		add(adminLink);
+		sidebar.add(adminLink);
+		return sidebar;
 	}
 	
 	protected String findRevision() {
@@ -146,21 +156,55 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 		
 		// SOURCE TABS
 		//
-		tabs.add(new ProjectPageTab(Model.of("Code"), Category.SOURCE, "icon-code", new Class[] { SourceTreePage.class, AbstractFilePage.class }));
-		tabs.add(new ProjectPageTab(Model.of("Commits"), Category.SOURCE, "icon-commits", CommitsPage.class));
-		tabs.add(new ProjectPageTab(Model.of("Branches"), Category.SOURCE, "icon-git-branch", BranchesPage.class));
-		tabs.add(new ProjectPageTab(Model.of("Tags"), Category.SOURCE, "icon-tags", TagsPage.class));
-		tabs.add(new ProjectPageTab(Model.of("Contributors"), Category.SOURCE, "icon-group-o", ContributorsPage.class));
+		tabs.add(new ProjectPageTab(Model.of("Code"), 
+									Category.SOURCE, 
+									"icon-code", 
+									new Class[] { SourceTreePage.class, 
+												  AbstractFilePage.class }));
+		
+		tabs.add(new ProjectPageTab(Model.of("Commits"), 
+									Category.SOURCE, 
+									"icon-commits", 
+									new Class[] { CommitsPage.class, 
+												  SourceCommitPage.class }));
+		
+		tabs.add(new ProjectPageTab(Model.of("Branches"), 
+									Category.SOURCE, 
+									"icon-git-branch", 
+									BranchesPage.class));
+		
+		tabs.add(new ProjectPageTab(Model.of("Tags"), 
+									Category.SOURCE, 
+									"icon-tags", 
+									TagsPage.class));
+		
+		tabs.add(new ProjectPageTab(Model.of("Contributors"), 
+									Category.SOURCE, 
+									"icon-group-o", 
+									ContributorsPage.class));
 		
 		// WIKI TABS
-		tabs.add(new ProjectPageTab(Model.of("Wiki"), Category.WIKI, "icon-wiki", ProjectWikiPage.class));
+		tabs.add(new ProjectPageTab(Model.of("Wiki"), 
+									Category.WIKI, 
+									"icon-wiki", 
+									ProjectWikiPage.class));
 		
 		// ISSUES TABS
-		tabs.add(new ProjectPageTab(Model.of("Pull Requests"), Category.ISSUES, "icon-pull-request", ProjectPullRequestsPage.class));
+		tabs.add(new ProjectPageTab(Model.of("Pull Requests"), 
+									Category.ISSUES, 
+									"icon-pull-request", 
+									ProjectPullRequestsPage.class));
 		
 		// STATISTICS TABS
-		tabs.add(new ProjectPageTab(Model.of("Graphs"), Category.STATISTICS, "icon-chart-area", ProjectGraphsPage.class));
-		tabs.add(new ProjectPageTab(Model.of("Forks"), Category.STATISTICS, "icon-network", ProjectForksPage.class));
+		tabs.add(new ProjectPageTab(Model.of("Graphs"), 
+									Category.STATISTICS, 
+									"icon-chart-area", 
+									ProjectGraphsPage.class));
+		
+		tabs.add(new ProjectPageTab(Model.of("Forks"), 
+									Category.STATISTICS, 
+									"icon-network", 
+									ProjectForksPage.class));
 		
 		return tabs;
 	} 
