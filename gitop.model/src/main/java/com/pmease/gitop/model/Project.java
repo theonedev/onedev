@@ -21,6 +21,7 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
@@ -46,9 +47,6 @@ public class Project extends AbstractEntity implements UserBelonging {
 	private User owner;
 	
 	private boolean forkable;
-	
-	@Column()
-	private String defaultBranchName;
 	
 	@ManyToOne
 	@JoinColumn(nullable=true)
@@ -132,14 +130,6 @@ public class Project extends AbstractEntity implements UserBelonging {
 	public void setCreatedAt(Date createdAt) {
 		this.createdAt = createdAt;
 	}
-
-	public String getDefaultBranchName() {
-        return defaultBranchName;
-    }
-
-    public void setDefaultBranchName(String defaultBranchName) {
-        this.defaultBranchName = defaultBranchName;
-    }
 
     @Override
 	public User getUser() {
@@ -236,6 +226,12 @@ public class Project extends AbstractEntity implements UserBelonging {
 		for (GateKeeper each: getGateKeepers())
 			andGateKeeper.getGateKeepers().add(each);
 		return andGateKeeper;
+	}
+
+	public String getDefaultBranchName() {
+		String refName = code().showSymbolicRef("HEAD");
+		Preconditions.checkState(refName.startsWith(Git.REFS_HEADS));
+		return refName.substring(Git.REFS_HEADS.length());
 	}
 	
 }

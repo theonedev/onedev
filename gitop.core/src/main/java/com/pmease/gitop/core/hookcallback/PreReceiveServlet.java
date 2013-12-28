@@ -60,7 +60,8 @@ public class PreReceiveServlet extends CallbackServlet {
 		
 		logger.info("Executing pre-receive hook against branch {}...", branchName);
 		
-		Branch branch = branchManager.findBy(project, branchName, true);
+		Branch branch = branchManager.findBy(project, branchName);
+		Preconditions.checkNotNull(branch);
 
 		User user = userManager.getCurrent();
 		Preconditions.checkNotNull(user, "User pushing commits is unknown.");

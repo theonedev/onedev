@@ -2,7 +2,6 @@ package com.pmease.gitop.core.manager;
 
 import com.google.inject.ImplementedBy;
 import com.pmease.commons.hibernate.dao.GenericDao;
-import com.pmease.commons.util.namedentity.EntityLoader;
 import com.pmease.gitop.core.manager.impl.DefaultTeamManager;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.User;
@@ -23,8 +22,6 @@ public interface TeamManager extends GenericDao<Team> {
 	 */
 	Team findBy(User owner, String teamName);
 	
-	EntityLoader asEntityLoader(User owner);
-
 	Team getAnonymous(User user);
 	
 	Team getLoggedIn(User user);

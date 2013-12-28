@@ -48,6 +48,8 @@ import com.pmease.commons.util.execution.StreamConsumer;
 @SuppressWarnings("serial")
 public class Git implements Serializable {
 
+	public static final String REFS_HEADS = "refs/heads/";
+	
 	private final File repoDir;
 
 	public Git(File repoDir) {

@@ -12,8 +12,6 @@ import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
-import com.pmease.commons.util.namedentity.EntityLoader;
-import com.pmease.commons.util.namedentity.NamedEntity;
 import com.pmease.gitop.core.manager.MembershipManager;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.manager.UserManager;
@@ -96,57 +94,6 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
     @Override
     public User findByEmail(String email) {
         return find(new Criterion[] {Restrictions.eq("email", email)});
-    }
-
-    @Override
-    public EntityLoader asEntityLoader() {
-        return new EntityLoader() {
-
-            @Override
-            public NamedEntity get(final Long id) {
-                final User user = DefaultUserManager.this.get(id);
-                if (user != null) {
-                    return new NamedEntity() {
-
-                        @Override
-                        public Long getId() {
-                            return id;
-                        }
-
-                        @Override
-                        public String getName() {
-                            return user.getName();
-                        }
-
-                    };
-                } else {
-                    return null;
-                }
-            }
-
-            @Override
-            public NamedEntity get(String name) {
-                final User user = findByName(name);
-                if (user != null) {
-                    return new NamedEntity() {
-
-                        @Override
-                        public Long getId() {
-                            return user.getId();
-                        }
-
-                        @Override
-                        public String getName() {
-                            return user.getName();
-                        }
-
-                    };
-                } else {
-                    return null;
-                }
-            }
-
-        };
     }
 
     @Override

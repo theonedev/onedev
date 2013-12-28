@@ -4,7 +4,6 @@ import javax.annotation.Nullable;
 
 import com.google.inject.ImplementedBy;
 import com.pmease.commons.hibernate.dao.GenericDao;
-import com.pmease.commons.util.namedentity.EntityLoader;
 import com.pmease.gitop.core.manager.impl.DefaultUserManager;
 import com.pmease.gitop.model.User;
 
@@ -47,5 +46,4 @@ public interface UserManager extends GenericDao<User> {
 	 */
 	@Nullable User getCurrent();
 	
-	EntityLoader asEntityLoader();
 }

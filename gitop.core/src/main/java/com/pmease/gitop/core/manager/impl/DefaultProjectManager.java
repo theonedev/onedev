@@ -34,13 +34,13 @@ import com.pmease.gitop.model.storage.StorageManager;
 public class DefaultProjectManager extends AbstractGenericDao<Project> implements ProjectManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultProjectManager.class);
-	
+
     private final StorageManager storageManager;
     
     private final ServerConfig serverConfig;
     
     private final String hookTemplate;
-
+    
     @Inject
     public DefaultProjectManager(GeneralDao generalDao, StorageManager storageManager, ServerConfig serverConfig) {
         super(generalDao);

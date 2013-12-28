@@ -8,6 +8,7 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.google.common.eventbus.EventBus;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.util.StringUtils;
@@ -53,7 +54,8 @@ public class PostReceiveServlet extends CallbackServlet {
 		} else {
 			logger.info("Executing post-receive hook against branch {}...", branchName);
 			
-			Branch branch = branchManager.findBy(project, branchName, true);
+			Branch branch = branchManager.findBy(project, branchName);
+			Preconditions.checkNotNull(branch);
 			eventBus.post(new BranchRefUpdateEvent(branch));
 		}
 		
