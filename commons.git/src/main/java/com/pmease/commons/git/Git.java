@@ -38,7 +38,9 @@ import com.pmease.commons.git.command.ResetCommand;
 import com.pmease.commons.git.command.ShowCommand;
 import com.pmease.commons.git.command.ShowForConsumeCommand;
 import com.pmease.commons.git.command.ShowRefCommand;
+import com.pmease.commons.git.command.ShowSymbolicRefCommand;
 import com.pmease.commons.git.command.UpdateRefCommand;
+import com.pmease.commons.git.command.UpdateSymbolicRefCommand;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.GeneralException;
 import com.pmease.commons.util.execution.StreamConsumer;
@@ -156,6 +158,34 @@ public class Git implements Serializable {
 	public Git checkout(String revision, @Nullable String newBranch) {
 		new CheckoutCommand(repoDir).revision(revision).newBranch(newBranch).call();
 		return this;
+	}
+
+	/**
+	 * Update specified symbolic ref name with specified ref name.
+	 * 
+	 * @param symbolicRefName
+	 * 			symbolic ref name to be updated
+	 * @param refName
+	 * 			ref name to point to
+	 * @param reason
+	 * 			reason to update the symbolic ref
+	 */
+	public Git updateSymbolicRef(String symbolicRefName, String refName, @Nullable String reason) {
+		new UpdateSymbolicRefCommand(repoDir).symbolicRefName(symbolicRefName).refName(refName)
+				.reason(reason).call();
+		return this;
+	}
+
+	/**
+	 * Show ref name for specified symbolic ref name.
+	 * 
+	 * @param symbolicRefName
+	 * 			symbolic ref name to be shown
+	 * @return
+	 * 			ref name of specified symbolic ref name
+	 */
+	public String showSymbolicRef(String symbolicRefName) {
+		return new ShowSymbolicRefCommand(repoDir).symbolicRefName(symbolicRefName).call();
 	}
 
 	/**
