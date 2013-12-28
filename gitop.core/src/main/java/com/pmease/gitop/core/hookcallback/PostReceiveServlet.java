@@ -42,23 +42,27 @@ public class PostReceiveServlet extends CallbackServlet {
     protected void callback(Project project, String callbackData, Output output) {
 		List<String> splitted = StringUtils.splitAndTrim(callbackData, " ");
 
-		String oldCommitHash = splitted.get(0);
 		String branchName = Branch.getName(splitted.get(2));
+		if (branchName != null) {
+			String oldCommitHash = splitted.get(0);
+			String newCommitHash = splitted.get(1);
 
-		// User with write permission can create new branch
-		if (oldCommitHash.equals(Commit.ZERO_HASH)) {
-			Branch branch = new Branch();
-			branch.setProject(project);
-			branch.setName(branchName);
-			branchManager.save(branch);
-		} else {
-			logger.info("Executing post-receive hook against branch {}...", branchName);
-			
-			Branch branch = branchManager.findBy(project, branchName);
-			Preconditions.checkNotNull(branch);
-			eventBus.post(new BranchRefUpdateEvent(branch));
+			if (oldCommitHash.equals(Commit.ZERO_HASH)) {
+				Branch branch = new Branch();
+				branch.setProject(project);
+				branch.setName(branchName);
+				branchManager.save(branch);
+			} else if (newCommitHash.equals(Commit.ZERO_HASH)) {
+				Branch branch = branchManager.findBy(project, branchName);
+				Preconditions.checkNotNull(branch);
+				branchManager.delete(branch);
+			} else {
+				logger.info("Executing post-receive hook against branch {}...", branchName);
+				
+				Branch branch = branchManager.findBy(project, branchName);
+				Preconditions.checkNotNull(branch);
+				eventBus.post(new BranchRefUpdateEvent(branch));
+			}
 		}
-		
     }
-    
 }

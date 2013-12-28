@@ -1,10 +1,12 @@
 package com.pmease.gitop.core.hookcallback;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,15 +17,14 @@ import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.MergePrediction;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
-import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
+import com.pmease.gitop.model.permission.ObjectPermission;
 
 @SuppressWarnings("serial")
 @Singleton
@@ -44,61 +45,73 @@ public class PreReceiveServlet extends CallbackServlet {
 		this.branchManager = branchManager;
 		this.userManager = userManager;
 	}
-
+	
+	private void error(Output output, String... messages) {
+		output.markError();
+		output.writeLine();
+		output.writeLine("*******************************************************");
+		output.writeLine("*");
+		for (String message: messages)
+			output.writeLine("*  " + message);
+		output.writeLine("*");
+		output.writeLine("*******************************************************");
+		output.writeLine();
+	}
+	
 	@Override
 	protected void callback(Project project, String callbackData, Output output) {
 		List<String> splitted = StringUtils.splitAndTrim(callbackData, " ");
+		String refName = splitted.get(2);
+		if (refName.startsWith(Project.REFS_GITOP)) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectAdmin(project)))
+				error(output, "Only project administrators can update gitop refs.");
+		} else {
+			String branchName = Branch.getName(refName);
+			if (branchName != null) {
+				String oldCommitHash = splitted.get(0);
+				
+				if (!oldCommitHash.equals(Commit.ZERO_HASH)) {
+					Branch branch = branchManager.findBy(project, branchName);
+					Preconditions.checkNotNull(branch);
 
-		String oldCommitHash = splitted.get(0);
-		
-		// User with write permission can create new branch
-		if (oldCommitHash.equals(Commit.ZERO_HASH))
-			return;
-		
-		String newCommitHash = splitted.get(1);
-		String branchName = Branch.getName(splitted.get(2));
-		
-		logger.info("Executing pre-receive hook against branch {}...", branchName);
-		
-		Branch branch = branchManager.findBy(project, branchName);
-		Preconditions.checkNotNull(branch);
+					logger.info("Executing pre-receive hook against branch {}...", branchName);
+					
+					User user = userManager.getCurrent();
+					Preconditions.checkNotNull(user);
+			
+					String newCommitHash = splitted.get(1);
 
-		User user = userManager.getCurrent();
-		Preconditions.checkNotNull(user, "User pushing commits is unknown.");
-
-		PullRequest request = new PullRequest();
-		request.setTarget(branch);
-		request.setSource(new Branch());
-		request.getSource().setProject(new Project());
-		request.getSource().getProject().setOwner(user);
-		request.setTitle("Faked pull request to check against push gatekeeper");
-		request.setMergePrediction(new MergePrediction(oldCommitHash, newCommitHash, newCommitHash));
-		
-		PullRequestUpdate update = new PullRequestUpdate();
-		update.setRequest(request);
-		update.setHeadCommit(newCommitHash);
-		request.getUpdates().add(update);
-
-		GateKeeper gateKeeper = project.getCompositeGateKeeper();
-		CheckResult checkResult = gateKeeper.check(request);
-
-		if (!(checkResult instanceof Accepted)) {
-			output.markError();
-			output.writeLine();
-			output.writeLine("*******************************************************");
-			output.writeLine("*");
-			for (String each: checkResult.getReasons()) {
-				output.writeLine("*  " + each);
+					GateKeeper gateKeeper = project.getCompositeGateKeeper();
+					CheckResult checkResult = gateKeeper.checkCommit(user, branch, newCommitHash);
+			
+					if (!(checkResult instanceof Accepted)) {
+						List<String> messages = new ArrayList<>();
+						for (String each: checkResult.getReasons())
+							messages.add(each);
+						if (!newCommitHash.equals(Commit.ZERO_HASH) && !(checkResult instanceof Rejected)) {
+							messages.add("");
+							messages.add("----------------------------------------------------");
+							messages.add("You may submit a pull request instead.");
+						}
+						error(output, messages.toArray(new String[messages.size()]));
+					} else {
+						for (PullRequest request: branch.getIngoingRequests()) {
+							if (request.isOpen()) {
+								error(output, "There are unclosed pull requests targeting this branch.", 
+										"Please close them before continue.");
+								return;
+							}
+						}
+						for (PullRequest request: branch.getOutgoingRequests()) {
+							if (request.isOpen()) {
+								error(output, "There are unclosed pull requests originating from this branch.", 
+										"Please close them before continue.");
+								return;
+							}
+						}
+					}
+				}
 			}
-			if (!(checkResult instanceof Rejected)) {
-				output.writeLine("*");
-				output.writeLine("*  ----------------------------------------------------");
-				output.writeLine("*  You may submit a pull request instead.");
-			}
-			output.writeLine("*");
-			output.writeLine("*******************************************************");
-			output.writeLine();
 		}
 	}
-
 }

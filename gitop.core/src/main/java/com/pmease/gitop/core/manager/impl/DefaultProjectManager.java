@@ -23,6 +23,7 @@ import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.hookcallback.PostReceiveServlet;
 import com.pmease.gitop.core.hookcallback.PreReceiveServlet;
+import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.setting.ServerConfig;
 import com.pmease.gitop.model.Project;
@@ -36,16 +37,20 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
 	private static final Logger logger = LoggerFactory.getLogger(DefaultProjectManager.class);
 
     private final StorageManager storageManager;
-    
+
+    private final BranchManager branchManager;
+
     private final ServerConfig serverConfig;
     
     private final String hookTemplate;
     
     @Inject
-    public DefaultProjectManager(GeneralDao generalDao, StorageManager storageManager, ServerConfig serverConfig) {
+    public DefaultProjectManager(GeneralDao generalDao, StorageManager storageManager, 
+    		BranchManager branchManager, ServerConfig serverConfig) {
         super(generalDao);
 
         this.storageManager = storageManager;
+        this.branchManager = branchManager;
         this.serverConfig = serverConfig;
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-hook-template")) {
@@ -90,6 +95,8 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
                         String.format(hookTemplate, urlRoot + PostReceiveServlet.PATH + "/" + project.getId()));
                 postReceiveHook.setExecutable(true);
             }
+            
+            branchManager.syncWithGit(project);
         } else {
             super.save(project);
         }

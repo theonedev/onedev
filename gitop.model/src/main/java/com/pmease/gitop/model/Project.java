@@ -41,6 +41,8 @@ import com.pmease.gitop.model.validation.ProjectName;
 @SuppressWarnings("serial")
 @Editable
 public class Project extends AbstractEntity implements UserBelonging {
+
+	public static final String REFS_GITOP = "refs/gitop/";
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)

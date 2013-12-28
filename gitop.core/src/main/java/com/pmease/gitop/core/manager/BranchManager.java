@@ -51,4 +51,13 @@ public interface BranchManager extends GenericDao<Branch> {
      * 			to be deleted
      */
     public void deleteRefs(Branch branch);
+    
+    /**
+     * Persist specified branch to database. Note that this won't update the git 
+     * repository.
+     * 
+     * @param branch
+     * 			branch to be saved
+     */
+    public void save(Branch branch);
 }

@@ -64,13 +64,8 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 	public void syncWithGit(Project project) {
 		Collection<String> branchesInGit = project.code().listBranches();
 		for (Branch branch: project.getBranches()) {
-			if (!branchesInGit.contains(branch.getName())) {
-				for (PullRequest request: branch.getIngoingRequests())
-					pullRequestManager.deleteRefs(request);
-				for (PullRequest request: branch.getOutgoingRequests())
-					pullRequestManager.deleteRefs(request);
+			if (!branchesInGit.contains(branch.getName()))
 				delete(branch);
-			}
 		}
 		
 		for (String branchInGit: branchesInGit) {

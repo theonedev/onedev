@@ -6,6 +6,7 @@ import javax.validation.constraints.Min;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.git.Commit;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.BuildResultManager;
 import com.pmease.gitop.model.BuildResult;
@@ -58,7 +59,7 @@ public class IfVerifiedByBuilds extends CommonGateKeeper {
 	}
 
 	public CheckResult doCheck(PullRequest request) {
-		BuildResultManager verificationManager = Gitop.getInstance(BuildResultManager.class);
+		BuildResultManager BuildResultManager = Gitop.getInstance(BuildResultManager.class);
 
 		Preconditions.checkNotNull(request.getMergePrediction());
 		
@@ -70,32 +71,41 @@ public class IfVerifiedByBuilds extends CommonGateKeeper {
 		} else {
 			commit = request.getLatestUpdate().getHeadCommit();
 		}
-		Collection<BuildResult> verifications = verificationManager.findBy(commit);
-		for (BuildResult each: verifications) {
-			if (!each.isPassed())
-				return rejected("At least one build is failed for the merged commit.");
-		}
-		int lacks = buildCount - verifications.size();
-		
-		String prefix;
-		if (request.getId() == null)
-			prefix = "Not ";
-		else
-			prefix = "To be ";
-		if (lacks > 0) {
-			if (blockMode) {
-				if (buildCount > 1)
-					return blocked(prefix + "verified by " + lacks + " more build(s)", new NoneCanVote());
-				else
-					return blocked(prefix + "verified by build", new NoneCanVote());
-			} else {
-				if (buildCount > 1)
-					return pending(prefix + "verified by " + lacks + " more build(s)", new NoneCanVote());
-				else
-					return pending(prefix + "verified by build", new NoneCanVote());
-			}
+		if (commit.equals(Commit.ZERO_HASH)) { // delete branch
+			return accepted("Build is no longer necessary.");
+		} else if (commit.startsWith(Commit.ZERO_HASH)) { // check if a certain file can be touched
+			if (blockMode)
+				return blocked("Not verified by build.", new NoneCanVote());
+			else
+				return pending("Not verified by build.", new NoneCanVote());
 		} else {
-			return accepted("Builds passed");
+			Collection<BuildResult> buildResults = BuildResultManager.findBy(commit);
+			for (BuildResult each: buildResults) {
+				if (!each.isPassed())
+					return rejected("At least one build is failed for the merged commit.");
+			}
+			int lacks = buildCount - buildResults.size();
+			
+			String prefix;
+			if (request.getId() == null)
+				prefix = "Not ";
+			else
+				prefix = "To be ";
+			if (lacks > 0) {
+				if (blockMode) {
+					if (buildCount > 1)
+						return blocked(prefix + "verified by " + lacks + " more build(s)", new NoneCanVote());
+					else
+						return blocked(prefix + "verified by build", new NoneCanVote());
+				} else {
+					if (buildCount > 1)
+						return pending(prefix + "verified by " + lacks + " more build(s)", new NoneCanVote());
+					else
+						return pending(prefix + "verified by build", new NoneCanVote());
+				}
+			} else {
+				return accepted("Builds passed");
+			}
 		}
 	}
 
