@@ -6,7 +6,7 @@ import javax.inject.Singleton;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
-import com.pmease.commons.hibernate.Transactional;
+import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.BranchManager;
@@ -21,7 +21,7 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 		super(generalDao);
 	}
 
-    @Transactional
+    @Sessional
     @Override
     public Branch findBy(Project project, String name) {
         return find(new Criterion[]{Restrictions.eq("project", project), Restrictions.eq("name", name)});
@@ -29,8 +29,7 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 
 	@Override
 	public Branch findDefault(Project project) {
-		// TODO Auto-generated method stub
-		return null;
+		return findBy(project, project.getDefaultBranchName());
 	}
 
 }
