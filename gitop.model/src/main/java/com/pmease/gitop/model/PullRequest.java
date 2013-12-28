@@ -233,6 +233,9 @@ public class PullRequest extends AbstractEntity {
 		return "refs/gitop/pulls/" + getId() + "/merge";
 	};
 
+	/**
+	 * Delete refs of this pull request, without touching refs of its updates.
+	 */
 	public void deleteRefs() {
 		Git git = getTarget().getProject().code();
 		git.deleteRef(getHeadRef());

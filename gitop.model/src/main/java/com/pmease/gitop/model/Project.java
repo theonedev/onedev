@@ -228,7 +228,7 @@ public class Project extends AbstractEntity implements UserBelonging {
 		return andGateKeeper;
 	}
 
-	public String getDefaultBranchName() {
+	public String resolveDefaultBranchName() {
 		String refName = code().showSymbolicRef("HEAD");
 		Preconditions.checkState(refName.startsWith(Git.REFS_HEADS));
 		return refName.substring(Git.REFS_HEADS.length());

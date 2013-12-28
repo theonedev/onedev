@@ -107,7 +107,7 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 		String rev;
 		Project project = getProject();
 		if (Strings.isNullOrEmpty(objectId)) {
-			String branchName = project.getDefaultBranchName();
+			String branchName = project.resolveDefaultBranchName();
 			if (Strings.isNullOrEmpty(branchName)) {
 				Git git = project.code();
 				List<String> branches = Lists.newArrayList(git.listBranches());

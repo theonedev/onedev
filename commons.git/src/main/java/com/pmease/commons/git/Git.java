@@ -50,6 +50,8 @@ public class Git implements Serializable {
 
 	public static final String REFS_HEADS = "refs/heads/";
 	
+	public static final String REFS_TAGS = "refs/tags/";
+	
 	private final File repoDir;
 
 	public Git(File repoDir) {
@@ -77,7 +79,7 @@ public class Git implements Serializable {
 		if (new ListBranchesCommand(repoDir).call().contains(branchName))
 			throw new GeneralException("Branch %s already exists.", branchName);
 
-		new UpdateRefCommand(repoDir).refName("refs/heads/" + branchName).revision(commitHash)
+		new UpdateRefCommand(repoDir).refName(Git.REFS_HEADS + branchName).revision(commitHash)
 				.call();
 		
 		return this;
@@ -92,7 +94,7 @@ public class Git implements Serializable {
 	 * 			this git object
 	 */
 	public Git deleteBranch(String branchName) {
-		new DeleteRefCommand(repoDir).refName("refs/heads/" + branchName).call();
+		new DeleteRefCommand(repoDir).refName(REFS_HEADS + branchName).call();
 		return this;
 	}
 
@@ -100,12 +102,12 @@ public class Git implements Serializable {
 		if (new ListTagsCommand(repoDir).call().contains(tagName))
 			throw new GeneralException("Tag %s already exists.", tagName);
 
-		new UpdateRefCommand(repoDir).refName("refs/tags/" + tagName).revision(commitHash).call();
+		new UpdateRefCommand(repoDir).refName(REFS_TAGS + tagName).revision(commitHash).call();
 		return this;
 	}
 
 	public Git deleteTag(String tagName) {
-		new DeleteRefCommand(repoDir).refName("refs/tags/" + tagName).call();
+		new DeleteRefCommand(repoDir).refName(REFS_TAGS + tagName).call();
 		return this;
 	}
 
@@ -385,7 +387,7 @@ public class Git implements Serializable {
 	}
 
 	public boolean hasCommits() {
-		File headsDir = new File(repoDir, "refs/heads");
+		File headsDir = new File(repoDir, Git.REFS_HEADS);
 		return headsDir.exists() && headsDir.list().length != 0 || new File(repoDir, "packed-refs").exists();
 	}
 	

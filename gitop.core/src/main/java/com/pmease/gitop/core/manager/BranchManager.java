@@ -34,4 +34,21 @@ public interface BranchManager extends GenericDao<Branch> {
 	 */
     public @Nullable Branch findDefault(Project project);
     
+    /**
+     * Sync branch information of specified project in database with git repository.
+     * 
+     * @param project
+     * 			branches of the project to be synced
+     */
+    public void syncWithGit(Project project);
+    
+    /**
+     * Delete all refs pointed to this branch and its associated pull requests and 
+     * pull request updates.
+     * 
+     * @param branch
+     * 			branch whose refs, pull request refs, and pull request update refs 
+     * 			to be deleted
+     */
+    public void deleteRefs(Branch branch);
 }

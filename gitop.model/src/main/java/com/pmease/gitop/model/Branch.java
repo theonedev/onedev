@@ -124,7 +124,7 @@ public class Branch extends AbstractEntity {
     }
     
     public String getHeadRef() {
-    	return "refs/heads/" + name; 
+    	return Git.REFS_HEADS + name; 
     }
     
     /**
@@ -136,8 +136,8 @@ public class Branch extends AbstractEntity {
      * 			name of the branch
      */ 
     public static String getName(String refName) {
-		Preconditions.checkArgument(refName.startsWith("refs/heads/"));
-		return refName.substring("refs/heads/".length());
+		Preconditions.checkArgument(refName.startsWith(Git.REFS_HEADS));
+		return refName.substring(Git.REFS_HEADS.length());
     }
 
     @Override
