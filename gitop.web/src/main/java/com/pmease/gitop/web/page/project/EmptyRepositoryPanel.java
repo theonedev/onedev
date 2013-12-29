@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.project.source.tree;
+package com.pmease.gitop.web.page.project;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
@@ -21,6 +21,12 @@ public class EmptyRepositoryPanel extends ProjectPanel {
 		super.onInitialize();
 		add(new Label("new", Model.of(getRepoUrl())));
 		add(new Label("existing", Model.of(getRepoUrl())));
+	}
+	
+	@Override
+	protected void onConfigure() {
+		super.onConfigure();
+		this.setVisibilityAllowed(!getProject().code().hasCommits());
 	}
 	
 	private String getRepoUrl() {

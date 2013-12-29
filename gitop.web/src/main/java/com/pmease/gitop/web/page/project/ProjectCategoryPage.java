@@ -20,7 +20,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.Constants;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
@@ -71,11 +70,11 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 		super.onPageInitialize();
 
 		add(createSidebar("sidebar"));
+		add(new EmptyRepositoryPanel("nocommit", projectModel));
 	}
 	
 	protected Component createSidebar(String id) {
 		WebMarkupContainer sidebar = new WebMarkupContainer(id);
-		sidebar.setVisibilityAllowed(getProject().code().hasCommits());
 		
 		Loop groups = new Loop("groups", Category.values().length) {
 
@@ -84,6 +83,13 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 				Category g = Category.values()[item.getIndex()];
 				item.add(newGroupHead("name", g));
 				item.add(newGroupNavs("nav", g));
+			}
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisibilityAllowed(getProject().code().hasCommits());
 			}
 		};
 		
@@ -107,19 +113,9 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 		String objectId = params.get(PageSpec.OBJECT_ID).toString();
 		String rev;
 		Project project = getProject();
+		
 		if (Strings.isNullOrEmpty(objectId)) {
-			String branchName = project.resolveDefaultBranchName();
-			if (Strings.isNullOrEmpty(branchName)) {
-				Git git = project.code();
-				List<String> branches = Lists.newArrayList(git.listBranches());
-				if (branches.contains(Constants.MASTER)) {
-					rev = Constants.MASTER;
-				} else {
-					rev = Iterables.getFirst(branches, null);
-				}
-			} else {
-				rev = branchName;
-			}
+			rev = project.resolveDefaultBranchName();
 		} else {
 			rev = objectId;
 		}

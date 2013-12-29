@@ -1,5 +1,8 @@
 package com.pmease.gitop.web.page.project.settings;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -7,14 +10,19 @@ import org.apache.wicket.bean.validation.PropertyValidator;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
+import org.eclipse.jgit.lib.Constants;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.pmease.commons.git.Git;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.model.Project;
@@ -23,9 +31,11 @@ import com.pmease.gitop.web.common.wicket.component.messenger.Messenger;
 import com.pmease.gitop.web.common.wicket.component.vex.AjaxConfirmLink;
 import com.pmease.gitop.web.common.wicket.form.FeedbackPanel;
 import com.pmease.gitop.web.common.wicket.form.checkbox.CheckBoxElement;
+import com.pmease.gitop.web.common.wicket.form.select.DropDownChoiceElement;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
+import com.pmease.gitop.web.util.GitUtils;
 
 @SuppressWarnings("serial")
 public class ProjectOptionsPage extends AbstractProjectSettingPage {
@@ -35,6 +45,7 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 	}
 
 	private String projectName;
+	private String defaultBranchName;
 	
 	@Override
 	protected void onPageInitialize() {
@@ -96,7 +107,6 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 		// Default branch is recorded in HEAD ref of the repository, since no any branches exist in 
 		// project when it is created, it might be more appropriate to assign default branch directly 
 		// via branches page.
-		/*
 		IModel<List<? extends String>> branchesModel = new AbstractReadOnlyModel<List<? extends String>>() {
 
 			@Override
@@ -111,13 +121,13 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 			}
 		};
 		
+		defaultBranchName = GitUtils.getDefaultBranch(getProject().code());
 		form.add(new DropDownChoiceElement<String>(
 				"defaultBranch", 
 				"Default Branch",
-				new PropertyModel<String>(projectModel, "defaultBranchName"),
+				new PropertyModel<String>(this, "defaultBranchName"),
 				branchesModel)
-				.setHelp("Set default branch which will be displayed when " ));
-		*/
+				.setHelp("Set default branch for browsing. By default, it is \"master\"." ));
 		
 		form.add(new AjaxButton("submit", form) {
 			@Override
@@ -133,6 +143,11 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 					project.setName(projectName);
 				}
 //				project.setDefaultBranchName(defaultBranch);
+				
+				if (!Strings.isNullOrEmpty(defaultBranchName)) {
+					project.code().updateSymbolicRef(Constants.HEAD, 
+							Constants.R_HEADS + defaultBranchName, null);
+				}
 				
 				Gitop.getInstance(ProjectManager.class).save(project);
 				

@@ -46,6 +46,19 @@ ul.piped, ol.piped { margin: 0; padding: 0; }
 .action-links > .link-item { display: inline-block; margin-left: 12px; }
 .action-links > .link-item:first-child { margin-left: 0;}
 
+.alert-error {
+  color: #a94442;
+  background-color: #f2dede;
+  border-color: #ebccd1;
+}
+
+.alert-error hr {
+  border-top-color: #e4b9c0;
+}
+
+.alert-error .alert-link {
+  color: #843534;
+}
 
 /* LINKS */
 .checkable-link { color: #333; cursor: pointer; }

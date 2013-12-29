@@ -15,5 +15,4 @@ public class ProjectPullRequestsPage extends ProjectCategoryPage {
 	protected String getPageTitle() {
 		return getProject() + " - pull requests";
 	}
-
 }
