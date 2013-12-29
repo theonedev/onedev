@@ -11,6 +11,10 @@ public class SessionData implements Serializable {
 	private String revision;
 	private List<String> paths;
 
+
+	public static SessionData get() {
+		return GitopSession.get().getSessionData();
+	}
 	
 	public Long getAccountId() {
 		return accountId;

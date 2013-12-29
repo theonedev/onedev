@@ -23,6 +23,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.Constants;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
@@ -129,9 +130,9 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 		String hash = git.parseRevision(rev, false);
 		if (hash == null) {
 			throw new EntityNotFoundException("Ref " + rev + " doesn't exist");
-		} else {
-			return rev;
 		}
+		
+		return rev;
 	}
 	
 	private Component newGroupHead(String id, Category group) {
@@ -214,7 +215,15 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 			@Override
 			protected void populateItem(ListItem<ProjectPageTab> item) {
 				final ProjectPageTab tab = item.getModelObject();
-				item.add(tab.newTabLink("link", projectModel, revisionModel));
+				Optional<IModel<String>> r;
+				if (isRevisionAware()) {
+					r = Optional.of(revisionModel);
+				} else {
+					r = Optional.absent();
+				}
+				
+				item.add(tab.newTabLink("link", projectModel, r));
+				
 				item.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
 					@Override
@@ -226,6 +235,10 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 		};
 		
 		return tabs;
+	}
+	
+	protected boolean isRevisionAware() {
+		return true;
 	}
 	
 	protected String getRevision() {

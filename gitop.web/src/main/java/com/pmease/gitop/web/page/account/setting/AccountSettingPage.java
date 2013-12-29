@@ -2,8 +2,6 @@ package com.pmease.gitop.web.page.account.setting;
 
 import java.util.List;
 
-import javax.persistence.EntityNotFoundException;
-
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
@@ -18,7 +16,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
@@ -27,10 +24,9 @@ import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.GitopHelper;
 import com.pmease.gitop.web.component.avatar.AvatarImage;
 import com.pmease.gitop.web.component.link.UserAvatarLink;
-import com.pmease.gitop.web.exception.AccessDeniedException;
 import com.pmease.gitop.web.model.UserModel;
-import com.pmease.gitop.web.page.AbstractLayoutPage;
 import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.account.AbstractAccountPage;
 import com.pmease.gitop.web.page.account.setting.api.AccountSettingTab;
 import com.pmease.gitop.web.page.account.setting.members.AccountMembersSettingPage;
 import com.pmease.gitop.web.page.account.setting.password.AccountPasswordPage;
@@ -40,38 +36,14 @@ import com.pmease.gitop.web.page.account.setting.teams.AccountTeamsPage;
 import com.pmease.gitop.web.page.account.setting.teams.EditTeamPage;
 
 @SuppressWarnings("serial")
-public abstract class AccountSettingPage extends AbstractLayoutPage {
+public abstract class AccountSettingPage extends AbstractAccountPage {
 
-	protected IModel<User> accountModel;
+	public static PageParameters newParams(User user) {
+		return PageSpec.forUser(user);
+	}
 	
 	public AccountSettingPage(PageParameters params) {
-		accountModel = newAccountModel(params);
-	}
-	
-	protected IModel<User> newAccountModel(PageParameters params) {
-		String name = params.get(PageSpec.USER).toString();
-		User user = null;
-		if (Strings.isNullOrEmpty(name)) {
-			user = Gitop.getInstance(UserManager.class).getCurrent();
-			if (user == null) {
-				throw new AccessDeniedException();
-			}
-		} else {
-			user = Gitop.getInstance(UserManager.class).findByName(name);
-			if (user == null) {
-				throw new EntityNotFoundException("Unable find user with name " + name);
-			}
-		}
-		
-		return new UserModel(user);
-	}
-	
-	protected PageParameters newAccountParams() {
-		if (Objects.equal(getAccount(), Gitop.getInstance(UserManager.class).getCurrent())) {
-			return new PageParameters();
-		} else {
-			return PageSpec.forUser(getAccount());
-		}
+		super(params);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -97,7 +69,7 @@ public abstract class AccountSettingPage extends AbstractLayoutPage {
 			@Override
 			protected void populateItem(ListItem<AccountSettingTab> item) {
 				final AccountSettingTab tab = item.getModelObject();
-				item.add(tab.newTabLink("link", newAccountParams()));
+				item.add(tab.newTabLink("link", newParams(getAccount())));
 				
 				item.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
@@ -137,14 +109,7 @@ public abstract class AccountSettingPage extends AbstractLayoutPage {
 			protected void populateItem(ListItem<User> item) {
 				User user = item.getModelObject();
 				
-				PageParameters params;
-				
-				if (Objects.equal(user, Gitop.getInstance(UserManager.class).getCurrent())) {
-					params = new PageParameters();
-				} else {
-					params = PageSpec.forUser(user);
-				}
-				
+				PageParameters params = newParams(user);
 				AbstractLink link = new BookmarkablePageLink<Void>("link",
 						AccountProfilePage.class,
 						params);
@@ -166,18 +131,5 @@ public abstract class AccountSettingPage extends AbstractLayoutPage {
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserAdmin(getAccount()));
-	}
-	
-	protected User getAccount() {
-		return accountModel.getObject();
-	}
-	
-	@Override
-	public void onDetach() {
-		if (accountModel != null) {
-			accountModel.detach();
-		}
-		
-		super.onDetach();
 	}
 }

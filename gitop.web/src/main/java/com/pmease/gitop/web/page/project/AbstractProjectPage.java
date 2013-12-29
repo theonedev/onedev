@@ -22,6 +22,7 @@ import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.model.permission.operation.GeneralOperation;
+import com.pmease.gitop.web.SessionData;
 import com.pmease.gitop.web.model.ProjectModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.AbstractAccountPage;
@@ -50,6 +51,7 @@ public abstract class AbstractProjectPage extends AbstractAccountPage {
 		}
 		
 		projectModel = new ProjectModel(project);
+		SessionData.get().setProjectId(project.getId());
 	}
 	
 	@Override

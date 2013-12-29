@@ -10,6 +10,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,6 +19,8 @@ import java.util.jar.JarEntry;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Throwables;
@@ -89,6 +92,12 @@ public class UrlUtils {
 		}
 	}
 	
+	/**
+	 * Encode url segment
+	 * 
+	 * @param segment
+	 * @return
+	 */
 	public static String encodeUrl(final String segment) {
 		try {
 			return URLEncoder.encode(segment, "UTF-8");
@@ -97,12 +106,28 @@ public class UrlUtils {
 		}
 	}
 	
+	/**
+	 * Decode url
+	 * 
+	 * @param value
+	 * @return
+	 */
 	public static String decodeUrl(final String value) {
 		try {
 			return URLDecoder.decode(value, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			throw new IllegalArgumentException(e);
 		}
+	}
+
+	public static List<String> normalizeUrlSegments(List<String> segments) {
+		List<String> normalized = new ArrayList<String>();
+		for (String each: segments) {
+			each = StringUtils.remove(each, '/');
+			if (each.length() != 0)
+				normalized.add(each);
+		}
+		return normalized;
 	}
 
 	/**

@@ -2,8 +2,8 @@
 <wicket:extend>
 	<div class="padder">
 		<div class="commit">
-			<wicket:container wicket:id="authoravatar"></wicket:container>
-			<div class="commit-meta">
+			<div class="commit-head">
+				<p class="title-message" wicket:id="shortmessage"></p>
 				<p class="author-info"><wicket:container wicket:id="author"></wicket:container> authored <span class="age" wicket:id="authorday"></span></p>
 				<wicket:enclosure child="committer">
 					<p class="committer-info">
@@ -13,19 +13,20 @@
 					</p>
 				</wicket:enclosure>
 				
-				<div class="right">
-					<p><span class="sha" wicket:id="commitsha"></span></p>
-					<p>parents 
+				<ul class="piped">
+					<li><span class="sha" wicket:id="commitsha"></span></li>
+					<li>parents
 						<wicket:container wicket:id="parents">
 							<span wicket:id="connector">+</span>
 							<a class="sha" wicket:id="link"><span wicket:id="sha"></span></a>
 						</wicket:container>
-					</p>
-				</div>
+					</li>
+				</ul>
+								
+				<wicket:container wicket:id="authoravatar"></wicket:container>
 			</div>
 			
 			<div class="commit-message">
-				<p class="short-message" wicket:id="shortmessage"></p>
 				<pre class="detailed-message" wicket:id="detailedmessage"></pre>
 			</div>
 		</div>

@@ -453,16 +453,15 @@ table.table-blob { width: 100%; }
 /*
  * COMMIT PAGE
  */
-.commit { padding-left: 60px; position: relative; }
-.commit .avatar { width: 48px; height: 48px; position: absolute; left: 0; top: 0; }
-.commit .commit-meta p { margin-bottom: 0; }
-.commit .committer-info { color: #999; }
+.commit { position: relative; }
+.commit .commit-head { font-size: 12px; color: #999; padding-bottom: 9px; margin-bottom: 9px; border-bottom: 1px solid #ddd; position: relative; padding-right: 80px; }
+.commit .commit-head .avatar { width: 64px; height: 64px; position: absolute; right: 0; top: 0; }
+.commit .commit-head .title-message { color: #333; font-size: 16px; font-weight: bold; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+.commit .author-info, .commit .committer-info { color: #999; margin: 0; }
 .commit .author-info .name,
-.commit .committer-info .name { font-weight: bold; }
-.commit .commit-meta { border-bottom: 1px solid #ddd; border-top: none; padding: 8px 0; position: relative; margin-bottom: 9px; min-height: 48px; }
-.commit .commit-meta .right { position: absolute; top: 8px; right: 15px; }
-.commit .commit-meta .right p { text-align: right; }
-.commit .short-message { font-weight: bold; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+.commit .committer-info .name { font-weight: bold; color: #555; }
+
+.commit .commit-message { border-bottom: 1px solid #ddd; padding-bottom: 9px; margin-bottom: 9px; }
 .commit .detailed-message { color: #666; border-width: 0 0 0 1px; background: transparent; border-width: 0; padding: 0; }
 
 /**

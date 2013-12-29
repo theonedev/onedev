@@ -144,6 +144,11 @@ public class SourceCommitPage extends ProjectCategoryPage {
 	}
 	
 	@Override
+	protected boolean isRevisionAware() {
+		return false;
+	}
+	
+	@Override
 	public void onDetach() {
 		if (commitModel != null) {
 			commitModel.detach();

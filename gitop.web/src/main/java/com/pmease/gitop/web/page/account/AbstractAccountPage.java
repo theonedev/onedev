@@ -10,6 +10,7 @@ import com.google.common.base.Strings;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
+import com.pmease.gitop.web.SessionData;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
 import com.pmease.gitop.web.page.PageSpec;
@@ -29,6 +30,7 @@ public abstract class AbstractAccountPage extends AbstractLayoutPage {
 		}
 		
 		this.accountModel = new UserModel(user);
+		SessionData.get().setAccountId(user.getId());
 	}
 
 	@Override

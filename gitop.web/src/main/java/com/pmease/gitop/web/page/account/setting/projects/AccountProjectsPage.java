@@ -41,7 +41,7 @@ public class AccountProjectsPage extends AccountSettingPage {
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 		
-		add(new BookmarkablePageLink<Void>("newlink", CreateProjectPage.class, newAccountParams()));
+		add(new BookmarkablePageLink<Void>("newlink", CreateProjectPage.class, newParams(getAccount())));
 		
 		IModel<List<Project>> model = new LoadableDetachableModel<List<Project>>() {
 

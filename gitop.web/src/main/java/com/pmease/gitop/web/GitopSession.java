@@ -13,6 +13,8 @@ public class GitopSession extends WebSession {
 
 	// private Long uid = null;
 
+	private final SessionData data = new SessionData();
+	
 	public GitopSession(Request request) {
 		super(request);
 	}
@@ -48,5 +50,9 @@ public class GitopSession extends WebSession {
 		UsernamePasswordToken token;
 		token = new UsernamePasswordToken(loginName, password, remember);
 		currentUser.login(token);
+	}
+
+	public SessionData getSessionData() {
+		return data;
 	}
 }

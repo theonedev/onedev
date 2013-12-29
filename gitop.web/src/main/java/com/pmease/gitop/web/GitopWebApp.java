@@ -2,7 +2,6 @@ package com.pmease.gitop.web;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -11,7 +10,6 @@ import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Application;
 import org.apache.wicket.Page;
 import org.apache.wicket.RuntimeConfigurationType;
@@ -101,6 +99,7 @@ import com.pmease.gitop.web.page.test.TestPage;
 import com.pmease.gitop.web.shiro.LoginPage;
 import com.pmease.gitop.web.shiro.LogoutPage;
 import com.pmease.gitop.web.shiro.ShiroWicketPlugin;
+import com.pmease.gitop.web.util.UrlUtils;
 
 @Singleton
 public class GitopWebApp extends AbstractWicketConfig {
@@ -250,7 +249,7 @@ public class GitopWebApp extends AbstractWicketConfig {
 
 			@Override
 			protected boolean urlStartsWith(Url url, String... segments) {
-				List<String> normalizedSegments = normalizeUrlSegments(url.getSegments());
+				List<String> normalizedSegments = UrlUtils.normalizeUrlSegments(url.getSegments());
 				if (normalizedSegments.size() < 2)
 					return false;
 				String userName = normalizedSegments.get(0);
@@ -283,11 +282,12 @@ public class GitopWebApp extends AbstractWicketConfig {
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/permissions", ProjectPermissionsPage.class));
 		
 		// account dashboard
-		mount(new MountedMapper("/${user}", AccountHomePage.class) {
+		mount(new MountedMapper("${user}", AccountHomePage.class)
+		{
 
 			@Override
 			protected boolean urlStartsWith(Url url, String... segments) {
-				List<String> normalizedSegments = normalizeUrlSegments(url.getSegments());
+				List<String> normalizedSegments = UrlUtils.normalizeUrlSegments(url.getSegments());
 				if (normalizedSegments.size() < 1)
 					return false;
 				String userName = normalizedSegments.get(0);
@@ -297,24 +297,24 @@ public class GitopWebApp extends AbstractWicketConfig {
 		});
 		
 		// account settings
-		mountPage("settings/profile", AccountProfilePage.class);
-		mountPage("settings/password", AccountPasswordPage.class);
-		mountPage("settings/projects", AccountProjectsPage.class);
-		mountPage("settings/members", AccountMembersSettingPage.class);
-		mountPage("settings/teams", AccountTeamsPage.class);
-		mountPage("settings/teams/new", AddTeamPage.class);
-		mountPage("settings/teams/edit/${teamId}", EditTeamPage.class);
+		mountPage("${user}/settings", AccountProfilePage.class);
+		mountPage("${user}/settings/password", AccountPasswordPage.class);
+		mountPage("${user}/settings/projects", AccountProjectsPage.class);
+		mountPage("${user}/settings/members", AccountMembersSettingPage.class);
+		mountPage("${user}/settings/teams", AccountTeamsPage.class);
+		mountPage("${user}/settings/teams/new", AddTeamPage.class);
+		mountPage("${user}/settings/teams/${teamId}", EditTeamPage.class);
 		
 		// project related
 		mountPage("new", CreateProjectPage.class);
 		
 		// system administration related
-		mountPage("admin", AdministrationOverviewPage.class);
-		mountPage("admin/users", UserAdministrationPage.class);
-		mountPage("admin/mail-settings", MailSettingEdit.class);
-		mountPage("admin/system-settings", SystemSettingEdit.class);
-		mountPage("admin/support", SupportPage.class);
-		mountPage("admin/licensing", LicensingPage.class);
+		mountPage("administration", AdministrationOverviewPage.class);
+		mountPage("administration/users", UserAdministrationPage.class);
+		mountPage("administration/mail-settings", MailSettingEdit.class);
+		mountPage("administration/system-settings", SystemSettingEdit.class);
+		mountPage("administration/support", SupportPage.class);
+		mountPage("administration/licensing", LicensingPage.class);
 
 		mountPage("/test", TestPage.class);
 		mountPage("/test/project", ProjectPage.class);
@@ -324,15 +324,6 @@ public class GitopWebApp extends AbstractWicketConfig {
 		// --------------------------------------------------------
 	}
 	
-	private List<String> normalizeUrlSegments(List<String> segments) {
-		List<String> normalized = new ArrayList<String>();
-		for (String each: segments) {
-			each = StringUtils.remove(each, '/');
-			if (each.length() != 0)
-				normalized.add(each);
-		}
-		return normalized;
-	}
 
 	private void configureResources() {
 		final IPackageResourceGuard packageResourceGuard = getResourceSettings().getPackageResourceGuard();

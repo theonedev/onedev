@@ -105,14 +105,14 @@ public class TeamMembersEditor extends Panel {
 				}
 
 				Team team = getTeam();
-				for (Membership each : team.getMemberships()) {
+				MembershipManager mm = Gitop
+						.getInstance(MembershipManager.class);
+				List<Membership> memberships = mm.query(Restrictions.eq("team", team));
+				for (Membership each : memberships) {
 					if (users.contains(each.getUser())) {
 						users.remove(each.getUser());
 					}
 				}
-				
-				MembershipManager mm = Gitop
-						.getInstance(MembershipManager.class);
 				
 				for (User each : users) {
 					Membership m = new Membership();

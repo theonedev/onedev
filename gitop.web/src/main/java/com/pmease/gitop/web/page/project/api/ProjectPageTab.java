@@ -9,6 +9,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.base.Optional;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.common.wicket.component.tab.AbstractPageTab;
@@ -53,13 +54,13 @@ public class ProjectPageTab extends AbstractPageTab {
 		return category;
 	}
 	
-	public Component newTabLink(String id, IModel<Project> projectModel, IModel<String> revisionModel) {
+	public Component newTabLink(String id, IModel<Project> projectModel, Optional<IModel<String>> revisionModel) {
 		ProjectCategoryPageLink container = new ProjectCategoryPageLink(id);
 		Class<? extends Page> pageClass = getBookmarkablePageClass();
 		
 		PageParameters params = PageSpec.forProject(projectModel.getObject()); 
-		if (IRevisionAware.class.isAssignableFrom(pageClass)) {
-			params.set(PageSpec.OBJECT_ID, revisionModel.getObject());
+		if (IRevisionAware.class.isAssignableFrom(pageClass) && revisionModel.isPresent()) {
+			params.set(PageSpec.OBJECT_ID, revisionModel.get().getObject());
 		}
 		
 		BookmarkablePageLink<Void> link = 
