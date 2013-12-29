@@ -13,6 +13,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.Constants;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
@@ -51,6 +52,11 @@ public abstract class AbstractProjectPage extends AbstractAccountPage {
 		}
 		
 		projectModel = new ProjectModel(project);
+		if (!Objects.equal(SessionData.get().getProjectId(), project.getId())) {
+			// displayed project changed
+			SessionData.get().onProjectChanged();
+		}
+		
 		SessionData.get().setProjectId(project.getId());
 	}
 	

@@ -6,6 +6,7 @@ import javax.persistence.EntityNotFoundException;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.Page;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -17,12 +18,10 @@ import org.apache.wicket.markup.html.list.Loop;
 import org.apache.wicket.markup.html.list.LoopItem;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
@@ -30,14 +29,15 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.Git;
-import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.permission.ObjectPermission;
+import com.pmease.gitop.web.SessionData;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.api.ProjectPageTab;
 import com.pmease.gitop.web.page.project.api.ProjectPageTab.Category;
 import com.pmease.gitop.web.page.project.issue.ProjectPullRequestsPage;
 import com.pmease.gitop.web.page.project.settings.ProjectOptionsPage;
 import com.pmease.gitop.web.page.project.source.AbstractFilePage;
+import com.pmease.gitop.web.page.project.source.ProjectHomePage;
 import com.pmease.gitop.web.page.project.source.branches.BranchesPage;
 import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
 import com.pmease.gitop.web.page.project.source.commits.CommitsPage;
@@ -55,16 +55,20 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 	
 	public ProjectCategoryPage(PageParameters params) {
 		super(params);
-		
-		revisionModel = new LoadableDetachableModel<String>() {
 
-			@Override
-			public String load() {
-				return findRevision();
-			}
-		};
+		String rev = findRevision(params);
+		onUpdateRevision(rev);
+		revisionModel = Model.of(rev);	
 	}
 
+	protected void onUpdateRevision(String rev) {
+		if (!Objects.equal(rev, SessionData.get().getRevision())) {
+			SessionData.get().onRevisionChanged();
+		}
+		
+		SessionData.get().setRevision(rev);
+	}
+	
 	@Override
 	protected void onPageInitialize() {
 		super.onPageInitialize();
@@ -108,27 +112,24 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 		return sidebar;
 	}
 	
-	protected String findRevision() {
-		PageParameters params = getPageParameters();
-		String objectId = params.get(PageSpec.OBJECT_ID).toString();
-		String rev;
-		Project project = getProject();
-		
-		if (Strings.isNullOrEmpty(objectId)) {
-			rev = project.resolveDefaultBranchName();
-		} else {
-			rev = objectId;
+	protected String findRevision(PageParameters params) {
+		String rev = params.get(PageSpec.OBJECT_ID).toString();
+		if (Strings.isNullOrEmpty(rev)) {
+			rev = SessionData.get().getRevision();
 		}
-
-		Preconditions.checkState(rev != null);
 		
+		if (Strings.isNullOrEmpty(rev)) {
+			rev = getProject().resolveDefaultBranchName();
+		}
+		
+
 		Git git = getProject().code();
 		String hash = git.parseRevision(rev, false);
 		if (hash == null) {
 			throw new EntityNotFoundException("Ref " + rev + " doesn't exist");
 		}
 		
-		return rev;
+		return Preconditions.checkNotNull(rev);
 	}
 	
 	private Component newGroupHead(String id, Category group) {
@@ -157,7 +158,17 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 									Category.SOURCE, 
 									"icon-code", 
 									new Class[] { SourceTreePage.class, 
-												  AbstractFilePage.class }));
+												  AbstractFilePage.class }) {
+			@Override
+			public Class<? extends Page> getBookmarkablePageClass() {
+				String rev = SessionData.get().getRevision();
+				if (Strings.isNullOrEmpty(rev)) {
+					return ProjectHomePage.class;
+				} else {
+					return SourceTreePage.class;
+				}
+			}
+		});
 		
 		tabs.add(new ProjectPageTab(Model.of("Commits"), 
 									Category.SOURCE, 
@@ -211,14 +222,8 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 			@Override
 			protected void populateItem(ListItem<ProjectPageTab> item) {
 				final ProjectPageTab tab = item.getModelObject();
-				Optional<IModel<String>> r;
-				if (isRevisionAware()) {
-					r = Optional.of(revisionModel);
-				} else {
-					r = Optional.absent();
-				}
 				
-				item.add(tab.newTabLink("link", projectModel, r));
+				item.add(tab.newTabLink("link"));
 				
 				item.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 

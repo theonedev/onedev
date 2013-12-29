@@ -52,6 +52,11 @@ public class SourceCommitPage extends ProjectCategoryPage {
 	}
 
 	@Override
+	protected void onUpdateRevision(String rev) {
+		// don't update revision in session
+	}
+	
+	@Override
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 		

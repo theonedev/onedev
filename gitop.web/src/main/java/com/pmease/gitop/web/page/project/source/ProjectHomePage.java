@@ -15,10 +15,16 @@ public class ProjectHomePage extends SourceTreePage {
 	}
 
 	@Override
+	protected String findRevision(PageParameters params) {
+		return getProject().resolveDefaultBranchName();
+	}
+	
+	@Override
 	protected String getPageTitle() {
 		return getAccount().getName() + "/" + getProject().getName();
 	}
 	
+	@Override
 	protected List<String> getPaths() {
 		return Collections.emptyList();
 	}

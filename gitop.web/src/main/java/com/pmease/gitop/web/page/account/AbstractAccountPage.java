@@ -5,6 +5,7 @@ import javax.persistence.EntityNotFoundException;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.pmease.gitop.core.Gitop;
@@ -30,6 +31,11 @@ public abstract class AbstractAccountPage extends AbstractLayoutPage {
 		}
 		
 		this.accountModel = new UserModel(user);
+		
+		if (!Objects.equal(SessionData.get().getAccountId(), user.getId())) {
+			SessionData.get().onAccountChanged();
+		}
+		
 		SessionData.get().setAccountId(user.getId());
 	}
 
