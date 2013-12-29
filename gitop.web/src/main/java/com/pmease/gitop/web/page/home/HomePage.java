@@ -2,7 +2,6 @@ package com.pmease.gitop.web.page.home;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
 
-import com.pmease.gitop.web.common.wicket.bootstrap.NotificationPanel;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
 
 public class HomePage extends AbstractLayoutPage {
@@ -21,9 +20,6 @@ public class HomePage extends AbstractLayoutPage {
 	@Override
 	protected void onPageInitialize() {
 		super.onPageInitialize();
-		
-		add(new NotificationPanel("alert", this));
-		this.error("You are wrong");
 	}
 
 	@Override
