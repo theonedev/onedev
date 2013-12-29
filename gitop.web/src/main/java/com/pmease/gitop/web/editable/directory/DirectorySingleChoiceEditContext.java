@@ -15,7 +15,7 @@ public class DirectorySingleChoiceEditContext extends PropertyEditContext {
 
 	@Override
     public Object renderForEdit(Object renderParam) {
-		return new DirectorySingleChoiceEditor((String) renderParam, this);
+		return new DirectoryChoiceEditor((String) renderParam, this, false);
     }
 
     @Override

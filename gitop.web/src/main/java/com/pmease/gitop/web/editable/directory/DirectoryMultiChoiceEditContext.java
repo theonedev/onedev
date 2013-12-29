@@ -17,7 +17,7 @@ public class DirectoryMultiChoiceEditContext extends PropertyEditContext {
 
 	@Override
     public Object renderForEdit(Object renderParam) {
-		return new DirectoryMultiChoiceEditor((String) renderParam, this);
+		return new DirectoryChoiceEditor((String) renderParam, this, true);
     }
 
     @SuppressWarnings("unchecked")

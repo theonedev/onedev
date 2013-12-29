@@ -13,7 +13,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
 
@@ -30,7 +29,7 @@ public class Branch extends AbstractEntity {
 
 	@Column(nullable=false)
 	private String name;
-
+	
 	@OneToMany(mappedBy="target", cascade=CascadeType.REMOVE)
 	private Collection<AutoPull> autoPullSources = new ArrayList<AutoPull>();
 
@@ -124,7 +123,7 @@ public class Branch extends AbstractEntity {
     }
     
     public String getHeadRef() {
-    	return "refs/heads/" + name; 
+    	return Git.REFS_HEADS + name; 
     }
     
     /**
@@ -133,13 +132,16 @@ public class Branch extends AbstractEntity {
      * @param refName
      *			name of the git reference 	
      * @return
-     * 			name of the branch
+     * 			name of the branch, or <tt>null</tt> if specified ref
+     * 			does not represent a branch
      */ 
     public static String getName(String refName) {
-		Preconditions.checkArgument(refName.startsWith("refs/heads/"));
-		return refName.substring("refs/heads/".length());
+		if (refName.startsWith(Git.REFS_HEADS)) 
+			return refName.substring(Git.REFS_HEADS.length());
+		else
+			return null;
     }
-
+    
     @Override
 	public String toString() {
 		return Objects.toStringHelper(this)

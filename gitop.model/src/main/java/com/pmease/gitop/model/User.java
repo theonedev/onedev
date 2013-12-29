@@ -163,7 +163,7 @@ public class User extends AbstractUser implements ProtectedObject {
 		
 		return null;
 	}
-
+	
 	@Override
 	public String toString() {
 		return getName();

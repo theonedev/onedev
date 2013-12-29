@@ -33,5 +33,13 @@ public interface PullRequestManager extends GenericDao<PullRequest> {
      */
     List<PullRequest> findByCommit(String commit);
     
+    /**
+     * Delete git refs of this pull request and all its updates.
+     * 
+     * @param request
+     *			pull request whose git refs and update refs to be deleted 	
+     */
+    void deleteRefs(PullRequest request);
+    
     PullRequest create(String title, Branch target, Branch source, boolean autoMerge);
 }

@@ -11,7 +11,69 @@ var gitop = {
 			else
 				input.val(value + ", " + path);
 		}
-	}
+	},
+	
+	choiceFormatter: {
+		user: {
+			formatSelection: function(user) {
+				return "<img class='img-thumbnail avatar' src='" + user.avatar + "' /> " + user.name + " (" + user.displayName + ")";
+			},
+			
+			formatResult: function(user) {
+				return "<div class='user-choice-row'><img class='img-thumbnail avatar avatar-big' src='" + user.avatar + "' />" 
+						+ "<p>"+ user.name + (user.displayName?" (" + user.displayName + ")": "") + "</p>"
+						+ "<p class='text-muted'>" + user.email + "</p>"
+						+ "</div>";
+			},
+			
+			escapeMarkup: function(m) {
+				return m;
+			},
+		}, 
+		
+		branch: {
+			formatSelection: function(branch) {
+				return branch.name;
+			},
+			
+			formatResult: function(branch) {
+				return branch.name;
+			},
+			
+			escapeMarkup: function(m) {
+				return m;
+			}
+		},
+
+		project: {
+			formatSelection: function(project) {
+				return project.name
+			},
+			
+			formatResult: function(project) {
+				return project.owner + '/' + project.name
+			},
+			
+			escapeMarkup: function(m) {
+				return m;
+			}
+		},
+		
+		team: {
+			formatSelection: function(team) {
+				return team.name;
+			},
+			
+			formatResult: function(team) {
+				return team.name;
+			},
+			
+			escapeMarkup: function(m) {
+				return m;
+			}
+		},
+	},
+	
 };
 
 $(document).ready(function() {

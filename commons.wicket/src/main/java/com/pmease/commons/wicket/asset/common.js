@@ -565,7 +565,7 @@ pmease.commons = {
 };
 
 $(function() {
-	$(document).click(function(event) {
+	$(document).mousedown(function(event) {
 		var source = $(event.target);
 		if (!source.closest(".dropdown-toggle")[0])
 			pmease.commons.dropdown.hideExcept(source);

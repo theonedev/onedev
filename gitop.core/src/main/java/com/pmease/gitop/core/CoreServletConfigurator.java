@@ -12,21 +12,21 @@ import org.eclipse.jetty.servlet.ServletHolder;
 
 import com.pmease.commons.hibernate.HibernateFilter;
 import com.pmease.commons.jetty.ServletConfigurator;
-import com.pmease.gitop.core.hookcallback.PostReceiveServlet;
-import com.pmease.gitop.core.hookcallback.PreReceiveServlet;
+import com.pmease.gitop.core.hookcallback.GitPostReceiveCallback;
+import com.pmease.gitop.core.hookcallback.GitUpdateCallback;
 
 @Singleton
 public class CoreServletConfigurator implements ServletConfigurator {
 
 	private final HibernateFilter hibernateFilter;
 	
-	private final PreReceiveServlet preReceiveServlet;
+	private final GitUpdateCallback preReceiveServlet;
 	
-	private final PostReceiveServlet postReceiveServlet;
+	private final GitPostReceiveCallback postReceiveServlet;
 	
 	@Inject
 	public CoreServletConfigurator(HibernateFilter hibernateFilter, 
-	        PreReceiveServlet preReceiveServlet, PostReceiveServlet postReceiveServlet) {
+	        GitUpdateCallback preReceiveServlet, GitPostReceiveCallback postReceiveServlet) {
 		this.hibernateFilter = hibernateFilter;
 		this.preReceiveServlet = preReceiveServlet;
 		this.postReceiveServlet = postReceiveServlet;
@@ -38,10 +38,10 @@ public class CoreServletConfigurator implements ServletConfigurator {
 		context.addFilter(filterHolder, "/*", EnumSet.of(DispatcherType.REQUEST));
 		
 		ServletHolder servletHolder = new ServletHolder(preReceiveServlet);
-		context.addServlet(servletHolder, PreReceiveServlet.PATH + "/*");
+		context.addServlet(servletHolder, GitUpdateCallback.PATH + "/*");
         
 		servletHolder = new ServletHolder(postReceiveServlet);
-        context.addServlet(servletHolder, PostReceiveServlet.PATH + "/*");
+        context.addServlet(servletHolder, GitPostReceiveCallback.PATH + "/*");
 	}
 
 }

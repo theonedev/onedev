@@ -49,5 +49,5 @@ public class Commit extends BriefCommit {
 	public List<FileChange> getFileChanges() {
 		return Collections.unmodifiableList(fileChanges);
 	}
-	
+
 }

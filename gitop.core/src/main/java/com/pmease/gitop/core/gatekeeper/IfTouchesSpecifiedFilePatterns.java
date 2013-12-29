@@ -1,10 +1,12 @@
 package com.pmease.gitop.core.gatekeeper;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.git.Commit;
 import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestUpdate;
@@ -39,8 +41,19 @@ public class IfTouchesSpecifiedFilePatterns extends FileGateKeeper {
 	public CheckResult doCheck(PullRequest request) {
 		for (int i=0; i<request.getEffectiveUpdates().size(); i++) {
 			PullRequestUpdate update = request.getEffectiveUpdates().get(i);
-			Collection<String> touchedFiles = request.getTarget().getProject().code().listChangedFiles(
-					update.getBaseCommit(), update.getHeadCommit());
+
+			Collection<String> touchedFiles;
+			if (!update.getHeadCommit().startsWith(Commit.ZERO_HASH)) {
+				touchedFiles = request.getTarget().getProject().code().listChangedFiles(
+						update.getBaseCommit(), update.getHeadCommit());
+			} else {
+				touchedFiles = new ArrayList<>();
+				String path = update.getHeadCommit().substring(Commit.ZERO_HASH.length());
+				if (path.length() != 0) // test if a certain file can be touched
+					touchedFiles.add(path);
+				else // test if the branch can be deleted
+					return accepted("Touched files match pattern '" + getFilePatterns() + "'.");
+			} 
 			
 			for (String file: touchedFiles) {
 				if (WildcardUtils.matchPath(getFilePatterns(), file)) {

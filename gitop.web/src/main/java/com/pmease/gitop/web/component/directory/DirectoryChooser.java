@@ -37,14 +37,18 @@ public abstract class DirectoryChooser extends Panel {
 
 			@Override
 			public Iterator<? extends TreeNode> getRoots() {
-				Git git = getBranch().getProject().code();
-				List<TreeNode> roots = git.listTree(getBranch().getName(), null, false);
-				if (roots != null) {
-					for (Iterator<TreeNode> it = roots.iterator(); it.hasNext();) {
-						if (it.next().getMode() != FileMode.TREE)
-							it.remove();
+				if (getBranch() != null) {
+					Git git = getBranch().getProject().code();
+					List<TreeNode> roots = git.listTree(getBranch().getName(), null, false);
+					if (roots != null) {
+						for (Iterator<TreeNode> it = roots.iterator(); it.hasNext();) {
+							if (it.next().getMode() != FileMode.TREE)
+								it.remove();
+						}
+						return roots.iterator();
+					} else {
+						return new ArrayList<TreeNode>().iterator();
 					}
-					return roots.iterator();
 				} else {
 					return new ArrayList<TreeNode>().iterator();
 				}

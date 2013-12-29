@@ -7,8 +7,13 @@ import javax.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.git.Commit;
+import com.pmease.gitop.model.Branch;
+import com.pmease.gitop.model.MergePrediction;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.PullRequestUpdate;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
 import com.pmease.gitop.model.gatekeeper.checkresult.Blocked;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
@@ -38,11 +43,46 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 			return accepted("Gate keeper is disabled.");
 	}
 	
+	@Override
+	public CheckResult checkFile(User user, Branch branch, String file) {
+		return checkCommit(user, branch, Commit.ZERO_HASH + file);
+	}
+	
+	
+	@Override
+	public CheckResult checkCommit(User user, Branch branch, String commit) {
+		PullRequest request = new PullRequest();
+		request.setTarget(branch);
+		request.setSource(new Branch());
+		request.getSource().setProject(new Project());
+		request.getSource().getProject().setOwner(user);
+		request.setTitle("Faked Pull Request");
+		request.setMergePrediction(new MergePrediction(null, commit, commit));
+		
+		PullRequestUpdate update = new PullRequestUpdate();
+		update.setRequest(request);
+		update.setHeadCommit(request.getMergePrediction().getRequestHead());
+		request.getUpdates().add(update);
+
+		return check(request);
+	}
+
 	/**
 	 * Check the gate keeper without considering enable flag. 
 	 * 
 	 * @param request
-	 *			pull request to be checked 		
+	 *			pull request to be checked. Gitop will create faked pull request in some
+	 *			special cases explained below:
+	 *			<ul>
+	 *				<li> When determine whether or not a push operation should be accepted.
+	 *				<li> When determine whether or not a branch can be deleted. In this 
+	 *					case, the commit hash of the update will be {@link Commit#ZERO_HASH}.
+	 *				<li> When determine whether or not a file can be touched. In this 
+	 *					case, the commit hash of the update will be {@link Commit#ZERO_HASH}
+	 *					concatenated with full path of the file.
+	 *			</ul>  
+	 *			For a faked pull request created in these special cases can be identified by 
+	 *			checking whether or not <tt>request.getId()</tt> returns <tt>null</tt>
 	 * @return
 	 * 			result of the check
 	 */

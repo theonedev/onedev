@@ -92,12 +92,18 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 	@Transactional
 	@Override
 	public void delete(final PullRequest request) {
+		deleteRefs(request);
+		
+		super.delete(request);
+	}
+
+	@Sessional
+	@Override
+	public void deleteRefs(PullRequest request) {
 		for (PullRequestUpdate update : request.getUpdates())
 			update.deleteRefs();
 		
 		request.deleteRefs();
-
-		super.delete(request);
 	}
 	
 	/**

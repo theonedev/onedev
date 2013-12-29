@@ -11,8 +11,6 @@ import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
-import com.pmease.commons.util.namedentity.EntityLoader;
-import com.pmease.commons.util.namedentity.NamedEntity;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.User;
@@ -36,57 +34,6 @@ public class DefaultTeamManager extends AbstractGenericDao<Team> implements Team
 	@Override
 	public Team findBy(User owner, String teamName) {
 		return find(new Criterion[]{Restrictions.eq("owner", owner), Restrictions.eq("name", teamName)});
-	}
-
-	@Override
-	public EntityLoader asEntityLoader(final User owner) {
-		return new EntityLoader() {
-
-			@Override
-			public NamedEntity get(final Long id) {
-				final Team team = DefaultTeamManager.this.get(id);
-				if (team != null) {
-					return new NamedEntity() {
-
-						@Override
-						public Long getId() {
-							return id;
-						}
-
-						@Override
-						public String getName() {
-							return team.getName();
-						}
-						
-					};
-				} else {
-					return null;
-				}
-			}
-
-			@Override
-			public NamedEntity get(String name) {
-				final Team team = findBy(owner, name);
-				if (team != null) {
-					return new NamedEntity() {
-
-						@Override
-						public Long getId() {
-							return team.getId();
-						}
-
-						@Override
-						public String getName() {
-							return team.getName();
-						}
-						
-					};
-				} else {
-					return null;
-				}
-			}
-			
-		};
 	}
 
 	@Transactional
