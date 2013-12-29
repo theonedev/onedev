@@ -48,7 +48,7 @@ public class ClassUtils extends org.apache.commons.lang3.ClassUtils {
 						className = StringUtils.substringBeforeLast(className, ".");
 						Class<T> clazz;
 						try {
-							clazz = (Class<T>) superClass.getClassLoader().loadClass(className);
+							clazz = (Class<T>) packageLocator.getClassLoader().loadClass(className);
 						} catch (ClassNotFoundException e) {
 							throw new RuntimeException(e);
 						}
