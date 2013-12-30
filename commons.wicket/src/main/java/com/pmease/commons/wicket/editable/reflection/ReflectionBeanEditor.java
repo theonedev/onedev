@@ -19,7 +19,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyEditContext;
-import com.pmease.commons.editable.annotation.OmitNames;
+import com.pmease.commons.editable.annotation.OmitName;
 import com.pmease.commons.editable.annotation.TableLayout;
 
 @SuppressWarnings("serial")
@@ -75,8 +75,12 @@ public class ReflectionBeanEditor extends Panel {
 			protected void populateItem(ListItem<PropertyEditContext> item) {
 				final PropertyEditContext propertyContext = item.getModelObject();
 				
-				item.add(new Label("name", EditableUtils.getName(propertyContext.getPropertyGetter()))
-						.setVisible(editContext.getBeanClass().getAnnotation(OmitNames.class) == null));
+				Label nameLabel = new Label("name", EditableUtils.getName(propertyContext.getPropertyGetter()));
+				item.add(nameLabel);
+				
+				OmitName omitName = propertyContext.getPropertyGetter().getAnnotation(OmitName.class);
+				if (omitName != null && omitName.value() != OmitName.Place.VIEWER)
+					nameLabel.setVisible(false);
 
 				String required;
 				if (propertyContext.isPropertyRequired())

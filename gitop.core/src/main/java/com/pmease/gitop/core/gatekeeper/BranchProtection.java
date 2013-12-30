@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.editable.annotation.OmitNames;
+import com.pmease.commons.editable.annotation.OmitName;
 import com.pmease.commons.util.trimmable.TrimUtils;
 import com.pmease.commons.util.trimmable.Trimmable;
 import com.pmease.gitop.core.Gitop;
@@ -30,7 +30,6 @@ import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 @Editable(order=100, icon="icon-lock", description="By default, users with write permission of "
 		+ "the project can push code to all branches. Use this gate keeper to restrict write "
 		+ "access of certain branches to certain teams.")
-@OmitNames
 public class BranchProtection extends CommonGateKeeper {
 	
 	private List<Entry> entries = new ArrayList<Entry>();
@@ -44,6 +43,7 @@ public class BranchProtection extends CommonGateKeeper {
 	@Size(min=1, message="At least one entry has to be specified.")
 	@Valid
 	@NotNull
+	@OmitName
 	public List<Entry> getEntries() {
 		return entries;
 	}

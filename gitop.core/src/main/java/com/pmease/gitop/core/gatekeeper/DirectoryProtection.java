@@ -2,6 +2,7 @@ package com.pmease.gitop.core.gatekeeper;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -11,12 +12,14 @@ import javax.validation.constraints.Size;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.editable.annotation.OmitNames;
+import com.pmease.commons.editable.annotation.OmitName;
 import com.pmease.commons.util.trimmable.TrimUtils;
 import com.pmease.commons.util.trimmable.Trimmable;
 import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.editable.BranchChoice;
 import com.pmease.gitop.core.editable.DirectoryChoice;
 import com.pmease.gitop.core.editable.TeamChoice;
+import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
@@ -30,9 +33,11 @@ import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 @SuppressWarnings("serial")
 @Editable(order=200, icon="icon-lock", description="By default, users with write permission of "
 		+ "the project can write to all directories. Use this gate keeper to restrict write "
-		+ "access of certain directories to certain users.")
-@OmitNames
+		+ "access of certain directories in specified branches to certain teams. Note that if "
+		+ "branch is not specified, the directory restriction will apply to all branches.")
 public class DirectoryProtection extends CommonGateKeeper {
+	
+	private List<Long> branchIds = new ArrayList<Long>();
 	
 	private List<Entry> entries = new ArrayList<Entry>();
 	
@@ -40,11 +45,23 @@ public class DirectoryProtection extends CommonGateKeeper {
 		Entry entry = new Entry();
 		entries.add(entry);
 	}
-	
+
+	@Editable(name="Branches To Apply (Optionally)", order=50)
+	@BranchChoice
+	@NotNull
+	public List<Long> getBranchIds() {
+		return branchIds;
+	}
+
+	public void setBranchIds(List<Long> branchIds) {
+		this.branchIds = branchIds;
+	}
+
 	@Editable(name="Protected Directories", order=100)
 	@Valid
 	@Size(min=1, message="At least one entry has to be added.")
 	@NotNull
+	@OmitName(OmitName.Place.EDITOR)
 	public List<Entry> getEntries() {
 		return entries;
 	}
@@ -95,6 +112,11 @@ public class DirectoryProtection extends CommonGateKeeper {
 	@Override
 	public CheckResult doCheck(PullRequest request) {
 		AndGateKeeper andGateKeeper = new AndGateKeeper();
+		if (!branchIds.isEmpty()) {
+			IfSubmittedToSpecifiedBranches branchGate = new IfSubmittedToSpecifiedBranches();
+			branchGate.getBranchIds().addAll(branchIds);
+			andGateKeeper.getGateKeepers().add(branchGate);
+		}
 		for (Entry entry: entries) {
 			IfThenGateKeeper ifThenGateKeeper = new IfThenGateKeeper();
 			IfTouchesSpecifiedDirectories ifGate = new IfTouchesSpecifiedDirectories();
@@ -112,6 +134,14 @@ public class DirectoryProtection extends CommonGateKeeper {
 
 	@Override
 	protected GateKeeper trim(Project project) {
+		if (!branchIds.isEmpty()) {
+			for (Iterator<Long> it = branchIds.iterator(); it.hasNext();) {
+				if (Gitop.getInstance(BranchManager.class).get(it.next()) == null)
+					it.remove();
+			}
+			if (branchIds.isEmpty())
+				return null;
+		}
 		TrimUtils.trim(entries, project);
 
 		if (entries.isEmpty())

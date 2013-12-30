@@ -6,6 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface OmitNames {
+@Target(ElementType.METHOD)
+public @interface OmitName {
+	
+	public enum Place {ALL, EDITOR, VIEWER};
+	
+	Place value() default Place.ALL;
 }

@@ -174,7 +174,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 						}
 					}
 					
-					request.setCheckResult(request.getTarget().getProject().getCompositeGateKeeper().check(request));
+					request.setCheckResult(request.getTarget().getProject().aggregateGateKeepers().check(request));
 			
 					for (VoteInvitation invitation : request.getVoteInvitations()) {
 						if (!request.getCheckResult().canVote(invitation.getVoter(), request))

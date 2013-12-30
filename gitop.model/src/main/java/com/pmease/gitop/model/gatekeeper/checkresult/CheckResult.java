@@ -57,4 +57,43 @@ public abstract class CheckResult implements Serializable {
         return false;
     }
     
+    /**
+     * Whether or not the check represents for a rejection.
+     * 
+     * @return
+     * 			<tt>true</tt> if rejected
+     */
+    public boolean isRejected() {
+    	return this instanceof Rejected;
+    }
+    
+    /**
+     * Whether or not the check represents for an acceptance.
+     * 
+     * @return
+     * 			<tt>true</tt> if accepted
+     */
+    public boolean isAccepted() {
+    	return this instanceof Accepted;
+    }
+    
+    /**
+     * Whether or not the check represents for a pending approval.
+     * 
+     * @return
+     * 			<tt>true</tt> if pending approval
+     */
+    public boolean isPending() {
+    	return this instanceof Pending;
+    }
+
+    /**
+     * Whether or not the check represents for a blocked pending approval.
+     * 
+     * @return
+     * 			<tt>true</tt> if pending blocked approval
+     */
+    public boolean isBlocked() {
+    	return this instanceof Blocked;
+    }
 }

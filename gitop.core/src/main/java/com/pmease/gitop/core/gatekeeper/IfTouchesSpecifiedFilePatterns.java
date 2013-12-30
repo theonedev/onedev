@@ -52,7 +52,7 @@ public class IfTouchesSpecifiedFilePatterns extends FileGateKeeper {
 				if (path.length() != 0) // test if a certain file can be touched
 					touchedFiles.add(path);
 				else // test if the branch can be deleted
-					return accepted("Touched files match pattern '" + getFilePatterns() + "'.");
+					return accepted("Delete branch '" + request.getTarget().getName() + "'.");
 			} 
 			
 			for (String file: touchedFiles) {

@@ -28,6 +28,7 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitop.model.gatekeeper.AndGateKeeper;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
+import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.permission.object.ProtectedObject;
 import com.pmease.gitop.model.permission.object.UserBelonging;
 import com.pmease.gitop.model.storage.StorageManager;
@@ -222,11 +223,27 @@ public class Project extends AbstractEntity implements UserBelonging {
 		
 	}
 	
-	public GateKeeper getCompositeGateKeeper() {
+	public GateKeeper aggregateGateKeepers() {
 		AndGateKeeper andGateKeeper = new AndGateKeeper();
 		for (GateKeeper each: getGateKeepers())
 			andGateKeeper.getGateKeepers().add(each);
 		return andGateKeeper;
 	}
 
+	/**
+	 * Check if specified user can touch specified file in specified branch.
+	 * 
+	 * @param user
+	 * 			user to be checked
+	 * @param branch
+	 * 			branch to be checked
+	 * @param file
+	 * 			file to be checked
+	 * @return
+	 * 			check result
+	 */
+	public CheckResult checkFile(User user, Branch branch, String file) {
+		return aggregateGateKeepers().checkFile(user, branch, file);
+	}
+	
 }

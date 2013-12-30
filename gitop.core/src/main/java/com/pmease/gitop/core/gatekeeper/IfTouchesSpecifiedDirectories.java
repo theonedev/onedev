@@ -50,7 +50,7 @@ public class IfTouchesSpecifiedDirectories extends FileGateKeeper {
 				if (path.length() != 0) // test if a certain file can be touched
 					touchedFiles.add(path);
 				else // test if the branch can be deleted
-					return accepted("Touched directory '" + directories.get(0) + "'.");
+					return accepted("Delete branch '" + request.getTarget().getName() + "'.");
 			} 
 			for (String file: touchedFiles) {
 				for (String each: directories) {
