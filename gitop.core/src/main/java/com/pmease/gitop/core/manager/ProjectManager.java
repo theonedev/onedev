@@ -14,5 +14,12 @@ public interface ProjectManager extends GenericDao<Project> {
 	@Nullable Project findBy(String ownerName, String projectName);
 	
 	@Nullable Project findBy(User owner, String projectName);
-	
+
+	/**
+	 * Check project information with corresponding git repository to keep data in sync.
+	 * 
+	 * @param project
+	 * 			the project to be checked
+	 */
+	void check(Project project);
 }

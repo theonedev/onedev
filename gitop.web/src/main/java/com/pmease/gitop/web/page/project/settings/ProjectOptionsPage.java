@@ -17,7 +17,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
-import org.eclipse.jgit.lib.Constants;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
@@ -145,8 +144,7 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 //				project.setDefaultBranchName(defaultBranch);
 				
 				if (!Strings.isNullOrEmpty(defaultBranchName)) {
-					project.code().updateSymbolicRef(Constants.HEAD, 
-							Constants.R_HEADS + defaultBranchName, null);
+					project.code().updateDefaultBranch(defaultBranchName);
 				}
 				
 				Gitop.getInstance(ProjectManager.class).save(project);

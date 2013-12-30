@@ -21,7 +21,6 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
@@ -230,10 +229,4 @@ public class Project extends AbstractEntity implements UserBelonging {
 		return andGateKeeper;
 	}
 
-	public String resolveDefaultBranchName() {
-		String refName = code().showSymbolicRef("HEAD");
-		Preconditions.checkState(refName.startsWith(Git.REFS_HEADS));
-		return refName.substring(Git.REFS_HEADS.length());
-	}
-	
 }

@@ -3,6 +3,7 @@ package com.pmease.gitop.core.manager.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -23,6 +24,7 @@ import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.storage.ProjectStorage;
@@ -91,7 +93,7 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
                 gitPostReceiveHookFile.setExecutable(true);
             }
             
-            branchManager.syncWithGit(project);
+            check(project);
         } else {
             super.save(project);
         }
@@ -123,5 +125,35 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
         return find(Restrictions.eq("owner.id", owner.getId()),
                 Restrictions.eq("name", projectName));
     }
+
+	@Transactional
+	@Override
+	public void check(Project project) {
+		Collection<String> branchesInGit = project.code().listBranches();
+		for (Branch branch: project.getBranches()) {
+			if (!branchesInGit.contains(branch.getName()))
+				branchManager.delete(branch);
+		}
+		
+		for (String branchInGit: branchesInGit) {
+			boolean found = false;
+			for (Branch branch: project.getBranches()) {
+				if (branch.getName().equals(branchInGit)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				Branch branch = new Branch();
+				branch.setName(branchInGit);
+				branch.setProject(project);
+				branchManager.save(branch);
+			}
+		}
+		
+		String defaultBranchName = project.code().resolveDefaultBranch();
+		if (!branchesInGit.isEmpty() && !branchesInGit.contains(defaultBranchName))
+			project.code().updateDefaultBranch(branchesInGit.iterator().next());
+	}
 
 }

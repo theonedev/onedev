@@ -119,10 +119,9 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 		}
 		
 		if (Strings.isNullOrEmpty(rev)) {
-			rev = getProject().resolveDefaultBranchName();
+			rev = getProject().code().resolveDefaultBranch();
 		}
 		
-
 		Git git = getProject().code();
 		String hash = git.parseRevision(rev, false);
 		if (hash == null) {

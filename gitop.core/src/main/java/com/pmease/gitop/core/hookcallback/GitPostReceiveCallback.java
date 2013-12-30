@@ -106,11 +106,17 @@ public class GitPostReceiveCallback extends HttpServlet {
 				Branch branch = new Branch();
 				branch.setProject(project);
 				branch.setName(branchName);
+				project.getBranches().add(branch);
 				branchManager.save(branch);
+				if (project.getBranches().size() == 1) 
+					project.code().updateDefaultBranch(branchName);
 			} else if (newCommitHash.equals(Commit.ZERO_HASH)) {
 				Branch branch = branchManager.findBy(project, branchName);
 				Preconditions.checkNotNull(branch);
+				project.getBranches().remove(branch);
 				branchManager.delete(branch);
+				if (project.code().resolveDefaultBranch().equals(branchName) && !project.getBranches().isEmpty()) 
+						project.code().updateDefaultBranch(project.getBranches().iterator().next().getName());
 			} else {
 				logger.info("Executing post-receive hook against branch {}...", branchName);
 				

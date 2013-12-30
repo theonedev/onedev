@@ -86,6 +86,26 @@ public class Git implements Serializable {
 	}
 
 	/**
+	 * Rename specified branch. Default branch will be updated if necessary.
+	 * 
+	 * @param oldName
+	 *			old name of the branch 	
+	 * @param newName
+	 * 			new name of the branch
+	 * @return
+	 * 			this git object
+	 */
+	public Git renameBranch(String oldName, String newName) {
+		String commitHash = parseRevision(oldName, true);
+		createBranch(newName, commitHash);
+		if (resolveDefaultBranch().equals(oldName))
+			updateDefaultBranch(newName);
+		deleteBranch(oldName);
+		
+		return this;
+	}
+
+	/**
 	 * delete branch even in a bare repository.
 	 * 
 	 * @param branchName
@@ -384,6 +404,16 @@ public class Git implements Serializable {
 	
 	public Map<String, String> listSubModules(String revision) {
 		return new ListSubModulesCommand(repoDir).revision(revision).call();
+	}
+
+	public String resolveDefaultBranch() {
+		String refName = showSymbolicRef("HEAD");
+		Preconditions.checkState(refName.startsWith(Git.REFS_HEADS));
+		return refName.substring(Git.REFS_HEADS.length());
+	}
+
+	public void updateDefaultBranch(String defaultBranch) {
+		updateSymbolicRef("HEAD", Git.REFS_HEADS + defaultBranch, null);
 	}
 
 	public boolean hasCommits() {

@@ -1,14 +1,13 @@
 package com.pmease.gitop.core.manager.impl;
 
-import java.util.Collection;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
 
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
-import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
@@ -39,7 +38,7 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
     @Sessional
 	@Override
 	public Branch findDefault(Project project) {
-		return findBy(project, project.resolveDefaultBranchName());
+		return findBy(project, project.code().resolveDefaultBranch());
 	}
 
     @Transactional
@@ -58,40 +57,48 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 			pullRequestManager.deleteRefs(request);
 		branch.getProject().code().deleteBranch(branch.getName());
     }
-    
-	@Transactional
+
+    @Transactional
 	@Override
-	public void syncWithGit(Project project) {
-		Collection<String> branchesInGit = project.code().listBranches();
-		for (Branch branch: project.getBranches()) {
-			if (!branchesInGit.contains(branch.getName()))
-				delete(branch);
-		}
-		
-		for (String branchInGit: branchesInGit) {
-			boolean found = false;
-			for (Branch branch: project.getBranches()) {
-				if (branch.getName().equals(branchInGit)) {
-					found = true;
-					break;
+	public void create(final Branch branch, final String commitHash) {
+		save(branch);
+
+		getSession().getTransaction().registerSynchronization(new Synchronization() {
+
+			public void afterCompletion(int status) {
+				if (status == Status.STATUS_COMMITTED) { 
+					branch.getProject().code().createBranch(branch.getName(), commitHash);
 				}
 			}
-			if (!found) {
-				Branch branch = new Branch();
-				branch.setName(branchInGit);
-				branch.setProject(project);
-				save(branch);
+
+			public void beforeCompletion() {
+				
 			}
-		}
+			
+		});
 		
-		String defaultBranchName = project.resolveDefaultBranchName();
-		if (!branchesInGit.isEmpty() && !branchesInGit.contains(defaultBranchName)) {
-			if (!branchesInGit.contains("master"))
-				defaultBranchName = "master";
-			else
-				defaultBranchName = branchesInGit.iterator().next();
-			project.code().updateSymbolicRef("HEAD", Git.REFS_HEADS + defaultBranchName, null);
-		}
 	}
 
+    @Transactional
+	@Override
+	public void rename(final Branch branch, String newName) {
+    	final String oldName = branch.getName(); 
+    	branch.setName(newName);
+    	
+		save(branch);
+
+		getSession().getTransaction().registerSynchronization(new Synchronization() {
+
+			public void afterCompletion(int status) {
+				if (status == Status.STATUS_COMMITTED)  
+					branch.getProject().code().renameBranch(oldName, branch.getName());
+			}
+
+			public void beforeCompletion() {
+				
+			}
+			
+		});
+	}
+    
 }

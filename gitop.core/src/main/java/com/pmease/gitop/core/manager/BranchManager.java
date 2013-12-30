@@ -35,14 +35,6 @@ public interface BranchManager extends GenericDao<Branch> {
     public @Nullable Branch findDefault(Project project);
     
     /**
-     * Sync branch information of specified project in database with git repository.
-     * 
-     * @param project
-     * 			branches of the project to be synced
-     */
-    public void syncWithGit(Project project);
-    
-    /**
      * Delete all refs pointed to this branch and its associated pull requests and 
      * pull request updates.
      * 
@@ -53,11 +45,42 @@ public interface BranchManager extends GenericDao<Branch> {
     public void deleteRefs(Branch branch);
     
     /**
-     * Persist specified branch to database. Note that this won't update the git 
+     * Delete the branch record from database, as well as removing the branch from 
+     * corresponding git repository.
+     * 
+     * @param branch
+     * 			branch to be deleted
+     */
+    public void delete(Branch branch);
+    
+    /**
+     * Save/update specified branch record in database. Note that this won't update the git 
      * repository.
      * 
      * @param branch
      * 			branch to be saved
      */
     public void save(Branch branch);
+
+    /**
+     * Create specified branch record in database, and update corresponding git repository to 
+     * add the branch.
+     * 
+     * @param branch
+     * 			branch to be created
+     * @param commitHash
+     * 			commit hash of the branch
+     */
+    public void create(Branch branch, String commitHash);
+    
+    /**
+     * Rename specified branch record in database, and update corresponding git repository to 
+     * reflect the renaming.
+     *   
+     * @param branch
+     * 			branch to be renamed
+     * @param newName
+     * 			new name of the branch
+     */
+    public void rename(Branch branch, String newName);
 }
