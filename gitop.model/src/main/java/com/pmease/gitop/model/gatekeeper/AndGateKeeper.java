@@ -8,7 +8,7 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.TableLayout;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
-import com.pmease.gitop.model.gatekeeper.checkresult.Blocked;
+import com.pmease.gitop.model.gatekeeper.checkresult.BlockedPending;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
@@ -32,7 +32,7 @@ public class AndGateKeeper extends AndOrGateKeeper {
 				acceptReasons.addAll(result.getReasons());
 			} else if (result instanceof Rejected) {
 				return result;
-			} else if (result instanceof Blocked) {
+			} else if (result instanceof BlockedPending) {
 				result.getReasons().addAll(pendingReasons);
 				result.getVoteEligibilities().addAll(voteEligibilities);
 				return result;

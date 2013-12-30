@@ -93,7 +93,7 @@ public abstract class CheckResult implements Serializable {
      * @return
      * 			<tt>true</tt> if pending blocked approval
      */
-    public boolean isBlocked() {
-    	return this instanceof Blocked;
+    public boolean isBlockedPending() {
+    	return this instanceof BlockedPending;
     }
 }

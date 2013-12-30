@@ -15,7 +15,7 @@ import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
-import com.pmease.gitop.model.gatekeeper.checkresult.Blocked;
+import com.pmease.gitop.model.gatekeeper.checkresult.BlockedPending;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
 import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
@@ -110,8 +110,8 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 		return new Pending(reason, voteEligibility);
 	}
 
-	protected CheckResult blocked(String reason, VoteEligibility voteEligibility) {
-		return new Blocked(reason, voteEligibility);
+	protected CheckResult blockedPending(String reason, VoteEligibility voteEligibility) {
+		return new BlockedPending(reason, voteEligibility);
 	}
 
 	protected CheckResult accepted(List<String> reasons) {
@@ -127,7 +127,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	}
 
 	protected CheckResult blocked(List<String> reasons, Collection<VoteEligibility> voteEligibilities) {
-		return new Blocked(reasons, voteEligibilities);
+		return new BlockedPending(reasons, voteEligibilities);
 	}
 
 }

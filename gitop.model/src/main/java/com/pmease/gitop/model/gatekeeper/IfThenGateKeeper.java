@@ -7,7 +7,7 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.TableLayout;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
-import com.pmease.gitop.model.gatekeeper.checkresult.Blocked;
+import com.pmease.gitop.model.gatekeeper.checkresult.BlockedPending;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
 
@@ -49,7 +49,7 @@ public class IfThenGateKeeper extends CompositeGateKeeper {
 			return getThenGate().check(request);
 		} else if (ifResult instanceof Rejected) {
 			return accepted(ifResult.getReasons());
-		} else if (ifResult instanceof Blocked) {
+		} else if (ifResult instanceof BlockedPending) {
 			return ifResult;
 		} else {
 			CheckResult thenResult = getThenGate().check(request);

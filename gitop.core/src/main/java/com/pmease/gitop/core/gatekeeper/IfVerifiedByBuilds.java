@@ -75,7 +75,7 @@ public class IfVerifiedByBuilds extends CommonGateKeeper {
 			return accepted("Build is no longer necessary.");
 		} else if (commit.startsWith(Commit.ZERO_HASH)) { // check if a certain file can be touched
 			if (blockMode)
-				return blocked("Not verified by build.", new NoneCanVote());
+				return blockedPending("Not verified by build.", new NoneCanVote());
 			else
 				return pending("Not verified by build.", new NoneCanVote());
 		} else {
@@ -94,9 +94,9 @@ public class IfVerifiedByBuilds extends CommonGateKeeper {
 			if (lacks > 0) {
 				if (blockMode) {
 					if (buildCount > 1)
-						return blocked(prefix + "verified by " + lacks + " more build(s)", new NoneCanVote());
+						return blockedPending(prefix + "verified by " + lacks + " more build(s)", new NoneCanVote());
 					else
-						return blocked(prefix + "verified by build", new NoneCanVote());
+						return blockedPending(prefix + "verified by build", new NoneCanVote());
 				} else {
 					if (buildCount > 1)
 						return pending(prefix + "verified by " + lacks + " more build(s)", new NoneCanVote());
