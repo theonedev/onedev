@@ -1,6 +1,7 @@
 package com.pmease.gitop.web.page.project.api;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.Page;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -9,7 +10,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.base.Strings;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.model.Project;
+import com.pmease.gitop.web.SessionData;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.common.wicket.component.tab.AbstractPageTab;
 import com.pmease.gitop.web.page.PageSpec;
@@ -53,24 +58,14 @@ public class ProjectPageTab extends AbstractPageTab {
 		return category;
 	}
 	
-	public Component newTabLink(String id, IModel<Project> projectModel, IModel<String> revisionModel) {
+	public Component newTabLink(String id) {
 		ProjectCategoryPageLink container = new ProjectCategoryPageLink(id);
-		Class<? extends Page> pageClass = getBookmarkablePageClass();
-		
-		PageParameters params = PageSpec.forProject(projectModel.getObject()); 
-		if (IRevisionAware.class.isAssignableFrom(pageClass)) {
-			params.set(PageSpec.OBJECT_ID, revisionModel.getObject());
-		}
-		
-		BookmarkablePageLink<Void> link = 
-				new BookmarkablePageLink<Void>("link", getBookmarkablePageClass(), 
-						params);
-		
+		MarkupContainer link = newPageLink("link");
 		container.add(link);
 		link.add(new Icon("icon", Model.of(icon)));
 		link.add(new Label("label", getTitle()));
 		
-		Component badge = createBadge("badge", projectModel);
+		Component badge = createBadge("badge", getProject());
 		if (badge == null) {
 			badge = new WebMarkupContainer("badge");
 			badge.setVisibilityAllowed(false);
@@ -81,12 +76,33 @@ public class ProjectPageTab extends AbstractPageTab {
 		return container;
 	}
 
+	protected Project getProject() {
+		return Gitop.getInstance(ProjectManager.class).get(SessionData.get().getProjectId());
+	}
+	
+	protected MarkupContainer newPageLink(String id) {
+		Class<? extends Page> pageClass = getBookmarkablePageClass();
+		
+		Project project = getProject();
+		PageParameters params = PageSpec.forProject(project); 
+		if (IRevisionAware.class.isAssignableFrom(pageClass)) {
+			String revision = SessionData.get().getRevision();
+			if (!Strings.isNullOrEmpty(revision)) {
+				params.set(PageSpec.OBJECT_ID, revision);
+			}
+		}
+		
+		return new BookmarkablePageLink<Void>("link", 
+				getBookmarkablePageClass(), 
+				params);
+	}
+	
 	@Override
 	public final Component newTabLink(String id, PageParameters params) {
 		throw new UnsupportedOperationException();
 	}
 	
-	protected Component createBadge(String id, IModel<Project> project) {
+	protected Component createBadge(String id, Project project) {
 		return null;
 	}
 }

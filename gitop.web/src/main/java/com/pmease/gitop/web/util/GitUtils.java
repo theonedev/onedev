@@ -41,11 +41,6 @@ public class GitUtils {
 	}
 	
 	public static @Nullable String getDefaultBranch(Git git) {
-		String rev = git.parseRevision(Constants.MASTER, false);
-		if (rev != null) {
-			return Constants.MASTER;
-		}
-		
 		// FIXME: here --heads is not a pattern
 		List<RefInfo> refs = git.showRefs("--heads");
 		if (refs.isEmpty()) {

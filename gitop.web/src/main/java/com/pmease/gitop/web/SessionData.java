@@ -1,7 +1,6 @@
 package com.pmease.gitop.web;
 
 import java.io.Serializable;
-import java.util.List;
 
 public class SessionData implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -9,8 +8,22 @@ public class SessionData implements Serializable {
 	private Long accountId;
 	private Long projectId;
 	private String revision;
-	private List<String> paths;
 
+	public static SessionData get() {
+		return GitopSession.get().getSessionData();
+	}
+	
+	public void onAccountChanged() {
+		this.projectId = null;
+		this.revision = null;
+	}
+	
+	public void onProjectChanged() {
+		this.revision = null;
+	}
+	
+	public void onRevisionChanged() {
+	}
 	
 	public Long getAccountId() {
 		return accountId;
@@ -35,13 +48,4 @@ public class SessionData implements Serializable {
 	public void setRevision(String revision) {
 		this.revision = revision;
 	}
-
-	public List<String> getPaths() {
-		return paths;
-	}
-
-	public void setPaths(List<String> paths) {
-		this.paths = paths;
-	}
-
 }

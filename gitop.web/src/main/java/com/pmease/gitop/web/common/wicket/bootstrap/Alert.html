@@ -1,0 +1,13 @@
+<html xmlns:wicket="http://wicket.apache.org">
+    <head>
+        <title>Alert</title>
+    </head>
+    <body>
+        <wicket:panel>
+            <a wicket:id="close" class="close" data-dismiss="alert" href="#">&times;</a>
+            <h4 wicket:id="block" class="alert-heading">Warning!</h4>
+            <strong wicket:id="inline"></strong>
+            <wicket:fragment wicket:id="message"/>
+        </wicket:panel>
+    </body>
+</html>

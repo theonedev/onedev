@@ -52,6 +52,11 @@ public class SourceCommitPage extends ProjectCategoryPage {
 	}
 
 	@Override
+	protected void onUpdateRevision(String rev) {
+		// don't update revision in session
+	}
+	
+	@Override
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 		
@@ -141,6 +146,11 @@ public class SourceCommitPage extends ProjectCategoryPage {
 
 	protected Commit getCommit() {
 		return commitModel.getObject();
+	}
+	
+	@Override
+	protected boolean isRevisionAware() {
+		return false;
 	}
 	
 	@Override

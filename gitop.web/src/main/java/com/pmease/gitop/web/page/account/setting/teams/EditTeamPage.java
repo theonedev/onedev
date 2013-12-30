@@ -13,11 +13,11 @@ import com.google.common.base.Preconditions;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Team;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.model.TeamModel;
-import com.pmease.gitop.web.model.UserModel;
+import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
-import com.pmease.gitop.web.util.WicketUtils;
 
 @SuppressWarnings("serial")
 public class EditTeamPage extends AccountSettingPage {
@@ -26,26 +26,27 @@ public class EditTeamPage extends AccountSettingPage {
 	
 	public static PageParameters newParams(Team team) {
 		Preconditions.checkNotNull(team);
-		return WicketUtils.newPageParams("teamId", team.getId());
+		PageParameters params = PageSpec.forUser(team.getOwner());
+		params.set("teamId", team.getId());
+		return params;
 	}
 	
 	public EditTeamPage(PageParameters params) {
 		super(params);
 		
+		User user = accountModel.getObject();
+		
 		StringValue sv = params.get("teamId");
 		Team team;
 		if (sv.isEmpty() || sv.isNull()) {
 			team = new Team();
+			team.setOwner(user);
 		} else {
 			Long id = sv.toLongObject();
 			team = Gitop.getInstance(TeamManager.class).get(id);
 			if (team == null) {
 				throw new EntityNotFoundException("Team " + id + " doesn't exist");
 			}
-		}
-		
-		if (!team.isNew()) {
-			this.accountModel = new UserModel(team.getOwner());
 		}
 		
 		this.teamModel = new TeamModel(team);

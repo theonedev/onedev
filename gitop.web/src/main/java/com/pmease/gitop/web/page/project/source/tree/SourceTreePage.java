@@ -16,7 +16,6 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.gitop.model.Project;
-import com.pmease.gitop.web.model.ProjectModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.source.AbstractFilePage;
 import com.pmease.gitop.web.page.project.source.component.SourceBreadcrumbPanel;
@@ -44,8 +43,6 @@ public class SourceTreePage extends AbstractFilePage {
 	@Override
 	protected void onPageInitialize() {
 		super.onPageInitialize();
-		
-		Git git = getProject().code();
 		
 		IModel<List<TreeNode>> nodesModel = new LoadableDetachableModel<List<TreeNode>>() {
 
@@ -81,14 +78,12 @@ public class SourceTreePage extends AbstractFilePage {
 			}
 		};
 		
-		if (git.hasCommits()) {
+		if (getProject().code().hasCommits()) {
 			add(new ProjectDescriptionPanel("description", projectModel).setVisibilityAllowed(getPaths().isEmpty()));
 			add(new SourceBreadcrumbPanel("breadcrumb", projectModel, revisionModel, pathsModel));
 			add(new SourceTreePanel("tree", projectModel, revisionModel, pathsModel, nodesModel));
 			add(new ReadmePanel("readme", projectModel, revisionModel, pathsModel, nodesModel));
-			add(new WebMarkupContainer("empty").setVisibilityAllowed(false));
 		} else {
-			add(new EmptyRepositoryPanel("empty", new ProjectModel(getProject())));
 			add(new WebMarkupContainer("tree").setVisibilityAllowed(false));
 		}
 	}

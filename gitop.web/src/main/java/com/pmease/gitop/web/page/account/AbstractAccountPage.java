@@ -5,11 +5,13 @@ import javax.persistence.EntityNotFoundException;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
+import com.pmease.gitop.web.SessionData;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
 import com.pmease.gitop.web.page.PageSpec;
@@ -29,6 +31,12 @@ public abstract class AbstractAccountPage extends AbstractLayoutPage {
 		}
 		
 		this.accountModel = new UserModel(user);
+		
+		if (!Objects.equal(SessionData.get().getAccountId(), user.getId())) {
+			SessionData.get().onAccountChanged();
+		}
+		
+		SessionData.get().setAccountId(user.getId());
 	}
 
 	@Override

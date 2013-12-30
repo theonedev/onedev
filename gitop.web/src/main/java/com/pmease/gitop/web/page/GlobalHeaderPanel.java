@@ -33,7 +33,10 @@ public class GlobalHeaderPanel extends Panel {
 		
 		if (isSignedIn()) {
 			add(new UserAvatarLink("userlink", new UserModel(currentUser().get())));
-			add(new BookmarkablePageLink<Void>("profileLink", AccountProfilePage.class));
+			add(new BookmarkablePageLink<Void>("profileLink", 
+												AccountProfilePage.class, 
+												AccountProfilePage.newParams(currentUser().get())));
+			
 			add(new BookmarkablePageLink<Void>("newlink", CreateProjectPage.class));
 			add(new BookmarkablePageLink<Void>("adminlink", AdministrationOverviewPage.class) {
 				@Override
