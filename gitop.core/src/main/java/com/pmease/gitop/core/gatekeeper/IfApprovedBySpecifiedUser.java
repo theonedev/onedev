@@ -1,5 +1,6 @@
 package com.pmease.gitop.core.gatekeeper;
 
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 
 import com.google.common.collect.Sets;
@@ -9,6 +10,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.editable.UserChoice;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
+import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
@@ -37,21 +39,15 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
     }
 
     @Override
-    public CheckResult doCheck(PullRequest request) {
+    public CheckResult doCheckRequest(PullRequest request) {
         UserManager userManager = Gitop.getInstance(UserManager.class);
         User user = userManager.load(getUserId());
 
         Vote.Result result = user.checkVoteSince(request.getBaseUpdate());
         if (result == null) {
-            if (request.getId() != null)
-            	Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, Sets.newHashSet(user), 1);
+            Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, Sets.newHashSet(user), 1);
 
-            String prefix;
-    		if (request.getId() == null)
-    			prefix = "Not ";
-    		else
-    			prefix = "To be ";
-            return pending(prefix + "approved by user '" + user.getName() + "'.",
+            return pending("To be approved by user '" + user.getName() + "'.",
                     new CanVoteBySpecifiedUser(user));
         } else if (result.isAccept()) {
             return accepted("Approved by user '" + user.getName() + "'.");
@@ -68,5 +64,25 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
         else
             return this;
     }
+
+    private CheckResult checkBranch(User user, Branch branch) {
+		User approver = Gitop.getInstance(UserManager.class).load(userId);
+        if (approver.getId().equals(user.getId())) {
+        	return accepted("Approved by user '" + approver.getName() + "'.");
+        } else {
+        	return pending("Not approved by user '" + approver.getName() + "'.", 
+        			new CanVoteBySpecifiedUser(approver)); 
+        }
+    }
+    
+	@Override
+	protected CheckResult doCheckFile(User user, Branch branch, @Nullable String file) {
+		return checkBranch(user, branch);
+	}
+
+	@Override
+	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
+		return checkBranch(user, branch);
+	}
 
 }

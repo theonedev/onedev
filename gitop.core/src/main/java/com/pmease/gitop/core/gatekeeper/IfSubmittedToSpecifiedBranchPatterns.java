@@ -1,10 +1,14 @@
 package com.pmease.gitop.core.gatekeeper;
 
+import javax.annotation.Nullable;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.pattern.WildcardUtils;
+import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.BranchGateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 
@@ -33,8 +37,24 @@ public class IfSubmittedToSpecifiedBranchPatterns extends BranchGateKeeper {
 	}
 
 	@Override
-	public CheckResult doCheck(PullRequest request) {
+	public CheckResult doCheckRequest(PullRequest request) {
 		if (WildcardUtils.matchPath(getBranchPatterns(), request.getTarget().getName()))
+			return accepted("Target branch matches pattern '" + branchPatterns + "'.");
+		else
+			return rejected("Target branch does not match pattern '" + branchPatterns + "'.");
+	}
+
+	@Override
+	protected CheckResult doCheckFile(User user, Branch branch, @Nullable String file) {
+		if (WildcardUtils.matchPath(getBranchPatterns(), branch.getName()))
+			return accepted("Target branch matches pattern '" + branchPatterns + "'.");
+		else
+			return rejected("Target branch does not match pattern '" + branchPatterns + "'.");
+	}
+
+	@Override
+	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
+		if (WildcardUtils.matchPath(getBranchPatterns(), branch.getName()))
 			return accepted("Target branch matches pattern '" + branchPatterns + "'.");
 		else
 			return rejected("Target branch does not match pattern '" + branchPatterns + "'.");

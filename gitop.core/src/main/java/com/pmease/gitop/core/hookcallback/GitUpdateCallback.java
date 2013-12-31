@@ -110,8 +110,12 @@ public class GitUpdateCallback extends HttpServlet {
 					User user = userManager.getCurrent();
 					Preconditions.checkNotNull(user);
 			
-					GateKeeper gateKeeper = project.aggregateGateKeepers();
-					CheckResult checkResult = gateKeeper.checkCommit(user, branch, newCommitHash);
+					GateKeeper gateKeeper = project.getGateKeeper();
+					CheckResult checkResult;
+					if (newCommitHash.equals(Commit.ZERO_HASH))
+						checkResult = gateKeeper.checkFile(user, branch, null);
+					else
+						checkResult = gateKeeper.checkCommit(user, branch, newCommitHash);
 			
 					if (!(checkResult instanceof Accepted)) {
 						List<String> messages = new ArrayList<>();

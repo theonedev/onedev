@@ -7,15 +7,12 @@ import javax.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.git.Commit;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.MergePrediction;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
-import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
-import com.pmease.gitop.model.gatekeeper.checkresult.BlockedPending;
+import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
 import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
@@ -36,57 +33,70 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	}
 	
 	@Override
-	public CheckResult check(PullRequest request) {
+	public CheckResult checkRequest(PullRequest request) {
 		if (enabled)
-			return doCheck(request);
+			return doCheckRequest(request);
 		else
 			return accepted("Gate keeper is disabled.");
 	}
 	
 	@Override
-	public CheckResult checkFile(User user, Branch branch, String file) {
-		return checkCommit(user, branch, Commit.ZERO_HASH + file);
+	public CheckResult checkFile(User user, Branch branch, @Nullable String file) {
+		if (isEnabled())
+			return doCheckFile(user, branch, file);
+		else
+			return accepted("Gate keeper is disabled");
 	}
-	
 	
 	@Override
 	public CheckResult checkCommit(User user, Branch branch, String commit) {
-		PullRequest request = new PullRequest();
-		request.setTarget(branch);
-		request.setSource(new Branch());
-		request.getSource().setProject(new Project());
-		request.getSource().getProject().setOwner(user);
-		request.setTitle("Faked Pull Request");
-		request.setMergePrediction(new MergePrediction(null, commit, commit));
-		
-		PullRequestUpdate update = new PullRequestUpdate();
-		update.setRequest(request);
-		update.setHeadCommit(request.getMergePrediction().getRequestHead());
-		request.getUpdates().add(update);
-
-		return check(request);
+		if (isEnabled())
+			return doCheckCommit(user, branch, commit);
+		else
+			return accepted("Gate keeper is disabled");
 	}
 
 	/**
-	 * Check the gate keeper without considering enable flag. 
+	 * Check the gate keeper against specified request without considering enable flag. This is 
+	 * typically used to determine whether or not to accept a pull request. 
 	 * 
 	 * @param request
-	 *			pull request to be checked. Gitop will create faked pull request in some
-	 *			special cases explained below:
-	 *			<ul>
-	 *				<li> When determine whether or not a push operation should be accepted.
-	 *				<li> When determine whether or not a branch can be deleted. In this 
-	 *					case, the commit hash of the update will be {@link Commit#ZERO_HASH}.
-	 *				<li> When determine whether or not a file can be touched. In this 
-	 *					case, the commit hash of the update will be {@link Commit#ZERO_HASH}
-	 *					concatenated with full path of the file.
-	 *			</ul>  
-	 *			For a faked pull request created in these special cases can be identified by 
-	 *			checking whether or not <tt>request.getId()</tt> returns <tt>null</tt>
+	 *			pull request to be checked
 	 * @return
 	 * 			result of the check
 	 */
-	protected abstract CheckResult doCheck(PullRequest request);
+	protected abstract CheckResult doCheckRequest(PullRequest request);
+	
+	/**
+	 * Check the gate keeper against specified user, branch and file without considering enable flag.
+	 * This is typically used to determine whether or not to accept a file modification or branch 
+	 * deletion (when file parameter is specified as <tt>null</tt>).
+	 *
+	 * @param user
+	 * 			user to be checked
+	 * @param branch
+	 * 			branch to be checked
+	 * @param file
+	 * 			file to be checked, <tt>null</tt> means to check if the user can administer/delete the branch
+	 * @return
+	 * 			result of the check
+	 */
+	protected abstract CheckResult doCheckFile(User user, Branch branch, @Nullable String file);
+	
+	/**
+	 * Check the gate keeper against specified user, branch and commit without considering enable flag. 
+	 * This is typically used to determine whether or not to accept a push operation.
+	 *
+	 * @param user
+	 * 			user to be checked
+	 * @param branch
+	 * 			branch to be checked
+	 * @param commit
+	 * 			commit to be checked
+	 * @return
+	 * 			result of the check
+	 */
+	protected abstract CheckResult doCheckCommit(User user, Branch branch, String commit);
 
 	@Override
 	public final Object trim(@Nullable Object context) {
@@ -110,8 +120,8 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 		return new Pending(reason, voteEligibility);
 	}
 
-	protected CheckResult blockedPending(String reason, VoteEligibility voteEligibility) {
-		return new BlockedPending(reason, voteEligibility);
+	protected CheckResult pendingAndBlock(String reason, VoteEligibility voteEligibility) {
+		return new PendingAndBlock(reason, voteEligibility);
 	}
 
 	protected CheckResult accepted(List<String> reasons) {
@@ -126,8 +136,8 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 		return new Pending(reasons, voteEligibilies);
 	}
 
-	protected CheckResult blocked(List<String> reasons, Collection<VoteEligibility> voteEligibilities) {
-		return new BlockedPending(reasons, voteEligibilities);
+	protected CheckResult pendingAndBlock(List<String> reasons, Collection<VoteEligibility> voteEligibilities) {
+		return new PendingAndBlock(reasons, voteEligibilities);
 	}
 
 }

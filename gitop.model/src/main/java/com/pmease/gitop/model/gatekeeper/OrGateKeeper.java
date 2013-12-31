@@ -6,9 +6,8 @@ import java.util.List;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.TableLayout;
-import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
-import com.pmease.gitop.model.gatekeeper.checkresult.BlockedPending;
+import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
@@ -20,18 +19,18 @@ import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
 public class OrGateKeeper extends AndOrGateKeeper {
 
 	@Override
-	public CheckResult doCheck(PullRequest request) {
+	protected CheckResult aggregate(Checker checker) {
 		List<String> pendingReasons = new ArrayList<String>();
 		List<String> rejectReasons = new ArrayList<String>();
 		Collection<VoteEligibility> voteEligibilities = new ArrayList<>();
 		
 		for (GateKeeper each: getGateKeepers()) {
-			CheckResult result = each.check(request);
+			CheckResult result = checker.check(each);
 			if (result instanceof Rejected) {
 				rejectReasons.addAll(result.getReasons());
 			} else if (result instanceof Accepted) {
 				return result;
-			} else if (result instanceof BlockedPending) {
+			} else if (result instanceof PendingAndBlock) {
 				result.getReasons().addAll(pendingReasons);
 				result.getVoteEligibilities().addAll(voteEligibilities);
 				return result;

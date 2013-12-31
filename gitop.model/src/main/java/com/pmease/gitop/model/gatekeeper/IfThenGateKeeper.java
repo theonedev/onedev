@@ -5,9 +5,8 @@ import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.TableLayout;
-import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
-import com.pmease.gitop.model.gatekeeper.checkresult.BlockedPending;
+import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
 
@@ -43,16 +42,16 @@ public class IfThenGateKeeper extends CompositeGateKeeper {
 	}
 
 	@Override
-	public CheckResult doCheck(PullRequest request) {
-		CheckResult ifResult = getIfGate().check(request);
+	protected CheckResult aggregate(Checker checker) {
+		CheckResult ifResult = checker.check(getIfGate());
 		if (ifResult instanceof Accepted) {
-			return getThenGate().check(request);
+			return checker.check(getThenGate());
 		} else if (ifResult instanceof Rejected) {
 			return accepted(ifResult.getReasons());
-		} else if (ifResult instanceof BlockedPending) {
+		} else if (ifResult instanceof PendingAndBlock) {
 			return ifResult;
 		} else {
-			CheckResult thenResult = getThenGate().check(request);
+			CheckResult thenResult = checker.check(getThenGate());
 			if (thenResult instanceof Accepted)
 				return thenResult;
 			else 

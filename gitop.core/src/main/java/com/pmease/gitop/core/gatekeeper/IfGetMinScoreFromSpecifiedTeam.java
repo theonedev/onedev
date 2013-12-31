@@ -8,6 +8,7 @@ import javax.validation.constraints.Min;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
+import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Membership;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
@@ -49,7 +50,7 @@ public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
     }
 
     @Override
-    public CheckResult doCheck(PullRequest request) {
+    public CheckResult doCheckRequest(PullRequest request) {
         Collection<User> members = new HashSet<User>();
         for (Membership membership : getTeam().getMemberships())
             members.add(membership.getUser());
@@ -68,37 +69,75 @@ public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
             }
         }
 
+        int lackApprovals = calcLackApprovals(score, pendings);
+
+        if (lackApprovals == 0) {
+            return accepted("Get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
+        } else if (lackApprovals < 0) {
+            return rejected("Can not get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
+        } else {
+            Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, members, lackApprovals);
+
+            return pending("To be approved by " + lackApprovals + " users from team '"
+                    + getTeam().getName() + ".", new CanVoteBySpecifiedTeam(getTeam()));
+        }
+    }
+
+    private int calcLackApprovals(int score, int pendings) {
         if (score + pendings < getMinScore()) {
-            return rejected("Can not get min score " + getMinScore() + " from team '"
-                    + getTeam().getName() + "'.");
+            return -1;
         } else {
             int lackApprovals;
             if (isRequireVoteOfAllMembers()) {
                 if (score - pendings >= getMinScore())
-                    return accepted("Get min score " + getMinScore() + " from team '"
-                            + getTeam().getName() + "'.");
+                    return 0;
                 int temp = getMinScore() + pendings - score;
                 lackApprovals = temp / 2;
                 if (temp % 2 != 0) lackApprovals++;
                 if (lackApprovals > pendings) lackApprovals = pendings;
             } else {
                 if (score >= getMinScore())
-                    return accepted("Get min score " + getMinScore() + " from team '"
-                            + getTeam().getName() + "'.");
+                    return 0;
                 lackApprovals = getMinScore() - score;
             }
 
-            if (request.getId() != null)
-            	Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, members, lackApprovals);
-
-    		String prefix;
-    		if (request.getId() == null)
-    			prefix = "Not ";
-    		else
-    			prefix = "To be ";
-            return pending(prefix + "approved by " + lackApprovals + " users from team '"
-                    + getTeam().getName() + ".", new CanVoteBySpecifiedTeam(getTeam()));
+            return lackApprovals;
         }
     }
+
+	private CheckResult checkBranch(User user, Branch branch) {
+        Collection<User> members = new HashSet<User>();
+        for (Membership membership : getTeam().getMemberships())
+            members.add(membership.getUser());
+
+        int score = 0;
+        int pendings = members.size();
+        
+        if (members.contains(user)) {
+        	score ++;
+        	pendings --;
+        }
+
+        int lackApprovals = calcLackApprovals(score, pendings);
+
+        if (lackApprovals == 0) {
+            return accepted("Get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
+        } else if (lackApprovals < 0) {
+            return rejected("Can not get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
+        } else {
+            return pending("Lack " + lackApprovals + " approvals from team '"
+                    + getTeam().getName() + ".", new CanVoteBySpecifiedTeam(getTeam()));
+        }
+	}
+
+	@Override
+	protected CheckResult doCheckFile(User user, Branch branch, String file) {
+		return checkBranch(user, branch);
+	}
+
+	@Override
+	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
+		return checkBranch(user, branch);
+	}
 
 }

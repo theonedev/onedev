@@ -10,13 +10,13 @@ import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
  * of this gate keeper has been determined.
  */
 @SuppressWarnings("serial")
-public class BlockedPending extends CheckResult {
+public class PendingAndBlock extends CheckResult {
 	
-	public BlockedPending(List<String> reasons, Collection<VoteEligibility> voteEligibilities) {
+	public PendingAndBlock(List<String> reasons, Collection<VoteEligibility> voteEligibilities) {
 		super(reasons, voteEligibilities);
 	}
 
-	public BlockedPending(String reason, VoteEligibility voteEligibility) {
+	public PendingAndBlock(String reason, VoteEligibility voteEligibility) {
 		super(reason, voteEligibility);
 	}
 

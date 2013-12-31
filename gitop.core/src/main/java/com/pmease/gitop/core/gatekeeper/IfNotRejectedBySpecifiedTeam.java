@@ -1,8 +1,12 @@
 package com.pmease.gitop.core.gatekeeper;
 
+import javax.annotation.Nullable;
+
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Membership;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 
@@ -12,8 +16,7 @@ import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 public class IfNotRejectedBySpecifiedTeam extends TeamAwareGateKeeper {
 
 	@Override
-	public CheckResult doCheck(PullRequest request) {
-		
+	public CheckResult doCheckRequest(PullRequest request) {
 		for (Membership membership: getTeam().getMemberships()) {
 			Vote.Result result = membership.getUser().checkVoteSince(request.getBaseUpdate());
 			if (result.isReject()) {
@@ -22,6 +25,16 @@ public class IfNotRejectedBySpecifiedTeam extends TeamAwareGateKeeper {
 		}
 		
 		return accepted("Not rejected by anyone from team '" + getTeam().getName() + ".");
+	}
+
+	@Override
+	protected CheckResult doCheckFile(User user, Branch branch, @Nullable String file) {
+		return accepted("Not rejected by anyone from team '" + getTeam().getName() + "'.");
+	}
+
+	@Override
+	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
+		return accepted("Not rejected by anyone from team '" + getTeam().getName() + "'.");
 	}
 
 }

@@ -1,15 +1,17 @@
 package com.pmease.gitop.core.gatekeeper;
 
-import java.util.ArrayList;
 import java.util.Collection;
+
+import javax.annotation.Nullable;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.git.Commit;
 import com.pmease.commons.util.pattern.WildcardUtils;
+import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestUpdate;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.FileGateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 
@@ -38,32 +40,44 @@ public class IfTouchesSpecifiedFilePatterns extends FileGateKeeper {
 	}
 
 	@Override
-	public CheckResult doCheck(PullRequest request) {
+	public CheckResult doCheckRequest(PullRequest request) {
 		for (int i=0; i<request.getEffectiveUpdates().size(); i++) {
 			PullRequestUpdate update = request.getEffectiveUpdates().get(i);
 
-			Collection<String> touchedFiles;
-			if (!update.getHeadCommit().startsWith(Commit.ZERO_HASH)) {
-				touchedFiles = request.getTarget().getProject().code().listChangedFiles(
-						update.getBaseCommit(), update.getHeadCommit());
-			} else {
-				touchedFiles = new ArrayList<>();
-				String path = update.getHeadCommit().substring(Commit.ZERO_HASH.length());
-				if (path.length() != 0) // test if a certain file can be touched
-					touchedFiles.add(path);
-				else // test if the branch can be deleted
-					return accepted("Delete branch '" + request.getTarget().getName() + "'.");
-			} 
+			Collection<String> touchedFiles = request.getTarget().getProject().code()
+					.listChangedFiles(update.getBaseCommit(), update.getHeadCommit());
 			
 			for (String file: touchedFiles) {
 				if (WildcardUtils.matchPath(getFilePatterns(), file)) {
 					request.setBaseUpdate(update);
-					return accepted("Touched files match pattern '" + getFilePatterns() + "'.");
+					return accepted("Touched files match patterns '" + getFilePatterns() + "'.");
 				}
 			}
 		}
 
-		return rejected("No touched files match pattern '" + getFilePatterns() + "'.");
+		return rejected("No touched files match patterns '" + getFilePatterns() + "'.");
+	}
+
+	@Override
+	protected CheckResult doCheckFile(User user, Branch branch, @Nullable String file) {
+		if (file != null) {
+			if (WildcardUtils.matchPath(filePatterns, file)) 
+				return accepted("Touched files match patterns '" + filePatterns + "'.");
+			else
+				return rejected("No touched files match patterns '" + filePatterns + "'.");
+		} else {
+			return accepted("Touched specified files.");
+		}
+	}
+
+	@Override
+	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
+		for (String file: branch.getProject().code().listChangedFiles(branch.getHeadCommit(), commit)) {
+			if (WildcardUtils.matchPath(filePatterns, file))
+					return accepted("Touched files match patterns '" + filePatterns + "'.");
+		}
+		
+		return rejected("No touched files match patterns '" + filePatterns + "'.");
 	}
 
 }

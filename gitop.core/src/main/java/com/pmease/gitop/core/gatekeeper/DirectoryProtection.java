@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -21,9 +22,11 @@ import com.pmease.gitop.core.editable.DirectoryChoice;
 import com.pmease.gitop.core.editable.TeamChoice;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.TeamManager;
+import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.Team;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.AndGateKeeper;
 import com.pmease.gitop.model.gatekeeper.CommonGateKeeper;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
@@ -109,27 +112,30 @@ public class DirectoryProtection extends CommonGateKeeper {
 
 	}
 
-	@Override
-	public CheckResult doCheck(PullRequest request) {
-		AndGateKeeper andGateKeeper = new AndGateKeeper();
-		if (!branchIds.isEmpty()) {
-			IfSubmittedToSpecifiedBranches branchGate = new IfSubmittedToSpecifiedBranches();
-			branchGate.getBranchIds().addAll(branchIds);
-			andGateKeeper.getGateKeepers().add(branchGate);
-		}
+	private GateKeeper getGateKeeper() {
+		AndGateKeeper andGate = new AndGateKeeper();
 		for (Entry entry: entries) {
-			IfThenGateKeeper ifThenGateKeeper = new IfThenGateKeeper();
+			IfThenGateKeeper ifThenGate = new IfThenGateKeeper();
 			IfTouchesSpecifiedDirectories ifGate = new IfTouchesSpecifiedDirectories();
 			ifGate.getDirectories().add(entry.getDirectory());
-			ifThenGateKeeper.setIfGate(ifGate);
+			ifThenGate.setIfGate(ifGate);
 			
 			IfApprovedBySpecifiedTeam thenGate = new IfApprovedBySpecifiedTeam();
 			thenGate.setTeamId(entry.getTeamId());
-			ifThenGateKeeper.setThenGate(thenGate);
+			ifThenGate.setThenGate(thenGate);
 			
-			andGateKeeper.getGateKeepers().add(ifThenGateKeeper);
+			andGate.getGateKeepers().add(ifThenGate);
 		}
-		return andGateKeeper.doCheck(request);
+		if (branchIds.isEmpty()) {
+			return andGate;
+		} else {
+			IfThenGateKeeper ifThenGate = new IfThenGateKeeper();
+			IfSubmittedToSpecifiedBranches branchGate = new IfSubmittedToSpecifiedBranches();
+			branchGate.getBranchIds().addAll(branchIds);
+			ifThenGate.setIfGate(branchGate);
+			ifThenGate.setThenGate(andGate);
+			return ifThenGate;
+		}
 	}
 
 	@Override
@@ -148,6 +154,21 @@ public class DirectoryProtection extends CommonGateKeeper {
 			return null;
 		else
 			return this;
+	}
+
+	@Override
+	protected CheckResult doCheckRequest(PullRequest request) {
+		return getGateKeeper().checkRequest(request);
+	}
+
+	@Override
+	protected CheckResult doCheckFile(User user, Branch branch, @Nullable String file) {
+		return getGateKeeper().checkFile(user, branch, file);
+	}
+
+	@Override
+	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
+		return getGateKeeper().checkCommit(user, branch, commit);
 	}
 
 }

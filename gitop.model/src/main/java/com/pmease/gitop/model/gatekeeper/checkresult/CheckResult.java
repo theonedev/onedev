@@ -88,12 +88,12 @@ public abstract class CheckResult implements Serializable {
     }
 
     /**
-     * Whether or not the check represents for a blocked pending approval.
+     * Whether or not the check represents for a pending approval with block.
      * 
      * @return
-     * 			<tt>true</tt> if pending blocked approval
+     * 			<tt>true</tt> if pending approval with block
      */
-    public boolean isBlockedPending() {
-    	return this instanceof BlockedPending;
+    public boolean isPendingAndBlock() {
+    	return this instanceof PendingAndBlock;
     }
 }

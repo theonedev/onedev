@@ -39,7 +39,7 @@ import com.pmease.gitop.model.PullRequest.Status;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.VoteInvitation;
-import com.pmease.gitop.model.gatekeeper.checkresult.BlockedPending;
+import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
 import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
 import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
 
@@ -174,7 +174,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 						}
 					}
 					
-					request.setCheckResult(request.getTarget().getProject().aggregateGateKeepers().check(request));
+					request.setCheckResult(request.getTarget().getProject().getGateKeeper().checkRequest(request));
 			
 					for (VoteInvitation invitation : request.getVoteInvitations()) {
 						if (!request.getCheckResult().canVote(invitation.getVoter(), request))
@@ -183,7 +183,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 			
 					Preconditions.checkNotNull(request.getMergePrediction());
 					
-					if (request.getCheckResult() instanceof Pending || request.getCheckResult() instanceof BlockedPending) {
+					if (request.getCheckResult() instanceof Pending || request.getCheckResult() instanceof PendingAndBlock) {
 						request.setStatus(Status.PENDING_APPROVAL);
 					} else if (request.getCheckResult() instanceof Rejected) {
 						request.setStatus(Status.PENDING_UPDATE);
