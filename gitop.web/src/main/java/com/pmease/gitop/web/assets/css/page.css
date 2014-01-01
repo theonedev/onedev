@@ -139,6 +139,16 @@ section>.head h2, section>.head h3 { margin: 0; font-size: 18px; line-height: 24
 section .padder, section > .body { padding: 20px 20px; }
 section > .well { border-radius: 0; border-width: 0 0 1px 0; margin: 0; }
 section>.head .actions { float: left; }
+section .actionbar { padding: 8px 20px; border-bottom: 1px solid #ddd; background: #f7f9fa; position: relative; }
+.actionbar .btn { color: #666;} 
+.actionbar .btn:hover { color: #08f; }
+.actionbar .btn:focus,
+.actionbar .btn:active {
+	background: transparent;
+	box-shadow: none;
+}
+
+.actionbar .btn-delete-team:hover { color: #900; }
 
 /** TABLE */
 
@@ -186,6 +196,7 @@ th.wicket_orderUp a, th.wicket_orderDown a { padding-left: 20px; }
 
 /* ACCOUNT SETTINGS PAGE */
 .owners-list > li > a { color: #666;  }
+.avatar-form .fileinput .thumbnail { width: 200px; height: 200px; }
 
 /* TEAM EDIT PAGE */
 .permission-link { color: #666; }
@@ -288,14 +299,13 @@ ul.btn-list { list-style: none; margin: 0; }
 .list-group-heading { padding-bottom: 12px; border-bottom: 1px solid #ddd; }
 
 .member-item { float: left; width: 330px; padding: 10px 0; margin: 0 20px 0 0; border: none; border-bottom: 1px solid #eee; }
-.member-item .avatar { width: 75px; height: 75px; float: left; box-shadow: none; }
+.member-item .avatar { width: 72px; height: 72px; float: left; box-shadow: none; }
 .member-item .avatar > img { background: transparent; border-radius: 50%;}
-.member-item .member-content { vertical-align: middle; margin-left: 90px;  }
+.member-item .member-content { vertical-align: middle; margin-left: 90px;  margin-right: 30px; overflow: hidden; white-space: nowrap; }
 .member-item .list-group-item-heading { margin-bottom: 9px; }
-.member-content .list-group-item-heading a,
-.member-content .list-group-item-heading em { display: block; overflow: hidden; white-space: nowrap;}
+.member-content .list-group-item-heading em { display: block; }
 .member-content .list-group-item-heading em { font-style: normal; color: #999; font-weight: normal; } 
-.member-content .list-item-teams { overflow: hidden; white-space: nowrap; margin-right: 10px; }
+.member-content .list-item-teams { overflow: auto; overflow-y: hidden; overflow-x: auto; white-space: nowrap; margin-right: 10px; }
 .member-content .list-item-teams .btn { position: relative; }
 .member-content .list-item-teams a.btn > i { position: absolute;left: 50%;margin-left: -6px;top: 50%;margin-top: -8px;font-size: 16px; display: none; }
 .member-content .list-item-teams a.btn:hover { background: #ff2a68; border-color: #ff2a68; }
@@ -314,6 +324,11 @@ ul.btn-list { list-style: none; margin: 0; }
 
 .list-group-item.repo:hover > .list-group-item-actions > .img-link { color: #990000; }
  
+.list-members .list-group-item-actions { top: 20px; margin-top: 0;}
+.simple-teams-list .member-item .avatar { width: 48px; height: 48px; }
+.simple-teams-list .member-item .member-content { margin-left: 60px; padding-top: 5px; }
+.simple-teams-list .member-item .list-group-item-heading { margin: 0; }
+
 /**
  * PROJECT PAGE
  */

@@ -30,11 +30,11 @@ public class Alert extends GenericPanel<String> {
     /**
      * The {@code Type} enum defines all possible alert types.
      */
-    public enum Type {
+    public static enum Type {
         Error, Success, Info, Warning;
 
         public String cssClassName() {
-            return equals(Warning) ? "alert-block" : "alert-" + name().toLowerCase();
+            return "alert-" + name().toLowerCase();
         }
 
         public static Type from(String level) {

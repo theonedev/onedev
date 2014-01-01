@@ -9,10 +9,10 @@ import org.apache.wicket.model.IModel;
 
 import com.google.common.base.Preconditions;
 import com.pmease.gitop.model.User;
+import com.pmease.gitop.web.common.wicket.util.WicketUtils;
 import com.pmease.gitop.web.component.avatar.AvatarImage;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
-import com.pmease.gitop.web.util.WicketUtils;
 
 @SuppressWarnings("serial")
 public class UserAvatarLink extends Panel {

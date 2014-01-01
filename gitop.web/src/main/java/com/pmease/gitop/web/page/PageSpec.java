@@ -12,11 +12,11 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.User;
+import com.pmease.gitop.web.common.wicket.util.WicketUtils;
 import com.pmease.gitop.web.component.avatar.AvatarImage.AvatarImageType;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
 import com.pmease.gitop.web.page.project.source.ProjectHomePage;
 import com.pmease.gitop.web.util.UrlUtils;
-import com.pmease.gitop.web.util.WicketUtils;
 
 public class PageSpec {
 

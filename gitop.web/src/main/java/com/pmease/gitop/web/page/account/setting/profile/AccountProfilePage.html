@@ -6,7 +6,7 @@
 		</div>
 		<div class="padder">
 			<form wicket:id="form" class="form-md">
-				<div wicket:id="feedback" class="form-feedback"></div>
+				<div wicket:id="feedback"></div>
 				<div wicket:id="displayName"></div>
 				<div wicket:id="email"></div>
 				<div class="submits">
@@ -22,11 +22,18 @@
 		<div class="padder">
 			<div class="clearfix">
 				<div class="left avatar avatar-xlarge" wicket:id="currentavatar"></div>
-				<form wicket:id="avatarForm" class="form-md" style="padding-left: 150px;">
-					<div wicket:id="feedback" class="form-feedback"></div>
-					<p>
-						<input type="file" wicket:id="fileInput" />
-					</p>
+				<form wicket:id="avatarForm" class="form-md avatar-form" style="padding-left: 150px;">
+					<div wicket:id="feedback" class=""></div>
+					
+					<div class="fileinput fileinput-new" data-provides="fileinput">
+					  <div class="fileinput-preview thumbnail" data-trigger="fileinput"></div>
+					  <div>
+					    <a class="btn btn-default btn-file"><span class="fileinput-new">Select image</span><span class="fileinput-exists">Change</span>
+					    <input type="file" wicket:id="fileInput" name="..."></a>
+					    <a href="#" class="btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
+					  </div>
+					</div>
+					
 					<p class="text-muted">
 						Supported image types are png, gif, jpg and jpeg. The image size should be less than 2M bytes.
 					</p>

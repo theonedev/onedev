@@ -48,4 +48,7 @@ public class JsOptions implements Serializable {
 		return this;
 	}
 
+	public boolean isEmpty() {
+		return map.isEmpty();
+	}
 }

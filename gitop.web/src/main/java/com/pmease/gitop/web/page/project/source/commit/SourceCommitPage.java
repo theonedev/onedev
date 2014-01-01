@@ -134,7 +134,7 @@ public class SourceCommitPage extends ProjectCategoryPage {
 				AbstractLink link = new BookmarkablePageLink<Void>("link", SourceCommitPage.class,
 						SourceCommitPage.newParams(getProject(), sha));
 				item.add(link);
-				link.add(new Label("sha", GitUtils.abbreviateSHA(sha, 8)));
+				link.add(new Label("sha", GitUtils.abbreviateSHA(sha)));
 				WebMarkupContainer connector = new WebMarkupContainer("connector");
 				int idx = item.getIndex();
 				connector.setVisibilityAllowed(idx > 0);

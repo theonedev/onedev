@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.util;
+package com.pmease.gitop.web.common.wicket.util;
 
 import java.util.Map;
 
@@ -20,6 +20,7 @@ import org.apache.wicket.util.string.StringValue;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.pmease.gitop.web.util.CookieUtils;
 
 public final class WicketUtils {
 	private WicketUtils() {

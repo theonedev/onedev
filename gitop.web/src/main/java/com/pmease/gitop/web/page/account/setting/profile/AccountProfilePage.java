@@ -7,9 +7,9 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.bean.validation.PropertyValidator;
 import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.feedback.ComponentFeedbackMessageFilter;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
-import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
@@ -25,9 +25,9 @@ import com.pmease.commons.util.FileUtils;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.SitePaths;
-import com.pmease.gitop.web.common.wicket.component.messenger.Messenger;
+import com.pmease.gitop.web.common.wicket.bootstrap.NotificationPanel;
+import com.pmease.gitop.web.common.wicket.bootstrap.jasny.FileUploadField;
 import com.pmease.gitop.web.common.wicket.component.vex.AjaxConfirmButton;
-import com.pmease.gitop.web.common.wicket.form.FeedbackPanel;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.component.avatar.AvatarChanged;
 import com.pmease.gitop.web.component.avatar.AvatarImage;
@@ -76,7 +76,7 @@ public class AccountProfilePage extends AccountSettingPage {
 			@SuppressWarnings("unchecked")
 			final IModel<User> model = (IModel<User>) getDefaultModel();
 
-			add(new FeedbackPanel("feedback", this));
+			add(new NotificationPanel("feedback", new ComponentFeedbackMessageFilter(this)));
 			add(new TextFieldElement<String>("displayName", "Display Name",
 					new PropertyModel<String>(model, "displayName"))
 					.setRequired(false).add(new PropertyValidator<String>()));
@@ -94,8 +94,8 @@ public class AccountProfilePage extends AccountSettingPage {
 				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 					User user = model.getObject();
 					AppLoader.getInstance(UserManager.class).save(user);
-					Messenger.success("Account profile has been updated.")
-							.run(target);
+					form.success("Account profile has been updated.");
+					target.add(form);
 				}
 			});
 		}
@@ -123,7 +123,7 @@ public class AccountProfilePage extends AccountSettingPage {
 			
 			add(uploadField);
 
-			add(new FeedbackPanel("feedback"));
+			add(new NotificationPanel("feedback", new ComponentFeedbackMessageFilter(this)));
 			add(new AjaxButton("submit", this) {
 				@Override
 				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -176,8 +176,8 @@ public class AccountProfilePage extends AccountSettingPage {
 						AppLoader.getInstance(UserManager.class).save(user);
 
 						send(getPage(), Broadcast.BREADTH, new AvatarChanged(target));
+						form.success("Your avatar has been updated successfully");
 						target.add(form);
-						Messenger.success("Your avatar has been changed!").run(target);;
 					}
 				}
 			});
@@ -192,7 +192,7 @@ public class AccountProfilePage extends AccountSettingPage {
 			        AppLoader.getInstance(UserManager.class).save(user);
 			        
 			        send(getPage(), Broadcast.BREADTH, new AvatarChanged(target));
-			        Messenger.success("Your avatar has been reset to the default.").run(target);
+			        form.success("Your avatar has been reset to the default.");
 			        target.add(form);
 				}
 			});

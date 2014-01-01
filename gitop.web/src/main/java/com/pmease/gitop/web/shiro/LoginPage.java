@@ -14,10 +14,10 @@ import org.slf4j.LoggerFactory;
 import com.pmease.gitop.web.GitopSession;
 import com.pmease.gitop.web.common.wicket.form.FeedbackPanel;
 import com.pmease.gitop.web.common.wicket.form.checkbox.CheckBoxElement;
+import com.pmease.gitop.web.common.wicket.util.WicketUtils;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
-import com.pmease.gitop.web.util.WicketUtils;
 
 @SuppressWarnings("serial")
 public class LoginPage extends AbstractLayoutPage {

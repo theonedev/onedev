@@ -6,6 +6,7 @@ import org.apache.shiro.authz.annotation.RequiresUser;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.bean.validation.PropertyValidator;
+import org.apache.wicket.feedback.ComponentFeedbackMessageFilter;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -25,7 +26,7 @@ import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.GitopHelper;
-import com.pmease.gitop.web.common.wicket.form.FeedbackPanel;
+import com.pmease.gitop.web.common.wicket.bootstrap.NotificationPanel;
 import com.pmease.gitop.web.common.wicket.form.select.DropDownChoiceElement;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.model.ProjectModel;
@@ -68,7 +69,7 @@ public class CreateProjectPage extends AbstractLayoutPage {
 		Form<Project> form = new Form<Project>("form", projectModel);
 		add(form);
 		
-		form.add(new FeedbackPanel("feedback"));
+		form.add(new NotificationPanel("feedback", new ComponentFeedbackMessageFilter(form)));
 		form.add(new DropDownChoiceElement<String>("owner", "Project Owner",
 				new PropertyModel<String>(this, "owner"),
 				new AbstractReadOnlyModel<List<? extends String>>() {

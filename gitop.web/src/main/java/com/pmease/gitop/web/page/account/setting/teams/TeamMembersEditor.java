@@ -10,6 +10,8 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.feedback.ComponentFeedbackMessageFilter;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -17,6 +19,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.util.WildcardListModel;
+import org.apache.wicket.util.time.Duration;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Objects;
@@ -27,8 +30,8 @@ import com.pmease.gitop.core.manager.MembershipManager;
 import com.pmease.gitop.model.Membership;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.common.wicket.component.messenger.Messenger;
-import com.pmease.gitop.web.common.wicket.form.FeedbackPanel;
+import com.pmease.gitop.web.common.wicket.bootstrap.NotificationPanel;
+import com.pmease.gitop.web.common.wicket.util.JQuery;
 import com.pmease.gitop.web.component.choice.UserMultiChoice;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.account.setting.members.MemberListView;
@@ -40,10 +43,14 @@ public class TeamMembersEditor extends Panel {
 		super(id, model);
 	}
 
+	private Form<?> membersForm;
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		add(newMembersForm());
+		
+		this.membersForm = newMembersForm();
+		add(membersForm);
 		
 		WebMarkupContainer membersDiv = new WebMarkupContainer("membersview");
 		membersDiv.setOutputMarkupId(true);
@@ -78,13 +85,16 @@ public class TeamMembersEditor extends Panel {
 			}
 		};
 		
-		membersDiv.add(newMembersListView(membersModel));
+		Component membersView = newMembersListView(membersModel); 
+		membersDiv.add(membersView);
+		NotificationPanel removeMembersFeedback = new NotificationPanel("removeMemberFeedback", new ComponentFeedbackMessageFilter(membersDiv));
+		membersDiv.add(removeMembersFeedback);
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Form<?> newMembersForm() {
 		Form<?> form = new Form<Void>("form");
-		form.add(new FeedbackPanel("feedback"));
+		form.add(new NotificationPanel("feedback", new ComponentFeedbackMessageFilter(form)).hideAfter(Duration.seconds(10)));
 		final IModel<Collection<User>> usersModel = new WildcardListModel(new ArrayList<User>());
 		
 		form.add(new UserMultiChoice("userchoice", usersModel));
@@ -99,7 +109,7 @@ public class TeamMembersEditor extends Panel {
 				Set<User> users = Sets.newHashSet(usersModel.getObject());
 				
 				if (users.isEmpty()) {
-					form.error("Please add an user first");
+					form.warn("Please add an user first");
 					target.add(form);
 					return;
 				}
@@ -122,8 +132,14 @@ public class TeamMembersEditor extends Panel {
 				}
 				
 				usersModel.setObject(new ArrayList<User>());
-				target.add(form);
-				onMembersChanged(target);
+				if (users.size() == 0) {
+					form.warn("Users were added before");
+					target.add(form);
+				} else {
+					form.success(users.size() + " new members added to this team");
+					target.add(form);
+					onMembersChanged(target);
+				}
 			}
 		});
 
@@ -132,6 +148,12 @@ public class TeamMembersEditor extends Panel {
 
 	private Component newMembersListView(IModel<List<User>> membersModel) {
 		return new MemberListView("members", new UserModel(getTeam().getOwner()), membersModel){
+			
+			@Override
+			protected Component createMemberTeams(String id, final IModel<User> user) {
+				return new WebMarkupContainer(id).setVisibilityAllowed(false);
+			}
+			
 			@Override
 			protected Component createActionsPanel(String id, IModel<User> model) {
 				Fragment frag = new Fragment(id, "memberactionfrag", TeamMembersEditor.this);
@@ -147,22 +169,30 @@ public class TeamMembersEditor extends Panel {
 								Restrictions.eq("team", team));
 						if (membership != null) {
 							Gitop.getInstance(MembershipManager.class).delete(membership);
-							Messenger.warn(String.format("User [%s] is removed from team [%s]", 
-									user.getName(), 
-									team.getName()))
-									.run(target);
 							
+							// Use membersForm to show feedback?
+							//
+							membersForm.info(String.format("User %s is removed from the team", 
+									user.getName()));
+							target.add(membersForm);
 							onMembersChanged(target);
 						}
 					}
-				}.setVisibilityAllowed(!Objects.equal(getTeam().getOwner(), model.getObject())));
+				}.setVisibilityAllowed(
+						!(getTeam().isOwners() && Objects.equal(getTeam().getOwner(), model.getObject()))));
 				return frag;
 			}
 		}.setOutputMarkupId(true);
 	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+	}
 	
 	private void onMembersChanged(AjaxRequestTarget target) {
 		target.add(get("membersview"));
+		target.appendJavaScript(JQuery.$("a.remove-link").chain("tooltip").get());
 	}
 	
 	private Team getTeam() {

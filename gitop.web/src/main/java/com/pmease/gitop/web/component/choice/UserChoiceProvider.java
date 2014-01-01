@@ -17,9 +17,9 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.GitopWebApp;
+import com.pmease.gitop.web.common.wicket.util.WicketUtils;
 import com.pmease.gitop.web.component.avatar.AvatarImageResourceReference;
 import com.pmease.gitop.web.util.Gravatar;
-import com.pmease.gitop.web.util.WicketUtils;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 

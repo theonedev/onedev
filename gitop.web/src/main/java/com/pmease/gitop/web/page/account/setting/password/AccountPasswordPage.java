@@ -3,6 +3,7 @@ package com.pmease.gitop.web.page.account.setting.password;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
+import org.apache.wicket.feedback.ComponentFeedbackMessageFilter;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.validation.EqualPasswordInputValidator;
 import org.apache.wicket.model.PropertyModel;
@@ -14,7 +15,7 @@ import org.apache.wicket.validation.ValidationError;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.common.wicket.component.messenger.Messenger;
+import com.pmease.gitop.web.common.wicket.bootstrap.NotificationPanel;
 import com.pmease.gitop.web.common.wicket.form.passwordfield.PasswordFieldElement;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
@@ -40,6 +41,8 @@ public class AccountPasswordPage extends AccountSettingPage {
 
 		Form<User> form = new Form<User>("form", new UserModel(getAccount()));
 		add(form);
+		
+		form.add(new NotificationPanel("feedback", new ComponentFeedbackMessageFilter(this)));
 		form.add(new PasswordFieldElement("oldPass", "Current Password", 
 				new PropertyModel<String>(this, "oldPass"))
 				.add(new IValidator<String>() {
@@ -79,8 +82,8 @@ public class AccountPasswordPage extends AccountSettingPage {
 			        oldPass = null;
 					newPass = null;
 					confirmPass = null;
+					form.success("Your password has been changed successfully.");
 					target.add(form);
-					Messenger.success("Your password has been changed successfully.").run(target);
 				}
 			}
 			

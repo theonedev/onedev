@@ -104,7 +104,7 @@ public class MemberListView extends Panel {
 		return result;
 	}
 	
-	private Component createMemberTeams(String id, final IModel<User> user) {
+	protected Component createMemberTeams(String id, final IModel<User> user) {
 		final WebMarkupContainer teamsDiv = new WebMarkupContainer(id);
 		teamsDiv.setOutputMarkupId(true);
 		IModel<List<Membership>> teamsModel = new LoadableDetachableModel<List<Membership>>() {

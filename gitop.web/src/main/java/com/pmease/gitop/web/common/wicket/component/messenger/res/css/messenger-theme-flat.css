@@ -359,6 +359,10 @@ ul.messenger-theme-flat .messenger-message.alert-info .messenger-message-inner:b
 ul.messenger-theme-flat .messenger-message.alert-error .messenger-message-inner:before {
   background: #dd6a45;
 }
+ul.messenger-theme-flat .messenger-message.alert-warning .messenger-message-inner:before {
+  background: #dd6a45;
+}
+
 /* line 32, ../../src/sass/messenger-spinner.scss */
 ul.messenger-theme-flat .messenger-message.alert-error.messenger-retry-soon .messenger-spinner {
   width: 32px;

@@ -194,7 +194,7 @@ public class GitopWebApp extends AbstractWicketConfig {
 		new BeanValidationConfiguration().configure(this);
 
 		loadDefaultUserAvatarData();
-		
+
 		new ShiroWicketPlugin()
 				.mountLoginPage("login", LoginPage.class)
 				.mountLogoutPage("logout", LogoutPage.class)
