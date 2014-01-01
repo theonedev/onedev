@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -13,8 +14,10 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.editable.BranchChoice;
 import com.pmease.gitop.core.manager.BranchManager;
+import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.BranchGateKeeper;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
@@ -39,7 +42,7 @@ public class IfSubmittedToSpecifiedBranches extends BranchGateKeeper {
 	}
 
 	@Override
-	public CheckResult doCheck(PullRequest request) {
+	public CheckResult doCheckRequest(PullRequest request) {
 		List<String> branchNames = new ArrayList<>();
 		BranchManager branchManager = Gitop.getInstance(BranchManager.class);
 		for (Long branchId: branchIds)
@@ -62,6 +65,28 @@ public class IfSubmittedToSpecifiedBranches extends BranchGateKeeper {
 			return null;
 		else
 			return this;
+	}
+
+	private CheckResult checkBranch(User user, Branch branch) {
+		List<String> branchNames = new ArrayList<>();
+		BranchManager branchManager = Gitop.getInstance(BranchManager.class);
+		for (Long branchId: branchIds)
+			branchNames.add(branchManager.load(branchId).getName());
+		
+		if (branchIds.contains(branch.getId()))
+			return accepted("Target branch is one of '" + StringUtils.join(branchNames, ", ") + "'.");
+		else
+			return rejected("Target branch is not one of '" + StringUtils.join(branchNames, ", ") + "'.");
+	}
+	
+	@Override
+	protected CheckResult doCheckFile(User user, Branch branch, @Nullable String file) {
+		return checkBranch(user, branch);
+	}
+
+	@Override
+	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
+		return checkBranch(user, branch);
 	}
 
 }

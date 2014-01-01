@@ -6,7 +6,6 @@ import javax.validation.constraints.NotNull;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.TableLayout;
 import com.pmease.gitop.model.Project;
-import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
@@ -30,8 +29,13 @@ public class NotGateKeeper extends CompositeGateKeeper {
 	}
 	
 	@Override
-	public CheckResult doCheck(PullRequest request) {
-		CheckResult result = getGateKeeper().check(request);
+	protected GateKeeper trim(Project project) {
+		return (GateKeeper) getGateKeeper().trim(project);
+	}
+
+	@Override
+	protected CheckResult aggregate(Checker checker) {
+		CheckResult result = checker.check(getGateKeeper());
 		
 		if (result instanceof Accepted)
 			return rejected(result.getReasons());
@@ -39,11 +43,6 @@ public class NotGateKeeper extends CompositeGateKeeper {
 			return accepted(result.getReasons());
 		else
 			return result;
-	}
-
-	@Override
-	protected GateKeeper trim(Project project) {
-		return (GateKeeper) getGateKeeper().trim(project);
 	}
 
 }

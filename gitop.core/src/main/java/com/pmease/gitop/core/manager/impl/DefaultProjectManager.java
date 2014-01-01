@@ -3,6 +3,7 @@ package com.pmease.gitop.core.manager.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -21,11 +22,9 @@ import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.gitop.core.hookcallback.GitPostReceiveCallback;
-import com.pmease.gitop.core.hookcallback.GitUpdateCallback;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.core.setting.ServerConfig;
+import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.storage.ProjectStorage;
@@ -40,31 +39,27 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
 
     private final BranchManager branchManager;
 
-    private final ServerConfig serverConfig;
+    private final String gitUpdateHook;
     
-    private final String gitUpdateHookTemplate;
-    
-    private final String gitPostReceiveHookTemplate;
+    private final String gitPostReceiveHook;
     
     @Inject
-    public DefaultProjectManager(GeneralDao generalDao, StorageManager storageManager, 
-    		BranchManager branchManager, ServerConfig serverConfig) {
+    public DefaultProjectManager(GeneralDao generalDao, StorageManager storageManager, BranchManager branchManager) {
         super(generalDao);
 
         this.storageManager = storageManager;
         this.branchManager = branchManager;
-        this.serverConfig = serverConfig;
         
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-update-hook-template")) {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-update-hook")) {
         	Preconditions.checkNotNull(is);
-            gitUpdateHookTemplate = StringUtils.join(IOUtils.readLines(is), "\n");
+            gitUpdateHook = StringUtils.join(IOUtils.readLines(is), "\n");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-postreceive-hook-template")) {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-postreceive-hook")) {
         	Preconditions.checkNotNull(is);
-            gitPostReceiveHookTemplate = StringUtils.join(IOUtils.readLines(is), "\n");
+            gitPostReceiveHook = StringUtils.join(IOUtils.readLines(is), "\n");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -88,24 +83,17 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
                 FileUtils.createDir(codeDir);
                 new Git(codeDir).init(true);
                 File hooksDir = new File(codeDir, "hooks");
-                String urlRoot;
-                if (serverConfig.getHttpPort() != 0)
-                    urlRoot = "http://localhost:" + serverConfig.getHttpPort();
-                else 
-                    urlRoot = "https://localhost:" + serverConfig.getSslConfig().getPort();
 
-                File gitUpdateHook = new File(hooksDir, "update");
-                FileUtils.writeFile(gitUpdateHook, 
-                        String.format(gitUpdateHookTemplate, urlRoot + GitUpdateCallback.PATH + "/" + project.getId()));
-                gitUpdateHook.setExecutable(true);
+                File gitUpdateHookFile = new File(hooksDir, "update");
+                FileUtils.writeFile(gitUpdateHookFile, gitUpdateHook);
+                gitUpdateHookFile.setExecutable(true);
                 
-                File gitPostReceiveHook = new File(hooksDir, "post-receive");
-                FileUtils.writeFile(gitPostReceiveHook, 
-                        String.format(gitPostReceiveHookTemplate, urlRoot + GitPostReceiveCallback.PATH + "/" + project.getId()));
-                gitPostReceiveHook.setExecutable(true);
+                File gitPostReceiveHookFile = new File(hooksDir, "post-receive");
+                FileUtils.writeFile(gitPostReceiveHookFile, gitPostReceiveHook);
+                gitPostReceiveHookFile.setExecutable(true);
             }
             
-            branchManager.syncWithGit(project);
+            check(project);
         } else {
             super.save(project);
         }
@@ -137,5 +125,35 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
         return find(Restrictions.eq("owner.id", owner.getId()),
                 Restrictions.eq("name", projectName));
     }
+
+	@Transactional
+	@Override
+	public void check(Project project) {
+		Collection<String> branchesInGit = project.code().listBranches();
+		for (Branch branch: project.getBranches()) {
+			if (!branchesInGit.contains(branch.getName()))
+				branchManager.delete(branch);
+		}
+		
+		for (String branchInGit: branchesInGit) {
+			boolean found = false;
+			for (Branch branch: project.getBranches()) {
+				if (branch.getName().equals(branchInGit)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				Branch branch = new Branch();
+				branch.setName(branchInGit);
+				branch.setProject(project);
+				branchManager.save(branch);
+			}
+		}
+		
+		String defaultBranchName = project.code().resolveDefaultBranch();
+		if (!branchesInGit.isEmpty() && !branchesInGit.contains(defaultBranchName))
+			project.code().updateDefaultBranch(branchesInGit.iterator().next());
+	}
 
 }

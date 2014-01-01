@@ -32,6 +32,7 @@ import com.pmease.commons.git.command.UploadCommand;
 import com.pmease.commons.util.GeneralException;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.core.setting.ServerConfig;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
@@ -50,11 +51,14 @@ public class GitFilter implements Filter {
 	
 	private final ProjectManager projectManager;
 	
+	private final ServerConfig serverConfig;
+	
 	@Inject
-	public GitFilter(Gitop gitop, StorageManager storageManager, ProjectManager projectManager) {
+	public GitFilter(Gitop gitop, StorageManager storageManager, ProjectManager projectManager, ServerConfig serverConfig) {
 		this.gitop = gitop;
 		this.storageManager = storageManager;
 		this.projectManager = projectManager;
+		this.serverConfig = serverConfig;
 	}
 	
 	private String getPathInfo(HttpServletRequest request) {
@@ -104,7 +108,15 @@ public class GitFilter implements Filter {
 		response.setHeader("Content-Type", "application/x-" + service + "-result");			
 
 		Map<String, String> environments = new HashMap<>();
+		String serverUrl;
+        if (serverConfig.getHttpPort() != 0)
+            serverUrl = "http://localhost:" + serverConfig.getHttpPort();
+        else 
+            serverUrl = "https://localhost:" + serverConfig.getSslConfig().getPort();
+
+		environments.put("GITOP_URL", serverUrl);
 		environments.put("GITOP_USER_ID", User.getCurrentId().toString());
+		environments.put("GITOP_PROJECT_ID", project.getId().toString());
 		File gitDir = storageManager.getStorage(project).ofCode();
 
 		if (GitSmartHttpTools.isUploadPack(request)) {

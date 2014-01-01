@@ -39,6 +39,13 @@
 		</dependency>
 		<dependency>
 			<groupId>com.pmease</groupId>
+			<artifactId>commons.git</artifactId>
+			<version>1.0.0</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.pmease</groupId>
 			<artifactId>commons.jetty</artifactId>
 			<version>1.0.31</version>
 		</dependency>

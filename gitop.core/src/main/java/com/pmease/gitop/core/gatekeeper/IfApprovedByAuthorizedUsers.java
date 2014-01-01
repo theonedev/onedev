@@ -2,12 +2,14 @@ package com.pmease.gitop.core.gatekeeper;
 
 import java.util.Collection;
 
+import javax.annotation.Nullable;
 import javax.validation.constraints.Min;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.AuthorizationManager;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
+import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
@@ -35,7 +37,7 @@ public class IfApprovedByAuthorizedUsers extends ApprovalGateKeeper {
     }
 
 	@Override
-	public CheckResult doCheck(PullRequest request) {
+	public CheckResult doCheckRequest(PullRequest request) {
 		AuthorizationManager authorizationManager = Gitop.getInstance(AuthorizationManager.class);
 		Collection<User> authorizedUsers = authorizationManager.listAuthorizedUsers(
 				request.getTarget().getProject(), GeneralOperation.WRITE);
@@ -59,17 +61,46 @@ public class IfApprovedByAuthorizedUsers extends ApprovalGateKeeper {
         } else {
             int lackApprovals = getLeastApprovals() - approvals;
 
-            if (request.getId() != null)
-            	Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, authorizedUsers, lackApprovals);
+            Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, authorizedUsers, lackApprovals);
 
-    		String prefix;
-    		if (request.getId() == null)
-    			prefix = "Not ";
-    		else
-    			prefix = "To be ";
-            return pending(prefix + "approved by " + lackApprovals + " authorized user(s).", 
+            return pending("To be approved by " + lackApprovals + " authorized user(s).", 
             		new CanVoteByAuthorizedUser());
         }
+	}
+	
+	private CheckResult checkBranch(User user, Branch branch) {
+		AuthorizationManager authorizationManager = Gitop.getInstance(AuthorizationManager.class);
+
+		Collection<User> authorizedUsers = authorizationManager.listAuthorizedUsers(
+				branch.getProject(), GeneralOperation.WRITE);
+
+        int approvals = 0;
+        int pendings = authorizedUsers.size();
+        
+        if (authorizedUsers.contains(user)) {
+        	approvals ++;
+        	pendings --;
+        }
+        
+        if (approvals >= leastApprovals) {
+            return accepted("Get at least " + leastApprovals + " approvals from authorized users.");
+        } else if (leastApprovals - approvals > pendings) {
+            return rejected("Can not get at least " + leastApprovals + " approvals from authorized users.");
+        } else {
+            int lackApprovals = getLeastApprovals() - approvals;
+            return pending("Lack " + lackApprovals + " approvals from authorized users.", 
+            		new CanVoteByAuthorizedUser());
+        }
+	}
+	
+	@Override
+	protected CheckResult doCheckFile(User user, Branch branch, @Nullable String file) {
+		return checkBranch(user, branch);
+	}
+
+	@Override
+	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
+		return checkBranch(user, branch);
 	}
 
 }

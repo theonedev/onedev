@@ -6,11 +6,12 @@ import javax.validation.constraints.Min;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.git.Commit;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.BuildResultManager;
+import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.BuildResult;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.CommonGateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.NoneCanVote;
@@ -58,7 +59,8 @@ public class IfVerifiedByBuilds extends CommonGateKeeper {
 		this.blockMode = blockMode;
 	}
 
-	public CheckResult doCheck(PullRequest request) {
+	@Override
+	protected CheckResult doCheckRequest(PullRequest request) {
 		BuildResultManager BuildResultManager = Gitop.getInstance(BuildResultManager.class);
 
 		Preconditions.checkNotNull(request.getMergePrediction());
@@ -71,41 +73,67 @@ public class IfVerifiedByBuilds extends CommonGateKeeper {
 		} else {
 			commit = request.getLatestUpdate().getHeadCommit();
 		}
-		if (commit.equals(Commit.ZERO_HASH)) { // delete branch
-			return accepted("Build is no longer necessary.");
-		} else if (commit.startsWith(Commit.ZERO_HASH)) { // check if a certain file can be touched
+		Collection<BuildResult> buildResults = BuildResultManager.findBy(commit);
+		for (BuildResult each: buildResults) {
+			if (!each.isPassed())
+				return rejected("At least one build is failed for the merged commit.");
+		}
+		int lacks = buildCount - buildResults.size();
+		
+		if (lacks > 0) {
+			if (blockMode) {
+				if (buildCount > 1)
+					return pendingAndBlock("To be verified by " + lacks + " more build(s)", new NoneCanVote());
+				else
+					return pendingAndBlock("To be verified by build", new NoneCanVote());
+			} else {
+				if (buildCount > 1)
+					return pending("To be verified by " + lacks + " more build(s)", new NoneCanVote());
+				else
+					return pending("To be verified by build", new NoneCanVote());
+			}
+		} else {
+			return accepted("Builds passed");
+		}
+	}
+
+	@Override
+	protected CheckResult doCheckFile(User user, Branch branch, String file) {
+		if (file != null) {
 			if (blockMode)
-				return blocked("Not verified by build.", new NoneCanVote());
+				return pendingAndBlock("Not verified by build.", new NoneCanVote());
 			else
 				return pending("Not verified by build.", new NoneCanVote());
 		} else {
-			Collection<BuildResult> buildResults = BuildResultManager.findBy(commit);
-			for (BuildResult each: buildResults) {
-				if (!each.isPassed())
-					return rejected("At least one build is failed for the merged commit.");
-			}
-			int lacks = buildCount - buildResults.size();
-			
-			String prefix;
-			if (request.getId() == null)
-				prefix = "Not ";
-			else
-				prefix = "To be ";
-			if (lacks > 0) {
-				if (blockMode) {
-					if (buildCount > 1)
-						return blocked(prefix + "verified by " + lacks + " more build(s)", new NoneCanVote());
-					else
-						return blocked(prefix + "verified by build", new NoneCanVote());
-				} else {
-					if (buildCount > 1)
-						return pending(prefix + "verified by " + lacks + " more build(s)", new NoneCanVote());
-					else
-						return pending(prefix + "verified by build", new NoneCanVote());
-				}
+			return accepted("Build is not necessary.");
+		}
+	}
+
+	@Override
+	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
+		BuildResultManager BuildResultManager = Gitop.getInstance(BuildResultManager.class);
+
+		Collection<BuildResult> buildResults = BuildResultManager.findBy(commit);
+		for (BuildResult each: buildResults) {
+			if (!each.isPassed())
+				return rejected("At least one build is failed for the commit.");
+		}
+		int lacks = buildCount - buildResults.size();
+		
+		if (lacks > 0) {
+			if (blockMode) {
+				if (buildCount > 1)
+					return pendingAndBlock("Lack verifications of " + lacks + " more build(s)", new NoneCanVote());
+				else
+					return pendingAndBlock("Not verified by build", new NoneCanVote());
 			} else {
-				return accepted("Builds passed");
+				if (buildCount > 1)
+					return pending("Lack verifications of " + lacks + " more build(s)", new NoneCanVote());
+				else
+					return pending("Not verified by build", new NoneCanVote());
 			}
+		} else {
+			return accepted("Builds passed");
 		}
 	}
 

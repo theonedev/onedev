@@ -4,12 +4,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.editable.annotation.OmitNames;
+import com.pmease.commons.editable.annotation.OmitName;
 import com.pmease.commons.util.trimmable.TrimUtils;
 import com.pmease.commons.util.trimmable.Trimmable;
 import com.pmease.gitop.core.Gitop;
@@ -17,9 +18,11 @@ import com.pmease.gitop.core.editable.BranchChoice;
 import com.pmease.gitop.core.editable.TeamChoice;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.TeamManager;
+import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.Team;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.AndGateKeeper;
 import com.pmease.gitop.model.gatekeeper.CommonGateKeeper;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
@@ -30,7 +33,6 @@ import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 @Editable(order=100, icon="icon-lock", description="By default, users with write permission of "
 		+ "the project can push code to all branches. Use this gate keeper to restrict write "
 		+ "access of certain branches to certain teams.")
-@OmitNames
 public class BranchProtection extends CommonGateKeeper {
 	
 	private List<Entry> entries = new ArrayList<Entry>();
@@ -44,6 +46,7 @@ public class BranchProtection extends CommonGateKeeper {
 	@Size(min=1, message="At least one entry has to be specified.")
 	@Valid
 	@NotNull
+	@OmitName
 	public List<Entry> getEntries() {
 		return entries;
 	}
@@ -93,24 +96,6 @@ public class BranchProtection extends CommonGateKeeper {
 	}
 
 	@Override
-	public CheckResult doCheck(PullRequest request) {
-		AndGateKeeper andGateKeeper = new AndGateKeeper();
-		for (Entry entry: entries) {
-			IfThenGateKeeper ifThenGateKeeper = new IfThenGateKeeper();
-			IfSubmittedToSpecifiedBranches ifGate = new IfSubmittedToSpecifiedBranches();
-			ifGate.getBranchIds().add(entry.getBranchId());
-			ifThenGateKeeper.setIfGate(ifGate);
-			
-			IfApprovedBySpecifiedTeam thenGate = new IfApprovedBySpecifiedTeam();
-			thenGate.setTeamId(entry.getTeamId());
-			ifThenGateKeeper.setThenGate(thenGate);
-			
-			andGateKeeper.getGateKeepers().add(ifThenGateKeeper);
-		}
-		return andGateKeeper.doCheck(request);
-	}
-
-	@Override
 	protected GateKeeper trim(Project project) {
 		TrimUtils.trim(entries, project);
 
@@ -118,6 +103,38 @@ public class BranchProtection extends CommonGateKeeper {
 			return null;
 		else
 			return this;
+	}
+
+	private GateKeeper getGateKeeper() {
+		AndGateKeeper andGate = new AndGateKeeper();
+		for (Entry entry: entries) {
+			IfThenGateKeeper ifThenGate = new IfThenGateKeeper();
+			IfSubmittedToSpecifiedBranches ifGate = new IfSubmittedToSpecifiedBranches();
+			ifGate.getBranchIds().add(entry.getBranchId());
+			ifThenGate.setIfGate(ifGate);
+			
+			IfApprovedBySpecifiedTeam thenGate = new IfApprovedBySpecifiedTeam();
+			thenGate.setTeamId(entry.getTeamId());
+			ifThenGate.setThenGate(thenGate);
+			
+			andGate.getGateKeepers().add(ifThenGate);
+		}
+		return andGate;
+	}
+
+	@Override
+	protected CheckResult doCheckRequest(PullRequest request) {
+		return getGateKeeper().checkRequest(request);
+	}
+
+	@Override
+	protected CheckResult doCheckFile(User user, Branch branch, @Nullable String file) {
+		return getGateKeeper().checkFile(user, branch, file);
+	}
+
+	@Override
+	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
+		return getGateKeeper().checkCommit(user, branch, commit);
 	}
 
 }

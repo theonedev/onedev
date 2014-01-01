@@ -16,7 +16,7 @@ public class ProjectHomePage extends SourceTreePage {
 
 	@Override
 	protected String findRevision(PageParameters params) {
-		return getProject().resolveDefaultBranchName();
+		return getProject().code().resolveDefaultBranch();
 	}
 	
 	@Override
