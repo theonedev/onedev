@@ -4,12 +4,11 @@
 		<div class="head">
 			<h2>Project Permissions</h2>
 		</div>
+		<div class="actionbar">
+			<a class="btn" wicket:id="teamslink"><i class="icon icon-group-o"></i> Manage Teams</a>
+			<a class="btn" wicket:id="resetlink"><i class="icon icon-reset"></i> Reset to default permissions</a>
+		</div>
 		<div class="body">
-			<div class="btn-group">
-				<a class="btn btn-default" wicket:id="teamslink"><i class="icon icon-group-o"></i> Manage Teams</a>
-				<a wicket:id="resetlink" class="btn btn-default">Reset to default permissions</a>
-			</div>
-			<hr />
 			<table class="table teams-table table-hover" wicket:id="teamstable">
 			</table>
 		</div>

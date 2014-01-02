@@ -7,6 +7,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.bean.validation.PropertyValidator;
+import org.apache.wicket.feedback.ComponentFeedbackMessageFilter;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -14,6 +17,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.util.time.Duration;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
@@ -26,9 +30,8 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.quantity.Data;
-import com.pmease.gitop.web.common.wicket.component.messenger.Messenger;
+import com.pmease.gitop.web.common.wicket.bootstrap.NotificationPanel;
 import com.pmease.gitop.web.common.wicket.component.vex.AjaxConfirmLink;
-import com.pmease.gitop.web.common.wicket.form.FeedbackPanel;
 import com.pmease.gitop.web.common.wicket.form.checkbox.CheckBoxElement;
 import com.pmease.gitop.web.common.wicket.form.select.DropDownChoiceElement;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
@@ -71,9 +74,19 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 		
 		projectName = getProject().getName();
 		
-		Form<?> form = new Form<Void>("form");
+		Form<?> form = new Form<Void>("form") {
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				response.render(OnDomReadyHeaderItem.forScript("gitop.form.init('#" + getMarkupId(true) + "')"));
+			}
+		};
+		
 		add(form);
-		form.add(new FeedbackPanel("feedback", form));
+		form.add(new NotificationPanel("feedback",
+									   new ComponentFeedbackMessageFilter(form))
+					.hideAfter(Duration.seconds(15)));
+
 		form.add(new TextFieldElement<String>("name", "Project Name", 
 				new PropertyModel<String>(this, "projectName"))
 				.add(new PropertyValidator<String>())
@@ -152,9 +165,8 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 				if (nameChanged) {
 					setResponsePage(ProjectOptionsPage.class, PageSpec.forProject(project));
 				} else {
+					form.success("Project " + project + " has been updated.");
 					target.add(form);
-					Messenger.success("Project " + project + " has been updated.")
-							 .run(target);
 				}
 			}
 		});

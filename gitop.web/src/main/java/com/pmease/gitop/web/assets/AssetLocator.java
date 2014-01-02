@@ -17,6 +17,8 @@ public class AssetLocator {
 	public static final CssResourceReference BASE_CSS = newCssResourceReference("css/base.css");
 	public static final CssResourceReference PAGE_CSS = newCssResourceReference("css/page.css");
 
+	public static final JavaScriptResourceReference ARE_YOU_SURE_JS = newJavaScriptResourceReference("js/vendor/jquery.are-you-sure.js");
+	
 	private static CssResourceReference newCssResourceReference(String url) {
 		return new CssResourceReference(AssetLocator.class, url);
 	}

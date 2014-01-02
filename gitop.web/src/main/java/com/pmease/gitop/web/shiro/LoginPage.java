@@ -5,14 +5,14 @@ import org.apache.shiro.authc.AuthenticationException;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.markup.html.form.PasswordTextField;
-import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pmease.gitop.web.GitopSession;
-import com.pmease.gitop.web.common.wicket.form.FeedbackPanel;
+import com.pmease.gitop.web.common.wicket.bootstrap.NotificationPanel;
+import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.checkbox.CheckBoxElement;
 import com.pmease.gitop.web.common.wicket.util.WicketUtils;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
@@ -28,11 +28,11 @@ public class LoginPage extends AbstractLayoutPage {
 			throw new RestartResponseException(getApplication().getHomePage());
 		}
 		add(new LoginForm("login"));
-		FeedbackPanel feedback = new FeedbackPanel("feedback");
+		NotificationPanel feedback = new NotificationPanel("feedback");
 		add(feedback);
 	}
 	
-	private class LoginForm extends StatelessForm<Void> {
+	private class LoginForm extends BaseForm<Void> {
 
 		public LoginForm(String id) {
 			super(id);

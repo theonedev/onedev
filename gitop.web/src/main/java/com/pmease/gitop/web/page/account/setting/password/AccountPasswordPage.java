@@ -16,6 +16,7 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.common.wicket.bootstrap.NotificationPanel;
+import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.passwordfield.PasswordFieldElement;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
@@ -39,7 +40,7 @@ public class AccountPasswordPage extends AccountSettingPage {
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 
-		Form<User> form = new Form<User>("form", new UserModel(getAccount()));
+		Form<User> form = new BaseForm<User>("form", new UserModel(getAccount()));
 		add(form);
 		
 		form.add(new NotificationPanel("feedback", new ComponentFeedbackMessageFilter(this)));

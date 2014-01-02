@@ -28,6 +28,7 @@ import com.pmease.gitop.web.SitePaths;
 import com.pmease.gitop.web.common.wicket.bootstrap.NotificationPanel;
 import com.pmease.gitop.web.common.wicket.bootstrap.jasny.FileUploadField;
 import com.pmease.gitop.web.common.wicket.component.vex.AjaxConfirmButton;
+import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.component.avatar.AvatarChanged;
 import com.pmease.gitop.web.component.avatar.AvatarImage;
@@ -63,7 +64,7 @@ public class AccountProfilePage extends AccountSettingPage {
 		add(new AvatarForm("avatarForm", userModel));
 	}
 
-	private class ProfileForm extends Form<User> {
+	private class ProfileForm extends BaseForm<User> {
 
 		public ProfileForm(String id, IModel<User> model) {
 			super(id, model);
@@ -101,7 +102,7 @@ public class AccountProfilePage extends AccountSettingPage {
 		}
 	}
 
-	private class AvatarForm extends Form<User> {
+	private class AvatarForm extends BaseForm<User> {
 		AvatarForm(String id, IModel<User> model) {
 			super(id, model);
 		}

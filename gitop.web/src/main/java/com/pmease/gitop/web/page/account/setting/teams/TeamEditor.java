@@ -24,6 +24,7 @@ import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.permission.operation.GeneralOperation;
 import com.pmease.gitop.web.common.wicket.bootstrap.NotificationPanel;
+import com.pmease.gitop.web.common.wicket.form.BaseForm;
 
 @SuppressWarnings("serial")
 public class TeamEditor extends Panel {
@@ -64,7 +65,7 @@ public class TeamEditor extends Panel {
 //		moreDiv.add(new TeamProjectsEditor("teamprojects", teamModel));
 	}
 
-	private class TeamPropForm extends Form<Team> {
+	private class TeamPropForm extends BaseForm<Team> {
 
 		private String oldTeamName;
 		
@@ -150,10 +151,14 @@ public class TeamEditor extends Panel {
 					Team team = getTeam();
 					boolean isNew = team.isNew();
 					Gitop.getInstance(TeamManager.class).save(team);
-					form.success(
-							String.format("Team has been %s successfully.",
-									isNew ? "created" : "updated"));
-					setResponsePage(EditTeamPage.class, EditTeamPage.newParams(team));
+					if (isNew) {
+						setResponsePage(EditTeamPage.class, EditTeamPage.newParams(team));
+					} else {
+						form.success(
+								String.format("Team has been updated successfully."));
+						target.add(form);
+					}
+					
 				}
 			});
 		}

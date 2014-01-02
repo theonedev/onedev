@@ -3,6 +3,7 @@ package com.pmease.gitop.web.page.project.settings;
 import java.util.List;
 
 import org.apache.shiro.authz.annotation.RequiresUser;
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.bean.validation.PropertyValidator;
@@ -27,6 +28,7 @@ import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.GitopHelper;
 import com.pmease.gitop.web.common.wicket.bootstrap.NotificationPanel;
+import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.select.DropDownChoiceElement;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.model.ProjectModel;
@@ -66,11 +68,11 @@ public class CreateProjectPage extends AbstractLayoutPage {
 		}
 		
 		final IModel<Project> projectModel = new ProjectModel(new Project());
-		Form<Project> form = new Form<Project>("form", projectModel);
+		Form<Project> form = new BaseForm<Project>("form", projectModel);
 		add(form);
 		
 		form.add(new NotificationPanel("feedback", new ComponentFeedbackMessageFilter(form)));
-		form.add(new DropDownChoiceElement<String>("owner", "Project Owner",
+		DropDownChoiceElement<?> e = new DropDownChoiceElement<String>("owner", "Project Owner",
 				new PropertyModel<String>(this, "owner"),
 				new AbstractReadOnlyModel<List<? extends String>>() {
 
@@ -87,7 +89,9 @@ public class CreateProjectPage extends AbstractLayoutPage {
 						
 						return names;
 					}
-		}));
+		});
+		
+		form.add(e.addFormComponentBehavior(AttributeModifier.replace("data-ays-ignore", "true")));
 		
 		form.add(new TextFieldElement<String>("name", "Project Name", 
 				new PropertyModel<String>(projectModel, "name"))

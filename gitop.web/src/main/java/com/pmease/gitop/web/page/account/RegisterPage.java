@@ -5,6 +5,7 @@ import javax.validation.constraints.Size;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
 import org.apache.wicket.bean.validation.PropertyValidator;
+import org.apache.wicket.feedback.ComponentFeedbackMessageFilter;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.validation.EqualPasswordInputValidator;
 import org.apache.wicket.model.IModel;
@@ -20,7 +21,8 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.GitopSession;
-import com.pmease.gitop.web.common.wicket.form.FeedbackPanel;
+import com.pmease.gitop.web.common.wicket.bootstrap.NotificationPanel;
+import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.passwordfield.PasswordFieldElement;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
@@ -45,16 +47,10 @@ public class RegisterPage extends AbstractLayoutPage {
 		super.onPageInitialize();
 		
 		final IModel<User> model = Model.<User>of(new User());
-		Form<User> form = new Form<User>("form", model) {
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-			}
-		};
+		Form<User> form = new BaseForm<User>("form", model);
 		add(form);
 
-		form.add(new FeedbackPanel("feedback", form));
+		form.add(new NotificationPanel("feedback", new ComponentFeedbackMessageFilter(form)));
 		form.add(new TextFieldElement<String>(
 							"username", "User Name", 
 							new PropertyModel<String>(model, "name"))

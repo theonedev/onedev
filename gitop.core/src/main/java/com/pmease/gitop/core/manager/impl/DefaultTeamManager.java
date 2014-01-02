@@ -6,12 +6,15 @@ import javax.inject.Singleton;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
-import com.google.common.base.Preconditions;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.TeamManager;
+import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.operation.GeneralOperation;
@@ -19,15 +22,44 @@ import com.pmease.gitop.model.permission.operation.GeneralOperation;
 @Singleton
 public class DefaultTeamManager extends AbstractGenericDao<Team> implements TeamManager {
 
-	private volatile Long anonymousId;
+//	private volatile Long anonymousId;
+//	
+//	private volatile Long ownersId;
+//	
+//	private volatile Long loggedInId;
 	
-	private volatile Long ownersId;
+	private static class BuiltInTeam {
+		final Long anonymousId;
+		final Long ownersId;
+		final Long loggedInId;
+		
+		BuiltInTeam(Long anonymousId, Long ownersId, Long loggedInId) {
+			this.anonymousId = anonymousId;
+			this.ownersId = ownersId;
+			this.loggedInId = loggedInId;
+		}
+	}
 	
-	private volatile Long loggedInId;
+	private final LoadingCache<Long, BuiltInTeam> builtInTeamsCache;
+	
 	
 	@Inject
-	public DefaultTeamManager(GeneralDao generalDao) {
+	public DefaultTeamManager(GeneralDao generalDao, final UserManager userManager) {
 		super(generalDao);
+		
+		builtInTeamsCache =
+				CacheBuilder.newBuilder()
+					.build(new CacheLoader<Long, BuiltInTeam>() {
+
+						@Override
+						public BuiltInTeam load(Long key) throws Exception {
+							User user = userManager.get(key);
+							Team anonymous = findBy(user, Team.ANONYMOUS);
+							Team owners = findBy(user, Team.OWNERS);
+							Team loggedIn = findBy(user, Team.LOGGEDIN);
+							return new BuiltInTeam(anonymous.getId(), owners.getId(), loggedIn.getId());
+						}
+					});
 	}
 
 	@Sessional
@@ -39,41 +71,44 @@ public class DefaultTeamManager extends AbstractGenericDao<Team> implements Team
 	@Transactional
 	@Override
 	public Team getAnonymous(User user) {
-		Team anonymous;
-		if (anonymousId == null) {
-			anonymous = findBy(user, Team.ANONYMOUS);
-			Preconditions.checkNotNull(anonymous);
-			anonymousId = anonymous.getId();
-		} else {
-			anonymous = load(anonymousId);
-		}
-		return anonymous;
+		return load(builtInTeamsCache.getUnchecked(user.getId()).anonymousId);
+//		Team anonymous;
+//		if (anonymousId == null) {
+//			anonymous = findBy(user, Team.ANONYMOUS);
+//			Preconditions.checkNotNull(anonymous);
+//			anonymousId = anonymous.getId();
+//		} else {
+//			anonymous = load(anonymousId);
+//		}
+//		return anonymous;
 	}
 
 	@Override
 	public Team getLoggedIn(User user) {
-		Team loggedIn;
-		if (loggedInId == null) {
-			loggedIn = findBy(user, Team.LOGGEDIN);
-			Preconditions.checkNotNull(loggedIn);
-			loggedInId = loggedIn.getId();
-		} else {
-			loggedIn = load(loggedInId);
-		}
-		return loggedIn;
+		return load(builtInTeamsCache.getUnchecked(user.getId()).loggedInId);
+//		Team loggedIn;
+//		if (loggedInId == null) {
+//			loggedIn = findBy(user, Team.LOGGEDIN);
+//			Preconditions.checkNotNull(loggedIn);
+//			loggedInId = loggedIn.getId();
+//		} else {
+//			loggedIn = load(loggedInId);
+//		}
+//		return loggedIn;
 	}
 
 	@Override
 	public Team getOwners(User user) {
-		Team owners;
-		if (ownersId == null) {
-			owners = findBy(user, Team.OWNERS);
-			Preconditions.checkNotNull(owners);
-			ownersId = owners.getId();
-		} else {
-			owners = load(ownersId);
-		}
-		return owners;
+		return load(builtInTeamsCache.getUnchecked(user.getId()).ownersId);
+//		Team owners;
+//		if (ownersId == null) {
+//			owners = findBy(user, Team.OWNERS);
+//			Preconditions.checkNotNull(owners);
+//			ownersId = owners.getId();
+//		} else {
+//			owners = load(ownersId);
+//		}
+//		return owners;
 	}
 
 	@Override

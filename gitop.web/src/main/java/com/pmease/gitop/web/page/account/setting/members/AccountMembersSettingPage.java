@@ -6,6 +6,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -87,7 +89,10 @@ public class AccountMembersSettingPage extends AccountSettingPage {
 							new UserModel(user),
 							Model.of("<p>Are you sure you want to remove below user? "
 									+ "Remove this user will remove her/him from <b>all teams</b></p>"
-									+ "<p><b>" + user.getName() + "</b> (" + user.getDisplayName() + ")</p>")) {
+									+ "<p><b>" 
+									+ StringEscapeUtils.escapeHtml4(user.getName()) + "</b> (" 
+									+ StringEscapeUtils.escapeHtml4(StringUtils.defaultString(user.getDisplayName(), " ")) 
+									+ ")</p>")) {
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {

@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
+import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.feedback.IFeedbackMessageFilter;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -23,6 +24,7 @@ public abstract class AbstractInputElement<T> extends ValidatableElement<T> {
   private boolean readOnly = false;
   private String help;
   private List<IValidator<T>> validators = Lists.newArrayList();
+  private List<Behavior> behaviors = Lists.newArrayList();
   private String extraCssClass = "";
 
   abstract protected Component createInputComponent(String id);
@@ -62,6 +64,11 @@ public abstract class AbstractInputElement<T> extends ValidatableElement<T> {
     return this;
   }
 
+  public AbstractInputElement<T> addFormComponentBehavior(Behavior behavior) {
+	  behaviors.add(behavior);
+	  return this;
+  }
+  
   @SuppressWarnings({"serial"})
   @Override
   protected void onInitialize() {
@@ -93,6 +100,10 @@ public abstract class AbstractInputElement<T> extends ValidatableElement<T> {
 
     for (IValidator<T> each : validators) {
       addValidator(each);
+    }
+    
+    for (Behavior each : behaviors) {
+    	getFormComponent().add(each);
     }
   }
 
