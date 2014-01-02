@@ -8,6 +8,7 @@ import java.util.Set;
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -109,7 +110,12 @@ public class AccountHomePage extends AbstractAccountPage {
 				}
 				
 			};
-			return new MemberListView(id, new UserModel(getAccount()), model);
+			return new MemberListView(id, new UserModel(getAccount()), model) {
+				@Override
+				protected Component createMemberTeams(String id, final IModel<User> user) {
+					return new WebMarkupContainer(id).setVisibilityAllowed(false);
+				}
+			};
 			
 		default:
 			throw new IllegalArgumentException("tab " + category);

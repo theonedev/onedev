@@ -298,21 +298,16 @@ ul.btn-list { list-style: none; margin: 0; }
 .list-group-heading h3 { margin: 0; }
 .list-group-heading { padding-bottom: 12px; border-bottom: 1px solid #ddd; }
 
-.member-item { float: left; width: 330px; padding: 10px 0; margin: 0 20px 0 0; border: none; border-bottom: 1px solid #eee; }
-.member-item .avatar { width: 72px; height: 72px; float: left; box-shadow: none; }
-.member-item .avatar > img { background: transparent; border-radius: 50%;}
-.member-item .member-content { vertical-align: middle; margin-left: 90px;  margin-right: 30px; overflow: hidden; white-space: nowrap; }
-.member-item .list-group-item-heading { margin-bottom: 9px; }
-.member-content .list-group-item-heading em { display: block; }
-.member-content .list-group-item-heading em { font-style: normal; color: #999; font-weight: normal; } 
-.member-content .list-item-teams { overflow: auto; overflow-y: hidden; overflow-x: auto; white-space: nowrap; margin-right: 10px; }
-.member-content .list-item-teams .btn { position: relative; }
-.member-content .list-item-teams a.btn > i { position: absolute;left: 50%;margin-left: -6px;top: 50%;margin-top: -8px;font-size: 16px; display: none; }
-.member-content .list-item-teams a.btn:hover { background: #ff2a68; border-color: #ff2a68; }
-.member-content .list-item-teams a.btn:hover > i { display: block; }
-.member-content .list-item-teams a.btn:hover > span { color: #ff2a68; }
-.member-content .list-item-teams a.btn.owners { background: #468847; border-color: #468847; color: white; }
-.member-content .list-item-teams a.btn.owners:hover > i { display: none; }
+.member-item { display: inline-block; width: 330px; padding: 10px 0; margin: 0 20px 0 0; border: none; border-bottom: 1px solid #eee; position: relative; }
+.member-item .member-content { vertical-align: middle;  overflow: hidden; white-space: nowrap; margin: 0 32px 0 0; position: relative;}
+.member-item .member-content .avatar { width: 48px; height: 48px; box-shadow: none; float: left; }
+.member-item .member-content .avatar > img { background: transparent; border-radius: 50%;}
+
+.member-item .list-group-item-heading { margin: 6px 0 6px 60px; overflow:hidden; text-overflow: ellipse; }
+.member-content .list-group-item-heading em { display: block; font-style: normal; color: #999; font-weight: normal; }
+ 
+.list-members .list-item-teams { margin: 0 0 0 60px; overflow:hidden; white-space: nowrap; position: relative;}
+.list-item-teams .btn:hover { background: #900; color: white; border-color: #900; }
 
 .list-repos > li.list-group-item.repo {width: 380px; float: left; padding: 0; list-style: none; margin: 0 20px 0 0;  position: relative;  border-width: 0; border-bottom: 1px solid #ddd;  }
 .list-repos > li.list-group-item.repo { min-height: 48px; padding: 15px 0 ; }
@@ -323,11 +318,7 @@ ul.btn-list { list-style: none; margin: 0; }
 .list-group-item-actions > .img-link:hover { color: #990000; }
 
 .list-group-item.repo:hover > .list-group-item-actions > .img-link { color: #990000; }
- 
 .list-members .list-group-item-actions { top: 20px; margin-top: 0;}
-.simple-teams-list .member-item .avatar { width: 48px; height: 48px; }
-.simple-teams-list .member-item .member-content { margin-left: 60px; padding-top: 5px; }
-.simple-teams-list .member-item .list-group-item-heading { margin: 0; }
 
 /**
  * PROJECT PAGE

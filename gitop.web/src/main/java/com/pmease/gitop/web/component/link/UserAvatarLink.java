@@ -17,8 +17,21 @@ import com.pmease.gitop.web.page.account.home.AccountHomePage;
 @SuppressWarnings("serial")
 public class UserAvatarLink extends Panel {
 
-	public UserAvatarLink(String id, IModel<User> model) {
+	public static enum Mode {
+		AVATAR_ONLY,
+		NAME_ONLY,
+		BOTH
+	}
+	
+	private final Mode mode;
+	
+	public UserAvatarLink(String id, IModel<User> model, Mode mode) {
 		super(id, model);
+		this.mode = mode;
+	}
+	
+	public UserAvatarLink(String id, IModel<User> model) {
+		this(id, model, Mode.BOTH);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -30,14 +43,27 @@ public class UserAvatarLink extends Panel {
 				WicketUtils.newPageParams(PageSpec.USER, getUser().getName()));
 		
 		add(link);
-		link.add(new AvatarImage("avatar", (IModel<User>) getDefaultModel()));
+		link.add(new AvatarImage("avatar", (IModel<User>) getDefaultModel()) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisibilityAllowed(mode != Mode.NAME_ONLY);
+			}
+		});
+		
 		link.add(new Label("name", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
 				return getUser().getName();
 			}
-		}));
+		}) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				this.setVisibilityAllowed(mode != Mode.AVATAR_ONLY);
+			}
+		});
 	}
 	
 	protected User getUser() {

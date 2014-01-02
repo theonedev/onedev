@@ -113,6 +113,7 @@ span.btn:hover, span.btn:active, span.btn:focus {
 .btn-mini > .icon, .btn-xs > .icon { font-size: 12px; }
 
 .btn-colorful-text { background: transparent; border-color: #cccccc; }
+.btn-colorful-text.disabled { background: transparent; opacity: 0.4; }
 
 .btn-danger.btn-colorful-text { color: #ff2a68; border-color: #ff2a68;}
 .btn-warning.btn-colorful-text { color: #ff9500; border-color: #ff9500;}
@@ -253,6 +254,132 @@ fieldset[disabled] .btn-inverse.active {
 .btn-radio-group .btn .icon-ok { display: none; }
 .btn-radio-group .btn.active { background: #999; color: white; }
 .btn-radio-group .btn.active .icon-ok, .btn-radio-group .btn:hover .icon-ok { display: inline-block; }
+
+/*-------------------
+	Animated Button
+--------------------*/
+
+.btn-animated {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-animated .visible-content {
+  position: relative;
+}
+
+.btn-animated .hidden-content {
+  position: absolute;
+  width: 100%;
+}
+
+/* Horizontal */
+
+.btn-animated .visible-content,
+.btn-animated .hidden-content {
+  -webkit-transition: right 0.3s ease 0s;
+  transition: right 0.3s ease 0s;
+}
+
+.btn-animated .visible-content {
+  left: auto;
+  right: 0%;
+}
+
+.btn-animated .hidden-content {
+  top: 50%;
+  left: auto;
+  right: -100%;
+  margin-top: -0.75em;
+}
+
+.btn-animated:hover .visible-content {
+  left: auto;
+  right: 200%;
+}
+
+.btn-animated:hover .hidden-content {
+  left: auto;
+  right: 0%;
+}
+
+/* Vertical */
+
+.btn-animated.animate-vertical .visible-content,
+.btn-animated.animate-vertical .hidden-content {
+  -webkit-transition: top 0.3s ease 0s, -webkit-transform 0.3s ease 0s;
+  transition: top 0.3s ease 0s, transform 0.3s ease 0s;
+}
+
+.btn-animated.animate-vertical .visible-content {
+  -webkit-transform: translateY(0%);
+  -ms-transform: translateY(0%);
+  transform: translateY(0%);
+  right: auto;
+}
+
+.btn-animated.animate-vertical .hidden-content {
+  top: -100%;
+  left: 0%;
+  right: auto;
+}
+
+.btn-animated.animate-vertical:hover .visible-content {
+  -webkit-transform: translateY(200%);
+  -ms-transform: translateY(200%);
+  transform: translateY(200%);
+  right: auto;
+}
+
+.btn-animated.animate-vertical:hover .hidden-content {
+  top: 50%;
+  right: auto;
+}
+
+/* Fade */
+.btn-animated.animate-fade .visible-content,
+.btn-animated.animate-fade .hidden-content {
+  -webkit-transition: opacity 0.3s ease 0s, -webkit-transform 0.3s ease 0s;
+  transition: opacity 0.3s ease 0s, transform 0.3s ease 0s;
+}
+
+.btn-animated.animate-fade .visible-content {
+  left: auto;
+  right: auto;
+  opacity: 1;
+  -webkit-transform: scale(1);
+  -ms-transform: scale(1);
+  transform: scale(1);
+}
+
+.btn-animated.animate-fade .hidden-content {
+  opacity: 0;
+  left: 0%;
+  right: auto;
+  -webkit-transform: scale(1.2);
+  -ms-transform: scale(1.2);
+  transform: scale(1.2);
+}
+
+.btn-animated.animate-fade:hover .visible-content {
+  left: auto;
+  right: auto;
+  opacity: 0;
+  -webkit-transform: scale(0.7);
+  -ms-transform: scale(0.7);
+  transform: scale(0.7);
+}
+
+.btn-animated.animate-fade:hover .hidden-content {
+  left: 0%;
+  right: auto;
+  opacity: 1;
+  -webkit-transform: scale(1);
+  -ms-transform: scale(1);
+  transform: scale(1);
+}
+
+
 /**
  * TABLE
  */

@@ -153,12 +153,7 @@ public class TeamEditor extends Panel {
 					form.success(
 							String.format("Team has been %s successfully.",
 									isNew ? "created" : "updated"));
-					oldTeamName = team.getName();
-					if (isNew) {
-						setResponsePage(EditTeamPage.class, EditTeamPage.newParams(team));
-					} else {
-						target.add(TeamEditor.this);
-					}
+					setResponsePage(EditTeamPage.class, EditTeamPage.newParams(team));
 				}
 			});
 		}

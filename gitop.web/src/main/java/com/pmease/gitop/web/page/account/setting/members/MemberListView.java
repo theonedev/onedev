@@ -19,6 +19,7 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.Gitop;
@@ -80,7 +81,11 @@ public class MemberListView extends Panel {
 				AbstractLink link = PageSpec.newUserHomeLink("userlink", user);
 				item.add(link);
 				link.add(new Label("name", Model.of(user.getName())));
-				item.add(new Label("displayName", Model.of(user.getDisplayName())));
+				if (Strings.isNullOrEmpty(user.getDisplayName())) {
+					item.add(new Label("displayName", "&nbsp;").setEscapeModelStrings(false));
+				} else {
+					item.add(new Label("displayName", user.getDisplayName()));
+				}
 				item.add(createActionsPanel("actions", item.getModel()));
 				item.add(createMemberTeams("teams", new UserModel(user)));
 			}
@@ -128,7 +133,7 @@ public class MemberListView extends Panel {
 						Objects.equal(membership.getUser(), accountModel.getObject())) {
 					// owner
 					link = new WebMarkupContainer("removelink");
-					link.add(AttributeAppender.append("class", "owners disabled"));
+					link.add(AttributeAppender.append("class", "self disabled"));
 				} else {
 					link = new AjaxConfirmLink<Void>("removelink",
 							Model.of("Are you sure you want to remove the user from team " + membership.getTeam().getName() + "?")) {

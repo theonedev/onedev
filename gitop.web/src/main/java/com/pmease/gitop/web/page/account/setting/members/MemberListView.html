@@ -5,20 +5,20 @@
 	</div>
 	<ul class="list-group list-group-hover list-members clearfix">
 		<li class="list-group-item member-item" wicket:id="member">
-			<span class="avatar" wicket:id="avatar"></span>
-			<div class="member-content">
+			<div class="member-content clearfix">
+				<span class="avatar" wicket:id="avatar"></span>
 				<h4 class="list-group-item-heading">
 					<a wicket:id="userlink"><wicket:container wicket:id="name"></wicket:container></a>
 					<em><wicket:container wicket:id="displayName"></wicket:container></em>
 				</h4>
-				<div class="list-group-item-text list-item-teams" wicket:id="teams">
-					<wicket:container wicket:id="team">
-						<a class="btn btn-xs btn-info btn-colorful-text" wicket:id="removelink">
-							<i class="icon icon-delete"></i>
-							<span wicket:id="teamname"></span>
-						</a>
-					</wicket:container>
-				</div>
+			</div>
+			<div class="list-group-item-text list-item-teams" wicket:id="teams">
+				<wicket:container wicket:id="team">
+					<a class="btn btn-xs btn-info btn-colorful-text btn-animated" wicket:id="removelink">
+						<span class="hidden-content"><i class="icon icon-delete"></i></span>
+						<span class="visible-content"><span wicket:id="teamname"></span></span>
+					</a>
+				</wicket:container>
 			</div>
 			<div class="list-group-item-actions" wicket:id="actions">
 			</div>
