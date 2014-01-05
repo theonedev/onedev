@@ -128,11 +128,15 @@ public abstract class GitCommand<V> implements Callable<V> {
 	}
 	
 	public Commandline cmd() {
-		String gitExe = AppLoader.getInstance(GitConfig.class).getExecutable();
+		String gitExe = getGitExe();
 		Commandline cmd = new Commandline(gitExe).workingDir(repoDir);
 		if (environments != null)
 			cmd.environment(environments);
 		return cmd;
+	}
+	
+	protected String getGitExe() {
+		return AppLoader.getInstance(GitConfig.class).getExecutable();
 	}
 	
 	@Override
