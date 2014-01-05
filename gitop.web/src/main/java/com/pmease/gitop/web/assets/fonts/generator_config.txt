@@ -2,4 +2,4 @@
 # Upload this file to the generator to recreate the settings
 # you used to create these fonts.
 
-{"mode":"expert","formats":["ttf","woff","eotz","svg"],"tt_instructor":"default","fix_vertical_metrics":"Y","fix_gasp":"xy","add_spaces":"Y","add_hyphens":"Y","fallback":"none","fallback_custom":"100","options_subset":"none","subset_custom":"","subset_custom_range":"","css_stylesheet":"stylesheet.css","filename_suffix":"-webfont","emsquare":"1024","spacing_adjustment":"64","rememberme":"Y"}
+{"mode":"expert","formats":["ttf","woff","eotz","svg"],"tt_instructor":"keep","fix_vertical_metrics":"Y","fix_gasp":"xy","add_spaces":"Y","add_hyphens":"Y","fallback":"none","fallback_custom":"100","options_subset":"none","subset_custom":"","subset_custom_range":"","css_stylesheet":"stylesheet.css","filename_suffix":"-webfont","emsquare":"1024","spacing_adjustment":"64","rememberme":"Y"}

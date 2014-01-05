@@ -41,11 +41,19 @@ public class GitUtils {
 	}
 	
 	public static @Nullable String getDefaultBranch(Git git) {
+		String defaultBranch = git.resolveDefaultBranch();
+		
 		// FIXME: here --heads is not a pattern
 		List<RefInfo> refs = git.showRefs("--heads");
 		if (refs.isEmpty()) {
-			return null;
+			return defaultBranch;
 		} else {
+			for (RefInfo each : refs) {
+				if (each.getName().substring(Constants.R_HEADS.length()).equals(defaultBranch)) {
+					return defaultBranch;
+				}
+			}
+			
 			RefInfo ref = Iterables.getFirst(refs, null);
 			return ref.getName().substring(Constants.R_HEADS.length());
 		}

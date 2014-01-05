@@ -30,6 +30,32 @@
 				<pre class="detailed-message" wicket:id="detailedmessage"></pre>
 			</div>
 		</div>
+		
+		<div id="diff-toc">
+			<p class="description clearfix">
+				<i class="icon icon-diff"></i> 
+				 Showing <strong><span wicket:id="changes"></span> changed files</strong> 
+				with <strong><span wicket:id="additions">1</span> additions</strong>
+				and <strong><span wicket:id="deletions">1</span> deletions</strong>
+				
+				<a class="btn btn-sm btn-gray btn-show" data-toggle="collapse" data-target="#files-stat">Show Diff Stats</a>
+				<a class="btn btn-sm btn-gray btn-hide" data-toggle="collapse" data-target="#files-stat">Hide Diff Stats</a>
+			</p>
+			
+			<div id="files-stat" class="collapse">
+				<ul class="list-unstyled">
+					<li wicket:id="files">
+						<i class="" wicket:id="icon"></i>
+						<a wicket:id="file"><span wicket:id="path"></span></a>
+						<a class="diffstat"><b class="additions" wicket:id="additions"></b> <b class="deletions" wicket:id="deletions"></b></a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		
+		<wicket:container wicket:id="filelist">
+			<div wicket:id="file"></div>
+		</wicket:container>
 	</div>
 </wicket:extend>
 </html>

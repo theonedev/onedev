@@ -37,7 +37,6 @@ public class SourceBlobPage extends AbstractFilePage {
 	private final IModel<Commit> lastCommitModel;
 	private final IModel<List<GitPerson>> committersModel;
 	
-	
 	public SourceBlobPage(PageParameters params) {
 		super(params);
 		

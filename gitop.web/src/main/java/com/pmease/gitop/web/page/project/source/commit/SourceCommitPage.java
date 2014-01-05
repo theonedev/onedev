@@ -3,6 +3,9 @@ package com.pmease.gitop.web.page.project.source.commit;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
@@ -12,12 +15,17 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 import com.pmease.commons.git.Commit;
 import com.pmease.gitop.model.Project;
+import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.component.avatar.GitPersonAvatar;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.GitPersonLink;
@@ -25,6 +33,9 @@ import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.ProjectCategoryPage;
 import com.pmease.gitop.web.page.project.api.GitPerson;
+import com.pmease.gitop.web.page.project.source.blob.SourceBlobPage;
+import com.pmease.gitop.web.page.project.source.commit.patch.FileHeader;
+import com.pmease.gitop.web.page.project.source.commit.patch.Patch;
 import com.pmease.gitop.web.util.GitUtils;
 
 @SuppressWarnings("serial")
@@ -35,7 +46,10 @@ public class SourceCommitPage extends ProjectCategoryPage {
 		return params;
 	}
 	
-	private IModel<Commit> commitModel;
+	private final IModel<Commit> commitModel;
+	private final IModel<Patch> patchModel;
+	
+	private static final int DEFAULT_CONTEXT_LINES = 3;
 	
 	public SourceCommitPage(PageParameters params) {
 		super(params);
@@ -47,6 +61,21 @@ public class SourceCommitPage extends ProjectCategoryPage {
 				String revision = getRevision();
 				Project project = getProject();
 				return project.code().showRevision(revision);
+			}
+		};
+		
+		this.patchModel = new LoadableDetachableModel<Patch>() {
+
+			@Override
+			protected Patch load() {
+				String toRev = getRevision();
+				String fromRev = toRev + "^";
+				Patch patch = new DiffCommand(getProject().code().repoDir())
+					.fromRev(fromRev)
+					.toRev(toRev)
+					.contextLines(DEFAULT_CONTEXT_LINES)
+					.call();
+				return patch;
 			}
 		};
 	}
@@ -61,13 +90,7 @@ public class SourceCommitPage extends ProjectCategoryPage {
 		super.onPageInitialize();
 		
 		add(new Label("shortmessage", new PropertyModel<String>(commitModel, "subject")));
-		add(new Label("detailedmessage", new PropertyModel<String>(commitModel, "message")) {
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisibilityAllowed(!Objects.equal(getCommit().getSubject(), getCommit().getMessage()));
-			}
-		});
+		add(new Label("detailedmessage", new PropertyModel<String>(commitModel, "message")));
 		
 		IModel<GitPerson> authorModel = new AbstractReadOnlyModel<GitPerson>() {
 
@@ -141,9 +164,126 @@ public class SourceCommitPage extends ProjectCategoryPage {
 				item.add(connector);
 			}
 		};
+		
 		add(parentsView);
+		
+		createDiffToc();
+		
+		add(new ListView<FileHeader>("filelist", new LoadableDetachableModel<List<? extends FileHeader>>() {
+
+			@Override
+			protected List<? extends FileHeader> load() {
+				return getDiffPatch().getFiles();
+			}
+			
+		}) {
+
+			@Override
+			protected void populateItem(ListItem<FileHeader> item) {
+				item.add(new BlobDiffPanel("file", item.getModel()));
+			}
+			
+		});
 	}
 
+	private void createDiffToc() {
+
+		add(new Label("changes", new AbstractReadOnlyModel<Integer>() {
+
+			@Override
+			public Integer getObject() {
+				return getDiffPatch().getFiles().size();
+			}
+			
+		}));
+		
+		add(new Label("additions", new AbstractReadOnlyModel<Integer>() {
+
+			@Override
+			public Integer getObject() {
+				return getDiffPatch().getDiffStat().getAdditions();
+			}
+			
+		}));
+		
+		add(new Label("deletions", new AbstractReadOnlyModel<Integer>() {
+
+			@Override
+			public Integer getObject() {
+				return getDiffPatch().getDiffStat().getDeletions();
+			}
+			
+		}));
+		
+		add(new ListView<FileHeader>("files", new AbstractReadOnlyModel<List<? extends FileHeader>>() {
+
+			@Override
+			public List<? extends FileHeader> getObject() {
+				return getDiffPatch().getFiles();
+			}
+			
+		}) {
+
+			@Override
+			protected void populateItem(ListItem<FileHeader> item) {
+				FileHeader file = item.getModelObject();
+				ChangeType changeType = file.getChangeType();
+				item.add(new Icon("icon", getChangeIcon(changeType)).add(AttributeModifier.replace("title", changeType.name())));
+				String path;
+				if (changeType == ChangeType.DELETE) {
+					path = file.getOldPath();
+				} else {
+					path = file.getNewPath();
+				}
+				
+				List<String> paths = Lists.newArrayList(Splitter.on("/").split(path));
+				BookmarkablePageLink<?> link = new BookmarkablePageLink<Void>("file",
+						SourceBlobPage.class,
+						SourceBlobPage.newParams(getProject(), getRevision(), paths));
+				
+				link.add(new Label("path", path));
+				item.add(link);
+				item.add(new Label("additions", Model.of(
+						file.getDiffStat().getAdditions() > 0 ?
+								"+" + file.getDiffStat().getAdditions() : "-")));
+				item.add(new Label("deletions", Model.of(
+						file.getDiffStat().getDeletions() > 0 ?
+								"-" + file.getDiffStat().getDeletions() : "-")));
+			}
+		});
+	}
+	
+	private static String getChangeIcon(ChangeType changeType) {
+		switch (changeType) {
+		case ADD:
+			return "icon-diff-added";
+			
+		case MODIFY:
+			return "icon-diff-modified";
+			
+		case DELETE:
+			return "icon-diff-deleted";
+			
+		case RENAME:
+			return "icon-diff-renamed";
+			
+		case COPY:
+			return "icon-diff-copy";
+		}
+		
+		throw new IllegalArgumentException("change type " + changeType);
+	}
+	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(OnDomReadyHeaderItem.forScript("$('#diff-toc .btn').click(function() { $('#diff-toc').toggleClass('open');})"));
+	}
+	
+	protected Patch getDiffPatch() {
+		return patchModel.getObject();
+	}
+	
 	protected Commit getCommit() {
 		return commitModel.getObject();
 	}
@@ -158,12 +298,18 @@ public class SourceCommitPage extends ProjectCategoryPage {
 		if (commitModel != null) {
 			commitModel.detach();
 		}
+
+		if (patchModel != null) {
+			patchModel.detach();
+		}
 		
 		super.onDetach();
 	}
 	
 	@Override
 	protected String getPageTitle() {
-		return getRevision() + " - " + getProject().getPathName();
+		return getCommit().getSubject() + " - "
+				+ GitUtils.abbreviateSHA(getRevision(), 5) 
+				+ " - " + getProject().getPathName();
 	}
 }

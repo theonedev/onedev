@@ -8,8 +8,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.bean.validation.PropertyValidator;
 import org.apache.wicket.feedback.ComponentFeedbackMessageFilter;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -32,6 +30,7 @@ import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.quantity.Data;
 import com.pmease.gitop.web.common.wicket.bootstrap.NotificationPanel;
 import com.pmease.gitop.web.common.wicket.component.vex.AjaxConfirmLink;
+import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.checkbox.CheckBoxElement;
 import com.pmease.gitop.web.common.wicket.form.select.DropDownChoiceElement;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
@@ -74,14 +73,7 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 		
 		projectName = getProject().getName();
 		
-		Form<?> form = new Form<Void>("form") {
-			@Override
-			public void renderHead(IHeaderResponse response) {
-				super.renderHead(response);
-				response.render(OnDomReadyHeaderItem.forScript("gitop.form.init('#" + getMarkupId(true) + "')"));
-			}
-		};
-		
+		Form<?> form = new BaseForm<Void>("form");
 		add(form);
 		form.add(new NotificationPanel("feedback",
 									   new ComponentFeedbackMessageFilter(form))

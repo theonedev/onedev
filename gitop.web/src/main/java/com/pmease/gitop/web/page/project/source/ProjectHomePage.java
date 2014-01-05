@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
+import com.pmease.gitop.web.util.GitUtils;
 
 @SuppressWarnings("serial")
 public class ProjectHomePage extends SourceTreePage {
@@ -16,7 +17,8 @@ public class ProjectHomePage extends SourceTreePage {
 
 	@Override
 	protected String findRevision(PageParameters params) {
-		return getProject().code().resolveDefaultBranch();
+		String defaultBranch = GitUtils.getDefaultBranch(getProject().code()); //getProject().code().resolveDefaultBranch();
+		return defaultBranch;
 	}
 	
 	@Override

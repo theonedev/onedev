@@ -467,8 +467,49 @@ table.table-blob { width: 100%; }
 .commit .author-info .name,
 .commit .committer-info .name { font-weight: bold; color: #555; }
 
-.commit .commit-message { border-bottom: 1px solid #ddd; padding-bottom: 9px; margin-bottom: 9px; }
+.commit .commit-message { border-bottom: 1px solid #ddd; margin-bottom: 9px; }
 .commit .detailed-message { color: #666; border-width: 0 0 0 1px; background: transparent; border-width: 0; padding: 0; }
+
+#diff-toc .btn { float: right; }
+#diff-toc.open .btn-show,
+#diff-toc .btn-hide { display: none; }
+#diff-toc.open .btn-hide,
+#diff-toc .btn-show { display: inline-block; }
+
+.diffstat { white-space: nowrap; display: inline-block; font-size: 12px; float: right; color: #888; text-decoration: none;}
+.diffstat .additions { color: #008F00; }
+.diffstat .deletions { color: #8F0000; }
+.diffstat > b { margin-left: 5px; }
+a.diffstat:hover { text-decoration: none; }
+#files-stat li { padding: 5px 0; border-bottom: 1px solid #ddd; }
+
+#diff-toc .description .icon { color: #999; }
+
+#diff-toc .icon-diff-added { color: #6cc644; }
+#diff-toc .icon-diff-removed { color: #bd2c00; }
+#diff-toc .icon-diff-renamed { color: #677a85; }
+#diff-toc .icon-diff-modified { color: #d0b44c; }
+
+.panel-body.panel-diff { padding: 0; }
+.table-source, .table-diff { margin: 0; }
+.table-source tbody > tr > td, .table-diff tbody > tr > td { border-top: none; padding: 3px 3px 3px 12px; }
+
+.table-source tbody>tr>td.lineno, 
+.table-diff tbody>tr>td.lineno { border-right: 1px solid #ddd; width: 1%; color: #999; text-align: right;  font-family: Consolas, 'Liberation Mono', Courier, monospace; font-size: 12px; line-height: 18px; white-space: nowrap; padding-left: 6px; }
+.table-source pre, .table-diff pre { margin: 0; padding: 0; background: transparent; border: none; font-family: Consolas, 'Liberation Mono', Courier, monospace; font-size: 12px; line-height: 18px; }
+
+.table-diff tr.old > td { background: #fdd; }
+.table-diff tr.new > td { background: #dfd; }
+.table-diff tbody>tr.old>td.lineno { color: #8f0000; }
+.table-diff tbody>tr.new>td.lineno { color: #008f00; }
+
+.table-diff tr.hunkhead > td { background: #eef; }
+.table-diff tr.hunkhead td.expandable { border-right: 1px solid #ddd; text-align: center; padding: 0; }
+
+.table-diff tr:hover > td { background: #fea; }
+
+.table-diff td.expandable > a { display: block; color: #999; padding: 3px 0; }
+.table-diff td.expandable > a:hover { color: #333; background: #ddf; text-decoration: none; }
 
 /**
  * GATE KEEPER SETTING PAGE

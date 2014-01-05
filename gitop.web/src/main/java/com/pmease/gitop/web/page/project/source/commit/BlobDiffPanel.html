@@ -1,0 +1,25 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<span wicket:id="path"></span>
+			<a class="btn btn-default"><i class="icon icon-file"></i></a>
+		</div>
+		<div class="panel-body panel-diff">
+			<table class="table table-diff">
+				<wicket:container wicket:id="hunk">
+				<tr class="hunkhead">
+					<td colspan="2" class="expandable"><a data-toggle="tooltip" title="expand"><i class="icon icon-expand"></i></a></td>
+					<td><pre wicket:id="head"></pre></td>
+				</tr>
+				<tr wicket:id="lines">
+					<td class="lineno"><span wicket:id="oldLineNo"></span></td>
+					<td class="lineno"><span wicket:id="newLineNo"></span></td>
+					<td class="linecode"><pre wicket:id="code"></pre></td>
+				</tr>
+				</wicket:container>
+			</table>
+		</div>
+	</div>
+</wicket:panel>
+</html>
