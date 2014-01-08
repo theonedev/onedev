@@ -222,4 +222,49 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
         }
         return resultLength > 0 ? result.toString() : input;
     }
+    
+    private static final String SINGLE_QUOTE = "\'";
+    private static final String DOUBLE_QUOTE = "\"";
+    /**
+     * Put quotes around the given String if necessary.
+     * <p>
+     * If the argument doesn't include spaces or quotes, return it as is. If it
+     * contains double quotes, use single quotes - else surround the argument by
+     * double quotes.
+     * </p>
+     *
+     * @param argument the argument to be quoted
+     * @return the quoted argument
+     * @throws IllegalArgumentException If argument contains both types of quotes
+     */
+    public static String quoteArgument(final String argument) {
+
+        String cleanedArgument = argument.trim();
+
+        // strip the quotes from both ends
+        while(cleanedArgument.startsWith(SINGLE_QUOTE) || cleanedArgument.startsWith(DOUBLE_QUOTE)) {
+            cleanedArgument = cleanedArgument.substring(1);
+        }
+        
+        while(cleanedArgument.endsWith(SINGLE_QUOTE) || cleanedArgument.endsWith(DOUBLE_QUOTE)) {
+            cleanedArgument = cleanedArgument.substring(0, cleanedArgument.length() - 1);
+        }
+
+        final StringBuffer buf = new StringBuffer();
+        if (cleanedArgument.indexOf(DOUBLE_QUOTE) > -1) {
+            if (cleanedArgument.indexOf(SINGLE_QUOTE) > -1) {
+                throw new IllegalArgumentException(
+                        "Can't handle single and double quotes in same argument");
+            } else {
+                return buf.append(SINGLE_QUOTE).append(cleanedArgument).append(
+                        SINGLE_QUOTE).toString();
+            }
+        } else if (cleanedArgument.indexOf(SINGLE_QUOTE) > -1
+                || cleanedArgument.indexOf(" ") > -1) {
+            return buf.append(DOUBLE_QUOTE).append(cleanedArgument).append(
+                    DOUBLE_QUOTE).toString();
+        } else {
+            return cleanedArgument;
+        }
+    }
 }
