@@ -40,7 +40,6 @@ public class BlobDiffPanel extends Panel {
 
 	private final IModel<Commit> commitModel;
 	private final IModel<Project> projectModel;
-	private final IModel<FileBlob> blobModel;
 	
 	public BlobDiffPanel(String id,
 			IModel<Project> projectModel,
@@ -50,16 +49,16 @@ public class BlobDiffPanel extends Panel {
 	
 		this.projectModel = projectModel;
 		this.commitModel = commitModel;
-		this.blobModel = new LoadableDetachableModel<FileBlob>() {
-
-			@Override
-			protected FileBlob load() {
-				return Gitop.getInstance(FileBlobService.class).get(
-						getProject(), 
-						getCommit().getHash(), 
-						getFile().getNewPath());
-			}
-		};
+//		this.blobModel = new LoadableDetachableModel<FileBlob>() {
+//
+//			@Override
+//			protected FileBlob load() {
+//				return Gitop.getInstance(FileBlobService.class).get(
+//						getProject(), 
+//						getCommit().getHash(), 
+//						getFile().getNewPath());
+//			}
+//		};
 	}
 
 	@Override
@@ -189,7 +188,17 @@ public class BlobDiffPanel extends Panel {
 			protected void populateItem(LoopItem item) {
 				item.add(new HunkPanel("hunk", 
 						(IModel<FileHeader>) BlobDiffPanel.this.getDefaultModel(), 
-						blobModel, 
+						new LoadableDetachableModel<List<String>>() {
+
+							@Override
+							protected List<String> load() {
+								FileBlob blob = Gitop.getInstance(FileBlobService.class).get(
+										getProject(), 
+										getCommit().getHash(), 
+										getFile().getNewPath());
+								return blob.getLines();
+							}
+						},
 						item.getIndex()));
 				item.setRenderBodyOnly(true);
 			}
@@ -219,10 +228,6 @@ public class BlobDiffPanel extends Panel {
 		
 		if (commitModel != null) {
 			commitModel.detach();
-		}
-		
-		if (blobModel != null) {
-			blobModel.detach();
 		}
 		
 		super.onDetach();

@@ -22,25 +22,25 @@ import com.pmease.gitop.web.page.project.source.commit.patch.FileHeader;
 import com.pmease.gitop.web.page.project.source.commit.patch.HunkHeader;
 import com.pmease.gitop.web.page.project.source.commit.patch.HunkLine;
 import com.pmease.gitop.web.page.project.source.commit.patch.HunkLine.LineType;
-import com.pmease.gitop.web.service.FileBlob;
 
 @SuppressWarnings("serial")
 public class HunkPanel extends Panel {
 	
-	private final IModel<FileBlob> blobModel;
+	private final IModel<List<String>> blobLinesModel;
 
 	private final int hunkIndex;
 	
-	private int expandedLines = 0;
+	private int aboveLines = 0;
+	private int belowLines = 0;
 	
 	public HunkPanel(String id, 
-			IModel<FileHeader> model,
-			IModel<FileBlob> blobModel,
+			IModel<FileHeader> fileModel,
+			IModel<List<String>> blobLinesModel,
 			final int hunkIndex) {
 		
-		super(id, model);
+		super(id, fileModel);
 		
-		this.blobModel = blobModel;
+		this.blobLinesModel = blobLinesModel;
 		this.hunkIndex = hunkIndex;
 	}
 
@@ -48,27 +48,30 @@ public class HunkPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(createHunkHead());
-		add(createPreviousLines());
-		add(createHunkLines());
+		add(createAboveHunkHead());
+		add(createAboveLines());
+		add(createCurrentHunk());
+		
+		add(createBelowLines());
+		add(createBelowHunkHead());
 	}
 	
-	private Component createPreviousLines() {
-		return createHunkLines("previouslines", new LoadableDetachableModel<List<HunkLine>>() {
+	private Component createAboveLines() {
+		return createHunkLines("abovelines", new LoadableDetachableModel<List<HunkLine>>() {
 
 			@Override
 			protected List<HunkLine> load() {
-				if (expandedLines > 0) {
+				if (aboveLines > 0) {
 					List<HunkLine> lines = Lists.newArrayList();
 					
 					// need more context lines
 					// line start from 1, not 0
 					//
-					int oldStart = getActualOldStartLine();
-					int newStart = getActualNewStartLine();
+					int oldStart = getAboveOldStartLine();
+					int newStart = getAboveNewStartLine();
 					
-					List<String> blobLines = getBlob().getLines();
-					for (int i = 0; i < expandedLines; i++) {
+					List<String> blobLines = getBlobLines();
+					for (int i = 0; i < aboveLines; i++) {
 						HunkLine line = new HunkLine(
 								blobLines.get(newStart + i - 1), 
 								LineType.CONTEXT, 
@@ -84,7 +87,42 @@ public class HunkPanel extends Panel {
 		});
 	}
 	
-	private Component createHunkLines() {
+	private Component createBelowLines() {
+		if (hunkIndex != getFile().getHunks().size() - 1) {
+			return new WebMarkupContainer("belowlines").setVisibilityAllowed(false);
+		}
+		
+		return createHunkLines("belowlines", new LoadableDetachableModel<List<HunkLine>>() {
+
+			@Override
+			protected List<HunkLine> load() {
+				// Only display the last hunk
+				//
+				if (hunkIndex == getFile().getHunks().size() - 1 && belowLines > 0) {
+					List<HunkLine> lines = Lists.newArrayList();
+					HunkHeader hunk = getCurrentHunk();
+					int oldStart = hunk.getOldImage().getLineCount() + hunk.getOldImage().getStartLine();
+					int newStart = getCurrentHunk().getNewStartLine() + getCurrentHunk().getNewLineCount();
+					int newEnd = newStart + belowLines;
+					List<String> blobLines = getBlobLines();
+					for (; newStart < newEnd; newStart++, oldStart++) {
+						HunkLine line = new HunkLine(
+								blobLines.get(newStart - 1),
+								LineType.CONTEXT,
+								oldStart, newStart);
+						lines.add(line);
+					}
+					
+					return lines;
+				} else {
+					return Collections.emptyList();
+				}
+			}
+			
+		});
+	}
+	
+	private Component createCurrentHunk() {
 		return createHunkLines("hunklines", new LoadableDetachableModel<List<HunkLine>>() {
 
 			@Override
@@ -95,21 +133,20 @@ public class HunkPanel extends Panel {
 		});
 	}
 	
-	private Component createHunkHead() {
-		WebMarkupContainer header = new WebMarkupContainer("hunkhead");
+	private Component createAboveHunkHead() {
+		WebMarkupContainer header = new WebMarkupContainer("abovehunk");
 		header.setOutputMarkupId(true);
 		header.add(new AjaxLink<Void>("expandlink") {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				expandLines();
-				onExpand(target);
+				onExpandAbove(target);
 			}
 			
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				int newStartLine = getActualNewStartLine();
+				int newStartLine = getAboveNewStartLine();
 				HunkHeader previousHunk = getPreviousHunk();
 				int previousStartLine = previousHunk == null ? 1 : previousHunk.getNewStartLine() + previousHunk.getNewLineCount();
 				setEnabled(newStartLine > 1 && newStartLine > previousStartLine);
@@ -123,10 +160,10 @@ public class HunkPanel extends Panel {
 				HunkHeader hunk = getCurrentHunk();
 				StringBuffer sb = new StringBuffer();
 				sb.append("@@ ");
-				int oldStart = getActualOldStartLine();
-				int newStart = getActualNewStartLine();
-				int oldOffset = expandedLines > 0 ? expandedLines : hunk.getOldImage().getLineCount();
-				int newOffset = expandedLines > 0 ? expandedLines : hunk.getNewLineCount();
+				int oldStart = getAboveOldStartLine();
+				int newStart = getAboveNewStartLine();
+				int oldOffset = aboveLines > 0 ? aboveLines : hunk.getOldImage().getLineCount();
+				int newOffset = aboveLines > 0 ? aboveLines : hunk.getNewLineCount();
 				
 				sb.append("-").append(oldStart).append(",").append(oldOffset);
 				sb.append(" +").append(newStart).append(",").append(newOffset);
@@ -138,18 +175,50 @@ public class HunkPanel extends Panel {
 		return header;
 	}
 	
-	private void expandLines() {
-		expandedLines += 20;
-		
-		int startLine = getCurrentHunk().getNewStartLine();
-		startLine -= expandedLines;
-		startLine = Math.max(1, startLine);
-		HunkHeader previous = getPreviousHunk();
-		if (previous != null) {
-			startLine = Math.max(previous.getNewStartLine() + previous.getNewLineCount(), startLine);
+	Component createBelowHunkHead() {
+		if (hunkIndex != getFile().getHunks().size() - 1) {
+			return new WebMarkupContainer("belowhunk").setVisibilityAllowed(false);
 		}
 		
-		expandedLines = getCurrentHunk().getNewStartLine() - startLine;
+		WebMarkupContainer header = new WebMarkupContainer("belowhunk") {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				int newEnd = getCurrentHunk().getNewStartLine() + getCurrentHunk().getNewLineCount() + belowLines;
+				setVisibilityAllowed(newEnd < getBlobLines().size());
+			}
+		};
+		
+		header.setOutputMarkupId(true);
+		header.add(new AjaxLink<Void>("expandlink") {
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onExpandBelow(target);
+			}
+		});
+		
+		return header;
+	}
+	
+	void expandBelowLines() {
+		belowLines += 20;
+		HunkHeader hunk = getCurrentHunk();
+		int newEnd = hunk.getNewStartLine() + hunk.getNewLineCount() + belowLines;
+		if (newEnd > getBlobLines().size()) {
+			belowLines = getBlobLines().size() - hunk.getNewLineCount() - hunk.getNewStartLine();
+		}
+	}
+	
+	void onExpandBelow(AjaxRequestTarget target) {
+		expandBelowLines();
+		Component head = createBelowHunkHead();
+		addOrReplace(head);
+		target.add(head);
+		
+		Component belowLines = createBelowLines();
+		addOrReplace(belowLines);
+		target.add(belowLines);
 	}
 	
 	Component createHunkLines(String id, IModel<List<HunkLine>> linesModel) {
@@ -184,13 +253,13 @@ public class HunkPanel extends Panel {
 		return frag;
 	}
 	
-	private int getActualOldStartLine() {
+	private int getAboveOldStartLine() {
 		HunkHeader currentHunk = getCurrentHunk();
-		return currentHunk.getOldImage().getStartLine() - expandedLines;
+		return currentHunk.getOldImage().getStartLine() - aboveLines;
 	}
 	
-	private int getActualNewStartLine() {
-		return getCurrentHunk().getNewStartLine() - expandedLines;
+	private int getAboveNewStartLine() {
+		return getCurrentHunk().getNewStartLine() - aboveLines;
 	}
 	
 	private HunkHeader getCurrentHunk() {
@@ -214,24 +283,39 @@ public class HunkPanel extends Panel {
 		return (FileHeader) getDefaultModelObject();
 	}
 	
-	private FileBlob getBlob() {
-		return blobModel.getObject();
+	private List<String> getBlobLines() {
+		return blobLinesModel.getObject();
 	}
 	
-	private void onExpand(AjaxRequestTarget target) {
-		Component head = createHunkHead();
+	private void expandAboveLines() {
+		aboveLines += 20;
+		
+		int startLine = getCurrentHunk().getNewStartLine();
+		startLine -= aboveLines;
+		startLine = Math.max(1, startLine);
+		HunkHeader previous = getPreviousHunk();
+		if (previous != null) {
+			startLine = Math.max(previous.getNewStartLine() + previous.getNewLineCount(), startLine);
+		}
+		
+		aboveLines = getCurrentHunk().getNewStartLine() - startLine;
+	}
+	
+	private void onExpandAbove(AjaxRequestTarget target) {
+		expandAboveLines();
+		Component head = createAboveHunkHead();
 		addOrReplace(head);
 		target.add(head);
 		
-		Component previousLines = createPreviousLines();
+		Component previousLines = createAboveLines();
 		addOrReplace(previousLines);
 		target.add(previousLines);
 	}
 	
 	@Override
 	public void onDetach() {
-		if (blobModel != null) {
-			blobModel.detach();
+		if (blobLinesModel != null) {
+			blobLinesModel.detach();
 		}
 		
 		super.onDetach();

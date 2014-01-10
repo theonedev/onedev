@@ -92,7 +92,7 @@ public class DefaultFileBlobService implements FileBlobService {
 			RepoUtils.close(repo);
 		}
 	}
-
+	
 	@Override
 	public ObjectStream openStream(Project project, String revision, String path) {
 		File gitDir = project.code().repoDir();
