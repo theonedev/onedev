@@ -34,10 +34,12 @@ public class SoyPanel extends Panel implements IMarkupResourceStreamProvider,
 	@Override
 	public IResourceStream getMarkupResourceStream(MarkupContainer container,
 			Class<?> containerClass) {
+//		Stopwatch watch = new Stopwatch().start();
 		StringBuffer sb = new StringBuffer();
 		sb.append("<wicket:panel>");
 		sb.append(evaluateSoyTemplate());
 		sb.append("</wicket:panel>");
+//		System.out.println("Duration " + watch.elapsedMillis());
 		return new StringResourceStream(sb.toString());
 	}
 

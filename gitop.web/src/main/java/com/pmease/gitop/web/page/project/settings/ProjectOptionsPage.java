@@ -34,9 +34,9 @@ import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.checkbox.CheckBoxElement;
 import com.pmease.gitop.web.common.wicket.form.select.DropDownChoiceElement;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
+import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
-import com.pmease.gitop.web.util.GitUtils;
 
 @SuppressWarnings("serial")
 public class ProjectOptionsPage extends AbstractProjectSettingPage {

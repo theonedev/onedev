@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.mime.MediaType;
 import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.util.RawParseUtils;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -90,11 +91,7 @@ public class FileBlob implements Serializable {
 			return null;
 		}
 		
-		if (charset != null) {
-			return new String(data, charset);
-		} else {
-			return new String(data);
-		}
+		return RawParseUtils.decode(charset, data);
 	}
 	
 	public List<String> getLines() {

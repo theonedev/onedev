@@ -34,10 +34,10 @@ import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.common.wicket.component.tab.BootstrapTabbedPanel;
+import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.source.ProjectHomePage;
 import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
-import com.pmease.gitop.web.util.GitUtils;
 
 @SuppressWarnings("serial")
 public class RevisionSelector extends AbstractSourcePagePanel {

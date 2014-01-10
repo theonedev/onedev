@@ -26,10 +26,10 @@ import com.pmease.gitop.web.common.datatype.DataTypes;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.GitPersonLink;
 import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
+import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.page.project.api.GitPerson;
 import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
 import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
-import com.pmease.gitop.web.util.GitUtils;
 
 @SuppressWarnings("serial")
 public class CommitsPanel extends Panel {

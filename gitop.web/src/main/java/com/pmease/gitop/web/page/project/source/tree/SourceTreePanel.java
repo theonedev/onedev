@@ -31,12 +31,12 @@ import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.GitPersonLink;
 import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
+import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.api.GitPerson;
 import com.pmease.gitop.web.page.project.source.blob.SourceBlobPage;
 import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
 import com.pmease.gitop.web.page.project.source.component.AbstractSourcePagePanel;
-import com.pmease.gitop.web.util.GitUtils;
 
 @SuppressWarnings("serial")
 public class SourceTreePanel extends AbstractSourcePagePanel {

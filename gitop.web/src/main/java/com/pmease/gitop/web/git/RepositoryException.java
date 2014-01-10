@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.jgit;
+package com.pmease.gitop.web.git;
 
 public class RepositoryException extends RuntimeException {
 	private static final long serialVersionUID = 1L;

@@ -1,0 +1,37 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<div class="diff-hunk">
+		<div class="diff-line hunk-head" wicket:id="hunkhead">
+			<div class="diff-line-nums">
+				<div class="expander">
+					<a wicket:id="expandlink" title="show more lines"><i class="icon icon-expand"></i></a>
+				</div>
+			</div>
+			<div class="diff-line-code">
+				<pre wicket:id="head"></pre>
+			</div>
+		</div>
+		<div wicket:id="previouslines"></div>
+		<div wicket:id="hunklines"></div>
+	</div>
+	
+	<wicket:fragment wicket:id="linefrag">
+		<div class="diff-line" wicket:id="lines">
+			<div class="diff-line-nums">
+				<div class="oldnum">
+					<span wicket:id="oldlineno"></span>
+				</div>
+				<div class="newnum">
+					<span wicket:id="newlineno"></span>
+				</div>
+			</div>
+			<div class="diff-line-code">
+				<a class="add-comment"><i class="icon icon-comment-add"></i></a>
+				<pre  wicket:id="code"></pre>
+			</div>
+		</div>
+	</wicket:fragment>
+
+	
+</wicket:panel>
+</html>

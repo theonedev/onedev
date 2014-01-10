@@ -4,11 +4,14 @@ import static org.eclipse.jgit.util.RawParseUtils.match;
 import static org.eclipse.jgit.util.RawParseUtils.nextLF;
 import static org.eclipse.jgit.util.RawParseUtils.parseBase10;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.text.MessageFormat;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.diff.Edit;
 import org.eclipse.jgit.diff.EditList;
 import org.eclipse.jgit.internal.JGitText;
@@ -16,7 +19,11 @@ import org.eclipse.jgit.lib.AbbreviatedObjectId;
 import org.eclipse.jgit.util.MutableInteger;
 import org.eclipse.jgit.util.RawParseUtils;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import com.google.common.io.ByteStreams;
+import com.pmease.gitop.web.page.project.source.commit.patch.HunkLine.LineType;
+import com.pmease.gitop.web.util.UniversalEncodingDetector;
 
 /** Hunk header describing the layout of a single block of lines */
 public class HunkHeader {
@@ -197,6 +204,8 @@ public class HunkHeader {
 		return editList;
 	}
 
+	String hunkFunction;
+	
 	void parseHeader() {
 		// Parse "@@ -236,9 +236,9 @@ protected boolean"
 		//
@@ -214,67 +223,42 @@ public class HunkHeader {
 			newLineCount = parseBase10(buf, ptr.value + 1, ptr);
 		else
 			newLineCount = 1;
-	}
 
-	public static enum LineType {
-		CONTEXT, OLD, NEW, NO_NEWLINE
-	}
-	
-	public static class AnnotatedLine {
-		final String text;
-		final LineType lineType;
-		final int oldLineNo;
-		final int newLineNo;
-		
-		AnnotatedLine(String text, LineType lineType, int oldLineNo, int newLineNo) {
-			this.text = text;
-			this.lineType = lineType;
-			this.oldLineNo = oldLineNo;
-			this.newLineNo = newLineNo;
-		}
-		
-		public String getText() {
-			return text;
-		}
-
-
-		public LineType getLineType() {
-			return lineType;
-		}
-
-		public int getOldLineNo() {
-			return oldLineNo;
-		}
-
-		public int getNewLineNo() {
-			return newLineNo;
-		}
-
-		@Override
-		public String toString() {
-			switch (lineType) {
-			case CONTEXT:
-				return " " + text;
-			case OLD:
-				return "-" + text;
-			case NEW:
-				return "+" + text;
-			case NO_NEWLINE:
-				return "\\ No newline at the end of file";
-			default:
-				throw new IllegalArgumentException();
-			}
+		// decode from " @@ protected boolean"
+		//
+		this.hunkFunction = RawParseUtils.decode(buf, ptr.value + 4, nextLF(buf, ptr.value));
+		if (this.hunkFunction.endsWith("\n")) {
+			this.hunkFunction = this.hunkFunction.substring(0, hunkFunction.length() - 1);
 		}
 	}
+
+	public String getHunkFunction() {
+		return hunkFunction;
+	}
 	
-	List<AnnotatedLine> lines = Lists.newArrayList();
+	List<HunkLine> lines = Lists.newArrayList();
 	
-	public List<AnnotatedLine> getAnnotatedLines() {
+	public List<HunkLine> getLines() {
 		return lines;
+	}
+	
+	public Charset getCharset() {
+		ByteArrayInputStream bas = null;
+		try {
+			bas = ByteStreams.newInputStreamSupplier(file.buf).getInput();
+			return UniversalEncodingDetector.detect(bas);
+		} catch (IOException e) {
+			throw Throwables.propagate(e);
+		} finally {
+			IOUtils.closeQuietly(bas);
+		}
 	}
 	
 	int parseBody(final Patch script, final int end) {
 		final byte[] buf = file.buf;
+		
+		Charset charset = getCharset();
+		
 		int c = nextLF(buf, startOffset), last = c;
 
 		old.nDeleted = 0;
@@ -283,6 +267,7 @@ public class HunkHeader {
 		int oldLineNo = old.startLine;
 		int newLineNo = newStartLine;
 		
+		HunkLine al = null;
 		SCAN: for (; c < end; last = c, c = nextLF(buf, c)) {
 			String line;
 			int eol;
@@ -291,8 +276,9 @@ public class HunkHeader {
 			case '\n':
 				nContext++;
 				eol = nextLF(buf, c);
-				line = RawParseUtils.decode(buf, c + 1, eol - 1);
-				lines.add(new AnnotatedLine(line, LineType.CONTEXT, oldLineNo, newLineNo));
+				line = RawParseUtils.decode(charset, buf, c + 1, eol - 1);
+				al = new HunkLine(line, LineType.CONTEXT, oldLineNo, newLineNo);
+				lines.add(al);
 				oldLineNo++;
 				newLineNo++;
 				continue;
@@ -300,8 +286,9 @@ public class HunkHeader {
 			case '-':
 				old.nDeleted++;
 				eol = nextLF(buf, c);
-				line = RawParseUtils.decode(buf, c + 1, eol - 1);
-				lines.add(new AnnotatedLine(line, LineType.OLD, oldLineNo, -1));
+				line = RawParseUtils.decode(charset, buf, c + 1, eol - 1);
+				al = new HunkLine(line, LineType.OLD, oldLineNo, -1);
+				lines.add(al);
 				file.diffStat.deletions++;
 				script.diffStat.deletions++;
 				oldLineNo++;
@@ -310,19 +297,20 @@ public class HunkHeader {
 			case '+':
 				old.nAdded++;
 				eol = nextLF(buf, c);
-				line = RawParseUtils.decode(buf, c + 1, eol - 1);
-				lines.add(new AnnotatedLine(line, LineType.NEW, -1, newLineNo));
+				line = RawParseUtils.decode(charset, buf, c + 1, eol - 1);
+				al = new HunkLine(line, LineType.NEW, -1, newLineNo);
+				lines.add(al);
 				file.diffStat.additions++;
 				script.diffStat.additions++;
 				newLineNo++;
 				continue;
 
 			case '\\': // Matches "\ No newline at end of file"
-				// TODO: no newline can occurred on either side, old line or new line
+				// no newline can occurred on either side, old line or new line
 				//
-				lines.add(new AnnotatedLine("", LineType.NO_NEWLINE, oldLineNo, newLineNo));
-				oldLineNo++;
-				newLineNo++;
+				if (al != null) {
+					al.noNewLine = true;
+				}
 				continue;
 
 			default:

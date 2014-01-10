@@ -1,25 +1,33 @@
 <html xmlns:wicket>
 <wicket:panel>
-	<div class="panel panel-default">
-		<div class="panel-heading">
-			<span wicket:id="path"></span>
-			<a class="btn btn-default"><i class="icon icon-file"></i></a>
+		<div class="panel-heading clearfix">
+			<div class="pull-left meta">
+				<span class="diffstat inline" data-toggle="tooltip" data-placement="right" wicket:id="statspan">
+					<b class="additions" wicket:id="additions"></b><b class="deletions" wicket:id="deletions"></b>
+				</span>
+				
+				<wicket:enclosure>
+				<span wicket:id="oldpath"></span> &#10142;
+				</wicket:enclosure>
+				
+				<span wicket:id="newpath"></span>
+			</div>
+			<div class="actions pull-right">
+				<a class="btn btn-default btn-sm" wicket:id="bloblink">View file @ <b class="sha" wicket:id="sha"></b></a>
+			</div>
 		</div>
-		<div class="panel-body panel-diff">
-			<table class="table table-diff">
-				<wicket:container wicket:id="hunk">
-				<tr class="hunkhead">
-					<td colspan="2" class="expandable"><a data-toggle="tooltip" title="expand"><i class="icon icon-expand"></i></a></td>
-					<td><pre wicket:id="head"></pre></td>
-				</tr>
-				<tr wicket:id="lines">
-					<td class="lineno"><span wicket:id="oldLineNo"></span></td>
-					<td class="lineno"><span wicket:id="newLineNo"></span></td>
-					<td class="linecode"><pre wicket:id="code"></pre></td>
-				</tr>
-				</wicket:container>
-			</table>
+		<div class="panel-body">
+			<div wicket:id="diffcontent"></div>
 		</div>
-	</div>
+	
+	<wicket:fragment wicket:id="frag">
+			<wicket:container wicket:id="loop">
+				<wicket:container wicket:id="hunk"></wicket:container>
+			</wicket:container>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="messagefrag">
+		<div class="empty-message" wicket:id="message"></div>
+	</wicket:fragment>
 </wicket:panel>
 </html>

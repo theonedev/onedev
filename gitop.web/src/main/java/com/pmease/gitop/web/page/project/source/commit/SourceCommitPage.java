@@ -21,7 +21,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.Commit;
 import com.pmease.gitop.model.Project;
@@ -30,13 +29,13 @@ import com.pmease.gitop.web.component.avatar.GitPersonAvatar;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.GitPersonLink;
 import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
+import com.pmease.gitop.web.git.GitUtils;
+import com.pmease.gitop.web.git.command.DiffTreeCommand;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.ProjectCategoryPage;
 import com.pmease.gitop.web.page.project.api.GitPerson;
-import com.pmease.gitop.web.page.project.source.blob.SourceBlobPage;
 import com.pmease.gitop.web.page.project.source.commit.patch.FileHeader;
 import com.pmease.gitop.web.page.project.source.commit.patch.Patch;
-import com.pmease.gitop.web.util.GitUtils;
 
 @SuppressWarnings("serial")
 public class SourceCommitPage extends ProjectCategoryPage {
@@ -68,12 +67,20 @@ public class SourceCommitPage extends ProjectCategoryPage {
 
 			@Override
 			protected Patch load() {
-				String toRev = getRevision();
-				String fromRev = toRev + "^";
-				Patch patch = new DiffCommand(getProject().code().repoDir())
-					.fromRev(fromRev)
-					.toRev(toRev)
+				Commit commit = commitModel.getObject();
+
+				String rev;
+				if (commit.getParentHashes().isEmpty()) {
+					// no parent, initial commit
+					rev = getRevision();
+				} else {
+					rev = getRevision() + "^.." + getRevision();
+				}
+				
+				Patch patch = new DiffTreeCommand(getProject().code().repoDir())
+					.revision(rev)
 					.contextLines(DEFAULT_CONTEXT_LINES)
+					.findRenames(true)
 					.call();
 				return patch;
 			}
@@ -169,18 +176,26 @@ public class SourceCommitPage extends ProjectCategoryPage {
 		
 		createDiffToc();
 		
-		add(new ListView<FileHeader>("filelist", new LoadableDetachableModel<List<? extends FileHeader>>() {
+		IModel<List<? extends FileHeader>> model = new LoadableDetachableModel<List<? extends FileHeader>>() {
 
 			@Override
 			protected List<? extends FileHeader> load() {
-				return getDiffPatch().getFiles();
+				List<? extends FileHeader> total = getDiffPatch().getFiles();
+				if (total.size() > 300) {
+					return Lists.newArrayList(total.subList(0, 300));
+				} else {
+					return total;
+				}
 			}
 			
-		}) {
+		};
+		
+		add(new ListView<FileHeader>("filelist", model) {
 
 			@Override
 			protected void populateItem(ListItem<FileHeader> item) {
-				item.add(new BlobDiffPanel("file", item.getModel()));
+				item.setMarkupId("diff-" + item.getIndex());
+				item.add(new BlobDiffPanel("file", projectModel, item.getModel(), commitModel));
 			}
 			
 		});
@@ -229,24 +244,21 @@ public class SourceCommitPage extends ProjectCategoryPage {
 				FileHeader file = item.getModelObject();
 				ChangeType changeType = file.getChangeType();
 				item.add(new Icon("icon", getChangeIcon(changeType)).add(AttributeModifier.replace("title", changeType.name())));
-				String path;
-				if (changeType == ChangeType.DELETE) {
-					path = file.getOldPath();
-				} else {
-					path = file.getNewPath();
-				}
-				
-				List<String> paths = Lists.newArrayList(Splitter.on("/").split(path));
-				BookmarkablePageLink<?> link = new BookmarkablePageLink<Void>("file",
-						SourceBlobPage.class,
-						SourceBlobPage.newParams(getProject(), getRevision(), paths));
-				
-				link.add(new Label("path", path));
+				WebMarkupContainer link = new WebMarkupContainer("link");
+				link.add(AttributeModifier.replace("href", "#diff-" + item.getIndex()));
 				item.add(link);
-				item.add(new Label("additions", Model.of(
+				link.add(new Label("oldpath", Model.of(file.getOldPath())).setVisibilityAllowed(file.getChangeType() == ChangeType.RENAME));
+				link.add(new Label("path", Model.of(file.getNewPath())));
+				
+				WebMarkupContainer statlink = new WebMarkupContainer("statlink");
+				statlink.add(AttributeModifier.replace("href", "#diff-" + item.getIndex()));
+				statlink.add(AttributeModifier.replace("title", file.getDiffStat().toString()));
+				
+				item.add(statlink);
+				statlink.add(new Label("additions", Model.of(
 						file.getDiffStat().getAdditions() > 0 ?
 								"+" + file.getDiffStat().getAdditions() : "-")));
-				item.add(new Label("deletions", Model.of(
+				statlink.add(new Label("deletions", Model.of(
 						file.getDiffStat().getDeletions() > 0 ?
 								"-" + file.getDiffStat().getDeletions() : "-")));
 			}

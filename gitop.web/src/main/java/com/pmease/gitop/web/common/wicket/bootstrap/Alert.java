@@ -196,6 +196,11 @@ public class Alert extends GenericPanel<String> {
         return this;
     }
 
+    public Alert setMessageEscapeModelStrings(boolean b) {
+    	message.setEscapeModelStrings(b);
+    	return this;
+    }
+    
     @Override
     protected void onConfigure() {
         super.onConfigure();

@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.util;
+package com.pmease.gitop.web.git;
 
 import java.util.List;
 import java.util.regex.Pattern;

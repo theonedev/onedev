@@ -1,11 +1,14 @@
 package com.pmease.gitop.web.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
 import org.apache.tika.metadata.Metadata;
 import org.mozilla.universalchardet.UniversalDetector;
+
+import com.google.common.io.Closeables;
 
 /**
  * Copied from tika UniversalEncodingDetector
@@ -44,6 +47,15 @@ public class UniversalEncodingDetector {
         } finally {
             input.reset();
         }
+    }
+    
+    public static Charset detect(byte[] buffer) throws IOException {
+		ByteArrayInputStream in = new ByteArrayInputStream(buffer); //ByteStreams.newInputStreamSupplier(buffer).getInput();
+		try {
+			return detect(in);
+		} finally {
+			Closeables.close(in, false);
+		}
     }
     
     public static boolean isBinary(InputStream in) throws IOException {
