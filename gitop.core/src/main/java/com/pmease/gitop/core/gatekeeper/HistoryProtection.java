@@ -22,7 +22,7 @@ public class HistoryProtection extends CommonGateKeeper {
 
 	private TargetBranchSelection branchSelection = new SpecifyTargetBranchesByIds();
 	
-	@Editable(name="Specify Branches to Be Protected", order=100)
+	@Editable(name="Branches to Be Protected", order=100)
 	@Valid
 	@NotNull
 	public TargetBranchSelection getBranchSelection() {

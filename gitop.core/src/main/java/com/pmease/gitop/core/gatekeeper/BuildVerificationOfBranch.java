@@ -29,7 +29,7 @@ public class BuildVerificationOfBranch extends CommonGateKeeper {
 	
 	private boolean blockMode = true;
 	
-	@Editable(name="Specify Branches to Be Protected", order=50)
+	@Editable(name="Branches to Be Checked", order=50)
 	@Valid
 	@NotNull
 	public TargetBranchSelection getBranchSelection() {

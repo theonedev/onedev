@@ -3,11 +3,12 @@ package com.pmease.gitop.core.gatekeeper.helper.pathselection;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.annotation.OmitName;
 import com.pmease.gitop.core.gatekeeper.IfTouchSpecifiedFilePatterns;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
 
 @SuppressWarnings("serial")
-@Editable(name="Paths Matching Specified File Patterns", order=200)
+@Editable(name="Specify Directory or File Patterns", order=200)
 public class SpecifyTargetPathsByPatterns implements TargetPathSelection {
 
 	private String filePatterns;
@@ -20,6 +21,7 @@ public class SpecifyTargetPathsByPatterns implements TargetPathSelection {
 			+ "<li><i>**/*.c, **/*.java</i>: matches all C and Java files."
 			+ "<li><i>-src/**, **</i>: matches all files except those under src."
 			+ "</ul>")
+	@OmitName
 	@NotEmpty
 	public String getFilePatterns() {
 		return filePatterns;

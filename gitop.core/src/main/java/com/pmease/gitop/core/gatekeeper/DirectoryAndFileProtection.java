@@ -39,7 +39,7 @@ public class DirectoryAndFileProtection extends CommonGateKeeper {
 	
 	private List<Long> teamIds = new ArrayList<>();
 
-	@Editable(name="Optionally Specify Applicable Branches", order=100)
+	@Editable(name="Applicable Branches (Optionally)", order=100)
 	@Valid
 	@Nullable
 	public TargetBranchSelection getBranchSelection() {
@@ -50,7 +50,7 @@ public class DirectoryAndFileProtection extends CommonGateKeeper {
 		this.branchSelection = branchSelection;
 	}
 	
-	@Editable(name="Specify Directory or File to Protect")
+	@Editable(name="Directories or Files to Be Protected")
 	@Valid
 	@NotNull
 	public TargetPathSelection getPathSelection() {
@@ -61,7 +61,7 @@ public class DirectoryAndFileProtection extends CommonGateKeeper {
 		this.pathSelection = pathSelection;
 	}
 
-	@Editable(name="Restrict Write Access of Above Paths to Below Teams", order=200)
+	@Editable(name="Restrict Write Access to Below Teams", order=200)
 	@TeamChoice(excludes={Team.ANONYMOUS, Team.LOGGEDIN})
 	@Size(min=1)
 	@NotNull

@@ -3,6 +3,7 @@ package com.pmease.commons.wicket.editable.reflection;
 import java.lang.reflect.Method;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -36,9 +37,11 @@ public class ReflectionBeanViewer extends Panel {
 				item.add(nameLabel);
 				OmitName omitName = propertyGetter.getAnnotation(OmitName.class);
 
-				if (omitName != null && omitName.value() != OmitName.Place.EDITOR)
+				if (omitName != null && omitName.value() != OmitName.Place.EDITOR) {
 					nameLabel.setVisible(false);
-				
+					item.add(AttributeAppender.append("class", "name-omitted"));
+				}
+
 				item.add((Component)item.getModelObject().renderForView("value"));
 			}
 

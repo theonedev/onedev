@@ -12,6 +12,7 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 
 import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.editable.TeamChoice;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.web.component.choice.TeamChoiceProvider;
@@ -73,7 +74,10 @@ public class TeamMultiChoiceEditor extends Panel {
 			protected DetachedCriteria load() {
 				DetachedCriteria criteria = DetachedCriteria.forClass(Team.class);
 				AbstractProjectPage page = (AbstractProjectPage) getPage();
-				criteria.add(Restrictions.eq("project", page.getProject()));
+				criteria.add(Restrictions.eq("owner", page.getProject()));
+				for (String each: editContext.getPropertyGetter().getAnnotation(TeamChoice.class).excludes()) {
+					criteria.add(Restrictions.not(Restrictions.eq("name", each)));
+				}
 				return criteria;
 			}
     		

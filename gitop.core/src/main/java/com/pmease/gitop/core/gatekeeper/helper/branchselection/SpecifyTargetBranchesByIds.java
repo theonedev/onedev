@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.annotation.OmitName;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.editable.BranchChoice;
 import com.pmease.gitop.core.gatekeeper.IfSubmitToSpecifiedBranches;
@@ -14,13 +15,14 @@ import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
 
 @SuppressWarnings("serial")
-@Editable(name="Selected Branches", order=100)
+@Editable(name="Specify Branch Names", order=100)
 public class SpecifyTargetBranchesByIds implements TargetBranchSelection {
 
 	private List<Long> branchIds = new ArrayList<>();
 	
-	@Editable(name="Branches", description="Select branches to check.")
+	@Editable(name="Branch Names")
 	@BranchChoice
+	@OmitName
 	@NotNull
 	@Size(min=1)
 	public List<Long> getBranchIds() {

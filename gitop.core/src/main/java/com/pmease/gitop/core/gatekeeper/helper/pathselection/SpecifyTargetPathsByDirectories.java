@@ -7,12 +7,13 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.annotation.OmitName;
 import com.pmease.gitop.core.editable.DirectoryChoice;
 import com.pmease.gitop.core.gatekeeper.IfTouchSpecifiedDirectories;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
 
 @SuppressWarnings("serial")
-@Editable(name="Selected Directories", order=100)
+@Editable(name="Specify Directory Paths", order=100)
 public class SpecifyTargetPathsByDirectories implements TargetPathSelection {
 
 	private List<String> directories = new ArrayList<>();
@@ -21,6 +22,7 @@ public class SpecifyTargetPathsByDirectories implements TargetPathSelection {
 	@DirectoryChoice
 	@NotNull
 	@Size(min=1, message="At least one directory has to be specified.")
+	@OmitName
 	public List<String> getDirectories() {
 		return directories;
 	}

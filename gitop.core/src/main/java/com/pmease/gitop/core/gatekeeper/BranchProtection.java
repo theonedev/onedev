@@ -34,7 +34,7 @@ public class BranchProtection extends CommonGateKeeper {
 	
 	private List<Long> teamIds = new ArrayList<>();
 	
-	@Editable(name="Specify Branches to Be Protected", order=100)
+	@Editable(name="Branches to Be Protected", order=100)
 	@Valid
 	@NotNull
 	public TargetBranchSelection getBranchSelection() {
@@ -45,7 +45,7 @@ public class BranchProtection extends CommonGateKeeper {
 		this.branchSelection = branchSelection;
 	}
 
-	@Editable(name="Restrict Write Access of Above Branches to Below Teams", order=200)
+	@Editable(name="Restrict Write Access to Below Teams", order=200)
 	@TeamChoice(excludes={Team.ANONYMOUS, Team.LOGGEDIN})
 	@Size(min=1)
 	@NotNull
