@@ -1,12 +1,11 @@
 package com.pmease.gitop.core.gatekeeper;
 
-import javax.annotation.Nullable;
-
 import com.google.common.collect.Sets;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
 import com.pmease.gitop.model.Branch;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
@@ -36,21 +35,29 @@ public class IfApprovedByProjectOwner extends ApprovalGateKeeper {
         }
     }
 
-    private CheckResult checkBranch(User user, Branch branch) {
-		if (user.equals(branch.getProject().getOwner()))
+    private CheckResult checkApproval(User user, Project project) {
+		if (user.equals(project.getOwner()))
 			return accepted("Approved by project owner.");
 		else
-			return pending("Not approved by project owner.", new CanVoteBySpecifiedUser(branch.getProject().getOwner()));
+			return pending("Not approved by project owner.", new CanVoteBySpecifiedUser(project.getOwner()));
     }
     
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, @Nullable String file) {
-		return checkBranch(user, branch);
+	protected CheckResult doCheckFile(User user, Branch branch, String file) {
+		return checkApproval(user, branch.getProject());
 	}
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		return checkBranch(user, branch);
+		return checkApproval(user, branch.getProject());
+	}
+
+	@Override
+	protected CheckResult doCheckRef(User user, Project project, String refName) {
+		if (user.equals(project.getOwner()))
+			return accepted("Approved by project owner.");
+		else
+			return rejected("Not approved by project owner.");
 	}
 
 }

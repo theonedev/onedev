@@ -2,7 +2,6 @@ package com.pmease.gitop.core.gatekeeper;
 
 import java.util.Collection;
 
-import javax.annotation.Nullable;
 import javax.validation.constraints.Min;
 
 import com.pmease.commons.editable.annotation.Editable;
@@ -10,6 +9,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.AuthorizationManager;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
 import com.pmease.gitop.model.Branch;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
@@ -22,7 +22,7 @@ import com.pmease.gitop.model.permission.operation.GeneralOperation;
 @Editable(order=50, icon="icon-group", description=
 		"This gate keeper will be passed if the commit is approved by specified number of users with "
 		+ "writing permission.")
-public class IfApprovedByAuthorizedUsers extends ApprovalGateKeeper {
+public class IfApprovedByProjectWriters extends ApprovalGateKeeper {
 
     private int leastApprovals = 1;
 
@@ -68,16 +68,16 @@ public class IfApprovedByAuthorizedUsers extends ApprovalGateKeeper {
         }
 	}
 	
-	private CheckResult checkBranch(User user, Branch branch) {
+	private CheckResult checkApproval(User user, Project project) {
 		AuthorizationManager authorizationManager = Gitop.getInstance(AuthorizationManager.class);
 
-		Collection<User> authorizedUsers = authorizationManager.listAuthorizedUsers(
-				branch.getProject(), GeneralOperation.WRITE);
+		Collection<User> writers = authorizationManager.listAuthorizedUsers(
+				project, GeneralOperation.WRITE);
 
         int approvals = 0;
-        int pendings = authorizedUsers.size();
+        int pendings = writers.size();
         
-        if (authorizedUsers.contains(user)) {
+        if (writers.contains(user)) {
         	approvals ++;
         	pendings --;
         }
@@ -94,13 +94,18 @@ public class IfApprovedByAuthorizedUsers extends ApprovalGateKeeper {
 	}
 	
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, @Nullable String file) {
-		return checkBranch(user, branch);
+	protected CheckResult doCheckFile(User user, Branch branch, String file) {
+		return checkApproval(user, branch.getProject());
 	}
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		return checkBranch(user, branch);
+		return checkApproval(user, branch.getProject());
+	}
+
+	@Override
+	protected CheckResult doCheckRef(User user, Project project, String refName) {
+		return checkApproval(user, project);
 	}
 
 }

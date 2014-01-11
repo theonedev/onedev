@@ -1,5 +1,7 @@
 package com.pmease.gitop.core.manager;
 
+import java.util.Collection;
+
 import javax.annotation.Nullable;
 
 import com.google.inject.ImplementedBy;
@@ -46,4 +48,5 @@ public interface UserManager extends GenericDao<User> {
 	 */
 	@Nullable User getCurrent();
 	
+	void trim(Collection<Long> userIds);
 }

@@ -1,5 +1,7 @@
 package com.pmease.gitop.core.manager;
 
+import java.util.Collection;
+
 import javax.annotation.Nullable;
 
 import com.google.inject.ImplementedBy;
@@ -83,4 +85,6 @@ public interface BranchManager extends GenericDao<Branch> {
      * 			new name of the branch
      */
     public void rename(Branch branch, String newName);
+    
+    public void trim(Collection<Long> branchIds);
 }

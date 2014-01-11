@@ -1,5 +1,7 @@
 package com.pmease.gitop.core.manager;
 
+import java.util.Collection;
+
 import com.google.inject.ImplementedBy;
 import com.pmease.commons.hibernate.dao.GenericDao;
 import com.pmease.gitop.core.manager.impl.DefaultTeamManager;
@@ -27,6 +29,8 @@ public interface TeamManager extends GenericDao<Team> {
 	Team getLoggedIn(User user);
 	
 	Team getOwners(User user);
+
+	void trim(Collection<Long> teamIds);
 
 	GeneralOperation getActualAuthorizedOperation(Team team);
 }

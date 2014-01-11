@@ -1,11 +1,9 @@
 package com.pmease.gitop.core.gatekeeper;
 
-import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 
 import com.google.common.collect.Sets;
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.editable.UserChoice;
 import com.pmease.gitop.core.manager.UserManager;
@@ -58,14 +56,13 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
 
     @Override
     protected GateKeeper trim(Project project) {
-        UserManager userManager = AppLoader.getInstance(UserManager.class);
-        if (userManager.get(getUserId()) == null)
+        if (Gitop.getInstance(UserManager.class).get(getUserId()) == null)
             return null;
         else
             return this;
     }
 
-    private CheckResult checkBranch(User user, Branch branch) {
+    private CheckResult checkApproval(User user) {
 		User approver = Gitop.getInstance(UserManager.class).load(userId);
         if (approver.getId().equals(user.getId())) {
         	return accepted("Approved by user '" + approver.getName() + "'.");
@@ -76,13 +73,18 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
     }
     
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, @Nullable String file) {
-		return checkBranch(user, branch);
+	protected CheckResult doCheckFile(User user, Branch branch, String file) {
+		return checkApproval(user);
 	}
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		return checkBranch(user, branch);
+		return checkApproval(user);
+	}
+
+	@Override
+	protected CheckResult doCheckRef(User user, Project project, String refName) {
+		return checkApproval(user);
 	}
 
 }

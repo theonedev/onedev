@@ -96,4 +96,15 @@ public abstract class CheckResult implements Serializable {
     public boolean isPendingAndBlock() {
     	return this instanceof PendingAndBlock;
     }
+    
+    /**
+     * Whether or not this check result should be ignored.
+     * 
+     * @return
+     * 			<tt>true</tt> if this check result should be ignored
+     */
+    public boolean isIgnored() {
+    	return this instanceof Ignored;
+    }
+    
 }

@@ -1,5 +1,8 @@
 package com.pmease.gitop.core.manager.impl;
 
+import java.util.Collection;
+import java.util.Iterator;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -12,10 +15,14 @@ import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.MembershipManager;
+import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.manager.UserManager;
+import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Membership;
+import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.operation.GeneralOperation;
@@ -26,15 +33,23 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
     private volatile Long rootId;
 
     private final TeamManager teamManager;
+    
     private final MembershipManager membershipManager;
+    
+    private final PullRequestManager pullRequestManager;
+    
+    private final BranchManager branchManager;
     
     @Inject
     public DefaultUserManager(GeneralDao generalDao, TeamManager teamManager, 
-    		MembershipManager membershipManager) {
+    		MembershipManager membershipManager, PullRequestManager pullRequestManager, 
+    		BranchManager branchManager) {
         super(generalDao);
 
         this.teamManager = teamManager;
         this.membershipManager = membershipManager;
+        this.pullRequestManager = pullRequestManager;
+        this.branchManager = branchManager;
     }
 
     @Transactional
@@ -84,7 +99,23 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
         return root;
     }
 
-    @Sessional
+    @Transactional
+    @Override
+	public void delete(User user) {
+    	for (PullRequest request: user.getRequests()) {
+    		request.setSubmitter(null);
+    		pullRequestManager.save(request);
+    	}
+    	
+    	for (Branch branch: user.getBranches()) {
+    		branch.setCreator(null);
+    		branchManager.save(branch);
+    	}
+    	
+		super.delete(user);
+	}
+
+	@Sessional
     @Override
     public User findByName(String userName) {
         return find(new Criterion[] {Restrictions.eq("name", userName)});
@@ -103,6 +134,14 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 			return load(userId);
 		} else {
 			return null;
+		}
+	}
+
+	@Override
+	public void trim(Collection<Long> userIds) {
+		for (Iterator<Long> it = userIds.iterator(); it.hasNext();) {
+			if (get(it.next()) == null)
+				it.remove();
 		}
 	}
 

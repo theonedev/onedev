@@ -1,10 +1,9 @@
 package com.pmease.gitop.core.gatekeeper;
 
-import javax.annotation.Nullable;
-
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Membership;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
@@ -28,12 +27,17 @@ public class IfNotRejectedBySpecifiedTeam extends TeamAwareGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, @Nullable String file) {
+	protected CheckResult doCheckFile(User user, Branch branch, String file) {
 		return accepted("Not rejected by anyone from team '" + getTeam().getName() + "'.");
 	}
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
+		return accepted("Not rejected by anyone from team '" + getTeam().getName() + "'.");
+	}
+
+	@Override
+	protected CheckResult doCheckRef(User user, Project project, String refName) {
 		return accepted("Not rejected by anyone from team '" + getTeam().getName() + "'.");
 	}
 

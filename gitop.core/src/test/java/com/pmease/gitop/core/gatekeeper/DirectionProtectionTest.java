@@ -13,7 +13,8 @@ import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.gitop.core.gatekeeper.DirectoryProtection.Entry;
+import com.pmease.gitop.core.gatekeeper.helper.branchselection.SpecifyTargetBranchesByIds;
+import com.pmease.gitop.core.gatekeeper.helper.pathselection.SpecifyTargetPathsByDirectories;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Branch;
@@ -60,11 +61,16 @@ public class DirectionProtectionTest extends AbstractGitTest {
 
 	@Test
 	public void testCheckFile() {
-		DirectoryProtection directoryProtection = new DirectoryProtection();
-		directoryProtection.setBranchIds(Lists.newArrayList(1L));
-		Entry entry = directoryProtection.getEntries().get(0);
-		entry.setDirectory("src");
-		entry.setTeamId(1L);
+		DirectoryAndFileProtection pathProtection = new DirectoryAndFileProtection();
+		SpecifyTargetBranchesByIds branchSelection = new SpecifyTargetBranchesByIds();
+		branchSelection.setBranchIds(Lists.newArrayList(1L));
+		pathProtection.setBranchSelection(branchSelection);
+		
+		SpecifyTargetPathsByDirectories pathSelection = new SpecifyTargetPathsByDirectories();
+		pathSelection.setDirectories(Lists.newArrayList("src"));
+		pathProtection.setPathSelection(pathSelection);
+		
+		pathProtection.setTeamIds(Lists.newArrayList(1L));
 		
 		Team team = new Team();
 		team.setId(1L);
@@ -83,10 +89,10 @@ public class DirectionProtectionTest extends AbstractGitTest {
 		branch1.setId(1L);
 		Branch branch2 = new Branch();
 		branch2.setId(2L);
-		assertTrue(directoryProtection.checkFile(user1, branch1, "src/test.java").isAccepted());
-		assertTrue(directoryProtection.checkFile(user1, branch1, "doc/test.pdf").isAccepted());
-		assertTrue(directoryProtection.checkFile(user2, branch1, "src/test.java").isPending());
-		assertTrue(directoryProtection.checkFile(user2, branch2, "src/test.java").isAccepted());
+		assertTrue(pathProtection.checkFile(user1, branch1, "src/test.java").isAccepted());
+		assertTrue(pathProtection.checkFile(user1, branch1, "doc/test.pdf").isAccepted());
+		assertTrue(pathProtection.checkFile(user2, branch1, "src/test.java").isPending());
+		assertTrue(pathProtection.checkFile(user2, branch2, "src/test.java").isAccepted());
 	}
 
 	@SuppressWarnings("serial")
@@ -95,12 +101,17 @@ public class DirectionProtectionTest extends AbstractGitTest {
 	    File tempDir = FileUtils.createTempDir();
 		
 		try {
-			DirectoryProtection directoryProtection = new DirectoryProtection();
-			directoryProtection.setBranchIds(Lists.newArrayList(1L));
-			Entry entry = directoryProtection.getEntries().get(0);
-			entry.setDirectory("src");
-			entry.setTeamId(1L);
+			DirectoryAndFileProtection pathProtection = new DirectoryAndFileProtection();
+			SpecifyTargetBranchesByIds branchSelection = new SpecifyTargetBranchesByIds();
+			branchSelection.setBranchIds(Lists.newArrayList(1L));
+			pathProtection.setBranchSelection(branchSelection);
 			
+			SpecifyTargetPathsByDirectories pathSelection = new SpecifyTargetPathsByDirectories();
+			pathSelection.setDirectories(Lists.newArrayList("src"));
+			pathProtection.setPathSelection(pathSelection);
+			
+			pathProtection.setTeamIds(Lists.newArrayList(1L));
+
 			final Git git = new Git(tempDir);
 			git.init(false);
 			
@@ -132,8 +143,8 @@ public class DirectionProtectionTest extends AbstractGitTest {
 			git.add("src/file2");
 			git.commit("add src/file2", false, false);
 			
-			assertTrue(directoryProtection.checkCommit(user1, master, git.parseRevision("branch1", true)).isAccepted());
-			assertTrue(directoryProtection.checkCommit(user2, master, git.parseRevision("branch1", true)).isPending());
+			assertTrue(pathProtection.checkCommit(user1, master, git.parseRevision("branch1", true)).isAccepted());
+			assertTrue(pathProtection.checkCommit(user2, master, git.parseRevision("branch1", true)).isPending());
 			
 			git.checkout("master", "branch2");
 
@@ -141,8 +152,8 @@ public class DirectionProtectionTest extends AbstractGitTest {
 			git.add("docs/file2");
 			git.commit("add docs/file2", false, false);
 			
-			assertTrue(directoryProtection.checkCommit(user1, master, git.parseRevision("branch2", true)).isAccepted());
-			assertTrue(directoryProtection.checkCommit(user2, master, git.parseRevision("branch2", true)).isAccepted());
+			assertTrue(pathProtection.checkCommit(user1, master, git.parseRevision("branch2", true)).isAccepted());
+			assertTrue(pathProtection.checkCommit(user2, master, git.parseRevision("branch2", true)).isAccepted());
 		} finally {
 			FileUtils.deleteDir(tempDir);;
 		}

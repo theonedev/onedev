@@ -2,13 +2,12 @@ package com.pmease.gitop.core.gatekeeper;
 
 import java.util.Collection;
 
-import javax.annotation.Nullable;
-
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.gitop.model.Branch;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.User;
@@ -18,7 +17,7 @@ import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 @SuppressWarnings("serial")
 @Editable(order=100, icon="icon-file-text", description=
 		"This gate keeper will be passed if any commit file maches specified file patterns.")
-public class IfTouchesSpecifiedFilePatterns extends FileGateKeeper {
+public class IfTouchSpecifiedFilePatterns extends FileGateKeeper {
 
 	private String filePatterns;
 	
@@ -59,15 +58,11 @@ public class IfTouchesSpecifiedFilePatterns extends FileGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, @Nullable String file) {
-		if (file != null) {
-			if (WildcardUtils.matchPath(filePatterns, file)) 
-				return accepted("Touched files match patterns '" + filePatterns + "'.");
-			else
-				return rejected("No touched files match patterns '" + filePatterns + "'.");
-		} else {
-			return accepted("Touched specified files.");
-		}
+	protected CheckResult doCheckFile(User user, Branch branch, String file) {
+		if (WildcardUtils.matchPath(filePatterns, file)) 
+			return accepted("Touched files match patterns '" + filePatterns + "'.");
+		else
+			return rejected("No touched files match patterns '" + filePatterns + "'.");
 	}
 
 	@Override
@@ -78,6 +73,11 @@ public class IfTouchesSpecifiedFilePatterns extends FileGateKeeper {
 		}
 		
 		return rejected("No touched files match patterns '" + filePatterns + "'.");
+	}
+
+	@Override
+	protected CheckResult doCheckRef(User user, Project project, String refName) {
+		return ignored();
 	}
 
 }

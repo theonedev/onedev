@@ -3,6 +3,7 @@ package com.pmease.gitop.core.gatekeeper;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -10,8 +11,9 @@ import javax.validation.constraints.Size;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.editable.TeamChoice;
-import com.pmease.gitop.core.gatekeeper.helper.branchselection.SpecifyTargetBranchesByIds;
 import com.pmease.gitop.core.gatekeeper.helper.branchselection.TargetBranchSelection;
+import com.pmease.gitop.core.gatekeeper.helper.pathselection.SpecifyTargetPathsByDirectories;
+import com.pmease.gitop.core.gatekeeper.helper.pathselection.TargetPathSelection;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Project;
@@ -25,18 +27,21 @@ import com.pmease.gitop.model.gatekeeper.OrGateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 
 @SuppressWarnings("serial")
-@Editable(order=100, icon="icon-lock", description="By default, users with write permission of "
-		+ "the project can push code to all branches. Use this gate keeper to restrict write "
-		+ "access of specified branches to specified teams.")
-public class BranchProtection extends CommonGateKeeper {
+@Editable(order=200, icon="icon-lock", description="By default, users with write permission of "
+		+ "the project can write to all directories/files. Use this gate keeper to restrict write "
+		+ "access of certain directories/files of specified branches to certain teams. Note that if "
+		+ "branch is not specified, the restriction will apply to all branches.")
+public class DirectoryAndFileProtection extends CommonGateKeeper {
 	
-	private TargetBranchSelection branchSelection = new SpecifyTargetBranchesByIds();
+	private TargetBranchSelection branchSelection;
+	
+	private TargetPathSelection pathSelection = new SpecifyTargetPathsByDirectories();
 	
 	private List<Long> teamIds = new ArrayList<>();
-	
-	@Editable(name="Specify Branches to Be Protected", order=100)
+
+	@Editable(name="Optionally Specify Applicable Branches", order=100)
 	@Valid
-	@NotNull
+	@Nullable
 	public TargetBranchSelection getBranchSelection() {
 		return branchSelection;
 	}
@@ -44,8 +49,19 @@ public class BranchProtection extends CommonGateKeeper {
 	public void setBranchSelection(TargetBranchSelection branchSelection) {
 		this.branchSelection = branchSelection;
 	}
+	
+	@Editable(name="Specify Directory or File to Protect")
+	@Valid
+	@NotNull
+	public TargetPathSelection getPathSelection() {
+		return pathSelection;
+	}
 
-	@Editable(name="Restrict Write Access of Above Branches to Below Teams", order=200)
+	public void setPathSelection(TargetPathSelection pathSelection) {
+		this.pathSelection = pathSelection;
+	}
+
+	@Editable(name="Restrict Write Access of Above Paths to Below Teams", order=200)
 	@TeamChoice(excludes={Team.ANONYMOUS, Team.LOGGEDIN})
 	@Size(min=1)
 	@NotNull
@@ -71,17 +87,27 @@ public class BranchProtection extends CommonGateKeeper {
 
 	private GateKeeper getGateKeeper() {
 		IfThenGateKeeper ifThenGate = new IfThenGateKeeper();
-		ifThenGate.setIfGate(branchSelection.getGateKeeper());
-		
-		OrGateKeeper orGateKeeper = new OrGateKeeper();
+		ifThenGate.setIfGate(pathSelection.getGateKeeper());
+		ifThenGate.setThenGate(getApprovalGate());
+
+		if (branchSelection != null) {
+			IfThenGateKeeper resultGate = new IfThenGateKeeper();
+			resultGate.setIfGate(branchSelection.getGateKeeper());
+			resultGate.setThenGate(ifThenGate);
+			return resultGate;
+		} else {
+			return ifThenGate;
+		}
+	}
+	
+	private GateKeeper getApprovalGate() {
+		OrGateKeeper approvalGate = new OrGateKeeper();
 		for (Long teamId: teamIds) {
 			IfApprovedBySpecifiedTeam ifApprovedBySpecifiedTeam = new IfApprovedBySpecifiedTeam();
 			ifApprovedBySpecifiedTeam.setTeamId(teamId);
-			orGateKeeper.getGateKeepers().add(ifApprovedBySpecifiedTeam);
+			approvalGate.getGateKeepers().add(ifApprovedBySpecifiedTeam);
 		}
-		ifThenGate.setThenGate(orGateKeeper);
-		
-		return ifThenGate;
+		return approvalGate;
 	}
 
 	@Override
@@ -103,5 +129,4 @@ public class BranchProtection extends CommonGateKeeper {
 	protected CheckResult doCheckRef(User user, Project project, String refName) {
 		return getGateKeeper().checkRef(user, project, refName);
 	}
-
 }

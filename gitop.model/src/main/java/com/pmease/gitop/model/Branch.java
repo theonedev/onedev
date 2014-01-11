@@ -3,7 +3,7 @@ package com.pmease.gitop.model;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.persistence.CascadeType;
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -30,22 +30,13 @@ public class Branch extends AbstractEntity {
 	@Column(nullable=false)
 	private String name;
 	
-	@OneToMany(mappedBy="target", cascade=CascadeType.REMOVE)
-	private Collection<AutoPull> autoPullSources = new ArrayList<AutoPull>();
-
-	@OneToMany(mappedBy="source", cascade=CascadeType.REMOVE)
-	private Collection<AutoPull> autoPullTargets = new ArrayList<AutoPull>();
-
-	@OneToMany(mappedBy="target", cascade=CascadeType.REMOVE)
-	private Collection<AutoPush> autoPushSources = new ArrayList<AutoPush>();
-
-	@OneToMany(mappedBy="source", cascade=CascadeType.REMOVE)
-	private Collection<AutoPush> autoPushTargets = new ArrayList<AutoPush>();
-
-    @OneToMany(mappedBy="target", cascade=CascadeType.REMOVE)
+	@ManyToOne
+	private User creator;
+	
+    @OneToMany(mappedBy="target")
     private Collection<PullRequest> ingoingRequests = new ArrayList<PullRequest>();
 
-    @OneToMany(mappedBy="source", cascade=CascadeType.REMOVE)
+    @OneToMany(mappedBy="source")
     private Collection<PullRequest> outgoingRequests = new ArrayList<PullRequest>();
     
     private transient String headCommit;
@@ -66,36 +57,19 @@ public class Branch extends AbstractEntity {
 		this.name = name;
 	}
 	
-	public Collection<AutoPull> getAutoPullSources() {
-		return autoPullSources;
+	/**
+	 * Get creator of the branch. 
+	 * 
+	 * @return
+	 * 			<tt>null</tt> if creator is unknown
+	 */
+	@Nullable
+	public User getCreator() {
+		return creator;
 	}
 
-	public void setAutoPullSources(Collection<AutoPull> autoPullSources) {
-		this.autoPullSources = autoPullSources;
-	}
-
-	public Collection<AutoPull> getAutoPullTargets() {
-		return autoPullTargets;
-	}
-
-	public void setAutoPullTargets(Collection<AutoPull> autoPullTargets) {
-		this.autoPullTargets = autoPullTargets;
-	}
-
-	public Collection<AutoPush> getAutoPushSources() {
-		return autoPushSources;
-	}
-
-	public void setAutoPushSources(Collection<AutoPush> autoPushSources) {
-		this.autoPushSources = autoPushSources;
-	}
-
-	public Collection<AutoPush> getAutoPushTargets() {
-		return autoPushTargets;
-	}
-
-	public void setAutoPushTargets(Collection<AutoPush> autoPushTargets) {
-		this.autoPushTargets = autoPushTargets;
+	public void setCreator(@Nullable User creator) {
+		this.creator = creator;
 	}
 
 	public Collection<PullRequest> getIngoingRequests() {

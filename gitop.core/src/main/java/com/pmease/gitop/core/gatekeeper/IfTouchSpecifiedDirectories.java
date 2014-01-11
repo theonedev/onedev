@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -12,6 +11,7 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.gitop.core.editable.DirectoryChoice;
 import com.pmease.gitop.model.Branch;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.User;
@@ -21,7 +21,7 @@ import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 @SuppressWarnings("serial")
 @Editable(order=90, icon="icon-folder-submodule", description=
 		"This gate keeper will be passed if any commit files are under specified directories.")
-public class IfTouchesSpecifiedDirectories extends FileGateKeeper {
+public class IfTouchSpecifiedDirectories extends FileGateKeeper {
 
 	private List<String> directories = new ArrayList<>();
 	
@@ -58,16 +58,12 @@ public class IfTouchesSpecifiedDirectories extends FileGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, @Nullable String file) {
-		if (file != null) {
-			for (String each: directories) {
-				if (WildcardUtils.matchPath(each + "/**", file)) 
-					return accepted("Touched directory '" + each + "'.");
-			}
-			return rejected("Not touched directories '" + getDirectories() + "'.");
-		} else {
-			return accepted("Touched specified directories.");
+	protected CheckResult doCheckFile(User user, Branch branch, String file) {
+		for (String each: directories) {
+			if (WildcardUtils.matchPath(each + "/**", file)) 
+				return accepted("Touched directory '" + each + "'.");
 		}
+		return rejected("Not touched directories '" + getDirectories() + "'.");
 	}
 
 	@Override
@@ -80,6 +76,11 @@ public class IfTouchesSpecifiedDirectories extends FileGateKeeper {
 		}
 
 		return rejected("Not touched directories '" + getDirectories() + "'.");
+	}
+
+	@Override
+	protected CheckResult doCheckRef(User user, Project project, String refName) {
+		return ignored();
 	}
 
 }

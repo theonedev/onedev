@@ -1,9 +1,8 @@
 package com.pmease.gitop.model.gatekeeper;
 
-import javax.annotation.Nullable;
-
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.model.Branch;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
@@ -31,7 +30,7 @@ public abstract class CompositeGateKeeper extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(final User user, final Branch branch, final @Nullable String file) {
+	protected CheckResult doCheckFile(final User user, final Branch branch, final String file) {
 		return aggregate(new Checker() {
 
 			@Override
@@ -49,6 +48,18 @@ public abstract class CompositeGateKeeper extends AbstractGateKeeper {
 			@Override
 			public CheckResult check(GateKeeper gateKeeper) {
 				return gateKeeper.checkCommit(user, branch, commit);
+			}
+			
+		});
+	}
+
+	@Override
+	protected CheckResult doCheckRef(final User user, final Project project, final String refName) {
+		return aggregate(new Checker() {
+
+			@Override
+			public CheckResult check(GateKeeper gateKeeper) {
+				return gateKeeper.checkRef(user, project, refName);
 			}
 			
 		});

@@ -10,9 +10,10 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.BuildResultManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.BuildResult;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.model.gatekeeper.CommonGateKeeper;
+import com.pmease.gitop.model.gatekeeper.AbstractGateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.NoneCanVote;
 
@@ -21,7 +22,7 @@ import com.pmease.gitop.model.gatekeeper.voteeligibility.NoneCanVote;
 				+ "by specified number of builds. To make this working, your CI system has to "
 				+ "be configured to build against Gitop pull requests.")
 @SuppressWarnings("serial")
-public class IfVerifiedByBuilds extends CommonGateKeeper {
+public class IfVerifiedByBuilds extends AbstractGateKeeper {
 	
 	private int buildCount = 1;
 	
@@ -29,7 +30,9 @@ public class IfVerifiedByBuilds extends CommonGateKeeper {
 	
 	private boolean blockMode = true;
 	
-	@Editable(order=100, description="Specify number of passed builds required by this gate keeper.")
+	@Editable(order=100, description="This specified number of builds has to be reported successful "
+			+ "for this gate keeper to be passed. Normally this number represents number of build "
+			+ "configurations setting up to verify the branch.")
 	@Min(1)
 	public int getBuildCount() {
 		return buildCount;
@@ -99,14 +102,10 @@ public class IfVerifiedByBuilds extends CommonGateKeeper {
 
 	@Override
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		if (file != null) {
-			if (blockMode)
-				return pendingAndBlock("Not verified by build.", new NoneCanVote());
-			else
-				return pending("Not verified by build.", new NoneCanVote());
-		} else {
-			return accepted("Build is not necessary.");
-		}
+		if (blockMode)
+			return pendingAndBlock("Not verified by build.", new NoneCanVote());
+		else
+			return pending("Not verified by build.", new NoneCanVote());
 	}
 
 	@Override
@@ -135,6 +134,11 @@ public class IfVerifiedByBuilds extends CommonGateKeeper {
 		} else {
 			return accepted("Builds passed");
 		}
+	}
+
+	@Override
+	protected CheckResult doCheckRef(User user, Project project, String refName) {
+		return ignored();
 	}
 
 }
