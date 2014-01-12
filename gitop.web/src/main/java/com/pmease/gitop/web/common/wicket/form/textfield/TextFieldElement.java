@@ -13,7 +13,7 @@ import org.apache.wicket.validation.IValidator;
 
 import com.pmease.gitop.web.common.wicket.form.AbstractInputElement;
 
-public class TextFieldElement<T> extends AbstractInputElement<T> {
+public class TextFieldElement<T> extends AbstractInputElement<T, TextFieldElement<T>> {
 
   private static final long serialVersionUID = 1L;
 
@@ -87,5 +87,10 @@ public class TextFieldElement<T> extends AbstractInputElement<T> {
   @Override
   protected IFeedbackMessageFilter getFeedbackMessageFilter() {
     return new ComponentFeedbackMessageFilter(getFormComponent());
+  }
+
+  @Override
+  protected TextFieldElement<T> self() {
+	return this;
   }
 }

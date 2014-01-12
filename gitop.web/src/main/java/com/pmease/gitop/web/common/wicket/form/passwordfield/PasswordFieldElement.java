@@ -12,7 +12,7 @@ import org.apache.wicket.validation.IValidator;
 
 import com.pmease.gitop.web.common.wicket.form.AbstractInputElement;
 
-public class PasswordFieldElement extends AbstractInputElement<String> {
+public class PasswordFieldElement extends AbstractInputElement<String, PasswordFieldElement> {
 
   private static final long serialVersionUID = 1L;
 
@@ -84,5 +84,8 @@ public class PasswordFieldElement extends AbstractInputElement<String> {
     return this;
   }
 
-
+  @Override
+  protected PasswordFieldElement self() {
+	return this;
+  }
 }

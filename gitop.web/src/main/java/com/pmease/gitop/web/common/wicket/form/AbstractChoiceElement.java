@@ -7,7 +7,8 @@ import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.util.WildcardListModel;
 
-public abstract class AbstractChoiceElement<T> extends AbstractInputElement<T> {
+public abstract class AbstractChoiceElement<T, B extends AbstractChoiceElement<T, B>> 
+	extends AbstractInputElement<T, B> {
 
   private static final long serialVersionUID = 1L;
 

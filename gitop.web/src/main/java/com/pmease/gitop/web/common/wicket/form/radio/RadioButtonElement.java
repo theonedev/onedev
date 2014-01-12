@@ -12,7 +12,7 @@ import org.apache.wicket.validation.IValidator;
 
 import com.pmease.gitop.web.common.wicket.form.AbstractInputElement;
 
-public class RadioButtonElement<T> extends AbstractInputElement<T> {
+public class RadioButtonElement<T> extends AbstractInputElement<T, RadioButtonElement<T>> {
 
   private static final long serialVersionUID = 1L;
 
@@ -51,5 +51,10 @@ public class RadioButtonElement<T> extends AbstractInputElement<T> {
 
   public Panel getContainer() {
     return radioContainer;
+  }
+
+  @Override
+  protected RadioButtonElement<T> self() {
+	return this;
   }
 }

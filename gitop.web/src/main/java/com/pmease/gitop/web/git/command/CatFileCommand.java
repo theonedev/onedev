@@ -70,7 +70,7 @@ public class CatFileCommand extends GitCommand<String> {
 				ByteArrayOutputStream out = (ByteArrayOutputStream) getOutputStream();
 				InputStream in = getInputStream()) {
 			
-			cmd.execute(out, errorLogger);
+			cmd.execute(out, errorLogger).checkReturnCode();
 			
 			byte[] bytes = out.toByteArray();
 			if (showType == ShowType.PRETTY) {

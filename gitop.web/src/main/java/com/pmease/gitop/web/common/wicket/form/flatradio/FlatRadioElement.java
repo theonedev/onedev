@@ -49,6 +49,11 @@ public class FlatRadioElement<T> extends RadioButtonElement<T> {
 	}
 
 	@Override
+	protected FlatRadioElement<T> self() {
+		return this;
+	}
+	
+	@Override
 	public void onDetach() {
 		super.onDetach();
 		

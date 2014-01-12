@@ -14,7 +14,7 @@ import org.apache.wicket.validation.IValidator;
 
 import com.pmease.gitop.web.common.wicket.form.AbstractInputElement;
 
-public class TextAreaElement<T> extends AbstractInputElement<T> {
+public class TextAreaElement<T> extends AbstractInputElement<T, TextAreaElement<T>> {
 
   private static final long serialVersionUID = 1L;
 
@@ -93,7 +93,7 @@ public class TextAreaElement<T> extends AbstractInputElement<T> {
 
   @Override
   public TextAreaElement<T> add(IValidator<T> validator) {
-    return (TextAreaElement<T>) super.add(validator);
+    return super.add(validator);
   }
 
   @Override
@@ -108,5 +108,10 @@ public class TextAreaElement<T> extends AbstractInputElement<T> {
   public TextAreaElement<T> setRows(int rows) {
     this.rows = rows;
     return this;
+  }
+
+  @Override
+  protected TextAreaElement<T> self() {
+	return this;
   }
 }

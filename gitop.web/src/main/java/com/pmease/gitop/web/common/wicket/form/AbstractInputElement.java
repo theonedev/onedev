@@ -15,7 +15,8 @@ import org.apache.wicket.validation.IValidator;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
-public abstract class AbstractInputElement<T> extends ValidatableElement<T> {
+public abstract class AbstractInputElement<T, B extends AbstractInputElement<T, B>> 
+	extends ValidatableElement<T> {
 
   private static final long serialVersionUID = 1L;
 
@@ -33,6 +34,8 @@ public abstract class AbstractInputElement<T> extends ValidatableElement<T> {
 
   abstract protected IFeedbackMessageFilter getFeedbackMessageFilter();
 
+  abstract protected B self();
+  
   public AbstractInputElement(String id, String label) {
     super(id);
     this.label = label;
@@ -59,14 +62,14 @@ public abstract class AbstractInputElement<T> extends ValidatableElement<T> {
     return getFormComponent().hasErrorMessage();
   }
 
-  public AbstractInputElement<T> add(IValidator<T> validator) {
+  public B add(IValidator<T> validator) {
     validators.add(validator);
-    return this;
+    return self();
   }
 
-  public AbstractInputElement<T> addFormComponentBehavior(Behavior behavior) {
+  public B addFormComponentBehavior(Behavior behavior) {
 	  behaviors.add(behavior);
-	  return this;
+	  return self();
   }
   
   @SuppressWarnings({"serial"})
@@ -111,9 +114,9 @@ public abstract class AbstractInputElement<T> extends ValidatableElement<T> {
     return extraCssClass;
   }
 
-  public AbstractInputElement<T> setExtraCssClass(String extraCssClass) {
+  public B setExtraCssClass(String extraCssClass) {
     this.extraCssClass = extraCssClass;
-    return this;
+    return self();
   }
 
   protected Component createFieldLabel(String id) {
@@ -142,27 +145,27 @@ public abstract class AbstractInputElement<T> extends ValidatableElement<T> {
     return required;
   }
 
-  public AbstractInputElement<T> setRequired(boolean required) {
+  public B setRequired(boolean required) {
     this.required = required;
-    return this;
+    return self();
   }
 
   public boolean isReadOnly() {
     return readOnly;
   }
 
-  public AbstractInputElement<T> setReadOnly(boolean readOnly) {
+  public B setReadOnly(boolean readOnly) {
     this.readOnly = readOnly;
-    return this;
+    return self();
   }
 
   public String getHelp() {
     return help;
   }
 
-  public AbstractInputElement<T> setHelp(String help) {
+  public B setHelp(String help) {
     this.help = help;
-    return this;
+    return self();
   }
 
   public String getLabel() {

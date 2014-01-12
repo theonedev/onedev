@@ -12,7 +12,7 @@ import org.apache.wicket.validation.IValidator;
 import com.google.common.base.Strings;
 import com.pmease.gitop.web.common.wicket.form.AbstractInputElement;
 
-public class CheckBoxElement extends AbstractInputElement<Boolean> {
+public class CheckBoxElement extends AbstractInputElement<Boolean, CheckBoxElement> {
 
   private static final long serialVersionUID = 1L;
 
@@ -73,5 +73,10 @@ public class CheckBoxElement extends AbstractInputElement<Boolean> {
   @Override
   protected IFeedbackMessageFilter getFeedbackMessageFilter() {
     return new ComponentFeedbackMessageFilter(checkbox);
+  }
+
+  @Override
+  protected CheckBoxElement self() {
+	return this;
   }
 }

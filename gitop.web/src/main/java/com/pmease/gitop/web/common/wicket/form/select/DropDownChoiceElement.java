@@ -14,7 +14,7 @@ import org.apache.wicket.validation.IValidator;
 
 import com.pmease.gitop.web.common.wicket.form.AbstractChoiceElement;
 
-public class DropDownChoiceElement<T> extends AbstractChoiceElement<T> {
+public class DropDownChoiceElement<T> extends AbstractChoiceElement<T, DropDownChoiceElement<T>> {
 
     private static final long serialVersionUID = 1L;
 
@@ -90,4 +90,9 @@ public class DropDownChoiceElement<T> extends AbstractChoiceElement<T> {
     public FormComponent<T> getFormComponent() {
         return dropdownChoice;
     }
+
+	@Override
+	protected DropDownChoiceElement<T> self() {
+		return this;
+	}
 }

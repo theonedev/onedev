@@ -166,13 +166,13 @@ public abstract class AbstractDiffCommand<T, S extends AbstractDiffCommand<T, S>
 		addArgWhitespaceType(cmd);
 		addArgRenameType(cmd);
 		addArgDiffAlgorithm(cmd);
-		
+		addArgFormat(cmd);
 		addArgPaths(cmd);
 		
 		return cmd;
 	}
 	
-	protected void applyFormat(Commandline cmd) {
+	protected void addArgFormat(Commandline cmd) {
 		if (!Strings.isNullOrEmpty(format)) {
 			cmd.addArgs("--format=", format);
 		}
