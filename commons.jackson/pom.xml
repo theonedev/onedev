@@ -35,8 +35,18 @@
         <dependency> 
             <groupId>io.dropwizard</groupId>  
             <artifactId>dropwizard-jackson</artifactId>  
-            <version>${dropwizardVersion}</version> 
-        </dependency> 
+            <version>${dropwizardVersion}</version>
+            <exclusions>
+            	<exclusion>
+            		<groupId>com.google.guava</groupId>
+            		<artifactId>guava</artifactId>
+            	</exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+        	<groupId>com.google.guava</groupId>
+        	<artifactId>guava</artifactId>
+        </dependency>
     </dependencies>  
     <repositories> 
         <repository> 

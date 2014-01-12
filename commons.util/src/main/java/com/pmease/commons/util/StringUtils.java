@@ -9,6 +9,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import javax.annotation.Nullable;
+
+import com.google.common.base.CaseFormat;
+
 public class StringUtils extends org.apache.commons.lang3.StringUtils {
 
     /**
@@ -175,8 +179,11 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
      * @param input
      * @return lower case string with underscore
      */
-    public static String camelCaseToLowerCaseWithUnderscore(String input) {
-    	return camelCaseToLowerCaseWithConnector(input, '_');
+    public static @Nullable String camelCaseToLowerCaseWithUnderscore(@Nullable String input) {
+    	if (input == null)
+    		return input;
+    	
+    	return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, input);
     }
     
     /**
@@ -187,11 +194,14 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
      * @param input
      * @return lower case string with hyphen
      */
-    public static String camelCaseToLowerCaseWithHyphen(String input) {
-    	return camelCaseToLowerCaseWithConnector(input, '-');
+    public static @Nullable String camelCaseToLowerCaseWithHyphen(@Nullable String input) {
+    	if (input == null)
+    		return input;
+    	
+    	return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_HYPHEN, input);
     }
     
-    private static String camelCaseToLowerCaseWithConnector(String input, char connector) {
+    public static String camelCaseToLowerCaseWithConnector(String input, char connector) {
     	if (input == null) return input; // garbage in, garbage out
         int length = input.length();
         StringBuilder result = new StringBuilder(length * 2);
