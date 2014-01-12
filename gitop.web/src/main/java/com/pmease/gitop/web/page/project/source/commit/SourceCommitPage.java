@@ -24,6 +24,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.Commit;
 import com.pmease.gitop.model.Project;
+import com.pmease.gitop.web.common.wicket.bootstrap.Alert;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.component.avatar.GitPersonAvatar;
 import com.pmease.gitop.web.component.label.AgeLabel;
@@ -36,6 +37,7 @@ import com.pmease.gitop.web.page.project.ProjectCategoryPage;
 import com.pmease.gitop.web.page.project.api.GitPerson;
 import com.pmease.gitop.web.page.project.source.commit.patch.FileHeader;
 import com.pmease.gitop.web.page.project.source.commit.patch.Patch;
+import com.pmease.gitop.web.page.project.source.commit.renderer.text.BlobDiffPanel;
 
 @SuppressWarnings("serial")
 public class SourceCommitPage extends ProjectCategoryPage {
@@ -49,6 +51,8 @@ public class SourceCommitPage extends ProjectCategoryPage {
 	private final IModel<Patch> patchModel;
 	
 	private static final int DEFAULT_CONTEXT_LINES = 3;
+	
+	static final int MAX_RENDERABLE_BLOBS = 500;
 	
 	public SourceCommitPage(PageParameters params) {
 		super(params);
@@ -79,6 +83,8 @@ public class SourceCommitPage extends ProjectCategoryPage {
 				
 				Patch patch = new DiffTreeCommand(getProject().code().repoDir())
 					.revision(rev)
+					.recurse(true)
+					.root(true)
 					.contextLines(DEFAULT_CONTEXT_LINES)
 					.findRenames(true)
 					.call();
@@ -156,6 +162,22 @@ public class SourceCommitPage extends ProjectCategoryPage {
 			}
 		};
 		
+		add(new Label("parentslabel", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				int parents = getCommit().getParentHashes().size();
+				if (parents == 0) {
+					return "no parent";
+				} else if (parents == 1) {
+					return "1 parent";
+				} else {
+					return parents + " parents";
+				}
+			}
+			
+		}));
+		
 		ListView<String> parentsView = new ListView<String>("parents", parentsModel) {
 			@Override
 			protected void populateItem(ListItem<String> item) {
@@ -181,7 +203,7 @@ public class SourceCommitPage extends ProjectCategoryPage {
 			@Override
 			protected List<? extends FileHeader> load() {
 				List<? extends FileHeader> total = getDiffPatch().getFiles();
-				if (total.size() > 300) {
+				if (total.size() > MAX_RENDERABLE_BLOBS) {
 					return Lists.newArrayList(total.subList(0, 300));
 				} else {
 					return total;
@@ -199,6 +221,22 @@ public class SourceCommitPage extends ProjectCategoryPage {
 			}
 			
 		});
+		
+		Alert alert = new Alert("largecommitwarning", 
+				Model.of("This commit contains too many changed files to render. "
+						+ "Showing only the first " + MAX_RENDERABLE_BLOBS 
+						+ " changed files. You can still get all changes "
+						+ "manually by running below command: "
+						+ "<pre><code>git diff-tree -C -r ")) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisibilityAllowed(getDiffPatch().getFiles().size() > MAX_RENDERABLE_BLOBS);
+			}
+		};
+		
+		alert.setCloseButtonVisible(true).type(Alert.Type.Warning);
+		add(alert);
 	}
 
 	private void createDiffToc() {

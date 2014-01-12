@@ -15,14 +15,17 @@
 				
 				<ul class="piped">
 					<li><span class="sha" wicket:id="commitsha"></span></li>
-					<li>parents
+					<li><wicket:container wicket:id="parentslabel"></wicket:container>
 						<wicket:container wicket:id="parents">
 							<span wicket:id="connector">+</span>
 							<a class="sha" wicket:id="link"><span wicket:id="sha"></span></a>
 						</wicket:container>
 					</li>
 				</ul>
-								
+				<div class="branches" style="padding-top: 5px; margin-top: 5px; border-top: 1px solid #e5e5e5;">
+					<i class="icon icon-git-branch"></i>
+				</div>
+				
 				<wicket:container wicket:id="authoravatar"></wicket:container>
 			</div>
 			
@@ -59,6 +62,8 @@
 				</ul>
 			</div>
 		</div>
+		
+		<div wicket:id="largecommitwarning"></div>
 		
 		<div class="panel panel-default panel-diff" wicket:id="filelist">
 			<wicket:container  wicket:id="file"></wicket:container>

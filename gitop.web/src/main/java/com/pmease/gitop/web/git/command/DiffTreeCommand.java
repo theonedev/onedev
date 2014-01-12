@@ -13,9 +13,10 @@ import com.google.common.io.ByteStreams;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.gitop.web.page.project.source.commit.patch.Patch;
 
-public class DiffTreeCommand extends AbstractDiffCommand<Patch> {
+public class DiffTreeCommand extends AbstractDiffCommand<Patch, DiffTreeCommand> {
 
-	boolean recurse;
+	boolean recurse = true;
+	private boolean root = true;
 	
 	public DiffTreeCommand(File repoDir) {
 		super(repoDir);
@@ -24,18 +25,22 @@ public class DiffTreeCommand extends AbstractDiffCommand<Patch> {
 	@Override
 	protected Commandline newCommand() {
 		Commandline cmd = super.newCommand();
-		cmd.addArgs("--root");
-		cmd.addArgs("--no-commit-id");
+		
+		if (root) {
+			cmd.addArgs("--root");
+		}
 		
 		if (recurse) {
 			cmd.addArgs("-r");
 		}
 		
+		cmd.addArgs("--no-commit-id");
+		
 		return cmd;
 	}
 	
 	@Override
-	protected void applyPaths(Commandline cmd) {
+	protected void addArgPaths(Commandline cmd) {
 		cmd.addArgs("--");
 		for (String path : paths) {
 			if (!Strings.isNullOrEmpty(path)) {
@@ -46,7 +51,12 @@ public class DiffTreeCommand extends AbstractDiffCommand<Patch> {
 	
 	public DiffTreeCommand recurse(boolean recurse) {
 		this.recurse = recurse;
-		return this;
+		return self();
+	}
+	
+	public DiffTreeCommand root(boolean root) {
+		this.root = root;
+		return self();
 	}
 	
 	@Override
@@ -74,5 +84,10 @@ public class DiffTreeCommand extends AbstractDiffCommand<Patch> {
 	@Override
 	protected String getSubCommand() {
 		return "diff-tree";
+	}
+
+	@Override
+	protected DiffTreeCommand self() {
+		return this;
 	}
 }

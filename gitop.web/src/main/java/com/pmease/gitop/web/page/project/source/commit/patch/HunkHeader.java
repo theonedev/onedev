@@ -151,6 +151,14 @@ public class HunkHeader {
 		return newLineCount;
 	}
 
+	public int getNewEndLine() {
+		return newStartLine + newLineCount - 1;
+	}
+	
+	public int getOldEndLine() {
+		return old.startLine + old.lineCount - 1;
+	}
+	
 	/** @return total number of lines of context appearing in this hunk */
 	public int getLinesContext() {
 		return nContext;

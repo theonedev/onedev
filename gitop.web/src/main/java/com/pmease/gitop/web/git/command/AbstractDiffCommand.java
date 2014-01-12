@@ -10,7 +10,7 @@ import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.execution.Commandline;
 
-public abstract class AbstractDiffCommand<T> extends GitCommand<T> {
+public abstract class AbstractDiffCommand<T, S extends AbstractDiffCommand<T, S>> extends GitCommand<T> {
 
 	public static enum RenameType {
 		NONE, FIND_RENAMES, FIND_COPIES, FIND_COPIES_HEADER
@@ -53,85 +53,93 @@ public abstract class AbstractDiffCommand<T> extends GitCommand<T> {
 	
 	protected DiffAlgorithm diffAlgorithm = DiffAlgorithm.MYERS; // git default
 	
+	protected String format;
 	
 	public AbstractDiffCommand(File repoDir) {
 		super(repoDir);
 	}
 
-	public AbstractDiffCommand<T> revision(String rev) {
+	protected abstract S self();
+	
+	public S revision(String rev) {
 		this.rev = rev;
-		return this;
+		return self();
 	}
 	
-	public AbstractDiffCommand<T> path(String path) {
+	public S path(String path) {
 		this.paths.add(path);
-		return this;
+		return self();
 	}
 	
-	public AbstractDiffCommand<T> paths(List<String> paths) {
+	public S paths(List<String> paths) {
 		this.paths.addAll(paths);
-		return this;
+		return self();
 	}
 	
-	public AbstractDiffCommand<T> contextLines(int contextLines) {
+	public S contextLines(int contextLines) {
 		this.contextLines = contextLines;
-		return this;
+		return self();
 	}
 	
-	public AbstractDiffCommand<T> findCopiesHarder(boolean b) {
+	public S findCopiesHarder(boolean b) {
 		return renameType(b ? RenameType.FIND_COPIES_HEADER : RenameType.NONE);
 	}
 	
-	public AbstractDiffCommand<T> findCopies(boolean b) {
+	public S findCopies(boolean b) {
 		return findCopies(b, -1);
 	}
 	
-	public AbstractDiffCommand<T> findCopies(boolean b, int threshold) {
+	public S findCopies(boolean b, int threshold) {
 		return renameType(b ? RenameType.FIND_COPIES : RenameType.NONE, threshold);
 	}
 	
-	public AbstractDiffCommand<T> findRenames(boolean b) {
+	public S findRenames(boolean b) {
 		return findRenames(b, -1);
 	}
 	
-	public AbstractDiffCommand<T> findRenames(boolean b, int threshold) {
+	public S findRenames(boolean b, int threshold) {
 		return renameType(b ? RenameType.FIND_RENAMES : RenameType.NONE, threshold);
 	}
 	
-	private AbstractDiffCommand<T> renameType(RenameType renameType) {
+	private S renameType(RenameType renameType) {
 		return renameType(renameType, -1);
 	}
 	
-	private AbstractDiffCommand<T> renameType(RenameType renameType, int threshold) {
+	private S renameType(RenameType renameType, int threshold) {
 		this.renameType = renameType;
 		this.threshold = threshold;
-		return this;
+		return self();
 	}
 	
-	private AbstractDiffCommand<T> whitespaceType(WhitespaceType whitespaceType) {
+	private S whitespaceType(WhitespaceType whitespaceType) {
 		this.whitespaceType = whitespaceType;
-		return this;
+		return self();
 	}
 	
-	public AbstractDiffCommand<T> ignoreSpaceAtEol() {
+	public S ignoreSpaceAtEol() {
 		return whitespaceType(WhitespaceType.IGNORE_SPACE_AT_EOL);
 	}
 	
-	public AbstractDiffCommand<T> ignoreAllSpace() {
+	public S ignoreAllSpace() {
 		return whitespaceType(WhitespaceType.IGNORE_ALL_SPACE);
 	}
 	
-	public AbstractDiffCommand<T> ignoreBlankLines() {
+	public S ignoreBlankLines() {
 		return whitespaceType(WhitespaceType.IGNORE_BLANK_LINES);
 	}
 	
-	public AbstractDiffCommand<T> ignoreSpaceChange() {
+	public S ignoreSpaceChange() {
 		return whitespaceType(WhitespaceType.IGNORE_SPACE_CHANGE);
 	}
 	
-	public AbstractDiffCommand<T> diffAlgorithm(DiffAlgorithm algorithm) {
+	public S diffAlgorithm(DiffAlgorithm algorithm) {
 		this.diffAlgorithm = algorithm;
-		return this;
+		return self();
+	}
+	
+	public S format(String format) {
+		this.format = format;
+		return self();
 	}
 	
 	@Override
@@ -154,23 +162,29 @@ public abstract class AbstractDiffCommand<T> extends GitCommand<T> {
 	protected Commandline buildCommand() {
 		Commandline cmd = newCommand();
 		
-		applyContextLines(cmd);
-		applyWhitespaceType(cmd);
-		applyRenameType(cmd);
-		applyDiffAlgorithm(cmd);
+		addArgContextLines(cmd);
+		addArgWhitespaceType(cmd);
+		addArgRenameType(cmd);
+		addArgDiffAlgorithm(cmd);
 		
-		applyPaths(cmd);
+		addArgPaths(cmd);
 		
 		return cmd;
 	}
 	
-	protected void applyContextLines(Commandline cmd) {
+	protected void applyFormat(Commandline cmd) {
+		if (!Strings.isNullOrEmpty(format)) {
+			cmd.addArgs("--format=", format);
+		}
+	}
+	
+	protected void addArgContextLines(Commandline cmd) {
 		if (contextLines > 0) {
 			cmd.addArgs("-U" + contextLines);
 		}
 	}
 	
-	protected void applyPaths(Commandline cmd) {
+	protected void addArgPaths(Commandline cmd) {
 		if (paths.isEmpty())
 			return;
 		
@@ -182,7 +196,7 @@ public abstract class AbstractDiffCommand<T> extends GitCommand<T> {
 		}
 	}
 	
-	protected void applyWhitespaceType(Commandline cmd) {
+	protected void addArgWhitespaceType(Commandline cmd) {
 		switch (whitespaceType) {
 		case IGNORE_SPACE_AT_EOL:
 			cmd.addArgs("--ignore-space-at-eol");
@@ -205,7 +219,7 @@ public abstract class AbstractDiffCommand<T> extends GitCommand<T> {
 		}
 	}
 	
-	protected void applyRenameType(Commandline cmd) {
+	protected void addArgRenameType(Commandline cmd) {
 		if (renameType == RenameType.FIND_COPIES_HEADER) {
 			cmd.addArgs("--find-copies-harder");
 		} else if (renameType == RenameType.FIND_COPIES) {
@@ -215,7 +229,7 @@ public abstract class AbstractDiffCommand<T> extends GitCommand<T> {
 		}
 	}
 	
-	protected void applyDiffAlgorithm(Commandline cmd) {
+	protected void addArgDiffAlgorithm(Commandline cmd) {
 		if (diffAlgorithm != DiffAlgorithm.MYERS) {
 			cmd.addArgs("--" + diffAlgorithm.name().toLowerCase());
 		}

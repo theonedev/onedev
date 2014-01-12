@@ -1,7 +1,8 @@
-package com.pmease.gitop.web.page.project.source.commit;
+package com.pmease.gitop.web.page.project.source.commit.renderer.text;
 
 import java.util.List;
 
+import org.apache.tika.mime.MediaType;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -34,6 +35,7 @@ import com.pmease.gitop.web.page.project.source.commit.patch.FileHeader.PatchTyp
 import com.pmease.gitop.web.page.project.source.commit.patch.HunkHeader;
 import com.pmease.gitop.web.service.FileBlob;
 import com.pmease.gitop.web.service.FileBlobService;
+import com.pmease.gitop.web.service.FileTypes;
 
 @SuppressWarnings("serial")
 public class BlobDiffPanel extends Panel {
@@ -158,6 +160,8 @@ public class BlobDiffPanel extends Panel {
 				}
 				
 				if (file.getPatchType() == PatchType.BINARY) {
+					MediaType mediaType = Gitop.getInstance(FileTypes.class).getMediaType(file.getNewPath(), new byte[0]);
+					System.out.println(mediaType);
 					return "File is a binary file";
 				}
 				

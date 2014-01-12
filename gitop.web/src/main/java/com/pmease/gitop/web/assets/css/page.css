@@ -362,7 +362,6 @@ ul.repo-actions { margin: 8px 4px 8px 0; padding: 0; list-style: none; }
 .source-tree .last-commit { background: #f2f2f2; border-radius: 4px 4px 0 0; }
 .source-tree .commit-message { padding: 8px 15px; }
 
-.commit-message > pre {  }
 .commit-message .title-message { display: inline-block; margin-right: 6px; background: transparent; border: none; margin: 0; padding: 0;}
 .commit-message .detailed-message {font-size: 12px; color: #666;  background: white; margin-top: 8px; }
 
@@ -447,9 +446,8 @@ table.table-blob { width: 100%; }
 .commit-group .commit-meta { margin-left: 64px; padding: 0; margin-right: 120px; background: transparent; border: none; }
 .committer-info .icon { color: #999; font-size: 12px; }
 .commit-group .commitish { width: 100px; overflow: hidden; }
-.commitish a { display: block; color: #888; font-size: 12px; }
-.commitish .browse-link { text-align: right; margin-top: 4px; }
-.commitish a.browse-link:hover { color: #09f; }
+.commit-group .commitish a { display: block; color: #888; font-size: 12px; text-align: right; margin-bottom: 4px;}
+.commit-group .commitish a:hover { color: #09f; }
 
 .commit-group .detailed-toggle { cursor: pointer; }
 .commit-group .detailed-toggle.collapsed .icon-toggle:before { content: "\F02B"; }
@@ -465,9 +463,10 @@ table.table-blob { width: 100%; }
 .commit .author-info, .commit .committer-info { color: #999; margin: 0; }
 .commit .author-info .name,
 .commit .committer-info .name { font-weight: bold; color: #555; }
+.commit-head .piped li { border-color: #ddd; }
 
 .commit .commit-message { border-bottom: 1px solid #ddd; margin-bottom: 9px; }
-.commit .detailed-message { color: #666; border-width: 0 0 0 1px; background: transparent; border-width: 0; padding: 0; }
+.commit .commit-message .detailed-message { color: #666; border-width: 0 0 0 1px; background: transparent; border-width: 0; padding: 0; font-size: 14px; }
 
 #diff-toc .btn { float: right; }
 #diff-toc.open .btn-show,
@@ -510,6 +509,7 @@ a.diffstat:hover { text-decoration: none; }
 .diff-line-nums > .oldnum { border-right: 1px solid #ddd;}
 .diff-line-nums > .expander { text-align: center; }
 .diff-line-nums > .expander a { color: #999; display: block; }
+.diff-line-nums > .expander .icon { vertical-align: middle; }
 .diff-line-nums > .expander a:hover { color: #333; text-decoration: none; }
 .diff-line-nums > .expander em .icon:before { content: ' '; } /* disabled expander */
 
@@ -517,10 +517,13 @@ a.diffstat:hover { text-decoration: none; }
 
 .diff-line.old {  background: #fdd; }
 .diff-line.new { background: #cfc; }
+.diff-line.new .diff-line-nums { background: #afa; }
+.diff-line.old .diff-line-nums { background: #faa; }
 .diff-line.old .diff-line-nums > .oldnum { color: #8f0000; }
 .diff-line.new .diff-line-nums > .newnum { color: #008f00; }
 
 .diff-line:hover, .diff-line.hunk-head:hover { background: #fea; } 
+.diff-line:hover .diff-line-nums { background: #ffe066; }
 
 .diff-line .diff-line-code { margin-left: 110px; padding: 0 12px; }
 .diff-line .diff-line-code pre { background: transparent; margin: 0; padding: 0; word-break: normal; word-wrap: normal; border: none; font-size: 12px; line-height: 20px; white-space: pre; }
