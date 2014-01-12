@@ -41,6 +41,12 @@ public class User extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
 	private Collection<Team> teams = new ArrayList<Team>();
 	
+	@OneToMany(mappedBy="creator")
+	private Collection<Branch> branches = new ArrayList<Branch>();
+	
+	@OneToMany(mappedBy="submitter")
+	private Collection<PullRequest> requests = new ArrayList<PullRequest>();
+
 	@OneToMany(mappedBy="voter", cascade=CascadeType.REMOVE)
 	private Collection<Vote> votes = new ArrayList<Vote>();
 	
@@ -122,6 +128,34 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.teams = teams;
 	}
 
+	/**
+	 * Get created branches.
+	 * 
+	 * @return
+	 * 			collection of created branches
+	 */
+	public Collection<Branch> getBranches() {
+		return branches;
+	}
+
+	public void setBranches(Collection<Branch> branches) {
+		this.branches = branches;
+	}
+
+	/**
+	 * Get submitted pull requests.
+	 * 
+	 * @return
+	 *			collection of submitted pull requests 
+	 */
+	public Collection<PullRequest> getRequests() {
+		return requests;
+	}
+
+	public void setRequests(Collection<PullRequest> requests) {
+		this.requests = requests;
+	}
+
 	public Collection<Vote> getVotes() {
 		return votes;
 	}
@@ -152,7 +186,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	}
 	
 	public Vote.Result checkVoteSince(PullRequestUpdate update) {
-		if (update.getRequest().getSubmitter().equals(this))
+		if (this.equals(update.getRequest().getSubmitter()))
 			return Vote.Result.ACCEPT;
 		
 		for (Vote vote: update.listVotesOnwards()) {

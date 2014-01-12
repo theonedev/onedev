@@ -1,10 +1,8 @@
 package com.pmease.gitop.core.gatekeeper;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -25,7 +23,7 @@ import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 @SuppressWarnings("serial")
 @Editable(order=100, icon="icon-git-branch", description=
 		"This gate keeper will be passed if the commit is submitted to specified branches.")
-public class IfSubmittedToSpecifiedBranches extends BranchGateKeeper {
+public class IfSubmitToSpecifiedBranches extends BranchGateKeeper {
 
 	private List<Long> branchIds = new ArrayList<>();
 	
@@ -56,11 +54,7 @@ public class IfSubmittedToSpecifiedBranches extends BranchGateKeeper {
 
 	@Override
 	protected GateKeeper trim(Project project) {
-		BranchManager branchManager = Gitop.getInstance(BranchManager.class);
-		for (Iterator<Long> it = branchIds.iterator(); it.hasNext();) {
-			if (branchManager.get(it.next()) == null)
-				it.remove();
-		}
+		Gitop.getInstance(BranchManager.class).trim(branchIds);
 		if (branchIds.isEmpty())
 			return null;
 		else
@@ -80,13 +74,18 @@ public class IfSubmittedToSpecifiedBranches extends BranchGateKeeper {
 	}
 	
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, @Nullable String file) {
+	protected CheckResult doCheckFile(User user, Branch branch, String file) {
 		return checkBranch(user, branch);
 	}
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
 		return checkBranch(user, branch);
+	}
+
+	@Override
+	protected CheckResult doCheckRef(User user, Project project, String refName) {
+		return ignored();
 	}
 
 }

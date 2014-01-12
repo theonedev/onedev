@@ -1,5 +1,8 @@
 package com.pmease.gitop.web.editable.directory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
@@ -12,8 +15,10 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import com.google.common.collect.Lists;
 import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.git.TreeNode;
+import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitop.core.Gitop;
@@ -57,14 +62,28 @@ public class DirectoryChoiceEditor extends Panel {
 			public void detach() {
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public String getObject() {
-				return (String) editContext.getPropertyValue();
+				Object propertyValue = editContext.getPropertyValue();
+				if (propertyValue == null)
+					return null;
+				else if (propertyValue instanceof String)
+					return (String) propertyValue;
+				else
+					return StringUtils.join((List<String>)propertyValue, ", ");
 			}
 
 			@Override
 			public void setObject(String object) {
-				editContext.setPropertyValue(object);
+				if (String.class.isAssignableFrom(editContext.getPropertyGetter().getReturnType())) {
+					editContext.setPropertyValue(object);
+				} else {
+					if (object != null)
+						editContext.setPropertyValue(Lists.newArrayList(StringUtils.splitAndTrim(object)));
+					else
+						editContext.setPropertyValue(new ArrayList<>());
+				}
 			}
 			
 		}));

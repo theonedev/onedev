@@ -3,7 +3,6 @@ package com.pmease.gitop.core.manager.impl;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -11,8 +10,6 @@ import javax.inject.Singleton;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.eventbus.EventBus;
@@ -21,10 +18,8 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.EntityEvent;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
-import com.pmease.commons.util.ExceptionUtils;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.LockUtils;
 import com.pmease.gitop.core.event.BranchRefUpdateEvent;
@@ -39,36 +34,27 @@ import com.pmease.gitop.model.PullRequest.Status;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.VoteInvitation;
-import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
 import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
+import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
 import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
 
 @Singleton
 public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> implements
 		PullRequestManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestManager.class);
-	
 	private final VoteInvitationManager voteInvitationManager;
 	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
-	private final UnitOfWork unitOfWork;
-	
 	private final EventBus eventBus;
-	
-	private final Executor executor;
 	
 	@Inject
 	public DefaultPullRequestManager(GeneralDao generalDao, VoteInvitationManager voteInvitationManager,
-			PullRequestUpdateManager pullRequestUpdateManager, UnitOfWork unitOfWork, EventBus eventBus, 
-			Executor executor) {
+			PullRequestUpdateManager pullRequestUpdateManager, EventBus eventBus) {
 		super(generalDao);
 		this.voteInvitationManager = voteInvitationManager;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
-		this.unitOfWork = unitOfWork;
 		this.eventBus = eventBus;
-		this.executor = executor;
 		eventBus.register(this);
 	}
 
@@ -268,7 +254,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 			
 		});
 	}
-	
+
 	@Sessional
 	@Subscribe
 	public void refreshUpon(EntityEvent entityEvent) {
@@ -292,31 +278,9 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 	@Sessional
 	@Subscribe
 	public void refreshUpon(BranchRefUpdateEvent event) {
-		for (final PullRequest request: event.getBranch().getIngoingRequests()) {
-			if (request.isOpen()) {
-				executor.execute(new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							unitOfWork.call(new Callable<Void>() {
-	
-								@Override
-								public Void call() throws Exception {
-										// Reload request to avoid Hibernate LazyInitializationException
-										refresh(load(request.getId()));
-										return null;
-								}
-								
-							});
-						} catch (Exception e) {
-							logger.error("Error refreshing pull request.", e);
-							throw ExceptionUtils.unchecked(e);
-						}
-					}
-					
-				});
-			}
+		for (PullRequest request: event.getBranch().getIngoingRequests()) {
+			if (request.isOpen())
+				refresh(load(request.getId()));
 		}
 	}
 	

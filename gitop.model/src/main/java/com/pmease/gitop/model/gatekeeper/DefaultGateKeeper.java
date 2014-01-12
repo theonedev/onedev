@@ -18,17 +18,22 @@ public class DefaultGateKeeper extends AbstractGateKeeper {
 
 	@Override
 	public CheckResult doCheckRequest(PullRequest request) {
-		return accepted("Not defined.");
+		return ignored();
 	}
 
 	@Override
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		return accepted("Not defined.");
+		return ignored();
 	}
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		return accepted("Not defined.");
+		return ignored();
+	}
+
+	@Override
+	protected CheckResult doCheckRef(User user, Project project, String refName) {
+		return ignored();
 	}
 
 }

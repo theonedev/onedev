@@ -34,11 +34,12 @@ public class PullRequest extends AbstractEntity {
 	private boolean autoMerge;
 
 	@ManyToOne
-	@JoinColumn(nullable = false)
+	private User submitter;
+	
+	@ManyToOne
 	private Branch target;
 
 	@ManyToOne
-	@JoinColumn(nullable = false)
 	private Branch source;
 
 	@Lob
@@ -83,24 +84,55 @@ public class PullRequest extends AbstractEntity {
 	public void setAutoMerge(boolean autoMerge) {
 		this.autoMerge = autoMerge;
 	}
-	
+
+	/**
+	 * Get the user submitting the pull request.
+	 * 
+	 * @return
+	 * 			the user submitting the pull request, or <tt>null</tt> if the user 
+	 * 			submitting the request is removed.
+	 */
+	@Nullable
 	public User getSubmitter() {
-		return getSource().getProject().getOwner();
+		return submitter;
 	}
 
+	public void setSubmitter(@Nullable User submitter) {
+		this.submitter = submitter;
+	}
+
+	/**
+	 * Get target branch of this request.
+	 * 
+	 * @return
+	 * 			target branch of this request, or <tt>null</tt> if target branch 
+	 * 			is deleted. In case of target branch being deleted, the pull request 
+	 * 			will also be closed 
+	 */
+	@Nullable
 	public Branch getTarget() {
 		return target;
 	}
 
-	public void setTarget(Branch target) {
+	public void setTarget(@Nullable Branch target) {
 		this.target = target;
 	}
 
+	/**
+	 * Get source branch of this request.
+	 * 
+	 * @return
+	 * 			source branch of this request, or <tt>null</tt> if source branch 
+	 * 			is deleted. In case of source branch being deleted, the pull request 
+	 * 			may still in opened state for review, but can not be updated with 
+	 * 			new commits
+	 */
+	@Nullable
 	public Branch getSource() {
 		return source;
 	}
 
-	public void setSource(Branch source) {
+	public void setSource(@Nullable Branch source) {
 		this.source = source;
 	}
 

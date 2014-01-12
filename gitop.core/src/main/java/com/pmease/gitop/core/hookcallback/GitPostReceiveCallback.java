@@ -24,6 +24,7 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.event.BranchRefUpdateEvent;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.User;
@@ -40,12 +41,16 @@ public class GitPostReceiveCallback extends HttpServlet {
     
     private final BranchManager branchManager;
     
+    private final UserManager userManager;
+    
     private final EventBus eventBus;
     
     @Inject
-    public GitPostReceiveCallback(ProjectManager projectManager, BranchManager branchManager, EventBus eventBus) {
+    public GitPostReceiveCallback(ProjectManager projectManager, BranchManager branchManager, 
+    		UserManager userManager, EventBus eventBus) {
     	this.projectManager = projectManager;
         this.branchManager = branchManager;
+        this.userManager = userManager;
         this.eventBus = eventBus;
     }
 
@@ -106,6 +111,7 @@ public class GitPostReceiveCallback extends HttpServlet {
 				Branch branch = new Branch();
 				branch.setProject(project);
 				branch.setName(branchName);
+				branch.setCreator(userManager.getCurrent());
 				project.getBranches().add(branch);
 				branchManager.save(branch);
 				if (project.getBranches().size() == 1) 
@@ -118,7 +124,7 @@ public class GitPostReceiveCallback extends HttpServlet {
 				if (project.code().resolveDefaultBranch().equals(branchName) && !project.getBranches().isEmpty()) 
 						project.code().updateDefaultBranch(project.getBranches().iterator().next().getName());
 			} else {
-				logger.info("Executing post-receive hook against branch {}...", branchName);
+				logger.debug("Executing post-receive hook against branch {}...", branchName);
 				
 				Branch branch = branchManager.findBy(project, branchName);
 				Preconditions.checkNotNull(branch);

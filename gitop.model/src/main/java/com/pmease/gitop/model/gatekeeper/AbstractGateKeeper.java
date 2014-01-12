@@ -12,9 +12,10 @@ import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
-import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitop.model.gatekeeper.checkresult.Ignored;
 import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
+import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
 import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
 
@@ -37,15 +38,15 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 		if (enabled)
 			return doCheckRequest(request);
 		else
-			return accepted("Gate keeper is disabled.");
+			return ignored();
 	}
 	
 	@Override
-	public CheckResult checkFile(User user, Branch branch, @Nullable String file) {
+	public CheckResult checkFile(User user, Branch branch, String file) {
 		if (isEnabled())
 			return doCheckFile(user, branch, file);
 		else
-			return accepted("Gate keeper is disabled");
+			return ignored();
 	}
 	
 	@Override
@@ -53,11 +54,19 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 		if (isEnabled())
 			return doCheckCommit(user, branch, commit);
 		else
-			return accepted("Gate keeper is disabled");
+			return ignored();
 	}
 
+	@Override
+	public CheckResult checkRef(User user, Project project, String refName) {
+		if (isEnabled())
+			return doCheckRef(user, project, refName);
+		else
+			return ignored();
+	}
+	
 	/**
-	 * Check the gate keeper against specified request without considering enable flag. This is 
+	 * Check gate keeper against specified pull request without considering enable flag. This is 
 	 * typically used to determine whether or not to accept a pull request. 
 	 * 
 	 * @param request
@@ -68,27 +77,24 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	protected abstract CheckResult doCheckRequest(PullRequest request);
 	
 	/**
-	 * Check the gate keeper against specified user, branch and file without considering enable flag.
-	 * This is typically used to determine whether or not to accept a file modification or branch 
-	 * deletion (when file parameter is specified as <tt>null</tt>).
+	 * Check if specified user can modify specified file in specified branch, without considering enable flag.
 	 *
 	 * @param user
 	 * 			user to be checked
 	 * @param branch
 	 * 			branch to be checked
 	 * @param file
-	 * 			file to be checked, <tt>null</tt> means to check if the user can administer/delete the branch
+	 * 			file to be checked
 	 * @return
 	 * 			result of the check
 	 */
-	protected abstract CheckResult doCheckFile(User user, Branch branch, @Nullable String file);
-	
+	protected abstract CheckResult doCheckFile(User user, Branch branch, String file);
+
 	/**
-	 * Check the gate keeper against specified user, branch and commit without considering enable flag. 
-	 * This is typically used to determine whether or not to accept a push operation.
-	 *
+	 * Check if specified user can push specified commit to specified branch, without considering enable flag.
+	 * 
 	 * @param user
-	 * 			user to be checked
+	 *			user to be checked 	
 	 * @param branch
 	 * 			branch to be checked
 	 * @param commit
@@ -98,6 +104,21 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	 */
 	protected abstract CheckResult doCheckCommit(User user, Branch branch, String commit);
 
+	/**
+	 * Check if specified user can create/delete specified reference in specified project, 
+	 * without considering enable flag.
+	 * 
+	 * @param user
+	 *			user to be checked 	
+	 * @param project
+	 * 			project to be checked
+	 * @param refName
+	 * 			reference name to be checked
+	 * @return
+	 * 			result of the check
+	 */
+	protected abstract CheckResult doCheckRef(User user, Project project, String refName);
+	
 	@Override
 	public final Object trim(@Nullable Object context) {
 		Preconditions.checkArgument(context instanceof Project);
@@ -124,10 +145,14 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 		return new PendingAndBlock(reason, voteEligibility);
 	}
 
+	protected CheckResult ignored() {
+		return new Ignored();
+	}
+
 	protected CheckResult accepted(List<String> reasons) {
 		return new Accepted(reasons);
 	}
-
+	
 	protected CheckResult rejected(List<String> reasons) {
 		return new Rejected(reasons);
 	}

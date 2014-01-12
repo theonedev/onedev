@@ -2,11 +2,10 @@ package com.pmease.gitop.model.gatekeeper;
 
 import java.io.Serializable;
 
-import javax.annotation.Nullable;
-
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.trimmable.Trimmable;
 import com.pmease.gitop.model.Branch;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
@@ -26,25 +25,21 @@ public interface GateKeeper extends Trimmable, Serializable {
 	CheckResult checkRequest(PullRequest request);
 	
 	/**
-	 * Check the gate keeper against specified user, branch and file. This is typically used 
-	 * to determine whether or not to accept a file modification or branch deletion (when 
-	 * file parameter is specified as <tt>null</tt>).
+	 * Check if specified user can modify specified file in specified branch.
 	 *
 	 * @param user
 	 * 			user to be checked
 	 * @param branch
 	 * 			branch to be checked
 	 * @param file
-	 * 			file to be checked, <tt>null</tt> means to check if the user can 
-	 * 			administer/delete the branch
+	 * 			file to be checked
 	 * @return
 	 * 			result of the check. 
 	 */
-	CheckResult checkFile(User user, Branch branch, @Nullable String file);
+	CheckResult checkFile(User user, Branch branch, String file);
 
 	/**
-	 * Check the gate keeper against specified user, branch and commit. This is typically used 
-	 * to determine whether or not to accept a push operation.
+	 * Check specified user can push specified commit to specified branch.
 	 *
 	 * @param user
 	 * 			user to be checked
@@ -56,6 +51,20 @@ public interface GateKeeper extends Trimmable, Serializable {
 	 * 			result of the check
 	 */
 	CheckResult checkCommit(User user, Branch branch, String commit);
-
+	
+	/**
+	 * Check if specified user can push specified reference to specified project. 
+	 * 
+	 * @param user
+	 * 			user to be checked
+	 * @param project
+	 * 			project to be checked
+	 * @param refName
+	 * 			reference name to be checked
+	 * @return
+	 * 			result of the check
+	 */
+	CheckResult checkRef(User user, Project project, String refName);
+	
 	boolean isEnabled();
 }

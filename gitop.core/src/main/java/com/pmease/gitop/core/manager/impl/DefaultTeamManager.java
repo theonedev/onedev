@@ -1,5 +1,8 @@
 package com.pmease.gitop.core.manager.impl;
 
+import java.util.Collection;
+import java.util.Iterator;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -22,12 +25,6 @@ import com.pmease.gitop.model.permission.operation.GeneralOperation;
 @Singleton
 public class DefaultTeamManager extends AbstractGenericDao<Team> implements TeamManager {
 
-//	private volatile Long anonymousId;
-//	
-//	private volatile Long ownersId;
-//	
-//	private volatile Long loggedInId;
-	
 	private static class BuiltInTeam {
 		final Long anonymousId;
 		final Long ownersId;
@@ -41,7 +38,6 @@ public class DefaultTeamManager extends AbstractGenericDao<Team> implements Team
 	}
 	
 	private final LoadingCache<Long, BuiltInTeam> builtInTeamsCache;
-	
 	
 	@Inject
 	public DefaultTeamManager(GeneralDao generalDao, final UserManager userManager) {
@@ -72,43 +68,16 @@ public class DefaultTeamManager extends AbstractGenericDao<Team> implements Team
 	@Override
 	public Team getAnonymous(User user) {
 		return load(builtInTeamsCache.getUnchecked(user.getId()).anonymousId);
-//		Team anonymous;
-//		if (anonymousId == null) {
-//			anonymous = findBy(user, Team.ANONYMOUS);
-//			Preconditions.checkNotNull(anonymous);
-//			anonymousId = anonymous.getId();
-//		} else {
-//			anonymous = load(anonymousId);
-//		}
-//		return anonymous;
 	}
 
 	@Override
 	public Team getLoggedIn(User user) {
 		return load(builtInTeamsCache.getUnchecked(user.getId()).loggedInId);
-//		Team loggedIn;
-//		if (loggedInId == null) {
-//			loggedIn = findBy(user, Team.LOGGEDIN);
-//			Preconditions.checkNotNull(loggedIn);
-//			loggedInId = loggedIn.getId();
-//		} else {
-//			loggedIn = load(loggedInId);
-//		}
-//		return loggedIn;
 	}
 
 	@Override
 	public Team getOwners(User user) {
 		return load(builtInTeamsCache.getUnchecked(user.getId()).ownersId);
-//		Team owners;
-//		if (ownersId == null) {
-//			owners = findBy(user, Team.OWNERS);
-//			Preconditions.checkNotNull(owners);
-//			ownersId = owners.getId();
-//		} else {
-//			owners = load(ownersId);
-//		}
-//		return owners;
 	}
 
 	@Override
@@ -124,6 +93,14 @@ public class DefaultTeamManager extends AbstractGenericDao<Team> implements Team
 			return GeneralOperation.mostPermissive(team.getAuthorizedOperation(), 
 					getAnonymous(team.getOwner()).getAuthorizedOperation(), 
 					getLoggedIn(team.getOwner()).getAuthorizedOperation());
+		}
+	}
+
+	@Override
+	public void trim(Collection<Long> teamIds) {
+		for (Iterator<Long> it = teamIds.iterator(); it.hasNext();) {
+			if (get(it.next()) == null)
+				it.remove();
 		}
 	}
 }

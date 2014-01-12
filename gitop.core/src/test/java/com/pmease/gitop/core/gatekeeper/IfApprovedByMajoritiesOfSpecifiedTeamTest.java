@@ -137,10 +137,10 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 				}
 				
 			});
-			request.getSource().getProject().setId(2L);
-			request.getSource().getProject().setOwner(new User());
-			request.getSource().getProject().getOwner().setId(2L);
-			request.getSource().getProject().getOwner().setName("user2");
+			
+			request.setSubmitter(new User());
+			request.getSubmitter().setId(2L);
+			request.getSubmitter().setName("user2");
 			
 			PullRequestUpdate update = new PullRequestUpdate();
 			update.setHeadCommit(git.parseRevision("dev", true));

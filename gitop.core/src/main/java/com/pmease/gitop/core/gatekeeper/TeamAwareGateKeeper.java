@@ -33,8 +33,7 @@ public abstract class TeamAwareGateKeeper extends ApprovalGateKeeper {
 
 	@Override
 	protected GateKeeper trim(Project project) {
-		TeamManager teamManager = Gitop.getInstance(TeamManager.class);
-		if (teamManager.get(getTeamId()) == null)
+		if (Gitop.getInstance(TeamManager.class).get(getTeamId()) == null)
 			return null;
 		else
 			return this;

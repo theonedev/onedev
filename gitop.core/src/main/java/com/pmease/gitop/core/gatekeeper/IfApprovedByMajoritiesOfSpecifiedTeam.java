@@ -1,9 +1,8 @@
 package com.pmease.gitop.core.gatekeeper;
 
-import javax.annotation.Nullable;
-
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.model.Branch;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
@@ -37,7 +36,7 @@ public class IfApprovedByMajoritiesOfSpecifiedTeam extends TeamAwareGateKeeper {
 	}
 	
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, @Nullable String file) {
+	protected CheckResult doCheckFile(User user, Branch branch, String file) {
 		CheckResult result = getGateKeeper().checkFile(user, branch, file);
 		
 		if (result instanceof Accepted)
@@ -51,6 +50,18 @@ public class IfApprovedByMajoritiesOfSpecifiedTeam extends TeamAwareGateKeeper {
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
 		CheckResult result = getGateKeeper().checkCommit(user, branch, commit);
+		
+		if (result instanceof Accepted)
+			result = accepted("Approved by majorities of team '" + getTeam().getName() + "'.");
+		else if (result instanceof Rejected)
+			result = rejected("Not approved by majorities of team '" + getTeam().getName() + "'.");
+		
+		return result;
+	}
+
+	@Override
+	protected CheckResult doCheckRef(User user, Project project, String refName) {
+		CheckResult result = getGateKeeper().checkRef(user, project, refName);
 		
 		if (result instanceof Accepted)
 			result = accepted("Approved by majorities of team '" + getTeam().getName() + "'.");

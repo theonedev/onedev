@@ -42,7 +42,8 @@ public class DefaultVoteInvitationManager extends AbstractGenericDao<VoteInvitat
 		Collection<User> copyOfCandidates = new HashSet<User>(candidates);
 
 		// submitter is not allowed to vote for this request
-		copyOfCandidates.remove(request.getSubmitter());
+		if (request.getSubmitter() != null)
+			copyOfCandidates.remove(request.getSubmitter());
 
 		/*
 		 * users already voted since base update should be excluded from

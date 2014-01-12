@@ -6,8 +6,9 @@ import javax.validation.constraints.NotNull;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.TableLayout;
 import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
-import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
+import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
 import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
 
 @SuppressWarnings("serial")
@@ -50,12 +51,14 @@ public class IfThenGateKeeper extends CompositeGateKeeper {
 			return accepted(ifResult.getReasons());
 		} else if (ifResult instanceof PendingAndBlock) {
 			return ifResult;
-		} else {
+		} else if (ifResult instanceof Pending) {
 			CheckResult thenResult = checker.check(getThenGate());
 			if (thenResult instanceof Accepted)
 				return thenResult;
 			else 
 				return ifResult;
+		} else {
+			return ifResult;
 		}
 	}
 

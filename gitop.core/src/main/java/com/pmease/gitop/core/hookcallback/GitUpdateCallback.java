@@ -26,7 +26,6 @@ import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Project;
-import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
@@ -67,6 +66,18 @@ public class GitUpdateCallback extends HttpServlet {
 		output.writeLine();
 	}
 	
+	private void checkRef(User user, Project project, String refName, Output output) {
+		GateKeeper gateKeeper = project.getGateKeeper();
+		CheckResult checkResult = gateKeeper.checkRef(user, project, refName);
+
+		if (!(checkResult instanceof Accepted)) {
+			List<String> messages = new ArrayList<>();
+			for (String each: checkResult.getReasons())
+				messages.add(each);
+			error(output, messages.toArray(new String[messages.size()]));
+		}
+	}
+	
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String clientIp = request.getHeader("X-Forwarded-For");
@@ -95,55 +106,46 @@ public class GitUpdateCallback extends HttpServlet {
         String oldCommitHash = fields.get(1);
         String newCommitHash = fields.get(2);
         
+		logger.debug("Executing update hook against reference {}...", refName);
+
+		User user = userManager.getCurrent();
+		Preconditions.checkNotNull(user);
+
 		if (refName.startsWith(Project.REFS_GITOP)) {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectAdmin(project)))
+			if (!user.asSubject().isPermitted(ObjectPermission.ofProjectAdmin(project)))
 				error(output, "Only project administrators can update gitop refs.");
 		} else {
 			String branchName = Branch.getName(refName);
-			if (branchName != null) {
-				if (!oldCommitHash.equals(Commit.ZERO_HASH)) {
+			if (branchName != null) { // push branch ref 
+				if (oldCommitHash.equals(Commit.ZERO_HASH)) { // create new branch
+					checkRef(user, project, refName, output);
+				} else {
 					Branch branch = branchManager.findBy(project, branchName);
 					Preconditions.checkNotNull(branch);
 
-					logger.info("Executing pre-receive hook against branch {}...", branchName);
-					
-					User user = userManager.getCurrent();
-					Preconditions.checkNotNull(user);
-			
-					GateKeeper gateKeeper = project.getGateKeeper();
-					CheckResult checkResult;
-					if (newCommitHash.equals(Commit.ZERO_HASH))
-						checkResult = gateKeeper.checkFile(user, branch, null);
-					else
-						checkResult = gateKeeper.checkCommit(user, branch, newCommitHash);
-			
-					if (!(checkResult instanceof Accepted)) {
-						List<String> messages = new ArrayList<>();
-						for (String each: checkResult.getReasons())
-							messages.add(each);
-						if (!newCommitHash.equals(Commit.ZERO_HASH) && !(checkResult instanceof Rejected)) {
-							messages.add("");
-							messages.add("----------------------------------------------------");
-							messages.add("You may submit a pull request instead.");
+					if (newCommitHash.equals(Commit.ZERO_HASH)) { // deleting a branch ref
+						if (!user.asSubject().isPermitted(ObjectPermission.ofProjectAdmin(project)) && !user.equals(branch.getCreator())) {
+							error(output, "Branch can only be deleted by its creator or project administrators.");
 						}
-						error(output, messages.toArray(new String[messages.size()]));
 					} else {
-						for (PullRequest each: branch.getIngoingRequests()) {
-							if (each.isOpen()) {
-								error(output, "There are unclosed pull requests targeting this branch.", 
-										"Please close them before continue.");
-								return;
+						GateKeeper gateKeeper = project.getGateKeeper();
+						CheckResult checkResult = gateKeeper.checkCommit(user, branch, newCommitHash);
+				
+						if (!(checkResult instanceof Accepted)) {
+							List<String> messages = new ArrayList<>();
+							for (String each: checkResult.getReasons())
+								messages.add(each);
+							if (!newCommitHash.equals(Commit.ZERO_HASH) && !(checkResult instanceof Rejected)) {
+								messages.add("");
+								messages.add("----------------------------------------------------");
+								messages.add("You may submit a pull request instead.");
 							}
-						}
-						for (PullRequest each: branch.getOutgoingRequests()) {
-							if (each.isOpen()) {
-								error(output, "There are unclosed pull requests originating from this branch.", 
-										"Please close them before continue.");
-								break;
-							}
+							error(output, messages.toArray(new String[messages.size()]));
 						}
 					}
 				}
+			} else { // push non-branch refs
+				checkRef(user, project, refName, output);
 			}
 		}
 	}	

@@ -135,6 +135,7 @@ table.reflection .right-spacing {margin-right: 8px;}
 .editor .has-error .error-message {color: #A94442;}
 .editor .required {font-size: 16px; color: #B94A48;}
 .viewer .table {margin-bottom: 0;}
+.viewer tr.name-omitted>td {padding: 0;}
 
 /* Select2 */
 .editor .select2-container {width: 100%;}

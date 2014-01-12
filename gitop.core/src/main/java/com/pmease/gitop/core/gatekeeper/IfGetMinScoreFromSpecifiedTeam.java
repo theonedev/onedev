@@ -10,6 +10,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Membership;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
@@ -105,7 +106,7 @@ public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
         }
     }
 
-	private CheckResult checkBranch(User user, Branch branch) {
+	private CheckResult checkApproval(User user) {
         Collection<User> members = new HashSet<User>();
         for (Membership membership : getTeam().getMemberships())
             members.add(membership.getUser());
@@ -132,12 +133,17 @@ public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
 
 	@Override
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		return checkBranch(user, branch);
+		return checkApproval(user);
 	}
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		return checkBranch(user, branch);
+		return checkApproval(user);
+	}
+
+	@Override
+	protected CheckResult doCheckRef(User user, Project project, String refName) {
+		return checkApproval(user);
 	}
 
 }

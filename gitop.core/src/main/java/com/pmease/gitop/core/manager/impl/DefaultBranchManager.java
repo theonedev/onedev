@@ -1,5 +1,8 @@
 package com.pmease.gitop.core.manager.impl;
 
+import java.util.Collection;
+import java.util.Iterator;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.transaction.Status;
@@ -45,16 +48,25 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 	@Override
 	public void delete(Branch branch) {
     	deleteRefs(branch);
+    	
+    	for (PullRequest request: branch.getIngoingRequests()) { 
+    		request.setTarget(null);
+    		if (request.isOpen())
+    			pullRequestManager.decline(request);
+    		else
+    			pullRequestManager.save(request);
+    	}
+    	
+    	for (PullRequest request: branch.getOutgoingRequests()) {
+    		request.setSource(null);
+    		pullRequestManager.save(request);
+    	}
 		super.delete(branch);
 	}
     
     @Sessional
     @Override
     public void deleteRefs(Branch branch) {
-		for (PullRequest request: branch.getIngoingRequests())
-			pullRequestManager.deleteRefs(request);
-		for (PullRequest request: branch.getOutgoingRequests())
-			pullRequestManager.deleteRefs(request);
 		branch.getProject().code().deleteBranch(branch.getName());
     }
 
@@ -99,6 +111,14 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 			}
 			
 		});
+	}
+
+	@Override
+	public void trim(Collection<Long> branchIds) {
+		for (Iterator<Long> it = branchIds.iterator(); it.hasNext();) {
+			if (get(it.next()) == null)
+				it.remove();
+		}
 	}
     
 }
