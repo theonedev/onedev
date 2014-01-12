@@ -5,31 +5,18 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
-import java.util.concurrent.Callable;
 
-import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteException;
-import org.apache.commons.exec.LogOutputStream;
-import org.apache.commons.exec.PumpStreamHandler;
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.util.RawParseUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
 import com.pmease.commons.git.GitConfig;
+import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.loader.AppLoader;
-import com.pmease.gitop.web.git.RepositoryException;
+import com.pmease.commons.util.execution.Commandline;
 import com.pmease.gitop.web.util.UniversalEncodingDetector;
 
-public class CatFileCommand implements Callable<String> {
+public class CatFileCommand extends GitCommand<String> {
 
-	private final File workingDir;
-	
 	private String revision;
 	private String path;
 	private ShowType showType = ShowType.PRETTY;
@@ -45,7 +32,7 @@ public class CatFileCommand implements Callable<String> {
 	}
 	
 	public CatFileCommand(File dir) {
-		this.workingDir = dir;
+		super(dir);
 	}
 	
 	public CatFileCommand revision(String revision) {
@@ -73,63 +60,27 @@ public class CatFileCommand implements Callable<String> {
 		return this;
 	}
 	
-	static class ErrorOutputStream extends LogOutputStream {
-		final static Logger log = LoggerFactory.getLogger(ErrorOutputStream.class);
-		
-		@Override
-		protected void processLine(String line, int level) {
-			log.error(line);
-		}
-	}
-	
-	static class LineOutputStream extends LogOutputStream {
-		List<String> lines = Lists.newArrayList();
-
-		@Override
-		protected void processLine(String line, int level) {
-			lines.add(line);
-		}
-		
-		public Iterable<String> getLines() {
-			return lines;
-		}
-		
-		public String getOutput() {
-			return Joiner.on("\n").join(lines);
-		}
-	}
-	
 	@Override
 	public String call() {
-		CommandLine cmd = new CommandLine(getGitExe());
-		cmd.addArguments(new String[] { "cat-file", showType.arg, revision+":"+path });
+		Commandline cmd = cmd();
+		cmd.addArgs("cat-file", showType.arg, revision+":"+path);
 		
-		DefaultExecutor executor = new DefaultExecutor();
-		executor.setWorkingDirectory(workingDir);
 		
-		ByteArrayOutputStream out = (ByteArrayOutputStream) getOutputStream();
-		OutputStream err = getErrorStream();
-		InputStream in = getInputStream();
-		
-		PumpStreamHandler streamHandler = new PumpStreamHandler(out, err, in);
-		executor.setStreamHandler(streamHandler);
-		
-		try {
-			int retCode = executor.execute(cmd);
-			if (executor.isFailure(retCode)) {
-				throw new RepositoryException("Executing command {" + cmd + "} failed with return code " + retCode);
-			}
+		try (
+				ByteArrayOutputStream out = (ByteArrayOutputStream) getOutputStream();
+				InputStream in = getInputStream()) {
+			
+			cmd.execute(out, errorLogger);
 			
 			byte[] bytes = out.toByteArray();
-			return RawParseUtils.decode(UniversalEncodingDetector.detect(bytes), bytes);
-		} catch (ExecuteException e) {
-			throw Throwables.propagate(e);
+			if (showType == ShowType.PRETTY) {
+				return RawParseUtils.decode(UniversalEncodingDetector.detect(bytes), bytes);
+			} else {
+				// needn't detect charset when showing size or type
+				return RawParseUtils.decode(bytes);
+			}
 		} catch (IOException e) {
 			throw Throwables.propagate(e);
-		} finally {
-			IOUtils.closeQuietly(out);
-			IOUtils.closeQuietly(err);
-			IOUtils.closeQuietly(in);
 		}
 	}
 	
@@ -137,17 +88,14 @@ public class CatFileCommand implements Callable<String> {
 		return new ByteArrayOutputStream(1024);
 	}
 	
-	protected OutputStream getErrorStream() {
-		return new ErrorOutputStream();
-	}
-	
 	protected InputStream getInputStream() {
 		return null;
 	}
 	
+	@Override
 	protected String getGitExe() {
 		if (AppLoader.injector == null) {
-			return "/usr/local/bin/git";
+			return "git";
 		} else {
 			return AppLoader.getInstance(GitConfig.class).getExecutable();
 		}
