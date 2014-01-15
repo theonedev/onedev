@@ -27,6 +27,7 @@ import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.model.permission.operation.GeneralOperation;
 import com.pmease.gitop.web.SessionData;
+import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.model.ProjectModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.AbstractAccountPage;
@@ -69,6 +70,11 @@ public abstract class AbstractProjectPage extends AbstractAccountPage {
 		super.onPageInitialize();
 		
 		Project project = getProject();
+		if (project.getForkedFrom() != null)
+			add(new Icon("repoIcon", "icon-repo-forked"));
+		else
+			add(new Icon("repoIcon", "icon-repo"));
+		
 		AbstractLink userlink = PageSpec.newUserHomeLink("userlink", project.getOwner());
 		add(userlink);
 		userlink.add(new Label("name", Model.of(project.getOwner().getName())));

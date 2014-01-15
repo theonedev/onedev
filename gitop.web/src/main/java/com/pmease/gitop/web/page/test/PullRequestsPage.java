@@ -41,7 +41,7 @@ public class PullRequestsPage extends AbstractLayoutPage {
             protected List<PullRequest> load() {
                 List<PullRequest> pullRequests = new ArrayList<PullRequest>();
                 for (Branch branch: Gitop.getInstance(BranchManager.class).query()) {
-                	for (PullRequest request: branch.getIngoingRequests()) {
+                	for (PullRequest request: branch.getIncomingRequests()) {
                 		if (request.getStatus() != PullRequest.Status.DECLINED && request.getCheckResult() != null)
                 			pullRequests.add(request);
                 	}

@@ -25,7 +25,10 @@ import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.core.manager.PullRequestManager;
+import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.storage.StorageManager;
 
@@ -37,6 +40,8 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
     private final BranchManager branchManager;
     
     private final StorageManager storageManager;
+    
+    private final PullRequestManager pullRequestManager;
 
     private final String gitUpdateHook;
     
@@ -44,11 +49,12 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
     
     @Inject
     public DefaultProjectManager(GeneralDao generalDao, BranchManager branchManager, 
-    		StorageManager storageManager) {
+    		StorageManager storageManager, PullRequestManager pullRequestManager) {
         super(generalDao);
 
         this.branchManager = branchManager;
         this.storageManager = storageManager;
+        this.pullRequestManager = pullRequestManager;
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-update-hook")) {
         	Preconditions.checkNotNull(is);
@@ -103,10 +109,22 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
     
     @Transactional
     @Override
-    public void delete(Project entity) {
-        super.delete(entity);
+    public void delete(Project project) {
+    	for (Branch branch: project.getBranches()) {
+	    	for (PullRequest request: branch.getOutgoingRequests()) {
+	    		request.setSource(null);
+	    		pullRequestManager.save(request);
+	    	}
+    	}
+    	
+    	for (Project each: project.getForks()) {
+    		each.setForkedFrom(null);
+    		save(each);
+    	}
+    	
+        super.delete(project);
 
-        storageManager.getStorage(entity).delete();
+        storageManager.getStorage(project).delete();
     }
 
     @Sessional

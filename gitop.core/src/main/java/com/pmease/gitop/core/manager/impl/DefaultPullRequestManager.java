@@ -271,7 +271,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 	@Sessional
 	@Subscribe
 	public void refreshUpon(BranchRefUpdateEvent event) {
-		for (PullRequest request: event.getBranch().getIngoingRequests()) {
+		for (PullRequest request: event.getBranch().getIncomingRequests()) {
 			if (request.isOpen())
 				refresh(load(request.getId()));
 		}

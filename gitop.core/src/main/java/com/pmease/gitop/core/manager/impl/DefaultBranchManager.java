@@ -49,7 +49,7 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 	public void delete(Branch branch) {
     	deleteRefs(branch);
     	
-    	for (PullRequest request: branch.getIngoingRequests()) { 
+    	for (PullRequest request: branch.getIncomingRequests()) { 
     		request.setTarget(null);
     		if (request.isOpen())
     			pullRequestManager.decline(request);
