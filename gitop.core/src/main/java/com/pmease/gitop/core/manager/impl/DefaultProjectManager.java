@@ -3,7 +3,8 @@ package com.pmease.gitop.core.manager.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -24,10 +25,8 @@ import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.model.storage.ProjectStorage;
 import com.pmease.gitop.model.storage.StorageManager;
 
 @Singleton
@@ -35,20 +34,21 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultProjectManager.class);
 
-    private final StorageManager storageManager;
-
     private final BranchManager branchManager;
+    
+    private final StorageManager storageManager;
 
     private final String gitUpdateHook;
     
     private final String gitPostReceiveHook;
     
     @Inject
-    public DefaultProjectManager(GeneralDao generalDao, StorageManager storageManager, BranchManager branchManager) {
+    public DefaultProjectManager(GeneralDao generalDao, BranchManager branchManager, 
+    		StorageManager storageManager) {
         super(generalDao);
 
-        this.storageManager = storageManager;
         this.branchManager = branchManager;
+        this.storageManager = storageManager;
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-update-hook")) {
         	Preconditions.checkNotNull(is);
@@ -71,9 +71,7 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
         if (project.isNew()) {
             super.save(project);
 
-            ProjectStorage storage = storageManager.getStorage(project);
-
-            File codeDir = storage.ofCode();
+            File codeDir = project.code().repoDir();
             if (codeDir.exists() && !Project.isCode(new Git(codeDir))) {
             	logger.warn("Deleting existing directory '" + codeDir + "' before initializing project code repo...");
             	FileUtils.deleteDir(codeDir);
@@ -82,23 +80,27 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
             if (!codeDir.exists()) {
                 FileUtils.createDir(codeDir);
                 new Git(codeDir).init(true);
-                File hooksDir = new File(codeDir, "hooks");
-
-                File gitUpdateHookFile = new File(hooksDir, "update");
-                FileUtils.writeFile(gitUpdateHookFile, gitUpdateHook);
-                gitUpdateHookFile.setExecutable(true);
-                
-                File gitPostReceiveHookFile = new File(hooksDir, "post-receive");
-                FileUtils.writeFile(gitPostReceiveHookFile, gitPostReceiveHook);
-                gitPostReceiveHookFile.setExecutable(true);
+                setupHooks(project);
             }
             
-            check(project);
+            branchManager.syncBranches(project);
         } else {
             super.save(project);
         }
     }
 
+    private void setupHooks(Project project) {
+        File hooksDir = new File(project.code().repoDir(), "hooks");
+
+        File gitUpdateHookFile = new File(hooksDir, "update");
+        FileUtils.writeFile(gitUpdateHookFile, gitUpdateHook);
+        gitUpdateHookFile.setExecutable(true);
+        
+        File gitPostReceiveHookFile = new File(hooksDir, "post-receive");
+        FileUtils.writeFile(gitPostReceiveHookFile, gitPostReceiveHook);
+        gitPostReceiveHookFile.setExecutable(true);
+    }
+    
     @Transactional
     @Override
     public void delete(Project entity) {
@@ -128,32 +130,44 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
 
 	@Transactional
 	@Override
-	public void check(Project project) {
-		Collection<String> branchesInGit = project.code().listBranches();
-		for (Branch branch: project.getBranches()) {
-			if (!branchesInGit.contains(branch.getName()))
-				branchManager.delete(branch);
-		}
+	public Project fork(Project project, User user) {
+		if (project.getOwner().equals(user))
+			return project;
 		
-		for (String branchInGit: branchesInGit) {
-			boolean found = false;
-			for (Branch branch: project.getBranches()) {
-				if (branch.getName().equals(branchInGit)) {
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				Branch branch = new Branch();
-				branch.setName(branchInGit);
-				branch.setProject(project);
-				branchManager.save(branch);
+		Project forked = null;
+		for (Project each: user.getProjects()) {
+			if (project.equals(each.getForkedFrom())) {
+				forked = each;
+				break;
 			}
 		}
+		if (forked == null) {
+			Set<String> existingNames = new HashSet<>();
+			for (Project each: user.getProjects()) 
+				existingNames.add(each.getName());
+			
+			forked = new Project();
+			forked.setOwner(user);
+			forked.setForkedFrom(project);
+			if (existingNames.contains(project.getName())) {
+				int suffix = 1;
+				while (existingNames.contains(project.getName() + "_" + suffix))
+					suffix++;
+				forked.setName(project.getName() + "_" + suffix);
+			} else {
+				forked.setName(project.getName());
+			}
+
+			super.save(forked);
+
+            FileUtils.cleanDir(forked.code().repoDir());
+            forked.code().clone(project.code().repoDir().getAbsolutePath(), true);
+            setupHooks(forked);
+            
+            branchManager.syncBranches(forked);
+		}
 		
-		String defaultBranchName = project.code().resolveDefaultBranch();
-		if (!branchesInGit.isEmpty() && !branchesInGit.contains(defaultBranchName))
-			project.code().updateDefaultBranch(branchesInGit.iterator().next());
+		return forked;
 	}
 
 }

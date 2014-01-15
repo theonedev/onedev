@@ -8,12 +8,15 @@ import com.google.inject.ImplementedBy;
 import com.pmease.commons.hibernate.dao.GenericDao;
 import com.pmease.gitop.core.manager.impl.DefaultPullRequestManager;
 import com.pmease.gitop.model.Branch;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 
 @ImplementedBy(DefaultPullRequestManager.class)
 public interface PullRequestManager extends GenericDao<PullRequest> {
     
     @Nullable PullRequest findOpen(Branch target, Branch source);
+    
+    List<PullRequest> findOpen(Project project);
     
     void refresh(PullRequest request);
     

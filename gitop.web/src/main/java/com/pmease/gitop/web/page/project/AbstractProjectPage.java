@@ -7,6 +7,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -18,15 +19,18 @@ import com.google.common.base.Preconditions;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.TeamManager;
+import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Authorization;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.Team;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.model.permission.operation.GeneralOperation;
 import com.pmease.gitop.web.SessionData;
 import com.pmease.gitop.web.model.ProjectModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.AbstractAccountPage;
+import com.pmease.gitop.web.page.project.source.ProjectHomePage;
 
 @SuppressWarnings("serial")
 public abstract class AbstractProjectPage extends AbstractAccountPage {
@@ -99,6 +103,27 @@ public abstract class AbstractProjectPage extends AbstractAccountPage {
 			
 		}));
 		add(publicLabel);
+		
+		add(new Link<Void>("fork") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				UserManager userManager = Gitop.getInstance(UserManager.class);
+				User currentUser = userManager.getCurrent();
+				setVisible(getProject().isForkable() 
+						&& currentUser != null 
+						&& !getProject().getOwner().equals(currentUser));
+			}
+
+			@Override
+			public void onClick() {
+				User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
+				Project forked = Gitop.getInstance(ProjectManager.class).fork(getProject(), currentUser);
+				setResponsePage(ProjectHomePage.class, PageSpec.forProject(forked));
+			}
+			
+		});
 	}
 	
 	// TODO: here can be slow?

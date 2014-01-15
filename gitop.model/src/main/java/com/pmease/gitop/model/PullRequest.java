@@ -15,6 +15,9 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
+
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
@@ -277,4 +280,38 @@ public class PullRequest extends AbstractEntity {
 	public String getLockName() {
 		return "pull request: " + getId();
 	}
+	
+	public static class CriterionHelper {
+		public static Criterion ofOpen() {
+			return Restrictions.and(
+					Restrictions.not(Restrictions.eq("status", PullRequest.Status.MERGED)),
+					Restrictions.not(Restrictions.eq("status", PullRequest.Status.DECLINED))
+				);
+		}
+		
+		public static Criterion ofClosed() {
+			return Restrictions.or(
+					Restrictions.eq("status", PullRequest.Status.MERGED),
+					Restrictions.eq("status", PullRequest.Status.DECLINED)
+				);
+		}
+		
+		public static Criterion ofProject(Project project) {
+			return Restrictions.eq("project", project);
+		}
+
+		public static Criterion ofTarget(Branch target) {
+			return Restrictions.eq("target", target);
+		}
+
+		public static Criterion ofSource(Branch source) {
+			return Restrictions.eq("source", source);
+		}
+		
+		public static Criterion ofSubmitter(User submitter) {
+			return Restrictions.eq("submitter", submitter);
+		}
+		
+	}
+
 }

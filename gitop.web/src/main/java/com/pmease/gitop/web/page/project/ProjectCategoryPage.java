@@ -34,7 +34,9 @@ import com.pmease.gitop.web.SessionData;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.api.ProjectPageTab;
 import com.pmease.gitop.web.page.project.api.ProjectPageTab.Category;
-import com.pmease.gitop.web.page.project.issue.ProjectPullRequestsPage;
+import com.pmease.gitop.web.page.project.pullrequest.ClosedPullRequestsPage;
+import com.pmease.gitop.web.page.project.pullrequest.NewPullRequestPage;
+import com.pmease.gitop.web.page.project.pullrequest.OpenPullRequestsPage;
 import com.pmease.gitop.web.page.project.settings.ProjectOptionsPage;
 import com.pmease.gitop.web.page.project.source.AbstractFilePage;
 import com.pmease.gitop.web.page.project.source.ProjectHomePage;
@@ -132,7 +134,9 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 	}
 	
 	private Component newGroupHead(String id, Category group) {
-		return new Label(id, group.name());
+		// Replace underscore with space in order to display category 
+		// PULL_REQUESTS as "PULL REQUESTS" 
+		return new Label(id, group.name().replace("_", " "));
 	}
 	
 	private List<ProjectPageTab> getTabs(final Category group) {
@@ -190,17 +194,27 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 									"icon-group-o", 
 									ContributorsPage.class));
 		
+		// PULL REQUESTS TABS
+		tabs.add(new ProjectPageTab(Model.of("Open"), 
+									Category.PULL_REQUESTS, 
+									"icon-pull-request", 
+									OpenPullRequestsPage.class));
+		
+		tabs.add(new ProjectPageTab(Model.of("Closed"), 
+									Category.PULL_REQUESTS, 
+									"icon-pull-request", 
+									ClosedPullRequestsPage.class));
+
+		tabs.add(new ProjectPageTab(Model.of("Create New"), 
+				Category.PULL_REQUESTS, 
+				"icon-pull-request", 
+				NewPullRequestPage.class));
+
 		// WIKI TABS
 		tabs.add(new ProjectPageTab(Model.of("Wiki"), 
 									Category.WIKI, 
 									"icon-wiki", 
 									ProjectWikiPage.class));
-		
-		// ISSUES TABS
-		tabs.add(new ProjectPageTab(Model.of("Pull Requests"), 
-									Category.ISSUES, 
-									"icon-pull-request", 
-									ProjectPullRequestsPage.class));
 		
 		// STATISTICS TABS
 		tabs.add(new ProjectPageTab(Model.of("Graphs"), 

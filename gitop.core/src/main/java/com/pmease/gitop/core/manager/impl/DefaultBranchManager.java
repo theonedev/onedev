@@ -120,5 +120,34 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 				it.remove();
 		}
 	}
-    
+
+	@Transactional
+	@Override
+	public void syncBranches(Project project) {
+		Collection<String> branchesInGit = project.code().listBranches();
+		for (Branch branch: project.getBranches()) {
+			if (!branchesInGit.contains(branch.getName()))
+				delete(branch);
+		}
+		
+		for (String branchInGit: branchesInGit) {
+			boolean found = false;
+			for (Branch branch: project.getBranches()) {
+				if (branch.getName().equals(branchInGit)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				Branch branch = new Branch();
+				branch.setName(branchInGit);
+				branch.setProject(project);
+				save(branch);
+			}
+		}
+		
+		String defaultBranchName = project.code().resolveDefaultBranch();
+		if (!branchesInGit.isEmpty() && !branchesInGit.contains(defaultBranchName))
+			project.code().updateDefaultBranch(branchesInGit.iterator().next());
+	}
 }

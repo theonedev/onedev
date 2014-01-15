@@ -35,7 +35,8 @@ import com.pmease.gitop.model.validation.ProjectName;
 
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"owner", "name"})
+		@UniqueConstraint(columnNames={"owner", "name"}), 
+		@UniqueConstraint(columnNames={"owner", "forkedFrom"})
 })
 @SuppressWarnings("serial")
 @Editable
@@ -47,7 +48,7 @@ public class Project extends AbstractEntity implements UserBelonging {
 	@JoinColumn(nullable=false)
 	private User owner;
 	
-	private boolean forkable;
+	private boolean forkable = true;
 	
 	@ManyToOne
 	@JoinColumn(nullable=true)

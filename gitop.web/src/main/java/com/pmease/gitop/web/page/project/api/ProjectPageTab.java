@@ -25,8 +25,8 @@ public class ProjectPageTab extends AbstractPageTab {
 
 	public static enum Category {
 		SOURCE,
+		PULL_REQUESTS,
 		WIKI,
-		ISSUES,
 		STATISTICS
 	}
 	

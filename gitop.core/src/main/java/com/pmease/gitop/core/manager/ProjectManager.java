@@ -16,10 +16,15 @@ public interface ProjectManager extends GenericDao<Project> {
 	@Nullable Project findBy(User owner, String projectName);
 
 	/**
-	 * Check project information with corresponding git repository to keep data in sync.
+	 * Fork specified project as specified user.
 	 * 
 	 * @param project
-	 * 			the project to be checked
+	 * 			project to be forked
+	 * @param user
+	 * 			user forking the project
+	 * @return
+	 * 			newly forked project. If the project has already been forked, return the 
+	 * 			project forked previously
 	 */
-	void check(Project project);
+	Project fork(Project project, User user);
 }

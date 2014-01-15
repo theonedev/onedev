@@ -29,6 +29,7 @@ import com.pmease.gitop.core.manager.VoteInvitationManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.BuildResult;
 import com.pmease.gitop.model.MergePrediction;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequest.Status;
 import com.pmease.gitop.model.PullRequestUpdate;
@@ -37,6 +38,8 @@ import com.pmease.gitop.model.VoteInvitation;
 import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
 import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
 import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
+
+import static com.pmease.gitop.model.PullRequest.CriterionHelper.*;
 
 @Singleton
 public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> implements
@@ -61,17 +64,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 	@Sessional
 	@Override
 	public PullRequest findOpen(Branch target, Branch source) {
-		Criterion statusCriterion =
-				Restrictions.and(
-						Restrictions.not(Restrictions.eq("status", PullRequest.Status.MERGED)),
-						Restrictions.not(Restrictions.eq("status", PullRequest.Status.DECLINED))
-					);
-
-		Criterion[] criterions = new Criterion[]{
-				Restrictions.eq("target", target), 
-				Restrictions.eq("source", source),
-				statusCriterion};
-		
+		Criterion[] criterions = new Criterion[]{ofOpen(), ofTarget(target), ofSource(source)};
 		return find(criterions, new Order[]{Order.desc("id")});
 	}
 
@@ -315,6 +308,11 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 		} else {
 			return null;
 		}
+	}
+
+	@Override
+	public List<PullRequest> findOpen(Project project) {
+		return query(ofProject(project));
 	}
 
 }
