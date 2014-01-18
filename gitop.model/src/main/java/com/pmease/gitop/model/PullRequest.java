@@ -31,7 +31,7 @@ public class PullRequest extends AbstractEntity {
 		PENDING_CHECK, PENDING_APPROVAL, PENDING_UPDATE, PENDING_MERGE, MERGED, DECLINED;
 	}
 	
-	@JoinColumn(nullable = false)
+	@Column(nullable = false)
 	private String title;
 
 	private boolean autoMerge;
@@ -40,6 +40,7 @@ public class PullRequest extends AbstractEntity {
 	private User submitter;
 	
 	@ManyToOne
+	@JoinColumn(nullable = false)
 	private Branch target;
 
 	@ManyToOne
@@ -108,11 +109,8 @@ public class PullRequest extends AbstractEntity {
 	 * Get target branch of this request.
 	 * 
 	 * @return
-	 * 			target branch of this request, or <tt>null</tt> if target branch 
-	 * 			is deleted. In case of target branch being deleted, the pull request 
-	 * 			will also be closed 
+	 * 			target branch of this request
 	 */
-	@Nullable
 	public Branch getTarget() {
 		return target;
 	}
@@ -296,10 +294,6 @@ public class PullRequest extends AbstractEntity {
 				);
 		}
 		
-		public static Criterion ofProject(Project project) {
-			return Restrictions.eq("project", project);
-		}
-
 		public static Criterion ofTarget(Branch target) {
 			return Restrictions.eq("target", target);
 		}

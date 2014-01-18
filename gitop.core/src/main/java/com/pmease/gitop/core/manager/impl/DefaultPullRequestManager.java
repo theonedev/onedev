@@ -1,5 +1,9 @@
 package com.pmease.gitop.core.manager.impl;
 
+import static com.pmease.gitop.model.PullRequest.CriterionHelper.ofOpen;
+import static com.pmease.gitop.model.PullRequest.CriterionHelper.ofSource;
+import static com.pmease.gitop.model.PullRequest.CriterionHelper.ofTarget;
+
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -29,7 +33,6 @@ import com.pmease.gitop.core.manager.VoteInvitationManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.BuildResult;
 import com.pmease.gitop.model.MergePrediction;
-import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequest.Status;
 import com.pmease.gitop.model.PullRequestUpdate;
@@ -38,8 +41,6 @@ import com.pmease.gitop.model.VoteInvitation;
 import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
 import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
 import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
-
-import static com.pmease.gitop.model.PullRequest.CriterionHelper.*;
 
 @Singleton
 public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> implements
@@ -308,11 +309,6 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 		} else {
 			return null;
 		}
-	}
-
-	@Override
-	public List<PullRequest> findOpen(Project project) {
-		return query(ofProject(project));
 	}
 
 }

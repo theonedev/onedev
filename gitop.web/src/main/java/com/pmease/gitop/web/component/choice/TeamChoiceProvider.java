@@ -3,6 +3,7 @@ package com.pmease.gitop.web.component.choice;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.model.IModel;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
@@ -48,8 +49,8 @@ public class TeamChoiceProvider extends ChoiceProvider<Team> {
 	@Override
 	public void toJson(Team choice, JSONWriter writer) throws JSONException {
 		writer.key("id").value(choice.getId())
-				.key("name").value(choice.getName())
-				.key("permission").value(choice.getAuthorizedOperation());
+				.key("name").value(StringEscapeUtils.escapeHtml4(choice.getName()))
+				.key("permission").value(StringEscapeUtils.escapeHtml4(choice.getAuthorizedOperation().toString()));
 	}
 
 	@Override

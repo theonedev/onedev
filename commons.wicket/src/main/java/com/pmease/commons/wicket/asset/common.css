@@ -139,3 +139,5 @@ table.reflection .right-spacing {margin-right: 8px;}
 
 /* Select2 */
 .editor .select2-container {width: 100%;}
+.input-group .select2-container.form-control .select2-choice, .input-group .select2-container.form-control .select2-choices {
+	border-radius: 0 4px 4px 0;}

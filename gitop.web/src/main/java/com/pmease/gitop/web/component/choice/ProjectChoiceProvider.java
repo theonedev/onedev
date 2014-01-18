@@ -3,6 +3,7 @@ package com.pmease.gitop.web.component.choice;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.model.IModel;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.MatchMode;
@@ -22,6 +23,8 @@ import com.vaynberg.wicket.select2.Response;
 @SuppressWarnings("serial")
 public class ProjectChoiceProvider extends ChoiceProvider<Project> {
 
+	private static final int PAGE_SIZE = 25;
+	
 	private IModel<User> userModel;
 	
 	public ProjectChoiceProvider(IModel<User> userModel) {
@@ -31,7 +34,7 @@ public class ProjectChoiceProvider extends ChoiceProvider<Project> {
 	@Override
 	public void query(String term, int page, Response<Project> response) {
 		ProjectManager pm = Gitop.getInstance(ProjectManager.class);
-		int first = page * 25;
+		int first = page * PAGE_SIZE;
 		List<Project> projects = 
 				pm.query(
 						new Criterion[] {
@@ -39,7 +42,7 @@ public class ProjectChoiceProvider extends ChoiceProvider<Project> {
 								Restrictions.like("name", term, MatchMode.START).ignoreCase()
 						}, new Order[] {
 								Order.asc("name")
-						}, first, 25);
+						}, first, PAGE_SIZE);
 		
 		response.addAll(projects);
 	}
@@ -47,8 +50,8 @@ public class ProjectChoiceProvider extends ChoiceProvider<Project> {
 	@Override
 	public void toJson(Project choice, JSONWriter writer) throws JSONException {
 		writer.key("id").value(choice.getId())
-			  .key("owner").value(choice.getOwner().getName())
-			  .key("name").value(choice.getName());
+			  .key("owner").value(StringEscapeUtils.escapeHtml4(choice.getOwner().getName()))
+			  .key("name").value(StringEscapeUtils.escapeHtml4(choice.getName()));
 	}
 
 	@Override

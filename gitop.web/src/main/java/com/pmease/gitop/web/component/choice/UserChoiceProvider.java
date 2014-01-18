@@ -3,6 +3,7 @@ package com.pmease.gitop.web.component.choice;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.MatchMode;
@@ -48,10 +49,10 @@ public class UserChoiceProvider extends ChoiceProvider<User> {
 
 	@Override
 	public void toJson(User choice, JSONWriter writer) throws JSONException {
-		writer.key("id").value(choice.getId()).key("name").value(choice.getName());
+		writer.key("id").value(choice.getId()).key("name").value(StringEscapeUtils.escapeHtml4(choice.getName()));
 		if (choice.getDisplayName() != null)
-			writer.key("displayName").value(choice.getDisplayName());
-		writer.key("email").value(choice.getEmail());
+			writer.key("displayName").value(StringEscapeUtils.escapeHtml4(choice.getDisplayName()));
+		writer.key("email").value(StringEscapeUtils.escapeHtml4(choice.getEmail()));
 		writer.key("avatar").value(getAvatarUrl(choice));
 	}
 

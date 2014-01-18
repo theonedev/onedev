@@ -1,0 +1,27 @@
+<wicket:panel>
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<div class="panel-title">Creating New Pull Request</div>
+		</div>
+		<form wicket:id="form">
+			<div class="panel-body">
+				<div class="form-group">
+					<label>Title</label> 
+					<input wicket:id="title" type="text" class="form-control">
+				</div>
+				<div class="target">
+					<div>Target</div>
+					<div wicket:id="target"></div>
+				</div>
+				<div class="source">
+					<div>Source</div>
+					<div wicket:id="source"></div>
+				</div>
+			</div>
+			<div class="panel-footer">
+				<input wicket:id="submit" value="Submit" class="btn btn-primary"></input>
+				<input wicket:id="cancel" value="Cancel" class="btn btn-default"></input>
+			</div>
+		</form>
+	</div>
+</wicket:panel>
