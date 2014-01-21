@@ -4,6 +4,7 @@ import java.io.File;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
+import com.pmease.commons.util.execution.LineConsumer;
 
 public class FetchCommand extends GitCommand<Void> {
 
@@ -33,7 +34,17 @@ public class FetchCommand extends GitCommand<Void> {
 		Commandline cmd = cmd().addArgs("fetch");
 		cmd.addArgs(from, refspec);
 		
-		cmd.execute(debugLogger, errorLogger).checkReturnCode();
+		cmd.execute(debugLogger, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				if (line.startsWith("From ") || line.startsWith(" * branch"))
+					debug(line);
+				else
+					error(line);
+			}
+			
+		}).checkReturnCode();
 		
 		return null;
 	}

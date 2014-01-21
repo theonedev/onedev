@@ -100,22 +100,22 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 		if (request.isNew()) {
 	    	Git git = new Git(FileUtils.createTempDir());
 	    	try {
-		    	request.getTarget().getProject().setCodeSandbox(git);
+		    	String targetHead = request.getTarget().getHeadCommit();
+				String sourceHead = request.getSource().getHeadCommit();
+				
 	    		git.clone(request.getTarget().getProject().code().repoDir().getAbsolutePath(), 
 	    				false, true, true, request.getTarget().getName());
 	    		git.reset(null, null);
 			
-				String targetHead = request.getTarget().getHeadCommit();
-				String sourceHead = request.getSource().getHeadCommit();
-				
+		    	request.getTarget().getProject().setCodeSandbox(git);
+
 				if (git.isAncestor(sourceHead, targetHead)) {
 					request.setStatus(Status.INTEGRATED);
 				} else {
 					if (git.isAncestor(targetHead, sourceHead)) {
 						request.setMergeResult(new MergeResult(targetHead, sourceHead, targetHead, sourceHead));
 					} else {
-						if (!request.getSource().getProject().equals(request.getTarget().getProject()))
-							git.fetch(request.getSource().getProject().code().repoDir().getAbsolutePath(), sourceHead);
+						git.fetch(request.getSource().getProject().code().repoDir().getAbsolutePath(), sourceHead);
 						
 						String mergeBase = git.calcMergeBase(targetHead, sourceHead);
 						if (git.merge(sourceHead, null, null, null))
@@ -136,9 +136,8 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 						request.setStatus(Status.PENDING_INTEGRATE);
 					}
 				}
-	    	} catch (Exception e) {
+	    	} finally {
 	    		FileUtils.deleteDir(git.repoDir());
-	    		throw ExceptionUtils.unchecked(e);
 	    	}
 		} else {
 			try {

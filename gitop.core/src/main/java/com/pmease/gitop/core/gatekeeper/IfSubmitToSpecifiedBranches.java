@@ -59,10 +59,17 @@ public class IfSubmitToSpecifiedBranches extends BranchGateKeeper {
 		for (Long branchId: branchIds)
 			branchNames.add(branchManager.load(branchId).getName());
 		
-		if (branchIds.contains(branch.getId()))
-			return accepted("Target branch is one of '" + StringUtils.join(branchNames, ", ") + "'.");
-		else
-			return rejected("Target branch is not one of '" + StringUtils.join(branchNames, ", ") + "'.");
+		if (branchIds.size() > 1) {
+			if (branchIds.contains(branch.getId()))
+				return accepted("Target branch is one of '" + StringUtils.join(branchNames, ", ") + "'.");
+			else
+				return rejected("Target branch is not any one of '" + StringUtils.join(branchNames, ", ") + "'.");
+		} else {
+			if (branchIds.contains(branch.getId()))
+				return accepted("Target branch is '" + branchNames.get(0) + "'.");
+			else
+				return rejected("Target branch is not '" + branchNames.get(0) + "'.");
+		}
 	}
 	
 	@Override

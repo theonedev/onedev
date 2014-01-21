@@ -4,6 +4,7 @@ import java.io.File;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
+import com.pmease.commons.util.execution.LineConsumer;
 
 public class CloneCommand extends GitCommand<Void> {
 
@@ -63,7 +64,17 @@ public class CloneCommand extends GitCommand<Void> {
 		cmd.addArgs(from);
 		cmd.addArgs(".");
 		
-		cmd.execute(debugLogger, errorLogger).checkReturnCode();
+		cmd.execute(debugLogger, new LineConsumer(){
+
+			@Override
+			public void consume(String line) {
+				if (line.contains("You appear to have cloned an empty repository"))
+					warn(line);
+				else
+					error(line);
+			}
+			
+		}).checkReturnCode();
 		
 		return null;
 	}

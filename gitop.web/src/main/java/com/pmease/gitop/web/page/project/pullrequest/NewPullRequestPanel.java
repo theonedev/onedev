@@ -96,7 +96,21 @@ public class NewPullRequestPanel extends Panel {
 		};
 		Form<Void> form = new Form<Void>("form");
 
+		final WebMarkupContainer messageContainer = new WebMarkupContainer("message") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				PullRequest request = getPullRequest();
+				setVisible(request.isNew() && (request.getStatus() == PENDING_APPROVAL || request.getStatus() == PENDING_INTEGRATE)); 
+			}
+			
+		};
+		messageContainer.setOutputMarkupPlaceholderTag(true);
+		form.add(messageContainer);
+
 		final WebMarkupContainer statusContainer = new WebMarkupContainer("status");
+		statusContainer.setOutputMarkupId(true);
 		form.add(statusContainer);
 		
 		form.add(new ComparableBranchSelector("target", currentProjectModel, targetModel, "Target Project", "Target Branch") {
@@ -104,6 +118,7 @@ public class NewPullRequestPanel extends Panel {
 			@Override
 			protected void onChange(AjaxRequestTarget target) {
 				super.onChange(target);
+				target.add(messageContainer);
 				target.add(statusContainer);
 			}
 			
@@ -114,23 +129,12 @@ public class NewPullRequestPanel extends Panel {
 			@Override
 			protected void onChange(AjaxRequestTarget target) {
 				super.onChange(target);
+				target.add(messageContainer);
 				target.add(statusContainer);
 			}
 			
 		}.setRequired(true));
 
-		WebMarkupContainer messageContainer = new WebMarkupContainer("message") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				PullRequest request = getPullRequest();
-				setVisible(request.isNew() && (request.getStatus() == PENDING_APPROVAL || request.getStatus() == PENDING_INTEGRATE)); 
-			}
-			
-		};
-		form.add(messageContainer);
-		
 		messageContainer.add(new TextField<String>("title", new PropertyModel<String>(this, "title")).setRequired(true));
 		messageContainer.add(new TextArea<String>("comment", new PropertyModel<String>(this, "comment")));
 
@@ -205,18 +209,17 @@ public class NewPullRequestPanel extends Panel {
 			@Override
 			public String getObject() {
 				PullRequest request = getPullRequest();
-				if (request.isNew()) {
+				if (!request.isNew()) {
 					return "#" + request.getId() + ": " + request.getTitle();
 				} else if (!getTarget().equals(getSource())) {
 					if (request.getStatus() == INTEGRATED) {
 						return "Target branch '" + getTarget().getName() + "' of project '" + getTarget().getProject() 
 								+ "' is already update to date.";
-					} else {
-						return null;
+					} else if (request.getStatus() != PENDING_UPDATE) {
+						return "You can still send the pull request.";
 					}
-				} else {
-					return null;
-				}
+				} 
+				return null;
 			}
 			
 		}));
