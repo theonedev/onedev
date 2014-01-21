@@ -41,15 +41,7 @@ public class IfSubmitToSpecifiedBranches extends BranchGateKeeper {
 
 	@Override
 	public CheckResult doCheckRequest(PullRequest request) {
-		List<String> branchNames = new ArrayList<>();
-		BranchManager branchManager = Gitop.getInstance(BranchManager.class);
-		for (Long branchId: branchIds)
-			branchNames.add(branchManager.load(branchId).getName());
-		
-		if (branchIds.contains(request.getTarget().getId()))
-			return accepted("Target branch is one of '" + StringUtils.join(branchNames, ", ") + "'.");
-		else
-			return rejected("Target branch is not one of '" + StringUtils.join(branchNames, ", ") + "'.");
+		return checkBranch(request.getTarget());
 	}
 
 	@Override
@@ -61,7 +53,7 @@ public class IfSubmitToSpecifiedBranches extends BranchGateKeeper {
 			return this;
 	}
 
-	private CheckResult checkBranch(User user, Branch branch) {
+	private CheckResult checkBranch(Branch branch) {
 		List<String> branchNames = new ArrayList<>();
 		BranchManager branchManager = Gitop.getInstance(BranchManager.class);
 		for (Long branchId: branchIds)
@@ -75,12 +67,12 @@ public class IfSubmitToSpecifiedBranches extends BranchGateKeeper {
 	
 	@Override
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		return checkBranch(user, branch);
+		return checkBranch(branch);
 	}
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		return checkBranch(user, branch);
+		return checkBranch(branch);
 	}
 
 	@Override

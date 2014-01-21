@@ -123,4 +123,5 @@ public class Branch extends AbstractEntity {
 				.add("project", getProject())
 				.toString();
 	}
+
 }

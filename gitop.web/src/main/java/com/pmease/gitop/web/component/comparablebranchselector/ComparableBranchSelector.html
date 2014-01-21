@@ -1,15 +1,16 @@
 <wicket:panel>
 	<div class="comparable-branch-selector clearfix">
-		<div class="pull-left project">
+		<div class="project">
 			<div class="input-group">
-				<span class="input-group-addon">Project</span> 
-				<input wicket:id="projectSelector" type="hidden" class="form-control"></input> 
+				<span wicket:id="projectLabel" class="input-group-addon">Project</span> 
+				<input wicket:id="projectChoice" type="hidden" class="form-control"></input> 
 			</div>
 		</div>
-		<div class="pull-left branch">
+		<div class="connector">&mdash;</div>
+		<div class="branch">
 			<div class="input-group">
-				<span class="input-group-addon">Branch</span> 
-				<input wicket:id="branchSelector" type="hidden" class="form-control"></input> 
+				<span wicket:id="branchLabel" class="input-group-addon">Branch</span> 
+				<input wicket:id="branchChoice" type="hidden" class="form-control"></input> 
 			</div>
 		</div>
 	</div>

@@ -28,7 +28,7 @@ import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 public class PullRequest extends AbstractEntity {
 
 	public enum Status {
-		PENDING_CHECK, PENDING_APPROVAL, PENDING_UPDATE, PENDING_MERGE, MERGED, DECLINED;
+		PENDING_CHECK, PENDING_APPROVAL, PENDING_UPDATE, PENDING_INTEGRATE, INTEGRATED, DECLINED;
 	}
 	
 	@Column(nullable = false)
@@ -53,7 +53,7 @@ public class PullRequest extends AbstractEntity {
 	private Status status = Status.PENDING_CHECK;
 	
 	@Embedded
-	private MergePrediction mergePrediction;
+	private MergeResult mergeResult;
 
 	private transient List<PullRequestUpdate> sortedUpdates;
 
@@ -66,6 +66,9 @@ public class PullRequest extends AbstractEntity {
 
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
 	private Collection<VoteInvitation> voteInvitations = new ArrayList<VoteInvitation>();
+	
+	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
+	private Collection<PullRequestComment> comments = new ArrayList<PullRequestComment>();
 
 	/**
 	 * Get title of this merge request.
@@ -153,6 +156,14 @@ public class PullRequest extends AbstractEntity {
 		this.voteInvitations = voteInvitations;
 	}
 
+	public Collection<PullRequestComment> getComments() {
+		return comments;
+	}
+
+	public void setComments(Collection<PullRequestComment> comments) {
+		this.comments = comments;
+	}
+
 	public Status getStatus() {
 		return status;
 	}
@@ -162,7 +173,7 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	public boolean isOpen() {
-		return status != Status.MERGED && status != Status.DECLINED;
+		return status != Status.INTEGRATED && status != Status.DECLINED;
 	}
 	
 	public PullRequestUpdate getBaseUpdate() {
@@ -192,17 +203,17 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	/**
-	 * Get merge prediction of this pull request.
+	 * Get merge result of this pull request.
 	 *  
 	 * @return
 	 * 			<tt>null</tt> if this pull request has not been refreshed yet
 	 */
-	public MergePrediction getMergePrediction() {
-		return mergePrediction;
+	public MergeResult getMergeResult() {
+		return mergeResult;
 	}
 	
-	public void setMergePrediction(MergePrediction mergePrediction) {
-		this.mergePrediction = mergePrediction;
+	public void setMergeResult(MergeResult mergeResult) {
+		this.mergeResult = mergeResult;
 	}
 
 	/**
@@ -282,14 +293,14 @@ public class PullRequest extends AbstractEntity {
 	public static class CriterionHelper {
 		public static Criterion ofOpen() {
 			return Restrictions.and(
-					Restrictions.not(Restrictions.eq("status", PullRequest.Status.MERGED)),
+					Restrictions.not(Restrictions.eq("status", PullRequest.Status.INTEGRATED)),
 					Restrictions.not(Restrictions.eq("status", PullRequest.Status.DECLINED))
 				);
 		}
 		
 		public static Criterion ofClosed() {
 			return Restrictions.or(
-					Restrictions.eq("status", PullRequest.Status.MERGED),
+					Restrictions.eq("status", PullRequest.Status.INTEGRATED),
 					Restrictions.eq("status", PullRequest.Status.DECLINED)
 				);
 		}

@@ -21,10 +21,14 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.PullRequestManager;
+import com.pmease.gitop.core.manager.UserManager;
+import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.Constants;
 import com.pmease.gitop.web.page.project.ProjectCategoryPage;
 
@@ -46,16 +50,18 @@ public class PullRequestsPage extends ProjectCategoryPage {
 
 			@Override
 			public void onClick() {
-				PullRequest pullRequest = new PullRequest();
+				Branch target, source;
 				BranchManager branchManager = Gitop.getInstance(BranchManager.class);
 				if (getProject().getForkedFrom() != null) {
-					pullRequest.setTarget(branchManager.findDefault(getProject().getForkedFrom()));
-					pullRequest.setSource(branchManager.findDefault(getProject()));
+					target = branchManager.findDefault(getProject().getForkedFrom());
+					source = branchManager.findDefault(getProject());
 				} else {
-					pullRequest.setTarget(branchManager.findDefault(getProject()));
-					pullRequest.setSource(branchManager.findDefault(getProject()));
+					target = branchManager.findDefault(getProject());
+					source = branchManager.findDefault(getProject());
 				}
-				PullRequestsPage.this.replace(new NewPullRequestPanel("content", pullRequest));
+				User currentUser = AppLoader.getInstance(UserManager.class).getCurrent();
+				
+				PullRequestsPage.this.replace(new NewPullRequestPanel("content", target, source, currentUser));
 			}
 			
 		});

@@ -23,7 +23,7 @@ public interface GateKeeper extends Trimmable, Serializable {
 	 * 			result of the check
 	 */
 	CheckResult checkRequest(PullRequest request);
-	
+
 	/**
 	 * Check if specified user can modify specified file in specified branch.
 	 *

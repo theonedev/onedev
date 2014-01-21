@@ -35,28 +35,26 @@ public class IfSubmitToSpecifiedBranchPatterns extends BranchGateKeeper {
 		this.branchPatterns = branchPatterns;
 	}
 
-	@Override
-	public CheckResult doCheckRequest(PullRequest request) {
-		if (WildcardUtils.matchPath(getBranchPatterns(), request.getTarget().getName()))
+	private CheckResult checkBranch(Branch branch) {
+		if (WildcardUtils.matchPath(getBranchPatterns(), branch.getName()))
 			return accepted("Target branch matches pattern '" + branchPatterns + "'.");
 		else
 			return rejected("Target branch does not match pattern '" + branchPatterns + "'.");
+	}
+	
+	@Override
+	public CheckResult doCheckRequest(PullRequest request) {
+		return checkBranch(request.getTarget());
 	}
 
 	@Override
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		if (WildcardUtils.matchPath(getBranchPatterns(), branch.getName()))
-			return accepted("Target branch matches pattern '" + branchPatterns + "'.");
-		else
-			return rejected("Target branch does not match pattern '" + branchPatterns + "'.");
+		return checkBranch(branch);
 	}
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		if (WildcardUtils.matchPath(getBranchPatterns(), branch.getName()))
-			return accepted("Target branch matches pattern '" + branchPatterns + "'.");
-		else
-			return rejected("Target branch does not match pattern '" + branchPatterns + "'.");
+		return checkBranch(branch);
 	}
 
 	@Override

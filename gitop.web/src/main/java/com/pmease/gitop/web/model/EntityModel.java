@@ -6,15 +6,18 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.loader.AppLoader;
+import com.pmease.commons.util.JavassistUtils;
 
 public class EntityModel<T extends AbstractEntity> extends LoadableDetachableModel<T> {
 
 	private static final long serialVersionUID = 1L;
 
-	private transient T entity;
-	private Long id;
 	private final Class<T> entityClass;
 
+	private T entity;
+	
+	private Long id;
+	
 	protected GeneralDao getDao() {
 		return AppLoader.getInstance(GeneralDao.class);
 	}
@@ -23,22 +26,27 @@ public class EntityModel<T extends AbstractEntity> extends LoadableDetachableMod
 	public EntityModel(T entity) {
 		Preconditions.checkNotNull(entity, "entity");
 		
-		if (entity.isNew()) {
-			this.entity = entity;
-		} else {
-			this.id = entity.getId();
-		}
+		this.entityClass = (Class<T>) JavassistUtils.unproxy(entity.getClass());
 		
-		this.entityClass = (Class<T>) entity.getClass();
+		setObject(entity);
 	}
 
 	@Override
 	protected T load() {
 		if (id != null) {
-			return getDao().get(entityClass, id);
+			return getDao().load(entityClass, id);
 		} else {
 			return entity;
 		}
 	}
 
+	@Override
+	public void setObject(T object) {
+		super.setObject(object);
+		if (object.isNew())
+			entity = object;
+		else
+			id = object.getId();
+	}
+	
 }

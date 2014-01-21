@@ -40,21 +40,31 @@ public class IfTouchSpecifiedFilePatterns extends FileGateKeeper {
 
 	@Override
 	public CheckResult doCheckRequest(PullRequest request) {
-		for (int i=0; i<request.getEffectiveUpdates().size(); i++) {
-			PullRequestUpdate update = request.getEffectiveUpdates().get(i);
-
-			Collection<String> touchedFiles = request.getTarget().getProject().code()
-					.listChangedFiles(update.getBaseCommit(), update.getHeadCommit());
+		if (request.isNew()) {
+			for (String file: request.getTarget().getProject().code().listChangedFiles(
+					request.getTarget().getHeadCommit(), request.getSource().getHeadCommit())) {
+				if (WildcardUtils.matchPath(filePatterns, file))
+						return accepted("Touched files match patterns '" + filePatterns + "'.");
+			}
 			
-			for (String file: touchedFiles) {
-				if (WildcardUtils.matchPath(getFilePatterns(), file)) {
-					request.setBaseUpdate(update);
-					return accepted("Touched files match patterns '" + getFilePatterns() + "'.");
+			return rejected("No touched files match patterns '" + filePatterns + "'.");
+		} else {
+			for (int i=0; i<request.getEffectiveUpdates().size(); i++) {
+				PullRequestUpdate update = request.getEffectiveUpdates().get(i);
+	
+				Collection<String> touchedFiles = request.getTarget().getProject().code()
+						.listChangedFiles(update.getBaseCommit(), update.getHeadCommit());
+				
+				for (String file: touchedFiles) {
+					if (WildcardUtils.matchPath(getFilePatterns(), file)) {
+						request.setBaseUpdate(update);
+						return accepted("Touched files match patterns '" + getFilePatterns() + "'.");
+					}
 				}
 			}
+	
+			return rejected("No touched files match patterns '" + getFilePatterns() + "'.");
 		}
-
-		return rejected("No touched files match patterns '" + getFilePatterns() + "'.");
 	}
 
 	@Override

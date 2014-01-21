@@ -75,7 +75,9 @@ public class Project extends AbstractEntity implements UserBelonging {
 
     @OneToMany(mappedBy="forkedFrom", cascade=CascadeType.REMOVE)
 	private Collection<Project> forks = new ArrayList<Project>();
-
+    
+    private transient Git codeSandbox;
+    
 	public User getOwner() {
 		return owner;
 	}
@@ -200,7 +202,18 @@ public class Project extends AbstractEntity implements UserBelonging {
 	}
 	
 	public Git code() {
-		return new Git(AppLoader.getInstance(StorageManager.class).getStorage(this).ofCode());
+		if (codeSandbox != null)
+			return codeSandbox;
+		else
+			return new Git(AppLoader.getInstance(StorageManager.class).getStorage(this).ofCode());
+	}
+	
+	public Git getCodeSandbox() {
+		return codeSandbox;
+	}
+
+	public void setCodeSandbox(Git codeSandbox) {
+		this.codeSandbox = codeSandbox;
 	}
 
 	/**
@@ -286,4 +299,5 @@ public class Project extends AbstractEntity implements UserBelonging {
 		}
 		return comparables;
 	}
+	
 }

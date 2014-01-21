@@ -1,26 +1,33 @@
 <wicket:panel>
-	<div class="panel panel-default">
-		<div class="panel-heading">
-			<div class="panel-title">Creating New Pull Request</div>
-		</div>
+	<div class="new-pull-request">
 		<form wicket:id="form">
-			<div class="panel-body">
-				<div class="form-group">
-					<label>Title</label> 
-					<input wicket:id="title" type="text" class="form-control">
-				</div>
-				<div class="target">
-					<div>Target</div>
-					<div wicket:id="target"></div>
-				</div>
-				<div class="source">
-					<div>Source</div>
-					<div wicket:id="source"></div>
-				</div>
+			<div class="head">
+				<div wicket:id="target" class="target"></div>
+				<div class="icon icon-arrow-slim-left icon-2x"></div>
+				<div wicket:id="source" class="source"></div>
 			</div>
-			<div class="panel-footer">
-				<input wicket:id="submit" value="Submit" class="btn btn-primary"></input>
-				<input wicket:id="cancel" value="Cancel" class="btn btn-default"></input>
+			<div class="body clearfix">
+				<div wicket:id="message" class="message pull-left">
+					<div class="title">
+						<input wicket:id="title" type="text" class="form-control">
+					</div>
+					<div class="comment">
+						<textarea wicket:id="comment" class="form-control"></textarea>
+					</div>
+				</div>
+				<div class="status pull-right">
+					<div wicket:id="summary" class="summary"></div>
+					<div wicket:id="detail" class="detail"></div>
+					<wicket:enclosure child="rejectReasons">
+					<ul>
+						<li wicket:id="rejectReasons">
+							<span wicket:id="reason"></span>
+						</li>
+					</ul>
+					</wicket:enclosure>
+					<input wicket:id="send" value="Send Pull Request" class="btn btn-lg btn-primary"></input>
+					<input wicket:id="view" value="View Pull Request" class="btn btn-lg btn-primary"></input>
+				</div>
 			</div>
 		</form>
 	</div>
