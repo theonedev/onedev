@@ -123,4 +123,8 @@ $(document).ready(function() {
             }
         });
     });
+	
+	$(window).on("beforeunload", function() {
+		$(":focus").trigger("blur");
+	});
 });

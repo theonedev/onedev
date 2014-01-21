@@ -8,11 +8,10 @@ import static com.pmease.gitop.model.PullRequest.Status.PENDING_UPDATE;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.SubmitLink;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
@@ -24,6 +23,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 
+import com.google.common.base.Preconditions;
+import com.pmease.commons.git.Commit;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.model.Branch;
@@ -37,7 +38,6 @@ import com.pmease.gitop.web.page.project.AbstractProjectPage;
 @SuppressWarnings("serial")
 public class NewPullRequestPanel extends Panel {
 
-	@SuppressWarnings("unused")
 	private String title;
 	
 	@SuppressWarnings("unused")
@@ -48,6 +48,8 @@ public class NewPullRequestPanel extends Panel {
 	private IModel<Branch> sourceModel;
 	
 	private IModel<User> submitterModel;
+	
+	private IModel<List<Commit>> commitsModel;
 	
 	private IModel<PullRequest> pullRequestModel;
 	
@@ -77,6 +79,17 @@ public class NewPullRequestPanel extends Panel {
 			}
 			
 		};
+		
+		commitsModel = new LoadableDetachableModel<List<Commit>>() {
+
+			@Override
+			protected List<Commit> load() {
+				PullRequest request = getPullRequest();
+				return getSource().getProject().code().log(request.getMergeResult().getMergeBase(), 
+						getSource().getHeadCommit(), null, 0, 0);
+			}
+			
+		};
 	}
 
 	@Override
@@ -94,8 +107,6 @@ public class NewPullRequestPanel extends Panel {
 			}
 			
 		};
-		Form<Void> form = new Form<Void>("form");
-
 		final WebMarkupContainer messageContainer = new WebMarkupContainer("message") {
 
 			@Override
@@ -107,13 +118,13 @@ public class NewPullRequestPanel extends Panel {
 			
 		};
 		messageContainer.setOutputMarkupPlaceholderTag(true);
-		form.add(messageContainer);
+		add(messageContainer);
 
 		final WebMarkupContainer statusContainer = new WebMarkupContainer("status");
 		statusContainer.setOutputMarkupId(true);
-		form.add(statusContainer);
+		add(statusContainer);
 		
-		form.add(new ComparableBranchSelector("target", currentProjectModel, targetModel, "Target Project", "Target Branch") {
+		add(new ComparableBranchSelector("target", currentProjectModel, targetModel, "Target Project", "Target Branch") {
 
 			@Override
 			protected void onChange(AjaxRequestTarget target) {
@@ -124,7 +135,7 @@ public class NewPullRequestPanel extends Panel {
 			
 		}.setRequired(true));
 		
-		form.add(new ComparableBranchSelector("source", currentProjectModel, sourceModel, "Source Project", "Source Branch") {
+		add(new ComparableBranchSelector("source", currentProjectModel, sourceModel, "Source Project", "Source Branch") {
 
 			@Override
 			protected void onChange(AjaxRequestTarget target) {
@@ -135,10 +146,48 @@ public class NewPullRequestPanel extends Panel {
 			
 		}.setRequired(true));
 
-		messageContainer.add(new TextField<String>("title", new PropertyModel<String>(this, "title")).setRequired(true));
-		messageContainer.add(new TextArea<String>("comment", new PropertyModel<String>(this, "comment")));
+		TextField<String> titleField = new TextField<String>("title", new IModel<String>() {
 
-		statusContainer.add(new SubmitLink("send") {
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				if (title != null)
+					return title;
+				else 
+					return getDefaultTitle();
+			}
+
+			@Override
+			public void setObject(String object) {
+				if (!getDefaultTitle().equals(object))
+					title = object;
+			}
+			
+		});
+		titleField.add(new AjaxFormComponentUpdatingBehavior("blur") {
+
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+			}
+			
+		});
+		titleField.setRequired(true);
+		messageContainer.add(titleField);
+		
+		TextArea<String> commentArea = new TextArea<String>("comment", new PropertyModel<String>(this, "comment"));
+		commentArea.add(new AjaxFormComponentUpdatingBehavior("blur") {
+
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+			}
+			
+		});
+		messageContainer.add(commentArea);
+
+		statusContainer.add(new Link<Void>("send") {
 
 			@Override
 			protected void onConfigure() {
@@ -149,8 +198,7 @@ public class NewPullRequestPanel extends Panel {
 			}
 
 			@Override
-			public void onSubmit() {
-				super.onSubmit();
+			public void onClick() {
 			}
 
 			@Override
@@ -247,8 +295,6 @@ public class NewPullRequestPanel extends Panel {
 			}
 			
 		});
-
-		add(form);
 	}
 	
 	private Branch getTarget() {
@@ -266,6 +312,18 @@ public class NewPullRequestPanel extends Panel {
 	private PullRequest getPullRequest() {
 		return pullRequestModel.getObject();
 	}
+	
+	private List<Commit> getCommits() {
+		return commitsModel.getObject();
+	}
+	
+	private String getDefaultTitle() {
+		Preconditions.checkState(!getCommits().isEmpty());
+		if (getCommits().size() == 1)
+			return getCommits().get(0).getSubject();
+		else
+			return getSource().getName();
+	}
 
 	@Override
 	protected void onDetach() {
@@ -273,6 +331,7 @@ public class NewPullRequestPanel extends Panel {
 		targetModel.detach();
 		sourceModel.detach();
 		submitterModel.detach();
+		commitsModel.detach();
 
 		super.onDetach();
 	}

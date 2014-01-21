@@ -21,6 +21,7 @@ public class MergeResult {
 	public MergeResult(String branchHead, String requestHead, String mergeBase, @Nullable String mergeHead) {
 		this.branchHead = branchHead;
 		this.requestHead = requestHead;
+		this.mergeBase = mergeBase;
 		this.mergeHead = mergeHead;
 	}
 
@@ -37,6 +38,14 @@ public class MergeResult {
 		return mergeHead;
 	}
 	
+	public String getMergeBase() {
+		return mergeBase;
+	}
+
+	public void setMergeBase(String mergeBase) {
+		this.mergeBase = mergeBase;
+	}
+
 	public boolean isConflict() {
 		return mergeHead == null;
 	}
