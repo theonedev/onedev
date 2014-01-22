@@ -4,8 +4,12 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 
@@ -13,41 +17,85 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @Entity
 public class CommitComment extends AbstractEntity {
 
-	@ManyToOne
-	@JoinColumn(nullable=false)
-	private User user;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(nullable = false)
+//	@Index(name = "IDX_COMMENT_AUTHOR_ID")
+	private User author;
 	
-	@Column(nullable=false)
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(nullable = false)
+//	@Index(name = "IDX_COMMENT_PROJECT_ID")
+	private Project project;
+	
+	// Always use commit sha
+	//
+	@Column(nullable = false, length=40)
+//	@Index(name = "IDX_COMMENT_COMMIT")
 	private String commit;
 	
-	@Column(nullable=false)
-	private Date date = new Date();
+	// when line is null means this is a commit comment, otherwise, this is 
+	// a line comment
+	@Column(nullable = true)
+	private String line;
 	
-	@Column(nullable=false)
+	@Column(nullable = false)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date createdDate = new Date();
+	
+	@Column(nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedDate = new Date();
+
+	@Column
+	@Lob
 	private String content;
-	
-	public User getUser() {
-		return user;
+
+	public User getAuthor() {
+		return author;
 	}
 
-	public void setUser(User user) {
-		this.user = user;
+	public void setAuthor(User author) {
+		this.author = author;
+	}
+
+	public Project getProject() {
+		return project;
+	}
+
+	public void setProject(Project project) {
+		this.project = project;
 	}
 
 	public String getCommit() {
-        return commit;
-    }
-
-    public void setCommit(String commit) {
-        this.commit = commit;
-    }
-
-    public Date getDate() {
-		return date;
+		return commit;
 	}
 
-	public void setDate(Date date) {
-		this.date = date;
+	public void setCommit(String commit) {
+		this.commit = commit;
+	}
+
+	public String getLine() {
+		return line;
+	}
+
+	public void setLine(String line) {
+		this.line = line;
+	}
+
+	public Date getCreatedDate() {
+		return createdDate;
+	}
+
+	public void setCreatedDate(Date createdDate) {
+		this.createdDate = createdDate;
+	}
+
+	public Date getUpdatedDate() {
+		return updatedDate;
+	}
+
+	public void setUpdatedDate(Date updatedDate) {
+		this.updatedDate = updatedDate;
 	}
 
 	public String getContent() {
@@ -57,5 +105,4 @@ public class CommitComment extends AbstractEntity {
 	public void setContent(String content) {
 		this.content = content;
 	}
-	
 }

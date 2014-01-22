@@ -20,34 +20,45 @@ import org.apache.wicket.util.lang.Args;
 
 import com.google.common.base.Strings;
 
+@SuppressWarnings("serial")
 public class BootstrapTabbedPanel<T extends ITab> extends Panel {
-	private static final long serialVersionUID = 1L;
 
 	private final List<T> tabs;
 	private final Loop tabContent;
+	private final IModel<Integer> tabCount;
 	
 	public BootstrapTabbedPanel(String id, List<T> tabs) {
 		this(id, tabs, null);
 	}
 	
-	@SuppressWarnings("serial")
 	public BootstrapTabbedPanel(String id, List<T> tabs, IModel<Integer> activeTab) {
 		super(id, activeTab);
 		
 		this.tabs = Args.notNull(tabs, "tabs");
-
-		final IModel<Integer> tabCount = new AbstractReadOnlyModel<Integer>() {
+		tabCount = new AbstractReadOnlyModel<Integer>() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public Integer getObject()
-			{
+			public Integer getObject() {
 				return BootstrapTabbedPanel.this.tabs.size();
 			}
 		};
-		
-		add(new Loop("tab-links", tabCount) {
 
+		add(newTabLinks("tab-links", tabCount));
+		
+		add(tabContent = newTabContent("tab-contents", tabCount));
+	}
+	
+	protected Component newTabLinks(String id, IModel<Integer> tabCount) {
+		return new Loop(id, tabCount) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				configureTabLinks(this);
+			}
+			
 			@Override
 			protected void populateItem(final LoopItem item) {
 				final int index = item.getIndex();
@@ -62,9 +73,15 @@ public class BootstrapTabbedPanel<T extends ITab> extends Panel {
 				
 				item.add(newTabLink("tab-link", item.getIndex()));
 			}
-		});
+		};
+	}
+	
+	protected void configureTabLinks(Component loop) {
 		
-		add(tabContent = new Loop("tab-contents", tabCount) {
+	}
+	
+	protected Loop newTabContent(String id, IModel<Integer> tabCount) {
+		return new Loop(id, tabCount) {
 
 			@Override
 			protected void populateItem(LoopItem item) {
@@ -80,10 +97,9 @@ public class BootstrapTabbedPanel<T extends ITab> extends Panel {
 				
 				item.add(newTabContent("panel", item.getIndex()));
 			}
-		});
+		};
 	}
 	
-	@SuppressWarnings("serial")
 	protected Component newTabLink(String id, final int index) {
 		T tab = tabs.get(index);
 		Fragment frag = new Fragment(id, "linkfrag", BootstrapTabbedPanel.this);

@@ -63,7 +63,7 @@ public class ContributorsPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<GitPerson> item) {
 				GitPerson person = item.getModelObject();
-				item.add(new GitPersonLink("link", Model.of(person), Mode.AVATAR_ONLY));
+				item.add(new GitPersonLink("link", Model.of(person), Mode.AVATAR_ONLY).enableTooltip());
 			}
 		};
 		

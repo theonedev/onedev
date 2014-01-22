@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.project.source.commit.patch;
+package com.pmease.gitop.web.page.project.source.commit.diff.patch;
 
 import static org.eclipse.jgit.util.RawParseUtils.match;
 import static org.eclipse.jgit.util.RawParseUtils.nextLF;
@@ -22,7 +22,7 @@ import org.eclipse.jgit.util.RawParseUtils;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
-import com.pmease.gitop.web.page.project.source.commit.patch.HunkLine.LineType;
+import com.pmease.gitop.web.page.project.source.commit.diff.patch.HunkLine.LineType;
 import com.pmease.gitop.web.util.UniversalEncodingDetector;
 
 /** Hunk header describing the layout of a single block of lines */

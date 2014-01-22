@@ -1,7 +1,7 @@
 package com.pmease.gitop.web.git.command;
 
 import java.io.File;
-import java.util.List;
+import java.util.Collection;
 import java.util.Set;
 
 import com.google.common.base.Strings;
@@ -39,7 +39,8 @@ public abstract class AbstractDiffCommand<T, S extends AbstractDiffCommand<T, S>
 		PATIENCE, MINIMAL, HISTOGRAM, MYERS
 	}
 	
-	protected String rev;
+	protected String since;
+	protected String until;
 	
 	protected Set<String> paths = Sets.newLinkedHashSet();
 	
@@ -61,8 +62,13 @@ public abstract class AbstractDiffCommand<T, S extends AbstractDiffCommand<T, S>
 
 	protected abstract S self();
 	
-	public S revision(String rev) {
-		this.rev = rev;
+	public S since(String since) {
+		this.since = since;
+		return self();
+	}
+	
+	public S until(String until) {
+		this.until = until;
 		return self();
 	}
 	
@@ -71,7 +77,7 @@ public abstract class AbstractDiffCommand<T, S extends AbstractDiffCommand<T, S>
 		return self();
 	}
 	
-	public S paths(List<String> paths) {
+	public S paths(Collection<String> paths) {
 		this.paths.addAll(paths);
 		return self();
 	}
@@ -155,7 +161,7 @@ public abstract class AbstractDiffCommand<T, S extends AbstractDiffCommand<T, S>
 	
 	protected Commandline newCommand() {
 		Commandline cmd = cmd();
-		cmd.addArgs(getSubCommand(), rev, "--full-index", "-p", "--no-color");
+		cmd.addArgs(getSubCommand(), "--full-index", "-p", "--no-color");
 		return cmd;
 	}
 	
@@ -167,9 +173,22 @@ public abstract class AbstractDiffCommand<T, S extends AbstractDiffCommand<T, S>
 		addArgRenameType(cmd);
 		addArgDiffAlgorithm(cmd);
 		addArgFormat(cmd);
+		
+		addArgRevision(cmd);
+		
 		addArgPaths(cmd);
 		
 		return cmd;
+	}
+	
+	protected void addArgRevision(Commandline cmd) {
+		if (!Strings.isNullOrEmpty(since)) {
+			cmd.addArgs(since);
+		}
+		
+		if (!Strings.isNullOrEmpty(until)) {
+			cmd.addArgs(until);
+		}
 	}
 	
 	protected void addArgFormat(Commandline cmd) {

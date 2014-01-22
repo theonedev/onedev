@@ -82,7 +82,6 @@ import com.pmease.gitop.web.page.project.settings.ProjectPermissionsPage;
 import com.pmease.gitop.web.page.project.settings.PullRequestSettingsPage;
 import com.pmease.gitop.web.page.project.source.ProjectHomePage;
 import com.pmease.gitop.web.page.project.source.blob.SourceBlobPage;
-import com.pmease.gitop.web.page.project.source.blob.renderer.ImageBlobResourceReference;
 import com.pmease.gitop.web.page.project.source.blob.renderer.RawBlobResourceReference;
 import com.pmease.gitop.web.page.project.source.branches.BranchesPage;
 import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
@@ -340,7 +339,7 @@ public class GitopWebApp extends AbstractWicketConfig {
 		mountResource("avatars/${type}/${id}", new AvatarImageResourceReference());
 		
 //		getSharedResources().add(ImageBlobResourceReference.IMAGE_BLOB_RESOURCE, new ImageBlobResource());
-		mountResource("imageblob/${user}/${project}/${objectId}", new ImageBlobResourceReference());
+//		mountResource("imageblob/${user}/${project}/${objectId}", new ImageBlobResourceReference());
 		
 //		getSharedResources().add(RawBlobResourceReference.RAW_BLOB_RESOURCE, new RawBlobResource());
 		mountResource("rawblob/${user}/${project}/${objectId}", new RawBlobResourceReference());

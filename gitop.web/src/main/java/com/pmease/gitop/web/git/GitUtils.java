@@ -6,9 +6,12 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.Constants;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
@@ -25,6 +28,15 @@ public class GitUtils {
 
     public static boolean isHash(String sha) {
     	return PATTERN_HASH.matcher(sha).matches();
+    }
+    
+    public static boolean isNullHash(String sha) {
+    	return Strings.isNullOrEmpty(sha) || Objects.equal(NULL_SHA1, sha);
+    }
+    
+    public static boolean isEmptyPath(String path) {
+    	return Strings.isNullOrEmpty(path) || 
+    			Objects.equal(path, DiffEntry.DEV_NULL);
     }
     
     public static String abbreviateSHA(String sha, int length) {

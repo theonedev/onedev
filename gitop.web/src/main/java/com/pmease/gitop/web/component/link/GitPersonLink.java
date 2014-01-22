@@ -13,6 +13,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.component.avatar.AvatarImage;
 import com.pmease.gitop.web.component.avatar.GravatarImage;
@@ -35,6 +36,11 @@ public class GitPersonLink extends Panel {
 	}
 	
 	private final Mode mode;
+	private WebMarkupContainer link;
+	private Component image;
+	
+	private boolean enableTooltip;
+	private String tooltipPosition;
 	
 	public GitPersonLink(String id, IModel<GitPerson> person, Mode mode) {
 		super(id, person);
@@ -48,11 +54,10 @@ public class GitPersonLink extends Panel {
 		GitPerson person = getPerson();
 		Optional<User> user = person.asUser();
 		
-		WebMarkupContainer link = newLink("link", user);
+		link = newLink("link", user);
 		add(link);
 		
 		if (mode == Mode.FULL || mode == Mode.AVATAR_ONLY) {
-			Component image;
 			if (user.isPresent()) {
 				image = new AvatarImage("avatar", new UserModel(user.get()));
 				link.add(image);
@@ -63,10 +68,10 @@ public class GitPersonLink extends Panel {
 				link.add(frag);
 			}
 			
-			if (mode == Mode.AVATAR_ONLY) {
-				image.add(AttributeModifier.replace("data-toggle", "tooltip"));
-				image.add(AttributeModifier.replace("title", user.isPresent() ? user.get().getName() : person.getName()));
-			}
+//			if (mode == Mode.AVATAR_ONLY) {
+//				image.add(AttributeModifier.replace("data-toggle", "tooltip"));
+//				image.add(AttributeModifier.replace("title", user.isPresent() ? user.get().getName() : person.getName()));
+//			}
 		}
 		
 		if (mode == Mode.FULL || mode == Mode.NAME_ONLY) {
@@ -84,8 +89,42 @@ public class GitPersonLink extends Panel {
 		if (mode == Mode.NAME_ONLY) {
 			link.add(new WebMarkupContainer("avatar").setVisibilityAllowed(false));
 		}
+		
+		setupTooltip(user.isPresent() ? user.get().getName() : person.getName());
 	}
 
+	public GitPersonLink enableTooltip() {
+		return enableTooltip(null);
+	}
+	
+	public GitPersonLink enableTooltip(String position) {
+		this.enableTooltip = true;
+		this.tooltipPosition = position;
+		return this;
+	}
+	
+	private void setupTooltip(String title) {
+		if (!enableTooltip) {
+			return;
+		}
+		
+		Component c = null;
+		if (image != null) {
+			c = image;
+		} else if (link != null) {
+			c = link;
+		} else {
+			throw new IllegalStateException();
+		}
+		
+		c.add(AttributeModifier.replace("data-toggle", "tooltip"));
+		if (!Strings.isNullOrEmpty(tooltipPosition)) {
+			c.add(AttributeModifier.replace("data-placement", tooltipPosition));
+		}
+		
+		c.add(AttributeModifier.replace("title", title));
+	}
+	
 	@SuppressWarnings("serial")
 	protected WebMarkupContainer newLink(String id, Optional<User> user) {
 		if (user.isPresent()) {

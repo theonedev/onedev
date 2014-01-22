@@ -182,13 +182,23 @@
 			<version>1.4.2</version>
 		</dependency>
 
-		<!--
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-exec</artifactId>
 			<version>1.1</version>
 		</dependency>
-		 -->
+		
+		<dependency>
+  			<groupId>com.atlassian.utils</groupId>
+		  	<artifactId>atlassian-processutils</artifactId>
+		  	<version>1.5.12</version>
+		  	<exclusions>
+		  		<exclusion>
+		  			<groupId>log4j</groupId>
+		  			<artifactId>log4j</artifactId>
+		  		</exclusion>
+		  	</exclusions>
+		</dependency>
 
 	</dependencies>
 
@@ -221,7 +231,23 @@
 			</snapshots>
 			<url>file://${project.basedir}/repo</url>
 		</repository>
+		
+		<repository>
+			<id>opencast-public</id>
+    		<url>http://repository.opencastproject.org/nexus/content/repositories/public/</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</snapshots>
+		</repository>
 	</repositories>
+	
 	<properties>
 		<moduleClass>com.pmease.gitop.web.WebModule</moduleClass>
 		<owsi-core.version>0.8.6-SNAPSHOT</owsi-core.version>

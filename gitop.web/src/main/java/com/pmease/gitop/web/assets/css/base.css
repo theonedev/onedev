@@ -484,4 +484,3 @@ fieldset[disabled] .btn-inverse.active {
 .faux-cell { display: table-cell; vertical-align: top; margin: 0; padding: 0; }
 .faux-cell.sidebar { width: 240px; position: relative; border-right: 1px solid #ddd; }
 .sidebar-inner { position: relative; width: 240px; }
-

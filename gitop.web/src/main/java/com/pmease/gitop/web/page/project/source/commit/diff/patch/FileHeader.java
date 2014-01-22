@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.project.source.commit.patch;
+package com.pmease.gitop.web.page.project.source.commit.diff.patch;
 
 import static org.eclipse.jgit.lib.Constants.encodeASCII;
 import static org.eclipse.jgit.util.RawParseUtils.decode;
