@@ -8,7 +8,8 @@ import java.nio.charset.Charset;
 import org.apache.tika.metadata.Metadata;
 import org.mozilla.universalchardet.UniversalDetector;
 
-import com.google.common.io.Closeables;
+import com.google.common.base.Throwables;
+import com.google.common.io.ByteStreams;
 
 /**
  * Copied from tika UniversalEncodingDetector
@@ -50,11 +51,16 @@ public class UniversalEncodingDetector {
     }
     
     public static Charset detect(byte[] buffer) throws IOException {
-		ByteArrayInputStream in = new ByteArrayInputStream(buffer); //ByteStreams.newInputStreamSupplier(buffer).getInput();
-		try {
+		try (ByteArrayInputStream in = new ByteArrayInputStream(buffer)) {
 			return detect(in);
-		} finally {
-			Closeables.close(in, false);
+		}
+    }
+    
+    public static boolean isBinary(byte[] bytes) {
+    	try {
+			return isBinary(ByteStreams.newInputStreamSupplier(bytes).getInput());
+		} catch (IOException e) {
+			throw Throwables.propagate(e);
 		}
     }
     

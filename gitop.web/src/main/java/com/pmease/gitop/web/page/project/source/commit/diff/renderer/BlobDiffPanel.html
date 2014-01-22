@@ -1,0 +1,19 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<div class="panel-heading clearfix">
+		<div class="pull-left meta">
+			<span class="diffstat inline" data-toggle="tooltip" data-placement="right" wicket:id="statspan">
+				<wicket:container wicket:id="stat"></wicket:container>
+			</span>
+			
+			<span class="path" wicket:id="path"></span>
+		</div>
+		<div class="actions pull-right">
+			<a class="btn btn-default btn-sm" wicket:id="bloblink">View file @ <b class="sha" wicket:id="sha"></b></a>
+		</div>
+	</div>
+	<div class="panel-body">
+		<div wicket:id="diffcontent"></div>
+	</div>
+</wicket:panel>
+</html>

@@ -1,0 +1,49 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<tr class="diff-line hunk-head" wicket:id="aboveexpander">
+		<td class="diff-line-num expander" colspan="2">
+			<a data-toggle="tooltip" title="show more lines" wicket:id="expander"><i class="icon icon-expand"></i></a>
+		</td>
+		<td class="diff-line-code">
+			<pre wicket:id="header">@@ xxx @@ context func</pre>
+		</td>
+	</tr>
+	<tr wicket:id="hunklines">
+		<wicket:container wicket:id="line"></wicket:container>
+	</tr>
+	<tr class="diff-line hunk-head" wicket:id="belowexpander">
+		<td class="diff-line-num expander" colspan="2">
+			<a data-toggle="tooltip" data-placement="bottom" title="show more lines" wicket:id="expander"><i class="icon icon-expand"></i></a>
+		</td>
+		<td class="diff-line-code"></td>
+	</tr>
+	
+	<wicket:fragment wicket:id="linefrag">
+		<td class="diff-line-num old">
+			<a class="add-comment" wicket:id="commentlink"><i class="icon icon-comment-add"></i></a>
+			<span wicket:id="oldnum"></span>
+		</td>
+		<td class="diff-line-num new">
+			<span wicket:id="newnum"></span>
+		</td>
+		<td class="diff-line-code">
+			<pre wicket:id="code"></pre>
+		</td>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="inlinecommentfrag">
+		<td class="comment-count" colspan="2">
+			<i class="icon icon-comment"></i> <b wicket:id="count"></b>
+		</td>
+		<td class="line-comment">
+			<div wicket:id="commentsholder">
+				<div class="inline-comment" wicket:id="comments">
+					<div wicket:id="comment"></div>
+				</div>
+			</div>
+			<wicket:container wicket:id="commentform">
+			</wicket:container>
+		</td>
+	</wicket:fragment>
+</wicket:panel>
+</html>

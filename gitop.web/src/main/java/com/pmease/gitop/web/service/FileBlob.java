@@ -29,7 +29,7 @@ public class FileBlob implements Serializable {
 
 	private final Long projectId;
 	private final String revision;
-	private final String path;
+	private final String file;
 	
 	// calculated fields
 	private String objectId;
@@ -41,14 +41,14 @@ public class FileBlob implements Serializable {
 
 	private static final long LARGE_FILE_SIZE = 2 * Data.ONE_MB;
 	
-	public FileBlob(final Long projectId, final String revision, final String path) {
+	public FileBlob(final Long projectId, final String revision, final String file) {
 		this.projectId = Preconditions.checkNotNull(projectId);
 		this.revision = Preconditions.checkNotNull(revision);
-		this.path = Preconditions.checkNotNull(path);
+		this.file = Preconditions.checkNotNull(file);
 	}
 
-	public static FileBlob of(Project project, String revision, String path) {
-		return Gitop.getInstance(FileBlobService.class).get(project, revision, path);
+	public static FileBlob of(Project project, String revision, String file) {
+		return Gitop.getInstance(FileBlobService.class).get(project, revision, file);
 	}
 	
 	public boolean isText() {
@@ -108,7 +108,7 @@ public class FileBlob implements Serializable {
 	}
 	
 	public String getName() {
-		return FilenameUtils.getName(getPath());
+		return FilenameUtils.getName(getFilePath());
 	}
 	
 	/**
@@ -118,7 +118,7 @@ public class FileBlob implements Serializable {
 	 * @return
 	 */
 	public String getFullPath() {
-		return FilenameUtils.getFullPath(getPath());
+		return FilenameUtils.getFullPath(getFilePath());
 	}
 	
 	public Long getProjectId() {
@@ -129,8 +129,13 @@ public class FileBlob implements Serializable {
 		return revision;
 	}
 
-	public String getPath() {
-		return path;
+	/**
+	 * Returns the full file name
+	 * 
+	 * @return
+	 */
+	public String getFilePath() {
+		return file;
 	}
 
 	public String getObjectId() {
@@ -189,12 +194,12 @@ public class FileBlob implements Serializable {
 		FileBlob rhs = (FileBlob) other;
 		return Objects.equal(projectId, rhs.projectId)
 				&& Objects.equal(revision, rhs.revision)
-				&& Objects.equal(path, rhs.path);
+				&& Objects.equal(file, rhs.file);
 	}
 	
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(projectId, revision, path);
+		return Objects.hashCode(projectId, revision, file);
 	}
 	
 	@Override
@@ -202,7 +207,7 @@ public class FileBlob implements Serializable {
 		return Objects.toStringHelper(this)
 				.add("Project Id", projectId)
 				.add("Revision", revision)
-				.add("Path", path)
+				.add("Path", file)
 				.toString();
 	}
 }

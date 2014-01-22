@@ -296,7 +296,7 @@
 .icon-file-css:before { content: "\F22B"; }
 
 .icon-diff:before { content: "\F240"; }
-.icon-deff-added:before { content: "\F241"; }
+.icon-diff-added:before { content: "\F241"; }
 .icon-diff-ignored:before { content: "\F242"; }
 .icon-diff-modified:before { content: "\F243"; }
 .icon-diff-removed:before { content: "\F244"; }

@@ -92,7 +92,7 @@ public class CommitsPanel extends Panel {
 								commit.getAuthor().getName(), 
 								commit.getAuthor().getEmail());
 						
-						item.add(new GitPersonLink("authoravatar", Model.of(author), Mode.AVATAR_ONLY));
+						item.add(new GitPersonLink("authoravatar", Model.of(author), Mode.AVATAR_ONLY).enableTooltip("right"));
 						item.add(new Label("shortmessage", commit.getSubject()));
 						item.add(new GitPersonLink("author", Model.of(author), Mode.NAME_ONLY));
 						item.add(new AgeLabel("authordate", Model.of(commit.getAuthor().getDate())));

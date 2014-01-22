@@ -1,0 +1,17 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<div class="image blend-view">
+		<div class="old-frame">
+			<img class="oldimg" wicket:id="old" />
+		</div>
+		
+		<div class="new-frame">
+			<img class="newimg" wicket:id="new" />
+		</div>
+	</div>
+	
+	<div class="slider">
+		<b class="old">OLD</b> <input type="range" min="0" max="1" step="0.01" value="1" /> <b class="new">NEW</b>
+	</div>
+</wicket:panel>
+</html>

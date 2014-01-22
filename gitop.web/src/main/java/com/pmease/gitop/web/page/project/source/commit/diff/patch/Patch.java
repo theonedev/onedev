@@ -1,8 +1,8 @@
-package com.pmease.gitop.web.page.project.source.commit.patch;
+package com.pmease.gitop.web.page.project.source.commit.diff.patch;
 
-import static com.pmease.gitop.web.page.project.source.commit.patch.FileHeader.NEW_NAME;
-import static com.pmease.gitop.web.page.project.source.commit.patch.FileHeader.OLD_NAME;
-import static com.pmease.gitop.web.page.project.source.commit.patch.FileHeader.isHunkHdr;
+import static com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader.NEW_NAME;
+import static com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader.OLD_NAME;
+import static com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader.isHunkHdr;
 import static org.eclipse.jgit.lib.Constants.encodeASCII;
 import static org.eclipse.jgit.util.RawParseUtils.match;
 import static org.eclipse.jgit.util.RawParseUtils.nextLF;

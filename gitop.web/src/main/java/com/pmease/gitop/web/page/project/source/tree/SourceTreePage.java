@@ -24,6 +24,10 @@ import com.pmease.gitop.web.util.UrlUtils;
 @SuppressWarnings("serial")
 public class SourceTreePage extends AbstractFilePage {
 
+	public static PageParameters newParams(Project project, String revision) {
+		return newParams(project, revision, Collections.<String>emptyList());
+	}
+	
 	public static PageParameters newParams(Project project, String revision, List<String> paths) {
 		PageParameters params = new PageParameters();
 		params.add(PageSpec.USER, project.getOwner().getName());

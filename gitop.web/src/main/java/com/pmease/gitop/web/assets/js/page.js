@@ -93,6 +93,39 @@ var gitop = {
 				}
 			});
 		},
+	},
+	
+	utils: {
+		/**
+		 * Trigger a callback when the selected images are loaded:
+		 * @param {String} selector
+		 * @param {Function} callback
+		 */
+		 onImageLoad: function(selector, callback){
+		    $(selector).each(function(){
+		        if (this.complete || /*for IE 10-*/ $(this).height() > 0) {
+		            callback.apply(this);
+		        }
+		        else {
+		            $(this).on('load', function(){
+		                callback.apply(this);
+		            });
+		        }
+		    });
+		},
+		
+		insertAfter: function(newElement,targetElement) {
+			//target is what you want it to go after. Look for this elements parent.
+			var parent = targetElement.parentNode;
+			if(parent.lastchild == targetElement)
+				parent.appendChild(newElement);
+			else 
+				parent.insertBefore(newElement, targetElement.nextSibling);
+		},
+		
+		insertBefore: function(newElement, targetElement) {
+			
+		}
 	}
 };
 

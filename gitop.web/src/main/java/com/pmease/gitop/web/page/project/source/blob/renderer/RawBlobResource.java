@@ -70,7 +70,7 @@ public class RawBlobResource extends AbstractResource {
 			final String path = UrlUtils.concatSegments(paths);
 			FileBlob blob = FileBlob.of(project, revision, path);
 			response.setContentLength(blob.getSize());
-			String fileName = FilenameUtils.getName(blob.getPath());
+			String fileName = FilenameUtils.getName(blob.getFilePath());
 			response.setFileName(fileName);
 			response.setContentType(blob.getMediaType().toString());
 			

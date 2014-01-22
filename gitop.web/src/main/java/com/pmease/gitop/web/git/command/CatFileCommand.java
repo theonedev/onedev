@@ -35,12 +35,8 @@ public class CatFileCommand extends GitCommand<String> {
 		super(dir);
 	}
 	
-	public CatFileCommand revision(String revision) {
+	public CatFileCommand object(String revision, String path) {
 		this.revision = revision;
-		return this;
-	}
-	
-	public CatFileCommand path(String path) {
 		this.path = path;
 		return this;
 	}
@@ -64,7 +60,6 @@ public class CatFileCommand extends GitCommand<String> {
 	public String call() {
 		Commandline cmd = cmd();
 		cmd.addArgs("cat-file", showType.arg, revision+":"+path);
-		
 		
 		try (
 				ByteArrayOutputStream out = (ByteArrayOutputStream) getOutputStream();

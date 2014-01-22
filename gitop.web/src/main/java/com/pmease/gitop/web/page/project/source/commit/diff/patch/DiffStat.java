@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.project.source.commit.patch;
+package com.pmease.gitop.web.page.project.source.commit.diff.patch;
 
 public class DiffStat {
 	int additions;

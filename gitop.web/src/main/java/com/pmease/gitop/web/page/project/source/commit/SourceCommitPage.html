@@ -14,7 +14,7 @@
 				</wicket:enclosure>
 				
 				<ul class="piped">
-					<li><span class="sha" wicket:id="commitsha"></span></li>
+					<li><span class="text-muted">commit</span> <span class="sha" wicket:id="commitsha"></span></li>
 					<li><wicket:container wicket:id="parentslabel"></wicket:container>
 						<wicket:container wicket:id="parents">
 							<span wicket:id="connector">+</span>
@@ -22,8 +22,9 @@
 						</wicket:container>
 					</li>
 				</ul>
-				<div class="branches" style="padding-top: 5px; margin-top: 5px; border-top: 1px solid #e5e5e5;">
-					<i class="icon icon-git-branch"></i>
+				<div class="in-refs">
+					<div wicket:id="branches"></div>
+					<div wicket:id="tags"></div>
 				</div>
 				
 				<wicket:container wicket:id="authoravatar"></wicket:container>
@@ -47,7 +48,7 @@
 			
 			<div id="files-stat" class="collapse">
 				<ul class="list-unstyled">
-					<li wicket:id="files">
+					<li wicket:id="fileitem">
 						<i class="" wicket:id="icon"></i>
 						<a wicket:id="link">
 							<wicket:enclosure>
@@ -56,7 +57,7 @@
 							<span wicket:id="path"></span>
 						</a>
 						<a class="diffstat" wicket:id="statlink" data-toggle="tooltip" data-placement="left">
-							<b class="additions" wicket:id="additions"></b><b class="deletions" wicket:id="deletions"></b>
+							<wicket:container wicket:id="statbar"></wicket:container>
 						</a>
 					</li>
 				</ul>
@@ -65,9 +66,14 @@
 		
 		<div wicket:id="largecommitwarning"></div>
 		
-		<div class="panel panel-default panel-diff" wicket:id="filelist">
-			<wicket:container  wicket:id="file"></wicket:container>
-		</div>
+		<div wicket:id="files"></div>
 	</div>
+	
+	<wicket:fragment wicket:id="refsFrag">
+		<i class="icon-fw" wicket:id="type"></i>
+		<wicket:container wicket:id="refs">
+			<a class="inref" wicket:id="link"><span wicket:id="name"></span></a>
+		</wicket:container>
+	</wicket:fragment>
 </wicket:extend>
 </html>

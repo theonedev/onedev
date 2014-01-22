@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.project.source.commit.patch;
+package com.pmease.gitop.web.page.project.source.commit.diff.patch;
 
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.util.RawParseUtils;

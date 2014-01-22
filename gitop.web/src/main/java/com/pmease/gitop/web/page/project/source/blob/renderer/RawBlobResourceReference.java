@@ -24,7 +24,7 @@ public class RawBlobResourceReference extends ResourceReference {
 		params.set(PageSpec.PROJECT, project.getName());
 		params.set("objectId", blob.getRevision());
 		
-		PageSpec.addPathToParameters(blob.getPath(), params);
+		PageSpec.addPathToParameters(blob.getFilePath(), params);
 		
 		return params;
 	}

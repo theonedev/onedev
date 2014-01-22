@@ -5,13 +5,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.commons.io.IOUtils;
-
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.io.ByteStreams;
 import com.pmease.commons.util.execution.Commandline;
-import com.pmease.gitop.web.page.project.source.commit.patch.Patch;
+import com.pmease.gitop.web.page.project.source.commit.diff.patch.Patch;
 
 public class DiffTreeCommand extends AbstractDiffCommand<Patch, DiffTreeCommand> {
 
@@ -59,26 +57,25 @@ public class DiffTreeCommand extends AbstractDiffCommand<Patch, DiffTreeCommand>
 		return self();
 	}
 	
+	static final int BUFFER_SIZE = 1024 * 8;
+	
 	@Override
 	public Patch call() {
 		Commandline cmd = buildCommand();
 		
 		final Patch patch = new Patch();
 		
-		ByteArrayOutputStream out = new ByteArrayOutputStream(2048);
-		ByteArrayInputStream in = null;
-		
-		try {
-			cmd.execute(out, errorLogger);
-			in = ByteStreams.newInputStreamSupplier(out.toByteArray()).getInput();
-			patch.parse(in);
-			return patch;
+		try (ByteArrayOutputStream out = new ByteArrayOutputStream(BUFFER_SIZE)) {
+			
+			cmd.execute(out, errorLogger).checkReturnCode();
+			try (ByteArrayInputStream in = ByteStreams.newInputStreamSupplier(
+					out.toByteArray()).getInput()) {
+				patch.parse(in);
+				return patch;
+			}
 		} catch (IOException e) {
 			throw Throwables.propagate(e);
-		} finally {
-			IOUtils.closeQuietly(out);
-			IOUtils.closeQuietly(in);
-		}		
+		}
 	}
 
 	@Override
