@@ -1,10 +1,6 @@
 <html xmlns:wicket>
 <wicket:panel>
-	<div class="short-message">
-		<span class="detailed-toggle collapsed" wicket:id="detailedToggle"><i class="icon icon-toggle"></i></span>
-		<a wicket:id="commitlink"><span wicket:id="shortmessage"></span></a>
-	</div>
-	
+	<pre class="title-message"><a wicket:id="commitlink"><wicket:container wicket:id="shortmessage"></wicket:container></a> <a class="btn btn-mini btn-gray detailed-toggle" href="javascript:void(0)" wicket:id="detailedToggle"><i class="icon icon-more"></i></a></pre>
 	<pre class="detailed-message" wicket:id="detailedmessage"></pre>
 </wicket:panel>
 </html>

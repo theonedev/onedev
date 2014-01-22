@@ -111,7 +111,7 @@ public class CommitsTablePanel extends Panel {
 			protected void populateItem(ListItem<Commit> item) {
 				Commit commit = item.getModelObject();
 				GitPerson person = GitPerson.of(commit.getAuthor());
-				item.add(new GitPersonLink("name", Model.of(person), GitPersonLink.Mode.FULL));
+				item.add(new GitPersonLink("name", Model.of(person), GitPersonLink.Mode.FULL).enableTooltip());
 				item.add(new CommitMessagePanel("message", item.getModel(), projectModel));
 				
 				AbstractLink link = new BookmarkablePageLink<Void>("commitlink",
@@ -128,7 +128,7 @@ public class CommitsTablePanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(OnDomReadyHeaderItem.forScript("$('.short-message .detailed-toggle').click(function(e) { \nvar $self = $(this); $self.toggleClass('collapsed'); \n$self.parent().siblings('.detailed-message').toggle(); });"));
+		response.render(OnDomReadyHeaderItem.forScript("gitop.commitMessage.toggle('.title-message .detailed-toggle');"));
 				
 	}
 	

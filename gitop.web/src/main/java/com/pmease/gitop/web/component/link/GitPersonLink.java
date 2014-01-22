@@ -67,11 +67,6 @@ public class GitPersonLink extends Panel {
 				frag.add(image);
 				link.add(frag);
 			}
-			
-//			if (mode == Mode.AVATAR_ONLY) {
-//				image.add(AttributeModifier.replace("data-toggle", "tooltip"));
-//				image.add(AttributeModifier.replace("title", user.isPresent() ? user.get().getName() : person.getName()));
-//			}
 		}
 		
 		if (mode == Mode.FULL || mode == Mode.NAME_ONLY) {

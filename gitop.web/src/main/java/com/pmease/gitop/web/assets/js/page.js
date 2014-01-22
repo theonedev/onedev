@@ -89,6 +89,16 @@ var gitop = {
 		},
 	},
 	
+	commitMessage: {
+		toggle: function(toggle) {
+			$(toggle).click(function(e) { 
+				var $self = $(this); 
+				$self.toggleClass('collapsed'); 
+				$self.parent().siblings('.detailed-message').toggle(); 
+			});
+		}
+	},
+	
 	form: {
 		init: function(form) {
 			var $form = $(form);

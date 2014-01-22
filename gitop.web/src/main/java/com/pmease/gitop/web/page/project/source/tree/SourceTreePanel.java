@@ -1,10 +1,11 @@
 package com.pmease.gitop.web.page.project.source.tree;
 
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
 
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
@@ -18,22 +19,17 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.TreeNode;
-import com.pmease.commons.git.UserInfo;
-import com.pmease.commons.wicket.behavior.CollapseBehavior;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
-import com.pmease.gitop.web.component.label.AgeLabel;
-import com.pmease.gitop.web.component.link.GitPersonLink;
-import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
+import com.pmease.gitop.web.component.commit.CommitMessagePanel;
+import com.pmease.gitop.web.component.commit.CommitMetaPanel;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.project.api.GitPerson;
 import com.pmease.gitop.web.page.project.source.blob.SourceBlobPage;
 import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
 import com.pmease.gitop.web.page.project.source.component.AbstractSourcePagePanel;
@@ -73,80 +69,9 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		add(new Label("shortMessage", new AbstractReadOnlyModel<String>() {
 
-			@Override
-			public String getObject() {
-				return getLastCommit().getSubject();
-			}
-		}));
-		
-		Label detailedMsg = new Label("detailedMessage", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return getLastCommit().getMessage();
-			}
-		}) {
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				if (Objects.equal(getLastCommit().getSubject(), getLastCommit().getMessage())) {
-					this.setVisibilityAllowed(false);
-				}
-			}
-		};
-		
-		add(detailedMsg);
-		
-		WebMarkupContainer detailedToggle = new WebMarkupContainer("detailed-toggle");
-		detailedToggle.add(new CollapseBehavior(detailedMsg));
-		add(detailedToggle);
-		
-		add(new GitPersonLink("author", new AbstractReadOnlyModel<GitPerson>() {
-			@Override
-			public GitPerson getObject() {
-				return GitPerson.of(getLastCommit().getAuthor());
-			}
-		},  Mode.FULL));
-
-		add(new AgeLabel("author-date", new AbstractReadOnlyModel<Date>() {
-
-			@Override
-			public Date getObject() {
-				return getLastCommit().getAuthor().getDate();
-			}
-			
-		}));
-		
-		add(new GitPersonLink("committer", new AbstractReadOnlyModel<GitPerson>() {
-
-			@Override
-			public GitPerson getObject() {
-				return GitPerson.of(getLastCommit().getCommitter());
-			}
-		},  Mode.NAME_ONLY) {
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				Commit commit = getLastCommit();
-				UserInfo author = commit.getAuthor();
-				UserInfo committer = commit.getCommitter();
-				this.setVisibilityAllowed(!Objects.equal(author, committer));
-			}
-		});
-		
-		add(new AgeLabel("committer-date", new AbstractReadOnlyModel<Date>() {
-
-			@Override
-			public Date getObject() {
-				return getLastCommit().getCommitter().getDate();
-			}
-			
-		}));
+		add(new CommitMessagePanel("message", lastCommitModel, projectModel));
+		add(new CommitMetaPanel("meta", lastCommitModel));
 		
 		BookmarkablePageLink<Void> commitLink = new BookmarkablePageLink<Void>(
 				"commitlink",
@@ -223,15 +148,16 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 				
 				link.add(new Label("name", node.getName()));
 				item.add(link);
-				
-//				Git git = getProject().code();
-//				Commit commit = GitUtils.getLastCommit(git, getRevision(), path);
-//				item.add(new Label("message", Model.of(commit.getSubject())));
-//				item.add(new AgeLabel("age", Model.of(commit.getAuthor().getDate())));
 			}
 		};
 		
 		add(fileTree);
+	}
+	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(OnDomReadyHeaderItem.forScript("gitop.commitMessage.toggle('.title-message .detailed-toggle');"));
 	}
 	
 	private Commit getLastCommit() {

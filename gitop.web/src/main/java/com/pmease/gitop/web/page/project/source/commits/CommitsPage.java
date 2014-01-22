@@ -15,7 +15,6 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.gitop.model.Project;
-import com.pmease.gitop.web.component.commit.CommitsTablePanel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.ProjectCategoryPage;
 import com.pmease.gitop.web.page.project.api.IRevisionAware;
@@ -83,7 +82,7 @@ public class CommitsPage extends ProjectCategoryPage implements IRevisionAware {
 			}
 		}));
 		
-		add(new CommitsTablePanel("commits", commitsModel, projectModel));
+		add(new CommitsPanel("commits", commitsModel, projectModel));
 		add(new BookmarkablePageLink<Void>("newer", CommitsPage.class,
 				newParams(getProject(), getRevision(), page - 1)).setEnabled(page > 1));
 		add(new BookmarkablePageLink<Void>("older", CommitsPage.class,
