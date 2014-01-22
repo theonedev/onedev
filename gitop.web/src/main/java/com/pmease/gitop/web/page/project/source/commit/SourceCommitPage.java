@@ -38,6 +38,7 @@ import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
 
 @SuppressWarnings("serial")
 public class SourceCommitPage extends ProjectCategoryPage {
+	
 	public static PageParameters newParams(Project project, String revision) {
 		PageParameters params = PageSpec.forProject(project);
 		params.add(PageSpec.OBJECT_ID, revision);
@@ -45,7 +46,6 @@ public class SourceCommitPage extends ProjectCategoryPage {
 	}
 	
 	private final IModel<Commit> commitModel;
-//	private final IModel<Patch> patchModel;
 	
 	public SourceCommitPage(PageParameters params) {
 		super(params);
@@ -59,25 +59,6 @@ public class SourceCommitPage extends ProjectCategoryPage {
 				return project.code().showRevision(revision);
 			}
 		};
-		
-//		this.patchModel = new LoadableDetachableModel<Patch>() {
-//
-//			@Override
-//			protected Patch load() {
-//				String since = getSince();
-//				String until = getUntil();
-//				
-//				Patch patch = new DiffTreeCommand(getProject().code().repoDir())
-//					.since(since)
-//					.until(until)
-//					.recurse(true) // -r
-//					.root(true)    // --root
-//					.contextLines(Constants.DEFAULT_CONTEXT_LINES) // -U3
-//					.findRenames(true) // -M
-//					.call();
-//				return patch;
-//			}
-//		};
 	}
 
 	private String getSince() {
@@ -194,26 +175,6 @@ public class SourceCommitPage extends ProjectCategoryPage {
 		
 		add(createInRefListView("branches", RefType.BRANCH));
 		add(createInRefListView("tags", RefType.TAG));
-		
-//		IModel<List<? extends FileHeader>> model = new LoadableDetachableModel<List<? extends FileHeader>>() {
-//
-//			@Override
-//			protected List<? extends FileHeader> load() {
-//				return getDiffPatch().getFiles();
-//			}
-//		};
-//		
-//		add(new ListView<FileHeader>("filelist", model) {
-//
-//			@Override
-//			protected void populateItem(ListItem<FileHeader> item) {
-//				int index = item.getIndex();
-//				item.setMarkupId("diff-" + item.getIndex());
-//				item.add(new BlobDiffPanel("file", index, item.getModel(), projectModel, Model.of(getSince()), Model.of(getUntil())));
-//			}
-//		});
-		
-
 		add(new DiffViewPanel("diffs", projectModel, Model.of(getSince()), Model.of(getUntil())));
 	}
 
