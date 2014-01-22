@@ -35,7 +35,10 @@ import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
 public class CommitsPanel extends Panel {
 	
 	private final IModel<Project> projectModel;
-	public CommitsPanel(String id, IModel<List<Commit>> commitsModel, IModel<Project> projectModel) {
+	
+	public CommitsPanel(String id, 
+			IModel<List<Commit>> commitsModel, 
+			IModel<Project> projectModel) {
 		super(id, commitsModel);
 		
 		this.projectModel = projectModel;

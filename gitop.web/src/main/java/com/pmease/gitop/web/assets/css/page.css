@@ -450,9 +450,28 @@ table.table-blob { width: 100%; }
 .commit-group .commitish a { display: block; color: #888; font-size: 12px; text-align: right; margin-bottom: 4px;}
 .commit-group .commitish a:hover { color: #09f; }
 
-.commit-group .detailed-toggle { cursor: pointer; }
-.commit-group .detailed-toggle.collapsed .icon-toggle:before { content: "\F02B"; }
-.commit-group .detailed-toggle .icon-toggle:before { content: "\F029"; }
+.detailed-toggle { cursor: pointer; }
+.detailed-toggle.collapsed .icon-toggle:before { content: "\F02B"; }
+.detailed-toggle .icon-toggle:before { content: "\F029"; }
+
+.panel-commit .panel-heading h3 { margin: 0; font-size:16px; }
+.panel-commit .panel-body { padding: 0; }
+.panel-commit .table-commits { margin: 0; }
+.table-commits .td-name { width: 120px; }
+.table-commits .td-name .name { width: 120px; overflow: hidden; white-space: nowrap; }
+.table-commits .td-commitish { text-align: right; }
+.table-commits .td-message a { color: #333; }
+
+.table-commits pre.detailed-message { background: transparent; border-width: 0 0 0 1px; display: none; }
+
+.table-commits> tbody > tr:nth-child(odd) > td,
+.table-commits > tbody > tr:nth-child(odd) > th {
+  background-color: #fff;
+}
+.table-commits> tbody > tr:nth-child(even) > td,
+.table-commits > tbody > tr:nth-child(even) > th {
+  background-color: #f9f9f9;
+}
 
 /*
  * COMMIT PAGE
