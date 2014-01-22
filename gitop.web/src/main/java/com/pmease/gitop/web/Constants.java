@@ -31,5 +31,6 @@ public class Constants {
 
 	public static final int DEFAULT_CONTEXT_LINES = 3;
 	public static final int MAX_RENDERABLE_BLOBS = 300;
+	public static final int MAX_RENDERABLE_COMMITS = 300;
 	public static final int MAX_RENDERABLE_DIFF_LINES = 10000;
 }
