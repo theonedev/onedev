@@ -638,9 +638,7 @@ tr.diff-line.new { background: #cfc; }
 #pull-requests>table {width: 100%;}
 
 .new-pull-request>.title {font-size: 20px; font-weight: bold; margin-bottom: 20px;}
-.new-pull-request>form>.head {padding: 0;}
-.new-pull-request>form>.head>div {float:left;}
-.new-pull-request>form>.head>.icon {margin: 2px 4px 0 6px;}
-.new-pull-request>form>div {margin-bottom: 20px;}
-.new-pull-request>form>.preview {border:1px solid #BBBBBB; border-radius: 4px; padding: 8px;}
-.new-pull-request>form>.preview>.buttons>div.submit {margin-bottom: 8px;}
+.new-pull-request>.head {padding: 0;}
+.new-pull-request>.head>div {float:left;}
+.new-pull-request>.head>.icon {margin: 2px 4px 0 6px;}
+.new-pull-request>div {margin-bottom: 20px;}

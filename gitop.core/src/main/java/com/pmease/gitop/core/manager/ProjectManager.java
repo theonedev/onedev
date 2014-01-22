@@ -27,4 +27,8 @@ public interface ProjectManager extends GenericDao<Project> {
 	 * 			project forked previously
 	 */
 	Project fork(Project project, User user);
+	
+	void checkSanity();
+	
+	void checkSanity(Project project);
 }

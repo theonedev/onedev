@@ -137,6 +137,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 					}
 				}
 	    	} finally {
+	    		request.getTarget().getProject().setCodeSandbox(null);
 	    		FileUtils.deleteDir(git.repoDir());
 	    	}
 		} else {
