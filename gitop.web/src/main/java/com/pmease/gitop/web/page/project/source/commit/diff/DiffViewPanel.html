@@ -1,5 +1,36 @@
 <html xmlns:wicket>
 <wicket:panel>
+	<div id="diff-toc">
+		<p class="diff-summary clearfix">
+			<i class="icon icon-diff text-muted"></i>
+			 <b wicket:id="changes"></b> files changed /
+			 <b class="additions"><span wicket:id="additions">1</span></b> additions /
+			 <b class="deletions"><span wicket:id="deletions">1</span></b> deletions
+			
+			<a class="btn btn-sm btn-gray btn-show" data-toggle="collapse" data-target="#files-stat">Show Diff Stats</a>
+			<a class="btn btn-sm btn-gray btn-hide" data-toggle="collapse" data-target="#files-stat">Hide Diff Stats</a>
+		</p>
+		
+		<div id="files-stat" class="collapse">
+			<ul class="list-unstyled">
+				<li wicket:id="fileitem">
+					<i class="" wicket:id="icon"></i>
+					<a wicket:id="link">
+						<wicket:enclosure>
+							<span wicket:id="oldpath"></span> &#10142;
+						</wicket:enclosure>
+						<span wicket:id="path"></span>
+					</a>
+					<a class="diffstat" wicket:id="statlink" data-toggle="tooltip" data-placement="left">
+						<wicket:container wicket:id="statbar"></wicket:container>
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+	
+	<div wicket:id="largecommitwarning"></div>
+	
 	<div class="panel panel-default panel-diff" wicket:id="filelist">
 		<wicket:container wicket:id="file"></wicket:container>
 	</div>

@@ -3,11 +3,8 @@ package com.pmease.gitop.web.page.project.source.commit;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
@@ -21,14 +18,11 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 import com.pmease.commons.git.Commit;
 import com.pmease.gitop.model.Project;
-import com.pmease.gitop.web.Constants;
-import com.pmease.gitop.web.common.wicket.bootstrap.Alert;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.GitPersonLink;
@@ -36,14 +30,10 @@ import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.git.command.CommitInCommand;
 import com.pmease.gitop.web.git.command.CommitInCommand.RefType;
-import com.pmease.gitop.web.git.command.DiffTreeCommand;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.ProjectCategoryPage;
 import com.pmease.gitop.web.page.project.api.GitPerson;
-import com.pmease.gitop.web.page.project.source.commit.diff.DiffStatBar;
 import com.pmease.gitop.web.page.project.source.commit.diff.DiffViewPanel;
-import com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader;
-import com.pmease.gitop.web.page.project.source.commit.diff.patch.Patch;
 import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
 
 @SuppressWarnings("serial")
@@ -55,7 +45,7 @@ public class SourceCommitPage extends ProjectCategoryPage {
 	}
 	
 	private final IModel<Commit> commitModel;
-	private final IModel<Patch> patchModel;
+//	private final IModel<Patch> patchModel;
 	
 	public SourceCommitPage(PageParameters params) {
 		super(params);
@@ -70,24 +60,24 @@ public class SourceCommitPage extends ProjectCategoryPage {
 			}
 		};
 		
-		this.patchModel = new LoadableDetachableModel<Patch>() {
-
-			@Override
-			protected Patch load() {
-				String since = getSince();
-				String until = getUntil();
-				
-				Patch patch = new DiffTreeCommand(getProject().code().repoDir())
-					.since(since)
-					.until(until)
-					.recurse(true) // -r
-					.root(true)    // --root
-					.contextLines(Constants.DEFAULT_CONTEXT_LINES) // -U3
-					.findRenames(true) // -M
-					.call();
-				return patch;
-			}
-		};
+//		this.patchModel = new LoadableDetachableModel<Patch>() {
+//
+//			@Override
+//			protected Patch load() {
+//				String since = getSince();
+//				String until = getUntil();
+//				
+//				Patch patch = new DiffTreeCommand(getProject().code().repoDir())
+//					.since(since)
+//					.until(until)
+//					.recurse(true) // -r
+//					.root(true)    // --root
+//					.contextLines(Constants.DEFAULT_CONTEXT_LINES) // -U3
+//					.findRenames(true) // -M
+//					.call();
+//				return patch;
+//			}
+//		};
 	}
 
 	private String getSince() {
@@ -205,8 +195,6 @@ public class SourceCommitPage extends ProjectCategoryPage {
 		add(createInRefListView("branches", RefType.BRANCH));
 		add(createInRefListView("tags", RefType.TAG));
 		
-		createDiffToc();
-		
 //		IModel<List<? extends FileHeader>> model = new LoadableDetachableModel<List<? extends FileHeader>>() {
 //
 //			@Override
@@ -225,35 +213,8 @@ public class SourceCommitPage extends ProjectCategoryPage {
 //			}
 //		});
 		
-		Alert alert = new Alert("largecommitwarning", new AbstractReadOnlyModel<String>() {
 
-			@Override
-			public String getObject() {
-				return "This commit contains too many changed files to render. "
-						+ "Showing only the first " + Constants.MAX_RENDERABLE_BLOBS 
-						+ " changed files. You can still get all changes "
-						+ "manually by running below command: "
-						+ "<pre><code>git diff-tree -M -r -p " 
-						+ getSince() + " " + getUntil() 
-						+ "</code></pre>";
-			}
-			
-		}) {
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisibilityAllowed(getDiffPatch().getFiles().size() > Constants.MAX_RENDERABLE_BLOBS );
-			}
-		};
-		
-		alert
-			 .setCloseButtonVisible(true)
-			 .type(Alert.Type.Warning)
-			 .setMessageEscapeModelStrings(false);
-		
-		add(alert);
-		
-		add(new DiffViewPanel("files", patchModel, projectModel, Model.of(getSince()), Model.of(getUntil())));
+		add(new DiffViewPanel("diffs", projectModel, Model.of(getSince()), Model.of(getUntil())));
 	}
 
 	private Component createInRefListView(String id, final RefType type) {
@@ -309,103 +270,6 @@ public class SourceCommitPage extends ProjectCategoryPage {
 		};
 	}
 	
-	private void createDiffToc() {
-
-		add(new Label("changes", new AbstractReadOnlyModel<Integer>() {
-
-			@Override
-			public Integer getObject() {
-				return getDiffPatch().getFiles().size();
-			}
-			
-		}));
-		
-		add(new Label("additions", new AbstractReadOnlyModel<Integer>() {
-
-			@Override
-			public Integer getObject() {
-				return getDiffPatch().getDiffStat().getAdditions();
-			}
-			
-		}));
-		
-		add(new Label("deletions", new AbstractReadOnlyModel<Integer>() {
-
-			@Override
-			public Integer getObject() {
-				return getDiffPatch().getDiffStat().getDeletions();
-			}
-			
-		}));
-		
-		add(new ListView<FileHeader>("fileitem", new AbstractReadOnlyModel<List<? extends FileHeader>>() {
-
-			@Override
-			public List<? extends FileHeader> getObject() {
-				return getDiffPatch().getFiles();
-			}
-			
-		}) {
-
-			@Override
-			protected void populateItem(ListItem<FileHeader> item) {
-				FileHeader file = item.getModelObject();
-				ChangeType changeType = file.getChangeType();
-				item.add(new Icon("icon", getChangeIcon(changeType)).add(AttributeModifier.replace("title", changeType.name())));
-				WebMarkupContainer link = new WebMarkupContainer("link");
-				link.add(AttributeModifier.replace("href", "#diff-" + item.getIndex()));
-				item.add(link);
-				link.add(new Label("oldpath", Model.of(file.getOldPath())).setVisibilityAllowed(file.getChangeType() == ChangeType.RENAME));
-				link.add(new Label("path", Model.of(file.getNewPath())));
-				
-				WebMarkupContainer statlink = new WebMarkupContainer("statlink");
-				statlink.add(AttributeModifier.replace("href", "#diff-" + item.getIndex()));
-				statlink.add(AttributeModifier.replace("title", file.getDiffStat().toString()));
-				
-				item.add(statlink);
-				statlink.add(new DiffStatBar("statbar", item.getModel()));
-				
-//				statlink.add(new Label("additions", Model.of(
-//						file.getDiffStat().getAdditions() > 0 ?
-//								"+" + file.getDiffStat().getAdditions() : "-")));
-//				statlink.add(new Label("deletions", Model.of(
-//						file.getDiffStat().getDeletions() > 0 ?
-//								"-" + file.getDiffStat().getDeletions() : "-")));
-			}
-		});
-	}
-	
-	private static String getChangeIcon(ChangeType changeType) {
-		switch (changeType) {
-		case ADD:
-			return "icon-diff-added";
-			
-		case MODIFY:
-			return "icon-diff-modified";
-			
-		case DELETE:
-			return "icon-diff-deleted";
-			
-		case RENAME:
-			return "icon-diff-renamed";
-			
-		case COPY:
-			return "icon-diff-copy";
-		}
-		
-		throw new IllegalArgumentException("change type " + changeType);
-	}
-	
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(OnDomReadyHeaderItem.forScript("$('#diff-toc .btn').click(function() { $('#diff-toc').toggleClass('open');})"));
-	}
-	
-	protected Patch getDiffPatch() {
-		return patchModel.getObject();
-	}
-	
 	protected Commit getCommit() {
 		return commitModel.getObject();
 	}
@@ -421,10 +285,6 @@ public class SourceCommitPage extends ProjectCategoryPage {
 			commitModel.detach();
 		}
 
-		if (patchModel != null) {
-			patchModel.detach();
-		}
-		
 		super.onDetach();
 	}
 	
