@@ -24,8 +24,8 @@ import com.pmease.commons.schedule.SchedulableTask;
 import com.pmease.commons.schedule.TaskScheduler;
 import com.pmease.commons.util.init.InitStage;
 import com.pmease.commons.util.init.ManualConfig;
-import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.DataManager;
+import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.setting.ServerConfig;
 
 public class Gitop extends AbstractPlugin {
@@ -34,7 +34,7 @@ public class Gitop extends AbstractPlugin {
 	
 	private final DataManager dataManager;
 	
-	private final BranchManager branchManager;
+	private final ProjectManager projectManager;
 	
 	private final ServerConfig serverConfig;
 
@@ -52,10 +52,10 @@ public class Gitop extends AbstractPlugin {
 	
 	@Inject
 	public Gitop(ServerConfig serverConfig, DataManager dataManager,  
-			BranchManager branchManager, TaskScheduler taskScheduler, 
+			ProjectManager projectManager, TaskScheduler taskScheduler, 
 			Provider<GitConfig> gitConfigProvider, @AppName String appName) {
 		this.dataManager = dataManager;
-		this.branchManager = branchManager;
+		this.projectManager = projectManager;
 		this.serverConfig = serverConfig;
 		this.taskScheduler = taskScheduler;
 		this.gitConfigProvider = gitConfigProvider;
@@ -90,9 +90,9 @@ public class Gitop extends AbstractPlugin {
 			
 		});
 		
-		logger.info("Syncing branches...");
+		logger.info("Checking projects...");
 		
-		branchManager.syncBranches();
+		projectManager.checkSanity();
 	}
 	
 	public void checkGit() {

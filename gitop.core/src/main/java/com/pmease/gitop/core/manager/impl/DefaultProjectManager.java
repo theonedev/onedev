@@ -3,6 +3,7 @@ package com.pmease.gitop.core.manager.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -74,25 +75,9 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
     @Transactional
     @Override
     public void save(Project project) {
-        if (project.isNew()) {
-            super.save(project);
-
-            File codeDir = project.code().repoDir();
-            if (codeDir.exists() && !Project.isCode(new Git(codeDir))) {
-            	logger.warn("Deleting existing directory '" + codeDir + "' before initializing project code repo...");
-            	FileUtils.deleteDir(codeDir);
-            }
-            
-            if (!codeDir.exists()) {
-                FileUtils.createDir(codeDir);
-                new Git(codeDir).init(true);
-                setupHooks(project);
-            }
-            
-            branchManager.syncBranches(project);
-        } else {
-            super.save(project);
-        }
+    	super.save(project);
+    	
+        checkSanity(project);
     }
 
     private void setupHooks(Project project) {
@@ -182,10 +167,63 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
             forked.code().clone(project.code().repoDir().getAbsolutePath(), true);
             setupHooks(forked);
             
-            branchManager.syncBranches(forked);
+            checkSanity(forked);
 		}
 		
 		return forked;
 	}
 
+	@Transactional
+	@Override
+	public void checkSanity() {
+		for (Project project: query()) {
+			checkSanity(project);
+		}
+	}
+	
+	@Transactional
+	@Override
+	public void checkSanity(Project project) {
+		logger.debug("Checking sanity of project '{}'...", project);
+        File codeDir = project.code().repoDir();
+        if (codeDir.exists() && !Project.isCode(new Git(codeDir))) {
+        	logger.warn("Directory '" + codeDir + "' is not a valid gitop repository, removing...");
+        	FileUtils.deleteDir(codeDir);
+        }
+        
+        if (!codeDir.exists()) {
+        	logger.warn("Initializing gitop repository in '" + codeDir + "'...");
+            FileUtils.createDir(codeDir);
+            new Git(codeDir).init(true);
+            setupHooks(project);
+        }
+		
+		logger.debug("Syncing branches of project '{}'...", project);
+		
+		Collection<String> branchesInGit = project.code().listBranches();
+		for (Branch branch: project.getBranches()) {
+			if (!branchesInGit.contains(branch.getName()))
+				branchManager.delete(branch);
+		}
+		
+		for (String branchInGit: branchesInGit) {
+			boolean found = false;
+			for (Branch branch: project.getBranches()) {
+				if (branch.getName().equals(branchInGit)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				Branch branch = new Branch();
+				branch.setName(branchInGit);
+				branch.setProject(project);
+				branchManager.save(branch);
+			}
+		}
+		
+		String defaultBranchName = project.code().resolveDefaultBranch();
+		if (!branchesInGit.isEmpty() && !branchesInGit.contains(defaultBranchName))
+			project.code().updateDefaultBranch(branchesInGit.iterator().next());
+	}
 }

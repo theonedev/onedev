@@ -16,7 +16,6 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.BranchManager;
-import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Project;
@@ -27,14 +26,10 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 	
 	private final PullRequestManager pullRequestManager;
 	
-	private final ProjectManager projectManager;
-
 	@Inject
-	public DefaultBranchManager(GeneralDao generalDao, PullRequestManager pullRequestManager, 
-			ProjectManager projectManager) {
+	public DefaultBranchManager(GeneralDao generalDao, PullRequestManager pullRequestManager) {
 		super(generalDao);
 		this.pullRequestManager = pullRequestManager;
-		this.projectManager = projectManager;
 	}
 
     @Sessional
@@ -122,41 +117,4 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 		}
 	}
 
-	@Transactional
-	@Override
-	public void syncBranches() {
-		for (Project project: projectManager.query()) {
-			syncBranches(project);
-		}
-	}
-	
-	@Transactional
-	@Override
-	public void syncBranches(Project project) {
-		Collection<String> branchesInGit = project.code().listBranches();
-		for (Branch branch: project.getBranches()) {
-			if (!branchesInGit.contains(branch.getName()))
-				delete(branch);
-		}
-		
-		for (String branchInGit: branchesInGit) {
-			boolean found = false;
-			for (Branch branch: project.getBranches()) {
-				if (branch.getName().equals(branchInGit)) {
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				Branch branch = new Branch();
-				branch.setName(branchInGit);
-				branch.setProject(project);
-				save(branch);
-			}
-		}
-		
-		String defaultBranchName = project.code().resolveDefaultBranch();
-		if (!branchesInGit.isEmpty() && !branchesInGit.contains(defaultBranchName))
-			project.code().updateDefaultBranch(branchesInGit.iterator().next());
-	}
 }

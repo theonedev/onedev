@@ -41,7 +41,6 @@ import com.pmease.commons.git.command.ShowRefCommand;
 import com.pmease.commons.git.command.ShowSymbolicRefCommand;
 import com.pmease.commons.git.command.UpdateRefCommand;
 import com.pmease.commons.git.command.UpdateSymbolicRefCommand;
-import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.GeneralException;
 import com.pmease.commons.util.execution.StreamConsumer;
 
@@ -56,9 +55,6 @@ public class Git implements Serializable {
 
 	public Git(File repoDir) {
 		this.repoDir = repoDir;
-
-		if (!repoDir.exists())
-		    FileUtils.createDir(repoDir);
 	}
 
 	public File repoDir() {
