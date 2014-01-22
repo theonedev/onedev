@@ -157,7 +157,7 @@ public class Git implements Serializable {
 	}
 	
 	public Git clone(String from, boolean bare, boolean shared, boolean noCheckout, @Nullable String branch) {
-		new CloneCommand(repoDir).from(from).bare(bare).noCheckout(noCheckout).branch(branch).call();
+		new CloneCommand(repoDir).from(from).bare(bare).shared(shared).noCheckout(noCheckout).branch(branch).call();
 		return this;
 	}
 

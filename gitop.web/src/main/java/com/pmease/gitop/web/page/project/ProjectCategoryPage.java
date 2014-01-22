@@ -34,9 +34,7 @@ import com.pmease.gitop.web.SessionData;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.api.ProjectPageTab;
 import com.pmease.gitop.web.page.project.api.ProjectPageTab.Category;
-import com.pmease.gitop.web.page.project.pullrequest.ClosedPullRequestsPage;
-import com.pmease.gitop.web.page.project.pullrequest.NewPullRequestPage;
-import com.pmease.gitop.web.page.project.pullrequest.OpenPullRequestsPage;
+import com.pmease.gitop.web.page.project.pullrequest.PullRequestsPage;
 import com.pmease.gitop.web.page.project.settings.ProjectOptionsPage;
 import com.pmease.gitop.web.page.project.source.AbstractFilePage;
 import com.pmease.gitop.web.page.project.source.ProjectHomePage;
@@ -195,21 +193,11 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 									ContributorsPage.class));
 		
 		// PULL REQUESTS TABS
-		tabs.add(new ProjectPageTab(Model.of("Open"), 
+		tabs.add(new ProjectPageTab(Model.of("Pull Requests"), 
 									Category.PULL_REQUESTS, 
 									"icon-pull-request", 
-									OpenPullRequestsPage.class));
+									PullRequestsPage.class));
 		
-		tabs.add(new ProjectPageTab(Model.of("Closed"), 
-									Category.PULL_REQUESTS, 
-									"icon-pull-request", 
-									ClosedPullRequestsPage.class));
-
-		tabs.add(new ProjectPageTab(Model.of("Create New"), 
-				Category.PULL_REQUESTS, 
-				"icon-pull-request", 
-				NewPullRequestPage.class));
-
 		// WIKI TABS
 		tabs.add(new ProjectPageTab(Model.of("Wiki"), 
 									Category.WIKI, 

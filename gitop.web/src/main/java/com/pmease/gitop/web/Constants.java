@@ -24,7 +24,9 @@ public class Constants {
 	public static final String SYSTEM_LOG_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss,SSS";
 
 	public static final String UTF8 = "UTF-8";
-
+	
+	public static int DEFAULT_PAGE_SIZE = 25;
+	
 	public static final String COOKIE_CREDENTIAL = "gitop.login";
 
 	public static final int DEFAULT_CONTEXT_LINES = 3;

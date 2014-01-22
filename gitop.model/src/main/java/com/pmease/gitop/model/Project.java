@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -74,7 +75,9 @@ public class Project extends AbstractEntity implements UserBelonging {
 
     @OneToMany(mappedBy="forkedFrom", cascade=CascadeType.REMOVE)
 	private Collection<Project> forks = new ArrayList<Project>();
-
+    
+    private transient Git codeSandbox;
+    
 	public User getOwner() {
 		return owner;
 	}
@@ -199,7 +202,18 @@ public class Project extends AbstractEntity implements UserBelonging {
 	}
 	
 	public Git code() {
-		return new Git(AppLoader.getInstance(StorageManager.class).getStorage(this).ofCode());
+		if (codeSandbox != null)
+			return codeSandbox;
+		else
+			return new Git(AppLoader.getInstance(StorageManager.class).getStorage(this).ofCode());
+	}
+	
+	public Git getCodeSandbox() {
+		return codeSandbox;
+	}
+
+	public void setCodeSandbox(Git codeSandbox) {
+		this.codeSandbox = codeSandbox;
 	}
 
 	/**
@@ -230,4 +244,60 @@ public class Project extends AbstractEntity implements UserBelonging {
 		return andGateKeeper;
 	}
 
+	/**
+	 * Find fork root of this project. 
+	 * 
+	 * @return
+	 * 			fork root of this project, or <tt>null</tt> if the project is not 
+	 * 			forked from any other project  
+	 */
+	public @Nullable Project findForkRoot() {
+		if (forkedFrom != null) {
+			Project forkedRoot = forkedFrom.findForkRoot();
+			if (forkedRoot != null)
+				return forkedRoot;
+			else
+				return forkedFrom;
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * Find all descendant projects forking from current project.
+	 * 
+	 * @return
+	 * 			all descendant projects forking from current project
+	 */
+	public List<Project> findForkDescendants() {
+		List<Project> descendants = new ArrayList<>();
+		for (Project fork: getForks()) { 
+			descendants.add(fork);
+			descendants.addAll(fork.findForkDescendants());
+		}
+		
+		return descendants;
+	}
+	
+	/**
+	 * Find all comparable projects of current project. Comparable projects can 
+	 * be connected via forks, and can be compared/pulled. 
+	 * 
+	 * @return
+	 * 			comparable projects of current project, with current project also 
+	 * 			included in the collection
+	 */
+	public List<Project> findComparables() {
+		List<Project> comparables = new ArrayList<Project>();
+		Project forkRoot = findForkRoot();
+		if (forkRoot != null) {
+			comparables.add(forkRoot);
+			comparables.addAll(forkRoot.findForkDescendants());
+		} else {
+			comparables.add(this);
+			comparables.addAll(findForkDescendants());
+		}
+		return comparables;
+	}
+	
 }

@@ -17,7 +17,7 @@ var gitop = {
 	choiceFormatter: {
 		user: {
 			formatSelection: function(user) {
-				return "<img class='img-thumbnail avatar' src='" + user.avatar + "' /> " + user.name + " (" + user.displayName + ")";
+				return "<img class='img-thumbnail avatar' src='" + user.avatar + "' /> " + user.name + (user.displayName?" (" + user.displayName + ")": "");
 			},
 			
 			formatResult: function(user) {
@@ -32,6 +32,20 @@ var gitop = {
 			},
 		}, 
 		
+		comparableProject: {
+			formatSelection: function(project) {
+				return project.name;
+			},
+			
+			formatResult: function(project) {
+				return project.name;
+			},
+			
+			escapeMarkup: function(m) {
+				return m;
+			}
+		}, 
+
 		branch: {
 			formatSelection: function(branch) {
 				return branch.name;

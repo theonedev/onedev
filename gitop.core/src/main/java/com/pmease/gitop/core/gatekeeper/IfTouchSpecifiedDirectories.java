@@ -39,22 +39,34 @@ public class IfTouchSpecifiedDirectories extends FileGateKeeper {
 
 	@Override
 	public CheckResult doCheckRequest(PullRequest request) {
-		for (int i=0; i<request.getEffectiveUpdates().size(); i++) {
-			PullRequestUpdate update = request.getEffectiveUpdates().get(i);
-
-			Collection<String> touchedFiles = request.getTarget().getProject().code()
-					.listChangedFiles(update.getBaseCommit(), update.getHeadCommit());
-			for (String file: touchedFiles) {
+		if (request.isNew()) {
+			for (String file: request.getTarget().getProject().code().listChangedFiles(
+					request.getTarget().getHeadCommit(), request.getSource().getHeadCommit())) {
 				for (String each: directories) {
-					if (WildcardUtils.matchPath(each + "/**", file)) {
-						request.setBaseUpdate(update);
+					if (WildcardUtils.matchPath(each + "/**", file))
 						return accepted("Touched directory '" + each + "'.");
+				}
+			}
+
+			return rejected("Not touched directories '" + getDirectories() + "'.");
+		} else {
+			for (int i=0; i<request.getEffectiveUpdates().size(); i++) {
+				PullRequestUpdate update = request.getEffectiveUpdates().get(i);
+	
+				Collection<String> touchedFiles = request.getTarget().getProject().code()
+						.listChangedFiles(update.getBaseCommit(), update.getHeadCommit());
+				for (String file: touchedFiles) {
+					for (String each: directories) {
+						if (WildcardUtils.matchPath(each + "/**", file)) {
+							request.setBaseUpdate(update);
+							return accepted("Touched directory '" + each + "'.");
+						}
 					}
 				}
 			}
+	
+			return rejected("Not touched directories '" + getDirectories() + "'.");
 		}
-
-		return rejected("Not touched directories '" + getDirectories() + "'.");
 	}
 
 	@Override

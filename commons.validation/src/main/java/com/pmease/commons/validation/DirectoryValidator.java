@@ -19,7 +19,7 @@ public class DirectoryValidator implements ConstraintValidator<Directory, String
 		File dir = new File(value);
 		if (!dir.isAbsolute()) {
 			constraintContext.disableDefaultConstraintViolation();
-			constraintContext.buildConstraintViolationWithTemplate("Please specify an absolute directory.");
+			constraintContext.buildConstraintViolationWithTemplate("Please specify an absolute directory.").addConstraintViolation();
 			return false;
 		}
 		

@@ -1,0 +1,34 @@
+<wicket:panel>
+	<div class="new-pull-request">
+		<form wicket:id="form">
+			<div class="head">
+				<div wicket:id="target" class="target"></div>
+				<div class="icon icon-arrow-slim-left icon-2x"></div>
+				<div wicket:id="source" class="source"></div>
+			</div>
+			<div class="body clearfix">
+				<div wicket:id="message" class="message pull-left">
+					<div class="title">
+						<input wicket:id="title" type="text" class="form-control">
+					</div>
+					<div class="comment">
+						<textarea wicket:id="comment" class="form-control"></textarea>
+					</div>
+				</div>
+				<div wicket:id="status" class="status pull-right">
+					<div wicket:id="summary" class="summary"></div>
+					<div wicket:id="detail" class="detail"></div>
+					<wicket:enclosure child="rejectReasons">
+					<ul>
+						<li wicket:id="rejectReasons">
+							<span wicket:id="reason"></span>
+						</li>
+					</ul>
+					</wicket:enclosure>
+					<input wicket:id="send" value="Send Pull Request" class="btn btn-lg btn-primary"></input>
+					<input wicket:id="view" value="View Pull Request" class="btn btn-lg btn-primary"></input>
+				</div>
+			</div>
+		</form>
+	</div>
+</wicket:panel>

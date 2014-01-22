@@ -34,7 +34,7 @@ public class Branch extends AbstractEntity {
 	private User creator;
 	
     @OneToMany(mappedBy="target")
-    private Collection<PullRequest> ingoingRequests = new ArrayList<PullRequest>();
+    private Collection<PullRequest> incomingRequests = new ArrayList<PullRequest>();
 
     @OneToMany(mappedBy="source")
     private Collection<PullRequest> outgoingRequests = new ArrayList<PullRequest>();
@@ -72,12 +72,12 @@ public class Branch extends AbstractEntity {
 		this.creator = creator;
 	}
 
-	public Collection<PullRequest> getIngoingRequests() {
-        return ingoingRequests;
+	public Collection<PullRequest> getIncomingRequests() {
+        return incomingRequests;
     }
 
-    public void setIngoingRequests(Collection<PullRequest> ingoingRequests) {
-        this.ingoingRequests = ingoingRequests;
+    public void setIncomingRequests(Collection<PullRequest> incomingRequests) {
+        this.incomingRequests = incomingRequests;
     }
 
     public Collection<PullRequest> getOutgoingRequests() {
@@ -123,4 +123,5 @@ public class Branch extends AbstractEntity {
 				.add("project", getProject())
 				.toString();
 	}
+
 }

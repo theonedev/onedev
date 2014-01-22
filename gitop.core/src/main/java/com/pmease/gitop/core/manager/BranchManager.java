@@ -88,6 +88,17 @@ public interface BranchManager extends GenericDao<Branch> {
     
     public void trim(Collection<Long> branchIds);
     
+    /**
+     * Sync branch information of specified project between database and git repository.
+     *  
+     * @param project
+     * 			project whose branch information should be synced
+     */
 	public void syncBranches(Project project);
 	
+    /**
+     * Sync branch information of all projects in the system.
+     * 
+     */
+	public void syncBranches();
 }

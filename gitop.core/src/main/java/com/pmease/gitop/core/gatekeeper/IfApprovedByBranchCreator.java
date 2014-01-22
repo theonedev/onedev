@@ -20,6 +20,9 @@ public class IfApprovedByBranchCreator extends ApprovalGateKeeper {
 
     @Override
     public CheckResult doCheckRequest(PullRequest request) {
+    	if (request.isNew())
+    		return checkApproval(request.getSubmitter(), request.getTarget());
+    	
         User branchCreator = request.getTarget().getCreator();
 
         if (branchCreator != null) {
@@ -39,7 +42,7 @@ public class IfApprovedByBranchCreator extends ApprovalGateKeeper {
         }
     }
 
-    private CheckResult checkBranch(User user, Branch branch) {
+    private CheckResult checkApproval(User user, Branch branch) {
     	if (branch.getCreator() != null) {
 			if (user.equals(branch.getCreator()))
 				return accepted("Approved by branch creator.");
@@ -52,12 +55,12 @@ public class IfApprovedByBranchCreator extends ApprovalGateKeeper {
     
 	@Override
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		return checkBranch(user, branch);
+		return checkApproval(user, branch);
 	}
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		return checkBranch(user, branch);
+		return checkApproval(user, branch);
 	}
 
 	@Override

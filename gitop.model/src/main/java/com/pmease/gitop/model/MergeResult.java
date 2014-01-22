@@ -5,7 +5,7 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class MergePrediction {
+public class MergeResult {
 	
 	@Column(nullable=false)
 	private String branchHead;
@@ -13,12 +13,15 @@ public class MergePrediction {
 	@Column(nullable=false)
 	private String requestHead;
 	
-	private String merged;
+	@Column(nullable=false)
+	private String mergeBase;
 	
-	public MergePrediction(String branchHead, String requestHead, @Nullable String merged) {
+	private String mergeHead;
+	
+	public MergeResult(String branchHead, String requestHead, String mergeBase, @Nullable String mergeHead) {
 		this.branchHead = branchHead;
 		this.requestHead = requestHead;
-		this.merged = merged;
+		this.mergeHead = mergeHead;
 	}
 
 	public String getBranchHead() {
@@ -30,16 +33,16 @@ public class MergePrediction {
 	}
 
 	@Nullable
-	public String getMerged() {
-		return merged;
+	public String getMergeHead() {
+		return mergeHead;
 	}
 	
 	public boolean isConflict() {
-		return merged == null;
+		return mergeHead == null;
 	}
 	
 	public boolean isFastForward() {
-		return requestHead.equals(merged);
+		return requestHead.equals(mergeHead);
 	}
 	
 }

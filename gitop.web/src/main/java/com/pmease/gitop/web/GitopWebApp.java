@@ -72,8 +72,7 @@ import com.pmease.gitop.web.page.error.PageExpiredPage;
 import com.pmease.gitop.web.page.error.PageNotFoundPage;
 import com.pmease.gitop.web.page.home.HomePage;
 import com.pmease.gitop.web.page.init.ServerInitPage;
-import com.pmease.gitop.web.page.project.pullrequest.ClosedPullRequestsPage;
-import com.pmease.gitop.web.page.project.pullrequest.OpenPullRequestsPage;
+import com.pmease.gitop.web.page.project.pullrequest.PullRequestsPage;
 import com.pmease.gitop.web.page.project.settings.CreateProjectPage;
 import com.pmease.gitop.web.page.project.settings.GateKeeperSettingPage;
 import com.pmease.gitop.web.page.project.settings.ProjectAuditLogPage;
@@ -93,8 +92,6 @@ import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
 import com.pmease.gitop.web.page.project.stats.ProjectForksPage;
 import com.pmease.gitop.web.page.project.stats.ProjectGraphsPage;
 import com.pmease.gitop.web.page.project.wiki.ProjectWikiPage;
-import com.pmease.gitop.web.page.test.ProjectPage;
-import com.pmease.gitop.web.page.test.PullRequestsPage;
 import com.pmease.gitop.web.page.test.TestPage;
 import com.pmease.gitop.web.shiro.LoginPage;
 import com.pmease.gitop.web.shiro.LogoutPage;
@@ -270,8 +267,7 @@ public class GitopWebApp extends AbstractWicketConfig {
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/tags", TagsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/contributors", ContributorsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/wiki", ProjectWikiPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/pull-requests/open", OpenPullRequestsPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/pull-requests/closed", ClosedPullRequestsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/pull-requests", PullRequestsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/graphs", ProjectGraphsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/forks", ProjectForksPage.class));
 
@@ -318,8 +314,6 @@ public class GitopWebApp extends AbstractWicketConfig {
 		mountPage("administration/licensing", LicensingPage.class);
 
 		mountPage("/test", TestPage.class);
-		mountPage("/test/project", ProjectPage.class);
-		mountPage("/test/merge_requests", PullRequestsPage.class);
 		
 		// repository pages
 		// --------------------------------------------------------

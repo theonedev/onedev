@@ -41,15 +41,7 @@ public class IfSubmitToSpecifiedBranches extends BranchGateKeeper {
 
 	@Override
 	public CheckResult doCheckRequest(PullRequest request) {
-		List<String> branchNames = new ArrayList<>();
-		BranchManager branchManager = Gitop.getInstance(BranchManager.class);
-		for (Long branchId: branchIds)
-			branchNames.add(branchManager.load(branchId).getName());
-		
-		if (branchIds.contains(request.getTarget().getId()))
-			return accepted("Target branch is one of '" + StringUtils.join(branchNames, ", ") + "'.");
-		else
-			return rejected("Target branch is not one of '" + StringUtils.join(branchNames, ", ") + "'.");
+		return checkBranch(request.getTarget());
 	}
 
 	@Override
@@ -61,26 +53,33 @@ public class IfSubmitToSpecifiedBranches extends BranchGateKeeper {
 			return this;
 	}
 
-	private CheckResult checkBranch(User user, Branch branch) {
+	private CheckResult checkBranch(Branch branch) {
 		List<String> branchNames = new ArrayList<>();
 		BranchManager branchManager = Gitop.getInstance(BranchManager.class);
 		for (Long branchId: branchIds)
 			branchNames.add(branchManager.load(branchId).getName());
 		
-		if (branchIds.contains(branch.getId()))
-			return accepted("Target branch is one of '" + StringUtils.join(branchNames, ", ") + "'.");
-		else
-			return rejected("Target branch is not one of '" + StringUtils.join(branchNames, ", ") + "'.");
+		if (branchIds.size() > 1) {
+			if (branchIds.contains(branch.getId()))
+				return accepted("Target branch is one of '" + StringUtils.join(branchNames, ", ") + "'.");
+			else
+				return rejected("Target branch is not any one of '" + StringUtils.join(branchNames, ", ") + "'.");
+		} else {
+			if (branchIds.contains(branch.getId()))
+				return accepted("Target branch is '" + branchNames.get(0) + "'.");
+			else
+				return rejected("Target branch is not '" + branchNames.get(0) + "'.");
+		}
 	}
 	
 	@Override
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		return checkBranch(user, branch);
+		return checkBranch(branch);
 	}
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		return checkBranch(user, branch);
+		return checkBranch(branch);
 	}
 
 	@Override

@@ -129,4 +129,5 @@ public class DirectoryAndFileProtection extends CommonGateKeeper {
 	protected CheckResult doCheckRef(User user, Project project, String refName) {
 		return getGateKeeper().checkRef(user, project, refName);
 	}
+
 }

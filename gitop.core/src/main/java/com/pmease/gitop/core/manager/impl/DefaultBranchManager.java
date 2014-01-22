@@ -16,6 +16,7 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.BranchManager;
+import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Project;
@@ -25,11 +26,15 @@ import com.pmease.gitop.model.PullRequest;
 public class DefaultBranchManager extends AbstractGenericDao<Branch> implements BranchManager {
 	
 	private final PullRequestManager pullRequestManager;
+	
+	private final ProjectManager projectManager;
 
 	@Inject
-	public DefaultBranchManager(GeneralDao generalDao, PullRequestManager pullRequestManager) {
+	public DefaultBranchManager(GeneralDao generalDao, PullRequestManager pullRequestManager, 
+			ProjectManager projectManager) {
 		super(generalDao);
 		this.pullRequestManager = pullRequestManager;
+		this.projectManager = projectManager;
 	}
 
     @Sessional
@@ -49,12 +54,8 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 	public void delete(Branch branch) {
     	deleteRefs(branch);
     	
-    	for (PullRequest request: branch.getIngoingRequests()) { 
-    		request.setTarget(null);
-    		if (request.isOpen())
-    			pullRequestManager.decline(request);
-    		else
-    			pullRequestManager.save(request);
+    	for (PullRequest request: branch.getIncomingRequests()) { 
+    		pullRequestManager.delete(request);
     	}
     	
     	for (PullRequest request: branch.getOutgoingRequests()) {
@@ -121,6 +122,14 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 		}
 	}
 
+	@Transactional
+	@Override
+	public void syncBranches() {
+		for (Project project: projectManager.query()) {
+			syncBranches(project);
+		}
+	}
+	
 	@Transactional
 	@Override
 	public void syncBranches(Project project) {

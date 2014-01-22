@@ -617,3 +617,19 @@ tr.diff-line.new { background: #cfc; }
 .dropdown-panel .directory-chooser {max-height: 650px; overflow: auto; padding: 12px 24px 12px 12px;}
 .dropdown-panel .directory-chooser .title {font-weight: bold; border-bottom: 1px solid #888888;}
 .dropdown-panel .alert.empty-directory-choice {margin: 0px;}
+
+.comparable-branch-selector .connector {margin-top: 4px; color: #888; font-weight: bold; font-size: 16px;}
+.comparable-branch-selector>div {float: left;}
+.comparable-branch-selector {clear: left;}
+
+/* PULL REQUESTS PAGE */
+#pull-requests {padding: 20px;}
+#pull-requests>table {width: 100%;}
+
+.new-pull-request>.title {font-size: 20px; font-weight: bold; margin-bottom: 20px;}
+.new-pull-request>form>.head {padding: 0;}
+.new-pull-request>form>.head>div {float:left;}
+.new-pull-request>form>.head>.icon {margin: 2px 4px 0 6px;}
+.new-pull-request>form>div {margin-bottom: 20px;}
+.new-pull-request>form>.preview {border:1px solid #BBBBBB; border-radius: 4px; padding: 8px;}
+.new-pull-request>form>.preview>.buttons>div.submit {margin-bottom: 8px;}
