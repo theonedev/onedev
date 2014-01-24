@@ -4,7 +4,10 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.form.PasswordTextField;
+import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.Model;
 import org.slf4j.Logger;
@@ -12,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import com.pmease.gitop.web.GitopSession;
 import com.pmease.gitop.web.common.wicket.bootstrap.NotificationPanel;
-import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.checkbox.CheckBoxElement;
 import com.pmease.gitop.web.common.wicket.util.WicketUtils;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
@@ -27,12 +29,13 @@ public class LoginPage extends AbstractLayoutPage {
 		if (SecurityUtils.getSubject().isAuthenticated()) {
 			throw new RestartResponseException(getApplication().getHomePage());
 		}
+		
 		add(new LoginForm("login"));
 		NotificationPanel feedback = new NotificationPanel("feedback");
 		add(feedback);
 	}
 	
-	private class LoginForm extends BaseForm<Void> {
+	private class LoginForm extends StatelessForm<Void> {
 
 		public LoginForm(String id) {
 			super(id);
@@ -108,6 +111,13 @@ public class LoginPage extends AbstractLayoutPage {
 			Boolean b = (Boolean) c.getFormComponent().getDefaultModelObject();
 //			System.out.println(b);
 			return b;
+		}
+		
+		@Override
+		public void renderHead(IHeaderResponse response) {
+			super.renderHead(response);
+			
+			response.render(OnDomReadyHeaderItem.forScript("gitop.form.setupFocus('#" + getMarkupId(true) + "');"));
 		}
 	}
 

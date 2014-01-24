@@ -30,7 +30,6 @@ import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.assets.PageBaseResourceReference;
 import com.pmease.gitop.web.common.wicket.component.messenger.MessengerResourcesBehavior;
-import com.pmease.gitop.web.common.wicket.component.modal.Modal;
 import com.pmease.gitop.web.exception.AccessDeniedException;
 import com.pmease.gitop.web.page.init.ServerInitPage;
 import com.pmease.gitop.web.shiro.LoginPage;
@@ -42,7 +41,7 @@ public abstract class BasePage extends WebPage {
 	
 	private boolean shouldInitialize = true;
 
-	protected Modal modal;
+//	protected Modal modal;
 	
 	public BasePage() {
 		commonInit();
@@ -71,8 +70,8 @@ public abstract class BasePage extends WebPage {
 					}
 				}));
 
-		modal = new Modal("modal");
-		add(modal);
+//		modal = new Modal("modal");
+//		add(modal);
 		
 		if (!Gitop.getInstance().isReady()
 				&& getClass() != ServerInitPage.class) {
@@ -250,7 +249,7 @@ public abstract class BasePage extends WebPage {
 		response.render(JavaScriptHeaderItem.forReference(PageBaseResourceReference.getInstance()));
 	}
 
-	public Modal getModal() {
-		return modal;
-	}
+//	public Modal getModal() {
+//		return modal;
+//	}
 }

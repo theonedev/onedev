@@ -100,10 +100,25 @@ var gitop = {
 	},
 	
 	form: {
-		init: function(form) {
+		/**
+		 * Focus on the first focusable field (input, textarea),
+		 * or focus on the first error field
+		 * 
+		 * @param {String} form selector
+		 */
+		setupFocus: function(form) {
 			var $form = $(form);
 			$form.find('.focusable:first').focus();
 			$form.find('.has-error:first .focusable').focus();
+		},
+		
+		/**
+		 * Enable/disable the submit button when this form is dirty or not
+		 * 
+		 * @param {String} form selector
+		 */
+		areYouSure: function(form) {
+			var $form = $(form);
 			$form.find('.btn-submit').attr('disabled', 'disabled');
 			
 			$form.areYouSure({
@@ -116,6 +131,16 @@ var gitop = {
 					}
 				}
 			});
+		},
+		
+		/**
+		 * Initialize the form's focus and install dirty check for submit button
+		 * 
+		 * @param {String} form selector
+		 */
+		init: function(form) {
+			gitop.form.setupFocus(form);
+			gitop.form.areYouSure(form);
 		},
 	},
 	
@@ -136,19 +161,6 @@ var gitop = {
 		            });
 		        }
 		    });
-		},
-		
-		insertAfter: function(newElement,targetElement) {
-			//target is what you want it to go after. Look for this elements parent.
-			var parent = targetElement.parentNode;
-			if(parent.lastchild == targetElement)
-				parent.appendChild(newElement);
-			else 
-				parent.insertBefore(newElement, targetElement.nextSibling);
-		},
-		
-		insertBefore: function(newElement, targetElement) {
-			
 		}
 	}
 };
@@ -156,16 +168,6 @@ var gitop = {
 $(document).ready(function() {
 	$('#globalheader a').tooltip({placement: 'bottom'});
 	$('#main [data-toggle="tooltip"]').tooltip();
-	
-	$(document).on('click', function (e) {
-        $('.popup-marker').each(function () {
-            //the 'is' for buttons that trigger popups
-            //the 'has' for icons within a button that triggers a popup
-            if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
-                $(this).popover('toggle');
-            }
-        });
-    });
 	
 	$(window).on("beforeunload", function() {
 		$(":focus").trigger("blur");
