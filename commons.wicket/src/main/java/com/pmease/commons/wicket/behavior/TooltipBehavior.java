@@ -1,68 +1,46 @@
 package com.pmease.commons.wicket.behavior;
 
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.Component;
-import org.apache.wicket.behavior.Behavior;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 
-import com.pmease.commons.jackson.JsOptions;
-import com.pmease.commons.wicket.asset.bootstrap.BootstrapHeaderItem;
+import com.google.common.base.Strings;
 
-public class TooltipBehavior extends Behavior {
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
+/**
+ *
+ */
+public class TooltipBehavior extends de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipBehavior {
 	private static final long serialVersionUID = 1L;
-
-	private final IModel<String> titleModel;
-	
-	private final String selector;
-	
-	private final String placement;
-	
-	public TooltipBehavior(@Nullable String selector, @Nullable IModel<String> titleModel, @Nullable String placement) {
-		this.selector = selector;
-		this.titleModel = titleModel;
-		this.placement = placement;
-	}
-	
-	public TooltipBehavior(@Nullable IModel<String> titleModel) {
-		this(null, titleModel, null);
-	}
 	
 	public TooltipBehavior() {
-		this(null);
+		this(Model.of(""));
 	}
-
+	
+	public TooltipBehavior(final TooltipConfig config) {
+		this(Model.of(""), config);
+	}
+	
+	public TooltipBehavior(IModel<String> label) {
+		super(label);
+	}
+	
+	public TooltipBehavior(final IModel<String> label, final TooltipConfig config) {
+		super(label, config);
+	}
+	
 	@Override
-	public void renderHead(Component component, IHeaderResponse response) {
-		super.renderHead(component, response);
-		response.render(BootstrapHeaderItem.get());
-		JsOptions options = new JsOptions();
-		if (titleModel != null)
-			options.put("title", StringEscapeUtils.escapeEcmaScript(titleModel.getObject()));
-		if (placement != null) {
-			options.put("placement", placement);
-		} else {
-			options.put("placement", "top auto");
+	public void onComponentTag(Component component, ComponentTag tag) {
+		String original = tag.getAttribute("title");
+		
+		super.onComponentTag(component, tag);
+		
+		// hack here
+		String current = tag.getAttribute("title");
+		if (!Strings.isNullOrEmpty(original) && Strings.isNullOrEmpty(current)) {
+			tag.put("title", original);
 		}
-		
-		String script;
-		if (selector != null)
-			script = String.format("$('#%s %s').tooltip(%s)", component.getMarkupId(true), selector, options.toString());
-		else
-			script = String.format("$('#%s').tooltip(%s)", component.getMarkupId(true), options.toString());
-		
-		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
-
-	@Override
-	public void detach(Component component) {
-		if (titleModel != null)
-			titleModel.detach();
-		super.detach(component);
-	}
-
 }

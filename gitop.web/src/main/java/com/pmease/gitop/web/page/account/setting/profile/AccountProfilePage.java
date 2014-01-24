@@ -10,6 +10,7 @@ import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.feedback.ComponentFeedbackMessageFilter;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
+import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
@@ -25,8 +26,6 @@ import com.pmease.commons.util.FileUtils;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.SitePaths;
-import com.pmease.gitop.web.common.wicket.bootstrap.NotificationPanel;
-import com.pmease.gitop.web.common.wicket.bootstrap.jasny.FileUploadField;
 import com.pmease.gitop.web.common.wicket.component.vex.AjaxConfirmButton;
 import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
@@ -35,6 +34,8 @@ import com.pmease.gitop.web.component.avatar.AvatarImage;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public class AccountProfilePage extends AccountSettingPage {

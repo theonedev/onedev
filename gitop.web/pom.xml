@@ -35,6 +35,16 @@
 			<artifactId>commons.wicket</artifactId>
 			<version>1.0.29</version>
 		</dependency>
+		<dependency>
+			<groupId>com.pmease</groupId>
+			<artifactId>commons.jetty</artifactId>
+			<version>1.0.31</version>
+		</dependency>
+		<dependency>
+			<groupId>com.pmease</groupId>
+			<artifactId>gitop.rest</artifactId>
+			<version>1.0.0</version>
+		</dependency>
         
 		<!-- JERSEY CLIENT -->
 		<dependency>
@@ -52,22 +62,13 @@
 			<artifactId>commons-validator</artifactId>
 			<version>1.4.0</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.imgscalr</groupId>
 			<artifactId>imgscalr-lib</artifactId>
 			<version>4.2</version>
 		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.jetty</artifactId>
-			<version>1.0.31</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>gitop.rest</artifactId>
-			<version>1.0.0</version>
-		</dependency>
-
+		
 		<!-- Google Closure Dependencies -->
 		<dependency>
 			<groupId>com.google.closure</groupId>
@@ -75,18 +76,21 @@
 			<version>20130228</version>
 		</dependency>
 
+		<!-- Google Closure need this -->
 		<dependency>
 			<groupId>rhino</groupId>
 			<artifactId>js</artifactId>
 			<version>1.7R2</version>
 		</dependency>
 
+		<!-- Google Closure need this -->
 		<dependency>
 			<groupId>cglib</groupId>
 			<artifactId>cglib-nodep</artifactId>
 			<version>2.2.2</version>
 		</dependency>
 
+		<!-- Google Closure need this -->
 		<dependency>
 			<groupId>aopalliance</groupId>
 			<artifactId>aopalliance</artifactId>
@@ -95,18 +99,21 @@
 
 		<!-- <dependency> <groupId>com.ibm.icu</groupId> <artifactId>icu4j</artifactId> 
 			<version>52.1</version> </dependency> -->
-
+		
+		<!-- Google Closure need this -->
 		<dependency>
 			<groupId>com.googlecode.juniversalchardet</groupId>
 			<artifactId>juniversalchardet</artifactId>
 			<version>1.0.3</version>
 		</dependency>
 
+		<!-- Google Closure need this -->
 		<dependency>
 			<groupId>org.objenesis</groupId>
 			<artifactId>objenesis</artifactId>
 			<version>1.3</version>
 		</dependency>
+		<!-- END OF GOOGLE CLOSURE -->
 
 		<dependency>
 			<groupId>org.reflections</groupId>
@@ -138,16 +145,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		
 		<dependency>
 			<groupId>com.sun.jna</groupId>
 			<artifactId>jna</artifactId>
 			<version>3.0.9</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.fasterxml.jackson.dataformat</groupId>
-			<artifactId>jackson-dataformat-yaml</artifactId>
-			<version>2.2.3</version>
 		</dependency>
 
 		<dependency>
@@ -187,7 +189,7 @@
 			<artifactId>commons-exec</artifactId>
 			<version>1.1</version>
 		</dependency>
-		
+		<!--
 		<dependency>
   			<groupId>com.atlassian.utils</groupId>
 		  	<artifactId>atlassian-processutils</artifactId>
@@ -199,6 +201,7 @@
 		  		</exclusion>
 		  	</exclusions>
 		</dependency>
+		-->
 
 	</dependencies>
 
@@ -232,6 +235,7 @@
 			<url>file://${project.basedir}/repo</url>
 		</repository>
 		
+		<!-- For Atlassian Processutils -->
 		<repository>
 			<id>opencast-public</id>
     		<url>http://repository.opencastproject.org/nexus/content/repositories/public/</url>

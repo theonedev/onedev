@@ -79,10 +79,15 @@
             <artifactId>commons.shiro</artifactId>  
             <version>1.0.30</version> 
         </dependency> 
+        <dependency>
+			<groupId>de.agilecoders.wicket</groupId>
+			<artifactId>wicket-bootstrap-core</artifactId>
+			<version>0.9.1</version>
+		</dependency>
     </dependencies>  
     <properties> 
         <moduleClass>com.pmease.commons.wicket.WicketModule</moduleClass>  
-        <wicketVersion>6.12.0</wicketVersion> 
+        <wicketVersion>6.13.0</wicketVersion> 
     </properties>  
     <repositories> 
         <repository> 

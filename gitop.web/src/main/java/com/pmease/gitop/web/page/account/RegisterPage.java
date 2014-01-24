@@ -21,11 +21,12 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.GitopSession;
-import com.pmease.gitop.web.common.wicket.bootstrap.NotificationPanel;
 import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.passwordfield.PasswordFieldElement;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public class RegisterPage extends AbstractLayoutPage {
@@ -68,26 +69,24 @@ public class RegisterPage extends AbstractLayoutPage {
 				.setRequired(false)
 				.add(new PropertyValidator<String>()));
 		
-		PasswordFieldElement passField = (PasswordFieldElement) 
-			new PasswordFieldElement("password", "Password",
-				new PropertyModel<String>(this, "password"))
-				.add(new PropertyValidator<String>())
-				.add(new IValidator<String>() {
+		PasswordFieldElement passField = new PasswordFieldElement("password", "Password",
+			new PropertyModel<String>(this, "password"))
+			.add(new PropertyValidator<String>())
+			.add(new IValidator<String>() {
 
-					@Override
-					public void validate(IValidatable<String> validatable) {
-						if (!Objects.equal(password, confirmPassword)) {
-							validatable.error(new ValidationError().setMessage("Password and confirmed should be identical"));
-						}
+				@Override
+				public void validate(IValidatable<String> validatable) {
+					if (!Objects.equal(password, confirmPassword)) {
+						validatable.error(new ValidationError().setMessage("Password and confirmed should be identical"));
 					}
-				})
-				.setHelp("Use at least six characters.");
+				}
+			})
+			.setHelp("Use at least six characters.");
 		form.add(passField);
-		PasswordFieldElement confirmField = (PasswordFieldElement) 
-				new PasswordFieldElement("confirmPassword",
-						"Confirm Password", 
-						new PropertyModel<String>(this, "confirmPassword"))
-				.add(new PropertyValidator<String>());
+		PasswordFieldElement confirmField = new PasswordFieldElement("confirmPassword",
+				"Confirm Password", 
+				new PropertyModel<String>(this, "confirmPassword"))
+		.add(new PropertyValidator<String>());
 		form.add(confirmField);
 		form.add(new EqualPasswordInputValidator(passField.getFormComponent(), confirmField.getFormComponent()));
 		

@@ -29,7 +29,6 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.assets.PageBaseResourceReference;
-import com.pmease.gitop.web.common.wicket.component.messenger.MessengerResourcesBehavior;
 import com.pmease.gitop.web.common.wicket.component.modal.Modal;
 import com.pmease.gitop.web.exception.AccessDeniedException;
 import com.pmease.gitop.web.page.init.ServerInitPage;
@@ -78,8 +77,6 @@ public abstract class BasePage extends WebPage {
 				&& getClass() != ServerInitPage.class) {
 			redirect(ServerInitPage.class);
 		}
-		
-		add(new WebMarkupContainer("messenger").add(MessengerResourcesBehavior.get()));
 		
 		shouldInitialize = true;
 	}
