@@ -26,22 +26,22 @@
 					<div wicket:id="feedback" class=""></div>
 					
 					<div class="fileupload fileupload-new" data-provides="fileupload">
-					  <div class="fileupload-preview thumbnail" data-trigger="fileupload"></div>
-					  <div>
-					    <a class="btn btn-default btn-file"><span class="fileupload-new">Select image</span><span class="fileupload-exists">Change</span>
-					    <input type="file" wicket:id="fileInput" name="..."></a>
-					    <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload"><i class="icon icon-delete"></i> Clear</a>
-					  </div>
-					</div>
-					
-					<p class="text-muted">
-						Supported image types are png, gif, jpg and jpeg. The image size should be less than 2M bytes.
-					</p>
-					<hr/>
-					<div class="btn-group btn-group-justified">
-						<a wicket:id="submit" class="btn btn-gray btn-submit">Change avatar</a>
-						<a wicket:id="remove" class="btn btn-gray">Reset avatar</a>
-					</div>
+						  <div class="fileupload-preview thumbnail" data-trigger="fileupload"></div>
+						  <div>
+						    <a class="btn btn-default btn-file"><span class="fileupload-new">Select image</span><span class="fileupload-exists">Change image</span>
+						    <input type="file" wicket:id="fileInput" name="..."></a>
+						    <btn class="btn btn-default fileupload-exists" data-dismiss="fileupload">Clear</btn>
+						  </div>
+					</div>	
+						
+						<p class="text-muted">
+							Supported image types are png, gif, jpg and jpeg. The image size should be less than 2M bytes.
+						</p>
+						<hr/>
+						<p class="clearfix">
+							<a wicket:id="submit" class="btn btn-gray pull-left btn-submit"><i class="icon icon-arrow-right"></i> Change avatar</a>							
+							<a wicket:id="remove" class="btn btn-gray pull-right"><i class="icon icon-reset"></i> Reset avatar</a>
+						</p>
 				</form>
 			</div>
 		</div>
