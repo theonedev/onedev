@@ -128,9 +128,9 @@ public class DiffViewPanel extends Panel {
 		};
 		
 		alert
+			 .withHtmlMessage(true)
 			 .setCloseButtonVisible(true)
-			 .type(Alert.Type.Warning)
-			 .setMessageEscapeModelStrings(false);
+			 .type(Alert.Type.Warning);
 		
 		return alert;
 	}

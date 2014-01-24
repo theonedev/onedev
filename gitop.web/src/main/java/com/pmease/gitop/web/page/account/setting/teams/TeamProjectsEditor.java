@@ -33,7 +33,6 @@ import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.model.Authorization;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.Team;
-import com.pmease.gitop.web.common.wicket.component.messenger.Messenger;
 import com.pmease.gitop.web.common.wicket.form.FeedbackPanel;
 import com.pmease.gitop.web.component.choice.ProjectMultiChoice;
 import com.pmease.gitop.web.component.link.ProjectHomeLink;
@@ -93,9 +92,11 @@ public class TeamProjectsEditor extends Panel {
 						AuthorizationManager am = Gitop.getInstance(AuthorizationManager.class);
 						Authorization authorization = am.get(id);
 						am.delete(authorization);
-						Messenger.warn("Project [" + authorization.getProject() 
-								+ "] is removed from team <b>[" 
-								+ authorization.getTeam().getName() + "]</b>").run(target);
+						// TODO: add notification
+						//
+//						Messenger.warn("Project [" + authorization.getProject() 
+//								+ "] is removed from team <b>[" 
+//								+ authorization.getTeam().getName() + "]</b>").run(target);
 						onProjectsChanged(target);
 					}
 				});

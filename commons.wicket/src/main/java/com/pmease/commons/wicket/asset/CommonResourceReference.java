@@ -9,8 +9,10 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import com.pmease.commons.wicket.asset.bootstrap.BootstrapHeaderItem;
 import com.vaynberg.wicket.select2.ApplicationSettings;
+
+import de.agilecoders.wicket.core.markup.html.references.BootstrapJavaScriptReference;
+import de.agilecoders.wicket.core.markup.html.themes.bootstrap.BootstrapCssReference;
 
 /**
  * Common resource is intended to provide a common look&feel for all products using 
@@ -36,7 +38,10 @@ public class CommonResourceReference extends JavaScriptResourceReference {
 	@Override
 	public Iterable<? extends HeaderItem> getDependencies() {
 		List<HeaderItem> headerItems = new ArrayList<>();
-		headerItems.add(BootstrapHeaderItem.get());
+//		headerItems.add(BootstrapHeaderItem.get());
+		
+		headerItems.add(CssHeaderItem.forReference(BootstrapCssReference.instance()));
+		headerItems.add(JavaScriptHeaderItem.forReference(BootstrapJavaScriptReference.instance()));
 		
 		ApplicationSettings select2Settings = ApplicationSettings.get();
 		headerItems.add(JavaScriptHeaderItem.forReference(select2Settings.getMouseWheelReference()));

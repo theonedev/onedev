@@ -23,6 +23,9 @@ import com.pmease.gitop.web.component.link.GitPersonLink;
 import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
 import com.pmease.gitop.web.page.project.api.GitPerson;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
+
 @SuppressWarnings("serial")
 public class ContributorsPanel extends Panel {
 
@@ -104,7 +107,9 @@ public class ContributorsPanel extends Panel {
 		
 		add(moreContainer);
 		
-		add(new TooltipBehavior("[data-toggle=\"tooltip\"]", null, "bottom"));
+		add(new TooltipBehavior(new TooltipConfig()
+					.withPlacement(Placement.top)
+					.withSelector("[data-toggle=\"tooltip\"]")));
 	}
 	
 	@SuppressWarnings("unchecked")

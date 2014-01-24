@@ -25,7 +25,6 @@ import com.pmease.gitop.model.CommitComment;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.Constants;
 import com.pmease.gitop.web.common.wicket.bootstrap.Alert;
-import com.pmease.gitop.web.common.wicket.bootstrap.Alert.Type;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.page.project.source.blob.SourceBlobPage;
 import com.pmease.gitop.web.page.project.source.commit.diff.DiffStatBar;
@@ -226,7 +225,7 @@ public class BlobDiffPanel extends Panel {
 								+ "</code></pre>";
 					}
 					
-				}).setMessageEscapeModelStrings(true);
+				}).withHtmlMessage(true);
 			}
 			
 			return new TextDiffTable(id, getFileModel(), projectModel, sinceModel, untilModel, commentsModel);
@@ -234,7 +233,9 @@ public class BlobDiffPanel extends Panel {
 	}
 	
 	private Alert createMessageLabel(String id, IModel<String> model) {
-		return new Alert(id, model).type(Type.Warning).setCloseButtonVisible(false);
+		Alert alert = new Alert(id, model);
+		alert.type(Alert.Type.Warning).setCloseButtonVisible(false);
+		return alert;
 	}
 	
 	private FileHeader getFile() {

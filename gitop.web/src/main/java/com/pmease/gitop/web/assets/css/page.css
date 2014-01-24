@@ -199,7 +199,7 @@ th.wicket_orderUp a, th.wicket_orderDown a { padding-left: 20px; }
 
 /* ACCOUNT SETTINGS PAGE */
 .owners-list > li > a { color: #666;  }
-.avatar-form .fileinput .thumbnail { width: 200px; height: 200px; }
+.avatar-form .fileupload .thumbnail { width: 200px; height: 200px; }
 
 /* TEAM EDIT PAGE */
 .permission-link { color: #666; }
