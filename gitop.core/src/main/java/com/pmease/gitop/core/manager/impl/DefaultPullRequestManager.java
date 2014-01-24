@@ -105,6 +105,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 				
 	    		git.clone(request.getTarget().getProject().code().repoDir().getAbsolutePath(), 
 	    				false, true, true, request.getTarget().getName());
+	    		
 	    		git.reset(null, null);
 			
 		    	request.getTarget().getProject().setCodeSandbox(git);
@@ -116,7 +117,6 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 						request.setMergeResult(new MergeResult(targetHead, sourceHead, targetHead, sourceHead));
 					} else {
 						git.fetch(request.getSource().getProject().code().repoDir().getAbsolutePath(), sourceHead);
-						
 						String mergeBase = git.calcMergeBase(targetHead, sourceHead);
 						if (git.merge(sourceHead, null, null, null))
 							request.setMergeResult(new MergeResult(targetHead, sourceHead, mergeBase, git.parseRevision("HEAD", true)));

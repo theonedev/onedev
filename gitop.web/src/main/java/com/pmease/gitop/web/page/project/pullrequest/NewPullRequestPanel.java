@@ -7,8 +7,10 @@ import static com.pmease.gitop.model.PullRequest.Status.PENDING_UPDATE;
 
 import java.util.List;
 
+import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -31,27 +33,31 @@ import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
+import com.pmease.gitop.web.component.commit.CommitsTablePanel;
 import com.pmease.gitop.web.component.comparablebranchselector.ComparableBranchSelector;
 import com.pmease.gitop.web.model.EntityModel;
 import com.pmease.gitop.web.page.project.AbstractProjectPage;
+import com.pmease.gitop.web.page.project.source.commit.diff.DiffViewPanel;
 
 @SuppressWarnings("serial")
 public class NewPullRequestPanel extends Panel {
 
-	private String title;
+	private static final String IMPOSSIBLE_TITLE = "*[@TITLE IMPOSSIBLE@]*";
+	
+	private String title = IMPOSSIBLE_TITLE;
 	
 	@SuppressWarnings("unused")
 	private String comment;
 	
-	private IModel<Branch> targetModel;
-	
-	private IModel<Branch> sourceModel;
+	private IModel<Branch> targetModel, sourceModel;
 	
 	private IModel<User> submitterModel;
 	
 	private IModel<List<Commit>> commitsModel;
 	
 	private IModel<PullRequest> pullRequestModel;
+	
+	private MarkupContainer feedbackContainer, commitsPanel, diffViewPanel;
 	
 	public NewPullRequestPanel(String id, Branch target, Branch source, User submitter) {
 		super(id);
@@ -107,7 +113,57 @@ public class NewPullRequestPanel extends Panel {
 			}
 			
 		};
-		final WebMarkupContainer messageContainer = new WebMarkupContainer("message") {
+		
+		add(new ComparableBranchSelector("target", currentProjectModel, targetModel) {
+
+			@Override
+			protected void onChange(AjaxRequestTarget target) {
+				super.onChange(target);
+				onBranchChange(target);
+			}
+			
+		}.setRequired(true));
+		
+		add(new ComparableBranchSelector("source", currentProjectModel, sourceModel) {
+
+			@Override
+			protected void onChange(AjaxRequestTarget target) {
+				super.onChange(target);
+				onBranchChange(target);
+			}
+			
+		}.setRequired(true));
+
+		add(feedbackContainer = new WebMarkupContainer("feedback"));
+		feedbackContainer.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				PullRequest request = getPullRequest();
+				if (request.isNew()) {
+					if (getTarget().equals(getSource())) {
+						return "danger";
+					} else if (request.getStatus() == INTEGRATED) {
+						return "info";
+					} else if (request.getStatus() == PENDING_UPDATE) {
+						return "danger";
+					} else if (title == null) {
+						return "error";
+					} else if (request.getMergeResult().getMergeHead() == null) {
+						return "warning";
+					} else {
+						return "success";
+					}
+				} else {
+					return "info";
+				}
+			}
+			
+		}));
+		feedbackContainer.setOutputMarkupId(true);
+		
+		WebMarkupContainer messageContainer;
+		feedbackContainer.add(messageContainer = new WebMarkupContainer("message") {
 
 			@Override
 			protected void onConfigure() {
@@ -116,37 +172,23 @@ public class NewPullRequestPanel extends Panel {
 				setVisible(request.isNew() && (request.getStatus() == PENDING_APPROVAL || request.getStatus() == PENDING_INTEGRATE)); 
 			}
 			
-		};
-		messageContainer.setOutputMarkupPlaceholderTag(true);
-		add(messageContainer);
+		});
 
-		final WebMarkupContainer statusContainer = new WebMarkupContainer("status");
-		statusContainer.setOutputMarkupId(true);
-		add(statusContainer);
-		
-		add(new ComparableBranchSelector("target", currentProjectModel, targetModel, "Target Project", "Target Branch") {
+		WebMarkupContainer titleContainer = new WebMarkupContainer("titleContainer");
+		titleContainer.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
 			@Override
-			protected void onChange(AjaxRequestTarget target) {
-				super.onChange(target);
-				target.add(messageContainer);
-				target.add(statusContainer);
+			public String getObject() {
+				if (title == null)
+					return "has-error";
+				else
+					return "";
 			}
 			
-		}.setRequired(true));
+		}));
+		messageContainer.add(titleContainer);
 		
-		add(new ComparableBranchSelector("source", currentProjectModel, sourceModel, "Source Project", "Source Branch") {
-
-			@Override
-			protected void onChange(AjaxRequestTarget target) {
-				super.onChange(target);
-				target.add(messageContainer);
-				target.add(statusContainer);
-			}
-			
-		}.setRequired(true));
-
-		TextField<String> titleField = new TextField<String>("title", new IModel<String>() {
+		final TextField<String> titleField = new TextField<String>("title", new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -154,10 +196,7 @@ public class NewPullRequestPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				if (title != null)
-					return title;
-				else 
-					return getDefaultTitle();
+				return getTitle();
 			}
 
 			@Override
@@ -171,34 +210,39 @@ public class NewPullRequestPanel extends Panel {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
+				titleField.processInput();
 			}
 			
 		});
-		titleField.setRequired(true);
-		messageContainer.add(titleField);
+		titleContainer.add(titleField);
 		
-		TextArea<String> commentArea = new TextArea<String>("comment", new PropertyModel<String>(this, "comment"));
+		final TextArea<String> commentArea = new TextArea<String>("comment", new PropertyModel<String>(this, "comment"));
 		commentArea.add(new AjaxFormComponentUpdatingBehavior("blur") {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
+				commentArea.processInput();
 			}
 			
 		});
 		messageContainer.add(commentArea);
 
-		statusContainer.add(new Link<Void>("send") {
+		feedbackContainer.add(new Link<Void>("send") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				PullRequest request = getPullRequest();
-				setVisible(request.isNew());
-				setEnabled(request.getStatus() == PENDING_APPROVAL || request.getStatus() == PENDING_INTEGRATE);
+				setVisible(request.isNew() 
+						&& (request.getStatus() == PENDING_APPROVAL || request.getStatus() == PENDING_INTEGRATE));
 			}
 
 			@Override
 			public void onClick() {
+				String title = getTitle();
+				if (title != null) {
+					
+				}
 			}
 
 			@Override
@@ -211,7 +255,7 @@ public class NewPullRequestPanel extends Panel {
 			
 		});
 		
-		statusContainer.add(new Link<Void>("view") {
+		feedbackContainer.add(new Link<Void>("view") {
 
 			@Override
 			protected void onConfigure() {
@@ -226,7 +270,7 @@ public class NewPullRequestPanel extends Panel {
 			
 		});
 		
-		statusContainer.add(new Label("summary", new AbstractReadOnlyModel<String>() {
+		feedbackContainer.add(new Label("summary", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -239,6 +283,8 @@ public class NewPullRequestPanel extends Panel {
 							return "No changes to pull.";
 						} else if (request.getStatus() == PENDING_UPDATE) {
 							return "Gate keeper of target project rejects the pull request.";
+						} else if (title == null) {
+							return "Title has to be specified.";
 						} else if (request.getMergeResult().getMergeHead() == null) {
 							return "There are merge conflicts.";
 						} else {
@@ -252,7 +298,7 @@ public class NewPullRequestPanel extends Panel {
 			
 		}));
 		
-		statusContainer.add(new Label("detail", new AbstractReadOnlyModel<String>() {
+		feedbackContainer.add(new Label("detail", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -263,8 +309,10 @@ public class NewPullRequestPanel extends Panel {
 					if (request.getStatus() == INTEGRATED) {
 						return "Target branch '" + getTarget().getName() + "' of project '" + getTarget().getProject() 
 								+ "' is already update to date.";
-					} else if (request.getStatus() != PENDING_UPDATE) {
-						return "You can still send the pull request.";
+					} else if (title != null 
+							&& request.getStatus() != PENDING_UPDATE 
+							&& request.getMergeResult().getMergeHead() == null) {
+						return "But you can still send the pull request.";
 					}
 				} 
 				return null;
@@ -272,7 +320,7 @@ public class NewPullRequestPanel extends Panel {
 			
 		}));
 		
-		statusContainer.add(new ListView<String>("rejectReasons", new LoadableDetachableModel<List<String>>() {
+		feedbackContainer.add(new ListView<String>("rejectReasons", new LoadableDetachableModel<List<String>>() {
 
 			@Override
 			protected List<String> load() {
@@ -295,6 +343,58 @@ public class NewPullRequestPanel extends Panel {
 			}
 			
 		});
+		
+		IModel<Project> projectModel = new AbstractReadOnlyModel<Project>() {
+
+			@Override
+			public Project getObject() {
+				return getTarget().getProject();
+			}
+			
+		};
+		add(commitsPanel = new CommitsTablePanel("commits", commitsModel, projectModel) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisible(getPullRequest().getStatus() != INTEGRATED);
+			}
+			
+		});
+		commitsPanel.setOutputMarkupPlaceholderTag(true);
+		
+		add(diffViewPanel = new DiffViewPanel("changes", projectModel, new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getPullRequest().getMergeResult().getMergeBase();
+			}
+			
+		}, new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getSource().getHeadCommit();
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisible(getPullRequest().getStatus() != INTEGRATED);
+			}
+			
+		});
+		diffViewPanel.setOutputMarkupPlaceholderTag(true);
+	}
+	
+	private void onBranchChange(AjaxRequestTarget target) {
+		target.add(feedbackContainer);
+		target.add(commitsPanel);
+		target.add(diffViewPanel);
 	}
 	
 	private Branch getTarget() {
@@ -335,5 +435,11 @@ public class NewPullRequestPanel extends Panel {
 
 		super.onDetach();
 	}
-	
+
+	private String getTitle() {
+		if (IMPOSSIBLE_TITLE.equals(title))
+			return getDefaultTitle();
+		else
+			return title;
+	}
 }

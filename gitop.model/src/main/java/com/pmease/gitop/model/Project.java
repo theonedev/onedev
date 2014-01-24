@@ -224,12 +224,12 @@ public class Project extends AbstractEntity implements UserBelonging {
 	 * 			<tt>true</tt> if valid; <tt>false</tt> otherwise
 	 */
 	public static boolean isCode(Git git) {
-        File preReceiveHook = new File(git.repoDir(), "hooks/update");
-        if (!preReceiveHook.exists()) 
+        File updateHook = new File(git.repoDir(), "hooks/update");
+        if (!updateHook.exists()) 
         	return false;
         
         try {
-			String content = FileUtils.readFileToString(preReceiveHook);
+			String content = FileUtils.readFileToString(updateHook);
 			return content.contains("GITOP_USER_ID");
 		} catch (IOException e) {
 			throw new RuntimeException(e);

@@ -43,7 +43,7 @@ public class AjaxLoadingIndicator implements IAjaxCallListener, IComponentAwareH
 		return 
 				"$('#ajax-loading-indicator')[0].timer = setTimeout(function() {" +
 				"	$('#ajax-loading-indicator').show();" +
-				"}, 1000);";
+				"}, 500);";
 	}
 
 	@Override
