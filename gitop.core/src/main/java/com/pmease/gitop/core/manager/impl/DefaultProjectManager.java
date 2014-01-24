@@ -80,18 +80,6 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
         checkSanity(project);
     }
 
-    private void setupHooks(Project project) {
-        File hooksDir = new File(project.code().repoDir(), "hooks");
-
-        File gitUpdateHookFile = new File(hooksDir, "update");
-        FileUtils.writeFile(gitUpdateHookFile, gitUpdateHook);
-        gitUpdateHookFile.setExecutable(true);
-        
-        File gitPostReceiveHookFile = new File(hooksDir, "post-receive");
-        FileUtils.writeFile(gitPostReceiveHookFile, gitPostReceiveHook);
-        gitPostReceiveHookFile.setExecutable(true);
-    }
-    
     @Transactional
     @Override
     public void delete(Project project) {
@@ -165,7 +153,6 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
 
             FileUtils.cleanDir(forked.code().repoDir());
             forked.code().clone(project.code().repoDir().getAbsolutePath(), true);
-            setupHooks(forked);
             
             checkSanity(forked);
 		}
@@ -185,17 +172,30 @@ public class DefaultProjectManager extends AbstractGenericDao<Project> implement
 	@Override
 	public void checkSanity(Project project) {
 		logger.debug("Checking sanity of project '{}'...", project);
-        File codeDir = project.code().repoDir();
-        if (codeDir.exists() && !Project.isCode(new Git(codeDir))) {
-        	logger.warn("Directory '" + codeDir + "' is not a valid gitop repository, removing...");
-        	FileUtils.deleteDir(codeDir);
+
+		Git git = project.code();
+
+		if (git.repoDir().exists() && !git.isValid()) {
+        	logger.warn("Directory '" + git.repoDir() + "' is not a valid git repository, removing...");
+        	FileUtils.deleteDir(git.repoDir());
         }
         
-        if (!codeDir.exists()) {
-        	logger.warn("Initializing gitop repository in '" + codeDir + "'...");
-            FileUtils.createDir(codeDir);
-            new Git(codeDir).init(true);
-            setupHooks(project);
+        if (!git.repoDir().exists()) {
+        	logger.warn("Initializing git repository in '" + git.repoDir() + "'...");
+            FileUtils.createDir(git.repoDir());
+            git.init(true);
+        }
+        
+        if (!Project.isCode(git)) {
+            File hooksDir = new File(project.code().repoDir(), "hooks");
+
+            File gitUpdateHookFile = new File(hooksDir, "update");
+            FileUtils.writeFile(gitUpdateHookFile, gitUpdateHook);
+            gitUpdateHookFile.setExecutable(true);
+            
+            File gitPostReceiveHookFile = new File(hooksDir, "post-receive");
+            FileUtils.writeFile(gitPostReceiveHookFile, gitPostReceiveHook);
+            gitPostReceiveHookFile.setExecutable(true);
         }
 		
 		logger.debug("Syncing branches of project '{}'...", project);

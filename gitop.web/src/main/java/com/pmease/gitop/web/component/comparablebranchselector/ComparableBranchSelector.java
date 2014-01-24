@@ -1,16 +1,15 @@
 package com.pmease.gitop.web.component.comparablebranchselector;
 
-import javax.annotation.Nullable;
-
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 
+import com.pmease.commons.wicket.ajaxlistener.ajaxloadingindicator.AjaxLoadingIndicator;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.model.Branch;
@@ -26,10 +25,6 @@ public class ComparableBranchSelector extends FormComponentPanel<Branch> {
 	
 	private IModel<Project> selectedProjectModel;
 	
-	private final String projectLabel;
-	
-	private final String branchLabel;
-	
 	/**
 	 * Construct with current project model and selected branch model.
 	 * 
@@ -39,13 +34,8 @@ public class ComparableBranchSelector extends FormComponentPanel<Branch> {
 	 * 			model of current project. Note that the model object should never be null
 	 * @param selectedBranchModel
 	 * 			model of selected branch
-	 * @param proejctLabel
-	 * 			label of the project choice
-	 * @param branchLabel
-	 * 			label of the branch choice
 	 */
-	public ComparableBranchSelector(String id, IModel<Project> currentProjectModel, IModel<Branch> selectedBranchModel, 
-			@Nullable String projectLabel, @Nullable String branchLabel) {
+	public ComparableBranchSelector(String id, IModel<Project> currentProjectModel, IModel<Branch> selectedBranchModel) {
 		super(id, selectedBranchModel);
 		
 		this.currentProjectModel = currentProjectModel;
@@ -73,8 +63,6 @@ public class ComparableBranchSelector extends FormComponentPanel<Branch> {
 			
 		};
 		
-		this.projectLabel = projectLabel;
-		this.branchLabel = branchLabel;
 	}
 	
 	protected void onChange(AjaxRequestTarget target) {
@@ -86,15 +74,18 @@ public class ComparableBranchSelector extends FormComponentPanel<Branch> {
 		
 		setOutputMarkupId(true);
 		
-		add(new Label("projectLabel", (projectLabel != null? projectLabel: "Project")));
-		add(new Label("branchLabel", (branchLabel != null? branchLabel: "Branch")));
-
 		add(new ComparableProjectChoice("projectChoice", currentProjectModel, selectedProjectModel).add(new OnChangeAjaxBehavior() {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				target.add(ComparableBranchSelector.this);
 				onChange(target);
+			}
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new AjaxLoadingIndicator());
 			}
 			
 		}));
@@ -116,6 +107,12 @@ public class ComparableBranchSelector extends FormComponentPanel<Branch> {
 				onChange(target);
 			}
 			
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new AjaxLoadingIndicator());
+			}
+
 		}));
 	}
 	

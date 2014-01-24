@@ -637,16 +637,53 @@ tr.diff-line.new { background: #cfc; }
 .dropdown-panel .directory-chooser .title {font-weight: bold; border-bottom: 1px solid #888888;}
 .dropdown-panel .alert.empty-directory-choice {margin: 0px;}
 
-.comparable-branch-selector .connector {margin-top: 4px; color: #888; font-weight: bold; font-size: 16px;}
-.comparable-branch-selector>div {float: left;}
-.comparable-branch-selector {clear: left;}
+.comparable-branch-selector .connector {margin-top: 4px; color: #BBB; font-weight: bold; font-size: 16px;}
 
 /* PULL REQUESTS PAGE */
 #pull-requests {padding: 20px;}
 #pull-requests>table {width: 100%;}
 
-.new-pull-request>.title {font-size: 20px; font-weight: bold; margin-bottom: 20px;}
-.new-pull-request>.head {padding: 0;}
-.new-pull-request>.head>div {float:left;}
-.new-pull-request>.head>.icon {margin: 2px 4px 0 6px;}
-.new-pull-request>div {margin-bottom: 20px;}
+.pull-request>.title {font-size: 20px; font-weight: bold; margin-bottom: 20px;}
+.pull-request>.branches {background: #F2F2F2; padding: 8px; border-radius: 4px;}
+
+/* Fix the issue that branch selectors can not be displayed in a single line in Chrome */
+.pull-request>.branches .input-group-addon {width: auto;} 
+
+.pull-request>.branches>.label {font-size: 16px; color: #444; margin-top: 4px;}
+.pull-request>.branches>.target {margin-right: 12px;}
+
+.pull-request>div {margin-bottom: 20px;}
+.pull-request>.feedback {background: #F2F2F2; padding: 4px; border-radius: 4px;}
+.pull-request>.feedback table {width: 100%; border-collapse: separate;}
+.pull-request>.feedback td {vertical-align: top;}
+
+.pull-request>.feedback td.message {width: 70%;}
+.pull-request>.feedback td.message>.title {margin: -1px 4px 8px -1px;}
+.pull-request>.feedback td.message>.comment {margin: 0 4px -1px -1px;}
+.pull-request>.feedback td.message>.comment>textarea {resize: vertical; min-height: 64px;}
+
+.pull-request>.feedback td.status {width: 30%; border:1px solid #CCC; border-radius: 4px; 
+	padding: 16px; margin: 1px 0 1px 4px;}
+.pull-request>.feedback td.status .summary {font-size: 18px; margin-bottom: 16px;}
+.pull-request>.feedback td.status .detail {margin-bottom: 16px;}
+.pull-request>.feedback td.status tr>td:first-child {width: 1%;}
+.pull-request>.feedback .icon {font-size: 26px; margin-right: 8px; display: none;}
+
+.pull-request>.feedback.danger .icon-exclamation, .pull-request>.feedback.error .icon-exclamation {
+	display: block; color: #A94442;}
+.pull-request>.feedback.warning .icon-warning-sign {display: block; color: #8A6D3B;}
+.pull-request>.feedback.info .icon-info-circle {display: block; color: #31708F;}
+.pull-request>.feedback.success .icon-ok-circle {display: block; color: #3C763D;}
+
+.pull-request>.feedback.danger .status, .pull-request>.feedback.info .status {border: none;}
+.pull-request>.feedback.danger {background: #F2DEDE; border: 1px solid #EBCCD1; color: #A94442;}
+.pull-request>.feedback.info {background: #D9EDF7; border: 1px solid #BCE8F1; color: #31708F;}
+
+.pull-request>.feedback.success {color: #3C763D;}
+.pull-request>.feedback.success td.status {border-color: #BDDCA4; background-color: #DFF0D8;}
+
+.pull-request>.feedback.warning {color: #8A6D3B;}
+.pull-request>.feedback.warning td.status {border-color: #F7DEAB; background-color: #FCF8E3;}
+
+.pull-request>.feedback.error {color: #A94442;}
+.pull-request>.feedback.error td.status {border-color: #EBCCD1; background-color: #F2DEDE;}

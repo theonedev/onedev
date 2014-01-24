@@ -282,19 +282,6 @@ pmease.commons = {
 		
 	},
 	
-	decorateTable: function(table) {
-		if ($(table).attr("class") == undefined)
-			$(table).addClass("table table-striped table-hover table-condensed");
-	},
-	
-	decorateElements: function(scope) {
-		if ($(scope).is("table"))
-			pmease.commons.decorateTable(scope);
-		$(scope).find("table").each(function() {
-			pmease.commons.decorateTable(this);
-		});
-	},
-	
 	setupCollapse: function(triggerId, targetId) {
 		var trigger = $("#" + triggerId);
 		var target = $("#" + targetId);
@@ -570,11 +557,6 @@ $(function() {
 		if (!source.closest(".dropdown-toggle")[0])
 			pmease.commons.dropdown.hideExcept(source);
 	});
-	
-	Wicket.Event.subscribe("/dom/node/added", function(jqEvent, element) {
-		pmease.commons.decorateElements(element);
-	});	
-	pmease.commons.decorateElements(document);
 	
 	$(document).keypress(function(e) {
 		if (e.keyCode == 27) { // esc

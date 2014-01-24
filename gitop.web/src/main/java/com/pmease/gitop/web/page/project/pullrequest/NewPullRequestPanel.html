@@ -1,40 +1,51 @@
 <wicket:panel>
-	<div class="new-pull-request">
-		<div class="head">
-			<div wicket:id="target" class="target"></div>
-			<div class="icon icon-arrow-slim-left icon-2x"></div>
-			<div wicket:id="source" class="source"></div>
+	<div class="pull-request">
+		<div class="branches clearfix">
+			<div class="pull-left label">To: </div>
+			<div wicket:id="target" class="target pull-left"></div>
+			<div class="pull-left label">From: </div>
+			<div wicket:id="source" class="source pull-left"></div>
 		</div>
-		<div class="body clearfix">
+		<div wicket:id="feedback" class="feedback">
 			<table>
 				<tr>
-					<td>
-						<div wicket:id="message" class="message">
-							<div class="title">
-								<input wicket:id="title" type="text" class="form-control">
-							</div>
-							<div class="comment">
-								<textarea wicket:id="comment" class="form-control"></textarea>
-							</div>
+					<td wicket:id="message" class="message">
+						<div wicket:id="titleContainer" class="title">
+							<input wicket:id="title" type="text" class="form-control" placeholder="Title has to be specified">
+						</div>
+						<div class="comment">
+							<textarea wicket:id="comment" class="form-control" rows="8" placeholder="Comment"></textarea>
 						</div>
 					</td>
-					<td>
-						<div wicket:id="status" class="status">
-							<div wicket:id="summary" class="summary"></div>
-							<div wicket:id="detail" class="detail"></div>
-							<wicket:enclosure child="rejectReasons">
-							<ul>
-								<li wicket:id="rejectReasons">
-									<span wicket:id="reason"></span>
-								</li>
-							</ul>
-							</wicket:enclosure>
-							<input wicket:id="send" value="Send Pull Request" class="btn btn-lg btn-primary"></input>
-							<input wicket:id="view" value="View Pull Request" class="btn btn-lg btn-primary"></input>
-						</div>
+					<td class="status">
+						<table>
+							<tr>
+								<td>
+									<span class="icon icon-ok-circle"></span>
+									<span class="icon icon-info-circle"></span>
+									<span class="icon icon-warning-sign"></span>
+									<span class="icon icon-exclamation"></span>
+								</td>
+								<td>
+									<div wicket:id="summary" class="summary"></div>
+									<div wicket:id="detail" class="detail"></div>
+									<wicket:enclosure child="rejectReasons">
+									<ul class="detail">
+										<li wicket:id="rejectReasons">
+											<span wicket:id="reason"></span>
+										</li>
+									</ul>
+									</wicket:enclosure>
+									<input wicket:id="send" value="Send Pull Request" class="btn btn-lg btn-primary send"></input>
+									<input wicket:id="view" value="View Pull Request" class="btn btn-lg btn-primary"></input>
+								</td>
+							</tr>
+						</table>
 					</td>
 				</tr>
 			</table>
 		</div>
+		<div wicket:id="commits" class="commits"></div>
+		<div wicket:id="changes" class="changes"></div>
 	</div>
 </wicket:panel>
