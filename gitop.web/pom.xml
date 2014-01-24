@@ -46,6 +46,12 @@
 			<version>1.0.0</version>
 		</dependency>
         
+        <dependency>
+		  <groupId>de.agilecoders.wicket</groupId>
+		  <artifactId>wicket-bootstrap-extensions</artifactId>
+		  <version>0.9.1</version>
+		</dependency>
+		
 		<!-- JERSEY CLIENT -->
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
