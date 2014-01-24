@@ -1,39 +1,28 @@
 <html xmlns:wicket>
 <wicket:panel>
-	<section class="commit-group" wicket:id="groups">
-		<h3 class="commit-group-head"><span wicket:id="date"></span></h3>
-		<ul>
-			<li wicket:id="commits">
-				<wicket:container wicket:id="authoravatar"></wicket:container>
-				<div class="right">
-					<div class="commitish">
-						<a class="sha" wicket:id="commitlink"><span class="" wicket:id="sha"></span> &rarr;</a>
-						<a class="sha" wicket:id="treelink">Browse code &raquo;</a>
-					</div>
-				</div>
-				
-				<div class="short-message">
-					<span class="detailed-toggle collapsed" wicket:id="detailedToggle"><i class="icon icon-toggle"></i></span>
-					<span wicket:id="shortmessage"></span>
-				</div>
-				
-				<pre class="detailed-message" wicket:id="detailedmessage"></pre>
-				
-				<div class="commit-meta">
-					<div class="author-info">
-						<wicket:container wicket:id="author"></wicket:container>
-						authored <span class="age" wicket:id="authordate"></span>
-					</div>
-					<wicket:enclosure child="committer">
-					<div class="committer-info">
-						<i class="icon icon-arrow-right"></i>
-						<wicket:container wicket:id="committer"></wicket:container>
-						committed <span class="age" wicket:id="committerdate"></span>
-					</div>
-					</wicket:enclosure>
-				</div>
-			</li>
-		</ul>
+	<section wicket:id="groups">
+		<div class="panel panel-default panel-commit">
+			<div class="panel-heading">
+				<h3><span wicket:id="date"></span></h3>
+			</div>
+			<div class="panel-body">
+				<table class="table table-commits table-compact">
+					<tr wicket:id="rows">
+						<td class="td-avatar">
+							<wicket:container wicket:id="avatar"></wicket:container>
+						</td>
+						<td class="td-message">
+							<wicket:container wicket:id="message"></wicket:container>
+							<wicket:container wicket:id="meta"></wicket:container>
+						</td>
+						<td class="td-commitish">
+							<a class="sha" wicket:id="shalink"><span class="" wicket:id="sha"></span> &rarr;</a>
+							<a class="sha" wicket:id="treelink">Browse code &raquo;</a>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
 	</section>
 </wicket:panel>
 </html>

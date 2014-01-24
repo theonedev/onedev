@@ -199,7 +199,7 @@ th.wicket_orderUp a, th.wicket_orderDown a { padding-left: 20px; }
 
 /* ACCOUNT SETTINGS PAGE */
 .owners-list > li > a { color: #666;  }
-.avatar-form .fileinput .thumbnail { width: 200px; height: 200px; }
+.avatar-form .fileupload .thumbnail { width: 200px; height: 200px; }
 
 /* TEAM EDIT PAGE */
 .permission-link { color: #666; }
@@ -359,28 +359,28 @@ ul.repo-actions { margin: 8px 4px 8px 0; padding: 0; list-style: none; }
   color: #999; font-weight: bold;
 }
 
+/*
+ * SOURCE TREE PAGE
+ */
+pre.title-message { background: transparent; padding: 0; border: 0; margin: 0; }
+.title-message a { color: #333; }
+pre.detailed-message { padding-left: 8px; background: transparent; color: #888; border-width: 0 0 0 1px; border-color: #ddd; display: none; }
+
+.panel-sourcetree .panel-body { padding: 0; }
+
 .source-tree { border: 1px solid #ddd; border-radius: 4px; }
-.source-tree .last-commit { background: #f2f2f2; border-radius: 4px 4px 0 0; }
-.source-tree .commit-message { padding: 8px 15px; }
-
-.commit-message .title-message { display: inline-block; margin-right: 6px; background: transparent; border: none; margin: 0; padding: 0;}
-.commit-message .detailed-message {font-size: 12px; color: #666;  background: white; margin-top: 8px; }
-
-.commit-meta { background: #fff; padding: 8px 15px; border-top: 1px solid #ddd; font-size: 0.857143em; }
-.persons .name { color: #666; font-weight: bold;}
-.source-tree .persons .committer { padding-left: 20px; }
-.source-tree td.message,
-.source-tree td.age { color: #999; }
-
-.commit-hash, .sha { font-family: Consolas, 'Liberation Mono', Courier, monospace; }
-.commit-hash > a { color: #999; }
-.commit-hash > a .sha { color: #555; }
 
 .commitish-list .menu-ul,
 .committer-list.menu-ul { max-height: 400px; padding: 10px 0; overflow: auto; }
 
 table.files { margin: 0; }
 table.files td.file-icon { width: 18px; padding-right: 2px; padding-left: 15px; color: #888; }
+
+.commit-meta { color: #999; font-size: 12px; padding: 5px 0; }
+.commit-meta .name, .commit-meta .name a { color: #333; font-weight: normal; }
+.commit-meta .committer-info .icon { font-size: 12px; }
+
+.sha {  font-family: Consolas, 'Liberation Mono', Courier, monospace; }
 
 /*
  * SOURCE BLOB PAGE
@@ -435,43 +435,35 @@ table.table-blob { width: 100%; }
 /*
  * COMMITS PAGE
  */
-.commit-group { margin-bottom: 18px; }
-.commit-group h3 { font-size: 14px; font-weight: bold; margin: 0; padding: 12px; background: #e6e9ee; border-radius: 4px 4px 0 0; border-width: 1px 1px 0; border-style:solid; border-color: #ddd; }
-.commit-group ul { margin: 0; padding: 0; list-style: none; border-radius: 0 0 4px 4px; border-width: 1px; border-style: solid; border-color: #ddd; }
-.commit-group li { padding: 8px 12px; border-top: 1px solid #ddd; min-height: 60px; }
-.commit-group li:hover { background: #fcfce5; }
-.commit-group .short-message { font-weight: bold; border: none; margin: 0 120px 0 64px; padding: 0; background: transparent; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
-.commit-group .detailed-message {display: none;  margin: 0 120px 18px 80px; color: #666; border-width: 0 0 0 1px; background: transparent; }
-.commit-group .avatar { float: left; width: 48px; height: 48px; background: transparent; box-shadow: none; }
-.commit-group .avatar > img { border-radius: 100%; }
-.commit-group .commit-meta { margin-left: 64px; padding: 0; margin-right: 120px; background: transparent; border: none; }
-.committer-info .icon { color: #999; font-size: 12px; }
-.commit-group .commitish { width: 100px; overflow: hidden; }
-.commit-group .commitish a { display: block; color: #888; font-size: 12px; text-align: right; margin-bottom: 4px;}
-.commit-group .commitish a:hover { color: #09f; }
-
-.detailed-toggle { cursor: pointer; }
-.detailed-toggle.collapsed .icon-toggle:before { content: "\F02B"; }
-.detailed-toggle .icon-toggle:before { content: "\F029"; }
+.commits-view .title-message a { font-weight: bold; font-size: 14px; }
 
 .panel-commit .panel-heading h3 { margin: 0; font-size:16px; }
 .panel-commit .panel-body { padding: 0; }
 .panel-commit .table-commits { margin: 0; }
 .table-commits .td-name { width: 120px; }
 .table-commits .td-name .name { width: 120px; overflow: hidden; white-space: nowrap; }
-.table-commits .td-commitish { text-align: right; }
+.table-commits .td-commitish { text-align: right; white-space: nowrap; }
+.table-commits .td-commitish a { display: block; }
 .table-commits .td-message a { color: #333; }
+.panel-commit .panel-body .table-commits > tbody > tr:first-child > td { border-top: none; }
+.panel-commit .panel-body .table-commits > tbody > tr:last-child > td:first-child { border-radius: 0 0 0 3px; }
+.panel-commit .panel-body .table-commits > tbody > tr:last-child > td:last-child { border-radius: 0 0 3px 0; }
 
 .table-commits pre.detailed-message { background: transparent; border-width: 0 0 0 1px; display: none; }
 
-.table-commits> tbody > tr:nth-child(odd) > td,
+.table-commits > tbody > tr:nth-child(odd) > td,
 .table-commits > tbody > tr:nth-child(odd) > th {
   background-color: #fff;
 }
-.table-commits> tbody > tr:nth-child(even) > td,
+.table-commits > tbody > tr:nth-child(even) > td,
 .table-commits > tbody > tr:nth-child(even) > th {
   background-color: #f9f9f9;
 }
+.table-commits > tbody > tr:hover > td { background-color: #fbfbe0; }
+
+.table-commits .td-avatar { width: 60px; }
+.table-commits .td-avatar .avatar { background: transparent; box-shadow: none; width: 48px; height: 48px; }
+.table-commits .td-avatar .avatar img { border-radius: 100%; }
 
 /*
  * COMMIT PAGE
@@ -492,7 +484,7 @@ table.table-blob { width: 100%; }
 .commit-head a.inref { margin-right: 6px; color: #555; font-weight: bold;}
 
 .commit .commit-message { border-bottom: 1px solid #ddd; margin-bottom: 9px; }
-.commit .commit-message .detailed-message { color: #666; border-width: 0 0 0 1px; background: transparent; border-width: 0; padding: 0; font-size: 14px; }
+.commit .commit-message .detailed-message { display: block; color: #666; border-width: 0 0 0 1px; background: transparent; border-width: 0; padding: 0; font-size: 14px; }
 
 #diff-toc .btn { float: right; }
 #diff-toc.open .btn-show,

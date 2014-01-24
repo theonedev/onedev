@@ -25,8 +25,6 @@ import com.pmease.commons.util.FileUtils;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.SitePaths;
-import com.pmease.gitop.web.common.wicket.bootstrap.NotificationPanel;
-import com.pmease.gitop.web.common.wicket.bootstrap.jasny.FileUploadField;
 import com.pmease.gitop.web.common.wicket.component.vex.AjaxConfirmButton;
 import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
@@ -35,6 +33,9 @@ import com.pmease.gitop.web.component.avatar.AvatarImage;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import de.agilecoders.wicket.extensions.javascript.jasny.FileUploadField;
 
 @SuppressWarnings("serial")
 public class AccountProfilePage extends AccountSettingPage {

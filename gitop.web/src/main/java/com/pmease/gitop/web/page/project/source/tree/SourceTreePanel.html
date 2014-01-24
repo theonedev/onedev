@@ -1,44 +1,34 @@
 <html xmlns:wicket>
 <wicket:panel>
-	<section class="source-tree">
-		<div class="last-commit">
-			<div class="commit-message">
-				<pre class="title-message inline" wicket:id="shortMessage"></pre>
-				<wicket:enclosure child="detailedMessage">
-				<a class="btn btn-mini btn-gray" href="javascript:void(0)" wicket:id="detailed-toggle"><i class="icon icon-more"></i></a>
-				<pre class="detailed-message collapse" wicket:id="detailedMessage"></pre>
-				</wicket:enclosure>
-			</div>
-			<div class="commit-meta clearfix">
-				<div class="persons text-muted left">
-					<div class="author"><span class="name" wicket:id="author"></span> authored <time class="age" wicket:id="author-date"></time></div>
-					<wicket:enclosure child="committer">
-					<div class="committer">
-						<i class="icon icon-long-arrow-right"></i> <span class="name" wicket:id="committer"></span> committed <time class="age" wicket:id="committer-date"></time>
-					</div>
-					</wicket:enclosure>
-				</div>
-				<div class="commit-hash right">
+	<div class="panel panel-default panel-sourcetree">
+		<div class="panel-heading panel-message">
+			<wicket:container wicket:id="message"></wicket:container>
+		</div>
+		<div class="panel-body">
+			<div class="last-commit clearfix">
+				<div wicket:id="meta"></div>
+				<div class="commitish">
 					<a wicket:id="commitlink">latest commit <span wicket:id="sha" class="sha"></span></a>
 				</div>
 			</div>
+			
+			<table class="table files">
+				<wicket:enclosure>
+				<tr>
+					<td class="file-icon"><i class="icon icon-back"></i></td>
+					<td class="file-name"><a wicket:id="parent" title="go to up level">..</a></td>
+					<td class="message"></td>
+					<td class="age"></td>
+				</tr>
+				</wicket:enclosure>
+				<tr wicket:id="files">
+					<td class="file-icon"><i class="" wicket:id="icon"></i></td>
+					<td class="file-name"><a wicket:id="file"><span wicket:id="name"></span></a></td>
+					<td class="message"></td>
+					<td class="age"></td>
+				</tr>
+			</table>
 		</div>
-		<table class="table files">
-			<wicket:enclosure>
-			<tr>
-				<td class="file-icon"><i class="icon icon-back"></i></td>
-				<td class="file-name"><a wicket:id="parent" title="go to up level">..</a></td>
-				<td class="message"></td>
-				<td class="age"></td>
-			</tr>
-			</wicket:enclosure>
-			<tr wicket:id="files">
-				<td class="file-icon"><i class="" wicket:id="icon"></i></td>
-				<td class="file-name"><a wicket:id="file"><span wicket:id="name"></span></a></td>
-				<td class="message"></td>
-				<td class="age"></td>
-			</tr>
-		</table>
-	</section>
+	</div>
 </wicket:panel>
 </html>

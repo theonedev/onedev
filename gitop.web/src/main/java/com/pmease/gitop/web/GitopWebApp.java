@@ -98,6 +98,9 @@ import com.pmease.gitop.web.shiro.LogoutPage;
 import com.pmease.gitop.web.shiro.ShiroWicketPlugin;
 import com.pmease.gitop.web.util.UrlUtils;
 
+import de.agilecoders.wicket.core.Bootstrap;
+import de.agilecoders.wicket.core.settings.BootstrapSettings;
+
 @Singleton
 public class GitopWebApp extends AbstractWicketConfig {
 	private static final Duration DEFAULT_TIMEOUT = Duration.minutes(10);
@@ -196,6 +199,8 @@ public class GitopWebApp extends AbstractWicketConfig {
 				.mountLoginPage("login", LoginPage.class)
 				.mountLogoutPage("logout", LogoutPage.class)
 				.install(this);
+		
+		Bootstrap.install(this, new BootstrapSettings());
 
 		mountPages();
 		configureResources();

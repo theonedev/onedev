@@ -25,16 +25,18 @@ import org.hibernate.criterion.Restrictions;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.MembershipManager;
 import com.pmease.gitop.model.Membership;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.common.wicket.bootstrap.NotificationPanel;
-import com.pmease.gitop.web.common.wicket.util.JQuery;
 import com.pmease.gitop.web.component.choice.UserMultiChoice;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.account.setting.members.MemberListView;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
 @SuppressWarnings("serial")
 public class TeamMembersEditor extends Panel {
@@ -54,6 +56,7 @@ public class TeamMembersEditor extends Panel {
 		
 		WebMarkupContainer membersDiv = new WebMarkupContainer("membersview");
 		membersDiv.setOutputMarkupId(true);
+		membersDiv.add(new TooltipBehavior(new TooltipConfig().withSelector("a.remove-link")));
 		add(membersDiv);
 		
 		final IModel<List<User>> membersModel = new LoadableDetachableModel<List<User>>() {
@@ -192,7 +195,7 @@ public class TeamMembersEditor extends Panel {
 	
 	private void onMembersChanged(AjaxRequestTarget target) {
 		target.add(get("membersview"));
-		target.appendJavaScript(JQuery.$("a.remove-link").chain("tooltip").get());
+//		target.appendJavaScript(JQuery.$("a.remove-link").chain("tooltip").get());
 	}
 	
 	private Team getTeam() {
