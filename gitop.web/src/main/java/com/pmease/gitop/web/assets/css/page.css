@@ -656,26 +656,28 @@ tr.diff-line.new { background: #cfc; }
 
 .pull-request>.feedback td.status {width: 30%; border:1px solid #CCC; border-radius: 4px; 
 	padding: 16px; margin: 1px 0 1px 4px;}
-.pull-request>.feedback td.status .summary {font-size: 18px; margin-bottom: 16px;}
+.pull-request>.feedback td.status .summary, .pull-request>.feedback td.status .validation {
+	font-size: 18px; margin-bottom: 16px;}
 .pull-request>.feedback td.status .detail {margin-bottom: 16px;}
 .pull-request>.feedback td.status tr>td:first-child {width: 1%;}
 .pull-request>.feedback .icon {font-size: 26px; margin-right: 8px; display: none;}
+.pull-request>.feedback .status .validation {display: none;}
 
-.pull-request>.feedback.danger .icon-exclamation, .pull-request>.feedback.error .icon-exclamation {
-	display: block; color: #A94442;}
 .pull-request>.feedback.warning .icon-warning-sign {display: block; color: #8A6D3B;}
-.pull-request>.feedback.info .icon-info-circle {display: block; color: #31708F;}
-.pull-request>.feedback.success .icon-ok-circle {display: block; color: #3C763D;}
-
-.pull-request>.feedback.danger .status, .pull-request>.feedback.info .status {border: none;}
-.pull-request>.feedback.danger {background: #F2DEDE; border: 1px solid #EBCCD1; color: #A94442;}
-.pull-request>.feedback.info {background: #D9EDF7; border: 1px solid #BCE8F1; color: #31708F;}
-
-.pull-request>.feedback.success {color: #3C763D;}
-.pull-request>.feedback.success td.status {border-color: #BDDCA4; background-color: #DFF0D8;}
-
 .pull-request>.feedback.warning {color: #8A6D3B;}
 .pull-request>.feedback.warning td.status {border-color: #F7DEAB; background-color: #FCF8E3;}
 
-.pull-request>.feedback.error {color: #A94442;}
-.pull-request>.feedback.error td.status {border-color: #EBCCD1; background-color: #F2DEDE;}
+.pull-request>.feedback.info .icon-info-circle {display: block; color: #31708F;}
+.pull-request>.feedback.info {color: #31708F;}
+.pull-request>.feedback.info td.status {border-color: #BCE8F1; background-color: #D9EDF7;}
+
+.pull-request>.feedback.success .icon-ok-circle {display: block; color: #3C763D;}
+.pull-request>.feedback.success {color: #3C763D;}
+.pull-request>.feedback.success td.status {border-color: #BDDCA4; background-color: #DFF0D8;}
+
+.pull-request>.feedback td.status.has-error .icon {display: none;}
+.pull-request>.feedback td.status.has-error .icon.icon-warning-sign {display: block; color: #A94442;}
+.pull-request>.feedback td.status.has-error {color: #A94442; border-color: #EBCCD1; 
+	background-color: #F2DEDE;}
+.pull-request>.feedback td.status.has-error .summary, 
+.pull-request>.feedback td.status.has-error .detail {display: none;}

@@ -142,13 +142,11 @@ public class NewPullRequestPanel extends Panel {
 				PullRequest request = getPullRequest();
 				if (request.isNew()) {
 					if (getTarget().equals(getSource())) {
-						return "danger";
+						return "warning";
 					} else if (request.getStatus() == INTEGRATED) {
 						return "info";
 					} else if (request.getStatus() == PENDING_UPDATE) {
-						return "danger";
-					} else if (title == null) {
-						return "error";
+						return "warning";
 					} else if (request.getMergeResult().getMergeHead() == null) {
 						return "warning";
 					} else {
@@ -174,20 +172,6 @@ public class NewPullRequestPanel extends Panel {
 			
 		});
 
-		WebMarkupContainer titleContainer = new WebMarkupContainer("titleContainer");
-		titleContainer.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				if (title == null)
-					return "has-error";
-				else
-					return "";
-			}
-			
-		}));
-		messageContainer.add(titleContainer);
-		
 		final TextField<String> titleField = new TextField<String>("title", new IModel<String>() {
 
 			@Override
@@ -214,7 +198,7 @@ public class NewPullRequestPanel extends Panel {
 			}
 			
 		});
-		titleContainer.add(titleField);
+		messageContainer.add(titleField);
 		
 		final TextArea<String> commentArea = new TextArea<String>("comment", new PropertyModel<String>(this, "comment"));
 		commentArea.add(new AjaxFormComponentUpdatingBehavior("blur") {
@@ -283,8 +267,6 @@ public class NewPullRequestPanel extends Panel {
 							return "No changes to pull.";
 						} else if (request.getStatus() == PENDING_UPDATE) {
 							return "Gate keeper of target project rejects the pull request.";
-						} else if (title == null) {
-							return "Title has to be specified.";
 						} else if (request.getMergeResult().getMergeHead() == null) {
 							return "There are merge conflicts.";
 						} else {
