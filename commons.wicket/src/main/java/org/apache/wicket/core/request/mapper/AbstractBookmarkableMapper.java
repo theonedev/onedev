@@ -210,8 +210,7 @@ public abstract class AbstractBookmarkableMapper extends AbstractComponentMapper
 		PageProvider provider = new PageProvider(pageInfo.getPageId(), pageClass, pageParameters,
 			renderCount);
 		provider.setPageSource(getContext());
-		if (provider.isNewPageInstance() &&
-			!WebApplication.get().getPageSettings().getRecreateMountedPagesAfterExpiry())
+		if (provider.isNewPageInstance() && !getRecreateMountedPagesAfterExpiry())
 		{
 			throw new PageExpiredException(String.format("Bookmarkable page id '%d' has expired.",
 				pageInfo.getPageId()));
@@ -220,6 +219,11 @@ public abstract class AbstractBookmarkableMapper extends AbstractComponentMapper
 		{
 			return new RenderPageRequestHandler(provider);
 		}
+	}
+
+	boolean getRecreateMountedPagesAfterExpiry()
+	{
+		return WebApplication.get().getPageSettings().getRecreateMountedPagesAfterExpiry();
 	}
 
 	/**
@@ -422,8 +426,11 @@ public abstract class AbstractBookmarkableMapper extends AbstractComponentMapper
 				requestListenerInterfaceToString(handler.getListenerInterface()),
 				handler.getComponentPath(), handler.getBehaviorIndex());
 
+			PageParameters parameters = getRecreateMountedPagesAfterExpiry() ? new PageParameters(
+				handler.getPage().getPageParameters()).mergeWith(handler.getPageParameters())
+				: handler.getPageParameters();
 			UrlInfo urlInfo = new UrlInfo(new PageComponentInfo(pageInfo, componentInfo),
-				pageClass, handler.getPageParameters());
+				pageClass, parameters);
 			return buildUrl(urlInfo);
 		}
 
