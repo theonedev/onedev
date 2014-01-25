@@ -22,8 +22,6 @@ public interface PullRequestManager extends GenericDao<PullRequest> {
     
     void decline(PullRequest request);
     
-    void reopen(PullRequest request);
-    
     /**
      * Find pull requests whose head commit or merge commit equals to specified commit.
      * 
@@ -43,5 +41,5 @@ public interface PullRequestManager extends GenericDao<PullRequest> {
     void deleteRefs(PullRequest request);
     
     PullRequest create(Branch target, Branch source, User submitter, String title, 
-    		@Nullable String comment, boolean autoMerge);
+    		@Nullable String description, boolean autoMerge);
 }

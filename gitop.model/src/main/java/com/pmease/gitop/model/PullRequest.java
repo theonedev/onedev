@@ -28,11 +28,13 @@ import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 public class PullRequest extends AbstractEntity {
 
 	public enum Status {
-		PENDING_CHECK, PENDING_APPROVAL, PENDING_UPDATE, PENDING_INTEGRATE, INTEGRATED, DECLINED;
+		PENDING_APPROVAL, PENDING_UPDATE, PENDING_INTEGRATE, INTEGRATED, DECLINED;
 	}
 	
 	@Column(nullable = false)
 	private String title;
+	
+	private String description;
 
 	private boolean autoMerge;
 
@@ -49,8 +51,7 @@ public class PullRequest extends AbstractEntity {
 	@Lob
 	private CheckResult checkResult;
 
-	@Column(nullable = false)
-	private Status status = Status.PENDING_CHECK;
+	private Status status;
 	
 	@Embedded
 	private MergeResult mergeResult;
@@ -82,6 +83,14 @@ public class PullRequest extends AbstractEntity {
 
 	public void setTitle(String title) {
 		this.title = title;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public boolean isAutoMerge() {

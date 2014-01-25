@@ -28,7 +28,6 @@ import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.LockUtils;
 import com.pmease.gitop.core.event.BranchRefUpdateEvent;
-import com.pmease.gitop.core.manager.PullRequestCommentManager;
 import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.core.manager.PullRequestUpdateManager;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
@@ -37,7 +36,6 @@ import com.pmease.gitop.model.BuildResult;
 import com.pmease.gitop.model.MergeResult;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequest.Status;
-import com.pmease.gitop.model.PullRequestComment;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
@@ -55,18 +53,14 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
-	private final PullRequestCommentManager pullRequestCommentManager;
-	
 	private final EventBus eventBus;
 	
 	@Inject
 	public DefaultPullRequestManager(GeneralDao generalDao, VoteInvitationManager voteInvitationManager,
-			PullRequestUpdateManager pullRequestUpdateManager, PullRequestCommentManager pullRequestCommentManager, 
-			EventBus eventBus) {
+			PullRequestUpdateManager pullRequestUpdateManager, EventBus eventBus) {
 		super(generalDao);
 		this.voteInvitationManager = voteInvitationManager;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
-		this.pullRequestCommentManager = pullRequestCommentManager;
 		this.eventBus = eventBus;
 		eventBus.register(this);
 	}
@@ -258,22 +252,6 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 		});
 	}
 	
-	@Sessional
-	public void reopen(final PullRequest request) {
-		LockUtils.call(request.getLockName(), new Callable<Void>() {
-
-			@Override
-			public Void call() throws Exception {
-				request.setStatus(Status.PENDING_CHECK);
-				request.setMergeResult(null);
-				request.setCheckResult(null);
-				save(request);
-				
-				return null;
-			}
-		});
-	}
-	
 	/**
 	 * Merge specified request if possible.
 	 * 
@@ -348,25 +326,17 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 	@Transactional
 	@Override
 	public PullRequest create(Branch target, Branch source, User submitter, String title, 
-			@Nullable String comment, boolean autoMerge) {
+			@Nullable String description, boolean autoMerge) {
 		PullRequest request = new PullRequest();
 		request.setAutoMerge(autoMerge);
 		request.setSource(source);
 		request.setTarget(target);
 		request.setTitle(title);
+		request.setDescription(description);
 		request.setSubmitter(submitter);
 		save(request);
 		
 		pullRequestUpdateManager.update(request);
-		
-		if (comment != null) {
-			PullRequestComment requestComment = new PullRequestComment();
-			requestComment.setComment(comment);
-			requestComment.setRequest(request);
-			requestComment.setUser(submitter);
-			request.getComments().add(requestComment);
-			pullRequestCommentManager.save(requestComment);
-		}
 		
 		refresh(request);
 		

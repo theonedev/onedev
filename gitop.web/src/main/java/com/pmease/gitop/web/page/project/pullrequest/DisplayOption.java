@@ -28,7 +28,6 @@ class DisplayOption implements Serializable {
 
 	public DisplayOption() {
 		statuses.add(PullRequest.Status.PENDING_APPROVAL);
-		statuses.add(PullRequest.Status.PENDING_CHECK);
 		statuses.add(PullRequest.Status.PENDING_INTEGRATE);
 		statuses.add(PullRequest.Status.PENDING_UPDATE);
 	}
