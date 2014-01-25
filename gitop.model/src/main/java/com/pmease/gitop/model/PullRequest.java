@@ -192,9 +192,9 @@ public class PullRequest extends AbstractEntity {
 	 * Get gate keeper check result.
 	 *  
 	 * @return
-	 * 			<tt>null</tt> if this pull request has not been refreshed yet
+	 * 			check result of this pull request has not been refreshed yet
 	 */
-	public @Nullable CheckResult getCheckResult() {
+	public CheckResult getCheckResult() {
 		return checkResult;
 	}
 	
@@ -206,7 +206,7 @@ public class PullRequest extends AbstractEntity {
 	 * Get merge result of this pull request.
 	 *  
 	 * @return
-	 * 			<tt>null</tt> if this pull request has not been refreshed yet
+	 * 			merge result of this pull request
 	 */
 	public MergeResult getMergeResult() {
 		return mergeResult;

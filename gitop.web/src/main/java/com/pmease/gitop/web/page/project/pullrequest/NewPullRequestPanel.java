@@ -36,6 +36,7 @@ import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.component.commit.CommitsTablePanel;
 import com.pmease.gitop.web.component.comparablebranchselector.ComparableBranchSelector;
 import com.pmease.gitop.web.model.EntityModel;
+import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.AbstractProjectPage;
 import com.pmease.gitop.web.page.project.source.commit.diff.DiffViewPanel;
 
@@ -46,7 +47,6 @@ public class NewPullRequestPanel extends Panel {
 	
 	private String title = IMPOSSIBLE_TITLE;
 	
-	@SuppressWarnings("unused")
 	private String comment;
 	
 	private IModel<Branch> targetModel, sourceModel;
@@ -225,7 +225,19 @@ public class NewPullRequestPanel extends Panel {
 			public void onClick() {
 				String title = getTitle();
 				if (title != null) {
+					PullRequestManager pullRequestManager = Gitop.getInstance(PullRequestManager.class);
+					PullRequest pullRequest = pullRequestManager.create(getTarget(), getSource(), 
+							getSubmitter(), title, comment, false);
 					
+					AbstractProjectPage page = (AbstractProjectPage) getPage();
+					Project currentProject = page.getProject();
+					if (currentProject.equals(pullRequest.getTarget().getProject()) 
+							|| currentProject.equals(pullRequest.getSource().getProject())) {
+						setResponsePage(PullRequestsPage.class, PageSpec.forProject(currentProject));
+					} else {
+						setResponsePage(PullRequestsPage.class, 
+								PageSpec.forProject(pullRequest.getTarget().getProject()));
+					}
 				}
 			}
 

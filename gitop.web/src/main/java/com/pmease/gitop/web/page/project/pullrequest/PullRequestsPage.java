@@ -50,14 +50,21 @@ public class PullRequestsPage extends ProjectCategoryPage {
 
 			@Override
 			public void onClick() {
-				Branch target, source;
+				Branch target, source = null;
 				BranchManager branchManager = Gitop.getInstance(BranchManager.class);
 				if (getProject().getForkedFrom() != null) {
 					target = branchManager.findDefault(getProject().getForkedFrom());
 					source = branchManager.findDefault(getProject());
 				} else {
 					target = branchManager.findDefault(getProject());
-					source = branchManager.findDefault(getProject());
+					for (Branch each: getProject().getBranches()) {
+						if (!each.equals(target)) {
+							source = each;
+							break;
+						}
+					}
+					if (source == null)
+						source = target;
 				}
 				User currentUser = AppLoader.getInstance(UserManager.class).getCurrent();
 				

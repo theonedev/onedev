@@ -1,22 +1,22 @@
 package com.pmease.gitop.model;
 
 import javax.annotation.Nullable;
-import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
 public class MergeResult {
 	
-	@Column(nullable=false)
 	private String branchHead;
 	
-	@Column(nullable=false)
 	private String requestHead;
 	
-	@Column(nullable=false)
 	private String mergeBase;
 	
 	private String mergeHead;
+	
+	@SuppressWarnings("unused")
+	private MergeResult() {
+	}
 	
 	public MergeResult(String branchHead, String requestHead, String mergeBase, @Nullable String mergeHead) {
 		this.branchHead = branchHead;
