@@ -1,93 +1,69 @@
 package com.pmease.gitop.web.page.project.pullrequest;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashSet;
+
+import javax.annotation.Nullable;
 
 import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Restrictions;
 
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.User;
 
 @SuppressWarnings("serial")
 class DisplayOption implements Serializable {
 	
-	private Collection<PullRequest.Status> statuses = new HashSet<>();
-	
-	private Long branchId;
-	
-	private Long submitterId;
-	
-	private boolean incoming = true;
-	
-	private boolean outgoing = true;
-	
-	private String sortBy;
+	private boolean open;
 
-	public DisplayOption() {
-		statuses.add(PullRequest.Status.PENDING_APPROVAL);
-		statuses.add(PullRequest.Status.PENDING_INTEGRATE);
-		statuses.add(PullRequest.Status.PENDING_UPDATE);
+	public static final Long SHOW_REQUESTS_OF_ALL_USERS = -1L;
+	
+	public static final Long SHOW_REQUESTS_OF_CURRENT_USER = -2L;
+
+	public static final Long SHOW_REQUESTS_OF_SELECTED_USER = -3L;
+	
+	private Long submitterId = SHOW_REQUESTS_OF_ALL_USERS;
+	
+	private SortOption sortOption = SortOption.CREATE_DATE_DESCENDING;
+
+	public DisplayOption(boolean open) {
+		this.open = open;
 	}
 	
-	public Collection<PullRequest.Status> getStatuses() {
-		return statuses;
+	public boolean isOpen() {
+		return open;
 	}
 
-	public void setStatuses(Collection<PullRequest.Status> statuses) {
-		this.statuses = statuses;
-	}
-
-	public Long getBranchId() {
-		return branchId;
-	}
-
-	public void setBranchId(Long branchId) {
-		this.branchId = branchId;
-	}
-
-	public Long getSubmitterId() {
+	public @Nullable Long getSubmitterId() {
 		return submitterId;
 	}
 
-	public void setSubmitterId(Long submitterId) {
+	public void setSubmitterId(@Nullable Long submitterId) {
 		this.submitterId = submitterId;
 	}
 
-	public String getSortBy() {
-		return sortBy;
+	public SortOption getSortOption() {
+		return sortOption;
 	}
 
-	public void setSortBy(String sortBy) {
-		this.sortBy = sortBy;
+	public void setSortOption(SortOption sortOption) {
+		this.sortOption = sortOption;
 	}
-	
+
 	public DetachedCriteria getCriteria(Project project) {
 		DetachedCriteria criteria = DetachedCriteria.forClass(PullRequest.class);
-		Disjunction projectDisjunction = Restrictions.disjunction();
-		Disjunction branchDisjunction = Restrictions.disjunction();
-		criteria.add(projectDisjunction);
-		criteria.add(branchDisjunction);
-		if (incoming || !incoming && !outgoing) {
-			criteria.createAlias("target", "target");
-			projectDisjunction.add(Restrictions.eq("target.project", project));
-			branchDisjunction.add(Restrictions.eq("target.id", branchId));
+		criteria.createCriteria("target").add(Restrictions.eq("project", project));
+		if (open) {
+			criteria.add(PullRequest.CriterionHelper.ofOpen());
+		} else {
+			criteria.add(PullRequest.CriterionHelper.ofClosed());
 		}
-		if (outgoing || !incoming && !outgoing) {
-			criteria.createAlias("source", "source");
-			projectDisjunction.add(Restrictions.eq("source.project", project));
-			branchDisjunction.add(Restrictions.eq("source.id", branchId));
-		}
-		if (!statuses.isEmpty()) {
-			Disjunction disjunction = Restrictions.disjunction();
-			for (PullRequest.Status status: statuses) 
-				disjunction.add(Restrictions.eq("status", status));
-			criteria.add(disjunction);
-		}
-		if (submitterId != null)
+		if (submitterId > 0L) {
 			criteria.add(Restrictions.eq("submitter.id", submitterId));
+		} else if (submitterId == SHOW_REQUESTS_OF_CURRENT_USER) {
+			criteria.add(Restrictions.eq("submitter.id", User.getCurrentId()));
+		}
+		criteria.addOrder(sortOption.getOrder());
 		return criteria;
 	}
 }

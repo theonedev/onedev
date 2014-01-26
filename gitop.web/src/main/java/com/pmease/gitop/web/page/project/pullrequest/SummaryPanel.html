@@ -1,0 +1,15 @@
+<wicket:panel>
+	<div class="title">
+		<a wicket:id="titleLink"><span wicket:id="titleLabel"></span></a>
+	</div>
+	<div wicket:id="description" class="description"></div>
+	<div class="source clearfix">
+		<div wicket:id="user" class="pull-left"></div> 
+		<div class="pull-left">wants to pull</div> 
+		<wicket:enclosure child="branchLink">
+			<div class="pull-left">from</div>
+			<div class="pull-left label"><span class="icon icon-git-branch"></span> <a wicket:id="branchLink"><span wicket:id="branchLabel"></span></a></div>
+		</wicket:enclosure>
+		<div class="pull-left">at <span wicket:id="date"></span></div>
+	</div>
+</wicket:panel>

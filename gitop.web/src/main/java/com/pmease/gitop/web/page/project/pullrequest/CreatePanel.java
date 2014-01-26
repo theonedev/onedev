@@ -41,7 +41,7 @@ import com.pmease.gitop.web.page.project.AbstractProjectPage;
 import com.pmease.gitop.web.page.project.source.commit.diff.DiffViewPanel;
 
 @SuppressWarnings("serial")
-public class NewPullRequestPanel extends Panel {
+public class CreatePanel extends Panel {
 
 	private static final String IMPOSSIBLE_TITLE = "*[@TITLE IMPOSSIBLE@]*";
 	
@@ -59,7 +59,7 @@ public class NewPullRequestPanel extends Panel {
 	
 	private MarkupContainer feedbackContainer, commitsPanel, diffViewPanel;
 	
-	public NewPullRequestPanel(String id, Branch target, Branch source, User submitter) {
+	public CreatePanel(String id, Branch target, Branch source, User submitter) {
 		super(id);
 
 		targetModel = new EntityModel<Branch>(target);
@@ -228,16 +228,8 @@ public class NewPullRequestPanel extends Panel {
 					PullRequestManager pullRequestManager = Gitop.getInstance(PullRequestManager.class);
 					PullRequest pullRequest = pullRequestManager.create(getTarget(), getSource(), 
 							getSubmitter(), title, comment, false);
-					
-					AbstractProjectPage page = (AbstractProjectPage) getPage();
-					Project currentProject = page.getProject();
-					if (currentProject.equals(pullRequest.getTarget().getProject()) 
-							|| currentProject.equals(pullRequest.getSource().getProject())) {
-						setResponsePage(PullRequestsPage.class, PageSpec.forProject(currentProject));
-					} else {
-						setResponsePage(PullRequestsPage.class, 
-								PageSpec.forProject(pullRequest.getTarget().getProject()));
-					}
+					setResponsePage(OpenRequestsPage.class, 
+							PageSpec.forProject(pullRequest.getTarget().getProject()));
 				}
 			}
 

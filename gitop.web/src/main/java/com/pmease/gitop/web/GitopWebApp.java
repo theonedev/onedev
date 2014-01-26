@@ -72,7 +72,8 @@ import com.pmease.gitop.web.page.error.PageExpiredPage;
 import com.pmease.gitop.web.page.error.PageNotFoundPage;
 import com.pmease.gitop.web.page.home.HomePage;
 import com.pmease.gitop.web.page.init.ServerInitPage;
-import com.pmease.gitop.web.page.project.pullrequest.PullRequestsPage;
+import com.pmease.gitop.web.page.project.pullrequest.ClosedRequestsPage;
+import com.pmease.gitop.web.page.project.pullrequest.OpenRequestsPage;
 import com.pmease.gitop.web.page.project.settings.CreateProjectPage;
 import com.pmease.gitop.web.page.project.settings.GateKeeperSettingPage;
 import com.pmease.gitop.web.page.project.settings.ProjectAuditLogPage;
@@ -272,7 +273,8 @@ public class GitopWebApp extends AbstractWicketConfig {
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/tags", TagsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/contributors", ContributorsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/wiki", ProjectWikiPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/pull-requests", PullRequestsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/pull-requests/open", OpenRequestsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/pull-requests/closed", ClosedRequestsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/graphs", ProjectGraphsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/forks", ProjectForksPage.class));
 

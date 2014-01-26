@@ -1,5 +1,6 @@
 package com.pmease.gitop.core.manager.impl;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -72,7 +73,9 @@ public class DefaultPullRequestUpdateManager extends AbstractGenericDao<PullRequ
 		update.setRequest(request);
 		request.getUpdates().add(update);
 		update.setHeadCommit(sourceHead);
+		request.setUpdateDate(new Date());
 		save(update);
+		pullRequestManager.save(request);
 		
 		if (!request.getTarget().getProject().equals(request.getSource().getProject())) {
 			request.getTarget().getProject().code().fetch(
