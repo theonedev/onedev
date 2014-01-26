@@ -683,10 +683,6 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .pull-request>.feedback.warning {color: #8A6D3B;}
 .pull-request>.feedback.warning td.status {border-color: #F7DEAB; background-color: #FCF8E3;}
 
-.pull-request>.feedback.info .icon-info-circle {display: block; color: #31708F;}
-.pull-request>.feedback.info {color: #31708F;}
-.pull-request>.feedback.info td.status {border-color: #BCE8F1; background-color: #D9EDF7;}
-
 .pull-request>.feedback.success .icon-ok-circle {display: block; color: #3C763D;}
 .pull-request>.feedback.success {color: #3C763D;}
 .pull-request>.feedback.success td.status {border-color: #BDDCA4; background-color: #DFF0D8;}

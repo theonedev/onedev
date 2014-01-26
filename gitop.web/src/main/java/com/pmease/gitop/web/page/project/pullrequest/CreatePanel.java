@@ -140,20 +140,12 @@ public class CreatePanel extends Panel {
 			@Override
 			public String getObject() {
 				PullRequest request = getPullRequest();
-				if (request.isNew()) {
-					if (getTarget().equals(getSource())) {
-						return "warning";
-					} else if (request.getStatus() == INTEGRATED) {
-						return "info";
-					} else if (request.getStatus() == PENDING_UPDATE) {
-						return "warning";
-					} else if (request.getMergeResult().getMergeHead() == null) {
-						return "warning";
-					} else {
-						return "success";
-					}
+				if (request.isNew() 
+						&& request.getStatus() == PENDING_INTEGRATE 
+						&& request.getMergeResult().getMergeHead() != null) {
+					return "success";
 				} else {
-					return "info";
+					return "warning";
 				}
 			}
 			
