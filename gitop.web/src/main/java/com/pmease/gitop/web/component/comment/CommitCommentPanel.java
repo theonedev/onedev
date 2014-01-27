@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.project.source.commit.diff.renderer.text;
+package com.pmease.gitop.web.component.comment;
 
 import java.util.Date;
 
@@ -111,10 +111,10 @@ public class CommitCommentPanel extends Panel {
 	}
 	
 	protected void onEdit(AjaxRequestTarget target) {
-		Component c = new CommitCommentFormPanel("content", Model.of(getCommitComment().getContent())) {
+		Component c = new CommitCommentEditor("content", Model.of(getCommitComment().getContent())) {
 
 			@Override
-			protected Component newSubmitButtons(String id, Form<?> form) {
+			protected Component createSubmitButtons(String id, Form<?> form) {
 				Fragment frag = new Fragment(id, "submitfrag", CommitCommentPanel.this);
 				frag.add(new AjaxLink<Void>("btnCancel") {
 
@@ -128,7 +128,7 @@ public class CommitCommentPanel extends Panel {
 					
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						String comment = getComment();
+						String comment = getCommentText();
 						if (Strings.isNullOrEmpty(comment)) {
 							form.error("Comment can not be empty");
 							target.add(form);

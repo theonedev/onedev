@@ -37,6 +37,8 @@ import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.CommitComment;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.Constants;
+import com.pmease.gitop.web.component.comment.CommitCommentEditor;
+import com.pmease.gitop.web.component.comment.CommitCommentPanel;
 import com.pmease.gitop.web.model.CommitCommentModel;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.HunkHeader;
@@ -378,10 +380,10 @@ public class HunkPanel extends Panel {
 	}
 
 	private WebMarkupContainer newCommentForm(final int position) {
-		return new CommitCommentFormPanel("commentform") {
+		return new CommitCommentEditor("commentform") {
 
 			@Override
-			protected Component newSubmitButtons(String id, final Form<?> form) {
+			protected Component createSubmitButtons(String id, final Form<?> form) {
 				Fragment frag = new Fragment(id, "commentformsubmitsfrag", HunkPanel.this);
 				frag.add(new AjaxLink<Void>("close") {
 
@@ -400,7 +402,7 @@ public class HunkPanel extends Panel {
 						comment.setCommit(commitModel.getObject());
 						comment.setLine(lineId);
 						comment.setProject(projectModel.getObject());
-						comment.setContent(getComment());
+						comment.setContent(getCommentText());
 						Gitop.getInstance(CommitCommentManager.class).save(comment);
 						
 						send(HunkPanel.this, Broadcast.DEPTH, new InlineCommentAddedEvent(target, position, comment.getId()));
@@ -575,7 +577,7 @@ public class HunkPanel extends Panel {
 						e.getTarget().add(commentForm);
 					}
 				} else if (e instanceof AddInlineCommentEvent) {
-					if (commentForm instanceof CommitCommentFormPanel) {
+					if (commentForm instanceof CommitCommentEditor) {
 						// form maybe hidden
 						e.getTarget().appendJavaScript("$('#" + commentForm.getMarkupId(true) + "').show()");
 					} else {

@@ -1,0 +1,31 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<form class="form-comment" wicket:id="form">
+		<div class="comment-editor-head">
+			<ul class="nav nav-tabs">
+				<li wicket:id="tabli"><a wicket:id="link"><span wicket:id="name"></span></a></li>
+			</ul>
+		</div>
+		<div class="comment-editor-body">
+			<div wicket:id="body"></div>
+		</div>
+		<div class="form-actions clearfix" wicket:id="actions"></div>
+	</form>
+	
+	<wicket:fragment wicket:id="editfrag">
+		<div wicket:id="feedback"></div>
+		<textarea wicket:id="input" placeholder="Leave a comment" class="focusable"></textarea>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="previewfrag">
+		<div class="panel panel-default panel-comment">
+			<div class="panel-heading">
+				<span class="author" wicket:id="author"></span>
+			</div>
+			<div class="panel-body">
+				<div wicket:id="content"></div>
+			</div>
+		</div>
+	</wicket:fragment>
+</wicket:panel>
+</html>

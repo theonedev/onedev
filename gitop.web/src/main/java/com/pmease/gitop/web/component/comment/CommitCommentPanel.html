@@ -4,10 +4,10 @@
 		<div class="panel-heading">
 			<div class="clearfix">
 				<div class="left">
-					<wicket:container wicket:id="author"></wicket:container>
+					<span class="author" wicket:id="author"></span>
 					<span class="label " wicket:id="authorType"></span>
 				</div>
-				<div class="right">
+				<div class="right actions">
 					<span wicket:id="age"></span>
 					<a wicket:id="editlink"><i class="icon icon-pencil"></i></a>
 					<a wicket:id="removelink"><i class="icon icon-delete"></i></a>
@@ -20,8 +20,8 @@
 	</div>
 	
 	<wicket:fragment wicket:id="submitfrag">
-		<button class="btn btn-default" wicket:id="btnCancel">Cancel</button>
-		<button class="btn btn-gray" wicket:id="btnUpdate">Update Comment</button>
+		<button class="btn btn-default secondary" wicket:id="btnCancel">Cancel</button>
+		<button class="btn btn-gray primary" wicket:id="btnUpdate">Update Comment</button>
 	</wicket:fragment>
 </wicket:panel>
 </html>

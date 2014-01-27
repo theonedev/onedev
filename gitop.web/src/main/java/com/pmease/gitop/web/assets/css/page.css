@@ -560,24 +560,27 @@ a.diffstat:hover { text-decoration: none; }
 .diff-line .add-comment .icon { line-height: 20px; }
 .diff-line .add-comment:hover { text-decoration: none; }
 
-.table-diff .inline-comment-holder { background: #f1eae0; }
+.table-diff .inline-comment-holder { background: #fffcf5; }
 .table-diff .inline-comment-holder td { border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; }
 .inline-comment-holder td.comment-count { border-right: 1px solid #ddd; text-align: center; vertical-align: top; padding-top: 10px; }
 .inline-comment-holder td.line-comment { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 14px; }
 .form-comment { margin-top: 10px; }
-.form-comment .head { padding: 0; }
-.form-comment .head .nav-tabs { padding-left: 18px; }
-.form-comment .body { background: white; padding: 12px; }
-.form-comment textarea { display: block; width: 100%; resize: vertical; padding: 10px; min-height: 100px; border-color: #aaa; }
+.form-comment .comment-editor-head { padding: 0; }
+.form-comment .comment-editor-head .nav-tabs { padding-left: 18px; }
+.form-comment .comment-editor-body { background: white; padding: 12px; }
+.form-comment textarea { display: block; width: 100%; resize: vertical; padding: 10px; min-height: 100px; max-height: 500px; border-color: #aaa; }
+.form-comment .form-actions { padding: 0 12px; margin-bottom: 12px; }
+.form-comment .form-actions .primary { float: right; }
+.form-comment .form-actions .secondary { float: left; }
 
 .inline-comment { padding: 0 12px; margin: 10px 0; }
 .inline-comment .panel-comment { margin: 0; } 
-.panel-comment .panel-heading { padding-top: 5px; padding-bottom: 5px; background: #fffcf5; color: #555; }
-.panel-comment .panel-heading .left a { color: #333; font-weight: bold;}
-.panel-comment .panel-heading .right a { margin-left: 5px; color: #555; }
-.panel-comment .panel-heading .right a:hover { color: #09f; text-decoration: none; }
+.panel-comment .panel-heading { padding-top: 5px; padding-bottom: 5px; background: #f1eae0; color: #555; }
+.panel-comment .panel-heading .author a { color: #333; font-weight: bold;}
+.panel-comment .panel-heading .actions a { margin-left: 5px; color: #555; }
+.panel-comment .panel-heading .actions a:hover { color: #09f; text-decoration: none; }
 
-.panel-comment .panel-body { padding: 8px 12px; }
+.panel-comment .panel-body .wiki { padding: 8px 12px; }
 
 .panel-diff .image-diff { padding: 30px; text-align: center; position: relative; background: #999; }
 .image-diff .btn-group.compares { margin-bottom: 18px; }
