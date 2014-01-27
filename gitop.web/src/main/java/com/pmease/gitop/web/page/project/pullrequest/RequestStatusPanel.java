@@ -10,9 +10,9 @@ import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequest.Status;
 
 @SuppressWarnings("serial")
-public class StatusPanel extends Panel {
+public class RequestStatusPanel extends Panel {
 
-	public StatusPanel(String id, IModel<PullRequest> requestModel) {
+	public RequestStatusPanel(String id, IModel<PullRequest> requestModel) {
 		super(id, requestModel);
 	}
 

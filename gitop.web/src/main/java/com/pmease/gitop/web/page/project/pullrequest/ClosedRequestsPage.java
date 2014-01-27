@@ -15,7 +15,7 @@ public class ClosedRequestsPage extends ProjectCategoryPage {
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 
-		add(new ListPanel("content", false));
+		add(new RequestListPanel("content", false));
 	}
 
 }

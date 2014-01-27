@@ -8,6 +8,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.PullRequest;
@@ -15,14 +16,15 @@ import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.component.link.GitPersonLink;
 import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
+import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.AbstractProjectPage;
 import com.pmease.gitop.web.page.project.api.GitPerson;
 import com.pmease.gitop.web.util.DateUtils;
 
 @SuppressWarnings("serial")
-public class SummaryPanel extends Panel {
+public class RequestSummaryPanel extends Panel {
 
-	public SummaryPanel(String id, IModel<PullRequest> requestModel) {
+	public RequestSummaryPanel(String id, IModel<PullRequest> requestModel) {
 		super(id, requestModel);
 	}
 
@@ -34,7 +36,10 @@ public class SummaryPanel extends Panel {
 
 			@Override
 			public void onClick() {
-				
+				AbstractProjectPage page = (AbstractProjectPage) getPage();
+				PageParameters params = PageSpec.forProject(page.getProject());
+				params.set(0, getPullRequest().getId());
+				setResponsePage(RequestDetailPage.class, params);
 			}
 			
 		};

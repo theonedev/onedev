@@ -15,7 +15,7 @@ public class OpenRequestsPage extends ProjectCategoryPage {
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 
-		add(new ListPanel("content", true));
+		add(new RequestListPanel("content", true));
 	}
 
 }

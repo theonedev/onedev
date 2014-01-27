@@ -24,6 +24,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Commit;
@@ -41,7 +42,7 @@ import com.pmease.gitop.web.page.project.AbstractProjectPage;
 import com.pmease.gitop.web.page.project.source.commit.diff.DiffViewPanel;
 
 @SuppressWarnings("serial")
-public class CreatePanel extends Panel {
+public class NewRequestPanel extends Panel {
 
 	private static final String IMPOSSIBLE_TITLE = "*[@TITLE IMPOSSIBLE@]*";
 	
@@ -59,7 +60,7 @@ public class CreatePanel extends Panel {
 	
 	private MarkupContainer feedbackContainer, commitsPanel, diffViewPanel;
 	
-	public CreatePanel(String id, Branch target, Branch source, User submitter) {
+	public NewRequestPanel(String id, Branch target, Branch source, User submitter) {
 		super(id);
 
 		targetModel = new EntityModel<Branch>(target);
@@ -246,6 +247,10 @@ public class CreatePanel extends Panel {
 
 			@Override
 			public void onClick() {
+				AbstractProjectPage page = (AbstractProjectPage) getPage();
+				PageParameters params = PageSpec.forProject(page.getProject());
+				params.set(0, getPullRequest().getId());
+				setResponsePage(RequestDetailPage.class, params);
 			}
 			
 		});

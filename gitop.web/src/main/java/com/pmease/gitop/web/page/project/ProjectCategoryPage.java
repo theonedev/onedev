@@ -35,7 +35,9 @@ import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.api.ProjectPageTab;
 import com.pmease.gitop.web.page.project.api.ProjectPageTab.Category;
 import com.pmease.gitop.web.page.project.pullrequest.ClosedRequestsPage;
+import com.pmease.gitop.web.page.project.pullrequest.NewRequestPage;
 import com.pmease.gitop.web.page.project.pullrequest.OpenRequestsPage;
+import com.pmease.gitop.web.page.project.pullrequest.RequestDetailPage;
 import com.pmease.gitop.web.page.project.settings.ProjectOptionsPage;
 import com.pmease.gitop.web.page.project.source.AbstractFilePage;
 import com.pmease.gitop.web.page.project.source.ProjectHomePage;
@@ -197,11 +199,40 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 		tabs.add(new ProjectPageTab(Model.of("Open"), 
 									Category.PULL_REQUESTS, 
 									"icon-pull-request", 
-									OpenRequestsPage.class));
+									OpenRequestsPage.class) {
+
+										@Override
+										public boolean isSelected(Page page) {
+											if (page instanceof RequestDetailPage) {
+												RequestDetailPage detailPage = (RequestDetailPage) page;
+												if (detailPage.getPullRequest().isOpen())
+													return true;
+											}
+											return super.isSelected(page);
+										}
+			
+		});
 		tabs.add(new ProjectPageTab(Model.of("Closed"), 
 									Category.PULL_REQUESTS, 
 									"icon-pull-request-abandon", 
-									ClosedRequestsPage.class));
+									ClosedRequestsPage.class) {
+			
+										@Override
+										public boolean isSelected(Page page) {
+											if (page instanceof RequestDetailPage) {
+												RequestDetailPage detailPage = (RequestDetailPage) page;
+												if (!detailPage.getPullRequest().isOpen())
+													return true;
+											}
+											return super.isSelected(page);
+										}
+			
+		});
+		
+		tabs.add(new ProjectPageTab(Model.of("Create"), 
+									Category.PULL_REQUESTS, 
+									"icon-pull-request", 
+									NewRequestPage.class));
 		
 		// WIKI TABS
 		tabs.add(new ProjectPageTab(Model.of("Wiki"), 

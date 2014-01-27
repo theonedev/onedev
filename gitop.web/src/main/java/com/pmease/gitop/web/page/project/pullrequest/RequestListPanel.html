@@ -1,36 +1,33 @@
 <wicket:panel>
-	<div wicket:id="content"></div>
-	<wicket:fragment wicket:id="listFrag">
-		<div class="pull-requests">
-			<div class="head clearfix">
-				<div class="filters clearfix pull-left">
-					<div class="pull-left">
-						<a wicket:id="filterMenuTrigger" class="btn btn-primary" href="javascript: void(0);">
-							<span class="icon icon-user"></span> <span wicket:id="filterBy"></span> <span class="caret"></span>
-						</a>
-						<div wicket:id="filterMenu"></div>
-					</div>
-					<wicket:enclosure child="userChoice">
-						<div class="pull-left">
-							<input wicket:id="userChoice" type="hidden" class="form-control"></input> 
-						</div>
-					</wicket:enclosure>
-				</div>
-				<div class="sorts pull-left">
-					<a wicket:id="sortMenuTrigger" class="btn btn-primary" href="javascript: void(0);">
-						<span class="icon icon-chart-bar"></span> <span wicket:id="sortBy"></span> <span class="caret"></span>
+	<div class="request-list">
+		<div class="head clearfix">
+			<div class="filters clearfix pull-left">
+				<div class="pull-left">
+					<a wicket:id="filterMenuTrigger" class="btn btn-primary" href="javascript: void(0);">
+						<span class="icon icon-user"></span> <span wicket:id="filterBy"></span> <span class="caret"></span>
 					</a>
-					<div wicket:id="sortMenu"></div>
+					<div wicket:id="filterMenu"></div>
 				</div>
-				<div class="actions pull-right">
-					<a wicket:id="newPullRequest" class="btn btn-primary"><span class="icon icon-add"></span> New pull request</a>
-				</div>
+				<wicket:enclosure child="userChoice">
+					<div class="pull-left">
+						<input wicket:id="userChoice" type="hidden" class="form-control"></input> 
+					</div>
+				</wicket:enclosure>
 			</div>
-			<div class="body">
-				<table wicket:id="pullRequests" class="table table-hover table-striped"></table>
+			<div class="sorts pull-left">
+				<a wicket:id="sortMenuTrigger" class="btn btn-primary" href="javascript: void(0);">
+					<span class="icon icon-chart-bar"></span> <span wicket:id="sortBy"></span> <span class="caret"></span>
+				</a>
+				<div wicket:id="sortMenu"></div>
+			</div>
+			<div class="actions pull-right">
+				<a wicket:id="newPullRequest" class="btn btn-primary"><span class="icon icon-add"></span> New pull request</a>
 			</div>
 		</div>
-	</wicket:fragment>	
+		<div class="body">
+			<table wicket:id="pullRequests" class="table table-hover table-striped"></table>
+		</div>
+	</div>
 	<wicket:fragment wicket:id="sortOptionFrag">
 		<a wicket:id="link"><span wicket:id="label"></span></a>
 	</wicket:fragment>
