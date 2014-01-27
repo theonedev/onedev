@@ -1,32 +1,26 @@
 <html xmlns:wicket>
 <wicket:panel>
-	<form wicket:id="form">
-		<div class="comment-form-head">
-			<ul class="nav nav-tab">
-				<li class="active"><a href="#write-comment">Write</a></li>
-				<li><a href="#preview-comment">Preview</a></li>
+	<form class="form-comment" wicket:id="form">
+		<div class="head">
+			<ul class="nav nav-tabs">
+				<li wicket:id="li"><a wicket:id="link" href="javascript:void(0);)"><span wicket:id="name"></span></a></li>
 			</ul>
 		</div>
-		<div class="tab-content">
-			<div id="write-comment">
-				<textarea></textarea>
+		<div class="body">
+			<div wicket:id="tabcontent"></div>
+			<div class="form-actions">
+				<wicket:container wicket:id="actions"></wicket:container>
 			</div>
-			<div id="preview-comment">
-				<div class="panel panel-default panel-comment">
-					<div class="panel-heading">
-						<span wicket:id="user"></span>
-					</div>
-					<div class="panel-body">
-						here is the preview
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		<div class="form-actions">
-			<button class="btn btn-gray">Close form</button>
-			<button class="btn btn-success">Comment on this line</button>
 		</div>
 	</form>
+	
+	<wicket:fragment wicket:id="writefrag">
+		<div wicket:id="feedback"></div>
+		<textarea class="focusable" placeholder="Leave a comment" wicket:id="input"></textarea>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="previewfrag">
+		here is a comment
+	</wicket:fragment>
 </wicket:panel>
 </html>

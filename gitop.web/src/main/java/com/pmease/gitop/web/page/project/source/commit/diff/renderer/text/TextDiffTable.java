@@ -78,7 +78,8 @@ public class TextDiffTable extends Panel {
 
 			@Override
 			protected void populateItem(ListItem<HunkHeader> item) {
-				item.add(new HunkPanel("hunk", 
+				item.add(new HunkPanel("hunk",
+						projectModel, untilModel,
 						Model.of(item.getIndex()),
 						fileModel,
 						new LoadableDetachableModel<List<String>>() {

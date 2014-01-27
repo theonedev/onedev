@@ -1,0 +1,27 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<div class="panel panel-default panel-comment">
+		<div class="panel-heading">
+			<div class="clearfix">
+				<div class="left">
+					<wicket:container wicket:id="author"></wicket:container>
+					<span class="label " wicket:id="authorType"></span>
+				</div>
+				<div class="right">
+					<span wicket:id="age"></span>
+					<a wicket:id="editlink"><i class="icon icon-pencil"></i></a>
+					<a wicket:id="removelink"><i class="icon icon-delete"></i></a>
+				</div>
+			</div>
+		</div>
+		<div class="panel-body">
+			<div wicket:id="content"></div>
+		</div>
+	</div>
+	
+	<wicket:fragment wicket:id="submitfrag">
+		<button class="btn btn-default" wicket:id="btnCancel">Cancel</button>
+		<button class="btn btn-gray" wicket:id="btnUpdate">Update Comment</button>
+	</wicket:fragment>
+</wicket:panel>
+</html>

@@ -31,19 +31,26 @@
 		</td>
 	</wicket:fragment>
 	
-	<wicket:fragment wicket:id="inlinecommentfrag">
+	<wicket:fragment wicket:id="commentfrag">
 		<td class="comment-count" colspan="2">
 			<i class="icon icon-comment"></i> <b wicket:id="count"></b>
 		</td>
+		
 		<td class="line-comment">
 			<div wicket:id="commentsholder">
 				<div class="inline-comment" wicket:id="comments">
 					<div wicket:id="comment"></div>
 				</div>
 			</div>
-			<wicket:container wicket:id="commentform">
-			</wicket:container>
+			
+			<div wicket:id="commentform"></div>
 		</td>
 	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="commentformsubmitsfrag">
+		<button class="btn btn-gray" wicket:id="close">Close form</button>
+		<button class="btn btn-success btn-submit" wicket:id="comment">Comment on this line</button>
+	</wicket:fragment>
+	
 </wicket:panel>
 </html>
