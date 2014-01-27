@@ -23,9 +23,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.iterator.ComponentHierarchyIterator;
-import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.parboiled.common.Preconditions;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedListMultimap;
@@ -33,17 +33,20 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.CommitCommentManager;
-import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.CommitComment;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.Constants;
+import com.pmease.gitop.web.GitopSession;
 import com.pmease.gitop.web.component.comment.CommitCommentEditor;
 import com.pmease.gitop.web.component.comment.CommitCommentPanel;
+import com.pmease.gitop.web.component.comment.CommitCommentRemoved;
 import com.pmease.gitop.web.model.CommitCommentModel;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.HunkHeader;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.HunkLine;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.HunkLine.LineType;
+
+import de.agilecoders.wicket.jquery.JQuery;
 
 @SuppressWarnings("serial")
 public class HunkPanel extends Panel {
@@ -58,11 +61,13 @@ public class HunkPanel extends Panel {
 	private int startLine;
 	private int endLine;
 	
-	private String belowMarkupId;
-	
 	private final IModel<Multimap<String, Long>> commentsModel;
 	
-	final static String INSERT_ROW_TEMPLATE = "var item = document.createElement('tr'); item.id='%s'; $(item).insertAfter($('#%s'));";
+	final static String INSERT_AFTER_ROW = "var item = document.createElement('tr'); item.id='%s'; $(item).insertAfter($('#%s'));";
+	final static String INSERT_BEFORE_ROW = "var item = document.createElement('tr'); item.id='%s'; $(item).insertBefore($('#%s'));";
+	
+	private final IModel<Boolean> showInlineComments;
+	private final IModel<Boolean> enableAddComments;
 	
 	public HunkPanel(String id,
 			IModel<Project> projectModel,
@@ -70,7 +75,9 @@ public class HunkPanel extends Panel {
 			IModel<Integer> indexModel,
 			IModel<FileHeader> fileModel,
 			IModel<List<String>> blobLinesModel,
-			final IModel<List<CommitComment>> commentsModel) {
+			final IModel<List<CommitComment>> commentsModel,
+			final IModel<Boolean> showInlineComments,
+			final IModel<Boolean> enableAddComments) {
 		
 		super(id, indexModel);
 		
@@ -78,6 +85,10 @@ public class HunkPanel extends Panel {
 		this.commitModel = commitModel;
 		this.fileModel = fileModel;
 		this.blobLinesModel = blobLinesModel;
+		
+		this.showInlineComments = showInlineComments;
+		this.enableAddComments = enableAddComments;
+		
 		this.commentsModel = new LoadableDetachableModel<Multimap<String, Long>>() {
 
 			@Override
@@ -85,7 +96,7 @@ public class HunkPanel extends Panel {
 				List<CommitComment> comments = commentsModel.getObject();
 				Multimap<String, Long> map = LinkedListMultimap.<String, Long>create();
 				
-				String fileId = getFileId();
+				String fileId = TextDiffPanel.getFileId(getFile());
 				for (CommitComment each : comments) {
 					String line = each.getLine();
 					if (!Strings.isNullOrEmpty(line) && line.startsWith(fileId)) {
@@ -98,47 +109,6 @@ public class HunkPanel extends Panel {
 		};
 	}
 
-	private String getFileId() {
-		FileHeader file = getFile();
-		if (file.getChangeType() == ChangeType.DELETE) {
-			return file.getOldId().name();
-		} else {
-			return file.getNewId().name();
-		}
-	}
-	
-	private String getLineId(int position) {
-		return getFileId() + "-L" + position;
-	}
-	
-	/*
-	static String toPathId(String original) {
-		StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < original.length(); i++) {
-			char c = original.charAt(i);
-			if (CharMatcher.JAVA_LETTER_OR_DIGIT.matches(c)) {
-				sb.append(c);
-			} else {
-				sb.append('-');
-			}
-		}
-		
-		return sb.toString();
-	}
-	
-	private String getPathId() {
-		FileHeader file = getFile();
-		String path;
-		if (file.getChangeType() == ChangeType.DELETE) {
-			path = file.getOldPath();
-		} else {
-			path = file.getNewPath();
-		}
-		
-		return toPathId(path);
-	}
-	*/
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -255,13 +225,7 @@ public class HunkPanel extends Panel {
 			Component item = newLineRow(markupId, line, -1);
 			item.setOutputMarkupId(true);
 			
-			insertRow(target, item.getMarkupId(), aboveMarkupId);
-//			target.prependJavaScript(
-//					String.format(INSERT_ROW_TEMPLATE,
-//							item.getMarkupId(true), aboveMarkupId));
-			
-			linesView.addOrReplace(item);
-			target.add(item);
+			insertRow(target, item, aboveMarkupId);
 			oldStart++;
 			aboveMarkupId = item.getMarkupId();
 		}
@@ -269,8 +233,10 @@ public class HunkPanel extends Panel {
 		startLine = newStart;
 	}
 	
-	private void insertRow(AjaxRequestTarget target, String markupId, String afterId) {
-		target.prependJavaScript(String.format(INSERT_ROW_TEMPLATE, markupId, afterId));
+	private void insertRow(AjaxRequestTarget target, Component row, String afterId) {
+		target.prependJavaScript(String.format(INSERT_AFTER_ROW, row.getMarkupId(), afterId));
+		linesView.addOrReplace(row);
+		target.add(row);
 	}
 	
 	private boolean isAboveExpandable() {
@@ -301,9 +267,7 @@ public class HunkPanel extends Panel {
 				// insert a comment row
 				Component row = newCommentRow(position, true);
 				Component lineRow = findLineRow(position);
-				insertRow(e.getTarget(), row.getMarkupId(), lineRow.getParent().getMarkupId());
-				linesView.addOrReplace(row);
-				e.getTarget().add(row);
+				insertRow(e.getTarget(), row, lineRow.getParent().getMarkupId());
 			}
 		}
 	}
@@ -337,6 +301,10 @@ public class HunkPanel extends Panel {
 		return row;
 	}
 	
+	String getLineId(int position) {
+		return CommitComment.buildLineId(TextDiffPanel.getFileId(getFile()), getHunkIndex(), position);
+	}
+	
 	private Component createHunkLines() {
 		linesView = new RepeatingView("hunklines");
 		
@@ -344,19 +312,20 @@ public class HunkPanel extends Panel {
 		
 		Multimap<String, Long> inlineComments = getInlineComments();
 		
+		boolean showComments = this.showInlineComments.getObject();
+		
 		for (int i = 0; i < lines.size(); i++) {
 			HunkLine line = lines.get(i);
 			Component item = newLineRow(linesView.newChildId(), line, i + 1);
 			linesView.add(item);
 			
-			String lineId = getLineId(i + 1);
-			if (inlineComments.containsKey(lineId)) {
-				// create inline comment block
-				linesView.add(newCommentRow(i+1, false));
-			}
-			
-			if (i == lines.size() - 1) {
-				belowMarkupId = item.getMarkupId();
+			if (showComments) {
+				String lineId = getLineId(i + 1);
+				if (inlineComments.containsKey(lineId)) {
+					// create inline comment block
+					item = newCommentRow(i + 1, false);
+					linesView.add(item);
+				}
 			}
 		}
 		
@@ -389,7 +358,7 @@ public class HunkPanel extends Panel {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						send(HunkPanel.this, Broadcast.DEPTH, new CloseInlineCommentEvent(target, position));
+						send(HunkPanel.this, Broadcast.DEPTH, new CloseInlineCommentEvent(target, position, getLineId(position)));
 					}
 				});
 
@@ -398,14 +367,14 @@ public class HunkPanel extends Panel {
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						String lineId = getLineId(position);
 						CommitComment comment = new CommitComment();
-						comment.setAuthor(Gitop.getInstance(UserManager.class).getCurrent());
+						comment.setAuthor(GitopSession.getCurrentUser().get());
 						comment.setCommit(commitModel.getObject());
 						comment.setLine(lineId);
 						comment.setProject(projectModel.getObject());
 						comment.setContent(getCommentText());
 						Gitop.getInstance(CommitCommentManager.class).save(comment);
 						
-						send(HunkPanel.this, Broadcast.DEPTH, new InlineCommentAddedEvent(target, position, comment.getId()));
+						send(getPage(), Broadcast.DEPTH, new InlineCommentAddedEvent(target, position, lineId, comment.getId()));
 					}
 				};
 				
@@ -417,6 +386,9 @@ public class HunkPanel extends Panel {
 		};
 	}
 	
+	/**
+	 * A row for rendering the source line information 
+	 */
 	private class LineRow extends Fragment {
 
 		private final int position;
@@ -452,14 +424,16 @@ public class HunkPanel extends Panel {
 			add(new Label("newnum", newLineNo).setEscapeModelStrings(false));
 			add(new Label("code", Model.of(line.getText())));
 			
-			if (position < 0) {
+			if (position < 0 
+					|| !GitopSession.getCurrentUser().isPresent()
+					|| !enableAddComments.getObject()) {
 				add(new WebMarkupContainer("commentlink").setVisibilityAllowed(false));
 			} else {
 				add(new AjaxLink<Void>("commentlink") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						send(HunkPanel.this, Broadcast.BREADTH, new AddInlineCommentEvent(target, position));
+						send(HunkPanel.this, Broadcast.BREADTH, new AddInlineCommentEvent(target, position, getLineId(position)));
 					}
 				});
 			}
@@ -483,6 +457,10 @@ public class HunkPanel extends Panel {
 		return item;
 	}
 	
+	/**
+	 * Comment row, including the discussions on a line and form for commenting
+	 * the line
+	 */
 	private class CommentRow extends Fragment {
 
 		final int position;
@@ -513,6 +491,7 @@ public class HunkPanel extends Panel {
 			add(new Label("count", sizeModel).setOutputMarkupId(true));
 			
 			commentsHolder = new WebMarkupContainer("commentsholder");
+			
 			commentsHolder.setOutputMarkupId(true);
 			add(commentsHolder);
 			
@@ -527,6 +506,7 @@ public class HunkPanel extends Panel {
 			};
 			
 			commentsHolder.add(commentsView);
+			
 			if (withForm) {
 				commentForm = newCommentForm(position);
 			} else {
@@ -534,6 +514,29 @@ public class HunkPanel extends Panel {
 			}
 			
 			add(commentForm);
+			
+			// Add note button should be created after commentForm created
+			commentsHolder.add(newAddNoteButton());
+		}
+		
+		private Component newAddNoteButton() {
+			WebMarkupContainer container = new WebMarkupContainer("addnotespan");
+			container.setOutputMarkupId(true);
+			Component result = new AjaxLink<Integer>("btnadd") {
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					send(HunkPanel.this, Broadcast.BREADTH, new AddInlineCommentEvent(target, position, getLineId(position)));
+				}
+			};
+
+			result.setVisible(
+					GitopSession.getCurrentUser().isPresent()
+					&& enableAddComments.getObject()
+					&& !(commentForm instanceof CommitCommentEditor)
+					&& !getCommentIds().isEmpty());
+			
+			container.add(result);
+			return container;
 		}
 		
 		private WebMarkupContainer newEmptyForm() {
@@ -555,6 +558,71 @@ public class HunkPanel extends Panel {
 			return ids;
 		}
 		
+		private void updateAddNoteButton(AjaxRequestTarget target) {
+			Component noteBtn = newAddNoteButton();
+			commentsHolder.addOrReplace(noteBtn);
+			target.add(noteBtn);
+		}
+		
+		private void onCloseComment(CloseInlineCommentEvent e) {
+			List<Long> ids = getCommentIds();
+			if (ids.isEmpty()) {
+				// remove the whole row
+				Component parent = getParent();
+				linesView.remove(parent);
+				e.getTarget().appendJavaScript("$('#" + parent.getMarkupId() + "').remove()");
+			} else {
+				// only hide comment form and show add note button
+				commentForm = newEmptyForm();
+				addOrReplace(commentForm);
+				e.getTarget().add(commentForm);
+				
+				updateAddNoteButton(e.getTarget());
+			}
+		}
+		
+		private void onAddComment(AddInlineCommentEvent e) {
+			// show this row first in case all comment rows are hidden
+			e.getTarget().prependJavaScript("$('#" + getParent().getMarkupId(true) + "').show()");
+			
+			if (commentForm instanceof CommitCommentEditor) {
+				// form maybe hidden
+				e.getTarget().appendJavaScript("$('#" + commentForm.getMarkupId(true) + "').show()");
+			} else {
+				commentForm = newCommentForm(position);
+				addOrReplace(commentForm);
+				e.getTarget().add(commentForm);
+			}
+			
+			updateAddNoteButton(e.getTarget());
+		}
+		
+		private void onCommentAdded(InlineCommentAddedEvent e) {
+			e.getTarget().add(get("count"));
+			commentForm = newEmptyForm();
+			addOrReplace(commentForm);
+			e.getTarget().add(commentForm);
+			
+			commentsHolder.addOrReplace(newAddNoteButton());
+			e.getTarget().add(commentsHolder);
+			e.getTarget().appendJavaScript(JQuery.$(commentsHolder, ".age").chain("tooltip").get());
+		}
+		
+		private void onCommentRemoved(CommitCommentRemoved e) {
+			List<Long> ids = getCommentIds();
+			if (ids.isEmpty()) {
+				// remove the whole row
+				Component parent = getParent();
+				linesView.remove(parent);
+				e.getTarget().appendJavaScript("$('#" + parent.getMarkupId() + "').remove()");
+			} else {
+				e.getTarget().add(get("count"));
+				
+				commentsHolder.addOrReplace(newAddNoteButton());
+				e.getTarget().add(commentsHolder);
+			}
+		}
+		
 		@Override
 		public void onEvent(IEvent<?> sink) {
 			if (sink.getPayload() instanceof InlineCommentEvent) {
@@ -564,34 +632,23 @@ public class HunkPanel extends Panel {
 				}
 				
 				if (e instanceof CloseInlineCommentEvent) {
-					List<Long> ids = getCommentIds();
-					if (ids.isEmpty()) {
-						// remove the whole row
-						Component parent = getParent();
-						linesView.remove(parent);
-						e.getTarget().appendJavaScript("$('#" + parent.getMarkupId() + "').remove()");
-					} else {
-						// only hide comment form
-						commentForm = newEmptyForm();
-						addOrReplace(commentForm);
-						e.getTarget().add(commentForm);
-					}
+					onCloseComment((CloseInlineCommentEvent) e);
+					
 				} else if (e instanceof AddInlineCommentEvent) {
-					if (commentForm instanceof CommitCommentEditor) {
-						// form maybe hidden
-						e.getTarget().appendJavaScript("$('#" + commentForm.getMarkupId(true) + "').show()");
-					} else {
-						commentForm = newCommentForm(position);
-						addOrReplace(commentForm);
-						e.getTarget().add(commentForm);
-					}
+					onAddComment((AddInlineCommentEvent) e);
+					
 				} else if (e instanceof InlineCommentAddedEvent) {
-					e.getTarget().add(get("count"));
-					e.getTarget().add(commentsHolder);
-					commentForm = newEmptyForm();
-					addOrReplace(commentForm);
-					e.getTarget().add(commentForm);
+					onCommentAdded((InlineCommentAddedEvent) e);
+					
 				}
+				
+			} else if (sink.getPayload() instanceof CommitCommentRemoved) {
+				CommitCommentRemoved ccr = (CommitCommentRemoved) sink.getPayload();
+				if (!Objects.equal(getLineId(position), ccr.getCommitComment().getLine())) {
+					return;
+				}
+				
+				onCommentRemoved(ccr);
 			}
 		}
 	}
@@ -647,7 +704,8 @@ public class HunkPanel extends Panel {
 		int offset = endLine - getCurrentHunk().getNewEndLine() + 1;
 		int oldLineNo = getCurrentHunk().getOldEndLine() + offset;
 		
-		for (int i = endLine + 1; i <= lineNo; i++) {
+		String id = expander.getMarkupId();
+		for (int i = lineNo; i >= endLine + 1; i--) {
 			HunkLine line = HunkLine.builder()
 					.text(blobLines.get(i - 1))
 					.newLineNo(i)
@@ -657,11 +715,15 @@ public class HunkPanel extends Panel {
 			
 			Component item = newLineRow(linesView.newChildId(), line, -1);
 			item.setOutputMarkupId(true);
-			insertRow(target, item.getMarkupId(), belowMarkupId);
+			
+			target.prependJavaScript(String.format(INSERT_BEFORE_ROW, item.getMarkupId(), id));
 			linesView.addOrReplace(item);
 			target.add(item);
+			
+//			insertRow(target, item, belowMarkupId);
 			oldLineNo++;
-			belowMarkupId = item.getMarkupId();
+//			belowMarkupId = item.getMarkupId();
+			id = item.getMarkupId();
 		}
 		
 		endLine = lineNo;
@@ -728,6 +790,14 @@ public class HunkPanel extends Panel {
 
 		if (commentsModel != null) {
 			commentsModel.detach();
+		}
+
+		if (showInlineComments != null) {
+			showInlineComments.detach();
+		}
+		
+		if (enableAddComments != null) {
+			enableAddComments.detach();
 		}
 		
 		super.onDetach();

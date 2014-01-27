@@ -54,6 +54,10 @@ public class CommitComment extends AbstractEntity {
 	@NotEmpty
 	private String content;
 
+	public static String buildLineId(String fileSha, int hunkIndex, int linePos) {
+		return fileSha + "-L" + hunkIndex + "-" + linePos;
+	}
+	
 	public User getAuthor() {
 		return author;
 	}

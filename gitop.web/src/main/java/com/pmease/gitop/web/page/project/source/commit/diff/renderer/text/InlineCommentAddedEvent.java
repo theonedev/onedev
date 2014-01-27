@@ -6,8 +6,8 @@ public class InlineCommentAddedEvent extends InlineCommentEvent {
 
 	private final Long commentId;
 	
-	public InlineCommentAddedEvent(AjaxRequestTarget target, int position, Long commentId) {
-		super(target, position);
+	public InlineCommentAddedEvent(AjaxRequestTarget target, int position, String lineId, Long commentId) {
+		super(target, position, lineId);
 		
 		this.commentId = commentId;
 	}

@@ -13,10 +13,12 @@ import org.apache.wicket.markup.html.list.Loop;
 import org.apache.wicket.markup.html.list.LoopItem;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.parboiled.common.Preconditions;
 
+import com.google.common.base.Strings;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
@@ -112,12 +114,22 @@ public abstract class CommitCommentEditor extends Panel {
 		return frag;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private Component newPreviewPanel(String id) {
 		Fragment frag = new Fragment(id, "previewfrag", this);
 		User user = Preconditions.checkNotNull(Gitop.getInstance(UserManager.class).getCurrent());
 		frag.add(new UserAvatarLink("author", new UserModel(user)));
-		frag.add(new WikiTextPanel("content", (IModel<String>) getDefaultModel()));
+		frag.add(new WikiTextPanel("content", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				String str = getCommentText();
+				if (Strings.isNullOrEmpty(str)) {
+					return "Nothing to be shown";
+				} else {
+					return str;
+				}
+			}
+		}));
 		
 		return frag;
 	}

@@ -520,8 +520,9 @@ a.diffstat:hover { text-decoration: none; }
 .panel-diff .panel-body { padding: 0;  overflow: auto; overflow-x: auto; overflow-y: hidden; }
 .panel-diff .empty-message { padding: 12px; }
 .panel-diff .panel-heading .meta {  }
-.panel-diff .meta .diffstat { margin-right: 6px; line-height: 30px; height: 30px; }
-.panel-diff .meta .path { display: inline-block; overflow: hidden; text-overflow: ellipsis; vertical-align: top; white-space: nowrap; line-height: 30px; height: 30px; }
+.panel-diff .meta .diffstat { margin-right: 6px; line-height: 30px; vertical-align: middle; }
+.panel-diff .meta .path { display: inline-block; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; white-space: nowrap; }
+.panel-diff .panel-heading .actions .checkbox { margin: 0 4px 0 0; padding: 0; }
 
 .panel-diff .alert { margin: 0; border-width: 0; border-radius: 0 0 4px 4px; }
 .panel-diff .alert > p { margin-bottom: 9px; }
@@ -573,8 +574,10 @@ a.diffstat:hover { text-decoration: none; }
 .form-comment .form-actions .primary { float: right; }
 .form-comment .form-actions .secondary { float: left; }
 
+.line-comment p.addnote { padding: 0 12px; }
+
 .inline-comment { padding: 0 12px; margin: 10px 0; }
-.inline-comment .panel-comment { margin: 0; } 
+.inline-comment .panel-comment { margin: 0; border-color: #ccc; } 
 .panel-comment .panel-heading { padding-top: 5px; padding-bottom: 5px; background: #f1eae0; color: #555; }
 .panel-comment .panel-heading .author a { color: #333; font-weight: bold;}
 .panel-comment .panel-heading .actions a { margin-left: 5px; color: #555; }

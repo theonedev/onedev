@@ -9,11 +9,14 @@
 			<span class="path" wicket:id="path"></span>
 		</div>
 		<div class="actions pull-right">
+			<span wicket:id="actions"></span>
 			<a class="btn btn-default btn-sm" wicket:id="bloblink">View file @ <b class="sha" wicket:id="sha"></b></a>
 		</div>
 	</div>
 	<div class="panel-body">
 		<div wicket:id="diffcontent"></div>
 	</div>
+	
+	<wicket:child></wicket:child>
 </wicket:panel>
 </html>

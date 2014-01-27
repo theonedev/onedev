@@ -7,6 +7,11 @@ import org.apache.shiro.subject.Subject;
 import org.apache.wicket.protocol.http.WebSession;
 import org.apache.wicket.request.Request;
 
+import com.google.common.base.Optional;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.UserManager;
+import com.pmease.gitop.model.User;
+
 public class GitopSession extends WebSession {
 
 	private static final long serialVersionUID = 1L;
@@ -23,6 +28,10 @@ public class GitopSession extends WebSession {
 		return (GitopSession) WebSession.get();
 	}
 
+	public static Optional<User> getCurrentUser() {
+		return Optional.fromNullable(Gitop.getInstance(UserManager.class).getCurrent());
+	}
+	
 	/**
 	 * Peform the actual authentication using Shiro's {@link Subject#login
 	 * login()}.

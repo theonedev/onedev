@@ -4,7 +4,8 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 
 public class AddInlineCommentEvent extends InlineCommentEvent {
 
-	public AddInlineCommentEvent(AjaxRequestTarget target, int position) {
-		super(target, position);
+	public AddInlineCommentEvent(AjaxRequestTarget target, int position,
+			String lineId) {
+		super(target, position, lineId);
 	}
 }

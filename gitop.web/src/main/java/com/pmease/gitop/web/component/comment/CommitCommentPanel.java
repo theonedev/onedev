@@ -6,6 +6,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -73,9 +74,11 @@ public class CommitCommentPanel extends Panel {
 					setVisibilityAllowed(Objects.equal(current, getCommitComment().getAuthor()));
 				}
 			}
+			
 		});
 		
-		add(new AjaxConfirmLink<Void>("removelink", Model.of("Are you sure you want to delete this comment?")) {
+		add(new AjaxConfirmLink<Void>("removelink", 
+				Model.of("Are you sure you want to delete this comment?")) {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -104,7 +107,12 @@ public class CommitCommentPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return getCommitComment().getContent();
+				String str = getCommitComment().getContent();
+				if (Strings.isNullOrEmpty(str)) {
+					return "Nothing to be shown";
+				} else {
+					return str;
+				}
 			}
 			
 		}).setOutputMarkupId(true);
@@ -160,14 +168,10 @@ public class CommitCommentPanel extends Panel {
 		target.add(c);
 	}
 	
-//	private void updateAgeLabel(AjaxRequestTarget target) {
-//		Component ageLabel = get("age");
-//		target.add(ageLabel);
-//		target.appendJavaScript(JQuery.$(ageLabel).chain("tooltip").get());
-//	}
-	
 	protected void onDelete(AjaxRequestTarget target) {
-		
+		CommitComment comment = getCommitComment();
+		Gitop.getInstance(CommitCommentManager.class).delete(comment);
+		send(getPage(), Broadcast.BREADTH, new CommitCommentRemoved(target, comment));
 	}
 	
 	private CommitComment getCommitComment() {
