@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.json.JSONException;
@@ -16,6 +18,7 @@ import com.google.common.collect.Lists;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.permission.ObjectPermission;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 
@@ -50,6 +53,10 @@ public class ComparableProjectChoiceProvider extends ChoiceProvider<Project> {
 				if (getCurrentProject().getForkedFrom() != null)
 					comparableProjects.add(0, getCurrentProject().getForkedFrom());
 				comparableProjects.add(0, getCurrentProject());
+				for (Iterator<Project> it = comparableProjects.iterator(); it.hasNext();) {
+					if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(it.next())))
+						it.remove();
+				}
 				return comparableProjects;
 			}
 			

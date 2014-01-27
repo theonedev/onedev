@@ -1,5 +1,6 @@
 package com.pmease.gitop.core.manager.impl;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -66,19 +67,23 @@ public class DefaultPullRequestUpdateManager extends AbstractGenericDao<PullRequ
 	@Transactional
 	@Override
 	public void update(PullRequest request) {
-		Git sourceGit = request.getSource().getProject().code();
-		String sourceHead = sourceGit.parseRevision(request.getSource().getHeadRef(), true);
-		Git targetGit = request.getTarget().getProject().code();
-		String targetHead = targetGit.parseRevision(request.getTarget().getHeadRef(), true);
+		String sourceHead = request.getSource().getHeadCommit();
 		
-		if (!targetGit.isAncestor(sourceHead, targetHead)) {
-			PullRequestUpdate update = new PullRequestUpdate();
-			update.setRequest(request);
-			request.getUpdates().add(update);
-			update.setHeadCommit(sourceHead);
-			save(update);
-			
-			targetGit.fetch(sourceGit.repoDir().getAbsolutePath(), "+" + sourceHead + ":" + update.getHeadRef()); 
+		PullRequestUpdate update = new PullRequestUpdate();
+		update.setRequest(request);
+		request.getUpdates().add(update);
+		update.setHeadCommit(sourceHead);
+		request.setUpdateDate(new Date());
+		save(update);
+		pullRequestManager.save(request);
+		
+		if (!request.getTarget().getProject().equals(request.getSource().getProject())) {
+			request.getTarget().getProject().code().fetch(
+					request.getSource().getProject().code().repoDir().getAbsolutePath(), 
+					"+" + sourceHead + ":" + update.getHeadRef()); 
+		} else {
+			request.getTarget().getProject().code().updateRef(update.getHeadRef(), 
+					sourceHead, null, null);
 		}
 	}
 

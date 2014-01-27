@@ -8,6 +8,7 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -24,7 +25,6 @@ import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
-import com.pmease.commons.util.ExceptionUtils;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.LockUtils;
 import com.pmease.gitop.core.event.BranchRefUpdateEvent;
@@ -37,8 +37,10 @@ import com.pmease.gitop.model.MergeResult;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequest.Status;
 import com.pmease.gitop.model.PullRequestUpdate;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.VoteInvitation;
+import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
 import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
 import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
 import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
@@ -112,6 +114,8 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 
 				if (git.isAncestor(sourceHead, targetHead)) {
 					request.setStatus(Status.INTEGRATED);
+					request.setCheckResult(new Accepted("Already integrated."));
+					request.setMergeResult(new MergeResult(targetHead, sourceHead, sourceHead, targetHead));
 				} else {
 					if (git.isAncestor(targetHead, sourceHead)) {
 						request.setMergeResult(new MergeResult(targetHead, sourceHead, targetHead, sourceHead));
@@ -141,98 +145,96 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 	    		FileUtils.deleteDir(git.repoDir());
 	    	}
 		} else {
-			try {
-				new Callable<Void>() {
+			LockUtils.call(request.getLockName(), new Callable<Void>() {
 
-					@Override
-					public Void call() throws Exception {
-						Git git = request.getTarget().getProject().code();
-						String branchHead = request.getTarget().getHeadCommit();
-						String requestHead = request.getLatestUpdate().getHeadCommit();
+				@Override
+				public Void call() throws Exception {
+					Git git = request.getTarget().getProject().code();
+					String branchHead = request.getTarget().getHeadCommit();
+					String requestHead = request.getLatestUpdate().getHeadCommit();
+					
+					String mergeRef = request.getMergeRef();
+					
+					if (git.isAncestor(requestHead, branchHead)) {
+						request.setStatus(Status.INTEGRATED);
+						request.setCheckResult(new Accepted("Already integrated."));
+						request.setMergeResult(new MergeResult(branchHead, requestHead, requestHead, branchHead));
+					} else {
+						// Update head ref so that it can be pulled by build system
+						git.updateRef(request.getHeadRef(), requestHead, null, null);
 						
-						String mergeRef = request.getMergeRef();
-						
-						if (git.isAncestor(requestHead, branchHead)) {
-							request.setStatus(Status.INTEGRATED);
+						if (git.isAncestor(branchHead, requestHead)) {
+							request.setMergeResult(new MergeResult(branchHead, requestHead, branchHead, requestHead));
+							git.updateRef(mergeRef, requestHead, null, null);
 						} else {
-							// Update head ref so that it can be pulled by build system
-							git.updateRef(request.getHeadRef(), requestHead, null, null);
-							
-							if (git.isAncestor(branchHead, requestHead)) {
-								request.setMergeResult(new MergeResult(branchHead, requestHead, branchHead, requestHead));
-								git.updateRef(mergeRef, requestHead, null, null);
-							} else {
-								if (request.getMergeResult() != null 
-										&& (!request.getMergeResult().getBranchHead().equals(branchHead) 
-												|| !request.getMergeResult().getRequestHead().equals(requestHead))) {
-									 // Commits for merging have been changed since last merge, we have to
-									 // re-merge 
-									request.setMergeResult(null);
-								}
-								if (request.getMergeResult() != null && request.getMergeResult().getMergeHead() != null 
-										&& !request.getMergeResult().getMergeHead().equals(git.parseRevision(mergeRef, false))) {
-									 // Commits for merging have not been changed since last merge, but recorded 
-									 // merge is incorrect in repository, so we have to re-merge 
-									request.setMergeResult(null);
-								}
-								if (request.getMergeResult() == null) {
-									String mergeBase = git.calcMergeBase(branchHead, requestHead);
+							if (request.getMergeResult() != null 
+									&& (!request.getMergeResult().getBranchHead().equals(branchHead) 
+											|| !request.getMergeResult().getRequestHead().equals(requestHead))) {
+								 // Commits for merging have been changed since last merge, we have to
+								 // re-merge 
+								request.setMergeResult(null);
+							}
+							if (request.getMergeResult() != null && request.getMergeResult().getMergeHead() != null 
+									&& !request.getMergeResult().getMergeHead().equals(git.parseRevision(mergeRef, false))) {
+								 // Commits for merging have not been changed since last merge, but recorded 
+								 // merge is incorrect in repository, so we have to re-merge 
+								request.setMergeResult(null);
+							}
+							if (request.getMergeResult() == null) {
+								String mergeBase = git.calcMergeBase(branchHead, requestHead);
+								
+								File tempDir = FileUtils.createTempDir();
+								try {
+									Git tempGit = new Git(tempDir);
 									
-									File tempDir = FileUtils.createTempDir();
-									try {
-										Git tempGit = new Git(tempDir);
-										
-										// Branch name here is not significant, we just use an existing branch
-										// in cloned repository to hold mergeBase, so that we can merge with 
-										// previousUpdate 
-										String branchName = request.getTarget().getName();
-										tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, branchName);
-										tempGit.updateRef("HEAD", requestHead, null, null);
-										tempGit.reset(null, null);
-										
-										if (tempGit.merge(branchHead, null, null, null)) {
-											git.fetch(tempGit.repoDir().getAbsolutePath(), "+HEAD:" + mergeRef);
-											request.setMergeResult(new MergeResult(branchHead, requestHead, 
-													mergeBase, git.parseRevision(mergeRef, true)));
-										} else {
-											request.setMergeResult(new MergeResult(branchHead, requestHead, mergeBase, null));
-										}
-									} finally {
-										FileUtils.deleteDir(tempDir);
+									// Branch name here is not significant, we just use an existing branch
+									// in cloned repository to hold mergeBase, so that we can merge with 
+									// previousUpdate 
+									String branchName = request.getTarget().getName();
+									tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, branchName);
+									tempGit.updateRef("HEAD", requestHead, null, null);
+									tempGit.reset(null, null);
+									
+									if (tempGit.merge(branchHead, null, null, null)) {
+										git.fetch(tempGit.repoDir().getAbsolutePath(), "+HEAD:" + mergeRef);
+										request.setMergeResult(new MergeResult(branchHead, requestHead, 
+												mergeBase, git.parseRevision(mergeRef, true)));
+									} else {
+										request.setMergeResult(new MergeResult(branchHead, requestHead, mergeBase, null));
 									}
+								} finally {
+									FileUtils.deleteDir(tempDir);
 								}
-							}
-							
-							request.setCheckResult(request.getTarget().getProject().getGateKeeper().checkRequest(request));
-					
-							for (VoteInvitation invitation : request.getVoteInvitations()) {
-								if (!request.getCheckResult().canVote(invitation.getVoter(), request))
-									voteInvitationManager.delete(invitation);
-							}
-					
-							Preconditions.checkNotNull(request.getMergeResult());
-							
-							if (request.getCheckResult() instanceof Pending || request.getCheckResult() instanceof PendingAndBlock) {
-								request.setStatus(Status.PENDING_APPROVAL);
-							} else if (request.getCheckResult() instanceof Rejected) {
-								request.setStatus(Status.PENDING_UPDATE);
-							} else {
-								request.setStatus(Status.PENDING_INTEGRATE);
 							}
 						}
+						
+						request.setCheckResult(request.getTarget().getProject().getGateKeeper().checkRequest(request));
 				
-						save(request);
+						for (VoteInvitation invitation : request.getVoteInvitations()) {
+							if (!request.getCheckResult().canVote(invitation.getVoter(), request))
+								voteInvitationManager.delete(invitation);
+						}
+				
+						Preconditions.checkNotNull(request.getMergeResult());
 						
-						if (request.isAutoMerge())
-							merge(request);
-						
-						return null;
+						if (request.getCheckResult() instanceof Pending || request.getCheckResult() instanceof PendingAndBlock) {
+							request.setStatus(Status.PENDING_APPROVAL);
+						} else if (request.getCheckResult() instanceof Rejected) {
+							request.setStatus(Status.PENDING_UPDATE);
+						} else {
+							request.setStatus(Status.PENDING_INTEGRATE);
+						}
 					}
+			
+					save(request);
 					
-				};
-			} catch (Exception e) {
-				throw ExceptionUtils.unchecked(e);
-			}
+					if (request.isAutoMerge())
+						merge(request);
+					
+					return null;
+				}
+				
+			});
 		}
 	}
 
@@ -247,22 +249,6 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 				return null;
 			}
 			
-		});
-	}
-	
-	@Sessional
-	public void reopen(final PullRequest request) {
-		LockUtils.call(request.getLockName(), new Callable<Void>() {
-
-			@Override
-			public Void call() throws Exception {
-				request.setStatus(Status.PENDING_CHECK);
-				request.setMergeResult(null);
-				request.setCheckResult(null);
-				save(request);
-				
-				return null;
-			}
 		});
 	}
 	
@@ -339,27 +325,22 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 
 	@Transactional
 	@Override
-	public PullRequest create(String title, Branch target, Branch source, boolean autoMerge) {
-		if (!target.equals(source)) {
-			PullRequest request = new PullRequest();
-			request.setAutoMerge(autoMerge);
-			request.setSource(source);
-			request.setTarget(target);
-			request.setTitle(title);
-	
-			save(request);
-			
-			pullRequestUpdateManager.update(request);
-			
-			if (request.getUpdates().isEmpty()) {
-				delete(request);
-				return null;
-			} else {
-				return request;
-			}
-		} else {
-			return null;
-		}
+	public PullRequest create(Branch target, Branch source, User submitter, String title, 
+			@Nullable String description, boolean autoMerge) {
+		PullRequest request = new PullRequest();
+		request.setAutoMerge(autoMerge);
+		request.setSource(source);
+		request.setTarget(target);
+		request.setTitle(title);
+		request.setDescription(description);
+		request.setSubmitter(submitter);
+		save(request);
+		
+		pullRequestUpdateManager.update(request);
+		
+		refresh(request);
+		
+		return request;
 	}
 
 }

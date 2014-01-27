@@ -24,6 +24,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Commit;
@@ -36,17 +37,17 @@ import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.component.commit.CommitsTablePanel;
 import com.pmease.gitop.web.component.comparablebranchselector.ComparableBranchSelector;
 import com.pmease.gitop.web.model.EntityModel;
+import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.AbstractProjectPage;
 import com.pmease.gitop.web.page.project.source.commit.diff.DiffViewPanel;
 
 @SuppressWarnings("serial")
-public class NewPullRequestPanel extends Panel {
+public class NewRequestPanel extends Panel {
 
 	private static final String IMPOSSIBLE_TITLE = "*[@TITLE IMPOSSIBLE@]*";
 	
 	private String title = IMPOSSIBLE_TITLE;
 	
-	@SuppressWarnings("unused")
 	private String comment;
 	
 	private IModel<Branch> targetModel, sourceModel;
@@ -59,7 +60,7 @@ public class NewPullRequestPanel extends Panel {
 	
 	private MarkupContainer feedbackContainer, commitsPanel, diffViewPanel;
 	
-	public NewPullRequestPanel(String id, Branch target, Branch source, User submitter) {
+	public NewRequestPanel(String id, Branch target, Branch source, User submitter) {
 		super(id);
 
 		targetModel = new EntityModel<Branch>(target);
@@ -140,22 +141,12 @@ public class NewPullRequestPanel extends Panel {
 			@Override
 			public String getObject() {
 				PullRequest request = getPullRequest();
-				if (request.isNew()) {
-					if (getTarget().equals(getSource())) {
-						return "danger";
-					} else if (request.getStatus() == INTEGRATED) {
-						return "info";
-					} else if (request.getStatus() == PENDING_UPDATE) {
-						return "danger";
-					} else if (title == null) {
-						return "error";
-					} else if (request.getMergeResult().getMergeHead() == null) {
-						return "warning";
-					} else {
-						return "success";
-					}
+				if (request.isNew() 
+						&& request.getStatus() == PENDING_INTEGRATE 
+						&& request.getMergeResult().getMergeHead() != null) {
+					return "success";
 				} else {
-					return "info";
+					return "warning";
 				}
 			}
 			
@@ -174,20 +165,6 @@ public class NewPullRequestPanel extends Panel {
 			
 		});
 
-		WebMarkupContainer titleContainer = new WebMarkupContainer("titleContainer");
-		titleContainer.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				if (title == null)
-					return "has-error";
-				else
-					return "";
-			}
-			
-		}));
-		messageContainer.add(titleContainer);
-		
 		final TextField<String> titleField = new TextField<String>("title", new IModel<String>() {
 
 			@Override
@@ -214,7 +191,7 @@ public class NewPullRequestPanel extends Panel {
 			}
 			
 		});
-		titleContainer.add(titleField);
+		messageContainer.add(titleField);
 		
 		final TextArea<String> commentArea = new TextArea<String>("comment", new PropertyModel<String>(this, "comment"));
 		commentArea.add(new AjaxFormComponentUpdatingBehavior("blur") {
@@ -241,7 +218,11 @@ public class NewPullRequestPanel extends Panel {
 			public void onClick() {
 				String title = getTitle();
 				if (title != null) {
-					
+					PullRequestManager pullRequestManager = Gitop.getInstance(PullRequestManager.class);
+					PullRequest pullRequest = pullRequestManager.create(getTarget(), getSource(), 
+							getSubmitter(), title, comment, false);
+					setResponsePage(OpenRequestsPage.class, 
+							PageSpec.forProject(pullRequest.getTarget().getProject()));
 				}
 			}
 
@@ -266,6 +247,10 @@ public class NewPullRequestPanel extends Panel {
 
 			@Override
 			public void onClick() {
+				AbstractProjectPage page = (AbstractProjectPage) getPage();
+				PageParameters params = PageSpec.forProject(page.getProject());
+				params.set(0, getPullRequest().getId());
+				setResponsePage(RequestDetailPage.class, params);
 			}
 			
 		});
@@ -283,8 +268,6 @@ public class NewPullRequestPanel extends Panel {
 							return "No changes to pull.";
 						} else if (request.getStatus() == PENDING_UPDATE) {
 							return "Gate keeper of target project rejects the pull request.";
-						} else if (title == null) {
-							return "Title has to be specified.";
 						} else if (request.getMergeResult().getMergeHead() == null) {
 							return "There are merge conflicts.";
 						} else {

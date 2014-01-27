@@ -3,6 +3,7 @@ package com.pmease.gitop.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -28,11 +29,27 @@ import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 public class PullRequest extends AbstractEntity {
 
 	public enum Status {
-		PENDING_CHECK, PENDING_APPROVAL, PENDING_UPDATE, PENDING_INTEGRATE, INTEGRATED, DECLINED;
+		PENDING_APPROVAL("Pending Approval"), PENDING_UPDATE("Pending Update"), 
+		PENDING_INTEGRATE("Pending Integrate"), INTEGRATED("Integrated"), 
+		DECLINED("Declined");
+
+		private final String displayName;
+		
+		Status(String displayName) {
+			this.displayName = displayName;
+		}
+		
+		@Override
+		public String toString() {
+			return displayName;
+		}
+		
 	}
 	
 	@Column(nullable = false)
 	private String title;
+	
+	private String description;
 
 	private boolean autoMerge;
 
@@ -45,15 +62,20 @@ public class PullRequest extends AbstractEntity {
 
 	@ManyToOne
 	private Branch source;
-
+	
 	@Lob
 	private CheckResult checkResult;
 
-	@Column(nullable = false)
-	private Status status = Status.PENDING_CHECK;
+	private Status status;
 	
 	@Embedded
 	private MergeResult mergeResult;
+
+	@Column(nullable=false)
+	private Date createDate = new Date();
+	
+	@Column(nullable=false)
+	private Date updateDate = new Date();
 
 	private transient List<PullRequestUpdate> sortedUpdates;
 
@@ -82,6 +104,14 @@ public class PullRequest extends AbstractEntity {
 
 	public void setTitle(String title) {
 		this.title = title;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public boolean isAutoMerge() {
@@ -192,9 +222,9 @@ public class PullRequest extends AbstractEntity {
 	 * Get gate keeper check result.
 	 *  
 	 * @return
-	 * 			<tt>null</tt> if this pull request has not been refreshed yet
+	 * 			check result of this pull request has not been refreshed yet
 	 */
-	public @Nullable CheckResult getCheckResult() {
+	public CheckResult getCheckResult() {
 		return checkResult;
 	}
 	
@@ -206,7 +236,7 @@ public class PullRequest extends AbstractEntity {
 	 * Get merge result of this pull request.
 	 *  
 	 * @return
-	 * 			<tt>null</tt> if this pull request has not been refreshed yet
+	 * 			merge result of this pull request
 	 */
 	public MergeResult getMergeResult() {
 		return mergeResult;
@@ -317,6 +347,22 @@ public class PullRequest extends AbstractEntity {
 			return Restrictions.eq("submitter", submitter);
 		}
 		
+	}
+
+	public Date getCreateDate() {
+		return createDate;
+	}
+
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
+	}
+
+	public Date getUpdateDate() {
+		return updateDate;
+	}
+
+	public void setUpdateDate(Date updateDate) {
+		this.updateDate = updateDate;
 	}
 
 }

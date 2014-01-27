@@ -18,8 +18,9 @@
 
 /* Table */
 table .navigator {border-radius: 4px 4px 4px 4px; margin-bottom: 0px; margin-left: 0; float: right;}
-table tfoot .navigatorLabel {padding-top: 2px; padding-right: 8px; float: left;}
-table tfoot tr.navigation td {vertical-align: middle; padding-top: 12px; text-align: right; min-width: 500px;}
+table thead .navigatorLabel, table tfoot .navigatorLabel {padding-top: 2px; padding-right: 8px; float: left;}
+table thead tr.navigation td, table tfoot tr.navigation td {vertical-align: middle; padding-top: 12px; 
+	text-align: right; min-width: 500px;}
 table .navigator>div a, table .navigator>div em {-moz-border-bottom-colors: none; -moz-border-left-colors: none;
     -moz-border-right-colors: none; -moz-border-top-colors: none; background-color: #FFFFFF; border-color: #DDDDDD;
     border-image: none; border-style: solid; border-width: 1px 1px 1px 0; line-height: 18px; padding: 4px 8px;
@@ -93,7 +94,7 @@ table td, table th {text-align: left;}
 
 /* Menu */
 .dropdown-panel.menu .content {padding: 4px 0; min-width: 120px;}
-.dropdown-panel.menu ul {list-style: none outside none; margin:0;}
+.dropdown-panel.menu ul {list-style: none outside none; margin:0; padding: 0;}
 .dropdown-panel.menu a {clear: both; color: #333333; display: block; font-weight: normal; line-height: 20px;
     padding: 3px 20px; white-space: nowrap;}
 .dropdown-panel.menu li.submenu>a {margin-right: 2px; margin-left: 2px; padding-left: 18px; padding-right: 18px;}

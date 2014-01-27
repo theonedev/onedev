@@ -1,5 +1,7 @@
 package com.pmease.gitop.model;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -21,6 +23,9 @@ public class PullRequestComment extends AbstractEntity {
 	
 	@Column(nullable=false)
 	private String comment;
+	
+	@Column(nullable=false)
+	private Date date = new Date();
 
 	public PullRequest getRequest() {
 		return request;
@@ -44,6 +49,14 @@ public class PullRequestComment extends AbstractEntity {
 
 	public void setComment(String comment) {
 		this.comment = comment;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
 	}
 	
 }

@@ -1,5 +1,5 @@
 <wicket:panel>
-	<div class="pull-request">
+	<div class="new-request">
 		<div class="branches clearfix">
 			<div class="pull-left label">To: </div>
 			<div wicket:id="target" class="target pull-left"></div>
@@ -10,11 +10,11 @@
 			<table>
 				<tr>
 					<td wicket:id="message" class="message">
-						<div wicket:id="titleContainer" class="title">
+						<div class="title">
 							<input wicket:id="title" type="text" class="form-control" placeholder="Title has to be specified">
 						</div>
 						<div class="comment">
-							<textarea wicket:id="comment" class="form-control" rows="8" placeholder="Comment"></textarea>
+							<textarea wicket:id="comment" class="form-control" rows="8" placeholder="Leave a comment"></textarea>
 						</div>
 					</td>
 					<td class="status">
@@ -22,11 +22,10 @@
 							<tr>
 								<td>
 									<span class="icon icon-ok-circle"></span>
-									<span class="icon icon-info-circle"></span>
 									<span class="icon icon-warning-sign"></span>
-									<span class="icon icon-exclamation"></span>
 								</td>
 								<td>
+									<div class="validation"></div>
 									<div wicket:id="summary" class="summary"></div>
 									<div wicket:id="detail" class="detail"></div>
 									<wicket:enclosure child="rejectReasons">
@@ -44,6 +43,29 @@
 					</td>
 				</tr>
 			</table>
+			<script type="text/javascript">
+				function titleChanged() {
+					var jqTitle = $(".pull-request .feedback .title input");
+					if (jqTitle.is(":visible")) {
+						var jqStatus = $(".pull-request .feedback .status");
+						var jqBtn = jqStatus.find(".btn");
+						if ($.trim(jqTitle.val()) == "") {
+							jqTitle.parent().addClass("has-error");
+							jqStatus.addClass("has-error");
+							jqBtn.attr("disabled", "disabled");
+							jqStatus.find(".validation").html("Title has to be specified.").show();
+						} else {
+							jqTitle.parent().removeClass("has-error");
+							jqStatus.removeClass("has-error");
+							jqBtn.removeAttr("disabled");
+							jqStatus.find(".validation").hide();
+						}
+					}
+				}
+				$(".pull-request .feedback .title input").on("input keyup cut paste", titleChanged);
+				
+				titleChanged();	
+			</script>
 		</div>
 		<div wicket:id="commits" class="commits"></div>
 		<div wicket:id="changes" class="changes"></div>
