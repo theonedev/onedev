@@ -570,7 +570,7 @@ a.diffstat:hover { text-decoration: none; }
 .form-comment .comment-editor-head .nav-tabs { padding-left: 18px; }
 .form-comment .comment-editor-body { background: white; padding: 12px; }
 .form-comment textarea { display: block; width: 100%; resize: vertical; padding: 10px; min-height: 100px; max-height: 500px; border-color: #aaa; }
-.form-comment .form-actions { padding: 0 12px; margin-bottom: 12px; }
+.form-comment .form-actions { padding: 0; margin-top: 12px; }
 .form-comment .form-actions .primary { float: right; }
 .form-comment .form-actions .secondary { float: left; }
 

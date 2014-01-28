@@ -5,11 +5,9 @@ import java.util.Date;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -120,46 +118,43 @@ public class CommitCommentPanel extends Panel {
 	
 	protected void onEdit(AjaxRequestTarget target) {
 		Component c = new CommitCommentEditor("content", Model.of(getCommitComment().getContent())) {
-
-			@Override
-			protected Component createSubmitButtons(String id, Form<?> form) {
-				Fragment frag = new Fragment(id, "submitfrag", CommitCommentPanel.this);
-				frag.add(new AjaxLink<Void>("btnCancel") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						updateCommentLabel(target);
-					}
-				});
-				
-				frag.add(new AjaxButton("btnUpdate", form) {
-					
-					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						String comment = getCommentText();
-						if (Strings.isNullOrEmpty(comment)) {
-							form.error("Comment can not be empty");
-							target.add(form);
-							return;
-						}
-						
-						CommitComment cc = getCommitComment();
-						cc.setUpdatedDate(new Date());
-						cc.setContent(comment);
-						
-						Gitop.getInstance(CommitCommentManager.class).save(cc);
-						updateCommentLabel(target);
-//						updateAgeLabel(target);
-					}
-				});
-				
-				return frag;
-			}
 			
 			private void updateCommentLabel(AjaxRequestTarget target) {
 				Component label = newCommentLabel();
 				CommitCommentPanel.this.addOrReplace(label);
 				target.add(label);
+			}
+
+			@Override
+			protected void onCancel(AjaxRequestTarget target, Form<?> form) {
+				updateCommentLabel(target);
+			}
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				String comment = getCommentText();
+				if (Strings.isNullOrEmpty(comment)) {
+					form.error("Comment can not be empty");
+					target.add(form);
+					return;
+				}
+				
+				CommitComment cc = getCommitComment();
+				cc.setUpdatedDate(new Date());
+				cc.setContent(comment);
+				
+				Gitop.getInstance(CommitCommentManager.class).save(cc);
+				updateCommentLabel(target);
+			}
+			
+			@Override
+			protected IModel<String> getCancelButtonLabel() {
+				return Model.of("Cancel");
+			}
+			
+			@Override
+			protected IModel<String> getSubmitButtonLabel() {
+				return Model.of("Update this comment");
 			}
 		};
 		

@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
@@ -205,7 +204,7 @@ public class HunkPanel extends Panel {
 		target.add(expander);
 		
 		String aboveMarkupId = expander.getMarkupId();
-		target.appendJavaScript("$('#" + aboveMarkupId + " a').tooltip();");
+		target.appendJavaScript("$('#" + aboveMarkupId + " .tooltiped').tooltip();");
 
 		HunkHeader hunk = getCurrentHunk();
 		List<String> blobLines = blobLinesModel.getObject();
@@ -350,38 +349,33 @@ public class HunkPanel extends Panel {
 
 	private WebMarkupContainer newCommentForm(final int position) {
 		return new CommitCommentEditor("commentform") {
+			@Override
+			protected void onCancel(AjaxRequestTarget target, Form<?> form) {
+				send(HunkPanel.this, Broadcast.DEPTH, new CloseInlineCommentEvent(target, position, getLineId(position)));
+			}
 
 			@Override
-			protected Component createSubmitButtons(String id, final Form<?> form) {
-				Fragment frag = new Fragment(id, "commentformsubmitsfrag", HunkPanel.this);
-				frag.add(new AjaxLink<Void>("close") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						send(HunkPanel.this, Broadcast.DEPTH, new CloseInlineCommentEvent(target, position, getLineId(position)));
-					}
-				});
-
-				AjaxButton submit = new AjaxButton("comment", form) {
-					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						String lineId = getLineId(position);
-						CommitComment comment = new CommitComment();
-						comment.setAuthor(GitopSession.getCurrentUser().get());
-						comment.setCommit(commitModel.getObject());
-						comment.setLine(lineId);
-						comment.setProject(projectModel.getObject());
-						comment.setContent(getCommentText());
-						Gitop.getInstance(CommitCommentManager.class).save(comment);
-						
-						send(getPage(), Broadcast.DEPTH, new InlineCommentAddedEvent(target, position, lineId, comment.getId()));
-					}
-				};
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				String lineId = getLineId(position);
+				CommitComment comment = new CommitComment();
+				comment.setAuthor(GitopSession.getCurrentUser().get());
+				comment.setCommit(commitModel.getObject());
+				comment.setLine(lineId);
+				comment.setProject(projectModel.getObject());
+				comment.setContent(getCommentText());
+				Gitop.getInstance(CommitCommentManager.class).save(comment);
 				
-				frag.add(submit);
-				form.setDefaultButton(submit);
-				
-				return frag;
+				send(getPage(), Broadcast.DEPTH, new InlineCommentAddedEvent(target, position, lineId, comment.getId()));				
+			}
+			
+			@Override
+			protected IModel<String> getCancelButtonLabel() {
+				return Model.of("Close form");
+			}
+			
+			@Override
+			protected IModel<String> getSubmitButtonLabel() {
+				return Model.of("Comment on this line");
 			}
 		};
 	}

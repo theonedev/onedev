@@ -11,7 +11,6 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffEntry.Side;
 
@@ -19,7 +18,6 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.model.CommitComment;
 import com.pmease.gitop.model.Project;
-import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.page.project.source.blob.SourceBlobPage;
 import com.pmease.gitop.web.page.project.source.commit.diff.DiffStatBar;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader;
@@ -102,106 +100,12 @@ public abstract class BlobDiffPanel extends Panel {
 										 paths));
 		blobLink.setVisibilityAllowed(getFile().getChangeType() != ChangeType.DELETE);
 		add(blobLink);
-		blobLink.add(new Label("sha", Model.of(GitUtils.abbreviateSHA(until, 6))));
+//		blobLink.add(new Label("sha", Model.of(GitUtils.abbreviateSHA(until, 6))));
 		
 		add(createActionsBar("actions"));
 		add(createDiffContent("diffcontent"));
 	}
 
-	/*
-	private Component createContent(String id) {
-		FileHeader file = getFile();
-		List<? extends HunkHeader> hunks = file.getHunks();
-		
-		if (hunks.isEmpty()) {
-			// hunks is empty when this file is renamed, or the file is binary
-			// or this file is just an empty file
-			//
-			
-			// renamed without change
-			if (file.getChangeType() == ChangeType.RENAME) {
-				return createMessageLabel(id, Model.of("File renamed without changes")); 
-			}
-			
-			// binary file also including image file, so we need detect the
-			// media type
-			if (file.getPatchType() == PatchType.BINARY) {
-				String path;
-				if (file.getChangeType() == ChangeType.DELETE) {
-					path = file.getOldPath();
-				} else {
-					path = file.getNewPath();
-				}
-				
-				FileTypes types = Gitop.getInstance(FileTypes.class);
-				
-				// fast detect the media type without loading file blob
-				//
-				MediaType mediaType = types.getMediaType(path, new byte[0]);
-				if (MediaTypeUtils.isImageType(mediaType) 
-						&& types.isSafeInline(mediaType)) {
-					// image diffs
-					return new ImageBlobDiffPanel(id, getFileModel(), projectModel, sinceModel, untilModel);
-					
-				} else {
-					// other binary diffs
-					return createMessageLabel(id, Model.of("File is a binary file"));
-					
-				}
-			}
-			
-			// file is just an empty file
-			return createMessageLabel(id, Model.of("File is empty"));
-			
-		} else {
-			// blob is text and we can show diffs
-			
-			if (index > Constants.MAX_RENDERABLE_BLOBS) {
-				// too many renderable blobs
-				// only show diff stats instead of showing the contents
-				//
-				return createMessageLabel(id, Model.of(
-						file.getDiffStat().getAdditions() + " additions, " 
-						+ file.getDiffStat().getDeletions() + " deletions"));
-			}
-			
-			if (hunks.size() > Constants.MAX_RENDERABLE_DIFF_LINES) {
-				// don't show huge diff (exceed 10000 lines)
-				//
-				return createMessageLabel(id, new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						String since = sinceModel.getObject();
-						String until = untilModel.getObject();
-						
-						if (Strings.isNullOrEmpty(since)) {
-							since = "";
-						}
-						
-						return "<p>"
-								+ "The diff for this file is too large to render. "
-								+ "You can run below command to get the diff manually:"
-								+ "</p> "
-								+ "<pre><code>"
-								+ "git diff -C -M " + since + " " + until + " -- " 
-								+ StringUtils.quoteArgument(getFile().getNewPath())
-								+ "</code></pre>";
-					}
-					
-				}).withHtmlMessage(true);
-			}
-			
-		}
-	}
-	
-	private Alert createMessageLabel(String id, IModel<String> model) {
-		Alert alert = new Alert(id, model);
-		alert.type(Alert.Type.Warning).setCloseButtonVisible(false);
-		return alert;
-	}
-	*/
-	
 	protected FileHeader getFile() {
 		return (FileHeader) getDefaultModelObject();	
 	}

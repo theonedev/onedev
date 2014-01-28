@@ -2,7 +2,7 @@
 <wicket:panel>
 	<tr class="diff-line hunk-head" wicket:id="aboveexpander">
 		<td class="diff-line-num expander" colspan="2">
-			<a data-toggle="tooltip" title="show more lines" wicket:id="expander"><i class="icon icon-expand"></i></a>
+			<a class="tooltiped" data-toggle="tooltip" title="show more lines" wicket:id="expander"><i class="icon icon-expand"></i></a>
 		</td>
 		<td class="diff-line-code">
 			<pre wicket:id="header">@@ xxx @@ context func</pre>
@@ -13,7 +13,7 @@
 	</tr>
 	<tr class="diff-line hunk-head" wicket:id="belowexpander">
 		<td class="diff-line-num expander" colspan="2">
-			<a data-toggle="tooltip" data-placement="bottom" title="show more lines" wicket:id="expander"><i class="icon icon-expand"></i></a>
+			<a class="tooltiped" data-toggle="tooltip" data-placement="bottom" title="show more lines" wicket:id="expander"><i class="icon icon-expand"></i></a>
 		</td>
 		<td class="diff-line-code"></td>
 	</tr>
@@ -48,11 +48,5 @@
 			<div wicket:id="commentform"></div>
 		</td>
 	</wicket:fragment>
-	
-	<wicket:fragment wicket:id="commentformsubmitsfrag">
-		<button class="btn btn-gray" wicket:id="close">Close form</button>
-		<button class="btn btn-success btn-submit" wicket:id="comment">Comment on this line</button>
-	</wicket:fragment>
-	
 </wicket:panel>
 </html>

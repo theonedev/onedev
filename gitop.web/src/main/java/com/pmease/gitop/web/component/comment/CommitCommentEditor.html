@@ -3,13 +3,16 @@
 	<form class="form-comment" wicket:id="form">
 		<div class="comment-editor-head">
 			<ul class="nav nav-tabs">
-				<li wicket:id="tabli"><a wicket:id="link"><span wicket:id="name"></span></a></li>
+				<li class="active"><a wicket:id="writelink">Write</a></li>
+				<li><a wicket:id="previewlink">Preview</a></li>
 			</ul>
 		</div>
-		<div class="comment-editor-body">
-			<div wicket:id="body"></div>
+		<div class="tab-content comment-editor-body">
+			<div class="tab-pane active" wicket:id="edit"></div>
+			<div class="tab-pane" wicket:id="preview"></div>
+			
+			<div class="form-actions clearfix" wicket:id="actions"></div>
 		</div>
-		<div class="form-actions clearfix" wicket:id="actions"></div>
 	</form>
 	
 	<wicket:fragment wicket:id="editfrag">
@@ -26,6 +29,11 @@
 				<div wicket:id="content"></div>
 			</div>
 		</div>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="submitfrag">
+		<button class="btn btn-default btn-cancel secondary" wicket:id="btnCancel"><span wicket:id="name"></span></button>
+		<button class="btn btn-success btn-submit primary" wicket:id="btnSubmit"><span wicket:id="name"></span></button>
 	</wicket:fragment>
 </wicket:panel>
 </html>
