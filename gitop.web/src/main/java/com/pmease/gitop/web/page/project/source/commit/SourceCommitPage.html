@@ -4,30 +4,25 @@
 		<div class="commit">
 			<div class="commit-head">
 				<p class="title-message" wicket:id="shortmessage"></p>
-				<p class="author-info"><wicket:container wicket:id="author"></wicket:container> authored <span class="age" wicket:id="authorday"></span></p>
-				<wicket:enclosure child="committer">
-					<p class="committer-info">
-						<i class="icon icon-arrow-right"></i> 
-						<wicket:container wicket:id="committer"></wicket:container> 
-						committed <span class="age" wicket:id="committerday"></span>
-					</p>
-				</wicket:enclosure>
+				<wicket:container wicket:id="meta"></wicket:container>
 				
 				<ul class="piped">
 					<li><span class="text-muted">commit</span> <span class="sha" wicket:id="commitsha"></span></li>
-					<li><wicket:container wicket:id="parentslabel"></wicket:container>
-						<wicket:container wicket:id="parents">
-							<span wicket:id="connector">+</span>
-							<a class="sha" wicket:id="link"><span wicket:id="sha"></span></a>
-						</wicket:container>
-					</li>
+					<li><a wicket:id="treelink">Browse Code &rarr;</a></li>
 				</ul>
+				<p>
+					<wicket:container wicket:id="parentslabel"></wicket:container>
+					<wicket:container wicket:id="parents">
+						<span wicket:id="connector">+</span>
+						<a class="sha" wicket:id="link"><span wicket:id="sha"></span></a>
+					</wicket:container>
+				</p>
 				<div class="in-refs">
 					<div wicket:id="branches"></div>
 					<div wicket:id="tags"></div>
 				</div>
 				
-				<wicket:container wicket:id="authoravatar"></wicket:container>
+				<div class="author-avatar" wicket:id="authoravatar"></div>
 			</div>
 			
 			<div class="commit-message">

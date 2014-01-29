@@ -1,0 +1,21 @@
+<html xmlns:wicket>
+<wicket:extend>
+
+	<wicket:fragment wicket:id="tablefrag">
+		<table class="table-diff">
+			<wicket:container wicket:id="hunks">
+				<wicket:container wicket:id="hunk"></wicket:container>
+			</wicket:container>
+		</table>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="actionsfrag">
+		<span class="checkbox inline">
+		    <label>
+		      <input class="trigger-show-inline-comments" type="checkbox" checked> show inline comments
+		    </label>
+		</span>
+	</wicket:fragment>
+	
+</wicket:extend>
+</html>

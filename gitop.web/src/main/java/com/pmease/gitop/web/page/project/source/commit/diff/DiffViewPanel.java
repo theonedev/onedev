@@ -4,7 +4,9 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.apache.tika.mime.MediaType;
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -20,6 +22,8 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.hibernate.criterion.Restrictions;
 import org.parboiled.common.Preconditions;
 
+import com.google.common.base.Strings;
+import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.CommitCommentManager;
 import com.pmease.gitop.model.CommitComment;
@@ -29,8 +33,14 @@ import com.pmease.gitop.web.common.wicket.bootstrap.Alert;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.git.command.DiffTreeCommand;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader;
+import com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader.PatchType;
+import com.pmease.gitop.web.page.project.source.commit.diff.patch.HunkHeader;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.Patch;
-import com.pmease.gitop.web.page.project.source.commit.diff.renderer.BlobDiffPanel;
+import com.pmease.gitop.web.page.project.source.commit.diff.renderer.BlobMessagePanel;
+import com.pmease.gitop.web.page.project.source.commit.diff.renderer.image.ImageDiffPanel;
+import com.pmease.gitop.web.page.project.source.commit.diff.renderer.text.TextDiffPanel;
+import com.pmease.gitop.web.service.FileTypes;
+import com.pmease.gitop.web.util.MediaTypeUtils;
 
 @SuppressWarnings("serial")
 public class DiffViewPanel extends Panel {
@@ -40,6 +50,9 @@ public class DiffViewPanel extends Panel {
 	private final IModel<String> sinceModel;
 	private final IModel<String> untilModel;
 	private final IModel<List<CommitComment>> commentsModel;
+	
+	private IModel<Boolean> showInlineComments = Model.of(true);
+	private IModel<Boolean> enableAddComments = Model.of(true);
 	
 	public DiffViewPanel(String id,
 			IModel<Project> projectModel,
@@ -65,15 +78,19 @@ public class DiffViewPanel extends Panel {
 
 			@Override
 			protected List<CommitComment> load() {
-				CommitCommentManager ccm = Gitop.getInstance(CommitCommentManager.class);
-				return ccm.query(
-							Restrictions.eq("project", getProject()),
-							Restrictions.eq("commit", getUntil()));
+				return loadComments();
 			}
 			
 		};
 	}
 
+	protected List<CommitComment> loadComments() {
+		CommitCommentManager ccm = Gitop.getInstance(CommitCommentManager.class);
+		return ccm.query(
+					Restrictions.eq("project", getProject()),
+					Restrictions.eq("commit", getUntil()));
+	}
+	
 	private Patch loadPatch() {
 		String since = getSince();
 		String until = getUntil();
@@ -157,11 +174,94 @@ public class DiffViewPanel extends Panel {
 			protected void populateItem(ListItem<FileHeader> item) {
 				int index = item.getIndex();
 				item.setMarkupId("diff-" + item.getIndex());
-				item.add(new BlobDiffPanel("file", index, item.getModel(), projectModel, sinceModel, untilModel, commentsModel));
+				item.add(createFileDiffPanel("file", item.getModel(), index));
 			}
 			
 		});
 	}
+	
+	private Component newMessagePanel(String id, int index, IModel<FileHeader> model, IModel<String> messageModel) {
+		return new BlobMessagePanel(id, index, model, projectModel, sinceModel, untilModel, commentsModel, messageModel);
+	}
+	
+	private Component createFileDiffPanel(String id, IModel<FileHeader> model, int index) {
+		FileHeader file = model.getObject();
+		List<? extends HunkHeader> hunks = file.getHunks();
+		
+		if (hunks.isEmpty()) {
+			// hunks is empty when this file is renamed, or the file is binary
+			// or this file is just an empty file
+			//
+			
+			// renamed without change
+			if (file.getChangeType() == ChangeType.RENAME) {
+				return newMessagePanel(id, index, model, Model.of("File renamed without changes")); 
+			}
+			
+			// binary file also including image file, so we need detect the
+			// media type
+			if (file.getPatchType() == PatchType.BINARY) {
+				String path;
+				if (file.getChangeType() == ChangeType.DELETE) {
+					path = file.getOldPath();
+				} else {
+					path = file.getNewPath();
+				}
+				
+				FileTypes types = Gitop.getInstance(FileTypes.class);
+				
+				// fast detect the media type without loading file blob
+				//
+				MediaType mediaType = types.getMediaType(path, new byte[0]);
+				if (MediaTypeUtils.isImageType(mediaType) 
+						&& types.isSafeInline(mediaType)) {
+					return new ImageDiffPanel(id, index, model, projectModel, sinceModel, untilModel, commentsModel);
+				} else {
+					// other binary diffs
+					return newMessagePanel(id, index, model, Model.of("File is a binary file"));
+				}
+			}
+			
+			// file is just an empty file
+			return newMessagePanel(id, index, model, Model.of("File is empty"));
+			
+		} else {
+			// blob is text and we can show diffs
+			
+			if (index > Constants.MAX_RENDERABLE_BLOBS) {
+				// too many renderable blobs
+				// only show diff stats instead of showing the contents
+				//
+				return newMessagePanel(id, index, model, Model.of(
+						file.getDiffStat().getAdditions() + " additions, " 
+						+ file.getDiffStat().getDeletions() + " deletions"));
+			}
+			
+			if (hunks.size() > Constants.MAX_RENDERABLE_DIFF_LINES) {
+				// don't show huge diff (exceed 10000 lines)
+				//
+				String since = sinceModel.getObject();
+				String until = untilModel.getObject();
+				
+				if (Strings.isNullOrEmpty(since)) {
+					since = "";
+				}
+				
+				return newMessagePanel(id, index, model, Model.of(
+						"<p>"
+						+ "The diff for this file is too large to render. "
+						+ "You can run below command to get the diff manually:"
+						+ "</p> "
+						+ "<pre><code>"
+						+ "git diff -C -M " + since + " " + until + " -- " 
+						+ StringUtils.quoteArgument(file.getNewPath())
+						+ "</code></pre>"));
+			}
+		}
+		
+		return new TextDiffPanel(id, index, model, projectModel, sinceModel, untilModel, commentsModel, showInlineComments, enableAddComments);
+	}
+	
 	
 	private final Patch getDiffPatch() {
 		return patchModel.getObject();
@@ -247,6 +347,16 @@ public class DiffViewPanel extends Panel {
 		throw new IllegalArgumentException("change type " + changeType);
 	}
 	
+	public DiffViewPanel showInlineComments(IModel<Boolean> b) {
+		showInlineComments = Preconditions.checkNotNull(b);
+		return this;
+	}
+	
+	public DiffViewPanel enableAddComments(IModel<Boolean> b) {
+		enableAddComments = Preconditions.checkNotNull(b);
+		return this;
+	}
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
@@ -273,6 +383,14 @@ public class DiffViewPanel extends Panel {
 		
 		if (commentsModel != null) {
 			commentsModel.detach();
+		}
+
+		if (showInlineComments != null) {
+			showInlineComments.detach();
+		}
+		
+		if (enableAddComments != null) {
+			enableAddComments.detach();
 		}
 		
 		super.onDetach();

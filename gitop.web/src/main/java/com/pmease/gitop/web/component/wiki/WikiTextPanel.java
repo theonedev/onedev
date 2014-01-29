@@ -7,6 +7,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
@@ -17,6 +18,10 @@ public class WikiTextPanel extends Panel {
 	private static final long serialVersionUID = 1L;
 
 	private final IModel<WikiType> langModel;
+	
+	public WikiTextPanel(String id, IModel<String> model) {
+		this(id, model, Model.of(WikiType.MARKDOWN));
+	}
 	
 	public WikiTextPanel(String id, IModel<String> model, IModel<WikiType> lang) {
 		super(id, model);
@@ -62,7 +67,7 @@ public class WikiTextPanel extends Panel {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(HighlightJsResourceReference.getInstance()));
 		response.render(OnDomReadyHeaderItem.forScript(
-				("$('.wiki pre code').each(function(i, e) { hljs.highlightBlock(e)});")));
+				("$('#" + getMarkupId(true) + " .wiki pre code').each(function(i, e) { hljs.highlightBlock(e)});")));
 
 	}
 	

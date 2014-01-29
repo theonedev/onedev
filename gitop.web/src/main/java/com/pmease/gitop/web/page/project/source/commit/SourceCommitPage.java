@@ -1,6 +1,5 @@
 package com.pmease.gitop.web.page.project.source.commit;
 
-import java.util.Date;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -19,12 +18,11 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 import com.pmease.commons.git.Commit;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
-import com.pmease.gitop.web.component.label.AgeLabel;
+import com.pmease.gitop.web.component.commit.CommitMetaPanel;
 import com.pmease.gitop.web.component.link.GitPersonLink;
 import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
 import com.pmease.gitop.web.git.GitUtils;
@@ -90,45 +88,13 @@ public class SourceCommitPage extends ProjectCategoryPage {
 			}
 		};
 		
-		add(new GitPersonLink("authoravatar", authorModel, Mode.AVATAR_ONLY));
-
-		add(new GitPersonLink("author", authorModel, Mode.NAME_ONLY));
+		add(new BookmarkablePageLink<Void>("treelink",
+				SourceTreePage.class,
+				SourceTreePage.newParams(getProject(), getRevision())));
 		
-		add(new AgeLabel("authorday", new AbstractReadOnlyModel<Date>() {
-
-			@Override
-			public Date getObject() {
-				return getCommit().getAuthor().getDate();
-			}
-		}));
+		add(new GitPersonLink("authoravatar", authorModel, Mode.AVATAR_ONLY).enableTooltip("left"));
 		
-		add(new GitPersonLink("committer", new AbstractReadOnlyModel<GitPerson>() {
-
-			@Override
-			public GitPerson getObject() {
-				Commit commit = getCommit();
-				return GitPerson.of(commit.getCommitter());
-			}
-			
-		}, Mode.NAME_ONLY) {
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				setVisibilityAllowed(!Objects.equal(getCommit().getAuthor(), 
-													getCommit().getCommitter()));
-			}
-		});
-		
-		add(new AgeLabel("committerday", new AbstractReadOnlyModel<Date>() {
-
-			@Override
-			public Date getObject() {
-				return getCommit().getCommitter().getDate();
-			}
-			
-		}));
-		
+		add(new CommitMetaPanel("meta", commitModel));
 		add(new Label("commitsha", new PropertyModel<String>(commitModel, "hash")));
 		
 		IModel<List<String>> parentsModel = new AbstractReadOnlyModel<List<String>>() {

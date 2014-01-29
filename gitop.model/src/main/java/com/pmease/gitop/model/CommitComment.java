@@ -11,6 +11,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.validator.constraints.NotEmpty;
+
+import com.google.common.base.Objects;
 import com.pmease.commons.hibernate.AbstractEntity;
 
 @SuppressWarnings("serial")
@@ -48,8 +51,13 @@ public class CommitComment extends AbstractEntity {
 
 	@Column
 	@Lob
+	@NotEmpty
 	private String content;
 
+	public static String buildLineId(String fileSha, int hunkIndex, int linePos) {
+		return fileSha + "-L" + hunkIndex + "-" + linePos;
+	}
+	
 	public User getAuthor() {
 		return author;
 	}
@@ -104,5 +112,18 @@ public class CommitComment extends AbstractEntity {
 
 	public void setContent(String content) {
 		this.content = content;
+	}
+	
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this)
+				.add("id", getId())
+				.add("project", getProject())
+				.add("commit", commit)
+				.add("line", line)
+				.add("content", content)
+				.add("created", createdDate)
+				.add("updatedDate", updatedDate)
+				.toString();
 	}
 }

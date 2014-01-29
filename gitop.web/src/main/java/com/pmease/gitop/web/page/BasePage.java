@@ -38,7 +38,7 @@ public abstract class BasePage extends WebPage {
 
 	private WebMarkupContainer body;
 	
-	private boolean shouldInitialize = true;
+//	private boolean shouldInitialize = true;
 
 //	protected Modal modal;
 	
@@ -77,7 +77,7 @@ public abstract class BasePage extends WebPage {
 			redirect(ServerInitPage.class);
 		}
 		
-		shouldInitialize = true;
+//		shouldInitialize = true;
 	}
 
 	@Override
@@ -133,51 +133,51 @@ public abstract class BasePage extends WebPage {
 		}
 	}
 
-	public final void onException(RuntimeException e) {
-		shouldInitialize = false;
-		throw e;
-	}
-	
+//	public final void onException(RuntimeException e) {
+//		shouldInitialize = false;
+//		throw e;
+//	}
+//	
 	public final void redirectWithInterception(final Class<? extends Page> clazz) {
-		shouldInitialize = true;
+//		shouldInitialize = true;
 		throw new RestartResponseAtInterceptPageException(clazz);
 	}
 	
 	public final void redirectWithInterception(final Class<? extends Page> clazz, final PageParameters pageParams) {
-		shouldInitialize = true;
+//		shouldInitialize = true;
 		throw new RestartResponseAtInterceptPageException(clazz, pageParams);
 	}
 
 	public final void redirectWithInterception(final Page page) {
-		shouldInitialize = true;
+//		shouldInitialize = true;
 		throw new RestartResponseAtInterceptPageException(page);
 	}
 
 	public final void redirect(final Class<? extends Page> clazz) {
-		shouldInitialize = false;
+//		shouldInitialize = false;
 		throw new RestartResponseException(clazz);
 	}
 
 	public final void redirect(final Class<? extends Page> clazz,
 			PageParameters parameters) {
-		shouldInitialize = false;
+//		shouldInitialize = false;
 		throw new RestartResponseException(clazz, parameters);
 	}
 
 	public final void redirect(final Page page) {
-		shouldInitialize = false;
+//		shouldInitialize = false;
 		throw new RestartResponseException(page);
 	}
 
 	public final void redirect(String url) {
-		shouldInitialize = false;
+//		shouldInitialize = false;
 		throw new RedirectToUrlException(url);
 	}
 	
 	public final void redirectToOriginal() {
-		shouldInitialize = false;
+//		shouldInitialize = false;
 		continueToOriginalDestination();		
-		shouldInitialize = true;
+//		shouldInitialize = true;
 	}
 	
 	protected String getPageCssClass() {
@@ -226,9 +226,9 @@ public abstract class BasePage extends WebPage {
 	protected final void onInitialize() {
 		super.onInitialize();
 
-		if (shouldInitialize) {
+//		if (shouldInitialize) {
 			onPageInitialize();
-		}
+//		}
 	}
 
 	protected String getPageTitle() {

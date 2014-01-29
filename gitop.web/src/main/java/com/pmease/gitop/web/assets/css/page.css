@@ -4,6 +4,8 @@
 pre, code { font-family: Consolas, 'Liberation Mono', Courier, monospace; }
 .alert pre, .alert code { background: white; margin: 5px 0; }
 
+.form-actions { padding: 10px 0; }
+
 /* MENU */
 .menu-ul { list-style: none; margin: 0; padding: 0; }
 .menu-item { display: block; padding: 5px 10px; color: #666; }
@@ -45,9 +47,7 @@ ul.f-dropdown { padding: 0; }
 /**
  * GLOBAL HEADER
  */
-#globalheader .navbar { border-width: 0 0 1px 0; border-color: #ddd; border-radius: 0; margin: 0;
-	background: #f0f2f4; color: white; 
-}
+#globalheader .navbar { border-width: 0 0 1px 0; border-color: #ddd; border-radius: 0; margin: 0; background: #f0f2f4; }
 #globalheader .navbar-brand { padding: 10px 10px 10px 20px; }
 #globalheader .search-form { margin-top: 12px; margin-bottom: 0;}
 .search-form input.text-field {
@@ -65,10 +65,9 @@ ul.f-dropdown { padding: 0; }
 #globalheader .tooltip { white-space: nowrap; }
 #globalheader .navbar-right { margin-right: 20px; }
 #globalheader .user-links { margin: 0; }
-.user-links > li { margin: 0; }
-.user-links > li.separator { height: 50px; border-left: 1px solid #d5d5d5; border-right: 1px solid #fefefe; margin: 0 6px;}
-.user-links a {  padding: 16px 10px 5px; line-height: 20px; }
-.user-links a > i { font-size: 16px; }
+.user-links > li { margin: 0; height: 52px; line-height: 52px; }
+.user-links > li.separator { border-left: 1px solid #d5d5d5; border-right: 1px solid #fefefe; margin: 0 6px;}
+.user-links a {  padding: 0 10px; }
 .user-links a:hover { color: #333; text-decoration: none; }
 .user-links li .caret { border-top-color: #09f; }
 .user-links li a:hover .caret { border-top-color: #333; }
@@ -373,14 +372,20 @@ pre.detailed-message { padding-left: 8px; background: transparent; color: #888; 
 .commitish-list .menu-ul,
 .committer-list.menu-ul { max-height: 400px; padding: 10px 0; overflow: auto; }
 
-table.files { margin: 0; }
-table.files td.file-icon { width: 18px; padding-right: 2px; padding-left: 15px; color: #888; }
+table.table-files { margin: 0; }
+table.table-files td.file-icon { width: 18px; padding-right: 2px; padding-left: 15px; color: #888; }
 
 .commit-meta { color: #999; font-size: 12px; padding: 5px 0; }
 .commit-meta .name, .commit-meta .name a { color: #333; font-weight: normal; }
 .commit-meta .committer-info .icon { font-size: 12px; }
 
-.sha {  font-family: Consolas, 'Liberation Mono', Courier, monospace; }
+.sha, .commitish {  font-family: Consolas, 'Liberation Mono', Courier, monospace; }
+.panel-sourcetree .last-commit { padding: 0 15px; }
+.panel-sourcetree .last-commit .commitish { padding: 5px 0; font-size: 12px; }
+.panel-sourcetree .last-commit .commitish a { color: #999; }
+
+.panel-sourcetree .panel-heading { position: relative; padding-right: 90px; }
+.panel-sourcetree .panel-heading .history-link { position: absolute; right: 15px; top: 10px; z-index: 10; }
 
 /*
  * SOURCE BLOB PAGE
@@ -427,6 +432,8 @@ table.table-blob { width: 100%; }
 .readme > .body { padding: 15px 4px; }
 .readme .plain pre { background: white; border-width: 0; }
 
+.wiki > *:first-child { margin-top: 0; }
+.wiki > *:last-child { margin-bottom: 0; }
 .wiki pre { }
 
 .code-highlight .ace_line { padding-left: 12px; }
@@ -474,14 +481,14 @@ table.table-blob { width: 100%; }
 .commit .commit-head a.sha { border-bottom: 1px dotted #999; }
 .commit .commit-head a.sha:hover { border-bottom: none; }
 
-.commit .commit-head .avatar { width: 64px; height: 64px; position: absolute; right: 0; top: 0; }
-.commit .commit-head .title-message { color: #333; font-size: 16px; font-weight: bold; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
-.commit .author-info, .commit .committer-info { color: #999; margin: 0; }
-.commit .author-info .name,
-.commit .committer-info .name { font-weight: bold; color: #555; }
+.commit .commit-head .author-avatar { position: absolute; right: 0; top: 0; }
+.commit-head .author-avatar .avatar { width: 64px; height: 64px; }
+.commit .commit-head .title-message { color: #333; font-size: 16px; font-weight: bold; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; margin: 0; }
+.commit .author-info .name, .commit .committer-info .name { font-weight: bold; color: #555; }
+
 .commit-head .piped li { border-color: #ddd; }
 
-.commit-head a.inref { margin-right: 6px; color: #555; font-weight: bold;}
+.commit-head .in-refs a { margin-right: 6px; color: #555; font-weight: bold;}
 
 .commit .commit-message { border-bottom: 1px solid #ddd; margin-bottom: 9px; }
 .commit .commit-message .detailed-message { display: block; color: #666; border-width: 0 0 0 1px; background: transparent; border-width: 0; padding: 0; font-size: 14px; }
@@ -513,8 +520,9 @@ a.diffstat:hover { text-decoration: none; }
 .panel-diff .panel-body { padding: 0;  overflow: auto; overflow-x: auto; overflow-y: hidden; }
 .panel-diff .empty-message { padding: 12px; }
 .panel-diff .panel-heading .meta {  }
-.panel-diff .meta .diffstat { margin-right: 6px; line-height: 30px; height: 30px; }
-.panel-diff .meta .path { display: inline-block; overflow: hidden; text-overflow: ellipsis; vertical-align: top; white-space: nowrap; line-height: 30px; height: 30px; }
+.panel-diff .meta .diffstat { margin-right: 6px; line-height: 30px; vertical-align: middle; }
+.panel-diff .meta .path { display: inline-block; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; white-space: nowrap; }
+.panel-diff .panel-heading .actions .checkbox { margin: 0 4px 0 0; padding: 0; }
 
 .panel-diff .alert { margin: 0; border-width: 0; border-radius: 0 0 4px 4px; }
 .panel-diff .alert > p { margin-bottom: 9px; }
@@ -523,11 +531,14 @@ a.diffstat:hover { text-decoration: none; }
 .table-diff { border-collapse: collapse !important; width: 100%; font-family: Consolas, 'Liberation Mono', Courier, monospace; }
 .panel-diff .table-diff { margin: 0; }
 .table-diff td { padding: 0; border: none; white-space: nowrap; font-size: 12px; line-height: 20px; -moz-tab-size: 4; -o-tab-size: 4; tab-size: 4;}
+.table-diff tbody>tr:last-child>td:first-child { border-radius: 0 0 0 3px; }
+.table-diff tbody>tr:last-child>td:last-child { border-radius: 0 0 3px 0; }
+
 .table-diff tbody + tbody { border: none; }
 .diff-line .diff-line-code pre { background: transparent; margin: 0; padding: 0; word-break: normal; word-wrap: normal; border: none; font-size: 12px; line-height: 20px; white-space: pre; }
 .hunk-head .diff-line-code pre { color: #999; }
 
-.diff-line .diff-line-num { text-align: right; border-right: 1px solid #ddd; padding: 0 5px 0 0; width: 70px; color: #999; }
+.diff-line .diff-line-num { text-align: right; border-right: 1px solid #ddd; padding: 0 6px 0 12px; width: 1%; color: #999; vertical-align: top; }
 .diff-line .diff-line-code { padding: 0 10px; }
 .diff-line-num.expander { text-align: center; }
 .diff-line-num.expander a { color: #999; display: block; }
@@ -535,23 +546,44 @@ a.diffstat:hover { text-decoration: none; }
 .diff-line-num.expander a:hover { color: #333; text-decoration: none; }
 .diff-line-num.expander em .icon:before { content: ' '; } /* disabled expander */
 
-tr.diff-line.old {  background: #fdd; }
-tr.diff-line.new { background: #cfc; }
+.table-diff tr.diff-line.old {  background: #fdd; }
+.table-diff tr.diff-line.new { background: #cfc; }
 .diff-line.new .diff-line-num { background: #afa; color: #008f00; }
 .diff-line.old .diff-line-num { background: #faa; color: #8f0000; }
 
 .diff-line:hover .diff-line-code, .diff-line.hunk-head:hover .diff-line-code { background: #fea; } 
 .diff-line:hover .diff-line-num { background: #ffe066; }
 
-
 .diff-line.hunk-head { background: #eef; }
-
 
 .diff-line .add-comment { position: absolute; left: 0px; width: 20px; height: 20px; margin-left: -20px; opacity: 0.0; filter: alpha(opacity=0); z-index: 10; }
 .diff-line:hover .add-comment { opacity:1.0;  filter: alpha(opacity=1); }
 .diff-line .add-comment .icon { line-height: 20px; }
 .diff-line .add-comment:hover { text-decoration: none; }
 
+.table-diff .inline-comment-holder { background: #fffcf5; }
+.table-diff .inline-comment-holder td { border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; }
+.inline-comment-holder td.comment-count { border-right: 1px solid #ddd; text-align: center; vertical-align: top; padding-top: 10px; }
+.inline-comment-holder td.line-comment { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 14px; }
+.form-comment { margin-top: 10px; }
+.form-comment .comment-editor-head { padding: 0; }
+.form-comment .comment-editor-head .nav-tabs { padding-left: 18px; }
+.form-comment .comment-editor-body { background: white; padding: 12px; }
+.form-comment textarea { display: block; width: 100%; resize: vertical; padding: 10px; min-height: 100px; max-height: 500px; border-color: #aaa; }
+.form-comment .form-actions { padding: 0 12px; margin-bottom: 12px; }
+.form-comment .form-actions .primary { float: right; }
+.form-comment .form-actions .secondary { float: left; }
+
+.line-comment p.addnote { padding: 0 12px; }
+
+.inline-comment { padding: 0 12px; margin: 10px 0; }
+.inline-comment .panel-comment { margin: 0; border-color: #ccc; } 
+.panel-comment .panel-heading { padding-top: 5px; padding-bottom: 5px; background: #f1eae0; color: #555; }
+.panel-comment .panel-heading .author a { color: #333; font-weight: bold;}
+.panel-comment .panel-heading .actions a { margin-left: 5px; color: #555; }
+.panel-comment .panel-heading .actions a:hover { color: #09f; text-decoration: none; }
+
+.panel-comment .panel-body .wiki { padding: 8px 12px; }
 
 .panel-diff .image-diff { padding: 30px; text-align: center; position: relative; background: #999; }
 .image-diff .btn-group.compares { margin-bottom: 18px; }

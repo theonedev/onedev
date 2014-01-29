@@ -2,7 +2,6 @@ package com.pmease.gitop.web.page.project.source.commit.diff.renderer;
 
 import java.util.List;
 
-import org.apache.tika.mime.MediaType;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -17,38 +16,31 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffEntry.Side;
 
 import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.pmease.commons.util.StringUtils;
-import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.CommitComment;
 import com.pmease.gitop.model.Project;
-import com.pmease.gitop.web.Constants;
-import com.pmease.gitop.web.common.wicket.bootstrap.Alert;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.page.project.source.blob.SourceBlobPage;
 import com.pmease.gitop.web.page.project.source.commit.diff.DiffStatBar;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader;
-import com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader.PatchType;
-import com.pmease.gitop.web.page.project.source.commit.diff.patch.HunkHeader;
-import com.pmease.gitop.web.page.project.source.commit.diff.renderer.image.ImageBlobDiffPanel;
-import com.pmease.gitop.web.page.project.source.commit.diff.renderer.text.TextDiffTable;
-import com.pmease.gitop.web.service.FileTypes;
-import com.pmease.gitop.web.util.MediaTypeUtils;
 
 @SuppressWarnings("serial")
-public class BlobDiffPanel extends Panel {
+public abstract class BlobDiffPanel extends Panel {
 
-//	private final IModel<Commit> commitModel;
-	private final IModel<Project> projectModel;
-	private final IModel<String> sinceModel;
-	private final IModel<String> untilModel;
-	private final IModel<List<CommitComment>> commentsModel;
+	protected final IModel<Project> projectModel;
+	protected final IModel<String> sinceModel;
+	protected final IModel<String> untilModel;
+	protected final IModel<List<CommitComment>> commentsModel;
 	
-	private final int index;
+	protected final int index;
+	
+	abstract protected Component createActionsBar(String id);
+	abstract protected Component createDiffContent(String id);
+	
+	protected final String markupId;
 	
 	public BlobDiffPanel(String id,
-			int index,
+			final int index,
 			IModel<FileHeader> fileModel,
 			IModel<Project> projectModel,
 			IModel<String> sinceModel,
@@ -57,11 +49,11 @@ public class BlobDiffPanel extends Panel {
 		super(id, fileModel);
 	
 		this.index = index;
+		this.markupId = "diff-" + index;
 		this.projectModel = projectModel;
 		this.sinceModel = sinceModel;
 		this.untilModel = untilModel;
 		this.commentsModel = commentsModel;
-//		this.commitModel = commitModel;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -81,36 +73,6 @@ public class BlobDiffPanel extends Panel {
 		}));
 		
 		statspan.add(new DiffStatBar("stat", (IModel<FileHeader>) getDefaultModel()));
-//		statspan.add(new Label("additions", new AbstractReadOnlyModel<String>() {
-//				@Override
-//				public String getObject() {
-//					int additions = getFile().getDiffStat().getAdditions(); 
-//					return additions > 0 ? "+" + additions : "-";
-//				} 
-//			}));
-//		statspan.add(new Label("deletions", new AbstractReadOnlyModel<String>() {
-//
-//			@Override
-//			public String getObject() {
-//				int deletions = getFile().getDiffStat().getDeletions(); 
-//				return deletions > 0 ? "-" + deletions : "-";
-//			}
-//		}));
-		
-//		add(new Label("oldpath", new AbstractReadOnlyModel<String>() {
-//
-//			@Override
-//			public String getObject() {
-//				return getFile().getPath(Side.OLD);
-//			}
-//		}) {
-//			@Override
-//			protected void onConfigure() {
-//				super.onConfigure();
-//				
-//				this.setVisibilityAllowed(getFile().getChangeType() == ChangeType.RENAME);
-//			}
-//		});
 		
 		add(new Label("path", new AbstractReadOnlyModel<String>() {
 
@@ -142,9 +104,11 @@ public class BlobDiffPanel extends Panel {
 		add(blobLink);
 		blobLink.add(new Label("sha", Model.of(GitUtils.abbreviateSHA(until, 6))));
 		
-		add(createContent("diffcontent"));
+		add(createActionsBar("actions"));
+		add(createDiffContent("diffcontent"));
 	}
 
+	/*
 	private Component createContent(String id) {
 		FileHeader file = getFile();
 		List<? extends HunkHeader> hunks = file.getHunks();
@@ -228,7 +192,6 @@ public class BlobDiffPanel extends Panel {
 				}).withHtmlMessage(true);
 			}
 			
-			return new TextDiffTable(id, getFileModel(), projectModel, sinceModel, untilModel, commentsModel);
 		}
 	}
 	
@@ -237,14 +200,27 @@ public class BlobDiffPanel extends Panel {
 		alert.type(Alert.Type.Warning).setCloseButtonVisible(false);
 		return alert;
 	}
+	*/
 	
-	private FileHeader getFile() {
+	protected FileHeader getFile() {
 		return (FileHeader) getDefaultModelObject();	
 	}
 	
 	@SuppressWarnings("unchecked")
-	private IModel<FileHeader> getFileModel() {
+	protected IModel<FileHeader> getFileModel() {
 		return (IModel<FileHeader>) getDefaultModel();
+	}
+	
+	protected String getSince() {
+		return sinceModel.getObject();
+	}
+	
+	protected String getUntil() {
+		return untilModel.getObject();
+	}
+	
+	protected Project getProject() {
+		return projectModel.getObject();
 	}
 	
 	@Override
@@ -264,7 +240,7 @@ public class BlobDiffPanel extends Panel {
 		if (commentsModel != null) {
 			commentsModel.detach();
 		}
-		
+
 		super.onDetach();
 	}
 }

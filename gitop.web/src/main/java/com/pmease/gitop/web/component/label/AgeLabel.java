@@ -21,6 +21,15 @@ public class AgeLabel extends Label {
 		super.onComponentTag(tag);
 		tag.put("title", DateUtils.format(getDate(), Constants.DATETIME_FORMAT));
 		tag.put("data-toggle", "tooltip");
+		String classes = tag.getAttribute("class");
+		if (classes == null) {
+			classes = "";
+		}
+		if (!classes.contains("age")) {
+			classes += " age";
+		}
+		
+		tag.put("class", classes);
 	}
 	
 	private Date getDate() {

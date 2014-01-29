@@ -32,6 +32,7 @@ import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.source.blob.SourceBlobPage;
 import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
+import com.pmease.gitop.web.page.project.source.commits.CommitsPage;
 import com.pmease.gitop.web.page.project.source.component.AbstractSourcePagePanel;
 
 @SuppressWarnings("serial")
@@ -73,6 +74,12 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 		add(new CommitMessagePanel("message", lastCommitModel, projectModel));
 		add(new CommitMetaPanel("meta", lastCommitModel));
 		
+		BookmarkablePageLink<Void> historyLink = new BookmarkablePageLink<Void>(
+				"history",
+				CommitsPage.class,
+				CommitsPage.newParams(getProject(), getRevision(), 0));
+		
+		add(historyLink);
 		BookmarkablePageLink<Void> commitLink = new BookmarkablePageLink<Void>(
 				"commitlink",
 				SourceCommitPage.class,
