@@ -307,13 +307,13 @@ public class RequestListPanel extends Panel {
 			public Iterator<? extends PullRequest> iterator(long first, long count) {
 				AbstractProjectPage page = (AbstractProjectPage) getPage();
 				return (Iterator<? extends PullRequest>) Gitop.getInstance(GeneralDao.class).query(
-						displayOption.getCriteria(page.getProject()), (int)first, (int)count).iterator();
+						displayOption.getCriteria(page.getProject(), true), (int)first, (int)count).iterator();
 			}
 
 			@Override
 			public long size() {
 				AbstractProjectPage page = (AbstractProjectPage) getPage();
-				return Gitop.getInstance(GeneralDao.class).count(displayOption.getCriteria(page.getProject()));
+				return Gitop.getInstance(GeneralDao.class).count(displayOption.getCriteria(page.getProject(), false));
 			}
 
 			@Override
