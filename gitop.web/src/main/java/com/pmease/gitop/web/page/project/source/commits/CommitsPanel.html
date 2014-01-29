@@ -16,7 +16,10 @@
 							<wicket:container wicket:id="meta"></wicket:container>
 						</td>
 						<td class="td-commitish">
-							<a class="sha" wicket:id="shalink"><span class="" wicket:id="sha"></span> &rarr;</a>
+							<a class="sha btn btn-default btn-xs btn-sha" wicket:id="shalink">
+								<wicket:enclosure>
+								<span class="comments-stat"><i class="icon icon-comment"></i><b wicket:id="commentsCount"></b></span></wicket:enclosure><span wicket:id="sha"></span> &rarr;
+							</a> <br/>
 							<a class="sha" wicket:id="treelink">Browse code &raquo;</a>
 						</td>
 					</tr>

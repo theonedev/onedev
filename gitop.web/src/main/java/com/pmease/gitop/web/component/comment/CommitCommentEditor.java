@@ -46,10 +46,14 @@ public abstract class CommitCommentEditor extends Panel {
 	public CommitCommentEditor(String id, IModel<String> textModel) {
 		super(id, textModel);
 		
-		form = new BaseForm<Void>("form");
+		form = createForm("form");
 		add(form);
 	}
 
+	protected Form<?> createForm(String id) {
+		return new BaseForm<Void>(id);
+	}
+	
 	private WebMarkupContainer previewPanel;
 	
 	@Override
@@ -121,6 +125,12 @@ public abstract class CommitCommentEditor extends Panel {
 		
 		cancelBtn.add(new Label("name", getCancelButtonLabel()));
 		return cancelBtn;
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected void clearInput() {
+		IModel<String> model = (IModel<String>) getDefaultModel();
+		model.setObject("");
 	}
 	
 	protected Component createSubmitButton(String id, Form<?> form) {

@@ -112,7 +112,7 @@ public class GitPersonLink extends Panel {
 			throw new IllegalStateException();
 		}
 		
-		c.add(AttributeModifier.append("class", "tooltiped"));
+		c.add(AttributeModifier.append("class", "has-tip"));
 		if (!Strings.isNullOrEmpty(tooltipPosition)) {
 			c.add(AttributeModifier.replace("data-placement", tooltipPosition));
 		}

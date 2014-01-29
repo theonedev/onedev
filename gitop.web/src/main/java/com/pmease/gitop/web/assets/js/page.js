@@ -167,7 +167,7 @@ var gitop = {
 
 $(document).ready(function() {
 	$('#globalheader a').tooltip({placement: 'bottom'});
-	$('#main .tooltiped').tooltip();
+	$('#main .has-tip').tooltip();
 	
 	$(window).on("beforeunload", function() {
 		$(":focus").trigger("blur");

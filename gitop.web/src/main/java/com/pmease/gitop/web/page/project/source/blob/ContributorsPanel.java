@@ -116,6 +116,6 @@ public class ContributorsPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(OnDomReadyHeaderItem.forScript(JQuery.$(this, ".tooltiped").chain("tooltip").get()));
+		response.render(OnDomReadyHeaderItem.forScript(JQuery.$(this, ".has-tip").chain("tooltip").get()));
 	}
 }

@@ -38,7 +38,12 @@ import com.pmease.gitop.web.Constants;
 import com.pmease.gitop.web.GitopSession;
 import com.pmease.gitop.web.component.comment.CommitCommentEditor;
 import com.pmease.gitop.web.component.comment.CommitCommentPanel;
-import com.pmease.gitop.web.component.comment.CommitCommentRemoved;
+import com.pmease.gitop.web.component.comment.event.AbstractLineCommentEvent;
+import com.pmease.gitop.web.component.comment.event.CloseLineCommentForm;
+import com.pmease.gitop.web.component.comment.event.CommitCommentAdded;
+import com.pmease.gitop.web.component.comment.event.CommitCommentEvent;
+import com.pmease.gitop.web.component.comment.event.CommitCommentRemoved;
+import com.pmease.gitop.web.component.comment.event.OpenLineCommentForm;
 import com.pmease.gitop.web.model.CommitCommentModel;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.HunkHeader;
@@ -204,7 +209,7 @@ public class HunkPanel extends Panel {
 		target.add(expander);
 		
 		String aboveMarkupId = expander.getMarkupId();
-		target.appendJavaScript("$('#" + aboveMarkupId + " .tooltiped').tooltip();");
+		target.appendJavaScript("$('#" + aboveMarkupId + " .has-tip').tooltip();");
 
 		HunkHeader hunk = getCurrentHunk();
 		List<String> blobLines = blobLinesModel.getObject();
@@ -257,8 +262,8 @@ public class HunkPanel extends Panel {
 	
 	@Override
 	public void onEvent(IEvent<?> event) {
-		if (event.getPayload() instanceof AddInlineCommentEvent) {
-			AddInlineCommentEvent e = (AddInlineCommentEvent) event.getPayload();
+		if (event.getPayload() instanceof OpenLineCommentForm) {
+			OpenLineCommentForm e = (OpenLineCommentForm) event.getPayload();
 			int position = e.getPosition();
 			CommentRow commentRow = findCommentRow(position);
 
@@ -351,7 +356,7 @@ public class HunkPanel extends Panel {
 		return new CommitCommentEditor("commentform") {
 			@Override
 			protected void onCancel(AjaxRequestTarget target, Form<?> form) {
-				send(HunkPanel.this, Broadcast.DEPTH, new CloseInlineCommentEvent(target, position, getLineId(position)));
+				send(HunkPanel.this, Broadcast.DEPTH, new CloseLineCommentForm(target, position, getLineId(position)));
 			}
 
 			@Override
@@ -365,7 +370,7 @@ public class HunkPanel extends Panel {
 				comment.setContent(getCommentText());
 				Gitop.getInstance(CommitCommentManager.class).save(comment);
 				
-				send(getPage(), Broadcast.DEPTH, new InlineCommentAddedEvent(target, position, lineId, comment.getId()));				
+				send(getPage(), Broadcast.DEPTH, new CommitCommentAdded(target, comment));				
 			}
 			
 			@Override
@@ -427,7 +432,7 @@ public class HunkPanel extends Panel {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						send(HunkPanel.this, Broadcast.BREADTH, new AddInlineCommentEvent(target, position, getLineId(position)));
+						send(HunkPanel.this, Broadcast.BREADTH, new OpenLineCommentForm(target, position, getLineId(position)));
 					}
 				});
 			}
@@ -495,7 +500,7 @@ public class HunkPanel extends Panel {
 				protected void populateItem(LoopItem item) {
 					int index = item.getIndex();
 					CommitComment comment = getComment(index);
-					item.add(new CommitCommentPanel("comment", new CommitCommentModel(comment)));
+					item.add(new CommitCommentPanel("comment", projectModel, new CommitCommentModel(comment)));
 				}
 			};
 			
@@ -519,7 +524,7 @@ public class HunkPanel extends Panel {
 			Component result = new AjaxLink<Integer>("btnadd") {
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					send(HunkPanel.this, Broadcast.BREADTH, new AddInlineCommentEvent(target, position, getLineId(position)));
+					send(HunkPanel.this, Broadcast.BREADTH, new OpenLineCommentForm(target, position, getLineId(position)));
 				}
 			};
 
@@ -558,7 +563,7 @@ public class HunkPanel extends Panel {
 			target.add(noteBtn);
 		}
 		
-		private void onCloseComment(CloseInlineCommentEvent e) {
+		private void onCloseComment(CloseLineCommentForm e) {
 			List<Long> ids = getCommentIds();
 			if (ids.isEmpty()) {
 				// remove the whole row
@@ -575,7 +580,7 @@ public class HunkPanel extends Panel {
 			}
 		}
 		
-		private void onAddComment(AddInlineCommentEvent e) {
+		private void onAddComment(OpenLineCommentForm e) {
 			// show this row first in case all comment rows are hidden
 			e.getTarget().prependJavaScript("$('#" + getParent().getMarkupId(true) + "').show()");
 			
@@ -591,7 +596,7 @@ public class HunkPanel extends Panel {
 			updateAddNoteButton(e.getTarget());
 		}
 		
-		private void onCommentAdded(InlineCommentAddedEvent e) {
+		private void onCommentAdded(CommitCommentAdded e) {
 			e.getTarget().add(get("count"));
 			commentForm = newEmptyForm();
 			addOrReplace(commentForm);
@@ -619,31 +624,37 @@ public class HunkPanel extends Panel {
 		
 		@Override
 		public void onEvent(IEvent<?> sink) {
-			if (sink.getPayload() instanceof InlineCommentEvent) {
-				InlineCommentEvent e = (InlineCommentEvent) sink.getPayload();
+			if (sink.getPayload() instanceof AbstractLineCommentEvent) {
+				AbstractLineCommentEvent e = (AbstractLineCommentEvent) sink.getPayload();
 				if (e.getPosition() != position) {
 					return;
 				}
 				
-				if (e instanceof CloseInlineCommentEvent) {
-					onCloseComment((CloseInlineCommentEvent) e);
+				if (e instanceof CloseLineCommentForm) {
+					onCloseComment((CloseLineCommentForm) e);
 					
-				} else if (e instanceof AddInlineCommentEvent) {
-					onAddComment((AddInlineCommentEvent) e);
-					
-				} else if (e instanceof InlineCommentAddedEvent) {
-					onCommentAdded((InlineCommentAddedEvent) e);
+				} else if (e instanceof OpenLineCommentForm) {
+					onAddComment((OpenLineCommentForm) e);
 					
 				}
 				
-			} else if (sink.getPayload() instanceof CommitCommentRemoved) {
-				CommitCommentRemoved ccr = (CommitCommentRemoved) sink.getPayload();
-				if (!Objects.equal(getLineId(position), ccr.getCommitComment().getLine())) {
+			} else if (sink.getPayload() instanceof CommitCommentEvent) {
+				CommitCommentEvent e = (CommitCommentEvent) sink.getPayload();
+				if (!e.getComment().isLineComment()) {
 					return;
 				}
 				
-				onCommentRemoved(ccr);
+				if (!Objects.equal(getLineId(position), e.getComment().getLine())) {
+					return;
+				}
+				
+				if (e instanceof CommitCommentAdded) {
+					onCommentAdded((CommitCommentAdded) e);
+				} else if (e instanceof CommitCommentRemoved) {
+					onCommentRemoved((CommitCommentRemoved) e);
+				}
 			}
+			
 		}
 	}
 	

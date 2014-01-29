@@ -15,11 +15,11 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
-import com.google.common.base.Strings;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.CommitComment;
 import com.pmease.gitop.model.Project;
-import com.pmease.gitop.web.component.comment.CommitCommentRemoved;
+import com.pmease.gitop.web.component.comment.event.CommitCommentAdded;
+import com.pmease.gitop.web.component.comment.event.CommitCommentRemoved;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.HunkHeader;
@@ -91,7 +91,7 @@ public class TextDiffPanel extends BlobDiffPanel {
 		List<CommitComment> comments = commentsModel.getObject();
 		String fileId = getFileId(getFile());
 		for (CommitComment each : comments) {
-			if (each.getLine().startsWith(fileId)) {
+			if (each.isLineComment() && each.getLine().startsWith(fileId)) {
 				return true;
 			}
 		}
@@ -131,17 +131,19 @@ public class TextDiffPanel extends BlobDiffPanel {
 
 	@Override
 	public void onEvent(IEvent<?> sink) {
-		if (sink.getPayload() instanceof InlineCommentAddedEvent) {
-			InlineCommentAddedEvent e = (InlineCommentAddedEvent) sink.getPayload();
-			String lineId = e.getLineId();
-			if (!Strings.isNullOrEmpty(lineId) && lineId.startsWith(getFileId(getFile()))) {
+		if (sink.getPayload() instanceof CommitCommentAdded) {
+			CommitCommentAdded e = (CommitCommentAdded) sink.getPayload();
+			
+			// inline comment added, enable view inline comments checkbox
+			//
+			if (e.getComment().isLineComment() && e.getComment().getLine().startsWith(getFileId(getFile()))) {
 				addOrReplace(createActionsBar("actions"));
 				e.getTarget().add(actionsBar);
 			}
+			
 		} else if (sink.getPayload() instanceof CommitCommentRemoved) {
 			CommitCommentRemoved e = (CommitCommentRemoved) sink.getPayload();
-			String lineId = e.getCommitComment().getLine();
-			if (!Strings.isNullOrEmpty(lineId) && lineId.startsWith(getFileId(getFile()))) {
+			if (!hasInlineComments()) {
 				addOrReplace(createActionsBar("actions"));
 				e.getTarget().add(actionsBar);
 			}

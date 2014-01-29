@@ -45,12 +45,13 @@ public class BlendPanel extends AbstractImageDiffPanel {
 					until,
 					file.getNewPath()));
 		}
+		
+		add(new WebMarkupContainer("slider").setOutputMarkupId(true));
 	}
 	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		
 		
 		response.render(OnDomReadyHeaderItem.forScript(getInitScript()));
 	}
@@ -58,14 +59,16 @@ public class BlendPanel extends AbstractImageDiffPanel {
 	private String getInitScript() {
 		String containerId = "#" + getMarkupId(true);
 		String oldImageId = containerId + " .oldimg";
-		String newImageId = containerId + " .oldimg";
+		String newImageId = containerId + " .newimg";
 		String imageWrapper = containerId + " .blend-view";
 		
-		String func = String.format(
-				"$('%s .slider input').on('change', function() {\n"
-						+ "$('%s').css('opacity', $(this).val());});",
-				containerId, newImageId);
+		String sliderId = get("slider").getMarkupId();
 		
+		String func = String.format(
+				"$('#%s').on('change', function() {\n"
+						+ "$('%s').css('opacity', $(this).val() / 100);});",
+				sliderId, newImageId);
+
 		String str =
 				String.format(
 					"gitop.utils.onImageLoad('%s', function() {\n"
@@ -75,7 +78,9 @@ public class BlendPanel extends AbstractImageDiffPanel {
 							+ "}); \n});",
 					oldImageId,
 					newImageId,
-					imageWrapper, oldImageId, newImageId,
+					imageWrapper, 
+					oldImageId, 
+					newImageId,
 					func);
 		return str;
 	}

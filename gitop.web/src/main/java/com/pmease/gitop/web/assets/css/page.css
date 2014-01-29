@@ -450,7 +450,8 @@ table.table-blob { width: 100%; }
 .table-commits .td-name { width: 120px; }
 .table-commits .td-name .name { width: 120px; overflow: hidden; white-space: nowrap; }
 .table-commits .td-commitish { text-align: right; white-space: nowrap; }
-.table-commits .td-commitish a { display: block; }
+.table-commits .td-commitish .btn-sha { color: #999; }
+.table-commits .td-commitish .btn-sha .comments-stat { display: inline-block; margin-right: 5px; padding-right: 5px; border-right: 1px solid #ddd; }
 .table-commits .td-message a { color: #333; }
 .panel-commit .panel-body .table-commits > tbody > tr:first-child > td { border-top: none; }
 .panel-commit .panel-body .table-commits > tbody > tr:last-child > td:first-child { border-radius: 0 0 0 3px; }
@@ -561,15 +562,17 @@ a.diffstat:hover { text-decoration: none; }
 .diff-line .add-comment .icon { line-height: 20px; }
 .diff-line .add-comment:hover { text-decoration: none; }
 
-.table-diff .inline-comment-holder { background: #fffcf5; }
+.table-diff .inline-comment-holder { background: #fff; }
 .table-diff .inline-comment-holder td { border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; }
-.inline-comment-holder td.comment-count { border-right: 1px solid #ddd; text-align: center; vertical-align: top; padding-top: 10px; }
+.inline-comment-holder td.comment-count { border-right: 1px solid #ddd; text-align: center; vertical-align: top; padding-top: 10px; padding-right: 10px; }
 .inline-comment-holder td.line-comment { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 14px; }
-.form-comment { margin-top: 10px; }
+
+.form-comment { margin-top: 10px;  }
 .form-comment .comment-editor-head { padding: 0; }
 .form-comment .comment-editor-head .nav-tabs { padding-left: 18px; }
 .form-comment .comment-editor-body { background: white; padding: 12px; }
 .form-comment textarea { display: block; width: 100%; resize: vertical; padding: 10px; min-height: 100px; max-height: 500px; border-color: #aaa; }
+.form-comment>.tab-content { border-radius: 0 0 3px 3px; }
 .form-comment .form-actions { padding: 0; margin-top: 12px; }
 .form-comment .form-actions .primary { float: right; }
 .form-comment .form-actions .secondary { float: left; }
@@ -578,9 +581,11 @@ a.diffstat:hover { text-decoration: none; }
 
 .inline-comment { padding: 0 12px; margin: 10px 0; }
 .inline-comment .panel-comment { margin: 0; border-color: #ccc; } 
-.panel-comment .panel-heading { padding-top: 5px; padding-bottom: 5px; background: #f1eae0; color: #555; }
+.panel-comment .panel-heading { padding-top: 5px; padding-bottom: 5px; background: #f5f5f5; color: #888; }
+.panel-comment .panel-heading a.sha { color: #888; border-bottom: 1px dotted #888; }
+.panel-comment .panel-heading a.sha:hover { border-bottom: none; color: #09f; }
 .panel-comment .panel-heading .author a { color: #333; font-weight: bold;}
-.panel-comment .panel-heading .actions a { margin-left: 5px; color: #555; }
+.panel-comment .panel-heading .actions a { margin-left: 5px; color: #999; }
 .panel-comment .panel-heading .actions a:hover { color: #09f; text-decoration: none; }
 
 .panel-comment .panel-body .wiki { padding: 8px 12px; }
@@ -610,6 +615,17 @@ a.diffstat:hover { text-decoration: none; }
 .panel-diff .slider b.new { color: #0f0; }
 
 .panel-diff .swipe-view.twentytwenty-container { margin: 0 auto; }
+
+.comment-list .panel-comment { margin: 0; }
+.comment-list .comment-holder { margin: 0 0 18px; }
+.comment-list .comment-author .avatar { width: 48px; height: 48px; }
+.comment-list .panel-comment .panel-body .wiki { padding: 0; }
+
+.comment-list-header { margin: 18px 0; }
+.comment-list-header h2 { margin: 0; font-size: 16px; }
+.comment-list-header h2 small { font-size: 14px; }
+.comment-list-header .checkbox { margin: 0; }
+.comment-list .form-comment { background: #f7f7f7; border: 1px solid #ddd; border-radius: 4px; padding-top: 8px; margin: 0; }
 
 /**
  * GATE KEEPER SETTING PAGE

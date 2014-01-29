@@ -27,8 +27,8 @@ public class AgeLabel extends Label {
 		if (!classes.contains("age")) {
 			classes += " age";
 		}
-		if (!classes.contains("tooltiped")) {
-			classes += " tooltiped";
+		if (!classes.contains("has-tip")) {
+			classes += " has-tip";
 		}
 		
 		tag.put("class", classes);

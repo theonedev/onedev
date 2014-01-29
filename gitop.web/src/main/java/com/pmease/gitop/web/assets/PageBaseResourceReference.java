@@ -25,13 +25,14 @@ public class PageBaseResourceReference extends JavaScriptResourceReference {
 						new PriorityHeaderItem(CommonHeaderItem.get()),
 						new PriorityHeaderItem(CssHeaderItem.forReference(AssetLocator.ICONS_CSS)),
 						new PriorityHeaderItem(CssHeaderItem.forReference(AssetLocator.BASE_CSS)),
+						JavaScriptHeaderItem.forReference(AssetLocator.ARE_YOU_SURE_JS),
 						CssHeaderItem.forReference(AssetLocator.PAGE_CSS)));
 	}
 	
 	public static final PageBaseResourceReference instance =
 			new PageBaseResourceReference();
 	
-	public static PageBaseResourceReference getInstance() {
+	public static PageBaseResourceReference instance() {
 		return instance;
 	}
 }

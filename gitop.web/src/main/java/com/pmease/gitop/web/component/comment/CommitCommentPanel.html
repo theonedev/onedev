@@ -2,21 +2,24 @@
 <wicket:panel>
 	<div class="panel panel-default panel-comment">
 		<div class="panel-heading">
-			<div class="clearfix">
-				<div class="left">
-					<span class="author" wicket:id="author"></span>
-					<span class="label " wicket:id="authorType"></span>
-				</div>
-				<div class="right actions">
-					<span wicket:id="age"></span>
-					<a wicket:id="editlink"><i class="icon icon-pencil"></i></a>
-					<a wicket:id="removelink"><i class="icon icon-delete"></i></a>
-				</div>
-			</div>
+			<wicket:container wicket:id="head"></wicket:container>
 		</div>
 		<div class="panel-body">
 			<div wicket:id="content"></div>
 		</div>
 	</div>
+	
+	<wicket:fragment wicket:id="headfrag">
+		<div class="clearfix">
+			<div class="left">
+				<span class="author" wicket:id="author"></span>
+			</div>
+			<div class="right actions">
+				<span wicket:id="age"></span>
+				<a wicket:id="editlink"><i class="icon icon-pencil"></i></a>
+				<a wicket:id="removelink"><i class="icon icon-delete"></i></a>
+			</div>
+		</div>
+	</wicket:fragment>
 </wicket:panel>
 </html>
