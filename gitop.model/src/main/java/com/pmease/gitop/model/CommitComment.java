@@ -14,6 +14,7 @@ import javax.persistence.TemporalType;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Strings;
 import com.pmease.commons.hibernate.AbstractEntity;
 
 @SuppressWarnings("serial")
@@ -56,6 +57,10 @@ public class CommitComment extends AbstractEntity {
 
 	public static String buildLineId(String fileSha, int hunkIndex, int linePos) {
 		return fileSha + "-L" + hunkIndex + "-" + linePos;
+	}
+	
+	public boolean isLineComment() {
+		return !Strings.isNullOrEmpty(getLine());
 	}
 	
 	public User getAuthor() {

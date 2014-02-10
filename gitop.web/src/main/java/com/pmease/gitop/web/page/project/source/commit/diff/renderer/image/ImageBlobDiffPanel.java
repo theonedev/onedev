@@ -32,8 +32,8 @@ public class ImageBlobDiffPanel extends AbstractImageDiffPanel {
 	static enum CompareType {
 		SIDE_BY_SIDE("Side by side"),
 		SWIPE("Swipe"),
-		BLEND("Blend"),
-		SPLIT("Split");
+		BLEND("Blend");
+//		DIFFERENCE("Difference");
 		
 		final String displayName;
 		CompareType(String displayName) {
@@ -102,7 +102,7 @@ public class ImageBlobDiffPanel extends AbstractImageDiffPanel {
 			return new BlendPanel("image", fileModel, projectModel, sinceModel, untilModel);
 			
 		default:
-			return new Label("image", "Compare type " + compareType);
+			return new WebMarkupContainer("image").setVisibilityAllowed(false);
 		}
 	}
 	

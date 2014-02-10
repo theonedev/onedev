@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.EnclosureContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -16,15 +17,13 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.google.common.collect.Lists;
-import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitop.web.component.link.GitPersonLink;
 import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
 import com.pmease.gitop.web.page.project.api.GitPerson;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
+import de.agilecoders.wicket.jquery.JQuery;
 
 @SuppressWarnings("serial")
 public class ContributorsPanel extends Panel {
@@ -106,10 +105,6 @@ public class ContributorsPanel extends Panel {
 		moreContainer.add(dropdownPanel);
 		
 		add(moreContainer);
-		
-		add(new TooltipBehavior(new TooltipConfig()
-					.withPlacement(Placement.top)
-					.withSelector("[data-toggle=\"tooltip\"]")));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -120,5 +115,7 @@ public class ContributorsPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
+		
+		response.render(OnDomReadyHeaderItem.forScript(JQuery.$(this, ".has-tip").chain("tooltip").get()));
 	}
 }

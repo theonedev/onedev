@@ -157,9 +157,17 @@ public class DiffViewPanel extends Panel {
 		super.onInitialize();
 		
 		add(createAlert("largecommitwarning"));
-		
 		createDiffToc();
+		add(createFileList("filelist"));
 		
+		add(createCommentsPanel("comments"));
+	}
+	
+	protected Component createCommentsPanel(String id) {
+		return new CommentListPanel(id, projectModel, untilModel, commentsModel);
+	}
+	
+	protected Component createFileList(String id) {
 		IModel<List<? extends FileHeader>> model = new LoadableDetachableModel<List<? extends FileHeader>>() {
 
 			@Override
@@ -168,7 +176,7 @@ public class DiffViewPanel extends Panel {
 			}
 		};
 		
-		add(new ListView<FileHeader>("filelist", model) {
+		return new ListView<FileHeader>(id, model) {
 
 			@Override
 			protected void populateItem(ListItem<FileHeader> item) {
@@ -177,14 +185,14 @@ public class DiffViewPanel extends Panel {
 				item.add(createFileDiffPanel("file", item.getModel(), index));
 			}
 			
-		});
+		};
 	}
 	
 	private Component newMessagePanel(String id, int index, IModel<FileHeader> model, IModel<String> messageModel) {
 		return new BlobMessagePanel(id, index, model, projectModel, sinceModel, untilModel, commentsModel, messageModel);
 	}
 	
-	private Component createFileDiffPanel(String id, IModel<FileHeader> model, int index) {
+	protected Component createFileDiffPanel(String id, IModel<FileHeader> model, int index) {
 		FileHeader file = model.getObject();
 		List<? extends HunkHeader> hunks = file.getHunks();
 		

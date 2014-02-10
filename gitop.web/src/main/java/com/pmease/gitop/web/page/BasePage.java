@@ -243,7 +243,7 @@ public abstract class BasePage extends WebPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(PageBaseResourceReference.getInstance()));
+		response.render(JavaScriptHeaderItem.forReference(PageBaseResourceReference.instance()));
 	}
 
 //	public Modal getModal() {

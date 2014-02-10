@@ -1,7 +1,7 @@
 <html xmlns:wicket>
 <wicket:panel>
 	<div class="file-navigator">
-		<a class="btn btn-success" data-toggle="tooltip" title="compare and review"><i class="icon icon-git-branch-compare"></i></a>
+		<a class="btn btn-success has-tip" data-toggle="tooltip" title="compare and review"><i class="icon icon-git-branch-compare"></i></a>
 		<wicket:container wicket:id="revselector"></wicket:container>
 		<ol class="breadcrumb inline breadcrumb-paths">
 			<li>
@@ -9,7 +9,7 @@
 			</li>
 			<li wicket:id="paths"><a wicket:id="link"><span wicket:id="name"></span></a></li>
 			<li>
-				<a data-toggle="tooltip" title="Fork this repository and add a new file"><i class="icon icon-file-add"></i></a>
+				<a class="has-tip" data-toggle="tooltip" title="Fork this repository and add a new file"><i class="icon icon-file-add"></i></a>
 			</li>
 		</ol>
 	</div>

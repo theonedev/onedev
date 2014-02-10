@@ -21,7 +21,7 @@
 						</wicket:enclosure>
 						<span wicket:id="path"></span>
 					</a>
-					<a class="diffstat" wicket:id="statlink" data-toggle="tooltip" data-placement="left">
+					<a class="diffstat has-tip" wicket:id="statlink" data-toggle="tooltip" data-placement="left">
 						<wicket:container wicket:id="statbar"></wicket:container>
 					</a>
 				</li>
@@ -34,5 +34,8 @@
 	<div class="panel panel-default panel-diff" wicket:id="filelist">
 		<wicket:container wicket:id="file"></wicket:container>
 	</div>
+	
+	<div wicket:id="comments"></div>
+	
 </wicket:panel>
 </html>

@@ -19,6 +19,8 @@ public class WikiTextPanel extends Panel {
 
 	private final IModel<WikiType> langModel;
 	
+	private final IModel<Boolean> enableHighlightJs = Model.of(true);
+	
 	public WikiTextPanel(String id, IModel<String> model) {
 		this(id, model, Model.of(WikiType.MARKDOWN));
 	}
@@ -65,10 +67,21 @@ public class WikiTextPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(HighlightJsResourceReference.getInstance()));
-		response.render(OnDomReadyHeaderItem.forScript(
-				("$('#" + getMarkupId(true) + " .wiki pre code').each(function(i, e) { hljs.highlightBlock(e)});")));
-
+		
+		if (isEnableHighlightJs()) {
+			response.render(JavaScriptHeaderItem.forReference(HighlightJsResourceReference.getInstance()));
+			response.render(OnDomReadyHeaderItem.forScript(
+					("$('#" + getMarkupId(true) + " .wiki pre code').each(function(i, e) { hljs.highlightBlock(e)});")));
+		}
+	}
+	
+	private boolean isEnableHighlightJs() {
+		return enableHighlightJs.getObject();
+	}
+	
+	public WikiTextPanel enableHighlightJs(Boolean b) {
+		enableHighlightJs.setObject(b);
+		return this;
 	}
 	
 	@Override
