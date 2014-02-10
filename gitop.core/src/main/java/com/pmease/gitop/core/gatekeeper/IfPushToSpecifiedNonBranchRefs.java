@@ -59,9 +59,9 @@ public class IfPushToSpecifiedNonBranchRefs extends AbstractGateKeeper {
 			return ignored();
 		} else {
 			if (WildcardUtils.matchPath(getRefPatterns(), refName))
-				return accepted("Target ref matches pattern '" + refPatterns + "'.");
+				return approved("Target ref matches pattern '" + refPatterns + "'.");
 			else
-				return rejected("Target ref does not match pattern '" + refPatterns + "'.");
+				return disapproved("Target ref does not match pattern '" + refPatterns + "'.");
 		}
 	}
 

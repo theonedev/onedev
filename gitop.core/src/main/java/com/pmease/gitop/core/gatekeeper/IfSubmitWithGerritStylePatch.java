@@ -23,9 +23,9 @@ public class IfSubmitWithGerritStylePatch extends AbstractGateKeeper {
 		else
 			requestHead = request.getLatestUpdate().getHeadCommit();
 		if (request.getTarget().getProject().code().log(branchHead, requestHead, null, 0, 0).size() > 1) {
-			return rejected("Please squash/rebase your commits.");
+			return disapproved("Please squash/rebase your commits.");
 		} else {
-			return accepted("No more than one commit.");
+			return approved("No more than one commit.");
 		}
 	}
 

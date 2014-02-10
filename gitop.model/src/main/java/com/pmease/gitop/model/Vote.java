@@ -17,32 +17,32 @@ import com.pmease.commons.hibernate.AbstractEntity;
 public class Vote extends AbstractEntity {
 
 	public static enum Result {
-		ACCEPT {
+		APPROVE {
 			@Override
-			public boolean isAccept() {
+			public boolean isApprove() {
 				return true;
 			}
 
 			@Override
-			public boolean isReject() {
+			public boolean isDisapprove() {
 				return false;
 			}
 		}, 
-		REJECT {
+		DISAPPROVE {
 			@Override
-			public boolean isAccept() {
+			public boolean isApprove() {
 				return false;
 			}
 
 			@Override
-			public boolean isReject() {
+			public boolean isDisapprove() {
 				return true;
 			}
 		};
 		
-		public abstract boolean isAccept();
+		public abstract boolean isApprove();
 		
-		public abstract boolean isReject();
+		public abstract boolean isDisapprove();
 	};
 	
 	@ManyToOne

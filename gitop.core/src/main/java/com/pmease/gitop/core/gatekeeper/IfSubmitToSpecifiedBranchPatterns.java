@@ -37,9 +37,9 @@ public class IfSubmitToSpecifiedBranchPatterns extends BranchGateKeeper {
 
 	private CheckResult checkBranch(Branch branch) {
 		if (WildcardUtils.matchPath(getBranchPatterns(), branch.getName()))
-			return accepted("Target branch matches pattern '" + branchPatterns + "'.");
+			return approved("Target branch matches pattern '" + branchPatterns + "'.");
 		else
-			return rejected("Target branch does not match pattern '" + branchPatterns + "'.");
+			return disapproved("Target branch does not match pattern '" + branchPatterns + "'.");
 	}
 	
 	@Override

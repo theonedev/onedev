@@ -3,19 +3,19 @@ package com.pmease.gitop.model.gatekeeper.checkresult;
 import java.util.List;
 
 @SuppressWarnings("serial")
-public class Accepted extends CheckResult {
+public class Approved extends CheckResult {
     
-    public Accepted(List<String> reasons) {
+    public Approved(List<String> reasons) {
         super(reasons);
     }
     
-    public Accepted(String reason) {
+    public Approved(String reason) {
         super(reason);
     }
 
     @Override
     public String toString() {
-        return "Accepted";
+        return "Approved";
     }
     
 }

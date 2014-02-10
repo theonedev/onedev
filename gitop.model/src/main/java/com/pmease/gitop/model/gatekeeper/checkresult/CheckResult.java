@@ -58,23 +58,23 @@ public abstract class CheckResult implements Serializable {
     }
     
     /**
-     * Whether or not the check represents for a rejection.
+     * Whether or not the check represents for a disapproval.
      * 
      * @return
-     * 			<tt>true</tt> if rejected
+     * 			<tt>true</tt> if disapproved
      */
-    public boolean isRejected() {
-    	return this instanceof Rejected;
+    public boolean isDisapproved() {
+    	return this instanceof Disapproved;
     }
     
     /**
-     * Whether or not the check represents for an acceptance.
+     * Whether or not the check represents for an approval.
      * 
      * @return
-     * 			<tt>true</tt> if accepted
+     * 			<tt>true</tt> if approved
      */
-    public boolean isAccepted() {
-    	return this instanceof Accepted;
+    public boolean isApproved() {
+    	return this instanceof Approved;
     }
     
     /**

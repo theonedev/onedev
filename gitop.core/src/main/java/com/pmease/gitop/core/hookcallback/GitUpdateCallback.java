@@ -28,9 +28,9 @@ import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
-import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
+import com.pmease.gitop.model.gatekeeper.checkresult.Approved;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
+import com.pmease.gitop.model.gatekeeper.checkresult.Disapproved;
 import com.pmease.gitop.model.permission.ObjectPermission;
 
 @SuppressWarnings("serial")
@@ -70,7 +70,7 @@ public class GitUpdateCallback extends HttpServlet {
 		GateKeeper gateKeeper = project.getGateKeeper();
 		CheckResult checkResult = gateKeeper.checkRef(user, project, refName);
 
-		if (!(checkResult instanceof Accepted)) {
+		if (!(checkResult instanceof Approved)) {
 			List<String> messages = new ArrayList<>();
 			for (String each: checkResult.getReasons())
 				messages.add(each);
@@ -131,11 +131,11 @@ public class GitUpdateCallback extends HttpServlet {
 						GateKeeper gateKeeper = project.getGateKeeper();
 						CheckResult checkResult = gateKeeper.checkCommit(user, branch, newCommitHash);
 				
-						if (!(checkResult instanceof Accepted)) {
+						if (!(checkResult instanceof Approved)) {
 							List<String> messages = new ArrayList<>();
 							for (String each: checkResult.getReasons())
 								messages.add(each);
-							if (!newCommitHash.equals(Commit.ZERO_HASH) && !(checkResult instanceof Rejected)) {
+							if (!newCommitHash.equals(Commit.ZERO_HASH) && !(checkResult instanceof Disapproved)) {
 								messages.add("");
 								messages.add("----------------------------------------------------");
 								messages.add("You may submit a pull request instead.");

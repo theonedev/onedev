@@ -166,14 +166,14 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 			
 			Vote vote = new Vote();
 			vote.setId(1L);
-			vote.setResult(Vote.Result.ACCEPT);
+			vote.setResult(Vote.Result.APPROVE);
 			vote.setUpdate(update);
 			vote.setVoter(new User());
 			vote.getVoter().setId(1L);
 			vote.getVoter().setName("user1");
 			update.getVotes().add(vote);
 			
-			Assert.assertTrue(gateKeeper.checkRequest(request).isAccepted());
+			Assert.assertTrue(gateKeeper.checkRequest(request).isApproved());
 		} finally {
 			FileUtils.deleteDir(git.repoDir());
 		}

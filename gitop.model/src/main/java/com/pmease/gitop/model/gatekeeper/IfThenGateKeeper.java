@@ -5,11 +5,11 @@ import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.TableLayout;
-import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
+import com.pmease.gitop.model.gatekeeper.checkresult.Approved;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
 import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
-import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
+import com.pmease.gitop.model.gatekeeper.checkresult.Disapproved;
 
 @SuppressWarnings("serial")
 @Editable(name="Check Second Gate Keeper If First Gate Keeper Is Passed", order=300, icon="icon-servers",  
@@ -45,15 +45,15 @@ public class IfThenGateKeeper extends CompositeGateKeeper {
 	@Override
 	protected CheckResult aggregate(Checker checker) {
 		CheckResult ifResult = checker.check(getIfGate());
-		if (ifResult instanceof Accepted) {
+		if (ifResult instanceof Approved) {
 			return checker.check(getThenGate());
-		} else if (ifResult instanceof Rejected) {
-			return accepted(ifResult.getReasons());
+		} else if (ifResult instanceof Disapproved) {
+			return approved(ifResult.getReasons());
 		} else if (ifResult instanceof PendingAndBlock) {
 			return ifResult;
 		} else if (ifResult instanceof Pending) {
 			CheckResult thenResult = checker.check(getThenGate());
-			if (thenResult instanceof Accepted)
+			if (thenResult instanceof Approved)
 				return thenResult;
 			else 
 				return ifResult;

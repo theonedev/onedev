@@ -6,11 +6,11 @@ import java.util.List;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.TableLayout;
-import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
+import com.pmease.gitop.model.gatekeeper.checkresult.Approved;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
 import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
-import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
+import com.pmease.gitop.model.gatekeeper.checkresult.Disapproved;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
 
 @SuppressWarnings("serial")
@@ -28,9 +28,9 @@ public class AndGateKeeper extends AndOrGateKeeper {
 		
 		for (GateKeeper each: getGateKeepers()) {
 			CheckResult result = checker.check(each);
-			if (result instanceof Accepted) {
+			if (result instanceof Approved) {
 				acceptReasons.addAll(result.getReasons());
-			} else if (result instanceof Rejected) {
+			} else if (result instanceof Disapproved) {
 				return result;
 			} else if (result instanceof PendingAndBlock) {
 				result.getReasons().addAll(pendingReasons);
@@ -45,7 +45,7 @@ public class AndGateKeeper extends AndOrGateKeeper {
 		if (!pendingReasons.isEmpty())
 			return pending(pendingReasons, voteEligibilities);
 		else
-			return accepted(acceptReasons);
+			return approved(acceptReasons);
 	}
 
 }

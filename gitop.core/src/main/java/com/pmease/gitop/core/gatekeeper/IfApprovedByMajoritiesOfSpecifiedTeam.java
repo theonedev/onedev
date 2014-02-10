@@ -6,9 +6,9 @@ import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
-import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
+import com.pmease.gitop.model.gatekeeper.checkresult.Approved;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
+import com.pmease.gitop.model.gatekeeper.checkresult.Disapproved;
 
 @SuppressWarnings("serial")
 @Editable(order=400, icon="icon-group", description=
@@ -19,10 +19,10 @@ public class IfApprovedByMajoritiesOfSpecifiedTeam extends TeamAwareGateKeeper {
 	public CheckResult doCheckRequest(PullRequest request) {
 		CheckResult result = getGateKeeper().checkRequest(request);
 		
-		if (result instanceof Accepted)
-			result = accepted("Approved by majorities of team '" + getTeam().getName() + "'.");
-		else if (result instanceof Rejected)
-			result = rejected("Not approved by majorities of team '" + getTeam().getName() + "'.");
+		if (result instanceof Approved)
+			result = approved("Approved by majorities of team '" + getTeam().getName() + "'.");
+		else if (result instanceof Disapproved)
+			result = disapproved("Not approved by majorities of team '" + getTeam().getName() + "'.");
 		
 		return result;
 	}
@@ -39,10 +39,10 @@ public class IfApprovedByMajoritiesOfSpecifiedTeam extends TeamAwareGateKeeper {
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
 		CheckResult result = getGateKeeper().checkFile(user, branch, file);
 		
-		if (result instanceof Accepted)
-			result = accepted("Approved by majorities of team '" + getTeam().getName() + "'.");
-		else if (result instanceof Rejected)
-			result = rejected("Not approved by majorities of team '" + getTeam().getName() + "'.");
+		if (result instanceof Approved)
+			result = approved("Approved by majorities of team '" + getTeam().getName() + "'.");
+		else if (result instanceof Disapproved)
+			result = disapproved("Not approved by majorities of team '" + getTeam().getName() + "'.");
 		
 		return result;
 	}
@@ -51,10 +51,10 @@ public class IfApprovedByMajoritiesOfSpecifiedTeam extends TeamAwareGateKeeper {
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
 		CheckResult result = getGateKeeper().checkCommit(user, branch, commit);
 		
-		if (result instanceof Accepted)
-			result = accepted("Approved by majorities of team '" + getTeam().getName() + "'.");
-		else if (result instanceof Rejected)
-			result = rejected("Not approved by majorities of team '" + getTeam().getName() + "'.");
+		if (result instanceof Approved)
+			result = approved("Approved by majorities of team '" + getTeam().getName() + "'.");
+		else if (result instanceof Disapproved)
+			result = disapproved("Not approved by majorities of team '" + getTeam().getName() + "'.");
 		
 		return result;
 	}
@@ -63,10 +63,10 @@ public class IfApprovedByMajoritiesOfSpecifiedTeam extends TeamAwareGateKeeper {
 	protected CheckResult doCheckRef(User user, Project project, String refName) {
 		CheckResult result = getGateKeeper().checkRef(user, project, refName);
 		
-		if (result instanceof Accepted)
-			result = accepted("Approved by majorities of team '" + getTeam().getName() + "'.");
-		else if (result instanceof Rejected)
-			result = rejected("Not approved by majorities of team '" + getTeam().getName() + "'.");
+		if (result instanceof Approved)
+			result = approved("Approved by majorities of team '" + getTeam().getName() + "'.");
+		else if (result instanceof Disapproved)
+			result = disapproved("Not approved by majorities of team '" + getTeam().getName() + "'.");
 		
 		return result;
 	}

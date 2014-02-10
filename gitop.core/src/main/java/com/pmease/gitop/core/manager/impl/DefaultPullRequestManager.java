@@ -40,10 +40,10 @@ import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.VoteInvitation;
-import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
+import com.pmease.gitop.model.gatekeeper.checkresult.Approved;
 import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
 import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
-import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
+import com.pmease.gitop.model.gatekeeper.checkresult.Disapproved;
 
 @Singleton
 public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> implements
@@ -114,7 +114,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 
 				if (git.isAncestor(sourceHead, targetHead)) {
 					request.setStatus(Status.INTEGRATED);
-					request.setCheckResult(new Accepted("Already integrated."));
+					request.setCheckResult(new Approved("Already integrated."));
 					request.setMergeResult(new MergeResult(targetHead, sourceHead, sourceHead, targetHead));
 				} else {
 					if (git.isAncestor(targetHead, sourceHead)) {
@@ -134,7 +134,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 					
 					if (request.getCheckResult() instanceof Pending || request.getCheckResult() instanceof PendingAndBlock) {
 						request.setStatus(Status.PENDING_APPROVAL);
-					} else if (request.getCheckResult() instanceof Rejected) {
+					} else if (request.getCheckResult() instanceof Disapproved) {
 						request.setStatus(Status.PENDING_UPDATE);
 					} else {
 						request.setStatus(Status.PENDING_INTEGRATE);
@@ -157,7 +157,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 					
 					if (git.isAncestor(requestHead, branchHead)) {
 						request.setStatus(Status.INTEGRATED);
-						request.setCheckResult(new Accepted("Already integrated."));
+						request.setCheckResult(new Approved("Already integrated."));
 						request.setMergeResult(new MergeResult(branchHead, requestHead, requestHead, branchHead));
 					} else {
 						// Update head ref so that it can be pulled by build system
@@ -219,7 +219,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 						
 						if (request.getCheckResult() instanceof Pending || request.getCheckResult() instanceof PendingAndBlock) {
 							request.setStatus(Status.PENDING_APPROVAL);
-						} else if (request.getCheckResult() instanceof Rejected) {
+						} else if (request.getCheckResult() instanceof Disapproved) {
 							request.setStatus(Status.PENDING_UPDATE);
 						} else {
 							request.setStatus(Status.PENDING_INTEGRATE);
@@ -239,12 +239,12 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 	}
 
 	@Sessional
-	public void decline(final PullRequest request) {
+	public void discard(final PullRequest request) {
 		LockUtils.call(request.getLockName(), new Callable<Void>() {
 
 			@Override
 			public Void call() throws Exception {
-				request.setStatus(Status.DECLINED);
+				request.setStatus(Status.DISCARDED);
 				save(request);
 				return null;
 			}

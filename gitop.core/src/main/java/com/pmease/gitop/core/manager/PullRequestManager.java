@@ -20,7 +20,7 @@ public interface PullRequestManager extends GenericDao<PullRequest> {
     
     boolean merge(PullRequest request);
     
-    void decline(PullRequest request);
+    void discard(PullRequest request);
     
     /**
      * Find pull requests whose head commit or merge commit equals to specified commit.
