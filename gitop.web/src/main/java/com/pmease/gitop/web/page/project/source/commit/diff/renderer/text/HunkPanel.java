@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.Page;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -45,6 +46,7 @@ import com.pmease.gitop.web.component.comment.event.CommitCommentEvent;
 import com.pmease.gitop.web.component.comment.event.CommitCommentRemoved;
 import com.pmease.gitop.web.component.comment.event.OpenLineCommentForm;
 import com.pmease.gitop.web.model.CommitCommentModel;
+import com.pmease.gitop.web.page.project.source.commit.diff.CommitCommentsAware;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.HunkHeader;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.HunkLine;
@@ -70,18 +72,12 @@ public class HunkPanel extends Panel {
 	final static String INSERT_AFTER_ROW = "var item = document.createElement('tr'); item.id='%s'; $(item).insertAfter($('#%s'));";
 	final static String INSERT_BEFORE_ROW = "var item = document.createElement('tr'); item.id='%s'; $(item).insertBefore($('#%s'));";
 	
-	private final IModel<Boolean> showInlineComments;
-	private final IModel<Boolean> enableAddComments;
-	
 	public HunkPanel(String id,
 			IModel<Project> projectModel,
 			IModel<String> commitModel,
 			IModel<Integer> indexModel,
 			IModel<FileHeader> fileModel,
-			IModel<List<String>> blobLinesModel,
-			final IModel<List<CommitComment>> commentsModel,
-			final IModel<Boolean> showInlineComments,
-			final IModel<Boolean> enableAddComments) {
+			IModel<List<String>> blobLinesModel) {
 		
 		super(id, indexModel);
 		
@@ -90,14 +86,11 @@ public class HunkPanel extends Panel {
 		this.fileModel = fileModel;
 		this.blobLinesModel = blobLinesModel;
 		
-		this.showInlineComments = showInlineComments;
-		this.enableAddComments = enableAddComments;
-		
 		this.commentsModel = new LoadableDetachableModel<Multimap<String, Long>>() {
 
 			@Override
 			protected Multimap<String, Long> load() {
-				List<CommitComment> comments = commentsModel.getObject();
+				List<CommitComment> comments = getCommentsAware().getCommitComments();
 				Multimap<String, Long> map = LinkedListMultimap.<String, Long>create();
 				
 				String fileId = TextDiffPanel.getFileId(getFile());
@@ -113,6 +106,12 @@ public class HunkPanel extends Panel {
 		};
 	}
 
+	private CommitCommentsAware getCommentsAware() {
+		Page page = getPage();
+		Preconditions.checkState(page instanceof CommitCommentsAware);
+		return (CommitCommentsAware) page;
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -316,7 +315,7 @@ public class HunkPanel extends Panel {
 		
 		Multimap<String, Long> inlineComments = getInlineComments();
 		
-		boolean showComments = this.showInlineComments.getObject();
+		boolean showComments = getCommentsAware().isShowInlineComments();
 		
 		for (int i = 0; i < lines.size(); i++) {
 			HunkLine line = lines.get(i);
@@ -425,7 +424,7 @@ public class HunkPanel extends Panel {
 			
 			if (position < 0 
 					|| !GitopSession.getCurrentUser().isPresent()
-					|| !enableAddComments.getObject()) {
+					|| !getCommentsAware().canAddComments()) {
 				add(new WebMarkupContainer("commentlink").setVisibilityAllowed(false));
 			} else {
 				add(new AjaxLink<Void>("commentlink") {
@@ -530,7 +529,7 @@ public class HunkPanel extends Panel {
 
 			result.setVisible(
 					GitopSession.getCurrentUser().isPresent()
-					&& enableAddComments.getObject()
+					&& getCommentsAware().canAddComments()
 					&& !(commentForm instanceof CommitCommentEditor)
 					&& !getCommentIds().isEmpty());
 			
@@ -795,14 +794,6 @@ public class HunkPanel extends Panel {
 
 		if (commentsModel != null) {
 			commentsModel.detach();
-		}
-
-		if (showInlineComments != null) {
-			showInlineComments.detach();
-		}
-		
-		if (enableAddComments != null) {
-			enableAddComments.detach();
 		}
 		
 		super.onDetach();

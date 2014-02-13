@@ -1,12 +1,9 @@
 package com.pmease.gitop.web.page.project.source.commit.diff.renderer;
 
-import java.util.List;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.gitop.model.CommitComment;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.wicket.bootstrap.Alert;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader;
@@ -22,9 +19,8 @@ public class BlobMessagePanel extends BlobDiffPanel {
 			IModel<Project> projectModel, 
 			IModel<String> sinceModel,
 			IModel<String> untilModel, 
-			IModel<List<CommitComment>> commentsModel,
 			IModel<String> messageModel) {
-		super(id, index, fileModel, projectModel, sinceModel, untilModel, commentsModel);
+		super(id, index, fileModel, projectModel, sinceModel, untilModel);
 		
 		this.messageModel = messageModel;
 	}

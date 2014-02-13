@@ -84,7 +84,8 @@ var highlight = function(el, opts, callback) {
             data = data.trim();
     }
     
-    highlight.render(data, mode, theme, opts.firstLineNumber, !opts.showGutter, function (highlighted) {
+    var hasLineId = opts.hasLineId || true;
+    highlight.render(data, mode, theme, opts.firstLineNumber, !opts.showGutter, hasLineId, function (highlighted) {
         dom.importCssString(highlighted.css, "ace_highlight");
         el.innerHTML = highlighted.html;
         var container = el.firstChild.firstChild;
@@ -98,7 +99,7 @@ var highlight = function(el, opts, callback) {
     });
 };
 
-highlight.render = function(input, mode, theme, lineStart, disableGutter, callback) {
+highlight.render = function(input, mode, theme, lineStart, disableGutter, hasLineId, callback) {
     var waiting = 0;
     var modeCache = EditSession.prototype.$modes;
     if (typeof theme == "string") {
@@ -118,13 +119,13 @@ highlight.render = function(input, mode, theme, lineStart, disableGutter, callba
         });
     }
     function done() {
-        var result = highlight.renderSync(input, mode, theme, lineStart, disableGutter);
+        var result = highlight.renderSync(input, mode, theme, lineStart, disableGutter, hasLineId);
         return callback ? callback(result) : result;
     }
     return waiting || done();
 };
 
-highlight.renderSync = function(input, mode, theme, lineStart, disableGutter) {
+highlight.renderSync = function(input, mode, theme, lineStart, disableGutter, hasLineId) {
     lineStart = parseInt(lineStart || 1, 10);
 
     var session = new EditSession("");
@@ -144,7 +145,10 @@ highlight.renderSync = function(input, mode, theme, lineStart, disableGutter) {
     var length =  session.getLength();
 
     for(var ix = 0; ix < length; ix++) {
-        stringBuilder.push("<div class='ace_line' id='LC" + (ix + 1) + "'>");
+        stringBuilder.push("<div class='ace_line'");
+        if (hasLineId)
+        	stringBuilder.push(" id='LC" + (ix + 1) + "'");
+        stringBuilder.push(">");
         if (!disableGutter)
             stringBuilder.push("<span class='ace_gutter ace_gutter-cell' unselectable='on'>" + (ix + lineStart) + "</span>");
         textLayer.$renderLine(stringBuilder, ix, true, false);

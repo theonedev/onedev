@@ -1,8 +1,6 @@
 package com.pmease.gitop.web.component.wiki;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
@@ -11,7 +9,7 @@ import org.apache.wicket.model.Model;
 
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
-import com.pmease.gitop.web.page.project.source.blob.renderer.highlighter.HighlightJsResourceReference;
+import com.pmease.gitop.web.page.project.source.blob.renderer.highlighter.AceHighlighter;
 import com.pmease.gitop.web.util.MarkdownUtils;
 
 public class WikiTextPanel extends Panel {
@@ -58,6 +56,10 @@ public class WikiTextPanel extends Panel {
 				} 
 			}
 		}).setEscapeModelStrings(false));
+		
+		if (isEnableHighlightJs()) {
+			add(new AceHighlighter().withSelector("#" + getMarkupId() + " pre code").hasLineId(false));
+		}
 	}
 	
 	private String getOriginalContent() {
@@ -69,9 +71,9 @@ public class WikiTextPanel extends Panel {
 		super.renderHead(response);
 		
 		if (isEnableHighlightJs()) {
-			response.render(JavaScriptHeaderItem.forReference(HighlightJsResourceReference.getInstance()));
-			response.render(OnDomReadyHeaderItem.forScript(
-					("$('#" + getMarkupId(true) + " .wiki pre code').each(function(i, e) { hljs.highlightBlock(e)});")));
+//			response.render(JavaScriptHeaderItem.forReference(HighlightJsResourceReference.getInstance()));
+//			response.render(OnDomReadyHeaderItem.forScript(
+//					("$('#" + getMarkupId(true) + " .wiki pre code').each(function(i, e) { hljs.highlightBlock(e)});")));
 		}
 	}
 	

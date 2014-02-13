@@ -3,6 +3,7 @@ package com.pmease.gitop.web.page.project.source.commit.diff.renderer.text;
 import java.util.List;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.Page;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -14,6 +15,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
+import org.parboiled.common.Preconditions;
 
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.CommitComment;
@@ -21,6 +23,7 @@ import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.component.comment.event.CommitCommentAdded;
 import com.pmease.gitop.web.component.comment.event.CommitCommentRemoved;
 import com.pmease.gitop.web.git.GitUtils;
+import com.pmease.gitop.web.page.project.source.commit.diff.CommitCommentsAware;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.HunkHeader;
 import com.pmease.gitop.web.page.project.source.commit.diff.renderer.BlobDiffPanel;
@@ -30,8 +33,8 @@ import com.pmease.gitop.web.service.FileBlobService;
 @SuppressWarnings("serial")
 public class TextDiffPanel extends BlobDiffPanel {
 
-	private IModel<Boolean> showInlineComments = Model.of(true);
-	private IModel<Boolean> enableAddComments = Model.of(true);
+//	private IModel<Boolean> showInlineComments = Model.of(true);
+//	private IModel<Boolean> enableAddComments = Model.of(true);
 	
 	private final IModel<FileBlob> newFileModel;
 	private final IModel<FileBlob> oldFileModel;
@@ -41,17 +44,10 @@ public class TextDiffPanel extends BlobDiffPanel {
 			IModel<FileHeader> fileModel,
 			IModel<Project> projectModel, 
 			IModel<String> sinceModel,
-			IModel<String> untilModel,
-			IModel<List<CommitComment>> commentsModel,
-			IModel<Boolean> showInlineComments,
-			IModel<Boolean> enableAddComments) {
+			IModel<String> untilModel) {
 		
-		super(id, index, fileModel, projectModel, sinceModel, untilModel, commentsModel);
+		super(id, index, fileModel, projectModel, sinceModel, untilModel);
 		
-		this.showInlineComments = showInlineComments;
-		this.enableAddComments = enableAddComments;
-
-
 		this.newFileModel = new LoadableDetachableModel<FileBlob>() {
 
 			@Override
@@ -87,8 +83,14 @@ public class TextDiffPanel extends BlobDiffPanel {
 		}
 	}
 	
+	private CommitCommentsAware getCommentsAware() {
+		Page page = getPage();
+		Preconditions.checkState(page instanceof CommitCommentsAware);
+		return (CommitCommentsAware) page;
+	}
+	
 	private boolean hasInlineComments() {
-		List<CommitComment> comments = commentsModel.getObject();
+		List<CommitComment> comments = getCommentsAware().getCommitComments();
 		String fileId = getFileId(getFile());
 		for (CommitComment each : comments) {
 			if (each.isLineComment() && each.getLine().startsWith(fileId)) {
@@ -180,10 +182,7 @@ public class TextDiffPanel extends BlobDiffPanel {
 									return newFileModel.getObject().getLines();
 								}
 							}
-						},
-						commentsModel,
-						showInlineComments,
-						enableAddComments));
+						}));
 			}
 		});
 		
@@ -198,14 +197,6 @@ public class TextDiffPanel extends BlobDiffPanel {
 	@Override
 	public void onDetach() {
 		
-		if (showInlineComments != null) {
-			showInlineComments.detach();
-		}
-		
-		if (enableAddComments != null) {
-			enableAddComments.detach();
-		}
-
 		if (newFileModel != null) {
 			newFileModel.detach();
 		}

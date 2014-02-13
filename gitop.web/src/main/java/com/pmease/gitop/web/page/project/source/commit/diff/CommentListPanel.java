@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
+import org.apache.wicket.Page;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.event.IEvent;
@@ -26,6 +27,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.parboiled.common.Preconditions;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
@@ -56,9 +58,8 @@ public class CommentListPanel extends Panel {
 	
 	public CommentListPanel(String id,
 			IModel<Project> projectModel, 
-			IModel<String> commitModel, 
-			IModel<List<CommitComment>> commentsModel) {
-		super(id, commentsModel);
+			IModel<String> commitModel) {
+		super(id);
 		
 		this.projectModel = projectModel;
 		this.commitModel = commitModel;
@@ -73,6 +74,48 @@ public class CommentListPanel extends Panel {
 		final WebMarkupContainer commentsHolder = new WebMarkupContainer("commentlist");
 		commentsHolder.setOutputMarkupId(true);
 		add(commentsHolder);
+		
+		WebMarkupContainer commentsHeader = new WebMarkupContainer("commentsHeader");
+		commentsHeader.setOutputMarkupId(true);
+		add(commentsHeader);
+		commentsHeader.add(new Label("count", new AbstractReadOnlyModel<Integer>() {
+
+			@Override
+			public Integer getObject() {
+				return getCommentsOnCommit().size();
+			}
+			
+		}));
+		
+		commentsHeader.add(new Label("inlinecount", new AbstractReadOnlyModel<Integer>() {
+
+			@Override
+			public Integer getObject() {
+				return getCommentsOnLine().size();
+			}
+			
+		}));
+		
+		commentsHeader.add(new Label("sha", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return GitUtils.abbreviateSHA(getCommit(), 6);
+			}
+			
+		}));
+		
+		CheckBox check = new CheckBox("showAllTrigger", new PropertyModel<Boolean>(this, "showAllNotes"));
+		commentsHeader.add(check);
+		
+		check.add(new AjaxFormComponentUpdatingBehavior("change") {
+
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				target.add(commentsHolder);
+			}
+		});
+		
 		IModel<List<CommitComment>> commentsModel = new LoadableDetachableModel<List<CommitComment>>() {
 
 			@Override
@@ -183,46 +226,14 @@ public class CommentListPanel extends Panel {
 			formHolder.add(new WebMarkupContainer("author").setVisibilityAllowed(false));
 			formHolder.add(new WebMarkupContainer("form").setVisibilityAllowed(false));
 		}
-		
-		add(new Label("count", new AbstractReadOnlyModel<Integer>() {
-
-			@Override
-			public Integer getObject() {
-				return getCommentsOnCommit().size();
-			}
-			
-		}));
-		
-		add(new Label("inlinecount", new AbstractReadOnlyModel<Integer>() {
-
-			@Override
-			public Integer getObject() {
-				return getCommentsOnLine().size();
-			}
-			
-		}));
-		
-		add(new Label("sha", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return GitUtils.abbreviateSHA(getCommit(), 6);
-			}
-			
-		}));
-		
-		CheckBox check = new CheckBox("showAllTrigger", new PropertyModel<Boolean>(this, "showAllNotes"));
-		add(check);
-		
-		check.add(new AjaxFormComponentUpdatingBehavior("change") {
-
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				target.add(commentsHolder);
-			}
-		});
 	}
 
+	private List<CommitComment> getCommitComments() {
+		Page page = getPage();
+		Preconditions.checkState(page instanceof CommitCommentsAware);
+		return ((CommitCommentsAware) page).getCommitComments();
+	}
+	
 	private List<CommitComment> getCommentsOnCommit() {
 		return Lists.newArrayList(Iterables.filter(getCommitComments(), new Predicate<CommitComment>() {
 
@@ -243,11 +254,6 @@ public class CommentListPanel extends Panel {
 			}
 			
 		}));
-	}
-	
-	@SuppressWarnings("unchecked")
-	private List<CommitComment> getCommitComments() {
-		return (List<CommitComment>) getDefaultModelObject();
 	}
 	
 	public @Nullable String getShortLineId(String line) {

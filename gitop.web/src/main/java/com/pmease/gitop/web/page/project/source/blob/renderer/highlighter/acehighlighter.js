@@ -1,13 +1,18 @@
 var SourceHighlighter = SourceHighlighter || {};
 
-SourceHighlighter.highlight = function(element) {
-	var el = $(element)[0];
-    
-	var highlighter = ace.require("ace/ext/static_highlight")
-    var m = el.className.match(/language-(\w+)|(text)/);
-    if (!m) return
-    var mode = "ace/mode/" + (m[1] || m[2]);
-    highlighter.highlight(el, {mode: mode, theme: "ace/theme/textmate"});
+SourceHighlighter.highlight = function(element, hasLineId) {
+	var highlighter = ace.require("ace/ext/static_highlight");
+	var dom = ace.require("ace/lib/dom")
+	function qsa(sel) {
+		return [].slice.call(document.querySelectorAll(sel));
+	}
+	
+	qsa(element).forEach(function(el) {
+		var m = el.className.match(/lang-(\w+)|(text)/);
+	    if (!m) return
+	    var mode = "ace/mode/" + (m[1] || m[2]);
+	    highlighter.highlight(el, {mode: mode, theme: "ace/theme/xcode", hasLineId: hasLineId});
+	});
     
     $(function() {
     	//This emulates a click on the correct button on page load

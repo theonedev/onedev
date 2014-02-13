@@ -17,9 +17,13 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.hibernate.criterion.Restrictions;
 
 import com.google.common.collect.Iterables;
 import com.pmease.commons.git.Commit;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.CommitCommentManager;
+import com.pmease.gitop.model.CommitComment;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.component.commit.CommitMetaPanel;
@@ -31,11 +35,13 @@ import com.pmease.gitop.web.git.command.CommitInCommand.RefType;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.ProjectCategoryPage;
 import com.pmease.gitop.web.page.project.api.GitPerson;
+import com.pmease.gitop.web.page.project.source.commit.diff.CommentListPanel;
+import com.pmease.gitop.web.page.project.source.commit.diff.CommitCommentsAware;
 import com.pmease.gitop.web.page.project.source.commit.diff.DiffViewPanel;
 import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
 
 @SuppressWarnings("serial")
-public class SourceCommitPage extends ProjectCategoryPage {
+public class SourceCommitPage extends ProjectCategoryPage implements CommitCommentsAware {
 	
 	public static PageParameters newParams(Project project, String revision) {
 		PageParameters params = PageSpec.forProject(project);
@@ -44,6 +50,7 @@ public class SourceCommitPage extends ProjectCategoryPage {
 	}
 	
 	private final IModel<Commit> commitModel;
+	private final IModel<List<CommitComment>> commentsModel;
 	
 	public SourceCommitPage(PageParameters params) {
 		super(params);
@@ -57,8 +64,23 @@ public class SourceCommitPage extends ProjectCategoryPage {
 				return project.code().showRevision(revision);
 			}
 		};
+		
+		this.commentsModel = new LoadableDetachableModel<List<CommitComment>>() {
+
+			@Override
+			protected List<CommitComment> load() {
+				return loadComments();
+			}
+			
+		};
 	}
 
+	private List<CommitComment> loadComments() {
+		return Gitop.getInstance(CommitCommentManager.class)
+				.query(Restrictions.eq("project", getProject()),
+						Restrictions.eq("commit", getUntil()));
+	}
+	
 	private String getSince() {
 		Commit commit = getCommit();
 		return Iterables.getFirst(commit.getParentHashes(), null);
@@ -142,6 +164,15 @@ public class SourceCommitPage extends ProjectCategoryPage {
 		add(createInRefListView("branches", RefType.BRANCH));
 		add(createInRefListView("tags", RefType.TAG));
 		add(new DiffViewPanel("diffs", projectModel, Model.of(getSince()), Model.of(getUntil())));
+		
+		add(new CommentListPanel("comments", projectModel, new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getCommit().getHash();
+			}
+			
+		}));
 	}
 
 	private Component createInRefListView(String id, final RefType type) {
@@ -206,6 +237,21 @@ public class SourceCommitPage extends ProjectCategoryPage {
 		return false;
 	}
 	
+	@Override
+	public List<CommitComment> getCommitComments() {
+		return commentsModel.getObject();
+	}
+
+	@Override
+	public boolean isShowInlineComments() {
+		return true;
+	}
+
+	@Override
+	public boolean canAddComments() {
+		return true;
+	}
+
 	@Override
 	public void onDetach() {
 		if (commitModel != null) {

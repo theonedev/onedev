@@ -61,34 +61,24 @@ public class TextBlobPanel extends Panel {
 			@Override
 			public String getObject() {
 				Language lang = Languages.INSTANCE.findByMediaType(getBlob().getMediaType());
+				StringBuffer sb = new StringBuffer();
 				if (lang == null) {
 					if (MediaTypeUtils.isXMLType(getBlob().getMediaType())) {
-						return "xml";
+						sb.append("xml lang-xml");
 					} else {
-						return "no-highlight";
+						sb.append("no-highlight lang-text");
 					}
 				} else {
-					return lang.getMode();
+					sb.append(lang.getMode()).append(" ").append("lang-" + lang.getAceMode());
 				}
+				
+				return sb.toString();
 			}
 		};
 		
 		code.add(AttributeAppender.append("class", cssModel));
-		
-		IModel<String> modeModel = new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				Language language = getBlob().getLanguage();
-				return language == null ? "text" : language.getAceMode(); 
-			}
-			
-		};
-		
-		code.add(new AceHighlighter(modeModel));
-		
+		code.add(new AceHighlighter());
 		add(code);
-		
 	}
 	
 	private FileBlob getBlob() {

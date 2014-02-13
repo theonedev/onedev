@@ -19,14 +19,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
-import org.hibernate.criterion.Restrictions;
 import org.parboiled.common.Preconditions;
 
 import com.google.common.base.Strings;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.CommitCommentManager;
-import com.pmease.gitop.model.CommitComment;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.Constants;
 import com.pmease.gitop.web.common.wicket.bootstrap.Alert;
@@ -49,10 +46,6 @@ public class DiffViewPanel extends Panel {
 	private final IModel<Patch> patchModel;
 	private final IModel<String> sinceModel;
 	private final IModel<String> untilModel;
-	private final IModel<List<CommitComment>> commentsModel;
-	
-	private IModel<Boolean> showInlineComments = Model.of(true);
-	private IModel<Boolean> enableAddComments = Model.of(true);
 	
 	public DiffViewPanel(String id,
 			IModel<Project> projectModel,
@@ -73,24 +66,8 @@ public class DiffViewPanel extends Panel {
 			}
 			
 		};
-		
-		this.commentsModel = new LoadableDetachableModel<List<CommitComment>>() {
-
-			@Override
-			protected List<CommitComment> load() {
-				return loadComments();
-			}
-			
-		};
 	}
 
-	protected List<CommitComment> loadComments() {
-		CommitCommentManager ccm = Gitop.getInstance(CommitCommentManager.class);
-		return ccm.query(
-					Restrictions.eq("project", getProject()),
-					Restrictions.eq("commit", getUntil()));
-	}
-	
 	private Patch loadPatch() {
 		String since = getSince();
 		String until = getUntil();
@@ -159,12 +136,6 @@ public class DiffViewPanel extends Panel {
 		add(createAlert("largecommitwarning"));
 		createDiffToc();
 		add(createFileList("filelist"));
-		
-		add(createCommentsPanel("comments"));
-	}
-	
-	protected Component createCommentsPanel(String id) {
-		return new CommentListPanel(id, projectModel, untilModel, commentsModel);
 	}
 	
 	protected Component createFileList(String id) {
@@ -189,7 +160,7 @@ public class DiffViewPanel extends Panel {
 	}
 	
 	private Component newMessagePanel(String id, int index, IModel<FileHeader> model, IModel<String> messageModel) {
-		return new BlobMessagePanel(id, index, model, projectModel, sinceModel, untilModel, commentsModel, messageModel);
+		return new BlobMessagePanel(id, index, model, projectModel, sinceModel, untilModel, messageModel);
 	}
 	
 	protected Component createFileDiffPanel(String id, IModel<FileHeader> model, int index) {
@@ -223,7 +194,7 @@ public class DiffViewPanel extends Panel {
 				MediaType mediaType = types.getMediaType(path, new byte[0]);
 				if (MediaTypeUtils.isImageType(mediaType) 
 						&& types.isSafeInline(mediaType)) {
-					return new ImageDiffPanel(id, index, model, projectModel, sinceModel, untilModel, commentsModel);
+					return new ImageDiffPanel(id, index, model, projectModel, sinceModel, untilModel);
 				} else {
 					// other binary diffs
 					return newMessagePanel(id, index, model, Model.of("File is a binary file"));
@@ -267,7 +238,7 @@ public class DiffViewPanel extends Panel {
 			}
 		}
 		
-		return new TextDiffPanel(id, index, model, projectModel, sinceModel, untilModel, commentsModel, showInlineComments, enableAddComments);
+		return new TextDiffPanel(id, index, model, projectModel, sinceModel, untilModel);
 	}
 	
 	
@@ -355,16 +326,6 @@ public class DiffViewPanel extends Panel {
 		throw new IllegalArgumentException("change type " + changeType);
 	}
 	
-	public DiffViewPanel showInlineComments(IModel<Boolean> b) {
-		showInlineComments = Preconditions.checkNotNull(b);
-		return this;
-	}
-	
-	public DiffViewPanel enableAddComments(IModel<Boolean> b) {
-		enableAddComments = Preconditions.checkNotNull(b);
-		return this;
-	}
-	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
@@ -387,18 +348,6 @@ public class DiffViewPanel extends Panel {
 		
 		if (untilModel != null) {
 			untilModel.detach();
-		}
-		
-		if (commentsModel != null) {
-			commentsModel.detach();
-		}
-
-		if (showInlineComments != null) {
-			showInlineComments.detach();
-		}
-		
-		if (enableAddComments != null) {
-			enableAddComments.detach();
 		}
 		
 		super.onDetach();
