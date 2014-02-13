@@ -142,7 +142,7 @@ highlight.renderSync = function(input, mode, theme, lineStart, disableGutter, ha
     session.setValue(input);
 
     var stringBuilder = [];
-    var length =  session.getLength();
+    var length =  session.getLength() - 1;
 
     for(var ix = 0; ix < length; ix++) {
         stringBuilder.push("<div class='ace_line'");

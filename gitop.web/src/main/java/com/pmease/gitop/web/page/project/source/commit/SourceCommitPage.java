@@ -257,6 +257,9 @@ public class SourceCommitPage extends ProjectCategoryPage implements CommitComme
 		if (commitModel != null) {
 			commitModel.detach();
 		}
+		if (commentsModel != null) {
+			commentsModel.detach();
+		}
 
 		super.onDetach();
 	}
