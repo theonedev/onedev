@@ -31,16 +31,16 @@ public class IfApprovedByProjectOwner extends ApprovalGateKeeper {
             Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, Sets.newHashSet(projectOwner), 1);
             return pending("To be approved by user '" + projectOwner.getName() + "'.",
                     new CanVoteBySpecifiedUser(projectOwner));
-        } else if (result.isAccept()) {
-            return accepted("Approved by user '" + projectOwner.getName() + "'.");
+        } else if (result.isApprove()) {
+            return approved("Approved by user '" + projectOwner.getName() + "'.");
         } else {
-            return rejected("Rejected by user '" + projectOwner.getName() + "'.");
+            return disapproved("Rejected by user '" + projectOwner.getName() + "'.");
         }
     }
 
     private CheckResult checkApproval(User user, Project project) {
 		if (user.equals(project.getOwner()))
-			return accepted("Approved by project owner.");
+			return approved("Approved by project owner.");
 		else
 			return pending("Not approved by project owner.", new CanVoteBySpecifiedUser(project.getOwner()));
     }
@@ -58,9 +58,9 @@ public class IfApprovedByProjectOwner extends ApprovalGateKeeper {
 	@Override
 	protected CheckResult doCheckRef(User user, Project project, String refName) {
 		if (user.equals(project.getOwner()))
-			return accepted("Approved by project owner.");
+			return approved("Approved by project owner.");
 		else
-			return rejected("Not approved by project owner.");
+			return disapproved("Not approved by project owner.");
 	}
 
 }

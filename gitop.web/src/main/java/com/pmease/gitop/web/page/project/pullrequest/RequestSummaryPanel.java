@@ -1,5 +1,7 @@
 package com.pmease.gitop.web.page.project.pullrequest;
 
+import java.util.Date;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
@@ -14,12 +16,12 @@ import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
+import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.GitPersonLink;
 import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.AbstractProjectPage;
 import com.pmease.gitop.web.page.project.api.GitPerson;
-import com.pmease.gitop.web.util.DateUtils;
 
 @SuppressWarnings("serial")
 public class RequestSummaryPanel extends Panel {
@@ -113,11 +115,11 @@ public class RequestSummaryPanel extends Panel {
 			
 		}));
 		
-		add(new Label("date", new LoadableDetachableModel<String>() {
+		add(new AgeLabel("date", new AbstractReadOnlyModel<Date>() {
 
 			@Override
-			protected String load() {
-				return DateUtils.formatAge(getPullRequest().getCreateDate());
+			public Date getObject() {
+				return getPullRequest().getCreateDate();
 			}
 			
 		}));

@@ -187,7 +187,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	
 	public Vote.Result checkVoteSince(PullRequestUpdate update) {
 		if (this.equals(update.getRequest().getSubmitter()))
-			return Vote.Result.ACCEPT;
+			return Vote.Result.APPROVE;
 		
 		for (Vote vote: update.listVotesOnwards()) {
 			if (vote.getVoter().equals(this)) {

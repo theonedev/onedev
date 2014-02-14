@@ -32,24 +32,24 @@ public class IfApprovedByBranchCreator extends ApprovalGateKeeper {
 	            Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, Sets.newHashSet(branchCreator), 1);
 	            return pending("To be approved by user '" + branchCreator.getName() + "'.",
 	                    new CanVoteBySpecifiedUser(branchCreator));
-	        } else if (result.isAccept()) {
-	            return accepted("Approved by user '" + branchCreator.getName() + "'.");
+	        } else if (result.isApprove()) {
+	            return approved("Approved by user '" + branchCreator.getName() + "'.");
 	        } else {
-	            return rejected("Rejected by user '" + branchCreator.getName() + "'.");
+	            return disapproved("Rejected by user '" + branchCreator.getName() + "'.");
 	        }
         } else {
-        	return rejected("Rejected as branch creator is unknown.");
+        	return disapproved("Rejected as branch creator is unknown.");
         }
     }
 
     private CheckResult checkApproval(User user, Branch branch) {
     	if (branch.getCreator() != null) {
 			if (user.equals(branch.getCreator()))
-				return accepted("Approved by branch creator.");
+				return approved("Approved by branch creator.");
 			else
 				return pending("Not approved by branch creator.", new CanVoteBySpecifiedUser(branch.getCreator()));
     	} else {
-    		return rejected("Rejected as branch creator is unknown.");
+    		return disapproved("Rejected as branch creator is unknown.");
     	}
     }
     

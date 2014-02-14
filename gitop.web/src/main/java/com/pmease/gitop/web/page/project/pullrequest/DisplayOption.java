@@ -50,7 +50,7 @@ class DisplayOption implements Serializable {
 		this.sortOption = sortOption;
 	}
 
-	public DetachedCriteria getCriteria(Project project) {
+	public DetachedCriteria getCriteria(Project project, boolean withOrderBy) {
 		DetachedCriteria criteria = DetachedCriteria.forClass(PullRequest.class);
 		criteria.createCriteria("target").add(Restrictions.eq("project", project));
 		if (open) {
@@ -63,7 +63,8 @@ class DisplayOption implements Serializable {
 		} else if (submitterId == SHOW_REQUESTS_OF_CURRENT_USER) {
 			criteria.add(Restrictions.eq("submitter.id", User.getCurrentId()));
 		}
-		criteria.addOrder(sortOption.getOrder());
+		if (withOrderBy)
+			criteria.addOrder(sortOption.getOrder());
 		return criteria;
 	}
 }

@@ -32,7 +32,7 @@ public class RequestStatusPanel extends Panel {
 			@Override
 			public String getObject() {
 				Status status = getPullRequest().getStatus();
-				if (status == Status.DECLINED)
+				if (status == Status.DISCARDED)
 					return "label-danger";
 				else if (status == Status.INTEGRATED)
 					return "label-success";

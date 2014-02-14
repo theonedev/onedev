@@ -31,7 +31,7 @@ public class PullRequest extends AbstractEntity {
 	public enum Status {
 		PENDING_APPROVAL("Pending Approval"), PENDING_UPDATE("Pending Update"), 
 		PENDING_INTEGRATE("Pending Integrate"), INTEGRATED("Integrated"), 
-		DECLINED("Declined");
+		DISCARDED("Discarded");
 
 		private final String displayName;
 		
@@ -203,7 +203,7 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	public boolean isOpen() {
-		return status != Status.INTEGRATED && status != Status.DECLINED;
+		return status != Status.INTEGRATED && status != Status.DISCARDED;
 	}
 	
 	public PullRequestUpdate getBaseUpdate() {
@@ -324,14 +324,14 @@ public class PullRequest extends AbstractEntity {
 		public static Criterion ofOpen() {
 			return Restrictions.and(
 					Restrictions.not(Restrictions.eq("status", PullRequest.Status.INTEGRATED)),
-					Restrictions.not(Restrictions.eq("status", PullRequest.Status.DECLINED))
+					Restrictions.not(Restrictions.eq("status", PullRequest.Status.DISCARDED))
 				);
 		}
 		
 		public static Criterion ofClosed() {
 			return Restrictions.or(
 					Restrictions.eq("status", PullRequest.Status.INTEGRATED),
-					Restrictions.eq("status", PullRequest.Status.DECLINED)
+					Restrictions.eq("status", PullRequest.Status.DISCARDED)
 				);
 		}
 		

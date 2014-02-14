@@ -66,7 +66,7 @@ public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
             Vote.Result result = member.checkVoteSince(request.getBaseUpdate());
             if (result == null) {
                 pendings++;
-            } else if (result.isAccept()) {
+            } else if (result.isApprove()) {
                 score++;
             } else {
                 score--;
@@ -76,9 +76,9 @@ public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
         int lackApprovals = calcLackApprovals(score, pendings);
 
         if (lackApprovals == 0) {
-            return accepted("Get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
+            return approved("Get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
         } else if (lackApprovals < 0) {
-            return rejected("Can not get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
+            return disapproved("Can not get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
         } else {
             Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, members, lackApprovals);
 
@@ -125,9 +125,9 @@ public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
         int lackApprovals = calcLackApprovals(score, pendings);
 
         if (lackApprovals == 0) {
-            return accepted("Get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
+            return approved("Get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
         } else if (lackApprovals < 0) {
-            return rejected("Can not get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
+            return disapproved("Can not get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
         } else {
             return pending("Lack " + lackApprovals + " approvals from team '"
                     + getTeam().getName() + ".", new CanVoteBySpecifiedTeam(getTeam()));

@@ -44,10 +44,10 @@ public class IfTouchSpecifiedFilePatterns extends FileGateKeeper {
 			for (String file: request.getTarget().getProject().code().listChangedFiles(
 					request.getTarget().getHeadCommit(), request.getSource().getHeadCommit())) {
 				if (WildcardUtils.matchPath(filePatterns, file))
-						return accepted("Touched files match patterns '" + filePatterns + "'.");
+						return approved("Touched files match patterns '" + filePatterns + "'.");
 			}
 			
-			return rejected("No touched files match patterns '" + filePatterns + "'.");
+			return disapproved("No touched files match patterns '" + filePatterns + "'.");
 		} else {
 			for (int i=0; i<request.getEffectiveUpdates().size(); i++) {
 				PullRequestUpdate update = request.getEffectiveUpdates().get(i);
@@ -58,31 +58,31 @@ public class IfTouchSpecifiedFilePatterns extends FileGateKeeper {
 				for (String file: touchedFiles) {
 					if (WildcardUtils.matchPath(getFilePatterns(), file)) {
 						request.setBaseUpdate(update);
-						return accepted("Touched files match patterns '" + getFilePatterns() + "'.");
+						return approved("Touched files match patterns '" + getFilePatterns() + "'.");
 					}
 				}
 			}
 	
-			return rejected("No touched files match patterns '" + getFilePatterns() + "'.");
+			return disapproved("No touched files match patterns '" + getFilePatterns() + "'.");
 		}
 	}
 
 	@Override
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
 		if (WildcardUtils.matchPath(filePatterns, file)) 
-			return accepted("Touched files match patterns '" + filePatterns + "'.");
+			return approved("Touched files match patterns '" + filePatterns + "'.");
 		else
-			return rejected("No touched files match patterns '" + filePatterns + "'.");
+			return disapproved("No touched files match patterns '" + filePatterns + "'.");
 	}
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
 		for (String file: branch.getProject().code().listChangedFiles(branch.getHeadCommit(), commit)) {
 			if (WildcardUtils.matchPath(filePatterns, file))
-					return accepted("Touched files match patterns '" + filePatterns + "'.");
+					return approved("Touched files match patterns '" + filePatterns + "'.");
 		}
 		
-		return rejected("No touched files match patterns '" + filePatterns + "'.");
+		return disapproved("No touched files match patterns '" + filePatterns + "'.");
 	}
 
 	@Override

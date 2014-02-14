@@ -51,15 +51,15 @@ public class IfApprovedByProjectWriters extends ApprovalGateKeeper {
             Vote.Result result = user.checkVoteSince(request.getBaseUpdate());
             if (result == null) {
                 pendings++;
-            } else if (result.isAccept()) {
+            } else if (result.isApprove()) {
                 approvals++;
             }
         }
 
         if (approvals >= getLeastApprovals()) {
-            return accepted("Get at least " + getLeastApprovals() + " approvals from authorized users.");
+            return approved("Get at least " + getLeastApprovals() + " approvals from authorized users.");
         } else if (getLeastApprovals() - approvals > pendings) {
-            return rejected("Can not get at least " + getLeastApprovals()
+            return disapproved("Can not get at least " + getLeastApprovals()
                     + " approvals from authorized users.");
         } else {
             int lackApprovals = getLeastApprovals() - approvals;
@@ -86,9 +86,9 @@ public class IfApprovedByProjectWriters extends ApprovalGateKeeper {
         }
         
         if (approvals >= leastApprovals) {
-            return accepted("Get at least " + leastApprovals + " approvals from authorized users.");
+            return approved("Get at least " + leastApprovals + " approvals from authorized users.");
         } else if (leastApprovals - approvals > pendings) {
-            return rejected("Can not get at least " + leastApprovals + " approvals from authorized users.");
+            return disapproved("Can not get at least " + leastApprovals + " approvals from authorized users.");
         } else {
             int lackApprovals = getLeastApprovals() - approvals;
             return pending("Lack " + lackApprovals + " approvals from authorized users.", 

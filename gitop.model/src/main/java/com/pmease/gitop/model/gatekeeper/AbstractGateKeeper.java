@@ -11,12 +11,12 @@ import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.model.gatekeeper.checkresult.Accepted;
+import com.pmease.gitop.model.gatekeeper.checkresult.Approved;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.checkresult.Ignored;
 import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
 import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
-import com.pmease.gitop.model.gatekeeper.checkresult.Rejected;
+import com.pmease.gitop.model.gatekeeper.checkresult.Disapproved;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
 
 @SuppressWarnings("serial")
@@ -129,12 +129,12 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 		return this;
 	}
 
-	protected CheckResult accepted(String reason) {
-		return new Accepted(reason);
+	protected CheckResult approved(String reason) {
+		return new Approved(reason);
 	}
 
-	protected CheckResult rejected(String reason) {
-		return new Rejected(reason);
+	protected CheckResult disapproved(String reason) {
+		return new Disapproved(reason);
 	}
 
 	protected CheckResult pending(String reason, VoteEligibility voteEligibility) {
@@ -149,12 +149,12 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 		return new Ignored();
 	}
 
-	protected CheckResult accepted(List<String> reasons) {
-		return new Accepted(reasons);
+	protected CheckResult approved(List<String> reasons) {
+		return new Approved(reasons);
 	}
 	
-	protected CheckResult rejected(List<String> reasons) {
-		return new Rejected(reasons);
+	protected CheckResult disapproved(List<String> reasons) {
+		return new Disapproved(reasons);
 	}
 
 	protected CheckResult pending(List<String> reasons, Collection<VoteEligibility> voteEligibilies) {

@@ -50,10 +50,10 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
 
             return pending("To be approved by user '" + user.getName() + "'.",
                     new CanVoteBySpecifiedUser(user));
-        } else if (result.isAccept()) {
-            return accepted("Approved by user '" + user.getName() + "'.");
+        } else if (result.isApprove()) {
+            return approved("Approved by user '" + user.getName() + "'.");
         } else {
-            return rejected("Rejected by user '" + user.getName() + "'.");
+            return disapproved("Rejected by user '" + user.getName() + "'.");
         }
     }
 
@@ -68,7 +68,7 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
     private CheckResult checkApproval(User user) {
 		User approver = Gitop.getInstance(UserManager.class).load(userId);
         if (approver.getId().equals(user.getId())) {
-        	return accepted("Approved by user '" + approver.getName() + "'.");
+        	return approved("Approved by user '" + approver.getName() + "'.");
         } else {
         	return pending("Not approved by user '" + approver.getName() + "'.", 
         			new CanVoteBySpecifiedUser(approver)); 

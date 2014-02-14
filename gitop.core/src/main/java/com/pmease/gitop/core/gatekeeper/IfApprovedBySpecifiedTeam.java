@@ -50,16 +50,16 @@ public class IfApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
             Vote.Result result = member.checkVoteSince(request.getBaseUpdate());
             if (result == null) {
                 pendings++;
-            } else if (result.isAccept()) {
+            } else if (result.isApprove()) {
                 approvals++;
             }
         }
 
         if (approvals >= getLeastApprovals()) {
-            return accepted("Get at least " + getLeastApprovals() + " approvals from team '"
+            return approved("Get at least " + getLeastApprovals() + " approvals from team '"
                     + getTeam().getName() + "'.");
         } else if (getLeastApprovals() - approvals > pendings) {
-            return rejected("Can not get at least " + getLeastApprovals()
+            return disapproved("Can not get at least " + getLeastApprovals()
                     + " approvals from team '" + getTeam().getName() + "'.");
         } else {
             int lackApprovals = getLeastApprovals() - approvals;
@@ -85,10 +85,10 @@ public class IfApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
         }
 
         if (approvals >= getLeastApprovals()) {
-            return accepted("Get at least " + leastApprovals + " approvals from team '"
+            return approved("Get at least " + leastApprovals + " approvals from team '"
                     + getTeam().getName() + "'.");
         } else if (getLeastApprovals() - approvals > pendings) {
-            return rejected("Can not get at least " + leastApprovals 
+            return disapproved("Can not get at least " + leastApprovals 
                     + " approvals from team '" + getTeam().getName() + "'.");
         } else {
             int lackApprovals = getLeastApprovals() - approvals;

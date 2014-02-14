@@ -12,12 +12,12 @@ import com.pmease.gitop.web.page.project.ProjectCategoryPage;
 @SuppressWarnings("serial")
 public class RequestDetailPage extends ProjectCategoryPage {
 
-	private IModel<PullRequest> requestModel;
+	private IModel<PullRequest> model;
 	
 	public RequestDetailPage(final PageParameters params) {
 		super(params);
 		
-		requestModel = new LoadableDetachableModel<PullRequest>() {
+		model = new LoadableDetachableModel<PullRequest>() {
 
 			@Override
 			protected PullRequest load() {
@@ -30,15 +30,17 @@ public class RequestDetailPage extends ProjectCategoryPage {
 	@Override
 	protected void onPageInitialize() {
 		super.onPageInitialize();
+	
+		add(new RequestDetailPanel("content", model));
 	}
-
+	
 	public PullRequest getPullRequest() {
-		return requestModel.getObject();
+		return model.getObject();
 	}
 
 	@Override
 	public void onDetach() {
-		requestModel.detach();
+		model.detach();
 		super.onDetach();
 	}
 	

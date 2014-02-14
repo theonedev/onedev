@@ -72,7 +72,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 		if (isCheckMerged()) {
 			commit = request.getMergeResult().getMergeHead();
 			if (commit == null) 
-				return rejected("Can not build against merged result due to conflicts.");
+				return disapproved("Can not build against merged result due to conflicts.");
 		} else if (request.isNew()) {
 			commit = request.getSource().getHeadCommit();
 		} else {
@@ -81,7 +81,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 		Collection<BuildResult> buildResults = BuildResultManager.findBy(commit);
 		for (BuildResult each: buildResults) {
 			if (!each.isPassed())
-				return rejected("At least one build is failed for the merged commit.");
+				return disapproved("At least one build is failed for the merged commit.");
 		}
 		int lacks = buildCount - buildResults.size();
 		
@@ -98,7 +98,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 					return pending("To be verified by build", new NoneCanVote());
 			}
 		} else {
-			return accepted("Builds passed");
+			return approved("Builds passed");
 		}
 	}
 
@@ -117,7 +117,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 		Collection<BuildResult> buildResults = BuildResultManager.findBy(commit);
 		for (BuildResult each: buildResults) {
 			if (!each.isPassed())
-				return rejected("At least one build is failed for the commit.");
+				return disapproved("At least one build is failed for the commit.");
 		}
 		int lacks = buildCount - buildResults.size();
 		
@@ -134,7 +134,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 					return pending("Not verified by build", new NoneCanVote());
 			}
 		} else {
-			return accepted("Builds passed");
+			return approved("Builds passed");
 		}
 	}
 

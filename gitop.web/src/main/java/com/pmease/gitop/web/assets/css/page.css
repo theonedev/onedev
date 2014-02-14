@@ -1,5 +1,8 @@
 /* MISC */
 .img-link:hover { text-decoration: none; }
+a.dropdown-toggle {text-decoration: none;}
+a.dropdown-toggle:focus, a.dropdown-toggle:hover, a.dropdown-toggle.open {
+	color: white; background-color: #2A6496;}
 
 pre, code { font-family: Consolas, 'Liberation Mono', Courier, monospace; }
 .alert pre, .alert code { background: white; margin: 5px 0; }
@@ -680,7 +683,7 @@ a.diffstat:hover { text-decoration: none; }
 
 .comparable-branch-selector .connector {margin-top: 4px; color: #BBB; font-weight: bold; font-size: 16px;}
 
-/* PULL REQUEST LIST PAGE */
+/* PULL REQUEST LIST PANEL */
 .request-list>.head {padding: 12px 10px !important; font-size: 16px;}
 .request-list>.head>div {margin-right: 20px;}
 .request-list>.head>div:last-child {margin-right: 0;}
@@ -698,7 +701,7 @@ ul.status-help .description {color: #444; margin: 4px 0 8px 0; border-bottom: 1p
 	padding-bottom: 4px; font-size: 14px;}
 ul.status-help li:last-child .description {border-bottom: none;}
 
-/* NEW PULL REQUEST PAGE */
+/* NEW PULL REQUEST PANEL */
 .new-request {padding: 20px;}
 .new-request>.title {font-size: 20px; font-weight: bold; margin-bottom: 20px;}
 .new-request>.branches {background: #F2F2F2; padding: 8px; border-radius: 4px;}
@@ -742,3 +745,24 @@ ul.status-help li:last-child .description {border-bottom: none;}
 	background-color: #F2DEDE;}
 .new-request>.feedback td.status.has-error .summary, 
 .new-request>.feedback td.status.has-error .detail {display: none;}
+
+/* PULL REQUEST DETAIL PANEL */
+.request-detail {padding: 20px;}
+.request-detail>div {margin-bottom: 16px;}
+.request-detail>.title {font-size: 20px; font-weight: bold;}
+.request-detail>.title>span {margin-right: 4px;}
+.request-detail>.title>.id {color: #999;}
+.request-detail>.title>.icon {font-size: 16px; margin-left: 8px;}
+.request-detail>.summary .branch {margin-right: 6px;}
+.request-detail>.summary .branch.label {background-color: #DDDDDD;}
+.request-detail>.summary .branch .icon {color: #666666;}
+.request-detail>.merge {border: 1px solid; padding: 8px; border-radius: 4px;}
+.request-detail>.merge .message {margin-bottom: 8px; font-size: 16px;}
+.request-detail>.merge.warning {color: #8A6D3B; border-color: #F7DEAB; background-color: #FCF8E3;}
+.request-detail>.merge.success {color: #3C763D; border-color: #BDDCA4; background-color: #DFF0D8;}
+
+.request-detail>.merge .icon {font-size: 26px; margin-right: 8px; display: none;}
+.request-detail>.merge.warning .icon-warning-sign {display: block; color: #8A6D3B;}
+.request-detail>.merge.success .icon-ok-circle {display: block; color: #3C763D;}
+
+.request-detail .actions>a {margin-right: 12px;}

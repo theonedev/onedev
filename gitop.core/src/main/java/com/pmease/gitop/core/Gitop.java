@@ -80,7 +80,7 @@ public class Gitop extends AbstractPlugin {
 			
 			@Override
 			public ScheduleBuilder<?> getScheduleBuilder() {
-				return SimpleScheduleBuilder.repeatMinutelyForever();
+				return SimpleScheduleBuilder.repeatHourlyForever();
 			}
 			
 			@Override
@@ -89,6 +89,7 @@ public class Gitop extends AbstractPlugin {
 			}
 			
 		});
+		checkGit();
 		
 		logger.info("Checking projects...");
 		

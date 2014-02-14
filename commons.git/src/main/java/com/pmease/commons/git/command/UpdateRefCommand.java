@@ -51,7 +51,7 @@ public class UpdateRefCommand extends GitCommand<Boolean> {
 		    cmd.addArgs(oldRevision);
 
 		if (reason != null)
-            cmd.addArgs(reason);
+            cmd.addArgs("-m", reason);
 		
 		final boolean refLockError[] = new boolean[]{false};
 		ExecuteResult result = cmd.execute(debugLogger, new LineConsumer() {

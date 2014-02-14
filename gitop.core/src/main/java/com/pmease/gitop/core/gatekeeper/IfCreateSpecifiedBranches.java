@@ -55,9 +55,9 @@ public class IfCreateSpecifiedBranches extends BranchGateKeeper {
 	protected CheckResult doCheckRef(User user, Project project, String refName) {
 		if (refName.startsWith(Git.REFS_HEADS)) {
 			if (WildcardUtils.matchPath(Git.REFS_HEADS + getBranchPatterns(), refName))
-				return accepted("Branch to be created matches pattern '" + branchPatterns + "'.");
+				return approved("Branch to be created matches pattern '" + branchPatterns + "'.");
 			else
-				return rejected("Branch to be created does not match pattern '" + branchPatterns + "'.");
+				return disapproved("Branch to be created does not match pattern '" + branchPatterns + "'.");
 		} else {
 			return ignored();
 		}

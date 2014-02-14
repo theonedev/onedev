@@ -44,11 +44,11 @@ public class IfTouchSpecifiedDirectories extends FileGateKeeper {
 					request.getTarget().getHeadCommit(), request.getSource().getHeadCommit())) {
 				for (String each: directories) {
 					if (WildcardUtils.matchPath(each + "/**", file))
-						return accepted("Touched directory '" + each + "'.");
+						return approved("Touched directory '" + each + "'.");
 				}
 			}
 
-			return rejected("Not touched directories '" + getDirectories() + "'.");
+			return disapproved("Not touched directories '" + getDirectories() + "'.");
 		} else {
 			for (int i=0; i<request.getEffectiveUpdates().size(); i++) {
 				PullRequestUpdate update = request.getEffectiveUpdates().get(i);
@@ -59,13 +59,13 @@ public class IfTouchSpecifiedDirectories extends FileGateKeeper {
 					for (String each: directories) {
 						if (WildcardUtils.matchPath(each + "/**", file)) {
 							request.setBaseUpdate(update);
-							return accepted("Touched directory '" + each + "'.");
+							return approved("Touched directory '" + each + "'.");
 						}
 					}
 				}
 			}
 	
-			return rejected("Not touched directories '" + getDirectories() + "'.");
+			return disapproved("Not touched directories '" + getDirectories() + "'.");
 		}
 	}
 
@@ -73,9 +73,9 @@ public class IfTouchSpecifiedDirectories extends FileGateKeeper {
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
 		for (String each: directories) {
 			if (WildcardUtils.matchPath(each + "/**", file)) 
-				return accepted("Touched directory '" + each + "'.");
+				return approved("Touched directory '" + each + "'.");
 		}
-		return rejected("Not touched directories '" + getDirectories() + "'.");
+		return disapproved("Not touched directories '" + getDirectories() + "'.");
 	}
 
 	@Override
@@ -83,11 +83,11 @@ public class IfTouchSpecifiedDirectories extends FileGateKeeper {
 		for (String file: branch.getProject().code().listChangedFiles(branch.getHeadCommit(), commit)) {
 			for (String each: directories) {
 				if (WildcardUtils.matchPath(each + "/**", file))
-					return accepted("Touched directory '" + each + "'.");
+					return approved("Touched directory '" + each + "'.");
 			}
 		}
 
-		return rejected("Not touched directories '" + getDirectories() + "'.");
+		return disapproved("Not touched directories '" + getDirectories() + "'.");
 	}
 
 	@Override
