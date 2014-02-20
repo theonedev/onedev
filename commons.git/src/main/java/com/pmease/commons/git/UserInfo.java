@@ -52,7 +52,10 @@ public class UserInfo implements Serializable {
 	@Override
 	public String toString() {
 		return Objects.toStringHelper(this)
-				.add("name", name).toString();
+				.add("name", name)
+				.add("email", email)
+				.add("date", date)
+				.toString();
 	}
 	
 }

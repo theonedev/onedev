@@ -632,6 +632,31 @@ a.diffstat:hover { text-decoration: none; }
 .comment-list .form-comment { background: #f7f7f7; border: 1px solid #ddd; border-radius: 4px; padding-top: 8px; margin: 0; }
 
 /**
+ * BRANCHES PAGE
+ */
+.branches-page h2 { margin-top: 0;}
+.table-branches td.actions { text-align: right; vertical-align: middle; }
+.table-branches p { margin: 0;}
+.table-branches td.meta a { font-size: 16px; font-weight: bold; } 
+.table-branches td.meta p { color: #666;}
+.table-branches tr.default-branch { background: #333; color: white; }
+.table-branches .default-branch .meta a { color: white; }
+.table-branches .default-branch .meta p { color: #ccc; }
+
+.bar { display: block; }
+.statbar { position: relative; width: 220px; }
+.statbar .ahead { position: absolute; left: 50%; right: 0; border-left: 1px solid #666; }
+.statbar .behind { position: absolute; left: 0; right: 50%; border-right: 1px solid #666; }
+.statbar .bar { height: 14px; }
+.statbar .bar.bar-empty { min-width: 1px; background: #fff; }
+.statbar .ahead .bar { background: #666; float: left; }
+.statbar .behind .bar { background: #ccc; float: right; }
+.statbar p { clear: both; margin: 0; color: #999; }
+.statbar .ahead p { padding-left: 4px; }
+.statbar .behind p { text-align: right; padding-right: 4px; }
+
+
+/**
  * GATE KEEPER SETTING PAGE
  */
 .gate-keeper-tip {margin: 0 20px 20px 20px;}

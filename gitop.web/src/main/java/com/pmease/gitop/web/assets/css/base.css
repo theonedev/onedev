@@ -26,6 +26,9 @@ ul.disc { list-style:disc outside; }
 
 .text-nowrap { white-space: nowrap; }
 
+hr.dash { border-style: dashed; }
+hr.deep { border-color: #999; }
+
 /* Inline Lists */
 .inline-list { margin: 0 auto 1.0625em auto; margin-left: -1.375em; margin-right: 0; padding: 0; list-style: none; overflow: hidden; }
 .inline-list > li { list-style: none; float: left; margin-left: 1.375em; display: block; }

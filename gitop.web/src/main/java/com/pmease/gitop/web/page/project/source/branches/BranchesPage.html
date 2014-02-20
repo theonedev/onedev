@@ -1,5 +1,59 @@
 <html xmlns:wicket>
 <wicket:extend>
-	<h1>Branches</h1>
+	<div class="padder">
+		<div class="page-heading">
+			<h2>Branches</h2>
+		</div>
+		
+		<wicket:container wicket:id="content"></wicket:container>
+	</div>
+	
+	<wicket:fragment wicket:id="nobranch">
+		<div class="alert alert-warning">There is no branches in this repository</div>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="branchesFrag">
+		<table class="table table-branches">
+			<tr class="default-branch">
+				<td class="meta">
+					<wicket:container wicket:id="defaultMeta"></wicket:container>
+				</td>
+				<td class="">
+				</td>
+				<td class="actions">
+					Default branch
+				</td>
+			</tr>
+			<tr class="branch" wicket:id="branches">
+				<td class="meta">
+					<wicket:container wicket:id="meta"></wicket:container>
+				</td>
+				<td class="">
+					<wicket:container wicket:id="statbar"></wicket:container>
+				</td>
+				<td class="actions">
+					<button class="btn btn-default"><i class="icon icon-git-branch-compare"></i> Compare</button>
+				</td>
+			</tr>
+		</table>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="metaFrag">
+		<a wicket:id="branchlink"><span wicket:id="name"></span></a>
+		<p>Last updated <span class="age" wicket:id="updatedTime"></span> by <span wicket:id="author"></span></p>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="statBarFrag">
+		<div class="statbar">
+			<div class="ahead">
+				<span class="bar bar-ahead" wicket:id="aheadbar"></span>
+				<p><span wicket:id="aheadnum"></span> ahead</p>
+			</div>
+			<div class="behind">
+				<span class="bar bar-behind" wicket:id="behindbar"></span>
+				<p><span wicket:id="behindnum"></span> behind</p>
+			</div>
+		</div>
+	</wicket:fragment>
 </wicket:extend>
 </html>
