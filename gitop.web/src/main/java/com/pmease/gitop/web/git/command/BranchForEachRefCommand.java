@@ -18,12 +18,17 @@ public class BranchForEachRefCommand extends ForEachRefCommand<Map<String, Brief
 		super(repoDir);
 	}
 
-	private static final String DEFAULT_FORMAT = 
+	private static final String FORMAT = 
 			"%(refname:short)|" +		// ref name
 			"%(objectname)|" +			// ref sha-1
 			"%(committername)|%(committeremail)|%(committerdate:raw)|" + // committer part
 			"%(authorname)|%(authoremail)|%(authordate:raw)" + // author part
 			"%09%(contents:subject)"; // \tcommit subject
+	
+	@Override
+	protected String getFormat() {
+		return FORMAT;
+	}
 	
 	@Override
 	protected void applyArgs(Commandline cmd) {
@@ -33,18 +38,9 @@ public class BranchForEachRefCommand extends ForEachRefCommand<Map<String, Brief
 			cmd.addArgs("--sort=-committerdate");
 		}
 		
-		if (Strings.isNullOrEmpty(getFormat())) {
-			cmd.addArgs("--format=" + DEFAULT_FORMAT);
-		}
-		
 		if (getPatterns().length == 0) {
 			cmd.addArgs("refs/heads/");
 		}
-	}
-	
-	@Override
-	public BranchForEachRefCommand format(String format) {
-		throw new UnsupportedOperationException();
 	}
 	
 	@Override

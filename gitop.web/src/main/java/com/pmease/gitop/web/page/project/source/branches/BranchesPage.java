@@ -199,7 +199,6 @@ public class BranchesPage extends ProjectCategoryPage {
 	
 	BriefCommit getLastCommit(String refName) {
 		Map<String, BriefCommit> branches = branchesModel.getObject();
-		System.out.println(branches.keySet());
 		if (branches.containsKey(refName))
 			return branches.get(refName);
 		else

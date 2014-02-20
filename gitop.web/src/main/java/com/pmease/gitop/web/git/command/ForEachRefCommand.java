@@ -12,7 +12,6 @@ import com.pmease.commons.util.execution.LineConsumer;
 
 public abstract class ForEachRefCommand<T, V extends ForEachRefCommand<T, V>> extends GitCommand<T> {
 
-	private String format;
 	private String[] patterns = new String[0];
 	private int count;
 	private String sort;
@@ -25,11 +24,6 @@ public abstract class ForEachRefCommand<T, V extends ForEachRefCommand<T, V>> ex
 		super(repoDir, environments);
 	}
 
-	public V format(String format) {
-		this.format = format;
-		return self();
-	}
-	
 	public V patterns(String value, String... values) {
 		if (value == null) {
 			this.patterns = new String[0];
@@ -56,6 +50,8 @@ public abstract class ForEachRefCommand<T, V extends ForEachRefCommand<T, V>> ex
 
 	abstract protected V self();
 	abstract protected ForEachRefOutputHandler<T> getOutputHandler();
+	abstract protected String getFormat();
+	
 	
 	@Override
 	public T call() {
@@ -90,10 +86,6 @@ public abstract class ForEachRefCommand<T, V extends ForEachRefCommand<T, V>> ex
 		for (String each : getPatterns()) {
 			cmd.addArgs(each);
 		}
-	}
-
-	public String getFormat() {
-		return format;
 	}
 
 	public String[] getPatterns() {
