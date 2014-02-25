@@ -117,6 +117,7 @@ public class DefaultPullRequestUpdateManager extends AbstractGenericDao<PullRequ
 							public Void call() throws Exception {
 									// Reload request to avoid Hibernate LazyInitializationException
 									update(pullRequestManager.load(request.getId()));
+									pullRequestManager.refresh(request);
 									return null;
 							}
 							

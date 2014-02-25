@@ -68,7 +68,9 @@ public class CloneCommand extends GitCommand<Void> {
 
 			@Override
 			public void consume(String line) {
-				if (line.contains("You appear to have cloned an empty repository"))
+				if (line.startsWith("Cloning into ") || line.equals("done."))
+					debug(line);
+				else if (line.contains("You appear to have cloned an empty repository"))
 					warn(line);
 				else
 					error(line);

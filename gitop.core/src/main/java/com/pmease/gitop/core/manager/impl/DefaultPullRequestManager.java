@@ -20,7 +20,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.pmease.commons.git.Git;
-import com.pmease.commons.hibernate.EntityEvent;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
@@ -32,18 +31,16 @@ import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.core.manager.PullRequestUpdateManager;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.BuildResult;
 import com.pmease.gitop.model.MergeResult;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequest.Status;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.VoteInvitation;
 import com.pmease.gitop.model.gatekeeper.checkresult.Approved;
+import com.pmease.gitop.model.gatekeeper.checkresult.Disapproved;
 import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
 import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
-import com.pmease.gitop.model.gatekeeper.checkresult.Disapproved;
 
 @Singleton
 public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> implements
@@ -286,26 +283,6 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 		});
 	}
 
-	@Sessional
-	@Subscribe
-	public void refreshUpon(EntityEvent entityEvent) {
-		if (entityEvent.getEntity() instanceof Vote) {
-			Vote vote = (Vote) entityEvent.getEntity();
-			if (vote.getUpdate().getRequest().isOpen())
-				refresh(vote.getUpdate().getRequest());
-		} else if (entityEvent.getEntity() instanceof PullRequestUpdate) {
-			PullRequestUpdate update = (PullRequestUpdate) entityEvent.getEntity();
-			if (update.getRequest().isOpen())
-				refresh(update.getRequest());
-		} else if (entityEvent.getEntity() instanceof BuildResult) {
-			BuildResult result = (BuildResult) entityEvent.getEntity();
-			for (PullRequest request: findByCommit(result.getCommit())) {
-				if (request.isOpen()) 
-					refresh(request);
-			}
-		}
-	}
-	
 	@Sessional
 	@Subscribe
 	public void refreshUpon(BranchRefUpdateEvent event) {
