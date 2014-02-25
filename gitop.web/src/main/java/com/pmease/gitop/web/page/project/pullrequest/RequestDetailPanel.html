@@ -3,7 +3,6 @@
 		<div class="title">
 			<span wicket:id="title"></span>
 			<span wicket:id="id" class="id"></span>
-			<span wicket:id="status" class="status"></span>
 			<a wicket:id="edit" class="icon icon-edit" href="javascript:void(0);"></a>
 		</div>
 		<div class="summary">
@@ -18,41 +17,46 @@
 				<span class="label branch"><span class="icon icon-git-branch"></span> <a wicket:id="sourceLink"><span wicket:id="sourceLabel"></span></a></span>
 			</wicket:enclosure>
 			<span wicket:id="date"></span>
+			<span wicket:id="statusLabel" class="status"></span>
 		</div>
-		<wicket:enclosure child="statusMessage">
-		<div class="status">
-			<div wicket:id="statusMessage" class="message"></div>
-			<div class="reasons">
-				<div wicket:id="reasons">
-					<span wicket:id="reason"></span>
-				</div>
-			</div>
-			<wicket:enclosure child="approve">
-			<div class="actions">
-				<a wicket:id="approve" class="btn btn-success" href="javascript:void(0);">Approve</a>
-				<a wicket:id="disapprove" class="btn btn-danger" href="javascript:void(0);">Disapprove</a>
-			</div>
-			</wicket:enclosure>
-		</div>
-		</wicket:enclosure>
-		<div wicket:id="merge" class="merge clearfix">
-			<div class="pull-left">
-				<span class="icon icon-ok-circle"></span>
-				<span class="icon icon-warning-sign"></span>
-			</div>
-			<div class="pull-left">
-				<div class="message">
-					<div wicket:id="noConflicts" class="no-conflicts">Be able to merge automatically.</div>
-					<div wicket:id="conflicts" class="conflicts">
-						There are merge conflicts, you may use <a wicket:id="helpTrigger" href="javascript:void(0);">command line</a> to resolve conflicts.
-						<div wicket:id="helpDropdown"></div>
-					</div>
-				</div>
-				<div class="actions">
-					<a wicket:id="integrate" class="btn btn-success">Integrate</a>
-					<a wicket:id="discard" class="btn btn-danger">Discard</a>
-				</div>
-			</div>
+		<div wicket:id="status" class="status">
+			<table>
+				<tr>
+					<wicket:enclosure child="message">
+					<td class="primary">
+						<div wicket:id="message" class="message"></div>
+						<ul class="reasons">
+							<li wicket:id="reasons">
+								<span wicket:id="reason"></span>
+							</li>
+						</ul>
+					</td>
+					</wicket:enclosure>
+					<td wicket:id="merge" class="merge">
+						<table>
+							<tr>
+								<td class="icons">
+									<span class="icon icon-ok-circle"></span>
+									<span class="icon icon-warning-sign"></span>
+								</td>
+								<td>
+									<div wicket:id="noConflicts" class="no-conflicts">Be able to merge automatically.</div>
+									<div wicket:id="conflicts" class="conflicts">
+										There are merge conflicts, you may use <a wicket:id="helpTrigger" href="javascript:void(0);">command line</a> to resolve conflicts.
+										<div wicket:id="helpDropdown"></div>
+									</div>
+								</td>
+							</tr>
+						</table>
+					</td>
+					<td wicket:id="actions" class="actions">
+						<a wicket:id="approve" class="btn btn-primary btn-sm btn-block" href="javascript:void(0);">Approve</a>
+						<a wicket:id="disapprove" class="btn btn-warning btn-sm btn-block" href="javascript:void(0);">Disapprove</a>
+						<a wicket:id="integrate" class="btn btn-success btn-sm btn-block">Integrate</a>
+						<a wicket:id="discard" class="btn btn-danger btn-sm btn-block">Discard</a>
+					</td>
+				</tr>
+			</table>
 		</div>
 	</div>
 	<wicket:fragment wicket:id="conflictHelpFrag">

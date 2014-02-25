@@ -45,7 +45,6 @@ public class RequestDetailPanel extends Panel {
 		super(id, model);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -66,7 +65,6 @@ public class RequestDetailPanel extends Panel {
 			}
 			
 		}));
-		add(new RequestStatusPanel("status", (IModel<PullRequest>) getDefaultModel()));
 		
 		add(new AjaxLink<Void>("edit") {
 
@@ -161,15 +159,39 @@ public class RequestDetailPanel extends Panel {
 			
 		}));
 
-		add(new Label("statusMessage", new AbstractReadOnlyModel<String>() {
+		add(new RequestStatusPanel("statusLabel", new AbstractReadOnlyModel<PullRequest>() {
 
 			@Override
-			public String getObject() {
-				PullRequest request = getPullRequest();
-				if (request.getStatus() == Status.PENDING_APPROVAL)
-					return "This request has to be approved.";
-				else 
-					return "This request has to be updated.";
+			public PullRequest getObject() {
+				return getPullRequest();
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getPullRequest().isOpen());
+			}
+			
+		});
+		
+		WebMarkupContainer statusContainer = new WebMarkupContainer("status") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getPullRequest().isOpen());
+			}
+			
+		};
+		add(statusContainer);
+		
+		statusContainer.add(new RequestStatusPanel("message", new AbstractReadOnlyModel<PullRequest>() {
+
+			@Override
+			public PullRequest getObject() {
+				return getPullRequest();
 			}
 			
 		}) {
@@ -185,7 +207,7 @@ public class RequestDetailPanel extends Panel {
 			
 		});
 		
-		add(new ListView<String>("reasons", new LoadableDetachableModel<List<String>>() {
+		statusContainer.add(new ListView<String>("reasons", new LoadableDetachableModel<List<String>>() {
 
 			@Override
 			protected List<String> load() {
@@ -201,47 +223,6 @@ public class RequestDetailPanel extends Panel {
 
 		});
 		
-		add(new Link<Void>("approve") {
-
-			@Override
-			public void onClick() {
-				vote(Vote.Result.APPROVE);
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				PullRequest request = getPullRequest();
-				
-				if (request.getStatus() == Status.PENDING_APPROVAL) {
-					User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
-					if (currentUser != null) {
-						boolean canVote = false;
-						for (VoteEligibility each: request.getCheckResult().getVoteEligibilities()) {
-							if (each.canVote(currentUser, request)) {
-								canVote = true;
-								break;
-							}
-						}
-						setVisible(canVote);
-					} else {
-						setVisible(false);
-					}
-				} else {
-					setVisible(false);
-				}
-			}
-			
-		});
-		
-		add(new Link<Void>("disapprove") {
-
-			@Override
-			public void onClick() {
-				vote(Vote.Result.DISAPPROVE);
-			}
-			
-		});
 
 		WebMarkupContainer mergeContainer = new WebMarkupContainer("merge") {
 
@@ -264,7 +245,7 @@ public class RequestDetailPanel extends Panel {
 			}
 			
 		}));
-		add(mergeContainer);
+		statusContainer.add(mergeContainer);
 		
 		mergeContainer.add(new WebMarkupContainer("noConflicts") {
 
@@ -299,7 +280,88 @@ public class RequestDetailPanel extends Panel {
 		conflictsContainer.add(new WebMarkupContainer("helpTrigger")
 				.add(new DropdownBehavior(helpDropdown).clickMode(false)));
 		
-		mergeContainer.add(new Link<Void>("integrate") {
+		WebMarkupContainer actionsContainer = new WebMarkupContainer("actions") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+
+				boolean visible = false;
+				for (Component link: visitChildren(Link.class)) {
+					link.configure();
+					if (link.isVisible())
+						visible = true;
+				}
+				setVisible(visible);
+			}
+			
+		};
+		statusContainer.add(actionsContainer);
+		
+		final Link<Void> approveLink;
+		actionsContainer.add(approveLink = new Link<Void>("approve") {
+
+			@Override
+			public void onClick() {
+				vote(Vote.Result.APPROVE);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				PullRequest request = getPullRequest();
+				
+				if (request.getStatus() == Status.PENDING_APPROVAL) {
+					User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
+					if (currentUser != null) {
+						boolean canVote = false;
+						for (VoteEligibility each: request.getCheckResult().getVoteEligibilities()) {
+							if (each.canVote(currentUser, request)) {
+								canVote = true;
+								break;
+							}
+						}
+						setVisible(canVote);
+					} else {
+						setVisible(false);
+					}
+				} else {
+					setVisible(false);
+				}
+			}
+			
+		});
+		
+		actionsContainer.add(new Link<Void>("disapprove") {
+
+			@Override
+			public void onClick() {
+				vote(Vote.Result.DISAPPROVE);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				approveLink.configure();
+				setVisible(approveLink.isVisible());
+			}
+			
+		});
+		
+		actionsContainer.add(new Link<Void>("integrate") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+
+				AbstractProjectPage page = (AbstractProjectPage) getPage();
+				
+				setVisible(SecurityUtils.getSubject().isPermitted(
+							ObjectPermission.ofProjectWrite(page.getProject())) 
+						&& getPullRequest().getMergeResult().getMergeHead() != null
+						&& getPullRequest().getStatus() == Status.PENDING_INTEGRATE);
+			}
 
 			@Override
 			public void onClick() {
@@ -308,7 +370,19 @@ public class RequestDetailPanel extends Panel {
 			
 		});
 		
-		mergeContainer.add(new Link<Void>("discard") {
+		actionsContainer.add(new Link<Void>("discard") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
+				AbstractProjectPage page = (AbstractProjectPage) getPage();
+				
+				setVisible(getPullRequest().getSubmitter().equals(currentUser) 
+							|| SecurityUtils.getSubject().isPermitted(
+								ObjectPermission.ofProjectWrite(page.getProject())));
+			}
 
 			@Override
 			public void onClick() {

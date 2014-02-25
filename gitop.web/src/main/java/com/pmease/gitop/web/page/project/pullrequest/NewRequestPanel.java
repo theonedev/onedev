@@ -142,7 +142,7 @@ public class NewRequestPanel extends Panel {
 			public String getObject() {
 				PullRequest request = getPullRequest();
 				if (request.isNew() 
-						&& request.getStatus() == PENDING_INTEGRATE 
+						&& (request.getStatus() == PENDING_INTEGRATE || request.getStatus() == PENDING_APPROVAL) 
 						&& request.getMergeResult().getMergeHead() != null) {
 					return "success";
 				} else {
