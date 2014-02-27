@@ -160,7 +160,9 @@ public class NewRequestPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				PullRequest request = getPullRequest();
-				setVisible(request.isNew() && (request.getStatus() == PENDING_APPROVAL || request.getStatus() == PENDING_INTEGRATE)); 
+				setVisible(request.isNew() 
+						&& (request.getStatus() == PENDING_APPROVAL 
+							|| request.getStatus() == PENDING_INTEGRATE)); 
 			}
 			
 		});

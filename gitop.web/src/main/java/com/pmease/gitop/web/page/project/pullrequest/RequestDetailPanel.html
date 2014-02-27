@@ -1,9 +1,18 @@
 <wicket:panel>
 	<div class="request-detail">
-		<div class="title">
-			<span wicket:id="title"></span>
-			<span wicket:id="id" class="id"></span>
-			<a wicket:id="edit" class="icon icon-edit" href="javascript:void(0);"></a>
+		<div wicket:id="head" class="head clearfix">
+			<div wicket:id="title" class="pull-left"></div>
+			<wicket:enclosure child="editTitle">
+			<div class="pull-left">
+				<a wicket:id="editTitle" class="icon icon-edit" href="javascript:void(0);"></a>
+			</div>
+			</wicket:enclosure>
+			<form wicket:id="titleEditor" class="pull-left form-inline">
+				<input wicket:id="title" type="text" placeholder="Input title" class="form-control input-sm"></input>
+				<input wicket:id="save" type="submit" value="Save" class="btn btn-sm btn-primary"/>
+				<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-sm btn-default"/>
+			</form>
+			<div wicket:id="id" class="id pull-right"></div>
 		</div>
 		<div class="summary">
 			<span wicket:id="user"></span> 

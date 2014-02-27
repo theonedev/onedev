@@ -775,10 +775,10 @@ ul.status-help li:last-child .description {border-bottom: none;}
 /* PULL REQUEST DETAIL PANEL */
 .request-detail {padding: 20px;}
 .request-detail>div {margin-bottom: 16px;}
-.request-detail>.title {font-size: 20px; font-weight: bold;}
-.request-detail>.title>span {margin-right: 4px;}
-.request-detail>.title>.id {color: #999;}
-.request-detail>.title>.icon {font-size: 16px;}
+.request-detail>.head {font-size: 20px; font-weight: bold; padding: 0;}
+.request-detail>.head>div {margin-right: 8px;}
+.request-detail>.head>.id {color: #999;}
+.request-detail>.head>.icon {font-size: 16px;}
 .request-detail>.summary .branch {margin-right: 6px;}
 .request-detail>.summary .branch.label {background-color: #DDDDDD;}
 .request-detail>.summary .branch .icon {color: #666666;}

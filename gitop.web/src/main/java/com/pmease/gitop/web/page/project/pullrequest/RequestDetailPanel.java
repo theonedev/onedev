@@ -3,13 +3,17 @@ package com.pmease.gitop.web.page.project.pullrequest;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -41,6 +45,8 @@ import com.pmease.gitop.web.page.project.api.GitPerson;
 @SuppressWarnings("serial")
 public class RequestDetailPanel extends Panel {
 
+	private boolean editingTitle;
+	
 	public RequestDetailPanel(String id, IModel<PullRequest> model) {
 		super(id, model);
 	}
@@ -48,16 +54,111 @@ public class RequestDetailPanel extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+
+		final WebMarkupContainer head = new WebMarkupContainer("head");
+		head.setOutputMarkupId(true);
+		add(head);
 		
-		add(new Label("title", new AbstractReadOnlyModel<String>() {
+		head.add(new Label("title", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
 				return getPullRequest().getTitle();
 			}
 			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!editingTitle);
+			}
+			
+		});
+		
+		head.add(new AjaxLink<Void>("editTitle") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				editingTitle = true;
+				
+				target.add(head);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
+				AbstractProjectPage page = (AbstractProjectPage) getPage();
+				
+				setVisible(!editingTitle 
+							&& (getPullRequest().getSubmitter().equals(currentUser) 
+								|| SecurityUtils.getSubject().isPermitted(
+									ObjectPermission.ofProjectWrite(page.getProject()))));
+			}
+			
+		});
+
+		Form<?> form = new Form<Void>("titleEditor") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(editingTitle);
+			}
+			
+		};
+		head.add(form);
+		
+		form.add(new TextField<String>("title", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				if (StringUtils.isNotBlank(getPullRequest().getTitle()))
+					return getPullRequest().getTitle();
+				else
+					return "";
+			}
+
+			@Override
+			public void setObject(String object) {
+				getPullRequest().setTitle(object);
+			}
+			
 		}));
-		add(new Label("id", new AbstractReadOnlyModel<String>() {
+		
+		form.add(new AjaxButton("save") {
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				super.onSubmit(target, form);
+				
+				if (StringUtils.isNotBlank(getPullRequest().getTitle())) {
+					Gitop.getInstance(PullRequestManager.class).save(getPullRequest());
+					editingTitle = false;
+				}
+
+				target.add(head);
+			}
+			
+		});
+		
+		form.add(new AjaxLink<Void>("cancel") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				editingTitle = false;
+				
+				target.add(head);
+			}
+			
+		});
+		
+		head.add(new Label("id", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -65,15 +166,6 @@ public class RequestDetailPanel extends Panel {
 			}
 			
 		}));
-		
-		add(new AjaxLink<Void>("edit") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				
-			}
-			
-		});
 
 		add(new GitPersonLink("user", new LoadableDetachableModel<GitPerson>() {
 
