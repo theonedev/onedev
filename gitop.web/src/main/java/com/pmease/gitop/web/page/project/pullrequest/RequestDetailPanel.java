@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -12,7 +13,9 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -22,6 +25,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.PropertyModel;
 
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
@@ -46,6 +50,10 @@ import com.pmease.gitop.web.page.project.api.GitPerson;
 public class RequestDetailPanel extends Panel {
 
 	private boolean editingTitle;
+	
+	private Action action;
+	
+	private String comment;
 	
 	public RequestDetailPanel(String id, IModel<PullRequest> model) {
 		super(id, model);
@@ -395,7 +403,7 @@ public class RequestDetailPanel extends Panel {
 
 			@Override
 			public void onClick() {
-				vote(Vote.Result.APPROVE);
+				action = Action.Approve;
 			}
 
 			@Override
@@ -406,14 +414,19 @@ public class RequestDetailPanel extends Panel {
 				if (request.getStatus() == Status.PENDING_APPROVAL) {
 					User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
 					if (currentUser != null) {
-						boolean canVote = false;
-						for (VoteEligibility each: request.getCheckResult().getVoteEligibilities()) {
-							if (each.canVote(currentUser, request)) {
-								canVote = true;
-								break;
+						if (Gitop.getInstance(VoteManager.class).find(
+								currentUser, request.getLatestUpdate()) != null) {
+							setVisible(false);
+						} else {
+							boolean canVote = false;
+							for (VoteEligibility each: request.getCheckResult().getVoteEligibilities()) {
+								if (each.canVote(currentUser, request)) {
+									canVote = true;
+									break;
+								}
 							}
+							setVisible(canVote);
 						}
-						setVisible(canVote);
 					} else {
 						setVisible(false);
 					}
@@ -428,7 +441,7 @@ public class RequestDetailPanel extends Panel {
 
 			@Override
 			public void onClick() {
-				vote(Vote.Result.DISAPPROVE);
+				action = Action.Disapprove;
 			}
 
 			@Override
@@ -457,7 +470,7 @@ public class RequestDetailPanel extends Panel {
 
 			@Override
 			public void onClick() {
-				Gitop.getInstance(PullRequestManager.class).merge(getPullRequest());
+				action = Action.Integrate;
 			}
 			
 		});
@@ -478,23 +491,87 @@ public class RequestDetailPanel extends Panel {
 
 			@Override
 			public void onClick() {
-				Gitop.getInstance(PullRequestManager.class).discard(getPullRequest());
+				action = Action.Discard;
+			}
+			
+		});
+		
+		Form<?> commentEditor = new Form<Void>("commentEditor") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(action != null);
+			}
+			
+		};
+		statusContainer.add(commentEditor);
+		
+		commentEditor.add(new TextArea<String>("comment", 
+				new PropertyModel<String>(this, "comment")));
+		
+		commentEditor.add(new Button("confirm") {
+
+			@Override
+			public void onSubmit() {
+				super.onSubmit();
+				
+				if (StringUtils.isBlank(comment))
+					comment = null;
+				User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
+				if (action == Action.Approve) {
+					Gitop.getInstance(VoteManager.class).vote(getPullRequest(), 
+							currentUser, Vote.Result.APPROVE, comment);
+				} else if (action == Action.Disapprove) {
+					Gitop.getInstance(VoteManager.class).vote(getPullRequest(), 
+							currentUser, Vote.Result.DISAPPROVE, comment);
+				} else if (action == Action.Integrate) {
+					Gitop.getInstance(PullRequestManager.class).merge(
+							getPullRequest(), currentUser, comment);
+				} else {
+					Gitop.getInstance(PullRequestManager.class).discard(
+							getPullRequest(), currentUser, comment);
+				}
+				action = null;
+				comment = null;
+			}
+			
+		}.add(AttributeModifier.replace("value", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return "Confirm " + action.name();
+			}
+			
+		})).add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				if (action == Action.Approve)
+					return "btn-primary";
+				else if (action == Action.Disapprove)
+					return "btn-warning";
+				else if (action == Action.Integrate)
+					return "btn-success";
+				else
+					return "btn-danger";
+			}
+			
+		})));
+		commentEditor.add(new Link<Void>("cancel") {
+
+			@Override
+			public void onClick() {
+				action = null;
+				comment = null;
 			}
 			
 		});
 	}
 	
-	private void vote(Vote.Result result) {
-		Vote vote = new Vote();
-		vote.setResult(Vote.Result.APPROVE);
-		vote.setUpdate(getPullRequest().getLatestUpdate());
-		vote.setVoter(Gitop.getInstance(UserManager.class).getCurrent());
-		Gitop.getInstance(VoteManager.class).save(vote);		
-		Gitop.getInstance(PullRequestManager.class).refresh(getPullRequest());
-	}
-
 	public PullRequest getPullRequest() {
 		return (PullRequest) getDefaultModelObject();
 	}
 
+	private static enum Action {Approve, Disapprove, Integrate, Discard}
 }

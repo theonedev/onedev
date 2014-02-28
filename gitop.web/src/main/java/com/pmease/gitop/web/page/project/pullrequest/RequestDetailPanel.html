@@ -66,6 +66,19 @@
 					</td>
 				</tr>
 			</table>
+			<form wicket:id="commentEditor">
+				<table>
+					<tr>
+						<td class="comment">
+							<textarea wicket:id="comment" rows="8" class="form-control" placeholder="Leave a comment"></textarea>
+						</td>
+						<td class="actions">
+							<input wicket:id="confirm" type="submit" value="Confirm" class="btn btn-primary btn-sm btn-block"></input> 
+							<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-default btn-sm btn-block"></input>
+						</td>
+					</tr>
+				</table>
+			</form>
 		</div>
 	</div>
 	<wicket:fragment wicket:id="conflictHelpFrag">

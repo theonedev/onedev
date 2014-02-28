@@ -801,5 +801,6 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.status td.icons {width: 1%;}
 .request-detail>.status td.merge.warning .icon-warning-sign {display: block; color: #8A6D3B;}
 .request-detail>.status td.merge.success .icon-ok-circle {display: block; color: #3C763D;}
-.request-detail>.status td.actions {width: 100px;}
-
+.request-detail>.status td.actions {width: 120px;}
+.request-detail>.status textarea {resize: vertical; min-height: 64px;}
+.request-detail>.status>form>table {border-spacing: 3px;}

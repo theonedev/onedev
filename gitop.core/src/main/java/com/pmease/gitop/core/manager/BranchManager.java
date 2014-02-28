@@ -86,6 +86,8 @@ public interface BranchManager extends GenericDao<Branch> {
      */
     public void rename(Branch branch, String newName);
     
+    public void onBranchRefUpdate(Branch branch);
+    
     public void trim(Collection<Long> branchIds);
     
 }

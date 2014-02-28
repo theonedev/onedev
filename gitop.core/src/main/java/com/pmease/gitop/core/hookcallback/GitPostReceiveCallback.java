@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -18,10 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
-import com.google.common.eventbus.EventBus;
 import com.pmease.commons.git.Commit;
+import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.gitop.core.event.BranchRefUpdateEvent;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.core.manager.UserManager;
@@ -43,15 +44,19 @@ public class GitPostReceiveCallback extends HttpServlet {
     
     private final UserManager userManager;
     
-    private final EventBus eventBus;
+    private final UnitOfWork unitOfWork;
+    
+    private final Executor executor;
     
     @Inject
-    public GitPostReceiveCallback(ProjectManager projectManager, BranchManager branchManager, 
-    		UserManager userManager, EventBus eventBus) {
+    public GitPostReceiveCallback(ProjectManager projectManager, 
+    		BranchManager branchManager, UserManager userManager,
+    		UnitOfWork unitOfWork, Executor executor) {
     	this.projectManager = projectManager;
         this.branchManager = branchManager;
         this.userManager = userManager;
-        this.eventBus = eventBus;
+        this.unitOfWork = unitOfWork;
+        this.executor = executor;
     }
 
     @Override
@@ -126,9 +131,27 @@ public class GitPostReceiveCallback extends HttpServlet {
 			} else {
 				logger.debug("Executing post-receive hook against branch {}...", branchName);
 				
-				Branch branch = branchManager.findBy(project, branchName);
+				final Branch branch = branchManager.findBy(project, branchName);
 				Preconditions.checkNotNull(branch);
-				eventBus.post(new BranchRefUpdateEvent(branch));
+				
+				final Long branchId = branch.getId();
+				executor.execute(new Runnable() {
+
+					@Override
+					public void run() {
+						unitOfWork.call(new Callable<Void>() {
+
+							@Override
+							public Void call() throws Exception {
+								Branch branch = branchManager.load(branchId);
+								branchManager.onBranchRefUpdate(branch);
+								return null;
+							}
+							
+						});
+					}
+					
+				});
 			}
 		}
     }

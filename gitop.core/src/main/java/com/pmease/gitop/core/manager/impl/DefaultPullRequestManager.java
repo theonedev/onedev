@@ -5,8 +5,10 @@ import static com.pmease.gitop.model.PullRequest.CriterionHelper.ofSource;
 import static com.pmease.gitop.model.PullRequest.CriterionHelper.ofTarget;
 
 import java.io.File;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -17,16 +19,16 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
+import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.LockUtils;
-import com.pmease.gitop.core.event.BranchRefUpdateEvent;
+import com.pmease.gitop.core.manager.BranchManager;
+import com.pmease.gitop.core.manager.PullRequestCommentManager;
 import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.core.manager.PullRequestUpdateManager;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
@@ -34,6 +36,7 @@ import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.MergeResult;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequest.Status;
+import com.pmease.gitop.model.PullRequestComment;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.VoteInvitation;
@@ -43,23 +46,35 @@ import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
 import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
 
 @Singleton
-public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> implements
-		PullRequestManager {
+public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> 
+		implements PullRequestManager {
 
 	private final VoteInvitationManager voteInvitationManager;
 	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
-	private final EventBus eventBus;
+	private final PullRequestCommentManager pullRequestCommentManager;
+	
+	private final BranchManager branchManager;
+	
+	private final UnitOfWork unitOfWork;
+	
+	private final Executor executor;
 	
 	@Inject
-	public DefaultPullRequestManager(GeneralDao generalDao, VoteInvitationManager voteInvitationManager,
-			PullRequestUpdateManager pullRequestUpdateManager, EventBus eventBus) {
+	public DefaultPullRequestManager(GeneralDao generalDao, 
+			VoteInvitationManager voteInvitationManager,
+			PullRequestUpdateManager pullRequestUpdateManager, 
+			PullRequestCommentManager pullRequestCommentManager,
+			BranchManager branchManager, 
+			UnitOfWork unitOfWork, Executor executor) {
 		super(generalDao);
 		this.voteInvitationManager = voteInvitationManager;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
-		this.eventBus = eventBus;
-		eventBus.register(this);
+		this.pullRequestCommentManager = pullRequestCommentManager;
+		this.branchManager = branchManager;
+		this.unitOfWork = unitOfWork;
+		this.executor = executor;
 	}
 
 	@Sessional
@@ -226,7 +241,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 					save(request);
 					
 					if (request.isAutoMerge())
-						merge(request);
+						merge(request, null, null);
 					
 					return null;
 				}
@@ -235,14 +250,25 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 		}
 	}
 
-	@Sessional
-	public void discard(final PullRequest request) {
+	@Transactional
+	public void discard(final PullRequest request, final User user, final String comment) {
 		LockUtils.call(request.getLockName(), new Callable<Void>() {
 
 			@Override
 			public Void call() throws Exception {
 				request.setStatus(Status.DISCARDED);
 				save(request);
+				
+				if (comment != null) {
+					PullRequestComment requestComment = new PullRequestComment();
+					requestComment.setRequest(request);
+					requestComment.setUser(user);
+					requestComment.setDate(new Date());
+					requestComment.setContent(comment);
+					
+					pullRequestCommentManager.save(requestComment);
+				}
+				
 				return null;
 			}
 			
@@ -261,21 +287,53 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 	 * 			<li> branch ref has just been updated in some other threads and this thread 
 	 * 				is unable to lock the reference.
 	 */
-	@Sessional
-	public boolean merge(final PullRequest request) {
+	@Transactional
+	public boolean merge(final PullRequest request, final User user, 
+			final String comment) {
 		return LockUtils.call(request.getLockName(), new Callable<Boolean>() {
 
 			@Override
 			public Boolean call() throws Exception {
 				if (request.getStatus() == Status.PENDING_INTEGRATE) {
 					Git git = request.getTarget().getProject().code();
-					if (git.updateRef(request.getTarget().getHeadRef(), request.getMergeResult().getMergeHead(), 
-							request.getMergeResult().getBranchHead(), "merge pull request")) {
+					if (git.updateRef(request.getTarget().getHeadRef(), 
+							request.getMergeResult().getMergeHead(), 
+							request.getMergeResult().getBranchHead(), 
+							comment!=null?comment:"merge pull request")) {
 						request.setStatus(Status.INTEGRATED);
 						save(request);
-						eventBus.post(new BranchRefUpdateEvent(request.getTarget()));
+
+						final Long branchId = request.getTarget().getId();
+						executor.execute(new Runnable() {
+
+							@Override
+							public void run() {
+								unitOfWork.call(new Callable<Void>() {
+
+									@Override
+									public Void call() throws Exception {
+										Branch branch = branchManager.load(branchId);
+										branchManager.onBranchRefUpdate(branch);
+										return null;
+									}
+									
+								});
+							}
+							
+						});
 						return true;
 					}
+					
+					if (user != null && comment != null) {
+						PullRequestComment requestComment = new PullRequestComment();
+						requestComment.setRequest(request);
+						requestComment.setUser(user);
+						requestComment.setDate(new Date());
+						requestComment.setContent(comment);
+						
+						pullRequestCommentManager.save(requestComment);
+					}
+					
 				}
 				return false;
 			}
@@ -283,15 +341,6 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> i
 		});
 	}
 
-	@Sessional
-	@Subscribe
-	public void refreshUpon(BranchRefUpdateEvent event) {
-		for (PullRequest request: event.getBranch().getIncomingRequests()) {
-			if (request.isOpen())
-				refresh(load(request.getId()));
-		}
-	}
-	
 	@Sessional
 	@Override
 	public List<PullRequest> findByCommit(String commit) {
