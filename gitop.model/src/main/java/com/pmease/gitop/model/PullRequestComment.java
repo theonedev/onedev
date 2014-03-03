@@ -22,7 +22,7 @@ public class PullRequestComment extends AbstractEntity {
 	private User user;
 	
 	@Column(nullable=false)
-	private String comment;
+	private String content;
 	
 	@Column(nullable=false)
 	private Date date = new Date();
@@ -43,12 +43,12 @@ public class PullRequestComment extends AbstractEntity {
 		this.user = user;
 	}
 
-	public String getComment() {
-		return comment;
+	public String getContent() {
+		return content;
 	}
 
-	public void setComment(String comment) {
-		this.comment = comment;
+	public void setContent(String content) {
+		this.content = content;
 	}
 
 	public Date getDate() {

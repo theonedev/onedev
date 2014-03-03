@@ -3,13 +3,20 @@ package com.pmease.gitop.web.page.project.pullrequest;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Button;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextArea;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -18,6 +25,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.PropertyModel;
 
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
@@ -41,24 +49,124 @@ import com.pmease.gitop.web.page.project.api.GitPerson;
 @SuppressWarnings("serial")
 public class RequestDetailPanel extends Panel {
 
+	private boolean editingTitle;
+	
+	private Action action;
+	
+	private String comment;
+	
 	public RequestDetailPanel(String id, IModel<PullRequest> model) {
 		super(id, model);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+
+		final WebMarkupContainer head = new WebMarkupContainer("head");
+		head.setOutputMarkupId(true);
+		add(head);
 		
-		add(new Label("title", new AbstractReadOnlyModel<String>() {
+		head.add(new Label("title", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
 				return getPullRequest().getTitle();
 			}
 			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!editingTitle);
+			}
+			
+		});
+		
+		head.add(new AjaxLink<Void>("editTitle") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				editingTitle = true;
+				
+				target.add(head);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
+				AbstractProjectPage page = (AbstractProjectPage) getPage();
+				
+				setVisible(!editingTitle 
+							&& (getPullRequest().getSubmitter().equals(currentUser) 
+								|| SecurityUtils.getSubject().isPermitted(
+									ObjectPermission.ofProjectWrite(page.getProject()))));
+			}
+			
+		});
+
+		Form<?> form = new Form<Void>("titleEditor") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(editingTitle);
+			}
+			
+		};
+		head.add(form);
+		
+		form.add(new TextField<String>("title", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				if (StringUtils.isNotBlank(getPullRequest().getTitle()))
+					return getPullRequest().getTitle();
+				else
+					return "";
+			}
+
+			@Override
+			public void setObject(String object) {
+				getPullRequest().setTitle(object);
+			}
+			
 		}));
-		add(new Label("id", new AbstractReadOnlyModel<String>() {
+		
+		form.add(new AjaxButton("save") {
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				super.onSubmit(target, form);
+				
+				if (StringUtils.isNotBlank(getPullRequest().getTitle())) {
+					Gitop.getInstance(PullRequestManager.class).save(getPullRequest());
+					editingTitle = false;
+				}
+
+				target.add(head);
+			}
+			
+		});
+		
+		form.add(new AjaxLink<Void>("cancel") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				editingTitle = false;
+				
+				target.add(head);
+			}
+			
+		});
+		
+		head.add(new Label("id", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -66,16 +174,6 @@ public class RequestDetailPanel extends Panel {
 			}
 			
 		}));
-		add(new RequestStatusPanel("status", (IModel<PullRequest>) getDefaultModel()));
-		
-		add(new AjaxLink<Void>("edit") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				
-			}
-			
-		});
 
 		add(new GitPersonLink("user", new LoadableDetachableModel<GitPerson>() {
 
@@ -161,15 +259,39 @@ public class RequestDetailPanel extends Panel {
 			
 		}));
 
-		add(new Label("statusMessage", new AbstractReadOnlyModel<String>() {
+		add(new RequestStatusPanel("statusLabel", new AbstractReadOnlyModel<PullRequest>() {
 
 			@Override
-			public String getObject() {
-				PullRequest request = getPullRequest();
-				if (request.getStatus() == Status.PENDING_APPROVAL)
-					return "This request has to be approved.";
-				else 
-					return "This request has to be updated.";
+			public PullRequest getObject() {
+				return getPullRequest();
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getPullRequest().isOpen());
+			}
+			
+		});
+		
+		WebMarkupContainer statusContainer = new WebMarkupContainer("status") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getPullRequest().isOpen());
+			}
+			
+		};
+		add(statusContainer);
+		
+		statusContainer.add(new RequestStatusPanel("message", new AbstractReadOnlyModel<PullRequest>() {
+
+			@Override
+			public PullRequest getObject() {
+				return getPullRequest();
 			}
 			
 		}) {
@@ -185,7 +307,7 @@ public class RequestDetailPanel extends Panel {
 			
 		});
 		
-		add(new ListView<String>("reasons", new LoadableDetachableModel<List<String>>() {
+		statusContainer.add(new ListView<String>("reasons", new LoadableDetachableModel<List<String>>() {
 
 			@Override
 			protected List<String> load() {
@@ -201,47 +323,6 @@ public class RequestDetailPanel extends Panel {
 
 		});
 		
-		add(new Link<Void>("approve") {
-
-			@Override
-			public void onClick() {
-				vote(Vote.Result.APPROVE);
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				PullRequest request = getPullRequest();
-				
-				if (request.getStatus() == Status.PENDING_APPROVAL) {
-					User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
-					if (currentUser != null) {
-						boolean canVote = false;
-						for (VoteEligibility each: request.getCheckResult().getVoteEligibilities()) {
-							if (each.canVote(currentUser, request)) {
-								canVote = true;
-								break;
-							}
-						}
-						setVisible(canVote);
-					} else {
-						setVisible(false);
-					}
-				} else {
-					setVisible(false);
-				}
-			}
-			
-		});
-		
-		add(new Link<Void>("disapprove") {
-
-			@Override
-			public void onClick() {
-				vote(Vote.Result.DISAPPROVE);
-			}
-			
-		});
 
 		WebMarkupContainer mergeContainer = new WebMarkupContainer("merge") {
 
@@ -264,7 +345,7 @@ public class RequestDetailPanel extends Panel {
 			}
 			
 		}));
-		add(mergeContainer);
+		statusContainer.add(mergeContainer);
 		
 		mergeContainer.add(new WebMarkupContainer("noConflicts") {
 
@@ -299,36 +380,198 @@ public class RequestDetailPanel extends Panel {
 		conflictsContainer.add(new WebMarkupContainer("helpTrigger")
 				.add(new DropdownBehavior(helpDropdown).clickMode(false)));
 		
-		mergeContainer.add(new Link<Void>("integrate") {
+		WebMarkupContainer actionsContainer = new WebMarkupContainer("actions") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+
+				boolean visible = false;
+				for (Component link: visitChildren(Link.class)) {
+					link.configure();
+					if (link.isVisible())
+						visible = true;
+				}
+				setVisible(visible);
+			}
+			
+		};
+		statusContainer.add(actionsContainer);
+		
+		final Link<Void> approveLink;
+		actionsContainer.add(approveLink = new Link<Void>("approve") {
 
 			@Override
 			public void onClick() {
-				Gitop.getInstance(PullRequestManager.class).merge(getPullRequest());
+				action = Action.Approve;
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				PullRequest request = getPullRequest();
+				
+				if (request.getStatus() == Status.PENDING_APPROVAL) {
+					User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
+					if (currentUser != null) {
+						if (Gitop.getInstance(VoteManager.class).find(
+								currentUser, request.getLatestUpdate()) != null) {
+							setVisible(false);
+						} else {
+							boolean canVote = false;
+							for (VoteEligibility each: request.getCheckResult().getVoteEligibilities()) {
+								if (each.canVote(currentUser, request)) {
+									canVote = true;
+									break;
+								}
+							}
+							setVisible(canVote);
+						}
+					} else {
+						setVisible(false);
+					}
+				} else {
+					setVisible(false);
+				}
 			}
 			
 		});
 		
-		mergeContainer.add(new Link<Void>("discard") {
+		actionsContainer.add(new Link<Void>("disapprove") {
 
 			@Override
 			public void onClick() {
-				Gitop.getInstance(PullRequestManager.class).discard(getPullRequest());
+				action = Action.Disapprove;
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				approveLink.configure();
+				setVisible(approveLink.isVisible());
+			}
+			
+		});
+		
+		actionsContainer.add(new Link<Void>("integrate") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+
+				AbstractProjectPage page = (AbstractProjectPage) getPage();
+				
+				setVisible(SecurityUtils.getSubject().isPermitted(
+							ObjectPermission.ofProjectWrite(page.getProject())) 
+						&& getPullRequest().getMergeResult().getMergeHead() != null
+						&& getPullRequest().getStatus() == Status.PENDING_INTEGRATE);
+			}
+
+			@Override
+			public void onClick() {
+				action = Action.Integrate;
+			}
+			
+		});
+		
+		actionsContainer.add(new Link<Void>("discard") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
+				AbstractProjectPage page = (AbstractProjectPage) getPage();
+				
+				setVisible(getPullRequest().getSubmitter().equals(currentUser) 
+							|| SecurityUtils.getSubject().isPermitted(
+								ObjectPermission.ofProjectWrite(page.getProject())));
+			}
+
+			@Override
+			public void onClick() {
+				action = Action.Discard;
+			}
+			
+		});
+		
+		Form<?> commentEditor = new Form<Void>("commentEditor") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(action != null);
+			}
+			
+		};
+		statusContainer.add(commentEditor);
+		
+		commentEditor.add(new TextArea<String>("comment", 
+				new PropertyModel<String>(this, "comment")));
+		
+		commentEditor.add(new Button("confirm") {
+
+			@Override
+			public void onSubmit() {
+				super.onSubmit();
+				
+				if (StringUtils.isBlank(comment))
+					comment = null;
+				User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
+				if (action == Action.Approve) {
+					Gitop.getInstance(VoteManager.class).vote(getPullRequest(), 
+							currentUser, Vote.Result.APPROVE, comment);
+				} else if (action == Action.Disapprove) {
+					Gitop.getInstance(VoteManager.class).vote(getPullRequest(), 
+							currentUser, Vote.Result.DISAPPROVE, comment);
+				} else if (action == Action.Integrate) {
+					Gitop.getInstance(PullRequestManager.class).merge(
+							getPullRequest(), currentUser, comment);
+				} else {
+					Gitop.getInstance(PullRequestManager.class).discard(
+							getPullRequest(), currentUser, comment);
+				}
+				action = null;
+				comment = null;
+			}
+			
+		}.add(AttributeModifier.replace("value", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return "Confirm " + action.name();
+			}
+			
+		})).add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				if (action == Action.Approve)
+					return "btn-primary";
+				else if (action == Action.Disapprove)
+					return "btn-warning";
+				else if (action == Action.Integrate)
+					return "btn-success";
+				else
+					return "btn-danger";
+			}
+			
+		})));
+		commentEditor.add(new Link<Void>("cancel") {
+
+			@Override
+			public void onClick() {
+				action = null;
+				comment = null;
 			}
 			
 		});
 	}
 	
-	private void vote(Vote.Result result) {
-		Vote vote = new Vote();
-		vote.setResult(Vote.Result.APPROVE);
-		vote.setUpdate(getPullRequest().getLatestUpdate());
-		vote.setVoter(Gitop.getInstance(UserManager.class).getCurrent());
-		Gitop.getInstance(VoteManager.class).save(vote);		
-		Gitop.getInstance(PullRequestManager.class).refresh(getPullRequest());
-	}
-
 	public PullRequest getPullRequest() {
 		return (PullRequest) getDefaultModelObject();
 	}
 
+	private static enum Action {Approve, Disapprove, Integrate, Discard}
 }

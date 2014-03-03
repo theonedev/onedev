@@ -142,7 +142,7 @@ public class NewRequestPanel extends Panel {
 			public String getObject() {
 				PullRequest request = getPullRequest();
 				if (request.isNew() 
-						&& request.getStatus() == PENDING_INTEGRATE 
+						&& (request.getStatus() == PENDING_INTEGRATE || request.getStatus() == PENDING_APPROVAL) 
 						&& request.getMergeResult().getMergeHead() != null) {
 					return "success";
 				} else {
@@ -160,7 +160,9 @@ public class NewRequestPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				PullRequest request = getPullRequest();
-				setVisible(request.isNew() && (request.getStatus() == PENDING_APPROVAL || request.getStatus() == PENDING_INTEGRATE)); 
+				setVisible(request.isNew() 
+						&& (request.getStatus() == PENDING_APPROVAL 
+							|| request.getStatus() == PENDING_INTEGRATE)); 
 			}
 			
 		});

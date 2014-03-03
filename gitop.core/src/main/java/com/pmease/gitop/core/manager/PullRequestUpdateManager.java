@@ -10,4 +10,5 @@ import com.pmease.gitop.model.PullRequestUpdate;
 public interface PullRequestUpdateManager extends GenericDao<PullRequestUpdate> {
 	
 	void update(PullRequest request);
+	
 }

@@ -779,7 +779,8 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .new-request>.feedback.success td.status {border-color: #BDDCA4; background-color: #DFF0D8;}
 
 .new-request>.feedback td.status.has-error .icon {display: none;}
-.new-request>.feedback td.status.has-error .icon.icon-warning-sign {display: block; color: #A94442;}
+.new-request>.feedback td.status.has-error .icon.icon-warning-sign {display: block; 
+	color: #A94442;}
 .new-request>.feedback td.status.has-error {color: #A94442; border-color: #EBCCD1; 
 	background-color: #F2DEDE;}
 .new-request>.feedback td.status.has-error .summary, 
@@ -788,20 +789,32 @@ ul.status-help li:last-child .description {border-bottom: none;}
 /* PULL REQUEST DETAIL PANEL */
 .request-detail {padding: 20px;}
 .request-detail>div {margin-bottom: 16px;}
-.request-detail>.title {font-size: 20px; font-weight: bold;}
-.request-detail>.title>span {margin-right: 4px;}
-.request-detail>.title>.id {color: #999;}
-.request-detail>.title>.icon {font-size: 16px; margin-left: 8px;}
+.request-detail>.head {font-size: 20px; font-weight: bold; padding: 0;}
+.request-detail>.head>div {margin-right: 8px;}
+.request-detail>.head>.id {color: #999;}
+.request-detail>.head>.icon {font-size: 16px;}
 .request-detail>.summary .branch {margin-right: 6px;}
 .request-detail>.summary .branch.label {background-color: #DDDDDD;}
 .request-detail>.summary .branch .icon {color: #666666;}
-.request-detail>.merge {border: 1px solid; padding: 8px; border-radius: 4px;}
-.request-detail>.merge .message {margin-bottom: 8px; font-size: 16px;}
-.request-detail>.merge.warning {color: #8A6D3B; border-color: #F7DEAB; background-color: #FCF8E3;}
-.request-detail>.merge.success {color: #3C763D; border-color: #BDDCA4; background-color: #DFF0D8;}
+.request-detail>.summary .status {margin-left: 6px;}
 
-.request-detail>.merge .icon {font-size: 26px; margin-right: 8px; display: none;}
-.request-detail>.merge.warning .icon-warning-sign {display: block; color: #8A6D3B;}
-.request-detail>.merge.success .icon-ok-circle {display: block; color: #3C763D;}
-
-.request-detail .actions>a {margin-right: 12px;}
+.request-detail>.status {background: #F2F2F2; border-radius: 4px;}
+.request-detail>.status table {border-collapse: separate; border-spacing: 4px; width: 100%;}
+.request-detail>.status td {vertical-align: top;}
+.request-detail>.status td.primary {border: 1px solid; padding: 8px; border-radius: 4px;
+	color: #8A6D3B; border-color: #F7DEAB; background-color: #FCF8E3;}
+.request-detail>.status td.primary .message {font-size: 18px;}
+.request-detail>.status td.primary .reasons {margin-top: 8px; padding-left: 24px;}
+.request-detail>.status td.merge {border: 1px solid; padding: 8px; border-radius: 4px;}
+.request-detail>.status td.merge .message {margin-bottom: 8px; font-size: 16px;}
+.request-detail>.status td.merge.warning {color: #8A6D3B; border-color: #F7DEAB; 
+	background-color: #FCF8E3;}
+.request-detail>.status td.merge.success {color: #3C763D; border-color: #BDDCA4; 
+	background-color: #DFF0D8;}
+.request-detail>.status .icon {display: none; font-size: 24px;}
+.request-detail>.status td.icons {width: 1%;}
+.request-detail>.status td.merge.warning .icon-warning-sign {display: block; color: #8A6D3B;}
+.request-detail>.status td.merge.success .icon-ok-circle {display: block; color: #3C763D;}
+.request-detail>.status td.actions {width: 120px;}
+.request-detail>.status textarea {resize: vertical; min-height: 64px;}
+.request-detail>.status>form>table {border-spacing: 3px;}

@@ -1,7 +1,9 @@
 package com.pmease.gitop.core.manager.impl;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -17,6 +19,7 @@ import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.PullRequestManager;
+import com.pmease.gitop.core.manager.PullRequestUpdateManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
@@ -26,10 +29,15 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 	
 	private final PullRequestManager pullRequestManager;
 	
+	private final PullRequestUpdateManager pullRequestUpdateManager;
+	
 	@Inject
-	public DefaultBranchManager(GeneralDao generalDao, PullRequestManager pullRequestManager) {
+	public DefaultBranchManager(GeneralDao generalDao, 
+			PullRequestManager pullRequestManager, 
+			PullRequestUpdateManager pullRequestUpdateManager) {
 		super(generalDao);
 		this.pullRequestManager = pullRequestManager;
+		this.pullRequestUpdateManager = pullRequestUpdateManager;
 	}
 
     @Sessional
@@ -115,6 +123,35 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 			if (get(it.next()) == null)
 				it.remove();
 		}
+	}
+
+	@Transactional
+	@Override
+	public void onBranchRefUpdate(Branch branch) {
+		for (PullRequest request: branch.getIncomingRequests()) {
+			if (request.isOpen())
+				pullRequestManager.refresh(request);
+		}
+		
+		// Calculates most recent open pull request for each branch. Note that although 
+		// we do not allow multiple opened requests for a single branch, there still 
+		// exist some chances multiple requests are opening for same branch, so we need 
+		// to handle this case here.
+		Map<Branch, PullRequest> branchRequests = new HashMap<>();
+		for (PullRequest request: branch.getOutgoingRequests()) {
+			if (request.isOpen()) {
+				PullRequest branchRequest = branchRequests.get(request.getTarget());
+				if (branchRequest == null)
+					branchRequests.put(request.getTarget(), request);
+				else if (request.getId() > branchRequest.getId())
+					branchRequests.put(request.getTarget(), request);
+			}
+		}
+		
+		for (PullRequest request: branchRequests.values()) {
+			pullRequestUpdateManager.update(request);
+			pullRequestManager.refresh(request);
+		}		
 	}
 
 }

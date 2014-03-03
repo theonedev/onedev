@@ -4,21 +4,16 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
-
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Projections;
 
-import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.commons.hibernate.EntityEvent;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.loader.ManagedSerializedForm;
@@ -31,14 +26,11 @@ public class DefaultGeneralDao implements GeneralDao, Serializable {
 	
 	private final Provider<Session> sessionProvider;
 	
-	private final EventBus eventBus;
-	
 	@Inject
 	public DefaultGeneralDao(Provider<SessionFactory> sessionFactoryProvider, 
-			Provider<Session> sessionProvider, EventBus eventBus) {
+			Provider<Session> sessionProvider) {
 		this.sessionFactoryProvider = sessionFactoryProvider;
 		this.sessionProvider = sessionProvider;
-		this.eventBus = eventBus;
 	}
 	
 	@Sessional
@@ -55,51 +47,14 @@ public class DefaultGeneralDao implements GeneralDao, Serializable {
 
 	@Transactional
 	@Override
-	public void save(final AbstractEntity entity) {
-		final boolean isNew = entity.isNew();
-		
-		Session session = getSession();
-		
-		session.saveOrUpdate(entity);
-		
-		session.getTransaction().registerSynchronization(new Synchronization() {
-
-			public void afterCompletion(int status) {
-				if (status == Status.STATUS_COMMITTED) { 
-					if (isNew)
-						eventBus.post(new EntityEvent(entity, EntityEvent.Operation.CREATE));
-					else
-						eventBus.post(new EntityEvent(entity, EntityEvent.Operation.UPDATE));
-				}
-			}
-
-			public void beforeCompletion() {
-				
-			}
-			
-		});
-		
+	public void save(AbstractEntity entity) {
+		getSession().saveOrUpdate(entity);
 	}
 
 	@Transactional
 	@Override
-	public void delete(final AbstractEntity entity) {
-		Session session = getSession();
-		
-		session.delete(entity);
-		
-		session.getTransaction().registerSynchronization(new Synchronization() {
-
-			public void afterCompletion(int status) {
-				if (status == Status.STATUS_COMMITTED)
-					eventBus.post(new EntityEvent(entity, EntityEvent.Operation.DELETE));
-			}
-
-			public void beforeCompletion() {
-				
-			}
-			
-		});
+	public void delete(AbstractEntity entity) {
+		getSession().delete(entity);
 	}
 
 	@Override
