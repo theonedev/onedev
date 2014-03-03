@@ -208,6 +208,12 @@
 		  	</exclusions>
 		</dependency>
 		-->
+		
+		<dependency>
+		   <groupId>org.ocpsoft.prettytime</groupId>
+		   <artifactId>prettytime</artifactId>
+		   <version>3.2.4.Final</version>
+		</dependency>
 
 	</dependencies>
 
