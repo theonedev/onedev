@@ -475,9 +475,8 @@ fieldset[disabled] .btn-inverse.active {
 }
 
 .avatar.img-thumbnail { padding: 1px; }
-.avatar > img { display: block; margin: 0 auto; width: 100%; height: 100%; border-radius: 3px; }
-.avatar-circle { border-radius: 50%; }
-.avatar-circle > img { border-radius: 50%; }
+.avatar > img { display: block; margin: 0 auto; width: 100%; height: 100%; border-radius: 3px; border-radius: 50%; }
+.avatar-rect > img { border-radius: 3px; }
 .avatar-big { width: 32px; height: 32px; }
 .avatar-xlarge { width: 128px; height: 128px; }
 
