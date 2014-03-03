@@ -16,7 +16,7 @@ import org.eclipse.jgit.util.RawParseUtils;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
-import com.google.common.io.CharStreams;
+import com.google.common.io.CharSource;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.quantity.Data;
@@ -100,8 +100,7 @@ public class FileBlob implements Serializable {
 		}
 		
 		try {
-			return CharStreams.readLines(
-					CharStreams.newReaderSupplier(getStringContent()));
+			return CharSource.wrap(getStringContent()).readLines();
 		} catch (IOException e) {
 			throw Throwables.propagate(e);
 		}

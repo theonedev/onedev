@@ -1,13 +1,13 @@
 package com.pmease.gitop.web.git.command;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
-import com.google.common.io.ByteStreams;
+import com.google.common.io.ByteSource;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.Patch;
 
@@ -68,8 +68,7 @@ public class DiffTreeCommand extends AbstractDiffCommand<Patch, DiffTreeCommand>
 		try (ByteArrayOutputStream out = new ByteArrayOutputStream(BUFFER_SIZE)) {
 			
 			cmd.execute(out, errorLogger).checkReturnCode();
-			try (ByteArrayInputStream in = ByteStreams.newInputStreamSupplier(
-					out.toByteArray()).getInput()) {
+			try (InputStream in = ByteSource.wrap(out.toByteArray()).openBufferedStream()) {
 				patch.parse(in);
 				return patch;
 			}

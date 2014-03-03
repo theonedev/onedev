@@ -90,6 +90,7 @@ import com.pmease.gitop.web.page.project.source.branches.BranchesPage;
 import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
 import com.pmease.gitop.web.page.project.source.commits.CommitsPage;
 import com.pmease.gitop.web.page.project.source.contributors.ContributorsPage;
+import com.pmease.gitop.web.page.project.source.tags.GitArchiveResourceReference;
 import com.pmease.gitop.web.page.project.source.tags.TagsPage;
 import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
 import com.pmease.gitop.web.page.project.stats.ProjectForksPage;
@@ -354,6 +355,7 @@ public class GitopWebApp extends AbstractWicketConfig {
 		
 //		getSharedResources().add(RawBlobResourceReference.RAW_BLOB_RESOURCE, new RawBlobResource());
 		mountResource("rawblob/${user}/${project}/${objectId}", new RawBlobResourceReference());
+		mountResource("archive/${user}/${project}/${file}", new GitArchiveResourceReference());
 	}
 	
 	public boolean isGravatarEnabled() {

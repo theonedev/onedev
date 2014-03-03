@@ -1,7 +1,6 @@
 package com.pmease.gitop.web.git.command;
 
 import java.io.File;
-import java.util.Date;
 import java.util.Map;
 
 import com.google.common.base.Splitter;
@@ -11,6 +10,7 @@ import com.google.common.collect.Maps;
 import com.pmease.commons.git.BriefCommit;
 import com.pmease.commons.git.UserInfo;
 import com.pmease.commons.util.execution.Commandline;
+import com.pmease.gitop.web.git.GitUtils;
 
 public class BranchForEachRefCommand extends ForEachRefCommand<Map<String, BriefCommit>, BranchForEachRefCommand> {
 
@@ -52,7 +52,7 @@ public class BranchForEachRefCommand extends ForEachRefCommand<Map<String, Brief
 		Map<String, BriefCommit> branches = Maps.newLinkedHashMap();
 
 		@Override
-		public Map<String, BriefCommit> getOutput() {
+		public Map<String, BriefCommit> getResult() {
 			return branches;
 		}
 
@@ -70,52 +70,20 @@ public class BranchForEachRefCommand extends ForEachRefCommand<Map<String, Brief
 			String refname = pieces[i++];
 			String sha = pieces[i++];
 			
-			UserInfo committer = new UserInfo(pieces[i++], parseEmail(pieces[i++]), parseDate(pieces[i++]));
-			UserInfo author = new UserInfo(pieces[i++], parseEmail(pieces[i++]), parseDate(pieces[i++]));
+			UserInfo committer = new UserInfo(pieces[i++], 
+											  GitUtils.parseEmail(pieces[i++]), 
+											  GitUtils.parseRawDate(pieces[i++]));
+			UserInfo author = new UserInfo(pieces[i++], 
+										   GitUtils.parseEmail(pieces[i++]), 
+										   GitUtils.parseRawDate(pieces[i++]));
 			
 			BriefCommit commit = new BriefCommit(sha, committer, author, subject);
 			branches.put(refname, commit);
 		}
 	}
 
-	static String parseEmail(String mail) {
-		if (mail.charAt(0) == '<')
-			mail = mail.substring(1, mail.length() - 1);
-		
-		return mail;
-	}
-	
-	static Date parseDate(String str) {
-		String[] pieces = Iterables.toArray(Splitter.on(" ").split(str), String.class);
-		long when = Long.valueOf(pieces[0]) * 1000;
-		return new Date(when);
-	}
-	
 	@Override
 	protected BranchForEachRefCommand self() {
 		return this;
-	}
-	
-	public static void main(String[] args) {
-		String line = "master|6c355beafdbd0a62add3a3d89825ca87cf8ecec0|Linus Torvalds|<torvalds@linux-foundation.org>|1372550568 -0700|Linus Torvalds|<torvalds@linux-foundation.org>|1372550568 -0700	Merge branch 'merge' of git://git.kernel.org/pub/scm/linux/kernel/git/benh/powerpc";
-		int pos = line.indexOf('\t');
-		if (pos <= 0)
-			return;
-		
-		String first = line.substring(0, pos);
-		String subject = line.substring(pos + 1);
-		String[] pieces = Iterables.toArray(Splitter.on('|').split(first), String.class);
-		
-		int i = 0;
-		String refname = pieces[i++];
-		String sha = pieces[i++];
-		
-		UserInfo committer = new UserInfo(pieces[i++], parseEmail(pieces[i++]), parseDate(pieces[i++]));
-		UserInfo author = new UserInfo(pieces[i++], parseEmail(pieces[i++]), parseDate(pieces[i++]));
-		System.out.println(refname);
-		System.out.println(sha);
-		System.out.println(committer);
-		System.out.println(author);
-		System.out.println(subject);
 	}
 }

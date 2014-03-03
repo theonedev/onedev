@@ -11,7 +11,6 @@ import java.nio.charset.Charset;
 import java.text.MessageFormat;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.diff.Edit;
 import org.eclipse.jgit.diff.EditList;
 import org.eclipse.jgit.internal.JGitText;
@@ -21,7 +20,6 @@ import org.eclipse.jgit.util.RawParseUtils;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
-import com.google.common.io.ByteStreams;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.HunkLine.LineType;
 import com.pmease.gitop.web.util.UniversalEncodingDetector;
 
@@ -251,14 +249,10 @@ public class HunkHeader {
 	}
 	
 	public Charset getCharset() {
-		ByteArrayInputStream bas = null;
-		try {
-			bas = ByteStreams.newInputStreamSupplier(file.buf).getInput();
+		try (ByteArrayInputStream bas = new ByteArrayInputStream(file.buf)) {
 			return UniversalEncodingDetector.detect(bas);
 		} catch (IOException e) {
 			throw Throwables.propagate(e);
-		} finally {
-			IOUtils.closeQuietly(bas);
 		}
 	}
 	

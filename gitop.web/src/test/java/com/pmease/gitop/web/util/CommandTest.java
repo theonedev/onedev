@@ -8,7 +8,6 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.nio.charset.Charset;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -17,19 +16,18 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteStreamHandler;
 import org.apache.commons.exec.ExecuteWatchdog;
-import org.junit.Test;
 
 import com.google.common.base.Throwables;
+import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
-import com.google.common.io.CharStreams;
-import com.google.common.io.InputSupplier;
+import com.google.common.io.CharSource;
 import com.pmease.gitop.web.common.quantity.Data;
 
 public class CommandTest {
 
 	static final File gitDir = new File("/Users/zhenyu/temp/aaa/.git");
 	
-	@Test public void testCancel() throws ExecuteException, IOException {
+	public void testCancel() throws ExecuteException, IOException {
 		CommandLine cmd = new CommandLine("/usr/local/bin/git");
 		cmd.addArguments(new String[] { "cat-file", "-p"});
 		cmd.addArgument("82c4424d00d3ad7bf89e622141811b39b1052458:guava.jar");
@@ -72,19 +70,9 @@ public class CommandTest {
 					handleBinary(bufferedIn);
 				} else {
 					Charset charset = UniversalEncodingDetector.detect(bufferedIn);
-					List<String> lines = CharStreams.readLines(
-							CharStreams.newReaderSupplier(new InputSupplier<InputStream>() {
-	
-						@Override
-						public InputStream getInput() throws IOException {
-							return bufferedIn;
-						}
-						
-					}, charset));
-					
-					for (String each : lines) {
-						System.out.println(each);
-					}
+					CharSource cs = ByteSource.wrap(ByteStreams.toByteArray(bufferedIn))
+						.asCharSource(charset);
+					System.out.println(cs.read());
 				}
 			}
 		}

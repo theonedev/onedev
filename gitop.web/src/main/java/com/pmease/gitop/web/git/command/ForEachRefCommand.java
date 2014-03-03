@@ -63,7 +63,7 @@ public abstract class ForEachRefCommand<T, V extends ForEachRefCommand<T, V>> ex
 		ForEachRefOutputHandler<T> outputHandler = getOutputHandler();
 		cmd.execute(outputHandler, getErrorHandler());
 		
-		return outputHandler.getOutput();
+		return outputHandler.getResult();
 	}
 
 	protected LineConsumer getErrorHandler() {
@@ -99,5 +99,4 @@ public abstract class ForEachRefCommand<T, V extends ForEachRefCommand<T, V>> ex
 	public String getSort() {
 		return sort;
 	}
-	
 }

@@ -634,7 +634,8 @@ a.diffstat:hover { text-decoration: none; }
 /**
  * BRANCHES PAGE
  */
-.branches-page h2 { margin-top: 0;}
+h2.section-title { margin: 18px 0; font-size: 16px; }
+
 .table-branches td.actions { text-align: right; vertical-align: middle; }
 .table-branches p { margin: 0;}
 .table-branches td.meta a { font-size: 16px; font-weight: bold; } 
@@ -655,6 +656,19 @@ a.diffstat:hover { text-decoration: none; }
 .statbar .ahead p { padding-left: 4px; }
 .statbar .behind p { text-align: right; padding-right: 4px; }
 
+/*
+ * TAGS PAGE
+ */
+.table-tags { border-bottom: 1px solid #ddd; }
+.table-tags .meta h3 { margin: 0 0 6px; font-size: 16px; font-weight: bold; }
+.meta h3 a { color: #333; }
+.table-tags .meta pre { background: transparent; border-width: 0; border-radius: 0; border-color: #ddd; color: #555; padding: 8px 0; margin: 0; }
+.table-tags > tbody > tr > td { padding: 12px; }
+.table-tags  td.date { color: #999; }
+.table-tags ul.list-inline { margin-bottom: 0; }
+.table-tags .list-inline a { color: #999; }
+.table-tags .list-inline a:hover { color: #09F; text-decoration: none; }
+.table-tags .avatar { width: 64px; height: 64px; }
 
 /**
  * GATE KEEPER SETTING PAGE

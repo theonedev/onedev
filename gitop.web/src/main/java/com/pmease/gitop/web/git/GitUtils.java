@@ -1,5 +1,6 @@
 package com.pmease.gitop.web.git;
 
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -11,11 +12,13 @@ import org.eclipse.jgit.lib.Constants;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.RefInfo;
+import com.pmease.commons.git.UserInfo;
 
 public class GitUtils {
 
@@ -75,4 +78,61 @@ public class GitUtils {
 		List<Commit> commits = git.log(null, revision, path, 1, 0);
 		return Iterables.getFirst(commits, null);
 	}
+	
+	public static @Nullable String parseEmail(String mail) {
+		if (mail == null || mail.length() == 0)
+			return null;
+		
+		if (mail.charAt(0) == '<')
+			mail = mail.substring(1, mail.length() - 1);
+		
+		return mail;
+	}
+	
+	/**
+	 * Parse the original git raw date to Java date. The raw git date is in
+	 * unix timestamp with timezone like:
+	 * 1392312299 -0800
+	 * 
+	 * @param input the input raw date string
+	 * @return Java date
+	 */
+	public static Date parseRawDate(String input) {
+		String[] pieces = Iterables.toArray(Splitter.on(" ").split(input), String.class);
+		long when = Long.valueOf(pieces[0]) * 1000;
+		return new Date(when);
+	}
+	
+	/**
+	 * Parse the raw user information into UserInfo object, the raw information
+	 * should be in format <code>[name] [<email>] [epoch timezone]</code>, for 
+	 * example:
+	 * 
+	 * Jacob Thornton <jacobthornton@gmail.com> 1328060294 -0800
+	 * 
+	 * @param raw
+	 * @return
+	 */
+	public static @Nullable UserInfo parseUserInfo(String raw) {
+		if (Strings.isNullOrEmpty(raw))
+			return null;
+		
+		int pos1 = raw.indexOf('<');
+		if (pos1 <= 0)
+			throw new IllegalArgumentException("Raw " + raw);
+		
+		String name = raw.substring(0, pos1 - 1);
+		
+		int pos2 = raw.indexOf('>');
+		if (pos2 <= 0)
+			throw new IllegalArgumentException("Raw " + raw);
+		
+		String time = raw.substring(pos2 + 1).trim();
+		Date date = parseRawDate(time);
+		
+		String email = raw.substring(pos1 + 1, pos2 - 1);
+		
+		return new UserInfo(name, email, date);
+	}
+	
 }

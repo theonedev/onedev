@@ -16,6 +16,7 @@ import org.joda.time.chrono.ISOChronology;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
+import org.ocpsoft.prettytime.PrettyTime;
 
 import com.google.common.base.Preconditions;
 import com.pmease.gitop.web.Constants;
@@ -56,7 +57,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         	return formatDurationPart(months, DurationUnit.MONTH);
         }
         
-        if (weeks > 0) {
+        if (weeks > 0 && weeks * 7 >= days) {
         	return formatDurationPart(weeks, DurationUnit.WEEK);
         }
         
@@ -113,7 +114,8 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
     }
 
     public static String formatAge(Date date) {
-        return formatAge(new DateTime(date), DateTime.now());
+    	return new PrettyTime().format(date);
+//        return formatAge(new DateTime(date), DateTime.now());
     }
 
     public static String formatDate(Date date) {

@@ -1,7 +1,7 @@
 package com.pmease.gitop.web.page.project.source.blob.renderer;
 
 import java.awt.Dimension;
-import java.io.ByteArrayInputStream;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.util.Iterator;
@@ -20,7 +20,7 @@ import org.apache.wicket.util.time.Time;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
-import com.google.common.io.ByteStreams;
+import com.google.common.io.ByteSource;
 import com.google.common.io.Files;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ProjectManager;
@@ -99,8 +99,7 @@ public class ImageBlobResource extends DynamicImageResource {
 
 		if (iter.hasNext()) {
 			ImageReader reader = iter.next();
-			try (ByteArrayInputStream is = ByteStreams.newInputStreamSupplier(
-					data).getInput()) {
+			try (BufferedInputStream is = (BufferedInputStream) ByteSource.wrap(data).openBufferedStream()) {
 				
 				reader.setInput(data);
 				ImageInputStream stream = new MemoryCacheImageInputStream(is);

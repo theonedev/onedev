@@ -9,7 +9,6 @@ import org.apache.tika.metadata.Metadata;
 import org.mozilla.universalchardet.UniversalDetector;
 
 import com.google.common.base.Throwables;
-import com.google.common.io.ByteStreams;
 
 /**
  * Copied from tika UniversalEncodingDetector
@@ -58,7 +57,7 @@ public class UniversalEncodingDetector {
     
     public static boolean isBinary(byte[] bytes) {
     	try {
-			return isBinary(ByteStreams.newInputStreamSupplier(bytes).getInput());
+			return isBinary(new ByteArrayInputStream(bytes));
 		} catch (IOException e) {
 			throw Throwables.propagate(e);
 		}
