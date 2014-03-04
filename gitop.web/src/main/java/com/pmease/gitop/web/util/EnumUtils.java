@@ -11,7 +11,16 @@ public class EnumUtils {
 	
 	public static <T extends Enum<T>> T inc(Enum<T> v) {
 		Class<T> clazz = v.getDeclaringClass();
-		int ordinal = Math.min(v.ordinal() + 1, clazz.getEnumConstants().length - 1);
+		return inc(v, clazz.getEnumConstants()[clazz.getEnumConstants().length - 1]);
+	}
+	
+	public static <T extends Enum<T>> T inc(Enum<T> v, T max) {
+		Class<T> clazz = v.getDeclaringClass();
+		if (v.ordinal() + 1 >= clazz.getEnumConstants().length - 1) {
+			return max;
+		}
+		
+		int ordinal = (v.ordinal() + 1) % clazz.getEnumConstants().length;
 		return clazz.getEnumConstants()[ordinal];
 	}
 	

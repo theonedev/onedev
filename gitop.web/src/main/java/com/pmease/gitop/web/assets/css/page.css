@@ -306,7 +306,7 @@ ul.btn-list { list-style: none; margin: 0; }
 .member-item { display: inline-block; width: 330px; padding: 10px 0; margin: 0 20px 0 0; border: none; border-bottom: 1px solid #eee; position: relative; }
 .member-item .member-content { vertical-align: middle;  overflow: hidden; white-space: nowrap; margin: 0 32px 0 0; position: relative;}
 .member-item .member-content .avatar { width: 48px; height: 48px; box-shadow: none; float: left; }
-.member-item .member-content .avatar > img { background: transparent; border-radius: 50%;}
+.member-item .member-content .avatar > img { background: transparent; }
 
 .member-item .list-group-item-heading { margin: 6px 0 6px 60px; overflow:hidden; text-overflow: ellipse; }
 .member-content .list-group-item-heading em { display: block; font-style: normal; color: #999; font-weight: normal; }
@@ -475,7 +475,6 @@ table.table-blob { width: 100%; }
 
 .table-commits .td-avatar { width: 60px; }
 .table-commits .td-avatar .avatar { background: transparent; box-shadow: none; width: 48px; height: 48px; }
-.table-commits .td-avatar .avatar img { border-radius: 100%; }
 
 /*
  * COMMIT PAGE

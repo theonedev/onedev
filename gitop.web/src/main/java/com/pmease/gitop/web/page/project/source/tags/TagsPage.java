@@ -19,6 +19,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.model.Project;
@@ -40,16 +41,11 @@ public class TagsPage extends ProjectCategoryPage {
 	private final IModel<Map<String, Tag>> tagsModel;
 	
 	private String before;
-	private String after;
 	
-	public static PageParameters newParams(Project project, String before, String after) {
+	public static PageParameters newParams(Project project, String before) {
 		PageParameters parameters = PageSpec.forProject(project);
 		if (!Strings.isNullOrEmpty(before)) {
 			parameters.add("before", before);
-		}
-		
-		if (!Strings.isNullOrEmpty(after)) {
-			parameters.add("after", after);
 		}
 		
 		return parameters;
@@ -69,7 +65,6 @@ public class TagsPage extends ProjectCategoryPage {
 		};
 		
 		before = params.get("before").toString();
-		after = params.get("after").toString();
 	}
 
 	@Override
@@ -88,7 +83,7 @@ public class TagsPage extends ProjectCategoryPage {
 
 				@Override
 				public List<String> getObject() {
-					return getTagsInRange();
+					return getCurrentTagNames();
 				}
 				
 			};
@@ -129,41 +124,65 @@ public class TagsPage extends ProjectCategoryPage {
 				
 			});
 			
-			String rangeFirst = getFirstInRange();
-			String rangeLast = getLastInRange();
-			String first = getFirstInAll();
 			String last = getLastInAll();
 			
 			WebMarkupContainer navigator = new WebMarkupContainer("navigator");
 			navigator.setVisibilityAllowed(
-					!Objects.equal(getTagsInRange(), getAllTagNames()));
+					!Objects.equal(getCurrentTagNames(), getAllTagNames()));
 			frag.add(navigator);
 			
+			String previous = getPreviousPos();
+			String next = getNextPos();
 			navigator.add(new BookmarkablePageLink<Void>("previouslink", 
 					TagsPage.class,
-					newParams(getProject(), null, rangeFirst)).setEnabled(!Objects.equal(first, rangeFirst)));
+					newParams(getProject(), previous)).setEnabled(previous != null));
 			navigator.add(new BookmarkablePageLink<Void>("nextlink", TagsPage.class, 
-					newParams(getProject(),rangeLast, null)).setEnabled(!Objects.equal(last, rangeLast)));
+					newParams(getProject(), next)).setEnabled(!Objects.equal(last, next)));
 		}
+	}
+	
+	private int getPageNo() {
+		List<String> allTags = getAllTagNames();
+		int beforePos = findPosition(allTags, before);
+		if (beforePos <= 0) {
+			return 0;
+		}
+		
+		return (beforePos + 1) / MAX_ROWS;
+	}
+	
+	private List<String> getTagNamesInPage(int pageNo) {
+		List<String> allTags = getAllTagNames();
+		int start = pageNo * MAX_ROWS;
+		int end = Math.min((pageNo + 1) * MAX_ROWS, allTags.size());
+		
+		return ImmutableList.copyOf(allTags.subList(start, end));
+	}
+	
+	private List<String> getCurrentTagNames() {
+		int pageNo = getPageNo();
+		return getTagNamesInPage(pageNo);
+	}
+	
+	private String getNextPos() {
+		List<String> current = getCurrentTagNames();
+		return Iterables.getLast(current, null);
+	}
+	
+	private String getPreviousPos() {
+		int previousPage = getPageNo() - 1;
+		if (previousPage < 0) {
+			return null;
+		} else if (previousPage == 0) {
+			return "";
+		}
+
+		List<String> names = getTagNamesInPage(previousPage);
+		return Iterables.getFirst(names, null);
 	}
 	
 	private List<String> getAllTagNames() {
 		return Lists.newArrayList(tagsModel.getObject().keySet());
-	}
-	
-	private String getFirstInRange() {
-		List<String> tags = getTagsInRange();
-		return Iterables.getFirst(tags, null);
-	}
-	
-	private String getLastInRange() {
-		List<String> tags = getTagsInRange();
-		return Iterables.getLast(tags, null);
-	}
-	
-	private String getFirstInAll() {
-		Map<String, Tag> tags = tagsModel.getObject();
-		return Iterables.getFirst(tags.keySet(), null);
 	}
 	
 	private String getLastInAll() {
@@ -183,31 +202,6 @@ public class TagsPage extends ProjectCategoryPage {
 		}
 		
 		return -1;
-	}
-	
-	private List<String> getTagsInRange() {
-		List<String> allTags = getAllTagNames();
-
-		int beforePos = findPosition(allTags, before);
-		int afterPos = findPosition(allTags, after);
-		
-		List<String> result = Lists.newArrayList(allTags);
-		if (beforePos >= 0) {
-			int start = beforePos + 1;
-			int end = Math.max(start + MAX_ROWS, allTags.size());
-			result = allTags.subList(start, end);
-		}
-		
-		if (afterPos >= 0) {
-			int start = Math.max(0, afterPos - MAX_ROWS);
-			result = allTags.subList(start, afterPos);
-		}
-
-		if (result.size() > MAX_ROWS) {
-			result = result.subList(0, MAX_ROWS);
-		}
-		
-		return Lists.newArrayList(result);
 	}
 	
 	Tag getTagCommit(String name) {
