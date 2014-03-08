@@ -100,7 +100,7 @@ public class RequestDetailPanel extends Panel {
 				AbstractProjectPage page = (AbstractProjectPage) getPage();
 				
 				setVisible(!editingTitle 
-							&& (getPullRequest().getSubmitter().equals(currentUser) 
+							&& (getPullRequest().getSubmittedBy().equals(currentUser) 
 								|| SecurityUtils.getSubject().isPermitted(
 									ObjectPermission.ofProjectWrite(page.getProject()))));
 			}
@@ -179,7 +179,7 @@ public class RequestDetailPanel extends Panel {
 
 			@Override
 			protected GitPerson load() {
-				User user = getPullRequest().getSubmitter();
+				User user = getPullRequest().getSubmittedBy();
 				return new GitPerson(user.getName(), user.getEmail());
 			}
 			
@@ -338,7 +338,7 @@ public class RequestDetailPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				if (getPullRequest().getMergeResult().getMergeHead() != null)
+				if (getPullRequest().getMergeInfo().getMergeHead() != null)
 					return "success";
 				else
 					return "warning";
@@ -352,7 +352,7 @@ public class RequestDetailPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getPullRequest().getMergeResult().getMergeHead() != null);
+				setVisible(getPullRequest().getMergeInfo().getMergeHead() != null);
 			}
 			
 		}); 
@@ -362,7 +362,7 @@ public class RequestDetailPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getPullRequest().getMergeResult().getMergeHead() == null);
+				setVisible(getPullRequest().getMergeInfo().getMergeHead() == null);
 			}
 			
 		}; 
@@ -464,7 +464,7 @@ public class RequestDetailPanel extends Panel {
 				
 				setVisible(SecurityUtils.getSubject().isPermitted(
 							ObjectPermission.ofProjectWrite(page.getProject())) 
-						&& getPullRequest().getMergeResult().getMergeHead() != null
+						&& getPullRequest().getMergeInfo().getMergeHead() != null
 						&& getPullRequest().getStatus() == Status.PENDING_INTEGRATE);
 			}
 
@@ -484,7 +484,7 @@ public class RequestDetailPanel extends Panel {
 				User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
 				AbstractProjectPage page = (AbstractProjectPage) getPage();
 				
-				setVisible(getPullRequest().getSubmitter().equals(currentUser) 
+				setVisible(getPullRequest().getSubmittedBy().equals(currentUser) 
 							|| SecurityUtils.getSubject().isPermitted(
 								ObjectPermission.ofProjectWrite(page.getProject())));
 			}

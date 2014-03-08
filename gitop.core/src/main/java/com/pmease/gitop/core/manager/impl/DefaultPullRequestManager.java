@@ -18,7 +18,6 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
@@ -33,7 +32,8 @@ import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.core.manager.PullRequestUpdateManager;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.MergeResult;
+import com.pmease.gitop.model.CloseInfo;
+import com.pmease.gitop.model.MergeInfo;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequest.Status;
 import com.pmease.gitop.model.PullRequestComment;
@@ -41,9 +41,6 @@ import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.VoteInvitation;
 import com.pmease.gitop.model.gatekeeper.checkresult.Approved;
-import com.pmease.gitop.model.gatekeeper.checkresult.Disapproved;
-import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
-import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
 
 @Singleton
 public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest> 
@@ -125,32 +122,22 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 		    	request.getTarget().getProject().setCodeSandbox(git);
 
 				if (git.isAncestor(sourceHead, targetHead)) {
-					request.setStatus(Status.INTEGRATED);
+					request.setCloseInfo(new CloseInfo(CloseInfo.Status.INTEGRATED, null));
 					request.setCheckResult(new Approved("Already integrated."));
-					request.setMergeResult(new MergeResult(targetHead, sourceHead, sourceHead, targetHead));
+					request.setMergeInfo(new MergeInfo(targetHead, sourceHead, sourceHead, targetHead));
 				} else {
 					if (git.isAncestor(targetHead, sourceHead)) {
-						request.setMergeResult(new MergeResult(targetHead, sourceHead, targetHead, sourceHead));
+						request.setMergeInfo(new MergeInfo(targetHead, sourceHead, targetHead, sourceHead));
 					} else {
 						git.fetch(request.getSource().getProject().code().repoDir().getAbsolutePath(), sourceHead);
 						String mergeBase = git.calcMergeBase(targetHead, sourceHead);
 						if (git.merge(sourceHead, null, null, null))
-							request.setMergeResult(new MergeResult(targetHead, sourceHead, mergeBase, git.parseRevision("HEAD", true)));
+							request.setMergeInfo(new MergeInfo(targetHead, sourceHead, mergeBase, git.parseRevision("HEAD", true)));
 						else
-							request.setMergeResult(new MergeResult(targetHead, sourceHead, mergeBase, null));
+							request.setMergeInfo(new MergeInfo(targetHead, sourceHead, mergeBase, null));
 					}
 					
 					request.setCheckResult(request.getTarget().getProject().getGateKeeper().checkRequest(request));
-	
-					Preconditions.checkNotNull(request.getMergeResult());
-					
-					if (request.getCheckResult() instanceof Pending || request.getCheckResult() instanceof PendingAndBlock) {
-						request.setStatus(Status.PENDING_APPROVAL);
-					} else if (request.getCheckResult() instanceof Disapproved) {
-						request.setStatus(Status.PENDING_UPDATE);
-					} else {
-						request.setStatus(Status.PENDING_INTEGRATE);
-					}
 				}
 	    	} finally {
 	    		request.getTarget().getProject().setCodeSandbox(null);
@@ -168,31 +155,31 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 					String mergeRef = request.getMergeRef();
 					
 					if (git.isAncestor(requestHead, branchHead)) {
-						request.setStatus(Status.INTEGRATED);
+						request.setCloseInfo(new CloseInfo(CloseInfo.Status.INTEGRATED, null));
 						request.setCheckResult(new Approved("Already integrated."));
-						request.setMergeResult(new MergeResult(branchHead, requestHead, requestHead, branchHead));
+						request.setMergeInfo(new MergeInfo(branchHead, requestHead, requestHead, branchHead));
 					} else {
 						// Update head ref so that it can be pulled by build system
 						git.updateRef(request.getHeadRef(), requestHead, null, null);
 						
 						if (git.isAncestor(branchHead, requestHead)) {
-							request.setMergeResult(new MergeResult(branchHead, requestHead, branchHead, requestHead));
+							request.setMergeInfo(new MergeInfo(branchHead, requestHead, branchHead, requestHead));
 							git.updateRef(mergeRef, requestHead, null, null);
 						} else {
-							if (request.getMergeResult() != null 
-									&& (!request.getMergeResult().getBranchHead().equals(branchHead) 
-											|| !request.getMergeResult().getRequestHead().equals(requestHead))) {
+							if (request.getMergeInfo() != null 
+									&& (!request.getMergeInfo().getBranchHead().equals(branchHead) 
+											|| !request.getMergeInfo().getRequestHead().equals(requestHead))) {
 								 // Commits for merging have been changed since last merge, we have to
 								 // re-merge 
-								request.setMergeResult(null);
+								request.setMergeInfo(null);
 							}
-							if (request.getMergeResult() != null && request.getMergeResult().getMergeHead() != null 
-									&& !request.getMergeResult().getMergeHead().equals(git.parseRevision(mergeRef, false))) {
+							if (request.getMergeInfo() != null && request.getMergeInfo().getMergeHead() != null 
+									&& !request.getMergeInfo().getMergeHead().equals(git.parseRevision(mergeRef, false))) {
 								 // Commits for merging have not been changed since last merge, but recorded 
 								 // merge is incorrect in repository, so we have to re-merge 
-								request.setMergeResult(null);
+								request.setMergeInfo(null);
 							}
-							if (request.getMergeResult() == null) {
+							if (request.getMergeInfo() == null) {
 								String mergeBase = git.calcMergeBase(branchHead, requestHead);
 								
 								File tempDir = FileUtils.createTempDir();
@@ -209,10 +196,10 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 									
 									if (tempGit.merge(branchHead, null, null, null)) {
 										git.fetch(tempGit.repoDir().getAbsolutePath(), "+HEAD:" + mergeRef);
-										request.setMergeResult(new MergeResult(branchHead, requestHead, 
+										request.setMergeInfo(new MergeInfo(branchHead, requestHead, 
 												mergeBase, git.parseRevision(mergeRef, true)));
 									} else {
-										request.setMergeResult(new MergeResult(branchHead, requestHead, mergeBase, null));
+										request.setMergeInfo(new MergeInfo(branchHead, requestHead, mergeBase, null));
 									}
 								} finally {
 									FileUtils.deleteDir(tempDir);
@@ -225,16 +212,6 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 						for (VoteInvitation invitation : request.getVoteInvitations()) {
 							if (!request.getCheckResult().canVote(invitation.getVoter(), request))
 								voteInvitationManager.delete(invitation);
-						}
-				
-						Preconditions.checkNotNull(request.getMergeResult());
-						
-						if (request.getCheckResult() instanceof Pending || request.getCheckResult() instanceof PendingAndBlock) {
-							request.setStatus(Status.PENDING_APPROVAL);
-						} else if (request.getCheckResult() instanceof Disapproved) {
-							request.setStatus(Status.PENDING_UPDATE);
-						} else {
-							request.setStatus(Status.PENDING_INTEGRATE);
 						}
 					}
 			
@@ -256,7 +233,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 
 			@Override
 			public Void call() throws Exception {
-				request.setStatus(Status.DISCARDED);
+				request.setCloseInfo(new CloseInfo(CloseInfo.Status.DISCARDED, user));
 				save(request);
 				
 				if (comment != null) {
@@ -297,10 +274,10 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 				if (request.getStatus() == Status.PENDING_INTEGRATE) {
 					Git git = request.getTarget().getProject().code();
 					if (git.updateRef(request.getTarget().getHeadRef(), 
-							request.getMergeResult().getMergeHead(), 
-							request.getMergeResult().getBranchHead(), 
+							request.getMergeInfo().getMergeHead(), 
+							request.getMergeInfo().getBranchHead(), 
 							comment!=null?comment:"merge pull request")) {
-						request.setStatus(Status.INTEGRATED);
+						request.setCloseInfo(new CloseInfo(CloseInfo.Status.INTEGRATED, user));
 						save(request);
 
 						final Long branchId = request.getTarget().getId();
@@ -345,8 +322,8 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 	@Override
 	public List<PullRequest> findByCommit(String commit) {
 		return query(Restrictions.or(
-				Restrictions.eq("mergeResult.requestHead", commit), 
-				Restrictions.eq("mergeResult.merged", commit)));
+				Restrictions.eq("mergeInfo.requestHead", commit), 
+				Restrictions.eq("mergeInfo.merged", commit)));
 	}
 
 	@Transactional
@@ -359,7 +336,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 		request.setTarget(target);
 		request.setTitle(title);
 		request.setDescription(description);
-		request.setSubmitter(submitter);
+		request.setSubmittedBy(submitter);
 		save(request);
 		
 		pullRequestUpdateManager.update(request);

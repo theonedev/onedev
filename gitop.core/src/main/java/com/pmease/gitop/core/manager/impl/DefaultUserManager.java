@@ -102,8 +102,8 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
     @Transactional
     @Override
 	public void delete(User user) {
-    	for (PullRequest request: user.getRequests()) {
-    		request.setSubmitter(null);
+    	for (PullRequest request: user.getSubmittedRequests()) {
+    		request.setSubmittedBy(null);
     		pullRequestManager.save(request);
     	}
     	

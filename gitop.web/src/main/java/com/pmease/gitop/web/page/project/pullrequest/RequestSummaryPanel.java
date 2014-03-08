@@ -77,7 +77,7 @@ public class RequestSummaryPanel extends Panel {
 
 			@Override
 			protected GitPerson load() {
-				User user = getPullRequest().getSubmitter();
+				User user = getPullRequest().getSubmittedBy();
 				return new GitPerson(user.getName(), user.getEmail());
 			}
 			

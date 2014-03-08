@@ -21,7 +21,7 @@ public class IfApprovedByProjectOwner extends ApprovalGateKeeper {
     @Override
     public CheckResult doCheckRequest(PullRequest request) {
     	if (request.isNew())
-    		return checkApproval(request.getSubmitter(), request.getTarget().getProject());
+    		return checkApproval(request.getSubmittedBy(), request.getTarget().getProject());
     	
         User projectOwner = request.getTarget().getProject().getOwner();
 

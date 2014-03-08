@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class MergeResult {
+public class MergeInfo {
 	
 	private String branchHead;
 	
@@ -15,10 +15,10 @@ public class MergeResult {
 	private String mergeHead;
 	
 	@SuppressWarnings("unused")
-	private MergeResult() {
+	private MergeInfo() {
 	}
 	
-	public MergeResult(String branchHead, String requestHead, String mergeBase, @Nullable String mergeHead) {
+	public MergeInfo(String branchHead, String requestHead, String mergeBase, @Nullable String mergeHead) {
 		this.branchHead = branchHead;
 		this.requestHead = requestHead;
 		this.mergeBase = mergeBase;
@@ -42,16 +42,4 @@ public class MergeResult {
 		return mergeBase;
 	}
 
-	public void setMergeBase(String mergeBase) {
-		this.mergeBase = mergeBase;
-	}
-
-	public boolean isConflict() {
-		return mergeHead == null;
-	}
-	
-	public boolean isFastForward() {
-		return requestHead.equals(mergeHead);
-	}
-	
 }

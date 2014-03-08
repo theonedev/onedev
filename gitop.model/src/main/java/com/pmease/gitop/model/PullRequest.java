@@ -23,6 +23,9 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitop.model.gatekeeper.checkresult.Disapproved;
+import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
+import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
 
 @SuppressWarnings("serial")
 @Entity
@@ -54,7 +57,7 @@ public class PullRequest extends AbstractEntity {
 	private boolean autoMerge;
 
 	@ManyToOne
-	private User submitter;
+	private User submittedBy;
 	
 	@ManyToOne
 	@JoinColumn(nullable = false)
@@ -66,10 +69,11 @@ public class PullRequest extends AbstractEntity {
 	@Lob
 	private CheckResult checkResult;
 
-	private Status status;
+	@Embedded
+	private MergeInfo mergeInfo;
 	
 	@Embedded
-	private MergeResult mergeResult;
+	private CloseInfo closeInfo;
 
 	@Column(nullable=false)
 	private Date createDate = new Date();
@@ -130,12 +134,12 @@ public class PullRequest extends AbstractEntity {
 	 * 			submitting the request is removed.
 	 */
 	@Nullable
-	public User getSubmitter() {
-		return submitter;
+	public User getSubmittedBy() {
+		return submittedBy;
 	}
 
-	public void setSubmitter(@Nullable User submitter) {
-		this.submitter = submitter;
+	public void setSubmittedBy(@Nullable User submittedBy) {
+		this.submittedBy = submittedBy;
 	}
 
 	/**
@@ -195,15 +199,22 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	public Status getStatus() {
-		return status;
-	}
-	
-	public void setStatus(Status status) {
-		this.status = status;
+		if (closeInfo != null) {
+			if (closeInfo.getCloseStatus() == CloseInfo.Status.INTEGRATED)
+				return Status.INTEGRATED;
+			else
+				return Status.DISCARDED;
+		} else if (checkResult instanceof Pending || checkResult instanceof PendingAndBlock) {
+			return Status.PENDING_APPROVAL;
+		} else if (checkResult instanceof Disapproved) {
+			return Status.PENDING_UPDATE;
+		} else {
+			return Status.PENDING_INTEGRATE;
+		}
 	}
 
 	public boolean isOpen() {
-		return status != Status.INTEGRATED && status != Status.DISCARDED;
+		return closeInfo == null;
 	}
 	
 	public PullRequestUpdate getBaseUpdate() {
@@ -233,17 +244,25 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	/**
-	 * Get merge result of this pull request.
+	 * Get merge info of this pull request.
 	 *  
 	 * @return
-	 * 			merge result of this pull request
+	 * 			merge info of this pull request
 	 */
-	public MergeResult getMergeResult() {
-		return mergeResult;
+	public MergeInfo getMergeInfo() {
+		return mergeInfo;
 	}
 	
-	public void setMergeResult(MergeResult mergeResult) {
-		this.mergeResult = mergeResult;
+	public void setMergeInfo(MergeInfo mergeInfo) {
+		this.mergeInfo = mergeInfo;
+	}
+
+	public CloseInfo getCloseInfo() {
+		return closeInfo;
+	}
+
+	public void setCloseInfo(CloseInfo closeInfo) {
+		this.closeInfo = closeInfo;
 	}
 
 	/**
@@ -322,17 +341,11 @@ public class PullRequest extends AbstractEntity {
 	
 	public static class CriterionHelper {
 		public static Criterion ofOpen() {
-			return Restrictions.and(
-					Restrictions.not(Restrictions.eq("status", PullRequest.Status.INTEGRATED)),
-					Restrictions.not(Restrictions.eq("status", PullRequest.Status.DISCARDED))
-				);
+			return Restrictions.isNull("closeInfo");
 		}
 		
 		public static Criterion ofClosed() {
-			return Restrictions.or(
-					Restrictions.eq("status", PullRequest.Status.INTEGRATED),
-					Restrictions.eq("status", PullRequest.Status.DISCARDED)
-				);
+			return Restrictions.isNotNull("closeInfo");
 		}
 		
 		public static Criterion ofTarget(Branch target) {
@@ -344,7 +357,7 @@ public class PullRequest extends AbstractEntity {
 		}
 		
 		public static Criterion ofSubmitter(User submitter) {
-			return Restrictions.eq("submitter", submitter);
+			return Restrictions.eq("submittedBy", submitter);
 		}
 		
 	}

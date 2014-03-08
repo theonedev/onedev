@@ -78,7 +78,7 @@ public class NewRequestPanel extends Panel {
 					request = new PullRequest();
 					request.setTarget(getTarget());
 					request.setSource(getSource());
-					request.setSubmitter(getSubmitter());
+					request.setSubmittedBy(getSubmitter());
 					Gitop.getInstance(PullRequestManager.class).refresh(request);
 					
 					return request;
@@ -92,7 +92,7 @@ public class NewRequestPanel extends Panel {
 			@Override
 			protected List<Commit> load() {
 				PullRequest request = getPullRequest();
-				return getSource().getProject().code().log(request.getMergeResult().getMergeBase(), 
+				return getSource().getProject().code().log(request.getMergeInfo().getMergeBase(), 
 						getSource().getHeadCommit(), null, 0, 0);
 			}
 			
@@ -143,7 +143,7 @@ public class NewRequestPanel extends Panel {
 				PullRequest request = getPullRequest();
 				if (request.isNew() 
 						&& (request.getStatus() == PENDING_INTEGRATE || request.getStatus() == PENDING_APPROVAL) 
-						&& request.getMergeResult().getMergeHead() != null) {
+						&& request.getMergeInfo().getMergeHead() != null) {
 					return "success";
 				} else {
 					return "warning";
@@ -270,7 +270,7 @@ public class NewRequestPanel extends Panel {
 							return "No changes to pull.";
 						} else if (request.getStatus() == PENDING_UPDATE) {
 							return "Gate keeper of target project rejects the pull request.";
-						} else if (request.getMergeResult().getMergeHead() == null) {
+						} else if (request.getMergeInfo().getMergeHead() == null) {
 							return "There are merge conflicts.";
 						} else {
 							return "Be able to merge automatically.";
@@ -296,7 +296,7 @@ public class NewRequestPanel extends Panel {
 								+ "' is already update to date.";
 					} else if (title != null 
 							&& request.getStatus() != PENDING_UPDATE 
-							&& request.getMergeResult().getMergeHead() == null) {
+							&& request.getMergeInfo().getMergeHead() == null) {
 						return "But you can still send the pull request.";
 					}
 				} 
@@ -353,7 +353,7 @@ public class NewRequestPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return getPullRequest().getMergeResult().getMergeBase();
+				return getPullRequest().getMergeInfo().getMergeBase();
 			}
 			
 		}, new AbstractReadOnlyModel<String>() {

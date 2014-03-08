@@ -21,7 +21,7 @@ public class IfApprovedByBranchCreator extends ApprovalGateKeeper {
     @Override
     public CheckResult doCheckRequest(PullRequest request) {
     	if (request.isNew())
-    		return checkApproval(request.getSubmitter(), request.getTarget());
+    		return checkApproval(request.getSubmittedBy(), request.getTarget());
     	
         User branchCreator = request.getTarget().getCreator();
 
