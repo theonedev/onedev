@@ -50,7 +50,7 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
 
             return pending("To be approved by user '" + user.getName() + "'.",
                     new CanVoteBySpecifiedUser(user));
-        } else if (result.isApprove()) {
+        } else if (result == Vote.Result.APPROVE) {
             return approved("Approved by user '" + user.getName() + "'.");
         } else {
             return disapproved("Rejected by user '" + user.getName() + "'.");

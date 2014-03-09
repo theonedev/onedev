@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.model;
+package com.pmease.gitop.web.page.project.pullrequest.activity;
 
 import org.apache.wicket.model.LoadableDetachableModel;
 

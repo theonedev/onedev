@@ -32,7 +32,7 @@ public class IfApprovedByBranchCreator extends ApprovalGateKeeper {
 	            Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, Sets.newHashSet(branchCreator), 1);
 	            return pending("To be approved by user '" + branchCreator.getName() + "'.",
 	                    new CanVoteBySpecifiedUser(branchCreator));
-	        } else if (result.isApprove()) {
+	        } else if (result == Vote.Result.APPROVE) {
 	            return approved("Approved by user '" + branchCreator.getName() + "'.");
 	        } else {
 	            return disapproved("Rejected by user '" + branchCreator.getName() + "'.");

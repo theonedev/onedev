@@ -16,7 +16,7 @@ public class ClosePullRequest implements PullRequestActivity {
 	
 	@Override
 	public Panel render(String panelId) {
-		return null;
+		return new CloseActivityPanel(panelId, new PullRequestModel(request.getId()));
 	}
 
 	@Override

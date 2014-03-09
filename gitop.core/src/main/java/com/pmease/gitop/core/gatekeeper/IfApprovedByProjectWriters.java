@@ -51,7 +51,7 @@ public class IfApprovedByProjectWriters extends ApprovalGateKeeper {
             Vote.Result result = user.checkVoteSince(request.getBaseUpdate());
             if (result == null) {
                 pendings++;
-            } else if (result.isApprove()) {
+            } else if (result == Vote.Result.APPROVE) {
                 approvals++;
             }
         }

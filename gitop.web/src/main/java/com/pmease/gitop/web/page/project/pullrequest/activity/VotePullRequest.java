@@ -16,7 +16,7 @@ public class VotePullRequest implements PullRequestActivity {
 	
 	@Override
 	public Panel render(String panelId) {
-		return null;
+		return new VoteActivityPanel(panelId, new VoteModel(vote.getId()));
 	}
 
 	@Override

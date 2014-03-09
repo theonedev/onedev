@@ -7,13 +7,17 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.shiro.SecurityUtils;
+
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.AuthorizationManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Authorization;
 import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
+import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.model.permission.operation.GeneralOperation;
 
@@ -37,5 +41,27 @@ public class DefaultAuthorizationManager extends AbstractGenericDao<Authorizatio
 		}
 		return authorizedUsers;
 	}
+
+	@Override
+	public boolean canModify(PullRequest request) {
+		Project project = request.getTarget().getProject();
+		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectAdmin(project))) {
+			return true;
+		} else {
+			User currentUser = userManager.getCurrent();
+			User submittedBy = request.getSubmittedBy();
+			return submittedBy != null && submittedBy.equals(currentUser);
+		}
+	}
 	
+	@Override
+	public boolean canModify(Vote vote) {
+		Project project = vote.getUpdate().getRequest().getTarget().getProject();
+		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectAdmin(project))) {
+			return true;
+		} else {
+			return vote.getVoter().equals(userManager.getCurrent());
+		}
+	}
+
 }

@@ -18,34 +18,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 })
 public class Vote extends AbstractEntity {
 
-	public static enum Result {
-		APPROVE {
-			@Override
-			public boolean isApprove() {
-				return true;
-			}
-
-			@Override
-			public boolean isDisapprove() {
-				return false;
-			}
-		}, 
-		DISAPPROVE {
-			@Override
-			public boolean isApprove() {
-				return false;
-			}
-
-			@Override
-			public boolean isDisapprove() {
-				return true;
-			}
-		};
-		
-		public abstract boolean isApprove();
-		
-		public abstract boolean isDisapprove();
-	};
+	public static enum Result {APPROVE, DISAPPROVE};
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)

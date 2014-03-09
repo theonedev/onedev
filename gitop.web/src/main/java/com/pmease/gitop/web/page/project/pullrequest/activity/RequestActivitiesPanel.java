@@ -10,11 +10,13 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.PullRequestUpdate;
+import com.pmease.gitop.model.Vote;
 
 @SuppressWarnings("serial")
-public class ActivitiesPanel extends Panel {
+public class RequestActivitiesPanel extends Panel {
 
-	public ActivitiesPanel(String id, IModel<PullRequest> model) {
+	public RequestActivitiesPanel(String id, IModel<PullRequest> model) {
 		super(id, model);
 	}
 	
@@ -35,9 +37,10 @@ public class ActivitiesPanel extends Panel {
 				for (PullRequestComment comment: request.getComments()) {
 					activities.add(new CommentPullRequest(comment));
 				}
+				*/
 				
 				for (PullRequestUpdate update: request.getUpdates()) {
-					activities.add(new UpdatePullRequest(update));
+					//activities.add(new UpdatePullRequest(update));
 					for (Vote vote: update.getVotes()) {
 						activities.add(new VotePullRequest(vote));
 					}
@@ -45,7 +48,8 @@ public class ActivitiesPanel extends Panel {
 				
 				if (!request.isOpen())
 					activities.add(new ClosePullRequest(request));
-				
+
+				/*
 				Collections.sort(activities, new Comparator<PullRequestActivity>() {
 
 					@Override

@@ -29,6 +29,7 @@ import org.apache.wicket.model.PropertyModel;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.AuthorizationManager;
 import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.manager.VoteManager;
@@ -39,7 +40,7 @@ import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.page.project.AbstractProjectPage;
-import com.pmease.gitop.web.page.project.pullrequest.activity.ActivitiesPanel;
+import com.pmease.gitop.web.page.project.pullrequest.activity.RequestActivitiesPanel;
 
 @SuppressWarnings("serial")
 public class RequestDetailPanel extends Panel {
@@ -91,13 +92,9 @@ public class RequestDetailPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
-				AbstractProjectPage page = (AbstractProjectPage) getPage();
-				
-				setVisible(!editingTitle 
-							&& (getPullRequest().getSubmittedBy().equals(currentUser) 
-								|| SecurityUtils.getSubject().isPermitted(
-									ObjectPermission.ofProjectWrite(page.getProject()))));
+
+				setVisible(Gitop.getInstance(AuthorizationManager.class)
+						.canModify(getPullRequest()));
 			}
 			
 		});
@@ -401,12 +398,8 @@ public class RequestDetailPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
-				AbstractProjectPage page = (AbstractProjectPage) getPage();
-				
-				setVisible(getPullRequest().getSubmittedBy().equals(currentUser) 
-							|| SecurityUtils.getSubject().isPermitted(
-								ObjectPermission.ofProjectAdmin(page.getProject())));
+				setVisible(Gitop.getInstance(AuthorizationManager.class)
+						.canModify(getPullRequest()));
 			}
 
 			@Override
@@ -488,7 +481,7 @@ public class RequestDetailPanel extends Panel {
 			
 		});
 		
-		add(new ActivitiesPanel("activities", new AbstractReadOnlyModel<PullRequest>() {
+		add(new RequestActivitiesPanel("activities", new AbstractReadOnlyModel<PullRequest>() {
 
 			@Override
 			public PullRequest getObject() {

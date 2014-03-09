@@ -5,7 +5,6 @@ import java.util.Date;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import com.pmease.gitop.model.PullRequest;
-import com.pmease.gitop.web.model.PullRequestModel;
 
 public class OpenPullRequest implements PullRequestActivity {
 
