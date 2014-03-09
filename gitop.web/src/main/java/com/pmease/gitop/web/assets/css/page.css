@@ -789,18 +789,25 @@ ul.status-help li:last-child .description {border-bottom: none;}
 /* PULL REQUEST DETAIL PANEL */
 .request-detail {padding: 20px;}
 .request-detail>div {margin-bottom: 16px;}
+.request-detail table {width: 100%;}
+.request-detail td {vertical-align: top;}
+.request-detail td.actions {width: 120px;}
+.request-detail textarea {resize: vertical; min-height: 64px;}
+
 .request-detail>.head {font-size: 20px; font-weight: bold; padding: 0;}
 .request-detail>.head>div {margin-right: 8px;}
-.request-detail>.head>.id {color: #999;}
+.request-detail>.head>.id {color: #999; margin-right: 0;}
 .request-detail>.head>.icon {font-size: 16px;}
-.request-detail>.summary .branch {margin-right: 6px;}
-.request-detail>.summary .branch.label {background-color: #DDDDDD;}
-.request-detail>.summary .branch .icon {color: #666666;}
-.request-detail>.summary .status {margin-left: 6px;}
+
+.request-detail>.description {background: #F2F2F2; padding: 3px; 
+	border-radius: 4px;}
+.request-detail>.description .actions {padding-left: 4px;}
+.request-detail>.description table.viewer {width: auto;}
+.request-detail>.description table.viewer td {padding: 5px;}
+.request-detail>.description p {margin-bottom: 0;}
 
 .request-detail>.status {background: #F2F2F2; border-radius: 4px;}
-.request-detail>.status table {border-collapse: separate; border-spacing: 4px; width: 100%;}
-.request-detail>.status td {vertical-align: top;}
+.request-detail>.status table {border-collapse: separate; border-spacing: 4px;}
 .request-detail>.status td.primary {border: 1px solid; padding: 8px; border-radius: 4px;
 	color: #8A6D3B; border-color: #F7DEAB; background-color: #FCF8E3;}
 .request-detail>.status td.primary .message {font-size: 18px;}
@@ -815,6 +822,12 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.status td.icons {width: 1%;}
 .request-detail>.status td.merge.warning .icon-warning-sign {display: block; color: #8A6D3B;}
 .request-detail>.status td.merge.success .icon-ok-circle {display: block; color: #3C763D;}
-.request-detail>.status td.actions {width: 120px;}
-.request-detail>.status textarea {resize: vertical; min-height: 64px;}
 .request-detail>.status>form>table {border-spacing: 3px;}
+
+.request-detail>.activities .branch {margin-right: 6px;}
+.request-detail>.activities .branch.label {background-color: #D8D8D8;}
+.request-detail>.activities .branch .icon {color: #666666;}
+
+.request-detail>.activities {background: #F2F2F2; border-radius: 4px; padding: 4px;}
+.request-detail>.activities td.actions {padding-left: 16px;}
+

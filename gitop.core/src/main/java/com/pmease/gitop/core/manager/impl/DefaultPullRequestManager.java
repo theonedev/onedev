@@ -5,7 +5,6 @@ import static com.pmease.gitop.model.PullRequest.CriterionHelper.ofSource;
 import static com.pmease.gitop.model.PullRequest.CriterionHelper.ofTarget;
 
 import java.io.File;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
@@ -27,16 +26,15 @@ import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.LockUtils;
 import com.pmease.gitop.core.manager.BranchManager;
-import com.pmease.gitop.core.manager.PullRequestCommentManager;
 import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.core.manager.PullRequestUpdateManager;
+import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.CloseInfo;
 import com.pmease.gitop.model.MergeInfo;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequest.Status;
-import com.pmease.gitop.model.PullRequestComment;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.VoteInvitation;
@@ -50,9 +48,9 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
-	private final PullRequestCommentManager pullRequestCommentManager;
-	
 	private final BranchManager branchManager;
+	
+	private final UserManager userManager;
 	
 	private final UnitOfWork unitOfWork;
 	
@@ -62,14 +60,13 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 	public DefaultPullRequestManager(GeneralDao generalDao, 
 			VoteInvitationManager voteInvitationManager,
 			PullRequestUpdateManager pullRequestUpdateManager, 
-			PullRequestCommentManager pullRequestCommentManager,
-			BranchManager branchManager, 
+			BranchManager branchManager, UserManager userManager, 
 			UnitOfWork unitOfWork, Executor executor) {
 		super(generalDao);
 		this.voteInvitationManager = voteInvitationManager;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
-		this.pullRequestCommentManager = pullRequestCommentManager;
 		this.branchManager = branchManager;
+		this.userManager = userManager;
 		this.unitOfWork = unitOfWork;
 		this.executor = executor;
 	}
@@ -122,7 +119,11 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 		    	request.getTarget().getProject().setCodeSandbox(git);
 
 				if (git.isAncestor(sourceHead, targetHead)) {
-					request.setCloseInfo(new CloseInfo(CloseInfo.Status.INTEGRATED, null));
+					CloseInfo closeInfo = new CloseInfo();
+					closeInfo.setClosedBy(null);
+					closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
+					closeInfo.setComment("Target branch already contains commit of source branch.");
+					request.setCloseInfo(closeInfo);
 					request.setCheckResult(new Approved("Already integrated."));
 					request.setMergeInfo(new MergeInfo(targetHead, sourceHead, sourceHead, targetHead));
 				} else {
@@ -155,7 +156,11 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 					String mergeRef = request.getMergeRef();
 					
 					if (git.isAncestor(requestHead, branchHead)) {
-						request.setCloseInfo(new CloseInfo(CloseInfo.Status.INTEGRATED, null));
+						CloseInfo closeInfo = new CloseInfo();
+						closeInfo.setClosedBy(null);
+						closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
+						closeInfo.setComment("Target branch already contains commit of source branch.");
+						request.setCloseInfo(closeInfo);
 						request.setCheckResult(new Approved("Already integrated."));
 						request.setMergeInfo(new MergeInfo(branchHead, requestHead, requestHead, branchHead));
 					} else {
@@ -218,7 +223,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 					save(request);
 					
 					if (request.isAutoMerge())
-						merge(request, null, null);
+						merge(request, null, "Integrated automatically by system.");
 					
 					return null;
 				}
@@ -233,25 +238,19 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 
 			@Override
 			public Void call() throws Exception {
-				request.setCloseInfo(new CloseInfo(CloseInfo.Status.DISCARDED, user));
+				CloseInfo closeInfo = new CloseInfo();
+				closeInfo.setClosedBy(user);
+				closeInfo.setCloseStatus(CloseInfo.Status.DISCARDED);
+				closeInfo.setComment(comment);
+				request.setCloseInfo(closeInfo);
 				save(request);
-				
-				if (comment != null) {
-					PullRequestComment requestComment = new PullRequestComment();
-					requestComment.setRequest(request);
-					requestComment.setUser(user);
-					requestComment.setDate(new Date());
-					requestComment.setContent(comment);
-					
-					pullRequestCommentManager.save(requestComment);
-				}
 				
 				return null;
 			}
 			
 		});
 	}
-	
+
 	/**
 	 * Merge specified request if possible.
 	 * 
@@ -265,8 +264,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 	 * 				is unable to lock the reference.
 	 */
 	@Transactional
-	public boolean merge(final PullRequest request, final User user, 
-			final String comment) {
+	public boolean merge(final PullRequest request, final User user, final String comment) {
 		return LockUtils.call(request.getLockName(), new Callable<Boolean>() {
 
 			@Override
@@ -277,10 +275,20 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 							request.getMergeInfo().getMergeHead(), 
 							request.getMergeInfo().getBranchHead(), 
 							comment!=null?comment:"merge pull request")) {
-						request.setCloseInfo(new CloseInfo(CloseInfo.Status.INTEGRATED, user));
+
+						CloseInfo closeInfo = new CloseInfo();
+						closeInfo.setClosedBy(user);
+						closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
+						closeInfo.setComment(comment);
+						request.setCloseInfo(closeInfo);
 						save(request);
 
 						final Long branchId = request.getTarget().getId();
+						final Long userId;
+						if (user != null)
+							userId = user.getId();
+						else
+							userId = null;
 						executor.execute(new Runnable() {
 
 							@Override
@@ -290,7 +298,12 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 									@Override
 									public Void call() throws Exception {
 										Branch branch = branchManager.load(branchId);
-										branchManager.onBranchRefUpdate(branch);
+										User user;
+										if (userId != null)
+											user = userManager.load(userId);
+										else
+											user = null;
+										branchManager.onBranchRefUpdate(branch, user);
 										return null;
 									}
 									
@@ -299,16 +312,6 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 							
 						});
 						return true;
-					}
-					
-					if (user != null && comment != null) {
-						PullRequestComment requestComment = new PullRequestComment();
-						requestComment.setRequest(request);
-						requestComment.setUser(user);
-						requestComment.setDate(new Date());
-						requestComment.setContent(comment);
-						
-						pullRequestCommentManager.save(requestComment);
 					}
 					
 				}
@@ -339,7 +342,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 		request.setSubmittedBy(submitter);
 		save(request);
 		
-		pullRequestUpdateManager.update(request);
+		pullRequestUpdateManager.update(request, null);
 		
 		refresh(request);
 		

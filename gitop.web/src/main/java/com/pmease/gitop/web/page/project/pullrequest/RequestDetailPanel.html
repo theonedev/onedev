@@ -13,21 +13,9 @@
 				<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-sm btn-default"/>
 			</form>
 			<div wicket:id="id" class="id pull-right"></div>
+			<div wicket:id="status" class="status pull-right"></div>
 		</div>
-		<div class="summary">
-			<span wicket:id="user"></span> 
-			<span>wants to pull</span> 
-			<wicket:enclosure child="targetLink">
-				into
-				<span class="label branch"><span class="icon icon-git-branch"></span> <a wicket:id="targetLink"><span wicket:id="targetLabel"></span></a></span>
-			</wicket:enclosure>
-			<wicket:enclosure child="sourceLink">
-				from
-				<span class="label branch"><span class="icon icon-git-branch"></span> <a wicket:id="sourceLink"><span wicket:id="sourceLabel"></span></a></span>
-			</wicket:enclosure>
-			<span wicket:id="date"></span>
-			<span wicket:id="statusLabel" class="status"></span>
-		</div>
+		<div wicket:id="description" class="description"></div>
 		<div wicket:id="status" class="status">
 			<table>
 				<tr>
@@ -80,6 +68,7 @@
 				</table>
 			</form>
 		</div>
+		<div wicket:id="activities" class="activities"></div>
 	</div>
 	<wicket:fragment wicket:id="conflictHelpFrag">
 		step1, step2, step3

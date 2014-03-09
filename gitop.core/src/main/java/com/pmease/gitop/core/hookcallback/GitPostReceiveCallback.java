@@ -135,6 +135,8 @@ public class GitPostReceiveCallback extends HttpServlet {
 				Preconditions.checkNotNull(branch);
 				
 				final Long branchId = branch.getId();
+				final Long userId = User.getCurrentId();
+				
 				executor.execute(new Runnable() {
 
 					@Override
@@ -144,7 +146,8 @@ public class GitPostReceiveCallback extends HttpServlet {
 							@Override
 							public Void call() throws Exception {
 								Branch branch = branchManager.load(branchId);
-								branchManager.onBranchRefUpdate(branch);
+								User user = userManager.load(userId);
+								branchManager.onBranchRefUpdate(branch, user);
 								return null;
 							}
 							

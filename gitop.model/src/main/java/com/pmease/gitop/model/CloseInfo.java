@@ -18,25 +18,38 @@ public class CloseInfo {
 	
 	private Date closeDate = new Date();
 	
-	@SuppressWarnings("unused")
-	private CloseInfo() {
-	}
-	
-	public CloseInfo(Status closeStatus, @Nullable User closedBy) {
-		this.closeStatus = closeStatus;
-		this.closedBy = closedBy;
-	}
+	private String comment;
 	
 	public @Nullable User getClosedBy() {
 		return closedBy;
+	}
+	
+	public void setClosedBy(@Nullable User closedBy) {
+		this.closedBy = closedBy;
 	}
 
 	public Status getCloseStatus() {
 		return closeStatus;
 	}
 
+	public void setCloseStatus(Status closeStatus) {
+		this.closeStatus = closeStatus;
+	}
+	
 	public Date getCloseDate() {
 		return closeDate;
+	}
+
+	public void setCloseDate(Date closeDate) {
+		this.closeDate = closeDate;
+	}
+	
+	public @Nullable String getComment() {
+		return comment;
+	}
+
+	public void setComment(@Nullable String comment) {
+		this.comment = comment;
 	}
 
 }

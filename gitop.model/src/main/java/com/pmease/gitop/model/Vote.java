@@ -1,5 +1,7 @@
 package com.pmease.gitop.model;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -48,6 +50,9 @@ public class Vote extends AbstractEntity {
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private User voter;
+
+	@Column(nullable=false)
+	private Date date = new Date();
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
@@ -55,6 +60,16 @@ public class Vote extends AbstractEntity {
 	
 	@Column(nullable=false)
 	private Result result;
+	
+	private String comment;
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
+	}
 
 	public User getVoter() {
 		return voter;
@@ -78,6 +93,14 @@ public class Vote extends AbstractEntity {
 
 	public void setResult(Result result) {
 		this.result = result;
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
 	}
 
 }

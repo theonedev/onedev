@@ -45,10 +45,13 @@ public class User extends AbstractUser implements ProtectedObject {
 	private Collection<Branch> branches = new ArrayList<Branch>();
 	
 	@OneToMany(mappedBy="submittedBy")
-	private Collection<PullRequest> submittedRequests = new ArrayList<PullRequest>();
+	private Collection<PullRequest> submittedRequests = new ArrayList<>();
 
 	@OneToMany(mappedBy="closeInfo.closedBy")
-	private Collection<PullRequest> closedRequests = new ArrayList<PullRequest>();
+	private Collection<PullRequest> closedRequests = new ArrayList<>();
+	
+	@OneToMany(mappedBy="user")
+	private Collection<PullRequestUpdate> updates = new ArrayList<>();
 
 	@OneToMany(mappedBy="voter", cascade=CascadeType.REMOVE)
 	private Collection<Vote> votes = new ArrayList<Vote>();
@@ -167,6 +170,14 @@ public class User extends AbstractUser implements ProtectedObject {
 	 */
 	public Collection<PullRequest> getClosedRequests() {
 		return closedRequests;
+	}
+
+	public Collection<PullRequestUpdate> getUpdates() {
+		return updates;
+	}
+
+	public void setUpdates(Collection<PullRequestUpdate> updates) {
+		this.updates = updates;
 	}
 
 	public void setClosedRequests(Collection<PullRequest> closedRequests) {
