@@ -461,7 +461,7 @@ public class RequestDetailPanel extends Panel {
 			@Override
 			public String getObject() {
 				if (action == Action.Approve)
-					return "btn-primary";
+					return "btn-info";
 				else if (action == Action.Disapprove)
 					return "btn-warning";
 				else if (action == Action.Integrate)

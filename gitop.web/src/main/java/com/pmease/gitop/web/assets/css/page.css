@@ -831,3 +831,5 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.activities td.actions {padding-left: 16px;}
 .request-detail>.activities .panel {margin-bottom: 8px;}
 .request-detail>.activities>div:last-child .panel {margin-bottom: 0;}
+.request-detail>.activities .panel-heading {padding: 4px 8px;}
+.request-detail>.activities .panel-body {padding: 8px;}
