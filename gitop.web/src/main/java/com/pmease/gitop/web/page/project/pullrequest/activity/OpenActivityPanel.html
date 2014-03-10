@@ -13,13 +13,14 @@
 		<div wicket:id="body" class="panel-body"></div>
 	</div>
 	<wicket:fragment wicket:id="viewFrag">
-		<div wicket:id="comment"></div>
+		<div wicket:id="description" class="description"></div>
+		<div wicket:id="commits" class="commits"></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="editFrag">
 		<table>
 			<tr>
 				<td>
-					<textarea wicket:id="comment" rows="6" class="form-control" placeholder="Leave a comment"></textarea>
+					<textarea wicket:id="description" rows="6" class="form-control" placeholder="Provide a description"></textarea>
 				</td>
 				<td class="actions">
 					<a wicket:id="save" class="btn btn-sm btn-primary btn-block">Save</a>

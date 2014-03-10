@@ -313,6 +313,11 @@ public class PullRequest extends AbstractEntity {
 		return getSortedUpdates().iterator().next();
 	}
 	
+	public PullRequestUpdate getInitialUpdate() {
+		List<PullRequestUpdate> updates = getSortedUpdates();
+		return updates.get(updates.size()-1);
+	}
+	
 	public Collection<String> findTouchedFiles() {
 		Git git = getTarget().getProject().code();
 		return git.listChangedFiles(getTarget().getHeadCommit(), getLatestUpdate().getHeadCommit());

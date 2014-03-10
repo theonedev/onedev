@@ -16,7 +16,7 @@ public class UpdatePullRequest implements PullRequestActivity {
 	
 	@Override
 	public Panel render(String panelId) {
-		return null;
+		return new UpdateActivityPanel(panelId, new PullRequestUpdateModel(update.getId()));
 	}
 
 	@Override

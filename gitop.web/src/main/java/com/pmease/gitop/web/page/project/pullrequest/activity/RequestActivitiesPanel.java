@@ -1,6 +1,8 @@
 package com.pmease.gitop.web.page.project.pullrequest.activity;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -55,7 +57,8 @@ public class RequestActivitiesPanel extends Panel {
 				}
 				
 				for (PullRequestUpdate update: request.getUpdates()) {
-					//activities.add(new UpdatePullRequest(update));
+					if (!update.equals(request.getInitialUpdate()))
+						activities.add(new UpdatePullRequest(update));
 					for (Vote vote: update.getVotes()) {
 						activities.add(new VotePullRequest(vote));
 					}
@@ -64,7 +67,6 @@ public class RequestActivitiesPanel extends Panel {
 				if (!request.isOpen())
 					activities.add(new ClosePullRequest(request));
 
-				/*
 				Collections.sort(activities, new Comparator<PullRequestActivity>() {
 
 					@Override
@@ -73,7 +75,6 @@ public class RequestActivitiesPanel extends Panel {
 					}
 					
 				});
-				*/
 				return activities;
 			}
 			

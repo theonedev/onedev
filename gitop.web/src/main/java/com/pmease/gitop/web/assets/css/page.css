@@ -820,10 +820,16 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.status td.merge.success .icon-ok-circle {display: block; color: #3C763D;}
 .request-detail>.status>form>table {border-spacing: 3px;}
 
-.request-detail>.activities {background: #F2F2F2; border-radius: 4px; padding: 4px;}
 .request-detail>.activities td.actions {padding-left: 8px;}
-.request-detail>.activities .panel {margin-bottom: 8px;}
+.request-detail>.activities .panel {margin-bottom: 16px;}
 .request-detail>.activities>div:last-child .panel {margin-bottom: 0;}
 .request-detail>.activities .panel-heading {padding: 4px 8px;}
 .request-detail>.activities .panel-body {padding: 8px;}
 .request-detail>.activities .panel-heading {font-size: 16px;}
+.request-detail>.activities .commits table {font-family: monospace; margin-bottom: 0;}
+.request-detail>.activities .commits table tbody tr td {
+	border-top: none;}
+.request-detail>.activities .commits .table-striped tbody tr:nth-child(2n+1) td {
+	background-color: #F5F5F5;} 
+	
+.request-detail>.activities .description {margin-bottom: 12px;}
