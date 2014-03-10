@@ -1,13 +1,16 @@
 <wicket:panel>
-	<div wicket:id="container" class="panel">
+	<div class="panel panel-default">
 		<div class="panel-heading clearfix">
 			<div class="pull-left">
 				<span wicket:id="user"></span>
-				<span wicket:id="action"></span>
+				commented
 				<span wicket:id="date"></span>
 			</div>
 			<div class="pull-right">
 				<a wicket:id="edit" title="Edit comment"><span class="icon icon-edit"></span></a>
+			</div>
+			<div class="pull-right right-spacing">
+				<a wicket:id="delete" title="Delete comment"><span class="icon icon-trash"></span></a>
 			</div>
 		</div>
 		<div wicket:id="body" class="panel-body"></div>

@@ -2,4 +2,17 @@
 	<div wicket:id="activities">
 		<div wicket:id="activity" class="activity"></div>
 	</div>
+	<div wicket:id="commentContainer" class="panel panel-default">
+		<div class="panel-heading clearfix">
+			<div class="pull-left">
+				<span wicket:id="user"></span> add new comment			
+			</div>
+			<div class="pull-right">
+				<a wicket:id="saveComment" title="Save new comment"><span class="icon icon-lg icon-add"></span></a>
+			</div>
+		</div>
+		<div class="panel-body">
+			<textarea wicket:id="comment" rows="6" class="form-control" placeholder="Leave a comment"></textarea>
+		</div>
+	</div> 
 </wicket:panel>

@@ -21,7 +21,7 @@ public class CommentPullRequest implements PullRequestActivity {
 
 	@Override
 	public Panel render(String panelId) {
-		return null;
+		return new CommentActivityPanel(panelId, new PullRequestCommentModel(comment.getId()));
 	}
 	
 }

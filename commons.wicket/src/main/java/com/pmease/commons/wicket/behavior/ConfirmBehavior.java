@@ -62,8 +62,8 @@ public class ConfirmBehavior extends Behavior {
 						}
 		
 						String decoratedScript = String.format(
-								"pmease.commons.confirm.show('%s', function() {%s}); return false;",
-								message, script);
+								"pmease.commons.confirm.show($('#%s'), '%s', function() {%s}); return false;",
+								component.getMarkupId(), message, script);
 						decoratedScript = StringUtils.replace(decoratedScript, 
 								"this.", "document.getElementById('" + component.getMarkupId() + "').");
 						tag.put("onclick", decoratedScript);
