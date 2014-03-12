@@ -30,9 +30,9 @@ public class GitPersonLink extends Panel {
 	private static final long serialVersionUID = 1L;
 
 	public static enum Mode {
-		FULL,
-		AVATAR_ONLY,
-		NAME_ONLY
+		AVATAR,
+		NAME,
+		AVATAR_AND_NAME
 	}
 	
 	private final Mode mode;
@@ -57,7 +57,7 @@ public class GitPersonLink extends Panel {
 		link = newLink("link", user);
 		add(link);
 		
-		if (mode == Mode.FULL || mode == Mode.AVATAR_ONLY) {
+		if (mode == Mode.AVATAR_AND_NAME || mode == Mode.AVATAR) {
 			if (user.isPresent()) {
 				image = new AvatarImage("avatar", new UserModel(user.get()));
 				link.add(image);
@@ -69,7 +69,7 @@ public class GitPersonLink extends Panel {
 			}
 		}
 		
-		if (mode == Mode.FULL || mode == Mode.NAME_ONLY) {
+		if (mode == Mode.AVATAR_AND_NAME || mode == Mode.NAME) {
 			if (user.isPresent()) {
 				link.add(new Label("name", user.get().getName()));
 			} else {
@@ -77,11 +77,11 @@ public class GitPersonLink extends Panel {
 			}
 		}
 		
-		if (mode == Mode.AVATAR_ONLY) {
+		if (mode == Mode.AVATAR) {
 			link.add(new WebMarkupContainer("name").setVisibilityAllowed(false));
 		}
 		
-		if (mode == Mode.NAME_ONLY) {
+		if (mode == Mode.NAME) {
 			link.add(new WebMarkupContainer("avatar").setVisibilityAllowed(false));
 		}
 		

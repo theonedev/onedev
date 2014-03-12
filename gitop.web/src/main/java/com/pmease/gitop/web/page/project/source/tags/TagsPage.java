@@ -101,7 +101,7 @@ public class TagsPage extends ProjectCategoryPage {
 					} else {
 						item.add(new GitPersonLink("creator", 
 								Model.of(GitPerson.of(tag.getTagger())), 
-								Mode.AVATAR_ONLY).enableTooltip("right"));
+								Mode.AVATAR).enableTooltip("right"));
 						item.add(new AgeLabel("date", Model.of(tag.getTagger().getDate())));
 					}
 					

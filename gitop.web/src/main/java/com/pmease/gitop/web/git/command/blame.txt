@@ -1,0 +1,374 @@
+a20e3a795b1a1975f09f7f729ba2b6fc74f4a54a 92 92 1
+author Michael Witten
+author-mail <mfwitten@gmail.com>
+author-time 1333480802
+author-tz +0000
+committer Jiri Kosina
+committer-mail <jkosina@suse.cz>
+committer-time 1334651011
+committer-tz +0200
+summary README: Grammar: `me has' -> `I have'
+previous 5b4285fbd4692928ed41992b9aba55c7d1efd723 README
+filename README
+5b4285fbd4692928ed41992b9aba55c7d1efd723 71 71 1
+author Michael Witten
+author-mail <mfwitten@gmail.com>
+author-time 1333319250
+author-tz +0000
+committer Jiri Kosina
+committer-mail <jkosina@suse.cz>
+committer-time 1334651011
+committer-tz +0200
+summary README: Use `X' and `x' consistently
+previous 6b2aac42b20f495d9ea220036f57596d525d4233 README
+filename README
+5b4285fbd4692928ed41992b9aba55c7d1efd723 81 81 1
+filename README
+5b4285fbd4692928ed41992b9aba55c7d1efd723 88 88 4
+filename README
+5b4285fbd4692928ed41992b9aba55c7d1efd723 145 145 1
+filename README
+5b4285fbd4692928ed41992b9aba55c7d1efd723 149 149 1
+filename README
+0466dcbeda72e6a2753cd7e81f0a190054bd2233 1 1 1
+author Jesper Juhl
+author-mail <jj@chaosbits.net>
+author-time 1309517216
+author-tz +0200
+committer Linus Torvalds
+committer-mail <torvalds@linux-foundation.org>
+committer-time 1309551934
+committer-tz -0700
+summary Update version number references in README
+previous 724d4c03066cec0e23b44344ad384fb4ebb7419d README
+filename README
+0466dcbeda72e6a2753cd7e81f0a190054bd2233 3 3 1
+filename README
+0466dcbeda72e6a2753cd7e81f0a190054bd2233 65 65 1
+filename README
+0466dcbeda72e6a2753cd7e81f0a190054bd2233 68 68 1
+filename README
+0466dcbeda72e6a2753cd7e81f0a190054bd2233 78 78 1
+filename README
+0466dcbeda72e6a2753cd7e81f0a190054bd2233 83 83 1
+filename README
+0466dcbeda72e6a2753cd7e81f0a190054bd2233 86 86 1
+filename README
+0466dcbeda72e6a2753cd7e81f0a190054bd2233 94 94 1
+filename README
+0466dcbeda72e6a2753cd7e81f0a190054bd2233 96 96 1
+filename README
+0466dcbeda72e6a2753cd7e81f0a190054bd2233 110 110 8
+filename README
+0466dcbeda72e6a2753cd7e81f0a190054bd2233 129 129 1
+filename README
+cddb5de0531738b1adcebca8186e7078fd8c33fd 27 27 1
+author Tracey Dent
+author-mail <tdent48227@gmail.com>
+author-time 1290599796
+author-tz -0500
+committer Chris Metcalf
+committer-mail <cmetcalf@tilera.com>
+committer-time 1298478682
+committer-tz -0500
+summary Readme: Add architecture
+previous f5412be599602124d2bdd49947b231dd77c0bf99 README
+filename README
+b3235fe420edf7faf5e8e67b978b12d5524fb161 169 169 1
+author Andrea Gelmini
+author-mail <andrea.gelmini@gelma.net>
+author-time 1285967735
+author-tz -0700
+committer Michal Marek
+committer-mail <mmarek@suse.cz>
+committer-time 1286962584
+committer-tz +0200
+summary README: cite nconfig
+previous b1f7d6e1909c72338aa93a113d5844767434dacb README
+filename README
+b2d8993026a26f4ece8c8b3f2e138d2ba8f18eaa 179 180 9
+author Patrick Ringl
+author-mail <patrick_@freenet.de>
+author-time 1244807916
+author-tz +0200
+committer Sam Ravnborg
+committer-mail <sam@ravnborg.org>
+committer-time 1245010827
+committer-tz +0200
+summary README: fix misleading pointer to the defconf directory
+previous 7923f90fffa8746f6457d4eea2109fd3d6414189 README
+filename README
+590a5857291e88c00a1be53fb373e8bf82f86284 177 178 1
+author Markus Heidelberg
+author-mail <markus.heidelberg@web.de>
+author-time 1242603406
+author-tz +0200
+committer Sam Ravnborg
+committer-mail <sam@ravnborg.org>
+committer-time 1244579866
+committer-tz +0200
+summary kconfig: add a note about the deps to the 'silentoldconfig' help
+previous 6f26e5e412ddc23e1d698390243e39802410ab15 README
+filename README
+ad444684b78f12fb3f45a733722e2cbfe102d25c 191 201 1
+author Li Zefan
+author-mail <lizf@cn.fujitsu.com>
+author-time 1235173123
+author-tz -0800
+committer Linus Torvalds
+committer-mail <torvalds@linux-foundation.org>
+committer-time 1235181469
+committer-tz -0800
+summary README: fix a wrong filename
+previous 3ef0e5ba467366125f04b423f4638baca54a4fc1 README
+filename README
+2af238e455ef5fd31c2f7a06c2db3f13d843b9bf 55 55 3
+author Randy Dunlap
+author-mail <randy.dunlap@oracle.com>
+author-time 1204323713
+author-tz -0800
+committer Sam Ravnborg
+committer-mail <sam@ravnborg.org>
+committer-time 1230925405
+committer-tz +0100
+summary kbuild: make *config usage docs
+previous 80a7d1d991e35b0370c0396f36f6a076869a6bac README
+filename README
+2af238e455ef5fd31c2f7a06c2db3f13d843b9bf 59 59 1
+filename README
+2af238e455ef5fd31c2f7a06c2db3f13d843b9bf 190 200 1
+filename README
+2af238e455ef5fd31c2f7a06c2db3f13d843b9bf 192 202 1
+filename README
+2af238e455ef5fd31c2f7a06c2db3f13d843b9bf 229 239 13
+filename README
+99ddcc7edbb6b1d35a542f6bf0383f1f5a1aa0b0 281 299 2
+author Linus Torvalds
+author-mail <torvalds@woody.linux-foundation.org>
+author-time 1169590955
+author-tz -0800
+committer Linus Torvalds
+committer-mail <torvalds@woody.linux-foundation.org>
+committer-time 1169590955
+committer-tz -0800
+summary Change Linus' email address too
+previous 65ebe63420eae40fba73d3b4f79f99adc8e148b3 README
+filename README
+620034c84d1d939717bdfbe02c51a3fee43541c3 25 25 1
+author Jesper Juhl
+author-mail <jesper.juhl@gmail.com>
+author-time 1165448758
+author-tz +0100
+committer Linus Torvalds
+committer-mail <torvalds@woody.osdl.org>
+committer-time 1165452081
+committer-tz -0800
+summary [PATCH] A few small additions and corrections to README
+previous 6fc52f81a871e4c29ade34dd736a383906caf47e README
+filename README
+620034c84d1d939717bdfbe02c51a3fee43541c3 34 34 2
+filename README
+620034c84d1d939717bdfbe02c51a3fee43541c3 118 118 1
+filename README
+620034c84d1d939717bdfbe02c51a3fee43541c3 167 167 1
+filename README
+620034c84d1d939717bdfbe02c51a3fee43541c3 310 328 3
+filename README
+620034c84d1d939717bdfbe02c51a3fee43541c3 344 362 1
+filename README
+9dfb563b07b1aafcd7d40528ebfa7f9ce28f0556 168 173 2
+author Randy Dunlap
+author-mail <rdunlap@xenotime.net>
+author-time 1145424113
+author-tz -0700
+committer Linus Torvalds
+committer-mail <torvalds@g5.osdl.org>
+committer-time 1145463232
+committer-tz -0700
+summary [PATCH] config: update usage/help info
+previous 7420884c038f326bdac3a8ded856033523e7684e README
+filename README
+9dfb563b07b1aafcd7d40528ebfa7f9ce28f0556 173 179 1
+filename README
+9dfb563b07b1aafcd7d40528ebfa7f9ce28f0556 175 189 11
+filename README
+2b422383c3d8dcd203dd9aea70155be6258dbf6c 77 79 1
+author Håkon Løvdal
+author-mail <Hakon.Lovdal@ericsson.com>
+author-time 1142883124
+author-tz +0100
+committer Adrian Bunk
+committer-mail <bunk@r063144.stusta.swh.mhn.de>
+committer-time 1142883124
+committer-tz +0100
+summary README: bzip2 is not new
+previous 44fc355db7c224c95752155c54cbe28380f14c19 README
+filename README
+4f4e2dc3ce46d279a311e5250ac3cbd394279c31 9 9 3
+author Xose Vazquez Perez
+author-mail <xose.vazquez@gmail.com>
+author-time 1137264988
+author-tz +0100
+committer Linus Torvalds
+committer-mail <torvalds@g5.osdl.org>
+committer-time 1137482761
+committer-tz -0800
+summary [PATCH] README updated
+previous a462e9ff524f33da3e504fc71b8dd2b7584e4f28 README
+filename README
+4f4e2dc3ce46d279a311e5250ac3cbd394279c31 13 13 4
+filename README
+4f4e2dc3ce46d279a311e5250ac3cbd394279c31 23 23 2
+filename README
+4f4e2dc3ce46d279a311e5250ac3cbd394279c31 26 26 1
+filename README
+4f4e2dc3ce46d279a311e5250ac3cbd394279c31 28 28 6
+filename README
+a1365647022eb05a5993f270a78e9bef3bf554eb 186 224 2
+author Andrew Morton
+author-mail <akpm@osdl.org>
+author-time 1136711049
+author-tz -0800
+committer Linus Torvalds
+committer-mail <torvalds@g5.osdl.org>
+committer-time 1136780042
+committer-tz -0800
+summary [PATCH] remove gcc-2 checks
+previous fd285bb54d8a3e99810090ae88cfe8ed77d1da25 README
+filename README
+6ad44229ec85b3938a313a325f0449e23eac8aac 85 95 1
+author Jesper Juhl
+author-mail <jesper.juhl@gmail.com>
+author-time 1131926864
+author-tz -0800
+committer Linus Torvalds
+committer-mail <torvalds@g5.osdl.org>
+committer-time 1131934457
+committer-tz -0800
+summary [PATCH] README: add info about -stable to README and point at applying-patches.txt
+previous 3f39894d1b5c253b10fcb8fbbbcf65a330f6cdc7 README
+filename README
+6ad44229ec85b3938a313a325f0449e23eac8aac 87 97 2
+filename README
+b39f72fef241ce0ce971ed21922b4d64aefaf916 57 67 1
+author Horms
+author-mail <horms@debian.org>
+author-time 1130713399
+author-tz -0800
+committer Linus Torvalds
+committer-mail <torvalds@g5.osdl.org>
+committer-time 1130722647
+committer-tz -0800
+summary [PATCH] README doesn't mention bzip2 source tarball
+previous 82da2c372712c772134d01317aa2517c923a74f8 README
+filename README
+b39f72fef241ce0ce971ed21922b4d64aefaf916 59 69 2
+filename README
+e3fc4cc17ac4dbadab0ba0d5c8233d3b18170d4a 154 177 1
+author Randy Dunlap
+author-mail <rdunlap@xenotime.net>
+author-time 1127450647
+author-tz -0700
+committer Linus Torvalds
+committer-mail <torvalds@g5.osdl.org>
+committer-time 1127452655
+committer-tz -0700
+summary [PATCH] corrections to top-level README
+previous 0365ba7fb1fa94a41289d6a3d36b4d95960e56cc README
+filename README
+e3fc4cc17ac4dbadab0ba0d5c8233d3b18170d4a 202 259 3
+filename README
+f875a1a6650edce859bd21051a22e1c27ac7ea63 152 175 2
+author Paolo 'Blaisorblade' Giarrusso
+author-mail <blaisorblade@yahoo.it>
+author-time 1127321737
+author-tz -0700
+committer Linus Torvalds
+committer-mail <torvalds@g5.osdl.org>
+committer-time 1127322715
+committer-tz -0700
+summary [PATCH] README update from the stone age
+previous f10df6860498c7f52db4f00ff00a1ba334bcfea0 README
+filename README
+896e5518da74f9d20db8163526014fba16b1f2b4 90 109 1
+author Kurt Wall
+author-mail <kwall@kurtwerks.com>
+author-time 1122489920
+author-tz -0700
+committer Linus Torvalds
+committer-mail <torvalds@g5.osdl.org>
+committer-time 1122506769
+committer-tz -0700
+summary [PATCH] Add text for dealing with "dot releases" to README
+previous e5c2d749172657ed51e20e4b5ab540447666cc50 README
+filename README
+896e5518da74f9d20db8163526014fba16b1f2b4 99 119 1
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 2 2 1
+author Linus Torvalds
+author-mail <torvalds@ppc970.osdl.org>
+author-time 1113690036
+author-tz -0700
+committer Linus Torvalds
+committer-mail <torvalds@ppc970.osdl.org>
+committer-time 1113690036
+committer-tz -0700
+summary Linux-2.6.12-rc2
+boundary
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 4 4 5
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 12 12 1
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 17 17 6
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 26 36 19
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 48 58 1
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 50 60 5
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 56 66 1
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 58 72 6
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 66 80 1
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 68 82 1
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 70 84 2
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 73 87 1
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 79 93 1
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 80 99 10
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 90 120 9
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 100 130 15
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 116 146 3
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 120 150 17
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 137 168 1
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 138 170 3
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 143 203 19
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 165 222 2
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 172 226 13
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 185 252 7
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 192 262 37
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 231 301 27
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 260 331 31
+filename README
+1da177e4c3f41524e886b7f1b8a0c1fc7321cac2 292 363 14
+filename README

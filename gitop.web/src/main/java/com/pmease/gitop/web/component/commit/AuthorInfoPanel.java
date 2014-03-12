@@ -17,12 +17,10 @@ import com.pmease.gitop.web.page.project.api.GitPerson;
 @SuppressWarnings("serial")
 public class AuthorInfoPanel extends Panel {
 
-	private final IModel<GitPersonLink.Mode> authorModeModel;
+	private final IModel<GitPersonLink.Mode> mode = Model.of(Mode.NAME);
 	
 	public AuthorInfoPanel(String id, IModel<Commit> model) {
 		super(id, model);
-		
-		authorModeModel = Model.of(Mode.NAME_ONLY);
 	}
 
 	@Override
@@ -36,7 +34,7 @@ public class AuthorInfoPanel extends Panel {
 				return GitPerson.of(getCommit().getAuthor());
 			}
 			
-		}, authorModeModel.getObject()));
+		}, mode.getObject()));
 		add(new AgeLabel("authordate", new AbstractReadOnlyModel<Date>() {
 
 			@Override
@@ -47,7 +45,7 @@ public class AuthorInfoPanel extends Panel {
 	}
 	
 	public void setAuthorMode(Mode mode) {
-		authorModeModel.setObject(Preconditions.checkNotNull(mode));
+		this.mode.setObject(Preconditions.checkNotNull(mode));
 	}
 	
 	private Commit getCommit() {
@@ -56,8 +54,8 @@ public class AuthorInfoPanel extends Panel {
 	
 	@Override
 	public void onDetach() {
-		if (authorModeModel != null) {
-			authorModeModel.detach();
+		if (mode != null) {
+			mode.detach();
 		}
 		
 		super.onDetach();

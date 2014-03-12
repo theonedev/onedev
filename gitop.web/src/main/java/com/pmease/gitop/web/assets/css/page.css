@@ -631,6 +631,17 @@ a.diffstat:hover { text-decoration: none; }
 .comment-list .form-comment { background: #f7f7f7; border: 1px solid #ddd; border-radius: 4px; padding-top: 8px; margin: 0; }
 
 /**
+ * BLAME PAGE
+ */
+.blame-head .breadcrumb { padding-left: 0; }
+.table-blob td.blame-msg { width: 1%; padding: 0;}
+.blame-row { white-space: nowrap; padding: 0 12px; border-right: 4px solid #ddd; }
+.blame-row:hover { background: #f2f2f2; border-right-color: #08C; }
+.blame-msg .blame-row:first-child { padding-top: 9px; }
+.blame-msg .blame-row:last-child { padding-bottom: 9px; }
+.blame-row .section-first > i { color: #888; }
+
+/**
  * BRANCHES PAGE
  */
 h2.section-title { margin: 18px 0; font-size: 16px; }

@@ -135,7 +135,7 @@ public class CommitsPanel extends Panel {
 						
 						item.add(new GitPersonLink("avatar", 
 													Model.of(GitPerson.of(commit.getAuthor())), 
-													Mode.AVATAR_ONLY)
+													Mode.AVATAR)
 									.enableTooltip("right"));
 						
 						item.add(new CommitMessagePanel("message", item.getModel(), projectModel));

@@ -135,7 +135,7 @@ public class CommentListPanel extends Panel {
 				CommitComment c = item.getModelObject();
 				item.add(new UserAvatarLink("author", 
 											new UserModel(c.getAuthor()),
-											UserAvatarLink.Mode.AVATAR_ONLY));
+											UserAvatarLink.Mode.AVATAR));
 				item.add(new CommitCommentPanel("message", projectModel, new CommitCommentModel(c)) {
 					@Override
 					protected Component createCommentHead(String id) {
@@ -145,7 +145,7 @@ public class CommentListPanel extends Panel {
 						Fragment frag = new Fragment(id, "commenthead", CommentListPanel.this);
 						frag.add(new UserAvatarLink("author", 
 													new UserModel(comment.getAuthor()),
-													UserAvatarLink.Mode.NAME_ONLY));
+													UserAvatarLink.Mode.NAME));
 						AbstractLink link = new BookmarkablePageLink<Void>("commitlink", 
 								SourceCommitPage.class,
 								SourceCommitPage.newParams(getProject(), getCommit()));
@@ -178,7 +178,7 @@ public class CommentListPanel extends Panel {
 		
 		add(formHolder);
 		if (GitopSession.getCurrentUser().isPresent()) {
-			formHolder.add(new UserAvatarLink("author", new UserModel(GitopSession.getCurrentUser().get()), UserAvatarLink.Mode.AVATAR_ONLY));
+			formHolder.add(new UserAvatarLink("author", new UserModel(GitopSession.getCurrentUser().get()), UserAvatarLink.Mode.AVATAR));
 			formHolder.add(new CommitCommentEditor("form") {
 
 				@Override

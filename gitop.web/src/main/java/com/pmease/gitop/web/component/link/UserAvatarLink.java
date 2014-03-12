@@ -18,9 +18,9 @@ import com.pmease.gitop.web.page.account.home.AccountHomePage;
 public class UserAvatarLink extends Panel {
 
 	public static enum Mode {
-		AVATAR_ONLY,
-		NAME_ONLY,
-		BOTH
+		NAME,
+		AVATAR,
+		NAME_AND_AVATAR
 	}
 	
 	private final Mode mode;
@@ -31,7 +31,7 @@ public class UserAvatarLink extends Panel {
 	}
 	
 	public UserAvatarLink(String id, IModel<User> model) {
-		this(id, model, Mode.BOTH);
+		this(id, model, Mode.NAME_AND_AVATAR);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -47,7 +47,7 @@ public class UserAvatarLink extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisibilityAllowed(mode != Mode.NAME_ONLY);
+				setVisibilityAllowed(mode != Mode.NAME);
 			}
 		});
 		
@@ -61,7 +61,7 @@ public class UserAvatarLink extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				this.setVisibilityAllowed(mode != Mode.AVATAR_ONLY);
+				this.setVisibilityAllowed(mode != Mode.AVATAR);
 			}
 		});
 	}

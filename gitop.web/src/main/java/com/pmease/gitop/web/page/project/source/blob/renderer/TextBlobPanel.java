@@ -2,7 +2,9 @@ package com.pmease.gitop.web.page.project.source.blob.renderer;
 
 import java.util.List;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -79,11 +81,16 @@ public class TextBlobPanel extends Panel {
 		code.add(AttributeAppender.append("class", cssModel));
 		code.add(new AceHighlighter());
 		add(code);
+		
+		add(createPrependColumn("prepend"));
 	}
 	
-	private FileBlob getBlob() {
+	protected Component createPrependColumn(String id) {
+		return new WebMarkupContainer(id).setVisibilityAllowed(false);
+	}
+	
+	protected FileBlob getBlob() {
 		return (FileBlob) getDefaultModelObject();
 	}
-	
 	
 }

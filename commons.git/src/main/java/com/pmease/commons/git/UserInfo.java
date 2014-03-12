@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 
 @SuppressWarnings("serial")
 public class UserInfo implements Serializable {
@@ -13,6 +15,43 @@ public class UserInfo implements Serializable {
 	private final String email;
 	
 	private final Date date;
+	
+	public static class Builder {
+		private String name;
+		private String email;
+		private Date date;
+		
+		public Builder name(String name) {
+			this.name = name;
+			return this;
+		}
+		
+		public Builder email(String email) {
+			this.email = email;
+			return this;
+		}
+		
+		public Builder date(Date date) {
+			this.date = date;
+			return this;
+		}
+		
+		public boolean isValid() {
+			return !Strings.isNullOrEmpty(name)
+					&& !Strings.isNullOrEmpty(email)
+					&& date != null;
+		}
+		
+		public UserInfo build() {
+			return new UserInfo(Preconditions.checkNotNull(name, "name"),
+								Preconditions.checkNotNull(email, "email"),
+								Preconditions.checkNotNull(date, "date"));
+		}
+	}
+	
+	public static Builder builder() {
+		return new Builder();
+	}
 	
 	public UserInfo(String name, String email, Date date) {
 		this.name = name;

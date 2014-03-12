@@ -28,6 +28,7 @@ import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.component.commit.CommitMessagePanel;
 import com.pmease.gitop.web.component.commit.CommitMetaPanel;
+import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.source.blob.SourceBlobPage;
@@ -72,12 +73,12 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 		super.onInitialize();
 
 		add(new CommitMessagePanel("message", lastCommitModel, projectModel));
-		add(new CommitMetaPanel("meta", lastCommitModel));
+		add(new CommitMetaPanel("meta", lastCommitModel).setAuthorMode(Mode.AVATAR_AND_NAME));
 		
 		BookmarkablePageLink<Void> historyLink = new BookmarkablePageLink<Void>(
 				"history",
 				CommitsPage.class,
-				CommitsPage.newParams(getProject(), getRevision(), 0));
+				CommitsPage.newParams(getProject(), getRevision(), getPaths(), 0));
 		
 		add(historyLink);
 		BookmarkablePageLink<Void> commitLink = new BookmarkablePageLink<Void>(

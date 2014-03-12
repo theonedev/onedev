@@ -1,0 +1,58 @@
+<html xmlns:wicket>
+<wicket:extend>
+	<div class="padder">
+		<div class="blame-head">
+			<ol class="breadcrumb breadcrumb-paths">
+				<wicket:container wicket:id="paths"></wicket:container>
+			</ol>
+		</div>
+		
+		<div wicket:id="content"></div>
+	</div>
+	
+	<wicket:fragment wicket:id="blamefrag">
+		<div class="blob">
+			<div class="blob-head clearfix">
+				<div class="left blob-meta">
+					<span><i class="icon" wicket:id="typeicon"></i> <span wicket:id="mode"></span></span>
+					<wicket:enclosure child="loc">
+					<span><wicket:container wicket:id="loc"></wicket:container> lines (<wicket:container wicket:id="sloc"></wicket:container> sloc)</span>
+					</wicket:enclosure>
+					<span wicket:id="size"></span>
+				</div>
+				<div class="right blob-actions btn-toolbar">
+					<div class="btn-group">
+						<a class="btn btn-sm btn-default">Raw</a>
+						<a wicket:id="normallink" class="btn btn-sm btn-default">Normal View</a>
+						<a wicket:id="historylink" class="btn btn-sm btn-default">History</a>
+					</div>
+				</div>
+			</div>
+			<div class="blob-body" wicket:id="body"></div>
+		</div>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="infofrag">
+		<div class="alert alert-warning">
+			This file doesn't support blame view
+		</div>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="blameColumnFrag">
+		<td class="blame-msg">
+			<div class="blob-blames">
+				<div wicket:id="rows" class="blame-row">
+					<div class="section-first">
+						<a wicket:id="shalink" class="sha"><span wicket:id="sha"></span></a>
+						&nbsp;&nbsp;
+						<i wicket:id="date"></i>
+						&nbsp;&nbsp;
+						<wicket:container wicket:id="author"></wicket:container>
+					</div>
+					<div wicket:id="empties">&nbsp;</div>
+				</div>
+			</div>
+		</td>
+	</wicket:fragment>
+</wicket:extend>
+</html>

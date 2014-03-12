@@ -84,6 +84,7 @@ import com.pmease.gitop.web.page.project.settings.ProjectOptionsPage;
 import com.pmease.gitop.web.page.project.settings.ProjectPermissionsPage;
 import com.pmease.gitop.web.page.project.settings.PullRequestSettingsPage;
 import com.pmease.gitop.web.page.project.source.ProjectHomePage;
+import com.pmease.gitop.web.page.project.source.blame.BlobBlamePage;
 import com.pmease.gitop.web.page.project.source.blob.SourceBlobPage;
 import com.pmease.gitop.web.page.project.source.blob.renderer.RawBlobResourceReference;
 import com.pmease.gitop.web.page.project.source.branches.BranchesPage;
@@ -270,16 +271,21 @@ public class GitopWebApp extends AbstractWicketConfig {
 		
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/tree/${objectId}", SourceTreePage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/blob/${objectId}", SourceBlobPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/blame/#{objectId}", BlobBlamePage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/commit/${objectId}", SourceCommitPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/commits/#{objectId}", CommitsPage.class));
+		
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/branches", BranchesPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/tags", TagsPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/contributors", ContributorsPage.class));
+		
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/wiki", ProjectWikiPage.class));
+		
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/pull-requests/open", OpenRequestsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/pull-requests/closed", ClosedRequestsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/pull-requests/new", NewRequestPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/pull-requests", RequestDetailPage.class));
+		
+		mount(new PageParameterAwareMountedMapper("${user}/${project}/contributors", ContributorsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/graphs", ProjectGraphsPage.class));
 		mount(new PageParameterAwareMountedMapper("${user}/${project}/forks", ProjectForksPage.class));
 

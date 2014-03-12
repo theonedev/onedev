@@ -183,7 +183,7 @@ public class RequestDetailPanel extends Panel {
 				return new GitPerson(user.getName(), user.getEmail());
 			}
 			
-		}, Mode.FULL));
+		}, Mode.AVATAR_AND_NAME));
 		
 		Link<Void> targetLink = new Link<Void>("targetLink") {
 

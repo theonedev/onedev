@@ -64,8 +64,8 @@ public class SwipePanel extends AbstractImageDiffPanel {
 	
 	private String getInitScript() {
 		String str = 
-				"gitop.utils.onImageLoad('#" + oldImage.getMarkupId(true) + "', function() {"
-				+ "gitop.utils.onImageLoad('#" + newImage.getMarkupId(true) + "', function() {"
+				"gitop.utils.onImageLoad('#" + newImage.getMarkupId(true) + "', function() {"
+				+ "gitop.utils.onImageLoad('#" + oldImage.getMarkupId(true) + "', function() {"
 				+ JQuery.$(this, ".swipe-view").chain("twentytwenty").get()
 				+ "});});";
 		

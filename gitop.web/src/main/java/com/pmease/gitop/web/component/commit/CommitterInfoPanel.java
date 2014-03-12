@@ -5,6 +5,7 @@ import java.util.Date;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.gitop.web.component.label.AgeLabel;
@@ -15,6 +16,8 @@ import com.pmease.gitop.web.page.project.api.GitPerson;
 @SuppressWarnings("serial")
 public class CommitterInfoPanel extends Panel {
 
+	private final IModel<GitPersonLink.Mode> mode = Model.of(Mode.NAME);
+	
 	public CommitterInfoPanel(String id, IModel<Commit> model) {
 		super(id, model);
 	}
@@ -31,7 +34,7 @@ public class CommitterInfoPanel extends Panel {
 				return GitPerson.of(getCommit().getCommitter());
 			}
 			
-		}, Mode.NAME_ONLY));
+		}, mode.getObject()));
 		
 		add(new AgeLabel("committerdate", new AbstractReadOnlyModel<Date>() {
 
@@ -44,5 +47,19 @@ public class CommitterInfoPanel extends Panel {
 	
 	private Commit getCommit() {
 		return (Commit) getDefaultModelObject();
+	}
+
+	public CommitterInfoPanel committerLinkMode(GitPersonLink.Mode mode) {
+		this.mode.setObject(mode);
+		return this;
+	}
+	
+	@Override
+	public void onDetach() {
+		if (mode != null) {
+			mode.detach();
+		}
+		
+		super.onDetach();
 	}
 }

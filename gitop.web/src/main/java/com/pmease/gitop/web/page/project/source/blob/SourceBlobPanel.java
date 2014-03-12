@@ -4,16 +4,23 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.lib.FileMode;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.quantity.Data;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
+import com.pmease.gitop.web.page.project.source.blame.BlobBlamePage;
 import com.pmease.gitop.web.page.project.source.blob.renderer.BlobRenderer;
 import com.pmease.gitop.web.page.project.source.blob.renderer.BlobRendererFactory;
+import com.pmease.gitop.web.page.project.source.commits.CommitsPage;
 import com.pmease.gitop.web.service.FileBlob;
 
 @SuppressWarnings("serial")
@@ -86,6 +93,21 @@ public class SourceBlobPanel extends Panel {
 			}
 			
 		}));
+		
+		FileBlob blob = getBlob();
+		
+		Project project = Gitop.getInstance(ProjectManager.class).get(blob.getProjectId());
+		List<String> paths = Lists.newArrayList(Splitter.on("/").split(blob.getFilePath())); 
+		add(new BookmarkablePageLink<Void>("historylink", CommitsPage.class,
+				CommitsPage.newParams(
+						project,
+						blob.getRevision(), 
+						paths,
+						0)));
+		
+		add(new BookmarkablePageLink<Void>("blamelink",
+						BlobBlamePage.class,
+						BlobBlamePage.newParams(project, blob.getRevision(), paths)).setVisibilityAllowed(blob.isText()));
 		
 		BlobRenderer renderer = getRenderer();
 		add(renderer.render("body", (IModel<FileBlob>) getDefaultModel()));

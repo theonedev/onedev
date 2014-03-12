@@ -193,7 +193,7 @@ public class BranchesPage extends ProjectCategoryPage {
 			add(new AgeLabel("updatedTime", Model.of(commit.getAuthor().getDate())));
 			add(new GitPersonLink("author", 
 					Model.<GitPerson>of(GitPerson.of(commit.getAuthor())),
-					Mode.NAME_ONLY));
+					Mode.NAME));
 		}
 	}
 	

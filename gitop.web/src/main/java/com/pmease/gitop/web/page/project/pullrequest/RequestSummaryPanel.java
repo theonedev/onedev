@@ -81,7 +81,7 @@ public class RequestSummaryPanel extends Panel {
 				return new GitPerson(user.getName(), user.getEmail());
 			}
 			
-		}, Mode.FULL));
+		}, Mode.AVATAR_AND_NAME));
 		
 		Link<Void> branchLink = new Link<Void>("branchLink") {
 

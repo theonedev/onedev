@@ -39,6 +39,20 @@ public class BriefCommit implements Serializable {
 	}
 
 	@Override
+	public int hashCode() {
+		return Objects.hashCode(hash);
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if (this == other) return true;
+		if (!(other instanceof BriefCommit)) return false;
+		
+		BriefCommit rhs = (BriefCommit) other;
+		return Objects.equal(hash, rhs.hash);
+	}
+	
+	@Override
 	public String toString() {
 		return Objects.toStringHelper(this)
 				.add("hash", hash)

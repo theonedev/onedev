@@ -114,7 +114,7 @@ public class SourceCommitPage extends ProjectCategoryPage implements CommitComme
 				SourceTreePage.class,
 				SourceTreePage.newParams(getProject(), getRevision())));
 		
-		add(new GitPersonLink("authoravatar", authorModel, Mode.AVATAR_ONLY).enableTooltip("left"));
+		add(new GitPersonLink("authoravatar", authorModel, Mode.AVATAR).enableTooltip("left"));
 		
 		add(new CommitMetaPanel("meta", commitModel));
 		add(new Label("commitsha", new PropertyModel<String>(commitModel, "hash")));
