@@ -70,7 +70,7 @@ public class OpenActivityPanel extends Panel {
 		User submittedBy = request.getSubmittedBy();
 		if (submittedBy != null) {
 			GitPerson person = new GitPerson(submittedBy.getName(), submittedBy.getEmail());
-			add(new GitPersonLink("user", Model.of(person), GitPersonLink.Mode.AVATAR_AND_NAME));
+			add(new GitPersonLink("user", Model.of(person), GitPersonLink.Mode.NAME_AND_AVATAR));
 		} else {
 			add(new Label("<i>Unknown</i>").setEscapeModelStrings(false));
 		}

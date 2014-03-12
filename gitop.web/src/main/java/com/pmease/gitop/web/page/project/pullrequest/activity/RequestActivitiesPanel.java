@@ -107,7 +107,7 @@ public class RequestActivitiesPanel extends Panel {
 				return person;
 			}
 			
-		}, GitPersonLink.Mode.AVATAR_AND_NAME));
+		}, GitPersonLink.Mode.NAME_AND_AVATAR));
 
 		final TextArea<String> commentArea = new TextArea<String>("comment", new IModel<String>() {
 

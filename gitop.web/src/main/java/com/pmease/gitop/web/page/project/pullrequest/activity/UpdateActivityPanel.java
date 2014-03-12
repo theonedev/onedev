@@ -32,7 +32,7 @@ public class UpdateActivityPanel extends Panel {
 		User updatedBy = update.getUser();
 		if (updatedBy != null) {
 			GitPerson person = new GitPerson(updatedBy.getName(), updatedBy.getEmail());
-			add(new GitPersonLink("user", Model.of(person), GitPersonLink.Mode.AVATAR_AND_NAME));
+			add(new GitPersonLink("user", Model.of(person), GitPersonLink.Mode.NAME_AND_AVATAR));
 		} else {
 			add(new Label("<i>Unknown</i>").setEscapeModelStrings(false));
 		}

@@ -52,7 +52,7 @@ public class CommentActivityPanel extends Panel {
 		User user = comment.getUser();
 		if (user != null) {
 			GitPerson person = new GitPerson(user.getName(), user.getEmail());
-			add(new GitPersonLink("user", Model.of(person), GitPersonLink.Mode.AVATAR_AND_NAME));
+			add(new GitPersonLink("user", Model.of(person), GitPersonLink.Mode.NAME_AND_AVATAR));
 		} else {
 			add(new Label("<i>Unknown</i>").setEscapeModelStrings(false));
 		}

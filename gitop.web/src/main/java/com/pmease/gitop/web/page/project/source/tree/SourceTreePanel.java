@@ -73,7 +73,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 		super.onInitialize();
 
 		add(new CommitMessagePanel("message", lastCommitModel, projectModel));
-		add(new CommitMetaPanel("meta", lastCommitModel).setAuthorMode(Mode.AVATAR_AND_NAME));
+		add(new CommitMetaPanel("meta", lastCommitModel).setAuthorMode(Mode.NAME_AND_AVATAR));
 		
 		BookmarkablePageLink<Void> historyLink = new BookmarkablePageLink<Void>(
 				"history",

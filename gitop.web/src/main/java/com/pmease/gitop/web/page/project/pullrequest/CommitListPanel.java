@@ -44,7 +44,7 @@ public class CommitListPanel extends Panel {
 			protected void populateItem(ListItem<Commit> item) {
 				Commit commit = item.getModelObject();
 				item.add(new GitPersonLink("author", 
-						Model.of(GitPerson.of(commit.getAuthor())), GitPersonLink.Mode.AVATAR_AND_NAME));
+						Model.of(GitPerson.of(commit.getAuthor())), GitPersonLink.Mode.NAME_AND_AVATAR));
 
 				item.add(new Label("message", commit.getSubject()));
 				

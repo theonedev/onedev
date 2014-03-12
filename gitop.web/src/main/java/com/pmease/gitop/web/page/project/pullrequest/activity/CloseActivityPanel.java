@@ -70,7 +70,7 @@ public class CloseActivityPanel extends Panel {
 		User closedBy = request.getCloseInfo().getClosedBy();
 		if (closedBy != null) {
 			GitPerson person = new GitPerson(closedBy.getName(), closedBy.getEmail());
-			container.add(new GitPersonLink("user", Model.of(person), GitPersonLink.Mode.AVATAR_AND_NAME));
+			container.add(new GitPersonLink("user", Model.of(person), GitPersonLink.Mode.NAME_AND_AVATAR));
 		} else {
 			container.add(new Label("<i>Unknown</i>").setEscapeModelStrings(false));
 		}

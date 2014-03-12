@@ -72,7 +72,7 @@ public class VoteActivityPanel extends Panel {
 				return person;
 			}
 			
-		}, GitPersonLink.Mode.AVATAR_AND_NAME));
+		}, GitPersonLink.Mode.NAME_AND_AVATAR));
 		
 		if (getVote().getResult() == Vote.Result.APPROVE) 
 			container.add(new Label("vote", "approved"));

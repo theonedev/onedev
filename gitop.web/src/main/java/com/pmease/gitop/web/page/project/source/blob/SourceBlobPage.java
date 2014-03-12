@@ -114,7 +114,7 @@ public class SourceBlobPage extends AbstractFilePage {
 			public GitPerson getObject() {
 				return GitPerson.of(getLastCommit().getAuthor());
 			}
-		},  Mode.AVATAR_AND_NAME));
+		},  Mode.NAME_AND_AVATAR));
 		
 		add(new AgeLabel("author-date", new AbstractReadOnlyModel<Date>() {
 

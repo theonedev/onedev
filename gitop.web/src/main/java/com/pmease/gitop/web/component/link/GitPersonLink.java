@@ -30,9 +30,9 @@ public class GitPersonLink extends Panel {
 	private static final long serialVersionUID = 1L;
 
 	public static enum Mode {
-		AVATAR,
 		NAME,
-		AVATAR_AND_NAME
+		AVATAR,
+		NAME_AND_AVATAR
 	}
 	
 	private final Mode mode;
@@ -57,7 +57,7 @@ public class GitPersonLink extends Panel {
 		link = newLink("link", user);
 		add(link);
 		
-		if (mode == Mode.AVATAR_AND_NAME || mode == Mode.AVATAR) {
+		if (mode == Mode.NAME_AND_AVATAR || mode == Mode.AVATAR) {
 			if (user.isPresent()) {
 				image = new AvatarImage("avatar", new UserModel(user.get()));
 				link.add(image);
@@ -69,7 +69,7 @@ public class GitPersonLink extends Panel {
 			}
 		}
 		
-		if (mode == Mode.AVATAR_AND_NAME || mode == Mode.NAME) {
+		if (mode == Mode.NAME_AND_AVATAR || mode == Mode.NAME) {
 			if (user.isPresent()) {
 				link.add(new Label("name", user.get().getName()));
 			} else {
