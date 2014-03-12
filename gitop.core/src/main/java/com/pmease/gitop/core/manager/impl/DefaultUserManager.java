@@ -18,11 +18,13 @@ import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.MembershipManager;
 import com.pmease.gitop.core.manager.PullRequestManager;
+import com.pmease.gitop.core.manager.PullRequestUpdateManager;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Membership;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.operation.GeneralOperation;
@@ -38,17 +40,20 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
     
     private final PullRequestManager pullRequestManager;
     
+    private final PullRequestUpdateManager pullRequestUpdateManager;
+    
     private final BranchManager branchManager;
     
     @Inject
     public DefaultUserManager(GeneralDao generalDao, TeamManager teamManager, 
     		MembershipManager membershipManager, PullRequestManager pullRequestManager, 
-    		BranchManager branchManager) {
+    		PullRequestUpdateManager pullRequestUpdateManager,BranchManager branchManager) {
         super(generalDao);
 
         this.teamManager = teamManager;
         this.membershipManager = membershipManager;
         this.pullRequestManager = pullRequestManager;
+        this.pullRequestUpdateManager = pullRequestUpdateManager;
         this.branchManager = branchManager;
     }
 
@@ -102,9 +107,19 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
     @Transactional
     @Override
 	public void delete(User user) {
-    	for (PullRequest request: user.getRequests()) {
-    		request.setSubmitter(null);
+    	for (PullRequest request: user.getSubmittedRequests()) {
+    		request.setSubmittedBy(null);
     		pullRequestManager.save(request);
+    	}
+    	
+    	for (PullRequest request: user.getClosedRequests()) {
+    		request.getCloseInfo().setClosedBy(null);
+    		pullRequestManager.save(request);
+    	}
+    	
+    	for (PullRequestUpdate update: user.getUpdates()) {
+    		update.setUser(null);
+    		pullRequestUpdateManager.save(update);
     	}
     	
     	for (Branch branch: user.getBranches()) {

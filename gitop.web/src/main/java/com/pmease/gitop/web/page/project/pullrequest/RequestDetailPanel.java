@@ -25,11 +25,13 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.AuthorizationManager;
 import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.manager.VoteManager;
@@ -42,9 +44,9 @@ import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.GitPersonLink;
-import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
 import com.pmease.gitop.web.page.project.AbstractProjectPage;
 import com.pmease.gitop.web.page.project.api.GitPerson;
+import com.pmease.gitop.web.page.project.pullrequest.activity.RequestActivitiesPanel;
 
 @SuppressWarnings("serial")
 public class RequestDetailPanel extends Panel {
@@ -96,13 +98,9 @@ public class RequestDetailPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
-				AbstractProjectPage page = (AbstractProjectPage) getPage();
-				
-				setVisible(!editingTitle 
-							&& (getPullRequest().getSubmitter().equals(currentUser) 
-								|| SecurityUtils.getSubject().isPermitted(
-									ObjectPermission.ofProjectWrite(page.getProject()))));
+
+				setVisible(Gitop.getInstance(AuthorizationManager.class)
+						.canModify(getPullRequest()));
 			}
 			
 		});
@@ -174,16 +172,32 @@ public class RequestDetailPanel extends Panel {
 			}
 			
 		}));
-
-		add(new GitPersonLink("user", new LoadableDetachableModel<GitPerson>() {
+		
+		head.add(new RequestStatusPanel("status", new AbstractReadOnlyModel<PullRequest>() {
 
 			@Override
-			protected GitPerson load() {
-				User user = getPullRequest().getSubmitter();
-				return new GitPerson(user.getName(), user.getEmail());
+			public PullRequest getObject() {
+				return getPullRequest();
 			}
 			
-		}, Mode.AVATAR_AND_NAME));
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getPullRequest().isOpen());
+			}
+			
+		});
+		
+		PullRequest request = getPullRequest();
+		User submittedBy = request.getSubmittedBy();
+		if (submittedBy != null) {
+			GitPerson person = new GitPerson(submittedBy.getName(), submittedBy.getEmail());
+			add(new GitPersonLink("user", Model.of(person), GitPersonLink.Mode.AVATAR_AND_NAME));
+		} else {
+			add(new Label("<i>Unknown</i>").setEscapeModelStrings(false));
+		}
 		
 		Link<Void> targetLink = new Link<Void>("targetLink") {
 
@@ -259,23 +273,6 @@ public class RequestDetailPanel extends Panel {
 			
 		}));
 
-		add(new RequestStatusPanel("statusLabel", new AbstractReadOnlyModel<PullRequest>() {
-
-			@Override
-			public PullRequest getObject() {
-				return getPullRequest();
-			}
-			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!getPullRequest().isOpen());
-			}
-			
-		});
-		
 		WebMarkupContainer statusContainer = new WebMarkupContainer("status") {
 
 			@Override
@@ -338,7 +335,7 @@ public class RequestDetailPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				if (getPullRequest().getMergeResult().getMergeHead() != null)
+				if (getPullRequest().getMergeInfo().getMergeHead() != null)
 					return "success";
 				else
 					return "warning";
@@ -352,7 +349,7 @@ public class RequestDetailPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getPullRequest().getMergeResult().getMergeHead() != null);
+				setVisible(getPullRequest().getMergeInfo().getMergeHead() != null);
 			}
 			
 		}); 
@@ -362,7 +359,7 @@ public class RequestDetailPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getPullRequest().getMergeResult().getMergeHead() == null);
+				setVisible(getPullRequest().getMergeInfo().getMergeHead() == null);
 			}
 			
 		}; 
@@ -464,7 +461,7 @@ public class RequestDetailPanel extends Panel {
 				
 				setVisible(SecurityUtils.getSubject().isPermitted(
 							ObjectPermission.ofProjectWrite(page.getProject())) 
-						&& getPullRequest().getMergeResult().getMergeHead() != null
+						&& getPullRequest().getMergeInfo().getMergeHead() != null
 						&& getPullRequest().getStatus() == Status.PENDING_INTEGRATE);
 			}
 
@@ -481,12 +478,8 @@ public class RequestDetailPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
-				AbstractProjectPage page = (AbstractProjectPage) getPage();
-				
-				setVisible(getPullRequest().getSubmitter().equals(currentUser) 
-							|| SecurityUtils.getSubject().isPermitted(
-								ObjectPermission.ofProjectWrite(page.getProject())));
+				setVisible(Gitop.getInstance(AuthorizationManager.class)
+						.canModify(getPullRequest()));
 			}
 
 			@Override
@@ -548,7 +541,7 @@ public class RequestDetailPanel extends Panel {
 			@Override
 			public String getObject() {
 				if (action == Action.Approve)
-					return "btn-primary";
+					return "btn-info";
 				else if (action == Action.Disapprove)
 					return "btn-warning";
 				else if (action == Action.Integrate)
@@ -567,11 +560,20 @@ public class RequestDetailPanel extends Panel {
 			}
 			
 		});
+		
+		add(new RequestActivitiesPanel("activities", new AbstractReadOnlyModel<PullRequest>() {
+
+			@Override
+			public PullRequest getObject() {
+				return getPullRequest();
+			}
+			
+		}));
 	}
 	
 	public PullRequest getPullRequest() {
 		return (PullRequest) getDefaultModelObject();
 	}
-
+	
 	private static enum Action {Approve, Disapprove, Integrate, Discard}
 }

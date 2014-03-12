@@ -31,6 +31,9 @@ public class PullRequestUpdate extends AbstractEntity {
 	@Column(nullable=false)
 	private String headCommit;
 
+	@ManyToOne
+	private User user;
+	
 	private Date date = new Date();
 	
 	@OneToMany(mappedBy="update", cascade=CascadeType.REMOVE)
@@ -54,7 +57,15 @@ public class PullRequestUpdate extends AbstractEntity {
 		this.headCommit = headCommit;
 	}
 	
-    public Date getDate() {
+    public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public Date getDate() {
 		return date;
 	}
 

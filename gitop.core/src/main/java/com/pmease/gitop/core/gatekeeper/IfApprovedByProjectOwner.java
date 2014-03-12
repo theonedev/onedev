@@ -21,7 +21,7 @@ public class IfApprovedByProjectOwner extends ApprovalGateKeeper {
     @Override
     public CheckResult doCheckRequest(PullRequest request) {
     	if (request.isNew())
-    		return checkApproval(request.getSubmitter(), request.getTarget().getProject());
+    		return checkApproval(request.getSubmittedBy(), request.getTarget().getProject());
     	
         User projectOwner = request.getTarget().getProject().getOwner();
 
@@ -31,7 +31,7 @@ public class IfApprovedByProjectOwner extends ApprovalGateKeeper {
             Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, Sets.newHashSet(projectOwner), 1);
             return pending("To be approved by user '" + projectOwner.getName() + "'.",
                     new CanVoteBySpecifiedUser(projectOwner));
-        } else if (result.isApprove()) {
+        } else if (result == Vote.Result.APPROVE) {
             return approved("Approved by user '" + projectOwner.getName() + "'.");
         } else {
             return disapproved("Rejected by user '" + projectOwner.getName() + "'.");

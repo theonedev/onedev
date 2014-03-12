@@ -47,7 +47,7 @@ public abstract class CheckResult implements Serializable {
     }
 
     public boolean canVote(User user, PullRequest request) {
-        if (user.equals(request.getSubmitter()))
+        if (user.equals(request.getSubmittedBy()))
             return false;
         
         for (VoteEligibility each: voteEligibilities) {

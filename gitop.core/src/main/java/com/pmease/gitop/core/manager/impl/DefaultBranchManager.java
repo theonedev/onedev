@@ -23,6 +23,7 @@ import com.pmease.gitop.core.manager.PullRequestUpdateManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.User;
 
 @Singleton
 public class DefaultBranchManager extends AbstractGenericDao<Branch> implements BranchManager {
@@ -127,7 +128,7 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 
 	@Transactional
 	@Override
-	public void onBranchRefUpdate(Branch branch) {
+	public void onBranchRefUpdate(Branch branch, User user) {
 		for (PullRequest request: branch.getIncomingRequests()) {
 			if (request.isOpen())
 				pullRequestManager.refresh(request);
@@ -149,7 +150,7 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 		}
 		
 		for (PullRequest request: branchRequests.values()) {
-			pullRequestUpdateManager.update(request);
+			pullRequestUpdateManager.update(request, user);
 			pullRequestManager.refresh(request);
 		}		
 	}

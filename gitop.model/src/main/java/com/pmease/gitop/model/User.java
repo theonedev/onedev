@@ -44,8 +44,14 @@ public class User extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="creator")
 	private Collection<Branch> branches = new ArrayList<Branch>();
 	
-	@OneToMany(mappedBy="submitter")
-	private Collection<PullRequest> requests = new ArrayList<PullRequest>();
+	@OneToMany(mappedBy="submittedBy")
+	private Collection<PullRequest> submittedRequests = new ArrayList<>();
+
+	@OneToMany(mappedBy="closeInfo.closedBy")
+	private Collection<PullRequest> closedRequests = new ArrayList<>();
+	
+	@OneToMany(mappedBy="user")
+	private Collection<PullRequestUpdate> updates = new ArrayList<>();
 
 	@OneToMany(mappedBy="voter", cascade=CascadeType.REMOVE)
 	private Collection<Vote> votes = new ArrayList<Vote>();
@@ -143,17 +149,39 @@ public class User extends AbstractUser implements ProtectedObject {
 	}
 
 	/**
-	 * Get submitted pull requests.
+	 * Get pull requests submitted by this user.
 	 * 
 	 * @return
-	 *			collection of submitted pull requests 
+	 *			collection of pull requests submitted by this user
 	 */
-	public Collection<PullRequest> getRequests() {
-		return requests;
+	public Collection<PullRequest> getSubmittedRequests() {
+		return submittedRequests;
 	}
 
-	public void setRequests(Collection<PullRequest> requests) {
-		this.requests = requests;
+	public void setSubmittedRequests(Collection<PullRequest> submittedRequests) {
+		this.closedRequests = submittedRequests;
+	}
+
+	/**
+	 * Get pull requests closed by this user.
+	 * 
+	 * @return
+	 * 			collection of pull requests closed by this user
+	 */
+	public Collection<PullRequest> getClosedRequests() {
+		return closedRequests;
+	}
+
+	public Collection<PullRequestUpdate> getUpdates() {
+		return updates;
+	}
+
+	public void setUpdates(Collection<PullRequestUpdate> updates) {
+		this.updates = updates;
+	}
+
+	public void setClosedRequests(Collection<PullRequest> closedRequests) {
+		this.closedRequests = closedRequests;
 	}
 
 	public Collection<Vote> getVotes() {
@@ -186,7 +214,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	}
 	
 	public Vote.Result checkVoteSince(PullRequestUpdate update) {
-		if (this.equals(update.getRequest().getSubmitter()))
+		if (this.equals(update.getRequest().getSubmittedBy()))
 			return Vote.Result.APPROVE;
 		
 		for (Vote vote: update.listVotesOnwards()) {

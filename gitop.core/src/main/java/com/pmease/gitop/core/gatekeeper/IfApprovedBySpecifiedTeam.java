@@ -38,7 +38,7 @@ public class IfApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
     @Override
     public CheckResult doCheckRequest(PullRequest request) {
     	if (request.isNew())
-    		return checkApproval(request.getSubmitter());
+    		return checkApproval(request.getSubmittedBy());
     	
         Collection<User> members = new HashSet<User>();
         for (Membership membership : getTeam().getMemberships())
@@ -50,7 +50,7 @@ public class IfApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
             Vote.Result result = member.checkVoteSince(request.getBaseUpdate());
             if (result == null) {
                 pendings++;
-            } else if (result.isApprove()) {
+            } else if (result == Vote.Result.APPROVE) {
                 approvals++;
             }
         }

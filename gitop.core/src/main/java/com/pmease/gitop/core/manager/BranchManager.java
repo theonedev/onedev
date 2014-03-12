@@ -9,6 +9,7 @@ import com.pmease.commons.hibernate.dao.GenericDao;
 import com.pmease.gitop.core.manager.impl.DefaultBranchManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.User;
 
 @ImplementedBy(DefaultBranchManager.class)
 public interface BranchManager extends GenericDao<Branch> {
@@ -86,7 +87,7 @@ public interface BranchManager extends GenericDao<Branch> {
      */
     public void rename(Branch branch, String newName);
     
-    public void onBranchRefUpdate(Branch branch);
+    public void onBranchRefUpdate(Branch branch, @Nullable User user);
     
     public void trim(Collection<Long> branchIds);
     

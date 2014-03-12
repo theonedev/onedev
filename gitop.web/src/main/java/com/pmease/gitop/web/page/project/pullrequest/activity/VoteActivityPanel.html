@@ -1,0 +1,31 @@
+<wicket:panel>
+	<div wicket:id="container" class="panel">
+		<div class="panel-heading clearfix">
+			<div class="pull-left">
+				<span wicket:id="user"></span>
+				<span wicket:id="vote"></span>
+				<span wicket:id="date"></span>
+			</div>
+			<div class="pull-right">
+				<a wicket:id="edit" title="Edit comment"><span class="icon icon-edit"></span></a>
+			</div>
+		</div>
+		<div wicket:id="body" class="panel-body"></div>
+	</div>
+	<wicket:fragment wicket:id="viewFrag">
+		<div wicket:id="comment"></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="editFrag">
+		<table>
+			<tr>
+				<td>
+					<textarea wicket:id="comment" rows="6" class="form-control" placeholder="Leave a comment"></textarea>
+				</td>
+				<td class="actions">
+					<a wicket:id="save" class="btn btn-sm btn-primary btn-block">Save</a>
+					<a wicket:id="cancel" class="btn btn-sm btn-default btn-block">Cancel</a>
+				</td>
+			</tr>
+		</table>
+	</wicket:fragment>
+</wicket:panel>

@@ -66,11 +66,11 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 	protected CheckResult doCheckRequest(PullRequest request) {
 		BuildResultManager BuildResultManager = Gitop.getInstance(BuildResultManager.class);
 
-		Preconditions.checkNotNull(request.getMergeResult());
+		Preconditions.checkNotNull(request.getMergeInfo());
 		
 		String commit;
 		if (isCheckMerged()) {
-			commit = request.getMergeResult().getMergeHead();
+			commit = request.getMergeInfo().getMergeHead();
 			if (commit == null) 
 				return disapproved("Can not build against merged result due to conflicts.");
 		} else if (request.isNew()) {

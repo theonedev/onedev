@@ -21,7 +21,7 @@ public class IfNotDisapprovedBySpecifiedTeam extends TeamAwareGateKeeper {
 		
 		for (Membership membership: getTeam().getMemberships()) {
 			Vote.Result result = membership.getUser().checkVoteSince(request.getBaseUpdate());
-			if (result.isDisapprove()) {
+			if (result == Vote.Result.DISAPPROVE) {
 				return disapproved("Disapproved by user '" + membership.getUser().getName() + "'.");
 			}
 		}

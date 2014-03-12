@@ -13,6 +13,7 @@ import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.core.manager.PullRequestUpdateManager;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestUpdate;
+import com.pmease.gitop.model.User;
 
 @Singleton
 public class DefaultPullRequestUpdateManager extends AbstractGenericDao<PullRequestUpdate>
@@ -45,11 +46,12 @@ public class DefaultPullRequestUpdateManager extends AbstractGenericDao<PullRequ
 
 	@Transactional
 	@Override
-	public void update(PullRequest request) {
+	public void update(PullRequest request, User user) {
 		String sourceHead = request.getSource().getHeadCommit();
 		
 		PullRequestUpdate update = new PullRequestUpdate();
 		update.setRequest(request);
+		update.setUser(user);
 		request.getUpdates().add(update);
 		update.setHeadCommit(sourceHead);
 		request.setUpdateDate(new Date());
