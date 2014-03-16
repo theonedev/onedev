@@ -380,6 +380,7 @@ table.table-files td.file-icon { width: 18px; padding-right: 2px; padding-left: 
 
 .commit-meta { color: #999; font-size: 12px; padding: 5px 0; }
 .commit-meta .name, .commit-meta .name a { color: #333; font-weight: normal; }
+.last-commit .commit-meta .committer-info { padding-left: 24px; }
 .commit-meta .committer-info .icon { font-size: 12px; }
 
 .sha, .commitish {  font-family: Consolas, 'Liberation Mono', Courier, monospace; }

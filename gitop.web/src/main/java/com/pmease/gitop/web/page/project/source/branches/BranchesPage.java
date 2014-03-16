@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -16,11 +17,18 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.pmease.commons.git.BriefCommit;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.BranchManager;
+import com.pmease.gitop.core.manager.PullRequestManager;
+import com.pmease.gitop.model.Branch;
+import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.web.common.wicket.component.BarLabel;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.GitPersonLink;
@@ -31,14 +39,18 @@ import com.pmease.gitop.web.git.command.AheadBehindCommand;
 import com.pmease.gitop.web.git.command.BranchForEachRefCommand;
 import com.pmease.gitop.web.page.project.ProjectCategoryPage;
 import com.pmease.gitop.web.page.project.api.GitPerson;
+import com.pmease.gitop.web.page.project.pullrequest.NewRequestPage;
 import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
 
 @SuppressWarnings("serial")
 public class BranchesPage extends ProjectCategoryPage {
 
 	private final IModel<String> defaultBranchModel;
+	private final IModel<String> baseBranchModel;
 	private final IModel<Map<String, BriefCommit>> branchesModel;
 	private final IModel<Map<String, AheadBehind>> aheadBehindsModel;
+	
+	private final IModel<Map<String, PullRequest>> requestsModel;
 	
 	public BranchesPage(PageParameters params) {
 		super(params);
@@ -50,6 +62,19 @@ public class BranchesPage extends ProjectCategoryPage {
 				return GitUtils.getDefaultBranch(getProject().code());
 			}
 			
+		};
+		
+		baseBranchModel = new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				String str = BranchesPage.this.getPageParameters().get("base").toString();
+				if (Strings.isNullOrEmpty(str)) {
+					return defaultBranchModel.getObject();
+				} else {
+					return str;
+				}
+			}
 		};
 		
 		branchesModel = new LoadableDetachableModel<Map<String, BriefCommit>>() {
@@ -83,6 +108,28 @@ public class BranchesPage extends ProjectCategoryPage {
 				return map;
 			}
 		};
+		
+		requestsModel = new LoadableDetachableModel<Map<String, PullRequest>>() {
+
+			@Override
+			protected Map<String, PullRequest> load() {
+				Branch base = Gitop.getInstance(BranchManager.class).findBy(getProject(), getBaseBranch());
+				
+				List<PullRequest> requests = Gitop.getInstance(PullRequestManager.class)
+						.query(Restrictions.isNotNull("closeInfo"),
+							  Restrictions.eq("target", base));
+				
+				Map<String, PullRequest> result = Maps.newHashMap();
+				for (PullRequest each : requests) {
+					if (Objects.equal(each.getSource().getProject(), getProject())) {
+						result.put(each.getSource().getName(), each);
+					}
+				}
+				
+				return result;
+			}
+			
+		};
 	}
 
 	@Override
@@ -98,7 +145,7 @@ public class BranchesPage extends ProjectCategoryPage {
 			add(new Fragment("content", "nobranch", this));
 		} else {
 			Fragment frag = new Fragment("content", "branchesFrag", this);
-			frag.add(new MetaFrag("defaultMeta", getDefaultBranch()));
+			frag.add(new MetaFrag("baseMeta", getBaseBranch()));
 			
 			IModel<List<String>> names = new AbstractReadOnlyModel<List<String>>() {
 
@@ -106,9 +153,9 @@ public class BranchesPage extends ProjectCategoryPage {
 				public List<String> getObject() {
 					Map<String, BriefCommit> branches = branchesModel.getObject();
 					List<String> list = Lists.newArrayList();
-					String defaultName = getDefaultBranch();
+					String base = getBaseBranch();
 					for (String each : branches.keySet()) {
-						if (!Objects.equal(each, defaultName)) {
+						if (!Objects.equal(each, base)) {
 							list.add(each);
 						}
 					}
@@ -132,6 +179,23 @@ public class BranchesPage extends ProjectCategoryPage {
 					barFrag.add(new Label("aheadnum", ab.getAhead()));
 					barFrag.add(new BarLabel("behindbar", Model.of(getPercent(ab.getBehind(), false))));
 					barFrag.add(new Label("behindnum", ab.getBehind()));
+					
+					PullRequest request = getPullRequest(refName);
+					
+					if (request == null) {
+						BookmarkablePageLink<Void> link = new BookmarkablePageLink<Void>(
+								"comparelink",
+								NewRequestPage.class,
+								NewRequestPage.newParams(getProject(), refName, getBaseBranch()));
+						
+						item.add(link);
+						item.add(new Label("pullname").setVisibilityAllowed(false));
+					} else {
+						add(new WebMarkupContainer("comparelink").setVisibilityAllowed(false));
+						
+						// TODO: Change this to LINK to pull request
+						add(new Label("pullname", request.getId()));
+					}
 				}
 			});
 			
@@ -162,8 +226,12 @@ public class BranchesPage extends ProjectCategoryPage {
 		
 		return percent;
 	}
+
+	private String getBaseBranch() {
+		return baseBranchModel.getObject();
+	}
 	
-	String getDefaultBranch() {
+	private String getDefaultBranch() {
 		return defaultBranchModel.getObject();
 	}
 	
@@ -194,6 +262,8 @@ public class BranchesPage extends ProjectCategoryPage {
 			add(new GitPersonLink("author", 
 					Model.<GitPerson>of(GitPerson.of(commit.getAuthor())),
 					Mode.NAME));
+			
+			add(new Label("default", "default").setVisibilityAllowed(Objects.equal(refName, getDefaultBranch())));
 		}
 	}
 	
@@ -210,6 +280,10 @@ public class BranchesPage extends ProjectCategoryPage {
 		return map.get(refName);
 	}
 	
+	private PullRequest getPullRequest(String source) {
+		return requestsModel.getObject().get(source);
+	}
+	
 	@Override
 	public void onDetach() {
 		if (branchesModel != null) {
@@ -220,8 +294,16 @@ public class BranchesPage extends ProjectCategoryPage {
 			defaultBranchModel.detach();
 		}
 		
+		if (baseBranchModel != null) {
+			baseBranchModel.detach();
+		}
+		
 		if (aheadBehindsModel != null) {
 			aheadBehindsModel.detach();
+		}
+		
+		if (requestsModel != null) {
+			requestsModel.detach();
 		}
 		
 		super.onDetach();

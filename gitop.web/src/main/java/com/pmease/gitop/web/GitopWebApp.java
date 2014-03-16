@@ -47,7 +47,6 @@ import com.pmease.gitop.model.validation.UserNameValidator;
 import com.pmease.gitop.web.assets.AssetLocator;
 import com.pmease.gitop.web.common.quantity.Data;
 import com.pmease.gitop.web.common.wicket.mapper.PageParameterAwareMountedMapper;
-import com.pmease.gitop.web.component.avatar.AvatarImageResource;
 import com.pmease.gitop.web.component.avatar.AvatarImageResourceReference;
 import com.pmease.gitop.web.exception.AccessDeniedException;
 import com.pmease.gitop.web.page.account.RegisterPage;
@@ -353,14 +352,13 @@ public class GitopWebApp extends AbstractWicketConfig {
 	}
 	
 	private void mountResources() {
-		getSharedResources().add(AvatarImageResourceReference.AVATAR_RESOURCE, new AvatarImageResource());
-		mountResource("avatars/${type}/${id}", new AvatarImageResourceReference());
-		
+//		getSharedResources().add(AvatarImageResourceReference.AVATAR_RESOURCE, new AvatarImageResource());
 //		getSharedResources().add(ImageBlobResourceReference.IMAGE_BLOB_RESOURCE, new ImageBlobResource());
 //		mountResource("imageblob/${user}/${project}/${objectId}", new ImageBlobResourceReference());
-		
 //		getSharedResources().add(RawBlobResourceReference.RAW_BLOB_RESOURCE, new RawBlobResource());
-		mountResource("rawblob/${user}/${project}/${objectId}", new RawBlobResourceReference());
+		
+		mountResource("avatar/${type}/${id}", new AvatarImageResourceReference());
+		mountResource("raw/${user}/${project}/${objectId}", new RawBlobResourceReference());
 		mountResource("archive/${user}/${project}/${file}", new GitArchiveResourceReference());
 	}
 	

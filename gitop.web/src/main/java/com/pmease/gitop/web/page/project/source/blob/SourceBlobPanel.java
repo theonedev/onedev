@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -20,6 +21,7 @@ import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.page.project.source.blame.BlobBlamePage;
 import com.pmease.gitop.web.page.project.source.blob.renderer.BlobRenderer;
 import com.pmease.gitop.web.page.project.source.blob.renderer.BlobRendererFactory;
+import com.pmease.gitop.web.page.project.source.blob.renderer.RawBlobResourceReference;
 import com.pmease.gitop.web.page.project.source.commits.CommitsPage;
 import com.pmease.gitop.web.service.FileBlob;
 
@@ -108,6 +110,9 @@ public class SourceBlobPanel extends Panel {
 		add(new BookmarkablePageLink<Void>("blamelink",
 						BlobBlamePage.class,
 						BlobBlamePage.newParams(project, blob.getRevision(), paths)).setVisibilityAllowed(blob.isText()));
+		
+		add(new ResourceLink<Void>("rawlink", new RawBlobResourceReference(),
+				RawBlobResourceReference.newParams(blob)));
 		
 		BlobRenderer renderer = getRenderer();
 		add(renderer.render("body", (IModel<FileBlob>) getDefaultModel()));

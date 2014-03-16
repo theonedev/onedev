@@ -16,12 +16,12 @@
 		<table class="table table-branches">
 			<tr class="default-branch">
 				<td class="meta">
-					<wicket:container wicket:id="defaultMeta"></wicket:container>
+					<wicket:container wicket:id="baseMeta"></wicket:container>
 				</td>
 				<td class="">
 				</td>
 				<td class="actions">
-					Default branch
+					Base branch
 				</td>
 			</tr>
 			<tr class="branch" wicket:id="branches">
@@ -32,14 +32,15 @@
 					<wicket:container wicket:id="statbar"></wicket:container>
 				</td>
 				<td class="actions">
-					<button class="btn btn-default"><i class="icon icon-git-branch-compare"></i> Compare</button>
+					<button wicket:id="comparelink" class="btn btn-default"><i class="icon icon-git-branch-compare"></i> Compare</button>
+					<span wicket:id="pullname"></span>
 				</td>
 			</tr>
 		</table>
 	</wicket:fragment>
 	
 	<wicket:fragment wicket:id="metaFrag">
-		<a wicket:id="branchlink"><span wicket:id="name"></span></a>
+		<a wicket:id="branchlink"><span wicket:id="name"></span></a> <span class="label" wicket:id="default">default</span>
 		<p>Last updated <span class="age" wicket:id="updatedTime"></span> by <span wicket:id="author"></span></p>
 	</wicket:fragment>
 	
