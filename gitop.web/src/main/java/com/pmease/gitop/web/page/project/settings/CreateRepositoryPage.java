@@ -30,20 +30,20 @@ import com.pmease.gitop.web.GitopHelper;
 import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.select.DropDownChoiceElement;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
-import com.pmease.gitop.web.model.ProjectModel;
+import com.pmease.gitop.web.model.RepositoryModel;
 import com.pmease.gitop.web.page.AbstractLayoutPage;
 import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.project.source.ProjectHomePage;
+import com.pmease.gitop.web.page.project.source.RepositoryHomePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 @RequiresUser
-public class CreateProjectPage extends AbstractLayoutPage {
+public class CreateRepositoryPage extends AbstractLayoutPage {
 
 	private String owner;
 	
-	public CreateProjectPage(PageParameters params) {
+	public CreateRepositoryPage(PageParameters params) {
 		StringValue sv = params.get("user");
 		if (!sv.isEmpty() && !sv.isNull()) {
 			owner = sv.toString();
@@ -68,7 +68,7 @@ public class CreateProjectPage extends AbstractLayoutPage {
 			this.owner = Gitop.getInstance(UserManager.class).getCurrent().getName();
 		}
 		
-		final IModel<Project> projectModel = new ProjectModel(new Project());
+		final IModel<Project> projectModel = new RepositoryModel(new Project());
 		Form<Project> form = new BaseForm<Project>("form", projectModel);
 		add(form);
 		
@@ -132,7 +132,7 @@ public class CreateProjectPage extends AbstractLayoutPage {
 				Preconditions.checkNotNull(o);
 				project.setOwner(o);
 				Gitop.getInstance(ProjectManager.class).save(project);
-				setResponsePage(ProjectHomePage.class, PageSpec.forProject(project));
+				setResponsePage(RepositoryHomePage.class, PageSpec.forProject(project));
 			}
 		});
 	}

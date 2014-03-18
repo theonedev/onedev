@@ -37,13 +37,13 @@ import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.git.command.AheadBehind;
 import com.pmease.gitop.web.git.command.AheadBehindCommand;
 import com.pmease.gitop.web.git.command.BranchForEachRefCommand;
-import com.pmease.gitop.web.page.project.ProjectCategoryPage;
+import com.pmease.gitop.web.page.project.RepositoryTabPage;
 import com.pmease.gitop.web.page.project.api.GitPerson;
 import com.pmease.gitop.web.page.project.pullrequest.NewRequestPage;
 import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
 
 @SuppressWarnings("serial")
-public class BranchesPage extends ProjectCategoryPage {
+public class BranchesPage extends RepositoryTabPage {
 
 	private final IModel<String> defaultBranchModel;
 	private final IModel<String> baseBranchModel;

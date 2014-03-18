@@ -40,9 +40,9 @@ import com.pmease.gitop.web.page.account.home.AccountHomePage;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
-public class ProjectOptionsPage extends AbstractProjectSettingPage {
+public class RepositoryOptionsPage extends AbstractRepositorySettingPage {
 
-	public ProjectOptionsPage(PageParameters params) {
+	public RepositoryOptionsPage(PageParameters params) {
 		super(params);
 	}
 
@@ -156,7 +156,7 @@ public class ProjectOptionsPage extends AbstractProjectSettingPage {
 				Gitop.getInstance(ProjectManager.class).save(project);
 				
 				if (nameChanged) {
-					setResponsePage(ProjectOptionsPage.class, PageSpec.forProject(project));
+					setResponsePage(RepositoryOptionsPage.class, PageSpec.forProject(project));
 				} else {
 					form.success("Project " + project + " has been updated.");
 					target.add(form);

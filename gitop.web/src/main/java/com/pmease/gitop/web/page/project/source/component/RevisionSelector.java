@@ -36,7 +36,7 @@ import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.common.wicket.component.tab.BootstrapTabbedPanel;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.project.source.ProjectHomePage;
+import com.pmease.gitop.web.page.project.source.RepositoryHomePage;
 import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
 
 @SuppressWarnings("serial")
@@ -54,7 +54,7 @@ public class RevisionSelector extends AbstractSourcePagePanel {
 
 			@Override
 			protected Map<RefType, List<String>> load() {
-				Git git = getProject().code();
+				Git git = getRepo().code();
 				Map<RefType, List<String>> map = Maps.newHashMapWithExpectedSize(RefType.values().length);
 				map.put(RefType.BRANCH, Lists.newArrayList(git.listBranches()));
 				List<String> tags = Lists.newArrayList(git.listTags());
@@ -237,10 +237,10 @@ public class RevisionSelector extends AbstractSourcePagePanel {
 	}
 	
 	protected AbstractLink newRefLink(String id, String ref) {
-		Project project = getProject();
+		Project project = getRepo();
 		PageParameters params = new PageParameters();
 		params.add(PageSpec.USER, project.getOwner().getName());
-		params.add(PageSpec.PROJECT, project.getName());
+		params.add(PageSpec.REPO, project.getName());
 		params.add(PageSpec.OBJECT_ID, ref);
 		List<String> paths = getPaths();
 		if (paths != null) {
@@ -265,7 +265,7 @@ public class RevisionSelector extends AbstractSourcePagePanel {
 
 	private Class<? extends Page> getPageClass() {
 		Page page = getPage();
-		if (page instanceof ProjectHomePage) {
+		if (page instanceof RepositoryHomePage) {
 			return SourceTreePage.class;
 		} else {
 			return page.getClass();

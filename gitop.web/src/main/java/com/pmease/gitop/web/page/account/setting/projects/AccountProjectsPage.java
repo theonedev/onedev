@@ -18,11 +18,11 @@ import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.Constants;
 import com.pmease.gitop.web.common.datatype.DataTypes;
 import com.pmease.gitop.web.component.link.ProjectHomeLink;
-import com.pmease.gitop.web.model.ProjectModel;
+import com.pmease.gitop.web.model.RepositoryModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
-import com.pmease.gitop.web.page.project.settings.CreateProjectPage;
-import com.pmease.gitop.web.page.project.settings.ProjectOptionsPage;
+import com.pmease.gitop.web.page.project.settings.CreateRepositoryPage;
+import com.pmease.gitop.web.page.project.settings.RepositoryOptionsPage;
 import com.pmease.gitop.web.util.DateUtils;
 
 @SuppressWarnings("serial")
@@ -41,7 +41,7 @@ public class AccountProjectsPage extends AccountSettingPage {
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 		
-		add(new BookmarkablePageLink<Void>("newlink", CreateProjectPage.class, newParams(getAccount())));
+		add(new BookmarkablePageLink<Void>("newlink", CreateRepositoryPage.class, newParams(getAccount())));
 		
 		IModel<List<Project>> model = new LoadableDetachableModel<List<Project>>() {
 
@@ -57,7 +57,7 @@ public class AccountProjectsPage extends AccountSettingPage {
 			@Override
 			protected void populateItem(ListItem<Project> item) {
 				Project project = item.getModelObject();
-				final IModel<Project> projectModel = new ProjectModel(project);
+				final IModel<Project> projectModel = new RepositoryModel(project);
 				item.add(new ProjectHomeLink("project", projectModel));
 				item.add(new Label("age", new AbstractReadOnlyModel<String>() {
 
@@ -91,7 +91,7 @@ public class AccountProjectsPage extends AccountSettingPage {
 					item.add(new WebMarkupContainer("forkedFrom").setVisibilityAllowed(false));
 				}
 				
-				item.add(new BookmarkablePageLink<Void>("admin", ProjectOptionsPage.class,
+				item.add(new BookmarkablePageLink<Void>("admin", RepositoryOptionsPage.class,
 						PageSpec.forProject(project)));
 			}
 			

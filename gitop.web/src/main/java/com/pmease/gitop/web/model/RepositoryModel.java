@@ -3,10 +3,10 @@ package com.pmease.gitop.web.model;
 import com.pmease.gitop.model.Project;
 
 /** Shortcut for {@link EntityModel}<Project> */
-public class ProjectModel extends EntityModel<Project> {
+public class RepositoryModel extends EntityModel<Project> {
 	private static final long serialVersionUID = 1L;
 
-	public ProjectModel(Project entity) {
+	public RepositoryModel(Project entity) {
 		super(entity);
 	}
 

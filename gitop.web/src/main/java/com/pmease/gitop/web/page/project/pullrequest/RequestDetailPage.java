@@ -7,10 +7,10 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.model.PullRequest;
-import com.pmease.gitop.web.page.project.ProjectCategoryPage;
+import com.pmease.gitop.web.page.project.RepositoryTabPage;
 
 @SuppressWarnings("serial")
-public class RequestDetailPage extends ProjectCategoryPage {
+public class RequestDetailPage extends RepositoryTabPage {
 
 	private IModel<PullRequest> model;
 	

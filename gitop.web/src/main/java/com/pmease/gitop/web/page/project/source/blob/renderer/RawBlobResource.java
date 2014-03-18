@@ -40,7 +40,7 @@ public class RawBlobResource extends AbstractResource {
 		PageParameters params = attributes.getParameters();
 		
 		final String username = params.get(PageSpec.USER).toString();
-		final String projectName = params.get(PageSpec.PROJECT).toString();
+		final String projectName = params.get(PageSpec.REPO).toString();
 		final String revision = params.get("objectId").toString();
 		
 		List<String> paths = Lists.newArrayList();

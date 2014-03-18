@@ -15,7 +15,7 @@ import org.apache.wicket.model.Model;
 import com.pmease.commons.git.Commit;
 import com.pmease.gitop.web.component.link.GitPersonLink;
 import com.pmease.gitop.web.git.GitUtils;
-import com.pmease.gitop.web.page.project.AbstractProjectPage;
+import com.pmease.gitop.web.page.project.RepositoryBasePage;
 import com.pmease.gitop.web.page.project.api.GitPerson;
 import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
 import com.pmease.gitop.web.util.DateUtils;
@@ -50,7 +50,7 @@ public class CommitListPanel extends Panel {
 				
 				item.add(new Label("date", DateUtils.formatAge(commit.getAuthor().getDate())));
 				
-				AbstractProjectPage page = (AbstractProjectPage) getPage();
+				RepositoryBasePage page = (RepositoryBasePage) getPage();
 				AbstractLink link = new BookmarkablePageLink<Void>("shaLink",
 						SourceCommitPage.class,
 						SourceCommitPage.newParams(page.getProject(), commit.getHash()));

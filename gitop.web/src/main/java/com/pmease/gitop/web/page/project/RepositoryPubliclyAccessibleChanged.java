@@ -4,9 +4,9 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.pmease.gitop.web.common.wicket.event.AjaxEvent;
 
-public class ProjectPubliclyAccessibleChanged extends AjaxEvent {
+public class RepositoryPubliclyAccessibleChanged extends AjaxEvent {
 
-	public ProjectPubliclyAccessibleChanged(AjaxRequestTarget target) {
+	public RepositoryPubliclyAccessibleChanged(AjaxRequestTarget target) {
 		super(target);
 	}
 

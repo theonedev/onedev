@@ -44,7 +44,7 @@ public class ReadmePanel extends AbstractSourcePagePanel {
 					return null;
 				}
 				
-				return FileBlob.of(getProject(), getRevision(), node.getPath());
+				return FileBlob.of(getRepo(), getRevision(), node.getPath());
 			}
 		};
 	}

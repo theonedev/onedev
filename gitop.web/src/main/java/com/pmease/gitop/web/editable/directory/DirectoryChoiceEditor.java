@@ -25,7 +25,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.web.component.directory.DirectoryChooser;
-import com.pmease.gitop.web.page.project.AbstractProjectPage;
+import com.pmease.gitop.web.page.project.RepositoryBasePage;
 
 @SuppressWarnings("serial")
 public class DirectoryChoiceEditor extends Panel {
@@ -43,7 +43,7 @@ public class DirectoryChoiceEditor extends Panel {
 
 			@Override
 			protected Branch load() {
-				AbstractProjectPage page = (AbstractProjectPage) getPage();
+				RepositoryBasePage page = (RepositoryBasePage) getPage();
 				return Gitop.getInstance(BranchManager.class).findDefault(page.getProject());
 			}
 			

@@ -28,20 +28,20 @@ import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.model.permission.operation.GeneralOperation;
 import com.pmease.gitop.web.SessionData;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
-import com.pmease.gitop.web.model.ProjectModel;
+import com.pmease.gitop.web.model.RepositoryModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.AbstractAccountPage;
-import com.pmease.gitop.web.page.project.source.ProjectHomePage;
+import com.pmease.gitop.web.page.project.source.RepositoryHomePage;
 
 @SuppressWarnings("serial")
-public abstract class AbstractProjectPage extends AbstractAccountPage {
+public abstract class RepositoryBasePage extends AbstractAccountPage {
 
 	protected IModel<Project> projectModel;
 	
-	public AbstractProjectPage(PageParameters params) {
+	public RepositoryBasePage(PageParameters params) {
 		super(params);
 		
-		String projectName = params.get(PageSpec.PROJECT).toString();
+		String projectName = params.get(PageSpec.REPO).toString();
 		Preconditions.checkNotNull(projectName);
 		
 		if (projectName.endsWith(Constants.DOT_GIT_EXT))
@@ -56,7 +56,7 @@ public abstract class AbstractProjectPage extends AbstractAccountPage {
 						+ getAccount() + "/" + projectName);
 		}
 		
-		projectModel = new ProjectModel(project);
+		projectModel = new RepositoryModel(project);
 		if (!Objects.equal(SessionData.get().getProjectId(), project.getId())) {
 			// displayed project changed
 			SessionData.get().onProjectChanged();
@@ -92,8 +92,8 @@ public abstract class AbstractProjectPage extends AbstractAccountPage {
 		}) {
 			@Override
 			public void onEvent(IEvent<?> event) {
-				if (event.getPayload() instanceof ProjectPubliclyAccessibleChanged) {
-					ProjectPubliclyAccessibleChanged e = (ProjectPubliclyAccessibleChanged) event.getPayload();
+				if (event.getPayload() instanceof RepositoryPubliclyAccessibleChanged) {
+					RepositoryPubliclyAccessibleChanged e = (RepositoryPubliclyAccessibleChanged) event.getPayload();
 					e.getTarget().add(this);
 				}
 			}
@@ -126,7 +126,7 @@ public abstract class AbstractProjectPage extends AbstractAccountPage {
 			public void onClick() {
 				User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
 				Project forked = Gitop.getInstance(ProjectManager.class).fork(getProject(), currentUser);
-				setResponsePage(ProjectHomePage.class, PageSpec.forProject(forked));
+				setResponsePage(RepositoryHomePage.class, PageSpec.forProject(forked));
 			}
 			
 		});

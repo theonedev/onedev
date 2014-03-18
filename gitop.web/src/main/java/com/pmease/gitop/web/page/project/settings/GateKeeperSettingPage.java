@@ -19,7 +19,7 @@ import com.pmease.gitop.web.page.project.settings.gatekeeper.GateKeeperEditor;
 import com.pmease.gitop.web.page.project.settings.gatekeeper.GateKeeperPanel;
 
 @SuppressWarnings("serial")
-public class GateKeeperSettingPage extends AbstractProjectSettingPage {
+public class GateKeeperSettingPage extends AbstractRepositorySettingPage {
 
 	public GateKeeperSettingPage(PageParameters params) {
 		super(params);

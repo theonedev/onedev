@@ -16,7 +16,7 @@ import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.page.project.source.component.ProjectPanel;
 
-public class ProjectDescriptionPanel extends ProjectPanel {
+public class RepositoryDescriptionPanel extends ProjectPanel {
 	private static final long serialVersionUID = 1L;
 	
 	static enum Mode {
@@ -25,7 +25,7 @@ public class ProjectDescriptionPanel extends ProjectPanel {
 	
 	private Mode mode = Mode.LABEL;
 	
-	public ProjectDescriptionPanel(String id, IModel<Project> model) {
+	public RepositoryDescriptionPanel(String id, IModel<Project> model) {
 		super(id, model);
 		
 		setOutputMarkupId(true);
@@ -34,7 +34,7 @@ public class ProjectDescriptionPanel extends ProjectPanel {
 	@SuppressWarnings("serial")
 	private Component newContent(String id) {
 		if (mode == Mode.LABEL) {
-			Fragment frag = new Fragment(id, "label", ProjectDescriptionPanel.this);
+			Fragment frag = new Fragment(id, "label", RepositoryDescriptionPanel.this);
 			frag.add(new Label("description", new PropertyModel<String>(getDefaultModel(), "description")));
 			frag.add(new AjaxLink<Void>("editlink") {
 
@@ -47,9 +47,9 @@ public class ProjectDescriptionPanel extends ProjectPanel {
 			
 			return frag;
 		} else {
-			Fragment frag = new Fragment(id, "editor", ProjectDescriptionPanel.this);
+			Fragment frag = new Fragment(id, "editor", RepositoryDescriptionPanel.this);
 			Form<?> form = new Form<Void>("form");
-			form.add(new TextField<String>("input", new PropertyModel<String>(ProjectDescriptionPanel.this.getDefaultModel(), "description")));
+			form.add(new TextField<String>("input", new PropertyModel<String>(RepositoryDescriptionPanel.this.getDefaultModel(), "description")));
 			form.add(new AjaxButton("save", form) {
 				@Override
 				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

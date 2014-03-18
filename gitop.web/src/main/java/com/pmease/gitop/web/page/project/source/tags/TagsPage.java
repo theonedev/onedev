@@ -31,12 +31,12 @@ import com.pmease.gitop.web.git.command.ArchiveCommand.Format;
 import com.pmease.gitop.web.git.command.Tag;
 import com.pmease.gitop.web.git.command.TagForEachRefCommand;
 import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.project.ProjectCategoryPage;
+import com.pmease.gitop.web.page.project.RepositoryTabPage;
 import com.pmease.gitop.web.page.project.api.GitPerson;
 import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
 
 @SuppressWarnings("serial")
-public class TagsPage extends ProjectCategoryPage {
+public class TagsPage extends RepositoryTabPage {
 
 	private final IModel<Map<String, Tag>> tagsModel;
 	

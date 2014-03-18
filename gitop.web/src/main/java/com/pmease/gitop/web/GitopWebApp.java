@@ -75,14 +75,14 @@ import com.pmease.gitop.web.page.project.pullrequest.ClosedRequestsPage;
 import com.pmease.gitop.web.page.project.pullrequest.NewRequestPage;
 import com.pmease.gitop.web.page.project.pullrequest.OpenRequestsPage;
 import com.pmease.gitop.web.page.project.pullrequest.RequestDetailPage;
-import com.pmease.gitop.web.page.project.settings.CreateProjectPage;
+import com.pmease.gitop.web.page.project.settings.CreateRepositoryPage;
 import com.pmease.gitop.web.page.project.settings.GateKeeperSettingPage;
-import com.pmease.gitop.web.page.project.settings.ProjectAuditLogPage;
-import com.pmease.gitop.web.page.project.settings.ProjectHooksPage;
-import com.pmease.gitop.web.page.project.settings.ProjectOptionsPage;
-import com.pmease.gitop.web.page.project.settings.ProjectPermissionsPage;
 import com.pmease.gitop.web.page.project.settings.PullRequestSettingsPage;
-import com.pmease.gitop.web.page.project.source.ProjectHomePage;
+import com.pmease.gitop.web.page.project.settings.RepositoryAuditLogPage;
+import com.pmease.gitop.web.page.project.settings.RepositoryHooksPage;
+import com.pmease.gitop.web.page.project.settings.RepositoryOptionsPage;
+import com.pmease.gitop.web.page.project.settings.RepositoryPermissionsPage;
+import com.pmease.gitop.web.page.project.source.RepositoryHomePage;
 import com.pmease.gitop.web.page.project.source.blame.BlobBlamePage;
 import com.pmease.gitop.web.page.project.source.blob.SourceBlobPage;
 import com.pmease.gitop.web.page.project.source.blob.renderer.RawBlobResourceReference;
@@ -93,10 +93,6 @@ import com.pmease.gitop.web.page.project.source.contributors.ContributorsPage;
 import com.pmease.gitop.web.page.project.source.tags.GitArchiveResourceReference;
 import com.pmease.gitop.web.page.project.source.tags.TagsPage;
 import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
-import com.pmease.gitop.web.page.project.stats.ProjectForksPage;
-import com.pmease.gitop.web.page.project.stats.ProjectGraphsPage;
-import com.pmease.gitop.web.page.project.wiki.ProjectWikiPage;
-import com.pmease.gitop.web.page.test.TestPage;
 import com.pmease.gitop.web.shiro.LoginPage;
 import com.pmease.gitop.web.shiro.LogoutPage;
 import com.pmease.gitop.web.shiro.ShiroWicketPlugin;
@@ -251,7 +247,7 @@ public class GitopWebApp extends AbstractWicketConfig {
 		// --------------------------------------------------------
 		
 		// project dashboard
-		mount(new MountedMapper("${user}/${project}", ProjectHomePage.class) {
+		mount(new MountedMapper("${user}/${repo}", RepositoryHomePage.class) {
 
 			@Override
 			protected boolean urlStartsWith(Url url, String... segments) {
@@ -268,32 +264,32 @@ public class GitopWebApp extends AbstractWicketConfig {
 
 		});
 		
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/tree/${objectId}", SourceTreePage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/blob/${objectId}", SourceBlobPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/blame/#{objectId}", BlobBlamePage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/commit/${objectId}", SourceCommitPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/commits/#{objectId}", CommitsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${repo}/tree/${objectId}", SourceTreePage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${repo}/blob/${objectId}", SourceBlobPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${repo}/blame/#{objectId}", BlobBlamePage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${repo}/commit/${objectId}", SourceCommitPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${repo}/commits/#{objectId}", CommitsPage.class));
 		
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/branches", BranchesPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/tags", TagsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${repo}/branches", BranchesPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${repo}/tags", TagsPage.class));
 		
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/wiki", ProjectWikiPage.class));
+//		mount(new PageParameterAwareMountedMapper("${user}/${project}/wiki", ProjectWikiPage.class));
 		
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/pull-requests/open", OpenRequestsPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/pull-requests/closed", ClosedRequestsPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/pull-requests/new", NewRequestPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/pull-requests", RequestDetailPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${repo}/pull-requests/open", OpenRequestsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${repo}/pull-requests/closed", ClosedRequestsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${repo}/pull-requests/new", NewRequestPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${repo}/pull-requests", RequestDetailPage.class));
 		
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/contributors", ContributorsPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/graphs", ProjectGraphsPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/forks", ProjectForksPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${repo}/contributors", ContributorsPage.class));
+//		mount(new PageParameterAwareMountedMapper("${user}/${project}/graphs", ProjectGraphsPage.class));
+//		mount(new PageParameterAwareMountedMapper("${user}/${project}/forks", ProjectForksPage.class));
 
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings", ProjectOptionsPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/gate-keepers", GateKeeperSettingPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/hooks", ProjectHooksPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/pull-requests", PullRequestSettingsPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/audits", ProjectAuditLogPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${project}/settings/permissions", ProjectPermissionsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${repo}/settings", RepositoryOptionsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${repo}/settings/gate-keepers", GateKeeperSettingPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${repo}/settings/hooks", RepositoryHooksPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${repo}/settings/pull-requests", PullRequestSettingsPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${repo}/settings/audits", RepositoryAuditLogPage.class));
+		mount(new PageParameterAwareMountedMapper("${user}/${repo}/settings/permissions", RepositoryPermissionsPage.class));
 		
 		// account dashboard
 		mount(new MountedMapper("${user}", AccountHomePage.class)
@@ -319,8 +315,7 @@ public class GitopWebApp extends AbstractWicketConfig {
 		mountPage("${user}/settings/teams/new", AddTeamPage.class);
 		mountPage("${user}/settings/teams/${teamId}", EditTeamPage.class);
 		
-		// project related
-		mountPage("new", CreateProjectPage.class);
+		mountPage("new", CreateRepositoryPage.class);
 		
 		// system administration related
 		mountPage("administration", AdministrationOverviewPage.class);
@@ -330,10 +325,6 @@ public class GitopWebApp extends AbstractWicketConfig {
 		mountPage("administration/support", SupportPage.class);
 		mountPage("administration/licensing", LicensingPage.class);
 
-		mountPage("/test", TestPage.class);
-		
-		// repository pages
-		// --------------------------------------------------------
 	}
 	
 

@@ -16,7 +16,7 @@ import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.web.component.choice.BranchChoiceProvider;
 import com.pmease.gitop.web.component.choice.BranchMultiChoice;
-import com.pmease.gitop.web.page.project.AbstractProjectPage;
+import com.pmease.gitop.web.page.project.RepositoryBasePage;
 
 @SuppressWarnings("serial")
 public class BranchMultiChoiceEditor extends Panel {
@@ -72,7 +72,7 @@ public class BranchMultiChoiceEditor extends Panel {
 			@Override
 			protected DetachedCriteria load() {
 				DetachedCriteria criteria = DetachedCriteria.forClass(Branch.class);
-				AbstractProjectPage page = (AbstractProjectPage) getPage();
+				RepositoryBasePage page = (RepositoryBasePage) getPage();
 				criteria.add(Restrictions.eq("project", page.getProject()));
 				return criteria;
 			}

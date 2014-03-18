@@ -16,13 +16,13 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.project.AbstractProjectPage;
-import com.pmease.gitop.web.page.project.api.ProjectSettingTab;
+import com.pmease.gitop.web.page.project.RepositoryBasePage;
+import com.pmease.gitop.web.page.project.api.RepositorySettingTab;
 
 @SuppressWarnings("serial")
-public abstract class AbstractProjectSettingPage extends AbstractProjectPage {
+public abstract class AbstractRepositorySettingPage extends RepositoryBasePage {
 
-	public AbstractProjectSettingPage(PageParameters params) {
+	public AbstractRepositorySettingPage(PageParameters params) {
 		super(params);
 	}
 	
@@ -39,19 +39,19 @@ public abstract class AbstractProjectSettingPage extends AbstractProjectPage {
 	}
 	
 	private Component createSideNavs(String id) {
-		IModel<List<ProjectSettingTab>> model = new LoadableDetachableModel<List<ProjectSettingTab>>() {
+		IModel<List<RepositorySettingTab>> model = new LoadableDetachableModel<List<RepositorySettingTab>>() {
 
 			@Override
-			protected List<ProjectSettingTab> load() {
+			protected List<RepositorySettingTab> load() {
 				return getAllTabs();
 			}
 		};
 		
-		ListView<ProjectSettingTab> navsView = new ListView<ProjectSettingTab>(id, model) {
+		ListView<RepositorySettingTab> navsView = new ListView<RepositorySettingTab>(id, model) {
 
 			@Override
-			protected void populateItem(ListItem<ProjectSettingTab> item) {
-				final ProjectSettingTab tab = item.getModelObject();
+			protected void populateItem(ListItem<RepositorySettingTab> item) {
+				final RepositorySettingTab tab = item.getModelObject();
 				Component link = tab.newTabLink("link", PageSpec.forProject(getProject()));
 				item.add(link);
 				item.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
@@ -67,14 +67,14 @@ public abstract class AbstractProjectSettingPage extends AbstractProjectPage {
 		return navsView;
 	}
 	
-	private List<ProjectSettingTab> getAllTabs() {
-		List<ProjectSettingTab> tabs = Lists.newArrayList();
-		tabs.add(new ProjectSettingTab(Model.of("Options"), ProjectOptionsPage.class));
-		tabs.add(new ProjectSettingTab(Model.of("Gate Keepers"), GateKeeperSettingPage.class));
-		tabs.add(new ProjectSettingTab(Model.of("Hooks"), ProjectHooksPage.class));
-		tabs.add(new ProjectSettingTab(Model.of("Pull Requests"), PullRequestSettingsPage.class));
-		tabs.add(new ProjectSettingTab(Model.of("Audit Log"), ProjectAuditLogPage.class));
-		tabs.add(new ProjectSettingTab(Model.of("Permissions"), ProjectPermissionsPage.class));
+	private List<RepositorySettingTab> getAllTabs() {
+		List<RepositorySettingTab> tabs = Lists.newArrayList();
+		tabs.add(new RepositorySettingTab(Model.of("Options"), RepositoryOptionsPage.class));
+		tabs.add(new RepositorySettingTab(Model.of("Gate Keepers"), GateKeeperSettingPage.class));
+		tabs.add(new RepositorySettingTab(Model.of("Hooks"), RepositoryHooksPage.class));
+		tabs.add(new RepositorySettingTab(Model.of("Pull Requests"), PullRequestSettingsPage.class));
+		tabs.add(new RepositorySettingTab(Model.of("Audit Log"), RepositoryAuditLogPage.class));
+		tabs.add(new RepositorySettingTab(Model.of("Permissions"), RepositoryPermissionsPage.class));
 		
 		return tabs;
 	}
