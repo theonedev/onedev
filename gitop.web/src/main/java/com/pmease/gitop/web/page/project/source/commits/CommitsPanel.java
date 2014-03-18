@@ -19,16 +19,13 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.hibernate.criterion.Restrictions;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.pmease.commons.git.Commit;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.CommitCommentManager;
-import com.pmease.gitop.model.CommitComment;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.common.datatype.DataTypes;
 import com.pmease.gitop.web.component.commit.CommitMessagePanel;
@@ -76,22 +73,7 @@ public class CommitsPanel extends Panel {
 			@Override
 			protected Map<String, Integer> load() {
 				// XXX: this may slow, performance tuning later
-				//
-				List<CommitComment> comments = Gitop.getInstance(CommitCommentManager.class)
-						.query(Restrictions.eq("project", getProject()));
-				
-				Map<String, Integer> stats = Maps.newHashMap();
-				
-				for (CommitComment each : comments) {
-					String sha = each.getCommit();
-					if (stats.containsKey(sha)) {
-						stats.put(sha, stats.get(sha) + 1);
-					} else {
-						stats.put(sha, 1);
-					}
-				}
-				
-				return stats;
+				return Gitop.getInstance(CommitCommentManager.class).getCommitCommentStats(getProject());
 			}
 			
 		};
