@@ -25,9 +25,7 @@ public class RepositoryPageTab extends AbstractPageTab {
 
 	public static enum Category {
 		SOURCE,
-		PULL_REQUESTS,
-		WIKI,
-		STATISTICS
+		PULL_REQUESTS
 	}
 	
 	final Category category;
