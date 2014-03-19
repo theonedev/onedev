@@ -54,7 +54,7 @@ import com.pmease.gitop.web.page.account.home.AccountHomePage;
 import com.pmease.gitop.web.page.account.setting.members.AccountMembersSettingPage;
 import com.pmease.gitop.web.page.account.setting.password.AccountPasswordPage;
 import com.pmease.gitop.web.page.account.setting.profile.AccountProfilePage;
-import com.pmease.gitop.web.page.account.setting.projects.AccountProjectsPage;
+import com.pmease.gitop.web.page.account.setting.repo.RepositoriesPage;
 import com.pmease.gitop.web.page.account.setting.teams.AccountTeamsPage;
 import com.pmease.gitop.web.page.account.setting.teams.AddTeamPage;
 import com.pmease.gitop.web.page.account.setting.teams.EditTeamPage;
@@ -309,7 +309,7 @@ public class GitopWebApp extends AbstractWicketConfig {
 		// account settings
 		mountPage("${user}/settings", AccountProfilePage.class);
 		mountPage("${user}/settings/password", AccountPasswordPage.class);
-		mountPage("${user}/settings/projects", AccountProjectsPage.class);
+		mountPage("${user}/settings/projects", RepositoriesPage.class);
 		mountPage("${user}/settings/members", AccountMembersSettingPage.class);
 		mountPage("${user}/settings/teams", AccountTeamsPage.class);
 		mountPage("${user}/settings/teams/new", AddTeamPage.class);
@@ -349,8 +349,8 @@ public class GitopWebApp extends AbstractWicketConfig {
 //		getSharedResources().add(RawBlobResourceReference.RAW_BLOB_RESOURCE, new RawBlobResource());
 		
 		mountResource("avatar/${type}/${id}", new AvatarImageResourceReference());
-		mountResource("raw/${user}/${project}/${objectId}", new RawBlobResourceReference());
-		mountResource("archive/${user}/${project}/${file}", new GitArchiveResourceReference());
+		mountResource("raw/${user}/${repo}/${objectId}", new RawBlobResourceReference());
+		mountResource("archive/${user}/${repo}/${file}", new GitArchiveResourceReference());
 	}
 	
 	public boolean isGravatarEnabled() {

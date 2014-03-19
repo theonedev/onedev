@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.account.setting.projects;
+package com.pmease.gitop.web.page.account.setting.repo;
 
 import java.util.List;
 
@@ -26,9 +26,9 @@ import com.pmease.gitop.web.page.project.settings.RepositoryOptionsPage;
 import com.pmease.gitop.web.util.DateUtils;
 
 @SuppressWarnings("serial")
-public class AccountProjectsPage extends AccountSettingPage {
+public class RepositoriesPage extends AccountSettingPage {
 
-	public AccountProjectsPage(PageParameters params) {
+	public RepositoriesPage(PageParameters params) {
 		super(params);
 	}
 

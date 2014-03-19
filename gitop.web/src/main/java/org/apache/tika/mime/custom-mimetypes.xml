@@ -148,6 +148,17 @@
 			<match value="#!/usr/bin/env escript" type="string" offset="0" />
 		</magic>
     	<sub-class-of type="text/plain"/>
-  </mime-type>
-	
+  	</mime-type>
+  	
+  	<mime-type type="text/x-viml">
+  		<_comment>VIM extension language</_comment>
+  		<glob pattern="*.vim" />
+  		<glob pattern=".vimrc" />
+  		<glob pattern="vimrc" />
+  		<glob pattern=".gvimrc" />
+  		<glob pattern="gvimrc" />
+  		
+  		<sub-class-of type="text/plain"/>
+  	</mime-type>
+  
 </mime-info>

@@ -41,9 +41,9 @@ import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 
 @SuppressWarnings("serial")
-public class TeamProjectsEditor extends Panel {
+public class TeamRepositoryEditor extends Panel {
 
-	public TeamProjectsEditor(String id, final IModel<Team> model) {
+	public TeamRepositoryEditor(String id, final IModel<Team> model) {
 		super(id, model);
 		
 		setOutputMarkupId(true);
