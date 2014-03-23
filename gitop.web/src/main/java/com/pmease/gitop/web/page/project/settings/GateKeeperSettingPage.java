@@ -12,7 +12,7 @@ import com.pmease.commons.util.ReflectionUtils;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.modal.ModalPanel;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.web.page.project.settings.gatekeeper.GateKeeperDropdown;
 import com.pmease.gitop.web.page.project.settings.gatekeeper.GateKeeperEditor;
@@ -105,7 +105,7 @@ public class GateKeeperSettingPage extends AbstractRepositorySettingPage {
 	}
 	
 	private void onGateKeeperChanged(AjaxRequestTarget target) {
-		Gitop.getInstance(ProjectManager.class).save(getProject());
+		Gitop.getInstance(RepositoryManager.class).save(getProject());
 		replace(newContent());
 		target.add(get("content"));
 	}

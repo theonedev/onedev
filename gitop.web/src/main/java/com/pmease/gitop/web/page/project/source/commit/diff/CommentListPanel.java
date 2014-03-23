@@ -36,7 +36,7 @@ import com.google.common.collect.Lists;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.CommitCommentManager;
 import com.pmease.gitop.model.CommitComment;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.GitopSession;
 import com.pmease.gitop.web.component.comment.CommitCommentEditor;
 import com.pmease.gitop.web.component.comment.CommitCommentPanel;
@@ -51,13 +51,13 @@ import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
 @SuppressWarnings("serial")
 public class CommentListPanel extends Panel {
 
-	private final IModel<Project> projectModel;
+	private final IModel<Repository> projectModel;
 	private final IModel<String> commitModel;
 	
 	private boolean showAllNotes = false;
 	
 	public CommentListPanel(String id,
-			IModel<Project> projectModel, 
+			IModel<Repository> projectModel, 
 			IModel<String> commitModel) {
 		super(id);
 		
@@ -280,7 +280,7 @@ public class CommentListPanel extends Panel {
 		}
 	}
 	
-	private Project getProject() {
+	private Repository getProject() {
 		return projectModel.getObject();
 	}
 	

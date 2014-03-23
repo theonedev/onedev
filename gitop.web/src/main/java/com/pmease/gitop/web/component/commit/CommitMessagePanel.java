@@ -11,15 +11,15 @@ import org.apache.wicket.model.Model;
 
 import com.google.common.base.Objects;
 import com.pmease.commons.git.Commit;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
 
 @SuppressWarnings("serial")
 public class CommitMessagePanel extends Panel {
 
-	private final IModel<Project> repoModel;
+	private final IModel<Repository> repoModel;
 	
-	public CommitMessagePanel(String id, IModel<Commit> commitModel, IModel<Project> repoModel) {
+	public CommitMessagePanel(String id, IModel<Commit> commitModel, IModel<Repository> repoModel) {
 		super(id, commitModel);
 		
 		this.repoModel = repoModel;
@@ -65,7 +65,7 @@ public class CommitMessagePanel extends Panel {
 		add(detailedToggle);
 	}
 	
-	private Project getRepo() {
+	private Repository getRepo() {
 		return repoModel.getObject();
 	}
 	

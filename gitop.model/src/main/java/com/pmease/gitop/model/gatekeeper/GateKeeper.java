@@ -5,7 +5,7 @@ import java.io.Serializable;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.trimmable.Trimmable;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
@@ -64,7 +64,7 @@ public interface GateKeeper extends Trimmable, Serializable {
 	 * @return
 	 * 			result of the check
 	 */
-	CheckResult checkRef(User user, Project project, String refName);
+	CheckResult checkRef(User user, Repository project, String refName);
 	
 	boolean isEnabled();
 }

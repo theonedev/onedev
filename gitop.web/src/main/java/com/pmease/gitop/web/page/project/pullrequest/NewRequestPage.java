@@ -11,7 +11,7 @@ import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.CommitComment;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.RepositoryBasePage;
@@ -21,7 +21,7 @@ import com.pmease.gitop.web.page.project.source.commit.diff.CommitCommentsAware;
 @SuppressWarnings("serial")
 public class NewRequestPage extends RepositoryTabPage implements CommitCommentsAware {
 
-	public static PageParameters newParams(Project project, String source, String dest) {
+	public static PageParameters newParams(Repository project, String source, String dest) {
 		PageParameters params = PageSpec.forProject(project);
 		params.set("source", source);
 		params.set("dest", dest);

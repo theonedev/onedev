@@ -17,11 +17,11 @@ import org.eclipse.jgit.lib.Constants;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Authorization;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
@@ -36,7 +36,7 @@ import com.pmease.gitop.web.page.project.source.RepositoryHomePage;
 @SuppressWarnings("serial")
 public abstract class RepositoryBasePage extends AbstractAccountPage {
 
-	protected IModel<Project> projectModel;
+	protected IModel<Repository> projectModel;
 	
 	public RepositoryBasePage(PageParameters params) {
 		super(params);
@@ -48,7 +48,7 @@ public abstract class RepositoryBasePage extends AbstractAccountPage {
 			projectName = projectName.substring(0, 
 					projectName.length() - Constants.DOT_GIT_EXT.length());
 		
-		Project project = Gitop.getInstance(ProjectManager.class).findBy(
+		Repository project = Gitop.getInstance(RepositoryManager.class).findBy(
 				getAccount(), projectName);
 		
 		if (project == null) {
@@ -69,7 +69,7 @@ public abstract class RepositoryBasePage extends AbstractAccountPage {
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 		
-		Project project = getProject();
+		Repository project = getProject();
 		if (project.getForkedFrom() != null)
 			add(new Icon("repoIcon", "icon-repo-forked"));
 		else
@@ -125,7 +125,7 @@ public abstract class RepositoryBasePage extends AbstractAccountPage {
 			@Override
 			public void onClick() {
 				User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
-				Project forked = Gitop.getInstance(ProjectManager.class).fork(getProject(), currentUser);
+				Repository forked = Gitop.getInstance(RepositoryManager.class).fork(getProject(), currentUser);
 				setResponsePage(RepositoryHomePage.class, PageSpec.forProject(forked));
 			}
 			
@@ -154,7 +154,7 @@ public abstract class RepositoryBasePage extends AbstractAccountPage {
 				ObjectPermission.ofProjectRead(projectModel.getObject()));
 	}
 	
-	public Project getProject() {
+	public Repository getProject() {
 		return projectModel.getObject();
 	}
 	

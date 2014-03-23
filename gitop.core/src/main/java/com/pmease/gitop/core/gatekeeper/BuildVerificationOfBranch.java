@@ -8,7 +8,7 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.gatekeeper.helper.branchselection.SpecifyTargetBranchesByIds;
 import com.pmease.gitop.core.gatekeeper.helper.branchselection.TargetBranchSelection;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.CommonGateKeeper;
@@ -41,7 +41,7 @@ public class BuildVerificationOfBranch extends CommonGateKeeper {
 	}
 
 	@Override
-	protected GateKeeper trim(Project project) {
+	protected GateKeeper trim(Repository project) {
 		if (branchSelection.trim(project) == null)
 			return null;
 		else
@@ -109,7 +109,7 @@ public class BuildVerificationOfBranch extends CommonGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Project project, String refName) {
+	protected CheckResult doCheckRef(User user, Repository project, String refName) {
 		return getGateKeeper().checkRef(user, project, refName);
 	}
 

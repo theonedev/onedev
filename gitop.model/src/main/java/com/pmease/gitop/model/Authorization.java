@@ -22,7 +22,7 @@ public class Authorization extends AbstractEntity {
 
 	@ManyToOne
 	@JoinColumn(nullable=false)
-	private Project project;
+	private Repository project;
 	
 	private GeneralOperation operation = GeneralOperation.READ;
 	
@@ -42,11 +42,11 @@ public class Authorization extends AbstractEntity {
 		this.team = team;
 	}
 	
-	public Project getProject() {
+	public Repository getProject() {
 		return project;
 	}
 
-	public void setProject(Project project) {
+	public void setProject(Repository project) {
 		this.project = project;
 	}
 

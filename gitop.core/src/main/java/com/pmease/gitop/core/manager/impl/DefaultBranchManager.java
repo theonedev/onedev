@@ -21,7 +21,7 @@ import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.core.manager.PullRequestUpdateManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 
@@ -43,13 +43,13 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 
     @Sessional
     @Override
-    public Branch findBy(Project project, String name) {
+    public Branch findBy(Repository project, String name) {
         return find(new Criterion[]{Restrictions.eq("project", project), Restrictions.eq("name", name)});
     }
 
     @Sessional
 	@Override
-	public Branch findDefault(Project project) {
+	public Branch findDefault(Repository project) {
 		return findBy(project, project.code().resolveDefaultBranch());
 	}
 

@@ -24,7 +24,7 @@ import org.parboiled.common.Preconditions;
 import com.google.common.base.Strings;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.Constants;
 import com.pmease.gitop.web.common.wicket.bootstrap.Alert;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
@@ -42,13 +42,13 @@ import com.pmease.gitop.web.util.MediaTypeUtils;
 @SuppressWarnings("serial")
 public class DiffViewPanel extends Panel {
 
-	private final IModel<Project> projectModel;
+	private final IModel<Repository> projectModel;
 	private final IModel<Patch> patchModel;
 	private final IModel<String> sinceModel;
 	private final IModel<String> untilModel;
 	
 	public DiffViewPanel(String id,
-			IModel<Project> projectModel,
+			IModel<Repository> projectModel,
 			IModel<String> sinceModel,
 			IModel<String> untilModel) {
 		
@@ -83,7 +83,7 @@ public class DiffViewPanel extends Panel {
 		return patch;
 	}
 	
-	private Project getProject() {
+	private Repository getProject() {
 		return Preconditions.checkNotNull(projectModel.getObject());
 	}
 	

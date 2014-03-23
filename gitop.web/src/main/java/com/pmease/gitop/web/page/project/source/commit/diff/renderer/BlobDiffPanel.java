@@ -16,7 +16,7 @@ import org.eclipse.jgit.diff.DiffEntry.Side;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.page.project.source.blob.SourceBlobPage;
 import com.pmease.gitop.web.page.project.source.commit.diff.DiffStatBar;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader;
@@ -24,7 +24,7 @@ import com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader;
 @SuppressWarnings("serial")
 public abstract class BlobDiffPanel extends Panel {
 
-	protected final IModel<Project> projectModel;
+	protected final IModel<Repository> projectModel;
 	protected final IModel<String> sinceModel;
 	protected final IModel<String> untilModel;
 //	protected final IModel<List<CommitComment>> commentsModel;
@@ -39,7 +39,7 @@ public abstract class BlobDiffPanel extends Panel {
 	public BlobDiffPanel(String id,
 			final int index,
 			IModel<FileHeader> fileModel,
-			IModel<Project> projectModel,
+			IModel<Repository> projectModel,
 			IModel<String> sinceModel,
 			IModel<String> untilModel) {
 		super(id, fileModel);
@@ -121,7 +121,7 @@ public abstract class BlobDiffPanel extends Panel {
 		return untilModel.getObject();
 	}
 	
-	protected Project getProject() {
+	protected Repository getProject() {
 		return projectModel.getObject();
 	}
 	

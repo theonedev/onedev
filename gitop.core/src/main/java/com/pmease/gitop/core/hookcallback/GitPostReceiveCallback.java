@@ -24,10 +24,10 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.manager.BranchManager;
-import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 
 @SuppressWarnings("serial")
@@ -38,7 +38,7 @@ public class GitPostReceiveCallback extends HttpServlet {
     
     private static final Logger logger = LoggerFactory.getLogger(GitPostReceiveCallback.class);
 
-    private final ProjectManager projectManager;
+    private final RepositoryManager projectManager;
     
     private final BranchManager branchManager;
     
@@ -49,7 +49,7 @@ public class GitPostReceiveCallback extends HttpServlet {
     private final Executor executor;
     
     @Inject
-    public GitPostReceiveCallback(ProjectManager projectManager, 
+    public GitPostReceiveCallback(RepositoryManager projectManager, 
     		BranchManager branchManager, UserManager userManager,
     		UnitOfWork unitOfWork, Executor executor) {
     	this.projectManager = projectManager;
@@ -73,7 +73,7 @@ public class GitPostReceiveCallback extends HttpServlet {
         List<String> fields = StringUtils.splitAndTrim(request.getPathInfo(), "/");
         Preconditions.checkState(fields.size() == 2);
         
-        Project project = projectManager.load(Long.valueOf(fields.get(0)));
+        Repository project = projectManager.load(Long.valueOf(fields.get(0)));
         
         SecurityUtils.getSubject().runAs(User.asPrincipal(Long.valueOf(fields.get(1))));
         
@@ -109,7 +109,7 @@ public class GitPostReceiveCallback extends HttpServlet {
     	
 	}
 
-    private void onRefUpdated(Project project, String refName, String oldCommitHash, String newCommitHash) {
+    private void onRefUpdated(Repository project, String refName, String oldCommitHash, String newCommitHash) {
 		String branchName = Branch.getName(refName);
 		if (branchName != null) {
 			if (oldCommitHash.equals(Commit.ZERO_HASH)) {

@@ -19,7 +19,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.CommitCommentManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.CommitComment;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.common.wicket.component.vex.AjaxConfirmLink;
 import com.pmease.gitop.web.component.comment.event.CommitCommentRemoved;
@@ -32,10 +32,10 @@ import com.pmease.gitop.web.model.UserModel;
 @SuppressWarnings("serial")
 public class CommitCommentPanel extends Panel {
 
-	private final IModel<Project> projectModel;
+	private final IModel<Repository> projectModel;
 	
 	public CommitCommentPanel(String id,
-			IModel<Project> projectModel,
+			IModel<Repository> projectModel,
 			IModel<CommitComment> model) {
 		super(id, model);
 	

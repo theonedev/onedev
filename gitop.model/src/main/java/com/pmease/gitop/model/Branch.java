@@ -25,7 +25,7 @@ public class Branch extends AbstractEntity {
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
-	private Project project;
+	private Repository project;
 
 	@Column(nullable=false)
 	private String name;
@@ -41,11 +41,11 @@ public class Branch extends AbstractEntity {
     
     private transient String headCommit;
 
-    public Project getProject() {
+    public Repository getProject() {
 		return project;
 	}
 
-	public void setProject(Project project) {
+	public void setProject(Repository project) {
 		this.project = project;
 	}
 

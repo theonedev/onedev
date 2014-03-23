@@ -2,7 +2,7 @@ package com.pmease.gitop.model.gatekeeper;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
@@ -54,7 +54,7 @@ public abstract class CompositeGateKeeper extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckRef(final User user, final Project project, final String refName) {
+	protected CheckResult doCheckRef(final User user, final Repository project, final String refName) {
 		return aggregate(new Checker() {
 
 			@Override

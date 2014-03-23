@@ -335,11 +335,11 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	public String getHeadRef() {
-		return Project.REFS_GITOP + "pulls/" + getId() + "/head";
+		return Repository.REFS_GITOP + "pulls/" + getId() + "/head";
 	}
 	
 	public String getMergeRef() {
-		return Project.REFS_GITOP + "pulls/" + getId() + "/merge";
+		return Repository.REFS_GITOP + "pulls/" + getId() + "/merge";
 	};
 
 	/**

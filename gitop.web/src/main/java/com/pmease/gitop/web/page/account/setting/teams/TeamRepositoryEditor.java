@@ -29,9 +29,9 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.AuthorizationManager;
-import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.model.Authorization;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.web.common.wicket.form.FeedbackPanel;
 import com.pmease.gitop.web.component.choice.ProjectMultiChoice;
@@ -110,7 +110,7 @@ public class TeamRepositoryEditor extends Panel {
 	private Component newProjectsForm() {
 		Form<?> form = new Form<Void>("reposForm");
 		form.add(new FeedbackPanel("feedback", form));
-		final IModel<Collection<Project>> reposModel = new WildcardListModel(new ArrayList<Project>());
+		final IModel<Collection<Repository>> reposModel = new WildcardListModel(new ArrayList<Repository>());
 		form.add(new ProjectMultiChoice("repochoice", reposModel, new ProjectChoiceProvider()));
 		
 		form.add(new AjaxButton("submit", form) {
@@ -121,16 +121,16 @@ public class TeamRepositoryEditor extends Panel {
 			
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				Collection<Project> projects = reposModel.getObject();
+				Collection<Repository> projects = reposModel.getObject();
 				AuthorizationManager am = Gitop.getInstance(AuthorizationManager.class);
-				for (Project each : projects) {
+				for (Repository each : projects) {
 					Authorization authorization = new Authorization();
 					authorization.setTeam(getTeam());
 					authorization.setProject(each);
 					am.save(authorization);
 				}
 				
-				reposModel.setObject(new ArrayList<Project>());
+				reposModel.setObject(new ArrayList<Repository>());
 				target.add(form);
 				onProjectsChanged(target);
 			}
@@ -139,13 +139,13 @@ public class TeamRepositoryEditor extends Panel {
 		return form;
 	}
 
-	class ProjectChoiceProvider extends ChoiceProvider<Project> {
+	class ProjectChoiceProvider extends ChoiceProvider<Repository> {
 		
 		@Override
-		public void query(String term, int page, Response<Project> response) {
-			ProjectManager pm = Gitop.getInstance(ProjectManager.class);
+		public void query(String term, int page, Response<Repository> response) {
+			RepositoryManager pm = Gitop.getInstance(RepositoryManager.class);
 			int first = page * 25;
-			List<Project> projects = 
+			List<Repository> projects = 
 					pm.query(
 							new Criterion[] {
 									Restrictions.eq("owner", getTeam().getOwner()),
@@ -163,8 +163,8 @@ public class TeamRepositoryEditor extends Panel {
 					Gitop.getInstance(AuthorizationManager.class)
 					.query(Restrictions.eq("team", getTeam()));
 			
-			List<Project> result = Lists.newArrayList();
-			for (Project each : projects) {
+			List<Repository> result = Lists.newArrayList();
+			for (Repository each : projects) {
 				if (!in(each, authorizations)) {
 					result.add(each);
 				}
@@ -173,7 +173,7 @@ public class TeamRepositoryEditor extends Panel {
 			response.addAll(result);
 		}
 
-		private boolean in(Project project, List<Authorization> authorizations) {
+		private boolean in(Repository project, List<Authorization> authorizations) {
 			for (Authorization each : authorizations) {
 				if (Objects.equal(project, each.getProject())) {
 					return true;
@@ -184,16 +184,16 @@ public class TeamRepositoryEditor extends Panel {
 		}
 		
 		@Override
-		public void toJson(Project choice, JSONWriter writer) throws JSONException {
+		public void toJson(Repository choice, JSONWriter writer) throws JSONException {
 			writer.key("id").value(choice.getId())
 				  .key("owner").value(choice.getOwner().getName())
 				  .key("name").value(choice.getName());
 		}
 
 		@Override
-		public Collection<Project> toChoices(Collection<String> ids) {
-			List<Project> list = Lists.newArrayList();
-			ProjectManager pm = Gitop.getInstance(ProjectManager.class);
+		public Collection<Repository> toChoices(Collection<String> ids) {
+			List<Repository> list = Lists.newArrayList();
+			RepositoryManager pm = Gitop.getInstance(RepositoryManager.class);
 			for (String each : ids) {
 				Long id = Long.valueOf(each);
 				list.add(pm.get(id));

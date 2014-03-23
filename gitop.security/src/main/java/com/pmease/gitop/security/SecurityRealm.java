@@ -15,7 +15,7 @@ import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Authorization;
 import com.pmease.gitop.model.Membership;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
@@ -97,8 +97,8 @@ public class SecurityRealm extends AbstractRealm {
     }
     
     private User getUser(ObjectPermission permission) {
-        if (permission.getObject() instanceof Project) {
-        	Project project = (Project) permission.getObject();
+        if (permission.getObject() instanceof Repository) {
+        	Repository project = (Repository) permission.getObject();
         	return project.getOwner();
         } else if (permission.getObject() instanceof User) {
         	return (User) permission.getObject();

@@ -18,8 +18,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.io.CharSource;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.core.manager.RepositoryManager;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.quantity.Data;
 import com.pmease.gitop.web.page.project.source.blob.language.Language;
 import com.pmease.gitop.web.page.project.source.blob.language.Languages;
@@ -48,7 +48,7 @@ public class FileBlob implements Serializable {
 		this.file = Preconditions.checkNotNull(file);
 	}
 
-	public static FileBlob of(Project project, String revision, String file) {
+	public static FileBlob of(Repository project, String revision, String file) {
 		return Gitop.getInstance(FileBlobService.class).get(project, revision, file);
 	}
 	
@@ -125,8 +125,8 @@ public class FileBlob implements Serializable {
 		return projectId;
 	}
 
-	public Project getProject() {
-		return Gitop.getInstance(ProjectManager.class).load(Preconditions.checkNotNull(getProjectId()));
+	public Repository getProject() {
+		return Gitop.getInstance(RepositoryManager.class).load(Preconditions.checkNotNull(getProjectId()));
 	}
 	
 	public String getRevision() {

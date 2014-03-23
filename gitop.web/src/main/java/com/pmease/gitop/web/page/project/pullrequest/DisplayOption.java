@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 
@@ -50,7 +50,7 @@ class DisplayOption implements Serializable {
 		this.sortOption = sortOption;
 	}
 
-	public DetachedCriteria getCriteria(Project project, boolean withOrderBy) {
+	public DetachedCriteria getCriteria(Repository project, boolean withOrderBy) {
 		DetachedCriteria criteria = DetachedCriteria.forClass(PullRequest.class);
 		criteria.createCriteria("target").add(Restrictions.eq("project", project));
 		if (open) {

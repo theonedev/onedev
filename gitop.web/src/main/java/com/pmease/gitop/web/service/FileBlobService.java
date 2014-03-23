@@ -2,11 +2,11 @@ package com.pmease.gitop.web.service;
 
 import org.eclipse.jgit.lib.ObjectStream;
 
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 
 public interface FileBlobService {
 	
-	FileBlob get(Project project, String revision, String path);
+	FileBlob get(Repository project, String revision, String path);
 	
-	ObjectStream openStream(Project project, String revision, String path);
+	ObjectStream openStream(Repository project, String revision, String path);
 }

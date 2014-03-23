@@ -19,7 +19,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
     
     private Git bareGit;
     
-    private Project project;
+    private Repository project;
     
     @Override
     public void setup() {
@@ -33,7 +33,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         workGit = new Git(new File(projectDir, "work"));
         workGit.clone(bareGit.repoDir().getAbsolutePath(), false);
         
-        project = Mockito.mock(Project.class);
+        project = Mockito.mock(Repository.class);
         Mockito.when(project.code()).thenReturn(bareGit);
     }
     

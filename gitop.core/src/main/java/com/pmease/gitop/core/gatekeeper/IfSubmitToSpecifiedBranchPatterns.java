@@ -5,7 +5,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.BranchGateKeeper;
@@ -58,7 +58,7 @@ public class IfSubmitToSpecifiedBranchPatterns extends BranchGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Project project, String refName) {
+	protected CheckResult doCheckRef(User user, Repository project, String refName) {
 		return ignored();
 	}
 

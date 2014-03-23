@@ -34,7 +34,7 @@ import com.google.common.collect.Multimap;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.CommitCommentManager;
 import com.pmease.gitop.model.CommitComment;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.Constants;
 import com.pmease.gitop.web.GitopSession;
 import com.pmease.gitop.web.component.comment.CommitCommentEditor;
@@ -57,7 +57,7 @@ import de.agilecoders.wicket.jquery.JQuery;
 @SuppressWarnings("serial")
 public class HunkPanel extends Panel {
 
-	private final IModel<Project> projectModel;
+	private final IModel<Repository> projectModel;
 	private final IModel<FileHeader> fileModel;
 	private final IModel<List<String>> blobLinesModel;
 	private final IModel<String> commitModel;
@@ -73,7 +73,7 @@ public class HunkPanel extends Panel {
 	final static String INSERT_BEFORE_ROW = "var item = document.createElement('tr'); item.id='%s'; $(item).insertBefore($('#%s'));";
 	
 	public HunkPanel(String id,
-			IModel<Project> projectModel,
+			IModel<Repository> projectModel,
 			IModel<String> commitModel,
 			IModel<Integer> indexModel,
 			IModel<FileHeader> fileModel,

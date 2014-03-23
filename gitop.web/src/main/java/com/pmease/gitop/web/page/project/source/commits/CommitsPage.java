@@ -19,7 +19,7 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.command.LogCommand;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.RepositoryTabPage;
 import com.pmease.gitop.web.page.project.api.IRevisionAware;
@@ -30,7 +30,7 @@ public class CommitsPage extends RepositoryTabPage implements IRevisionAware {
 
 	public static final int COMMITS_PER_PAGE = 30;
 	
-	public static PageParameters newParams(Project project, String revision, List<String> paths, int page) {
+	public static PageParameters newParams(Repository project, String revision, List<String> paths, int page) {
 		Preconditions.checkNotNull(project);
 		PageParameters params = PageSpec.forProject(project);
 		if (!Strings.isNullOrEmpty(revision)) {

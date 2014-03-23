@@ -13,7 +13,7 @@ import com.pmease.commons.wicket.ajaxlistener.ajaxloadingindicator.AjaxLoadingIn
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.component.choice.BranchChoiceProvider;
 import com.pmease.gitop.web.component.choice.BranchSingleChoice;
 import com.pmease.gitop.web.component.choice.ComparableProjectChoice;
@@ -21,9 +21,9 @@ import com.pmease.gitop.web.component.choice.ComparableProjectChoice;
 @SuppressWarnings("serial")
 public class ComparableBranchSelector extends FormComponentPanel<Branch> {
 
-	private IModel<Project> currentProjectModel;
+	private IModel<Repository> currentProjectModel;
 	
-	private IModel<Project> selectedProjectModel;
+	private IModel<Repository> selectedProjectModel;
 	
 	/**
 	 * Construct with current project model and selected branch model.
@@ -35,19 +35,19 @@ public class ComparableBranchSelector extends FormComponentPanel<Branch> {
 	 * @param selectedBranchModel
 	 * 			model of selected branch
 	 */
-	public ComparableBranchSelector(String id, IModel<Project> currentProjectModel, IModel<Branch> selectedBranchModel) {
+	public ComparableBranchSelector(String id, IModel<Repository> currentProjectModel, IModel<Branch> selectedBranchModel) {
 		super(id, selectedBranchModel);
 		
 		this.currentProjectModel = currentProjectModel;
 		
-		selectedProjectModel = new IModel<Project>() {
+		selectedProjectModel = new IModel<Repository>() {
 
 			@Override
 			public void detach() {
 			}
 
 			@Override
-			public Project getObject() {
+			public Repository getObject() {
 				Branch branch = getBranch();
 				if (branch == null) {
 					return ComparableBranchSelector.this.currentProjectModel.getObject();
@@ -57,7 +57,7 @@ public class ComparableBranchSelector extends FormComponentPanel<Branch> {
 			}
 
 			@Override
-			public void setObject(Project object) {
+			public void setObject(Repository object) {
 				setBranch(Gitop.getInstance(BranchManager.class).findDefault(object));
 			}
 			

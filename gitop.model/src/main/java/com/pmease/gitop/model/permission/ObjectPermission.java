@@ -2,7 +2,7 @@ package com.pmease.gitop.model.permission;
 
 import org.apache.shiro.authz.Permission;
 
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.object.ProtectedObject;
 import com.pmease.gitop.model.permission.object.SystemObject;
@@ -66,15 +66,15 @@ public class ObjectPermission implements Permission {
 		return new ObjectPermission(user, GeneralOperation.WRITE);
 	}
 
-	public static ObjectPermission ofProjectAdmin(Project project) {
+	public static ObjectPermission ofProjectAdmin(Repository project) {
 		return new ObjectPermission(project, GeneralOperation.ADMIN);
 	}
 
-	public static ObjectPermission ofProjectRead(Project project) {
+	public static ObjectPermission ofProjectRead(Repository project) {
 		return new ObjectPermission(project, GeneralOperation.READ);
 	}
 
-	public static ObjectPermission ofProjectWrite(Project project) {
+	public static ObjectPermission ofProjectWrite(Repository project) {
 		return new ObjectPermission(project, GeneralOperation.WRITE);
 	}
 

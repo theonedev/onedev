@@ -18,7 +18,7 @@ import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Membership;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.Team;
@@ -115,7 +115,7 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 			request.setId(1L);
 			request.setTarget(new Branch());
 			request.getTarget().setName("master");
-			request.getTarget().setProject(new Project() {
+			request.getTarget().setProject(new Repository() {
 
 				@Override
 				public Git code() {
@@ -129,7 +129,7 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 			
 			request.setSource(new Branch());
 			request.getSource().setName("dev");
-			request.getSource().setProject(new Project() {
+			request.getSource().setProject(new Repository() {
 
 				@Override
 				public Git code() {

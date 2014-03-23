@@ -25,7 +25,7 @@ import com.pmease.commons.schedule.TaskScheduler;
 import com.pmease.commons.util.init.InitStage;
 import com.pmease.commons.util.init.ManualConfig;
 import com.pmease.gitop.core.manager.DataManager;
-import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.core.setting.ServerConfig;
 
 public class Gitop extends AbstractPlugin {
@@ -34,7 +34,7 @@ public class Gitop extends AbstractPlugin {
 	
 	private final DataManager dataManager;
 	
-	private final ProjectManager projectManager;
+	private final RepositoryManager projectManager;
 	
 	private final ServerConfig serverConfig;
 
@@ -52,7 +52,7 @@ public class Gitop extends AbstractPlugin {
 	
 	@Inject
 	public Gitop(ServerConfig serverConfig, DataManager dataManager,  
-			ProjectManager projectManager, TaskScheduler taskScheduler, 
+			RepositoryManager projectManager, TaskScheduler taskScheduler, 
 			Provider<GitConfig> gitConfigProvider, @AppName String appName) {
 		this.dataManager = dataManager;
 		this.projectManager = projectManager;

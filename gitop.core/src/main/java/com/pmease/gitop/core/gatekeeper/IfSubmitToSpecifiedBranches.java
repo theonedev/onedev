@@ -13,7 +13,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.editable.BranchChoice;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.BranchGateKeeper;
@@ -45,7 +45,7 @@ public class IfSubmitToSpecifiedBranches extends BranchGateKeeper {
 	}
 
 	@Override
-	protected GateKeeper trim(Project project) {
+	protected GateKeeper trim(Repository project) {
 		Gitop.getInstance(BranchManager.class).trim(branchIds);
 		if (branchIds.isEmpty())
 			return null;
@@ -83,7 +83,7 @@ public class IfSubmitToSpecifiedBranches extends BranchGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Project project, String refName) {
+	protected CheckResult doCheckRef(User user, Repository project, String refName) {
 		return ignored();
 	}
 

@@ -19,7 +19,7 @@ import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Membership;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.User;
 
@@ -124,7 +124,7 @@ public class DirectionProtectionTest extends AbstractGitTest {
 			Branch master = new Branch();
 			master.setName("master");
 			master.setId(1L);
-			master.setProject(new Project() {
+			master.setProject(new Repository() {
 
 				@Override
 				public Git code() {

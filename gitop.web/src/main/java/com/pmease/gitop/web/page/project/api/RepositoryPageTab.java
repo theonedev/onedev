@@ -12,8 +12,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Strings;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.core.manager.RepositoryManager;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.SessionData;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.common.wicket.component.tab.AbstractPageTab;
@@ -74,14 +74,14 @@ public class RepositoryPageTab extends AbstractPageTab {
 		return container;
 	}
 
-	protected Project getProject() {
-		return Gitop.getInstance(ProjectManager.class).get(SessionData.get().getProjectId());
+	protected Repository getProject() {
+		return Gitop.getInstance(RepositoryManager.class).get(SessionData.get().getProjectId());
 	}
 	
 	protected MarkupContainer newPageLink(String id) {
 		Class<? extends Page> pageClass = getBookmarkablePageClass();
 		
-		Project project = getProject();
+		Repository project = getProject();
 		PageParameters params = PageSpec.forProject(project); 
 		if (IRevisionAware.class.isAssignableFrom(pageClass)) {
 			String revision = SessionData.get().getRevision();
@@ -100,7 +100,7 @@ public class RepositoryPageTab extends AbstractPageTab {
 		throw new UnsupportedOperationException();
 	}
 	
-	protected Component createBadge(String id, Project project) {
+	protected Component createBadge(String id, Repository project) {
 		return null;
 	}
 }

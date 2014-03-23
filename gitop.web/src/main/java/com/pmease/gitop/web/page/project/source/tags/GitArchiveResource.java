@@ -11,8 +11,8 @@ import org.apache.wicket.request.resource.ContentDisposition;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.core.manager.RepositoryManager;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.exception.AccessDeniedException;
 import com.pmease.gitop.web.git.command.ArchiveCommand;
@@ -36,7 +36,7 @@ public class GitArchiveResource extends AbstractResource {
 		Preconditions.checkArgument(!Strings.isNullOrEmpty(fileName) && 
 				(fileName.endsWith(".zip") || fileName.endsWith(".tar.gz")));
 
-		Project project = Gitop.getInstance(ProjectManager.class).findBy(username, repoName);
+		Repository project = Gitop.getInstance(RepositoryManager.class).findBy(username, repoName);
 		if (project == null) {
 			throw new EntityNotFoundException("Repository " + username + "/" + repoName + " doesn't exist");
 		}
@@ -57,7 +57,7 @@ public class GitArchiveResource extends AbstractResource {
 		response.setWriteCallback(new WriteCallback() {
 			@Override
 			public void writeData(final Attributes attributes) {
-				Project project = Gitop.getInstance(ProjectManager.class).get(projectId);
+				Repository project = Gitop.getInstance(RepositoryManager.class).get(projectId);
 				ArchiveCommand ac = new ArchiveCommand(project.code().repoDir(),
 						attributes.getResponse().getOutputStream());
 				

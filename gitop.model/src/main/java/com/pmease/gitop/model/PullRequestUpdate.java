@@ -82,11 +82,11 @@ public class PullRequestUpdate extends AbstractEntity {
 	}
 	
 	public String getBaseRef() {
-		return Project.REFS_GITOP + "updates/" + getId() + "/base";
+		return Repository.REFS_GITOP + "updates/" + getId() + "/base";
 	}
 	
 	public String getHeadRef() {
-		return Project.REFS_GITOP + "updates/" + getId() + "/head";
+		return Repository.REFS_GITOP + "updates/" + getId() + "/head";
 	}
 
 	/**

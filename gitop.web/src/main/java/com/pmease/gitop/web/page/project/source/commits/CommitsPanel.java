@@ -26,7 +26,7 @@ import com.google.common.collect.Multimap;
 import com.pmease.commons.git.Commit;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.CommitCommentManager;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.datatype.DataTypes;
 import com.pmease.gitop.web.component.commit.CommitMessagePanel;
 import com.pmease.gitop.web.component.commit.CommitMetaPanel;
@@ -40,13 +40,13 @@ import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
 @SuppressWarnings("serial")
 public class CommitsPanel extends Panel {
 	
-	private final IModel<Project> projectModel;
+	private final IModel<Repository> projectModel;
 	private final IModel<Multimap<Date, Commit>> groupsModel;
 	private final IModel<Map<String, Integer>> commentStatsModel;
 	
 	public CommitsPanel(String id, 
 			IModel<List<Commit>> commitsModel, 
-			IModel<Project> projectModel) {
+			IModel<Repository> projectModel) {
 		super(id, commitsModel);
 		
 		this.projectModel = projectModel;
@@ -160,7 +160,7 @@ public class CommitsPanel extends Panel {
 				
 	}
 	
-	private Project getProject() {
+	private Repository getProject() {
 		return projectModel.getObject();
 	}
 	

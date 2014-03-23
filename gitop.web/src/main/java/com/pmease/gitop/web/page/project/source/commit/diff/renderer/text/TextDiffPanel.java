@@ -19,7 +19,7 @@ import org.parboiled.common.Preconditions;
 
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.CommitComment;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.component.comment.event.CommitCommentAdded;
 import com.pmease.gitop.web.component.comment.event.CommitCommentRemoved;
 import com.pmease.gitop.web.git.GitUtils;
@@ -42,7 +42,7 @@ public class TextDiffPanel extends BlobDiffPanel {
 	public TextDiffPanel(String id,
 			int index,
 			IModel<FileHeader> fileModel,
-			IModel<Project> projectModel, 
+			IModel<Repository> projectModel, 
 			IModel<String> sinceModel,
 			IModel<String> untilModel) {
 		

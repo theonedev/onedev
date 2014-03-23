@@ -5,8 +5,8 @@ import org.apache.wicket.markup.html.image.NonCachingImage;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.core.manager.RepositoryManager;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.service.FileBlob;
 
@@ -15,19 +15,19 @@ public class FileBlobImage extends NonCachingImage {
 
 	public static PageParameters newParams(FileBlob blob) {
 		Long projectId = blob.getProjectId();
-		Project project = Gitop.getInstance(ProjectManager.class).get(projectId);
+		Repository project = Gitop.getInstance(RepositoryManager.class).get(projectId);
 		
 		return newParams(project, blob.getRevision(), blob.getFilePath());
 	}
 	
-	public static PageParameters newParams(Project project, String revision, String path) {
+	public static PageParameters newParams(Repository project, String revision, String path) {
 		PageParameters params = PageSpec.forProject(project);
 		params.set(PageSpec.OBJECT_ID, revision);
 		PageSpec.addPathToParameters(path, params);
 		return params;
 	}
 	
-	public FileBlobImage(String id, Project project, String revision, String path) {
+	public FileBlobImage(String id, Repository project, String revision, String path) {
 		this(id, newParams(project, revision, path));
 	}
 	

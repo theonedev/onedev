@@ -25,8 +25,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.Git;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.core.manager.RepositoryManager;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.quantity.Data;
 import com.pmease.gitop.web.common.wicket.component.vex.AjaxConfirmLink;
 import com.pmease.gitop.web.common.wicket.form.BaseForm;
@@ -87,14 +87,14 @@ public class RepositoryOptionsPage extends AbstractRepositorySettingPage {
 
 					@Override
 					public void validate(IValidatable<String> validatable) {
-						Project project = getProject();
+						Repository project = getProject();
 						
 						String name = validatable.getValue();
 						if (Objects.equal(name, project.getName())) {
 							return;
 						}
 						
-						ProjectManager pm = Gitop.getInstance(ProjectManager.class);
+						RepositoryManager pm = Gitop.getInstance(RepositoryManager.class);
 						if (pm.findBy(project.getOwner(), name) != null) {
 							validatable.error(new ValidationError().setMessage("Project name is already exist"));
 						}
@@ -116,7 +116,7 @@ public class RepositoryOptionsPage extends AbstractRepositorySettingPage {
 
 			@Override
 			public List<String> getObject() {
-				Project project = getProject();
+				Repository project = getProject();
 				Git git = project.code();
 				if (git.hasCommits()) {
 					return Lists.newArrayList(git.listBranches());
@@ -142,7 +142,7 @@ public class RepositoryOptionsPage extends AbstractRepositorySettingPage {
 			
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				Project project = getProject();
+				Repository project = getProject();
 				boolean nameChanged = !Objects.equal(project.getName(), projectName);
 				if (nameChanged) {
 					project.setName(projectName);
@@ -153,7 +153,7 @@ public class RepositoryOptionsPage extends AbstractRepositorySettingPage {
 					project.code().updateDefaultBranch(defaultBranchName);
 				}
 				
-				Gitop.getInstance(ProjectManager.class).save(project);
+				Gitop.getInstance(RepositoryManager.class).save(project);
 				
 				if (nameChanged) {
 					setResponsePage(RepositoryOptionsPage.class, PageSpec.forProject(project));
@@ -171,7 +171,7 @@ public class RepositoryOptionsPage extends AbstractRepositorySettingPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Gitop.getInstance(ProjectManager.class).delete(getProject());
+				Gitop.getInstance(RepositoryManager.class).delete(getProject());
 				setResponsePage(AccountHomePage.class, PageSpec.forUser(getAccount()));
 			}
 		});

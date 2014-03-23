@@ -19,8 +19,8 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.core.manager.RepositoryManager;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.exception.AccessDeniedException;
 import com.pmease.gitop.web.page.PageSpec;
@@ -53,7 +53,7 @@ public class RawBlobResource extends AbstractResource {
 		Preconditions.checkArgument(!Strings.isNullOrEmpty(revision));
 		Preconditions.checkArgument(!paths.isEmpty());
 		
-		Project project = Gitop.getInstance(ProjectManager.class).findBy(username, projectName);
+		Repository project = Gitop.getInstance(RepositoryManager.class).findBy(username, projectName);
 		if (project == null) {
 			throw new EntityNotFoundException("Project " + username + "/" + projectName + " doesn't exist");
 		}
@@ -84,7 +84,7 @@ public class RawBlobResource extends AbstractResource {
 			response.setWriteCallback(new WriteCallback() {
 				@Override
 				public void writeData(final Attributes attributes) {
-					Project project = Gitop.getInstance(ProjectManager.class).get(projectId);
+					Repository project = Gitop.getInstance(RepositoryManager.class).get(projectId);
 					ObjectStream os = Gitop.getInstance(FileBlobService.class).openStream(project, revision, path);
 					try {
 						ByteStreams.copy(os, attributes.getResponse().getOutputStream());

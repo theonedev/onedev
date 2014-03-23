@@ -16,7 +16,7 @@ public class PullRequestTest extends AbstractGitTest {
     
     private Git git;
     
-    private Project project;
+    private Repository project;
 
     @Override
     public void setup() {
@@ -27,7 +27,7 @@ public class PullRequestTest extends AbstractGitTest {
         git = new Git(new File(projectDir, "code"));
         git.init(false);
         
-        project = Mockito.mock(Project.class);
+        project = Mockito.mock(Repository.class);
         Mockito.when(project.code()).thenReturn(git);
     }
 

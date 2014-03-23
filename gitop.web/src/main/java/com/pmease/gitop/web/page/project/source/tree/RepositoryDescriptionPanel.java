@@ -12,8 +12,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.core.manager.RepositoryManager;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.page.project.source.component.ProjectPanel;
 
 public class RepositoryDescriptionPanel extends ProjectPanel {
@@ -25,7 +25,7 @@ public class RepositoryDescriptionPanel extends ProjectPanel {
 	
 	private Mode mode = Mode.LABEL;
 	
-	public RepositoryDescriptionPanel(String id, IModel<Project> model) {
+	public RepositoryDescriptionPanel(String id, IModel<Repository> model) {
 		super(id, model);
 		
 		setOutputMarkupId(true);
@@ -53,8 +53,8 @@ public class RepositoryDescriptionPanel extends ProjectPanel {
 			form.add(new AjaxButton("save", form) {
 				@Override
 				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-					Project project = getProject();
-					Gitop.getInstance(ProjectManager.class).save(project);
+					Repository project = getProject();
+					Gitop.getInstance(RepositoryManager.class).save(project);
 					mode = Mode.LABEL;
 					onModeChanged(target);
 				}

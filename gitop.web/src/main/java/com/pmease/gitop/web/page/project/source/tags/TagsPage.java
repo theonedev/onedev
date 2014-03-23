@@ -22,7 +22,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.GitPersonLink;
 import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
@@ -42,7 +42,7 @@ public class TagsPage extends RepositoryTabPage {
 	
 	private String before;
 	
-	public static PageParameters newParams(Project project, String before) {
+	public static PageParameters newParams(Repository project, String before) {
 		PageParameters parameters = PageSpec.forProject(project);
 		if (!Strings.isNullOrEmpty(before)) {
 			parameters.add("before", before);

@@ -14,14 +14,14 @@ import org.json.JSONWriter;
 
 import com.google.common.collect.Lists;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.core.manager.RepositoryManager;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 
 @SuppressWarnings("serial")
-public class ProjectChoiceProvider extends ChoiceProvider<Project> {
+public class ProjectChoiceProvider extends ChoiceProvider<Repository> {
 
 	private static final int PAGE_SIZE = 25;
 	
@@ -32,10 +32,10 @@ public class ProjectChoiceProvider extends ChoiceProvider<Project> {
 	}
 	
 	@Override
-	public void query(String term, int page, Response<Project> response) {
-		ProjectManager pm = Gitop.getInstance(ProjectManager.class);
+	public void query(String term, int page, Response<Repository> response) {
+		RepositoryManager pm = Gitop.getInstance(RepositoryManager.class);
 		int first = page * PAGE_SIZE;
-		List<Project> projects = 
+		List<Repository> projects = 
 				pm.query(
 						new Criterion[] {
 								Restrictions.eq("owner", getUser()),
@@ -48,16 +48,16 @@ public class ProjectChoiceProvider extends ChoiceProvider<Project> {
 	}
 
 	@Override
-	public void toJson(Project choice, JSONWriter writer) throws JSONException {
+	public void toJson(Repository choice, JSONWriter writer) throws JSONException {
 		writer.key("id").value(choice.getId())
 			  .key("owner").value(StringEscapeUtils.escapeHtml4(choice.getOwner().getName()))
 			  .key("name").value(StringEscapeUtils.escapeHtml4(choice.getName()));
 	}
 
 	@Override
-	public Collection<Project> toChoices(Collection<String> ids) {
-		List<Project> list = Lists.newArrayList();
-		ProjectManager pm = Gitop.getInstance(ProjectManager.class);
+	public Collection<Repository> toChoices(Collection<String> ids) {
+		List<Repository> list = Lists.newArrayList();
+		RepositoryManager pm = Gitop.getInstance(RepositoryManager.class);
 		for (String each : ids) {
 			Long id = Long.valueOf(each);
 			list.add(pm.load(id));

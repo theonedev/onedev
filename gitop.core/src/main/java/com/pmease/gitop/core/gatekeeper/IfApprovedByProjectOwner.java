@@ -5,7 +5,7 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.VoteInvitationManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
@@ -38,7 +38,7 @@ public class IfApprovedByProjectOwner extends ApprovalGateKeeper {
         }
     }
 
-    private CheckResult checkApproval(User user, Project project) {
+    private CheckResult checkApproval(User user, Repository project) {
 		if (user.equals(project.getOwner()))
 			return approved("Approved by project owner.");
 		else
@@ -56,7 +56,7 @@ public class IfApprovedByProjectOwner extends ApprovalGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Project project, String refName) {
+	protected CheckResult doCheckRef(User user, Repository project, String refName) {
 		if (user.equals(project.getOwner()))
 			return approved("Approved by project owner.");
 		else

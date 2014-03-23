@@ -23,8 +23,8 @@ import com.google.common.base.Throwables;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Files;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.core.manager.RepositoryManager;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.exception.AccessDeniedException;
 import com.pmease.gitop.web.page.PageSpec;
@@ -66,7 +66,7 @@ public class ImageBlobResource extends DynamicImageResource {
 		final String projectName = params.get(PageSpec.REPO).toString();
 		final String revision = params.get("objectId").toString();
 
-		Project project = Gitop.getInstance(ProjectManager.class).findBy(
+		Repository project = Gitop.getInstance(RepositoryManager.class).findBy(
 				username, projectName);
 		if (project == null) {
 			throw new EntityNotFoundException("Project " + username + "/"

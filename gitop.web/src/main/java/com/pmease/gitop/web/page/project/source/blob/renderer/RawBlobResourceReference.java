@@ -4,7 +4,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.IResource;
 import org.apache.wicket.request.resource.ResourceReference;
 
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.service.FileBlob;
 
@@ -17,7 +17,7 @@ public class RawBlobResourceReference extends ResourceReference {
 		return newParams(blob.getProject(), blob.getRevision(), blob.getFilePath());
 	}
 	
-	public static PageParameters newParams(Project project, String revision, String path) {
+	public static PageParameters newParams(Repository project, String revision, String path) {
 		PageParameters params = PageSpec.forProject(project);
 		params.set("objectId", revision);
 		PageSpec.addPathToParameters(path, params);

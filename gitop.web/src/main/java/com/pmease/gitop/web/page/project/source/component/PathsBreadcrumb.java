@@ -10,14 +10,14 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
 
 @SuppressWarnings("serial")
 public class PathsBreadcrumb extends AbstractSourcePagePanel {
 
-	public PathsBreadcrumb(String id, IModel<Project> projectModel, 
+	public PathsBreadcrumb(String id, IModel<Repository> projectModel, 
 			IModel<String> revisionModel, 
 			IModel<List<String>> pathsModel) {
 		super(id, projectModel, revisionModel, pathsModel);

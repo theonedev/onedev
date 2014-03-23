@@ -9,7 +9,7 @@ import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
 import com.google.common.base.Strings;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.wicket.util.JQuery;
 import com.pmease.gitop.web.page.project.source.blob.renderer.FileBlobImage;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader;
@@ -18,7 +18,7 @@ import com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader;
 public class SwipePanel extends AbstractImageDiffPanel {
 
 	public SwipePanel(String id, IModel<FileHeader> fileModel,
-			IModel<Project> projectModel, IModel<String> sinceModel,
+			IModel<Repository> projectModel, IModel<String> sinceModel,
 			IModel<String> untilModel) {
 		
 		super(id, fileModel, projectModel, sinceModel, untilModel);

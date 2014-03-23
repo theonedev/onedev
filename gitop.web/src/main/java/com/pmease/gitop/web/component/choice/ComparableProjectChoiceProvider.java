@@ -16,36 +16,36 @@ import org.json.JSONWriter;
 
 import com.google.common.collect.Lists;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.core.manager.RepositoryManager;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 
 @SuppressWarnings("serial")
-public class ComparableProjectChoiceProvider extends ChoiceProvider<Project> {
+public class ComparableProjectChoiceProvider extends ChoiceProvider<Repository> {
 
 	private static final int PAGE_SIZE = 25;
 	
-	private IModel<Project> currentProjectModel;
+	private IModel<Repository> currentProjectModel;
 	
-	private IModel<List<Project>> comparableProjectsModel;
+	private IModel<List<Repository>> comparableProjectsModel;
 
-	public ComparableProjectChoiceProvider(IModel<Project> currentProjectModel) {
+	public ComparableProjectChoiceProvider(IModel<Repository> currentProjectModel) {
 		this.currentProjectModel = currentProjectModel;
 		
-		comparableProjectsModel = new LoadableDetachableModel<List<Project>>() {
+		comparableProjectsModel = new LoadableDetachableModel<List<Repository>>() {
 
 			@Override
-			protected List<Project> load() {
-				List<Project> comparableProjects = getCurrentProject().findComparables();
+			protected List<Repository> load() {
+				List<Repository> comparableProjects = getCurrentProject().findComparables();
 				comparableProjects.remove(getCurrentProject());
 				if (getCurrentProject().getForkedFrom() != null)
 					comparableProjects.remove(getCurrentProject().getForkedFrom());
-				Collections.sort(comparableProjects, new Comparator<Project>() {
+				Collections.sort(comparableProjects, new Comparator<Repository>() {
 
 					@Override
-					public int compare(Project project1, Project project2) {
+					public int compare(Repository project1, Repository project2) {
 						return project1.getUser().getName().compareTo(project2.getUser().getName());
 					}
 					
@@ -53,7 +53,7 @@ public class ComparableProjectChoiceProvider extends ChoiceProvider<Project> {
 				if (getCurrentProject().getForkedFrom() != null)
 					comparableProjects.add(0, getCurrentProject().getForkedFrom());
 				comparableProjects.add(0, getCurrentProject());
-				for (Iterator<Project> it = comparableProjects.iterator(); it.hasNext();) {
+				for (Iterator<Repository> it = comparableProjects.iterator(); it.hasNext();) {
 					if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(it.next())))
 						it.remove();
 				}
@@ -64,9 +64,9 @@ public class ComparableProjectChoiceProvider extends ChoiceProvider<Project> {
 	}
 	
 	@Override
-	public void query(String term, int page, Response<Project> response) {
-		List<Project> projects = new ArrayList<>();
-		for (Project project: getComparableProjects()) {
+	public void query(String term, int page, Response<Repository> response) {
+		List<Repository> projects = new ArrayList<>();
+		for (Repository project: getComparableProjects()) {
 			if (project.getOwner().getName().contains(term))
 				projects.add(project);
 		}
@@ -84,7 +84,7 @@ public class ComparableProjectChoiceProvider extends ChoiceProvider<Project> {
 	}
 
 	@Override
-	public void toJson(Project choice, JSONWriter writer) throws JSONException {
+	public void toJson(Repository choice, JSONWriter writer) throws JSONException {
 		writer.key("id").value(choice.getId());
 		writer.key("name");
 		String value;
@@ -98,9 +98,9 @@ public class ComparableProjectChoiceProvider extends ChoiceProvider<Project> {
 	}
 
 	@Override
-	public Collection<Project> toChoices(Collection<String> ids) {
-		List<Project> projects = Lists.newArrayList();
-		ProjectManager projectManager = Gitop.getInstance(ProjectManager.class);
+	public Collection<Repository> toChoices(Collection<String> ids) {
+		List<Repository> projects = Lists.newArrayList();
+		RepositoryManager projectManager = Gitop.getInstance(RepositoryManager.class);
 		for (String each : ids) {
 			Long id = Long.valueOf(each);
 			projects.add(projectManager.load(id));
@@ -109,11 +109,11 @@ public class ComparableProjectChoiceProvider extends ChoiceProvider<Project> {
 		return projects;
 	}
 
-	private Project getCurrentProject() {
+	private Repository getCurrentProject() {
 		return currentProjectModel.getObject();
 	}
 	
-	private List<Project> getComparableProjects() {
+	private List<Repository> getComparableProjects() {
 		return comparableProjectsModel.getObject();
 	}
 

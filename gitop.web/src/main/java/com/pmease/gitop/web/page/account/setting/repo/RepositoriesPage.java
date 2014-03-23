@@ -14,7 +14,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Lists;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.Constants;
 import com.pmease.gitop.web.common.datatype.DataTypes;
 import com.pmease.gitop.web.component.link.ProjectHomeLink;
@@ -43,21 +43,21 @@ public class RepositoriesPage extends AccountSettingPage {
 		
 		add(new BookmarkablePageLink<Void>("newlink", CreateRepositoryPage.class, newParams(getAccount())));
 		
-		IModel<List<Project>> model = new LoadableDetachableModel<List<Project>>() {
+		IModel<List<Repository>> model = new LoadableDetachableModel<List<Repository>>() {
 
 			@Override
-			protected List<Project> load() {
+			protected List<Repository> load() {
 				return Lists.newArrayList(getAccount().getProjects());
 			}
 			
 		};
 		
-		ListView<Project> view = new ListView<Project>("projects", model) {
+		ListView<Repository> view = new ListView<Repository>("projects", model) {
 
 			@Override
-			protected void populateItem(ListItem<Project> item) {
-				Project project = item.getModelObject();
-				final IModel<Project> projectModel = new RepositoryModel(project);
+			protected void populateItem(ListItem<Repository> item) {
+				Repository project = item.getModelObject();
+				final IModel<Repository> projectModel = new RepositoryModel(project);
 				item.add(new ProjectHomeLink("project", projectModel));
 				item.add(new Label("age", new AbstractReadOnlyModel<String>() {
 
@@ -80,10 +80,10 @@ public class RepositoriesPage extends AccountSettingPage {
 
 				if (project.getForkedFrom() != null) {
 					item.add(new ProjectHomeLink("forkedFrom",
-							new LoadableDetachableModel<Project>() {
+							new LoadableDetachableModel<Repository>() {
 
 								@Override
-								protected Project load() {
+								protected Repository load() {
 									return projectModel.getObject().getForkedFrom();
 								}
 							}));

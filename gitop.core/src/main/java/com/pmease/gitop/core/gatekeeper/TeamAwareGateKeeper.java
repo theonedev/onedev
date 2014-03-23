@@ -6,7 +6,7 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.editable.TeamChoice;
 import com.pmease.gitop.core.manager.TeamManager;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.gatekeeper.ApprovalGateKeeper;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
@@ -32,7 +32,7 @@ public abstract class TeamAwareGateKeeper extends ApprovalGateKeeper {
 	}
 
 	@Override
-	protected GateKeeper trim(Project project) {
+	protected GateKeeper trim(Repository project) {
 		if (Gitop.getInstance(TeamManager.class).get(getTeamId()) == null)
 			return null;
 		else

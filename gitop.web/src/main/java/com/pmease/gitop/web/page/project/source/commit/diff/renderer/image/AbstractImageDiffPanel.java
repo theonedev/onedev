@@ -3,20 +3,20 @@ package com.pmease.gitop.web.page.project.source.commit.diff.renderer.image;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader;
 
 @SuppressWarnings("serial")
 public class AbstractImageDiffPanel extends Panel {
 	
 	protected final IModel<FileHeader> fileModel;
-	protected final IModel<Project> projectModel;
+	protected final IModel<Repository> projectModel;
 	protected final IModel<String> sinceModel;
 	protected final IModel<String> untilModel;
 	
 	public AbstractImageDiffPanel(String id, 
 			IModel<FileHeader> fileModel, 
-			IModel<Project> projectModel,
+			IModel<Repository> projectModel,
 			IModel<String> sinceModel,
 			IModel<String> untilModel) {
 		
@@ -34,7 +34,7 @@ public class AbstractImageDiffPanel extends Panel {
 		return fileModel.getObject();
 	}
 	
-	protected Project getProject() {
+	protected Repository getProject() {
 		return projectModel.getObject();
 	}
 	

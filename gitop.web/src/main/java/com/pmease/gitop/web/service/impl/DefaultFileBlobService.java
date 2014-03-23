@@ -13,7 +13,6 @@ import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.ObjectStream;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.gitective.core.BlobUtils;
@@ -21,7 +20,7 @@ import org.gitective.core.CommitUtils;
 
 import com.google.common.base.Objects;
 import com.google.common.io.ByteStreams;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.git.RepoUtils;
 import com.pmease.gitop.web.git.RepositoryException;
 import com.pmease.gitop.web.service.FileBlob;
@@ -39,11 +38,11 @@ public class DefaultFileBlobService implements FileBlobService {
 	}
 	
 	@Override
-	public FileBlob get(Project project, String revision, String path) {
+	public FileBlob get(Repository project, String revision, String path) {
 		FileBlob blob = new FileBlob(project.getId(), revision, path);
 
 		File gitDir = project.code().repoDir();
-		Repository repo = null;
+		org.eclipse.jgit.lib.Repository repo = null;
 		try {
 			repo = RepoUtils.open(gitDir);
 			RevCommit commit = CommitUtils.getCommit(repo, revision);
@@ -94,9 +93,9 @@ public class DefaultFileBlobService implements FileBlobService {
 	}
 	
 	@Override
-	public ObjectStream openStream(Project project, String revision, String path) {
+	public ObjectStream openStream(Repository project, String revision, String path) {
 		File gitDir = project.code().repoDir();
-		Repository repo = null;
+		org.eclipse.jgit.lib.Repository repo = null;
 		try {
 			repo = RepoUtils.open(gitDir);
 			return BlobUtils.getStream(repo, revision, path); 

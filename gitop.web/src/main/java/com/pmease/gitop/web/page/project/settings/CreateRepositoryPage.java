@@ -22,9 +22,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.GitopHelper;
 import com.pmease.gitop.web.common.wicket.form.BaseForm;
@@ -68,8 +68,8 @@ public class CreateRepositoryPage extends AbstractLayoutPage {
 			this.owner = Gitop.getInstance(UserManager.class).getCurrent().getName();
 		}
 		
-		final IModel<Project> projectModel = new RepositoryModel(new Project());
-		Form<Project> form = new BaseForm<Project>("form", projectModel);
+		final IModel<Repository> projectModel = new RepositoryModel(new Repository());
+		Form<Repository> form = new BaseForm<Repository>("form", projectModel);
 		add(form);
 		
 		form.add(new NotificationPanel("feedback", new ComponentFeedbackMessageFilter(form)));
@@ -104,7 +104,7 @@ public class CreateRepositoryPage extends AbstractLayoutPage {
 						String name = validatable.getValue();
 						User o = Gitop.getInstance(UserManager.class).findByName(owner);
 						
-						for (Project each : o.getProjects()) {
+						for (Repository each : o.getProjects()) {
 							if (each.getName().equalsIgnoreCase(name)) {
 								validatable.error(new ValidationError().setMessage("This project already exists"));
 								return;
@@ -127,11 +127,11 @@ public class CreateRepositoryPage extends AbstractLayoutPage {
 			
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				Project project = projectModel.getObject();
+				Repository project = projectModel.getObject();
 				User o = Gitop.getInstance(UserManager.class).findByName(owner);
 				Preconditions.checkNotNull(o);
 				project.setOwner(o);
-				Gitop.getInstance(ProjectManager.class).save(project);
+				Gitop.getInstance(RepositoryManager.class).save(project);
 				setResponsePage(RepositoryHomePage.class, PageSpec.forProject(project));
 			}
 		});

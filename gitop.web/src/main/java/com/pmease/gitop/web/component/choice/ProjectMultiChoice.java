@@ -4,14 +4,14 @@ import java.util.Collection;
 
 import org.apache.wicket.model.IModel;
 
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Select2MultiChoice;
 
-public class ProjectMultiChoice extends Select2MultiChoice<Project> {
+public class ProjectMultiChoice extends Select2MultiChoice<Repository> {
 	private static final long serialVersionUID = 1L;
 
-	public ProjectMultiChoice(String id, IModel<Collection<Project>> model, ChoiceProvider<Project> provider) {
+	public ProjectMultiChoice(String id, IModel<Collection<Repository>> model, ChoiceProvider<Repository> provider) {
 		super(id, model, provider);
 	}
 

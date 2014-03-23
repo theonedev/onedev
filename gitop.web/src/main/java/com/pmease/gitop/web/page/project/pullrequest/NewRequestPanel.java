@@ -31,7 +31,7 @@ import com.pmease.commons.git.Commit;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.component.commit.CommitsTablePanel;
@@ -105,10 +105,10 @@ public class NewRequestPanel extends Panel {
 
 		setOutputMarkupId(true);
 		
-		IModel<Project> currentProjectModel = new LoadableDetachableModel<Project>() {
+		IModel<Repository> currentProjectModel = new LoadableDetachableModel<Repository>() {
 
 			@Override
-			protected Project load() {
+			protected Repository load() {
 				RepositoryBasePage page = (RepositoryBasePage) getPage();
 				return page.getProject();
 			}
@@ -329,10 +329,10 @@ public class NewRequestPanel extends Panel {
 			
 		});
 		
-		IModel<Project> projectModel = new AbstractReadOnlyModel<Project>() {
+		IModel<Repository> projectModel = new AbstractReadOnlyModel<Repository>() {
 
 			@Override
-			public Project getObject() {
+			public Repository getObject() {
 				return getTarget().getProject();
 			}
 			

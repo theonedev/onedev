@@ -30,7 +30,7 @@ public class CommitComment extends AbstractEntity {
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(nullable = false)
 //	@Index(name = "IDX_COMMENT_PROJECT_ID")
-	private Project project;
+	private Repository project;
 	
 	// Always use commit sha
 	//
@@ -72,11 +72,11 @@ public class CommitComment extends AbstractEntity {
 		this.author = author;
 	}
 
-	public Project getProject() {
+	public Repository getProject() {
 		return project;
 	}
 
-	public void setProject(Project project) {
+	public void setProject(Repository project) {
 		this.project = project;
 	}
 

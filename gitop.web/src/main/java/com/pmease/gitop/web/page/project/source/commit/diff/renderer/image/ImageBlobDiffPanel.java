@@ -12,7 +12,7 @@ import org.apache.wicket.markup.html.list.LoopItem;
 import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader;
 
 @SuppressWarnings("serial")
@@ -20,7 +20,7 @@ public class ImageBlobDiffPanel extends AbstractImageDiffPanel {
 
 	public ImageBlobDiffPanel(String id, 
 			IModel<FileHeader> model, 
-			IModel<Project> projectModel,
+			IModel<Repository> projectModel,
 			IModel<String> sinceModel,
 			IModel<String> untilModel) {
 		

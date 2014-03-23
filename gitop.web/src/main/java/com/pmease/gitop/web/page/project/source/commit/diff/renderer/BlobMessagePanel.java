@@ -4,7 +4,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.wicket.bootstrap.Alert;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader;
 
@@ -16,7 +16,7 @@ public class BlobMessagePanel extends BlobDiffPanel {
 	public BlobMessagePanel(String id,
 			int index,
 			IModel<FileHeader> fileModel,
-			IModel<Project> projectModel, 
+			IModel<Repository> projectModel, 
 			IModel<String> sinceModel,
 			IModel<String> untilModel, 
 			IModel<String> messageModel) {

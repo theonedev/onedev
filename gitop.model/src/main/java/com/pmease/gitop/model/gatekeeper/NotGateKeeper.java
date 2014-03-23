@@ -5,7 +5,7 @@ import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.TableLayout;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.gatekeeper.checkresult.Approved;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.checkresult.Disapproved;
@@ -29,7 +29,7 @@ public class NotGateKeeper extends CompositeGateKeeper {
 	}
 	
 	@Override
-	protected GateKeeper trim(Project project) {
+	protected GateKeeper trim(Repository project) {
 		return (GateKeeper) getGateKeeper().trim(project);
 	}
 

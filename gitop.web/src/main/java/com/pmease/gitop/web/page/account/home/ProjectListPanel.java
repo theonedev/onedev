@@ -18,8 +18,8 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.core.manager.RepositoryManager;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.component.label.AgeLabel;
@@ -38,13 +38,13 @@ public class ProjectListPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		IModel<List<Project>> model = new LoadableDetachableModel<List<Project>>() {
+		IModel<List<Repository>> model = new LoadableDetachableModel<List<Repository>>() {
 
 			@Override
-			protected List<Project> load() {
+			protected List<Repository> load() {
 				User account = getThisAccount();
-				List<Project> projects = Lists.newArrayList();
-				for (Project each : account.getProjects()) {
+				List<Repository> projects = Lists.newArrayList();
+				for (Repository each : account.getProjects()) {
 					if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(each))) {
 						projects.add(each);
 					}
@@ -55,11 +55,11 @@ public class ProjectListPanel extends Panel {
 			
 		};
 		
-		ListView<Project> projectsView = new ListView<Project>("project", model) {
+		ListView<Repository> projectsView = new ListView<Repository>("project", model) {
 
 			@Override
-			protected void populateItem(ListItem<Project> item) {
-				Project project = item.getModelObject();
+			protected void populateItem(ListItem<Repository> item) {
+				Repository project = item.getModelObject();
 //				IModel<Project> model = new ProjectModel(project);
 				item.add(PageSpec.newProjectHomeLink("projectlink", project)
 						.add(new Label("name", project.getName())));
@@ -77,7 +77,7 @@ public class ProjectListPanel extends Panel {
 
 					@Override
 					public Date getObject() {
-						Project project = Gitop.getInstance(ProjectManager.class).get(projectId);
+						Repository project = Gitop.getInstance(RepositoryManager.class).get(projectId);
 						if (project.code().hasCommits()) {
 							LogCommand command = new LogCommand(project.code().repoDir());
 							List<Commit> commits = command.maxCount(1).call();

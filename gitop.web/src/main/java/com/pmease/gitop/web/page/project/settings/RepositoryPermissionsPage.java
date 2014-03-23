@@ -33,10 +33,10 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.AuthorizationManager;
-import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Authorization;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.model.permission.operation.GeneralOperation;
@@ -65,7 +65,7 @@ public class RepositoryPermissionsPage extends AbstractRepositorySettingPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Project project = getProject();
+				Repository project = getProject();
 				Collection<Authorization> list = project.getAuthorizations();
 				AuthorizationManager am = Gitop.getInstance(AuthorizationManager.class);
 				for (Iterator<Authorization> it = list.iterator(); it.hasNext();) {
@@ -74,7 +74,7 @@ public class RepositoryPermissionsPage extends AbstractRepositorySettingPage {
 					it.remove();
 				}
 				
-				Gitop.getInstance(ProjectManager.class).save(project);
+				Gitop.getInstance(RepositoryManager.class).save(project);
 				onPermissionChanged(null, target);
 			}
 			
@@ -174,10 +174,10 @@ public class RepositoryPermissionsPage extends AbstractRepositorySettingPage {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						AuthorizationManager am = Gitop.getInstance(AuthorizationManager.class);
-						ProjectManager pm = Gitop.getInstance(ProjectManager.class);
+						RepositoryManager pm = Gitop.getInstance(RepositoryManager.class);
 						Authorization auth = (Authorization) getDefaultModelObject();
 						am.delete(auth);
-						Project project = getProject();
+						Repository project = getProject();
 						project.getAuthorizations().remove(auth);
 						pm.save(project);
 						onPermissionChanged(rowModel.getObject(), target);
@@ -299,9 +299,9 @@ public class RepositoryPermissionsPage extends AbstractRepositorySettingPage {
 					
 					auth.setOperation(permission);
 					am.save(auth);
-					Project project = getProject();
+					Repository project = getProject();
 					project.getAuthorizations().add(auth);
-					Gitop.getInstance(ProjectManager.class).save(project);
+					Gitop.getInstance(RepositoryManager.class).save(project);
 					onPermissionChanged(team, target);
 					
 					if (team.isAnonymous()) {

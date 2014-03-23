@@ -24,7 +24,7 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.pmease.commons.git.Commit;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.Constants;
 import com.pmease.gitop.web.common.datatype.DataTypes;
 import com.pmease.gitop.web.common.wicket.bootstrap.Alert;
@@ -37,9 +37,9 @@ import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
 public class CommitsTablePanel extends Panel {
 
 	private final IModel<Multimap<Date, Commit>> groupsModel;
-	private final IModel<Project> projectModel;
+	private final IModel<Repository> projectModel;
 	
-	public CommitsTablePanel(String id, IModel<List<Commit>> model, IModel<Project> projectModel) {
+	public CommitsTablePanel(String id, IModel<List<Commit>> model, IModel<Repository> projectModel) {
 		super(id, model);
 		
 		this.projectModel = projectModel;
@@ -137,7 +137,7 @@ public class CommitsTablePanel extends Panel {
 		return (List<Commit>) getDefaultModelObject();
 	}
 	
-	private Project getProject() {
+	private Repository getProject() {
 		return projectModel.getObject();
 	}
 	

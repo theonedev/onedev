@@ -4,7 +4,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.page.project.source.commit.diff.patch.FileHeader;
 import com.pmease.gitop.web.page.project.source.commit.diff.renderer.BlobDiffPanel;
 
@@ -13,7 +13,7 @@ public class ImageDiffPanel extends BlobDiffPanel {
 
 	public ImageDiffPanel(String id, int index, 
 			IModel<FileHeader> fileModel,
-			IModel<Project> projectModel, 
+			IModel<Repository> projectModel, 
 			IModel<String> sinceModel,
 			IModel<String> untilModel) {
 		

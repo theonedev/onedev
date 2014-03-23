@@ -8,7 +8,7 @@ import com.google.inject.ImplementedBy;
 import com.pmease.commons.hibernate.dao.GenericDao;
 import com.pmease.gitop.core.manager.impl.DefaultBranchManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 
 @ImplementedBy(DefaultBranchManager.class)
@@ -24,7 +24,7 @@ public interface BranchManager extends GenericDao<Branch> {
 	 * @return
 	 * 			found branch, or <tt>null</tt> if not found
 	 */
-	public @Nullable Branch findBy(Project project, String branchName);
+	public @Nullable Branch findBy(Repository project, String branchName);
 	
 	/**
 	 * Find default branch in specified project.
@@ -35,7 +35,7 @@ public interface BranchManager extends GenericDao<Branch> {
 	 * 			found default branch, or <tt>null</tt> if default branch 
 	 * 			can not be found
 	 */
-    public @Nullable Branch findDefault(Project project);
+    public @Nullable Branch findDefault(Repository project);
     
     /**
      * Delete all refs pointed to this branch and its associated pull requests and 

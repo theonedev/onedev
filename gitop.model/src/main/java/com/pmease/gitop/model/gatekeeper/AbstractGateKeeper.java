@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.checkresult.Approved;
@@ -58,7 +58,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	}
 
 	@Override
-	public CheckResult checkRef(User user, Project project, String refName) {
+	public CheckResult checkRef(User user, Repository project, String refName) {
 		if (isEnabled())
 			return doCheckRef(user, project, refName);
 		else
@@ -117,15 +117,15 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	 * @return
 	 * 			result of the check
 	 */
-	protected abstract CheckResult doCheckRef(User user, Project project, String refName);
+	protected abstract CheckResult doCheckRef(User user, Repository project, String refName);
 	
 	@Override
 	public final Object trim(@Nullable Object context) {
-		Preconditions.checkArgument(context instanceof Project);
-		return trim((Project)context);
+		Preconditions.checkArgument(context instanceof Repository);
+		return trim((Repository)context);
 	}
 	
-	protected GateKeeper trim(Project project) {
+	protected GateKeeper trim(Repository project) {
 		return this;
 	}
 

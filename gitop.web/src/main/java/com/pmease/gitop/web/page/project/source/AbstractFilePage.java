@@ -8,7 +8,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.RepositoryTabPage;
 import com.pmease.gitop.web.page.project.api.IRevisionAware;
@@ -18,7 +18,7 @@ public abstract class AbstractFilePage extends RepositoryTabPage implements IRev
 
 	protected final IModel<List<String>> pathsModel;
 	
-	public static PageParameters newParams(Project project, String revision, List<String> paths) {
+	public static PageParameters newParams(Repository project, String revision, List<String> paths) {
 		PageParameters params = PageSpec.forProject(project);
 		params.set(PageSpec.OBJECT_ID, revision);
 		for (int i = 0; i < paths.size(); i++) {

@@ -6,11 +6,11 @@ import com.google.inject.ImplementedBy;
 import com.pmease.commons.hibernate.dao.GenericDao;
 import com.pmease.gitop.core.manager.impl.DefaultCommitCommentManager;
 import com.pmease.gitop.model.CommitComment;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 
 @ImplementedBy(DefaultCommitCommentManager.class)
 public interface CommitCommentManager extends GenericDao<CommitComment> {
 	
-	Map<String, Integer> getCommitCommentStats(Project project);
+	Map<String, Integer> getCommitCommentStats(Repository project);
 	
 }

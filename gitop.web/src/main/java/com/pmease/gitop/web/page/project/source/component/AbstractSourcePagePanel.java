@@ -6,18 +6,18 @@ import java.util.List;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.util.UrlUtils;
 
 public class AbstractSourcePagePanel extends Panel {
 	private static final long serialVersionUID = 1L;
 
-	protected final IModel<Project> repoModel;
+	protected final IModel<Repository> repoModel;
 	protected final IModel<String> revisionModel;
 	protected final IModel<List<String>> pathsModel;
 	
 	public AbstractSourcePagePanel(String id,
-			IModel<Project> projectModel,
+			IModel<Repository> projectModel,
 			IModel<String> revisionModel,
 			IModel<List<String>> pathsModel) {
 		super(id);
@@ -27,7 +27,7 @@ public class AbstractSourcePagePanel extends Panel {
 		this.pathsModel = pathsModel;
 	}
 
-	public Project getRepo() {
+	public Repository getRepo() {
 		return repoModel.getObject();
 	}
 	

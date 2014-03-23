@@ -2,11 +2,11 @@ package com.pmease.gitop.web.component.choice;
 
 import org.apache.wicket.model.IModel;
 
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.vaynberg.wicket.select2.Select2Choice;
 
 @SuppressWarnings("serial")
-public class ComparableProjectChoice extends Select2Choice<Project> {
+public class ComparableProjectChoice extends Select2Choice<Repository> {
 
 	/**
 	 * Constructor with model.
@@ -19,7 +19,7 @@ public class ComparableProjectChoice extends Select2Choice<Project> {
 	 * @param selectedProjectModel
 	 * 			model of selected project
 	 */
-	public ComparableProjectChoice(String id, IModel<Project> currentProjectModel, IModel<Project> selectedProjectModel) {
+	public ComparableProjectChoice(String id, IModel<Repository> currentProjectModel, IModel<Repository> selectedProjectModel) {
 		super(id, selectedProjectModel, new ComparableProjectChoiceProvider(currentProjectModel));
 	}
 

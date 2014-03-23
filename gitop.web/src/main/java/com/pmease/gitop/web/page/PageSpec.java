@@ -10,7 +10,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.common.wicket.util.WicketUtils;
 import com.pmease.gitop.web.component.avatar.AvatarImage.AvatarImageType;
@@ -36,12 +36,12 @@ public class PageSpec {
 		return WicketUtils.newPageParams(USER, user.getName());
 	}
 
-	public static PageParameters forProject(Project project) {
+	public static PageParameters forProject(Repository project) {
 		return WicketUtils.newPageParams(USER, project.getOwner().getName(), 
 										 REPO, project.getName());
 	}
 
-	public static PageParameters forRepoPath(Project project, String objectId, List<String> paths) {
+	public static PageParameters forRepoPath(Repository project, String objectId, List<String> paths) {
 		Preconditions.checkArgument(!Strings.isNullOrEmpty(objectId), "object id");
 		Preconditions.checkArgument(!paths.isEmpty(), "paths should not be empty");
 		
@@ -80,7 +80,7 @@ public class PageSpec {
 		return new BookmarkablePageLink<Void>(id, AccountHomePage.class, forUser(user));
 	}
 
-	public static Link<?> newProjectHomeLink(String id, Project project) {
+	public static Link<?> newProjectHomeLink(String id, Repository project) {
 		return new BookmarkablePageLink<Void>(id, RepositoryHomePage.class, forProject(project));
 	}
 

@@ -24,7 +24,7 @@ import com.pmease.commons.git.Commit;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.CommitCommentManager;
 import com.pmease.gitop.model.CommitComment;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.component.commit.CommitMetaPanel;
 import com.pmease.gitop.web.component.link.GitPersonLink;
@@ -43,7 +43,7 @@ import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
 @SuppressWarnings("serial")
 public class SourceCommitPage extends RepositoryTabPage implements CommitCommentsAware {
 	
-	public static PageParameters newParams(Project project, String revision) {
+	public static PageParameters newParams(Repository project, String revision) {
 		PageParameters params = PageSpec.forProject(project);
 		params.add(PageSpec.OBJECT_ID, revision);
 		return params;
@@ -60,7 +60,7 @@ public class SourceCommitPage extends RepositoryTabPage implements CommitComment
 			@Override
 			protected Commit load() {
 				String revision = getRevision();
-				Project project = getProject();
+				Repository project = getProject();
 				return project.code().showRevision(revision);
 			}
 		};

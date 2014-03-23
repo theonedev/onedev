@@ -13,7 +13,7 @@ import com.pmease.commons.hibernate.dao.AbstractGenericDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.CommitCommentManager;
 import com.pmease.gitop.model.CommitComment;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 
 @Singleton
 public class DefaultCommitCommentManager extends AbstractGenericDao<CommitComment> 
@@ -26,7 +26,7 @@ public class DefaultCommitCommentManager extends AbstractGenericDao<CommitCommen
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String, Integer> getCommitCommentStats(Project project) {
+	public Map<String, Integer> getCommitCommentStats(Repository project) {
 		String sql = "SELECT c.commit, count(c.id) from CommitComment c "
 					+ "WHERE project=:project "
 				    + "GROUP BY c.commit";

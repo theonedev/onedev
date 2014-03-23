@@ -13,7 +13,7 @@ import org.apache.wicket.model.Model;
 
 import com.google.common.collect.ImmutableSet;
 import com.pmease.commons.git.TreeNode;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.component.wiki.WikiTextPanel;
 import com.pmease.gitop.web.component.wiki.WikiType;
 import com.pmease.gitop.web.page.project.source.blob.language.Language;
@@ -27,7 +27,7 @@ public class ReadmePanel extends AbstractSourcePagePanel {
 	private final IModel<FileBlob> blobModel;
 	
 	public ReadmePanel(String id,
-						IModel<Project> project,
+						IModel<Repository> project,
 						IModel<String> revisionModel,
 						IModel<List<String>> pathsModel,
 						IModel<List<TreeNode>> nodesModel) {

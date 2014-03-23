@@ -14,7 +14,7 @@ import com.pmease.commons.hibernate.dao.GeneralDao;
 import com.pmease.gitop.core.manager.AuthorizationManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Authorization;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
@@ -33,7 +33,7 @@ public class DefaultAuthorizationManager extends AbstractGenericDao<Authorizatio
 		this.userManager = userManager;
 	}
 
-	public Collection<User> listAuthorizedUsers(Project project, GeneralOperation operation) {
+	public Collection<User> listAuthorizedUsers(Repository project, GeneralOperation operation) {
 		Set<User> authorizedUsers = new HashSet<User>();
 		for (User user: userManager.query()) {
 			if (user.asSubject().isPermitted(new ObjectPermission(project, operation)))
@@ -44,7 +44,7 @@ public class DefaultAuthorizationManager extends AbstractGenericDao<Authorizatio
 
 	@Override
 	public boolean canModify(PullRequest request) {
-		Project project = request.getTarget().getProject();
+		Repository project = request.getTarget().getProject();
 		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectAdmin(project))) {
 			return true;
 		} else {
@@ -56,7 +56,7 @@ public class DefaultAuthorizationManager extends AbstractGenericDao<Authorizatio
 	
 	@Override
 	public boolean canModify(Vote vote) {
-		Project project = vote.getUpdate().getRequest().getTarget().getProject();
+		Repository project = vote.getUpdate().getRequest().getTarget().getProject();
 		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectAdmin(project))) {
 			return true;
 		} else {

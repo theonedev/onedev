@@ -11,28 +11,28 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.core.manager.RepositoryManager;
+import com.pmease.gitop.model.Repository;
 
 @Path("/projects")
 @Produces(MediaType.APPLICATION_JSON)
 public class ProjectResource {
 
-	private final ProjectManager projectManager;
+	private final RepositoryManager projectManager;
 	
 	@Inject
-	public ProjectResource(ProjectManager projectManager) {
+	public ProjectResource(RepositoryManager projectManager) {
 		this.projectManager = projectManager;
 	}
 	
 	@Path("/{projectId}")
     @GET
-    public Project get(@PathParam("projectId") LongParam projectId) {
+    public Repository get(@PathParam("projectId") LongParam projectId) {
     	return projectManager.load(projectId.get());
     }
     
     @POST
-    public Long save(@Valid Project project) {
+    public Long save(@Valid Repository project) {
     	projectManager.save(project);
     	return project.getId();
     }

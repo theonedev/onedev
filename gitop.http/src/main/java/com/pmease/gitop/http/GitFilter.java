@@ -31,9 +31,9 @@ import com.pmease.commons.git.command.ReceiveCommand;
 import com.pmease.commons.git.command.UploadCommand;
 import com.pmease.commons.util.GeneralException;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.core.setting.ServerConfig;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.model.storage.StorageManager;
@@ -49,12 +49,12 @@ public class GitFilter implements Filter {
 	
 	private final StorageManager storageManager;
 	
-	private final ProjectManager projectManager;
+	private final RepositoryManager projectManager;
 	
 	private final ServerConfig serverConfig;
 	
 	@Inject
-	public GitFilter(Gitop gitop, StorageManager storageManager, ProjectManager projectManager, ServerConfig serverConfig) {
+	public GitFilter(Gitop gitop, StorageManager storageManager, RepositoryManager projectManager, ServerConfig serverConfig) {
 		this.gitop = gitop;
 		this.storageManager = storageManager;
 		this.projectManager = projectManager;
@@ -66,7 +66,7 @@ public class GitFilter implements Filter {
 		return StringUtils.stripStart(pathInfo, "/");
 	}
 	
-	private Project getProject(HttpServletRequest request, HttpServletResponse response, String repoInfo) 
+	private Repository getProject(HttpServletRequest request, HttpServletResponse response, String repoInfo) 
 			throws IOException {
 		repoInfo = StringUtils.stripStart(StringUtils.stripEnd(repoInfo, "/"), "/");
 		
@@ -82,7 +82,7 @@ public class GitFilter implements Filter {
 		if (projectName.endsWith(".git"))
 			projectName = projectName.substring(0, projectName.length()-".git".length());
 		
-		Project project = projectManager.findBy(ownerName, projectName);
+		Repository project = projectManager.findBy(ownerName, projectName);
 		if (project == null) {
 			throw new GeneralException("Unable to find project %s owned by %s.", projectName, ownerName);
 		}
@@ -102,7 +102,7 @@ public class GitFilter implements Filter {
 		String service = StringUtils.substringAfterLast(pathInfo, "/");
 
 		String repoInfo = StringUtils.substringBeforeLast(pathInfo, "/");
-		Project project = getProject(request, response, repoInfo);
+		Repository project = getProject(request, response, repoInfo);
 		
 		doNotCache(response);
 		response.setHeader("Content-Type", "application/x-" + service + "-result");			
@@ -117,7 +117,7 @@ public class GitFilter implements Filter {
 		environments.put("GITOP_URL", serverUrl);
 		environments.put("GITOP_USER_ID", User.getCurrentId().toString());
 		environments.put("GITOP_PROJECT_ID", project.getId().toString());
-		File gitDir = storageManager.getStorage(project).ofCode();
+		File gitDir = storageManager.getStorage(project);
 
 		if (GitSmartHttpTools.isUploadPack(request)) {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(project))) {
@@ -147,10 +147,10 @@ public class GitFilter implements Filter {
 		pathInfo = StringUtils.stripStart(pathInfo, "/");
 
 		String repoInfo = pathInfo.substring(0, pathInfo.length() - INFO_REFS.length());
-		Project project = getProject(request, response, repoInfo);
+		Repository project = getProject(request, response, repoInfo);
 		String service = request.getParameter("service");
 		
-		File gitDir = storageManager.getStorage(project).ofCode();
+		File gitDir = storageManager.getStorage(project);
 
 		if (service.contains("upload")) {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(project))) {

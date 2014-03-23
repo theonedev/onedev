@@ -24,7 +24,7 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.TreeNode;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.component.commit.CommitMessagePanel;
 import com.pmease.gitop.web.component.commit.CommitMetaPanel;
@@ -43,7 +43,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 	private final IModel<List<TreeNode>> nodesModel;
 	
 	public SourceTreePanel(String id, 
-			IModel<Project> repo,
+			IModel<Repository> repo,
 			IModel<String> revisionModel,
 			IModel<List<String>> pathsModel,
 			IModel<List<TreeNode>> nodesModel) {

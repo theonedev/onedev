@@ -31,7 +31,7 @@ import com.google.common.collect.Maps;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.common.wicket.component.tab.BootstrapTabbedPanel;
 import com.pmease.gitop.web.git.GitUtils;
@@ -45,7 +45,7 @@ public class RevisionSelector extends AbstractSourcePagePanel {
 	private final IModel<Map<RefType, List<String>>> refsModel;
 	
 	public RevisionSelector(String id, 
-			IModel<Project> projectModel,
+			IModel<Repository> projectModel,
 			IModel<String> revisionModel, 
 			IModel<List<String>> pathsModel) {
 		super(id, projectModel, revisionModel, pathsModel);
@@ -237,7 +237,7 @@ public class RevisionSelector extends AbstractSourcePagePanel {
 	}
 	
 	protected AbstractLink newRefLink(String id, String ref) {
-		Project project = getRepo();
+		Repository project = getRepo();
 		PageParameters params = new PageParameters();
 		params.add(PageSpec.USER, project.getOwner().getName());
 		params.add(PageSpec.REPO, project.getName());

@@ -18,8 +18,8 @@ import org.parboiled.common.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.core.manager.RepositoryManager;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.service.FileBlob;
 import com.pmease.gitop.web.service.FileBlobService;
@@ -39,7 +39,7 @@ public class BlobResource {
 		Preconditions.checkArgument(!Strings.isNullOrEmpty(revision));
 		Preconditions.checkArgument(!Strings.isNullOrEmpty(path));
 		
-		final Project project = Gitop.getInstance(ProjectManager.class).findBy(username, projectName);
+		final Repository project = Gitop.getInstance(RepositoryManager.class).findBy(username, projectName);
 		
 		if (project == null) {
 			return Response.status(Status.NOT_FOUND)

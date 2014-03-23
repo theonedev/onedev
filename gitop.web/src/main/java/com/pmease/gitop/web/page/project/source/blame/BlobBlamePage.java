@@ -24,8 +24,8 @@ import org.eclipse.jgit.lib.FileMode;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ProjectManager;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.core.manager.RepositoryManager;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.datatype.DataTypes;
 import com.pmease.gitop.web.common.quantity.Data;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
@@ -161,7 +161,7 @@ public class BlobBlamePage extends AbstractFilePage {
 		}));
 		
 		FileBlob blob = getBlob();
-		Project project = Gitop.getInstance(ProjectManager.class).get(blob.getProjectId());
+		Repository project = Gitop.getInstance(RepositoryManager.class).get(blob.getProjectId());
 		List<String> paths = Lists.newArrayList(Splitter.on("/").split(blob.getFilePath())); 
 		frag.add(new BookmarkablePageLink<Void>("historylink", CommitsPage.class,
 				CommitsPage.newParams(

@@ -22,10 +22,10 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.manager.BranchManager;
-import com.pmease.gitop.core.manager.ProjectManager;
+import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.Approved;
@@ -41,14 +41,14 @@ public class GitUpdateCallback extends HttpServlet {
 
 	public static final String PATH = "/git-update-callback";
 
-	private final ProjectManager projectManager;
+	private final RepositoryManager projectManager;
 	
 	private final BranchManager branchManager;
 
 	private final UserManager userManager;
 	
 	@Inject
-	public GitUpdateCallback(ProjectManager projectManager, BranchManager branchManager, UserManager userManager) {
+	public GitUpdateCallback(RepositoryManager projectManager, BranchManager branchManager, UserManager userManager) {
 		this.projectManager = projectManager;
 		this.branchManager = branchManager;
 		this.userManager = userManager;
@@ -66,7 +66,7 @@ public class GitUpdateCallback extends HttpServlet {
 		output.writeLine();
 	}
 	
-	private void checkRef(User user, Project project, String refName, Output output) {
+	private void checkRef(User user, Repository project, String refName, Output output) {
 		GateKeeper gateKeeper = project.getGateKeeper();
 		CheckResult checkResult = gateKeeper.checkRef(user, project, refName);
 
@@ -92,7 +92,7 @@ public class GitUpdateCallback extends HttpServlet {
         List<String> fields = StringUtils.splitAndTrim(request.getPathInfo(), "/");
         Preconditions.checkState(fields.size() == 2);
         
-        Project project = projectManager.load(Long.valueOf(fields.get(0)));
+        Repository project = projectManager.load(Long.valueOf(fields.get(0)));
         
         SecurityUtils.getSubject().runAs(User.asPrincipal(Long.valueOf(fields.get(1))));
         
@@ -111,7 +111,7 @@ public class GitUpdateCallback extends HttpServlet {
 		User user = userManager.getCurrent();
 		Preconditions.checkNotNull(user);
 
-		if (refName.startsWith(Project.REFS_GITOP)) {
+		if (refName.startsWith(Repository.REFS_GITOP)) {
 			if (!user.asSubject().isPermitted(ObjectPermission.ofProjectAdmin(project)))
 				error(output, "Only project administrators can update gitop refs.");
 		} else {

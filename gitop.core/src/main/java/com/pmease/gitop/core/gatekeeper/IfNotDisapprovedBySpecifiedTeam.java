@@ -3,7 +3,7 @@ package com.pmease.gitop.core.gatekeeper;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Membership;
-import com.pmease.gitop.model.Project;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
@@ -40,7 +40,7 @@ public class IfNotDisapprovedBySpecifiedTeam extends TeamAwareGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Project project, String refName) {
+	protected CheckResult doCheckRef(User user, Repository project, String refName) {
 		return approved("Not disapproved by anyone from team '" + getTeam().getName() + "'.");
 	}
 

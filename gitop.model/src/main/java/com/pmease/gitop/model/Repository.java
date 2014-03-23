@@ -41,7 +41,7 @@ import com.pmease.gitop.model.validation.ProjectName;
 })
 @SuppressWarnings("serial")
 @Editable
-public class Project extends AbstractEntity implements UserBelonging {
+public class Repository extends AbstractEntity implements UserBelonging {
 
 	public static final String REFS_GITOP = "refs/gitop/";
 	
@@ -53,7 +53,7 @@ public class Project extends AbstractEntity implements UserBelonging {
 	
 	@ManyToOne
 	@JoinColumn(nullable=true)
-	private Project forkedFrom;
+	private Repository forkedFrom;
 
 	@Column(nullable=false)
 	private String name;
@@ -74,7 +74,7 @@ public class Project extends AbstractEntity implements UserBelonging {
     private Collection<Branch> branches = new ArrayList<Branch>();
 
     @OneToMany(mappedBy="forkedFrom", cascade=CascadeType.REMOVE)
-	private Collection<Project> forks = new ArrayList<Project>();
+	private Collection<Repository> forks = new ArrayList<Repository>();
     
     private transient Git sandbox;
     
@@ -149,26 +149,26 @@ public class Project extends AbstractEntity implements UserBelonging {
 		this.authorizations = authorizations;
 	}
 
-    public Project getForkedFrom() {
+    public Repository getForkedFrom() {
 		return forkedFrom;
 	}
 
-	public void setForkedFrom(Project forkedFrom) {
+	public void setForkedFrom(Repository forkedFrom) {
 		this.forkedFrom = forkedFrom;
 	}
 
-	public Collection<Project> getForks() {
+	public Collection<Repository> getForks() {
 		return forks;
 	}
 
-	public void setForks(Collection<Project> forks) {
+	public void setForks(Collection<Repository> forks) {
 		this.forks = forks;
 	}
 
 	/**
 	 * Get branches for this project from database. The result might be 
 	 * different from actual branches in repository. To get actual 
-	 * branches in repository, call {@link BranchManager#listBranches(Project)} 
+	 * branches in repository, call {@link BranchManager#listBranches(Repository)} 
 	 * instead.
 	 * 
 	 * @return
@@ -184,8 +184,8 @@ public class Project extends AbstractEntity implements UserBelonging {
 
     @Override
 	public boolean has(ProtectedObject object) {
-		if (object instanceof Project) {
-			Project project = (Project) object;
+		if (object instanceof Repository) {
+			Repository project = (Repository) object;
 			return project.getId().equals(getId());
 		} else {
 			return false;
@@ -205,7 +205,7 @@ public class Project extends AbstractEntity implements UserBelonging {
 		if (sandbox != null)
 			return sandbox;
 		else
-			return new Git(AppLoader.getInstance(StorageManager.class).getStorage(this).ofCode());
+			return new Git(AppLoader.getInstance(StorageManager.class).getStorage(this));
 	}
 	
 	public void setSandbox(Git sandbox) {
@@ -247,9 +247,9 @@ public class Project extends AbstractEntity implements UserBelonging {
 	 * 			fork root of this project, or <tt>null</tt> if the project is not 
 	 * 			forked from any other project  
 	 */
-	public @Nullable Project findForkRoot() {
+	public @Nullable Repository findForkRoot() {
 		if (forkedFrom != null) {
-			Project forkedRoot = forkedFrom.findForkRoot();
+			Repository forkedRoot = forkedFrom.findForkRoot();
 			if (forkedRoot != null)
 				return forkedRoot;
 			else
@@ -265,9 +265,9 @@ public class Project extends AbstractEntity implements UserBelonging {
 	 * @return
 	 * 			all descendant projects forking from current project
 	 */
-	public List<Project> findForkDescendants() {
-		List<Project> descendants = new ArrayList<>();
-		for (Project fork: getForks()) { 
+	public List<Repository> findForkDescendants() {
+		List<Repository> descendants = new ArrayList<>();
+		for (Repository fork: getForks()) { 
 			descendants.add(fork);
 			descendants.addAll(fork.findForkDescendants());
 		}
@@ -283,9 +283,9 @@ public class Project extends AbstractEntity implements UserBelonging {
 	 * 			comparable projects of current project, with current project also 
 	 * 			included in the collection
 	 */
-	public List<Project> findComparables() {
-		List<Project> comparables = new ArrayList<Project>();
-		Project forkRoot = findForkRoot();
+	public List<Repository> findComparables() {
+		List<Repository> comparables = new ArrayList<Repository>();
+		Repository forkRoot = findForkRoot();
 		if (forkRoot != null) {
 			comparables.add(forkRoot);
 			comparables.addAll(forkRoot.findForkDescendants());
