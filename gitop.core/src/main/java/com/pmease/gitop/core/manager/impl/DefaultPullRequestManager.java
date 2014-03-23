@@ -17,6 +17,7 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
@@ -105,131 +106,137 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 	 */
 	@Sessional
 	public void refresh(final PullRequest request) {
-		if (request.isNew()) {
-	    	Git git = new Git(FileUtils.createTempDir());
-	    	try {
-		    	String targetHead = request.getTarget().getHeadCommit();
-				String sourceHead = request.getSource().getHeadCommit();
-				
-	    		git.clone(request.getTarget().getProject().code().repoDir().getAbsolutePath(), 
-	    				false, true, true, request.getTarget().getName());
-	    		
-	    		git.reset(null, null);
-			
-		    	request.getTarget().getProject().setCodeSandbox(git);
+		Preconditions.checkArgument(!request.isNew());
+		
+		LockUtils.call(request.getLockName(), new Callable<Void>() {
 
-				if (git.isAncestor(sourceHead, targetHead)) {
+			@Override
+			public Void call() throws Exception {
+				Git git = request.getTarget().getProject().code();
+				String branchHead = request.getTarget().getHeadCommit();
+				String requestHead = request.getLatestUpdate().getHeadCommit();
+				
+				String mergeRef = request.getMergeRef();
+				
+				if (git.isAncestor(requestHead, branchHead)) {
 					CloseInfo closeInfo = new CloseInfo();
 					closeInfo.setClosedBy(null);
 					closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
 					closeInfo.setComment("Target branch already contains commit of source branch.");
 					request.setCloseInfo(closeInfo);
 					request.setCheckResult(new Approved("Already integrated."));
-					request.setMergeInfo(new MergeInfo(targetHead, sourceHead, sourceHead, targetHead));
+					request.setMergeInfo(new MergeInfo(branchHead, requestHead, requestHead, branchHead));
 				} else {
-					if (git.isAncestor(targetHead, sourceHead)) {
-						request.setMergeInfo(new MergeInfo(targetHead, sourceHead, targetHead, sourceHead));
+					// Update head ref so that it can be pulled by build system
+					git.updateRef(request.getHeadRef(), requestHead, null, null);
+					
+					if (git.isAncestor(branchHead, requestHead)) {
+						request.setMergeInfo(new MergeInfo(branchHead, requestHead, branchHead, requestHead));
+						git.updateRef(mergeRef, requestHead, null, null);
 					} else {
-						git.fetch(request.getSource().getProject().code().repoDir().getAbsolutePath(), sourceHead);
-						String mergeBase = git.calcMergeBase(targetHead, sourceHead);
-						if (git.merge(sourceHead, null, null, null))
-							request.setMergeInfo(new MergeInfo(targetHead, sourceHead, mergeBase, git.parseRevision("HEAD", true)));
-						else
-							request.setMergeInfo(new MergeInfo(targetHead, sourceHead, mergeBase, null));
+						if (request.getMergeInfo() != null 
+								&& (!request.getMergeInfo().getBranchHead().equals(branchHead) 
+										|| !request.getMergeInfo().getRequestHead().equals(requestHead))) {
+							 // Commits for merging have been changed since last merge, we have to
+							 // re-merge 
+							request.setMergeInfo(null);
+						}
+						if (request.getMergeInfo() != null && request.getMergeInfo().getMergeHead() != null 
+								&& !request.getMergeInfo().getMergeHead().equals(git.parseRevision(mergeRef, false))) {
+							 // Commits for merging have not been changed since last merge, but recorded 
+							 // merge is incorrect in repository, so we have to re-merge 
+							request.setMergeInfo(null);
+						}
+						if (request.getMergeInfo() == null) {
+							String mergeBase = git.calcMergeBase(branchHead, requestHead);
+							
+							File tempDir = FileUtils.createTempDir();
+							try {
+								Git tempGit = new Git(tempDir);
+								
+								// Branch name here is not significant, we just use an existing branch
+								// in cloned repository to hold mergeBase, so that we can merge with 
+								// previousUpdate 
+								String branchName = request.getTarget().getName();
+								tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, branchName);
+								tempGit.updateRef("HEAD", requestHead, null, null);
+								tempGit.reset(null, null);
+								
+								if (tempGit.merge(branchHead, null, null, null)) {
+									git.fetch(tempGit.repoDir().getAbsolutePath(), "+HEAD:" + mergeRef);
+									request.setMergeInfo(new MergeInfo(branchHead, requestHead, 
+											mergeBase, git.parseRevision(mergeRef, true)));
+								} else {
+									request.setMergeInfo(new MergeInfo(branchHead, requestHead, mergeBase, null));
+								}
+							} finally {
+								FileUtils.deleteDir(tempDir);
+							}
+						}
 					}
 					
 					request.setCheckResult(request.getTarget().getProject().getGateKeeper().checkRequest(request));
-				}
-	    	} finally {
-	    		request.getTarget().getProject().setCodeSandbox(null);
-	    		FileUtils.deleteDir(git.repoDir());
-	    	}
-		} else {
-			LockUtils.call(request.getLockName(), new Callable<Void>() {
-
-				@Override
-				public Void call() throws Exception {
-					Git git = request.getTarget().getProject().code();
-					String branchHead = request.getTarget().getHeadCommit();
-					String requestHead = request.getLatestUpdate().getHeadCommit();
-					
-					String mergeRef = request.getMergeRef();
-					
-					if (git.isAncestor(requestHead, branchHead)) {
-						CloseInfo closeInfo = new CloseInfo();
-						closeInfo.setClosedBy(null);
-						closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
-						closeInfo.setComment("Target branch already contains commit of source branch.");
-						request.setCloseInfo(closeInfo);
-						request.setCheckResult(new Approved("Already integrated."));
-						request.setMergeInfo(new MergeInfo(branchHead, requestHead, requestHead, branchHead));
-					} else {
-						// Update head ref so that it can be pulled by build system
-						git.updateRef(request.getHeadRef(), requestHead, null, null);
-						
-						if (git.isAncestor(branchHead, requestHead)) {
-							request.setMergeInfo(new MergeInfo(branchHead, requestHead, branchHead, requestHead));
-							git.updateRef(mergeRef, requestHead, null, null);
-						} else {
-							if (request.getMergeInfo() != null 
-									&& (!request.getMergeInfo().getBranchHead().equals(branchHead) 
-											|| !request.getMergeInfo().getRequestHead().equals(requestHead))) {
-								 // Commits for merging have been changed since last merge, we have to
-								 // re-merge 
-								request.setMergeInfo(null);
-							}
-							if (request.getMergeInfo() != null && request.getMergeInfo().getMergeHead() != null 
-									&& !request.getMergeInfo().getMergeHead().equals(git.parseRevision(mergeRef, false))) {
-								 // Commits for merging have not been changed since last merge, but recorded 
-								 // merge is incorrect in repository, so we have to re-merge 
-								request.setMergeInfo(null);
-							}
-							if (request.getMergeInfo() == null) {
-								String mergeBase = git.calcMergeBase(branchHead, requestHead);
-								
-								File tempDir = FileUtils.createTempDir();
-								try {
-									Git tempGit = new Git(tempDir);
-									
-									// Branch name here is not significant, we just use an existing branch
-									// in cloned repository to hold mergeBase, so that we can merge with 
-									// previousUpdate 
-									String branchName = request.getTarget().getName();
-									tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, branchName);
-									tempGit.updateRef("HEAD", requestHead, null, null);
-									tempGit.reset(null, null);
-									
-									if (tempGit.merge(branchHead, null, null, null)) {
-										git.fetch(tempGit.repoDir().getAbsolutePath(), "+HEAD:" + mergeRef);
-										request.setMergeInfo(new MergeInfo(branchHead, requestHead, 
-												mergeBase, git.parseRevision(mergeRef, true)));
-									} else {
-										request.setMergeInfo(new MergeInfo(branchHead, requestHead, mergeBase, null));
-									}
-								} finally {
-									FileUtils.deleteDir(tempDir);
-								}
-							}
-						}
-						
-						request.setCheckResult(request.getTarget().getProject().getGateKeeper().checkRequest(request));
-				
-						for (VoteInvitation invitation : request.getVoteInvitations()) {
-							if (!request.getCheckResult().canVote(invitation.getVoter(), request))
-								voteInvitationManager.delete(invitation);
-						}
-					}
 			
-					save(request);
-					
-					if (request.isAutoMerge())
-						merge(request, null, "Integrated automatically by system.");
-					
-					return null;
+					for (VoteInvitation invitation : request.getVoteInvitations()) {
+						if (!request.getCheckResult().canVote(invitation.getVoter(), request))
+							voteInvitationManager.delete(invitation);
+					}
+				}
+		
+				save(request);
+				
+				if (request.isAutoMerge())
+					merge(request, null, "Integrated automatically by system.");
+				
+				return null;
+			}
+			
+		});
+	}
+
+	@Sessional
+	public void initialize(PullRequest request) {
+		Preconditions.checkArgument(request.isNew());
+		
+    	Git git = new Git(FileUtils.createTempDir());
+    	try {
+	    	String targetHead = request.getTarget().getHeadCommit();
+			request.setBaseCommit(targetHead);
+			String sourceHead = request.getSource().getHeadCommit();
+			
+    		git.clone(request.getTarget().getProject().code().repoDir().getAbsolutePath(), 
+    				false, true, true, request.getTarget().getName());
+    		
+    		git.reset(null, null);
+		
+	    	request.getTarget().getProject().setSandbox(git);
+
+			if (git.isAncestor(sourceHead, targetHead)) {
+				CloseInfo closeInfo = new CloseInfo();
+				closeInfo.setClosedBy(null);
+				closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
+				closeInfo.setComment("Target branch already contains commit of source branch.");
+				request.setCloseInfo(closeInfo);
+				request.setCheckResult(new Approved("Already integrated."));
+				request.setMergeInfo(new MergeInfo(targetHead, sourceHead, sourceHead, targetHead));
+			} else {
+				if (git.isAncestor(targetHead, sourceHead)) {
+					request.setMergeInfo(new MergeInfo(targetHead, sourceHead, targetHead, sourceHead));
+				} else {
+					git.fetch(request.getSource().getProject().code().repoDir().getAbsolutePath(), sourceHead);
+					String mergeBase = git.calcMergeBase(targetHead, sourceHead);
+					if (git.merge(sourceHead, null, null, null))
+						request.setMergeInfo(new MergeInfo(targetHead, sourceHead, mergeBase, git.parseRevision("HEAD", true)));
+					else
+						request.setMergeInfo(new MergeInfo(targetHead, sourceHead, mergeBase, null));
 				}
 				
-			});
-		}
+				request.setCheckResult(request.getTarget().getProject().getGateKeeper().checkRequest(request));
+			}
+    	} finally {
+    		request.getTarget().getProject().setSandbox(null);
+    		FileUtils.deleteDir(git.repoDir());
+    	}
 	}
 
 	@Transactional

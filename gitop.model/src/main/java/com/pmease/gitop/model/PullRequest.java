@@ -53,6 +53,9 @@ public class PullRequest extends AbstractEntity {
 	private String title;
 	
 	private String description;
+	
+	@Column(nullable=false)
+	private String baseCommit;
 
 	private boolean autoMerge;
 
@@ -116,6 +119,14 @@ public class PullRequest extends AbstractEntity {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public String getBaseCommit() {
+		return baseCommit;
+	}
+
+	public void setBaseCommit(String baseCommit) {
+		this.baseCommit = baseCommit;
 	}
 
 	public boolean isAutoMerge() {
