@@ -15,7 +15,7 @@ import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.account.RegisterPage;
 import com.pmease.gitop.web.page.account.setting.profile.AccountProfilePage;
 import com.pmease.gitop.web.page.admin.AdministrationOverviewPage;
-import com.pmease.gitop.web.page.project.settings.CreateProjectPage;
+import com.pmease.gitop.web.page.project.settings.CreateRepositoryPage;
 import com.pmease.gitop.web.shiro.LoginPage;
 import com.pmease.gitop.web.shiro.LogoutPage;
 
@@ -37,7 +37,7 @@ public class GlobalHeaderPanel extends Panel {
 												AccountProfilePage.class, 
 												AccountProfilePage.newParams(currentUser().get())));
 			
-			add(new BookmarkablePageLink<Void>("newlink", CreateProjectPage.class));
+			add(new BookmarkablePageLink<Void>("newlink", CreateRepositoryPage.class));
 			add(new BookmarkablePageLink<Void>("adminlink", AdministrationOverviewPage.class) {
 				@Override
 				protected void onConfigure() {

@@ -31,7 +31,7 @@ public class SourceTreePage extends AbstractFilePage {
 	public static PageParameters newParams(Project project, String revision, List<String> paths) {
 		PageParameters params = new PageParameters();
 		params.add(PageSpec.USER, project.getOwner().getName());
-		params.add(PageSpec.PROJECT, project.getName());
+		params.add(PageSpec.REPO, project.getName());
 		params.add(PageSpec.OBJECT_ID, revision);
 		for (int i = 0; i < paths.size(); i++) {
 			params.set(i, paths.get(i));
@@ -83,7 +83,7 @@ public class SourceTreePage extends AbstractFilePage {
 		};
 		
 		if (getProject().code().hasCommits()) {
-			add(new ProjectDescriptionPanel("description", projectModel).setVisibilityAllowed(getPaths().isEmpty()));
+			add(new RepositoryDescriptionPanel("description", projectModel).setVisibilityAllowed(getPaths().isEmpty()));
 			add(new SourceBreadcrumbPanel("breadcrumb", projectModel, revisionModel, pathsModel));
 			add(new SourceTreePanel("tree", projectModel, revisionModel, pathsModel, nodesModel));
 			add(new ReadmePanel("readme", projectModel, revisionModel, pathsModel, nodesModel));

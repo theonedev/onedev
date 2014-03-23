@@ -20,7 +20,7 @@ import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.GitPersonLink;
 import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
 import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.project.AbstractProjectPage;
+import com.pmease.gitop.web.page.project.RepositoryBasePage;
 import com.pmease.gitop.web.page.project.api.GitPerson;
 
 @SuppressWarnings("serial")
@@ -38,7 +38,7 @@ public class RequestSummaryPanel extends Panel {
 
 			@Override
 			public void onClick() {
-				AbstractProjectPage page = (AbstractProjectPage) getPage();
+				RepositoryBasePage page = (RepositoryBasePage) getPage();
 				PageParameters params = PageSpec.forProject(page.getProject());
 				params.set(0, getPullRequest().getId());
 				setResponsePage(RequestDetailPage.class, params);
@@ -105,7 +105,7 @@ public class RequestSummaryPanel extends Panel {
 			@Override
 			public String getObject() {
 				PullRequest request = getPullRequest();
-				AbstractProjectPage page = (AbstractProjectPage) getPage();
+				RepositoryBasePage page = (RepositoryBasePage) getPage();
 				if (page.getProject().equals(request.getSource().getProject())) {
 					return request.getSource().getName();
 				} else {

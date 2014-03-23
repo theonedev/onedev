@@ -63,7 +63,7 @@ public class ImageBlobResource extends DynamicImageResource {
 	// private byte[] imageData;
 	private synchronized byte[] internalGetImageData(PageParameters params) {
 		final String username = params.get(PageSpec.USER).toString();
-		final String projectName = params.get(PageSpec.PROJECT).toString();
+		final String projectName = params.get(PageSpec.REPO).toString();
 		final String revision = params.get("objectId").toString();
 
 		Project project = Gitop.getInstance(ProjectManager.class).findBy(

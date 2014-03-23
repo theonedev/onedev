@@ -11,6 +11,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.Index;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Objects;
@@ -34,7 +35,7 @@ public class CommitComment extends AbstractEntity {
 	// Always use commit sha
 	//
 	@Column(nullable = false, length=40)
-//	@Index(name = "IDX_COMMENT_COMMIT")
+	@Index(name = "IDX_COMMENT_COMMIT")
 	private String commit;
 	
 	// when line is null means this is a commit comment, otherwise, this is 

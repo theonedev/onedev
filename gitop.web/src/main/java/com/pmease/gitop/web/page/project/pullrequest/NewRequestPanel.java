@@ -38,7 +38,7 @@ import com.pmease.gitop.web.component.commit.CommitsTablePanel;
 import com.pmease.gitop.web.component.comparablebranchselector.ComparableBranchSelector;
 import com.pmease.gitop.web.model.EntityModel;
 import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.project.AbstractProjectPage;
+import com.pmease.gitop.web.page.project.RepositoryBasePage;
 import com.pmease.gitop.web.page.project.source.commit.diff.DiffViewPanel;
 
 @SuppressWarnings("serial")
@@ -109,7 +109,7 @@ public class NewRequestPanel extends Panel {
 
 			@Override
 			protected Project load() {
-				AbstractProjectPage page = (AbstractProjectPage) getPage();
+				RepositoryBasePage page = (RepositoryBasePage) getPage();
 				return page.getProject();
 			}
 			
@@ -249,7 +249,7 @@ public class NewRequestPanel extends Panel {
 
 			@Override
 			public void onClick() {
-				AbstractProjectPage page = (AbstractProjectPage) getPage();
+				RepositoryBasePage page = (RepositoryBasePage) getPage();
 				PageParameters params = PageSpec.forProject(page.getProject());
 				params.set(0, getPullRequest().getId());
 				setResponsePage(RequestDetailPage.class, params);

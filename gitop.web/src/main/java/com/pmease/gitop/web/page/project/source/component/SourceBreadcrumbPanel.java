@@ -20,7 +20,7 @@ public class SourceBreadcrumbPanel extends AbstractSourcePagePanel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new RevisionSelector("revselector", projectModel, revisionModel, pathsModel));
-		add(new PathsBreadcrumb("paths", projectModel, revisionModel, pathsModel));
+		add(new RevisionSelector("revselector", repoModel, revisionModel, pathsModel));
+		add(new PathsBreadcrumb("paths", repoModel, revisionModel, pathsModel));
 	}
 }

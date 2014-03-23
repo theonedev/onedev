@@ -3,9 +3,9 @@ package com.pmease.gitop.web.page.project.settings;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 @SuppressWarnings("serial")
-public class ProjectAuditLogPage extends AbstractProjectSettingPage {
+public class RepositoryAuditLogPage extends AbstractRepositorySettingPage {
 
-	public ProjectAuditLogPage(PageParameters params) {
+	public RepositoryAuditLogPage(PageParameters params) {
 		super(params);
 	}
 

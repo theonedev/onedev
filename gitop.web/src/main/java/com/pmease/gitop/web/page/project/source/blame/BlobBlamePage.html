@@ -41,9 +41,10 @@
 	<wicket:fragment wicket:id="blameColumnFrag">
 		<td class="blame-msg">
 			<div class="blob-blames">
-				<div wicket:id="rows" class="blame-row">
+				<div wicket:id="rows" class="blame-row" data-toggle="tooltip">
 					<div class="section-first">
-						<a wicket:id="shalink" class="sha"><span wicket:id="sha"></span></a>
+						<a wicket:id="shalink"><span wicket:id="sha"></span></a>
+						<a wicket:id="blamelink">&raquo;</a>
 						&nbsp;&nbsp;
 						<i wicket:id="date"></i>
 						&nbsp;&nbsp;

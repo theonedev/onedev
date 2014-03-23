@@ -5,6 +5,8 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -186,10 +188,11 @@ public class BlobBlamePage extends AbstractFilePage {
 					WebMarkupContainer container = new WebMarkupContainer(view.newChildId());
 					view.add(container);
 					container.add(AttributeModifier.replace("title", each.getCommit().getSubject()));
+					String hash = each.getCommit().getHash();
 					BookmarkablePageLink<Void> link = new BookmarkablePageLink<Void>(
 							"shalink", 
 							SourceCommitPage.class,
-							SourceCommitPage.newParams(getProject(), getRevision()));
+							SourceCommitPage.newParams(getProject(), hash));
 					
 					link.add(new Label("sha", GitUtils.abbreviateSHA(each.getCommit().getHash(), 8)));
 					container.add(link);
@@ -199,7 +202,11 @@ public class BlobBlamePage extends AbstractFilePage {
 					
 					container.add(new Label("date", 
 							DataTypes.DATE.asString(each.getCommit().getAuthor().getDate(), "yyyy-MM-dd")));
-					
+					BookmarkablePageLink<Void> blameLink = new BookmarkablePageLink<Void>(
+							"blamelink",
+							BlobBlamePage.class,
+							BlobBlamePage.newParams(getProject(), hash, getPaths()));
+					container.add(blameLink);
 					Loop loop = new Loop("empties", each.getNumLines() - 1) {
 
 						@Override
@@ -223,8 +230,15 @@ public class BlobBlamePage extends AbstractFilePage {
 		return frag;
 	}
 	
-	FileBlob getBlob() {
+	private FileBlob getBlob() {
 		return blobModel.getObject();
+	}
+	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		
+		response.render(OnDomReadyHeaderItem.forScript("$('.blame-row').tooltip({placement: 'top'});"));
 	}
 	
 	@Override

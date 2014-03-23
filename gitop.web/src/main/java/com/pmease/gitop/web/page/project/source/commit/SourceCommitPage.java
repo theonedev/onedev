@@ -33,7 +33,7 @@ import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.git.command.CommitInCommand;
 import com.pmease.gitop.web.git.command.CommitInCommand.RefType;
 import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.project.ProjectCategoryPage;
+import com.pmease.gitop.web.page.project.RepositoryTabPage;
 import com.pmease.gitop.web.page.project.api.GitPerson;
 import com.pmease.gitop.web.page.project.source.commit.diff.CommentListPanel;
 import com.pmease.gitop.web.page.project.source.commit.diff.CommitCommentsAware;
@@ -41,7 +41,7 @@ import com.pmease.gitop.web.page.project.source.commit.diff.DiffViewPanel;
 import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
 
 @SuppressWarnings("serial")
-public class SourceCommitPage extends ProjectCategoryPage implements CommitCommentsAware {
+public class SourceCommitPage extends RepositoryTabPage implements CommitCommentsAware {
 	
 	public static PageParameters newParams(Project project, String revision) {
 		PageParameters params = PageSpec.forProject(project);

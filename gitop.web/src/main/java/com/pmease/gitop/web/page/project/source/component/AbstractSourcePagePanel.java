@@ -12,7 +12,7 @@ import com.pmease.gitop.web.util.UrlUtils;
 public class AbstractSourcePagePanel extends Panel {
 	private static final long serialVersionUID = 1L;
 
-	protected final IModel<Project> projectModel;
+	protected final IModel<Project> repoModel;
 	protected final IModel<String> revisionModel;
 	protected final IModel<List<String>> pathsModel;
 	
@@ -22,13 +22,13 @@ public class AbstractSourcePagePanel extends Panel {
 			IModel<List<String>> pathsModel) {
 		super(id);
 		
-		this.projectModel = projectModel;
+		this.repoModel = projectModel;
 		this.revisionModel = revisionModel;
 		this.pathsModel = pathsModel;
 	}
 
-	public Project getProject() {
-		return projectModel.getObject();
+	public Project getRepo() {
+		return repoModel.getObject();
 	}
 	
 	public String getRevision() {
@@ -61,8 +61,8 @@ public class AbstractSourcePagePanel extends Panel {
 			pathsModel.detach();
 		}
 
-		if (projectModel != null) {
-			projectModel.detach();
+		if (repoModel != null) {
+			repoModel.detach();
 		}
 		
 		super.onDetach();

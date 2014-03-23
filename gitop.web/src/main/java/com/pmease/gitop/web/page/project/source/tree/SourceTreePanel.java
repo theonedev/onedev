@@ -43,17 +43,17 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 	private final IModel<List<TreeNode>> nodesModel;
 	
 	public SourceTreePanel(String id, 
-			IModel<Project> project,
+			IModel<Project> repo,
 			IModel<String> revisionModel,
 			IModel<List<String>> pathsModel,
 			IModel<List<TreeNode>> nodesModel) {
-		super(id, project, revisionModel, pathsModel);
+		super(id, repo, revisionModel, pathsModel);
 		
 		lastCommitModel = new LoadableDetachableModel<Commit>() {
 
 			@Override
 			protected Commit load() {
-				Git git = getProject().code();
+				Git git = getRepo().code();
 				List<String> paths = getPaths();
 				List<Commit> commits = git.log(null, getRevision(), Joiner.on("/").join(paths), 1, 0);
 				Commit c = Iterables.getFirst(commits, null);
@@ -72,19 +72,19 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new CommitMessagePanel("message", lastCommitModel, projectModel));
+		add(new CommitMessagePanel("message", lastCommitModel, repoModel));
 		add(new CommitMetaPanel("meta", lastCommitModel).setAuthorMode(Mode.NAME_AND_AVATAR));
 		
 		BookmarkablePageLink<Void> historyLink = new BookmarkablePageLink<Void>(
 				"history",
 				CommitsPage.class,
-				CommitsPage.newParams(getProject(), getRevision(), getPaths(), 0));
+				CommitsPage.newParams(getRepo(), getRevision(), getPaths(), 0));
 		
 		add(historyLink);
 		BookmarkablePageLink<Void> commitLink = new BookmarkablePageLink<Void>(
 				"commitlink",
 				SourceCommitPage.class,
-				SourceCommitPage.newParams(getProject(), getLastCommit().getHash()));
+				SourceCommitPage.newParams(getRepo(), getLastCommit().getHash()));
 		add(commitLink);
 		commitLink.add(new Label("sha", new AbstractReadOnlyModel<String>() {
 
@@ -100,7 +100,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 		} else {
 			BookmarkablePageLink<Void> link = new BookmarkablePageLink<Void>("parent",
 					SourceTreePage.class,
-					SourceTreePage.newParams(getProject(), getRevision(), paths.subList(0, paths.size() - 1)));
+					SourceTreePage.newParams(getRepo(), getRevision(), paths.subList(0, paths.size() - 1)));
 			
 			add(link);
 		}
@@ -122,7 +122,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 						else if (mode == FileMode.GITLINK)
 							return "icon-folder-submodule";
 						else if (mode == FileMode.SYMLINK) {
-							Git git = getProject().code();
+							Git git = getRepo().code();
 							if (git.isTreeLink(path, getRevision()))
 								return "icon-folder-symlink";
 							else
@@ -135,8 +135,8 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 				item.add(icon);
 				
 				PageParameters params = new PageParameters();
-				params.add(PageSpec.USER, getProject().getOwner().getName());
-				params.add(PageSpec.PROJECT, getProject().getName());
+				params.add(PageSpec.USER, getRepo().getOwner().getName());
+				params.add(PageSpec.REPO, getRepo().getName());
 				params.add(PageSpec.OBJECT_ID, getRevision());
 				
 				List<String> paths = Lists.newArrayList(getPaths());

@@ -17,12 +17,12 @@ import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
 @SuppressWarnings("serial")
 public class CommitMessagePanel extends Panel {
 
-	private final IModel<Project> projectModel;
+	private final IModel<Project> repoModel;
 	
-	public CommitMessagePanel(String id, IModel<Commit> commitModel, IModel<Project> projectModel) {
+	public CommitMessagePanel(String id, IModel<Commit> commitModel, IModel<Project> repoModel) {
 		super(id, commitModel);
 		
-		this.projectModel = projectModel;
+		this.repoModel = repoModel;
 	}
 
 	@Override
@@ -31,7 +31,7 @@ public class CommitMessagePanel extends Panel {
 		
 		AbstractLink link = new BookmarkablePageLink<Void>("commitlink",
 				SourceCommitPage.class,
-				SourceCommitPage.newParams(getProject(), getCommit().getHash()));
+				SourceCommitPage.newParams(getRepo(), getCommit().getHash()));
 		
 		add(link);
 		link.add(new Label("shortmessage", new AbstractReadOnlyModel<String>() {
@@ -65,8 +65,8 @@ public class CommitMessagePanel extends Panel {
 		add(detailedToggle);
 	}
 	
-	private Project getProject() {
-		return projectModel.getObject();
+	private Project getRepo() {
+		return repoModel.getObject();
 	}
 	
 	private Commit getCommit() {
@@ -75,8 +75,8 @@ public class CommitMessagePanel extends Panel {
 	
 	@Override
 	public void onDetach() {
-		if (projectModel != null) {
-			projectModel.detach();
+		if (repoModel != null) {
+			repoModel.detach();
 		}
 		
 		super.onDetach();

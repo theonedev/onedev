@@ -20,20 +20,18 @@ import com.pmease.gitop.web.common.wicket.component.tab.AbstractPageTab;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.ProjectCategoryPageLink;
 
-public class ProjectPageTab extends AbstractPageTab {
+public class RepositoryPageTab extends AbstractPageTab {
 	private static final long serialVersionUID = 1L;
 
 	public static enum Category {
 		SOURCE,
-		PULL_REQUESTS,
-		WIKI,
-		STATISTICS
+		PULL_REQUESTS
 	}
 	
 	final Category category;
 	final String icon;
 	
-	public ProjectPageTab(IModel<String> title, 
+	public RepositoryPageTab(IModel<String> title, 
 			Category category,
 			String icon,
 			Class<? extends Page>[] pageClasses) {
@@ -43,7 +41,7 @@ public class ProjectPageTab extends AbstractPageTab {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public ProjectPageTab(IModel<String> title, Category group,
+	public RepositoryPageTab(IModel<String> title, Category group,
 			String icon,
 			Class<? extends Page> pageClass) {
 		this(title, group, icon, new Class[] { pageClass });

@@ -127,22 +127,27 @@ public class DurationFormatUtils {
     return ISOPeriodFormat.standard();
   }
 
-  static PeriodFormatter wordFormatter = new PeriodFormatterBuilder().appendYears()
-      .appendSuffix(" year", " years").appendSeparator(" ").appendMonths()
-      .appendSuffix(" month", " months").appendSeparator(" ").appendDays()
-      .appendSuffix(" day", " days").appendSeparator(" ").appendHours()
-      .appendSuffix(" hour", " hours").appendSeparator(" ").appendMinutes()
-      .appendSuffix(" minute", " minutes").appendSeparator(" ").appendSeconds()
-      .appendSuffix(" second", " seconds").appendSeparator(" ").appendMillis3Digit().toFormatter();
+  static PeriodFormatter wordFormatter = new PeriodFormatterBuilder()
+  		.appendYears().appendSuffix(" year", " years").appendSeparator(" ")
+  		.appendMonths().appendSuffix(" month", " months").appendSeparator(" ")
+  		.appendDays().appendSuffix(" day", " days").appendSeparator(" ")
+  		.appendHours().appendSuffix(" hour", " hours").appendSeparator(" ")
+  		.appendMinutes().appendSuffix(" minute", " minutes").appendSeparator(" ")
+  		.appendSeconds().appendSuffix(" second", " seconds").appendSeparator(" ")
+  		.appendMillis3Digit()
+  		.toFormatter();
 
   public static PeriodFormatter wordFormatter() {
     return wordFormatter;
   }
 
-  static PeriodFormatter shortWordFormatter = new PeriodFormatterBuilder().appendDays()
-      .appendSuffix("d").appendSeparator(", ").appendHours().appendSuffix("h").appendSeparator(":")
-      .appendMinutes().appendSuffix("m").appendSeparator(":").appendSeconds().appendSuffix("s")
-      .appendSeparator(", ").appendMillis().toFormatter();
+  static PeriodFormatter shortWordFormatter = new PeriodFormatterBuilder()
+  		.appendDays().appendSuffix("d").appendSeparator(", ")
+  		.appendHours().appendSuffix("h").appendSeparator(":")
+  		.appendMinutes().appendSuffix("m").appendSeparator(":")
+  		.appendSeconds().appendSuffix("s").appendSeparator(", ")
+  		.appendMillis()
+  		.toFormatter();
 
   public static PeriodFormatter shortWordFormatter() {
     return shortWordFormatter;

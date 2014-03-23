@@ -11,32 +11,32 @@ import com.pmease.gitop.web.page.PageSpec;
 public class ProjectHomeLink extends LinkPanel {
 	private static final long serialVersionUID = 1L;
 
-	private final IModel<Project> projectModel;
+	private final IModel<Project> repoModel;
 	
 	@SuppressWarnings("serial")
-	public ProjectHomeLink(String id, final IModel<Project> projectModel) {
+	public ProjectHomeLink(String id, final IModel<Project> repoModel) {
 		super(id, new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				Project project = projectModel.getObject();
+				Project project = repoModel.getObject();
 				return project.getOwner().getName() + "/" + project.getName();
 			}
 			
 		});
 		
-		this.projectModel = projectModel;
+		this.repoModel = repoModel;
 	}
 
 	@Override
 	protected AbstractLink createLink(String id) {
-		return PageSpec.newProjectHomeLink(id, projectModel.getObject());
+		return PageSpec.newProjectHomeLink(id, repoModel.getObject());
 	}
 
 	@Override
 	public void onDetach() {
-		if (projectModel != null) {
-			projectModel.detach();
+		if (repoModel != null) {
+			repoModel.detach();
 		}
 		
 		super.onDetach();

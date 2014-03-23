@@ -11,14 +11,23 @@ import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.CommitComment;
+import com.pmease.gitop.model.Project;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.page.project.AbstractProjectPage;
-import com.pmease.gitop.web.page.project.ProjectCategoryPage;
+import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.project.RepositoryBasePage;
+import com.pmease.gitop.web.page.project.RepositoryTabPage;
 import com.pmease.gitop.web.page.project.source.commit.diff.CommitCommentsAware;
 
 @SuppressWarnings("serial")
-public class NewRequestPage extends ProjectCategoryPage implements CommitCommentsAware {
+public class NewRequestPage extends RepositoryTabPage implements CommitCommentsAware {
 
+	public static PageParameters newParams(Project project, String source, String dest) {
+		PageParameters params = PageSpec.forProject(project);
+		params.set("source", source);
+		params.set("dest", dest);
+		return params;
+	}
+	
 	public NewRequestPage(PageParameters params) {
 		super(params);
 	}
@@ -29,7 +38,7 @@ public class NewRequestPage extends ProjectCategoryPage implements CommitComment
 
 		Branch target, source = null;
 		BranchManager branchManager = Gitop.getInstance(BranchManager.class);
-		AbstractProjectPage page = (AbstractProjectPage) getPage();
+		RepositoryBasePage page = (RepositoryBasePage) getPage();
 		if (page.getProject().getForkedFrom() != null) {
 			target = branchManager.findDefault(page.getProject().getForkedFrom());
 			source = branchManager.findDefault(page.getProject());

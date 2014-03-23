@@ -110,4 +110,55 @@
 		<sub-class-of type="text/plain" />
 	</mime-type>
 
+	<mime-type type="text/x-sh">
+		<_comment>UNIX/LINUX Shell Script</_comment>
+
+	    <glob pattern="*.zsh"/>
+	    
+	    <glob pattern=".bash_logout" />
+	    <glob pattern=".bash_profile" />
+	    <glob pattern=".bashrc"/>
+	    <glob pattern=".cshrc"/>
+	    <glob pattern=".login"/>
+	    <glob pattern=".profile"/>
+	    <glob pattern=".zlogin"/>
+	    <glob pattern=".zlogout"/>
+	    <glob pattern=".zprofile"/>
+	    <glob pattern=".zshenv"/>
+	    <glob pattern=".zshrc"/>
+	    <glob pattern="Dockerfile"/>
+	    <glob pattern="bash_logout"/>
+	    <glob pattern="bash_profile"/>
+	    <glob pattern="bashrc"/>
+	    <glob pattern="cshrc"/>
+	    <glob pattern="login"/>
+	    <glob pattern="profile"/>
+	    <glob pattern="zlogin"/>
+	    <glob pattern="zlogout"/>
+	    <glob pattern="zprofile"/>
+	    <glob pattern="zshenv"/>
+	    <glob pattern="zshrc"/>
+	    
+	    <sub-class-of type="text/plain"/>
+	</mime-type>
+	
+	<mime-type type="text/x-erlang">
+	    <_comment>Erlang source code</_comment>
+	    <magic priority="50">
+			<match value="#!/usr/bin/env escript" type="string" offset="0" />
+		</magic>
+    	<sub-class-of type="text/plain"/>
+  	</mime-type>
+  	
+  	<mime-type type="text/x-viml">
+  		<_comment>VIM extension language</_comment>
+  		<glob pattern="*.vim" />
+  		<glob pattern=".vimrc" />
+  		<glob pattern="vimrc" />
+  		<glob pattern=".gvimrc" />
+  		<glob pattern="gvimrc" />
+  		
+  		<sub-class-of type="text/plain"/>
+  	</mime-type>
+  
 </mime-info>

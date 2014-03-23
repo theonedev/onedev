@@ -84,7 +84,11 @@ var highlight = function(el, opts, callback) {
             data = data.trim();
     }
     
-    var hasLineId = opts.hasLineId || true;
+    var hasLineId = opts.hasLineId;
+    if (hasLineId === undefined) {
+    	hasLineId = true;
+    }
+    
     highlight.render(data, mode, theme, opts.firstLineNumber, !opts.showGutter, hasLineId, function (highlighted) {
         dom.importCssString(highlighted.css, "ace_highlight");
         el.innerHTML = highlighted.html;

@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.EntityNotFoundException;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -47,7 +49,13 @@ public class SourceBlobPage extends AbstractFilePage {
 				Git git = getProject().code();
 				List<String> paths = getPaths();
 				List<Commit> commits = git.log(null, getRevision(), Joiner.on("/").join(paths), 1, 0);
-				return Iterables.getFirst(commits, null);
+				Commit commit = Iterables.getFirst(commits, null);
+				if (commit == null) {
+					throw new EntityNotFoundException(
+							"Path: " + getFilePath() +
+							", revision: " + getRevision() + " doesn't exist"); 
+				}
+				return commit;
 			}
 		};
 		

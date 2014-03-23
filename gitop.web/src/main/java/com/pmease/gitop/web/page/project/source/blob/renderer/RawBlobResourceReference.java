@@ -4,8 +4,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.IResource;
 import org.apache.wicket.request.resource.ResourceReference;
 
-import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ProjectManager;
 import com.pmease.gitop.model.Project;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.service.FileBlob;
@@ -16,16 +14,13 @@ public class RawBlobResourceReference extends ResourceReference {
 	public static final String RAW_BLOB_RESOURCE = "gitop-raw-blob";
 	
 	public static PageParameters newParams(FileBlob blob) {
-		PageParameters params = new PageParameters();
-		Long projectId = blob.getProjectId();
-		Project project = Gitop.getInstance(ProjectManager.class).get(projectId);
-		
-		params.set(PageSpec.USER, project.getOwner().getName());
-		params.set(PageSpec.PROJECT, project.getName());
-		params.set("objectId", blob.getRevision());
-		
-		PageSpec.addPathToParameters(blob.getFilePath(), params);
-		
+		return newParams(blob.getProject(), blob.getRevision(), blob.getFilePath());
+	}
+	
+	public static PageParameters newParams(Project project, String revision, String path) {
+		PageParameters params = PageSpec.forProject(project);
+		params.set("objectId", revision);
+		PageSpec.addPathToParameters(path, params);
 		return params;
 	}
 	

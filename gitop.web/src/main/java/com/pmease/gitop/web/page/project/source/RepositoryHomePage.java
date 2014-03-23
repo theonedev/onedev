@@ -9,9 +9,9 @@ import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
 
 @SuppressWarnings("serial")
-public class ProjectHomePage extends SourceTreePage {
+public class RepositoryHomePage extends SourceTreePage {
 
-	public ProjectHomePage(PageParameters params) {
+	public RepositoryHomePage(PageParameters params) {
 		super(params);
 	}
 

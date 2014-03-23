@@ -44,7 +44,7 @@ import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.GitPersonLink;
-import com.pmease.gitop.web.page.project.AbstractProjectPage;
+import com.pmease.gitop.web.page.project.RepositoryBasePage;
 import com.pmease.gitop.web.page.project.api.GitPerson;
 import com.pmease.gitop.web.page.project.pullrequest.activity.RequestActivitiesPanel;
 
@@ -221,7 +221,7 @@ public class RequestDetailPanel extends Panel {
 			public String getObject() {
 				PullRequest request = getPullRequest();
 				Branch target = request.getTarget();
-				AbstractProjectPage page = (AbstractProjectPage) getPage();
+				RepositoryBasePage page = (RepositoryBasePage) getPage();
 				if (page.getProject().equals(target.getProject())) {
 					return target.getName();
 				} else {
@@ -254,7 +254,7 @@ public class RequestDetailPanel extends Panel {
 			public String getObject() {
 				PullRequest request = getPullRequest();
 				Branch source = request.getSource();
-				AbstractProjectPage page = (AbstractProjectPage) getPage();
+				RepositoryBasePage page = (RepositoryBasePage) getPage();
 				if (page.getProject().equals(source.getProject())) {
 					return source.getName();
 				} else {
@@ -457,7 +457,7 @@ public class RequestDetailPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 
-				AbstractProjectPage page = (AbstractProjectPage) getPage();
+				RepositoryBasePage page = (RepositoryBasePage) getPage();
 				
 				setVisible(SecurityUtils.getSubject().isPermitted(
 							ObjectPermission.ofProjectWrite(page.getProject())) 

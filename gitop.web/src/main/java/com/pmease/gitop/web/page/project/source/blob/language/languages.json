@@ -55,7 +55,7 @@
   },
   {
     name: "Bash",
-    mediaTypes: ["text/x-sh"],
+    mediaTypes: ["text/x-sh", "application/x-sh"],
     mode: "bash",
     aceMode: "sh"
   },

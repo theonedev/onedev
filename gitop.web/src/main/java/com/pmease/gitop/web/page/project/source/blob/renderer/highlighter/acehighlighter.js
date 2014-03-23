@@ -9,9 +9,9 @@ SourceHighlighter.highlight = function(element, hasLineId) {
 	
 	qsa(element).forEach(function(el) {
 		var m = el.className.match(/lang-(\w+)|(text)/);
-	    if (!m) return
-	    var mode = "ace/mode/" + (m[1] || m[2]);
-	    highlighter.highlight(el, {mode: mode, theme: "ace/theme/xcode", hasLineId: hasLineId});
+	    //if (!m) return
+	    //var mode = "ace/mode/" + (m[1] || m[2]);
+	    highlighter.highlight(el, {mode: "ace/mode/java", theme: "ace/theme/xcode", hasLineId: hasLineId});
 	});
     
     $(function() {

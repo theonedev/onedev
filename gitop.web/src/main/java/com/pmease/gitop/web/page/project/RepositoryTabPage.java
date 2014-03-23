@@ -32,31 +32,28 @@ import com.pmease.commons.git.Git;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.SessionData;
 import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.project.api.ProjectPageTab;
-import com.pmease.gitop.web.page.project.api.ProjectPageTab.Category;
+import com.pmease.gitop.web.page.project.api.RepositoryPageTab;
+import com.pmease.gitop.web.page.project.api.RepositoryPageTab.Category;
 import com.pmease.gitop.web.page.project.pullrequest.ClosedRequestsPage;
 import com.pmease.gitop.web.page.project.pullrequest.NewRequestPage;
 import com.pmease.gitop.web.page.project.pullrequest.OpenRequestsPage;
 import com.pmease.gitop.web.page.project.pullrequest.RequestDetailPage;
-import com.pmease.gitop.web.page.project.settings.ProjectOptionsPage;
+import com.pmease.gitop.web.page.project.settings.RepositoryOptionsPage;
 import com.pmease.gitop.web.page.project.source.AbstractFilePage;
-import com.pmease.gitop.web.page.project.source.ProjectHomePage;
+import com.pmease.gitop.web.page.project.source.RepositoryHomePage;
 import com.pmease.gitop.web.page.project.source.branches.BranchesPage;
 import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
 import com.pmease.gitop.web.page.project.source.commits.CommitsPage;
 import com.pmease.gitop.web.page.project.source.contributors.ContributorsPage;
 import com.pmease.gitop.web.page.project.source.tags.TagsPage;
 import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
-import com.pmease.gitop.web.page.project.stats.ProjectForksPage;
-import com.pmease.gitop.web.page.project.stats.ProjectGraphsPage;
-import com.pmease.gitop.web.page.project.wiki.ProjectWikiPage;
 
 @SuppressWarnings("serial")
-public abstract class ProjectCategoryPage extends AbstractProjectPage {
+public abstract class RepositoryTabPage extends RepositoryBasePage {
 
 	protected final IModel<String> revisionModel;
 	
-	public ProjectCategoryPage(PageParameters params) {
+	public RepositoryTabPage(PageParameters params) {
 		super(params);
 
 		String rev = findRevision(params);
@@ -103,7 +100,7 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 		sidebar.add(groups);
 		
 		AbstractLink adminLink = new BookmarkablePageLink<Void>("settinglink", 
-				ProjectOptionsPage.class, PageSpec.forProject(getProject())) {
+				RepositoryOptionsPage.class, PageSpec.forProject(getProject())) {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
@@ -140,12 +137,12 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 		return new Label(id, group.name().replace("_", " "));
 	}
 	
-	private List<ProjectPageTab> getTabs(final Category group) {
-		return ImmutableList.<ProjectPageTab>copyOf(
-				Iterables.filter(getAllTabs(), new Predicate<ProjectPageTab>() {
+	private List<RepositoryPageTab> getTabs(final Category group) {
+		return ImmutableList.<RepositoryPageTab>copyOf(
+				Iterables.filter(getAllTabs(), new Predicate<RepositoryPageTab>() {
 
 			@Override
-			public boolean apply(ProjectPageTab input) {
+			public boolean apply(RepositoryPageTab input) {
 				return Objects.equal(group.name(), input.getGroupName());
 			}
 			
@@ -153,12 +150,12 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private List<ProjectPageTab> getAllTabs() {
-		List<ProjectPageTab> tabs = Lists.newArrayList();
+	private List<RepositoryPageTab> getAllTabs() {
+		List<RepositoryPageTab> tabs = Lists.newArrayList();
 		
 		// SOURCE TABS
 		//
-		tabs.add(new ProjectPageTab(Model.of("Code"), 
+		tabs.add(new RepositoryPageTab(Model.of("Code"), 
 									Category.SOURCE, 
 									"icon-code", 
 									new Class[] { SourceTreePage.class, 
@@ -167,36 +164,36 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 			public Class<? extends Page> getBookmarkablePageClass() {
 				String rev = SessionData.get().getRevision();
 				if (Strings.isNullOrEmpty(rev)) {
-					return ProjectHomePage.class;
+					return RepositoryHomePage.class;
 				} else {
 					return SourceTreePage.class;
 				}
 			}
 		});
 		
-		tabs.add(new ProjectPageTab(Model.of("Commits"), 
+		tabs.add(new RepositoryPageTab(Model.of("Commits"), 
 									Category.SOURCE, 
 									"icon-commits", 
 									new Class[] { CommitsPage.class, 
 												  SourceCommitPage.class }));
 		
-		tabs.add(new ProjectPageTab(Model.of("Branches"), 
+		tabs.add(new RepositoryPageTab(Model.of("Branches"), 
 									Category.SOURCE, 
 									"icon-git-branch", 
 									BranchesPage.class));
 		
-		tabs.add(new ProjectPageTab(Model.of("Tags"), 
+		tabs.add(new RepositoryPageTab(Model.of("Tags"), 
 									Category.SOURCE, 
 									"icon-tags", 
 									TagsPage.class));
 		
-		tabs.add(new ProjectPageTab(Model.of("Contributors"), 
+		tabs.add(new RepositoryPageTab(Model.of("Contributors"), 
 									Category.SOURCE, 
 									"icon-group-o", 
 									ContributorsPage.class));
 		
 		// PULL REQUESTS TABS
-		tabs.add(new ProjectPageTab(Model.of("Open"), 
+		tabs.add(new RepositoryPageTab(Model.of("Open"), 
 									Category.PULL_REQUESTS, 
 									"icon-pull-request", 
 									OpenRequestsPage.class) {
@@ -212,7 +209,7 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 										}
 			
 		});
-		tabs.add(new ProjectPageTab(Model.of("Closed"), 
+		tabs.add(new RepositoryPageTab(Model.of("Closed"), 
 									Category.PULL_REQUESTS, 
 									"icon-pull-request-abandon", 
 									ClosedRequestsPage.class) {
@@ -229,36 +226,36 @@ public abstract class ProjectCategoryPage extends AbstractProjectPage {
 			
 		});
 		
-		tabs.add(new ProjectPageTab(Model.of("Create"), 
+		tabs.add(new RepositoryPageTab(Model.of("Create"), 
 									Category.PULL_REQUESTS, 
 									"icon-pull-request", 
 									NewRequestPage.class));
 		
 		// WIKI TABS
-		tabs.add(new ProjectPageTab(Model.of("Wiki"), 
-									Category.WIKI, 
-									"icon-wiki", 
-									ProjectWikiPage.class));
+//		tabs.add(new ProjectPageTab(Model.of("Wiki"), 
+//									Category.WIKI, 
+//									"icon-wiki", 
+//									ProjectWikiPage.class));
 		
 		// STATISTICS TABS
-		tabs.add(new ProjectPageTab(Model.of("Graphs"), 
-									Category.STATISTICS, 
-									"icon-chart-area", 
-									ProjectGraphsPage.class));
-		
-		tabs.add(new ProjectPageTab(Model.of("Forks"), 
-									Category.STATISTICS, 
-									"icon-network", 
-									ProjectForksPage.class));
+//		tabs.add(new RepositoryPageTab(Model.of("Graphs"), 
+//									Category.STATISTICS, 
+//									"icon-chart-area", 
+//									ProjectGraphsPage.class));
+//		
+//		tabs.add(new RepositoryPageTab(Model.of("Forks"), 
+//									Category.STATISTICS, 
+//									"icon-network", 
+//									ProjectForksPage.class));
 		
 		return tabs;
 	} 
 
 	private Component newGroupNavs(String id, Category group) {
-		ListView<ProjectPageTab> tabs = new ListView<ProjectPageTab>(id, getTabs(group)) {
+		ListView<RepositoryPageTab> tabs = new ListView<RepositoryPageTab>(id, getTabs(group)) {
 			@Override
-			protected void populateItem(ListItem<ProjectPageTab> item) {
-				final ProjectPageTab tab = item.getModelObject();
+			protected void populateItem(ListItem<RepositoryPageTab> item) {
+				final RepositoryPageTab tab = item.getModelObject();
 				
 				item.add(tab.newTabLink("link"));
 				

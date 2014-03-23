@@ -28,22 +28,22 @@ public class GitArchiveResource extends AbstractResource {
 		PageParameters params = attributes.getParameters();
 		
 		final String username = params.get(PageSpec.USER).toString();
-		final String projectName = params.get(PageSpec.PROJECT).toString();
+		final String repoName = params.get(PageSpec.REPO).toString();
 		final String fileName = params.get("file").toString();
 
 		Preconditions.checkArgument(username != null);
-		Preconditions.checkArgument(!Strings.isNullOrEmpty(projectName));
+		Preconditions.checkArgument(!Strings.isNullOrEmpty(repoName));
 		Preconditions.checkArgument(!Strings.isNullOrEmpty(fileName) && 
 				(fileName.endsWith(".zip") || fileName.endsWith(".tar.gz")));
 
-		Project project = Gitop.getInstance(ProjectManager.class).findBy(username, projectName);
+		Project project = Gitop.getInstance(ProjectManager.class).findBy(username, repoName);
 		if (project == null) {
-			throw new EntityNotFoundException("Project " + username + "/" + projectName + " doesn't exist");
+			throw new EntityNotFoundException("Repository " + username + "/" + repoName + " doesn't exist");
 		}
 		
 		if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(project))) {
 			throw new AccessDeniedException("User " + SecurityUtils.getSubject() 
-					+ " have no permission to access project " 
+					+ " have no permission to access repository " 
 					+ project.getPathName());
 		}
 		

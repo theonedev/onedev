@@ -46,13 +46,13 @@ import com.pmease.gitop.web.common.wicket.component.datagrid.hibernate.EntityLis
 import com.pmease.gitop.web.common.wicket.component.vex.AjaxConfirmLink;
 import com.pmease.gitop.web.page.account.setting.teams.AccountTeamsPage;
 import com.pmease.gitop.web.page.account.setting.teams.EditTeamPage;
-import com.pmease.gitop.web.page.project.ProjectPubliclyAccessibleChanged;
+import com.pmease.gitop.web.page.project.RepositoryPubliclyAccessibleChanged;
 import com.pmease.gitop.web.util.EnumUtils;
 
 @SuppressWarnings("serial")
-public class ProjectPermissionsPage extends AbstractProjectSettingPage {
+public class RepositoryPermissionsPage extends AbstractRepositorySettingPage {
 
-	public ProjectPermissionsPage(PageParameters params) {
+	public RepositoryPermissionsPage(PageParameters params) {
 		super(params);
 	}
 
@@ -132,7 +132,7 @@ public class ProjectPermissionsPage extends AbstractProjectSettingPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<Team>> cellItem,
 					String componentId, IModel<Team> rowModel) {
-				Fragment frag = new Fragment(componentId, "namefrag", ProjectPermissionsPage.this);
+				Fragment frag = new Fragment(componentId, "namefrag", RepositoryPermissionsPage.this);
 				Team team = rowModel.getObject();
 				AbstractLink link = new BookmarkablePageLink<Void>("editlink", 
 																	EditTeamPage.class,
@@ -156,7 +156,7 @@ public class ProjectPermissionsPage extends AbstractProjectSettingPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<Team>> cellItem,
 					String componentId, final IModel<Team> rowModel) {
-				Fragment frag = new Fragment(componentId, "operationfrag", ProjectPermissionsPage.this);
+				Fragment frag = new Fragment(componentId, "operationfrag", RepositoryPermissionsPage.this);
 				
 				IModel<Authorization> model = new AbstractReadOnlyModel<Authorization>() {
 
@@ -247,7 +247,7 @@ public class ProjectPermissionsPage extends AbstractProjectSettingPage {
 				return;
 			}
 
-			Fragment frag = new Fragment(componentId, "permissionop", ProjectPermissionsPage.this);
+			Fragment frag = new Fragment(componentId, "permissionop", RepositoryPermissionsPage.this);
 			cellItem.add(frag);
 
 			boolean enabled = true;
@@ -305,7 +305,7 @@ public class ProjectPermissionsPage extends AbstractProjectSettingPage {
 					onPermissionChanged(team, target);
 					
 					if (team.isAnonymous()) {
-						send(getPage(), Broadcast.BREADTH, new ProjectPubliclyAccessibleChanged(target));
+						send(getPage(), Broadcast.BREADTH, new RepositoryPubliclyAccessibleChanged(target));
 					}
 				}
 				
@@ -333,7 +333,7 @@ public class ProjectPermissionsPage extends AbstractProjectSettingPage {
 	
 	private void onPermissionChanged(Team team, AjaxRequestTarget target) {
 		if (team == null || team.isAnonymous()) {
-			send(this, Broadcast.BREADTH, new ProjectPubliclyAccessibleChanged(target));
+			send(this, Broadcast.BREADTH, new RepositoryPubliclyAccessibleChanged(target));
 		}
 		
 		target.add(get("teamstable"));
