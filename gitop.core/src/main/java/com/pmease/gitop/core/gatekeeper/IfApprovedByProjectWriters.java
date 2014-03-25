@@ -7,10 +7,9 @@ import javax.validation.constraints.Min;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.AuthorizationManager;
-import com.pmease.gitop.core.manager.VoteInvitationManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.gatekeeper.ApprovalGateKeeper;
@@ -64,7 +63,7 @@ public class IfApprovedByProjectWriters extends ApprovalGateKeeper {
         } else {
             int lackApprovals = getLeastApprovals() - approvals;
 
-            Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, authorizedUsers, lackApprovals);
+            request.inviteToVote(authorizedUsers, lackApprovals);
 
             return pending("To be approved by " + lackApprovals + " authorized user(s).", 
             		new CanVoteByAuthorizedUser());

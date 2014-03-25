@@ -155,7 +155,7 @@
 		</repository>
 	</repositories>
 	<properties>
-		<mavenVersion>3.0</mavenVersion>
+		<mavenVersion>3.2.1</mavenVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>

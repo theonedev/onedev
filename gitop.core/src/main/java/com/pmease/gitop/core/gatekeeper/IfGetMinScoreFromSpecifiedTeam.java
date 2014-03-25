@@ -6,12 +6,10 @@ import java.util.HashSet;
 import javax.validation.constraints.Min;
 
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.VoteInvitationManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Membership;
-import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
@@ -80,7 +78,7 @@ public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
         } else if (lackApprovals < 0) {
             return disapproved("Can not get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
         } else {
-            Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, members, lackApprovals);
+            request.inviteToVote(members, lackApprovals);
 
             return pending("To be approved by " + lackApprovals + " users from team '"
                     + getTeam().getName() + ".", new CanVoteBySpecifiedTeam(getTeam()));

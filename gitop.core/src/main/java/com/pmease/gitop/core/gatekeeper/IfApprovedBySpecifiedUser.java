@@ -7,10 +7,9 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.editable.UserChoice;
 import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.core.manager.VoteInvitationManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.gatekeeper.ApprovalGateKeeper;
@@ -46,7 +45,7 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
 
         Vote.Result result = user.checkVoteSince(request.getBaseUpdate());
         if (result == null) {
-            Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, Sets.newHashSet(user), 1);
+            request.inviteToVote(Sets.newHashSet(user), 1);
 
             return pending("To be approved by user '" + user.getName() + "'.",
                     new CanVoteBySpecifiedUser(user));
