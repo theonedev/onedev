@@ -2,6 +2,7 @@ package com.pmease.gitop.web.validator;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
@@ -20,6 +21,8 @@ public class UsernameValidator implements IValidator<String> {
 	private final String oldName;
 	private static Set<String> reservedNames;
 	
+	static final Pattern pName = Pattern.compile("^[a-zA-Z0-9\\.-_@]{2,}");
+	
 	public UsernameValidator(String oldName) {
 		this.oldName = oldName;
 	}
@@ -30,6 +33,12 @@ public class UsernameValidator implements IValidator<String> {
 		
 		if (Objects.equal(oldName, newName)) {
 			return; // not updated
+		}
+		
+		if (!pName.matcher(newName).matches()) {
+			validatable.error(new ValidationError("Username can only contains "
+					+ "alphabetical characters, numbers, '.', '@', '_' and '-'"));
+			return;
 		}
 		
 		Set<String> reserved = getReservedNames();

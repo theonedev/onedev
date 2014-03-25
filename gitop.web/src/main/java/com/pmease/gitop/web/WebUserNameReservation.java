@@ -1,6 +1,7 @@
 package com.pmease.gitop.web;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,9 +11,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.core.request.mapper.MountedMapper;
 import org.apache.wicket.core.request.mapper.ResourceMapper;
 import org.apache.wicket.request.IRequestMapper;
+import org.apache.wicket.request.mapper.CompoundRequestMapper;
 import org.eclipse.jetty.servlet.ServletMapping;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import com.pmease.commons.jetty.JettyPlugin;
 import com.pmease.commons.util.ReflectionUtils;
 import com.pmease.gitop.model.validation.UserNameReservation;
@@ -44,21 +47,40 @@ public class WebUserNameReservation implements UserNameReservation {
 		reserved.add("wicket");
 		
 		for (IRequestMapper mapper: webApp.getRequestMappers()) {
-			if (mapper instanceof MountedMapper || mapper instanceof ResourceMapper) {
-				try {
-					Field field = ReflectionUtils.findField(mapper.getClass(), "mountSegments");
-					Preconditions.checkNotNull(field);
-					field.setAccessible(true);
-					String[] mountSegments = (String[]) field.get(mapper);
-					if (mountSegments != null && mountSegments.length != 0 && mountSegments[0] != null)
-						reserved.add(mountSegments[0]);
-				} catch (SecurityException | IllegalArgumentException | IllegalAccessException e) {
-					throw new RuntimeException(e);
-				}
-			}
+			Set<String> set = getReservedNames(mapper);
+			reserved.addAll(set);
 		}
 
 		return reserved;
 	}
 
+	private Set<String> getReservedNames(IRequestMapper mapper) {
+		if (mapper instanceof MountedMapper || mapper instanceof ResourceMapper) {
+			try {
+				Field field = ReflectionUtils.findField(mapper.getClass(), "mountSegments");
+				Preconditions.checkNotNull(field);
+				field.setAccessible(true);
+				String[] mountSegments = (String[]) field.get(mapper);
+				if (mountSegments != null && mountSegments.length != 0 && mountSegments[0] != null)
+					return Collections.singleton(mountSegments[0]);
+				else
+					return Collections.emptySet();
+			} catch (SecurityException | IllegalArgumentException | IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		if (mapper instanceof CompoundRequestMapper) {
+			CompoundRequestMapper m = (CompoundRequestMapper) mapper;
+			Set<String> result = Sets.newHashSet();
+			for (IRequestMapper each : m) {
+				Set<String> set = getReservedNames(each);
+				result.addAll(set);
+			}
+			
+			return result;
+		}
+		
+		return Collections.emptySet();
+	}
 }
