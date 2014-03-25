@@ -1,8 +1,5 @@
 package com.pmease.gitop.web.page.account;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.validation.constraints.Size;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -23,7 +20,6 @@ import com.google.common.base.Objects;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.model.validation.UserNameReservation;
 import com.pmease.gitop.web.GitopSession;
 import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.passwordfield.PasswordFieldElement;
@@ -51,16 +47,17 @@ public class RegisterPage extends BasePage {
 	protected void onPageInitialize() {
 		super.onPageInitialize();
 		
-		final IModel<User> model = Model.<User>of(new User());
+		User user = new User();
+		final IModel<User> model = Model.<User>of(user);
 		Form<User> form = new BaseForm<User>("form", model);
 		add(form);
 
 		form.add(new NotificationPanel("feedback", new ComponentFeedbackMessageFilter(form)));
 		form.add(new TextFieldElement<String>(
 							"username", "User Name", 
-							new PropertyModel<String>(model, "name"))
+							new PropertyModel<String>(user, "name"))
 				.add(new PropertyValidator<String>())
-				.add(new UsernameValidator()));
+				);
 		
 		form.add(new TextFieldElement<String>(
 							"email", "Email Address",
@@ -112,35 +109,6 @@ public class RegisterPage extends BasePage {
 				target.add(form);
 			}
 		});
-	}
-
-	class UsernameValidator implements IValidator<String> {
-
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public void validate(IValidatable<String> validatable) {
-			String username = validatable.getValue();
-			UserManager userManager = AppLoader.getInstance(UserManager.class);
-			User user = userManager.findByName(username);
-			if (user != null) {
-				validatable.error(new ValidationError()
-						.setMessage("The username is already registered."));
-				return;
-			}
-			
-			Set<String> reservedNames = new HashSet<>();
-	        for (UserNameReservation each : AppLoader.getExtensions(UserNameReservation.class)) {
-	        	reservedNames.addAll(each.getReserved());
-	        }
-	        
-	        if (reservedNames.contains(username)) {
-	        	validatable.error(new ValidationError()
-	        			.setMessage("The username is reserved by system"));
-	        	return;
-	        }
-		}
-
 	}
 
 	public String getPassword() {

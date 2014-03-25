@@ -1,10 +1,16 @@
 package com.pmease.gitop.web.page;
 
+import java.util.Iterator;
+
+import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.IMarkupFragment;
+import org.apache.wicket.markup.MarkupElement;
+import org.apache.wicket.markup.MarkupResourceStream;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.TransparentWebMarkupContainer;
@@ -70,7 +76,6 @@ public abstract class BarePage extends WebPage {
 //		shouldInitialize = true;
 	}
 
-	/*
 	@Override
 	public IMarkupFragment getMarkup(Component child) {
 		if (child != null) {
@@ -123,7 +128,6 @@ public abstract class BarePage extends WebPage {
 			};
 		}
 	}
-	*/
 
 //	public final void onException(RuntimeException e) {
 //		shouldInitialize = false;
