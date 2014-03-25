@@ -1,6 +1,7 @@
 package com.pmease.gitop.core.manager;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -49,4 +50,12 @@ public interface UserManager extends GenericDao<User> {
 	@Nullable User getCurrent();
 	
 	void trim(Collection<Long> userIds);
+	
+	/**
+	 * Get all accounts that the specified user can manage/admin
+	 * 
+	 * @param user
+	 * @return all accounts can be managed
+	 */
+	List<User> getManagableAccounts(User user);
 }
