@@ -31,7 +31,7 @@ import com.pmease.gitop.web.page.admin.SupportPage;
 import com.pmease.gitop.web.page.admin.SystemSettingEdit;
 import com.pmease.gitop.web.page.admin.UserAdministrationPage;
 import com.pmease.gitop.web.page.error.AccessDeniedPage;
-import com.pmease.gitop.web.page.error.InternalErrorPage;
+import com.pmease.gitop.web.page.error.InternalServerErrorPage;
 import com.pmease.gitop.web.page.error.PageNotFoundPage;
 import com.pmease.gitop.web.page.init.ServerInitPage;
 import com.pmease.gitop.web.page.project.pullrequest.ClosedRequestsPage;
@@ -81,7 +81,7 @@ public class GitopMappings extends CompoundRequestMapper {
 		// --------------------------------------------------------------------
 		addPage("404", PageNotFoundPage.class);
 		addPage("403", AccessDeniedPage.class);
-		addPage("501", InternalErrorPage.class);
+		addPage("501", InternalServerErrorPage.class);
 	}
 
 	private void addAdministrationPages() {
@@ -157,9 +157,6 @@ public class GitopMappings extends CompoundRequestMapper {
 		add(new PageParameterAwareMountedMapper("${user}/${repo}/tags",
 				TagsPage.class));
 
-		// mount(new PageParameterAwareMountedMapper("${user}/${project}/wiki",
-		// ProjectWikiPage.class));
-
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/pull-requests/open", OpenRequestsPage.class));
 		add(new PageParameterAwareMountedMapper(
@@ -172,12 +169,7 @@ public class GitopMappings extends CompoundRequestMapper {
 
 		add(new PageParameterAwareMountedMapper("${user}/${repo}/contributors",
 				ContributorsPage.class));
-		// mount(new
-		// PageParameterAwareMountedMapper("${user}/${project}/graphs",
-		// ProjectGraphsPage.class));
-		// mount(new PageParameterAwareMountedMapper("${user}/${project}/forks",
-		// ProjectForksPage.class));
-
+		
 		add(new PageParameterAwareMountedMapper("${user}/${repo}/settings",
 				RepositoryOptionsPage.class));
 		add(new PageParameterAwareMountedMapper(

@@ -31,7 +31,7 @@ import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.select.DropDownChoiceElement;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.model.RepositoryModel;
-import com.pmease.gitop.web.page.AbstractLayoutPage;
+import com.pmease.gitop.web.page.BasePage;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.project.source.RepositoryHomePage;
 
@@ -39,7 +39,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 
 @SuppressWarnings("serial")
 @RequiresUser
-public class CreateRepositoryPage extends AbstractLayoutPage {
+public class CreateRepositoryPage extends BasePage {
 
 	private String owner;
 	

@@ -21,12 +21,12 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.model.permission.ObjectPermission;
-import com.pmease.gitop.web.page.AbstractLayoutPage;
+import com.pmease.gitop.web.page.BasePage;
 import com.pmease.gitop.web.page.admin.api.AdministrationTab;
 import com.pmease.gitop.web.page.admin.api.AdministrationTab.Category;
 
 @SuppressWarnings("serial")
-public abstract class AdministrationLayoutPage extends AbstractLayoutPage {
+public abstract class AdministrationLayoutPage extends BasePage {
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.getSubject().isPermitted(ObjectPermission.ofSystemAdmin());

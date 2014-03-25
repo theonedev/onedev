@@ -33,7 +33,7 @@ import com.google.common.io.ByteStreams;
 import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.gitop.web.assets.AssetLocator;
 import com.pmease.gitop.web.common.quantity.Data;
-import com.pmease.gitop.web.page.error.ErrorPage;
+import com.pmease.gitop.web.page.error.BaseErrorPage;
 import com.pmease.gitop.web.page.error.PageExpiredPage;
 import com.pmease.gitop.web.page.home.HomePage;
 import com.pmease.gitop.web.shiro.LoginPage;
@@ -92,7 +92,7 @@ public class GitopWebApp extends AbstractWicketConfig {
 					 *  user can know which page is actually causing the error. This behavior is common
 					 *  for main stream applications.   
 					 */
-					if (requestHandler.getPage() instanceof ErrorPage)
+					if (requestHandler.getPage() instanceof BaseErrorPage)
 						return true;
 				}
 				return super.shouldPreserveClientUrl();

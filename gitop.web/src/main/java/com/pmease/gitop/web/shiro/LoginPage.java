@@ -16,14 +16,14 @@ import org.slf4j.LoggerFactory;
 import com.pmease.gitop.web.GitopSession;
 import com.pmease.gitop.web.common.wicket.form.checkbox.CheckBoxElement;
 import com.pmease.gitop.web.common.wicket.util.WicketUtils;
-import com.pmease.gitop.web.page.AbstractLayoutPage;
+import com.pmease.gitop.web.page.BasePage;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
-public class LoginPage extends AbstractLayoutPage {
+public class LoginPage extends BasePage {
 	private static final Logger logger = LoggerFactory.getLogger(LoginPage.class);
 	
 	public LoginPage() {

@@ -13,11 +13,11 @@ import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.SessionData;
 import com.pmease.gitop.web.model.UserModel;
-import com.pmease.gitop.web.page.AbstractLayoutPage;
+import com.pmease.gitop.web.page.BasePage;
 import com.pmease.gitop.web.page.PageSpec;
 
 @SuppressWarnings("serial")
-public abstract class AbstractAccountPage extends AbstractLayoutPage {
+public abstract class AbstractAccountPage extends BasePage {
 
 	protected final IModel<User> accountModel;
 	

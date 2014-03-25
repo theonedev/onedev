@@ -1,5 +1,8 @@
 package com.pmease.gitop.web.page.account;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.validation.constraints.Size;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -20,16 +23,17 @@ import com.google.common.base.Objects;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
+import com.pmease.gitop.model.validation.UserNameReservation;
 import com.pmease.gitop.web.GitopSession;
 import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.passwordfield.PasswordFieldElement;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
-import com.pmease.gitop.web.page.AbstractLayoutPage;
+import com.pmease.gitop.web.page.BasePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
-public class RegisterPage extends AbstractLayoutPage {
+public class RegisterPage extends BasePage {
 
 	@NotEmpty
 	@Size(min = 6, max = 32, message = "The password should be 6-32 characters.")
@@ -122,7 +126,19 @@ public class RegisterPage extends AbstractLayoutPage {
 			if (user != null) {
 				validatable.error(new ValidationError()
 						.setMessage("The username is already registered."));
+				return;
 			}
+			
+			Set<String> reservedNames = new HashSet<>();
+	        for (UserNameReservation each : AppLoader.getExtensions(UserNameReservation.class)) {
+	        	reservedNames.addAll(each.getReserved());
+	        }
+	        
+	        if (reservedNames.contains(username)) {
+	        	validatable.error(new ValidationError()
+	        			.setMessage("The username is reserved by system"));
+	        	return;
+	        }
 		}
 
 	}

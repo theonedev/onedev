@@ -2,17 +2,18 @@ package com.pmease.gitop.web.page.error;
 
 import org.apache.commons.httpclient.HttpStatus;
 
-@SuppressWarnings("serial")
-public class PageNotFoundPage extends BaseErrorPage {
+public class InternalServerErrorPage extends BaseErrorPage {
+
+	private static final long serialVersionUID = 1L;
 
 	@Override
 	protected String getPageTitle() {
-		return "404 - Page not found";
+		return "500 - Internal Error";
 	}
 
 	@Override
 	protected int getErrorCode() {
-		return HttpStatus.SC_NOT_FOUND;
+		return HttpStatus.SC_INTERNAL_SERVER_ERROR;
 	}
 
 }
