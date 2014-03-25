@@ -45,6 +45,10 @@ public class AccountHomePage extends AbstractAccountPage {
 		}
 	}
 	
+	public static PageParameters newParams(User account) {
+		return PageSpec.forUser(account);
+	}
+	
 	private Category category = Category.PROJECTS;
 	
 	public AccountHomePage(PageParameters params) {

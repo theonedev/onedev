@@ -4,6 +4,7 @@ import javax.validation.constraints.Size;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
+import org.apache.wicket.bean.validation.Property;
 import org.apache.wicket.bean.validation.PropertyValidator;
 import org.apache.wicket.feedback.ComponentFeedbackMessageFilter;
 import org.apache.wicket.markup.html.form.Form;
@@ -25,6 +26,7 @@ import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.passwordfield.PasswordFieldElement;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.page.BasePage;
+import com.pmease.gitop.web.page.account.home.AccountHomePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -56,19 +58,19 @@ public class RegisterPage extends BasePage {
 		form.add(new TextFieldElement<String>(
 							"username", "User Name", 
 							new PropertyModel<String>(user, "name"))
-				.add(new PropertyValidator<String>())
+				.add(new PropertyValidator<String>(new Property(User.class, "name")))
 				);
 		
 		form.add(new TextFieldElement<String>(
 							"email", "Email Address",
 							new PropertyModel<String>(model, "email"))
-				.add(new PropertyValidator<String>()));
+				.add(new PropertyValidator<String>(new Property(User.class, "email"))));
 		
 		form.add(new TextFieldElement<String>(
 							"displayname", "Display Name",
 							new PropertyModel<String>(model, "displayName"))
 				.setRequired(false)
-				.add(new PropertyValidator<String>()));
+				.add(new PropertyValidator<String>(new Property(User.class, "displayName"))));
 		
 		PasswordFieldElement passField = new PasswordFieldElement("password", "Password",
 			new PropertyModel<String>(this, "password"))
@@ -100,8 +102,7 @@ public class RegisterPage extends BasePage {
 				um.save(user);
 				GitopSession.get().login(user.getName(), password, false);
 				
-				// TODO: redirect to account home page
-				setResponsePage(getApplication().getHomePage());
+				setResponsePage(AccountHomePage.class, AccountHomePage.newParams(user));
 			}
 			
 			@Override

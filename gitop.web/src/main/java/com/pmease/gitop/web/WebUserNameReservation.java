@@ -11,7 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.core.request.mapper.MountedMapper;
 import org.apache.wicket.core.request.mapper.ResourceMapper;
 import org.apache.wicket.request.IRequestMapper;
-import org.apache.wicket.request.mapper.CompoundRequestMapper;
+import org.apache.wicket.request.mapper.ICompoundRequestMapper;
 import org.eclipse.jetty.servlet.ServletMapping;
 
 import com.google.common.base.Preconditions;
@@ -50,7 +50,7 @@ public class WebUserNameReservation implements UserNameReservation {
 			Set<String> set = getReservedNames(mapper);
 			reserved.addAll(set);
 		}
-
+		
 		return reserved;
 	}
 
@@ -70,8 +70,8 @@ public class WebUserNameReservation implements UserNameReservation {
 			}
 		}
 		
-		if (mapper instanceof CompoundRequestMapper) {
-			CompoundRequestMapper m = (CompoundRequestMapper) mapper;
+		if (mapper instanceof ICompoundRequestMapper) {
+			ICompoundRequestMapper m = (ICompoundRequestMapper) mapper;
 			Set<String> result = Sets.newHashSet();
 			for (IRequestMapper each : m) {
 				Set<String> set = getReservedNames(each);
