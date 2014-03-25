@@ -65,7 +65,7 @@ public class GitopMappings extends CompoundRequestMapper {
 		addAdministrationPages();
 		addAccountPages();
 		addRepositoryPages();
-		
+
 		addResources();
 	}
 
@@ -169,7 +169,7 @@ public class GitopMappings extends CompoundRequestMapper {
 
 		add(new PageParameterAwareMountedMapper("${user}/${repo}/contributors",
 				ContributorsPage.class));
-		
+
 		add(new PageParameterAwareMountedMapper("${user}/${repo}/settings",
 				RepositoryOptionsPage.class));
 		add(new PageParameterAwareMountedMapper(

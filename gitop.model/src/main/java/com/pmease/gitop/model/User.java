@@ -23,7 +23,7 @@ import com.pmease.gitop.model.validation.UserName;
 @Editable
 public class User extends AbstractUser implements ProtectedObject {
 
-	@Column(nullable=false)
+	@Column(nullable=false, unique=true)
 	private String email;
 	
 	private String displayName;
@@ -66,7 +66,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	public String getName() {
 		return super.getName();
 	}
-
+	
 	@Editable(order=200)
 	public String getDisplayName() {
 		return displayName;

@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.core.request.mapper.MountedMapper;
 import org.apache.wicket.core.request.mapper.ResourceMapper;
 import org.apache.wicket.request.IRequestMapper;
+import org.apache.wicket.request.mapper.ICompoundRequestMapper;
 import org.eclipse.jetty.servlet.ServletMapping;
 
 import com.google.common.base.Preconditions;
@@ -42,8 +43,14 @@ public class WebUserNameReservation implements UserNameReservation {
 		}
 		
 		reserved.add("wicket");
-		
-		for (IRequestMapper mapper: webApp.getRequestMappers()) {
+
+		fillReserved(webApp.getRequestMappers(), reserved);
+
+		return reserved;
+	}
+	
+	private void fillReserved(Iterable<IRequestMapper> mappers, Set<String> reserved) {
+		for (IRequestMapper mapper: mappers) {
 			if (mapper instanceof MountedMapper || mapper instanceof ResourceMapper) {
 				try {
 					Field field = ReflectionUtils.findField(mapper.getClass(), "mountSegments");
@@ -55,10 +62,11 @@ public class WebUserNameReservation implements UserNameReservation {
 				} catch (SecurityException | IllegalArgumentException | IllegalAccessException e) {
 					throw new RuntimeException(e);
 				}
+			} else if (mapper instanceof ICompoundRequestMapper) {
+				ICompoundRequestMapper compoundMapper = (ICompoundRequestMapper) mapper;
+				fillReserved(compoundMapper, reserved);
 			}
 		}
-
-		return reserved;
 	}
 
 }
