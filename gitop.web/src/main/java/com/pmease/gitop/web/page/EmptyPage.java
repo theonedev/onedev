@@ -2,6 +2,7 @@ package com.pmease.gitop.web.page;
 
 import java.util.Iterator;
 
+import org.apache.wicket.Application;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
@@ -17,6 +18,7 @@ import org.apache.wicket.markup.html.TransparentWebMarkupContainer;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.flow.RedirectToUrlException;
@@ -34,22 +36,22 @@ import com.pmease.gitop.web.page.init.ServerInitPage;
 import com.pmease.gitop.web.shiro.LoginPage;
 
 @SuppressWarnings("serial")
-public abstract class BarePage extends WebPage {
+public abstract class EmptyPage extends WebPage {
 
 	private WebMarkupContainer body;
 	
 //	private boolean shouldInitialize = true;
 
-	public BarePage() {
+	public EmptyPage() {
 		commonInit();
 	}
 
-	public BarePage(IModel<?> model) {
+	public EmptyPage(IModel<?> model) {
 		super(model);
 		commonInit();
 	}
 
-	public BarePage(PageParameters params) {
+	public EmptyPage(PageParameters params) {
 		super(params);
 		commonInit();
 	}
@@ -68,6 +70,8 @@ public abstract class BarePage extends WebPage {
 					}
 				}));
 
+		add(new BookmarkablePageLink<Void>("home-link", Application.get().getHomePage()));
+		
 		if (!Gitop.getInstance().isReady()
 				&& getClass() != ServerInitPage.class) {
 			redirect(ServerInitPage.class);
