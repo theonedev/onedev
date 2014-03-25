@@ -3,31 +3,23 @@ package com.pmease.gitop.web;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
-import java.util.List;
 
 import javax.inject.Singleton;
-import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.wicket.Application;
 import org.apache.wicket.Page;
-import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.Session;
 import org.apache.wicket.bean.validation.BeanValidationConfiguration;
-import org.apache.wicket.core.request.handler.PageProvider;
 import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
-import org.apache.wicket.core.request.mapper.MountedMapper;
 import org.apache.wicket.devutils.stateless.StatelessChecker;
 import org.apache.wicket.markup.html.IPackageResourceGuard;
 import org.apache.wicket.markup.html.SecurePackageResourceGuard;
 import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
-import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.IRequestMapper;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
-import org.apache.wicket.request.Url;
-import org.apache.wicket.request.cycle.AbstractRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.resource.caching.FilenameWithVersionResourceCachingStrategy;
@@ -38,65 +30,15 @@ import org.eclipse.jgit.storage.file.WindowCacheConfig;
 
 import com.google.common.base.Throwables;
 import com.google.common.io.ByteStreams;
-import com.pmease.commons.util.ExceptionUtils;
 import com.pmease.commons.wicket.AbstractWicketConfig;
-import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.UserManager;
-import com.pmease.gitop.model.validation.ProjectNameValidator;
-import com.pmease.gitop.model.validation.UserNameValidator;
 import com.pmease.gitop.web.assets.AssetLocator;
 import com.pmease.gitop.web.common.quantity.Data;
-import com.pmease.gitop.web.common.wicket.mapper.PageParameterAwareMountedMapper;
-import com.pmease.gitop.web.component.avatar.AvatarImageResourceReference;
-import com.pmease.gitop.web.exception.AccessDeniedException;
-import com.pmease.gitop.web.page.account.RegisterPage;
-import com.pmease.gitop.web.page.account.home.AccountHomePage;
-import com.pmease.gitop.web.page.account.setting.members.AccountMembersSettingPage;
-import com.pmease.gitop.web.page.account.setting.password.AccountPasswordPage;
-import com.pmease.gitop.web.page.account.setting.profile.AccountProfilePage;
-import com.pmease.gitop.web.page.account.setting.repo.RepositoriesPage;
-import com.pmease.gitop.web.page.account.setting.teams.AccountTeamsPage;
-import com.pmease.gitop.web.page.account.setting.teams.AddTeamPage;
-import com.pmease.gitop.web.page.account.setting.teams.EditTeamPage;
-import com.pmease.gitop.web.page.admin.AdministrationOverviewPage;
-import com.pmease.gitop.web.page.admin.LicensingPage;
-import com.pmease.gitop.web.page.admin.MailSettingEdit;
-import com.pmease.gitop.web.page.admin.SupportPage;
-import com.pmease.gitop.web.page.admin.SystemSettingEdit;
-import com.pmease.gitop.web.page.admin.UserAdministrationPage;
-import com.pmease.gitop.web.page.error.AccessDeniedPage;
 import com.pmease.gitop.web.page.error.ErrorPage;
-import com.pmease.gitop.web.page.error.InternalErrorPage;
 import com.pmease.gitop.web.page.error.PageExpiredPage;
-import com.pmease.gitop.web.page.error.PageNotFoundPage;
 import com.pmease.gitop.web.page.home.HomePage;
-import com.pmease.gitop.web.page.init.ServerInitPage;
-import com.pmease.gitop.web.page.project.pullrequest.ClosedRequestsPage;
-import com.pmease.gitop.web.page.project.pullrequest.NewRequestPage;
-import com.pmease.gitop.web.page.project.pullrequest.OpenRequestsPage;
-import com.pmease.gitop.web.page.project.pullrequest.RequestDetailPage;
-import com.pmease.gitop.web.page.project.settings.CreateRepositoryPage;
-import com.pmease.gitop.web.page.project.settings.GateKeeperSettingPage;
-import com.pmease.gitop.web.page.project.settings.PullRequestSettingsPage;
-import com.pmease.gitop.web.page.project.settings.RepositoryAuditLogPage;
-import com.pmease.gitop.web.page.project.settings.RepositoryHooksPage;
-import com.pmease.gitop.web.page.project.settings.RepositoryOptionsPage;
-import com.pmease.gitop.web.page.project.settings.RepositoryPermissionsPage;
-import com.pmease.gitop.web.page.project.source.RepositoryHomePage;
-import com.pmease.gitop.web.page.project.source.blame.BlobBlamePage;
-import com.pmease.gitop.web.page.project.source.blob.SourceBlobPage;
-import com.pmease.gitop.web.page.project.source.blob.renderer.RawBlobResourceReference;
-import com.pmease.gitop.web.page.project.source.branches.BranchesPage;
-import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
-import com.pmease.gitop.web.page.project.source.commits.CommitsPage;
-import com.pmease.gitop.web.page.project.source.contributors.ContributorsPage;
-import com.pmease.gitop.web.page.project.source.tags.GitArchiveResourceReference;
-import com.pmease.gitop.web.page.project.source.tags.TagsPage;
-import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
 import com.pmease.gitop.web.shiro.LoginPage;
 import com.pmease.gitop.web.shiro.LogoutPage;
 import com.pmease.gitop.web.shiro.ShiroWicketPlugin;
-import com.pmease.gitop.web.util.UrlUtils;
 
 import de.agilecoders.wicket.core.Bootstrap;
 import de.agilecoders.wicket.core.settings.BootstrapSettings;
@@ -171,22 +113,7 @@ public class GitopWebApp extends AbstractWicketConfig {
 		
 		getResourceSettings().setCachingStrategy(new FilenameWithVersionResourceCachingStrategy(new LastModifiedResourceVersion()));
 
-		getRequestCycleListeners().add(new AbstractRequestCycleListener() {
-			@Override
-			public IRequestHandler onException(RequestCycle cycle, Exception e) {
-				if (ExceptionUtils.find(e, EntityNotFoundException.class) != null) {
-					return new RenderPageRequestHandler(new PageProvider(PageNotFoundPage.class));
-				} else if (ExceptionUtils.find(e, AccessDeniedException.class) != null) {
-					if (Gitop.getInstance(UserManager.class).getCurrent() == null) {
-						return new RenderPageRequestHandler(new PageProvider(LoginPage.class));
-					} else {
-						return new RenderPageRequestHandler(new PageProvider(AccessDeniedPage.class));
-					}
-				} else {
-					return null;
-				}
-			}
-		});
+		getRequestCycleListeners().add(new WicketRequestCycleListener());
 		
 		getApplicationSettings().setPageExpiredErrorPage(PageExpiredPage.class);
 		
@@ -202,10 +129,12 @@ public class GitopWebApp extends AbstractWicketConfig {
 		
 		Bootstrap.install(this, new BootstrapSettings());
 
-		mountPages();
 		configureResources();
 		
-		if (getConfigurationType() == RuntimeConfigurationType.DEVELOPMENT) {
+		// mount all pages and resources
+		mount(new GitopMappings(this));
+		
+		if (usesDevelopmentConfig()) {
 			getComponentPreOnBeforeRenderListeners().add(new StatelessChecker());
 		}
 		
@@ -234,6 +163,7 @@ public class GitopWebApp extends AbstractWicketConfig {
 		}
 	}
 
+	/*
 	private void mountPages() {
 		mountPage("init", ServerInitPage.class);
 		mountPage("register", RegisterPage.class);
@@ -324,8 +254,19 @@ public class GitopWebApp extends AbstractWicketConfig {
 		mountPage("administration/system-settings", SystemSettingEdit.class);
 		mountPage("administration/support", SupportPage.class);
 		mountPage("administration/licensing", LicensingPage.class);
-
 	}
+	
+	private void mountResources() {
+//		getSharedResources().add(AvatarImageResourceReference.AVATAR_RESOURCE, new AvatarImageResource());
+//		getSharedResources().add(ImageBlobResourceReference.IMAGE_BLOB_RESOURCE, new ImageBlobResource());
+//		mountResource("imageblob/${user}/${project}/${objectId}", new ImageBlobResourceReference());
+//		getSharedResources().add(RawBlobResourceReference.RAW_BLOB_RESOURCE, new RawBlobResource());
+		
+		mountResource("avatar/${type}/${id}", new AvatarImageResourceReference());
+		mountResource("raw/${user}/${repo}/${objectId}", new RawBlobResourceReference());
+		mountResource("archive/${user}/${repo}/${file}", new GitArchiveResourceReference());
+	}
+	*/
 	
 
 	private void configureResources() {
@@ -339,18 +280,7 @@ public class GitopWebApp extends AbstractWicketConfig {
             guard.addPattern("+*.ttf");
         }
         
-        mountResources();
-	}
-	
-	private void mountResources() {
-//		getSharedResources().add(AvatarImageResourceReference.AVATAR_RESOURCE, new AvatarImageResource());
-//		getSharedResources().add(ImageBlobResourceReference.IMAGE_BLOB_RESOURCE, new ImageBlobResource());
-//		mountResource("imageblob/${user}/${project}/${objectId}", new ImageBlobResourceReference());
-//		getSharedResources().add(RawBlobResourceReference.RAW_BLOB_RESOURCE, new RawBlobResource());
-		
-		mountResource("avatar/${type}/${id}", new AvatarImageResourceReference());
-		mountResource("raw/${user}/${repo}/${objectId}", new RawBlobResourceReference());
-		mountResource("archive/${user}/${repo}/${file}", new GitArchiveResourceReference());
+//        mountResources();
 	}
 	
 	public boolean isGravatarEnabled() {
