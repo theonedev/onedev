@@ -108,7 +108,7 @@ public class EditableUtils {
 	 * @param element
 	 * 			annotated element to get order from
 	 * @return
-	 * 			defined order, or {@link Integer.MAX_VALUE} if Editable annotation is not found
+	 * 			defined order, or {@link Integer#MAX_VALUE} if Editable annotation is not found
 	 */
 	public static int getOrder(AnnotatedElement element) {
 		Editable editable = element.getAnnotation(Editable.class);

@@ -56,7 +56,6 @@
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-client</artifactId>
-			<version>1.17.1</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-fileupload</groupId>
@@ -68,13 +67,14 @@
 			<artifactId>commons-validator</artifactId>
 			<version>1.4.0</version>
 		</dependency>
-		
+		<!--
 		<dependency>
 			<groupId>org.imgscalr</groupId>
 			<artifactId>imgscalr-lib</artifactId>
 			<version>4.2</version>
 		</dependency>
-		
+		 -->
+		 
 		<!-- Google Closure Dependencies -->
 		<dependency>
 			<groupId>com.google.closure</groupId>
@@ -129,6 +129,10 @@
 				<exclusion>
 					<groupId>com.google.guava</groupId>
 					<artifactId>guava</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javassist</groupId>
+					<artifactId>javassist</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -245,22 +249,6 @@
 				<enabled>false</enabled>
 			</snapshots>
 			<url>file://${project.basedir}/repo</url>
-		</repository>
-		
-		<!-- For Atlassian Processutils -->
-		<repository>
-			<id>opencast-public</id>
-    		<url>http://repository.opencastproject.org/nexus/content/repositories/public/</url>
-			<releases>
-				<enabled>true</enabled>
-				<updatePolicy>never</updatePolicy>
-				<checksumPolicy>fail</checksumPolicy>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-				<checksumPolicy>fail</checksumPolicy>
-			</snapshots>
 		</repository>
 	</repositories>
 	

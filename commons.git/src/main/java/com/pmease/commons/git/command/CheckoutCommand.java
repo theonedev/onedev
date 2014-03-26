@@ -50,6 +50,8 @@ public class CheckoutCommand extends GitCommand<Void> {
 			public void consume(String line) {
 				if (line.startsWith("Switched to a new branch"))
 					info(line);
+				else if (line.startsWith("Switched to branch"))
+					info(line);
 				else
 					error(line);
 			}

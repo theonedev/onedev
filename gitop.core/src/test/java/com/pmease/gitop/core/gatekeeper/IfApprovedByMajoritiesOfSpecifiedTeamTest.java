@@ -15,12 +15,11 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.TeamManager;
-import com.pmease.gitop.core.manager.VoteInvitationManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Membership;
-import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestUpdate;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
@@ -32,9 +31,6 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 	
 	@Mock
 	private TeamManager teamManager;
-	
-	@Mock
-	private VoteInvitationManager voteInvitationManager;
 	
 	@Override
 	protected void setup() {
@@ -76,8 +72,6 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 		team.getMemberships().add(membership);
 		
 		Mockito.when(teamManager.load(1L)).thenReturn(team);
-		
-		Mockito.when(AppLoader.getInstance(VoteInvitationManager.class)).thenReturn(voteInvitationManager);
 	}
 
 	@Test
@@ -162,7 +156,7 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 			user.setId(3L);
 			user.setName("user3");
 			candidates.add(user);
-			Mockito.verify(voteInvitationManager).inviteToVote(request, candidates, 1);
+			Assert.assertEquals("user1", request.getVoteInvitations().iterator().next().getVoter().getName());
 			
 			Vote vote = new Vote();
 			vote.setId(1L);

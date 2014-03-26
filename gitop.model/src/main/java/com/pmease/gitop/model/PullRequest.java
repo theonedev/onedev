@@ -3,8 +3,11 @@ package com.pmease.gitop.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -353,6 +356,57 @@ public class PullRequest extends AbstractEntity {
 	
 	public String getLockName() {
 		return "pull request: " + getId();
+	}
+	
+	/**
+	 * Invite specified number of users in candidates to vote for this request.
+	 * <p>
+	 * 
+	 * @param candidates 
+	 * 			a collection of users to invite users from
+	 * @param count 
+	 * 			number of users to invite
+	 */
+	public void inviteToVote(Collection<User> candidates, int count) {
+		Collection<User> copyOfCandidates = new HashSet<User>(candidates);
+
+		// submitter is not allowed to vote for this request
+		if (getSubmittedBy() != null)
+			copyOfCandidates.remove(getSubmittedBy());
+
+		/*
+		 * users already voted since base update should be excluded from
+		 * invitation list as their votes are still valid
+		 */
+		for (Vote vote : getBaseUpdate().listVotesOnwards()) {
+			copyOfCandidates.remove(vote.getVoter());
+		}
+
+		Set<User> invited = new HashSet<User>();
+		for (VoteInvitation each : getVoteInvitations())
+			invited.add(each.getVoter());
+
+		invited.retainAll(copyOfCandidates);
+
+		for (int i = 0; i < count - invited.size(); i++) {
+			User selected = Collections.min(copyOfCandidates, new Comparator<User>() {
+
+				@Override
+				public int compare(User user1, User user2) {
+					return user1.getVotes().size() - user2.getVotes().size();
+				}
+
+			});
+
+			copyOfCandidates.remove(selected);
+
+			VoteInvitation invitation = new VoteInvitation();
+			invitation.setRequest(this);
+			invitation.setVoter(selected);
+			invitation.getRequest().getVoteInvitations().add(invitation);
+			invitation.getVoter().getVoteInvitations().add(invitation);
+		}
+
 	}
 	
 	public static class CriterionHelper {

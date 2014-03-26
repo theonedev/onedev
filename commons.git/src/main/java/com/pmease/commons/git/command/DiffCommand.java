@@ -111,7 +111,21 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 					
 			}
 			
-		}, errorLogger).checkReturnCode();
+		}, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				if (line.startsWith("warning: "))
+					warn(line.substring("warning: ".length()));
+				else if (line.startsWith("The file will have its original line endings"))
+					warn(line);
+				else if (line.startsWith("The file will have its original line endings in your working directory"))
+					warn(line);
+				else
+					error(line);
+			}
+			
+		}).checkReturnCode();
 
 		if (changeBuilder.newPath != null)
 			fileChanges.add(changeBuilder.buildFileChange());

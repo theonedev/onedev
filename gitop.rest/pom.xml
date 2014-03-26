@@ -59,6 +59,5 @@
     </repositories>  
     <properties> 
         <moduleClass>com.pmease.gitop.rest.RestModule</moduleClass>  
-        <jerseyVersion>1.17</jerseyVersion> 
     </properties> 
 </project>

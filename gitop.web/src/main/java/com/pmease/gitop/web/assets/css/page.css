@@ -1,8 +1,11 @@
 /* MISC */
 .img-link:hover { text-decoration: none; }
+
+/*
 a.dropdown-toggle {text-decoration: none;}
 a.dropdown-toggle:focus, a.dropdown-toggle:hover, a.dropdown-toggle.open {
 	color: white; background-color: #2A6496;}
+*/
 
 pre, code { font-family: Consolas, 'Liberation Mono', Courier, monospace; }
 .alert pre, .alert code { background: white; margin: 5px 0; }

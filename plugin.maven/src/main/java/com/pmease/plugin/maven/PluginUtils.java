@@ -33,12 +33,13 @@ import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
-import org.sonatype.aether.RepositorySystem;
-import org.sonatype.aether.RepositorySystemSession;
-import org.sonatype.aether.collection.CollectRequest;
-import org.sonatype.aether.graph.Dependency;
-import org.sonatype.aether.repository.RemoteRepository;
-import org.sonatype.aether.resolution.ArtifactResult;
+import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.collection.CollectRequest;
+import org.eclipse.aether.graph.Dependency;
+import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.resolution.ArtifactResult;
+import org.eclipse.aether.resolution.DependencyRequest;
 
 public class PluginUtils {
 	
@@ -149,13 +150,14 @@ public class PluginUtils {
 		for (Artifact each: project.getArtifacts()) {
 			if (containsFile(each.getFile(), PluginConstants.BOOTSTRAP_PROPERTY_FILE)) {
 				bootArtifacts.add(each);
-				org.sonatype.aether.artifact.Artifact aetherArtifact = new org.sonatype.aether.util.artifact.DefaultArtifact(
+				org.eclipse.aether.artifact.Artifact aetherArtifact = new org.eclipse.aether.artifact.DefaultArtifact(
 						each.getGroupId(), each.getArtifactId(), each.getClassifier(), each.getType(), 
 						each.getVersion());
                 CollectRequest collectRequest = new CollectRequest(new Dependency(aetherArtifact, null), 
                 		new ArrayList<Dependency>(), remoteRepos);
+                DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, null);
                 try {
-					for (ArtifactResult result: repoSystem.resolveDependencies(repoSession, collectRequest, null)) {
+					for (ArtifactResult result: repoSystem.resolveDependencies(repoSession, dependencyRequest).getArtifactResults()) {
 						Dependency dependency = result.getRequest().getDependencyNode().getDependency();
 						if (dependency.getArtifact()  != null && dependency.getArtifact().getFile() != null) {
 							aetherArtifact = dependency.getArtifact();

@@ -2,11 +2,9 @@ package com.pmease.gitop.core.gatekeeper;
 
 import com.google.common.collect.Sets;
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.VoteInvitationManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.gatekeeper.ApprovalGateKeeper;
@@ -29,7 +27,7 @@ public class IfApprovedByBranchCreator extends ApprovalGateKeeper {
 	        Vote.Result result = branchCreator.checkVoteSince(request.getBaseUpdate());
 	
 	        if (result == null) {
-	            Gitop.getInstance(VoteInvitationManager.class).inviteToVote(request, Sets.newHashSet(branchCreator), 1);
+	            request.inviteToVote(Sets.newHashSet(branchCreator), 1);
 	            return pending("To be approved by user '" + branchCreator.getName() + "'.",
 	                    new CanVoteBySpecifiedUser(branchCreator));
 	        } else if (result == Vote.Result.APPROVE) {
