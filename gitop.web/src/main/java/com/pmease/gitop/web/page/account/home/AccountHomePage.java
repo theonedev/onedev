@@ -23,6 +23,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.pmease.gitop.model.Membership;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
@@ -91,7 +92,24 @@ public class AccountHomePage extends AbstractAccountPage {
 	private Component createContent(String id) {
 		switch (category) {
 		case PROJECTS:
-			return new RepositoryListPanel(id, accountModel);
+			IModel<List<Repository>> repos = new LoadableDetachableModel<List<Repository>>() {
+
+				@Override
+				protected List<Repository> load() {
+					User account = accountModel.getObject();
+					List<Repository> projects = Lists.newArrayList();
+					for (Repository each : account.getProjects()) {
+						if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(each))) {
+							projects.add(each);
+						}
+					}
+					
+					return projects;
+				}
+				
+			};
+			
+			return new RepositoryListPanel(id, repos);
 			
 		case MEMBERS:
 			IModel<List<User>> model = new LoadableDetachableModel<List<User>>() {
