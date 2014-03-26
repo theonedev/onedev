@@ -105,7 +105,7 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 			IfApprovedByMajoritiesOfSpecifiedTeam gateKeeper = new IfApprovedByMajoritiesOfSpecifiedTeam();
 			gateKeeper.setTeamId(1L);
 
-			PullRequest request = Mockito.mock(PullRequest.class);
+			PullRequest request = new PullRequest();
 			request.setId(1L);
 			request.setTarget(new Branch());
 			request.getTarget().setName("master");
@@ -156,7 +156,7 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 			user.setId(3L);
 			user.setName("user3");
 			candidates.add(user);
-			Mockito.verify(request).inviteToVote(candidates, 1);
+			Assert.assertEquals("user1", request.getVoteInvitations().iterator().next().getVoter().getName());
 			
 			Vote vote = new Vote();
 			vote.setId(1L);
