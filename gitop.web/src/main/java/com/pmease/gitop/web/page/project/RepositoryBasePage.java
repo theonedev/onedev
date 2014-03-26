@@ -79,7 +79,7 @@ public abstract class RepositoryBasePage extends AbstractAccountPage {
 		add(userlink);
 		userlink.add(new Label("name", Model.of(project.getOwner().getName())));
 		
-		AbstractLink projectLink = PageSpec.newProjectHomeLink("projectlink", project);
+		AbstractLink projectLink = PageSpec.newRepositoryHomeLink("projectlink", project);
 		add(projectLink);
 		projectLink.add(new Label("name", Model.of(project.getName())));
 		
@@ -126,7 +126,7 @@ public abstract class RepositoryBasePage extends AbstractAccountPage {
 			public void onClick() {
 				User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
 				Repository forked = Gitop.getInstance(RepositoryManager.class).fork(getProject(), currentUser);
-				setResponsePage(RepositoryHomePage.class, PageSpec.forProject(forked));
+				setResponsePage(RepositoryHomePage.class, PageSpec.forRepository(forked));
 			}
 			
 		});

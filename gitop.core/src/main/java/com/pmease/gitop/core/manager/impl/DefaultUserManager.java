@@ -2,6 +2,7 @@ package com.pmease.gitop.core.manager.impl;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -11,6 +12,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
@@ -158,6 +160,21 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 			if (get(it.next()) == null)
 				it.remove();
 		}
+	}
+
+	@Override
+	@Sessional
+	public List<User> getManagableAccounts(User user) {
+		Preconditions.checkNotNull(user);
+		Collection<Membership> memberships = user.getMemberships();
+		List<User> result = Lists.newArrayList();
+		for (Membership each : memberships) {
+			if (each.getTeam().isOwners()) {
+				result.add(each.getTeam().getOwner());
+			}
+		}
+		
+		return result;
 	}
 
 }

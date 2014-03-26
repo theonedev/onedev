@@ -224,7 +224,7 @@ public class NewRequestPanel extends Panel {
 					PullRequest pullRequest = pullRequestManager.create(getTarget(), getSource(), 
 							getSubmitter(), title, comment, false);
 					setResponsePage(OpenRequestsPage.class, 
-							PageSpec.forProject(pullRequest.getTarget().getProject()));
+							PageSpec.forRepository(pullRequest.getTarget().getProject()));
 				}
 			}
 
@@ -250,7 +250,7 @@ public class NewRequestPanel extends Panel {
 			@Override
 			public void onClick() {
 				RepositoryBasePage page = (RepositoryBasePage) getPage();
-				PageParameters params = PageSpec.forProject(page.getProject());
+				PageParameters params = PageSpec.forRepository(page.getProject());
 				params.set(0, getPullRequest().getId());
 				setResponsePage(RequestDetailPage.class, params);
 			}

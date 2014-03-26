@@ -17,8 +17,8 @@ public class RawBlobResourceReference extends ResourceReference {
 		return newParams(blob.getProject(), blob.getRevision(), blob.getFilePath());
 	}
 	
-	public static PageParameters newParams(Repository project, String revision, String path) {
-		PageParameters params = PageSpec.forProject(project);
+	public static PageParameters newParams(Repository repo, String revision, String path) {
+		PageParameters params = PageSpec.forRepository(repo);
 		params.set("objectId", revision);
 		PageSpec.addPathToParameters(path, params);
 		return params;

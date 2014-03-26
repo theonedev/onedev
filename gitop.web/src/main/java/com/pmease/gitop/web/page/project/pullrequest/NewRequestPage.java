@@ -22,7 +22,7 @@ import com.pmease.gitop.web.page.project.source.commit.diff.CommitCommentsAware;
 public class NewRequestPage extends RepositoryTabPage implements CommitCommentsAware {
 
 	public static PageParameters newParams(Repository project, String source, String dest) {
-		PageParameters params = PageSpec.forProject(project);
+		PageParameters params = PageSpec.forRepository(project);
 		params.set("source", source);
 		params.set("dest", dest);
 		return params;

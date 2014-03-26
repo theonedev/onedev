@@ -32,7 +32,7 @@ public class CommitsPage extends RepositoryTabPage implements IRevisionAware {
 	
 	public static PageParameters newParams(Repository project, String revision, List<String> paths, int page) {
 		Preconditions.checkNotNull(project);
-		PageParameters params = PageSpec.forProject(project);
+		PageParameters params = PageSpec.forRepository(project);
 		if (!Strings.isNullOrEmpty(revision)) {
 			params.set("objectId", revision);
 		}

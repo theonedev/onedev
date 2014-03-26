@@ -36,16 +36,16 @@ public class PageSpec {
 		return WicketUtils.newPageParams(USER, user.getName());
 	}
 
-	public static PageParameters forProject(Repository project) {
-		return WicketUtils.newPageParams(USER, project.getOwner().getName(), 
-										 REPO, project.getName());
+	public static PageParameters forRepository(Repository repo) {
+		return WicketUtils.newPageParams(USER, repo.getOwner().getName(), 
+										 REPO, repo.getName());
 	}
 
-	public static PageParameters forRepoPath(Repository project, String objectId, List<String> paths) {
+	public static PageParameters forRepoPath(Repository repo, String objectId, List<String> paths) {
 		Preconditions.checkArgument(!Strings.isNullOrEmpty(objectId), "object id");
 		Preconditions.checkArgument(!paths.isEmpty(), "paths should not be empty");
 		
-		PageParameters params = forProject(project);
+		PageParameters params = forRepository(repo);
 		params.add(OBJECT_ID, objectId);
 		for (int i = 0; i < paths.size(); i++) {
 			params.set(i, paths.get(i));
@@ -80,8 +80,8 @@ public class PageSpec {
 		return new BookmarkablePageLink<Void>(id, AccountHomePage.class, forUser(user));
 	}
 
-	public static Link<?> newProjectHomeLink(String id, Repository project) {
-		return new BookmarkablePageLink<Void>(id, RepositoryHomePage.class, forProject(project));
+	public static Link<?> newRepositoryHomeLink(String id, Repository repo) {
+		return new BookmarkablePageLink<Void>(id, RepositoryHomePage.class, forRepository(repo));
 	}
 
 }

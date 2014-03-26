@@ -19,7 +19,7 @@ public abstract class AbstractFilePage extends RepositoryTabPage implements IRev
 	protected final IModel<List<String>> pathsModel;
 	
 	public static PageParameters newParams(Repository project, String revision, List<String> paths) {
-		PageParameters params = PageSpec.forProject(project);
+		PageParameters params = PageSpec.forRepository(project);
 		params.set(PageSpec.OBJECT_ID, revision);
 		for (int i = 0; i < paths.size(); i++) {
 			params.set(i, paths.get(i));

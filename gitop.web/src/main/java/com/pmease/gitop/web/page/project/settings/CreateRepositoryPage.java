@@ -26,7 +26,6 @@ import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.GitopHelper;
 import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.select.DropDownChoiceElement;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
@@ -79,10 +78,8 @@ public class CreateRepositoryPage extends BasePage {
 
 					@Override
 					public List<String> getObject() {
-						List<User> users = 
-								GitopHelper.getInstance()
-									.getManagableAccounts(Gitop.getInstance(UserManager.class).getCurrent());
-						
+						UserManager um = Gitop.getInstance(UserManager.class);
+						List<User> users = um.getManagableAccounts(um.getCurrent());
 						List<String> names = Lists.newArrayList();
 						for (User each : users) {
 							names.add(each.getName());
@@ -132,7 +129,7 @@ public class CreateRepositoryPage extends BasePage {
 				Preconditions.checkNotNull(o);
 				project.setOwner(o);
 				Gitop.getInstance(RepositoryManager.class).save(project);
-				setResponsePage(RepositoryHomePage.class, PageSpec.forProject(project));
+				setResponsePage(RepositoryHomePage.class, PageSpec.forRepository(project));
 			}
 		});
 	}

@@ -21,7 +21,6 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
-import com.pmease.gitop.web.GitopHelper;
 import com.pmease.gitop.web.component.avatar.AvatarImage;
 import com.pmease.gitop.web.component.link.UserAvatarLink;
 import com.pmease.gitop.web.model.UserModel;
@@ -86,9 +85,9 @@ public abstract class AccountSettingPage extends AbstractAccountPage {
 
 			@Override
 			protected List<User> load() {
+				UserManager um = Gitop.getInstance(UserManager.class);
 				List<User> users = 
-						GitopHelper.getInstance()
-							.getManagableAccounts(Gitop.getInstance(UserManager.class).getCurrent());
+							um.getManagableAccounts(um.getCurrent());
 				
 				List<User> result = Lists.newArrayList();
 				

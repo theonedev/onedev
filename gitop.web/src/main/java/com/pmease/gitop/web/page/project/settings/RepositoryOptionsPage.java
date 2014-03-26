@@ -156,7 +156,7 @@ public class RepositoryOptionsPage extends AbstractRepositorySettingPage {
 				Gitop.getInstance(RepositoryManager.class).save(project);
 				
 				if (nameChanged) {
-					setResponsePage(RepositoryOptionsPage.class, PageSpec.forProject(project));
+					setResponsePage(RepositoryOptionsPage.class, PageSpec.forRepository(project));
 				} else {
 					form.success("Project " + project + " has been updated.");
 					target.add(form);

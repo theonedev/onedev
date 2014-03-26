@@ -56,10 +56,10 @@ public class AvatarImage extends Panel {
 				return (new StatelessAvatarImage("avatar", params));
 			}
 		} else {
-			Repository project = (Repository) getDefaultModelObject();
+			Repository repo = (Repository) getDefaultModelObject();
 			PageParameters params = new PageParameters();
 			params.set("type", AvatarImageType.REPOSITORY.name().toLowerCase());
-			params.set("id", project.getId());
+			params.set("id", repo.getId());
 			return (new StatelessAvatarImage("avatar", params));
 		}
 	}

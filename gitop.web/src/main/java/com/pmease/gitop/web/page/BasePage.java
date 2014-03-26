@@ -15,7 +15,7 @@ import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.page.admin.SystemSettingEdit;
 
 @SuppressWarnings("serial")
-public abstract class BasePage extends BarePage {
+public abstract class BasePage extends EmptyPage {
 
 	@Override
 	protected void onPageInitialize() {

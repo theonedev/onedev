@@ -52,7 +52,7 @@ public abstract class AbstractRepositorySettingPage extends RepositoryBasePage {
 			@Override
 			protected void populateItem(ListItem<RepositorySettingTab> item) {
 				final RepositorySettingTab tab = item.getModelObject();
-				Component link = tab.newTabLink("link", PageSpec.forProject(getProject()));
+				Component link = tab.newTabLink("link", PageSpec.forRepository(getProject()));
 				item.add(link);
 				item.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
