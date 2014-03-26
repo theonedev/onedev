@@ -23,14 +23,14 @@ import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.component.label.AgeLabel;
-import com.pmease.gitop.web.component.link.ProjectHomeLink;
+import com.pmease.gitop.web.component.link.RepositoryHomeLink;
 import com.pmease.gitop.web.model.RepositoryModel;
 import com.pmease.gitop.web.page.PageSpec;
 
 @SuppressWarnings("serial")
-public class ProjectListPanel extends Panel {
+public class RepositoryListPanel extends Panel {
 
-	public ProjectListPanel(String id, IModel<User> model) {
+	public RepositoryListPanel(String id, IModel<User> model) {
 		super(id, model);
 	}
 
@@ -61,11 +61,11 @@ public class ProjectListPanel extends Panel {
 			protected void populateItem(ListItem<Repository> item) {
 				Repository project = item.getModelObject();
 //				IModel<Project> model = new ProjectModel(project);
-				item.add(PageSpec.newProjectHomeLink("projectlink", project)
+				item.add(PageSpec.newRepositoryHomeLink("projectlink", project)
 						.add(new Label("name", project.getName())));
 				
 				if (project.getForkedFrom() != null) {
-					item.add(new ProjectHomeLink("forklink", new RepositoryModel(project.getForkedFrom())));
+					item.add(new RepositoryHomeLink("forklink", new RepositoryModel(project.getForkedFrom())));
 				} else {
 					item.add(new WebMarkupContainer("forklink").setVisibilityAllowed(false));
 				}

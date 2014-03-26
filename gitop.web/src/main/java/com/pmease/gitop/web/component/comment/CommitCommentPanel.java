@@ -32,14 +32,14 @@ import com.pmease.gitop.web.model.UserModel;
 @SuppressWarnings("serial")
 public class CommitCommentPanel extends Panel {
 
-	private final IModel<Repository> projectModel;
+	private final IModel<Repository> repositoryModel;
 	
 	public CommitCommentPanel(String id,
-			IModel<Repository> projectModel,
+			IModel<Repository> repositoryModel,
 			IModel<CommitComment> model) {
 		super(id, model);
 	
-		this.projectModel = projectModel;
+		this.repositoryModel = repositoryModel;
 		
 		this.setOutputMarkupId(true);
 	}
@@ -207,8 +207,8 @@ public class CommitCommentPanel extends Panel {
 	public void onDetach() {
 		super.onDetach();
 		
-		if (projectModel != null) {
-			projectModel.detach();
+		if (repositoryModel != null) {
+			repositoryModel.detach();
 		}
 	}
 }

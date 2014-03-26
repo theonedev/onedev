@@ -129,7 +129,7 @@ public class CreateRepositoryPage extends BasePage {
 				Preconditions.checkNotNull(o);
 				project.setOwner(o);
 				Gitop.getInstance(RepositoryManager.class).save(project);
-				setResponsePage(RepositoryHomePage.class, PageSpec.forProject(project));
+				setResponsePage(RepositoryHomePage.class, PageSpec.forRepository(project));
 			}
 		});
 	}

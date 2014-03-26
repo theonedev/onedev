@@ -17,7 +17,7 @@ import com.google.common.collect.Lists;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.Constants;
 import com.pmease.gitop.web.common.datatype.DataTypes;
-import com.pmease.gitop.web.component.link.ProjectHomeLink;
+import com.pmease.gitop.web.component.link.RepositoryHomeLink;
 import com.pmease.gitop.web.model.RepositoryModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
@@ -58,7 +58,7 @@ public class RepositoriesPage extends AccountSettingPage {
 			protected void populateItem(ListItem<Repository> item) {
 				Repository project = item.getModelObject();
 				final IModel<Repository> projectModel = new RepositoryModel(project);
-				item.add(new ProjectHomeLink("project", projectModel));
+				item.add(new RepositoryHomeLink("project", projectModel));
 				item.add(new Label("age", new AbstractReadOnlyModel<String>() {
 
 					@Override
@@ -79,7 +79,7 @@ public class RepositoriesPage extends AccountSettingPage {
 						})));
 
 				if (project.getForkedFrom() != null) {
-					item.add(new ProjectHomeLink("forkedFrom",
+					item.add(new RepositoryHomeLink("forkedFrom",
 							new LoadableDetachableModel<Repository>() {
 
 								@Override
@@ -92,7 +92,7 @@ public class RepositoriesPage extends AccountSettingPage {
 				}
 				
 				item.add(new BookmarkablePageLink<Void>("admin", RepositoryOptionsPage.class,
-						PageSpec.forProject(project)));
+						PageSpec.forRepository(project)));
 			}
 			
 		};

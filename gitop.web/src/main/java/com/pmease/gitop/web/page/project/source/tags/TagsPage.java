@@ -43,7 +43,7 @@ public class TagsPage extends RepositoryTabPage {
 	private String before;
 	
 	public static PageParameters newParams(Repository project, String before) {
-		PageParameters parameters = PageSpec.forProject(project);
+		PageParameters parameters = PageSpec.forRepository(project);
 		if (!Strings.isNullOrEmpty(before)) {
 			parameters.add("before", before);
 		}

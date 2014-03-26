@@ -44,7 +44,7 @@ import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
 public class SourceCommitPage extends RepositoryTabPage implements CommitCommentsAware {
 	
 	public static PageParameters newParams(Repository project, String revision) {
-		PageParameters params = PageSpec.forProject(project);
+		PageParameters params = PageSpec.forRepository(project);
 		params.add(PageSpec.OBJECT_ID, revision);
 		return params;
 	}

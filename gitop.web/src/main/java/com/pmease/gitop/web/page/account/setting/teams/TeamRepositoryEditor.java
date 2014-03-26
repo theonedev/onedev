@@ -35,7 +35,7 @@ import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.web.common.wicket.form.FeedbackPanel;
 import com.pmease.gitop.web.component.choice.ProjectMultiChoice;
-import com.pmease.gitop.web.component.link.ProjectHomeLink;
+import com.pmease.gitop.web.component.link.RepositoryHomeLink;
 import com.pmease.gitop.web.model.RepositoryModel;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
@@ -83,7 +83,7 @@ public class TeamRepositoryEditor extends Panel {
 			@Override
 			protected void populateItem(ListItem<Authorization> item) {
 				Authorization a = item.getModelObject();
-				item.add(new ProjectHomeLink("link", new RepositoryModel(a.getProject())));
+				item.add(new RepositoryHomeLink("link", new RepositoryModel(a.getProject())));
 				final Long id = a.getId();
 				item.add(new AjaxLink<Void>("removelink") {
 

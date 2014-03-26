@@ -91,7 +91,7 @@ public class AccountHomePage extends AbstractAccountPage {
 	private Component createContent(String id) {
 		switch (category) {
 		case PROJECTS:
-			return new ProjectListPanel(id, accountModel);
+			return new RepositoryListPanel(id, accountModel);
 			
 		case MEMBERS:
 			IModel<List<User>> model = new LoadableDetachableModel<List<User>>() {

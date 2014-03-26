@@ -29,7 +29,7 @@ public class PathsBreadcrumb extends AbstractSourcePagePanel {
 		
 		BookmarkablePageLink<Void> homeLink = new BookmarkablePageLink<Void>("home", 
 				SourceTreePage.class, 
-				PageSpec.forProject(getRepo()).add(PageSpec.OBJECT_ID, getRevision()));
+				PageSpec.forRepository(getRepo()).add(PageSpec.OBJECT_ID, getRevision()));
 		add(homeLink);
 		homeLink.add(new Label("name", new AbstractReadOnlyModel<String>() {
 

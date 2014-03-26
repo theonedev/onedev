@@ -100,7 +100,7 @@ public abstract class RepositoryTabPage extends RepositoryBasePage {
 		sidebar.add(groups);
 		
 		AbstractLink adminLink = new BookmarkablePageLink<Void>("settinglink", 
-				RepositoryOptionsPage.class, PageSpec.forProject(getProject())) {
+				RepositoryOptionsPage.class, PageSpec.forRepository(getProject())) {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();

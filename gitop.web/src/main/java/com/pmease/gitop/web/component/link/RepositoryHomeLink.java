@@ -8,13 +8,13 @@ import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.wicket.component.link.LinkPanel;
 import com.pmease.gitop.web.page.PageSpec;
 
-public class ProjectHomeLink extends LinkPanel {
+public class RepositoryHomeLink extends LinkPanel {
 	private static final long serialVersionUID = 1L;
 
 	private final IModel<Repository> repoModel;
 	
 	@SuppressWarnings("serial")
-	public ProjectHomeLink(String id, final IModel<Repository> repoModel) {
+	public RepositoryHomeLink(String id, final IModel<Repository> repoModel) {
 		super(id, new AbstractReadOnlyModel<String>() {
 
 			@Override
@@ -30,7 +30,7 @@ public class ProjectHomeLink extends LinkPanel {
 
 	@Override
 	protected AbstractLink createLink(String id) {
-		return PageSpec.newProjectHomeLink(id, repoModel.getObject());
+		return PageSpec.newRepositoryHomeLink(id, repoModel.getObject());
 	}
 
 	@Override

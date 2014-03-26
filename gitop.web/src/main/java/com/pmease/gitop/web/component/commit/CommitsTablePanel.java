@@ -37,12 +37,12 @@ import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
 public class CommitsTablePanel extends Panel {
 
 	private final IModel<Multimap<Date, Commit>> groupsModel;
-	private final IModel<Repository> projectModel;
+	private final IModel<Repository> repositoryModel;
 	
-	public CommitsTablePanel(String id, IModel<List<Commit>> model, IModel<Repository> projectModel) {
+	public CommitsTablePanel(String id, IModel<List<Commit>> model, IModel<Repository> repositoryModel) {
 		super(id, model);
 		
-		this.projectModel = projectModel;
+		this.repositoryModel = repositoryModel;
 		groupsModel = new LoadableDetachableModel<Multimap<Date, Commit>>() {
 
 			@Override
@@ -112,11 +112,11 @@ public class CommitsTablePanel extends Panel {
 				Commit commit = item.getModelObject();
 				GitPerson person = GitPerson.of(commit.getAuthor());
 				item.add(new GitPersonLink("name", Model.of(person), GitPersonLink.Mode.NAME_AND_AVATAR).enableTooltip());
-				item.add(new CommitMessagePanel("message", item.getModel(), projectModel));
+				item.add(new CommitMessagePanel("message", item.getModel(), repositoryModel));
 				
 				AbstractLink link = new BookmarkablePageLink<Void>("commitlink",
 						SourceCommitPage.class,
-						SourceCommitPage.newParams(getProject(), commit.getHash()));
+						SourceCommitPage.newParams(getRepository(), commit.getHash()));
 				
 				item.add(link);
 				link.add(new Label("sha", GitUtils.abbreviateSHA(commit.getHash())));
@@ -137,8 +137,8 @@ public class CommitsTablePanel extends Panel {
 		return (List<Commit>) getDefaultModelObject();
 	}
 	
-	private Repository getProject() {
-		return projectModel.getObject();
+	private Repository getRepository() {
+		return repositoryModel.getObject();
 	}
 	
 	@Override
@@ -147,8 +147,8 @@ public class CommitsTablePanel extends Panel {
 			groupsModel.detach();
 		}
 
-		if (projectModel != null) {
-			projectModel.detach();
+		if (repositoryModel != null) {
+			repositoryModel.detach();
 		}
 		
 		super.onDetach();

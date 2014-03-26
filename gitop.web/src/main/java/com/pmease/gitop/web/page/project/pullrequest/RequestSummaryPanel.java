@@ -39,7 +39,7 @@ public class RequestSummaryPanel extends Panel {
 			@Override
 			public void onClick() {
 				RepositoryBasePage page = (RepositoryBasePage) getPage();
-				PageParameters params = PageSpec.forProject(page.getProject());
+				PageParameters params = PageSpec.forRepository(page.getProject());
 				params.set(0, getPullRequest().getId());
 				setResponsePage(RequestDetailPage.class, params);
 			}

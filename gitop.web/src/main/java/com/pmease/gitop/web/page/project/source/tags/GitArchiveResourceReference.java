@@ -24,7 +24,7 @@ public class GitArchiveResourceReference extends ResourceReference {
 	}
 
 	public static PageParameters newParams(Repository project, String treeish, Format format) {
-		PageParameters params = PageSpec.forProject(project);
+		PageParameters params = PageSpec.forRepository(project);
 		params.set("file", treeish + "." + format.getSuffix());
 		return params;
 	}

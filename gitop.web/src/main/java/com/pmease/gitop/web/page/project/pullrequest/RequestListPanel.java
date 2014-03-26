@@ -238,7 +238,7 @@ public class RequestListPanel extends Panel {
 			@Override
 			public void onClick() {
 				RepositoryBasePage page = (RepositoryBasePage) getPage();
-				setResponsePage(NewRequestPage.class, PageSpec.forProject(page.getProject()));
+				setResponsePage(NewRequestPage.class, PageSpec.forRepository(page.getProject()));
 			}
 			
 		});

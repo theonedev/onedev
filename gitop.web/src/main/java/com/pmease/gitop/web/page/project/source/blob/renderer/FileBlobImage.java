@@ -21,7 +21,7 @@ public class FileBlobImage extends NonCachingImage {
 	}
 	
 	public static PageParameters newParams(Repository project, String revision, String path) {
-		PageParameters params = PageSpec.forProject(project);
+		PageParameters params = PageSpec.forRepository(project);
 		params.set(PageSpec.OBJECT_ID, revision);
 		PageSpec.addPathToParameters(path, params);
 		return params;

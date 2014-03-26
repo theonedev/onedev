@@ -82,7 +82,7 @@ public class RepositoryPageTab extends AbstractPageTab {
 		Class<? extends Page> pageClass = getBookmarkablePageClass();
 		
 		Repository project = getProject();
-		PageParameters params = PageSpec.forProject(project); 
+		PageParameters params = PageSpec.forRepository(project); 
 		if (IRevisionAware.class.isAssignableFrom(pageClass)) {
 			String revision = SessionData.get().getRevision();
 			if (!Strings.isNullOrEmpty(revision)) {
