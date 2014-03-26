@@ -19,6 +19,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Objects;
 import com.pmease.commons.loader.AppLoader;
+import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.GitopSession;
@@ -64,7 +65,20 @@ public class RegisterPage extends BasePage {
 		form.add(new TextFieldElement<String>(
 							"email", "Email Address",
 							new PropertyModel<String>(model, "email"))
-				.add(new PropertyValidator<String>(new Property(User.class, "email"))));
+				.add(new PropertyValidator<String>(new Property(User.class, "email")))
+				.add(new IValidator<String>() {
+
+					@Override
+					public void validate(IValidatable<String> validatable) {
+						String mail = validatable.getValue();
+						UserManager um = Gitop.getInstance(UserManager.class);
+						User u = um.findByEmail(mail);
+						if (u != null) {
+							validatable.error(new ValidationError("This email is already used."));
+						}
+					}
+					
+				}));
 		
 		form.add(new TextFieldElement<String>(
 							"displayname", "Display Name",

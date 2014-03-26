@@ -41,7 +41,7 @@ public class PageSpec {
 										 REPO, repo.getName());
 	}
 
-	public static PageParameters forRepoPath(Repository repo, String objectId, List<String> paths) {
+	public static PageParameters forRepositoryWithPath(Repository repo, String objectId, List<String> paths) {
 		Preconditions.checkArgument(!Strings.isNullOrEmpty(objectId), "object id");
 		Preconditions.checkArgument(!paths.isEmpty(), "paths should not be empty");
 		
