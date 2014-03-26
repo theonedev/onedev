@@ -89,6 +89,5 @@
     </repositories>  
     <properties> 
         <moduleClass>com.pmease.commons.jersey.JerseyModule</moduleClass>  
-        <jerseyVersion>1.17</jerseyVersion> 
     </properties> 
 </project>
