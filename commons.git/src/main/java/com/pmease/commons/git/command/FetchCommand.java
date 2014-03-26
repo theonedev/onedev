@@ -39,7 +39,9 @@ public class FetchCommand extends GitCommand<Void> {
 			@Override
 			public void consume(String line) {
 				if (line.startsWith("From ") || line.startsWith(" * branch"))
-					debug(line);
+					info(line);
+				else if (line.startsWith(" * [new ref]"))
+					info(line);
 				else
 					error(line);
 			}

@@ -58,7 +58,11 @@ public class UpdateRefCommand extends GitCommand<Boolean> {
 
 			@Override
 			public void consume(String line) {
-				error(line);
+				if (line.startsWith(" * [new ref]"))
+					info(line);
+				else
+					error(line);
+				
 				if (line.startsWith("fatal: Cannot lock the ref")) 
 					refLockError[0] = true;
 			} 

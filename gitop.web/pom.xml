@@ -130,6 +130,10 @@
 					<groupId>com.google.guava</groupId>
 					<artifactId>guava</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>javassist</groupId>
+					<artifactId>javassist</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 

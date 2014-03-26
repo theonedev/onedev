@@ -37,6 +37,8 @@ public class AddCommand extends GitCommand<Void> {
 					warn(line.substring("warning: ".length()));
 				else if (line.startsWith("The file will have its original line endings"))
 					warn(line);
+				else if (line.startsWith("The file will have its original line endings in your working directory"))
+					warn(line);
 				else
 					error(line);
 			}
