@@ -38,8 +38,8 @@ public class AccountPasswordPage extends AccountSettingPage {
 	}
 
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 
 		Form<User> form = new BaseForm<User>("form", new UserModel(getAccount()));
 		add(form);

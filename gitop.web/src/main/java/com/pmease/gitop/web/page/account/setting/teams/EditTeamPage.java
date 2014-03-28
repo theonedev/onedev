@@ -79,8 +79,8 @@ public class EditTeamPage extends AccountSettingPage {
 	}
 
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		add(new TeamEditor("editor", new TeamModel(getTeam())));
 		add(new Label("head", new AbstractReadOnlyModel<String>() {

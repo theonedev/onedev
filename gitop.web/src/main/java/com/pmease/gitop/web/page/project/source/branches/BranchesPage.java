@@ -138,8 +138,8 @@ public class BranchesPage extends RepositoryTabPage {
 	}
 
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		if (getDefaultBranch() == null) {
 			add(new Fragment("content", "nobranch", this));

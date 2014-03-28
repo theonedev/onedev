@@ -68,8 +68,8 @@ public class TagsPage extends RepositoryTabPage {
 	}
 
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		Map<String, Tag> tags = tagsModel.getObject();
 		if (tags.isEmpty()) {

@@ -96,8 +96,8 @@ public class SourceCommitPage extends RepositoryTabPage implements CommitComment
 	}
 	
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		add(new Label("shortmessage", new PropertyModel<String>(commitModel, "subject")));
 		add(new Label("detailedmessage", new PropertyModel<String>(commitModel, "message")));

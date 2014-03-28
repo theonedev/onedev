@@ -50,8 +50,8 @@ public class RepositoryOptionsPage extends AbstractRepositorySettingPage {
 	private String defaultBranchName;
 	
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		add(new Label("location", new AbstractReadOnlyModel<String>() {
 

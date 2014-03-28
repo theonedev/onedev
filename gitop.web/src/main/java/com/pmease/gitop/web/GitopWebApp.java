@@ -127,7 +127,9 @@ public class GitopWebApp extends AbstractWicketConfig {
 				.mountLogoutPage("logout", LogoutPage.class)
 				.install(this);
 		
-		Bootstrap.install(this, new BootstrapSettings());
+		BootstrapSettings bootstrapSettings = new BootstrapSettings();
+		bootstrapSettings.setAutoAppendResources(false);
+		Bootstrap.install(this, bootstrapSettings);
 
 		configureResources();
 		

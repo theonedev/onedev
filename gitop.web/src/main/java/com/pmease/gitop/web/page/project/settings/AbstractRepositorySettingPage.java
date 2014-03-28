@@ -32,8 +32,8 @@ public abstract class AbstractRepositorySettingPage extends RepositoryBasePage {
 	}
 
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		add(createSideNavs("nav"));
 	}

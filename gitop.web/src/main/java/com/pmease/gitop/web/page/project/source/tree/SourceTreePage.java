@@ -45,8 +45,8 @@ public class SourceTreePage extends AbstractFilePage {
 	}
 
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		IModel<List<TreeNode>> nodesModel = new LoadableDetachableModel<List<TreeNode>>() {
 

@@ -33,8 +33,8 @@ public abstract class AdministrationLayoutPage extends BasePage {
 	}
 	
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		add(new BookmarkablePageLink<Void>("overviewlink", AdministrationOverviewPage.class));
 		add(createSidebarNavs());

@@ -55,8 +55,8 @@ public class AccountProfilePage extends AccountSettingPage {
 	}
 
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 
 		IModel<User> userModel = new UserModel(getAccount());
 		add(new ProfileForm("form", userModel));

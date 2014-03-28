@@ -98,8 +98,8 @@ public class GateKeeperSettingPage extends AbstractRepositorySettingPage {
 	}
 	
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		add(newContent());
 	}

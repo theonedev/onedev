@@ -55,8 +55,8 @@ public class AccountTeamsPage extends AccountSettingPage {
 	}
 
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		add(new BookmarkablePageLink<Void>("addTeam", AddTeamPage.class, newParams(getAccount())));
 		add(createTeamTable());

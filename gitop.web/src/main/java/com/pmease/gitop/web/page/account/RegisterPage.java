@@ -46,8 +46,8 @@ public class RegisterPage extends BasePage {
 	}
 	
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		User user = new User();
 		final IModel<User> model = Model.<User>of(user);

@@ -70,8 +70,8 @@ public abstract class RepositoryTabPage extends RepositoryBasePage {
 	}
 	
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 
 		add(createSidebar("sidebar"));
 		add(new EmptyRepositoryPanel("nocommit", projectModel));

@@ -18,8 +18,9 @@ import com.pmease.gitop.web.page.admin.SystemSettingEdit;
 public abstract class BasePage extends EmptyPage {
 
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
+		
 		add(new GlobalHeaderPanel("header"));
 		
 		add(new Label("gitError", new LoadableDetachableModel<String>() {

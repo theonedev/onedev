@@ -16,8 +16,8 @@ import com.pmease.gitop.core.setting.SystemSetting;
 public class SystemSettingEdit extends AdministrationLayoutPage {
 
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		setOutputMarkupId(true);
 		

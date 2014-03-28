@@ -33,8 +33,8 @@ public class NewRequestPage extends RepositoryTabPage implements CommitCommentsA
 	}
 
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 
 		Branch target, source = null;
 		BranchManager branchManager = Gitop.getInstance(BranchManager.class);

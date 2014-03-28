@@ -16,8 +16,8 @@ import com.pmease.gitop.core.setting.MailSetting;
 public class MailSettingEdit extends AdministrationLayoutPage {
 
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		setOutputMarkupId(true);
 		

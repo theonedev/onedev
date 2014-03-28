@@ -3,6 +3,7 @@ package com.pmease.gitop.web.page.init;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 
@@ -21,15 +22,15 @@ public class ServerInitPage extends EmptyPage {
 	public ServerInitPage() {
 		initStage = Gitop.getInstance().getInitStage();
 		if (initStage == null) {
-			redirectToOriginal();
+			continueToOriginalDestination();
 			
-			redirect(getApplication().getHomePage());
+			throw new RestartResponseException(getApplication().getHomePage());
 		}
 	}
 
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 
 		add(new Label("message", initStage.getMessage()));
 		

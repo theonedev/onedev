@@ -12,8 +12,8 @@ public class OpenRequestsPage extends RepositoryTabPage {
 	}
 
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 
 		add(new RequestListPanel("content", true));
 	}

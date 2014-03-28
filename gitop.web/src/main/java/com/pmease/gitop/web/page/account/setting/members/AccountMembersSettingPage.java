@@ -45,8 +45,8 @@ public class AccountMembersSettingPage extends AccountSettingPage {
 	}
 
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		final IModel<List<User>> model = new LoadableDetachableModel<List<User>>() {
 

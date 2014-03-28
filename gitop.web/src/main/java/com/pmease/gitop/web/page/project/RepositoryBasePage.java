@@ -66,8 +66,8 @@ public abstract class RepositoryBasePage extends AbstractAccountPage {
 	}
 	
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		Repository project = getProject();
 		if (project.getForkedFrom() != null)

@@ -4,7 +4,6 @@ import java.util.Iterator;
 
 import org.apache.wicket.Application;
 import org.apache.wicket.Component;
-import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -21,7 +20,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Optional;
@@ -39,8 +37,6 @@ import com.pmease.gitop.web.shiro.LoginPage;
 public abstract class EmptyPage extends WebPage {
 
 	private WebMarkupContainer body;
-	
-//	private boolean shouldInitialize = true;
 
 	public EmptyPage() {
 		commonInit();
@@ -74,10 +70,8 @@ public abstract class EmptyPage extends WebPage {
 		
 		if (!Gitop.getInstance().isReady()
 				&& getClass() != ServerInitPage.class) {
-			redirect(ServerInitPage.class);
+			throw new RestartResponseException(ServerInitPage.class);
 		}
-		
-//		shouldInitialize = true;
 	}
 
 	@Override
@@ -133,53 +127,6 @@ public abstract class EmptyPage extends WebPage {
 		}
 	}
 
-//	public final void onException(RuntimeException e) {
-//		shouldInitialize = false;
-//		throw e;
-//	}
-//	
-	public final void redirectWithInterception(final Class<? extends Page> clazz) {
-//		shouldInitialize = true;
-		throw new RestartResponseAtInterceptPageException(clazz);
-	}
-	
-	public final void redirectWithInterception(final Class<? extends Page> clazz, final PageParameters pageParams) {
-//		shouldInitialize = true;
-		throw new RestartResponseAtInterceptPageException(clazz, pageParams);
-	}
-
-	public final void redirectWithInterception(final Page page) {
-//		shouldInitialize = true;
-		throw new RestartResponseAtInterceptPageException(page);
-	}
-
-	public final void redirect(final Class<? extends Page> clazz) {
-//		shouldInitialize = false;
-		throw new RestartResponseException(clazz);
-	}
-
-	public final void redirect(final Class<? extends Page> clazz,
-			PageParameters parameters) {
-//		shouldInitialize = false;
-		throw new RestartResponseException(clazz, parameters);
-	}
-
-	public final void redirect(final Page page) {
-//		shouldInitialize = false;
-		throw new RestartResponseException(page);
-	}
-
-	public final void redirect(String url) {
-//		shouldInitialize = false;
-		throw new RedirectToUrlException(url);
-	}
-	
-	public final void redirectToOriginal() {
-//		shouldInitialize = false;
-		continueToOriginalDestination();		
-//		shouldInitialize = true;
-	}
-	
 	protected String getPageCssClass() {
 		String name = getClass().getSimpleName();
 		return StringUtils.camelCaseToLowerCaseWithHyphen(name);
@@ -193,7 +140,10 @@ public abstract class EmptyPage extends WebPage {
 		return Optional.fromNullable(Gitop.getInstance(UserManager.class).getCurrent());
 	}
 	
-	protected void onPageInitialize() {
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
 		if (!isPermitted()) {
 			if (currentUser().isPresent()) {
 				throw new AccessDeniedException("Access denied");
@@ -222,15 +172,6 @@ public abstract class EmptyPage extends WebPage {
 
 	}
 	
-	@Override
-	protected final void onInitialize() {
-		super.onInitialize();
-
-//		if (shouldInitialize) {
-			onPageInitialize();
-//		}
-	}
-
 	protected String getPageTitle() {
 		return "Gitop - Enterprise Git Management System";
 	};

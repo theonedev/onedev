@@ -78,8 +78,8 @@ public class SourceBlobPage extends AbstractFilePage {
 	}
 
 	@Override
-	public void onPageInitialize() {
-		super.onPageInitialize();
+	public void onInitialize() {
+		super.onInitialize();
 		
 		add(new SourceBreadcrumbPanel("breadcrumb", projectModel, revisionModel, pathsModel));
 		

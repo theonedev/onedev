@@ -105,8 +105,8 @@ public class CommitsPage extends RepositoryTabPage implements IRevisionAware {
 	}
 	
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		add(new RevisionSelector("revselector", projectModel, revisionModel, null));
 //		BookmarkablePageLink<Void> homeLink = new BookmarkablePageLink<Void>("home", 

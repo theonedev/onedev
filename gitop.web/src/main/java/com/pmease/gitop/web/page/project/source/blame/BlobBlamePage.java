@@ -85,8 +85,8 @@ public class BlobBlamePage extends AbstractFilePage {
 	}
 	
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		add(new PathsBreadcrumb("paths", projectModel, revisionModel, pathsModel));
 		

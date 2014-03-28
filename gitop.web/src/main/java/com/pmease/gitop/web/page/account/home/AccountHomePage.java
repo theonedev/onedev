@@ -61,8 +61,8 @@ public class AccountHomePage extends AbstractAccountPage {
 	}
 	
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 		add(new AvatarImage("avatar", accountModel));
 		add(new Label("fullname", new PropertyModel<String>(accountModel, "displayName")));
 		add(new Label("username", new PropertyModel<String>(accountModel, "name")));

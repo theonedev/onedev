@@ -60,8 +60,8 @@ public class CreateRepositoryPage extends BasePage {
 	}
 	
 	@Override
-	protected void onPageInitialize() {
-		super.onPageInitialize();
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		if (Strings.isNullOrEmpty(owner)) {
 			this.owner = Gitop.getInstance(UserManager.class).getCurrent().getName();
