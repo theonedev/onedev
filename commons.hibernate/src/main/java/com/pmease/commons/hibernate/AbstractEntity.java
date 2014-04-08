@@ -38,7 +38,7 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 		if (this == other)
 			return true;
 		AbstractEntity otherEntity = (AbstractEntity) other;
-		if (getId() == null && otherEntity.getId() == null)
+		if (getId() == null || otherEntity.getId() == null)
 			return super.equals(other);
 		else 
 			return new EqualsBuilder().append(getId(), otherEntity.getId()).isEquals();
@@ -53,7 +53,16 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 
 	@Override
 	public int compareTo(AbstractEntity entity) {
-		return getId().compareTo(entity.getId());
+		if (getId() != null) {
+			if (entity.getId() != null)
+				return getId().compareTo(entity.getId());
+			else
+				return -1;
+		} else if (entity.getId() != null) {
+			return 1;
+		} else {
+			return 0;
+		}
 	}
 	
 	public boolean isNew() {
