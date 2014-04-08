@@ -75,7 +75,7 @@ public class EditTeamPage extends AccountSettingPage {
 	@Override
 	protected String getPageTitle() {
 		Team team = getTeam();
-		return team.isNew() ? "Create Team" : team.getOwner().getName() + "'s team " + team.getName();
+		return team.getId() == null ? "Create Team" : team.getOwner().getName() + "'s team " + team.getName();
 	}
 
 	@Override
@@ -87,7 +87,7 @@ public class EditTeamPage extends AccountSettingPage {
 
 			@Override
 			public String getObject() {
-				return getTeam().isNew() ? "Create Team" : "Edit Team";
+				return getTeam().getId() == null ? "Create Team" : "Edit Team";
 			}
 			
 		}));
@@ -107,7 +107,7 @@ public class EditTeamPage extends AccountSettingPage {
 			@Override
 			public List<Team> load() {
 				Team current = getTeam();
-				if (current.isNew()) {
+				if (current.getId() == null) {
 					return Lists.newArrayList(getAccount().getTeams());
 				} else {
 					List<Team> teams = Lists.newArrayList();

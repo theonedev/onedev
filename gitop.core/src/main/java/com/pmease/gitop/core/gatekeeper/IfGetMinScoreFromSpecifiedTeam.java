@@ -50,9 +50,6 @@ public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
 
     @Override
     public CheckResult doCheckRequest(PullRequest request) {
-    	if (request.isNew())
-    		return checkApproval(request.getSubmittedBy());
-    	
         Collection<User> members = new HashSet<User>();
         for (Membership membership : getTeam().getMemberships())
             members.add(membership.getUser());

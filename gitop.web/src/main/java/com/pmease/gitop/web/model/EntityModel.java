@@ -43,7 +43,7 @@ public class EntityModel<T extends AbstractEntity> extends LoadableDetachableMod
 	@Override
 	public void setObject(T object) {
 		super.setObject(object);
-		if (object.isNew())
+		if (object.getId() == null)
 			entity = object;
 		else
 			id = object.getId();

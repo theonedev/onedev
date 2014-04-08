@@ -62,7 +62,7 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
     @Transactional
     @Override
 	public void save(User user) {
-    	boolean isNew = user.isNew();
+    	boolean isNew = user.getId() == null;
     	super.save(user);
     	
     	if (isNew) {

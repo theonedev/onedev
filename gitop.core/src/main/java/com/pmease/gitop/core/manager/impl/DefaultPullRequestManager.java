@@ -106,7 +106,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 	 */
 	@Sessional
 	public void refresh(final PullRequest request) {
-		Preconditions.checkArgument(!request.isNew());
+		Preconditions.checkArgument(request.getId() != null);
 		
 		LockUtils.call(request.getLockName(), new Callable<Void>() {
 
@@ -196,7 +196,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 
 	@Sessional
 	public void initialize(PullRequest request) {
-		Preconditions.checkArgument(request.isNew());
+		Preconditions.checkArgument(request.getId() == null);
 		
     	Git git = new Git(FileUtils.createTempDir());
     	try {

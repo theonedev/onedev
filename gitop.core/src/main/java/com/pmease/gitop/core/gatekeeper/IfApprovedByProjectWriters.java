@@ -37,9 +37,6 @@ public class IfApprovedByProjectWriters extends ApprovalGateKeeper {
 
 	@Override
 	public CheckResult doCheckRequest(PullRequest request) {
-		if (request.isNew())
-			return checkApproval(request.getSubmittedBy(), request.getTarget().getProject());
-		
 		AuthorizationManager authorizationManager = Gitop.getInstance(AuthorizationManager.class);
 		Collection<User> authorizedUsers = authorizationManager.listAuthorizedUsers(
 				request.getTarget().getProject(), GeneralOperation.WRITE);

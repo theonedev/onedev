@@ -37,9 +37,6 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
 
     @Override
     public CheckResult doCheckRequest(PullRequest request) {
-    	if (request.isNew())
-    		return checkApproval(request.getSubmittedBy());
-    	
         UserManager userManager = Gitop.getInstance(UserManager.class);
         User user = userManager.load(getUserId());
 

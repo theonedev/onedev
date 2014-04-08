@@ -73,8 +73,6 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 			commit = request.getMergeInfo().getMergeHead();
 			if (commit == null) 
 				return disapproved("Can not build against merged result due to conflicts.");
-		} else if (request.isNew()) {
-			commit = request.getSource().getHeadCommit();
 		} else {
 			commit = request.getLatestUpdate().getHeadCommit();
 		}

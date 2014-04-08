@@ -64,7 +64,7 @@ public class TeamMembersEditor extends Panel {
 			@Override
 			protected List<User> load() {
 				Team team = getTeam();
-				if (team.isNew()) {
+				if (team.getId() == null) {
 					return Collections.emptyList();
 				}
 

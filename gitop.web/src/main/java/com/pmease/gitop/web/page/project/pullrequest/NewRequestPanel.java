@@ -141,7 +141,7 @@ public class NewRequestPanel extends Panel {
 			@Override
 			public String getObject() {
 				PullRequest request = getPullRequest();
-				if (request.isNew() 
+				if (request.getId() == null
 						&& (request.getStatus() == PENDING_INTEGRATE || request.getStatus() == PENDING_APPROVAL) 
 						&& request.getMergeInfo().getMergeHead() != null) {
 					return "success";
@@ -160,7 +160,7 @@ public class NewRequestPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				PullRequest request = getPullRequest();
-				setVisible(request.isNew() 
+				setVisible(request.getId() == null 
 						&& (request.getStatus() == PENDING_APPROVAL 
 							|| request.getStatus() == PENDING_INTEGRATE)); 
 			}
@@ -212,7 +212,7 @@ public class NewRequestPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				PullRequest request = getPullRequest();
-				setVisible(request.isNew() 
+				setVisible(request.getId() == null 
 						&& (request.getStatus() == PENDING_APPROVAL || request.getStatus() == PENDING_INTEGRATE));
 			}
 
@@ -244,7 +244,7 @@ public class NewRequestPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(!getPullRequest().isNew());
+				setVisible(getPullRequest().getId() != null);
 			}
 
 			@Override
@@ -265,7 +265,7 @@ public class NewRequestPanel extends Panel {
 					return "Please select different branches to pull.";
 				} else {
 					PullRequest request = getPullRequest();
-					if (request.isNew()) {
+					if (request.getId() == null) {
 						if (request.getStatus() == INTEGRATED) {
 							return "No changes to pull.";
 						} else if (request.getStatus() == PENDING_UPDATE) {
@@ -288,7 +288,7 @@ public class NewRequestPanel extends Panel {
 			@Override
 			public String getObject() {
 				PullRequest request = getPullRequest();
-				if (!request.isNew()) {
+				if (request.getId() != null) {
 					return "#" + request.getId() + ": " + request.getTitle();
 				} else if (!getTarget().equals(getSource())) {
 					if (request.getStatus() == INTEGRATED) {
@@ -324,7 +324,7 @@ public class NewRequestPanel extends Panel {
 				super.onConfigure();
 				
 				PullRequest request = getPullRequest();
-				setVisible(request.isNew() && request.getStatus() == PENDING_UPDATE);
+				setVisible(request.getId() == null && request.getStatus() == PENDING_UPDATE);
 			}
 			
 		});

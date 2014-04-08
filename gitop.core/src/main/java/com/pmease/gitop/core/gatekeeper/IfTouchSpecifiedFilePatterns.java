@@ -7,9 +7,9 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestUpdate;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.FileGateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
@@ -40,31 +40,21 @@ public class IfTouchSpecifiedFilePatterns extends FileGateKeeper {
 
 	@Override
 	public CheckResult doCheckRequest(PullRequest request) {
-		if (request.isNew()) {
-			for (String file: request.getTarget().getProject().git().listChangedFiles(
-					request.getTarget().getHeadCommit(), request.getSource().getHeadCommit())) {
-				if (WildcardUtils.matchPath(filePatterns, file))
-						return approved("Touched files match patterns '" + filePatterns + "'.");
-			}
+		for (int i=0; i<request.getEffectiveUpdates().size(); i++) {
+			PullRequestUpdate update = request.getEffectiveUpdates().get(i);
+
+			Collection<String> touchedFiles = request.getTarget().getProject().git()
+					.listChangedFiles(update.getBaseCommit(), update.getHeadCommit());
 			
-			return disapproved("No touched files match patterns '" + filePatterns + "'.");
-		} else {
-			for (int i=0; i<request.getEffectiveUpdates().size(); i++) {
-				PullRequestUpdate update = request.getEffectiveUpdates().get(i);
-	
-				Collection<String> touchedFiles = request.getTarget().getProject().git()
-						.listChangedFiles(update.getBaseCommit(), update.getHeadCommit());
-				
-				for (String file: touchedFiles) {
-					if (WildcardUtils.matchPath(getFilePatterns(), file)) {
-						request.setBaseUpdate(update);
-						return approved("Touched files match patterns '" + getFilePatterns() + "'.");
-					}
+			for (String file: touchedFiles) {
+				if (WildcardUtils.matchPath(getFilePatterns(), file)) {
+					request.setBaseUpdate(update);
+					return approved("Touched files match patterns '" + getFilePatterns() + "'.");
 				}
 			}
-	
-			return disapproved("No touched files match patterns '" + getFilePatterns() + "'.");
 		}
+
+		return disapproved("No touched files match patterns '" + getFilePatterns() + "'.");
 	}
 
 	@Override

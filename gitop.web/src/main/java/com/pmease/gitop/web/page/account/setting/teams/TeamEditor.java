@@ -54,7 +54,7 @@ public class TeamEditor extends Panel {
 				super.onConfigure();
 				
 				Team team = getTeam();
-				setVisibilityAllowed(!team.isNew() && !team.isAnonymous() && !team.isLoggedIn());
+				setVisibilityAllowed(team.getId() != null && !team.isAnonymous() && !team.isLoggedIn());
 			}
 		};
 		
@@ -95,7 +95,7 @@ public class TeamEditor extends Panel {
 								return;
 							}
 							
-							if (!getTeam().isNew() && name.equalsIgnoreCase(oldTeamName)) {
+							if (getTeam().getId() != null && name.equalsIgnoreCase(oldTeamName)) {
 								return; // name not change
 							}
 							
@@ -150,7 +150,7 @@ public class TeamEditor extends Panel {
 				@Override
 				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 					Team team = getTeam();
-					boolean isNew = team.isNew();
+					boolean isNew = team.getId() == null;
 					Gitop.getInstance(TeamManager.class).save(team);
 					if (isNew) {
 						setResponsePage(EditTeamPage.class, EditTeamPage.newParams(team));
