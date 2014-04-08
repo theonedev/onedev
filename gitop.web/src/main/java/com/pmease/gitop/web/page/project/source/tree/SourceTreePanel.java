@@ -53,7 +53,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 
 			@Override
 			protected Commit load() {
-				Git git = getRepo().code();
+				Git git = getRepo().git();
 				List<String> paths = getPaths();
 				List<Commit> commits = git.log(null, getRevision(), Joiner.on("/").join(paths), 1, 0);
 				Commit c = Iterables.getFirst(commits, null);
@@ -122,7 +122,7 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 						else if (mode == FileMode.GITLINK)
 							return "icon-folder-submodule";
 						else if (mode == FileMode.SYMLINK) {
-							Git git = getRepo().code();
+							Git git = getRepo().git();
 							if (git.isTreeLink(path, getRevision()))
 								return "icon-folder-symlink";
 							else

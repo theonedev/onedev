@@ -34,7 +34,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         workGit.clone(bareGit.repoDir().getAbsolutePath(), false);
         
         project = Mockito.mock(Repository.class);
-        Mockito.when(project.code()).thenReturn(bareGit);
+        Mockito.when(project.git()).thenReturn(bareGit);
     }
     
     @Override

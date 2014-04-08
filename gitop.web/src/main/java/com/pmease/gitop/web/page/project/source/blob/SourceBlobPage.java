@@ -46,7 +46,7 @@ public class SourceBlobPage extends AbstractFilePage {
 
 			@Override
 			protected Commit load() {
-				Git git = getProject().code();
+				Git git = getProject().git();
 				List<String> paths = getPaths();
 				List<Commit> commits = git.log(null, getRevision(), Joiner.on("/").join(paths), 1, 0);
 				Commit commit = Iterables.getFirst(commits, null);
@@ -63,7 +63,7 @@ public class SourceBlobPage extends AbstractFilePage {
 
 			@Override
 			protected List<GitPerson> load() {
-				Git git = getProject().code();
+				Git git = getProject().git();
 				List<Commit> commits = git.log(null, getRevision(), getFilePath(), 0, 0);
 				Set<GitPerson> users = Sets.newHashSet();
 				for (Commit each : commits) {

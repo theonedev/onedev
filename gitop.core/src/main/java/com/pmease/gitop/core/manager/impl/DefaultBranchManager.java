@@ -50,7 +50,7 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
     @Sessional
 	@Override
 	public Branch findDefault(Repository project) {
-		return findBy(project, project.code().resolveDefaultBranch());
+		return findBy(project, project.git().resolveDefaultBranch());
 	}
 
     @Transactional
@@ -72,7 +72,7 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
     @Sessional
     @Override
     public void deleteRefs(Branch branch) {
-		branch.getProject().code().deleteBranch(branch.getName());
+		branch.getProject().git().deleteBranch(branch.getName());
     }
 
     @Transactional
@@ -84,7 +84,7 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 
 			public void afterCompletion(int status) {
 				if (status == Status.STATUS_COMMITTED) { 
-					branch.getProject().code().createBranch(branch.getName(), commitHash);
+					branch.getProject().git().createBranch(branch.getName(), commitHash);
 				}
 			}
 
@@ -108,7 +108,7 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 
 			public void afterCompletion(int status) {
 				if (status == Status.STATUS_COMMITTED)  
-					branch.getProject().code().renameBranch(oldName, branch.getName());
+					branch.getProject().git().renameBranch(oldName, branch.getName());
 			}
 
 			public void beforeCompletion() {

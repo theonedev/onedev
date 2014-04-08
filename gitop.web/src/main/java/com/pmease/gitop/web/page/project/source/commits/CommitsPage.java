@@ -80,7 +80,7 @@ public class CommitsPage extends RepositoryTabPage implements IRevisionAware {
 
 			@Override
 			protected List<Commit> load() {
-				Git git = getProject().code();
+				Git git = getProject().git();
 				
 				List<String> paths = getPaths();
 				

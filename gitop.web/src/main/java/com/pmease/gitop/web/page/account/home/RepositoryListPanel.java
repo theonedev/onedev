@@ -56,8 +56,8 @@ public class RepositoryListPanel extends Panel {
 					@Override
 					public Date getObject() {
 						Repository project = Gitop.getInstance(RepositoryManager.class).get(projectId);
-						if (project.code().hasCommits()) {
-							LogCommand command = new LogCommand(project.code().repoDir());
+						if (project.git().hasCommits()) {
+							LogCommand command = new LogCommand(project.git().repoDir());
 							List<Commit> commits = command.maxCount(1).call();
 							Commit first = Iterables.getFirst(commits, null);
 							return first.getCommitter().getDate();

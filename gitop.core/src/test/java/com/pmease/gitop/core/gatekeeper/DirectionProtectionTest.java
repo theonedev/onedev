@@ -127,7 +127,7 @@ public class DirectionProtectionTest extends AbstractGitTest {
 			master.setProject(new Repository() {
 
 				@Override
-				public Git code() {
+				public Git git() {
 					return git;
 				}
 				

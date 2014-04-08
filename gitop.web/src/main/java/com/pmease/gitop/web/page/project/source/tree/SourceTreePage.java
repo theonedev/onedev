@@ -52,7 +52,7 @@ public class SourceTreePage extends AbstractFilePage {
 
 			@Override
 			protected List<TreeNode> load() {
-				Git git = getProject().code();
+				Git git = getProject().git();
 				List<String> paths = getPaths();
 				String path = Joiner.on("/").join(paths);
 				if (!Strings.isNullOrEmpty(path)) {
@@ -82,7 +82,7 @@ public class SourceTreePage extends AbstractFilePage {
 			}
 		};
 		
-		if (getProject().code().hasCommits()) {
+		if (getProject().git().hasCommits()) {
 			add(new RepositoryDescriptionPanel("description", projectModel).setVisibilityAllowed(getPaths().isEmpty()));
 			add(new SourceBreadcrumbPanel("breadcrumb", projectModel, revisionModel, pathsModel));
 			add(new SourceTreePanel("tree", projectModel, revisionModel, pathsModel, nodesModel));

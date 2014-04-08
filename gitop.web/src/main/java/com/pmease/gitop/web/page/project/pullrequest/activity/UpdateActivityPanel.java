@@ -44,7 +44,7 @@ public class UpdateActivityPanel extends Panel {
 			@Override
 			protected List<Commit> load() {
 				PullRequestUpdate update = getPullRequestUpdate();
-				Git git = update.getRequest().getTarget().getProject().code();
+				Git git = update.getRequest().getTarget().getProject().git();
 				
 				int index = update.getRequest().getSortedUpdates().indexOf(update);
 				return git.log(update.getRequest().getSortedUpdates().get(index+1).getHeadCommit(), 

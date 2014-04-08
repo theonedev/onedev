@@ -309,7 +309,7 @@ public class PullRequest extends AbstractEntity {
 		if (effectiveUpdates == null) {
 			effectiveUpdates = new ArrayList<PullRequestUpdate>();
 
-			Git git = getTarget().getProject().code();
+			Git git = getTarget().getProject().git();
 			for (PullRequestUpdate update : getSortedUpdates()) {
 				if (!git.isAncestor(update.getHeadCommit(), getTarget().getHeadCommit())) {
 					effectiveUpdates.add(update);
@@ -333,7 +333,7 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	public Collection<String> findTouchedFiles() {
-		Git git = getTarget().getProject().code();
+		Git git = getTarget().getProject().git();
 		return git.listChangedFiles(getTarget().getHeadCommit(), getLatestUpdate().getHeadCommit());
 	}
 
@@ -349,7 +349,7 @@ public class PullRequest extends AbstractEntity {
 	 * Delete refs of this pull request, without touching refs of its updates.
 	 */
 	public void deleteRefs() {
-		Git git = getTarget().getProject().code();
+		Git git = getTarget().getProject().git();
 		git.deleteRef(getHeadRef());
 		git.deleteRef(getMergeRef());
 	}

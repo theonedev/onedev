@@ -26,7 +26,7 @@ public class EmptyRepositoryPanel extends ProjectPanel {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		this.setVisibilityAllowed(!getProject().code().hasCommits());
+		this.setVisibilityAllowed(!getProject().git().hasCommits());
 	}
 	
 	private String getRepoUrl() {

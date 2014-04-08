@@ -151,8 +151,8 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
 
 			super.save(forked);
 
-            FileUtils.cleanDir(forked.code().repoDir());
-            forked.code().clone(project.code().repoDir().getAbsolutePath(), true);
+            FileUtils.cleanDir(forked.git().repoDir());
+            forked.git().clone(project.git().repoDir().getAbsolutePath(), true);
             
             checkSanity(forked);
 		}
@@ -173,7 +173,7 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
 	public void checkSanity(Repository project) {
 		logger.debug("Checking sanity of project '{}'...", project);
 
-		Git git = project.code();
+		Git git = project.git();
 
 		if (git.repoDir().exists() && !git.isValid()) {
         	logger.warn("Directory '" + git.repoDir() + "' is not a valid git repository, removing...");
@@ -186,8 +186,8 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
             git.init(true);
         }
         
-        if (!Repository.isCode(git)) {
-            File hooksDir = new File(project.code().repoDir(), "hooks");
+        if (!Repository.isValid(git)) {
+            File hooksDir = new File(project.git().repoDir(), "hooks");
 
             File gitUpdateHookFile = new File(hooksDir, "update");
             FileUtils.writeFile(gitUpdateHookFile, gitUpdateHook);
@@ -200,7 +200,7 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
 		
 		logger.debug("Syncing branches of project '{}'...", project);
 		
-		Collection<String> branchesInGit = project.code().listBranches();
+		Collection<String> branchesInGit = project.git().listBranches();
 		for (Branch branch: project.getBranches()) {
 			if (!branchesInGit.contains(branch.getName()))
 				branchManager.delete(branch);
@@ -222,8 +222,8 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
 			}
 		}
 		
-		String defaultBranchName = project.code().resolveDefaultBranch();
+		String defaultBranchName = project.git().resolveDefaultBranch();
 		if (!branchesInGit.isEmpty() && !branchesInGit.contains(defaultBranchName))
-			project.code().updateDefaultBranch(branchesInGit.iterator().next());
+			project.git().updateDefaultBranch(branchesInGit.iterator().next());
 	}
 }

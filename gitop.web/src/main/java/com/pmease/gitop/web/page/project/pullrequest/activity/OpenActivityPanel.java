@@ -50,7 +50,7 @@ public class OpenActivityPanel extends Panel {
 			@Override
 			protected List<Commit> load() {
 				PullRequest request = getPullRequest();
-				Git git = request.getTarget().getProject().code();
+				Git git = request.getTarget().getProject().git();
 				
 				return git.log(request.getTarget().getHeadCommit(), 
 						request.getInitialUpdate().getHeadCommit(), 

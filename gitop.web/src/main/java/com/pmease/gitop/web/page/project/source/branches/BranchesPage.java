@@ -59,7 +59,7 @@ public class BranchesPage extends RepositoryTabPage {
 
 			@Override
 			protected String load() {
-				return GitUtils.getDefaultBranch(getProject().code());
+				return GitUtils.getDefaultBranch(getProject().git());
 			}
 			
 		};
@@ -81,7 +81,7 @@ public class BranchesPage extends RepositoryTabPage {
 
 			@Override
 			protected Map<String, BriefCommit> load() {
-				BranchForEachRefCommand cmd = new BranchForEachRefCommand(getProject().code().repoDir());
+				BranchForEachRefCommand cmd = new BranchForEachRefCommand(getProject().git().repoDir());
 				return cmd.call();
 			}
 		};
@@ -93,7 +93,7 @@ public class BranchesPage extends RepositoryTabPage {
 				List<String> branchNames = getBranchNames();
 				
 				Map<String, AheadBehind> map = Maps.newHashMap();
-				File repoDir = getProject().code().repoDir();
+				File repoDir = getProject().git().repoDir();
 				String defaultBranch = getDefaultBranch();
 				for (String each : branchNames) {
 					if (Objects.equal(defaultBranch, each)) {

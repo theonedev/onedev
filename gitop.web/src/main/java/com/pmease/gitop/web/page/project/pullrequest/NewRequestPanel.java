@@ -92,7 +92,7 @@ public class NewRequestPanel extends Panel {
 			@Override
 			protected List<Commit> load() {
 				PullRequest request = getPullRequest();
-				return getSource().getProject().code().log(request.getMergeInfo().getMergeBase(), 
+				return getSource().getProject().git().log(request.getMergeInfo().getMergeBase(), 
 						getSource().getHeadCommit(), null, 0, 0);
 			}
 			

@@ -58,7 +58,7 @@ public class GitArchiveResource extends AbstractResource {
 			@Override
 			public void writeData(final Attributes attributes) {
 				Repository project = Gitop.getInstance(RepositoryManager.class).get(projectId);
-				ArchiveCommand ac = new ArchiveCommand(project.code().repoDir(),
+				ArchiveCommand ac = new ArchiveCommand(project.git().repoDir(),
 						attributes.getResponse().getOutputStream());
 				
 				if (fileName.endsWith(".zip")) {

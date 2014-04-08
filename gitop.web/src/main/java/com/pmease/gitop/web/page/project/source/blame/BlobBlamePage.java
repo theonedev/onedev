@@ -66,7 +66,7 @@ public class BlobBlamePage extends AbstractFilePage {
 
 			@Override
 			protected List<BlameEntry> load() {
-				BlameCommand cmd = new BlameCommand(getProject().code().repoDir());
+				BlameCommand cmd = new BlameCommand(getProject().git().repoDir());
 				cmd.fileName(getFilePath()).objectId(getRevision());
 				
 				return cmd.call();

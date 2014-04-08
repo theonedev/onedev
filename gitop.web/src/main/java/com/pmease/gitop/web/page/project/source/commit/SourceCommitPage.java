@@ -61,7 +61,7 @@ public class SourceCommitPage extends RepositoryTabPage implements CommitComment
 			protected Commit load() {
 				String revision = getRevision();
 				Repository project = getProject();
-				return project.code().showRevision(revision);
+				return project.git().showRevision(revision);
 			}
 		};
 		
@@ -180,7 +180,7 @@ public class SourceCommitPage extends RepositoryTabPage implements CommitComment
 
 			@Override
 			protected List<String> load() {
-				CommitInCommand command = new CommitInCommand(getProject().code().repoDir());
+				CommitInCommand command = new CommitInCommand(getProject().git().repoDir());
 				command.commit(getRevision()).in(type);
 				return command.call();
 			}

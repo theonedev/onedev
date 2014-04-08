@@ -54,7 +54,7 @@ public class RevisionSelector extends AbstractSourcePagePanel {
 
 			@Override
 			protected Map<RefType, List<String>> load() {
-				Git git = getRepo().code();
+				Git git = getRepo().git();
 				Map<RefType, List<String>> map = Maps.newHashMapWithExpectedSize(RefType.values().length);
 				map.put(RefType.BRANCH, Lists.newArrayList(git.listBranches()));
 				List<String> tags = Lists.newArrayList(git.listTags());

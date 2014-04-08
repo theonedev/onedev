@@ -112,7 +112,7 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 			request.getTarget().setProject(new Repository() {
 
 				@Override
-				public Git code() {
+				public Git git() {
 					return git;
 				}
 				
@@ -126,7 +126,7 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 			request.getSource().setProject(new Repository() {
 
 				@Override
-				public Git code() {
+				public Git git() {
 					return git;
 				}
 				

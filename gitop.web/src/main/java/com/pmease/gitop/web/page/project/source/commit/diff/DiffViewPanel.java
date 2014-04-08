@@ -72,7 +72,7 @@ public class DiffViewPanel extends Panel {
 		String since = getSince();
 		String until = getUntil();
 		
-		Patch patch = new DiffTreeCommand(getProject().code().repoDir())
+		Patch patch = new DiffTreeCommand(getProject().git().repoDir())
 			.since(since)
 			.until(until)
 			.recurse(true) // -r

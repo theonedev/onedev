@@ -17,7 +17,7 @@ public class RepositoryHomePage extends SourceTreePage {
 
 	@Override
 	protected String findRevision(PageParameters params) {
-		String defaultBranch = GitUtils.getDefaultBranch(getProject().code()); //getProject().code().resolveDefaultBranch();
+		String defaultBranch = GitUtils.getDefaultBranch(getProject().git()); //getProject().code().resolveDefaultBranch();
 		return defaultBranch;
 	}
 	

@@ -93,7 +93,7 @@ public abstract class RepositoryTabPage extends RepositoryBasePage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisibilityAllowed(getProject().code().hasCommits());
+				setVisibilityAllowed(getProject().git().hasCommits());
 			}
 		};
 		
@@ -119,10 +119,10 @@ public abstract class RepositoryTabPage extends RepositoryBasePage {
 		}
 		
 		if (Strings.isNullOrEmpty(rev)) {
-			rev = getProject().code().resolveDefaultBranch();
+			rev = getProject().git().resolveDefaultBranch();
 		}
 		
-		Git git = getProject().code();
+		Git git = getProject().git();
 		String hash = git.parseRevision(rev, false);
 		if (hash == null) {
 			throw new EntityNotFoundException("Ref " + rev + " doesn't exist");

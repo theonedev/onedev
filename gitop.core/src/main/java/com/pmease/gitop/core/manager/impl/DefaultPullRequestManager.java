@@ -112,7 +112,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 
 			@Override
 			public Void call() throws Exception {
-				Git git = request.getTarget().getProject().code();
+				Git git = request.getTarget().getProject().git();
 				String branchHead = request.getTarget().getHeadCommit();
 				String requestHead = request.getLatestUpdate().getHeadCommit();
 				
@@ -204,7 +204,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 			request.setBaseCommit(targetHead);
 			String sourceHead = request.getSource().getHeadCommit();
 			
-    		git.clone(request.getTarget().getProject().code().repoDir().getAbsolutePath(), 
+    		git.clone(request.getTarget().getProject().git().repoDir().getAbsolutePath(), 
     				false, true, true, request.getTarget().getName());
     		
     		git.reset(null, null);
@@ -223,7 +223,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 				if (git.isAncestor(targetHead, sourceHead)) {
 					request.setMergeInfo(new MergeInfo(targetHead, sourceHead, targetHead, sourceHead));
 				} else {
-					git.fetch(request.getSource().getProject().code().repoDir().getAbsolutePath(), sourceHead);
+					git.fetch(request.getSource().getProject().git().repoDir().getAbsolutePath(), sourceHead);
 					String mergeBase = git.calcMergeBase(targetHead, sourceHead);
 					if (git.merge(sourceHead, null, null, null))
 						request.setMergeInfo(new MergeInfo(targetHead, sourceHead, mergeBase, git.parseRevision("HEAD", true)));
@@ -277,7 +277,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 			@Override
 			public Boolean call() throws Exception {
 				if (request.getStatus() == Status.PENDING_INTEGRATE) {
-					Git git = request.getTarget().getProject().code();
+					Git git = request.getTarget().getProject().git();
 					if (git.updateRef(request.getTarget().getHeadRef(), 
 							request.getMergeInfo().getMergeHead(), 
 							request.getMergeInfo().getBranchHead(), 

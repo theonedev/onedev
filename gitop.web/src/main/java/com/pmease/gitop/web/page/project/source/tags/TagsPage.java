@@ -58,7 +58,7 @@ public class TagsPage extends RepositoryTabPage {
 
 			@Override
 			protected Map<String, Tag> load() {
-				Map<String, Tag> map = new TagForEachRefCommand(getProject().code().repoDir()).call();
+				Map<String, Tag> map = new TagForEachRefCommand(getProject().git().repoDir()).call();
 				return map;
 			}
 			

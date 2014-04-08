@@ -201,7 +201,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		return getPathName();
 	}
 	
-	public Git code() {
+	public Git git() {
 		if (sandbox != null)
 			return sandbox;
 		else
@@ -213,13 +213,13 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 
 	/**
-	 * Whether or not the code repository is valid. This can be used to tell apart a Gitop 
-	 * repository from some other Git repositories.
+	 * Whether or not specified git represents a valid repository git. This can be used to tell 
+	 * apart a Gitop repository git from some other Git repositories.
 	 * 
 	 * @return
 	 * 			<tt>true</tt> if valid; <tt>false</tt> otherwise
 	 */
-	public static boolean isCode(Git git) {
+	public static boolean isValid(Git git) {
         File updateHook = new File(git.repoDir(), "hooks/update");
         if (!updateHook.exists()) 
         	return false;

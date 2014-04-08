@@ -57,7 +57,7 @@ public class RepositoryOptionsPage extends AbstractRepositorySettingPage {
 
 			@Override
 			public String getObject() {
-				return getProject().code().repoDir().toString();
+				return getProject().git().repoDir().toString();
 			}
 			
 		}));
@@ -66,7 +66,7 @@ public class RepositoryOptionsPage extends AbstractRepositorySettingPage {
 
 			@Override
 			public String getObject() {
-				long size = FileUtils.sizeOf(getProject().code().repoDir());
+				long size = FileUtils.sizeOf(getProject().git().repoDir());
 				return Data.formatBytes(size);
 			}
 			
@@ -117,7 +117,7 @@ public class RepositoryOptionsPage extends AbstractRepositorySettingPage {
 			@Override
 			public List<String> getObject() {
 				Repository project = getProject();
-				Git git = project.code();
+				Git git = project.git();
 				if (git.hasCommits()) {
 					return Lists.newArrayList(git.listBranches());
 				} else {
@@ -126,7 +126,7 @@ public class RepositoryOptionsPage extends AbstractRepositorySettingPage {
 			}
 		};
 		
-		defaultBranchName = GitUtils.getDefaultBranch(getProject().code());
+		defaultBranchName = GitUtils.getDefaultBranch(getProject().git());
 		form.add(new DropDownChoiceElement<String>(
 				"defaultBranch", 
 				"Default Branch",
@@ -150,7 +150,7 @@ public class RepositoryOptionsPage extends AbstractRepositorySettingPage {
 //				project.setDefaultBranchName(defaultBranch);
 				
 				if (!Strings.isNullOrEmpty(defaultBranchName)) {
-					project.code().updateDefaultBranch(defaultBranchName);
+					project.git().updateDefaultBranch(defaultBranchName);
 				}
 				
 				Gitop.getInstance(RepositoryManager.class).save(project);
