@@ -75,7 +75,7 @@ public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
         } else if (lackApprovals < 0) {
             return disapproved("Can not get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
         } else {
-            request.inviteToVote(members, lackApprovals);
+            request.pickVoters(members, lackApprovals);
 
             return pending("To be approved by " + lackApprovals + " users from team '"
                     + getTeam().getName() + ".", new CanVoteBySpecifiedTeam(getTeam()));

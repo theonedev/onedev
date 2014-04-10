@@ -42,7 +42,7 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
 
         Vote.Result result = user.checkVoteSince(request.getBaseUpdate());
         if (result == null) {
-            request.inviteToVote(Sets.newHashSet(user), 1);
+            request.pickVoters(Sets.newHashSet(user), 1);
 
             return pending("To be approved by user '" + user.getName() + "'.",
                     new CanVoteBySpecifiedUser(user));

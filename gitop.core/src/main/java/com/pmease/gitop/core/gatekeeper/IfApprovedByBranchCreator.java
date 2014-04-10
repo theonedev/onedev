@@ -24,7 +24,7 @@ public class IfApprovedByBranchCreator extends ApprovalGateKeeper {
 	        Vote.Result result = branchCreator.checkVoteSince(request.getBaseUpdate());
 	
 	        if (result == null) {
-	            request.inviteToVote(Sets.newHashSet(branchCreator), 1);
+	            request.pickVoters(Sets.newHashSet(branchCreator), 1);
 	            return pending("To be approved by user '" + branchCreator.getName() + "'.",
 	                    new CanVoteBySpecifiedUser(branchCreator));
 	        } else if (result == Vote.Result.APPROVE) {

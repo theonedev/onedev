@@ -18,6 +18,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
@@ -71,6 +72,9 @@ public class PullRequest extends AbstractEntity {
 
 	@ManyToOne
 	private Branch source;
+	
+	@Transient
+	private Git sandbox;
 	
 	@Lob
 	private CheckResult checkResult;
@@ -186,6 +190,21 @@ public class PullRequest extends AbstractEntity {
 
 	public void setSource(@Nullable Branch source) {
 		this.source = source;
+	}
+
+	public Git git() {
+		if (sandbox == null)
+			return getTarget().getProject().git();
+		else
+			return sandbox;
+	}
+
+	public Git getSandbox() {
+		return sandbox;
+	}
+
+	public void setSandbox(Git sandbox) {
+		this.sandbox = sandbox;
 	}
 
 	public Collection<PullRequestUpdate> getUpdates() {
@@ -338,10 +357,12 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	public String getHeadRef() {
+		Preconditions.checkNotNull(getId());
 		return Repository.REFS_GITOP + "pulls/" + getId() + "/head";
 	}
 	
 	public String getMergeRef() {
+		Preconditions.checkNotNull(getId());
 		return Repository.REFS_GITOP + "pulls/" + getId() + "/merge";
 	};
 
@@ -355,6 +376,7 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	public String getLockName() {
+		Preconditions.checkNotNull(getId());
 		return "pull request: " + getId();
 	}
 	
@@ -367,7 +389,7 @@ public class PullRequest extends AbstractEntity {
 	 * @param count 
 	 * 			number of users to invite
 	 */
-	public void inviteToVote(Collection<User> candidates, int count) {
+	public void pickVoters(Collection<User> candidates, int count) {
 		Collection<User> copyOfCandidates = new HashSet<User>(candidates);
 
 		// submitter is not allowed to vote for this request

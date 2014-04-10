@@ -60,7 +60,7 @@ public class IfApprovedByProjectWriters extends ApprovalGateKeeper {
         } else {
             int lackApprovals = getLeastApprovals() - approvals;
 
-            request.inviteToVote(authorizedUsers, lackApprovals);
+            request.pickVoters(authorizedUsers, lackApprovals);
 
             return pending("To be approved by " + lackApprovals + " authorized user(s).", 
             		new CanVoteByAuthorizedUser());

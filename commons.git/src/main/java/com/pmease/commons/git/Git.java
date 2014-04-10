@@ -298,7 +298,10 @@ public class Git implements Serializable {
 	 * 			param
 	 */
 	public boolean isAncestor(String ancestor, String descendant) {
-		return new IsAncestorCommand(repoDir).ancestor(ancestor).descendant(descendant).call();
+		if (ancestor.equals(descendant))
+			return true;
+		else
+			return new IsAncestorCommand(repoDir).ancestor(ancestor).descendant(descendant).call();
 	}
 	
 	public Collection<String> listBranches() {

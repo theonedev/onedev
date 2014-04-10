@@ -76,8 +76,6 @@ public class Repository extends AbstractEntity implements UserBelonging {
     @OneToMany(mappedBy="forkedFrom", cascade=CascadeType.REMOVE)
 	private Collection<Repository> forks = new ArrayList<Repository>();
     
-    private transient Git sandbox;
-    
 	public User getOwner() {
 		return owner;
 	}
@@ -202,16 +200,9 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	public Git git() {
-		if (sandbox != null)
-			return sandbox;
-		else
-			return new Git(AppLoader.getInstance(StorageManager.class).getStorage(this));
+		return new Git(AppLoader.getInstance(StorageManager.class).getStorage(this));
 	}
 	
-	public void setSandbox(Git sandbox) {
-		this.sandbox = sandbox;
-	}
-
 	/**
 	 * Whether or not specified git represents a valid repository git. This can be used to tell 
 	 * apart a Gitop repository git from some other Git repositories.

@@ -59,7 +59,7 @@ public class IfApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
         } else {
             int lackApprovals = getLeastApprovals() - approvals;
 
-            request.inviteToVote(members, lackApprovals);
+            request.pickVoters(members, lackApprovals);
 
             return pending("To be approved by " + lackApprovals + " user(s) from team '"
                     + getTeam().getName() + "'.", new CanVoteBySpecifiedTeam(getTeam()));

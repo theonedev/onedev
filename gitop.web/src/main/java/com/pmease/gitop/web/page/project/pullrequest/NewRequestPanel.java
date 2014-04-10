@@ -5,6 +5,7 @@ import static com.pmease.gitop.model.PullRequest.Status.PENDING_APPROVAL;
 import static com.pmease.gitop.model.PullRequest.Status.PENDING_INTEGRATE;
 import static com.pmease.gitop.model.PullRequest.Status.PENDING_UPDATE;
 
+import java.io.File;
 import java.util.List;
 
 import org.apache.wicket.MarkupContainer;
@@ -28,11 +29,13 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Commit;
+import com.pmease.commons.util.ExceptionUtils;
+import com.pmease.commons.util.FileUtils;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.component.commit.CommitsTablePanel;
 import com.pmease.gitop.web.component.comparablebranchselector.ComparableBranchSelector;
@@ -75,14 +78,25 @@ public class NewRequestPanel extends Panel {
 				if (request != null) {
 					return request;
 				} else {
-					request = new PullRequest();
-					request.setTarget(getTarget());
-					request.setSource(getSource());
-					request.setSubmittedBy(getSubmitter());
-					Gitop.getInstance(PullRequestManager.class).refresh(request);
-					
-					return request;
+					File sandbox = FileUtils.createTempDir();
+					try {
+						return Gitop.getInstance(PullRequestManager.class).preview(getTarget(), getSource(), 
+								getSubmitter(), sandbox);
+					} catch (Exception e) {
+						FileUtils.deleteDir(sandbox);
+						throw ExceptionUtils.unchecked(e);
+					}
 				}
+			}
+
+			@Override
+			protected void onDetach() {
+				PullRequest request = getObject();
+				if (request.getSandbox() != null) {
+					FileUtils.deleteDir(request.getSandbox().repoDir());
+					request.setSandbox(null);
+				}
+				super.onDetach();
 			}
 			
 		};
@@ -221,10 +235,19 @@ public class NewRequestPanel extends Panel {
 				String title = getTitle();
 				if (title != null) {
 					PullRequestManager pullRequestManager = Gitop.getInstance(PullRequestManager.class);
-					PullRequest pullRequest = pullRequestManager.create(getTarget(), getSource(), 
-							getSubmitter(), title, comment, false);
-					setResponsePage(OpenRequestsPage.class, 
-							PageSpec.forRepository(pullRequest.getTarget().getProject()));
+
+					PullRequest request = getPullRequest();
+					
+					if (request.getStatus() != INTEGRATED) {
+						request.setAutoMerge(false);
+						request.setTitle(title);
+						request.setDescription(comment);
+						
+						pullRequestManager.realize(request);
+						
+						setResponsePage(OpenRequestsPage.class, 
+								PageSpec.forRepository(request.getTarget().getProject()));
+					}
 				}
 			}
 
@@ -395,7 +418,13 @@ public class NewRequestPanel extends Panel {
 	}
 	
 	private PullRequest getPullRequest() {
-		return pullRequestModel.getObject();
+		PullRequest request = pullRequestModel.getObject();
+		if (request.getSandbox() != null) {
+			FileUtils.deleteDir(request.getSandbox().repoDir());
+			request.setSandbox(null);
+		}
+		
+		return request;
 	}
 	
 	private List<Commit> getCommits() {

@@ -1,5 +1,6 @@
 package com.pmease.gitop.core.manager;
 
+import java.io.File;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -18,7 +19,7 @@ public interface PullRequestManager extends GenericDao<PullRequest> {
 
     void refresh(PullRequest request);
     
-    void initialize(PullRequest request);
+    PullRequest preview(Branch target, Branch source, User submitter, File sandbox);
     
     boolean merge(PullRequest request, @Nullable User user, @Nullable String comment);
     
@@ -42,6 +43,5 @@ public interface PullRequestManager extends GenericDao<PullRequest> {
      */
     void deleteRefs(PullRequest request);
     
-    PullRequest create(Branch target, Branch source, User submitter, String title, 
-    		@Nullable String description, boolean autoMerge);
+    void realize(PullRequest request);
 }

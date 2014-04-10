@@ -23,7 +23,7 @@ public class IfApprovedByProjectOwner extends ApprovalGateKeeper {
         Vote.Result result = projectOwner.checkVoteSince(request.getBaseUpdate());
 
         if (result == null) {
-            request.inviteToVote(Sets.newHashSet(projectOwner), 1);
+            request.pickVoters(Sets.newHashSet(projectOwner), 1);
             return pending("To be approved by user '" + projectOwner.getName() + "'.",
                     new CanVoteBySpecifiedUser(projectOwner));
         } else if (result == Vote.Result.APPROVE) {

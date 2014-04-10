@@ -1,7 +1,5 @@
 package com.pmease.gitop.core.manager.impl;
 
-import java.util.Date;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -13,19 +11,15 @@ import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.core.manager.PullRequestUpdateManager;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestUpdate;
-import com.pmease.gitop.model.User;
 
 @Singleton
 public class DefaultPullRequestUpdateManager extends AbstractGenericDao<PullRequestUpdate>
 		implements PullRequestUpdateManager {
-
-	private final PullRequestManager pullRequestManager;
 	
 	@Inject
 	public DefaultPullRequestUpdateManager(GeneralDao generalDao, 
 			PullRequestManager pullRequestManager) {
 		super(generalDao);
-		this.pullRequestManager = pullRequestManager;
 	}
 
 	@Transactional
@@ -46,18 +40,12 @@ public class DefaultPullRequestUpdateManager extends AbstractGenericDao<PullRequ
 
 	@Transactional
 	@Override
-	public void update(PullRequest request, User user) {
-		String sourceHead = request.getSource().getHeadCommit();
-		
-		PullRequestUpdate update = new PullRequestUpdate();
-		update.setRequest(request);
-		update.setUser(user);
-		request.getUpdates().add(update);
-		update.setHeadCommit(sourceHead);
-		request.setUpdateDate(new Date());
+	public void realize(PullRequestUpdate update) {
 		save(update);
-		pullRequestManager.save(request);
 		
+		PullRequest request = update.getRequest();
+		String sourceHead = request.getSource().getHeadCommit();
+
 		if (!request.getTarget().getProject().equals(request.getSource().getProject())) {
 			request.getTarget().getProject().git().fetch(
 					request.getSource().getProject().git().repoDir().getAbsolutePath(), 

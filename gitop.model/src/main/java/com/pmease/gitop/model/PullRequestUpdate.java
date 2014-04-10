@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -19,6 +20,7 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.commons.util.LockUtils;
 
 @SuppressWarnings("serial")
 @Entity
@@ -82,10 +84,12 @@ public class PullRequestUpdate extends AbstractEntity {
 	}
 	
 	public String getBaseRef() {
+		Preconditions.checkNotNull(getId());
 		return Repository.REFS_GITOP + "updates/" + getId() + "/base";
 	}
 	
 	public String getHeadRef() {
+		Preconditions.checkNotNull(getId());
 		return Repository.REFS_GITOP + "updates/" + getId() + "/head";
 	}
 
@@ -122,35 +126,40 @@ public class PullRequestUpdate extends AbstractEntity {
 			} else if (git.isAncestor(mergeBase, previousUpdate)) {
 				baseCommit = previousUpdate;
 			} else {
-				String baseRef = getBaseRef();
-				baseCommit = git.parseRevision(baseRef, false);
-
-				if (baseCommit != null) {
-					Commit commit = git.showRevision(baseCommit);
-					if (!commit.getParentHashes().contains(mergeBase) || !commit.getParentHashes().contains(previousUpdate)) 
-						baseCommit = null;
-				} 
-				
-				if (baseCommit == null) {
-					File tempDir = FileUtils.createTempDir();
-					try {
-						Git tempGit = new Git(tempDir);
-						
-						/*
-						 * Branch name here is not significant, we just use an existing branch
-						 * in cloned repository to hold mergeBase, so that we can merge with 
-						 * previousUpdate 
-						 */
-						String branchName = getRequest().getTarget().getName();
-						tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, branchName);
-						tempGit.updateRef("HEAD", mergeBase, null, null);
-						tempGit.reset(null, null);
-						Preconditions.checkState(tempGit.merge(previousUpdate, null, "ours", null));
-						git.fetch(tempGit.repoDir().getAbsolutePath(), "+HEAD:" + baseRef);
-						baseCommit = git.parseRevision(baseRef, true);
-					} finally {
-						FileUtils.deleteDir(tempDir);
+				Lock lock = LockUtils.lock(getLockName());
+				try {
+					String baseRef = getBaseRef();
+					baseCommit = git.parseRevision(baseRef, false);
+	
+					if (baseCommit != null) {
+						Commit commit = git.showRevision(baseCommit);
+						if (!commit.getParentHashes().contains(mergeBase) || !commit.getParentHashes().contains(previousUpdate)) 
+							baseCommit = null;
+					} 
+					
+					if (baseCommit == null) {
+						File tempDir = FileUtils.createTempDir();
+						try {
+							Git tempGit = new Git(tempDir);
+							
+							/*
+							 * Branch name here is not significant, we just use an existing branch
+							 * in cloned repository to hold mergeBase, so that we can merge with 
+							 * previousUpdate 
+							 */
+							String branchName = getRequest().getTarget().getName();
+							tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, branchName);
+							tempGit.updateRef("HEAD", mergeBase, null, null);
+							tempGit.reset(null, null);
+							Preconditions.checkState(tempGit.merge(previousUpdate, null, "ours", null));
+							git.fetch(tempGit.repoDir().getAbsolutePath(), "+HEAD:" + baseRef);
+							baseCommit = git.parseRevision(baseRef, true);
+						} finally {
+							FileUtils.deleteDir(tempDir);
+						}
 					}
+				} finally {
+					lock.unlock();
 				}
 			}
 		}
@@ -184,4 +193,10 @@ public class PullRequestUpdate extends AbstractEntity {
 		git.deleteRef(getHeadRef());
 		git.deleteRef(getBaseRef());
 	}
+	
+	public String getLockName() {
+		Preconditions.checkNotNull(getId());
+		return "pull request update: " + getId();
+	}
+	
 }

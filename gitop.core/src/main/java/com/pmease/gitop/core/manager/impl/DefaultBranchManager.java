@@ -1,6 +1,7 @@
 package com.pmease.gitop.core.manager.impl;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -21,6 +22,7 @@ import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.core.manager.PullRequestUpdateManager;
 import com.pmease.gitop.model.Branch;
+import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
@@ -150,7 +152,17 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 		}
 		
 		for (PullRequest request: branchRequests.values()) {
-			pullRequestUpdateManager.update(request, user);
+			PullRequestUpdate update = new PullRequestUpdate();
+			request.getUpdates().add(update);
+			update.setRequest(request);
+			update.setUser(user);
+			
+			request.getUpdates().add(update);
+			update.setHeadCommit(branch.getHeadCommit());
+			
+			pullRequestUpdateManager.realize(update);
+
+			request.setUpdateDate(new Date());
 			pullRequestManager.refresh(request);
 		}		
 	}
