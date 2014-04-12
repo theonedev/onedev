@@ -52,7 +52,7 @@ public class OpenActivityPanel extends Panel {
 				PullRequest request = getPullRequest();
 				Git git = request.getTarget().getProject().git();
 				
-				return git.log(request.getTarget().getHeadCommit(), 
+				return git.log(request.getBaseCommit(), 
 						request.getInitialUpdate().getHeadCommit(), 
 						null, 0, 0); 
 			}
