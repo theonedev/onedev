@@ -148,10 +148,11 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 	public User getCurrent() {
 		Long userId = User.getCurrentId();
 		if (userId != 0L) {
-			return load(userId);
-		} else {
-			return null;
+			User user = get(userId);
+			if (user != null)
+				return user;
 		}
+		return null;
 	}
 
 	@Override

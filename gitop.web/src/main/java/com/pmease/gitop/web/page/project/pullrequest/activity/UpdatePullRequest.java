@@ -5,6 +5,7 @@ import java.util.Date;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import com.pmease.gitop.model.PullRequestUpdate;
+import com.pmease.gitop.model.User;
 
 public class UpdatePullRequest implements PullRequestActivity {
 
@@ -22,6 +23,16 @@ public class UpdatePullRequest implements PullRequestActivity {
 	@Override
 	public Date getDate() {
 		return update.getDate();
+	}
+
+	@Override
+	public User getUser() {
+		return update.getUser();
+	}
+
+	@Override
+	public String getAction() {
+		return "Updated";
 	}
 
 }

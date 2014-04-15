@@ -5,6 +5,7 @@ import java.util.Date;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.User;
 
 public class OpenPullRequest implements PullRequestActivity {
 
@@ -22,6 +23,16 @@ public class OpenPullRequest implements PullRequestActivity {
 	@Override
 	public Date getDate() {
 		return request.getCreateDate();
+	}
+
+	@Override
+	public User getUser() {
+		return request.getSubmittedBy();
+	}
+
+	@Override
+	public String getAction() {
+		return "Opened";
 	}
 
 }

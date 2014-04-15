@@ -1,18 +1,31 @@
 <wicket:panel>
-	<div wicket:id="activities">
-		<div wicket:id="activity" class="activity"></div>
-	</div>
-	<div wicket:id="commentContainer" class="panel panel-default">
-		<div class="panel-heading clearfix">
-			<div class="pull-left">
-				<span wicket:id="user"></span> to add new comment			
-			</div>
-			<div class="pull-right">
-				<a wicket:id="saveComment" title="Save new comment"><span class="icon icon-lg icon-add"></span></a>
-			</div>
-		</div>
-		<div class="panel-body">
-			<textarea wicket:id="comment" rows="6" class="form-control" placeholder="Leave a comment"></textarea>
-		</div>
-	</div> 
+	<table class="table table-striped">
+		<tr wicket:id="activities">
+			<td class="summary">
+				<div wicket:id="userAvatar"></div>
+				<div wicket:id="userName"></div>
+				<div class="text">
+					<span wicket:id="action"></span> <span wicket:id="date"></span>
+				</div>
+			</td>
+			<td class="detail">
+				<div wicket:id="detail"></div>
+			</td>
+		</tr>
+		<tr wicket:id="newCommentContainer">
+			<td class="summary">
+				<div wicket:id="userAvatar"></div>
+				<div wicket:id="userName"></div>
+				<div class="text">
+					Add new comment
+				</div>
+			</td>
+			<td class="detail">
+				<textarea wicket:id="content" rows="6" class="form-control" placeholder="Leave a comment"></textarea>
+				<div class="top-spacing">
+					<a wicket:id="save" class="btn btn-sm btn-primary" disabled="disabled">Post New Comment</a>
+				</div>
+			</td>
+		</tr>
+	</table>
 </wicket:panel>

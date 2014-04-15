@@ -11,17 +11,13 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
+import com.pmease.commons.wicket.behavior.DisableIfBlankBehavior;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.AuthorizationManager;
 import com.pmease.gitop.core.manager.PullRequestCommentManager;
 import com.pmease.gitop.model.PullRequestComment;
-import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.component.link.GitPersonLink;
-import com.pmease.gitop.web.page.project.api.GitPerson;
-import com.pmease.gitop.web.util.DateUtils;
 
 @SuppressWarnings("serial")
 public class CommentActivityPanel extends Panel {
@@ -41,25 +37,7 @@ public class CommentActivityPanel extends Panel {
 		else
 			fragment.add(new Label("comment", "<i>No description</i>").setEscapeModelStrings(false));
 		
-		return fragment;
-	}
-
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-
-		PullRequestComment comment = getComment();
-		User user = comment.getUser();
-		if (user != null) {
-			GitPerson person = new GitPerson(user.getName(), user.getEmail());
-			add(new GitPersonLink("user", Model.of(person), GitPersonLink.Mode.NAME_AND_AVATAR));
-		} else {
-			add(new Label("<i>Unknown</i>").setEscapeModelStrings(false));
-		}
-		
-		add(new Label("date", DateUtils.formatAge(comment.getDate())));
-		
-		add(new AjaxLink<Void>("edit") {
+		fragment.add(new AjaxLink<Void>("edit") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -111,6 +89,8 @@ public class CommentActivityPanel extends Panel {
 					
 				});
 				
+				commentArea.add(new DisableIfBlankBehavior(fragment.get("save")));
+				
 				fragment.add(new AjaxLink<Void>("cancel") {
 
 					@Override
@@ -137,15 +117,30 @@ public class CommentActivityPanel extends Panel {
 
 		});
 		
-		add(new Link<Void>("delete") {
+		fragment.add(new Link<Void>("delete") {
 
 			@Override
 			public void onClick() {
 				Gitop.getInstance(PullRequestCommentManager.class).delete(getComment());
 			}
 			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisible(Gitop.getInstance(AuthorizationManager.class)
+						.canModify(getComment().getRequest()));
+			}
+
 		}.add(new ConfirmBehavior("Do you really want to delete this comment?")));
 		
+		return fragment;
+	}
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+
 		add(renderForView());
 
 		setOutputMarkupId(true);

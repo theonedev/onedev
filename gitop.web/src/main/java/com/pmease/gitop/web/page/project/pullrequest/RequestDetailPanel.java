@@ -273,7 +273,7 @@ public class RequestDetailPanel extends Panel {
 			
 		}));
 
-		WebMarkupContainer statusContainer = new WebMarkupContainer("status") {
+		final WebMarkupContainer statusContainer = new WebMarkupContainer("status") {
 
 			@Override
 			protected void onConfigure() {
@@ -282,6 +282,7 @@ public class RequestDetailPanel extends Panel {
 			}
 			
 		};
+		statusContainer.setOutputMarkupId(true);
 		add(statusContainer);
 		
 		statusContainer.add(new RequestStatusPanel("message", new AbstractReadOnlyModel<PullRequest>() {
@@ -384,7 +385,7 @@ public class RequestDetailPanel extends Panel {
 				super.onConfigure();
 
 				boolean visible = false;
-				for (Component link: visitChildren(Link.class)) {
+				for (Component link: visitChildren(AjaxLink.class)) {
 					link.configure();
 					if (link.isVisible())
 						visible = true;
@@ -395,12 +396,13 @@ public class RequestDetailPanel extends Panel {
 		};
 		statusContainer.add(actionsContainer);
 		
-		final Link<Void> approveLink;
-		actionsContainer.add(approveLink = new Link<Void>("approve") {
+		final AjaxLink<Void> approveLink;
+		actionsContainer.add(approveLink = new AjaxLink<Void>("approve") {
 
 			@Override
-			public void onClick() {
+			public void onClick(AjaxRequestTarget target) {
 				action = Action.Approve;
+				target.add(statusContainer);
 			}
 
 			@Override
@@ -434,11 +436,12 @@ public class RequestDetailPanel extends Panel {
 			
 		});
 		
-		actionsContainer.add(new Link<Void>("disapprove") {
+		actionsContainer.add(new AjaxLink<Void>("disapprove") {
 
 			@Override
-			public void onClick() {
+			public void onClick(AjaxRequestTarget target) {
 				action = Action.Disapprove;
+				target.add(statusContainer);
 			}
 
 			@Override
@@ -451,7 +454,7 @@ public class RequestDetailPanel extends Panel {
 			
 		});
 		
-		actionsContainer.add(new Link<Void>("integrate") {
+		actionsContainer.add(new AjaxLink<Void>("integrate") {
 
 			@Override
 			protected void onConfigure() {
@@ -466,13 +469,14 @@ public class RequestDetailPanel extends Panel {
 			}
 
 			@Override
-			public void onClick() {
+			public void onClick(AjaxRequestTarget target) {
 				action = Action.Integrate;
+				target.add(statusContainer);
 			}
 			
 		});
 		
-		actionsContainer.add(new Link<Void>("discard") {
+		actionsContainer.add(new AjaxLink<Void>("discard") {
 
 			@Override
 			protected void onConfigure() {
@@ -483,8 +487,9 @@ public class RequestDetailPanel extends Panel {
 			}
 
 			@Override
-			public void onClick() {
+			public void onClick(AjaxRequestTarget target) {
 				action = Action.Discard;
+				target.add(statusContainer);
 			}
 			
 		});
@@ -551,12 +556,13 @@ public class RequestDetailPanel extends Panel {
 			}
 			
 		})));
-		commentEditor.add(new Link<Void>("cancel") {
+		commentEditor.add(new AjaxLink<Void>("cancel") {
 
 			@Override
-			public void onClick() {
+			public void onClick(AjaxRequestTarget target) {
 				action = null;
 				comment = null;
+				target.add(statusContainer);
 			}
 			
 		});

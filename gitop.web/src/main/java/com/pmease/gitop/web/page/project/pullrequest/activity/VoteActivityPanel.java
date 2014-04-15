@@ -4,30 +4,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.AuthorizationManager;
 import com.pmease.gitop.core.manager.VoteManager;
 import com.pmease.gitop.model.Vote;
-import com.pmease.gitop.web.component.link.GitPersonLink;
-import com.pmease.gitop.web.page.project.api.GitPerson;
-import com.pmease.gitop.web.util.DateUtils;
 
 @SuppressWarnings("serial")
 public class VoteActivityPanel extends Panel {
 
-	private WebMarkupContainer container;
-	
 	private String comment;
 	
 	public VoteActivityPanel(String id, IModel<Vote> model) {
@@ -35,61 +28,23 @@ public class VoteActivityPanel extends Panel {
 	}
 	
 	private Fragment renderForView() {
-		Fragment fragment = new Fragment("body", "viewFrag", this);
+		Fragment fragment = new Fragment("comment", "viewFrag", this);
 
 		comment = getVote().getComment();
 		if (StringUtils.isNotBlank(comment))
-			fragment.add(new MultiLineLabel("comment", comment));
+			fragment.add(new MultiLineLabel("content", comment));
 		else
-			fragment.add(new Label("comment", "<i>No comment</i>").setEscapeModelStrings(false));
+			fragment.add(new Label("content", "<i>No comment</i>").setEscapeModelStrings(false));
 		
-		return fragment;
-	}
-
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
-		container = new WebMarkupContainer("container");
-		container.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				if (getVote().getResult() == Vote.Result.APPROVE)
-					return "panel-info";
-				else
-					return "panel-warning";
-			}
-			
-		}));
-		
-		container.add(new GitPersonLink("user", new LoadableDetachableModel<GitPerson>() {
-
-			@Override
-			protected GitPerson load() {
-				GitPerson person = new GitPerson(getVote().getVoter().getName(), 
-						getVote().getVoter().getEmail());
-				return person;
-			}
-			
-		}, GitPersonLink.Mode.NAME_AND_AVATAR));
-		
-		if (getVote().getResult() == Vote.Result.APPROVE) 
-			container.add(new Label("vote", "approved"));
-		else
-			container.add(new Label("vote", "disapproved"));
-		
-		container.add(new Label("date", DateUtils.formatAge(getVote().getDate())));
-		
-		container.add(new AjaxLink<Void>("edit") {
+		fragment.add(new AjaxLink<Void>("edit") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				comment = getVote().getComment();
 				
-				Fragment fragment = new Fragment("body", "editFrag", VoteActivityPanel.this);
+				Fragment fragment = new Fragment("comment", "editFrag", VoteActivityPanel.this);
 				
-				final TextArea<String> commentArea = new TextArea<String>("comment", new IModel<String>() {
+				final TextArea<String> commentArea = new TextArea<String>("content", new IModel<String>() {
 
 					@Override
 					public void detach() {
@@ -127,8 +82,8 @@ public class VoteActivityPanel extends Panel {
 						Gitop.getInstance(VoteManager.class).save(vote);
 
 						Fragment fragment = renderForView();
-						container.replace(fragment);
-						target.add(container);
+						VoteActivityPanel.this.replace(fragment);
+						target.add(VoteActivityPanel.this);
 					}
 					
 				});
@@ -138,15 +93,15 @@ public class VoteActivityPanel extends Panel {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						Fragment fragment = renderForView();
-						container.replace(fragment);
-						target.add(container);
+						VoteActivityPanel.this.replace(fragment);
+						target.add(VoteActivityPanel.this);
 					}
 					
 				});
 				
-				container.replace(fragment);
+				VoteActivityPanel.this.replace(fragment);
 				
-				target.add(container);
+				target.add(VoteActivityPanel.this);
 			}
 
 			@Override
@@ -159,11 +114,33 @@ public class VoteActivityPanel extends Panel {
 
 		});
 		
-		container.add(renderForView());
+		return fragment;
+	}
 
-		container.setOutputMarkupId(true);
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
 		
-		add(container);
+		add(renderForView());
+
+		add(new WebMarkupContainer("icon") {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				
+				if (getVote().getResult() == Vote.Result.APPROVE) {
+					tag.put("class",  "icon icon-2x icon-arrow-slim-up-circle");
+					tag.put("title", "Approved");
+				} else {
+					tag.put("class",  "icon icon-2x icon-arrow-slim-down-circle");
+					tag.put("title", "Disapproved");
+				}
+			}
+			
+		});
+
+		setOutputMarkupId(true);
 	}
 
 	private Vote getVote() {

@@ -819,7 +819,7 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.status {background: #F2F2F2; border-radius: 4px;}
 .request-detail>.status table {border-collapse: separate; border-spacing: 4px;}
 .request-detail>.status td.primary {border: 1px solid; padding: 8px; border-radius: 4px;
-	color: #8A6D3B; border-color: #F7DEAB; background-color: #FCF8E3;}
+	color: #8A6D3B; border-color: #F7DEAB; background-color: #FCF8E3; width: 50%;}
 .request-detail>.status td.primary .message {font-size: 18px;}
 .request-detail>.status td.primary .reasons {margin-top: 8px; padding-left: 24px;}
 .request-detail>.status td.merge {border: 1px solid; padding: 8px; border-radius: 4px;}
@@ -834,16 +834,27 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.status td.merge.success .icon-ok-circle {display: block; color: #3C763D;}
 .request-detail>.status>form>table {border-spacing: 3px;}
 
-.request-detail>.activities td.actions {padding-left: 8px;}
-.request-detail>.activities .panel {margin-bottom: 16px;}
-.request-detail>.activities>div:last-child .panel {margin-bottom: 0;}
-.request-detail>.activities .panel-heading {padding: 4px 8px;}
-.request-detail>.activities .panel-body {padding: 8px;}
-.request-detail>.activities .panel-heading {font-size: 16px;}
-.request-detail>.activities .commits table {font-family: monospace; margin-bottom: 0;}
-.request-detail>.activities .commits table tbody tr td {
-	border-top: none;}
-.request-detail>.activities .commits .table-striped tbody tr:nth-child(2n+1) td {
-	background-color: #F5F5F5;} 
-	
-.request-detail>.activities .description {margin-bottom: 12px;}
+.request-detail>.activities>table>tbody>tr>td {padding: 8px;}
+.request-detail>.activities td.summary {width: 240px; padding-right: 8px;}
+.request-detail>.activities td.summary .avatar {width: 48px; height: 48px;} 
+.request-detail>.activities td.summary .text {color: #666; font-size: 13px;}
+.request-detail>.activities td.detail .icon-2x {cursor: default; position: relative;
+	background: url("/assets/img/commits.png") no-repeat 0 7px;
+	padding-left: 24px; margin: 0 0 8px -14px;}
+.request-detail>.activities .icon-delete-circle {color: #D9534F;}
+.request-detail>.activities .icon-arrow-slim-down-circle {color: #ED9C28;}
+.request-detail>.activities .icon-check-circle {color: #5CB85C;}
+.request-detail>.activities .icon-arrow-slim-up-circle {color: #39B3D7;}
+.request-detail>.activities td.detail {border-left: 2px solid #BBB;}
+
+table.update-commits {margin-left: -14px;}
+table.update-commits tr>td.handle {
+	background: url("/assets/img/commits.png") no-repeat 0 6px;
+	padding-left: 24px; width: 1px; position: relative;}
+table.update-commits tr>td.data.overview {width: 360px;}
+table.update-commits tr>td.data.status {width: 1%;}
+table.update-commits {font-family: monospace; margin-bottom: 0;}
+table.update-commits tbody tr td {border-top: none;}
+table.update-commits tr:nth-child(odd) td.data {background: #E3F3FD;}
+table.update-commits tbody>tr:hover td.data {background: #FCF2CE;}
+table.update-commits .label {font-family: cursive;}

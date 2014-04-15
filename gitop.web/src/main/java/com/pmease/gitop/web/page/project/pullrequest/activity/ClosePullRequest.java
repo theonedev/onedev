@@ -4,7 +4,9 @@ import java.util.Date;
 
 import org.apache.wicket.markup.html.panel.Panel;
 
+import com.pmease.gitop.model.CloseInfo;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.User;
 
 public class ClosePullRequest implements PullRequestActivity {
 
@@ -22,6 +24,19 @@ public class ClosePullRequest implements PullRequestActivity {
 	@Override
 	public Date getDate() {
 		return request.getCloseInfo().getCloseDate();
+	}
+
+	@Override
+	public User getUser() {
+		return request.getCloseInfo().getClosedBy();
+	}
+
+	@Override
+	public String getAction() {
+		if (request.getCloseInfo().getCloseStatus() == CloseInfo.Status.INTEGRATED)
+			return "Integrated";
+		else
+			return "Discarded";
 	}
 
 }

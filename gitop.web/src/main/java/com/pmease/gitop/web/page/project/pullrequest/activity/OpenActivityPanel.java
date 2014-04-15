@@ -1,7 +1,5 @@
 package com.pmease.gitop.web.page.project.pullrequest.activity;
 
-import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -11,21 +9,15 @@ import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 
-import com.pmease.commons.git.Commit;
-import com.pmease.commons.git.Git;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.AuthorizationManager;
 import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.model.PullRequest;
-import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.component.link.GitPersonLink;
-import com.pmease.gitop.web.page.project.api.GitPerson;
-import com.pmease.gitop.web.page.project.pullrequest.CommitListPanel;
-import com.pmease.gitop.web.util.DateUtils;
+import com.pmease.gitop.model.PullRequestUpdate;
+import com.pmease.gitop.web.page.project.pullrequest.UpdateCommitsPanel;
 
 @SuppressWarnings("serial")
 public class OpenActivityPanel extends Panel {
@@ -37,55 +29,23 @@ public class OpenActivityPanel extends Panel {
 	}
 	
 	private Fragment renderForView() {
-		Fragment fragment = new Fragment("body", "viewFrag", this);
+		Fragment fragment = new Fragment("description", "viewFrag", this);
 
 		description = getPullRequest().getDescription();
 		if (StringUtils.isNotBlank(description))
-			fragment.add(new MultiLineLabel("description", description));
+			fragment.add(new MultiLineLabel("content", description));
 		else
-			fragment.add(new Label("description", "<i>No description</i>").setEscapeModelStrings(false));
+			fragment.add(new Label("content", "<i>No description</i>").setEscapeModelStrings(false));
 		
-		fragment.add(new CommitListPanel("commits", new LoadableDetachableModel<List<Commit>>() {
-
-			@Override
-			protected List<Commit> load() {
-				PullRequest request = getPullRequest();
-				Git git = request.getTarget().getProject().git();
-				
-				return git.log(request.getBaseCommit(), 
-						request.getInitialUpdate().getHeadCommit(), 
-						null, 0, 0); 
-			}
-			
-		}));
-		
-		return fragment;
-	}
-
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
-		PullRequest request = getPullRequest();
-		User submittedBy = request.getSubmittedBy();
-		if (submittedBy != null) {
-			GitPerson person = new GitPerson(submittedBy.getName(), submittedBy.getEmail());
-			add(new GitPersonLink("user", Model.of(person), GitPersonLink.Mode.NAME_AND_AVATAR));
-		} else {
-			add(new Label("<i>Unknown</i>").setEscapeModelStrings(false));
-		}
-		
-		add(new Label("date", DateUtils.formatAge(request.getCreateDate())));
-		
-		add(new AjaxLink<Void>("edit") {
+		fragment.add(new AjaxLink<Void>("edit") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				description = getPullRequest().getDescription();
 				
-				Fragment fragment = new Fragment("body", "editFrag", OpenActivityPanel.this);
+				Fragment fragment = new Fragment("description", "editFrag", OpenActivityPanel.this);
 				
-				final TextArea<String> descriptionArea = new TextArea<String>("description", new IModel<String>() {
+				final TextArea<String> descriptionArea = new TextArea<String>("content", new IModel<String>() {
 
 					@Override
 					public void detach() {
@@ -124,7 +84,7 @@ public class OpenActivityPanel extends Panel {
 
 						Fragment fragment = renderForView();
 						OpenActivityPanel.this.replace(fragment);
-						target.add(OpenActivityPanel.this);
+						target.add(fragment);
 					}
 					
 				});
@@ -135,14 +95,14 @@ public class OpenActivityPanel extends Panel {
 					public void onClick(AjaxRequestTarget target) {
 						Fragment fragment = renderForView();
 						OpenActivityPanel.this.replace(fragment);
-						target.add(OpenActivityPanel.this);
+						target.add(fragment);
 					}
 					
 				});
 				
 				OpenActivityPanel.this.replace(fragment);
 				
-				target.add(OpenActivityPanel.this);
+				target.add(fragment);
 			}
 
 			@Override
@@ -155,9 +115,24 @@ public class OpenActivityPanel extends Panel {
 
 		});
 		
+		fragment.setOutputMarkupId(true);
+		
+		return fragment;
+	}
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
 		add(renderForView());
 
-		setOutputMarkupId(true);
+		add(new UpdateCommitsPanel("commits", new AbstractReadOnlyModel<PullRequestUpdate>() {
+
+			@Override
+			public PullRequestUpdate getObject() {
+				return getPullRequest().getInitialUpdate();
+			}
+			
+		}));
 	}
 
 	private PullRequest getPullRequest() {

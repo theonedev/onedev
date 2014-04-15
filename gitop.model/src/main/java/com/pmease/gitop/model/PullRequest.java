@@ -24,6 +24,7 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
@@ -91,12 +92,6 @@ public class PullRequest extends AbstractEntity {
 	@Column(nullable=false)
 	private Date updateDate = new Date();
 
-	private transient List<PullRequestUpdate> sortedUpdates;
-
-	private transient List<PullRequestUpdate> effectiveUpdates;
-
-	private transient PullRequestUpdate baseUpdate;
-	
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
 	private Collection<PullRequestUpdate> updates = new ArrayList<PullRequestUpdate>();
 
@@ -106,6 +101,16 @@ public class PullRequest extends AbstractEntity {
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
 	private Collection<PullRequestComment> comments = new ArrayList<PullRequestComment>();
 
+	private transient List<PullRequestUpdate> sortedUpdates;
+
+	private transient List<PullRequestUpdate> effectiveUpdates;
+
+	private transient PullRequestUpdate baseUpdate;
+	
+	private transient Set<String> mergedCommits;
+	
+	private transient Set<String> pendingCommits;
+	
 	/**
 	 * Get title of this merge request.
 	 * 
@@ -470,4 +475,26 @@ public class PullRequest extends AbstractEntity {
 		this.updateDate = updateDate;
 	}
 
+	public Set<String> getMergedCommits() {
+		if (mergedCommits == null) {
+			mergedCommits = new HashSet<>();
+			Repository repo = getTarget().getProject();
+			for (Commit commit: repo.git().log(getBaseCommit(), getTarget().getHeadCommit(), null, 0, 0)) {
+				mergedCommits.add(commit.getHash());
+			}
+		}
+		return mergedCommits;
+	}
+
+	public Set<String> getPendingCommits() {
+		if (pendingCommits == null) {
+			pendingCommits = new HashSet<>();
+			Repository repo = getTarget().getProject();
+			for (Commit commit: repo.git().log(getTarget().getHeadCommit(), getLatestUpdate().getHeadCommit(), null, 0, 0)) {
+				pendingCommits.add(commit.getHash());
+			}
+		}
+		return pendingCommits;
+	}
+ 
 }

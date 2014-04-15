@@ -1,18 +1,24 @@
 package com.pmease.gitop.web.page.project.pullrequest;
 
+import java.util.Collections;
 import java.util.List;
 
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.commons.git.Commit;
+import com.pmease.commons.git.Git;
+import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.web.component.link.GitPersonLink;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.page.project.RepositoryBasePage;
@@ -21,9 +27,9 @@ import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
 import com.pmease.gitop.web.util.DateUtils;
 
 @SuppressWarnings("serial")
-public class CommitListPanel extends Panel {
+public class UpdateCommitsPanel extends Panel {
 
-	public CommitListPanel(String id, IModel<List<Commit>> model) {
+	public UpdateCommitsPanel(String id, IModel<PullRequestUpdate> model) {
 		super(id, model);
 	}
 
@@ -31,11 +37,27 @@ public class CommitListPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ListView<Commit>("commits", new AbstractReadOnlyModel<List<Commit>>() {
+		add(new ListView<Commit>("commits", new LoadableDetachableModel<List<Commit>>() {
 
 			@Override
-			public List<Commit> getObject() {
-				return getCommits();
+			public List<Commit> load() {
+				PullRequestUpdate update = getUpdate();
+				PullRequest request = update.getRequest();
+				
+				List<Commit> commits;
+				Git git = request.getTarget().getProject().git();
+				int index = request.getSortedUpdates().indexOf(update);
+				if (index == request.getSortedUpdates().size() - 1) {
+					commits = git.log(request.getBaseCommit(), 
+							request.getInitialUpdate().getHeadCommit(), 
+							null, 0, 0); 
+				} else {
+					commits = git.log(request.getSortedUpdates().get(index+1).getHeadCommit(), 
+							update.getHeadCommit(), null, 0, 0); 
+				}
+				
+				Collections.reverse(commits);
+				return commits;
 			}
 			
 		}) {
@@ -57,14 +79,21 @@ public class CommitListPanel extends Panel {
 				link.add(new Label("sha", GitUtils.abbreviateSHA(commit.getHash())));
 				
 				item.add(link);
+				
+				if (getUpdate().getRequest().getMergedCommits().contains(commit.getHash())) {
+					item.add(new Label("label", "merged").add(AttributeAppender.append("class", "label label-success")));
+				} else if (getUpdate().getRequest().getPendingCommits().contains(commit.getHash())) {
+					item.add(new WebMarkupContainer("label"));
+				} else {
+					item.add(new Label("label", "rebased").add(AttributeAppender.append("class", "label label-danger")));
+				}
 			}
 			
 		});
 	}
 
-	@SuppressWarnings("unchecked")
-	private List<Commit> getCommits() {
-		return (List<Commit>) getDefaultModelObject();
+	private PullRequestUpdate getUpdate() {
+		return (PullRequestUpdate) getDefaultModelObject();
 	}
 	
 }

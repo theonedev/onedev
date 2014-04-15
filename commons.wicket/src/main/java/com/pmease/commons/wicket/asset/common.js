@@ -549,6 +549,18 @@ pmease.commons = {
 			input.after("<div style='clear:both;'/>")
 		},		
 	},
+	
+	// Disable specified button if value of specified input is blank 
+	disableIfBlank: function(inputId, buttonId) {
+		$("#" + inputId).bind("input propertychange keyup", function() {
+			var value = $(this).val();
+			var button = $("#" + buttonId);
+			if (value.trim().length != 0)
+				button.removeAttr("disabled");
+			else
+				button.attr("disabled", "disabled");
+		});
+	}
 };
 
 $(function() {

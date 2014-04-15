@@ -58,15 +58,17 @@ public class SecurityRealm extends AbstractRealm {
             		ObjectPermission objectPermission = (ObjectPermission) permission;
             		Collection<Team> teams = new ArrayList<>();
 	                if (userId != 0L) {
-	                    User user = userManager.load(userId);
-	                    // Administrator can do anything
-	                    if (user.equals(Gitop.getInstance(UserManager.class).getRoot()) || user.isAdmin()) return true;
-	
-	                    for (Membership membership: user.getMemberships())
-	                    	teams.add(membership.getTeam());
-	                    
-	                    if (getUser(objectPermission) != null)
-	                    	teams.add(teamManager.getLoggedIn(getUser(objectPermission)));
+	                    User user = userManager.get(userId);
+	                    if (user != null) {
+		                    // Administrator can do anything
+		                    if (user.equals(Gitop.getInstance(UserManager.class).getRoot()) || user.isAdmin()) return true;
+		
+		                    for (Membership membership: user.getMemberships())
+		                    	teams.add(membership.getTeam());
+		                    
+		                    if (getUser(objectPermission) != null)
+		                    	teams.add(teamManager.getLoggedIn(getUser(objectPermission)));
+	                    }
 	                }
 
                     if (getUser(objectPermission) != null)

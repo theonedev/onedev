@@ -4,16 +4,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 
 import com.google.common.base.Preconditions;
 import com.pmease.gitop.core.Gitop;
@@ -21,16 +19,10 @@ import com.pmease.gitop.core.manager.AuthorizationManager;
 import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.model.CloseInfo;
 import com.pmease.gitop.model.PullRequest;
-import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.component.link.GitPersonLink;
-import com.pmease.gitop.web.page.project.api.GitPerson;
-import com.pmease.gitop.web.util.DateUtils;
 
 @SuppressWarnings("serial")
 public class CloseActivityPanel extends Panel {
 
-	private WebMarkupContainer container;
-	
 	private String comment;
 	
 	public CloseActivityPanel(String id, IModel<PullRequest> model) {
@@ -38,59 +30,23 @@ public class CloseActivityPanel extends Panel {
 	}
 	
 	private Fragment renderForView() {
-		Fragment fragment = new Fragment("body", "viewFrag", this);
+		Fragment fragment = new Fragment("comment", "viewFrag", this);
 
 		comment = getPullRequest().getCloseInfo().getComment();
 		if (StringUtils.isNotBlank(comment))
-			fragment.add(new MultiLineLabel("comment", comment));
+			fragment.add(new MultiLineLabel("content", comment));
 		else
-			fragment.add(new Label("comment", "<i>No comment</i>").setEscapeModelStrings(false));
+			fragment.add(new Label("content", "<i>No comment</i>").setEscapeModelStrings(false));
 		
-		return fragment;
-	}
-
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
-		container = new WebMarkupContainer("container");
-		container.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				if (getPullRequest().getCloseInfo().getCloseStatus() == CloseInfo.Status.INTEGRATED)
-					return "panel-success";
-				else
-					return "panel-danger";
-			}
-			
-		}));
-		
-		PullRequest request = getPullRequest();
-		User closedBy = request.getCloseInfo().getClosedBy();
-		if (closedBy != null) {
-			GitPerson person = new GitPerson(closedBy.getName(), closedBy.getEmail());
-			container.add(new GitPersonLink("user", Model.of(person), GitPersonLink.Mode.NAME_AND_AVATAR));
-		} else {
-			container.add(new Label("<i>Unknown</i>").setEscapeModelStrings(false));
-		}
-		
-		if (request.getCloseInfo().getCloseStatus() == CloseInfo.Status.INTEGRATED)
-			container.add(new Label("action", "integrated"));
-		else
-			container.add(new Label("action", "discarded"));
-		
-		container.add(new Label("date", DateUtils.formatAge(request.getCloseInfo().getCloseDate())));
-		
-		container.add(new AjaxLink<Void>("edit") {
+		fragment.add(new AjaxLink<Void>("edit") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				comment = getPullRequest().getCloseInfo().getComment();
 				
-				Fragment fragment = new Fragment("body", "editFrag", CloseActivityPanel.this);
+				Fragment fragment = new Fragment("comment", "editFrag", CloseActivityPanel.this);
 				
-				final TextArea<String> commentArea = new TextArea<String>("comment", new IModel<String>() {
+				final TextArea<String> commentArea = new TextArea<String>("content", new IModel<String>() {
 
 					@Override
 					public void detach() {
@@ -128,8 +84,8 @@ public class CloseActivityPanel extends Panel {
 						Gitop.getInstance(PullRequestManager.class).save(request);
 
 						Fragment fragment = renderForView();
-						container.replace(fragment);
-						target.add(container);
+						CloseActivityPanel.this.replace(fragment);
+						target.add(CloseActivityPanel.this);
 					}
 					
 				});
@@ -139,15 +95,15 @@ public class CloseActivityPanel extends Panel {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						Fragment fragment = renderForView();
-						container.replace(fragment);
-						target.add(container);
+						CloseActivityPanel.this.replace(fragment);
+						target.add(CloseActivityPanel.this);
 					}
 					
 				});
 				
-				container.replace(fragment);
+				CloseActivityPanel.this.replace(fragment);
 				
-				target.add(container);
+				target.add(CloseActivityPanel.this);
 			}
 
 			@Override
@@ -160,11 +116,33 @@ public class CloseActivityPanel extends Panel {
 
 		});
 		
-		container.add(renderForView());
+		return fragment;
+	}
 
-		container.setOutputMarkupId(true);
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
 		
-		add(container);
+		add(renderForView());
+		
+		add(new WebMarkupContainer("icon") {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				
+				if (getPullRequest().getCloseInfo().getCloseStatus() == CloseInfo.Status.INTEGRATED) {
+					tag.put("class",  "icon icon-2x icon-check-circle");
+					tag.put("title", "This request has been integrated");
+				} else {
+					tag.put("class",  "icon icon-2x icon-delete-circle");
+					tag.put("title", "This request has been discarded");
+				}
+			}
+			
+		});
+
+		setOutputMarkupId(true);
 	}
 
 	private PullRequest getPullRequest() {

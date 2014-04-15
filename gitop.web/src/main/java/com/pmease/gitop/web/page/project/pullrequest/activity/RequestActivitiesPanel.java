@@ -5,10 +5,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -17,8 +17,9 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 
-import com.google.common.base.Preconditions;
+import com.pmease.commons.wicket.behavior.DisableIfBlankBehavior;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.PullRequestCommentManager;
 import com.pmease.gitop.core.manager.UserManager;
@@ -29,11 +30,12 @@ import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.web.component.link.GitPersonLink;
 import com.pmease.gitop.web.page.project.api.GitPerson;
+import com.pmease.gitop.web.util.DateUtils;
 
 @SuppressWarnings("serial")
 public class RequestActivitiesPanel extends Panel {
 
-	private String commentContent;
+	private String newCommentContent;
 	
 	public RequestActivitiesPanel(String id, IModel<PullRequest> model) {
 		super(id, model);
@@ -82,12 +84,26 @@ public class RequestActivitiesPanel extends Panel {
 
 			@Override
 			protected void populateItem(final ListItem<PullRequestActivity> item) {
-				item.add(item.getModelObject().render("activity"));
+				PullRequestActivity activity = item.getModelObject();
+
+				User user = activity.getUser();
+				if (user != null) {
+					GitPerson person = new GitPerson(user.getName(), user.getEmail());
+					item.add(new GitPersonLink("userAvatar", Model.of(person), GitPersonLink.Mode.AVATAR));
+					item.add(new GitPersonLink("userName", Model.of(person), GitPersonLink.Mode.NAME));
+				} else {
+					item.add(new WebMarkupContainer("userAvatar").setVisible(false));
+					item.add(new Label("userName", "<i>Unknown</i>").setEscapeModelStrings(false));
+				}
+				
+				item.add(new Label("action", activity.getAction()));
+				item.add(new Label("date", DateUtils.formatAge(activity.getDate())));
+				item.add(item.getModelObject().render("detail"));
 			}
 			
 		});
 
-		WebMarkupContainer commentContainer = new WebMarkupContainer("commentContainer") {
+		WebMarkupContainer newCommentContainer = new WebMarkupContainer("newCommentContainer") {
 
 			@Override
 			protected void onConfigure() {
@@ -96,20 +112,29 @@ public class RequestActivitiesPanel extends Panel {
 			}
 			
 		};
-
-		commentContainer.add(new GitPersonLink("user", new LoadableDetachableModel<GitPerson>() {
+		add(newCommentContainer);
+		
+		newCommentContainer.add(new GitPersonLink("userAvatar", new LoadableDetachableModel<GitPerson>() {
 
 			@Override
 			protected GitPerson load() {
-				User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
-				Preconditions.checkNotNull(currentUser);
-				GitPerson person = new GitPerson(currentUser.getName(), currentUser.getEmail());
-				return person;
+				User currentUser = Gitop.getInstance(UserManager.class).getCurrent(); 
+				return new GitPerson(currentUser.getName(), currentUser.getEmail());
 			}
 			
-		}, GitPersonLink.Mode.NAME_AND_AVATAR));
+		}, GitPersonLink.Mode.AVATAR));
+		
+		newCommentContainer.add(new GitPersonLink("userName", new LoadableDetachableModel<GitPerson>() {
 
-		final TextArea<String> commentArea = new TextArea<String>("comment", new IModel<String>() {
+			@Override
+			protected GitPerson load() {
+				User currentUser = Gitop.getInstance(UserManager.class).getCurrent(); 
+				return new GitPerson(currentUser.getName(), currentUser.getEmail());
+			}
+			
+		}, GitPersonLink.Mode.NAME));
+		
+		final TextArea<String> newCommentArea = new TextArea<String>("content", new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -117,43 +142,42 @@ public class RequestActivitiesPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return commentContent;
+				return newCommentContent;
 			}
 
 			@Override
 			public void setObject(String object) {
-				commentContent = object;
+				newCommentContent = object;
 			}
-			
-		});
-		
-		commentArea.add(new AjaxFormComponentUpdatingBehavior("blur") {
 
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				commentArea.processInput();
-			}
-					
 		});
-		commentContainer.add(commentArea);
 		
-		commentContainer.add(new Link<Void>("saveComment") {
+		Link<Void> newCommentSaveLink = new Link<Void>("save") {
 
 			@Override
 			public void onClick() {
-				if (StringUtils.isNotBlank(commentContent)) {
-					PullRequestComment comment = new PullRequestComment();
-					comment.setContent(commentContent);
-					comment.setRequest(getPullRequest());
-					comment.setUser(Gitop.getInstance(UserManager.class).getCurrent());
-					Gitop.getInstance(PullRequestCommentManager.class).save(comment);
-					commentContent = null;
-				}
+				PullRequestComment comment = new PullRequestComment();
+				comment.setRequest(getPullRequest());
+				comment.setUser(Gitop.getInstance(UserManager.class).getCurrent());
+				comment.setContent(newCommentContent);
+				Gitop.getInstance(PullRequestCommentManager.class).save(comment);
+				newCommentContent = null;
+			}
+			
+		};
+		newCommentContainer.add(newCommentSaveLink);
+		
+		newCommentArea.add(new AjaxFormComponentUpdatingBehavior("blur") {
+
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				newCommentArea.processInput();
 			}
 			
 		});
+		newCommentArea.add(new DisableIfBlankBehavior(newCommentSaveLink));
 		
-		add(commentContainer);
+		newCommentContainer.add(newCommentArea);
 	}
 
 	private PullRequest getPullRequest() {
