@@ -52,7 +52,7 @@ public class IfCreateSpecifiedBranches extends BranchGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Repository project, String refName) {
+	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
 		if (refName.startsWith(Git.REFS_HEADS)) {
 			if (WildcardUtils.matchPath(Git.REFS_HEADS + getBranchPatterns(), refName))
 				return approved("Branch to be created matches pattern '" + branchPatterns + "'.");

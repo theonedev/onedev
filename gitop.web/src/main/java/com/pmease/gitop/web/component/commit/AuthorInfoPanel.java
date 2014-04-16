@@ -12,7 +12,7 @@ import com.pmease.commons.git.Commit;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.GitPersonLink;
 import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
-import com.pmease.gitop.web.page.project.api.GitPerson;
+import com.pmease.gitop.web.page.repository.api.GitPerson;
 
 @SuppressWarnings("serial")
 public class AuthorInfoPanel extends Panel {

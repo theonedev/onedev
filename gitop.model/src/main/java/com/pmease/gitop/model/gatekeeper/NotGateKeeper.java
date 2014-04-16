@@ -29,8 +29,8 @@ public class NotGateKeeper extends CompositeGateKeeper {
 	}
 	
 	@Override
-	protected GateKeeper trim(Repository project) {
-		return (GateKeeper) getGateKeeper().trim(project);
+	protected GateKeeper trim(Repository repository) {
+		return (GateKeeper) getGateKeeper().trim(repository);
 	}
 
 	@Override

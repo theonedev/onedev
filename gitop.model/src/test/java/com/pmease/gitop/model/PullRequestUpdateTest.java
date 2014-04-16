@@ -13,33 +13,33 @@ import com.pmease.commons.util.FileUtils;
 
 public class PullRequestUpdateTest extends AbstractGitTest {
 
-    private File projectDir;
+    private File repoDir;
     
     private Git workGit;
     
     private Git bareGit;
     
-    private Repository project;
+    private Repository repository;
     
     @Override
     public void setup() {
     	super.setup();
     	
-        projectDir = FileUtils.createTempDir();
+        repoDir = FileUtils.createTempDir();
         
-        bareGit = new Git(new File(projectDir, "code"));
+        bareGit = new Git(new File(repoDir, "code"));
         bareGit.init(true);
         
-        workGit = new Git(new File(projectDir, "work"));
+        workGit = new Git(new File(repoDir, "work"));
         workGit.clone(bareGit.repoDir().getAbsolutePath(), false);
         
-        project = Mockito.mock(Repository.class);
-        Mockito.when(project.git()).thenReturn(bareGit);
+        repository = Mockito.mock(Repository.class);
+        Mockito.when(repository.git()).thenReturn(bareGit);
     }
     
     @Override
     public void teardown() {
-        FileUtils.deleteDir(projectDir);
+        FileUtils.deleteDir(repoDir);
         super.teardown();
     }
 
@@ -47,7 +47,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
     public void testResolveBaseCommitWhenThereIsNoMerge() {
         PullRequest request = new PullRequest();
         Branch target = new Branch();
-        target.setProject(project);
+        target.setRepository(repository);
         target.setName("master");
         request.setTarget(target);
 
@@ -96,7 +96,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
     public void testResolveBaseCommitWhenThereIsMerge() {
         PullRequest request = new PullRequest();
         Branch target = new Branch();
-        target.setProject(project);
+        target.setRepository(repository);
         target.setName("master");
         request.setTarget(target);
 

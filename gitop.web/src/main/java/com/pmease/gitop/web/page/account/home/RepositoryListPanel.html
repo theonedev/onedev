@@ -4,7 +4,7 @@
 		<div class="pull-left">
 			<form class="form-inline form-search">
 				<div class="form-group">
-					<input type="search" class="form-control" placeholder="Find a project ..." />
+					<input type="search" class="form-control" placeholder="Find a repository ..." />
 				</div>
 				<button class="btn btn-gray">Search</button>
 			</form>
@@ -15,10 +15,10 @@
 		</div>
 	</div>
 	<p></p>
-	<ul class="list-group list-view project-list">
-		<li class="list-group-item" wicket:id="project">
+	<ul class="list-group list-view repository-list">
+		<li class="list-group-item" wicket:id="repository">
 			<i class="icon icon-repo"></i>
-			<h4><a wicket:id="projectlink"><span wicket:id="name"></span></a></h4>
+			<h4><a wicket:id="repositorylink"><span wicket:id="name"></span></a></h4>
 			<wicket:enclosure>
 				forked from <span wicket:id="forklink"></span>
 			</wicket:enclosure>

@@ -10,7 +10,7 @@ import org.apache.wicket.request.Url;
 import org.apache.wicket.request.mapper.CompoundRequestMapper;
 import org.apache.wicket.request.resource.ResourceReference;
 
-import com.pmease.gitop.model.validation.ProjectNameValidator;
+import com.pmease.gitop.model.validation.RepositoryNameValidator;
 import com.pmease.gitop.model.validation.UserNameValidator;
 import com.pmease.gitop.web.common.wicket.mapper.PageParameterAwareMountedMapper;
 import com.pmease.gitop.web.common.wicket.mapper.PatternMountedMapper;
@@ -34,28 +34,28 @@ import com.pmease.gitop.web.page.error.AccessDeniedPage;
 import com.pmease.gitop.web.page.error.InternalServerErrorPage;
 import com.pmease.gitop.web.page.error.PageNotFoundPage;
 import com.pmease.gitop.web.page.init.ServerInitPage;
-import com.pmease.gitop.web.page.project.pullrequest.ClosedRequestsPage;
-import com.pmease.gitop.web.page.project.pullrequest.NewRequestPage;
-import com.pmease.gitop.web.page.project.pullrequest.OpenRequestsPage;
-import com.pmease.gitop.web.page.project.pullrequest.RequestDetailPage;
-import com.pmease.gitop.web.page.project.settings.CreateRepositoryPage;
-import com.pmease.gitop.web.page.project.settings.GateKeeperSettingPage;
-import com.pmease.gitop.web.page.project.settings.PullRequestSettingsPage;
-import com.pmease.gitop.web.page.project.settings.RepositoryAuditLogPage;
-import com.pmease.gitop.web.page.project.settings.RepositoryHooksPage;
-import com.pmease.gitop.web.page.project.settings.RepositoryOptionsPage;
-import com.pmease.gitop.web.page.project.settings.RepositoryPermissionsPage;
-import com.pmease.gitop.web.page.project.source.RepositoryHomePage;
-import com.pmease.gitop.web.page.project.source.blame.BlobBlamePage;
-import com.pmease.gitop.web.page.project.source.blob.SourceBlobPage;
-import com.pmease.gitop.web.page.project.source.blob.renderer.RawBlobResourceReference;
-import com.pmease.gitop.web.page.project.source.branches.BranchesPage;
-import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
-import com.pmease.gitop.web.page.project.source.commits.CommitsPage;
-import com.pmease.gitop.web.page.project.source.contributors.ContributorsPage;
-import com.pmease.gitop.web.page.project.source.tags.GitArchiveResourceReference;
-import com.pmease.gitop.web.page.project.source.tags.TagsPage;
-import com.pmease.gitop.web.page.project.source.tree.SourceTreePage;
+import com.pmease.gitop.web.page.repository.pullrequest.ClosedRequestsPage;
+import com.pmease.gitop.web.page.repository.pullrequest.NewRequestPage;
+import com.pmease.gitop.web.page.repository.pullrequest.OpenRequestsPage;
+import com.pmease.gitop.web.page.repository.pullrequest.RequestDetailPage;
+import com.pmease.gitop.web.page.repository.settings.CreateRepositoryPage;
+import com.pmease.gitop.web.page.repository.settings.GateKeeperSettingPage;
+import com.pmease.gitop.web.page.repository.settings.PullRequestSettingsPage;
+import com.pmease.gitop.web.page.repository.settings.RepositoryAuditLogPage;
+import com.pmease.gitop.web.page.repository.settings.RepositoryHooksPage;
+import com.pmease.gitop.web.page.repository.settings.RepositoryOptionsPage;
+import com.pmease.gitop.web.page.repository.settings.RepositoryPermissionsPage;
+import com.pmease.gitop.web.page.repository.source.RepositoryHomePage;
+import com.pmease.gitop.web.page.repository.source.blame.BlobBlamePage;
+import com.pmease.gitop.web.page.repository.source.blob.SourceBlobPage;
+import com.pmease.gitop.web.page.repository.source.blob.renderer.RawBlobResourceReference;
+import com.pmease.gitop.web.page.repository.source.branches.BranchesPage;
+import com.pmease.gitop.web.page.repository.source.commit.SourceCommitPage;
+import com.pmease.gitop.web.page.repository.source.commits.CommitsPage;
+import com.pmease.gitop.web.page.repository.source.contributors.ContributorsPage;
+import com.pmease.gitop.web.page.repository.source.tags.GitArchiveResourceReference;
+import com.pmease.gitop.web.page.repository.source.tags.TagsPage;
+import com.pmease.gitop.web.page.repository.source.tree.SourceTreePage;
 import com.pmease.gitop.web.util.UrlUtils;
 
 public class GitopMappings extends CompoundRequestMapper {
@@ -111,7 +111,7 @@ public class GitopMappings extends CompoundRequestMapper {
 		// account settings
 		addPage("${user}/settings", AccountProfilePage.class);
 		addPage("${user}/settings/password", AccountPasswordPage.class);
-		addPage("${user}/settings/projects", RepositoriesPage.class);
+		addPage("${user}/settings/repositories", RepositoriesPage.class);
 		addPage("${user}/settings/members", AccountMembersSettingPage.class);
 		addPage("${user}/settings/teams", AccountTeamsPage.class);
 		addPage("${user}/settings/teams/new", AddTeamPage.class);
@@ -131,9 +131,9 @@ public class GitopMappings extends CompoundRequestMapper {
 				if (UserNameValidator.getReservedNames().contains(userName))
 					return false;
 
-				String projectName = normalizedSegments.get(1);
-				return !ProjectNameValidator.getReservedNames().contains(
-						projectName);
+				String repositoryName = normalizedSegments.get(1);
+				return !RepositoryNameValidator.getReservedNames().contains(
+						repositoryName);
 			}
 
 		});

@@ -66,16 +66,16 @@ public class ObjectPermission implements Permission {
 		return new ObjectPermission(user, GeneralOperation.WRITE);
 	}
 
-	public static ObjectPermission ofProjectAdmin(Repository project) {
-		return new ObjectPermission(project, GeneralOperation.ADMIN);
+	public static ObjectPermission ofRepositoryAdmin(Repository repository) {
+		return new ObjectPermission(repository, GeneralOperation.ADMIN);
 	}
 
-	public static ObjectPermission ofProjectRead(Repository project) {
-		return new ObjectPermission(project, GeneralOperation.READ);
+	public static ObjectPermission ofRepositoryRead(Repository repository) {
+		return new ObjectPermission(repository, GeneralOperation.READ);
 	}
 
-	public static ObjectPermission ofProjectWrite(Repository project) {
-		return new ObjectPermission(project, GeneralOperation.WRITE);
+	public static ObjectPermission ofRepositoryWrite(Repository repository) {
+		return new ObjectPermission(repository, GeneralOperation.WRITE);
 	}
 
 	public static ObjectPermission ofSystemAdmin() {

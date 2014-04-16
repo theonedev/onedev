@@ -9,7 +9,7 @@ public class CanVoteByAuthorizedUser implements VoteEligibility {
 
     @Override
     public boolean canVote(User user, PullRequest request) {
-        return user.asSubject().isPermitted(ObjectPermission.ofProjectWrite(request.getTarget().getProject()));
+        return user.asSubject().isPermitted(ObjectPermission.ofRepositoryWrite(request.getTarget().getRepository()));
     }
 
 }

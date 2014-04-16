@@ -111,7 +111,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 		
 		Lock lock = LockUtils.lock(request.getLockName());
 		try {
-			Git git = request.getTarget().getProject().git();
+			Git git = request.getTarget().getRepository().git();
 			String branchHead = request.getTarget().getHeadCommit();
 			String requestHead = request.getLatestUpdate().getHeadCommit();
 			
@@ -174,7 +174,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 					}
 				}
 				
-				request.setCheckResult(request.getTarget().getProject().getGateKeeper().checkRequest(request));
+				request.setCheckResult(request.getTarget().getRepository().getGateKeeper().checkRequest(request));
 
 				inviteToVote(request);
 			}
@@ -205,7 +205,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 		request.setUpdateDate(new Date());
 		
 		Git git = new Git(sandbox);
-		git.clone(request.getTarget().getProject().git().repoDir().getAbsolutePath(), 
+		git.clone(request.getTarget().getRepository().git().repoDir().getAbsolutePath(), 
 				false, true, true, request.getTarget().getName());
 		git.reset(null, null);
 
@@ -227,7 +227,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 			if (git.isAncestor(targetHead, sourceHead)) {
 				request.setMergeInfo(new MergeInfo(targetHead, sourceHead, targetHead, sourceHead));
 			} else {
-				git.fetch(source.getProject().git().repoDir().getAbsolutePath(), sourceHead);
+				git.fetch(source.getRepository().git().repoDir().getAbsolutePath(), sourceHead);
 				String mergeBase = git.calcMergeBase(targetHead, sourceHead);
 				if (git.merge(sourceHead, null, null, null))
 					request.setMergeInfo(new MergeInfo(targetHead, sourceHead, mergeBase, git.parseRevision("HEAD", true)));
@@ -235,7 +235,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 					request.setMergeInfo(new MergeInfo(targetHead, sourceHead, mergeBase, null));
 			}
 			
-			request.setCheckResult(target.getProject().getGateKeeper().checkRequest(request));
+			request.setCheckResult(target.getRepository().getGateKeeper().checkRequest(request));
 		}
 		
 		return request;
@@ -273,7 +273,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 		Lock lock = LockUtils.lock(request.getLockName());
 		try {
 			if (request.getStatus() == Status.PENDING_INTEGRATE) {
-				Git git = request.getTarget().getProject().git();
+				Git git = request.getTarget().getRepository().git();
 				if (git.updateRef(request.getTarget().getHeadRef(), 
 						request.getMergeInfo().getMergeHead(), 
 						request.getMergeInfo().getBranchHead(), 
@@ -343,7 +343,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 			pullRequestUpdateManager.realize(update);
 		}
 
-		Git targetGit = request.getTarget().getProject().git();
+		Git targetGit = request.getTarget().getRepository().git();
 		String mergeRef = request.getMergeRef();
 		
 		// Update head ref so that it can be pulled by build system

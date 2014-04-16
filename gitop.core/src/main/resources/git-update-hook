@@ -1,7 +1,7 @@
 #!/bin/sh
 IFS=$'\r\n'; 
 lines=($(
-curl -k -s -S -f -X POST -d @- ${GITOP_URL}/git-update-callback/${GITOP_PROJECT_ID}/${GITOP_USER_ID} 2>&1 <<EOF
+curl -k -s -S -f -X POST -d @- ${GITOP_URL}/git-update-callback/${GITOP_REPOSITORY_ID}/${GITOP_USER_ID} 2>&1 <<EOF
 $1 $2 $3
 EOF
 ))

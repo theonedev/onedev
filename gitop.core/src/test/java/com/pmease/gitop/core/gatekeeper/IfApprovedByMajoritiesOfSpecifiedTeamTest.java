@@ -109,7 +109,7 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 			request.setId(1L);
 			request.setTarget(new Branch());
 			request.getTarget().setName("master");
-			request.getTarget().setProject(new Repository() {
+			request.getTarget().setRepository(new Repository() {
 
 				@Override
 				public Git git() {
@@ -117,13 +117,13 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 				}
 				
 			});
-			request.getTarget().getProject().setId(1L);
-			request.getTarget().getProject().setOwner(new User());
-			request.getTarget().getProject().getOwner().setId(1L);
+			request.getTarget().getRepository().setId(1L);
+			request.getTarget().getRepository().setOwner(new User());
+			request.getTarget().getRepository().getOwner().setId(1L);
 			
 			request.setSource(new Branch());
 			request.getSource().setName("dev");
-			request.getSource().setProject(new Repository() {
+			request.getSource().setRepository(new Repository() {
 
 				@Override
 				public Git git() {

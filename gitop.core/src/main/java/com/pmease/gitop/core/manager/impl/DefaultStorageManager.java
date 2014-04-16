@@ -21,9 +21,9 @@ public class DefaultStorageManager implements StorageManager {
     }
 
     @Override
-    public File getStorage(Repository project) {
+    public File getStorage(Repository repository) {
         return new File(configManager.getSystemSetting().getDataPath(),
-                "projects/" + project.getId().toString());
+                "repositories/" + repository.getId().toString());
     }
 
     @Override

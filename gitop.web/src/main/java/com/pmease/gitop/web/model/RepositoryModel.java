@@ -2,7 +2,7 @@ package com.pmease.gitop.web.model;
 
 import com.pmease.gitop.model.Repository;
 
-/** Shortcut for {@link EntityModel}<Project> */
+/** Shortcut for {@link EntityModel}<Repository> */
 public class RepositoryModel extends EntityModel<Repository> {
 	private static final long serialVersionUID = 1L;
 

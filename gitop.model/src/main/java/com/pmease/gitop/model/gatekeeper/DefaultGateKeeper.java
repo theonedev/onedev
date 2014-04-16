@@ -12,7 +12,7 @@ import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 public class DefaultGateKeeper extends AbstractGateKeeper {
 
 	@Override
-	protected GateKeeper trim(Repository project) {
+	protected GateKeeper trim(Repository repository) {
 		return this;
 	}
 
@@ -32,7 +32,7 @@ public class DefaultGateKeeper extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Repository project, String refName) {
+	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
 		return ignored();
 	}
 

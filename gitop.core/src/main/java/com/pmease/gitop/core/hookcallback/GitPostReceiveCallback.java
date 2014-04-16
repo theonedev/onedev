@@ -38,7 +38,7 @@ public class GitPostReceiveCallback extends HttpServlet {
     
     private static final Logger logger = LoggerFactory.getLogger(GitPostReceiveCallback.class);
 
-    private final RepositoryManager projectManager;
+    private final RepositoryManager repositoryManager;
     
     private final BranchManager branchManager;
     
@@ -49,10 +49,10 @@ public class GitPostReceiveCallback extends HttpServlet {
     private final Executor executor;
     
     @Inject
-    public GitPostReceiveCallback(RepositoryManager projectManager, 
+    public GitPostReceiveCallback(RepositoryManager repositoryManager, 
     		BranchManager branchManager, UserManager userManager,
     		UnitOfWork unitOfWork, Executor executor) {
-    	this.projectManager = projectManager;
+    	this.repositoryManager = repositoryManager;
         this.branchManager = branchManager;
         this.userManager = userManager;
         this.unitOfWork = unitOfWork;
@@ -73,7 +73,7 @@ public class GitPostReceiveCallback extends HttpServlet {
         List<String> fields = StringUtils.splitAndTrim(request.getPathInfo(), "/");
         Preconditions.checkState(fields.size() == 2);
         
-        Repository project = projectManager.load(Long.valueOf(fields.get(0)));
+        Repository repository = repositoryManager.load(Long.valueOf(fields.get(0)));
         
         SecurityUtils.getSubject().runAs(User.asPrincipal(Long.valueOf(fields.get(1))));
         
@@ -98,7 +98,7 @@ public class GitPostReceiveCallback extends HttpServlet {
         	pos++;
         	String field = fields.get(pos);
         	String oldCommitHash = StringUtils.reverse(field.substring(0, 40));
-        	onRefUpdated(project, refName, oldCommitHash, newCommitHash);
+        	onRefUpdated(repository, refName, oldCommitHash, newCommitHash);
         	
         	field = field.substring(40);
         	if (field.length() == 0)
@@ -109,29 +109,29 @@ public class GitPostReceiveCallback extends HttpServlet {
     	
 	}
 
-    private void onRefUpdated(Repository project, String refName, String oldCommitHash, String newCommitHash) {
+    private void onRefUpdated(Repository repository, String refName, String oldCommitHash, String newCommitHash) {
 		String branchName = Branch.getName(refName);
 		if (branchName != null) {
 			if (oldCommitHash.equals(Commit.ZERO_HASH)) {
 				Branch branch = new Branch();
-				branch.setProject(project);
+				branch.setRepository(repository);
 				branch.setName(branchName);
 				branch.setCreator(userManager.getCurrent());
-				project.getBranches().add(branch);
+				repository.getBranches().add(branch);
 				branchManager.save(branch);
-				if (project.getBranches().size() == 1) 
-					project.git().updateDefaultBranch(branchName);
+				if (repository.getBranches().size() == 1) 
+					repository.git().updateDefaultBranch(branchName);
 			} else if (newCommitHash.equals(Commit.ZERO_HASH)) {
-				Branch branch = branchManager.findBy(project, branchName);
+				Branch branch = branchManager.findBy(repository, branchName);
 				Preconditions.checkNotNull(branch);
-				project.getBranches().remove(branch);
+				repository.getBranches().remove(branch);
 				branchManager.delete(branch);
-				if (project.git().resolveDefaultBranch().equals(branchName) && !project.getBranches().isEmpty()) 
-						project.git().updateDefaultBranch(project.getBranches().iterator().next().getName());
+				if (repository.git().resolveDefaultBranch().equals(branchName) && !repository.getBranches().isEmpty()) 
+						repository.git().updateDefaultBranch(repository.getBranches().iterator().next().getName());
 			} else {
 				logger.debug("Executing post-receive hook against branch {}...", branchName);
 				
-				final Branch branch = branchManager.findBy(project, branchName);
+				final Branch branch = branchManager.findBy(repository, branchName);
 				Preconditions.checkNotNull(branch);
 				
 				final Long branchId = branch.getId();

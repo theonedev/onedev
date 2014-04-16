@@ -45,7 +45,7 @@ public class IfSubmitToSpecifiedBranches extends BranchGateKeeper {
 	}
 
 	@Override
-	protected GateKeeper trim(Repository project) {
+	protected GateKeeper trim(Repository repository) {
 		Gitop.getInstance(BranchManager.class).trim(branchIds);
 		if (branchIds.isEmpty())
 			return null;
@@ -83,7 +83,7 @@ public class IfSubmitToSpecifiedBranches extends BranchGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Repository project, String refName) {
+	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
 		return ignored();
 	}
 

@@ -10,8 +10,7 @@ import org.apache.wicket.model.PropertyModel;
 
 import com.google.common.base.Optional;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.model.UserModel;
-import com.pmease.gitop.web.page.project.api.GitPerson;
+import com.pmease.gitop.web.page.repository.api.GitPerson;
 
 @SuppressWarnings("serial")
 public class GitPersonAvatar extends Panel {
@@ -34,7 +33,7 @@ public class GitPersonAvatar extends Panel {
 		Optional<User> user = getGitPerson().asUser();
 		Component image;
 		if (user.isPresent()) {
-			image = new AvatarImage("avatar", new UserModel(user.get()));
+			image = new AvatarImage("avatar", user.get());
 			add(image);
 		} else {
 			Fragment frag = new Fragment("avatar", "imgfrag", this);

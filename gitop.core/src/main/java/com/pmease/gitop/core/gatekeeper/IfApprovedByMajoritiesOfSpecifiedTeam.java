@@ -60,8 +60,8 @@ public class IfApprovedByMajoritiesOfSpecifiedTeam extends TeamAwareGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Repository project, String refName) {
-		CheckResult result = getGateKeeper().checkRef(user, project, refName);
+	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
+		CheckResult result = getGateKeeper().checkRef(user, repository, refName);
 		
 		if (result instanceof Approved)
 			result = approved("Approved by majorities of team '" + getTeam().getName() + "'.");

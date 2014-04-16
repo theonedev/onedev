@@ -36,7 +36,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	private Collection<Membership> memberships = new ArrayList<Membership>();
 	
 	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
-	private Collection<Repository> projects = new ArrayList<Repository>();
+	private Collection<Repository> repositories = new ArrayList<Repository>();
 
 	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
 	private Collection<Team> teams = new ArrayList<Team>();
@@ -118,12 +118,12 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.memberships = memberships;
 	}
 
-	public Collection<Repository> getProjects() {
-		return projects;
+	public Collection<Repository> getRepositories() {
+		return repositories;
 	}
 
-	public void setProjects(Collection<Repository> repositories) {
-		this.projects = repositories;
+	public void setRepositories(Collection<Repository> repositories) {
+		this.repositories = repositories;
 	}
 
 	public Collection<Team> getTeams() {

@@ -17,19 +17,19 @@ public enum SystemOperation implements PrivilegedOperation {
 		}
 		
 	},
-	CREATE_PROJECT {
+	CREATE_REPOSITORY {
 
 		@Override
 		public boolean can(PrivilegedOperation operation) {
-			return operation == CREATE_PROJECT;
+			return operation == CREATE_REPOSITORY;
 		}
 		
 	},
-	CREATE_MERGE_REQUEST {
+	CREATE_PULL_REQUEST {
 
 		@Override
 		public boolean can(PrivilegedOperation operation) {
-			return operation == CREATE_MERGE_REQUEST;
+			return operation == CREATE_PULL_REQUEST;
 		}
 		
 	}

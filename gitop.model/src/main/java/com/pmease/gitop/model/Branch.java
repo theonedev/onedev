@@ -19,13 +19,13 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"project", "name"})
+		@UniqueConstraint(columnNames={"repository", "name"})
 })
 public class Branch extends AbstractEntity {
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
-	private Repository project;
+	private Repository repository;
 
 	@Column(nullable=false)
 	private String name;
@@ -41,12 +41,12 @@ public class Branch extends AbstractEntity {
     
     private transient String headCommit;
 
-    public Repository getProject() {
-		return project;
+    public Repository getRepository() {
+		return repository;
 	}
 
-	public void setProject(Repository project) {
-		this.project = project;
+	public void setRepository(Repository repository) {
+		this.repository = repository;
 	}
 
 	public String getName() {
@@ -90,7 +90,7 @@ public class Branch extends AbstractEntity {
     
     public String getHeadCommit() {
     	if (headCommit == null) {
-	    	Git git = getProject().git();
+	    	Git git = getRepository().git();
 	    	headCommit = git.parseRevision(getHeadRef(), true);
     	} 
     	return headCommit;
@@ -120,7 +120,7 @@ public class Branch extends AbstractEntity {
 	public String toString() {
 		return Objects.toStringHelper(this)
 				.add("name", getName())
-				.add("project", getProject())
+				.add("repository", getRepository())
 				.toString();
 	}
 

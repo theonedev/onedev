@@ -9,7 +9,7 @@ import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.io.ByteSource;
 import com.pmease.commons.util.execution.Commandline;
-import com.pmease.gitop.web.page.project.source.commit.diff.patch.Patch;
+import com.pmease.gitop.web.page.repository.source.commit.diff.patch.Patch;
 
 public class DiffTreeCommand extends AbstractDiffCommand<Patch, DiffTreeCommand> {
 

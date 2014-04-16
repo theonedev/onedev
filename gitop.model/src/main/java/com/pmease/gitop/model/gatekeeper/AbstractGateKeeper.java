@@ -58,9 +58,9 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	}
 
 	@Override
-	public CheckResult checkRef(User user, Repository project, String refName) {
+	public CheckResult checkRef(User user, Repository repository, String refName) {
 		if (isEnabled())
-			return doCheckRef(user, project, refName);
+			return doCheckRef(user, repository, refName);
 		else
 			return ignored();
 	}
@@ -105,19 +105,19 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	protected abstract CheckResult doCheckCommit(User user, Branch branch, String commit);
 
 	/**
-	 * Check if specified user can create/delete specified reference in specified project, 
+	 * Check if specified user can create/delete specified reference in specified repository, 
 	 * without considering enable flag.
 	 * 
 	 * @param user
 	 *			user to be checked 	
-	 * @param project
-	 * 			project to be checked
+	 * @param repository
+	 * 			repository to be checked
 	 * @param refName
 	 * 			reference name to be checked
 	 * @return
 	 * 			result of the check
 	 */
-	protected abstract CheckResult doCheckRef(User user, Repository project, String refName);
+	protected abstract CheckResult doCheckRef(User user, Repository repository, String refName);
 	
 	@Override
 	public final Object trim(@Nullable Object context) {
@@ -125,7 +125,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 		return trim((Repository)context);
 	}
 	
-	protected GateKeeper trim(Repository project) {
+	protected GateKeeper trim(Repository repository) {
 		return this;
 	}
 

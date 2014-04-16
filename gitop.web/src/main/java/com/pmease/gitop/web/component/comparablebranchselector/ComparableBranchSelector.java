@@ -16,31 +16,31 @@ import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.component.choice.BranchChoiceProvider;
 import com.pmease.gitop.web.component.choice.BranchSingleChoice;
-import com.pmease.gitop.web.component.choice.ComparableProjectChoice;
+import com.pmease.gitop.web.component.choice.ComparableRepositoryChoice;
 
 @SuppressWarnings("serial")
 public class ComparableBranchSelector extends FormComponentPanel<Branch> {
 
-	private IModel<Repository> currentProjectModel;
+	private IModel<Repository> currentRepositoryModel;
 	
-	private IModel<Repository> selectedProjectModel;
+	private IModel<Repository> selectedRepositoryModel;
 	
 	/**
-	 * Construct with current project model and selected branch model.
+	 * Construct with current repository model and selected branch model.
 	 * 
 	 * @param id
 	 * 			id of the component
-	 * @param currentProjectModel
-	 * 			model of current project. Note that the model object should never be null
+	 * @param currentRepositoryModel
+	 * 			model of current repository. Note that the model object should never be null
 	 * @param selectedBranchModel
 	 * 			model of selected branch
 	 */
-	public ComparableBranchSelector(String id, IModel<Repository> currentProjectModel, IModel<Branch> selectedBranchModel) {
+	public ComparableBranchSelector(String id, IModel<Repository> currentRepositoryModel, IModel<Branch> selectedBranchModel) {
 		super(id, selectedBranchModel);
 		
-		this.currentProjectModel = currentProjectModel;
+		this.currentRepositoryModel = currentRepositoryModel;
 		
-		selectedProjectModel = new IModel<Repository>() {
+		selectedRepositoryModel = new IModel<Repository>() {
 
 			@Override
 			public void detach() {
@@ -50,9 +50,9 @@ public class ComparableBranchSelector extends FormComponentPanel<Branch> {
 			public Repository getObject() {
 				Branch branch = getBranch();
 				if (branch == null) {
-					return ComparableBranchSelector.this.currentProjectModel.getObject();
+					return ComparableBranchSelector.this.currentRepositoryModel.getObject();
 				} else {
-					return branch.getProject();
+					return branch.getRepository();
 				}
 			}
 
@@ -74,7 +74,7 @@ public class ComparableBranchSelector extends FormComponentPanel<Branch> {
 		
 		setOutputMarkupId(true);
 		
-		add(new ComparableProjectChoice("projectChoice", currentProjectModel, selectedProjectModel).add(new OnChangeAjaxBehavior() {
+		add(new ComparableRepositoryChoice("repositoryChoice", currentRepositoryModel, selectedRepositoryModel).add(new OnChangeAjaxBehavior() {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
@@ -95,7 +95,7 @@ public class ComparableBranchSelector extends FormComponentPanel<Branch> {
 			@Override
 			protected DetachedCriteria load() {
 				DetachedCriteria criteria = DetachedCriteria.forClass(Branch.class);
-				criteria.add(Restrictions.eq("project", selectedProjectModel.getObject()));
+				criteria.add(Restrictions.eq("repository", selectedRepositoryModel.getObject()));
 				return criteria;
 			}
 			
@@ -126,8 +126,8 @@ public class ComparableBranchSelector extends FormComponentPanel<Branch> {
 
 	@Override
 	protected void onDetach() {
-		currentProjectModel.detach();
-		selectedProjectModel.detach();
+		currentRepositoryModel.detach();
+		selectedRepositoryModel.detach();
 		
 		super.onDetach();
 	}

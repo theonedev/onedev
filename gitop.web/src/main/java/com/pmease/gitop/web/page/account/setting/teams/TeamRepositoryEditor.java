@@ -34,7 +34,7 @@ import com.pmease.gitop.model.Authorization;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.web.common.wicket.form.FeedbackPanel;
-import com.pmease.gitop.web.component.choice.ProjectMultiChoice;
+import com.pmease.gitop.web.component.choice.RepositoryMultiChoice;
 import com.pmease.gitop.web.component.link.RepositoryHomeLink;
 import com.pmease.gitop.web.model.RepositoryModel;
 import com.vaynberg.wicket.select2.ChoiceProvider;
@@ -53,11 +53,11 @@ public class TeamRepositoryEditor extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(newProjectsForm());
+		add(newRepositoriesForm());
 		
-		WebMarkupContainer projectsDiv = new WebMarkupContainer("projects");
-		projectsDiv.setOutputMarkupId(true);
-		add(projectsDiv);
+		WebMarkupContainer repositoriesDiv = new WebMarkupContainer("repositories");
+		repositoriesDiv.setOutputMarkupId(true);
+		add(repositoriesDiv);
 		
 		final IModel<List<Authorization>> model = 
 				new LoadableDetachableModel<List<Authorization>>() {
@@ -69,7 +69,7 @@ public class TeamRepositoryEditor extends Panel {
 					}
 		};
 		
-		projectsDiv.add(new Label("total", new AbstractReadOnlyModel<Integer>() {
+		repositoriesDiv.add(new Label("total", new AbstractReadOnlyModel<Integer>() {
 
 			@Override
 			public Integer getObject() {
@@ -78,12 +78,12 @@ public class TeamRepositoryEditor extends Panel {
 			
 		}));
 		
-		ListView<Authorization> projectsView = new ListView<Authorization>("repo", model) {
+		ListView<Authorization> repositoriesView = new ListView<Authorization>("repo", model) {
 
 			@Override
 			protected void populateItem(ListItem<Authorization> item) {
 				Authorization a = item.getModelObject();
-				item.add(new RepositoryHomeLink("link", new RepositoryModel(a.getProject())));
+				item.add(new RepositoryHomeLink("link", new RepositoryModel(a.getRepository())));
 				final Long id = a.getId();
 				item.add(new AjaxLink<Void>("removelink") {
 
@@ -94,24 +94,24 @@ public class TeamRepositoryEditor extends Panel {
 						am.delete(authorization);
 						// TODO: add notification
 						//
-//						Messenger.warn("Project [" + authorization.getProject() 
+//						Messenger.warn("Repository [" + authorization.getRepository() 
 //								+ "] is removed from team <b>[" 
 //								+ authorization.getTeam().getName() + "]</b>").run(target);
-						onProjectsChanged(target);
+						onRepositoriesChanged(target);
 					}
 				});
 			}
 		};
 		
-		projectsDiv.add(projectsView);
+		repositoriesDiv.add(repositoriesView);
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private Component newProjectsForm() {
+	private Component newRepositoriesForm() {
 		Form<?> form = new Form<Void>("reposForm");
 		form.add(new FeedbackPanel("feedback", form));
 		final IModel<Collection<Repository>> reposModel = new WildcardListModel(new ArrayList<Repository>());
-		form.add(new ProjectMultiChoice("repochoice", reposModel, new ProjectChoiceProvider()));
+		form.add(new RepositoryMultiChoice("repochoice", reposModel, new RepositoryChoiceProvider()));
 		
 		form.add(new AjaxButton("submit", form) {
 			@Override
@@ -121,31 +121,31 @@ public class TeamRepositoryEditor extends Panel {
 			
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				Collection<Repository> projects = reposModel.getObject();
+				Collection<Repository> repositories = reposModel.getObject();
 				AuthorizationManager am = Gitop.getInstance(AuthorizationManager.class);
-				for (Repository each : projects) {
+				for (Repository each : repositories) {
 					Authorization authorization = new Authorization();
 					authorization.setTeam(getTeam());
-					authorization.setProject(each);
+					authorization.setRepository(each);
 					am.save(authorization);
 				}
 				
 				reposModel.setObject(new ArrayList<Repository>());
 				target.add(form);
-				onProjectsChanged(target);
+				onRepositoriesChanged(target);
 			}
 		});
 		
 		return form;
 	}
 
-	class ProjectChoiceProvider extends ChoiceProvider<Repository> {
+	class RepositoryChoiceProvider extends ChoiceProvider<Repository> {
 		
 		@Override
 		public void query(String term, int page, Response<Repository> response) {
 			RepositoryManager pm = Gitop.getInstance(RepositoryManager.class);
 			int first = page * 25;
-			List<Repository> projects = 
+			List<Repository> repositories = 
 					pm.query(
 							new Criterion[] {
 									Restrictions.eq("owner", getTeam().getOwner()),
@@ -154,8 +154,8 @@ public class TeamRepositoryEditor extends Panel {
 									Order.asc("name")
 							}, first, 25);
 			
-			if (projects.isEmpty()) {
-				response.addAll(projects);
+			if (repositories.isEmpty()) {
+				response.addAll(repositories);
 				return;
 			}
 			
@@ -164,7 +164,7 @@ public class TeamRepositoryEditor extends Panel {
 					.query(Restrictions.eq("team", getTeam()));
 			
 			List<Repository> result = Lists.newArrayList();
-			for (Repository each : projects) {
+			for (Repository each : repositories) {
 				if (!in(each, authorizations)) {
 					result.add(each);
 				}
@@ -173,9 +173,9 @@ public class TeamRepositoryEditor extends Panel {
 			response.addAll(result);
 		}
 
-		private boolean in(Repository project, List<Authorization> authorizations) {
+		private boolean in(Repository repository, List<Authorization> authorizations) {
 			for (Authorization each : authorizations) {
-				if (Objects.equal(project, each.getProject())) {
+				if (Objects.equal(repository, each.getRepository())) {
 					return true;
 				}
 			}
@@ -203,8 +203,8 @@ public class TeamRepositoryEditor extends Panel {
 		}
 	}
 	
-	private void onProjectsChanged(AjaxRequestTarget target) {
-		target.add(get("projects"));
+	private void onRepositoriesChanged(AjaxRequestTarget target) {
+		target.add(get("repositories"));
 	}
 	
 	private Team getTeam() {

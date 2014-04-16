@@ -27,7 +27,7 @@ public class DefaultPullRequestUpdateManager extends AbstractGenericDao<PullRequ
 	public void save(PullRequestUpdate update) {
 		super.save(update);
 
-		Git git = update.getRequest().getTarget().getProject().git();
+		Git git = update.getRequest().getTarget().getRepository().git();
 		git.updateRef(update.getHeadRef(), update.getHeadCommit(), null, null);
 	}
 
@@ -46,12 +46,12 @@ public class DefaultPullRequestUpdateManager extends AbstractGenericDao<PullRequ
 		PullRequest request = update.getRequest();
 		String sourceHead = request.getSource().getHeadCommit();
 
-		if (!request.getTarget().getProject().equals(request.getSource().getProject())) {
-			request.getTarget().getProject().git().fetch(
-					request.getSource().getProject().git().repoDir().getAbsolutePath(), 
+		if (!request.getTarget().getRepository().equals(request.getSource().getRepository())) {
+			request.getTarget().getRepository().git().fetch(
+					request.getSource().getRepository().git().repoDir().getAbsolutePath(), 
 					"+" + sourceHead + ":" + update.getHeadRef()); 
 		} else {
-			request.getTarget().getProject().git().updateRef(update.getHeadRef(), 
+			request.getTarget().getRepository().git().updateRef(update.getHeadRef(), 
 					sourceHead, null, null);
 		}
 	}

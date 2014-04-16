@@ -137,7 +137,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Repository project, String refName) {
+	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
 		return ignored();
 	}
 

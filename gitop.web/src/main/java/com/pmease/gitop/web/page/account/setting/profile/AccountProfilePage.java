@@ -61,7 +61,7 @@ public class AccountProfilePage extends AccountSettingPage {
 		IModel<User> userModel = new UserModel(getAccount());
 		add(new ProfileForm("form", userModel));
 
-		add(new AvatarImage("currentavatar", userModel));
+		add(new AvatarImage("currentavatar", getAccount()));
 		add(new AvatarForm("avatarForm", userModel));
 	}
 

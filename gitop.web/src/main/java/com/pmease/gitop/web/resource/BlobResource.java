@@ -29,38 +29,38 @@ import com.pmease.gitop.web.service.FileTypes;
 public class BlobResource {
 
 	@GET
-	@Path("raw/{user}/{project}/{objectId}/{path:.*}")
+	@Path("raw/{user}/{repository}/{objectId}/{path:.*}")
 	public Response getRawContent(@PathParam("user") String username,
-								  @PathParam("project") String projectName,
+								  @PathParam("repository") String repositoryName,
 								  final @PathParam("objectId") String revision,
 								  final @PathParam("path") String path) {
 		Preconditions.checkArgument(!Strings.isNullOrEmpty(username));
-		Preconditions.checkArgument(!Strings.isNullOrEmpty(projectName));
+		Preconditions.checkArgument(!Strings.isNullOrEmpty(repositoryName));
 		Preconditions.checkArgument(!Strings.isNullOrEmpty(revision));
 		Preconditions.checkArgument(!Strings.isNullOrEmpty(path));
 		
-		final Repository project = Gitop.getInstance(RepositoryManager.class).findBy(username, projectName);
+		final Repository repository = Gitop.getInstance(RepositoryManager.class).findBy(username, repositoryName);
 		
-		if (project == null) {
+		if (repository == null) {
 			return Response.status(Status.NOT_FOUND)
-				.entity("Project " + username + "/" + projectName + " doesn't exist")
+				.entity("Repository " + username + "/" + repositoryName + " doesn't exist")
 				.build();
 		}
 		
-		if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(project))) {
+		if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(repository))) {
 			return Response.status(Status.FORBIDDEN)
 					.entity("You have no permission to access this resource")
 					.build();
 		}
 		
-		FileBlob blob = Gitop.getInstance(FileBlobService.class).get(project, revision, path);
+		FileBlob blob = Gitop.getInstance(FileBlobService.class).get(repository, revision, path);
 		
 		StreamingOutput stream = new StreamingOutput() {
 
 			@Override
 			public void write(OutputStream output) throws IOException,
 					WebApplicationException {
-				ObjectStream os = Gitop.getInstance(FileBlobService.class).openStream(project, revision, path);
+				ObjectStream os = Gitop.getInstance(FileBlobService.class).openStream(repository, revision, path);
 				ByteStreams.copy(os, output);
 			}
 		};

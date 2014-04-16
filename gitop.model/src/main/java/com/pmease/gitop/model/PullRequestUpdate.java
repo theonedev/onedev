@@ -109,7 +109,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	 */
 	public String getBaseCommit() {
 		if (baseCommit == null) {
-			Git git = getRequest().getTarget().getProject().git();
+			Git git = getRequest().getTarget().getRepository().git();
 			String mergeBase = git.calcMergeBase(getHeadCommit(), getRequest().getTarget().getHeadCommit());
 			int index = getRequest().getSortedUpdates().indexOf(this);
 			Preconditions.checkState(index != -1);
@@ -189,7 +189,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	}
 
 	public void deleteRefs() {
-		Git git = getRequest().getTarget().getProject().git();
+		Git git = getRequest().getTarget().getRepository().git();
 		git.deleteRef(getHeadRef());
 		git.deleteRef(getBaseRef());
 	}

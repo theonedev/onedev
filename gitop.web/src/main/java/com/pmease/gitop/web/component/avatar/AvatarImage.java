@@ -6,7 +6,6 @@ import org.apache.wicket.devutils.stateless.StatelessComponent;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.image.NonCachingImage;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -19,6 +18,8 @@ import com.pmease.gitop.web.GitopWebApp;
 public class AvatarImage extends Panel {
 
 	private static final long serialVersionUID = 1L;
+	
+	private User user;
 
 	public static enum AvatarImageType {
 		USER, REPOSITORY
@@ -26,12 +27,13 @@ public class AvatarImage extends Panel {
 
 	private final AvatarImageType imageType;
 
-	public AvatarImage(String id, IModel<User> model) {
-		this(id, model, AvatarImageType.USER);
+	public AvatarImage(String id, User user) {
+		this(id, user, AvatarImageType.USER);
 	}
 
-	public AvatarImage(String id, IModel<?> model, AvatarImageType imageType) {
-		super(id, model);
+	public AvatarImage(String id, User user, AvatarImageType imageType) {
+		super(id);
+		this.user = user;
 		this.imageType = imageType;
 	}
 
@@ -46,7 +48,6 @@ public class AvatarImage extends Panel {
 
 	private Component createAvatarImage() {
 		if (imageType == AvatarImageType.USER) {
-			User user = (User) getDefaultModelObject();
 			if (GitopWebApp.get().isGravatarEnabled() && Strings.isNullOrEmpty(user.getAvatarUrl())) {
 				return (new GravatarImage("avatar", Model.of(user.getEmail())));
 			} else {

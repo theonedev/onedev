@@ -199,7 +199,7 @@ public class PullRequest extends AbstractEntity {
 
 	public Git git() {
 		if (sandbox == null)
-			return getTarget().getProject().git();
+			return getTarget().getRepository().git();
 		else
 			return sandbox;
 	}
@@ -333,7 +333,7 @@ public class PullRequest extends AbstractEntity {
 		if (effectiveUpdates == null) {
 			effectiveUpdates = new ArrayList<PullRequestUpdate>();
 
-			Git git = getTarget().getProject().git();
+			Git git = getTarget().getRepository().git();
 			for (PullRequestUpdate update : getSortedUpdates()) {
 				if (!git.isAncestor(update.getHeadCommit(), getTarget().getHeadCommit())) {
 					effectiveUpdates.add(update);
@@ -357,7 +357,7 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	public Collection<String> findTouchedFiles() {
-		Git git = getTarget().getProject().git();
+		Git git = getTarget().getRepository().git();
 		return git.listChangedFiles(getTarget().getHeadCommit(), getLatestUpdate().getHeadCommit());
 	}
 
@@ -375,7 +375,7 @@ public class PullRequest extends AbstractEntity {
 	 * Delete refs of this pull request, without touching refs of its updates.
 	 */
 	public void deleteRefs() {
-		Git git = getTarget().getProject().git();
+		Git git = getTarget().getRepository().git();
 		git.deleteRef(getHeadRef());
 		git.deleteRef(getMergeRef());
 	}
@@ -478,7 +478,7 @@ public class PullRequest extends AbstractEntity {
 	public Set<String> getMergedCommits() {
 		if (mergedCommits == null) {
 			mergedCommits = new HashSet<>();
-			Repository repo = getTarget().getProject();
+			Repository repo = getTarget().getRepository();
 			for (Commit commit: repo.git().log(getBaseCommit(), getTarget().getHeadCommit(), null, 0, 0)) {
 				mergedCommits.add(commit.getHash());
 			}
@@ -489,7 +489,7 @@ public class PullRequest extends AbstractEntity {
 	public Set<String> getPendingCommits() {
 		if (pendingCommits == null) {
 			pendingCommits = new HashSet<>();
-			Repository repo = getTarget().getProject();
+			Repository repo = getTarget().getRepository();
 			for (Commit commit: repo.git().log(getTarget().getHeadCommit(), getLatestUpdate().getHeadCommit(), null, 0, 0)) {
 				pendingCommits.add(commit.getHash());
 			}

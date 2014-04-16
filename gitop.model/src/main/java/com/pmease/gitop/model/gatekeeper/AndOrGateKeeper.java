@@ -26,7 +26,7 @@ public abstract class AndOrGateKeeper extends CompositeGateKeeper {
 	}
 
 	@Override
-	protected GateKeeper trim(Repository project) {
+	protected GateKeeper trim(Repository repository) {
 		return (GateKeeper) TrimUtils.trim(new AndOrConstruct() {
 			
 			@Override
@@ -39,7 +39,7 @@ public abstract class AndOrGateKeeper extends CompositeGateKeeper {
 				return getGateKeepers();
 			}
 			
-		}, project);
+		}, repository);
 	}
 
 }

@@ -30,7 +30,6 @@ import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.component.link.UserAvatarLink;
 import com.pmease.gitop.web.component.wiki.WikiTextPanel;
-import com.pmease.gitop.web.model.UserModel;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -171,7 +170,7 @@ public abstract class CommitCommentEditor extends Panel {
 	private Component newPreviewPanel(String id) {
 		Fragment frag = new Fragment(id, "previewfrag", this);
 		User user = Preconditions.checkNotNull(Gitop.getInstance(UserManager.class).getCurrent());
-		frag.add(new UserAvatarLink("author", new UserModel(user)));
+		frag.add(new UserAvatarLink("author", user));
 		frag.add(newPreview((IModel<String>) getDefaultModel()));
 		
 		return frag;

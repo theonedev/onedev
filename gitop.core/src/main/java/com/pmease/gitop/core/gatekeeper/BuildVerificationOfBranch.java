@@ -41,8 +41,8 @@ public class BuildVerificationOfBranch extends CommonGateKeeper {
 	}
 
 	@Override
-	protected GateKeeper trim(Repository project) {
-		if (branchSelection.trim(project) == null)
+	protected GateKeeper trim(Repository repository) {
+		if (branchSelection.trim(repository) == null)
 			return null;
 		else
 			return this;
@@ -109,8 +109,8 @@ public class BuildVerificationOfBranch extends CommonGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Repository project, String refName) {
-		return getGateKeeper().checkRef(user, project, refName);
+	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
+		return getGateKeeper().checkRef(user, repository, refName);
 	}
 
 }

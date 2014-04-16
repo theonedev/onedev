@@ -12,28 +12,28 @@ import com.pmease.commons.util.FileUtils;
 
 public class PullRequestTest extends AbstractGitTest {
 
-    private File projectDir;
+    private File repoDir;
     
     private Git git;
     
-    private Repository project;
+    private Repository repository;
 
     @Override
     public void setup() {
     	super.setup();
     	
-        projectDir = FileUtils.createTempDir();
+        repoDir = FileUtils.createTempDir();
         
-        git = new Git(new File(projectDir, "code"));
+        git = new Git(new File(repoDir, "code"));
         git.init(false);
         
-        project = Mockito.mock(Repository.class);
-        Mockito.when(project.git()).thenReturn(git);
+        repository = Mockito.mock(Repository.class);
+        Mockito.when(repository.git()).thenReturn(git);
     }
 
     @Override
     public void teardown() {
-        FileUtils.deleteDir(projectDir);
+        FileUtils.deleteDir(repoDir);
         super.teardown();
     }
 
@@ -42,7 +42,7 @@ public class PullRequestTest extends AbstractGitTest {
         PullRequest request = new PullRequest();
         Branch target = new Branch();
         target.setName("master");
-        target.setProject(project);
+        target.setRepository(repository);
         request.setTarget(target);
 
         FileUtils.touchFile(new File(git.repoDir(), "a"));
@@ -81,7 +81,7 @@ public class PullRequestTest extends AbstractGitTest {
         PullRequest request = new PullRequest();
         Branch target = new Branch();
         target.setName("master");
-        target.setProject(project);
+        target.setRepository(repository);
         request.setTarget(target);
 
         FileUtils.touchFile(new File(git.repoDir(), "a"));

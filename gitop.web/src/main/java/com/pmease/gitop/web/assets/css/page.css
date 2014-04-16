@@ -291,14 +291,14 @@ ul.btn-list { list-style: none; margin: 0; }
 .page-nav .btn-list > li { padding: 7px 0; }
 .page-nav .btn-list .btn { font-weight: bold; }
 
-.project-list .list-group-item { position: relative; padding-left: 48px; }
-.project-list .list-group-item i { position: absolute; left: 0; top: 10px; font-size: 48px; width: 48px; color: #ddd; }
-.project-list h4 { margin: 0 0 9px; }
-.project-list p { margin: 0 0 6px; font-size: 12px;}
-.project-list .age { color: #999; }
+.repository-list .list-group-item { position: relative; padding-left: 48px; }
+.repository-list .list-group-item i { position: absolute; left: 0; top: 10px; font-size: 48px; width: 48px; color: #ddd; }
+.repository-list h4 { margin: 0 0 9px; }
+.repository-list p { margin: 0 0 6px; font-size: 12px;}
+.repository-list .age { color: #999; }
 
-.project-info .age { color: #999; font-size: 12px; }
-.project-info .fork-info { color: #999; margin: 0 0 0 1em; font-size: 12px; }
+.repository-info .age { color: #999; font-size: 12px; }
+.repository-info .fork-info { color: #999; margin: 0 0 0 1em; font-size: 12px; }
 
 .members-summary, .repos-summary { border-bottom: 1px solid #ddd; margin: 0; padding-bottom: 10px; }
 .members-summary > b, .repos-summary > b { color: #333; }
@@ -329,7 +329,7 @@ ul.btn-list { list-style: none; margin: 0; }
 .list-members .list-group-item-actions { top: 20px; margin-top: 0;}
 
 /**
- * PROJECT PAGE
+ * REPOSITORY PAGE
  */
 .page-nav.repo-head {padding-bottom: 10px; }
 

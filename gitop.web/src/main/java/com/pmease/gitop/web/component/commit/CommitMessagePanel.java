@@ -12,7 +12,7 @@ import org.apache.wicket.model.Model;
 import com.google.common.base.Objects;
 import com.pmease.commons.git.Commit;
 import com.pmease.gitop.model.Repository;
-import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
+import com.pmease.gitop.web.page.repository.source.commit.SourceCommitPage;
 
 @SuppressWarnings("serial")
 public class CommitMessagePanel extends Panel {

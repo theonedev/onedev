@@ -77,7 +77,7 @@ public class SecurityRealm extends AbstractRealm {
                     for (Team team: teams) {
                     	PrivilegedOperation operation = null;
                     	for (Authorization authorization: team.getAuthorizations()) {
-                    		if (authorization.getProject().has(objectPermission.getObject())) {
+                    		if (authorization.getRepository().has(objectPermission.getObject())) {
                     			operation = authorization.getOperation();
                     			break;
                     		}
@@ -100,8 +100,8 @@ public class SecurityRealm extends AbstractRealm {
     
     private User getUser(ObjectPermission permission) {
         if (permission.getObject() instanceof Repository) {
-        	Repository project = (Repository) permission.getObject();
-        	return project.getOwner();
+        	Repository repository = (Repository) permission.getObject();
+        	return repository.getOwner();
         } else if (permission.getObject() instanceof User) {
         	return (User) permission.getObject();
         } else {

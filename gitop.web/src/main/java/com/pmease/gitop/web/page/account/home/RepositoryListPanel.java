@@ -34,12 +34,12 @@ public class RepositoryListPanel extends Panel {
 		super.onInitialize();
 		
 		@SuppressWarnings("unchecked")
-		ListView<Repository> projectsView = new ListView<Repository>("project", (IModel<List<Repository>>) getDefaultModel()) {
+		ListView<Repository> repositoriesView = new ListView<Repository>("repository", (IModel<List<Repository>>) getDefaultModel()) {
 
 			@Override
 			protected void populateItem(ListItem<Repository> item) {
 				Repository repo = item.getModelObject();
-				item.add(PageSpec.newRepositoryHomeLink("projectlink", repo)
+				item.add(PageSpec.newRepositoryHomeLink("repositorylink", repo)
 						.add(new Label("name", repo.getName())));
 				
 				if (repo.getForkedFrom() != null) {
@@ -50,19 +50,19 @@ public class RepositoryListPanel extends Panel {
 				
 				item.add(new Label("description", repo.getDescription()));
 				
-				final Long projectId = repo.getId();
+				final Long repositoryId = repo.getId();
 				item.add(new AgeLabel("lastUpdated", new AbstractReadOnlyModel<Date>() {
 
 					@Override
 					public Date getObject() {
-						Repository project = Gitop.getInstance(RepositoryManager.class).get(projectId);
-						if (project.git().hasCommits()) {
-							LogCommand command = new LogCommand(project.git().repoDir());
+						Repository repository = Gitop.getInstance(RepositoryManager.class).get(repositoryId);
+						if (repository.git().hasCommits()) {
+							LogCommand command = new LogCommand(repository.git().repoDir());
 							List<Commit> commits = command.maxCount(1).call();
 							Commit first = Iterables.getFirst(commits, null);
 							return first.getCommitter().getDate();
 						} else {
-							return project.getCreatedAt();
+							return repository.getCreatedAt();
 						}
 					}
 				}));
@@ -70,6 +70,6 @@ public class RepositoryListPanel extends Panel {
 			
 		};
 		
-		add(projectsView);
+		add(repositoriesView);
 	}
 }

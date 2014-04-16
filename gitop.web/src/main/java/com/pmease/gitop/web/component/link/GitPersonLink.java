@@ -17,10 +17,9 @@ import com.google.common.base.Strings;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.component.avatar.AvatarImage;
 import com.pmease.gitop.web.component.avatar.GravatarImage;
-import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
-import com.pmease.gitop.web.page.project.api.GitPerson;
+import com.pmease.gitop.web.page.repository.api.GitPerson;
 
 /**
  * Displays git person, name and avatar
@@ -59,7 +58,7 @@ public class GitPersonLink extends Panel {
 		
 		if (mode == Mode.NAME_AND_AVATAR || mode == Mode.AVATAR) {
 			if (user.isPresent()) {
-				image = new AvatarImage("avatar", new UserModel(user.get()));
+				image = new AvatarImage("avatar", user.get());
 				link.add(image);
 			} else {
 				Fragment frag = new Fragment("avatar", "imgfrag", this);

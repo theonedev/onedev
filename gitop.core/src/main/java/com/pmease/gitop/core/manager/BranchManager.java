@@ -15,27 +15,27 @@ import com.pmease.gitop.model.User;
 public interface BranchManager extends GenericDao<Branch> {
 
 	/**
-	 * Find branch by project and branch name.
+	 * Find branch by repository and branch name.
 	 * 
-	 * @param project
-	 * 			project to find branch inside
+	 * @param repository
+	 * 			repository to find branch inside
 	 * @param branchName
 	 * 			name of the branch to find
 	 * @return
 	 * 			found branch, or <tt>null</tt> if not found
 	 */
-	public @Nullable Branch findBy(Repository project, String branchName);
+	public @Nullable Branch findBy(Repository repository, String branchName);
 	
 	/**
-	 * Find default branch in specified project.
+	 * Find default branch in specified repository.
 	 * 
-	 * @param project
-	 * 			project to find default branch
+	 * @param repository
+	 * 			repository to find default branch
 	 * @return
 	 * 			found default branch, or <tt>null</tt> if default branch 
 	 * 			can not be found
 	 */
-    public @Nullable Branch findDefault(Repository project);
+    public @Nullable Branch findDefault(Repository repository);
     
     /**
      * Delete all refs pointed to this branch and its associated pull requests and 

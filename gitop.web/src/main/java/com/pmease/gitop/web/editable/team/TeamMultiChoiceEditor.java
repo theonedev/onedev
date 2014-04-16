@@ -17,7 +17,7 @@ import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.web.component.choice.TeamChoiceProvider;
 import com.pmease.gitop.web.component.choice.TeamMultiChoice;
-import com.pmease.gitop.web.page.project.RepositoryBasePage;
+import com.pmease.gitop.web.page.repository.RepositoryBasePage;
 
 @SuppressWarnings("serial")
 public class TeamMultiChoiceEditor extends Panel {
@@ -74,7 +74,7 @@ public class TeamMultiChoiceEditor extends Panel {
 			protected DetachedCriteria load() {
 				DetachedCriteria criteria = DetachedCriteria.forClass(Team.class);
 				RepositoryBasePage page = (RepositoryBasePage) getPage();
-				criteria.add(Restrictions.eq("owner", page.getProject()));
+				criteria.add(Restrictions.eq("owner", page.getRepository()));
 				for (String each: editContext.getPropertyGetter().getAnnotation(TeamChoice.class).excludes()) {
 					criteria.add(Restrictions.not(Restrictions.eq("name", each)));
 				}

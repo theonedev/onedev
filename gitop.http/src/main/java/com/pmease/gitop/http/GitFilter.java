@@ -49,15 +49,15 @@ public class GitFilter implements Filter {
 	
 	private final StorageManager storageManager;
 	
-	private final RepositoryManager projectManager;
+	private final RepositoryManager repositoryManager;
 	
 	private final ServerConfig serverConfig;
 	
 	@Inject
-	public GitFilter(Gitop gitop, StorageManager storageManager, RepositoryManager projectManager, ServerConfig serverConfig) {
+	public GitFilter(Gitop gitop, StorageManager storageManager, RepositoryManager repositoryManager, ServerConfig serverConfig) {
 		this.gitop = gitop;
 		this.storageManager = storageManager;
-		this.projectManager = projectManager;
+		this.repositoryManager = repositoryManager;
 		this.serverConfig = serverConfig;
 	}
 	
@@ -66,28 +66,28 @@ public class GitFilter implements Filter {
 		return StringUtils.stripStart(pathInfo, "/");
 	}
 	
-	private Repository getProject(HttpServletRequest request, HttpServletResponse response, String repoInfo) 
+	private Repository getRepository(HttpServletRequest request, HttpServletResponse response, String repoInfo) 
 			throws IOException {
 		repoInfo = StringUtils.stripStart(StringUtils.stripEnd(repoInfo, "/"), "/");
 		
 		String ownerName = StringUtils.substringBefore(repoInfo, "/");
-		String projectName = StringUtils.substringAfter(repoInfo, "/");
+		String repositoryName = StringUtils.substringAfter(repoInfo, "/");
 
-		if (StringUtils.isBlank(ownerName) || StringUtils.isBlank(projectName)) {
+		if (StringUtils.isBlank(ownerName) || StringUtils.isBlank(repositoryName)) {
 			String url = request.getRequestURL().toString();
 			String urlRoot = url.substring(0, url.length()-getPathInfo(request).length());
-			throw new GeneralException("Expecting url of format %s<owner name>/<project name>", urlRoot);
+			throw new GeneralException("Expecting url of format %s<owner name>/<repository name>", urlRoot);
 		} 
 		
-		if (projectName.endsWith(".git"))
-			projectName = projectName.substring(0, projectName.length()-".git".length());
+		if (repositoryName.endsWith(".git"))
+			repositoryName = repositoryName.substring(0, repositoryName.length()-".git".length());
 		
-		Repository project = projectManager.findBy(ownerName, projectName);
-		if (project == null) {
-			throw new GeneralException("Unable to find project %s owned by %s.", projectName, ownerName);
+		Repository repository = repositoryManager.findBy(ownerName, repositoryName);
+		if (repository == null) {
+			throw new GeneralException("Unable to find repository %s owned by %s.", repositoryName, ownerName);
 		}
 		
-		return project;
+		return repository;
 	}
 	
 	private void doNotCache(HttpServletResponse response) {
@@ -102,7 +102,7 @@ public class GitFilter implements Filter {
 		String service = StringUtils.substringAfterLast(pathInfo, "/");
 
 		String repoInfo = StringUtils.substringBeforeLast(pathInfo, "/");
-		Repository project = getProject(request, response, repoInfo);
+		Repository repository = getRepository(request, response, repoInfo);
 		
 		doNotCache(response);
 		response.setHeader("Content-Type", "application/x-" + service + "-result");			
@@ -116,17 +116,17 @@ public class GitFilter implements Filter {
 
 		environments.put("GITOP_URL", serverUrl);
 		environments.put("GITOP_USER_ID", User.getCurrentId().toString());
-		environments.put("GITOP_PROJECT_ID", project.getId().toString());
-		File gitDir = storageManager.getStorage(project);
+		environments.put("GITOP_REPOSITORY_ID", repository.getId().toString());
+		File gitDir = storageManager.getStorage(repository);
 
 		if (GitSmartHttpTools.isUploadPack(request)) {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(project))) {
-				throw new UnauthorizedException("You do not have permission to pull from this project.");
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(repository))) {
+				throw new UnauthorizedException("You do not have permission to pull from this repository.");
 			}
 			new UploadCommand(gitDir, environments).input(ServletUtils.getInputStream(request)).output(response.getOutputStream()).call();
 		} else {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectWrite(project))) {
-				throw new UnauthorizedException("You do not have permission to push to this project.");
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryWrite(repository))) {
+				throw new UnauthorizedException("You do not have permission to push to this repository.");
 			}
 			new ReceiveCommand(gitDir, environments).input(ServletUtils.getInputStream(request)).output(response.getOutputStream()).call();
 		}
@@ -147,20 +147,20 @@ public class GitFilter implements Filter {
 		pathInfo = StringUtils.stripStart(pathInfo, "/");
 
 		String repoInfo = pathInfo.substring(0, pathInfo.length() - INFO_REFS.length());
-		Repository project = getProject(request, response, repoInfo);
+		Repository repository = getRepository(request, response, repoInfo);
 		String service = request.getParameter("service");
 		
-		File gitDir = storageManager.getStorage(project);
+		File gitDir = storageManager.getStorage(repository);
 
 		if (service.contains("upload")) {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(project))) {
-				throw new UnauthorizedException("You do not have permission to pull from this project.");
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(repository))) {
+				throw new UnauthorizedException("You do not have permission to pull from this repository.");
 			}
 			writeInitial(response, service);
 			new AdvertiseUploadRefsCommand(gitDir).output(response.getOutputStream()).call();
 		} else {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectWrite(project))) {
-				throw new UnauthorizedException("You do not have permission to push to this project.");
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryWrite(repository))) {
+				throw new UnauthorizedException("You do not have permission to push to this repository.");
 			}
 			writeInitial(response, service);
 			new AdvertiseReceiveRefsCommand(gitDir).output(response.getOutputStream()).call();

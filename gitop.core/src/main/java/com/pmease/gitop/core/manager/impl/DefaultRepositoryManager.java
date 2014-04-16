@@ -74,37 +74,37 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
     
     @Transactional
     @Override
-    public void save(Repository project) {
-    	super.save(project);
+    public void save(Repository repository) {
+    	super.save(repository);
     	
-        checkSanity(project);
+        checkSanity(repository);
     }
 
     @Transactional
     @Override
-    public void delete(Repository project) {
-    	for (Branch branch: project.getBranches()) {
+    public void delete(Repository repository) {
+    	for (Branch branch: repository.getBranches()) {
 	    	for (PullRequest request: branch.getOutgoingRequests()) {
 	    		request.setSource(null);
 	    		pullRequestManager.save(request);
 	    	}
     	}
     	
-    	for (Repository each: project.getForks()) {
+    	for (Repository each: repository.getForks()) {
     		each.setForkedFrom(null);
     		save(each);
     	}
     	
-        super.delete(project);
+        super.delete(repository);
 
-        storageManager.getStorage(project).delete();
+        storageManager.getStorage(repository).delete();
     }
 
     @Sessional
     @Override
-    public Repository findBy(String ownerName, String projectName) {
+    public Repository findBy(String ownerName, String repositoryName) {
         Criteria criteria = createCriteria();
-        criteria.add(Restrictions.eq("name", projectName));
+        criteria.add(Restrictions.eq("name", repositoryName));
         criteria.createAlias("owner", "owner");
         criteria.add(Restrictions.eq("owner.name", ownerName));
 
@@ -114,45 +114,45 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
 
     @Sessional
     @Override
-    public Repository findBy(User owner, String projectName) {
+    public Repository findBy(User owner, String repositoryName) {
         return find(Restrictions.eq("owner.id", owner.getId()),
-                Restrictions.eq("name", projectName));
+                Restrictions.eq("name", repositoryName));
     }
 
 	@Transactional
 	@Override
-	public Repository fork(Repository project, User user) {
-		if (project.getOwner().equals(user))
-			return project;
+	public Repository fork(Repository repository, User user) {
+		if (repository.getOwner().equals(user))
+			return repository;
 		
 		Repository forked = null;
-		for (Repository each: user.getProjects()) {
-			if (project.equals(each.getForkedFrom())) {
+		for (Repository each: user.getRepositories()) {
+			if (repository.equals(each.getForkedFrom())) {
 				forked = each;
 				break;
 			}
 		}
 		if (forked == null) {
 			Set<String> existingNames = new HashSet<>();
-			for (Repository each: user.getProjects()) 
+			for (Repository each: user.getRepositories()) 
 				existingNames.add(each.getName());
 			
 			forked = new Repository();
 			forked.setOwner(user);
-			forked.setForkedFrom(project);
-			if (existingNames.contains(project.getName())) {
+			forked.setForkedFrom(repository);
+			if (existingNames.contains(repository.getName())) {
 				int suffix = 1;
-				while (existingNames.contains(project.getName() + "_" + suffix))
+				while (existingNames.contains(repository.getName() + "_" + suffix))
 					suffix++;
-				forked.setName(project.getName() + "_" + suffix);
+				forked.setName(repository.getName() + "_" + suffix);
 			} else {
-				forked.setName(project.getName());
+				forked.setName(repository.getName());
 			}
 
 			super.save(forked);
 
             FileUtils.cleanDir(forked.git().repoDir());
-            forked.git().clone(project.git().repoDir().getAbsolutePath(), true);
+            forked.git().clone(repository.git().repoDir().getAbsolutePath(), true);
             
             checkSanity(forked);
 		}
@@ -163,17 +163,17 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
 	@Transactional
 	@Override
 	public void checkSanity() {
-		for (Repository project: query()) {
-			checkSanity(project);
+		for (Repository repository: query()) {
+			checkSanity(repository);
 		}
 	}
 	
 	@Transactional
 	@Override
-	public void checkSanity(Repository project) {
-		logger.debug("Checking sanity of project '{}'...", project);
+	public void checkSanity(Repository repository) {
+		logger.debug("Checking sanity of repository '{}'...", repository);
 
-		Git git = project.git();
+		Git git = repository.git();
 
 		if (git.repoDir().exists() && !git.isValid()) {
         	logger.warn("Directory '" + git.repoDir() + "' is not a valid git repository, removing...");
@@ -187,7 +187,7 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
         }
         
         if (!Repository.isValid(git)) {
-            File hooksDir = new File(project.git().repoDir(), "hooks");
+            File hooksDir = new File(repository.git().repoDir(), "hooks");
 
             File gitUpdateHookFile = new File(hooksDir, "update");
             FileUtils.writeFile(gitUpdateHookFile, gitUpdateHook);
@@ -198,17 +198,17 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
             gitPostReceiveHookFile.setExecutable(true);
         }
 		
-		logger.debug("Syncing branches of project '{}'...", project);
+		logger.debug("Syncing branches of repository '{}'...", repository);
 		
-		Collection<String> branchesInGit = project.git().listBranches();
-		for (Branch branch: project.getBranches()) {
+		Collection<String> branchesInGit = repository.git().listBranches();
+		for (Branch branch: repository.getBranches()) {
 			if (!branchesInGit.contains(branch.getName()))
 				branchManager.delete(branch);
 		}
 		
 		for (String branchInGit: branchesInGit) {
 			boolean found = false;
-			for (Branch branch: project.getBranches()) {
+			for (Branch branch: repository.getBranches()) {
 				if (branch.getName().equals(branchInGit)) {
 					found = true;
 					break;
@@ -217,13 +217,13 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
 			if (!found) {
 				Branch branch = new Branch();
 				branch.setName(branchInGit);
-				branch.setProject(project);
+				branch.setRepository(repository);
 				branchManager.save(branch);
 			}
 		}
 		
-		String defaultBranchName = project.git().resolveDefaultBranch();
+		String defaultBranchName = repository.git().resolveDefaultBranch();
 		if (!branchesInGit.isEmpty() && !branchesInGit.contains(defaultBranchName))
-			project.git().updateDefaultBranch(branchesInGit.iterator().next());
+			repository.git().updateDefaultBranch(branchesInGit.iterator().next());
 	}
 }

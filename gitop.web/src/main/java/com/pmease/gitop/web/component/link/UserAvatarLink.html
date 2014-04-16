@@ -1,5 +1,11 @@
 <html xmlns:wicket>
 <wicket:panel>
-	<a wicket:id="link"><span class="avatar" wicket:id="avatar"></span> <span wicket:id="name"></span></a>
+	<wicket:container wicket:id="content"></wicket:container>
+	<wicket:fragment wicket:id="notNullFrag">
+		<a wicket:id="link"><span class="avatar" wicket:id="avatar"></span> <span wicket:id="name"></span></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="nullFrag">
+		<img wicket:id="avatar" class="avatar" src="/assets/img/empty-avatar.jpg"></img> <i wicket:id="name">Internal</i>
+	</wicket:fragment>
 </wicket:panel>
 </html>

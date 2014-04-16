@@ -34,7 +34,7 @@ public class Gitop extends AbstractPlugin {
 	
 	private final DataManager dataManager;
 	
-	private final RepositoryManager projectManager;
+	private final RepositoryManager repositoryManager;
 	
 	private final ServerConfig serverConfig;
 
@@ -52,10 +52,10 @@ public class Gitop extends AbstractPlugin {
 	
 	@Inject
 	public Gitop(ServerConfig serverConfig, DataManager dataManager,  
-			RepositoryManager projectManager, TaskScheduler taskScheduler, 
+			RepositoryManager repositoryManager, TaskScheduler taskScheduler, 
 			Provider<GitConfig> gitConfigProvider, @AppName String appName) {
 		this.dataManager = dataManager;
-		this.projectManager = projectManager;
+		this.repositoryManager = repositoryManager;
 		this.serverConfig = serverConfig;
 		this.taskScheduler = taskScheduler;
 		this.gitConfigProvider = gitConfigProvider;
@@ -91,9 +91,9 @@ public class Gitop extends AbstractPlugin {
 		});
 		checkGit();
 		
-		logger.info("Checking projects...");
+		logger.info("Checking repositories...");
 		
-		projectManager.checkSanity();
+		repositoryManager.checkSanity();
 	}
 	
 	public void checkGit() {

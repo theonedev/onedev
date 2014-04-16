@@ -38,10 +38,10 @@ public class DefaultFileBlobService implements FileBlobService {
 	}
 	
 	@Override
-	public FileBlob get(Repository project, String revision, String path) {
-		FileBlob blob = new FileBlob(project.getId(), revision, path);
+	public FileBlob get(Repository repository, String revision, String path) {
+		FileBlob blob = new FileBlob(repository.getId(), revision, path);
 
-		File gitDir = project.git().repoDir();
+		File gitDir = repository.git().repoDir();
 		org.eclipse.jgit.lib.Repository repo = null;
 		try {
 			repo = RepoUtils.open(gitDir);
@@ -93,8 +93,8 @@ public class DefaultFileBlobService implements FileBlobService {
 	}
 	
 	@Override
-	public ObjectStream openStream(Repository project, String revision, String path) {
-		File gitDir = project.git().repoDir();
+	public ObjectStream openStream(Repository repository, String revision, String path) {
+		File gitDir = repository.git().repoDir();
 		org.eclipse.jgit.lib.Repository repo = null;
 		try {
 			repo = RepoUtils.open(gitDir);

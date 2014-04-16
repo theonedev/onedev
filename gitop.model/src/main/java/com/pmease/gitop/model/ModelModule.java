@@ -4,7 +4,7 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 import com.pmease.commons.loader.AbstractPluginModule;
-import com.pmease.gitop.model.validation.ProjectNameReservation;
+import com.pmease.gitop.model.validation.RepositoryNameReservation;
 import com.pmease.gitop.model.validation.UserNameReservation;
 
 /**
@@ -32,7 +32,7 @@ public class ModelModule extends AbstractPluginModule {
 		/*
 		 * Contribute empty reservations to avoid Guice complain 
 		 */
-		contribute(ProjectNameReservation.class, new ProjectNameReservation() {
+		contribute(RepositoryNameReservation.class, new RepositoryNameReservation() {
 			
 			@Override
 			public Set<String> getReserved() {

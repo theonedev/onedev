@@ -54,12 +54,12 @@ public abstract class CompositeGateKeeper extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckRef(final User user, final Repository project, final String refName) {
+	protected CheckResult doCheckRef(final User user, final Repository repository, final String refName) {
 		return aggregate(new Checker() {
 
 			@Override
 			public CheckResult check(GateKeeper gateKeeper) {
-				return gateKeeper.checkRef(user, project, refName);
+				return gateKeeper.checkRef(user, repository, refName);
 			}
 			
 		});

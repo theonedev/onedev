@@ -23,7 +23,6 @@ import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.component.avatar.AvatarImage;
 import com.pmease.gitop.web.component.link.UserAvatarLink;
-import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.AbstractAccountPage;
 import com.pmease.gitop.web.page.account.setting.api.AccountSettingTab;
@@ -50,7 +49,7 @@ public abstract class AccountSettingPage extends AbstractAccountPage {
 		List<AccountSettingTab> tabs = Lists.newArrayList();
 		tabs.add(new AccountSettingTab(Model.of("Profile"), AccountProfilePage.class));
 		tabs.add(new AccountSettingTab(Model.of("Change Password"), AccountPasswordPage.class));
-		tabs.add(new AccountSettingTab(Model.of("Projects"), RepositoriesPage.class));
+		tabs.add(new AccountSettingTab(Model.of("Repositories"), RepositoriesPage.class));
 		tabs.add(new AccountSettingTab(Model.of("Teams"), new Class[] { AccountTeamsPage.class, EditTeamPage.class }));
 		tabs.add(new AccountSettingTab(Model.of("Members"), AccountMembersSettingPage.class));
 		
@@ -61,7 +60,7 @@ public abstract class AccountSettingPage extends AbstractAccountPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new UserAvatarLink("userlink", new UserModel(getAccount())));
+		add(new UserAvatarLink("userlink", getAccount()));
 		
 		add(new ListView<AccountSettingTab>("setting", getAllTabs()) {
 
@@ -112,7 +111,7 @@ public abstract class AccountSettingPage extends AbstractAccountPage {
 				AbstractLink link = new BookmarkablePageLink<Void>("link",
 						AccountProfilePage.class,
 						params);
-				link.add(new AvatarImage("avatar", new UserModel(user)));
+				link.add(new AvatarImage("avatar", user));
 				item.add(link);
 				link.add(new Label("name", user.getName()));
 			}

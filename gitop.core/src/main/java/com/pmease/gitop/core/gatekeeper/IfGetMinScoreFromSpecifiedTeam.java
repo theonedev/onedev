@@ -140,7 +140,7 @@ public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Repository project, String refName) {
+	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
 		return checkApproval(user);
 	}
 

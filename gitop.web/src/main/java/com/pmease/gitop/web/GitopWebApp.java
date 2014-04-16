@@ -165,112 +165,6 @@ public class GitopWebApp extends AbstractWicketConfig {
 		}
 	}
 
-	/*
-	private void mountPages() {
-		mountPage("init", ServerInitPage.class);
-		mountPage("register", RegisterPage.class);
-		
-		// error pages
-		mountPage("404", PageNotFoundPage.class);
-		mountPage("403", AccessDeniedPage.class);
-		mountPage("501", InternalErrorPage.class);
-		
-		// account related pages
-		// --------------------------------------------------------
-		
-		// project dashboard
-		mount(new MountedMapper("${user}/${repo}", RepositoryHomePage.class) {
-
-			@Override
-			protected boolean urlStartsWith(Url url, String... segments) {
-				List<String> normalizedSegments = UrlUtils.normalizeUrlSegments(url.getSegments());
-				if (normalizedSegments.size() < 2)
-					return false;
-				String userName = normalizedSegments.get(0);
-				if (UserNameValidator.getReservedNames().contains(userName))
-					return false;
-				
-				String projectName = normalizedSegments.get(1);
-				return !ProjectNameValidator.getReservedNames().contains(projectName);
-			}
-
-		});
-		
-		mount(new PageParameterAwareMountedMapper("${user}/${repo}/tree/${objectId}", SourceTreePage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${repo}/blob/${objectId}", SourceBlobPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${repo}/blame/#{objectId}", BlobBlamePage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${repo}/commit/${objectId}", SourceCommitPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${repo}/commits/#{objectId}", CommitsPage.class));
-		
-		mount(new PageParameterAwareMountedMapper("${user}/${repo}/branches", BranchesPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${repo}/tags", TagsPage.class));
-		
-//		mount(new PageParameterAwareMountedMapper("${user}/${project}/wiki", ProjectWikiPage.class));
-		
-		mount(new PageParameterAwareMountedMapper("${user}/${repo}/pull-requests/open", OpenRequestsPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${repo}/pull-requests/closed", ClosedRequestsPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${repo}/pull-requests/new", NewRequestPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${repo}/pull-requests", RequestDetailPage.class));
-		
-		mount(new PageParameterAwareMountedMapper("${user}/${repo}/contributors", ContributorsPage.class));
-//		mount(new PageParameterAwareMountedMapper("${user}/${project}/graphs", ProjectGraphsPage.class));
-//		mount(new PageParameterAwareMountedMapper("${user}/${project}/forks", ProjectForksPage.class));
-
-		mount(new PageParameterAwareMountedMapper("${user}/${repo}/settings", RepositoryOptionsPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${repo}/settings/gate-keepers", GateKeeperSettingPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${repo}/settings/hooks", RepositoryHooksPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${repo}/settings/pull-requests", PullRequestSettingsPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${repo}/settings/audits", RepositoryAuditLogPage.class));
-		mount(new PageParameterAwareMountedMapper("${user}/${repo}/settings/permissions", RepositoryPermissionsPage.class));
-		
-		// account dashboard
-		mount(new MountedMapper("${user}", AccountHomePage.class)
-		{
-
-			@Override
-			protected boolean urlStartsWith(Url url, String... segments) {
-				List<String> normalizedSegments = UrlUtils.normalizeUrlSegments(url.getSegments());
-				if (normalizedSegments.size() < 1)
-					return false;
-				String userName = normalizedSegments.get(0);
-				return !UserNameValidator.getReservedNames().contains(userName);
-			}
-
-		});
-		
-		// account settings
-		mountPage("${user}/settings", AccountProfilePage.class);
-		mountPage("${user}/settings/password", AccountPasswordPage.class);
-		mountPage("${user}/settings/projects", RepositoriesPage.class);
-		mountPage("${user}/settings/members", AccountMembersSettingPage.class);
-		mountPage("${user}/settings/teams", AccountTeamsPage.class);
-		mountPage("${user}/settings/teams/new", AddTeamPage.class);
-		mountPage("${user}/settings/teams/${teamId}", EditTeamPage.class);
-		
-		mountPage("new", CreateRepositoryPage.class);
-		
-		// system administration related
-		mountPage("administration", AdministrationOverviewPage.class);
-		mountPage("administration/users", UserAdministrationPage.class);
-		mountPage("administration/mail-settings", MailSettingEdit.class);
-		mountPage("administration/system-settings", SystemSettingEdit.class);
-		mountPage("administration/support", SupportPage.class);
-		mountPage("administration/licensing", LicensingPage.class);
-	}
-	
-	private void mountResources() {
-//		getSharedResources().add(AvatarImageResourceReference.AVATAR_RESOURCE, new AvatarImageResource());
-//		getSharedResources().add(ImageBlobResourceReference.IMAGE_BLOB_RESOURCE, new ImageBlobResource());
-//		mountResource("imageblob/${user}/${project}/${objectId}", new ImageBlobResourceReference());
-//		getSharedResources().add(RawBlobResourceReference.RAW_BLOB_RESOURCE, new RawBlobResource());
-		
-		mountResource("avatar/${type}/${id}", new AvatarImageResourceReference());
-		mountResource("raw/${user}/${repo}/${objectId}", new RawBlobResourceReference());
-		mountResource("archive/${user}/${repo}/${file}", new GitArchiveResourceReference());
-	}
-	*/
-	
-
 	private void configureResources() {
 		final IPackageResourceGuard packageResourceGuard = getResourceSettings().getPackageResourceGuard();
 
@@ -281,8 +175,6 @@ public class GitopWebApp extends AbstractWicketConfig {
             guard.addPattern("+*.svg");
             guard.addPattern("+*.ttf");
         }
-        
-//        mountResources();
 	}
 	
 	public boolean isGravatarEnabled() {

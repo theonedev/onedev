@@ -15,7 +15,7 @@ import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.common.wicket.util.WicketUtils;
 import com.pmease.gitop.web.component.avatar.AvatarImage.AvatarImageType;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
-import com.pmease.gitop.web.page.project.source.RepositoryHomePage;
+import com.pmease.gitop.web.page.repository.source.RepositoryHomePage;
 import com.pmease.gitop.web.util.UrlUtils;
 
 public class PageSpec {

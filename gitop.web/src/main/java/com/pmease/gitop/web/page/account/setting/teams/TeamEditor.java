@@ -63,7 +63,7 @@ public class TeamEditor extends Panel {
 		
 		
 		membersDiv.add(new TeamMembersEditor("teammembers", teamModel));
-//		moreDiv.add(new TeamProjectsEditor("teamprojects", teamModel));
+//		moreDiv.add(new TeamRepositoriesEditor("teamrepositories", teamModel));
 	}
 
 	private class TeamPropForm extends BaseForm<Team> {

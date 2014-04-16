@@ -21,8 +21,8 @@ import com.pmease.gitop.web.component.link.RepositoryHomeLink;
 import com.pmease.gitop.web.model.RepositoryModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
-import com.pmease.gitop.web.page.project.settings.CreateRepositoryPage;
-import com.pmease.gitop.web.page.project.settings.RepositoryOptionsPage;
+import com.pmease.gitop.web.page.repository.settings.CreateRepositoryPage;
+import com.pmease.gitop.web.page.repository.settings.RepositoryOptionsPage;
 import com.pmease.gitop.web.util.DateUtils;
 
 @SuppressWarnings("serial")
@@ -47,23 +47,23 @@ public class RepositoriesPage extends AccountSettingPage {
 
 			@Override
 			protected List<Repository> load() {
-				return Lists.newArrayList(getAccount().getProjects());
+				return Lists.newArrayList(getAccount().getRepositories());
 			}
 			
 		};
 		
-		ListView<Repository> view = new ListView<Repository>("projects", model) {
+		ListView<Repository> view = new ListView<Repository>("repositories", model) {
 
 			@Override
 			protected void populateItem(ListItem<Repository> item) {
-				Repository project = item.getModelObject();
-				final IModel<Repository> projectModel = new RepositoryModel(project);
-				item.add(new RepositoryHomeLink("project", projectModel));
+				Repository repository = item.getModelObject();
+				final IModel<Repository> repositoryModel = new RepositoryModel(repository);
+				item.add(new RepositoryHomeLink("repository", repositoryModel));
 				item.add(new Label("age", new AbstractReadOnlyModel<String>() {
 
 					@Override
 					public String getObject() {
-						return DateUtils.formatAge(projectModel.getObject().getCreatedAt());
+						return DateUtils.formatAge(repositoryModel.getObject().getCreatedAt());
 					}
 
 				}).add(AttributeModifier.replace("title",
@@ -72,19 +72,19 @@ public class RepositoriesPage extends AccountSettingPage {
 							@Override
 							public String getObject() {
 								return DataTypes.DATE
-										.asString(projectModel.getObject().getCreatedAt(),
+										.asString(repositoryModel.getObject().getCreatedAt(),
 												Constants.DATETIME_FULL_FORMAT);
 							}
 
 						})));
 
-				if (project.getForkedFrom() != null) {
+				if (repository.getForkedFrom() != null) {
 					item.add(new RepositoryHomeLink("forkedFrom",
 							new LoadableDetachableModel<Repository>() {
 
 								@Override
 								protected Repository load() {
-									return projectModel.getObject().getForkedFrom();
+									return repositoryModel.getObject().getForkedFrom();
 								}
 							}));
 				} else {
@@ -92,7 +92,7 @@ public class RepositoriesPage extends AccountSettingPage {
 				}
 				
 				item.add(new BookmarkablePageLink<Void>("admin", RepositoryOptionsPage.class,
-						PageSpec.forRepository(project)));
+						PageSpec.forRepository(repository)));
 			}
 			
 		};

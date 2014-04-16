@@ -19,8 +19,8 @@ public class RepositoryHomeLink extends LinkPanel {
 
 			@Override
 			public String getObject() {
-				Repository project = repoModel.getObject();
-				return project.getOwner().getName() + "/" + project.getName();
+				Repository repository = repoModel.getObject();
+				return repository.getOwner().getName() + "/" + repository.getName();
 			}
 			
 		});

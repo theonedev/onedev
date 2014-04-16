@@ -30,8 +30,8 @@ import com.pmease.gitop.web.common.datatype.DataTypes;
 import com.pmease.gitop.web.common.wicket.bootstrap.Alert;
 import com.pmease.gitop.web.component.link.GitPersonLink;
 import com.pmease.gitop.web.git.GitUtils;
-import com.pmease.gitop.web.page.project.api.GitPerson;
-import com.pmease.gitop.web.page.project.source.commit.SourceCommitPage;
+import com.pmease.gitop.web.page.repository.api.GitPerson;
+import com.pmease.gitop.web.page.repository.source.commit.SourceCommitPage;
 
 @SuppressWarnings("serial")
 public class CommitsTablePanel extends Panel {

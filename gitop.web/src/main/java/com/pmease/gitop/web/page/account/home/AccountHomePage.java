@@ -37,7 +37,7 @@ import com.pmease.gitop.web.page.account.setting.members.MemberListView;
 public class AccountHomePage extends AbstractAccountPage {
 
 	public static enum Category {
-		PROJECTS("Projects"), 
+		REPOSITORIES("Repositories"), 
 		MEMBERS("Members");
 		
 		final String displayName;
@@ -50,7 +50,7 @@ public class AccountHomePage extends AbstractAccountPage {
 		return PageSpec.forUser(account);
 	}
 	
-	private Category category = Category.PROJECTS;
+	private Category category = Category.REPOSITORIES;
 	
 	public AccountHomePage(PageParameters params) {
 		super(params);
@@ -64,7 +64,7 @@ public class AccountHomePage extends AbstractAccountPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		add(new AvatarImage("avatar", accountModel));
+		add(new AvatarImage("avatar", accountModel.getObject()));
 		add(new Label("fullname", new PropertyModel<String>(accountModel, "displayName")));
 		add(new Label("username", new PropertyModel<String>(accountModel, "name")));
 		
@@ -74,7 +74,7 @@ public class AccountHomePage extends AbstractAccountPage {
 			protected void populateItem(ListItem<Category> item) {
 				Category current = item.getModelObject();
 				PageParameters params = PageSpec.forUser(accountModel.getObject());
-				if (current != Category.PROJECTS) {
+				if (current != Category.REPOSITORIES) {
 					params.add(PageSpec.TAB, current.name().toLowerCase());
 				}
 				
@@ -91,20 +91,20 @@ public class AccountHomePage extends AbstractAccountPage {
 	
 	private Component createContent(String id) {
 		switch (category) {
-		case PROJECTS:
+		case REPOSITORIES:
 			IModel<List<Repository>> repos = new LoadableDetachableModel<List<Repository>>() {
 
 				@Override
 				protected List<Repository> load() {
 					User account = accountModel.getObject();
-					List<Repository> projects = Lists.newArrayList();
-					for (Repository each : account.getProjects()) {
-						if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectRead(each))) {
-							projects.add(each);
+					List<Repository> repositories = Lists.newArrayList();
+					for (Repository each : account.getRepositories()) {
+						if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(each))) {
+							repositories.add(each);
 						}
 					}
 					
-					return projects;
+					return repositories;
 				}
 				
 			};

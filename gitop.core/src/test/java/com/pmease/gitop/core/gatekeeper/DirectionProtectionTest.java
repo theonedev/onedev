@@ -124,7 +124,7 @@ public class DirectionProtectionTest extends AbstractGitTest {
 			Branch master = new Branch();
 			master.setName("master");
 			master.setId(1L);
-			master.setProject(new Repository() {
+			master.setRepository(new Repository() {
 
 				@Override
 				public Git git() {

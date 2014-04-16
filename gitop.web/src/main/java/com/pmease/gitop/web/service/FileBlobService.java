@@ -6,7 +6,7 @@ import com.pmease.gitop.model.Repository;
 
 public interface FileBlobService {
 	
-	FileBlob get(Repository project, String revision, String path);
+	FileBlob get(Repository repository, String revision, String path);
 	
-	ObjectStream openStream(Repository project, String revision, String path);
+	ObjectStream openStream(Repository repository, String revision, String path);
 }

@@ -1,13 +1,14 @@
 package com.pmease.gitop.web.component.link;
 
+import javax.annotation.Nullable;
+
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
 
-import com.google.common.base.Preconditions;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.common.wicket.util.WicketUtils;
 import com.pmease.gitop.web.component.avatar.AvatarImage;
@@ -23,50 +24,40 @@ public class UserAvatarLink extends Panel {
 		NAME_AND_AVATAR
 	}
 	
+	private final User user;
+	
 	private final Mode mode;
 	
-	public UserAvatarLink(String id, IModel<User> model, Mode mode) {
-		super(id, model);
+	public UserAvatarLink(String id, @Nullable User user, Mode mode) {
+		super(id);
+		this.user = user;
 		this.mode = mode;
 	}
 	
-	public UserAvatarLink(String id, IModel<User> model) {
-		this(id, model, Mode.NAME_AND_AVATAR);
+	public UserAvatarLink(String id, @Nullable User user) {
+		this(id, user, Mode.NAME_AND_AVATAR);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		Link<?> link = new BookmarkablePageLink<Void>("link", AccountHomePage.class, 
-				WicketUtils.newPageParams(PageSpec.USER, getUser().getName()));
-		
-		add(link);
-		link.add(new AvatarImage("avatar", (IModel<User>) getDefaultModel()) {
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisibilityAllowed(mode != Mode.NAME);
-			}
-		});
-		
-		link.add(new Label("name", new AbstractReadOnlyModel<String>() {
 
-			@Override
-			public String getObject() {
-				return getUser().getName();
-			}
-		}) {
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				this.setVisibilityAllowed(mode != Mode.AVATAR);
-			}
-		});
+		Fragment fragment;
+		if (user != null) {
+			fragment = new Fragment("content", "notNullFrag", this);
+			Link<?> link = new BookmarkablePageLink<Void>("link", AccountHomePage.class, 
+					WicketUtils.newPageParams(PageSpec.USER, user.getName()));
+			
+			fragment.add(link);
+			link.add(new AvatarImage("avatar", user).setVisible(mode != Mode.NAME));
+			
+			link.add(new Label("name", user.getName()).setVisible(mode != Mode.AVATAR));
+		} else {
+			fragment = new Fragment("content", "nullFrag", this);
+			fragment.add(new WebMarkupContainer("avatar").setVisible(mode != Mode.NAME));
+			fragment.add(new WebMarkupContainer("name").setVisible(mode != Mode.AVATAR));
+		}
+		add(fragment);
 	}
 	
-	protected User getUser() {
-		return Preconditions.checkNotNull((User) getDefaultModelObject());
-	}
 }

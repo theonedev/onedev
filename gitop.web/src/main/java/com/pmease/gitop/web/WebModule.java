@@ -12,7 +12,7 @@ import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.gitop.model.validation.UserNameReservation;
 import com.pmease.gitop.web.common.soy.impl.SoyTemplateModule;
 import com.pmease.gitop.web.editable.EditSupportLocator;
-import com.pmease.gitop.web.page.project.source.blob.renderer.BlobRendererFactory;
+import com.pmease.gitop.web.page.repository.source.blob.renderer.BlobRendererFactory;
 import com.pmease.gitop.web.resource.TestResource;
 import com.pmease.gitop.web.service.ServiceModule;
 

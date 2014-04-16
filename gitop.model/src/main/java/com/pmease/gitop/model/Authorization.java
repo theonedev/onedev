@@ -12,7 +12,7 @@ import com.pmease.gitop.model.permission.operation.GeneralOperation;
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"team", "project"})
+		@UniqueConstraint(columnNames={"team", "repository"})
 })
 public class Authorization extends AbstractEntity {
 
@@ -22,7 +22,7 @@ public class Authorization extends AbstractEntity {
 
 	@ManyToOne
 	@JoinColumn(nullable=false)
-	private Repository project;
+	private Repository repository;
 	
 	private GeneralOperation operation = GeneralOperation.READ;
 	
@@ -42,12 +42,12 @@ public class Authorization extends AbstractEntity {
 		this.team = team;
 	}
 	
-	public Repository getProject() {
-		return project;
+	public Repository getRepository() {
+		return repository;
 	}
 
-	public void setProject(Repository project) {
-		this.project = project;
+	public void setRepository(Repository repository) {
+		this.repository = repository;
 	}
 
 }

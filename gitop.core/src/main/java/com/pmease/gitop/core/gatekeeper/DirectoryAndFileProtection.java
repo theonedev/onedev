@@ -28,7 +28,7 @@ import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 
 @SuppressWarnings("serial")
 @Editable(order=200, icon="icon-lock", description="By default, users with write permission of "
-		+ "the project can write to all directories/files. Use this gate keeper to restrict write "
+		+ "the repository can write to all directories/files. Use this gate keeper to restrict write "
 		+ "access of certain directories/files of specified branches to certain teams. Note that if "
 		+ "branch is not specified, the restriction will apply to all branches.")
 public class DirectoryAndFileProtection extends CommonGateKeeper {
@@ -74,8 +74,8 @@ public class DirectoryAndFileProtection extends CommonGateKeeper {
 	}
 
 	@Override
-	protected GateKeeper trim(Repository project) {
-		if (branchSelection.trim(project) == null)
+	protected GateKeeper trim(Repository repository) {
+		if (branchSelection.trim(repository) == null)
 			return null;
 		
 		Gitop.getInstance(TeamManager.class).trim(teamIds);
@@ -126,8 +126,8 @@ public class DirectoryAndFileProtection extends CommonGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Repository project, String refName) {
-		return getGateKeeper().checkRef(user, project, refName);
+	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
+		return getGateKeeper().checkRef(user, repository, refName);
 	}
 
 }

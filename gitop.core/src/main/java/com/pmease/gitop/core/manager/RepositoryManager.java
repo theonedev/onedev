@@ -11,9 +11,9 @@ import com.pmease.gitop.model.User;
 @ImplementedBy(DefaultRepositoryManager.class)
 public interface RepositoryManager extends GenericDao<Repository> {
 	
-	@Nullable Repository findBy(String ownerName, String projectName);
+	@Nullable Repository findBy(String ownerName, String repositoryName);
 	
-	@Nullable Repository findBy(User owner, String projectName);
+	@Nullable Repository findBy(User owner, String repositoryName);
 
 	/**
 	 * Fork specified repository as specified user.

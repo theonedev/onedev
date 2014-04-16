@@ -26,13 +26,13 @@ public class DefaultCommitCommentManager extends AbstractGenericDao<CommitCommen
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String, Integer> getCommitCommentStats(Repository project) {
+	public Map<String, Integer> getCommitCommentStats(Repository repository) {
 		String sql = "SELECT c.commit, count(c.id) from CommitComment c "
-					+ "WHERE project=:project "
+					+ "WHERE repository=:repository "
 				    + "GROUP BY c.commit";
 		
 		Query query = this.getSession().createQuery(sql);
-		query.setParameter("project", project);
+		query.setParameter("repository", repository);
 		List<Object[]> list = query.list();
 		
 		Map<String, Integer> map = Maps.newHashMap();

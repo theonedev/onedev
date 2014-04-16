@@ -33,10 +33,10 @@ public class DefaultAuthorizationManager extends AbstractGenericDao<Authorizatio
 		this.userManager = userManager;
 	}
 
-	public Collection<User> listAuthorizedUsers(Repository project, GeneralOperation operation) {
+	public Collection<User> listAuthorizedUsers(Repository repository, GeneralOperation operation) {
 		Set<User> authorizedUsers = new HashSet<User>();
 		for (User user: userManager.query()) {
-			if (user.asSubject().isPermitted(new ObjectPermission(project, operation)))
+			if (user.asSubject().isPermitted(new ObjectPermission(repository, operation)))
 				authorizedUsers.add(user);
 		}
 		return authorizedUsers;
@@ -44,8 +44,8 @@ public class DefaultAuthorizationManager extends AbstractGenericDao<Authorizatio
 
 	@Override
 	public boolean canModify(PullRequest request) {
-		Repository project = request.getTarget().getProject();
-		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectAdmin(project))) {
+		Repository repository = request.getTarget().getRepository();
+		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(repository))) {
 			return true;
 		} else {
 			User currentUser = userManager.getCurrent();
@@ -56,8 +56,8 @@ public class DefaultAuthorizationManager extends AbstractGenericDao<Authorizatio
 	
 	@Override
 	public boolean canModify(Vote vote) {
-		Repository project = vote.getUpdate().getRequest().getTarget().getProject();
-		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofProjectAdmin(project))) {
+		Repository repository = vote.getUpdate().getRequest().getTarget().getRepository();
+		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(repository))) {
 			return true;
 		} else {
 			return vote.getVoter().equals(userManager.getCurrent());

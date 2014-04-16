@@ -36,11 +36,11 @@ public class AvatarImageResource extends DynamicImageResource {
 						user.getAvatarUrl());
 			}
 		} else {
-			// Repository project =
+			// Repository repository =
 			// AppLoader.getInstance(RepositoryManager.class).get(id);
-			// if (!Strings.isNullOrEmpty(project.getAvatarUrl())) {
-			// avatarFile = new File(GitopWebApp.getProjectAvatarDir(id),
-			// project.getAvatarUrl());
+			// if (!Strings.isNullOrEmpty(repository.getAvatarUrl())) {
+			// avatarFile = new File(GitopWebApp.getRepositoryAvatarDir(id),
+			// repository.getAvatarUrl());
 			// }
 		}
 

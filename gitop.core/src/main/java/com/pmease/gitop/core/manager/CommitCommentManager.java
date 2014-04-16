@@ -11,6 +11,6 @@ import com.pmease.gitop.model.Repository;
 @ImplementedBy(DefaultCommitCommentManager.class)
 public interface CommitCommentManager extends GenericDao<CommitComment> {
 	
-	Map<String, Integer> getCommitCommentStats(Repository project);
+	Map<String, Integer> getCommitCommentStats(Repository repository);
 	
 }

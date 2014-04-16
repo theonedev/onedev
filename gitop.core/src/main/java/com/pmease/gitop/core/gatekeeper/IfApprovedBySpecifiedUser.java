@@ -54,7 +54,7 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
     }
 
     @Override
-    protected GateKeeper trim(Repository project) {
+    protected GateKeeper trim(Repository repository) {
         if (Gitop.getInstance(UserManager.class).get(getUserId()) == null)
             return null;
         else
@@ -82,7 +82,7 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Repository project, String refName) {
+	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
 		return checkApproval(user);
 	}
 

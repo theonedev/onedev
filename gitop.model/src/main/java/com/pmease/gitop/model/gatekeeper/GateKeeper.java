@@ -53,18 +53,18 @@ public interface GateKeeper extends Trimmable, Serializable {
 	CheckResult checkCommit(User user, Branch branch, String commit);
 	
 	/**
-	 * Check if specified user can push specified reference to specified project. 
+	 * Check if specified user can push specified reference to specified repository. 
 	 * 
 	 * @param user
 	 * 			user to be checked
-	 * @param project
-	 * 			project to be checked
+	 * @param repository
+	 * 			repository to be checked
 	 * @param refName
 	 * 			reference name to be checked
 	 * @return
 	 * 			result of the check
 	 */
-	CheckResult checkRef(User user, Repository project, String refName);
+	CheckResult checkRef(User user, Repository repository, String refName);
 	
 	boolean isEnabled();
 }

@@ -32,7 +32,7 @@ import com.pmease.gitop.model.gatekeeper.GateKeeper;
 import com.pmease.gitop.model.permission.object.ProtectedObject;
 import com.pmease.gitop.model.permission.object.UserBelonging;
 import com.pmease.gitop.model.storage.StorageManager;
-import com.pmease.gitop.model.validation.ProjectName;
+import com.pmease.gitop.model.validation.RepositoryName;
 
 @Entity
 @Table(uniqueConstraints={
@@ -67,10 +67,10 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	@Column(nullable=false)
 	private Date createdAt = new Date();
 
-	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="repository", cascade=CascadeType.REMOVE)
 	private Collection<Authorization> authorizations = new ArrayList<Authorization>();
 
-    @OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+    @OneToMany(mappedBy="repository", cascade=CascadeType.REMOVE)
     private Collection<Branch> branches = new ArrayList<Branch>();
 
     @OneToMany(mappedBy="forkedFrom", cascade=CascadeType.REMOVE)
@@ -85,8 +85,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 
 	@Editable(order=100, description=
-			"Specify name of the project. It will be used to identify the project when accessing via Git.")
-	@ProjectName
+			"Specify name of the repository. It will be used to identify the repository when accessing via Git.")
+	@RepositoryName
 	@NotEmpty
 	public String getName() {
 		return name;
@@ -96,7 +96,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		this.name = name;
 	}
 
-	@Editable(order=200, description="Specify description of the project.")
+	@Editable(order=200, description="Specify description of the repository.")
 	public String getDescription() {
 		return description;
 	}
@@ -105,7 +105,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		this.description = description;
 	}
 
-    @Editable(order=450, description="Whether or not this project can be forked.")
+    @Editable(order=450, description="Whether or not this repository can be forked.")
     public boolean isForkable() {
         return forkable;
     }
@@ -164,13 +164,13 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 
 	/**
-	 * Get branches for this project from database. The result might be 
+	 * Get branches for this repository from database. The result might be 
 	 * different from actual branches in repository. To get actual 
 	 * branches in repository, call {@link BranchManager#listBranches(Repository)} 
 	 * instead.
 	 * 
 	 * @return
-	 *         collection of branches available in database for this project 
+	 *         collection of branches available in database for this repository 
 	 */
 	public Collection<Branch> getBranches() {
         return branches;
@@ -183,8 +183,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
     @Override
 	public boolean has(ProtectedObject object) {
 		if (object instanceof Repository) {
-			Repository project = (Repository) object;
-			return project.getId().equals(getId());
+			Repository repository = (Repository) object;
+			return repository.getId().equals(getId());
 		} else {
 			return false;
 		}
@@ -232,11 +232,11 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 
 	/**
-	 * Find fork root of this project. 
+	 * Find fork root of this repository. 
 	 * 
 	 * @return
-	 * 			fork root of this project, or <tt>null</tt> if the project is not 
-	 * 			forked from any other project  
+	 * 			fork root of this repository, or <tt>null</tt> if the repository is not 
+	 * 			forked from any other repository  
 	 */
 	public @Nullable Repository findForkRoot() {
 		if (forkedFrom != null) {
@@ -251,10 +251,10 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	/**
-	 * Find all descendant projects forking from current project.
+	 * Find all descendant repositories forking from current repository.
 	 * 
 	 * @return
-	 * 			all descendant projects forking from current project
+	 * 			all descendant repositories forking from current repository
 	 */
 	public List<Repository> findForkDescendants() {
 		List<Repository> descendants = new ArrayList<>();
@@ -267,11 +267,11 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	/**
-	 * Find all comparable projects of current project. Comparable projects can 
+	 * Find all comparable repositories of current repository. Comparable repositories can 
 	 * be connected via forks, and can be compared/pulled. 
 	 * 
 	 * @return
-	 * 			comparable projects of current project, with current project also 
+	 * 			comparable repositories of current repository, with current repository also 
 	 * 			included in the collection
 	 */
 	public List<Repository> findComparables() {

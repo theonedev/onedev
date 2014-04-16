@@ -27,7 +27,6 @@ import com.pmease.gitop.web.component.comment.event.CommitCommentUpdated;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.UserAvatarLink;
 import com.pmease.gitop.web.component.wiki.WikiTextPanel;
-import com.pmease.gitop.web.model.UserModel;
 
 @SuppressWarnings("serial")
 public class CommitCommentPanel extends Panel {
@@ -55,14 +54,14 @@ public class CommitCommentPanel extends Panel {
 	protected Component createCommentHead(String id) {
 		Fragment frag = new Fragment(id, "headfrag", this);
 		
-		frag.add(new UserAvatarLink("author", new UserModel(getCommitComment().getAuthor())));
+		frag.add(new UserAvatarLink("author", getCommitComment().getAuthor()));
 //		frag.add(new WebMarkupContainer("authorType") {
 //			@Override
 //			protected void onConfigure() {
 //				super.onConfigure();
 //				
 //				User author = getCommitComment().getAuthor();
-//				setVisibilityAllowed(Objects.equal(author, projectModel.getObject().getOwner()));
+//				setVisibilityAllowed(Objects.equal(author, repositoryModel.getObject().getOwner()));
 //			}
 //		});
 		

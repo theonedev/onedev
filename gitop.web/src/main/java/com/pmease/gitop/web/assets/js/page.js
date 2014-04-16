@@ -32,13 +32,13 @@ var gitop = {
 			},
 		}, 
 		
-		comparableProject: {
-			formatSelection: function(project) {
-				return project.name;
+		comparableRepository: {
+			formatSelection: function(repository) {
+				return repository.name;
 			},
 			
-			formatResult: function(project) {
-				return project.name;
+			formatResult: function(repository) {
+				return repository.name;
 			},
 			
 			escapeMarkup: function(m) {
@@ -60,13 +60,13 @@ var gitop = {
 			}
 		},
 
-		project: {
-			formatSelection: function(project) {
-				return project.name
+		repository: {
+			formatSelection: function(repository) {
+				return repository.name
 			},
 			
-			formatResult: function(project) {
-				return project.owner + '/' + project.name
+			formatResult: function(repository) {
+				return repository.owner + '/' + repository.name
 			},
 			
 			escapeMarkup: function(m) {

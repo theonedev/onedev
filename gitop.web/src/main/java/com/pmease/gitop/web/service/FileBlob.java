@@ -21,14 +21,14 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.quantity.Data;
-import com.pmease.gitop.web.page.project.source.blob.language.Language;
-import com.pmease.gitop.web.page.project.source.blob.language.Languages;
+import com.pmease.gitop.web.page.repository.source.blob.language.Language;
+import com.pmease.gitop.web.page.repository.source.blob.language.Languages;
 import com.pmease.gitop.web.util.MediaTypeUtils;
 
 public class FileBlob implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private final Long projectId;
+	private final Long repositoryId;
 	private final String revision;
 	private final String file;
 	
@@ -42,14 +42,14 @@ public class FileBlob implements Serializable {
 
 	private static final long LARGE_FILE_SIZE = 2 * Data.ONE_MB;
 	
-	public FileBlob(final Long projectId, final String revision, final String file) {
-		this.projectId = Preconditions.checkNotNull(projectId);
+	public FileBlob(final Long repositoryId, final String revision, final String file) {
+		this.repositoryId = Preconditions.checkNotNull(repositoryId);
 		this.revision = Preconditions.checkNotNull(revision);
 		this.file = Preconditions.checkNotNull(file);
 	}
 
-	public static FileBlob of(Repository project, String revision, String file) {
-		return Gitop.getInstance(FileBlobService.class).get(project, revision, file);
+	public static FileBlob of(Repository repository, String revision, String file) {
+		return Gitop.getInstance(FileBlobService.class).get(repository, revision, file);
 	}
 	
 	public boolean isText() {
@@ -121,12 +121,12 @@ public class FileBlob implements Serializable {
 		return FilenameUtils.getFullPath(getFilePath());
 	}
 	
-	public Long getProjectId() {
-		return projectId;
+	public Long getRepositoryId() {
+		return repositoryId;
 	}
 
-	public Repository getProject() {
-		return Gitop.getInstance(RepositoryManager.class).load(Preconditions.checkNotNull(getProjectId()));
+	public Repository getRepository() {
+		return Gitop.getInstance(RepositoryManager.class).load(Preconditions.checkNotNull(getRepositoryId()));
 	}
 	
 	public String getRevision() {
@@ -196,20 +196,20 @@ public class FileBlob implements Serializable {
 			return false;
 		
 		FileBlob rhs = (FileBlob) other;
-		return Objects.equal(projectId, rhs.projectId)
+		return Objects.equal(repositoryId, rhs.repositoryId)
 				&& Objects.equal(revision, rhs.revision)
 				&& Objects.equal(file, rhs.file);
 	}
 	
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(projectId, revision, file);
+		return Objects.hashCode(repositoryId, revision, file);
 	}
 	
 	@Override
 	public String toString() {
 		return Objects.toStringHelper(this)
-				.add("Project Id", projectId)
+				.add("Repository Id", repositoryId)
 				.add("Revision", revision)
 				.add("Path", file)
 				.toString();

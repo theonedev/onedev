@@ -41,15 +41,15 @@ public class GitUpdateCallback extends HttpServlet {
 
 	public static final String PATH = "/git-update-callback";
 
-	private final RepositoryManager projectManager;
+	private final RepositoryManager repositoryManager;
 	
 	private final BranchManager branchManager;
 
 	private final UserManager userManager;
 	
 	@Inject
-	public GitUpdateCallback(RepositoryManager projectManager, BranchManager branchManager, UserManager userManager) {
-		this.projectManager = projectManager;
+	public GitUpdateCallback(RepositoryManager repositoryManager, BranchManager branchManager, UserManager userManager) {
+		this.repositoryManager = repositoryManager;
 		this.branchManager = branchManager;
 		this.userManager = userManager;
 	}
@@ -66,9 +66,9 @@ public class GitUpdateCallback extends HttpServlet {
 		output.writeLine();
 	}
 	
-	private void checkRef(User user, Repository project, String refName, Output output) {
-		GateKeeper gateKeeper = project.getGateKeeper();
-		CheckResult checkResult = gateKeeper.checkRef(user, project, refName);
+	private void checkRef(User user, Repository repository, String refName, Output output) {
+		GateKeeper gateKeeper = repository.getGateKeeper();
+		CheckResult checkResult = gateKeeper.checkRef(user, repository, refName);
 
 		if (!(checkResult instanceof Approved)) {
 			List<String> messages = new ArrayList<>();
@@ -92,7 +92,7 @@ public class GitUpdateCallback extends HttpServlet {
         List<String> fields = StringUtils.splitAndTrim(request.getPathInfo(), "/");
         Preconditions.checkState(fields.size() == 2);
         
-        Repository project = projectManager.load(Long.valueOf(fields.get(0)));
+        Repository repository = repositoryManager.load(Long.valueOf(fields.get(0)));
         
         SecurityUtils.getSubject().runAs(User.asPrincipal(Long.valueOf(fields.get(1))));
         
@@ -112,23 +112,23 @@ public class GitUpdateCallback extends HttpServlet {
 		Preconditions.checkNotNull(user);
 
 		if (refName.startsWith(Repository.REFS_GITOP)) {
-			if (!user.asSubject().isPermitted(ObjectPermission.ofProjectAdmin(project)))
-				error(output, "Only project administrators can update gitop refs.");
+			if (!user.asSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(repository)))
+				error(output, "Only repository administrators can update gitop refs.");
 		} else {
 			String branchName = Branch.getName(refName);
 			if (branchName != null) { // push branch ref 
 				if (oldCommitHash.equals(Commit.ZERO_HASH)) { // create new branch
-					checkRef(user, project, refName, output);
+					checkRef(user, repository, refName, output);
 				} else {
-					Branch branch = branchManager.findBy(project, branchName);
+					Branch branch = branchManager.findBy(repository, branchName);
 					Preconditions.checkNotNull(branch);
 
 					if (newCommitHash.equals(Commit.ZERO_HASH)) { // deleting a branch ref
-						if (!user.asSubject().isPermitted(ObjectPermission.ofProjectAdmin(project)) && !user.equals(branch.getCreator())) {
-							error(output, "Branch can only be deleted by its creator or project administrators.");
+						if (!user.asSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(repository)) && !user.equals(branch.getCreator())) {
+							error(output, "Branch can only be deleted by its creator or repository administrators.");
 						}
 					} else {
-						GateKeeper gateKeeper = project.getGateKeeper();
+						GateKeeper gateKeeper = repository.getGateKeeper();
 						CheckResult checkResult = gateKeeper.checkCommit(user, branch, newCommitHash);
 				
 						if (!(checkResult instanceof Approved)) {
@@ -145,7 +145,7 @@ public class GitUpdateCallback extends HttpServlet {
 					}
 				}
 			} else { // push non-branch refs
-				checkRef(user, project, refName, output);
+				checkRef(user, repository, refName, output);
 			}
 		}
 	}	

@@ -15,7 +15,7 @@ import com.pmease.gitop.model.permission.operation.GeneralOperation;
 @ImplementedBy(DefaultAuthorizationManager.class)
 public interface AuthorizationManager extends GenericDao<Authorization> {
 	
-	Collection<User> listAuthorizedUsers(Repository project, GeneralOperation operation);
+	Collection<User> listAuthorizedUsers(Repository repository, GeneralOperation operation);
 	
 	boolean canModify(PullRequest request);
 	

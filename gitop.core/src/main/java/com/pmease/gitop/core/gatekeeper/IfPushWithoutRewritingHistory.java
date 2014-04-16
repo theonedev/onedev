@@ -26,14 +26,14 @@ public class IfPushWithoutRewritingHistory extends AbstractGateKeeper {
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		if (branch.getProject().git().isAncestor(branch.getHeadCommit(), commit))
+		if (branch.getRepository().git().isAncestor(branch.getHeadCommit(), commit))
 			return approved("Push operation does not rewrite history.");
 		else
 			return disapproved("Push operation rewrites history.");
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Repository project, String refName) {
+	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
 		return ignored();
 	}
 

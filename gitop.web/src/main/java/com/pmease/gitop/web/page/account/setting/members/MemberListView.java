@@ -77,7 +77,7 @@ public class MemberListView extends Panel {
 			@Override
 			protected void populateItem(ListItem<User> item) {
 				User user = item.getModelObject();
-				item.add(new AvatarImage("avatar", item.getModel()));
+				item.add(new AvatarImage("avatar", user));
 				AbstractLink link = PageSpec.newUserHomeLink("userlink", user);
 				item.add(link);
 				link.add(new Label("name", Model.of(user.getName())));

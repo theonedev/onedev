@@ -1,0 +1,31 @@
+<html xmlns:wicket>
+<wicket:extend>
+	<div class="page-nav repo-head clearfix">
+		<h1 class="repo-info pull-left">
+			<span class="repo-avatar"><i wicket:id="repoIcon" class="icon"></i></span>
+			<span class="name">
+				<a wicket:id="userlink"><wicket:container wicket:id="name"></wicket:container></a> / 
+				<b><a wicket:id="repositorylink"><wicket:container wicket:id="name"></wicket:container></a></b>
+				<wicket:enclosure>
+				<span class="status">
+					<span class="label label-info" wicket:id="public-label"></span>
+				</span>
+				</wicket:enclosure>
+			</span>
+		</h1>
+		<ul class="pull-right repo-actions">
+			<li>
+				<a class="btn btn-default popup-marker"><i class="icon icon-download"></i> Clone <span class="caret"></span></a>
+			</li>
+			<li>
+				<div class="btn-group">
+					<a class="btn btn-default"><i class="icon icon-watch"></i> Watch</a>
+					<a wicket:id="fork" class="btn btn-default"><i class="icon icon-git-branch-add"></i> Fork</a>
+					<a class="btn btn-default"><i class="icon icon-git-branch-compare"></i> Compare</a>
+				</div>
+			</li>
+		</ul>
+	</div>
+	<wicket:child></wicket:child>
+</wicket:extend>
+</html>

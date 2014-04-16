@@ -6,7 +6,7 @@ public class SessionData implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private Long accountId;
-	private Long projectId;
+	private Long repositoryId;
 	private String revision;
 
 	public static SessionData get() {
@@ -14,11 +14,11 @@ public class SessionData implements Serializable {
 	}
 	
 	public void onAccountChanged() {
-		this.projectId = null;
+		this.repositoryId = null;
 		this.revision = null;
 	}
 	
-	public void onProjectChanged() {
+	public void onRepositoryChanged() {
 		this.revision = null;
 	}
 	
@@ -33,12 +33,12 @@ public class SessionData implements Serializable {
 		this.accountId = accountId;
 	}
 
-	public Long getProjectId() {
-		return projectId;
+	public Long getRepositoryId() {
+		return repositoryId;
 	}
 
-	public void setProjectId(Long projectId) {
-		this.projectId = projectId;
+	public void setRepositoryId(Long repositoryId) {
+		this.repositoryId = repositoryId;
 	}
 
 	public String getRevision() {
