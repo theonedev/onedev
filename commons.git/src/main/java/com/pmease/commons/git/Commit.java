@@ -31,8 +31,8 @@ public class Commit extends BriefCommit {
 		String subject;
 		String body;
 		String note;
-		UserInfo author;
-		UserInfo committer;
+		GitContribInfo author;
+		GitContribInfo committer;
 		List<String> parents = Lists.newArrayList();
 		List<FileChange> changes = Lists.newArrayList();
 		
@@ -58,12 +58,12 @@ public class Commit extends BriefCommit {
 			return this;
 		}
 		
-		public Builder author(UserInfo author) {
+		public Builder author(GitContribInfo author) {
 			this.author = author;
 			return this;
 		}
 		
-		public Builder committer(UserInfo committer) {
+		public Builder committer(GitContribInfo committer) {
 			this.committer = committer;
 			return this;
 		}
@@ -94,7 +94,7 @@ public class Commit extends BriefCommit {
     	return new Builder();
     }
     
-    public Commit(String hash, UserInfo committer, UserInfo author, 
+    public Commit(String hash, GitContribInfo committer, GitContribInfo author, 
     		String subject, @Nullable String body, 
     		@Nullable String note, List<String> parentHashes, 
     		List<FileChange> fileChanges) {

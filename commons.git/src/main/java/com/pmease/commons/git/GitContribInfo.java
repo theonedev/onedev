@@ -8,11 +8,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
 @SuppressWarnings("serial")
-public class UserInfo implements Serializable {
+public class GitContribInfo implements Serializable {
 	
-	private final String name;
-	
-	private final String email;
+	private final GitUser user;
 	
 	private final Date date;
 	
@@ -42,8 +40,8 @@ public class UserInfo implements Serializable {
 					&& date != null;
 		}
 		
-		public UserInfo build() {
-			return new UserInfo(Preconditions.checkNotNull(name, "name"),
+		public GitContribInfo build() {
+			return new GitContribInfo(Preconditions.checkNotNull(name, "name"),
 								Preconditions.checkNotNull(email, "email"),
 								Preconditions.checkNotNull(date, "date"));
 		}
@@ -53,46 +51,51 @@ public class UserInfo implements Serializable {
 		return new Builder();
 	}
 	
-	public UserInfo(String name, String email, Date date) {
-		this.name = name;
-		this.email = email;
+	public GitContribInfo(String name, String email, Date date) {
+		this(new GitUser(name, email), date);
+	}
+	
+	public GitContribInfo(GitUser user, Date date) {
+		this.user = user;
 		this.date = date;
 	}
-
+	
 	public String getName() {
-		return name;
+		return user.getName();
 	}
 
 	public String getEmail() {
-		return email;
+		return user.getEmail();
 	}
 
 	public Date getDate() {
 		return date;
 	}
+	
+	public GitUser getUser() {
+		return user;
+	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(name, email, date);
+		return Objects.hashCode(user, date);
 	}
 
 	@Override
 	public boolean equals(Object other) {
-		if (!(other instanceof UserInfo))
+		if (!(other instanceof GitContribInfo))
 			return false;
 		if (this == other)
 			return true;
-		UserInfo otherUser = (UserInfo) other;
-		return Objects.equal(name, otherUser.name) 
-				&& Objects.equal(email, otherUser.email)
-				&& Objects.equal(date, otherUser.date);
+		GitContribInfo otherInfo = (GitContribInfo) other;
+		return Objects.equal(user, otherInfo.user) 
+				&& Objects.equal(date, otherInfo.date);
 	}
 
 	@Override
 	public String toString() {
 		return Objects.toStringHelper(this)
-				.add("name", name)
-				.add("email", email)
+				.add("user", user)
 				.add("date", date)
 				.toString();
 	}

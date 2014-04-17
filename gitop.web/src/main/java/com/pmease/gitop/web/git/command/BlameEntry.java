@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.google.common.base.Objects;
 import com.pmease.commons.git.BriefCommit;
-import com.pmease.commons.git.UserInfo;
+import com.pmease.commons.git.GitContribInfo;
 
 public class BlameEntry implements Serializable, Comparable<BlameEntry> {
 	private static final long serialVersionUID = 1L;
@@ -19,8 +19,8 @@ public class BlameEntry implements Serializable, Comparable<BlameEntry> {
 		private int sourceLine;
 		private int resultLine;
 		private int numLines;
-		private UserInfo author;
-		private UserInfo committer;
+		private GitContribInfo author;
+		private GitContribInfo committer;
 		private String summary;
 		
 		public Builder sha(String sha) {
@@ -43,12 +43,12 @@ public class BlameEntry implements Serializable, Comparable<BlameEntry> {
 			return this;
 		}
 		
-		public Builder author(UserInfo author) {
+		public Builder author(GitContribInfo author) {
 			this.author = author;
 			return this;
 		}
 		
-		public Builder committer(UserInfo committer) {
+		public Builder committer(GitContribInfo committer) {
 			this.committer = committer;
 			return this;
 		}

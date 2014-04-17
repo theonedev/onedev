@@ -17,7 +17,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.io.LineProcessor;
 import com.google.common.io.Resources;
-import com.pmease.commons.git.UserInfo;
+import com.pmease.commons.git.GitContribInfo;
 import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
@@ -83,8 +83,8 @@ public class BlameCommand extends GitCommand<List<BlameEntry>> {
 			if (lines.isEmpty())
 				return;
 			
-			UserInfo.Builder author = UserInfo.builder();
-			UserInfo.Builder committer = UserInfo.builder();
+			GitContribInfo.Builder author = GitContribInfo.builder();
+			GitContribInfo.Builder committer = GitContribInfo.builder();
 			String summary = null;
 			String hash = null;
 			int sourceLine = 0, resultLine = 0, numLines = 0;

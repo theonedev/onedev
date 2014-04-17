@@ -17,8 +17,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
+import com.pmease.commons.git.GitContribInfo;
 import com.pmease.commons.git.RefInfo;
-import com.pmease.commons.git.UserInfo;
 
 public class GitUtils {
 
@@ -113,7 +113,7 @@ public class GitUtils {
 	 * @param raw
 	 * @return
 	 */
-	public static @Nullable UserInfo parseUserInfo(String raw) {
+	public static @Nullable GitContribInfo parseContribInfo(String raw) {
 		if (Strings.isNullOrEmpty(raw))
 			return null;
 		
@@ -132,7 +132,7 @@ public class GitUtils {
 		
 		String email = raw.substring(pos1 + 1, pos2 - 1);
 		
-		return new UserInfo(name, email, date);
+		return new GitContribInfo(name, email, date);
 	}
 	
 }

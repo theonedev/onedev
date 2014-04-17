@@ -9,13 +9,13 @@ public class BriefCommit implements Serializable {
 
     private final String hash;
     
-    private final UserInfo committer;
+    private final GitContribInfo committer;
     
-    private final UserInfo author;
+    private final GitContribInfo author;
     
     private final String subject;
 
-    public BriefCommit(String hash, UserInfo committer, UserInfo author, String subject) {
+    public BriefCommit(String hash, GitContribInfo committer, GitContribInfo author, String subject) {
     	this.hash = hash;
     	this.committer = committer;
     	this.author = author;
@@ -26,11 +26,11 @@ public class BriefCommit implements Serializable {
 		return hash;
 	}
 
-	public UserInfo getCommitter() {
+	public GitContribInfo getCommitter() {
 		return committer;
 	}
 
-	public UserInfo getAuthor() {
+	public GitContribInfo getAuthor() {
 		return author;
 	}
 

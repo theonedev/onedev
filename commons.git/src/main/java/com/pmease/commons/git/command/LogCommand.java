@@ -11,7 +11,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.FileChange;
-import com.pmease.commons.git.UserInfo;
+import com.pmease.commons.git.GitContribInfo;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
@@ -214,8 +214,8 @@ public class LogCommand extends GitCommand<List<Commit>> {
     	private Commit build() {
     		return new Commit(
     				hash, 
-    				new UserInfo(committer, committerEmail, committerDate), 
-    				new UserInfo(author, authorEmail, authorDate),
+    				new GitContribInfo(committer, committerEmail, committerDate), 
+    				new GitContribInfo(author, authorEmail, authorDate),
     				summary.trim(), 
     				StringUtils.isNotBlank(message)?message.trim():null, 
     				StringUtils.isNotBlank(note)?note.trim():null, 

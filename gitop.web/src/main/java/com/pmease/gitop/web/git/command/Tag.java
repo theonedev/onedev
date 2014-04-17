@@ -7,7 +7,7 @@ import java.io.Serializable;
 import javax.annotation.Nullable;
 
 import com.google.common.base.Strings;
-import com.pmease.commons.git.UserInfo;
+import com.pmease.commons.git.GitContribInfo;
 
 public class Tag implements Serializable {
 
@@ -16,7 +16,7 @@ public class Tag implements Serializable {
 	private final String name;
 	private final String hash;
 	private final String commitHash;
-	private final UserInfo tagger;
+	private final GitContribInfo tagger;
 	private final String subject;
 	private final String body;
 
@@ -24,7 +24,7 @@ public class Tag implements Serializable {
 		private String name;
 		private String hash;
 		private String commitHash;
-		private UserInfo tagger;
+		private GitContribInfo tagger;
 		private String subject;
 		private String body;
 		
@@ -43,7 +43,7 @@ public class Tag implements Serializable {
 			return this;
 		}
 		
-		public Builder tagger(UserInfo tagger) {
+		public Builder tagger(GitContribInfo tagger) {
 			this.tagger = tagger;
 			return this;
 		}
@@ -74,7 +74,7 @@ public class Tag implements Serializable {
 	}
 	
 	Tag(String name, String hash, @Nullable String commitHash, 
-			UserInfo tagger, String subject, @Nullable String body) {
+			GitContribInfo tagger, String subject, @Nullable String body) {
 		this.name = name;
 		this.hash = hash;
 		this.commitHash = commitHash;
@@ -95,7 +95,7 @@ public class Tag implements Serializable {
 		return commitHash;
 	}
 
-	public UserInfo getTagger() {
+	public GitContribInfo getTagger() {
 		return tagger;
 	}
 
