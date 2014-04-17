@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -31,8 +32,10 @@ public class Commit extends BriefCommit {
 		String subject;
 		String body;
 		String note;
-		GitContribInfo author;
-		GitContribInfo committer;
+		GitIdentity author;
+		GitIdentity committer;
+		Date commitDate;
+		Date authorDate;
 		List<String> parents = Lists.newArrayList();
 		List<FileChange> changes = Lists.newArrayList();
 		
@@ -58,13 +61,23 @@ public class Commit extends BriefCommit {
 			return this;
 		}
 		
-		public Builder author(GitContribInfo author) {
+		public Builder author(GitIdentity author) {
 			this.author = author;
 			return this;
 		}
 		
-		public Builder committer(GitContribInfo committer) {
+		public Builder committer(GitIdentity committer) {
 			this.committer = committer;
+			return this;
+		}
+		
+		public Builder commitDate(Date commitDate) {
+			this.commitDate = commitDate;
+			return this;
+		}
+		
+		public Builder authorDate(Date authorDate) {
+			this.authorDate = authorDate;
 			return this;
 		}
 		
@@ -82,7 +95,9 @@ public class Commit extends BriefCommit {
 			return new Commit(
 					checkNotNull(hash, "hash"), 
 					checkNotNull(committer, "committer"), 
+					checkNotNull(commitDate, "commitDate"), 
 					checkNotNull(author, "author"), 
+					checkNotNull(authorDate, "authorDate"), 
 					checkNotNull(subject, "subject"), 
 					body, note, 
 					checkNotNull(parents, "parents"), 
@@ -94,11 +109,12 @@ public class Commit extends BriefCommit {
     	return new Builder();
     }
     
-    public Commit(String hash, GitContribInfo committer, GitContribInfo author, 
+    public Commit(String hash, GitIdentity committer, Date commitDate,
+    		GitIdentity author, Date authorDate,
     		String subject, @Nullable String body, 
     		@Nullable String note, List<String> parentHashes, 
     		List<FileChange> fileChanges) {
-    	super(hash, committer, author, subject);
+    	super(hash, committer, commitDate, author, authorDate, subject);
     	
     	this.body = body;
     	this.note = note;

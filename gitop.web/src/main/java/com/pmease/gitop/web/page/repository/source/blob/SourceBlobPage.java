@@ -128,7 +128,7 @@ public class SourceBlobPage extends AbstractFilePage {
 
 			@Override
 			public Date getObject() {
-				return getLastCommit().getAuthor().getDate();
+				return getLastCommit().getAuthorDate();
 			}
 			
 		}));

@@ -70,7 +70,7 @@ public class UpdateCommitsPanel extends Panel {
 
 				item.add(new Label("message", commit.getSubject()));
 				
-				item.add(new Label("date", DateUtils.formatAge(commit.getAuthor().getDate())));
+				item.add(new Label("date", DateUtils.formatAge(commit.getAuthorDate())));
 				
 				RepositoryBasePage page = (RepositoryBasePage) getPage();
 				AbstractLink link = new BookmarkablePageLink<Void>("shaLink",

@@ -17,7 +17,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.io.LineProcessor;
 import com.google.common.io.Resources;
-import com.pmease.commons.git.GitContribInfo;
+import com.pmease.commons.git.GitIdentity;
 import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
@@ -83,8 +83,9 @@ public class BlameCommand extends GitCommand<List<BlameEntry>> {
 			if (lines.isEmpty())
 				return;
 			
-			GitContribInfo.Builder author = GitContribInfo.builder();
-			GitContribInfo.Builder committer = GitContribInfo.builder();
+			String authorName = null, committerName = null;
+			String committerEmail = null, authorEmail = null;
+			Date authorDate = null, commitDate = null; 
 			String summary = null;
 			String hash = null;
 			int sourceLine = 0, resultLine = 0, numLines = 0;
@@ -97,28 +98,22 @@ public class BlameCommand extends GitCommand<List<BlameEntry>> {
 					resultLine = Integer.valueOf(m.group(3));
 					numLines = Integer.valueOf(m.group(4));
 				} else if (each.startsWith("author ")) {
-					author.name(each.substring("author ".length()));
-					
+					authorName = each.substring("author ".length());
 				} else if (each.startsWith("author-mail ")) {
-					author.email(GitUtils.parseEmail(each.substring("author-mail ".length())));
-					
+					authorEmail = GitUtils.parseEmail(each.substring("author-mail ".length()));
 				} else if (each.startsWith("author-time ")) {
 					long time = Long.valueOf(each.substring("author-time ".length()));
-					author.date(new Date(time * 1000L));
-					
+					authorDate = new Date(time * 1000L);
 				} else if (each.startsWith("author-tz ")) {
 					// TODO: Add timezone info
 					
 				} else if (each.startsWith("committer ")) {
-					committer.name(each.substring("committer ".length()));
-					
+					committerName = each.substring("committer ".length());
 				} else if (each.startsWith("committer-mail ")) {
-					committer.email(each.substring("committer-mail ".length()));
-					
+					committerEmail = each.substring("committer-mail ".length());
 				} else if (each.startsWith("committer-time ")) {
 					long time = Long.valueOf(each.substring("committer-time ".length()));
-					committer.date(new Date(time * 1000L));
-					
+					commitDate = new Date(time * 1000L);
 				} else if (each.startsWith("committer-tz ")) {
 					// TODO: add timezone info
 					
@@ -142,10 +137,13 @@ public class BlameCommand extends GitCommand<List<BlameEntry>> {
 				builder.sha(hash)
 						.author(previous.getCommit().getAuthor())
 						.committer(previous.getCommit().getCommitter())
+						.authorDate(previous.getCommit().getAuthorDate())
+						.commitDate(previous.getCommit().getCommitDate())
 						.summary(previous.getCommit().getSubject());
 			} else {
-				builder.committer(committer.build())
-						.author(author.build())
+				builder.committer(new GitIdentity(committerName, committerEmail))
+						.author(new GitIdentity(authorName, authorEmail))
+						.commitDate(commitDate).authorDate(authorDate)
 						.summary(summary);
 			}
 			

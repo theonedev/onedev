@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.google.inject.ImplementedBy;
+import com.pmease.commons.git.GitIdentity;
 import com.pmease.commons.hibernate.dao.GenericDao;
 import com.pmease.gitop.core.manager.impl.DefaultUserManager;
 import com.pmease.gitop.model.User;
@@ -39,6 +40,8 @@ public interface UserManager extends GenericDao<User> {
 	 * 			matching user, or <tt>null</tt> if not found 
 	 */
 	@Nullable User findByEmail(String email);
+	
+	@Nullable User findByGitIdentity(GitIdentity gitIdentity);
 	
 	/**
 	 * Get current authenticated user in Shiro context, or <tt>null</tt> if not 

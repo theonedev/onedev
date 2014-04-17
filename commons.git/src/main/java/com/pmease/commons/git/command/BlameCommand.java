@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blame;
 import com.pmease.commons.git.BriefCommit;
-import com.pmease.commons.git.GitContribInfo;
+import com.pmease.commons.git.GitIdentity;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.ExecuteResult;
 import com.pmease.commons.util.execution.LineConsumer;
@@ -111,7 +111,7 @@ public class BlameCommand extends GitCommand<List<Blame>> {
 						line = StringUtils.substringAfter(line, "<");
 						commitBuilder.committerEmail = StringUtils.substringBeforeLast(line, ">");
 					} else if (line.startsWith("committer-time ")) {
-						commitBuilder.committerDate = new Date(1000L * Long.parseLong(line.substring("committer-time ".length())));
+						commitBuilder.commitDate = new Date(1000L * Long.parseLong(line.substring("committer-time ".length())));
 					} else if (line.startsWith("summary ")) {
 						commitBuilder.summary = line.substring("summary ".length());
 						commitMap.put(commitBuilder.hash, commitBuilder.build());
@@ -164,7 +164,7 @@ public class BlameCommand extends GitCommand<List<Blame>> {
 
     private static class BriefCommitBuilder {
         
-    	private Date committerDate;
+    	private Date commitDate;
     	
         private Date authorDate;
         
@@ -183,8 +183,8 @@ public class BlameCommand extends GitCommand<List<Blame>> {
     	private BriefCommit build() {
     		return new BriefCommit(
     				hash, 
-    				new GitContribInfo(committer, committerEmail, committerDate), 
-    				new GitContribInfo(author, authorEmail, authorDate), 
+    				new GitIdentity(committer, committerEmail), commitDate, 
+    				new GitIdentity(author, authorEmail), authorDate, 
     				summary.trim());
     	}
     }

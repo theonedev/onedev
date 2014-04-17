@@ -11,7 +11,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.FileChange;
-import com.pmease.commons.git.GitContribInfo;
+import com.pmease.commons.git.GitIdentity;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
@@ -166,7 +166,7 @@ public class LogCommand extends GitCommand<List<Commit>> {
             	} else if (line.startsWith("authorDate:")) {
                 	commitBuilder.authorDate = dateFormatter.parseDateTime(line.substring("authorDate:".length()).trim()).toDate();
             	} else if (line.startsWith("committerDate:")) {
-                	commitBuilder.committerDate = dateFormatter.parseDateTime(line.substring("committerDate:".length()).trim()).toDate();
+                	commitBuilder.commitDate = dateFormatter.parseDateTime(line.substring("committerDate:".length()).trim()).toDate();
             	} else if (line.startsWith("authorEmail:")) {
                 	commitBuilder.authorEmail = line.substring("authorEmail:".length());
             	} else if (line.startsWith("committerEmail:")) {
@@ -187,7 +187,7 @@ public class LogCommand extends GitCommand<List<Commit>> {
 
     private static class CommitBuilder {
         
-    	private Date committerDate;
+    	private Date commitDate;
     	
         private Date authorDate;
         
@@ -214,8 +214,8 @@ public class LogCommand extends GitCommand<List<Commit>> {
     	private Commit build() {
     		return new Commit(
     				hash, 
-    				new GitContribInfo(committer, committerEmail, committerDate), 
-    				new GitContribInfo(author, authorEmail, authorDate),
+    				new GitIdentity(committer, committerEmail), commitDate, 
+    				new GitIdentity(author, authorEmail), authorDate,
     				summary.trim(), 
     				StringUtils.isNotBlank(message)?message.trim():null, 
     				StringUtils.isNotBlank(note)?note.trim():null, 

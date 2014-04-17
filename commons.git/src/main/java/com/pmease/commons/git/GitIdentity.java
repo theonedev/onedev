@@ -5,13 +5,13 @@ import java.io.Serializable;
 import com.google.common.base.Objects;
 
 @SuppressWarnings("serial")
-public class GitUser implements Serializable {
+public class GitIdentity implements Serializable {
 	
 	private final String name;
 	
 	private final String email;
 	
-	public GitUser(String name, String email) {
+	public GitIdentity(String name, String email) {
 		this.name = name;
 		this.email = email;
 	}
@@ -31,13 +31,13 @@ public class GitUser implements Serializable {
 
 	@Override
 	public boolean equals(Object other) {
-		if (!(other instanceof GitUser))
+		if (!(other instanceof GitIdentity))
 			return false;
 		if (this == other)
 			return true;
-		GitUser otherUser = (GitUser) other;
-		return Objects.equal(name, otherUser.name) 
-				&& Objects.equal(email, otherUser.email);
+		GitIdentity otherIdentity = (GitIdentity) other;
+		return Objects.equal(name, otherIdentity.name) 
+				&& Objects.equal(email, otherIdentity.email);
 	}
 
 	@Override

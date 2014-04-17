@@ -1,6 +1,7 @@
 package com.pmease.gitop.web.git.command;
 
 import java.io.File;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +14,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.pmease.commons.git.GitContribInfo;
+import com.pmease.commons.git.GitIdentity;
+import com.pmease.commons.util.Pair;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.gitop.web.git.GitUtils;
 
@@ -94,8 +96,9 @@ public class TagForEachRefCommand extends ForEachRefCommand<Map<String, Tag>, Ta
 			builder.hash(hash1);
 			builder.commitHash(hash2);
 			
-			GitContribInfo tagger = GitUtils.parseContribInfo(pieces[i++]);
-			builder.tagger(tagger);
+			Pair<GitIdentity, Date> taggerAndDate = GitUtils.parseIdentityAndDate(pieces[i++]);
+			builder.tagger(taggerAndDate.getFirst());
+			builder.tagDate(taggerAndDate.getSecond());
 		}
 		
 		void onBlockFinish() {

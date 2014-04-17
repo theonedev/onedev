@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
-import com.pmease.commons.git.GitContribInfo;
+import com.pmease.commons.git.GitIdentity;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
@@ -23,7 +23,7 @@ public class GitPerson implements Serializable {
 		this.emailAddress = emailAddress;
 	}
 
-	public static GitPerson of(GitContribInfo user) {
+	public static GitPerson of(GitIdentity user) {
 		return new GitPerson(user.getName(), user.getEmail());
 	}
 	

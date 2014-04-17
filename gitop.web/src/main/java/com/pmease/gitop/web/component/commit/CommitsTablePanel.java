@@ -51,7 +51,7 @@ public class CommitsTablePanel extends Panel {
 				
 				LinkedListMultimap<Date, Commit> groups = LinkedListMultimap.<Date, Commit>create();
 				for (Commit commit : commits) {
-					Date date = commit.getAuthor().getDate();
+					Date date = commit.getAuthorDate();
 					date = DateUtils.round(date, Calendar.DAY_OF_MONTH);
 					groups.put(date, commit);
 				}

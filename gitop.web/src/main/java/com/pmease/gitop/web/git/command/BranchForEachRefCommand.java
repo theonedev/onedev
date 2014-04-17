@@ -1,6 +1,7 @@
 package com.pmease.gitop.web.git.command;
 
 import java.io.File;
+import java.util.Date;
 import java.util.Map;
 
 import com.google.common.base.Splitter;
@@ -8,7 +9,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.pmease.commons.git.BriefCommit;
-import com.pmease.commons.git.GitContribInfo;
+import com.pmease.commons.git.GitIdentity;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.gitop.web.git.GitUtils;
 
@@ -70,14 +71,12 @@ public class BranchForEachRefCommand extends ForEachRefCommand<Map<String, Brief
 			String refname = pieces[i++];
 			String sha = pieces[i++];
 			
-			GitContribInfo committer = new GitContribInfo(pieces[i++], 
-											  GitUtils.parseEmail(pieces[i++]), 
-											  GitUtils.parseRawDate(pieces[i++]));
-			GitContribInfo author = new GitContribInfo(pieces[i++], 
-										   GitUtils.parseEmail(pieces[i++]), 
-										   GitUtils.parseRawDate(pieces[i++]));
+			GitIdentity committer = new GitIdentity(pieces[i++], GitUtils.parseEmail(pieces[i++]));
+			Date commitDate = GitUtils.parseRawDate(pieces[i++]);
+			GitIdentity author = new GitIdentity(pieces[i++], GitUtils.parseEmail(pieces[i++]));
+			Date authorDate = GitUtils.parseRawDate(pieces[i++]);
 			
-			BriefCommit commit = new BriefCommit(sha, committer, author, subject);
+			BriefCommit commit = new BriefCommit(sha, committer, commitDate, author, authorDate, subject);
 			branches.put(refname, commit);
 		}
 	}

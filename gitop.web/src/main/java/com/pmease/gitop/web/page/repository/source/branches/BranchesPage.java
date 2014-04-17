@@ -258,7 +258,7 @@ public class BranchesPage extends RepositoryTabPage {
 			add(link);
 			
 			BriefCommit commit = getLastCommit(refName);
-			add(new AgeLabel("updatedTime", Model.of(commit.getAuthor().getDate())));
+			add(new AgeLabel("updatedTime", Model.of(commit.getAuthorDate())));
 			add(new GitPersonLink("author", 
 					Model.<GitPerson>of(GitPerson.of(commit.getAuthor())),
 					Mode.NAME));

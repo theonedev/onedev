@@ -39,7 +39,7 @@ public class AuthorInfoPanel extends Panel {
 
 			@Override
 			public Date getObject() {
-				return getCommit().getAuthor().getDate();
+				return getCommit().getAuthorDate();
 			}
 		}));
 	}

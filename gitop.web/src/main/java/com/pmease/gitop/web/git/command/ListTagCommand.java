@@ -14,7 +14,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.LineProcessor;
 import com.pmease.commons.git.Commit;
-import com.pmease.commons.git.GitContribInfo;
+import com.pmease.commons.git.GitIdentity;
 import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
@@ -69,8 +69,10 @@ public class ListTagCommand extends GitCommand<Map<String, Commit>> {
 			int i = 0;
 			currentNames = parseTagNames(pieces[i++]);
 			currentBuilder.hash(pieces[i++]);
-			currentBuilder.author(new GitContribInfo(pieces[i++], GitUtils.parseEmail(pieces[i++]), GitUtils.parseRawDate(pieces[i++])));
-			currentBuilder.committer(new GitContribInfo(pieces[i++], GitUtils.parseEmail(pieces[i++]), GitUtils.parseRawDate(pieces[i++])));
+			currentBuilder.author(new GitIdentity(pieces[i++], GitUtils.parseEmail(pieces[i++])));
+			currentBuilder.authorDate(GitUtils.parseRawDate(pieces[i++]));
+			currentBuilder.committer(new GitIdentity(pieces[i++], GitUtils.parseEmail(pieces[i++])));
+			currentBuilder.commitDate(GitUtils.parseRawDate(pieces[i++]));
 		}
 		
 		private void onFinishBlock() {

@@ -40,7 +40,7 @@ public class CommitterInfoPanel extends Panel {
 
 			@Override
 			public Date getObject() {
-				return getCommit().getCommitter().getDate();
+				return getCommit().getCommitDate();
 			}
 		}));
 	}

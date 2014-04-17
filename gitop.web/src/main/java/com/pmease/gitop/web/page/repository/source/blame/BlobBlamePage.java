@@ -201,7 +201,7 @@ public class BlobBlamePage extends AbstractFilePage {
 							Mode.NAME));
 					
 					container.add(new Label("date", 
-							DataTypes.DATE.asString(each.getCommit().getAuthor().getDate(), "yyyy-MM-dd")));
+							DataTypes.DATE.asString(each.getCommit().getAuthorDate(), "yyyy-MM-dd")));
 					BookmarkablePageLink<Void> blameLink = new BookmarkablePageLink<Void>(
 							"blamelink",
 							BlobBlamePage.class,

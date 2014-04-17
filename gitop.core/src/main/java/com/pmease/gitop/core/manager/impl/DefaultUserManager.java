@@ -13,6 +13,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.pmease.commons.git.GitIdentity;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
@@ -176,6 +177,16 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 		}
 		
 		return result;
+	}
+
+	@Sessional
+	@Override
+	public User findByGitIdentity(GitIdentity gitIdentity) {
+		User user = findByEmail(gitIdentity.getEmail());
+		if (user != null)
+			return user;
+		else
+			return findByName(gitIdentity.getName());
 	}
 
 }
