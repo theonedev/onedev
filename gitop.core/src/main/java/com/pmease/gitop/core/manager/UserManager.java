@@ -6,12 +6,13 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.google.inject.ImplementedBy;
+import com.pmease.commons.bootstrap.Lifecycle;
 import com.pmease.commons.hibernate.dao.GenericDao;
 import com.pmease.gitop.core.manager.impl.DefaultUserManager;
 import com.pmease.gitop.model.User;
 
 @ImplementedBy(DefaultUserManager.class)
-public interface UserManager extends GenericDao<User> {
+public interface UserManager extends GenericDao<User>, Lifecycle {
 	/**
 	 * Find root account in the system. 
 	 * 

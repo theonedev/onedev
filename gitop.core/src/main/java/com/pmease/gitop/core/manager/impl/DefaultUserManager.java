@@ -67,11 +67,6 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
         this.pullRequestManager = pullRequestManager;
         this.pullRequestUpdateManager = pullRequestUpdateManager;
         this.branchManager = branchManager;
-
-        for (User user: query()) {
-        	emailToId.inverse().put(user.getId(), user.getEmailAddress());
-        	nameToId.inverse().put(user.getId(), user.getName());
-        }
     }
 
     @Transactional
@@ -249,6 +244,18 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 		}
 		
 		return result;
+	}
+
+	@Override
+	public void start() {
+        for (User user: query()) {
+        	emailToId.inverse().put(user.getId(), user.getEmailAddress());
+        	nameToId.inverse().put(user.getId(), user.getName());
+        }
+	}
+
+	@Override
+	public void stop() {
 	}
 
 }

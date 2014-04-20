@@ -26,6 +26,7 @@ import com.pmease.commons.util.init.InitStage;
 import com.pmease.commons.util.init.ManualConfig;
 import com.pmease.gitop.core.manager.DataManager;
 import com.pmease.gitop.core.manager.RepositoryManager;
+import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.setting.ServerConfig;
 
 public class Gitop extends AbstractPlugin {
@@ -35,6 +36,8 @@ public class Gitop extends AbstractPlugin {
 	private final DataManager dataManager;
 	
 	private final RepositoryManager repositoryManager;
+	
+	private final UserManager userManager;
 	
 	private final ServerConfig serverConfig;
 
@@ -52,10 +55,12 @@ public class Gitop extends AbstractPlugin {
 	
 	@Inject
 	public Gitop(ServerConfig serverConfig, DataManager dataManager,  
-			RepositoryManager repositoryManager, TaskScheduler taskScheduler, 
-			Provider<GitConfig> gitConfigProvider, @AppName String appName) {
+			RepositoryManager repositoryManager, UserManager userManager,
+			TaskScheduler taskScheduler, Provider<GitConfig> gitConfigProvider, 
+			@AppName String appName) {
 		this.dataManager = dataManager;
 		this.repositoryManager = repositoryManager;
+		this.userManager = userManager;
 		this.serverConfig = serverConfig;
 		this.taskScheduler = taskScheduler;
 		this.gitConfigProvider = gitConfigProvider;
@@ -67,6 +72,8 @@ public class Gitop extends AbstractPlugin {
 	
 	@Override
 	public void start() {
+		userManager.start();
+		
 		List<ManualConfig> manualConfigs = dataManager.init();
 		
 		if (!manualConfigs.isEmpty()) {
@@ -183,6 +190,7 @@ public class Gitop extends AbstractPlugin {
 	@Override
 	public void stop() {
 		taskScheduler.unschedule(gitCheckTaskId);
+		userManager.stop();
 	}
 	
 	public String getGitError() {
