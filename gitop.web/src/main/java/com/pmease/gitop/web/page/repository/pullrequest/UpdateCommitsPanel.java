@@ -13,7 +13,6 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
@@ -64,8 +63,7 @@ public class UpdateCommitsPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<Commit> item) {
 				Commit commit = item.getModelObject();
-				item.add(new PersonLink("author", 
-						Model.of(commit.getAuthor()), PersonLink.Mode.NAME_AND_AVATAR));
+				item.add(new PersonLink("author", commit.getAuthor(), PersonLink.Mode.NAME_AND_AVATAR));
 
 				item.add(new Label("message", commit.getSubject()));
 				

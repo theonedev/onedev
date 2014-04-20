@@ -4,6 +4,10 @@ import java.io.InputStream;
 
 import org.apache.tika.mime.MediaType;
 
+import com.google.inject.ImplementedBy;
+import com.pmease.gitop.web.service.impl.TikaFileTypes;
+
+@ImplementedBy(TikaFileTypes.class)
 public interface FileTypes {
 	 /**
      * Get the most specific media type available for a file.

@@ -2,17 +2,13 @@ package com.pmease.gitop.web.component.link;
 
 import javax.annotation.Nullable;
 
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
-import org.eclipse.jgit.lib.PersonIdent;
 
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
-import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.component.avatar.AvatarImage;
 import com.pmease.gitop.web.page.PageSpec;
@@ -25,23 +21,28 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig
  *
  */
 @SuppressWarnings("serial")
-public class PersonLink extends Panel {
+public class UserLink extends Panel {
 
 	public static enum Mode {NAME, AVATAR, NAME_AND_AVATAR}
 	
-	private final PersonIdent person;
-	
 	private final Mode mode;
+	
+	private User user;
 	
 	private TooltipConfig tooltipConfig;
 	
-	public PersonLink(String id, PersonIdent person, Mode mode) {
+	public UserLink(String id, User user, Mode mode) {
 		super(id);
-		this.person = person;
+
+		this.user = user;
 		this.mode = mode;
 	}
 	
-	public PersonLink withTooltipConfig(@Nullable TooltipConfig tooltipConfig) {
+	public UserLink(String id, User user) {
+		this(id, user, Mode.NAME_AND_AVATAR);
+	}
+
+	public UserLink withTooltipConfig(@Nullable TooltipConfig tooltipConfig) {
 		this.tooltipConfig = tooltipConfig;
 		return this;
 	}
@@ -50,46 +51,30 @@ public class PersonLink extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		User user = Gitop.getInstance(UserManager.class).findByEmail(person.getEmailAddress());
-		
-		WebMarkupContainer link;
-		if (user != null) {
-			link = new BookmarkablePageLink<Void>("link", AccountHomePage.class, PageSpec.forUser(user));
-		} else {
-			link = new WebMarkupContainer("link") {
-
-				@Override
-				protected void onComponentTag(ComponentTag tag) {
-					super.onComponentTag(tag);
-					tag.setName("span");
-				}
-				
-			};
-		}
-		
+		WebMarkupContainer link = new BookmarkablePageLink<Void>("link", AccountHomePage.class, PageSpec.forUser(user));
 		add(link);
 		
-		String displayName;
-		if (user != null)
-			displayName = user.getDisplayName();
-		else
-			displayName = person.getName();
-		
 		if (mode == Mode.NAME_AND_AVATAR || mode == Mode.AVATAR) {
-			AvatarImage avatar = new AvatarImage("avatar", person.getEmailAddress());
+			AvatarImage avatar = new AvatarImage("avatar", user);
 			if (tooltipConfig != null)
-				avatar.add(new TooltipBehavior(Model.of(displayName), tooltipConfig));
+				avatar.add(new TooltipBehavior(Model.of(user.getDisplayName()), tooltipConfig));
 			link.add(avatar);
 		} else {
 			link.add(new WebMarkupContainer("avatar").setVisible(false));
 		}
 		
 		if (mode == Mode.NAME_AND_AVATAR || mode == Mode.NAME) {
-			link.add(new Label("name", displayName));
+			link.add(new Label("name", user.getDisplayName()));
 		} else {
 			link.add(new Label("name").setVisible(false));
 		}
 		
+	}
+
+	@Override
+	protected void onDetach() {
+		user = null;
+		super.onDetach();
 	}
 
 }

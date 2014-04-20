@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
@@ -14,12 +13,9 @@ import org.json.JSONWriter;
 
 import com.google.common.collect.Lists;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.common.wicket.util.WicketUtils;
-import com.pmease.gitop.web.component.avatar.AvatarImageResourceReference;
-import com.pmease.gitop.web.util.Gravatar;
+import com.pmease.gitop.web.service.AvatarManager;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 
@@ -49,10 +45,10 @@ public class UserChoiceProvider extends ChoiceProvider<User> {
 	@Override
 	public void toJson(User choice, JSONWriter writer) throws JSONException {
 		writer.key("id").value(choice.getId()).key("name").value(StringEscapeUtils.escapeHtml4(choice.getName()));
-		if (choice.getDisplayName() != null)
-			writer.key("displayName").value(StringEscapeUtils.escapeHtml4(choice.getDisplayName()));
-		writer.key("email").value(StringEscapeUtils.escapeHtml4(choice.getEmail()));
-		writer.key("avatar").value(getAvatarUrl(choice));
+		if (choice.getFullName() != null)
+			writer.key("displayName").value(StringEscapeUtils.escapeHtml4(choice.getFullName()));
+		writer.key("email").value(StringEscapeUtils.escapeHtml4(choice.getEmailAddress()));
+		writer.key("avatar").value(Gitop.getInstance(AvatarManager.class).getAvatarUrl(choice));
 	}
 
 	@Override
@@ -67,16 +63,4 @@ public class UserChoiceProvider extends ChoiceProvider<User> {
 		return users;
 	}
 
-	private String getAvatarUrl(User user) {
-		boolean gravatarEnabled = Gitop.getInstance(ConfigManager.class).getSystemSetting().isGravatarEnabled();
-		if (gravatarEnabled && !user.getLocalAvatar().exists()) {
-			return Gravatar.getURL(user.getEmail());
-		} else {
-			CharSequence url = RequestCycle.get().urlFor(
-					new AvatarImageResourceReference(),
-					WicketUtils.newPageParams("id",String.valueOf(user.getId()))); 
-
-			return url.toString() + "?antiCache=" + System.currentTimeMillis();
-		}
-	}
 }

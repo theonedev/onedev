@@ -18,7 +18,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
@@ -35,6 +34,9 @@ import com.pmease.gitop.web.component.link.PersonLink.Mode;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.page.repository.source.commit.SourceCommitPage;
 import com.pmease.gitop.web.page.repository.source.tree.SourceTreePage;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 
 @SuppressWarnings("serial")
 public class CommitsPanel extends Panel {
@@ -114,8 +116,8 @@ public class CommitsPanel extends Panel {
 					protected void populateItem(ListItem<Commit> item) {
 						Commit commit = item.getModelObject();
 						
-						item.add(new PersonLink("avatar", Model.of(commit.getAuthor()), Mode.AVATAR)
-									.enableTooltip("right"));
+						item.add(new PersonLink("avatar", commit.getAuthor(), Mode.AVATAR)
+									.withTooltipConfig(new TooltipConfig().withPlacement(Placement.right)));
 						
 						item.add(new CommitMessagePanel("message", item.getModel(), repositoryModel));
 						item.add(new CommitMetaPanel("meta", item.getModel()));

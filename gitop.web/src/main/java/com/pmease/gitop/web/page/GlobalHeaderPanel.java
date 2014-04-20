@@ -10,7 +10,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
-import com.pmease.gitop.web.component.link.UserAvatarLink;
+import com.pmease.gitop.web.component.link.UserLink;
 import com.pmease.gitop.web.page.account.RegisterPage;
 import com.pmease.gitop.web.page.account.setting.profile.AccountProfilePage;
 import com.pmease.gitop.web.page.admin.AdministrationOverviewPage;
@@ -31,7 +31,7 @@ public class GlobalHeaderPanel extends Panel {
 		add(new BookmarkablePageLink<Void>("logoutLink", LogoutPage.class).setVisibilityAllowed(isSignedIn()));
 		
 		if (isSignedIn()) {
-			add(new UserAvatarLink("userlink", currentUser().get()));
+			add(new UserLink("userlink", currentUser().get()));
 			add(new BookmarkablePageLink<Void>("profileLink", 
 												AccountProfilePage.class, 
 												AccountProfilePage.newParams(currentUser().get())));

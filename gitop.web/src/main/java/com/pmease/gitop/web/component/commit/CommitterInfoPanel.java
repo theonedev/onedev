@@ -6,7 +6,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.eclipse.jgit.lib.PersonIdent;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.gitop.web.component.label.AgeLabel;
@@ -27,14 +26,7 @@ public class CommitterInfoPanel extends Panel {
 		super.onInitialize();
 		
 
-		add(new PersonLink("committer", new AbstractReadOnlyModel<PersonIdent>() {
-
-			@Override
-			public PersonIdent getObject() {
-				return getCommit().getCommitter();
-			}
-			
-		}, mode.getObject()));
+		add(new PersonLink("committer", getCommit().getCommitter(), mode.getObject()));
 		
 		add(new AgeLabel("committerdate", new AbstractReadOnlyModel<Date>() {
 

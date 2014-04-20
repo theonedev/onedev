@@ -25,7 +25,7 @@ import com.pmease.gitop.web.common.wicket.component.vex.AjaxConfirmLink;
 import com.pmease.gitop.web.component.comment.event.CommitCommentRemoved;
 import com.pmease.gitop.web.component.comment.event.CommitCommentUpdated;
 import com.pmease.gitop.web.component.label.AgeLabel;
-import com.pmease.gitop.web.component.link.UserAvatarLink;
+import com.pmease.gitop.web.component.link.UserLink;
 import com.pmease.gitop.web.component.wiki.WikiTextPanel;
 
 @SuppressWarnings("serial")
@@ -54,7 +54,7 @@ public class CommitCommentPanel extends Panel {
 	protected Component createCommentHead(String id) {
 		Fragment frag = new Fragment(id, "headfrag", this);
 		
-		frag.add(new UserAvatarLink("author", getCommitComment().getAuthor()));
+		frag.add(new UserLink("author", getCommitComment().getAuthor()));
 //		frag.add(new WebMarkupContainer("authorType") {
 //			@Override
 //			protected void onConfigure() {

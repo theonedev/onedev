@@ -33,7 +33,7 @@
                         <configuration> 
                             <target> 
                                 <copy todir="${project.build.directory}/sandbox"> 
-                                    <fileset dir="system" excludes="site/images/**, **/*.keystore"/>  
+                                    <fileset dir="system" excludes="site/images/**, site/avatars/**, **/*.keystore"/>  
                                     <filterset> 
                                         <filter token="dbName" value="${project.artifactId}"/>  
                                         <filter token="productName" value="${project.name}"/> 

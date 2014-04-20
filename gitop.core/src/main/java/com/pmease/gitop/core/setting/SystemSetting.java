@@ -19,22 +19,21 @@ import com.pmease.commons.validation.Validatable;
 @Editable
 public class SystemSetting implements Serializable, Validatable {
 	
-	private String dataPath;
+	private String repoPath;
 	
 	private GitConfig gitConfig = new SystemGit();
 	
 	private boolean gravatarEnabled;
 	
-	@Editable(name="Directory to Store Application Data", order=100, description="Specify directory to store application data, "
-			+ "such as managed git repositories and various settings.")
+	@Editable(name="Directory to Store Repositories", order=100, description="Specify directory to store Git repositories.")
 	@Directory
 	@NotEmpty
-	public String getDataPath() {
-		return dataPath;
+	public String getRepoPath() {
+		return repoPath;
 	}
 
-	public void setDataPath(String dataPath) {
-		this.dataPath = dataPath;
+	public void setRepoPath(String repoPath) {
+		this.repoPath = repoPath;
 	}
 
 	@Editable(order=200, description="Gitop relies on git command line to operate managed repositories. The minimum "
@@ -60,7 +59,7 @@ public class SystemSetting implements Serializable, Validatable {
 
 	@Override
 	public void validate(ConstraintValidatorContext constraintValidatorContext) {
-		File dataDir = new File(dataPath);
+		File dataDir = new File(repoPath);
 		File testFile = new File(dataDir, "test");
 		try {
 			FileUtils.createDir(dataDir);

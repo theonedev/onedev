@@ -27,9 +27,9 @@ import com.pmease.gitop.model.validation.UserName;
 public class User extends AbstractUser implements ProtectedObject {
 
 	@Column(nullable=false, unique=true)
-	private String email;
+	private String emailAddress;
 	
-	private String displayName;
+	private String fullName;
 	
 	private boolean admin;
 	
@@ -69,23 +69,23 @@ public class User extends AbstractUser implements ProtectedObject {
 	}
 	
 	@Editable(order=200)
-	public String getDisplayName() {
-		return displayName;
+	public String getFullName() {
+		return fullName;
 	}
 
-	public void setDisplayName(String displayName) {
-		this.displayName = displayName;
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
 	}
-
+	
 	@Editable(order=300)
 	@NotEmpty
 	@Email
-	public String getEmail() {
-		return email;
+	public String getEmailAddress() {
+		return emailAddress;
 	}
 
-	public void setEmail(String email) {
-		this.email = email;
+	public void setEmailAddress(String emailAddress) {
+		this.emailAddress = emailAddress;
 	}
 
 	@Editable(order=400)
@@ -225,11 +225,18 @@ public class User extends AbstractUser implements ProtectedObject {
 	}
 	
 	public PersonIdent asPerson() {
-		return new PersonIdent(getName(), getEmail());
+		return new PersonIdent(getName(), getEmailAddress());
 	}
 
 	public File getLocalAvatar() {
-		return new File(Bootstrap.installDir, "avatars/" + getId());
+		return new File(Bootstrap.getSiteDir(), "avatars/" + getId());
+	}
+	
+	public String getDisplayName() {
+		if (getFullName() != null)
+			return getFullName();
+		else
+			return getName();
 	}
 	
 }

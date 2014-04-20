@@ -91,7 +91,7 @@ public class AccountMembersSettingPage extends AccountSettingPage {
 									+ "Remove this user will remove her/him from <b>all teams</b></p>"
 									+ "<p><b>" 
 									+ StringEscapeUtils.escapeHtml4(user.getName()) + "</b> (" 
-									+ StringEscapeUtils.escapeHtml4(StringUtils.defaultString(user.getDisplayName(), " ")) 
+									+ StringEscapeUtils.escapeHtml4(StringUtils.defaultString(user.getFullName(), " ")) 
 									+ ")</p>")) {
 
 						@Override

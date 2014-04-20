@@ -14,7 +14,6 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.collect.Lists;
@@ -23,6 +22,7 @@ import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitop.web.component.link.PersonLink;
 import com.pmease.gitop.web.component.link.PersonLink.Mode;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.jquery.JQuery;
 
 @SuppressWarnings("serial")
@@ -65,7 +65,7 @@ public class ContributorsPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<PersonIdent> item) {
 				PersonIdent person = item.getModelObject();
-				item.add(new PersonLink("link", Model.of(person), Mode.AVATAR).enableTooltip());
+				item.add(new PersonLink("link", person, Mode.AVATAR).withTooltipConfig(new TooltipConfig()));
 			}
 		};
 		
@@ -91,7 +91,7 @@ public class ContributorsPanel extends Panel {
 
 					@Override
 					protected void populateItem(ListItem<PersonIdent> item) {
-						item.add(new PersonLink("committer", item.getModel(), Mode.NAME_AND_AVATAR));
+						item.add(new PersonLink("committer", item.getModelObject(), Mode.NAME_AND_AVATAR));
 					}
 				});
 				

@@ -3,16 +3,19 @@ package com.pmease.gitop.core.manager.impl;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
 
-import org.eclipse.jgit.lib.PersonIdent;
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
@@ -47,7 +50,13 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
     
     private final BranchManager branchManager;
     
-    @Inject
+    private final ReadWriteLock idLock = new ReentrantReadWriteLock();
+    		
+	private final BiMap<String, Long> emailToId = HashBiMap.create();
+	
+	private final BiMap<String, Long> nameToId = HashBiMap.create();
+	
+	@Inject
     public DefaultUserManager(GeneralDao generalDao, TeamManager teamManager, 
     		MembershipManager membershipManager, PullRequestManager pullRequestManager, 
     		PullRequestUpdateManager pullRequestUpdateManager,BranchManager branchManager) {
@@ -58,11 +67,16 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
         this.pullRequestManager = pullRequestManager;
         this.pullRequestUpdateManager = pullRequestUpdateManager;
         this.branchManager = branchManager;
+
+        for (User user: query()) {
+        	emailToId.inverse().put(user.getId(), user.getEmailAddress());
+        	nameToId.inverse().put(user.getId(), user.getName());
+        }
     }
 
     @Transactional
     @Override
-	public void save(User user) {
+	public void save(final User user) {
     	boolean isNew = user.getId() == null;
     	super.save(user);
     	
@@ -90,6 +104,26 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
         	membership.setUser(user);
         	membershipManager.save(membership);
     	}
+
+    	getSession().getTransaction().registerSynchronization(new Synchronization() {
+
+			public void afterCompletion(int status) {
+				if (status == Status.STATUS_COMMITTED) { 
+					idLock.writeLock().lock();
+					try {
+						emailToId.inverse().put(user.getId(), user.getEmailAddress());
+						nameToId.inverse().put(user.getId(), user.getName());
+					} finally {
+						idLock.writeLock().unlock();
+					}
+				}
+			}
+
+			public void beforeCompletion() {
+				
+			}
+			
+		});
     }
     
     @Sessional
@@ -109,7 +143,7 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 
     @Transactional
     @Override
-	public void delete(User user) {
+	public void delete(final User user) {
     	for (PullRequest request: user.getSubmittedRequests()) {
     		request.setSubmittedBy(null);
     		pullRequestManager.save(request);
@@ -131,29 +165,58 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
     	}
     	
 		super.delete(user);
+		
+    	getSession().getTransaction().registerSynchronization(new Synchronization() {
+
+			public void afterCompletion(int status) {
+				if (status == Status.STATUS_COMMITTED) { 
+					idLock.writeLock().lock();
+					try {
+						emailToId.inverse().remove(user.getId());
+						nameToId.inverse().remove(user.getId());
+					} finally {
+						idLock.writeLock().unlock();
+					}
+				}
+			}
+
+			public void beforeCompletion() {
+				
+			}
+			
+		});
 	}
 
 	@Sessional
     @Override
     public User findByName(String userName) {
-        return find(new Criterion[] {Restrictions.eq("name", userName)});
+    	idLock.readLock().lock();
+    	try {
+    		Long id = nameToId.get(userName);
+    		if (id != null)
+    			return load(id);
+    		else
+    			return null;
+    	} finally {
+    		idLock.readLock().unlock();
+    	}
     }
 
     @Sessional
     @Override
     public User findByEmail(String email) {
-        return find(new Criterion[] {Restrictions.eq("email", email)});
+    	idLock.readLock().lock();
+    	try {
+    		Long id = emailToId.get(email);
+    		if (id != null)
+    			return load(id);
+    		else
+    			return null;
+    	} finally {
+    		idLock.readLock().unlock();
+    	}
     }
     
-    @Sessional
-    @Override
-    public User findByPerson(PersonIdent person) {
-    	User user = findByEmail(person.getEmailAddress());
-    	if (user == null)
-    		user = findByName(person.getName());
-    	return user;
-    }
-
     @Override
 	public User getCurrent() {
 		Long userId = User.getCurrentId();

@@ -7,7 +7,6 @@ import javax.inject.Singleton;
 
 import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.model.Repository;
-import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.storage.StorageManager;
 
 @Singleton
@@ -22,14 +21,7 @@ public class DefaultStorageManager implements StorageManager {
 
     @Override
     public File getStorage(Repository repository) {
-        return new File(configManager.getSystemSetting().getDataPath(),
-                "repositories/" + repository.getId().toString());
-    }
-
-    @Override
-    public File getStorage(User user) {
-        return new File(configManager.getSystemSetting().getDataPath(),
-                "users/" + user.getId().toString());
+        return new File(configManager.getSystemSetting().getRepoPath(), repository.getId().toString());
     }
 
 }

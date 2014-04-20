@@ -109,7 +109,7 @@ public class CommitsTablePanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<Commit> item) {
 				Commit commit = item.getModelObject();
-				item.add(new PersonLink("name", Model.of(commit.getAuthor()), PersonLink.Mode.NAME_AND_AVATAR).enableTooltip());
+				item.add(new PersonLink("name", commit.getAuthor(), PersonLink.Mode.NAME_AND_AVATAR));
 				item.add(new CommitMessagePanel("message", item.getModel(), repositoryModel));
 				
 				AbstractLink link = new BookmarkablePageLink<Void>("commitlink",

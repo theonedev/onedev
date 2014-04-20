@@ -1,13 +1,8 @@
 package com.pmease.gitop.web;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Date;
-
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.wicket.Application;
 import org.apache.wicket.Page;
 import org.apache.wicket.Session;
@@ -25,13 +20,9 @@ import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.resource.caching.FilenameWithVersionResourceCachingStrategy;
 import org.apache.wicket.request.resource.caching.version.LastModifiedResourceVersion;
 import org.apache.wicket.util.time.Duration;
-import org.apache.wicket.util.time.Time;
 import org.eclipse.jgit.storage.file.WindowCacheConfig;
 
-import com.google.common.base.Throwables;
-import com.google.common.io.ByteStreams;
 import com.pmease.commons.wicket.AbstractWicketConfig;
-import com.pmease.gitop.web.assets.AssetLocator;
 import com.pmease.gitop.web.common.quantity.Data;
 import com.pmease.gitop.web.page.error.BaseErrorPage;
 import com.pmease.gitop.web.page.error.PageExpiredPage;
@@ -44,27 +35,12 @@ import de.agilecoders.wicket.core.Bootstrap;
 import de.agilecoders.wicket.core.settings.BootstrapSettings;
 
 @Singleton
-public class GitopWebApp extends AbstractWicketConfig {
+public class WicketConfig extends AbstractWicketConfig {
+	
 	private static final Duration DEFAULT_TIMEOUT = Duration.minutes(10);
 	
-	private Date startupDate;
-	private byte[] defaultUserAvatar;
-
-	public static GitopWebApp get() {
-		return (GitopWebApp) Application.get();
-	}
-
-	public Date getStartupDate() {
-		return startupDate;
-	}
-
-	public Duration getUptime() {
-		Date start = getStartupDate();
-		if (start == null) {
-			return Duration.milliseconds(0);
-		}
-
-		return Duration.elapsed(Time.valueOf(start));
+	public static WicketConfig get() {
+		return (WicketConfig) Application.get();
 	}
 
 	@Override
@@ -103,8 +79,6 @@ public class GitopWebApp extends AbstractWicketConfig {
 
 	@Override
 	protected void init() {
-		this.startupDate = new Date();
-
 		super.init();
 
 		getMarkupSettings().setDefaultMarkupEncoding("UTF-8");
@@ -119,8 +93,6 @@ public class GitopWebApp extends AbstractWicketConfig {
 		
 		// wicket bean validation
 		new BeanValidationConfiguration().configure(this);
-
-		loadDefaultUserAvatarData();
 
 		new ShiroWicketPlugin()
 				.mountLoginPage("login", LoginPage.class)
@@ -149,22 +121,6 @@ public class GitopWebApp extends AbstractWicketConfig {
         cfg.install();
 	}
 	
-	public byte[] getDefaultUserAvatar() {
-		return defaultUserAvatar;
-	}
-	
-	private void loadDefaultUserAvatarData() {
-		InputStream in = null;
-		try {
-			in = AssetLocator.class.getResourceAsStream("img/empty-avatar.jpg");
-			defaultUserAvatar = ByteStreams.toByteArray(in);
-		} catch (IOException e) {
-			throw Throwables.propagate(e);
-		} finally {
-			IOUtils.closeQuietly(in);
-		}
-	}
-
 	private void configureResources() {
 		final IPackageResourceGuard packageResourceGuard = getResourceSettings().getPackageResourceGuard();
 

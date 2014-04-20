@@ -14,7 +14,6 @@ import com.pmease.gitop.model.validation.RepositoryNameValidator;
 import com.pmease.gitop.model.validation.UserNameValidator;
 import com.pmease.gitop.web.common.wicket.mapper.PageParameterAwareMountedMapper;
 import com.pmease.gitop.web.common.wicket.mapper.PatternMountedMapper;
-import com.pmease.gitop.web.component.avatar.AvatarImageResourceReference;
 import com.pmease.gitop.web.page.account.RegisterPage;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
 import com.pmease.gitop.web.page.account.setting.members.AccountMembersSettingPage;
@@ -191,11 +190,8 @@ public class GitopMappings extends CompoundRequestMapper {
 		// --------------------------------------------------------------------
 		// system shared resources
 		// --------------------------------------------------------------------
-		addResource("avatar/${type}/${id}", new AvatarImageResourceReference());
-		addResource("raw/${user}/${repo}/${objectId}",
-				new RawBlobResourceReference());
-		addResource("archive/${user}/${repo}/${file}",
-				new GitArchiveResourceReference());
+		addResource("raw/${user}/${repo}/${objectId}", new RawBlobResourceReference());
+		addResource("archive/${user}/${repo}/${file}",new GitArchiveResourceReference());
 	}
 
 	private void addPage(String path, Class<? extends Page> page) {

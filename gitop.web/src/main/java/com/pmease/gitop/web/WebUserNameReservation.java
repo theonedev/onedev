@@ -24,10 +24,10 @@ public class WebUserNameReservation implements UserNameReservation {
 
 	private final JettyPlugin jettyPlugin;
 	
-	private final GitopWebApp webApp;
+	private final WicketConfig webApp;
 	
 	@Inject
-	public WebUserNameReservation(JettyPlugin jettyPlugin, GitopWebApp webApp) {
+	public WebUserNameReservation(JettyPlugin jettyPlugin, WicketConfig webApp) {
 		this.jettyPlugin = jettyPlugin;
 		this.webApp = webApp;
 	}

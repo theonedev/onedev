@@ -34,6 +34,9 @@ import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.repository.RepositoryTabPage;
 import com.pmease.gitop.web.page.repository.source.commit.SourceCommitPage;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
+
 @SuppressWarnings("serial")
 public class TagsPage extends RepositoryTabPage {
 
@@ -98,9 +101,8 @@ public class TagsPage extends RepositoryTabPage {
 						item.add(new WebMarkupContainer("creator").setVisibilityAllowed(false));
 						item.add(new WebMarkupContainer("date").setVisibilityAllowed(false));
 					} else {
-						item.add(new PersonLink("creator", 
-								Model.of(tag.getTagger()), 
-								Mode.AVATAR).enableTooltip("right"));
+						TooltipConfig tooltipConfig = new TooltipConfig().withPlacement(Placement.right);
+						item.add(new PersonLink("creator", tag.getTagger(), Mode.AVATAR).withTooltipConfig(tooltipConfig));
 						item.add(new AgeLabel("date", Model.of(tag.getTagger().getWhen())));
 					}
 					

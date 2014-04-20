@@ -17,7 +17,6 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
@@ -195,7 +194,7 @@ public class BlobBlamePage extends AbstractFilePage {
 					
 					link.add(new Label("sha", GitUtils.abbreviateSHA(each.getCommit().getHash(), 8)));
 					container.add(link);
-					container.add(new PersonLink("author", Model.of(each.getCommit().getAuthor()), Mode.NAME));
+					container.add(new PersonLink("author", each.getCommit().getAuthor(), Mode.NAME));
 					
 					container.add(new Label("date", 
 							DataTypes.DATE.asString(each.getCommit().getAuthor().getWhen(), "yyyy-MM-dd")));

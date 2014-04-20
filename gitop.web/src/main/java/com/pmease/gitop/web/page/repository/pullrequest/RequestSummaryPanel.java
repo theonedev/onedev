@@ -9,9 +9,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.PersonIdent;
 
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.PullRequest;
@@ -72,14 +70,7 @@ public class RequestSummaryPanel extends Panel {
 			
 		});
 		
-		add(new PersonLink("user", new LoadableDetachableModel<PersonIdent>() {
-
-			@Override
-			protected PersonIdent load() {
-				return getPullRequest().getSubmittedBy().asPerson();
-			}
-			
-		}, Mode.NAME_AND_AVATAR));
+		add(new PersonLink("user", getPullRequest().getSubmittedBy().asPerson(), Mode.NAME_AND_AVATAR));
 		
 		Link<Void> branchLink = new Link<Void>("branchLink") {
 

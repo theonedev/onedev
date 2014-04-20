@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.tika.mime.MediaType;
@@ -28,6 +29,7 @@ import com.pmease.gitop.web.service.FileBlobService;
 import com.pmease.gitop.web.service.FileTypes;
 import com.pmease.gitop.web.util.UniversalEncodingDetector;
 
+@Singleton
 public class DefaultFileBlobService implements FileBlobService {
 
 	final FileTypes fileTypes;

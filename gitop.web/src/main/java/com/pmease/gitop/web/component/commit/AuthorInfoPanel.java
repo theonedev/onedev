@@ -6,7 +6,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.eclipse.jgit.lib.PersonIdent;
 import org.parboiled.common.Preconditions;
 
 import com.pmease.commons.git.Commit;
@@ -27,14 +26,7 @@ public class AuthorInfoPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new PersonLink("author", new AbstractReadOnlyModel<PersonIdent>() {
-
-			@Override
-			public PersonIdent getObject() {
-				return getCommit().getAuthor();
-			}
-			
-		}, mode.getObject()));
+		add(new PersonLink("author", getCommit().getAuthor(), mode.getObject()));
 		add(new AgeLabel("authordate", new AbstractReadOnlyModel<Date>() {
 
 			@Override

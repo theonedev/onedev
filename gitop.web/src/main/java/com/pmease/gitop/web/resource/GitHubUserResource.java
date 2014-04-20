@@ -71,12 +71,12 @@ public class GitHubUserResource {
 						HubUser.class);
 				User user = new User();
 				user.setName(u.login);
-				user.setDisplayName(u.name);
+				user.setFullName(u.name);
 
 				if (Strings.isNullOrEmpty(u.email)) {
-					user.setEmail(u.login + "@github.com");
+					user.setEmailAddress(u.login + "@github.com");
 				} else {
-					user.setEmail(u.email);
+					user.setEmailAddress(u.email);
 				}
 
 				System.out.println(user);

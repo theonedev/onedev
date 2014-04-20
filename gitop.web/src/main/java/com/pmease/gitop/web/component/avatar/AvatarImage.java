@@ -1,70 +1,35 @@
 package com.pmease.gitop.web.component.avatar;
 
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.devutils.stateless.StatelessComponent;
-import org.apache.wicket.event.IEvent;
-import org.apache.wicket.markup.html.image.NonCachingImage;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.WebComponent;
 
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.model.User;
+import com.pmease.gitop.web.service.AvatarManager;
 
-@StatelessComponent
-public class AvatarImage extends Panel {
+@SuppressWarnings("serial")
+public class AvatarImage extends WebComponent {
 
-	private static final long serialVersionUID = 1L;
+	private final String url;
 	
-	private User user;
-
 	public AvatarImage(String id, User user) {
 		super(id);
-		this.user = user;
+		
+		url = Gitop.getInstance(AvatarManager.class).getAvatarUrl(user);
+	}
+
+	public AvatarImage(String id, String emailAddress) {
+		super(id);
+		
+		url = Gitop.getInstance(AvatarManager.class).getAvatarUrl(emailAddress);
 	}
 
 	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-
-		setOutputMarkupId(true);
-		add(createAvatarImage());
-
+	protected void onComponentTag(ComponentTag tag) {
+		super.onComponentTag(tag);
+		
+		tag.setName("img");
+		tag.put("src", url);
 	}
 
-	private Component createAvatarImage() {
-		boolean gravatarEnabled = Gitop.getInstance(ConfigManager.class).getSystemSetting().isGravatarEnabled();
-		if (gravatarEnabled && !user.getLocalAvatar().exists()) {
-			return (new GravatarImage("avatar", Model.of(user.getEmail())));
-		} else {
-			PageParameters params = new PageParameters();
-			params.set("id", user.getId());
-			return (new StatelessAvatarImage("avatar", params));
-		}
-	}
-
-	private class StatelessAvatarImage extends NonCachingImage {
-		private static final long serialVersionUID = 1L;
-
-		public StatelessAvatarImage(String id, PageParameters params) {
-			super(id, new AvatarImageResourceReference(), params);
-		}
-
-		@Override
-		protected boolean getStatelessHint() {
-			return true;
-		}
-	}
-
-	@Override
-	public void onEvent(IEvent<?> event) {
-		if (event.getPayload() instanceof AvatarChanged) {
-			AjaxRequestTarget target = ((AvatarChanged) event.getPayload())
-					.getTarget();
-			this.addOrReplace(createAvatarImage());
-			target.add(this);
-		}
-	}
 }

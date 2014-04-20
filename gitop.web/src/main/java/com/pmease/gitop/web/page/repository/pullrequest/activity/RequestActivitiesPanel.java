@@ -16,8 +16,6 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import com.pmease.commons.wicket.behavior.DisableIfBlankBehavior;
@@ -89,8 +87,8 @@ public class RequestActivitiesPanel extends Panel {
 				User user = activity.getUser();
 				if (user != null) {
 					PersonIdent person = user.asPerson();
-					item.add(new PersonLink("userAvatar", Model.of(person), PersonLink.Mode.AVATAR));
-					item.add(new PersonLink("userName", Model.of(person), PersonLink.Mode.NAME));
+					item.add(new PersonLink("userAvatar", person, PersonLink.Mode.AVATAR));
+					item.add(new PersonLink("userName", person, PersonLink.Mode.NAME));
 				} else {
 					item.add(new WebMarkupContainer("userAvatar").setVisible(false));
 					item.add(new Label("userName", "<i>Unknown</i>").setEscapeModelStrings(false));
@@ -114,23 +112,10 @@ public class RequestActivitiesPanel extends Panel {
 		};
 		add(newCommentContainer);
 		
-		newCommentContainer.add(new PersonLink("userAvatar", new LoadableDetachableModel<PersonIdent>() {
-
-			@Override
-			protected PersonIdent load() {
-				return Gitop.getInstance(UserManager.class).getCurrent().asPerson(); 
-			}
-			
-		}, PersonLink.Mode.AVATAR));
+		PersonIdent person = Gitop.getInstance(UserManager.class).getCurrent().asPerson();
+		newCommentContainer.add(new PersonLink("userAvatar", person, PersonLink.Mode.AVATAR));
 		
-		newCommentContainer.add(new PersonLink("userName", new LoadableDetachableModel<PersonIdent>() {
-
-			@Override
-			protected PersonIdent load() {
-				return Gitop.getInstance(UserManager.class).getCurrent().asPerson(); 
-			}
-			
-		}, PersonLink.Mode.NAME));
+		newCommentContainer.add(new PersonLink("userName", person, PersonLink.Mode.NAME));
 		
 		final TextArea<String> newCommentArea = new TextArea<String>("content", new IModel<String>() {
 

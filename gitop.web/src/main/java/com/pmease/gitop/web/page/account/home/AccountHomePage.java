@@ -152,8 +152,8 @@ public class AccountHomePage extends AbstractAccountPage {
 	
 	@Override
 	protected String getPageTitle() {
-		if (getAccount().getDisplayName() != null) 
-			return getAccount().getName() + " (" + getAccount().getDisplayName() + ")";
+		if (getAccount().getFullName() != null) 
+			return getAccount().getName() + " (" + getAccount().getFullName() + ")";
 		else
 			return getAccount().getName();
 	}

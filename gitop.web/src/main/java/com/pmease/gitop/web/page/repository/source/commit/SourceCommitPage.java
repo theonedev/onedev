@@ -17,7 +17,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.collect.Iterables;
@@ -39,6 +38,8 @@ import com.pmease.gitop.web.page.repository.source.commit.diff.CommentListPanel;
 import com.pmease.gitop.web.page.repository.source.commit.diff.CommitCommentsAware;
 import com.pmease.gitop.web.page.repository.source.commit.diff.DiffViewPanel;
 import com.pmease.gitop.web.page.repository.source.tree.SourceTreePage;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
 @SuppressWarnings("serial")
 public class SourceCommitPage extends RepositoryTabPage implements CommitCommentsAware {
@@ -102,19 +103,12 @@ public class SourceCommitPage extends RepositoryTabPage implements CommitComment
 		add(new Label("shortmessage", new PropertyModel<String>(commitModel, "subject")));
 		add(new Label("detailedmessage", new PropertyModel<String>(commitModel, "message")));
 		
-		IModel<PersonIdent> authorModel = new AbstractReadOnlyModel<PersonIdent>() {
-
-			@Override
-			public PersonIdent getObject() {
-				return getCommit().getAuthor();
-			}
-		};
-		
 		add(new BookmarkablePageLink<Void>("treelink",
 				SourceTreePage.class,
 				SourceTreePage.newParams(getRepository(), getRevision())));
 		
-		add(new PersonLink("authoravatar", authorModel, Mode.AVATAR).enableTooltip("left"));
+		TooltipConfig tooltipConfig = new TooltipConfig().withPlacement(TooltipConfig.Placement.left);
+		add(new PersonLink("authoravatar", getCommit().getAuthor(), Mode.AVATAR).withTooltipConfig(tooltipConfig));
 		
 		add(new CommitMetaPanel("meta", commitModel));
 		add(new Label("commitsha", new PropertyModel<String>(commitModel, "hash")));

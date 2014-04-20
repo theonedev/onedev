@@ -25,7 +25,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.eclipse.jgit.lib.PersonIdent;
 
@@ -193,8 +192,8 @@ public class RequestDetailPanel extends Panel {
 		PullRequest request = getPullRequest();
 		User submittedBy = request.getSubmittedBy();
 		if (submittedBy != null) {
-			PersonIdent person = new PersonIdent(submittedBy.getName(), submittedBy.getEmail());
-			add(new PersonLink("user", Model.of(person), PersonLink.Mode.NAME_AND_AVATAR));
+			PersonIdent person = new PersonIdent(submittedBy.getName(), submittedBy.getEmailAddress());
+			add(new PersonLink("user", person, PersonLink.Mode.NAME_AND_AVATAR));
 		} else {
 			add(new Label("<i>Unknown</i>").setEscapeModelStrings(false));
 		}

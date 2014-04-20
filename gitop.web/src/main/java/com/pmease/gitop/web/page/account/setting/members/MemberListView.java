@@ -81,10 +81,10 @@ public class MemberListView extends Panel {
 				AbstractLink link = PageSpec.newUserHomeLink("userlink", user);
 				item.add(link);
 				link.add(new Label("name", Model.of(user.getName())));
-				if (Strings.isNullOrEmpty(user.getDisplayName())) {
+				if (Strings.isNullOrEmpty(user.getFullName())) {
 					item.add(new Label("displayName", "&nbsp;").setEscapeModelStrings(false));
 				} else {
-					item.add(new Label("displayName", user.getDisplayName()));
+					item.add(new Label("displayName", user.getFullName()));
 				}
 				item.add(createActionsPanel("actions", item.getModel()));
 				item.add(createMemberTeams("teams", new UserModel(user)));

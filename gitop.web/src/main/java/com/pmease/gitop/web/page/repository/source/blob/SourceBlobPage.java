@@ -115,13 +115,7 @@ public class SourceBlobPage extends AbstractFilePage {
 		detailedToggle.add(new CollapseBehavior(detailedMsg));
 		detailedContainer.add(detailedToggle);
 		
-		add(new PersonLink("author", new AbstractReadOnlyModel<PersonIdent>() {
-
-			@Override
-			public PersonIdent getObject() {
-				return getLastCommit().getAuthor();
-			}
-		},  Mode.NAME_AND_AVATAR));
+		add(new PersonLink("author", getLastCommit().getAuthor(),  Mode.NAME_AND_AVATAR));
 		
 		add(new AgeLabel("author-date", new AbstractReadOnlyModel<Date>() {
 
