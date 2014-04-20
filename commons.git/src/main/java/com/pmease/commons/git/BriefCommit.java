@@ -1,7 +1,8 @@
 package com.pmease.commons.git;
 
 import java.io.Serializable;
-import java.util.Date;
+
+import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.base.Objects;
 
@@ -10,23 +11,16 @@ public class BriefCommit implements Serializable {
 
     private final String hash;
     
-    private final GitIdentity committer;
+    private final PersonIdent committer;
     
-    private final Date commitDate;
-    
-    private final GitIdentity author;
-    
-    private final Date authorDate;
+    private final PersonIdent author;
     
     private final String subject;
 
-    public BriefCommit(String hash, GitIdentity committer, Date commitDate, 
-    		GitIdentity author, Date authorDate, String subject) {
+    public BriefCommit(String hash, PersonIdent committer, PersonIdent author, String subject) {
     	this.hash = hash;
     	this.committer = committer;
-    	this.commitDate = commitDate;
     	this.author = author;
-    	this.authorDate = authorDate;
     	this.subject = subject;
     }
 
@@ -34,20 +28,12 @@ public class BriefCommit implements Serializable {
 		return hash;
 	}
 
-	public GitIdentity getCommitter() {
+	public PersonIdent getCommitter() {
 		return committer;
 	}
 
-	public GitIdentity getAuthor() {
+	public PersonIdent getAuthor() {
 		return author;
-	}
-	
-	public Date getCommitDate() {
-		return commitDate;
-	}
-	
-	public Date getAuthorDate() {
-		return authorDate;
 	}
 
 	public String getSubject() {
@@ -73,7 +59,7 @@ public class BriefCommit implements Serializable {
 		return Objects.toStringHelper(this)
 				.add("hash", hash)
 				.add("committer", committer.getName())
-				.add("commit date", commitDate)
+				.add("date", committer.getWhen())
 				.add("subject", subject)
 				.toString();
 	}

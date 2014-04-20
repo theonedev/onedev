@@ -5,8 +5,9 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.eclipse.jgit.lib.PersonIdent;
+
 import com.google.inject.ImplementedBy;
-import com.pmease.commons.git.GitIdentity;
 import com.pmease.commons.hibernate.dao.GenericDao;
 import com.pmease.gitop.core.manager.impl.DefaultUserManager;
 import com.pmease.gitop.model.User;
@@ -41,7 +42,7 @@ public interface UserManager extends GenericDao<User> {
 	 */
 	@Nullable User findByEmail(String email);
 	
-	@Nullable User findByGitIdentity(GitIdentity gitIdentity);
+	@Nullable User findByPerson(PersonIdent person);
 	
 	/**
 	 * Get current authenticated user in Shiro context, or <tt>null</tt> if not 

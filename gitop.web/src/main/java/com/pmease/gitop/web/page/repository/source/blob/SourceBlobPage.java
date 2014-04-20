@@ -15,6 +15,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
@@ -25,9 +26,8 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.behavior.CollapseBehavior;
 import com.pmease.gitop.web.component.label.AgeLabel;
-import com.pmease.gitop.web.component.link.GitPersonLink;
-import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
-import com.pmease.gitop.web.page.repository.api.GitPerson;
+import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.component.link.PersonLink.Mode;
 import com.pmease.gitop.web.page.repository.source.AbstractFilePage;
 import com.pmease.gitop.web.page.repository.source.component.SourceBreadcrumbPanel;
 import com.pmease.gitop.web.service.FileBlob;
@@ -37,7 +37,7 @@ import com.pmease.gitop.web.util.UrlUtils;
 public class SourceBlobPage extends AbstractFilePage {
 
 	private final IModel<Commit> lastCommitModel;
-	private final IModel<List<GitPerson>> committersModel;
+	private final IModel<List<PersonIdent>> committersModel;
 	
 	public SourceBlobPage(PageParameters params) {
 		super(params);
@@ -59,16 +59,15 @@ public class SourceBlobPage extends AbstractFilePage {
 			}
 		};
 		
-		committersModel = new LoadableDetachableModel<List<GitPerson>>() {
+		committersModel = new LoadableDetachableModel<List<PersonIdent>>() {
 
 			@Override
-			protected List<GitPerson> load() {
+			protected List<PersonIdent> load() {
 				Git git = getRepository().git();
 				List<Commit> commits = git.log(null, getRevision(), getFilePath(), 0, 0);
-				Set<GitPerson> users = Sets.newHashSet();
+				Set<PersonIdent> users = Sets.newHashSet();
 				for (Commit each : commits) {
-					GitPerson person = new GitPerson(each.getAuthor().getName(), each.getAuthor().getEmail());
-					users.add(person);
+					users.add(each.getAuthor());
 				}
 				
 				return Lists.newArrayList(users);
@@ -116,11 +115,11 @@ public class SourceBlobPage extends AbstractFilePage {
 		detailedToggle.add(new CollapseBehavior(detailedMsg));
 		detailedContainer.add(detailedToggle);
 		
-		add(new GitPersonLink("author", new AbstractReadOnlyModel<GitPerson>() {
+		add(new PersonLink("author", new AbstractReadOnlyModel<PersonIdent>() {
 
 			@Override
-			public GitPerson getObject() {
-				return GitPerson.of(getLastCommit().getAuthor());
+			public PersonIdent getObject() {
+				return getLastCommit().getAuthor();
 			}
 		},  Mode.NAME_AND_AVATAR));
 		
@@ -128,7 +127,7 @@ public class SourceBlobPage extends AbstractFilePage {
 
 			@Override
 			public Date getObject() {
-				return getLastCommit().getAuthorDate();
+				return getLastCommit().getAuthor().getWhen();
 			}
 			
 		}));

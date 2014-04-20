@@ -1,6 +1,5 @@
 package com.pmease.gitop.web.git;
 
-import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -9,6 +8,7 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -17,9 +17,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
-import com.pmease.commons.git.GitIdentity;
 import com.pmease.commons.git.RefInfo;
-import com.pmease.commons.util.Pair;
 
 public class GitUtils {
 
@@ -98,10 +96,9 @@ public class GitUtils {
 	 * @param input the input raw date string
 	 * @return Java date
 	 */
-	public static Date parseRawDate(String input) {
+	public static long parseRawDate(String input) {
 		String[] pieces = Iterables.toArray(Splitter.on(" ").split(input), String.class);
-		long when = Long.valueOf(pieces[0]) * 1000;
-		return new Date(when);
+		return Long.valueOf(pieces[0]) * 1000;
 	}
 	
 	/**
@@ -114,7 +111,7 @@ public class GitUtils {
 	 * @param raw
 	 * @return
 	 */
-	public static @Nullable Pair<GitIdentity, Date> parseIdentityAndDate(String raw) {
+	public static @Nullable PersonIdent parsePersonIdent(String raw) {
 		if (Strings.isNullOrEmpty(raw))
 			return null;
 		
@@ -129,11 +126,11 @@ public class GitUtils {
 			throw new IllegalArgumentException("Raw " + raw);
 		
 		String time = raw.substring(pos2 + 1).trim();
-		Date date = parseRawDate(time);
+		long when = parseRawDate(time);
 		
 		String email = raw.substring(pos1 + 1, pos2 - 1);
 		
-		return new Pair<GitIdentity, Date>(new GitIdentity(name, email), date);
+		return new PersonIdent(name, email, when, 0);
 	}
 	
 }

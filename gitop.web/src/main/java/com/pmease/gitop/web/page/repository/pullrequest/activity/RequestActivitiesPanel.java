@@ -18,6 +18,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.eclipse.jgit.lib.PersonIdent;
 
 import com.pmease.commons.wicket.behavior.DisableIfBlankBehavior;
 import com.pmease.gitop.core.Gitop;
@@ -28,8 +29,7 @@ import com.pmease.gitop.model.PullRequestComment;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
-import com.pmease.gitop.web.component.link.GitPersonLink;
-import com.pmease.gitop.web.page.repository.api.GitPerson;
+import com.pmease.gitop.web.component.link.PersonLink;
 import com.pmease.gitop.web.util.DateUtils;
 
 @SuppressWarnings("serial")
@@ -88,9 +88,9 @@ public class RequestActivitiesPanel extends Panel {
 
 				User user = activity.getUser();
 				if (user != null) {
-					GitPerson person = new GitPerson(user.getName(), user.getEmail());
-					item.add(new GitPersonLink("userAvatar", Model.of(person), GitPersonLink.Mode.AVATAR));
-					item.add(new GitPersonLink("userName", Model.of(person), GitPersonLink.Mode.NAME));
+					PersonIdent person = user.asPerson();
+					item.add(new PersonLink("userAvatar", Model.of(person), PersonLink.Mode.AVATAR));
+					item.add(new PersonLink("userName", Model.of(person), PersonLink.Mode.NAME));
 				} else {
 					item.add(new WebMarkupContainer("userAvatar").setVisible(false));
 					item.add(new Label("userName", "<i>Unknown</i>").setEscapeModelStrings(false));
@@ -114,25 +114,23 @@ public class RequestActivitiesPanel extends Panel {
 		};
 		add(newCommentContainer);
 		
-		newCommentContainer.add(new GitPersonLink("userAvatar", new LoadableDetachableModel<GitPerson>() {
+		newCommentContainer.add(new PersonLink("userAvatar", new LoadableDetachableModel<PersonIdent>() {
 
 			@Override
-			protected GitPerson load() {
-				User currentUser = Gitop.getInstance(UserManager.class).getCurrent(); 
-				return new GitPerson(currentUser.getName(), currentUser.getEmail());
+			protected PersonIdent load() {
+				return Gitop.getInstance(UserManager.class).getCurrent().asPerson(); 
 			}
 			
-		}, GitPersonLink.Mode.AVATAR));
+		}, PersonLink.Mode.AVATAR));
 		
-		newCommentContainer.add(new GitPersonLink("userName", new LoadableDetachableModel<GitPerson>() {
+		newCommentContainer.add(new PersonLink("userName", new LoadableDetachableModel<PersonIdent>() {
 
 			@Override
-			protected GitPerson load() {
-				User currentUser = Gitop.getInstance(UserManager.class).getCurrent(); 
-				return new GitPerson(currentUser.getName(), currentUser.getEmail());
+			protected PersonIdent load() {
+				return Gitop.getInstance(UserManager.class).getCurrent().asPerson(); 
 			}
 			
-		}, GitPersonLink.Mode.NAME));
+		}, PersonLink.Mode.NAME));
 		
 		final TextArea<String> newCommentArea = new TextArea<String>("content", new IModel<String>() {
 

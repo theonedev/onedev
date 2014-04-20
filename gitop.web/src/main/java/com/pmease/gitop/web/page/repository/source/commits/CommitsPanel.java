@@ -30,10 +30,9 @@ import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.datatype.DataTypes;
 import com.pmease.gitop.web.component.commit.CommitMessagePanel;
 import com.pmease.gitop.web.component.commit.CommitMetaPanel;
-import com.pmease.gitop.web.component.link.GitPersonLink;
-import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
+import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.component.link.PersonLink.Mode;
 import com.pmease.gitop.web.git.GitUtils;
-import com.pmease.gitop.web.page.repository.api.GitPerson;
 import com.pmease.gitop.web.page.repository.source.commit.SourceCommitPage;
 import com.pmease.gitop.web.page.repository.source.tree.SourceTreePage;
 
@@ -59,7 +58,7 @@ public class CommitsPanel extends Panel {
 				
 				LinkedListMultimap<Date, Commit> groups = LinkedListMultimap.<Date, Commit>create();
 				for (Commit commit : commits) {
-					Date date = commit.getAuthorDate();
+					Date date = commit.getAuthor().getWhen();
 					date = DateUtils.round(date, Calendar.DAY_OF_MONTH);
 					groups.put(date, commit);
 				}
@@ -115,9 +114,7 @@ public class CommitsPanel extends Panel {
 					protected void populateItem(ListItem<Commit> item) {
 						Commit commit = item.getModelObject();
 						
-						item.add(new GitPersonLink("avatar", 
-													Model.of(GitPerson.of(commit.getAuthor())), 
-													Mode.AVATAR)
+						item.add(new PersonLink("avatar", Model.of(commit.getAuthor()), Mode.AVATAR)
 									.enableTooltip("right"));
 						
 						item.add(new CommitMessagePanel("message", item.getModel(), repositoryModel));

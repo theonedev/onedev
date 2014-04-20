@@ -28,9 +28,8 @@ import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.Constants;
 import com.pmease.gitop.web.common.datatype.DataTypes;
 import com.pmease.gitop.web.common.wicket.bootstrap.Alert;
-import com.pmease.gitop.web.component.link.GitPersonLink;
+import com.pmease.gitop.web.component.link.PersonLink;
 import com.pmease.gitop.web.git.GitUtils;
-import com.pmease.gitop.web.page.repository.api.GitPerson;
 import com.pmease.gitop.web.page.repository.source.commit.SourceCommitPage;
 
 @SuppressWarnings("serial")
@@ -51,7 +50,7 @@ public class CommitsTablePanel extends Panel {
 				
 				LinkedListMultimap<Date, Commit> groups = LinkedListMultimap.<Date, Commit>create();
 				for (Commit commit : commits) {
-					Date date = commit.getAuthorDate();
+					Date date = commit.getAuthor().getWhen();
 					date = DateUtils.round(date, Calendar.DAY_OF_MONTH);
 					groups.put(date, commit);
 				}
@@ -110,8 +109,7 @@ public class CommitsTablePanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<Commit> item) {
 				Commit commit = item.getModelObject();
-				GitPerson person = GitPerson.of(commit.getAuthor());
-				item.add(new GitPersonLink("name", Model.of(person), GitPersonLink.Mode.NAME_AND_AVATAR).enableTooltip());
+				item.add(new PersonLink("name", Model.of(commit.getAuthor()), PersonLink.Mode.NAME_AND_AVATAR).enableTooltip());
 				item.add(new CommitMessagePanel("message", item.getModel(), repositoryModel));
 				
 				AbstractLink link = new BookmarkablePageLink<Void>("commitlink",

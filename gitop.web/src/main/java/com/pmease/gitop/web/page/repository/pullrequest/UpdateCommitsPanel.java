@@ -19,10 +19,9 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestUpdate;
-import com.pmease.gitop.web.component.link.GitPersonLink;
+import com.pmease.gitop.web.component.link.PersonLink;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.page.repository.RepositoryBasePage;
-import com.pmease.gitop.web.page.repository.api.GitPerson;
 import com.pmease.gitop.web.page.repository.source.commit.SourceCommitPage;
 import com.pmease.gitop.web.util.DateUtils;
 
@@ -65,12 +64,12 @@ public class UpdateCommitsPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<Commit> item) {
 				Commit commit = item.getModelObject();
-				item.add(new GitPersonLink("author", 
-						Model.of(GitPerson.of(commit.getAuthor())), GitPersonLink.Mode.NAME_AND_AVATAR));
+				item.add(new PersonLink("author", 
+						Model.of(commit.getAuthor()), PersonLink.Mode.NAME_AND_AVATAR));
 
 				item.add(new Label("message", commit.getSubject()));
 				
-				item.add(new Label("date", DateUtils.formatAge(commit.getAuthorDate())));
+				item.add(new Label("date", DateUtils.formatAge(commit.getAuthor().getWhen())));
 				
 				RepositoryBasePage page = (RepositoryBasePage) getPage();
 				AbstractLink link = new BookmarkablePageLink<Void>("shaLink",

@@ -11,17 +11,16 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.PersonIdent;
 
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.PullRequest;
-import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.component.label.AgeLabel;
-import com.pmease.gitop.web.component.link.GitPersonLink;
-import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
+import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.component.link.PersonLink.Mode;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.repository.RepositoryBasePage;
-import com.pmease.gitop.web.page.repository.api.GitPerson;
 
 @SuppressWarnings("serial")
 public class RequestSummaryPanel extends Panel {
@@ -73,12 +72,11 @@ public class RequestSummaryPanel extends Panel {
 			
 		});
 		
-		add(new GitPersonLink("user", new LoadableDetachableModel<GitPerson>() {
+		add(new PersonLink("user", new LoadableDetachableModel<PersonIdent>() {
 
 			@Override
-			protected GitPerson load() {
-				User user = getPullRequest().getSubmittedBy();
-				return new GitPerson(user.getName(), user.getEmail());
+			protected PersonIdent load() {
+				return getPullRequest().getSubmittedBy().asPerson();
 			}
 			
 		}, Mode.NAME_AND_AVATAR));

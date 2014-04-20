@@ -3,12 +3,12 @@ package com.pmease.gitop.web.git.command;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.Serializable;
-import java.util.Date;
 
 import javax.annotation.Nullable;
 
+import org.eclipse.jgit.lib.PersonIdent;
+
 import com.google.common.base.Strings;
-import com.pmease.commons.git.GitIdentity;
 
 public class Tag implements Serializable {
 
@@ -17,8 +17,7 @@ public class Tag implements Serializable {
 	private final String name;
 	private final String hash;
 	private final String commitHash;
-	private final GitIdentity tagger;
-	private final Date tagDate;
+	private final PersonIdent tagger;
 	private final String subject;
 	private final String body;
 
@@ -26,8 +25,7 @@ public class Tag implements Serializable {
 		private String name;
 		private String hash;
 		private String commitHash;
-		private GitIdentity tagger;
-		private Date tagDate;
+		private PersonIdent tagger;
 		private String subject;
 		private String body;
 		
@@ -46,13 +44,8 @@ public class Tag implements Serializable {
 			return this;
 		}
 		
-		public Builder tagger(GitIdentity tagger) {
+		public Builder tagger(PersonIdent tagger) {
 			this.tagger = tagger;
-			return this;
-		}
-		
-		public Builder tagDate(Date tagDate) {
-			this.tagDate = tagDate;
 			return this;
 		}
 		
@@ -71,8 +64,7 @@ public class Tag implements Serializable {
 					checkNotNull(name),
 					checkNotNull(hash), 
 					commitHash, 
-					tagger,
-					tagDate,
+					tagger, 
 					checkNotNull(subject), 
 					body);
 		}
@@ -83,13 +75,11 @@ public class Tag implements Serializable {
 	}
 	
 	Tag(String name, String hash, @Nullable String commitHash, 
-			GitIdentity tagger, Date tagDate, String subject, 
-			@Nullable String body) {
+			PersonIdent tagger, String subject, @Nullable String body) {
 		this.name = name;
 		this.hash = hash;
 		this.commitHash = commitHash;
 		this.tagger = tagger;
-		this.tagDate = tagDate;
 		this.subject = subject;
 		this.body = body;
 	}
@@ -106,12 +96,8 @@ public class Tag implements Serializable {
 		return commitHash;
 	}
 
-	public GitIdentity getTagger() {
+	public PersonIdent getTagger() {
 		return tagger;
-	}
-	
-	public Date getTagDate() {
-		return tagDate;
 	}
 
 	public String getSubject() {

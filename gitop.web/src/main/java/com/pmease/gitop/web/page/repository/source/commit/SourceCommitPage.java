@@ -17,6 +17,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.collect.Iterables;
@@ -27,14 +28,13 @@ import com.pmease.gitop.model.CommitComment;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.component.commit.CommitMetaPanel;
-import com.pmease.gitop.web.component.link.GitPersonLink;
-import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
+import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.component.link.PersonLink.Mode;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.git.command.CommitInCommand;
 import com.pmease.gitop.web.git.command.CommitInCommand.RefType;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.repository.RepositoryTabPage;
-import com.pmease.gitop.web.page.repository.api.GitPerson;
 import com.pmease.gitop.web.page.repository.source.commit.diff.CommentListPanel;
 import com.pmease.gitop.web.page.repository.source.commit.diff.CommitCommentsAware;
 import com.pmease.gitop.web.page.repository.source.commit.diff.DiffViewPanel;
@@ -102,11 +102,11 @@ public class SourceCommitPage extends RepositoryTabPage implements CommitComment
 		add(new Label("shortmessage", new PropertyModel<String>(commitModel, "subject")));
 		add(new Label("detailedmessage", new PropertyModel<String>(commitModel, "message")));
 		
-		IModel<GitPerson> authorModel = new AbstractReadOnlyModel<GitPerson>() {
+		IModel<PersonIdent> authorModel = new AbstractReadOnlyModel<PersonIdent>() {
 
 			@Override
-			public GitPerson getObject() {
-				return GitPerson.of(getCommit().getAuthor());
+			public PersonIdent getObject() {
+				return getCommit().getAuthor();
 			}
 		};
 		
@@ -114,7 +114,7 @@ public class SourceCommitPage extends RepositoryTabPage implements CommitComment
 				SourceTreePage.class,
 				SourceTreePage.newParams(getRepository(), getRevision())));
 		
-		add(new GitPersonLink("authoravatar", authorModel, Mode.AVATAR).enableTooltip("left"));
+		add(new PersonLink("authoravatar", authorModel, Mode.AVATAR).enableTooltip("left"));
 		
 		add(new CommitMetaPanel("meta", commitModel));
 		add(new Label("commitsha", new PropertyModel<String>(commitModel, "hash")));

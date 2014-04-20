@@ -15,13 +15,13 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
-import com.pmease.gitop.web.component.link.GitPersonLink;
-import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
-import com.pmease.gitop.web.page.repository.api.GitPerson;
+import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.component.link.PersonLink.Mode;
 
 import de.agilecoders.wicket.jquery.JQuery;
 
@@ -30,7 +30,7 @@ public class ContributorsPanel extends Panel {
 
 	private final static int MAX_DISPLAYED_COMMITTERS = 20;
 	
-	public ContributorsPanel(String id, IModel<List<GitPerson>> model) {
+	public ContributorsPanel(String id, IModel<List<PersonIdent>> model) {
 		super(id, model);
 	}
 
@@ -47,12 +47,12 @@ public class ContributorsPanel extends Panel {
 			
 		}));
 		
-		ListView<GitPerson> contributorsView = new ListView<GitPerson>("contributors", 
-				new AbstractReadOnlyModel<List<GitPerson>>() {
+		ListView<PersonIdent> contributorsView = new ListView<PersonIdent>("contributors", 
+				new AbstractReadOnlyModel<List<PersonIdent>>() {
 
 			@Override
-			public List<GitPerson> getObject() {
-				List<GitPerson> committers = getContributors();
+			public List<PersonIdent> getObject() {
+				List<PersonIdent> committers = getContributors();
 				if (committers.size() > MAX_DISPLAYED_COMMITTERS) {
 					return Lists.newArrayList(committers.subList(0, MAX_DISPLAYED_COMMITTERS));
 				} else {
@@ -63,9 +63,9 @@ public class ContributorsPanel extends Panel {
 		}) {
 
 			@Override
-			protected void populateItem(ListItem<GitPerson> item) {
-				GitPerson person = item.getModelObject();
-				item.add(new GitPersonLink("link", Model.of(person), Mode.AVATAR).enableTooltip());
+			protected void populateItem(ListItem<PersonIdent> item) {
+				PersonIdent person = item.getModelObject();
+				item.add(new PersonLink("link", Model.of(person), Mode.AVATAR).enableTooltip());
 			}
 		};
 		
@@ -86,12 +86,12 @@ public class ContributorsPanel extends Panel {
 			@Override
 			protected Component newContent(String id) {
 				Fragment frag = new Fragment(id, "committers-dropdown", ContributorsPanel.this);
-				frag.add(new ListView<GitPerson>("committers", 
-						(IModel<List<GitPerson>>) ContributorsPanel.this.getDefaultModel()) {
+				frag.add(new ListView<PersonIdent>("committers", 
+						(IModel<List<PersonIdent>>) ContributorsPanel.this.getDefaultModel()) {
 
 					@Override
-					protected void populateItem(ListItem<GitPerson> item) {
-						item.add(new GitPersonLink("committer", item.getModel(), Mode.NAME_AND_AVATAR));
+					protected void populateItem(ListItem<PersonIdent> item) {
+						item.add(new PersonLink("committer", item.getModel(), Mode.NAME_AND_AVATAR));
 					}
 				});
 				
@@ -108,8 +108,8 @@ public class ContributorsPanel extends Panel {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private List<GitPerson> getContributors() {
-		return (List<GitPerson>) getDefaultModelObject();
+	private List<PersonIdent> getContributors() {
+		return (List<PersonIdent>) getDefaultModelObject();
 	}
 	
 	@Override

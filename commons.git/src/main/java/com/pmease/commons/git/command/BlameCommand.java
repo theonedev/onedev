@@ -2,17 +2,16 @@ package com.pmease.commons.git.command;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blame;
 import com.pmease.commons.git.BriefCommit;
-import com.pmease.commons.git.GitIdentity;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.ExecuteResult;
 import com.pmease.commons.util.execution.LineConsumer;
@@ -104,14 +103,14 @@ public class BlameCommand extends GitCommand<List<Blame>> {
 						line = StringUtils.substringAfter(line, "<");
 						commitBuilder.authorEmail = StringUtils.substringBeforeLast(line, ">");
 					} else if (line.startsWith("author-time ")) {
-						commitBuilder.authorDate = new Date(1000L * Long.parseLong(line.substring("author-time ".length())));
+						commitBuilder.authorDate = 1000L * Long.parseLong(line.substring("author-time ".length()));
 					} else if (line.startsWith("committer ")) {
 						commitBuilder.committer = line.substring("committer ".length());
 					} else if (line.startsWith("committer-mail ")) {
 						line = StringUtils.substringAfter(line, "<");
 						commitBuilder.committerEmail = StringUtils.substringBeforeLast(line, ">");
 					} else if (line.startsWith("committer-time ")) {
-						commitBuilder.commitDate = new Date(1000L * Long.parseLong(line.substring("committer-time ".length())));
+						commitBuilder.committerDate = 1000L * Long.parseLong(line.substring("committer-time ".length()));
 					} else if (line.startsWith("summary ")) {
 						commitBuilder.summary = line.substring("summary ".length());
 						commitMap.put(commitBuilder.hash, commitBuilder.build());
@@ -164,9 +163,9 @@ public class BlameCommand extends GitCommand<List<Blame>> {
 
     private static class BriefCommitBuilder {
         
-    	private Date commitDate;
+    	private long committerDate;
     	
-        private Date authorDate;
+        private long authorDate;
         
         private String author;
         
@@ -183,8 +182,8 @@ public class BlameCommand extends GitCommand<List<Blame>> {
     	private BriefCommit build() {
     		return new BriefCommit(
     				hash, 
-    				new GitIdentity(committer, committerEmail), commitDate, 
-    				new GitIdentity(author, authorEmail), authorDate, 
+    				new PersonIdent(committer, committerEmail, committerDate, 0), 
+    				new PersonIdent(author, authorEmail, authorDate, 0), 
     				summary.trim());
     	}
     }

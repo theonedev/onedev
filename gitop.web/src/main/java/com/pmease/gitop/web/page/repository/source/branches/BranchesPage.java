@@ -31,14 +31,13 @@ import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.web.common.wicket.component.BarLabel;
 import com.pmease.gitop.web.component.label.AgeLabel;
-import com.pmease.gitop.web.component.link.GitPersonLink;
-import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
+import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.component.link.PersonLink.Mode;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.git.command.AheadBehind;
 import com.pmease.gitop.web.git.command.AheadBehindCommand;
 import com.pmease.gitop.web.git.command.BranchForEachRefCommand;
 import com.pmease.gitop.web.page.repository.RepositoryTabPage;
-import com.pmease.gitop.web.page.repository.api.GitPerson;
 import com.pmease.gitop.web.page.repository.pullrequest.NewRequestPage;
 import com.pmease.gitop.web.page.repository.source.tree.SourceTreePage;
 
@@ -258,10 +257,8 @@ public class BranchesPage extends RepositoryTabPage {
 			add(link);
 			
 			BriefCommit commit = getLastCommit(refName);
-			add(new AgeLabel("updatedTime", Model.of(commit.getAuthorDate())));
-			add(new GitPersonLink("author", 
-					Model.<GitPerson>of(GitPerson.of(commit.getAuthor())),
-					Mode.NAME));
+			add(new AgeLabel("updatedTime", Model.of(commit.getAuthor().getWhen())));
+			add(new PersonLink("author", Model.of(commit.getAuthor()), Mode.NAME));
 			
 			add(new Label("default", "default").setVisibilityAllowed(Objects.equal(refName, getDefaultBranch())));
 		}

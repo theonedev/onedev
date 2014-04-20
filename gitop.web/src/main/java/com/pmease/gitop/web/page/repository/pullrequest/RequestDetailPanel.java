@@ -27,6 +27,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.eclipse.jgit.lib.PersonIdent;
 
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
@@ -43,9 +44,8 @@ import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.component.label.AgeLabel;
-import com.pmease.gitop.web.component.link.GitPersonLink;
+import com.pmease.gitop.web.component.link.PersonLink;
 import com.pmease.gitop.web.page.repository.RepositoryBasePage;
-import com.pmease.gitop.web.page.repository.api.GitPerson;
 import com.pmease.gitop.web.page.repository.pullrequest.activity.RequestActivitiesPanel;
 
 @SuppressWarnings("serial")
@@ -193,8 +193,8 @@ public class RequestDetailPanel extends Panel {
 		PullRequest request = getPullRequest();
 		User submittedBy = request.getSubmittedBy();
 		if (submittedBy != null) {
-			GitPerson person = new GitPerson(submittedBy.getName(), submittedBy.getEmail());
-			add(new GitPersonLink("user", Model.of(person), GitPersonLink.Mode.NAME_AND_AVATAR));
+			PersonIdent person = new PersonIdent(submittedBy.getName(), submittedBy.getEmail());
+			add(new PersonLink("user", Model.of(person), PersonLink.Mode.NAME_AND_AVATAR));
 		} else {
 			add(new Label("<i>Unknown</i>").setEscapeModelStrings(false));
 		}

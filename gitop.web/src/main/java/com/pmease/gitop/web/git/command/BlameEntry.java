@@ -1,11 +1,11 @@
 package com.pmease.gitop.web.git.command;
 
 import java.io.Serializable;
-import java.util.Date;
+
+import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.base.Objects;
 import com.pmease.commons.git.BriefCommit;
-import com.pmease.commons.git.GitIdentity;
 
 public class BlameEntry implements Serializable, Comparable<BlameEntry> {
 	private static final long serialVersionUID = 1L;
@@ -20,10 +20,8 @@ public class BlameEntry implements Serializable, Comparable<BlameEntry> {
 		private int sourceLine;
 		private int resultLine;
 		private int numLines;
-		private GitIdentity author;
-		private GitIdentity committer;
-		private Date authorDate;
-		private Date commitDate;
+		private PersonIdent author;
+		private PersonIdent committer;
 		private String summary;
 		
 		public Builder sha(String sha) {
@@ -46,23 +44,13 @@ public class BlameEntry implements Serializable, Comparable<BlameEntry> {
 			return this;
 		}
 		
-		public Builder author(GitIdentity author) {
+		public Builder author(PersonIdent author) {
 			this.author = author;
 			return this;
 		}
 		
-		public Builder committer(GitIdentity committer) {
+		public Builder committer(PersonIdent committer) {
 			this.committer = committer;
-			return this;
-		}
-		
-		public Builder authorDate(Date authorDate) {
-			this.authorDate = authorDate;
-			return this;
-		}
-		
-		public Builder commitDate(Date commitDate) {
-			this.commitDate = commitDate;
 			return this;
 		}
 		
@@ -72,8 +60,7 @@ public class BlameEntry implements Serializable, Comparable<BlameEntry> {
 		}
 		
 		public BlameEntry build() {
-			BriefCommit commit = new BriefCommit(sha, committer, commitDate, 
-					author, authorDate, summary);
+			BriefCommit commit = new BriefCommit(sha, committer, author, summary);
 			return new BlameEntry(commit, sourceLine, resultLine, numLines);
 		}
 	}

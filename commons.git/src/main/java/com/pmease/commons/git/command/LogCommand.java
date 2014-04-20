@@ -2,16 +2,15 @@ package com.pmease.commons.git.command;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.FileChange;
-import com.pmease.commons.git.GitIdentity;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
@@ -160,13 +159,13 @@ public class LogCommand extends GitCommand<List<Commit>> {
             	} else if (line.startsWith("hash:")) {
                 	commitBuilder.hash = line.substring("hash:".length());
             	} else if (line.startsWith("author:")) {
-                	commitBuilder.author = line.substring("author:".length());
+                	commitBuilder.authorName = line.substring("author:".length());
             	} else if (line.startsWith("committer:")) {
-                	commitBuilder.committer = line.substring("committer:".length());
+                	commitBuilder.committerName = line.substring("committer:".length());
             	} else if (line.startsWith("authorDate:")) {
-                	commitBuilder.authorDate = dateFormatter.parseDateTime(line.substring("authorDate:".length()).trim()).toDate();
+                	commitBuilder.authorDate = dateFormatter.parseDateTime(line.substring("authorDate:".length()).trim()).getMillis();
             	} else if (line.startsWith("committerDate:")) {
-                	commitBuilder.commitDate = dateFormatter.parseDateTime(line.substring("committerDate:".length()).trim()).toDate();
+                	commitBuilder.committerDate = dateFormatter.parseDateTime(line.substring("committerDate:".length()).trim()).getMillis();
             	} else if (line.startsWith("authorEmail:")) {
                 	commitBuilder.authorEmail = line.substring("authorEmail:".length());
             	} else if (line.startsWith("committerEmail:")) {
@@ -187,13 +186,13 @@ public class LogCommand extends GitCommand<List<Commit>> {
 
     private static class CommitBuilder {
         
-    	private Date commitDate;
+    	private long committerDate;
     	
-        private Date authorDate;
+        private long authorDate;
         
-        private String author;
+        private String authorName;
         
-        private String committer;
+        private String committerName;
         
         private String authorEmail;
         
@@ -214,8 +213,8 @@ public class LogCommand extends GitCommand<List<Commit>> {
     	private Commit build() {
     		return new Commit(
     				hash, 
-    				new GitIdentity(committer, committerEmail), commitDate, 
-    				new GitIdentity(author, authorEmail), authorDate,
+    				new PersonIdent(committerName, committerEmail, committerDate, 0), 
+    				new PersonIdent(authorName, authorEmail, authorDate, 0),
     				summary.trim(), 
     				StringUtils.isNotBlank(message)?message.trim():null, 
     				StringUtils.isNotBlank(note)?note.trim():null, 

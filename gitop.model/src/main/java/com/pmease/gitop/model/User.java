@@ -8,6 +8,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
+import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -230,4 +231,9 @@ public class User extends AbstractUser implements ProtectedObject {
 	public String toString() {
 		return getName();
 	}
+	
+	public PersonIdent asPerson() {
+		return new PersonIdent(getName(), getEmail());
+	}
+	
 }

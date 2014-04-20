@@ -24,15 +24,14 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.component.label.AgeLabel;
-import com.pmease.gitop.web.component.link.GitPersonLink;
-import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
+import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.component.link.PersonLink.Mode;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.git.command.ArchiveCommand.Format;
 import com.pmease.gitop.web.git.command.Tag;
 import com.pmease.gitop.web.git.command.TagForEachRefCommand;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.repository.RepositoryTabPage;
-import com.pmease.gitop.web.page.repository.api.GitPerson;
 import com.pmease.gitop.web.page.repository.source.commit.SourceCommitPage;
 
 @SuppressWarnings("serial")
@@ -99,10 +98,10 @@ public class TagsPage extends RepositoryTabPage {
 						item.add(new WebMarkupContainer("creator").setVisibilityAllowed(false));
 						item.add(new WebMarkupContainer("date").setVisibilityAllowed(false));
 					} else {
-						item.add(new GitPersonLink("creator", 
-								Model.of(GitPerson.of(tag.getTagger())), 
+						item.add(new PersonLink("creator", 
+								Model.of(tag.getTagger()), 
 								Mode.AVATAR).enableTooltip("right"));
-						item.add(new AgeLabel("date", Model.of(tag.getTagDate())));
+						item.add(new AgeLabel("date", Model.of(tag.getTagger().getWhen())));
 					}
 					
 					item.add(new Label("tagname", tagName));

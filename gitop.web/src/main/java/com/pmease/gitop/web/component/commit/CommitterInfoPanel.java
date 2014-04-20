@@ -6,17 +6,17 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.eclipse.jgit.lib.PersonIdent;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.gitop.web.component.label.AgeLabel;
-import com.pmease.gitop.web.component.link.GitPersonLink;
-import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
-import com.pmease.gitop.web.page.repository.api.GitPerson;
+import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.component.link.PersonLink.Mode;
 
 @SuppressWarnings("serial")
 public class CommitterInfoPanel extends Panel {
 
-	private final IModel<GitPersonLink.Mode> mode = Model.of(Mode.NAME);
+	private final IModel<PersonLink.Mode> mode = Model.of(Mode.NAME);
 	
 	public CommitterInfoPanel(String id, IModel<Commit> model) {
 		super(id, model);
@@ -27,11 +27,11 @@ public class CommitterInfoPanel extends Panel {
 		super.onInitialize();
 		
 
-		add(new GitPersonLink("committer", new AbstractReadOnlyModel<GitPerson>() {
+		add(new PersonLink("committer", new AbstractReadOnlyModel<PersonIdent>() {
 
 			@Override
-			public GitPerson getObject() {
-				return GitPerson.of(getCommit().getCommitter());
+			public PersonIdent getObject() {
+				return getCommit().getCommitter();
 			}
 			
 		}, mode.getObject()));
@@ -40,7 +40,7 @@ public class CommitterInfoPanel extends Panel {
 
 			@Override
 			public Date getObject() {
-				return getCommit().getCommitDate();
+				return getCommit().getCommitter().getWhen();
 			}
 		}));
 	}
@@ -49,7 +49,7 @@ public class CommitterInfoPanel extends Panel {
 		return (Commit) getDefaultModelObject();
 	}
 
-	public CommitterInfoPanel committerLinkMode(GitPersonLink.Mode mode) {
+	public CommitterInfoPanel committerLinkMode(PersonLink.Mode mode) {
 		this.mode.setObject(mode);
 		return this;
 	}

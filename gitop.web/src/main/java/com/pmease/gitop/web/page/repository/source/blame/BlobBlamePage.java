@@ -29,12 +29,11 @@ import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.datatype.DataTypes;
 import com.pmease.gitop.web.common.quantity.Data;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
-import com.pmease.gitop.web.component.link.GitPersonLink;
-import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
+import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.component.link.PersonLink.Mode;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.git.command.BlameCommand;
 import com.pmease.gitop.web.git.command.BlameEntry;
-import com.pmease.gitop.web.page.repository.api.GitPerson;
 import com.pmease.gitop.web.page.repository.source.AbstractFilePage;
 import com.pmease.gitop.web.page.repository.source.blob.SourceBlobPage;
 import com.pmease.gitop.web.page.repository.source.blob.renderer.TextBlobPanel;
@@ -196,12 +195,10 @@ public class BlobBlamePage extends AbstractFilePage {
 					
 					link.add(new Label("sha", GitUtils.abbreviateSHA(each.getCommit().getHash(), 8)));
 					container.add(link);
-					container.add(new GitPersonLink("author", 
-							Model.of(GitPerson.of(each.getCommit().getAuthor())),
-							Mode.NAME));
+					container.add(new PersonLink("author", Model.of(each.getCommit().getAuthor()), Mode.NAME));
 					
 					container.add(new Label("date", 
-							DataTypes.DATE.asString(each.getCommit().getAuthorDate(), "yyyy-MM-dd")));
+							DataTypes.DATE.asString(each.getCommit().getAuthor().getWhen(), "yyyy-MM-dd")));
 					BookmarkablePageLink<Void> blameLink = new BookmarkablePageLink<Void>(
 							"blamelink",
 							BlobBlamePage.class,

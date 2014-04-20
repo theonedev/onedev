@@ -7,21 +7,22 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.eclipse.jgit.lib.PersonIdent;
 
-import com.google.common.base.Optional;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.page.repository.api.GitPerson;
 
 @SuppressWarnings("serial")
 public class GitPersonAvatar extends Panel {
 
 	private final boolean enableTooltip;
 	
-	public GitPersonAvatar(String id, IModel<GitPerson> model) {
+	public GitPersonAvatar(String id, IModel<PersonIdent> model) {
 		this(id, model, false);
 	}
 	
-	public GitPersonAvatar(String id, IModel<GitPerson> model, boolean enableTooltip) {
+	public GitPersonAvatar(String id, IModel<PersonIdent> model, boolean enableTooltip) {
 		super(id, model);
 		this.enableTooltip = enableTooltip;
 	}
@@ -30,14 +31,14 @@ public class GitPersonAvatar extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Optional<User> user = getGitPerson().asUser();
+		User user = Gitop.getInstance(UserManager.class).findByPerson(getPerson());
 		Component image;
-		if (user.isPresent()) {
-			image = new AvatarImage("avatar", user.get());
+		if (user != null) {
+			image = new AvatarImage("avatar", user);
 			add(image);
 		} else {
 			Fragment frag = new Fragment("avatar", "imgfrag", this);
-			image = new GravatarImage("img", Model.of(getGitPerson().getEmailAddress()));
+			image = new GravatarImage("img", Model.of(getPerson().getEmailAddress()));
 			frag.add(image);
 			add(frag);
 		}
@@ -48,7 +49,7 @@ public class GitPersonAvatar extends Panel {
 		}
 	}
 	
-	private GitPerson getGitPerson() {
-		return (GitPerson) getDefaultModelObject();
+	private PersonIdent getPerson() {
+		return (PersonIdent) getDefaultModelObject();
 	}
 }

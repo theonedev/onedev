@@ -7,13 +7,13 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.pmease.commons.git.GitIdentity;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractGenericDao;
@@ -144,6 +144,15 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
     public User findByEmail(String email) {
         return find(new Criterion[] {Restrictions.eq("email", email)});
     }
+    
+    @Sessional
+    @Override
+    public User findByPerson(PersonIdent person) {
+    	User user = findByEmail(person.getEmailAddress());
+    	if (user == null)
+    		user = findByName(person.getName());
+    	return user;
+    }
 
     @Override
 	public User getCurrent() {
@@ -177,16 +186,6 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 		}
 		
 		return result;
-	}
-
-	@Sessional
-	@Override
-	public User findByGitIdentity(GitIdentity gitIdentity) {
-		User user = findByEmail(gitIdentity.getEmail());
-		if (user != null)
-			return user;
-		else
-			return findByName(gitIdentity.getName());
 	}
 
 }

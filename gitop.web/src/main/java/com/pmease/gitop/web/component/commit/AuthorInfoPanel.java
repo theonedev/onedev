@@ -6,18 +6,18 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.parboiled.common.Preconditions;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.gitop.web.component.label.AgeLabel;
-import com.pmease.gitop.web.component.link.GitPersonLink;
-import com.pmease.gitop.web.component.link.GitPersonLink.Mode;
-import com.pmease.gitop.web.page.repository.api.GitPerson;
+import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.component.link.PersonLink.Mode;
 
 @SuppressWarnings("serial")
 public class AuthorInfoPanel extends Panel {
 
-	private final IModel<GitPersonLink.Mode> mode = Model.of(Mode.NAME);
+	private final IModel<PersonLink.Mode> mode = Model.of(Mode.NAME);
 	
 	public AuthorInfoPanel(String id, IModel<Commit> model) {
 		super(id, model);
@@ -27,11 +27,11 @@ public class AuthorInfoPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new GitPersonLink("author", new AbstractReadOnlyModel<GitPerson>() {
+		add(new PersonLink("author", new AbstractReadOnlyModel<PersonIdent>() {
 
 			@Override
-			public GitPerson getObject() {
-				return GitPerson.of(getCommit().getAuthor());
+			public PersonIdent getObject() {
+				return getCommit().getAuthor();
 			}
 			
 		}, mode.getObject()));
@@ -39,8 +39,9 @@ public class AuthorInfoPanel extends Panel {
 
 			@Override
 			public Date getObject() {
-				return getCommit().getAuthorDate();
+				return getCommit().getAuthor().getWhen();
 			}
+			
 		}));
 	}
 	
