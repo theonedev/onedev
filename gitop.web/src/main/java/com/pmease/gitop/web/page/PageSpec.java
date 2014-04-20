@@ -13,7 +13,6 @@ import com.google.common.collect.Lists;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.common.wicket.util.WicketUtils;
-import com.pmease.gitop.web.component.avatar.AvatarImage.AvatarImageType;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
 import com.pmease.gitop.web.page.repository.source.RepositoryHomePage;
 import com.pmease.gitop.web.util.UrlUtils;
@@ -28,8 +27,7 @@ public class PageSpec {
 	public static final String TAB = "tab";
 
 	public static PageParameters avatarOfUser(User user) {
-		return WicketUtils.newPageParams(TYPE, AvatarImageType.USER.name()
-				.toLowerCase(), ID, String.valueOf(user.getId()));
+		return WicketUtils.newPageParams(ID, String.valueOf(user.getId()));
 	}
 
 	public static PageParameters forUser(User user) {

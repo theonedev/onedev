@@ -9,10 +9,9 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.base.Strings;
-import com.pmease.gitop.model.Repository;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.GitopWebApp;
 
 @StatelessComponent
 public class AvatarImage extends Panel {
@@ -21,20 +20,9 @@ public class AvatarImage extends Panel {
 	
 	private User user;
 
-	public static enum AvatarImageType {
-		USER, REPOSITORY
-	}
-
-	private final AvatarImageType imageType;
-
 	public AvatarImage(String id, User user) {
-		this(id, user, AvatarImageType.USER);
-	}
-
-	public AvatarImage(String id, User user, AvatarImageType imageType) {
 		super(id);
 		this.user = user;
-		this.imageType = imageType;
 	}
 
 	@Override
@@ -47,20 +35,12 @@ public class AvatarImage extends Panel {
 	}
 
 	private Component createAvatarImage() {
-		if (imageType == AvatarImageType.USER) {
-			if (GitopWebApp.get().isGravatarEnabled() && Strings.isNullOrEmpty(user.getAvatarUrl())) {
-				return (new GravatarImage("avatar", Model.of(user.getEmail())));
-			} else {
-				PageParameters params = new PageParameters();
-				params.set("type", AvatarImageType.USER.name().toLowerCase());
-				params.set("id", user.getId());
-				return (new StatelessAvatarImage("avatar", params));
-			}
+		boolean gravatarEnabled = Gitop.getInstance(ConfigManager.class).getSystemSetting().isGravatarEnabled();
+		if (gravatarEnabled && !user.getLocalAvatar().exists()) {
+			return (new GravatarImage("avatar", Model.of(user.getEmail())));
 		} else {
-			Repository repo = (Repository) getDefaultModelObject();
 			PageParameters params = new PageParameters();
-			params.set("type", AvatarImageType.REPOSITORY.name().toLowerCase());
-			params.set("id", repo.getId());
+			params.set("id", user.getId());
 			return (new StatelessAvatarImage("avatar", params));
 		}
 	}

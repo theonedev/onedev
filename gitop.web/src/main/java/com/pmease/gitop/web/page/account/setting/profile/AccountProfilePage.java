@@ -1,6 +1,5 @@
 package com.pmease.gitop.web.page.account.setting.profile;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -17,14 +16,11 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.lang.Bytes;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
-import com.google.common.io.Files;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.SitePaths;
 import com.pmease.gitop.web.common.wicket.component.vex.AjaxConfirmButton;
 import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
@@ -138,44 +134,11 @@ public class AccountProfilePage extends AccountSettingPage {
 					
 					User user = getUser();
 					if (upload != null) {
-						File dir = SitePaths.get().userAvatarDir(user);
-						if (!dir.exists()) {
-							try {
-								FileUtils.forceMkdir(dir);
-							} catch (IOException e) {
-								throw Throwables.propagate(e);
-							}
-						}
-
-						String filename = upload.getClientFileName();
-						String ext = Files.getFileExtension(filename);
-						File avatarFile;
-
-						// delete old avatar file
-						String avatarPath = user.getAvatarUrl();
-						if (!Strings.isNullOrEmpty(avatarPath)
-								&& !(avatarPath.startsWith("http") || avatarPath
-										.startsWith("https"))) {
-							avatarFile = new File(dir, user.getAvatarUrl());
-							// TODO: lock avatarFile for write
-							if (avatarFile.exists()) {
-								try {
-									FileUtils.forceDelete(avatarFile);
-								} catch (IOException e) {
-									throw Throwables.propagate(e);
-								}
-							}
-						}
-
-						avatarFile = new File(dir, "avatar." + ext);
 						try {
-							upload.writeTo(avatarFile);
+							upload.writeTo(user.getLocalAvatar());
 						} catch (IOException e) {
 							throw Throwables.propagate(e);
 						}
-
-						user.setAvatarUrl(avatarFile.getName());
-						AppLoader.getInstance(UserManager.class).save(user);
 
 						send(getPage(), Broadcast.BREADTH, new AvatarChanged(target));
 						form.success("Your avatar has been updated successfully");
@@ -190,8 +153,7 @@ public class AccountProfilePage extends AccountSettingPage {
 				@Override
 				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 					User user = getUser();
-			        user.setAvatarUrl(null);
-			        AppLoader.getInstance(UserManager.class).save(user);
+					FileUtils.deleteFile(user.getLocalAvatar());
 			        
 			        send(getPage(), Broadcast.BREADTH, new AvatarChanged(target));
 			        form.success("Your avatar has been reset to the default.");

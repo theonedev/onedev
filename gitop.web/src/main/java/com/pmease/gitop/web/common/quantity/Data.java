@@ -2,6 +2,7 @@ package com.pmease.gitop.web.common.quantity;
 
 import com.pmease.gitop.web.common.datatype.DataTypes;
 
+
 /**
  * Provides a unit to allow conversions and unambiguous passing around of data
  * {@link Amount}s. The kilo/mega/giga/... hierarchy is built on base 2 so that

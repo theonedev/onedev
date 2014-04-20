@@ -62,4 +62,5 @@ public interface UserManager extends GenericDao<User> {
 	 * @return all accounts can be managed
 	 */
 	List<User> getManagableAccounts(User user);
+	
 }

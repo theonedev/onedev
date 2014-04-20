@@ -1,5 +1,6 @@
 package com.pmease.gitop.model;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -12,6 +13,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.Password;
 import com.pmease.commons.shiro.AbstractUser;
@@ -28,8 +30,6 @@ public class User extends AbstractUser implements ProtectedObject {
 	private String email;
 	
 	private String displayName;
-	
-	private String avatarUrl;
 	
 	private boolean admin;
 	
@@ -101,14 +101,6 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	public void setAdmin(boolean admin) {
 		this.admin = admin;
-	}
-
-	public String getAvatarUrl() {
-		return avatarUrl;
-	}
-
-	public void setAvatarUrl(String avatarUrl) {
-		this.avatarUrl = avatarUrl;
 	}
 
 	public Collection<Membership> getMemberships() {
@@ -234,6 +226,10 @@ public class User extends AbstractUser implements ProtectedObject {
 	
 	public PersonIdent asPerson() {
 		return new PersonIdent(getName(), getEmail());
+	}
+
+	public File getLocalAvatar() {
+		return new File(Bootstrap.installDir, "avatars/" + getId());
 	}
 	
 }

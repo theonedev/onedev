@@ -177,14 +177,6 @@ public class GitopWebApp extends AbstractWicketConfig {
         }
 	}
 	
-	public boolean isGravatarEnabled() {
-		return true;
-	}
-
-	public boolean isPublicSignupEnabled() {
-		return true;
-	}
-
 	public Iterable<IRequestMapper> getRequestMappers() {
 		return getRootRequestMapperAsCompound();
 	}

@@ -1,20 +1,18 @@
 package com.pmease.gitop.web.component.avatar;
 
-import java.io.File;
 import java.io.IOException;
 
+import org.apache.tika.mime.MediaType;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.DynamicImageResource;
 
-import com.google.common.base.Strings;
-import com.google.common.base.Throwables;
 import com.google.common.io.Files;
 import com.pmease.commons.loader.AppLoader;
+import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.GitopWebApp;
-import com.pmease.gitop.web.SitePaths;
-import com.pmease.gitop.web.component.avatar.AvatarImage.AvatarImageType;
+import com.pmease.gitop.web.service.FileTypes;
 
 public class AvatarImageResource extends DynamicImageResource {
 
@@ -23,34 +21,21 @@ public class AvatarImageResource extends DynamicImageResource {
 	@Override
 	protected byte[] getImageData(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
-		AvatarImageType imageType = AvatarImageType.valueOf(params.get("type")
-				.toString().toUpperCase());
 		long id = params.get("id").toLong();
-		File avatarFile = null;
 
-		if (imageType == AvatarImageType.USER) {
-			User user = AppLoader.getInstance(UserManager.class).get(id);
+		User user = AppLoader.getInstance(UserManager.class).get(id);
 
-			if (!Strings.isNullOrEmpty(user.getAvatarUrl())) {
-				avatarFile = new File(SitePaths.get().userAvatarDir(id),
-						user.getAvatarUrl());
-			}
-		} else {
-			// Repository repository =
-			// AppLoader.getInstance(RepositoryManager.class).get(id);
-			// if (!Strings.isNullOrEmpty(repository.getAvatarUrl())) {
-			// avatarFile = new File(GitopWebApp.getRepositoryAvatarDir(id),
-			// repository.getAvatarUrl());
-			// }
-		}
-
-		if (avatarFile != null && avatarFile.exists()) {
-			setFormat("image/" + Files.getFileExtension(avatarFile.getName()));
+		if (user.getLocalAvatar().exists()) {
+			byte[] imageData;
 			try {
-				return Files.toByteArray(avatarFile);
+				imageData = Files.toByteArray(user.getLocalAvatar());
 			} catch (IOException e) {
-				throw Throwables.propagate(e);
+				throw new RuntimeException(e);
 			}
+			MediaType mediaType = Gitop.getInstance(FileTypes.class).getMediaType(
+					user.getLocalAvatar().getAbsolutePath(), imageData);
+			setFormat(mediaType.getType());
+			return imageData;
 		} else {
 			setFormat("image/jpg");
 			return GitopWebApp.get().getDefaultUserAvatar();

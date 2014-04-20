@@ -23,6 +23,8 @@ public class SystemSetting implements Serializable, Validatable {
 	
 	private GitConfig gitConfig = new SystemGit();
 	
+	private boolean gravatarEnabled;
+	
 	@Editable(name="Directory to Store Application Data", order=100, description="Specify directory to store application data, "
 			+ "such as managed git repositories and various settings.")
 	@Directory
@@ -45,6 +47,15 @@ public class SystemSetting implements Serializable, Validatable {
 
 	public void setGitConfig(GitConfig gitConfig) {
 		this.gitConfig = gitConfig;
+	}
+
+	@Editable(order=300, description="Whether or not to enable user gravatar.")
+	public boolean isGravatarEnabled() {
+		return gravatarEnabled;
+	}
+
+	public void setGravatarEnabled(boolean gravatarEnabled) {
+		this.gravatarEnabled = gravatarEnabled;
 	}
 
 	@Override

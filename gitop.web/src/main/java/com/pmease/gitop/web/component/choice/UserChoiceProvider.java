@@ -12,12 +12,11 @@ import org.hibernate.criterion.Restrictions;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.GitopWebApp;
 import com.pmease.gitop.web.common.wicket.util.WicketUtils;
 import com.pmease.gitop.web.component.avatar.AvatarImageResourceReference;
 import com.pmease.gitop.web.util.Gravatar;
@@ -69,15 +68,13 @@ public class UserChoiceProvider extends ChoiceProvider<User> {
 	}
 
 	private String getAvatarUrl(User user) {
-		String path = user.getAvatarUrl();
-		if (GitopWebApp.get().isGravatarEnabled() && Strings.isNullOrEmpty(path)) {
+		boolean gravatarEnabled = Gitop.getInstance(ConfigManager.class).getSystemSetting().isGravatarEnabled();
+		if (gravatarEnabled && !user.getLocalAvatar().exists()) {
 			return Gravatar.getURL(user.getEmail());
 		} else {
 			CharSequence url = RequestCycle.get().urlFor(
 					new AvatarImageResourceReference(),
-					WicketUtils.newPageParams(
-							"id",String.valueOf(user.getId()), 
-							"type", "user"));
+					WicketUtils.newPageParams("id",String.valueOf(user.getId()))); 
 
 			return url.toString() + "?antiCache=" + System.currentTimeMillis();
 		}
