@@ -43,6 +43,7 @@ import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.component.label.AgeLabel;
+import com.pmease.gitop.web.component.link.AvatarLink.Mode;
 import com.pmease.gitop.web.component.link.PersonLink;
 import com.pmease.gitop.web.page.repository.RepositoryBasePage;
 import com.pmease.gitop.web.page.repository.pullrequest.activity.RequestActivitiesPanel;
@@ -193,7 +194,7 @@ public class RequestDetailPanel extends Panel {
 		User submittedBy = request.getSubmittedBy();
 		if (submittedBy != null) {
 			GitPerson person = new GitPerson(submittedBy.getName(), submittedBy.getEmailAddress());
-			add(new PersonLink("user", person, PersonLink.Mode.NAME_AND_AVATAR));
+			add(new PersonLink("user", person, Mode.NAME_AND_AVATAR));
 		} else {
 			add(new Label("<i>Unknown</i>").setEscapeModelStrings(false));
 		}

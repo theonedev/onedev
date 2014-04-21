@@ -28,7 +28,7 @@ import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.component.commit.CommitMessagePanel;
 import com.pmease.gitop.web.component.commit.CommitMetaPanel;
-import com.pmease.gitop.web.component.link.PersonLink.Mode;
+import com.pmease.gitop.web.component.link.AvatarLink.Mode;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.repository.source.blob.SourceBlobPage;

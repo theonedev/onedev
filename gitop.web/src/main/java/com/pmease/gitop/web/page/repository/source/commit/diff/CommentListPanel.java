@@ -42,6 +42,7 @@ import com.pmease.gitop.web.component.comment.CommitCommentEditor;
 import com.pmease.gitop.web.component.comment.CommitCommentPanel;
 import com.pmease.gitop.web.component.comment.event.CommitCommentEvent;
 import com.pmease.gitop.web.component.label.AgeLabel;
+import com.pmease.gitop.web.component.link.AvatarLink.Mode;
 import com.pmease.gitop.web.component.link.UserLink;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.model.CommitCommentModel;
@@ -132,8 +133,7 @@ public class CommentListPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<CommitComment> item) {
 				CommitComment c = item.getModelObject();
-				item.add(new UserLink("author", c.getAuthor(),
-											UserLink.Mode.AVATAR));
+				item.add(new UserLink("author", c.getAuthor(), Mode.AVATAR));
 				item.add(new CommitCommentPanel("message", repositoryModel, new CommitCommentModel(c)) {
 					@Override
 					protected Component createCommentHead(String id) {
@@ -141,7 +141,7 @@ public class CommentListPanel extends Panel {
 						CommitComment comment = getCommitComment();
 						
 						Fragment frag = new Fragment(id, "commenthead", CommentListPanel.this);
-						frag.add(new UserLink("author", comment.getAuthor(), UserLink.Mode.NAME));
+						frag.add(new UserLink("author", comment.getAuthor(), Mode.NAME));
 						AbstractLink link = new BookmarkablePageLink<Void>("commitlink", 
 								SourceCommitPage.class,
 								SourceCommitPage.newParams(getRepository(), getCommit()));
@@ -174,7 +174,7 @@ public class CommentListPanel extends Panel {
 		
 		add(formHolder);
 		if (GitopSession.getCurrentUser().isPresent()) {
-			formHolder.add(new UserLink("author", GitopSession.getCurrentUser().get(), UserLink.Mode.AVATAR));
+			formHolder.add(new UserLink("author", GitopSession.getCurrentUser().get(), Mode.AVATAR));
 			formHolder.add(new CommitCommentEditor("form") {
 
 				@Override

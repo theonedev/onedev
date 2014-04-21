@@ -10,13 +10,13 @@ import org.parboiled.common.Preconditions;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.gitop.web.component.label.AgeLabel;
+import com.pmease.gitop.web.component.link.AvatarLink.Mode;
 import com.pmease.gitop.web.component.link.PersonLink;
-import com.pmease.gitop.web.component.link.PersonLink.Mode;
 
 @SuppressWarnings("serial")
 public class AuthorInfoPanel extends Panel {
 
-	private final IModel<PersonLink.Mode> mode = Model.of(Mode.NAME);
+	private final IModel<Mode> mode = Model.of(Mode.NAME);
 	
 	public AuthorInfoPanel(String id, IModel<Commit> model) {
 		super(id, model);

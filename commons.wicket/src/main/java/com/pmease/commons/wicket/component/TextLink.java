@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.component.link;
+package com.pmease.commons.wicket.component;
 
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.MarkupStream;
@@ -8,15 +8,15 @@ import org.apache.wicket.model.IModel;
 @SuppressWarnings("serial")
 public abstract class TextLink<T> extends Link<T> {
 
-	private final IModel<String> nameModel;
+	private final IModel<String> labelModel;
 
 	public TextLink(String id, IModel<String> nameModel) {
 		this(id, null, nameModel);
 	}
 
-	public TextLink(String id, IModel<T> model, IModel<String> nameModel) {
-		super(id, model);
-		this.nameModel = nameModel;
+	public TextLink(String id, IModel<T> linkModel, IModel<String> labelModel) {
+		super(id, linkModel);
+		this.labelModel = labelModel;
 	}
 
 	@Override
@@ -28,7 +28,7 @@ public abstract class TextLink<T> extends Link<T> {
 			getResponse().write(getBeforeDisabledLink());
 		}
 		
-		replaceComponentTagBody(markupStream, openTag, nameModel.getObject());
+		replaceComponentTagBody(markupStream, openTag, labelModel.getObject());
 
 		// Draw anything after the body?
 		if (!isLinkEnabled() && (getAfterDisabledLink() != null)) {
@@ -38,8 +38,8 @@ public abstract class TextLink<T> extends Link<T> {
 	
 	@Override
 	public void onDetach() {
-		if (nameModel != null) {
-			nameModel.detach();
+		if (labelModel != null) {
+			labelModel.detach();
 		}
 		
 		super.onDetach();

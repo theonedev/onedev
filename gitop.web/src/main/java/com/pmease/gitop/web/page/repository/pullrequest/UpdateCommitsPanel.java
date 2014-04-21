@@ -18,6 +18,7 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestUpdate;
+import com.pmease.gitop.web.component.link.AvatarLink.Mode;
 import com.pmease.gitop.web.component.link.PersonLink;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.page.repository.RepositoryBasePage;
@@ -63,7 +64,7 @@ public class UpdateCommitsPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<Commit> item) {
 				Commit commit = item.getModelObject();
-				item.add(new PersonLink("author", commit.getAuthor().getPerson(), PersonLink.Mode.NAME_AND_AVATAR));
+				item.add(new PersonLink("author", commit.getAuthor().getPerson(), Mode.NAME_AND_AVATAR));
 
 				item.add(new Label("message", commit.getSubject()));
 				

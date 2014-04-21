@@ -1,5 +1,7 @@
 package com.pmease.gitop.web.service.impl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -30,6 +32,8 @@ public class DefaultAvatarManager implements AvatarManager {
 	
 	@Override
 	public String getAvatarUrl(User user) {
+		checkNotNull(user, "user");
+		
 		if (user.getAvatarUpdateDate() != null) { 
 			String url = BASE_AVATAR_URL + user.getId();
 			url += "?antiCache=" + user.getAvatarUpdateDate().getTime();
@@ -43,6 +47,8 @@ public class DefaultAvatarManager implements AvatarManager {
 
 	@Override
 	public String getAvatarUrl(String emailAddress) {
+		checkNotNull(emailAddress, "emailAddress");
+		
 		User user = userManager.findByEmail(emailAddress);
 		if (user != null)
 			return getAvatarUrl(user);
@@ -50,6 +56,11 @@ public class DefaultAvatarManager implements AvatarManager {
 			return Gravatar.getURL(emailAddress);
 		else
 			return BASE_AVATAR_URL + DEFAULT_AVATAR;
+	}
+
+	@Override
+	public String getDefaultAvatarUrl() {
+		return BASE_AVATAR_URL + DEFAULT_AVATAR;
 	}
 
 }

@@ -1,12 +1,13 @@
 package com.pmease.gitop.web.component.link;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import javax.annotation.Nullable;
 
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.commons.git.GitPerson;
@@ -25,20 +26,13 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig
  *
  */
 @SuppressWarnings("serial")
-public class PersonLink extends Panel {
+public class PersonLink extends AvatarLink {
 
-	public static enum Mode {NAME, AVATAR, NAME_AND_AVATAR}
-	
 	private final GitPerson person;
 	
-	private final Mode mode;
-	
-	private TooltipConfig tooltipConfig;
-	
 	public PersonLink(String id, GitPerson person, Mode mode) {
-		super(id);
-		this.person = person;
-		this.mode = mode;
+		super(id, mode);
+		this.person = checkNotNull(person, "person");
 	}
 	
 	public PersonLink withTooltipConfig(@Nullable TooltipConfig tooltipConfig) {

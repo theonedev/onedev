@@ -5,7 +5,7 @@ import org.apache.wicket.model.IModel;
 
 import com.google.common.base.Objects;
 import com.pmease.commons.git.Commit;
-import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.component.link.AvatarLink.Mode;
 
 @SuppressWarnings("serial")
 public class CommitMetaPanel extends Panel {
@@ -27,7 +27,7 @@ public class CommitMetaPanel extends Panel {
 		});
 	}
 
-	public CommitMetaPanel setAuthorMode(PersonLink.Mode mode) {
+	public CommitMetaPanel setAuthorMode(Mode mode) {
 		authorInfo.setAuthorMode(mode);
 		return this;
 	}

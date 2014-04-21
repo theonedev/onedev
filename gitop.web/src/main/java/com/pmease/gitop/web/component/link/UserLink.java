@@ -1,11 +1,10 @@
 package com.pmease.gitop.web.component.link;
 
-import javax.annotation.Nullable;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
@@ -14,39 +13,25 @@ import com.pmease.gitop.web.component.avatar.AvatarImage;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
-
 /**
  * Displays git person, name and avatar
  *
  */
 @SuppressWarnings("serial")
-public class UserLink extends Panel {
+public class UserLink extends AvatarLink {
 
-	public static enum Mode {NAME, AVATAR, NAME_AND_AVATAR}
-	
-	private final Mode mode;
-	
 	private User user;
 	
-	private TooltipConfig tooltipConfig;
-	
 	public UserLink(String id, User user, Mode mode) {
-		super(id);
+		super(id, mode);
 
-		this.user = user;
-		this.mode = mode;
+		this.user = checkNotNull(user, "user");
 	}
 	
 	public UserLink(String id, User user) {
 		this(id, user, Mode.NAME_AND_AVATAR);
 	}
 
-	public UserLink withTooltipConfig(@Nullable TooltipConfig tooltipConfig) {
-		this.tooltipConfig = tooltipConfig;
-		return this;
-	}
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

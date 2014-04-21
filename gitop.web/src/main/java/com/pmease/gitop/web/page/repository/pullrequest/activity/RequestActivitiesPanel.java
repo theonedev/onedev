@@ -27,6 +27,8 @@ import com.pmease.gitop.model.PullRequestComment;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
+import com.pmease.gitop.web.component.link.AvatarLink.Mode;
+import com.pmease.gitop.web.component.link.NullableUserLink;
 import com.pmease.gitop.web.component.link.PersonLink;
 import com.pmease.gitop.web.util.DateUtils;
 
@@ -85,14 +87,8 @@ public class RequestActivitiesPanel extends Panel {
 				PullRequestActivity activity = item.getModelObject();
 
 				User user = activity.getUser();
-				if (user != null) {
-					GitPerson person = user.asPerson();
-					item.add(new PersonLink("userAvatar", person, PersonLink.Mode.AVATAR));
-					item.add(new PersonLink("userName", person, PersonLink.Mode.NAME));
-				} else {
-					item.add(new WebMarkupContainer("userAvatar").setVisible(false));
-					item.add(new Label("userName", "<i>Unknown</i>").setEscapeModelStrings(false));
-				}
+				item.add(new NullableUserLink("userAvatar", user, Mode.AVATAR));
+				item.add(new NullableUserLink("userName", user, Mode.NAME));
 				
 				item.add(new Label("action", activity.getAction()));
 				item.add(new Label("date", DateUtils.formatAge(activity.getDate())));
@@ -113,9 +109,9 @@ public class RequestActivitiesPanel extends Panel {
 		add(newCommentContainer);
 		
 		GitPerson person = Gitop.getInstance(UserManager.class).getCurrent().asPerson();
-		newCommentContainer.add(new PersonLink("userAvatar", person, PersonLink.Mode.AVATAR));
+		newCommentContainer.add(new PersonLink("userAvatar", person, Mode.AVATAR));
 		
-		newCommentContainer.add(new PersonLink("userName", person, PersonLink.Mode.NAME));
+		newCommentContainer.add(new PersonLink("userName", person, Mode.NAME));
 		
 		final TextArea<String> newCommentArea = new TextArea<String>("content", new IModel<String>() {
 

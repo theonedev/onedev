@@ -27,8 +27,8 @@ import com.pmease.gitop.model.CommitComment;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.component.commit.CommitMetaPanel;
+import com.pmease.gitop.web.component.link.AvatarLink.Mode;
 import com.pmease.gitop.web.component.link.PersonLink;
-import com.pmease.gitop.web.component.link.PersonLink.Mode;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.git.command.CommitInCommand;
 import com.pmease.gitop.web.git.command.CommitInCommand.RefType;
@@ -108,7 +108,8 @@ public class SourceCommitPage extends RepositoryTabPage implements CommitComment
 				SourceTreePage.newParams(getRepository(), getRevision())));
 		
 		TooltipConfig tooltipConfig = new TooltipConfig().withPlacement(TooltipConfig.Placement.left);
-		add(new PersonLink("authoravatar", getCommit().getAuthor().getPerson(), Mode.AVATAR).withTooltipConfig(tooltipConfig));
+		add(new PersonLink("authoravatar", getCommit().getAuthor().getPerson(), Mode.AVATAR)
+				.withTooltipConfig(tooltipConfig));
 		
 		add(new CommitMetaPanel("meta", commitModel));
 		add(new Label("commitsha", new PropertyModel<String>(commitModel, "hash")));
