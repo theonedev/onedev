@@ -1,10 +1,12 @@
 package com.pmease.gitop.web.page.account.setting.profile;
 
 import java.io.IOException;
+import java.util.Date;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.bean.validation.PropertyValidator;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.feedback.ComponentFeedbackMessageFilter;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
@@ -18,11 +20,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.common.wicket.component.vex.AjaxConfirmButton;
 import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
+import com.pmease.gitop.web.component.avatar.AvatarChanged;
 import com.pmease.gitop.web.component.avatar.AvatarImage;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.PageSpec;
@@ -134,10 +138,13 @@ public class AccountProfilePage extends AccountSettingPage {
 					if (upload != null) {
 						try {
 							upload.writeTo(user.getLocalAvatar());
+							user.setAvatarUpdateDate(new Date());
+							Gitop.getInstance(UserManager.class).save(user);
 						} catch (IOException e) {
 							throw Throwables.propagate(e);
 						}
 
+						send(getPage(), Broadcast.BREADTH, new AvatarChanged(target));
 						form.success("Your avatar has been updated successfully");
 						target.add(form);
 					}
@@ -151,7 +158,10 @@ public class AccountProfilePage extends AccountSettingPage {
 				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 					User user = getUser();
 					FileUtils.deleteFile(user.getLocalAvatar());
+					user.setAvatarUpdateDate(null);
+					Gitop.getInstance(UserManager.class).save(user);
 			        
+					send(getPage(), Broadcast.BREADTH, new AvatarChanged(target));
 			        form.success("Your avatar has been reset to the default.");
 			        target.add(form);
 				}

@@ -30,8 +30,10 @@ public class DefaultAvatarManager implements AvatarManager {
 	
 	@Override
 	public String getAvatarUrl(User user) {
-		if (user.getLocalAvatar().exists()) { 
-			return BASE_AVATAR_URL + user.getId();
+		if (user.getAvatarUpdateDate() != null && user.getLocalAvatar().exists()) { 
+			String url = BASE_AVATAR_URL + user.getId();
+			url += "?antiCache=" + user.getAvatarUpdateDate().getTime();
+			return url;
 		} else if (configManager.getSystemSetting().isGravatarEnabled()) {
 			return Gravatar.getURL(user.getEmailAddress(), GRAVATAR_SIZE);
 		} else {

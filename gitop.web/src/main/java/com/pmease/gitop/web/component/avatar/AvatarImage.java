@@ -1,27 +1,48 @@
 package com.pmease.gitop.web.component.avatar;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebComponent;
+import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.service.AvatarManager;
 
 @SuppressWarnings("serial")
 public class AvatarImage extends WebComponent {
 
-	private final String url;
-	
 	public AvatarImage(String id, User user) {
 		super(id);
 		
-		url = Gitop.getInstance(AvatarManager.class).getAvatarUrl(user);
+		final Long userId = user.getId();
+		
+		setDefaultModel(new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				User user = Gitop.getInstance(UserManager.class).load(userId);
+				return Gitop.getInstance(AvatarManager.class).getAvatarUrl(user);
+			}
+			
+		});
+		
+		setOutputMarkupId(true);
 	}
 
-	public AvatarImage(String id, String emailAddress) {
+	public AvatarImage(String id, final String emailAddress) {
 		super(id);
 		
-		url = Gitop.getInstance(AvatarManager.class).getAvatarUrl(emailAddress);
+		setDefaultModel(new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				return Gitop.getInstance(AvatarManager.class).getAvatarUrl(emailAddress);
+			}
+			
+		});
 	}
 
 	@Override
@@ -29,7 +50,17 @@ public class AvatarImage extends WebComponent {
 		super.onComponentTag(tag);
 		
 		tag.setName("img");
-		tag.put("src", url);
+		tag.put("src", getDefaultModelObjectAsString());
+	}
+
+	@Override
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+
+		if (event.getPayload() instanceof AvatarChanged) {
+			AjaxRequestTarget target = ((AvatarChanged) event.getPayload()).getTarget();
+			target.add(this);
+		}
 	}
 
 }

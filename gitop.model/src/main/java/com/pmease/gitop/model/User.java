@@ -3,6 +3,7 @@ package com.pmease.gitop.model;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -32,6 +33,8 @@ public class User extends AbstractUser implements ProtectedObject {
 	private String fullName;
 	
 	private boolean admin;
+	
+	private Date avatarUpdateDate;
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<Membership> memberships = new ArrayList<Membership>();
@@ -101,6 +104,14 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	public void setAdmin(boolean admin) {
 		this.admin = admin;
+	}
+
+	public Date getAvatarUpdateDate() {
+		return avatarUpdateDate;
+	}
+
+	public void setAvatarUpdateDate(Date avatarUpdateDate) {
+		this.avatarUpdateDate = avatarUpdateDate;
 	}
 
 	public Collection<Membership> getMemberships() {
