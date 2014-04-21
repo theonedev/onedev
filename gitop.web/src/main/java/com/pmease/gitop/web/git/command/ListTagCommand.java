@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.eclipse.jgit.lib.PersonIdent;
-
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Splitter;
@@ -16,6 +14,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.LineProcessor;
 import com.pmease.commons.git.Commit;
+import com.pmease.commons.git.GitContrib;
 import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
@@ -70,8 +69,8 @@ public class ListTagCommand extends GitCommand<Map<String, Commit>> {
 			int i = 0;
 			currentNames = parseTagNames(pieces[i++]);
 			currentBuilder.hash(pieces[i++]);
-			currentBuilder.author(new PersonIdent(pieces[i++], GitUtils.parseEmail(pieces[i++]), GitUtils.parseRawDate(pieces[i++]), 0));
-			currentBuilder.committer(new PersonIdent(pieces[i++], GitUtils.parseEmail(pieces[i++]), GitUtils.parseRawDate(pieces[i++]), 0));
+			currentBuilder.author(new GitContrib(pieces[i++], GitUtils.parseEmail(pieces[i++]), GitUtils.parseRawDate(pieces[i++])));
+			currentBuilder.committer(new GitContrib(pieces[i++], GitUtils.parseEmail(pieces[i++]), GitUtils.parseRawDate(pieces[i++])));
 		}
 		
 		private void onFinishBlock() {

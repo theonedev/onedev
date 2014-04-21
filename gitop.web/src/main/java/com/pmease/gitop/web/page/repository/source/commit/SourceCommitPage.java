@@ -108,7 +108,7 @@ public class SourceCommitPage extends RepositoryTabPage implements CommitComment
 				SourceTreePage.newParams(getRepository(), getRevision())));
 		
 		TooltipConfig tooltipConfig = new TooltipConfig().withPlacement(TooltipConfig.Placement.left);
-		add(new PersonLink("authoravatar", getCommit().getAuthor(), Mode.AVATAR).withTooltipConfig(tooltipConfig));
+		add(new PersonLink("authoravatar", getCommit().getAuthor().getPerson(), Mode.AVATAR).withTooltipConfig(tooltipConfig));
 		
 		add(new CommitMetaPanel("meta", commitModel));
 		add(new Label("commitsha", new PropertyModel<String>(commitModel, "hash")));

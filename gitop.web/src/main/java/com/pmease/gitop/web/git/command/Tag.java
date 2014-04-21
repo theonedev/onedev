@@ -6,9 +6,8 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
-import org.eclipse.jgit.lib.PersonIdent;
-
 import com.google.common.base.Strings;
+import com.pmease.commons.git.GitContrib;
 
 public class Tag implements Serializable {
 
@@ -17,7 +16,7 @@ public class Tag implements Serializable {
 	private final String name;
 	private final String hash;
 	private final String commitHash;
-	private final PersonIdent tagger;
+	private final GitContrib tagger;
 	private final String subject;
 	private final String body;
 
@@ -25,7 +24,7 @@ public class Tag implements Serializable {
 		private String name;
 		private String hash;
 		private String commitHash;
-		private PersonIdent tagger;
+		private GitContrib tagger;
 		private String subject;
 		private String body;
 		
@@ -44,7 +43,7 @@ public class Tag implements Serializable {
 			return this;
 		}
 		
-		public Builder tagger(PersonIdent tagger) {
+		public Builder tagger(GitContrib tagger) {
 			this.tagger = tagger;
 			return this;
 		}
@@ -60,13 +59,7 @@ public class Tag implements Serializable {
 		}
 		
 		public Tag build() {
-			return new Tag(
-					checkNotNull(name),
-					checkNotNull(hash), 
-					commitHash, 
-					tagger, 
-					checkNotNull(subject), 
-					body);
+			return new Tag(name, hash, commitHash, tagger, subject, body);
 		}
 	}
 	
@@ -75,12 +68,12 @@ public class Tag implements Serializable {
 	}
 	
 	Tag(String name, String hash, @Nullable String commitHash, 
-			PersonIdent tagger, String subject, @Nullable String body) {
-		this.name = name;
-		this.hash = hash;
+			GitContrib tagger, String subject, @Nullable String body) {
+		this.name = checkNotNull(name, "name"); 
+		this.hash = checkNotNull(hash, "hash");
 		this.commitHash = commitHash;
 		this.tagger = tagger;
-		this.subject = subject;
+		this.subject = checkNotNull(subject, "subject");
 		this.body = body;
 	}
 
@@ -96,7 +89,7 @@ public class Tag implements Serializable {
 		return commitHash;
 	}
 
-	public PersonIdent getTagger() {
+	public GitContrib getTagger() {
 		return tagger;
 	}
 

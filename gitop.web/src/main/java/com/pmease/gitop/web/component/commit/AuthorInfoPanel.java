@@ -26,12 +26,12 @@ public class AuthorInfoPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new PersonLink("author", getCommit().getAuthor(), mode.getObject()));
+		add(new PersonLink("author", getCommit().getAuthor().getPerson(), mode.getObject()));
 		add(new AgeLabel("authordate", new AbstractReadOnlyModel<Date>() {
 
 			@Override
 			public Date getObject() {
-				return getCommit().getAuthor().getWhen();
+				return getCommit().getAuthor().getDate();
 			}
 			
 		}));

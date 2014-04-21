@@ -2,15 +2,16 @@ package com.pmease.commons.git.command;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.lib.PersonIdent;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.FileChange;
+import com.pmease.commons.git.GitContrib;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
@@ -163,9 +164,9 @@ public class LogCommand extends GitCommand<List<Commit>> {
             	} else if (line.startsWith("committer:")) {
                 	commitBuilder.committerName = line.substring("committer:".length());
             	} else if (line.startsWith("authorDate:")) {
-                	commitBuilder.authorDate = dateFormatter.parseDateTime(line.substring("authorDate:".length()).trim()).getMillis();
+                	commitBuilder.authorDate = dateFormatter.parseDateTime(line.substring("authorDate:".length()).trim()).toDate();
             	} else if (line.startsWith("committerDate:")) {
-                	commitBuilder.committerDate = dateFormatter.parseDateTime(line.substring("committerDate:".length()).trim()).getMillis();
+                	commitBuilder.committerDate = dateFormatter.parseDateTime(line.substring("committerDate:".length()).trim()).toDate();
             	} else if (line.startsWith("authorEmail:")) {
                 	commitBuilder.authorEmail = line.substring("authorEmail:".length());
             	} else if (line.startsWith("committerEmail:")) {
@@ -186,9 +187,9 @@ public class LogCommand extends GitCommand<List<Commit>> {
 
     private static class CommitBuilder {
         
-    	private long committerDate;
+    	private Date committerDate;
     	
-        private long authorDate;
+        private Date authorDate;
         
         private String authorName;
         
@@ -213,8 +214,8 @@ public class LogCommand extends GitCommand<List<Commit>> {
     	private Commit build() {
     		return new Commit(
     				hash, 
-    				new PersonIdent(committerName, committerEmail, committerDate, 0), 
-    				new PersonIdent(authorName, authorEmail, authorDate, 0),
+    				new GitContrib(committerName, committerEmail, committerDate), 
+    				new GitContrib(authorName, authorEmail, authorDate),
     				summary.trim(), 
     				StringUtils.isNotBlank(message)?message.trim():null, 
     				StringUtils.isNotBlank(note)?note.trim():null, 

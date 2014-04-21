@@ -102,8 +102,8 @@ public class TagsPage extends RepositoryTabPage {
 						item.add(new WebMarkupContainer("date").setVisibilityAllowed(false));
 					} else {
 						TooltipConfig tooltipConfig = new TooltipConfig().withPlacement(Placement.right);
-						item.add(new PersonLink("creator", tag.getTagger(), Mode.AVATAR).withTooltipConfig(tooltipConfig));
-						item.add(new AgeLabel("date", Model.of(tag.getTagger().getWhen())));
+						item.add(new PersonLink("creator", tag.getTagger().getPerson(), Mode.AVATAR).withTooltipConfig(tooltipConfig));
+						item.add(new AgeLabel("date", Model.of(tag.getTagger().getDate())));
 					}
 					
 					item.add(new Label("tagname", tagName));

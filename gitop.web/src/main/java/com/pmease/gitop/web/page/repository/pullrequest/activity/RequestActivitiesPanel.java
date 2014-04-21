@@ -16,8 +16,8 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.eclipse.jgit.lib.PersonIdent;
 
+import com.pmease.commons.git.GitPerson;
 import com.pmease.commons.wicket.behavior.DisableIfBlankBehavior;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.PullRequestCommentManager;
@@ -86,7 +86,7 @@ public class RequestActivitiesPanel extends Panel {
 
 				User user = activity.getUser();
 				if (user != null) {
-					PersonIdent person = user.asPerson();
+					GitPerson person = user.asPerson();
 					item.add(new PersonLink("userAvatar", person, PersonLink.Mode.AVATAR));
 					item.add(new PersonLink("userName", person, PersonLink.Mode.NAME));
 				} else {
@@ -112,7 +112,7 @@ public class RequestActivitiesPanel extends Panel {
 		};
 		add(newCommentContainer);
 		
-		PersonIdent person = Gitop.getInstance(UserManager.class).getCurrent().asPerson();
+		GitPerson person = Gitop.getInstance(UserManager.class).getCurrent().asPerson();
 		newCommentContainer.add(new PersonLink("userAvatar", person, PersonLink.Mode.AVATAR));
 		
 		newCommentContainer.add(new PersonLink("userName", person, PersonLink.Mode.NAME));

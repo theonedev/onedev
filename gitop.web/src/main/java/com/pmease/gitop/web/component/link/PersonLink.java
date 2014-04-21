@@ -8,8 +8,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
-import org.eclipse.jgit.lib.PersonIdent;
 
+import com.pmease.commons.git.GitPerson;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
@@ -29,13 +29,13 @@ public class PersonLink extends Panel {
 
 	public static enum Mode {NAME, AVATAR, NAME_AND_AVATAR}
 	
-	private final PersonIdent person;
+	private final GitPerson person;
 	
 	private final Mode mode;
 	
 	private TooltipConfig tooltipConfig;
 	
-	public PersonLink(String id, PersonIdent person, Mode mode) {
+	public PersonLink(String id, GitPerson person, Mode mode) {
 		super(id);
 		this.person = person;
 		this.mode = mode;

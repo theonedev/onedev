@@ -26,8 +26,8 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
-import org.eclipse.jgit.lib.PersonIdent;
 
+import com.pmease.commons.git.GitPerson;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitop.core.Gitop;
@@ -192,7 +192,7 @@ public class RequestDetailPanel extends Panel {
 		PullRequest request = getPullRequest();
 		User submittedBy = request.getSubmittedBy();
 		if (submittedBy != null) {
-			PersonIdent person = new PersonIdent(submittedBy.getName(), submittedBy.getEmailAddress());
+			GitPerson person = new GitPerson(submittedBy.getName(), submittedBy.getEmailAddress());
 			add(new PersonLink("user", person, PersonLink.Mode.NAME_AND_AVATAR));
 		} else {
 			add(new Label("<i>Unknown</i>").setEscapeModelStrings(false));

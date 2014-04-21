@@ -9,7 +9,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -32,8 +31,8 @@ public class Commit extends BriefCommit {
 		String subject;
 		String body;
 		String note;
-		PersonIdent author;
-		PersonIdent committer;
+		GitContrib author;
+		GitContrib committer;
 		List<String> parents = Lists.newArrayList();
 		List<FileChange> changes = Lists.newArrayList();
 		
@@ -59,12 +58,12 @@ public class Commit extends BriefCommit {
 			return this;
 		}
 		
-		public Builder author(PersonIdent author) {
+		public Builder author(GitContrib author) {
 			this.author = author;
 			return this;
 		}
 		
-		public Builder committer(PersonIdent committer) {
+		public Builder committer(GitContrib committer) {
 			this.committer = committer;
 			return this;
 		}
@@ -81,13 +80,8 @@ public class Commit extends BriefCommit {
 		
 		public Commit build() {
 			return new Commit(
-					checkNotNull(hash, "hash"), 
-					checkNotNull(committer, "committer"), 
-					checkNotNull(author, "author"), 
-					checkNotNull(subject, "subject"), 
-					body, note, 
-					checkNotNull(parents, "parents"), 
-					checkNotNull(changes, "changes"));
+					hash, committer, author, subject,  
+					body, note, parents, changes);
 		}
 	}
 	
@@ -95,7 +89,7 @@ public class Commit extends BriefCommit {
     	return new Builder();
     }
     
-    public Commit(String hash, PersonIdent committer, PersonIdent author, 
+    public Commit(String hash, GitContrib committer, GitContrib author, 
     		String subject, @Nullable String body, 
     		@Nullable String note, List<String> parentHashes, 
     		List<FileChange> fileChanges) {
@@ -103,8 +97,8 @@ public class Commit extends BriefCommit {
     	
     	this.body = body;
     	this.note = note;
-    	this.parentHashes = new ArrayList<>(parentHashes);
-    	this.fileChanges = new ArrayList<>(fileChanges);
+    	this.parentHashes = new ArrayList<>(checkNotNull(parentHashes, "parentHashes"));
+    	this.fileChanges = new ArrayList<>(checkNotNull(fileChanges, "fileChanges"));
     }
     
 	public String getMessage() {

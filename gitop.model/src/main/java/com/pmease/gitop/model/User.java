@@ -10,13 +10,13 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
-import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.Password;
+import com.pmease.commons.git.GitPerson;
 import com.pmease.commons.shiro.AbstractUser;
 import com.pmease.gitop.model.permission.object.ProtectedObject;
 import com.pmease.gitop.model.permission.object.UserBelonging;
@@ -235,8 +235,8 @@ public class User extends AbstractUser implements ProtectedObject {
 		return getName();
 	}
 	
-	public PersonIdent asPerson() {
-		return new PersonIdent(getName(), getEmailAddress());
+	public GitPerson asPerson() {
+		return new GitPerson(getName(), getEmailAddress());
 	}
 
 	public File getLocalAvatar() {

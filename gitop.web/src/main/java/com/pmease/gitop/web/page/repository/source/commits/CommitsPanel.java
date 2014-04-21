@@ -60,7 +60,7 @@ public class CommitsPanel extends Panel {
 				
 				LinkedListMultimap<Date, Commit> groups = LinkedListMultimap.<Date, Commit>create();
 				for (Commit commit : commits) {
-					Date date = commit.getAuthor().getWhen();
+					Date date = commit.getAuthor().getDate();
 					date = DateUtils.round(date, Calendar.DAY_OF_MONTH);
 					groups.put(date, commit);
 				}
@@ -116,7 +116,7 @@ public class CommitsPanel extends Panel {
 					protected void populateItem(ListItem<Commit> item) {
 						Commit commit = item.getModelObject();
 						
-						item.add(new PersonLink("avatar", commit.getAuthor(), Mode.AVATAR)
+						item.add(new PersonLink("avatar", commit.getAuthor().getPerson(), Mode.AVATAR)
 									.withTooltipConfig(new TooltipConfig().withPlacement(Placement.right)));
 						
 						item.add(new CommitMessagePanel("message", item.getModel(), repositoryModel));

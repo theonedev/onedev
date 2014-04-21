@@ -26,13 +26,13 @@ public class CommitterInfoPanel extends Panel {
 		super.onInitialize();
 		
 
-		add(new PersonLink("committer", getCommit().getCommitter(), mode.getObject()));
+		add(new PersonLink("committer", getCommit().getCommitter().getPerson(), mode.getObject()));
 		
 		add(new AgeLabel("committerdate", new AbstractReadOnlyModel<Date>() {
 
 			@Override
 			public Date getObject() {
-				return getCommit().getCommitter().getWhen();
+				return getCommit().getCommitter().getDate();
 			}
 		}));
 	}

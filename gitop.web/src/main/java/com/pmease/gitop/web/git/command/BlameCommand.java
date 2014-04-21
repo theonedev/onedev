@@ -3,12 +3,12 @@ package com.pmease.gitop.web.git.command;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.lib.PersonIdent;
 import org.parboiled.common.Preconditions;
 
 import com.google.common.base.Charsets;
@@ -17,6 +17,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.io.LineProcessor;
 import com.google.common.io.Resources;
+import com.pmease.commons.git.GitContrib;
 import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
@@ -82,8 +83,8 @@ public class BlameCommand extends GitCommand<List<BlameEntry>> {
 			if (lines.isEmpty())
 				return;
 			
-			String authorName = null, authorEmail = null, committerName = null, committerEmail = null;
-			long authorDate = 0, committerDate = 0;
+			GitContrib.Builder authorBuilder = new GitContrib.Builder();
+			GitContrib.Builder committerBuilder = new GitContrib.Builder();
 			String summary = null;
 			String hash = null;
 			int sourceLine = 0, resultLine = 0, numLines = 0;
@@ -96,29 +97,25 @@ public class BlameCommand extends GitCommand<List<BlameEntry>> {
 					resultLine = Integer.valueOf(m.group(3));
 					numLines = Integer.valueOf(m.group(4));
 				} else if (each.startsWith("author ")) {
-					authorName = each.substring("author ".length());
+					authorBuilder.name(each.substring("author ".length()));
 				} else if (each.startsWith("author-mail ")) {
-					authorEmail = GitUtils.parseEmail(each.substring("author-mail ".length()));
+					authorBuilder.emailAddress(GitUtils.parseEmail(each.substring("author-mail ".length())));
 				} else if (each.startsWith("author-time ")) {
 					long time = Long.valueOf(each.substring("author-time ".length()));
-					authorDate = time * 1000L;
+					authorBuilder.date(new Date(time * 1000L));
 				} else if (each.startsWith("author-tz ")) {
 					// TODO: Add timezone info
-					
 				} else if (each.startsWith("committer ")) {
-					committerName = each.substring("committer ".length());
+					committerBuilder.name(each.substring("committer ".length()));
 				} else if (each.startsWith("committer-mail ")) {
-					committerEmail = each.substring("committer-mail ".length());
-					
+					committerBuilder.emailAddress(each.substring("committer-mail ".length()));
 				} else if (each.startsWith("committer-time ")) {
 					long time = Long.valueOf(each.substring("committer-time ".length()));
-					committerDate = time * 1000L;
+					committerBuilder.date(new Date(time * 1000L));
 				} else if (each.startsWith("committer-tz ")) {
 					// TODO: add timezone info
-					
 				} else if (each.startsWith("summary ")) {
 					summary = each.substring("summary ".length());
-					
 				}
 			}
 			
@@ -138,8 +135,8 @@ public class BlameCommand extends GitCommand<List<BlameEntry>> {
 						.committer(previous.getCommit().getCommitter())
 						.summary(previous.getCommit().getSubject());
 			} else {
-				builder.committer(new PersonIdent(committerName, committerEmail, committerDate, 0))
-						.author(new PersonIdent(authorName, authorEmail, authorDate, 0))
+				builder.committer(committerBuilder.build())
+						.author(authorBuilder.build())
 						.summary(summary);
 			}
 			

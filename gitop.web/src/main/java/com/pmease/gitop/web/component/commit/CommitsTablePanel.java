@@ -50,7 +50,7 @@ public class CommitsTablePanel extends Panel {
 				
 				LinkedListMultimap<Date, Commit> groups = LinkedListMultimap.<Date, Commit>create();
 				for (Commit commit : commits) {
-					Date date = commit.getAuthor().getWhen();
+					Date date = commit.getAuthor().getDate();
 					date = DateUtils.round(date, Calendar.DAY_OF_MONTH);
 					groups.put(date, commit);
 				}
@@ -109,7 +109,7 @@ public class CommitsTablePanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<Commit> item) {
 				Commit commit = item.getModelObject();
-				item.add(new PersonLink("name", commit.getAuthor(), PersonLink.Mode.NAME_AND_AVATAR));
+				item.add(new PersonLink("name", commit.getAuthor().getPerson(), PersonLink.Mode.NAME_AND_AVATAR));
 				item.add(new CommitMessagePanel("message", item.getModel(), repositoryModel));
 				
 				AbstractLink link = new BookmarkablePageLink<Void>("commitlink",

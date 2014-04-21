@@ -30,7 +30,7 @@ public class DefaultAvatarManager implements AvatarManager {
 	
 	@Override
 	public String getAvatarUrl(User user) {
-		if (user.getAvatarUpdateDate() != null && user.getLocalAvatar().exists()) { 
+		if (user.getAvatarUpdateDate() != null) { 
 			String url = BASE_AVATAR_URL + user.getId();
 			url += "?antiCache=" + user.getAvatarUpdateDate().getTime();
 			return url;

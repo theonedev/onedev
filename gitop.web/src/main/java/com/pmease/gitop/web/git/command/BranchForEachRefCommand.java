@@ -3,13 +3,12 @@ package com.pmease.gitop.web.git.command;
 import java.io.File;
 import java.util.Map;
 
-import org.eclipse.jgit.lib.PersonIdent;
-
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.pmease.commons.git.BriefCommit;
+import com.pmease.commons.git.GitContrib;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.gitop.web.git.GitUtils;
 
@@ -71,12 +70,12 @@ public class BranchForEachRefCommand extends ForEachRefCommand<Map<String, Brief
 			String refname = pieces[i++];
 			String sha = pieces[i++];
 			
-			PersonIdent committer = new PersonIdent(pieces[i++], 
+			GitContrib committer = new GitContrib(pieces[i++], 
 											  GitUtils.parseEmail(pieces[i++]), 
-											  GitUtils.parseRawDate(pieces[i++]), 0);
-			PersonIdent author = new PersonIdent(pieces[i++], 
+											  GitUtils.parseRawDate(pieces[i++]));
+			GitContrib author = new GitContrib(pieces[i++], 
 										   GitUtils.parseEmail(pieces[i++]), 
-										   GitUtils.parseRawDate(pieces[i++]), 0);
+										   GitUtils.parseRawDate(pieces[i++]));
 			
 			BriefCommit commit = new BriefCommit(sha, committer, author, subject);
 			branches.put(refname, commit);
