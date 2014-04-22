@@ -8,7 +8,6 @@ import org.apache.wicket.Page;
 import org.apache.wicket.Session;
 import org.apache.wicket.bean.validation.BeanValidationConfiguration;
 import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
-import org.apache.wicket.devutils.stateless.StatelessChecker;
 import org.apache.wicket.markup.html.IPackageResourceGuard;
 import org.apache.wicket.markup.html.SecurePackageResourceGuard;
 import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
@@ -20,19 +19,14 @@ import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.resource.caching.FilenameWithVersionResourceCachingStrategy;
 import org.apache.wicket.request.resource.caching.version.LastModifiedResourceVersion;
 import org.apache.wicket.util.time.Duration;
-import org.eclipse.jgit.storage.file.WindowCacheConfig;
 
 import com.pmease.commons.wicket.AbstractWicketConfig;
-import com.pmease.gitop.web.common.quantity.Data;
 import com.pmease.gitop.web.page.error.BaseErrorPage;
 import com.pmease.gitop.web.page.error.PageExpiredPage;
 import com.pmease.gitop.web.page.home.HomePage;
 import com.pmease.gitop.web.shiro.LoginPage;
 import com.pmease.gitop.web.shiro.LogoutPage;
 import com.pmease.gitop.web.shiro.ShiroWicketPlugin;
-
-import de.agilecoders.wicket.core.Bootstrap;
-import de.agilecoders.wicket.core.settings.BootstrapSettings;
 
 @Singleton
 public class WicketConfig extends AbstractWicketConfig {
@@ -81,8 +75,6 @@ public class WicketConfig extends AbstractWicketConfig {
 	protected void init() {
 		super.init();
 
-		getMarkupSettings().setDefaultMarkupEncoding("UTF-8");
-
 		getRequestCycleSettings().setTimeout(DEFAULT_TIMEOUT);
 		
 		getResourceSettings().setCachingStrategy(new FilenameWithVersionResourceCachingStrategy(new LastModifiedResourceVersion()));
@@ -99,28 +91,12 @@ public class WicketConfig extends AbstractWicketConfig {
 				.mountLogoutPage("logout", LogoutPage.class)
 				.install(this);
 		
-		BootstrapSettings bootstrapSettings = new BootstrapSettings();
-		bootstrapSettings.setAutoAppendResources(false);
-		Bootstrap.install(this, bootstrapSettings);
-
 		configureResources();
 		
 		// mount all pages and resources
 		mount(new GitopMappings(this));
-		
-		if (usesDevelopmentConfig()) {
-			getComponentPreOnBeforeRenderListeners().add(new StatelessChecker());
-		}
-		
-		initGitConfig();
 	}
 
-	private void initGitConfig() {
-		WindowCacheConfig cfg = new WindowCacheConfig();
-        cfg.setStreamFileThreshold((int) Data.ONE_MB * 10);
-        cfg.install();
-	}
-	
 	private void configureResources() {
 		final IPackageResourceGuard packageResourceGuard = getResourceSettings().getPackageResourceGuard();
 

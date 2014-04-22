@@ -65,7 +65,7 @@ public class AccountHomePage extends AbstractAccountPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		add(new AvatarImage("avatar", accountModel.getObject()));
-		add(new Label("fullname", new PropertyModel<String>(accountModel, "displayName")));
+		add(new Label("fullname", new PropertyModel<String>(accountModel, "fullName")));
 		add(new Label("username", new PropertyModel<String>(accountModel, "name")));
 		
 		add(new ListView<Category>("category", Lists.newArrayList(Category.values())) {

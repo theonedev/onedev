@@ -474,7 +474,7 @@
 		<dropwizardVersion>0.7.0-rc2</dropwizardVersion>
 		<jerseyVersion>1.18.1</jerseyVersion>
         <jettyVersion>8.1.10.v20130312</jettyVersion> 
-		<jacksonVersion>2.2.3</jacksonVersion>
+		<jacksonVersion>2.3.3</jacksonVersion>
 		<powermockVersion>1.5.1</powermockVersion>
 		<servletVersion>3.1-b09</servletVersion>
 	</properties>

@@ -15,13 +15,13 @@ import org.apache.wicket.model.Model;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
+import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.CommitCommentManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.CommitComment;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.common.wicket.component.vex.AjaxConfirmLink;
 import com.pmease.gitop.web.component.comment.event.CommitCommentRemoved;
 import com.pmease.gitop.web.component.comment.event.CommitCommentUpdated;
 import com.pmease.gitop.web.component.label.AgeLabel;
@@ -104,8 +104,7 @@ public class CommitCommentPanel extends Panel {
 	}
 	
 	protected Component newRemoveLink(String id) {
-		return new AjaxConfirmLink<Void>(id, 
-				Model.of("Are you sure you want to delete this comment?")) {
+		return new AjaxLink<Void>(id) {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -124,7 +123,7 @@ public class CommitCommentPanel extends Panel {
 							|| current.isAdmin());
 				}
 			}
-		};
+		}.add(new ConfirmBehavior("Are you sure you want to delete this comment?"));
 	}
 	
 	private Component newCommentContent() {

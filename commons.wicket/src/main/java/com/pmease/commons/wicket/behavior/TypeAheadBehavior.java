@@ -15,8 +15,6 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.handler.TextRequestHandler;
 
-import com.pmease.commons.wicket.asset.bootstrap.BootstrapHeaderItem;
-
 @SuppressWarnings("serial")
 public abstract class TypeAheadBehavior extends AbstractDefaultAjaxBehavior {
 
@@ -45,8 +43,6 @@ public abstract class TypeAheadBehavior extends AbstractDefaultAjaxBehavior {
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
-		
-		response.render(BootstrapHeaderItem.get());
 		
 		String template = 
 				"$('#%s').typeahead({\n" + 

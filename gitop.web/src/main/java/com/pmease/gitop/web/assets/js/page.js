@@ -17,12 +17,12 @@ var gitop = {
 	choiceFormatter: {
 		user: {
 			formatSelection: function(user) {
-				return "<img class='img-thumbnail avatar' src='" + user.avatar + "' /> " + user.name + (user.displayName?" (" + user.displayName + ")": "");
+				return "<img class='img-thumbnail avatar' src='" + user.avatar + "' /> " + (user.fullName? user.fullName: user.name);
 			},
 			
 			formatResult: function(user) {
 				return "<div class='user-choice-row'><img class='img-thumbnail avatar avatar-big' src='" + user.avatar + "' />" 
-						+ "<p>"+ user.name + (user.displayName?" (" + user.displayName + ")": "") + "</p>"
+						+ "<p>"+ (user.fullName? user.fullName: user.name) + "</p>"
 						+ "<p class='text-muted'>" + user.email + "</p>"
 						+ "</div>";
 			},

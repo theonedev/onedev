@@ -14,6 +14,7 @@ import com.pmease.gitop.model.validation.RepositoryNameValidator;
 import com.pmease.gitop.model.validation.UserNameValidator;
 import com.pmease.gitop.web.common.wicket.mapper.PageParameterAwareMountedMapper;
 import com.pmease.gitop.web.common.wicket.mapper.PatternMountedMapper;
+import com.pmease.gitop.web.page.TestPage;
 import com.pmease.gitop.web.page.account.RegisterPage;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
 import com.pmease.gitop.web.page.account.setting.members.AccountMembersSettingPage;
@@ -64,10 +65,15 @@ public class GitopMappings extends CompoundRequestMapper {
 		addAdministrationPages();
 		addAccountPages();
 		addRepositoryPages();
+		addTestPages();
 
 		addResources();
 	}
 
+	private void addTestPages() {
+		addPage("/test", TestPage.class);
+	}
+	
 	private void addSystemPages() {
 		// --------------------------------------------------------------------
 		// system global pages

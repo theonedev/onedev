@@ -91,9 +91,9 @@
 			<version>1.0.30</version>
 		</dependency>
 		<dependency>
-			<groupId>de.agilecoders.wicket</groupId>
-			<artifactId>wicket-bootstrap-core</artifactId>
-			<version>0.9.1</version>
+			<groupId>com.pmease</groupId>
+			<artifactId>commons.jetty</artifactId>
+			<version>1.0.31</version>
 		</dependency>
 	</dependencies>
 	<properties>

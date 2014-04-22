@@ -11,7 +11,6 @@ import org.apache.wicket.feedback.ComponentFeedbackMessageFilter;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.lang.Bytes;
@@ -20,10 +19,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.common.wicket.component.vex.AjaxConfirmButton;
 import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.component.avatar.AvatarChanged;
@@ -78,7 +77,7 @@ public class AccountProfilePage extends AccountSettingPage {
 
 			add(new NotificationPanel("feedback", new ComponentFeedbackMessageFilter(this)));
 			add(new TextFieldElement<String>("displayName", "Display Name",
-					new PropertyModel<String>(model, "displayName"))
+					new PropertyModel<String>(model, "fullName"))
 					.setRequired(false).add(new PropertyValidator<String>()));
 			add(new TextFieldElement<String>("email", "Email Address",
 					new PropertyModel<String>(model, "emailAddress"))
@@ -151,9 +150,7 @@ public class AccountProfilePage extends AccountSettingPage {
 				}
 			});
 			
-			add(new AjaxConfirmButton("remove", this, 
-					Model.of("Are you sure you want to use the default avatar?"),
-					null, Model.of("Yes"), Model.of("No"), null) {
+			add(new AjaxButton("remove", this) {
 				@Override
 				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 					User user = getUser();
@@ -165,7 +162,7 @@ public class AccountProfilePage extends AccountSettingPage {
 			        form.success("Your avatar has been reset to the default.");
 			        target.add(form);
 				}
-			});
+			}.add(new ConfirmBehavior("Are you sure you want to use the default avatar?")));
 		}
 	}
 }

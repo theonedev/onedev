@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -22,11 +23,11 @@ import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.MembershipManager;
 import com.pmease.gitop.model.Membership;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.common.wicket.component.vex.AjaxConfirmLink;
 import com.pmease.gitop.web.component.avatar.AvatarImage;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.PageSpec;
@@ -135,8 +136,7 @@ public class MemberListView extends Panel {
 					link = new WebMarkupContainer("removelink");
 					link.add(AttributeAppender.append("class", "self disabled"));
 				} else {
-					link = new AjaxConfirmLink<Void>("removelink",
-							Model.of("Are you sure you want to remove the user from team " + membership.getTeam().getName() + "?")) {
+					link = new AjaxLink<Void>("removelink") {
 	
 								@Override
 								public void onClick(AjaxRequestTarget target) {
@@ -149,6 +149,7 @@ public class MemberListView extends Panel {
 									}
 								}
 					};
+					link.add(new ConfirmBehavior("Are you sure you want to remove the user from team " + membership.getTeam().getName() + "?"));
 				}
 				
 				link.add(new Label("teamname", Model.of(membership.getTeam().getName())));

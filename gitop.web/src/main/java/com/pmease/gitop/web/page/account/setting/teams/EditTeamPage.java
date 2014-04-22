@@ -6,6 +6,7 @@ import javax.persistence.EntityNotFoundException;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
@@ -15,7 +16,6 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.string.StringValue;
@@ -23,12 +23,12 @@ import org.apache.wicket.util.string.StringValue;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
-import com.pmease.gitop.web.common.wicket.component.vex.AjaxConfirmLink;
 import com.pmease.gitop.web.model.TeamModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
@@ -135,7 +135,7 @@ public class EditTeamPage extends AccountSettingPage {
 		};
 		add(teamsView);
 		
-		add(new AjaxConfirmLink<Void>("deleteteamlink", Model.of("Are you sure you want to delete this team?")) {
+		add(new AjaxLink<Void>("deleteteamlink") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -144,7 +144,7 @@ public class EditTeamPage extends AccountSettingPage {
 				setResponsePage(AccountTeamsPage.class, AccountTeamsPage.newParams(getAccount()));
 			}
 			
-		});
+		}.add(new ConfirmBehavior("Are you sure you want to delete this team?")));
 	}
 	
 	protected Team getTeam() {

@@ -30,6 +30,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
+import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Team;
@@ -37,7 +38,6 @@ import com.pmease.gitop.model.permission.operation.GeneralOperation;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.common.wicket.component.datagrid.DataGrid;
 import com.pmease.gitop.web.common.wicket.component.datagrid.hibernate.EntityListProvider;
-import com.pmease.gitop.web.common.wicket.component.vex.AjaxConfirmLink;
 import com.pmease.gitop.web.model.TeamModel;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
 import com.pmease.gitop.web.util.EnumUtils;
@@ -132,9 +132,7 @@ public class AccountTeamsPage extends AccountSettingPage {
 					String componentId, IModel<Team> rowModel) {
 				Team team = rowModel.getObject();
 				Fragment frag = new Fragment(componentId, "ops", AccountTeamsPage.this);
-				AbstractLink link = new AjaxConfirmLink<Team>("removelink",
-						new TeamModel(team),
-						Model.of("Are you sure you want to remove team <b>" + team.getName() + "</b>?")) {
+				AbstractLink link = new AjaxLink<Team>("removelink", new TeamModel(team)) {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
@@ -143,6 +141,8 @@ public class AccountTeamsPage extends AccountSettingPage {
 						target.add(AccountTeamsPage.this.get("teams"));
 					}
 				};
+				link.add(new ConfirmBehavior("Are you sure you want to remove team <b>" + team.getName() + "</b>?"));
+				
 				frag.add(link);
 				frag.setVisibilityAllowed(!team.isBuiltIn());
 				cellItem.add(frag);
@@ -296,9 +296,7 @@ public class AccountTeamsPage extends AccountSettingPage {
 						EditTeamPage.newParams(team));
 				link.add(new Label("name", Model.of(team.getName())));
 				item.add(link);
-				item.add(new AjaxConfirmLink<Team>("removelink",
-						new TeamModel(team),
-						Model.of("Are you sure you want to remove team <b>" + team.getName() + "</b>?")) {
+				item.add(new AjaxLink<Team>("removelink", new TeamModel(team)) {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
@@ -306,7 +304,7 @@ public class AccountTeamsPage extends AccountSettingPage {
 						Gitop.getInstance(TeamManager.class).delete(p);
 						target.add(teamsDiv);
 					}
-				});
+				}.add(new ConfirmBehavior("Are you sure you want to remove team <b>" + team.getName() + "</b>?")));
 			}
 		};
 		teamsDiv.add(view);

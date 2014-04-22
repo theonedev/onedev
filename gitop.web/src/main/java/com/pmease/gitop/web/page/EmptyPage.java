@@ -28,7 +28,7 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.assets.PageBaseResourceReference;
+import com.pmease.gitop.web.assets.PageResourceReference;
 import com.pmease.gitop.web.exception.AccessDeniedException;
 import com.pmease.gitop.web.page.init.ServerInitPage;
 import com.pmease.gitop.web.shiro.LoginPage;
@@ -188,6 +188,6 @@ public abstract class EmptyPage extends WebPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(PageBaseResourceReference.instance()));
+		response.render(JavaScriptHeaderItem.forReference(PageResourceReference.get()));
 	}
 }

@@ -31,6 +31,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
+import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.AuthorizationManager;
 import com.pmease.gitop.core.manager.RepositoryManager;
@@ -43,7 +44,6 @@ import com.pmease.gitop.model.permission.operation.GeneralOperation;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.common.wicket.component.datagrid.DataGrid;
 import com.pmease.gitop.web.common.wicket.component.datagrid.hibernate.EntityListProvider;
-import com.pmease.gitop.web.common.wicket.component.vex.AjaxConfirmLink;
 import com.pmease.gitop.web.page.account.setting.teams.AccountTeamsPage;
 import com.pmease.gitop.web.page.account.setting.teams.EditTeamPage;
 import com.pmease.gitop.web.page.repository.RepositoryPubliclyAccessibleChanged;
@@ -61,7 +61,7 @@ public class RepositoryPermissionsPage extends AbstractRepositorySettingPage {
 		super.onInitialize();
 		
 		add(newTeamsTable());
-		add(new AjaxConfirmLink<Void>("resetlink", Model.of("Are you sure you want to reset to the default permissions?")) {
+		add(new AjaxLink<Void>("resetlink") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -78,7 +78,8 @@ public class RepositoryPermissionsPage extends AbstractRepositorySettingPage {
 				onPermissionChanged(null, target);
 			}
 			
-		});
+		}.add(new ConfirmBehavior("Are you sure you want to reset to the default permissions?")));
+		
 		add(new BookmarkablePageLink<Void>("teamslink", AccountTeamsPage.class)
 				.setVisibilityAllowed(SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserAdmin(getAccount()))));
 	}

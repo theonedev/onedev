@@ -10,9 +10,10 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
 import com.google.common.base.Strings;
 import com.pmease.gitop.model.Repository;
-import com.pmease.gitop.web.common.wicket.util.JQuery;
 import com.pmease.gitop.web.page.repository.source.blob.renderer.FileBlobImage;
 import com.pmease.gitop.web.page.repository.source.commit.diff.patch.FileHeader;
+
+import de.agilecoders.wicket.jquery.JQuery;
 
 @SuppressWarnings("serial")
 public class SwipePanel extends AbstractImageDiffPanel {

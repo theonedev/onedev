@@ -31,7 +31,7 @@ public class UserChoiceProvider extends ChoiceProvider<User> {
 		int first = page * PAGE_SIZE;
 		Criterion criterion = Restrictions.or(
 				Restrictions.ilike("name", term, MatchMode.START),
-				Restrictions.ilike("displayName", term, MatchMode.START));
+				Restrictions.ilike("fullName", term, MatchMode.START));
 		List<User> users = um.query(new Criterion[] {criterion}, new Order[]{Order.asc("name")}, first, PAGE_SIZE + 1);
 
 		if (users.size() <= PAGE_SIZE) {
@@ -46,7 +46,7 @@ public class UserChoiceProvider extends ChoiceProvider<User> {
 	public void toJson(User choice, JSONWriter writer) throws JSONException {
 		writer.key("id").value(choice.getId()).key("name").value(StringEscapeUtils.escapeHtml4(choice.getName()));
 		if (choice.getFullName() != null)
-			writer.key("displayName").value(StringEscapeUtils.escapeHtml4(choice.getFullName()));
+			writer.key("fullName").value(StringEscapeUtils.escapeHtml4(choice.getFullName()));
 		writer.key("email").value(StringEscapeUtils.escapeHtml4(choice.getEmailAddress()));
 		writer.key("avatar").value(Gitop.getInstance(AvatarManager.class).getAvatarUrl(choice));
 	}

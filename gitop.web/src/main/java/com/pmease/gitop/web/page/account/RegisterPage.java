@@ -82,9 +82,9 @@ public class RegisterPage extends BasePage {
 		
 		form.add(new TextFieldElement<String>(
 							"displayname", "Display Name",
-							new PropertyModel<String>(model, "displayName"))
+							new PropertyModel<String>(model, "fullName"))
 				.setRequired(false)
-				.add(new PropertyValidator<String>(new Property(User.class, "displayName"))));
+				.add(new PropertyValidator<String>(new Property(User.class, "fullName"))));
 		
 		PasswordFieldElement passField = new PasswordFieldElement("password", "Password",
 			new PropertyModel<String>(this, "password"))
