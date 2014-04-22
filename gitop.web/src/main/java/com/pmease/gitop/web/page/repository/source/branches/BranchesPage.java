@@ -183,17 +183,17 @@ public class BranchesPage extends RepositoryTabPage {
 					
 					if (request == null) {
 						BookmarkablePageLink<Void> link = new BookmarkablePageLink<Void>(
-								"comparelink",
+								"compareLink",
 								NewRequestPage.class,
 								NewRequestPage.newParams(getRepository(), refName, getBaseBranch()));
 						
 						item.add(link);
-						item.add(new Label("pullname").setVisibilityAllowed(false));
+						item.add(new Label("pullName").setVisibilityAllowed(false));
 					} else {
-						add(new WebMarkupContainer("comparelink").setVisibilityAllowed(false));
+						item.add(new WebMarkupContainer("compareLink").setVisibilityAllowed(false));
 						
 						// TODO: Change this to LINK to pull request
-						add(new Label("pullname", request.getId()));
+						item.add(new Label("pullName", request.getId()));
 					}
 				}
 			});
