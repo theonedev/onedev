@@ -57,15 +57,15 @@ public class RegisterPage extends BasePage {
 
 		form.add(new NotificationPanel("feedback", new ComponentFeedbackMessageFilter(form)));
 		form.add(new TextFieldElement<String>(
-							"username", "User Name", 
+							"name", "Login Name", 
 							new PropertyModel<String>(user, "name"))
 				.add(new PropertyValidator<String>(new Property(User.class, "name")))
 				);
 		
 		form.add(new TextFieldElement<String>(
-							"email", "Email Address",
-							new PropertyModel<String>(model, "email"))
-				.add(new PropertyValidator<String>(new Property(User.class, "email")))
+							"emailAddress", "Email Address",
+							new PropertyModel<String>(model, "emailAddress"))
+				.add(new PropertyValidator<String>(new Property(User.class, "emailAddress")))
 				.add(new IValidator<String>() {
 
 					@Override
@@ -81,7 +81,7 @@ public class RegisterPage extends BasePage {
 				}));
 		
 		form.add(new TextFieldElement<String>(
-							"displayname", "Display Name",
+							"fullName", "Full Name",
 							new PropertyModel<String>(model, "fullName"))
 				.setRequired(false)
 				.add(new PropertyValidator<String>(new Property(User.class, "fullName"))));

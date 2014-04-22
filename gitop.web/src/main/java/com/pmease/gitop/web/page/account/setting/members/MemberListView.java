@@ -79,13 +79,13 @@ public class MemberListView extends Panel {
 			protected void populateItem(ListItem<User> item) {
 				User user = item.getModelObject();
 				item.add(new AvatarImage("avatar", user));
-				AbstractLink link = PageSpec.newUserHomeLink("userlink", user);
+				AbstractLink link = PageSpec.newUserHomeLink("userLink", user);
 				item.add(link);
 				link.add(new Label("name", Model.of(user.getName())));
 				if (Strings.isNullOrEmpty(user.getFullName())) {
-					item.add(new Label("displayName", "&nbsp;").setEscapeModelStrings(false));
+					item.add(new Label("fullName", "&nbsp;").setEscapeModelStrings(false));
 				} else {
-					item.add(new Label("displayName", user.getFullName()));
+					item.add(new Label("fullName", user.getFullName()));
 				}
 				item.add(createActionsPanel("actions", item.getModel()));
 				item.add(createMemberTeams("teams", new UserModel(user)));
@@ -152,7 +152,7 @@ public class MemberListView extends Panel {
 					link.add(new ConfirmBehavior("Are you sure you want to remove the user from team " + membership.getTeam().getName() + "?"));
 				}
 				
-				link.add(new Label("teamname", Model.of(membership.getTeam().getName())));
+				link.add(new Label("teamName", Model.of(membership.getTeam().getName())));
 				item.add(link);
 			}
 		};

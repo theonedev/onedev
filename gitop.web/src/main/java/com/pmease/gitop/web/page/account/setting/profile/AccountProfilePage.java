@@ -76,10 +76,10 @@ public class AccountProfilePage extends AccountSettingPage {
 			final IModel<User> model = (IModel<User>) getDefaultModel();
 
 			add(new NotificationPanel("feedback", new ComponentFeedbackMessageFilter(this)));
-			add(new TextFieldElement<String>("displayName", "Display Name",
+			add(new TextFieldElement<String>("fullName", "Full Name",
 					new PropertyModel<String>(model, "fullName"))
 					.setRequired(false).add(new PropertyValidator<String>()));
-			add(new TextFieldElement<String>("email", "Email Address",
+			add(new TextFieldElement<String>("emailAddress", "Email Address",
 					new PropertyModel<String>(model, "emailAddress"))
 					.add(new PropertyValidator<String>()));
 
