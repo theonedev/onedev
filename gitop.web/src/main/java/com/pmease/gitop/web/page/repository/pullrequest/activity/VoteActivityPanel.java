@@ -130,10 +130,10 @@ public class VoteActivityPanel extends Panel {
 				super.onComponentTag(tag);
 				
 				if (getVote().getResult() == Vote.Result.APPROVE) {
-					tag.put("class",  "icon icon-2x icon-arrow-slim-up-circle");
+					tag.put("class",  "fa fa-2x fa-smile-o");
 					tag.put("title", "Approved");
 				} else {
-					tag.put("class",  "icon icon-2x icon-arrow-slim-down-circle");
+					tag.put("class",  "fa fa-2x fa-frown-o");
 					tag.put("title", "Disapproved");
 				}
 			}

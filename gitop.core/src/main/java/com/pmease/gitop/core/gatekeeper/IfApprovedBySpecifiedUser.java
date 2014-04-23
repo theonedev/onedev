@@ -44,12 +44,12 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
         if (result == null) {
             request.pickVoters(Sets.newHashSet(user), 1);
 
-            return pending("To be approved by user '" + user.getName() + "'.",
+            return pending("To be approved by " + user.getDisplayName() + ".",
                     new CanVoteBySpecifiedUser(user));
         } else if (result == Vote.Result.APPROVE) {
-            return approved("Approved by user '" + user.getName() + "'.");
+            return approved("Approved by " + user.getDisplayName() + ".");
         } else {
-            return disapproved("Rejected by user '" + user.getName() + "'.");
+            return disapproved("Rejected by " + user.getDisplayName() + ".");
         }
     }
 
@@ -64,9 +64,9 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
     private CheckResult checkApproval(User user) {
 		User approver = Gitop.getInstance(UserManager.class).load(userId);
         if (approver.getId().equals(user.getId())) {
-        	return approved("Approved by user '" + approver.getName() + "'.");
+        	return approved("Approved by " + approver.getName() + ".");
         } else {
-        	return pending("Not approved by user '" + approver.getName() + "'.", 
+        	return pending("Not approved by " + approver.getName() + ".", 
         			new CanVoteBySpecifiedUser(approver)); 
         }
     }

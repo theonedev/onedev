@@ -132,10 +132,10 @@ public class CloseActivityPanel extends Panel {
 				super.onComponentTag(tag);
 				
 				if (getPullRequest().getCloseInfo().getCloseStatus() == CloseInfo.Status.INTEGRATED) {
-					tag.put("class",  "icon icon-2x icon-check-circle");
+					tag.put("class",  "fa fa-2x fa-check-circle");
 					tag.put("title", "This request has been integrated");
 				} else {
-					tag.put("class",  "icon icon-2x icon-delete-circle");
+					tag.put("class",  "fa fa-2x fa-times-circle");
 					tag.put("title", "This request has been discarded");
 				}
 			}

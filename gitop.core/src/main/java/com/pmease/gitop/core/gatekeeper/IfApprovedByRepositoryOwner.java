@@ -24,12 +24,12 @@ public class IfApprovedByRepositoryOwner extends ApprovalGateKeeper {
 
         if (result == null) {
             request.pickVoters(Sets.newHashSet(repoOwner), 1);
-            return pending("To be approved by user '" + repoOwner.getName() + "'.",
+            return pending("To be approved by " + repoOwner.getName() + ".",
                     new CanVoteBySpecifiedUser(repoOwner));
         } else if (result == Vote.Result.APPROVE) {
-            return approved("Approved by user '" + repoOwner.getName() + "'.");
+            return approved("Approved by " + repoOwner.getName() + ".");
         } else {
-            return disapproved("Rejected by user '" + repoOwner.getName() + "'.");
+            return disapproved("Rejected by " + repoOwner.getName() + ".");
         }
     }
 

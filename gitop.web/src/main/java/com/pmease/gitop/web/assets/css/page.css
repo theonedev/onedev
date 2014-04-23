@@ -1323,13 +1323,13 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.activities td.summary {width: 240px; padding-right: 8px;}
 .request-detail>.activities td.summary .avatar {width: 48px; height: 48px;} 
 .request-detail>.activities td.summary .text {color: #666; font-size: 13px;}
-.request-detail>.activities td.detail .icon-2x {cursor: default; position: relative;
+.request-detail>.activities td.detail .fa-2x {cursor: default; position: relative;
 	background: url("/assets/img/commits.png") no-repeat 0 7px;
 	padding-left: 24px; margin: 0 0 8px -14px;}
-.request-detail>.activities .icon-delete-circle {color: #D9534F;}
-.request-detail>.activities .icon-arrow-slim-down-circle {color: #ED9C28;}
-.request-detail>.activities .icon-check-circle {color: #5CB85C;}
-.request-detail>.activities .icon-arrow-slim-up-circle {color: #39B3D7;}
+.request-detail>.activities .fa-times-circle {color: #D9534F;}
+.request-detail>.activities .fa-frown-o {color: #ED9C28;}
+.request-detail>.activities .fa-check-circle {color: #5CB85C;}
+.request-detail>.activities .fa-smile-o {color: #39B3D7;}
 .request-detail>.activities td.detail {border-left: 2px solid #BBB;}
 
 table.update-commits {margin-left: -14px;}
