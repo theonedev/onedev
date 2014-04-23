@@ -33,12 +33,13 @@ import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.model.Authorization;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.Team;
-import com.pmease.gitop.web.common.wicket.form.FeedbackPanel;
 import com.pmease.gitop.web.component.choice.RepositoryMultiChoice;
 import com.pmease.gitop.web.component.link.RepositoryHomeLink;
 import com.pmease.gitop.web.model.RepositoryModel;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public class TeamRepositoryEditor extends Panel {
@@ -109,7 +110,7 @@ public class TeamRepositoryEditor extends Panel {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Component newRepositoriesForm() {
 		Form<?> form = new Form<Void>("reposForm");
-		form.add(new FeedbackPanel("feedback", form));
+		form.add(new NotificationPanel("feedback", form));
 		final IModel<Collection<Repository>> reposModel = new WildcardListModel(new ArrayList<Repository>());
 		form.add(new RepositoryMultiChoice("repochoice", reposModel, new RepositoryChoiceProvider()));
 		

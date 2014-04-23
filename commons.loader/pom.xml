@@ -83,6 +83,6 @@
 		</repository>
 	</repositories>
 	<properties>
-		<guiceVersion>4.0-beta</guiceVersion>
+		<guiceVersion>4.0-beta4</guiceVersion>
 	</properties>
 </project>

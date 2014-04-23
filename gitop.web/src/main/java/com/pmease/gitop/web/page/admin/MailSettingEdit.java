@@ -7,10 +7,11 @@ import org.apache.wicket.markup.html.form.Form;
 
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.EditableUtils;
-import com.pmease.commons.wicket.component.FeedbackPanel;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.core.setting.MailSetting;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public class MailSettingEdit extends AdministrationLayoutPage {
@@ -42,7 +43,7 @@ public class MailSettingEdit extends AdministrationLayoutPage {
 			
 		}; 
 		form.add((Component)editContext.renderForEdit("editor"));
-		form.add(new FeedbackPanel("feedback", form));
+		form.add(new NotificationPanel("feedback", form));
 		form.add(new AjaxSubmitLink("update") {
 
 			@Override

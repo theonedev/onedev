@@ -2,7 +2,6 @@ package com.pmease.gitop.web.common.wicket.form;
 
 import java.util.List;
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.behavior.Behavior;
@@ -15,160 +14,156 @@ import org.apache.wicket.validation.IValidator;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
-public abstract class AbstractInputElement<T, B extends AbstractInputElement<T, B>> 
-	extends ValidatableElement<T> {
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
-  private static final long serialVersionUID = 1L;
+public abstract class AbstractInputElement<T, B extends AbstractInputElement<T, B>>
+		extends ValidatableElement<T> {
 
-  private final String label;
-  private boolean required = true;
-  private boolean readOnly = false;
-  private String help;
-  private List<IValidator<T>> validators = Lists.newArrayList();
-  private List<Behavior> behaviors = Lists.newArrayList();
-  private String extraCssClass = "";
+	private static final long serialVersionUID = 1L;
 
-  abstract protected Component createInputComponent(String id);
+	private final String label;
+	private boolean required = true;
+	private boolean readOnly = false;
+	private String help;
+	private List<IValidator<T>> validators = Lists.newArrayList();
+	private List<Behavior> behaviors = Lists.newArrayList();
+	private String extraCssClass = "";
 
-  abstract protected void addValidator(IValidator<T> validator);
+	abstract protected Component createInputComponent(String id);
 
-  abstract protected IFeedbackMessageFilter getFeedbackMessageFilter();
+	abstract protected void addValidator(IValidator<T> validator);
 
-  abstract protected B self();
-  
-  public AbstractInputElement(String id, String label) {
-    super(id);
-    this.label = label;
-  }
+	abstract protected IFeedbackMessageFilter getFeedbackMessageFilter();
 
-  public AbstractInputElement(String id, String label, boolean required) {
-    super(id);
-    this.label = label;
-    this.required = required;
-  }
+	abstract protected B self();
 
-  public AbstractInputElement(String id, String label, String help) {
-    this(label, help, true);
-  }
+	public AbstractInputElement(String id, String label) {
+		super(id);
+		this.label = label;
+	}
 
-  public AbstractInputElement(String id, String label, String help, boolean required) {
-    super(id);
-    this.label = label;
-    this.help = help;
-    this.required = required;
-  }
+	public AbstractInputElement(String id, String label, boolean required) {
+		super(id);
+		this.label = label;
+		this.required = required;
+	}
 
-  public boolean hasError() {
-    return getFormComponent().hasErrorMessage();
-  }
+	public AbstractInputElement(String id, String label, String help) {
+		this(label, help, true);
+	}
 
-  public B add(IValidator<T> validator) {
-    validators.add(validator);
-    return self();
-  }
+	public AbstractInputElement(String id, String label, String help,
+			boolean required) {
+		super(id);
+		this.label = label;
+		this.help = help;
+		this.required = required;
+	}
 
-  public B addFormComponentBehavior(Behavior behavior) {
-	  behaviors.add(behavior);
-	  return self();
-  }
-  
-  @SuppressWarnings({"serial"})
-  @Override
-  protected void onInitialize() {
-    super.onInitialize();
+	public boolean hasError() {
+		return getFormComponent().hasErrorMessage();
+	}
 
-    MarkupContainer container = new WebMarkupContainer("fieldContainer");
-    add(container);
-    container.add(createFieldLabel("label"));
-    container.add(createRequiredLabel("required"));
-    container.add(createHelpLabel("help"));
+	public B add(IValidator<T> validator) {
+		validators.add(validator);
+		return self();
+	}
 
-    final FeedbackPanel feedback = new FeedbackPanel("feedback");
+	public B addFormComponentBehavior(Behavior behavior) {
+		behaviors.add(behavior);
+		return self();
+	}
 
-    feedback.setOutputMarkupId(true);
-    container.add(feedback);
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
 
-    Component c = createInputComponent("input");
-    
-    container.add(c);
+		MarkupContainer container = new WebMarkupContainer("fieldContainer");
+		add(container);
+		container.add(createFieldLabel("label"));
+		container.add(createRequiredLabel("required"));
+		container.add(createHelpLabel("help"));
 
-    feedback.setFilter(getFeedbackMessageFilter());
-    container.add(AttributeModifier.append("class", new AbstractReadOnlyModel<String>() {
+		final NotificationPanel feedback = new NotificationPanel("feedback");
 
-      @Override
-      public String getObject() {
-        return getExtraCssClass() + " " + feedback.getCssClass();
-      }
-    }));
+		feedback.setOutputMarkupId(true);
+		container.add(feedback);
 
-    for (IValidator<T> each : validators) {
-      addValidator(each);
-    }
-    
-    for (Behavior each : behaviors) {
-    	getFormComponent().add(each);
-    }
-  }
+		Component c = createInputComponent("input");
 
-  public String getExtraCssClass() {
-    return extraCssClass;
-  }
+		container.add(c);
 
-  public B setExtraCssClass(String extraCssClass) {
-    this.extraCssClass = extraCssClass;
-    return self();
-  }
+		feedback.setFilter(getFeedbackMessageFilter());
 
-  protected Component createFieldLabel(String id) {
-    return new Label(id, label).setVisibilityAllowed(!Strings.isNullOrEmpty(label))
-        .setEscapeModelStrings(false);
-  }
+		for (IValidator<T> each : validators) {
+			addValidator(each);
+		}
 
-  protected Component createRequiredLabel(String id) {
-    return new Label(id, new AbstractReadOnlyModel<String>() {
+		for (Behavior each : behaviors) {
+			getFormComponent().add(each);
+		}
+	}
 
-      private static final long serialVersionUID = 1L;
+	public String getExtraCssClass() {
+		return extraCssClass;
+	}
 
-      @Override
-      public String getObject() {
-        return isRequired() ? "*" : "&nbsp;";
-      }
-    }).setEscapeModelStrings(false).setVisibilityAllowed(!Strings.isNullOrEmpty(label));
-  }
+	public B setExtraCssClass(String extraCssClass) {
+		this.extraCssClass = extraCssClass;
+		return self();
+	}
 
-  protected Component createHelpLabel(String id) {
-    return new Label(id, help).setVisibilityAllowed(!Strings.isNullOrEmpty(help))
-        .setEscapeModelStrings(false);
-  }
+	protected Component createFieldLabel(String id) {
+		return new Label(id, label).setVisibilityAllowed(
+				!Strings.isNullOrEmpty(label)).setEscapeModelStrings(false);
+	}
 
-  public boolean isRequired() {
-    return required;
-  }
+	protected Component createRequiredLabel(String id) {
+		return new Label(id, new AbstractReadOnlyModel<String>() {
 
-  public B setRequired(boolean required) {
-    this.required = required;
-    return self();
-  }
+			private static final long serialVersionUID = 1L;
 
-  public boolean isReadOnly() {
-    return readOnly;
-  }
+			@Override
+			public String getObject() {
+				return isRequired() ? "*" : "&nbsp;";
+			}
+		}).setEscapeModelStrings(false).setVisibilityAllowed(
+				!Strings.isNullOrEmpty(label));
+	}
 
-  public B setReadOnly(boolean readOnly) {
-    this.readOnly = readOnly;
-    return self();
-  }
+	protected Component createHelpLabel(String id) {
+		return new Label(id, help).setVisibilityAllowed(
+				!Strings.isNullOrEmpty(help)).setEscapeModelStrings(false);
+	}
 
-  public String getHelp() {
-    return help;
-  }
+	public boolean isRequired() {
+		return required;
+	}
 
-  public B setHelp(String help) {
-    this.help = help;
-    return self();
-  }
+	public B setRequired(boolean required) {
+		this.required = required;
+		return self();
+	}
 
-  public String getLabel() {
-    return label;
-  }
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+
+	public B setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
+		return self();
+	}
+
+	public String getHelp() {
+		return help;
+	}
+
+	public B setHelp(String help) {
+		this.help = help;
+		return self();
+	}
+
+	public String getLabel() {
+		return label;
+	}
 }

@@ -36,7 +36,7 @@ public class DefaultAvatarManager implements AvatarManager {
 		
 		if (user.getAvatarUpdateDate() != null) { 
 			String url = BASE_AVATAR_URL + user.getId();
-			url += "?antiCache=" + user.getAvatarUpdateDate().getTime();
+			url += "?version=" + user.getAvatarUpdateDate().getTime();
 			return url;
 		} else if (configManager.getSystemSetting().isGravatarEnabled()) {
 			return Gravatar.getURL(user.getEmailAddress(), GRAVATAR_SIZE);
