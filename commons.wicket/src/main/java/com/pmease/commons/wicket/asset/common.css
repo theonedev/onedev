@@ -107,6 +107,9 @@ table td, table th {text-align: left;}
     margin: 8px 1px; overflow: hidden;}
 .dropdown-panel.menu li.divider:hover {background-color: #E5E5E5;}
 
+/* Tabs */
+.tabbable>.tab-content {padding-top: 16px;}
+
 /* Wizard */
 .wizard {text-align: left;}
 .wizard .panel-heading {font-size: 16px;}

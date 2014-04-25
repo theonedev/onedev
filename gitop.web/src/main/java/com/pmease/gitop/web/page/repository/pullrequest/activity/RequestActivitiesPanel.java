@@ -14,8 +14,8 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.commons.git.GitPerson;
 import com.pmease.commons.wicket.behavior.DisableIfBlankBehavior;
@@ -45,10 +45,10 @@ public class RequestActivitiesPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ListView<PullRequestActivity>("activities", new AbstractReadOnlyModel<List<PullRequestActivity>>() {
+		add(new ListView<PullRequestActivity>("activities", new LoadableDetachableModel<List<PullRequestActivity>>() {
 
 			@Override
-			public List<PullRequestActivity> getObject() {
+			public List<PullRequestActivity> load() {
 				PullRequest request = getPullRequest();
 				List<PullRequestActivity> activities = new ArrayList<>();
 

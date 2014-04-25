@@ -36,10 +36,8 @@ public class RequestStatusPanel extends Panel {
 					return "label-danger";
 				else if (status == Status.INTEGRATED)
 					return "label-success";
-				else if (status == Status.PENDING_APPROVAL || status == Status.PENDING_UPDATE)
-					return "label-warning";
 				else 
-					return "label-primary";
+					return "label-warning";
 			}
 			
 		})));

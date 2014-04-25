@@ -1,5 +1,6 @@
 package com.pmease.gitop.web.page.repository.pullrequest;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.extensions.markup.html.tabs.ITab;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
@@ -25,6 +27,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
 import com.pmease.commons.git.GitPerson;
@@ -47,6 +50,8 @@ import com.pmease.gitop.web.component.link.AvatarLink.Mode;
 import com.pmease.gitop.web.component.link.PersonLink;
 import com.pmease.gitop.web.page.repository.RepositoryBasePage;
 import com.pmease.gitop.web.page.repository.pullrequest.activity.RequestActivitiesPanel;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.tabs.AjaxBootstrapTabbedPanel;
 
 @SuppressWarnings("serial")
 public class RequestDetailPanel extends Panel {
@@ -196,7 +201,7 @@ public class RequestDetailPanel extends Panel {
 			GitPerson person = new GitPerson(submittedBy.getName(), submittedBy.getEmailAddress());
 			add(new PersonLink("user", person, Mode.NAME_AND_AVATAR));
 		} else {
-			add(new Label("<i>Unknown</i>").setEscapeModelStrings(false));
+			add(new Label("<i>System</i>").setEscapeModelStrings(false));
 		}
 		
 		Link<Void> targetLink = new Link<Void>("targetLink") {
@@ -300,7 +305,8 @@ public class RequestDetailPanel extends Panel {
 
 				PullRequest request = getPullRequest();
 				setVisible(request.getStatus() == Status.PENDING_APPROVAL 
-						|| request.getStatus() == Status.PENDING_UPDATE);
+						|| request.getStatus() == Status.PENDING_UPDATE
+						|| request.getStatus() == Status.PENDING_INTEGRATE);
 			}
 			
 		});
@@ -546,9 +552,9 @@ public class RequestDetailPanel extends Panel {
 			@Override
 			public String getObject() {
 				if (action == Action.Approve)
-					return "btn-info";
+					return "btn-primary";
 				else if (action == Action.Disapprove)
-					return "btn-warning";
+					return "btn-primary";
 				else if (action == Action.Integrate)
 					return "btn-success";
 				else
@@ -567,14 +573,58 @@ public class RequestDetailPanel extends Panel {
 			
 		});
 		
-		add(new RequestActivitiesPanel("activities", new AbstractReadOnlyModel<PullRequest>() {
+		List<ITab> tabs = new ArrayList<>();
+		tabs.add(new ITab() {
 
 			@Override
-			public PullRequest getObject() {
-				return getPullRequest();
+			public IModel<String> getTitle() {
+				return Model.of("Activities");
+			}
+
+			@Override
+			public WebMarkupContainer getPanel(String containerId) {
+				return new RequestActivitiesPanel(containerId, new AbstractReadOnlyModel<PullRequest>() {
+
+					@Override
+					public PullRequest getObject() {
+						return getPullRequest();
+					}
+					
+				});
+			}
+
+			@Override
+			public boolean isVisible() {
+				return true;
 			}
 			
-		}));
+		});
+		tabs.add(new ITab() {
+
+			@Override
+			public IModel<String> getTitle() {
+				return Model.of("Commits");
+			}
+
+			@Override
+			public WebMarkupContainer getPanel(String containerId) {
+				return new RequestCommitsPanel(containerId, new AbstractReadOnlyModel<PullRequest>() {
+
+					@Override
+					public PullRequest getObject() {
+						return getPullRequest();
+					}
+					
+				});
+			}
+
+			@Override
+			public boolean isVisible() {
+				return true;
+			}
+			
+		});
+		add(new AjaxBootstrapTabbedPanel<>("tabs", tabs));
 	}
 	
 	public PullRequest getPullRequest() {

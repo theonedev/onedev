@@ -45,8 +45,8 @@
 						<table>
 							<tr>
 								<td class="icons">
-									<span class="icon icon-ok-circle"></span>
-									<span class="icon icon-warning-sign"></span>
+									<span class="fa fa-info-circle"></span>
+									<span class="fa fa-exclamation-triangle"></span>
 								</td>
 								<td>
 									<div wicket:id="noConflicts" class="no-conflicts">Be able to merge automatically.</div>
@@ -59,8 +59,8 @@
 						</table>
 					</td>
 					<td wicket:id="actions" class="actions">
-						<a wicket:id="approve" class="btn btn-info btn-sm btn-block" href="javascript:void(0);">Approve</a>
-						<a wicket:id="disapprove" class="btn btn-warning btn-sm btn-block" href="javascript:void(0);">Disapprove</a>
+						<a wicket:id="approve" class="btn btn-primary btn-sm btn-block" href="javascript:void(0);">Approve</a>
+						<a wicket:id="disapprove" class="btn btn-primary btn-sm btn-block" href="javascript:void(0);">Disapprove</a>
 						<a wicket:id="integrate" class="btn btn-success btn-sm btn-block">Integrate</a>
 						<a wicket:id="discard" class="btn btn-danger btn-sm btn-block">Discard</a>
 					</td>
@@ -73,14 +73,15 @@
 							<textarea wicket:id="comment" rows="8" class="form-control" placeholder="Leave a comment"></textarea>
 						</td>
 						<td class="actions">
-							<input wicket:id="confirm" type="submit" value="Confirm" class="btn btn-primary btn-sm btn-block"></input> 
+							<input wicket:id="confirm" type="submit" value="Confirm" class="btn btn-sm btn-block"></input> 
 							<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-default btn-sm btn-block"></input>
 						</td>
 					</tr>
 				</table>
 			</form>
 		</div>
-		<div wicket:id="activities" class="activities"></div>
+		<div wicket:id="tabs"></div>
+		<!-- div wicket:id="activities" class="activities"></div-->
 	</div>
 	<wicket:fragment wicket:id="conflictHelpFrag">
 		step1, step2, step3

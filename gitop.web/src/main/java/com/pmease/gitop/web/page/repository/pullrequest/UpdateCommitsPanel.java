@@ -80,10 +80,12 @@ public class UpdateCommitsPanel extends Panel {
 				
 				if (getUpdate().getRequest().getMergedCommits().contains(commit.getHash())) {
 					item.add(new Label("label", "merged").add(AttributeAppender.append("class", "label label-success")));
+					item.add(AttributeAppender.append("class", " merged"));
 				} else if (getUpdate().getRequest().getPendingCommits().contains(commit.getHash())) {
 					item.add(new WebMarkupContainer("label"));
 				} else {
 					item.add(new Label("label", "rebased").add(AttributeAppender.append("class", "label label-danger")));
+					item.add(AttributeAppender.append("class", " rebased"));
 				}
 			}
 			

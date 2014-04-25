@@ -1,0 +1,23 @@
+<wicket:panel>
+	<table class="activities table table-striped">
+		<tr wicket:id="updates">
+			<td class="summary">
+				<div wicket:id="userAvatar"></div>
+				<div wicket:id="userName"></div>
+				<div class="text">
+					<span wicket:id="action"></span> <span wicket:id="date"></span>
+				</div>
+			</td>
+			<td class="detail">
+				<div wicket:id="detail"></div>
+			</td>
+			<td class="votes">
+				<div wicket:id="votes" class="vote" data-html="true">
+					<span wicket:id="user"></span>
+					<span wicket:id="result" class="fa result "></span>	
+					<span wicket:id="comment" class="fa fa-comment-o"></span>
+				</div>			
+			</td>
+		</tr>
+	</table>
+</wicket:panel>

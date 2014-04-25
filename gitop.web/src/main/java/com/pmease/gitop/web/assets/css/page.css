@@ -1313,24 +1313,29 @@ ul.status-help li:last-child .description {border-bottom: none;}
 	background-color: #FCF8E3;}
 .request-detail>.status td.merge.success {color: #3C763D; border-color: #BDDCA4; 
 	background-color: #DFF0D8;}
-.request-detail>.status .icon {display: none; font-size: 24px;}
+.request-detail>.status .fa {display: none; font-size: 24px;}
 .request-detail>.status td.icons {width: 1%;}
-.request-detail>.status td.merge.warning .icon-warning-sign {display: block; color: #8A6D3B;}
-.request-detail>.status td.merge.success .icon-ok-circle {display: block; color: #3C763D;}
+.request-detail>.status td.merge.warning .fa-exclamation-triangle {display: block; color: #8A6D3B;}
+.request-detail>.status td.merge.success .fa-info-circle {display: block; color: #3C763D;}
 .request-detail>.status>form>table {border-spacing: 3px;}
 
-.request-detail>.activities>table>tbody>tr>td {padding: 8px;}
-.request-detail>.activities td.summary {width: 240px; padding-right: 8px;}
-.request-detail>.activities td.summary .avatar {width: 48px; height: 48px;} 
-.request-detail>.activities td.summary .text {color: #666; font-size: 13px;}
-.request-detail>.activities td.detail .fa-2x {cursor: default; position: relative;
-	background: url("/assets/img/commits.png") no-repeat 0 7px;
-	padding-left: 24px; margin: 0 0 8px -14px;}
-.request-detail>.activities .fa-times-circle {color: #D9534F;}
-.request-detail>.activities .fa-frown-o {color: #ED9C28;}
-.request-detail>.activities .fa-check-circle {color: #5CB85C;}
-.request-detail>.activities .fa-smile-o {color: #39B3D7;}
-.request-detail>.activities td.detail {border-left: 2px solid #BBB;}
+.request-detail .activities>tbody>tr>td {padding: 8px;}
+.request-detail .activities>tbody>tr>td {border-top-style: dashed;}
+.request-detail .activities td.summary {width: 240px; padding-right: 8px;}
+.request-detail .activities td.summary .avatar {width: 48px; height: 48px;} 
+.request-detail .activities td.summary .text {color: #666; font-size: 13px;}
+.request-detail .activities td.detail .fa-2x {cursor: default; position: relative;
+	background: url("/assets/img/commits.png") no-repeat 0 7px; padding-left: 24px; 
+	margin: 0 0 8px -14px;}
+.request-detail .activities .fa-check-circle {color: #5CB85C;}
+.request-detail .activities .fa-times-circle {color: #D9534F;}
+.request-detail .activities .fa-smile-o {color: #5CB85C;}
+.request-detail .activities .fa-frown-o {color: #D9534F;}
+.request-detail .activities td.detail {border-left: 2px solid #BBB;}
+.request-detail .activities td.votes {border-left: 1px dashed #BBB;}
+.request-detail .activities .votes .fa.result {font-size: 16px;}
+.request-detail .activities .votes .fa-comment-o {color: #888; font-size: 16px;}
+.request-detail .activities .votes .vote {margin-bottom: 4px; white-space: nowrap;}
 
 table.update-commits {margin-left: -14px;}
 table.update-commits tr>td.handle {
@@ -1340,6 +1345,7 @@ table.update-commits tr>td.data.overview {width: 360px;}
 table.update-commits tr>td.data.status {width: 1%;}
 table.update-commits {font-family: monospace; margin-bottom: 0;}
 table.update-commits tbody tr td {border-top: none;}
-table.update-commits tr:nth-child(odd) td.data {background: #E3F3FD;}
+table.update-commits tr.rebased td.data {background: #F8E1E0;}
+table.update-commits tr.merged td.data {background: #DBEFDB;}
 table.update-commits tbody>tr:hover td.data {background: #FCF2CE;}
 table.update-commits .label {font-family: cursive;}
