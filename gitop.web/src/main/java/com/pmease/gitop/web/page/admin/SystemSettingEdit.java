@@ -31,7 +31,7 @@ public class SystemSettingEdit extends AdministrationLayoutPage {
 			@Override
 			protected void onSubmit() {
 				editContext.validate();
-				if (!editContext.hasValidationError()) {
+				if (!editContext.hasValidationErrors()) {
 					Gitop.getInstance(ConfigManager.class).saveSystemSetting((SystemSetting) editContext.getBean());
 					success("System setting has been updated");
 				} else {

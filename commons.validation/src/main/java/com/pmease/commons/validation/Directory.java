@@ -22,8 +22,8 @@ import javax.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy=DirectoryValidator.class) 
 public @interface Directory {
-	String message() default "Make sure the OS user running this program has permission to "
-			+ "write files into this directory.";
+	String message() default "Make sure the directory is valid and OS user running this program "
+			+ "has permission to write files into the directory.";
 
 	Class<?>[] groups() default {};
 

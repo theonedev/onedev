@@ -57,7 +57,7 @@ public abstract class GateKeeperEditor extends Panel {
 				super.onSubmit(target, form);
 				
 				editContext.validate();
-				if (!editContext.hasValidationError())
+				if (!editContext.hasValidationErrors())
 					onSave(target, gateKeeper);
 				else
 					target.add(GateKeeperEditor.this);

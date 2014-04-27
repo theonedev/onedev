@@ -197,7 +197,7 @@ public class EditableUtils {
 		Serializable bean = ReflectionUtils.instantiateClass(beanClass);
 		EditContext editContext = getContext(bean);
 		editContext.validate();
-		return !editContext.hasValidationError();
+		return !editContext.hasValidationErrors();
 	}
 	
 }

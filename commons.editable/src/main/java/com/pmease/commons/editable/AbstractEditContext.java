@@ -42,12 +42,12 @@ public abstract class AbstractEditContext implements EditContext {
 		return validationErrors;
 	}
 	
-	public boolean hasValidationError() {
+	public boolean hasValidationErrors() {
 		if (!validationErrors.isEmpty())
 			return true;
 
 		for (EditContext each: getChildContexts().values()) {
-			if (each.hasValidationError())
+			if (each.hasValidationErrors())
 				return true;
 		}
 		

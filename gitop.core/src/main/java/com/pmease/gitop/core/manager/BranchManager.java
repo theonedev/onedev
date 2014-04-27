@@ -87,6 +87,14 @@ public interface BranchManager extends GenericDao<Branch> {
      */
     public void rename(Branch branch, String newName);
     
+    /**
+     * Call this method when branch ref is updated.
+     * 
+     * @param branch
+     * 			branch whose ref has been updated
+     * @param user
+     * 			user who updates the ref
+     */
     public void onBranchRefUpdate(Branch branch, @Nullable User user);
     
     public void trim(Collection<Long> branchIds);

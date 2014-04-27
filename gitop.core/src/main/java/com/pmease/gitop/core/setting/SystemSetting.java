@@ -65,7 +65,7 @@ public class SystemSetting implements Serializable, Validatable {
 			FileUtils.createDir(dataDir);
 			FileUtils.writeFile(testFile, "test");
 		} catch (Exception e) {
-			constraintValidatorContext.buildConstraintViolationWithTemplate("Unable to ");
+			constraintValidatorContext.buildConstraintViolationWithTemplate("Unable to write files to directory.");
 		} finally {
 			if (testFile.exists())
 				FileUtils.deleteFile(testFile);

@@ -18,7 +18,7 @@ public interface EditContext extends Serializable {
 	
 	void clearValidationErrors();
 	
-	boolean hasValidationError();
+	boolean hasValidationErrors();
 	
 	Map<Serializable, EditContext> getChildContexts();
 	

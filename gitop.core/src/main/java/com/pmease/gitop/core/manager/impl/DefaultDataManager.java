@@ -10,6 +10,8 @@ import javax.inject.Singleton;
 
 import org.hibernate.criterion.Order;
 
+import com.pmease.commons.editable.EditContext;
+import com.pmease.commons.editable.EditSupportRegistry;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.loader.ManagedSerializedForm;
 import com.pmease.commons.util.init.ManualConfig;
@@ -30,10 +32,14 @@ public class DefaultDataManager implements DataManager, Serializable {
 	
 	private final ConfigManager configManager;
 	
+	private final EditSupportRegistry editSupportRegistry;
+	
 	@Inject
-	public DefaultDataManager(UserManager userManager, ConfigManager configManager) {
+	public DefaultDataManager(UserManager userManager, ConfigManager configManager, 
+			EditSupportRegistry editSupportRegistry) {
 		this.userManager = userManager;
 		this.configManager = configManager;
+		this.editSupportRegistry = editSupportRegistry;
 	}
 	
 	@SuppressWarnings("serial")
@@ -57,16 +63,26 @@ public class DefaultDataManager implements DataManager, Serializable {
 				
 			});
 		}
-		
-		Config systemConfig = configManager.getConfig(Key.SYSTEM);
-		if (systemConfig == null || systemConfig.getSetting() == null) {
-			manualConfigs.add(new ManualConfig("Specify System Setting", new SystemSetting()) {
 
+		Config systemConfig = configManager.getConfig(Key.SYSTEM);
+		Serializable systemSetting = null;
+		
+		if (systemConfig == null || systemConfig.getSetting() == null) {
+			systemSetting = new SystemSetting();
+		} else {
+			EditContext editContext = editSupportRegistry.getBeanEditContext(systemConfig.getSetting());
+			editContext.validate();
+			if (editContext.hasValidationErrors()) 
+				systemSetting = systemConfig.getSetting();
+		}
+		if (systemSetting != null) {
+			manualConfigs.add(new ManualConfig("Specify System Setting", systemSetting) {
+	
 				@Override
 				public Skippable getSkippable() {
 					return null;
 				}
-
+	
 				@Override
 				public void complete() {
 					configManager.saveSystemSetting((SystemSetting) getSetting());
@@ -74,10 +90,20 @@ public class DefaultDataManager implements DataManager, Serializable {
 				
 			});
 		}
-		
+
 		Config mailConfig = configManager.getConfig(Key.MAIL);
+		Serializable mailSetting = null;
 		if (mailConfig == null) {
-			manualConfigs.add(new ManualConfig("Specify Mail Setting", new MailSetting()) {
+			mailSetting = new MailSetting();
+		} else if (mailConfig.getSetting() != null) {
+			EditContext editContext = editSupportRegistry.getBeanEditContext(mailConfig.getSetting());
+			editContext.validate();
+			if (editContext.hasValidationErrors()) 
+				mailSetting = mailConfig.getSetting();
+		}
+		
+		if (mailSetting != null) {
+			manualConfigs.add(new ManualConfig("Specify Mail Setting", mailSetting) {
 
 				@Override
 				public Skippable getSkippable() {

@@ -33,7 +33,7 @@ public class MailSettingEdit extends AdministrationLayoutPage {
 			@Override
 			protected void onSubmit() {
 				editContext.validate();
-				if (!editContext.hasValidationError()) {
+				if (!editContext.hasValidationErrors()) {
 					Gitop.getInstance(ConfigManager.class).saveMailSetting((MailSetting) editContext.getBean());
 					success("Mail setting has been updated");
 				} else {
