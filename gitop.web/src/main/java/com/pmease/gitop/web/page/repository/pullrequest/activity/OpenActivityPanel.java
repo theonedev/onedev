@@ -9,15 +9,12 @@ import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.AuthorizationManager;
 import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.model.PullRequest;
-import com.pmease.gitop.model.PullRequestUpdate;
-import com.pmease.gitop.web.page.repository.pullrequest.UpdateCommitsPanel;
 
 @SuppressWarnings("serial")
 public class OpenActivityPanel extends Panel {
@@ -124,15 +121,6 @@ public class OpenActivityPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		add(renderForView());
-
-		add(new UpdateCommitsPanel("commits", new AbstractReadOnlyModel<PullRequestUpdate>() {
-
-			@Override
-			public PullRequestUpdate getObject() {
-				return getPullRequest().getInitialUpdate();
-			}
-			
-		}));
 	}
 
 	private PullRequest getPullRequest() {

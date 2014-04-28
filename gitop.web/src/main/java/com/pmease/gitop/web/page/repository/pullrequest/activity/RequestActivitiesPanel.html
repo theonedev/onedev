@@ -2,10 +2,12 @@
 	<table class="activities table table-striped">
 		<tr wicket:id="activities">
 			<td class="summary">
-				<div wicket:id="userAvatar"></div>
-				<div wicket:id="userName"></div>
-				<div class="text">
-					<span wicket:id="action"></span> <span wicket:id="date"></span>
+				<div wicket:id="userAvatar" class="pull-left"></div>
+				<div class="pull-left">
+					<div wicket:id="userName"></div>
+					<div class="text">
+						<span wicket:id="action"></span> <span wicket:id="date"></span>
+					</div>
 				</div>
 			</td>
 			<td class="detail">
@@ -13,11 +15,13 @@
 			</td>
 		</tr>
 		<tr wicket:id="newCommentContainer">
-			<td class="summary">
-				<div wicket:id="userAvatar"></div>
-				<div wicket:id="userName"></div>
-				<div class="text">
-					Add new comment
+			<td class="summary clearfix">
+				<div wicket:id="userAvatar" class="pull-left"></div>
+				<div class="pull-left">
+					<div wicket:id="userName"></div>
+					<div class="text">
+						Add new comment
+					</div>
 				</div>
 			</td>
 			<td class="detail">

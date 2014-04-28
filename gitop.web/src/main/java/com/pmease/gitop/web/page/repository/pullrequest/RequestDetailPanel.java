@@ -624,6 +624,31 @@ public class RequestDetailPanel extends Panel {
 			}
 			
 		});
+		tabs.add(new ITab() {
+
+			@Override
+			public IModel<String> getTitle() {
+				return Model.of("Changes");
+			}
+
+			@Override
+			public WebMarkupContainer getPanel(String containerId) {
+				return new RequestChangesPanel(containerId, new AbstractReadOnlyModel<PullRequest>() {
+
+					@Override
+					public PullRequest getObject() {
+						return getPullRequest();
+					}
+					
+				});
+			}
+
+			@Override
+			public boolean isVisible() {
+				return true;
+			}
+			
+		});
 		add(new AjaxBootstrapTabbedPanel<>("tabs", tabs));
 	}
 	

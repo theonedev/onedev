@@ -1,11 +1,13 @@
 <wicket:panel>
 	<table class="activities table table-striped">
 		<tr wicket:id="updates">
-			<td class="summary">
-				<div wicket:id="userAvatar"></div>
-				<div wicket:id="userName"></div>
-				<div class="text">
-					<span wicket:id="action"></span> <span wicket:id="date"></span>
+			<td class="summary clearfix">
+				<div wicket:id="userAvatar" class="pull-left"></div>
+				<div class="pull-left">
+					<div wicket:id="userName"></div>
+					<div class="text">
+						Updated <span wicket:id="date"></span>
+					</div>
 				</div>
 			</td>
 			<td class="detail">

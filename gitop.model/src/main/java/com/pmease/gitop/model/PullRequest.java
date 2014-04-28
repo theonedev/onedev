@@ -133,6 +133,12 @@ public class PullRequest extends AbstractEntity {
 		this.description = description;
 	}
 
+	/**
+	 * Get head commit of target branch at the time when pull request is created.
+     *
+	 * @return
+	 * 			head commit of the target branch at the time creating the pull request
+	 */
 	public String getBaseCommit() {
 		return baseCommit;
 	}

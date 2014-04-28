@@ -59,8 +59,7 @@ public class RequestActivitiesPanel extends Panel {
 				}
 				
 				for (PullRequestUpdate update: request.getUpdates()) {
-					if (!update.equals(request.getInitialUpdate()))
-						activities.add(new UpdatePullRequest(update));
+					activities.add(new UpdatePullRequest(update));
 					for (Vote vote: update.getVotes()) {
 						activities.add(new VotePullRequest(vote));
 					}

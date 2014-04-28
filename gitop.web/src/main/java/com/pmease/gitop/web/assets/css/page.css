@@ -1322,8 +1322,8 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail .activities>tbody>tr>td {padding: 8px;}
 .request-detail .activities>tbody>tr>td {border-top-style: dashed;}
 .request-detail .activities td.summary {width: 240px; padding-right: 8px;}
-.request-detail .activities td.summary .avatar {width: 48px; height: 48px;} 
-.request-detail .activities td.summary .text {color: #666; font-size: 13px;}
+.request-detail .activities td.summary .avatar {width: 36px; height: 36px; margin-right: 4px;} 
+.request-detail .activities td-summary .text {color: #666; font-size: 13px;}
 .request-detail .activities td.detail .fa-2x {cursor: default; position: relative;
 	background: url("/assets/img/commits.png") no-repeat 0 7px; padding-left: 24px; 
 	margin: 0 0 8px -14px;}
@@ -1336,6 +1336,11 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail .activities .votes .fa.result {font-size: 16px;}
 .request-detail .activities .votes .fa-comment-o {color: #888; font-size: 16px;}
 .request-detail .activities .votes .vote {margin-bottom: 4px; white-space: nowrap;}
+
+.request-detail .changes .comparison-choices {margin-bottom: 16px; border-bottom: 1px dashed #CCC;
+	padding-bottom: 16px;}
+.request-detail .changes .comparison-choices span {font-weight: bold; 
+	margin-right: 36px;}
 
 table.update-commits {margin-left: -14px;}
 table.update-commits tr>td.handle {

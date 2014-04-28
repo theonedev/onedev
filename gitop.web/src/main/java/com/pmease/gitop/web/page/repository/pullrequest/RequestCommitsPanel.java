@@ -60,10 +60,6 @@ public class RequestCommitsPanel extends Panel {
 				item.add(new NullableUserLink("userAvatar", user, Mode.AVATAR));
 				item.add(new NullableUserLink("userName", user, Mode.NAME));
 				
-				if (update.equals(getPullRequest().getInitialUpdate()))
-					item.add(new Label("action", "Opened"));
-				else
-					item.add(new Label("action", "Updated"));
 				item.add(new Label("date", DateUtils.formatAge(update.getDate())));
 				item.add(new UpdateCommitsPanel("detail", item.getModel()));
 
