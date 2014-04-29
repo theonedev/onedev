@@ -1295,14 +1295,27 @@ ul.status-help li:last-child .description {border-bottom: none;}
 
 .request-detail>.head {font-size: 20px; font-weight: bold; padding: 0;}
 .request-detail>.head>div {margin-right: 8px;}
-.request-detail>.head>.id {color: #999; margin-right: 0;}
+.request-detail>.head>.id {color: #999;}
 .request-detail>.head>.icon {font-size: 16px;}
 
 .request-detail>.summary .branch.label {background-color: #D8D8D8;}
 .request-detail>.summary .branch .icon {color: #666666;}
 
 .request-detail>.status {background: #F2F2F2; border-radius: 4px;}
+.request-detail>.status .fa {display: none; font-size: 28px;}
 .request-detail>.status table {border-collapse: separate; border-spacing: 4px;}
+.request-detail>.status td.primary {border: 1px solid; padding: 8px; border-radius: 4px; 
+	width: 50%;}
+.request-detail>.status td.primary.warning {color: #8A6D3B; border-color: #F7DEAB; 
+	background-color: #FCF8E3;}	
+.request-detail>.status td.primary.success {color: #3C763D; border-color: #C3DFAD; 
+	background-color: #DFF0D8;}	
+.request-detail>.status td.primary.danger {color: #A94442; border-color: #DDA8A7; 
+	background-color: #F2DEDE;}	
+.request-detail>.status td.primary.success .fa-check-circle {display: block;}
+.request-detail>.status td.primary.danger .fa-times-circle {display: block;}
+.request-detail>.status td.primary.warning .fa-exclamation-circle {display: block;}
+
 .request-detail>.status td.primary {border: 1px solid; padding: 8px; border-radius: 4px;
 	color: #8A6D3B; border-color: #F7DEAB; background-color: #FCF8E3; width: 50%;}
 .request-detail>.status td.primary .message {font-size: 18px;}
@@ -1313,7 +1326,6 @@ ul.status-help li:last-child .description {border-bottom: none;}
 	background-color: #FCF8E3;}
 .request-detail>.status td.merge.success {color: #3C763D; border-color: #BDDCA4; 
 	background-color: #DFF0D8;}
-.request-detail>.status .fa {display: none; font-size: 24px;}
 .request-detail>.status td.icons {width: 1%;}
 .request-detail>.status td.merge.warning .fa-exclamation-triangle {display: block; color: #8A6D3B;}
 .request-detail>.status td.merge.success .fa-info-circle {display: block; color: #3C763D;}

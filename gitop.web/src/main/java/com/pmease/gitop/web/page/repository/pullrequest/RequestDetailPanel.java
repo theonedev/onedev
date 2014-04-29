@@ -91,6 +91,23 @@ public class RequestDetailPanel extends Panel {
 			
 		});
 		
+		head.add(new Label("id", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return "#" + getPullRequest().getId();
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!editingTitle);
+			}
+			
+		});
+		
 		head.add(new AjaxLink<Void>("editTitle") {
 
 			@Override
@@ -104,8 +121,8 @@ public class RequestDetailPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 
-				setVisible(Gitop.getInstance(AuthorizationManager.class)
-						.canModify(getPullRequest()));
+				AuthorizationManager authorizationManager = Gitop.getInstance(AuthorizationManager.class);
+				setVisible(!editingTitle && authorizationManager.canModify(getPullRequest()));
 			}
 			
 		});
@@ -165,32 +182,6 @@ public class RequestDetailPanel extends Panel {
 				editingTitle = false;
 				
 				target.add(head);
-			}
-			
-		});
-		
-		head.add(new Label("id", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return "#" + getPullRequest().getId();
-			}
-			
-		}));
-		
-		head.add(new RequestStatusPanel("status", new AbstractReadOnlyModel<PullRequest>() {
-
-			@Override
-			public PullRequest getObject() {
-				return getPullRequest();
-			}
-			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!getPullRequest().isOpen());
 			}
 			
 		});
@@ -278,40 +269,41 @@ public class RequestDetailPanel extends Panel {
 			
 		}));
 
-		final WebMarkupContainer statusContainer = new WebMarkupContainer("status") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getPullRequest().isOpen());
-			}
-			
-		};
+		final WebMarkupContainer statusContainer = new WebMarkupContainer("status");
 		statusContainer.setOutputMarkupId(true);
 		add(statusContainer);
 		
-		statusContainer.add(new RequestStatusPanel("message", new AbstractReadOnlyModel<PullRequest>() {
+		WebMarkupContainer primaryContainer = new WebMarkupContainer("primary");
+		primaryContainer.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
 			@Override
-			public PullRequest getObject() {
-				return getPullRequest();
-			}
-			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-
+			public String getObject() {
 				PullRequest request = getPullRequest();
-				setVisible(request.getStatus() == Status.PENDING_APPROVAL 
-						|| request.getStatus() == Status.PENDING_UPDATE
-						|| request.getStatus() == Status.PENDING_INTEGRATE);
+				if (request.getStatus() == Status.INTEGRATED) {
+					return " success";
+				} else if (request.getStatus() == Status.DISCARDED) {
+					return " danger";
+				} else {
+					return " warning";
+				}
 			}
 			
-		});
+		}));
+		statusContainer.add(primaryContainer);
+		primaryContainer.add(new Label("message", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				if (getPullRequest().isOpen()) {
+					return "This request is " + getPullRequest().getStatus().toString().toLowerCase();
+				} else {
+					return "This request has been " + getPullRequest().getStatus().toString().toLowerCase();
+				}
+			}
+			
+		}));
 		
-		statusContainer.add(new ListView<String>("reasons", new LoadableDetachableModel<List<String>>() {
+		primaryContainer.add(new ListView<String>("reasons", new LoadableDetachableModel<List<String>>() {
 
 			@Override
 			protected List<String> load() {
@@ -319,6 +311,12 @@ public class RequestDetailPanel extends Panel {
 			}
 			
 		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getPullRequest().isOpen() && !getPullRequest().getCheckResult().getReasons().isEmpty());
+			}
 
 			@Override
 			protected void populateItem(ListItem<String> item) {
@@ -467,11 +465,11 @@ public class RequestDetailPanel extends Panel {
 				super.onConfigure();
 
 				RepositoryBasePage page = (RepositoryBasePage) getPage();
-				
+				PullRequest request = getPullRequest();
 				setVisible(SecurityUtils.getSubject().isPermitted(
 							ObjectPermission.ofRepositoryWrite(page.getRepository())) 
-						&& getPullRequest().getMergeInfo().getMergeHead() != null
-						&& getPullRequest().getStatus() == Status.PENDING_INTEGRATE);
+						&& request.getMergeInfo().getMergeHead() != null
+						&& request.getStatus() == Status.PENDING_INTEGRATE);
 			}
 
 			@Override
@@ -488,8 +486,9 @@ public class RequestDetailPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(Gitop.getInstance(AuthorizationManager.class)
-						.canModify(getPullRequest()));
+				PullRequest request = getPullRequest();
+				AuthorizationManager authorizationManager = Gitop.getInstance(AuthorizationManager.class);
+				setVisible(request.isOpen() && authorizationManager.canModify(getPullRequest()));
 			}
 
 			@Override
@@ -603,12 +602,12 @@ public class RequestDetailPanel extends Panel {
 
 			@Override
 			public IModel<String> getTitle() {
-				return Model.of("Commits");
+				return Model.of("Updates");
 			}
 
 			@Override
 			public WebMarkupContainer getPanel(String containerId) {
-				return new RequestCommitsPanel(containerId, new AbstractReadOnlyModel<PullRequest>() {
+				return new RequestUpdatesPanel(containerId, new AbstractReadOnlyModel<PullRequest>() {
 
 					@Override
 					public PullRequest getObject() {

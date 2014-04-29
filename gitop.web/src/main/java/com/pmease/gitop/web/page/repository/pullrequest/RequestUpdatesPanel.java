@@ -30,9 +30,9 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.PopoverConfig
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 
 @SuppressWarnings("serial")
-public class RequestCommitsPanel extends Panel {
+public class RequestUpdatesPanel extends Panel {
 
-	public RequestCommitsPanel(String id, IModel<PullRequest> model) {
+	public RequestUpdatesPanel(String id, IModel<PullRequest> model) {
 		super(id, model);
 	}
 
@@ -60,6 +60,8 @@ public class RequestCommitsPanel extends Panel {
 				item.add(new NullableUserLink("userAvatar", user, Mode.AVATAR));
 				item.add(new NullableUserLink("userName", user, Mode.NAME));
 				
+				List<PullRequestUpdate> allUpdates = update.getRequest().getSortedUpdates();
+				item.add(new Label("updateNo", allUpdates.size() - allUpdates.indexOf(update)));
 				item.add(new Label("date", DateUtils.formatAge(update.getDate())));
 				item.add(new UpdateCommitsPanel("detail", item.getModel()));
 

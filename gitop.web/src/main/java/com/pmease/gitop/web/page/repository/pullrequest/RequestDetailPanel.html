@@ -2,6 +2,7 @@
 	<div class="request-detail">
 		<div wicket:id="head" class="head clearfix">
 			<div wicket:id="title" class="pull-left"></div>
+			<div wicket:id="id" class="id pull-left"></div>
 			<wicket:enclosure child="editTitle">
 			<div class="pull-left">
 				<a wicket:id="editTitle" class="icon icon-edit" href="javascript:void(0);"></a>
@@ -12,8 +13,6 @@
 				<input wicket:id="save" type="submit" value="Save" class="btn btn-sm btn-primary"/>
 				<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-sm btn-default"/>
 			</form>
-			<div wicket:id="id" class="id pull-right"></div>
-			<div wicket:id="status" class="status pull-right"></div>
 		</div>
 		<div class="summary">
 			<span wicket:id="user"></span> 
@@ -31,32 +30,29 @@
 		<div wicket:id="status" class="status">
 			<table>
 				<tr>
-					<wicket:enclosure child="message">
-					<td class="primary">
-						<div wicket:id="message" class="message"></div>
-						<ul class="reasons">
-							<li wicket:id="reasons">
-								<span wicket:id="reason"></span>
-							</li>
-						</ul>
+					<td wicket:id="primary" class="primary">
+						<div class="fa fa-check-circle pull-left"></div>
+						<div class="fa fa-times-circle pull-left"></div>
+						<div class="fa fa-exclamation-circle pull-left"></div>
+						<div class="pull-left">
+							<div wicket:id="message" class="message"></div>
+							<wicket:enclosure child="reasons">
+							<ul class="reasons">
+								<li wicket:id="reasons">
+									<span wicket:id="reason"></span>
+								</li>
+							</ul>
+							</wicket:enclosure>
+						</div>
 					</td>
-					</wicket:enclosure>
 					<td wicket:id="merge" class="merge">
-						<table>
-							<tr>
-								<td class="icons">
-									<span class="fa fa-info-circle"></span>
-									<span class="fa fa-exclamation-triangle"></span>
-								</td>
-								<td>
-									<div wicket:id="noConflicts" class="no-conflicts">Be able to merge automatically.</div>
-									<div wicket:id="conflicts" class="conflicts">
-										There are merge conflicts, you may use <a wicket:id="helpTrigger" href="javascript:void(0);">command line</a> to resolve conflicts.
-										<div wicket:id="helpDropdown"></div>
-									</div>
-								</td>
-							</tr>
-						</table>
+						<div class="fa fa-info-circle pull-left"></div>
+						<div class="fa fa-exclamation-triangle pull-left"></div>
+						<div wicket:id="noConflicts" class="no-conflicts message pull-left">This request can be merged automatically.</div>
+						<div wicket:id="conflicts" class="conflicts message pull-left">
+							There are merge conflicts, you may use <a wicket:id="helpTrigger" href="javascript:void(0);">command line</a> to resolve conflicts.
+							<div wicket:id="helpDropdown"></div>
+						</div>
 					</td>
 					<td wicket:id="actions" class="actions">
 						<a wicket:id="approve" class="btn btn-primary btn-sm btn-block" href="javascript:void(0);">Approve</a>
