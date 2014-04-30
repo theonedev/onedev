@@ -462,7 +462,7 @@ fieldset[disabled] .btn-inverse.active {
 /**
  * AVATAR
  */
-.avatar {
+img.avatar {
   display: inline-block;
   vertical-align: middle;
   border-radius: 3px;
@@ -474,8 +474,8 @@ fieldset[disabled] .btn-inverse.active {
           transition: all 0.2s ease-in-out;
 }
 
-.avatar-big { width: 32px; height: 32px; }
-.avatar-xlarge { width: 128px; height: 128px; }
+img.avatar-big { width: 32px; height: 32px; }
+img.avatar-xlarge { width: 128px; height: 128px; }
 
 /** FAUX ROW */
 .faux { display: table; width: 100%; border-collapse: collapse; table-layout: fixed; border-spacing: 0; }
@@ -1333,9 +1333,11 @@ ul.status-help li:last-child .description {border-bottom: none;}
 
 .request-detail .activities>tbody>tr>td {padding: 8px;}
 .request-detail .activities>tbody>tr>td {border-top-style: dashed;}
-.request-detail .activities td.summary {width: 240px; padding-right: 8px;}
-.request-detail .activities td.summary .avatar {width: 36px; height: 36px; margin-right: 4px;} 
-.request-detail .activities td-summary .text {color: #666; font-size: 13px;}
+.request-detail .activities td.avatar, .request-detail .activities td.action {
+	width: 1px; white-space: nowrap;}
+.request-detail .activities td.action {padding-right: 8px;} 
+.request-detail .activities td.avatar .avatar {width: 36px; height: 36px;} 
+.request-detail .activities td.action .text {color: #666; font-size: 13px;}
 .request-detail .activities td.detail .fa-2x {cursor: default; position: relative;
 	background: url("/assets/img/commits.png") no-repeat 0 7px; padding-left: 24px; 
 	margin: 0 0 8px -14px;}

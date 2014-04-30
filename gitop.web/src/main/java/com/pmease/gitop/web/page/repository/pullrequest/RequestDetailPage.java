@@ -45,6 +45,7 @@ import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.manager.VoteManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.CommitComment;
+import com.pmease.gitop.model.MergeInfo;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequest.Status;
 import com.pmease.gitop.model.User;
@@ -367,15 +368,42 @@ public class RequestDetailPage extends RepositoryPage implements CommitCommentsA
 		}));
 		statusContainer.add(mergeContainer);
 		
-		mergeContainer.add(new WebMarkupContainer("noConflicts") {
+		WebMarkupContainer canMergeContainer = new WebMarkupContainer("canMerge") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getPullRequest().getMergeInfo().getMergeHead() != null);
+				
+				MergeInfo mergeInfo = getPullRequest().getMergeInfo();
+
+				setVisible(mergeInfo.getMergeHead() != null 
+						&& !mergeInfo.getMergeHead().equals(mergeInfo.getRequestHead()));
 			}
 			
-		}); 
+		}; 
+		
+		PageParameters params = RequestChangesPage.params4(
+				request, 
+				request.getLatestUpdate().getHeadCommit(), 
+				request.getMergeInfo().getMergeHead());
+		
+		canMergeContainer.add(new BookmarkablePageLink<Void>("preview", RequestChangesPage.class, params));
+		
+		mergeContainer.add(canMergeContainer);
+		
+		mergeContainer.add(new WebMarkupContainer("canFastforward") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+
+				MergeInfo mergeInfo = getPullRequest().getMergeInfo();
+
+				setVisible(mergeInfo.getMergeHead() != null 
+						&& mergeInfo.getMergeHead().equals(mergeInfo.getRequestHead()));
+			}
+			
+		});
 		
 		WebMarkupContainer conflictsContainer = new WebMarkupContainer("conflicts") {
 

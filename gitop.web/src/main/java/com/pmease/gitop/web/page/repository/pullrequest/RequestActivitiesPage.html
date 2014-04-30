@@ -1,13 +1,13 @@
 <wicket:extend>
 	<table class="activities table table-striped">
 		<tr wicket:id="activities">
-			<td class="summary">
-				<div wicket:id="userAvatar" class="pull-left"></div>
-				<div class="pull-left">
-					<div wicket:id="userName"></div>
-					<div class="text">
-						<span wicket:id="action"></span> <span wicket:id="date"></span>
-					</div>
+			<td class="avatar">
+				<div wicket:id="userAvatar"></div>
+			</td>
+			<td class="action">
+				<div wicket:id="userName"></div>
+				<div class="text">
+					<span wicket:id="action"></span> <span wicket:id="date"></span>
 				</div>
 			</td>
 			<td class="detail">
@@ -15,13 +15,13 @@
 			</td>
 		</tr>
 		<tr wicket:id="newCommentContainer">
-			<td class="summary clearfix">
-				<div wicket:id="userAvatar" class="pull-left"></div>
-				<div class="pull-left">
-					<div wicket:id="userName"></div>
-					<div class="text">
-						Add new comment
-					</div>
+			<td class="avatar">
+				<div wicket:id="userAvatar"></div>
+			</td>
+			<td class="action">
+				<div wicket:id="userName"></div>
+				<div class="text">
+					Add new comment
 				</div>
 			</td>
 			<td class="detail">

@@ -1,13 +1,13 @@
 <wicket:extend>
 	<table class="activities table table-striped">
 		<tr wicket:id="updates">
-			<td class="summary clearfix">
+			<td class="avatar">
 				<div wicket:id="userAvatar" class="pull-left"></div>
-				<div class="pull-left">
-					<div wicket:id="userName"></div>
-					<div class="text">
-						Update #<span wicket:id="updateNo"></span>, <span wicket:id="date"></span>
-					</div>
+			</td>
+			<td class="action">
+				<div wicket:id="userName"></div>
+				<div class="text">
+					Made <a wicket:id="updateLink">update #<span wicket:id="updateNo"></span></a>, <span wicket:id="date"></span>
 				</div>
 			</td>
 			<td class="detail">

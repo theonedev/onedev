@@ -48,7 +48,12 @@
 					<td wicket:id="merge" class="merge">
 						<div class="fa fa-info-circle pull-left"></div>
 						<div class="fa fa-exclamation-triangle pull-left"></div>
-						<div wicket:id="noConflicts" class="no-conflicts message pull-left">This request can be merged automatically.</div>
+						<div wicket:id="canMerge" class="no-conflicts message pull-left">
+							This request can be merged automatically. <a wicket:id="preview">Preview</a> the merge result.
+						</div>
+						<div wicket:id="canFastforward" class="no-conflicts message pull-left">
+							This request can be fast-forwarded.
+						</div>
 						<div wicket:id="conflicts" class="conflicts message pull-left">
 							There are merge conflicts, you may use <a wicket:id="helpTrigger" href="javascript:void(0);">command line</a> to resolve conflicts.
 							<div wicket:id="helpDropdown"></div>

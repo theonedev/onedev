@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.markup.html.form.DropDownChoice;
+import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -17,6 +18,7 @@ import com.pmease.gitop.model.MergeInfo;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.Repository;
+import com.pmease.gitop.model.PullRequest.Status;
 import com.pmease.gitop.web.page.repository.source.commit.diff.DiffViewPanel;
 
 @SuppressWarnings("serial")
@@ -29,10 +31,10 @@ public class RequestChangesPage extends RequestDetailPage {
 	private DropDownChoice<String> headCommitSelector;
 	
 	// base commit represents comparison base
-	private String baseCommitName;
+	private String baseCommit;
 	
 	// head commit represents comparison head
-	private String headCommitName;
+	private String headCommit;
 	
 	// map commit name to comit hash
 	private IModel<LinkedHashMap<String, String>> commitsModel = 
@@ -44,24 +46,29 @@ public class RequestChangesPage extends RequestDetailPage {
 			
 			PullRequest request = getPullRequest();
 			MergeInfo mergeInfo = request.getMergeInfo();
-			if (mergeInfo.getMergeHead() != null && !mergeInfo.getMergeHead().equals(mergeInfo.getRequestHead())) 
-				choices.put("Auto-Merge Preview", request.getMergeInfo().getMergeHead());
+			if (request.isOpen() 
+					&& mergeInfo.getMergeHead() != null 
+					&& !mergeInfo.getMergeHead().equals(mergeInfo.getRequestHead())) { 
+				choices.put(request.getMergeInfo().getMergeHead(), "Auto-Merge Preview");
+			}
 			
 			int index = 0;
 			int count = request.getSortedUpdates().size();
 			for (PullRequestUpdate update: request.getSortedUpdates()) {
-				if (index == 0)
-					choices.put("Head of Update #" + (count-index) + " (latest)", update.getHeadCommit());
-				else 
-					choices.put("Head of Update #" + (count-index), update.getHeadCommit());
+				choices.put(update.getHeadCommit(), "Head of Update #" + (count-index));
 				index++;
 			}
 			
 			if (request.getTarget().getHeadCommit().equals(request.getBaseCommit())) {
-				choices.put("Target Branch Head", request.getTarget().getHeadCommit());
+				choices.put(request.getTarget().getHeadCommit(), "Target Branch Head");
 			} else {
-				choices.put("Target Branch Head (current)", request.getTarget().getHeadCommit());
-				choices.put("Target Branch Head (original)", request.getBaseCommit());
+				String displayName = choices.get(request.getTarget().getHeadCommit());
+				if (displayName != null) {
+					choices.put(request.getTarget().getHeadCommit(), displayName + " (current head of target branch)");
+				} else {
+					choices.put(request.getTarget().getHeadCommit(), "Target Branch Head (current)");
+				}
+				choices.put(request.getBaseCommit(), "Target Branch Head (original)");
 			}
 			
 			return choices;
@@ -71,12 +78,38 @@ public class RequestChangesPage extends RequestDetailPage {
 
 	public RequestChangesPage(PageParameters params) {
 		super(params);
+		
+		baseCommit = params.get("base").toString();
+		headCommit = params.get("head").toString();
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
+		IModel<List<String>> commitChoices = new LoadableDetachableModel<List<String>>() {
+
+			@Override
+			protected List<String> load() {
+				return new ArrayList<String>(commitsModel.getObject().keySet());
+			}
+			
+		};
+		
+		IChoiceRenderer<String> choiceRenderer = new IChoiceRenderer<String>() {
+
+			@Override
+			public Object getDisplayValue(String object) {
+				return commitsModel.getObject().get(object);
+			}
+
+			@Override
+			public String getIdValue(String object, int index) {
+				return object;
+			}
+			
+		};
+		
 		baseCommitSelector = new DropDownChoice<String>("baseCommitChoice", new IModel<String>() {
 
 			@Override
@@ -85,31 +118,22 @@ public class RequestChangesPage extends RequestDetailPage {
 
 			@Override
 			public String getObject() {
-				if (!commitsModel.getObject().containsKey(baseCommitName)) {
-					List<String> commitNames = new ArrayList<>(commitsModel.getObject().keySet());
-					PullRequest request = getPullRequest();
-					if (request.getTarget().getHeadCommit().equals(request.getBaseCommit())) {
-						baseCommitName = commitNames.get(commitNames.size()-1);
-					} else {
-						baseCommitName = commitNames.get(commitNames.size()-2);
-					}
+				if (!commitsModel.getObject().containsKey(baseCommit)) {
+					if (getPullRequest().getStatus() == Status.INTEGRATED)
+						baseCommit = getPullRequest().getBaseCommit();
+					else
+						baseCommit = getPullRequest().getTarget().getHeadCommit();
 				}
-				return baseCommitName;
+				return baseCommit;
 			}
 
 			@Override
 			public void setObject(String object) {
-				baseCommitName = object;
+				baseCommit = object;
 			}
 			
-		}, new LoadableDetachableModel<List<String>>() {
-
-			@Override
-			protected List<String> load() {
-				return new ArrayList<String>(commitsModel.getObject().keySet());
-			}
-			
-		});
+		}, commitChoices, choiceRenderer);
+		
 		baseCommitSelector.add(new OnChangeAjaxBehavior() {
 			
 			@Override
@@ -127,31 +151,19 @@ public class RequestChangesPage extends RequestDetailPage {
 
 			@Override
 			public String getObject() {
-				if (!commitsModel.getObject().containsKey(headCommitName)) {
-					List<String> commitNames = new ArrayList<>(commitsModel.getObject().keySet());
-					PullRequest request = getPullRequest();
-					MergeInfo mergeInfo = request.getMergeInfo();
-					if (mergeInfo.getMergeHead() != null && !mergeInfo.getMergeHead().equals(mergeInfo.getRequestHead())) 
-						headCommitName = commitNames.get(1);
-					else
-						headCommitName = commitNames.get(0);
+				if (!commitsModel.getObject().containsKey(headCommit)) {
+					headCommit = getPullRequest().getLatestUpdate().getHeadCommit();
 				}
-				return headCommitName;
+				return headCommit;
 			}
 			
 			@Override
 			public void setObject(String object) {
-				headCommitName = object;
+				headCommit = object;
 			}
 
-		}, new LoadableDetachableModel<List<String>>() {
-
-			@Override
-			protected List<String> load() {
-				return new ArrayList<String>(commitsModel.getObject().keySet());
-			}
-			
-		});
+		}, commitChoices, choiceRenderer);
+		
 		headCommitSelector.add(new OnChangeAjaxBehavior() {
 
 			@Override
@@ -173,14 +185,14 @@ public class RequestChangesPage extends RequestDetailPage {
 
 			@Override
 			protected String load() {
-				return commitsModel.getObject().get(baseCommitSelector.getDefaultModelObjectAsString());
+				return baseCommitSelector.getDefaultModelObjectAsString();
 			}
 			
 		}, new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
-				return commitsModel.getObject().get(headCommitSelector.getDefaultModelObjectAsString());
+				return headCommitSelector.getDefaultModelObjectAsString();
 			}
 			
 		}));
@@ -193,6 +205,15 @@ public class RequestChangesPage extends RequestDetailPage {
 		commitsModel.detach();
 		
 		super.onDetach();
+	}
+
+	public static PageParameters params4(PullRequest request, String baseCommit, String headCommit) {
+		PageParameters params = RequestDetailPage.params4(request);
+		
+		params.set("base", baseCommit);
+		params.set("head", headCommit);
+		
+		return params;
 	}
 	
 }

@@ -9,6 +9,8 @@ import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -59,7 +61,17 @@ public class RequestUpdatesPage extends RequestDetailPage {
 				item.add(new NullableUserLink("userName", user, Mode.NAME));
 				
 				List<PullRequestUpdate> allUpdates = update.getRequest().getSortedUpdates();
-				item.add(new Label("updateNo", allUpdates.size() - allUpdates.indexOf(update)));
+				int index = allUpdates.indexOf(update);
+				String baseCommit;
+				if (index == allUpdates.size()-1)
+					baseCommit = update.getRequest().getBaseCommit();
+				else
+					baseCommit = allUpdates.get(index+1).getHeadCommit();
+				PageParameters params = RequestChangesPage.params4(
+						update.getRequest(), baseCommit, update.getHeadCommit());
+				Link<Void> updateLink = new BookmarkablePageLink<Void>("updateLink", RequestChangesPage.class, params);
+				updateLink.add(new Label("updateNo", allUpdates.size() - allUpdates.indexOf(update)));
+				item.add(updateLink);
 				item.add(new Label("date", DateUtils.formatAge(update.getDate())));
 				item.add(new UpdateCommitsPanel("detail", item.getModel()));
 
