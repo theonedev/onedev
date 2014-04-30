@@ -40,7 +40,7 @@ public abstract class AbstractAccountPage extends BasePage {
 	}
 
 	@Override
-	public void onDetach() {
+	protected void onDetach() {
 		if (accountModel != null) {
 			accountModel.detach();
 		}
@@ -51,4 +51,11 @@ public abstract class AbstractAccountPage extends BasePage {
 	public User getAccount() {
 		return accountModel.getObject();
 	}
+	
+	public static PageParameters params4(User user) {
+		PageParameters params = new PageParameters();
+		params.set("user", user.getName());
+		return params;
+	}
+	
 }

@@ -11,12 +11,10 @@ import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
@@ -30,10 +28,10 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.PopoverConfig
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 
 @SuppressWarnings("serial")
-public class RequestUpdatesPanel extends Panel {
+public class RequestUpdatesPage extends RequestDetailPage {
 
-	public RequestUpdatesPanel(String id, IModel<PullRequest> model) {
-		super(id, model);
+	public RequestUpdatesPage(PageParameters params) {
+		super(params);
 	}
 
 	@Override
@@ -114,8 +112,4 @@ public class RequestUpdatesPanel extends Panel {
 		});		
 	}
 
-	private PullRequest getPullRequest() {
-		return (PullRequest) getDefaultModelObject();
-	}
-	
 }

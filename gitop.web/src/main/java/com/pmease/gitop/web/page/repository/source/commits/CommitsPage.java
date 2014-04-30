@@ -21,12 +21,12 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.repository.RepositoryTabPage;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 import com.pmease.gitop.web.page.repository.api.IRevisionAware;
 import com.pmease.gitop.web.page.repository.source.component.RevisionSelector;
 
 @SuppressWarnings("serial")
-public class CommitsPage extends RepositoryTabPage implements IRevisionAware {
+public class CommitsPage extends RepositoryPage implements IRevisionAware {
 
 	public static final int COMMITS_PER_PAGE = 30;
 	

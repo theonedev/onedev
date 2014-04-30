@@ -6,9 +6,9 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 
 @SuppressWarnings("serial")
-public class ActionTabComponent extends Panel {
+public class ActionTabHeader extends Panel {
 
-	public ActionTabComponent(String id, ActionTab tab) {
+	public ActionTabHeader(String id, ActionTab tab) {
 		super(id);
 		
 		Link<?> link = newLink("link", tab);

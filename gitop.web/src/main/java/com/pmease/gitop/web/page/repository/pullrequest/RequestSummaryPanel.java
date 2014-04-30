@@ -9,7 +9,6 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.PullRequest;
@@ -17,14 +16,13 @@ import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.AvatarLink.Mode;
 import com.pmease.gitop.web.component.link.PersonLink;
-import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.repository.RepositoryBasePage;
 
 @SuppressWarnings("serial")
 public class RequestSummaryPanel extends Panel {
 
-	public RequestSummaryPanel(String id, IModel<PullRequest> requestModel) {
-		super(id, requestModel);
+	public RequestSummaryPanel(String id, IModel<PullRequest> model) {
+		super(id, model);
 	}
 
 	@Override
@@ -35,10 +33,7 @@ public class RequestSummaryPanel extends Panel {
 
 			@Override
 			public void onClick() {
-				RepositoryBasePage page = (RepositoryBasePage) getPage();
-				PageParameters params = PageSpec.forRepository(page.getRepository());
-				params.set(0, getPullRequest().getId());
-				setResponsePage(RequestDetailPage.class, params);
+				setResponsePage(RequestActivitiesPage.class, RequestActivitiesPage.params4(getPullRequest()));
 			}
 			
 		};

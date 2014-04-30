@@ -31,14 +31,14 @@ import com.pmease.gitop.web.git.command.ArchiveCommand.Format;
 import com.pmease.gitop.web.git.command.Tag;
 import com.pmease.gitop.web.git.command.TagForEachRefCommand;
 import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.repository.RepositoryTabPage;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 import com.pmease.gitop.web.page.repository.source.commit.SourceCommitPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 
 @SuppressWarnings("serial")
-public class TagsPage extends RepositoryTabPage {
+public class TagsPage extends RepositoryPage {
 
 	private final IModel<Map<String, Tag>> tagsModel;
 	

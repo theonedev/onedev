@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page.repository.pullrequest.activity;
+package com.pmease.gitop.web.page.repository.pullrequest;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,9 +13,9 @@ import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.git.GitPerson;
 import com.pmease.commons.wicket.behavior.DisableIfBlankBehavior;
@@ -30,15 +30,21 @@ import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.web.component.link.AvatarLink.Mode;
 import com.pmease.gitop.web.component.link.NullableUserLink;
 import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.page.repository.pullrequest.activity.ClosePullRequest;
+import com.pmease.gitop.web.page.repository.pullrequest.activity.CommentPullRequest;
+import com.pmease.gitop.web.page.repository.pullrequest.activity.OpenPullRequest;
+import com.pmease.gitop.web.page.repository.pullrequest.activity.PullRequestActivity;
+import com.pmease.gitop.web.page.repository.pullrequest.activity.UpdatePullRequest;
+import com.pmease.gitop.web.page.repository.pullrequest.activity.VotePullRequest;
 import com.pmease.gitop.web.util.DateUtils;
 
 @SuppressWarnings("serial")
-public class RequestActivitiesPanel extends Panel {
+public class RequestActivitiesPage extends RequestDetailPage {
 
 	private String newCommentContent;
 	
-	public RequestActivitiesPanel(String id, IModel<PullRequest> model) {
-		super(id, model);
+	public RequestActivitiesPage(PageParameters params) {
+		super(params);
 	}
 	
 	@Override
@@ -158,8 +164,4 @@ public class RequestActivitiesPanel extends Panel {
 		newCommentContainer.add(newCommentArea);
 	}
 
-	private PullRequest getPullRequest() {
-		return (PullRequest) getDefaultModelObject(); 
-	}
-	
 }

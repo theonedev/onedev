@@ -11,6 +11,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitop.model.MergeInfo;
 import com.pmease.gitop.model.PullRequest;
@@ -19,7 +20,7 @@ import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.page.repository.source.commit.diff.DiffViewPanel;
 
 @SuppressWarnings("serial")
-public class RequestChangesPanel extends Panel {
+public class RequestChangesPage extends RequestDetailPage {
 
 	private Panel diffView;
 	
@@ -68,8 +69,8 @@ public class RequestChangesPanel extends Panel {
 		
 	};
 
-	public RequestChangesPanel(String id, IModel<PullRequest> model) {
-		super(id, model);
+	public RequestChangesPage(PageParameters params) {
+		super(params);
 	}
 
 	@Override
@@ -187,12 +188,8 @@ public class RequestChangesPanel extends Panel {
 		diffView.setOutputMarkupId(true);
 	}
 	
-	private PullRequest getPullRequest() {
-		return (PullRequest) getDefaultModelObject();
-	}
-
 	@Override
-	protected void onDetach() {
+	public void onDetach() {
 		commitsModel.detach();
 		
 		super.onDetach();

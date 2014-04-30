@@ -33,7 +33,7 @@ import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.git.command.CommitInCommand;
 import com.pmease.gitop.web.git.command.CommitInCommand.RefType;
 import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.repository.RepositoryTabPage;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 import com.pmease.gitop.web.page.repository.source.commit.diff.CommentListPanel;
 import com.pmease.gitop.web.page.repository.source.commit.diff.CommitCommentsAware;
 import com.pmease.gitop.web.page.repository.source.commit.diff.DiffViewPanel;
@@ -42,7 +42,7 @@ import com.pmease.gitop.web.page.repository.source.tree.SourceTreePage;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
 @SuppressWarnings("serial")
-public class SourceCommitPage extends RepositoryTabPage implements CommitCommentsAware {
+public class SourceCommitPage extends RepositoryPage implements CommitCommentsAware {
 	
 	public static PageParameters newParams(Repository repository, String revision) {
 		PageParameters params = PageSpec.forRepository(repository);

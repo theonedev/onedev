@@ -159,7 +159,7 @@ public abstract class RepositoryBasePage extends AbstractAccountPage {
 	}
 	
 	@Override
-	public void onDetach() {
+	protected void onDetach() {
 		if (repositoryModel != null) {
 			repositoryModel.detach();
 		}

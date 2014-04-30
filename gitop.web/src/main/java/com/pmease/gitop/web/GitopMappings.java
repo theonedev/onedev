@@ -37,7 +37,9 @@ import com.pmease.gitop.web.page.init.ServerInitPage;
 import com.pmease.gitop.web.page.repository.pullrequest.ClosedRequestsPage;
 import com.pmease.gitop.web.page.repository.pullrequest.NewRequestPage;
 import com.pmease.gitop.web.page.repository.pullrequest.OpenRequestsPage;
-import com.pmease.gitop.web.page.repository.pullrequest.RequestDetailPage;
+import com.pmease.gitop.web.page.repository.pullrequest.RequestActivitiesPage;
+import com.pmease.gitop.web.page.repository.pullrequest.RequestChangesPage;
+import com.pmease.gitop.web.page.repository.pullrequest.RequestUpdatesPage;
 import com.pmease.gitop.web.page.repository.settings.CreateRepositoryPage;
 import com.pmease.gitop.web.page.repository.settings.GateKeeperSettingPage;
 import com.pmease.gitop.web.page.repository.settings.PullRequestSettingsPage;
@@ -170,7 +172,13 @@ public class GitopMappings extends CompoundRequestMapper {
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/pull-requests/new", NewRequestPage.class));
 		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/pull-requests", RequestDetailPage.class));
+				"${user}/${repo}/pull-requests/${request}", RequestActivitiesPage.class));
+		add(new PageParameterAwareMountedMapper(
+				"${user}/${repo}/pull-requests/${request}/activities", RequestActivitiesPage.class));
+		add(new PageParameterAwareMountedMapper(
+				"${user}/${repo}/pull-requests/${request}/updates", RequestUpdatesPage.class));
+		add(new PageParameterAwareMountedMapper(
+				"${user}/${repo}/pull-requests/${request}/changes", RequestChangesPage.class));
 
 		add(new PageParameterAwareMountedMapper("${user}/${repo}/contributors",
 				ContributorsPage.class));

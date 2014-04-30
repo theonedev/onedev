@@ -1,3 +1,85 @@
 <wicket:extend>
-	<div wicket:id="content"></div>
+	<div class="request-detail">
+		<div wicket:id="head" class="head clearfix">
+			<div wicket:id="title" class="pull-left"></div>
+			<div wicket:id="id" class="id pull-left"></div>
+			<wicket:enclosure child="editTitle">
+			<div class="pull-left">
+				<a wicket:id="editTitle" title="Edit title" class="icon icon-edit" href="javascript:void(0);"></a>
+			</div>
+			</wicket:enclosure>
+			<form wicket:id="titleEditor" class="pull-left form-inline">
+				<input wicket:id="title" type="text" placeholder="Input title" class="form-control input-sm"></input>
+				<input wicket:id="save" type="submit" value="Save" class="btn btn-sm btn-primary"/>
+				<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-sm btn-default"/>
+			</form>
+		</div>
+		<div class="summary">
+			<span wicket:id="user"></span> 
+			<span>wants to pull</span> 
+			<wicket:enclosure child="targetLink">
+				into
+				<span class="label branch"><span class="icon icon-git-branch"></span> <a wicket:id="targetLink"><span wicket:id="targetLabel"></span></a></span>
+			</wicket:enclosure>
+			<wicket:enclosure child="sourceLink">
+				from
+				<span class="label branch"><span class="icon icon-git-branch"></span> <a wicket:id="sourceLink"><span wicket:id="sourceLabel"></span></a></span>
+			</wicket:enclosure>
+			<span wicket:id="date"></span>
+		</div>
+		<div wicket:id="status" class="status">
+			<table>
+				<tr>
+					<td wicket:id="primary" class="primary">
+						<div class="fa fa-check-circle pull-left"></div>
+						<div class="fa fa-times-circle pull-left"></div>
+						<div class="fa fa-exclamation-circle pull-left"></div>
+						<div class="pull-left">
+							<div wicket:id="message" class="message"></div>
+							<wicket:enclosure child="reasons">
+							<ul class="reasons">
+								<li wicket:id="reasons">
+									<span wicket:id="reason"></span>
+								</li>
+							</ul>
+							</wicket:enclosure>
+						</div>
+					</td>
+					<td wicket:id="merge" class="merge">
+						<div class="fa fa-info-circle pull-left"></div>
+						<div class="fa fa-exclamation-triangle pull-left"></div>
+						<div wicket:id="noConflicts" class="no-conflicts message pull-left">This request can be merged automatically.</div>
+						<div wicket:id="conflicts" class="conflicts message pull-left">
+							There are merge conflicts, you may use <a wicket:id="helpTrigger" href="javascript:void(0);">command line</a> to resolve conflicts.
+							<div wicket:id="helpDropdown"></div>
+						</div>
+					</td>
+					<td wicket:id="actions" class="actions">
+						<a wicket:id="approve" class="btn btn-primary btn-sm btn-block" href="javascript:void(0);">Approve</a>
+						<a wicket:id="disapprove" class="btn btn-primary btn-sm btn-block" href="javascript:void(0);">Disapprove</a>
+						<a wicket:id="integrate" class="btn btn-success btn-sm btn-block">Integrate</a>
+						<a wicket:id="discard" class="btn btn-danger btn-sm btn-block">Discard</a>
+					</td>
+				</tr>
+			</table>
+			<form wicket:id="commentEditor">
+				<table>
+					<tr>
+						<td class="comment">
+							<textarea wicket:id="comment" rows="8" class="form-control" placeholder="Leave a comment"></textarea>
+						</td>
+						<td class="actions">
+							<input wicket:id="confirm" type="submit" value="Confirm" class="btn btn-sm btn-block"></input> 
+							<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-default btn-sm btn-block"></input>
+						</td>
+					</tr>
+				</table>
+			</form>
+		</div>
+		<div wicket:id="tabs"></div>
+		<wicket:child></wicket:child>
+	</div>
+	<wicket:fragment wicket:id="conflictHelpFrag">
+		step1, step2, step3
+	</wicket:fragment>
 </wicket:extend>

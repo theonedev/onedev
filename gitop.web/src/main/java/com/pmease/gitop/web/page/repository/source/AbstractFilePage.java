@@ -10,11 +10,11 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.repository.RepositoryTabPage;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 import com.pmease.gitop.web.page.repository.api.IRevisionAware;
 
 @SuppressWarnings("serial")
-public abstract class AbstractFilePage extends RepositoryTabPage implements IRevisionAware {
+public abstract class AbstractFilePage extends RepositoryPage implements IRevisionAware {
 
 	protected final IModel<List<String>> pathsModel;
 	

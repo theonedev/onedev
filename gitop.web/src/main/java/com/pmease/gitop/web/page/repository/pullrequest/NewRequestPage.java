@@ -15,11 +15,11 @@ import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.repository.RepositoryBasePage;
-import com.pmease.gitop.web.page.repository.RepositoryTabPage;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 import com.pmease.gitop.web.page.repository.source.commit.diff.CommitCommentsAware;
 
 @SuppressWarnings("serial")
-public class NewRequestPage extends RepositoryTabPage implements CommitCommentsAware {
+public class NewRequestPage extends RepositoryPage implements CommitCommentsAware {
 
 	public static PageParameters newParams(Repository repository, String source, String dest) {
 		PageParameters params = PageSpec.forRepository(repository);

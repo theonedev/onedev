@@ -29,9 +29,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.Git;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.SessionData;
 import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.account.AbstractAccountPage;
 import com.pmease.gitop.web.page.repository.api.RepositoryPageTab;
 import com.pmease.gitop.web.page.repository.api.RepositoryPageTab.Category;
 import com.pmease.gitop.web.page.repository.pullrequest.ClosedRequestsPage;
@@ -49,11 +51,11 @@ import com.pmease.gitop.web.page.repository.source.tags.TagsPage;
 import com.pmease.gitop.web.page.repository.source.tree.SourceTreePage;
 
 @SuppressWarnings("serial")
-public abstract class RepositoryTabPage extends RepositoryBasePage {
+public abstract class RepositoryPage extends RepositoryBasePage {
 
 	protected final IModel<String> revisionModel;
 	
-	public RepositoryTabPage(PageParameters params) {
+	public RepositoryPage(PageParameters params) {
 		super(params);
 
 		String rev = findRevision(params);
@@ -264,11 +266,17 @@ public abstract class RepositoryTabPage extends RepositoryBasePage {
 	}
 
 	@Override
-	public void onDetach() {
+	protected void onDetach() {
 		if (revisionModel != null) {
 			revisionModel.detach();
 		}
 		
 		super.onDetach();
+	}
+	
+	public static PageParameters params4(Repository repository) {
+		PageParameters params = AbstractAccountPage.params4(repository.getUser());
+		params.set("repo", repository.getName());
+		return params;
 	}
 }

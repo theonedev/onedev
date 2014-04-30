@@ -1,9 +1,11 @@
 package com.pmease.commons.wicket.component.tabbable;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.wicket.Page;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.model.IModel;
-
-import com.google.common.base.Preconditions;
 
 public class PageTab implements Tab {
 	
@@ -11,20 +13,25 @@ public class PageTab implements Tab {
 
 	private final IModel<String> titleModel;
 	
-	private final Class<?>[] pageClasses;
+	private final List<Class<? extends Page>> pageClasses;
 	
-	public PageTab(IModel<String> titleModel, Class<?>...pageClasses) {
-		Preconditions.checkArgument(pageClasses.length > 0, "At least one page class has to be provided.");
-		
+	public PageTab(IModel<String> titleModel, Class<? extends Page> pageClass, 
+			List<Class<? extends Page>> additionalPageClasses) {
 		this.titleModel = titleModel;
-		this.pageClasses = pageClasses;
+		pageClasses = new ArrayList<>();
+		pageClasses.add(pageClass);
+		pageClasses.addAll(additionalPageClasses);
 	}
 	
+	public PageTab(IModel<String> titleModel, Class<? extends Page> pageClass) {
+		this(titleModel, pageClass, new ArrayList<Class<? extends Page>>());
+	}
+
 	protected final IModel<String> getTitleModel() {
 		return titleModel;
 	}
 	
-	protected final Class<?>[] getPageClasses() {
+	protected final List<Class<? extends Page>> getPageClasses() {
 		return pageClasses;
 	}
 	
@@ -38,7 +45,7 @@ public class PageTab implements Tab {
 	 */
 	@Override
 	public void populate(ListItem<Tab> item, String componentId) {
-		item.add(new PageTabComponent(componentId, this));
+		item.add(new PageTabHeader(componentId, this));
 	}
 
 	@Override
