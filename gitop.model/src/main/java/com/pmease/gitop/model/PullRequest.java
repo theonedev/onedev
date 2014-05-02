@@ -301,7 +301,7 @@ public class PullRequest extends AbstractEntity {
 		this.mergeInfo = mergeInfo;
 	}
 
-	public CloseInfo getCloseInfo() {
+	public @Nullable CloseInfo getCloseInfo() {
 		return closeInfo;
 	}
 
