@@ -32,12 +32,12 @@
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
             <version>1.0.31</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>io.dropwizard</groupId>  
-            <artifactId>dropwizard-validation</artifactId>  
-            <version>${dropwizardVersion}</version> 
-        </dependency> 
+        </dependency>
+        <dependency>
+        	<groupId>org.hibernate</groupId>
+        	<artifactId>hibernate-validator</artifactId>
+        	<version>5.1.0.Final</version>
+        </dependency>
     </dependencies>  
     <repositories> 
         <repository> 

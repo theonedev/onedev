@@ -1,5 +1,7 @@
 package com.pmease.commons.jersey;
 
+import org.glassfish.jersey.server.ResourceConfig;
+
 public interface JerseyConfigurator {
-	void configure(JerseyEnvironment environment);
+	void configure(ResourceConfig resourceConfig);
 }

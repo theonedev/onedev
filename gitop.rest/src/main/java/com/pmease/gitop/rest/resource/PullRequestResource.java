@@ -1,7 +1,5 @@
 package com.pmease.gitop.rest.resource;
 
-import io.dropwizard.jersey.params.LongParam;
-
 import java.util.Collection;
 
 import javax.annotation.Nullable;
@@ -38,8 +36,9 @@ public class PullRequestResource {
 	
     @GET
     @Path("/{pullRequestId}")
-    public PullRequest get(@PathParam("pullRequestId") LongParam pullRequestId) {
-    	PullRequest request = pullRequestManager.load(pullRequestId.get());
+    public PullRequest get(@PathParam("pullRequestId") Long pullRequestId) {
+    	System.out.println(this);
+    	PullRequest request = pullRequestManager.load(pullRequestId);
     	
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(request.getTarget().getRepository())))
     		throw new UnauthorizedException();

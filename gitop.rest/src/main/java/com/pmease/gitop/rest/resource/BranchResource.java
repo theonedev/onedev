@@ -1,7 +1,5 @@
 package com.pmease.gitop.rest.resource;
 
-import io.dropwizard.jersey.params.LongParam;
-
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.GET;
@@ -27,8 +25,8 @@ public class BranchResource {
 	
     @GET
     @Path("/{branchId}")
-    public Branch get(@PathParam("branchId") LongParam branchId) {
-    	return branchManager.load(branchId.get());
+    public Branch get(@PathParam("branchId") Long branchId) {
+    	return branchManager.load(branchId);
     }
     
     @POST

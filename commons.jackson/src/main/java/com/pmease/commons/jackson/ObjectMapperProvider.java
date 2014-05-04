@@ -1,7 +1,5 @@
 package com.pmease.commons.jackson;
 
-import io.dropwizard.jackson.Jackson;
-
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -11,6 +9,8 @@ import javax.inject.Singleton;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 
 @Singleton
 public class ObjectMapperProvider implements Provider<ObjectMapper> {
@@ -24,9 +24,12 @@ public class ObjectMapperProvider implements Provider<ObjectMapper> {
 	
 	@Override
 	public ObjectMapper get() {
-		ObjectMapper mapper = Jackson.newObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new GuavaModule());
+        mapper.registerModule(new JodaModule());
 		
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 
 		mapper.setVisibilityChecker(mapper.getSerializationConfig().getDefaultVisibilityChecker()
                 .withFieldVisibility(JsonAutoDetect.Visibility.ANY)

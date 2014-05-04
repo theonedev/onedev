@@ -48,8 +48,9 @@
         
 		<!-- JERSEY CLIENT -->
 		<dependency>
-			<groupId>com.sun.jersey</groupId>
+			<groupId>org.glassfish.jersey.core</groupId>
 			<artifactId>jersey-client</artifactId>
+			<version>${jerseyVersion}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-fileupload</groupId>

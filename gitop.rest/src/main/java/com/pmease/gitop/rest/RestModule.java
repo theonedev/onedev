@@ -1,9 +1,9 @@
 package com.pmease.gitop.rest;
 
 import org.apache.shiro.web.filter.mgt.FilterChainManager;
+import org.glassfish.jersey.server.ResourceConfig;
 
 import com.pmease.commons.jersey.JerseyConfigurator;
-import com.pmease.commons.jersey.JerseyEnvironment;
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.shiro.FilterChainConfigurator;
@@ -25,8 +25,8 @@ public class RestModule extends AbstractPluginModule {
 		contribute(JerseyConfigurator.class, new JerseyConfigurator() {
 			
 			@Override
-			public void configure(JerseyEnvironment environment) {
-				environment.addComponentFromPackage(ResourceLocator.class);
+			public void configure(ResourceConfig resourceConfig) {
+				resourceConfig.packages(true, ResourceLocator.class.getPackage().getName());
 			}
 			
 		});

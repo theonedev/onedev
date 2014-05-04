@@ -1,10 +1,10 @@
 package com.pmease.gitop.web;
 
 import org.apache.tika.mime.MimeTypes;
+import org.glassfish.jersey.server.ResourceConfig;
 
 import com.pmease.commons.editable.EditSupport;
 import com.pmease.commons.jersey.JerseyConfigurator;
-import com.pmease.commons.jersey.JerseyEnvironment;
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.wicket.AbstractWicketConfig;
@@ -31,8 +31,8 @@ public class WebModule extends AbstractPluginModule {
 		contribute(JerseyConfigurator.class, new JerseyConfigurator() {
 			
 			@Override
-			public void configure(JerseyEnvironment environment) {
-				environment.addComponentFromPackage(ResourceLocator.class);
+			public void configure(ResourceConfig resourceConfig) {
+				resourceConfig.packages(true, ResourceLocator.class.getPackage().getName());
 			}
 			
 		});

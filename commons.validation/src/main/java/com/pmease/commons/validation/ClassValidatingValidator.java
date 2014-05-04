@@ -18,7 +18,7 @@ public class ClassValidatingValidator implements ConstraintValidator<ClassValida
 		// We did not disable the default violation before calling validate method as otherwise calling 
 		// to getMessageAndPathList() will complain about no default violations if no validation errors 
 		// is added to it in the validate method. 
-		if (impl.getMessageAndPathList().size() > 1) {
+		if (impl.getConstraintViolationCreationContexts().size() > 1) {
 			impl.disableDefaultConstraintViolation();
 			return false;
 		} else {

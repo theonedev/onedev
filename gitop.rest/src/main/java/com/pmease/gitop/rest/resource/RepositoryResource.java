@@ -1,7 +1,5 @@
 package com.pmease.gitop.rest.resource;
 
-import io.dropwizard.jersey.params.LongParam;
-
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.GET;
@@ -27,8 +25,8 @@ public class RepositoryResource {
 	
 	@Path("/{repositoryId}")
     @GET
-    public Repository get(@PathParam("repositoryId") LongParam repositoryId) {
-    	return repositoryManager.load(repositoryId.get());
+    public Repository get(@PathParam("repositoryId") Long repositoryId) {
+    	return repositoryManager.load(repositoryId);
     }
     
     @POST

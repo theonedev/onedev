@@ -1,7 +1,5 @@
 package com.pmease.gitop.rest.resource;
 
-import io.dropwizard.jersey.params.LongParam;
-
 import java.util.List;
 
 import javax.inject.Inject;
@@ -34,8 +32,8 @@ public class UserResource {
 	
     @GET
     @Path("/{userId}")
-    public User get(@PathParam("userId") LongParam userId) {
-    	return userManager.load(userId.get());
+    public User get(@PathParam("userId") Long userId) {
+    	return userManager.load(userId);
     }
     
     @POST

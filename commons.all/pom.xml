@@ -25,7 +25,6 @@
         <module>../gitop.product</module>  
         <module>../gitop.web</module>  
         <module>../commons.jackson</module>  
-        <module>../commons.metrics</module>  
         <module>../commons.validation</module>  
         <module>../gitop.rest</module>
         <module>../gitop.http</module>

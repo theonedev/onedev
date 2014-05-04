@@ -1,7 +1,10 @@
 package com.pmease.commons.jersey;
 
+import javax.inject.Singleton;
+
+import org.glassfish.jersey.server.ResourceConfig;
+
 import com.pmease.commons.loader.AbstractPluginModule;
-import com.sun.jersey.api.core.ResourceConfig;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -13,16 +16,7 @@ public class JerseyModule extends AbstractPluginModule {
 	protected void configure() {
 		super.configure();
 		
-		contribute(JerseyConfigurator.class, new JerseyConfigurator() {
-			
-			@Override
-			public void configure(JerseyEnvironment app) {
-			}
-		});
-		
-		bind(JerseyEnvironment.class);
-		
-		bind(ResourceConfig.class).toProvider(JerseyEnvironment.class);
+		bind(ResourceConfig.class).toProvider(ResourceConfigProvider.class).in(Singleton.class);
 	}
 
 }

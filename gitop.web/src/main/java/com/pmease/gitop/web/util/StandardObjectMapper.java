@@ -1,19 +1,11 @@
 package com.pmease.gitop.web.util;
 
-import io.dropwizard.jackson.AnnotationSensitivePropertyNamingStrategy;
-import io.dropwizard.jackson.DiscoverableSubtypeResolver;
-import io.dropwizard.jackson.FuzzyEnumModule;
-import io.dropwizard.jackson.GuavaExtrasModule;
-import io.dropwizard.jackson.LogbackModule;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.fasterxml.jackson.datatype.joda.JodaModule;
-import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 
 public class StandardObjectMapper {
 	private static final ObjectMapper MAPPER = newObjectMapper();
@@ -27,14 +19,6 @@ public class StandardObjectMapper {
 	 */
 	private static ObjectMapper newObjectMapper() {
 		final ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new GuavaModule());
-		mapper.registerModule(new LogbackModule());
-		mapper.registerModule(new GuavaExtrasModule());
-		mapper.registerModule(new JodaModule());
-		mapper.registerModule(new AfterburnerModule());
-		mapper.registerModule(new FuzzyEnumModule());
-		mapper.setPropertyNamingStrategy(new AnnotationSensitivePropertyNamingStrategy());
-		mapper.setSubtypeResolver(new DiscoverableSubtypeResolver());
 		mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		mapper.disable(MapperFeature.USE_GETTERS_AS_SETTERS);
