@@ -52,6 +52,11 @@
 			<artifactId>guice-bridge</artifactId>
 			<version>2.2.0</version>
 		</dependency>
+		<dependency>
+			<groupId>com.pmease</groupId>
+			<artifactId>commons.shiro</artifactId>
+			<version>1.0.30</version>
+		</dependency>
 	</dependencies>
 	<repositories>
 		<repository>

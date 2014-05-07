@@ -91,6 +91,11 @@
 			<artifactId>jackson-datatype-hibernate4</artifactId>
 			<version>${jacksonVersion}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.pmease</groupId>
+			<artifactId>commons.jetty</artifactId>
+			<version>1.0.31</version>
+		</dependency>
 	</dependencies>
 	<repositories>
 		<repository>

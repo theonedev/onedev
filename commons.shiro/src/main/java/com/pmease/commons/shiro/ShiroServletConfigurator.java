@@ -1,4 +1,4 @@
-package com.pmease.gitop.security;
+package com.pmease.commons.shiro;
 
 import java.util.EnumSet;
 
@@ -13,15 +13,14 @@ import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
 import com.pmease.commons.jetty.ServletConfigurator;
-import com.pmease.commons.shiro.DefaultWebEnvironment;
 
 @Singleton
-public class SecurityServletConfigurator implements ServletConfigurator {
+public class ShiroServletConfigurator implements ServletConfigurator {
 
 	private final ShiroFilter shiroFilter;
 	
 	@Inject
-	public SecurityServletConfigurator(ShiroFilter shiroFilter) {
+	public ShiroServletConfigurator(ShiroFilter shiroFilter) {
 		this.shiroFilter = shiroFilter;
 	}
 	

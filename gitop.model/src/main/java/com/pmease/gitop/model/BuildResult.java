@@ -10,13 +10,16 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"commit", "configuration"})
+		@UniqueConstraint(columnNames={"branch", "commit", "configuration"})
 })
 public class BuildResult extends AbstractEntity {
 	
 	@Column(nullable=false)
-	private String commit;
+	private Branch branch;
 	
+	@Column(nullable=false)
+	private String commit;
+
 	@Column(nullable=false)
 	private String configuration;
 	
@@ -39,6 +42,14 @@ public class BuildResult extends AbstractEntity {
 
 	public void setPassed(boolean passed) {
 		this.passed = passed;
+	}
+
+	public Branch getBranch() {
+		return branch;
+	}
+
+	public void setBranch(Branch branch) {
+		this.branch = branch;
 	}
 
 	public String getConfiguration() {

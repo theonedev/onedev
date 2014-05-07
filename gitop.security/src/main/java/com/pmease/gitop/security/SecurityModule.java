@@ -1,6 +1,5 @@
 package com.pmease.gitop.security;
 
-import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.shiro.AbstractRealm;
 
@@ -15,7 +14,6 @@ public class SecurityModule extends AbstractPluginModule {
 		super.configure();
 
 		bind(AbstractRealm.class).to(SecurityRealm.class);
-        contribute(ServletConfigurator.class, SecurityServletConfigurator.class);
 	}
 
 }

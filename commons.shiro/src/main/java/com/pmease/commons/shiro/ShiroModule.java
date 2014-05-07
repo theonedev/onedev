@@ -9,6 +9,7 @@ import org.apache.shiro.web.filter.mgt.FilterChainResolver;
 import org.apache.shiro.web.mgt.WebSecurityManager;
 import org.apache.shiro.web.servlet.ShiroFilter;
 
+import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
 
 /**
@@ -29,6 +30,8 @@ public class ShiroModule extends AbstractPluginModule {
 		bind(ShiroFilter.class);
 		 
 		install(new ShiroAopModule());
+		
+		contribute(ServletConfigurator.class, ShiroServletConfigurator.class);
 	}
 
 }

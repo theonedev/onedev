@@ -37,7 +37,6 @@ public class PullRequestResource {
     @GET
     @Path("/{pullRequestId}")
     public PullRequest get(@PathParam("pullRequestId") Long pullRequestId) {
-    	System.out.println(this);
     	PullRequest request = pullRequestManager.load(pullRequestId);
     	
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(request.getTarget().getRepository())))
@@ -47,10 +46,9 @@ public class PullRequestResource {
     }
         
     @GET
-    @Path("/open")
-    public Collection<PullRequest> queryOpen(@QueryParam("targetBranchId") @Nullable Long branchId) {
-    	if (branchId != null) {
-    		Branch targetBranch = branchManager.load(branchId); 
+    public Collection<PullRequest> query(@QueryParam("targetBranchId") @Nullable Long targetBranchId) {
+    	if (targetBranchId != null) {
+    		Branch targetBranch = branchManager.load(targetBranchId); 
         	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(targetBranch.getRepository())))
         		throw new UnauthorizedException();
     		

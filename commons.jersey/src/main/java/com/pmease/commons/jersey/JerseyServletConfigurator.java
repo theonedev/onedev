@@ -1,4 +1,4 @@
-package com.pmease.gitop.rest;
+package com.pmease.commons.jersey;
 
 import javax.inject.Inject;
 
@@ -9,12 +9,12 @@ import org.glassfish.jersey.servlet.ServletContainer;
 
 import com.pmease.commons.jetty.ServletConfigurator;
 
-public class RestServletConfigurator implements ServletConfigurator {
+public class JerseyServletConfigurator implements ServletConfigurator {
 
 	private final ResourceConfig resourceConfig;
 	
 	@Inject
-	public RestServletConfigurator(ResourceConfig resourceConfig) {
+	public JerseyServletConfigurator(ResourceConfig resourceConfig) {
 		this.resourceConfig = resourceConfig;
 	}
 	
@@ -22,7 +22,7 @@ public class RestServletConfigurator implements ServletConfigurator {
 	public void configure(ServletContextHandler context) {
 		ServletHolder servletHolder = new ServletHolder(new ServletContainer(resourceConfig));
 		
-		context.addServlet(servletHolder, RestModule.SERVLET_PATH + "/*");
+		context.addServlet(servletHolder, "/rest/*");
 	}
 
 }
