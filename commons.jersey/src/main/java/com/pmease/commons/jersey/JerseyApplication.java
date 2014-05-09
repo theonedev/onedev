@@ -24,8 +24,6 @@ public class JerseyApplication extends ResourceConfig {
 		GuiceIntoHK2Bridge guiceBridge = serviceLocator.getService(GuiceIntoHK2Bridge.class);
 	    guiceBridge.bridgeGuiceInjector(AppLoader.injector);
 	    
-	    register(AppLoader.getInstance(JacksonContextResolver.class));
-
 	    String disableMoxy = PropertiesHelper.getPropertyNameForRuntime(
 	    		CommonProperties.MOXY_JSON_FEATURE_DISABLE,
                 getConfiguration().getRuntimeType());
@@ -35,7 +33,9 @@ public class JerseyApplication extends ResourceConfig {
         register(JsonParseExceptionMapper.class);
         register(JsonMappingExceptionMapper.class);
         register(JacksonJsonProvider.class, MessageBodyReader.class, MessageBodyWriter.class);
-	    
+
+        packages(JerseyApplication.class.getPackage().getName());
+        
 	    for (JerseyConfigurator configurator: AppLoader.getExtensions(JerseyConfigurator.class)) {
 	    	configurator.configure(this);
 	    }

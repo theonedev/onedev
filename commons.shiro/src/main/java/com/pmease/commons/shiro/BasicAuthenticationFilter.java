@@ -76,7 +76,7 @@ public class BasicAuthenticationFilter extends PathMatchingFilter {
 			throws ServletException, IOException {
 
         HttpServletResponse httpResponse = WebUtils.toHttp(response);
-		if (existing != null) {
+		if (existing != null && !httpResponse.isCommitted()) {
 			if (ExceptionUtils.find(existing, UnauthenticatedException.class) != null) {
 				httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		        String authcHeader = HttpServletRequest.BASIC_AUTH + " realm=\"" + appName + "\"";
