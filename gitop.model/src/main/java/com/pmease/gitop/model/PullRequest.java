@@ -65,7 +65,7 @@ public class PullRequest extends AbstractEntity {
 	private boolean autoMerge;
 
 	@ManyToOne
-	private User submittedBy;
+	private User submitter;
 	
 	@ManyToOne
 	@JoinColumn(nullable = false)
@@ -163,12 +163,12 @@ public class PullRequest extends AbstractEntity {
 	 * 			submitting the request is removed.
 	 */
 	@Nullable
-	public User getSubmittedBy() {
-		return submittedBy;
+	public User getSubmitter() {
+		return submitter;
 	}
 
-	public void setSubmittedBy(@Nullable User submittedBy) {
-		this.submittedBy = submittedBy;
+	public void setSubmitter(@Nullable User submitter) {
+		this.submitter = submitter;
 	}
 
 	/**
@@ -404,8 +404,8 @@ public class PullRequest extends AbstractEntity {
 		Collection<User> copyOfCandidates = new HashSet<User>(candidates);
 
 		// submitter is not allowed to vote for this request
-		if (getSubmittedBy() != null)
-			copyOfCandidates.remove(getSubmittedBy());
+		if (getSubmitter() != null)
+			copyOfCandidates.remove(getSubmitter());
 
 		/*
 		 * users already voted since base update should be excluded from
@@ -460,7 +460,7 @@ public class PullRequest extends AbstractEntity {
 		}
 		
 		public static Criterion ofSubmitter(User submitter) {
-			return Restrictions.eq("submittedBy", submitter);
+			return Restrictions.eq("submitter", submitter);
 		}
 		
 	}
@@ -502,5 +502,5 @@ public class PullRequest extends AbstractEntity {
 		}
 		return pendingCommits;
 	}
- 
+
 }

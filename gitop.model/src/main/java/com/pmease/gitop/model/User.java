@@ -48,7 +48,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="creator")
 	private Collection<Branch> branches = new ArrayList<Branch>();
 	
-	@OneToMany(mappedBy="submittedBy")
+	@OneToMany(mappedBy="submitter")
 	private Collection<PullRequest> submittedRequests = new ArrayList<>();
 
 	@OneToMany(mappedBy="closeInfo.closedBy")
@@ -218,7 +218,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	}
 	
 	public Vote.Result checkVoteSince(PullRequestUpdate update) {
-		if (this.equals(update.getRequest().getSubmittedBy()))
+		if (this.equals(update.getRequest().getSubmitter()))
 			return Vote.Result.APPROVE;
 		
 		for (Vote vote: update.listVotesOnwards()) {

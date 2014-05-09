@@ -49,8 +49,8 @@ public class DefaultAuthorizationManager extends AbstractGenericDao<Authorizatio
 			return true;
 		} else {
 			User currentUser = userManager.getCurrent();
-			User submittedBy = request.getSubmittedBy();
-			return submittedBy != null && submittedBy.equals(currentUser);
+			User submitter = request.getSubmitter();
+			return submitter != null && submitter.equals(currentUser);
 		}
 	}
 	

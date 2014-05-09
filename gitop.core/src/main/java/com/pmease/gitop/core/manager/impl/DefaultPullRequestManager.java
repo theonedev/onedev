@@ -193,7 +193,7 @@ public class DefaultPullRequestManager extends AbstractGenericDao<PullRequest>
 		PullRequest request = new PullRequest();
 		request.setTarget(target);
 		request.setSource(source);
-		request.setSubmittedBy(submitter);
+		request.setSubmitter(submitter);
 		
 		PullRequestUpdate update = new PullRequestUpdate();
 		request.getUpdates().add(update);

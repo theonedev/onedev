@@ -140,7 +140,7 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
     @Override
 	public void delete(final User user) {
     	for (PullRequest request: user.getSubmittedRequests()) {
-    		request.setSubmittedBy(null);
+    		request.setSubmitter(null);
     		pullRequestManager.save(request);
     	}
     	

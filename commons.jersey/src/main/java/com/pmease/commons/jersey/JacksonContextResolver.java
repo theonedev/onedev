@@ -2,9 +2,11 @@ package com.pmease.commons.jersey;
 
 import javax.inject.Inject;
 import javax.ws.rs.ext.ContextResolver;
+import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+@Provider
 public class JacksonContextResolver implements ContextResolver<ObjectMapper> {
 
 	private final ObjectMapper objectMapper;

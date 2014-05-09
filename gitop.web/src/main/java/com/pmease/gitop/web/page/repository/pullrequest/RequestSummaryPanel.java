@@ -65,7 +65,7 @@ public class RequestSummaryPanel extends Panel {
 			
 		});
 		
-		add(new PersonLink("user", getPullRequest().getSubmittedBy().asPerson(), Mode.NAME_AND_AVATAR));
+		add(new PersonLink("user", getPullRequest().getSubmitter().asPerson(), Mode.NAME_AND_AVATAR));
 		
 		Link<Void> branchLink = new Link<Void>("branchLink") {
 

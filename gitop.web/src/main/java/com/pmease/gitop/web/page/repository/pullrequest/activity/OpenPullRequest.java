@@ -27,7 +27,7 @@ public class OpenPullRequest implements PullRequestActivity {
 
 	@Override
 	public User getUser() {
-		return request.getSubmittedBy();
+		return request.getSubmitter();
 	}
 
 	@Override

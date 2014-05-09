@@ -12,7 +12,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.google.common.base.Objects;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
 
@@ -100,6 +99,10 @@ public class Branch extends AbstractEntity {
     	return Git.REFS_HEADS + name; 
     }
     
+    public String getPathName() {
+    	return getRepository().getPathName() + "/" + getName();
+    }
+    
     /**
      * Convert a git reference name to branch name.
      * 
@@ -118,10 +121,7 @@ public class Branch extends AbstractEntity {
     
     @Override
 	public String toString() {
-		return Objects.toStringHelper(this)
-				.add("name", getName())
-				.add("repository", getRepository())
-				.toString();
+    	return getPathName();
 	}
 
 }
