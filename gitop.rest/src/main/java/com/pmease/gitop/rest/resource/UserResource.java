@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -21,6 +22,7 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.validator.constraints.Email;
 
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.gitop.core.manager.UserManager;
@@ -30,6 +32,7 @@ import com.pmease.gitop.model.permission.ObjectPermission;
 @Path("/users")
 @Consumes(MediaType.WILDCARD)
 @Produces(MediaType.APPLICATION_JSON)
+@Singleton
 public class UserResource {
 
 	private final UserManager userManager;
@@ -41,14 +44,14 @@ public class UserResource {
 	
 	@GET
 	public Collection<User> query(
-			@Nullable @QueryParam("name") String name, 
-			@Nullable @QueryParam("emailAddress") String emailAddress, 
-			@Nullable @QueryParam("fullName") String fullName) {
+			@QueryParam("name") String name, 
+			@Email @QueryParam("email") String email, 
+			@QueryParam("fullName") String fullName) {
 		List<Criterion> criterions = new ArrayList<>();
 		if (name != null)
 			criterions.add(Restrictions.eq("name", name));
-		if (emailAddress != null)
-			criterions.add(Restrictions.eq("emailAddress", emailAddress));
+		if (email != null)
+			criterions.add(Restrictions.eq("email", email));
 		if (fullName != null)
 			criterions.add(Restrictions.eq("fullName", fullName));
 		List<User> users = userManager.query(criterions.toArray(new Criterion[criterions.size()]));
@@ -72,7 +75,7 @@ public class UserResource {
     }
     
     @POST
-    public Long save(@Valid User user) {
+    public Long save(@NotNull @Valid User user) {
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserAdmin(user)))
     		throw new UnauthorizedException();
     	

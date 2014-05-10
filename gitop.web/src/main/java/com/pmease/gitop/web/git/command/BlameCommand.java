@@ -99,7 +99,7 @@ public class BlameCommand extends GitCommand<List<BlameEntry>> {
 				} else if (each.startsWith("author ")) {
 					authorBuilder.name(each.substring("author ".length()));
 				} else if (each.startsWith("author-mail ")) {
-					authorBuilder.emailAddress(GitUtils.parseEmail(each.substring("author-mail ".length())));
+					authorBuilder.email(GitUtils.parseEmail(each.substring("author-mail ".length())));
 				} else if (each.startsWith("author-time ")) {
 					long time = Long.valueOf(each.substring("author-time ".length()));
 					authorBuilder.date(new Date(time * 1000L));
@@ -108,7 +108,7 @@ public class BlameCommand extends GitCommand<List<BlameEntry>> {
 				} else if (each.startsWith("committer ")) {
 					committerBuilder.name(each.substring("committer ".length()));
 				} else if (each.startsWith("committer-mail ")) {
-					committerBuilder.emailAddress(each.substring("committer-mail ".length()));
+					committerBuilder.email(each.substring("committer-mail ".length()));
 				} else if (each.startsWith("committer-time ")) {
 					long time = Long.valueOf(each.substring("committer-time ".length()));
 					committerBuilder.date(new Date(time * 1000L));

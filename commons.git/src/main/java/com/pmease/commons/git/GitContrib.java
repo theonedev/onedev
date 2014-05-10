@@ -14,8 +14,8 @@ public class GitContrib implements Serializable {
 	
 	private final Date date;
 	
-	public GitContrib(String name, String emailAddress, Date date) {
-		person = new GitPerson(name, emailAddress);
+	public GitContrib(String name, String email, Date date) {
+		person = new GitPerson(name, email);
 		this.date = checkNotNull(date, "date");
 	}
 
@@ -54,7 +54,7 @@ public class GitContrib implements Serializable {
 	public static class Builder {
 		private String name;
 		
-		private String emailAddress;
+		private String email;
 		
 		private Date date;
 		
@@ -63,8 +63,8 @@ public class GitContrib implements Serializable {
 			return this;
 		}
 		
-		public Builder emailAddress(String emailAddress) {
-			this.emailAddress = emailAddress;
+		public Builder email(String email) {
+			this.email = email;
 			return this;
 		}
 		
@@ -74,7 +74,7 @@ public class GitContrib implements Serializable {
 		}
 		
 		public GitContrib build() {
-			return new GitContrib(name, emailAddress, date);
+			return new GitContrib(name, email, date);
 		}
 	}
 	

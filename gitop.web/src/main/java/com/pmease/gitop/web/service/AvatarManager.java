@@ -9,7 +9,7 @@ public interface AvatarManager {
 	
 	String getAvatarUrl(User user);
 	
-	String getAvatarUrl(String emailAddress);
+	String getAvatarUrl(String email);
 	
 	String getDefaultAvatarUrl();
 }

@@ -32,14 +32,14 @@ public class AvatarImage extends WebComponent {
 		setOutputMarkupId(true);
 	}
 
-	public AvatarImage(String id, final String emailAddress) {
+	public AvatarImage(String id, final String email) {
 		super(id);
 		
 		setDefaultModel(new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
-				return Gitop.getInstance(AvatarManager.class).getAvatarUrl(emailAddress);
+				return Gitop.getInstance(AvatarManager.class).getAvatarUrl(email);
 			}
 			
 		});

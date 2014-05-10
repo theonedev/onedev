@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -29,6 +30,7 @@ import com.pmease.gitop.model.permission.ObjectPermission;
 @Path("/branches")
 @Consumes(MediaType.WILDCARD)
 @Produces(MediaType.APPLICATION_JSON)
+@Singleton
 public class BranchResource {
 
 	private final BranchManager branchManager;
@@ -49,8 +51,8 @@ public class BranchResource {
     
 	@GET
     public Collection<Branch> query(
-    		@Nullable @QueryParam("repositoryId") Long repositoryId,
-    		@Nullable @QueryParam("name") String name) {
+    		@QueryParam("repositoryId") Long repositoryId,
+    		@QueryParam("name") String name) {
 
 		List<Criterion> criterions = new ArrayList<>();
 		if (repositoryId != null)
@@ -78,7 +80,7 @@ public class BranchResource {
 	}
 	
     @POST
-    public Long save(@Valid Branch branch) {
+    public Long save(@NotNull @Valid Branch branch) {
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(branch.getRepository())))
     		branchManager.save(branch);
     	

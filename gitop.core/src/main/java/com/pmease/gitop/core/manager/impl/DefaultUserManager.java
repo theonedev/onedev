@@ -106,7 +106,7 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 				if (status == Status.STATUS_COMMITTED) { 
 					idLock.writeLock().lock();
 					try {
-						emailToId.inverse().put(user.getId(), user.getEmailAddress());
+						emailToId.inverse().put(user.getId(), user.getEmail());
 						nameToId.inverse().put(user.getId(), user.getName());
 					} finally {
 						idLock.writeLock().unlock();
@@ -249,7 +249,7 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 	@Override
 	public void start() {
         for (User user: query()) {
-        	emailToId.inverse().put(user.getId(), user.getEmailAddress());
+        	emailToId.inverse().put(user.getId(), user.getEmail());
         	nameToId.inverse().put(user.getId(), user.getName());
         }
 	}

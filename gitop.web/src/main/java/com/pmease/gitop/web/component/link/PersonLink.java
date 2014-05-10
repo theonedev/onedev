@@ -44,7 +44,7 @@ public class PersonLink extends AvatarLink {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		User user = Gitop.getInstance(UserManager.class).findByEmail(person.getEmailAddress());
+		User user = Gitop.getInstance(UserManager.class).findByEmail(person.getEmail());
 		
 		WebMarkupContainer link;
 		if (user != null) {
@@ -70,7 +70,7 @@ public class PersonLink extends AvatarLink {
 			displayName = person.getName();
 		
 		if (mode == Mode.NAME_AND_AVATAR || mode == Mode.AVATAR) {
-			AvatarImage avatar = new AvatarImage("avatar", person.getEmailAddress());
+			AvatarImage avatar = new AvatarImage("avatar", person.getEmail());
 			if (tooltipConfig != null)
 				avatar.add(new TooltipBehavior(Model.of(displayName), tooltipConfig));
 			link.add(avatar);

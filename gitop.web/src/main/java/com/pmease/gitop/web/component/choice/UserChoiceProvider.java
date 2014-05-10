@@ -47,7 +47,7 @@ public class UserChoiceProvider extends ChoiceProvider<User> {
 		writer.key("id").value(choice.getId()).key("name").value(StringEscapeUtils.escapeHtml4(choice.getName()));
 		if (choice.getFullName() != null)
 			writer.key("fullName").value(StringEscapeUtils.escapeHtml4(choice.getFullName()));
-		writer.key("emailAddress").value(StringEscapeUtils.escapeHtml4(choice.getEmailAddress()));
+		writer.key("email").value(StringEscapeUtils.escapeHtml4(choice.getEmail()));
 		writer.key("avatar").value(Gitop.getInstance(AvatarManager.class).getAvatarUrl(choice));
 	}
 

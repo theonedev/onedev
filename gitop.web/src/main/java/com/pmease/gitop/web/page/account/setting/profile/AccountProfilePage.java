@@ -79,8 +79,8 @@ public class AccountProfilePage extends AccountSettingPage {
 			add(new TextFieldElement<String>("fullName", "Full Name",
 					new PropertyModel<String>(model, "fullName"))
 					.setRequired(false).add(new PropertyValidator<String>()));
-			add(new TextFieldElement<String>("emailAddress", "Email Address",
-					new PropertyModel<String>(model, "emailAddress"))
+			add(new TextFieldElement<String>("email", "Email Address",
+					new PropertyModel<String>(model, "email"))
 					.add(new PropertyValidator<String>()));
 
 			add(new AjaxButton("submit", this) {

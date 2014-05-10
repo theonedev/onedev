@@ -29,7 +29,7 @@ import com.pmease.gitop.model.validation.UserName;
 public class User extends AbstractUser implements ProtectedObject {
 
 	@Column(nullable=false, unique=true)
-	private String emailAddress;
+	private String email;
 	
 	private String fullName;
 	
@@ -84,12 +84,12 @@ public class User extends AbstractUser implements ProtectedObject {
 	@Editable(order=300)
 	@NotEmpty
 	@Email
-	public String getEmailAddress() {
-		return emailAddress;
+	public String getEmail() {
+		return email;
 	}
 
-	public void setEmailAddress(String emailAddress) {
-		this.emailAddress = emailAddress;
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	@Editable(order=400)
@@ -238,7 +238,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	}
 	
 	public GitPerson asPerson() {
-		return new GitPerson(getName(), getEmailAddress());
+		return new GitPerson(getName(), getEmail());
 	}
 
 	public File getLocalAvatar() {

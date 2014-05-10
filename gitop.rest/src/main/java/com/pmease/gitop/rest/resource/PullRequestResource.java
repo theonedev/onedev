@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -29,6 +30,7 @@ import com.pmease.gitop.model.permission.ObjectPermission;
 @Path("/pull_requests")
 @Consumes(MediaType.WILDCARD)
 @Produces(MediaType.APPLICATION_JSON)
+@Singleton
 public class PullRequestResource {
 
 	private final PullRequestManager pullRequestManager;
@@ -51,10 +53,10 @@ public class PullRequestResource {
         
     @GET
     public Collection<PullRequest> query(
-    		@Nullable @QueryParam("targetId") Long targetId, 
-    		@Nullable @QueryParam("sourceId") Long sourceId, 
-    		@Nullable @QueryParam("submitterId") Long submitterId, 
-    		@Nullable @QueryParam("status") String status) {
+    		@QueryParam("targetId") Long targetId, 
+    		@QueryParam("sourceId") Long sourceId, 
+    		@QueryParam("submitterId") Long submitterId, 
+    		@QueryParam("status") String status) {
 
     	List<Criterion> criterions = new ArrayList<>();
 		if (targetId != null)
@@ -80,7 +82,7 @@ public class PullRequestResource {
     }
     
     @POST
-    public Long save(@Valid PullRequest pullRequest) {
+    public Long save(@NotNull @Valid PullRequest pullRequest) {
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(pullRequest.getTarget().getRepository())))
     		throw new UnauthorizedException();
     	

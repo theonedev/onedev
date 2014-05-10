@@ -208,7 +208,7 @@ public class RequestDetailPage extends RepositoryPage implements CommitCommentsA
 		PullRequest request = getPullRequest();
 		User submitter = request.getSubmitter();
 		if (submitter != null) {
-			GitPerson person = new GitPerson(submitter.getName(), submitter.getEmailAddress());
+			GitPerson person = new GitPerson(submitter.getName(), submitter.getEmail());
 			add(new PersonLink("user", person, Mode.NAME_AND_AVATAR));
 		} else {
 			add(new Label("<i>System</i>").setEscapeModelStrings(false));

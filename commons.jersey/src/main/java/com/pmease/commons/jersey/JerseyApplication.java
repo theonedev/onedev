@@ -8,6 +8,7 @@ import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.jersey.CommonProperties;
 import org.glassfish.jersey.internal.util.PropertiesHelper;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.ServerProperties;
 import org.jvnet.hk2.guice.bridge.api.GuiceBridge;
 import org.jvnet.hk2.guice.bridge.api.GuiceIntoHK2Bridge;
 
@@ -28,7 +29,10 @@ public class JerseyApplication extends ResourceConfig {
 	    		CommonProperties.MOXY_JSON_FEATURE_DISABLE,
                 getConfiguration().getRuntimeType());
         property(disableMoxy, true);
+        property(ServerProperties.BV_SEND_ERROR_IN_RESPONSE, true);
 
+        register(ValidationConfigurationContextResolver.class);
+        
         // add the default Jackson exception mappers
         register(JsonParseExceptionMapper.class);
         register(JsonMappingExceptionMapper.class);

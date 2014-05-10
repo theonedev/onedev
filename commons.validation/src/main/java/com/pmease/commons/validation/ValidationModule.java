@@ -1,7 +1,8 @@
 package com.pmease.commons.validation;
 
-import javax.validation.Validation;
+import javax.inject.Singleton;
 import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 
 import com.pmease.commons.loader.AbstractPluginModule;
 
@@ -15,7 +16,10 @@ public class ValidationModule extends AbstractPluginModule {
 	protected void configure() {
 		super.configure();
 		
-		bind(Validator.class).toInstance(Validation.buildDefaultValidatorFactory().getValidator());
+		bind(ValidatorFactory.class).toProvider(ValidatorFactoryProvider.class).in(Singleton.class);
+		bind(Validator.class).toProvider(ValidatorProvider.class).in(Singleton.class);
+		
+		contribute(ValidationConfigurator.class, DummyValidationConfigurator.class);
 	}
 
 }

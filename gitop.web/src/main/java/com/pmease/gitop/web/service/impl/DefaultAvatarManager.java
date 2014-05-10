@@ -39,21 +39,21 @@ public class DefaultAvatarManager implements AvatarManager {
 			url += "?version=" + user.getAvatarUpdateDate().getTime();
 			return url;
 		} else if (configManager.getSystemSetting().isGravatarEnabled()) {
-			return Gravatar.getURL(user.getEmailAddress(), GRAVATAR_SIZE);
+			return Gravatar.getURL(user.getEmail(), GRAVATAR_SIZE);
 		} else {
 			return BASE_AVATAR_URL + DEFAULT_AVATAR; 
 		}
 	}
 
 	@Override
-	public String getAvatarUrl(String emailAddress) {
-		checkNotNull(emailAddress, "emailAddress");
+	public String getAvatarUrl(String email) {
+		checkNotNull(email, "email");
 		
-		User user = userManager.findByEmail(emailAddress);
+		User user = userManager.findByEmail(email);
 		if (user != null)
 			return getAvatarUrl(user);
 		else if (configManager.getSystemSetting().isGravatarEnabled())
-			return Gravatar.getURL(emailAddress);
+			return Gravatar.getURL(email);
 		else
 			return BASE_AVATAR_URL + DEFAULT_AVATAR;
 	}

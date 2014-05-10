@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -29,6 +30,7 @@ import com.pmease.gitop.model.permission.ObjectPermission;
 @Path("/build_results")
 @Consumes(MediaType.WILDCARD)
 @Produces(MediaType.APPLICATION_JSON)
+@Singleton
 public class BuildResultResource {
 
 	private final BuildResultManager buildResultManager;
@@ -49,9 +51,9 @@ public class BuildResultResource {
     
 	@GET
     public Collection<BuildResult> query(
-    		@Nullable @QueryParam("branchId") Long branchId,
-    		@Nullable @QueryParam("configuration") String configuration, 
-    		@Nullable @QueryParam("commit") String commit) {
+    		@QueryParam("branchId") Long branchId,
+    		@QueryParam("configuration") String configuration, 
+    		@QueryParam("commit") String commit) {
 
 		List<Criterion> criterions = new ArrayList<>();
 		if (branchId != null)
@@ -81,7 +83,7 @@ public class BuildResultResource {
     }
 
     @POST
-    public Long save(@Valid BuildResult buildResult) {
+    public Long save(@NotNull @Valid BuildResult buildResult) {
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryWrite(buildResult.getBranch().getRepository())))
     		buildResultManager.save(buildResult);
     	

@@ -21,7 +21,7 @@ public class AppLoaderModule extends AbstractModule {
 		bindConstant().annotatedWith(AppName.class).to("Application");
 
 		/*
-		 * Bind at least implementation provider in order to prevent Guice from complaining of 
+		 * Bind at least one implementation provider in order to prevent Guice from complaining of 
 		 * not bound when injecting Set<ImplementationProvider>
 		 */
 		Multibinder<ImplementationProvider> binder = Multibinder.newSetBinder(binder(), ImplementationProvider.class);
@@ -40,15 +40,8 @@ public class AppLoaderModule extends AbstractModule {
 			
 		});
 	    
-	    bind(EventBus.class).toProvider(new Provider<EventBus>() {
-
-			@Override
-			public EventBus get() {
-				return new EventBus();
-			}
-	    	
-	    }).in(Singleton.class);
-
+	    bind(EventBus.class).toInstance(new EventBus());
+	    
 	    bind(Executor.class).toProvider(new Provider<Executor>() {
 
 			@Override

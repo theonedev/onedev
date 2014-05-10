@@ -10,19 +10,19 @@ public class GitPerson implements Serializable {
 
 	private final String name;
 	
-	private final String emailAddress;
+	private final String email;
 	
-	public GitPerson(String name, String emailAddress) {
+	public GitPerson(String name, String email) {
 		this.name = checkNotNull(name, "name");
-		this.emailAddress = checkNotNull(emailAddress, "emailAddress");
+		this.email = checkNotNull(email, "email");
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public String getEmailAddress() {
-		return emailAddress;
+	public String getEmail() {
+		return email;
 	}
 
 	@Override
@@ -33,19 +33,19 @@ public class GitPerson implements Serializable {
 		
 		GitPerson rhs = (GitPerson) other;
 		return Objects.equal(name, rhs.name)
-				&& Objects.equal(emailAddress, rhs.emailAddress);
+				&& Objects.equal(email, rhs.email);
 	}
 	
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(name, emailAddress);
+		return Objects.hashCode(name, email);
 	}
 	
 	@Override
 	public String toString() {
 		return Objects.toStringHelper(this)
 				.add("name", name)
-				.add("emailAddress", emailAddress)
+				.add("email", email)
 				.toString();
 	}
 	

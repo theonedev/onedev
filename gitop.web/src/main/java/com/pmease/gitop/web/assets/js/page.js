@@ -23,7 +23,7 @@ var gitop = {
 			formatResult: function(user) {
 				return "<div class='user-choice-row'><img class='img-thumbnail avatar avatar-big' src='" + user.avatar + "' />" 
 						+ "<p>"+ user.name + (user.fullName?" (" + user.fullName + ")": "") + "</p>"
-						+ "<p class='text-muted'>" + user.emailAddress + "</p>"
+						+ "<p class='text-muted'>" + user.email + "</p>"
 						+ "</div>";
 			},
 			

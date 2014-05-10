@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -30,6 +31,7 @@ import com.pmease.gitop.model.permission.ObjectPermission;
 @Path("/repositories")
 @Consumes(MediaType.WILDCARD)
 @Produces(MediaType.APPLICATION_JSON)
+@Singleton
 public class RepositoryResource {
 
 	private final RepositoryManager repositoryManager;
@@ -51,8 +53,8 @@ public class RepositoryResource {
     
 	@GET
 	public Collection<Repository> query(
-			@Nullable @QueryParam("userId") Long userId, 
-			@Nullable @QueryParam("name") String name) {
+			@QueryParam("userId") Long userId, 
+			@QueryParam("name") String name) {
 		List<Criterion> criterions = new ArrayList<>();
 		if (userId != null)
 			criterions.add(Restrictions.eq("owner.id", userId));
@@ -69,7 +71,7 @@ public class RepositoryResource {
 	}
 
 	@POST
-    public Long save(@Valid Repository repository) {
+    public Long save(@NotNull @Valid Repository repository) {
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(repository)))
     		throw new UnauthenticatedException();
     	repositoryManager.save(repository);
