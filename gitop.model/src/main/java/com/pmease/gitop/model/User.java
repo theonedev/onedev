@@ -11,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
 import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.bootstrap.Bootstrap;
@@ -94,8 +95,9 @@ public class User extends AbstractUser implements ProtectedObject {
 	@Editable(order=400)
 	@Password(confirmative=true)
 	@NotEmpty
+	@Length(min=5)
 	public String getPassword() {
-		return getPasswordHash();
+		return super.getPassword();
 	}
 
 	public boolean isAdmin() {

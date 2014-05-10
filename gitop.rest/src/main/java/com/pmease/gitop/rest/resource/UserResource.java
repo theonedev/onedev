@@ -7,6 +7,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.validation.Valid;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -21,11 +22,13 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
+import com.pmease.commons.editable.EditableUtils;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
 
 @Path("/users")
+@Consumes(MediaType.WILDCARD)
 @Produces(MediaType.APPLICATION_JSON)
 public class UserResource {
 
@@ -73,8 +76,15 @@ public class UserResource {
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserAdmin(user)))
     		throw new UnauthorizedException();
     	
-    	userManager.save(user);
-    	return user.getId();
+    	User currentUser = userManager.getCurrent();
+    	if (user.equals(currentUser)) {
+    		EditableUtils.copyProperties(user, currentUser);
+    		userManager.save(currentUser);
+    		return currentUser.getId();
+    	} else {
+    		userManager.save(user);
+        	return user.getId();
+    	}
     }
     
     @DELETE

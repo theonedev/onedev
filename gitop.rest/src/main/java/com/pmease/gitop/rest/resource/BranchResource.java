@@ -27,7 +27,7 @@ import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.permission.ObjectPermission;
 
 @Path("/branches")
-@Consumes(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.WILDCARD)
 @Produces(MediaType.APPLICATION_JSON)
 public class BranchResource {
 

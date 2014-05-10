@@ -9,8 +9,6 @@ import com.pmease.commons.editable.PropertyEditContext;
 @SuppressWarnings("serial")
 public class ConfirmativePasswordPropertyEditContext extends PropertyEditContext {
 
-	private static final int PASSWORD_MIN_LEN = 6;
-	
 	private String password;
 	
 	private String confirmedPassword;
@@ -32,9 +30,7 @@ public class ConfirmativePasswordPropertyEditContext extends PropertyEditContext
 	@Override
 	public void updateBean() {
 		if (password != null) {
-			if (password.length() < PASSWORD_MIN_LEN)
-				addValidationError("Password should take at least " + PASSWORD_MIN_LEN + " characters.");
-			else if (confirmedPassword == null)
+			if (confirmedPassword == null)
 				addValidationError("Please confirm the password.");
 			else if (!password.equals(confirmedPassword))
 				addValidationError("Password and its confirmation should be identical.");

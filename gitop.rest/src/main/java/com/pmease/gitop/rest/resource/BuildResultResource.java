@@ -27,7 +27,7 @@ import com.pmease.gitop.model.BuildResult;
 import com.pmease.gitop.model.permission.ObjectPermission;
 
 @Path("/build_results")
-@Consumes(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.WILDCARD)
 @Produces(MediaType.APPLICATION_JSON)
 public class BuildResultResource {
 

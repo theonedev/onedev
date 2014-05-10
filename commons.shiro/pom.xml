@@ -47,7 +47,12 @@
             <groupId>org.apache.shiro</groupId>  
             <artifactId>shiro-guice</artifactId>  
             <version>${shiroVersion}</version> 
-        </dependency> 
+        </dependency>
+        <dependency>
+        	<groupId>com.pmease</groupId>
+        	<artifactId>commons.jackson</artifactId>
+        	<version>1.0.0</version>
+        </dependency>
     </dependencies>  
     <repositories> 
         <repository> 

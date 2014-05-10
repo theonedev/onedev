@@ -11,6 +11,7 @@ import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.mgt.WebSecurityManager;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.loader.AppLoader;
@@ -19,11 +20,14 @@ import com.pmease.commons.loader.AppLoader;
 @MappedSuperclass
 public abstract class AbstractUser extends AbstractEntity implements AuthenticationInfo {
 
-    @Column(unique = true, nullable = false)
+	public static final String HASH_PREFIX = "@hash^prefix@";
+	
+    @Column(unique=true, nullable=false)
     private String name;
 
-    @Column(length = 1024)
-    private String passwordHash;
+    @JsonDeserialize(using=PasswordDeserializer.class)
+    @Column(length=1024)
+    private String password;
 
     public String getName() {
         return name;
@@ -33,19 +37,29 @@ public abstract class AbstractUser extends AbstractEntity implements Authenticat
         this.name = name;
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
+    /**
+     * Get hashed password of this user.
+     *  
+     * @return
+     * 			hashed password of this user
+     */
+    public String getPassword() {
+    	return password;
     }
     
-    public void setPasswordHash(String passwordHash) {
-    	this.passwordHash = passwordHash;
-    }
-    
+    /**
+     * Set plain text password of this user. 
+     * <p>
+     * The plain text password will be hashed via {@link PasswordService} before stored. Bind PasswordService to 
+     * your own implementation via Guice if you'd like to change the default hash algorithm.
+     * 
+     * @param password
+     * 			plain text password to set
+     */
     public void setPassword(String password) {
-        passwordHash = AppLoader.getInstance(PasswordService.class)
-                .encryptPassword(password);
+        this.password = HASH_PREFIX + AppLoader.getInstance(PasswordService.class).encryptPassword(password);
     }
-
+    
     @Override
     public PrincipalCollection getPrincipals() {
         return new SimplePrincipalCollection(getId(), "");
@@ -53,7 +67,10 @@ public abstract class AbstractUser extends AbstractEntity implements Authenticat
     
     @Override
     public Object getCredentials() {
-        return passwordHash;
+    	if (password != null && password.startsWith(HASH_PREFIX))
+    		return password.substring(HASH_PREFIX.length());
+    	else
+    		return password;
     }
 
     public Subject asSubject() {

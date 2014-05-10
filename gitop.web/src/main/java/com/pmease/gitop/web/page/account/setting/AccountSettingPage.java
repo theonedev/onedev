@@ -27,7 +27,6 @@ import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.AbstractAccountPage;
 import com.pmease.gitop.web.page.account.setting.api.AccountSettingTab;
 import com.pmease.gitop.web.page.account.setting.members.AccountMembersSettingPage;
-import com.pmease.gitop.web.page.account.setting.password.AccountPasswordPage;
 import com.pmease.gitop.web.page.account.setting.profile.AccountProfilePage;
 import com.pmease.gitop.web.page.account.setting.repo.RepositoriesPage;
 import com.pmease.gitop.web.page.account.setting.teams.AccountTeamsPage;
@@ -48,7 +47,6 @@ public abstract class AccountSettingPage extends AbstractAccountPage {
 	private List<AccountSettingTab> getAllTabs() {
 		List<AccountSettingTab> tabs = Lists.newArrayList();
 		tabs.add(new AccountSettingTab(Model.of("Profile"), AccountProfilePage.class));
-		tabs.add(new AccountSettingTab(Model.of("Change Password"), AccountPasswordPage.class));
 		tabs.add(new AccountSettingTab(Model.of("Repositories"), RepositoriesPage.class));
 		tabs.add(new AccountSettingTab(Model.of("Teams"), new Class[] { AccountTeamsPage.class, EditTeamPage.class }));
 		tabs.add(new AccountSettingTab(Model.of("Members"), AccountMembersSettingPage.class));
