@@ -28,6 +28,7 @@ public class ObjectMapperProvider implements Provider<ObjectMapper> {
         mapper.registerModule(new GuavaModule());
         mapper.registerModule(new JodaModule());
 		
+//        mapper.enableDefaultTyping();
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 

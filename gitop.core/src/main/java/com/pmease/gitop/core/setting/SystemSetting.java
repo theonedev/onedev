@@ -23,7 +23,7 @@ public class SystemSetting implements Serializable, Validatable {
 	
 	private GitConfig gitConfig = new SystemGit();
 	
-	private boolean gravatarEnabled;
+	private boolean gravatarEnabled = true;
 	
 	@Editable(name="Directory to Store Repositories", order=100, description="Specify directory to store Git repositories.")
 	@Directory
