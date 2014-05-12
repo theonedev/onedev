@@ -24,7 +24,6 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.validator.constraints.Email;
 
-import com.pmease.commons.editable.EditableUtils;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
@@ -78,16 +77,9 @@ public class UserResource {
     public Long save(@NotNull @Valid User user) {
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserAdmin(user)))
     		throw new UnauthorizedException();
-    	
-    	User currentUser = userManager.getCurrent();
-    	if (user.equals(currentUser)) {
-    		EditableUtils.copyProperties(user, currentUser);
-    		userManager.save(currentUser);
-    		return currentUser.getId();
-    	} else {
-    		userManager.save(user);
-        	return user.getId();
-    	}
+
+    	userManager.save(user);
+    	return user.getId();
     }
     
     @DELETE

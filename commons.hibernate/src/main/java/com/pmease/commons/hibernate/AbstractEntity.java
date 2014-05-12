@@ -64,5 +64,5 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 			return 0;
 		}
 	}
-	
+
 }

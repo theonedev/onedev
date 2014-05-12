@@ -1,6 +1,7 @@
 package com.pmease.commons.hibernate;
 
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
@@ -10,12 +11,12 @@ import com.google.inject.Singleton;
 @Singleton
 public class DefaultPersistService implements PersistService, Provider<SessionFactory> {
 
-	private final ConfigurationProvider configurationProvider;
+	private final Provider<Configuration> configurationProvider;
 	
 	private volatile SessionFactory sessionFactory;
 	
 	@Inject
-	public DefaultPersistService(ConfigurationProvider configurationProvider) {
+	public DefaultPersistService(Provider<Configuration> configurationProvider) {
 		this.configurationProvider = configurationProvider;
 	}
 	

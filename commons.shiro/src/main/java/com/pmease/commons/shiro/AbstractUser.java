@@ -25,8 +25,8 @@ public abstract class AbstractUser extends AbstractEntity implements Authenticat
     @Column(unique=true, nullable=false)
     private String name;
 
-    @JsonDeserialize(using=PasswordDeserializer.class)
     @Column(length=1024)
+    @JsonDeserialize(using=PasswordDeserializer.class)
     private String password;
 
     public String getName() {
@@ -57,7 +57,14 @@ public abstract class AbstractUser extends AbstractEntity implements Authenticat
      * 			plain text password to set
      */
     public void setPassword(String password) {
-        this.password = HASH_PREFIX + AppLoader.getInstance(PasswordService.class).encryptPassword(password);
+    	if (password != null) {
+    		if (password.startsWith(HASH_PREFIX))
+    			this.password = password;
+    		else
+    			this.password = HASH_PREFIX + AppLoader.getInstance(PasswordService.class).encryptPassword(password);
+    	} else {
+    		this.password = null;
+    	}
     }
     
     @Override

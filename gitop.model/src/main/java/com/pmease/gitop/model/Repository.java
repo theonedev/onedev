@@ -48,7 +48,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private User owner;
-	
+
 	private boolean forkable = true;
 	
 	@ManyToOne
@@ -286,5 +286,5 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		}
 		return comparables;
 	}
-	
+
 }

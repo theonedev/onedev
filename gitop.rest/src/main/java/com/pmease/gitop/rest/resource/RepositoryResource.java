@@ -45,6 +45,7 @@ public class RepositoryResource {
     @GET
     public Repository get(@PathParam("repositoryId") Long repositoryId) {
     	Repository repository = repositoryManager.load(repositoryId);
+    	
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(repository)))
     		throw new UnauthenticatedException();
     	else
@@ -74,6 +75,7 @@ public class RepositoryResource {
     public Long save(@NotNull @Valid Repository repository) {
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(repository)))
     		throw new UnauthenticatedException();
+    	
     	repositoryManager.save(repository);
     	return repository.getId();
     }
@@ -88,4 +90,5 @@ public class RepositoryResource {
     	
     	repositoryManager.delete(repository);
     }
+    
 }

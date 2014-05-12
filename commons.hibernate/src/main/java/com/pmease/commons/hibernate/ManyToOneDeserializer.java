@@ -25,8 +25,8 @@ public final class ManyToOneDeserializer extends StdDeserializer<AbstractEntity>
 	@Override
     public AbstractEntity deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException,
             JsonProcessingException {
-        String entityId = jp.readValueAsTree().get("id").toString();
+        Long entityId = jp.getLongValue();
         Class<? extends AbstractEntity> valueClass = (Class<? extends AbstractEntity>) handledType();
-        return (AbstractEntity) AppLoader.getInstance(GeneralDao.class).load(valueClass, Long.valueOf(entityId));
+        return (AbstractEntity) AppLoader.getInstance(GeneralDao.class).load(valueClass, entityId);
     }
 }
