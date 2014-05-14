@@ -9,10 +9,10 @@ import com.pmease.commons.jackson.ObjectMapperConfigurator;
 @Singleton
 public class HibernateObjectMapperConfigurator implements ObjectMapperConfigurator {
 
-	private final HibernateJacksonModule module; 
+	private final HibernateObjectMapperModule module; 
 	
 	@Inject
-	public HibernateObjectMapperConfigurator(HibernateJacksonModule module) {
+	public HibernateObjectMapperConfigurator(HibernateObjectMapperModule module) {
 		this.module = module;
 	}
 

@@ -19,12 +19,12 @@ import com.fasterxml.jackson.datatype.hibernate4.Hibernate4Module;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 
 @Singleton
-public class HibernateJacksonModule extends Hibernate4Module {
+public class HibernateObjectMapperModule extends Hibernate4Module {
 
 	private final GeneralDao generalDao;
 	
 	@Inject
-    public HibernateJacksonModule(GeneralDao generalDao) {
+    public HibernateObjectMapperModule(GeneralDao generalDao) {
 		this.generalDao = generalDao;
         enable(Feature.FORCE_LAZY_LOADING);
     }
