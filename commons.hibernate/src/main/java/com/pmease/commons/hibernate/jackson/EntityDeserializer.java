@@ -1,4 +1,4 @@
-package com.pmease.commons.hibernate;
+package com.pmease.commons.hibernate.jackson;
 
 import java.io.IOException;
 
@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.deser.SettableAnyProperty;
 import com.fasterxml.jackson.databind.deser.SettableBeanProperty;
 import com.fasterxml.jackson.databind.deser.impl.PropertyValue;
 import com.google.common.base.Preconditions;
+import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.GeneralDao;
 
 @SuppressWarnings("serial")

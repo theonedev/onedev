@@ -13,6 +13,7 @@ import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
 import com.pmease.commons.hibernate.dao.DefaultGeneralDao;
 import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.hibernate.jackson.HibernateObjectMapperConfigurator;
 import com.pmease.commons.jackson.ObjectMapperConfigurator;
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;

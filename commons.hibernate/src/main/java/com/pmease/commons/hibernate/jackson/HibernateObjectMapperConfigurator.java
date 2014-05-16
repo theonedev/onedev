@@ -1,4 +1,4 @@
-package com.pmease.commons.hibernate;
+package com.pmease.commons.hibernate.jackson;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

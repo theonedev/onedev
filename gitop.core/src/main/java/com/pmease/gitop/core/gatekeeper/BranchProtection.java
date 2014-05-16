@@ -14,8 +14,8 @@ import com.pmease.gitop.core.gatekeeper.helper.branchselection.SpecifyTargetBran
 import com.pmease.gitop.core.gatekeeper.helper.branchselection.TargetBranchSelection;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.CommonGateKeeper;

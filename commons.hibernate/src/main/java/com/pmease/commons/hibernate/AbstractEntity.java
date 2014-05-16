@@ -10,7 +10,10 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.GenericGenerator;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @MappedSuperclass
+@JsonIgnoreProperties("handler")
 public abstract class AbstractEntity implements Serializable, Comparable<AbstractEntity> {
 
 	private static final long serialVersionUID = 1L;

@@ -49,7 +49,7 @@ public class RegisterPage extends BasePage {
 				if (!nameContext.hasValidationErrors() && userManager.findByName(user.getName()) != null) 
 					nameContext.addValidationError("This name is already used by another user.");
 				if (!emailContext.hasValidationErrors() && userManager.findByEmail(user.getEmail()) != null) 
-					nameContext.addValidationError("This email address is already used by another user.");
+					emailContext.addValidationError("This email address is already used by another user.");
 				
 				if (!editContext.hasValidationErrors()) {
 					userManager.save(user);

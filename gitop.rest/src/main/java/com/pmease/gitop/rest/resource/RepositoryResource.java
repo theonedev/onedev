@@ -45,7 +45,7 @@ public class RepositoryResource {
     @GET
     public Repository get(@PathParam("repositoryId") Long repositoryId) {
     	Repository repository = repositoryManager.load(repositoryId);
-    	
+
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(repository)))
     		throw new UnauthenticatedException();
     	else
