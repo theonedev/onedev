@@ -8,6 +8,7 @@ import javax.inject.Singleton;
 
 import org.apache.shiro.authz.Permission;
 
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.shiro.AbstractUser;
 import com.pmease.gitop.core.Gitop;
@@ -24,14 +25,17 @@ import com.pmease.gitop.model.permission.operation.PrivilegedOperation;
 @Singleton
 public class SecurityRealm extends AbstractRealm {
 
+    private final Dao dao;
+    
     private final UserManager userManager;
     
     private final TeamManager teamManager;
-
+    
     @Inject
-    public SecurityRealm(UserManager userManager, TeamManager teamManager) {
-        this.userManager = userManager;
-        this.teamManager = teamManager;
+    public SecurityRealm(Dao dao, UserManager userManager, TeamManager teamManager) {
+    	this.dao = dao;
+    	this.userManager = userManager;
+    	this.teamManager = teamManager;
     }
 
     @Override
@@ -58,7 +62,7 @@ public class SecurityRealm extends AbstractRealm {
             		ObjectPermission objectPermission = (ObjectPermission) permission;
             		Collection<Team> teams = new ArrayList<>();
 	                if (userId != 0L) {
-	                    User user = userManager.get(userId);
+	                    User user = dao.get(User.class, userId);
 	                    if (user != null) {
 		                    // Administrator can do anything
 		                    if (user.equals(Gitop.getInstance(UserManager.class).getRoot()) || user.isAdmin()) return true;

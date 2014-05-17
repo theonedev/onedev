@@ -13,6 +13,8 @@ import org.hibernate.criterion.Order;
 import com.pmease.commons.editable.EditContext;
 import com.pmease.commons.editable.EditSupportRegistry;
 import com.pmease.commons.hibernate.Transactional;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.loader.ManagedSerializedForm;
 import com.pmease.commons.util.init.ManualConfig;
 import com.pmease.commons.util.init.Skippable;
@@ -28,6 +30,8 @@ import com.pmease.gitop.model.User;
 @Singleton
 public class DefaultDataManager implements DataManager, Serializable {
 
+	private final Dao dao;
+	
 	private final UserManager userManager;
 	
 	private final ConfigManager configManager;
@@ -35,8 +39,9 @@ public class DefaultDataManager implements DataManager, Serializable {
 	private final EditSupportRegistry editSupportRegistry;
 	
 	@Inject
-	public DefaultDataManager(UserManager userManager, ConfigManager configManager, 
+	public DefaultDataManager(Dao dao, UserManager userManager, ConfigManager configManager, 
 			EditSupportRegistry editSupportRegistry) {
+		this.dao = dao;
 		this.userManager = userManager;
 		this.configManager = configManager;
 		this.editSupportRegistry = editSupportRegistry;
@@ -47,7 +52,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 	@Override
 	public List<ManualConfig> init() {
 		List<ManualConfig> manualConfigs = new ArrayList<ManualConfig>();
-		User rootUser = userManager.find(null, new Order[]{Order.asc("id")});		
+		User rootUser = dao.find(EntityCriteria.of(User.class).addOrder(Order.asc("id")));		
 		if (rootUser == null) {
 			manualConfigs.add(new ManualConfig("Create Administator Account", new User()) {
 

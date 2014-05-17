@@ -15,8 +15,8 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 
 import com.google.common.collect.Lists;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.vaynberg.wicket.select2.ChoiceProvider;
@@ -100,10 +100,10 @@ public class ComparableRepositoryChoiceProvider extends ChoiceProvider<Repositor
 	@Override
 	public Collection<Repository> toChoices(Collection<String> ids) {
 		List<Repository> repositories = Lists.newArrayList();
-		RepositoryManager repositoryManager = Gitop.getInstance(RepositoryManager.class);
+		Dao dao = Gitop.getInstance(Dao.class);
 		for (String each : ids) {
 			Long id = Long.valueOf(each);
-			repositories.add(repositoryManager.load(id));
+			repositories.add(dao.load(Repository.class, id));
 		}
 
 		return repositories;

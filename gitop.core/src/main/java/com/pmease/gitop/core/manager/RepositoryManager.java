@@ -3,13 +3,12 @@ package com.pmease.gitop.core.manager;
 import javax.annotation.Nullable;
 
 import com.google.inject.ImplementedBy;
-import com.pmease.commons.hibernate.dao.GenericDao;
 import com.pmease.gitop.core.manager.impl.DefaultRepositoryManager;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 
 @ImplementedBy(DefaultRepositoryManager.class)
-public interface RepositoryManager extends GenericDao<Repository> {
+public interface RepositoryManager {
 	
 	@Nullable Repository findBy(String ownerName, String repositoryName);
 	
@@ -31,4 +30,8 @@ public interface RepositoryManager extends GenericDao<Repository> {
 	void checkSanity();
 	
 	void checkSanity(Repository repository);
+	
+	void save(Repository repository);
+	
+	void delete(Repository repository);
 }

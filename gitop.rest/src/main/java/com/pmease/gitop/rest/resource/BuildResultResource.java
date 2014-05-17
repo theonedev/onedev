@@ -1,6 +1,5 @@
 package com.pmease.gitop.rest.resource;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -20,10 +19,10 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
-import com.pmease.gitop.core.manager.BuildResultManager;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitop.model.BuildResult;
 import com.pmease.gitop.model.permission.ObjectPermission;
 
@@ -33,17 +32,17 @@ import com.pmease.gitop.model.permission.ObjectPermission;
 @Singleton
 public class BuildResultResource {
 
-	private final BuildResultManager buildResultManager;
+	private final Dao dao;
 	
 	@Inject
-	public BuildResultResource(BuildResultManager buildResultManager) {
-		this.buildResultManager = buildResultManager;
+	public BuildResultResource(Dao dao) {
+		this.dao = dao;
 	}
 	
     @GET
     @Path("/{buildResultId}")
     public BuildResult get(@PathParam("buildResultId") Long buildResultId) {
-    	BuildResult buildResult  = buildResultManager.load(buildResultId);
+    	BuildResult buildResult  = dao.load(BuildResult.class, buildResultId);
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(buildResult.getBranch().getRepository())))
     		throw new UnauthorizedException();
     	return buildResult;
@@ -55,15 +54,15 @@ public class BuildResultResource {
     		@QueryParam("configuration") String configuration, 
     		@QueryParam("commit") String commit) {
 
-		List<Criterion> criterions = new ArrayList<>();
+		EntityCriteria<BuildResult> criteria = EntityCriteria.of(BuildResult.class);
 		if (branchId != null)
-			criterions.add(Restrictions.eq("branch.id", branchId));
+			criteria.add(Restrictions.eq("branch.id", branchId));
 		if (configuration != null)
-			criterions.add(Restrictions.eq("configuration", configuration));
+			criteria.add(Restrictions.eq("configuration", configuration));
 		if (commit != null)
-			criterions.add(Restrictions.eq("commit", commit));
+			criteria.add(Restrictions.eq("commit", commit));
 		
-		List<BuildResult> buildResults = buildResultManager.query(criterions.toArray(new Criterion[criterions.size()]));
+		List<BuildResult> buildResults = dao.query(criteria);
 		
     	for (BuildResult buildResult: buildResults) {
     		if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(buildResult.getBranch().getRepository()))) {
@@ -77,15 +76,15 @@ public class BuildResultResource {
     @DELETE
     @Path("/{buildResultId}")
     public void delete(@PathParam("buildResultId") Long buildResultId) {
-    	BuildResult buildResult = buildResultManager.load(buildResultId);
+    	BuildResult buildResult = dao.load(BuildResult.class, buildResultId);
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryWrite(buildResult.getBranch().getRepository())))
-    		buildResultManager.delete(buildResult);
+    		dao.remove(buildResult);
     }
 
     @POST
     public Long save(@NotNull @Valid BuildResult buildResult) {
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryWrite(buildResult.getBranch().getRepository())))
-    		buildResultManager.save(buildResult);
+    		dao.persist(buildResult);
     	
     	return buildResult.getId();
     }

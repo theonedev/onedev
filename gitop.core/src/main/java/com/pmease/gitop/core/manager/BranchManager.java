@@ -5,14 +5,13 @@ import java.util.Collection;
 import javax.annotation.Nullable;
 
 import com.google.inject.ImplementedBy;
-import com.pmease.commons.hibernate.dao.GenericDao;
 import com.pmease.gitop.core.manager.impl.DefaultBranchManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 
 @ImplementedBy(DefaultBranchManager.class)
-public interface BranchManager extends GenericDao<Branch> {
+public interface BranchManager {
 
 	/**
 	 * Find branch by repository and branch name.
@@ -56,15 +55,6 @@ public interface BranchManager extends GenericDao<Branch> {
      */
     public void delete(Branch branch);
     
-    /**
-     * Save/update specified branch record in database. Note that this won't update the git 
-     * repository.
-     * 
-     * @param branch
-     * 			branch to be saved
-     */
-    public void save(Branch branch);
-
     /**
      * Create specified branch record in database, and update corresponding git repository to 
      * add the branch.

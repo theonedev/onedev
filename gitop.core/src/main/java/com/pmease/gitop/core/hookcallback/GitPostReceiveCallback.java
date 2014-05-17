@@ -22,9 +22,9 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.hibernate.UnitOfWork;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.manager.BranchManager;
-import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Repository;
@@ -38,7 +38,7 @@ public class GitPostReceiveCallback extends HttpServlet {
     
     private static final Logger logger = LoggerFactory.getLogger(GitPostReceiveCallback.class);
 
-    private final RepositoryManager repositoryManager;
+    private final Dao dao;
     
     private final BranchManager branchManager;
     
@@ -49,10 +49,9 @@ public class GitPostReceiveCallback extends HttpServlet {
     private final Executor executor;
     
     @Inject
-    public GitPostReceiveCallback(RepositoryManager repositoryManager, 
-    		BranchManager branchManager, UserManager userManager,
-    		UnitOfWork unitOfWork, Executor executor) {
-    	this.repositoryManager = repositoryManager;
+    public GitPostReceiveCallback(Dao dao, BranchManager branchManager, 
+    		UserManager userManager, UnitOfWork unitOfWork, Executor executor) {
+    	this.dao = dao;
         this.branchManager = branchManager;
         this.userManager = userManager;
         this.unitOfWork = unitOfWork;
@@ -73,7 +72,7 @@ public class GitPostReceiveCallback extends HttpServlet {
         List<String> fields = StringUtils.splitAndTrim(request.getPathInfo(), "/");
         Preconditions.checkState(fields.size() == 2);
         
-        Repository repository = repositoryManager.load(Long.valueOf(fields.get(0)));
+        Repository repository = dao.load(Repository.class, Long.valueOf(fields.get(0)));
         
         SecurityUtils.getSubject().runAs(User.asPrincipal(Long.valueOf(fields.get(1))));
         
@@ -118,7 +117,7 @@ public class GitPostReceiveCallback extends HttpServlet {
 				branch.setName(branchName);
 				branch.setCreator(userManager.getCurrent());
 				repository.getBranches().add(branch);
-				branchManager.save(branch);
+				dao.persist(branch);
 				if (repository.getBranches().size() == 1) 
 					repository.git().updateDefaultBranch(branchName);
 			} else if (newCommitHash.equals(Commit.ZERO_HASH)) {
@@ -145,8 +144,8 @@ public class GitPostReceiveCallback extends HttpServlet {
 
 							@Override
 							public Void call() throws Exception {
-								Branch branch = branchManager.load(branchId);
-								User user = userManager.load(userId);
+								Branch branch = dao.load(Branch.class, branchId);
+								User user = dao.load(User.class, userId);
 								branchManager.onBranchRefUpdate(branch, user);
 								return null;
 							}

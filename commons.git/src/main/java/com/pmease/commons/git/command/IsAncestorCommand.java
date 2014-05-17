@@ -5,7 +5,6 @@ import java.io.File;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.ExecuteResult;
-import com.pmease.commons.util.execution.LineConsumer;
 
 public class IsAncestorCommand extends GitCommand<Boolean> {
 
@@ -36,22 +35,7 @@ public class IsAncestorCommand extends GitCommand<Boolean> {
 		
 		cmd.addArgs("merge-base", "--is-ancestor", ancestor, descendant);
 		
-		final boolean revExists[] = new boolean[]{true};
-		
-		ExecuteResult result = cmd.execute(infoLogger, new LineConsumer() {
-
-			@Override
-			public void consume(String line) {
-				error(line);
-				if (line.startsWith("fatal: Not a valid object name")) {
-					revExists[0] = false;
-				}
-			}
-			
-		});
-		
-		if (!revExists[0])
-			return false;
+		ExecuteResult result = cmd.execute(infoLogger, errorLogger);
 		
 		if (result.getReturnCode() == 0)
 			return true;

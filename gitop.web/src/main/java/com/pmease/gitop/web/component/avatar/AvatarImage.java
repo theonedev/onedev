@@ -6,8 +6,8 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.service.AvatarManager;
 
@@ -23,7 +23,7 @@ public class AvatarImage extends WebComponent {
 
 			@Override
 			protected String load() {
-				User user = Gitop.getInstance(UserManager.class).load(userId);
+				User user = Gitop.getInstance(Dao.class).load(User.class, userId);
 				return Gitop.getInstance(AvatarManager.class).getAvatarUrl(user);
 			}
 			

@@ -11,10 +11,9 @@ import org.mockito.Mockito;
 
 import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.Git;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.gitop.core.manager.BranchManager;
-import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Membership;
 import com.pmease.gitop.model.PullRequest;
@@ -27,27 +26,22 @@ import com.pmease.gitop.model.Vote;
 public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 
 	@Mock
-	private BranchManager branchManager;
-	
-	@Mock
-	private TeamManager teamManager;
+	private Dao dao;
 	
 	@Override
 	protected void setup() {
 		super.setup();
 		
-		Mockito.when(AppLoader.getInstance(BranchManager.class)).thenReturn(branchManager);
+		Mockito.when(AppLoader.getInstance(Dao.class)).thenReturn(dao);
 		Branch branch1 = new Branch();
 		branch1.setId(1L);
 		branch1.setName("branch1");
-		Mockito.when(branchManager.load(1L)).thenReturn(branch1);
+		Mockito.when(dao.load(Branch.class, 1L)).thenReturn(branch1);
 		
 		Branch branch2 = new Branch();
 		branch2.setId(2L);
 		branch2.setName("branch2");
-		Mockito.when(branchManager.load(2L)).thenReturn(branch2);
-		
-		Mockito.when(AppLoader.getInstance(TeamManager.class)).thenReturn(teamManager);
+		Mockito.when(dao.load(Branch.class, 2L)).thenReturn(branch2);
 		
 		Team team = new Team();
 		team.setName("team");
@@ -71,7 +65,7 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 		membership.getUser().setName("user3");
 		team.getMemberships().add(membership);
 		
-		Mockito.when(teamManager.load(1L)).thenReturn(team);
+		Mockito.when(dao.load(Team.class, 1L)).thenReturn(team);
 	}
 
 	@Test

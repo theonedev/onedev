@@ -18,6 +18,7 @@ import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.model.Repository;
@@ -84,7 +85,7 @@ public class RawBlobResource extends AbstractResource {
 			response.setWriteCallback(new WriteCallback() {
 				@Override
 				public void writeData(final Attributes attributes) {
-					Repository repository = Gitop.getInstance(RepositoryManager.class).get(repositoryId);
+					Repository repository = Gitop.getInstance(Dao.class).load(Repository.class, repositoryId);
 					ObjectStream os = Gitop.getInstance(FileBlobService.class).openStream(repository, revision, path);
 					try {
 						ByteStreams.copy(os, attributes.getResponse().getOutputStream());

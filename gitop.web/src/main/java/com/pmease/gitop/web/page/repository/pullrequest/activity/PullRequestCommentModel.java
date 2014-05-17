@@ -2,8 +2,8 @@ package com.pmease.gitop.web.page.repository.pullrequest.activity;
 
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.PullRequestCommentManager;
 import com.pmease.gitop.model.PullRequestComment;
 
 @SuppressWarnings("serial")
@@ -17,7 +17,7 @@ public class PullRequestCommentModel extends LoadableDetachableModel<PullRequest
 	
 	@Override
 	protected PullRequestComment load() {
-		return Gitop.getInstance(PullRequestCommentManager.class).load(commentId);
+		return Gitop.getInstance(Dao.class).load(PullRequestComment.class, commentId);
 	}
 
 }

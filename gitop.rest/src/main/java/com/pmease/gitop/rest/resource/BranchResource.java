@@ -1,6 +1,5 @@
 package com.pmease.gitop.rest.resource;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -20,10 +19,10 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
-import com.pmease.gitop.core.manager.BranchManager;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.permission.ObjectPermission;
 
@@ -33,17 +32,17 @@ import com.pmease.gitop.model.permission.ObjectPermission;
 @Singleton
 public class BranchResource {
 
-	private final BranchManager branchManager;
+	private final Dao dao;
 	
 	@Inject
-	public BranchResource(BranchManager branchManager) {
-		this.branchManager = branchManager;
+	public BranchResource(Dao dao) {
+		this.dao = dao;
 	}
 	
     @GET
     @Path("/{branchId}")
     public Branch get(@PathParam("branchId") Long branchId) {
-    	Branch branch = branchManager.load(branchId);
+    	Branch branch = dao.load(Branch.class, branchId);
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(branch.getRepository())))
     		throw new UnauthorizedException();
     	return branch;
@@ -54,12 +53,12 @@ public class BranchResource {
     		@QueryParam("repositoryId") Long repositoryId,
     		@QueryParam("name") String name) {
 
-		List<Criterion> criterions = new ArrayList<>();
+		EntityCriteria<Branch> criteria = EntityCriteria.of(Branch.class);
 		if (repositoryId != null)
-			criterions.add(Restrictions.eq("repository.id", repositoryId));
+			criteria.add(Restrictions.eq("repository.id", repositoryId));
 		if (name != null)
-			criterions.add(Restrictions.eq("name", name));
-		List<Branch> branches = branchManager.query(criterions.toArray(new Criterion[criterions.size()]));
+			criteria.add(Restrictions.eq("name", name));
+		List<Branch> branches = dao.query(criteria);
 		
     	for (Branch branch: branches) {
     		if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(branch.getRepository()))) {
@@ -73,16 +72,16 @@ public class BranchResource {
 	@DELETE
 	@Path("/{branchId}")
 	public void delete(@PathParam("branchId") Long branchId) {
-		Branch branch = branchManager.load(branchId);
+		Branch branch = dao.load(Branch.class, branchId);
 		
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(branch.getRepository())))
-    		branchManager.delete(branch);
+    		dao.remove(branch);
 	}
 	
     @POST
     public Long save(@NotNull @Valid Branch branch) {
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(branch.getRepository())))
-    		branchManager.save(branch);
+    		dao.persist(branch);
     	
     	return branch.getId();
     }

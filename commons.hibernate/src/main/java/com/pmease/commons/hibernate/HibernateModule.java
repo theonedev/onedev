@@ -11,8 +11,8 @@ import org.hibernate.cfg.NamingStrategy;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
-import com.pmease.commons.hibernate.dao.DefaultGeneralDao;
-import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.hibernate.dao.DefaultDao;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.jackson.HibernateObjectMapperConfigurator;
 import com.pmease.commons.jackson.ObjectMapperConfigurator;
 import com.pmease.commons.jetty.ServletConfigurator;
@@ -36,7 +36,7 @@ public class HibernateModule extends AbstractPluginModule {
 		bind(UnitOfWork.class).to(DefaultUnitOfWork.class);
 		bind(Session.class).toProvider(DefaultUnitOfWork.class);
 		
-		bind(GeneralDao.class).to(DefaultGeneralDao.class);
+		bind(Dao.class).to(DefaultDao.class);
 		
 	    TransactionInterceptor transactionInterceptor = new TransactionInterceptor();
 	    requestInjection(transactionInterceptor);

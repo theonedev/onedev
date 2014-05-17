@@ -24,9 +24,10 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.pmease.commons.git.BriefCommit;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.BranchManager;
-import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.web.common.wicket.component.BarLabel;
@@ -114,9 +115,9 @@ public class BranchesPage extends RepositoryPage {
 			protected Map<String, PullRequest> load() {
 				Branch base = Gitop.getInstance(BranchManager.class).findBy(getRepository(), getBaseBranch());
 				
-				List<PullRequest> requests = Gitop.getInstance(PullRequestManager.class)
-						.query(Restrictions.isNotNull("closeInfo"),
-							  Restrictions.eq("target", base));
+				List<PullRequest> requests = Gitop.getInstance(Dao.class).query(EntityCriteria.of(PullRequest.class)
+						.add(Restrictions.isNotNull("closeInfo"))
+						.add(Restrictions.eq("target", base)));
 				
 				Map<String, PullRequest> result = Maps.newHashMap();
 				for (PullRequest each : requests) {

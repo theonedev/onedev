@@ -6,28 +6,28 @@ import java.util.List;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortParam;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.model.IModel;
-import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Order;
 
 import com.google.common.base.Splitter;
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitop.web.model.EntityModel;
 
 public abstract class HibernateDataProvider<T extends AbstractEntity> extends SortableDataProvider<T, String> {
 	private static final long serialVersionUID = 9007657871051510330L;
 
-	abstract protected DetachedCriteria getCriteria();
+	abstract protected EntityCriteria<T> getCriteria();
 	
-	protected GeneralDao getDao() {
-		return AppLoader.getInstance(GeneralDao.class);
+	protected Dao getDao() {
+		return AppLoader.getInstance(Dao.class);
 	}
 	
 	@Override
 	public Iterator<? extends T> iterator(long first, long count) {
-		GeneralDao dao = getDao();
-		DetachedCriteria criteria = getCriteria();
+		Dao dao = getDao();
+		EntityCriteria<T> criteria = getCriteria();
 		
 		SortParam<String> param = getSort();
 		if (param != null) {
@@ -40,7 +40,6 @@ public abstract class HibernateDataProvider<T extends AbstractEntity> extends So
 			}
 		}
 		
-		@SuppressWarnings("unchecked")
 		List<T> list = (List<T>) dao.query(criteria, (int) first, (int) count);
 		
 		return list.iterator();
@@ -48,7 +47,7 @@ public abstract class HibernateDataProvider<T extends AbstractEntity> extends So
 
 	@Override
 	public long size() {
-		GeneralDao dao = getDao();
+		Dao dao = getDao();
 		return dao.count(getCriteria());
 	}
 

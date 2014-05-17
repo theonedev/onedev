@@ -9,12 +9,13 @@ import javax.validation.constraints.Size;
 import org.apache.commons.lang3.StringUtils;
 
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.editable.BranchChoice;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.BranchGateKeeper;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
@@ -55,9 +56,9 @@ public class IfSubmitToSpecifiedBranches extends BranchGateKeeper {
 
 	private CheckResult checkBranch(Branch branch) {
 		List<String> branchNames = new ArrayList<>();
-		BranchManager branchManager = Gitop.getInstance(BranchManager.class);
+		Dao dao = Gitop.getInstance(Dao.class);
 		for (Long branchId: branchIds)
-			branchNames.add(branchManager.load(branchId).getName());
+			branchNames.add(dao.load(Branch.class, branchId).getName());
 		
 		if (branchIds.size() > 1) {
 			if (branchIds.contains(branch.getId()))

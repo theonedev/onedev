@@ -19,13 +19,8 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.AbstractGenericDao;
-import com.pmease.commons.hibernate.dao.GeneralDao;
-import com.pmease.gitop.core.manager.BranchManager;
-import com.pmease.gitop.core.manager.MembershipManager;
-import com.pmease.gitop.core.manager.PullRequestManager;
-import com.pmease.gitop.core.manager.PullRequestUpdateManager;
-import com.pmease.gitop.core.manager.TeamManager;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Membership;
@@ -36,19 +31,11 @@ import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.operation.GeneralOperation;
 
 @Singleton
-public class DefaultUserManager extends AbstractGenericDao<User> implements UserManager {
+public class DefaultUserManager implements UserManager {
 
     private volatile Long rootId;
 
-    private final TeamManager teamManager;
-    
-    private final MembershipManager membershipManager;
-    
-    private final PullRequestManager pullRequestManager;
-    
-    private final PullRequestUpdateManager pullRequestUpdateManager;
-    
-    private final BranchManager branchManager;
+    private final Dao dao;
     
     private final ReadWriteLock idLock = new ReentrantReadWriteLock();
     		
@@ -57,50 +44,42 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 	private final BiMap<String, Long> nameToId = HashBiMap.create();
 	
 	@Inject
-    public DefaultUserManager(GeneralDao generalDao, TeamManager teamManager, 
-    		MembershipManager membershipManager, PullRequestManager pullRequestManager, 
-    		PullRequestUpdateManager pullRequestUpdateManager,BranchManager branchManager) {
-        super(generalDao);
-
-        this.teamManager = teamManager;
-        this.membershipManager = membershipManager;
-        this.pullRequestManager = pullRequestManager;
-        this.pullRequestUpdateManager = pullRequestUpdateManager;
-        this.branchManager = branchManager;
+    public DefaultUserManager(Dao dao) {
+        this.dao = dao;
     }
 
     @Transactional
     @Override
 	public void save(final User user) {
     	boolean isNew = user.getId() == null;
-    	super.save(user);
+    	dao.persist(user);
     	
     	if (isNew) {
         	Team team = new Team();
         	team.setOwner(user);
         	team.setAuthorizedOperation(GeneralOperation.NO_ACCESS);
         	team.setName(Team.ANONYMOUS);
-        	teamManager.save(team);
+        	dao.persist(team);
         	
         	team = new Team();
         	team.setOwner(user);
         	team.setName(Team.LOGGEDIN);
         	team.setAuthorizedOperation(GeneralOperation.NO_ACCESS);
-        	teamManager.save(team);
+        	dao.persist(team);
         	
         	team = new Team();
         	team.setOwner(user);
         	team.setName(Team.OWNERS);
         	team.setAuthorizedOperation(GeneralOperation.ADMIN);
-        	teamManager.save(team);
+        	dao.persist(team);
         	
         	Membership membership = new Membership();
         	membership.setTeam(team);
         	membership.setUser(user);
-        	membershipManager.save(membership);
+        	dao.persist(membership);
     	}
 
-    	getSession().getTransaction().registerSynchronization(new Synchronization() {
+    	dao.getSession().getTransaction().registerSynchronization(new Synchronization() {
 
 			public void afterCompletion(int status) {
 				if (status == Status.STATUS_COMMITTED) { 
@@ -127,11 +106,11 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
         User root;
         if (rootId == null) {
             // The first created user should be root user
-            root = find(null, new Order[] {Order.asc("id")});
+            root = dao.find(EntityCriteria.of(User.class).addOrder(Order.asc("id")));
             Preconditions.checkNotNull(root);
             rootId = root.getId();
         } else {
-            root = load(rootId);
+            root = dao.load(User.class, rootId);
         }
         return root;
     }
@@ -141,27 +120,27 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 	public void delete(final User user) {
     	for (PullRequest request: user.getSubmittedRequests()) {
     		request.setSubmitter(null);
-    		pullRequestManager.save(request);
+    		dao.persist(request);
     	}
     	
     	for (PullRequest request: user.getClosedRequests()) {
     		request.getCloseInfo().setClosedBy(null);
-    		pullRequestManager.save(request);
+    		dao.persist(request);
     	}
     	
     	for (PullRequestUpdate update: user.getUpdates()) {
     		update.setUser(null);
-    		pullRequestUpdateManager.save(update);
+    		dao.persist(update);
     	}
     	
     	for (Branch branch: user.getBranches()) {
     		branch.setCreator(null);
-    		branchManager.save(branch);
+    		dao.persist(branch);
     	}
     	
-		super.delete(user);
+		dao.remove(user);
 		
-    	getSession().getTransaction().registerSynchronization(new Synchronization() {
+    	dao.getSession().getTransaction().registerSynchronization(new Synchronization() {
 
 			public void afterCompletion(int status) {
 				if (status == Status.STATUS_COMMITTED) { 
@@ -189,7 +168,7 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
     	try {
     		Long id = nameToId.get(userName);
     		if (id != null)
-    			return load(id);
+    			return dao.load(User.class, id);
     		else
     			return null;
     	} finally {
@@ -204,7 +183,7 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
     	try {
     		Long id = emailToId.get(email);
     		if (id != null)
-    			return load(id);
+    			return dao.load(User.class, id);
     		else
     			return null;
     	} finally {
@@ -216,7 +195,7 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 	public User getCurrent() {
 		Long userId = User.getCurrentId();
 		if (userId != 0L) {
-			User user = get(userId);
+			User user = dao.get(User.class, userId);
 			if (user != null)
 				return user;
 		}
@@ -226,7 +205,7 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 	@Override
 	public void trim(Collection<Long> userIds) {
 		for (Iterator<Long> it = userIds.iterator(); it.hasNext();) {
-			if (get(it.next()) == null)
+			if (dao.get(User.class, it.next()) == null)
 				it.remove();
 		}
 	}
@@ -248,7 +227,7 @@ public class DefaultUserManager extends AbstractGenericDao<User> implements User
 
 	@Override
 	public void start() {
-        for (User user: query()) {
+        for (User user: dao.allOf(User.class)) {
         	emailToId.inverse().put(user.getId(), user.getEmail());
         	nameToId.inverse().put(user.getId(), user.getName());
         }

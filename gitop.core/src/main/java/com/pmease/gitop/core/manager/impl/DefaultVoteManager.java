@@ -3,13 +3,12 @@ package com.pmease.gitop.core.manager.impl;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.AbstractGenericDao;
-import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.core.manager.VoteManager;
 import com.pmease.gitop.model.PullRequest;
@@ -19,22 +18,24 @@ import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.Vote.Result;
 
 @Singleton
-public class DefaultVoteManager extends AbstractGenericDao<Vote> implements VoteManager {
+public class DefaultVoteManager implements VoteManager {
 
+	private final Dao dao;
+	
 	private final PullRequestManager pullRequestManager;
 	
 	@Inject
-	public DefaultVoteManager(GeneralDao generalDao, PullRequestManager pullRequestManager) {
-		super(generalDao);
+	public DefaultVoteManager(Dao dao, PullRequestManager pullRequestManager) {
+		this.dao = dao;
 		this.pullRequestManager = pullRequestManager;
 	}
 
 	@Sessional
 	@Override
 	public Vote find(User reviewer, PullRequestUpdate update) {
-		return find(new Criterion[]{
-				Restrictions.eq("voter", reviewer), 
-				Restrictions.eq("update", update)});
+		return dao.find(EntityCriteria.of(Vote.class)
+				.add(Restrictions.eq("voter", reviewer)) 
+				.add(Restrictions.eq("update", update)));
 	}
 
 	@Transactional
@@ -48,7 +49,7 @@ public class DefaultVoteManager extends AbstractGenericDao<Vote> implements Vote
 		
 		vote.getVoter().getVotes().add(vote);
 		vote.getUpdate().getVotes().add(vote);
-		save(vote);		
+		dao.persist(vote);		
 
 		pullRequestManager.refresh(request);
 	}

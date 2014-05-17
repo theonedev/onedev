@@ -18,9 +18,9 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.git.GitPerson;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.DisableIfBlankBehavior;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.PullRequestCommentManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestComment;
@@ -144,7 +144,7 @@ public class RequestActivitiesPage extends RequestDetailPage {
 				comment.setRequest(getPullRequest());
 				comment.setUser(Gitop.getInstance(UserManager.class).getCurrent());
 				comment.setContent(newCommentContent);
-				Gitop.getInstance(PullRequestCommentManager.class).save(comment);
+				Gitop.getInstance(Dao.class).persist(comment);
 				newCommentContent = null;
 			}
 			

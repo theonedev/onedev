@@ -4,9 +4,9 @@ import javax.validation.constraints.NotNull;
 
 import com.google.common.collect.Sets;
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.editable.UserChoice;
-import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.Repository;
@@ -37,8 +37,7 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
 
     @Override
     public CheckResult doCheckRequest(PullRequest request) {
-        UserManager userManager = Gitop.getInstance(UserManager.class);
-        User user = userManager.load(getUserId());
+        User user = Gitop.getInstance(Dao.class).load(User.class, getUserId());
 
         Vote.Result result = user.checkVoteSince(request.getBaseUpdate());
         if (result == null) {
@@ -55,14 +54,14 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
 
     @Override
     protected GateKeeper trim(Repository repository) {
-        if (Gitop.getInstance(UserManager.class).get(getUserId()) == null)
+        if (Gitop.getInstance(Dao.class).get(User.class, getUserId()) == null)
             return null;
         else
             return this;
     }
 
     private CheckResult checkApproval(User user) {
-		User approver = Gitop.getInstance(UserManager.class).load(userId);
+		User approver = Gitop.getInstance(Dao.class).load(User.class, userId);
         if (approver.getId().equals(user.getId())) {
         	return approved("Approved by " + approver.getName() + ".");
         } else {

@@ -2,8 +2,8 @@ package com.pmease.gitop.web.page.repository.pullrequest.activity;
 
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.VoteManager;
 import com.pmease.gitop.model.Vote;
 
 @SuppressWarnings("serial")
@@ -17,7 +17,7 @@ public class VoteModel extends LoadableDetachableModel<Vote> {
 	
 	@Override
 	protected Vote load() {
-		return Gitop.getInstance(VoteManager.class).load(voteId);
+		return Gitop.getInstance(Dao.class).load(Vote.class, voteId);
 	}
 
 }

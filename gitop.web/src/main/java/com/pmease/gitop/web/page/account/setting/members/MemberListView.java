@@ -16,16 +16,15 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.MembershipManager;
 import com.pmease.gitop.model.Membership;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.component.avatar.AvatarImage;
@@ -46,14 +45,13 @@ public class MemberListView extends Panel {
 		this.accountModel = accountModel;
 		membershipsModel = new LoadableDetachableModel<List<Membership>>() {
 
-			@SuppressWarnings("unchecked")
 			@Override
 			protected List<Membership> load() {
-				GeneralDao dao = Gitop.getInstance(GeneralDao.class);
-				DetachedCriteria criteria = DetachedCriteria.forClass(Membership.class);
+				Dao dao = Gitop.getInstance(Dao.class);
+				EntityCriteria<Membership> criteria = EntityCriteria.of(Membership.class);
 				criteria.createAlias("team", "team");
 				criteria.add(Restrictions.eq("team.owner", getAccount()));
-				return (List<Membership>) dao.query(criteria, 0, Integer.MAX_VALUE);
+				return dao.query(criteria);
 			}
 		};
 	}
@@ -140,8 +138,8 @@ public class MemberListView extends Panel {
 	
 								@Override
 								public void onClick(AjaxRequestTarget target) {
-									MembershipManager mm = Gitop.getInstance(MembershipManager.class);
-									mm.delete(mm.get(membershipId));
+									Dao dao = Gitop.getInstance(Dao.class);
+									dao.remove(dao.load(Membership.class, membershipId));
 									if (size > 1) {
 										target.add(teamsDiv);
 									} else {

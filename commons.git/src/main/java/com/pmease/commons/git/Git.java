@@ -293,9 +293,7 @@ public class Git implements Serializable {
 	 * @param descendant
 	 * 			descendant to be checked 
 	 * @return
-	 * 			<tt>true</tt> if first param is ancestor of second param, <tt>false</tt> if either 
-	 * 			revision does not exist in repository, or if first param is not ancestor of second 
-	 * 			param
+	 * 			<tt>true</tt> if first param is ancestor of second param
 	 */
 	public boolean isAncestor(String ancestor, String descendant) {
 		if (ancestor.equals(descendant))

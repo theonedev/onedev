@@ -19,8 +19,9 @@ import org.apache.wicket.validation.ValidationError;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.collect.ImmutableList;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.permission.operation.GeneralOperation;
 import com.pmease.gitop.web.common.wicket.form.BaseForm;
@@ -99,9 +100,10 @@ public class TeamEditor extends Panel {
 								return; // name not change
 							}
 							
-							TeamManager tm = Gitop.getInstance(TeamManager.class);
-							boolean b = tm.find(Restrictions.eq("owner", getTeam().getOwner()),
-									Restrictions.eq("name", name).ignoreCase()) != null;
+							Dao dao = Gitop.getInstance(Dao.class);
+							boolean b = dao.find(EntityCriteria.of(Team.class)
+									.add(Restrictions.eq("owner", getTeam().getOwner()))
+									.add(Restrictions.eq("name", name).ignoreCase())) != null;
 							if (b) {
 								validatable.error(new ValidationError().setMessage("The name is already exist"));
 								return;
@@ -151,7 +153,7 @@ public class TeamEditor extends Panel {
 				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 					Team team = getTeam();
 					boolean isNew = team.getId() == null;
-					Gitop.getInstance(TeamManager.class).save(team);
+					Gitop.getInstance(Dao.class).persist(team);
 					if (isNew) {
 						setResponsePage(EditTeamPage.class, EditTeamPage.newParams(team));
 					} else {

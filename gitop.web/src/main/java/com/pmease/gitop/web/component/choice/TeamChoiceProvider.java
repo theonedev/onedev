@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.model.IModel;
-import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -13,9 +12,9 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 
 import com.google.common.collect.Lists;
-import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Team;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
@@ -24,24 +23,24 @@ public class TeamChoiceProvider extends ChoiceProvider<Team> {
 
 	private static final long serialVersionUID = 1L;
 
-	IModel<DetachedCriteria> criteria;
+	IModel<EntityCriteria<Team>> criteria;
 
-	public TeamChoiceProvider(IModel<DetachedCriteria> criteria) {
+	public TeamChoiceProvider(IModel<EntityCriteria<Team>> criteria) {
 		this.criteria = criteria;
 	}
 
 	@Override
 	public void query(String term, int page, Response<Team> response) {
-		DetachedCriteria crit = criteria == null ? null : criteria.getObject();
+		EntityCriteria<Team> crit = criteria == null ? null : criteria.getObject();
 		if (crit == null) {
-			crit = DetachedCriteria.forClass(Team.class);
+			crit = EntityCriteria.of(Team.class);
 		}
 
 		crit.add(Restrictions.ilike("name", term, MatchMode.START));
 		crit.addOrder(Order.asc("name"));
 		int first = page * 10;
-		@SuppressWarnings("unchecked")
-		List<Team> teams = (List<Team>) Gitop.getInstance(GeneralDao.class).query(crit, first, 10);
+
+		List<Team> teams = (List<Team>) Gitop.getInstance(Dao.class).query(crit, first, 10);
 		
 		response.addAll(teams);
 	}
@@ -56,10 +55,10 @@ public class TeamChoiceProvider extends ChoiceProvider<Team> {
 	@Override
 	public Collection<Team> toChoices(Collection<String> ids) {
 		List<Team> teams = Lists.newArrayList();
-		TeamManager tm = Gitop.getInstance(TeamManager.class);
+		Dao dao = Gitop.getInstance(Dao.class);
 		for (String each : ids) {
 			Long id = Long.valueOf(each);
-			teams.add(tm.get(id));
+			teams.add(dao.load(Team.class, id));
 		}
 
 		return teams;

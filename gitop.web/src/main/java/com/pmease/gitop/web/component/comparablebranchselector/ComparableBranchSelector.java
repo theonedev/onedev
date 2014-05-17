@@ -6,9 +6,9 @@ import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.ajaxlistener.ajaxloadingindicator.AjaxLoadingIndicator;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.BranchManager;
@@ -90,11 +90,11 @@ public class ComparableBranchSelector extends FormComponentPanel<Branch> {
 			
 		}));
 		
-		BranchChoiceProvider choiceProvider = new BranchChoiceProvider(new LoadableDetachableModel<DetachedCriteria>() {
+		BranchChoiceProvider choiceProvider = new BranchChoiceProvider(new LoadableDetachableModel<EntityCriteria<Branch>>() {
 
 			@Override
-			protected DetachedCriteria load() {
-				DetachedCriteria criteria = DetachedCriteria.forClass(Branch.class);
+			protected EntityCriteria<Branch> load() {
+				EntityCriteria<Branch> criteria = EntityCriteria.of(Branch.class);
 				criteria.add(Restrictions.eq("repository", selectedRepositoryModel.getObject()));
 				return criteria;
 			}

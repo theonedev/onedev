@@ -3,8 +3,8 @@ package com.pmease.gitop.web.editable.user;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.component.choice.UserSingleChoice;
 
@@ -32,7 +32,7 @@ public class UserSingleChoiceEditor extends Panel {
 			public User getObject() {
 				Long userId = (Long) editContext.getPropertyValue();
 				if (userId != null)
-					return Gitop.getInstance(UserManager.class).load(userId); 
+					return Gitop.getInstance(Dao.class).load(User.class, userId); 
 				else
 					return null;
 			}

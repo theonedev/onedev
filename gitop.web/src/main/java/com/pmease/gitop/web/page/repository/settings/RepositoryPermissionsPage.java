@@ -25,15 +25,15 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.AuthorizationManager;
 import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Authorization;
@@ -67,10 +67,10 @@ public class RepositoryPermissionsPage extends AbstractRepositorySettingPage {
 			public void onClick(AjaxRequestTarget target) {
 				Repository repository = getRepository();
 				Collection<Authorization> list = repository.getAuthorizations();
-				AuthorizationManager am = Gitop.getInstance(AuthorizationManager.class);
+				Dao dao = Gitop.getInstance(Dao.class);
 				for (Iterator<Authorization> it = list.iterator(); it.hasNext();) {
 					Authorization auth = it.next();
-					am.delete(auth);
+					dao.remove(auth);
 					it.remove();
 				}
 				
@@ -163,9 +163,10 @@ public class RepositoryPermissionsPage extends AbstractRepositorySettingPage {
 
 					@Override
 					public Authorization getObject() {
-						AuthorizationManager am = Gitop.getInstance(AuthorizationManager.class);
-						return am.find(Restrictions.eq("team", rowModel.getObject()),
-										Restrictions.eq("repository", getRepository()));
+						Dao dao = Gitop.getInstance(Dao.class);
+						return dao.find(EntityCriteria.of(Authorization.class)
+								.add(Restrictions.eq("team", rowModel.getObject()))
+								.add(Restrictions.eq("repository", getRepository())));
 					}
 					
 				};
@@ -174,10 +175,10 @@ public class RepositoryPermissionsPage extends AbstractRepositorySettingPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						AuthorizationManager am = Gitop.getInstance(AuthorizationManager.class);
+						Dao dao = Gitop.getInstance(Dao.class);
 						RepositoryManager pm = Gitop.getInstance(RepositoryManager.class);
 						Authorization auth = (Authorization) getDefaultModelObject();
-						am.delete(auth);
+						dao.remove(auth);
 						Repository repository = getRepository();
 						repository.getAuthorizations().remove(auth);
 						pm.save(repository);
@@ -206,12 +207,10 @@ public class RepositoryPermissionsPage extends AbstractRepositorySettingPage {
 
 			@Override
 			protected List<Team> load() {
-				TeamManager tm = Gitop.getInstance(TeamManager.class);
-				return tm.query(
-						new Criterion[] {Restrictions.eq("owner", getRepository().getOwner())}, 
-						new Order[] { Order.asc("id")}, 
-						0, 
-						Integer.MAX_VALUE);
+				Dao dao = Gitop.getInstance(Dao.class);
+				return dao.query(EntityCriteria.of(Team.class)
+						.add(Restrictions.eq("owner", getRepository().getOwner())) 
+						.addOrder(Order.asc("id")));
 			}
 			
 		};
@@ -287,10 +286,10 @@ public class RepositoryPermissionsPage extends AbstractRepositorySettingPage {
 						permission = operation;
 					}
 					
-					AuthorizationManager am = Gitop.getInstance(AuthorizationManager.class);
-					Authorization auth = am.find(
-							Restrictions.eq("repository", getRepository()),
-							Restrictions.eq("team", rowModel.getObject()));
+					Dao dao = Gitop.getInstance(Dao.class);
+					Authorization auth = dao.find(EntityCriteria.of(Authorization.class)
+							.add(Restrictions.eq("repository", getRepository()))
+							.add(Restrictions.eq("team", rowModel.getObject())));
 
 					if (auth == null) {
 						auth = new Authorization();
@@ -299,7 +298,7 @@ public class RepositoryPermissionsPage extends AbstractRepositorySettingPage {
 					}
 					
 					auth.setOperation(permission);
-					am.save(auth);
+					dao.persist(auth);
 					Repository repository = getRepository();
 					repository.getAuthorizations().add(auth);
 					Gitop.getInstance(RepositoryManager.class).save(repository);

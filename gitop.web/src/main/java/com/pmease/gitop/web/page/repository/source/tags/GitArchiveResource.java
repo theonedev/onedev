@@ -10,6 +10,7 @@ import org.apache.wicket.request.resource.ContentDisposition;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.model.Repository;
@@ -57,7 +58,7 @@ public class GitArchiveResource extends AbstractResource {
 		response.setWriteCallback(new WriteCallback() {
 			@Override
 			public void writeData(final Attributes attributes) {
-				Repository repository = Gitop.getInstance(RepositoryManager.class).get(repositoryId);
+				Repository repository = Gitop.getInstance(Dao.class).load(Repository.class, repositoryId);
 				ArchiveCommand ac = new ArchiveCommand(repository.git().repoDir(),
 						attributes.getResponse().getOutputStream());
 				

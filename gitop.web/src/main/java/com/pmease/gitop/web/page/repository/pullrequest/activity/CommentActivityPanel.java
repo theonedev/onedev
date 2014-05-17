@@ -12,11 +12,11 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.commons.wicket.behavior.DisableIfBlankBehavior;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.AuthorizationManager;
-import com.pmease.gitop.core.manager.PullRequestCommentManager;
 import com.pmease.gitop.model.PullRequestComment;
 
 @SuppressWarnings("serial")
@@ -80,7 +80,7 @@ public class CommentActivityPanel extends Panel {
 					public void onClick(AjaxRequestTarget target) {
 						PullRequestComment comment = getComment();
 						comment.setContent(content);
-						Gitop.getInstance(PullRequestCommentManager.class).save(comment);
+						Gitop.getInstance(Dao.class).persist(comment);
 
 						Fragment fragment = renderForView();
 						CommentActivityPanel.this.replace(fragment);
@@ -121,7 +121,7 @@ public class CommentActivityPanel extends Panel {
 
 			@Override
 			public void onClick() {
-				Gitop.getInstance(PullRequestCommentManager.class).delete(getComment());
+				Gitop.getInstance(Dao.class).remove(getComment());
 			}
 			
 			@Override

@@ -8,7 +8,7 @@ import org.hibernate.criterion.DetachedCriteria;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 
-public interface GeneralDao {
+public interface Dao {
 	
 	/**
 	 * Get the entity with the specified type and id from data store.
@@ -48,7 +48,7 @@ public interface GeneralDao {
 	 * @param entity
 	 * 			the entity to be saved
 	 */
-	void save(AbstractEntity entity);
+	void persist(AbstractEntity entity);
 
 	/**
 	 * Remove the specified entity from the datastore.
@@ -56,7 +56,7 @@ public interface GeneralDao {
 	 * @param entity
 	 * 			the entity to be deleted
 	 */
-	void delete(AbstractEntity entity);
+	void remove(AbstractEntity entity);
 
 	/**
 	 * Query with specified criteria.
@@ -70,8 +70,12 @@ public interface GeneralDao {
 	 * @return
 	 * 			a list of execution result of the detached criteria
 	 */
-	List<?> query(DetachedCriteria criteria, int firstResult, int maxResults);
+	<T extends AbstractEntity> List<T> query(EntityCriteria<T> criteria, int firstResult, int maxResults);
+	
+	<T extends AbstractEntity> List<T> query(EntityCriteria<T> criteria);
 
+	<T extends AbstractEntity> List<T> allOf(Class<T> entityClass);
+	
 	/**
 	 * This method expects to lookup a single entity with specified criteria
 	 * 
@@ -80,7 +84,7 @@ public interface GeneralDao {
 	 * @return
 	 * 			the first matching entity, or null if not found 
 	 */
-	Object find(DetachedCriteria detachedCriteria);
+	<T extends AbstractEntity> T find(EntityCriteria<T> entityCriteria);
 	
 	/**
 	 * Count entities of specified class matching specified criteria. 
@@ -88,7 +92,7 @@ public interface GeneralDao {
 	 * @return
 	 * 			number of entities matching specified {@link DetachedCriteria}
 	 */
-	<T extends AbstractEntity> int count(DetachedCriteria detachedCriteria);
+	<T extends AbstractEntity> int count(EntityCriteria<T> detachedCriteria);
 
 	Session getSession();
 }

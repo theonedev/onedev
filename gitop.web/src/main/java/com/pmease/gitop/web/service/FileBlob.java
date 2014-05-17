@@ -17,8 +17,8 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.io.CharSource;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.quantity.Data;
 import com.pmease.gitop.web.page.repository.source.blob.language.Language;
@@ -126,7 +126,7 @@ public class FileBlob implements Serializable {
 	}
 
 	public Repository getRepository() {
-		return Gitop.getInstance(RepositoryManager.class).load(Preconditions.checkNotNull(getRepositoryId()));
+		return Gitop.getInstance(Dao.class).load(Repository.class, Preconditions.checkNotNull(getRepositoryId()));
 	}
 	
 	public String getRevision() {

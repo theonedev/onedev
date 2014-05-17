@@ -23,9 +23,9 @@ import org.apache.wicket.util.string.StringValue;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
@@ -57,7 +57,7 @@ public class EditTeamPage extends AccountSettingPage {
 			team.setOwner(user);
 		} else {
 			Long id = sv.toLongObject();
-			team = Gitop.getInstance(TeamManager.class).get(id);
+			team = Gitop.getInstance(Dao.class).get(Team.class, id);
 			if (team == null) {
 				throw new EntityNotFoundException("Team " + id + " doesn't exist");
 			}
@@ -140,7 +140,7 @@ public class EditTeamPage extends AccountSettingPage {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				Team team = getTeam();
-				Gitop.getInstance(TeamManager.class).delete(team);
+				Gitop.getInstance(Dao.class).remove(team);
 				setResponsePage(AccountTeamsPage.class, AccountTeamsPage.newParams(getAccount()));
 			}
 			

@@ -105,7 +105,7 @@ public class NewRequestPanel extends Panel {
 
 			@Override
 			protected List<Commit> load() {
-				PullRequest request = getPullRequest();
+				PullRequest request = pullRequestModel.getObject();
 				return getSource().getRepository().git().log(request.getMergeInfo().getMergeBase(), 
 						getSource().getHeadCommit(), null, 0, 0);
 			}
@@ -154,7 +154,7 @@ public class NewRequestPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				PullRequest request = getPullRequest();
+				PullRequest request = pullRequestModel.getObject();
 				if (request.getId() == null
 						&& (request.getStatus() == PENDING_INTEGRATE || request.getStatus() == PENDING_APPROVAL) 
 						&& request.getMergeInfo().getMergeHead() != null) {
@@ -173,7 +173,7 @@ public class NewRequestPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				PullRequest request = getPullRequest();
+				PullRequest request = pullRequestModel.getObject();
 				setVisible(request.getId() == null 
 						&& (request.getStatus() == PENDING_APPROVAL 
 							|| request.getStatus() == PENDING_INTEGRATE)); 
@@ -225,7 +225,7 @@ public class NewRequestPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				PullRequest request = getPullRequest();
+				PullRequest request = pullRequestModel.getObject();
 				setVisible(request.getId() == null 
 						&& (request.getStatus() == PENDING_APPROVAL || request.getStatus() == PENDING_INTEGRATE));
 			}
@@ -236,14 +236,14 @@ public class NewRequestPanel extends Panel {
 				if (title != null) {
 					PullRequestManager pullRequestManager = Gitop.getInstance(PullRequestManager.class);
 
-					PullRequest request = getPullRequest();
+					PullRequest request = pullRequestModel.getObject();
 					
 					if (request.getStatus() != INTEGRATED) {
 						request.setAutoMerge(false);
 						request.setTitle(title);
 						request.setDescription(comment);
 						
-						pullRequestManager.realize(request);
+						pullRequestManager.send(request);
 						
 						setResponsePage(OpenRequestsPage.class, 
 								PageSpec.forRepository(request.getTarget().getRepository()));
@@ -254,7 +254,7 @@ public class NewRequestPanel extends Panel {
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
-				PullRequest request = getPullRequest();
+				PullRequest request = pullRequestModel.getObject();
 				if (request.getStatus() != PENDING_APPROVAL && request.getStatus() != PENDING_INTEGRATE)
 					tag.put("disabled", "disabled");
 			}
@@ -267,14 +267,14 @@ public class NewRequestPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(getPullRequest().getId() != null);
+				setVisible(pullRequestModel.getObject().getId() != null);
 			}
 
 			@Override
 			public void onClick() {
 				RepositoryBasePage page = (RepositoryBasePage) getPage();
 				PageParameters params = PageSpec.forRepository(page.getRepository());
-				params.set(0, getPullRequest().getId());
+				params.set(0, pullRequestModel.getObject().getId());
 				setResponsePage(RequestDetailPage.class, params);
 			}
 			
@@ -287,7 +287,7 @@ public class NewRequestPanel extends Panel {
 				if (getTarget().equals(getSource())) {
 					return "Please select different branches to pull.";
 				} else {
-					PullRequest request = getPullRequest();
+					PullRequest request = pullRequestModel.getObject();
 					if (request.getId() == null) {
 						if (request.getStatus() == INTEGRATED) {
 							return "No changes to pull.";
@@ -310,7 +310,7 @@ public class NewRequestPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				PullRequest request = getPullRequest();
+				PullRequest request = pullRequestModel.getObject();
 				if (request.getId() != null) {
 					return "#" + request.getId() + ": " + request.getTitle();
 				} else if (!getTarget().equals(getSource())) {
@@ -332,7 +332,7 @@ public class NewRequestPanel extends Panel {
 
 			@Override
 			protected List<String> load() {
-				return getPullRequest().getCheckResult().getReasons();
+				return pullRequestModel.getObject().getCheckResult().getReasons();
 			}
 			
 		}) {
@@ -346,7 +346,7 @@ public class NewRequestPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				PullRequest request = getPullRequest();
+				PullRequest request = pullRequestModel.getObject();
 				setVisible(request.getId() == null && request.getStatus() == PENDING_UPDATE);
 			}
 			
@@ -366,7 +366,7 @@ public class NewRequestPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(getPullRequest().getStatus() != INTEGRATED);
+				setVisible(pullRequestModel.getObject().getStatus() != INTEGRATED);
 			}
 			
 		});
@@ -376,7 +376,7 @@ public class NewRequestPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return getPullRequest().getMergeInfo().getMergeBase();
+				return pullRequestModel.getObject().getMergeInfo().getMergeBase();
 			}
 			
 		}, new AbstractReadOnlyModel<String>() {
@@ -392,7 +392,7 @@ public class NewRequestPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(getPullRequest().getStatus() != INTEGRATED);
+				setVisible(pullRequestModel.getObject().getStatus() != INTEGRATED);
 			}
 			
 		});
@@ -415,16 +415,6 @@ public class NewRequestPanel extends Panel {
 	
 	private User getSubmitter() {
 		return submitterModel.getObject();
-	}
-	
-	private PullRequest getPullRequest() {
-		PullRequest request = pullRequestModel.getObject();
-		if (request.getSandbox() != null) {
-			FileUtils.deleteDir(request.getSandbox().repoDir());
-			request.setSandbox(null);
-		}
-		
-		return request;
 	}
 	
 	private List<Commit> getCommits() {

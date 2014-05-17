@@ -18,7 +18,6 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.util.WildcardListModel;
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -27,9 +26,9 @@ import org.json.JSONWriter;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.AuthorizationManager;
-import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.model.Authorization;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.Team;
@@ -65,8 +64,8 @@ public class TeamRepositoryEditor extends Panel {
 
 					@Override
 					protected List<Authorization> load() {
-						AuthorizationManager am = Gitop.getInstance(AuthorizationManager.class);
-						return am.query(Restrictions.eq("team", getTeam()));
+						Dao dao = Gitop.getInstance(Dao.class);
+						return dao.query(EntityCriteria.of(Authorization.class).add(Restrictions.eq("team", getTeam())));
 					}
 		};
 		
@@ -90,9 +89,9 @@ public class TeamRepositoryEditor extends Panel {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						AuthorizationManager am = Gitop.getInstance(AuthorizationManager.class);
-						Authorization authorization = am.get(id);
-						am.delete(authorization);
+						Dao dao = Gitop.getInstance(Dao.class);
+						Authorization authorization = dao.get(Authorization.class, id);
+						dao.remove(authorization);
 						// TODO: add notification
 						//
 //						Messenger.warn("Repository [" + authorization.getRepository() 
@@ -123,12 +122,12 @@ public class TeamRepositoryEditor extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				Collection<Repository> repositories = reposModel.getObject();
-				AuthorizationManager am = Gitop.getInstance(AuthorizationManager.class);
+				Dao dao = Gitop.getInstance(Dao.class);
 				for (Repository each : repositories) {
 					Authorization authorization = new Authorization();
 					authorization.setTeam(getTeam());
 					authorization.setRepository(each);
-					am.save(authorization);
+					dao.persist(authorization);
 				}
 				
 				reposModel.setObject(new ArrayList<Repository>());
@@ -144,25 +143,20 @@ public class TeamRepositoryEditor extends Panel {
 		
 		@Override
 		public void query(String term, int page, Response<Repository> response) {
-			RepositoryManager pm = Gitop.getInstance(RepositoryManager.class);
+			Dao dao = Gitop.getInstance(Dao.class);
 			int first = page * 25;
-			List<Repository> repositories = 
-					pm.query(
-							new Criterion[] {
-									Restrictions.eq("owner", getTeam().getOwner()),
-									Restrictions.like("name", term, MatchMode.START).ignoreCase()
-							}, new Order[] {
-									Order.asc("name")
-							}, first, 25);
+			List<Repository> repositories = dao.query(EntityCriteria.of(Repository.class)
+							.add(Restrictions.eq("owner", getTeam().getOwner()))
+							.add(Restrictions.like("name", term, MatchMode.START).ignoreCase())
+							.addOrder(Order.asc("name")), first, 25);
 			
 			if (repositories.isEmpty()) {
 				response.addAll(repositories);
 				return;
 			}
 			
-			List<Authorization> authorizations =
-					Gitop.getInstance(AuthorizationManager.class)
-					.query(Restrictions.eq("team", getTeam()));
+			List<Authorization> authorizations = dao.query(EntityCriteria.of(Authorization.class)
+					.add(Restrictions.eq("team", getTeam())));
 			
 			List<Repository> result = Lists.newArrayList();
 			for (Repository each : repositories) {
@@ -194,10 +188,10 @@ public class TeamRepositoryEditor extends Panel {
 		@Override
 		public Collection<Repository> toChoices(Collection<String> ids) {
 			List<Repository> list = Lists.newArrayList();
-			RepositoryManager pm = Gitop.getInstance(RepositoryManager.class);
+			Dao dao = Gitop.getInstance(Dao.class);
 			for (String each : ids) {
 				Long id = Long.valueOf(each);
-				list.add(pm.get(id));
+				list.add(dao.load(Repository.class, id));
 			}
 			
 			return list;

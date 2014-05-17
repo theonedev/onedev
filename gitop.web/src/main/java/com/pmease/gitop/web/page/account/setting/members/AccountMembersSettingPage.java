@@ -21,10 +21,11 @@ import org.hibernate.criterion.Restrictions;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.MembershipManager;
 import com.pmease.gitop.model.Membership;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.User;
@@ -89,11 +90,11 @@ public class AccountMembersSettingPage extends AccountSettingPage {
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
-							MembershipManager mm = Gitop.getInstance(MembershipManager.class);
+							Dao dao = Gitop.getInstance(Dao.class);
 							User user = (User) getDefaultModelObject();
-							List<Membership> memberships = mm.query(Restrictions.eq("user", user));
+							List<Membership> memberships = dao.query(EntityCriteria.of(Membership.class).add(Restrictions.eq("user", user)));
 							for (Membership each : memberships) {
-								mm.delete(each);
+								dao.remove(each);
 							}
 							
 							target.add(AccountMembersSettingPage.this.get("members"));

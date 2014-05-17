@@ -13,9 +13,9 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.AuthorizationManager;
-import com.pmease.gitop.core.manager.VoteManager;
 import com.pmease.gitop.model.Vote;
 
 @SuppressWarnings("serial")
@@ -79,7 +79,7 @@ public class VoteActivityPanel extends Panel {
 					public void onClick(AjaxRequestTarget target) {
 						Vote vote = getVote();
 						vote.setComment(comment);
-						Gitop.getInstance(VoteManager.class).save(vote);
+						Gitop.getInstance(Dao.class).persist(vote);
 
 						Fragment fragment = renderForView();
 						VoteActivityPanel.this.replace(fragment);

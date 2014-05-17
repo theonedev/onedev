@@ -14,8 +14,8 @@ import org.apache.wicket.model.IModel;
 import com.google.common.collect.Iterables;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.command.LogCommand;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.RepositoryHomeLink;
@@ -55,7 +55,7 @@ public class RepositoryListPanel extends Panel {
 
 					@Override
 					public Date getObject() {
-						Repository repository = Gitop.getInstance(RepositoryManager.class).get(repositoryId);
+						Repository repository = Gitop.getInstance(Dao.class).load(Repository.class, repositoryId);
 						if (repository.git().hasCommits()) {
 							LogCommand command = new LogCommand(repository.git().repoDir());
 							List<Commit> commits = command.maxCount(1).call();

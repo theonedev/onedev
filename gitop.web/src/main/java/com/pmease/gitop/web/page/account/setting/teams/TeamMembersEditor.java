@@ -25,9 +25,10 @@ import org.hibernate.criterion.Restrictions;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.MembershipManager;
 import com.pmease.gitop.model.Membership;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.User;
@@ -69,8 +70,8 @@ public class TeamMembersEditor extends Panel {
 				}
 
 				List<User> users = Lists.newArrayList();
-				List<Membership> memberships = Gitop.getInstance(MembershipManager.class)
-						.query(Restrictions.eq("team", team));
+				List<Membership> memberships = Gitop.getInstance(Dao.class)
+						.query(EntityCriteria.of(Membership.class).add(Restrictions.eq("team", team)));
 				for (Membership each : memberships) {
 					users.add(each.getUser());
 				}
@@ -118,9 +119,8 @@ public class TeamMembersEditor extends Panel {
 				}
 
 				Team team = getTeam();
-				MembershipManager mm = Gitop
-						.getInstance(MembershipManager.class);
-				List<Membership> memberships = mm.query(Restrictions.eq("team", team));
+				Dao dao = Gitop.getInstance(Dao.class);
+				List<Membership> memberships = dao.query(EntityCriteria.of(Membership.class).add(Restrictions.eq("team", team)));
 				for (Membership each : memberships) {
 					if (users.contains(each.getUser())) {
 						users.remove(each.getUser());
@@ -131,7 +131,7 @@ public class TeamMembersEditor extends Panel {
 					Membership m = new Membership();
 					m.setTeam(team);
 					m.setUser(each);
-					mm.save(m);
+					dao.persist(m);
 				}
 				
 				usersModel.setObject(new ArrayList<User>());
@@ -164,14 +164,14 @@ public class TeamMembersEditor extends Panel {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						MembershipManager mm = Gitop.getInstance(MembershipManager.class);
+						Dao dao = Gitop.getInstance(Dao.class);
 						User user = (User) getDefaultModelObject();
 						Team team = getTeam();
-						Membership membership = mm.find(
-								Restrictions.eq("user", user),
-								Restrictions.eq("team", team));
+						Membership membership = dao.find(EntityCriteria.of(Membership.class)
+								.add(Restrictions.eq("user", user))
+								.add(Restrictions.eq("team", team)));
 						if (membership != null) {
-							Gitop.getInstance(MembershipManager.class).delete(membership);
+							dao.remove(membership);
 							
 							// Use membersForm to show feedback?
 							//

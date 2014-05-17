@@ -4,8 +4,8 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.image.NonCachingImage;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.service.FileBlob;
@@ -15,7 +15,7 @@ public class FileBlobImage extends NonCachingImage {
 
 	public static PageParameters newParams(FileBlob blob) {
 		Long repositoryId = blob.getRepositoryId();
-		Repository repository = Gitop.getInstance(RepositoryManager.class).get(repositoryId);
+		Repository repository = Gitop.getInstance(Dao.class).load(Repository.class, repositoryId);
 		
 		return newParams(repository, blob.getRevision(), blob.getFilePath());
 	}

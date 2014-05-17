@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.model.IModel;
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -13,8 +12,9 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 
 import com.google.common.collect.Lists;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.vaynberg.wicket.select2.ChoiceProvider;
@@ -33,16 +33,12 @@ public class RepositoryChoiceProvider extends ChoiceProvider<Repository> {
 	
 	@Override
 	public void query(String term, int page, Response<Repository> response) {
-		RepositoryManager pm = Gitop.getInstance(RepositoryManager.class);
+		Dao dao = Gitop.getInstance(Dao.class);
 		int first = page * PAGE_SIZE;
-		List<Repository> repositories = 
-				pm.query(
-						new Criterion[] {
-								Restrictions.eq("owner", getUser()),
-								Restrictions.like("name", term, MatchMode.START).ignoreCase()
-						}, new Order[] {
-								Order.asc("name")
-						}, first, PAGE_SIZE);
+		List<Repository> repositories = dao.query(EntityCriteria.of(Repository.class)
+						.add(Restrictions.eq("owner", getUser()))
+						.add(Restrictions.like("name", term, MatchMode.START).ignoreCase())
+						.addOrder(Order.asc("name")), first, PAGE_SIZE);
 		
 		response.addAll(repositories);
 	}
@@ -57,10 +53,10 @@ public class RepositoryChoiceProvider extends ChoiceProvider<Repository> {
 	@Override
 	public Collection<Repository> toChoices(Collection<String> ids) {
 		List<Repository> list = Lists.newArrayList();
-		RepositoryManager pm = Gitop.getInstance(RepositoryManager.class);
+		Dao dao = Gitop.getInstance(Dao.class);
 		for (String each : ids) {
 			Long id = Long.valueOf(each);
-			list.add(pm.load(id));
+			list.add(dao.load(Repository.class, id));
 		}
 		
 		return list;

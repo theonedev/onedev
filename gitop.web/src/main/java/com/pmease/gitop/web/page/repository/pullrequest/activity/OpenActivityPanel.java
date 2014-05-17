@@ -11,9 +11,9 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.AuthorizationManager;
-import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.model.PullRequest;
 
 @SuppressWarnings("serial")
@@ -77,7 +77,7 @@ public class OpenActivityPanel extends Panel {
 					public void onClick(AjaxRequestTarget target) {
 						PullRequest request = getPullRequest();
 						request.setDescription(description);
-						Gitop.getInstance(PullRequestManager.class).save(request);
+						Gitop.getInstance(Dao.class).persist(request);
 
 						Fragment fragment = renderForView();
 						OpenActivityPanel.this.replace(fragment);

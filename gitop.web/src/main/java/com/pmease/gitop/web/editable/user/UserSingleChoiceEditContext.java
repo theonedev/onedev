@@ -5,8 +5,8 @@ import java.io.Serializable;
 import org.apache.wicket.markup.html.basic.Label;
 
 import com.pmease.commons.editable.PropertyEditContext;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 
 @SuppressWarnings("serial")
@@ -25,7 +25,7 @@ public class UserSingleChoiceEditContext extends PropertyEditContext {
     public Object renderForView(Object renderParam) {
         Long userId = (Long) getPropertyValue();
         if (userId != null) {
-        	User user = Gitop.getInstance(UserManager.class).load(userId);
+        	User user = Gitop.getInstance(Dao.class).load(User.class, userId);
             return new Label((String) renderParam, user.getName());
         } else {
             return new Label((String) renderParam, "<i>Not Defined</i>")

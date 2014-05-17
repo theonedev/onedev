@@ -12,8 +12,9 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 
 import com.google.common.collect.Lists;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.service.AvatarManager;
 import com.vaynberg.wicket.select2.ChoiceProvider;
@@ -27,12 +28,13 @@ public class UserChoiceProvider extends ChoiceProvider<User> {
 
 	@Override
 	public void query(String term, int page, Response<User> response) {
-		UserManager um = Gitop.getInstance(UserManager.class);
+		Dao dao = Gitop.getInstance(Dao.class);
 		int first = page * PAGE_SIZE;
 		Criterion criterion = Restrictions.or(
 				Restrictions.ilike("name", term, MatchMode.START),
 				Restrictions.ilike("fullName", term, MatchMode.START));
-		List<User> users = um.query(new Criterion[] {criterion}, new Order[]{Order.asc("name")}, first, PAGE_SIZE + 1);
+		List<User> users = dao.query(EntityCriteria.of(User.class)
+				.add(criterion).addOrder(Order.asc("name")), first, PAGE_SIZE + 1);
 
 		if (users.size() <= PAGE_SIZE) {
 			response.addAll(users);
@@ -54,10 +56,10 @@ public class UserChoiceProvider extends ChoiceProvider<User> {
 	@Override
 	public Collection<User> toChoices(Collection<String> ids) {
 		List<User> users = Lists.newArrayList();
-		UserManager um = Gitop.getInstance(UserManager.class);
+		Dao dao = Gitop.getInstance(Dao.class);
 		for (String each : ids) {
 			Long id = Long.valueOf(each);
-			users.add(um.load(id));
+			users.add(dao.load(User.class, id));
 		}
 
 		return users;

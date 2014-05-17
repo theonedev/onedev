@@ -11,34 +11,34 @@ import javax.inject.Singleton;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.AbstractGenericDao;
-import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.core.manager.PullRequestUpdateManager;
 import com.pmease.gitop.model.Branch;
+import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.Repository;
-import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 
 @Singleton
-public class DefaultBranchManager extends AbstractGenericDao<Branch> implements BranchManager {
+public class DefaultBranchManager implements BranchManager {
+	
+	private final Dao dao;
 	
 	private final PullRequestManager pullRequestManager;
 	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
 	@Inject
-	public DefaultBranchManager(GeneralDao generalDao, 
-			PullRequestManager pullRequestManager, 
+	public DefaultBranchManager(Dao dao, PullRequestManager pullRequestManager, 
 			PullRequestUpdateManager pullRequestUpdateManager) {
-		super(generalDao);
+		this.dao = dao;
 		this.pullRequestManager = pullRequestManager;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 	}
@@ -46,7 +46,9 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
     @Sessional
     @Override
     public Branch findBy(Repository repository, String name) {
-        return find(new Criterion[]{Restrictions.eq("repository", repository), Restrictions.eq("name", name)});
+        return dao.find(EntityCriteria.of(Branch.class)
+        		.add(Restrictions.eq("repository", repository))
+        		.add(Restrictions.eq("name", name)));
     }
 
     @Sessional
@@ -66,9 +68,9 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
     	
     	for (PullRequest request: branch.getOutgoingRequests()) {
     		request.setSource(null);
-    		pullRequestManager.save(request);
+    		dao.persist(request);
     	}
-		super.delete(branch);
+		dao.remove(branch);
 	}
     
     @Sessional
@@ -80,9 +82,9 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
     @Transactional
 	@Override
 	public void create(final Branch branch, final String commitHash) {
-		save(branch);
+		dao.persist(branch);
 
-		getSession().getTransaction().registerSynchronization(new Synchronization() {
+		dao.getSession().getTransaction().registerSynchronization(new Synchronization() {
 
 			public void afterCompletion(int status) {
 				if (status == Status.STATUS_COMMITTED) { 
@@ -104,9 +106,9 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
     	final String oldName = branch.getName(); 
     	branch.setName(newName);
     	
-		save(branch);
+		dao.persist(branch);
 
-		getSession().getTransaction().registerSynchronization(new Synchronization() {
+		dao.getSession().getTransaction().registerSynchronization(new Synchronization() {
 
 			public void afterCompletion(int status) {
 				if (status == Status.STATUS_COMMITTED)  
@@ -123,7 +125,7 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 	@Override
 	public void trim(Collection<Long> branchIds) {
 		for (Iterator<Long> it = branchIds.iterator(); it.hasNext();) {
-			if (get(it.next()) == null)
+			if (dao.get(Branch.class, it.next()) == null)
 				it.remove();
 		}
 	}
@@ -160,7 +162,7 @@ public class DefaultBranchManager extends AbstractGenericDao<Branch> implements 
 			request.getUpdates().add(update);
 			update.setHeadCommit(branch.getHeadCommit());
 			
-			pullRequestUpdateManager.realize(update);
+			pullRequestUpdateManager.save(update);
 
 			request.setUpdateDate(new Date());
 			pullRequestManager.refresh(request);

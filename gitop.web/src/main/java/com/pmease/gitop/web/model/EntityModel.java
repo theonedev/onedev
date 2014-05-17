@@ -4,7 +4,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.JavassistUtils;
 
@@ -18,8 +18,8 @@ public class EntityModel<T extends AbstractEntity> extends LoadableDetachableMod
 	
 	private Long id;
 	
-	protected GeneralDao getDao() {
-		return AppLoader.getInstance(GeneralDao.class);
+	protected Dao getDao() {
+		return AppLoader.getInstance(Dao.class);
 	}
 
 	@SuppressWarnings("unchecked")

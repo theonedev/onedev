@@ -7,7 +7,6 @@ import java.util.List;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Projections;
 
 import com.google.inject.Inject;
@@ -20,14 +19,14 @@ import com.pmease.commons.loader.ManagedSerializedForm;
 
 @Singleton
 @SuppressWarnings("unchecked")
-public class DefaultGeneralDao implements GeneralDao, Serializable {
+public class DefaultDao implements Dao, Serializable {
 
 	private final Provider<SessionFactory> sessionFactoryProvider;
 	
 	private final Provider<Session> sessionProvider;
 	
 	@Inject
-	public DefaultGeneralDao(Provider<SessionFactory> sessionFactoryProvider, 
+	public DefaultDao(Provider<SessionFactory> sessionFactoryProvider, 
 			Provider<Session> sessionProvider) {
 		this.sessionFactoryProvider = sessionFactoryProvider;
 		this.sessionProvider = sessionProvider;
@@ -47,13 +46,13 @@ public class DefaultGeneralDao implements GeneralDao, Serializable {
 
 	@Transactional
 	@Override
-	public void save(AbstractEntity entity) {
+	public void persist(AbstractEntity entity) {
 		getSession().saveOrUpdate(entity);
 	}
 
 	@Transactional
 	@Override
-	public void delete(AbstractEntity entity) {
+	public void remove(AbstractEntity entity) {
 		getSession().delete(entity);
 	}
 
@@ -78,8 +77,8 @@ public class DefaultGeneralDao implements GeneralDao, Serializable {
 
 	@Sessional
 	@Override
-	public List<?> query(DetachedCriteria detachedCriteria, int firstResult, int maxResults) {
-		Criteria criteria = detachedCriteria.getExecutableCriteria(getSession());
+	public <T extends AbstractEntity> List<T> query(EntityCriteria<T> entityCriteria, int firstResult, int maxResults) {
+		Criteria criteria = entityCriteria.getExecutableCriteria(getSession());
 		if (firstResult != 0)
 			criteria.setFirstResult(firstResult);
 		if (maxResults != 0)
@@ -89,22 +88,34 @@ public class DefaultGeneralDao implements GeneralDao, Serializable {
 
 	@Sessional
 	@Override
-	public Object find(DetachedCriteria detachedCriteria) {
-		Criteria criteria = detachedCriteria.getExecutableCriteria(getSession());
+	public <T extends AbstractEntity> List<T> query(EntityCriteria<T> entityCriteria) {
+		return query(entityCriteria, 0, 0);
+	}
+
+	@Sessional
+	@Override
+	public <T extends AbstractEntity> T find(EntityCriteria<T> entityCriteria) {
+		Criteria criteria = entityCriteria.getExecutableCriteria(getSession());
 		criteria.setFirstResult(0);
 		criteria.setMaxResults(1);
-		return criteria.uniqueResult();
+		return (T) criteria.uniqueResult();
 	}
 
 	@Override
-	public <T extends AbstractEntity> int count(DetachedCriteria detachedCriteria) {
-		Criteria criteria = detachedCriteria.getExecutableCriteria(getSession());
+	public <T extends AbstractEntity> int count(EntityCriteria<T> entityCriteria) {
+		Criteria criteria = entityCriteria.getExecutableCriteria(getSession());
 		criteria.setProjection(Projections.rowCount());
 		return ((Long) criteria.uniqueResult()).intValue();
 	}
 	
 	public Object writeReplace() throws ObjectStreamException {
-		return new ManagedSerializedForm(GeneralDao.class);
+		return new ManagedSerializedForm(Dao.class);
+	}
+
+	@Sessional
+	@Override
+	public <T extends AbstractEntity> List<T> allOf(Class<T> entityClass) {
+		return query(EntityCriteria.of(entityClass), 0, 0);
 	}	
 
 }

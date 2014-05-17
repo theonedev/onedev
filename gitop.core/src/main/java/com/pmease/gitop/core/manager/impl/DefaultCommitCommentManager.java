@@ -9,19 +9,18 @@ import javax.inject.Singleton;
 import org.hibernate.Query;
 
 import com.google.common.collect.Maps;
-import com.pmease.commons.hibernate.dao.AbstractGenericDao;
-import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.manager.CommitCommentManager;
-import com.pmease.gitop.model.CommitComment;
 import com.pmease.gitop.model.Repository;
 
 @Singleton
-public class DefaultCommitCommentManager extends AbstractGenericDao<CommitComment> 
-		implements CommitCommentManager {
+public class DefaultCommitCommentManager implements CommitCommentManager {
 
+	private final Dao dao;
+	
 	@Inject
-	public DefaultCommitCommentManager(GeneralDao generalDao) {
-		super(generalDao);
+	public DefaultCommitCommentManager(Dao dao) {
+		this.dao = dao;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -31,7 +30,7 @@ public class DefaultCommitCommentManager extends AbstractGenericDao<CommitCommen
 					+ "WHERE repository=:repository "
 				    + "GROUP BY c.commit";
 		
-		Query query = this.getSession().createQuery(sql);
+		Query query = dao.getSession().createQuery(sql);
 		query.setParameter("repository", repository);
 		List<Object[]> list = query.list();
 		

@@ -15,9 +15,9 @@ import org.apache.wicket.model.Model;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.CommitCommentManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.CommitComment;
 import com.pmease.gitop.model.Repository;
@@ -169,7 +169,7 @@ public class CommitCommentPanel extends Panel {
 				cc.setUpdatedDate(new Date());
 				cc.setContent(comment);
 				
-				Gitop.getInstance(CommitCommentManager.class).save(cc);
+				Gitop.getInstance(Dao.class).persist(cc);
 				
 				send(getPage(), Broadcast.DEPTH, new CommitCommentUpdated(target, cc));
 				updateCommentLabel(target);
@@ -193,7 +193,7 @@ public class CommitCommentPanel extends Panel {
 	
 	protected void onDelete(AjaxRequestTarget target) {
 		CommitComment comment = getCommitComment();
-		Gitop.getInstance(CommitCommentManager.class).delete(comment);
+		Gitop.getInstance(Dao.class).remove(comment);
 		send(getPage(), Broadcast.BREADTH, new CommitCommentRemoved(target, comment));
 	}
 	

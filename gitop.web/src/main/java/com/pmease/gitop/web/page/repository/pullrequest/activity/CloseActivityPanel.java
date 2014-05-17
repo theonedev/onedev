@@ -14,9 +14,9 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.AuthorizationManager;
-import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.model.CloseInfo;
 import com.pmease.gitop.model.PullRequest;
 
@@ -81,7 +81,7 @@ public class CloseActivityPanel extends Panel {
 					public void onClick(AjaxRequestTarget target) {
 						PullRequest request = getPullRequest();
 						request.getCloseInfo().setComment(comment);
-						Gitop.getInstance(PullRequestManager.class).save(request);
+						Gitop.getInstance(Dao.class).persist(request);
 
 						Fragment fragment = renderForView();
 						CloseActivityPanel.this.replace(fragment);

@@ -24,12 +24,13 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.TeamManager;
@@ -137,7 +138,7 @@ public class AccountTeamsPage extends AccountSettingPage {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						Team p = (Team) this.getDefaultModelObject();
-						Gitop.getInstance(TeamManager.class).delete(p);
+						Gitop.getInstance(Dao.class).remove(p);
 						target.add(AccountTeamsPage.this.get("teams"));
 					}
 				};
@@ -160,12 +161,10 @@ public class AccountTeamsPage extends AccountSettingPage {
 
 			@Override
 			protected List<Team> load() {
-				TeamManager tm = Gitop.getInstance(TeamManager.class);
-				return tm.query(
-						new Criterion[] {Restrictions.eq("owner", getAccount())}, 
-						new Order[] { Order.asc("id")}, 
-						0, 
-						Integer.MAX_VALUE);
+				Dao dao = Gitop.getInstance(Dao.class);
+				return dao.query(EntityCriteria.of(Team.class)
+						.add(Restrictions.eq("owner", getAccount()))
+						.addOrder(Order.asc("id")));
 			}
 			
 		};
@@ -237,7 +236,7 @@ public class AccountTeamsPage extends AccountSettingPage {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					Team team = Gitop.getInstance(TeamManager.class).get(teamId);
+					Team team = Gitop.getInstance(Dao.class).load(Team.class, teamId);
 					GeneralOperation permission = team.getAuthorizedOperation();
 					if (Objects.equal(operation, permission)
 							|| operation.ordinal() < permission.ordinal()) {
@@ -246,7 +245,7 @@ public class AccountTeamsPage extends AccountSettingPage {
 						team.setAuthorizedOperation(operation);
 					}
 					
-					Gitop.getInstance(TeamManager.class).save(team);
+					Gitop.getInstance(Dao.class).persist(team);
 					target.add(AccountTeamsPage.this.get("teams"));
 				}
 			};
@@ -256,7 +255,7 @@ public class AccountTeamsPage extends AccountSettingPage {
 
 				@Override
 				public String getObject() {
-					Team team = Gitop.getInstance(TeamManager.class).get(teamId);
+					Team team = Gitop.getInstance(Dao.class).load(Team.class, teamId);
 					return getTeamPermission(team).can(operation) ?
 							"icon-checkbox-checked" : "icon-checkbox-unchecked";
 				}
@@ -301,7 +300,7 @@ public class AccountTeamsPage extends AccountSettingPage {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						Team p = (Team) this.getDefaultModelObject();
-						Gitop.getInstance(TeamManager.class).delete(p);
+						Gitop.getInstance(Dao.class).remove(p);
 						target.add(teamsDiv);
 					}
 				}.add(new ConfirmBehavior("Are you sure you want to remove team <b>" + team.getName() + "</b>?")));

@@ -15,15 +15,15 @@ import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
 import com.fasterxml.jackson.databind.ser.BeanSerializer;
 import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.hibernate.dao.Dao;
 
 @Singleton
 public class HibernateObjectMapperModule extends Module {
 
-	private final GeneralDao generalDao;
+	private final Dao generalDao;
 	
 	@Inject
-    public HibernateObjectMapperModule(GeneralDao generalDao) {
+    public HibernateObjectMapperModule(Dao generalDao) {
 		this.generalDao = generalDao;
     }
     

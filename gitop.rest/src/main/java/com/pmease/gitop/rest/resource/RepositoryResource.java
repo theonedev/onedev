@@ -1,6 +1,5 @@
 package com.pmease.gitop.rest.resource;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -21,10 +20,10 @@ import javax.ws.rs.core.MediaType;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
-import com.pmease.gitop.core.manager.RepositoryManager;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.permission.ObjectPermission;
 
@@ -34,17 +33,17 @@ import com.pmease.gitop.model.permission.ObjectPermission;
 @Singleton
 public class RepositoryResource {
 
-	private final RepositoryManager repositoryManager;
+	private final Dao dao;
 	
 	@Inject
-	public RepositoryResource(RepositoryManager repositoryManager) {
-		this.repositoryManager = repositoryManager;
+	public RepositoryResource(Dao dao) {
+		this.dao = dao;
 	}
 	
 	@Path("/{repositoryId}")
     @GET
     public Repository get(@PathParam("repositoryId") Long repositoryId) {
-    	Repository repository = repositoryManager.load(repositoryId);
+    	Repository repository = dao.load(Repository.class, repositoryId);
 
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(repository)))
     		throw new UnauthenticatedException();
@@ -56,12 +55,13 @@ public class RepositoryResource {
 	public Collection<Repository> query(
 			@QueryParam("userId") Long userId, 
 			@QueryParam("name") String name) {
-		List<Criterion> criterions = new ArrayList<>();
+		
+		EntityCriteria<Repository> criteria = EntityCriteria.of(Repository.class);
 		if (userId != null)
-			criterions.add(Restrictions.eq("owner.id", userId));
+			criteria.add(Restrictions.eq("owner.id", userId));
 		if (name != null)
-			criterions.add(Restrictions.eq("name", name));
-		List<Repository> repositories = repositoryManager.query(criterions.toArray(new Criterion[criterions.size()]));
+			criteria.add(Restrictions.eq("name", name));
+		List<Repository> repositories = dao.query(criteria);
 		
 		for (Repository repository: repositories) {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(repository))) {
@@ -76,19 +76,19 @@ public class RepositoryResource {
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(repository)))
     		throw new UnauthenticatedException();
     	
-    	repositoryManager.save(repository);
+    	dao.persist(repository);
     	return repository.getId();
     }
 
     @DELETE
     @Path("/{repositoryId}")
     public void delete(@PathParam("repositoryId") Long repositoryId) {
-    	Repository repository = repositoryManager.load(repositoryId);
+    	Repository repository = dao.load(Repository.class, repositoryId);
 
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(repository)))
     		throw new UnauthorizedException();
     	
-    	repositoryManager.delete(repository);
+    	dao.remove(repository);
     }
     
 }

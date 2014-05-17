@@ -21,8 +21,9 @@ import org.hibernate.criterion.Restrictions;
 
 import com.google.common.collect.Iterables;
 import com.pmease.commons.git.Commit;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.CommitCommentManager;
 import com.pmease.gitop.model.CommitComment;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
@@ -77,9 +78,9 @@ public class SourceCommitPage extends RepositoryPage implements CommitCommentsAw
 	}
 
 	private List<CommitComment> loadComments() {
-		return Gitop.getInstance(CommitCommentManager.class)
-				.query(Restrictions.eq("repository", getRepository()),
-						Restrictions.eq("commit", getUntil()));
+		return Gitop.getInstance(Dao.class).query(EntityCriteria.of(CommitComment.class)
+				.add(Restrictions.eq("repository", getRepository()))
+				.add(Restrictions.eq("commit", getUntil())));
 	}
 	
 	private String getSince() {

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.AppLoader;
 
 @SuppressWarnings("serial")
@@ -28,6 +28,6 @@ public final class ManyToOneDeserializer extends StdDeserializer<AbstractEntity>
             JsonProcessingException {
         Long entityId = jp.getLongValue();
         Class<? extends AbstractEntity> valueClass = (Class<? extends AbstractEntity>) handledType();
-        return (AbstractEntity) AppLoader.getInstance(GeneralDao.class).load(valueClass, entityId);
+        return (AbstractEntity) AppLoader.getInstance(Dao.class).load(valueClass, entityId);
     }
 }

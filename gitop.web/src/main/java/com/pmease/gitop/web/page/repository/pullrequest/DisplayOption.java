@@ -4,11 +4,11 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
-import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 
-import com.pmease.gitop.model.Repository;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 
 @SuppressWarnings("serial")
@@ -50,8 +50,8 @@ class DisplayOption implements Serializable {
 		this.sortOption = sortOption;
 	}
 
-	public DetachedCriteria getCriteria(Repository repository, boolean withOrderBy) {
-		DetachedCriteria criteria = DetachedCriteria.forClass(PullRequest.class);
+	public EntityCriteria<PullRequest> getCriteria(Repository repository, boolean withOrderBy) {
+		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.createCriteria("target").add(Restrictions.eq("repository", repository));
 		if (open) {
 			criteria.add(PullRequest.CriterionHelper.ofOpen());

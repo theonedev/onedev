@@ -11,8 +11,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Strings;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.SessionData;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
@@ -75,7 +75,7 @@ public class RepositoryPageTab extends AbstractPageTab {
 	}
 
 	protected Repository getRepository() {
-		return Gitop.getInstance(RepositoryManager.class).get(SessionData.get().getRepositoryId());
+		return Gitop.getInstance(Dao.class).load(Repository.class, SessionData.get().getRepositoryId());
 	}
 	
 	protected MarkupContainer newPageLink(String id) {

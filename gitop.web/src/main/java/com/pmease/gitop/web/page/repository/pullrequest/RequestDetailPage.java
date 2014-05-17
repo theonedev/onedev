@@ -32,6 +32,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.git.GitPerson;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
@@ -79,7 +80,7 @@ public class RequestDetailPage extends RepositoryPage implements CommitCommentsA
 
 			@Override
 			protected PullRequest load() {
-				return Gitop.getInstance(PullRequestManager.class).load(params.get("request").toLong());
+				return Gitop.getInstance(Dao.class).load(PullRequest.class, params.get("request").toLong());
 			}
 			
 		};
@@ -185,7 +186,7 @@ public class RequestDetailPage extends RepositoryPage implements CommitCommentsA
 				super.onSubmit(target, form);
 				
 				if (StringUtils.isNotBlank(getPullRequest().getTitle())) {
-					Gitop.getInstance(PullRequestManager.class).save(getPullRequest());
+					Gitop.getInstance(Dao.class).persist(getPullRequest());
 					editingTitle = false;
 				}
 

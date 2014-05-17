@@ -1,6 +1,5 @@
 package com.pmease.gitop.rest.resource;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -20,11 +19,11 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.validator.constraints.Email;
 
-import com.pmease.gitop.core.manager.UserManager;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
 
@@ -34,11 +33,11 @@ import com.pmease.gitop.model.permission.ObjectPermission;
 @Singleton
 public class UserResource {
 
-	private final UserManager userManager;
+	private final Dao dao;
 	
 	@Inject
-	public UserResource(UserManager userManager) {
-		this.userManager = userManager;
+	public UserResource(Dao dao) {
+		this.dao = dao;
 	}
 	
 	@GET
@@ -46,14 +45,14 @@ public class UserResource {
 			@QueryParam("name") String name, 
 			@Email @QueryParam("email") String email, 
 			@QueryParam("fullName") String fullName) {
-		List<Criterion> criterions = new ArrayList<>();
+		EntityCriteria<User> criteria = EntityCriteria.of(User.class);
 		if (name != null)
-			criterions.add(Restrictions.eq("name", name));
+			criteria.add(Restrictions.eq("name", name));
 		if (email != null)
-			criterions.add(Restrictions.eq("email", email));
+			criteria.add(Restrictions.eq("email", email));
 		if (fullName != null)
-			criterions.add(Restrictions.eq("fullName", fullName));
-		List<User> users = userManager.query(criterions.toArray(new Criterion[criterions.size()]));
+			criteria.add(Restrictions.eq("fullName", fullName));
+		List<User> users = dao.query(criteria);
 		
 		for (User user: users) {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserRead(user))) {
@@ -66,7 +65,7 @@ public class UserResource {
     @GET
     @Path("/{userId}")
     public User get(@PathParam("userId") Long userId) {
-    	User user = userManager.load(userId);
+    	User user = dao.load(User.class, userId);
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserRead(user)))
     		throw new UnauthorizedException();
     	else
@@ -78,18 +77,18 @@ public class UserResource {
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserAdmin(user)))
     		throw new UnauthorizedException();
 
-    	userManager.save(user);
+    	dao.persist(user);
     	return user.getId();
     }
     
     @DELETE
     @Path("/{userId}")
     public void delete(@PathParam("userId") Long userId) {
-    	User user = userManager.load(userId);
+    	User user = dao.load(User.class, userId);
     	
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserAdmin(user)))
     		throw new UnauthorizedException();
     	
-    	userManager.delete(user);
+    	dao.remove(user);
     }
 }

@@ -8,12 +8,12 @@ import java.util.List;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.editable.TeamChoice;
-import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.web.component.choice.TeamChoiceProvider;
 import com.pmease.gitop.web.component.choice.TeamMultiChoice;
@@ -44,10 +44,10 @@ public class TeamMultiChoiceEditor extends Panel {
 			public Collection<Team> getObject() {
 				List<Long> teamIds = (List<Long>) editContext.getPropertyValue();
 				if (teamIds != null) {
-					TeamManager teamManager = Gitop.getInstance(TeamManager.class);
+					Dao dao = Gitop.getInstance(Dao.class);
 					Collection<Team> teams = new ArrayList<>();
 					for (Long teamId: teamIds) 
-						teams.add(teamManager.load(teamId));
+						teams.add(dao.load(Team.class, teamId));
 					return teams;
 				} else {
 					return null;
@@ -68,11 +68,11 @@ public class TeamMultiChoiceEditor extends Panel {
     		
     	};
     	
-    	TeamChoiceProvider teamProvider = new TeamChoiceProvider(new LoadableDetachableModel<DetachedCriteria>() {
+    	TeamChoiceProvider teamProvider = new TeamChoiceProvider(new LoadableDetachableModel<EntityCriteria<Team>>() {
 
 			@Override
-			protected DetachedCriteria load() {
-				DetachedCriteria criteria = DetachedCriteria.forClass(Team.class);
+			protected EntityCriteria<Team> load() {
+				EntityCriteria<Team> criteria = EntityCriteria.of(Team.class);
 				RepositoryBasePage page = (RepositoryBasePage) getPage();
 				criteria.add(Restrictions.eq("owner", page.getRepository()));
 				for (String each: editContext.getPropertyGetter().getAnnotation(TeamChoice.class).excludes()) {

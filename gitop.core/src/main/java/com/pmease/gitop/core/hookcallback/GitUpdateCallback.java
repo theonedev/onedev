@@ -20,9 +20,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Commit;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.manager.BranchManager;
-import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Repository;
@@ -41,15 +41,15 @@ public class GitUpdateCallback extends HttpServlet {
 
 	public static final String PATH = "/git-update-callback";
 
-	private final RepositoryManager repositoryManager;
+	private final Dao dao;
 	
 	private final BranchManager branchManager;
 
 	private final UserManager userManager;
 	
 	@Inject
-	public GitUpdateCallback(RepositoryManager repositoryManager, BranchManager branchManager, UserManager userManager) {
-		this.repositoryManager = repositoryManager;
+	public GitUpdateCallback(Dao dao, BranchManager branchManager, UserManager userManager) {
+		this.dao = dao;
 		this.branchManager = branchManager;
 		this.userManager = userManager;
 	}
@@ -92,7 +92,7 @@ public class GitUpdateCallback extends HttpServlet {
         List<String> fields = StringUtils.splitAndTrim(request.getPathInfo(), "/");
         Preconditions.checkState(fields.size() == 2);
         
-        Repository repository = repositoryManager.load(Long.valueOf(fields.get(0)));
+        Repository repository = dao.load(Repository.class, Long.valueOf(fields.get(0)));
         
         SecurityUtils.getSubject().runAs(User.asPrincipal(Long.valueOf(fields.get(1))));
         

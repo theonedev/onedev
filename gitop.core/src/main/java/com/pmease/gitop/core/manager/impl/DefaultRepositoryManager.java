@@ -20,42 +20,39 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.AbstractGenericDao;
-import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.RepositoryManager;
-import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.storage.StorageManager;
 
 @Singleton
-public class DefaultRepositoryManager extends AbstractGenericDao<Repository> implements RepositoryManager {
+public class DefaultRepositoryManager implements RepositoryManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultRepositoryManager.class);
 
+	private final Dao dao;
+	
     private final BranchManager branchManager;
     
     private final StorageManager storageManager;
     
-    private final PullRequestManager pullRequestManager;
-
     private final String gitUpdateHook;
     
     private final String gitPostReceiveHook;
     
     @Inject
-    public DefaultRepositoryManager(GeneralDao generalDao, BranchManager branchManager, 
-    		StorageManager storageManager, PullRequestManager pullRequestManager) {
-        super(generalDao);
-
+    public DefaultRepositoryManager(Dao dao, BranchManager branchManager, StorageManager storageManager) {
+    	this.dao = dao;
+    	
         this.branchManager = branchManager;
         this.storageManager = storageManager;
-        this.pullRequestManager = pullRequestManager;
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-update-hook")) {
         	Preconditions.checkNotNull(is);
@@ -75,7 +72,7 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
     @Transactional
     @Override
     public void save(Repository repository) {
-    	super.save(repository);
+    	dao.persist(repository);
     	
         checkSanity(repository);
     }
@@ -86,7 +83,7 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
     	for (Branch branch: repository.getBranches()) {
 	    	for (PullRequest request: branch.getOutgoingRequests()) {
 	    		request.setSource(null);
-	    		pullRequestManager.save(request);
+	    		dao.persist(request);
 	    	}
     	}
     	
@@ -95,7 +92,7 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
     		save(each);
     	}
     	
-        super.delete(repository);
+        dao.remove(repository);
 
         storageManager.getStorage(repository).delete();
     }
@@ -103,7 +100,7 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
     @Sessional
     @Override
     public Repository findBy(String ownerName, String repositoryName) {
-        Criteria criteria = createCriteria();
+        Criteria criteria = dao.getSession().createCriteria(Repository.class);
         criteria.add(Restrictions.eq("name", repositoryName));
         criteria.createAlias("owner", "owner");
         criteria.add(Restrictions.eq("owner.name", ownerName));
@@ -115,8 +112,9 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
     @Sessional
     @Override
     public Repository findBy(User owner, String repositoryName) {
-        return find(Restrictions.eq("owner.id", owner.getId()),
-                Restrictions.eq("name", repositoryName));
+        return dao.find(EntityCriteria.of(Repository.class)
+        		.add(Restrictions.eq("owner.id", owner.getId()))
+        		.add(Restrictions.eq("name", repositoryName)));
     }
 
 	@Transactional
@@ -149,7 +147,7 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
 				forked.setName(repository.getName());
 			}
 
-			super.save(forked);
+			dao.persist(forked);
 
             FileUtils.cleanDir(forked.git().repoDir());
             forked.git().clone(repository.git().repoDir().getAbsolutePath(), true);
@@ -163,7 +161,7 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
 	@Transactional
 	@Override
 	public void checkSanity() {
-		for (Repository repository: query()) {
+		for (Repository repository: dao.query(EntityCriteria.of(Repository.class), 0, 0)) {
 			checkSanity(repository);
 		}
 	}
@@ -218,7 +216,7 @@ public class DefaultRepositoryManager extends AbstractGenericDao<Repository> imp
 				Branch branch = new Branch();
 				branch.setName(branchInGit);
 				branch.setRepository(repository);
-				branchManager.save(branch);
+				dao.persist(branch);
 			}
 		}
 		

@@ -8,11 +8,11 @@ import java.util.List;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.web.component.choice.BranchChoiceProvider;
 import com.pmease.gitop.web.component.choice.BranchMultiChoice;
@@ -43,10 +43,10 @@ public class BranchMultiChoiceEditor extends Panel {
 			public Collection<Branch> getObject() {
 				List<Long> branchIds = (List<Long>) editContext.getPropertyValue();
 				if (branchIds != null) {
-					BranchManager branchManager = Gitop.getInstance(BranchManager.class);
+					Dao dao = Gitop.getInstance(Dao.class);
 					Collection<Branch> branches = new ArrayList<>();
 					for (Long branchId: branchIds) 
-						branches.add(branchManager.load(branchId));
+						branches.add(dao.load(Branch.class, branchId));
 					return branches;
 				} else {
 					return null;
@@ -67,11 +67,11 @@ public class BranchMultiChoiceEditor extends Panel {
     		
     	};
     	
-    	BranchChoiceProvider branchProvider = new BranchChoiceProvider(new LoadableDetachableModel<DetachedCriteria>() {
+    	BranchChoiceProvider branchProvider = new BranchChoiceProvider(new LoadableDetachableModel<EntityCriteria<Branch>>() {
 
 			@Override
-			protected DetachedCriteria load() {
-				DetachedCriteria criteria = DetachedCriteria.forClass(Branch.class);
+			protected EntityCriteria<Branch> load() {
+				EntityCriteria<Branch> criteria = EntityCriteria.of(Branch.class);
 				RepositoryBasePage page = (RepositoryBasePage) getPage();
 				criteria.add(Restrictions.eq("repository", page.getRepository()));
 				return criteria;

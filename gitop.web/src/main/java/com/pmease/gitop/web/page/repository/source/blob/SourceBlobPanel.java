@@ -13,8 +13,8 @@ import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.quantity.Data;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
@@ -98,7 +98,7 @@ public class SourceBlobPanel extends Panel {
 		
 		FileBlob blob = getBlob();
 		
-		Repository repository = Gitop.getInstance(RepositoryManager.class).get(blob.getRepositoryId());
+		Repository repository = Gitop.getInstance(Dao.class).load(Repository.class, blob.getRepositoryId());
 		List<String> paths = Lists.newArrayList(Splitter.on("/").split(blob.getFilePath())); 
 		add(new BookmarkablePageLink<Void>("historylink", CommitsPage.class,
 				CommitsPage.newParams(

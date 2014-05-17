@@ -3,9 +3,9 @@ package com.pmease.gitop.core.gatekeeper;
 import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.editable.TeamChoice;
-import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.gatekeeper.ApprovalGateKeeper;
@@ -28,12 +28,12 @@ public abstract class TeamAwareGateKeeper extends ApprovalGateKeeper {
 	}
 	
 	public Team getTeam() {
-		return Gitop.getInstance(TeamManager.class).load(getTeamId());
+		return Gitop.getInstance(Dao.class).load(Team.class, getTeamId());
 	}
 
 	@Override
 	protected GateKeeper trim(Repository repository) {
-		if (Gitop.getInstance(TeamManager.class).get(getTeamId()) == null)
+		if (Gitop.getInstance(Dao.class).get(Team.class, getTeamId()) == null)
 			return null;
 		else
 			return this;

@@ -27,15 +27,13 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
-import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.PullRequestManager;
-import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.Constants;
@@ -155,8 +153,8 @@ public class RequestListPanel extends Panel {
 			@Override
 			public User getObject() {
 				if (displayOption.getSubmitterId() > 0L) {
-					UserManager userManager = Gitop.getInstance(UserManager.class);
-					return userManager.load(displayOption.getSubmitterId());
+					Dao dao = Gitop.getInstance(Dao.class);
+					return dao.load(User.class, displayOption.getSubmitterId());
 				} else {
 					return null;
 				}
@@ -302,18 +300,16 @@ public class RequestListPanel extends Panel {
 			public void detach() {
 			}
 
-			@SuppressWarnings("unchecked")
 			@Override
 			public Iterator<? extends PullRequest> iterator(long first, long count) {
 				RepositoryBasePage page = (RepositoryBasePage) getPage();
-				return (Iterator<? extends PullRequest>) Gitop.getInstance(GeneralDao.class).query(
-						displayOption.getCriteria(page.getRepository(), true), (int)first, (int)count).iterator();
+				return Gitop.getInstance(Dao.class).query(displayOption.getCriteria(page.getRepository(), true), (int)first, (int)count).iterator();
 			}
 
 			@Override
 			public long size() {
 				RepositoryBasePage page = (RepositoryBasePage) getPage();
-				return Gitop.getInstance(GeneralDao.class).count(displayOption.getCriteria(page.getRepository(), false));
+				return Gitop.getInstance(Dao.class).count(displayOption.getCriteria(page.getRepository(), false));
 			}
 
 			@Override
@@ -323,7 +319,7 @@ public class RequestListPanel extends Panel {
 
 					@Override
 					protected PullRequest load() {
-						return Gitop.getInstance(PullRequestManager.class).load(pullRequestId);
+						return Gitop.getInstance(Dao.class).load(PullRequest.class, pullRequestId);
 					}
 					
 				};

@@ -31,8 +31,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.CommitCommentManager;
 import com.pmease.gitop.model.CommitComment;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.Constants;
@@ -367,7 +367,7 @@ public class HunkPanel extends Panel {
 				comment.setLine(lineId);
 				comment.setRepository(repositoryModel.getObject());
 				comment.setContent(getCommentText());
-				Gitop.getInstance(CommitCommentManager.class).save(comment);
+				Gitop.getInstance(Dao.class).persist(comment);
 				
 				send(getPage(), Broadcast.DEPTH, new CommitCommentAdded(target, comment));				
 			}
@@ -545,7 +545,7 @@ public class HunkPanel extends Panel {
 		
 		private CommitComment getComment(int index) {
 			Long id = Iterables.get(getCommentIds(), index);
-			return Gitop.getInstance(CommitCommentManager.class).get(id);
+			return Gitop.getInstance(Dao.class).load(CommitComment.class, id);
 		}
 		
 		private List<Long> getCommentIds() {

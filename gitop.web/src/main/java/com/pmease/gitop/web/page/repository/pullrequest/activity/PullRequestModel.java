@@ -2,7 +2,7 @@ package com.pmease.gitop.web.page.repository.pullrequest.activity;
 
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.pmease.gitop.core.manager.PullRequestManager;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.PullRequest;
 
@@ -17,7 +17,7 @@ public class PullRequestModel extends LoadableDetachableModel<PullRequest> {
 	
 	@Override
 	protected PullRequest load() {
-		return Gitop.getInstance(PullRequestManager.class).load(requestId);
+		return Gitop.getInstance(Dao.class).load(PullRequest.class, requestId);
 	}
 
 }

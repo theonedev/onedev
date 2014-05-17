@@ -9,8 +9,9 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.eclipse.jgit.util.StringUtils;
 
 import com.pmease.commons.editable.PropertyEditContext;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.TeamManager;
+import com.pmease.gitop.model.Team;
 
 @SuppressWarnings("serial")
 public class TeamMultiChoiceEditContext extends PropertyEditContext {
@@ -29,10 +30,10 @@ public class TeamMultiChoiceEditContext extends PropertyEditContext {
     public Object renderForView(Object renderParam) {
         Collection<Long> teamIds = (Collection<Long>) getPropertyValue();
         if (teamIds != null && !teamIds.isEmpty()) {
-        	TeamManager teamManager = Gitop.getInstance(TeamManager.class);
+        	Dao dao = Gitop.getInstance(Dao.class);
         	List<String> teamNames = new ArrayList<>();
         	for (Long teamId: teamIds) {
-        		teamNames.add(teamManager.load(teamId).getName());
+        		teamNames.add(dao.load(Team.class, teamId).getName());
         	}
             return new Label((String) renderParam, StringUtils.join(teamNames, ", " ));
         } else {

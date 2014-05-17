@@ -6,7 +6,6 @@ import java.util.Iterator;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.cache.CacheBuilder;
@@ -14,8 +13,8 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.AbstractGenericDao;
-import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitop.core.manager.TeamManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Team;
@@ -23,7 +22,7 @@ import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.operation.GeneralOperation;
 
 @Singleton
-public class DefaultTeamManager extends AbstractGenericDao<Team> implements TeamManager {
+public class DefaultTeamManager implements TeamManager {
 
 	private static class BuiltInTeam {
 		final Long anonymousId;
@@ -36,12 +35,14 @@ public class DefaultTeamManager extends AbstractGenericDao<Team> implements Team
 			this.loggedInId = loggedInId;
 		}
 	}
+
+	private final Dao dao;
 	
 	private final LoadingCache<Long, BuiltInTeam> builtInTeamsCache;
 	
 	@Inject
-	public DefaultTeamManager(GeneralDao generalDao, final UserManager userManager) {
-		super(generalDao);
+	public DefaultTeamManager(Dao dao, final UserManager userManager) {
+		this.dao = dao;
 		
 		builtInTeamsCache =
 				CacheBuilder.newBuilder()
@@ -49,7 +50,7 @@ public class DefaultTeamManager extends AbstractGenericDao<Team> implements Team
 
 						@Override
 						public BuiltInTeam load(Long key) throws Exception {
-							User user = userManager.get(key);
+							User user = DefaultTeamManager.this.dao.get(User.class, key);
 							Team anonymous = findBy(user, Team.ANONYMOUS);
 							Team owners = findBy(user, Team.OWNERS);
 							Team loggedIn = findBy(user, Team.LOGGEDIN);
@@ -61,23 +62,25 @@ public class DefaultTeamManager extends AbstractGenericDao<Team> implements Team
 	@Sessional
 	@Override
 	public Team findBy(User owner, String teamName) {
-		return find(new Criterion[]{Restrictions.eq("owner", owner), Restrictions.eq("name", teamName)});
+		return dao.find(EntityCriteria.of(Team.class)
+				.add(Restrictions.eq("owner", owner))
+				.add(Restrictions.eq("name", teamName)));
 	}
 
 	@Transactional
 	@Override
 	public Team getAnonymous(User user) {
-		return load(builtInTeamsCache.getUnchecked(user.getId()).anonymousId);
+		return dao.load(Team.class, builtInTeamsCache.getUnchecked(user.getId()).anonymousId);
 	}
 
 	@Override
 	public Team getLoggedIn(User user) {
-		return load(builtInTeamsCache.getUnchecked(user.getId()).loggedInId);
+		return dao.load(Team.class, builtInTeamsCache.getUnchecked(user.getId()).loggedInId);
 	}
 
 	@Override
 	public Team getOwners(User user) {
-		return load(builtInTeamsCache.getUnchecked(user.getId()).ownersId);
+		return dao.load(Team.class, builtInTeamsCache.getUnchecked(user.getId()).ownersId);
 	}
 
 	@Override
@@ -99,7 +102,7 @@ public class DefaultTeamManager extends AbstractGenericDao<Team> implements Team
 	@Override
 	public void trim(Collection<Long> teamIds) {
 		for (Iterator<Long> it = teamIds.iterator(); it.hasNext();) {
-			if (get(it.next()) == null)
+			if (dao.get(Team.class, it.next()) == null)
 				it.remove();
 		}
 	}

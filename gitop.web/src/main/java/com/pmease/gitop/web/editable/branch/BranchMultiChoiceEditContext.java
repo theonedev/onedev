@@ -9,8 +9,9 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.eclipse.jgit.util.StringUtils;
 
 import com.pmease.commons.editable.PropertyEditContext;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.BranchManager;
+import com.pmease.gitop.model.Branch;
 
 @SuppressWarnings("serial")
 public class BranchMultiChoiceEditContext extends PropertyEditContext {
@@ -29,10 +30,10 @@ public class BranchMultiChoiceEditContext extends PropertyEditContext {
     public Object renderForView(Object renderParam) {
         Collection<Long> branchIds = (Collection<Long>) getPropertyValue();
         if (branchIds != null && !branchIds.isEmpty()) {
-        	BranchManager branchManager = Gitop.getInstance(BranchManager.class);
+        	Dao dao = Gitop.getInstance(Dao.class);
         	List<String> branchNames = new ArrayList<>();
         	for (Long branchId: branchIds) {
-        		branchNames.add(branchManager.load(branchId).getName());
+        		branchNames.add(dao.load(Branch.class, branchId).getName());
         	}
             return new Label((String) renderParam, StringUtils.join(branchNames, ", " ));
         } else {

@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.deser.SettableBeanProperty;
 import com.fasterxml.jackson.databind.deser.impl.PropertyValue;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.commons.hibernate.dao.GeneralDao;
+import com.pmease.commons.hibernate.dao.Dao;
 
 @SuppressWarnings("serial")
 public class EntityDeserializer extends BeanDeserializer {
@@ -23,12 +23,12 @@ public class EntityDeserializer extends BeanDeserializer {
 	
 	private final BeanDeserializer defaultDeserializer;
 	
-	private final GeneralDao generalDao;
+	private final Dao generalDao;
 	
 	public EntityDeserializer(
 			Class<? extends AbstractEntity> entityClass, 
 			BeanDeserializer defaultDeserializer, 
-			GeneralDao generalDao) {
+			Dao generalDao) {
 		super(defaultDeserializer);
 		
 		this.entityClass = entityClass;

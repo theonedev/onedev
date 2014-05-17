@@ -33,8 +33,8 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.CommitCommentManager;
 import com.pmease.gitop.model.CommitComment;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.GitopSession;
@@ -191,7 +191,7 @@ public class CommentListPanel extends Panel {
 					
 					clearInput();
 					
-					Gitop.getInstance(CommitCommentManager.class).save(c);
+					Gitop.getInstance(Dao.class).persist(c);
 					onAddComment(target, c);
 				}
 				
