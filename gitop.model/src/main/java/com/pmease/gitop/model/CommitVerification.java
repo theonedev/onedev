@@ -12,7 +12,9 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"branch", "commit", "configuration"})
 })
-public class BuildResult extends AbstractEntity {
+public class CommitVerification extends AbstractEntity {
+	
+	public enum Status {ONGOING, PASSED, FAILED}
 	
 	@Column(nullable=false)
 	private Branch branch;
@@ -26,7 +28,7 @@ public class BuildResult extends AbstractEntity {
 	@Column(nullable=false)
 	private String message;
 	
-	private boolean passed;
+	private Status status;
 
 	public String getCommit() {
 		return commit;
@@ -36,12 +38,12 @@ public class BuildResult extends AbstractEntity {
 		this.commit = commit;
 	}
 
-	public boolean isPassed() {
-		return passed;
+	public Status getStatus() {
+		return status;
 	}
 
-	public void setPassed(boolean passed) {
-		this.passed = passed;
+	public void setStatus(Status status) {
+		this.status = status;
 	}
 
 	public Branch getBranch() {

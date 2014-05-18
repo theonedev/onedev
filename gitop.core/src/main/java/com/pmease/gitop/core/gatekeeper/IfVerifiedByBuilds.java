@@ -7,9 +7,9 @@ import javax.validation.constraints.Min;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.BuildResultManager;
+import com.pmease.gitop.core.manager.CommitVerificationManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.BuildResult;
+import com.pmease.gitop.model.CommitVerification;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
@@ -24,7 +24,7 @@ import com.pmease.gitop.model.gatekeeper.voteeligibility.NoneCanVote;
 @SuppressWarnings("serial")
 public class IfVerifiedByBuilds extends AbstractGateKeeper {
 	
-	private int buildCount = 1;
+	private int leastPassCount = 1;
 	
 	private boolean checkMerged = true;
 	
@@ -34,12 +34,12 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 			+ "for this gate keeper to be passed. Normally this number represents number of build "
 			+ "configurations setting up to verify the branch.")
 	@Min(1)
-	public int getBuildCount() {
-		return buildCount;
+	public int getLeastPassCount() {
+		return leastPassCount;
 	}
 
-	public void setBuildCount(int buildCount) {
-		this.buildCount = buildCount;
+	public void setLeastPassCount(int leastPassCount) {
+		this.leastPassCount = leastPassCount;
 	}
 
 	@Editable(order=200, description="Enable this to check the merged commit instead of head commit.")
@@ -64,7 +64,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 
 	@Override
 	protected CheckResult doCheckRequest(PullRequest request) {
-		BuildResultManager BuildResultManager = Gitop.getInstance(BuildResultManager.class);
+		CommitVerificationManager commitVerificationManager = Gitop.getInstance(CommitVerificationManager.class);
 
 		Preconditions.checkNotNull(request.getMergeInfo());
 		
@@ -76,21 +76,25 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 		} else {
 			commit = request.getLatestUpdate().getHeadCommit();
 		}
-		Collection<BuildResult> buildResults = BuildResultManager.findBy(commit);
-		for (BuildResult each: buildResults) {
-			if (!each.isPassed())
-				return disapproved("At least one build is failed for the merged commit.");
+
+		int passedCount = 0;
+		Collection<CommitVerification> commitVerifications = commitVerificationManager.findBy(request.getTarget(), commit);
+		for (CommitVerification each: commitVerifications) {
+			if (each.getStatus() == CommitVerification.Status.FAILED)
+				return disapproved("At least one build is failed for the commit.");
+			else if (each.getStatus() == CommitVerification.Status.PASSED)
+				passedCount++;
 		}
-		int lacks = buildCount - buildResults.size();
+		int lacks = leastPassCount - passedCount;
 		
 		if (lacks > 0) {
 			if (blockMode) {
-				if (buildCount > 1)
+				if (leastPassCount > 1)
 					return pendingAndBlock("To be verified by " + lacks + " more build(s)", new NoneCanVote());
 				else
 					return pendingAndBlock("To be verified by build", new NoneCanVote());
 			} else {
-				if (buildCount > 1)
+				if (leastPassCount > 1)
 					return pending("To be verified by " + lacks + " more build(s)", new NoneCanVote());
 				else
 					return pending("To be verified by build", new NoneCanVote());
@@ -110,23 +114,26 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		BuildResultManager BuildResultManager = Gitop.getInstance(BuildResultManager.class);
+		CommitVerificationManager commitVerificationManager = Gitop.getInstance(CommitVerificationManager.class);
 
-		Collection<BuildResult> buildResults = BuildResultManager.findBy(commit);
-		for (BuildResult each: buildResults) {
-			if (!each.isPassed())
+		int passedCount = 0;
+		Collection<CommitVerification> commitVerifications = commitVerificationManager.findBy(branch, commit);
+		for (CommitVerification each: commitVerifications) {
+			if (each.getStatus() == CommitVerification.Status.FAILED)
 				return disapproved("At least one build is failed for the commit.");
+			else if (each.getStatus() == CommitVerification.Status.PASSED)
+				passedCount++;
 		}
-		int lacks = buildCount - buildResults.size();
+		int lacks = leastPassCount - passedCount;
 		
 		if (lacks > 0) {
 			if (blockMode) {
-				if (buildCount > 1)
+				if (leastPassCount > 1)
 					return pendingAndBlock("Lack verifications of " + lacks + " more build(s)", new NoneCanVote());
 				else
 					return pendingAndBlock("Not verified by build", new NoneCanVote());
 			} else {
-				if (buildCount > 1)
+				if (leastPassCount > 1)
 					return pending("Lack verifications of " + lacks + " more build(s)", new NoneCanVote());
 				else
 					return pending("Not verified by build", new NoneCanVote());
