@@ -124,45 +124,35 @@ public class DefaultPullRequestManager implements PullRequestManager {
 				if (git.isAncestor(branchHead, requestHead)) {
 					request.setMergeInfo(new MergeInfo(branchHead, requestHead, branchHead, requestHead));
 					git.updateRef(mergeRef, requestHead, null, null);
-				} else {
-					if (request.getMergeInfo() != null 
-							&& (!request.getMergeInfo().getBranchHead().equals(branchHead) 
-									|| !request.getMergeInfo().getRequestHead().equals(requestHead))) {
-						 // Commits for merging have been changed since last merge, we have to
-						 // re-merge 
-						request.setMergeInfo(null);
-					}
-					if (request.getMergeInfo() != null && request.getMergeInfo().getMergeHead() != null 
-							&& !request.getMergeInfo().getMergeHead().equals(git.parseRevision(mergeRef, false))) {
-						 // Commits for merging have not been changed since last merge, but recorded 
-						 // merge is incorrect in repository, so we have to re-merge 
-						request.setMergeInfo(null);
-					}
-					if (request.getMergeInfo() == null) {
-						String mergeBase = git.calcMergeBase(branchHead, requestHead);
+				} else if (!request.getMergeInfo().getBranchHead().equals(branchHead) 
+						|| !request.getMergeInfo().getRequestHead().equals(requestHead)
+						|| (request.getMergeInfo().getMergeHead() != null 
+								&& !request.getMergeInfo().getMergeHead().equals(git.parseRevision(mergeRef, false)))) {
+					String mergeBase = git.calcMergeBase(branchHead, requestHead);
+					
+					File tempDir = FileUtils.createTempDir();
+					try {
+						Git tempGit = new Git(tempDir);
 						
-						File tempDir = FileUtils.createTempDir();
-						try {
-							Git tempGit = new Git(tempDir);
-							
-							// Branch name here is not significant, we just use an existing branch
-							// in cloned repository to hold mergeBase, so that we can merge with 
-							// previousUpdate 
-							String branchName = request.getTarget().getName();
-							tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, branchName);
-							tempGit.updateRef("HEAD", branchHead, null, null);
-							tempGit.reset(null, null);
-							
-							if (tempGit.merge(requestHead, null, null, null)) {
-								git.fetch(tempGit.repoDir().getAbsolutePath(), "+HEAD:" + mergeRef);
-								request.setMergeInfo(new MergeInfo(branchHead, requestHead, 
-										mergeBase, git.parseRevision(mergeRef, true)));
-							} else {
-								request.setMergeInfo(new MergeInfo(branchHead, requestHead, mergeBase, null));
-							}
-						} finally {
-							FileUtils.deleteDir(tempDir);
+						// Branch name here is not significant, we just use an existing branch
+						// in cloned repository to hold mergeBase, so that we can merge with 
+						// previousUpdate 
+						String branchName = request.getTarget().getName();
+						tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, branchName);
+						tempGit.updateRef("HEAD", branchHead, null, null);
+						tempGit.reset(null, null);
+						
+						if (tempGit.merge(requestHead, null, null, null)) {
+							git.fetch(tempGit.repoDir().getAbsolutePath(), "+HEAD:" + mergeRef);
+							request.setMergeInfo(new MergeInfo(branchHead, requestHead, 
+									mergeBase, git.parseRevision(mergeRef, true)));
+						} else {
+							if (request.getMergeInfo().getMergeHead() != null)
+								git.deleteRef(mergeRef);
+							request.setMergeInfo(new MergeInfo(branchHead, requestHead, mergeBase, null));
 						}
+					} finally {
+						FileUtils.deleteDir(tempDir);
 					}
 				}
 				

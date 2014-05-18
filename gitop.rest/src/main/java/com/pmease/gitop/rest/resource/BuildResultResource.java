@@ -15,7 +15,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -23,6 +25,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.commons.jersey.JerseyUtils;
 import com.pmease.gitop.model.BuildResult;
 import com.pmease.gitop.model.permission.ObjectPermission;
 
@@ -52,7 +55,10 @@ public class BuildResultResource {
     public Collection<BuildResult> query(
     		@QueryParam("branchId") Long branchId,
     		@QueryParam("configuration") String configuration, 
-    		@QueryParam("commit") String commit) {
+    		@QueryParam("commit") String commit, 
+    		@Context UriInfo uriInfo) {
+		
+    	JerseyUtils.checkQueryParams(uriInfo, "branchId", "configuration", "commit");
 
 		EntityCriteria<BuildResult> criteria = EntityCriteria.of(BuildResult.class);
 		if (branchId != null)
