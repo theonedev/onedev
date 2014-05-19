@@ -43,9 +43,9 @@ public class PullRequestResource {
 	}
 	
     @GET
-    @Path("/{pullRequestId}")
-    public PullRequest get(@PathParam("pullRequestId") Long pullRequestId) {
-    	PullRequest request = dao.load(PullRequest.class, pullRequestId);
+    @Path("/{id}")
+    public PullRequest get(@PathParam("id") Long id) {
+    	PullRequest request = dao.load(PullRequest.class, id);
     	
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(request.getTarget().getRepository())))
     		throw new UnauthorizedException();
@@ -55,13 +55,11 @@ public class PullRequestResource {
         
     @GET
     public Collection<PullRequest> query(
-    		@QueryParam("targetId") Long targetId, 
-    		@QueryParam("sourceId") Long sourceId, 
-    		@QueryParam("submitterId") Long submitterId, 
-    		@QueryParam("status") String status, 
+    		@QueryParam("target") Long targetId, @QueryParam("source") Long sourceId, 
+    		@QueryParam("submitter") Long submitterId, @QueryParam("status") String status, 
     		@Context UriInfo uriInfo) {
     	
-    	JerseyUtils.checkQueryParams(uriInfo, "targetId", "sourceId", "submitter_id", "status");
+    	JerseyUtils.checkQueryParams(uriInfo, "target", "source", "submitter", "status");
     	
     	EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		if (targetId != null)
@@ -99,9 +97,9 @@ public class PullRequestResource {
     }
 
     @DELETE
-    @Path("/{pullRequestId}")
-    public void delete(@PathParam("pullRequestId") Long pullRequestId) {
-    	PullRequest pullRequest = dao.load(PullRequest.class, pullRequestId);
+    @Path("/{id}")
+    public void delete(@PathParam("id") Long id) {
+    	PullRequest pullRequest = dao.load(PullRequest.class, id);
 
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(pullRequest.getTarget().getRepository())))
     		throw new UnauthorizedException();

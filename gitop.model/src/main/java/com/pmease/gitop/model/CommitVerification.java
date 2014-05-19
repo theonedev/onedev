@@ -2,6 +2,8 @@ package com.pmease.gitop.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -14,9 +16,10 @@ import com.pmease.commons.hibernate.AbstractEntity;
 })
 public class CommitVerification extends AbstractEntity {
 	
-	public enum Status {ONGOING, PASSED, FAILED}
+	public enum Status {ONGOING, PASSED, NOT_PASSED}
 	
-	@Column(nullable=false)
+	@ManyToOne
+	@JoinColumn(nullable=false)
 	private Branch branch;
 	
 	@Column(nullable=false)

@@ -70,9 +70,9 @@ public class UserResource {
 	}
 	
     @GET
-    @Path("/{userId}")
-    public User get(@PathParam("userId") Long userId) {
-    	User user = dao.load(User.class, userId);
+    @Path("/{id}")
+    public User get(@PathParam("id") Long id) {
+    	User user = dao.load(User.class, id);
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserRead(user)))
     		throw new UnauthorizedException();
     	else
@@ -89,9 +89,9 @@ public class UserResource {
     }
     
     @DELETE
-    @Path("/{userId}")
-    public void delete(@PathParam("userId") Long userId) {
-    	User user = dao.load(User.class, userId);
+    @Path("/{id}")
+    public void delete(@PathParam("id") Long id) {
+    	User user = dao.load(User.class, id);
     	
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserAdmin(user)))
     		throw new UnauthorizedException();

@@ -80,8 +80,8 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 		int passedCount = 0;
 		Collection<CommitVerification> commitVerifications = commitVerificationManager.findBy(request.getTarget(), commit);
 		for (CommitVerification each: commitVerifications) {
-			if (each.getStatus() == CommitVerification.Status.FAILED)
-				return disapproved("At least one build is failed for the commit.");
+			if (each.getStatus() == CommitVerification.Status.NOT_PASSED)
+				return disapproved("At least one build is not passed for the commit.");
 			else if (each.getStatus() == CommitVerification.Status.PASSED)
 				passedCount++;
 		}
@@ -119,8 +119,8 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 		int passedCount = 0;
 		Collection<CommitVerification> commitVerifications = commitVerificationManager.findBy(branch, commit);
 		for (CommitVerification each: commitVerifications) {
-			if (each.getStatus() == CommitVerification.Status.FAILED)
-				return disapproved("At least one build is failed for the commit.");
+			if (each.getStatus() == CommitVerification.Status.NOT_PASSED)
+				return disapproved("At least one build is not passed for the commit.");
 			else if (each.getStatus() == CommitVerification.Status.PASSED)
 				passedCount++;
 		}

@@ -43,9 +43,9 @@ public class BranchResource {
 	}
 	
     @GET
-    @Path("/{branchId}")
-    public Branch get(@PathParam("branchId") Long branchId) {
-    	Branch branch = dao.load(Branch.class, branchId);
+    @Path("/{id}")
+    public Branch get(@PathParam("id") Long id) {
+    	Branch branch = dao.load(Branch.class, id);
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(branch.getRepository())))
     		throw new UnauthorizedException();
     	return branch;
@@ -53,11 +53,11 @@ public class BranchResource {
     
 	@GET
     public Collection<Branch> query(
-    		@QueryParam("repositoryId") Long repositoryId,
+    		@QueryParam("repository") Long repositoryId,
     		@QueryParam("name") String name, 
     		@Context UriInfo uriInfo) {
 
-		JerseyUtils.checkQueryParams(uriInfo, "repositoryId", "name");
+		JerseyUtils.checkQueryParams(uriInfo, "repository", "name");
 
 		EntityCriteria<Branch> criteria = EntityCriteria.of(Branch.class);
 		if (repositoryId != null)
@@ -76,18 +76,21 @@ public class BranchResource {
     }
 
 	@DELETE
-	@Path("/{branchId}")
-	public void delete(@PathParam("branchId") Long branchId) {
-		Branch branch = dao.load(Branch.class, branchId);
+	@Path("/{id}")
+	public void delete(@PathParam("id") Long id) {
+		Branch branch = dao.load(Branch.class, id);
 		
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(branch.getRepository())))
-    		dao.remove(branch);
+    		throw new UnauthorizedException();
+    	dao.remove(branch);
 	}
 	
     @POST
     public Long save(@NotNull @Valid Branch branch) {
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(branch.getRepository())))
-    		dao.persist(branch);
+    		throw new UnauthorizedException();
+    	
+    	dao.persist(branch);
     	
     	return branch.getId();
     }

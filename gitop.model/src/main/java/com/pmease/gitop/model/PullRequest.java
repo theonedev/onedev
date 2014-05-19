@@ -38,7 +38,7 @@ public class PullRequest extends AbstractEntity {
 
 	public enum Status {
 		PENDING_APPROVAL("Pending Approval"), PENDING_UPDATE("Pending Update"), 
-		PENDING_INTEGRATE("Pending Integrate"), INTEGRATED("Integrated"), 
+		PENDING_INTEGRATE("Pending Integration"), INTEGRATED("Integrated"), 
 		DISCARDED("Discarded");
 
 		private final String displayName;

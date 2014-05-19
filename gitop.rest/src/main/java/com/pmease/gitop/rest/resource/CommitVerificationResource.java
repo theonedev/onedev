@@ -43,9 +43,9 @@ public class CommitVerificationResource {
 	}
 	
     @GET
-    @Path("/{commitVerificationId}")
-    public CommitVerification get(@PathParam("commitVerificationId") Long commitVerificationId) {
-    	CommitVerification commitVerification  = dao.load(CommitVerification.class, commitVerificationId);
+    @Path("/{id}")
+    public CommitVerification get(@PathParam("id") Long id) {
+    	CommitVerification commitVerification  = dao.load(CommitVerification.class, id);
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(commitVerification.getBranch().getRepository())))
     		throw new UnauthorizedException();
     	return commitVerification;
@@ -53,12 +53,12 @@ public class CommitVerificationResource {
     
 	@GET
     public Collection<CommitVerification> query(
-    		@QueryParam("branchId") Long branchId,
+    		@QueryParam("branch") Long branchId,
     		@QueryParam("configuration") String configuration, 
     		@QueryParam("commit") String commit, 
     		@Context UriInfo uriInfo) {
 		
-    	JerseyUtils.checkQueryParams(uriInfo, "branchId", "configuration", "commit");
+    	JerseyUtils.checkQueryParams(uriInfo, "branch", "configuration", "commit");
 
 		EntityCriteria<CommitVerification> criteria = EntityCriteria.of(CommitVerification.class);
 		if (branchId != null)
@@ -82,17 +82,21 @@ public class CommitVerificationResource {
     }
     
     @DELETE
-    @Path("/{commitVerificationId}")
-    public void delete(@PathParam("commitVerificationId") Long commitVerificationId) {
-    	CommitVerification commitVerification = dao.load(CommitVerification.class, commitVerificationId);
+    @Path("/{id}")
+    public void delete(@PathParam("id") Long id) {
+    	CommitVerification commitVerification = dao.load(CommitVerification.class, id);
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryWrite(commitVerification.getBranch().getRepository())))
-    		dao.remove(commitVerification);
+    		throw new UnauthorizedException();
+    	
+    	dao.remove(commitVerification);
     }
 
     @POST
     public Long save(@NotNull @Valid CommitVerification commitVerification) {
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryWrite(commitVerification.getBranch().getRepository())))
-    		dao.persist(commitVerification);
+    		throw new UnauthorizedException();
+    	
+    	dao.persist(commitVerification);
     	
     	return commitVerification.getId();
     }

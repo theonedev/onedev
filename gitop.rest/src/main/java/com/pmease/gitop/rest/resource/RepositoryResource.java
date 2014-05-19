@@ -43,10 +43,10 @@ public class RepositoryResource {
 		this.dao = dao;
 	}
 	
-	@Path("/{repositoryId}")
+	@Path("/{id}")
     @GET
-    public Repository get(@PathParam("repositoryId") Long repositoryId) {
-    	Repository repository = dao.load(Repository.class, repositoryId);
+    public Repository get(@PathParam("id") Long id) {
+    	Repository repository = dao.load(Repository.class, id);
 
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(repository)))
     		throw new UnauthenticatedException();
@@ -56,11 +56,11 @@ public class RepositoryResource {
     
 	@GET
 	public Collection<Repository> query(
-			@QueryParam("userId") Long userId, 
+			@QueryParam("user") Long userId, 
 			@QueryParam("name") String name, 
 			@Context UriInfo uriInfo) {
 
-		JerseyUtils.checkQueryParams(uriInfo, "userId", "name");
+		JerseyUtils.checkQueryParams(uriInfo, "user", "name");
 		
 		EntityCriteria<Repository> criteria = EntityCriteria.of(Repository.class);
 		if (userId != null)
@@ -80,16 +80,16 @@ public class RepositoryResource {
 	@POST
     public Long save(@NotNull @Valid Repository repository) {
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(repository)))
-    		throw new UnauthenticatedException();
+    		throw new UnauthorizedException();
     	
     	dao.persist(repository);
     	return repository.getId();
     }
 
     @DELETE
-    @Path("/{repositoryId}")
-    public void delete(@PathParam("repositoryId") Long repositoryId) {
-    	Repository repository = dao.load(Repository.class, repositoryId);
+    @Path("/{id}")
+    public void delete(@PathParam("id") Long id) {
+    	Repository repository = dao.load(Repository.class, id);
 
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(repository)))
     		throw new UnauthorizedException();
