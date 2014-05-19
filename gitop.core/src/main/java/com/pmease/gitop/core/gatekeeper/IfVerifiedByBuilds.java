@@ -7,12 +7,12 @@ import javax.validation.constraints.Min;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.CommitVerificationManager;
+import com.pmease.gitop.core.manager.PullRequestVerificationManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.CommitVerification;
-import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
+import com.pmease.gitop.model.Verification;
 import com.pmease.gitop.model.gatekeeper.AbstractGateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.NoneCanVote;
@@ -64,7 +64,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 
 	@Override
 	protected CheckResult doCheckRequest(PullRequest request) {
-		CommitVerificationManager commitVerificationManager = Gitop.getInstance(CommitVerificationManager.class);
+		PullRequestVerificationManager verificationManager = Gitop.getInstance(PullRequestVerificationManager.class);
 
 		Preconditions.checkNotNull(request.getMergeInfo());
 		
@@ -78,11 +78,11 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 		}
 
 		int passedCount = 0;
-		Collection<CommitVerification> commitVerifications = commitVerificationManager.findBy(request.getTarget(), commit);
-		for (CommitVerification each: commitVerifications) {
-			if (each.getStatus() == CommitVerification.Status.NOT_PASSED)
+		Collection<Verification> verifications = verificationManager.findBy(request, commit);
+		for (Verification each: verifications) {
+			if (each.getStatus() == Verification.Status.NOT_PASSED)
 				return disapproved("At least one build is not passed for the commit.");
-			else if (each.getStatus() == CommitVerification.Status.PASSED)
+			else if (each.getStatus() == Verification.Status.PASSED)
 				passedCount++;
 		}
 		int lacks = leastPassCount - passedCount;
@@ -114,32 +114,10 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		CommitVerificationManager commitVerificationManager = Gitop.getInstance(CommitVerificationManager.class);
-
-		int passedCount = 0;
-		Collection<CommitVerification> commitVerifications = commitVerificationManager.findBy(branch, commit);
-		for (CommitVerification each: commitVerifications) {
-			if (each.getStatus() == CommitVerification.Status.NOT_PASSED)
-				return disapproved("At least one build is not passed for the commit.");
-			else if (each.getStatus() == CommitVerification.Status.PASSED)
-				passedCount++;
-		}
-		int lacks = leastPassCount - passedCount;
-		
-		if (lacks > 0) {
-			if (blockMode) {
-				if (leastPassCount > 1)
-					return pendingAndBlock("Lack verifications of " + lacks + " more build(s)", new NoneCanVote());
-				else
-					return pendingAndBlock("Not verified by build", new NoneCanVote());
-			} else {
-				if (leastPassCount > 1)
-					return pending("Lack verifications of " + lacks + " more build(s)", new NoneCanVote());
-				else
-					return pending("Not verified by build", new NoneCanVote());
-			}
+		if (blockMode) {
+			return pendingAndBlock("Has to be verified by builds.", new NoneCanVote());
 		} else {
-			return approved("Builds passed");
+			return pendingAndBlock("Has to be verified by builds.", new NoneCanVote());
 		}
 	}
 

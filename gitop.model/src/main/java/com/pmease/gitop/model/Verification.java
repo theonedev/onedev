@@ -12,15 +12,15 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"branch", "commit", "configuration"})
+		@UniqueConstraint(columnNames={"request", "commit", "configuration"})
 })
-public class CommitVerification extends AbstractEntity {
+public class Verification extends AbstractEntity {
 	
 	public enum Status {ONGOING, PASSED, NOT_PASSED}
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
-	private Branch branch;
+	private PullRequest request;
 	
 	@Column(nullable=false)
 	private String commit;
@@ -49,12 +49,12 @@ public class CommitVerification extends AbstractEntity {
 		this.status = status;
 	}
 
-	public Branch getBranch() {
-		return branch;
+	public PullRequest getRequest() {
+		return request;
 	}
 
-	public void setBranch(Branch branch) {
-		this.branch = branch;
+	public void setRequest(PullRequest request) {
+		this.request = request;
 	}
 
 	public String getConfiguration() {
