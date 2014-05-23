@@ -99,6 +99,9 @@ public class PullRequest extends AbstractEntity {
 	private Collection<VoteInvitation> voteInvitations = new ArrayList<VoteInvitation>();
 	
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
+	private Collection<Verification> verifications = new ArrayList<Verification>();
+
+	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
 	private Collection<PullRequestComment> comments = new ArrayList<PullRequestComment>();
 
 	private transient List<PullRequestUpdate> sortedUpdates;
@@ -106,8 +109,6 @@ public class PullRequest extends AbstractEntity {
 	private transient List<PullRequestUpdate> effectiveUpdates;
 
 	private transient PullRequestUpdate baseUpdate;
-	
-	private transient Set<String> mergedCommits;
 	
 	private transient Set<String> pendingCommits;
 	
@@ -232,6 +233,14 @@ public class PullRequest extends AbstractEntity {
 
 	public void setVoteInvitations(Collection<VoteInvitation> voteInvitations) {
 		this.voteInvitations = voteInvitations;
+	}
+
+	public Collection<Verification> getVerifications() {
+		return verifications;
+	}
+
+	public void setVerifications(Collection<Verification> verifications) {
+		this.verifications = verifications;
 	}
 
 	public Collection<PullRequestComment> getComments() {
@@ -479,17 +488,6 @@ public class PullRequest extends AbstractEntity {
 
 	public void setUpdateDate(Date updateDate) {
 		this.updateDate = updateDate;
-	}
-
-	public Set<String> getMergedCommits() {
-		if (mergedCommits == null) {
-			mergedCommits = new HashSet<>();
-			Repository repo = getTarget().getRepository();
-			for (Commit commit: repo.git().log(getBaseCommit(), getTarget().getHeadCommit(), null, 0, 0)) {
-				mergedCommits.add(commit.getHash());
-			}
-		}
-		return mergedCommits;
 	}
 
 	public Set<String> getPendingCommits() {

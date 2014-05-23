@@ -8,7 +8,7 @@ import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.Verification;
 
 @ImplementedBy(DefaultVerificationManager.class)
-public interface PullRequestVerificationManager {
+public interface VerificationManager {
 	
 	void save(Verification verification);
 	
@@ -17,4 +17,6 @@ public interface PullRequestVerificationManager {
 	Collection<Verification> findBy(PullRequest request, String commit);
 	
 	Verification findBy(PullRequest request, String commit, String configuration);
+	
+	Verification.Status getOverallStatus(Collection<Verification> verifications);
 }

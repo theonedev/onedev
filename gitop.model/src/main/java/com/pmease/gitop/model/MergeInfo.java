@@ -1,10 +1,13 @@
 package com.pmease.gitop.model;
 
+import java.io.Serializable;
+
 import javax.annotation.Nullable;
 import javax.persistence.Embeddable;
 
+@SuppressWarnings("serial")
 @Embeddable
-public class MergeInfo {
+public class MergeInfo implements Serializable {
 	
 	private String branchHead;
 	

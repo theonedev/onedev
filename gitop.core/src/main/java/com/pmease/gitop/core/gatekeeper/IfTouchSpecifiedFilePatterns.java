@@ -44,7 +44,7 @@ public class IfTouchSpecifiedFilePatterns extends FileGateKeeper {
 			PullRequestUpdate update = request.getEffectiveUpdates().get(i);
 
 			Collection<String> touchedFiles = request.git()
-					.listChangedFiles(update.getBaseCommit(), update.getHeadCommit());
+					.listChangedFiles(update.getChangeCommit(), update.getHeadCommit());
 			
 			for (String file: touchedFiles) {
 				if (WildcardUtils.matchPath(getFilePatterns(), file)) {

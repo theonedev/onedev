@@ -44,7 +44,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
     }
 
     @Test
-    public void testResolveBaseCommitWhenThereIsNoMerge() {
+    public void testResolveChangeCommitWhenThereIsNoMerge() {
         PullRequest request = new PullRequest();
         Branch target = new Branch();
         target.setRepository(repository);
@@ -88,12 +88,12 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         bareGit.updateRef(update.getHeadRef(), update.getHeadCommit(), null, null);
         request.getUpdates().add(update);
 
-        Assert.assertEquals(bareGit.showRevision("dev~1").getHash(), request.getLatestUpdate().getBaseCommit());
-        Assert.assertEquals(bareGit.showRevision("master~1").getHash(), request.getSortedUpdates().get(1).getBaseCommit());
+        Assert.assertEquals(bareGit.showRevision("dev~1").getHash(), request.getLatestUpdate().getChangeCommit());
+        Assert.assertEquals(bareGit.showRevision("master~1").getHash(), request.getSortedUpdates().get(1).getChangeCommit());
     }
 
     @Test
-    public void testResolveBaseCommitWhenThereIsMerge() {
+    public void testResolveChangeCommitWhenThereIsMerge() {
         PullRequest request = new PullRequest();
         Branch target = new Branch();
         target.setRepository(repository);
@@ -137,10 +137,134 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         bareGit.updateRef(update.getHeadRef(), update.getHeadCommit(), null, null);
         request.getUpdates().add(update);
 
-        Commit baseCommit = bareGit.showRevision(request.getLatestUpdate().getBaseCommit());
-        Assert.assertTrue(baseCommit.getParentHashes().contains(bareGit.showRevision("master").getHash()));
-        Assert.assertTrue(baseCommit.getParentHashes().contains(bareGit.showRevision("dev~2").getHash()));
-        Assert.assertEquals(bareGit.showRevision("master~1").getHash(), request.getSortedUpdates().get(1).getBaseCommit());
+        Commit changeCommit = bareGit.showRevision(request.getLatestUpdate().getChangeCommit());
+        Assert.assertTrue(changeCommit.getParentHashes().contains(bareGit.showRevision("master").getHash()));
+        Assert.assertTrue(changeCommit.getParentHashes().contains(bareGit.showRevision("dev~2").getHash()));
+        Assert.assertEquals(bareGit.showRevision("master~1").getHash(), request.getSortedUpdates().get(1).getChangeCommit());
+    }
+
+    @Test
+    public void testGetCommitsWhenTargetBranchIsMergedToSourceBranch() {
+        PullRequest request = new PullRequest();
+        Branch target = new Branch();
+        target.setRepository(repository);
+        target.setName("master");
+        request.setTarget(target);
+
+        FileUtils.touchFile(new File(workGit.repoDir(), "0"));
+        workGit.add("0");
+        workGit.commit("0", false, false);
+        
+        workGit.checkout("head", "dev");
+        workGit.checkout("master", null);
+        
+        FileUtils.touchFile(new File(workGit.repoDir(), "m1"));
+        workGit.add("m1");
+        workGit.commit("m1", false, false);
+        
+        workGit.checkout("dev", null);
+
+        FileUtils.touchFile(new File(workGit.repoDir(), "d1"));
+        workGit.add("d1");
+        workGit.commit("d1", false, false);
+
+        FileUtils.touchFile(new File(workGit.repoDir(), "d2"));
+        workGit.add("d2");
+        workGit.commit("d2", false, false);
+
+        workGit.push(bareGit.repoDir().getAbsolutePath(), "master:master");
+        workGit.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
+        
+        request.setBaseCommit(bareGit.showRevision("master").getHash());
+
+        PullRequestUpdate update1 = new PullRequestUpdate();
+        update1.setId(1L);
+        update1.setRequest(request);
+        update1.setHeadCommit(bareGit.showRevision("dev").getHash());
+        
+        bareGit.updateRef(update1.getHeadRef(), update1.getHeadCommit(), null, null);
+        request.getUpdates().add(update1);
+
+        workGit.merge("master", null, null, "merge master to dev");
+        workGit.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
+        
+        PullRequestUpdate update2 = new PullRequestUpdate();
+        update2.setId(2L);
+        update2.setRequest(request);
+        update2.setHeadCommit(bareGit.showRevision("dev").getHash());
+        
+        bareGit.updateRef(update2.getHeadRef(), update2.getHeadCommit(), null, null);
+        request.getUpdates().add(update2);
+        
+        Assert.assertEquals(2, update1.getCommits().size());
+        Assert.assertEquals("d1", update1.getCommits().get(0).getMessage());
+        Assert.assertEquals("d2", update1.getCommits().get(1).getMessage());
+        
+        Assert.assertEquals(1, update2.getCommits().size());
+        Assert.assertTrue(update2.getCommits().get(0).getMessage().startsWith("merge master to dev"));
+    }
+
+    @Test
+    public void testGetCommitsWhenSourceBranchIsMergedToTargetBranch() {
+        PullRequest request = new PullRequest();
+        Branch target = new Branch();
+        target.setRepository(repository);
+        target.setName("master");
+        request.setTarget(target);
+
+        FileUtils.touchFile(new File(workGit.repoDir(), "0"));
+        workGit.add("0");
+        workGit.commit("0", false, false);
+        
+        workGit.checkout("head", "dev");
+        workGit.checkout("master", null);
+        
+        FileUtils.touchFile(new File(workGit.repoDir(), "m1"));
+        workGit.add("m1");
+        workGit.commit("m1", false, false);
+        
+        request.setBaseCommit(workGit.parseRevision("master", true));
+        
+        workGit.checkout("dev", null);
+
+        FileUtils.touchFile(new File(workGit.repoDir(), "d1"));
+        workGit.add("d1");
+        workGit.commit("d1", false, false);
+        
+        PullRequestUpdate update1 = new PullRequestUpdate();
+        update1.setId(1L);
+        update1.setRequest(request);
+        update1.setHeadCommit(workGit.showRevision("dev").getHash());
+        request.getUpdates().add(update1);
+
+        FileUtils.touchFile(new File(workGit.repoDir(), "d2"));
+        workGit.add("d2");
+        workGit.commit("d2", false, false);
+
+        workGit.checkout("master", null);
+        workGit.merge("dev", null, null, null);
+        
+        workGit.checkout("dev", null);
+        FileUtils.touchFile(new File(workGit.repoDir(), "d3"));
+        workGit.add("d3");
+        workGit.commit("d3", false, false);
+
+        workGit.push(bareGit.repoDir().getAbsolutePath(), "master:master");
+        workGit.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
+        
+        bareGit.updateRef(update1.getHeadRef(), update1.getHeadCommit(), null, null);
+
+        PullRequestUpdate update2 = new PullRequestUpdate();
+        update2.setId(2L);
+        update2.setRequest(request);
+        update2.setHeadCommit(bareGit.showRevision("dev").getHash());
+        bareGit.updateRef(update2.getHeadRef(), update2.getHeadCommit(), null, null);
+        
+        request.getUpdates().add(update2);
+        
+        Assert.assertEquals(2, update2.getCommits().size());
+        Assert.assertEquals("d2", update2.getCommits().get(0).getMessage());
+        Assert.assertEquals("d3", update2.getCommits().get(1).getMessage());
     }
 
 }

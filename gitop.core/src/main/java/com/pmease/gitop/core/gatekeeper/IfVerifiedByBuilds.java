@@ -7,7 +7,7 @@ import javax.validation.constraints.Min;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.manager.PullRequestVerificationManager;
+import com.pmease.gitop.core.manager.VerificationManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.Repository;
@@ -64,7 +64,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 
 	@Override
 	protected CheckResult doCheckRequest(PullRequest request) {
-		PullRequestVerificationManager verificationManager = Gitop.getInstance(PullRequestVerificationManager.class);
+		VerificationManager verificationManager = Gitop.getInstance(VerificationManager.class);
 
 		Preconditions.checkNotNull(request.getMergeInfo());
 		

@@ -43,6 +43,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.AuthorizationManager;
 import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.core.manager.UserManager;
+import com.pmease.gitop.core.manager.VerificationManager;
 import com.pmease.gitop.core.manager.VoteManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.CommitComment;
@@ -50,6 +51,7 @@ import com.pmease.gitop.model.MergeInfo;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequest.Status;
 import com.pmease.gitop.model.User;
+import com.pmease.gitop.model.Verification;
 import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
 import com.pmease.gitop.model.permission.ObjectPermission;
@@ -65,7 +67,9 @@ public class RequestDetailPage extends RepositoryPage implements CommitCommentsA
 
 	private enum Action {Approve, Disapprove, Integrate, Discard}
 
-	private IModel<PullRequest> model;
+	private IModel<PullRequest> requestModel;
+	
+	private IModel<List<Verification>> mergeVerificationsModel;
 	
 	private boolean editingTitle;
 	
@@ -76,7 +80,7 @@ public class RequestDetailPage extends RepositoryPage implements CommitCommentsA
 	public RequestDetailPage(final PageParameters params) {
 		super(params);
 		
-		model = new LoadableDetachableModel<PullRequest>() {
+		requestModel = new LoadableDetachableModel<PullRequest>() {
 
 			@Override
 			protected PullRequest load() {
@@ -84,6 +88,21 @@ public class RequestDetailPage extends RepositoryPage implements CommitCommentsA
 			}
 			
 		};
+
+		mergeVerificationsModel = new LoadableDetachableModel<List<Verification>>() {
+
+			@Override
+			protected List<Verification> load() {
+				List<Verification> verifications = new ArrayList<Verification>();
+				for (Verification verification: getPullRequest().getVerifications()) {
+					if (verification.getCommit().equals(getPullRequest().getMergeInfo().getMergeHead())) 
+						verifications.add(verification);
+				}
+				return verifications;
+			}
+			
+		};
+
 	}
 
 	@Override
@@ -390,6 +409,56 @@ public class RequestDetailPage extends RepositoryPage implements CommitCommentsA
 		
 		canMergeContainer.add(new BookmarkablePageLink<Void>("preview", RequestChangesPage.class, params));
 		
+		DropdownPanel verificationDetails = new DropdownPanel("verificationDetails") {
+
+			@Override
+			protected Component newContent(String id) {
+				return new VerificationDetailPanel(id, mergeVerificationsModel);
+			}
+			
+		};
+		canMergeContainer.add(verificationDetails);
+		canMergeContainer.add(new Label("verification", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				Verification.Status overallStatus = Gitop.getInstance(VerificationManager.class)
+						.getOverallStatus(getMergeVerifications());
+				String label;
+				if (overallStatus == Verification.Status.PASSED)
+					label = "Build of this merge commit is passed.";
+				else if (overallStatus == Verification.Status.NOT_PASSED)
+					label = "Build of this merge commit is not passed.";
+				else
+					label = "Build of this merge commit is ongoing.";
+				label += " <span class='fa fa-caret-down'/>";
+				return label;
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getMergeVerifications().isEmpty());
+			}
+			
+		}.setEscapeModelStrings(false).add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				Verification.Status overallStatus = Gitop.getInstance(VerificationManager.class)
+						.getOverallStatus(getMergeVerifications());
+				if (overallStatus == Verification.Status.PASSED)
+					return "label label-success verification";
+				else if (overallStatus == Verification.Status.NOT_PASSED)
+					return "label label-danger verification";
+				else
+					return "label label-warning verification";
+			}
+			
+		})).add(new DropdownBehavior(verificationDetails)));
+
 		mergeContainer.add(canMergeContainer);
 		
 		mergeContainer.add(new WebMarkupContainer("canFastforward") {
@@ -576,8 +645,8 @@ public class RequestDetailPage extends RepositoryPage implements CommitCommentsA
 					Gitop.getInstance(VoteManager.class).vote(getPullRequest(), 
 							currentUser, Vote.Result.DISAPPROVE, comment);
 				} else if (action == Action.Integrate) {
-					Gitop.getInstance(PullRequestManager.class).merge(
-							getPullRequest(), currentUser, comment);
+					Gitop.getInstance(PullRequestManager.class)
+							.merge(getPullRequest(), currentUser, comment);
 				} else {
 					Gitop.getInstance(PullRequestManager.class).discard(
 							getPullRequest(), currentUser, comment);
@@ -629,12 +698,17 @@ public class RequestDetailPage extends RepositoryPage implements CommitCommentsA
 	}
 	
 	public PullRequest getPullRequest() {
-		return model.getObject();
+		return requestModel.getObject();
+	}
+	
+	private List<Verification> getMergeVerifications() {
+		return mergeVerificationsModel.getObject();
 	}
 	
 	@Override
 	protected void onDetach() {
-		model.detach();
+		requestModel.detach();
+		mergeVerificationsModel.detach();
 		super.onDetach();
 	}
 

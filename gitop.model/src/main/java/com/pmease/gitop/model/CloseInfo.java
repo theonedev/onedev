@@ -1,13 +1,15 @@
 package com.pmease.gitop.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.annotation.Nullable;
 import javax.persistence.Embeddable;
 import javax.persistence.ManyToOne;
 
+@SuppressWarnings("serial")
 @Embeddable
-public class CloseInfo {
+public class CloseInfo implements Serializable {
 
 	public enum Status {INTEGRATED, DISCARDED};
 	

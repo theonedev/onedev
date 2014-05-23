@@ -31,6 +31,7 @@ public class Verification extends AbstractEntity {
 	@Column(nullable=false)
 	private String message;
 	
+	@Column(nullable=false)
 	private Status status;
 
 	public String getCommit() {

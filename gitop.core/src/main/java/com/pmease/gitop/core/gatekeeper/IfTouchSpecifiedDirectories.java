@@ -43,7 +43,7 @@ public class IfTouchSpecifiedDirectories extends FileGateKeeper {
 			PullRequestUpdate update = request.getEffectiveUpdates().get(i);
 
 			Collection<String> touchedFiles = request.git()
-					.listChangedFiles(update.getBaseCommit(), update.getHeadCommit());
+					.listChangedFiles(update.getChangeCommit(), update.getHeadCommit());
 			for (String file: touchedFiles) {
 				for (String each: directories) {
 					if (WildcardUtils.matchPath(each + "/**", file)) {

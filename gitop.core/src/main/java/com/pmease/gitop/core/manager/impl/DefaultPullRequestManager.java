@@ -13,6 +13,7 @@ import java.util.concurrent.locks.Lock;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.transaction.Synchronization;
 
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -309,25 +310,36 @@ public class DefaultPullRequestManager implements PullRequestManager {
 						userId = user.getId();
 					else
 						userId = null;
-					executor.execute(new Runnable() {
+					dao.getSession().getTransaction().registerSynchronization(new Synchronization() {
 
-						@Override
-						public void run() {
-							unitOfWork.call(new Callable<Void>() {
+						public void afterCompletion(int status) {
+							if (status == javax.transaction.Status.STATUS_COMMITTED) {
+								executor.execute(new Runnable() {
 
-								@Override
-								public Void call() throws Exception {
-									Branch branch = dao.load(Branch.class, branchId);
-									User user;
-									if (userId != null)
-										user = dao.load(User.class, userId);
-									else
-										user = null;
-									branchManager.onBranchRefUpdate(branch, user);
-									return null;
-								}
-								
-							});
+									@Override
+									public void run() {
+										unitOfWork.call(new Callable<Void>() {
+
+											@Override
+											public Void call() throws Exception {
+												Branch branch = dao.load(Branch.class, branchId);
+												User user;
+												if (userId != null)
+													user = dao.load(User.class, userId);
+												else
+													user = null;
+												branchManager.onBranchRefUpdate(branch, user);
+												return null;
+											}
+											
+										});
+									}
+									
+								});
+							}
+						}
+
+						public void beforeCompletion() {
 						}
 						
 					});

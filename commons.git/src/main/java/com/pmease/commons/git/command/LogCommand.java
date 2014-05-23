@@ -28,6 +28,8 @@ public class LogCommand extends GitCommand<List<Commit>> {
     private int maxCount;
     
     private int skip;
+    
+    private boolean firstParent;
 
     public LogCommand(File repoDir) {
         super(repoDir);
@@ -58,7 +60,12 @@ public class LogCommand extends GitCommand<List<Commit>> {
     	return this;
     }
     
-    @Override
+	public LogCommand firstParent(boolean firstParent) {
+		this.firstParent = firstParent;
+		return this;
+	}
+
+	@Override
     public List<Commit> call() {
         Commandline cmd = cmd();
         cmd.addArgs("log",
@@ -80,6 +87,9 @@ public class LogCommand extends GitCommand<List<Commit>> {
         	cmd.addArgs("-" + maxCount);
         if (skip != 0)
         	cmd.addArgs("--skip=" + skip);
+        
+        if (firstParent)
+        	cmd.addArgs("--first-parent");
         
         cmd.addArgs("--");
         if (path != null)
