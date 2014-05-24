@@ -1,3 +1,73 @@
 <wicket:extend>
-	<div wicket:id="content"></div>
+	<div class="new-request">
+		<div class="branches clearfix">
+			<div class="pull-left label">To: </div>
+			<div wicket:id="target" class="target pull-left"></div>
+			<div class="pull-left label">From: </div>
+			<div wicket:id="source" class="source pull-left"></div>
+		</div>
+		<div wicket:id="feedback" class="feedback">
+			<table>
+				<tr>
+					<td wicket:id="message" class="message">
+						<div class="title">
+							<input wicket:id="title" type="text" class="form-control" placeholder="Title has to be specified">
+						</div>
+						<div class="comment">
+							<textarea wicket:id="comment" class="form-control" rows="8" placeholder="Leave a comment"></textarea>
+						</div>
+					</td>
+					<td class="status">
+						<table>
+							<tr>
+								<td>
+									<span class="icon icon-ok-circle"></span>
+									<span class="icon icon-warning-sign"></span>
+								</td>
+								<td>
+									<div class="validation"></div>
+									<div wicket:id="summary" class="summary"></div>
+									<div wicket:id="detail" class="detail"></div>
+									<wicket:enclosure child="rejectReasons">
+									<ul class="detail">
+										<li wicket:id="rejectReasons">
+											<span wicket:id="reason"></span>
+										</li>
+									</ul>
+									</wicket:enclosure>
+									<input wicket:id="send" value="Send Pull Request" class="btn btn-lg btn-primary send"></input>
+									<input wicket:id="view" value="View Pull Request" class="btn btn-lg btn-primary"></input>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+			<script type="text/javascript">
+				function titleChanged() {
+					var jqTitle = $(".pull-request .feedback .title input");
+					if (jqTitle.is(":visible")) {
+						var jqStatus = $(".pull-request .feedback .status");
+						var jqBtn = jqStatus.find(".btn");
+						if ($.trim(jqTitle.val()) == "") {
+							jqTitle.parent().addClass("has-error");
+							jqStatus.addClass("has-error");
+							jqBtn.attr("disabled", "disabled");
+							jqStatus.find(".validation").html("Title has to be specified.").show();
+						} else {
+							jqTitle.parent().removeClass("has-error");
+							jqStatus.removeClass("has-error");
+							jqBtn.removeAttr("disabled");
+							jqStatus.find(".validation").hide();
+						}
+					}
+				}
+				$(".pull-request .feedback .title input").on("input keyup cut paste", titleChanged);
+				
+				titleChanged();	
+			</script>
+		</div>
+		<div wicket:id="commits" class="commits"></div>
+		<div wicket:id="changes" class="changes"></div>
+	</div>
 </wicket:extend>

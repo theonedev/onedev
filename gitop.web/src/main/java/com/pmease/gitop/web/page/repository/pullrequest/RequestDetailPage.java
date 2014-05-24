@@ -63,7 +63,7 @@ import com.pmease.gitop.web.page.repository.RepositoryPage;
 import com.pmease.gitop.web.page.repository.source.commit.diff.CommitCommentsAware;
 
 @SuppressWarnings("serial")
-public class RequestDetailPage extends RepositoryPage implements CommitCommentsAware {
+public abstract class RequestDetailPage extends RepositoryPage implements CommitCommentsAware {
 
 	private enum Action {Approve, Disapprove, Integrate, Discard}
 
