@@ -15,9 +15,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -25,7 +23,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.commons.jersey.JerseyUtils;
+import com.pmease.commons.jersey.ValidQueryParams;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.permission.ObjectPermission;
 
@@ -53,14 +51,11 @@ public class PullRequestResource {
     	return request;
     }
         
+    @ValidQueryParams
     @GET
     public Collection<PullRequest> query(
     		@QueryParam("target") Long targetId, @QueryParam("source") Long sourceId, 
-    		@QueryParam("submitter") Long submitterId, @QueryParam("status") String status, 
-    		@Context UriInfo uriInfo) {
-    	
-    	JerseyUtils.checkQueryParams(uriInfo, "target", "source", "submitter", "status");
-    	
+    		@QueryParam("submitter") Long submitterId, @QueryParam("status") String status) {
     	EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		if (targetId != null)
 			criteria.add(Restrictions.eq("target.id", targetId));

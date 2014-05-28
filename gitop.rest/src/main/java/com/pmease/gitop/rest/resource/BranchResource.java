@@ -15,9 +15,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -25,7 +23,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.commons.jersey.JerseyUtils;
+import com.pmease.commons.jersey.ValidQueryParams;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.permission.ObjectPermission;
 
@@ -51,14 +49,11 @@ public class BranchResource {
     	return branch;
     }
     
-	@GET
+    @ValidQueryParams
+    @GET
     public Collection<Branch> query(
     		@QueryParam("repository") Long repositoryId,
-    		@QueryParam("name") String name, 
-    		@Context UriInfo uriInfo) {
-
-		JerseyUtils.checkQueryParams(uriInfo, "repository", "name");
-
+    		@QueryParam("name") String name) {
 		EntityCriteria<Branch> criteria = EntityCriteria.of(Branch.class);
 		if (repositoryId != null)
 			criteria.add(Restrictions.eq("repository.id", repositoryId));

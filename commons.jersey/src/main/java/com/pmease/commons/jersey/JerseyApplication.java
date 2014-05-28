@@ -37,7 +37,7 @@ public class JerseyApplication extends ResourceConfig {
         register(JsonParseExceptionMapper.class);
         register(JsonMappingExceptionMapper.class);
         register(JacksonJsonProvider.class, MessageBodyReader.class, MessageBodyWriter.class);
-
+        
         packages(JerseyApplication.class.getPackage().getName());
         
 	    for (JerseyConfigurator configurator: AppLoader.getExtensions(JerseyConfigurator.class)) {

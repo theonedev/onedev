@@ -54,7 +54,7 @@ import com.pmease.gitop.web.page.repository.source.commit.diff.patch.HunkLine.Li
 
 import de.agilecoders.wicket.jquery.JQuery;
 
-@SuppressWarnings("serial")
+@SuppressWarnings({ "serial", "deprecation" })
 public class HunkPanel extends Panel {
 
 	private final IModel<Repository> repositoryModel;

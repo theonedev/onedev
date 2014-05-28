@@ -500,6 +500,7 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 		
 		WebMarkupContainer actionsContainer = new WebMarkupContainer("actions") {
 
+			@SuppressWarnings("deprecation")
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();

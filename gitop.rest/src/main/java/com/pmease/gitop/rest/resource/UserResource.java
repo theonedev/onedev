@@ -15,9 +15,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -26,7 +24,7 @@ import org.hibernate.validator.constraints.Email;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.commons.jersey.JerseyUtils;
+import com.pmease.commons.jersey.ValidQueryParams;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
 
@@ -43,15 +41,12 @@ public class UserResource {
 		this.dao = dao;
 	}
 	
+	@ValidQueryParams
 	@GET
 	public Collection<User> query(
 			@QueryParam("name") String name, 
 			@Email @QueryParam("email") String email, 
-			@QueryParam("fullName") String fullName,
-			@Context UriInfo uriInfo) {
-    	
-		JerseyUtils.checkQueryParams(uriInfo, "name", "email", "fullName");
-
+			@QueryParam("fullName") String fullName) {
     	EntityCriteria<User> criteria = EntityCriteria.of(User.class);
 		if (name != null)
 			criteria.add(Restrictions.eq("name", name));

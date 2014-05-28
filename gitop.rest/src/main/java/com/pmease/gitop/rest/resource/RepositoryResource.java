@@ -15,9 +15,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.UnauthenticatedException;
@@ -26,7 +24,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.commons.jersey.JerseyUtils;
+import com.pmease.commons.jersey.ValidQueryParams;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.permission.ObjectPermission;
 
@@ -54,14 +52,11 @@ public class RepositoryResource {
     		return repository;
     }
     
+	@ValidQueryParams
 	@GET
 	public Collection<Repository> query(
 			@QueryParam("user") Long userId, 
-			@QueryParam("name") String name, 
-			@Context UriInfo uriInfo) {
-
-		JerseyUtils.checkQueryParams(uriInfo, "user", "name");
-		
+			@QueryParam("name") String name) {
 		EntityCriteria<Repository> criteria = EntityCriteria.of(Repository.class);
 		if (userId != null)
 			criteria.add(Restrictions.eq("owner.id", userId));
