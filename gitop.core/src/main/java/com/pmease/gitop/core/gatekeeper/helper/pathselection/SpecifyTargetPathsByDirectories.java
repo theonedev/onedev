@@ -6,8 +6,8 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.editable.annotation.OmitName;
+import com.pmease.commons.editable.Editable;
+import com.pmease.commons.editable.OmitName;
 import com.pmease.gitop.core.editable.DirectoryChoice;
 import com.pmease.gitop.core.gatekeeper.IfTouchSpecifiedDirectories;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;

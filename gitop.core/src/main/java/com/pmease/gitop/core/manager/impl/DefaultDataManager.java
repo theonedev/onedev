@@ -7,11 +7,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.validation.Validator;
 
 import org.hibernate.criterion.Order;
 
-import com.pmease.commons.editable.EditContext;
-import com.pmease.commons.editable.EditSupportRegistry;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
@@ -36,15 +35,14 @@ public class DefaultDataManager implements DataManager, Serializable {
 	
 	private final ConfigManager configManager;
 	
-	private final EditSupportRegistry editSupportRegistry;
+	private final Validator validator;
 	
 	@Inject
-	public DefaultDataManager(Dao dao, UserManager userManager, ConfigManager configManager, 
-			EditSupportRegistry editSupportRegistry) {
+	public DefaultDataManager(Dao dao, UserManager userManager, ConfigManager configManager, Validator validator) {
 		this.dao = dao;
 		this.userManager = userManager;
 		this.configManager = configManager;
-		this.editSupportRegistry = editSupportRegistry;
+		this.validator = validator;
 	}
 	
 	@SuppressWarnings("serial")
@@ -75,9 +73,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (systemConfig == null || systemConfig.getSetting() == null) {
 			systemSetting = new SystemSetting();
 		} else {
-			EditContext editContext = editSupportRegistry.getBeanEditContext(systemConfig.getSetting());
-			editContext.validate();
-			if (editContext.hasValidationErrors()) 
+			if (!validator.validate(systemConfig.getSetting()).isEmpty())
 				systemSetting = systemConfig.getSetting();
 		}
 		if (systemSetting != null) {
@@ -101,9 +97,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (mailConfig == null) {
 			mailSetting = new MailSetting();
 		} else if (mailConfig.getSetting() != null) {
-			EditContext editContext = editSupportRegistry.getBeanEditContext(mailConfig.getSetting());
-			editContext.validate();
-			if (editContext.hasValidationErrors()) 
+			if (!validator.validate(mailConfig.getSetting()).isEmpty())
 				mailSetting = mailConfig.getSetting();
 		}
 		

@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.Editable;
 
 @SuppressWarnings("serial")
 @Editable

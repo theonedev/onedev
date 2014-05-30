@@ -1,4 +1,4 @@
-package com.pmease.commons.editable.annotation;
+package com.pmease.commons.editable;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -5,11 +5,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.eclipse.jgit.util.StringUtils;
 
-import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.wicket.editable.PropertyEditContext;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.Branch;
 
@@ -21,13 +22,13 @@ public class BranchMultiChoiceEditContext extends PropertyEditContext {
     }
 
 	@Override
-    public Object renderForEdit(Object renderParam) {
-		return new BranchMultiChoiceEditor((String) renderParam, this);
+    public Component renderForEdit(String componentId) {
+		return new BranchMultiChoiceEditor(componentId, this);
     }
 
     @SuppressWarnings("unchecked")
 	@Override
-    public Object renderForView(Object renderParam) {
+    public Component renderForView(String componentId) {
         Collection<Long> branchIds = (Collection<Long>) getPropertyValue();
         if (branchIds != null && !branchIds.isEmpty()) {
         	Dao dao = Gitop.getInstance(Dao.class);
@@ -35,9 +36,9 @@ public class BranchMultiChoiceEditContext extends PropertyEditContext {
         	for (Long branchId: branchIds) {
         		branchNames.add(dao.load(Branch.class, branchId).getName());
         	}
-            return new Label((String) renderParam, StringUtils.join(branchNames, ", " ));
+            return new Label(componentId, StringUtils.join(branchNames, ", " ));
         } else {
-            return new Label((String) renderParam, "<i>Not Defined</i>")
+            return new Label(componentId, "<i>Not Defined</i>")
                     .setEscapeModelStrings(false);
         }
     }

@@ -1,6 +1,6 @@
 package com.pmease.gitop.model.gatekeeper;
 
-import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.Editable;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;

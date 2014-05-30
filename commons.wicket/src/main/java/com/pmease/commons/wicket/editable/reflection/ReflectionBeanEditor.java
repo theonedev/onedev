@@ -16,11 +16,11 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.pmease.commons.editable.EditContext;
-import com.pmease.commons.editable.EditableUtils;
-import com.pmease.commons.editable.PropertyEditContext;
-import com.pmease.commons.editable.annotation.OmitName;
-import com.pmease.commons.editable.annotation.TableLayout;
+import com.pmease.commons.editable.OmitName;
+import com.pmease.commons.editable.TableLayout;
+import com.pmease.commons.wicket.editable.EditContext;
+import com.pmease.commons.wicket.editable.EditableUtils;
+import com.pmease.commons.wicket.editable.PropertyEditContext;
 
 @SuppressWarnings("serial")
 public class ReflectionBeanEditor extends Panel {

@@ -2,13 +2,14 @@ package com.pmease.commons.wicket.editable.nuemric;
 
 import java.io.Serializable;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import com.pmease.commons.editable.PropertyEditContext;
+import com.pmease.commons.wicket.editable.PropertyEditContext;
 
 @SuppressWarnings("serial")
 public class NumericPropertyEditContext extends PropertyEditContext {
@@ -29,8 +30,8 @@ public class NumericPropertyEditContext extends PropertyEditContext {
 	}
 
 	@Override
-	public Object renderForEdit(Object renderParam) {
-		return new TextField<String>((String) renderParam, getInputModel()) {
+	public Component renderForEdit(String componentId) {
+		return new TextField<String>(componentId, getInputModel()) {
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
@@ -45,12 +46,12 @@ public class NumericPropertyEditContext extends PropertyEditContext {
 	}
 
 	@Override
-	public Object renderForView(Object renderParam) {
+	public Component renderForView(String componentId) {
 		Object propertyValue = getPropertyValue();
 		if (propertyValue != null) {
-			return new Label((String) renderParam, propertyValue.toString());
+			return new Label(componentId, propertyValue.toString());
 		} else {
-			return new Label((String) renderParam, "<i>Not Defined</i>").setEscapeModelStrings(false);
+			return new Label(componentId, "<i>Not Defined</i>").setEscapeModelStrings(false);
 		}
 	}
 

@@ -5,7 +5,7 @@ import java.util.HashSet;
 
 import javax.validation.constraints.Min;
 
-import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.Editable;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Membership;
 import com.pmease.gitop.model.PullRequest;

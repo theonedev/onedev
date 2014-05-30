@@ -16,11 +16,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.google.common.collect.Lists;
-import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.commons.wicket.editable.PropertyEditContext;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.model.Branch;

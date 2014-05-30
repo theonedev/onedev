@@ -2,12 +2,13 @@ package com.pmease.commons.wicket.editable.password;
 
 import java.io.Serializable;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.commons.editable.PropertyEditContext;
+import com.pmease.commons.wicket.editable.PropertyEditContext;
 
 @SuppressWarnings("serial")
 public class PasswordPropertyEditContext extends PropertyEditContext {
@@ -17,8 +18,8 @@ public class PasswordPropertyEditContext extends PropertyEditContext {
 	}
 
 	@Override
-	public Object renderForEdit(Object renderParam) {
-		PasswordTextField editor = new PasswordTextField((String) renderParam, new IModel<String>() {
+	public Component renderForEdit(String componentId) {
+		PasswordTextField editor = new PasswordTextField(componentId, new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -53,11 +54,11 @@ public class PasswordPropertyEditContext extends PropertyEditContext {
 	}
 
 	@Override
-	public Object renderForView(Object renderParam) {
+	public Component renderForView(String componentId) {
 		if (getPropertyValue() != null) {
-			return new Label((String) renderParam, "******");
+			return new Label(componentId, "******");
 		} else {
-			return new Label((String) renderParam, "<i>Not Defined</i>").setEscapeModelStrings(false);
+			return new Label(componentId, "<i>Not Defined</i>").setEscapeModelStrings(false);
 		}
 	}
 

@@ -2,7 +2,7 @@ package com.pmease.commons.wicket.editable.reflection;
 
 import java.io.Serializable;
 
-import com.pmease.commons.editable.AbstractReflectionEditSupport;
+import com.pmease.commons.wicket.editable.AbstractReflectionEditSupport;
 
 public class ReflectionEditSupport extends AbstractReflectionEditSupport {
 

@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.Editable;
 import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.PullRequest;

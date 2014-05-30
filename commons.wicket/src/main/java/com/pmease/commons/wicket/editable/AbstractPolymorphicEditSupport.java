@@ -1,9 +1,9 @@
-package com.pmease.commons.editable;
+package com.pmease.commons.wicket.editable;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
-import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.Editable;
 import com.pmease.commons.util.BeanUtils;
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.commons.util.JavassistUtils;

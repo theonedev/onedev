@@ -6,7 +6,7 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.pmease.commons.editable.BeanEditContext;
+import com.pmease.commons.wicket.editable.BeanEditContext;
 
 @SuppressWarnings("serial")
 public class PolymorphicListPropertyViewer extends Panel {

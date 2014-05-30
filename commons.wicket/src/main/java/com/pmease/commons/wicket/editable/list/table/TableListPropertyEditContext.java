@@ -2,9 +2,10 @@ package com.pmease.commons.wicket.editable.list.table;
 
 import java.io.Serializable;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 
-import com.pmease.commons.editable.AbstractTableListPropertyEditContext;
+import com.pmease.commons.wicket.editable.AbstractTableListPropertyEditContext;
 
 @SuppressWarnings("serial")
 public class TableListPropertyEditContext extends AbstractTableListPropertyEditContext {
@@ -14,16 +15,16 @@ public class TableListPropertyEditContext extends AbstractTableListPropertyEditC
 	}
 
 	@Override
-	public Object renderForEdit(Object renderParam) {
-		return new TableListPropertyEditor((String) renderParam, this);
+	public Component renderForEdit(String componentId) {
+		return new TableListPropertyEditor(componentId, this);
 	}
 
 	@Override
-	public Object renderForView(Object renderParam) {
+	public Component renderForView(String componentId) {
 		if (getElementContexts() != null) {
-			return new TableListPropertyViewer((String) renderParam, this);
+			return new TableListPropertyViewer(componentId, this);
 		} else {
-			return new Label((String) renderParam, "<i>Not Defined</i>").setEscapeModelStrings(false);
+			return new Label(componentId, "<i>Not Defined</i>").setEscapeModelStrings(false);
 		}
 	}
 

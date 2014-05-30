@@ -2,9 +2,9 @@ package com.pmease.commons.wicket.editable.list;
 
 import java.io.Serializable;
 
-import com.pmease.commons.editable.AbstractListEditSupport;
-import com.pmease.commons.editable.AbstractPolymorphicListPropertyEditContext;
-import com.pmease.commons.editable.AbstractTableListPropertyEditContext;
+import com.pmease.commons.wicket.editable.AbstractListEditSupport;
+import com.pmease.commons.wicket.editable.AbstractPolymorphicListPropertyEditContext;
+import com.pmease.commons.wicket.editable.AbstractTableListPropertyEditContext;
 import com.pmease.commons.wicket.editable.list.polymorphic.PolymorphicListPropertyEditConext;
 import com.pmease.commons.wicket.editable.list.table.TableListPropertyEditContext;
 

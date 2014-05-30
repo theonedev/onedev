@@ -1,4 +1,4 @@
-package com.pmease.commons.editable;
+package com.pmease.commons.wicket.editable;
 
 import java.io.Serializable;
 
@@ -10,6 +10,4 @@ public interface EditSupport {
 	BeanEditContext getBeanEditContext(Serializable bean);
 
 	PropertyEditContext getPropertyEditContext(Serializable bean, String propertyName);
-
-	int getPriorty();
 }

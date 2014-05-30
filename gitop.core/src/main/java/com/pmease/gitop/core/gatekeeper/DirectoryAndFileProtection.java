@@ -8,7 +8,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.Editable;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.editable.TeamChoice;
 import com.pmease.gitop.core.gatekeeper.helper.branchselection.TargetBranchSelection;

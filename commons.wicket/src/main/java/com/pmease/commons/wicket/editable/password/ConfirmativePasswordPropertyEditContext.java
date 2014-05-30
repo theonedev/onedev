@@ -2,9 +2,10 @@ package com.pmease.commons.wicket.editable.password;
 
 import java.io.Serializable;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 
-import com.pmease.commons.editable.PropertyEditContext;
+import com.pmease.commons.wicket.editable.PropertyEditContext;
 
 @SuppressWarnings("serial")
 public class ConfirmativePasswordPropertyEditContext extends PropertyEditContext {
@@ -18,13 +19,13 @@ public class ConfirmativePasswordPropertyEditContext extends PropertyEditContext
 	}
 
 	@Override
-	public Object renderForEdit(Object renderParam) {
-		return new ConfirmativePasswordPropertyEditor((String) renderParam, this);
+	public Component renderForEdit(String componentId) {
+		return new ConfirmativePasswordPropertyEditor(componentId, this);
 	}
 
 	@Override
-	public Object renderForView(Object renderParam) {
-		return new Label((String) renderParam, "******");
+	public Component renderForView(String componentId) {
+		return new Label(componentId, "******");
 	}
 
 	@Override

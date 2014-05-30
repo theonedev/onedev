@@ -8,7 +8,7 @@ import javax.validation.constraints.Size;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.Editable;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.editable.BranchChoice;

@@ -1,4 +1,4 @@
-package com.pmease.commons.editable;
+package com.pmease.commons.wicket.editable;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.Editable;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.BeanUtils;
 

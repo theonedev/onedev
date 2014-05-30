@@ -18,9 +18,9 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.commons.editable.BeanEditContext;
-import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.wicket.WicketUtils;
+import com.pmease.commons.wicket.editable.BeanEditContext;
+import com.pmease.commons.wicket.editable.EditableUtils;
 
 @SuppressWarnings("serial")
 public class PolymorphicListPropertyEditor extends Panel {

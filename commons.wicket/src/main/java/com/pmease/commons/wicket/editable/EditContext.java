@@ -1,8 +1,10 @@
-package com.pmease.commons.editable;
+package com.pmease.commons.wicket.editable;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.wicket.Component;
 
 public interface EditContext extends Serializable {
 	
@@ -26,8 +28,8 @@ public interface EditContext extends Serializable {
 	
 	void addValidationError(String errorMessage);
 	
-	Object renderForEdit(Object renderParam);
+	Component renderForEdit(String componentId);
 	
-	Object renderForView(Object renderParam);
+	Component renderForView(String componentId);
 
 }

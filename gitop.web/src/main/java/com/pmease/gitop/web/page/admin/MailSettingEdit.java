@@ -5,8 +5,8 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.markup.html.form.Form;
 
-import com.pmease.commons.editable.EditContext;
-import com.pmease.commons.editable.EditableUtils;
+import com.pmease.commons.wicket.editable.EditContext;
+import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.core.setting.MailSetting;

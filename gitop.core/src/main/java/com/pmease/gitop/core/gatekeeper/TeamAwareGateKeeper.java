@@ -2,7 +2,7 @@ package com.pmease.gitop.core.gatekeeper;
 
 import javax.validation.constraints.NotNull;
 
-import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.Editable;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.editable.TeamChoice;

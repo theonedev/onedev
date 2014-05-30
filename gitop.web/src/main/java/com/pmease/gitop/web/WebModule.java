@@ -3,11 +3,11 @@ package com.pmease.gitop.web;
 import org.apache.tika.mime.MimeTypes;
 import org.glassfish.jersey.server.ResourceConfig;
 
-import com.pmease.commons.editable.EditSupport;
 import com.pmease.commons.jersey.JerseyConfigurator;
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.wicket.AbstractWicketConfig;
+import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.gitop.model.validation.UserNameReservation;
 import com.pmease.gitop.web.editable.EditSupportLocator;
 import com.pmease.gitop.web.page.repository.source.blob.renderer.BlobRendererFactory;

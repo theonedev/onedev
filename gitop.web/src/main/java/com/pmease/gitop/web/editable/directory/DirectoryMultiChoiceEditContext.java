@@ -4,9 +4,10 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 
-import com.pmease.commons.editable.PropertyEditContext;
+import com.pmease.commons.wicket.editable.PropertyEditContext;
 
 @SuppressWarnings("serial")
 public class DirectoryMultiChoiceEditContext extends PropertyEditContext {
@@ -16,18 +17,18 @@ public class DirectoryMultiChoiceEditContext extends PropertyEditContext {
     }
 
 	@Override
-    public Object renderForEdit(Object renderParam) {
-		return new DirectoryChoiceEditor((String) renderParam, this, true);
+    public Component renderForEdit(String componentId) {
+		return new DirectoryChoiceEditor(componentId, this, true);
     }
 
     @SuppressWarnings("unchecked")
 	@Override
-    public Object renderForView(Object renderParam) {
+    public Component renderForView(String componentId) {
         List<String> directories = (List<String>) getPropertyValue();
         if (directories != null && !directories.isEmpty()) {
-            return new Label((String) renderParam, StringUtils.join(directories, ", "));
+            return new Label(componentId, StringUtils.join(directories, ", "));
         } else {
-            return new Label((String) renderParam, "<i>Not Defined</i>")
+            return new Label(componentId, "<i>Not Defined</i>")
                     .setEscapeModelStrings(false);
         }
     }

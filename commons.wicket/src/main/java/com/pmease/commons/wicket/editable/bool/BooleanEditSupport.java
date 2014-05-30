@@ -3,11 +3,11 @@ package com.pmease.commons.wicket.editable.bool;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
-import com.pmease.commons.editable.BeanEditContext;
-import com.pmease.commons.editable.EditSupport;
-import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.util.BeanUtils;
 import com.pmease.commons.util.JavassistUtils;
+import com.pmease.commons.wicket.editable.BeanEditContext;
+import com.pmease.commons.wicket.editable.EditSupport;
+import com.pmease.commons.wicket.editable.PropertyEditContext;
 
 public class BooleanEditSupport implements EditSupport {
 
@@ -27,11 +27,6 @@ public class BooleanEditSupport implements EditSupport {
 		} else {
 			return null;
 		}
-	}
-
-	@Override
-	public int getPriorty() {
-		return 1;
 	}
 
 }

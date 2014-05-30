@@ -4,8 +4,8 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.SubmitLink;
 
-import com.pmease.commons.editable.EditContext;
-import com.pmease.commons.editable.EditableUtils;
+import com.pmease.commons.wicket.editable.EditContext;
+import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;

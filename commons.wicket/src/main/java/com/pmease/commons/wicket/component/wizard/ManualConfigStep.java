@@ -2,9 +2,9 @@ package com.pmease.commons.wicket.component.wizard;
 
 import org.apache.wicket.Component;
 
-import com.pmease.commons.editable.EditContext;
-import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.util.init.ManualConfig;
+import com.pmease.commons.wicket.editable.EditContext;
+import com.pmease.commons.wicket.editable.EditableUtils;
 
 @SuppressWarnings("serial")
 public class ManualConfigStep implements WizardStep {

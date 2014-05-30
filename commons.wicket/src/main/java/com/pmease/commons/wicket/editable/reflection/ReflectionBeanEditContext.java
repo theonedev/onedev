@@ -2,7 +2,9 @@ package com.pmease.commons.wicket.editable.reflection;
 
 import java.io.Serializable;
 
-import com.pmease.commons.editable.AbstractReflectionBeanEditContext;
+import org.apache.wicket.Component;
+
+import com.pmease.commons.wicket.editable.AbstractReflectionBeanEditContext;
 
 @SuppressWarnings("serial")
 public class ReflectionBeanEditContext extends AbstractReflectionBeanEditContext {
@@ -12,13 +14,13 @@ public class ReflectionBeanEditContext extends AbstractReflectionBeanEditContext
 	}
 
 	@Override
-	public Object renderForEdit(Object renderParam) {
-		return new ReflectionBeanEditor((String) renderParam, this);
+	public Component renderForEdit(String componentId) {
+		return new ReflectionBeanEditor(componentId, this);
 	}
 
 	@Override
-	public Object renderForView(Object renderParam) {
-		return new ReflectionBeanViewer((String) renderParam, this);
+	public Component renderForView(String componentId) {
+		return new ReflectionBeanViewer(componentId, this);
 	}
 
 }

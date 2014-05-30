@@ -3,11 +3,11 @@ package com.pmease.commons.wicket.editable.string;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
-import com.pmease.commons.editable.BeanEditContext;
-import com.pmease.commons.editable.EditSupport;
-import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.util.BeanUtils;
 import com.pmease.commons.util.JavassistUtils;
+import com.pmease.commons.wicket.editable.BeanEditContext;
+import com.pmease.commons.wicket.editable.EditSupport;
+import com.pmease.commons.wicket.editable.PropertyEditContext;
 
 public class StringEditSupport implements EditSupport {
 
@@ -24,11 +24,6 @@ public class StringEditSupport implements EditSupport {
 		} else {
 			return null;
 		}
-	}
-
-	@Override
-	public int getPriorty() {
-		return 1;
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.pmease.commons.editable;
+package com.pmease.commons.wicket.editable;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -7,8 +7,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.wicket.Component;
+
 import com.google.common.base.Preconditions;
-import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.Editable;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.BeanUtils;
 
@@ -120,12 +122,12 @@ public abstract class AbstractTableListPropertyEditContext extends PropertyEditC
 					}
 
 					@Override
-					public Object renderForEdit(Object renderParam) {
+					public Component renderForEdit(String componentId) {
 						throw new UnsupportedOperationException();
 					}
 
 					@Override
-					public Object renderForView(Object renderParam) {
+					public Component renderForView(String componentId) {
 						throw new UnsupportedOperationException();
 					}
 

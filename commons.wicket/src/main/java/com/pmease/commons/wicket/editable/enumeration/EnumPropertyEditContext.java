@@ -6,13 +6,14 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.commons.editable.EditableUtils;
-import com.pmease.commons.editable.PropertyEditContext;
+import com.pmease.commons.wicket.editable.EditableUtils;
+import com.pmease.commons.wicket.editable.PropertyEditContext;
 
 @SuppressWarnings("serial")
 public class EnumPropertyEditContext extends PropertyEditContext {
@@ -22,7 +23,7 @@ public class EnumPropertyEditContext extends PropertyEditContext {
     }
 
     @Override
-    public Object renderForEdit(Object renderParam) {
+    public Component renderForEdit(String componentId) {
         List<String> choices = new ArrayList<>();
 
         @SuppressWarnings({"unchecked", "rawtypes"})
@@ -34,7 +35,7 @@ public class EnumPropertyEditContext extends PropertyEditContext {
         }
 
         DropDownChoice<String> dropDownChoice =
-                new DropDownChoice<String>((String) renderParam, new IModel<String>() {
+                new DropDownChoice<String>(componentId, new IModel<String>() {
 
                     public void detach() {
                     }
@@ -76,12 +77,12 @@ public class EnumPropertyEditContext extends PropertyEditContext {
     }
 
     @Override
-    public Object renderForView(Object renderParam) {
+    public Component renderForView(String componentId) {
         Enum<?> propertyValue = (Enum<?>) getPropertyValue();
         if (propertyValue != null) {
-            return new Label((String) renderParam, propertyValue.toString());
+            return new Label(componentId, propertyValue.toString());
         } else {
-            return new Label((String) renderParam, "<i>Not Defined</i>")
+            return new Label(componentId, "<i>Not Defined</i>")
                     .setEscapeModelStrings(false);
         }
     }

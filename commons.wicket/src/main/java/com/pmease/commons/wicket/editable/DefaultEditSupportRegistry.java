@@ -1,9 +1,7 @@
-package com.pmease.commons.editable;
+package com.pmease.commons.wicket.editable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -20,14 +18,6 @@ public class DefaultEditSupportRegistry implements EditSupportRegistry {
 	@Inject
 	public DefaultEditSupportRegistry(Set<EditSupport> editSupports) {
 		this.editSupports = new ArrayList<EditSupport>(editSupports);
-		Collections.sort(this.editSupports, new Comparator<EditSupport>() {
-
-			@Override
-			public int compare(EditSupport editSupport1, EditSupport editSupport2) {
-				return editSupport2.getPriorty() - editSupport1.getPriorty();
-			}
-			
-		});
 	}
 	
 	@Override

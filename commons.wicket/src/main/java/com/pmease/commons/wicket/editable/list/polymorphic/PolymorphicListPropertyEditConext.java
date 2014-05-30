@@ -2,9 +2,10 @@ package com.pmease.commons.wicket.editable.list.polymorphic;
 
 import java.io.Serializable;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 
-import com.pmease.commons.editable.AbstractPolymorphicListPropertyEditContext;
+import com.pmease.commons.wicket.editable.AbstractPolymorphicListPropertyEditContext;
 
 @SuppressWarnings("serial")
 public class PolymorphicListPropertyEditConext extends AbstractPolymorphicListPropertyEditContext {
@@ -14,16 +15,16 @@ public class PolymorphicListPropertyEditConext extends AbstractPolymorphicListPr
 	}
 
 	@Override
-	public Object renderForEdit(Object renderParam) {
-		return new PolymorphicListPropertyEditor((String) renderParam, this);
+	public Component renderForEdit(String componentId) {
+		return new PolymorphicListPropertyEditor(componentId, this);
 	}
 
 	@Override
-	public Object renderForView(Object renderParam) {
+	public Component renderForView(String componentId) {
 		if (getElementContexts() != null) {
-			return new PolymorphicListPropertyViewer((String) renderParam, this);
+			return new PolymorphicListPropertyViewer(componentId, this);
 		} else {
-			return new Label((String) renderParam, "<i>Not Defined</i>").setEscapeModelStrings(false);
+			return new Label(componentId, "<i>Not Defined</i>").setEscapeModelStrings(false);
 		}
 	}
 

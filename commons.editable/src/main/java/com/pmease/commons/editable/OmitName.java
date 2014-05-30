@@ -1,11 +1,15 @@
-package com.pmease.commons.editable.annotation;
+package com.pmease.commons.editable;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Numeric {
+@Target(ElementType.METHOD)
+public @interface OmitName {
+	
+	public enum Place {ALL, EDITOR, VIEWER};
+	
+	Place value() default Place.ALL;
 }

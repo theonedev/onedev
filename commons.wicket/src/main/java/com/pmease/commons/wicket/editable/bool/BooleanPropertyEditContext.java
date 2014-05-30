@@ -8,7 +8,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.commons.editable.PropertyEditContext;
+import com.pmease.commons.wicket.editable.PropertyEditContext;
 
 @SuppressWarnings("serial")
 public class BooleanPropertyEditContext extends PropertyEditContext {
@@ -18,8 +18,8 @@ public class BooleanPropertyEditContext extends PropertyEditContext {
 	}
 
 	@Override
-	public Component renderForEdit(Object renderParam) {
-		return new CheckBox((String)renderParam, new IModel<Boolean>() {
+	public Component renderForEdit(String componentId) {
+		return new CheckBox(componentId, new IModel<Boolean>() {
 
 			@Override
 			public void detach() {
@@ -48,8 +48,8 @@ public class BooleanPropertyEditContext extends PropertyEditContext {
 	}
 
 	@Override
-	public Component renderForView(Object renderParam) {
-		return new Label((String) renderParam, getPropertyValue().toString());
+	public Component renderForView(String componentId) {
+		return new Label(componentId, getPropertyValue().toString());
 	}
 
 }

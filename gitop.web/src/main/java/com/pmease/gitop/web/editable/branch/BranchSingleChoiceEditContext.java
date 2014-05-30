@@ -2,10 +2,11 @@ package com.pmease.gitop.web.editable.branch;
 
 import java.io.Serializable;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 
-import com.pmease.commons.editable.PropertyEditContext;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.wicket.editable.PropertyEditContext;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.Branch;
 
@@ -17,18 +18,18 @@ public class BranchSingleChoiceEditContext extends PropertyEditContext {
     }
 
 	@Override
-    public Object renderForEdit(Object renderParam) {
-		return new BranchSingleChoiceEditor((String) renderParam, this);
+    public Component renderForEdit(String componentId) {
+		return new BranchSingleChoiceEditor(componentId, this);
     }
 
     @Override
-    public Object renderForView(Object renderParam) {
+    public Component renderForView(String componentId) {
         Long branchId = (Long)getPropertyValue();
         if (branchId != null) {
         	Branch branch = Gitop.getInstance(Dao.class).load(Branch.class, branchId);
-            return new Label((String) renderParam, branch.getName());
+            return new Label(componentId, branch.getName());
         } else {
-            return new Label((String) renderParam, "<i>Not Defined</i>")
+            return new Label(componentId, "<i>Not Defined</i>")
                     .setEscapeModelStrings(false);
         }
     }

@@ -1,4 +1,4 @@
-package com.pmease.commons.editable;
+package com.pmease.commons.wicket.editable;
 
 import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
@@ -12,11 +12,12 @@ import java.util.Comparator;
 import java.util.List;
 
 import javax.annotation.Nullable;
+import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.Editable;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.BeanUtils;
 import com.pmease.commons.util.GeneralException;
@@ -161,14 +162,6 @@ public class EditableUtils {
 		}
 	}
 	
-	public static EditContext getContext(Serializable bean) {
-		return AppLoader.getInstance(EditSupportRegistry.class).getBeanEditContext(bean);
-	}
-	
-	public static EditContext getContext(Serializable bean, String propertyName) {
-		return AppLoader.getInstance(EditSupportRegistry.class).getPropertyEditContext(bean, propertyName);
-	}
-
 	public static void copyProperties(Serializable from, Serializable to) {
 	    for (Method getter: BeanUtils.findGetters(JavassistUtils.unproxy(from.getClass()))) {
 	        Method setter = BeanUtils.findSetter(getter);
@@ -192,12 +185,17 @@ public class EditableUtils {
 	    }
 	    return false;
 	}
-
+	
 	public static boolean isDefaultInstanceValid(Class<? extends Serializable> beanClass) {
 		Serializable bean = ReflectionUtils.instantiateClass(beanClass);
-		EditContext editContext = getContext(bean);
-		editContext.validate();
-		return !editContext.hasValidationErrors();
+		return AppLoader.getInstance(Validator.class).validate(bean).isEmpty();
+	}
+
+	public static EditContext getContext(Serializable bean) {
+		return AppLoader.getInstance(EditSupportRegistry.class).getBeanEditContext(bean);
 	}
 	
+	public static EditContext getContext(Serializable bean, String propertyName) {
+		return AppLoader.getInstance(EditSupportRegistry.class).getPropertyEditContext(bean, propertyName);
+	}
 }

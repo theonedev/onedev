@@ -9,7 +9,7 @@ import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.commons.editable.EditContext;
+import com.pmease.commons.wicket.editable.EditContext;
 
 @SuppressWarnings("serial")
 public class ReflectionPropertyEditor extends Panel {

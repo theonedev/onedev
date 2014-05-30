@@ -2,8 +2,8 @@ package com.pmease.commons.wicket.editable.polymorphic;
 
 import java.io.Serializable;
 
-import com.pmease.commons.editable.AbstractPolymorphicEditSupport;
-import com.pmease.commons.editable.AbstractPolymorphicPropertyEditContext;
+import com.pmease.commons.wicket.editable.AbstractPolymorphicEditSupport;
+import com.pmease.commons.wicket.editable.AbstractPolymorphicPropertyEditContext;
 
 public class PolymorphicEditSuport extends AbstractPolymorphicEditSupport {
 
@@ -11,11 +11,6 @@ public class PolymorphicEditSuport extends AbstractPolymorphicEditSupport {
 	protected AbstractPolymorphicPropertyEditContext newPolymorphicPropertyEditContext(
 			Serializable bean, String propertyName) {
 		return new PolymorphicPropertyEditContext(bean, propertyName);
-	}
-
-	@Override
-	public int getPriorty() {
-		return 1;
 	}
 
 }
