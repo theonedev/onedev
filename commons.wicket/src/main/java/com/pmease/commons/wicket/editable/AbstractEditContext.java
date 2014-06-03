@@ -20,11 +20,10 @@ public abstract class AbstractEditContext implements EditContext {
 	
 	private final Serializable bean;
 	
-	private final Class<?> beanClass;
+	private transient Class<?> beanClass;
 	
 	public AbstractEditContext(Serializable bean) {
 		this.bean = bean;
-		this.beanClass = JavassistUtils.unproxy(bean.getClass());
 	}
 	
 	@Override
@@ -32,8 +31,9 @@ public abstract class AbstractEditContext implements EditContext {
 		return bean;
 	}
 	
-	@Override
 	public Class<?> getBeanClass() {
+		if (beanClass == null)
+			beanClass = JavassistUtils.unproxy(bean.getClass());
 	    return beanClass;
 	}
 	
