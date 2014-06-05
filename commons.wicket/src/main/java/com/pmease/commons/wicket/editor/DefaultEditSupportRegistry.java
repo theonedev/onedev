@@ -1,5 +1,6 @@
 package com.pmease.commons.wicket.editor;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -19,22 +20,24 @@ public class DefaultEditSupportRegistry implements EditSupportRegistry {
 		this.editSupports = new ArrayList<EditSupport>(editSupports);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public BeanEditContext<Object> getBeanEditContext(Class<?> beanClass) {
+	public BeanEditContext<Serializable> getBeanEditContext(Class<? extends Serializable> beanClass) {
 		for (EditSupport each: editSupports) {
-			BeanEditContext<Object> editContext = each.getBeanEditContext(beanClass);
+			BeanEditContext<?> editContext = each.getBeanEditContext(beanClass);
 			if (editContext != null)
-				return editContext;
+				return (BeanEditContext<Serializable>) editContext;
 		}
 		throw new GeneralException(String.format("Unable to find edit context (bean: %s)", beanClass.getName()));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public PropertyEditContext<Object> getPropertyEditContext(Class<?> beanClass, String propertyName) {
+	public PropertyEditContext<Serializable> getPropertyEditContext(Class<? extends Serializable> beanClass, String propertyName) {
 		for (EditSupport each: editSupports) {
-			PropertyEditContext<Object> editContext = each.getPropertyEditContext(beanClass, propertyName);
+			PropertyEditContext<?> editContext = each.getPropertyEditContext(beanClass, propertyName);
 			if (editContext != null)
-				return editContext;
+				return (PropertyEditContext<Serializable>) editContext;
 		}
 		throw new GeneralException(String.format(
 				"Unable to find edit context (bean: %s, property: %s)", 

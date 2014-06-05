@@ -1,5 +1,7 @@
 package com.pmease.gitop.web.page.account;
 
+import java.io.Serializable;
+
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.SubmitLink;
 
@@ -18,7 +20,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 @SuppressWarnings("serial")
 public class RegisterPage extends BasePage {
 
-	private BeanEditor<Object> beanEditor;
+	private BeanEditor<Serializable> beanEditor;
 	
 	private User user = new User();
 	

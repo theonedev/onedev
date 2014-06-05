@@ -56,7 +56,7 @@ public class Gitop extends AbstractPlugin {
 	@Inject
 	public Gitop(ServerConfig serverConfig, DataManager dataManager,  
 			RepositoryManager repositoryManager, UserManager userManager,
-			TaskScheduler taskScheduler, Provider<GitConfig> gitConfigProvider, 
+			TaskScheduler taskScheduler, Provider<GitConfig> gitConfigProvider,
 			@AppName String appName) {
 		this.dataManager = dataManager;
 		this.repositoryManager = repositoryManager;

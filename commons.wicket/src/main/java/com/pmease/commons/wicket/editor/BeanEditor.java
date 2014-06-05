@@ -1,5 +1,7 @@
 package com.pmease.commons.wicket.editor;
 
+import java.io.Serializable;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
@@ -11,7 +13,7 @@ import com.pmease.commons.editable.BeanDescriptor;
 import com.pmease.commons.loader.AppLoader;
 
 @SuppressWarnings("serial")
-public abstract class BeanEditor<T> extends ValueEditor<T> {
+public abstract class BeanEditor<T extends Serializable> extends ValueEditor<T> {
 
 	private final BeanDescriptor<T> beanDescriptor;
 	

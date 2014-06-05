@@ -1,5 +1,7 @@
 package com.pmease.commons.wicket.component.wizard;
 
+import java.io.Serializable;
+
 import org.apache.wicket.markup.html.form.FormComponent;
 
 import com.pmease.commons.util.init.ManualConfig;
@@ -15,7 +17,7 @@ public class ManualConfigStep implements WizardStep {
 	}
 	
 	@Override
-	public FormComponent<Object> render(String componentId) {
+	public FormComponent<Serializable> render(String componentId) {
 		return BeanEditContext.edit(componentId, config.getSetting());
 	}
 

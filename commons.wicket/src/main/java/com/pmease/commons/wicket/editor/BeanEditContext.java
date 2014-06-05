@@ -11,7 +11,7 @@ import com.pmease.commons.editable.BeanDescriptorImpl;
 import com.pmease.commons.loader.AppLoader;
 
 @SuppressWarnings("serial")
-public abstract class BeanEditContext<T> extends BeanDescriptorImpl<T> {
+public abstract class BeanEditContext<T extends Serializable> extends BeanDescriptorImpl<T> {
 	
 	public BeanEditContext(Class<? extends T> beanClass) {
 		super(beanClass);
@@ -46,38 +46,38 @@ public abstract class BeanEditContext<T> extends BeanDescriptorImpl<T> {
 		};
 	}
 
-	public static BeanEditor<Object> edit(String componentId, IModel<Object> beanModel, boolean selfUpdating) {
+	public static BeanEditor<Serializable> edit(String componentId, IModel<Serializable> beanModel, boolean selfUpdating) {
 		EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
-		BeanEditContext<Object> editContext = registry.getBeanEditContext(beanModel.getObject().getClass());
+		BeanEditContext<Serializable> editContext = registry.getBeanEditContext(beanModel.getObject().getClass());
 		if (selfUpdating)
 			beanModel = editContext.wrapAsSelfUpdating(beanModel);
 		return editContext.renderForEdit(componentId, beanModel);
 	}
 	
-	public static BeanEditor<Object> edit(String componentId, final Serializable bean) {
-		IModel<Object> beanModel = new IModel<Object>() {
+	public static BeanEditor<Serializable> edit(String componentId, final Serializable bean) {
+		IModel<Serializable> beanModel = new IModel<Serializable>() {
 
 			@Override
 			public void detach() {
 			}
 
 			@Override
-			public Object getObject() {
+			public Serializable getObject() {
 				return bean;
 			}
 
 			@Override
-			public void setObject(Object object) {
+			public void setObject(Serializable object) {
 				throw new IllegalStateException();
 			}
 			
 		};
-		return edit(componentId, beanModel);
+		return edit(componentId, beanModel, true);
 	}
 
-	public static Component view(String componentId, IModel<Object> beanModel) {
+	public static Component view(String componentId, IModel<Serializable> beanModel) {
 		EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
-		BeanEditContext<Object> editContext = registry.getBeanEditContext(beanModel.getObject().getClass());
+		BeanEditContext<Serializable> editContext = registry.getBeanEditContext(beanModel.getObject().getClass());
 		return editContext.renderForView(componentId, beanModel);
 	}
 	
@@ -85,4 +85,12 @@ public abstract class BeanEditContext<T> extends BeanDescriptorImpl<T> {
 		return view(componentId, Model.of(bean));
 	}
 	
+	public static BeanEditContext<Serializable> of(Class<? extends Serializable> beanClass) {
+		EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
+		return registry.getBeanEditContext(beanClass);
+	}
+	
+	public static BeanEditContext<Serializable> of(BeanDescriptor<? extends Serializable> beanDescriptor) {
+		return of(beanDescriptor.getBeanClass());
+	}
 }

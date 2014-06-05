@@ -12,9 +12,9 @@ import com.pmease.commons.editable.PropertyDescriptorImpl;
 import com.pmease.commons.loader.AppLoader;
 
 @SuppressWarnings("serial")
-public abstract class PropertyEditContext<T> extends PropertyDescriptorImpl {
+public abstract class PropertyEditContext<T extends Serializable> extends PropertyDescriptorImpl {
 
-	public PropertyEditContext(Class<?> beanClass, String propertyName) {
+	public PropertyEditContext(Class<? extends Serializable> beanClass, String propertyName) {
 		super(beanClass, propertyName);
 	}
 	
@@ -26,10 +26,9 @@ public abstract class PropertyEditContext<T> extends PropertyDescriptorImpl {
 
 	public abstract PropertyEditor<T> renderForEdit(String componentId, IModel<T> model);
 
-	public static PropertyEditor<Object> edit(String componentId, final IModel<Object> beanModel, String propertyName) {
-		EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
-		final PropertyEditContext<Object> editContext = registry.getPropertyEditContext(beanModel.getObject().getClass(), propertyName);
-		return editContext.renderForEdit(componentId, new IModel<Object>() {
+	public static PropertyEditor<Serializable> edit(String componentId, final IModel<Serializable> beanModel, String propertyName) {
+		final PropertyEditContext<Serializable> editContext = of(beanModel.getObject().getClass(), propertyName);
+		return editContext.renderForEdit(componentId, new IModel<Serializable>() {
 
 			@Override
 			public void detach() {
@@ -37,12 +36,12 @@ public abstract class PropertyEditContext<T> extends PropertyDescriptorImpl {
 			}
 
 			@Override
-			public Object getObject() {
+			public Serializable getObject() {
 				return editContext.getPropertyValue(beanModel.getObject());
 			}
 
 			@Override
-			public void setObject(Object object) {
+			public void setObject(Serializable object) {
 				editContext.setPropertyValue(beanModel.getObject(), object);
 			}
 			
@@ -70,13 +69,12 @@ public abstract class PropertyEditContext<T> extends PropertyDescriptorImpl {
 		return edit(componentId, beanModel, propertyName);
 	}
 
-	public static Component view(String componentId, final IModel<Object> beanModel, String propertyName) {
-		EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
-		final PropertyEditContext<Object> editContext = registry.getPropertyEditContext(beanModel.getObject().getClass(), propertyName);
-		return editContext.renderForView(componentId, new LoadableDetachableModel<Object>() {
+	public static Component view(String componentId, final IModel<Serializable> beanModel, String propertyName) {
+		final PropertyEditContext<Serializable> editContext = of(beanModel.getObject().getClass(), propertyName);
+		return editContext.renderForView(componentId, new LoadableDetachableModel<Serializable>() {
 
 			@Override
-			protected Object load() {
+			protected Serializable load() {
 				return editContext.getPropertyValue(beanModel.getObject());
 			}
 			
@@ -87,4 +85,12 @@ public abstract class PropertyEditContext<T> extends PropertyDescriptorImpl {
 		return view(componentId, Model.of(bean), propertyName);
 	}
 
+	public static PropertyEditContext<Serializable> of(Class<? extends Serializable> beanClass, String propertyName) {
+		EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
+		return registry.getPropertyEditContext(beanClass, propertyName);
+	}
+	
+	public static PropertyEditContext<Serializable> of(PropertyDescriptor propertyDescriptor) {
+		return of(propertyDescriptor.getBeanClass(), propertyDescriptor.getPropertyName());
+	}
 }

@@ -1,8 +1,13 @@
 package com.pmease.commons.wicket.editor;
 
+import java.io.Serializable;
+
+import com.pmease.commons.loader.ExtensionPoint;
+
+@ExtensionPoint
 public interface EditSupport {
 	
-	BeanEditContext<Object> getBeanEditContext(Class<?> beanClass);
+	BeanEditContext<? extends Serializable> getBeanEditContext(Class<? extends Serializable> beanClass);
 	
-	PropertyEditContext<Object> getPropertyEditContext(Class<?> beanClass, String propertyName);
+	PropertyEditContext<? extends Serializable> getPropertyEditContext(Class<? extends Serializable> beanClass, String propertyName);
 }

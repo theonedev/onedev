@@ -1,5 +1,6 @@
 package com.pmease.commons.editable;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +9,7 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.BeanUtils;
 
 @SuppressWarnings("serial")
-public class BeanDescriptorImpl<T> implements BeanDescriptor<T> {
+public class BeanDescriptorImpl<T extends Serializable> implements BeanDescriptor<T> {
 
 	private final Class<? extends T> beanClass;
 	
@@ -48,9 +49,18 @@ public class BeanDescriptorImpl<T> implements BeanDescriptor<T> {
 	}
 
 	@Override
-	public void copyProperties(Object from, Object to) {
+	public void copyProperties(Serializable from, Serializable to) {
 		for (PropertyDescriptor propertyDescriptor: getPropertyDescriptors())
 			propertyDescriptor.copyProperty(from, to);
+	}
+
+	@Override
+	public T newBeanInstance() {
+		try {
+			return getBeanClass().newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }
