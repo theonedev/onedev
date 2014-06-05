@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import javax.validation.constraints.Min;
 
-import com.pmease.commons.editable.Editable;
+import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.AuthorizationManager;
 import com.pmease.gitop.model.Branch;

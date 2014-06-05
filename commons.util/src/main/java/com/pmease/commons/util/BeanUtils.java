@@ -113,7 +113,7 @@ public class BeanUtils {
 	public static Method getGetter(Class<?> clazz, String propertyName) {
 		Method getter = findGetter(clazz, propertyName);
 		if (getter == null) {
-			throw new GeneralException("Getter not found (class: %s, property: %s)", clazz.getName(), propertyName);
+			throw new GeneralException(String.format("Getter not found (class: %s, property: %s)", clazz.getName(), propertyName));
 		}
 		return getter;
 	}
@@ -153,8 +153,8 @@ public class BeanUtils {
 		} else if (getter.getName().startsWith("is")) {
 			return getPropertyName(getter.getName().substring(2));
 		} else {
-			throw new GeneralException("Not recognized getter method (class: %s, method: %s)", 
-					getter.getDeclaringClass().getName(), getter.getName());
+			throw new GeneralException(String.format("Not recognized getter method (class: %s, method: %s)", 
+					getter.getDeclaringClass().getName(), getter.getName()));
 		}
 	}
 	

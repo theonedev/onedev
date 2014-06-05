@@ -73,7 +73,7 @@ public class Git implements Serializable {
 	 */
 	public Git createBranch(String branchName, String commitHash) {
 		if (new ListBranchesCommand(repoDir).call().contains(branchName))
-			throw new GeneralException("Branch %s already exists.", branchName);
+			throw new GeneralException(String.format("Branch %s already exists.", branchName));
 
 		new UpdateRefCommand(repoDir).refName(Git.REFS_HEADS + branchName).revision(commitHash)
 				.call();
@@ -116,7 +116,7 @@ public class Git implements Serializable {
 
 	public Git createTag(String tagName, String commitHash) {
 		if (new ListTagsCommand(repoDir).call().contains(tagName))
-			throw new GeneralException("Tag %s already exists.", tagName);
+			throw new GeneralException(String.format("Tag %s already exists.", tagName));
 
 		new UpdateRefCommand(repoDir).refName(REFS_TAGS + tagName).revision(commitHash).call();
 		return this;

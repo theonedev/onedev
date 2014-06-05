@@ -100,14 +100,18 @@ public abstract class Wizard extends Panel {
 
 			@Override
 			public void onSubmit() {
-				if (getActiveStep().complete()) {
-					activeStepIndex++;
-					form.replace(getActiveStep().render(STEP_CONTENT_ID));
-				} else {
-					form.error("Fix errors below");
-				}
+				super.onSubmit();
+				getActiveStep().complete();
+				activeStepIndex++;
+				form.replace(getActiveStep().render(STEP_CONTENT_ID));
 			}
 			
+			@Override
+			public void onError() {
+				super.onError();
+				form.error("Fix errors below");				
+			}
+
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
@@ -119,13 +123,17 @@ public abstract class Wizard extends Panel {
 
 			@Override
 			public void onSubmit() {
-				if (getActiveStep().complete()) {
-					finished();
-				} else {
-					form.error("Fix errors below");
-				}
+				super.onSubmit();
+				getActiveStep().complete();
+				finished();
 			}
 			
+			@Override
+			public void onError() {
+				super.onError();
+				form.error("Fix errors below");
+			}
+
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();

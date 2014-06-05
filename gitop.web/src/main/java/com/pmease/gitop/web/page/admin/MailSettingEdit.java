@@ -1,12 +1,10 @@
 package com.pmease.gitop.web.page.admin;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.markup.html.form.Form;
 
-import com.pmease.commons.wicket.editable.EditContext;
-import com.pmease.commons.wicket.editable.EditableUtils;
+import com.pmease.commons.wicket.editor.BeanEditContext;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.core.setting.MailSetting;
@@ -16,33 +14,33 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 @SuppressWarnings("serial")
 public class MailSettingEdit extends AdministrationLayoutPage {
 
+	private MailSetting mailSetting;
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
 		setOutputMarkupId(true);
 		
-		MailSetting mailSetting = Gitop.getInstance(ConfigManager.class).getMailSetting();
+		mailSetting = Gitop.getInstance(ConfigManager.class).getMailSetting();
 		if (mailSetting == null)
 			mailSetting = new MailSetting();
 
-		final EditContext editContext = EditableUtils.getContext(mailSetting);
-		
 		Form<?> form = new Form<Void>("form"){
 
 			@Override
 			protected void onSubmit() {
-				editContext.validate();
-				if (!editContext.hasValidationErrors()) {
-					Gitop.getInstance(ConfigManager.class).saveMailSetting((MailSetting) editContext.getBean());
-					success("Mail setting has been updated");
-				} else {
-					error("Fix errors below");
-				}
+				Gitop.getInstance(ConfigManager.class).saveMailSetting(mailSetting);
+				success("Mail setting has been updated");
+			}
+
+			@Override
+			protected void onError() {
+				error("Fix errors below");
 			}
 			
 		}; 
-		form.add((Component)editContext.renderForEdit("editor"));
+		form.add(BeanEditContext.edit("editor", mailSetting));
 		form.add(new NotificationPanel("feedback", form));
 		form.add(new AjaxSubmitLink("update") {
 

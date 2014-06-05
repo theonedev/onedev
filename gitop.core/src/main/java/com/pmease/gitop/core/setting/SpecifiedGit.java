@@ -2,7 +2,7 @@ package com.pmease.gitop.core.setting;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.pmease.commons.editable.Editable;
+import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.GitConfig;
 
 @Editable(name="Use Specified Git", order=200)

@@ -3,7 +3,7 @@ package com.pmease.commons.wicket.editable.password;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
-import com.pmease.commons.editable.Password;
+import com.pmease.commons.editable.annotation.Password;
 import com.pmease.commons.util.BeanUtils;
 import com.pmease.commons.util.JavassistUtils;
 import com.pmease.commons.wicket.editable.BeanEditContext;

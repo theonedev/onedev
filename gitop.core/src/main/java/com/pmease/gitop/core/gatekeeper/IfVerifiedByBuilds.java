@@ -5,7 +5,7 @@ import java.util.Collection;
 import javax.validation.constraints.Min;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.editable.Editable;
+import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.VerificationManager;
 import com.pmease.gitop.model.Branch;

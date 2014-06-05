@@ -2,8 +2,8 @@ package com.pmease.gitop.core.gatekeeper.helper.branchselection;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.pmease.commons.editable.Editable;
-import com.pmease.commons.editable.OmitName;
+import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.annotation.OmitName;
 import com.pmease.gitop.core.gatekeeper.IfSubmitToSpecifiedBranchPatterns;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
 

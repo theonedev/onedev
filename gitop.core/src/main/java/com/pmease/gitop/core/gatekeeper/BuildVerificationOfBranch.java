@@ -4,7 +4,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-import com.pmease.commons.editable.Editable;
+import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.core.gatekeeper.helper.branchselection.SpecifyTargetBranchesByIds;
 import com.pmease.gitop.core.gatekeeper.helper.branchselection.TargetBranchSelection;
 import com.pmease.gitop.model.Branch;

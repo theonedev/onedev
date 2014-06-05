@@ -4,13 +4,13 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import com.pmease.commons.editable.Editable;
+import com.pmease.commons.editable.EditableUtils;
+import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.BeanUtils;
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.commons.util.JavassistUtils;
 import com.pmease.commons.wicket.editable.BeanEditContext;
 import com.pmease.commons.wicket.editable.EditSupport;
-import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.commons.wicket.editable.PropertyEditContext;
 import com.pmease.commons.wicket.editable.list.polymorphic.PolymorphicListPropertyEditConext;
 import com.pmease.commons.wicket.editable.list.table.TableListPropertyEditContext;

@@ -10,12 +10,12 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.loader.ImplementationRegistry;
 import com.pmease.commons.wicket.editable.BeanEditContext;
 import com.pmease.commons.wicket.editable.EditContext;
 import com.pmease.commons.wicket.editable.EditSupportRegistry;
-import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.commons.wicket.editable.PropertyEditContext;
 
 @SuppressWarnings("serial")

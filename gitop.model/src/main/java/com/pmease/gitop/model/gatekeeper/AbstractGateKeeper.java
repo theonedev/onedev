@@ -6,7 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.editable.Editable;
+import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;

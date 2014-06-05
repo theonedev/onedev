@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.pmease.commons.editable.Editable;
-import com.pmease.commons.editable.TableLayout;
+import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.annotation.TableLayout;
 import com.pmease.gitop.model.gatekeeper.checkresult.Approved;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.checkresult.Pending;

@@ -9,13 +9,13 @@ import java.util.Map;
 
 import org.apache.wicket.Component;
 
-import com.pmease.commons.editable.Editable;
+import com.pmease.commons.editable.EditableUtils;
+import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.BeanUtils;
 import com.pmease.commons.wicket.editable.BeanEditContext;
 import com.pmease.commons.wicket.editable.EditContext;
 import com.pmease.commons.wicket.editable.EditSupportRegistry;
-import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.commons.wicket.editable.PropertyEditContext;
 
 @SuppressWarnings("serial")

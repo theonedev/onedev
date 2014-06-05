@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
+import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.util.BeanUtils;
 import com.pmease.commons.util.ExceptionUtils;
 import com.pmease.commons.util.ReflectionUtils;

@@ -1,12 +1,10 @@
 package com.pmease.gitop.web.page.admin;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.markup.html.form.Form;
 
-import com.pmease.commons.wicket.editable.EditContext;
-import com.pmease.commons.wicket.editable.EditableUtils;
+import com.pmease.commons.wicket.editor.BeanEditContext;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.core.setting.SystemSetting;
@@ -22,25 +20,24 @@ public class SystemSettingEdit extends AdministrationLayoutPage {
 		
 		setOutputMarkupId(true);
 		
-		SystemSetting systemSetting = Gitop.getInstance(ConfigManager.class).getSystemSetting();
+		final SystemSetting systemSetting = Gitop.getInstance(ConfigManager.class).getSystemSetting();
 
-		final EditContext editContext = EditableUtils.getContext(systemSetting);
-		
 		Form<?> form = new Form<Void>("form"){
 
 			@Override
 			protected void onSubmit() {
-				editContext.validate();
-				if (!editContext.hasValidationErrors()) {
-					Gitop.getInstance(ConfigManager.class).saveSystemSetting((SystemSetting) editContext.getBean());
-					success("System setting has been updated");
-				} else {
-					error("Fix errors below");
-				}
+				Gitop.getInstance(ConfigManager.class).saveSystemSetting(systemSetting);
+				success("System setting has been updated");
+			}
+
+			@Override
+			protected void onError() {
+				super.onError();
+				error("Fix errors below");
 			}
 			
 		}; 
-		form.add((Component)editContext.renderForEdit("editor"));
+		form.add(BeanEditContext.edit("editor", systemSetting));
 		form.add(new NotificationPanel("feedback", form));
 		form.add(new AjaxSubmitLink("update") {
 

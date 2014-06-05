@@ -19,6 +19,6 @@ public interface WizardStep extends Serializable {
 	
 	Skippable getSkippable();
 	
-	boolean complete();
+	void complete();
 	
 }

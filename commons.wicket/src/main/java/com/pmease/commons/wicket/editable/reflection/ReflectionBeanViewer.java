@@ -9,8 +9,8 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.pmease.commons.editable.OmitName;
-import com.pmease.commons.wicket.editable.EditableUtils;
+import com.pmease.commons.editable.EditableUtils;
+import com.pmease.commons.editable.annotation.OmitName;
 import com.pmease.commons.wicket.editable.PropertyEditContext;
 
 @SuppressWarnings("serial")

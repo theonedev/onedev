@@ -1,4 +1,4 @@
-package com.pmease.commons.wicket.editable;
+package com.pmease.commons.editable;
 
 import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
@@ -17,7 +17,7 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.pmease.commons.editable.Editable;
+import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.BeanUtils;
 import com.pmease.commons.util.GeneralException;
@@ -162,7 +162,7 @@ public class EditableUtils {
 		}
 	}
 	
-	public static void copyProperties(Serializable from, Serializable to) {
+	public static void copyProperties(Object from, Object to) {
 	    for (Method getter: BeanUtils.findGetters(JavassistUtils.unproxy(from.getClass()))) {
 	        Method setter = BeanUtils.findSetter(getter);
 	        if (setter != null && getter.getAnnotation(Editable.class) != null) {
@@ -191,11 +191,4 @@ public class EditableUtils {
 		return AppLoader.getInstance(Validator.class).validate(bean).isEmpty();
 	}
 
-	public static EditContext getContext(Serializable bean) {
-		return AppLoader.getInstance(EditSupportRegistry.class).getBeanEditContext(bean);
-	}
-	
-	public static EditContext getContext(Serializable bean, String propertyName) {
-		return AppLoader.getInstance(EditSupportRegistry.class).getPropertyEditContext(bean, propertyName);
-	}
 }

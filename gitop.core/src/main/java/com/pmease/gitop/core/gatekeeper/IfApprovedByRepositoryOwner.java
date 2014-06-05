@@ -1,7 +1,7 @@
 package com.pmease.gitop.core.gatekeeper;
 
 import com.google.common.collect.Sets;
-import com.pmease.commons.editable.Editable;
+import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.Repository;

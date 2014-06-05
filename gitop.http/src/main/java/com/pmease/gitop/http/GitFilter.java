@@ -76,7 +76,7 @@ public class GitFilter implements Filter {
 		if (StringUtils.isBlank(ownerName) || StringUtils.isBlank(repositoryName)) {
 			String url = request.getRequestURL().toString();
 			String urlRoot = url.substring(0, url.length()-getPathInfo(request).length());
-			throw new GeneralException("Expecting url of format %s<owner name>/<repository name>", urlRoot);
+			throw new GeneralException(String.format("Expecting url of format %s<owner name>/<repository name>", urlRoot));
 		} 
 		
 		if (repositoryName.endsWith(".git"))
@@ -84,7 +84,7 @@ public class GitFilter implements Filter {
 		
 		Repository repository = repositoryManager.findBy(ownerName, repositoryName);
 		if (repository == null) {
-			throw new GeneralException("Unable to find repository %s owned by %s.", repositoryName, ownerName);
+			throw new GeneralException(String.format("Unable to find repository %s owned by %s.", repositoryName, ownerName));
 		}
 		
 		return repository;

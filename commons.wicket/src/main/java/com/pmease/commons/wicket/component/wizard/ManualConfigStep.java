@@ -1,26 +1,22 @@
 package com.pmease.commons.wicket.component.wizard;
 
-import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.form.FormComponent;
 
 import com.pmease.commons.util.init.ManualConfig;
-import com.pmease.commons.wicket.editable.EditContext;
-import com.pmease.commons.wicket.editable.EditableUtils;
+import com.pmease.commons.wicket.editor.BeanEditContext;
 
 @SuppressWarnings("serial")
 public class ManualConfigStep implements WizardStep {
 
 	private ManualConfig config;
 	
-	private EditContext editContext;
-	
 	public ManualConfigStep(ManualConfig config) {
 		this.config = config;
-		editContext = EditableUtils.getContext(config.getSetting());
 	}
 	
 	@Override
-	public Component render(String componentId) {
-		return (Component) editContext.renderForEdit(componentId);
+	public FormComponent<Object> render(String componentId) {
+		return BeanEditContext.edit(componentId, config.getSetting());
 	}
 
 	@Override
@@ -40,14 +36,8 @@ public class ManualConfigStep implements WizardStep {
 	}
 
 	@Override
-	public boolean complete() {
-		editContext.validate();
-		if (editContext.hasValidationErrors()) {
-			return false;
-		} else {
-			config.complete();
-			return true;
-		}
+	public void complete() {
+		config.complete();
 	}
 
 	@Override

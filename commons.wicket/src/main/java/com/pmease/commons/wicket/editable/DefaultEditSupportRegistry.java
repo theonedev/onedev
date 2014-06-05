@@ -27,7 +27,7 @@ public class DefaultEditSupportRegistry implements EditSupportRegistry {
 			if (editContext != null)
 				return editContext;
 		}
-		throw new GeneralException("Unable to find edit context (bean: %s)", bean);
+		throw new GeneralException(String.format("Unable to find edit context (bean: %s)", bean));
 	}
 
 	@Override
@@ -37,9 +37,9 @@ public class DefaultEditSupportRegistry implements EditSupportRegistry {
 			if (editContext != null)
 				return editContext;
 		}
-		throw new GeneralException(
+		throw new GeneralException(String.format(
 				"Unable to find edit context (bean: %s, property: %s)", 
-				bean, propertyName);
+				bean, propertyName));
 	}
 
 }
