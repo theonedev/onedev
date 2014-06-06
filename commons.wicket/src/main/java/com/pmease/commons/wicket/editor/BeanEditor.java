@@ -26,20 +26,22 @@ public abstract class BeanEditor<T extends Serializable> extends ValueEditor<T> 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		add(new IValidator<T>() {
 
-			@Override
-			public void validate(IValidatable<T> validatable) {
-				Validator validator = AppLoader.getInstance(Validator.class);
-				for (ConstraintViolation<T> violation: validator.validate(validatable.getValue())) {
-					ValuePath valuePath = new ValuePath(violation.getPropertyPath());
-					ErrorContext errorContext = getErrorContext(valuePath);
-					errorContext.addError(violation.getMessage());
+		if (findParent(BeanEditor.class) == null) {
+			add(new IValidator<T>() {
+	
+				@Override
+				public void validate(IValidatable<T> validatable) {
+					Validator validator = AppLoader.getInstance(Validator.class);
+					for (ConstraintViolation<T> violation: validator.validate(validatable.getValue())) {
+						ValuePath valuePath = new ValuePath(violation.getPropertyPath());
+						ErrorContext errorContext = getErrorContext(valuePath);
+						errorContext.addError(violation.getMessage());
+					}
 				}
-			}
-			
-		});
+				
+			});
+		}
 	}
 	
 	public BeanDescriptor<T> getBeanDescriptor() {

@@ -2,6 +2,8 @@ package com.pmease.commons.wicket.editor;
 
 import java.io.Serializable;
 
+import com.google.common.base.Preconditions;
+
 public interface PathSegment extends Serializable {
 
 	@SuppressWarnings("serial")
@@ -10,10 +12,15 @@ public interface PathSegment extends Serializable {
 		private final String name;
 		
 		public Property(String name) {
-			this.name = name;
+			this.name = Preconditions.checkNotNull(name);
 		}
 		
-		public String getname() {
+		public String getName() {
+			return name;
+		}
+
+		@Override
+		public String toString() {
 			return name;
 		}
 		
@@ -32,6 +39,11 @@ public interface PathSegment extends Serializable {
 			return index;
 		}
 		
+		@Override
+		public String toString() {
+			return String.valueOf(index);
+		}
+
 	}
 	
 }

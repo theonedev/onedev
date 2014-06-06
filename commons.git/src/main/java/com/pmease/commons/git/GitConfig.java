@@ -28,11 +28,18 @@ public abstract class GitConfig implements Serializable, Validatable {
 	public abstract String getExecutable();
 
 	@Override
-	public void validate(ConstraintValidatorContext constraintValidatorContext) {
+	public boolean isValid(ConstraintValidatorContext context) {
 		if (getExecutable() != null) {
 			String error = GitCommand.checkError(getExecutable());
-			if (error != null)
-				constraintValidatorContext.buildConstraintViolationWithTemplate(error).addConstraintViolation();
+			if (error != null) {
+				context.disableDefaultConstraintViolation();
+				context.buildConstraintViolationWithTemplate(error).addConstraintViolation();
+				return false;
+			} else {
+				return true;
+			}
+		} else {
+			return true;
 		}
 	}
 	

@@ -3,9 +3,10 @@
 <head>
 </head>
 <body>
-	<div style="padding: 50px;">
-		<span class="btn btn-sm btn-primary"><i class="glyphicon glyphicon-search"></i> hello world </span>
-		<span class="btn btn-lg btn-primary"><i class="fa fa-camera-retro"></i> hello world </span>
-	</div>
+	<form wicket:id="form">
+		<div wicket:id="feedback"></div>
+		<div wicket:id="editor"></div>
+		<input type="submit" value="save"></input>
+	</form>
 </body>
 </html>

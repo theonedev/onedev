@@ -82,7 +82,7 @@ class CommonResourcesReference extends JavaScriptResourceReference {
 		
 		dependencies.addAll(Lists.newArrayList(super.getDependencies()));
 
-		dependencies.add(JavaScriptHeaderItem.forReference(ModernizrJavaScriptReference.INSTANCE));
+		dependencies.add(JavaScriptHeaderItem.forReference(ModernizrJavaScriptReference.instance()));
 		dependencies.addAll(bootstrapHeaderItems);
 		dependencies.add(CssHeaderItem.forReference(FontAwesomeCssReference.instance()));
 		ApplicationSettings select2Settings = ApplicationSettings.get();

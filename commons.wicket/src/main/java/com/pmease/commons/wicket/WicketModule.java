@@ -5,8 +5,7 @@ import org.apache.wicket.protocol.http.WicketServlet;
 
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
-import com.pmease.commons.wicket.editable.EditSupport;
-import com.pmease.commons.wicket.editable.EditSupportLocator;
+import com.pmease.commons.wicket.editor.EditSupport;
 
 public class WicketModule extends AbstractPluginModule {
 
@@ -19,7 +18,7 @@ public class WicketModule extends AbstractPluginModule {
 
 		contribute(ServletConfigurator.class, WicketServletConfigurator.class);
 		
-		contributeFromPackage(EditSupport.class, EditSupportLocator.class);
+		contributeFromPackage(EditSupport.class, EditSupport.class);
 	}
 
 }

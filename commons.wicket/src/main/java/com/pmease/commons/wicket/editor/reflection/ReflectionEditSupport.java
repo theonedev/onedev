@@ -16,9 +16,9 @@ import com.pmease.commons.wicket.editor.EditSupport;
 import com.pmease.commons.wicket.editor.PropertyEditContext;
 import com.pmease.commons.wicket.editor.PropertyEditor;
 
+@SuppressWarnings("serial")
 public class ReflectionEditSupport implements EditSupport {
 
-	@SuppressWarnings("serial")
 	@Override
 	public BeanEditContext<? extends Serializable> getBeanEditContext(Class<? extends Serializable> beanClass) {
 		if (beanClass.getAnnotation(Editable.class) != null && ClassUtils.isConcrete(beanClass)) {
@@ -40,7 +40,6 @@ public class ReflectionEditSupport implements EditSupport {
 		}
 	}
 
-	@SuppressWarnings("serial")
 	@Override
 	public PropertyEditContext<? extends Serializable> getPropertyEditContext(Class<? extends Serializable> beanClass, String propertyName) {
 		PropertyDescriptor propertyDescriptor = new PropertyDescriptorImpl(beanClass, propertyName);

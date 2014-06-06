@@ -5,7 +5,7 @@ import java.io.Serializable;
 import com.pmease.commons.loader.ExtensionPoint;
 
 @ExtensionPoint
-public interface EditSupport {
+public interface EditSupport extends Serializable {
 	
 	BeanEditContext<? extends Serializable> getBeanEditContext(Class<? extends Serializable> beanClass);
 	

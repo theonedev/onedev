@@ -4,12 +4,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
@@ -27,8 +28,6 @@ import com.pmease.commons.wicket.editor.PathSegment;
 import com.pmease.commons.wicket.editor.PathSegment.Property;
 import com.pmease.commons.wicket.editor.PropertyEditContext;
 import com.pmease.commons.wicket.editor.PropertyEditor;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public class ReflectionBeanEditor extends BeanEditor<Serializable> {
@@ -57,41 +56,40 @@ public class ReflectionBeanEditor extends BeanEditor<Serializable> {
 		
 		add(fragment);
 		
-		fragment.add(new ListView<PropertyEditContext<Serializable>>("properties", propertyContexts) {
+		RepeatingView propertiesView = new RepeatingView("properties");
+		fragment.add(propertiesView);
+		
+		for (PropertyEditContext<Serializable> propertyContext: propertyContexts) {
+			WebMarkupContainer item = new WebMarkupContainer(propertiesView.newChildId());
+			propertiesView.add(item);
+			Label nameLabel = new Label("name", EditableUtils.getName(propertyContext.getPropertyGetter()));
+			item.add(nameLabel);
+			
+			OmitName omitName = propertyContext.getPropertyGetter().getAnnotation(OmitName.class);
+			if (omitName != null && omitName.value() != OmitName.Place.VIEWER)
+				nameLabel.setVisible(false);
 
-			@Override
-			protected void populateItem(ListItem<PropertyEditContext<Serializable>> item) {
-				PropertyEditContext<Serializable> propertyContext = item.getModelObject();
-				
-				Label nameLabel = new Label("name", EditableUtils.getName(propertyContext.getPropertyGetter()));
-				item.add(nameLabel);
-				
-				OmitName omitName = propertyContext.getPropertyGetter().getAnnotation(OmitName.class);
-				if (omitName != null && omitName.value() != OmitName.Place.VIEWER)
-					nameLabel.setVisible(false);
-
-				String required;
-				if (propertyContext.isPropertyRequired() && propertyContext.getPropertyClass() != boolean.class)
-					required = "*";
-				else
-					required = "&nbsp;";
-				
-				item.add(new Label("required", required).setEscapeModelStrings(false));
-				
-				Serializable propertyValue = propertyContext.getPropertyValue(ReflectionBeanEditor.this.getModelObject());
-				PropertyEditor<Serializable> propertyEditor = propertyContext.renderForEdit("value", Model.of(propertyValue)); 
-				item.add(propertyEditor);
-				
-				String description = EditableUtils.getDescription(propertyContext.getPropertyGetter());
-				if (description != null)
-					item.add(new Label("description", description).setEscapeModelStrings(false));
-				else
-					item.add(new Label("description").setVisible(false));
-				
-				item.add(new NotificationPanel("feedback", propertyEditor));
-			}
-
-		});
+			String required;
+			if (propertyContext.isPropertyRequired() && propertyContext.getPropertyClass() != boolean.class)
+				required = "*";
+			else
+				required = "&nbsp;";
+			
+			item.add(new Label("required", required).setEscapeModelStrings(false));
+			
+			Serializable propertyValue = propertyContext.getPropertyValue(ReflectionBeanEditor.this.getModelObject());
+			PropertyEditor<Serializable> propertyEditor = propertyContext.renderForEdit("value", Model.of(propertyValue)); 
+			item.add(propertyEditor);
+			
+			String description = EditableUtils.getDescription(propertyContext.getPropertyGetter());
+			if (description != null)
+				item.add(new Label("description", description).setEscapeModelStrings(false));
+			else
+				item.add(new Label("description").setVisible(false));
+			
+			item.add(new FencedFeedbackPanel("feedback", propertyEditor));
+		}
+		
 	}
 
 	@Override
@@ -101,7 +99,7 @@ public class ReflectionBeanEditor extends BeanEditor<Serializable> {
 
 			@Override
 			public void component(PropertyEditor<Serializable> object, IVisit<PropertyEditor<Serializable>> visit) {
-				if (object.getPropertyDescriptor().getPropertyName().equals(property.getname()))
+				if (object.getPropertyDescriptor().getPropertyName().equals(property.getName()))
 					visit.stop(object);
 				else
 					visit.dontGoDeeper();

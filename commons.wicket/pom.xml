@@ -99,7 +99,7 @@
 	<properties>
 		<moduleClass>com.pmease.commons.wicket.WicketModule</moduleClass>
 		<wicketVersion>6.15.0</wicketVersion>
-		<wicketBootstrapVersion>0.9.2</wicketBootstrapVersion>
+		<wicketBootstrapVersion>0.9.3</wicketBootstrapVersion>
 	</properties>
 	<repositories>
 		<repository>

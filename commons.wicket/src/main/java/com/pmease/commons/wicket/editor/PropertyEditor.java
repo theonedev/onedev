@@ -27,25 +27,25 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new IValidator<T>() {
+		if (findParent(BeanEditor.class) == null) {
+			add(new IValidator<T>() {
 
-			@Override
-			public void validate(IValidatable<T> validatable) {
-				Validator validator = AppLoader.getInstance(Validator.class);
-				Set<?> violations = validator.validateValue(
-						propertyDescriptor.getBeanClass(), 
-						propertyDescriptor.getPropertyName(), 
-						validatable.getValue());
-				
-				for (Object each: violations) {
-					ConstraintViolation<?> violation = (ConstraintViolation<?>) each;
-					ValuePath valuePath = new ValuePath(violation.getPropertyPath());
-					ErrorContext errorContext = getErrorContext(valuePath);
-					errorContext.addError(violation.getMessage());
+				@Override
+				public void validate(IValidatable<T> validatable) {
+					Validator validator = AppLoader.getInstance(Validator.class);
+					Set<?> violations = validator.validateValue(
+							propertyDescriptor.getBeanClass(), 
+							propertyDescriptor.getPropertyName(), 
+							validatable.getValue());
+					
+					for (Object each: violations) {
+						ConstraintViolation<?> violation = (ConstraintViolation<?>) each;
+						addError(violation.getMessage());
+					}
 				}
-			}
-			
-		});
+				
+			});
+		}
 	}
 
 	public PropertyDescriptor getPropertyDescriptor() {

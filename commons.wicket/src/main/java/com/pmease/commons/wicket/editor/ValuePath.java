@@ -22,17 +22,20 @@ public class ValuePath implements Serializable {
 	
 	public ValuePath(Path validationPath) {
 		for (Path.Node node: validationPath) {
-			if (node.getKey() != null)
-				elements.add(new PathSegment.Property((String) node.getKey()));
-			else if (node.getIndex() != null) 
+			if (node.getIndex() != null) 
 				elements.add(new PathSegment.Element(node.getIndex()));
-			else
-				throw new IllegalArgumentException("Unsupported path node: " + node);
+			if (node.getName() != null)
+				elements.add(new PathSegment.Property(node.getName()));
 		}
 	}
 	
 	public List<PathSegment> getElements() {
 		return elements;
+	}
+
+	@Override
+	public String toString() {
+		return elements.toString();
 	}
 	
 }
