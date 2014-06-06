@@ -2,8 +2,6 @@ package com.pmease.commons.wicket.editor.reflection;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotNull;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -31,7 +29,7 @@ public class ReflectionPropertyEditor extends PropertyEditor<Serializable> {
 		
 		propertyValue = propertyModel.getObject();
 		
-		if (isPropertyRequired() && propertyValue == null) {
+		if (propertyDescriptor.isPropertyRequired() && propertyValue == null) {
 			try {
 				propertyValue = (Serializable) propertyDescriptor.getPropertyClass().newInstance();
 			} catch (InstantiationException | IllegalAccessException e) {
@@ -40,15 +38,11 @@ public class ReflectionPropertyEditor extends PropertyEditor<Serializable> {
 		}
 	}
 	
-	private boolean isPropertyRequired() {
-		return getPropertyDescriptor().getPropertyGetter().getAnnotation(NotNull.class) != null;
-	}
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		if (isPropertyRequired()) {
+		if (getPropertyDescriptor().isPropertyRequired()) {
 			add(new WebMarkupContainer("enable").setVisible(false));
 		} else {
 			add(new CheckBox("enable", new IModel<Boolean>() {

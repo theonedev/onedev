@@ -140,6 +140,7 @@ table.reflection .right-spacing {margin-right: 8px;}
 .editor .required {font-size: 16px; color: #B94A48;}
 .viewer .table {margin-bottom: 0;}
 .viewer tr.name-omitted>td {padding: 0;}
+.viewer div.type {margin-bottom: 4px;}
 
 /* Select2 */
 .editor .select2-container {width: 100%;}

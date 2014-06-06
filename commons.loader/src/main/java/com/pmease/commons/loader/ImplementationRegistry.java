@@ -6,5 +6,5 @@ import com.google.inject.ImplementedBy;
 
 @ImplementedBy(DefaultImplementationRegistry.class)
 public interface ImplementationRegistry {
-	Collection<Class<?>> getImplementations(Class<?> abstractClass);
+	<T> Collection<Class<? extends T>> getImplementations(Class<T> abstractClass);
 }

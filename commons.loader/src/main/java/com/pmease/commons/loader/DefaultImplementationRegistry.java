@@ -19,15 +19,18 @@ public class DefaultImplementationRegistry implements ImplementationRegistry {
 		this.providers = providers;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public Collection<Class<?>> getImplementations(Class<?> abstractClass) {
-		Collection<Class<?>> implementations = new HashSet<Class<?>>();
-		for (Class<?> subClass: ClassUtils.findImplementations(abstractClass, abstractClass)) {
+	public <T> Collection<Class<? extends T>> getImplementations(Class<T> abstractClass) {
+		Collection<Class<? extends T>> implementations = new HashSet<>();
+		for (Class<? extends T> subClass: ClassUtils.findImplementations(abstractClass, abstractClass)) {
 			implementations.add(subClass);
 		}
 		for (ImplementationProvider provider: providers) {
-			if (provider.getAbstractClass() == abstractClass)
-				implementations.addAll(provider.getImplementations());
+			if (provider.getAbstractClass() == abstractClass) {
+				for (Class<?> implementation: provider.getImplementations())
+					implementations.add((Class<? extends T>) implementation);
+			}
 		}
 		return implementations;
 	}
