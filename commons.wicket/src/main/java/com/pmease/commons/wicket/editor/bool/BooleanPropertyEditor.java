@@ -1,6 +1,6 @@
-package com.pmease.commons.wicket.editor.numeric;
+package com.pmease.commons.wicket.editor.bool;
 
-import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
@@ -11,11 +11,11 @@ import com.pmease.commons.wicket.editor.PathSegment;
 import com.pmease.commons.wicket.editor.PropertyEditor;
 
 @SuppressWarnings("serial")
-public class NumericPropertyEditor extends PropertyEditor<Number> {
+public class BooleanPropertyEditor extends PropertyEditor<Boolean> {
 
-	private TextField<Number> input;
+	private CheckBox input;
 	
-	public NumericPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<Number> propertyModel) {
+	public BooleanPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<Boolean> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -23,9 +23,7 @@ public class NumericPropertyEditor extends PropertyEditor<Number> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		input = new TextField<Number>("input", Model.of(getModelObject()));
-		input.setType(getPropertyDescriptor().getPropertyClass());
-		add(input);
+		add(input = new CheckBox("input", Model.of(getModelObject())));
 	}
 
 	@Override
@@ -34,7 +32,7 @@ public class NumericPropertyEditor extends PropertyEditor<Number> {
 	}
 
 	@Override
-	protected Number convertInputToValue() throws ConversionException {
+	protected Boolean convertInputToValue() throws ConversionException {
 		return input.getConvertedInput();
 	}
 

@@ -7,16 +7,20 @@ import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.annotation.Password;
 import com.pmease.commons.validation.ClassValidating;
 import com.pmease.commons.validation.Validatable;
 import com.pmease.commons.wicket.editor.BeanEditContext;
 import com.pmease.commons.wicket.editor.BeanEditor;
+import com.pmease.gitop.model.permission.operation.GeneralOperation;
 
 @SuppressWarnings("serial")
 public class TestPage extends WebPage {
@@ -64,6 +68,14 @@ public class TestPage extends WebPage {
 		private Long money;
 		
 		private Bean child;
+		
+		private String password;
+		
+		private String name;
+		
+		private Boolean married;
+		
+		private GeneralOperation operation;
 
 		@Editable(order=100)
 		public int getAge() {
@@ -84,6 +96,46 @@ public class TestPage extends WebPage {
 			this.money = money;
 		}
 
+		@Editable(order=201)
+		@Password(confirmative=true)
+		@NotEmpty
+		public String getPassword() {
+			return password;
+		}
+
+		public void setPassword(String password) {
+			this.password = password;
+		}
+
+		@Editable(order=202)
+		@NotEmpty
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		@Editable(order=203)
+		public Boolean isMarried() {
+			return married;
+		}
+
+		public void setMarried(Boolean married) {
+			this.married = married;
+		}
+
+		@Editable(order=204)
+		@NotNull
+		public GeneralOperation getOperation() {
+			return operation;
+		}
+
+		public void setOperation(GeneralOperation operation) {
+			this.operation = operation;
+		}
+
 		@Editable(order=300)
 		@Valid
 		public Bean getChild() {
@@ -96,13 +148,11 @@ public class TestPage extends WebPage {
 
 		@Override
 		public String toString() {
-			return "age: " + age + ", " + "money: " + money + ", child: " + child;
+			return ReflectionToStringBuilder.toString(this);
 		}
 
 		@Override
 		public boolean isValid(ConstraintValidatorContext context) {
-			System.out.println(this);
-			
 			if (money == null)
 				return true;
 			

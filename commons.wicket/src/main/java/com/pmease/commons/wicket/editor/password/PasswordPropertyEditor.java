@@ -1,6 +1,6 @@
-package com.pmease.commons.wicket.editor.numeric;
+package com.pmease.commons.wicket.editor.password;
 
-import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
@@ -11,11 +11,11 @@ import com.pmease.commons.wicket.editor.PathSegment;
 import com.pmease.commons.wicket.editor.PropertyEditor;
 
 @SuppressWarnings("serial")
-public class NumericPropertyEditor extends PropertyEditor<Number> {
+public class PasswordPropertyEditor extends PropertyEditor<String> {
 
-	private TextField<Number> input;
+	private PasswordTextField input;
 	
-	public NumericPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<Number> propertyModel) {
+	public PasswordPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -23,8 +23,9 @@ public class NumericPropertyEditor extends PropertyEditor<Number> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		input = new TextField<Number>("input", Model.of(getModelObject()));
-		input.setType(getPropertyDescriptor().getPropertyClass());
+		input = new PasswordTextField("input", Model.of(getModelObject()));
+		input.setRequired(false);
+		input.setResetPassword(false);
 		add(input);
 	}
 
@@ -34,7 +35,7 @@ public class NumericPropertyEditor extends PropertyEditor<Number> {
 	}
 
 	@Override
-	protected Number convertInputToValue() throws ConversionException {
+	protected String convertInputToValue() throws ConversionException {
 		return input.getConvertedInput();
 	}
 
