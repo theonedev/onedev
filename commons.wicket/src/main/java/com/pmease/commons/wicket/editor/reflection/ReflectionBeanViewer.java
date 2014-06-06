@@ -51,7 +51,8 @@ public class ReflectionBeanViewer extends Panel {
 					item.add(AttributeAppender.append("class", "name-omitted"));
 				}
 
-				Serializable propertyValue = propertyContext.getPropertyValue((Serializable)getDefaultModelObject());
+				Serializable bean = (Serializable) ReflectionBeanViewer.this.getDefaultModelObject();
+				Serializable propertyValue = propertyContext.getPropertyValue(bean);
 				item.add(propertyContext.renderForView("value", Model.of(propertyValue)));
 			}
 

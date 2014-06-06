@@ -1,6 +1,7 @@
 package com.pmease.gitop.web.page;
 
 import java.io.Serializable;
+import java.util.Random;
 
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
@@ -9,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.validation.ClassValidating;
@@ -40,6 +42,17 @@ public class TestPage extends WebPage {
 		BeanEditor<Serializable> editor = BeanEditContext.edit("editor", bean); 
 		form.add(editor);
 		form.add(new FencedFeedbackPanel("feedback", editor));
+		
+		add(BeanEditContext.view("viewer", new LoadableDetachableModel<Serializable>() {
+
+			@Override
+			protected Serializable load() {
+				Bean bean = new Bean();
+				bean.setAge(new Random().nextInt());
+				return bean;
+			}
+			
+		}));
 	}
 	
 	@Editable
