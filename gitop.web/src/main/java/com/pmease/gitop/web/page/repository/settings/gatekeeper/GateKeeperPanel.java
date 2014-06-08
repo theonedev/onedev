@@ -18,7 +18,7 @@ import com.pmease.commons.util.ReflectionUtils;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.modal.ModalPanel;
-import com.pmease.commons.wicket.editor.BeanEditContext;
+import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitop.model.gatekeeper.AbstractGateKeeper;
 import com.pmease.gitop.model.gatekeeper.AndGateKeeper;
 import com.pmease.gitop.model.gatekeeper.AndOrGateKeeper;
@@ -414,7 +414,7 @@ public abstract class GateKeeperPanel extends Panel {
 			container.add(fragment);
 		} else {
 			Fragment fragment = new Fragment("content", "otherFrag", GateKeeperPanel.this);
-			fragment.add(BeanEditContext.view("viewer", gateKeeper));
+			fragment.add(BeanContext.view("viewer", gateKeeper));
 			container.add(fragment);
 		}
 	}

@@ -1,76 +1,72 @@
 package com.pmease.commons.wicket.editable.list.table;
 
-import java.lang.reflect.Method;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.AttributeModifier;
-import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 
+import com.pmease.commons.editable.BeanDescriptorImpl;
 import com.pmease.commons.editable.EditableUtils;
-import com.pmease.commons.wicket.editable.EditContext;
-import com.pmease.commons.wicket.editable.PropertyEditContext;
+import com.pmease.commons.editable.PropertyDescriptor;
+import com.pmease.commons.wicket.editable.PropertyContext;
 
 @SuppressWarnings("serial")
 public class TableListPropertyViewer extends Panel {
 
-	private final TableListPropertyEditContext editContext;
+	private final List<PropertyContext<Serializable>> elementPropertyContexts;
 	
-	public TableListPropertyViewer(String id, TableListPropertyEditContext editContext) {
+	private final List<Serializable> elements;
+	
+	public TableListPropertyViewer(String id, Class<?> elementClass, List<Serializable> elements) {
 		super(id);
-		this.editContext = editContext;
+		
+		elementPropertyContexts = new ArrayList<>();
+		for (PropertyDescriptor propertyDescriptor: new BeanDescriptorImpl(elementClass).getPropertyDescriptors()) {
+			elementPropertyContexts.add(PropertyContext.of(propertyDescriptor));
+		}
+		
+		this.elements = elements;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ListView<Method>("headers", new LoadableDetachableModel<List<Method>>() {
+		add(new ListView<PropertyContext<?>>("headers", elementPropertyContexts) {
 
 			@Override
-			protected List<Method> load() {
-				return editContext.getElementPropertyGetters();
-			}
-			
-		}) {
-
-			@Override
-			protected void populateItem(ListItem<Method> item) {
-				item.add(new Label("header", EditableUtils.getName(item.getModelObject())));
+			protected void populateItem(ListItem<PropertyContext<?>> item) {
+				item.add(new Label("header", EditableUtils.getName(item.getModelObject().getPropertyGetter())));
 			}
 			
 		});
-		add(new ListView<List<PropertyEditContext>>("rows", editContext.getElementContexts()) {
+		add(new ListView<Serializable>("rows", elements) {
 
 			@Override
-			protected void populateItem(ListItem<List<PropertyEditContext>> rowItem) {
-				rowItem.add(new ListView<PropertyEditContext>("columns", rowItem.getModelObject()) {
+			protected void populateItem(final ListItem<Serializable> rowItem) {
+				rowItem.add(new ListView<PropertyContext<Serializable>>("columns", elementPropertyContexts) {
 
 					@Override
-					protected void populateItem(ListItem<PropertyEditContext> columnItem) {
-						EditContext elementPropertyContext = columnItem.getModelObject();
-						columnItem.add((Component)elementPropertyContext.renderForView("cell"));
+					protected void populateItem(ListItem<PropertyContext<Serializable>> columnItem) {
+						PropertyContext<Serializable> propertyContext = columnItem.getModelObject(); 
+						Serializable elementPropertyValue = (Serializable) propertyContext.getPropertyValue(rowItem.getModelObject());
+						columnItem.add(propertyContext.renderForView("cell", Model.of(elementPropertyValue)));
 					}
 					
 				});
 			}
 			
 		});
-		WebMarkupContainer noElements = new WebMarkupContainer("noElements") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(editContext.getElementContexts().isEmpty());
-			}
-			
-		};
-		noElements.add(AttributeModifier.append("colspan", editContext.getElementPropertyGetters().size()));
+		WebMarkupContainer noElements = new WebMarkupContainer("noElements");
+		noElements.setVisible(elements.isEmpty());
+		noElements.add(AttributeModifier.append("colspan", elementPropertyContexts.size()));
 		add(noElements);
 	}
 

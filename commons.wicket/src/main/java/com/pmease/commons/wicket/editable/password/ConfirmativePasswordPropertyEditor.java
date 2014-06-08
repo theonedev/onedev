@@ -1,58 +1,60 @@
 package com.pmease.commons.wicket.editable.password;
 
 import org.apache.wicket.markup.html.form.PasswordTextField;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.util.convert.ConversionException;
+
+import com.pmease.commons.editable.PropertyDescriptor;
+import com.pmease.commons.wicket.editable.ErrorContext;
+import com.pmease.commons.wicket.editable.PathSegment;
+import com.pmease.commons.wicket.editable.PropertyEditor;
 
 @SuppressWarnings("serial")
-public class ConfirmativePasswordPropertyEditor extends Panel {
+public class ConfirmativePasswordPropertyEditor extends PropertyEditor<String> {
 	
-	private final ConfirmativePasswordPropertyEditContext editContext;
-
-	public ConfirmativePasswordPropertyEditor(String id, ConfirmativePasswordPropertyEditContext editContext) {
-		super(id);
-		this.editContext = editContext;
+	private PasswordTextField input;
+	
+	private PasswordTextField inputAgain;
+	
+	public ConfirmativePasswordPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
+		super(id, propertyDescriptor, propertyModel);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new PasswordTextField("input", new IModel<String>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return editContext.getPassword();
-			}
-
-			@Override
-			public void setObject(String object) {
-				editContext.setPassword(object);
-			}
-			
-		}).setResetPassword(true).setRequired(false));
+		input = new PasswordTextField("input", Model.of(getModelObject()));
+		input.setResetPassword(true);
+		input.setRequired(false);
+		add(input);
 		
-		add(new PasswordTextField("inputAgain", new IModel<String>() {
+		inputAgain = new PasswordTextField("inputAgain", Model.of(getModelObject()));
+		inputAgain.setResetPassword(true);
+		inputAgain.setRequired(false);
+		add(inputAgain);
+	}
 
-			@Override
-			public void detach() {
-			}
+	@Override
+	public ErrorContext getErrorContext(PathSegment pathSegment) {
+		return null;
+	}
 
-			@Override
-			public String getObject() {
-				return editContext.getConfirmedPassword();
-			}
-
-			@Override
-			public void setObject(String object) {
-				editContext.setConfirmedPassword(object);
-			}
-			
-		}).setResetPassword(true).setRequired(false));
+	@Override
+	protected String convertInputToValue() throws ConversionException {
+		if (input.getConvertedInput() != null) {
+			if (inputAgain.getConvertedInput() == null)
+				throw new ConversionException("Please confirm the password.");
+			else if (!input.getConvertedInput().equals(inputAgain.getConvertedInput()))
+				throw new ConversionException("Password and its confirmation should be identical.");
+			else
+				return input.getConvertedInput();
+		} else if (inputAgain.getConvertedInput() != null) {
+			throw new ConversionException("Password and its confirmation should be identical.");
+		} else {
+			return input.getConvertedInput();
+		}
 	}
 
 }

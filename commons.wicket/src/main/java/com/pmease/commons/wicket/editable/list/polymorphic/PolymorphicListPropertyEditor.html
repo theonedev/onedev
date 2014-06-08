@@ -2,7 +2,7 @@
 	<wicket:enclosure child:id="enable">
 		<input wicket:id="enable" type="checkbox" class="enable"></input>
 	</wicket:enclosure>
-	<table wicket:id="valueEditor" class="polymorphic editor">
+	<table wicket:id="listEditor" class="polymorphic editor">
 		<tbody>
 			<tr wicket:id="elements">
 				<td>
@@ -15,13 +15,7 @@
 						</div>
 					</div>
 					<div wicket:id="elementEditor"></div>
-					<wicket:enclosure child="elementValidationErrors">
-						<ul class="error-message">
-							<li wicket:id="elementValidationErrors">
-								<span wicket:id="elementValidationError"></span>
-							</li>
-						</ul>
-					</wicket:enclosure>
+					<div wicket:id="feedback"></div>
 				</td>
 			</tr>
 			<wicket:enclosure>

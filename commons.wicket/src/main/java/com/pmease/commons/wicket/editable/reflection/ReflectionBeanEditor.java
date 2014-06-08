@@ -1,36 +1,45 @@
 package com.pmease.commons.wicket.editable.reflection;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.wicket.AttributeModifier;
-import org.apache.wicket.Component;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.util.convert.ConversionException;
+import org.apache.wicket.util.visit.IVisit;
+import org.apache.wicket.util.visit.IVisitor;
 
+import com.pmease.commons.editable.BeanDescriptor;
 import com.pmease.commons.editable.EditableUtils;
+import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.editable.annotation.OmitName;
 import com.pmease.commons.editable.annotation.TableLayout;
-import com.pmease.commons.wicket.editable.EditContext;
-import com.pmease.commons.wicket.editable.PropertyEditContext;
+import com.pmease.commons.wicket.editable.BeanEditor;
+import com.pmease.commons.wicket.editable.ErrorContext;
+import com.pmease.commons.wicket.editable.PathSegment;
+import com.pmease.commons.wicket.editable.PropertyContext;
+import com.pmease.commons.wicket.editable.PropertyEditor;
+import com.pmease.commons.wicket.editable.PathSegment.Property;
 
 @SuppressWarnings("serial")
-public class ReflectionBeanEditor extends Panel {
+public class ReflectionBeanEditor extends BeanEditor<Serializable> {
 
-	private final ReflectionBeanEditContext editContext;
-	
-	public ReflectionBeanEditor(String panelId, ReflectionBeanEditContext editContext) {
-		super(panelId);
-		
-		this.editContext = editContext;
+	private final List<PropertyContext<Serializable>> propertyContexts = new ArrayList<>();
+
+	public ReflectionBeanEditor(String id, BeanDescriptor beanDescriptor, IModel<Serializable> model) {
+		super(id, beanDescriptor, model);
+
+		for (PropertyDescriptor propertyDescriptor: beanDescriptor.getPropertyDescriptors()) {
+			propertyContexts.add(PropertyContext.of(propertyDescriptor));
+		}
 	}
 
 	@Override
@@ -38,96 +47,82 @@ public class ReflectionBeanEditor extends Panel {
 		super.onInitialize();
 		
 		setOutputMarkupId(true);
-		add(new ListView<String>("beanValidationErrors", new LoadableDetachableModel<List<String>>() {
-
-			@Override
-			protected List<String> load() {
-				return editContext.getValidationErrors();
-			}
-			
-		}) {
-
-			@Override
-			protected void populateItem(ListItem<String> item) {
-				item.add(new Label("beanValidationError", item.getModelObject()));
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				setVisible(!getModelObject().isEmpty());
-			}
-			
-		});
 
 		Fragment fragment;
-		if (editContext.getBeanClass().getAnnotation(TableLayout.class) == null)
-			fragment = new Fragment("beanEditor", "default", ReflectionBeanEditor.this);
+		if (getBeanDescriptor().getBeanClass().getAnnotation(TableLayout.class) == null)
+			fragment = new Fragment("content", "default", ReflectionBeanEditor.this);
 		else
-			fragment = new Fragment("beanEditor", "table", ReflectionBeanEditor.this);
+			fragment = new Fragment("content", "table", ReflectionBeanEditor.this);
 		
 		add(fragment);
 		
-		fragment.add(new ListView<PropertyEditContext>("properties", editContext.getPropertyContexts()) {
+		RepeatingView propertiesView = new RepeatingView("properties");
+		fragment.add(propertiesView);
+		
+		for (PropertyContext<Serializable> propertyContext: propertyContexts) {
+			WebMarkupContainer item = new WebMarkupContainer(propertiesView.newChildId());
+			propertiesView.add(item);
+			Label nameLabel = new Label("name", EditableUtils.getName(propertyContext.getPropertyGetter()));
+			item.add(nameLabel);
+			
+			OmitName omitName = propertyContext.getPropertyGetter().getAnnotation(OmitName.class);
+			if (omitName != null && omitName.value() != OmitName.Place.VIEWER)
+				nameLabel.setVisible(false);
+
+			String required;
+			if (propertyContext.isPropertyRequired() && propertyContext.getPropertyClass() != boolean.class)
+				required = "*";
+			else
+				required = "&nbsp;";
+			
+			item.add(new Label("required", required).setEscapeModelStrings(false));
+			
+			Serializable propertyValue = (Serializable) propertyContext.getPropertyValue(ReflectionBeanEditor.this.getModelObject());
+			PropertyEditor<Serializable> propertyEditor = propertyContext.renderForEdit("value", Model.of(propertyValue)); 
+			item.add(propertyEditor);
+			
+			String description = EditableUtils.getDescription(propertyContext.getPropertyGetter());
+			if (description != null)
+				item.add(new Label("description", description).setEscapeModelStrings(false));
+			else
+				item.add(new Label("description").setVisible(false));
+			
+			item.add(new FencedFeedbackPanel("feedback", propertyEditor));
+		}
+		
+	}
+
+	@Override
+	public ErrorContext getErrorContext(PathSegment pathSegment) {
+		final PathSegment.Property property = (Property) pathSegment;
+		return visitChildren(PropertyEditor.class, new IVisitor<PropertyEditor<Serializable>, PropertyEditor<Serializable>>() {
 
 			@Override
-			protected void populateItem(ListItem<PropertyEditContext> item) {
-				final PropertyEditContext propertyContext = item.getModelObject();
-				
-				Label nameLabel = new Label("name", EditableUtils.getName(propertyContext.getPropertyGetter()));
-				item.add(nameLabel);
-				
-				OmitName omitName = propertyContext.getPropertyGetter().getAnnotation(OmitName.class);
-				if (omitName != null && omitName.value() != OmitName.Place.VIEWER)
-					nameLabel.setVisible(false);
-
-				String required;
-				if (propertyContext.isPropertyRequired())
-					required = "*";
+			public void component(PropertyEditor<Serializable> object, IVisit<PropertyEditor<Serializable>> visit) {
+				if (object.getPropertyDescriptor().getPropertyName().equals(property.getName()))
+					visit.stop(object);
 				else
-					required = "&nbsp;";
-				
-				item.add(new Label("required", required).setEscapeModelStrings(false));
-				
-				item.add((Component)propertyContext.renderForEdit("value"));
-				
-				WebMarkupContainer hint = new WebMarkupContainer("hint");
-				String description = EditableUtils.getDescription(propertyContext.getPropertyGetter());
-				if (description != null)
-					hint.add(new Label("description", description).setEscapeModelStrings(false));
-				else
-					hint.add(new Label("description").setVisible(false));
-				
-				hint.add(new ListView<String>("propertyValidationErrors", propertyContext.getValidationErrors()) {
-
-					@Override
-					protected void populateItem(ListItem<String> item) {
-						item.add(new Label("propertyValidationError", item.getModelObject()));
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						
-						setVisible(!propertyContext.getValidationErrors().isEmpty());
-					}
-					
-				});
-				
-				item.add(hint);
-				
-				Map<Serializable, EditContext> childContexts = propertyContext.getChildContexts();
-				if (!propertyContext.getValidationErrors().isEmpty()) {
-	                if (childContexts.isEmpty())
-	                    item.add(AttributeModifier.append("class", "has-error"));
-	                else
-	                    hint.add(AttributeModifier.append("class", "has-error"));
-				}
+					visit.dontGoDeeper();
 			}
+			
+		});
+	}
 
+	@Override
+	protected Serializable convertInputToValue() throws ConversionException {
+		final Serializable bean = (Serializable) getBeanDescriptor().newBeanInstance();
+		
+		visitChildren(PropertyEditor.class, new IVisitor<PropertyEditor<Serializable>, PropertyEditor<Serializable>>() {
+
+			@Override
+			public void component(PropertyEditor<Serializable> object, IVisit<PropertyEditor<Serializable>> visit) {
+				object.getPropertyDescriptor().setPropertyValue(bean, object.getConvertedInput());
+				visit.dontGoDeeper();
+			}
+			
 		});
 		
+		return bean;
 	}
 
 	@Override
@@ -136,5 +131,4 @@ public class ReflectionBeanEditor extends Panel {
 		
 		response.render(OnDomReadyHeaderItem.forScript(String.format("pmease.commons.editable.adjustReflectionEditor('%s')", getMarkupId())));
 	}
-
 }

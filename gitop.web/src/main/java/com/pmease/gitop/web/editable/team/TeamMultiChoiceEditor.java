@@ -5,88 +5,77 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.util.convert.ConversionException;
 import org.hibernate.criterion.Restrictions;
 
+import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.commons.wicket.editable.ErrorContext;
+import com.pmease.commons.wicket.editable.PathSegment;
+import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.core.editable.TeamChoice;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.web.component.choice.TeamChoiceProvider;
 import com.pmease.gitop.web.component.choice.TeamMultiChoice;
 import com.pmease.gitop.web.page.repository.RepositoryBasePage;
 
 @SuppressWarnings("serial")
-public class TeamMultiChoiceEditor extends Panel {
+public class TeamMultiChoiceEditor extends PropertyEditor<List<Long>> {
 	
-	private final TeamMultiChoiceEditContext editContext;
-
-	public TeamMultiChoiceEditor(String id, TeamMultiChoiceEditContext editContext) {
-		super(id);
-		this.editContext = editContext;
+	private TeamMultiChoice input;
+	
+	public TeamMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<Long>> propertyModel) {
+		super(id, propertyDescriptor, propertyModel);
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-    	IModel<Collection<Team>> model = new IModel<Collection<Team>>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public Collection<Team> getObject() {
-				List<Long> teamIds = (List<Long>) editContext.getPropertyValue();
-				if (teamIds != null) {
-					Dao dao = Gitop.getInstance(Dao.class);
-					Collection<Team> teams = new ArrayList<>();
-					for (Long teamId: teamIds) 
-						teams.add(dao.load(Team.class, teamId));
-					return teams;
-				} else {
-					return null;
-				}
-			}
-
-			@Override
-			public void setObject(Collection<Team> teams) {
-				if (teams != null) {
-					List<Long> teamIds = new ArrayList<>();
-					for (Team team: teams)
-						teamIds.add(team.getId());
-					editContext.setPropertyValue((Serializable) teamIds);
-				} else {
-					editContext.setPropertyValue(null);
-				}
-			}
-    		
-    	};
-    	
     	TeamChoiceProvider teamProvider = new TeamChoiceProvider(new LoadableDetachableModel<EntityCriteria<Team>>() {
 
 			@Override
 			protected EntityCriteria<Team> load() {
 				EntityCriteria<Team> criteria = EntityCriteria.of(Team.class);
 				RepositoryBasePage page = (RepositoryBasePage) getPage();
-				criteria.add(Restrictions.eq("owner", page.getRepository()));
-				for (String each: editContext.getPropertyGetter().getAnnotation(TeamChoice.class).excludes()) {
-					criteria.add(Restrictions.not(Restrictions.eq("name", each)));
-				}
+				criteria.add(Restrictions.eq("owner", page.getRepository().getOwner()));
 				return criteria;
 			}
     		
     	});
 
-    	TeamMultiChoice chooser = new TeamMultiChoice("chooser", model, teamProvider);
-        chooser.setConvertEmptyInputStringToNull(true);
+    	List<Team> teames = new ArrayList<>();
+		if (getModelObject() != null) {
+			Dao dao = Gitop.getInstance(Dao.class);
+			for (Long teamId: getModelObject()) 
+				teames.add(dao.load(Team.class, teamId));
+		} 
+		
+		input = new TeamMultiChoice("input", new Model((Serializable)teames), teamProvider);
+        input.setConvertEmptyInputStringToNull(true);
         
-        add(chooser);
+        add(input);
+	}
+
+	@Override
+	public ErrorContext getErrorContext(PathSegment pathSegment) {
+		return null;
+	}
+
+	@Override
+	protected List<Long> convertInputToValue() throws ConversionException {
+		List<Long> teamIds = new ArrayList<>();
+		Collection<Team> teames = input.getConvertedInput();
+		if (teames != null) {
+			for (Team team: teames)
+				teamIds.add(team.getId());
+		}
+		return teamIds;
 	}
 
 }

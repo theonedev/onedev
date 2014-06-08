@@ -1,0 +1,53 @@
+package com.pmease.commons.wicket.editable.numeric;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.model.IModel;
+
+import com.pmease.commons.editable.PropertyDescriptor;
+import com.pmease.commons.editable.PropertyDescriptorImpl;
+import com.pmease.commons.wicket.editable.BeanContext;
+import com.pmease.commons.wicket.editable.EditSupport;
+import com.pmease.commons.wicket.editable.NotDefinedLabel;
+import com.pmease.commons.wicket.editable.PropertyContext;
+import com.pmease.commons.wicket.editable.PropertyEditor;
+
+@SuppressWarnings("serial")
+public class NumericEditSupport implements EditSupport {
+
+	@Override
+	public BeanContext<?> getBeanEditContext(Class<?> beanClass) {
+		return null;
+	}
+
+	@Override
+	public PropertyContext<?> getPropertyEditContext(Class<?> beanClass, String propertyName) {
+		PropertyDescriptor propertyDescriptor = new PropertyDescriptorImpl(beanClass, propertyName);
+
+		Class<?> propertyClass = propertyDescriptor.getPropertyGetter().getReturnType();
+		if (propertyClass == int.class || propertyClass == long.class 
+				|| propertyClass == Integer.class || propertyClass == Long.class) {
+			return new PropertyContext<Number>(propertyDescriptor) {
+
+				@Override
+				public Component renderForView(String componentId, IModel<Number> model) {
+					if (model.getObject() != null) {
+						return new Label(componentId, model.getObject().toString());
+					} else {
+						return new NotDefinedLabel(componentId);
+					}
+				}
+
+				@Override
+				public PropertyEditor<Number> renderForEdit(String componentId, IModel<Number> model) {
+					return new NumericPropertyEditor(componentId, this, model);
+				}
+				
+			};
+		} else {
+			return null;
+		}
+		
+	}
+
+}

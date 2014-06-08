@@ -11,7 +11,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import com.pmease.commons.editable.EditableUtils;
-import com.pmease.commons.wicket.editor.BeanEditContext;
+import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
 
 @SuppressWarnings("serial")
@@ -37,7 +37,7 @@ public abstract class GateKeeperEditor extends Panel {
 		
 		Form<?> form = new Form<Void>("form");
 		add(form);
-		form.add(BeanEditContext.edit("beanEditor", gateKeeper));
+		form.add(BeanContext.edit("beanEditor", gateKeeper));
 		
 		form.add(new AjaxLink<Void>("cancel") {
 

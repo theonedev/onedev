@@ -9,22 +9,39 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.DropDownChoice;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.util.convert.ConversionException;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.EditableUtils;
-import com.pmease.commons.wicket.editable.EditContext;
+import com.pmease.commons.editable.PropertyDescriptor;
+import com.pmease.commons.loader.AppLoader;
+import com.pmease.commons.loader.ImplementationRegistry;
+import com.pmease.commons.wicket.editable.BeanContext;
+import com.pmease.commons.wicket.editable.BeanEditor;
+import com.pmease.commons.wicket.editable.ErrorContext;
+import com.pmease.commons.wicket.editable.PathSegment;
+import com.pmease.commons.wicket.editable.PropertyEditor;
 
 @SuppressWarnings("serial")
-public class PolymorphicPropertyEditor extends Panel {
+public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 
-	private final PolymorphicPropertyEditContext editContext;
+	private static final String BEAN_EDITOR_ID = "beanEditor";
 	
-	private static final String VALUE_EDITOR_ID = "valueEditor";
+	private final List<Class<?>> implementations = new ArrayList<>();
 	
-	public PolymorphicPropertyEditor(String id, PolymorphicPropertyEditContext editContext) {
-		super(id);
-		this.editContext = editContext;
+	public PolymorphicPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<Serializable> propertyModel) {
+		super(id, propertyDescriptor, propertyModel);
+		
+		Class<?> baseClass = propertyDescriptor.getPropertyClass();
+		ImplementationRegistry registry = AppLoader.getInstance(ImplementationRegistry.class);
+		implementations.addAll(registry.getImplementations(baseClass));
+		
+		Preconditions.checkArgument(
+				!implementations.isEmpty(), 
+				"Can not find implementations for '" + baseClass + "'.");
+		
+		EditableUtils.sortAnnotatedElements(implementations);
 	}
 
 	@Override
@@ -32,65 +49,84 @@ public class PolymorphicPropertyEditor extends Panel {
 		super.onInitialize();
 
 		List<String> implementationNames = new ArrayList<String>();
-		for (Class<?> each: editContext.getImplementations())
+		for (Class<?> each: implementations)
 			implementationNames.add(EditableUtils.getName(each));
 				
-		add(new DropDownChoice<String>("typeSelector", new IModel<String>() {
+		DropDownChoice<String> typeSelector = new DropDownChoice<String>("typeSelector", new IModel<String>() {
 			
 			@Override
 			public void detach() {
-				
 			}
 
 			@Override
 			public String getObject() {
-				Serializable propertyValue = editContext.getPropertyValue();
-				if (propertyValue != null)
-					return EditableUtils.getName(propertyValue.getClass());
-				else
+				Component beanEditor = PolymorphicPropertyEditor.this.get(BEAN_EDITOR_ID);
+				if (beanEditor.isVisible()) {
+					return EditableUtils.getName(((BeanEditor<?>) beanEditor).getBeanDescriptor().getBeanClass());
+				} else {
 					return null;
+				}
 			}
 
 			@Override
 			public void setObject(String object) {
-				boolean found = false;
-				
-				for (Class<?> each: editContext.getImplementations()) {
+				Serializable propertyValue = null;
+				for (Class<?> each: implementations) {
 					if (EditableUtils.getName(each).equals(object)) {
-						editContext.setPropertyValue(editContext.instantiate(each));
-						found = true;
+						try {
+							propertyValue = (Serializable) each.newInstance();
+						} catch (InstantiationException | IllegalAccessException e) {
+							throw new RuntimeException(e);
+						}
+						break;
 					}
 				}
-				
-				if (!found)
-					editContext.setPropertyValue(null);
+				PolymorphicPropertyEditor.this.replace(newBeanEditor(propertyValue));
 			}
 			
-		}, implementationNames).setNullValid(!editContext.isPropertyRequired()).add(new AjaxFormComponentUpdatingBehavior("onclick"){
+		}, implementationNames);
+		
+		typeSelector.setNullValid(!getPropertyDescriptor().isPropertyRequired());
+		typeSelector.add(new AjaxFormComponentUpdatingBehavior("change"){
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				Component valueEditor = newValueEditor();
-				replace(valueEditor);
-				target.add(valueEditor);
+				target.add(PolymorphicPropertyEditor.this.get(BEAN_EDITOR_ID));
 			}
 			
-		}));
+		});
+		
+		add(typeSelector);
 
-		add(newValueEditor());
+		add(newBeanEditor(getModelObject()));
 	}
 	
-	private Component newValueEditor() {
-		EditContext valueContext = editContext.getValueContext();
-		Component valueEditor;
-		if (valueContext != null) {
-			valueEditor = (Component)valueContext.renderForEdit(VALUE_EDITOR_ID);
+	private Component newBeanEditor(Serializable propertyValue) {
+		Component beanEditor;
+		if (propertyValue != null) {
+			beanEditor = BeanContext.edit(BEAN_EDITOR_ID, propertyValue);
 		} else {
-			valueEditor = new WebMarkupContainer(VALUE_EDITOR_ID).setVisible(false);
+			beanEditor = new WebMarkupContainer(BEAN_EDITOR_ID).setVisible(false);
 		}
-		valueEditor.setOutputMarkupId(true);
-		valueEditor.setOutputMarkupPlaceholderTag(true);
-		return valueEditor;
+		beanEditor.setOutputMarkupId(true);
+		beanEditor.setOutputMarkupPlaceholderTag(true);
+		return beanEditor;
+	}
+
+	@Override
+	public ErrorContext getErrorContext(PathSegment pathSegment) {
+		return ((ErrorContext) get(BEAN_EDITOR_ID)).getErrorContext(pathSegment);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	protected Serializable convertInputToValue() throws ConversionException {
+		Component beanEditor = get(BEAN_EDITOR_ID);
+		if (beanEditor.isVisible()) {
+			return ((BeanEditor<Serializable>) beanEditor).getConvertedInput();
+		} else {
+			return null;
+		}
 	}
 
 }

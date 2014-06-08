@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 
 public interface PropertyDescriptor extends Serializable {
 	
-	Class<? extends Serializable> getBeanClass();
+	Class<?> getBeanClass();
 	
 	String getPropertyName();
 	
@@ -13,14 +13,14 @@ public interface PropertyDescriptor extends Serializable {
 	
 	Method getPropertySetter();
 	
-	Class<? extends Serializable> getPropertyClass();
+	Class<?> getPropertyClass();
 	
-	Serializable getPropertyValue(Serializable bean);
+	Object getPropertyValue(Object bean);
 	
 	boolean isPropertyRequired();
 	
-	void setPropertyValue(Serializable bean, Serializable propertyValue);
+	void setPropertyValue(Object bean, Object propertyValue);
 	
-	void copyProperty(Serializable fromBean, Serializable toBean);
+	void copyProperty(Object fromBean, Object toBean);
 	
 }

@@ -20,26 +20,28 @@ public class DefaultEditSupportRegistry implements EditSupportRegistry {
 		this.editSupports = new ArrayList<EditSupport>(editSupports);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public BeanEditContext getBeanEditContext(Serializable bean) {
+	public BeanContext<Serializable> getBeanEditContext(Class<?> beanClass) {
 		for (EditSupport each: editSupports) {
-			BeanEditContext editContext = each.getBeanEditContext(bean);
+			BeanContext<?> editContext = each.getBeanEditContext(beanClass);
 			if (editContext != null)
-				return editContext;
+				return (BeanContext<Serializable>) editContext;
 		}
-		throw new GeneralException(String.format("Unable to find edit context (bean: %s)", bean));
+		throw new GeneralException(String.format("Unable to find edit context (bean: %s)", beanClass.getName()));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public PropertyEditContext getPropertyEditContext(Serializable bean, String propertyName) {
+	public PropertyContext<Serializable> getPropertyEditContext(Class<?> beanClass, String propertyName) {
 		for (EditSupport each: editSupports) {
-			PropertyEditContext editContext = each.getPropertyEditContext(bean, propertyName);
+			PropertyContext<?> editContext = each.getPropertyEditContext(beanClass, propertyName);
 			if (editContext != null)
-				return editContext;
+				return (PropertyContext<Serializable>) editContext;
 		}
 		throw new GeneralException(String.format(
 				"Unable to find edit context (bean: %s, property: %s)", 
-				bean, propertyName));
+				beanClass.getName(), propertyName));
 	}
 
 }

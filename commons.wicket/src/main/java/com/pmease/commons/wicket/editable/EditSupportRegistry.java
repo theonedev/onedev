@@ -7,8 +7,8 @@ import com.google.inject.ImplementedBy;
 @ImplementedBy(DefaultEditSupportRegistry.class)
 public interface EditSupportRegistry {
 
-	BeanEditContext getBeanEditContext(Serializable bean);
+	BeanContext<Serializable> getBeanEditContext(Class<?> beanClass);
 
-	PropertyEditContext getPropertyEditContext(Serializable bean, String propertyName);
+	PropertyContext<Serializable> getPropertyEditContext(Class<?> beanClass, String propertyName);
 
 }

@@ -1,56 +1,55 @@
 package com.pmease.gitop.web.editable.user;
 
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.util.convert.ConversionException;
 
+import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.wicket.editable.ErrorContext;
+import com.pmease.commons.wicket.editable.PathSegment;
+import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.component.choice.UserSingleChoice;
 
 @SuppressWarnings("serial")
-public class UserSingleChoiceEditor extends Panel {
-	
-	private final UserSingleChoiceEditContext editContext;
+public class UserSingleChoiceEditor extends PropertyEditor<Long> {
 
-	public UserSingleChoiceEditor(String id, UserSingleChoiceEditContext editContext) {
-		super(id);
-		this.editContext = editContext;
+	public UserSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<Long> propertyModel) {
+		super(id, propertyDescriptor, propertyModel);
 	}
 
+	private UserSingleChoice input;
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+
+		User user;
+		if (getModelObject() != null)
+			user = Gitop.getInstance(Dao.class).load(User.class, getModelObject()); 
+		else
+			user = null;
 		
-    	IModel<User> model = new IModel<User>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public User getObject() {
-				Long userId = (Long) editContext.getPropertyValue();
-				if (userId != null)
-					return Gitop.getInstance(Dao.class).load(User.class, userId); 
-				else
-					return null;
-			}
-
-			@Override
-			public void setObject(User object) {
-				if (object != null)
-					editContext.setPropertyValue(object.getId());
-				else
-					editContext.setPropertyValue(null);
-			}
-    		
-    	};
-    	
-    	UserSingleChoice chooser = new UserSingleChoice("chooser", model);
-        chooser.setConvertEmptyInputStringToNull(true);
+    	input = new UserSingleChoice("input", Model.of(user));
+        input.setConvertEmptyInputStringToNull(true);
         
-        add(chooser);
+        add(input);
+	}
+
+	@Override
+	public ErrorContext getErrorContext(PathSegment pathSegment) {
+		return null;
+	}
+
+	@Override
+	protected Long convertInputToValue() throws ConversionException {
+		User user = input.getConvertedInput();
+		if (user != null)
+			return user.getId();
+		else
+			return null;
 	}
 
 }

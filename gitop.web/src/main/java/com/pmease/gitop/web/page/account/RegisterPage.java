@@ -5,11 +5,11 @@ import java.io.Serializable;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.SubmitLink;
 
-import com.pmease.commons.wicket.editor.BeanEditContext;
-import com.pmease.commons.wicket.editor.BeanEditor;
-import com.pmease.commons.wicket.editor.ErrorContext;
-import com.pmease.commons.wicket.editor.PathSegment;
-import com.pmease.commons.wicket.editor.ValuePath;
+import com.pmease.commons.wicket.editable.BeanContext;
+import com.pmease.commons.wicket.editable.BeanEditor;
+import com.pmease.commons.wicket.editable.ErrorContext;
+import com.pmease.commons.wicket.editable.PathSegment;
+import com.pmease.commons.wicket.editable.ValuePath;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
@@ -57,7 +57,7 @@ public class RegisterPage extends BasePage {
 		
 		add(new NotificationPanel("feedback", form));
 		
-		form.add(beanEditor = BeanEditContext.edit("editor", user));
+		form.add(beanEditor = BeanContext.edit("editor", user));
 
 		form.add(new SubmitLink("submit", form) {
 
@@ -71,7 +71,7 @@ public class RegisterPage extends BasePage {
 					
 				// clear the form fields
 				user = new User();
-				form.replace(BeanEditContext.edit("editor", user));
+				form.replace(BeanContext.edit("editor", user));
 			}
 			
 		});

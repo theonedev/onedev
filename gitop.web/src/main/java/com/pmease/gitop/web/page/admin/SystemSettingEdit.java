@@ -4,7 +4,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.markup.html.form.Form;
 
-import com.pmease.commons.wicket.editor.BeanEditContext;
+import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.core.setting.SystemSetting;
@@ -37,7 +37,7 @@ public class SystemSettingEdit extends AdministrationLayoutPage {
 			}
 			
 		}; 
-		form.add(BeanEditContext.edit("editor", systemSetting));
+		form.add(BeanContext.edit("editor", systemSetting));
 		form.add(new NotificationPanel("feedback", form));
 		form.add(new AjaxSubmitLink("update") {
 

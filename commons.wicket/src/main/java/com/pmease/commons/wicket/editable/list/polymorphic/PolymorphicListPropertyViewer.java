@@ -1,44 +1,38 @@
 package com.pmease.commons.wicket.editable.list.polymorphic;
 
-import org.apache.wicket.Component;
+import java.io.Serializable;
+import java.util.List;
+
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.pmease.commons.wicket.editable.BeanEditContext;
+import com.pmease.commons.wicket.editable.BeanContext;
 
 @SuppressWarnings("serial")
 public class PolymorphicListPropertyViewer extends Panel {
 
-	private final PolymorphicListPropertyEditConext editContext;
+	private final List<Serializable> elements;
 	
-	public PolymorphicListPropertyViewer(String id, PolymorphicListPropertyEditConext editContext) {
+	public PolymorphicListPropertyViewer(String id, List<Serializable> elements) {
 		super(id);
-		this.editContext = editContext;
+		this.elements = elements;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ListView<BeanEditContext>("elements", editContext.getElementContexts()) {
+		add(new ListView<Serializable>("elements", elements) {
 
 			@Override
-			protected void populateItem(ListItem<BeanEditContext> item) {
-				item.add((Component)item.getModelObject().renderForView("element"));
+			protected void populateItem(ListItem<Serializable> item) {
+				item.add(BeanContext.view("element", item.getModelObject()));
 			}
 			
 		});
-		add(new WebMarkupContainer("noElements") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(editContext.getElementContexts().isEmpty());
-			}
-			
-		});
+		add(new WebMarkupContainer("noElements").setVisible(elements.isEmpty()));
 	}
 
 }

@@ -2,7 +2,7 @@
 	<wicket:enclosure child:id="enable">
 		<input wicket:id="enable" type="checkbox" class="enable"></input>
 	</wicket:enclosure>
-	<table wicket:id="valueEditor" class="list editor table table-hover">
+	<table wicket:id="listEditor" class="list editor table table-hover">
 		<thead>
 			<th wicket:id="headers">
 				<span wicket:id="header"></span>
@@ -12,15 +12,9 @@
 		</thead>
 		<tbody>
 			<tr wicket:id="elements">
-				<td wicket:id="elementProperties">
-					<div wicket:id="elementPropertyEditor"></div>
-					<wicket:enclosure child="propertyValidationErrors">
-						<ul class="error-message">
-							<li wicket:id="propertyValidationErrors">
-								<span wicket:id="propertyValidationError"></span>
-							</li>
-						</ul>
-					</wicket:enclosure>
+				<td wicket:id="properties">
+					<div wicket:id="propertyEditor"></div>
+					<div wicket:id="feedback"></div>
 				</td>
 				<td><a wicket:id="deleteElement" class="btn btn-danger btn-sm">Delete</a></td>
 			</tr>

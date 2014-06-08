@@ -1,6 +1,5 @@
 package com.pmease.commons.editable;
 
-import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -13,7 +12,7 @@ import com.pmease.commons.util.BeanUtils;
 @SuppressWarnings("serial")
 public class PropertyDescriptorImpl implements PropertyDescriptor {
 
-	private final Class<? extends Serializable> beanClass;
+	private final Class<?> beanClass;
 	
 	private final String propertyName;
 	
@@ -21,21 +20,19 @@ public class PropertyDescriptorImpl implements PropertyDescriptor {
 	
 	private transient Method propertySetter;
 	
-	public PropertyDescriptorImpl(Class<? extends Serializable> beanClass, String propertyName) {
+	public PropertyDescriptorImpl(Class<?> beanClass, String propertyName) {
 		this.beanClass = beanClass;
 		this.propertyName = propertyName;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public PropertyDescriptorImpl(Method propertyGetter) {
-		this.beanClass = (Class<? extends Serializable>) propertyGetter.getDeclaringClass();
+		this.beanClass = propertyGetter.getDeclaringClass();
 		this.propertyName = BeanUtils.getPropertyName(propertyGetter);
 		this.propertyGetter = propertyGetter;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public PropertyDescriptorImpl(Method propertyGetter, Method propertySetter) {
-		this.beanClass = (Class<? extends Serializable>) propertyGetter.getDeclaringClass();
+		this.beanClass = propertyGetter.getDeclaringClass();
 		this.propertyName = BeanUtils.getPropertyName(propertyGetter);
 		this.propertyGetter = propertyGetter;
 		this.propertySetter = propertySetter;
@@ -49,7 +46,7 @@ public class PropertyDescriptorImpl implements PropertyDescriptor {
 	}
 	
 	@Override
-	public Class<? extends Serializable> getBeanClass() {
+	public Class<?> getBeanClass() {
 		return beanClass;
 	}
 
@@ -72,21 +69,21 @@ public class PropertyDescriptorImpl implements PropertyDescriptor {
 	}
 
 	@Override
-	public void copyProperty(Serializable fromBean, Serializable toBean) {
+	public void copyProperty(Object fromBean, Object toBean) {
 		setPropertyValue(toBean, getPropertyValue(fromBean));
 	}
 
 	@Override
-	public Serializable getPropertyValue(Serializable bean) {
+	public Object getPropertyValue(Object bean) {
 		try {
-			return (Serializable) getPropertyGetter().invoke(bean);
+			return getPropertyGetter().invoke(bean);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	@Override
-	public void setPropertyValue(Serializable bean, Serializable propertyValue) {
+	public void setPropertyValue(Object bean, Object propertyValue) {
 		try {
 			getPropertySetter().invoke(bean, propertyValue);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -94,10 +91,9 @@ public class PropertyDescriptorImpl implements PropertyDescriptor {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public Class<? extends Serializable> getPropertyClass() {
-		return (Class<? extends Serializable>) getPropertyGetter().getReturnType();
+	public Class<?> getPropertyClass() {
+		return getPropertyGetter().getReturnType();
 	}
 
 	@Override

@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.apache.wicket.markup.html.form.FormComponent;
 
 import com.pmease.commons.util.init.ManualConfig;
-import com.pmease.commons.wicket.editor.BeanEditContext;
+import com.pmease.commons.wicket.editable.BeanContext;
 
 @SuppressWarnings("serial")
 public class ManualConfigStep implements WizardStep {
@@ -18,7 +18,7 @@ public class ManualConfigStep implements WizardStep {
 	
 	@Override
 	public FormComponent<Serializable> render(String componentId) {
-		return BeanEditContext.edit(componentId, config.getSetting());
+		return BeanContext.edit(componentId, config.getSetting());
 	}
 
 	@Override
