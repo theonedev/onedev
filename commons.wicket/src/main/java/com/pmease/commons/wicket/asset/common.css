@@ -141,6 +141,8 @@ table.reflection .right-spacing {margin-right: 8px;}
 .viewer .table {margin-bottom: 0;}
 .viewer tr.name-omitted>td {padding: 0;}
 .viewer div.type {margin-bottom: 4px;}
+.editor ul.feedbackPanel {margin: 4px 0 0 -8px; padding-bottom: 0;}
+.editor li.feedbackPanelERROR {color: #AA0000; font-size: 16px;}
 
 /* Select2 */
 .editor .select2-container {width: 100%;}

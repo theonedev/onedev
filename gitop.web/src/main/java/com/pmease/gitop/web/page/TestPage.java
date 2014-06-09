@@ -40,9 +40,12 @@ public class TestPage extends WebPage {
 	public static class Bean implements Serializable {
 		private String name;
 		
-		private List<Pet> pets;
+		private int age = 0;
+		
+		private List<Cat> cats;
 
-		@Editable
+		@Editable(description="This is just a joke<br>Can you please help me?")
+		@NotEmpty
 		public String getName() {
 			return name;
 		}
@@ -51,14 +54,23 @@ public class TestPage extends WebPage {
 			this.name = name;
 		}
 
-		@Valid
 		@Editable
-		public List<Pet> getPets() {
-			return pets;
+		public int getAge() {
+			return age;
 		}
 
-		public void setPets(List<Pet> pets) {
-			this.pets = pets;
+		public void setAge(int age) {
+			this.age = age;
+		}
+
+		@Valid
+		@Editable
+		public List<Cat> getCats() {
+			return cats;
+		}
+
+		public void setCats(List<Cat> cats) {
+			this.cats = cats;
 		}
 
 	}
@@ -74,8 +86,6 @@ public class TestPage extends WebPage {
 		
 		private String mouse;
 
-		private Dog pet;
-		
 		@Editable
 		@NotEmpty
 		public String getName() {
@@ -94,16 +104,6 @@ public class TestPage extends WebPage {
 
 		public void setMouse(String mouse) {
 			this.mouse = mouse;
-		}
-
-		@Editable
-		@Valid
-		public Dog getPet() {
-			return pet;
-		}
-
-		public void setPet(Dog pet) {
-			this.pet = pet;
 		}
 
 		@Override

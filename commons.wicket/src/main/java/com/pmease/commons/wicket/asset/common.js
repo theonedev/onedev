@@ -547,7 +547,7 @@ pmease.commons = {
 			input = editor.find(".value>div>input[type=checkbox]");
 			input.parent().parent().prev("label.name").addClass("pull-left");
 			input.after("<div style='clear:both;'/>")
-		},		
+		}
 	},
 	
 	// Disable specified button if value of specified input is blank 

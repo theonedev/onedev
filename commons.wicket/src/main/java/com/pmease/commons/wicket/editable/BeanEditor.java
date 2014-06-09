@@ -3,6 +3,7 @@ package com.pmease.commons.wicket.editable;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
@@ -40,6 +41,8 @@ public abstract class BeanEditor<T> extends ValueEditor<T> {
 				
 			});
 		}
+		
+		add(AttributeAppender.append("class", " bean editor"));
 	}
 	
 	public BeanDescriptor getBeanDescriptor() {

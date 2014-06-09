@@ -5,8 +5,10 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
@@ -48,6 +50,19 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
 
         input.setNullValid(!getPropertyDescriptor().isPropertyRequired());	
         add(input);
+        
+		add(new AttributeAppender("class", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				if (hasErrors())
+					return " has-error";
+				else
+					return "";
+			}
+			
+		}));
+        
     }
 
 	@Override

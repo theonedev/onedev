@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
@@ -46,10 +47,12 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 				
 			});
 		}
+		
+		add(new AttributeAppender("class", " property editor"));
 	}
-
+	
 	public PropertyDescriptor getPropertyDescriptor() {
 		return propertyDescriptor;
 	}
-	
+
 }

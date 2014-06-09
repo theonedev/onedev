@@ -1,7 +1,9 @@
 package com.pmease.commons.wicket.editable.numeric;
 
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
@@ -26,6 +28,18 @@ public class NumericPropertyEditor extends PropertyEditor<Number> {
 		input = new TextField<Number>("input", Model.of(getModelObject()));
 		input.setType(getPropertyDescriptor().getPropertyClass());
 		add(input);
+
+		add(new AttributeAppender("class", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				if (hasErrors())
+					return " has-error";
+				else
+					return "";
+			}
+			
+		}));
 	}
 
 	@Override
