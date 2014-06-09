@@ -7,7 +7,6 @@ import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.bean.validation.PropertyValidator;
-import org.apache.wicket.feedback.ComponentFeedbackMessageFilter;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -21,6 +20,7 @@ import org.apache.wicket.validation.ValidationError;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.core.manager.UserManager;
@@ -33,8 +33,6 @@ import com.pmease.gitop.web.model.RepositoryModel;
 import com.pmease.gitop.web.page.BasePage;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.repository.source.RepositoryHomePage;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 @RequiresUser
@@ -71,7 +69,7 @@ public class CreateRepositoryPage extends BasePage {
 		Form<Repository> form = new BaseForm<Repository>("form", repositoryModel);
 		add(form);
 		
-		form.add(new NotificationPanel("feedback", new ComponentFeedbackMessageFilter(form)));
+		form.add(new FeedbackPanel("feedback", form));
 		DropDownChoiceElement<?> e = new DropDownChoiceElement<String>("owner", "Repository Owner",
 				new PropertyModel<String>(this, "owner"),
 				new AbstractReadOnlyModel<List<? extends String>>() {

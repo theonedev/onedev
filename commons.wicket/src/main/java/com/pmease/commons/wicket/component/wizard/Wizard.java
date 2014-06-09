@@ -19,8 +19,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 
 import com.google.common.base.Preconditions;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 
 @SuppressWarnings("serial")
 public abstract class Wizard extends Panel {
@@ -53,7 +52,7 @@ public abstract class Wizard extends Panel {
 		}));
 		
 		final Form<?> form = new Form<Void>("form");
-		form.add(new NotificationPanel("feedback", form));
+		form.add(new FeedbackPanel("feedback", form));
 		form.add(getActiveStep().render(STEP_CONTENT_ID));
 		form.add(new Link<Void>("previous") {
 

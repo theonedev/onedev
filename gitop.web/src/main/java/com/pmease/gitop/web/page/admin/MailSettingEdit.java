@@ -4,12 +4,11 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.markup.html.form.Form;
 
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.core.setting.MailSetting;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public class MailSettingEdit extends AdministrationLayoutPage {
@@ -41,7 +40,7 @@ public class MailSettingEdit extends AdministrationLayoutPage {
 			
 		}; 
 		form.add(BeanContext.edit("editor", mailSetting));
-		form.add(new NotificationPanel("feedback", form));
+		form.add(new FeedbackPanel("feedback", form));
 		form.add(new AjaxSubmitLink("update") {
 
 			@Override

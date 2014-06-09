@@ -13,8 +13,7 @@ import org.apache.wicket.validation.IValidator;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 
 public abstract class AbstractInputElement<T, B extends AbstractInputElement<T, B>>
 		extends ValidatableElement<T> {
@@ -84,7 +83,7 @@ public abstract class AbstractInputElement<T, B extends AbstractInputElement<T, 
 		container.add(createRequiredLabel("required"));
 		container.add(createHelpLabel("help"));
 
-		final NotificationPanel feedback = new NotificationPanel("feedback");
+		FeedbackPanel feedback = new FeedbackPanel("feedback", container);
 
 		feedback.setOutputMarkupId(true);
 		container.add(feedback);

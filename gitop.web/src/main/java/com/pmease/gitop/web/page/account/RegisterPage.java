@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.SubmitLink;
 
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.ErrorContext;
@@ -14,8 +15,6 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.page.BasePage;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public class RegisterPage extends BasePage {
@@ -55,7 +54,7 @@ public class RegisterPage extends BasePage {
 		};
 		add(form);
 		
-		add(new NotificationPanel("feedback", form));
+		add(new FeedbackPanel("feedback", form));
 		
 		form.add(beanEditor = BeanContext.edit("editor", user));
 

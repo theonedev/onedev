@@ -21,12 +21,11 @@ import org.hibernate.criterion.Restrictions;
 import com.google.common.collect.ImmutableList;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.permission.operation.GeneralOperation;
 import com.pmease.gitop.web.common.wicket.form.BaseForm;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public class TeamEditor extends Panel {
@@ -81,7 +80,7 @@ public class TeamEditor extends Panel {
 			
 			Team team = getTeam();
 			oldTeamName = team.getName();
-			add(new NotificationPanel("feedback", this));
+			add(new FeedbackPanel("feedback", this));
 			add(new TextField<String>("name", new PropertyModel<String>(getDefaultModel(), "name"))
 					.add(new IValidator<String>() {
 

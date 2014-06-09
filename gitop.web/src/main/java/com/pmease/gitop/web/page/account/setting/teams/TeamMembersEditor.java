@@ -10,7 +10,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.feedback.ComponentFeedbackMessageFilter;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
@@ -28,6 +27,7 @@ import com.google.common.collect.Sets;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.Membership;
 import com.pmease.gitop.model.Team;
@@ -36,7 +36,6 @@ import com.pmease.gitop.web.component.choice.UserMultiChoice;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.account.setting.members.MemberListView;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
 @SuppressWarnings("serial")
@@ -91,14 +90,14 @@ public class TeamMembersEditor extends Panel {
 		
 		Component membersView = newMembersListView(membersModel); 
 		membersDiv.add(membersView);
-		NotificationPanel removeMembersFeedback = new NotificationPanel("removeMemberFeedback", new ComponentFeedbackMessageFilter(membersDiv));
+		FeedbackPanel removeMembersFeedback = new FeedbackPanel("removeMemberFeedback", membersDiv);
 		membersDiv.add(removeMembersFeedback);
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Form<?> newMembersForm() {
 		Form<?> form = new Form<Void>("form");
-		form.add(new NotificationPanel("feedback", new ComponentFeedbackMessageFilter(form)).hideAfter(Duration.seconds(10)));
+		form.add(new FeedbackPanel("feedback", form).hideAfter(Duration.seconds(10)));
 		final IModel<Collection<User>> usersModel = new WildcardListModel(new ArrayList<User>());
 		
 		form.add(new UserMultiChoice("userchoice", usersModel));

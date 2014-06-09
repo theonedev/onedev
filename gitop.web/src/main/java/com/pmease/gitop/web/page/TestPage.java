@@ -14,6 +14,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.validation.ClassValidating;
 import com.pmease.commons.validation.Validatable;
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
 
@@ -26,7 +27,22 @@ public class TestPage extends WebPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Form<?> form = new Form<Void>("form");
+		Form<?> form = new Form<Void>("form") {
+
+			@Override
+			protected void onError() {
+				super.onError();
+				
+				error("Some errors Sir!");
+			}
+
+			@Override
+			protected void onSubmit() {
+				super.onSubmit();
+				success("Updated successfully Sir!");
+			}
+			
+		};
 		add(form);
 
 		BeanEditor<Serializable> editor = BeanContext.edit("editor", bean); 
@@ -34,6 +50,8 @@ public class TestPage extends WebPage {
 		form.add(new FencedFeedbackPanel("feedback", editor));
 		
 		add(BeanContext.view("viewer", bean));
+		
+		add(new FeedbackPanel("feedback", form));
 	}
 	
 	@Editable

@@ -43,9 +43,6 @@ table td, table th {text-align: left;}
 .tree-theme-windows .tree-node span.tree-content a {color: #444444;}
 .tree-content {white-space: nowrap;}
 
-/* Feedback panel */
-.alert ul.feedbackPanel {margin: 0; padding-left: 20px;}
-
 /* Modal dialog */
 .modal>.modal-dialog>.loading {margin:8px; min-height:64px;
 	background: url("ajax-indicator.gif") center center no-repeat white;}
@@ -142,7 +139,7 @@ table.reflection .right-spacing {margin-right: 8px;}
 .viewer tr.name-omitted>td {padding: 0;}
 .viewer div.type {margin-bottom: 4px;}
 .editor ul.feedbackPanel {margin: 4px 0 0 -8px; padding-bottom: 0;}
-.editor li.feedbackPanelERROR {color: #AA0000; font-size: 16px;}
+.editor li.feedbackPanelERROR {color: #AA0000;}
 
 /* Select2 */
 .editor .select2-container {width: 100%;}

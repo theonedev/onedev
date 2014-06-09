@@ -7,7 +7,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.bean.validation.PropertyValidator;
 import org.apache.wicket.event.Broadcast;
-import org.apache.wicket.feedback.ComponentFeedbackMessageFilter;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.model.IModel;
@@ -20,6 +19,7 @@ import com.google.common.base.Throwables;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
@@ -31,7 +31,6 @@ import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import de.agilecoders.wicket.extensions.javascript.jasny.FileUploadField;
 
 @SuppressWarnings("serial")
@@ -75,7 +74,7 @@ public class AccountProfilePage extends AccountSettingPage {
 			@SuppressWarnings("unchecked")
 			final IModel<User> model = (IModel<User>) getDefaultModel();
 
-			add(new NotificationPanel("feedback", new ComponentFeedbackMessageFilter(this)));
+			add(new FeedbackPanel("feedback", this));
 			add(new TextFieldElement<String>("fullName", "Full Name",
 					new PropertyModel<String>(model, "fullName"))
 					.setRequired(false).add(new PropertyValidator<String>()));
@@ -122,7 +121,7 @@ public class AccountProfilePage extends AccountSettingPage {
 			
 			add(uploadField);
 
-			add(new NotificationPanel("feedback", new ComponentFeedbackMessageFilter(this)));
+			add(new FeedbackPanel("feedback", this));
 			add(new AjaxButton("submit", this) {
 				@Override
 				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

@@ -61,6 +61,9 @@ public class SystemSetting implements Serializable, Validatable {
 
 	@Override
 	public boolean isValid(ConstraintValidatorContext context) {
+		if (repoPath == null)
+			return true;
+		
 		File dataDir = new File(repoPath);
 		File testFile = new File(dataDir, "test");
 		try {

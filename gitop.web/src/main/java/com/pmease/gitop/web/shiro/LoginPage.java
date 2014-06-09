@@ -13,14 +13,13 @@ import org.apache.wicket.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitop.web.GitopSession;
 import com.pmease.gitop.web.common.wicket.form.checkbox.CheckBoxElement;
 import com.pmease.gitop.web.common.wicket.util.WicketUtils;
 import com.pmease.gitop.web.page.BasePage;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public class LoginPage extends BasePage {
@@ -32,7 +31,7 @@ public class LoginPage extends BasePage {
 		}
 		
 		add(new LoginForm("login"));
-		NotificationPanel feedback = new NotificationPanel("feedback");
+		FeedbackPanel feedback = new FeedbackPanel("feedback");
 		add(feedback);
 	}
 	

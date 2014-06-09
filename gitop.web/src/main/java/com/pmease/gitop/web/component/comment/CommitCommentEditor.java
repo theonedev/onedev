@@ -24,14 +24,13 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.parboiled.common.Preconditions;
 
 import com.google.common.base.Strings;
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.component.link.UserLink;
 import com.pmease.gitop.web.component.wiki.WikiTextPanel;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public abstract class CommitCommentEditor extends Panel {
@@ -160,7 +159,7 @@ public abstract class CommitCommentEditor extends Panel {
 	@SuppressWarnings("unchecked")
 	private Component newEditPanel(String id) {
 		Fragment frag = new Fragment(id, "editfrag", this);
-		frag.add(new NotificationPanel("feedback", form));
+		frag.add(new FeedbackPanel("feedback", form));
 		frag.add(inputField = new TextArea<String>("input", (IModel<String>) getDefaultModel()));
 		
 		return frag;

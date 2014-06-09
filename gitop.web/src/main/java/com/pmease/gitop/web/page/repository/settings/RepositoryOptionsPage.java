@@ -26,6 +26,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.model.Repository;
@@ -37,8 +38,6 @@ import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public class RepositoryOptionsPage extends AbstractRepositorySettingPage {
@@ -77,7 +76,7 @@ public class RepositoryOptionsPage extends AbstractRepositorySettingPage {
 		
 		Form<?> form = new BaseForm<Void>("form");
 		add(form);
-		form.add(new NotificationPanel("feedback",
+		form.add(new FeedbackPanel("feedback",
 									   new ComponentFeedbackMessageFilter(form))
 					.hideAfter(Duration.seconds(15)));
 
