@@ -7,7 +7,6 @@ import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
 
 import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.form.Form;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -19,7 +18,7 @@ import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
 
 @SuppressWarnings("serial")
-public class TestPage extends WebPage {
+public class TestPage extends EmptyPage {
 
 	private Bean bean = new Bean();
 	

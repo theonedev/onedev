@@ -5,7 +5,6 @@ import java.util.Iterator;
 import org.apache.wicket.Application;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
-import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.IMarkupFragment;
@@ -70,7 +69,7 @@ public abstract class EmptyPage extends WebPage {
 		
 		if (!Gitop.getInstance().isReady()
 				&& getClass() != ServerInitPage.class) {
-			throw new RestartResponseException(ServerInitPage.class);
+			throw new RestartResponseAtInterceptPageException(ServerInitPage.class);
 		}
 	}
 
