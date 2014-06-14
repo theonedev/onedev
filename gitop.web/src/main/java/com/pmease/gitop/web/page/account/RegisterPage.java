@@ -14,10 +14,10 @@ import com.pmease.commons.wicket.editable.ValuePath;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.page.BasePage;
+import com.pmease.gitop.web.page.LayoutPage;
 
 @SuppressWarnings("serial")
-public class RegisterPage extends BasePage {
+public class RegisterPage extends LayoutPage {
 
 	private BeanEditor<Serializable> beanEditor;
 	

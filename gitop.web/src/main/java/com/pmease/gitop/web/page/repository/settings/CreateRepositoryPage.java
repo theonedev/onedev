@@ -30,13 +30,13 @@ import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.select.DropDownChoiceElement;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.model.RepositoryModel;
-import com.pmease.gitop.web.page.BasePage;
+import com.pmease.gitop.web.page.LayoutPage;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.repository.source.RepositoryHomePage;
 
 @SuppressWarnings("serial")
 @RequiresUser
-public class CreateRepositoryPage extends BasePage {
+public class CreateRepositoryPage extends LayoutPage {
 
 	private String owner;
 	

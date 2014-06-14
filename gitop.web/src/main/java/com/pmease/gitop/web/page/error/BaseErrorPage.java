@@ -2,10 +2,10 @@ package com.pmease.gitop.web.page.error;
 
 import org.apache.wicket.request.http.WebResponse;
 
-import com.pmease.gitop.web.page.EmptyPage;
+import com.pmease.gitop.web.page.BasePage;
 
 @SuppressWarnings("serial")
-public abstract class BaseErrorPage extends EmptyPage {
+public abstract class BaseErrorPage extends BasePage {
 	protected BaseErrorPage() {
 	}
 	

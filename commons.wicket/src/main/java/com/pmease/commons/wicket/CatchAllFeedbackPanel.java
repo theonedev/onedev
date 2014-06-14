@@ -3,7 +3,7 @@ package com.pmease.commons.wicket;
 import org.apache.wicket.feedback.FeedbackMessage;
 import org.apache.wicket.feedback.IFeedbackMessageFilter;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnLoadHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 
 @SuppressWarnings("serial")
@@ -22,7 +22,7 @@ class CatchAllFeedbackPanel extends FeedbackPanel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(OnLoadHeaderItem.forScript("pmease.commons.showCatchAllFeedback();"));
+		response.render(OnDomReadyHeaderItem.forScript("pmease.commons.showCatchAllFeedback();"));
 	}
 
 }

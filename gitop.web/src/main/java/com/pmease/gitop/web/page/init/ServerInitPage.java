@@ -12,10 +12,10 @@ import com.pmease.commons.util.init.ManualConfig;
 import com.pmease.commons.wicket.component.wizard.ManualConfigStep;
 import com.pmease.commons.wicket.component.wizard.Wizard;
 import com.pmease.gitop.core.Gitop;
-import com.pmease.gitop.web.page.EmptyPage;
+import com.pmease.gitop.web.page.BasePage;
 
 @SuppressWarnings("serial")
-public class ServerInitPage extends EmptyPage {
+public class ServerInitPage extends BasePage {
 
 	private InitStage initStage;
 	

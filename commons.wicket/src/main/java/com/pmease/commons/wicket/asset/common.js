@@ -574,9 +574,6 @@ pmease.commons = {
 			if (body[0].hideCatchAllFeedbackTimer) {
 				clearTimeout(body[0].hideCatchAllFeedbackTimer);
 			}
-			body[0].hideCatchAllFeedbackTimer = setTimeout(function() {
-				$('#catch-all-feedback').slideUp();
-			}, 5000);
 		}
 	}
 };

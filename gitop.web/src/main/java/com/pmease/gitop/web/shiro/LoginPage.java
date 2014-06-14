@@ -17,12 +17,12 @@ import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitop.web.GitopSession;
 import com.pmease.gitop.web.common.wicket.form.checkbox.CheckBoxElement;
 import com.pmease.gitop.web.common.wicket.util.WicketUtils;
-import com.pmease.gitop.web.page.BasePage;
+import com.pmease.gitop.web.page.LayoutPage;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
 
 @SuppressWarnings("serial")
-public class LoginPage extends BasePage {
+public class LoginPage extends LayoutPage {
 	private static final Logger logger = LoggerFactory.getLogger(LoginPage.class);
 	
 	public LoginPage() {

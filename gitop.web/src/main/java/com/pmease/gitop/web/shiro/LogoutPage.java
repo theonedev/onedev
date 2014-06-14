@@ -1,13 +1,14 @@
 package com.pmease.gitop.web.shiro;
 
 import org.apache.shiro.SecurityUtils;
-import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.string.StringValue;
 
+import com.pmease.commons.wicket.CommonPage;
+
 @SuppressWarnings("serial")
-public class LogoutPage extends WebPage {
+public class LogoutPage extends CommonPage {
 
 	/**
 	 * Bookmarkable constructor. If a {@code "to"} parameter is provided, assume

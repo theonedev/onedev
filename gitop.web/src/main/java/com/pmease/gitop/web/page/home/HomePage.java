@@ -2,9 +2,9 @@ package com.pmease.gitop.web.page.home;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
 
-import com.pmease.gitop.web.page.BasePage;
+import com.pmease.gitop.web.page.LayoutPage;
 
-public class HomePage extends BasePage {
+public class HomePage extends LayoutPage {
 
 	private static final long serialVersionUID = 1L;
 	

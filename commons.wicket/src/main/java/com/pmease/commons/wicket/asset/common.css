@@ -18,9 +18,9 @@
 
 /* Feedback */
 #catch-all-feedback {position:absolute; background:#FFFFDE; max-width:75%;
-	border:1px solid #9C9E9C; border-top:none; padding:6px 6px 6px 10px; z-index:10000; 
+	border:1px solid #9C9E9C; border-top:none; padding: 6px; z-index:10000; 
 	border-radius:0 0 4px 4px; box-shadow:2px 2px 5px #888; display: none;}
-#catch-all-feedback ul {padding-left: 0;}
+#catch-all-feedback ul {padding: 0; margin: 0;}
 #catch-all-feedback li {list-style: none;}
 
 /* Table */
