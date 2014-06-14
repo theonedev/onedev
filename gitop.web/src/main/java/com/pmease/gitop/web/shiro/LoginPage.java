@@ -31,7 +31,7 @@ public class LoginPage extends BasePage {
 		}
 		
 		add(new LoginForm("login"));
-		FeedbackPanel feedback = new FeedbackPanel("feedback");
+		FeedbackPanel feedback = new FeedbackPanel("feedback", get("login"));
 		add(feedback);
 	}
 	

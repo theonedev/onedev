@@ -25,7 +25,7 @@ public class GlobalHeaderPanel extends Panel {
 		super(id);
 		
 		add(new BookmarkablePageLink<Void>("homeLink", getApplication().getHomePage()));
-
+		
 		add(new BookmarkablePageLink<Void>("loginLink", LoginPage.class).setVisibilityAllowed(!isSignedIn()));
 		add(new BookmarkablePageLink<Void>("registerLink", RegisterPage.class).setVisibilityAllowed(!isSignedIn()));
 		add(new BookmarkablePageLink<Void>("logoutLink", LogoutPage.class).setVisibilityAllowed(isSignedIn()));

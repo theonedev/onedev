@@ -60,7 +60,6 @@ public abstract class BasePage extends EmptyPage {
 		}.add(new TooltipBehavior()));
 	}
 	
-	@Override
 	protected Optional<User> currentUser() {
 	    return Optional.<User>fromNullable(Gitop.getInstance(UserManager.class).getCurrent());
 	}

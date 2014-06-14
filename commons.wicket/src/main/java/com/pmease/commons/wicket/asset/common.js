@@ -560,6 +560,24 @@ pmease.commons = {
 			else
 				button.attr("disabled", "disabled");
 		});
+	},
+	
+	showCatchAllFeedback: function() {
+		if ($("#catch-all-feedback li").length != 0) {
+			var feedback = $("#catch-all-feedback");
+	        var x = ($(window).width() - feedback.outerWidth()) / 2;
+	        feedback.css("left", x+$(window).scrollLeft());
+			feedback.css("top", $(window).scrollTop());
+			feedback.slideDown("slow");
+			
+			var body = $("body");
+			if (body[0].hideCatchAllFeedbackTimer) {
+				clearTimeout(body[0].hideCatchAllFeedbackTimer);
+			}
+			body[0].hideCatchAllFeedbackTimer = setTimeout(function() {
+				$('#catch-all-feedback').slideUp();
+			}, 5000);
+		}
 	}
 };
 
@@ -612,5 +630,5 @@ $(function() {
 			}
 		});
 	});
-	
+
 });
