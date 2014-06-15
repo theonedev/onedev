@@ -1,13 +1,7 @@
-package com.pmease.commons.wicket.ajaxlistener.ajaxloadingoverlay;
+package com.pmease.commons.wicket.ajaxlistener;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.attributes.IAjaxCallListener;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.html.IComponentAwareHeaderContributor;
-import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 /**
  * Ajax loading overlay is used to froze the page to prevent users from clicking anything to avoid 
@@ -20,16 +14,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
  * @author robin
  *
  */
-@SuppressWarnings("serial")
-public class AjaxLoadingOverlay implements IAjaxCallListener, IComponentAwareHeaderContributor {
-
-	@Override
-	public void renderHead(Component component, IHeaderResponse response) {
-		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				AjaxLoadingOverlay.class, "ajax-loading-overlay.js")));
-		response.render(CssHeaderItem.forReference(new CssResourceReference(
-				AjaxLoadingOverlay.class, "ajax-loading-overlay.css")));
-	}
+public class AjaxLoadingOverlay implements IAjaxCallListener {
 
 	@Override
 	public CharSequence getBeforeHandler(Component component) {

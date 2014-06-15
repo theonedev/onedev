@@ -1,7 +1,6 @@
 package com.pmease.gitop.web.component.comparablebranchselector;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.IModel;
@@ -9,7 +8,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.commons.wicket.ajaxlistener.ajaxloadingindicator.AjaxLoadingIndicator;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.model.Branch;
@@ -82,12 +80,6 @@ public class ComparableBranchSelector extends FormComponentPanel<Branch> {
 				onChange(target);
 			}
 
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new AjaxLoadingIndicator());
-			}
-			
 		}));
 		
 		BranchChoiceProvider choiceProvider = new BranchChoiceProvider(new LoadableDetachableModel<EntityCriteria<Branch>>() {
@@ -107,12 +99,6 @@ public class ComparableBranchSelector extends FormComponentPanel<Branch> {
 				onChange(target);
 			}
 			
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new AjaxLoadingIndicator());
-			}
-
 		}));
 	}
 	

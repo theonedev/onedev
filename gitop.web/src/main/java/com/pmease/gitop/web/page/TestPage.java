@@ -20,6 +20,12 @@ public class TestPage extends CommonPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				error("error");
 				//target.add(TestPage.this.get("feedback"));
 			}

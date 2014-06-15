@@ -14,8 +14,7 @@ import org.apache.wicket.markup.html.navigation.paging.IPagingLabelProvider;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigation;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 
-import com.pmease.commons.wicket.ajaxlistener.ajaxloadingindicator.AjaxLoadingIndicator;
-import com.pmease.commons.wicket.ajaxlistener.ajaxloadingoverlay.AjaxLoadingOverlay;
+import com.pmease.commons.wicket.ajaxlistener.AjaxLoadingOverlay;
 
 @SuppressWarnings("serial")
 public class CustomAjaxNavigationToolbar extends AjaxNavigationToolbar {
@@ -38,7 +37,6 @@ public class CustomAjaxNavigationToolbar extends AjaxNavigationToolbar {
 						super.updateAjaxAttributes(attributes);
 
 						attributes.getAjaxCallListeners().add(new AjaxLoadingOverlay());
-						attributes.getAjaxCallListeners().add(new AjaxLoadingIndicator());
 					}
 					
 				};
@@ -53,7 +51,6 @@ public class CustomAjaxNavigationToolbar extends AjaxNavigationToolbar {
 						super.updateAjaxAttributes(attributes);
 
 						attributes.getAjaxCallListeners().add(new AjaxLoadingOverlay());
-						attributes.getAjaxCallListeners().add(new AjaxLoadingIndicator());
 					}
 					
 				};
@@ -72,7 +69,6 @@ public class CustomAjaxNavigationToolbar extends AjaxNavigationToolbar {
 							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 								super.updateAjaxAttributes(attributes);
 								attributes.getAjaxCallListeners().add(new AjaxLoadingOverlay());
-								attributes.getAjaxCallListeners().add(new AjaxLoadingIndicator());
 							}
 							
 						};

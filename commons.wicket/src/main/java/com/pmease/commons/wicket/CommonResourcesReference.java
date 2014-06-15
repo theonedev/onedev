@@ -15,7 +15,6 @@ import com.google.common.collect.Lists;
 import com.vaynberg.wicket.select2.ApplicationSettings;
 
 import de.agilecoders.wicket.core.Bootstrap;
-import de.agilecoders.wicket.core.markup.html.references.ModernizrJavaScriptReference;
 import de.agilecoders.wicket.extensions.markup.html.bootstrap.icon.FontAwesomeCssReference;
 
 /**
@@ -82,7 +81,7 @@ class CommonResourcesReference extends JavaScriptResourceReference {
 		
 		dependencies.addAll(Lists.newArrayList(super.getDependencies()));
 
-		dependencies.add(JavaScriptHeaderItem.forReference(ModernizrJavaScriptReference.instance()));
+		dependencies.add(JavaScriptHeaderItem.forReference(Bootstrap.getSettings().getModernizrResourceReference()));
 		dependencies.addAll(bootstrapHeaderItems);
 		dependencies.add(CssHeaderItem.forReference(FontAwesomeCssReference.instance()));
 		ApplicationSettings select2Settings = ApplicationSettings.get();
