@@ -14,7 +14,7 @@
 			<form wicket:id="form" class="padder">
 				<div wicket:id="feedback"></div>
 				<div wicket:id="editor"></div>
-				<input type="submit" value="Update" class="btn btn-primary"></input>
+				<a wicket:id="save" class="btn btn-primary">Save</a>
 			</form>
 		</div>
 	</section>
@@ -42,7 +42,7 @@
 			<form wicket:id="form" class="padder">
 				<div wicket:id="feedback"></div>
 				<div wicket:id="editor"></div>
-				<a wicket:id="update" class="btn btn-primary">Update</a>
+				<a wicket:id="save" class="btn btn-primary">Save</a>
 			</form>
 		</div>
 	</section>
@@ -66,6 +66,11 @@
 					be fast forwarded to source branch.</li>
 				</ul> 
 			</div>
+			<form wicket:id="form" class="padder">
+				<div wicket:id="feedback"></div>
+				<div wicket:id="editor"></div>
+				<a wicket:id="save" class="btn btn-primary">Save</a>
+			</form>
 		</div>
 	</section>
 </wicket:extend>

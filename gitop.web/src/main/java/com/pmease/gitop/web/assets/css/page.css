@@ -1384,6 +1384,5 @@ table.verifications tr.passed .fa-check {display: inline; color: #5CB85C;}
 table.verifications tr.not-passed .fa-times {display: inline; color: #D9534F;}
 table.verifications tr.ongoing .fa-cog {display: inline; color: #F0AD4E;}
 
-.integration-setting-page select, .integration-setting-page input[type=text],  
-.integration-setting-page .select2-container {
-	width: 240px !important;}
+.integration-setting-page form>.editor {margin-bottom: 16px;}
+.integration-setting-page form .help-block {display: none;}

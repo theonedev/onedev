@@ -7,6 +7,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.annotation.Horizontal;
 import com.pmease.gitop.model.helper.BranchMatcher;
 
 @SuppressWarnings("serial")
@@ -20,6 +21,7 @@ public class IntegrationSetting implements Serializable {
 	private List<IntegrationStrategy> upstreamStrategies = new ArrayList<>();
 
 	@Editable(order=100)
+	@Horizontal
 	public BranchMatcher getRebasibleBranches() {
 		return rebasibleBranches;
 	}

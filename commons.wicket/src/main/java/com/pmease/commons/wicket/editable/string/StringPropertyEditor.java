@@ -1,5 +1,8 @@
 package com.pmease.commons.wicket.editable.string;
 
+import java.lang.reflect.Method;
+
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
@@ -7,7 +10,9 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyDescriptor;
+import com.pmease.commons.editable.annotation.OmitName;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
@@ -27,6 +32,9 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 		
 		input = new TextField<String>("input", Model.of(getModelObject()));
 		input.setType(getPropertyDescriptor().getPropertyClass());
+		Method propertyGetter = getPropertyDescriptor().getPropertyGetter();
+		if (propertyGetter.getAnnotation(OmitName.class) != null)
+			input.add(AttributeModifier.replace("placeholder", EditableUtils.getName(propertyGetter)));
 		add(input);
 
 		add(new AttributeAppender("class", new LoadableDetachableModel<String>() {

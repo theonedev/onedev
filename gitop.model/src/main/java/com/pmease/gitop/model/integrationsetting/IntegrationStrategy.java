@@ -5,6 +5,7 @@ import java.io.Serializable;
 import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.annotation.Horizontal;
 import com.pmease.gitop.model.helper.BranchMatcher;
 
 @SuppressWarnings("serial")
@@ -19,6 +20,7 @@ public class IntegrationStrategy implements Serializable {
 
 	@Editable(order=100)
 	@NotNull
+	@Horizontal
 	public BranchMatcher getTargetBranches() {
 		return targetBranches;
 	}

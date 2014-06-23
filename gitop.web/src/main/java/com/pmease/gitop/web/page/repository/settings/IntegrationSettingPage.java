@@ -3,7 +3,7 @@ package com.pmease.gitop.web.page.repository.settings;
 import java.io.Serializable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -25,31 +25,14 @@ public class IntegrationSettingPage extends AbstractRepositorySettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		WebMarkupContainer container = new WebMarkupContainer("rebasibleBranchesContainer");
-		add(container);
-		Form<?> form = new Form<Void>("form") {
+		WebMarkupContainer rebasibleBranchesContainer = new WebMarkupContainer("rebasibleBranchesContainer");
+		add(rebasibleBranchesContainer);
+		Form<?> rebasibleBranchesForm = new Form<Void>("form");
+		rebasibleBranchesContainer.add(rebasibleBranchesForm);
 
-			@Override
-			protected void onSubmit() {
-				super.onSubmit();
-				
-				Gitop.getInstance(RepositoryManager.class).save(getRepository());
-				success("Rebasible branches have been updated.");
-			}
-
-			@Override
-			protected void onError() {
-				super.onError();
-				
-				error("Fix errors below.");
-			}
-			
-		};
-		container.add(form);
-
-		form.add(new FeedbackPanel("feedback", form));
+		rebasibleBranchesForm.add(new FeedbackPanel("feedback", rebasibleBranchesForm));
 		
-		form.add(PropertyContext.editModel("editor", new LoadableDetachableModel<Serializable>() {
+		rebasibleBranchesForm.add(PropertyContext.editModel("editor", new LoadableDetachableModel<Serializable>() {
 
 			@Override
 			public Serializable load() {
@@ -58,31 +41,35 @@ public class IntegrationSettingPage extends AbstractRepositorySettingPage {
 
 		}, "rebasibleBranches"));
 		
-		container = new WebMarkupContainer("downstreamStrategiesContainer");
-		add(container);
-		form = new Form<Void>("form") {
+		rebasibleBranchesForm.add(new AjaxButton("save") {
 
 			@Override
-			protected void onSubmit() {
-				super.onSubmit();
-				
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				super.onSubmit(target, form);
+
 				Gitop.getInstance(RepositoryManager.class).save(getRepository());
-				success("Downstream integration strategies have been updated.");
+				success("Rebasible branches have been updated.");
+				target.add(form);
 			}
 
 			@Override
-			protected void onError() {
-				super.onError();
+			protected void onError(AjaxRequestTarget target, Form<?> form) {
+				super.onError(target, form);
 				
 				error("Fix errors below.");
+				target.add(form);
 			}
 			
-		};
-		container.add(form);
-
-		form.add(new FeedbackPanel("feedback", form));
+		});
 		
-		form.add(PropertyContext.editModel("editor", new LoadableDetachableModel<Serializable>() {
+		WebMarkupContainer downstreamStrategiesContainer = new WebMarkupContainer("downstreamStrategiesContainer");
+		add(downstreamStrategiesContainer);
+		Form<?> downstreamStrategiesForm = new Form<Void>("form");
+		downstreamStrategiesContainer.add(downstreamStrategiesForm);
+
+		downstreamStrategiesForm.add(new FeedbackPanel("feedback", downstreamStrategiesForm));
+		
+		downstreamStrategiesForm.add(PropertyContext.editModel("editor", new LoadableDetachableModel<Serializable>() {
 
 			@Override
 			public Serializable load() {
@@ -91,12 +78,14 @@ public class IntegrationSettingPage extends AbstractRepositorySettingPage {
 
 		}, "downstreamStrategies"));
 		
-		form.add(new AjaxSubmitLink("update") {
+		downstreamStrategiesForm.add(new AjaxButton("save") {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
+				Gitop.getInstance(RepositoryManager.class).save(getRepository());
+				success("Downstream integration strategies have been updated.");
 				target.add(form);
 			}
 
@@ -104,13 +93,48 @@ public class IntegrationSettingPage extends AbstractRepositorySettingPage {
 			protected void onError(AjaxRequestTarget target, Form<?> form) {
 				super.onError(target, form);
 				
+				error("Fix errors below.");
 				target.add(form);
 			}
 			
 		});
 
-		container = new WebMarkupContainer("upstreamStrategiesContainer");
-		add(container);
+		WebMarkupContainer upstreamStrategiesContainer = new WebMarkupContainer("upstreamStrategiesContainer");
+		add(upstreamStrategiesContainer);
+		Form<?> upstreamStrategiesForm = new Form<Void>("form");
+		upstreamStrategiesContainer.add(upstreamStrategiesForm);
+
+		upstreamStrategiesForm.add(new FeedbackPanel("feedback", upstreamStrategiesForm));
+		
+		upstreamStrategiesForm.add(PropertyContext.editModel("editor", new LoadableDetachableModel<Serializable>() {
+
+			@Override
+			public Serializable load() {
+				return getRepository().getIntegrationSetting();
+			}
+
+		}, "upstreamStrategies"));
+		
+		upstreamStrategiesForm.add(new AjaxButton("save") {
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				super.onSubmit(target, form);
+				
+				Gitop.getInstance(RepositoryManager.class).save(getRepository());
+				success("Upstream integration strategies have been updated.");
+				target.add(form);
+			}
+
+			@Override
+			protected void onError(AjaxRequestTarget target, Form<?> form) {
+				super.onError(target, form);
+				
+				error("Fix errors below.");
+				target.add(form);
+			}
+			
+		});
 	}
 
 	@Override
