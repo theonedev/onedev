@@ -85,7 +85,7 @@ public class ReflectionPropertyEditor extends PropertyEditor<Serializable> {
 	private Component newBeanEditor(Serializable propertyValue) {
 		Component beanEditor;
 		if (propertyValue != null) {
-			beanEditor = BeanContext.edit(BEAN_EDITOR_ID, propertyValue);
+			beanEditor = BeanContext.editBean(BEAN_EDITOR_ID, propertyValue);
 		} else {
 			beanEditor = new WebMarkupContainer(BEAN_EDITOR_ID).setVisible(false);
 		}

@@ -11,6 +11,7 @@ import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.commons.wicket.editable.NotDefinedLabel;
 import com.pmease.commons.wicket.editable.PropertyContext;
 import com.pmease.commons.wicket.editable.PropertyEditor;
+import com.pmease.commons.wicket.editable.PropertyViewer;
 
 @SuppressWarnings("serial")
 public class NumericEditSupport implements EditSupport {
@@ -30,12 +31,19 @@ public class NumericEditSupport implements EditSupport {
 			return new PropertyContext<Number>(propertyDescriptor) {
 
 				@Override
-				public Component renderForView(String componentId, IModel<Number> model) {
-					if (model.getObject() != null) {
-						return new Label(componentId, model.getObject().toString());
-					} else {
-						return new NotDefinedLabel(componentId);
-					}
+				public PropertyViewer renderForView(String componentId, final IModel<Number> model) {
+					return new PropertyViewer(componentId, this) {
+
+						@Override
+						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
+							if (model.getObject() != null) {
+								return new Label(id, model.getObject().toString());
+							} else {
+								return new NotDefinedLabel(id);
+							}
+						}
+						
+					};
 				}
 
 				@Override

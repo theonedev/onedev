@@ -41,7 +41,7 @@ import com.pmease.gitop.web.page.repository.pullrequest.RequestChangesPage;
 import com.pmease.gitop.web.page.repository.pullrequest.RequestUpdatesPage;
 import com.pmease.gitop.web.page.repository.settings.CreateRepositoryPage;
 import com.pmease.gitop.web.page.repository.settings.GateKeeperSettingPage;
-import com.pmease.gitop.web.page.repository.settings.PullRequestSettingsPage;
+import com.pmease.gitop.web.page.repository.settings.IntegrationSettingPage;
 import com.pmease.gitop.web.page.repository.settings.RepositoryAuditLogPage;
 import com.pmease.gitop.web.page.repository.settings.RepositoryHooksPage;
 import com.pmease.gitop.web.page.repository.settings.RepositoryOptionsPage;
@@ -187,10 +187,10 @@ public class GitopMappings extends CompoundRequestMapper {
 				"${user}/${repo}/settings/gate-keepers",
 				GateKeeperSettingPage.class));
 		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/settings/hooks", RepositoryHooksPage.class));
+				"${user}/${repo}/settings/integration-setting",
+				IntegrationSettingPage.class));
 		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/settings/pull-requests",
-				PullRequestSettingsPage.class));
+				"${user}/${repo}/settings/hooks", RepositoryHooksPage.class));
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/settings/audits", RepositoryAuditLogPage.class));
 		add(new PageParameterAwareMountedMapper(

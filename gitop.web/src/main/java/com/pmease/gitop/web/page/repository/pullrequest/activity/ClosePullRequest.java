@@ -4,9 +4,9 @@ import java.util.Date;
 
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.pmease.gitop.model.CloseInfo;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
+import com.pmease.gitop.model.helper.CloseInfo;
 
 public class ClosePullRequest implements PullRequestActivity {
 

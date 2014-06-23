@@ -1,10 +1,12 @@
 <wicket:panel>
-	<table class="reflection viewer">
-		<tr wicket:id="properties">
-			<wicket:enclosure child="name">
-				<td class="name"><span wicket:id="name"></span></td>
-			</wicket:enclosure>
-			<td class="value"><span wicket:id="value"></span></td>
-		</tr>
-	</table>
+	<div class="reflection properties">
+		<table>
+			<tr wicket:id="properties">
+				<wicket:enclosure child="name">
+					<td class="name"><span wicket:id="name"></span></td>
+				</wicket:enclosure>
+				<td class="value"><div wicket:id="value"></div></td>
+			</tr>
+		</table>
+	</div>
 </wicket:panel>

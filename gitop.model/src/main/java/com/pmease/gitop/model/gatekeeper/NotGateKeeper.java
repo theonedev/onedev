@@ -4,7 +4,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.editable.annotation.TableLayout;
+import com.pmease.commons.editable.annotation.Horizontal;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.gatekeeper.checkresult.Approved;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
@@ -13,7 +13,7 @@ import com.pmease.gitop.model.gatekeeper.checkresult.Disapproved;
 @SuppressWarnings("serial")
 @Editable(name="If Contained Gate Keeper Is Not Passed", order=400, icon="icon-servers",  
 		description="This gate keeper will be passed if contained gate keeper is not passed.")
-@TableLayout
+@Horizontal
 public class NotGateKeeper extends CompositeGateKeeper {
 
 	private GateKeeper gateKeeper = new DefaultGateKeeper();

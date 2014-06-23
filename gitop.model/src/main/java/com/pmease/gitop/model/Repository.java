@@ -29,6 +29,7 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitop.model.gatekeeper.AndGateKeeper;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
+import com.pmease.gitop.model.integrationsetting.IntegrationSetting;
 import com.pmease.gitop.model.permission.object.ProtectedObject;
 import com.pmease.gitop.model.permission.object.UserBelonging;
 import com.pmease.gitop.model.storage.StorageManager;
@@ -62,19 +63,23 @@ public class Repository extends AbstractEntity implements UserBelonging {
 
 	@Lob
 	@Column(nullable=false)
-	private ArrayList<GateKeeper> gateKeepers = new ArrayList<GateKeeper>();
+	private ArrayList<GateKeeper> gateKeepers = new ArrayList<>();
+	
+	@Lob
+	@Column(nullable=false)
+	private IntegrationSetting integrationSetting = new IntegrationSetting();
 	
 	@Column(nullable=false)
 	private Date createdAt = new Date();
 
 	@OneToMany(mappedBy="repository", cascade=CascadeType.REMOVE)
-	private Collection<Authorization> authorizations = new ArrayList<Authorization>();
+	private Collection<Authorization> authorizations = new ArrayList<>();
 
     @OneToMany(mappedBy="repository", cascade=CascadeType.REMOVE)
-    private Collection<Branch> branches = new ArrayList<Branch>();
+    private Collection<Branch> branches = new ArrayList<>();
 
     @OneToMany(mappedBy="forkedFrom", cascade=CascadeType.REMOVE)
-	private Collection<Repository> forks = new ArrayList<Repository>();
+	private Collection<Repository> forks = new ArrayList<>();
     
 	public User getOwner() {
 		return owner;
@@ -114,8 +119,6 @@ public class Repository extends AbstractEntity implements UserBelonging {
         this.forkable = forkable;
     }
 
-    @Editable(name="Accept Merge Requests If", order=500,
-			description="Optionally define gate keeper to accept merge requests under certain condition.")
     @NotNull
 	@Valid
 	public List<GateKeeper> getGateKeepers() {
@@ -124,6 +127,16 @@ public class Repository extends AbstractEntity implements UserBelonging {
 
 	public void setGateKeepers(ArrayList<GateKeeper> gateKeepers) {
 		this.gateKeepers = gateKeepers;
+	}
+
+	@NotNull
+	@Valid
+	public IntegrationSetting getIntegrationSetting() {
+		return integrationSetting;
+	}
+
+	public void setIntegrationSetting(IntegrationSetting integrationSetting) {
+		this.integrationSetting = integrationSetting;
 	}
 
 	public Date getCreatedAt() {

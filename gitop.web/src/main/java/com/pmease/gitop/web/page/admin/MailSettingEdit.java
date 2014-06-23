@@ -39,7 +39,7 @@ public class MailSettingEdit extends AdministrationLayoutPage {
 			}
 			
 		}; 
-		form.add(BeanContext.edit("editor", mailSetting));
+		form.add(BeanContext.editBean("editor", mailSetting));
 		form.add(new FeedbackPanel("feedback", form));
 		form.add(new AjaxSubmitLink("update") {
 

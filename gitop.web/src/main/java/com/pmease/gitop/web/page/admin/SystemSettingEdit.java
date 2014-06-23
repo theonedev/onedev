@@ -36,7 +36,7 @@ public class SystemSettingEdit extends AdministrationLayoutPage {
 			}
 			
 		}; 
-		form.add(BeanContext.edit("editor", systemSetting));
+		form.add(BeanContext.editBean("editor", systemSetting));
 		form.add(new FeedbackPanel("feedback", form));
 		form.add(new AjaxSubmitLink("update") {
 

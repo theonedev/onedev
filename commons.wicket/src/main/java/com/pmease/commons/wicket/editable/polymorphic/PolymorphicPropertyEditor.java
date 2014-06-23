@@ -1,20 +1,25 @@
 package com.pmease.commons.wicket.editable.polymorphic;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.DropDownChoice;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyDescriptor;
+import com.pmease.commons.editable.annotation.Horizontal;
+import com.pmease.commons.editable.annotation.Vertical;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.loader.ImplementationRegistry;
 import com.pmease.commons.wicket.editable.BeanContext;
@@ -29,6 +34,10 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 	private static final String BEAN_EDITOR_ID = "beanEditor";
 	
 	private final List<Class<?>> implementations = new ArrayList<>();
+
+	private final boolean vertical;
+	
+	private Fragment fragment;
 	
 	public PolymorphicPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<Serializable> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
@@ -42,12 +51,30 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 				"Can not find implementations for '" + baseClass + "'.");
 		
 		EditableUtils.sortAnnotatedElements(implementations);
+		
+		Method propertyGetter = propertyDescriptor.getPropertyGetter();
+		if (propertyGetter.getAnnotation(Vertical.class) != null)
+			vertical = true;
+		else if (propertyGetter.getAnnotation(Horizontal.class) != null)
+			vertical = false;
+		else 
+			vertical = true;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
+		if (vertical) {
+			fragment = new Fragment("content", "verticalFrag", this);
+			fragment.add(AttributeAppender.append("class", " vertical"));
+		} else {
+			fragment = new Fragment("content", "horizontalFrag", this);
+			fragment.add(AttributeAppender.append("class", " horizontal"));
+		}
+		
+		add(fragment);
+		
 		List<String> implementationNames = new ArrayList<String>();
 		for (Class<?> each: implementations)
 			implementationNames.add(EditableUtils.getName(each));
@@ -60,7 +87,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 
 			@Override
 			public String getObject() {
-				Component beanEditor = PolymorphicPropertyEditor.this.get(BEAN_EDITOR_ID);
+				Component beanEditor = fragment.get(BEAN_EDITOR_ID);
 				if (beanEditor.isVisible()) {
 					return EditableUtils.getName(((BeanEditor<?>) beanEditor).getBeanDescriptor().getBeanClass());
 				} else {
@@ -81,7 +108,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 						break;
 					}
 				}
-				PolymorphicPropertyEditor.this.replace(newBeanEditor(propertyValue));
+				fragment.replace(newBeanEditor(propertyValue));
 			}
 			
 		}, implementationNames);
@@ -91,20 +118,20 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				target.add(PolymorphicPropertyEditor.this.get(BEAN_EDITOR_ID));
+				target.add(fragment.get(BEAN_EDITOR_ID));
 			}
 			
 		});
 		
-		add(typeSelector);
+		fragment.add(typeSelector);
 
-		add(newBeanEditor(getModelObject()));
+		fragment.add(newBeanEditor(getModelObject()));
 	}
 	
 	private Component newBeanEditor(Serializable propertyValue) {
 		Component beanEditor;
 		if (propertyValue != null) {
-			beanEditor = BeanContext.edit(BEAN_EDITOR_ID, propertyValue);
+			beanEditor = BeanContext.editBean(BEAN_EDITOR_ID, propertyValue);
 		} else {
 			beanEditor = new WebMarkupContainer(BEAN_EDITOR_ID).setVisible(false);
 		}
@@ -115,13 +142,13 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 
 	@Override
 	public ErrorContext getErrorContext(PathSegment pathSegment) {
-		return ((ErrorContext) get(BEAN_EDITOR_ID)).getErrorContext(pathSegment);
+		return ((ErrorContext) fragment.get(BEAN_EDITOR_ID)).getErrorContext(pathSegment);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	protected Serializable convertInputToValue() throws ConversionException {
-		Component beanEditor = get(BEAN_EDITOR_ID);
+		Component beanEditor = fragment.get(BEAN_EDITOR_ID);
 		if (beanEditor.isVisible()) {
 			return ((BeanEditor<Serializable>) beanEditor).getConvertedInput();
 		} else {

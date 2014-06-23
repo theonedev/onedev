@@ -31,14 +31,14 @@ import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.core.manager.PullRequestManager;
 import com.pmease.gitop.core.manager.PullRequestUpdateManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.CloseInfo;
-import com.pmease.gitop.model.MergeInfo;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequest.Status;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.VoteInvitation;
 import com.pmease.gitop.model.gatekeeper.checkresult.Approved;
+import com.pmease.gitop.model.helper.CloseInfo;
+import com.pmease.gitop.model.helper.MergeInfo;
 
 @Singleton
 public class DefaultPullRequestManager implements PullRequestManager {

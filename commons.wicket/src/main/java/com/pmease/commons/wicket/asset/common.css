@@ -15,13 +15,18 @@
 .bottom-spacing {margin-bottom: 10px;}
 .spacing {margin: 10px;}
 
+/* Links */
+a {cursor: pointer;}
+a.fa {text-decoration: none;}
+a.fa-times {color: #FF2A68;}
+a.fa-times:hover {color: #BD2E29;}
 
 /* Feedback */
-#catch-all-feedback {position:absolute; background:#FFFFDE; max-width:75%;
+#session-feedback {position:absolute; background:#FFFFDE; max-width:75%;
 	border:1px solid #9C9E9C; border-top:none; padding: 6px; z-index:10000; 
 	border-radius:0 0 4px 4px; box-shadow:2px 2px 5px #888; display: none;}
-#catch-all-feedback ul {padding: 0; margin: 0;}
-#catch-all-feedback li {list-style: none;}
+#session-feedback ul {padding: 0; margin: 0;}
+#session-feedback li {list-style: none;}
 
 /* Table */
 table .navigator {border-radius: 4px 4px 4px 4px; margin-bottom: 0px; margin-left: 0; float: right;}
@@ -119,34 +124,40 @@ table td, table th {text-align: left;}
 .wizard .panel-heading {font-size: 16px;}
 .wizard .panel-body {padding: 24px;}
 
-/* Editor */
-table.reflection {width: 100%; margin-bottom: 20px;}
-table.reflection>tbody>tr>td {vertical-align: top;}
-table.reflection>tbody>tr>td {padding: 10px;}
-table.reflection>tbody>tr>td.name {font-weight: bold; background: #F0F0F0; text-align: right; white-space: nowrap; width: 20%;}
-table.reflection>tbody>tr:first-child>td.name {border-radius: 4px 4px 0 0;}
-table.reflection>tbody>tr:last-child>td.name {border-radius: 0 0 4px 4px;}
-table.reflection>tbody>tr:first-child:last-child>td.name {border-radius: 4px;}
-table.reflection td.value {font-size: 13px;}
-table.reflection td input.enable, table.reflection td select.type {margin-bottom: 8px;}
-table.list.editor {margin-bottom: 0;}
-table.list.editor input, table.list.editor select {margin-bottom: 0;}
-td.no-elements {font-style: italic;	padding-bottom: 10px;}
-table.polymorphic {width: 100%;}
-table.reflection table.reflection {margin-bottom: 10px;}
-table.reflection input[type="text"], table.reflection select {width: 100%; height: 32px; font-size: 13px;}
-div.reflection div.name {font-weight: bold;}
-div.reflection select.type, div.reflectio input.enable {margin-bottom: 15px;}
-table.reflection .right-spacing {margin-right: 8px;}
-.editor .has-error .help-block {color: #737373;}
-.editor .has-error .control-label {color: #333333;}
-.editor .has-error .error-message {color: #A94442;}
+/* Editor and Viewer */
+.editable table.elements {margin-bottom: 0;}
+.editable table.elements>tbody>tr>td, .editable table.elements>tfoot>tr>td {border-top-style: dotted; border-top-width: 2px;}
+.editable table.elements>tfoot>tr>td {border-bottom: 2px dotted #DDD; padding: 0;}
+.editable table.elements>tfoot>tr>td>a {display: block; text-decoration: none; padding: 4px 8px;}
+.editable table.elements>tfoot>tr>td:hover {background-color: #F2F2F2;}
+.editable table.list>tbody>tr>td.no-elements {font-style: italic;}
+
+.editable>.reflection>table {width: 100%;}
+.editable>.reflection>table>tbody>tr>td {vertical-align: top;}
+.editable>.reflection>table>tbody>tr>td {padding: 10px;}
+.editable>.reflection>table>tbody>tr>td.name {font-weight: bold; background: #F0F0F0; 
+	text-align: right; white-space: nowrap; width: 20%;}
+.editable>.reflection>table>tbody>tr:first-child>td.name {border-radius: 4px 4px 0 0;}
+.editable>.reflection>table>tbody>tr:last-child>td.name {border-radius: 0 0 4px 4px;}
+.editable>.reflection>table>tbody>tr:first-child:last-child>td.name {border-radius: 4px;}
+
+.editor>.reflection.properties>div.form-group:last-child {margin-bottom: 0;} 
+
+.editor>.polymorphic.vertical.elements>tbody>tr>td>select.type {margin-bottom: 12px;}
+
+.editor>.polymorphic.horizontal>table {width: 100%;}
+.editor>.polymorphic.horizontal>table>tbody>tr>td {vertical-align: top;}
+.editor>.polymorphic.horizontal>table>tbody>tr>td:FIRST-CHILD {padding-right: 8px;}
+.editor>.polymorphic.vertical>select.type {margin-bottom: 8px;}
+
+.editor>input.enable {margin-bottom: 12px;}
+
 .editor .required {font-size: 16px; color: #B94A48;}
-.viewer .table {margin-bottom: 0;}
-.viewer tr.name-omitted>td {padding: 0;}
-.viewer div.type {margin-bottom: 4px;}
 .editor ul.feedbackPanel {margin: 4px 0 0 -8px; padding-bottom: 0;}
 .editor li.feedbackPanelERROR {color: #AA0000;}
+
+.viewer .reflection > tbody > tr.name-omitted > td {padding: 0;}
+.viewer div.type {margin-bottom: 8px; font-style: italic;}
 
 /* Select2 */
 .editor .select2-container {width: 100%;}

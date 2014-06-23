@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -20,26 +21,37 @@ import org.apache.wicket.util.visit.IVisitor;
 import com.pmease.commons.editable.BeanDescriptor;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyDescriptor;
+import com.pmease.commons.editable.annotation.Horizontal;
 import com.pmease.commons.editable.annotation.OmitName;
-import com.pmease.commons.editable.annotation.TableLayout;
+import com.pmease.commons.editable.annotation.Vertical;
 import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
+import com.pmease.commons.wicket.editable.PathSegment.Property;
 import com.pmease.commons.wicket.editable.PropertyContext;
 import com.pmease.commons.wicket.editable.PropertyEditor;
-import com.pmease.commons.wicket.editable.PathSegment.Property;
 
 @SuppressWarnings("serial")
 public class ReflectionBeanEditor extends BeanEditor<Serializable> {
 
 	private final List<PropertyContext<Serializable>> propertyContexts = new ArrayList<>();
-
+	
+	private final boolean vertical;
+	
 	public ReflectionBeanEditor(String id, BeanDescriptor beanDescriptor, IModel<Serializable> model) {
 		super(id, beanDescriptor, model);
 
 		for (PropertyDescriptor propertyDescriptor: beanDescriptor.getPropertyDescriptors()) {
 			propertyContexts.add(PropertyContext.of(propertyDescriptor));
 		}
+		
+		Class<?> beanClass = beanDescriptor.getBeanClass();
+		if (beanClass.getAnnotation(Vertical.class) != null)
+			vertical = true;
+		else if (beanClass.getAnnotation(Horizontal.class) != null)
+			vertical = false;
+		else 
+			vertical = true;
 	}
 
 	@Override
@@ -49,10 +61,13 @@ public class ReflectionBeanEditor extends BeanEditor<Serializable> {
 		setOutputMarkupId(true);
 
 		Fragment fragment;
-		if (getBeanDescriptor().getBeanClass().getAnnotation(TableLayout.class) == null)
-			fragment = new Fragment("content", "default", ReflectionBeanEditor.this);
-		else
-			fragment = new Fragment("content", "table", ReflectionBeanEditor.this);
+		if (vertical) {
+			fragment = new Fragment("content", "verticalFrag", ReflectionBeanEditor.this);
+			fragment.add(AttributeAppender.append("class", " vertical"));
+		} else {
+			fragment = new Fragment("content", "horizontalFrag", ReflectionBeanEditor.this);
+			fragment.add(AttributeAppender.append("class", " horizontal"));
+		}
 		
 		add(fragment);
 		

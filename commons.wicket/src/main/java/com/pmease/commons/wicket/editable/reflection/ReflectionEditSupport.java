@@ -5,16 +5,19 @@ import java.io.Serializable;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
+import com.pmease.commons.editable.BeanDescriptor;
 import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.editable.PropertyDescriptorImpl;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
+import com.pmease.commons.wicket.editable.BeanViewer;
 import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.commons.wicket.editable.NotDefinedLabel;
 import com.pmease.commons.wicket.editable.PropertyContext;
 import com.pmease.commons.wicket.editable.PropertyEditor;
+import com.pmease.commons.wicket.editable.PropertyViewer;
 
 @SuppressWarnings("serial")
 public class ReflectionEditSupport implements EditSupport {
@@ -25,8 +28,15 @@ public class ReflectionEditSupport implements EditSupport {
 			return new BeanContext<Serializable>(beanClass) {
 
 				@Override
-				public Component renderForView(String componentId, IModel<Serializable> model) {
-					return new ReflectionBeanViewer(componentId, this, model);
+				public BeanViewer renderForView(String componentId, final IModel<Serializable> model) {
+					return new BeanViewer(componentId, this) {
+
+						@Override
+						protected Component newContent(String id, BeanDescriptor beanDescriptor) {
+							return new ReflectionBeanViewer(id, beanDescriptor, model);
+						}
+						
+					};
 				}
 
 				@Override
@@ -48,12 +58,19 @@ public class ReflectionEditSupport implements EditSupport {
 			return new PropertyContext<Serializable>(propertyDescriptor) {
 
 				@Override
-				public Component renderForView(String componentId, IModel<Serializable> model) {
-					if (model.getObject() != null) {
-						return BeanContext.view(componentId, model.getObject());
-					} else {
-						return new NotDefinedLabel(componentId);
-					}
+				public PropertyViewer renderForView(String componentId, final IModel<Serializable> model) {
+					return new PropertyViewer(componentId, this) {
+
+						@Override
+						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
+							if (model.getObject() != null) {
+								return BeanContext.viewBean(id, model.getObject());
+							} else {
+								return new NotDefinedLabel(id);
+							}
+						}
+						
+					};
 				}
 
 				@Override

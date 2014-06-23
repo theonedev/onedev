@@ -21,7 +21,7 @@ public abstract class BeanContext<T> extends BeanDescriptorImpl {
 		super(beanDescriptor);
 	}
 	
-	public abstract Component renderForView(String componentId, IModel<T> model);
+	public abstract BeanViewer renderForView(String componentId, IModel<T> model);
 
 	public abstract BeanEditor<T> renderForEdit(String componentId, IModel<T> model);
 	
@@ -46,15 +46,13 @@ public abstract class BeanContext<T> extends BeanDescriptorImpl {
 		};
 	}
 
-	public static BeanEditor<Serializable> edit(String componentId, IModel<Serializable> beanModel, boolean selfUpdating) {
+	public static BeanEditor<Serializable> editModel(String componentId, IModel<Serializable> beanModel) {
 		EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
 		BeanContext<Serializable> editContext = registry.getBeanEditContext(beanModel.getObject().getClass());
-		if (selfUpdating)
-			beanModel = editContext.wrapAsSelfUpdating(beanModel);
 		return editContext.renderForEdit(componentId, beanModel);
 	}
 	
-	public static BeanEditor<Serializable> edit(String componentId, final Serializable bean) {
+	public static BeanEditor<Serializable> editBean(String componentId, final Serializable bean) {
 		IModel<Serializable> beanModel = new IModel<Serializable>() {
 
 			@Override
@@ -72,17 +70,20 @@ public abstract class BeanContext<T> extends BeanDescriptorImpl {
 			}
 			
 		};
-		return edit(componentId, beanModel, true);
+		EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
+		BeanContext<Serializable> editContext = registry.getBeanEditContext(beanModel.getObject().getClass());
+		beanModel = editContext.wrapAsSelfUpdating(beanModel);
+		return editContext.renderForEdit(componentId, beanModel);
 	}
 
-	public static Component view(String componentId, IModel<Serializable> beanModel) {
+	public static Component viewModel(String componentId, IModel<Serializable> beanModel) {
 		EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
 		BeanContext<Serializable> editContext = registry.getBeanEditContext(beanModel.getObject().getClass());
 		return editContext.renderForView(componentId, beanModel);
 	}
 	
-	public static Component view(String componentId, Serializable bean) {
-		return view(componentId, Model.of(bean));
+	public static Component viewBean(String componentId, Serializable bean) {
+		return viewModel(componentId, Model.of(bean));
 	}
 	
 	public static BeanContext<Serializable> of(Class<?> beanClass) {

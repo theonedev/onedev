@@ -42,7 +42,7 @@ public abstract class BeanEditor<T> extends ValueEditor<T> {
 			});
 		}
 		
-		add(AttributeAppender.append("class", " bean editor"));
+		add(AttributeAppender.append("class", " bean editor editable"));
 	}
 	
 	public BeanDescriptor getBeanDescriptor() {

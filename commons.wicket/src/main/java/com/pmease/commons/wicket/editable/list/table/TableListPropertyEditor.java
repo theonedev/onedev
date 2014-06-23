@@ -128,7 +128,7 @@ public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> 
 				item.add(new Label("header", EditableUtils.getName(item.getModelObject().getPropertyGetter())));
 				
 				String required;
-				if (item.getModelObject().isPropertyRequired())
+				if (item.getModelObject().isPropertyRequired() && item.getModelObject().getPropertyClass() != boolean.class)
 					required = "*";
 				else
 					required = "&nbsp;";
@@ -162,7 +162,7 @@ public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> 
 		noElements.add(AttributeModifier.append("colspan", propertyContexts.size() + 1));
 		table.add(noElements);
 		
-		WebMarkupContainer newRow = new WebMarkupContainer("addElement");
+		WebMarkupContainer newRow = new WebMarkupContainer("newRow");
 		newRow.add(AttributeModifier.append("colspan", propertyContexts.size() + 1));
 		newRow.add(new AjaxButton("addElement") {
 

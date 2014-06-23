@@ -14,6 +14,7 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.gitop.core.extensions.gatekeeper.IfApprovedByMajoritiesOfSpecifiedTeam;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Membership;
 import com.pmease.gitop.model.PullRequest;

@@ -1,24 +1,22 @@
 <wicket:panel>
-	<div wicket:id="content"></div>
+	<div wicket:id="content" class="reflection properties"></div>
 	
-	<wicket:fragment wicket:id="default">
-		<div class="reflection">
-			<div wicket:id="properties" class="form-group">
-				<wicket:enclosure child="name">
-				<label class="name control-label">
-					<span wicket:id="name"></span>
-					<span wicket:id="required" class="required"></span>
-				</label>
-				</wicket:enclosure>
-				<div wicket:id="value" class="value"></div>
-				<div wicket:id="feedback"></div>
-				<div wicket:id="description" class="help-block"></div>
-			</div>
+	<wicket:fragment wicket:id="verticalFrag">
+		<div wicket:id="properties" class="form-group">
+			<wicket:enclosure child="name">
+			<label class="name control-label">
+				<span wicket:id="name"></span>
+				<span wicket:id="required" class="required"></span>
+			</label>
+			</wicket:enclosure>
+			<div wicket:id="value" class="value"></div>
+			<div wicket:id="feedback"></div>
+			<div wicket:id="description" class="help-block"></div>
 		</div>
 	</wicket:fragment>
 
-	<wicket:fragment wicket:id="table">
-		<table class="reflection">
+	<wicket:fragment wicket:id="horizontalFrag">
+		<table>
 			<tr wicket:id="properties">
 				<wicket:enclosure child="name">
 				<td class="name control-label">

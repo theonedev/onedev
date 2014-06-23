@@ -22,11 +22,13 @@ public abstract class PropertyContext<T> extends PropertyDescriptorImpl {
 		super(propertyDescriptor);
 	}
 
-	public abstract Component renderForView(String componentId, IModel<T> model);
+	public abstract PropertyViewer renderForView(String componentId, IModel<T> model);
 
 	public abstract PropertyEditor<T> renderForEdit(String componentId, IModel<T> model);
 
-	public static PropertyEditor<Serializable> edit(String componentId, final IModel<Serializable> beanModel, String propertyName) {
+	public static PropertyEditor<Serializable> editModel(String componentId, 
+			final IModel<Serializable> beanModel, String propertyName) {
+		
 		final PropertyContext<Serializable> editContext = of(beanModel.getObject().getClass(), propertyName);
 		return editContext.renderForEdit(componentId, new IModel<Serializable>() {
 
@@ -48,28 +50,30 @@ public abstract class PropertyContext<T> extends PropertyDescriptorImpl {
 		});
 	}
 
-	public static PropertyEditor<Object> edit(String componentId, final Serializable bean, String propertyName) {
-		IModel<Object> beanModel = new IModel<Object>() {
+	public static PropertyEditor<Serializable> editBean(String componentId, 
+			final Serializable bean, String propertyName) {
+		
+		IModel<Serializable> beanModel = new IModel<Serializable>() {
 
 			@Override
 			public void detach() {
 			}
 
 			@Override
-			public Object getObject() {
+			public Serializable getObject() {
 				return bean;
 			}
 
 			@Override
-			public void setObject(Object object) {
+			public void setObject(Serializable object) {
 				throw new IllegalStateException();
 			}
 			
 		};
-		return edit(componentId, beanModel, propertyName);
+		return editModel(componentId, beanModel, propertyName);
 	}
 
-	public static Component view(String componentId, final IModel<Serializable> beanModel, String propertyName) {
+	public static Component viewModel(String componentId, final IModel<Serializable> beanModel, String propertyName) {
 		final PropertyContext<Serializable> editContext = of(beanModel.getObject().getClass(), propertyName);
 		return editContext.renderForView(componentId, new LoadableDetachableModel<Serializable>() {
 
@@ -81,8 +85,8 @@ public abstract class PropertyContext<T> extends PropertyDescriptorImpl {
 		});
 	}
 
-	public static Component view(String componentId, Serializable bean, String propertyName) {
-		return view(componentId, Model.of(bean), propertyName);
+	public static Component viewBean(String componentId, Serializable bean, String propertyName) {
+		return viewModel(componentId, Model.of(bean), propertyName);
 	}
 
 	public static PropertyContext<Serializable> of(Class<?> beanClass, String propertyName) {

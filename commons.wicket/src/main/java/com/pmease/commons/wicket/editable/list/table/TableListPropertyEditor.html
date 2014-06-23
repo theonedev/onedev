@@ -2,7 +2,7 @@
 	<wicket:enclosure child:id="enable">
 		<input wicket:id="enable" type="checkbox" class="enable"></input>
 	</wicket:enclosure>
-	<table wicket:id="listEditor" class="list editor table table-hover">
+	<table wicket:id="listEditor" class="list elements table table-hover">
 		<thead>
 			<th wicket:id="headers">
 				<span wicket:id="header"></span>
@@ -16,7 +16,7 @@
 					<div wicket:id="propertyEditor"></div>
 					<div wicket:id="feedback"></div>
 				</td>
-				<td><a wicket:id="deleteElement" class="btn btn-danger btn-sm">Delete</a></td>
+				<td class="delete"><a wicket:id="deleteElement" class="fa fa-2x fa-times" title="Delete this element"></a></td>
 			</tr>
 			<wicket:enclosure>
 				<tr>
@@ -26,7 +26,7 @@
 		</tbody>
 		<tfoot>
 			<tr>
-				<td wicket:id="addElement"><a wicket:id="addElement" class="btn btn-primary btn-sm">Add New</a></td>
+				<td wicket:id="newRow"><a wicket:id="addElement" class="fa fa-2x fa-plus" title="Add new element"></a></td>
 			</tr>
 		</tfoot>
 	</table>

@@ -39,7 +39,7 @@ public interface GateKeeper extends Trimmable, Serializable {
 	CheckResult checkFile(User user, Branch branch, String file);
 
 	/**
-	 * Check specified user can push specified commit to specified branch.
+	 * Check if specified user can push specified commit to specified branch.
 	 *
 	 * @param user
 	 * 			user to be checked

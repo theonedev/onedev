@@ -56,7 +56,7 @@ public class RegisterPage extends LayoutPage {
 		
 		add(new FeedbackPanel("feedback", form));
 		
-		form.add(beanEditor = BeanContext.edit("editor", user));
+		form.add(beanEditor = BeanContext.editBean("editor", user));
 
 		form.add(new SubmitLink("submit", form) {
 
@@ -70,7 +70,7 @@ public class RegisterPage extends LayoutPage {
 					
 				// clear the form fields
 				user = new User();
-				form.replace(BeanContext.edit("editor", user));
+				form.replace(BeanContext.editBean("editor", user));
 			}
 			
 		});

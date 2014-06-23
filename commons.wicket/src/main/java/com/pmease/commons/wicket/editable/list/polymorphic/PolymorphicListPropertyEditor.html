@@ -2,22 +2,9 @@
 	<wicket:enclosure child:id="enable">
 		<input wicket:id="enable" type="checkbox" class="enable"></input>
 	</wicket:enclosure>
-	<table wicket:id="listEditor" class="polymorphic editor">
+	<table wicket:id="listEditor" class="polymorphic elements table table-hover">
 		<tbody>
-			<tr wicket:id="elements">
-				<td>
-					<div class="clearfix">
-						<div class="pull-left right-spacing">
-							<select wicket:id="elementTypeSelector" class="type form-control"></select>
-						</div>
-						<div class="pull-left">
-							<a wicket:id="deleteElement" class="btn btn-danger btn-sm">Delete</a>
-						</div>
-					</div>
-					<div wicket:id="elementEditor"></div>
-					<div wicket:id="feedback"></div>
-				</td>
-			</tr>
+			<tr wicket:id="elements"></tr>
 			<wicket:enclosure>
 				<tr>
 					<td wicket:id="noElements" class="no-elements">No Elements Defined</td>
@@ -26,8 +13,30 @@
 		</tbody>
 		<tfoot>
 			<tr>
-				<td wicket:id="addElement"><a wicket:id="addElement" class="btn btn-primary btn-sm">Add New</a></td>
+				<td wicket:id="addRow"><a wicket:id="addElement" class="fa fa-2x fa-plus" title="Add new element"></a></td>
 			</tr>
 		</tfoot>
 	</table>
+	<wicket:fragment wicket:id="horizontalFrag">
+		<td>
+			<select wicket:id="elementTypeSelector" class="type form-control"></select>
+		</td>
+		<td>
+			<div wicket:id="elementEditor"></div>
+			<div wicket:id="feedback"></div>
+		</td>			
+		<td>
+			<a wicket:id="deleteElement" class="fa fa-2x fa-times" title="Delete this element"></a>
+		</td>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="verticalFrag">
+		<td>
+			<select wicket:id="elementTypeSelector" class="type form-control"></select>
+			<div wicket:id="elementEditor"></div>
+			<div wicket:id="feedback"></div>
+		</td>
+		<td>
+			<a wicket:id="deleteElement" class="fa fa-2x fa-times" title="Delete this element"></a>
+		</td>
+	</wicket:fragment>
 </wicket:panel>

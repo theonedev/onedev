@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.editable.annotation.TableLayout;
+import com.pmease.commons.editable.annotation.Horizontal;
 import com.pmease.gitop.model.gatekeeper.checkresult.Approved;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
@@ -16,7 +16,7 @@ import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
 @SuppressWarnings("serial")
 @Editable(name="If All Contained Gate Keepers Are Passed", icon="icon-servers", order=100, 
 		description="This gate keeper will be passed if all contained gate keepers are passed.")
-@TableLayout
+@Horizontal
 public class AndGateKeeper extends AndOrGateKeeper {
 
 	@Override

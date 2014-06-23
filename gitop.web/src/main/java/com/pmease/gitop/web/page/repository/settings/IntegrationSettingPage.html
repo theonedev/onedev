@@ -1,0 +1,72 @@
+<html xmlns:wicket>
+<wicket:extend>
+	<section wicket:id="rebasibleBranchesContainer">
+		<div class="head">
+			<h2>Branches Can Be Rebased</h2>
+		</div>
+		<div class="body">
+			<div>
+				Declare branches which can be rebased. This setting tells integration process 
+				that these branches have rebase capability, and they will be rebased if relevant 
+				integration strategy defines the option <i>rebase if possible</i>. Leave this 
+				option undefined if no branches can be rebased in this repository.
+			</div>
+			<form wicket:id="form" class="padder">
+				<div wicket:id="feedback"></div>
+				<div wicket:id="editor"></div>
+				<input type="submit" value="Update" class="btn btn-primary"></input>
+			</form>
+		</div>
+	</section>
+	<section wicket:id="downstreamStrategiesContainer">
+		<div class="head">
+			<h2>Downstream Integration Strategies</h2>
+		</div>
+		<div class="body">
+			<div>
+				Define strategies on how to integrate pull requests sent from downstream branches.
+				Target branch of the pull request will be used to find the first matching strategy 
+				to apply to the integration. If no matching strategy is found, the default 
+				strategy will apply. The pull request can be either rebased or merged based on 
+				strategy options:
+				<ul>
+					<li>If option <i>rebase if possible</i> is specified and source branch (ie.
+					downstream branch) can be rebased, the source branch will be rebased to 
+					target branch, and then target branch will be fast forwarded to source branch; 
+					otherwise, the pull request will be merged following below procedure.</li>
+					<li>If pull request has to be merged, the option <i>merge always</i> 
+					determines whether or not to create a merge commit even if target branch can 
+					be fast forwarded to source branch.</li>
+				</ul> 
+			</div>
+			<form wicket:id="form" class="padder">
+				<div wicket:id="feedback"></div>
+				<div wicket:id="editor"></div>
+				<a wicket:id="update" class="btn btn-primary">Update</a>
+			</form>
+		</div>
+	</section>
+	<section wicket:id="upstreamStrategiesContainer">
+		<div class="head">
+			<h2>Upstream Integration Strategies</h2>
+		</div>
+		<div class="body">
+			<div>
+				Define strategies on how to integrate pull requests sent from upstream branches.
+				Target branch of the pull request will be used to find the first matching strategy 
+				to apply to the integration. If no matching strategy is found, the default 
+				strategy will apply. The pull request can be either rebased or merged based on 
+				strategy options:
+				<ul>
+					<li>If option <i>rebase if possible</i> is specified and target branch can be 
+					rebased, the target branch will be rebased to source branch (ie. upstream 
+					branch); otherwise, the pull request will be merged following below procedure.</li>
+					<li>If pull request has to be merged, the option <i>merge always</i> 
+					determines whether or not to create a merge commit even if target branch can 
+					be fast forwarded to source branch.</li>
+				</ul> 
+			</div>
+		</div>
+	</section>
+</wicket:extend>
+</html>

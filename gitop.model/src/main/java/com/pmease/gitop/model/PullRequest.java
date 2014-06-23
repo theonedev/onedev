@@ -31,6 +31,8 @@ import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.checkresult.Disapproved;
 import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
 import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
+import com.pmease.gitop.model.helper.CloseInfo;
+import com.pmease.gitop.model.helper.MergeInfo;
 
 @SuppressWarnings("serial")
 @Entity

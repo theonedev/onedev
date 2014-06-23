@@ -24,7 +24,7 @@ import com.pmease.commons.util.StringUtils;
 @SuppressWarnings("serial")
 public abstract class CommonPage extends WebPage {
 
-	private FeedbackPanel catchAllFeedback;
+	private FeedbackPanel sessionFeedback;
 	
 	private WebMarkupContainer body;
 
@@ -114,13 +114,13 @@ public abstract class CommonPage extends WebPage {
 			
 		}));
 
-		catchAllFeedback = new CatchAllFeedbackPanel("catchAllFeedback");
-		add(catchAllFeedback);			
-		catchAllFeedback.setOutputMarkupId(true);
+		sessionFeedback = new SessionFeedbackPanel("sessionFeedback");
+		add(sessionFeedback);			
+		sessionFeedback.setOutputMarkupId(true);
 	}
 	
-	public FeedbackPanel getCatchAllFeedback() {
-		return catchAllFeedback;
+	public FeedbackPanel getSessionFeedback() {
+		return sessionFeedback;
 	}
 	
 	@Override

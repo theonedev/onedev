@@ -139,8 +139,8 @@ public class PullRequestUpdate extends AbstractEntity {
 			} else {
 				Lock lock = LockUtils.lock(getLockName());
 				try {
-					String baseRef = getChangeRef();
-					changeCommit = git.parseRevision(baseRef, false);
+					String changeRef = getChangeRef();
+					changeCommit = git.parseRevision(changeRef, false);
 	
 					if (changeCommit != null) {
 						Commit commit = git.showRevision(changeCommit);
@@ -163,8 +163,8 @@ public class PullRequestUpdate extends AbstractEntity {
 							tempGit.updateRef("HEAD", mergeBase, null, null);
 							tempGit.reset(null, null);
 							Preconditions.checkState(tempGit.merge(previousUpdate, null, "ours", null));
-							git.fetch(tempGit.repoDir().getAbsolutePath(), "+HEAD:" + baseRef);
-							changeCommit = git.parseRevision(baseRef, true);
+							git.fetch(tempGit.repoDir().getAbsolutePath(), "+HEAD:" + changeRef);
+							changeCommit = git.parseRevision(changeRef, true);
 						} finally {
 							FileUtils.deleteDir(tempDir);
 						}

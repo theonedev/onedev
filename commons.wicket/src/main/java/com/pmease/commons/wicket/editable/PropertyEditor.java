@@ -7,8 +7,8 @@ import javax.validation.Validator;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.validation.INullAcceptingValidator;
 import org.apache.wicket.validation.IValidatable;
-import org.apache.wicket.validation.IValidator;
 
 import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.loader.AppLoader;
@@ -29,7 +29,7 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 		super.onInitialize();
 		
 		if (findParent(BeanEditor.class) == null) {
-			add(new IValidator<T>() {
+			add(new INullAcceptingValidator<T>() {
 
 				@Override
 				public void validate(IValidatable<T> validatable) {
@@ -48,7 +48,7 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 			});
 		}
 		
-		add(new AttributeAppender("class", " property editor"));
+		add(new AttributeAppender("class", " property editor editable"));
 	}
 	
 	public PropertyDescriptor getPropertyDescriptor() {

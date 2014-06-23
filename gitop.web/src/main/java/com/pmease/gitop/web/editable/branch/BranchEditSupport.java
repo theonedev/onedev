@@ -18,6 +18,7 @@ import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.commons.wicket.editable.NotDefinedLabel;
 import com.pmease.commons.wicket.editable.PropertyContext;
 import com.pmease.commons.wicket.editable.PropertyEditor;
+import com.pmease.commons.wicket.editable.PropertyViewer;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.editable.BranchChoice;
 import com.pmease.gitop.model.Branch;
@@ -40,18 +41,25 @@ public class BranchEditSupport implements EditSupport {
         		return new PropertyContext<List<Long>>(propertyDescriptor) {
 
 					@Override
-					public Component renderForView(String componentId, IModel<List<Long>> model) {
-				        List<Long> branchIds = model.getObject();
-				        if (branchIds != null && !branchIds.isEmpty()) {
-				        	Dao dao = Gitop.getInstance(Dao.class);
-				        	List<String> branchNames = new ArrayList<>();
-				        	for (Long branchId: branchIds) {
-				        		branchNames.add(dao.load(Branch.class, branchId).getName());
-				        	}
-				            return new Label(componentId, StringUtils.join(branchNames, ", " ));
-				        } else {
-							return new NotDefinedLabel(componentId);
-				        }
+					public PropertyViewer renderForView(String componentId, final IModel<List<Long>> model) {
+						return new PropertyViewer(componentId, this) {
+
+							@Override
+							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
+						        List<Long> branchIds = model.getObject();
+						        if (branchIds != null && !branchIds.isEmpty()) {
+						        	Dao dao = Gitop.getInstance(Dao.class);
+						        	List<String> branchNames = new ArrayList<>();
+						        	for (Long branchId: branchIds) {
+						        		branchNames.add(dao.load(Branch.class, branchId).getName());
+						        	}
+						            return new Label(id, StringUtils.join(branchNames, ", " ));
+						        } else {
+									return new NotDefinedLabel(id);
+						        }
+							}
+							
+						};
 					}
 
 					@Override
@@ -64,14 +72,21 @@ public class BranchEditSupport implements EditSupport {
         		return new PropertyContext<Long>(propertyDescriptor) {
 
 					@Override
-					public Component renderForView(String componentId, IModel<Long> model) {
-				        Long branchId = model.getObject();
-				        if (branchId != null) {
-				        	Branch branch = Gitop.getInstance(Dao.class).load(Branch.class, branchId);
-				            return new Label(componentId, branch.getName());
-				        } else {
-							return new NotDefinedLabel(componentId);
-				        }
+					public PropertyViewer renderForView(String componentId, final IModel<Long> model) {
+						return new PropertyViewer(componentId, this) {
+
+							@Override
+							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
+						        Long branchId = model.getObject();
+						        if (branchId != null) {
+						        	Branch branch = Gitop.getInstance(Dao.class).load(Branch.class, branchId);
+						            return new Label(id, branch.getName());
+						        } else {
+									return new NotDefinedLabel(id);
+						        }
+							}
+							
+						};
 					}
 
 					@Override

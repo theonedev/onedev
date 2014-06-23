@@ -16,6 +16,7 @@ import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.commons.wicket.editable.NotDefinedLabel;
 import com.pmease.commons.wicket.editable.PropertyContext;
 import com.pmease.commons.wicket.editable.PropertyEditor;
+import com.pmease.commons.wicket.editable.PropertyViewer;
 import com.pmease.commons.wicket.editable.list.polymorphic.PolymorphicListPropertyEditor;
 import com.pmease.commons.wicket.editable.list.polymorphic.PolymorphicListPropertyViewer;
 import com.pmease.commons.wicket.editable.list.table.TableListPropertyEditor;
@@ -41,12 +42,19 @@ public class ListEditSupport implements EditSupport {
 						return new PropertyContext<List<Serializable>>(propertyDescriptor) {
 
 							@Override
-							public Component renderForView(String componentId, IModel<List<Serializable>> model) {
-								if (model.getObject() != null) {
-									return new TableListPropertyViewer(componentId, elementClass, model.getObject());
-								} else {
-									return new NotDefinedLabel(componentId);
-								}
+							public PropertyViewer renderForView(String componentId, final IModel<List<Serializable>> model) {
+								return new PropertyViewer(componentId, this) {
+
+									@Override
+									protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
+										if (model.getObject() != null) {
+											return new TableListPropertyViewer(id, elementClass, model.getObject());
+										} else {
+											return new NotDefinedLabel(id);
+										}
+									}
+									
+								};
 							}
 
 							@Override
@@ -60,12 +68,19 @@ public class ListEditSupport implements EditSupport {
 					return new PropertyContext<List<Serializable>>(propertyDescriptor) {
 
 						@Override
-						public Component renderForView(String componentId, IModel<List<Serializable>> model) {
-							if (model.getObject() != null) {
-								return new PolymorphicListPropertyViewer(componentId, model.getObject());
-							} else {
-								return new NotDefinedLabel(componentId);
-							}
+						public PropertyViewer renderForView(String componentId, final IModel<List<Serializable>> model) {
+							return new PropertyViewer(componentId, this) {
+
+								@Override
+								protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
+									if (model.getObject() != null) {
+										return new PolymorphicListPropertyViewer(id, model.getObject());
+									} else {
+										return new NotDefinedLabel(id);
+									}
+								}
+								
+							};
 						}
 
 						@Override

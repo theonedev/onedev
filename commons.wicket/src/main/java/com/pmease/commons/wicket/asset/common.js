@@ -562,9 +562,9 @@ pmease.commons = {
 		});
 	},
 	
-	showCatchAllFeedback: function() {
-		if ($("#catch-all-feedback li").length != 0) {
-			var feedback = $("#catch-all-feedback");
+	showSessionFeedback: function() {
+		if ($("#session-feedback li").length != 0) {
+			var feedback = $("#session-feedback");
 	        var x = ($(window).width() - feedback.outerWidth()) / 2;
 	        feedback.css("left", x+$(window).scrollLeft());
 			feedback.css("top", $(window).scrollTop());
@@ -575,7 +575,7 @@ pmease.commons = {
 				clearTimeout(body[0].hideCatchAllFeedbackTimer);
 			}
 			body[0].hideCatchAllFeedbackTimer = setTimeout(function() {
-				$("#catch-all-feedback").slideUp();
+				$("#session-feedback").slideUp();
 			}, 5000);
 		}
 	},

@@ -414,7 +414,7 @@ public abstract class GateKeeperPanel extends Panel {
 			container.add(fragment);
 		} else {
 			Fragment fragment = new Fragment("content", "otherFrag", GateKeeperPanel.this);
-			fragment.add(BeanContext.view("viewer", gateKeeper));
+			fragment.add(BeanContext.viewBean("viewer", gateKeeper));
 			container.add(fragment);
 		}
 	}

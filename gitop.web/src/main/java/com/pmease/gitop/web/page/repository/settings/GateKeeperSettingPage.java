@@ -112,8 +112,7 @@ public class GateKeeperSettingPage extends AbstractRepositorySettingPage {
 
 	@Override
 	protected String getPageTitle() {
-		return "Gate Keeper - " + getRepository();
+		return "Gate Keepers - " + getRepository();
 	}
-
 
 }

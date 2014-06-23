@@ -71,8 +71,8 @@ public abstract class AbstractRepositorySettingPage extends RepositoryBasePage {
 		List<RepositorySettingTab> tabs = Lists.newArrayList();
 		tabs.add(new RepositorySettingTab(Model.of("Options"), RepositoryOptionsPage.class));
 		tabs.add(new RepositorySettingTab(Model.of("Gate Keepers"), GateKeeperSettingPage.class));
+		tabs.add(new RepositorySettingTab(Model.of("Integration Setting"), IntegrationSettingPage.class));
 		tabs.add(new RepositorySettingTab(Model.of("Hooks"), RepositoryHooksPage.class));
-		tabs.add(new RepositorySettingTab(Model.of("Pull Requests"), PullRequestSettingsPage.class));
 		tabs.add(new RepositorySettingTab(Model.of("Audit Log"), RepositoryAuditLogPage.class));
 		tabs.add(new RepositorySettingTab(Model.of("Permissions"), RepositoryPermissionsPage.class));
 		

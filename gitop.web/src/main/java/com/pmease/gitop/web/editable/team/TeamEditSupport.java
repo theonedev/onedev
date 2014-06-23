@@ -18,6 +18,7 @@ import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.commons.wicket.editable.NotDefinedLabel;
 import com.pmease.commons.wicket.editable.PropertyContext;
 import com.pmease.commons.wicket.editable.PropertyEditor;
+import com.pmease.commons.wicket.editable.PropertyViewer;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.editable.TeamChoice;
 import com.pmease.gitop.model.Team;
@@ -40,18 +41,25 @@ public class TeamEditSupport implements EditSupport {
         		return new PropertyContext<List<Long>>(propertyDescriptor) {
 
 					@Override
-					public Component renderForView(String componentId, IModel<List<Long>> model) {
-				        List<Long> teamIds = model.getObject();
-				        if (teamIds != null && !teamIds.isEmpty()) {
-				        	Dao dao = Gitop.getInstance(Dao.class);
-				        	List<String> teamNames = new ArrayList<>();
-				        	for (Long teamId: teamIds) {
-				        		teamNames.add(dao.load(Team.class, teamId).getName());
-				        	}
-				            return new Label(componentId, StringUtils.join(teamNames, ", " ));
-				        } else {
-							return new NotDefinedLabel(componentId);
-				        }
+					public PropertyViewer renderForView(String componentId, final IModel<List<Long>> model) {
+						return new PropertyViewer(componentId, this) {
+
+							@Override
+							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
+						        List<Long> teamIds = model.getObject();
+						        if (teamIds != null && !teamIds.isEmpty()) {
+						        	Dao dao = Gitop.getInstance(Dao.class);
+						        	List<String> teamNames = new ArrayList<>();
+						        	for (Long teamId: teamIds) {
+						        		teamNames.add(dao.load(Team.class, teamId).getName());
+						        	}
+						            return new Label(id, StringUtils.join(teamNames, ", " ));
+						        } else {
+									return new NotDefinedLabel(id);
+						        }
+							}
+							
+						};
 					}
 
 					@Override
@@ -64,14 +72,21 @@ public class TeamEditSupport implements EditSupport {
         		return new PropertyContext<Long>(propertyDescriptor) {
 
 					@Override
-					public Component renderForView(String componentId, IModel<Long> model) {
-				        Long teamId = model.getObject();
-				        if (teamId != null) {
-				        	Team team = Gitop.getInstance(Dao.class).load(Team.class, teamId);
-				            return new Label(componentId, team.getName());
-				        } else {
-							return new NotDefinedLabel(componentId);
-				        }
+					public PropertyViewer renderForView(String componentId, final IModel<Long> model) {
+						return new PropertyViewer(componentId, this) {
+
+							@Override
+							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
+						        Long teamId = model.getObject();
+						        if (teamId != null) {
+						        	Team team = Gitop.getInstance(Dao.class).load(Team.class, teamId);
+						            return new Label(id, team.getName());
+						        } else {
+									return new NotDefinedLabel(id);
+						        }
+							}
+							
+						};
 					}
 
 					@Override

@@ -18,6 +18,7 @@ import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.commons.wicket.editable.NotDefinedLabel;
 import com.pmease.commons.wicket.editable.PropertyContext;
 import com.pmease.commons.wicket.editable.PropertyEditor;
+import com.pmease.commons.wicket.editable.PropertyViewer;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.editable.UserChoice;
 import com.pmease.gitop.model.User;
@@ -40,18 +41,25 @@ public class UserEditSupport implements EditSupport {
         		return new PropertyContext<List<Long>>(propertyDescriptor) {
 
 					@Override
-					public Component renderForView(String componentId, IModel<List<Long>> model) {
-				        List<Long> userIds = model.getObject();
-				        if (userIds != null && !userIds.isEmpty()) {
-				        	Dao dao = Gitop.getInstance(Dao.class);
-				        	List<String> userNames = new ArrayList<>();
-				        	for (Long userId: userIds) {
-				        		userNames.add(dao.load(User.class, userId).getDisplayName());
-				        	}
-				            return new Label(componentId, StringUtils.join(userNames, ", " ));
-				        } else {
-							return new NotDefinedLabel(componentId);
-				        }
+					public PropertyViewer renderForView(String componentId, final IModel<List<Long>> model) {
+						return new PropertyViewer(componentId, this) {
+
+							@Override
+							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
+						        List<Long> userIds = model.getObject();
+						        if (userIds != null && !userIds.isEmpty()) {
+						        	Dao dao = Gitop.getInstance(Dao.class);
+						        	List<String> userNames = new ArrayList<>();
+						        	for (Long userId: userIds) {
+						        		userNames.add(dao.load(User.class, userId).getDisplayName());
+						        	}
+						            return new Label(id, StringUtils.join(userNames, ", " ));
+						        } else {
+									return new NotDefinedLabel(id);
+						        }
+							}
+							
+						};
 					}
 
 					@Override
@@ -64,14 +72,21 @@ public class UserEditSupport implements EditSupport {
         		return new PropertyContext<Long>(propertyDescriptor) {
 
 					@Override
-					public Component renderForView(String componentId, IModel<Long> model) {
-				        Long userId = model.getObject();
-				        if (userId != null) {
-				        	User user = Gitop.getInstance(Dao.class).load(User.class, userId);
-				            return new Label(componentId, user.getDisplayName());
-				        } else {
-							return new NotDefinedLabel(componentId);
-				        }
+					public PropertyViewer renderForView(String componentId, final IModel<Long> model) {
+						return new PropertyViewer(componentId, this) {
+
+							@Override
+							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
+						        Long userId = model.getObject();
+						        if (userId != null) {
+						        	User user = Gitop.getInstance(Dao.class).load(User.class, userId);
+						            return new Label(id, user.getDisplayName());
+						        } else {
+									return new NotDefinedLabel(id);
+						        }
+							}
+							
+						};
 					}
 
 					@Override

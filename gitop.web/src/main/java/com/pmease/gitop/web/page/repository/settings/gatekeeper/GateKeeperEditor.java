@@ -37,7 +37,7 @@ public abstract class GateKeeperEditor extends Panel {
 		
 		Form<?> form = new Form<Void>("form");
 		add(form);
-		form.add(BeanContext.edit("beanEditor", gateKeeper));
+		form.add(BeanContext.editBean("beanEditor", gateKeeper));
 		
 		form.add(new AjaxLink<Void>("cancel") {
 

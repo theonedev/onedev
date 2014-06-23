@@ -14,11 +14,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.gitop.model.MergeInfo;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest.Status;
+import com.pmease.gitop.model.helper.MergeInfo;
 import com.pmease.gitop.web.page.repository.source.commit.diff.DiffViewPanel;
 
 @SuppressWarnings("serial")

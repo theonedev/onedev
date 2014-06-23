@@ -53,7 +53,8 @@ public abstract class AbstractWicketConfig extends WebApplication {
 			@Override
 			public void onBeforeRespond(Map<String, Component> map, AjaxRequestTarget target) {
 				CommonPage page = (CommonPage) target.getPage();
-				target.add(page.getCatchAllFeedback());
+				if (page.getSessionFeedback().anyMessage())
+					target.add(page.getSessionFeedback());
 			}
 
 			@Override

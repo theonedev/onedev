@@ -1,26 +1,33 @@
 package com.pmease.commons.wicket.editable.list.polymorphic;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyDescriptor;
+import com.pmease.commons.editable.annotation.Horizontal;
+import com.pmease.commons.editable.annotation.Vertical;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.loader.ImplementationRegistry;
 import com.pmease.commons.util.ClassUtils;
@@ -34,6 +41,8 @@ import com.pmease.commons.wicket.editable.PropertyEditor;
 public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializable>> {
 
 	private final List<Class<?>> implementations;
+	
+	private final boolean horizontal;
 	
 	public PolymorphicListPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
 		super(id, propertyDescriptor, model);
@@ -50,6 +59,14 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 				"Can not find implementations for '" + baseClass + "'.");
 		
 		EditableUtils.sortAnnotatedElements(implementations);
+
+		Method propertyGetter = propertyDescriptor.getPropertyGetter();
+		if (propertyGetter.getAnnotation(Horizontal.class) != null)
+			horizontal = true;
+		else if (propertyGetter.getAnnotation(Vertical.class) != null)
+			horizontal = false;
+		else 
+			horizontal = true;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -108,6 +125,10 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 
 	private Component newListEditor(List<Serializable> list) {
 		final WebMarkupContainer table = new WebMarkupContainer("listEditor");
+		if (horizontal)
+			table.add(AttributeAppender.append("class", " horizontal"));
+		else
+			table.add(AttributeAppender.append("class", " vertical"));
 
 		table.setOutputMarkupId(true);
 		table.setOutputMarkupPlaceholderTag(true);
@@ -135,7 +156,22 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 		
 		table.add(noElements);
 		
-		WebMarkupContainer newRow = new WebMarkupContainer("addElement");
+		WebMarkupContainer newRow = new WebMarkupContainer("addRow");
+		newRow.add(AttributeModifier.replace("colspan", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				if (rows.iterator().hasNext()) {
+					if (horizontal)
+						return "3";
+					else
+						return "2";
+				} else {
+					return "1";
+				}
+			}
+			
+		}));
 		newRow.add(new AjaxButton("addElement") {
 
 			@Override
@@ -161,8 +197,13 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 
 	private void addRow(Serializable element) {
 		final RepeatingView rows = (RepeatingView) get("listEditor").get("elements");
+
+		final Fragment row;
+		if (horizontal)
+			row = new Fragment(rows.newChildId(), "horizontalFrag", this);
+		else 
+			row = new Fragment(rows.newChildId(), "verticalFrag", this);
 		
-		final WebMarkupContainer row = new WebMarkupContainer(rows.newChildId());
 		rows.add(row);
 		
 		List<String> implementationNames = new ArrayList<String>();
@@ -232,7 +273,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 	private Component newElementEditor(Serializable element) {
 		Component elementEditor;
 		if (element != null) {
-			elementEditor = BeanContext.edit("elementEditor", element);
+			elementEditor = BeanContext.editBean("elementEditor", element);
 		} else {
 			elementEditor = new WebMarkupContainer("elementEditor").setVisible(false);
 		}
@@ -272,4 +313,5 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 			return null;
 		}
 	}
+	
 }

@@ -25,7 +25,14 @@ public abstract class ValueEditor<T> extends FormComponentPanel<T> implements Er
 		return context;
 	}
 	
-	public abstract ErrorContext getErrorContext(PathSegment pathSegment);
+	/**
+	 * Get error context for specified path segment. 
+	 * 
+	 * @return
+	 * 			error context of specified path segment, or <tt>null</tt> if error context 
+	 * 			for specified path segment can not be found
+	 */
+	public abstract @Nullable ErrorContext getErrorContext(PathSegment pathSegment);
 
 	protected abstract T convertInputToValue() throws ConversionException;
 	

@@ -4,7 +4,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.editable.annotation.TableLayout;
+import com.pmease.commons.editable.annotation.Horizontal;
 import com.pmease.gitop.model.gatekeeper.checkresult.Approved;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
@@ -15,7 +15,7 @@ import com.pmease.gitop.model.gatekeeper.checkresult.Disapproved;
 @Editable(name="Check Second Gate Keeper If First Gate Keeper Is Passed", order=300, icon="icon-servers",  
 		description="If first gate keeper is passed, go ahead to check second gate keeper; otherwise, consider "
 				+ "the whole gate keeper as passed.")
-@TableLayout
+@Horizontal
 public class IfThenGateKeeper extends CompositeGateKeeper {
 
 	private GateKeeper ifGate = new DefaultGateKeeper();

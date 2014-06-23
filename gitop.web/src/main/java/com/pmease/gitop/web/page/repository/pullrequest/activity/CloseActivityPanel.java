@@ -17,8 +17,8 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.AuthorizationManager;
-import com.pmease.gitop.model.CloseInfo;
 import com.pmease.gitop.model.PullRequest;
+import com.pmease.gitop.model.helper.CloseInfo;
 
 @SuppressWarnings("serial")
 public class CloseActivityPanel extends Panel {
