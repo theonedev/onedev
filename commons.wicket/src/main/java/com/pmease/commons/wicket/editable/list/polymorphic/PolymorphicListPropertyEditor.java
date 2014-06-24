@@ -31,6 +31,8 @@ import com.pmease.commons.editable.annotation.Vertical;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.loader.ImplementationRegistry;
 import com.pmease.commons.util.ClassUtils;
+import com.pmease.commons.wicket.behavior.sortable.SortBehavior;
+import com.pmease.commons.wicket.behavior.sortable.SortPosition;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.ErrorContext;
@@ -138,7 +140,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 		
 		if (list != null) {
 			for (Serializable element: list) {
-				addRow(element);
+				addRow(rows, element);
 			}
 		} else {
 			table.setVisible(false);
@@ -184,7 +186,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 				} catch (InstantiationException | IllegalAccessException e) {
 					throw new RuntimeException(e);
 				}
-				addRow(newElement);
+				addRow(rows, newElement);
 				target.add(PolymorphicListPropertyEditor.this.get("listEditor"));
 			}
 			
@@ -192,12 +194,28 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 		
 		table.add(newRow);
 		
+		table.add(new SortBehavior() {
+
+			@Override
+			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
+				List<Component> children = new ArrayList<>();
+				for (Component child: rows)
+					children.add(child);
+
+				Component fromChild = children.remove(from.getItemIndex());
+				children.add(to.getItemIndex(), fromChild);
+				
+				rows.removeAll();
+				for (Component child: children)
+					rows.add(child);
+			}
+			
+		}.sortable("tbody").handle(".handle").helperClass("sort-helper"));
+
 		return table;		
 	}
 
-	private void addRow(Serializable element) {
-		final RepeatingView rows = (RepeatingView) get("listEditor").get("elements");
-
+	private void addRow(final RepeatingView rows, Serializable element) {
 		final Fragment row;
 		if (horizontal)
 			row = new Fragment(rows.newChildId(), "horizontalFrag", this);

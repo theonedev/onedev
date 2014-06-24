@@ -16,7 +16,12 @@
 					<div wicket:id="propertyEditor"></div>
 					<div wicket:id="feedback"></div>
 				</td>
-				<td class="delete"><a wicket:id="deleteElement" class="fa fa-2x fa-times" title="Delete this element"></a></td>
+				<td class="actions">
+					<!-- float elements here in order to adjust icon position easily as these two icons are not 
+					of the same size under same font -->
+					<a wicket:id="deleteElement" class="fa fa-2x fa-times pull-left" title="Delete this element"></a>
+					<div class="fa fa-arrows handle pull-left" title="Drag to reorder elements"></div>
+				</td>
 			</tr>
 			<wicket:enclosure>
 				<tr>

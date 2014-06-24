@@ -27,6 +27,8 @@ import com.pmease.commons.editable.BeanDescriptorImpl;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.util.ClassUtils;
+import com.pmease.commons.wicket.behavior.sortable.SortPosition;
+import com.pmease.commons.wicket.behavior.sortable.SortBehavior;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyContext;
@@ -143,7 +145,7 @@ public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> 
 		
 		if (list != null) {
 			for (Serializable element: list) {
-				addRow(element);
+				addRow(rows, element);
 			}
 		} else {
 			table.setVisible(false);
@@ -170,7 +172,7 @@ public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> 
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				addRow(newElement());
+				addRow(rows, newElement());
 				target.add(TableListPropertyEditor.this.get("listEditor"));
 			}
 
@@ -178,12 +180,28 @@ public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> 
 		
 		table.add(newRow);
 		
+		table.add(new SortBehavior() {
+
+			@Override
+			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
+				List<Component> children = new ArrayList<>();
+				for (Component child: rows)
+					children.add(child);
+
+				Component fromChild = children.remove(from.getItemIndex());
+				children.add(to.getItemIndex(), fromChild);
+				
+				rows.removeAll();
+				for (Component child: children)
+					rows.add(child);
+			}
+			
+		}.sortable("tbody").handle(".handle").helperClass("sort-helper"));
+
 		return table;		
 	}
 
-	private void addRow(Serializable element) {
-		final RepeatingView rows = (RepeatingView) get("listEditor").get("elements");
-		
+	private void addRow(final RepeatingView rows, Serializable element) {
 		final WebMarkupContainer row = new WebMarkupContainer(rows.newChildId());
 		rows.add(row);
 		

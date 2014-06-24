@@ -126,9 +126,11 @@ table td, table th {text-align: left;}
 
 /* Editor and Viewer */
 .editable table.elements {margin-bottom: 0;}
-.editable table.elements>tbody>tr>td, .editable table.elements>tfoot>tr>td {border-top-style: dotted; border-top-width: 2px;}
+.editable table.elements>tbody>tr>td, .editable table.elements>tfoot>tr>td {
+	border-top-style: dotted; border-top-width: 2px;}
 .editable table.elements>tfoot>tr>td {border-bottom: 2px dotted #DDD; padding: 0;}
-.editable table.elements>tfoot>tr>td>a {display: block; text-decoration: none; padding: 4px 8px;}
+.editable table.elements>tfoot>tr>td>a {
+	display: block; text-decoration: none; padding: 4px 8px;}
 .editable table.elements>tfoot>tr>td:hover {background-color: #F2F2F2;}
 .editable table.list>tbody>tr>td.no-elements {font-style: italic;}
 
@@ -149,6 +151,12 @@ table td, table th {text-align: left;}
 .editor>.polymorphic.horizontal>table>tbody>tr>td {vertical-align: top;}
 .editor>.polymorphic.horizontal>table>tbody>tr>td:FIRST-CHILD {padding-right: 8px;}
 .editor>.polymorphic.vertical>select.type {margin-bottom: 8px;}
+
+.editor>table.list.elements>tbody>tr>td.actions {width: 76px;}
+.editor>table.list.elements>tbody>tr>td.actions a {margin-right: 8px;}
+.editor>table.elements>tbody>tr>td.actions .handle {
+	color: #666; cursor: move; font-size: 22px; margin-top: 4px;}
+.editor>table.elements .sort-helper {border: 2px solid #DDD; background: #F5F5F5;}
 
 .editor>input.enable {margin-bottom: 12px;}
 

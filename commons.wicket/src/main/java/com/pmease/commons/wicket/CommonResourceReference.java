@@ -24,20 +24,20 @@ import de.agilecoders.wicket.extensions.markup.html.bootstrap.icon.FontAwesomeCs
  * @author robin
  *
  */
-class CommonResourcesReference extends JavaScriptResourceReference {
+class CommonResourceReference extends JavaScriptResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
 	private List<HeaderItem> bootstrapHeaderItems = new ArrayList<>();
 	
-	public static CommonResourcesReference get() {
+	public static CommonResourceReference get() {
 		return INSTANCE;
 	}
 	
-	private static CommonResourcesReference INSTANCE = new CommonResourcesReference();
+	private static CommonResourceReference INSTANCE = new CommonResourceReference();
 	
-	private CommonResourcesReference() {
-		super(CommonResourcesReference.class, "asset/common.js");
+	private CommonResourceReference() {
+		super(CommonResourceReference.class, "asset/common.js");
 		
 		Bootstrap.renderHead(new IHeaderResponse() {
 
@@ -90,9 +90,9 @@ class CommonResourcesReference extends JavaScriptResourceReference {
 		dependencies.add(CssHeaderItem.forReference(select2Settings.getCssReference()));
 		
 		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(
-				CommonResourcesReference.class, "asset/select2-bootstrap.css")));
+				CommonResourceReference.class, "asset/select2-bootstrap.css")));
 		dependencies.add(CssHeaderItem.forReference(
-				new CssResourceReference(CommonResourcesReference.class, "asset/common.css")));
+				new CssResourceReference(CommonResourceReference.class, "asset/common.css")));
 
 		return dependencies;
 	}

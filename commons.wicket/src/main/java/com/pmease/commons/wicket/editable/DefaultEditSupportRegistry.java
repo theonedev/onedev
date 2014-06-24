@@ -28,7 +28,8 @@ public class DefaultEditSupportRegistry implements EditSupportRegistry {
 			if (editContext != null)
 				return (BeanContext<Serializable>) editContext;
 		}
-		throw new GeneralException(String.format("Unable to find edit context (bean: %s)", beanClass.getName()));
+		throw new GeneralException(String.format("Unable to find edit context (bean: %s). "
+				+ "Possible reason: forget to annotate the class with @Editable.", beanClass.getName()));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -40,7 +41,8 @@ public class DefaultEditSupportRegistry implements EditSupportRegistry {
 				return (PropertyContext<Serializable>) editContext;
 		}
 		throw new GeneralException(String.format(
-				"Unable to find edit context (bean: %s, property: %s)", 
+				"Unable to find edit context (bean: %s, property: %s). Possible reason: forget to annotate "
+				+ "return type of the method with @Editable.", 
 				beanClass.getName(), propertyName));
 	}
 
