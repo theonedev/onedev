@@ -14,14 +14,8 @@ public class MatchBranchesByPatterns implements BranchMatcher {
 
 	private String branchPatterns;
 	
-	@Editable(name="Branch Patterns", description="Specify branch patterns to match. Below is some examples:"
-			+ "<ul>"
-			+ "<li><i>dev/*</i>: matches all branches directly under dev."
-			+ "<li><i>dev/**</i>: matches all branches under dev recursively."
-			+ "<li><i>**</i>: matches all branches."
-			+ "<li><i>**/bugfix</i>: matches all branches whose last segment is bugfix."
-			+ "<li><i>-dev/**, **</i>: matches all branches except those under dev."
-			+ "</ul>")
+	@Editable(name="Branch Patterns", description=
+			"Patterns should be specified following the <a href='http://wiki.pmease.com/display/gp/Pattern+Set'>pattern set</a> format.")
 	@OmitName
 	@NotEmpty
 	public String getBranchPatterns() {

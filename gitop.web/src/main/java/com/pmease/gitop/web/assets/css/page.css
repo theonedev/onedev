@@ -1385,4 +1385,4 @@ table.verifications tr.not-passed .fa-times {display: inline; color: #D9534F;}
 table.verifications tr.ongoing .fa-cog {display: inline; color: #F0AD4E;}
 
 .integration-setting-page form>.editor {margin-bottom: 16px;}
-.integration-setting-page form .help-block {display: none;}
+.polymorphic.horizontal>table>tbody>tr>td:FIRST-CHILD {width: 360px;}

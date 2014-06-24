@@ -152,6 +152,8 @@ table td, table th {text-align: left;}
 .editor>.polymorphic.horizontal>table>tbody>tr>td:FIRST-CHILD {padding-right: 8px;}
 .editor>.polymorphic.vertical>select.type {margin-bottom: 8px;}
 
+.editor>table.elements .help-block {display: none;}
+
 .editor>table.list.elements>tbody>tr>td.actions {width: 76px;}
 .editor>table.list.elements>tbody>tr>td.actions a {margin-right: 8px;}
 .editor>table.elements>tbody>tr>td.actions .handle {
