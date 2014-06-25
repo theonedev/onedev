@@ -27,13 +27,13 @@ import com.pmease.commons.editable.BeanDescriptorImpl;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.util.ClassUtils;
-import com.pmease.commons.wicket.behavior.sortable.SortPosition;
 import com.pmease.commons.wicket.behavior.sortable.SortBehavior;
+import com.pmease.commons.wicket.behavior.sortable.SortPosition;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
+import com.pmease.commons.wicket.editable.PathSegment.Property;
 import com.pmease.commons.wicket.editable.PropertyContext;
 import com.pmease.commons.wicket.editable.PropertyEditor;
-import com.pmease.commons.wicket.editable.PathSegment.Property;
 
 @SuppressWarnings("serial")
 public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> {
@@ -118,7 +118,7 @@ public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> 
 	}
 
 	private Component newListEditor(List<Serializable> list) {
-		WebMarkupContainer table = new WebMarkupContainer("listEditor");
+		final WebMarkupContainer table = new WebMarkupContainer("listEditor");
 
 		table.setOutputMarkupId(true);
 		table.setOutputMarkupPlaceholderTag(true);
@@ -172,7 +172,9 @@ public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> 
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				addRow(rows, newElement());
+				Component newRow = addRow(rows, newElement());
+				newRow.setOutputMarkupId(true);
+				target.focusComponent(newRow);
 				target.add(TableListPropertyEditor.this.get("listEditor"));
 			}
 
@@ -194,6 +196,7 @@ public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> 
 				rows.removeAll();
 				for (Component child: children)
 					rows.add(child);
+				target.appendJavaScript(String.format("pmease.commons.form.markDirty('%s');", table.getMarkupId()));
 			}
 			
 		}.sortable("tbody").handle(".handle").helperClass("sort-helper"));
@@ -201,7 +204,7 @@ public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> 
 		return table;		
 	}
 
-	private void addRow(final RepeatingView rows, Serializable element) {
+	private WebMarkupContainer addRow(final RepeatingView rows, Serializable element) {
 		final WebMarkupContainer row = new WebMarkupContainer(rows.newChildId());
 		rows.add(row);
 		
@@ -225,9 +228,13 @@ public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> 
 				super.onSubmit(target, form);
 				rows.remove(row);
 				target.add(TableListPropertyEditor.this.get("listEditor"));
+				
+				target.focusComponent(null);
 			}
 
 		}.setDefaultFormProcessing(false));
+		
+		return row;
 	}
 	
 	@Override

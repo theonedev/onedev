@@ -550,6 +550,165 @@ pmease.commons = {
 		}
 	},
 	
+	form: {
+		/*
+		 * This function can be called to mark enclosing form of specified element dirty. It should be
+		 * called if underlying data has been changed but no form fields are updated, for instance 
+		 * when sorting the elements inside a form. 
+		 */
+		markDirty: function(componentId) {
+			var $component = $("#" + componentId);
+			$component.closest("form").addClass("dirty").find(".dirty-aware").removeAttr("disabled");
+		},
+		
+		setupDirtyCheck: function() {
+			var initAYS = function(form) {
+				var $form = $(form);
+				$form.find(".dirty-aware").attr("disabled", "disabled");
+				
+				$form.areYouSure({
+					"silent": true,
+					"addRemoveFieldsMarksDirty": true,
+					change: function() {
+						if ($(this).hasClass("dirty")) {
+							$(this).find(".dirty-aware").removeAttr("disabled");
+						} else {
+							$(this).find(".dirty-aware").attr("disabled", "disabled")
+						}
+					}
+				});
+			};
+			
+			$("form").each(function() {
+				initAYS(this);
+			});
+			
+			$(document).on("replace", function(event, componentId) {
+				var $component = $("#" + componentId);
+				var $forms = $component.find("form");
+				if ($component.is("form"))
+					$forms = $forms.add($component);
+				$forms.each(function() {
+					initAYS(this);
+				});
+				
+				$component.closest("form").not($component).trigger("checkform.areYouSure");
+			});
+			
+		},
+	},
+	
+	setupAjaxLoadingIndicator: function() {
+		$("#ajax-loading-overlay").click(function(e) {
+			e.stopPropagation();
+		});
+
+		Wicket.Event.subscribe('/ajax/call/beforeSend', function() {
+			var ajaxLoadingIndicator = $("#ajax-loading-indicator");
+			ajaxLoadingIndicator[0].timer = setTimeout(function() {
+				ajaxLoadingIndicator.show();
+			}, 1000);		
+		});
+		
+		Wicket.Event.subscribe('/ajax/call/complete', function() {
+			var ajaxLoadingIndicator = $("#ajax-loading-indicator");
+			clearTimeout(ajaxLoadingIndicator[0].timer);
+			ajaxLoadingIndicator.hide();
+		});
+	}, 
+		
+	setupDropdownAndModel: function() {
+		$(document).mousedown(function(event) {
+			var source = $(event.target);
+			if (!source.closest(".dropdown-toggle")[0])
+				pmease.commons.dropdown.hideExcept(source);
+		});
+		
+		$(document).keypress(function(e) {
+			if (e.keyCode == 27) { // esc
+				if ($(".select2-drop:visible").length == 0) {
+					var topmostPopup = $("body>.popup:visible:last");
+					if (topmostPopup.hasClass("modal")) {
+						if (!topmostPopup[0].confirm)
+							pmease.commons.modal.hide(topmostPopup[0].id);
+						else
+							topmostPopup.modal("hide").remove();
+					}
+					if (topmostPopup.hasClass("dropdown-panel"))
+						pmease.commons.dropdown.hide(topmostPopup[0].id);
+				}
+			} else if (e.keyCode == 13) {
+				var topmostPopup = $("body>.popup:visible:last");
+				if (topmostPopup[0].confirm) {
+					topmostPopup[0].confirm.callback();
+					topmostPopup.modal("hide").remove();
+				}
+			}
+		});
+
+		Wicket.Event.subscribe('/ajax/call/complete', function() {
+			$("body>.dropdown-panel:visible").each(function() {
+				if (!$("#" + this.id + "-placeholder")[0])
+					$(this).remove();
+			});
+			
+			$("body>.dropdown-panel:visible:last").align();
+
+			$("body>.modal:visible").each(function() {
+				if (!this.confirm) {
+					if (!$("#" + this.id + "-placeholder")[0]) {
+						$(this).modal("hide");
+						$(this).remove();
+					}
+				} else {
+					if (!$("#" + this.confirm.trigger.id)[0])
+						$(this).modal("hide").remove();
+				}
+			});
+		});
+	},
+	
+	focus: {
+		$components: null,
+		
+		focusOn: function(componentId) {
+			if (componentId)
+				pmease.commons.focus.doFocus($("#" + componentId));
+			pmease.commons.focus.$components = null;
+		},
+		
+		doFocus: function($containers) {
+			$containers.find(".focusable:visible:first").focus(); 
+			$containers.find(".has-error:first .focusable").focus();
+		},
+		
+		setupAutoFocus: function() {
+			if (typeof(Wicket) != "undefined") {
+				var wicketSetFocusOnId = Wicket.Focus.setFocusOnId;
+				Wicket.Focus.setFocusOnId = function(componentId) {
+					pmease.commons.focus.focusOn(componentId);
+					wicketSetFocusOnId(componentId);
+				}
+			}
+			
+			Wicket.Event.subscribe('/ajax/call/beforeSend', function() {
+				pmease.commons.focus.$components = $();
+			});
+			Wicket.Event.subscribe('/ajax/call/complete', function() {
+				if (pmease.commons.focus.$components != null)
+					pmease.commons.focus.doFocus(pmease.commons.focus.$components);
+			});
+
+			pmease.commons.focus.doFocus($(document));
+
+			$(document).on("replace", function(event, componentId) {
+				if (pmease.commons.focus.$components != null)
+					pmease.commons.focus.$components = pmease.commons.focus.$components.add("#" + componentId);
+			});			
+		},
+		
+	},
+
 	// Disable specified button if value of specified input is blank 
 	disableIfBlank: function(inputId, buttonId) {
 		$("#" + inputId).bind("input propertychange keyup", function() {
@@ -583,68 +742,8 @@ pmease.commons = {
 };
 
 $(function() {
-	$(document).mousedown(function(event) {
-		var source = $(event.target);
-		if (!source.closest(".dropdown-toggle")[0])
-			pmease.commons.dropdown.hideExcept(source);
-	});
-	
-	$(document).keypress(function(e) {
-		if (e.keyCode == 27) { // esc
-			if ($(".select2-drop:visible").length == 0) {
-				var topmostPopup = $("body>.popup:visible:last");
-				if (topmostPopup.hasClass("modal")) {
-					if (!topmostPopup[0].confirm)
-						pmease.commons.modal.hide(topmostPopup[0].id);
-					else
-						topmostPopup.modal("hide").remove();
-				}
-				if (topmostPopup.hasClass("dropdown-panel"))
-					pmease.commons.dropdown.hide(topmostPopup[0].id);
-			}
-		} else if (e.keyCode == 13) {
-			var topmostPopup = $("body>.popup:visible:last");
-			if (topmostPopup[0].confirm) {
-				topmostPopup[0].confirm.callback();
-				topmostPopup.modal("hide").remove();
-			}
-		}
-	});
-
-	Wicket.Event.subscribe('/ajax/call/beforeSend', function() {
-		var ajaxLoadingIndicator = $("#ajax-loading-indicator");
-		ajaxLoadingIndicator[0].timer = setTimeout(function() {
-			ajaxLoadingIndicator.show();
-		}, 1000);		
-	});
-	
-	Wicket.Event.subscribe('/ajax/call/complete', function() {
-		$("body>.dropdown-panel:visible").each(function() {
-			if (!$("#" + this.id + "-placeholder")[0])
-				$(this).remove();
-		});
-		
-		$("body>.dropdown-panel:visible:last").align();
-
-		$("body>.modal:visible").each(function() {
-			if (!this.confirm) {
-				if (!$("#" + this.id + "-placeholder")[0]) {
-					$(this).modal("hide");
-					$(this).remove();
-				}
-			} else {
-				if (!$("#" + this.confirm.trigger.id)[0])
-					$(this).modal("hide").remove();
-			}
-		});
-		
-		var ajaxLoadingIndicator = $("#ajax-loading-indicator");
-		clearTimeout(ajaxLoadingIndicator[0].timer);
-		ajaxLoadingIndicator.hide();
-	});
-	
-	$("#ajax-loading-overlay").click(function(e) {
-		e.stopPropagation();
-	});
-	
+	pmease.commons.setupDropdownAndModel();
+	pmease.commons.setupAjaxLoadingIndicator();
+	pmease.commons.form.setupDirtyCheck();
+	pmease.commons.focus.setupAutoFocus();
 });

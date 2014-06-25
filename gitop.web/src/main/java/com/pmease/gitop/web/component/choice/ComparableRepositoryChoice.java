@@ -2,8 +2,8 @@ package com.pmease.gitop.web.component.choice;
 
 import org.apache.wicket.model.IModel;
 
+import com.pmease.commons.wicket.component.select2.Select2Choice;
 import com.pmease.gitop.model.Repository;
-import com.vaynberg.wicket.select2.Select2Choice;
 
 @SuppressWarnings("serial")
 public class ComparableRepositoryChoice extends Select2Choice<Repository> {

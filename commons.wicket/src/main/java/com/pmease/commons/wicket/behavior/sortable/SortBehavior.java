@@ -10,8 +10,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import com.pmease.commons.wicket.jqueryui.JQueryUISortableResourceReference;
-
 public abstract class SortBehavior extends AbstractDefaultAjaxBehavior {
 
 	private static final long serialVersionUID = 1L;
@@ -98,7 +96,7 @@ public abstract class SortBehavior extends AbstractDefaultAjaxBehavior {
 	@Override
 	protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 		super.updateAjaxAttributes(attributes);
-
+		
 		attributes.getDynamicExtraParameters().add("return {"
 				+ "'fromList': fromList, "
 				+ "'toList': toList, "
@@ -141,7 +139,7 @@ public abstract class SortBehavior extends AbstractDefaultAjaxBehavior {
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
-		response.render(JavaScriptHeaderItem.forReference(JQueryUISortableResourceReference.get()));
+		response.render(JavaScriptHeaderItem.forReference(SortResourceReference.get()));
 		response.render(OnLoadHeaderItem.forScript(getSortScript()));
 	}
 	
@@ -164,8 +162,8 @@ public abstract class SortBehavior extends AbstractDefaultAjaxBehavior {
 		if (helperClass != null)
 			script.append("helper:function(event,item){return item.addClass('" + helperClass + "');},");
 		script.append("start:function(event,ui){" +
-				"ui.item.data('fromList', " + listIndex + ");" +
-				"ui.item.data('fromItem', " + itemIndex + ");},");
+				"ui.item.fromList=" + listIndex + ";" +
+				"ui.item.fromItem=" + itemIndex + ";},");
 		if (change != null)
 			script.append("change:" + change + ",");
 		if (update != null)
@@ -173,8 +171,8 @@ public abstract class SortBehavior extends AbstractDefaultAjaxBehavior {
 		
 		script.append("stop:function(event, ui){");
 			script.append("ui.item.removeClass('" + helperClass + "');");			
-		script.append("fromList=ui.item.data('fromList'); fromItem=ui.item.data('fromItem');" +
-				"toList=" + listIndex + "; toItem=" + itemIndex + ";" +
+		script.append("var fromList=ui.item.fromList; var fromItem=ui.item.fromItem;" +
+				"var toList=" + listIndex + "; var toItem=" + itemIndex + ";" +
 				getCallbackScript() + ";}});");
 		return script.toString();
 	}

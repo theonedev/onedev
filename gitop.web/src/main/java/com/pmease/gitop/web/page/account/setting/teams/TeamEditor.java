@@ -25,7 +25,6 @@ import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.permission.operation.GeneralOperation;
-import com.pmease.gitop.web.common.wicket.form.BaseForm;
 
 @SuppressWarnings("serial")
 public class TeamEditor extends Panel {
@@ -66,7 +65,7 @@ public class TeamEditor extends Panel {
 //		moreDiv.add(new TeamRepositoriesEditor("teamrepositories", teamModel));
 	}
 
-	private class TeamPropForm extends BaseForm<Team> {
+	private class TeamPropForm extends Form<Team> {
 
 		private String oldTeamName;
 		

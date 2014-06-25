@@ -31,7 +31,6 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.quantity.Data;
-import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.checkbox.CheckBoxElement;
 import com.pmease.gitop.web.common.wicket.form.select.DropDownChoiceElement;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
@@ -74,7 +73,7 @@ public class RepositoryOptionsPage extends AbstractRepositorySettingPage {
 		
 		repositoryName = getRepository().getName();
 		
-		Form<?> form = new BaseForm<Void>("form");
+		Form<?> form = new Form<Void>("form");
 		add(form);
 		form.add(new FeedbackPanel("feedback",
 									   new ComponentFeedbackMessageFilter(form))

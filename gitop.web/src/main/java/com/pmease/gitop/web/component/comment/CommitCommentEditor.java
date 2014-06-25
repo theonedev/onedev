@@ -28,7 +28,6 @@ import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.component.link.UserLink;
 import com.pmease.gitop.web.component.wiki.WikiTextPanel;
 
@@ -49,7 +48,7 @@ public abstract class CommitCommentEditor extends Panel {
 	}
 
 	protected Form<?> createForm(String id) {
-		return new BaseForm<Void>(id);
+		return new Form<Void>(id);
 	}
 	
 	private WebMarkupContainer previewPanel;

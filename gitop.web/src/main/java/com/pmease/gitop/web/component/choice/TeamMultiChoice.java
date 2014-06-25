@@ -4,9 +4,9 @@ import java.util.Collection;
 
 import org.apache.wicket.model.IModel;
 
+import com.pmease.commons.wicket.component.select2.Select2MultiChoice;
 import com.pmease.gitop.model.Team;
 import com.vaynberg.wicket.select2.ChoiceProvider;
-import com.vaynberg.wicket.select2.Select2MultiChoice;
 
 @SuppressWarnings("serial")
 public class TeamMultiChoice extends Select2MultiChoice<Team> {

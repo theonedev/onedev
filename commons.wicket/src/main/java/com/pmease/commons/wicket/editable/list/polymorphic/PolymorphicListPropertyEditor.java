@@ -208,6 +208,8 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 				rows.removeAll();
 				for (Component child: children)
 					rows.add(child);
+				
+				target.appendJavaScript(String.format("pmease.commons.markEnclosingFormDirty('%s');", table.getMarkupId()));
 			}
 			
 		}.sortable("tbody").handle(".handle").helperClass("sort-helper"));

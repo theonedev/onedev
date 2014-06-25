@@ -8,6 +8,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.util.time.Duration;
 
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.editable.PropertyContext;
@@ -30,7 +31,7 @@ public class IntegrationSettingPage extends AbstractRepositorySettingPage {
 		Form<?> rebasibleBranchesForm = new Form<Void>("form");
 		rebasibleBranchesContainer.add(rebasibleBranchesForm);
 
-		rebasibleBranchesForm.add(new FeedbackPanel("feedback", rebasibleBranchesForm));
+		rebasibleBranchesForm.add(new FeedbackPanel("feedback", rebasibleBranchesForm).hideAfter(Duration.seconds(5)));
 		
 		rebasibleBranchesForm.add(PropertyContext.editModel("editor", new LoadableDetachableModel<Serializable>() {
 
@@ -67,7 +68,7 @@ public class IntegrationSettingPage extends AbstractRepositorySettingPage {
 		Form<?> downstreamStrategiesForm = new Form<Void>("form");
 		downstreamStrategiesContainer.add(downstreamStrategiesForm);
 
-		downstreamStrategiesForm.add(new FeedbackPanel("feedback", downstreamStrategiesForm));
+		downstreamStrategiesForm.add(new FeedbackPanel("feedback", downstreamStrategiesForm).hideAfter(Duration.seconds(5)));
 		
 		downstreamStrategiesForm.add(PropertyContext.editModel("editor", new LoadableDetachableModel<Serializable>() {
 
@@ -104,7 +105,7 @@ public class IntegrationSettingPage extends AbstractRepositorySettingPage {
 		Form<?> upstreamStrategiesForm = new Form<Void>("form");
 		upstreamStrategiesContainer.add(upstreamStrategiesForm);
 
-		upstreamStrategiesForm.add(new FeedbackPanel("feedback", upstreamStrategiesForm));
+		upstreamStrategiesForm.add(new FeedbackPanel("feedback", upstreamStrategiesForm).hideAfter(Duration.seconds(5)));
 		
 		upstreamStrategiesForm.add(PropertyContext.editModel("editor", new LoadableDetachableModel<Serializable>() {
 

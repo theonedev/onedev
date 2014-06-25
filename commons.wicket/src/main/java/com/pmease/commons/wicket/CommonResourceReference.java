@@ -8,11 +8,10 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.Response;
-import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.google.common.collect.Lists;
-import com.vaynberg.wicket.select2.ApplicationSettings;
+import com.pmease.commons.wicket.asset.Asset;
 
 import de.agilecoders.wicket.core.Bootstrap;
 import de.agilecoders.wicket.extensions.markup.html.bootstrap.icon.FontAwesomeCssReference;
@@ -37,7 +36,7 @@ class CommonResourceReference extends JavaScriptResourceReference {
 	private static CommonResourceReference INSTANCE = new CommonResourceReference();
 	
 	private CommonResourceReference() {
-		super(CommonResourceReference.class, "asset/common.js");
+		super(new Key(Asset.COMMON_JS));
 		
 		Bootstrap.renderHead(new IHeaderResponse() {
 
@@ -83,16 +82,11 @@ class CommonResourceReference extends JavaScriptResourceReference {
 
 		dependencies.add(JavaScriptHeaderItem.forReference(Bootstrap.getSettings().getModernizrResourceReference()));
 		dependencies.addAll(bootstrapHeaderItems);
-		dependencies.add(CssHeaderItem.forReference(FontAwesomeCssReference.instance()));
-		ApplicationSettings select2Settings = ApplicationSettings.get();
-		dependencies.add(JavaScriptHeaderItem.forReference(select2Settings.getMouseWheelReference()));
-		dependencies.add(JavaScriptHeaderItem.forReference(select2Settings.getJavaScriptReference()));
-		dependencies.add(CssHeaderItem.forReference(select2Settings.getCssReference()));
+
+		dependencies.add(JavaScriptHeaderItem.forReference(Asset.ARE_YOU_SURE_JS));
 		
-		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(
-				CommonResourceReference.class, "asset/select2-bootstrap.css")));
-		dependencies.add(CssHeaderItem.forReference(
-				new CssResourceReference(CommonResourceReference.class, "asset/common.css")));
+		dependencies.add(CssHeaderItem.forReference(FontAwesomeCssReference.instance()));
+		dependencies.add(CssHeaderItem.forReference(Asset.COMMON_CSS));
 
 		return dependencies;
 	}

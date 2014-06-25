@@ -26,7 +26,6 @@ import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.common.wicket.form.BaseForm;
 import com.pmease.gitop.web.common.wicket.form.select.DropDownChoiceElement;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.model.RepositoryModel;
@@ -66,7 +65,7 @@ public class CreateRepositoryPage extends LayoutPage {
 		}
 		
 		final IModel<Repository> repositoryModel = new RepositoryModel(new Repository());
-		Form<Repository> form = new BaseForm<Repository>("form", repositoryModel);
+		Form<Repository> form = new Form<Repository>("form", repositoryModel);
 		add(form);
 		
 		form.add(new FeedbackPanel("feedback", form));

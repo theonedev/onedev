@@ -55,6 +55,9 @@ public abstract class AbstractWicketConfig extends WebApplication {
 				CommonPage page = (CommonPage) target.getPage();
 				if (page.getSessionFeedback().anyMessage())
 					target.add(page.getSessionFeedback());
+				
+				for (Component component: map.values())
+					target.appendJavaScript((String.format("$(document).trigger('replace', '%s');", component.getMarkupId())));
 			}
 
 			@Override

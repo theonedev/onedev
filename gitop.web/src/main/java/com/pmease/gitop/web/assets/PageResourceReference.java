@@ -2,7 +2,6 @@ package com.pmease.gitop.web.assets;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.PriorityHeaderItem;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
@@ -20,7 +19,6 @@ public class PageResourceReference extends JavaScriptResourceReference {
 		return Dependencies.combine(
 				super.getDependencies(),
 				new PriorityHeaderItem(CssHeaderItem.forReference(AssetLocator.ICONS_CSS)),
-				JavaScriptHeaderItem.forReference(AssetLocator.ARE_YOU_SURE_JS),
 				CssHeaderItem.forReference(AssetLocator.PAGE_CSS));
 	}
 	

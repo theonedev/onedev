@@ -99,51 +99,6 @@ var gitop = {
 		}
 	},
 	
-	form: {
-		/**
-		 * Focus on the first focusable field (input, textarea),
-		 * or focus on the first error field
-		 * 
-		 * @param {String} form selector
-		 */
-		setupFocus: function(form) {
-			var $form = $(form);
-			$form.find('.focusable:first').focus();
-			$form.find('.has-error:first .focusable').focus();
-		},
-		
-		/**
-		 * Enable/disable the submit button when this form is dirty or not
-		 * 
-		 * @param {String} form selector
-		 */
-		areYouSure: function(form) {
-			var $form = $(form);
-			$form.find('.btn-submit').attr('disabled', 'disabled');
-			
-			$form.areYouSure({
-				silent: 'true',
-				change: function() {
-					if ($(this).hasClass('dirty')) {
-						$(this).find('.btn-submit').removeAttr('disabled');
-					} else {
-						$(this).find('.btn-submit').attr('disabled', 'disabled')
-					}
-				}
-			});
-		},
-		
-		/**
-		 * Initialize the form's focus and install dirty check for submit button
-		 * 
-		 * @param {String} form selector
-		 */
-		init: function(form) {
-			gitop.form.setupFocus(form);
-			gitop.form.areYouSure(form);
-		},
-	},
-	
 	utils: {
 		/**
 		 * Trigger a callback when the selected images are loaded:

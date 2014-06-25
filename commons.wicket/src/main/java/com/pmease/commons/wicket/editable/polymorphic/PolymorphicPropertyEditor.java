@@ -88,7 +88,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 			@Override
 			public String getObject() {
 				Component beanEditor = fragment.get(BEAN_EDITOR_ID);
-				if (beanEditor.isVisible()) {
+				if (beanEditor instanceof BeanEditor) {
 					return EditableUtils.getName(((BeanEditor<?>) beanEditor).getBeanDescriptor().getBeanClass());
 				} else {
 					return null;
@@ -133,7 +133,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 		if (propertyValue != null) {
 			beanEditor = BeanContext.editBean(BEAN_EDITOR_ID, propertyValue);
 		} else {
-			beanEditor = new WebMarkupContainer(BEAN_EDITOR_ID).setVisible(false);
+			beanEditor = new WebMarkupContainer(BEAN_EDITOR_ID);
 		}
 		beanEditor.setOutputMarkupId(true);
 		beanEditor.setOutputMarkupPlaceholderTag(true);
@@ -149,7 +149,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 	@Override
 	protected Serializable convertInputToValue() throws ConversionException {
 		Component beanEditor = fragment.get(BEAN_EDITOR_ID);
-		if (beanEditor.isVisible()) {
+		if (beanEditor instanceof BeanEditor) {
 			return ((BeanEditor<Serializable>) beanEditor).getConvertedInput();
 		} else {
 			return null;

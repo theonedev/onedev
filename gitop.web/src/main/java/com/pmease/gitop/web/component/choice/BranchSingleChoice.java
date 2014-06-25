@@ -2,9 +2,9 @@ package com.pmease.gitop.web.component.choice;
 
 import org.apache.wicket.model.IModel;
 
+import com.pmease.commons.wicket.component.select2.Select2Choice;
 import com.pmease.gitop.model.Branch;
 import com.vaynberg.wicket.select2.ChoiceProvider;
-import com.vaynberg.wicket.select2.Select2Choice;
 
 @SuppressWarnings("serial")
 public class BranchSingleChoice extends Select2Choice<Branch> {

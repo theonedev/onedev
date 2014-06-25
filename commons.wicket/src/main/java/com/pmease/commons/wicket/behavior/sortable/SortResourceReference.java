@@ -1,4 +1,4 @@
-package com.pmease.commons.wicket.jqueryui;
+package com.pmease.commons.wicket.behavior.sortable;
 
 import java.util.List;
 
@@ -12,23 +12,23 @@ import de.agilecoders.wicket.extensions.markup.html.bootstrap.jqueryui.JQueryUIW
 import de.agilecoders.wicket.webjars.request.resource.WebjarsJavaScriptResourceReference;
 
 @SuppressWarnings("serial")
-public class JQueryUISortableResourceReference extends WebjarsJavaScriptResourceReference {
+public class SortResourceReference extends WebjarsJavaScriptResourceReference {
     /**
      * Singleton instance of this reference
      */
-    private static final JQueryUISortableResourceReference INSTANCE = new JQueryUISortableResourceReference();
+    private static final SortResourceReference INSTANCE = new SortResourceReference();
 
     /**
      * @return the single instance of the resource reference
      */
-    public static JQueryUISortableResourceReference get() {
+    public static SortResourceReference get() {
         return INSTANCE;
     }
 
     /**
      * Private constructor.
      */
-    private JQueryUISortableResourceReference() {
+    private SortResourceReference() {
         super("jquery-ui/current/ui/minified/jquery.ui.sortable.min.js");
     }
 
