@@ -1384,6 +1384,13 @@ table.verifications tr.passed .fa-check {display: inline; color: #5CB85C;}
 table.verifications tr.not-passed .fa-times {display: inline; color: #D9534F;}
 table.verifications tr.ongoing .fa-cog {display: inline; color: #F0AD4E;}
 
-.integration-setting-page form {margin-top: 16px;}
+.integration-setting-page form {margin-top: 16px; color: #666;}
 .integration-setting-page form>.editor {margin-bottom: 16px;}
 .integration-setting-page .polymorphic.horizontal>table>tbody>tr>td:FIRST-CHILD {width: 360px;}
+.integration-setting-page fieldset {border: 1px solid #DDD !important; margin-bottom: 16px;
+    padding: 16px !important;}
+.integration-setting-page legend {width:auto; margin-bottom: 0; border-bottom:none;
+	font-size: 20px; color: #666;}
+
+.integration-setting-page fieldset.default .form-group {float:left; width: 200px;}
+.integration-setting-page fieldset.default .form-group .name {font-weight: normal !important;}

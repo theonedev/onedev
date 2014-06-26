@@ -31,7 +31,7 @@ public class BooleanPropertyEditor extends PropertyEditor<Boolean> {
 
 			@Override
 			protected String load() {
-				if (hasErrors())
+				if (hasError(true))
 					return " has-error";
 				else
 					return "";

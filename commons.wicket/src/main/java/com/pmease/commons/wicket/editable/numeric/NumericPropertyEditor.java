@@ -33,7 +33,7 @@ public class NumericPropertyEditor extends PropertyEditor<Number> {
 
 			@Override
 			protected String load() {
-				if (hasErrors())
+				if (hasError(true))
 					return " has-error";
 				else
 					return "";

@@ -186,6 +186,7 @@ public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> 
 
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
+				/*
 				List<Component> children = new ArrayList<>();
 				for (Component child: rows)
 					children.add(child);
@@ -196,7 +197,17 @@ public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> 
 				rows.removeAll();
 				for (Component child: children)
 					rows.add(child);
-				target.appendJavaScript(String.format("pmease.commons.form.markDirty('%s');", table.getMarkupId()));
+				*/
+				
+				// Do not use code above as removing components outside of a container and add again 
+				// can cause the fenced feedback panel not functioning properly
+				if (from.getItemIndex() < to.getItemIndex()) {
+					for (int i=0; i<to.getItemIndex()-from.getItemIndex(); i++) 
+						rows.swap(from.getItemIndex()+i, from.getItemIndex()+i+1);
+				} else {
+					for (int i=0; i<from.getItemIndex()-to.getItemIndex(); i++) 
+						rows.swap(from.getItemIndex()-i, from.getItemIndex()-i-1);
+				}
 			}
 			
 		}.sortable("tbody").handle(".handle").helperClass("sort-helper"));
@@ -237,6 +248,27 @@ public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> 
 		return row;
 	}
 	
+	@SuppressWarnings("unchecked")
+	private List<PropertyEditor<Serializable>> getPropertyEditorsAtRow(int index) {
+		WebMarkupContainer table = (WebMarkupContainer) get("listEditor");
+		RepeatingView rows = (RepeatingView) table.get("elements");
+
+		int currentIndex = 0;
+		Iterator<Component> it = rows.iterator();
+		Component row = it.next();
+		while (currentIndex++ < index) {
+			row = it.next();
+		}
+		
+		List<PropertyEditor<Serializable>> propertyEditors = new ArrayList<>();
+		RepeatingView columns = (RepeatingView) row.get("properties");
+		for (Component column: columns) {
+			propertyEditors.add((PropertyEditor<Serializable>) column.get("propertyEditor"));
+		}
+		
+		return propertyEditors;
+	}
+	
 	@Override
 	public ErrorContext getErrorContext(PathSegment pathSegment) {
 		final int index = ((PathSegment.Element) pathSegment).getIndex();
@@ -250,35 +282,27 @@ public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> 
 			}
 
 			@Override
-			public boolean hasErrors() {
-				boolean found = false;
+			public boolean hasError(boolean recursive) {
 				for (FeedbackMessage message: getFeedbackMessages()) {
 					if (message.getMessage().toString().startsWith(messagePrefix)) {
-						found = true;
-						break;
+						return true;
 					}
 				}
-				return found;
+				
+				if (recursive) {
+					for (PropertyEditor<Serializable> propertyEditor: getPropertyEditorsAtRow(index)) {
+						if (propertyEditor.hasError(true))
+							return true;
+					}
+				} 
+				return false;
 			}
 
 			@Override
 			public ErrorContext getErrorContext(PathSegment pathSegment) {
 				PathSegment.Property property = (Property) pathSegment;
 
-				WebMarkupContainer table = (WebMarkupContainer) get("listEditor");
-				RepeatingView rows = (RepeatingView) table.get("elements");
-
-				int currentIndex = 0;
-				Iterator<Component> it = rows.iterator();
-				Component row = it.next();
-				while (currentIndex++ < index) {
-					row = it.next();
-				}
-				
-				RepeatingView columns = (RepeatingView) row.get("properties");
-				for (Component column: columns) {
-					@SuppressWarnings("unchecked")
-					PropertyEditor<Serializable> propertyEditor = (PropertyEditor<Serializable>) column.get("propertyEditor");
+				for (PropertyEditor<Serializable> propertyEditor: getPropertyEditorsAtRow(index)) {
 					if (propertyEditor.getPropertyDescriptor().getPropertyName().equals(property.getName()))
 						return propertyEditor;
 				}
@@ -292,6 +316,7 @@ public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> 
 	protected List<Serializable> convertInputToValue() throws ConversionException {
 		if (get("listEditor").isVisible()) {
 			List<Serializable> newList = newList();
+			
 			RepeatingView rows = (RepeatingView) get("listEditor").get("elements");
 			for (Component row: rows) {
 				Serializable element = newElement();

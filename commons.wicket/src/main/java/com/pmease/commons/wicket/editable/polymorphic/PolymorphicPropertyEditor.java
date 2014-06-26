@@ -13,6 +13,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.base.Preconditions;
@@ -79,6 +80,21 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 		for (Class<?> each: implementations)
 			implementationNames.add(EditableUtils.getName(each));
 				
+		WebMarkupContainer typeSelectorContainer = new WebMarkupContainer("typeSelectorContainer");
+		typeSelectorContainer.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				if (hasError(false))
+					return " has-error";
+				else
+					return "";
+			}
+			
+		}));
+		
+		fragment.add(typeSelectorContainer);
+		
 		DropDownChoice<String> typeSelector = new DropDownChoice<String>("typeSelector", new IModel<String>() {
 			
 			@Override
@@ -122,9 +138,8 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 			}
 			
 		});
+		typeSelectorContainer.add(typeSelector);
 		
-		fragment.add(typeSelector);
-
 		fragment.add(newBeanEditor(getModelObject()));
 	}
 	

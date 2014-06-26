@@ -4,7 +4,7 @@ public interface ErrorContext {
 	
 	void addError(String errorMessage);
 	
-	boolean hasErrors();
+	boolean hasError(boolean recursive);
 	
 	ErrorContext getErrorContext(PathSegment pathSegment);
 }

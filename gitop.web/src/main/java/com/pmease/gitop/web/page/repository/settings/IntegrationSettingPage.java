@@ -6,14 +6,17 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.time.Duration;
 
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
+import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.PropertyContext;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.RepositoryManager;
+import com.pmease.gitop.model.integrationsetting.IntegrationStrategy;
 
 @SuppressWarnings("serial")
 public class IntegrationSettingPage extends AbstractRepositorySettingPage {
@@ -70,7 +73,7 @@ public class IntegrationSettingPage extends AbstractRepositorySettingPage {
 
 		downstreamStrategiesForm.add(new FeedbackPanel("feedback", downstreamStrategiesForm).hideAfter(Duration.seconds(5)));
 		
-		downstreamStrategiesForm.add(PropertyContext.editModel("editor", new LoadableDetachableModel<Serializable>() {
+		downstreamStrategiesForm.add(PropertyContext.editModel("strategiesEditor", new LoadableDetachableModel<Serializable>() {
 
 			@Override
 			public Serializable load() {
@@ -78,6 +81,24 @@ public class IntegrationSettingPage extends AbstractRepositorySettingPage {
 			}
 
 		}, "downstreamStrategies"));
+		
+		downstreamStrategiesForm.add(BeanContext.editModel("defaultStrategyEditor", new IModel<Serializable>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public Serializable getObject() {
+				return getRepository().getIntegrationSetting().getDefaultDownstreamStrategy();
+			}
+
+			@Override
+			public void setObject(Serializable object) {
+				getRepository().getIntegrationSetting().setDefaultDownstreamStrategy((IntegrationStrategy) object);
+			}
+			
+		}));
 		
 		downstreamStrategiesForm.add(new AjaxButton("save") {
 
@@ -107,7 +128,7 @@ public class IntegrationSettingPage extends AbstractRepositorySettingPage {
 
 		upstreamStrategiesForm.add(new FeedbackPanel("feedback", upstreamStrategiesForm).hideAfter(Duration.seconds(5)));
 		
-		upstreamStrategiesForm.add(PropertyContext.editModel("editor", new LoadableDetachableModel<Serializable>() {
+		upstreamStrategiesForm.add(PropertyContext.editModel("strategiesEditor", new LoadableDetachableModel<Serializable>() {
 
 			@Override
 			public Serializable load() {
@@ -116,6 +137,24 @@ public class IntegrationSettingPage extends AbstractRepositorySettingPage {
 
 		}, "upstreamStrategies"));
 		
+		upstreamStrategiesForm.add(BeanContext.editModel("defaultStrategyEditor", new IModel<Serializable>() {
+
+			@Override
+			public Serializable getObject() {
+				return getRepository().getIntegrationSetting().getDefaultUpstreamStrategy();			
+			}
+
+			@Override
+			public void setObject(Serializable object) {
+				getRepository().getIntegrationSetting().setDefaultUpstreamStrategy((IntegrationStrategy) object);				
+			}
+
+			@Override
+			public void detach() {
+			}
+			
+		}));
+
 		upstreamStrategiesForm.add(new AjaxButton("save") {
 
 			@Override

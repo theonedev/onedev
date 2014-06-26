@@ -564,19 +564,24 @@ pmease.commons = {
 		setupDirtyCheck: function() {
 			var initAYS = function(form) {
 				var $form = $(form);
-				$form.find(".dirty-aware").attr("disabled", "disabled");
-				
-				$form.areYouSure({
-					"silent": true,
-					"addRemoveFieldsMarksDirty": true,
-					change: function() {
-						if ($(this).hasClass("dirty")) {
-							$(this).find(".dirty-aware").removeAttr("disabled");
-						} else {
-							$(this).find(".dirty-aware").attr("disabled", "disabled")
+				var $dirtyAware = $form.find(".dirty-aware");
+
+				if ($dirtyAware.length != 0) {
+					$form.addClass("ays-inited");
+					$dirtyAware.attr("disabled", "disabled");
+
+					$form.areYouSure({
+						"silent": true,
+						"addRemoveFieldsMarksDirty": true,
+						change: function() {
+							if ($(this).hasClass("dirty")) {
+								$(this).find(".dirty-aware").removeAttr("disabled");
+							} else {
+								$(this).find(".dirty-aware").attr("disabled", "disabled")
+							}
 						}
-					}
-				});
+					});
+				}
 			};
 			
 			$("form").each(function() {
@@ -592,7 +597,7 @@ pmease.commons = {
 					initAYS(this);
 				});
 				
-				$component.closest("form").not($component).trigger("checkform.areYouSure");
+				$component.closest("form.ays-inited").not($component).trigger("checkform.areYouSure");
 			});
 			
 		},

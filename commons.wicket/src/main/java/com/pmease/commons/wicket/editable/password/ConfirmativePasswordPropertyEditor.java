@@ -41,7 +41,7 @@ public class ConfirmativePasswordPropertyEditor extends PropertyEditor<String> {
 
 			@Override
 			protected String load() {
-				if (hasErrors())
+				if (hasError(true))
 					return " has-error";
 				else
 					return "";

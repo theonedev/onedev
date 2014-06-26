@@ -198,6 +198,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
+				/*
 				List<Component> children = new ArrayList<>();
 				for (Component child: rows)
 					children.add(child);
@@ -208,8 +209,17 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 				rows.removeAll();
 				for (Component child: children)
 					rows.add(child);
-				
-				target.appendJavaScript(String.format("pmease.commons.markEnclosingFormDirty('%s');", table.getMarkupId()));
+				*/
+
+				// Do not use code above as removing components outside of a container and add again 
+				// can cause the fenced feedback panel not functioning properly
+				if (from.getItemIndex() < to.getItemIndex()) {
+					for (int i=0; i<to.getItemIndex()-from.getItemIndex(); i++) 
+						rows.swap(from.getItemIndex()+i, from.getItemIndex()+i+1);
+				} else {
+					for (int i=0; i<from.getItemIndex()-to.getItemIndex(); i++) 
+						rows.swap(from.getItemIndex()-i, from.getItemIndex()-i-1);
+				}
 			}
 			
 		}.sortable("tbody").handle(".handle").helperClass("sort-helper"));
