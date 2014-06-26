@@ -1,15 +1,24 @@
 <wicket:panel>
-	<table class="polymorphic elements table table-condensed">
+	<table wicket:id="table" class="polymorphic list table table-condensed">
 		<tbody>
 			<tr wicket:id="elements">
-				<td>
-					<div wicket:id="elementType" class="type"></div>
-					<div wicket:id="element"></div>
-				</td>
+				<wicket:container wicket:id="content"></wicket:container>
 			</tr>
+		</tbody>
+		<tfoot>
 			<tr wicket:id="noElements">
 				<td class="no-elements">No Elements Defined</td>
 			</tr>
-		</tbody>
+		</tfoot>
 	</table>
+	<wicket:fragment wicket:id="horizontalFrag">
+		<td wicket:id="elementType" class="type-selector"></td>
+		<td wicket:id="element"></td>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="verticalFrag">
+		<td>
+			<div wicket:id="elementType" class="type-selector"></div>
+			<div wicket:id="element"></div>
+		</td>
+	</wicket:fragment>
 </wicket:panel>

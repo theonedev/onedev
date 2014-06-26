@@ -2,24 +2,24 @@
 	<wicket:enclosure child:id="enable">
 		<input wicket:id="enable" type="checkbox" class="enable"></input>
 	</wicket:enclosure>
-	<table wicket:id="listEditor" class="polymorphic elements table table-hover">
+	<table wicket:id="listEditor" class="polymorphic list table table-hover">
 		<tbody>
+			<!-- Put no-elements row here as Firefox has some issues displaying top border 
+			of no-elements if tbody is empty -->
+			<tr wicket:id="noElements" class="no-elements">
+				<td>No Elements Defined</td>
+			</tr>
 			<tr wicket:id="elements"></tr>
-			<wicket:enclosure>
-				<tr>
-					<td wicket:id="noElements" class="no-elements">No Elements Defined</td>
-				</tr>
-			</wicket:enclosure>
 		</tbody>
 		<tfoot>
-			<tr>
-				<td wicket:id="addRow"><a wicket:id="addElement" class="fa fa-2x fa-plus" title="Add new element"></a></td>
+			<tr class="add-element">
+				<td colspan="3"><a wicket:id="addElement" class="fa fa-2x fa-plus" title="Add new element"></a></td>
 			</tr>
 		</tfoot>
 	</table>
 	<wicket:fragment wicket:id="horizontalFrag">
-		<td>
-			<select wicket:id="elementTypeSelector" class="type form-control focusable"></select>
+		<td class="type-selector">
+			<select wicket:id="elementTypeSelector" class="form-control focusable"></select>
 		</td>
 		<td>
 			<div wicket:id="elementEditor"></div>
@@ -34,7 +34,9 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="verticalFrag">
 		<td>
-			<select wicket:id="elementTypeSelector" class="type form-control focusable"></select>
+			<div class="type-selector">
+				<select wicket:id="elementTypeSelector" class="form-control focusable"></select>
+			</div>
 			<div wicket:id="elementEditor"></div>
 			<div wicket:id="feedback"></div>
 		</td>

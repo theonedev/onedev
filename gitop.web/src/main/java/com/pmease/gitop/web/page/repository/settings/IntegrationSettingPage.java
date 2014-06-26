@@ -34,7 +34,7 @@ public class IntegrationSettingPage extends AbstractRepositorySettingPage {
 		Form<?> rebasibleBranchesForm = new Form<Void>("form");
 		rebasibleBranchesContainer.add(rebasibleBranchesForm);
 
-		rebasibleBranchesForm.add(new FeedbackPanel("feedback", rebasibleBranchesForm).hideAfter(Duration.seconds(5)));
+		rebasibleBranchesForm.add(new FeedbackPanel("feedback", rebasibleBranchesForm).hideAfter(Duration.seconds(500)));
 		
 		rebasibleBranchesForm.add(PropertyContext.editModel("editor", new LoadableDetachableModel<Serializable>() {
 

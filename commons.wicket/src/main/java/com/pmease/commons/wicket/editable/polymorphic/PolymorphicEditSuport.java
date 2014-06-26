@@ -38,7 +38,7 @@ public class PolymorphicEditSuport implements EditSupport {
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 							if (model.getObject() != null)
-								return new PolymorphicPropertyViewer(id, model.getObject());
+								return new PolymorphicPropertyViewer(id, propertyDescriptor, model.getObject());
 							else
 								return new NotDefinedLabel(id);
 						}

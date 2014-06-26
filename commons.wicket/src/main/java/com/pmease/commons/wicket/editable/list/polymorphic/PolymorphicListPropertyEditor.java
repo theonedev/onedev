@@ -1,12 +1,13 @@
 package com.pmease.commons.wicket.editable.list.polymorphic;
 
+import static de.agilecoders.wicket.jquery.JQuery.$;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -20,7 +21,6 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.base.Preconditions;
@@ -38,6 +38,9 @@ import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
+import com.pmease.commons.wicket.jquery.FunctionWithParams;
+
+import de.agilecoders.wicket.jquery.JQuery;
 
 @SuppressWarnings("serial")
 public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializable>> {
@@ -146,53 +149,52 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 			table.setVisible(false);
 		}
 		
-		WebMarkupContainer noElements = new WebMarkupContainer("noElements") {
+		final WebMarkupContainer noElements = new WebMarkupContainer("noElements") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!rows.iterator().hasNext());
+				setVisible(rows.size() == 0);
 			}
 			
 		};
-		
+		noElements.setOutputMarkupPlaceholderTag(true);
 		table.add(noElements);
 		
-		WebMarkupContainer newRow = new WebMarkupContainer("addRow");
-		newRow.add(AttributeModifier.replace("colspan", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				if (rows.iterator().hasNext()) {
-					if (horizontal)
-						return "3";
-					else
-						return "2";
-				} else {
-					return "1";
-				}
-			}
-			
-		}));
-		newRow.add(new AjaxButton("addElement") {
+		table.add(new AjaxButton("addElement") {
 
 			@Override
 			public void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
+				Component lastRow;
+				if (rows.size() != 0)
+					lastRow = rows.get(rows.size() - 1);
+				else 
+					lastRow = null;
+				
 				Serializable newElement;
 				try {
 					newElement = (Serializable) implementations.get(0).newInstance();
 				} catch (InstantiationException | IllegalAccessException e) {
 					throw new RuntimeException(e);
 				}
-				addRow(rows, newElement);
-				target.add(PolymorphicListPropertyEditor.this.get("listEditor"));
+				Component newRow = addRow(rows, newElement);
+				
+				JQuery script = $(String.format("<tr id=\"%s\"></tr>", newRow.getMarkupId()));
+				if (lastRow != null)
+					script.chain(new FunctionWithParams("insertAfter", "'#" + lastRow.getMarkupId() + "'"));
+				else
+					script.chain(new FunctionWithParams("appendTo", "'#" + table.getMarkupId() + ">tbody'"));
+
+				target.prependJavaScript(script.get());
+				target.add(newRow);
+				
+				if (rows.size() == 1)
+					target.add(noElements);
 			}
 			
 		}.setDefaultFormProcessing(false));
-		
-		table.add(newRow);
 		
 		table.add(new SortBehavior() {
 
@@ -213,12 +215,14 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 
 				// Do not use code above as removing components outside of a container and add again 
 				// can cause the fenced feedback panel not functioning properly
-				if (from.getItemIndex() < to.getItemIndex()) {
-					for (int i=0; i<to.getItemIndex()-from.getItemIndex(); i++) 
-						rows.swap(from.getItemIndex()+i, from.getItemIndex()+i+1);
+				int fromIndex = from.getItemIndex() - 1;
+				int toIndex = to.getItemIndex() - 1;
+				if (fromIndex < toIndex) {
+					for (int i=0; i<toIndex-fromIndex; i++) 
+						rows.swap(fromIndex+i, fromIndex+i+1);
 				} else {
-					for (int i=0; i<from.getItemIndex()-to.getItemIndex(); i++) 
-						rows.swap(from.getItemIndex()-i, from.getItemIndex()-i-1);
+					for (int i=0; i<fromIndex-toIndex; i++) 
+						rows.swap(fromIndex-i, fromIndex-i-1);
 				}
 			}
 			
@@ -227,7 +231,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 		return table;		
 	}
 
-	private void addRow(final RepeatingView rows, Serializable element) {
+	private WebMarkupContainer addRow(final RepeatingView rows, Serializable element) {
 		final Fragment row;
 		if (horizontal)
 			row = new Fragment(rows.newChildId(), "horizontalFrag", this);
@@ -293,11 +297,19 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
+
+				target.appendJavaScript($(row).chain("remove").get());
 				rows.remove(row);
-				target.add(PolymorphicListPropertyEditor.this.get("listEditor"));
+
+				if (rows.size() == 0) {
+					WebMarkupContainer table = (WebMarkupContainer) PolymorphicListPropertyEditor.this.get("listEditor");
+					target.add(table.get("noElements"));
+				}
 			}
 
 		}.setDefaultFormProcessing(false));
+		
+		return row;
 	}
 
 	private Component newElementEditor(Serializable element) {

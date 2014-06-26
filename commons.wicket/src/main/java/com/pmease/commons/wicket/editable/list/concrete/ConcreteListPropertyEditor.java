@@ -1,4 +1,6 @@
-package com.pmease.commons.wicket.editable.list.table;
+package com.pmease.commons.wicket.editable.list.concrete;
+
+import static de.agilecoders.wicket.jquery.JQuery.$;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -34,15 +36,18 @@ import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PathSegment.Property;
 import com.pmease.commons.wicket.editable.PropertyContext;
 import com.pmease.commons.wicket.editable.PropertyEditor;
+import com.pmease.commons.wicket.jquery.FunctionWithParams;
+
+import de.agilecoders.wicket.jquery.JQuery;
 
 @SuppressWarnings("serial")
-public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> {
+public class ConcreteListPropertyEditor extends PropertyEditor<List<Serializable>> {
 
 	private final List<PropertyContext<Serializable>> propertyContexts;
 	
 	private final Class<?> elementClass;
 	
-	public TableListPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
+	public ConcreteListPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
 		super(id, propertyDescriptor, model);
 		
 		elementClass = EditableUtils.getElementClass(propertyDescriptor.getPropertyGetter().getGenericReturnType());
@@ -92,19 +97,19 @@ public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> 
 	
 				@Override
 				public Boolean getObject() {
-					return TableListPropertyEditor.this.get("listEditor").isVisible();
+					return ConcreteListPropertyEditor.this.get("listEditor").isVisible();
 				}
 	
 				@Override
 				public void setObject(Boolean object) {
-					TableListPropertyEditor.this.get("listEditor").setVisible(object);
+					ConcreteListPropertyEditor.this.get("listEditor").setVisible(object);
 				}
 				
 			}).add(new AjaxFormComponentUpdatingBehavior("onclick") {
 				
 				@Override
 				protected void onUpdate(AjaxRequestTarget target) {
-					target.add(TableListPropertyEditor.this.get("listEditor"));
+					target.add(ConcreteListPropertyEditor.this.get("listEditor"));
 				}
 				
 			}));
@@ -151,18 +156,21 @@ public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> 
 			table.setVisible(false);
 		}
 		
-		WebMarkupContainer noElements = new WebMarkupContainer("noElements") {
+		final WebMarkupContainer noElementsRow = new WebMarkupContainer("noElementsRow") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!rows.iterator().hasNext());
+				setVisible(rows.size() == 0);
 			}
 			
 		};
+		noElementsRow.setOutputMarkupPlaceholderTag(true);
+		table.add(noElementsRow);
 		
-		noElements.add(AttributeModifier.append("colspan", propertyContexts.size() + 1));
-		table.add(noElements);
+		WebMarkupContainer noElementsColumn = new WebMarkupContainer("noElementsColumn");
+		noElementsColumn.add(AttributeModifier.append("colspan", propertyContexts.size() + 1));
+		noElementsRow.add(noElementsColumn);
 		
 		WebMarkupContainer newRow = new WebMarkupContainer("newRow");
 		newRow.add(AttributeModifier.append("colspan", propertyContexts.size() + 1));
@@ -172,10 +180,27 @@ public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> 
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
+				Component lastRow;
+				if (rows.size() != 0)
+					lastRow = rows.get(rows.size() - 1);
+				else 
+					lastRow = null;
+				
 				Component newRow = addRow(rows, newElement());
-				newRow.setOutputMarkupId(true);
-				target.focusComponent(newRow);
-				target.add(TableListPropertyEditor.this.get("listEditor"));
+				JQuery script = $(String.format("<tr id=\"%s\"></tr>", newRow.getMarkupId()));
+				if (lastRow != null)
+					script.chain(new FunctionWithParams("insertAfter", "'#" + lastRow.getMarkupId() + "'"));
+				else
+					script.chain(new FunctionWithParams("appendTo", "'#" + table.getMarkupId() + ">tbody'"));
+
+				target.prependJavaScript(script.get());
+				target.add(newRow);
+				
+				if (rows.size() == 1)
+					target.add(noElementsRow);
+				
+				//target.focusComponent(newRow);
+				//target.add(TableListPropertyEditor.this.get("listEditor"));
 			}
 
 		}.setDefaultFormProcessing(false));
@@ -201,12 +226,14 @@ public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> 
 				
 				// Do not use code above as removing components outside of a container and add again 
 				// can cause the fenced feedback panel not functioning properly
-				if (from.getItemIndex() < to.getItemIndex()) {
-					for (int i=0; i<to.getItemIndex()-from.getItemIndex(); i++) 
-						rows.swap(from.getItemIndex()+i, from.getItemIndex()+i+1);
+				int fromIndex = from.getItemIndex()-1;
+				int toIndex = to.getItemIndex()-1;
+				if (fromIndex < toIndex) {
+					for (int i=0; i<toIndex-fromIndex; i++) 
+						rows.swap(fromIndex+i, fromIndex+i+1);
 				} else {
-					for (int i=0; i<from.getItemIndex()-to.getItemIndex(); i++) 
-						rows.swap(from.getItemIndex()-i, from.getItemIndex()-i-1);
+					for (int i=0; i<fromIndex-toIndex; i++) 
+						rows.swap(fromIndex-i, fromIndex-i-1);
 				}
 			}
 			
@@ -217,6 +244,7 @@ public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> 
 
 	private WebMarkupContainer addRow(final RepeatingView rows, Serializable element) {
 		final WebMarkupContainer row = new WebMarkupContainer(rows.newChildId());
+		row.setOutputMarkupId(true);
 		rows.add(row);
 		
 		RepeatingView columns = new RepeatingView("properties");
@@ -237,10 +265,16 @@ public class TableListPropertyEditor extends PropertyEditor<List<Serializable>> 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				rows.remove(row);
-				target.add(TableListPropertyEditor.this.get("listEditor"));
 				
-				target.focusComponent(null);
+				target.appendJavaScript($(row).chain("remove").get());
+				rows.remove(row);
+
+				if (rows.size() == 0) {
+					WebMarkupContainer table = (WebMarkupContainer) ConcreteListPropertyEditor.this.get("listEditor");
+					target.add(table.get("noElementsRow"));
+				}
+				//target.add(TableListPropertyEditor.this.get("listEditor"));
+				//target.focusComponent(null);
 			}
 
 		}.setDefaultFormProcessing(false));

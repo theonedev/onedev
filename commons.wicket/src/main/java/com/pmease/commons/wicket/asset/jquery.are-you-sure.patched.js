@@ -22,7 +22,7 @@
         'silent' : false,
         'addRemoveFieldsMarksDirty' : false,
         'fieldEvents' : 'change keyup propertychange input',
-        'fieldSelector': ":input:not(input[type=submit]):not(input[type=button])"
+        'fieldSelector': ":input:not(input[type=submit]):not(input[type=button]):not(button)"
       }, options);
 
     var getValue = function($field) {
@@ -51,6 +51,8 @@
         case 'select':
           if($field.val()) {
             val = $field.val().toString();
+          } else if ($field.val() == "") {
+        	  val = "";
           }
           break;
         default:

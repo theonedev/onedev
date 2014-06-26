@@ -1,4 +1,4 @@
-package com.pmease.commons.wicket.editable.list.table;
+package com.pmease.commons.wicket.editable.list.concrete;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -18,13 +18,13 @@ import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyContext;
 
 @SuppressWarnings("serial")
-public class TableListPropertyViewer extends Panel {
+public class ConcreteListPropertyViewer extends Panel {
 
 	private final List<PropertyContext<Serializable>> elementPropertyContexts;
 	
 	private final List<Serializable> elements;
 	
-	public TableListPropertyViewer(String id, Class<?> elementClass, List<Serializable> elements) {
+	public ConcreteListPropertyViewer(String id, Class<?> elementClass, List<Serializable> elements) {
 		super(id);
 		
 		elementPropertyContexts = new ArrayList<>();

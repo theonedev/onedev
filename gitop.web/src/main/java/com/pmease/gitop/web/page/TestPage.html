@@ -1,7 +1,14 @@
 <wicket:extend>
+	<div style="padding: 20px; background: white;">
+	<p>
 	<form wicket:id="form">
 		<div wicket:id="feedback"></div>
-		<div wicket:id="editor"></div>
-		<a wicket:id="save" href="#" class="btn btn-primary">save</a>
+		<div wicket:id="editor" style="margin-bottom: 16px;"></div>
+		<input type="submit" value="Save" class="btn btn-primary dirty-aware"></input>
 	</form>
+	</p>
+	<p>
+		<div wicket:id="viewer"></div>
+	</p>	
+	</div>
 </wicket:extend>

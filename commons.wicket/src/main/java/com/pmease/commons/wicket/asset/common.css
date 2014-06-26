@@ -125,14 +125,16 @@ table td, table th {text-align: left;}
 .wizard .panel-body {padding: 24px;}
 
 /* Editor and Viewer */
-.editable table.elements {margin-bottom: 0;}
-.editable table.elements>tbody>tr>td, .editable table.elements>tfoot>tr>td {
+.editable table.list {margin-bottom: 0;}
+.editable table.list>tbody>tr>td, .editable table.list>tfoot>tr>td {
 	border-top-style: dotted; border-top-width: 2px;}
-.editable table.elements>tfoot>tr>td {border-bottom: 2px dotted #DDD; padding: 0;}
-.editable table.elements>tfoot>tr>td>a {
+.editable table.list>tfoot>tr.add-element>td {border-bottom: 2px dotted #DDD; padding: 0;}
+.editable table.list>tfoot>tr.add-element>td>a {
 	display: block; text-decoration: none; padding: 4px 8px;}
-.editable table.elements>tfoot>tr>td:hover {background-color: #F2F2F2;}
-.editable table.list>tbody>tr>td.no-elements {font-style: italic;}
+
+.editable table.list>tbody>tr.no-elements>td {font-style: italic;}
+.editable table.list>tbody>tr.no-elements>td:hover {background: inherit;}
+.editable table.list>tfoot>tr.add-element>td:hover {background-color: #F2F2F2;}
 
 .editable>.reflection>table {width: 100%;}
 .editable>.reflection>table>tbody>tr>td {vertical-align: top;}
@@ -145,20 +147,20 @@ table td, table th {text-align: left;}
 
 .editor>.reflection.properties>div.form-group:last-child {margin-bottom: 0;} 
 
-.editor>.polymorphic.vertical.elements>tbody>tr>td>select.type {margin-bottom: 12px;}
+.editable>table.polymorphic.vertical.list>tbody>tr>td>.type-selector {margin-bottom: 8px;}
+.editable>.polymorphic.vertical>div.type-selector {margin-bottom: 8px;}
 
-.editor>.polymorphic.horizontal>table {width: 100%;}
-.editor>.polymorphic.horizontal>table>tbody>tr>td {vertical-align: top;}
-.editor>.polymorphic.horizontal>table>tbody>tr>td:FIRST-CHILD {padding-right: 8px;}
-.editor>.polymorphic.vertical>div>select.type {margin-bottom: 8px;}
+.editable>.polymorphic.horizontal>table {width: 100%;}
+.editable>.polymorphic.horizontal>table>tbody>tr>td {vertical-align: top;}
+.editable>.polymorphic.horizontal>table>tbody>tr>td:first-child {padding-right: 8px;}
 
-.editor>table.elements .help-block {display: none;}
+.editor>table.list .help-block {display: none;}
 
-.editor>table.list.elements>tbody>tr>td.actions {width: 76px;}
-.editor>table.list.elements>tbody>tr>td.actions a {margin-right: 8px;}
-.editor>table.elements>tbody>tr>td.actions .handle {
+.editor>table.concrete.list>tbody>tr>td.actions {width: 76px;}
+.editor>table.concrete.list>tbody>tr>td.actions a {margin-right: 8px;}
+.editor>table.list>tbody>tr>td.actions .handle {
 	color: #666; cursor: move; font-size: 22px; margin-top: 4px;}
-.editor>table.elements .sort-helper {border: 2px solid #DDD; background: #F5F5F5;}
+.editor>table.list .sort-helper {border: 2px solid #DDD; background: #F5F5F5;}
 
 .editor>input.enable {margin-bottom: 12px;}
 
@@ -166,12 +168,13 @@ table td, table th {text-align: left;}
 .editor ul.feedbackPanel {margin: 4px 0 0 -8px; padding-bottom: 0;}
 .editor li.feedbackPanelERROR {color: #AA0000;}
 
-.viewer .reflection > tbody > tr.name-omitted > td {padding: 0;}
-.viewer div.type {margin-bottom: 8px; font-style: italic;}
+.viewer .reflection>table>tbody>tr.name-omitted>td {padding: 0;}
+.viewer .type-selector {font-style: italic;} 
 
 /* Select2 */
 .editor .select2-container {width: 100%;}
-.input-group .select2-container.form-control .select2-choice, .input-group .select2-container.form-control .select2-choices {
+.input-group .select2-container.form-control .select2-choice, 
+.input-group .select2-container.form-control .select2-choices {
 	border-radius: 0 4px 4px 0;}
 	
 /* Ajax Loading Indicator */

@@ -17,10 +17,10 @@ import com.pmease.commons.wicket.editable.NotDefinedLabel;
 import com.pmease.commons.wicket.editable.PropertyContext;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.commons.wicket.editable.PropertyViewer;
+import com.pmease.commons.wicket.editable.list.concrete.ConcreteListPropertyEditor;
+import com.pmease.commons.wicket.editable.list.concrete.ConcreteListPropertyViewer;
 import com.pmease.commons.wicket.editable.list.polymorphic.PolymorphicListPropertyEditor;
 import com.pmease.commons.wicket.editable.list.polymorphic.PolymorphicListPropertyViewer;
-import com.pmease.commons.wicket.editable.list.table.TableListPropertyEditor;
-import com.pmease.commons.wicket.editable.list.table.TableListPropertyViewer;
 
 @SuppressWarnings("serial")
 public class ListEditSupport implements EditSupport {
@@ -48,7 +48,7 @@ public class ListEditSupport implements EditSupport {
 									@Override
 									protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 										if (model.getObject() != null) {
-											return new TableListPropertyViewer(id, elementClass, model.getObject());
+											return new ConcreteListPropertyViewer(id, elementClass, model.getObject());
 										} else {
 											return new NotDefinedLabel(id);
 										}
@@ -59,7 +59,7 @@ public class ListEditSupport implements EditSupport {
 
 							@Override
 							public PropertyEditor<List<Serializable>> renderForEdit(String componentId, IModel<List<Serializable>> model) {
-								return new TableListPropertyEditor(componentId, this, model);
+								return new ConcreteListPropertyEditor(componentId, this, model);
 							}
 							
 						};
@@ -74,7 +74,7 @@ public class ListEditSupport implements EditSupport {
 								@Override
 								protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 									if (model.getObject() != null) {
-										return new PolymorphicListPropertyViewer(id, model.getObject());
+										return new PolymorphicListPropertyViewer(id, propertyDescriptor, model.getObject());
 									} else {
 										return new NotDefinedLabel(id);
 									}
