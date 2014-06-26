@@ -2,6 +2,7 @@ package com.pmease.commons.wicket.component.feedback;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.feedback.FeedbackMessage;
+import org.apache.wicket.feedback.FeedbackMessagesModel;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.feedback.IFeedbackMessageFilter;
 import org.apache.wicket.util.time.Duration;
@@ -23,6 +24,11 @@ public class FeedbackPanel extends FencedFeedbackPanel {
 
 	public FeedbackPanel(String id, IFeedbackMessageFilter filter) {
 		super(id, null, filter);
+	}
+
+	@Override
+	protected FeedbackMessagesModel newFeedbackMessagesModel() {
+		return super.newFeedbackMessagesModel();
 	}
 
 	public FeedbackPanel(String id, Component fence, IFeedbackMessageFilter filter) {

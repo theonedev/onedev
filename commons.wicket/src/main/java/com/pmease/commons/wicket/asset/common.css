@@ -8,7 +8,7 @@
 .tal {text-align: left;}
 .tar {text-align: right;}
 
-/* spacings */
+/* Spacings */
 .left-spacing {margin-left: 10px;}
 .right-spacing {margin-right: 10px;}
 .top-spacing {margin-top: 10px;}
@@ -150,7 +150,7 @@ table td, table th {text-align: left;}
 .editor>.polymorphic.horizontal>table {width: 100%;}
 .editor>.polymorphic.horizontal>table>tbody>tr>td {vertical-align: top;}
 .editor>.polymorphic.horizontal>table>tbody>tr>td:FIRST-CHILD {padding-right: 8px;}
-.editor>.polymorphic.vertical>select.type {margin-bottom: 8px;}
+.editor>.polymorphic.vertical>div>select.type {margin-bottom: 8px;}
 
 .editor>table.elements .help-block {display: none;}
 

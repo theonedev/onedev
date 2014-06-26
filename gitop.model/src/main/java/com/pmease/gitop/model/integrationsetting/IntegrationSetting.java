@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
@@ -16,11 +17,24 @@ public class IntegrationSetting implements Serializable {
 
 	private BranchMatcher rebasibleBranches;
 	
-	private List<IntegrationStrategy> downstreamStrategies = new ArrayList<>();
+	private List<BranchStrategy> downstreamStrategies = new ArrayList<>();
 	
-	private List<IntegrationStrategy> upstreamStrategies = new ArrayList<>();
+	private IntegrationStrategy defaultDownstreamStrategy = new IntegrationStrategy();
+	
+	private List<BranchStrategy> upstreamStrategies = new ArrayList<>();
+	
+	private IntegrationStrategy defaultUpstreamStrategy = new IntegrationStrategy();
 
-	@Editable(order=100)
+	public IntegrationSetting() {
+		defaultDownstreamStrategy.setTryRebaseFirst(false);
+		defaultDownstreamStrategy.setMergeAlwaysOtherwise(true);
+		
+		defaultUpstreamStrategy.setTryRebaseFirst(false);
+		defaultUpstreamStrategy.setMergeAlwaysOtherwise(false);
+	}
+	
+	@Editable
+	@Valid
 	@Horizontal
 	public BranchMatcher getRebasibleBranches() {
 		return rebasibleBranches;
@@ -30,25 +44,48 @@ public class IntegrationSetting implements Serializable {
 		this.rebasibleBranches = rebasibleBranches;
 	}
 
-	@Editable(order=200)
+	@Editable
+	@Valid
 	@NotNull
-	public List<IntegrationStrategy> getDownstreamStrategies() {
+	public List<BranchStrategy> getDownstreamStrategies() {
 		return downstreamStrategies;
 	}
 
-	public void setDownstreamStrategies(
-			List<IntegrationStrategy> downstreamStrategies) {
+	public void setDownstreamStrategies(List<BranchStrategy> downstreamStrategies) {
 		this.downstreamStrategies = downstreamStrategies;
 	}
 
-	@Editable(order=300)
+	@Editable
+	@Valid
 	@NotNull
-	public List<IntegrationStrategy> getUpstreamStrategies() {
+	public IntegrationStrategy getDefaultDownstreamStrategy() {
+		return defaultDownstreamStrategy;
+	}
+
+	public void setDefaultDownstreamStrategy(IntegrationStrategy defaultDownstreamStrategy) {
+		this.defaultDownstreamStrategy = defaultDownstreamStrategy;
+	}
+
+	@Editable
+	@Valid
+	@NotNull
+	public List<BranchStrategy> getUpstreamStrategies() {
 		return upstreamStrategies;
 	}
 
-	public void setUpstreamStrategies(List<IntegrationStrategy> upstreamStrategies) {
+	public void setUpstreamStrategies(List<BranchStrategy> upstreamStrategies) {
 		this.upstreamStrategies = upstreamStrategies;
+	}
+
+	@Editable
+	@Valid
+	@NotNull
+	public IntegrationStrategy getDefaultUpstreamStrategy() {
+		return defaultUpstreamStrategy;
+	}
+
+	public void setDefaultUpstreamStrategy(IntegrationStrategy defaultUpstreamStrategy) {
+		this.defaultUpstreamStrategy = defaultUpstreamStrategy;
 	}
 
 }

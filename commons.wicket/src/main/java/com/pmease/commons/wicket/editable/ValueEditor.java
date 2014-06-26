@@ -51,8 +51,11 @@ public abstract class ValueEditor<T> extends FormComponentPanel<T> implements Er
 	}
 
 	@Override
-	public boolean hasErrors() {
-		return !isValid();
+	public boolean hasError(boolean recursive) {
+		if (recursive)
+			return !isValid();
+		else
+			return hasErrorMessage();
 	}
 
 }

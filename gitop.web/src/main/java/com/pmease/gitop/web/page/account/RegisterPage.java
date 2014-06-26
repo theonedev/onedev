@@ -45,9 +45,9 @@ public class RegisterPage extends LayoutPage {
 				
 				UserManager userManager = Gitop.getInstance(UserManager.class);
 
-				if (!nameContext.hasErrors() && userManager.findByName(user.getName()) != null) 
+				if (!nameContext.hasError(true) && userManager.findByName(user.getName()) != null) 
 					nameContext.addError("This name is already used by another user.");
-				if (!emailContext.hasErrors() && userManager.findByEmail(user.getEmail()) != null) 
+				if (!emailContext.hasError(true) && userManager.findByEmail(user.getEmail()) != null) 
 					emailContext.addError("This email address is already used by another user.");
 			}
 			
