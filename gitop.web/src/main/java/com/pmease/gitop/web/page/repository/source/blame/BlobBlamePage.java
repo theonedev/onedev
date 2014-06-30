@@ -194,10 +194,10 @@ public class BlobBlamePage extends AbstractFilePage {
 					
 					link.add(new Label("sha", GitUtils.abbreviateSHA(each.getCommit().getHash(), 8)));
 					container.add(link);
-					container.add(new PersonLink("author", each.getCommit().getAuthor().getPerson(), Mode.NAME));
+					container.add(new PersonLink("author", each.getCommit().getAuthor(), Mode.NAME));
 					
 					container.add(new Label("date", 
-							DataTypes.DATE.asString(each.getCommit().getAuthor().getDate(), "yyyy-MM-dd")));
+							DataTypes.DATE.asString(each.getCommit().getAuthor().getWhen(), "yyyy-MM-dd")));
 					BookmarkablePageLink<Void> blameLink = new BookmarkablePageLink<Void>(
 							"blamelink",
 							BlobBlamePage.class,

@@ -109,7 +109,7 @@ public class SourceCommitPage extends RepositoryPage implements CommitCommentsAw
 				SourceTreePage.newParams(getRepository(), getRevision())));
 		
 		TooltipConfig tooltipConfig = new TooltipConfig().withPlacement(TooltipConfig.Placement.left);
-		add(new PersonLink("authoravatar", getCommit().getAuthor().getPerson(), Mode.AVATAR)
+		add(new PersonLink("authoravatar", getCommit().getAuthor(), Mode.AVATAR)
 				.withTooltipConfig(tooltipConfig));
 		
 		add(new CommitMetaPanel("meta", commitModel));

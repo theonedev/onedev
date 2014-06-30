@@ -9,6 +9,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -31,8 +32,8 @@ public class Commit extends BriefCommit {
 		String subject;
 		String body;
 		String note;
-		GitContrib author;
-		GitContrib committer;
+		PersonIdent author;
+		PersonIdent committer;
 		List<String> parents = Lists.newArrayList();
 		List<FileChange> changes = Lists.newArrayList();
 		
@@ -58,12 +59,12 @@ public class Commit extends BriefCommit {
 			return this;
 		}
 		
-		public Builder author(GitContrib author) {
+		public Builder author(PersonIdent author) {
 			this.author = author;
 			return this;
 		}
 		
-		public Builder committer(GitContrib committer) {
+		public Builder committer(PersonIdent committer) {
 			this.committer = committer;
 			return this;
 		}
@@ -89,7 +90,7 @@ public class Commit extends BriefCommit {
     	return new Builder();
     }
     
-    public Commit(String hash, GitContrib committer, GitContrib author, 
+    public Commit(String hash, PersonIdent committer, PersonIdent author, 
     		String subject, @Nullable String body, 
     		@Nullable String note, List<String> parentHashes, 
     		List<FileChange> fileChanges) {

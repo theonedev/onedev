@@ -9,8 +9,8 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.Model;
+import org.eclipse.jgit.lib.PersonIdent;
 
-import com.pmease.commons.git.GitPerson;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
@@ -28,9 +28,9 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig
 @SuppressWarnings("serial")
 public class PersonLink extends AvatarLink {
 
-	private final GitPerson person;
+	private final PersonIdent person;
 	
-	public PersonLink(String id, GitPerson person, Mode mode) {
+	public PersonLink(String id, PersonIdent person, Mode mode) {
 		super(id, mode);
 		this.person = checkNotNull(person, "person");
 	}
@@ -44,7 +44,7 @@ public class PersonLink extends AvatarLink {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		User user = Gitop.getInstance(UserManager.class).findByEmail(person.getEmail());
+		User user = Gitop.getInstance(UserManager.class).findByEmail(person.getEmailAddress());
 		
 		WebMarkupContainer link;
 		if (user != null) {
@@ -70,7 +70,7 @@ public class PersonLink extends AvatarLink {
 			displayName = person.getName();
 		
 		if (mode == Mode.NAME_AND_AVATAR || mode == Mode.AVATAR) {
-			AvatarImage avatar = new AvatarImage("avatar", person.getEmail());
+			AvatarImage avatar = new AvatarImage("avatar", person.getEmailAddress());
 			if (tooltipConfig != null)
 				avatar.add(new TooltipBehavior(Model.of(displayName), tooltipConfig));
 			link.add(avatar);

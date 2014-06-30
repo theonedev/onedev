@@ -4,6 +4,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.Serializable;
 
+import org.eclipse.jgit.lib.PersonIdent;
+
 import com.google.common.base.Objects;
 
 @SuppressWarnings("serial")
@@ -11,13 +13,13 @@ public class BriefCommit implements Serializable {
 
     private final String hash;
     
-    private final GitContrib committer;
+    private final PersonIdent committer;
     
-    private final GitContrib author;
+    private final PersonIdent author;
     
     private final String subject;
 
-    public BriefCommit(String hash, GitContrib committer, GitContrib author, String subject) {
+    public BriefCommit(String hash, PersonIdent committer, PersonIdent author, String subject) {
     	this.hash = checkNotNull(hash, "hash");
     	this.committer = checkNotNull(committer, "committer");
     	this.author = checkNotNull(author, "author");
@@ -28,11 +30,11 @@ public class BriefCommit implements Serializable {
 		return hash;
 	}
 
-	public GitContrib getCommitter() {
+	public PersonIdent getCommitter() {
 		return committer;
 	}
 
-	public GitContrib getAuthor() {
+	public PersonIdent getAuthor() {
 		return author;
 	}
 
@@ -58,8 +60,8 @@ public class BriefCommit implements Serializable {
 	public String toString() {
 		return Objects.toStringHelper(this)
 				.add("hash", hash)
-				.add("committer", committer.getPerson().getName())
-				.add("date", committer.getDate())
+				.add("committer", committer.getName())
+				.add("date", committer.getWhen())
 				.add("subject", subject)
 				.toString();
 	}

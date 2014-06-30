@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
@@ -13,7 +14,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.pmease.commons.git.GitContrib;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.gitop.web.git.GitUtils;
 
@@ -94,7 +94,7 @@ public class TagForEachRefCommand extends ForEachRefCommand<Map<String, Tag>, Ta
 			builder.hash(hash1);
 			builder.commitHash(hash2);
 			
-			GitContrib tagger = GitUtils.parseGitContrib(pieces[i++]);
+			PersonIdent tagger = GitUtils.parseGitContrib(pieces[i++]);
 			builder.tagger(tagger);
 		}
 		

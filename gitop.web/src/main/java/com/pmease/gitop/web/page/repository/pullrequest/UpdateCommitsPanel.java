@@ -66,11 +66,11 @@ public class UpdateCommitsPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<Commit> item) {
 				Commit commit = item.getModelObject();
-				item.add(new PersonLink("author", commit.getAuthor().getPerson(), Mode.NAME_AND_AVATAR));
+				item.add(new PersonLink("author", commit.getAuthor(), Mode.NAME_AND_AVATAR));
 
 				item.add(new Label("message", commit.getSubject()));
 				
-				item.add(new Label("date", DateUtils.formatAge(commit.getAuthor().getDate())));
+				item.add(new Label("date", DateUtils.formatAge(commit.getAuthor().getWhen())));
 				
 				RepositoryBasePage page = (RepositoryBasePage) getPage();
 				AbstractLink link = new BookmarkablePageLink<Void>("shaLink",

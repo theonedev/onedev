@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -34,6 +35,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.util.SystemReader;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -312,5 +314,10 @@ public class GitUtils {
 		} finally {
 			revWalk.release();
 		}
+	}
+	
+	public static PersonIdent newPersonIdent(String name, String email, Date when) {
+		return new PersonIdent(name, email, when.getTime(), 
+				SystemReader.getInstance().getTimezone(when.getTime()));
 	}
 }

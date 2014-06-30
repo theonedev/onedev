@@ -30,8 +30,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.PersonIdent;
 
-import com.pmease.commons.git.GitPerson;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
@@ -228,7 +228,7 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 		PullRequest request = getPullRequest();
 		User submitter = request.getSubmitter();
 		if (submitter != null) {
-			GitPerson person = new GitPerson(submitter.getName(), submitter.getEmail());
+			PersonIdent person = new PersonIdent(submitter.getName(), submitter.getEmail());
 			add(new PersonLink("user", person, Mode.NAME_AND_AVATAR));
 		} else {
 			add(new Label("<i>System</i>").setEscapeModelStrings(false));

@@ -60,7 +60,7 @@ public class RepositoryListPanel extends Panel {
 							LogCommand command = new LogCommand(repository.git().repoDir());
 							List<Commit> commits = command.maxCount(1).call();
 							Commit first = Iterables.getFirst(commits, null);
-							return first.getCommitter().getDate();
+							return first.getCommitter().getWhen();
 						} else {
 							return repository.getCreatedAt();
 						}

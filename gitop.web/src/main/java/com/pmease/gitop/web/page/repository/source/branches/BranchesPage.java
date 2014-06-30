@@ -258,8 +258,8 @@ public class BranchesPage extends RepositoryPage {
 			add(link);
 			
 			BriefCommit commit = getLastCommit(refName);
-			add(new AgeLabel("updatedTime", Model.of(commit.getAuthor().getDate())));
-			add(new PersonLink("author", commit.getAuthor().getPerson(), Mode.NAME));
+			add(new AgeLabel("updatedTime", Model.of(commit.getAuthor().getWhen())));
+			add(new PersonLink("author", commit.getAuthor(), Mode.NAME));
 			
 			add(new Label("default", "default").setVisibilityAllowed(Objects.equal(refName, getDefaultBranch())));
 		}

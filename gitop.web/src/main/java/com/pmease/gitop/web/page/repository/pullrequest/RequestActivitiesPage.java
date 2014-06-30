@@ -16,8 +16,8 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.PersonIdent;
 
-import com.pmease.commons.git.GitPerson;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.DisableIfBlankBehavior;
 import com.pmease.gitop.core.Gitop;
@@ -113,7 +113,7 @@ public class RequestActivitiesPage extends RequestDetailPage {
 		};
 		add(newCommentContainer);
 		
-		GitPerson person = Gitop.getInstance(UserManager.class).getCurrent().asPerson();
+		PersonIdent person = Gitop.getInstance(UserManager.class).getCurrent().asPerson();
 		newCommentContainer.add(new PersonLink("userAvatar", person, Mode.AVATAR));
 		
 		newCommentContainer.add(new PersonLink("userName", person, Mode.NAME));

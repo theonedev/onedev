@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -17,7 +18,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
-import com.pmease.commons.git.GitContrib;
 import com.pmease.commons.git.RefInfo;
 
 public class GitUtils {
@@ -112,7 +112,7 @@ public class GitUtils {
 	 * @param raw
 	 * @return
 	 */
-	public static @Nullable GitContrib parseGitContrib(String raw) {
+	public static @Nullable PersonIdent parseGitContrib(String raw) {
 		if (Strings.isNullOrEmpty(raw))
 			return null;
 		
@@ -131,7 +131,7 @@ public class GitUtils {
 		
 		String email = raw.substring(pos1 + 1, pos2 - 1);
 		
-		return new GitContrib(name, email, when);
+		return com.pmease.commons.git.GitUtils.newPersonIdent(name, email, when);
 	}
 	
 }

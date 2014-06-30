@@ -2,9 +2,10 @@ package com.pmease.gitop.web.git.command;
 
 import java.io.Serializable;
 
+import org.eclipse.jgit.lib.PersonIdent;
+
 import com.google.common.base.Objects;
 import com.pmease.commons.git.BriefCommit;
-import com.pmease.commons.git.GitContrib;
 
 public class BlameEntry implements Serializable, Comparable<BlameEntry> {
 	private static final long serialVersionUID = 1L;
@@ -19,8 +20,8 @@ public class BlameEntry implements Serializable, Comparable<BlameEntry> {
 		private int sourceLine;
 		private int resultLine;
 		private int numLines;
-		private GitContrib author;
-		private GitContrib committer;
+		private PersonIdent author;
+		private PersonIdent committer;
 		private String summary;
 		
 		public Builder sha(String sha) {
@@ -43,12 +44,12 @@ public class BlameEntry implements Serializable, Comparable<BlameEntry> {
 			return this;
 		}
 		
-		public Builder author(GitContrib author) {
+		public Builder author(PersonIdent author) {
 			this.author = author;
 			return this;
 		}
 		
-		public Builder committer(GitContrib committer) {
+		public Builder committer(PersonIdent committer) {
 			this.committer = committer;
 			return this;
 		}

@@ -15,6 +15,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
@@ -23,7 +24,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
-import com.pmease.commons.git.GitPerson;
 import com.pmease.commons.wicket.behavior.CollapseBehavior;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.AvatarLink.Mode;
@@ -37,7 +37,7 @@ import com.pmease.gitop.web.util.UrlUtils;
 public class SourceBlobPage extends AbstractFilePage {
 
 	private final IModel<Commit> lastCommitModel;
-	private final IModel<List<GitPerson>> committersModel;
+	private final IModel<List<PersonIdent>> committersModel;
 	
 	public SourceBlobPage(PageParameters params) {
 		super(params);
@@ -59,15 +59,15 @@ public class SourceBlobPage extends AbstractFilePage {
 			}
 		};
 		
-		committersModel = new LoadableDetachableModel<List<GitPerson>>() {
+		committersModel = new LoadableDetachableModel<List<PersonIdent>>() {
 
 			@Override
-			protected List<GitPerson> load() {
+			protected List<PersonIdent> load() {
 				Git git = getRepository().git();
 				List<Commit> commits = git.log(null, getRevision(), getFilePath(), 0, 0);
-				Set<GitPerson> users = Sets.newHashSet();
+				Set<PersonIdent> users = Sets.newHashSet();
 				for (Commit each : commits) {
-					users.add(each.getAuthor().getPerson());
+					users.add(each.getAuthor());
 				}
 				
 				return Lists.newArrayList(users);
@@ -115,13 +115,13 @@ public class SourceBlobPage extends AbstractFilePage {
 		detailedToggle.add(new CollapseBehavior(detailedMsg));
 		detailedContainer.add(detailedToggle);
 		
-		add(new PersonLink("author", getLastCommit().getAuthor().getPerson(),  Mode.NAME_AND_AVATAR));
+		add(new PersonLink("author", getLastCommit().getAuthor(),  Mode.NAME_AND_AVATAR));
 		
 		add(new AgeLabel("author-date", new AbstractReadOnlyModel<Date>() {
 
 			@Override
 			public Date getObject() {
-				return getLastCommit().getAuthor().getDate();
+				return getLastCommit().getAuthor().getWhen();
 			}
 			
 		}));
