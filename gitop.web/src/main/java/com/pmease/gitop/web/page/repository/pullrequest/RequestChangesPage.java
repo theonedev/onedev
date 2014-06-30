@@ -18,7 +18,7 @@ import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest.Status;
-import com.pmease.gitop.model.helper.MergeInfo;
+import com.pmease.gitop.model.helper.IntegrationInfo;
 import com.pmease.gitop.web.page.repository.source.commit.diff.DiffViewPanel;
 
 @SuppressWarnings("serial")
@@ -45,11 +45,11 @@ public class RequestChangesPage extends RequestDetailPage {
 			LinkedHashMap<String, String> choices = new LinkedHashMap<>();
 			
 			PullRequest request = getPullRequest();
-			MergeInfo mergeInfo = request.getMergeInfo();
+			IntegrationInfo mergeInfo = request.getIntegrationInfo();
 			if (request.isOpen() 
-					&& mergeInfo.getMergeHead() != null 
-					&& !mergeInfo.getMergeHead().equals(mergeInfo.getRequestHead())) { 
-				choices.put(request.getMergeInfo().getMergeHead(), "Auto-Merge Preview");
+					&& mergeInfo.getIntegrationHead() != null 
+					&& !mergeInfo.getIntegrationHead().equals(mergeInfo.getRequestHead())) { 
+				choices.put(request.getIntegrationInfo().getIntegrationHead(), "Auto-Merge Preview");
 			}
 			
 			int index = 0;

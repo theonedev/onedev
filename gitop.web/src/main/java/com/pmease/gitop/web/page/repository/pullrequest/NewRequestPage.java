@@ -138,7 +138,7 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 			@Override
 			protected List<Commit> load() {
 				PullRequest request = pullRequestModel.getObject();
-				return getSource().getRepository().git().log(request.getMergeInfo().getMergeBase(), 
+				return getSource().getRepository().git().log(request.getIntegrationInfo().getIntegrationBase(), 
 						getSource().getHeadCommit(), null, 0, 0);
 			}
 			
@@ -189,7 +189,7 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 				PullRequest request = pullRequestModel.getObject();
 				if (request.getId() == null
 						&& (request.getStatus() == PENDING_INTEGRATE || request.getStatus() == PENDING_APPROVAL) 
-						&& request.getMergeInfo().getMergeHead() != null) {
+						&& request.getIntegrationInfo().getIntegrationHead() != null) {
 					return "success";
 				} else {
 					return "warning";
@@ -323,7 +323,7 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 							return "No changes to pull.";
 						} else if (request.getStatus() == PENDING_UPDATE) {
 							return "Gate keeper of target repository rejects the pull request.";
-						} else if (request.getMergeInfo().getMergeHead() == null) {
+						} else if (request.getIntegrationInfo().getIntegrationHead() == null) {
 							return "There are merge conflicts.";
 						} else {
 							return "Be able to merge automatically.";
@@ -349,7 +349,7 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 								+ "' is already update to date.";
 					} else if (title != null 
 							&& request.getStatus() != PENDING_UPDATE 
-							&& request.getMergeInfo().getMergeHead() == null) {
+							&& request.getIntegrationInfo().getIntegrationHead() == null) {
 						return "But you can still send the pull request.";
 					}
 				} 
@@ -406,7 +406,7 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 
 			@Override
 			public String getObject() {
-				return pullRequestModel.getObject().getMergeInfo().getMergeBase();
+				return pullRequestModel.getObject().getIntegrationInfo().getIntegrationBase();
 			}
 			
 		}, new AbstractReadOnlyModel<String>() {

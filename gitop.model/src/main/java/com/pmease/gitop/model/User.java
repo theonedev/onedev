@@ -240,7 +240,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	public GitPerson asPerson() {
 		return new GitPerson(getName(), getEmail());
 	}
-
+	
 	public File getLocalAvatar() {
 		return new File(Bootstrap.getSiteDir(), "avatars/" + getId());
 	}

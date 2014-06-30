@@ -7,25 +7,25 @@ import javax.persistence.Embeddable;
 
 @SuppressWarnings("serial")
 @Embeddable
-public class MergeInfo implements Serializable {
+public class IntegrationInfo implements Serializable {
 	
 	private String branchHead;
 	
 	private String requestHead;
 	
-	private String mergeBase;
+	private String integrationBase;
 	
-	private String mergeHead;
+	private String integrationHead;
 	
 	@SuppressWarnings("unused")
-	private MergeInfo() {
+	private IntegrationInfo() {
 	}
 	
-	public MergeInfo(String branchHead, String requestHead, String mergeBase, @Nullable String mergeHead) {
+	public IntegrationInfo(String branchHead, String requestHead, String integrationBase, @Nullable String integrationHead) {
 		this.branchHead = branchHead;
 		this.requestHead = requestHead;
-		this.mergeBase = mergeBase;
-		this.mergeHead = mergeHead;
+		this.integrationBase = integrationBase;
+		this.integrationHead = integrationHead;
 	}
 
 	public String getBranchHead() {
@@ -37,12 +37,12 @@ public class MergeInfo implements Serializable {
 	}
 
 	@Nullable
-	public String getMergeHead() {
-		return mergeHead;
+	public String getIntegrationHead() {
+		return integrationHead;
 	}
 	
-	public String getMergeBase() {
-		return mergeBase;
+	public String getIntegrationBase() {
+		return integrationBase;
 	}
 
 }

@@ -38,7 +38,7 @@ import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.VoteInvitation;
 import com.pmease.gitop.model.gatekeeper.checkresult.Approved;
 import com.pmease.gitop.model.helper.CloseInfo;
-import com.pmease.gitop.model.helper.MergeInfo;
+import com.pmease.gitop.model.helper.IntegrationInfo;
 
 @Singleton
 public class DefaultPullRequestManager implements PullRequestManager {
@@ -117,18 +117,18 @@ public class DefaultPullRequestManager implements PullRequestManager {
 				closeInfo.setComment("Target branch already contains commit of source branch.");
 				request.setCloseInfo(closeInfo);
 				request.setCheckResult(new Approved("Already integrated."));
-				request.setMergeInfo(new MergeInfo(branchHead, requestHead, requestHead, branchHead));
+				request.setIntegrationInfo(new IntegrationInfo(branchHead, requestHead, requestHead, branchHead));
 			} else {
 				// Update head ref so that it can be pulled by build system
 				git.updateRef(request.getHeadRef(), requestHead, null, null);
 				
 				if (git.isAncestor(branchHead, requestHead)) {
-					request.setMergeInfo(new MergeInfo(branchHead, requestHead, branchHead, requestHead));
+					request.setIntegrationInfo(new IntegrationInfo(branchHead, requestHead, branchHead, requestHead));
 					git.updateRef(mergeRef, requestHead, null, null);
-				} else if (!request.getMergeInfo().getBranchHead().equals(branchHead) 
-						|| !request.getMergeInfo().getRequestHead().equals(requestHead)
-						|| (request.getMergeInfo().getMergeHead() != null 
-								&& !request.getMergeInfo().getMergeHead().equals(git.parseRevision(mergeRef, false)))) {
+				} else if (!request.getIntegrationInfo().getBranchHead().equals(branchHead) 
+						|| !request.getIntegrationInfo().getRequestHead().equals(requestHead)
+						|| (request.getIntegrationInfo().getIntegrationHead() != null 
+								&& !request.getIntegrationInfo().getIntegrationHead().equals(git.parseRevision(mergeRef, false)))) {
 					String mergeBase = git.calcMergeBase(branchHead, requestHead);
 					
 					File tempDir = FileUtils.createTempDir();
@@ -145,12 +145,12 @@ public class DefaultPullRequestManager implements PullRequestManager {
 						
 						if (tempGit.merge(requestHead, null, null, null)) {
 							git.fetch(tempGit.repoDir().getAbsolutePath(), "+HEAD:" + mergeRef);
-							request.setMergeInfo(new MergeInfo(branchHead, requestHead, 
+							request.setIntegrationInfo(new IntegrationInfo(branchHead, requestHead, 
 									mergeBase, git.parseRevision(mergeRef, true)));
 						} else {
-							if (request.getMergeInfo().getMergeHead() != null)
+							if (request.getIntegrationInfo().getIntegrationHead() != null)
 								git.deleteRef(mergeRef);
-							request.setMergeInfo(new MergeInfo(branchHead, requestHead, mergeBase, null));
+							request.setIntegrationInfo(new IntegrationInfo(branchHead, requestHead, mergeBase, null));
 						}
 					} finally {
 						FileUtils.deleteDir(tempDir);
@@ -165,7 +165,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 			dao.persist(request);
 			
 			if (request.isAutoMerge())
-				merge(request, null, "Integrated automatically by system.");
+				integrate(request, null, "Integrated automatically by system.");
 		} finally {
 			lock.unlock();
 		}
@@ -199,10 +199,10 @@ public class DefaultPullRequestManager implements PullRequestManager {
 				closeInfo.setComment("Target branch already contains commit of source branch.");
 				request.setCloseInfo(closeInfo);
 				request.setCheckResult(new Approved("Already integrated."));
-				request.setMergeInfo(new MergeInfo(targetHead, sourceHead, sourceHead, targetHead));
+				request.setIntegrationInfo(new IntegrationInfo(targetHead, sourceHead, sourceHead, targetHead));
 			} else {
 				if (target.getRepository().git().isAncestor(targetHead, sourceHead)) {
-					request.setMergeInfo(new MergeInfo(targetHead, sourceHead, targetHead, sourceHead));
+					request.setIntegrationInfo(new IntegrationInfo(targetHead, sourceHead, targetHead, sourceHead));
 				} else {
 					Git git = new Git(sandbox);
 					git.clone(target.getRepository().git().repoDir().getAbsolutePath(), 
@@ -214,9 +214,9 @@ public class DefaultPullRequestManager implements PullRequestManager {
 					
 					String mergeBase = git.calcMergeBase(targetHead, sourceHead);
 					if (git.merge(sourceHead, null, null, null))
-						request.setMergeInfo(new MergeInfo(targetHead, sourceHead, mergeBase, git.parseRevision("HEAD", true)));
+						request.setIntegrationInfo(new IntegrationInfo(targetHead, sourceHead, mergeBase, git.parseRevision("HEAD", true)));
 					else
-						request.setMergeInfo(new MergeInfo(targetHead, sourceHead, mergeBase, null));
+						request.setIntegrationInfo(new IntegrationInfo(targetHead, sourceHead, mergeBase, null));
 				}
 				
 				request.setCheckResult(target.getRepository().getGateKeeper().checkRequest(request));
@@ -239,16 +239,16 @@ public class DefaultPullRequestManager implements PullRequestManager {
 				closeInfo.setComment("Target branch already contains commit of source branch.");
 				request.setCloseInfo(closeInfo);
 				request.setCheckResult(new Approved("Already integrated."));
-				request.setMergeInfo(new MergeInfo(targetHead, sourceHead, sourceHead, targetHead));
+				request.setIntegrationInfo(new IntegrationInfo(targetHead, sourceHead, sourceHead, targetHead));
 			} else {
 				if (git.isAncestor(targetHead, sourceHead)) {
-					request.setMergeInfo(new MergeInfo(targetHead, sourceHead, targetHead, sourceHead));
+					request.setIntegrationInfo(new IntegrationInfo(targetHead, sourceHead, targetHead, sourceHead));
 				} else {
 					String mergeBase = git.calcMergeBase(targetHead, sourceHead);
 					if (git.merge(sourceHead, null, null, null))
-						request.setMergeInfo(new MergeInfo(targetHead, sourceHead, mergeBase, git.parseRevision("HEAD", true)));
+						request.setIntegrationInfo(new IntegrationInfo(targetHead, sourceHead, mergeBase, git.parseRevision("HEAD", true)));
 					else
-						request.setMergeInfo(new MergeInfo(targetHead, sourceHead, mergeBase, null));
+						request.setIntegrationInfo(new IntegrationInfo(targetHead, sourceHead, mergeBase, null));
 				}
 				
 				request.setCheckResult(target.getRepository().getGateKeeper().checkRequest(request));
@@ -287,14 +287,14 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	 * 				is unable to lock the reference.
 	 */
 	@Transactional
-	public boolean merge(final PullRequest request, final User user, final String comment) {
+	public boolean integrate(final PullRequest request, final User user, final String comment) {
 		Lock lock = LockUtils.lock(request.getLockName());
 		try {
 			if (request.getStatus() == Status.PENDING_INTEGRATE) {
 				Git git = request.getTarget().getRepository().git();
 				if (git.updateRef(request.getTarget().getHeadRef(), 
-						request.getMergeInfo().getMergeHead(), 
-						request.getMergeInfo().getBranchHead(), 
+						request.getIntegrationInfo().getIntegrationHead(), 
+						request.getIntegrationInfo().getBranchHead(), 
 						comment!=null?comment:"merge pull request")) {
 
 					CloseInfo closeInfo = new CloseInfo();
@@ -378,7 +378,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		// Update head ref so that it can be pulled by build system
 		targetGit.updateRef(request.getHeadRef(), request.getLatestUpdate().getHeadCommit(), null, null);
 
-		String mergeHead = request.getMergeInfo().getMergeHead();
+		String mergeHead = request.getIntegrationInfo().getIntegrationHead();
 		if (mergeHead != null) {
 			if (mergeHead.equals(request.getLatestUpdate().getHeadCommit()))
 				targetGit.updateRef(request.getMergeRef(), mergeHead, null, null);

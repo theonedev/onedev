@@ -53,7 +53,7 @@ import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Verification;
 import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
-import com.pmease.gitop.model.helper.MergeInfo;
+import com.pmease.gitop.model.helper.IntegrationInfo;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.AvatarLink.Mode;
@@ -95,7 +95,7 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 			protected List<Verification> load() {
 				List<Verification> verifications = new ArrayList<Verification>();
 				for (Verification verification: getPullRequest().getVerifications()) {
-					if (verification.getCommit().equals(getPullRequest().getMergeInfo().getMergeHead())) 
+					if (verification.getCommit().equals(getPullRequest().getIntegrationInfo().getIntegrationHead())) 
 						verifications.add(verification);
 				}
 				return verifications;
@@ -379,7 +379,7 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 
 			@Override
 			public String getObject() {
-				if (getPullRequest().getMergeInfo().getMergeHead() != null)
+				if (getPullRequest().getIntegrationInfo().getIntegrationHead() != null)
 					return "success";
 				else
 					return "warning";
@@ -394,10 +394,10 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				MergeInfo mergeInfo = getPullRequest().getMergeInfo();
+				IntegrationInfo mergeInfo = getPullRequest().getIntegrationInfo();
 
-				setVisible(mergeInfo.getMergeHead() != null 
-						&& !mergeInfo.getMergeHead().equals(mergeInfo.getRequestHead()));
+				setVisible(mergeInfo.getIntegrationHead() != null 
+						&& !mergeInfo.getIntegrationHead().equals(mergeInfo.getRequestHead()));
 			}
 			
 		}; 
@@ -405,7 +405,7 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 		PageParameters params = RequestChangesPage.params4(
 				request, 
 				request.getLatestUpdate().getHeadCommit(), 
-				request.getMergeInfo().getMergeHead());
+				request.getIntegrationInfo().getIntegrationHead());
 		
 		canMergeContainer.add(new BookmarkablePageLink<Void>("preview", RequestChangesPage.class, params));
 		
@@ -467,10 +467,10 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 			protected void onConfigure() {
 				super.onConfigure();
 
-				MergeInfo mergeInfo = getPullRequest().getMergeInfo();
+				IntegrationInfo mergeInfo = getPullRequest().getIntegrationInfo();
 
-				setVisible(mergeInfo.getMergeHead() != null 
-						&& mergeInfo.getMergeHead().equals(mergeInfo.getRequestHead()));
+				setVisible(mergeInfo.getIntegrationHead() != null 
+						&& mergeInfo.getIntegrationHead().equals(mergeInfo.getRequestHead()));
 			}
 			
 		});
@@ -480,7 +480,7 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getPullRequest().getMergeInfo().getMergeHead() == null);
+				setVisible(getPullRequest().getIntegrationInfo().getIntegrationHead() == null);
 			}
 			
 		}; 
@@ -585,7 +585,7 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 				PullRequest request = getPullRequest();
 				setVisible(SecurityUtils.getSubject().isPermitted(
 							ObjectPermission.ofRepositoryWrite(page.getRepository())) 
-						&& request.getMergeInfo().getMergeHead() != null
+						&& request.getIntegrationInfo().getIntegrationHead() != null
 						&& request.getStatus() == Status.PENDING_INTEGRATE);
 			}
 
@@ -647,7 +647,7 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 							currentUser, Vote.Result.DISAPPROVE, comment);
 				} else if (action == Action.Integrate) {
 					Gitop.getInstance(PullRequestManager.class)
-							.merge(getPullRequest(), currentUser, comment);
+							.integrate(getPullRequest(), currentUser, comment);
 				} else {
 					Gitop.getInstance(PullRequestManager.class).discard(
 							getPullRequest(), currentUser, comment);

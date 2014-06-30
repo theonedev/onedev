@@ -20,7 +20,7 @@ public interface PullRequestManager {
     
     PullRequest preview(Branch target, Branch source, User submitter, File sandbox);
     
-    boolean merge(PullRequest request, @Nullable User user, @Nullable String comment);
+    boolean integrate(PullRequest request, @Nullable User user, @Nullable String comment);
     
     void discard(PullRequest request, User user, @Nullable String comment);
     

@@ -32,7 +32,7 @@ import com.pmease.gitop.model.gatekeeper.checkresult.Disapproved;
 import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
 import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
 import com.pmease.gitop.model.helper.CloseInfo;
-import com.pmease.gitop.model.helper.MergeInfo;
+import com.pmease.gitop.model.helper.IntegrationInfo;
 
 @SuppressWarnings("serial")
 @Entity
@@ -83,7 +83,7 @@ public class PullRequest extends AbstractEntity {
 	private CheckResult checkResult;
 
 	@Embedded
-	private MergeInfo mergeInfo;
+	private IntegrationInfo integrationInfo;
 	
 	@Embedded
 	private CloseInfo closeInfo;
@@ -299,17 +299,17 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	/**
-	 * Get merge info of this pull request.
+	 * Get integration info of this pull request.
 	 *  
 	 * @return
-	 * 			merge info of this pull request
+	 * 			integration info of this pull request
 	 */
-	public MergeInfo getMergeInfo() {
-		return mergeInfo;
+	public IntegrationInfo getIntegrationInfo() {
+		return integrationInfo;
 	}
 	
-	public void setMergeInfo(MergeInfo mergeInfo) {
-		this.mergeInfo = mergeInfo;
+	public void setIntegrationInfo(IntegrationInfo integrationInfo) {
+		this.integrationInfo = integrationInfo;
 	}
 
 	public @Nullable CloseInfo getCloseInfo() {
