@@ -75,7 +75,7 @@ public class AbstractGitTest extends AppLoaderMocker {
 	}
 	
 	protected void commit(String comment) {
-		call(workGit.commit().setAuthor(getDefaultAuthor()).setCommitter(getDefaultCommitter()).setMessage(comment));
+		call(workGit.commit().setAuthor(getAuthor()).setCommitter(getCommitter()).setMessage(comment));
 	}
 	
 	protected void addFile(String path, String content) {
@@ -93,11 +93,11 @@ public class AbstractGitTest extends AppLoaderMocker {
 		commit(comment);
 	}
 	
-	protected PersonIdent getDefaultCommitter() {
+	protected PersonIdent getCommitter() {
 		return new PersonIdent("A Tester", "atester@example.com");
 	}
 	
-	protected PersonIdent getDefaultAuthor() {
+	protected PersonIdent getAuthor() {
 		return new PersonIdent("A Tester", "atester@example.com");
 	}
 	
