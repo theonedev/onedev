@@ -161,5 +161,5 @@ public abstract class GitCommand<V> implements Callable<V> {
 	protected void error(String line) {
 		logger.error(line);
 	}
-	
+
 }
