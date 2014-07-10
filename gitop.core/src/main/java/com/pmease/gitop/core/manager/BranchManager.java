@@ -86,7 +86,7 @@ public interface BranchManager {
      * @param byUser
      * 			user who updates the ref
      * @param byRequest
-     * 			integration request on behalf of which the branch ref is updated
+     * 			pull request on behalf of which the branch ref is updated
      */
     public void onBranchRefUpdate(Branch branch, @Nullable User byUser, @Nullable PullRequest byRequest);
     

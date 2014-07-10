@@ -190,7 +190,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 									else 
 										fastForwardMode = FastForwardMode.FF;
 									integrateHead = tempGit.merge(requestHead, fastForwardMode, null, null, 
-											"Merge integration request: " + request.getTitle());
+											"Merge pull request: " + request.getTitle());
 								}
 							}
 							
@@ -265,7 +265,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 					Git sourceGit = request.getSource().getRepository().git();
 					if (!sourceGit.updateRef(request.getSource().getHeadRef(), 
 							request.getIntegrationInfo().getIntegrationHead(), 
-							request.getIntegrationInfo().getRequestHead(), "Rebase for integration request: " +request.getId())) {
+							request.getIntegrationInfo().getRequestHead(), "Rebase for pull request: " +request.getId())) {
 						return false;
 					} else {
 						onBranchRefUpdate(request.getSource().getId(), userId, request.getId());
@@ -275,7 +275,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 				if (git.updateRef(request.getTarget().getHeadRef(), 
 						request.getIntegrationInfo().getIntegrationHead(), 
 						request.getIntegrationInfo().getBranchHead(), 
-						comment!=null?comment:"Integration request #" + request.getId())) {
+						comment!=null?comment:"Pull request #" + request.getId())) {
 					onBranchRefUpdate(request.getTarget().getId(), userId, request.getId());
 
 					CloseInfo closeInfo = new CloseInfo();

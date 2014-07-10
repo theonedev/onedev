@@ -410,7 +410,7 @@ public class PullRequest extends AbstractEntity {
 	
 	public String getLockName() {
 		Preconditions.checkNotNull(getId());
-		return "integration request: " + getId();
+		return "pull request: " + getId();
 	}
 	
 	/**
