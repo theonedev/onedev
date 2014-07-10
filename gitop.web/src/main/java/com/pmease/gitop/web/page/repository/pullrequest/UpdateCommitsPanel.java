@@ -30,6 +30,12 @@ import com.pmease.gitop.web.page.repository.RepositoryBasePage;
 import com.pmease.gitop.web.page.repository.source.commit.SourceCommitPage;
 import com.pmease.gitop.web.util.DateUtils;
 
+/**
+ * This panel displays commits of a request update.
+ * 
+ * @author robin
+ *
+ */
 @SuppressWarnings("serial")
 public class UpdateCommitsPanel extends Panel {
 

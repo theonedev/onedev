@@ -146,7 +146,7 @@ public class GitPostReceiveCallback extends HttpServlet {
 							public Void call() throws Exception {
 								Branch branch = dao.load(Branch.class, branchId);
 								User user = dao.load(User.class, userId);
-								branchManager.onBranchRefUpdate(branch, user);
+								branchManager.onBranchRefUpdate(branch, user, null);
 								return null;
 							}
 							

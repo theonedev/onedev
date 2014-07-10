@@ -23,7 +23,8 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.pmease.commons.util.LogUtils;
 
 /**
  * heavily inspired from LogOutputStream
@@ -35,8 +36,6 @@ import org.slf4j.LoggerFactory;
  *
  */
 public abstract class LineConsumer extends OutputStream {
-	
-	private static final Logger logger = LoggerFactory.getLogger(LineConsumer.class);
 	
 	/**
 	 * If this property is not empty, output will be re-directed to this stream
@@ -118,6 +117,10 @@ public abstract class LineConsumer extends OutputStream {
     	flush();
     	super.close();
     }
+    
+    private static Logger getLogger() {
+    	return LogUtils.getLogger(3);
+    }
 
 	public static class InfoLogger extends LineConsumer {
 
@@ -130,7 +133,7 @@ public abstract class LineConsumer extends OutputStream {
 		
 		@Override
 		public void consume(String line) {
-			logger.info(line);
+			getLogger().info(line);
 		}
 		
 	}
@@ -147,7 +150,7 @@ public abstract class LineConsumer extends OutputStream {
 		
 		@Override
 		public void consume(String line) {
-			logger.debug(line);
+			getLogger().debug(line);
 		}
 		
 	}
@@ -164,7 +167,7 @@ public abstract class LineConsumer extends OutputStream {
 		
 		@Override
 		public void consume(String line) {
-			logger.trace(line);
+			getLogger().trace(line);
 		}
 		
 	}
@@ -181,7 +184,7 @@ public abstract class LineConsumer extends OutputStream {
 		
 		@Override
 		public void consume(String line) {
-			logger.warn(line);
+			getLogger().warn(line);
 		}
 		
 	}
@@ -198,7 +201,7 @@ public abstract class LineConsumer extends OutputStream {
 		
 		@Override
 		public void consume(String line) {
-			logger.error(line);
+			getLogger().error(line);
 		}
 		
 	}

@@ -1,12 +1,18 @@
 <wicket:extend>
 	<div class="changes">
-		<div class="comparison-choices">
-			<span class="comparison-base">
-				Comparision Base: <select wicket:id="baseCommitChoice"></select>
-			</span>
-			<span class="comparison-head">
-				Comparision Head: <select wicket:id="headCommitChoice"></select>
-			</span>
+		<div class="comparison-choices clearfix">
+			<div class="comparison-base clearfix pull-left">
+				<label class="pull-left">Comparision Base:</label> 
+				<div class="pull-left select">
+					<select wicket:id="baseCommitChoice" class="form-control"></select>
+				</div>
+			</div>
+			<div class="comparison-head clearfix pull-left">
+				<label class="pull-left">Comparision Head:</label>
+				<div class="pull-left select">
+					<select wicket:id="headCommitChoice" class="form-control"></select>
+				</div>
+			</div>
 		</div>
 		<div wicket:id="diffView" class="diffs"></div>
 	</div>

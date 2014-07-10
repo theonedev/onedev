@@ -31,7 +31,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         bareGit.init(true);
         
         workGit = new Git(new File(repoDir, "work"));
-        workGit.clone(bareGit.repoDir().getAbsolutePath(), false);
+        workGit.clone(bareGit.repoDir().getAbsolutePath(), false, false, false, null);
         
         repository = Mockito.mock(Repository.class);
         Mockito.when(repository.git()).thenReturn(bareGit);
@@ -114,7 +114,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         workGit.add("3");
         workGit.commit("dev:3", false, false);
         
-        workGit.merge("master", null, null, null);
+        workGit.merge("master", null, null, null, null);
 
         FileUtils.touchFile(new File(workGit.repoDir(), "4"));
         workGit.add("4");
@@ -185,7 +185,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         bareGit.updateRef(update1.getHeadRef(), update1.getHeadCommit(), null, null);
         request.getUpdates().add(update1);
 
-        workGit.merge("master", null, null, "merge master to dev");
+        workGit.merge("master", null, null, null, "merge master to dev");
         workGit.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
         
         PullRequestUpdate update2 = new PullRequestUpdate();
@@ -242,7 +242,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         workGit.commit("d2", false, false);
 
         workGit.checkout("master", null);
-        workGit.merge("dev", null, null, null);
+        workGit.merge("dev", null, null, null, null);
         
         workGit.checkout("dev", null);
         FileUtils.touchFile(new File(workGit.repoDir(), "d3"));

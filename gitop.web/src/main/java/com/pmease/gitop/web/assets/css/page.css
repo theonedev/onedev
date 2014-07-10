@@ -1219,7 +1219,8 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 .dropdown-panel .directory-chooser .title {font-weight: bold; border-bottom: 1px solid #888888;}
 .dropdown-panel .alert.empty-directory-choice {margin: 0px;}
 
-.comparable-branch-selector .connector {margin-top: 4px; color: #BBB; font-weight: bold; font-size: 16px;}
+.comparable-branch-selector .connector {margin: 10px 0 0 0; color: #BBB; font-weight: bold; 
+	font-size: 16px;}
 
 /* PULL REQUEST LIST PANEL */
 .request-list>.head {padding: 12px 10px !important; font-size: 16px;}
@@ -1249,41 +1250,15 @@ ul.status-help li:last-child .description {border-bottom: none;}
 
 .new-request>.branches>.label {font-size: 16px; color: #444; margin-top: 4px;}
 .new-request>.branches>.target {margin-right: 12px;}
-
+.new-request>.branches>.source {margin-right: 24px;}
 .new-request>div {margin-bottom: 20px;}
-.new-request>.feedback {background: #F2F2F2; padding: 4px; border-radius: 4px;}
-.new-request>.feedback table {width: 100%; border-collapse: separate;}
-.new-request>.feedback td {vertical-align: top;}
-
-.new-request>.feedback td.message {width: 70%;}
-.new-request>.feedback td.message>.title {margin: -1px 4px 8px -1px;}
-.new-request>.feedback td.message>.comment {margin: 0 4px -1px -1px;}
-.new-request>.feedback td.message>.comment>textarea {resize: vertical; min-height: 64px;}
-
-.new-request>.feedback td.status {width: 30%; border:1px solid #CCC; border-radius: 4px; 
-	padding: 16px; margin: 1px 0 1px 4px;}
-.new-request>.feedback td.status .summary, .pull-request>.feedback td.status .validation {
-	font-size: 18px; margin-bottom: 16px;}
-.new-request>.feedback td.status .detail {margin-bottom: 16px;}
-.new-request>.feedback td.status tr>td:first-child {width: 1%;}
-.new-request>.feedback .icon {font-size: 26px; margin-right: 8px; display: none;}
-.new-request>.feedback .status .validation {display: none;}
-
-.new-request>.feedback.warning .icon-warning-sign {display: block; color: #8A6D3B;}
-.new-request>.feedback.warning {color: #8A6D3B;}
-.new-request>.feedback.warning td.status {border-color: #F7DEAB; background-color: #FCF8E3;}
-
-.new-request>.feedback.success .icon-ok-circle {display: block; color: #3C763D;}
-.new-request>.feedback.success {color: #3C763D;}
-.new-request>.feedback.success td.status {border-color: #BDDCA4; background-color: #DFF0D8;}
-
-.new-request>.feedback td.status.has-error .icon {display: none;}
-.new-request>.feedback td.status.has-error .icon.icon-warning-sign {display: block; 
-	color: #A94442;}
-.new-request>.feedback td.status.has-error {color: #A94442; border-color: #EBCCD1; 
-	background-color: #F2DEDE;}
-.new-request>.feedback td.status.has-error .summary, 
-.new-request>.feedback td.status.has-error .detail {display: none;}
+.new-request .status .summary {font-size: 16px; padding: 0; margin-bottom: 8px;}
+.new-request .can-send {border-radius: 4px; background: #F2F2F2; padding: 4px;}
+.new-request .can-send form .title, .new-request .can-send form .comment {margin-bottom: 12px;}
+.new-request .can-send textarea {resize: vertical; min-height: 64px;}
+.new-request .can-send .foot>div {margin-right: 12px;}
+.new-request .can-send .foot label {font-weight: normal;}
+.new-request .can-send .foot .help-block {margin: 0;}
 
 /* PULL REQUEST DETAIL PANEL */
 .request-detail {padding: 20px;}
@@ -1297,9 +1272,6 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.head>div {margin-right: 8px;}
 .request-detail>.head>.id {color: #999;}
 .request-detail>.head>.icon {font-size: 16px;}
-
-.request-detail>.summary .branch.label {background-color: #D8D8D8;}
-.request-detail>.summary .branch .icon {color: #666666;}
 
 .request-detail>.status {background: #F2F2F2; border-radius: 4px;}
 .request-detail>.status .fa {display: none; font-size: 28px;}
@@ -1353,10 +1325,12 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail .activities .votes .fa-comment-o {color: #888; font-size: 16px;}
 .request-detail .activities .votes .vote {margin-bottom: 4px; white-space: nowrap;}
 
-.request-detail .changes .comparison-choices {margin-bottom: 16px; border-bottom: 1px dashed #CCC;
-	padding-bottom: 16px;}
-.request-detail .changes .comparison-choices span {font-weight: bold; 
-	margin-right: 36px;}
+.request-detail .changes .comparison-choices {margin-bottom: 16px; 
+	border-bottom: 1px dashed #CCC; padding-bottom: 16px;}
+.request-detail .changes .comparison-choices>div {font-weight: bold; margin-right: 36px;}
+.request-detail .changes .comparison-choices label {font-weight: bold; margin-top: 4px; 
+	margin-right: 8px; font-size: 16px; color: #666;}
+.request-detail .changes .comparison-choices select {font-weight: normal;}
 
 table.update-commits {margin: 0 0 0 -14px;}
 table.update-commits tr>td.handle {

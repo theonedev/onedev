@@ -8,18 +8,16 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.git.GitConfig;
 import com.pmease.commons.git.GitVersion;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.commons.util.LogUtils;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
 public abstract class GitCommand<V> implements Callable<V> {
-
-	protected static final Logger logger = LoggerFactory.getLogger(GitCommand.class);
 
 	private static final String MIN_VERSION = "1.8.0";
 	
@@ -27,11 +25,15 @@ public abstract class GitCommand<V> implements Callable<V> {
 	
 	private final Map<String, String> environments;
 	
+	private static Logger getLogger() {
+		return LogUtils.getLogger(3);
+	}
+	
 	protected static final LineConsumer debugLogger = new LineConsumer() {
 
 		@Override
 		public void consume(String line) {
-			logger.debug(line);
+			getLogger().debug(line);
 		}
 		
 	};
@@ -40,7 +42,7 @@ public abstract class GitCommand<V> implements Callable<V> {
 
 		@Override
 		public void consume(String line) {
-			logger.info(line);
+			getLogger().info(line);
 		}
 		
 	};
@@ -49,7 +51,7 @@ public abstract class GitCommand<V> implements Callable<V> {
 
 		@Override
 		public void consume(String line) {
-			logger.warn(line);
+			getLogger().warn(line);
 		}
 		
 	};
@@ -58,7 +60,7 @@ public abstract class GitCommand<V> implements Callable<V> {
 
 		@Override
 		public void consume(String line) {
-			logger.error(line);
+			getLogger().error(line);
 		}
 		
 	};
@@ -67,7 +69,7 @@ public abstract class GitCommand<V> implements Callable<V> {
 
 		@Override
 		public void consume(String line) {
-			logger.trace(line);
+			getLogger().trace(line);
 		}
 		
 	};
@@ -143,23 +145,23 @@ public abstract class GitCommand<V> implements Callable<V> {
 	public abstract V call();
 	
 	protected void debug(String line) {
-		logger.debug(line);
+		getLogger().debug(line);
 	}
 	
 	protected void trace(String line) {
-		logger.trace(line);
+		getLogger().trace(line);
 	}
 
 	protected void info(String line) {
-		logger.info(line);
+		getLogger().info(line);
 	}
 
 	protected void warn(String line) {
-		logger.warn(line);
+		getLogger().warn(line);
 	}
 
 	protected void error(String line) {
-		logger.error(line);
+		getLogger().error(line);
 	}
 
 }

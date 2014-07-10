@@ -55,6 +55,8 @@ public class PullRequest extends AbstractEntity {
 		}
 		
 	}
+
+	private boolean toUpstream = true;
 	
 	@Column(nullable = false)
 	private String title;
@@ -134,6 +136,14 @@ public class PullRequest extends AbstractEntity {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public boolean isToUpstream() {
+		return toUpstream;
+	}
+
+	public void setToUpstream(boolean toUpstream) {
+		this.toUpstream = toUpstream;
 	}
 
 	/**
@@ -302,9 +312,10 @@ public class PullRequest extends AbstractEntity {
 	 * Get integration info of this pull request.
 	 *  
 	 * @return
-	 * 			integration info of this pull request
+	 * 			integration info of this pull request, or <tt>null</tt> if integration 
+	 * 			info has not been calculated yet
 	 */
-	public IntegrationInfo getIntegrationInfo() {
+	public @Nullable IntegrationInfo getIntegrationInfo() {
 		return integrationInfo;
 	}
 	
@@ -380,12 +391,12 @@ public class PullRequest extends AbstractEntity {
 
 	public String getHeadRef() {
 		Preconditions.checkNotNull(getId());
-		return Repository.REFS_GITOP + "pulls/" + getId() + "/head";
+		return Repository.REFS_GITOP + "requests/" + getId() + "/head";
 	}
 	
-	public String getMergeRef() {
+	public String getIntegrateRef() {
 		Preconditions.checkNotNull(getId());
-		return Repository.REFS_GITOP + "pulls/" + getId() + "/merge";
+		return Repository.REFS_GITOP + "requests/" + getId() + "/integrate";
 	};
 
 	/**
@@ -393,13 +404,13 @@ public class PullRequest extends AbstractEntity {
 	 */
 	public void deleteRefs() {
 		Git git = getTarget().getRepository().git();
-		git.deleteRef(getHeadRef());
-		git.deleteRef(getMergeRef());
+		git.deleteRef(getHeadRef(), null, null);
+		git.deleteRef(getIntegrateRef(), null, null);
 	}
 	
 	public String getLockName() {
 		Preconditions.checkNotNull(getId());
-		return "pull request: " + getId();
+		return "integration request: " + getId();
 	}
 	
 	/**
@@ -496,7 +507,12 @@ public class PullRequest extends AbstractEntity {
 		if (pendingCommits == null) {
 			pendingCommits = new HashSet<>();
 			Repository repo = getTarget().getRepository();
-			for (Commit commit: repo.git().log(getTarget().getHeadCommit(), getLatestUpdate().getHeadCommit(), null, 0, 0)) {
+			String futureTargetHead;
+			if (getIntegrationInfo() != null && getIntegrationInfo().getIntegrationHead() != null)
+				futureTargetHead = getIntegrationInfo().getIntegrationHead();
+			else
+				futureTargetHead = getLatestUpdate().getHeadCommit();
+			for (Commit commit: repo.git().log(getTarget().getHeadCommit(), futureTargetHead, null, 0, 0)) {
 				pendingCommits.add(commit.getHash());
 			}
 		}

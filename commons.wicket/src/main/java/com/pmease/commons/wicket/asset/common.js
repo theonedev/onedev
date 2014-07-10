@@ -716,7 +716,8 @@ pmease.commons = {
 
 	// Disable specified button if value of specified input is blank 
 	disableIfBlank: function(inputId, buttonId) {
-		$("#" + inputId).bind("input propertychange keyup", function() {
+		var $input = $("#" + inputId);
+		$input.bind("input propertychange keyup", function() {
 			var value = $(this).val();
 			var button = $("#" + buttonId);
 			if (value.trim().length != 0)
@@ -724,6 +725,7 @@ pmease.commons = {
 			else
 				button.attr("disabled", "disabled");
 		});
+		$input.trigger("input");
 	},
 	
 	showSessionFeedback: function() {

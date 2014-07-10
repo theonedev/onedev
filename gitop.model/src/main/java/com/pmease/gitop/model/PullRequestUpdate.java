@@ -162,8 +162,8 @@ public class PullRequestUpdate extends AbstractEntity {
 							tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, branchName);
 							tempGit.updateRef("HEAD", mergeBase, null, null);
 							tempGit.reset(null, null);
-							Preconditions.checkState(tempGit.merge(previousUpdate, null, "ours", null));
-							git.fetch(tempGit.repoDir().getAbsolutePath(), "+HEAD:" + changeRef);
+							Preconditions.checkState(tempGit.merge(previousUpdate, null, null, "ours", null) != null);
+							git.fetch(tempGit, "+HEAD:" + changeRef);
 							changeCommit = git.parseRevision(changeRef, true);
 						} finally {
 							FileUtils.deleteDir(tempDir);
@@ -201,8 +201,8 @@ public class PullRequestUpdate extends AbstractEntity {
 
 	public void deleteRefs() {
 		Git git = getRequest().getTarget().getRepository().git();
-		git.deleteRef(getHeadRef());
-		git.deleteRef(getChangeRef());
+		git.deleteRef(getHeadRef(), null, null);
+		git.deleteRef(getChangeRef(), null, null);
 	}
 	
 	public String getLockName() {
@@ -253,7 +253,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	}
 	
 	/**
-	 * Get commits belonging to this update, descendantly ordered with commit date 
+	 * Get commits belonging to this update, descendantly ordered by commit date 
 	 * 
 	 * @return
 	 * 			commits belonging to this update

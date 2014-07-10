@@ -1,6 +1,7 @@
 package com.pmease.commons.git.command;
 
 import java.io.File;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
@@ -53,7 +54,7 @@ public class UpdateRefCommand extends GitCommand<Boolean> {
 		if (reason != null)
             cmd.addArgs("-m", reason);
 		
-		final boolean refLockError[] = new boolean[]{false};
+		final AtomicBoolean refLockError = new AtomicBoolean(false);
 		ExecuteResult result = cmd.execute(debugLogger, new LineConsumer() {
 
 			@Override
@@ -64,12 +65,12 @@ public class UpdateRefCommand extends GitCommand<Boolean> {
 					error(line);
 				
 				if (line.startsWith("fatal: Cannot lock the ref")) 
-					refLockError[0] = true;
+					refLockError.set(true);
 			} 
 			
 		});
 		
-		if (refLockError[0])
+		if (refLockError.get())
 			return false;
 		
 		result.checkReturnCode();

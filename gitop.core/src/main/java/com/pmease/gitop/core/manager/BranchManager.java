@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import com.google.inject.ImplementedBy;
 import com.pmease.gitop.core.manager.impl.DefaultBranchManager;
 import com.pmease.gitop.model.Branch;
+import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 
@@ -82,10 +83,12 @@ public interface BranchManager {
      * 
      * @param branch
      * 			branch whose ref has been updated
-     * @param user
+     * @param byUser
      * 			user who updates the ref
+     * @param byRequest
+     * 			integration request on behalf of which the branch ref is updated
      */
-    public void onBranchRefUpdate(Branch branch, @Nullable User user);
+    public void onBranchRefUpdate(Branch branch, @Nullable User byUser, @Nullable PullRequest byRequest);
     
     public void trim(Collection<Long> branchIds);
     

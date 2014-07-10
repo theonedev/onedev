@@ -55,7 +55,7 @@ public class LogCommandTest extends AbstractGitTest {
     		workGit.commit("remove dir/file", false, false);
     		
     		Git bareGit = new Git(new File(tempDir, "bare"));
-    		bareGit.clone(workGit.repoDir().getAbsolutePath(), true);
+    		bareGit.clone(workGit.repoDir().getAbsolutePath(), true, false, false, null);
 
     		bareGit.addNote("master", "hello\nworld");
 
@@ -75,7 +75,7 @@ public class LogCommandTest extends AbstractGitTest {
     		workGit.checkout("master", null).remove("a").commit("remove a", false, false);
     		FileUtils.writeFile(new File(workGit.repoDir(), "dir/file2"), "file2");
     		workGit.add("dir/file2").commit("add dir/file2", false, false);
-    		workGit.merge("dev", null, null, null);
+    		workGit.merge("dev", null, null, null, null);
     		
     		commits = workGit.log(null, "master", null, 0, 0);
     		

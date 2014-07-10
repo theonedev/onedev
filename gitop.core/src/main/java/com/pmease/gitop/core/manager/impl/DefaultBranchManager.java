@@ -132,9 +132,9 @@ public class DefaultBranchManager implements BranchManager {
 
 	@Transactional
 	@Override
-	public void onBranchRefUpdate(Branch branch, User user) {
+	public void onBranchRefUpdate(Branch branch, User byUser, PullRequest byRequest) {
 		for (PullRequest request: branch.getIncomingRequests()) {
-			if (request.isOpen())
+			if (request.isOpen() && !request.equals(byRequest))
 				pullRequestManager.refresh(request);
 		}
 		
@@ -144,7 +144,7 @@ public class DefaultBranchManager implements BranchManager {
 		// to handle this case here.
 		Map<Branch, PullRequest> branchRequests = new HashMap<>();
 		for (PullRequest request: branch.getOutgoingRequests()) {
-			if (request.isOpen()) {
+			if (request.isOpen() && !request.equals(byRequest)) {
 				PullRequest branchRequest = branchRequests.get(request.getTarget());
 				if (branchRequest == null)
 					branchRequests.put(request.getTarget(), request);
@@ -157,7 +157,7 @@ public class DefaultBranchManager implements BranchManager {
 			PullRequestUpdate update = new PullRequestUpdate();
 			request.getUpdates().add(update);
 			update.setRequest(request);
-			update.setUser(user);
+			update.setUser(byUser);
 			
 			request.getUpdates().add(update);
 			update.setHeadCommit(branch.getHeadCommit());

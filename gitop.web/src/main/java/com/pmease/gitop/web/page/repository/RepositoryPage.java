@@ -274,7 +274,7 @@ public abstract class RepositoryPage extends RepositoryBasePage {
 		super.onDetach();
 	}
 	
-	public static PageParameters params4(Repository repository) {
+	public static PageParameters paramsOf(Repository repository) {
 		PageParameters params = AbstractAccountPage.params4(repository.getUser());
 		params.set("repo", repository.getName());
 		return params;

@@ -100,7 +100,7 @@ public class Branch extends AbstractEntity {
     }
     
     public String getPathName() {
-    	return getRepository().getPathName() + "/" + getName();
+    	return getRepository().getPathName() + ":" + getName();
     }
     
     /**

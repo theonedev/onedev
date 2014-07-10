@@ -29,10 +29,12 @@ public class FetchCommand extends GitCommand<Void> {
 	@Override
 	public Void call() {
 	    Preconditions.checkNotNull(from, "from param has to be specified.");
-	    Preconditions.checkNotNull(refspec, "refspec param has to be specified.");
 	    
 		Commandline cmd = cmd().addArgs("fetch");
-		cmd.addArgs(from, refspec);
+		cmd.addArgs(from);
+		
+		if (refspec == null)
+			cmd.addArgs(refspec);
 		
 		cmd.execute(debugLogger, new LineConsumer() {
 

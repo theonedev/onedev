@@ -29,7 +29,7 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 
 		if (!request.getTarget().getRepository().equals(request.getSource().getRepository())) {
 			request.getTarget().getRepository().git().fetch(
-					request.getSource().getRepository().git().repoDir().getAbsolutePath(), 
+					request.getSource().getRepository().git(), 
 					"+" + request.getSource().getHeadRef() + ":" + update.getHeadRef()); 
 		}
 		request.getTarget().getRepository().git().updateRef(update.getHeadRef(), 

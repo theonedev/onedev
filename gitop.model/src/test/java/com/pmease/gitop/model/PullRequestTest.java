@@ -130,7 +130,7 @@ public class PullRequestTest extends AbstractGitTest {
         git.add("e");
         git.commit("master:5", false, false);
         
-        git.merge(secondRef, null, null, null);
+        git.merge(secondRef, null, null, null, null);
 
         Assert.assertEquals(1, request.getEffectiveUpdates().size());
         Assert.assertEquals(3L, request.getEffectiveUpdates().get(0).getId().longValue());

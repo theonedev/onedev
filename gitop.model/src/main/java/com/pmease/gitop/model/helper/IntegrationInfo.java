@@ -9,23 +9,26 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class IntegrationInfo implements Serializable {
 	
+	public enum IntegrateApproach {REBASE_SOURCE, REBASE_TARGET, MERGE_ALWAYS, MERGE_IF_NECESSARY};
+	
 	private String branchHead;
 	
 	private String requestHead;
 	
-	private String integrationBase;
-	
 	private String integrationHead;
+	
+	private IntegrateApproach integrateApproach;
 	
 	@SuppressWarnings("unused")
 	private IntegrationInfo() {
 	}
 	
-	public IntegrationInfo(String branchHead, String requestHead, String integrationBase, @Nullable String integrationHead) {
+	public IntegrationInfo(String branchHead, String requestHead, @Nullable String integrationHead, 
+			IntegrateApproach integrateApproach) {
 		this.branchHead = branchHead;
 		this.requestHead = requestHead;
-		this.integrationBase = integrationBase;
 		this.integrationHead = integrationHead;
+		this.integrateApproach = integrateApproach;
 	}
 
 	public String getBranchHead() {
@@ -40,9 +43,9 @@ public class IntegrationInfo implements Serializable {
 	public String getIntegrationHead() {
 		return integrationHead;
 	}
-	
-	public String getIntegrationBase() {
-		return integrationBase;
-	}
 
+	public IntegrateApproach getIntegrateApproach() {
+		return integrateApproach;
+	}
+	
 }

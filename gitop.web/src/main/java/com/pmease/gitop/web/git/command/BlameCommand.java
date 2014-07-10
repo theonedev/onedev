@@ -17,6 +17,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.io.LineProcessor;
 import com.google.common.io.Resources;
+import com.pmease.commons.git.Git;
 import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
@@ -135,8 +136,8 @@ public class BlameCommand extends GitCommand<List<BlameEntry>> {
 						.summary(previous.getCommit().getSubject());
 			} else {
 				builder
-					.committer(com.pmease.commons.git.GitUtils.newPersonIdent(committerName, committerEmail, committerDate))
-					.author(com.pmease.commons.git.GitUtils.newPersonIdent(authorName, authorEmail, authorDate))
+					.committer(Git.newPersonIdent(committerName, committerEmail, committerDate))
+					.author(Git.newPersonIdent(authorName, authorEmail, authorDate))
 					.summary(summary);
 			}
 			

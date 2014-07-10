@@ -1,6 +1,5 @@
 package com.pmease.gitop.core.manager;
 
-import java.io.File;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -17,8 +16,6 @@ public interface PullRequestManager {
     @Nullable PullRequest findOpen(Branch target, Branch source);
 
     void refresh(PullRequest request);
-    
-    PullRequest preview(Branch target, Branch source, User submitter, File sandbox);
     
     boolean integrate(PullRequest request, @Nullable User user, @Nullable String comment);
     

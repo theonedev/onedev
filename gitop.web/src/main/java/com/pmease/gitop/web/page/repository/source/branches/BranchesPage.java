@@ -20,6 +20,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -183,10 +184,15 @@ public class BranchesPage extends RepositoryPage {
 					PullRequest request = getPullRequest(refName);
 					
 					if (request == null) {
+						BranchManager bm = Gitop.getInstance(BranchManager.class);
+						Branch refBranch = bm.findBy(getRepository(), refName);
+						Preconditions.checkNotNull(refBranch);
+						Branch baseBranch = bm.findBy(getRepository(), getBaseBranch());
+						Preconditions.checkNotNull(baseBranch);
 						BookmarkablePageLink<Void> link = new BookmarkablePageLink<Void>(
 								"compareLink",
 								NewRequestPage.class,
-								NewRequestPage.newParams(getRepository(), refName, getBaseBranch()));
+								NewRequestPage.paramsOf(getRepository(), refBranch, baseBranch));
 						
 						item.add(link);
 						item.add(new Label("pullName").setVisibilityAllowed(false));

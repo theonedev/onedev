@@ -55,6 +55,7 @@ import com.pmease.gitop.model.Vote;
 import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
 import com.pmease.gitop.model.helper.IntegrationInfo;
 import com.pmease.gitop.model.permission.ObjectPermission;
+import com.pmease.gitop.web.component.branch.BranchLink;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.link.AvatarLink.Mode;
 import com.pmease.gitop.web.component.link.PersonLink;
@@ -234,70 +235,31 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 			add(new Label("<i>System</i>").setEscapeModelStrings(false));
 		}
 		
-		Link<Void> targetLink = new Link<Void>("targetLink") {
+		add(new BranchLink("targetBranch", new AbstractReadOnlyModel<Branch>() {
 
 			@Override
-			public void onClick() {
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				Branch target = getPullRequest().getTarget();
-				setEnabled(SecurityUtils.getSubject().isPermitted(
-						ObjectPermission.ofRepositoryRead(target.getRepository())));
-			}
-			
-		};
-		add(targetLink);
-		targetLink.add(new Label("targetLabel", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				PullRequest request = getPullRequest();
-				Branch target = request.getTarget();
-				RepositoryBasePage page = (RepositoryBasePage) getPage();
-				if (page.getRepository().equals(target.getRepository())) {
-					return target.getName();
-				} else {
-					return target.getRepository().toString() + ":" + target.getName();
-				}
+			public Branch getObject() {
+				return getPullRequest().getTarget();
 			}
 			
 		}));
 		
-		Link<Void> sourceLink = new Link<Void>("sourceLink") {
+		add(new BranchLink("sourceBranch", new AbstractReadOnlyModel<Branch>() {
 
 			@Override
-			public void onClick() {
+			public Branch getObject() {
+				return getPullRequest().getSource();
 			}
+			
+		}) {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				Branch source = getPullRequest().getSource();
-				setVisible(source != null);
-				setEnabled(SecurityUtils.getSubject().isPermitted(
-						ObjectPermission.ofRepositoryRead(source.getRepository())));
+				setVisible(getPullRequest().getSource() != null);
 			}
 			
-		};
-		add(sourceLink);
-		sourceLink.add(new Label("sourceLabel", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				PullRequest request = getPullRequest();
-				Branch source = request.getSource();
-				RepositoryBasePage page = (RepositoryBasePage) getPage();
-				if (page.getRepository().equals(source.getRepository())) {
-					return source.getName();
-				} else {
-					return source.getRepository().toString() + ":" + source.getName();
-				}
-			}
-			
-		}));
+		});
 		
 		add(new AgeLabel("date", new AbstractReadOnlyModel<Date>() {
 
@@ -729,7 +691,7 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 	}
 
 	public static PageParameters params4(PullRequest request) {
-		PageParameters params = RepositoryPage.params4(request.getTarget().getRepository());
+		PageParameters params = RepositoryPage.paramsOf(request.getTarget().getRepository());
 		params.set("request", request.getId());
 		return params;
 	}

@@ -16,7 +16,7 @@ public class BranchStrategy implements Serializable {
 	
 	private IntegrationStrategy integrationStrategy = new IntegrationStrategy();
 	
-	@Editable(order=100)
+	@Editable(name="Pull Request Target", order=100)
 	@NotNull
 	@Horizontal
 	public BranchMatcher getTargetBranches() {

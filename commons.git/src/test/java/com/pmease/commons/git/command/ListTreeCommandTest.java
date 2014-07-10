@@ -62,7 +62,7 @@ public class ListTreeCommandTest extends AbstractGitTest {
     		workGit.commit("commit", false, false);
     		
 			Git bareGit = new Git(new File(tempDir, "bare"));
-    		bareGit.clone(workGit.repoDir().getAbsolutePath(), true);
+    		bareGit.clone(workGit.repoDir().getAbsolutePath(), true, false, false, null);
 
     		List<TreeNode> treeNodes = bareGit.listTree("master", null, false);
 

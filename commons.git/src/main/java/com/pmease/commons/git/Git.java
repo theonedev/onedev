@@ -3,10 +3,14 @@ package com.pmease.commons.git;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
+
+import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.util.SystemReader;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.command.AddCommand;
@@ -15,6 +19,7 @@ import com.pmease.commons.git.command.AddSubModuleCommand;
 import com.pmease.commons.git.command.BlameCommand;
 import com.pmease.commons.git.command.CalcMergeBaseCommand;
 import com.pmease.commons.git.command.CheckoutCommand;
+import com.pmease.commons.git.command.CherryPickCommand;
 import com.pmease.commons.git.command.CloneCommand;
 import com.pmease.commons.git.command.CommitCommand;
 import com.pmease.commons.git.command.DeleteRefCommand;
@@ -31,6 +36,7 @@ import com.pmease.commons.git.command.ListTagsCommand;
 import com.pmease.commons.git.command.ListTreeCommand;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.git.command.MergeCommand;
+import com.pmease.commons.git.command.MergeCommand.FastForwardMode;
 import com.pmease.commons.git.command.ParseRevisionCommand;
 import com.pmease.commons.git.command.PushCommand;
 import com.pmease.commons.git.command.RemoveCommand;
@@ -157,10 +163,13 @@ public class Git implements Serializable {
 		return this;
 	}
 
-	public Git clone(String from, boolean bare) {
-		return clone(from, bare, false, true, null);
+	public Git clone(Git from, boolean bare, boolean shared, boolean noCheckout, @Nullable String branch) {
+		new CloneCommand(repoDir)
+				.from(from.repoDir.getAbsolutePath()).bare(bare)
+				.shared(shared).noCheckout(noCheckout).branch(branch).call();
+		return this;
 	}
-	
+
 	public Git reset(@Nullable String mode, @Nullable String commit) {
 		new ResetCommand(repoDir).mode(mode).commit(commit).call();
 		return this;
@@ -230,14 +239,15 @@ public class Git implements Serializable {
 				.reason(reason).call();
 	}
 	
-	public Git deleteRef(String refName) {
-		new DeleteRefCommand(repoDir).refName(refName).call();
+	public Git deleteRef(String refName, @Nullable String oldRevision, @Nullable String reason) {
+		new DeleteRefCommand(repoDir).refName(refName).oldRevision(oldRevision).reason(reason).call();
 		return this;
 	}
 
-	public boolean merge(String revision, @Nullable String strategy, 
-			@Nullable String strategyOption, @Nullable String message) {
-		return new MergeCommand(repoDir).revision(revision).message(message).call();
+	public String merge(String revision, @Nullable FastForwardMode fastForwardMode, 
+			@Nullable String strategy, @Nullable String strategyOption, @Nullable String message) {
+		return new MergeCommand(repoDir).revision(revision).fastForwardMode(fastForwardMode)
+				.strategy(strategy).strategyOption(strategyOption).message(message).call();
 	}
 
 	public Git fetch(String from, String refspec) {
@@ -245,8 +255,18 @@ public class Git implements Serializable {
 		return this;
 	}
 	
+	public Git fetch(Git from, @Nullable String refspec) {
+		new FetchCommand(repoDir).from(from.repoDir.getAbsolutePath()).refspec(refspec).call();
+		return this;
+	}
+
 	public Git push(String to, String refspec) {
 		new PushCommand(repoDir).to(to).refspec(refspec).call();
+		return this;
+	}
+
+	public Git push(Git to, String refspec) {
+		new PushCommand(repoDir).to(to.repoDir.getAbsolutePath()).refspec(refspec).call();
 		return this;
 	}
 
@@ -343,10 +363,8 @@ public class Git implements Serializable {
 	/**
 	 * General diff between specified revisions for specified path.
 	 *  
-	 * @param fromRev
-	 * 			calculate diffs since this revision (not include changes of this revision)
-	 * @param toRev
-	 * 			calculate diffs till this revision (include changes of this revision)
+	 * @param revisions
+	 * 			calculate diffs using this revisions 
 	 * @param path
 	 * 			optionally specify directory or file for diff. Use <tt>null</tt> to diff 
 	 * 			all files in the repository
@@ -355,8 +373,8 @@ public class Git implements Serializable {
 	 * @return
 	 * 			list of file changes with diff information included
 	 */
-	public List<FileChangeWithDiffs> diff(String fromRev, String toRev, @Nullable String path, int contextLines) {
-		return new DiffCommand(repoDir).fromRev(fromRev).toRev(toRev).contextLines(contextLines).path(path).call();
+	public List<FileChangeWithDiffs> diff(String revisions, @Nullable String path, int contextLines) {
+		return new DiffCommand(repoDir).revisions(revisions).contextLines(contextLines).path(path).call();
 	}
 
 	public Git addNote(String object, String message) {
@@ -412,6 +430,10 @@ public class Git implements Serializable {
 	public void updateDefaultBranch(String defaultBranch) {
 		updateSymbolicRef("HEAD", Git.REFS_HEADS + defaultBranch, null);
 	}
+	
+	public String cherryPick(String revisions) {
+		return new CherryPickCommand(repoDir).revisions(revisions).call();
+	}
 
 	public boolean hasCommits() {
 		File headsDir = new File(repoDir, Git.REFS_HEADS);
@@ -427,4 +449,8 @@ public class Git implements Serializable {
 		return repoDir.toString();
 	}
 
+	public static PersonIdent newPersonIdent(String name, String email, Date when) {
+		return new PersonIdent(name, email, when.getTime(), 
+				SystemReader.getInstance().getTimezone(when.getTime()));
+	}
 }

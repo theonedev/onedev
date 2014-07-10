@@ -150,7 +150,7 @@ public class DefaultRepositoryManager implements RepositoryManager {
 			dao.persist(forked);
 
             FileUtils.cleanDir(forked.git().repoDir());
-            forked.git().clone(repository.git().repoDir().getAbsolutePath(), true);
+            forked.git().clone(repository.git().repoDir().getAbsolutePath(), true, false, false, null);
             
             checkSanity(forked);
 		}
@@ -224,4 +224,5 @@ public class DefaultRepositoryManager implements RepositoryManager {
 		if (!branchesInGit.isEmpty() && !branchesInGit.contains(defaultBranchName))
 			repository.git().updateDefaultBranch(branchesInGit.iterator().next());
 	}
+	
 }

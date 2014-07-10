@@ -77,7 +77,7 @@ public class BlameCommandTest extends AbstractGitTest {
 			workGit.add("file").commit("third commit", false, false);
 			
 			Git bareGit = new Git(new File(tempDir, "bare"));
-			bareGit.clone(workGit.repoDir().getAbsolutePath(), true);
+			bareGit.clone(workGit.repoDir().getAbsolutePath(), true, false, false, null);
 			blames = bareGit.blame("file", "master", -1, -1);
 			
 			assertEquals(1, blames.size());

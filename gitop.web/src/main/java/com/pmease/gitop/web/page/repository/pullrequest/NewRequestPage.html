@@ -5,69 +5,74 @@
 			<div wicket:id="target" class="target pull-left"></div>
 			<div class="pull-left label">From: </div>
 			<div wicket:id="source" class="source pull-left"></div>
+			<a wicket:id="swap" class="btn btn-default">Swap <span class="fa fa-exchange"></span></a>
 		</div>
-		<div wicket:id="feedback" class="feedback">
-			<table>
-				<tr>
-					<td wicket:id="message" class="message">
-						<div class="title">
-							<input wicket:id="title" type="text" class="form-control" placeholder="Title has to be specified">
-						</div>
-						<div class="comment">
-							<textarea wicket:id="comment" class="form-control" rows="8" placeholder="Leave a comment"></textarea>
-						</div>
-					</td>
-					<td class="status">
-						<table>
-							<tr>
-								<td>
-									<span class="icon icon-ok-circle"></span>
-									<span class="icon icon-warning-sign"></span>
-								</td>
-								<td>
-									<div class="validation"></div>
-									<div wicket:id="summary" class="summary"></div>
-									<div wicket:id="detail" class="detail"></div>
-									<wicket:enclosure child="rejectReasons">
-									<ul class="detail">
-										<li wicket:id="rejectReasons">
-											<span wicket:id="reason"></span>
-										</li>
-									</ul>
-									</wicket:enclosure>
-									<input wicket:id="send" value="Send Pull Request" class="btn btn-lg btn-primary send"></input>
-									<input wicket:id="view" value="View Pull Request" class="btn btn-lg btn-primary"></input>
-								</td>
-							</tr>
-						</table>
-					</td>
-				</tr>
-			</table>
-			<script type="text/javascript">
-				function titleChanged() {
-					var jqTitle = $(".pull-request .feedback .title input");
-					if (jqTitle.is(":visible")) {
-						var jqStatus = $(".pull-request .feedback .status");
-						var jqBtn = jqStatus.find(".btn");
-						if ($.trim(jqTitle.val()) == "") {
-							jqTitle.parent().addClass("has-error");
-							jqStatus.addClass("has-error");
-							jqBtn.attr("disabled", "disabled");
-							jqStatus.find(".validation").html("Title has to be specified.").show();
-						} else {
-							jqTitle.parent().removeClass("has-error");
-							jqStatus.removeClass("has-error");
-							jqBtn.removeAttr("disabled");
-							jqStatus.find(".validation").hide();
-						}
-					}
-				}
-				$(".pull-request .feedback .title input").on("input keyup cut paste", titleChanged);
-				
-				titleChanged();	
-			</script>
-		</div>
+		<div wicket:id="status" class="status"></div>
 		<div wicket:id="commits" class="commits"></div>
 		<div wicket:id="changes" class="changes"></div>
 	</div>
+	<wicket:fragment wicket:id="openedFrag">
+		<div class="alert alert-info">
+			<div class="summary">
+				<span class="fa fa-lg fa-info-circle"></span>
+				<span>
+					Below integration request is already open for selected branches.
+					<a wicket:id="viewRequest">View Request <span class="fa fa-arrow-right"></span></a>
+				</span>
+			</div>
+			<div wicket:id="requestInfo" class="detail" ></div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="sameBranchFrag">
+		<div class="alert alert-warning">
+			<div class="summary">
+				<span class="fa fa-lg fa-warning"></span>
+				<span>Please select different branches to integrate.</span>
+			</div>
+		</div>		
+	</wicket:fragment>
+	<wicket:fragment wicket:id="integratedFrag">
+		<div class="alert alert-success">
+			<div class="summary">
+				<span class="fa fa-lg fa-check-circle"></span>
+				<span wicket:id="sourceBranch"></span> is already integrated to <span wicket:id="targetBranch"></span>.
+				<a wicket:id="swapBranches"> Swap Source and Target <span class="fa fa-exchange"></span></a>
+			</div>
+		</div>		
+	</wicket:fragment>
+	<wicket:fragment wicket:id="rejectedFrag">
+		<div class="alert alert-danger">
+			<div class="summary">
+				<span class="fa fa-lg fa-ban"></span>
+				<span class="message">Gate keeper of target repository rejects the integration request for below reasons:</span>
+			</div>
+			<ul class="detail">
+				<li wicket:id="reasons"><span wicket:id="reason"></span></li>
+			</ul>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="canSendFrag">
+		<div class="can-send">
+			<form wicket:id="form">
+				<div class="title">
+					<input wicket:id="title" type="text" class="form-control" placeholder="Title has to be specified">
+				</div>
+				<div class="comment">
+					<textarea wicket:id="comment" class="form-control" rows="8" placeholder="Leave a comment"></textarea>
+				</div>
+				<div class="foot clearfix">
+					<div class="pull-left">
+						<input wicket:id="send" type="submit" class="btn btn-primary btn-lg" value="Send Integration Request"></input>
+					</div>
+					<div class="pull-left">
+					  <label>
+					    <input wicket:id="toUpstream" type="checkbox"/> 
+					    Check this if <span wicket:id="target"></span> is Upstream of <span wicket:id="source"></span>
+					  </label>
+					  <div class="help-block">This information helps Gitop to select appropriate integration strategy for this request.</div>
+					</div>				
+				</div>
+			</form>
+		</div>	
+	</wicket:fragment>
 </wicket:extend>

@@ -76,12 +76,12 @@ public class DiffCommandTest extends AbstractGitTest {
 		    workGit.commit("modify readme, modify dir/file1, remove dir/file2, and add dir/file3", false, false);
 		    
     		Git bareGit = new Git(new File(tempDir, "bare"));
-    		bareGit.clone(workGit.repoDir().getAbsolutePath(), true);
+    		bareGit.clone(workGit.repoDir().getAbsolutePath(), true, false, false, null);
     		
-    		List<FileChangeWithDiffs> fileChanges = bareGit.diff("master", "dev", null, 3);
+    		List<FileChangeWithDiffs> fileChanges = bareGit.diff("master..dev", null, 3);
     		assertEquals(fileChanges.size(), 4);
     		
-    		fileChanges = bareGit.diff("master", "dev", "dir", 3);
+    		fileChanges = bareGit.diff("master..dev", "dir", 3);
     		assertEquals(fileChanges.size(), 3);
     		
     		for (FileChangeWithDiffs fileChange: fileChanges) {
@@ -137,11 +137,11 @@ public class DiffCommandTest extends AbstractGitTest {
 		    git.add("b2");
 		    git.commit("move b to b2", false, false);
 
-		    List<FileChangeWithDiffs> changes = git.diff("master~3", "master", null, 4);
+		    List<FileChangeWithDiffs> changes = git.diff("master~3..master", null, 4);
 		    assertEquals("COPY\ta->a2", changes.get(1).toString());
 		    assertEquals("COPY\ta->b2", changes.get(2).toString());
 		    
-		    changes = git.diff("master~1", "master", null, 4);
+		    changes = git.diff("master~1..master", null, 4);
 		    assertEquals("RENAME\tb->b2", changes.get(0).toString());
 		    
 	    } finally {

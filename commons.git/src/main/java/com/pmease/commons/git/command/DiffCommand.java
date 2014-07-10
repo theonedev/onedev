@@ -17,9 +17,7 @@ import com.pmease.commons.util.execution.LineConsumer;
 
 public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 
-	private String fromRev;
-	
-	private String toRev;
+	private String revisions;
 	
 	private String path;
 	
@@ -29,16 +27,11 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 		super(repoDir);
 	}
 	
-	public DiffCommand fromRev(String fromRev) {
-		this.fromRev = fromRev;
+	public DiffCommand revisions(String revisions) {
+		this.revisions = revisions;
 		return this;
 	}
 	
-	public DiffCommand toRev(String toRev) {
-		this.toRev = toRev;
-		return this;
-	}
-
 	public DiffCommand path(String path) {
 		this.path = path;
 		return this;
@@ -51,11 +44,10 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 
 	@Override
 	public List<FileChangeWithDiffs> call() {
-		Preconditions.checkNotNull(fromRev, "fromRev has to be specified.");
-		Preconditions.checkNotNull(toRev, "toRev has to be specified.");
+		Preconditions.checkNotNull(revisions, "revisions has to be specified.");
 		
 		Commandline cmd = cmd();
-		cmd.addArgs("diff", fromRev + ".." + toRev, "--full-index", "--no-color", "--find-renames", 
+		cmd.addArgs("diff", revisions, "--full-index", "--no-color", "--find-renames", 
 				"--find-copies", "--src-prefix=#gitop_old/", "--dst-prefix=#gitop_new/");
 		if (contextLines != 0)
 			cmd.addArgs("--unified=" + contextLines);
