@@ -10,13 +10,13 @@ import org.parboiled.common.Preconditions;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.gitop.web.component.label.AgeLabel;
-import com.pmease.gitop.web.component.link.AvatarLink.Mode;
-import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.component.user.AvatarMode;
+import com.pmease.gitop.web.component.user.PersonLink;
 
 @SuppressWarnings("serial")
 public class AuthorInfoPanel extends Panel {
 
-	private final IModel<Mode> mode = Model.of(Mode.NAME);
+	private final IModel<AvatarMode> mode = Model.of(AvatarMode.NAME);
 	
 	public AuthorInfoPanel(String id, IModel<Commit> model) {
 		super(id, model);
@@ -26,7 +26,7 @@ public class AuthorInfoPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new PersonLink("author", getCommit().getAuthor(), mode.getObject()));
+		add(new PersonLink("author", Model.of(getCommit().getAuthor()), mode.getObject()));
 		add(new AgeLabel("authordate", new AbstractReadOnlyModel<Date>() {
 
 			@Override
@@ -37,7 +37,7 @@ public class AuthorInfoPanel extends Panel {
 		}));
 	}
 	
-	public void setAuthorMode(Mode mode) {
+	public void setAuthorMode(AvatarMode mode) {
 		this.mode.setObject(Preconditions.checkNotNull(mode));
 	}
 	

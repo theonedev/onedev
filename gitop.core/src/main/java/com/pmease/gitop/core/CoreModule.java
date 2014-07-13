@@ -25,6 +25,7 @@ import com.pmease.gitop.model.gatekeeper.ApprovalGateKeeper;
 import com.pmease.gitop.model.gatekeeper.BranchGateKeeper;
 import com.pmease.gitop.model.gatekeeper.FileGateKeeper;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
+import com.pmease.gitop.model.helper.AffinalBranchMatcher;
 import com.pmease.gitop.model.helper.BranchMatcher;
 import com.pmease.gitop.model.storage.StorageManager;
 
@@ -83,6 +84,22 @@ public class CoreModule extends AbstractPluginModule {
 			@Override
 			public Class<?> getAbstractClass() {
 				return BranchMatcher.class;
+			}
+		});
+
+		contribute(ImplementationProvider.class, new ImplementationProvider() {
+			
+			@Override
+			public Collection<Class<?>> getImplementations() {
+				Collection<Class<?>> implementations = new ArrayList<>();
+				for (Class<?> each: ClassUtils.findImplementations(AffinalBranchMatcher.class, BranchMatcherLocator.class)) 
+					implementations.add(each);
+				return implementations;
+			}
+			
+			@Override
+			public Class<?> getAbstractClass() {
+				return AffinalBranchMatcher.class;
 			}
 		});
 

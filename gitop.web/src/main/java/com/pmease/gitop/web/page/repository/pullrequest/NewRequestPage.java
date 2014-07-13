@@ -8,10 +8,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
-import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
@@ -42,10 +40,10 @@ import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.checkresult.Approved;
-import com.pmease.gitop.model.helper.CloseInfo;
+import com.pmease.gitop.model.integration.CloseInfo;
+import com.pmease.gitop.web.component.branch.AffinalBranchSingleChoice;
 import com.pmease.gitop.web.component.branch.BranchLink;
 import com.pmease.gitop.web.component.commit.CommitsTablePanel;
-import com.pmease.gitop.web.component.comparablebranchselector.ComparableBranchSelector;
 import com.pmease.gitop.web.model.EntityModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.repository.RepositoryBasePage;
@@ -140,8 +138,6 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 					request.getUpdates().add(update);
 					update.setRequest(request);
 					update.setUser(getSubmitter());
-					
-					request.getUpdates().add(update);
 					update.setHeadCommit(getSource().getHeadCommit());
 					request.setUpdateDate(new Date());
 					
@@ -226,7 +222,7 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 			
 		};
 		
-		add(new ComparableBranchSelector("target", currentRepositoryModel, targetModel) {
+		add(new AffinalBranchSingleChoice("target", currentRepositoryModel, targetModel) {
 
 			@Override
 			protected void onChange(AjaxRequestTarget target) {
@@ -238,7 +234,7 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 			
 		}.setRequired(true));
 		
-		add(new ComparableBranchSelector("source", currentRepositoryModel, sourceModel) {
+		add(new AffinalBranchSingleChoice("source", currentRepositoryModel, sourceModel) {
 
 			@Override
 			protected void onChange(AjaxRequestTarget target) {
@@ -261,8 +257,6 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 			
 		});
 		
-		add(new WebMarkupContainer("status"));
-
 		IModel<Repository> repositoryModel = new AbstractReadOnlyModel<Repository>() {
 
 			@Override
@@ -355,22 +349,8 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 	
 	private Fragment newIntegratedFrag() {
 		Fragment fragment = new Fragment("status", "integratedFrag", this);
-		fragment.add(new BranchLink("sourceBranch", new AbstractReadOnlyModel<Branch>() {
-
-			@Override
-			public Branch getObject() {
-				return getSource();
-			}
-			
-		}));
-		fragment.add(new BranchLink("targetBranch", new AbstractReadOnlyModel<Branch>() {
-
-			@Override
-			public Branch getObject() {
-				return getTarget();
-			}
-			
-		}));
+		fragment.add(new BranchLink("sourceBranch", new EntityModel<Branch>(getSource())));
+		fragment.add(new BranchLink("targetBranch", new EntityModel<Branch>(getTarget())));
 		fragment.add(new Link<Void>("swapBranches") {
 
 			@Override
@@ -417,7 +397,7 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 				super.onSubmit();
 
 				PullRequest request = requestModel.getObject();
-				request.setAutoMerge(false);
+				request.setAutoIntegrate(false);
 				
 				Gitop.getInstance(PullRequestManager.class).send(request);
 				
@@ -468,41 +448,6 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 			@Override
 			public void setObject(String object) {
 				checkedRequestModel.getObject().setDescription(object);
-			}
-			
-		}));
-		
-		form.add(new CheckBox("toUpstream", new IModel<Boolean>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public Boolean getObject() {
-				return checkedRequestModel.getObject().isToUpstream();
-			}
-
-			@Override
-			public void setObject(Boolean object) {
-				checkedRequestModel.getObject().setToUpstream(object);
-			}
-			
-		}));
-		
-		form.add(new BranchLink("target", new AbstractReadOnlyModel<Branch>() {
-
-			@Override
-			public Branch getObject() {
-				return getTarget();
-			}
-		}));
-		
-		form.add(new BranchLink("source", new AbstractReadOnlyModel<Branch>() {
-
-			@Override
-			public Branch getObject() {
-				return getSource();
 			}
 			
 		}));

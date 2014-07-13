@@ -27,7 +27,7 @@ import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.Membership;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.component.avatar.AvatarImage;
+import com.pmease.gitop.web.component.user.AvatarByUser;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.PageSpec;
 
@@ -76,7 +76,7 @@ public class MemberListView extends Panel {
 			@Override
 			protected void populateItem(ListItem<User> item) {
 				User user = item.getModelObject();
-				item.add(new AvatarImage("avatar", user));
+				item.add(new AvatarByUser("avatar", item.getModel()));
 				AbstractLink link = PageSpec.newUserHomeLink("userLink", user);
 				item.add(link);
 				link.add(new Label("name", Model.of(user.getName())));

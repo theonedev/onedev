@@ -21,8 +21,9 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
-import com.pmease.gitop.web.component.avatar.AvatarImage;
-import com.pmease.gitop.web.component.link.UserLink;
+import com.pmease.gitop.web.component.user.AvatarByUser;
+import com.pmease.gitop.web.component.user.UserLink;
+import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.AbstractAccountPage;
 import com.pmease.gitop.web.page.account.setting.api.AccountSettingTab;
@@ -58,7 +59,7 @@ public abstract class AccountSettingPage extends AbstractAccountPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new UserLink("userlink", getAccount()));
+		add(new UserLink("userlink", new UserModel(getAccount())));
 		
 		add(new ListView<AccountSettingTab>("setting", getAllTabs()) {
 
@@ -109,7 +110,7 @@ public abstract class AccountSettingPage extends AbstractAccountPage {
 				AbstractLink link = new BookmarkablePageLink<Void>("link",
 						AccountProfilePage.class,
 						params);
-				link.add(new AvatarImage("avatar", user));
+				link.add(new AvatarByUser("avatar", item.getModel()));
 				item.add(link);
 				link.add(new Label("name", user.getName()));
 			}

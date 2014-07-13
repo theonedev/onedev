@@ -196,5 +196,5 @@ public class Gitop extends AbstractPlugin {
 	public String getGitError() {
 		return gitError;
 	}
-	
+
 }

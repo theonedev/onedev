@@ -31,6 +31,6 @@ public class EmptyRepositoryPanel extends RepositoryPanel {
 	
 	private String getRepoUrl() {
 		Repository repository = getRepository();
-		return UrlUtils.concatSegments(Gitop.getInstance().guessServerUrl(), repository.getPathName() + ".git");
+		return UrlUtils.concatSegments(Gitop.getInstance().guessServerUrl(), repository.getFullName() + ".git");
 	}
 }

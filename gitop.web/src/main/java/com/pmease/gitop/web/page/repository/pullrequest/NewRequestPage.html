@@ -35,8 +35,8 @@
 		<div class="alert alert-success">
 			<div class="summary">
 				<span class="fa fa-lg fa-check-circle"></span>
-				<span wicket:id="sourceBranch"></span> is already integrated to <span wicket:id="targetBranch"></span>.
-				<a wicket:id="swapBranches"> Swap Source and Target <span class="fa fa-exchange"></span></a>
+				<span wicket:id="targetBranch"></span> is up to date with all commits from <span wicket:id="sourceBranch"></span>.
+				Try <a wicket:id="swapBranches">swap source and target</a> for the comparison.
 			</div>
 		</div>		
 	</wicket:fragment>
@@ -60,17 +60,8 @@
 				<div class="comment">
 					<textarea wicket:id="comment" class="form-control" rows="8" placeholder="Leave a comment"></textarea>
 				</div>
-				<div class="foot clearfix">
-					<div class="pull-left">
-						<input wicket:id="send" type="submit" class="btn btn-primary btn-lg" value="Send Integration Request"></input>
-					</div>
-					<div class="pull-left">
-					  <label>
-					    <input wicket:id="toUpstream" type="checkbox"/> 
-					    Check this if <span wicket:id="target"></span> is Upstream of <span wicket:id="source"></span>
-					  </label>
-					  <div class="help-block">This information helps Gitop to select appropriate integration strategy for this request.</div>
-					</div>				
+				<div class="foot">
+					<input wicket:id="send" type="submit" class="btn btn-primary btn-lg" value="Send Integration Request"></input>
 				</div>
 			</form>
 		</div>	

@@ -53,7 +53,8 @@ public class CherryPickCommand extends GitCommand<String> {
 				if (line.equals("fatal: empty commit set passed")) {
 					emptyCommitSet.set(true);
 				} else if (line.equals("nothing to commit, working directory clean") 
-						|| line.equals("hint: after resolving the conflicts, mark the corrected paths")) {
+						|| line.equals("hint: after resolving the conflicts, mark the corrected paths")
+						|| line.startsWith("The previous cherry-pick is now empty")) {
 					hasConflict.set(true);
 				} else {
 					logger.error(line);

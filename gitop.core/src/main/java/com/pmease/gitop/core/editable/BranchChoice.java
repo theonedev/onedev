@@ -9,4 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BranchChoice {
 
+	public enum Scope {AFFINAL, LOCAL};
+	
+	Scope value() default Scope.LOCAL; 
 }

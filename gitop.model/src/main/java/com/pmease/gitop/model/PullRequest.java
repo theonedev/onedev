@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -27,21 +28,24 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
+import com.pmease.commons.util.LockUtils;
+import com.pmease.gitop.model.gatekeeper.checkresult.Approved;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitop.model.gatekeeper.checkresult.Disapproved;
+import com.pmease.gitop.model.gatekeeper.checkresult.Ignored;
 import com.pmease.gitop.model.gatekeeper.checkresult.Pending;
 import com.pmease.gitop.model.gatekeeper.checkresult.PendingAndBlock;
-import com.pmease.gitop.model.helper.CloseInfo;
-import com.pmease.gitop.model.helper.IntegrationInfo;
+import com.pmease.gitop.model.integration.CloseInfo;
+import com.pmease.gitop.model.integration.IntegrationInfo;
 
 @SuppressWarnings("serial")
 @Entity
 public class PullRequest extends AbstractEntity {
 
 	public enum Status {
-		PENDING_APPROVAL("Pending Approval"), PENDING_UPDATE("Pending Update"), 
-		PENDING_INTEGRATE("Pending Integration"), INTEGRATED("Integrated"), 
-		DISCARDED("Discarded");
+		PENDING_REFRESH("Pending Check"), PENDING_APPROVAL("Pending Approval"), 
+		PENDING_UPDATE("Pending Update"), PENDING_INTEGRATE("Pending Integration"), 
+		INTEGRATED("Integrated"), DISCARDED("Discarded");
 
 		private final String displayName;
 		
@@ -56,8 +60,6 @@ public class PullRequest extends AbstractEntity {
 		
 	}
 
-	private boolean toUpstream = true;
-	
 	@Column(nullable = false)
 	private String title;
 	
@@ -66,7 +68,7 @@ public class PullRequest extends AbstractEntity {
 	@Column(nullable=false)
 	private String baseCommit;
 
-	private boolean autoMerge;
+	private boolean autoIntegrate;
 
 	@ManyToOne
 	private User submitter;
@@ -138,14 +140,6 @@ public class PullRequest extends AbstractEntity {
 		this.description = description;
 	}
 
-	public boolean isToUpstream() {
-		return toUpstream;
-	}
-
-	public void setToUpstream(boolean toUpstream) {
-		this.toUpstream = toUpstream;
-	}
-
 	/**
 	 * Get head commit of target branch at the time when pull request is created.
      *
@@ -160,12 +154,12 @@ public class PullRequest extends AbstractEntity {
 		this.baseCommit = baseCommit;
 	}
 
-	public boolean isAutoMerge() {
-		return autoMerge;
+	public boolean isAutoIntegrate() {
+		return autoIntegrate;
 	}
 
-	public void setAutoMerge(boolean autoMerge) {
-		this.autoMerge = autoMerge;
+	public void setAutoIntegrate(boolean autoIntegrate) {
+		this.autoIntegrate = autoIntegrate;
 	}
 
 	/**
@@ -273,8 +267,10 @@ public class PullRequest extends AbstractEntity {
 			return Status.PENDING_APPROVAL;
 		} else if (checkResult instanceof Disapproved) {
 			return Status.PENDING_UPDATE;
-		} else {
+		} else if (checkResult instanceof Ignored || checkResult instanceof Approved) {
 			return Status.PENDING_INTEGRATE;
+		} else {
+			return Status.PENDING_REFRESH;
 		}
 	}
 
@@ -391,12 +387,18 @@ public class PullRequest extends AbstractEntity {
 
 	public String getHeadRef() {
 		Preconditions.checkNotNull(getId());
-		return Repository.REFS_GITOP + "requests/" + getId() + "/head";
+		return Repository.REFS_GITOP + "pulls/" + getId() + "/head";
 	}
+	
+	public String getBaseRef() {
+		Preconditions.checkNotNull(getId());
+		return Repository.REFS_GITOP + "pulls/" + getId() + "/base";
+	}
+	
 	
 	public String getIntegrateRef() {
 		Preconditions.checkNotNull(getId());
-		return Repository.REFS_GITOP + "requests/" + getId() + "/integrate";
+		return Repository.REFS_GITOP + "pulls/" + getId() + "/integrate";
 	};
 
 	/**
@@ -405,13 +407,15 @@ public class PullRequest extends AbstractEntity {
 	public void deleteRefs() {
 		Git git = getTarget().getRepository().git();
 		git.deleteRef(getHeadRef(), null, null);
+		git.deleteRef(getBaseRef(), null, null);
 		git.deleteRef(getIntegrateRef(), null, null);
 	}
 	
-	public String getLockName() {
+    public <T> T lockAndCall(Callable<T> callable) {
 		Preconditions.checkNotNull(getId());
-		return "pull request: " + getId();
-	}
+		
+    	return LockUtils.call("pull request: " + getId(), callable);
+    }
 	
 	/**
 	 * Invite specified number of users in candidates to vote for this request.
@@ -503,20 +507,27 @@ public class PullRequest extends AbstractEntity {
 		this.updateDate = updateDate;
 	}
 
+	/**
+	 * Get commits pending integration.
+	 * 
+	 * @return
+	 * 			commits pending integration
+	 */
 	public Set<String> getPendingCommits() {
 		if (pendingCommits == null) {
 			pendingCommits = new HashSet<>();
 			Repository repo = getTarget().getRepository();
-			String futureTargetHead;
-			if (getIntegrationInfo() != null && getIntegrationInfo().getIntegrationHead() != null)
-				futureTargetHead = getIntegrationInfo().getIntegrationHead();
-			else
-				futureTargetHead = getLatestUpdate().getHeadCommit();
-			for (Commit commit: repo.git().log(getTarget().getHeadCommit(), futureTargetHead, null, 0, 0)) {
+			for (Commit commit: repo.git().log(getTarget().getHeadCommit(), getLatestUpdate().getHeadCommit(), null, 0, 0)) {
 				pendingCommits.add(commit.getHash());
 			}
 		}
 		return pendingCommits;
+	}
+
+	public boolean canIntegrate() {
+		return getStatus() == Status.PENDING_INTEGRATE 
+				&& getIntegrationInfo() != null 
+				&& getIntegrationInfo().getIntegrationHead() != null;
 	}
 
 }

@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 import com.google.inject.ImplementedBy;
 import com.pmease.gitop.core.manager.impl.DefaultBranchManager;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 
@@ -53,8 +52,10 @@ public interface BranchManager {
      * 
      * @param branch
      * 			branch to be deleted
+     * @param user
+     * 			user deleting the branch
      */
-    public void delete(Branch branch);
+    public void delete(Branch branch, @Nullable User user);
     
     /**
      * Create specified branch record in database, and update corresponding git repository to 
@@ -78,17 +79,7 @@ public interface BranchManager {
      */
     public void rename(Branch branch, String newName);
     
-    /**
-     * Call this method when branch ref is updated.
-     * 
-     * @param branch
-     * 			branch whose ref has been updated
-     * @param byUser
-     * 			user who updates the ref
-     * @param byRequest
-     * 			pull request on behalf of which the branch ref is updated
-     */
-    public void onBranchRefUpdate(Branch branch, @Nullable User byUser, @Nullable PullRequest byRequest);
+    public void save(Branch branch);
     
     public void trim(Collection<Long> branchIds);
     

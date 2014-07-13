@@ -191,3 +191,8 @@ table td, table th {text-align: left;}
     right: 0; top: 0; z-index: 1000000; filter:alpha(opacity=0); /* Only applies to IE */
     background: white; /* This will be overwritten by browsers that support rgba */
     background: rgba(255,255,255,0.0); /* IE ignores this since it's not supported */}
+    
+/* div table */
+div.table {display: table;}
+div.tr {display: table-row;}    
+div.td {display: table-cell;}

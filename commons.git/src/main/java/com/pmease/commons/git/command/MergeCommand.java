@@ -70,7 +70,7 @@ public class MergeCommand extends GitCommand<String> {
 		if (strategy != null)
 			cmd.addArgs("--strategy=" + strategy);
 		if (strategyOption != null)
-			cmd.addArgs("--strategy-option" + strategyOption);
+			cmd.addArgs("--strategy-option=" + strategyOption);
 		
 		if (message != null)
 			cmd.addArgs("-m", message);

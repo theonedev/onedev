@@ -17,6 +17,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
@@ -28,8 +29,8 @@ import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.datatype.DataTypes;
 import com.pmease.gitop.web.common.quantity.Data;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
-import com.pmease.gitop.web.component.link.AvatarLink.Mode;
-import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.component.user.AvatarMode;
+import com.pmease.gitop.web.component.user.PersonLink;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.git.command.BlameCommand;
 import com.pmease.gitop.web.git.command.BlameEntry;
@@ -79,7 +80,7 @@ public class BlobBlamePage extends AbstractFilePage {
 	
 	@Override
 	protected String getPageTitle() {
-		return getFilePath() + " at " + getRevision() + " " + getRepository().getPathName();
+		return getFilePath() + " at " + getRevision() + " " + getRepository().getFullName();
 	}
 	
 	@Override
@@ -194,7 +195,7 @@ public class BlobBlamePage extends AbstractFilePage {
 					
 					link.add(new Label("sha", GitUtils.abbreviateSHA(each.getCommit().getHash(), 8)));
 					container.add(link);
-					container.add(new PersonLink("author", each.getCommit().getAuthor(), Mode.NAME));
+					container.add(new PersonLink("author", Model.of(each.getCommit().getAuthor()), AvatarMode.NAME));
 					
 					container.add(new Label("date", 
 							DataTypes.DATE.asString(each.getCommit().getAuthor().getWhen(), "yyyy-MM-dd")));

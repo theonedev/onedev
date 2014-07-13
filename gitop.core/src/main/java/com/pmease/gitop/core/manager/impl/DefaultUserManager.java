@@ -12,6 +12,7 @@ import javax.transaction.Status;
 import javax.transaction.Synchronization;
 
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
@@ -133,8 +134,8 @@ public class DefaultUserManager implements UserManager {
     		dao.persist(update);
     	}
     	
-    	for (Branch branch: user.getBranches()) {
-    		branch.setCreator(null);
+    	for (Branch branch: dao.query(EntityCriteria.of(Branch.class).add(Restrictions.eq("updater", user)))) {
+    		branch.setUpdater(null);
     		dao.persist(branch);
     	}
     	

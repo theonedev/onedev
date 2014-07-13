@@ -17,14 +17,15 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.Verification;
-import com.pmease.gitop.web.component.link.AvatarLink.Mode;
-import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.component.user.AvatarMode;
+import com.pmease.gitop.web.component.user.PersonLink;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.page.repository.RepositoryBasePage;
 import com.pmease.gitop.web.page.repository.source.commit.SourceCommitPage;
@@ -39,13 +40,13 @@ import com.pmease.gitop.web.util.DateUtils;
 @SuppressWarnings("serial")
 public class UpdateCommitsPanel extends Panel {
 
-	private IModel<Set<String>> integratedCommitHashesModel = new LoadableDetachableModel<Set<String>>() {
+	private IModel<Set<String>> mergedCommitHashesModel = new LoadableDetachableModel<Set<String>>() {
 
 		@Override
 		protected Set<String> load() {
 			Set<String> hashes = new HashSet<>();
 
-			for (Commit commit: getUpdate().getIntegratedCommits())
+			for (Commit commit: getUpdate().getMergedCommits())
 				hashes.add(commit.getHash());
 			return hashes;
 		}
@@ -72,7 +73,7 @@ public class UpdateCommitsPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<Commit> item) {
 				Commit commit = item.getModelObject();
-				item.add(new PersonLink("author", commit.getAuthor(), Mode.NAME_AND_AVATAR));
+				item.add(new PersonLink("author", Model.of(commit.getAuthor()), AvatarMode.NAME_AND_AVATAR));
 
 				item.add(new Label("message", commit.getSubject()));
 				
@@ -139,9 +140,9 @@ public class UpdateCommitsPanel extends Panel {
 					item.add(new WebMarkupContainer("verification"));
 				}
 				
-				if (integratedCommitHashesModel.getObject().contains(commit.getHash())) {
-					item.add(new Label("integration", "integrated").add(AttributeAppender.append("class", "label label-success")));
-					item.add(AttributeAppender.append("class", " integrated"));
+				if (mergedCommitHashesModel.getObject().contains(commit.getHash())) {
+					item.add(new Label("integration", "merged").add(AttributeAppender.append("class", "label label-success")));
+					item.add(AttributeAppender.append("class", " merged"));
 				} else if (getUpdate().getRequest().getPendingCommits().contains(commit.getHash())) {
 					item.add(new WebMarkupContainer("integration"));
 				} else {
@@ -159,7 +160,7 @@ public class UpdateCommitsPanel extends Panel {
 	
 	@Override
 	protected void onDetach() {
-		integratedCommitHashesModel.detach();
+		mergedCommitHashesModel.detach();
 		
 		super.onDetach();
 	}

@@ -37,7 +37,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.Constants;
-import com.pmease.gitop.web.component.choice.UserSingleChoice;
+import com.pmease.gitop.web.component.user.UserSingleChoice;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.repository.RepositoryBasePage;
 

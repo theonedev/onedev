@@ -1,25 +1,23 @@
 <wicket:extend>
 	<table class="activities table">
 		<tr wicket:id="updates">
-			<td class="avatar">
-				<div wicket:id="userAvatar" class="pull-left"></div>
-			</td>
-			<td class="action">
-				<div wicket:id="userName"></div>
-				<div class="text">
-					Made <a wicket:id="updateLink">update #<span wicket:id="updateNo"></span></a>, <span wicket:id="date"></span>
-				</div>
+			<td class="summary">
+				<div wicket:id="updater"></div>
+				<div wicket:id="votes" class="vote" data-html="true">
+					<div wicket:id="voter"></div>
+				</div>			
 			</td>
 			<td class="detail">
 				<div wicket:id="detail"></div>
 			</td>
-			<td class="votes">
-				<div wicket:id="votes" class="vote" data-html="true">
-					<span wicket:id="user"></span>
-					<span wicket:id="result" class="fa result "></span>	
-					<span wicket:id="comment" class="fa fa-comment-o"></span>
-				</div>			
-			</td>
 		</tr>
 	</table>
+	<wicket:fragment wicket:id="updateInfoFrag">
+		Made <a wicket:id="updateLink">update #<span wicket:id="updateNo"></span></a>, <span wicket:id="date"></span>	
+	</wicket:fragment>
+	<wicket:fragment wicket:id="voteInfoFrag">
+		<span wicket:id="vote" class="label"></span>	
+		<span wicket:id="comment" class="fa fa-comment-o"></span>
+		, <span wicket:id="date"></span>
+	</wicket:fragment>
 </wicket:extend>

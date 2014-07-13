@@ -13,21 +13,18 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
-import com.pmease.gitop.web.component.link.AvatarLink.Mode;
-import com.pmease.gitop.web.component.link.NullableUserLink;
-import com.pmease.gitop.web.component.link.UserLink;
+import com.pmease.gitop.web.component.user.UserInfoSnippet;
+import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.util.DateUtils;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.PopoverBehavior;
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.PopoverConfig;
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 
 @SuppressWarnings("serial")
 public class RequestUpdatesPage extends RequestDetailPage {
@@ -57,24 +54,31 @@ public class RequestUpdatesPage extends RequestDetailPage {
 				PullRequestUpdate update = item.getModelObject();
 
 				User user = update.getUser();
-				item.add(new NullableUserLink("userAvatar", user, Mode.AVATAR));
-				item.add(new NullableUserLink("userName", user, Mode.NAME));
-				
-				List<PullRequestUpdate> allUpdates = update.getRequest().getSortedUpdates();
-				int index = allUpdates.indexOf(update);
-				String baseCommit;
-				if (index == allUpdates.size()-1)
-					baseCommit = update.getRequest().getBaseCommit();
-				else
-					baseCommit = allUpdates.get(index+1).getHeadCommit();
-				PageParameters params = RequestChangesPage.params4(
-						update.getRequest(), baseCommit, update.getHeadCommit());
-				Link<Void> updateLink = new BookmarkablePageLink<Void>("updateLink", RequestChangesPage.class, params);
-				updateLink.add(new Label("updateNo", allUpdates.size() - allUpdates.indexOf(update)));
-				item.add(updateLink);
-				item.add(new Label("date", DateUtils.formatAge(update.getDate())));
-				item.add(new UpdateCommitsPanel("detail", item.getModel()));
+				item.add(new UserInfoSnippet("updater", new UserModel(user)) {
+					
+					@Override
+					protected Component newInfoLine(String componentId) {
+						Fragment fragment = new Fragment(componentId, "updateInfoFrag", RequestUpdatesPage.this);
 
+						PullRequestUpdate update = item.getModelObject();
+						List<PullRequestUpdate> allUpdates = update.getRequest().getSortedUpdates();
+						int index = allUpdates.indexOf(update);
+						String baseCommit;
+						if (index == allUpdates.size()-1)
+							baseCommit = update.getRequest().getBaseCommit();
+						else
+							baseCommit = allUpdates.get(index+1).getHeadCommit();
+						PageParameters params = RequestChangesPage.params4(
+								update.getRequest(), baseCommit, update.getHeadCommit());
+						Link<Void> updateLink = new BookmarkablePageLink<Void>("updateLink", RequestChangesPage.class, params);
+						updateLink.add(new Label("updateNo", allUpdates.size() - allUpdates.indexOf(update)));
+						fragment.add(updateLink);
+						fragment.add(new Label("date", DateUtils.formatAge(update.getDate())));
+						
+						return fragment;
+					}
+				});
+				
 				item.add(new ListView<Vote>("votes", new LoadableDetachableModel<List<Vote>>() {
 
 					@Override
@@ -94,31 +98,39 @@ public class RequestUpdatesPage extends RequestDetailPage {
 				}) {
 
 					@Override
-					protected void populateItem(ListItem<Vote> item) {
+					protected void populateItem(final ListItem<Vote> item) {
 						Vote vote = item.getModelObject();
-						UserLink userLink = new UserLink("user", vote.getVoter());
-						item.add(userLink);
 
-						String popoverTitle;
-						if (vote.getResult() == Vote.Result.APPROVE) {
-							item.add(new WebComponent("result").add(AttributeModifier.append("class", " fa-smile-o")));
-							popoverTitle = "Approved";
-						} else {
-							item.add(new WebComponent("result").add(AttributeModifier.append("class", " fa-frown-o")));
-							popoverTitle = "Disapproved";
-						}
-						
-						Component commentIndicator = new WebComponent("comment");
-						commentIndicator.setVisible(vote.getComment() != null);
-						item.add(commentIndicator);
-						
-						item.add(new PopoverBehavior(
-								Model.of(popoverTitle), 
-								Model.of(vote.getComment() != null? vote.getComment(): "<i>No comment</i>"), 
-								new PopoverConfig().withHoverTrigger().withPlacement(Placement.top)));
+						item.add(new UserInfoSnippet("voter", new UserModel(vote.getVoter())) {
+							
+							@Override
+							protected Component newInfoLine(String componentId) {
+								Fragment fragment = new Fragment(componentId, "voteInfoFrag", RequestUpdatesPage.this);
+
+								Vote vote = item.getModelObject();
+								if (vote.getResult() == Vote.Result.APPROVE)
+									fragment.add(new Label("vote", "Approved").add(AttributeModifier.append("class", " label-success")));
+								else
+									fragment.add(new Label("vote", "Disapproved").add(AttributeModifier.append("class", " label-danger")));
+								
+								Component commentIndicator = new WebComponent("comment");
+								if (vote.getComment() != null) {
+									commentIndicator.add(new TooltipBehavior(Model.of(vote.getComment())));
+								} else {
+									commentIndicator.setVisible(vote.getComment() != null);
+								}
+								fragment.add(commentIndicator);
+								fragment.add(new Label("date", DateUtils.formatAge(vote.getDate())));
+								
+								return fragment;
+							}
+							
+						});
 					}
 					
 				});
+
+				item.add(new UpdateCommitsPanel("detail", item.getModel()));
 			}
 			
 		});		

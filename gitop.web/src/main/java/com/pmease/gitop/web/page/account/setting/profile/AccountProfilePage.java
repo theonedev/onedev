@@ -24,8 +24,8 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
-import com.pmease.gitop.web.component.avatar.AvatarChanged;
-import com.pmease.gitop.web.component.avatar.AvatarImage;
+import com.pmease.gitop.web.component.user.AvatarByUser;
+import com.pmease.gitop.web.component.user.AvatarChanged;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
@@ -56,7 +56,7 @@ public class AccountProfilePage extends AccountSettingPage {
 		IModel<User> userModel = new UserModel(getAccount());
 		add(new ProfileForm("form", userModel));
 
-		add(new AvatarImage("currentavatar", userModel.getObject()));
+		add(new AvatarByUser("currentavatar", userModel));
 		add(new AvatarForm("avatarForm", userModel));
 	}
 

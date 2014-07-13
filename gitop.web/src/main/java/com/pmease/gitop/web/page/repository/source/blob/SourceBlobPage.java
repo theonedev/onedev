@@ -14,6 +14,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.PersonIdent;
 
@@ -26,8 +27,8 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.behavior.CollapseBehavior;
 import com.pmease.gitop.web.component.label.AgeLabel;
-import com.pmease.gitop.web.component.link.AvatarLink.Mode;
-import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.component.user.AvatarMode;
+import com.pmease.gitop.web.component.user.PersonLink;
 import com.pmease.gitop.web.page.repository.source.AbstractFilePage;
 import com.pmease.gitop.web.page.repository.source.component.SourceBreadcrumbPanel;
 import com.pmease.gitop.web.service.FileBlob;
@@ -115,7 +116,7 @@ public class SourceBlobPage extends AbstractFilePage {
 		detailedToggle.add(new CollapseBehavior(detailedMsg));
 		detailedContainer.add(detailedToggle);
 		
-		add(new PersonLink("author", getLastCommit().getAuthor(),  Mode.NAME_AND_AVATAR));
+		add(new PersonLink("author", Model.of(getLastCommit().getAuthor()), AvatarMode.NAME_AND_AVATAR));
 		
 		add(new AgeLabel("author-date", new AbstractReadOnlyModel<Date>() {
 
@@ -149,7 +150,7 @@ public class SourceBlobPage extends AbstractFilePage {
 	
 	@Override
 	protected String getPageTitle() {
-		return getFilePath() + " at " + getRevision() + " " + getRepository().getPathName();
+		return getFilePath() + " at " + getRevision() + " " + getRepository().getFullName();
 	}
 	
 	protected Commit getLastCommit() {

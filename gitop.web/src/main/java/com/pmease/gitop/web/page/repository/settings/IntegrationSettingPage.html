@@ -1,99 +1,53 @@
 <html xmlns:wicket>
 <wicket:extend>
-	<section wicket:id="rebasibleBranchesContainer">
-		<div class="head">
-			<h2>Branches Can Be Rebased</h2>
-		</div>
+	<section class="integration-setting">
+		<div class="head"><h2>Integration Setting</h2></div>
 		<div class="body">
 			<div class="help-block">
-				Declare branches which can be rebased. This setting tells integration process 
-				that these branches have rebase capability, and they will be rebased if relevant 
-				integration strategy defines the option <i>rebase if possible</i>. Leave this 
-				option undefined if no branches can be rebased in this repository.
+				<p>Define strategies to integrate pull requests sent to this repository. 
+				Target and source branch of the pull request will be used to find first 
+				matching strategy defined below. If no matching strategy can be found, 
+				the default strategy will apply.
 			</div>
-			<form wicket:id="form">
-				<div wicket:id="feedback"></div>
-				<div wicket:id="editor" class="rebasibles"></div>
-				<a wicket:id="save" class="btn btn-primary dirty-aware">&nbsp;&nbsp;Save&nbsp;&nbsp;</a>
-			</form>
-		</div>
-	</section>
-	<section wicket:id="downstreamStrategiesContainer">
-		<div class="head">
-			<h2>Downstream Integration Strategies</h2>
-		</div>
-		<div class="body">
-			<div class="help-block">
-				Define strategies to integrate pull requests sent from downstream branches.
-				Target branch of the pull request will be used to find the first matching strategy 
-				to apply to the integration. If no matching strategy is found, the default 
-				strategy will apply. The pull request can be either rebased or merged based on 
-				strategy options:
-				<ul>
-					<li>If option <i>try rebase first</i> is specified and source branch (ie.
-					downstream branch) can be rebased, the source branch will be rebased to 
-					target branch, and then target branch will be fast forwarded to source branch; 
-					otherwise, the pull request will be merged following below procedure.</li>
-					<li>If pull request has to be merged, the option <i>merge always otherwise</i> 
-					determines whether or not to create a merge commit even if target branch can 
-					be fast forwarded to source branch.</li>
-				</ul> 
-			</div>
-			<form wicket:id="form">
-				<fieldset class="strategies">
+			<form wicket:id="integrationSettingForm">
+				<fieldset class="branch-strategies">
 					<legend>Strategies</legend>
 					<div wicket:id="feedback"></div>
-					<div wicket:id="strategiesEditor" class="strategies"></div>
+					<div wicket:id="branchStrategiesEditor" class="branch-strategies"></div>
 					<div class="help-block">
-						Branch patterns specified in above table should follow the <a href='http://wiki.pmease.com/display/gp/Pattern+Set'>pattern set</a> format.
+						<p>Branch patterns specified in above table should follow the <a href='http://wiki.pmease.com/display/gp/Pattern+Set'>pattern set</a> format.
+						When match against branch patterns, target branch will use the simple branch name, while source branch 
+						will use its full name in form of:<br>
+						<em>&lt;user name&gt;/&lt;repository name&gt;:&lt;branch name&gt;</em>. 
+						
+						<p><span class="fa fa-hand-o-right"></span> Some examples to match target branch:
+						<dl class="dl-horizontal">
+							<dt>**</dt>
+							<dd>match all target branches</dd>
+							<dt>release/**</dt>
+							<dd>match all target branches beginning with <em>release/</em></dd>
+						</dl>
+						
+						<p><span class="fa fa-hand-o-right"></span> Some examples to match source branch:
+						<dl class="dl-horizontal">
+							<dt>**</dt>
+							<dd>match all source branches</dd>
+							<dt>robin/*:release</dt>
+							<dd>match all source branches with name <em>release</em> from all repositories of user <em>robin</em></dd>
+							<dt>**:release/**</dt>
+							<dd>match all source branches begining with name <em>release/</em> from all repositories</dd>
+						</dl>
 					</div>
 				</fieldset>
-				<fieldset class="default">
+				<fieldset class="default-strategy">
 					<legend>Default Strategy</legend>
-					<div wicket:id="defaultStrategyEditor" class="clearfix"></div>
-					<div class="help-block">Default strategy will be used if target branch of pull request can not match any of strategies defined above.</div>
+					<p wicket:id="defaultStrategyEditor"></p>
+					<div class="help-block">Default strategy will be used if target and source branch of pull request can not 
+					match any of strategies defined above.</div>
 				</fieldset>
 				<a wicket:id="save" class="btn btn-primary dirty-aware">&nbsp;&nbsp;Save&nbsp;&nbsp;</a>
 			</form>
-		</div>
-	</section>
-	<section wicket:id="upstreamStrategiesContainer">
-		<div class="head">
-			<h2>Upstream Integration Strategies</h2>
-		</div>
-		<div class="body">
-			<div class="help-block">
-				Define strategies to integrate pull requests sent from upstream branches.
-				Target branch of the pull request will be used to find the first matching strategy 
-				to apply to the integration. If no matching strategy is found, the default 
-				strategy will apply. The pull request can be either rebased or merged based on 
-				strategy options:
-				<ul>
-					<li>If option <i>try rebase first</i> is specified and target branch can be 
-					rebased, the target branch will be rebased to source branch (ie. upstream 
-					branch); otherwise, the pull request will be merged following below procedure.</li>
-					<li>If pull request has to be merged, the option <i>merge always otherwise</i> 
-					determines whether or not to create a merge commit even if target branch can 
-					be fast forwarded to source branch.</li>
-				</ul> 
 			</div>
-			<form wicket:id="form">
-				<fieldset class="strategies">
-					<legend>Strategies</legend>
-					<div wicket:id="feedback"></div>
-					<div wicket:id="strategiesEditor" class="strategies"></div>
-					<div class="help-block">
-						Branch patterns specified in above table should follow the <a href='http://wiki.pmease.com/display/gp/Pattern+Set'>pattern set</a> format.
-					</div>
-				</fieldset>
-				<fieldset class="default">
-					<legend>Default Strategy</legend>
-					<div wicket:id="defaultStrategyEditor" class="clearfix"></div>
-					<div class="help-block">Default strategy will be used if target branch of pull request can not match any of strategies defined above.</div>
-				</fieldset>
-				<a wicket:id="save" class="btn btn-primary dirty-aware">&nbsp;&nbsp;Save&nbsp;&nbsp;</a>
-			</form>
-		</div>
 	</section>
 </wicket:extend>
 </html>

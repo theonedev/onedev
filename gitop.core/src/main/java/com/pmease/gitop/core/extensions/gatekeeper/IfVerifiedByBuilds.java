@@ -25,7 +25,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 	
 	private int leastPassCount = 1;
 	
-	private boolean checkMerged = true;
+	private boolean checkIntegrated = true;
 	
 	private boolean blockMode = true;
 	
@@ -41,13 +41,13 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 		this.leastPassCount = leastPassCount;
 	}
 
-	@Editable(order=200, description="Enable this to check the merged commit instead of head commit.")
-	public boolean isCheckMerged() {
-		return checkMerged;
+	@Editable(order=200, description="Enable this to check the integrated commit instead of head commit.")
+	public boolean isCheckIntegrated() {
+		return checkIntegrated;
 	}
 
-	public void setCheckMerged(boolean checkMerged) {
-		this.checkMerged = checkMerged;
+	public void setCheckIntegrated(boolean checkIntegrated) {
+		this.checkIntegrated = checkIntegrated;
 	}
 
 	@Editable(order=300, description="If this is checked, subsequent gate keepers will not be checked "
@@ -65,14 +65,19 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 	protected CheckResult doCheckRequest(PullRequest request) {
 		VerificationManager verificationManager = Gitop.getInstance(VerificationManager.class);
 
-		if (request.getIntegrationInfo() == null) 
-			return ignored();
+		if (request.getIntegrationInfo() == null) {
+			if (blockMode) {
+				return pendingAndBlock("To be verified by build", new NoneCanVote());
+			} else {
+				return pending("To be verified by build", new NoneCanVote());
+			}
+		}
 		
 		String commit;
-		if (isCheckMerged()) {
+		if (isCheckIntegrated()) {
 			commit = request.getIntegrationInfo().getIntegrationHead();
 			if (commit == null) 
-				return disapproved("Can not build against merged result due to conflicts.");
+				return disapproved("Can not build against integration result due to conflicts.");
 		} else {
 			commit = request.getLatestUpdate().getHeadCommit();
 		}

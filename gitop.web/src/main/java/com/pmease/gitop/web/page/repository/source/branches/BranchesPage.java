@@ -33,8 +33,8 @@ import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.web.common.wicket.component.BarLabel;
 import com.pmease.gitop.web.component.label.AgeLabel;
-import com.pmease.gitop.web.component.link.AvatarLink.Mode;
-import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.component.user.AvatarMode;
+import com.pmease.gitop.web.component.user.PersonLink;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.git.command.AheadBehind;
 import com.pmease.gitop.web.git.command.AheadBehindCommand;
@@ -265,7 +265,7 @@ public class BranchesPage extends RepositoryPage {
 			
 			BriefCommit commit = getLastCommit(refName);
 			add(new AgeLabel("updatedTime", Model.of(commit.getAuthor().getWhen())));
-			add(new PersonLink("author", commit.getAuthor(), Mode.NAME));
+			add(new PersonLink("author", Model.of(commit.getAuthor()), AvatarMode.NAME));
 			
 			add(new Label("default", "default").setVisibilityAllowed(Objects.equal(refName, getDefaultBranch())));
 		}

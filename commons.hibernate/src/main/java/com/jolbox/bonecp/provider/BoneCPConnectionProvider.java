@@ -232,9 +232,8 @@ public class BoneCPConnectionProvider implements ConnectionProvider,Configurable
 		this.classLoader = classLoader;
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
-	public boolean isUnwrappableAs(Class unwrapType) {
+	public boolean isUnwrappableAs(@SuppressWarnings("rawtypes") Class unwrapType) {
 		return ConnectionProvider.class.equals( unwrapType ) ||
 			BoneCPConnectionProvider.class.isAssignableFrom( unwrapType );
 	}

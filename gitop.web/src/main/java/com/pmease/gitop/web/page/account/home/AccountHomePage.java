@@ -27,7 +27,7 @@ import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
-import com.pmease.gitop.web.component.avatar.AvatarImage;
+import com.pmease.gitop.web.component.user.AvatarByUser;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.AbstractAccountPage;
@@ -64,7 +64,7 @@ public class AccountHomePage extends AbstractAccountPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		add(new AvatarImage("avatar", accountModel.getObject()));
+		add(new AvatarByUser("avatar", accountModel));
 		add(new Label("fullname", new PropertyModel<String>(accountModel, "fullName")));
 		add(new Label("username", new PropertyModel<String>(accountModel, "name")));
 		

@@ -1,7 +1,5 @@
 package com.pmease.gitop.core.extensions.gatekeeper;
 
-import java.util.Collection;
-
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.editable.annotation.Editable;
@@ -43,10 +41,7 @@ public class IfTouchSpecifiedFilePatterns extends FileGateKeeper {
 		for (int i=0; i<request.getEffectiveUpdates().size(); i++) {
 			PullRequestUpdate update = request.getEffectiveUpdates().get(i);
 
-			Collection<String> touchedFiles = request.git()
-					.listChangedFiles(update.getChangeCommit(), update.getHeadCommit());
-			
-			for (String file: touchedFiles) {
+			for (String file: update.getChangedFiles()) {
 				if (WildcardUtils.matchPath(getFilePatterns(), file)) {
 					request.setBaseUpdate(update);
 					return approved("Touched files match patterns '" + getFilePatterns() + "'.");
@@ -59,7 +54,7 @@ public class IfTouchSpecifiedFilePatterns extends FileGateKeeper {
 
 	@Override
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		if (WildcardUtils.matchPath(filePatterns, file)) 
+		if (file == null || WildcardUtils.matchPath(filePatterns, file)) 
 			return approved("Touched files match patterns '" + filePatterns + "'.");
 		else
 			return disapproved("No touched files match patterns '" + filePatterns + "'.");

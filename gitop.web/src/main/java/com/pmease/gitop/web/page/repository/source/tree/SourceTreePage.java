@@ -99,12 +99,12 @@ public class SourceTreePage extends AbstractFilePage {
 		Repository repository = getRepository();
 		
 		if (paths.isEmpty()) {
-			return repository.getPathName();
+			return repository.getFullName();
 		} else {
 			StringBuffer sb = new StringBuffer();
 			sb.append(Joiner.on("/").join(paths))
 				.append(" at ").append(rev)
-				.append(" - ").append(repository.getPathName());
+				.append(" - ").append(repository.getFullName());
 			
 			return sb.toString();
 		}

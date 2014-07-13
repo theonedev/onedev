@@ -78,7 +78,7 @@ public class Git implements Serializable {
 	 * 			this git object
 	 */
 	public Git createBranch(String branchName, String commitHash) {
-		if (new ListBranchesCommand(repoDir).call().contains(branchName))
+		if (new ListBranchesCommand(repoDir).call().containsKey(branchName))
 			throw new GeneralException(String.format("Branch %s already exists.", branchName));
 
 		new UpdateRefCommand(repoDir).refName(Git.REFS_HEADS + branchName).revision(commitHash)
@@ -322,7 +322,13 @@ public class Git implements Serializable {
 			return new IsAncestorCommand(repoDir).ancestor(ancestor).descendant(descendant).call();
 	}
 	
-	public Collection<String> listBranches() {
+	/**
+	 * List all local branches in git repository.
+
+	 * @return
+	 * 			a map from branch name to head commit
+	 */
+	public Map<String, String> listBranches() {
 		return new ListBranchesCommand(repoDir).call();
 	}
 	

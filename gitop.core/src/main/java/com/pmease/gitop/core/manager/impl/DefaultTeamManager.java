@@ -12,7 +12,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.pmease.commons.hibernate.Sessional;
-import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitop.core.manager.TeamManager;
@@ -67,7 +66,6 @@ public class DefaultTeamManager implements TeamManager {
 				.add(Restrictions.eq("name", teamName)));
 	}
 
-	@Transactional
 	@Override
 	public Team getAnonymous(User user) {
 		return dao.load(Team.class, builtInTeamsCache.getUnchecked(user.getId()).anonymousId);

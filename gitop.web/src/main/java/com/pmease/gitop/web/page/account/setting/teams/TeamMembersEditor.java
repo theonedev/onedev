@@ -32,7 +32,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.Membership;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.component.choice.UserMultiChoice;
+import com.pmease.gitop.web.component.user.UserMultiChoice;
 import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.account.setting.members.MemberListView;
 

@@ -29,7 +29,7 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitop.model.gatekeeper.AndGateKeeper;
 import com.pmease.gitop.model.gatekeeper.GateKeeper;
-import com.pmease.gitop.model.integrationsetting.IntegrationSetting;
+import com.pmease.gitop.model.integration.IntegrationSetting;
 import com.pmease.gitop.model.permission.object.ProtectedObject;
 import com.pmease.gitop.model.permission.object.UserBelonging;
 import com.pmease.gitop.model.storage.StorageManager;
@@ -203,13 +203,13 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		}
 	}
 
-	public String getPathName() {
+	public String getFullName() {
 		return getOwner().getName() + "/" + getName();
 	}
 	
 	@Override
 	public String toString() {
-		return getPathName();
+		return getFullName();
 	}
 	
 	public Git git() {
@@ -300,4 +300,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		return comparables;
 	}
 
+	public String getUrl() {
+		return "http://localhost:6610/" + getFullName();
+	}
 }

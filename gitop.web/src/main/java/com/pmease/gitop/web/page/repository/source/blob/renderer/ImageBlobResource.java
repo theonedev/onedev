@@ -81,7 +81,7 @@ public class ImageBlobResource extends DynamicImageResource {
 		if (!SecurityUtils.getSubject().isPermitted(
 				ObjectPermission.ofRepositoryRead(repository))) {
 			throw new AccessDeniedException("Permission denied to access "
-					+ repository.getPathName() + " for user "
+					+ repository.getFullName() + " for user "
 					+ SecurityUtils.getSubject());
 		}
 

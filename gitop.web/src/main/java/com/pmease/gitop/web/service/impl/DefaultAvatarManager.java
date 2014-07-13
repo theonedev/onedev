@@ -1,7 +1,5 @@
 package com.pmease.gitop.web.service.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -18,6 +16,8 @@ public class DefaultAvatarManager implements AvatarManager {
 	
 	private static String BASE_AVATAR_URL = "/site/avatars/";
 	
+	private static String UNKNOWN_AVATAR = "unknown.jpg";
+
 	private static String DEFAULT_AVATAR = "default.jpg";
 	
 	private final ConfigManager configManager;
@@ -32,30 +32,28 @@ public class DefaultAvatarManager implements AvatarManager {
 	
 	@Override
 	public String getAvatarUrl(User user) {
-		checkNotNull(user, "user");
-		
-		if (user.getAvatarUpdateDate() != null) { 
+		if (user == null) {
+			return BASE_AVATAR_URL + UNKNOWN_AVATAR;
+		} else if (user.getAvatarUpdateDate() != null) { 
 			String url = BASE_AVATAR_URL + user.getId();
 			url += "?version=" + user.getAvatarUpdateDate().getTime();
 			return url;
 		} else if (configManager.getSystemSetting().isGravatarEnabled()) {
 			return Gravatar.getURL(user.getEmail(), GRAVATAR_SIZE);
 		} else {
-			return BASE_AVATAR_URL + DEFAULT_AVATAR; 
+			return getDefaultAvatarUrl();
 		}
 	}
 
 	@Override
 	public String getAvatarUrl(String email) {
-		checkNotNull(email, "email");
-		
 		User user = userManager.findByEmail(email);
 		if (user != null)
 			return getAvatarUrl(user);
 		else if (configManager.getSystemSetting().isGravatarEnabled())
 			return Gravatar.getURL(email);
 		else
-			return BASE_AVATAR_URL + DEFAULT_AVATAR;
+			return getDefaultAvatarUrl();
 	}
 
 	@Override

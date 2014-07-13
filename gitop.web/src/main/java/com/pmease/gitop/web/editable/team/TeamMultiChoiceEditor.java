@@ -19,8 +19,8 @@ import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.Team;
-import com.pmease.gitop.web.component.choice.TeamChoiceProvider;
-import com.pmease.gitop.web.component.choice.TeamMultiChoice;
+import com.pmease.gitop.web.component.team.TeamChoiceProvider;
+import com.pmease.gitop.web.component.team.TeamMultiChoice;
 import com.pmease.gitop.web.page.repository.RepositoryBasePage;
 
 @SuppressWarnings("serial")

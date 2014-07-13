@@ -17,7 +17,7 @@ import com.google.common.collect.Lists;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.Constants;
 import com.pmease.gitop.web.common.datatype.DataTypes;
-import com.pmease.gitop.web.component.link.RepositoryHomeLink;
+import com.pmease.gitop.web.component.repository.RepositoryHomeLink;
 import com.pmease.gitop.web.model.RepositoryModel;
 import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;

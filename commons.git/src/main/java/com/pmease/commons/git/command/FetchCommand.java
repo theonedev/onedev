@@ -33,7 +33,7 @@ public class FetchCommand extends GitCommand<Void> {
 		Commandline cmd = cmd().addArgs("fetch");
 		cmd.addArgs(from);
 		
-		if (refspec == null)
+		if (refspec != null)
 			cmd.addArgs(refspec);
 		
 		cmd.execute(debugLogger, new LineConsumer() {

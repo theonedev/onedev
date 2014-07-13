@@ -18,7 +18,7 @@ import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest.Status;
-import com.pmease.gitop.model.helper.IntegrationInfo;
+import com.pmease.gitop.model.integration.IntegrationInfo;
 import com.pmease.gitop.web.page.repository.source.commit.diff.DiffViewPanel;
 
 @SuppressWarnings("serial")
@@ -49,7 +49,7 @@ public class RequestChangesPage extends RequestDetailPage {
 			if (request.isOpen() 
 					&& mergeInfo.getIntegrationHead() != null 
 					&& !mergeInfo.getIntegrationHead().equals(mergeInfo.getRequestHead())) { 
-				choices.put(request.getIntegrationInfo().getIntegrationHead(), "Auto-Merge Preview");
+				choices.put(request.getIntegrationInfo().getIntegrationHead(), "Integration Preview");
 			}
 			
 			int index = 0;

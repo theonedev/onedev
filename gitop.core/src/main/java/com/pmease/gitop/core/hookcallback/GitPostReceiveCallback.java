@@ -4,8 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -21,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Commit;
-import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitop.core.manager.BranchManager;
@@ -44,18 +41,11 @@ public class GitPostReceiveCallback extends HttpServlet {
     
     private final UserManager userManager;
     
-    private final UnitOfWork unitOfWork;
-    
-    private final Executor executor;
-    
     @Inject
-    public GitPostReceiveCallback(Dao dao, BranchManager branchManager, 
-    		UserManager userManager, UnitOfWork unitOfWork, Executor executor) {
+    public GitPostReceiveCallback(Dao dao, BranchManager branchManager, UserManager userManager) {
     	this.dao = dao;
         this.branchManager = branchManager;
         this.userManager = userManager;
-        this.unitOfWork = unitOfWork;
-        this.executor = executor;
     }
 
     @Override
@@ -108,14 +98,15 @@ public class GitPostReceiveCallback extends HttpServlet {
     	
 	}
 
-    private void onRefUpdated(Repository repository, String refName, String oldCommitHash, String newCommitHash) {
-		String branchName = Branch.getName(refName);
+    private void onRefUpdated(Repository repository, String refName, String oldCommitHash, final String newCommitHash) {
+		String branchName = Branch.parseName(refName);
 		if (branchName != null) {
 			if (oldCommitHash.equals(Commit.ZERO_HASH)) {
 				Branch branch = new Branch();
 				branch.setRepository(repository);
 				branch.setName(branchName);
-				branch.setCreator(userManager.getCurrent());
+				branch.setHeadCommit(newCommitHash);
+				branch.setUpdater(userManager.getCurrent());
 				repository.getBranches().add(branch);
 				dao.persist(branch);
 				if (repository.getBranches().size() == 1) 
@@ -123,8 +114,10 @@ public class GitPostReceiveCallback extends HttpServlet {
 			} else if (newCommitHash.equals(Commit.ZERO_HASH)) {
 				Branch branch = branchManager.findBy(repository, branchName);
 				Preconditions.checkNotNull(branch);
+
+				User currentUser = userManager.getCurrent();
 				repository.getBranches().remove(branch);
-				branchManager.delete(branch);
+				branchManager.delete(branch, currentUser);
 				if (repository.git().resolveDefaultBranch().equals(branchName) && !repository.getBranches().isEmpty()) 
 						repository.git().updateDefaultBranch(repository.getBranches().iterator().next().getName());
 			} else {
@@ -132,28 +125,10 @@ public class GitPostReceiveCallback extends HttpServlet {
 				
 				final Branch branch = branchManager.findBy(repository, branchName);
 				Preconditions.checkNotNull(branch);
-				
-				final Long branchId = branch.getId();
-				final Long userId = User.getCurrentId();
-				
-				executor.execute(new Runnable() {
 
-					@Override
-					public void run() {
-						unitOfWork.call(new Callable<Void>() {
-
-							@Override
-							public Void call() throws Exception {
-								Branch branch = dao.load(Branch.class, branchId);
-								User user = dao.load(User.class, userId);
-								branchManager.onBranchRefUpdate(branch, user, null);
-								return null;
-							}
-							
-						});
-					}
-					
-				});
+				branch.setHeadCommit(newCommitHash);
+				branch.setUpdater(userManager.getCurrent());
+				branchManager.save(branch);
 			}
 		}
     }

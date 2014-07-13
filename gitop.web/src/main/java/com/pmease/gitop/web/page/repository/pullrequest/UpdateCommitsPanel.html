@@ -1,18 +1,20 @@
 <wicket:panel>
-	<table class="update-commits">
-		<tr wicket:id="commits">
-			<td class="handle"></td>
-			<td class="data overview">
-				<a wicket:id="shaLink"><span wicket:id="sha"></span></a>
-				, by <span wicket:id="author"></span>,
-				<span wicket:id="date"></span>
-			</td>
-			<td wicket:id="message" class="data message"></td>
-			<td class="data status">
-				<div><span wicket:id="verification" class="verification"></span></div>
-				<div wicket:id="verificationDetails"></div>
-				<div><span wicket:id="integration" class="integration"></span></div>
-			</td>
-		</tr>
-	</table>
+	<div class="update-commits">
+		<table>
+			<tr wicket:id="commits">
+				<td class="handle"></td>
+				<td class="data overview">
+					<a wicket:id="shaLink"><span wicket:id="sha"></span></a>
+					, by <span wicket:id="author"></span>,
+					<span wicket:id="date"></span>
+					<div wicket:id="message" class="data message"></div>
+				</td>
+				<td class="data status">
+					<div><span wicket:id="verification" class="verification"></span></div>
+					<div wicket:id="verificationDetails"></div>
+					<div><span wicket:id="integration" class="integration"></span></div>
+				</td>
+			</tr>
+		</table>
+	</div>
 </wicket:panel>

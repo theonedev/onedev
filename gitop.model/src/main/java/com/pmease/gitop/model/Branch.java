@@ -30,7 +30,7 @@ public class Branch extends AbstractEntity {
 	private String name;
 	
 	@ManyToOne
-	private User creator;
+	private User updater;
 	
     @OneToMany(mappedBy="target")
     private Collection<PullRequest> incomingRequests = new ArrayList<PullRequest>();
@@ -38,7 +38,7 @@ public class Branch extends AbstractEntity {
     @OneToMany(mappedBy="source")
     private Collection<PullRequest> outgoingRequests = new ArrayList<PullRequest>();
     
-    private transient String headCommit;
+    private String headCommit;
 
     public Repository getRepository() {
 		return repository;
@@ -57,18 +57,18 @@ public class Branch extends AbstractEntity {
 	}
 	
 	/**
-	 * Get creator of the branch. 
+	 * Get user who updates this branch ref last time.
 	 * 
 	 * @return
-	 * 			<tt>null</tt> if creator is unknown
+	 * 			<tt>null</tt> if updater is unknown
 	 */
 	@Nullable
-	public User getCreator() {
-		return creator;
+	public User getUpdater() {
+		return updater;
 	}
 
-	public void setCreator(@Nullable User creator) {
-		this.creator = creator;
+	public void setUpdater(User updater) {
+		this.updater = updater;
 	}
 
 	public Collection<PullRequest> getIncomingRequests() {
@@ -87,20 +87,26 @@ public class Branch extends AbstractEntity {
         this.outgoingRequests = outgoingRequests;
     }
     
+    /**
+     * Get head commit this branch pointing to.
+     * 
+     * @return
+     * 			head commit of this branch
+     */
     public String getHeadCommit() {
-    	if (headCommit == null) {
-	    	Git git = getRepository().git();
-	    	headCommit = git.parseRevision(getHeadRef(), true);
-    	} 
     	return headCommit;
+    }
+
+    public void setHeadCommit(String headCommit) {
+    	this.headCommit = headCommit;
     }
     
     public String getHeadRef() {
     	return Git.REFS_HEADS + name; 
     }
     
-    public String getPathName() {
-    	return getRepository().getPathName() + ":" + getName();
+    public String getFullName() {
+    	return getRepository().getFullName() + ":" + getName();
     }
     
     /**
@@ -112,7 +118,7 @@ public class Branch extends AbstractEntity {
      * 			name of the branch, or <tt>null</tt> if specified ref
      * 			does not represent a branch
      */ 
-    public static String getName(String refName) {
+    public static @Nullable String parseName(String refName) {
 		if (refName.startsWith(Git.REFS_HEADS)) 
 			return refName.substring(Git.REFS_HEADS.length());
 		else
@@ -121,7 +127,7 @@ public class Branch extends AbstractEntity {
     
     @Override
 	public String toString() {
-    	return getPathName();
+    	return getFullName();
 	}
 
 }

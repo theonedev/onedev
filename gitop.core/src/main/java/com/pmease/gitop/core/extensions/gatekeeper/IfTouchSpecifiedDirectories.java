@@ -1,7 +1,6 @@
 package com.pmease.gitop.core.extensions.gatekeeper;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -11,9 +10,9 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.gitop.core.editable.DirectoryChoice;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequestUpdate;
+import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.gatekeeper.FileGateKeeper;
 import com.pmease.gitop.model.gatekeeper.checkresult.CheckResult;
@@ -42,9 +41,7 @@ public class IfTouchSpecifiedDirectories extends FileGateKeeper {
 		for (int i=0; i<request.getEffectiveUpdates().size(); i++) {
 			PullRequestUpdate update = request.getEffectiveUpdates().get(i);
 
-			Collection<String> touchedFiles = request.git()
-					.listChangedFiles(update.getChangeCommit(), update.getHeadCommit());
-			for (String file: touchedFiles) {
+			for (String file: update.getChangedFiles()) {
 				for (String each: directories) {
 					if (WildcardUtils.matchPath(each + "/**", file)) {
 						request.setBaseUpdate(update);
@@ -60,7 +57,7 @@ public class IfTouchSpecifiedDirectories extends FileGateKeeper {
 	@Override
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
 		for (String each: directories) {
-			if (WildcardUtils.matchPath(each + "/**", file)) 
+			if (file == null || WildcardUtils.matchPath(each + "/**", file)) 
 				return approved("Touched directory '" + each + "'.");
 		}
 		return disapproved("Not touched directories '" + getDirectories() + "'.");

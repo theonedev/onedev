@@ -28,8 +28,8 @@ import com.pmease.gitop.model.CommitComment;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.component.commit.CommitMetaPanel;
-import com.pmease.gitop.web.component.link.AvatarLink.Mode;
-import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.component.user.AvatarMode;
+import com.pmease.gitop.web.component.user.PersonLink;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.git.command.CommitInCommand;
 import com.pmease.gitop.web.git.command.CommitInCommand.RefType;
@@ -109,7 +109,7 @@ public class SourceCommitPage extends RepositoryPage implements CommitCommentsAw
 				SourceTreePage.newParams(getRepository(), getRevision())));
 		
 		TooltipConfig tooltipConfig = new TooltipConfig().withPlacement(TooltipConfig.Placement.left);
-		add(new PersonLink("authoravatar", getCommit().getAuthor(), Mode.AVATAR)
+		add(new PersonLink("authoravatar", Model.of(getCommit().getAuthor()), AvatarMode.AVATAR)
 				.withTooltipConfig(tooltipConfig));
 		
 		add(new CommitMetaPanel("meta", commitModel));
@@ -264,6 +264,6 @@ public class SourceCommitPage extends RepositoryPage implements CommitCommentsAw
 	protected String getPageTitle() {
 		return getCommit().getSubject() + " - "
 				+ GitUtils.abbreviateSHA(getRevision(), 8) 
-				+ " - " + getRepository().getPathName();
+				+ " - " + getRepository().getFullName();
 	}
 }

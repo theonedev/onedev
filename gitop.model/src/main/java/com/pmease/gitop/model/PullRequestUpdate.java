@@ -50,9 +50,11 @@ public class PullRequestUpdate extends AbstractEntity {
 	
 	private transient String baseCommit;
 	
-	private transient Collection<Commit> integratedCommits;
+	private transient Collection<Commit> mergedCommits;
 	
 	private transient List<Commit> commits;
+	
+	private transient Collection<String> changedFiles;
 	
 	public PullRequest getRequest() {
 		return request;
@@ -203,11 +205,17 @@ public class PullRequestUpdate extends AbstractEntity {
 		Git git = getRequest().getTarget().getRepository().git();
 		git.deleteRef(getHeadRef(), null, null);
 		git.deleteRef(getChangeRef(), null, null);
-	}
+	}	
 	
 	public String getLockName() {
 		Preconditions.checkNotNull(getId());
 		return "pull request update: " + getId();
+	}
+	
+	public Collection<String> getChangedFiles() {
+		if (changedFiles == null) 
+			changedFiles = getRequest().git().listChangedFiles(getChangeCommit(), getHeadCommit());
+		return changedFiles;
 	}
 	
 	/**
@@ -234,22 +242,22 @@ public class PullRequestUpdate extends AbstractEntity {
 	}
 	
 	/**
-	 * Integrated commits represent commits already integrated to target branch since base commit.
+	 * Merged commits represent commits already merged to target branch since base commit.
 	 * 
 	 * @return
-	 * 			commits already integrated to target branch since base commit
+	 * 			commits already merged to target branch since base commit
 	 */
-	public Collection<Commit> getIntegratedCommits() {
-		if (integratedCommits == null) {
-			integratedCommits = new HashSet<>();
+	public Collection<Commit> getMergedCommits() {
+		if (mergedCommits == null) {
+			mergedCommits = new HashSet<>();
 
 			Branch target = getRequest().getTarget();
 			Repository repo = target.getRepository();
 			for (Commit commit: repo.git().log(getBaseCommit(), target.getHeadCommit(), null, 0, 0)) {
-				integratedCommits.add(commit);
+				mergedCommits.add(commit);
 			}
 		}
-		return integratedCommits;
+		return mergedCommits;
 	}
 	
 	/**
@@ -292,21 +300,21 @@ public class PullRequestUpdate extends AbstractEntity {
 				updateAffinityScores(allCommits, headCommit);
 			}
 			
-			Map<String, ScoreAwareCommit> integratedCommits = new HashMap<>();
-			for (Commit commit: getIntegratedCommits()) {
+			Map<String, ScoreAwareCommit> mergedCommits = new HashMap<>();
+			for (Commit commit: getMergedCommits()) {
 				ScoreAwareCommit scoredCommit = new ScoreAwareCommit();
 				scoredCommit.setCommit(commit);
-				integratedCommits.put(commit.getHash(), scoredCommit);
+				mergedCommits.put(commit.getHash(), scoredCommit);
 			}
 			
-			headCommit = integratedCommits.get(getRequest().getTarget().getHeadCommit());
+			headCommit = mergedCommits.get(getRequest().getTarget().getHeadCommit());
 			if (headCommit != null) {
 				headCommit.setScore(0);
-				updateAffinityScores(integratedCommits, headCommit);
+				updateAffinityScores(mergedCommits, headCommit);
 			}
 			
 			for (ScoreAwareCommit commit: allCommits.values()) {
-				ScoreAwareCommit mergedCommit = integratedCommits.get(commit.getCommit().getHash());
+				ScoreAwareCommit mergedCommit = mergedCommits.get(commit.getCommit().getHash());
 				if (mergedCommit == null || mergedCommit.getScore() >= commit.getScore()) {
 					commits.add(commit.getCommit());
 				} 

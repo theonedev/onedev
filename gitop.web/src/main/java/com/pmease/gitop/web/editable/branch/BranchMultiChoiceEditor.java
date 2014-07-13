@@ -19,8 +19,8 @@ import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.Branch;
-import com.pmease.gitop.web.component.choice.BranchChoiceProvider;
-import com.pmease.gitop.web.component.choice.BranchMultiChoice;
+import com.pmease.gitop.web.component.branch.BranchChoiceProvider;
+import com.pmease.gitop.web.component.branch.BranchMultiChoice;
 import com.pmease.gitop.web.page.repository.RepositoryBasePage;
 
 @SuppressWarnings("serial")
@@ -57,7 +57,6 @@ public class BranchMultiChoiceEditor extends PropertyEditor<List<Long>> {
 		}
 		
 		input = new BranchMultiChoice("input", new Model((Serializable)branches), branchProvider);
-        input.setConvertEmptyInputStringToNull(true);
         
         add(input);
 	}

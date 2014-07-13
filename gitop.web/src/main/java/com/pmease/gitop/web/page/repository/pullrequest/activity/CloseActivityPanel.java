@@ -18,7 +18,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.AuthorizationManager;
 import com.pmease.gitop.model.PullRequest;
-import com.pmease.gitop.model.helper.CloseInfo;
+import com.pmease.gitop.model.integration.CloseInfo;
 
 @SuppressWarnings("serial")
 public class CloseActivityPanel extends Panel {

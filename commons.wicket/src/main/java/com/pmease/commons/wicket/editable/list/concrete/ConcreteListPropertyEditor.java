@@ -12,6 +12,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FeedbackMessage;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -133,6 +134,7 @@ public class ConcreteListPropertyEditor extends PropertyEditor<List<Serializable
 			@Override
 			protected void populateItem(ListItem<PropertyContext<?>> item) {
 				item.add(new Label("header", EditableUtils.getName(item.getModelObject().getPropertyGetter())));
+				item.add(AttributeAppender.append("class", " " + item.getModelObject().getPropertyName()));
 				
 				String required;
 				if (item.getModelObject().isPropertyRequired() && item.getModelObject().getPropertyClass() != boolean.class)
@@ -252,6 +254,7 @@ public class ConcreteListPropertyEditor extends PropertyEditor<List<Serializable
 		
 		for (PropertyContext<Serializable> propertyContext: propertyContexts) {
 			WebMarkupContainer column = new WebMarkupContainer(columns.newChildId());
+			column.add(AttributeAppender.append("class", " " + propertyContext.getPropertyName()));
 			columns.add(column);
 			
 			Serializable propertyValue = (Serializable) propertyContext.getPropertyValue(element);

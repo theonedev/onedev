@@ -46,9 +46,6 @@ public class User extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
 	private Collection<Team> teams = new ArrayList<Team>();
 	
-	@OneToMany(mappedBy="creator")
-	private Collection<Branch> branches = new ArrayList<Branch>();
-	
 	@OneToMany(mappedBy="submitter")
 	private Collection<PullRequest> submittedRequests = new ArrayList<>();
 
@@ -138,20 +135,6 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	public void setTeams(Collection<Team> teams) {
 		this.teams = teams;
-	}
-
-	/**
-	 * Get created branches.
-	 * 
-	 * @return
-	 * 			collection of created branches
-	 */
-	public Collection<Branch> getBranches() {
-		return branches;
-	}
-
-	public void setBranches(Collection<Branch> branches) {
-		this.branches = branches;
 	}
 
 	/**

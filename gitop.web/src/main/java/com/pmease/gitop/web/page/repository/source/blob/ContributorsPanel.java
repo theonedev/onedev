@@ -19,8 +19,8 @@ import org.eclipse.jgit.lib.PersonIdent;
 import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
-import com.pmease.gitop.web.component.link.AvatarLink.Mode;
-import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.component.user.AvatarMode;
+import com.pmease.gitop.web.component.user.PersonLink;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.jquery.JQuery;
@@ -64,8 +64,7 @@ public class ContributorsPanel extends Panel {
 
 			@Override
 			protected void populateItem(ListItem<PersonIdent> item) {
-				PersonIdent person = item.getModelObject();
-				item.add(new PersonLink("link", person, Mode.AVATAR).withTooltipConfig(new TooltipConfig()));
+				item.add(new PersonLink("link", item.getModel(), AvatarMode.AVATAR).withTooltipConfig(new TooltipConfig()));
 			}
 		};
 		
@@ -91,7 +90,7 @@ public class ContributorsPanel extends Panel {
 
 					@Override
 					protected void populateItem(ListItem<PersonIdent> item) {
-						item.add(new PersonLink("committer", item.getModelObject(), Mode.NAME_AND_AVATAR));
+						item.add(new PersonLink("committer", item.getModel(), AvatarMode.NAME_AND_AVATAR));
 					}
 				});
 				

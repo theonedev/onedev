@@ -28,8 +28,8 @@ import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.Constants;
 import com.pmease.gitop.web.common.datatype.DataTypes;
 import com.pmease.gitop.web.common.wicket.bootstrap.Alert;
-import com.pmease.gitop.web.component.link.AvatarLink.Mode;
-import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.component.user.AvatarMode;
+import com.pmease.gitop.web.component.user.PersonLink;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.page.repository.source.commit.SourceCommitPage;
 
@@ -110,7 +110,7 @@ public class CommitsTablePanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<Commit> item) {
 				Commit commit = item.getModelObject();
-				item.add(new PersonLink("name", commit.getAuthor(), Mode.NAME_AND_AVATAR));
+				item.add(new PersonLink("name", Model.of(commit.getAuthor()), AvatarMode.NAME_AND_AVATAR));
 				item.add(new CommitMessagePanel("message", item.getModel(), repositoryModel));
 				
 				AbstractLink link = new BookmarkablePageLink<Void>("commitlink",

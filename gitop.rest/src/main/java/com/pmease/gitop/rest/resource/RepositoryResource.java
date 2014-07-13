@@ -66,7 +66,7 @@ public class RepositoryResource {
 		
 		for (Repository repository: repositories) {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(repository))) {
-				throw new UnauthorizedException("Unauthorized access to repository " + repository.getPathName());
+				throw new UnauthorizedException("Unauthorized access to repository " + repository.getFullName());
 			}
 		}
 		return repositories;

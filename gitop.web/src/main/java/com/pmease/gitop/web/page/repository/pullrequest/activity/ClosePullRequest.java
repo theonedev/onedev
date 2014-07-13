@@ -6,7 +6,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.model.helper.CloseInfo;
+import com.pmease.gitop.model.integration.CloseInfo;
 
 public class ClosePullRequest implements PullRequestActivity {
 

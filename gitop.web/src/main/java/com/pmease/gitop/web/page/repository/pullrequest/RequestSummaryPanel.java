@@ -2,21 +2,20 @@ package com.pmease.gitop.web.page.repository.pullrequest;
 
 import java.util.Date;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.PullRequest;
-import com.pmease.gitop.model.permission.ObjectPermission;
+import com.pmease.gitop.web.component.branch.BranchLink;
 import com.pmease.gitop.web.component.label.AgeLabel;
-import com.pmease.gitop.web.component.link.AvatarLink.Mode;
-import com.pmease.gitop.web.component.link.PersonLink;
-import com.pmease.gitop.web.page.repository.RepositoryBasePage;
+import com.pmease.gitop.web.component.user.AvatarMode;
+import com.pmease.gitop.web.component.user.UserLink;
 
 @SuppressWarnings("serial")
 public class RequestSummaryPanel extends Panel {
@@ -65,39 +64,24 @@ public class RequestSummaryPanel extends Panel {
 			
 		});
 		
-		add(new PersonLink("user", getPullRequest().getSubmitter().asPerson(), Mode.NAME_AND_AVATAR));
+		add(new UserLink("user", Model.of(getPullRequest().getSubmitter()), AvatarMode.NAME_AND_AVATAR));
 		
-		Link<Void> branchLink = new Link<Void>("branchLink") {
+		add(new BranchLink("branch", new AbstractReadOnlyModel<Branch>() {
 
 			@Override
-			public void onClick() {
+			public Branch getObject() {
+				return getPullRequest().getSource();
 			}
+			
+		}) {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				Branch source = getPullRequest().getSource();
-				setVisible(source != null);
-				setEnabled(SecurityUtils.getSubject().isPermitted(
-						ObjectPermission.ofRepositoryRead(source.getRepository())));
+				setVisible(getPullRequest().getSource() != null);
 			}
 			
-		};
-		add(branchLink);
-		branchLink.add(new Label("branchLabel", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				PullRequest request = getPullRequest();
-				RepositoryBasePage page = (RepositoryBasePage) getPage();
-				if (page.getRepository().equals(request.getSource().getRepository())) {
-					return request.getSource().getName();
-				} else {
-					return request.getSource().getRepository().toString() + ":" + request.getSource().getName();
-				}
-			}
-			
-		}));
+		});
 		
 		add(new AgeLabel("date", new AbstractReadOnlyModel<Date>() {
 

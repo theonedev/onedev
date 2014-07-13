@@ -1,56 +1,28 @@
 package com.pmease.gitop.web.page;
 
-import java.io.Serializable;
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.basic.Label;
 
-import org.apache.wicket.markup.html.form.Form;
-import org.hibernate.validator.constraints.NotEmpty;
-
-import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
-import com.pmease.commons.wicket.editable.BeanContext;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.model.User;
+import com.pmease.gitop.web.component.user.UserInfoSnippet;
+import com.pmease.gitop.web.model.UserModel;
 
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
 
-	private Bean bean = new Bean();
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-
-		Form<?> form = new Form<Void>("form");
-		form.add(new FeedbackPanel("feedback", form));
-		form.add(BeanContext.editBean("editor", bean));
-		add(form);
 		
-		add(BeanContext.viewBean("viewer", bean));
+		add(new UserInfoSnippet("userActivity", new UserModel(Gitop.getInstance(Dao.class).load(User.class, 1L))) {
+			
+			@Override
+			protected Component newInfoLine(String componentId) {
+				return new Label(componentId, "hello world");
+			}
+		});
 	}
 	
-	@Editable
-	public static class Bean implements Serializable {
-		
-		private String name;
-		
-		private String address;
-
-		@Editable
-		@NotEmpty
-		public String getName() {
-			return name;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		@NotEmpty
-		public String getAddress() {
-			return address;
-		}
-
-		public void setAddress(String address) {
-			this.address = address;
-		}
-		
-	}
 }

@@ -118,7 +118,7 @@ public class RepositoryOptionsPage extends AbstractRepositorySettingPage {
 				Repository repository = getRepository();
 				Git git = repository.git();
 				if (git.hasCommits()) {
-					return Lists.newArrayList(git.listBranches());
+					return Lists.newArrayList(git.listBranches().keySet());
 				} else {
 					return Collections.emptyList();
 				}

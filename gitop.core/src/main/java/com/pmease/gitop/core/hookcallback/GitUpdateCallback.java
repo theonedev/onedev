@@ -115,7 +115,7 @@ public class GitUpdateCallback extends HttpServlet {
 			if (!user.asSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(repository)))
 				error(output, "Only repository administrators can update gitop refs.");
 		} else {
-			String branchName = Branch.getName(refName);
+			String branchName = Branch.parseName(refName);
 			if (branchName != null) { // push branch ref 
 				if (oldCommitHash.equals(Commit.ZERO_HASH)) { // create new branch
 					checkRef(user, repository, refName, output);
@@ -124,8 +124,14 @@ public class GitUpdateCallback extends HttpServlet {
 					Preconditions.checkNotNull(branch);
 
 					if (newCommitHash.equals(Commit.ZERO_HASH)) { // deleting a branch ref
-						if (!user.asSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(repository)) && !user.equals(branch.getCreator())) {
-							error(output, "Branch can only be deleted by its creator or repository administrators.");
+						GateKeeper gateKeeper = repository.getGateKeeper();
+						CheckResult checkResult = gateKeeper.checkBranch(user, branch);
+						
+						if (!(checkResult instanceof Approved)) {
+							List<String> messages = new ArrayList<>();
+							for (String each: checkResult.getReasons())
+								messages.add(each);
+							error(output, messages.toArray(new String[messages.size()]));
 						}
 					} else {
 						GateKeeper gateKeeper = repository.getGateKeeper();

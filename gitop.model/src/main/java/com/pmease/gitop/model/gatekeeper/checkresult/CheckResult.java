@@ -107,4 +107,8 @@ public abstract class CheckResult implements Serializable {
     	return this instanceof Ignored;
     }
     
+    public boolean allowIntegration() {
+    	return isApproved() || isIgnored();
+    }
+    
 }

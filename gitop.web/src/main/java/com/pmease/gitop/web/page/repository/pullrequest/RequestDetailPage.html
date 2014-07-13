@@ -16,8 +16,7 @@
 		</div>
 		<div class="summary">
 			<span wicket:id="user"></span> 
-			<span>wants to integrate</span> 
-			into
+			wants to pull into
 			<span wicket:id="targetBranch"></span>
 			<wicket:enclosure child="sourceBranch">
 				from
@@ -25,68 +24,115 @@
 			</wicket:enclosure>
 			<span wicket:id="date"></span>
 		</div>
-		<div wicket:id="status" class="status">
-			<table>
-				<tr>
-					<td wicket:id="primary" class="primary">
-						<div class="fa fa-check-circle pull-left"></div>
-						<div class="fa fa-times-circle pull-left"></div>
-						<div class="fa fa-info-circle pull-left"></div>
-						<div class="pull-left">
-							<div wicket:id="message" class="message"></div>
-							<wicket:enclosure child="reasons">
-							<ul class="reasons">
-								<li wicket:id="reasons">
-									<span wicket:id="reason"></span>
-								</li>
-							</ul>
-							</wicket:enclosure>
-						</div>
-					</td>
-					<td wicket:id="merge" class="merge">
-						<div class="fa fa-info-circle pull-left"></div>
-						<div class="fa fa-exclamation-triangle pull-left"></div>
-						<div wicket:id="canMerge" class="no-conflicts message pull-left">
-							<div>
-								This request can be merged automatically. <a wicket:id="preview">Preview</a> the merge result.
-							</div>
-							<div wicket:id="verification"></div>
-							<div wicket:id="verificationDetails"></div>
-						</div>
-						<div wicket:id="canFastforward" class="no-conflicts message pull-left">
-							This request can be fast-forwarded.
-						</div>
-						<div wicket:id="conflicts" class="conflicts message pull-left">
-							There are merge conflicts, you may use <a wicket:id="helpTrigger" href="javascript:void(0);">command line</a> to resolve conflicts.
-							<div wicket:id="helpDropdown"></div>
-						</div>
-					</td>
-					<td wicket:id="actions" class="actions">
-						<a wicket:id="approve" class="btn btn-primary btn-sm btn-block" href="javascript:void(0);">Approve</a>
-						<a wicket:id="disapprove" class="btn btn-primary btn-sm btn-block" href="javascript:void(0);">Disapprove</a>
-						<a wicket:id="integrate" class="btn btn-success btn-sm btn-block">Integrate</a>
-						<a wicket:id="discard" class="btn btn-danger btn-sm btn-block">Discard</a>
-					</td>
-				</tr>
-			</table>
-			<form wicket:id="commentEditor">
-				<table>
-					<tr>
-						<td class="comment">
-							<textarea wicket:id="comment" rows="8" class="form-control" placeholder="Leave a comment"></textarea>
-						</td>
-						<td class="actions">
-							<input wicket:id="confirm" type="submit" value="Confirm" class="btn btn-sm btn-block"></input> 
-							<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-default btn-sm btn-block"></input>
-						</td>
-					</tr>
-				</table>
-			</form>
+		<div wicket:id="status" class="status"></div>
+		<!-- separate actions from status component as status component will be recreated 
+		upon page refreshing, and this will cause confirm comments and action feedbacks not
+		being displayed in case there are errors carrying out some actions. -->
+		<div wicket:id="actions" class="actions">
+			<div class="buttons">
+				<a wicket:id="approve" class="btn btn-primary" href="javascript:void(0);">Approve</a>
+				<a wicket:id="disapprove" class="btn btn-primary" href="javascript:void(0);">Disapprove</a>
+				<a wicket:id="integrate" class="btn btn-success">Integrate</a>
+				<a wicket:id="discard" class="btn btn-danger">Discard</a>
+			</div>
+			<div class="confirm">
+				<form wicket:id="confirm">
+					<div class="comment">
+						<textarea wicket:id="comment" rows="8" class="form-control" placeholder="Leave a comment"></textarea>
+					</div>
+					<div wicket:id="feedback"></div>
+					<div class="actions">
+						<input wicket:id="submit" type="submit" value="Confirm" class="btn"></input> 
+						<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-default"></input>
+					</div>
+				</form>
+			</div>
 		</div>
 		<div wicket:id="tabs"></div>
 		<wicket:child></wicket:child>
 	</div>
-	<wicket:fragment wicket:id="conflictHelpFrag">
-		step1, step2, step3
+	<wicket:fragment wicket:id="integratedFrag">
+		<div class="integrated alert alert-success">
+			<div class="summary">
+				<span class="fa fa-2x fa-check-circle"></span>
+				<span class="message">This request has been integrated.</span>
+			</div>
+			<div wicket:id="detail" class="detail"></div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="sourceRebasedFrag">
+		<p>Source branch <span wicket:id="source"></span> was rebased on top 
+		of target branch <span wicket:id="target"></span>, and then target 
+		branch was fast forwarded to rebased result per the integration 
+		strategy.</p> 
+		<p>If you have a local branch whose upstream tracking branch 
+		points to source branch, please run this command to do the sync:
+		<kbd>git fetch origin && git rebase</kbd>
+		</p>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="targetRebasedFrag">
+		<p>Target branch <span wicket:id="target"></span> was rebased on top of 
+		this request per the integration strategy.</p>
+		<p>If you have a local branch whose upstream tracking 
+		branch points to target branch, please run this command to do the sync:
+		<kbd>git fetch origin && git rebase</kbd>
+		</p>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="discardedFrag">
+		<div class="discarded alert alert-danger">
+			<div class="summary">
+				<span class="fa fa-2x fa-times-circle"></span>
+				<span class="message">This request has been discarded.</span>
+			</div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="openFrag">
+		<div class="open">
+			<div class="table">
+				<div class="tr">
+					<div wicket:id="checkResult" class="td check-result">
+						<div class="summary">
+							<span class="fa fa-2x fa-warning"></span>
+							<span class="fa fa-2x fa-info-circle"></span>
+							<span wicket:id="message" class="message"></span>
+						</div>
+						<wicket:enclosure child="reasons">
+						<ul class="detail">
+							<li wicket:id="reasons"><span wicket:id="reason"></span></li>
+						</ul>
+						</wicket:enclosure>
+					</div>
+					<div wicket:id="integrationInfo" class="td integration-info"></div>
+				</div>
+			</div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="canIntegrateFrag">
+		<div class="summary">
+			<span class="fa fa-2x fa-check-circle"></span>
+			<span class="message">Able to integrate.</span>
+		</div>
+		<div class="detail">
+			<span wicket:id="message"></span>
+			<wicket:enclosure child="preview">
+				<span class="fa fa-hand-o-right"></span> <a wicket:id="preview">Preview</a> the integration result.
+			</wicket:enclosure>
+			<wicket:enclosure child="verification">
+				<span class="fa fa-hand-o-right"></span> Build of the integration is <span wicket:id="verification"></span>
+			</wicket:enclosure>
+			<div wicket:id="verificationDetails"></div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="integrateConflictFrag">
+		<div class="summary">
+			<span class="fa fa-2x fa-exclamation-triangle pull-left"></span>
+			<span class="message">Integration conflicts detected.</span>	
+		</div>
+		<div class="detail">
+			<span wicket:id="message"></span> Please follow 
+			<a wicket:id="resolveInstructionsTrigger" href="javascript:void(0);">this instruction</a> 
+			to resolve the conflicts.
+			<div wicket:id="resolveInstructions"></div>
+		</div>
 	</wicket:fragment>
 </wicket:extend>

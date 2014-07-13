@@ -45,7 +45,7 @@ public class GitArchiveResource extends AbstractResource {
 		if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(repository))) {
 			throw new AccessDeniedException("User " + SecurityUtils.getSubject() 
 					+ " have no permission to access repository " 
-					+ repository.getPathName());
+					+ repository.getFullName());
 		}
 		
 		ResourceResponse response = new ResourceResponse();

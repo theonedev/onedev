@@ -11,7 +11,7 @@ import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.component.choice.UserSingleChoice;
+import com.pmease.gitop.web.component.user.UserSingleChoice;
 
 @SuppressWarnings("serial")
 public class UserSingleChoiceEditor extends PropertyEditor<Long> {

@@ -37,6 +37,18 @@ public interface GateKeeper extends Trimmable, Serializable {
 	 * 			result of the check. 
 	 */
 	CheckResult checkFile(User user, Branch branch, String file);
+	
+	/**
+	 * Check if specified user can modify/delete specified branch.
+	 *
+	 * @param user
+	 * 			user to be checked
+	 * @param branch
+	 * 			branch to be checked
+	 * @return
+	 * 			result of the check. 
+	 */
+	CheckResult checkBranch(User user, Branch branch);
 
 	/**
 	 * Check if specified user can push specified commit to specified branch.

@@ -9,6 +9,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.util.StringUtils;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.editable.PropertyDescriptorImpl;
@@ -51,7 +52,10 @@ public class BranchEditSupport implements EditSupport {
 						        	Dao dao = Gitop.getInstance(Dao.class);
 						        	List<String> branchNames = new ArrayList<>();
 						        	for (Long branchId: branchIds) {
-						        		branchNames.add(dao.load(Branch.class, branchId).getName());
+										if (isAffinal(getPropertyGetter()))
+						        			branchNames.add(dao.load(Branch.class, branchId).getFullName());
+						        		else
+						        			branchNames.add(dao.load(Branch.class, branchId).getName());
 						        	}
 						            return new Label(id, StringUtils.join(branchNames, ", " ));
 						        } else {
@@ -64,7 +68,10 @@ public class BranchEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<List<Long>> renderForEdit(String componentId, IModel<List<Long>> model) {
-						return new BranchMultiChoiceEditor(componentId, this, model);
+						if (isAffinal(getPropertyGetter()))
+			        		return new AffinalBranchMultiChoiceEditor(componentId, this, model);
+			        	else
+			        		return new BranchMultiChoiceEditor(componentId, this, model);
 					}
         			
         		};
@@ -80,7 +87,10 @@ public class BranchEditSupport implements EditSupport {
 						        Long branchId = model.getObject();
 						        if (branchId != null) {
 						        	Branch branch = Gitop.getInstance(Dao.class).load(Branch.class, branchId);
-						            return new Label(id, branch.getName());
+									if (isAffinal(getPropertyGetter()))
+						        		return new Label(id, branch.getFullName());
+						        	else
+						        		return new Label(id, branch.getName());
 						        } else {
 									return new NotDefinedLabel(id);
 						        }
@@ -91,16 +101,25 @@ public class BranchEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<Long> renderForEdit(String componentId, IModel<Long> model) {
-						return new BranchSingleChoiceEditor(componentId, this, model);
+						if (isAffinal(getPropertyGetter()))
+			        		return new AffinalBranchSingleChoiceEditor(componentId, this, model);
+			        	else
+			        		return new BranchSingleChoiceEditor(componentId, this, model);
 					}
         			
         		};
         	} else {
-        		throw new RuntimeException("Annotation 'BranchChoice' should be applied to property with type 'Long' or 'List<Long>'.");
+        		throw new RuntimeException("Annotation 'BranchChoice' should be applied to property "
+        				+ "with type 'Long' or 'List<Long>'.");
         	}
         } else {
             return null;
         }
 	}
 
+	private boolean isAffinal(Method propertyGetter) {
+    	BranchChoice branchChoice = propertyGetter.getAnnotation(BranchChoice.class);
+    	Preconditions.checkNotNull(branchChoice);
+    	return branchChoice.value() == BranchChoice.Scope.AFFINAL;
+	}
 }

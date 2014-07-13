@@ -17,6 +17,25 @@ public interface PullRequestManager {
 
     void refresh(PullRequest request);
     
+    /**
+     * Integrate specified pull request.
+     * 
+     * @param request
+     * 			pull request to be integrated
+     * @param user
+     * 			user initiating the integration, <tt>null</tt> to indicate system user
+     * @param comment
+     * 			comment for the integration
+     * @return
+     * 			<tt>true</tt> if integrated successfully, <tt>false</tt> if unable to 
+     * 			update relevant refs due to ref lock failure. Ref lock failure can happen 
+     * 			either because the ref is currently being updated by some other one, or 
+     * 			the ref has been updated since last refresh of the pull request. In these 
+     * 			cases, the best bet is to refresh pull request again and retry the 
+     * 			integration  
+     * @throws IllegalArgumentException 
+     * 			if <tt>request.canIntegrate()</tt> returns false
+     */
     boolean integrate(PullRequest request, @Nullable User user, @Nullable String comment);
     
     void discard(PullRequest request, User user, @Nullable String comment);
@@ -42,4 +61,5 @@ public interface PullRequestManager {
     void send(PullRequest request);
     
     void delete(PullRequest request);
+    
 }

@@ -87,7 +87,7 @@ public class BuildVerificationOfBranch extends CommonGateKeeper {
 		IfVerifiedByBuilds thenGate = new IfVerifiedByBuilds();
 		thenGate.setBlockMode(blockMode);
 		thenGate.setLeastPassCount(buildCount);
-		thenGate.setCheckMerged(checkMerged);
+		thenGate.setCheckIntegrated(checkMerged);
 		ifThenGate.setThenGate(thenGate);
 		
 		return ifThenGate;

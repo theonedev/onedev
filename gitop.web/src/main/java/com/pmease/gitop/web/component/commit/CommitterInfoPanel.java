@@ -9,13 +9,13 @@ import org.apache.wicket.model.Model;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.gitop.web.component.label.AgeLabel;
-import com.pmease.gitop.web.component.link.AvatarLink.Mode;
-import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.component.user.AvatarMode;
+import com.pmease.gitop.web.component.user.PersonLink;
 
 @SuppressWarnings("serial")
 public class CommitterInfoPanel extends Panel {
 
-	private final IModel<Mode> mode = Model.of(Mode.NAME);
+	private final IModel<AvatarMode> mode = Model.of(AvatarMode.NAME);
 	
 	public CommitterInfoPanel(String id, IModel<Commit> model) {
 		super(id, model);
@@ -26,7 +26,7 @@ public class CommitterInfoPanel extends Panel {
 		super.onInitialize();
 		
 
-		add(new PersonLink("committer", getCommit().getCommitter(), mode.getObject()));
+		add(new PersonLink("committer", Model.of(getCommit().getCommitter()), mode.getObject()));
 		
 		add(new AgeLabel("committerdate", new AbstractReadOnlyModel<Date>() {
 
@@ -41,7 +41,7 @@ public class CommitterInfoPanel extends Panel {
 		return (Commit) getDefaultModelObject();
 	}
 
-	public CommitterInfoPanel committerLinkMode(Mode mode) {
+	public CommitterInfoPanel committerLinkMode(AvatarMode mode) {
 		this.mode.setObject(mode);
 		return this;
 	}

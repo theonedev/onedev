@@ -18,7 +18,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.component.label.AgeLabel;
-import com.pmease.gitop.web.component.link.RepositoryHomeLink;
+import com.pmease.gitop.web.component.repository.RepositoryHomeLink;
 import com.pmease.gitop.web.model.RepositoryModel;
 import com.pmease.gitop.web.page.PageSpec;
 

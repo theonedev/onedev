@@ -3,8 +3,10 @@ package com.pmease.gitop.core.manager.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -197,32 +199,37 @@ public class DefaultRepositoryManager implements RepositoryManager {
         }
 		
 		logger.debug("Syncing branches of repository '{}'...", repository);
-		
-		Collection<String> branchesInGit = repository.git().listBranches();
-		for (Branch branch: repository.getBranches()) {
-			if (!branchesInGit.contains(branch.getName()))
-				branchManager.delete(branch);
+
+		Map<String, Branch> branchesInDB = new HashMap<String, Branch>();
+		Map<String, String> branchesInGit = repository.git().listBranches();
+		for (Iterator<Branch> it = repository.getBranches().iterator(); it.hasNext();) {
+			Branch branch = it.next();
+			if (branchesInGit.containsKey(branch.getName())) {
+				branchesInDB.put(branch.getName(), branch);
+			} else {
+				branchManager.delete(branch, null);
+				it.remove();
+			}
 		}
 		
-		for (String branchInGit: branchesInGit) {
-			boolean found = false;
-			for (Branch branch: repository.getBranches()) {
-				if (branch.getName().equals(branchInGit)) {
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				Branch branch = new Branch();
-				branch.setName(branchInGit);
+		for (Map.Entry<String, String> entry: branchesInGit.entrySet()) {
+			Branch branch = branchesInDB.get(entry.getKey());
+			if (branch == null) {
+				branch = new Branch();
+				branch.setName(entry.getKey());
+				branch.setHeadCommit(entry.getValue());
 				branch.setRepository(repository);
+				dao.persist(branch);
+			} else if (!branch.getHeadCommit().equals(entry.getValue()))	 {
+				branch.setHeadCommit(entry.getValue());
+				branch.setUpdater(null);
 				dao.persist(branch);
 			}
 		}
 		
 		String defaultBranchName = repository.git().resolveDefaultBranch();
-		if (!branchesInGit.isEmpty() && !branchesInGit.contains(defaultBranchName))
-			repository.git().updateDefaultBranch(branchesInGit.iterator().next());
+		if (!branchesInGit.isEmpty() && !branchesInGit.containsKey(defaultBranchName))
+			repository.git().updateDefaultBranch(branchesInGit.keySet().iterator().next());
 	}
 	
 }

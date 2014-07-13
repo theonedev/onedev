@@ -1,11 +1,14 @@
 package com.pmease.gitop.web.page.repository.pullrequest;
 
+import static com.pmease.gitop.model.integration.IntegrationStrategy.*;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
+import org.apache.commons.lang3.text.WordUtils;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
@@ -35,38 +38,34 @@ import org.eclipse.jgit.lib.PersonIdent;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.PageTabHeader;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.AuthorizationManager;
-import com.pmease.gitop.core.manager.PullRequestManager;
-import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.core.manager.VerificationManager;
-import com.pmease.gitop.core.manager.VoteManager;
+import com.pmease.gitop.core.pullrequest.RequestOperateException;
+import com.pmease.gitop.core.pullrequest.RequestOperation;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.CommitComment;
 import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.PullRequest.Status;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Verification;
-import com.pmease.gitop.model.Vote;
-import com.pmease.gitop.model.gatekeeper.voteeligibility.VoteEligibility;
-import com.pmease.gitop.model.helper.IntegrationInfo;
-import com.pmease.gitop.model.permission.ObjectPermission;
+import com.pmease.gitop.model.integration.IntegrationInfo;
+import com.pmease.gitop.model.integration.IntegrationStrategy;
 import com.pmease.gitop.web.component.branch.BranchLink;
 import com.pmease.gitop.web.component.label.AgeLabel;
-import com.pmease.gitop.web.component.link.AvatarLink.Mode;
-import com.pmease.gitop.web.component.link.PersonLink;
-import com.pmease.gitop.web.page.repository.RepositoryBasePage;
+import com.pmease.gitop.web.component.user.AvatarMode;
+import com.pmease.gitop.web.component.user.PersonLink;
+import com.pmease.gitop.web.model.EntityModel;
 import com.pmease.gitop.web.page.repository.RepositoryPage;
 import com.pmease.gitop.web.page.repository.source.commit.diff.CommitCommentsAware;
 
 @SuppressWarnings("serial")
 public abstract class RequestDetailPage extends RepositoryPage implements CommitCommentsAware {
-
-	private enum Action {Approve, Disapprove, Integrate, Discard}
 
 	private IModel<PullRequest> requestModel;
 	
@@ -74,7 +73,7 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 	
 	private boolean editingTitle;
 	
-	private Action action;
+	private RequestOperation actionToConfirm;
 	
 	private String comment;
 	
@@ -110,6 +109,8 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 	protected void onInitialize() {
 		super.onInitialize();
 
+		PullRequest request = getPullRequest();
+
 		final WebMarkupContainer head = new WebMarkupContainer("head");
 		head.setOutputMarkupId(true);
 		add(head);
@@ -131,14 +132,7 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 			
 		});
 		
-		head.add(new Label("id", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return "#" + getPullRequest().getId();
-			}
-			
-		}) {
+		head.add(new Label("id", "#" + request.getId()) {
 
 			@Override
 			protected void onConfigure() {
@@ -226,40 +220,19 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 			
 		});
 		
-		PullRequest request = getPullRequest();
 		User submitter = request.getSubmitter();
 		if (submitter != null) {
 			PersonIdent person = new PersonIdent(submitter.getName(), submitter.getEmail());
-			add(new PersonLink("user", person, Mode.NAME_AND_AVATAR));
+			add(new PersonLink("user", Model.of(person), AvatarMode.NAME_AND_AVATAR));
 		} else {
 			add(new Label("<i>System</i>").setEscapeModelStrings(false));
 		}
 		
-		add(new BranchLink("targetBranch", new AbstractReadOnlyModel<Branch>() {
-
-			@Override
-			public Branch getObject() {
-				return getPullRequest().getTarget();
-			}
-			
-		}));
+		add(new BranchLink("targetBranch", new EntityModel<Branch>(request.getTarget())));
 		
-		add(new BranchLink("sourceBranch", new AbstractReadOnlyModel<Branch>() {
-
-			@Override
-			public Branch getObject() {
-				return getPullRequest().getSource();
-			}
-			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getPullRequest().getSource() != null);
-			}
-			
-		});
+		BranchLink branchLink = new BranchLink("sourceBranch", new EntityModel<Branch>(request.getSource()));
+		branchLink.setVisible(request.getSource() != null);
+		add(branchLink);
 		
 		add(new AgeLabel("date", new AbstractReadOnlyModel<Date>() {
 
@@ -270,251 +243,22 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 			
 		}));
 
-		final WebMarkupContainer statusContainer = new WebMarkupContainer("status");
-		statusContainer.setOutputMarkupId(true);
-		add(statusContainer);
+		final WebMarkupContainer actionsContainer = new WebMarkupContainer("actions");
+		actionsContainer.setOutputMarkupId(true);
+		add(actionsContainer);
 		
-		WebMarkupContainer primaryContainer = new WebMarkupContainer("primary");
-		primaryContainer.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				PullRequest request = getPullRequest();
-				if (request.getStatus() == Status.INTEGRATED) {
-					return " success";
-				} else if (request.getStatus() == Status.DISCARDED) {
-					return " danger";
-				} else {
-					return " warning";
-				}
-			}
-			
-		}));
-		statusContainer.add(primaryContainer);
-		primaryContainer.add(new Label("message", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				if (getPullRequest().isOpen()) {
-					return "This request is " + getPullRequest().getStatus().toString().toLowerCase();
-				} else {
-					return "This request has been " + getPullRequest().getStatus().toString().toLowerCase();
-				}
-			}
-			
-		}));
-		
-		primaryContainer.add(new ListView<String>("reasons", new LoadableDetachableModel<List<String>>() {
-
-			@Override
-			protected List<String> load() {
-				return getPullRequest().getCheckResult().getReasons();
-			}
-			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getPullRequest().isOpen() && !getPullRequest().getCheckResult().getReasons().isEmpty());
-			}
-
-			@Override
-			protected void populateItem(ListItem<String> item) {
-				item.add(new Label("reason", item.getModelObject()));
-			}
-
-		});
-		
-
-		WebMarkupContainer mergeContainer = new WebMarkupContainer("merge") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				PullRequest request = getPullRequest();
-				setVisible(request.isOpen());
-			}
-			
-		};
-		mergeContainer.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				if (getPullRequest().getIntegrationInfo().getIntegrationHead() != null)
-					return "success";
-				else
-					return "warning";
-			}
-			
-		}));
-		statusContainer.add(mergeContainer);
-		
-		WebMarkupContainer canMergeContainer = new WebMarkupContainer("canMerge") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				IntegrationInfo mergeInfo = getPullRequest().getIntegrationInfo();
-
-				setVisible(mergeInfo.getIntegrationHead() != null 
-						&& !mergeInfo.getIntegrationHead().equals(mergeInfo.getRequestHead()));
-			}
-			
-		}; 
-		
-		PageParameters params = RequestChangesPage.params4(
-				request, 
-				request.getLatestUpdate().getHeadCommit(), 
-				request.getIntegrationInfo().getIntegrationHead());
-		
-		canMergeContainer.add(new BookmarkablePageLink<Void>("preview", RequestChangesPage.class, params));
-		
-		DropdownPanel verificationDetails = new DropdownPanel("verificationDetails") {
-
-			@Override
-			protected Component newContent(String id) {
-				return new VerificationDetailPanel(id, mergeVerificationsModel);
-			}
-			
-		};
-		canMergeContainer.add(verificationDetails);
-		canMergeContainer.add(new Label("verification", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				Verification.Status overallStatus = Gitop.getInstance(VerificationManager.class)
-						.getOverallStatus(getMergeVerifications());
-				String label;
-				if (overallStatus == Verification.Status.PASSED)
-					label = "Build of this merge commit is passed.";
-				else if (overallStatus == Verification.Status.NOT_PASSED)
-					label = "Build of this merge commit is not passed.";
-				else
-					label = "Build of this merge commit is ongoing.";
-				label += " <span class='fa fa-caret-down'/>";
-				return label;
-			}
-			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!getMergeVerifications().isEmpty());
-			}
-			
-		}.setEscapeModelStrings(false).add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				Verification.Status overallStatus = Gitop.getInstance(VerificationManager.class)
-						.getOverallStatus(getMergeVerifications());
-				if (overallStatus == Verification.Status.PASSED)
-					return "label label-success verification";
-				else if (overallStatus == Verification.Status.NOT_PASSED)
-					return "label label-danger verification";
-				else
-					return "label label-warning verification";
-			}
-			
-		})).add(new DropdownBehavior(verificationDetails)));
-
-		mergeContainer.add(canMergeContainer);
-		
-		mergeContainer.add(new WebMarkupContainer("canFastforward") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-
-				IntegrationInfo mergeInfo = getPullRequest().getIntegrationInfo();
-
-				setVisible(mergeInfo.getIntegrationHead() != null 
-						&& mergeInfo.getIntegrationHead().equals(mergeInfo.getRequestHead()));
-			}
-			
-		});
-		
-		WebMarkupContainer conflictsContainer = new WebMarkupContainer("conflicts") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getPullRequest().getIntegrationInfo().getIntegrationHead() == null);
-			}
-			
-		}; 
-		mergeContainer.add(conflictsContainer);
-		
-		DropdownPanel helpDropdown = new DropdownPanel("helpDropdown") {
-
-			@Override
-			protected Component newContent(String id) {
-				return new Fragment(id, "conflictHelpFrag", RequestDetailPage.this);
-			}
-			
-		};
-		conflictsContainer.add(helpDropdown);
-		conflictsContainer.add(new WebMarkupContainer("helpTrigger")
-				.add(new DropdownBehavior(helpDropdown).clickMode(false)));
-		
-		WebMarkupContainer actionsContainer = new WebMarkupContainer("actions") {
-
-			@SuppressWarnings("deprecation")
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-
-				boolean visible = false;
-				for (Component link: visitChildren(AjaxLink.class)) {
-					link.configure();
-					if (link.isVisible())
-						visible = true;
-				}
-				setVisible(visible);
-			}
-			
-		};
-		statusContainer.add(actionsContainer);
-		
-		final AjaxLink<Void> approveLink;
-		actionsContainer.add(approveLink = new AjaxLink<Void>("approve") {
+		actionsContainer.add(new AjaxLink<Void>("approve") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				action = Action.Approve;
-				target.add(statusContainer);
+				actionToConfirm = RequestOperation.APPROVE;
+				target.add(actionsContainer);
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				PullRequest request = getPullRequest();
-				
-				if (request.getStatus() == Status.PENDING_APPROVAL) {
-					User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
-					if (currentUser != null) {
-						if (Gitop.getInstance(VoteManager.class).find(
-								currentUser, request.getLatestUpdate()) != null) {
-							setVisible(false);
-						} else {
-							boolean canVote = false;
-							for (VoteEligibility each: request.getCheckResult().getVoteEligibilities()) {
-								if (each.canVote(currentUser, request)) {
-									canVote = true;
-									break;
-								}
-							}
-							setVisible(canVote);
-						}
-					} else {
-						setVisible(false);
-					}
-				} else {
-					setVisible(false);
-				}
+				setVisible(RequestOperation.APPROVE.canOperate(getPullRequest()));
 			}
 			
 		});
@@ -523,16 +267,15 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				action = Action.Disapprove;
-				target.add(statusContainer);
+				actionToConfirm = RequestOperation.DISAPPROVE;
+				target.add(actionsContainer);
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				approveLink.configure();
-				setVisible(approveLink.isVisible());
+				setVisible(RequestOperation.DISAPPROVE.canOperate(getPullRequest()));
 			}
 			
 		});
@@ -540,59 +283,51 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 		actionsContainer.add(new AjaxLink<Void>("integrate") {
 
 			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-
-				RepositoryBasePage page = (RepositoryBasePage) getPage();
-				PullRequest request = getPullRequest();
-				setVisible(SecurityUtils.getSubject().isPermitted(
-							ObjectPermission.ofRepositoryWrite(page.getRepository())) 
-						&& request.getIntegrationInfo().getIntegrationHead() != null
-						&& request.getStatus() == Status.PENDING_INTEGRATE);
-			}
-
-			@Override
 			public void onClick(AjaxRequestTarget target) {
-				action = Action.Integrate;
-				target.add(statusContainer);
+				actionToConfirm = RequestOperation.INTEGRATE;
+				target.add(actionsContainer);
 			}
 			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisible(RequestOperation.INTEGRATE.canOperate(getPullRequest()));
+			}
+
 		});
 		
 		actionsContainer.add(new AjaxLink<Void>("discard") {
 
 			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				PullRequest request = getPullRequest();
-				AuthorizationManager authorizationManager = Gitop.getInstance(AuthorizationManager.class);
-				setVisible(request.isOpen() && authorizationManager.canModify(getPullRequest()));
-			}
-
-			@Override
 			public void onClick(AjaxRequestTarget target) {
-				action = Action.Discard;
-				target.add(statusContainer);
+				actionToConfirm = RequestOperation.DISCARD;
+				target.add(actionsContainer);
 			}
 			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+
+				setVisible(RequestOperation.DISCARD.canOperate(getPullRequest()));
+			}
+
 		});
 		
-		Form<?> commentEditor = new Form<Void>("commentEditor") {
+		Form<?> confirmForm = new Form<Void>("confirm") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(action != null);
+				setVisible(actionToConfirm != null);
 			}
 			
 		};
-		statusContainer.add(commentEditor);
+		actionsContainer.add(confirmForm);
 		
-		commentEditor.add(new TextArea<String>("comment", 
-				new PropertyModel<String>(this, "comment")));
-		
-		commentEditor.add(new Button("confirm") {
+		confirmForm.add(new TextArea<String>("comment", new PropertyModel<String>(this, "comment")));
+		confirmForm.add(new FeedbackPanel("feedback", confirmForm));
+		confirmForm.add(new Button("submit") {
 
 			@Override
 			public void onSubmit() {
@@ -600,56 +335,54 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 				
 				if (StringUtils.isBlank(comment))
 					comment = null;
-				User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
-				if (action == Action.Approve) {
-					Gitop.getInstance(VoteManager.class).vote(getPullRequest(), 
-							currentUser, Vote.Result.APPROVE, comment);
-				} else if (action == Action.Disapprove) {
-					Gitop.getInstance(VoteManager.class).vote(getPullRequest(), 
-							currentUser, Vote.Result.DISAPPROVE, comment);
-				} else if (action == Action.Integrate) {
-					Gitop.getInstance(PullRequestManager.class)
-							.integrate(getPullRequest(), currentUser, comment);
-				} else {
-					Gitop.getInstance(PullRequestManager.class).discard(
-							getPullRequest(), currentUser, comment);
+
+				String actionName = actionToConfirm.name().toLowerCase();
+
+				PullRequest request = getPullRequest();
+				try {
+					actionToConfirm.checkOperate(request);
+					actionToConfirm.operate(request, comment);
+					actionToConfirm = null;
+					comment = null;
+				} catch (UnauthorizedException e) {
+					error("Unable to " + actionName + ": Permission denied.");
+				} catch (RequestOperateException e) {
+					error("Unable to " + actionName + ": " + e.getMessage());
 				}
-				action = null;
-				comment = null;
 			}
 			
 		}.add(AttributeModifier.replace("value", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return "Confirm " + action.name();
+				return "Confirm " + WordUtils.capitalizeFully(actionToConfirm.name());
 			}
 			
 		})).add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				if (action == Action.Approve)
+				if (actionToConfirm == RequestOperation.APPROVE)
 					return "btn-primary";
-				else if (action == Action.Disapprove)
+				else if (actionToConfirm == RequestOperation.DISAPPROVE)
 					return "btn-primary";
-				else if (action == Action.Integrate)
+				else if (actionToConfirm == RequestOperation.INTEGRATE)
 					return "btn-success";
 				else
 					return "btn-danger";
 			}
 			
 		})));
-		commentEditor.add(new AjaxLink<Void>("cancel") {
+		confirmForm.add(new AjaxLink<Void>("cancel") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				action = null;
+				actionToConfirm = null;
 				comment = null;
-				target.add(statusContainer);
+				target.add(actionsContainer);
 			}
 			
-		});
+		});		
 		
 		List<Tab> tabs = new ArrayList<>();
 		
@@ -660,8 +393,188 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 		add(new Tabbable("tabs", tabs));
 	}
 	
-	public PullRequest getPullRequest() {
-		return requestModel.getObject();
+	private Component newStatusComponent(String id) {
+		PullRequest request = getPullRequest();
+		Fragment fragment;
+		if (request.getStatus() == Status.INTEGRATED) {
+			fragment = new Fragment(id, "integratedFrag", this);
+			IntegrationInfo integrationInfo = request.getIntegrationInfo();
+			if (integrationInfo.getIntegrationHead().equals(integrationInfo.getRequestHead())) {
+				fragment.add(new Label("detail", 
+						"Target branch was fast forwarded to this request per the integration strategy."));
+			} else {
+				IntegrationStrategy strategy = integrationInfo.getIntegrationStrategy();
+				if (strategy == MERGE_ALWAYS || strategy == MERGE_IF_NECESSARY) { 
+					fragment.add(new Label("detail", 
+							"Target branch was merged with this request per the integration strategy."));
+				} else if (strategy == REBASE_SOURCE) {
+					if (request.getSource() != null) {
+						Fragment detailFrag = new Fragment("detail", "sourceRebasedFrag", this);
+						fragment.add(detailFrag);
+						detailFrag.add(new BranchLink("target", new EntityModel<Branch>(request.getTarget())));
+						detailFrag.add(new BranchLink("source", new EntityModel<Branch>(request.getSource())));
+					} else {
+						fragment.add(new Label("detail", 
+								"Request was rebased on top of target branch and then target branch was fast "
+								+ "forwarded to rebased result per the integration strategy."));
+					}
+				} else if (strategy == REBASE_TARGET){
+					Fragment detailFrag = new Fragment("detail", "targetRebasedFrag", this);
+					fragment.add(detailFrag);
+					detailFrag.add(new BranchLink("target", new EntityModel<Branch>(request.getTarget())));
+				} else {
+					fragment.add(new Label("detail", 
+							"Head commit of the request was merged into target branch by some other party."));
+				}
+			}
+		} else if (request.getStatus() == Status.DISCARDED) {
+			fragment = new Fragment(id, "discardedFrag", this);
+		} else {
+			fragment = new Fragment(id, "openFrag", this);
+			populateOpenFrag(fragment);
+		}
+		return fragment;
+	}
+	
+	private void populateOpenFrag(Fragment fragment) {
+		WebMarkupContainer checkResultContainer = new WebMarkupContainer("checkResult");
+		fragment.add(checkResultContainer);
+		PullRequest request = getPullRequest();
+		if (request.getStatus() == Status.PENDING_INTEGRATE)
+			checkResultContainer.add(AttributeAppender.append("class", " alert alert-info"));
+		else
+			checkResultContainer.add(AttributeAppender.append("class", " alert alert-warning"));
+		
+		checkResultContainer.add(new Label("message", 
+				"This request is " + request.getStatus().toString().toLowerCase() + "."));
+		
+		checkResultContainer.add(new ListView<String>("reasons", request.getCheckResult().getReasons()) {
+
+			@Override
+			protected void populateItem(ListItem<String> item) {
+				item.add(new Label("reason", item.getModelObject()));
+			}
+
+		}.setVisible(!request.getCheckResult().getReasons().isEmpty()));
+		
+		fragment.add(newIntegrationInfoComponent("integrationInfo"));
+		
+
+	}
+	
+	private Component newIntegrationInfoComponent(String id) {
+		Fragment fragment;
+		PullRequest request = getPullRequest();
+		IntegrationInfo integrationInfo = request.getIntegrationInfo();
+		if (integrationInfo.getIntegrationHead() == null) {
+			fragment = new Fragment(id, "integrateConflictFrag", this);
+			fragment.add(AttributeAppender.append("class", " alert alert-warning"));
+			
+			String message;
+			IntegrationStrategy strategy = integrationInfo.getIntegrationStrategy();
+			if (strategy == MERGE_ALWAYS || strategy == MERGE_IF_NECESSARY) {
+				message = "Per the integration strategy, this request will be merged with target branch. "
+						+ "However there are merge conflicts.";
+			} else if (strategy == REBASE_SOURCE) {
+				if (request.getSource() == null) {
+					message = "Per the integration strategy, this request will be rebased on top of target "
+							+ "branch before fast forwarding target branch to rebased result. However there "
+							+ "are rebase conflicts.";
+				} else {
+					message = "Per the integration strategy, source branch will be rebased on top of target "
+							+ "branch before fast forwarding target branch to rebased result. However there "
+							+ "are rebase conflicts.";
+				}
+			} else {
+				message = "Per the integration strategy, target branch will be rebased on top of this "
+						+ "request. However there are rebase conflicts.";
+			}
+			fragment.add(new Label("message", message));
+			
+			DropdownPanel resolveInstructions = new DropdownPanel("resolveInstructions") {
+
+				@Override
+				protected Component newContent(String id) {
+					return new ResolveConflictInstructionPanel(id, new EntityModel<PullRequest>(getPullRequest()));
+				}
+				
+			};
+			fragment.add(resolveInstructions);
+			WebMarkupContainer resolveInstructionsTrigger = new WebMarkupContainer("resolveInstructionsTrigger");
+			resolveInstructionsTrigger.add(new DropdownBehavior(resolveInstructions));
+			fragment.add(resolveInstructionsTrigger);
+		} else {
+			fragment = new Fragment(id, "canIntegrateFrag", this);
+			fragment.add(AttributeAppender.append("class", " alert alert-success"));
+
+			String message;
+			if (integrationInfo.getIntegrationHead().equals(integrationInfo.getRequestHead())) {
+				message = "Per the integration strategy, target branch will be fast forwarded to this request.";
+			} else {
+				IntegrationStrategy strategy = integrationInfo.getIntegrationStrategy();
+				if (strategy == MERGE_ALWAYS || strategy == MERGE_IF_NECESSARY) {
+					message = "Per the integration strategy, target branch will be merged with this request.";
+				} else if (strategy == REBASE_SOURCE) {
+					if (request.getSource() == null) {
+						message = "Per the integration strategy, this request will be rebased on top of target branch, "
+								+ "and then target branch will be fast forwarded to rebased result.";
+					} else {
+						message = "Per the integration strategy, source branch will be rebased on top of target branch, "
+								+ "and then target branch will be fast forwarded to rebased result.";
+					}
+				} else {
+					message = "Per the integration strategy, target branch will be rebased on top of this request.";
+				}
+			}
+			fragment.add(new Label("message", message));
+			
+			PageParameters params = RequestChangesPage.params4(
+					request, 
+					request.getLatestUpdate().getHeadCommit(), 
+					request.getIntegrationInfo().getIntegrationHead());
+			
+			Link<Void> link = new BookmarkablePageLink<Void>("preview", RequestChangesPage.class, params);
+			link.setVisible(!integrationInfo.getIntegrationHead().equals(integrationInfo.getRequestHead()));
+			fragment.add(link);
+			
+			DropdownPanel verificationDetails = new DropdownPanel("verificationDetails") {
+
+				@Override
+				protected Component newContent(String id) {
+					return new VerificationDetailPanel(id, mergeVerificationsModel);
+				}
+				
+			};
+			fragment.add(verificationDetails);
+			
+			VerificationManager verificationManager = Gitop.getInstance(VerificationManager.class);
+			Verification.Status overallStatus = verificationManager.getOverallStatus(getMergeVerifications());
+			String verificationStatus;
+			if (overallStatus == Verification.Status.PASSED)
+				verificationStatus = "passed";
+			else if (overallStatus == Verification.Status.NOT_PASSED)
+				verificationStatus = "not passed";
+			else
+				verificationStatus = "ongoing";
+			verificationStatus += " <span class='fa fa-caret-down'/>";
+
+			Label verificationLabel = new Label("verification", verificationStatus);
+			fragment.add(verificationLabel);
+			verificationLabel.setVisible(!getMergeVerifications().isEmpty());
+			verificationLabel.setEscapeModelStrings(false);
+
+			String cssClass;
+			if (overallStatus == Verification.Status.PASSED)
+				cssClass = "label label-success verification";
+			else if (overallStatus == Verification.Status.NOT_PASSED)
+				cssClass = "label label-danger verification";
+			else
+				cssClass = "label label-warning verification";
+			verificationLabel.add(AttributeAppender.append("class", cssClass));
+			
+			verificationLabel.add(new DropdownBehavior(verificationDetails));
+		}
+		return fragment;
 	}
 	
 	private List<Verification> getMergeVerifications() {
@@ -715,4 +628,16 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 		}
 		
 	}
+	
+	public PullRequest getPullRequest() {
+		return requestModel.getObject();
+	}
+
+	@Override
+	protected void onBeforeRender() {
+		addOrReplace(newStatusComponent("status"));
+		
+		super.onBeforeRender();
+	}
+	
 }

@@ -1,28 +1,16 @@
 <wicket:extend>
 	<table class="activities table">
 		<tr wicket:id="activities">
-			<td class="avatar">
-				<div wicket:id="userAvatar"></div>
-			</td>
-			<td class="action">
-				<div wicket:id="userName"></div>
-				<div class="text">
-					<span wicket:id="action"></span> <span wicket:id="date"></span>
-				</div>
+			<td class="summary">
+				<div wicket:id="activity"></div>
 			</td>
 			<td class="detail">
 				<div wicket:id="detail"></div>
 			</td>
 		</tr>
 		<tr wicket:id="newCommentContainer">
-			<td class="avatar">
-				<div wicket:id="userAvatar"></div>
-			</td>
-			<td class="action">
-				<div wicket:id="userName"></div>
-				<div class="text">
-					Add new comment
-				</div>
+			<td class="summary">
+				<div wicket:id="newComment"></div>
 			</td>
 			<td class="detail">
 				<textarea wicket:id="content" rows="6" class="form-control" placeholder="Leave a comment"></textarea>
@@ -32,4 +20,7 @@
 			</td>
 		</tr>
 	</table>
+	<wicket:fragment wicket:id="actionInfoFrag">
+		<span wicket:id="action"></span> <span wicket:id="date"></span>	
+	</wicket:fragment>
 </wicket:extend>

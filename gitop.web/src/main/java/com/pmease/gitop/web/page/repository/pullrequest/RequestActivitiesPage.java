@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -13,10 +14,10 @@ import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.PersonIdent;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.DisableIfBlankBehavior;
@@ -27,9 +28,8 @@ import com.pmease.gitop.model.PullRequestComment;
 import com.pmease.gitop.model.PullRequestUpdate;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.Vote;
-import com.pmease.gitop.web.component.link.AvatarLink.Mode;
-import com.pmease.gitop.web.component.link.NullableUserLink;
-import com.pmease.gitop.web.component.link.PersonLink;
+import com.pmease.gitop.web.component.user.UserInfoSnippet;
+import com.pmease.gitop.web.model.UserModel;
 import com.pmease.gitop.web.page.repository.pullrequest.activity.ClosePullRequest;
 import com.pmease.gitop.web.page.repository.pullrequest.activity.CommentPullRequest;
 import com.pmease.gitop.web.page.repository.pullrequest.activity.OpenPullRequest;
@@ -91,12 +91,20 @@ public class RequestActivitiesPage extends RequestDetailPage {
 			protected void populateItem(final ListItem<PullRequestActivity> item) {
 				PullRequestActivity activity = item.getModelObject();
 
-				User user = activity.getUser();
-				item.add(new NullableUserLink("userAvatar", user, Mode.AVATAR));
-				item.add(new NullableUserLink("userName", user, Mode.NAME));
+				item.add(new UserInfoSnippet("activity", new UserModel(activity.getUser())) {
+					
+					@Override
+					protected Component newInfoLine(String componentId) {
+						Fragment fragment = new Fragment(componentId, "actionInfoFrag", RequestActivitiesPage.this);
+
+						PullRequestActivity activity = item.getModelObject();
+						fragment.add(new Label("action", activity.getAction()));
+						fragment.add(new Label("date", DateUtils.formatAge(activity.getDate())));
+						
+						return fragment;
+					}
+				});
 				
-				item.add(new Label("action", activity.getAction()));
-				item.add(new Label("date", DateUtils.formatAge(activity.getDate())));
 				item.add(item.getModelObject().render("detail"));
 			}
 			
@@ -113,10 +121,14 @@ public class RequestActivitiesPage extends RequestDetailPage {
 		};
 		add(newCommentContainer);
 		
-		PersonIdent person = Gitop.getInstance(UserManager.class).getCurrent().asPerson();
-		newCommentContainer.add(new PersonLink("userAvatar", person, Mode.AVATAR));
-		
-		newCommentContainer.add(new PersonLink("userName", person, Mode.NAME));
+		User user = Gitop.getInstance(UserManager.class).getCurrent();
+		newCommentContainer.add(new UserInfoSnippet("newComment", new UserModel(user)) {
+			
+			@Override
+			protected Component newInfoLine(String componentId) {
+				return new Label(componentId, "Add New Comment");
+			}
+		});
 		
 		final TextArea<String> newCommentArea = new TextArea<String>("content", new IModel<String>() {
 

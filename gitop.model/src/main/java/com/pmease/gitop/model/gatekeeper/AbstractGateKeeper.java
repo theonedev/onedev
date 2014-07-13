@@ -32,7 +32,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
-	
+		
 	@Override
 	public CheckResult checkRequest(PullRequest request) {
 		if (enabled)
@@ -45,6 +45,13 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	public CheckResult checkFile(User user, Branch branch, String file) {
 		if (isEnabled())
 			return doCheckFile(user, branch, file);
+		else
+			return ignored();
+	}
+	
+	public CheckResult checkBranch(User user, Branch branch) {
+		if (isEnabled())
+			return doCheckFile(user, branch, null);
 		else
 			return ignored();
 	}
@@ -84,11 +91,11 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	 * @param branch
 	 * 			branch to be checked
 	 * @param file
-	 * 			file to be checked
+	 * 			file to be checked, pass <tt>null</tt> to check for any file
 	 * @return
 	 * 			result of the check
 	 */
-	protected abstract CheckResult doCheckFile(User user, Branch branch, String file);
+	protected abstract CheckResult doCheckFile(User user, Branch branch, @Nullable String file);
 
 	/**
 	 * Check if specified user can push specified commit to specified branch, without considering enable flag.
