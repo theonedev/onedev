@@ -163,7 +163,7 @@ public class BlobBlamePage extends AbstractFilePage {
 		Repository repository = Gitop.getInstance(Dao.class).load(Repository.class, blob.getRepositoryId());
 		List<String> paths = Lists.newArrayList(Splitter.on("/").split(blob.getFilePath())); 
 		frag.add(new BookmarkablePageLink<Void>("historylink", CommitsPage.class,
-				CommitsPage.newParams(
+				CommitsPage.paramsOf(
 						repository,
 						blob.getRevision(), 
 						paths,
@@ -171,7 +171,7 @@ public class BlobBlamePage extends AbstractFilePage {
 		
 		frag.add(new BookmarkablePageLink<Void>("normallink",
 						SourceBlobPage.class,
-						SourceBlobPage.newParams(repository, blob.getRevision(), paths)));
+						SourceBlobPage.paramsOf(repository, blob.getRevision(), paths)));
 		
 		frag.add(new TextBlobPanel("body", blobModel) {
 			
@@ -191,7 +191,7 @@ public class BlobBlamePage extends AbstractFilePage {
 					BookmarkablePageLink<Void> link = new BookmarkablePageLink<Void>(
 							"shalink", 
 							SourceCommitPage.class,
-							SourceCommitPage.newParams(getRepository(), hash));
+							SourceCommitPage.paramsOf(getRepository(), hash));
 					
 					link.add(new Label("sha", GitUtils.abbreviateSHA(each.getCommit().getHash(), 8)));
 					container.add(link);
@@ -202,7 +202,7 @@ public class BlobBlamePage extends AbstractFilePage {
 					BookmarkablePageLink<Void> blameLink = new BookmarkablePageLink<Void>(
 							"blamelink",
 							BlobBlamePage.class,
-							BlobBlamePage.newParams(getRepository(), hash, getPaths()));
+							BlobBlamePage.paramsOf(getRepository(), hash, getPaths()));
 					container.add(blameLink);
 					Loop loop = new Loop("empties", each.getNumLines() - 1) {
 

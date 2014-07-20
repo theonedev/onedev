@@ -19,16 +19,15 @@ import com.pmease.gitop.web.Constants;
 import com.pmease.gitop.web.common.datatype.DataTypes;
 import com.pmease.gitop.web.component.repository.RepositoryHomeLink;
 import com.pmease.gitop.web.model.RepositoryModel;
-import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
 import com.pmease.gitop.web.page.repository.settings.CreateRepositoryPage;
 import com.pmease.gitop.web.page.repository.settings.RepositoryOptionsPage;
 import com.pmease.gitop.web.util.DateUtils;
 
 @SuppressWarnings("serial")
-public class RepositoriesPage extends AccountSettingPage {
+public class AccountRepositoriesPage extends AccountSettingPage {
 
-	public RepositoriesPage(PageParameters params) {
+	public AccountRepositoriesPage(PageParameters params) {
 		super(params);
 	}
 
@@ -41,7 +40,7 @@ public class RepositoriesPage extends AccountSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new BookmarkablePageLink<Void>("newlink", CreateRepositoryPage.class, newParams(getAccount())));
+		add(new BookmarkablePageLink<Void>("newlink", CreateRepositoryPage.class, paramsOf(getAccount())));
 		
 		IModel<List<Repository>> model = new LoadableDetachableModel<List<Repository>>() {
 
@@ -92,7 +91,7 @@ public class RepositoriesPage extends AccountSettingPage {
 				}
 				
 				item.add(new BookmarkablePageLink<Void>("admin", RepositoryOptionsPage.class,
-						PageSpec.forRepository(repository)));
+						RepositoryOptionsPage.paramsOf(repository)));
 			}
 			
 		};

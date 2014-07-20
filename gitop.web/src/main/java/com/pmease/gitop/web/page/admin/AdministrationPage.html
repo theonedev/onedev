@@ -1,0 +1,40 @@
+<html xmlns:wicket>
+<wicket:extend>
+	<div class="page-nav">
+		<h1>System Administration</h1>
+	</div>
+	<div class="faux">
+		<div class="faux-row">
+			<div class="faux-cell sidebar">
+				<div class="sidebar-inner">
+					<h3 class="nav-head">&nbsp;</h3>
+					<ul class="list-group list-navs">
+						<li class="list-group-item">
+							<a wicket:id="overviewlink">Overview</a>
+						</li>
+					</ul>
+					
+					<wicket:container wicket:id="categories">
+						<h3 class="nav-head" wicket:id="name"></h3>
+						<ul class="list-group list-navs">
+							<li class="list-group-item" wicket:id="nav">
+								<wicket:container wicket:id="link"></wicket:container>
+							</li>
+						</ul>
+					</wicket:container>
+				</div>
+			</div>
+			
+			<div class="faux-cell content">
+				<div class="content-inner">
+					<wicket:child></wicket:child>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<wicket:fragment wicket:id="linkfrag">
+		<a wicket:id="link"><span wicket:id="name"></span></a>
+	</wicket:fragment>	
+</wicket:extend>
+</html>

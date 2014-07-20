@@ -30,22 +30,21 @@ import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.git.command.ArchiveCommand.Format;
 import com.pmease.gitop.web.git.command.Tag;
 import com.pmease.gitop.web.git.command.TagForEachRefCommand;
-import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.repository.RepositoryPage;
+import com.pmease.gitop.web.page.repository.RepositoryInfoPage;
 import com.pmease.gitop.web.page.repository.source.commit.SourceCommitPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 
 @SuppressWarnings("serial")
-public class TagsPage extends RepositoryPage {
+public class TagsPage extends RepositoryInfoPage {
 
 	private final IModel<Map<String, Tag>> tagsModel;
 	
 	private String before;
 	
-	public static PageParameters newParams(Repository repository, String before) {
-		PageParameters parameters = PageSpec.forRepository(repository);
+	public static PageParameters paramsOf(Repository repository, String before) {
+		PageParameters parameters = paramsOf(repository);
 		if (!Strings.isNullOrEmpty(before)) {
 			parameters.add("before", before);
 		}
@@ -111,7 +110,7 @@ public class TagsPage extends RepositoryPage {
 					item.add(new Label("message", tag.getMessage()));
 					AbstractLink commitLink = new BookmarkablePageLink<Void>("commitlink",
 							SourceCommitPage.class,
-							SourceCommitPage.newParams(getRepository(), tag.getSha()));
+							SourceCommitPage.paramsOf(getRepository(), tag.getSha()));
 					
 					item.add(commitLink);
 					commitLink.add(new Label("hash", GitUtils.abbreviateSHA(tag.getSha())));
@@ -137,9 +136,9 @@ public class TagsPage extends RepositoryPage {
 			String next = getNextPos();
 			navigator.add(new BookmarkablePageLink<Void>("previouslink", 
 					TagsPage.class,
-					newParams(getRepository(), previous)).setEnabled(previous != null));
+					paramsOf(getRepository(), previous)).setEnabled(previous != null));
 			navigator.add(new BookmarkablePageLink<Void>("nextlink", TagsPage.class, 
-					newParams(getRepository(), next)).setEnabled(!Objects.equal(last, next)));
+					paramsOf(getRepository(), next)).setEnabled(!Objects.equal(last, next)));
 		}
 	}
 	

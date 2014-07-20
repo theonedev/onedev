@@ -21,6 +21,6 @@ public class RawBlobPanel extends Panel {
 		
 		add(new ResourceLink<Void>("link", 
 				new RawBlobResourceReference(),
-				RawBlobResourceReference.newParams(blob)));
+				RawBlobResourceReference.paramsOf(blob)));
 	}
 }

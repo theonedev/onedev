@@ -1,7 +1,6 @@
 package com.pmease.gitop.web.page.admin;
 
-
-public class AvatarSettingPage extends AdministrationLayoutPage {
+public class AvatarSettingPage extends AdministrationPage {
 	private static final long serialVersionUID = 1L;
 
 	@Override

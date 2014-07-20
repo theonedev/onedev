@@ -31,7 +31,7 @@ public class CommitMessagePanel extends Panel {
 		
 		AbstractLink link = new BookmarkablePageLink<Void>("commitlink",
 				SourceCommitPage.class,
-				SourceCommitPage.newParams(getRepo(), getCommit().getHash()));
+				SourceCommitPage.paramsOf(getRepo(), getCommit().getHash()));
 		
 		add(link);
 		link.add(new Label("shortmessage", new AbstractReadOnlyModel<String>() {

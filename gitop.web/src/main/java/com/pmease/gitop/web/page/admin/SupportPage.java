@@ -1,7 +1,7 @@
 package com.pmease.gitop.web.page.admin;
 
 
-public class SupportPage extends AdministrationLayoutPage {
+public class SupportPage extends AdministrationPage {
 	private static final long serialVersionUID = 1L;
 
 	@Override

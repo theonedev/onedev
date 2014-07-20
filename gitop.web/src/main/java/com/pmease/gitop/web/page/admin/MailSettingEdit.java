@@ -11,7 +11,7 @@ import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.core.setting.MailSetting;
 
 @SuppressWarnings("serial")
-public class MailSettingEdit extends AdministrationLayoutPage {
+public class MailSettingEdit extends AdministrationPage {
 
 	private MailSetting mailSetting;
 	

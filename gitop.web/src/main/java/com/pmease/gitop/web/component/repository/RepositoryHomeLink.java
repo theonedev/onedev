@@ -1,12 +1,13 @@
 package com.pmease.gitop.web.component.repository;
 
 import org.apache.wicket.markup.html.link.AbstractLink;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.wicket.component.link.LinkPanel;
-import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.repository.source.RepositoryHomePage;
 
 public class RepositoryHomeLink extends LinkPanel {
 	private static final long serialVersionUID = 1L;
@@ -30,7 +31,8 @@ public class RepositoryHomeLink extends LinkPanel {
 
 	@Override
 	protected AbstractLink createLink(String id) {
-		return PageSpec.newRepositoryHomeLink(id, repoModel.getObject());
+		return new BookmarkablePageLink<Void>(id, 
+				RepositoryHomePage.class, RepositoryHomePage.paramsOf(repoModel.getObject()));
 	}
 
 	@Override

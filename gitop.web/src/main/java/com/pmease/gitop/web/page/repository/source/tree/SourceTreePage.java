@@ -16,7 +16,7 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.gitop.model.Repository;
-import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 import com.pmease.gitop.web.page.repository.source.AbstractFilePage;
 import com.pmease.gitop.web.page.repository.source.component.SourceBreadcrumbPanel;
 import com.pmease.gitop.web.util.UrlUtils;
@@ -29,10 +29,8 @@ public class SourceTreePage extends AbstractFilePage {
 	}
 	
 	public static PageParameters newParams(Repository repository, String revision, List<String> paths) {
-		PageParameters params = new PageParameters();
-		params.add(PageSpec.USER, repository.getOwner().getName());
-		params.add(PageSpec.REPO, repository.getName());
-		params.add(PageSpec.OBJECT_ID, revision);
+		PageParameters params = RepositoryPage.paramsOf(repository);
+		params.add(RepositoryPage.PARAM_OBJECT_ID, revision);
 		for (int i = 0; i < paths.size(); i++) {
 			params.set(i, paths.get(i));
 		}

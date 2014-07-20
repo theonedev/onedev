@@ -20,19 +20,18 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.gitop.model.Repository;
-import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.repository.RepositoryPage;
+import com.pmease.gitop.web.page.repository.RepositoryInfoPage;
 import com.pmease.gitop.web.page.repository.api.IRevisionAware;
 import com.pmease.gitop.web.page.repository.source.component.RevisionSelector;
 
 @SuppressWarnings("serial")
-public class CommitsPage extends RepositoryPage implements IRevisionAware {
+public class CommitsPage extends RepositoryInfoPage implements IRevisionAware {
 
 	public static final int COMMITS_PER_PAGE = 30;
 	
-	public static PageParameters newParams(Repository repository, String revision, List<String> paths, int page) {
+	public static PageParameters paramsOf(Repository repository, String revision, List<String> paths, int page) {
 		Preconditions.checkNotNull(repository);
-		PageParameters params = PageSpec.forRepository(repository);
+		PageParameters params = paramsOf(repository);
 		if (!Strings.isNullOrEmpty(revision)) {
 			params.set("objectId", revision);
 		}
@@ -132,9 +131,9 @@ public class CommitsPage extends RepositoryPage implements IRevisionAware {
 		
 		add(new CommitsPanel("commits", commitsModel, repositoryModel));
 		add(new BookmarkablePageLink<Void>("newer", CommitsPage.class,
-				newParams(getRepository(), getRevision(), getPaths(), page - 1)).setEnabled(page > 1));
+				paramsOf(getRepository(), getRevision(), getPaths(), page - 1)).setEnabled(page > 1));
 		add(new BookmarkablePageLink<Void>("older", CommitsPage.class,
-				newParams(getRepository(), getRevision(), getPaths(), page + 1)) {
+				paramsOf(getRepository(), getRevision(), getPaths(), page + 1)) {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
@@ -153,7 +152,7 @@ public class CommitsPage extends RepositoryPage implements IRevisionAware {
 		
 		BookmarkablePageLink<Void> link = new BookmarkablePageLink<Void>(id,
 				CommitsPage.class,
-				CommitsPage.newParams(getRepository(), getRevision(), paths, 0));
+				paramsOf(getRepository(), getRevision(), paths, 0));
 		link.setEnabled(pathNum < 0 || pathNum < all.size() - 1);
 		link.add(new Label("name", new AbstractReadOnlyModel<String>() {
 

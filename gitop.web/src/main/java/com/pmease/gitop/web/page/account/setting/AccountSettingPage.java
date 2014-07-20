@@ -24,22 +24,17 @@ import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.component.user.AvatarByUser;
 import com.pmease.gitop.web.component.user.UserLink;
 import com.pmease.gitop.web.model.UserModel;
-import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.account.AbstractAccountPage;
+import com.pmease.gitop.web.page.account.AccountPage;
 import com.pmease.gitop.web.page.account.setting.api.AccountSettingTab;
 import com.pmease.gitop.web.page.account.setting.members.AccountMembersSettingPage;
 import com.pmease.gitop.web.page.account.setting.profile.AccountProfilePage;
-import com.pmease.gitop.web.page.account.setting.repo.RepositoriesPage;
+import com.pmease.gitop.web.page.account.setting.repo.AccountRepositoriesPage;
 import com.pmease.gitop.web.page.account.setting.teams.AccountTeamsPage;
 import com.pmease.gitop.web.page.account.setting.teams.EditTeamPage;
 
 @SuppressWarnings("serial")
-public abstract class AccountSettingPage extends AbstractAccountPage {
+public abstract class AccountSettingPage extends AccountPage {
 
-	public static PageParameters newParams(User user) {
-		return PageSpec.forUser(user);
-	}
-	
 	public AccountSettingPage(PageParameters params) {
 		super(params);
 	}
@@ -48,7 +43,7 @@ public abstract class AccountSettingPage extends AbstractAccountPage {
 	private List<AccountSettingTab> getAllTabs() {
 		List<AccountSettingTab> tabs = Lists.newArrayList();
 		tabs.add(new AccountSettingTab(Model.of("Profile"), AccountProfilePage.class));
-		tabs.add(new AccountSettingTab(Model.of("Repositories"), RepositoriesPage.class));
+		tabs.add(new AccountSettingTab(Model.of("Repositories"), AccountRepositoriesPage.class));
 		tabs.add(new AccountSettingTab(Model.of("Teams"), new Class[] { AccountTeamsPage.class, EditTeamPage.class }));
 		tabs.add(new AccountSettingTab(Model.of("Members"), AccountMembersSettingPage.class));
 		
@@ -66,7 +61,7 @@ public abstract class AccountSettingPage extends AbstractAccountPage {
 			@Override
 			protected void populateItem(ListItem<AccountSettingTab> item) {
 				final AccountSettingTab tab = item.getModelObject();
-				item.add(tab.newTabLink("link", newParams(getAccount())));
+				item.add(tab.newTabLink("link", paramsOf(getAccount())));
 				
 				item.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
@@ -106,7 +101,7 @@ public abstract class AccountSettingPage extends AbstractAccountPage {
 			protected void populateItem(ListItem<User> item) {
 				User user = item.getModelObject();
 				
-				PageParameters params = newParams(user);
+				PageParameters params = paramsOf(user);
 				AbstractLink link = new BookmarkablePageLink<Void>("link",
 						AccountProfilePage.class,
 						params);

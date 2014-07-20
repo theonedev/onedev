@@ -9,6 +9,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -29,7 +30,7 @@ import com.pmease.gitop.model.Membership;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.component.user.AvatarByUser;
 import com.pmease.gitop.web.model.UserModel;
-import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.account.home.AccountHomePage;
 
 @SuppressWarnings("serial")
 public class MemberListView extends Panel {
@@ -77,7 +78,8 @@ public class MemberListView extends Panel {
 			protected void populateItem(ListItem<User> item) {
 				User user = item.getModelObject();
 				item.add(new AvatarByUser("avatar", item.getModel()));
-				AbstractLink link = PageSpec.newUserHomeLink("userLink", user);
+				AbstractLink link = new BookmarkablePageLink<>("userLink", 
+						AccountHomePage.class, AccountHomePage.paramsOf(user));
 				item.add(link);
 				link.add(new Label("name", Model.of(user.getName())));
 				if (Strings.isNullOrEmpty(user.getFullName())) {

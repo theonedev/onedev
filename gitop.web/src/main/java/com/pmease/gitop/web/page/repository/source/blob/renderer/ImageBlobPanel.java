@@ -17,7 +17,7 @@ public class ImageBlobPanel extends Panel {
 		super.onInitialize();
 		
 		FileBlob blob = getBlob();
-		add(new FileBlobImage("image", FileBlobImage.newParams(blob)));
+		add(new FileBlobImage("image", FileBlobImage.paramsOf(blob)));
 	}
 	
 	private FileBlob getBlob() {

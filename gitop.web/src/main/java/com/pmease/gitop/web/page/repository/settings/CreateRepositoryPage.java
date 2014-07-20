@@ -29,8 +29,7 @@ import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.common.wicket.form.select.DropDownChoiceElement;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.model.RepositoryModel;
-import com.pmease.gitop.web.page.LayoutPage;
-import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.layout.LayoutPage;
 import com.pmease.gitop.web.page.repository.source.RepositoryHomePage;
 
 @SuppressWarnings("serial")
@@ -126,7 +125,7 @@ public class CreateRepositoryPage extends LayoutPage {
 				Preconditions.checkNotNull(o);
 				repository.setOwner(o);
 				Gitop.getInstance(RepositoryManager.class).save(repository);
-				setResponsePage(RepositoryHomePage.class, PageSpec.forRepository(repository));
+				setResponsePage(RepositoryHomePage.class, RepositoryHomePage.paramsOf(repository));
 			}
 		});
 	}

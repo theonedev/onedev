@@ -15,7 +15,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.RepositoryManager;
 
 @SuppressWarnings("serial")
-public class IntegrationSettingPage extends AbstractRepositorySettingPage {
+public class IntegrationSettingPage extends RepositoryAdministrationPage {
 
 	public IntegrationSettingPage(PageParameters params) {
 		super(params);

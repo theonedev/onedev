@@ -13,16 +13,17 @@ import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.SessionData;
 import com.pmease.gitop.web.model.UserModel;
-import com.pmease.gitop.web.page.LayoutPage;
-import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.layout.LayoutPage;
 
 @SuppressWarnings("serial")
-public abstract class AbstractAccountPage extends LayoutPage {
+public abstract class AccountPage extends LayoutPage {
 
+	public static final String PARAM_USER = "user";
+	
 	protected final IModel<User> accountModel;
 	
-	public AbstractAccountPage(PageParameters params) {
-		String name = params.get(PageSpec.USER).toString();
+	public AccountPage(PageParameters params) {
+		String name = params.get(PARAM_USER).toString();
 		Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
 		
 		User user = Gitop.getInstance(UserManager.class).findByName(name);
@@ -30,7 +31,7 @@ public abstract class AbstractAccountPage extends LayoutPage {
 			throw (new EntityNotFoundException("User " + name + " not found"));
 		}
 		
-		this.accountModel = new UserModel(user);
+		accountModel = new UserModel(user);
 		
 		if (!Objects.equal(SessionData.get().getAccountId(), user.getId())) {
 			SessionData.get().onAccountChanged();
@@ -52,9 +53,9 @@ public abstract class AbstractAccountPage extends LayoutPage {
 		return accountModel.getObject();
 	}
 	
-	public static PageParameters params4(User user) {
+	public static PageParameters paramsOf(User user) {
 		PageParameters params = new PageParameters();
-		params.set("user", user.getName());
+		params.set(PARAM_USER, user.getName());
 		return params;
 	}
 	

@@ -27,7 +27,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.BranchManager;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.web.component.directory.DirectoryChooser;
-import com.pmease.gitop.web.page.repository.RepositoryBasePage;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
 public class DirectoryMultiChoiceEditor extends PropertyEditor<List<String>> {
@@ -55,7 +55,7 @@ public class DirectoryMultiChoiceEditor extends PropertyEditor<List<String>> {
 
 			@Override
 			protected Component newContent(String id) {
-				RepositoryBasePage page = (RepositoryBasePage) getPage();
+				RepositoryPage page = (RepositoryPage) getPage();
 				Branch defaultBranch = Gitop.getInstance(BranchManager.class).findDefault(page.getRepository());
 				
 				if (defaultBranch != null) {

@@ -14,7 +14,6 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.lang.Bytes;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
@@ -27,7 +26,6 @@ import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.component.user.AvatarByUser;
 import com.pmease.gitop.web.component.user.AvatarChanged;
 import com.pmease.gitop.web.model.UserModel;
-import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
 
 import de.agilecoders.wicket.extensions.javascript.jasny.FileUploadField;
@@ -35,11 +33,6 @@ import de.agilecoders.wicket.extensions.javascript.jasny.FileUploadField;
 @SuppressWarnings("serial")
 public class AccountProfilePage extends AccountSettingPage {
 
-	public static PageParameters newParams(User user) {
-		Preconditions.checkNotNull(user);
-		return PageSpec.forUser(user); 
-	}
-	
 	public AccountProfilePage(PageParameters params) {
 		super(params);
 	}

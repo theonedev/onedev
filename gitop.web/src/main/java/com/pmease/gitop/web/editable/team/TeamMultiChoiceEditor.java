@@ -21,7 +21,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.Team;
 import com.pmease.gitop.web.component.team.TeamChoiceProvider;
 import com.pmease.gitop.web.component.team.TeamMultiChoice;
-import com.pmease.gitop.web.page.repository.RepositoryBasePage;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
 public class TeamMultiChoiceEditor extends PropertyEditor<List<Long>> {
@@ -42,7 +42,7 @@ public class TeamMultiChoiceEditor extends PropertyEditor<List<Long>> {
 			@Override
 			protected EntityCriteria<Team> load() {
 				EntityCriteria<Team> criteria = EntityCriteria.of(Team.class);
-				RepositoryBasePage page = (RepositoryBasePage) getPage();
+				RepositoryPage page = (RepositoryPage) getPage();
 				criteria.add(Restrictions.eq("owner", page.getRepository().getOwner()));
 				return criteria;
 			}

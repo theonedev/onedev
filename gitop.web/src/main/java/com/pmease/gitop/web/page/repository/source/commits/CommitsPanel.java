@@ -125,7 +125,7 @@ public class CommitsPanel extends Panel {
 						
 						AbstractLink shalink =new BookmarkablePageLink<Void>(
 								"shalink", SourceCommitPage.class, 
-								SourceCommitPage.newParams(getRepository(), commit.getHash()));
+								SourceCommitPage.paramsOf(getRepository(), commit.getHash()));
 						shalink.add(new Label("sha", GitUtils.abbreviateSHA(commit.getHash())));
 						int commentsCount = getCommentCount(commit.getHash());
 						shalink.add(new Label("commentsCount", commentsCount).setVisibilityAllowed(commentsCount > 0));

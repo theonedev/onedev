@@ -14,7 +14,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.component.branch.AffinalBranchSingleChoice;
-import com.pmease.gitop.web.page.repository.RepositoryBasePage;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
 public class AffinalBranchSingleChoiceEditor extends PropertyEditor<Long> {
@@ -39,7 +39,7 @@ public class AffinalBranchSingleChoiceEditor extends PropertyEditor<Long> {
 
 			@Override
 			public Repository getObject() {
-				RepositoryBasePage page = (RepositoryBasePage) getPage();
+				RepositoryPage page = (RepositoryPage) getPage();
 				return page.getRepository();
 			}
     		

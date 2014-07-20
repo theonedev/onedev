@@ -11,7 +11,7 @@ import com.pmease.gitop.core.manager.ConfigManager;
 import com.pmease.gitop.core.setting.SystemSetting;
 
 @SuppressWarnings("serial")
-public class SystemSettingEdit extends AdministrationLayoutPage {
+public class SystemSettingEdit extends AdministrationPage {
 
 	@Override
 	protected void onInitialize() {

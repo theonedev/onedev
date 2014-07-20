@@ -2,10 +2,10 @@ package com.pmease.gitop.web.page.repository.pullrequest;
 
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.gitop.web.page.repository.RepositoryPage;
+import com.pmease.gitop.web.page.repository.RepositoryInfoPage;
 
 @SuppressWarnings("serial")
-public class ClosedRequestsPage extends RepositoryPage {
+public class ClosedRequestsPage extends RepositoryInfoPage {
 
 	public ClosedRequestsPage(PageParameters params) {
 		super(params);

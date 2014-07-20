@@ -27,8 +27,10 @@ import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.exception.AccessDeniedException;
-import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.account.AccountPage;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 import com.pmease.gitop.web.service.FileBlob;
+import com.pmease.gitop.web.util.ParamUtils;
 
 public class ImageBlobResource extends DynamicImageResource {
 
@@ -62,8 +64,8 @@ public class ImageBlobResource extends DynamicImageResource {
 	
 	// private byte[] imageData;
 	private synchronized byte[] internalGetImageData(PageParameters params) {
-		final String username = params.get(PageSpec.USER).toString();
-		final String repositoryName = params.get(PageSpec.REPO).toString();
+		final String username = params.get(AccountPage.PARAM_USER).toString();
+		final String repositoryName = params.get(RepositoryPage.PARAM_REPO).toString();
 		final String revision = params.get("objectId").toString();
 
 		Repository repository = Gitop.getInstance(RepositoryManager.class).findBy(
@@ -75,7 +77,7 @@ public class ImageBlobResource extends DynamicImageResource {
 
 		Preconditions.checkState(!Strings.isNullOrEmpty(revision));
 
-		String path = PageSpec.getPathFromParams(params);
+		String path = ParamUtils.getPathFromParams(params);
 		Preconditions.checkState(!Strings.isNullOrEmpty(path));
 
 		if (!SecurityUtils.getSubject().isPermitted(
@@ -90,7 +92,7 @@ public class ImageBlobResource extends DynamicImageResource {
 	}
 
 	public Dimension getImageDimension(PageParameters params) {
-		String path = PageSpec.getPathFromParams(params);
+		String path = ParamUtils.getPathFromParams(params);
 		Preconditions.checkState(!Strings.isNullOrEmpty(path));
 		byte[] data = getImageBytes(params);
 		

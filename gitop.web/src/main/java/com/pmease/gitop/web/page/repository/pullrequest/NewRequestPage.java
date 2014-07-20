@@ -45,14 +45,13 @@ import com.pmease.gitop.web.component.branch.AffinalBranchSingleChoice;
 import com.pmease.gitop.web.component.branch.BranchLink;
 import com.pmease.gitop.web.component.commit.CommitsTablePanel;
 import com.pmease.gitop.web.model.EntityModel;
-import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.repository.RepositoryBasePage;
 import com.pmease.gitop.web.page.repository.RepositoryPage;
+import com.pmease.gitop.web.page.repository.RepositoryInfoPage;
 import com.pmease.gitop.web.page.repository.source.commit.diff.CommitCommentsAware;
 import com.pmease.gitop.web.page.repository.source.commit.diff.DiffViewPanel;
 
 @SuppressWarnings("serial")
-public class NewRequestPage extends RepositoryPage implements CommitCommentsAware {
+public class NewRequestPage extends RepositoryInfoPage implements CommitCommentsAware {
 
 	private IModel<Branch> targetModel, sourceModel;
 	
@@ -65,7 +64,7 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 	private IModel<PullRequest> checkedRequestModel;
 	
 	public static PageParameters paramsOf(Repository repository, Branch source, Branch target) {
-		PageParameters params = PageSpec.forRepository(repository);
+		PageParameters params = paramsOf(repository);
 		params.set("source", source.getId());
 		params.set("target", target.getId());
 		return params;
@@ -77,7 +76,7 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 		BranchManager branchManager = Gitop.getInstance(BranchManager.class);
 		Dao dao = AppLoader.getInstance(Dao.class);
 		
-		RepositoryBasePage page = (RepositoryBasePage) getPage();
+		RepositoryPage page = (RepositoryPage) getPage();
 
 		Branch target, source = null;
 		if (params.get("target").toString() != null) {
@@ -216,7 +215,7 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 
 			@Override
 			protected Repository load() {
-				RepositoryBasePage page = (RepositoryBasePage) getPage();
+				RepositoryPage page = (RepositoryPage) getPage();
 				return page.getRepository();
 			}
 			
@@ -401,8 +400,7 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 				
 				Gitop.getInstance(PullRequestManager.class).send(request);
 				
-				setResponsePage(OpenRequestsPage.class, 
-						PageSpec.forRepository(request.getTarget().getRepository()));
+				setResponsePage(OpenRequestsPage.class, paramsOf(request.getTarget().getRepository()));
 			}
 			
 		});

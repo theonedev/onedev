@@ -19,7 +19,6 @@ import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
-import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
@@ -52,7 +51,7 @@ public class PersonLink extends Panel {
 
 		WebMarkupContainer link;
 		if (user != null) {
-			link = new BookmarkablePageLink<Void>("link", AccountHomePage.class, PageSpec.forUser(user));
+			link = new BookmarkablePageLink<Void>("link", AccountHomePage.class, AccountHomePage.paramsOf(user));
 		} else {
 			link = new WebMarkupContainer("link") {
 

@@ -76,7 +76,8 @@ public class AccountMembersSettingPage extends AccountSettingPage {
 			
 		};
 		
-		add(new BookmarkablePageLink<Void>("teamlink", AccountTeamsPage.class, newParams(getAccount())));
+		add(new BookmarkablePageLink<Void>("teamlink", 
+				AccountTeamsPage.class, AccountTeamsPage.paramsOf(getAccount())));
 		
 		add(new MemberListView("members", new UserModel(getAccount()), model){
 			@Override

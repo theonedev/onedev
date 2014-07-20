@@ -115,7 +115,7 @@ public class CommitsTablePanel extends Panel {
 				
 				AbstractLink link = new BookmarkablePageLink<Void>("commitlink",
 						SourceCommitPage.class,
-						SourceCommitPage.newParams(getRepository(), commit.getHash()));
+						SourceCommitPage.paramsOf(getRepository(), commit.getHash()));
 				
 				item.add(link);
 				link.add(new Label("sha", GitUtils.abbreviateSHA(commit.getHash())));

@@ -144,7 +144,7 @@ public class CommentListPanel extends Panel {
 						frag.add(new UserLink("author", Model.of(comment.getAuthor()), AvatarMode.NAME));
 						AbstractLink link = new BookmarkablePageLink<Void>("commitlink", 
 								SourceCommitPage.class,
-								SourceCommitPage.newParams(getRepository(), getCommit()));
+								SourceCommitPage.paramsOf(getRepository(), getCommit()));
 						frag.add(link);
 						link.add(new Label("sha", GitUtils.abbreviateSHA(getCommit(), 6)));
 						frag.add(new AgeLabel("age", Model.of(comment.getCreatedDate())));

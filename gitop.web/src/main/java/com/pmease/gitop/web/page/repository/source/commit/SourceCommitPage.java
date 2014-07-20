@@ -33,8 +33,8 @@ import com.pmease.gitop.web.component.user.PersonLink;
 import com.pmease.gitop.web.git.GitUtils;
 import com.pmease.gitop.web.git.command.CommitInCommand;
 import com.pmease.gitop.web.git.command.CommitInCommand.RefType;
-import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.repository.RepositoryPage;
+import com.pmease.gitop.web.page.repository.RepositoryInfoPage;
 import com.pmease.gitop.web.page.repository.source.commit.diff.CommentListPanel;
 import com.pmease.gitop.web.page.repository.source.commit.diff.CommitCommentsAware;
 import com.pmease.gitop.web.page.repository.source.commit.diff.DiffViewPanel;
@@ -43,11 +43,11 @@ import com.pmease.gitop.web.page.repository.source.tree.SourceTreePage;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
 @SuppressWarnings("serial")
-public class SourceCommitPage extends RepositoryPage implements CommitCommentsAware {
+public class SourceCommitPage extends RepositoryInfoPage implements CommitCommentsAware {
 	
-	public static PageParameters newParams(Repository repository, String revision) {
-		PageParameters params = PageSpec.forRepository(repository);
-		params.add(PageSpec.OBJECT_ID, revision);
+	public static PageParameters paramsOf(Repository repository, String revision) {
+		PageParameters params = paramsOf(repository);
+		params.add(RepositoryPage.PARAM_OBJECT_ID, revision);
 		return params;
 	}
 	
@@ -144,8 +144,8 @@ public class SourceCommitPage extends RepositoryPage implements CommitCommentsAw
 			protected void populateItem(ListItem<String> item) {
 				String sha = item.getModelObject();
 				
-				AbstractLink link = new BookmarkablePageLink<Void>("link", SourceCommitPage.class,
-						SourceCommitPage.newParams(getRepository(), sha));
+				AbstractLink link = new BookmarkablePageLink<Void>("link", 
+						SourceCommitPage.class, paramsOf(getRepository(), sha));
 				item.add(link);
 				link.add(new Label("sha", GitUtils.abbreviateSHA(sha)));
 				WebMarkupContainer connector = new WebMarkupContainer("connector");

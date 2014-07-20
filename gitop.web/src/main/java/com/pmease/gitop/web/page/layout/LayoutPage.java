@@ -1,4 +1,4 @@
-package com.pmease.gitop.web.page;
+package com.pmease.gitop.web.page.layout;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.markup.html.basic.Label;
@@ -12,6 +12,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
+import com.pmease.gitop.web.page.BasePage;
 import com.pmease.gitop.web.page.admin.SystemSettingEdit;
 
 @SuppressWarnings("serial")

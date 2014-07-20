@@ -27,7 +27,7 @@ import com.pmease.gitop.model.Verification;
 import com.pmease.gitop.web.component.user.AvatarMode;
 import com.pmease.gitop.web.component.user.PersonLink;
 import com.pmease.gitop.web.git.GitUtils;
-import com.pmease.gitop.web.page.repository.RepositoryBasePage;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 import com.pmease.gitop.web.page.repository.source.commit.SourceCommitPage;
 import com.pmease.gitop.web.util.DateUtils;
 
@@ -79,10 +79,10 @@ public class UpdateCommitsPanel extends Panel {
 				
 				item.add(new Label("date", DateUtils.formatAge(commit.getAuthor().getWhen())));
 				
-				RepositoryBasePage page = (RepositoryBasePage) getPage();
+				RepositoryPage page = (RepositoryPage) getPage();
 				AbstractLink link = new BookmarkablePageLink<Void>("shaLink",
 						SourceCommitPage.class,
-						SourceCommitPage.newParams(page.getRepository(), commit.getHash()));
+						SourceCommitPage.paramsOf(page.getRepository(), commit.getHash()));
 				link.add(new Label("sha", GitUtils.abbreviateSHA(commit.getHash())));
 				
 				item.add(link);

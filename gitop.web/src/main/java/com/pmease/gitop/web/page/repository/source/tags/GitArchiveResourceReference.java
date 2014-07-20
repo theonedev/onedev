@@ -6,7 +6,7 @@ import org.apache.wicket.request.resource.ResourceReference;
 
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.git.command.ArchiveCommand.Format;
-import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 
 public class GitArchiveResourceReference extends ResourceReference {
 
@@ -24,7 +24,7 @@ public class GitArchiveResourceReference extends ResourceReference {
 	}
 
 	public static PageParameters newParams(Repository repository, String treeish, Format format) {
-		PageParameters params = PageSpec.forRepository(repository);
+		PageParameters params = RepositoryPage.paramsOf(repository);
 		params.set("file", treeish + "." + format.getSuffix());
 		return params;
 	}

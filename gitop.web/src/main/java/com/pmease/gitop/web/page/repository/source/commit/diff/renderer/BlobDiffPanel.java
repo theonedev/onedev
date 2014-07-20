@@ -93,7 +93,7 @@ public abstract class BlobDiffPanel extends Panel {
 		String until = untilModel.getObject();
 		AbstractLink blobLink = new BookmarkablePageLink<Void>("bloblink",
 				SourceBlobPage.class,
-				SourceBlobPage.newParams(repositoryModel.getObject(), 
+				SourceBlobPage.paramsOf(repositoryModel.getObject(), 
 										 until, 
 										 paths));
 		blobLink.setVisibilityAllowed(getFile().getChangeType() != ChangeType.DELETE);

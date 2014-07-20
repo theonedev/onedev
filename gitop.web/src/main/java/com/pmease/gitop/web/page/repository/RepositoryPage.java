@@ -1,282 +1,193 @@
 package com.pmease.gitop.web.page.repository;
 
-import java.util.List;
-
 import javax.persistence.EntityNotFoundException;
 
 import org.apache.shiro.SecurityUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.Page;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.list.Loop;
-import org.apache.wicket.markup.html.list.LoopItem;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.Constants;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.pmease.commons.git.Git;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.RepositoryManager;
+import com.pmease.gitop.core.manager.TeamManager;
+import com.pmease.gitop.core.manager.UserManager;
+import com.pmease.gitop.model.Authorization;
 import com.pmease.gitop.model.Repository;
+import com.pmease.gitop.model.Team;
+import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
+import com.pmease.gitop.model.permission.operation.GeneralOperation;
 import com.pmease.gitop.web.SessionData;
-import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.account.AbstractAccountPage;
-import com.pmease.gitop.web.page.repository.api.RepositoryPageTab;
-import com.pmease.gitop.web.page.repository.api.RepositoryPageTab.Category;
-import com.pmease.gitop.web.page.repository.pullrequest.ClosedRequestsPage;
-import com.pmease.gitop.web.page.repository.pullrequest.NewRequestPage;
-import com.pmease.gitop.web.page.repository.pullrequest.OpenRequestsPage;
-import com.pmease.gitop.web.page.repository.pullrequest.RequestDetailPage;
+import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
+import com.pmease.gitop.web.model.RepositoryModel;
+import com.pmease.gitop.web.page.account.AccountPage;
+import com.pmease.gitop.web.page.account.home.AccountHomePage;
 import com.pmease.gitop.web.page.repository.settings.RepositoryOptionsPage;
-import com.pmease.gitop.web.page.repository.source.AbstractFilePage;
 import com.pmease.gitop.web.page.repository.source.RepositoryHomePage;
-import com.pmease.gitop.web.page.repository.source.branches.BranchesPage;
-import com.pmease.gitop.web.page.repository.source.commit.SourceCommitPage;
-import com.pmease.gitop.web.page.repository.source.commits.CommitsPage;
-import com.pmease.gitop.web.page.repository.source.contributors.ContributorsPage;
-import com.pmease.gitop.web.page.repository.source.tags.TagsPage;
-import com.pmease.gitop.web.page.repository.source.tree.SourceTreePage;
 
 @SuppressWarnings("serial")
-public abstract class RepositoryPage extends RepositoryBasePage {
+public abstract class RepositoryPage extends AccountPage {
 
-	protected final IModel<String> revisionModel;
+	public static final String PARAM_REPO = "repo";
+	
+	public static final String PARAM_OBJECT_ID = "objectId";
+	
+	protected IModel<Repository> repositoryModel;
 	
 	public RepositoryPage(PageParameters params) {
 		super(params);
-
-		String rev = findRevision(params);
-		onUpdateRevision(rev);
-		revisionModel = Model.of(rev);	
-	}
-
-	protected void onUpdateRevision(String rev) {
-		if (!Objects.equal(rev, SessionData.get().getRevision())) {
-			SessionData.get().onRevisionChanged();
+		
+		String repositoryName = params.get(PARAM_REPO).toString();
+		Preconditions.checkNotNull(repositoryName);
+		
+		if (repositoryName.endsWith(Constants.DOT_GIT_EXT))
+			repositoryName = repositoryName.substring(0, 
+					repositoryName.length() - Constants.DOT_GIT_EXT.length());
+		
+		Repository repository = Gitop.getInstance(RepositoryManager.class).findBy(
+				getAccount(), repositoryName);
+		
+		if (repository == null) {
+			throw new EntityNotFoundException("Unable to find repository " 
+						+ getAccount() + "/" + repositoryName);
 		}
 		
-		SessionData.get().setRevision(rev);
+		repositoryModel = new RepositoryModel(repository);
+		if (!Objects.equal(SessionData.get().getRepositoryId(), repository.getId())) {
+			// displayed repository changed
+			SessionData.get().onRepositoryChanged();
+		}
+		
+		SessionData.get().setRepositoryId(repository.getId());
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-
-		add(createSidebar("sidebar"));
-		add(new EmptyRepositoryPanel("nocommit", repositoryModel));
-	}
-	
-	protected Component createSidebar(String id) {
-		WebMarkupContainer sidebar = new WebMarkupContainer(id);
 		
-		Loop groups = new Loop("groups", Category.values().length) {
+		Repository repository = getRepository();
+		if (repository.getForkedFrom() != null)
+			add(new Icon("repoIcon", "icon-repo-forked"));
+		else
+			add(new Icon("repoIcon", "icon-repo"));
+		
+		AbstractLink userlink = new BookmarkablePageLink<Void>("userlink", 
+				AccountHomePage.class, AccountHomePage.paramsOf(repository.getOwner()));
+		add(userlink);
+		userlink.add(new Label("name", Model.of(repository.getOwner().getName())));
+		
+		AbstractLink repositoryLink = new BookmarkablePageLink<Void>("repositorylink", 
+				RepositoryHomePage.class, RepositoryHomePage.paramsOf(repository));
+		add(repositoryLink);
+		repositoryLink.add(new Label("name", Model.of(repository.getName())));
+		
+		Label publicLabel = new Label("public-label", new AbstractReadOnlyModel<String>() {
 
 			@Override
-			protected void populateItem(LoopItem item) {
-				Category g = Category.values()[item.getIndex()];
-				item.add(newGroupHead("name", g));
-				item.add(newGroupNavs("nav", g));
+			public String getObject() {
+				return isPubliclyAccessible() ? "public" : "private";
 			}
-			
+		}) {
 			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				setVisibilityAllowed(getRepository().git().hasCommits());
+			public void onEvent(IEvent<?> event) {
+				if (event.getPayload() instanceof RepositoryPubliclyAccessibleChanged) {
+					RepositoryPubliclyAccessibleChanged e = (RepositoryPubliclyAccessibleChanged) event.getPayload();
+					e.getTarget().add(this);
+				}
 			}
 		};
 		
-		sidebar.add(groups);
+		publicLabel.setOutputMarkupId(true);
+		publicLabel.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return isPubliclyAccessible() ? "" : "hidden";
+			}
+			
+		}));
+		add(publicLabel);
 		
-		AbstractLink adminLink = new BookmarkablePageLink<Void>("settinglink", 
-				RepositoryOptionsPage.class, PageSpec.forRepository(getRepository())) {
+		add(new Link<Void>("forkRepo") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				UserManager userManager = Gitop.getInstance(UserManager.class);
+				User currentUser = userManager.getCurrent();
+				setVisible(getRepository().isForkable() 
+						&& currentUser != null 
+						&& !getRepository().getOwner().equals(currentUser));
+			}
+
+			@Override
+			public void onClick() {
+				User currentUser = Gitop.getInstance(UserManager.class).getCurrent();
+				Repository forked = Gitop.getInstance(RepositoryManager.class).fork(getRepository(), currentUser);
+				setResponsePage(RepositoryHomePage.class, paramsOf(forked));
+			}
+			
+		});
+		
+		add(new BookmarkablePageLink<Void>("adminRepo", 
+				RepositoryOptionsPage.class, paramsOf(getRepository())) {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisibilityAllowed(SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(getRepository())));
 			}
-		};
-		
-		sidebar.add(adminLink);
-		return sidebar;
+		});
 	}
 	
-	protected String findRevision(PageParameters params) {
-		String rev = params.get(PageSpec.OBJECT_ID).toString();
-		if (Strings.isNullOrEmpty(rev)) {
-			rev = SessionData.get().getRevision();
+	// TODO: here can be slow?
+	private boolean isPubliclyAccessible() {
+		Team anonymous = Gitop.getInstance(TeamManager.class).getAnonymous(getAccount());
+		for (Authorization each : getRepository().getAuthorizations()) {
+			if (each.getTeam().isAnonymous()) {
+				return each.getOperation().can(GeneralOperation.READ);
+			}
 		}
 		
-		if (Strings.isNullOrEmpty(rev)) {
-			rev = getRepository().git().resolveDefaultBranch();
+		if (anonymous.getAuthorizedOperation().can(GeneralOperation.READ)) {
+			return true;
 		}
 		
-		Git git = getRepository().git();
-		String hash = git.parseRevision(rev, false);
-		if (hash == null) {
-			throw new EntityNotFoundException("Ref " + rev + " doesn't exist");
-		}
-		
-		return Preconditions.checkNotNull(rev);
+		return false;
 	}
 	
-	private Component newGroupHead(String id, Category group) {
-		// Replace underscore with space in order to display category 
-		// PULL_REQUESTS as "PULL REQUESTS" 
-		return new Label(id, group.name().replace("_", " "));
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.getSubject().isPermitted(
+				ObjectPermission.ofRepositoryRead(repositoryModel.getObject()));
 	}
 	
-	private List<RepositoryPageTab> getTabs(final Category group) {
-		return ImmutableList.<RepositoryPageTab>copyOf(
-				Iterables.filter(getAllTabs(), new Predicate<RepositoryPageTab>() {
-
-			@Override
-			public boolean apply(RepositoryPageTab input) {
-				return Objects.equal(group.name(), input.getGroupName());
-			}
-			
-		}));
+	public Repository getRepository() {
+		return repositoryModel.getObject();
 	}
 	
-	@SuppressWarnings("unchecked")
-	private List<RepositoryPageTab> getAllTabs() {
-		List<RepositoryPageTab> tabs = Lists.newArrayList();
-		
-		// SOURCE TABS
-		//
-		tabs.add(new RepositoryPageTab(Model.of("Code"), 
-									Category.SOURCE, 
-									"icon-code", 
-									new Class[] { SourceTreePage.class, 
-												  AbstractFilePage.class }) {
-			@Override
-			public Class<? extends Page> getBookmarkablePageClass() {
-				String rev = SessionData.get().getRevision();
-				if (Strings.isNullOrEmpty(rev)) {
-					return RepositoryHomePage.class;
-				} else {
-					return SourceTreePage.class;
-				}
-			}
-		});
-		
-		tabs.add(new RepositoryPageTab(Model.of("Commits"), 
-									Category.SOURCE, 
-									"icon-commits", 
-									new Class[] { CommitsPage.class, 
-												  SourceCommitPage.class }));
-		
-		tabs.add(new RepositoryPageTab(Model.of("Branches"), 
-									Category.SOURCE, 
-									"icon-git-branch", 
-									BranchesPage.class));
-		
-		tabs.add(new RepositoryPageTab(Model.of("Tags"), 
-									Category.SOURCE, 
-									"icon-tags", 
-									TagsPage.class));
-		
-		tabs.add(new RepositoryPageTab(Model.of("Contributors"), 
-									Category.SOURCE, 
-									"icon-group-o", 
-									ContributorsPage.class));
-		
-		// PULL REQUESTS TABS
-		tabs.add(new RepositoryPageTab(Model.of("Open"), 
-									Category.PULL_REQUESTS, 
-									"icon-pull-request", 
-									OpenRequestsPage.class) {
-
-										@Override
-										public boolean isSelected(Page page) {
-											if (page instanceof RequestDetailPage) {
-												RequestDetailPage detailPage = (RequestDetailPage) page;
-												if (detailPage.getPullRequest().isOpen())
-													return true;
-											}
-											return super.isSelected(page);
-										}
-			
-		});
-		tabs.add(new RepositoryPageTab(Model.of("Closed"), 
-									Category.PULL_REQUESTS, 
-									"icon-pull-request-abandon", 
-									ClosedRequestsPage.class) {
-			
-										@Override
-										public boolean isSelected(Page page) {
-											if (page instanceof RequestDetailPage) {
-												RequestDetailPage detailPage = (RequestDetailPage) page;
-												if (!detailPage.getPullRequest().isOpen())
-													return true;
-											}
-											return super.isSelected(page);
-										}
-			
-		});
-		
-		tabs.add(new RepositoryPageTab(Model.of("Create"), 
-									Category.PULL_REQUESTS, 
-									"icon-pull-request", 
-									NewRequestPage.class));
-		
-		return tabs;
-	} 
-
-	private Component newGroupNavs(String id, Category group) {
-		ListView<RepositoryPageTab> tabs = new ListView<RepositoryPageTab>(id, getTabs(group)) {
-			@Override
-			protected void populateItem(ListItem<RepositoryPageTab> item) {
-				final RepositoryPageTab tab = item.getModelObject();
-				
-				item.add(tab.newTabLink("link"));
-				
-				item.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						return tab.isSelected(getPage()) ? "active" : "";
-					}
-				}));
-			}
-		};
-		
-		return tabs;
-	}
-	
-	protected boolean isRevisionAware() {
-		return true;
-	}
-	
-	protected String getRevision() {
-		return revisionModel.getObject();
-	}
-
 	@Override
 	protected void onDetach() {
-		if (revisionModel != null) {
-			revisionModel.detach();
+		if (repositoryModel != null) {
+			repositoryModel.detach();
 		}
 		
 		super.onDetach();
 	}
-	
+
 	public static PageParameters paramsOf(Repository repository) {
-		PageParameters params = AbstractAccountPage.params4(repository.getUser());
-		params.set("repo", repository.getName());
+		PageParameters params = paramsOf(repository.getUser());
+		params.set(PARAM_REPO, repository.getName());
 		return params;
 	}
+	
 }

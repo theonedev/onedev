@@ -30,7 +30,7 @@ import com.pmease.gitop.web.component.commit.CommitMessagePanel;
 import com.pmease.gitop.web.component.commit.CommitMetaPanel;
 import com.pmease.gitop.web.component.user.AvatarMode;
 import com.pmease.gitop.web.git.GitUtils;
-import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 import com.pmease.gitop.web.page.repository.source.blob.SourceBlobPage;
 import com.pmease.gitop.web.page.repository.source.commit.SourceCommitPage;
 import com.pmease.gitop.web.page.repository.source.commits.CommitsPage;
@@ -78,13 +78,13 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 		BookmarkablePageLink<Void> historyLink = new BookmarkablePageLink<Void>(
 				"history",
 				CommitsPage.class,
-				CommitsPage.newParams(getRepo(), getRevision(), getPaths(), 0));
+				CommitsPage.paramsOf(getRepo(), getRevision(), getPaths(), 0));
 		
 		add(historyLink);
 		BookmarkablePageLink<Void> commitLink = new BookmarkablePageLink<Void>(
 				"commitlink",
 				SourceCommitPage.class,
-				SourceCommitPage.newParams(getRepo(), getLastCommit().getHash()));
+				SourceCommitPage.paramsOf(getRepo(), getLastCommit().getHash()));
 		add(commitLink);
 		commitLink.add(new Label("sha", new AbstractReadOnlyModel<String>() {
 
@@ -134,10 +134,8 @@ public class SourceTreePanel extends AbstractSourcePagePanel {
 				
 				item.add(icon);
 				
-				PageParameters params = new PageParameters();
-				params.add(PageSpec.USER, getRepo().getOwner().getName());
-				params.add(PageSpec.REPO, getRepo().getName());
-				params.add(PageSpec.OBJECT_ID, getRevision());
+				PageParameters params = RepositoryPage.paramsOf(getRepo());
+				params.add(RepositoryPage.PARAM_OBJECT_ID, getRevision());
 				
 				List<String> paths = Lists.newArrayList(getPaths());
 				paths.add(node.getName());

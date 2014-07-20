@@ -29,12 +29,11 @@ import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.component.user.AvatarByUser;
 import com.pmease.gitop.web.model.UserModel;
-import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.account.AbstractAccountPage;
+import com.pmease.gitop.web.page.account.AccountPage;
 import com.pmease.gitop.web.page.account.setting.members.MemberListView;
 
 @SuppressWarnings("serial")
-public class AccountHomePage extends AbstractAccountPage {
+public class AccountHomePage extends AccountPage {
 
 	public static enum Category {
 		REPOSITORIES("Repositories"), 
@@ -44,10 +43,6 @@ public class AccountHomePage extends AbstractAccountPage {
 		Category(String displayName) {
 			this.displayName = displayName;
 		}
-	}
-	
-	public static PageParameters newParams(User account) {
-		return PageSpec.forUser(account);
 	}
 	
 	private Category category = Category.REPOSITORIES;
@@ -73,9 +68,9 @@ public class AccountHomePage extends AbstractAccountPage {
 			@Override
 			protected void populateItem(ListItem<Category> item) {
 				Category current = item.getModelObject();
-				PageParameters params = PageSpec.forUser(accountModel.getObject());
+				PageParameters params = paramsOf(accountModel.getObject());
 				if (current != Category.REPOSITORIES) {
-					params.add(PageSpec.TAB, current.name().toLowerCase());
+					params.add("tab", current.name().toLowerCase());
 				}
 				
 				AbstractLink link = new BookmarkablePageLink<Void>("link", 
@@ -157,4 +152,5 @@ public class AccountHomePage extends AbstractAccountPage {
 		else
 			return getAccount().getName();
 	}
+	
 }

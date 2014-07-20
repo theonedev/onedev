@@ -11,7 +11,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.gitop.model.Repository;
-import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 import com.pmease.gitop.web.page.repository.source.tree.SourceTreePage;
 
 @SuppressWarnings("serial")
@@ -29,7 +29,7 @@ public class PathsBreadcrumb extends AbstractSourcePagePanel {
 		
 		BookmarkablePageLink<Void> homeLink = new BookmarkablePageLink<Void>("home", 
 				SourceTreePage.class, 
-				PageSpec.forRepository(getRepo()).add(PageSpec.OBJECT_ID, getRevision()));
+				SourceTreePage.paramsOf(getRepo()).add(RepositoryPage.PARAM_OBJECT_ID, getRevision()));
 		add(homeLink);
 		homeLink.add(new Label("name", new AbstractReadOnlyModel<String>() {
 

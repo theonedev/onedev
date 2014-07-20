@@ -35,11 +35,10 @@ import com.pmease.gitop.web.common.wicket.form.checkbox.CheckBoxElement;
 import com.pmease.gitop.web.common.wicket.form.select.DropDownChoiceElement;
 import com.pmease.gitop.web.common.wicket.form.textfield.TextFieldElement;
 import com.pmease.gitop.web.git.GitUtils;
-import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
 
 @SuppressWarnings("serial")
-public class RepositoryOptionsPage extends AbstractRepositorySettingPage {
+public class RepositoryOptionsPage extends RepositoryAdministrationPage {
 
 	public RepositoryOptionsPage(PageParameters params) {
 		super(params);
@@ -155,7 +154,7 @@ public class RepositoryOptionsPage extends AbstractRepositorySettingPage {
 				Gitop.getInstance(RepositoryManager.class).save(repository);
 				
 				if (nameChanged) {
-					setResponsePage(RepositoryOptionsPage.class, PageSpec.forRepository(repository));
+					setResponsePage(RepositoryOptionsPage.class, RepositoryOptionsPage.paramsOf(repository));
 				} else {
 					form.success("Repository " + repository + " has been updated.");
 					target.add(form);
@@ -168,7 +167,7 @@ public class RepositoryOptionsPage extends AbstractRepositorySettingPage {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				Gitop.getInstance(RepositoryManager.class).delete(getRepository());
-				setResponsePage(AccountHomePage.class, PageSpec.forUser(getAccount()));
+				setResponsePage(AccountHomePage.class, AccountHomePage.paramsOf(getAccount()));
 			}
 		}.add(new ConfirmBehavior("<p>Are you sure you want to delete repository: " + getRepository() 
 				+ "?</p><b>NOTE:</b> Once you delete this repository, there is no going back")));

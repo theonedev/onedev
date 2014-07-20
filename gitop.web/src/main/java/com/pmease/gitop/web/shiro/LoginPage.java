@@ -14,12 +14,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
+import com.pmease.gitop.core.Gitop;
+import com.pmease.gitop.core.manager.UserManager;
 import com.pmease.gitop.web.GitopSession;
 import com.pmease.gitop.web.common.wicket.form.checkbox.CheckBoxElement;
-import com.pmease.gitop.web.common.wicket.util.WicketUtils;
-import com.pmease.gitop.web.page.LayoutPage;
-import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
+import com.pmease.gitop.web.page.layout.LayoutPage;
 
 @SuppressWarnings("serial")
 public class LoginPage extends LayoutPage {
@@ -77,7 +77,9 @@ public class LoginPage extends LayoutPage {
 
 			if (loginShiro(username, password, remember())) {
 				continueToOriginalDestination();
-				setResponsePage(AccountHomePage.class, WicketUtils.newPageParams(PageSpec.USER, username));
+				setResponsePage(
+						AccountHomePage.class, 
+						AccountHomePage.paramsOf(Gitop.getInstance(UserManager.class).getCurrent()));
 			}
 		}
 

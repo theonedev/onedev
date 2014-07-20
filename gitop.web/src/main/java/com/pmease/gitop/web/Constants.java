@@ -25,7 +25,7 @@ public class Constants {
 
 	public static final String UTF8 = "UTF-8";
 	
-	public static int DEFAULT_PAGE_SIZE = 25;
+	public static final int DEFAULT_PAGE_SIZE = 25;
 	
 	public static final String COOKIE_CREDENTIAL = "gitop.login";
 

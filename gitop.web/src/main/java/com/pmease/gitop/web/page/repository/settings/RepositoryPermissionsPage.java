@@ -50,7 +50,7 @@ import com.pmease.gitop.web.page.repository.RepositoryPubliclyAccessibleChanged;
 import com.pmease.gitop.web.util.EnumUtils;
 
 @SuppressWarnings("serial")
-public class RepositoryPermissionsPage extends AbstractRepositorySettingPage {
+public class RepositoryPermissionsPage extends RepositoryAdministrationPage {
 
 	public RepositoryPermissionsPage(PageParameters params) {
 		super(params);

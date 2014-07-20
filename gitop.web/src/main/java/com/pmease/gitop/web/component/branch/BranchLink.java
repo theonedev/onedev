@@ -9,7 +9,7 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.model.permission.ObjectPermission;
-import com.pmease.gitop.web.page.repository.RepositoryPage;
+import com.pmease.gitop.web.page.repository.RepositoryInfoPage;
 
 @SuppressWarnings("serial")
 public class BranchLink extends Panel {
@@ -46,7 +46,7 @@ public class BranchLink extends Panel {
 
 			@Override
 			public String getObject() {
-				RepositoryPage page = (RepositoryPage) getPage();
+				RepositoryInfoPage page = (RepositoryInfoPage) getPage();
 				if (page.getRepository().equals(getBranch().getRepository())) {
 					return getBranch().getName();
 				} else {

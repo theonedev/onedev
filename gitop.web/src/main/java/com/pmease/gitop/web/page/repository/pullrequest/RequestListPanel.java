@@ -38,8 +38,7 @@ import com.pmease.gitop.model.PullRequest;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.web.Constants;
 import com.pmease.gitop.web.component.user.UserSingleChoice;
-import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.repository.RepositoryBasePage;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
 public class RequestListPanel extends Panel {
@@ -235,8 +234,8 @@ public class RequestListPanel extends Panel {
 
 			@Override
 			public void onClick() {
-				RepositoryBasePage page = (RepositoryBasePage) getPage();
-				setResponsePage(NewRequestPage.class, PageSpec.forRepository(page.getRepository()));
+				RepositoryPage page = (RepositoryPage) getPage();
+				setResponsePage(NewRequestPage.class, NewRequestPage.paramsOf(page.getRepository()));
 			}
 			
 		});
@@ -302,13 +301,13 @@ public class RequestListPanel extends Panel {
 
 			@Override
 			public Iterator<? extends PullRequest> iterator(long first, long count) {
-				RepositoryBasePage page = (RepositoryBasePage) getPage();
+				RepositoryPage page = (RepositoryPage) getPage();
 				return Gitop.getInstance(Dao.class).query(displayOption.getCriteria(page.getRepository(), true), (int)first, (int)count).iterator();
 			}
 
 			@Override
 			public long size() {
-				RepositoryBasePage page = (RepositoryBasePage) getPage();
+				RepositoryPage page = (RepositoryPage) getPage();
 				return Gitop.getInstance(Dao.class).count(displayOption.getCriteria(page.getRepository(), false));
 			}
 

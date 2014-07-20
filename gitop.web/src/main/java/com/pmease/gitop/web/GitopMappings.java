@@ -19,7 +19,7 @@ import com.pmease.gitop.web.page.account.RegisterPage;
 import com.pmease.gitop.web.page.account.home.AccountHomePage;
 import com.pmease.gitop.web.page.account.setting.members.AccountMembersSettingPage;
 import com.pmease.gitop.web.page.account.setting.profile.AccountProfilePage;
-import com.pmease.gitop.web.page.account.setting.repo.RepositoriesPage;
+import com.pmease.gitop.web.page.account.setting.repo.AccountRepositoriesPage;
 import com.pmease.gitop.web.page.account.setting.teams.AccountTeamsPage;
 import com.pmease.gitop.web.page.account.setting.teams.AddTeamPage;
 import com.pmease.gitop.web.page.account.setting.teams.EditTeamPage;
@@ -116,7 +116,7 @@ public class GitopMappings extends CompoundRequestMapper {
 
 		// account settings
 		addPage("${user}/settings", AccountProfilePage.class);
-		addPage("${user}/settings/repositories", RepositoriesPage.class);
+		addPage("${user}/settings/repositories", AccountRepositoriesPage.class);
 		addPage("${user}/settings/members", AccountMembersSettingPage.class);
 		addPage("${user}/settings/teams", AccountTeamsPage.class);
 		addPage("${user}/settings/teams/new", AddTeamPage.class);

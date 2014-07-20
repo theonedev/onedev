@@ -35,7 +35,7 @@ import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.common.wicket.component.tab.BootstrapTabbedPanel;
 import com.pmease.gitop.web.git.GitUtils;
-import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 import com.pmease.gitop.web.page.repository.source.RepositoryHomePage;
 import com.pmease.gitop.web.page.repository.source.tree.SourceTreePage;
 
@@ -238,10 +238,8 @@ public class RevisionSelector extends AbstractSourcePagePanel {
 	
 	protected AbstractLink newRefLink(String id, String ref) {
 		Repository repository = getRepo();
-		PageParameters params = new PageParameters();
-		params.add(PageSpec.USER, repository.getOwner().getName());
-		params.add(PageSpec.REPO, repository.getName());
-		params.add(PageSpec.OBJECT_ID, ref);
+		PageParameters params = RepositoryPage.paramsOf(repository);
+		params.add(RepositoryPage.PARAM_OBJECT_ID, ref);
 		List<String> paths = getPaths();
 		if (paths != null) {
 			int i = 0;

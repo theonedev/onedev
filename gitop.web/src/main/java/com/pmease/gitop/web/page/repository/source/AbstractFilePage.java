@@ -9,18 +9,18 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.pmease.gitop.model.Repository;
-import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.repository.RepositoryPage;
+import com.pmease.gitop.web.page.repository.RepositoryInfoPage;
 import com.pmease.gitop.web.page.repository.api.IRevisionAware;
 
 @SuppressWarnings("serial")
-public abstract class AbstractFilePage extends RepositoryPage implements IRevisionAware {
+public abstract class AbstractFilePage extends RepositoryInfoPage implements IRevisionAware {
 
 	protected final IModel<List<String>> pathsModel;
 	
-	public static PageParameters newParams(Repository repository, String revision, List<String> paths) {
-		PageParameters params = PageSpec.forRepository(repository);
-		params.set(PageSpec.OBJECT_ID, revision);
+	public static PageParameters paramsOf(Repository repository, String revision, List<String> paths) {
+		PageParameters params = paramsOf(repository);
+		params.set(RepositoryPage.PARAM_OBJECT_ID, revision);
 		for (int i = 0; i < paths.size(); i++) {
 			params.set(i, paths.get(i));
 		}

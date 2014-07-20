@@ -30,7 +30,6 @@ import com.pmease.gitop.model.Team;
 import com.pmease.gitop.model.User;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.model.TeamModel;
-import com.pmease.gitop.web.page.PageSpec;
 import com.pmease.gitop.web.page.account.setting.AccountSettingPage;
 
 @SuppressWarnings("serial")
@@ -40,7 +39,7 @@ public class EditTeamPage extends AccountSettingPage {
 	
 	public static PageParameters newParams(Team team) {
 		Preconditions.checkNotNull(team);
-		PageParameters params = PageSpec.forUser(team.getOwner());
+		PageParameters params = paramsOf(team.getOwner());
 		params.set("teamId", team.getId());
 		return params;
 	}
@@ -94,10 +93,10 @@ public class EditTeamPage extends AccountSettingPage {
 		
 		add(new Label("teamname", new PropertyModel<String>(teamModel, "name")));
 		add(new BookmarkablePageLink<Void>("backlink", AccountTeamsPage.class,
-				AccountTeamsPage.newParams(getAccount())));
+				AccountTeamsPage.paramsOf(getAccount())));
 		
 		add(new BookmarkablePageLink<Void>("addlink", AddTeamPage.class,
-				AddTeamPage.newParams(getAccount())));
+				AddTeamPage.paramsOf(getAccount())));
 		
 		WebMarkupContainer teamstoggle = new WebMarkupContainer("teamstoggle");
 		add(teamstoggle);
@@ -141,7 +140,7 @@ public class EditTeamPage extends AccountSettingPage {
 			public void onClick(AjaxRequestTarget target) {
 				Team team = getTeam();
 				Gitop.getInstance(Dao.class).remove(team);
-				setResponsePage(AccountTeamsPage.class, AccountTeamsPage.newParams(getAccount()));
+				setResponsePage(AccountTeamsPage.class, AccountTeamsPage.paramsOf(getAccount()));
 			}
 			
 		}.add(new ConfirmBehavior("Are you sure you want to delete this team?")));

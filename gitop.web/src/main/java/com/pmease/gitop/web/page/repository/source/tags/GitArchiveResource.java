@@ -18,7 +18,8 @@ import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.exception.AccessDeniedException;
 import com.pmease.gitop.web.git.command.ArchiveCommand;
 import com.pmease.gitop.web.git.command.ArchiveCommand.Format;
-import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.account.AccountPage;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 import com.pmease.gitop.web.service.FileTypes;
 
 @SuppressWarnings("serial")
@@ -28,8 +29,8 @@ public class GitArchiveResource extends AbstractResource {
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
 		
-		final String username = params.get(PageSpec.USER).toString();
-		final String repoName = params.get(PageSpec.REPO).toString();
+		final String username = params.get(AccountPage.PARAM_USER).toString();
+		final String repoName = params.get(RepositoryPage.PARAM_REPO).toString();
 		final String fileName = params.get("file").toString();
 
 		Preconditions.checkArgument(username != null);

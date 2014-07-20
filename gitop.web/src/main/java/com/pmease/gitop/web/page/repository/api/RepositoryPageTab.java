@@ -17,7 +17,7 @@ import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.SessionData;
 import com.pmease.gitop.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitop.web.common.wicket.component.tab.AbstractPageTab;
-import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 import com.pmease.gitop.web.page.repository.RepositoryCategoryPageLink;
 
 public class RepositoryPageTab extends AbstractPageTab {
@@ -82,11 +82,11 @@ public class RepositoryPageTab extends AbstractPageTab {
 		Class<? extends Page> pageClass = getBookmarkablePageClass();
 		
 		Repository repository = getRepository();
-		PageParameters params = PageSpec.forRepository(repository); 
+		PageParameters params = RepositoryPage.paramsOf(repository); 
 		if (IRevisionAware.class.isAssignableFrom(pageClass)) {
 			String revision = SessionData.get().getRevision();
 			if (!Strings.isNullOrEmpty(revision)) {
-				params.set(PageSpec.OBJECT_ID, revision);
+				params.set(RepositoryPage.PARAM_OBJECT_ID, revision);
 			}
 		}
 		

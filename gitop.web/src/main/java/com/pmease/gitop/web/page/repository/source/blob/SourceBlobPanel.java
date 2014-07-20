@@ -101,7 +101,7 @@ public class SourceBlobPanel extends Panel {
 		Repository repository = Gitop.getInstance(Dao.class).load(Repository.class, blob.getRepositoryId());
 		List<String> paths = Lists.newArrayList(Splitter.on("/").split(blob.getFilePath())); 
 		add(new BookmarkablePageLink<Void>("historylink", CommitsPage.class,
-				CommitsPage.newParams(
+				CommitsPage.paramsOf(
 						repository,
 						blob.getRevision(), 
 						paths,
@@ -109,10 +109,10 @@ public class SourceBlobPanel extends Panel {
 		
 		add(new BookmarkablePageLink<Void>("blamelink",
 						BlobBlamePage.class,
-						BlobBlamePage.newParams(repository, blob.getRevision(), paths)).setVisibilityAllowed(blob.isText()));
+						BlobBlamePage.paramsOf(repository, blob.getRevision(), paths)).setVisibilityAllowed(blob.isText()));
 		
 		add(new ResourceLink<Void>("rawlink", new RawBlobResourceReference(),
-				RawBlobResourceReference.newParams(blob)));
+				RawBlobResourceReference.paramsOf(blob)));
 		
 		BlobRenderer renderer = getRenderer();
 		add(renderer.render("body", (IModel<FileBlob>) getDefaultModel()));

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -20,7 +21,7 @@ import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.repository.RepositoryHomeLink;
 import com.pmease.gitop.web.model.RepositoryModel;
-import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.repository.source.RepositoryHomePage;
 
 @SuppressWarnings("serial")
 public class RepositoryListPanel extends Panel {
@@ -39,7 +40,7 @@ public class RepositoryListPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<Repository> item) {
 				Repository repo = item.getModelObject();
-				item.add(PageSpec.newRepositoryHomeLink("repositorylink", repo)
+				item.add(new BookmarkablePageLink<Void>("repositorylink", RepositoryHomePage.class, RepositoryHomePage.paramsOf(repo))
 						.add(new Label("name", repo.getName())));
 				
 				if (repo.getForkedFrom() != null) {

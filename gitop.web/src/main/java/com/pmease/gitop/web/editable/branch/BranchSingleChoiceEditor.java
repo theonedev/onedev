@@ -16,7 +16,7 @@ import com.pmease.gitop.core.Gitop;
 import com.pmease.gitop.model.Branch;
 import com.pmease.gitop.web.component.branch.BranchChoiceProvider;
 import com.pmease.gitop.web.component.branch.BranchSingleChoice;
-import com.pmease.gitop.web.page.repository.RepositoryBasePage;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
 public class BranchSingleChoiceEditor extends PropertyEditor<Long> {
@@ -36,7 +36,7 @@ public class BranchSingleChoiceEditor extends PropertyEditor<Long> {
 			@Override
 			protected EntityCriteria<Branch> load() {
 				EntityCriteria<Branch> criteria = EntityCriteria.of(Branch.class);
-				RepositoryBasePage page = (RepositoryBasePage) getPage();
+				RepositoryPage page = (RepositoryPage) getPage();
 				criteria.add(Restrictions.eq("repository", page.getRepository()));
 				return criteria;
 			}

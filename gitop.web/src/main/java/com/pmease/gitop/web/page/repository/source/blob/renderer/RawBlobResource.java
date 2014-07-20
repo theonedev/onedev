@@ -24,7 +24,8 @@ import com.pmease.gitop.core.manager.RepositoryManager;
 import com.pmease.gitop.model.Repository;
 import com.pmease.gitop.model.permission.ObjectPermission;
 import com.pmease.gitop.web.exception.AccessDeniedException;
-import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.account.AccountPage;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 import com.pmease.gitop.web.service.FileBlob;
 import com.pmease.gitop.web.service.FileBlobService;
 import com.pmease.gitop.web.service.FileTypes;
@@ -40,8 +41,8 @@ public class RawBlobResource extends AbstractResource {
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
 		
-		final String username = params.get(PageSpec.USER).toString();
-		final String repositoryName = params.get(PageSpec.REPO).toString();
+		final String username = params.get(AccountPage.PARAM_USER).toString();
+		final String repositoryName = params.get(RepositoryPage.PARAM_REPO).toString();
 		final String revision = params.get("objectId").toString();
 		
 		List<String> paths = Lists.newArrayList();

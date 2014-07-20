@@ -61,11 +61,11 @@ import com.pmease.gitop.web.component.label.AgeLabel;
 import com.pmease.gitop.web.component.user.AvatarMode;
 import com.pmease.gitop.web.component.user.PersonLink;
 import com.pmease.gitop.web.model.EntityModel;
-import com.pmease.gitop.web.page.repository.RepositoryPage;
+import com.pmease.gitop.web.page.repository.RepositoryInfoPage;
 import com.pmease.gitop.web.page.repository.source.commit.diff.CommitCommentsAware;
 
 @SuppressWarnings("serial")
-public abstract class RequestDetailPage extends RepositoryPage implements CommitCommentsAware {
+public abstract class RequestDetailPage extends RepositoryInfoPage implements CommitCommentsAware {
 
 	private IModel<PullRequest> requestModel;
 	
@@ -604,7 +604,7 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 	}
 
 	public static PageParameters params4(PullRequest request) {
-		PageParameters params = RepositoryPage.paramsOf(request.getTarget().getRepository());
+		PageParameters params = RepositoryInfoPage.paramsOf(request.getTarget().getRepository());
 		params.set("request", request.getId());
 		return params;
 	}

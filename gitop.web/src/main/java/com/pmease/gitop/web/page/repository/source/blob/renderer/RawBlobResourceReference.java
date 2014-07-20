@@ -5,22 +5,23 @@ import org.apache.wicket.request.resource.IResource;
 import org.apache.wicket.request.resource.ResourceReference;
 
 import com.pmease.gitop.model.Repository;
-import com.pmease.gitop.web.page.PageSpec;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 import com.pmease.gitop.web.service.FileBlob;
+import com.pmease.gitop.web.util.ParamUtils;
 
 @SuppressWarnings("serial")
 public class RawBlobResourceReference extends ResourceReference {
 
 	public static final String RAW_BLOB_RESOURCE = "gitop-raw-blob";
 	
-	public static PageParameters newParams(FileBlob blob) {
-		return newParams(blob.getRepository(), blob.getRevision(), blob.getFilePath());
+	public static PageParameters paramsOf(FileBlob blob) {
+		return paramsOf(blob.getRepository(), blob.getRevision(), blob.getFilePath());
 	}
 	
-	public static PageParameters newParams(Repository repo, String revision, String path) {
-		PageParameters params = PageSpec.forRepository(repo);
+	public static PageParameters paramsOf(Repository repo, String revision, String path) {
+		PageParameters params = RepositoryPage.paramsOf(repo);
 		params.set("objectId", revision);
-		PageSpec.addPathToParameters(path, params);
+		ParamUtils.addPathToParams(path, params);
 		return params;
 	}
 	

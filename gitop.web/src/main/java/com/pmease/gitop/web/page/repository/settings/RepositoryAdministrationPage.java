@@ -15,14 +15,13 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Lists;
 import com.pmease.gitop.model.permission.ObjectPermission;
-import com.pmease.gitop.web.page.PageSpec;
-import com.pmease.gitop.web.page.repository.RepositoryBasePage;
+import com.pmease.gitop.web.page.repository.RepositoryPage;
 import com.pmease.gitop.web.page.repository.api.RepositorySettingTab;
 
 @SuppressWarnings("serial")
-public abstract class AbstractRepositorySettingPage extends RepositoryBasePage {
+public abstract class RepositoryAdministrationPage extends RepositoryPage {
 
-	public AbstractRepositorySettingPage(PageParameters params) {
+	public RepositoryAdministrationPage(PageParameters params) {
 		super(params);
 	}
 	
@@ -52,7 +51,7 @@ public abstract class AbstractRepositorySettingPage extends RepositoryBasePage {
 			@Override
 			protected void populateItem(ListItem<RepositorySettingTab> item) {
 				final RepositorySettingTab tab = item.getModelObject();
-				Component link = tab.newTabLink("link", PageSpec.forRepository(getRepository()));
+				Component link = tab.newTabLink("link", paramsOf(getRepository()));
 				item.add(link);
 				item.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
