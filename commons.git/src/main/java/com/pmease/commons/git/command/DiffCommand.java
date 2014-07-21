@@ -48,7 +48,7 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 		
 		Commandline cmd = cmd();
 		cmd.addArgs("diff", revisions, "--full-index", "--no-color", "--find-renames", 
-				"--find-copies", "--src-prefix=#gitop_old/", "--dst-prefix=#gitop_new/");
+				"--find-copies", "--src-prefix=#gitplex_old/", "--dst-prefix=#gitplex_new/");
 		if (contextLines != 0)
 			cmd.addArgs("--unified=" + contextLines);
 		if (path != null)
@@ -72,10 +72,10 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 					changeBuilder.newCommit = null;
 					changeBuilder.diffLines.clear();
 					
-					line = line.substring("diff --git #gitop_old/".length());
+					line = line.substring("diff --git #gitplex_old/".length());
 					
-					changeBuilder.oldPath = StringUtils.substringBefore(line, " #gitop_new/");
-					changeBuilder.newPath = StringUtils.substringAfter(line, " #gitop_new/");
+					changeBuilder.oldPath = StringUtils.substringBefore(line, " #gitplex_new/");
+					changeBuilder.newPath = StringUtils.substringAfter(line, " #gitplex_new/");
 				} else if (line.startsWith("deleted file mode ")) {
 					changeBuilder.action = FileChange.Action.DELETE;
 					changeBuilder.mode = FileMode.fromBits(Integer.parseInt(line.substring("deleted file mode ".length()), 8));

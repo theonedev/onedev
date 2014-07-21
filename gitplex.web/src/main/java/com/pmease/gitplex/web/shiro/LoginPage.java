@@ -1,0 +1,131 @@
+package com.pmease.gitplex.web.shiro;
+
+import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.web.GitPlexSession;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.wicket.Component;
+import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.form.PasswordTextField;
+import org.apache.wicket.markup.html.form.StatelessForm;
+import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.model.Model;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
+import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.web.common.wicket.form.checkbox.CheckBoxElement;
+import com.pmease.gitplex.web.page.account.home.AccountHomePage;
+import com.pmease.gitplex.web.page.layout.LayoutPage;
+
+@SuppressWarnings("serial")
+public class LoginPage extends LayoutPage {
+	private static final Logger logger = LoggerFactory.getLogger(LoginPage.class);
+	
+	public LoginPage() {
+		if (SecurityUtils.getSubject().isAuthenticated()) {
+			throw new RestartResponseException(getApplication().getHomePage());
+		}
+		
+		add(new LoginForm("login"));
+		FeedbackPanel feedback = new FeedbackPanel("feedback", get("login"));
+		add(feedback);
+	}
+	
+	private class LoginForm extends StatelessForm<Void> {
+
+		public LoginForm(String id) {
+			super(id);
+		}
+		
+		@Override
+		protected void onInitialize() {
+			super.onInitialize();
+			
+			add(new TextField<String>("username", new Model<String>()).setRequired(true));
+			add(new PasswordTextField("password", new Model<String>()).setResetPassword(false));
+			add(new CheckBoxElement("rememberme", Model.of(false),
+					Model.of("Remember me on this computer")));
+		}
+		
+		private Component getUsernameField() {
+			return get("username");
+		}
+		
+		private Component getPasswordField() {
+			return get("password");
+		}
+		
+		/**
+		 * Delegate to {@link #loginShiro loginShiro()} to peform the
+		 * authentication; if it succeeds, redirect to the user's original intended
+		 * destination or to the application home page.
+		 */
+		@Override
+		protected void onSubmit() {
+			String username = getUsernameField().getDefaultModelObjectAsString();
+			String password = getPasswordField().getDefaultModelObjectAsString();
+
+			// Convert username to lowercase just in case the backend authentication
+			// system is case sensitive and the user accidentally typed in uppercase.
+			if (username != null) {
+				username = username.toLowerCase();
+			}
+
+			if (loginShiro(username, password, remember())) {
+				continueToOriginalDestination();
+				setResponsePage(
+						AccountHomePage.class, 
+						AccountHomePage.paramsOf(GitPlex.getInstance(UserManager.class).getCurrent()));
+			}
+		}
+
+		
+		protected boolean loginShiro(String loginName, String password, boolean remember) {
+			try {
+				GitPlexSession.get().login(loginName, password, remember);
+				return true;
+			} catch (AuthenticationException ae) {
+				onAuthenticationException(ae);
+			}
+			return false;
+		}
+
+		/**
+		 * Handle any exceptions that are thrown upon login failure by setting an
+		 * appropriate feedback message. The default implemention adds an error
+		 * feedback message with the key {@code loginFailed} to the email field.
+		 */
+		protected void onAuthenticationException(AuthenticationException ae) {
+			logger.debug("Shiro Subject.login() failed", ae);
+			getUsernameField().error(getString("loginFailed", null, "Invalid user name and/or password."));
+		}
+
+		/**
+		 * Override this method to return {@code true} if you want to enable Shiro's
+		 * "remember me" feature. By default this returns {@code false}.
+		 */
+		protected boolean remember() {
+			CheckBoxElement c = (CheckBoxElement) get("rememberme");
+			Boolean b = (Boolean) c.getFormComponent().getDefaultModelObject();
+//			System.out.println(b);
+			return b;
+		}
+		
+		@Override
+		public void renderHead(IHeaderResponse response) {
+			super.renderHead(response);
+			
+			response.render(OnDomReadyHeaderItem.forScript("gitplex.form.setupFocus('#" + getMarkupId(true) + "');"));
+		}
+	}
+
+
+	@Override
+	protected String getPageTitle() {
+		return "GitPlex - Log in";
+	}
+}

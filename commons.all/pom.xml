@@ -15,22 +15,20 @@
         <module>../commons.util</module>  
         <module>../commons.bootstrap</module>  
         <module>../commons.jetty</module>  
-        <module>../gitop.core</module>  
         <module>../commons.editable</module>  
         <module>../commons.git</module>  
         <module>../commons.hibernate</module>  
         <module>../commons.jersey</module>  
         <module>../commons.shiro</module>  
         <module>../commons.wicket</module>  
-        <module>../gitop.product</module>  
-        <module>../gitop.web</module>  
         <module>../commons.jackson</module>  
         <module>../commons.validation</module>  
-        <module>../gitop.rest</module>
-        <module>../gitop.http</module>
-        <module>../gitop.security</module>
-        <module>../gitop.model</module>
-        <module>../commons.schedule</module>
+        <module>../gitplex.core</module>
+        <module>../gitplex.web</module>
+        <module>../gitplex.rest</module>
+        <module>../gitplex.http</module>
+        <module>../gitplex.security</module>
+        <module>../gitplex.product</module>
     </modules>  
     <repositories> 
         <repository> 

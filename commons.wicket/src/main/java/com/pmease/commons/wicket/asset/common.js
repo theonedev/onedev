@@ -688,7 +688,7 @@ pmease.commons = {
 		},
 		
 		setupAutoFocus: function() {
-			if (typeof(Wicket) != "undefined") {
+			if (typeof(Wicket) != "undefined" && typeof(Wicket.Focus) != "undefined") {
 				var wicketSetFocusOnId = Wicket.Focus.setFocusOnId;
 				Wicket.Focus.setFocusOnId = function(componentId) {
 					pmease.commons.focus.focusOn(componentId);
