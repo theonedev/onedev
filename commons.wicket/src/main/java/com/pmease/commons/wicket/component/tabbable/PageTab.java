@@ -13,26 +13,71 @@ public class PageTab implements Tab {
 
 	private final IModel<String> titleModel;
 	
-	private final List<Class<? extends Page>> pageClasses;
+	private final Class<? extends Page> mainPageClass;
 	
-	public PageTab(IModel<String> titleModel, Class<? extends Page> pageClass, 
+	private final List<Class<? extends Page>> additionalPageClasses;
+	
+	public PageTab(IModel<String> titleModel, Class<? extends Page> mainPageClass, 
 			List<Class<? extends Page>> additionalPageClasses) {
 		this.titleModel = titleModel;
-		pageClasses = new ArrayList<>();
-		pageClasses.add(pageClass);
-		pageClasses.addAll(additionalPageClasses);
+		this.mainPageClass = mainPageClass;
+		this.additionalPageClasses = additionalPageClasses;
 	}
 	
-	public PageTab(IModel<String> titleModel, Class<? extends Page> pageClass) {
-		this(titleModel, pageClass, new ArrayList<Class<? extends Page>>());
+	public PageTab(IModel<String> titleModel, Class<? extends Page> mainPageClass) {
+		this(titleModel, mainPageClass, new ArrayList<Class<? extends Page>>());
 	}
 
-	protected final IModel<String> getTitleModel() {
+	public PageTab(IModel<String> titleModel, Class<? extends Page> mainPageClass, 
+			Class<? extends Page> additionalPageClass) {
+		this(titleModel, mainPageClass, asList(additionalPageClass));
+	}
+
+	public PageTab(IModel<String> titleModel, Class<? extends Page> mainPageClass, 
+			Class<? extends Page> additionalPageClass1, Class<? extends Page> additionalPageClass2) {
+		this(titleModel, mainPageClass, asList(additionalPageClass1, additionalPageClass2));
+	}
+
+	public PageTab(IModel<String> titleModel, Class<? extends Page> mainPageClass, 
+			Class<? extends Page> additionalPageClass1, 
+			Class<? extends Page> additionalPageClass2,
+			Class<? extends Page> additionalPageClass3) {
+		this(titleModel, mainPageClass, asList(additionalPageClass1, additionalPageClass2, additionalPageClass3));
+	}
+
+	private static List<Class<? extends Page>> asList(Class<? extends Page> pageClass) {
+		List<Class<? extends Page>> pageClasses = new ArrayList<Class<? extends Page>>();
+		pageClasses.add(pageClass);
+		return pageClasses;
+	}
+	
+	private static List<Class<? extends Page>> asList(Class<? extends Page> pageClass1, 
+			Class<? extends Page> pageClass2) {
+		List<Class<? extends Page>> pageClasses = new ArrayList<Class<? extends Page>>();
+		pageClasses.add(pageClass1);
+		pageClasses.add(pageClass2);
+		return pageClasses;
+	}
+
+	private static List<Class<? extends Page>> asList(Class<? extends Page> pageClass1, 
+			Class<? extends Page> pageClass2, Class<? extends Page> pageClass3) {
+		List<Class<? extends Page>> pageClasses = new ArrayList<Class<? extends Page>>();
+		pageClasses.add(pageClass1);
+		pageClasses.add(pageClass2);
+		pageClasses.add(pageClass3);
+		return pageClasses;
+	}
+
+	public final IModel<String> getTitleModel() {
 		return titleModel;
 	}
 	
-	protected final List<Class<? extends Page>> getPageClasses() {
-		return pageClasses;
+	public final List<Class<? extends Page>> getAdditionalPageClasses() {
+		return additionalPageClasses;
+	}
+	
+	public final Class<? extends Page> getMainPageClass() {
+		return mainPageClass;
 	}
 	
 	/**
@@ -45,13 +90,21 @@ public class PageTab implements Tab {
 	 */
 	@Override
 	public void populate(ListItem<Tab> item, String componentId) {
-		item.add(new PageTabHeader(componentId, this));
+		item.add(new PageTabLink(componentId, this));
 	}
 
+	
 	@Override
-	public boolean isActive(ListItem<Tab> item) {
-		for (Class<?> pageClass: pageClasses) {
-			if (pageClass.isAssignableFrom(item.getPage().getClass())) 
+	public final boolean isActive(ListItem<Tab> item) {
+		return isActive(item.getPage());
+	}
+
+	public boolean isActive(Page currentPage) {
+		if (mainPageClass.isAssignableFrom(currentPage.getClass()))
+			return true;
+		
+		for (Class<?> pageClass: additionalPageClasses) {
+			if (pageClass.isAssignableFrom(currentPage.getClass())) 
 				return true;
 		}
 		return false;

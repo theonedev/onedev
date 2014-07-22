@@ -21,8 +21,8 @@ import com.google.common.io.CharSource;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.common.quantity.Data;
-import com.pmease.gitplex.web.page.repository.source.blob.language.Language;
-import com.pmease.gitplex.web.page.repository.source.blob.language.Languages;
+import com.pmease.gitplex.web.page.repository.info.code.blob.language.Language;
+import com.pmease.gitplex.web.page.repository.info.code.blob.language.Languages;
 import com.pmease.gitplex.web.util.MediaTypeUtils;
 
 public class FileBlob implements Serializable {

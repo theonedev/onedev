@@ -8,7 +8,6 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.base.Objects;
@@ -18,7 +17,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
-import com.pmease.commons.git.RefInfo;
 
 public class GitUtils {
 
@@ -53,25 +51,6 @@ public class GitUtils {
 	
 	public static String getCommitSummary(Commit commit) {
 		return commit.getSubject();
-	}
-	
-	public static @Nullable String getDefaultBranch(Git git) {
-		String defaultBranch = git.resolveDefaultBranch();
-		
-		// FIXME: here --heads is not a pattern
-		List<RefInfo> refs = git.showRefs("--heads");
-		if (refs.isEmpty()) {
-			return defaultBranch;
-		} else {
-			for (RefInfo each : refs) {
-				if (each.getName().substring(Constants.R_HEADS.length()).equals(defaultBranch)) {
-					return defaultBranch;
-				}
-			}
-			
-			RefInfo ref = Iterables.getFirst(refs, null);
-			return ref.getName().substring(Constants.R_HEADS.length());
-		}
 	}
 	
 	public static @Nullable Commit getLastCommit(Git git, String revision, String path) {

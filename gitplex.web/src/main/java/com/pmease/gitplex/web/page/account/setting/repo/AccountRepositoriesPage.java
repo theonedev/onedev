@@ -20,8 +20,8 @@ import com.pmease.gitplex.web.common.datatype.DataTypes;
 import com.pmease.gitplex.web.component.repository.RepositoryHomeLink;
 import com.pmease.gitplex.web.model.RepositoryModel;
 import com.pmease.gitplex.web.page.account.setting.AccountSettingPage;
-import com.pmease.gitplex.web.page.repository.settings.CreateRepositoryPage;
-import com.pmease.gitplex.web.page.repository.settings.RepositoryOptionsPage;
+import com.pmease.gitplex.web.page.repository.admin.CreateRepositoryPage;
+import com.pmease.gitplex.web.page.repository.admin.RepoOptionsPage;
 import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")
@@ -90,8 +90,8 @@ public class AccountRepositoriesPage extends AccountSettingPage {
 					item.add(new WebMarkupContainer("forkedFrom").setVisibilityAllowed(false));
 				}
 				
-				item.add(new BookmarkablePageLink<Void>("admin", RepositoryOptionsPage.class,
-						RepositoryOptionsPage.paramsOf(repository)));
+				item.add(new BookmarkablePageLink<Void>("admin", RepoOptionsPage.class,
+						RepoOptionsPage.paramsOf(repository)));
 			}
 			
 		};

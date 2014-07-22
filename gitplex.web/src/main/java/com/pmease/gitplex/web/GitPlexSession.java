@@ -16,10 +16,6 @@ public class GitPlexSession extends WebSession {
 
 	private static final long serialVersionUID = 1L;
 
-	// private Long uid = null;
-
-	private final SessionData data = new SessionData();
-	
 	public GitPlexSession(Request request) {
 		super(request);
 	}
@@ -61,7 +57,4 @@ public class GitPlexSession extends WebSession {
 		currentUser.login(token);
 	}
 
-	public SessionData getSessionData() {
-		return data;
-	}
 }

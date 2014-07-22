@@ -11,8 +11,17 @@ import org.apache.wicket.markup.html.panel.Panel;
 @SuppressWarnings("serial")
 public class Tabbable extends Panel {
 	
+	private final List<Tab> tabs;
+	
 	public Tabbable(String id, List<Tab> tabs) {
 		super(id);
+		
+		this.tabs = tabs;
+	}
+	
+	@Override
+	public void onInitialize() {
+		super.onInitialize();
 		
 		WebMarkupContainer container = new WebMarkupContainer("container");
 		container.add(AttributeModifier.replace("class", getCssClasses()));

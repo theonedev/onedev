@@ -1,0 +1,35 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<div class="panel panel-default panel-sourcetree">
+		<div class="panel-heading panel-message">
+			<wicket:container wicket:id="message"></wicket:container>
+			<a class="history-link" wicket:id="history"><i class="icon icon-history"></i> History</a>
+		</div>
+		<div class="panel-body">
+			<div class="last-commit clearfix">
+				<div class="pull-left" wicket:id="meta"></div>
+				<div class="commitish right">
+					<a wicket:id="commitlink">latest commit <span wicket:id="sha" class="sha"></span></a>
+				</div>
+			</div>
+			
+			<table class="table table-files">
+				<wicket:enclosure>
+				<tr>
+					<td class="file-icon"><i class="icon icon-back"></i></td>
+					<td class="file-name"><a wicket:id="parent" title="go to up level">..</a></td>
+					<td class="message"></td>
+					<td class="age"></td>
+				</tr>
+				</wicket:enclosure>
+				<tr wicket:id="files">
+					<td class="file-icon"><i class="" wicket:id="icon"></i></td>
+					<td class="file-name"><a wicket:id="file"><span wicket:id="name"></span></a></td>
+					<td class="message"></td>
+					<td class="age"></td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</wicket:panel>
+</html>

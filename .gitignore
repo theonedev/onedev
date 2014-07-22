@@ -1,8 +1,10 @@
 */target/**
 */bin/**
 .metadata/**
+.idea/**
 **/.classpath
 **/.project
+**/*.iml
 */.settings/**
 release.properties
 pom.xml.releaseBackup

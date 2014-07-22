@@ -7,7 +7,7 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.common.wicket.component.link.LinkPanel;
-import com.pmease.gitplex.web.page.repository.source.RepositoryHomePage;
+import com.pmease.gitplex.web.page.repository.RepositoryHomePage;
 
 public class RepositoryHomeLink extends LinkPanel {
 	private static final long serialVersionUID = 1L;

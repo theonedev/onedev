@@ -9,7 +9,7 @@ import org.apache.wicket.model.Model;
 
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
-import com.pmease.gitplex.web.page.repository.source.blob.renderer.highlighter.AceHighlighter;
+import com.pmease.gitplex.web.page.repository.info.code.blob.renderer.highlighter.AceHighlighter;
 import com.pmease.gitplex.web.util.MarkdownUtils;
 
 public class WikiTextPanel extends Panel {

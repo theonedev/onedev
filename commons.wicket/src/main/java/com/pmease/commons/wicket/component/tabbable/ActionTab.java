@@ -21,7 +21,7 @@ public abstract class ActionTab implements Tab {
 	
 	@Override
 	public void populate(ListItem<Tab> item, String componentId) {
-		item.add(new ActionTabHeader(componentId, this));
+		item.add(new ActionTabLink(componentId, this));
 	}
 
 	public final ActionTab setActive(boolean active) {

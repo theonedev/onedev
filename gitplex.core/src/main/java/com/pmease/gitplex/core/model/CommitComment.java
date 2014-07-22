@@ -4,7 +4,6 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
@@ -12,7 +11,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.Index;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
@@ -22,18 +20,14 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @Entity
 public class CommitComment extends AbstractEntity {
 
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@ManyToOne
 	@JoinColumn(nullable = false)
-//	@Index(name = "IDX_COMMENT_AUTHOR_ID")
 	private User author;
 	
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@ManyToOne
 	@JoinColumn(nullable = false)
-//	@Index(name = "IDX_COMMENT_REPOSITORY_ID")
 	private Repository repository;
 	
-	// Always use commit sha
-	//
 	@Column(nullable = false, length=40)
 	@Index(name = "IDX_COMMENT_COMMIT")
 	private String commit;
@@ -44,16 +38,11 @@ public class CommitComment extends AbstractEntity {
 	private String line;
 	
 	@Column(nullable = false)
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date createdDate = new Date();
-	
-	@Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedDate = new Date();
+    private Date updateDate = new Date();
 
-	@Column
+	@Column(nullable=false)
 	@Lob
-	@NotEmpty
 	private String content;
 
 	public static String buildLineId(String fileSha, int hunkIndex, int linePos) {
@@ -96,20 +85,12 @@ public class CommitComment extends AbstractEntity {
 		this.line = line;
 	}
 
-	public Date getCreatedDate() {
-		return createdDate;
+	public Date getUpdateDate() {
+		return updateDate;
 	}
 
-	public void setCreatedDate(Date createdDate) {
-		this.createdDate = createdDate;
-	}
-
-	public Date getUpdatedDate() {
-		return updatedDate;
-	}
-
-	public void setUpdatedDate(Date updatedDate) {
-		this.updatedDate = updatedDate;
+	public void setUpdateDate(Date updateDate) {
+		this.updateDate = updateDate;
 	}
 
 	public String getContent() {
@@ -128,8 +109,7 @@ public class CommitComment extends AbstractEntity {
 				.add("commit", commit)
 				.add("line", line)
 				.add("content", content)
-				.add("created", createdDate)
-				.add("updatedDate", updatedDate)
+				.add("updateDate", updateDate)
 				.toString();
 	}
 }

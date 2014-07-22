@@ -16,7 +16,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.Constants;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
@@ -28,20 +27,16 @@ import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.permission.operation.GeneralOperation;
-import com.pmease.gitplex.web.SessionData;
 import com.pmease.gitplex.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitplex.web.model.RepositoryModel;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.home.AccountHomePage;
-import com.pmease.gitplex.web.page.repository.settings.RepositoryOptionsPage;
-import com.pmease.gitplex.web.page.repository.source.RepositoryHomePage;
+import com.pmease.gitplex.web.page.repository.admin.RepoOptionsPage;
 
 @SuppressWarnings("serial")
 public abstract class RepositoryPage extends AccountPage {
 
 	public static final String PARAM_REPO = "repo";
-	
-	public static final String PARAM_OBJECT_ID = "objectId";
 	
 	protected IModel<Repository> repositoryModel;
 	
@@ -55,8 +50,7 @@ public abstract class RepositoryPage extends AccountPage {
 			repositoryName = repositoryName.substring(0, 
 					repositoryName.length() - Constants.DOT_GIT_EXT.length());
 		
-		Repository repository = GitPlex.getInstance(RepositoryManager.class).findBy(
-				getAccount(), repositoryName);
+		Repository repository = GitPlex.getInstance(RepositoryManager.class).findBy(getAccount(), repositoryName);
 		
 		if (repository == null) {
 			throw new EntityNotFoundException("Unable to find repository " 
@@ -64,12 +58,6 @@ public abstract class RepositoryPage extends AccountPage {
 		}
 		
 		repositoryModel = new RepositoryModel(repository);
-		if (!Objects.equal(SessionData.get().getRepositoryId(), repository.getId())) {
-			// displayed repository changed
-			SessionData.get().onRepositoryChanged();
-		}
-		
-		SessionData.get().setRepositoryId(repository.getId());
 	}
 	
 	@Override
@@ -119,7 +107,7 @@ public abstract class RepositoryPage extends AccountPage {
 		}));
 		add(publicLabel);
 		
-		WebMarkupContainer actionsContainer = new WebMarkupContainer("actions") {
+		WebMarkupContainer actionsContainer = new WebMarkupContainer("repoActions") {
 
 			@Override
 			protected void onConfigure() {
@@ -152,7 +140,7 @@ public abstract class RepositoryPage extends AccountPage {
 		});
 		
 		add(new BookmarkablePageLink<Void>("adminRepo", 
-				RepositoryOptionsPage.class, paramsOf(getRepository())) {
+				RepoOptionsPage.class, paramsOf(getRepository())) {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
@@ -201,5 +189,5 @@ public abstract class RepositoryPage extends AccountPage {
 		params.set(PARAM_REPO, repository.getName());
 		return params;
 	}
-	
+
 }

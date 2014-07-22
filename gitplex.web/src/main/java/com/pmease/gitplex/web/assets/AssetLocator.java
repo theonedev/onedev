@@ -7,6 +7,8 @@ public class AssetLocator {
 
 	public static final CssResourceReference ICONS_CSS = newCssResourceReference("css/icons.css");
 	
+	public static final JavaScriptResourceReference LIVEFILTER_JS = newJavaScriptResourceReference("js/jquery.livefilter.js");
+	
 	public static final JavaScriptResourceReference PAGE_JS = newJavaScriptResourceReference("js/page.js");
 
 	public static final CssResourceReference PAGE_CSS = newCssResourceReference("css/page.css");

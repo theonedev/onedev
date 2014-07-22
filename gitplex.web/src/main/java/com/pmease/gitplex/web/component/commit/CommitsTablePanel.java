@@ -31,7 +31,7 @@ import com.pmease.gitplex.web.common.wicket.bootstrap.Alert;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.PersonLink;
 import com.pmease.gitplex.web.git.GitUtils;
-import com.pmease.gitplex.web.page.repository.source.commit.SourceCommitPage;
+import com.pmease.gitplex.web.page.repository.info.code.commit.RepoCommitPage;
 
 @SuppressWarnings("serial")
 public class CommitsTablePanel extends Panel {
@@ -111,11 +111,11 @@ public class CommitsTablePanel extends Panel {
 			protected void populateItem(ListItem<Commit> item) {
 				Commit commit = item.getModelObject();
 				item.add(new PersonLink("name", Model.of(commit.getAuthor()), AvatarMode.NAME_AND_AVATAR));
-				item.add(new CommitMessagePanel("message", item.getModel(), repositoryModel));
+				item.add(new CommitMessagePanel("message", item.getModel()));
 				
 				AbstractLink link = new BookmarkablePageLink<Void>("commitlink",
-						SourceCommitPage.class,
-						SourceCommitPage.paramsOf(getRepository(), commit.getHash()));
+						RepoCommitPage.class,
+						RepoCommitPage.paramsOf(getRepository(), commit.getHash(), null));
 				
 				item.add(link);
 				link.add(new Label("sha", GitUtils.abbreviateSHA(commit.getHash())));

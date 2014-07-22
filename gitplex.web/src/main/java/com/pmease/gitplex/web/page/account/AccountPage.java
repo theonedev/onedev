@@ -2,16 +2,14 @@ package com.pmease.gitplex.web.page.account;
 
 import javax.persistence.EntityNotFoundException;
 
-import com.pmease.gitplex.core.GitPlex;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.web.SessionData;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.layout.LayoutPage;
 
@@ -32,12 +30,6 @@ public abstract class AccountPage extends LayoutPage {
 		}
 		
 		accountModel = new UserModel(user);
-		
-		if (!Objects.equal(SessionData.get().getAccountId(), user.getId())) {
-			SessionData.get().onAccountChanged();
-		}
-		
-		SessionData.get().setAccountId(user.getId());
 	}
 
 	@Override

@@ -1,13 +1,9 @@
 package com.pmease.gitplex.web.shiro;
 
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.web.GitPlexSession;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextField;
@@ -16,7 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.web.GitPlexSession;
 import com.pmease.gitplex.web.common.wicket.form.checkbox.CheckBoxElement;
 import com.pmease.gitplex.web.page.account.home.AccountHomePage;
 import com.pmease.gitplex.web.page.layout.LayoutPage;
@@ -114,13 +112,7 @@ public class LoginPage extends LayoutPage {
 //			System.out.println(b);
 			return b;
 		}
-		
-		@Override
-		public void renderHead(IHeaderResponse response) {
-			super.renderHead(response);
-			
-			response.render(OnDomReadyHeaderItem.forScript("gitplex.form.setupFocus('#" + getMarkupId(true) + "');"));
-		}
+
 	}
 
 

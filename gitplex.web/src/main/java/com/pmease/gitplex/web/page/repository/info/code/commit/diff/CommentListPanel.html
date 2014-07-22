@@ -1,0 +1,57 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<div class="comment-list-header clearfix" wicket:id="commentsHeader">
+		<h2 class="pull-left"><span wicket:id="count"></span> notes on commit 
+			<small><span class="sha" wicket:id="sha"></span></small>
+			<small class="text-muted">(<span wicket:id="inlinecount"></span> line notes)</small>
+		</h2>
+		<div class="pull-right">
+			<span class="checkbox">
+				<label>
+					<input class="trigger-show-all-notes" type="checkbox" wicket:id="showAllTrigger" /> show line notes below
+				</label>
+			</span>
+		</div>
+	</div>
+	
+	<div class="comment-list">
+		<div wicket:id="commentlist">
+			<wicket:container wicket:id="comments">
+				<div class="comment-holder media">
+					<span class="comment-author pull-left">
+						<wicket:container wicket:id="author"></wicket:container>
+					</span>
+					<div class="comment-body media-body">
+						<div wicket:id="message"></div>
+					</div>
+				</div>
+			</wicket:container>
+		</div>
+		
+		<hr class="dash deep" />
+		
+		<div class="comment-holder media comment-form-container" wicket:id="formholder">
+			<span class="pull-left comment-author">
+				<wicket:container wicket:id="author"></wicket:container>
+			</span>
+			<div class="comment-body media-body">
+				<div wicket:id="form"></div>
+			</div>
+		</div>
+	</div>
+	
+	<wicket:fragment wicket:id="commenthead">
+		<div class="clearfix">
+			<span class="author" wicket:id="author"></span> commented on
+			<a class="sha" wicket:id="commitlink"><span wicket:id="sha"></span></a> 
+			<a class="sha" wicket:id="linelink"><span wicket:id="lineid"></span></a>
+			<span wicket:id="age"></span>
+			
+			<div class="actions right">
+				<a wicket:id="editlink"><i class="icon icon-pencil"></i></a>
+				<a wicket:id="removelink"><i class="icon icon-delete"></i></a>
+			</div>
+		</div>
+	</wicket:fragment>
+</wicket:panel>
+</html>

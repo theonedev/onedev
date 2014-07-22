@@ -2,6 +2,7 @@ package com.pmease.gitplex.web.assets;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.PriorityHeaderItem;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
@@ -18,6 +19,7 @@ public class PageResourceReference extends JavaScriptResourceReference {
 	public Iterable<? extends HeaderItem> getDependencies() {
 		return Dependencies.combine(
 				super.getDependencies(),
+				JavaScriptHeaderItem.forReference(AssetLocator.LIVEFILTER_JS),
 				new PriorityHeaderItem(CssHeaderItem.forReference(AssetLocator.ICONS_CSS)),
 				CssHeaderItem.forReference(AssetLocator.PAGE_CSS));
 	}

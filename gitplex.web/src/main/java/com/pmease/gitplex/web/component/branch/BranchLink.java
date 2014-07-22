@@ -9,7 +9,7 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.permission.ObjectPermission;
-import com.pmease.gitplex.web.page.repository.RepositoryInfoPage;
+import com.pmease.gitplex.web.page.repository.info.RepositoryInfoPage;
 
 @SuppressWarnings("serial")
 public class BranchLink extends Panel {

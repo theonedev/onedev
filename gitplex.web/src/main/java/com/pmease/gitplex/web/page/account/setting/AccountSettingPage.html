@@ -1,18 +1,12 @@
 <html xmlns:wicket>
 <wicket:extend>
-	<div class="faux">
-		<div class="faux-row">
-			<div class="faux-cell sidebar">
-				<div class="sidebar-inner">
+	<table>
+		<tbody>
+			<tr>
+				<td class="sidebar">
 					<div class="head">
-						<wicket:container wicket:id="userlink"></wicket:container>
+						<wicket:container wicket:id="userLink"></wicket:container>
 					</div>
-					<ul class="list-group list-navs">
-						<li class="list-group-item" wicket:id="setting">
-							<wicket:container wicket:id="link"></wicket:container>
-						</li>
-					</ul>
-					
 					<wicket:enclosure child="owner">
 					<h4 class="list-head">Switch account to</h4>
 					<ul class="nav owners-list" role="menu">
@@ -21,14 +15,13 @@
 						</li>
 					</ul>
 					</wicket:enclosure>
-				</div>
-			</div>
-			<div class="faux-cell content">
-				<div class="content-inner">
+					<wicket:container wicket:id="tabs"></wicket:container>
+				</td>
+				<td class="content">
 					<wicket:child></wicket:child>
-				</div>
-			</div>
-		</div>
-	</div>
+				</td>
+			</tr>
+		</tbody>
+	</table>
 </wicket:extend>
 </html>

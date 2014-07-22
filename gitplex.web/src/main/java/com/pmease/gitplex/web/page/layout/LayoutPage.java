@@ -14,7 +14,7 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.page.BasePage;
-import com.pmease.gitplex.web.page.admin.SystemSettingEdit;
+import com.pmease.gitplex.web.page.admin.SystemSettingPage;
 
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
@@ -51,7 +51,7 @@ public abstract class LayoutPage extends BasePage {
 			
 		}.add(new TooltipBehavior()));
 		
-		add(new BookmarkablePageLink<Void>("configureGit", SystemSettingEdit.class) {
+		add(new BookmarkablePageLink<Void>("configureGit", SystemSettingPage.class) {
 
 			@Override
 			protected void onConfigure() {

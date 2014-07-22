@@ -23,41 +23,37 @@ import com.pmease.gitplex.web.page.account.setting.repo.AccountRepositoriesPage;
 import com.pmease.gitplex.web.page.account.setting.teams.AccountTeamsPage;
 import com.pmease.gitplex.web.page.account.setting.teams.AddTeamPage;
 import com.pmease.gitplex.web.page.account.setting.teams.EditTeamPage;
-import com.pmease.gitplex.web.page.admin.AdministrationOverviewPage;
-import com.pmease.gitplex.web.page.admin.LicensingPage;
-import com.pmease.gitplex.web.page.admin.MailSettingEdit;
-import com.pmease.gitplex.web.page.admin.SupportPage;
-import com.pmease.gitplex.web.page.admin.SystemSettingEdit;
-import com.pmease.gitplex.web.page.admin.UserAdministrationPage;
+import com.pmease.gitplex.web.page.admin.MailSettingPage;
+import com.pmease.gitplex.web.page.admin.SystemSettingPage;
 import com.pmease.gitplex.web.page.error.AccessDeniedPage;
 import com.pmease.gitplex.web.page.error.InternalServerErrorPage;
 import com.pmease.gitplex.web.page.error.PageNotFoundPage;
 import com.pmease.gitplex.web.page.init.ServerInitPage;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
-import com.pmease.gitplex.web.page.repository.pullrequest.ClosedRequestsPage;
-import com.pmease.gitplex.web.page.repository.pullrequest.NewRequestPage;
-import com.pmease.gitplex.web.page.repository.pullrequest.OpenRequestsPage;
-import com.pmease.gitplex.web.page.repository.pullrequest.RequestActivitiesPage;
-import com.pmease.gitplex.web.page.repository.pullrequest.RequestChangesPage;
-import com.pmease.gitplex.web.page.repository.pullrequest.RequestUpdatesPage;
-import com.pmease.gitplex.web.page.repository.settings.CreateRepositoryPage;
-import com.pmease.gitplex.web.page.repository.settings.GateKeeperSettingPage;
-import com.pmease.gitplex.web.page.repository.settings.IntegrationSettingPage;
-import com.pmease.gitplex.web.page.repository.settings.RepositoryAuditLogPage;
-import com.pmease.gitplex.web.page.repository.settings.RepositoryHooksPage;
-import com.pmease.gitplex.web.page.repository.settings.RepositoryOptionsPage;
-import com.pmease.gitplex.web.page.repository.settings.RepositoryPermissionsPage;
-import com.pmease.gitplex.web.page.repository.source.RepositoryHomePage;
-import com.pmease.gitplex.web.page.repository.source.blame.BlobBlamePage;
-import com.pmease.gitplex.web.page.repository.source.blob.SourceBlobPage;
-import com.pmease.gitplex.web.page.repository.source.blob.renderer.RawBlobResourceReference;
-import com.pmease.gitplex.web.page.repository.source.branches.BranchesPage;
-import com.pmease.gitplex.web.page.repository.source.commit.SourceCommitPage;
-import com.pmease.gitplex.web.page.repository.source.commits.CommitsPage;
-import com.pmease.gitplex.web.page.repository.source.contributors.ContributorsPage;
-import com.pmease.gitplex.web.page.repository.source.tags.GitArchiveResourceReference;
-import com.pmease.gitplex.web.page.repository.source.tags.TagsPage;
-import com.pmease.gitplex.web.page.repository.source.tree.SourceTreePage;
+import com.pmease.gitplex.web.page.repository.RepositoryHomePage;
+import com.pmease.gitplex.web.page.repository.admin.CreateRepositoryPage;
+import com.pmease.gitplex.web.page.repository.admin.GateKeeperSettingPage;
+import com.pmease.gitplex.web.page.repository.admin.IntegrationSettingPage;
+import com.pmease.gitplex.web.page.repository.admin.RepoAuditPage;
+import com.pmease.gitplex.web.page.repository.admin.RepoHooksPage;
+import com.pmease.gitplex.web.page.repository.admin.RepoOptionsPage;
+import com.pmease.gitplex.web.page.repository.admin.RepoPermissionsPage;
+import com.pmease.gitplex.web.page.repository.info.code.blame.BlobBlamePage;
+import com.pmease.gitplex.web.page.repository.info.code.blob.RepoBlobPage;
+import com.pmease.gitplex.web.page.repository.info.code.blob.renderer.RawBlobResourceReference;
+import com.pmease.gitplex.web.page.repository.info.code.branches.BranchesPage;
+import com.pmease.gitplex.web.page.repository.info.code.commit.RepoCommitPage;
+import com.pmease.gitplex.web.page.repository.info.code.commits.RepoCommitsPage;
+import com.pmease.gitplex.web.page.repository.info.code.contributors.ContributorsPage;
+import com.pmease.gitplex.web.page.repository.info.code.tags.GitArchiveResourceReference;
+import com.pmease.gitplex.web.page.repository.info.code.tags.TagsPage;
+import com.pmease.gitplex.web.page.repository.info.code.tree.RepoTreePage;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.ClosedRequestsPage;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.NewRequestPage;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.OpenRequestsPage;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.RequestActivitiesPage;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.RequestChangesPage;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.RequestUpdatesPage;
 import com.pmease.gitplex.web.util.UrlUtils;
 
 public class GitPlexMappings extends CompoundRequestMapper {
@@ -92,12 +88,8 @@ public class GitPlexMappings extends CompoundRequestMapper {
 	}
 
 	private void addAdministrationPages() {
-		addPage("administration", AdministrationOverviewPage.class);
-		addPage("administration/users", UserAdministrationPage.class);
-		addPage("administration/mail-settings", MailSettingEdit.class);
-		addPage("administration/system-settings", SystemSettingEdit.class);
-		addPage("administration/support", SupportPage.class);
-		addPage("administration/licensing", LicensingPage.class);
+		addPage("administration/mail-settings", MailSettingPage.class);
+		addPage("administration/system-settings", SystemSettingPage.class);
 	}
 
 	private void addAccountPages() {
@@ -148,15 +140,15 @@ public class GitPlexMappings extends CompoundRequestMapper {
 		addPage("new", CreateRepositoryPage.class);
 
 		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/tree/${objectId}", SourceTreePage.class));
+				"${user}/${repo}/tree", RepoTreePage.class));
 		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/blob/${objectId}", SourceBlobPage.class));
+				"${user}/${repo}/blob", RepoBlobPage.class));
 		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/blame/#{objectId}", BlobBlamePage.class));
+				"${user}/${repo}/blame", BlobBlamePage.class));
 		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/commit/${objectId}", SourceCommitPage.class));
+				"${user}/${repo}/commit", RepoCommitPage.class));
 		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/commits/#{objectId}", CommitsPage.class));
+				"${user}/${repo}/commits", RepoCommitsPage.class));
 
 		add(new PageParameterAwareMountedMapper("${user}/${repo}/branches",
 				BranchesPage.class));
@@ -183,7 +175,7 @@ public class GitPlexMappings extends CompoundRequestMapper {
 				ContributorsPage.class));
 
 		add(new PageParameterAwareMountedMapper("${user}/${repo}/settings",
-				RepositoryOptionsPage.class));
+				RepoOptionsPage.class));
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/settings/gate-keepers",
 				GateKeeperSettingPage.class));
@@ -191,12 +183,12 @@ public class GitPlexMappings extends CompoundRequestMapper {
 				"${user}/${repo}/settings/integration-setting",
 				IntegrationSettingPage.class));
 		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/settings/hooks", RepositoryHooksPage.class));
+				"${user}/${repo}/settings/hooks", RepoHooksPage.class));
 		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/settings/audits", RepositoryAuditLogPage.class));
+				"${user}/${repo}/settings/audits", RepoAuditPage.class));
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/settings/permissions",
-				RepositoryPermissionsPage.class));
+				RepoPermissionsPage.class));
 		
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/no-commits", NoCommitsPage.class));
@@ -206,7 +198,7 @@ public class GitPlexMappings extends CompoundRequestMapper {
 		// --------------------------------------------------------------------
 		// system shared resources
 		// --------------------------------------------------------------------
-		addResource("raw/${user}/${repo}/${objectId}", new RawBlobResourceReference());
+		addResource("raw/${user}/${repo}/${revision}", new RawBlobResourceReference());
 		addResource("archive/${user}/${repo}/${file}",new GitArchiveResourceReference());
 	}
 

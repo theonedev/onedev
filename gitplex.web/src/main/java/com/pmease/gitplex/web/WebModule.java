@@ -10,7 +10,7 @@ import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.gitplex.core.validation.UserNameReservation;
 import com.pmease.gitplex.web.editable.EditSupportLocator;
-import com.pmease.gitplex.web.page.repository.source.blob.renderer.BlobRendererFactory;
+import com.pmease.gitplex.web.page.repository.info.code.blob.renderer.BlobRendererFactory;
 import com.pmease.gitplex.web.resource.ResourceLocator;
 
 /**

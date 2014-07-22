@@ -1,9 +1,9 @@
 <html xmlns:wicket>
 <wicket:extend>
-	<div class="faux">
-		<div class="faux-row">
-			<div class="faux-cell sidebar">
-				<div class="sidebar-inner">
+	<table>
+		<tbody>
+			<tr>
+				<td class="sidebar">
 					<div class="vcard-column">
 						<div wicket:id="avatar" class="avatar"></div>
 						<h1 class="vcard-name">
@@ -12,18 +12,8 @@
 							<a class="img-link has-tip" data-toggle="tooltip" data-placement="right" title="edit your profile"><i class="icon icon-pencil"></i></a>
 						</h1>
 					</div>
-					
-					
-					<ul class="list-group list-navs">
-						<li class="list-group-item active"><a>Repositories <span class="ind">(8)</span></a></li>
-						<li class="list-group-item"><a>Members <span class="ind">(18)</span></a></li>
-						<li class="list-group-item"><a>Merge Requests <span class="ind">(28)</span></a></li>
-						<li class="list-group-item"><a>Activity</a></li>
-					</ul>
-				</div>
-			</div>
-			<div class="faux-cell content">
-				<div class="content-inner">
+				</td>
+				<td class="content">
 					<div class="page-nav clearfix">
 						<ul class="nav nav-piped pull-left">
 							<li wicket:id="category"><a wicket:id="link"><wicket:container wicket:id="name"></wicket:container></a></li>
@@ -36,9 +26,9 @@
 					<div class="padder">
 						<wicket:container wicket:id="content"></wicket:container>
 					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+				</td>
+			</tr>
+		</tbody>
+	</table>
 </wicket:extend>
 </html>

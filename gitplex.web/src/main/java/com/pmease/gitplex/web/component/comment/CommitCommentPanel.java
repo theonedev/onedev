@@ -69,7 +69,7 @@ public class CommitCommentPanel extends Panel {
 
 			@Override
 			public Date getObject() {
-				return getCommitComment().getCreatedDate();
+				return getCommitComment().getUpdateDate();
 			}
 			
 		}).setOutputMarkupId(true));
@@ -166,7 +166,7 @@ public class CommitCommentPanel extends Panel {
 				}
 				
 				CommitComment cc = getCommitComment();
-				cc.setUpdatedDate(new Date());
+				cc.setUpdateDate(new Date());
 				cc.setContent(comment);
 				
 				GitPlex.getInstance(Dao.class).persist(cc);

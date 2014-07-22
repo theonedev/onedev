@@ -21,7 +21,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.repository.RepositoryHomeLink;
 import com.pmease.gitplex.web.model.RepositoryModel;
-import com.pmease.gitplex.web.page.repository.source.RepositoryHomePage;
+import com.pmease.gitplex.web.page.repository.RepositoryHomePage;
 
 @SuppressWarnings("serial")
 public class RepositoryListPanel extends Panel {

@@ -1,12 +1,11 @@
 package com.pmease.gitplex.web.page.layout;
 
-import com.pmease.gitplex.core.GitPlex;
-
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
@@ -14,8 +13,8 @@ import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.account.RegisterPage;
 import com.pmease.gitplex.web.page.account.setting.profile.AccountProfilePage;
-import com.pmease.gitplex.web.page.admin.AdministrationOverviewPage;
-import com.pmease.gitplex.web.page.repository.settings.CreateRepositoryPage;
+import com.pmease.gitplex.web.page.admin.SystemSettingPage;
+import com.pmease.gitplex.web.page.repository.admin.CreateRepositoryPage;
 import com.pmease.gitplex.web.shiro.LoginPage;
 import com.pmease.gitplex.web.shiro.LogoutPage;
 
@@ -46,7 +45,7 @@ public class GlobalHeaderPanel extends Panel {
 												AccountProfilePage.paramsOf(currentUser)));
 			
 			add(new BookmarkablePageLink<Void>("newRepoLink", CreateRepositoryPage.class));
-			add(new BookmarkablePageLink<Void>("adminLink", AdministrationOverviewPage.class) {
+			add(new BookmarkablePageLink<Void>("adminLink", SystemSettingPage.class) {
 				@Override
 				protected void onConfigure() {
 					setVisible(SecurityUtils.getSubject().isPermitted(ObjectPermission.ofSystemAdmin()));

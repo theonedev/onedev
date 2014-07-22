@@ -4,25 +4,20 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.google.common.base.Objects;
 import com.pmease.commons.git.Commit;
-import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.page.repository.source.commit.SourceCommitPage;
+import com.pmease.gitplex.web.page.repository.info.RepoInfoPanel;
+import com.pmease.gitplex.web.page.repository.info.code.commit.RepoCommitPage;
 
 @SuppressWarnings("serial")
-public class CommitMessagePanel extends Panel {
+public class CommitMessagePanel extends RepoInfoPanel {
 
-	private final IModel<Repository> repoModel;
-	
-	public CommitMessagePanel(String id, IModel<Commit> commitModel, IModel<Repository> repoModel) {
+	public CommitMessagePanel(String id, IModel<Commit> commitModel) {
 		super(id, commitModel);
-		
-		this.repoModel = repoModel;
 	}
 
 	@Override
@@ -30,8 +25,8 @@ public class CommitMessagePanel extends Panel {
 		super.onInitialize();
 		
 		AbstractLink link = new BookmarkablePageLink<Void>("commitlink",
-				SourceCommitPage.class,
-				SourceCommitPage.paramsOf(getRepo(), getCommit().getHash()));
+				RepoCommitPage.class,
+				RepoCommitPage.paramsOf(getRepository(), getCommit().getHash(), null));
 		
 		add(link);
 		link.add(new Label("shortmessage", new AbstractReadOnlyModel<String>() {
@@ -65,20 +60,8 @@ public class CommitMessagePanel extends Panel {
 		add(detailedToggle);
 	}
 	
-	private Repository getRepo() {
-		return repoModel.getObject();
-	}
-	
 	private Commit getCommit() {
 		return (Commit) getDefaultModelObject();
 	}
 	
-	@Override
-	public void onDetach() {
-		if (repoModel != null) {
-			repoModel.detach();
-		}
-		
-		super.onDetach();
-	}
 }
