@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.pmease.gitplex.core.GitPlex;
-
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
@@ -22,6 +20,7 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
@@ -31,6 +30,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.wicket.behavior.DisableIfBlankBehavior;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Approved;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
@@ -45,7 +45,6 @@ import com.pmease.gitplex.core.pullrequest.CloseInfo;
 import com.pmease.gitplex.web.component.branch.AffinalBranchSingleChoice;
 import com.pmease.gitplex.web.component.branch.BranchLink;
 import com.pmease.gitplex.web.component.commit.CommitsTablePanel;
-import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.info.RepositoryInfoPage;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.CommitCommentsAware;
@@ -54,15 +53,11 @@ import com.pmease.gitplex.web.page.repository.info.code.commit.diff.DiffViewPane
 @SuppressWarnings("serial")
 public class NewRequestPage extends RepositoryInfoPage implements CommitCommentsAware {
 
-	private IModel<Branch> targetModel, sourceModel;
-	
-	private IModel<User> submitterModel;
+	private AffinalBranchSingleChoice targetChoice, sourceChoice;
 	
 	private IModel<List<Commit>> commitsModel;
 	
-	private IModel<PullRequest> requestModel;
-	
-	private IModel<PullRequest> checkedRequestModel;
+	private PullRequest pullRequest;
 	
 	public static PageParameters paramsOf(Repository repository, Branch source, Branch target) {
 		PageParameters params = paramsOf(repository);
@@ -108,100 +103,67 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 
 		User currentUser = AppLoader.getInstance(UserManager.class).getCurrent();
 		
-		targetModel = new EntityModel<Branch>(target);
-		sourceModel = new EntityModel<Branch>(source);
-		submitterModel = new EntityModel<User>(currentUser);
+		pullRequest = GitPlex.getInstance(PullRequestManager.class).findOpen(target, source);
+		
+		if (pullRequest == null) {
+			pullRequest = new PullRequest();
+			pullRequest.setTarget(target);
+			pullRequest.setSource(source);
+			pullRequest.setSubmitter(currentUser);
+			
+			if (target.getRepository().equals(source.getRepository())) {
+				if (target.getRepository().git().isAncestor(source.getHeadCommit(), target.getHeadCommit())) {
+					CloseInfo closeInfo = new CloseInfo();
+					closeInfo.setClosedBy(null);
+					closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
+					closeInfo.setComment("Target branch already contains commit of source branch.");
+					pullRequest.setCloseInfo(closeInfo);
+					pullRequest.setCheckResult(new Approved("Already integrated."));
+				} else {
+					pullRequest.setCheckResult(target.getRepository().getGateKeeper().checkRequest(pullRequest));
+				}
+			} else {
+				Git sandbox = new Git(FileUtils.createTempDir());
+				pullRequest.setSandbox(sandbox);
+				sandbox.clone(target.getRepository().git(), false, true, true, pullRequest.getTarget().getName());
+				sandbox.reset(null, null);
 
+				sandbox.fetch(source.getRepository().git(), null);
+				
+				if (sandbox.isAncestor(source.getHeadCommit(), target.getHeadCommit())) {
+					CloseInfo closeInfo = new CloseInfo();
+					closeInfo.setClosedBy(null);
+					closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
+					closeInfo.setComment("Target branch already contains commit of source branch.");
+					pullRequest.setCloseInfo(closeInfo);
+					pullRequest.setCheckResult(new Approved("Already integrated."));
+				} else {
+					pullRequest.setCheckResult(target.getRepository().getGateKeeper().checkRequest(pullRequest));
+				}
+			}
+			
+			PullRequestUpdate update0 = new PullRequestUpdate();
+			pullRequest.getUpdates().add(update0);
+			update0.setRequest(pullRequest);
+			update0.setHeadCommit(pullRequest.git().calcMergeBase(target.getHeadCommit(), source.getHeadCommit()));
+			pullRequest.setUpdateDate(new Date());
+
+			PullRequestUpdate update1 = new PullRequestUpdate();
+			pullRequest.getUpdates().add(update1);
+			update1.setRequest(pullRequest);
+			update1.setUser(currentUser);
+			update1.setHeadCommit(source.getHeadCommit());
+			pullRequest.setUpdateDate(new Date());
+		}
+		
 		commitsModel = new LoadableDetachableModel<List<Commit>>() {
 
 			@Override
 			protected List<Commit> load() {
-				PullRequest request = checkedRequestModel.getObject();
-				return request.git().log(getTarget().getHeadCommit(), 
-						getSource().getHeadCommit(), null, 0, 0);
+				return pullRequest.git().log(pullRequest.getBaseUpdate().getHeadCommit(), 
+						pullRequest.getLatestUpdate().getHeadCommit(), null, 0, 0);
 			}
 			
-		};
-		
-		requestModel = new LoadableDetachableModel<PullRequest>() {
-
-			@Override
-			protected PullRequest load() {
-				PullRequest request = GitPlex.getInstance(PullRequestManager.class).findOpen(getTarget(), getSource());
-				if (request == null) {
-					request = new PullRequest();
-					request.setTarget(getTarget());
-					request.setSource(getSource());
-					request.setSubmitter(getSubmitter());
-					
-					PullRequestUpdate update = new PullRequestUpdate();
-					request.getUpdates().add(update);
-					update.setRequest(request);
-					update.setUser(getSubmitter());
-					update.setHeadCommit(getSource().getHeadCommit());
-					request.setUpdateDate(new Date());
-					
-			    	String targetHead = getTarget().getHeadCommit();
-					request.setBaseCommit(targetHead);
-				}
-				return request;
-			}
-
-		};
-		
-		checkedRequestModel = new LoadableDetachableModel<PullRequest>() {
-
-			@Override
-			protected PullRequest load() {
-				PullRequest request = requestModel.getObject();
-				if (request.getId() == null) {
-			    	String targetHead = getTarget().getHeadCommit();
-					String sourceHead = getSource().getHeadCommit();
-
-					if (getTarget().getRepository().equals(getSource().getRepository())) {
-						if (getTarget().getRepository().git().isAncestor(sourceHead, targetHead)) {
-							CloseInfo closeInfo = new CloseInfo();
-							closeInfo.setClosedBy(null);
-							closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
-							closeInfo.setComment("Target branch already contains commit of source branch.");
-							request.setCloseInfo(closeInfo);
-							request.setCheckResult(new Approved("Already integrated."));
-						} else {
-							request.setCheckResult(getTarget().getRepository().getGateKeeper().checkRequest(request));
-						}
-					} else {
-						Git sandbox = new Git(FileUtils.createTempDir());
-						request.setSandbox(sandbox);
-						sandbox.clone(getTarget().getRepository().git(), false, true, true, request.getTarget().getName());
-						sandbox.reset(null, null);
-
-						sandbox.fetch(getSource().getRepository().git(), null);
-						
-						if (sandbox.isAncestor(sourceHead, targetHead)) {
-							CloseInfo closeInfo = new CloseInfo();
-							closeInfo.setClosedBy(null);
-							closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
-							closeInfo.setComment("Target branch already contains commit of source branch.");
-							request.setCloseInfo(closeInfo);
-							request.setCheckResult(new Approved("Already integrated."));
-						} else {
-							request.setCheckResult(getTarget().getRepository().getGateKeeper().checkRequest(request));
-						}
-					}
-				}
-				return request;
-			}
-			
-			@Override
-			protected void onDetach() {
-				PullRequest request = getObject();
-				if (request.getSandbox() != null) {
-					FileUtils.deleteDir(request.getSandbox().repoDir());
-					request.setSandbox(null);
-				}
-				super.onDetach();
-			}
-
 		};
 		
 	}
@@ -222,29 +184,35 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 			
 		};
 		
-		add(new AffinalBranchSingleChoice("target", currentRepositoryModel, targetModel) {
+		targetChoice = new AffinalBranchSingleChoice("target", currentRepositoryModel, 
+				Model.of(pullRequest.getTarget())) {
 
 			@Override
 			protected void onChange(AjaxRequestTarget target) {
 				super.onChange(target);
 				setResponsePage(
 						NewRequestPage.class, 
-						paramsOf(getRepository(), getSource(), getTarget()));
+						paramsOf(getRepository(), sourceChoice.getModelObject(), targetChoice.getModelObject()));
 			}
 			
-		}.setRequired(true));
+		};
+		targetChoice.setRequired(true);
+		add(targetChoice);
 		
-		add(new AffinalBranchSingleChoice("source", currentRepositoryModel, sourceModel) {
+		sourceChoice = new AffinalBranchSingleChoice("source", currentRepositoryModel, 
+				Model.of(pullRequest.getSource())) {
 
 			@Override
 			protected void onChange(AjaxRequestTarget target) {
 				super.onChange(target);
 				setResponsePage(
 						NewRequestPage.class, 
-						paramsOf(getRepository(), getSource(), getTarget()));
+						paramsOf(getRepository(), sourceChoice.getModelObject(), targetChoice.getModelObject()));
 			}
 			
-		}.setRequired(true));
+		};
+		sourceChoice.setRequired(true);
+		add(sourceChoice);
 		
 		add(new Link<Void>("swap") {
 
@@ -252,16 +220,30 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 			public void onClick() {
 				setResponsePage(
 						NewRequestPage.class, 
-						paramsOf(getRepository(), getTarget(), getSource()));
+						paramsOf(getRepository(), pullRequest.getTarget(), pullRequest.getSource()));
 			}
 			
 		});
 		
+		Fragment fragment;
+		if (pullRequest.getId() != null) {
+			fragment = newOpenedFrag();
+		} else if (pullRequest.getSource().equals(pullRequest.getTarget())) {
+			fragment = newSameBranchFrag();
+		} else if (pullRequest.getStatus() == INTEGRATED) {
+			fragment = newIntegratedFrag();
+		} else if (pullRequest.getStatus() == PENDING_UPDATE) {
+			fragment = newRejectedFrag();
+		} else {
+			fragment = newCanSendFrag();
+		}
+		add(fragment);
+
 		IModel<Repository> repositoryModel = new AbstractReadOnlyModel<Repository>() {
 
 			@Override
 			public Repository getObject() {
-				return getTarget().getRepository();
+				return pullRequest.getTarget().getRepository();
 			}
 			
 		};
@@ -271,7 +253,7 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(checkedRequestModel.getObject().getStatus() != INTEGRATED);
+				setVisible(pullRequest.getStatus() != INTEGRATED);
 			}
 			
 		});
@@ -280,14 +262,14 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 
 			@Override
 			public String getObject() {
-				return checkedRequestModel.getObject().getTarget().getHeadCommit();
+				return pullRequest.getBaseUpdate().getHeadCommit();
 			}
 			
 		}, new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return getSource().getHeadCommit();
+				return pullRequest.getLatestUpdate().getHeadCommit();
 			}
 			
 		}) {
@@ -296,45 +278,20 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(checkedRequestModel.getObject().getStatus() != INTEGRATED);
+				setVisible(pullRequest.getStatus() != INTEGRATED);
 			}
 			
 		});
 	}
 	
-	@Override
-	protected void onBeforeRender() {
-		addOrReplace(newStatusFragment());
-		
-		super.onBeforeRender();
-	}
-
-	private Fragment newStatusFragment() {
-		Fragment fragment;
-		PullRequest request = checkedRequestModel.getObject();
-		if (request.getId() != null) {
-			fragment = newOpenedFrag();
-		} else if (request.getSource().equals(request.getTarget())) {
-			fragment = newSameBranchFrag();
-		} else if (request.getStatus() == INTEGRATED) {
-			fragment = newIntegratedFrag();
-		} else if (request.getStatus() == PENDING_UPDATE) {
-			fragment = newRejectedFrag();
-		} else {
-			fragment = newCanSendFrag();
-		}
-		return fragment;
-	}
-	
 	private Fragment newOpenedFrag() {
-		PullRequest request = checkedRequestModel.getObject();
 		Fragment fragment = new Fragment("status", "openedFrag", this);
-		fragment.add(new Label("requestInfo", "#" + request.getId() + ": " + request.getTitle()));
+		fragment.add(new Label("requestInfo", "#" + pullRequest.getId() + ": " + pullRequest.getTitle()));
 		fragment.add(new Link<Void>("viewRequest") {
 
 			@Override
 			public void onClick() {
-				PageParameters params = RequestDetailPage.params4(checkedRequestModel.getObject());
+				PageParameters params = RequestDetailPage.params4(pullRequest);
 				setResponsePage(RequestActivitiesPage.class, params);
 			}
 			
@@ -349,15 +306,15 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 	
 	private Fragment newIntegratedFrag() {
 		Fragment fragment = new Fragment("status", "integratedFrag", this);
-		fragment.add(new BranchLink("sourceBranch", new EntityModel<Branch>(getSource())));
-		fragment.add(new BranchLink("targetBranch", new EntityModel<Branch>(getTarget())));
+		fragment.add(new BranchLink("sourceBranch", Model.of(pullRequest.getSource())));
+		fragment.add(new BranchLink("targetBranch", Model.of(pullRequest.getTarget())));
 		fragment.add(new Link<Void>("swapBranches") {
 
 			@Override
 			public void onClick() {
 				setResponsePage(
 						NewRequestPage.class, 
-						paramsOf(getRepository(), getTarget(), getSource()));
+						paramsOf(getRepository(), pullRequest.getTarget(), pullRequest.getSource()));
 			}
 			
 		});
@@ -370,7 +327,7 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 
 			@Override
 			protected List<String> load() {
-				return checkedRequestModel.getObject().getCheckResult().getReasons();
+				return pullRequest.getCheckResult().getReasons();
 			}
 			
 		}) {
@@ -396,12 +353,23 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 			public void onSubmit() {
 				super.onSubmit();
 
-				PullRequest request = requestModel.getObject();
-				request.setAutoIntegrate(false);
-				
-				GitPlex.getInstance(PullRequestManager.class).send(request);
-				
-				setResponsePage(OpenRequestsPage.class, paramsOf(request.getTarget().getRepository()));
+				Dao dao = GitPlex.getInstance(Dao.class);
+				Branch target = dao.load(Branch.class, pullRequest.getTarget().getId());
+				Branch source = dao.load(Branch.class, pullRequest.getSource().getId());
+				if (!target.getHeadCommit().equals(pullRequest.getTarget().getHeadCommit()) 
+						|| !source.getHeadCommit().equals(pullRequest.getSource().getHeadCommit())) {
+					getSession().warn("Either target branch or source branch has new commits just now, please re-check.");
+					setResponsePage(NewRequestPage.class, paramsOf(getRepository(), source, target));
+				} else {
+					pullRequest.setSource(source);
+					pullRequest.setTarget(target);
+					
+					pullRequest.setAutoIntegrate(false);
+					
+					GitPlex.getInstance(PullRequestManager.class).send(pullRequest);
+					
+					setResponsePage(OpenRequestsPage.class, paramsOf(pullRequest.getTarget().getRepository()));
+				}
 			}
 			
 		});
@@ -414,21 +382,20 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 
 			@Override
 			public String getObject() {
-				PullRequest request = checkedRequestModel.getObject();
-				if (request.getTitle() == null) {
+				if (pullRequest.getTitle() == null) {
 					List<Commit> commits = commitsModel.getObject();
 					Preconditions.checkState(!commits.isEmpty());
 					if (commits.size() == 1)
-			 			request.setTitle(commits.get(0).getSubject());
+						pullRequest.setTitle(commits.get(0).getSubject());
 					else
-						request.setTitle(getSource().getName());
+						pullRequest.setTitle(pullRequest.getSource().getName());
 				}
-				return request.getTitle();
+				return pullRequest.getTitle();
 			}
 
 			@Override
 			public void setObject(String object) {
-				checkedRequestModel.getObject().setTitle(object);
+				pullRequest.setTitle(object);
 			}
 			
 		}).setRequired(true).add(new DisableIfBlankBehavior(form.get("send"))));
@@ -441,12 +408,12 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 
 			@Override
 			public String getObject() {
-				return checkedRequestModel.getObject().getDescription();
+				return pullRequest.getDescription();
 			}
 
 			@Override
 			public void setObject(String object) {
-				checkedRequestModel.getObject().setDescription(object);
+				pullRequest.setDescription(object);
 			}
 			
 		}));
@@ -454,26 +421,14 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 		return fragment;
 	}
 
-	private Branch getTarget() {
-		return targetModel.getObject();
-	}
-	
-	private Branch getSource() {
-		return sourceModel.getObject();
-	}
-	
-	private User getSubmitter() {
-		return submitterModel.getObject();
-	}
-	
 	@Override
 	protected void onDetach() {
-		requestModel.detach();
-		checkedRequestModel.detach();
-		targetModel.detach();
-		sourceModel.detach();
-		submitterModel.detach();
 		commitsModel.detach();
+
+		if (pullRequest != null && pullRequest.getSandbox() != null) {
+			FileUtils.deleteDir(pullRequest.getSandbox().repoDir());
+			pullRequest.setSandbox(null);
+		}
 
 		super.onDetach();
 	}

@@ -41,10 +41,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 
 			@Override
 			public List<PullRequestUpdate> load() {
-				List<PullRequestUpdate> updates = new ArrayList<>();
-				updates.addAll(getPullRequest().getSortedUpdates());
-				Collections.reverse(updates);
-				return updates;
+				return getPullRequest().getSortedUpdates();
 			}
 			
 		}) {
@@ -61,17 +58,10 @@ public class RequestUpdatesPage extends RequestDetailPage {
 						Fragment fragment = new Fragment(componentId, "updateInfoFrag", RequestUpdatesPage.this);
 
 						PullRequestUpdate update = item.getModelObject();
-						List<PullRequestUpdate> allUpdates = update.getRequest().getSortedUpdates();
-						int index = allUpdates.indexOf(update);
-						String baseCommit;
-						if (index == allUpdates.size()-1)
-							baseCommit = update.getRequest().getBaseCommit();
-						else
-							baseCommit = allUpdates.get(index+1).getHeadCommit();
 						PageParameters params = RequestChangesPage.params4(
-								update.getRequest(), baseCommit, update.getHeadCommit());
+								update.getRequest(), update.getBaseCommit(), update.getHeadCommit());
 						Link<Void> updateLink = new BookmarkablePageLink<Void>("updateLink", RequestChangesPage.class, params);
-						updateLink.add(new Label("updateNo", allUpdates.size() - allUpdates.indexOf(update)));
+						updateLink.add(new Label("updateNo", update.getRequest().getSortedUpdates().indexOf(update) + 1));
 						fragment.add(updateLink);
 						fragment.add(new Label("date", DateUtils.formatAge(update.getDate())));
 						

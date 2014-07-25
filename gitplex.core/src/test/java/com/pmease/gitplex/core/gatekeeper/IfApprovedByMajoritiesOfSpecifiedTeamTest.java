@@ -132,11 +132,17 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 			request.getSubmitter().setId(2L);
 			request.getSubmitter().setName("user2");
 			
-			PullRequestUpdate update = new PullRequestUpdate();
-			update.setHeadCommit(git.parseRevision("dev", true));
-			update.setId(1L);
-			update.setRequest(request);
-			request.getUpdates().add(update);
+			PullRequestUpdate update0 = new PullRequestUpdate();
+			update0.setHeadCommit(git.calcMergeBase("dev", "master"));
+			update0.setId(1L);
+			update0.setRequest(request);
+			request.getUpdates().add(update0);
+
+			PullRequestUpdate update1 = new PullRequestUpdate();
+			update1.setHeadCommit(git.parseRevision("dev", true));
+			update1.setId(2L);
+			update1.setRequest(request);
+			request.getUpdates().add(update1);
 			
 			Assert.assertTrue(gateKeeper.checkRequest(request).isPending());
 			Collection<User> candidates = new HashSet<>();
@@ -157,11 +163,11 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 			Vote vote = new Vote();
 			vote.setId(1L);
 			vote.setResult(Vote.Result.APPROVE);
-			vote.setUpdate(update);
+			vote.setUpdate(update1);
 			vote.setVoter(new User());
 			vote.getVoter().setId(1L);
 			vote.getVoter().setName("user1");
-			update.getVotes().add(vote);
+			update1.getVotes().add(vote);
 			
 			Assert.assertTrue(gateKeeper.checkRequest(request).isApproved());
 		} finally {

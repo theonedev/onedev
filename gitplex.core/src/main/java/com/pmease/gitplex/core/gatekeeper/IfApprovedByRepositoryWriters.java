@@ -43,7 +43,7 @@ public class IfApprovedByRepositoryWriters extends ApprovalGateKeeper {
         int approvals = 0;
         int pendings = 0;
         for (User user: authorizedUsers) {
-            Vote.Result result = user.checkVoteSince(request.getBaseUpdate());
+            Vote.Result result = user.checkVoteSince(request.getReferentialUpdate());
             if (result == null) {
                 pendings++;
             } else if (result == Vote.Result.APPROVE) {

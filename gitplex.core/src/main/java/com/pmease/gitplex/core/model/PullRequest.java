@@ -21,13 +21,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
-import com.pmease.gitplex.core.gatekeeper.checkresult.Approved;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Disapproved;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Ignored;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
-import com.pmease.gitplex.core.gatekeeper.checkresult.PendingAndBlock;
-
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
@@ -36,6 +29,12 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.util.LockUtils;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Approved;
+import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Disapproved;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Ignored;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
+import com.pmease.gitplex.core.gatekeeper.checkresult.PendingAndBlock;
 import com.pmease.gitplex.core.pullrequest.CloseInfo;
 import com.pmease.gitplex.core.pullrequest.IntegrationInfo;
 
@@ -66,9 +65,6 @@ public class PullRequest extends AbstractEntity {
 	
 	private String description;
 	
-	@Column(nullable=false)
-	private String baseCommit;
-
 	private boolean autoIntegrate;
 
 	@ManyToOne
@@ -112,10 +108,12 @@ public class PullRequest extends AbstractEntity {
 	private Collection<PullRequestComment> comments = new ArrayList<PullRequestComment>();
 
 	private transient List<PullRequestUpdate> sortedUpdates;
+	
+	private transient PullRequestUpdate baseUpdate;
 
 	private transient List<PullRequestUpdate> effectiveUpdates;
 
-	private transient PullRequestUpdate baseUpdate;
+	private transient PullRequestUpdate referentialUpdate;
 	
 	private transient Set<String> pendingCommits;
 	
@@ -139,20 +137,6 @@ public class PullRequest extends AbstractEntity {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	/**
-	 * Get head commit of target branch at the time when pull request is created.
-     *
-	 * @return
-	 * 			head commit of the target branch at the time creating the pull request
-	 */
-	public String getBaseCommit() {
-		return baseCommit;
-	}
-
-	public void setBaseCommit(String baseCommit) {
-		this.baseCommit = baseCommit;
 	}
 
 	public boolean isAutoIntegrate() {
@@ -279,16 +263,16 @@ public class PullRequest extends AbstractEntity {
 		return closeInfo == null;
 	}
 	
-	public PullRequestUpdate getBaseUpdate() {
-		if (baseUpdate != null) {
-			return baseUpdate;
+	public PullRequestUpdate getReferentialUpdate() {
+		if (referentialUpdate != null) {
+			return referentialUpdate;
 		} else {
-			return getEffectiveUpdates().iterator().next();
+			return getEffectiveUpdates().get(0);
 		}
 	}
 
-	public void setBaseUpdate(PullRequestUpdate baseUpdate) {
-		this.baseUpdate = baseUpdate;
+	public void setReferentialUpdate(PullRequestUpdate referentiralUpdate) {
+		this.referentialUpdate = referentiralUpdate;
 	}
 
 	/**
@@ -329,37 +313,35 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	/**
-	 * Get list of sorted updates.
-	 * <p>
+	 * Get list of sorted updates with base update removed.
 	 * 
-	 * @return list of sorted updates ordered by update id reversely
+	 * @return 
+	 * 			list of sorted updates ordered by id with base update removed
 	 */
 	public List<PullRequestUpdate> getSortedUpdates() {
 		if (sortedUpdates == null) {
-			Preconditions.checkState(!getUpdates().isEmpty());
+			Preconditions.checkState(getUpdates().size() >= 2);
 			sortedUpdates = new ArrayList<PullRequestUpdate>(getUpdates());
-
-			if (sortedUpdates.size() > 1) {
-				Collections.sort(sortedUpdates);
-				Collections.reverse(sortedUpdates);
-			}
+			Collections.sort(sortedUpdates);
+			sortedUpdates.remove(0);
 		}
 		return sortedUpdates;
 	}
 
 	/**
-	 * Get list of effective updates in reverse order. Update is considered
-	 * effective if it is not ancestor of target branch head.
+	 * Get list of effective updates reversely sorted by id. Update is considered effective if it is 
+	 * not ancestor of target branch head.
 	 * 
 	 * @return 
-	 * 			list of effective updates in reverse order.
+	 * 			list of effective updates reversely sorted by id
 	 */
 	public List<PullRequestUpdate> getEffectiveUpdates() {
 		if (effectiveUpdates == null) {
 			effectiveUpdates = new ArrayList<PullRequestUpdate>();
 
 			Git git = getTarget().getRepository().git();
-			for (PullRequestUpdate update : getSortedUpdates()) {
+			for (int i= getSortedUpdates().size()-1; i>=0; i--) {
+				PullRequestUpdate update = getSortedUpdates().get(i);
 				if (!git.isAncestor(update.getHeadCommit(), getTarget().getHeadCommit())) {
 					effectiveUpdates.add(update);
 				} else {
@@ -373,12 +355,13 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	public PullRequestUpdate getLatestUpdate() {
-		return getSortedUpdates().iterator().next();
+		return getSortedUpdates().get(getSortedUpdates().size()-1);
 	}
 	
-	public PullRequestUpdate getInitialUpdate() {
-		List<PullRequestUpdate> updates = getSortedUpdates();
-		return updates.get(updates.size()-1);
+	public PullRequestUpdate getBaseUpdate() {
+		if (baseUpdate == null)
+			baseUpdate = Collections.min(getUpdates());
+		return baseUpdate;
 	}
 	
 	public Collection<String> findTouchedFiles() {
@@ -391,12 +374,6 @@ public class PullRequest extends AbstractEntity {
 		return Repository.REFS_GITOP + "pulls/" + getId() + "/head";
 	}
 	
-	public String getBaseRef() {
-		Preconditions.checkNotNull(getId());
-		return Repository.REFS_GITOP + "pulls/" + getId() + "/base";
-	}
-	
-	
 	public String getIntegrateRef() {
 		Preconditions.checkNotNull(getId());
 		return Repository.REFS_GITOP + "pulls/" + getId() + "/integrate";
@@ -408,7 +385,6 @@ public class PullRequest extends AbstractEntity {
 	public void deleteRefs() {
 		Git git = getTarget().getRepository().git();
 		git.deleteRef(getHeadRef(), null, null);
-		git.deleteRef(getBaseRef(), null, null);
 		git.deleteRef(getIntegrateRef(), null, null);
 	}
 	
@@ -438,7 +414,7 @@ public class PullRequest extends AbstractEntity {
 		 * users already voted since base update should be excluded from
 		 * invitation list as their votes are still valid
 		 */
-		for (Vote vote : getBaseUpdate().listVotesOnwards()) {
+		for (Vote vote : getReferentialUpdate().listVotesOnwards()) {
 			copyOfCandidates.remove(vote.getVoter());
 		}
 

@@ -6,13 +6,13 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
 import com.pmease.commons.wicket.component.tabbable.StylelessTabbable;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.gitplex.core.model.Repository;
@@ -43,9 +43,9 @@ public abstract class RepositoryInfoPage extends RepositoryPage {
 	
 	public static PageParameters paramsOf(Repository repository, @Nullable String revision, @Nullable String path) {
 		PageParameters params = paramsOf(repository);
-		if (revision != null)
+		if (StringUtils.isNotBlank(revision))
 			params.set(PARAM_REVISION, revision);
-		if (path != null)
+		if (StringUtils.isNotBlank(path))
 			params.set(PARAM_PATH, path);
 		return params;
 	}
@@ -55,12 +55,16 @@ public abstract class RepositoryInfoPage extends RepositoryPage {
 		
 		String revision = params.get(PARAM_REVISION).toString();
 		
-		if (Strings.isNullOrEmpty(revision)) 
+		if (StringUtils.isBlank(revision)) 
 			revision = getRepository().git().resolveDefaultBranch();
 		
 		this.revision = revision;
 		
-		objPath = params.get(PARAM_PATH).toString();
+		String objPath = params.get(PARAM_PATH).toString();
+		if (StringUtils.isBlank(objPath))
+			objPath = null;
+		
+		this.objPath = objPath;
 		
 		if (!getRepository().git().hasCommits()) 
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));

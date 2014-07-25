@@ -37,12 +37,10 @@ public class IfTouchSpecifiedFilePatterns extends FileGateKeeper {
 
 	@Override
 	public CheckResult doCheckRequest(PullRequest request) {
-		for (int i=0; i<request.getEffectiveUpdates().size(); i++) {
-			PullRequestUpdate update = request.getEffectiveUpdates().get(i);
-
+		for (PullRequestUpdate update: request.getEffectiveUpdates()) {
 			for (String file: update.getChangedFiles()) {
 				if (WildcardUtils.matchPath(getFilePatterns(), file)) {
-					request.setBaseUpdate(update);
+					request.setReferentialUpdate(update);
 					return approved("Touched files match patterns '" + getFilePatterns() + "'.");
 				}
 			}

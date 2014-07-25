@@ -19,7 +19,7 @@ public class IfApprovedByRepositoryOwner extends ApprovalGateKeeper {
     public CheckResult doCheckRequest(PullRequest request) {
         User repoOwner = request.getTarget().getRepository().getOwner();
 
-        Vote.Result result = repoOwner.checkVoteSince(request.getBaseUpdate());
+        Vote.Result result = repoOwner.checkVoteSince(request.getReferentialUpdate());
 
         if (result == null) {
             request.pickVoters(Sets.newHashSet(repoOwner), 1);

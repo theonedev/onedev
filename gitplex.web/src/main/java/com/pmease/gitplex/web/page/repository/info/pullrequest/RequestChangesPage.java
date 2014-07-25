@@ -15,9 +15,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.PullRequest.Status;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.pullrequest.IntegrationInfo;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.DiffViewPanel;
 
@@ -52,14 +51,11 @@ public class RequestChangesPage extends RequestDetailPage {
 				choices.put(request.getIntegrationInfo().getIntegrationHead(), "Integration Preview");
 			}
 			
-			int index = 0;
-			int count = request.getSortedUpdates().size();
-			for (PullRequestUpdate update: request.getSortedUpdates()) {
-				choices.put(update.getHeadCommit(), "Head of Update #" + (count-index));
-				index++;
-			}
+			for (int i=request.getSortedUpdates().size()-1; i>=0; i--)
+				choices.put(request.getSortedUpdates().get(i).getHeadCommit(), "Head of Update #" + i);
 			
-			if (request.getTarget().getHeadCommit().equals(request.getBaseCommit())) {
+			String baseCommit = request.getBaseUpdate().getHeadCommit();
+			if (request.getTarget().getHeadCommit().equals(baseCommit)) {
 				choices.put(request.getTarget().getHeadCommit(), "Target Branch Head");
 			} else {
 				String displayName = choices.get(request.getTarget().getHeadCommit());
@@ -68,7 +64,7 @@ public class RequestChangesPage extends RequestDetailPage {
 				} else {
 					choices.put(request.getTarget().getHeadCommit(), "Target Branch Head (current)");
 				}
-				choices.put(request.getBaseCommit(), "Target Branch Head (original)");
+				choices.put(baseCommit, "Target Branch Head (original)");
 			}
 			
 			return choices;
@@ -120,7 +116,7 @@ public class RequestChangesPage extends RequestDetailPage {
 			public String getObject() {
 				if (!commitsModel.getObject().containsKey(baseCommit)) {
 					if (getPullRequest().getStatus() == Status.INTEGRATED)
-						baseCommit = getPullRequest().getBaseCommit();
+						baseCommit = getPullRequest().getBaseUpdate().getHeadCommit();
 					else
 						baseCommit = getPullRequest().getTarget().getHeadCommit();
 				}

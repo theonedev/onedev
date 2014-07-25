@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +45,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	@OneToMany(mappedBy="update", cascade=CascadeType.REMOVE)
 	private Collection<Vote> votes = new ArrayList<Vote>();
 	
-	private transient String changeCommit;
+	private transient String referentialCommit;
 	
 	private transient String baseCommit;
 	
@@ -107,50 +106,41 @@ public class PullRequestUpdate extends AbstractEntity {
 	}
 
 	/**
-	 * Calculate base commit for change calculation of this update. Base commit is merged 
+	 * Calculate referential commit for change calculation of this update. Referential commit is merged 
 	 * commit of:
 	 * 
-	 * <li> merge base of head ref and target branch head
-	 * <li> head ref of previous update
+	 * <li> merge base of update head and target branch head
+	 * <li> head of previous update
 	 * 
-	 * Changed files of this update will be calculated between change base and head ref
-	 * and this effectively represents changes made since previous update with merged 
-	 * changes from target branch excluded if there is any.  
+	 * Changed files of this update will be calculated between referential commit and head commit 
+	 * and this effectively represents changes made since previous update with merged changes 
+	 * from target branch excluded if there is any.  
 	 *  
 	 * @return
-	 * 			base commit used for change calculation of current update
+	 * 			referential commit used for change calculation of current update
 	 */
-	public String getChangeCommit() {
-		if (changeCommit == null) {
+	public String getReferentialCommit() {
+		if (referentialCommit == null) {
 			Git git = getRequest().getTarget().getRepository().git();
 			String mergeBase = git.calcMergeBase(getHeadCommit(), getRequest().getTarget().getHeadCommit());
-			int index = getRequest().getSortedUpdates().indexOf(this);
-			Preconditions.checkState(index != -1);
-			
-			String previousUpdate;
-			if (index >= getRequest().getSortedUpdates().size()-1) {
-				previousUpdate = mergeBase;
-			} else {
-				previousUpdate = getRequest().getSortedUpdates().get(index+1).getHeadCommit();
-			}
-	
-			if (git.isAncestor(previousUpdate, mergeBase)) { 
-				changeCommit = mergeBase;
-			} else if (git.isAncestor(mergeBase, previousUpdate)) {
-				changeCommit = previousUpdate;
+
+			if (git.isAncestor(getBaseCommit(), mergeBase)) { 
+				referentialCommit = mergeBase;
+			} else if (git.isAncestor(mergeBase, getBaseCommit())) {
+				referentialCommit = getBaseCommit();
 			} else {
 				Lock lock = LockUtils.lock(getLockName());
 				try {
 					String changeRef = getChangeRef();
-					changeCommit = git.parseRevision(changeRef, false);
+					referentialCommit = git.parseRevision(changeRef, false);
 	
-					if (changeCommit != null) {
-						Commit commit = git.showRevision(changeCommit);
-						if (!commit.getParentHashes().contains(mergeBase) || !commit.getParentHashes().contains(previousUpdate)) 
-							changeCommit = null;
+					if (referentialCommit != null) {
+						Commit commit = git.showRevision(referentialCommit);
+						if (!commit.getParentHashes().contains(mergeBase) || !commit.getParentHashes().contains(getBaseCommit())) 
+							referentialCommit = null;
 					} 
 					
-					if (changeCommit == null) {
+					if (referentialCommit == null) {
 						File tempDir = FileUtils.createTempDir();
 						try {
 							Git tempGit = new Git(tempDir);
@@ -164,9 +154,9 @@ public class PullRequestUpdate extends AbstractEntity {
 							tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, branchName);
 							tempGit.updateRef("HEAD", mergeBase, null, null);
 							tempGit.reset(null, null);
-							Preconditions.checkState(tempGit.merge(previousUpdate, null, null, "ours", null) != null);
+							Preconditions.checkState(tempGit.merge(getBaseCommit(), null, null, "ours", null) != null);
 							git.fetch(tempGit, "+HEAD:" + changeRef);
-							changeCommit = git.parseRevision(changeRef, true);
+							referentialCommit = git.parseRevision(changeRef, true);
 						} finally {
 							FileUtils.deleteDir(tempDir);
 						}
@@ -177,7 +167,7 @@ public class PullRequestUpdate extends AbstractEntity {
 			}
 		}
 		
-		return changeCommit;
+		return referentialCommit;
 	}
 	
 	/**
@@ -189,9 +179,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	public List<Vote> listVotesOnwards() {
 		List<Vote> votes = new ArrayList<Vote>();
 		
-		List<PullRequestUpdate> updates = getRequest().getEffectiveUpdates();
-		for (Iterator<PullRequestUpdate> it = updates.iterator(); it.hasNext();) {
-			PullRequestUpdate update = it.next();
+		for (PullRequestUpdate update: getRequest().getEffectiveUpdates()) {
 			votes.addAll(update.getVotes());
 			if (update.equals(this)) {
 				break;
@@ -214,7 +202,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	
 	public Collection<String> getChangedFiles() {
 		if (changedFiles == null) 
-			changedFiles = getRequest().git().listChangedFiles(getChangeCommit(), getHeadCommit());
+			changedFiles = getRequest().git().listChangedFiles(getReferentialCommit(), getHeadCommit());
 		return changedFiles;
 	}
 	
@@ -229,14 +217,12 @@ public class PullRequestUpdate extends AbstractEntity {
 	public String getBaseCommit() {
 		if (baseCommit == null) {
 			PullRequest request = getRequest();
-			
+
 			int index = request.getSortedUpdates().indexOf(this);
-			if (index == request.getSortedUpdates().size() - 1) {
-				baseCommit = request.getBaseCommit();
-			} else {
-				baseCommit = request.getSortedUpdates().get(index+1).getHeadCommit();
-			}
-			
+			if (index > 0)
+				baseCommit = request.getSortedUpdates().get(index-1).getHeadCommit();
+			else
+				baseCommit = request.getBaseUpdate().getHeadCommit();
 		}
 		return baseCommit;
 	}

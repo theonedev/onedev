@@ -58,7 +58,7 @@ public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
         int pendings = 0;
 
         for (User member : members) {
-            Vote.Result result = member.checkVoteSince(request.getBaseUpdate());
+            Vote.Result result = member.checkVoteSince(request.getReferentialUpdate());
             if (result == null) {
                 pendings++;
             } else if (result == Vote.Result.APPROVE) {

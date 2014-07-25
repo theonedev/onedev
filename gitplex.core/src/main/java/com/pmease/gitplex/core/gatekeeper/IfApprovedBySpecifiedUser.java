@@ -37,7 +37,7 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
     public CheckResult doCheckRequest(PullRequest request) {
         User user = GitPlex.getInstance(Dao.class).load(User.class, getUserId());
 
-        Vote.Result result = user.checkVoteSince(request.getBaseUpdate());
+        Vote.Result result = user.checkVoteSince(request.getReferentialUpdate());
         if (result == null) {
             request.pickVoters(Sets.newHashSet(user), 1);
 

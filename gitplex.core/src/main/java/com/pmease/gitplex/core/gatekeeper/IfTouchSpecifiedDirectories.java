@@ -37,13 +37,11 @@ public class IfTouchSpecifiedDirectories extends FileGateKeeper {
 
 	@Override
 	public CheckResult doCheckRequest(PullRequest request) {
-		for (int i=0; i<request.getEffectiveUpdates().size(); i++) {
-			PullRequestUpdate update = request.getEffectiveUpdates().get(i);
-
+		for (PullRequestUpdate update: request.getEffectiveUpdates()) {
 			for (String file: update.getChangedFiles()) {
 				for (String each: directories) {
 					if (WildcardUtils.matchPath(each + "/**", file)) {
-						request.setBaseUpdate(update);
+						request.setReferentialUpdate(update);
 						return approved("Touched directory '" + each + "'.");
 					}
 				}

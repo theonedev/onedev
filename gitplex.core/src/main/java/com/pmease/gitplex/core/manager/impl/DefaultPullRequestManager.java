@@ -290,8 +290,6 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	public void send(PullRequest request) {
 		dao.persist(request);
 
-		request.getTarget().getRepository().git().updateRef(request.getBaseRef(), request.getBaseCommit(), null, null);
-		
 		for (PullRequestUpdate update: request.getUpdates()) {
 			pullRequestUpdateManager.save(update);
 		}
