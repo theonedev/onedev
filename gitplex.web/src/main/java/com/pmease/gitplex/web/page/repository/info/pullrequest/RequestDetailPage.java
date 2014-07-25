@@ -1,6 +1,6 @@
 package com.pmease.gitplex.web.page.repository.info.pullrequest;
 
-import static com.pmease.gitplex.core.pullrequest.IntegrationStrategy.*;
+import static com.pmease.gitplex.core.model.IntegrationStrategy.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,16 +47,16 @@ import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.VerificationManager;
-import com.pmease.gitplex.core.pullrequest.IntegrationInfo;
-import com.pmease.gitplex.core.pullrequest.IntegrationStrategy;
-import com.pmease.gitplex.core.pullrequest.RequestOperateException;
-import com.pmease.gitplex.core.pullrequest.RequestOperation;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.CommitComment;
+import com.pmease.gitplex.core.model.IntegrationInfo;
+import com.pmease.gitplex.core.model.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.Status;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.model.Verification;
+import com.pmease.gitplex.core.pullrequest.RequestOperateException;
+import com.pmease.gitplex.core.pullrequest.RequestOperation;
 import com.pmease.gitplex.web.component.branch.BranchLink;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.user.AvatarMode;

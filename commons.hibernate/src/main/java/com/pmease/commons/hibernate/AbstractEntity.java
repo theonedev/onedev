@@ -68,4 +68,7 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 		}
 	}
 
+	public boolean isNew() {
+		return getId() == null;
+	}
 }

@@ -13,9 +13,9 @@ import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.manager.VoteManager;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.model.Vote;
 import com.pmease.gitplex.core.model.PullRequest.Status;
-import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
 public enum RequestOperation {

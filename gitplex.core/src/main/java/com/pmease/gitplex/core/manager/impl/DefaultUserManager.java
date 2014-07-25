@@ -11,7 +11,7 @@ import javax.inject.Singleton;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 
-import org.hibernate.criterion.Order;
+import org.hibernate.ReplicationMode;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
@@ -34,8 +34,6 @@ import com.pmease.gitplex.core.permission.operation.GeneralOperation;
 @Singleton
 public class DefaultUserManager implements UserManager {
 
-    private volatile Long rootId;
-
     private final Dao dao;
     
     private final ReadWriteLock idLock = new ReentrantReadWriteLock();
@@ -52,8 +50,14 @@ public class DefaultUserManager implements UserManager {
     @Transactional
     @Override
 	public void save(final User user) {
-    	boolean isNew = user.getId() == null;
-    	dao.persist(user);
+    	boolean isNew;
+    	if (user.isRoot()) {
+    		isNew = dao.get(User.class, User.ROOT_ID) == null;
+    		dao.getSession().replicate(user, ReplicationMode.OVERWRITE);
+    	} else {
+    		isNew = user.isNew();
+    		dao.persist(user);
+    	}
     	
     	if (isNew) {
         	Team team = new Team();
@@ -100,20 +104,11 @@ public class DefaultUserManager implements UserManager {
 			
 		});
     }
-    
+
     @Sessional
     @Override
     public User getRoot() {
-        User root;
-        if (rootId == null) {
-            // The first created user should be root user
-            root = dao.find(EntityCriteria.of(User.class).addOrder(Order.asc("id")));
-            Preconditions.checkNotNull(root);
-            rootId = root.getId();
-        } else {
-            root = dao.load(User.class, rootId);
-        }
-        return root;
+    	return dao.load(User.class, User.ROOT_ID);
     }
 
     @Transactional

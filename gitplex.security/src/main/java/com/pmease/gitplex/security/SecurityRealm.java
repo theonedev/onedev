@@ -6,13 +6,12 @@ import java.util.Collection;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.pmease.gitplex.core.GitPlex;
-
 import org.apache.shiro.authz.Permission;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.shiro.AbstractUser;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Authorization;
@@ -41,7 +40,7 @@ public class SecurityRealm extends AbstractRealm {
 
     @Override
     protected AbstractUser getUserByName(String userName) {
-        return userManager.findByName(userName);
+    	return userManager.findByName(userName);
     }
 
     @Override

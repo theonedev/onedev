@@ -10,10 +10,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
-import com.pmease.gitplex.core.permission.object.ProtectedObject;
-import com.pmease.gitplex.core.permission.object.UserBelonging;
-import com.pmease.gitplex.core.validation.UserName;
-
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
@@ -23,12 +19,17 @@ import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.Password;
 import com.pmease.commons.shiro.AbstractUser;
+import com.pmease.gitplex.core.permission.object.ProtectedObject;
+import com.pmease.gitplex.core.permission.object.UserBelonging;
+import com.pmease.gitplex.core.validation.UserName;
 
 @SuppressWarnings("serial")
 @Entity
 @Editable
 public class User extends AbstractUser implements ProtectedObject {
 
+	public static final Long ROOT_ID = 1L;
+	
 	@Column(nullable=false, unique=true)
 	private String email;
 	
@@ -234,6 +235,10 @@ public class User extends AbstractUser implements ProtectedObject {
 			return getFullName();
 		else
 			return getName();
+	}
+
+	public boolean isRoot() {
+		return ROOT_ID.equals(getId());
 	}
 	
 }

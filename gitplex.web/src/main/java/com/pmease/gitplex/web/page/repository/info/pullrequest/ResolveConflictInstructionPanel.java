@@ -1,6 +1,6 @@
 package com.pmease.gitplex.web.page.repository.info.pullrequest;
 
-import static com.pmease.gitplex.core.pullrequest.IntegrationStrategy.*;
+import static com.pmease.gitplex.core.model.IntegrationStrategy.*;
 
 import com.pmease.gitplex.core.GitPlex;
 
@@ -12,12 +12,12 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.model.IntegrationInfo;
+import com.pmease.gitplex.core.model.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
-import com.pmease.gitplex.core.pullrequest.IntegrationInfo;
-import com.pmease.gitplex.core.pullrequest.IntegrationStrategy;
 
 @SuppressWarnings("serial")
 public class ResolveConflictInstructionPanel extends Panel {

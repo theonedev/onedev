@@ -1,12 +1,12 @@
 package com.pmease.gitplex.core.manager.impl;
 
+import static com.pmease.gitplex.core.model.IntegrationStrategy.MERGE_ALWAYS;
+import static com.pmease.gitplex.core.model.IntegrationStrategy.MERGE_IF_NECESSARY;
+import static com.pmease.gitplex.core.model.IntegrationStrategy.REBASE_SOURCE;
+import static com.pmease.gitplex.core.model.IntegrationStrategy.REBASE_TARGET;
 import static com.pmease.gitplex.core.model.PullRequest.CriterionHelper.ofOpen;
 import static com.pmease.gitplex.core.model.PullRequest.CriterionHelper.ofSource;
 import static com.pmease.gitplex.core.model.PullRequest.CriterionHelper.ofTarget;
-import static com.pmease.gitplex.core.pullrequest.IntegrationStrategy.MERGE_ALWAYS;
-import static com.pmease.gitplex.core.pullrequest.IntegrationStrategy.MERGE_IF_NECESSARY;
-import static com.pmease.gitplex.core.pullrequest.IntegrationStrategy.REBASE_SOURCE;
-import static com.pmease.gitplex.core.pullrequest.IntegrationStrategy.REBASE_TARGET;
 
 import java.io.File;
 import java.util.Date;
@@ -34,15 +34,15 @@ import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.BranchStrategy;
+import com.pmease.gitplex.core.model.CloseInfo;
+import com.pmease.gitplex.core.model.IntegrationInfo;
+import com.pmease.gitplex.core.model.IntegrationSetting;
+import com.pmease.gitplex.core.model.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.model.VoteInvitation;
-import com.pmease.gitplex.core.pullrequest.BranchStrategy;
-import com.pmease.gitplex.core.pullrequest.CloseInfo;
-import com.pmease.gitplex.core.pullrequest.IntegrationInfo;
-import com.pmease.gitplex.core.pullrequest.IntegrationSetting;
-import com.pmease.gitplex.core.pullrequest.IntegrationStrategy;
 
 @Singleton
 public class DefaultPullRequestManager implements PullRequestManager {

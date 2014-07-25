@@ -1,13 +1,8 @@
 package com.pmease.gitplex.web.page;
 
-import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.basic.Label;
-
-import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.web.component.user.UserInfoSnippet;
-import com.pmease.gitplex.web.model.UserModel;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.wicket.markup.html.link.Link;
 
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
@@ -15,13 +10,14 @@ public class TestPage extends BasePage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		add(new UserInfoSnippet("userActivity", new UserModel(GitPlex.getInstance(Dao.class).load(User.class, 1L))) {
-			
+
+		add(new Link<Void>("test") {
+
 			@Override
-			protected Component newInfoLine(String componentId) {
-				return new Label(componentId, "hello world");
+			public void onClick() {
+				SecurityUtils.getSubject().login(new UsernamePasswordToken("System", ""));
 			}
+			
 		});
 	}
 	

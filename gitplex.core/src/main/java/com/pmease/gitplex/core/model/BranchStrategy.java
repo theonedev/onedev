@@ -1,4 +1,4 @@
-package com.pmease.gitplex.core.pullrequest;
+package com.pmease.gitplex.core.model;
 
 import java.io.Serializable;
 

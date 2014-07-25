@@ -25,7 +25,6 @@ import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.permission.object.ProtectedObject;
 import com.pmease.gitplex.core.permission.object.UserBelonging;
-import com.pmease.gitplex.core.pullrequest.IntegrationSetting;
 import com.pmease.gitplex.core.validation.RepositoryName;
 
 import org.hibernate.validator.constraints.NotEmpty;

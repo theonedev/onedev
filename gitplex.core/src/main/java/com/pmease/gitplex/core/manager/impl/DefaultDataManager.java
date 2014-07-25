@@ -9,22 +9,19 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.Validator;
 
-import org.hibernate.criterion.Order;
-
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.loader.ManagedSerializedForm;
 import com.pmease.commons.util.init.ManualConfig;
 import com.pmease.commons.util.init.Skippable;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DataManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.setting.MailSetting;
-import com.pmease.gitplex.core.setting.SystemSetting;
 import com.pmease.gitplex.core.model.Config;
 import com.pmease.gitplex.core.model.Config.Key;
 import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.setting.MailSetting;
+import com.pmease.gitplex.core.setting.SystemSetting;
 
 @Singleton
 public class DefaultDataManager implements DataManager, Serializable {
@@ -50,9 +47,11 @@ public class DefaultDataManager implements DataManager, Serializable {
 	@Override
 	public List<ManualConfig> init() {
 		List<ManualConfig> manualConfigs = new ArrayList<ManualConfig>();
-		User rootUser = dao.find(EntityCriteria.of(User.class).addOrder(Order.asc("id")));		
+		User rootUser = dao.get(User.class, User.ROOT_ID);		
 		if (rootUser == null) {
-			manualConfigs.add(new ManualConfig("Create Administator Account", new User()) {
+			rootUser = new User();
+			rootUser.setId(User.ROOT_ID);
+			manualConfigs.add(new ManualConfig("Create Administator Account", rootUser) {
 
 				@Override
 				public Skippable getSkippable() {

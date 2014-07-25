@@ -35,8 +35,6 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Disapproved;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Ignored;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.gatekeeper.checkresult.PendingAndBlock;
-import com.pmease.gitplex.core.pullrequest.CloseInfo;
-import com.pmease.gitplex.core.pullrequest.IntegrationInfo;
 
 @SuppressWarnings("serial")
 @Entity

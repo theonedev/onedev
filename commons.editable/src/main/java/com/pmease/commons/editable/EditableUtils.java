@@ -3,7 +3,6 @@ package com.pmease.commons.editable;
 import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -13,9 +12,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.validation.Validator;
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.loader.AppLoader;
@@ -152,30 +148,6 @@ public class EditableUtils {
 		return null;
 	}
 	
-	public static boolean isPropertyRequired(Method propertyGetter) {
-		if (propertyGetter.getReturnType().isPrimitive() && propertyGetter.getReturnType() != boolean.class
-				|| propertyGetter.getAnnotation(NotNull.class) != null 
-				|| propertyGetter.getAnnotation(NotEmpty.class) != null) { 
-			return true;
-		} else {
-			return false;
-		}
-	}
-	
-	public static void copyProperties(Object from, Object to) {
-	    for (Method getter: BeanUtils.findGetters(JavassistUtils.unproxy(from.getClass()))) {
-	        Method setter = BeanUtils.findSetter(getter);
-	        if (setter != null && getter.getAnnotation(Editable.class) != null) {
-	            try {
-                    setter.invoke(to, getter.invoke(from));
-                } catch (IllegalAccessException | IllegalArgumentException
-                        | InvocationTargetException e) {
-                    throw new RuntimeException(e);
-                }
-	        }
-	    }
-	}
-
 	public static boolean hasEditableProperties(Class<?> beanClass) {
 	    for (Method getter: BeanUtils.findGetters(JavassistUtils.unproxy(beanClass))) {
 	        Method setter = BeanUtils.findSetter(getter);

@@ -1,4 +1,4 @@
-package com.pmease.gitplex.core.pullrequest;
+package com.pmease.gitplex.core.model;
 
 public enum IntegrationStrategy {
 	MERGE_ALWAYS("Merge (always create merge commit)"), 

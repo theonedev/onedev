@@ -18,8 +18,8 @@ import org.apache.wicket.model.IModel;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
+import com.pmease.gitplex.core.model.CloseInfo;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.pullrequest.CloseInfo;
 
 @SuppressWarnings("serial")
 public class CloseActivityPanel extends Panel {

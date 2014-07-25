@@ -14,10 +14,10 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.pmease.gitplex.core.model.IntegrationInfo;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.Status;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.core.pullrequest.IntegrationInfo;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.DiffViewPanel;
 
 @SuppressWarnings("serial")
