@@ -10,11 +10,11 @@ import org.apache.wicket.model.Model;
 
 import com.google.common.base.Objects;
 import com.pmease.commons.git.Commit;
-import com.pmease.gitplex.web.page.repository.info.RepoInfoPanel;
+import com.pmease.gitplex.web.component.repository.RepoAwarePanel;
 import com.pmease.gitplex.web.page.repository.info.code.commit.RepoCommitPage;
 
 @SuppressWarnings("serial")
-public class CommitMessagePanel extends RepoInfoPanel {
+public class CommitMessagePanel extends RepoAwarePanel {
 
 	public CommitMessagePanel(String id, IModel<Commit> commitModel) {
 		super(id, commitModel);

@@ -51,11 +51,11 @@ public class RepoCommitsPage extends RepositoryInfoPage {
 				
 				// load additional one commit to see whether there is still more page
 				LogCommand command = new LogCommand(git.repoDir())
-										.toRev(getRevision())
+										.toRev(getCurrentRevision())
 										.skip((page - 1) * COMMITS_PER_PAGE)
 										.maxCount(COMMITS_PER_PAGE + 1);
-				if (getObjPath() != null) 
-					command.path(getObjPath());
+				if (getCurrentPath() != null) 
+					command.path(getCurrentPath());
 				
 				List<Commit> commits = command.call();
 				return commits;
@@ -81,7 +81,7 @@ public class RepoCommitsPage extends RepositoryInfoPage {
 //		}));
 
 		add(newNavLink("home", -1));
-		add(new ListView<String>("pathSegments", getObjPathSegments()) {
+		add(new ListView<String>("pathSegments", getCurrentPathSegments()) {
 
 			@Override
 			protected void populateItem(ListItem<String> item) {
@@ -91,9 +91,9 @@ public class RepoCommitsPage extends RepositoryInfoPage {
 		
 		add(new RepoCommitsPanel("commits", commitsModel, repositoryModel));
 		add(new BookmarkablePageLink<Void>("newer", RepoCommitsPage.class,
-				paramsOf(getRepository(), getRevision(), getObjPath(), page - 1)).setEnabled(page > 1));
+				paramsOf(getRepository(), getCurrentRevision(), getCurrentPath(), page - 1)).setEnabled(page > 1));
 		add(new BookmarkablePageLink<Void>("older", RepoCommitsPage.class,
-				paramsOf(getRepository(), getRevision(), getObjPath(), page + 1)) {
+				paramsOf(getRepository(), getCurrentRevision(), getCurrentPath(), page + 1)) {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
@@ -104,11 +104,11 @@ public class RepoCommitsPage extends RepositoryInfoPage {
 	}
 	
 	private Component newNavLink(String id, final int pathNum) {
-		List<String> all = getObjPathSegments();
+		List<String> all = getCurrentPathSegments();
 		
 		BookmarkablePageLink<Void> link = new BookmarkablePageLink<Void>(id,
 				RepoCommitsPage.class,
-				paramsOf(getRepository(), getRevision(), getObjPath(), 0));
+				paramsOf(getRepository(), getCurrentRevision(), getCurrentPath(), 0));
 		link.setEnabled(pathNum < 0 || pathNum < all.size() - 1);
 		link.add(new Label("name", new AbstractReadOnlyModel<String>() {
 
@@ -117,7 +117,7 @@ public class RepoCommitsPage extends RepositoryInfoPage {
 				if (pathNum < 0) {
 					return getRepository().getName();
 				} else {
-					List<String> all = getObjPathSegments();
+					List<String> all = getCurrentPathSegments();
 					return all.get(pathNum);
 				}
 			}

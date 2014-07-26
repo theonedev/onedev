@@ -32,14 +32,14 @@ import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitplex.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitplex.web.common.wicket.component.tab.BootstrapTabbedPanel;
+import com.pmease.gitplex.web.component.repository.RepoAwarePanel;
 import com.pmease.gitplex.web.git.GitUtils;
 import com.pmease.gitplex.web.page.repository.RepositoryHomePage;
-import com.pmease.gitplex.web.page.repository.info.RepoInfoPanel;
 import com.pmease.gitplex.web.page.repository.info.RepositoryInfoPage;
 import com.pmease.gitplex.web.page.repository.info.code.tree.RepoTreePage;
 
 @SuppressWarnings("serial")
-public class RevisionSelector extends RepoInfoPanel {
+public class RevisionSelector extends RepoAwarePanel {
 
 	private final IModel<Map<RefType, List<String>>> refsModel;
 	
@@ -72,7 +72,7 @@ public class RevisionSelector extends RepoInfoPanel {
 
 			@Override
 			public String getObject() {
-				String revision = getRevision();
+				String revision = getCurrentRevision();
 				RefType type = getRevisionType(revision);
 				if (type == null) {
 					return GitUtils.abbreviateSHA(revision);
@@ -86,7 +86,7 @@ public class RevisionSelector extends RepoInfoPanel {
 
 			@Override
 			public String getObject() {
-				String revision = getRevision();
+				String revision = getCurrentRevision();
 				RefType type = getRevisionType(revision);
 				if (type == null) {
 					return "icon-commit";
@@ -135,7 +135,7 @@ public class RevisionSelector extends RepoInfoPanel {
 
 					@Override
 					public Integer getObject() {
-						String revision = getRevision();
+						String revision = getCurrentRevision();
 						Map<RefType, List<String>> map = refsModel.getObject();
 						for (RefType each : RefType.values()) {
 							List<String> refs = map.get(each);
@@ -199,7 +199,7 @@ public class RevisionSelector extends RepoInfoPanel {
 
 					@Override
 					public String getObject() {
-						return Objects.equal(getRevision(), ref) ? "checked" : "unchecked";
+						return Objects.equal(getCurrentRevision(), ref) ? "checked" : "unchecked";
 					}
 				}));
 				
@@ -233,7 +233,7 @@ public class RevisionSelector extends RepoInfoPanel {
 	}
 	
 	protected AbstractLink newRefLink(String id, String ref) {
-		PageParameters params = RepositoryInfoPage.paramsOf(getRepository(), ref, getObjPath());
+		PageParameters params = RepositoryInfoPage.paramsOf(getRepository(), ref, getCurrentPath());
 		
 		return new BookmarkablePageLink<Void>("link", getPageClass(), params);
 	}

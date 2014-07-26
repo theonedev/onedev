@@ -55,7 +55,7 @@ public class RepoCommitPage extends RepositoryInfoPage implements CommitComments
 
 			@Override
 			protected Commit load() {
-				String revision = getRevision();
+				String revision = getCurrentRevision();
 				Repository repository = getRepository();
 				return repository.git().showRevision(revision);
 			}
@@ -95,7 +95,7 @@ public class RepoCommitPage extends RepositoryInfoPage implements CommitComments
 		
 		add(new BookmarkablePageLink<Void>("treelink",
 				RepoTreePage.class,
-				RepoTreePage.paramsOf(getRepository(), getRevision(), null)));
+				RepoTreePage.paramsOf(getRepository(), getCurrentRevision(), null)));
 		
 		TooltipConfig tooltipConfig = new TooltipConfig().withPlacement(TooltipConfig.Placement.left);
 		add(new PersonLink("authoravatar", Model.of(getCommit().getAuthor()), AvatarMode.AVATAR)
@@ -148,7 +148,7 @@ public class RepoCommitPage extends RepositoryInfoPage implements CommitComments
 		
 		add(createInRefListView("branches", RefType.BRANCH));
 		add(createInRefListView("tags", RefType.TAG));
-		add(new DiffViewPanel("diffs", repositoryModel, Model.of(getSince()), Model.of(getUntil())));
+		add(new DiffViewPanel("diffs", Model.of(getSince()), Model.of(getUntil())));
 		
 		add(new CommentListPanel("comments", repositoryModel, new AbstractReadOnlyModel<String>() {
 
@@ -166,7 +166,7 @@ public class RepoCommitPage extends RepositoryInfoPage implements CommitComments
 			@Override
 			protected List<String> load() {
 				CommitInCommand command = new CommitInCommand(getRepository().git().repoDir());
-				command.commit(getRevision()).in(type);
+				command.commit(getCurrentRevision()).in(type);
 				return command.call();
 			}
 			
@@ -234,23 +234,22 @@ public class RepoCommitPage extends RepositoryInfoPage implements CommitComments
 
 	@Override
 	public void onDetach() {
-		if (commitModel != null) {
+		if (commitModel != null) 
 			commitModel.detach();
-		}
-		if (commentsModel != null) {
+		
+		if (commentsModel != null)
 			commentsModel.detach();
-		}
 
 		super.onDetach();
 	}
 	
 	@Override
 	protected String getPageTitle() {
-		if (GitUtils.isHash(getRevision())) {
-			return getCommit().getSubject() + " - " + GitUtils.abbreviateSHA(getRevision(), 8) 
+		if (GitUtils.isHash(getCurrentRevision())) {
+			return getCommit().getSubject() + " - " + GitUtils.abbreviateSHA(getCurrentRevision(), 8) 
 					+ " - " + getRepository().getFullName();
 		} else {
-			return getCommit().getSubject() + " - " + getRevision() 
+			return getCommit().getSubject() + " - " + getCurrentRevision() 
 					+ " - " + getRepository().getFullName();
 		}
 	}

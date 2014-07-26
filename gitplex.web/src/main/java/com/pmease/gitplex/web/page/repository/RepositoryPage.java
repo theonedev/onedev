@@ -1,7 +1,12 @@
 package com.pmease.gitplex.web.page.repository;
 
+import java.util.Collections;
+import java.util.List;
+
+import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
@@ -17,6 +22,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.Constants;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.manager.TeamManager;
@@ -28,17 +34,44 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.permission.operation.GeneralOperation;
 import com.pmease.gitplex.web.common.wicket.bootstrap.Icon;
+import com.pmease.gitplex.web.component.repository.RepositoryAware;
 import com.pmease.gitplex.web.model.RepositoryModel;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.home.AccountHomePage;
 import com.pmease.gitplex.web.page.repository.admin.RepoOptionsPage;
 
 @SuppressWarnings("serial")
-public abstract class RepositoryPage extends AccountPage {
+public abstract class RepositoryPage extends AccountPage implements RepositoryAware {
 
 	public static final String PARAM_REPO = "repo";
+
+	public static final String PARAM_REVISION = "revision";
 	
+	public static final String PARAM_PATH = "path";
+
 	protected IModel<Repository> repositoryModel;
+	
+	private final String revision;
+	
+	private final String objPath;
+	
+	public static PageParameters paramsOf(Repository repository) {
+		return paramsOf(repository, null);
+	}
+
+	public static PageParameters paramsOf(Repository repository, @Nullable String revision) {
+		return paramsOf(repository, revision, null);
+	}
+
+	public static PageParameters paramsOf(Repository repository, @Nullable String revision, @Nullable String path) {
+		PageParameters params = paramsOf(repository.getUser());
+		params.set(PARAM_REPO, repository.getName());
+		if (StringUtils.isNotBlank(revision))
+			params.set(PARAM_REVISION, revision);
+		if (StringUtils.isNotBlank(path))
+			params.set(PARAM_PATH, path);
+		return params;
+	}
 	
 	public RepositoryPage(PageParameters params) {
 		super(params);
@@ -58,6 +91,19 @@ public abstract class RepositoryPage extends AccountPage {
 		}
 		
 		repositoryModel = new RepositoryModel(repository);
+
+		String revision = params.get(PARAM_REVISION).toString();
+		
+		if (StringUtils.isBlank(revision)) 
+			revision = null;
+		
+		this.revision = revision;
+		
+		String objPath = params.get(PARAM_PATH).toString();
+		if (StringUtils.isBlank(objPath))
+			objPath = null;
+		
+		this.objPath = objPath;
 	}
 	
 	@Override
@@ -177,17 +223,31 @@ public abstract class RepositoryPage extends AccountPage {
 	
 	@Override
 	protected void onDetach() {
-		if (repositoryModel != null) {
+		if (repositoryModel != null) 
 			repositoryModel.detach();
-		}
 		
 		super.onDetach();
 	}
 
-	public static PageParameters paramsOf(Repository repository) {
-		PageParameters params = paramsOf(repository.getUser());
-		params.set(PARAM_REPO, repository.getName());
-		return params;
+	@Override
+	public String getCurrentRevision() {
+		if (revision != null)
+			return revision;
+		else
+			return getRepository().getDefaultBranch();
+	}
+
+	@Override
+	public String getCurrentPath() {
+		return objPath;
+	}
+
+	@Override
+	public List<String> getCurrentPathSegments() {
+		if (objPath != null)
+			return Splitter.on("/").splitToList(objPath);
+		else
+			return Collections.emptyList();
 	}
 
 }

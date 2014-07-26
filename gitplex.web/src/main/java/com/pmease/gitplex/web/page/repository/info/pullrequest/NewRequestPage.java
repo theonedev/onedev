@@ -258,7 +258,7 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 			
 		});
 		
-		add(new DiffViewPanel("changes", repositoryModel, new AbstractReadOnlyModel<String>() {
+		add(new DiffViewPanel("changes", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {

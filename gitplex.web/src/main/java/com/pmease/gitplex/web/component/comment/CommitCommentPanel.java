@@ -2,7 +2,6 @@ package com.pmease.gitplex.web.component.comment;
 
 import java.util.Date;
 
-import com.pmease.gitplex.core.GitPlex;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -18,9 +17,9 @@ import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.CommitComment;
-import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.comment.event.CommitCommentRemoved;
 import com.pmease.gitplex.web.component.comment.event.CommitCommentUpdated;
@@ -31,15 +30,9 @@ import com.pmease.gitplex.web.component.wiki.WikiTextPanel;
 @SuppressWarnings("serial")
 public class CommitCommentPanel extends Panel {
 
-	private final IModel<Repository> repositoryModel;
-	
-	public CommitCommentPanel(String id,
-			IModel<Repository> repositoryModel,
-			IModel<CommitComment> model) {
+	public CommitCommentPanel(String id, IModel<CommitComment> model) {
 		super(id, model);
 	
-		this.repositoryModel = repositoryModel;
-		
 		this.setOutputMarkupId(true);
 	}
 
@@ -201,12 +194,4 @@ public class CommitCommentPanel extends Panel {
 		return (CommitComment) getDefaultModelObject();
 	}
 	
-	@Override
-	public void onDetach() {
-		super.onDetach();
-		
-		if (repositoryModel != null) {
-			repositoryModel.detach();
-		}
-	}
 }

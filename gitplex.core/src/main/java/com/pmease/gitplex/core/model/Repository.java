@@ -60,6 +60,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	private String name;
 	
 	private String description;
+	
+	private transient String defaultBranch;
 
 	@Lob
 	@Column(nullable=false)
@@ -303,4 +305,11 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	public String getUrl() {
 		return "http://localhost:6610/" + getFullName();
 	}
+	
+	public String getDefaultBranch() {
+		if (defaultBranch == null)
+			defaultBranch = git().resolveDefaultBranch();
+		return defaultBranch;
+	}
+	
 }

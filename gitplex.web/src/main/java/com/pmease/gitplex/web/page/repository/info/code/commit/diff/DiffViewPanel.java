@@ -29,10 +29,11 @@ import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.common.wicket.bootstrap.Alert;
 import com.pmease.gitplex.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitplex.web.git.command.DiffTreeCommand;
+import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.FileHeader;
+import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.FileHeader.PatchType;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.HunkHeader;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.Patch;
-import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.FileHeader.PatchType;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.renderer.BlobMessagePanel;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.renderer.image.ImageDiffPanel;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.renderer.text.TextDiffPanel;
@@ -42,19 +43,16 @@ import com.pmease.gitplex.web.util.MediaTypeUtils;
 @SuppressWarnings("serial")
 public class DiffViewPanel extends Panel {
 
-	private final IModel<Repository> repositoryModel;
-	private final IModel<Patch> patchModel;
 	private final IModel<String> sinceModel;
-	private final IModel<String> untilModel;
 	
-	public DiffViewPanel(String id,
-			IModel<Repository> repositoryModel,
-			IModel<String> sinceModel,
-			IModel<String> untilModel) {
+	private final IModel<String> untilModel;
+
+	private final IModel<Patch> patchModel;
+	
+	public DiffViewPanel(String id, IModel<String> sinceModel, IModel<String> untilModel) {
 		
 		super(id);
 		
-		this.repositoryModel = repositoryModel;
 		this.sinceModel = sinceModel;
 		this.untilModel = untilModel;
 		
@@ -84,7 +82,8 @@ public class DiffViewPanel extends Panel {
 	}
 	
 	private Repository getRepository() {
-		return Preconditions.checkNotNull(repositoryModel.getObject());
+		RepositoryPage page = (RepositoryPage) getPage();
+		return page.getRepository();
 	}
 	
 	private @Nullable String getSince() {
@@ -160,7 +159,7 @@ public class DiffViewPanel extends Panel {
 	}
 	
 	private Component newMessagePanel(String id, int index, IModel<FileHeader> model, IModel<String> messageModel) {
-		return new BlobMessagePanel(id, index, model, repositoryModel, sinceModel, untilModel, messageModel);
+		return new BlobMessagePanel(id, index, model, sinceModel, untilModel, messageModel);
 	}
 	
 	protected Component createFileDiffPanel(String id, IModel<FileHeader> model, int index) {
@@ -194,7 +193,7 @@ public class DiffViewPanel extends Panel {
 				MediaType mediaType = types.getMediaType(path, new byte[0]);
 				if (MediaTypeUtils.isImageType(mediaType) 
 						&& types.isSafeInline(mediaType)) {
-					return new ImageDiffPanel(id, index, model, repositoryModel, sinceModel, untilModel);
+					return new ImageDiffPanel(id, index, model, sinceModel, untilModel);
 				} else {
 					// other binary diffs
 					return newMessagePanel(id, index, model, Model.of("File is a binary file"));
@@ -238,7 +237,7 @@ public class DiffViewPanel extends Panel {
 			}
 		}
 		
-		return new TextDiffPanel(id, index, model, repositoryModel, sinceModel, untilModel);
+		return new TextDiffPanel(id, index, model, sinceModel, untilModel);
 	}
 	
 	
@@ -334,21 +333,14 @@ public class DiffViewPanel extends Panel {
 	
 	@Override
 	public void onDetach() {
-		if (repositoryModel != null) {
-			repositoryModel.detach();
-		}
-		
-		if (patchModel != null) {
+		if (patchModel != null) 
 			patchModel.detach();
-		}
 		
-		if (sinceModel != null) {
+		if (sinceModel != null) 
 			sinceModel.detach();
-		}
 		
-		if (untilModel != null) {
+		if (untilModel != null) 
 			untilModel.detach();
-		}
 		
 		super.onDetach();
 	}

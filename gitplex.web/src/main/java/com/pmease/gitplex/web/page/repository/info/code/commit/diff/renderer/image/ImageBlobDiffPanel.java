@@ -12,7 +12,6 @@ import org.apache.wicket.markup.html.list.LoopItem;
 import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
-import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.FileHeader;
 
 @SuppressWarnings("serial")
@@ -20,11 +19,10 @@ public class ImageBlobDiffPanel extends AbstractImageDiffPanel {
 
 	public ImageBlobDiffPanel(String id, 
 			IModel<FileHeader> model, 
-			IModel<Repository> repositoryModel,
 			IModel<String> sinceModel,
 			IModel<String> untilModel) {
 		
-		super(id, model, repositoryModel, sinceModel, untilModel);
+		super(id, model, sinceModel, untilModel);
 		
 		setOutputMarkupId(true);
 	}
@@ -93,13 +91,13 @@ public class ImageBlobDiffPanel extends AbstractImageDiffPanel {
 	protected Component createImageContainer() {
 		switch (compareType) {
 		case SIDE_BY_SIDE:
-			return new SideBySidePanel("image", fileModel, repositoryModel, sinceModel, untilModel);
+			return new SideBySidePanel("image", fileModel, sinceModel, untilModel);
 			
 		case SWIPE:
-			return new SwipePanel("image", fileModel, repositoryModel, sinceModel, untilModel);
+			return new SwipePanel("image", fileModel, sinceModel, untilModel);
 			
 		case BLEND:
-			return new BlendPanel("image", fileModel, repositoryModel, sinceModel, untilModel);
+			return new BlendPanel("image", fileModel, sinceModel, untilModel);
 			
 		default:
 			return new WebMarkupContainer("image").setVisibilityAllowed(false);

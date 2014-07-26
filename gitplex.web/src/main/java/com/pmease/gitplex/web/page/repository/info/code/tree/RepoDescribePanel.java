@@ -13,9 +13,9 @@ import org.apache.wicket.model.PropertyModel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.page.repository.info.RepoInfoPanel;
+import com.pmease.gitplex.web.component.repository.RepoAwarePanel;
 
-public class RepoDescribePanel extends RepoInfoPanel {
+public class RepoDescribePanel extends RepoAwarePanel {
 	private static final long serialVersionUID = 1L;
 	
 	static enum Mode {

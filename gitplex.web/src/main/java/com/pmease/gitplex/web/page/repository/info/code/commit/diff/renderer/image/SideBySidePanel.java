@@ -5,7 +5,6 @@ import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
 import com.google.common.base.Strings;
-import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.info.code.blob.renderer.FileBlobImage;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.FileHeader;
 
@@ -13,9 +12,9 @@ import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.FileHe
 public class SideBySidePanel extends AbstractImageDiffPanel {
 	
 	public SideBySidePanel(String id, IModel<FileHeader> model,
-			IModel<Repository> repositoryModel, IModel<String> sinceModel,
+			IModel<String> sinceModel,
 			IModel<String> untilModel) {
-		super(id, model, repositoryModel, sinceModel, untilModel);
+		super(id, model, sinceModel, untilModel);
 	}
 
 	@Override

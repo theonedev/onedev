@@ -46,12 +46,12 @@ public class RepoBlobPage extends RepositoryInfoPage {
 			@Override
 			protected Commit load() {
 				Git git = getRepository().git();
-				List<Commit> commits = git.log(null, getRevision(), getObjPath(), 1, 0);
+				List<Commit> commits = git.log(null, getCurrentRevision(), getCurrentPath(), 1, 0);
 				Commit commit = Iterables.getFirst(commits, null);
 				if (commit == null) {
 					throw new EntityNotFoundException(
-							"Path: " + getObjPath() +
-							", revision: " + getRevision() + " doesn't exist"); 
+							"Path: " + getCurrentPath() +
+							", revision: " + getCurrentRevision() + " doesn't exist"); 
 				}
 				return commit;
 			}
@@ -62,7 +62,7 @@ public class RepoBlobPage extends RepositoryInfoPage {
 			@Override
 			protected List<PersonIdent> load() {
 				Git git = getRepository().git();
-				List<Commit> commits = git.log(null, getRevision(), getObjPath(), 0, 0);
+				List<Commit> commits = git.log(null, getCurrentRevision(), getCurrentPath(), 0, 0);
 				Set<PersonIdent> users = Sets.newHashSet();
 				for (Commit each : commits) {
 					users.add(each.getAuthor());
@@ -136,14 +136,14 @@ public class RepoBlobPage extends RepositoryInfoPage {
 
 			@Override
 			protected FileBlob load() {
-				return FileBlob.of(getRepository(), getRevision(), getObjPath());
+				return FileBlob.of(getRepository(), getCurrentRevision(), getCurrentPath());
 			}
 		}));
 	}
 
 	@Override
 	protected String getPageTitle() {
-		return getObjPath() + " at " + getRevision() + " " + getRepository().getFullName();
+		return getCurrentPath() + " at " + getCurrentRevision() + " " + getRepository().getFullName();
 	}
 	
 	protected Commit getLastCommit() {

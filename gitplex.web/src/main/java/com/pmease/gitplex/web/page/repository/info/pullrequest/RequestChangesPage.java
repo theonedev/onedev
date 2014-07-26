@@ -9,7 +9,6 @@ import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -17,7 +16,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.pmease.gitplex.core.model.IntegrationInfo;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.Status;
-import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.DiffViewPanel;
 
 @SuppressWarnings("serial")
@@ -170,14 +168,7 @@ public class RequestChangesPage extends RequestDetailPage {
 		});
 		add(headCommitSelector);
 		
-		add(diffView = new DiffViewPanel("diffView", new AbstractReadOnlyModel<Repository>() {
-
-			@Override
-			public Repository getObject() {
-				return getPullRequest().getTarget().getRepository();
-			}
-			
-		}, new LoadableDetachableModel<String>() {
+		add(diffView = new DiffViewPanel("diffView", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {

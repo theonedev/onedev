@@ -132,7 +132,7 @@ public class CommentListPanel extends Panel {
 			protected void populateItem(ListItem<CommitComment> item) {
 				CommitComment c = item.getModelObject();
 				item.add(new UserLink("author", Model.of(c.getAuthor()), AvatarMode.AVATAR));
-				item.add(new CommitCommentPanel("message", repositoryModel, new CommitCommentModel(c)) {
+				item.add(new CommitCommentPanel("message", new CommitCommentModel(c)) {
 					@Override
 					protected Component createCommentHead(String id) {
 						

@@ -54,7 +54,7 @@ public class BlobBlamePage extends RepositoryInfoPage {
 
 			@Override
 			protected FileBlob load() {
-				return FileBlob.of(getRepository(), getRevision(), getObjPath());
+				return FileBlob.of(getRepository(), getCurrentRevision(), getCurrentPath());
 			}
 			
 		};
@@ -64,7 +64,7 @@ public class BlobBlamePage extends RepositoryInfoPage {
 			@Override
 			protected List<BlameEntry> load() {
 				BlameCommand cmd = new BlameCommand(getRepository().git().repoDir());
-				cmd.fileName(getObjPath()).objectId(getRevision());
+				cmd.fileName(getCurrentPath()).objectId(getCurrentRevision());
 				
 				return cmd.call();
 			}
@@ -74,7 +74,7 @@ public class BlobBlamePage extends RepositoryInfoPage {
 
 	@Override
 	protected String getPageTitle() {
-		return getObjPath() + " at " + getRevision() + " " + getRepository().getFullName();
+		return getCurrentPath() + " at " + getCurrentRevision() + " " + getRepository().getFullName();
 	}
 	
 	@Override
@@ -195,7 +195,7 @@ public class BlobBlamePage extends RepositoryInfoPage {
 					BookmarkablePageLink<Void> blameLink = new BookmarkablePageLink<Void>(
 							"blamelink",
 							BlobBlamePage.class,
-							BlobBlamePage.paramsOf(getRepository(), hash, getObjPath()));
+							BlobBlamePage.paramsOf(getRepository(), hash, getCurrentPath()));
 					container.add(blameLink);
 					Loop loop = new Loop("empties", each.getNumLines() - 1) {
 

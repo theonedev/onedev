@@ -3,8 +3,6 @@ package com.pmease.gitplex.web.page.repository.info.code.commit.diff.renderer.te
 import java.util.Collections;
 import java.util.List;
 
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.web.GitPlexSession;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -18,7 +16,6 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.Loop;
 import org.apache.wicket.markup.html.list.LoopItem;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -34,9 +31,10 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.CommitComment;
-import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
+import com.pmease.gitplex.web.GitPlexSession;
 import com.pmease.gitplex.web.component.comment.CommitCommentEditor;
 import com.pmease.gitplex.web.component.comment.CommitCommentPanel;
 import com.pmease.gitplex.web.component.comment.event.AbstractLineCommentEvent;
@@ -45,6 +43,7 @@ import com.pmease.gitplex.web.component.comment.event.CommitCommentAdded;
 import com.pmease.gitplex.web.component.comment.event.CommitCommentEvent;
 import com.pmease.gitplex.web.component.comment.event.CommitCommentRemoved;
 import com.pmease.gitplex.web.component.comment.event.OpenLineCommentForm;
+import com.pmease.gitplex.web.component.repository.RepoAwarePanel;
 import com.pmease.gitplex.web.model.CommitCommentModel;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.CommitCommentsAware;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.FileHeader;
@@ -55,9 +54,8 @@ import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.HunkLi
 import de.agilecoders.wicket.jquery.JQuery;
 
 @SuppressWarnings({ "serial", "deprecation" })
-public class HunkPanel extends Panel {
+public class HunkPanel extends RepoAwarePanel {
 
-	private final IModel<Repository> repositoryModel;
 	private final IModel<FileHeader> fileModel;
 	private final IModel<List<String>> blobLinesModel;
 	private final IModel<String> commitModel;
@@ -73,7 +71,6 @@ public class HunkPanel extends Panel {
 	final static String INSERT_BEFORE_ROW = "var item = document.createElement('tr'); item.id='%s'; $(item).insertBefore($('#%s'));";
 	
 	public HunkPanel(String id,
-			IModel<Repository> repositoryModel,
 			IModel<String> commitModel,
 			IModel<Integer> indexModel,
 			IModel<FileHeader> fileModel,
@@ -81,7 +78,6 @@ public class HunkPanel extends Panel {
 		
 		super(id, indexModel);
 		
-		this.repositoryModel = repositoryModel;
 		this.commitModel = commitModel;
 		this.fileModel = fileModel;
 		this.blobLinesModel = blobLinesModel;
@@ -365,7 +361,7 @@ public class HunkPanel extends Panel {
 				comment.setAuthor(GitPlexSession.getCurrentUser().get());
 				comment.setCommit(commitModel.getObject());
 				comment.setLine(lineId);
-				comment.setRepository(repositoryModel.getObject());
+				comment.setRepository(getRepository());
 				comment.setContent(getCommentText());
 				GitPlex.getInstance(Dao.class).persist(comment);
 				
@@ -499,7 +495,7 @@ public class HunkPanel extends Panel {
 				protected void populateItem(LoopItem item) {
 					int index = item.getIndex();
 					CommitComment comment = getComment(index);
-					item.add(new CommitCommentPanel("comment", repositoryModel, new CommitCommentModel(comment)));
+					item.add(new CommitCommentPanel("comment", new CommitCommentModel(comment)));
 				}
 			};
 			
@@ -776,25 +772,17 @@ public class HunkPanel extends Panel {
 	
 	@Override
 	public void onDetach() {
-		if (repositoryModel != null) {
-			repositoryModel.detach();
-		}
-
-		if (commitModel != null) {
+		if (commitModel != null) 
 			commitModel.detach();
-		}
 		
-		if (fileModel != null) {
+		if (fileModel != null)
 			fileModel.detach();
-		}
 		
-		if (blobLinesModel != null) {
+		if (blobLinesModel != null) 
 			blobLinesModel.detach();
-		}
 
-		if (commentsModel != null) {
+		if (commentsModel != null)
 			commentsModel.detach();
-		}
 		
 		super.onDetach();
 	}

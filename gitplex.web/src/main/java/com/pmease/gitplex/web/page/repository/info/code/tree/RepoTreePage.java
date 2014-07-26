@@ -34,12 +34,12 @@ public class RepoTreePage extends RepositoryInfoPage {
 			@Override
 			protected List<TreeNode> load() {
 				Git git = getRepository().git();
-				String path = getObjPath();
+				String path = getCurrentPath();
 				if (!Strings.isNullOrEmpty(path)) {
 					path = UrlUtils.removeRedundantSlashes(path + "/");
 				}
 				
-				List<TreeNode> nodes = Lists.newArrayList(git.listTree(getRevision(), path, false));
+				List<TreeNode> nodes = Lists.newArrayList(git.listTree(getCurrentRevision(), path, false));
 				
 				Collections.sort(nodes, new Comparator<TreeNode>() {
 
@@ -62,7 +62,7 @@ public class RepoTreePage extends RepositoryInfoPage {
 			}
 		};
 		
-		add(new RepoDescribePanel("description").setVisible(getObjPath() != null));
+		add(new RepoDescribePanel("description").setVisible(getCurrentPath() != null));
 		add(new SourceBreadcrumbPanel("breadcrumb"));
 		add(new RepoTreePanel("tree", nodesModel));
 		add(new ReadmePanel("readme", nodesModel));
@@ -72,12 +72,12 @@ public class RepoTreePage extends RepositoryInfoPage {
 	protected String getPageTitle() {
 		Repository repository = getRepository();
 		
-		if (getObjPath() == null) {
+		if (getCurrentPath() == null) {
 			return repository.getFullName();
 		} else {
 			StringBuffer sb = new StringBuffer();
-			sb.append(getObjPath())
-				.append(" at ").append(getRevision())
+			sb.append(getCurrentPath())
+				.append(" at ").append(getCurrentRevision())
 				.append(" - ").append(repository.getFullName());
 			
 			return sb.toString();

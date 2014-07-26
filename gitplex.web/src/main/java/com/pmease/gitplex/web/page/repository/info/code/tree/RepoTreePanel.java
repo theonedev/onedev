@@ -27,16 +27,16 @@ import com.pmease.commons.git.TreeNode;
 import com.pmease.gitplex.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitplex.web.component.commit.CommitMessagePanel;
 import com.pmease.gitplex.web.component.commit.CommitMetaPanel;
+import com.pmease.gitplex.web.component.repository.RepoAwarePanel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.git.GitUtils;
-import com.pmease.gitplex.web.page.repository.info.RepoInfoPanel;
 import com.pmease.gitplex.web.page.repository.info.RepositoryInfoPage;
 import com.pmease.gitplex.web.page.repository.info.code.blob.RepoBlobPage;
 import com.pmease.gitplex.web.page.repository.info.code.commit.RepoCommitPage;
 import com.pmease.gitplex.web.page.repository.info.code.commits.RepoCommitsPage;
 
 @SuppressWarnings("serial")
-public class RepoTreePanel extends RepoInfoPanel {
+public class RepoTreePanel extends RepoAwarePanel {
 	
 	private final IModel<Commit> lastCommitModel;
 	private final IModel<List<TreeNode>> nodesModel;
@@ -49,10 +49,10 @@ public class RepoTreePanel extends RepoInfoPanel {
 			@Override
 			protected Commit load() {
 				Git git = getRepository().git();
-				List<Commit> commits = git.log(null, getRevision(), getObjPath(), 1, 0);
+				List<Commit> commits = git.log(null, getCurrentRevision(), getCurrentPath(), 1, 0);
 				Commit c = Iterables.getFirst(commits, null);
 				if (c == null) {
-					throw new EntityNotFoundException("Unable to get commit for revision " + getRevision());
+					throw new EntityNotFoundException("Unable to get commit for revision " + getCurrentRevision());
 				} else {
 					return c;
 				}
@@ -72,7 +72,7 @@ public class RepoTreePanel extends RepoInfoPanel {
 		BookmarkablePageLink<Void> historyLink = new BookmarkablePageLink<Void>(
 				"history",
 				RepoCommitsPage.class,
-				RepoCommitsPage.paramsOf(getRepository(), getRevision(), getObjPath(), 0));
+				RepoCommitsPage.paramsOf(getRepository(), getCurrentRevision(), getCurrentPath(), 0));
 		
 		add(historyLink);
 		BookmarkablePageLink<Void> commitLink = new BookmarkablePageLink<Void>(
@@ -88,13 +88,13 @@ public class RepoTreePanel extends RepoInfoPanel {
 			}
 		}));
 		
-		List<String> pathSegments = getObjPathSegments();
+		List<String> pathSegments = getCurrentPathSegments();
 		if (pathSegments.isEmpty()) {
 			add(new WebMarkupContainer("parent").setVisibilityAllowed(false));
 		} else {
 			BookmarkablePageLink<Void> link = new BookmarkablePageLink<Void>("parent",
 					RepoTreePage.class,
-					RepoTreePage.paramsOf(getRepository(), getRevision(), Joiner.on("/").join(pathSegments.subList(0, pathSegments.size() - 1))));
+					RepoTreePage.paramsOf(getRepository(), getCurrentRevision(), Joiner.on("/").join(pathSegments.subList(0, pathSegments.size() - 1))));
 			
 			add(link);
 		}
@@ -117,7 +117,7 @@ public class RepoTreePanel extends RepoInfoPanel {
 							return "icon-folder-submodule";
 						else if (mode == FileMode.SYMLINK) {
 							Git git = getRepository().git();
-							if (git.isTreeLink(path, getRevision()))
+							if (git.isTreeLink(path, getCurrentRevision()))
 								return "icon-folder-symlink";
 							else
 								return "icon-file-symlink";
@@ -128,10 +128,10 @@ public class RepoTreePanel extends RepoInfoPanel {
 				
 				item.add(icon);
 				
-				List<String> pathSegments = Lists.newArrayList(getObjPathSegments());
+				List<String> pathSegments = Lists.newArrayList(getCurrentPathSegments());
 				pathSegments.add(node.getName());
 				
-				PageParameters params = RepositoryInfoPage.paramsOf(getRepository(), getRevision(), 
+				PageParameters params = RepositoryInfoPage.paramsOf(getRepository(), getCurrentRevision(), 
 						Joiner.on("/").join(pathSegments));
 				
 				AbstractLink link;

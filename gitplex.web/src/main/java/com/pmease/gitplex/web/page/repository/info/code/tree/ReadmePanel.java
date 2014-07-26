@@ -13,14 +13,14 @@ import org.apache.wicket.model.Model;
 
 import com.google.common.collect.ImmutableSet;
 import com.pmease.commons.git.TreeNode;
+import com.pmease.gitplex.web.component.repository.RepoAwarePanel;
 import com.pmease.gitplex.web.component.wiki.WikiTextPanel;
 import com.pmease.gitplex.web.component.wiki.WikiType;
-import com.pmease.gitplex.web.page.repository.info.RepoInfoPanel;
 import com.pmease.gitplex.web.page.repository.info.code.blob.language.Language;
 import com.pmease.gitplex.web.service.FileBlob;
 
 @SuppressWarnings("serial")
-public class ReadmePanel extends RepoInfoPanel {
+public class ReadmePanel extends RepoAwarePanel {
 
 	private final IModel<List<TreeNode>> nodesModel;
 	
@@ -41,7 +41,7 @@ public class ReadmePanel extends RepoInfoPanel {
 					return null;
 				}
 				
-				return FileBlob.of(getRepository(), getRevision(), node.getPath());
+				return FileBlob.of(getRepository(), getCurrentRevision(), node.getPath());
 			}
 		};
 	}
