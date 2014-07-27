@@ -37,6 +37,7 @@ import com.pmease.gitplex.web.page.repository.info.code.commit.RepoCommitPage;
 public class CommitsTablePanel extends Panel {
 
 	private final IModel<Multimap<Date, Commit>> groupsModel;
+	
 	private final IModel<Repository> repositoryModel;
 	
 	public CommitsTablePanel(String id, IModel<List<Commit>> model, IModel<Repository> repositoryModel) {
@@ -111,7 +112,7 @@ public class CommitsTablePanel extends Panel {
 			protected void populateItem(ListItem<Commit> item) {
 				Commit commit = item.getModelObject();
 				item.add(new PersonLink("name", Model.of(commit.getAuthor()), AvatarMode.NAME_AND_AVATAR));
-				item.add(new CommitMessagePanel("message", item.getModel()));
+				item.add(new CommitMessagePanel("message", repositoryModel, item.getModel()));
 				
 				AbstractLink link = new BookmarkablePageLink<Void>("commitlink",
 						RepoCommitPage.class,

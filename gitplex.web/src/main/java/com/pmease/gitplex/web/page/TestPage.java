@@ -1,12 +1,15 @@
 package com.pmease.gitplex.web.page;
 
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
 
+	public TestPage(PageParameters params) {
+		super(params);
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -15,7 +18,8 @@ public class TestPage extends BasePage {
 
 			@Override
 			public void onClick() {
-				SecurityUtils.getSubject().login(new UsernamePasswordToken("System", ""));
+				PageParameters params = getPageParameters();
+				System.out.println(params.get("path").toString());
 			}
 			
 		});

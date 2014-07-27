@@ -54,7 +54,7 @@ public class BlobBlamePage extends RepositoryInfoPage {
 
 			@Override
 			protected FileBlob load() {
-				return FileBlob.of(getRepository(), getCurrentRevision(), getCurrentPath());
+				return FileBlob.of(getRepository(), getRepository().defaultBranchIfNull(getCurrentRevision()), getCurrentPath());
 			}
 			
 		};
@@ -64,7 +64,7 @@ public class BlobBlamePage extends RepositoryInfoPage {
 			@Override
 			protected List<BlameEntry> load() {
 				BlameCommand cmd = new BlameCommand(getRepository().git().repoDir());
-				cmd.fileName(getCurrentPath()).objectId(getCurrentRevision());
+				cmd.fileName(getCurrentPath()).objectId(getRepository().defaultBranchIfNull(getCurrentRevision()));
 				
 				return cmd.call();
 			}
@@ -74,14 +74,14 @@ public class BlobBlamePage extends RepositoryInfoPage {
 
 	@Override
 	protected String getPageTitle() {
-		return getCurrentPath() + " at " + getCurrentRevision() + " " + getRepository().getFullName();
+		return getCurrentPath() + " at " + getRepository().defaultBranchIfNull(getCurrentRevision()) + " " + getRepository().getFullName();
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new PathsBreadcrumb("paths"));
+		add(new PathsBreadcrumb("paths", repositoryModel, currentRevision, currentPath));
 		
 		FileBlob blob = getBlob();
 		if (blob.isText()) {

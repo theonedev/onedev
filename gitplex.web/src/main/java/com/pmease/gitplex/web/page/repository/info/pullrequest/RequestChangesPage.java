@@ -168,7 +168,7 @@ public class RequestChangesPage extends RequestDetailPage {
 		});
 		add(headCommitSelector);
 		
-		add(diffView = new DiffViewPanel("diffView", new LoadableDetachableModel<String>() {
+		add(diffView = new DiffViewPanel("diffView", repositoryModel, new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {

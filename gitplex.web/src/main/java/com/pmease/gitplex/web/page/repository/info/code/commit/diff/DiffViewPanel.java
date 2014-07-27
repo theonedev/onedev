@@ -43,16 +43,18 @@ import com.pmease.gitplex.web.util.MediaTypeUtils;
 @SuppressWarnings("serial")
 public class DiffViewPanel extends Panel {
 
+	private final IModel<Repository> repoModel;
+	
 	private final IModel<String> sinceModel;
 	
 	private final IModel<String> untilModel;
 
 	private final IModel<Patch> patchModel;
 	
-	public DiffViewPanel(String id, IModel<String> sinceModel, IModel<String> untilModel) {
-		
+	public DiffViewPanel(String id, IModel<Repository> repoModel, IModel<String> sinceModel, IModel<String> untilModel) {
 		super(id);
-		
+	
+		this.repoModel = repoModel;
 		this.sinceModel = sinceModel;
 		this.untilModel = untilModel;
 		
@@ -159,7 +161,7 @@ public class DiffViewPanel extends Panel {
 	}
 	
 	private Component newMessagePanel(String id, int index, IModel<FileHeader> model, IModel<String> messageModel) {
-		return new BlobMessagePanel(id, index, model, sinceModel, untilModel, messageModel);
+		return new BlobMessagePanel(id, index, repoModel, model, sinceModel, untilModel, messageModel);
 	}
 	
 	protected Component createFileDiffPanel(String id, IModel<FileHeader> model, int index) {
@@ -193,7 +195,7 @@ public class DiffViewPanel extends Panel {
 				MediaType mediaType = types.getMediaType(path, new byte[0]);
 				if (MediaTypeUtils.isImageType(mediaType) 
 						&& types.isSafeInline(mediaType)) {
-					return new ImageDiffPanel(id, index, model, sinceModel, untilModel);
+					return new ImageDiffPanel(id, index, repoModel, model, sinceModel, untilModel);
 				} else {
 					// other binary diffs
 					return newMessagePanel(id, index, model, Model.of("File is a binary file"));
@@ -237,7 +239,7 @@ public class DiffViewPanel extends Panel {
 			}
 		}
 		
-		return new TextDiffPanel(id, index, model, sinceModel, untilModel);
+		return new TextDiffPanel(id, index, repoModel, model, sinceModel, untilModel);
 	}
 	
 	
@@ -333,14 +335,10 @@ public class DiffViewPanel extends Panel {
 	
 	@Override
 	public void onDetach() {
-		if (patchModel != null) 
-			patchModel.detach();
-		
-		if (sinceModel != null) 
-			sinceModel.detach();
-		
-		if (untilModel != null) 
-			untilModel.detach();
+		patchModel.detach();
+		repoModel.detach();
+		sinceModel.detach();
+		untilModel.detach();
 		
 		super.onDetach();
 	}

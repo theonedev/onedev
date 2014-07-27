@@ -312,4 +312,11 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		return defaultBranch;
 	}
 	
+	public String defaultBranchIfNull(@Nullable String revision) {
+		if (revision != null)
+			return revision;
+		else
+			return getDefaultBranch();
+	}
+	
 }

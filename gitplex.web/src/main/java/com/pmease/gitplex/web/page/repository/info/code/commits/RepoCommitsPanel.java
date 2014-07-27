@@ -120,7 +120,7 @@ public class RepoCommitsPanel extends Panel {
 						item.add(new PersonLink("avatar", Model.of(commit.getAuthor()), AvatarMode.AVATAR)
 									.withTooltipConfig(new TooltipConfig().withPlacement(Placement.right)));
 						
-						item.add(new CommitMessagePanel("message", item.getModel()));
+						item.add(new CommitMessagePanel("message", repositoryModel, item.getModel()));
 						item.add(new CommitMetaPanel("meta", item.getModel()));
 						
 						AbstractLink shalink =new BookmarkablePageLink<Void>(

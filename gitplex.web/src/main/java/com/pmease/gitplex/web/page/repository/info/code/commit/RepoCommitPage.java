@@ -55,7 +55,7 @@ public class RepoCommitPage extends RepositoryInfoPage implements CommitComments
 
 			@Override
 			protected Commit load() {
-				String revision = getCurrentRevision();
+				String revision = getRepository().defaultBranchIfNull(getCurrentRevision());
 				Repository repository = getRepository();
 				return repository.git().showRevision(revision);
 			}
@@ -148,7 +148,7 @@ public class RepoCommitPage extends RepositoryInfoPage implements CommitComments
 		
 		add(createInRefListView("branches", RefType.BRANCH));
 		add(createInRefListView("tags", RefType.TAG));
-		add(new DiffViewPanel("diffs", Model.of(getSince()), Model.of(getUntil())));
+		add(new DiffViewPanel("diffs", repositoryModel, Model.of(getSince()), Model.of(getUntil())));
 		
 		add(new CommentListPanel("comments", repositoryModel, new AbstractReadOnlyModel<String>() {
 
@@ -166,7 +166,7 @@ public class RepoCommitPage extends RepositoryInfoPage implements CommitComments
 			@Override
 			protected List<String> load() {
 				CommitInCommand command = new CommitInCommand(getRepository().git().repoDir());
-				command.commit(getCurrentRevision()).in(type);
+				command.commit(getRepository().defaultBranchIfNull(getCurrentRevision())).in(type);
 				return command.call();
 			}
 			
@@ -245,11 +245,12 @@ public class RepoCommitPage extends RepositoryInfoPage implements CommitComments
 	
 	@Override
 	protected String getPageTitle() {
-		if (GitUtils.isHash(getCurrentRevision())) {
-			return getCommit().getSubject() + " - " + GitUtils.abbreviateSHA(getCurrentRevision(), 8) 
+		String revision = getRepository().defaultBranchIfNull(getCurrentRevision());
+		if (GitUtils.isHash(revision)) {
+			return getCommit().getSubject() + " - " + GitUtils.abbreviateSHA(revision, 8) 
 					+ " - " + getRepository().getFullName();
 		} else {
-			return getCommit().getSubject() + " - " + getCurrentRevision() 
+			return getCommit().getSubject() + " - " + revision 
 					+ " - " + getRepository().getFullName();
 		}
 	}

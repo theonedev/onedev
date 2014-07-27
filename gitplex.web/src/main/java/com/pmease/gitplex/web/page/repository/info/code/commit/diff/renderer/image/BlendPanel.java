@@ -7,16 +7,19 @@ import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
 import com.google.common.base.Strings;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.info.code.blob.renderer.FileBlobImage;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.FileHeader;
 
 @SuppressWarnings("serial")
 public class BlendPanel extends AbstractImageDiffPanel {
 
-	public BlendPanel(String id, IModel<FileHeader> fileModel,
+	public BlendPanel(String id,
+			IModel<Repository> repoModel, 
+			IModel<FileHeader> fileModel,
 			IModel<String> sinceModel,
 			IModel<String> untilModel) {
-		super(id, fileModel, sinceModel, untilModel);
+		super(id, repoModel, fileModel, sinceModel, untilModel);
 	}
 
 	@Override

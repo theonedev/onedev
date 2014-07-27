@@ -19,6 +19,7 @@ import org.parboiled.common.Preconditions;
 
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.CommitComment;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.comment.event.CommitCommentAdded;
 import com.pmease.gitplex.web.component.comment.event.CommitCommentRemoved;
 import com.pmease.gitplex.web.git.GitUtils;
@@ -40,11 +41,12 @@ public class TextDiffPanel extends BlobDiffPanel {
 	
 	public TextDiffPanel(String id,
 			int index,
+			IModel<Repository> repoModel,
 			IModel<FileHeader> fileModel,
 			IModel<String> sinceModel,
 			IModel<String> untilModel) {
 		
-		super(id, index, fileModel, sinceModel, untilModel);
+		super(id, index, repoModel, fileModel, sinceModel, untilModel);
 		
 		this.newFileModel = new LoadableDetachableModel<FileBlob>() {
 
@@ -68,7 +70,7 @@ public class TextDiffPanel extends BlobDiffPanel {
 			return null;
 		}
 		
-		return GitPlex.getInstance(FileBlobService.class).get(getRepository(), revision, path);
+		return GitPlex.getInstance(FileBlobService.class).get(repoModel.getObject(), revision, path);
 	}
 	
 	WebMarkupContainer actionsBar;
@@ -165,6 +167,7 @@ public class TextDiffPanel extends BlobDiffPanel {
 			@Override
 			protected void populateItem(ListItem<HunkHeader> item) {
 				item.add(new HunkPanel("hunk",
+						repoModel,
 						untilModel,
 						Model.of(item.getIndex()),
 						getFileModel(),

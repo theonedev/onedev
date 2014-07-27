@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -18,6 +20,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -30,27 +33,36 @@ import com.google.common.collect.Maps;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitplex.web.common.wicket.component.tab.BootstrapTabbedPanel;
-import com.pmease.gitplex.web.component.repository.RepoAwarePanel;
 import com.pmease.gitplex.web.git.GitUtils;
 import com.pmease.gitplex.web.page.repository.RepositoryHomePage;
 import com.pmease.gitplex.web.page.repository.info.RepositoryInfoPage;
 import com.pmease.gitplex.web.page.repository.info.code.tree.RepoTreePage;
 
 @SuppressWarnings("serial")
-public class RevisionSelector extends RepoAwarePanel {
+public class RevisionSelector extends Panel {
 
+	private final IModel<Repository> repoModel;
+	
+	private final String revision;
+	
+	private final String path;
+	
 	private final IModel<Map<RefType, List<String>>> refsModel;
 	
-	public RevisionSelector(String id) {
+	public RevisionSelector(String id, IModel<Repository> repoModel, @Nullable String revision, @Nullable String path) {
 		super(id);
 		
+		this.repoModel = repoModel;
+		this.revision = revision;
+		this.path = path;
 		this.refsModel = new LoadableDetachableModel<Map<RefType, List<String>>>() {
 
 			@Override
 			protected Map<RefType, List<String>> load() {
-				Git git = getRepository().git();
+				Git git = RevisionSelector.this.repoModel.getObject().git();
 				Map<RefType, List<String>> map = Maps.newHashMapWithExpectedSize(RefType.values().length);
 				map.put(RefType.BRANCH, Lists.newArrayList(git.listBranches().keySet()));
 				List<String> tags = Lists.newArrayList(git.listTags());
@@ -72,7 +84,7 @@ public class RevisionSelector extends RepoAwarePanel {
 
 			@Override
 			public String getObject() {
-				String revision = getCurrentRevision();
+				String revision = repoModel.getObject().defaultBranchIfNull(RevisionSelector.this.revision);
 				RefType type = getRevisionType(revision);
 				if (type == null) {
 					return GitUtils.abbreviateSHA(revision);
@@ -86,8 +98,7 @@ public class RevisionSelector extends RepoAwarePanel {
 
 			@Override
 			public String getObject() {
-				String revision = getCurrentRevision();
-				RefType type = getRevisionType(revision);
+				RefType type = getRevisionType(repoModel.getObject().defaultBranchIfNull(revision));
 				if (type == null) {
 					return "icon-commit";
 				} else if (type == RefType.BRANCH) {
@@ -135,12 +146,11 @@ public class RevisionSelector extends RepoAwarePanel {
 
 					@Override
 					public Integer getObject() {
-						String revision = getCurrentRevision();
 						Map<RefType, List<String>> map = refsModel.getObject();
 						for (RefType each : RefType.values()) {
 							List<String> refs = map.get(each);
 							for (String ref : refs) {
-								if (ref.equalsIgnoreCase(revision)) {
+								if (ref.equalsIgnoreCase(repoModel.getObject().defaultBranchIfNull(revision))) {
 									return each.ordinal();
 								}
 							}
@@ -171,7 +181,6 @@ public class RevisionSelector extends RepoAwarePanel {
 				}
 			}
 		}
-		
 		return null;
 	}
 	
@@ -199,7 +208,7 @@ public class RevisionSelector extends RepoAwarePanel {
 
 					@Override
 					public String getObject() {
-						return Objects.equal(getCurrentRevision(), ref) ? "checked" : "unchecked";
+						return Objects.equal(repoModel.getObject().defaultBranchIfNull(revision), ref) ? "checked" : "unchecked";
 					}
 				}));
 				
@@ -233,7 +242,7 @@ public class RevisionSelector extends RepoAwarePanel {
 	}
 	
 	protected AbstractLink newRefLink(String id, String ref) {
-		PageParameters params = RepositoryInfoPage.paramsOf(getRepository(), ref, getCurrentPath());
+		PageParameters params = RepositoryInfoPage.paramsOf(repoModel.getObject(), ref, path);
 		
 		return new BookmarkablePageLink<Void>("link", getPageClass(), params);
 	}
@@ -249,9 +258,8 @@ public class RevisionSelector extends RepoAwarePanel {
 	
 	@Override
 	public void onDetach() {
-		if (refsModel != null) {
-			refsModel.detach();
-		}
+		repoModel.detach();
+		refsModel.detach();
 		
 		super.onDetach();
 	}

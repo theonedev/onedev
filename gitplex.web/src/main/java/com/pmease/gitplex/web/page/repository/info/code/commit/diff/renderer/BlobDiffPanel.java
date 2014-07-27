@@ -6,19 +6,21 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffEntry.Side;
 
-import com.pmease.gitplex.web.component.repository.RepoAwarePanel;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.info.code.blob.RepoBlobPage;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.DiffStatBar;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.FileHeader;
 
 @SuppressWarnings("serial")
-public abstract class BlobDiffPanel extends RepoAwarePanel {
+public abstract class BlobDiffPanel extends Panel {
 
+	protected final IModel<Repository> repoModel;
 	protected final IModel<String> sinceModel;
 	protected final IModel<String> untilModel;
 //	protected final IModel<List<CommitComment>> commentsModel;
@@ -32,6 +34,7 @@ public abstract class BlobDiffPanel extends RepoAwarePanel {
 	
 	public BlobDiffPanel(String id,
 			final int index,
+			IModel<Repository> repoModel,
 			IModel<FileHeader> fileModel,
 			IModel<String> sinceModel,
 			IModel<String> untilModel) {
@@ -39,6 +42,7 @@ public abstract class BlobDiffPanel extends RepoAwarePanel {
 	
 		this.index = index;
 		this.markupId = "diff-" + index;
+		this.repoModel = repoModel;
 		this.sinceModel = sinceModel;
 		this.untilModel = untilModel;
 //		this.commentsModel = commentsModel;
@@ -84,7 +88,7 @@ public abstract class BlobDiffPanel extends RepoAwarePanel {
 		String until = untilModel.getObject();
 		AbstractLink blobLink = new BookmarkablePageLink<Void>("bloblink",
 				RepoBlobPage.class,
-				RepoBlobPage.paramsOf(getRepository(), 
+				RepoBlobPage.paramsOf(repoModel.getObject(), 
 										 until, 
 										 path));
 		blobLink.setVisibilityAllowed(getFile().getChangeType() != ChangeType.DELETE);
@@ -114,13 +118,9 @@ public abstract class BlobDiffPanel extends RepoAwarePanel {
 	
 	@Override
 	public void onDetach() {
-		if (sinceModel != null) {
-			sinceModel.detach();
-		}
-		
-		if (untilModel != null) {
-			untilModel.detach();
-		}
+		sinceModel.detach();
+		untilModel.detach();
+		repoModel.detach();
 		
 //		if (commentsModel != null) {
 //			commentsModel.detach();

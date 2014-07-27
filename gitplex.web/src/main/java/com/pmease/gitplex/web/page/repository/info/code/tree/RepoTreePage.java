@@ -39,7 +39,7 @@ public class RepoTreePage extends RepositoryInfoPage {
 					path = UrlUtils.removeRedundantSlashes(path + "/");
 				}
 				
-				List<TreeNode> nodes = Lists.newArrayList(git.listTree(getCurrentRevision(), path, false));
+				List<TreeNode> nodes = Lists.newArrayList(git.listTree(getRepository().defaultBranchIfNull(getCurrentRevision()), path, false));
 				
 				Collections.sort(nodes, new Comparator<TreeNode>() {
 
@@ -62,10 +62,10 @@ public class RepoTreePage extends RepositoryInfoPage {
 			}
 		};
 		
-		add(new RepoDescribePanel("description").setVisible(getCurrentPath() != null));
-		add(new SourceBreadcrumbPanel("breadcrumb"));
-		add(new RepoTreePanel("tree", nodesModel));
-		add(new ReadmePanel("readme", nodesModel));
+		add(new RepoDescribePanel("description", repositoryModel).setVisible(getCurrentPath() != null));
+		add(new SourceBreadcrumbPanel("breadcrumb", repositoryModel, currentRevision, currentPath));
+		add(new RepoTreePanel("tree", repositoryModel, currentRevision, currentPath, nodesModel));
+		add(new ReadmePanel("readme", repositoryModel, currentRevision, nodesModel));
 	}
 	
 	@Override
@@ -77,7 +77,7 @@ public class RepoTreePage extends RepositoryInfoPage {
 		} else {
 			StringBuffer sb = new StringBuffer();
 			sb.append(getCurrentPath())
-				.append(" at ").append(getCurrentRevision())
+				.append(" at ").append(repository.defaultBranchIfNull(getCurrentRevision()))
 				.append(" - ").append(repository.getFullName());
 			
 			return sb.toString();

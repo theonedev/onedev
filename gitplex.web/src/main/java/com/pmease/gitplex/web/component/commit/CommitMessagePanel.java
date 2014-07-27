@@ -4,20 +4,25 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.google.common.base.Objects;
 import com.pmease.commons.git.Commit;
-import com.pmease.gitplex.web.component.repository.RepoAwarePanel;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.info.code.commit.RepoCommitPage;
 
 @SuppressWarnings("serial")
-public class CommitMessagePanel extends RepoAwarePanel {
+public class CommitMessagePanel extends Panel {
 
-	public CommitMessagePanel(String id, IModel<Commit> commitModel) {
+	private final IModel<Repository> repoModel;
+	
+	public CommitMessagePanel(String id, IModel<Repository> repoModel, IModel<Commit> commitModel) {
 		super(id, commitModel);
+		
+		this.repoModel = repoModel;
 	}
 
 	@Override
@@ -26,7 +31,7 @@ public class CommitMessagePanel extends RepoAwarePanel {
 		
 		AbstractLink link = new BookmarkablePageLink<Void>("commitlink",
 				RepoCommitPage.class,
-				RepoCommitPage.paramsOf(getRepository(), getCommit().getHash(), null));
+				RepoCommitPage.paramsOf(repoModel.getObject(), getCommit().getHash(), null));
 		
 		add(link);
 		link.add(new Label("shortmessage", new AbstractReadOnlyModel<String>() {
@@ -62,6 +67,13 @@ public class CommitMessagePanel extends RepoAwarePanel {
 	
 	private Commit getCommit() {
 		return (Commit) getDefaultModelObject();
+	}
+
+	@Override
+	protected void onDetach() {
+		repoModel.detach();
+		
+		super.onDetach();
 	}
 	
 }

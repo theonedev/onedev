@@ -16,6 +16,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.Loop;
 import org.apache.wicket.markup.html.list.LoopItem;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -33,6 +34,7 @@ import com.google.common.collect.Multimap;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.CommitComment;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.GitPlexSession;
 import com.pmease.gitplex.web.component.comment.CommitCommentEditor;
@@ -43,7 +45,6 @@ import com.pmease.gitplex.web.component.comment.event.CommitCommentAdded;
 import com.pmease.gitplex.web.component.comment.event.CommitCommentEvent;
 import com.pmease.gitplex.web.component.comment.event.CommitCommentRemoved;
 import com.pmease.gitplex.web.component.comment.event.OpenLineCommentForm;
-import com.pmease.gitplex.web.component.repository.RepoAwarePanel;
 import com.pmease.gitplex.web.model.CommitCommentModel;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.CommitCommentsAware;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.FileHeader;
@@ -54,10 +55,14 @@ import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.HunkLi
 import de.agilecoders.wicket.jquery.JQuery;
 
 @SuppressWarnings({ "serial", "deprecation" })
-public class HunkPanel extends RepoAwarePanel {
+public class HunkPanel extends Panel {
 
+	private final IModel<Repository> repoModel;
+	
 	private final IModel<FileHeader> fileModel;
+	
 	private final IModel<List<String>> blobLinesModel;
+	
 	private final IModel<String> commitModel;
 	
 	private RepeatingView linesView;
@@ -71,6 +76,7 @@ public class HunkPanel extends RepoAwarePanel {
 	final static String INSERT_BEFORE_ROW = "var item = document.createElement('tr'); item.id='%s'; $(item).insertBefore($('#%s'));";
 	
 	public HunkPanel(String id,
+			IModel<Repository> repoModel,
 			IModel<String> commitModel,
 			IModel<Integer> indexModel,
 			IModel<FileHeader> fileModel,
@@ -78,6 +84,7 @@ public class HunkPanel extends RepoAwarePanel {
 		
 		super(id, indexModel);
 		
+		this.repoModel = repoModel;
 		this.commitModel = commitModel;
 		this.fileModel = fileModel;
 		this.blobLinesModel = blobLinesModel;
@@ -361,7 +368,7 @@ public class HunkPanel extends RepoAwarePanel {
 				comment.setAuthor(GitPlexSession.getCurrentUser().get());
 				comment.setCommit(commitModel.getObject());
 				comment.setLine(lineId);
-				comment.setRepository(getRepository());
+				comment.setRepository(repoModel.getObject());
 				comment.setContent(getCommentText());
 				GitPlex.getInstance(Dao.class).persist(comment);
 				
@@ -772,17 +779,11 @@ public class HunkPanel extends RepoAwarePanel {
 	
 	@Override
 	public void onDetach() {
-		if (commitModel != null) 
-			commitModel.detach();
-		
-		if (fileModel != null)
-			fileModel.detach();
-		
-		if (blobLinesModel != null) 
-			blobLinesModel.detach();
-
-		if (commentsModel != null)
-			commentsModel.detach();
+		commitModel.detach();
+		fileModel.detach();
+		blobLinesModel.detach();
+		commentsModel.detach();
+		repoModel.detach();
 		
 		super.onDetach();
 	}

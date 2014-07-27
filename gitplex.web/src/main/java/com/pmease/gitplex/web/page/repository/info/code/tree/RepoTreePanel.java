@@ -2,6 +2,7 @@ package com.pmease.gitplex.web.page.repository.info.code.tree;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -12,22 +13,22 @@ import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
+import com.pmease.commons.git.PathUtils;
 import com.pmease.commons.git.TreeNode;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitplex.web.component.commit.CommitMessagePanel;
 import com.pmease.gitplex.web.component.commit.CommitMetaPanel;
-import com.pmease.gitplex.web.component.repository.RepoAwarePanel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.git.GitUtils;
 import com.pmease.gitplex.web.page.repository.info.RepositoryInfoPage;
@@ -36,23 +37,36 @@ import com.pmease.gitplex.web.page.repository.info.code.commit.RepoCommitPage;
 import com.pmease.gitplex.web.page.repository.info.code.commits.RepoCommitsPage;
 
 @SuppressWarnings("serial")
-public class RepoTreePanel extends RepoAwarePanel {
+public class RepoTreePanel extends Panel {
+	
+	private final IModel<Repository> repoModel;
+	
+	private final String currentRevision;
+	
+	private final String currentPath;
 	
 	private final IModel<Commit> lastCommitModel;
+	
 	private final IModel<List<TreeNode>> nodesModel;
 	
-	public RepoTreePanel(String id, IModel<List<TreeNode>> nodesModel) {
+	public RepoTreePanel(String id, final IModel<Repository> repoModel, final @Nullable String currentRevision, 
+			final @Nullable String currentPath, IModel<List<TreeNode>> nodesModel) {
 		super(id);
+		
+		this.repoModel = repoModel;
+		this.currentRevision = currentRevision;
+		this.currentPath = currentPath;
 		
 		lastCommitModel = new LoadableDetachableModel<Commit>() {
 
 			@Override
 			protected Commit load() {
-				Git git = getRepository().git();
-				List<Commit> commits = git.log(null, getCurrentRevision(), getCurrentPath(), 1, 0);
+				Git git = repoModel.getObject().git();
+				String revision = repoModel.getObject().defaultBranchIfNull(RepoTreePanel.this.currentRevision);
+				List<Commit> commits = git.log(null, revision, currentPath, 1, 0);
 				Commit c = Iterables.getFirst(commits, null);
 				if (c == null) {
-					throw new EntityNotFoundException("Unable to get commit for revision " + getCurrentRevision());
+					throw new EntityNotFoundException("Unable to get commit for revision " + revision);
 				} else {
 					return c;
 				}
@@ -66,19 +80,19 @@ public class RepoTreePanel extends RepoAwarePanel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new CommitMessagePanel("message", lastCommitModel));
+		add(new CommitMessagePanel("message", repoModel, lastCommitModel));
 		add(new CommitMetaPanel("meta", lastCommitModel).setAuthorMode(AvatarMode.NAME_AND_AVATAR));
 		
 		BookmarkablePageLink<Void> historyLink = new BookmarkablePageLink<Void>(
 				"history",
 				RepoCommitsPage.class,
-				RepoCommitsPage.paramsOf(getRepository(), getCurrentRevision(), getCurrentPath(), 0));
+				RepoCommitsPage.paramsOf(repoModel.getObject(), currentRevision, currentPath, 0));
 		
 		add(historyLink);
 		BookmarkablePageLink<Void> commitLink = new BookmarkablePageLink<Void>(
 				"commitlink",
 				RepoCommitPage.class,
-				RepoCommitPage.paramsOf(getRepository(), getLastCommit().getHash(), null));
+				RepoCommitPage.paramsOf(repoModel.getObject(), getLastCommit().getHash(), null));
 		add(commitLink);
 		commitLink.add(new Label("sha", new AbstractReadOnlyModel<String>() {
 
@@ -88,13 +102,13 @@ public class RepoTreePanel extends RepoAwarePanel {
 			}
 		}));
 		
-		List<String> pathSegments = getCurrentPathSegments();
-		if (pathSegments.isEmpty()) {
+		List<String> pathElements = PathUtils.split(currentPath);
+		if (pathElements.isEmpty()) {
 			add(new WebMarkupContainer("parent").setVisibilityAllowed(false));
 		} else {
 			BookmarkablePageLink<Void> link = new BookmarkablePageLink<Void>("parent",
 					RepoTreePage.class,
-					RepoTreePage.paramsOf(getRepository(), getCurrentRevision(), Joiner.on("/").join(pathSegments.subList(0, pathSegments.size() - 1))));
+					RepoTreePage.paramsOf(repoModel.getObject(), currentRevision, PathUtils.join(pathElements.subList(0, pathElements.size() - 1))));
 			
 			add(link);
 		}
@@ -116,8 +130,8 @@ public class RepoTreePanel extends RepoAwarePanel {
 						else if (mode == FileMode.GITLINK)
 							return "icon-folder-submodule";
 						else if (mode == FileMode.SYMLINK) {
-							Git git = getRepository().git();
-							if (git.isTreeLink(path, getCurrentRevision()))
+							Git git = repoModel.getObject().git();
+							if (git.isTreeLink(path, repoModel.getObject().defaultBranchIfNull(currentRevision)))
 								return "icon-folder-symlink";
 							else
 								return "icon-file-symlink";
@@ -128,11 +142,11 @@ public class RepoTreePanel extends RepoAwarePanel {
 				
 				item.add(icon);
 				
-				List<String> pathSegments = Lists.newArrayList(getCurrentPathSegments());
-				pathSegments.add(node.getName());
+				List<String> pathElements = PathUtils.split(currentPath);
+				pathElements.add(node.getName());
 				
-				PageParameters params = RepositoryInfoPage.paramsOf(getRepository(), getCurrentRevision(), 
-						Joiner.on("/").join(pathSegments));
+				PageParameters params = RepositoryInfoPage.paramsOf(repoModel.getObject(), 
+						currentRevision, PathUtils.join(pathElements));
 				
 				AbstractLink link;
 				FileMode mode = node.getMode();
@@ -162,13 +176,9 @@ public class RepoTreePanel extends RepoAwarePanel {
 	
 	@Override
 	public void onDetach() {
-		if (lastCommitModel != null) {
-			lastCommitModel.detach();
-		}
-		
-		if (nodesModel != null) {
-			nodesModel.detach();
-		}
+		repoModel.detach();
+		lastCommitModel.detach();
+		nodesModel.detach();
 		
 		super.onDetach();
 	}

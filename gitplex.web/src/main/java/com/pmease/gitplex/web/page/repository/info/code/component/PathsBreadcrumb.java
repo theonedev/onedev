@@ -5,18 +5,30 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 
-import com.google.common.base.Joiner;
-import com.pmease.gitplex.web.component.repository.RepoAwarePanel;
+import com.pmease.commons.git.PathUtils;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.info.RepositoryInfoPage;
 import com.pmease.gitplex.web.page.repository.info.code.tree.RepoTreePage;
 
 @SuppressWarnings("serial")
-public class PathsBreadcrumb extends RepoAwarePanel {
+public class PathsBreadcrumb extends Panel {
 
-	public PathsBreadcrumb(String id) {
+	private final IModel<Repository> repoModel;
+	
+	private final String currentRevision;
+	
+	private final String currentPath;
+	
+	public PathsBreadcrumb(String id, IModel<Repository> repoModel, String currentRevision, String currentPath) {
 		super(id);
+		
+		this.repoModel = repoModel;
+		this.currentRevision = currentRevision;
+		this.currentPath = currentPath;
 	}
 
 	@Override
@@ -25,17 +37,17 @@ public class PathsBreadcrumb extends RepoAwarePanel {
 		
 		BookmarkablePageLink<Void> homeLink = new BookmarkablePageLink<Void>("home", 
 				RepoTreePage.class, 
-				RepositoryInfoPage.paramsOf(getRepository(), getCurrentRevision(), null));
+				RepositoryInfoPage.paramsOf(repoModel.getObject(), currentRevision));
 		add(homeLink);
 		homeLink.add(new Label("name", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return getRepository().getName();
+				return repoModel.getObject().getName();
 			}
 		}));
 		
-		ListView<String> pathsView = new ListView<String>("paths", getCurrentPathSegments()) {
+		ListView<String> pathsView = new ListView<String>("paths", PathUtils.split(currentPath)) {
 
 			@Override
 			protected void populateItem(ListItem<String> item) {
@@ -44,9 +56,9 @@ public class PathsBreadcrumb extends RepoAwarePanel {
 				BookmarkablePageLink<Void> link = new BookmarkablePageLink<Void>(
 						"link", 
 						RepoTreePage.class,
-						RepoTreePage.paramsOf(getRepository(), 
-													 getCurrentRevision(), 
-													 Joiner.on("/").join(getCurrentPathSegments().subList(0, item.getIndex() + 1))));
+						RepoTreePage.paramsOf(repoModel.getObject(), 
+													 currentRevision, 
+													 PathUtils.join(PathUtils.split(currentPath).subList(0, item.getIndex() + 1))));
 				
 				item.add(link);
 				link.add(new Label("name", path));
@@ -60,4 +72,12 @@ public class PathsBreadcrumb extends RepoAwarePanel {
 		
 		add(pathsView);
 	}
+
+	@Override
+	protected void onDetach() {
+		repoModel.detach();
+		
+		super.onDetach();
+	}
+	
 }

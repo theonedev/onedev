@@ -14,6 +14,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
+import com.pmease.commons.git.PathUtils;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.info.RepositoryInfoPage;
@@ -51,7 +52,7 @@ public class RepoCommitsPage extends RepositoryInfoPage {
 				
 				// load additional one commit to see whether there is still more page
 				LogCommand command = new LogCommand(git.repoDir())
-										.toRev(getCurrentRevision())
+										.toRev(getRepository().defaultBranchIfNull(getCurrentRevision()))
 										.skip((page - 1) * COMMITS_PER_PAGE)
 										.maxCount(COMMITS_PER_PAGE + 1);
 				if (getCurrentPath() != null) 
@@ -67,7 +68,7 @@ public class RepoCommitsPage extends RepositoryInfoPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new RevisionSelector("revselector"));
+		add(new RevisionSelector("revselector", repositoryModel, currentRevision, currentPath));
 //		BookmarkablePageLink<Void> homeLink = new BookmarkablePageLink<Void>("home", 
 //				SourceTreePage.class, 
 //				PageSpec.forRepository(getRepository()).add(PageSpec.OBJECT_ID, getRevision()));
@@ -81,7 +82,7 @@ public class RepoCommitsPage extends RepositoryInfoPage {
 //		}));
 
 		add(newNavLink("home", -1));
-		add(new ListView<String>("pathSegments", getCurrentPathSegments()) {
+		add(new ListView<String>("pathSegments", PathUtils.split(currentPath)) {
 
 			@Override
 			protected void populateItem(ListItem<String> item) {
@@ -104,7 +105,7 @@ public class RepoCommitsPage extends RepositoryInfoPage {
 	}
 	
 	private Component newNavLink(String id, final int pathNum) {
-		List<String> all = getCurrentPathSegments();
+		List<String> all = PathUtils.split(currentPath);
 		
 		BookmarkablePageLink<Void> link = new BookmarkablePageLink<Void>(id,
 				RepoCommitsPage.class,
@@ -117,7 +118,7 @@ public class RepoCommitsPage extends RepositoryInfoPage {
 				if (pathNum < 0) {
 					return getRepository().getName();
 				} else {
-					List<String> all = getCurrentPathSegments();
+					List<String> all = PathUtils.split(currentPath);
 					return all.get(pathNum);
 				}
 			}

@@ -9,6 +9,7 @@ import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
 import com.google.common.base.Strings;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.info.code.blob.renderer.FileBlobImage;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.FileHeader;
 
@@ -17,11 +18,13 @@ import de.agilecoders.wicket.jquery.JQuery;
 @SuppressWarnings("serial")
 public class SwipePanel extends AbstractImageDiffPanel {
 
-	public SwipePanel(String id, IModel<FileHeader> fileModel,
+	public SwipePanel(String id, 
+			IModel<Repository> repoModel,
+			IModel<FileHeader> fileModel,
 			IModel<String> sinceModel,
 			IModel<String> untilModel) {
 		
-		super(id, fileModel, sinceModel, untilModel);
+		super(id, repoModel, fileModel, sinceModel, untilModel);
 	}
 
 	Image oldImage;

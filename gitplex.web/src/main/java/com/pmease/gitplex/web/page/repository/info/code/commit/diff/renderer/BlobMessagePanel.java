@@ -4,6 +4,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.IModel;
 
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.common.wicket.bootstrap.Alert;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.FileHeader;
 
@@ -14,11 +15,12 @@ public class BlobMessagePanel extends BlobDiffPanel {
 	
 	public BlobMessagePanel(String id,
 			int index,
+			IModel<Repository> repoModel,
 			IModel<FileHeader> fileModel,
 			IModel<String> sinceModel,
 			IModel<String> untilModel, 
 			IModel<String> messageModel) {
-		super(id, index, fileModel, sinceModel, untilModel);
+		super(id, index, repoModel, fileModel, sinceModel, untilModel);
 		
 		this.messageModel = messageModel;
 	}

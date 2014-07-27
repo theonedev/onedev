@@ -45,6 +45,7 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.branch.AffinalBranchSingleChoice;
 import com.pmease.gitplex.web.component.branch.BranchLink;
 import com.pmease.gitplex.web.component.commit.CommitsTablePanel;
+import com.pmease.gitplex.web.model.RepositoryModel;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.info.RepositoryInfoPage;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.CommitCommentsAware;
@@ -258,7 +259,8 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 			
 		});
 		
-		add(new DiffViewPanel("changes", new AbstractReadOnlyModel<String>() {
+		IModel<Repository> sourceRepoModel = new RepositoryModel(pullRequest.getSource().getRepository());
+		add(new DiffViewPanel("changes", sourceRepoModel, new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {

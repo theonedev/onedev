@@ -6,6 +6,7 @@ import java.util.Set;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -13,23 +14,26 @@ import org.apache.wicket.model.Model;
 
 import com.google.common.collect.ImmutableSet;
 import com.pmease.commons.git.TreeNode;
-import com.pmease.gitplex.web.component.repository.RepoAwarePanel;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.wiki.WikiTextPanel;
 import com.pmease.gitplex.web.component.wiki.WikiType;
 import com.pmease.gitplex.web.page.repository.info.code.blob.language.Language;
 import com.pmease.gitplex.web.service.FileBlob;
 
 @SuppressWarnings("serial")
-public class ReadmePanel extends RepoAwarePanel {
+public class ReadmePanel extends Panel {
 
+	private final IModel<Repository> repoModel;
+	
 	private final IModel<List<TreeNode>> nodesModel;
 	
 	private final IModel<FileBlob> blobModel;
 	
-	public ReadmePanel(String id, IModel<List<TreeNode>> nodesModel) {
+	public ReadmePanel(String id, IModel<Repository> repoModel, final String revision, IModel<List<TreeNode>> nodesModel) {
 		
 		super(id);
-		
+	
+		this.repoModel = repoModel;
 		this.nodesModel = nodesModel;
 		
 		this.blobModel = new LoadableDetachableModel<FileBlob>() {
@@ -41,7 +45,7 @@ public class ReadmePanel extends RepoAwarePanel {
 					return null;
 				}
 				
-				return FileBlob.of(getRepository(), getCurrentRevision(), node.getPath());
+				return FileBlob.of(ReadmePanel.this.repoModel.getObject(), revision, node.getPath());
 			}
 		};
 	}
@@ -129,13 +133,9 @@ public class ReadmePanel extends RepoAwarePanel {
 	
 	@Override
 	public void onDetach() {
-		if (nodesModel != null) {
-			nodesModel.detach();
-		}
-		
-		if (blobModel != null) {
-			blobModel.detach();
-		}
+		repoModel.detach();
+		nodesModel.detach();
+		blobModel.detach();
 		
 		super.onDetach();
 	}

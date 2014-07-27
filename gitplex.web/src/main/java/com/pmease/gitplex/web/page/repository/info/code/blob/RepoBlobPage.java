@@ -46,12 +46,12 @@ public class RepoBlobPage extends RepositoryInfoPage {
 			@Override
 			protected Commit load() {
 				Git git = getRepository().git();
-				List<Commit> commits = git.log(null, getCurrentRevision(), getCurrentPath(), 1, 0);
+				List<Commit> commits = git.log(null, getRepository().defaultBranchIfNull(getCurrentRevision()), getCurrentPath(), 1, 0);
 				Commit commit = Iterables.getFirst(commits, null);
 				if (commit == null) {
 					throw new EntityNotFoundException(
 							"Path: " + getCurrentPath() +
-							", revision: " + getCurrentRevision() + " doesn't exist"); 
+							", revision: " + getRepository().defaultBranchIfNull(getCurrentRevision()) + " doesn't exist"); 
 				}
 				return commit;
 			}
@@ -62,7 +62,7 @@ public class RepoBlobPage extends RepositoryInfoPage {
 			@Override
 			protected List<PersonIdent> load() {
 				Git git = getRepository().git();
-				List<Commit> commits = git.log(null, getCurrentRevision(), getCurrentPath(), 0, 0);
+				List<Commit> commits = git.log(null, getRepository().defaultBranchIfNull(getCurrentRevision()), getCurrentPath(), 0, 0);
 				Set<PersonIdent> users = Sets.newHashSet();
 				for (Commit each : commits) {
 					users.add(each.getAuthor());
@@ -78,7 +78,7 @@ public class RepoBlobPage extends RepositoryInfoPage {
 	public void onInitialize() {
 		super.onInitialize();
 		
-		add(new SourceBreadcrumbPanel("breadcrumb"));
+		add(new SourceBreadcrumbPanel("breadcrumb", repositoryModel, currentRevision, currentPath));
 		
 		add(new Label("shortMessage", new AbstractReadOnlyModel<String>() {
 
@@ -136,14 +136,14 @@ public class RepoBlobPage extends RepositoryInfoPage {
 
 			@Override
 			protected FileBlob load() {
-				return FileBlob.of(getRepository(), getCurrentRevision(), getCurrentPath());
+				return FileBlob.of(getRepository(), getRepository().defaultBranchIfNull(getCurrentRevision()), getCurrentPath());
 			}
 		}));
 	}
 
 	@Override
 	protected String getPageTitle() {
-		return getCurrentPath() + " at " + getCurrentRevision() + " " + getRepository().getFullName();
+		return getCurrentPath() + " at " + getRepository().defaultBranchIfNull(getCurrentRevision()) + " " + getRepository().getFullName();
 	}
 	
 	protected Commit getLastCommit() {
