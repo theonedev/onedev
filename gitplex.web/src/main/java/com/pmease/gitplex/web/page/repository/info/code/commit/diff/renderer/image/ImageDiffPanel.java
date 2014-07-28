@@ -14,10 +14,10 @@ public class ImageDiffPanel extends BlobDiffPanel {
 	public ImageDiffPanel(String id, int index, 
 			IModel<Repository> repoModel,
 			IModel<FileHeader> fileModel,
-			IModel<String> sinceModel,
-			IModel<String> untilModel) {
+			String sinceRevision,
+			String untilRevision) {
 		
-		super(id, index, repoModel, fileModel, sinceModel, untilModel);
+		super(id, index, repoModel, fileModel, sinceRevision, untilRevision);
 	}
 
 	@Override
@@ -27,6 +27,6 @@ public class ImageDiffPanel extends BlobDiffPanel {
 
 	@Override
 	protected Component createDiffContent(String id) {
-		return new ImageBlobDiffPanel(id, repoModel, getFileModel(), sinceModel, untilModel);
+		return new ImageBlobDiffPanel(id, repoModel, getFileModel(), sinceRevision, untilRevision);
 	}
 }

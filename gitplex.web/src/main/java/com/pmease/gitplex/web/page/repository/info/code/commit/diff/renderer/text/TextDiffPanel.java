@@ -43,16 +43,16 @@ public class TextDiffPanel extends BlobDiffPanel {
 			int index,
 			IModel<Repository> repoModel,
 			IModel<FileHeader> fileModel,
-			IModel<String> sinceModel,
-			IModel<String> untilModel) {
+			final String sinceRevision,
+			final String untilRevision) {
 		
-		super(id, index, repoModel, fileModel, sinceModel, untilModel);
+		super(id, index, repoModel, fileModel, sinceRevision, untilRevision);
 		
 		this.newFileModel = new LoadableDetachableModel<FileBlob>() {
 
 			@Override
 			protected FileBlob load() {
-				return loadBlob(getUntil(), getFile().getNewPath());
+				return loadBlob(untilRevision, getFile().getNewPath());
 			}
 			
 		};
@@ -60,7 +60,7 @@ public class TextDiffPanel extends BlobDiffPanel {
 
 			@Override
 			protected FileBlob load() {
-				return loadBlob(getSince(), getFile().getOldPath());
+				return loadBlob(sinceRevision, getFile().getOldPath());
 			}
 		};
 	}
@@ -168,7 +168,7 @@ public class TextDiffPanel extends BlobDiffPanel {
 			protected void populateItem(ListItem<HunkHeader> item) {
 				item.add(new HunkPanel("hunk",
 						repoModel,
-						untilModel,
+						untilRevision,
 						Model.of(item.getIndex()),
 						getFileModel(),
 						new LoadableDetachableModel<List<String>>() {

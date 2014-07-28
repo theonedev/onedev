@@ -9,6 +9,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.pmease.gitplex.core.GitPlex;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.mime.MediaType;
 import org.eclipse.jgit.lib.FileMode;
@@ -19,11 +20,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.io.CharSource;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.util.MediaTypes;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.common.quantity.Data;
 import com.pmease.gitplex.web.page.repository.info.code.blob.language.Language;
 import com.pmease.gitplex.web.page.repository.info.code.blob.language.Languages;
-import com.pmease.gitplex.web.util.MediaTypeUtils;
 
 public class FileBlob implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -53,11 +54,11 @@ public class FileBlob implements Serializable {
 	}
 	
 	public boolean isText() {
-		return MediaTypeUtils.isTextType(mediaType);
+		return MediaTypes.isText(mediaType);
 	}
 	
 	public boolean isImage() {
-		return MediaTypeUtils.isImageType(mediaType);
+		return MediaTypes.isImage(mediaType);
 	}
 	
 	public boolean isEmpty() {
@@ -74,7 +75,7 @@ public class FileBlob implements Serializable {
 	
 	public @Nullable Language getLanguage() {
 		Language lang = Languages.INSTANCE.findByMediaType(mediaType);
-		if ((lang == null) && (MediaTypeUtils.isXMLType(mediaType))) {
+		if ((lang == null) && (MediaTypes.isXML(mediaType))) {
 			return Languages.INSTANCE.findByMediaType(MediaType.APPLICATION_XML);
 		}
 		

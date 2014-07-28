@@ -148,7 +148,7 @@ public class RepoCommitPage extends RepositoryInfoPage implements CommitComments
 		
 		add(createInRefListView("branches", RefType.BRANCH));
 		add(createInRefListView("tags", RefType.TAG));
-		add(new DiffViewPanel("diffs", repositoryModel, Model.of(getSince()), Model.of(getUntil())));
+		add(new DiffViewPanel("diffs", repositoryModel, getSince(), getUntil()));
 		
 		add(new CommentListPanel("comments", repositoryModel, new AbstractReadOnlyModel<String>() {
 

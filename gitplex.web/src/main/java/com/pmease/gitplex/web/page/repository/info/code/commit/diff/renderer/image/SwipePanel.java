@@ -21,10 +21,10 @@ public class SwipePanel extends AbstractImageDiffPanel {
 	public SwipePanel(String id, 
 			IModel<Repository> repoModel,
 			IModel<FileHeader> fileModel,
-			IModel<String> sinceModel,
-			IModel<String> untilModel) {
+			String sinceRevision,
+			String untilRevision) {
 		
-		super(id, repoModel, fileModel, sinceModel, untilModel);
+		super(id, repoModel, fileModel, sinceRevision, untilRevision);
 	}
 
 	Image oldImage;
@@ -35,15 +35,13 @@ public class SwipePanel extends AbstractImageDiffPanel {
 		super.onInitialize();
 		
 		FileHeader file = getFile();
-		String since = getSince();
-		String until = getUntil();
 		
-		if (file.getChangeType() == ChangeType.ADD || Strings.isNullOrEmpty(since)) {
+		if (file.getChangeType() == ChangeType.ADD || Strings.isNullOrEmpty(sinceRevision)) {
 			add(new WebMarkupContainer("old").setVisibilityAllowed(false));
 		} else {
 			add(oldImage = new FileBlobImage("old", 
 					getRepository(), 
-					since,
+					sinceRevision,
 					file.getOldPath()));
 		}
 		
@@ -52,7 +50,7 @@ public class SwipePanel extends AbstractImageDiffPanel {
 		} else {
 			add(newImage = new FileBlobImage("new",
 					getRepository(),
-					until,
+					untilRevision,
 					file.getNewPath()));
 		}
 	}

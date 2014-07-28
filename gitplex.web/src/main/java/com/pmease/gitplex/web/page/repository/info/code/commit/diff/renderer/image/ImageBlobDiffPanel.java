@@ -21,10 +21,10 @@ public class ImageBlobDiffPanel extends AbstractImageDiffPanel {
 	public ImageBlobDiffPanel(String id, 
 			IModel<Repository> repoModel,
 			IModel<FileHeader> model, 
-			IModel<String> sinceModel,
-			IModel<String> untilModel) {
+			String sinceRevision,
+			String untilRevision) {
 		
-		super(id, repoModel, model, sinceModel, untilModel);
+		super(id, repoModel, model, sinceRevision, untilRevision);
 		
 		setOutputMarkupId(true);
 	}
@@ -93,13 +93,13 @@ public class ImageBlobDiffPanel extends AbstractImageDiffPanel {
 	protected Component createImageContainer() {
 		switch (compareType) {
 		case SIDE_BY_SIDE:
-			return new SideBySidePanel("image", repoModel, fileModel, sinceModel, untilModel);
+			return new SideBySidePanel("image", repoModel, fileModel, sinceRevision, untilRevision);
 			
 		case SWIPE:
-			return new SwipePanel("image", repoModel, fileModel, sinceModel, untilModel);
+			return new SwipePanel("image", repoModel, fileModel, sinceRevision, untilRevision);
 			
 		case BLEND:
-			return new BlendPanel("image", repoModel, fileModel, sinceModel, untilModel);
+			return new BlendPanel("image", repoModel, fileModel, sinceRevision, untilRevision);
 			
 		default:
 			return new WebMarkupContainer("image").setVisibilityAllowed(false);

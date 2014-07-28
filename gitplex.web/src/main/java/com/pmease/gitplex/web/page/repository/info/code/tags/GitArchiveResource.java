@@ -11,6 +11,7 @@ import org.apache.wicket.request.resource.ContentDisposition;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.util.MediaTypes;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.model.Repository;
@@ -20,7 +21,6 @@ import com.pmease.gitplex.web.git.command.ArchiveCommand;
 import com.pmease.gitplex.web.git.command.ArchiveCommand.Format;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
-import com.pmease.gitplex.web.service.FileTypes;
 
 @SuppressWarnings("serial")
 public class GitArchiveResource extends AbstractResource {
@@ -52,7 +52,7 @@ public class GitArchiveResource extends AbstractResource {
 		ResourceResponse response = new ResourceResponse();
 		response.setFileName(fileName);
 		
-		MediaType mt = GitPlex.getInstance(FileTypes.class).getMediaType(fileName, new byte[0]);
+		MediaType mt = MediaTypes.detectFrom(new byte[0], fileName);
 		response.setContentType(mt.toString());
 		response.setContentDisposition(ContentDisposition.ATTACHMENT);
 		final Long repositoryId = repository.getId();

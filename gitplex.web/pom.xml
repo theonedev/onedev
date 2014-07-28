@@ -65,18 +65,6 @@
 
 		<!-- Google Closure need this -->
 		<dependency>
-			<groupId>com.googlecode.juniversalchardet</groupId>
-			<artifactId>juniversalchardet</artifactId>
-			<version>1.0.3</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.tika</groupId>
-			<artifactId>tika-core</artifactId>
-			<version>${tika.version}</version>
-		</dependency>
-		
-		<dependency>
 			<groupId>org.gitective</groupId>
 			<artifactId>gitective-core</artifactId>
 			<version>0.9.9</version>

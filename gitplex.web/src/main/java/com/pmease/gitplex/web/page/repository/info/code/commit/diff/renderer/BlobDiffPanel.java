@@ -21,13 +21,17 @@ import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.FileHe
 public abstract class BlobDiffPanel extends Panel {
 
 	protected final IModel<Repository> repoModel;
-	protected final IModel<String> sinceModel;
-	protected final IModel<String> untilModel;
-//	protected final IModel<List<CommitComment>> commentsModel;
+	
+	protected final String sinceRevision;
+	
+	protected final String untilRevision;
+	
+	//	protected final IModel<List<CommitComment>> commentsModel;
 	
 	protected final int index;
 	
 	abstract protected Component createActionsBar(String id);
+	
 	abstract protected Component createDiffContent(String id);
 	
 	protected final String markupId;
@@ -36,15 +40,15 @@ public abstract class BlobDiffPanel extends Panel {
 			final int index,
 			IModel<Repository> repoModel,
 			IModel<FileHeader> fileModel,
-			IModel<String> sinceModel,
-			IModel<String> untilModel) {
+			String sinceRevision,
+			String untilRevision) {
 		super(id, fileModel);
 	
 		this.index = index;
 		this.markupId = "diff-" + index;
 		this.repoModel = repoModel;
-		this.sinceModel = sinceModel;
-		this.untilModel = untilModel;
+		this.sinceRevision = sinceRevision;
+		this.untilRevision = untilRevision;
 //		this.commentsModel = commentsModel;
 	}
 
@@ -85,11 +89,10 @@ public abstract class BlobDiffPanel extends Panel {
 		}).setEscapeModelStrings(false));
 		
 		String path = getFile().getNewPath();
-		String until = untilModel.getObject();
 		AbstractLink blobLink = new BookmarkablePageLink<Void>("bloblink",
 				RepoBlobPage.class,
 				RepoBlobPage.paramsOf(repoModel.getObject(), 
-										 until, 
+										 untilRevision, 
 										 path));
 		blobLink.setVisibilityAllowed(getFile().getChangeType() != ChangeType.DELETE);
 		add(blobLink);
@@ -108,18 +111,8 @@ public abstract class BlobDiffPanel extends Panel {
 		return (IModel<FileHeader>) getDefaultModel();
 	}
 	
-	protected String getSince() {
-		return sinceModel.getObject();
-	}
-	
-	protected String getUntil() {
-		return untilModel.getObject();
-	}
-	
 	@Override
 	public void onDetach() {
-		sinceModel.detach();
-		untilModel.detach();
 		repoModel.detach();
 		
 //		if (commentsModel != null) {

@@ -168,21 +168,9 @@ public class RequestChangesPage extends RequestDetailPage {
 		});
 		add(headCommitSelector);
 		
-		add(diffView = new DiffViewPanel("diffView", repositoryModel, new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				return baseCommitSelector.getDefaultModelObjectAsString();
-			}
-			
-		}, new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				return headCommitSelector.getDefaultModelObjectAsString();
-			}
-			
-		}));
+		add(diffView = new DiffViewPanel("diffView", repositoryModel, 
+				baseCommitSelector.getDefaultModelObjectAsString(), 
+				headCommitSelector.getDefaultModelObjectAsString()));
 		
 		diffView.setOutputMarkupId(true);
 	}

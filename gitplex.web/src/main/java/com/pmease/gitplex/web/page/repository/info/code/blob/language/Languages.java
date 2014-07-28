@@ -16,7 +16,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
-import com.pmease.gitplex.web.util.MediaTypeUtils;
+import com.pmease.commons.util.MediaTypes;
 import com.pmease.gitplex.web.util.StandardObjectMapper;
 
 public enum Languages {
@@ -62,7 +62,7 @@ public enum Languages {
 	
 	public @Nullable Language findByMediaType(MediaType mime) {
 		Language lang = mediaTypeIndex.get(mime.toString());
-		if (lang == null && MediaTypeUtils.isXMLType(mime)) {
+		if (lang == null && MediaTypes.isXML(mime)) {
 			return languages.get("xml");
 		}
 		

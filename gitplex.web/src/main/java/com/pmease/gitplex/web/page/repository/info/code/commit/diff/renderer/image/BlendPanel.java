@@ -17,9 +17,9 @@ public class BlendPanel extends AbstractImageDiffPanel {
 	public BlendPanel(String id,
 			IModel<Repository> repoModel, 
 			IModel<FileHeader> fileModel,
-			IModel<String> sinceModel,
-			IModel<String> untilModel) {
-		super(id, repoModel, fileModel, sinceModel, untilModel);
+			String sinceRevision,
+			String untilRevision) {
+		super(id, repoModel, fileModel, sinceRevision, untilRevision);
 	}
 
 	@Override
@@ -27,15 +27,13 @@ public class BlendPanel extends AbstractImageDiffPanel {
 		super.onInitialize();
 		
 		FileHeader file = getFile();
-		String since = getSince();
-		String until = getUntil();
 		
-		if (file.getChangeType() == ChangeType.ADD || Strings.isNullOrEmpty(since)) {
+		if (file.getChangeType() == ChangeType.ADD || Strings.isNullOrEmpty(sinceRevision)) {
 			add(new WebMarkupContainer("old").setVisibilityAllowed(false));
 		} else {
 			add(new FileBlobImage("old", 
 					getRepository(), 
-					since,
+					sinceRevision,
 					file.getOldPath()));
 		}
 		
@@ -44,7 +42,7 @@ public class BlendPanel extends AbstractImageDiffPanel {
 		} else {
 			add(new FileBlobImage("new",
 					getRepository(),
-					until,
+					untilRevision,
 					file.getNewPath()));
 		}
 		

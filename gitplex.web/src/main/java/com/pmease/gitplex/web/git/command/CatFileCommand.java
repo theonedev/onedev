@@ -12,8 +12,8 @@ import com.google.common.base.Throwables;
 import com.pmease.commons.git.GitConfig;
 import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.loader.AppLoader;
+import com.pmease.commons.util.Charsets;
 import com.pmease.commons.util.execution.Commandline;
-import com.pmease.gitplex.web.util.UniversalEncodingDetector;
 
 public class CatFileCommand extends GitCommand<String> {
 
@@ -69,7 +69,7 @@ public class CatFileCommand extends GitCommand<String> {
 			
 			byte[] bytes = out.toByteArray();
 			if (showType == ShowType.PRETTY) {
-				return RawParseUtils.decode(UniversalEncodingDetector.detect(bytes), bytes);
+				return RawParseUtils.decode(Charsets.detectFrom(bytes), bytes);
 			} else {
 				// needn't detect charset when showing size or type
 				return RawParseUtils.decode(bytes);

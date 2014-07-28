@@ -15,9 +15,9 @@ public class SideBySidePanel extends AbstractImageDiffPanel {
 	public SideBySidePanel(String id, 
 			IModel<Repository> repoModel,
 			IModel<FileHeader> model,
-			IModel<String> sinceModel,
-			IModel<String> untilModel) {
-		super(id, repoModel, model, sinceModel, untilModel);
+			String sinceRevision,
+			String untilRevision) {
+		super(id, repoModel, model, sinceRevision, untilRevision);
 	}
 
 	@Override
@@ -25,15 +25,13 @@ public class SideBySidePanel extends AbstractImageDiffPanel {
 		super.onInitialize();
 		
 		FileHeader file = getFile();
-		String until = getUntil();
-		String since = getSince();
 		
-		if (file.getChangeType() == ChangeType.ADD || Strings.isNullOrEmpty(since)) {
+		if (file.getChangeType() == ChangeType.ADD || Strings.isNullOrEmpty(sinceRevision)) {
 			add(new WebMarkupContainer("old").setVisibilityAllowed(false));
 		} else {
 			add(new FileBlobImage("old", 
 					getRepository(), 
-					since,
+					sinceRevision,
 					file.getOldPath()));
 		}
 		
@@ -42,7 +40,7 @@ public class SideBySidePanel extends AbstractImageDiffPanel {
 		} else {
 			add(new FileBlobImage("new",
 					getRepository(),
-					until,
+					untilRevision,
 					file.getNewPath()));
 		}
 	}

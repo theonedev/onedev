@@ -17,13 +17,13 @@ import org.parboiled.common.Preconditions;
 
 import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
+import com.pmease.commons.util.MediaTypes;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.service.FileBlob;
 import com.pmease.gitplex.web.service.FileBlobService;
-import com.pmease.gitplex.web.service.FileTypes;
 
 @Path("/blob")
 public class BlobResource {
@@ -65,7 +65,7 @@ public class BlobResource {
 			}
 		};
 		
-		String disposition = GitPlex.getInstance(FileTypes.class).isSafeInline(blob.getMediaType()) ?
+		String disposition = MediaTypes.isSafeInline(blob.getMediaType()) ?
 				"inline" : "attachment; filename = " + blob.getName();
 		
 		return Response.ok(stream, blob.getMediaType().toString())

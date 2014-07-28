@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.util;
+package com.pmease.commons.util;
 
 import java.nio.charset.Charset;
 

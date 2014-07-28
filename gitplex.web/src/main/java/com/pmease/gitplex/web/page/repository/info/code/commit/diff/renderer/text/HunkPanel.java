@@ -63,11 +63,12 @@ public class HunkPanel extends Panel {
 	
 	private final IModel<List<String>> blobLinesModel;
 	
-	private final IModel<String> commitModel;
+	private final String revision;
 	
 	private RepeatingView linesView;
 
 	private int startLine;
+	
 	private int endLine;
 	
 	private final IModel<Multimap<String, Long>> commentsModel;
@@ -77,7 +78,7 @@ public class HunkPanel extends Panel {
 	
 	public HunkPanel(String id,
 			IModel<Repository> repoModel,
-			IModel<String> commitModel,
+			String revision,
 			IModel<Integer> indexModel,
 			IModel<FileHeader> fileModel,
 			IModel<List<String>> blobLinesModel) {
@@ -85,7 +86,7 @@ public class HunkPanel extends Panel {
 		super(id, indexModel);
 		
 		this.repoModel = repoModel;
-		this.commitModel = commitModel;
+		this.revision = revision;
 		this.fileModel = fileModel;
 		this.blobLinesModel = blobLinesModel;
 		
@@ -366,7 +367,7 @@ public class HunkPanel extends Panel {
 				String lineId = getLineId(position);
 				CommitComment comment = new CommitComment();
 				comment.setAuthor(GitPlexSession.getCurrentUser().get());
-				comment.setCommit(commitModel.getObject());
+				comment.setCommit(revision);
 				comment.setLine(lineId);
 				comment.setRepository(repoModel.getObject());
 				comment.setContent(getCommentText());
@@ -779,7 +780,6 @@ public class HunkPanel extends Panel {
 	
 	@Override
 	public void onDetach() {
-		commitModel.detach();
 		fileModel.detach();
 		blobLinesModel.detach();
 		commentsModel.detach();

@@ -260,21 +260,9 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 		});
 		
 		IModel<Repository> sourceRepoModel = new RepositoryModel(pullRequest.getSource().getRepository());
-		add(new DiffViewPanel("changes", sourceRepoModel, new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return pullRequest.getBaseUpdate().getHeadCommit();
-			}
-			
-		}, new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return pullRequest.getLatestUpdate().getHeadCommit();
-			}
-			
-		}) {
+		add(new DiffViewPanel("changes", sourceRepoModel, 
+				pullRequest.getBaseUpdate().getHeadCommit(),
+				pullRequest.getLatestUpdate().getHeadCommit()) {
 
 			@Override
 			protected void onConfigure() {

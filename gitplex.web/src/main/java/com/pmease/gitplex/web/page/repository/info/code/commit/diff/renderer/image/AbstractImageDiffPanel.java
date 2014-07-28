@@ -11,21 +11,21 @@ public class AbstractImageDiffPanel extends Panel {
 	
 	protected final IModel<Repository> repoModel;
 	protected final IModel<FileHeader> fileModel;
-	protected final IModel<String> sinceModel;
-	protected final IModel<String> untilModel;
+	protected final String sinceRevision;
+	protected final String untilRevision;
 	
 	public AbstractImageDiffPanel(String id, 
 			IModel<Repository> repoModel,
 			IModel<FileHeader> fileModel, 
-			IModel<String> sinceModel,
-			IModel<String> untilModel) {
+			String sinceRevision,
+			String untilRevision) {
 		
 		super(id);
 		
 		this.repoModel = repoModel;
 		this.fileModel = fileModel;
-		this.sinceModel = sinceModel;
-		this.untilModel = untilModel;
+		this.sinceRevision = sinceRevision;
+		this.untilRevision = untilRevision;
 		
 		setOutputMarkupId(true);
 	}
@@ -38,20 +38,10 @@ public class AbstractImageDiffPanel extends Panel {
 		return fileModel.getObject();
 	}
 	
-	protected String getSince() {
-		return sinceModel.getObject();
-	}
-	
-	protected String getUntil() {
-		return untilModel.getObject();
-	}
-	
 	@Override
 	public void onDetach() {
 		repoModel.detach();
 		fileModel.detach();
-		sinceModel.detach();
-		untilModel.detach();
 		
 		super.onDetach();
 	}

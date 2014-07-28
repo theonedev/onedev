@@ -18,8 +18,7 @@ public class TestPage extends BasePage {
 
 			@Override
 			public void onClick() {
-				PageParameters params = getPageParameters();
-				System.out.println(params.get("path").toString());
+				System.out.println();
 			}
 			
 		});

@@ -17,10 +17,10 @@ public class DifferencePanel extends AbstractImageDiffPanel {
 	public DifferencePanel(String id, 
 			IModel<Repository> repoModel,
 			IModel<FileHeader> fileModel,
-			IModel<String> sinceModel,
-			IModel<String> untilModel) {
+			String sinceRevision,
+			String untilRevision) {
 		
-		super(id, repoModel, fileModel, sinceModel, untilModel);
+		super(id, repoModel, fileModel, sinceRevision, untilRevision);
 	}
 
 	@Override
@@ -28,15 +28,13 @@ public class DifferencePanel extends AbstractImageDiffPanel {
 		super.onInitialize();
 		
 		FileHeader file = getFile();
-		String until = getUntil();
-		String since = getSince();
 		
-		if (file.getChangeType() == ChangeType.ADD || Strings.isNullOrEmpty(since)) {
+		if (file.getChangeType() == ChangeType.ADD || Strings.isNullOrEmpty(sinceRevision)) {
 			add(new WebMarkupContainer("old").setVisibilityAllowed(false));
 		} else {
 			add(new FileBlobImage("old", 
 					getRepository(), 
-					since,
+					sinceRevision,
 					file.getOldPath()));
 		}
 		
@@ -45,7 +43,7 @@ public class DifferencePanel extends AbstractImageDiffPanel {
 		} else {
 			add(new FileBlobImage("new",
 					getRepository(),
-					until,
+					untilRevision,
 					file.getNewPath()));
 		}
 

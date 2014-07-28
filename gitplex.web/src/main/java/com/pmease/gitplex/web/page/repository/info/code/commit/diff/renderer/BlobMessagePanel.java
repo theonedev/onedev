@@ -17,10 +17,10 @@ public class BlobMessagePanel extends BlobDiffPanel {
 			int index,
 			IModel<Repository> repoModel,
 			IModel<FileHeader> fileModel,
-			IModel<String> sinceModel,
-			IModel<String> untilModel, 
+			String sinceRevision,
+			String untilRevision, 
 			IModel<String> messageModel) {
-		super(id, index, repoModel, fileModel, sinceModel, untilModel);
+		super(id, index, repoModel, fileModel, sinceRevision, untilRevision);
 		
 		this.messageModel = messageModel;
 	}

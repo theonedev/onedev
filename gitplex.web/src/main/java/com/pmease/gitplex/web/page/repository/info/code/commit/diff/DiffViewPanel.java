@@ -21,15 +21,13 @@ import org.apache.wicket.model.Model;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.parboiled.common.Preconditions;
 
-import com.google.common.base.Strings;
+import com.pmease.commons.util.MediaTypes;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.common.wicket.bootstrap.Alert;
 import com.pmease.gitplex.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitplex.web.git.command.DiffTreeCommand;
-import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.FileHeader;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.FileHeader.PatchType;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.HunkHeader;
@@ -37,26 +35,24 @@ import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.Patch;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.renderer.BlobMessagePanel;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.renderer.image.ImageDiffPanel;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.renderer.text.TextDiffPanel;
-import com.pmease.gitplex.web.service.FileTypes;
-import com.pmease.gitplex.web.util.MediaTypeUtils;
 
 @SuppressWarnings("serial")
 public class DiffViewPanel extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
-	private final IModel<String> sinceModel;
+	private final String sinceRevision;
 	
-	private final IModel<String> untilModel;
+	private final String untilRevision;
 
 	private final IModel<Patch> patchModel;
 	
-	public DiffViewPanel(String id, IModel<Repository> repoModel, IModel<String> sinceModel, IModel<String> untilModel) {
+	public DiffViewPanel(String id, IModel<Repository> repoModel, @Nullable String sinceRevision, String untilRevision) {
 		super(id);
 	
 		this.repoModel = repoModel;
-		this.sinceModel = sinceModel;
-		this.untilModel = untilModel;
+		this.sinceRevision = sinceRevision;
+		this.untilRevision = Preconditions.checkNotNull(untilRevision);
 		
 		this.patchModel = new LoadableDetachableModel<Patch>() {
 
@@ -69,12 +65,9 @@ public class DiffViewPanel extends Panel {
 	}
 
 	private Patch loadPatch() {
-		String since = getSince();
-		String until = getUntil();
-		
-		Patch patch = new DiffTreeCommand(getRepository().git().repoDir())
-			.since(since)
-			.until(until)
+		Patch patch = new DiffTreeCommand(repoModel.getObject().git().repoDir())
+			.since(sinceRevision)
+			.until(untilRevision)
 			.recurse(true) // -r
 			.root(true)    // --root
 			.contextLines(Constants.DEFAULT_CONTEXT_LINES) // -U3
@@ -83,26 +76,13 @@ public class DiffViewPanel extends Panel {
 		return patch;
 	}
 	
-	private Repository getRepository() {
-		RepositoryPage page = (RepositoryPage) getPage();
-		return page.getRepository();
-	}
-	
-	private @Nullable String getSince() {
-		return sinceModel.getObject();
-	}
-	
-	private String getUntil() {
-		return Preconditions.checkNotNull(untilModel.getObject());
-	}
-	
 	protected String getWarningMessage() {
 		return "This commit contains too many changed files to render. "
 				+ "Showing only the first " + Constants.MAX_RENDERABLE_BLOBS 
 				+ " changed files. You can still get all changes "
 				+ "manually by running below command: "
-				+ "<pre><code>git diff-tree -M -r -p " 
-				+ getSince() + " " + getUntil() 
+				+ "<pre><code>git diff-tree --root -M -r -p " 
+				+ (sinceRevision!=null?sinceRevision + " ":"") + untilRevision 
 				+ "</code></pre>";
 	}
 	
@@ -161,7 +141,7 @@ public class DiffViewPanel extends Panel {
 	}
 	
 	private Component newMessagePanel(String id, int index, IModel<FileHeader> model, IModel<String> messageModel) {
-		return new BlobMessagePanel(id, index, repoModel, model, sinceModel, untilModel, messageModel);
+		return new BlobMessagePanel(id, index, repoModel, model, sinceRevision, untilRevision, messageModel);
 	}
 	
 	protected Component createFileDiffPanel(String id, IModel<FileHeader> model, int index) {
@@ -188,14 +168,12 @@ public class DiffViewPanel extends Panel {
 					path = file.getNewPath();
 				}
 				
-				FileTypes types = GitPlex.getInstance(FileTypes.class);
-				
 				// fast detect the media type without loading file blob
 				//
-				MediaType mediaType = types.getMediaType(path, new byte[0]);
-				if (MediaTypeUtils.isImageType(mediaType) 
-						&& types.isSafeInline(mediaType)) {
-					return new ImageDiffPanel(id, index, repoModel, model, sinceModel, untilModel);
+				MediaType mediaType = MediaTypes.detectFrom(new byte[0], path);
+				if (MediaTypes.isImage(mediaType) 
+						&& MediaTypes.isSafeInline(mediaType)) {
+					return new ImageDiffPanel(id, index, repoModel, model, sinceRevision, untilRevision);
 				} else {
 					// other binary diffs
 					return newMessagePanel(id, index, model, Model.of("File is a binary file"));
@@ -220,26 +198,19 @@ public class DiffViewPanel extends Panel {
 			if (hunks.size() > Constants.MAX_RENDERABLE_DIFF_LINES) {
 				// don't show huge diff (exceed 10000 lines)
 				//
-				String since = sinceModel.getObject();
-				String until = untilModel.getObject();
-				
-				if (Strings.isNullOrEmpty(since)) {
-					since = "";
-				}
-				
 				return newMessagePanel(id, index, model, Model.of(
 						"<p>"
 						+ "The diff for this file is too large to render. "
 						+ "You can run below command to get the diff manually:"
 						+ "</p> "
 						+ "<pre><code>"
-						+ "git diff -C -M " + since + " " + until + " -- " 
+						+ "git diff -C -M " + (sinceRevision!=null?sinceRevision:"") + " " + untilRevision + " -- " 
 						+ StringUtils.quoteArgument(file.getNewPath())
 						+ "</code></pre>"));
 			}
 		}
 		
-		return new TextDiffPanel(id, index, repoModel, model, sinceModel, untilModel);
+		return new TextDiffPanel(id, index, repoModel, model, sinceRevision, untilRevision);
 	}
 	
 	
@@ -335,10 +306,8 @@ public class DiffViewPanel extends Panel {
 	
 	@Override
 	public void onDetach() {
-		patchModel.detach();
 		repoModel.detach();
-		sinceModel.detach();
-		untilModel.detach();
+		patchModel.detach();
 		
 		super.onDetach();
 	}

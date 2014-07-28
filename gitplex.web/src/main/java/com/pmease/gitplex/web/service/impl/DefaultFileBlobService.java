@@ -4,7 +4,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
@@ -21,24 +20,17 @@ import org.gitective.core.CommitUtils;
 
 import com.google.common.base.Objects;
 import com.google.common.io.ByteStreams;
+import com.pmease.commons.util.Charsets;
+import com.pmease.commons.util.MediaTypes;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.git.RepoUtils;
 import com.pmease.gitplex.web.git.RepositoryException;
 import com.pmease.gitplex.web.service.FileBlob;
 import com.pmease.gitplex.web.service.FileBlobService;
-import com.pmease.gitplex.web.service.FileTypes;
-import com.pmease.gitplex.web.util.UniversalEncodingDetector;
 
 @Singleton
 public class DefaultFileBlobService implements FileBlobService {
 
-	final FileTypes fileTypes;
-	
-	@Inject
-	DefaultFileBlobService(FileTypes fileTypes) {
-		this.fileTypes = fileTypes;
-	}
-	
 	@Override
 	public FileBlob get(Repository repository, String revision, String path) {
 		FileBlob blob = new FileBlob(repository.getId(), revision, path);
@@ -69,16 +61,16 @@ public class DefaultFileBlobService implements FileBlobService {
 				BufferedInputStream stream = null;
 				try {
 					stream = new BufferedInputStream(ol.openStream());
-					blob.setMediaType(fileTypes.getMediaType(path, stream));
+					blob.setMediaType(MediaTypes.detectFrom(stream, path));
 					
-					if (!UniversalEncodingDetector.isBinary(stream) 
+					if (!Charsets.isBinary(stream) 
 							&& Objects.equal(blob.getMediaType(), MediaType.OCTET_STREAM)) {
 						// error detecting by tika
 						blob.setMediaType(MediaType.TEXT_PLAIN);
 					}
 					
-					if (!blob.isLarge() && fileTypes.isSafeInline(blob.getMediaType())) {
-						blob.setCharset(UniversalEncodingDetector.detect(stream));
+					if (!blob.isLarge() && MediaTypes.isSafeInline(blob.getMediaType())) {
+						blob.setCharset(Charsets.detectFrom(stream));
 						blob.setData(ByteStreams.toByteArray(stream));
 					}
 				} finally {

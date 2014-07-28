@@ -18,10 +18,9 @@ import org.eclipse.jgit.lib.AbbreviatedObjectId;
 import org.eclipse.jgit.util.MutableInteger;
 import org.eclipse.jgit.util.RawParseUtils;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import com.pmease.commons.util.Charsets;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.HunkLine.LineType;
-import com.pmease.gitplex.web.util.UniversalEncodingDetector;
 
 /** Hunk header describing the layout of a single block of lines */
 public class HunkHeader {
@@ -249,11 +248,7 @@ public class HunkHeader {
 	}
 	
 	public Charset getCharset() {
-		try (ByteArrayInputStream bas = new ByteArrayInputStream(file.buf)) {
-			return UniversalEncodingDetector.detect(bas);
-		} catch (IOException e) {
-			throw Throwables.propagate(e);
-		}
+		return Charsets.detectFrom(new ByteArrayInputStream(file.buf));
 	}
 	
 	int parseBody(final Patch script, final int end) {

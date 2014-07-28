@@ -5,8 +5,6 @@ import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
 
-import com.pmease.gitplex.core.GitPlex;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.tika.io.IOUtils;
@@ -21,6 +19,8 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.util.MediaTypes;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.permission.ObjectPermission;
@@ -29,7 +29,6 @@ import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.service.FileBlob;
 import com.pmease.gitplex.web.service.FileBlobService;
-import com.pmease.gitplex.web.service.FileTypes;
 import com.pmease.gitplex.web.util.UrlUtils;
 
 public class RawBlobResource extends AbstractResource {
@@ -77,7 +76,7 @@ public class RawBlobResource extends AbstractResource {
 			response.setFileName(fileName);
 			response.setContentType(blob.getMediaType().toString());
 			
-			if (GitPlex.getInstance(FileTypes.class).isSafeInline(blob.getMediaType())) {
+			if (MediaTypes.isSafeInline(blob.getMediaType())) {
 				response.setContentDisposition(ContentDisposition.INLINE);
 			} else {
 				response.setContentDisposition(ContentDisposition.ATTACHMENT);

@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.util;
+package com.pmease.commons.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -8,13 +8,11 @@ import java.nio.charset.Charset;
 import org.apache.tika.metadata.Metadata;
 import org.mozilla.universalchardet.UniversalDetector;
 
-import com.google.common.base.Throwables;
-
 /**
  * Copied from tika UniversalEncodingDetector
  *
  */
-public class UniversalEncodingDetector {
+class UniversalEncodingDetector {
 	private static final int BUFSIZE = 1024;
 
     private static final int LOOKAHEAD = 16 * BUFSIZE;
@@ -50,17 +48,11 @@ public class UniversalEncodingDetector {
     }
     
     public static Charset detect(byte[] buffer) throws IOException {
-		try (ByteArrayInputStream in = new ByteArrayInputStream(buffer)) {
-			return detect(in);
-		}
+		return detect(new ByteArrayInputStream(buffer));
     }
     
-    public static boolean isBinary(byte[] bytes) {
-    	try {
-			return isBinary(new ByteArrayInputStream(bytes));
-		} catch (IOException e) {
-			throw Throwables.propagate(e);
-		}
+    public static boolean isBinary(byte[] bytes) throws IOException {
+		return isBinary(new ByteArrayInputStream(bytes));
     }
     
     public static boolean isBinary(InputStream in) throws IOException {

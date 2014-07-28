@@ -10,11 +10,11 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
+import com.pmease.commons.util.MediaTypes;
 import com.pmease.gitplex.web.page.repository.info.code.blob.language.Language;
 import com.pmease.gitplex.web.page.repository.info.code.blob.language.Languages;
 import com.pmease.gitplex.web.page.repository.info.code.blob.renderer.highlighter.AceHighlighter;
 import com.pmease.gitplex.web.service.FileBlob;
-import com.pmease.gitplex.web.util.MediaTypeUtils;
 
 @SuppressWarnings("serial")
 public class TextBlobPanel extends Panel {
@@ -65,7 +65,7 @@ public class TextBlobPanel extends Panel {
 				Language lang = Languages.INSTANCE.findByMediaType(getBlob().getMediaType());
 				StringBuffer sb = new StringBuffer();
 				if (lang == null) {
-					if (MediaTypeUtils.isXMLType(getBlob().getMediaType())) {
+					if (MediaTypes.isXML(getBlob().getMediaType())) {
 						sb.append("xml lang-xml");
 					} else {
 						sb.append("no-highlight lang-text");
