@@ -5,11 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.util.diff.DiffLine.Action;
 import com.pmease.commons.util.diff.DiffMatchPatch.Diff;
-import com.pmease.commons.util.diff.DiffUnit.Action;
 
 public class DiffUtils {
 
@@ -20,66 +22,159 @@ public class DiffUtils {
 	 * 			original list of tokens. 
 	 * @param revised 
 	 * 			revised list of tokens
+	 * @param partialSplitter
+	 * 			pass a not null partial splitter to split line into partials, in order to 
+	 * 			identify modified lines in diff result, so that modified partials can be 
+	 * 			marked via {@link Partial#isEmphasized()} 
 	 * @return
 	 *			list of difference tokens 				
 	 */
-	public static List<DiffUnit> diff(List<String> original, List<String> revised) {
+	public static List<DiffLine> diff(List<String> original, List<String> revised, 
+			@Nullable PartialSplitter partialSplitter) {
 		Preconditions.checkArgument(original.size() + revised.size() <= 65535, 
 				"Total size of original and revised list should be less than 65535.");
-		
 		DiffMatchPatch dmp = new DiffMatchPatch();
 		TokensToCharsResult result = tokensToChars(original, revised);
 		
 		List<DiffMatchPatch.Diff> diffs = dmp.diff_main(result.chars1, result.chars2, false);
 
-		return charsToTokens(diffs, result.tokenArray);
+		List<DiffLine> diffLines = charsToTokens(diffs, result.tokenArray);
+		
+		if (partialSplitter != null) {
+			List<DiffLine> processedDiffLines = new ArrayList<>();
+			List<List<String>> deletions = new ArrayList<>();
+			List<List<String>> additions = new ArrayList<>();
+			List<DiffLine> processedDeletions = new ArrayList<>();
+			List<DiffLine> processedAdditions = new ArrayList<>();
+			for (DiffLine diffLine: diffLines) {
+				Preconditions.checkState(diffLine.getPartials().size() == 1);
+				if (diffLine.getAction() == DiffLine.Action.DELETE) {
+					deletions.add(partialSplitter.split(diffLine.getPartials().get(0).getContent()));
+				} else if (diffLine.getAction() == DiffLine.Action.ADD) {
+					additions.add(partialSplitter.split(diffLine.getPartials().get(0).getContent()));
+				} else {
+					process(processedDiffLines, deletions, additions, processedDeletions, processedAdditions);
+					processedDiffLines.add(new DiffLine(DiffLine.Action.EQUAL, diffLine.getPartials().get(0).getContent()));
+				}
+			}
+			process(processedDiffLines, deletions, additions, processedDeletions, processedAdditions);
+			
+			return processedDiffLines;
+		} else {
+			return diffLines;
+		}
 	}
 	
-	public static List<DiffChunk> diffAsChunks(List<String> original, List<String> revised, int chunkMargin) {
-		return asChunks(diff(original, revised), chunkMargin);
+	private static void process(List<DiffLine> processedDiffLines, 
+			List<List<String>> deletions, List<List<String>> additions, 
+			List<DiffLine> processedDeletions, List<DiffLine> processedAdditions) {
+		for (List<String> deletion: deletions) {
+			boolean matching = false;
+			for (int i=0; i<additions.size(); i++) {
+				List<String> addition = additions.get(i);
+				List<DiffLine> diffPartials = diff(deletion, addition, null);
+				int equals = 0;
+				for (DiffLine diffPartial: diffPartials) {
+					if (diffPartial.getAction() == DiffLine.Action.EQUAL)
+						equals++;
+				}
+				if (equals*2 >= diffPartials.size()) {
+					for (int j=0; j<i; j++) {	
+						List<Partial> partials = new ArrayList<>();
+						for (String content: additions.get(j)) 
+							partials.add(new Partial(content, false));
+						processedAdditions.add(new DiffLine(DiffLine.Action.ADD, partials));
+					}
+					for (int j=0; j<=i; j++)
+						additions.remove(0);
+					List<Partial> addPartials = new ArrayList<>();
+					List<Partial> deletePartials = new ArrayList<>();
+					for (DiffLine diffPartial: diffPartials) {
+						Preconditions.checkState(diffPartial.getPartials().size() == 1);
+						if (diffPartial.getAction() == DiffLine.Action.ADD) {
+							addPartials.add(new Partial(diffPartial.getPartials().get(0).getContent(), true));
+						} else if (diffPartial.getAction() == DiffLine.Action.DELETE) {
+							deletePartials.add(new Partial(diffPartial.getPartials().get(0).getContent(), true));
+						} else {
+							addPartials.add(new Partial(diffPartial.getPartials().get(0).getContent(), false));
+							deletePartials.add(new Partial(diffPartial.getPartials().get(0).getContent(), false));
+						}
+					}
+					processedAdditions.add(new DiffLine(DiffLine.Action.ADD, addPartials));
+					processedDeletions.add(new DiffLine(DiffLine.Action.DELETE, deletePartials));
+					matching = true;
+					break;
+				}
+			}
+			if (!matching) {
+				List<Partial> partials = new ArrayList<>();
+				for (String content: deletion) 
+					partials.add(new Partial(content, false));
+				processedDeletions.add(new DiffLine(DiffLine.Action.DELETE, partials));
+			}
+		}
+		
+		for (List<String> addition: additions) {
+			List<Partial> partials = new ArrayList<>();
+			for (String content: addition) 
+				partials.add(new Partial(content, false));
+			processedAdditions.add(new DiffLine(DiffLine.Action.ADD, partials));
+		}
+		
+		additions.clear();
+		deletions.clear();
+		processedDiffLines.addAll(processedDeletions);
+		processedDiffLines.addAll(processedAdditions);
+		processedDeletions.clear();
+		processedAdditions.clear();
+	}
+	
+	public static List<DiffChunk> diffAsChunks(List<String> original, List<String> revised, 
+			PartialSplitter wordSplitter, int chunkMargin) {
+		return chunksOf(diff(original, revised, wordSplitter), chunkMargin);
 	}
 
-	public static List<DiffChunk> asChunks(List<DiffUnit> diffUnits, int chunkMargin) {
-		List<RemoveAwareDiffUnit> removeAwareDiffUnits = new ArrayList<>();
-		for (DiffUnit diffUnit: diffUnits)
-			removeAwareDiffUnits.add(new RemoveAwareDiffUnit(diffUnit, false));
+	public static List<DiffChunk> chunksOf(List<DiffLine> diffLines, int contextLines) {
+		List<RemovableDiffLine> removeAwareDiffLines = new ArrayList<>();
+		for (DiffLine diffLine: diffLines)
+			removeAwareDiffLines.add(new RemovableDiffLine(diffLine, false));
 		
 		int equalCount = 0;
 		int index = 0;
-		for (RemoveAwareDiffUnit each: removeAwareDiffUnits) {
-			if (each.diffUnit.getAction() == Action.EQUAL) {
+		for (RemovableDiffLine each: removeAwareDiffLines) {
+			if (each.diffLine.getAction() == Action.EQUAL) {
 				equalCount++;
 			} else {
-				for (int i=index-equalCount+chunkMargin; i<=index-chunkMargin-1; i++)
-					removeAwareDiffUnits.get(i).removed = true;
+				for (int i=index-equalCount+contextLines; i<=index-contextLines-1; i++)
+					removeAwareDiffLines.get(i).removed = true;
 				equalCount = 0;
 			}
 			index++;
 		}
-		for (int i=index-equalCount+chunkMargin; i<=index-chunkMargin-1; i++)
-			removeAwareDiffUnits.get(i).removed = true;
+		for (int i=index-equalCount+contextLines; i<=index-contextLines-1; i++)
+			removeAwareDiffLines.get(i).removed = true;
 		
 		List<DiffChunk> diffChunks = new ArrayList<>();
 
 		int start1 = 0;
 		int start2 = 0;
 		DiffChunkBuilder chunkBuilder = new DiffChunkBuilder();
-		for (RemoveAwareDiffUnit each: removeAwareDiffUnits) {
+		for (RemovableDiffLine each: removeAwareDiffLines) {
 			if (!each.removed) {
 				if (chunkBuilder.diffUnits.isEmpty()) {
 					chunkBuilder.start1 = start1;
 					chunkBuilder.start2 = start2;
 				}
-				chunkBuilder.diffUnits.add(each.diffUnit);
+				chunkBuilder.diffUnits.add(each.diffLine);
 			} else {
 				if (!chunkBuilder.diffUnits.isEmpty()) {
 					diffChunks.add(chunkBuilder.build());
 					chunkBuilder = new DiffChunkBuilder();
 				}
 			}
-			if (each.diffUnit.getAction() == Action.INSERT) {
+			if (each.diffLine.getAction() == Action.ADD) {
 				start2++;
-			} else if (each.diffUnit.getAction() == Action.DELETE) {
+			} else if (each.diffLine.getAction() == Action.DELETE) {
 				start1++;
 			} else {
 				start1++; 
@@ -115,21 +210,11 @@ public class DiffUtils {
 				}
 			} else if (chunkBuilder != null) {
 				if (line.startsWith("+")) {
-					chunkBuilder.diffUnits.add(new DiffUnit(Action.INSERT, line.substring(1)));
+					chunkBuilder.diffUnits.add(new DiffLine(Action.ADD, line.substring(1)));
 				} else if (line.startsWith("-")) {
-					chunkBuilder.diffUnits.add(new DiffUnit(Action.DELETE, line.substring(1)));
+					chunkBuilder.diffUnits.add(new DiffLine(Action.DELETE, line.substring(1)));
 				} else if (line.startsWith(" ")) {
-					chunkBuilder.diffUnits.add(new DiffUnit(Action.EQUAL, line.substring(1)));
-				} else if (line.startsWith("\\") && !chunkBuilder.diffUnits.isEmpty()) {
-					int index = chunkBuilder.diffUnits.size() - 1;
-					DiffUnit prevDiff = chunkBuilder.diffUnits.get(index);
-					String warnings;
-					if (prevDiff.getWarnings() != null)
-						warnings = prevDiff.getWarnings() + "\n" + line.substring(2);
-					else
-						warnings = line.substring(2);
-					chunkBuilder.diffUnits.remove(index);
-					chunkBuilder.diffUnits.add(new DiffUnit(prevDiff.getAction(), prevDiff.getText(), warnings));
+					chunkBuilder.diffUnits.add(new DiffLine(Action.EQUAL, line.substring(1)));
 				}
 			}
 		}
@@ -168,11 +253,11 @@ public class DiffUtils {
 		return chars.toString();
 	}
 	
-	private static List<DiffUnit> charsToTokens(List<Diff> diffs, List<String> tokenArray) {
-		List<DiffUnit> diffTokens = new ArrayList<>();
+	private static List<DiffLine> charsToTokens(List<Diff> diffs, List<String> tokenArray) {
+		List<DiffLine> diffTokens = new ArrayList<>();
 		for (Diff diff : diffs) {
 			for (int i = 0; i < diff.text.length(); i++) {
-				diffTokens.add(new DiffUnit(Action.fromOperation(diff.operation), 
+				diffTokens.add(new DiffLine(Action.fromOperation(diff.operation), 
 						tokenArray.get(diff.text.charAt(i))));
 			}
 		}
@@ -194,22 +279,10 @@ public class DiffUtils {
 	private static class DiffChunkBuilder {
 		private int start1, start2;
 		
-		private List<DiffUnit> diffUnits = new ArrayList<>();
+		private List<DiffLine> diffUnits = new ArrayList<>();
 		
 		private DiffChunk build() {
 			return new DiffChunk(start1, start2, diffUnits);
-		}
-	}
-	
-	private static class RemoveAwareDiffUnit {
-		
-		private DiffUnit diffUnit;
-		
-		private boolean removed;
-		
-		private RemoveAwareDiffUnit(DiffUnit diffUnit, boolean removed) {
-			this.diffUnit = diffUnit;
-			this.removed = removed;
 		}
 	}
 }

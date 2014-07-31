@@ -1,18 +1,18 @@
 package com.pmease.commons.util.diff;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
 
-import com.pmease.commons.util.diff.DiffUnit.Action;
+import com.pmease.commons.util.diff.DiffLine.Action;
 
 public class DiffUtilsTest {
 
 	@Test
-	public void shouldGenerateDiffUnitsCorrectly() {
+	public void shouldGenerateDiffLinesCorrectly() {
 		List<String> text1 = new ArrayList<>();
 		text1.add("this is the 1st line");
 		text1.add("this is the 2nd line");
@@ -38,12 +38,12 @@ public class DiffUtilsTest {
 		text2.add("this is the 10th line");
 		text2.add("this is the 11th line");
 		
-		List<DiffUnit> diffUnits = DiffUtils.diff(text1, text2);
-		assertEquals(13, diffUnits.size());
+		List<DiffLine> diffLines = DiffUtils.diff(text1, text2, null);
+		assertEquals(13, diffLines.size());
 		
-		assertEquals(Action.DELETE, diffUnits.get(1).getAction());
-		assertEquals(Action.INSERT, diffUnits.get(2).getAction());
-		assertEquals(Action.INSERT, diffUnits.get(12).getAction());
+		assertEquals(Action.DELETE, diffLines.get(1).getAction());
+		assertEquals(Action.ADD, diffLines.get(2).getAction());
+		assertEquals(Action.ADD, diffLines.get(12).getAction());
 	}
 
 	@Test
@@ -73,7 +73,7 @@ public class DiffUtilsTest {
 		text2.add("this is the 10th line");
 		text2.add("this is the 11th line");
 		
-		List<DiffChunk> diffChunks = DiffUtils.diffAsChunks(text1, text2, 3);
+		List<DiffChunk> diffChunks = DiffUtils.diffAsChunks(text1, text2, null, 3);
 		assertEquals(1, diffChunks.size());
 		assertEquals(
 				"@@ -1 +1 @@\n" +
@@ -92,7 +92,7 @@ public class DiffUtilsTest {
 				"+this is the 11th line\n",
 				diffChunks.get(0).toString());
 		
-		diffChunks = DiffUtils.diffAsChunks(text1, text2, 2);
+		diffChunks = DiffUtils.diffAsChunks(text1, text2, null, 2);
 		assertEquals(2, diffChunks.size());
 		assertEquals(
 				"@@ -1 +1 @@\n" +
@@ -111,6 +111,59 @@ public class DiffUtilsTest {
 				" this is the 10th line\n" +
 				"+this is the 11th line\n", 
 				diffChunks.get(1).toString());
+	}
+
+	@Test
+	public void shouldEmphasizeDiffWordsCorrectly() {
+		List<String> text1 = new ArrayList<>();
+		text1.add("this is the 1st line");
+		text1.add("this is the 2nd line");
+		text1.add("this is the 3rd line");
+		text1.add("this is the 4th line");
+
+		List<String> text2 = new ArrayList<>();
+		text2.add("this is the 1st line");
+		text2.add("this is the 11th line");
+		text2.add("this is the second line");
+		text2.add("this is the 3rd line");
+		text2.add("this is the 4th line");
+		
+		List<DiffChunk> diffChunks = DiffUtils.diffAsChunks(text1, text2, new WordSplitter(), 100);
+		assertEquals(
+				"@@ -1 +1 @@\n" +
+				" this is the 1st line\n" +
+				"-this is the *2nd* line\n" + 
+				"+this is the *11th* line\n" +
+				"+this is the second line\n" +
+				" this is the 3rd line\n" +
+				" this is the 4th line\n", 
+				diffChunks.get(0).toString());
+		
+		text1 = new ArrayList<>();
+		text1.add("this is the 1st line");
+		text1.add("this is the 2nd line");
+		text1.add("this is the 3rd line");
+		text1.add("this is the 4th line");
+
+		text2 = new ArrayList<>();
+		text2.add("this is the 1st line");
+		text2.add("I do not think this is the 11th line");
+		text2.add("this is the second line");
+		text2.add("this is the 3rd line");
+		text2.add("I do not think this works");
+		
+		diffChunks = DiffUtils.diffAsChunks(text1, text2, new WordSplitter(), 100);
+		assertEquals(
+				"@@ -1 +1 @@\n" +
+				" this is the 1st line\n" +
+				"-this is the *2nd* line\n" + 
+				"+I do not think this is the 11th line\n" +
+				"+this is the *second* line\n" +
+				" this is the 3rd line\n" +
+				"-this is the 4th line\n" + 
+				"+I do not think this works\n", 
+				diffChunks.get(0).toString());
+		
 	}
 
 }

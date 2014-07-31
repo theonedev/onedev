@@ -10,12 +10,12 @@ public class DiffChunk {
 	
 	private final int start2;
 	
-	public final List<DiffUnit> diffUnits;
+	public final List<DiffLine> diffLines;
 
-	public DiffChunk(int start1, int start2, List<DiffUnit> diffUnits) {
+	public DiffChunk(int start1, int start2, List<DiffLine> diffLines) {
 		this.start1 = start1;
 		this.start2 = start2;
-		this.diffUnits = new ArrayList<>(diffUnits);
+		this.diffLines = new ArrayList<>(diffLines);
 	}
 
 	/**
@@ -40,8 +40,8 @@ public class DiffChunk {
 		return start2;
 	}
 	
-	public List<DiffUnit> getDiffUnits() {
-		return Collections.unmodifiableList(diffUnits);
+	public List<DiffLine> getDiffLines() {
+		return Collections.unmodifiableList(diffLines);
 	}
 	
 	/**
@@ -53,8 +53,8 @@ public class DiffChunk {
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("@@ -").append(start1+1).append(" +").append(start2+1).append(" @@\n");
-		for (DiffUnit token: diffUnits)
-			buffer.append(token).append("\n");
+		for (DiffLine line: diffLines)
+			buffer.append(line).append("\n");
 		return buffer.toString();
 	}
 	
