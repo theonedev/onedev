@@ -1,6 +1,5 @@
 package com.pmease.commons.git;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.List;
 
@@ -9,18 +8,16 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.FileMode;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.pmease.commons.git.command.ListTreeCommand;
 
 @SuppressWarnings("serial")
-public class TreeNode implements Serializable {
-
-	protected final File gitDir;
+public class TreeNode implements Comparable<TreeNode>, Serializable {
 	
 	private final int modeBits;
 	
 	private final String path;
+	
+	private transient String name;
 	
 	private final String hash;
 	
@@ -30,10 +27,21 @@ public class TreeNode implements Serializable {
 	
 	private transient FileMode mode;
 	
-	private Optional<TreeNode> parentNode;
-	
-	public TreeNode(File gitDir, int modeBits, String path, String revision, String hash, int size) {
-		this.gitDir = gitDir;
+	/**
+	 * Construct a tree node.
+	 * 
+	 * @param modeBits
+	 * 			mode bits of the node object. Pass <tt>0</tt> if unknown
+	 * @param path
+	 * 			path of the node object
+	 * @param revision
+	 * 			revision of the node object
+	 * @param hash
+	 * 			hash of the node object
+	 * @param size
+	 * 			size of the node object 
+	 */
+	public TreeNode(int modeBits, String path, String revision, String hash, int size) {
 		this.path = path;
 		this.revision = revision;
 		this.hash = hash;
@@ -46,10 +54,13 @@ public class TreeNode implements Serializable {
 	}
 
 	public String getName() {
-		if (path.contains("/"))
-			return StringUtils.substringAfterLast(path, "/");
-		else
-			return path;
+		if (name == null) {
+			if (path.contains("/"))
+				name = StringUtils.substringAfterLast(path, "/");
+			else
+				name = path;
+		}
+		return name;
 	}
 
 	public String getRevision() {
@@ -69,34 +80,9 @@ public class TreeNode implements Serializable {
 			mode = FileMode.fromBits(modeBits);
 		return mode;
 	}
-	
+
 	public int getSize() {
 		return size;
-	}
-
-	/**
-	 * Get parent node of current node. 
-	 *  
-	 * @return
-	 * 			parent node of current node, or <tt>null</tt> if current node locates directly 
-	 * 			under the repository root
-	 */
-	public @Nullable TreeNode getParent() {
-		if (parentNode == null) {
-			if (path.contains("/")) {
-				String parentPath = StringUtils.substringBeforeLast(path, "/");
-				List<TreeNode> result = new ListTreeCommand(gitDir).revision(getRevision()).path(parentPath).call();
-				Preconditions.checkArgument(result.size() == 1);
-				parentNode = Optional.of(result.get(0));
-			} else {
-				parentNode = Optional.fromNullable(null);
-			}
-		}
-		return parentNode.orNull();
-	}
-	
-	public void setParent(@Nullable TreeNode parent) {
-		this.parentNode = Optional.fromNullable(parent);
 	}
 
 	@Override
@@ -111,13 +97,9 @@ public class TreeNode implements Serializable {
 	 * 			child nodes of current node, or <tt>null</tt> if current node does not represent a 
 	 * 			directory. 
 	 */
-	public @Nullable List<TreeNode> listChildren() {
+	public @Nullable List<TreeNode> listChildren(Git git) {
 		if (getMode() == FileMode.TREE) {
-			List<TreeNode> children = new ListTreeCommand(gitDir).revision(getRevision()).path(getPath() + "/").call();
-			for (TreeNode each: children) {
-				each.setParent(this);
-			}
-			return children;
+			return new ListTreeCommand(git.repoDir()).revision(getRevision()).path(getPath() + "/").call();
 		} else {
 			return null;
 		}
@@ -132,12 +114,25 @@ public class TreeNode implements Serializable {
 	 * 			represents a symbol link, or contents of the directory if current node 
 	 * 			represents a directory
 	 */
-	public byte[] show() {
-		Git git = new Git(gitDir);
+	public byte[] show(Git git) {
 		if (getMode() == FileMode.GITLINK) {
 			return git.listSubModules(revision).get(path).getBytes();
 		} else {
 			return git.show(getRevision(), getPath());
+		}
+	}
+
+	@Override
+	public int compareTo(TreeNode node) {
+		if (FileMode.TREE.equals(modeBits)) {
+			if (FileMode.TREE.equals(node.getModeBits()))
+				return getName().compareTo(node.getName());
+			else 
+				return 1;
+		} else if (FileMode.TREE.equals(node.getModeBits())) {
+			return -1;
+		} else {
+			return getName().compareTo(node.getName());
 		}
 	}
 

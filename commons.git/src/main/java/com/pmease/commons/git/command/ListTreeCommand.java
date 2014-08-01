@@ -2,12 +2,14 @@ package com.pmease.commons.git.command;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
@@ -16,9 +18,7 @@ public class ListTreeCommand extends GitCommand<List<TreeNode>> {
 
 	private String revision;
 	
-	private String path;
-	
-	private boolean recursive;
+	private String path = "";
 	
 	public ListTreeCommand(final File repoDir) {
 		super(repoDir);
@@ -30,12 +30,7 @@ public class ListTreeCommand extends GitCommand<List<TreeNode>> {
 	}
 	
 	public ListTreeCommand path(String path) {
-		this.path = path;
-		return this;
-	}
-	
-	public ListTreeCommand recursive(boolean recursive) {
-		this.recursive = recursive;
+		this.path = GitUtils.normalizeTreePath(path);
 		return this;
 	}
 	
@@ -44,11 +39,8 @@ public class ListTreeCommand extends GitCommand<List<TreeNode>> {
 		Preconditions.checkNotNull(revision, "revision has to be specified for browse.");
 		
 		Commandline cmd = cmd().addArgs("ls-tree", "-l");
-		if (recursive)
-			cmd.addArgs("-r");
 		cmd.addArgs(revision);
-		if (path != null)
-			cmd.addArgs(path);
+		cmd.addArgs(path);
 		
 		final List<TreeNode> treeNodes = new ArrayList<TreeNode>();
 		
@@ -67,11 +59,13 @@ public class ListTreeCommand extends GitCommand<List<TreeNode>> {
 					size = Integer.parseInt(sizeStr);
 				String path = StringUtils.substringAfter(line.trim(), "\t");
 				
-				treeNodes.add(new TreeNode(repoDir, Integer.parseInt(mode, 8), path, revision, hash, size));
+				treeNodes.add(new TreeNode(Integer.parseInt(mode, 8), path, revision, hash, size));
 			}
 			
 		}, errorLogger).checkReturnCode();
 
+		Collections.sort(treeNodes);
+		
 		return treeNodes;
 	}
 

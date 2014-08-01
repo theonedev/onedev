@@ -39,7 +39,7 @@ public class ListChangedFilesCommandTest extends AbstractGitTest {
     		git.add("a");
     		git.commit("commit", false, false);
     		
-    		Collection<String> changedFiles = git.listChangedFiles("HEAD~4", "HEAD");
+    		Collection<String> changedFiles = git.listChangedFiles("HEAD~4", "HEAD", null);
     		
     		Assert.assertTrue(changedFiles.containsAll(Sets.newHashSet("a", "b", "c", "d")));
 	    } finally {

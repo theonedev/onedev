@@ -62,7 +62,7 @@ public class IfTouchSpecifiedDirectories extends FileGateKeeper {
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		for (String file: branch.getRepository().git().listChangedFiles(branch.getHeadCommit(), commit)) {
+		for (String file: branch.getRepository().git().listChangedFiles(branch.getHeadCommit(), commit, null)) {
 			for (String each: directories) {
 				if (WildcardUtils.matchPath(each + "/**", file))
 					return approved("Touched directory '" + each + "'.");

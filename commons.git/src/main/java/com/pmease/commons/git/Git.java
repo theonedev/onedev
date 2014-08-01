@@ -2,13 +2,17 @@ package com.pmease.commons.git;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.util.SystemReader;
 
@@ -31,6 +35,7 @@ import com.pmease.commons.git.command.IsBinaryCommand;
 import com.pmease.commons.git.command.IsTreeLinkCommand;
 import com.pmease.commons.git.command.ListBranchesCommand;
 import com.pmease.commons.git.command.ListChangedFilesCommand;
+import com.pmease.commons.git.command.ListFileChangesCommand;
 import com.pmease.commons.git.command.ListSubModulesCommand;
 import com.pmease.commons.git.command.ListTagsCommand;
 import com.pmease.commons.git.command.ListTreeCommand;
@@ -139,10 +144,92 @@ public class Git implements Serializable {
 		return commits.get(0);
 	}
 
-	public List<TreeNode> listTree(String revision, @Nullable String path, boolean recursive) {
-		return new ListTreeCommand(repoDir).revision(revision).path(path).recursive(recursive).call();
+	public List<TreeNode> listTree(String revision, @Nullable String path) {
+		return new ListTreeCommand(repoDir).revision(revision).path(path).call();
 	}
+	
+	/**
+	 * List tree of fromRev, and mark differences from fromRev to toRev in the resulting tree.  
+	 * 
+	 * @param fromRev
+	 * 			revision to base the tree off
+	 * @param toRev
+	 * 			revision to calculate file differences since fromRev 
+	 * @param path
+	 * 			path to list tree inside
+	 * @return
+	 * 			a list of tree node with appropriate actions set up to mark whether or not this 
+	 * 			tree node is modified, added, deleted or remaining the same
+	 */
+	public List<DiffTreeNode> listTreeWithDiff(String fromRev, String toRev, @Nullable String path) {
+		path = GitUtils.normalizeTreePath(path);
+		
+		Collection<FileChange> changes = listFileChanges(fromRev, toRev, path, false, false);
+		Set<String> addedFiles = new HashSet<>();
+		Set<String> deletedFiles = new HashSet<>();
+		Set<String> modifiedFiles = new HashSet<>();
+		Set<String> changedFiles = new HashSet<>();
+		
+		for (FileChange change: changes) {
+			if (change.getAction() == FileChange.Action.ADD) {
+				addedFiles.add(change.getNewPath());
+			} else if (change.getAction() == FileChange.Action.DELETE) {
+				deletedFiles.add(change.getOldPath());
+			} else if (change.getAction() == FileChange.Action.MODIFY 
+					|| change.getAction() == FileChange.Action.TYPE) {
+				modifiedFiles.add(change.getOldPath());
+			} else {
+				throw new IllegalStateException("Unexpected action: " + change.getAction());
+			}
+		}
+		
+		changedFiles.addAll(addedFiles);
+		changedFiles.addAll(deletedFiles);
+		changedFiles.addAll(modifiedFiles);
+		
+		List<DiffTreeNode> diffs = new ArrayList<>();
+		
+		for (TreeNode treeNode: listTree(fromRev, path)) {
+			if (FileMode.TREE.equals(treeNode.getModeBits())) {
+				String name = treeNode.getName() + "/";
+				DiffTreeNode diff = null;
+				for (String changedFile: changedFiles) {
+					if (changedFile.startsWith(name)) {
+						diff = new DiffTreeNode(treeNode.getPath(), true, DiffTreeNode.Action.MODIFY);
+						break;
+					}
+				}
+				if (diff == null)
+					diff = new DiffTreeNode(treeNode.getPath(), true, DiffTreeNode.Action.EQUAL);
+				diffs.add(diff);
+			} else {
+				DiffTreeNode diff;
+				if (modifiedFiles.contains(treeNode.getName()))
+					diff = new DiffTreeNode(treeNode.getName(), false, DiffTreeNode.Action.MODIFY);
+				else if (deletedFiles.contains(treeNode.getName()))
+					diff = new DiffTreeNode(treeNode.getName(), false, DiffTreeNode.Action.DELETE);
+				else
+					diff = new DiffTreeNode(treeNode.getName(), false, DiffTreeNode.Action.EQUAL);
+				diffs.add(diff);
+			}
+		}
 
+		Set<String> addedDirs = new HashSet<>();
+		for (String addedFile: addedFiles) {
+			String relativePath = addedFile.substring(path.length());
+			int index = relativePath.indexOf('/');
+			if (index != -1)
+				addedDirs.add(path + relativePath.substring(0, index));
+			else
+				diffs.add(new DiffTreeNode(addedFile, false, DiffTreeNode.Action.ADD));
+		}
+		
+		for (String addedDir: addedDirs)
+			diffs.add(new DiffTreeNode(addedDir, true, DiffTreeNode.Action.ADD));
+		
+		return diffs;
+	}
+	
 	public Git init(boolean bare) {
 		new InitCommand(repoDir).bare(bare).call();
 		return this;
@@ -180,8 +267,14 @@ public class Git implements Serializable {
 		return this;
 	}
 
-	public Collection<String> listChangedFiles(String fromRev, String toRev) {
-		return new ListChangedFilesCommand(repoDir).fromRev(fromRev).toRev(toRev).call();
+	public Collection<String> listChangedFiles(String fromRev, String toRev, @Nullable String path) {
+		return new ListChangedFilesCommand(repoDir).fromRev(fromRev).toRev(toRev).path(path).call();
+	}
+
+	public Collection<FileChange> listFileChanges(String fromRev, String toRev, @Nullable String path,
+			boolean findRenames, boolean findCopies) {
+		return new ListFileChangesCommand(repoDir).fromRev(fromRev).toRev(toRev).path(path)
+				.findRenames(findRenames).findCopies(findCopies).call();
 	}
 
 	public Git checkout(String revision, @Nullable String newBranch) {
@@ -355,7 +448,7 @@ public class Git implements Serializable {
 	public byte[] show(String revision, String path) {
 		return new ShowCommand(repoDir).revision(revision).path(path).call();
 	}
-
+	
 	public List<Commit> log(@Nullable String fromRev, @Nullable String toRev, 
 			@Nullable String path, int maxCount, int skip) {
 		return new LogCommand(repoDir).fromRev(fromRev).toRev(toRev)

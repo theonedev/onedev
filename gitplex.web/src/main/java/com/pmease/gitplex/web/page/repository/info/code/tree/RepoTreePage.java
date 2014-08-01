@@ -39,7 +39,7 @@ public class RepoTreePage extends RepositoryInfoPage {
 					path = UrlUtils.removeRedundantSlashes(path + "/");
 				}
 				
-				List<TreeNode> nodes = Lists.newArrayList(git.listTree(getRepository().defaultBranchIfNull(getCurrentRevision()), path, false));
+				List<TreeNode> nodes = Lists.newArrayList(git.listTree(getRepository().defaultBranchIfNull(getCurrentRevision()), path));
 				
 				Collections.sort(nodes, new Comparator<TreeNode>() {
 

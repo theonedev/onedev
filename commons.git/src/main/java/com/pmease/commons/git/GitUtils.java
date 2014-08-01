@@ -44,5 +44,14 @@ public class GitUtils {
 			return null;
 		}
 	}
-	
+
+	public static String normalizeTreePath(String treePath) {
+		if (treePath == null || treePath.length() == 0 || treePath.equals("/")) {
+			return "";
+		} else if (!treePath.endsWith("/")) {
+			return treePath + "/";
+		} else {
+			return treePath;
+		}
+	}
 }

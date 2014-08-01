@@ -202,7 +202,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	
 	public Collection<String> getChangedFiles() {
 		if (changedFiles == null) 
-			changedFiles = getRequest().git().listChangedFiles(getReferentialCommit(), getHeadCommit());
+			changedFiles = getRequest().git().listChangedFiles(getReferentialCommit(), getHeadCommit(), null);
 		return changedFiles;
 	}
 	

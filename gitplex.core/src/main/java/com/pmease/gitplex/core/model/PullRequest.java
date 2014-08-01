@@ -364,7 +364,7 @@ public class PullRequest extends AbstractEntity {
 	
 	public Collection<String> findTouchedFiles() {
 		Git git = getTarget().getRepository().git();
-		return git.listChangedFiles(getTarget().getHeadCommit(), getLatestUpdate().getHeadCommit());
+		return git.listChangedFiles(getTarget().getHeadCommit(), getLatestUpdate().getHeadCommit(), null);
 	}
 
 	public String getHeadRef() {

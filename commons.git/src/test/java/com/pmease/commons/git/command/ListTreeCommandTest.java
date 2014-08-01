@@ -64,26 +64,25 @@ public class ListTreeCommandTest extends AbstractGitTest {
 			Git bareGit = new Git(new File(tempDir, "bare"));
     		bareGit.clone(workGit.repoDir().getAbsolutePath(), true, false, false, null);
 
-    		List<TreeNode> treeNodes = bareGit.listTree("master", null, false);
+    		List<TreeNode> treeNodes = bareGit.listTree("master", null);
 
     		assertEquals(7, treeNodes.size());
     		assertEquals("dir", treeNodes.get(5).getPath());
     		assertEquals("dir", treeNodes.get(5).getName());
     		assertEquals(FileMode.TREE, treeNodes.get(5).getMode());
+    		
     		assertEquals(moduleGit.repoDir().getAbsolutePath(), 
-    				new File(new String(treeNodes.get(6).show())).getCanonicalPath());
+    				new File(new String(treeNodes.get(6).show(bareGit))).getCanonicalPath());
     		
     		TreeNode dirNode = treeNodes.get(5);
-    		treeNodes = dirNode.listChildren();
+    		treeNodes = bareGit.listTree(dirNode.getRevision(), dirNode.getPath());
     		
     		assertEquals(1, treeNodes.size());
     		assertEquals("dir/file", treeNodes.get(0).getPath());
     		assertEquals("file", treeNodes.get(0).getName());
     		
     		TreeNode fileNode = treeNodes.get(0);
-    		assertEquals("hello world", new String(fileNode.show()));
-    		assertEquals("dir", fileNode.getParent().getName());
-    		
+    		assertEquals("hello world", new String(fileNode.show(bareGit)));
 	    } finally {
 	        FileUtils.deleteDir(tempDir);
 	    }
