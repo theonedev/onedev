@@ -16,44 +16,35 @@ public class ListSubModulesCommandTest extends AbstractGitTest {
 
 	@Test
 	public void test() throws IOException {
-		File tempDir = FileUtils.createTempDir();
-		try {
-			Git work = new Git(new File(tempDir, "work"));
-			Git module1 = new Git(new File(tempDir, "module1"));
-			Git module2 = new Git(new File(tempDir, "module2"));
-			
-			work.init(false);
-			module1.init(false);
-			module2.init(false);
-			
-			FileUtils.writeFile(new File(work.repoDir(), "readme"), "readme");
-			work.add("readme").commit("initial commit", false, false);
-			FileUtils.writeFile(new File(module1.repoDir(), "readme"), "readme");
-			module1.add("readme").commit("initial commit", false, false);
-			FileUtils.writeFile(new File(module2.repoDir(), "readme"), "readme");
-			module2.add("readme").commit("initial commit", false, false);
-			
-			work.addSubModule(module1.repoDir().getAbsolutePath(), "module1");
-			work.commit("add submodule1", false, false);
-			
-			Map<String, String> subModules = work.listSubModules("master");
-			assertEquals(module1.repoDir().getCanonicalPath(), 
-					new File(subModules.get("module1")).getCanonicalPath());
+		Git module1 = new Git(new File(tempDir, "module1"));
+		Git module2 = new Git(new File(tempDir, "module2"));
+		
+		module1.init(false);
+		module2.init(false);
+		
+		addFileAndCommit("readme", "readme", "initial commit");
+		
+		FileUtils.writeFile(new File(module1.repoDir(), "readme"), "readme");
+		module1.add("readme").commit("initial commit", false, false);
+		FileUtils.writeFile(new File(module2.repoDir(), "readme"), "readme");
+		module2.add("readme").commit("initial commit", false, false);
+		
+		git.addSubModule(module1.repoDir().getAbsolutePath(), "module1");
+		git.commit("add submodule1", false, false);
+		
+		Map<String, String> subModules = git.listSubModules("master");
+		assertEquals(module1.repoDir().getCanonicalPath(), 
+				new File(subModules.get("module1")).getCanonicalPath());
 
-			File dir = new File(work.repoDir(), "dir");
-			FileUtils.createDir(dir);
-			
-			work.addSubModule(module2.repoDir().getAbsolutePath(), "dir/module2");
-			work.commit("add submodule2", false, false);
-			subModules = work.listSubModules("master");
-			assertEquals(module1.repoDir().getCanonicalPath(), 
-					new File(subModules.get("module1")).getCanonicalPath());
-			assertEquals(module2.repoDir().getCanonicalPath(), 
-					new File(subModules.get("dir/module2")).getCanonicalPath());
-			
-		} finally {
-			FileUtils.deleteDir(tempDir);
-		}
+		createDir("dir");
+		
+		git.addSubModule(module2.repoDir().getAbsolutePath(), "dir/module2");
+		commit("add submodule2");
+		subModules = git.listSubModules("master");
+		assertEquals(module1.repoDir().getCanonicalPath(), 
+				new File(subModules.get("module1")).getCanonicalPath());
+		assertEquals(module2.repoDir().getCanonicalPath(), 
+				new File(subModules.get("dir/module2")).getCanonicalPath());
 	}
 
 }

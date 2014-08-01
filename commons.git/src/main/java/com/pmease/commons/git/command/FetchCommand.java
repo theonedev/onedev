@@ -10,7 +10,7 @@ public class FetchCommand extends GitCommand<Void> {
 
     private String from;
     
-    private String refspec;
+    private String[] refspec = new String[0];
     
 	public FetchCommand(final File repoDir) {
 		super(repoDir);
@@ -21,7 +21,7 @@ public class FetchCommand extends GitCommand<Void> {
 	    return this;
 	}
 	
-	public FetchCommand refspec(String refspec) {
+	public FetchCommand refspec(String... refspec) {
 		this.refspec = refspec;
 		return this;
 	}
@@ -33,8 +33,8 @@ public class FetchCommand extends GitCommand<Void> {
 		Commandline cmd = cmd().addArgs("fetch");
 		cmd.addArgs(from);
 		
-		if (refspec != null)
-			cmd.addArgs(refspec);
+		for (String each: refspec)
+			cmd.addArgs(each);
 		
 		cmd.execute(debugLogger, new LineConsumer() {
 

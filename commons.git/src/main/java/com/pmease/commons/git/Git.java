@@ -43,6 +43,7 @@ import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.git.command.MergeCommand;
 import com.pmease.commons.git.command.MergeCommand.FastForwardMode;
 import com.pmease.commons.git.command.ParseRevisionCommand;
+import com.pmease.commons.git.command.PullCommand;
 import com.pmease.commons.git.command.PushCommand;
 import com.pmease.commons.git.command.RemoveCommand;
 import com.pmease.commons.git.command.ResetCommand;
@@ -240,8 +241,8 @@ public class Git implements Serializable {
 		return this;
 	}
 	
-	public Git remove(String... paths) {
-		new RemoveCommand(repoDir).removePaths(paths).call();
+	public Git rm(String... paths) {
+		new RemoveCommand(repoDir).paths(paths).call();
 		return this;
 	}
 	
@@ -343,22 +344,32 @@ public class Git implements Serializable {
 				.strategy(strategy).strategyOption(strategyOption).message(message).call();
 	}
 
-	public Git fetch(String from, String refspec) {
+	public Git fetch(String from, String... refspec) {
 		new FetchCommand(repoDir).from(from).refspec(refspec).call();
 		return this;
 	}
 	
-	public Git fetch(Git from, @Nullable String refspec) {
+	public Git fetch(Git from, String... refspec) {
 		new FetchCommand(repoDir).from(from.repoDir.getAbsolutePath()).refspec(refspec).call();
 		return this;
 	}
 
-	public Git push(String to, String refspec) {
+	public Git pull(String from, String... refspec) {
+		new PullCommand(repoDir).from(from).refspec(refspec).call();
+		return this;
+	}
+
+	public Git pull(Git from, String... refspec) {
+		new PullCommand(repoDir).from(from.repoDir.getAbsolutePath()).refspec(refspec).call();
+		return this;
+	}
+
+	public Git push(String to, String... refspec) {
 		new PushCommand(repoDir).to(to).refspec(refspec).call();
 		return this;
 	}
 
-	public Git push(Git to, String refspec) {
+	public Git push(Git to, String... refspec) {
 		new PushCommand(repoDir).to(to.repoDir.getAbsolutePath()).refspec(refspec).call();
 		return this;
 	}

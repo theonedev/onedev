@@ -124,13 +124,13 @@ public class TreeNode implements Comparable<TreeNode>, Serializable {
 
 	@Override
 	public int compareTo(TreeNode node) {
-		if (FileMode.TREE.equals(modeBits)) {
-			if (FileMode.TREE.equals(node.getModeBits()))
+		if (getMode() == FileMode.TREE) {
+			if (node.getMode() == FileMode.TREE)
 				return getName().compareTo(node.getName());
 			else 
-				return 1;
-		} else if (FileMode.TREE.equals(node.getModeBits())) {
-			return -1;
+				return -1;
+		} else if (node.getMode() == FileMode.TREE) {
+			return 1;
 		} else {
 			return getName().compareTo(node.getName());
 		}

@@ -18,74 +18,48 @@ public class ListTreeCommandTest extends AbstractGitTest {
 
 	@Test
 	public void shouldListTreeAndReadFileCorrectly() throws IOException {
-	    File tempDir = FileUtils.createTempDir();
-	    
-	    try {
-		    Git workGit = new Git(new File(tempDir, "work"));
-		    workGit.init(false);
-		        
-    		FileUtils.touchFile(new File(workGit.repoDir(), "a"));
-    		workGit.add("a");
-    		workGit.commit("commit", false, false);
-    		
-    		FileUtils.touchFile(new File(workGit.repoDir(), "b"));
-    		workGit.add("b");
-    		workGit.commit("commit", false, false);
-    		
-    		FileUtils.touchFile(new File(workGit.repoDir(), "c"));
-    		workGit.add("c");
-    		workGit.commit("commit", false, false);
-    		
-    		FileUtils.touchFile(new File(workGit.repoDir(), "d"));
-    		workGit.add("d");
-    		workGit.commit("commit", false, false);
-    		
-    		FileUtils.writeFile(new File(workGit.repoDir(), "a"), "a");
-    		workGit.add("a");
-    		workGit.commit("commit", false, false);
-    		
-    		FileUtils.createDir(new File(workGit.repoDir(), "dir"));
-    		FileUtils.writeFile(new File(workGit.repoDir(), "dir/file"), "hello world");
-    		workGit.add("dir/file");
-    		workGit.commit("commit", false, false);
-    		
-			Git moduleGit = new Git(new File(tempDir, "module"));
-			moduleGit.init(false);
-			FileUtils.writeFile(new File(moduleGit.repoDir(), "readme"), "readme");
-			moduleGit.add("readme").commit("commit", false, false);
-			
-			workGit.addSubModule(moduleGit.repoDir().getAbsolutePath(), "module");
-			workGit.commit("commit", false, false);
+		addFileAndCommit("a", "", "commit");
+		addFileAndCommit("b", "", "commit");
+		addFileAndCommit("c", "", "commit");
+		addFileAndCommit("d", "", "commit");
+		addFileAndCommit("a", "a", "commit");
+		createDir("dir");
+		addFileAndCommit("dir/file", "hello world", "commit");
+		
+		Git moduleGit = new Git(new File(tempDir, "module"));
+		moduleGit.init(false);
+		FileUtils.writeFile(new File(moduleGit.repoDir(), "readme"), "readme");
+		moduleGit.add("readme").commit("commit", false, false);
+		
+		git.addSubModule(moduleGit.repoDir().getAbsolutePath(), "module");
+		git.commit("commit", false, false);
 
-    		workGit.checkout("head", "dev");
-    		workGit.remove("dir/file");
-    		workGit.commit("commit", false, false);
-    		
-			Git bareGit = new Git(new File(tempDir, "bare"));
-    		bareGit.clone(workGit.repoDir().getAbsolutePath(), true, false, false, null);
+		git.checkout("head", "dev");
+		rm("dir/file");
+		commit("commit");
+		
+		Git bareGit = new Git(new File(tempDir, "bare"));
+		bareGit.clone(git, true, false, false, null);
+		
+		List<TreeNode> treeNodes = bareGit.listTree("master", null);
 
-    		List<TreeNode> treeNodes = bareGit.listTree("master", null);
-
-    		assertEquals(7, treeNodes.size());
-    		assertEquals("dir", treeNodes.get(5).getPath());
-    		assertEquals("dir", treeNodes.get(5).getName());
-    		assertEquals(FileMode.TREE, treeNodes.get(5).getMode());
-    		
-    		assertEquals(moduleGit.repoDir().getAbsolutePath(), 
-    				new File(new String(treeNodes.get(6).show(bareGit))).getCanonicalPath());
-    		
-    		TreeNode dirNode = treeNodes.get(5);
-    		treeNodes = bareGit.listTree(dirNode.getRevision(), dirNode.getPath());
-    		
-    		assertEquals(1, treeNodes.size());
-    		assertEquals("dir/file", treeNodes.get(0).getPath());
-    		assertEquals("file", treeNodes.get(0).getName());
-    		
-    		TreeNode fileNode = treeNodes.get(0);
-    		assertEquals("hello world", new String(fileNode.show(bareGit)));
-	    } finally {
-	        FileUtils.deleteDir(tempDir);
-	    }
+		assertEquals(7, treeNodes.size());
+		assertEquals("dir", treeNodes.get(0).getPath());
+		assertEquals("dir", treeNodes.get(0).getName());
+		assertEquals(FileMode.TREE, treeNodes.get(0).getMode());
+		
+		assertEquals(moduleGit.repoDir().getAbsolutePath(), 
+				new File(new String(treeNodes.get(6).show(bareGit))).getCanonicalPath());
+		
+		TreeNode dirNode = treeNodes.get(0);
+		treeNodes = bareGit.listTree(dirNode.getRevision(), dirNode.getPath());
+		
+		assertEquals(1, treeNodes.size());
+		assertEquals("dir/file", treeNodes.get(0).getPath());
+		assertEquals("file", treeNodes.get(0).getName());
+		
+		TreeNode fileNode = treeNodes.get(0);
+		assertEquals("hello world", new String(fileNode.show(bareGit)));
 	}
 
 }

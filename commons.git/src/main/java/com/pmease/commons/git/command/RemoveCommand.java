@@ -14,7 +14,7 @@ public class RemoveCommand extends GitCommand<Void> {
 		super(repoDir);
 	}
 	
-	public RemoveCommand removePaths(String... paths) {
+	public RemoveCommand paths(String... paths) {
 		for (String path: paths)
 			this.paths.add(path);
 		return this;

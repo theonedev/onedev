@@ -129,7 +129,7 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 				sandbox.clone(target.getRepository().git(), false, true, true, pullRequest.getTarget().getName());
 				sandbox.reset(null, null);
 
-				sandbox.fetch(source.getRepository().git(), null);
+				sandbox.fetch(source.getRepository().git());
 				
 				if (sandbox.isAncestor(source.getHeadCommit(), target.getHeadCommit())) {
 					CloseInfo closeInfo = new CloseInfo();
