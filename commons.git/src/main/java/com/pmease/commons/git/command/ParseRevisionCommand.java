@@ -2,6 +2,9 @@ package com.pmease.commons.git.command;
 
 import java.io.File;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.execution.Commandline;
@@ -9,6 +12,8 @@ import com.pmease.commons.util.execution.LineConsumer;
 
 public class ParseRevisionCommand extends GitCommand<String> {
 
+	private static final Logger logger = LoggerFactory.getLogger(ParseRevisionCommand.class);
+	
     private String revision;
     
 	public ParseRevisionCommand(File repoDir) {
@@ -35,7 +40,14 @@ public class ParseRevisionCommand extends GitCommand<String> {
 					commit[0] = line.trim();
 			}
 			
-		}, errorLogger).checkReturnCode();
+		}, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.error(line);
+			}
+			
+		}).checkReturnCode();
 
 		return commit[0];
 	}

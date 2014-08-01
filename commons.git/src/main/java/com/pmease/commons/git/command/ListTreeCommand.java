@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
@@ -16,6 +18,8 @@ import com.pmease.commons.util.execution.LineConsumer;
 
 public class ListTreeCommand extends GitCommand<List<TreeNode>> {
 
+	private static final Logger logger = LoggerFactory.getLogger(ListTreeCommand.class);
+	
 	private String revision;
 	
 	private String path = "";
@@ -62,7 +66,14 @@ public class ListTreeCommand extends GitCommand<List<TreeNode>> {
 				treeNodes.add(new TreeNode(Integer.parseInt(mode, 8), path, revision, hash, size));
 			}
 			
-		}, errorLogger).checkReturnCode();
+		}, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.error(line);
+			}
+			
+		}).checkReturnCode();
 
 		Collections.sort(treeNodes);
 		

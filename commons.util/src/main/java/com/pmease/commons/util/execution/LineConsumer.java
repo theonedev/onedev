@@ -22,10 +22,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
-import org.slf4j.Logger;
-
-import com.pmease.commons.util.LogUtils;
-
 /**
  * heavily inspired from LogOutputStream
  * this stream class calls back the P4Handler on each line of stdout or stderr read
@@ -118,101 +114,6 @@ public abstract class LineConsumer extends OutputStream {
     	super.close();
     }
     
-    private static Logger getLogger() {
-    	return LogUtils.getLogger(3);
-    }
-
-	public static class InfoLogger extends LineConsumer {
-
-		public InfoLogger(String encoding) {
-			super(encoding);
-		}
-		
-		public InfoLogger() {
-		}
-		
-		@Override
-		public void consume(String line) {
-			getLogger().info(line);
-		}
-		
-	}
-
-	public static class DebugLogger extends LineConsumer {
-
-		public DebugLogger(String encoding) {
-			super(encoding);
-		}
-		
-		public DebugLogger() {
-			
-		}
-		
-		@Override
-		public void consume(String line) {
-			getLogger().debug(line);
-		}
-		
-	}
-
-	public static class TraceLogger extends LineConsumer {
-
-		public TraceLogger(String encoding) {
-			super(encoding);
-		}
-		
-		public TraceLogger() {
-			
-		}
-		
-		@Override
-		public void consume(String line) {
-			getLogger().trace(line);
-		}
-		
-	}
-
-	public static class WarnLogger extends LineConsumer {
-
-		public WarnLogger(String encoding) {
-			super(encoding);
-		}
-		
-		public WarnLogger() {
-			
-		}
-		
-		@Override
-		public void consume(String line) {
-			getLogger().warn(line);
-		}
-		
-	}
-
-	public static class ErrorLogger extends LineConsumer {
-
-		public ErrorLogger(String encoding) {
-			super(encoding);
-		}
-		
-		public ErrorLogger() {
-			
-		}
-		
-		@Override
-		public void consume(String line) {
-			getLogger().error(line);
-		}
-		
-	}
-	
-	public static class NoOp extends LineConsumer {
-
-		@Override
-		public void consume(String line) {
-		}
-		
-	}
 }
 
 

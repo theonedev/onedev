@@ -3,6 +3,9 @@ package com.pmease.commons.git.command;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.ExecuteResult;
@@ -10,6 +13,8 @@ import com.pmease.commons.util.execution.LineConsumer;
 
 public class UpdateRefCommand extends GitCommand<Boolean> {
 
+	private static final Logger logger = LoggerFactory.getLogger(UpdateRefCommand.class);
+	
     private String refName;
     
     private String revision;
@@ -55,14 +60,21 @@ public class UpdateRefCommand extends GitCommand<Boolean> {
             cmd.addArgs("-m", reason);
 		
 		final AtomicBoolean refLockError = new AtomicBoolean(false);
-		ExecuteResult result = cmd.execute(debugLogger, new LineConsumer() {
+		ExecuteResult result = cmd.execute(new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.debug(line);
+			}
+			
+		}, new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
 				if (line.startsWith(" * [new ref]"))
-					info(line);
+					logger.info(line);
 				else
-					error(line);
+					logger.error(line);
 				
 				if (line.startsWith("fatal: Cannot lock the ref")) 
 					refLockError.set(true);

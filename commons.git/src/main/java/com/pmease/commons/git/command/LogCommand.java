@@ -8,6 +8,8 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.FileChange;
@@ -17,7 +19,9 @@ import com.pmease.commons.util.execution.LineConsumer;
 
 public class LogCommand extends GitCommand<List<Commit>> {
 
-    private final DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss Z");
+	private static final Logger logger = LoggerFactory.getLogger(LogCommand.class); 
+	
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss Z");
     
     private String fromRev;
     
@@ -174,9 +178,9 @@ public class LogCommand extends GitCommand<List<Commit>> {
             	} else if (line.startsWith("committer:")) {
                 	commitBuilder.committerName = line.substring("committer:".length());
             	} else if (line.startsWith("authorDate:")) {
-                	commitBuilder.authorDate = dateFormatter.parseDateTime(line.substring("authorDate:".length()).trim()).toDate();
+                	commitBuilder.authorDate = DATE_FORMATTER.parseDateTime(line.substring("authorDate:".length()).trim()).toDate();
             	} else if (line.startsWith("committerDate:")) {
-                	commitBuilder.committerDate = dateFormatter.parseDateTime(line.substring("committerDate:".length()).trim()).toDate();
+                	commitBuilder.committerDate = DATE_FORMATTER.parseDateTime(line.substring("committerDate:".length()).trim()).toDate();
             	} else if (line.startsWith("authorEmail:")) {
                 	commitBuilder.authorEmail = line.substring("authorEmail:".length());
             	} else if (line.startsWith("committerEmail:")) {
@@ -187,7 +191,14 @@ public class LogCommand extends GitCommand<List<Commit>> {
                 }
             }
             
-        }, errorLogger).checkReturnCode();
+        }, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.error(line);
+			}
+        	
+        }).checkReturnCode();
 
         if (commitBuilder.hash != null)
         	commits.add(commitBuilder.build());

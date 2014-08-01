@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.parboiled.common.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -15,6 +17,8 @@ import com.pmease.commons.util.execution.LineConsumer;
 
 public class ArchiveCommand extends GitCommand<Void> {
 
+	private static final Logger logger = LoggerFactory.getLogger(ArchiveCommand.class);
+	
 	public static enum Format {
 		TAR("tar"), TGZ("tgz"), TAR_GZ("tar.gz"), ZIP("zip");
 		
@@ -80,7 +84,14 @@ public class ArchiveCommand extends GitCommand<Void> {
 		
 		applyArgs(cmd);
 		
-		cmd.execute(output, new LineConsumer.ErrorLogger());
+		cmd.execute(output, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.error(line);
+			}
+			
+		});
 		
 		return null;
 	}

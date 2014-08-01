@@ -2,12 +2,17 @@ package com.pmease.commons.git.command;
 
 import java.io.File;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
 public class PushCommand extends GitCommand<Void> {
 
+	private static final Logger logger = LoggerFactory.getLogger(PushCommand.class);
+	
     private String to;
     
     private String refspec[] = new String[0];
@@ -36,16 +41,23 @@ public class PushCommand extends GitCommand<Void> {
 		for (String each: refspec)
 			cmd.addArgs(each);
 		
-		cmd.execute(debugLogger, new LineConsumer() {
+		cmd.execute(new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.debug(line);
+			}
+			
+		}, new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
 				if (line.startsWith("To "))
-					info(line);
+					logger.info(line);
 				else if (line.startsWith(" * [new branch]"))
-					info(line);
+					logger.info(line);
 				else
-					error(line);
+					logger.error(line);
 			}
 			
 		}).checkReturnCode();

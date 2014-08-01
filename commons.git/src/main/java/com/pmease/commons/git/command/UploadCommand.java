@@ -5,12 +5,17 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
 public class UploadCommand extends GitCommand<Void> {
 
+	private static final Logger logger = LoggerFactory.getLogger(UploadCommand.class);
+	
 	private InputStream input;
 	
 	private OutputStream output;
@@ -37,7 +42,15 @@ public class UploadCommand extends GitCommand<Void> {
 		Commandline cmd = cmd();
 		cmd.addArgs("upload-pack", "--stateless-rpc", ".");
 		
-		cmd.execute(output, new LineConsumer.ErrorLogger(), input).checkReturnCode();
+		cmd.execute(output, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.error(line);
+			}
+			
+		}, input).checkReturnCode();
+		
 		return null;
 	}
 

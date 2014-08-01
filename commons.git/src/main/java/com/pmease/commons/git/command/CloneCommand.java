@@ -2,12 +2,17 @@ package com.pmease.commons.git.command;
 
 import java.io.File;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
 public class CloneCommand extends GitCommand<Void> {
 
+	private static final Logger logger = LoggerFactory.getLogger(CloneCommand.class);
+	
 	private String from;
 	
 	private boolean bare;
@@ -64,16 +69,23 @@ public class CloneCommand extends GitCommand<Void> {
 		cmd.addArgs(from);
 		cmd.addArgs(".");
 		
-		cmd.execute(debugLogger, new LineConsumer(){
+		cmd.execute(new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.debug(line);
+			}
+			
+		}, new LineConsumer(){
 
 			@Override
 			public void consume(String line) {
 				if (line.startsWith("Cloning into ") || line.equals("done."))
-					debug(line);
+					logger.debug(line);
 				else if (line.contains("You appear to have cloned an empty repository"))
-					warn(line);
+					logger.warn(line);
 				else
-					error(line);
+					logger.error(line);
 			}
 			
 		}).checkReturnCode();

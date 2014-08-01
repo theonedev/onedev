@@ -8,6 +8,8 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
 import org.parboiled.common.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.util.execution.Commandline;
@@ -15,6 +17,8 @@ import com.pmease.commons.util.execution.LineConsumer;
 
 public class AheadBehindCommand extends GitCommand<AheadBehind> {
 
+	private static final Logger logger = LoggerFactory.getLogger(AheadBehindCommand.class);
+	
 	public AheadBehindCommand(File repoDir) {
 		super(repoDir);
 	}
@@ -56,7 +60,14 @@ public class AheadBehindCommand extends GitCommand<AheadBehind> {
 				}
 			}
 			
-		}, new LineConsumer.ErrorLogger());
+		}, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.error(line);
+			}
+			
+		});
 		
 		return counter;
 	}

@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.parboiled.common.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -14,6 +16,8 @@ import com.pmease.commons.util.execution.LineConsumer;
 
 public class CommitInCommand extends GitCommand<List<String>> {
 
+	private static final Logger logger = LoggerFactory.getLogger(CommitInCommand.class);
+	
 	public static enum RefType {
 		BRANCH, TAG
 	}
@@ -62,7 +66,14 @@ public class CommitInCommand extends GitCommand<List<String>> {
 				}
 			}
 			
-		}, errorLogger);
+		}, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.error(line);
+			}
+			
+		});
 		
 		return lines;
 	}

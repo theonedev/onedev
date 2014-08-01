@@ -10,6 +10,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.parboiled.common.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
@@ -25,6 +27,8 @@ import com.pmease.gitplex.web.git.GitUtils;
 
 public class BlameCommand extends GitCommand<List<BlameEntry>> {
 
+	private static final Logger logger = LoggerFactory.getLogger(BlameCommand.class);
+	
 	public BlameCommand(File repoDir) {
 		super(repoDir);
 	}
@@ -51,7 +55,14 @@ public class BlameCommand extends GitCommand<List<BlameEntry>> {
 		cmd.addArgs("--", Preconditions.checkArgNotNull(fileName, "file name"));
 		
 		BlameOutputHandler out = new BlameOutputHandler();
-		cmd.execute(out, new LineConsumer.ErrorLogger());
+		cmd.execute(out, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.error(line);
+			}
+			
+		});
 		
 		return out.getResult();
 	}

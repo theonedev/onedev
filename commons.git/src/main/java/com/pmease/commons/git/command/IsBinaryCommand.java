@@ -2,12 +2,17 @@ package com.pmease.commons.git.command;
 
 import java.io.File;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
 public class IsBinaryCommand extends GitCommand<Boolean> {
 
+	private static final Logger logger = LoggerFactory.getLogger(IsBinaryCommand.class);
+	
 	private String revision;
 	
 	private String file;
@@ -44,7 +49,14 @@ public class IsBinaryCommand extends GitCommand<Boolean> {
 					isBinary[0] = true;
 			}
 			
-		}, errorLogger).checkReturnCode();
+		}, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.error(line);
+			}
+			
+		}).checkReturnCode();
 		
 		return isBinary[0];
 	}

@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Splitter;
@@ -22,6 +25,8 @@ import com.pmease.gitplex.web.git.GitUtils;
 
 public class ListTagCommand extends GitCommand<Map<String, Commit>> {
 
+	private static final Logger logger = LoggerFactory.getLogger(ListTagCommand.class);
+	
 	public ListTagCommand(File repoDir) {
 		super(repoDir);
 	}
@@ -37,7 +42,14 @@ public class ListTagCommand extends GitCommand<Map<String, Commit>> {
 		cmd.addArgs("--format=" + FORMAT + "");
 		
 		TagConsumer consumer = new TagConsumer();
-		cmd.execute(consumer , new LineConsumer.ErrorLogger());
+		cmd.execute(consumer , new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.error(line);
+			}
+			
+		});
 		
 		return consumer.commits;
 	}

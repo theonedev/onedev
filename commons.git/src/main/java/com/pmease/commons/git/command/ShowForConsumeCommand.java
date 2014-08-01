@@ -2,12 +2,18 @@ package com.pmease.commons.git.command;
 
 import java.io.File;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
+import com.pmease.commons.util.execution.LineConsumer;
 import com.pmease.commons.util.execution.StreamConsumer;
 
 public class ShowForConsumeCommand extends GitCommand<Void> {
 
+	private static final Logger logger = LoggerFactory.getLogger(ShowForConsumeCommand.class);
+	
 	private String revision;
 	
 	private String path;
@@ -40,7 +46,14 @@ public class ShowForConsumeCommand extends GitCommand<Void> {
 		Preconditions.checkNotNull(consumer, "consumer has to be specified.");
 		
 		Commandline cmd = cmd().addArgs("show", revision + ":" + path);
-		cmd.execute(consumer, errorLogger).checkReturnCode();
+		cmd.execute(consumer, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.error(line);
+			}
+			
+		}).checkReturnCode();
 		
 		return null;
 	}

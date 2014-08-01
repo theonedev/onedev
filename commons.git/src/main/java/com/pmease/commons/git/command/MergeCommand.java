@@ -3,6 +3,9 @@ package com.pmease.commons.git.command;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.util.execution.Commandline;
@@ -11,6 +14,8 @@ import com.pmease.commons.util.execution.LineConsumer;
 
 public class MergeCommand extends GitCommand<String> {
 
+	private static final Logger logger = LoggerFactory.getLogger(MergeCommand.class);
+	
 	public enum FastForwardMode {FF_ONLY, NO_FF, FF};
 	
     private String revision;
@@ -87,7 +92,14 @@ public class MergeCommand extends GitCommand<String> {
 					conflict.set(true);
 			}
 			
-		}, errorLogger);
+		}, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.error(line);
+			}
+			
+		});
 		
 		if (conflict.get())
 			return null;

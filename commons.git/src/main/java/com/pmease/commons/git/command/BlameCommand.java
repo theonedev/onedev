@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blame;
@@ -19,6 +21,8 @@ import com.pmease.commons.util.execution.LineConsumer;
 
 public class BlameCommand extends GitCommand<List<Blame>> {
 
+	private static final Logger logger = LoggerFactory.getLogger(BlameCommand.class);
+	
 	private String revision;
 	
 	private String file;
@@ -124,9 +128,9 @@ public class BlameCommand extends GitCommand<List<Blame>> {
 				public void consume(String line) {
 					if (line.startsWith("fatal: file ") && line.contains("has only ")) {
 						endOfFile[0] = true;
-						debug(line.substring("fatal: ".length()));
+						logger.debug(line.substring("fatal: ".length()));
 					} else {
-						error(line);
+						logger.error(line);
 					}
 				}
 				

@@ -4,12 +4,17 @@ import java.io.File;
 
 import javax.annotation.Nullable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
 public class CalcMergeBaseCommand extends GitCommand<String> {
 
+	private static final Logger logger = LoggerFactory.getLogger(CalcMergeBaseCommand.class);
+	
 	private String rev1;
 	
 	private String rev2;
@@ -51,7 +56,7 @@ public class CalcMergeBaseCommand extends GitCommand<String> {
 
 			@Override
 			public void consume(String line) {
-				error(line);
+				logger.error(line);
 			}
 			
 		}).checkReturnCode();

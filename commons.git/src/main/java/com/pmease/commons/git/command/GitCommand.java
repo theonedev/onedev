@@ -8,71 +8,24 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.git.GitConfig;
 import com.pmease.commons.git.GitVersion;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.commons.util.LogUtils;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
 public abstract class GitCommand<V> implements Callable<V> {
 
+	private static final Logger logger = LoggerFactory.getLogger(GitCommand.class);
+	
 	private static final String MIN_VERSION = "1.8.0";
 	
 	protected final File repoDir;
 	
 	private final Map<String, String> environments;
-	
-	private static Logger getLogger() {
-		return LogUtils.getLogger(3);
-	}
-	
-	protected static final LineConsumer debugLogger = new LineConsumer() {
-
-		@Override
-		public void consume(String line) {
-			getLogger().debug(line);
-		}
-		
-	};
-	
-	protected static final LineConsumer infoLogger = new LineConsumer() {
-
-		@Override
-		public void consume(String line) {
-			getLogger().info(line);
-		}
-		
-	};
-	
-	protected static final LineConsumer warnLogger = new LineConsumer() {
-
-		@Override
-		public void consume(String line) {
-			getLogger().warn(line);
-		}
-		
-	};
-	
-	protected static final LineConsumer errorLogger = new LineConsumer() {
-
-		@Override
-		public void consume(String line) {
-			getLogger().error(line);
-		}
-		
-	};
-	
-	protected static final LineConsumer traceLogger = new LineConsumer() {
-
-		@Override
-		public void consume(String line) {
-			getLogger().trace(line);
-		}
-		
-	};
 	
 	public GitCommand(File repoDir, @Nullable Map<String, String> environments) {
 		this.repoDir = repoDir;
@@ -106,7 +59,14 @@ public abstract class GitCommand<V> implements Callable<V> {
 						version[0] = line.substring("git version ".length());
 				}
 				
-			}, new LineConsumer.ErrorLogger()).checkReturnCode();
+			}, new LineConsumer() {
+
+				@Override
+				public void consume(String line) {
+					logger.error(line);
+				}
+				
+			}).checkReturnCode();
 
 			if (version[0] == null)
 				return "Unable to determine git version of '" + gitExe + "'";
@@ -143,25 +103,5 @@ public abstract class GitCommand<V> implements Callable<V> {
 	
 	@Override
 	public abstract V call();
-	
-	protected void debug(String line) {
-		getLogger().debug(line);
-	}
-	
-	protected void trace(String line) {
-		getLogger().trace(line);
-	}
-
-	protected void info(String line) {
-		getLogger().info(line);
-	}
-
-	protected void warn(String line) {
-		getLogger().warn(line);
-	}
-
-	protected void error(String line) {
-		getLogger().error(line);
-	}
 
 }

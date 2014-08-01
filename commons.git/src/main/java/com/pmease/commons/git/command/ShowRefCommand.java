@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.RefInfo;
@@ -14,6 +16,8 @@ import com.pmease.commons.util.execution.LineConsumer;
 
 public class ShowRefCommand extends GitCommand<List<RefInfo>> {
 
+	private static final Logger logger = LoggerFactory.getLogger(ShowRefCommand.class);
+	
     private String pattern;
     
 	public ShowRefCommand(File repoDir) {
@@ -46,7 +50,7 @@ public class ShowRefCommand extends GitCommand<List<RefInfo>> {
 
 			@Override
 			public void consume(String line) {
-				error(line);
+				logger.error(line);
 				hasError[0] = true;
 			}
 			

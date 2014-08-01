@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.FileMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.FileChange;
@@ -17,6 +19,8 @@ import com.pmease.commons.util.execution.LineConsumer;
 
 public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 
+	private static final Logger logger = LoggerFactory.getLogger(DiffCommand.class);
+	
 	private String revisions;
 	
 	private String path;
@@ -108,13 +112,13 @@ public class DiffCommand extends GitCommand<List<FileChangeWithDiffs>> {
 			@Override
 			public void consume(String line) {
 				if (line.startsWith("warning: "))
-					warn(line.substring("warning: ".length()));
+					logger.warn(line.substring("warning: ".length()));
 				else if (line.startsWith("The file will have its original line endings"))
-					warn(line);
+					logger.warn(line);
 				else if (line.startsWith("The file will have its original line endings in your working directory"))
-					warn(line);
+					logger.warn(line);
 				else
-					error(line);
+					logger.error(line);
 			}
 			
 		}).checkReturnCode();

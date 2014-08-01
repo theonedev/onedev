@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.eclipse.jgit.util.RawParseUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
 import com.pmease.commons.git.GitConfig;
@@ -14,11 +16,16 @@ import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.Charsets;
 import com.pmease.commons.util.execution.Commandline;
+import com.pmease.commons.util.execution.LineConsumer;
 
 public class CatFileCommand extends GitCommand<String> {
 
+	private static final Logger logger = LoggerFactory.getLogger(CatFileCommand.class);
+	
 	private String revision;
+	
 	private String path;
+	
 	private ShowType showType = ShowType.PRETTY;
 	
 	static enum ShowType {
@@ -65,7 +72,14 @@ public class CatFileCommand extends GitCommand<String> {
 				ByteArrayOutputStream out = (ByteArrayOutputStream) getOutputStream();
 				InputStream in = getInputStream()) {
 			
-			cmd.execute(out, errorLogger).checkReturnCode();
+			cmd.execute(out, new LineConsumer() {
+
+				@Override
+				public void consume(String line) {
+					logger.debug(line);
+				}
+				
+			}).checkReturnCode();
 			
 			byte[] bytes = out.toByteArray();
 			if (showType == ShowType.PRETTY) {

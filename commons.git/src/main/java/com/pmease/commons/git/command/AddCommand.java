@@ -4,11 +4,16 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
 public class AddCommand extends GitCommand<Void> {
 
+	private static final Logger logger = LoggerFactory.getLogger(AddCommand.class);
+	
 	private List<String> paths = new ArrayList<String>();
 	
 	public AddCommand(File repoDir) {
@@ -29,18 +34,25 @@ public class AddCommand extends GitCommand<Void> {
 			cmd.addArgs(path);
 		}
 		
-		cmd.execute(debugLogger, new LineConsumer() {
+		cmd.execute(new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.debug(line);
+			}
+			
+		}, new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
 				if (line.startsWith("warning: "))
-					warn(line.substring("warning: ".length()));
+					logger.warn(line.substring("warning: ".length()));
 				else if (line.startsWith("The file will have its original line endings"))
-					warn(line);
+					logger.warn(line);
 				else if (line.startsWith("The file will have its original line endings in your working directory"))
-					warn(line);
+					logger.warn(line);
 				else
-					error(line);
+					logger.error(line);
 			}
 			
 		}).checkReturnCode();

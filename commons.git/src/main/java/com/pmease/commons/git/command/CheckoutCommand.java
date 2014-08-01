@@ -2,12 +2,17 @@ package com.pmease.commons.git.command;
 
 import java.io.File;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
 public class CheckoutCommand extends GitCommand<Void> {
 
+	private static final Logger logger = LoggerFactory.getLogger(CheckoutCommand.class);
+	
     private String revision;
     
     private String newBranch;
@@ -44,16 +49,23 @@ public class CheckoutCommand extends GitCommand<Void> {
 		
 		cmd.addArgs(revision);
 		
-		cmd.execute(debugLogger, new LineConsumer() {
+		cmd.execute(new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.debug(line);
+			}
+			
+		}, new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
 				if (line.startsWith("Switched to a new branch"))
-					info(line);
+					logger.info(line);
 				else if (line.startsWith("Switched to branch"))
-					info(line);
+					logger.info(line);
 				else
-					error(line);
+					logger.error(line);
 			}
 			
 		}).checkReturnCode();

@@ -3,6 +3,9 @@ package com.pmease.commons.git.command;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.util.execution.Commandline;
@@ -11,6 +14,8 @@ import com.pmease.commons.util.execution.LineConsumer;
 
 public class IsTreeLinkCommand extends GitCommand<Boolean> {
 
+	private static final Logger logger = LoggerFactory.getLogger(IsTreeLinkCommand.class);
+	
 	private String revision;
 	
 	private String symlink;
@@ -43,11 +48,18 @@ public class IsTreeLinkCommand extends GitCommand<Boolean> {
 		
 		Commandline cmd = cmd().addArgs("ls-tree", revision + ":" + targetPath);
 		final boolean[] notTreeObject = new boolean[]{false};
-		ExecuteResult result = cmd.execute(traceLogger, new LineConsumer() {
+		ExecuteResult result = cmd.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
-				debug(line);
+				logger.trace(line);
+			}
+			
+		}, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.debug(line);
 				if (line.equals("fatal: not a tree object") || line.startsWith("fatal: Not a valid object name "))
 					notTreeObject[0] = true;
 			}

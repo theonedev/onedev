@@ -5,12 +5,17 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
 public class ListChangedFilesCommand extends GitCommand<Collection<String>> {
 
+	private static final Logger logger = LoggerFactory.getLogger(ListChangedFilesCommand.class);
+	
 	private String fromRev;
 	
 	private String toRev;
@@ -58,7 +63,14 @@ public class ListChangedFilesCommand extends GitCommand<Collection<String>> {
 					changedFiles.add(line);
 			}
 			
-		}, errorLogger).checkReturnCode();
+		}, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.error(line);
+			}
+			
+		}).checkReturnCode();
 		
 		return changedFiles;
 	}

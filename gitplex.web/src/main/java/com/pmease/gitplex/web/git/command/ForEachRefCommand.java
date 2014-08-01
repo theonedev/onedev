@@ -3,6 +3,9 @@ package com.pmease.gitplex.web.git.command;
 import java.io.File;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -12,6 +15,8 @@ import com.pmease.commons.util.execution.LineConsumer;
 
 public abstract class ForEachRefCommand<T, V extends ForEachRefCommand<T, V>> extends GitCommand<T> {
 
+	private static final Logger logger = LoggerFactory.getLogger(ForEachRefCommand.class);
+	
 	private String[] patterns = new String[0];
 	private int count;
 	private String sort;
@@ -67,7 +72,14 @@ public abstract class ForEachRefCommand<T, V extends ForEachRefCommand<T, V>> ex
 	}
 
 	protected LineConsumer getErrorHandler() {
-		return new LineConsumer.ErrorLogger();
+		return new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.error(line);
+			}
+			
+		};
 	}
 	
 	protected void applyArgs(Commandline cmd) {

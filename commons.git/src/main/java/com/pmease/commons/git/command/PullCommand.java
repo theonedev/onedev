@@ -53,11 +53,11 @@ public class PullCommand extends GitCommand<Void> {
 			@Override
 			public void consume(String line) {
 				if (line.startsWith("To "))
-					info(line);
+					logger.info(line);
 				else if (line.startsWith(" * [new branch]"))
-					info(line);
+					logger.info(line);
 				else
-					error(line);
+					logger.error(line);
 			}
 			
 		}).checkReturnCode();

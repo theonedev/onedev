@@ -2,12 +2,17 @@ package com.pmease.commons.git.command;
 
 import java.io.File;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
 public class CommitCommand extends GitCommand<Void> {
 
+	private static final Logger logger = LoggerFactory.getLogger(CommitCommand.class);
+	
 	private String message;
 	
 	private boolean amend;
@@ -45,18 +50,25 @@ public class CommitCommand extends GitCommand<Void> {
 		if (amend) 
 			cmd.addArgs("--amend");
 		
-		cmd.execute(debugLogger, new LineConsumer() {
+		cmd.execute(new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.debug(line);
+			}
+			
+		}, new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
 				if (line.startsWith("warning: "))
-					warn(line.substring("warning: ".length()));
+					logger.warn(line.substring("warning: ".length()));
 				else if (line.startsWith("The file will have its original line endings"))
-					warn(line);
+					logger.warn(line);
 				else if (line.startsWith("The file will have its original line endings in your working directory"))
-					warn(line);
+					logger.warn(line);
 				else
-					error(line);
+					logger.error(line);
 			}
 			
 		}).checkReturnCode();
