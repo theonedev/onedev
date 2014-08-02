@@ -42,22 +42,22 @@ public class DiffUtils {
 		
 		if (partialSplitter != null) {
 			List<DiffLine> processedDiffLines = new ArrayList<>();
-			List<List<String>> deletions = new ArrayList<>();
-			List<List<String>> additions = new ArrayList<>();
+			List<String> deletions = new ArrayList<>();
+			List<String> additions = new ArrayList<>();
 			List<DiffLine> processedDeletions = new ArrayList<>();
 			List<DiffLine> processedAdditions = new ArrayList<>();
 			for (DiffLine diffLine: diffLines) {
 				Preconditions.checkState(diffLine.getPartials().size() == 1);
 				if (diffLine.getAction() == DiffLine.Action.DELETE) {
-					deletions.add(partialSplitter.split(diffLine.getPartials().get(0).getContent()));
+					deletions.add(diffLine.getPartials().get(0).getContent());
 				} else if (diffLine.getAction() == DiffLine.Action.ADD) {
-					additions.add(partialSplitter.split(diffLine.getPartials().get(0).getContent()));
+					additions.add(diffLine.getPartials().get(0).getContent());
 				} else {
-					process(processedDiffLines, deletions, additions, processedDeletions, processedAdditions);
+					process(processedDiffLines, deletions, additions, processedDeletions, processedAdditions, partialSplitter);
 					processedDiffLines.add(new DiffLine(DiffLine.Action.EQUAL, diffLine.getPartials().get(0).getContent()));
 				}
 			}
-			process(processedDiffLines, deletions, additions, processedDeletions, processedAdditions);
+			process(processedDiffLines, deletions, additions, processedDeletions, processedAdditions, partialSplitter);
 			
 			return processedDiffLines;
 		} else {
@@ -65,26 +65,34 @@ public class DiffUtils {
 		}
 	}
 	
-	private static void process(List<DiffLine> processedDiffLines, 
-			List<List<String>> deletions, List<List<String>> additions, 
-			List<DiffLine> processedDeletions, List<DiffLine> processedAdditions) {
-		for (List<String> deletion: deletions) {
+	private static List<String> getPartials(String line, PartialSplitter splitter, Map<String, List<String>> partialsCache) {
+		List<String> partials = partialsCache.get(line);
+		if (partials == null) {
+			partials = splitter.split(line);
+			partialsCache.put(line, partials);
+		}
+		return partials;
+	}
+	
+	private static void process(List<DiffLine> processedDiffLines, List<String> deletions, List<String> additions, 
+			List<DiffLine> processedDeletions, List<DiffLine> processedAdditions, PartialSplitter partialSplitter) {
+		Map<String, List<String>> partialsCache = new HashMap<String, List<String>>();
+		
+		for (String deletion: deletions) {
 			boolean matching = false;
 			for (int i=0; i<additions.size(); i++) {
-				List<String> addition = additions.get(i);
-				List<DiffLine> diffPartials = diff(deletion, addition, null);
+				String addition = additions.get(i);
+				
+				List<DiffLine> diffPartials = diff(getPartials(deletion, partialSplitter, partialsCache), 
+						getPartials(addition, partialSplitter, partialsCache), null);
 				int equals = 0;
 				for (DiffLine diffPartial: diffPartials) {
 					if (diffPartial.getAction() == DiffLine.Action.EQUAL)
 						equals++;
 				}
 				if (equals*2 >= diffPartials.size()) {
-					for (int j=0; j<i; j++) {	
-						List<Partial> partials = new ArrayList<>();
-						for (String content: additions.get(j)) 
-							partials.add(new Partial(content, false));
-						processedAdditions.add(new DiffLine(DiffLine.Action.ADD, partials));
-					}
+					for (int j=0; j<i; j++)	
+						processedAdditions.add(new DiffLine(DiffLine.Action.ADD, additions.get(j)));
 					for (int j=0; j<=i; j++)
 						additions.remove(0);
 					List<Partial> addPartials = new ArrayList<>();
@@ -106,20 +114,12 @@ public class DiffUtils {
 					break;
 				}
 			}
-			if (!matching) {
-				List<Partial> partials = new ArrayList<>();
-				for (String content: deletion) 
-					partials.add(new Partial(content, false));
-				processedDeletions.add(new DiffLine(DiffLine.Action.DELETE, partials));
-			}
+			if (!matching) 
+				processedDeletions.add(new DiffLine(DiffLine.Action.DELETE, deletion));
 		}
 		
-		for (List<String> addition: additions) {
-			List<Partial> partials = new ArrayList<>();
-			for (String content: addition) 
-				partials.add(new Partial(content, false));
-			processedAdditions.add(new DiffLine(DiffLine.Action.ADD, partials));
-		}
+		for (String addition: additions) 
+			processedAdditions.add(new DiffLine(DiffLine.Action.ADD, addition));
 		
 		additions.clear();
 		deletions.clear();
