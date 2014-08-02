@@ -24,7 +24,7 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.CommitComment;
+import com.pmease.gitplex.core.model.OldCommitComment;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitplex.web.component.commit.CommitMetaPanel;
@@ -46,7 +46,7 @@ public class RepoCommitPage extends RepositoryInfoPage implements CommitComments
 	
 	private final IModel<Commit> commitModel;
 	
-	private final IModel<List<CommitComment>> commentsModel;
+	private final IModel<List<OldCommitComment>> commentsModel;
 	
 	public RepoCommitPage(PageParameters params) {
 		super(params);
@@ -61,18 +61,18 @@ public class RepoCommitPage extends RepositoryInfoPage implements CommitComments
 			}
 		};
 		
-		this.commentsModel = new LoadableDetachableModel<List<CommitComment>>() {
+		this.commentsModel = new LoadableDetachableModel<List<OldCommitComment>>() {
 
 			@Override
-			protected List<CommitComment> load() {
+			protected List<OldCommitComment> load() {
 				return loadComments();
 			}
 			
 		};
 	}
 
-	private List<CommitComment> loadComments() {
-		return GitPlex.getInstance(Dao.class).query(EntityCriteria.of(CommitComment.class)
+	private List<OldCommitComment> loadComments() {
+		return GitPlex.getInstance(Dao.class).query(EntityCriteria.of(OldCommitComment.class)
 				.add(Restrictions.eq("repository", getRepository()))
 				.add(Restrictions.eq("commit", getUntil())));
 	}
@@ -218,7 +218,7 @@ public class RepoCommitPage extends RepositoryInfoPage implements CommitComments
 	}
 	
 	@Override
-	public List<CommitComment> getCommitComments() {
+	public List<OldCommitComment> getCommitComments() {
 		return commentsModel.getObject();
 	}
 

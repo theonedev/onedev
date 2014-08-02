@@ -2,7 +2,7 @@ package com.pmease.gitplex.web.page.repository.info.code.commit.diff;
 
 import java.util.List;
 
-import com.pmease.gitplex.core.model.CommitComment;
+import com.pmease.gitplex.core.model.OldCommitComment;
 
 /**
  * Whether or this page is commit comments aware
@@ -10,7 +10,7 @@ import com.pmease.gitplex.core.model.CommitComment;
  */
 public interface CommitCommentsAware {
 	
-	List<CommitComment> getCommitComments();
+	List<OldCommitComment> getCommitComments();
 	
 	boolean isShowInlineComments();
 	

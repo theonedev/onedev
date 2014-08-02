@@ -37,7 +37,7 @@ import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.CloseInfo;
-import com.pmease.gitplex.core.model.CommitComment;
+import com.pmease.gitplex.core.model.OldCommitComment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
@@ -143,17 +143,13 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 				}
 			}
 			
-			PullRequestUpdate update0 = new PullRequestUpdate();
-			pullRequest.getUpdates().add(update0);
-			update0.setRequest(pullRequest);
-			update0.setHeadCommit(pullRequest.git().calcMergeBase(target.getHeadCommit(), source.getHeadCommit()));
-			pullRequest.setUpdateDate(new Date());
+			pullRequest.setBaseCommit(pullRequest.git().calcMergeBase(target.getHeadCommit(), source.getHeadCommit()));			
 
-			PullRequestUpdate update1 = new PullRequestUpdate();
-			pullRequest.getUpdates().add(update1);
-			update1.setRequest(pullRequest);
-			update1.setUser(currentUser);
-			update1.setHeadCommit(source.getHeadCommit());
+			PullRequestUpdate update = new PullRequestUpdate();
+			pullRequest.getUpdates().add(update);
+			update.setRequest(pullRequest);
+			update.setUser(currentUser);
+			update.setHeadCommit(source.getHeadCommit());
 			pullRequest.setUpdateDate(new Date());
 		}
 		
@@ -161,7 +157,7 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 
 			@Override
 			protected List<Commit> load() {
-				return pullRequest.git().log(pullRequest.getBaseUpdate().getHeadCommit(), 
+				return pullRequest.git().log(pullRequest.getBaseCommit(), 
 						pullRequest.getLatestUpdate().getHeadCommit(), null, 0, 0);
 			}
 			
@@ -261,7 +257,7 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 		
 		IModel<Repository> sourceRepoModel = new RepositoryModel(pullRequest.getSource().getRepository());
 		add(new DiffViewPanel("changes", sourceRepoModel, 
-				pullRequest.getBaseUpdate().getHeadCommit(),
+				pullRequest.getBaseCommit(),
 				pullRequest.getLatestUpdate().getHeadCommit()) {
 
 			@Override
@@ -424,7 +420,7 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 	}
 
 	@Override
-	public List<CommitComment> getCommitComments() {
+	public List<OldCommitComment> getCommitComments() {
 		return new ArrayList<>();
 	}
 

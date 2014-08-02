@@ -50,9 +50,9 @@ public class RequestChangesPage extends RequestDetailPage {
 			}
 			
 			for (int i=request.getSortedUpdates().size()-1; i>=0; i--)
-				choices.put(request.getSortedUpdates().get(i).getHeadCommit(), "Head of Update #" + i);
+				choices.put(request.getSortedUpdates().get(i).getHeadCommit(), "Head of Update #" + (i+1));
 			
-			String baseCommit = request.getBaseUpdate().getHeadCommit();
+			String baseCommit = request.getBaseCommit();
 			if (request.getTarget().getHeadCommit().equals(baseCommit)) {
 				choices.put(request.getTarget().getHeadCommit(), "Target Branch Head");
 			} else {
@@ -114,7 +114,7 @@ public class RequestChangesPage extends RequestDetailPage {
 			public String getObject() {
 				if (!commitsModel.getObject().containsKey(baseCommit)) {
 					if (getPullRequest().getStatus() == Status.INTEGRATED)
-						baseCommit = getPullRequest().getBaseUpdate().getHeadCommit();
+						baseCommit = getPullRequest().getBaseCommit();
 					else
 						baseCommit = getPullRequest().getTarget().getHeadCommit();
 				}

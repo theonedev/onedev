@@ -33,7 +33,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.CommitComment;
+import com.pmease.gitplex.core.model.OldCommitComment;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.GitPlexSession;
@@ -94,11 +94,11 @@ public class HunkPanel extends Panel {
 
 			@Override
 			protected Multimap<String, Long> load() {
-				List<CommitComment> comments = getCommentsAware().getCommitComments();
+				List<OldCommitComment> comments = getCommentsAware().getCommitComments();
 				Multimap<String, Long> map = LinkedListMultimap.<String, Long>create();
 				
 				String fileId = TextDiffPanel.getFileId(getFile());
-				for (CommitComment each : comments) {
+				for (OldCommitComment each : comments) {
 					String line = each.getLine();
 					if (!Strings.isNullOrEmpty(line) && line.startsWith(fileId)) {
 						map.put(line, each.getId());
@@ -309,7 +309,7 @@ public class HunkPanel extends Panel {
 	}
 	
 	String getLineId(int position) {
-		return CommitComment.buildLineId(TextDiffPanel.getFileId(getFile()), getHunkIndex(), position);
+		return OldCommitComment.buildLineId(TextDiffPanel.getFileId(getFile()), getHunkIndex(), position);
 	}
 	
 	private Component createHunkLines() {
@@ -365,7 +365,7 @@ public class HunkPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				String lineId = getLineId(position);
-				CommitComment comment = new CommitComment();
+				OldCommitComment comment = new OldCommitComment();
 				comment.setAuthor(GitPlexSession.getCurrentUser().get());
 				comment.setCommit(revision);
 				comment.setLine(lineId);
@@ -502,7 +502,7 @@ public class HunkPanel extends Panel {
 				@Override
 				protected void populateItem(LoopItem item) {
 					int index = item.getIndex();
-					CommitComment comment = getComment(index);
+					OldCommitComment comment = getComment(index);
 					item.add(new CommitCommentPanel("comment", new CommitCommentModel(comment)));
 				}
 			};
@@ -547,9 +547,9 @@ public class HunkPanel extends Panel {
 			return commentForm;
 		}
 		
-		private CommitComment getComment(int index) {
+		private OldCommitComment getComment(int index) {
 			Long id = Iterables.get(getCommentIds(), index);
-			return GitPlex.getInstance(Dao.class).load(CommitComment.class, id);
+			return GitPlex.getInstance(Dao.class).load(OldCommitComment.class, id);
 		}
 		
 		private List<Long> getCommentIds() {

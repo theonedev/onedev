@@ -65,11 +65,9 @@ public class RequestActivitiesPage extends RequestDetailPage {
 				}
 				
 				for (PullRequestUpdate update: request.getUpdates()) {
-					if (update != request.getBaseUpdate()) {
-						activities.add(new UpdatePullRequest(update));
-						for (Vote vote: update.getVotes()) {
-							activities.add(new VotePullRequest(vote));
-						}
+					activities.add(new UpdatePullRequest(update));
+					for (Vote vote: update.getVotes()) {
+						activities.add(new VotePullRequest(vote));
 					}
 				}
 				

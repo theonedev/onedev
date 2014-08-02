@@ -33,7 +33,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.CommitComment;
+import com.pmease.gitplex.core.model.OldCommitComment;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.GitPlexSession;
 import com.pmease.gitplex.web.component.comment.CommitCommentEditor;
@@ -114,10 +114,10 @@ public class CommentListPanel extends Panel {
 			}
 		});
 		
-		IModel<List<CommitComment>> commentsModel = new LoadableDetachableModel<List<CommitComment>>() {
+		IModel<List<OldCommitComment>> commentsModel = new LoadableDetachableModel<List<OldCommitComment>>() {
 
 			@Override
-			protected List<CommitComment> load() {
+			protected List<OldCommitComment> load() {
 				if (showAllNotes) {
 					return getCommitComments();
 				} else {
@@ -126,17 +126,17 @@ public class CommentListPanel extends Panel {
 			}
 		};
 		
-		commentsHolder.add(new ListView<CommitComment>("comments", commentsModel) {
+		commentsHolder.add(new ListView<OldCommitComment>("comments", commentsModel) {
 
 			@Override
-			protected void populateItem(ListItem<CommitComment> item) {
-				CommitComment c = item.getModelObject();
+			protected void populateItem(ListItem<OldCommitComment> item) {
+				OldCommitComment c = item.getModelObject();
 				item.add(new UserLink("author", Model.of(c.getAuthor()), AvatarMode.AVATAR));
 				item.add(new CommitCommentPanel("message", new CommitCommentModel(c)) {
 					@Override
 					protected Component createCommentHead(String id) {
 						
-						CommitComment comment = getCommitComment();
+						OldCommitComment comment = getCommitComment();
 						
 						Fragment frag = new Fragment(id, "commenthead", CommentListPanel.this);
 						frag.add(new UserLink("author", Model.of(comment.getAuthor()), AvatarMode.NAME));
@@ -181,7 +181,7 @@ public class CommentListPanel extends Panel {
 
 				@Override
 				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-					CommitComment c = new CommitComment();
+					OldCommitComment c = new OldCommitComment();
 					c.setAuthor(GitPlexSession.getCurrentUser().get());
 					c.setCommit(getCommit());
 					c.setRepository(getRepository());
@@ -214,28 +214,28 @@ public class CommentListPanel extends Panel {
 		}
 	}
 
-	private List<CommitComment> getCommitComments() {
+	private List<OldCommitComment> getCommitComments() {
 		Page page = getPage();
 		Preconditions.checkState(page instanceof CommitCommentsAware);
 		return ((CommitCommentsAware) page).getCommitComments();
 	}
 	
-	private List<CommitComment> getCommentsOnCommit() {
-		return Lists.newArrayList(Iterables.filter(getCommitComments(), new Predicate<CommitComment>() {
+	private List<OldCommitComment> getCommentsOnCommit() {
+		return Lists.newArrayList(Iterables.filter(getCommitComments(), new Predicate<OldCommitComment>() {
 
 			@Override
-			public boolean apply(CommitComment input) {
+			public boolean apply(OldCommitComment input) {
 				return Strings.isNullOrEmpty(input.getLine());
 			}
 			
 		}));
 	}
 	
-	private List<CommitComment> getCommentsOnLine() {
-		return Lists.newArrayList(Iterables.filter(getCommitComments(), new Predicate<CommitComment>() {
+	private List<OldCommitComment> getCommentsOnLine() {
+		return Lists.newArrayList(Iterables.filter(getCommitComments(), new Predicate<OldCommitComment>() {
 
 			@Override
-			public boolean apply(CommitComment input) {
+			public boolean apply(OldCommitComment input) {
 				return !Strings.isNullOrEmpty(input.getLine());
 			}
 			
@@ -252,7 +252,7 @@ public class CommentListPanel extends Panel {
 		return GitUtils.abbreviateSHA(hash, 6) + line.substring(pos);
 	}
 	
-	private void onAddComment(AjaxRequestTarget target, CommitComment c) {
+	private void onAddComment(AjaxRequestTarget target, OldCommitComment c) {
 		target.add(this);
 	}
 	

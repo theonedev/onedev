@@ -18,7 +18,7 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.parboiled.common.Preconditions;
 
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.CommitComment;
+import com.pmease.gitplex.core.model.OldCommitComment;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.comment.event.CommitCommentAdded;
 import com.pmease.gitplex.web.component.comment.event.CommitCommentRemoved;
@@ -90,9 +90,9 @@ public class TextDiffPanel extends BlobDiffPanel {
 	}
 	
 	private boolean hasInlineComments() {
-		List<CommitComment> comments = getCommentsAware().getCommitComments();
+		List<OldCommitComment> comments = getCommentsAware().getCommitComments();
 		String fileId = getFileId(getFile());
-		for (CommitComment each : comments) {
+		for (OldCommitComment each : comments) {
 			if (each.isLineComment() && each.getLine().startsWith(fileId)) {
 				return true;
 			}

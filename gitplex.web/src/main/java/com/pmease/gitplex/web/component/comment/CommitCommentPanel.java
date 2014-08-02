@@ -19,7 +19,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.CommitComment;
+import com.pmease.gitplex.core.model.OldCommitComment;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.comment.event.CommitCommentRemoved;
 import com.pmease.gitplex.web.component.comment.event.CommitCommentUpdated;
@@ -30,7 +30,7 @@ import com.pmease.gitplex.web.component.wiki.WikiTextPanel;
 @SuppressWarnings("serial")
 public class CommitCommentPanel extends Panel {
 
-	public CommitCommentPanel(String id, IModel<CommitComment> model) {
+	public CommitCommentPanel(String id, IModel<OldCommitComment> model) {
 		super(id, model);
 	
 		this.setOutputMarkupId(true);
@@ -158,7 +158,7 @@ public class CommitCommentPanel extends Panel {
 					return;
 				}
 				
-				CommitComment cc = getCommitComment();
+				OldCommitComment cc = getCommitComment();
 				cc.setUpdateDate(new Date());
 				cc.setContent(comment);
 				
@@ -185,13 +185,13 @@ public class CommitCommentPanel extends Panel {
 	}
 	
 	protected void onDelete(AjaxRequestTarget target) {
-		CommitComment comment = getCommitComment();
+		OldCommitComment comment = getCommitComment();
 		GitPlex.getInstance(Dao.class).remove(comment);
 		send(getPage(), Broadcast.BREADTH, new CommitCommentRemoved(target, comment));
 	}
 	
-	protected CommitComment getCommitComment() {
-		return (CommitComment) getDefaultModelObject();
+	protected OldCommitComment getCommitComment() {
+		return (OldCommitComment) getDefaultModelObject();
 	}
 	
 }

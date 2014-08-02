@@ -48,7 +48,7 @@ import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.model.Branch;
-import com.pmease.gitplex.core.model.CommitComment;
+import com.pmease.gitplex.core.model.OldCommitComment;
 import com.pmease.gitplex.core.model.IntegrationInfo;
 import com.pmease.gitplex.core.model.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -590,7 +590,7 @@ public abstract class RequestDetailPage extends RepositoryInfoPage implements Co
 	}
 
 	@Override
-	public List<CommitComment> getCommitComments() {
+	public List<OldCommitComment> getCommitComments() {
 		return new ArrayList<>();
 	}
 

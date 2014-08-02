@@ -5,68 +5,53 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
-import org.hibernate.annotations.Index;
-
-import com.google.common.base.Objects;
-import com.google.common.base.Strings;
 import com.pmease.commons.hibernate.AbstractEntity;
 
 @SuppressWarnings("serial")
 @Entity
 public class CommitComment extends AbstractEntity {
-
-	@ManyToOne
-	@JoinColumn(nullable = false)
-	private User author;
 	
-	@ManyToOne
-	@JoinColumn(nullable = false)
-	private Repository repository;
-	
-	@Column(nullable = false, length=40)
-	@Index(name = "IDX_COMMENT_COMMIT")
+	@Column(nullable=false)
 	private String commit;
 	
-	// when line is null means this is a commit comment, otherwise, this is 
-	// a line comment
-	@Column(nullable = true)
-	private String line;
+	@ManyToOne
+	@JoinColumn(nullable=false)
+	private User user;
 	
-	@Column(nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updateDate = new Date();
+	@Column(nullable=false)
+	private Date date = new Date();
 
 	@Column(nullable=false)
-	@Lob
 	private String content;
-
-	public static String buildLineId(String fileSha, int hunkIndex, int linePos) {
-		return fileSha + "-L" + hunkIndex + "-" + linePos;
-	}
 	
-	public boolean isLineComment() {
-		return !Strings.isNullOrEmpty(getLine());
-	}
+	private String filePath;
 	
-	public User getAuthor() {
-		return author;
+	private Integer lineNo;
+	
+	public User getUser() {
+		return user;
 	}
 
-	public void setAuthor(User author) {
-		this.author = author;
+	public void setUser(User user) {
+		this.user = user;
 	}
 
-	public Repository getRepository() {
-		return repository;
+	public String getContent() {
+		return content;
 	}
 
-	public void setRepository(Repository repository) {
-		this.repository = repository;
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
 	}
 
 	public String getCommit() {
@@ -77,39 +62,20 @@ public class CommitComment extends AbstractEntity {
 		this.commit = commit;
 	}
 
-	public String getLine() {
-		return line;
+	public String getFilePath() {
+		return filePath;
 	}
 
-	public void setLine(String line) {
-		this.line = line;
+	public void setFilePath(String filePath) {
+		this.filePath = filePath;
 	}
 
-	public Date getUpdateDate() {
-		return updateDate;
+	public Integer getLineNo() {
+		return lineNo;
 	}
 
-	public void setUpdateDate(Date updateDate) {
-		this.updateDate = updateDate;
+	public void setLineNo(Integer lineNo) {
+		this.lineNo = lineNo;
 	}
 
-	public String getContent() {
-		return content;
-	}
-
-	public void setContent(String content) {
-		this.content = content;
-	}
-	
-	@Override
-	public String toString() {
-		return Objects.toStringHelper(this)
-				.add("id", getId())
-				.add("repository", getRepository())
-				.add("commit", commit)
-				.add("line", line)
-				.add("content", content)
-				.add("updateDate", updateDate)
-				.toString();
-	}
 }

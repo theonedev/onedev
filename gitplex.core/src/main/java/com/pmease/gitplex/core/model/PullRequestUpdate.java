@@ -97,12 +97,12 @@ public class PullRequestUpdate extends AbstractEntity {
 	
 	public String getChangeRef() {
 		Preconditions.checkNotNull(getId());
-		return Repository.REFS_GITOP + "updates/" + getId() + "/change";
+		return Repository.REFS_GITPLEX + "updates/" + getId() + "/change";
 	}
 	
 	public String getHeadRef() {
 		Preconditions.checkNotNull(getId());
-		return Repository.REFS_GITOP + "updates/" + getId() + "/head";
+		return Repository.REFS_GITPLEX + "updates/" + getId() + "/head";
 	}
 
 	/**
@@ -222,7 +222,7 @@ public class PullRequestUpdate extends AbstractEntity {
 			if (index > 0)
 				baseCommit = request.getSortedUpdates().get(index-1).getHeadCommit();
 			else
-				baseCommit = request.getBaseUpdate().getHeadCommit();
+				baseCommit = request.getBaseCommit();
 		}
 		return baseCommit;
 	}

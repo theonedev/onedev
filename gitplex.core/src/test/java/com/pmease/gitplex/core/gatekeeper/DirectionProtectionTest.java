@@ -2,8 +2,6 @@ package com.pmease.gitplex.core.gatekeeper;
 
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
-
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -13,7 +11,6 @@ import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.AppLoader;
-import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.gatekeeper.helper.branchselection.SpecifyTargetBranchesByIds;
 import com.pmease.gitplex.core.gatekeeper.helper.pathselection.SpecifyTargetPathsByDirectories;
 import com.pmease.gitplex.core.model.Branch;
@@ -92,71 +89,51 @@ public class DirectionProtectionTest extends AbstractGitTest {
 	@SuppressWarnings("serial")
 	@Test
 	public void testCheckCommit() {
-	    File tempDir = FileUtils.createTempDir();
+		DirectoryAndFileProtection pathProtection = new DirectoryAndFileProtection();
+		SpecifyTargetBranchesByIds branchSelection = new SpecifyTargetBranchesByIds();
+		branchSelection.setBranchIds(Lists.newArrayList(1L));
+		pathProtection.setBranchSelection(branchSelection);
 		
-		try {
-			DirectoryAndFileProtection pathProtection = new DirectoryAndFileProtection();
-			SpecifyTargetBranchesByIds branchSelection = new SpecifyTargetBranchesByIds();
-			branchSelection.setBranchIds(Lists.newArrayList(1L));
-			pathProtection.setBranchSelection(branchSelection);
-			
-			SpecifyTargetPathsByDirectories pathSelection = new SpecifyTargetPathsByDirectories();
-			pathSelection.setDirectories(Lists.newArrayList("src"));
-			pathProtection.setPathSelection(pathSelection);
-			
-			pathProtection.setTeamIds(Lists.newArrayList(1L));
+		SpecifyTargetPathsByDirectories pathSelection = new SpecifyTargetPathsByDirectories();
+		pathSelection.setDirectories(Lists.newArrayList("src"));
+		pathProtection.setPathSelection(pathSelection);
+		
+		pathProtection.setTeamIds(Lists.newArrayList(1L));
 
-			final Git git = new Git(tempDir);
-			git.init(false);
-			
-			FileUtils.touchFile(new File(tempDir, "src/file1"));
-			git.add("src/file1");
-			git.commit("add src/file1", false, false);
+		addFileAndCommit("src/file1", "", "add src/file1");
 
-			git.checkout("master", "branch1");
-			
-			Branch master = new Branch();
-			master.setName("master");
-			master.setHeadCommit(git.parseRevision("master", true));
-			master.setId(1L);
-			master.setRepository(new Repository() {
+		git.checkout("master", "branch1");
+		
+		Branch master = new Branch();
+		master.setName("master");
+		master.setHeadCommit(git.parseRevision("master", true));
+		master.setId(1L);
+		master.setRepository(new Repository() {
 
-				@Override
-				public Git git() {
-					return git;
-				}
-				
-			});
-
-			User user1 = new User();
-			user1.setId(1L);
+			@Override
+			public Git git() {
+				return git;
+			}
 			
-			User user2 = new User();
-			user2.setId(2L);
+		});
 
-			FileUtils.touchFile(new File(tempDir, "src/file2"));
-			git.add("src/file2");
-			git.commit("add src/file2", false, false);
-			
-			assertTrue(pathProtection.checkCommit(user1, master, git.parseRevision("branch1", true)).isApproved());
-			assertTrue(pathProtection.checkCommit(user2, master, git.parseRevision("branch1", true)).isPending());
-			
-			git.checkout("master", "branch2");
+		User user1 = new User();
+		user1.setId(1L);
+		
+		User user2 = new User();
+		user2.setId(2L);
 
-			FileUtils.touchFile(new File(tempDir, "docs/file2"));
-			git.add("docs/file2");
-			git.commit("add docs/file2", false, false);
-			
-			assertTrue(pathProtection.checkCommit(user1, master, git.parseRevision("branch2", true)).isApproved());
-			assertTrue(pathProtection.checkCommit(user2, master, git.parseRevision("branch2", true)).isApproved());
-		} finally {
-			FileUtils.deleteDir(tempDir);;
-		}
-	}
+		addFileAndCommit("src/file2", "", "add src/file2");
+		
+		assertTrue(pathProtection.checkCommit(user1, master, git.parseRevision("branch1", true)).isApproved());
+		assertTrue(pathProtection.checkCommit(user2, master, git.parseRevision("branch1", true)).isPending());
+		
+		git.checkout("master", "branch2");
 
-	@Override
-	protected void teardown() {
-		super.teardown();
+		addFileAndCommit("docs/file2", "", "add docs/file2");
+		
+		assertTrue(pathProtection.checkCommit(user1, master, git.parseRevision("branch2", true)).isApproved());
+		assertTrue(pathProtection.checkCommit(user2, master, git.parseRevision("branch2", true)).isApproved());
 	}
 
 }

@@ -1,6 +1,5 @@
 package com.pmease.gitplex.core.gatekeeper;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -13,7 +12,6 @@ import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.AppLoader;
-import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.Membership;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -83,101 +81,81 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 	@SuppressWarnings("serial")
 	@Test
 	public void testCheckRequest() {
-		final Git git = new Git(FileUtils.createTempDir());
-		try {
-			git.init(false);
+		addFileAndCommit("file1", "", "add file1");
+		
+		git.checkout("master", "dev");
+		
+		addFileAndCommit("file2", "", "add file2");
+		
+		IfApprovedByMajoritiesOfSpecifiedTeam gateKeeper = new IfApprovedByMajoritiesOfSpecifiedTeam();
+		gateKeeper.setTeamId(1L);
 
-			FileUtils.touchFile(new File(git.repoDir(), "file1"));
-			git.add("file1");
-			git.commit("add file1", false, false);
-			
-			git.checkout("master", "dev");
-			FileUtils.touchFile(new File(git.repoDir(), "file2"));
-			git.add("file2");
-			git.commit("add file2", false, false);
-			
-			IfApprovedByMajoritiesOfSpecifiedTeam gateKeeper = new IfApprovedByMajoritiesOfSpecifiedTeam();
-			gateKeeper.setTeamId(1L);
+		PullRequest request = new PullRequest();
+		request.setId(1L);
+		request.setTarget(new Branch());
+		request.getTarget().setName("master");
+		request.getTarget().setHeadCommit(git.parseRevision("master", true));
+		request.getTarget().setRepository(new Repository() {
 
-			PullRequest request = new PullRequest();
-			request.setId(1L);
-			request.setTarget(new Branch());
-			request.getTarget().setName("master");
-			request.getTarget().setHeadCommit(git.parseRevision("master", true));
-			request.getTarget().setRepository(new Repository() {
+			@Override
+			public Git git() {
+				return git;
+			}
+			
+		});
+		request.getTarget().getRepository().setId(1L);
+		request.getTarget().getRepository().setOwner(new User());
+		request.getTarget().getRepository().getOwner().setId(1L);
+		
+		request.setSource(new Branch());
+		request.getSource().setName("dev");
+		request.getSource().setHeadCommit(git.parseRevision("dev", true));
+		request.getSource().setRepository(new Repository() {
 
-				@Override
-				public Git git() {
-					return git;
-				}
-				
-			});
-			request.getTarget().getRepository().setId(1L);
-			request.getTarget().getRepository().setOwner(new User());
-			request.getTarget().getRepository().getOwner().setId(1L);
+			@Override
+			public Git git() {
+				return git;
+			}
 			
-			request.setSource(new Branch());
-			request.getSource().setName("dev");
-			request.getSource().setHeadCommit(git.parseRevision("dev", true));
-			request.getSource().setRepository(new Repository() {
+		});
+		
+		request.setSubmitter(new User());
+		request.getSubmitter().setId(2L);
+		request.getSubmitter().setName("user2");
+		request.setBaseCommit(git.calcMergeBase("dev", "master"));
 
-				@Override
-				public Git git() {
-					return git;
-				}
-				
-			});
-			
-			request.setSubmitter(new User());
-			request.getSubmitter().setId(2L);
-			request.getSubmitter().setName("user2");
-			
-			PullRequestUpdate update0 = new PullRequestUpdate();
-			update0.setHeadCommit(git.calcMergeBase("dev", "master"));
-			update0.setId(1L);
-			update0.setRequest(request);
-			request.getUpdates().add(update0);
-
-			PullRequestUpdate update1 = new PullRequestUpdate();
-			update1.setHeadCommit(git.parseRevision("dev", true));
-			update1.setId(2L);
-			update1.setRequest(request);
-			request.getUpdates().add(update1);
-			
-			Assert.assertTrue(gateKeeper.checkRequest(request).isPending());
-			Collection<User> candidates = new HashSet<>();
-			User user = new User();
-			user.setId(1L);
-			user.setName("user1");
-			candidates.add(user);
-			user = new User();
-			user.setId(2L);
-			user.setName("user2");
-			candidates.add(user);
-			user = new User();
-			user.setId(3L);
-			user.setName("user3");
-			candidates.add(user);
-			Assert.assertEquals("user1", request.getVoteInvitations().iterator().next().getVoter().getName());
-			
-			Vote vote = new Vote();
-			vote.setId(1L);
-			vote.setResult(Vote.Result.APPROVE);
-			vote.setUpdate(update1);
-			vote.setVoter(new User());
-			vote.getVoter().setId(1L);
-			vote.getVoter().setName("user1");
-			update1.getVotes().add(vote);
-			
-			Assert.assertTrue(gateKeeper.checkRequest(request).isApproved());
-		} finally {
-			FileUtils.deleteDir(git.repoDir());
-		}
-	}
-
-	@Override
-	protected void teardown() {
-		super.teardown();
+		PullRequestUpdate update = new PullRequestUpdate();
+		update.setHeadCommit(git.parseRevision("dev", true));
+		update.setId(1L);
+		update.setRequest(request);
+		request.getUpdates().add(update);
+		
+		Assert.assertTrue(gateKeeper.checkRequest(request).isPending());
+		Collection<User> candidates = new HashSet<>();
+		User user = new User();
+		user.setId(1L);
+		user.setName("user1");
+		candidates.add(user);
+		user = new User();
+		user.setId(2L);
+		user.setName("user2");
+		candidates.add(user);
+		user = new User();
+		user.setId(3L);
+		user.setName("user3");
+		candidates.add(user);
+		Assert.assertEquals("user1", request.getVoteInvitations().iterator().next().getVoter().getName());
+		
+		Vote vote = new Vote();
+		vote.setId(1L);
+		vote.setResult(Vote.Result.APPROVE);
+		vote.setUpdate(update);
+		vote.setVoter(new User());
+		vote.getVoter().setId(1L);
+		vote.getVoter().setName("user1");
+		update.getVotes().add(vote);
+		
+		Assert.assertTrue(gateKeeper.checkRequest(request).isApproved());
 	}
 
 }

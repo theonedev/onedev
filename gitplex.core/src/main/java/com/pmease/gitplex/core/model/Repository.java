@@ -44,7 +44,7 @@ import com.pmease.commons.util.FileUtils;
 @Editable
 public class Repository extends AbstractEntity implements UserBelonging {
 
-	public static final String REFS_GITOP = "refs/gitplex/";
+	public static final String REFS_GITPLEX = "refs/gitplex/";
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)

@@ -9,14 +9,9 @@ import org.mockito.Mockito;
 import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
-import com.pmease.commons.util.FileUtils;
 
 public class PullRequestUpdateTest extends AbstractGitTest {
 
-    private File repoDir;
-    
-    private Git workGit;
-    
     private Git bareGit;
     
     private Repository repository;
@@ -25,24 +20,13 @@ public class PullRequestUpdateTest extends AbstractGitTest {
     public void setup() {
     	super.setup();
     	
-        repoDir = FileUtils.createTempDir();
-        
-        bareGit = new Git(new File(repoDir, "code"));
-        bareGit.init(true);
-        
-        workGit = new Git(new File(repoDir, "work"));
-        workGit.clone(bareGit.repoDir().getAbsolutePath(), false, false, false, null);
+        bareGit = new Git(new File(tempDir, "bare"));
+        bareGit.clone(git, true, false, false, null);
         
         repository = Mockito.mock(Repository.class);
         Mockito.when(repository.git()).thenReturn(bareGit);
     }
     
-    @Override
-    public void teardown() {
-        FileUtils.deleteDir(repoDir);
-        super.teardown();
-    }
-
     @Test
     public void testResolveChangeCommitWhenThereIsNoMerge() {
         PullRequest request = new PullRequest();
@@ -51,45 +35,32 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         target.setName("master");
         request.setTarget(target);
 
-        FileUtils.touchFile(new File(workGit.repoDir(), "a"));
-        workGit.add("a");
-        workGit.commit("master:1", false, false);
+        addFileAndCommit("a", "", "master:1");
         
-        workGit.checkout("head", "dev");
-        
-        FileUtils.touchFile(new File(workGit.repoDir(), "b"));
-        workGit.add("b");
-        workGit.commit("dev:2", false, false);
-        
-        FileUtils.touchFile(new File(workGit.repoDir(), "c"));
-        workGit.add("c");
-        workGit.commit("dev:3", false, false);
-        
-        workGit.checkout("master", null);
+        git.checkout("head", "dev");
 
-        FileUtils.touchFile(new File(workGit.repoDir(), "d"));
-        workGit.add("d");
-        workGit.commit("master:4", false, false);
-
-        workGit.push(bareGit.repoDir().getAbsolutePath(), "master:master");
-        workGit.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
+        addFileAndCommit("b", "", "dev:2");
         
-        PullRequestUpdate update0 = new PullRequestUpdate();
-        update0.setId(1L);
-        update0.setRequest(request);
-        update0.setHeadCommit(bareGit.showRevision("master~1").getHash());
-        bareGit.updateRef(update0.getHeadRef(), update0.getHeadCommit(), null, null);
-        request.getUpdates().add(update0);
+        addFileAndCommit("c", "", "dev:3");
+        
+        git.checkout("master", null);
+
+        addFileAndCommit("d", "", "master:4");
+
+        git.push(bareGit.repoDir().getAbsolutePath(), "master:master");
+        git.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
+        
+        request.setBaseCommit(bareGit.showRevision("master~1").getHash());
 
         PullRequestUpdate update1 = new PullRequestUpdate();
-        update1.setId(2L);
+        update1.setId(1L);
         update1.setRequest(request);
         update1.setHeadCommit(bareGit.showRevision("dev~1").getHash());
         bareGit.updateRef(update1.getHeadRef(), update1.getHeadCommit(), null, null);
         request.getUpdates().add(update1);
         
         PullRequestUpdate update2 = new PullRequestUpdate();
-        update2.setId(3L);
+        update2.setId(2L);
         update2.setRequest(request);
         update2.setHeadCommit(bareGit.showRevision("dev").getHash());
         bareGit.updateRef(update2.getHeadRef(), update2.getHeadCommit(), null, null);
@@ -109,45 +80,32 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         target.setName("master");
         request.setTarget(target);
 
-        FileUtils.touchFile(new File(workGit.repoDir(), "1"));
-        workGit.add("1");
-        workGit.commit("master:1", false, false);
-        
-        FileUtils.touchFile(new File(workGit.repoDir(), "2"));
-        workGit.add("2");
-        workGit.commit("master:2", false, false);
-        
-        workGit.checkout("master~1", "dev");
-        
-        FileUtils.touchFile(new File(workGit.repoDir(), "3"));
-        workGit.add("3");
-        workGit.commit("dev:3", false, false);
-        
-        workGit.merge("master", null, null, null, null);
+        addFileAndCommit("1", "", "master:1");
 
-        FileUtils.touchFile(new File(workGit.repoDir(), "4"));
-        workGit.add("4");
-        workGit.commit("dev:4", false, false);
+        addFileAndCommit("2", "", "master:2");
+        
+        git.checkout("master~1", "dev");
 
-        workGit.push(bareGit.repoDir().getAbsolutePath(), "master:master");
-        workGit.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
+        addFileAndCommit("3", "", "dev:3");
+        
+        git.merge("master", null, null, null, null);
 
-        PullRequestUpdate update0 = new PullRequestUpdate();
-        update0.setId(1L);
-        update0.setRequest(request);
-        update0.setHeadCommit(bareGit.calcMergeBase("dev~2", "master"));
-        bareGit.updateRef(update0.getHeadRef(), update0.getHeadCommit(), null, null);
-        request.getUpdates().add(update0);
+        addFileAndCommit("4", "", "dev:4");
+
+        git.push(bareGit.repoDir().getAbsolutePath(), "master:master");
+        git.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
+
+        request.setBaseCommit(bareGit.calcMergeBase("dev~2", "master"));
 
         PullRequestUpdate update1 = new PullRequestUpdate();
-        update1.setId(2L);
+        update1.setId(1L);
         update1.setRequest(request);
         update1.setHeadCommit(bareGit.showRevision("dev~2").getHash());
         bareGit.updateRef(update1.getHeadRef(), update1.getHeadCommit(), null, null);
         request.getUpdates().add(update1);
         
         PullRequestUpdate update2 = new PullRequestUpdate();
-        update2.setId(3L);
+        update2.setId(2L);
         update2.setRequest(request);
         update2.setHeadCommit(bareGit.showRevision("dev").getHash());
         bareGit.updateRef(update2.getHeadRef(), update2.getHeadCommit(), null, null);
@@ -169,49 +127,36 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         target.setName("master");
         request.setTarget(target);
 
-        FileUtils.touchFile(new File(workGit.repoDir(), "0"));
-        workGit.add("0");
-        workGit.commit("0", false, false);
+        addFileAndCommit("0", "", "0");
         
-        workGit.checkout("head", "dev");
-        workGit.checkout("master", null);
-        
-        FileUtils.touchFile(new File(workGit.repoDir(), "m1"));
-        workGit.add("m1");
-        workGit.commit("m1", false, false);
-        
-        workGit.checkout("dev", null);
+        git.checkout("head", "dev");
+        git.checkout("master", null);
 
-        FileUtils.touchFile(new File(workGit.repoDir(), "d1"));
-        workGit.add("d1");
-        workGit.commit("d1", false, false);
-
-        FileUtils.touchFile(new File(workGit.repoDir(), "d2"));
-        workGit.add("d2");
-        workGit.commit("d2", false, false);
-
-        workGit.push(bareGit.repoDir().getAbsolutePath(), "master:master");
-        workGit.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
+        addFileAndCommit("m1", "", "m1");
         
-        PullRequestUpdate update0 = new PullRequestUpdate();
-        update0.setId(1L);
-        update0.setRequest(request);
-        update0.setHeadCommit(bareGit.calcMergeBase("master", "dev"));
-        bareGit.updateRef(update0.getHeadRef(), update0.getHeadCommit(), null, null);
-        request.getUpdates().add(update0);
+        git.checkout("dev", null);
+
+        addFileAndCommit("d1", "", "d1");
+
+        addFileAndCommit("d2", "", "d2");
+
+        git.push(bareGit.repoDir().getAbsolutePath(), "master:master");
+        git.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
+        
+        request.setBaseCommit(bareGit.calcMergeBase("master", "dev"));
 
         PullRequestUpdate update1 = new PullRequestUpdate();
-        update1.setId(2L);
+        update1.setId(1L);
         update1.setRequest(request);
         update1.setHeadCommit(bareGit.showRevision("dev").getHash());
         bareGit.updateRef(update1.getHeadRef(), update1.getHeadCommit(), null, null);
         request.getUpdates().add(update1);
 
-        workGit.merge("master", null, null, null, "merge master to dev");
-        workGit.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
+        git.merge("master", null, null, null, "merge master to dev");
+        git.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
         
         PullRequestUpdate update2 = new PullRequestUpdate();
-        update2.setId(3L);
+        update2.setId(2L);
         update2.setRequest(request);
         update2.setHeadCommit(bareGit.showRevision("dev").getHash());
         bareGit.updateRef(update2.getHeadRef(), update2.getHeadCommit(), null, null);
@@ -235,49 +180,36 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         target.setName("master");
         request.setTarget(target);
 
-        FileUtils.touchFile(new File(workGit.repoDir(), "0"));
-        workGit.add("0");
-        workGit.commit("0", false, false);
+        addFileAndCommit("0", "", "0");
         
-        workGit.checkout("head", "dev");
-        workGit.checkout("master", null);
-        
-        FileUtils.touchFile(new File(workGit.repoDir(), "m1"));
-        workGit.add("m1");
-        workGit.commit("m1", false, false);
-        
-        workGit.checkout("dev", null);
+        git.checkout("head", "dev");
+        git.checkout("master", null);
 
-        FileUtils.touchFile(new File(workGit.repoDir(), "d1"));
-        workGit.add("d1");
-        workGit.commit("d1", false, false);
+        addFileAndCommit("m1", "", "m1");
         
-        PullRequestUpdate update0 = new PullRequestUpdate();
-        update0.setId(1L);
-        update0.setRequest(request);
-        update0.setHeadCommit(workGit.parseRevision("master", true));
-        request.getUpdates().add(update0);
+        git.checkout("dev", null);
+
+        addFileAndCommit("d1", "", "d1");
+        
+        request.setBaseCommit(git.parseRevision("master", true));
 
         PullRequestUpdate update1 = new PullRequestUpdate();
         update1.setId(1L);
         update1.setRequest(request);
-        update1.setHeadCommit(workGit.showRevision("dev").getHash());
+        update1.setHeadCommit(git.showRevision("dev").getHash());
         request.getUpdates().add(update1);
 
-        FileUtils.touchFile(new File(workGit.repoDir(), "d2"));
-        workGit.add("d2");
-        workGit.commit("d2", false, false);
+        addFileAndCommit("d2", "", "d2");
 
-        workGit.checkout("master", null);
-        workGit.merge("dev", null, null, null, null);
+        git.checkout("master", null);
+        git.merge("dev", null, null, null, null);
         
-        workGit.checkout("dev", null);
-        FileUtils.touchFile(new File(workGit.repoDir(), "d3"));
-        workGit.add("d3");
-        workGit.commit("d3", false, false);
+        git.checkout("dev", null);
+        
+        addFileAndCommit("d3", "", "d3");
 
-        workGit.push(bareGit.repoDir().getAbsolutePath(), "master:master");
-        workGit.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
+        git.push(bareGit.repoDir().getAbsolutePath(), "master:master");
+        git.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
         
         bareGit.updateRef(update1.getHeadRef(), update1.getHeadCommit(), null, null);
 

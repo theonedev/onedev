@@ -1,12 +1,12 @@
 package com.pmease.gitplex.web.model;
 
-import com.pmease.gitplex.core.model.CommitComment;
+import com.pmease.gitplex.core.model.OldCommitComment;
 
-public class CommitCommentModel extends EntityModel<CommitComment> {
+public class CommitCommentModel extends EntityModel<OldCommitComment> {
 
 	private static final long serialVersionUID = 1L;
 
-	public CommitCommentModel(CommitComment entity) {
+	public CommitCommentModel(OldCommitComment entity) {
 		super(entity);
 	}
 }

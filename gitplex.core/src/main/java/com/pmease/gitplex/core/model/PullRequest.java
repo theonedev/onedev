@@ -58,7 +58,7 @@ public class PullRequest extends AbstractEntity {
 		
 	}
 
-	@Column(nullable = false)
+	@Column(nullable=false)
 	private String title;
 	
 	private String description;
@@ -74,6 +74,9 @@ public class PullRequest extends AbstractEntity {
 
 	@ManyToOne
 	private Branch source;
+	
+	@Column(nullable=false)
+	private String baseCommit;
 	
 	@Transient
 	private Git sandbox;
@@ -107,8 +110,6 @@ public class PullRequest extends AbstractEntity {
 
 	private transient List<PullRequestUpdate> sortedUpdates;
 	
-	private transient PullRequestUpdate baseUpdate;
-
 	private transient List<PullRequestUpdate> effectiveUpdates;
 
 	private transient PullRequestUpdate referentialUpdate;
@@ -191,6 +192,14 @@ public class PullRequest extends AbstractEntity {
 
 	public void setSource(@Nullable Branch source) {
 		this.source = source;
+	}
+
+	public String getBaseCommit() {
+		return baseCommit;
+	}
+
+	public void setBaseCommit(String baseCommit) {
+		this.baseCommit = baseCommit;
 	}
 
 	public Git git() {
@@ -318,10 +327,9 @@ public class PullRequest extends AbstractEntity {
 	 */
 	public List<PullRequestUpdate> getSortedUpdates() {
 		if (sortedUpdates == null) {
-			Preconditions.checkState(getUpdates().size() >= 2);
+			Preconditions.checkState(getUpdates().size() >= 1);
 			sortedUpdates = new ArrayList<PullRequestUpdate>(getUpdates());
 			Collections.sort(sortedUpdates);
-			sortedUpdates.remove(0);
 		}
 		return sortedUpdates;
 	}
@@ -356,25 +364,24 @@ public class PullRequest extends AbstractEntity {
 		return getSortedUpdates().get(getSortedUpdates().size()-1);
 	}
 	
-	public PullRequestUpdate getBaseUpdate() {
-		if (baseUpdate == null)
-			baseUpdate = Collections.min(getUpdates());
-		return baseUpdate;
-	}
-	
 	public Collection<String> findTouchedFiles() {
 		Git git = getTarget().getRepository().git();
 		return git.listChangedFiles(getTarget().getHeadCommit(), getLatestUpdate().getHeadCommit(), null);
 	}
 
+	public String getBaseRef() {
+		Preconditions.checkNotNull(getId());
+		return Repository.REFS_GITPLEX + "pulls/" + getId() + "/base";
+	}
+
 	public String getHeadRef() {
 		Preconditions.checkNotNull(getId());
-		return Repository.REFS_GITOP + "pulls/" + getId() + "/head";
+		return Repository.REFS_GITPLEX + "pulls/" + getId() + "/head";
 	}
 	
 	public String getIntegrateRef() {
 		Preconditions.checkNotNull(getId());
-		return Repository.REFS_GITOP + "pulls/" + getId() + "/integrate";
+		return Repository.REFS_GITPLEX + "pulls/" + getId() + "/integrate";
 	};
 
 	/**
@@ -382,6 +389,7 @@ public class PullRequest extends AbstractEntity {
 	 */
 	public void deleteRefs() {
 		Git git = getTarget().getRepository().git();
+		git.deleteRef(getBaseRef(), null, null);
 		git.deleteRef(getHeadRef(), null, null);
 		git.deleteRef(getIntegrateRef(), null, null);
 	}
