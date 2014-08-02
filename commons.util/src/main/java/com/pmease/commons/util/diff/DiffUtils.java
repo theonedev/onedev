@@ -129,6 +129,24 @@ public class DiffUtils {
 		processedAdditions.clear();
 	}
 	
+	public static Map<Integer, Integer> mapLines(List<String> original, List<String> revised) {
+		Map<Integer, Integer> lineMapping = new HashMap<Integer, Integer>();
+		int originalLine = 0;
+		int revisedLine = 0;
+		for (DiffLine diff: diff(original, revised, null)) {
+			if (diff.getAction() == DiffLine.Action.ADD) {
+				revisedLine++;
+			} else if (diff.getAction() == DiffLine.Action.DELETE) {
+				originalLine++;
+			} else {
+				revisedLine++;
+				originalLine++;
+				lineMapping.put(originalLine, revisedLine);
+			}
+		}
+		return lineMapping;
+	}
+	
 	public static List<DiffChunk> diffAsChunks(List<String> original, List<String> revised, 
 			PartialSplitter wordSplitter, int chunkMargin) {
 		return chunksOf(diff(original, revised, wordSplitter), chunkMargin);

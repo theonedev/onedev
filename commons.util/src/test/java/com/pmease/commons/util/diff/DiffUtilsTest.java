@@ -1,9 +1,12 @@
 package com.pmease.commons.util.diff;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -166,4 +169,31 @@ public class DiffUtilsTest {
 		
 	}
 
+	@Test
+	public void testMapLines() {
+		String[] original = new String[]{
+				"line 1",
+				"line 2",
+				"line 3",
+				"line 4",
+				"line 5",
+				"line 6"
+		};
+		String[] revised = new String[]{
+				"line 1", 
+				"line second",
+				"line 3",
+				"line 3.1",
+				"line 4",
+				"line 5",
+				"line 6"
+		};
+		Map<Integer, Integer> map = DiffUtils.mapLines(Arrays.asList(original), Arrays.asList(revised));
+		assertTrue(map.get(1) == 1);
+		assertTrue(map.get(2) == null);
+		assertTrue(map.get(3) == 3);
+		assertTrue(map.get(4) == 5);
+		assertTrue(map.get(5) == 6);
+		assertTrue(map.get(6) == 7);
+	}
 }
