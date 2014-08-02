@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.base.Objects;
+
 @SuppressWarnings("serial")
 public class DiffTreeNode implements Comparable<DiffTreeNode>, Serializable {
 
@@ -57,6 +59,15 @@ public class DiffTreeNode implements Comparable<DiffTreeNode>, Serializable {
 		} else {
 			return getPath().compareTo(other.getPath());
 		}
+	}
+
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(DiffTreeNode.class)
+				.add("path", path)
+				.add("action", action)
+				.add("folder", folder)
+				.toString();
 	}
 
 }

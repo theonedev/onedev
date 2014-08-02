@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -192,10 +193,10 @@ public class Git implements Serializable {
 		
 		for (TreeNode treeNode: listTree(fromRev, path)) {
 			if (FileMode.TREE.equals(treeNode.getModeBits())) {
-				String name = treeNode.getName() + "/";
+				String nodePath = treeNode.getPath() + "/";
 				DiffTreeNode diff = null;
 				for (String changedFile: changedFiles) {
-					if (changedFile.startsWith(name)) {
+					if (changedFile.startsWith(nodePath)) {
 						diff = new DiffTreeNode(treeNode.getPath(), true, DiffTreeNode.Action.MODIFY);
 						break;
 					}
@@ -205,12 +206,12 @@ public class Git implements Serializable {
 				diffs.add(diff);
 			} else {
 				DiffTreeNode diff;
-				if (modifiedFiles.contains(treeNode.getName()))
-					diff = new DiffTreeNode(treeNode.getName(), false, DiffTreeNode.Action.MODIFY);
-				else if (deletedFiles.contains(treeNode.getName()))
-					diff = new DiffTreeNode(treeNode.getName(), false, DiffTreeNode.Action.DELETE);
+				if (modifiedFiles.contains(treeNode.getPath()))
+					diff = new DiffTreeNode(treeNode.getPath(), false, DiffTreeNode.Action.MODIFY);
+				else if (deletedFiles.contains(treeNode.getPath()))
+					diff = new DiffTreeNode(treeNode.getPath(), false, DiffTreeNode.Action.DELETE);
 				else
-					diff = new DiffTreeNode(treeNode.getName(), false, DiffTreeNode.Action.EQUAL);
+					diff = new DiffTreeNode(treeNode.getPath(), false, DiffTreeNode.Action.EQUAL);
 				diffs.add(diff);
 			}
 		}
@@ -227,6 +228,8 @@ public class Git implements Serializable {
 		
 		for (String addedDir: addedDirs)
 			diffs.add(new DiffTreeNode(addedDir, true, DiffTreeNode.Action.ADD));
+		
+		Collections.sort(diffs);
 		
 		return diffs;
 	}
