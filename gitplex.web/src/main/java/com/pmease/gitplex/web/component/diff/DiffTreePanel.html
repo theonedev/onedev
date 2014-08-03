@@ -1,0 +1,16 @@
+<wicket:panel>
+	<div class="diff-tree">
+		<div wicket:id="tree"></div>
+	</div>
+	<wicket:fragment wicket:id="nodeFrag">
+		<span wicket:id="addedDir" class="fa-stack added dir"><i class="fa fa-folder-o fa-stack-2x"></i><i class="fa fa-plus fa-stack-1x"></i></span>
+		<span wicket:id="deletedDir" class="fa-stack deleted dir"><i class="fa fa-folder-o fa-stack-2x"></i><i class="fa fa-minus fa-stack-1x"></i></span>
+		<span wicket:id="modifiedDir" class="fa-stack modified dir"><i class="fa fa-folder-o fa-stack-2x"></i><i class="fa fa-asterisk fa-stack-1x"></i></span>
+		<span wicket:id="unchangedDir" class="unchanged dir"><i class="fa fa-folder-o"></i></span>
+		<span wicket:id="addedFile" class="fa-stack added file"><i class="fa fa-file-o fa-stack-2x"></i><i class="fa fa-plus fa-stack-1x"></i></span>
+		<span wicket:id="deletedFile" class="fa-stack deleted file"><i class="fa fa-file-o fa-stack-2x"></i><i class="fa fa-minus fa-stack-1x"></i></span>
+		<span wicket:id="modifiedFile" class="fa-stack modified file"><i class="fa fa-file-o fa-stack-2x"></i><i class="fa fa-asterisk fa-stack-1x"></i></span>
+		<span wicket:id="unchangedFile" class="unchanged file"><i class="fa fa-file-o"></i></span>
+		<a wicket:id="link"><span wicket:id="label"></span></a>
+	</wicket:fragment>
+</wicket:panel>

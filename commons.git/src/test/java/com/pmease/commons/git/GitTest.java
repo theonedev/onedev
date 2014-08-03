@@ -20,6 +20,7 @@ public class GitTest extends AbstractGitTest {
 		git.checkout("master", "dev");
 		
 		addFileAndCommit("dir1/file1", "dir1/file11", "dir1/file11");
+		addFileAndCommit("dir1/file2", "", "dir1/file2");
 		rm("file2", "dir2/file1");
 		addFileAndCommit("dir2", "dir2", "dir2");
 		

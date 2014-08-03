@@ -26,7 +26,7 @@ public class DefaultCommitCommentManager implements CommitCommentManager {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Integer> getCommitCommentStats(Repository repository) {
-		String sql = "SELECT c.commit, count(c.id) from CommitComment c "
+		String sql = "SELECT c.commit, count(c.id) from OldCommitComment c "
 					+ "WHERE repository=:repository "
 				    + "GROUP BY c.commit";
 		

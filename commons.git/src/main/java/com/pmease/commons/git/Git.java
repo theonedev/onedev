@@ -197,6 +197,7 @@ public class Git implements Serializable {
 				DiffTreeNode diff = null;
 				for (String changedFile: changedFiles) {
 					if (changedFile.startsWith(nodePath)) {
+						addedFiles.remove(changedFile);
 						diff = new DiffTreeNode(treeNode.getPath(), true, DiffTreeNode.Action.MODIFY);
 						break;
 					}
