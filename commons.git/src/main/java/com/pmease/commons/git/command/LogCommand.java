@@ -77,7 +77,7 @@ public class LogCommand extends GitCommand<List<Commit>> {
                         + "*** commit_note_end ***%nhash:%H%nauthor:%aN%nauthorEmail:%aE%n"
                         + "committerEmail:%cE%ncommitter:%cN%nparents:%P%ncommitterDate:%cd %n"
                         + "authorDate:%ad %n*** commit_info_end ***",
-                        "--name-status", "--find-renames", "--find-copies", "--date=iso");
+                        "--raw", "--find-renames", "--date=iso");
         if (fromRev != null) {
         	if (toRev != null)
         		cmd.addArgs(fromRev + ".." + toRev);
@@ -105,7 +105,7 @@ public class LogCommand extends GitCommand<List<Commit>> {
         
         final boolean[] commitNoteBlock = new boolean[1];
         final boolean[] commitMessageBlock = new boolean[1];
-        final boolean[] fileChangesBlock = new boolean[1];
+        final boolean[] rawBlock = new boolean[1];
         
         cmd.execute(new LineConsumer() {
 
@@ -121,14 +121,14 @@ public class LogCommand extends GitCommand<List<Commit>> {
 	            		commitBuilder.note = null;
             		}
             		commitMessageBlock[0] = true;
-            		fileChangesBlock[0] = false;
+            		rawBlock[0] = false;
             	} else if (line.equals("*** commit_message_end ***")) {
             		commitMessageBlock[0] = false;
             		commitNoteBlock[0] = true;
             	} else if (line.equals("*** commit_note_end ***")) {
             		commitNoteBlock[0] = false;
             	} else if (line.equals("*** commit_info_end ***")) {
-            		fileChangesBlock[0] = true;
+            		rawBlock[0] = true;
             	} else if (commitMessageBlock[0]) {
             		if (commitBuilder.summary == null)
             			commitBuilder.summary = line;
@@ -141,34 +141,9 @@ public class LogCommand extends GitCommand<List<Commit>> {
             			commitBuilder.note = line;
             		else
             			commitBuilder.note += "\n" + line;
-            	} else if (fileChangesBlock[0]) {
-            		FileChange.Action action = null;
-            		if (line.startsWith("A")) 
-            			action = FileChange.Action.ADD;
-            		else if (line.startsWith("M"))
-            			action = FileChange.Action.MODIFY;
-            		else if (line.startsWith("D"))
-            			action = FileChange.Action.DELETE;
-            		else if (line.startsWith("C"))
-            			action = FileChange.Action.COPY;
-            		else if (line.startsWith("R"))
-            			action = FileChange.Action.RENAME;
-            		else if (line.startsWith("T"))
-            			action = FileChange.Action.TYPE;
-            		
-            		if (action != null) {
-            			String path = StringUtils.substringAfter(line, "\t").trim();
-            			String path1;
-            			String path2;
-            			if (path.indexOf('\t') != -1) {
-            				path1 = StringUtils.substringBefore(path, "\t").trim();
-            				path2 = StringUtils.substringAfter(path, "\t").trim();
-            			} else {
-            				path1 = path2 = path;
-            			}
-            			FileChange fileChange = new FileChange(action, path1, path2);
-            			commitBuilder.fileChanges.add(fileChange);
-            		}
+            	} else if (rawBlock[0]) {
+            		if (line.startsWith(":"))
+            			commitBuilder.fileChanges.add(FileChange.parseRawLine(line));
             	} else if (line.startsWith("subject:")) {
             		commitBuilder.summary = line.substring("subject:".length());
             	} else if (line.startsWith("hash:")) {

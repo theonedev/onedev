@@ -198,8 +198,8 @@ public class GitPlexMappings extends CompoundRequestMapper {
 		// --------------------------------------------------------------------
 		// system shared resources
 		// --------------------------------------------------------------------
-		addResource("raw/${user}/${repo}/${revision}", new RawBlobResourceReference());
-		addResource("archive/${user}/${repo}/${file}",new GitArchiveResourceReference());
+		addResource("raw/${user}/${repo}", new RawBlobResourceReference());
+		addResource("archive/${user}/${repo}",new GitArchiveResourceReference());
 	}
 
 	private void addPage(String path, Class<? extends Page> page) {

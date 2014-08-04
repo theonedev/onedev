@@ -43,7 +43,7 @@ public class LogCommandTest extends AbstractGitTest {
 		assertEquals("hello\nworld", commits.get(0).getNote());
 		assertEquals(commits.get(0).getFileChanges().size(), 2);
 		assertEquals(commits.get(0).getFileChanges().get(0).getNewPath(), "dir/file");
-		assertEquals(commits.get(0).getFileChanges().get(0).getAction(), FileChange.Action.ADD);
+		assertEquals(commits.get(0).getFileChanges().get(0).getStatus(), FileChange.Status.ADD);
 		assertEquals(commits.get(0).getParentHashes().size(), 1);
 		assertEquals(commits.get(0).getParentHashes().iterator().next(), commits.get(1).getHash());
 		
@@ -83,6 +83,6 @@ public class LogCommandTest extends AbstractGitTest {
 	    FileChange change = commits.get(0).getFileChanges().get(0);
 	    assertEquals("RENAME\tb->b2", change.toString());
 	    change = commits.get(2).getFileChanges().get(1);
-	    assertEquals("COPY\ta->a2", change.toString());
+	    assertEquals("ADD\ta2", change.toString());
 	}
 }

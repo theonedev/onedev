@@ -1,8 +1,6 @@
 package com.pmease.commons.git.command;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,15 +12,14 @@ public class RemoveCommand extends GitCommand<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(RemoveCommand.class);
 	
-	private List<String> paths = new ArrayList<String>();
+	private String paths[] = new String[0];
 	
 	public RemoveCommand(File repoDir) {
 		super(repoDir);
 	}
 	
 	public RemoveCommand paths(String... paths) {
-		for (String path: paths)
-			this.paths.add(path);
+		this.paths = paths;
 		return this;
 	}
 

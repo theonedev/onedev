@@ -2,9 +2,8 @@ package com.pmease.commons.git.command;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +12,7 @@ import com.pmease.commons.git.FileChange;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
-public class ListFileChangesCommand extends GitCommand<Collection<FileChange>> {
+public class ListFileChangesCommand extends GitCommand<List<FileChange>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ListFileChangesCommand.class);
 	
@@ -24,8 +23,6 @@ public class ListFileChangesCommand extends GitCommand<Collection<FileChange>> {
 	private String path;
 	
 	private boolean findRenames;
-	
-	private boolean findCopies;
 	
 	public ListFileChangesCommand(final File repoDir) {
 		super(repoDir);
@@ -51,26 +48,19 @@ public class ListFileChangesCommand extends GitCommand<Collection<FileChange>> {
 		return this;
 	}
 	
-	public ListFileChangesCommand findCopies(final boolean findCopies) {
-		this.findCopies = findCopies;
-		return this;
-	}
-
 	@Override
-	public Collection<FileChange> call() {
+	public List<FileChange> call() {
 		Preconditions.checkNotNull(toRev, "toRev has to be specified.");
 		Preconditions.checkNotNull(fromRev, "fromRev has to be specified.");
 		
-		final Collection<FileChange> fileChanges = new ArrayList<>();
+		final List<FileChange> fileChanges = new ArrayList<>();
 		
 		Commandline cmd = cmd();
 		
-		cmd.addArgs("diff", "--name-status");
+		cmd.addArgs("diff", "--raw");
 		
 		if (findRenames)
 			cmd.addArgs("--find-renames");
-		if (findCopies)
-			cmd.addArgs("--find-copies");
 		
 		cmd.addArgs(fromRev + ".." + toRev);
 		
@@ -81,33 +71,8 @@ public class ListFileChangesCommand extends GitCommand<Collection<FileChange>> {
 
 			@Override
 			public void consume(String line) {
-        		FileChange.Action action = null;
-        		if (line.startsWith("A")) 
-        			action = FileChange.Action.ADD;
-        		else if (line.startsWith("M"))
-        			action = FileChange.Action.MODIFY;
-        		else if (line.startsWith("D"))
-        			action = FileChange.Action.DELETE;
-        		else if (line.startsWith("C"))
-        			action = FileChange.Action.COPY;
-        		else if (line.startsWith("R"))
-        			action = FileChange.Action.RENAME;
-        		else if (line.startsWith("T"))
-        			action = FileChange.Action.TYPE;
-        		
-        		if (action != null) {
-        			String path = StringUtils.substringAfter(line, "\t").trim();
-        			String path1;
-        			String path2;
-        			if (path.indexOf('\t') != -1) {
-        				path1 = StringUtils.substringBefore(path, "\t").trim();
-        				path2 = StringUtils.substringAfter(path, "\t").trim();
-        			} else {
-        				path1 = path2 = path;
-        			}
-        			FileChange fileChange = new FileChange(action, path1, path2);
-        			fileChanges.add(fileChange);
-        		}
+				if (line.startsWith(":"))
+					fileChanges.add(FileChange.parseRawLine(line));
 			}
 			
 		}, new LineConsumer() {

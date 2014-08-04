@@ -28,7 +28,6 @@ import com.pmease.commons.git.command.CherryPickCommand;
 import com.pmease.commons.git.command.CloneCommand;
 import com.pmease.commons.git.command.CommitCommand;
 import com.pmease.commons.git.command.DeleteRefCommand;
-import com.pmease.commons.git.command.DiffCommand;
 import com.pmease.commons.git.command.FetchCommand;
 import com.pmease.commons.git.command.InitCommand;
 import com.pmease.commons.git.command.IsAncestorCommand;
@@ -166,22 +165,22 @@ public class Git implements Serializable {
 	public List<DiffTreeNode> listTreeWithDiff(String fromRev, String toRev, @Nullable String path) {
 		path = GitUtils.normalizeTreePath(path);
 		
-		Collection<FileChange> changes = listFileChanges(fromRev, toRev, path, false, false);
+		Collection<FileChange> changes = listFileChanges(fromRev, toRev, path, false);
 		Set<String> addedFiles = new HashSet<>();
 		Set<String> deletedFiles = new HashSet<>();
 		Set<String> modifiedFiles = new HashSet<>();
 		Set<String> changedFiles = new HashSet<>();
 		
 		for (FileChange change: changes) {
-			if (change.getAction() == FileChange.Action.ADD) {
+			if (change.getStatus() == FileChange.Status.ADD) {
 				addedFiles.add(change.getNewPath());
-			} else if (change.getAction() == FileChange.Action.DELETE) {
+			} else if (change.getStatus() == FileChange.Status.DELETE) {
 				deletedFiles.add(change.getOldPath());
-			} else if (change.getAction() == FileChange.Action.MODIFY 
-					|| change.getAction() == FileChange.Action.TYPE) {
+			} else if (change.getStatus() == FileChange.Status.MODIFY 
+					|| change.getStatus() == FileChange.Status.TYPE) {
 				modifiedFiles.add(change.getOldPath());
 			} else {
-				throw new IllegalStateException("Unexpected action: " + change.getAction());
+				throw new IllegalStateException("Unexpected action: " + change.getStatus());
 			}
 		}
 		
@@ -276,10 +275,10 @@ public class Git implements Serializable {
 		return new ListChangedFilesCommand(repoDir).fromRev(fromRev).toRev(toRev).path(path).call();
 	}
 
-	public Collection<FileChange> listFileChanges(String fromRev, String toRev, @Nullable String path,
-			boolean findRenames, boolean findCopies) {
+	public List<FileChange> listFileChanges(String fromRev, String toRev, @Nullable String path,
+			boolean findRenames) {
 		return new ListFileChangesCommand(repoDir).fromRev(fromRev).toRev(toRev).path(path)
-				.findRenames(findRenames).findCopies(findCopies).call();
+				.findRenames(findRenames).call();
 	}
 
 	public Git checkout(String revision, @Nullable String newBranch) {
@@ -474,23 +473,6 @@ public class Git implements Serializable {
 		return log(null, revision, path, 1, 0).get(0);
 	}
 	
-	/**
-	 * General diff between specified revisions for specified path.
-	 *  
-	 * @param revisions
-	 * 			calculate diffs using this revisions 
-	 * @param path
-	 * 			optionally specify directory or file for diff. Use <tt>null</tt> to diff 
-	 * 			all files in the repository
-	 * @param contextLines
-	 * 			number of not changed lines before and after the difference lines
-	 * @return
-	 * 			list of file changes with diff information included
-	 */
-	public List<FileChangeWithDiffs> diff(String revisions, @Nullable String path, int contextLines) {
-		return new DiffCommand(repoDir).revisions(revisions).contextLines(contextLines).path(path).call();
-	}
-
 	public Git addNote(String object, String message) {
 		new AddNoteCommand(repoDir).object(object).message(message).call();
 		return this;
