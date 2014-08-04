@@ -118,7 +118,7 @@ public class RepoTreePanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<TreeNode> item) {
 				TreeNode node = item.getModelObject();
-				final int bits = node.getMode().getBits();
+				final int bits = node.getFileMode().getBits();
 				final String path = node.getPath();
 				Icon icon = new Icon("icon", new AbstractReadOnlyModel<String>() {
 
@@ -149,7 +149,7 @@ public class RepoTreePanel extends Panel {
 						currentRevision, PathUtils.join(pathElements));
 				
 				AbstractLink link;
-				FileMode mode = node.getMode();
+				FileMode mode = node.getFileMode();
 				if (mode == FileMode.TREE) {
 					link = new BookmarkablePageLink<Void>("file", RepoTreePage.class, params);
 				} else {

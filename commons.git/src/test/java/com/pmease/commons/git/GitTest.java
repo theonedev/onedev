@@ -32,32 +32,51 @@ public class GitTest extends AbstractGitTest {
 		List<DiffTreeNode> diffs = git.listTreeWithDiff("master", "dev", null);
 		assertEquals(7, diffs.size());
 		assertEquals("dir1", diffs.get(0).getPath());
-		assertEquals(DiffTreeNode.Action.MODIFY, diffs.get(0).getAction());
+		assertEquals(DiffTreeNode.Status.MODIFY, diffs.get(0).getStatus());
 		assertEquals("dir2", diffs.get(1).getPath());
-		assertEquals(DiffTreeNode.Action.MODIFY, diffs.get(1).getAction());
+		assertEquals(DiffTreeNode.Status.MODIFY, diffs.get(1).getStatus());
 		assertEquals("dir3", diffs.get(2).getPath());
-		assertEquals(DiffTreeNode.Action.ADD, diffs.get(2).getAction());
+		assertEquals(DiffTreeNode.Status.ADD, diffs.get(2).getStatus());
 		assertEquals("dir2", diffs.get(3).getPath());
-		assertEquals(DiffTreeNode.Action.ADD, diffs.get(3).getAction());
+		assertEquals(DiffTreeNode.Status.ADD, diffs.get(3).getStatus());
 		assertEquals(false, diffs.get(3).isFolder());
 		assertEquals("file1", diffs.get(4).getPath());
-		assertEquals(DiffTreeNode.Action.EQUAL, diffs.get(4).getAction());
+		assertEquals(DiffTreeNode.Status.EQUAL, diffs.get(4).getStatus());
 		assertEquals("file2", diffs.get(5).getPath());
-		assertEquals(DiffTreeNode.Action.DELETE, diffs.get(5).getAction());
+		assertEquals(DiffTreeNode.Status.DELETE, diffs.get(5).getStatus());
 		assertEquals("file3", diffs.get(6).getPath());
-		assertEquals(DiffTreeNode.Action.ADD, diffs.get(6).getAction());
+		assertEquals(DiffTreeNode.Status.ADD, diffs.get(6).getStatus());
 		
-		diffs = git.listTreeWithDiff("master", "dev", "dir2");
+		diffs = git.listTreeWithDiff("master", "dev", "dir2/");
 		assertEquals(1, diffs.size());
 		assertEquals("dir2/file1", diffs.get(0).getPath());
-		assertEquals(DiffTreeNode.Action.DELETE, diffs.get(0).getAction());
+		assertEquals(DiffTreeNode.Status.DELETE, diffs.get(0).getStatus());
 		
-		diffs = git.listTreeWithDiff("master", "dev", "dir3");
+		diffs = git.listTreeWithDiff("master", "dev", "dir3/");
 		assertEquals(2, diffs.size());
 		assertEquals("dir3/file1", diffs.get(0).getPath());
-		assertEquals(DiffTreeNode.Action.ADD, diffs.get(0).getAction());
+		assertEquals(DiffTreeNode.Status.ADD, diffs.get(0).getStatus());
 		assertEquals("dir3/file2", diffs.get(1).getPath());
-		assertEquals(DiffTreeNode.Action.ADD, diffs.get(1).getAction());
+		assertEquals(DiffTreeNode.Status.ADD, diffs.get(1).getStatus());
+		
+		diffs = git.listTreeWithDiff("master", "dev", "dir3");
+		assertEquals(1, diffs.size());
+		assertEquals("dir3", diffs.get(0).getPath());
+		assertEquals(DiffTreeNode.Status.ADD, diffs.get(0).getStatus());
+
+		rm("dir3/file1");
+		rm("dir3/file2");
+		commit("delete dir3");
+
+		diffs = git.listTreeWithDiff("dev~1", "dev", null);
+		assertEquals(5, diffs.size());
+		assertEquals("dir3", diffs.get(1).getPath());
+		assertEquals(DiffTreeNode.Status.DELETE, diffs.get(1).getStatus());
+		
+		diffs = git.listTreeWithDiff("dev~1", "dev", "dir3");
+		assertEquals(1, diffs.size());
+		assertEquals("dir3", diffs.get(0).getPath());
+		assertEquals(DiffTreeNode.Status.DELETE, diffs.get(0).getStatus());
 	}
 
 }

@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
@@ -22,7 +21,7 @@ public class ListTreeCommand extends GitCommand<List<TreeNode>> {
 	
 	private String revision;
 	
-	private String path = "";
+	private String path;
 	
 	public ListTreeCommand(final File repoDir) {
 		super(repoDir);
@@ -34,7 +33,7 @@ public class ListTreeCommand extends GitCommand<List<TreeNode>> {
 	}
 	
 	public ListTreeCommand path(String path) {
-		this.path = GitUtils.normalizeTreePath(path);
+		this.path = path;
 		return this;
 	}
 	
@@ -42,9 +41,11 @@ public class ListTreeCommand extends GitCommand<List<TreeNode>> {
 	public List<TreeNode> call() {
 		Preconditions.checkNotNull(revision, "revision has to be specified for browse.");
 		
-		Commandline cmd = cmd().addArgs("ls-tree", "-l");
+		Commandline cmd = cmd().addArgs("ls-tree", "-l", "--full-name");
 		cmd.addArgs(revision);
-		cmd.addArgs(path);
+		
+		if (path != null)
+			cmd.addArgs(path);
 		
 		final List<TreeNode> treeNodes = new ArrayList<TreeNode>();
 		

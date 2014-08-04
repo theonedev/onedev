@@ -3,26 +3,30 @@ package com.pmease.commons.git;
 import java.io.Serializable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.base.Objects;
 
 @SuppressWarnings("serial")
 public class DiffTreeNode implements Comparable<DiffTreeNode>, Serializable {
 
-	public enum Action {ADD, MODIFY, DELETE, EQUAL};
+	public enum Status {ADD, MODIFY, DELETE, EQUAL};
 
+	private final Status status;
+	
 	private final String path;
 	
-	private final boolean folder;
+	private final int oldMode;
 	
-	private final Action action;
+	private final int newMode;
 	
 	private transient String name;
 
-	public DiffTreeNode(String path, boolean folder, Action action) {
+	public DiffTreeNode(Status status, String path, int oldMode, int newMode) {
 		this.path = path;
-		this.folder = folder;
-		this.action = action;
+		this.status = status;
+		this.oldMode = oldMode;
+		this.newMode = newMode;
 	}
 
 	public String getPath() {
@@ -39,12 +43,20 @@ public class DiffTreeNode implements Comparable<DiffTreeNode>, Serializable {
 		return name;
 	}
 	
-	public Action getAction() {
-		return action;
+	public Status getStatus() {
+		return status;
 	}
 
+	public int getOldMode() {
+		return oldMode;
+	}
+
+	public int getNewMode() {
+		return newMode;
+	}
+	
 	public boolean isFolder() {
-		return folder;
+		return oldMode == FileMode.TYPE_TREE || newMode == FileMode.TYPE_TREE;
 	}
 
 	@Override
@@ -64,9 +76,8 @@ public class DiffTreeNode implements Comparable<DiffTreeNode>, Serializable {
 	@Override
 	public String toString() {
 		return Objects.toStringHelper(DiffTreeNode.class)
+				.add("action", status)
 				.add("path", path)
-				.add("action", action)
-				.add("folder", folder)
 				.toString();
 	}
 

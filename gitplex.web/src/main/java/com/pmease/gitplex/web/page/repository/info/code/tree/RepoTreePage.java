@@ -45,11 +45,11 @@ public class RepoTreePage extends RepositoryInfoPage {
 
 					@Override
 					public int compare(TreeNode o1, TreeNode o2) {
-						if (o1.getMode() == o2.getMode()) {
+						if (o1.getFileMode() == o2.getFileMode()) {
 							return o1.getName().compareTo(o2.getName());
-						} else if (o1.getMode() == FileMode.TREE) {
+						} else if (o1.getFileMode() == FileMode.TREE) {
 							return -1;
-						} else if (o2.getMode() == FileMode.TREE) {
+						} else if (o2.getFileMode() == FileMode.TREE) {
 							return 1;
 						} else {
 							return o1.getName().compareTo(o2.getName());

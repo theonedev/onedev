@@ -13,6 +13,7 @@ import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.commons.util.StringUtils;
 
 public class ListTreeCommandTest extends AbstractGitTest {
 
@@ -46,20 +47,23 @@ public class ListTreeCommandTest extends AbstractGitTest {
 		assertEquals(7, treeNodes.size());
 		assertEquals("dir", treeNodes.get(0).getPath());
 		assertEquals("dir", treeNodes.get(0).getName());
-		assertEquals(FileMode.TREE, treeNodes.get(0).getMode());
+		assertEquals(FileMode.TREE, treeNodes.get(0).getFileMode());
 		
-		assertEquals(moduleGit.repoDir().getAbsolutePath(), 
-				new File(new String(treeNodes.get(6).show(bareGit))).getCanonicalPath());
+		String submoduleInfo = new String(treeNodes.get(6).readContent(bareGit));
+		String submodulePath = new File(StringUtils.substringBeforeLast(submoduleInfo, ":")).getCanonicalPath();
+		String submoduleCommit = StringUtils.substringAfterLast(submoduleInfo, ":");
+		assertEquals(moduleGit.repoDir().getAbsolutePath(), submodulePath);
+		assertEquals(moduleGit.parseRevision("master", true), submoduleCommit);
 		
 		TreeNode dirNode = treeNodes.get(0);
-		treeNodes = bareGit.listTree(dirNode.getRevision(), dirNode.getPath());
+		treeNodes = bareGit.listTree(dirNode.getRevision(), dirNode.getPath() + "/");
 		
 		assertEquals(1, treeNodes.size());
 		assertEquals("dir/file", treeNodes.get(0).getPath());
 		assertEquals("file", treeNodes.get(0).getName());
 		
 		TreeNode fileNode = treeNodes.get(0);
-		assertEquals("hello world", new String(fileNode.show(bareGit)));
+		assertEquals("hello world", new String(fileNode.readContent(bareGit)));
 	}
 
 }

@@ -58,7 +58,7 @@ public abstract class DiffTreePanel extends Panel {
 
 			@Override
 			public Iterator<? extends DiffTreeNode> getChildren(DiffTreeNode node) {
-				return repoModel.getObject().git().listTreeWithDiff(fromRev, toRev, node.getPath()).iterator();
+				return repoModel.getObject().git().listTreeWithDiff(fromRev, toRev, node.getPath() + "/").iterator();
 			}
 
 			@Override
@@ -79,21 +79,21 @@ public abstract class DiffTreePanel extends Panel {
 				final DiffTreeNode node = nodeModel.getObject();
 				Fragment fragment = new Fragment(id, "nodeFrag", DiffTreePanel.this);
 				fragment.add(new WebMarkupContainer("addedDir").setVisible(
-						node.isFolder() && node.getAction() == DiffTreeNode.Action.ADD));
+						node.isFolder() && node.getStatus() == DiffTreeNode.Status.ADD));
 				fragment.add(new WebMarkupContainer("deletedDir").setVisible(
-						node.isFolder() && node.getAction() == DiffTreeNode.Action.DELETE));
+						node.isFolder() && node.getStatus() == DiffTreeNode.Status.DELETE));
 				fragment.add(new WebMarkupContainer("modifiedDir").setVisible(
-						node.isFolder() && node.getAction() == DiffTreeNode.Action.MODIFY));
+						node.isFolder() && node.getStatus() == DiffTreeNode.Status.MODIFY));
 				fragment.add(new WebMarkupContainer("unchangedDir").setVisible(
-						node.isFolder() && node.getAction() == DiffTreeNode.Action.EQUAL));
+						node.isFolder() && node.getStatus() == DiffTreeNode.Status.EQUAL));
 				fragment.add(new WebMarkupContainer("addedFile").setVisible(
-						!node.isFolder() && node.getAction() == DiffTreeNode.Action.ADD));
+						!node.isFolder() && node.getStatus() == DiffTreeNode.Status.ADD));
 				fragment.add(new WebMarkupContainer("deletedFile").setVisible(
-						!node.isFolder() && node.getAction() == DiffTreeNode.Action.DELETE));
+						!node.isFolder() && node.getStatus() == DiffTreeNode.Status.DELETE));
 				fragment.add(new WebMarkupContainer("modifiedFile").setVisible(
-						!node.isFolder() && node.getAction() == DiffTreeNode.Action.MODIFY));
+						!node.isFolder() && node.getStatus() == DiffTreeNode.Status.MODIFY));
 				fragment.add(new WebMarkupContainer("unchangedFile").setVisible(
-						!node.isFolder() && node.getAction() == DiffTreeNode.Action.EQUAL));
+						!node.isFolder() && node.getStatus() == DiffTreeNode.Status.EQUAL));
 
 				WebMarkupContainer link;
 				if (node.isFolder()) {

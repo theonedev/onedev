@@ -13,7 +13,7 @@ import com.pmease.commons.git.command.ListTreeCommand;
 @SuppressWarnings("serial")
 public class TreeNode implements Comparable<TreeNode>, Serializable {
 	
-	private final int modeBits;
+	private final int mode;
 	
 	private final String path;
 	
@@ -25,7 +25,7 @@ public class TreeNode implements Comparable<TreeNode>, Serializable {
 	
 	private final int size;
 	
-	private transient FileMode mode;
+	private transient FileMode fileMode;
 	
 	/**
 	 * Construct a tree node.
@@ -45,7 +45,7 @@ public class TreeNode implements Comparable<TreeNode>, Serializable {
 		this.path = path;
 		this.revision = revision;
 		this.hash = hash;
-		this.modeBits = modeBits;
+		this.mode = modeBits;
 		this.size = size;
 	}
 	
@@ -71,14 +71,14 @@ public class TreeNode implements Comparable<TreeNode>, Serializable {
 		return hash;
 	}
 	
-	public int getModeBits() {
-		return modeBits;
+	public int getMode() {
+		return mode;
 	}
 
-	public FileMode getMode() {
-		if (mode == null)
-			mode = FileMode.fromBits(modeBits);
-		return mode;
+	public FileMode getFileMode() {
+		if (fileMode == null)
+			fileMode = FileMode.fromBits(mode);
+		return fileMode;
 	}
 
 	public int getSize() {
@@ -98,7 +98,7 @@ public class TreeNode implements Comparable<TreeNode>, Serializable {
 	 * 			directory. 
 	 */
 	public @Nullable List<TreeNode> listChildren(Git git) {
-		if (getMode() == FileMode.TREE) {
+		if (getFileMode() == FileMode.TREE) {
 			return new ListTreeCommand(git.repoDir()).revision(getRevision()).path(getPath() + "/").call();
 		} else {
 			return null;
@@ -106,7 +106,7 @@ public class TreeNode implements Comparable<TreeNode>, Serializable {
 	}
 	
 	/**
-	 * Show content of current node. 
+	 * Read content of current node. 
 	 * 
 	 * @return
 	 * 			content of the file if current node is a file, or URL of the submodule if 
@@ -114,9 +114,9 @@ public class TreeNode implements Comparable<TreeNode>, Serializable {
 	 * 			represents a symbol link, or contents of the directory if current node 
 	 * 			represents a directory
 	 */
-	public byte[] show(Git git) {
-		if (getMode() == FileMode.GITLINK) {
-			return git.listSubModules(revision).get(path).getBytes();
+	public byte[] readContent(Git git) {
+		if (getFileMode() == FileMode.GITLINK) { 
+			return git.readSubModule(getRevision(), getPath()).getBytes();
 		} else {
 			return git.show(getRevision(), getPath());
 		}
@@ -124,12 +124,12 @@ public class TreeNode implements Comparable<TreeNode>, Serializable {
 
 	@Override
 	public int compareTo(TreeNode node) {
-		if (getMode() == FileMode.TREE) {
-			if (node.getMode() == FileMode.TREE)
+		if (getFileMode() == FileMode.TREE) {
+			if (node.getFileMode() == FileMode.TREE)
 				return getName().compareTo(node.getName());
 			else 
 				return -1;
-		} else if (node.getMode() == FileMode.TREE) {
+		} else if (node.getFileMode() == FileMode.TREE) {
 			return 1;
 		} else {
 			return getName().compareTo(node.getName());

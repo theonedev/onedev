@@ -42,7 +42,7 @@ public abstract class DirectoryChooser extends Panel {
 					List<TreeNode> roots = git.listTree(getBranch().getName(), null);
 					if (roots != null) {
 						for (Iterator<TreeNode> it = roots.iterator(); it.hasNext();) {
-							if (it.next().getMode() != FileMode.TREE)
+							if (it.next().getFileMode() != FileMode.TREE)
 								it.remove();
 						}
 						return roots.iterator();
@@ -64,7 +64,7 @@ public abstract class DirectoryChooser extends Panel {
 				List<TreeNode> children = node.listChildren(getBranch().getRepository().git());
 				if (children != null) {
 					for (Iterator<TreeNode> it = children.iterator(); it.hasNext();) {
-						if (it.next().getMode() != FileMode.TREE)
+						if (it.next().getFileMode() != FileMode.TREE)
 							it.remove();
 					}
 					return children.iterator();
