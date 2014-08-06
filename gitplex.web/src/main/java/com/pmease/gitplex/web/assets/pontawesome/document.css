@@ -1,0 +1,38 @@
+#test { width: 1120px; margin: 20px auto; }
+.icon-list {
+    list-style-type: none;
+    padding-left: 0px;
+    overflow: hidden;
+}
+
+.icon-list li {
+  display: inline-block;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  float: left;
+  background-color: #fff;
+  width: 96px; height: 72px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px; 
+}
+
+.icon-list a {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  line-height: 0;
+  color: #333;
+  outline: none;
+  position: relative;
+}
+.icon-list a:hover, .icon-list a.zeroclipboard-is-hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.icon-list li:hover { background: #333; }
+.icon-list li:hover > a > .fa { color: white; }
+.icon-list-item > a > .fa { font-size: 48px; }
+.icon-list-item > a > b { display: block; color: #999; font-size: 11px; margin-top: 15px; }
+

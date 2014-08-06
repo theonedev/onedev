@@ -889,14 +889,12 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 .dropdown-panel .alert.empty-directory-choice {margin: 0px;}
 
 /* TREE DIFF */
-.diff-tree .unchanged.dir {font-size: 18px;}
-.diff-tree .added.dir {color: #05B505; font-size: 9px;}
-.diff-tree .deleted.dir {color: #DF0B0B; font-size: 9px;}
-.diff-tree .modified.dir {color: #A48C22; font-size: 9px;}
-.diff-tree .unchanged.file {font-size: 16px; margin-left: 1px;}
-.diff-tree .added.file {color: #05B505; font-size: 8px;}
-.diff-tree .deleted.file {color: #DF0B0B; font-size: 8px;}
-.diff-tree .modified.file {color: #A48C22; font-size: 8px;}
+.diff-tree .added.dir {color: #05B505;}
+.diff-tree .deleted.dir {color: #DF0B0B;}
+.diff-tree .modified.dir {color: #A48C22;}
+.diff-tree .added.file {color: #05B505;}
+.diff-tree .deleted.file {color: #DF0B0B;}
+.diff-tree .modified.file {color: #A48C22;}
 .diff-tree em span {font-style: normal;}
 
 /* BLOB DIFF*/
