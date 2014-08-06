@@ -64,7 +64,7 @@ public class ListTreeCommand extends GitCommand<List<TreeNode>> {
 					size = Integer.parseInt(sizeStr);
 				String path = StringUtils.substringAfter(line.trim(), "\t");
 				
-				treeNodes.add(new TreeNode(Integer.parseInt(mode, 8), path, revision, hash, size));
+				treeNodes.add(new TreeNode(Integer.parseInt(mode, 8), path, hash, size));
 			}
 			
 		}, new LineConsumer() {

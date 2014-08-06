@@ -61,7 +61,7 @@ public abstract class DirectoryChooser extends Panel {
 
 			@Override
 			public Iterator<? extends TreeNode> getChildren(TreeNode node) {
-				List<TreeNode> children = node.listChildren(getBranch().getRepository().git());
+				List<TreeNode> children = node.listChildren(getBranch().getRepository().git(), getBranch().getName());
 				if (children != null) {
 					for (Iterator<TreeNode> it = children.iterator(); it.hasNext();) {
 						if (it.next().getFileMode() != FileMode.TREE)

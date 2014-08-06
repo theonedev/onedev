@@ -58,7 +58,7 @@ public class DiffTreeNode implements Comparable<DiffTreeNode>, Serializable {
 	public boolean isFolder() {
 		return oldMode == FileMode.TYPE_TREE || newMode == FileMode.TYPE_TREE;
 	}
-
+	
 	@Override
 	public int compareTo(DiffTreeNode other) {
 		if (isFolder()) {

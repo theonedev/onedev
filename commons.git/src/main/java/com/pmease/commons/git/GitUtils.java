@@ -4,6 +4,8 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jgit.lib.FileMode;
+
 import com.pmease.commons.util.Charsets;
 
 public class GitUtils {
@@ -45,4 +47,15 @@ public class GitUtils {
 		}
 	}
 
+	public static String getTypeName(int blobType) {
+		if (blobType == FileMode.TYPE_FILE)
+			return "File";
+		else if (blobType == FileMode.TYPE_GITLINK)
+			return "Sub module";
+		else if (blobType == FileMode.TYPE_SYMLINK)
+			return "Symbol link";
+		else 
+			return "Folder";
+	}
+	
 }

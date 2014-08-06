@@ -883,21 +883,30 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 .gate-keeper td.ifthen.connector {width:1px;}
 .gate-keeper td.ifthen.connector .icon {margin: 0; color: #666666; font-size: 36px;}
 
-/* Components */
+/* DROPDOWN PANEL */
 .dropdown-panel .directory-chooser {max-height: 650px; overflow: auto; padding: 12px 24px 12px 12px;}
 .dropdown-panel .directory-chooser .title {font-weight: bold; border-bottom: 1px solid #888888;}
 .dropdown-panel .alert.empty-directory-choice {margin: 0px;}
 
-.diff-tree .unchanged.dir {font-size: 16px;}
-.diff-tree .added.dir {color: #05B505; font-size: 8px;}
-.diff-tree .deleted.dir {color: #DF0B0B; font-size: 8px;}
-.diff-tree .modified.dir {color: #A48C22; font-size: 8px;}
+/* TREE DIFF */
+.diff-tree .unchanged.dir {font-size: 18px;}
+.diff-tree .added.dir {color: #05B505; font-size: 9px;}
+.diff-tree .deleted.dir {color: #DF0B0B; font-size: 9px;}
+.diff-tree .modified.dir {color: #A48C22; font-size: 9px;}
 .diff-tree .unchanged.file {font-size: 16px; margin-left: 1px;}
 .diff-tree .added.file {color: #05B505; font-size: 8px;}
 .diff-tree .deleted.file {color: #DF0B0B; font-size: 8px;}
 .diff-tree .modified.file {color: #A48C22; font-size: 8px;}
 .diff-tree em span {font-style: normal;}
 
+/* BLOB DIFF*/
+.blob-diff>.panel-body {font-family: Consolas, 'Liberation Mono', Courier, monospace;}
+.blob-diff>.panel-body>.original:before {content: "\f068"; font-family: FontAwesome;}
+.blob-diff>.panel-body>.revised:before {content: "\f067"; font-family: FontAwesome;}
+.blob-diff>.panel-body .original {color: #c33535; background: #fdd; padding: 0 8px;}
+.blob-diff>.panel-body .revised {color: #2EAA2E; background: #cfc; padding: 0 8px;}
+
+/* BRANCH CHOICE */
 .affinal-branch-choice .connector {margin: 10px 0 0 0; color: #BBB; font-weight: bold; 
 	font-size: 16px;}
 

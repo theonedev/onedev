@@ -1,42 +1,81 @@
 package com.pmease.gitplex.web.page;
 
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.pmease.commons.git.DiffTreeNode;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.component.diff.BlobDiffPanel;
+import com.pmease.gitplex.web.component.diff.BlobInfo;
 import com.pmease.gitplex.web.component.diff.DiffTreePanel;
-import com.pmease.gitplex.web.page.home.HomePage;
 
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
 
+	private IModel<Repository> repoModel;
+	
 	public TestPage(PageParameters params) {
 		super(params);
+		
+		repoModel = new LoadableDetachableModel<Repository>() {
+
+			@Override
+			protected Repository load() {
+				return GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
+			}
+		};
+		
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new DiffTreePanel("test", new LoadableDetachableModel<Repository>() {
+		add(new DiffTreePanel("test", repoModel, "master", "dev") {
 
 			@Override
-			protected Repository load() {
-				return GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
-			}
-			
-		}, "master", "dev") {
+			protected Link<Void> newFileLink(String id, final DiffTreeNode node) {
+				return new Link<Void>(id) {
 
-			@Override
-			protected Link<Void> newFileLink(String id) {
-				return new BookmarkablePageLink<Void>(id, HomePage.class);
+					@Override
+					public void onClick() {
+						IModel<BlobInfo> originalBlobModel = new LoadableDetachableModel<BlobInfo>(){
+
+							@Override
+							protected BlobInfo load() {
+								return BlobInfo.fromDiffTreeNode(repoModel.getObject().git(), node, "master", true);
+							}
+							
+						};
+						IModel<BlobInfo> revisedBlobModel = new LoadableDetachableModel<BlobInfo>(){
+
+							@Override
+							protected BlobInfo load() {
+								return BlobInfo.fromDiffTreeNode(repoModel.getObject().git(), node, "dev", false);
+							}
+							
+						};
+						TestPage.this.replace(new BlobDiffPanel("diff", repoModel, originalBlobModel, revisedBlobModel));
+					}
+					
+				};
 			}
 			
 		});
+		
+		add(new WebMarkupContainer("diff"));
+	}
+
+	@Override
+	protected void onDetach() {
+		repoModel.detach();
+		
+		super.onDetach();
 	}
 	
 }

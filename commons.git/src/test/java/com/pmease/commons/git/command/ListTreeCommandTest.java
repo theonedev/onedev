@@ -49,21 +49,21 @@ public class ListTreeCommandTest extends AbstractGitTest {
 		assertEquals("dir", treeNodes.get(0).getName());
 		assertEquals(FileMode.TREE, treeNodes.get(0).getFileMode());
 		
-		String submoduleInfo = new String(treeNodes.get(6).readContent(bareGit));
+		String submoduleInfo = new String(treeNodes.get(6).readContent(bareGit, "master"));
 		String submodulePath = new File(StringUtils.substringBeforeLast(submoduleInfo, ":")).getCanonicalPath();
 		String submoduleCommit = StringUtils.substringAfterLast(submoduleInfo, ":");
 		assertEquals(moduleGit.repoDir().getAbsolutePath(), submodulePath);
 		assertEquals(moduleGit.parseRevision("master", true), submoduleCommit);
 		
 		TreeNode dirNode = treeNodes.get(0);
-		treeNodes = bareGit.listTree(dirNode.getRevision(), dirNode.getPath() + "/");
+		treeNodes = bareGit.listTree("master", dirNode.getPath() + "/");
 		
 		assertEquals(1, treeNodes.size());
 		assertEquals("dir/file", treeNodes.get(0).getPath());
 		assertEquals("file", treeNodes.get(0).getName());
 		
 		TreeNode fileNode = treeNodes.get(0);
-		assertEquals("hello world", new String(fileNode.readContent(bareGit)));
+		assertEquals("hello world", new String(fileNode.readContent(bareGit, "master")));
 	}
 
 }

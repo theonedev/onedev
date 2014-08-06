@@ -21,8 +21,6 @@ public class TreeNode implements Comparable<TreeNode>, Serializable {
 	
 	private final String hash;
 	
-	private final String revision;
-	
 	private final int size;
 	
 	private transient FileMode fileMode;
@@ -34,16 +32,13 @@ public class TreeNode implements Comparable<TreeNode>, Serializable {
 	 * 			mode bits of the node object. Pass <tt>0</tt> if unknown
 	 * @param path
 	 * 			path of the node object
-	 * @param revision
-	 * 			revision of the node object
 	 * @param hash
 	 * 			hash of the node object
 	 * @param size
 	 * 			size of the node object 
 	 */
-	public TreeNode(int modeBits, String path, String revision, String hash, int size) {
+	public TreeNode(int modeBits, String path, String hash, int size) {
 		this.path = path;
-		this.revision = revision;
 		this.hash = hash;
 		this.mode = modeBits;
 		this.size = size;
@@ -63,10 +58,6 @@ public class TreeNode implements Comparable<TreeNode>, Serializable {
 		return name;
 	}
 
-	public String getRevision() {
-		return revision;
-	}
-	
 	public String getHash() {
 		return hash;
 	}
@@ -79,6 +70,10 @@ public class TreeNode implements Comparable<TreeNode>, Serializable {
 		if (fileMode == null)
 			fileMode = FileMode.fromBits(mode);
 		return fileMode;
+	}
+	
+	public boolean isFolder() {
+		return mode == FileMode.TYPE_TREE;
 	}
 
 	public int getSize() {
@@ -97,9 +92,9 @@ public class TreeNode implements Comparable<TreeNode>, Serializable {
 	 * 			child nodes of current node, or <tt>null</tt> if current node does not represent a 
 	 * 			directory. 
 	 */
-	public @Nullable List<TreeNode> listChildren(Git git) {
+	public @Nullable List<TreeNode> listChildren(Git git, String revision) {
 		if (getFileMode() == FileMode.TREE) {
-			return new ListTreeCommand(git.repoDir()).revision(getRevision()).path(getPath() + "/").call();
+			return new ListTreeCommand(git.repoDir()).revision(revision).path(getPath() + "/").call();
 		} else {
 			return null;
 		}
@@ -114,11 +109,11 @@ public class TreeNode implements Comparable<TreeNode>, Serializable {
 	 * 			represents a symbol link, or contents of the directory if current node 
 	 * 			represents a directory
 	 */
-	public byte[] readContent(Git git) {
+	public byte[] readContent(Git git, String revision) {
 		if (getFileMode() == FileMode.GITLINK) { 
-			return git.readSubModule(getRevision(), getPath()).getBytes();
+			return git.readSubModule(revision, getPath()).getBytes();
 		} else {
-			return git.show(getRevision(), getPath());
+			return git.show(revision, getPath());
 		}
 	}
 

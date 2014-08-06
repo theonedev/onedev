@@ -109,7 +109,7 @@ public abstract class DiffTreePanel extends Panel {
 						
 					};
 				} else {
-					link = newFileLink("link");
+					link = newFileLink("link", node);
 				}
 				fragment.add(link);
 				link.add(new Label("label", node.getName()));
@@ -120,7 +120,7 @@ public abstract class DiffTreePanel extends Panel {
 		});
 	}
 	
-	protected abstract Link<Void> newFileLink(String id);
+	protected abstract Link<Void> newFileLink(String id, DiffTreeNode node);
 
 	@Override
 	protected void onDetach() {

@@ -77,7 +77,7 @@ public class GitPlex extends AbstractPlugin {
 		List<ManualConfig> manualConfigs = dataManager.init();
 		
 		if (!manualConfigs.isEmpty()) {
-			logger.warn("Please set up the server at " + GitPlex.getInstance().guessServerUrl() + ".");
+			logger.warn("Please set up the server at " + GitPlex.getInstance().getServerUrl() + ".");
 			initStage = new InitStage("Server Setup", manualConfigs);
 			
 			initStage.waitFor();
@@ -111,10 +111,10 @@ public class GitPlex extends AbstractPlugin {
 	public void postStart() {
 		initStage = null;
 		
-		logger.info("Server is ready at " + guessServerUrl() + ".");
+		logger.info("Server is ready at " + getServerUrl() + ".");
 	}
 
-	public String guessServerUrl() {
+	public String getServerUrl() {
 		String hostName;
 		try {
 			hostName = InetAddress.getLocalHost().getHostName();
@@ -128,7 +128,7 @@ public class GitPlex extends AbstractPlugin {
 		else 
 			serverUrl = "https://" + hostName + ":" + serverConfig.getSslConfig().getPort();
 
-		return serverUrl + serverConfig.getContextPath();
+		return StringUtils.stripEnd(serverUrl + serverConfig.getContextPath(), "/");
 	}
 	
 	/**

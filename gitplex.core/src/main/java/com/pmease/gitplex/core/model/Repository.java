@@ -20,6 +20,7 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.AndGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.manager.StorageManager;
@@ -303,7 +304,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 
 	public String getUrl() {
-		return "http://localhost:6610/" + getFullName();
+		return GitPlex.getInstance().getServerUrl() + "/" + getFullName();
 	}
 	
 	public String getDefaultBranch() {

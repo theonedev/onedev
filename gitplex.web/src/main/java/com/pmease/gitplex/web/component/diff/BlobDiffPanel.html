@@ -1,0 +1,52 @@
+<wicket:panel>
+	<div wicket:id="content" class="blob-diff panel panel-default"></div>
+	<wicket:fragment wicket:id="addedFrag">
+		<div class="panel-heading">
+			<div class="panel-title">
+				<span wicket:id="type"></span> <strong wicket:id="path"></strong> is added
+			</div>
+		</div>
+		<div class="panel-body">
+			<div wicket:id="blobContent"></div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="deletedFrag">
+		<div class="panel-heading">
+			<div class="panel-title">
+				<span wicket:id="type"></span> <strong wicket:id="path"></strong> is deleted
+			</div>
+		</div>
+		<div class="panel-body">
+			<div wicket:id="blobContent"></div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="renamedOrModifiedFrag">
+		<div class="panel-heading">
+			<div class="panel-title">
+				<div wicket:id="renamed">
+					<strong wicket:id="originalPath"></strong> is renamed to <span wicket:id="revisedPath"></span>
+				</div>
+				<div wicket:id="modified">
+					<strong wicket:id="path"></strong> is modified
+				</div>
+				<div wicket:id="blobTypeChanged">Type is changed from <strong wicket:id="originalType"></strong> to <strong wicket:id="revisedType"></strong></div>
+				<div wicket:id="fileModeChanged">File mode is changed from <strong wicket:id="originalMode"></strong> to <strong wicket:id="revisedMode"></strong></div>
+			</div>
+		</div>
+		<div class="panel-body">
+			<div wicket:id="originalContent"></div>
+			<div wicket:id="revisedContent"></div>
+			<div wicket:id="diffContent"></div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="equalFrag">
+		<div class="panel-heading">
+			<div class="panel-title">
+				<strong wicket:id="path"></strong> is not modified			
+			</div>
+		</div>
+		<div class="panel-body">
+			<div wicket:id="blobContent"></div>
+		</div>
+	</wicket:fragment>
+</wicket:panel>
