@@ -85,7 +85,7 @@ public abstract class DiffTreePanel extends Panel {
 				fragment.add(new WebMarkupContainer("modifiedDir").setVisible(
 						node.isFolder() && node.getStatus() == DiffTreeNode.Status.MODIFY));
 				fragment.add(new WebMarkupContainer("unchangedDir").setVisible(
-						node.isFolder() && node.getStatus() == DiffTreeNode.Status.EQUAL));
+						node.isFolder() && node.getStatus() == DiffTreeNode.Status.UNCHANGE));
 				fragment.add(new WebMarkupContainer("addedFile").setVisible(
 						!node.isFolder() && node.getStatus() == DiffTreeNode.Status.ADD));
 				fragment.add(new WebMarkupContainer("deletedFile").setVisible(
@@ -93,7 +93,7 @@ public abstract class DiffTreePanel extends Panel {
 				fragment.add(new WebMarkupContainer("modifiedFile").setVisible(
 						!node.isFolder() && node.getStatus() == DiffTreeNode.Status.MODIFY));
 				fragment.add(new WebMarkupContainer("unchangedFile").setVisible(
-						!node.isFolder() && node.getStatus() == DiffTreeNode.Status.EQUAL));
+						!node.isFolder() && node.getStatus() == DiffTreeNode.Status.UNCHANGE));
 
 				WebMarkupContainer link;
 				if (node.isFolder()) {

@@ -11,14 +11,12 @@ public class GitUtilsTest {
 
 	@Test
 	public void testReadLines() {
-		assertEquals(null, GitUtils.readLines(new byte[]{1,2,3,4,5}));
-		assertEquals(Charsets.ISO_8859_1, GitUtils.readLines("some text".getBytes()).getCharset());
-		LineReadResult result = GitUtils.readLines("中文测试\r\nsecond line".getBytes()); 
+		String content = "中文测试\r\nsecond line";
+		GitText result = GitText.from(content.getBytes(), Charsets.detectFrom(content.getBytes())); 
 		assertEquals(Lists.newArrayList("中文测试\r", "second line"), result.getLines());
 		assertEquals(false, result.isHasEolAtEof());
-		assertEquals(Charsets.UTF_8, result.getCharset());		
 
-		result = GitUtils.readLines("\nhello\n\nworld\n".getBytes()); 
+		result = GitText.from("\nhello\n\nworld\n".getBytes(), Charsets.UTF_8); 
 		assertEquals(Lists.newArrayList("", "hello", "", "world"), result.getLines());
 	}
 

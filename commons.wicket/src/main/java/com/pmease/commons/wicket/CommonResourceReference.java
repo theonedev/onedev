@@ -14,7 +14,6 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.asset.Asset;
 
 import de.agilecoders.wicket.core.Bootstrap;
-import de.agilecoders.wicket.extensions.markup.html.bootstrap.icon.FontAwesomeCssReference;
 
 /**
  * Common resource is intended to provide a common look&feel for all products using 
@@ -85,7 +84,6 @@ class CommonResourceReference extends JavaScriptResourceReference {
 
 		dependencies.add(JavaScriptHeaderItem.forReference(Asset.ARE_YOU_SURE_JS));
 		
-		dependencies.add(CssHeaderItem.forReference(FontAwesomeCssReference.instance()));
 		dependencies.add(CssHeaderItem.forReference(Asset.COMMON_CSS));
 
 		return dependencies;

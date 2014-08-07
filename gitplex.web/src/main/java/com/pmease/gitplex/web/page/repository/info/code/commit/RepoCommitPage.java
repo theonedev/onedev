@@ -193,7 +193,7 @@ public class RepoCommitPage extends RepositoryInfoPage implements CommitComments
 			@Override
 			public Component getLazyLoadComponent(String markupId) {
 				Fragment frag = new Fragment(markupId, "refsFrag", RepoCommitPage.this);
-				frag.add(new Icon("type", Model.of("icon-git-" + type.name().toLowerCase())));
+				frag.add(new Icon("type", Model.of("fa-" + type.name().toLowerCase())));
 				frag.add(new ListView<String>("refs", (IModel<List<String>>) getDefaultModel()) {
 
 					@Override

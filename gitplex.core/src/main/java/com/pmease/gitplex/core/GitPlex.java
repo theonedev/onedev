@@ -183,7 +183,7 @@ public class GitPlex extends AbstractPlugin {
 		return AppLoader.getInstance(type);
 	}
 
-	public <T> Set<T> getExtensions(Class<T> extensionPoint) {
+	public static <T> Set<T> getExtensions(Class<T> extensionPoint) {
 		return AppLoader.getExtensions(extensionPoint);
 	}
 

@@ -118,25 +118,24 @@ public class RepoTreePanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<TreeNode> item) {
 				TreeNode node = item.getModelObject();
-				final int bits = node.getFileMode().getBits();
+				final int bits = node.getMode();
 				final String path = node.getPath();
 				Icon icon = new Icon("icon", new AbstractReadOnlyModel<String>() {
 
 					@Override
 					public String getObject() {
-						FileMode mode = FileMode.fromBits(bits);
-						if (mode == FileMode.TREE) 
-							return "icon-folder";
-						else if (mode == FileMode.GITLINK)
-							return "icon-folder-submodule";
-						else if (mode == FileMode.SYMLINK) {
+						if (bits == FileMode.TYPE_TREE) 
+							return "fa-folder";
+						else if (bits == FileMode.TYPE_GITLINK)
+							return "fa-folder-submodule";
+						else if (bits == FileMode.TYPE_SYMLINK) {
 							Git git = repoModel.getObject().git();
 							if (git.isTreeLink(path, repoModel.getObject().defaultBranchIfNull(currentRevision)))
-								return "icon-folder-symlink";
+								return "fa-folder-link";
 							else
-								return "icon-file-symlink";
+								return "fa-file-link";
 						} else 
-							return "icon-file-general";
+							return "fa-file-txt";
 					}
 				});
 				
@@ -149,8 +148,7 @@ public class RepoTreePanel extends Panel {
 						currentRevision, PathUtils.join(pathElements));
 				
 				AbstractLink link;
-				FileMode mode = node.getFileMode();
-				if (mode == FileMode.TREE) {
+				if (node.getMode() == FileMode.TYPE_TREE) {
 					link = new BookmarkablePageLink<Void>("file", RepoTreePage.class, params);
 				} else {
 					link = new BookmarkablePageLink<Void>("file", RepoBlobPage.class, params);					

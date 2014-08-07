@@ -280,19 +280,19 @@ public class DiffViewPanel extends Panel {
 	private static String getChangeIcon(ChangeType changeType) {
 		switch (changeType) {
 		case ADD:
-			return "icon-diff-added";
+			return "fa-diff-added";
 			
 		case MODIFY:
-			return "icon-diff-modified";
+			return "fa-diff-modified";
 			
 		case DELETE:
-			return "icon-diff-deleted";
+			return "fa-diff-removed";
 			
 		case RENAME:
-			return "icon-diff-renamed";
+			return "fd-diff-renamed";
 			
 		case COPY:
-			return "icon-diff-copy";
+			return "fa-diff-copy";
 		}
 		
 		throw new IllegalArgumentException("change type " + changeType);

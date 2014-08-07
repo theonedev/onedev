@@ -13,7 +13,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=400, icon="icon-lock", description=
+@Editable(order=400, icon="fa-lock", description=
 		"Use this gate keeper to prevent history of certain branches from being rewritten via forced push.")
 public class HistoryProtection extends CommonGateKeeper {
 

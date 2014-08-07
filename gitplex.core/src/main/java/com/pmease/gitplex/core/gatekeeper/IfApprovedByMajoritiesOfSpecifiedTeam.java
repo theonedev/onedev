@@ -10,7 +10,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=400, icon="icon-group", description=
+@Editable(order=400, icon="fa-group-o", description=
 		"This gate keeper will be passed if the commit is approved by majorities of specified team.")
 public class IfApprovedByMajoritiesOfSpecifiedTeam extends TeamAwareGateKeeper {
 

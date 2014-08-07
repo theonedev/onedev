@@ -74,7 +74,8 @@ public class BlobInfo {
 	
 	public static BlobInfo fromTreeNode(Git git, TreeNode node, String revision) {
 		Preconditions.checkArgument(node.isFolder());
-		return new BlobInfo(node.getPath(), revision, node.getMode(), node.readContent(git, revision));
+		return new BlobInfo(node.getPath(), revision, node.getMode(), 
+				git.read(revision, node.getPath(), node.getMode()));
 	}
 	
 }

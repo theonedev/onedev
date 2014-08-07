@@ -10,8 +10,8 @@ import com.pmease.commons.git.DiffTreeNode;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.component.diff.BlobDiffInfo;
 import com.pmease.gitplex.web.component.diff.BlobDiffPanel;
-import com.pmease.gitplex.web.component.diff.BlobInfo;
 import com.pmease.gitplex.web.component.diff.DiffTreePanel;
 
 @SuppressWarnings("serial")
@@ -44,23 +44,14 @@ public class TestPage extends BasePage {
 
 					@Override
 					public void onClick() {
-						IModel<BlobInfo> originalBlobModel = new LoadableDetachableModel<BlobInfo>(){
+						TestPage.this.replace(new BlobDiffPanel("diff", repoModel, new LoadableDetachableModel<BlobDiffInfo>() {
 
 							@Override
-							protected BlobInfo load() {
-								return BlobInfo.fromDiffTreeNode(repoModel.getObject().git(), node, "master", true);
+							protected BlobDiffInfo load() {
+								return BlobDiffInfo.from(repoModel.getObject().git(), node, "master", "dev");
 							}
 							
-						};
-						IModel<BlobInfo> revisedBlobModel = new LoadableDetachableModel<BlobInfo>(){
-
-							@Override
-							protected BlobInfo load() {
-								return BlobInfo.fromDiffTreeNode(repoModel.getObject().git(), node, "dev", false);
-							}
-							
-						};
-						TestPage.this.replace(new BlobDiffPanel("diff", repoModel, originalBlobModel, revisedBlobModel));
+						}));
 					}
 					
 				};

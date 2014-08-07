@@ -100,11 +100,11 @@ public class RevisionSelector extends Panel {
 			public String getObject() {
 				RefType type = getRevisionType(repoModel.getObject().defaultBranchIfNull(revision));
 				if (type == null) {
-					return "icon-commit";
+					return "fa-commit";
 				} else if (type == RefType.BRANCH) {
-					return "icon-git-branch";
+					return "fa-branch";
 				} else {
-					return "icon-git-tag";
+					return "fa-tag";
 				}
 			}
 			

@@ -1,6 +1,6 @@
 package com.pmease.gitplex.web;
 
-import org.apache.tika.mime.MimeTypes;
+import org.apache.tika.mime.MediaType;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import com.pmease.commons.jersey.JerseyConfigurator;
@@ -10,6 +10,12 @@ import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.gitplex.core.validation.UserNameReservation;
 import com.pmease.gitplex.web.editable.EditSupportLocator;
+import com.pmease.gitplex.web.extensionpoint.DiffRenderer;
+import com.pmease.gitplex.web.extensionpoint.DiffRendererProvider;
+import com.pmease.gitplex.web.extensionpoint.MediaRenderer;
+import com.pmease.gitplex.web.extensionpoint.MediaRendererProvider;
+import com.pmease.gitplex.web.extensionpoint.TextConverter;
+import com.pmease.gitplex.web.extensionpoint.TextConverterProvider;
 import com.pmease.gitplex.web.page.repository.info.code.blob.renderer.BlobRendererFactory;
 import com.pmease.gitplex.web.resource.ResourceLocator;
 
@@ -39,9 +45,34 @@ public class WebModule extends AbstractPluginModule {
 		
 		contributeFromPackage(EditSupport.class, EditSupportLocator.class);
 
-		bind(MimeTypes.class).toInstance(MimeTypes.getDefaultMimeTypes());
-		
 		bind(BlobRendererFactory.class);
+		
+		contribute(MediaRendererProvider.class, new MediaRendererProvider() {
+
+			@Override
+			public MediaRenderer getMediaRenderer(MediaType mediaType) {
+				return null;
+			}
+			
+		});
+		
+		contribute(DiffRendererProvider.class, new DiffRendererProvider() {
+
+			@Override
+			public DiffRenderer getDiffRenderer(MediaType originalMediaType, MediaType revisedMediaType) {
+				return null;
+			}
+			
+		});
+		
+		contribute(TextConverterProvider.class, new TextConverterProvider() {
+
+			@Override
+			public TextConverter getTextConverter(MediaType mediaType) {
+				return null;
+			}
+
+		});
 	}
 
 }

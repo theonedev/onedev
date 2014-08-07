@@ -2,6 +2,7 @@ package com.pmease.commons.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import javax.annotation.Nullable;
 
@@ -45,10 +46,19 @@ public class MediaTypes {
 
 	public static MediaType detectFrom(byte[] contentBytes, @Nullable String fileName) {
 		String type = tika.detect(contentBytes, fileName);
+		MediaType mediaType;
 		if (MimeType.isValid(type))
-			return MediaType.parse(type);
+			mediaType = MediaType.parse(type);
 		else
-			return MediaType.OCTET_STREAM;
+			mediaType = MediaType.OCTET_STREAM;
+
+		if (mediaType.equals(MediaType.OCTET_STREAM)) {
+			Charset charset = Charsets.detectFrom(contentBytes);
+			if (charset != null)
+				mediaType = MediaType.TEXT_PLAIN;
+		}
+		
+		return mediaType;
 	}
 
 	public static MediaType detectFrom(InputStream contentStream, @Nullable String fileName) {

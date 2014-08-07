@@ -16,7 +16,7 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.model.Vote;
 
 @SuppressWarnings("serial")
-@Editable(order=500, icon="icon-group", description=
+@Editable(order=500, icon="fa-group-o", description=
 		"This gate keeper will be passed if specified score can be get from specified team, the score "
 		+ "starts at zero, and will increase by one for each approval, and decrease by one for each "
 		+ "rejection.")

@@ -317,7 +317,7 @@ public class RepoPermissionsPage extends RepoAdminPage {
 				@Override
 				public String getObject() {
 					return operation.ordinal() > getTeamPermission(rowModel.getObject()).ordinal() ?
-							"icon-checkbox-unchecked" : "icon-checkbox-checked";
+							"fa-check-empty" : "fa-check-checked";
 				}
 				
 			}));

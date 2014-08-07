@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 public class DiffLine {
 	
 	public enum Action {
+		
 		ADD, 
 		EQUAL, 
 		DELETE;

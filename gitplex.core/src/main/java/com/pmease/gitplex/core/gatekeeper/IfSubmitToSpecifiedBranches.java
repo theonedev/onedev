@@ -21,7 +21,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=100, icon="icon-git-branch", description=
+@Editable(order=100, icon="fa-branch", description=
 		"This gate keeper will be passed if the commit is submitted to specified branches.")
 public class IfSubmitToSpecifiedBranches extends BranchGateKeeper {
 

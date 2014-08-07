@@ -114,7 +114,7 @@ public class BlobBlamePage extends RepositoryInfoPage {
 
 			@Override
 			public String getObject() {
-				return "icon-file-text";
+				return "fa-file-txt";
 			}
 		}));
 

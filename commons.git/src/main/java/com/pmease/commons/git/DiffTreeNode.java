@@ -10,7 +10,7 @@ import com.google.common.base.Objects;
 @SuppressWarnings("serial")
 public class DiffTreeNode implements Comparable<DiffTreeNode>, Serializable {
 
-	public enum Status {ADD, MODIFY, DELETE, EQUAL};
+	public enum Status {ADD, MODIFY, DELETE, UNCHANGE};
 
 	private final Status status;
 	

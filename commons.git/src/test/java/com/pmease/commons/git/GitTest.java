@@ -2,9 +2,15 @@ package com.pmease.commons.git;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
+
+import com.pmease.commons.util.Charsets;
+import com.pmease.commons.util.MediaTypes;
 
 public class GitTest extends AbstractGitTest {
 
@@ -41,7 +47,7 @@ public class GitTest extends AbstractGitTest {
 		assertEquals(DiffTreeNode.Status.ADD, diffs.get(3).getStatus());
 		assertEquals(false, diffs.get(3).isFolder());
 		assertEquals("file1", diffs.get(4).getPath());
-		assertEquals(DiffTreeNode.Status.EQUAL, diffs.get(4).getStatus());
+		assertEquals(DiffTreeNode.Status.UNCHANGE, diffs.get(4).getStatus());
 		assertEquals("file2", diffs.get(5).getPath());
 		assertEquals(DiffTreeNode.Status.DELETE, diffs.get(5).getStatus());
 		assertEquals("file3", diffs.get(6).getPath());
@@ -79,4 +85,19 @@ public class GitTest extends AbstractGitTest {
 		assertEquals(DiffTreeNode.Status.DELETE, diffs.get(0).getStatus());
 	}
 
+	@Test
+	public void test() {
+		try {
+			System.out.println(MediaTypes.detectFrom(FileUtils.readFileToByteArray(new File("w:\\temp\\file.txt")), null));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			System.out.println(Charsets.detectFrom(FileUtils.readFileToByteArray(new File("w:\\temp\\file.txt"))));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }

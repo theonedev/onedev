@@ -55,7 +55,7 @@ public class RepoBlobPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return "icon-file-text";
+				return "fa-file-txt";
 			}
 		}));
 

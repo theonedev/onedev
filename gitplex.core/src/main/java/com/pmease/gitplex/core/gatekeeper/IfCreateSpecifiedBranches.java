@@ -11,7 +11,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
-@Editable(order=210, icon="icon-git-branch-pattern", description=
+@Editable(order=210, icon="fa-branch-pattern", description=
 		"This gate keeper will be passed if the branch to be created matches specified patterns.")
 @SuppressWarnings("serial")
 public class IfCreateSpecifiedBranches extends BranchGateKeeper {

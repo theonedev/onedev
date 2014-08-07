@@ -220,7 +220,7 @@ public class Git implements Serializable {
 							diff = new DiffTreeNode(DiffTreeNode.Status.DELETE, treeNode.getPath(), 
 									FileMode.TYPE_TREE, 0);
 					} else {
-						diff = new DiffTreeNode(DiffTreeNode.Status.EQUAL, treeNode.getPath(), 
+						diff = new DiffTreeNode(DiffTreeNode.Status.UNCHANGE, treeNode.getPath(), 
 								FileMode.TYPE_TREE, FileMode.TYPE_TREE);
 					}
 					diffs.add(diff);
@@ -236,7 +236,7 @@ public class Git implements Serializable {
 									change.getOldMode(), change.getNewMode());
 						}
 					} else {
-						diff = new DiffTreeNode(DiffTreeNode.Status.EQUAL, treeNode.getPath(), 
+						diff = new DiffTreeNode(DiffTreeNode.Status.UNCHANGE, treeNode.getPath(), 
 								treeNode.getMode(), treeNode.getMode());
 					}
 					diffs.add(diff);
@@ -275,7 +275,7 @@ public class Git implements Serializable {
 							if (!listChangedFiles(fromRev, toRev, path).isEmpty())
 								diffs.add(new DiffTreeNode(DiffTreeNode.Status.MODIFY, path, oldNode.getMode(), newNode.getMode()));
 							else
-								diffs.add(new DiffTreeNode(DiffTreeNode.Status.EQUAL, path, oldNode.getMode(), newNode.getMode()));
+								diffs.add(new DiffTreeNode(DiffTreeNode.Status.UNCHANGE, path, oldNode.getMode(), newNode.getMode()));
 						} else {
 							diffs.add(new DiffTreeNode(DiffTreeNode.Status.DELETE, path, oldNode.getMode(), 0));
 							diffs.add(new DiffTreeNode(DiffTreeNode.Status.ADD, path, 0, newNode.getMode()));
@@ -288,7 +288,7 @@ public class Git implements Serializable {
 					} else if (!listChangedFiles(fromRev, toRev, path).isEmpty()) {
 						diffs.add(new DiffTreeNode(DiffTreeNode.Status.MODIFY, path, oldNode.getMode(), newNode.getMode()));
 					} else {
-						diffs.add(new DiffTreeNode(DiffTreeNode.Status.EQUAL, path, oldNode.getMode(), newNode.getMode()));
+						diffs.add(new DiffTreeNode(DiffTreeNode.Status.UNCHANGE, path, oldNode.getMode(), newNode.getMode()));
 					}
 				} else {
 					diffs.add(new DiffTreeNode(DiffTreeNode.Status.DELETE, path, oldNode.getMode(), 0));
@@ -535,10 +535,16 @@ public class Git implements Serializable {
 	public String readSubModule(String revision, String path) {
 		String subModuleUrl = listSubModules(revision).get(path);
 		Preconditions.checkNotNull(subModuleUrl);
-		String subModule = subModuleUrl + ":" + listTree(revision, path).iterator().next().getHash();
-		return subModule;
+		return subModuleUrl + ":" + listTree(revision, path).iterator().next().getHash();
 	}
 	
+	public byte[] read(String revision, String path, int mode) {
+		if (mode == FileMode.TYPE_GITLINK)
+			return readSubModule(revision, path).getBytes();
+		else
+			return show(revision, path);
+	}
+
 	public List<Commit> log(@Nullable String fromRev, @Nullable String toRev, 
 			@Nullable String path, int maxCount, int skip) {
 		return new LogCommand(repoDir).fromRev(fromRev).toRev(toRev)

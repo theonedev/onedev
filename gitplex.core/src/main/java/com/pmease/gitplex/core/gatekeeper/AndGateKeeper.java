@@ -14,7 +14,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.PendingAndBlock;
 import com.pmease.gitplex.core.gatekeeper.voteeligibility.VoteEligibility;
 
 @SuppressWarnings("serial")
-@Editable(name="If All Contained Gate Keepers Are Passed", icon="icon-servers", order=100, 
+@Editable(name="If All Contained Gate Keepers Are Passed", icon="fa-servers", order=100, 
 		description="This gate keeper will be passed if all contained gate keepers are passed.")
 @Horizontal
 public class AndGateKeeper extends AndOrGateKeeper {

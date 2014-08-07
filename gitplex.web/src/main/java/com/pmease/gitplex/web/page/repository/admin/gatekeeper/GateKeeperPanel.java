@@ -106,9 +106,9 @@ public abstract class GateKeeperPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				if (gateKeeper.isEnabled()) {
-					tag.append("class", "icon-checkbox-checked", " ");
+					tag.append("class", "fa-check-checked", " ");
 				} else {
-					tag.append("class", "icon-checkbox-unchecked", " ");
+					tag.append("class", "fa-check-empty", " ");
 				}
 			}
 			

@@ -11,7 +11,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
-@Editable(order=200, icon="icon-git-branch-pattern", name="If Push To Specified Non-Branch Refs", description=
+@Editable(order=200, icon="fa-branch-pattern", name="If Push To Specified Non-Branch Refs", description=
 		"This gate keeper will be passed if push to specified non-branch references. Note that "
 		+ "touching various branch references under refs/heads will not trigger this gate "
 		+ "keeper. Use branch related gate keepers if you would like to match desired branches.")

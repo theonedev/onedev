@@ -97,9 +97,9 @@ public abstract class RepositoryPage extends AccountPage {
 		
 		Repository repository = getRepository();
 		if (repository.getForkedFrom() != null)
-			add(new Icon("repoIcon", "icon-repo-forked"));
+			add(new Icon("repoIcon", "fa-repo-forked"));
 		else
-			add(new Icon("repoIcon", "icon-repo"));
+			add(new Icon("repoIcon", "fa-repo"));
 		
 		AbstractLink userlink = new BookmarkablePageLink<Void>("userlink", 
 				AccountHomePage.class, AccountHomePage.paramsOf(repository.getOwner()));

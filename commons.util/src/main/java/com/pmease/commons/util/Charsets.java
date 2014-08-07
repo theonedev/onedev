@@ -31,8 +31,7 @@ public class Charsets extends org.apache.commons.io.Charsets {
 	 * @param contentBytes
 	 * 			content to be detected
 	 * @return
-	 * 			charset of the content, or <tt>null</tt> if charset can not be detected or 
-	 * 			content represents binary data
+	 * 			charset of the content, or <tt>null</tt> if charset can not be detected
 	 */
 	public static @Nullable Charset detectFrom(byte[] contentBytes) {
 		try {

@@ -5,13 +5,12 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
-import com.pmease.commons.util.Charsets;
 
-public class LineReadResultTest {
+public class GitTextTest {
 
 	@Test
 	public void test() {
-		LineReadResult result = new LineReadResult(Lists.newArrayList(" hello \tworld \t \r"), Charsets.UTF_8, true);
+		GitText result = new GitText(Lists.newArrayList(" hello \tworld \t \r"), true);
 		assertEquals(" hello \tworld \t ", result.ignoreEOL().getLines().get(0));
 		assertEquals(" hello \tworld", result.ignoreEOLWhitespaces().getLines().get(0));
 		assertEquals("hello world", result.ignoreWhitespaces().getLines().get(0));

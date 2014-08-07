@@ -17,7 +17,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=90, icon="icon-folder-submodule", description=
+@Editable(order=90, icon="fa-folder-o", description=
 		"This gate keeper will be passed if any commit files are under specified directories.")
 public class IfTouchSpecifiedDirectories extends FileGateKeeper {
 

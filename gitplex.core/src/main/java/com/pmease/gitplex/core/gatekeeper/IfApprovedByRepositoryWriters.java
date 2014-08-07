@@ -17,7 +17,7 @@ import com.pmease.gitplex.core.model.Vote;
 import com.pmease.gitplex.core.permission.operation.GeneralOperation;
 
 @SuppressWarnings("serial")
-@Editable(order=50, icon="icon-group", description=
+@Editable(order=50, icon="fa-group-o", description=
 		"This gate keeper will be passed if the commit is approved by specified number of users with "
 		+ "writing permission.")
 public class IfApprovedByRepositoryWriters extends ApprovalGateKeeper {

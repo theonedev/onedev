@@ -11,7 +11,7 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.model.Vote;
 
 @SuppressWarnings("serial")
-@Editable(order=300, icon="icon-user", description=
+@Editable(order=300, icon="fa-user-o", description=
 		"This gate keeper will be passed if the commit is approved by owner of the repository.")
 public class IfApprovedByRepositoryOwner extends ApprovalGateKeeper {
 
