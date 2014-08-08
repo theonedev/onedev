@@ -1,19 +1,19 @@
 package com.pmease.commons.git;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
-
-import com.google.common.collect.Lists;
 
 public class GitTextTest {
 
 	@Test
 	public void test() {
-		GitText result = new GitText(Lists.newArrayList(" hello \tworld \t \r"), true);
+		GitText result = GitText.from(" hello \tworld \t \r".getBytes());
+		assertNotNull(result);
 		assertEquals(" hello \tworld \t ", result.ignoreEOL().getLines().get(0));
-		assertEquals(" hello \tworld", result.ignoreEOLWhitespaces().getLines().get(0));
-		assertEquals("hello world", result.ignoreWhitespaces().getLines().get(0));
+		assertEquals(" hello \tworld", result.ignoreEOLSpaces().getLines().get(0));
+		assertEquals("hello world", result.ignoreChangeSpaces().getLines().get(0));
 	}
 
 }

@@ -114,6 +114,34 @@ public class DiffUtilsTest {
 				" this is the 10th line\n" +
 				"+this is the 11th line\n", 
 				diffChunks.get(1).toString());
+		
+		text1 = new ArrayList<>();
+		text1.add("this is the 1st line");
+		text1.add("this is the 2nd line");
+		text1.add("this is the 3rd line");
+		text1.add("this is the 4th line");
+		text1.add("this is the 5th line");
+		text1.add("this is the 6th line");
+		text1.add("this is the 7th line");
+		text1.add("this is the 8th line");
+		text1.add("this is the 9th line");
+		text1.add("this is the 10th line");
+
+		text2 = new ArrayList<>();
+		text2.add("this is the 1st line");
+		text2.add("this is the 2nd line");
+		text2.add("this is the 3rd line");
+		text2.add("this is the 4th line");
+		text2.add("this is the 5 line");
+		text2.add("this is the 6th line");
+		text2.add("this is the 7th line");
+		text2.add("this is the 8th line");
+		text2.add("this is the 9th line");
+		text2.add("this is the 10th line");
+		
+		diffChunks = DiffUtils.diffAsChunks(text1, text2, null, 3);
+
+		assertEquals(1, diffChunks.size());
 	}
 
 	@Test
@@ -166,7 +194,6 @@ public class DiffUtilsTest {
 				"-this is the 4th line\n" + 
 				"+I do not think this works\n", 
 				diffChunks.get(0).toString());
-		
 	}
 
 	@Test

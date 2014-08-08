@@ -1,6 +1,9 @@
 package com.pmease.commons.util.diff;
 
-public class Partial {
+import java.io.Serializable;
+
+@SuppressWarnings("serial")
+public class Partial implements Serializable {
 	
 	private final String content;
 	

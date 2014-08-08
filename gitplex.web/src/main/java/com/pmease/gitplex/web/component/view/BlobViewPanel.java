@@ -1,22 +1,17 @@
 package com.pmease.gitplex.web.component.view;
 
-import java.nio.charset.Charset;
-
 import org.apache.tika.mime.MediaType;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.eclipse.jgit.lib.FileMode;
 
-import com.pmease.commons.util.Charsets;
+import com.pmease.commons.git.GitText;
 import com.pmease.commons.util.MediaTypes;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.gitlink.GitLink;
 import com.pmease.gitplex.web.component.symbollink.SymbolLink;
-import com.pmease.gitplex.web.extensionpoint.MediaRenderInfo;
 import com.pmease.gitplex.web.extensionpoint.MediaRenderer;
 import com.pmease.gitplex.web.extensionpoint.MediaRendererProvider;
 
@@ -25,29 +20,33 @@ public class BlobViewPanel extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
-	private final IModel<BlobRenderInfo> blobModel;
+	private final BlobRenderInfo blobInfo;
 	
-	public BlobViewPanel(String id, IModel<Repository> repoModel, IModel<BlobRenderInfo> blobModel) {
+	private final IModel<byte[]> blobContentModel;
+	
+	public BlobViewPanel(String id, IModel<Repository> repoModel, BlobRenderInfo blobInfo, 
+			IModel<byte[]> blobContentModel) {
 		super(id);
 	
 		this.repoModel = repoModel;
-		this.blobModel = blobModel;
+		this.blobInfo = blobInfo;
+		this.blobContentModel = blobContentModel;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		BlobRenderInfo blob = blobModel.getObject();
-		if (blob.getMode() == FileMode.TYPE_GITLINK) {
-			add(new GitLink("blob", new String(blob.getContent())));
-		} else if (blob.getMode() == FileMode.TYPE_SYMLINK) {
-			add(new SymbolLink("blob", repoModel, blob.getRevision(), 
-					blob.getPath(), new String(blob.getContent())));
-		} else if (blob.getContent().length == 0) {
+		byte[] content = blobContentModel.getObject();
+		if (blobInfo.getMode() == FileMode.TYPE_GITLINK) {
+			add(new GitLink("blob", new String(content)));
+		} else if (blobInfo.getMode() == FileMode.TYPE_SYMLINK) {
+			add(new SymbolLink("blob", repoModel, blobInfo.getRevision(), 
+					blobInfo.getPath(), new String(content)));
+		} else if (blobContentModel.getObject().length == 0) {
 			add(new Label("blob", "<i class='fa fa-info-circle'></i> <em>File is empty</em>").setEscapeModelStrings(false));
 		} else {
-			final MediaType mediaType = MediaTypes.detectFrom(blob.getContent(), blob.getPath());
+			final MediaType mediaType = MediaTypes.detectFrom(content, blobInfo.getPath());
 			MediaRenderer renderer = null;
 			for (MediaRendererProvider provider: GitPlex.getExtensions(MediaRendererProvider.class)) {
 				renderer = provider.getMediaRenderer(mediaType);
@@ -55,18 +54,11 @@ public class BlobViewPanel extends Panel {
 					break;
 			}
 			if (renderer != null) {
-				add(renderer.render("blob", new LoadableDetachableModel<MediaRenderInfo>() {
-
-					@Override
-					protected MediaRenderInfo load() {
-						return MediaRenderInfo.from(blobModel.getObject(), mediaType);
-					}
-					
-				}));
+				add(renderer.render("blob", blobInfo, blobContentModel));
 			} else {
-				Charset charset = Charsets.detectFrom(blob.getContent());
-				if (charset != null) {
-					add(new TextViewPanel("blob", Model.of(TextRenderInfo.from(blobModel.getObject(), charset))));
+				GitText text = GitText.from(content);
+				if (text != null) {
+					add(new TextViewPanel("blob", blobInfo, text));
 				} else {
 					add(new Label("blob", 
 							"<i class='fa fa-info-circle'></i> <em>Binary file</em>").setEscapeModelStrings(false));
@@ -77,7 +69,8 @@ public class BlobViewPanel extends Panel {
 
 	@Override
 	protected void onDetach() {
-		blobModel.detach();
+		repoModel.detach();
+		blobContentModel.detach();
 		super.onDetach();
 	}
 

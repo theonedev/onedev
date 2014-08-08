@@ -36,7 +36,7 @@ public class TestPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new DiffTreePanel("test", repoModel, "master", "dev") {
+		add(new DiffTreePanel("test", repoModel, "dev~1", "dev") {
 
 			@Override
 			protected Link<Void> newFileLink(String id, final DiffTreeNode node) {
@@ -44,14 +44,8 @@ public class TestPage extends BasePage {
 
 					@Override
 					public void onClick() {
-						TestPage.this.replace(new BlobDiffPanel("diff", repoModel, new LoadableDetachableModel<BlobDiffInfo>() {
-
-							@Override
-							protected BlobDiffInfo load() {
-								return BlobDiffInfo.from(repoModel.getObject().git(), node, "master", "dev");
-							}
-							
-						}));
+						TestPage.this.replace(new BlobDiffPanel("diff", repoModel, 
+								BlobDiffInfo.from(repoModel.getObject().git(), node, "dev~1", "dev")));
 					}
 					
 				};

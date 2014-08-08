@@ -1,42 +1,64 @@
 <wicket:panel>
-	<div class="blob-diff">
-		<div class="well well-sm">
-			<div wicket:id="blobRenamed">
-				<strong wicket:id="oldPath"></strong> is renamed to <strong wicket:id="newPath"></strong> 
+	<wicket:enclosure child="originalContent">
+		<div class="blob-diff original">
+			<div class="head">
+				<i class="fa fa-minus"></i> <span wicket:id="originalTitle"></span>
 			</div>
-			<div wicket:id="blobAdded">
-				<strong wicket:id="newPath"></strong> is added 
-			</div>
-			<div wicket:id="blobDeleted">
-				<strong wicket:id="oldPath"></strong> is deleted 
-			</div>
-			<div wicket:id="blobModified">
-				<strong wicket:id="oldPath"></strong> is modified
-			</div>
-			<div wicket:id="blobUnchanged">
-				<strong wicket:id="oldPath"></strong> is unchanged
-			</div>
-			<div wicket:id="blobTypeChanged">
-				Blob type is changed from <strong wicket:id="oldType"></strong> to <strong wicket:id="newType"></strong>
-			</div>
-			<div wicket:id="fileModeChanged">
-				File mode is changed from <strong wicket:id="oldMode"></strong> to <strong wicket:id="newMode"></strong>
-			</div>
+			<div wicket:id="originalContent" class="body"></div>
 		</div>
-		<div class="content">
-			<wicket:enclosure child="originalContent">
-				<div class="original">
-					<div class="head"><i class="fa fa-minus"></i> old content</div>
-					<div wicket:id="originalContent" class="body"></div>
-				</div>
-			</wicket:enclosure>
-			<wicket:enclosure child="revisedContent">
-				<div class="revised">
-					<div class="head"><i class="fa fa-plus"></i> new content</div>
-					<div wicket:id="revisedContent" class="body"></div>
-				</div>
-			</wicket:enclosure>
-			<div wicket:id="blobContent"></div>
+	</wicket:enclosure>
+	<wicket:enclosure child="revisedContent">
+		<div class="blob-diff revised">
+			<div class="head">
+				<i class="fa fa-plus"></i> <span wicket:id="revisedTitle"></span>
+			</div>
+			<div wicket:id="revisedContent" class="body"></div>
 		</div>
-	</div>
+	</wicket:enclosure>
+	<div wicket:id="blobContent"></div>
+	<wicket:fragment wicket:id="notChangedFrag">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<div class="panel-title"><span wicket:id="title"></span> <em>is not changed</em></div>
+			</div>
+			<div wicket:id="content" class="panel-body"></div>
+		</div>				
+	</wicket:fragment>
+	<wicket:fragment wicket:id="emptyFileFrag">
+		<div class="panel panel-default">
+			<div class="panel-heading"><span wicket:id="summary"></span></div>
+			<div class="panel-body">
+				<i class='fa fa-info-circle'></i> <em>File is empty</em>
+			</div>
+		</div>				
+	</wicket:fragment>
+	<wicket:fragment wicket:id="binaryFileFrag">
+		<div class="panel panel-default">
+			<div class="panel-heading"><span wicket:id="summary"></span></div>
+			<div class="panel-body">
+				<i class='fa fa-info-circle'></i> <em>Binary files</em>
+			</div>
+		</div>				
+	</wicket:fragment>
+	<wicket:fragment wicket:id="nonFileDiffFrag">
+		<div class="blob-diff">
+			<div class="head">
+				<wicket:enclosure child="renamedTitle">
+					<span wicket:id="renamedTitle"></span>
+					<i class="fa fa-arrow-slim-right"></i>
+				</wicket:enclosure>
+				<span wicket:id="title"></span>
+			</div>
+			<div class="body">
+				<div class="original line">
+					<i class="fa fa-minus"></i>
+					<span wicket:id="oldContent"></span>
+				</div>
+				<div class="revised line">
+					<i class="fa fa-plus"></i>
+					<span wicket:id="newContent"></span>
+				</div>
+			</div>
+		</div>				
+	</wicket:fragment>
 </wicket:panel>

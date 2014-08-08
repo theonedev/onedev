@@ -90,7 +90,7 @@ public class DiffUtils {
 					if (diffPartial.getAction() == DiffLine.Action.EQUAL)
 						equals++;
 				}
-				if (equals*2 >= diffPartials.size()) {
+				if (equals*3 >= diffPartials.size()) {
 					for (int j=0; j<i; j++)	
 						processedAdditions.add(new DiffLine(DiffLine.Action.ADD, additions.get(j)));
 					for (int j=0; j<=i; j++)
@@ -153,31 +153,35 @@ public class DiffUtils {
 	}
 
 	public static List<DiffChunk> chunksOf(List<DiffLine> diffLines, int contextLines) {
-		List<RemovableDiffLine> removeAwareDiffLines = new ArrayList<>();
+		List<RemovableDiffLine> removableDiffLines = new ArrayList<>();
 		for (DiffLine diffLine: diffLines)
-			removeAwareDiffLines.add(new RemovableDiffLine(diffLine, false));
+			removableDiffLines.add(new RemovableDiffLine(diffLine, false));
 		
 		int equalCount = 0;
 		int index = 0;
-		for (RemovableDiffLine each: removeAwareDiffLines) {
+		for (RemovableDiffLine each: removableDiffLines) {
 			if (each.diffLine.getAction() == Action.EQUAL) {
 				equalCount++;
+			} else if (index == equalCount) {
+				for (int i=index-equalCount; i<index-contextLines; i++)
+					removableDiffLines.get(i).removed = true;
+				equalCount = 0;
 			} else {
-				for (int i=index-equalCount+contextLines; i<=index-contextLines-1; i++)
-					removeAwareDiffLines.get(i).removed = true;
+				for (int i=index-equalCount+contextLines; i<index-contextLines; i++)
+					removableDiffLines.get(i).removed = true;
 				equalCount = 0;
 			}
 			index++;
 		}
-		for (int i=index-equalCount+contextLines; i<=index-contextLines-1; i++)
-			removeAwareDiffLines.get(i).removed = true;
+		for (int i=index-equalCount+contextLines; i<index; i++)
+			removableDiffLines.get(i).removed = true;
 		
 		List<DiffChunk> diffChunks = new ArrayList<>();
 
 		int start1 = 0;
 		int start2 = 0;
 		DiffChunkBuilder chunkBuilder = new DiffChunkBuilder();
-		for (RemovableDiffLine each: removeAwareDiffLines) {
+		for (RemovableDiffLine each: removableDiffLines) {
 			if (!each.removed) {
 				if (chunkBuilder.diffUnits.isEmpty()) {
 					chunkBuilder.start1 = start1;

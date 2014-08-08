@@ -1,10 +1,13 @@
 package com.pmease.gitplex.web.component.diff;
 
+import java.io.Serializable;
+
 import com.pmease.commons.git.DiffTreeNode;
 import com.pmease.commons.git.FileChange;
 import com.pmease.commons.git.Git;
 
-public class BlobDiffInfo {
+@SuppressWarnings("serial")
+public class BlobDiffInfo implements Serializable {
 	
 	public enum Status {ADD, MODIFY, DELETE, RENAME, UNCHANGE}
 	
@@ -22,19 +25,13 @@ public class BlobDiffInfo {
 	
 	private final String newRevision;
 	
-	private final byte[] oldContent;
-	
-	private final byte[] newContent;
-	
 	public BlobDiffInfo(Status status, String oldPath, String newPath, int oldMode, int newMode, 
-			String oldRevision, String newRevision, byte[] oldContent, byte[] newContent) {
+			String oldRevision, String newRevision) {
 		this.status = status;
 		this.oldPath = oldPath;
 		this.newPath = newPath;
 		this.oldMode = oldMode;
 		this.newMode = newMode;
-		this.oldContent = oldContent;
-		this.newContent = newContent;
 		this.oldRevision = oldRevision;
 		this.newRevision = newRevision;
 	}
@@ -67,60 +64,32 @@ public class BlobDiffInfo {
 		return newRevision;
 	}
 
-	public byte[] getOldContent() {
-		return oldContent;
-	}
-
-	public byte[] getNewContent() {
-		return newContent;
-	}
-
 	public static BlobDiffInfo from(Git git, DiffTreeNode node, String oldRevision, String newRevision) {
 		Status status;
-		byte[] oldContent, newContent;
-		if (node.getStatus() == DiffTreeNode.Status.ADD) {
+		if (node.getStatus() == DiffTreeNode.Status.ADD) 
 			status = Status.ADD;
-			oldContent = null;
-			newContent = git.read(newRevision, node.getPath(), node.getNewMode());
-		} else if (node.getStatus() == DiffTreeNode.Status.DELETE) {
+		else if (node.getStatus() == DiffTreeNode.Status.DELETE) 
 			status = Status.DELETE;
-			oldContent = git.read(oldRevision, node.getPath(), node.getOldMode());
-			newContent = null;
-		} else if (node.getStatus() == DiffTreeNode.Status.UNCHANGE) {
+		else if (node.getStatus() == DiffTreeNode.Status.UNCHANGE) 
 			status = Status.UNCHANGE;
-			oldContent = newContent = git.read(newRevision, node.getPath(), node.getNewMode());
-		} else { 
+		else 
 			status = Status.MODIFY;
-			oldContent = git.read(oldRevision, node.getPath(), node.getOldMode());
-			newContent = git.read(newRevision, node.getPath(), node.getNewMode());
-		}
 		return new BlobDiffInfo(status, node.getPath(), node.getPath(), node.getOldMode(), 
-				node.getNewMode(), oldRevision, newRevision, oldContent, newContent);
+				node.getNewMode(), oldRevision, newRevision);
 	}
 	
 	public static BlobDiffInfo from(Git git, FileChange change, String oldRevision, String newRevision) {
 		Status status;
-		byte[] oldContent, newContent;
-		if (change.getStatus() == FileChange.Status.ADD) {
+		if (change.getStatus() == FileChange.Status.ADD)
 			status = Status.ADD;
-			oldContent = null;
-			newContent = git.show(newRevision, change.getNewPath());
-		} else if (change.getStatus() == FileChange.Status.DELETE) {
+		else if (change.getStatus() == FileChange.Status.DELETE)
 			status = Status.DELETE;
-			oldContent = git.show(oldRevision, change.getOldPath());
-			newContent = null;
-		} else if (change.getStatus() == FileChange.Status.MODIFY) {
+		else if (change.getStatus() == FileChange.Status.MODIFY)
 			status = Status.MODIFY;
-			oldContent = git.show(oldRevision, change.getOldPath());
-			newContent = git.show(newRevision, change.getNewPath());
-		} else {
+		else 
 			status = Status.RENAME;
-			oldContent = git.show(oldRevision, change.getOldPath());
-			newContent = git.show(newRevision, change.getNewPath());
-		}
 		
 		return new BlobDiffInfo(status, change.getOldPath(), change.getNewPath(), 
-				change.getOldMode(), change.getNewMode(), oldRevision, newRevision, 
-				oldContent, newContent);
+				change.getOldMode(), change.getNewMode(), oldRevision, newRevision);
 	}
 }

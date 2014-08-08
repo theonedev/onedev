@@ -1,10 +1,12 @@
 package com.pmease.commons.util.diff;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class DiffChunk {
+@SuppressWarnings("serial")
+public class DiffChunk implements Serializable {
 
 	private final int start1;
 	

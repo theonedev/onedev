@@ -898,17 +898,45 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 .diff-tree .unchanged {color: #888;}
 .diff-tree em span {font-style: normal;}
 
-/* BLOB DIFF*/
-.blob-diff>.content {font-family: Consolas, 'Liberation Mono', Courier, monospace;
-	margin-bottom: 16px;}
-.blob-diff>.content>.original {border: 1px dashed #F83C3C; border-radius: 4px;
-	margin-bottom: 16px;}
-.blob-diff>.content>.original>.head {background: #FDB7B7; color: #BF0707; padding: 4px 8px;
-	border-bottom: 1px dashed #F83C3C;}
-.blob-diff>.content>.revised {border: 1px dashed #05B505; border-radius: 4px;}
-.blob-diff>.content>.revised>.head {background: #94E294; color: #1F731F; padding: 4px 8px;
-	border-bottom: 1px dashed #05B505;}
-.blob-diff>.content>.original>.body, .blob-diff>.content>.revised>.body {padding: 4px 8px;}
+/* TEXT DIFF */
+.text-diff>.panel-heading .fa.action {cursor: pointer; margin-left: 8px;}
+.text-diff .hunk-line .content pre { background: transparent; margin: 0; padding: 0; word-break: normal; 
+	word-wrap: normal; border: none; font-size: 12px; line-height: 20px; white-space: pre; }
+.table-diff {font-size: 12px;}
+.table-diff .hunk-head, .equal.hunk-line>td.info {color: #999;}
+.table-diff .hunk-head a {display: block; color: #999;}
+.table-diff .hunk-head a:hover {color: #444;}
+.table-diff .hunk-head td.info {text-align: center;}
+.table-diff>tbody>tr>td {padding: 0 8px; vertical-align: top;}
+.table-diff>tbody>tr>td.content, .table-diff>tbody>tr>td.revised {
+	border-left: 1px solid #E5E5E5;}  
+.revised.hunk-line {background: none repeat scroll 0 0 #cfc;}
+.revised.hunk-line>td.info {background: none repeat scroll 0 0 #89FB89; color: #007f00;}
+.original.hunk-line>td.info {background: none repeat scroll 0 0 #faa; color: #8f0000;}
+.original.hunk-line {background: none repeat scroll 0 0 #fdd;}
+.hunk-line>td.info {width: 1%; text-align: right; white-space: nowrap;}
+.original.hunk-line .emphasize {background: #FC9090;}
+.revised.hunk-line .emphasize {background: #07C907;}
+.table-diff .hunk-head {background: none repeat scroll 0 0 #eef;}
+.table-diff .hunk-row:hover {background: #fea; } 
+.table-diff .hunk-row:hover .info {background: #FBDE6D;}
+ul.diff-alerts li {text-align: left;}
+ul.diff-alerts {padding-left: 12px;}
+
+/* BLOB DIFF */
+.blob-diff {border: 1px solid #BBB; border-radius: 4px;}
+.blob-diff>.head {border-bottom: 1px solid #BBB; padding: 4px 8px; font-size: 16px; 
+	border-radius: 4px 4px 0 0; background: #F2F2F2;}
+.blob-diff>.body {padding: 8px;}
+.blob-diff.original {margin-bottom: 16px;}
+.blob-diff.original, .blob-diff.original>.head {border-color: #FC9494;}
+.blob-diff.revised, .blob-diff.revised>.head {border-color: #07C707;}
+.blob-diff.original>.head {color: #FA5A5A; background: #FDBFBF;}
+.blob-diff.revised>.head {color: #059505; background: #B6F8A2;}
+.blob-diff .line {padding: 4px 8px;}
+.blob-diff .line>.fa {width: 16px;}
+.blob-diff .original.line {background: #FCA6A6; color: #8f0000;}
+.blob-diff .revised.line {background: #B6F8A2; color: #007f00;}
 
 /* BRANCH CHOICE */
 .affinal-branch-choice .connector {margin: 4px 0 0 0; color: #BBB; font-weight: bold; 

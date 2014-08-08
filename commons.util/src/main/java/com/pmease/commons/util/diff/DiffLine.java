@@ -1,10 +1,12 @@
 package com.pmease.commons.util.diff;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.google.common.collect.Lists;
 
-public class DiffLine {
+@SuppressWarnings("serial")
+public class DiffLine implements Serializable {
 	
 	public enum Action {
 		
