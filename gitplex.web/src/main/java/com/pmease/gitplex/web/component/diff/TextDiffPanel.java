@@ -123,6 +123,15 @@ public class TextDiffPanel extends Panel {
 		
 		setOutputMarkupId(true);
 		
+		add(new DiffStatBar("diffStat", new AbstractReadOnlyModel<List<DiffLine>>() {
+
+			@Override
+			public List<DiffLine> getObject() {
+				return diffs;
+			}
+			
+		}));
+		
 		List<String> alerts = new ArrayList<>();
 		if (!oldText.getCharset().equals(newText.getCharset()))
 			alerts.add("Charset is changed from " + oldText.getCharset() + " to " + newText.getCharset());

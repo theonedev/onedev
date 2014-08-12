@@ -1,7 +1,10 @@
 <wicket:panel>
 	<div class="text-diff panel panel-default">
 		<div class="panel-heading clearfix">
-			<div wicket:id="title" class="pull-left panel-title"></div>
+			<div class="pull-left">
+				<span wicket:id="diffStat"></span>
+				<span wicket:id="title" class="panel-title"></span>
+			</div>
 			<div class="pull-right">
 				<span wicket:id="identical"><i class="fa fa-info-circle fa-lg"></i> <em>content is identical</em></span>
 				<span wicket:id="viewFull" class="fa fa-file-txt fa-lg action" title="View full file"></span>

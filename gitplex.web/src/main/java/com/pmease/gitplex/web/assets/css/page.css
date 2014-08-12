@@ -938,6 +938,12 @@ ul.diff-alerts {padding-left: 12px;}
 .blob-diff .original.line {background: #FCA6A6; color: #8f0000;}
 .blob-diff .revised.line {background: #B6F8A2; color: #007f00;}
 
+/* DIFF STAT */
+.diff-stat {font-family: 'PontAwesome'; color: #ddd; }
+.diff-stat .additions {color: #35c335; font-style: normal; }
+.diff-stat .deletions {color: #c33535; font-style: normal; }
+
+
 /* BRANCH CHOICE */
 .affinal-branch-choice .connector {margin: 4px 0 0 0; color: #BBB; font-weight: bold; 
 	font-size: 26px;}
