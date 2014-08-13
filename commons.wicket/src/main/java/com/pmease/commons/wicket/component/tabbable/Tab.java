@@ -2,11 +2,26 @@ package com.pmease.commons.wicket.component.tabbable;
 
 import java.io.Serializable;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.list.ListItem;
 
-public interface Tab extends Serializable {
+import com.google.common.base.Preconditions;
+
+@SuppressWarnings("serial")
+public abstract class Tab implements Serializable {
 	
-	void populate(ListItem<Tab> item, String componentId);
+	private ListItem<Tab> item;
 	
-	boolean isActive(ListItem<Tab> item);
+	void setItem(ListItem<Tab> item) {
+		this.item = item;
+	}
+	
+	protected ListItem<Tab> getItem() {
+		Preconditions.checkNotNull(item);
+		return item;
+	}
+	
+	protected abstract Component render(String componentId);
+	
+	public abstract boolean isSelected();
 }

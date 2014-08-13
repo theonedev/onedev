@@ -37,8 +37,8 @@ import com.pmease.gitplex.core.model.OldCommitComment;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.GitPlexSession;
-import com.pmease.gitplex.web.component.comment.CommitCommentEditor;
-import com.pmease.gitplex.web.component.comment.CommitCommentPanel;
+import com.pmease.gitplex.web.component.comment.OldCommitCommentEditor;
+import com.pmease.gitplex.web.component.comment.OldCommitCommentPanel;
 import com.pmease.gitplex.web.component.comment.event.AbstractLineCommentEvent;
 import com.pmease.gitplex.web.component.comment.event.CloseLineCommentForm;
 import com.pmease.gitplex.web.component.comment.event.CommitCommentAdded;
@@ -356,7 +356,7 @@ public class HunkPanel extends Panel {
 	}
 
 	private WebMarkupContainer newCommentForm(final int position) {
-		return new CommitCommentEditor("commentform") {
+		return new OldCommitCommentEditor("commentform") {
 			@Override
 			protected void onCancel(AjaxRequestTarget target, Form<?> form) {
 				send(HunkPanel.this, Broadcast.DEPTH, new CloseLineCommentForm(target, position, getLineId(position)));
@@ -503,7 +503,7 @@ public class HunkPanel extends Panel {
 				protected void populateItem(LoopItem item) {
 					int index = item.getIndex();
 					OldCommitComment comment = getComment(index);
-					item.add(new CommitCommentPanel("comment", new CommitCommentModel(comment)));
+					item.add(new OldCommitCommentPanel("comment", new CommitCommentModel(comment)));
 				}
 			};
 			
@@ -534,7 +534,7 @@ public class HunkPanel extends Panel {
 			result.setVisible(
 					GitPlexSession.getCurrentUser().isPresent()
 					&& getCommentsAware().canAddComments()
-					&& !(commentForm instanceof CommitCommentEditor)
+					&& !(commentForm instanceof OldCommitCommentEditor)
 					&& !getCommentIds().isEmpty());
 			
 			container.add(result);
@@ -587,7 +587,7 @@ public class HunkPanel extends Panel {
 			// show this row first in case all comment rows are hidden
 			e.getTarget().prependJavaScript("$('#" + getParent().getMarkupId(true) + "').show()");
 			
-			if (commentForm instanceof CommitCommentEditor) {
+			if (commentForm instanceof OldCommitCommentEditor) {
 				// form maybe hidden
 				e.getTarget().appendJavaScript("$('#" + commentForm.getMarkupId(true) + "').show()");
 			} else {

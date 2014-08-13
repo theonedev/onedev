@@ -1,21 +1,21 @@
 package com.pmease.commons.wicket.component.tabbable;
 
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.list.ListItem;
 
-public class TabDivider implements Tab {
+public class TabDivider extends Tab {
 
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public void populate(ListItem<Tab> item, String componentId) {
-		item.add(AttributeModifier.append("class", "divider"));
-		item.add(new WebMarkupContainer(componentId));
+	public Component render(String componentId) {
+		getItem().add(AttributeModifier.append("class", "divider"));
+		return new WebMarkupContainer(componentId);
 	}
 
 	@Override
-	public boolean isActive(ListItem<Tab> item) {
+	public boolean isSelected() {
 		return false;
 	}
 

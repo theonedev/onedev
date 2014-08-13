@@ -1,6 +1,10 @@
 <wicket:extend>
-	<div class="padder" style="background: white;">
+	<div class="padder" style="background: white; padding: 50px;">
 		<p wicket:id="test">test</p>
 		<div wicket:id="diff"></div>
+		<form wicket:id="form">
+			<div wicket:id="comment"></div>
+			<input type="submit" value="Save" class="btn btn-primary dirty-aware"></input>
+		</form>
 	</div>
 </wicket:extend>

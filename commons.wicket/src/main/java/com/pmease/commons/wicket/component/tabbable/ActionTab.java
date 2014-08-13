@@ -1,15 +1,16 @@
 package com.pmease.commons.wicket.component.tabbable;
 
-import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.IModel;
 
-public abstract class ActionTab implements Tab {
+public abstract class ActionTab extends Tab {
 
 	private static final long serialVersionUID = 1L;
 
 	private IModel<String> titleModel;
 	
-	private boolean active;
+	private boolean selected;
 	
 	public ActionTab(IModel<String> titleModel) {
 		this.titleModel = titleModel;
@@ -20,19 +21,29 @@ public abstract class ActionTab implements Tab {
 	}
 	
 	@Override
-	public void populate(ListItem<Tab> item, String componentId) {
-		item.add(new ActionTabLink(componentId, this));
+	public Component render(String componentId) {
+		return new ActionTabLink(componentId, this);
 	}
 
-	public final ActionTab setActive(boolean active) {
-		this.active = active;
+	public ActionTab setSelected(boolean selected) {
+		this.selected = selected;
 		return this;
 	}
 
 	@Override
-	public final boolean isActive(ListItem<Tab> item) {
-		return active;
+	public final boolean isSelected() {
+		return selected;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void selectTab(Component tabLink) {
+		ListView<ActionTab> tabItems = tabLink.findParent(ListView.class);
+		for (ActionTab each: tabItems.getModelObject())
+			each.setSelected(false);
+		
+		setSelected(true);
+		onSelect();
 	}
 
-	protected abstract void tabActivated();
+	protected abstract void onSelect();
 }

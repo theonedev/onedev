@@ -1,6 +1,7 @@
 html, body { background: #f0f2f4; }
 
 a { color: #09f; }
+textarea {resize: vertical;}
 
 /**
  * MISC COMPONENTS
@@ -732,7 +733,7 @@ a.diffstat:hover { text-decoration: none; }
 .form-comment .comment-editor-head { padding: 0; }
 .form-comment .comment-editor-head .nav-tabs { padding-left: 18px; }
 .form-comment .comment-editor-body { background: white; padding: 12px; }
-.form-comment textarea { display: block; width: 100%; resize: vertical; padding: 10px; min-height: 100px; max-height: 500px; border-color: #aaa; }
+.form-comment textarea { display: block; width: 100%; padding: 10px; min-height: 100px; max-height: 500px; border-color: #aaa; }
 .form-comment>.tab-content { border-radius: 0 0 3px 3px; }
 .form-comment .form-actions { padding: 0; margin-top: 12px; }
 .form-comment .form-actions .primary { float: right; }
@@ -902,7 +903,7 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 .text-diff>.panel-heading .fa.action {cursor: pointer; margin-left: 8px;}
 .text-diff .hunk-line .content pre { background: transparent; margin: 0; padding: 0; word-break: normal; 
 	word-wrap: normal; border: none; font-size: 12px; line-height: 20px; white-space: pre; }
-.table-diff {font-size: 12px;}
+.table-diff {font-size: 12px; position:relative;}
 .table-diff .hunk-head, .equal.hunk-line>td.info {color: #999;}
 .table-diff .hunk-head a {display: block; color: #999;}
 .table-diff .hunk-head a:hover {color: #444;}
@@ -922,6 +923,9 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 .table-diff .hunk-row:hover .info {background: #FBDE6D;}
 ul.diff-alerts li {text-align: left;}
 ul.diff-alerts {padding-left: 12px;}
+.table-diff .add-comment {position: absolute; left:0; margin-left: -16px;}
+.table-diff .add-comment .fa {display:none;}
+.table-diff tr:hover .add-comment .fa {display:inline;}
 
 /* BLOB DIFF */
 .blob-diff {border: 1px solid #BBB; border-radius: 4px;}
@@ -943,6 +947,11 @@ ul.diff-alerts {padding-left: 12px;}
 .diff-stat .additions {color: #35c335; font-style: normal; }
 .diff-stat .deletions {color: #c33535; font-style: normal; }
 
+/* COMMENT */
+.comment-input textarea {width: 100%; min-height: 80px;}
+.comment-input>.tab-pane {padding: 12px;}
+.comment-input>.tab-head .nav-tabs {padding-left: 12px;}
+.comment-input>.tab-pane>.preview {display: none;}
 
 /* BRANCH CHOICE */
 .affinal-branch-choice .connector {margin: 4px 0 0 0; color: #BBB; font-weight: bold; 
@@ -979,7 +988,7 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .new-request .status .summary {font-size: 16px; padding: 0; margin-bottom: 8px;}
 .new-request .can-send {border-radius: 4px; background: #F2F2F2; padding: 4px;}
 .new-request .can-send form .title, .new-request .can-send form .comment {margin-bottom: 12px;}
-.new-request .can-send textarea {resize: vertical; min-height: 64px;}
+.new-request .can-send textarea {min-height: 64px;}
 .new-request .can-send .foot>div {margin-right: 12px;}
 .new-request .can-send .foot label {font-weight: normal;}
 .new-request .can-send .foot .help-block {margin: 0;}
@@ -991,7 +1000,7 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail table {width: 100%;}
 .request-detail td {vertical-align: top;}
 .request-detail td.actions {width: 120px;}
-.request-detail textarea {resize: vertical; min-height: 64px;}
+.request-detail textarea {min-height: 64px;}
 
 .request-detail>.head {font-size: 20px; font-weight: bold; padding: 0;}
 .request-detail>.head>div {margin-right: 8px;}

@@ -1,10 +1,9 @@
 package com.pmease.gitplex.web.page.account.setting;
 
-import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.tabbable.PageTab;
-import com.pmease.commons.wicket.component.tabbable.Tab;
 
 @SuppressWarnings("serial")
 public class AccountSettingTab extends PageTab {
@@ -19,8 +18,8 @@ public class AccountSettingTab extends PageTab {
 	}
 
 	@Override
-	public void populate(ListItem<Tab> item, String componentId) {
-		item.add(new AccountSettingTabLink(componentId, this));
+	public Component render(String componentId) {
+		return new AccountSettingTabLink(componentId, this);
 	}
 
 }

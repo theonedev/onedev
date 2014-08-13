@@ -1,12 +1,13 @@
 package com.pmease.gitplex.web.page.repository.info.pullrequest;
 
-import static com.pmease.gitplex.core.model.IntegrationStrategy.*;
+import static com.pmease.gitplex.core.model.IntegrationStrategy.MERGE_ALWAYS;
+import static com.pmease.gitplex.core.model.IntegrationStrategy.MERGE_IF_NECESSARY;
+import static com.pmease.gitplex.core.model.IntegrationStrategy.REBASE_SOURCE;
+import static com.pmease.gitplex.core.model.IntegrationStrategy.REBASE_TARGET;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import com.pmease.gitplex.core.GitPlex;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
@@ -45,12 +46,13 @@ import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.PageTabLink;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.model.Branch;
-import com.pmease.gitplex.core.model.OldCommitComment;
 import com.pmease.gitplex.core.model.IntegrationInfo;
 import com.pmease.gitplex.core.model.IntegrationStrategy;
+import com.pmease.gitplex.core.model.OldCommitComment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.Status;
 import com.pmease.gitplex.core.model.User;
@@ -617,15 +619,15 @@ public abstract class RequestDetailPage extends RepositoryInfoPage implements Co
 		}
 		
 		@Override
-		public void populate(ListItem<Tab> item, String componentId) {
-			item.add(new PageTabLink(componentId, this) {
+		public Component render(String componentId) {
+			return new PageTabLink(componentId, this) {
 
 				@Override
 				protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
 					return new BookmarkablePageLink<Void>(linkId, pageClass, params4(getPullRequest()));
 				}
 				
-			});
+			};
 		}
 		
 	}

@@ -36,8 +36,8 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.OldCommitComment;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.GitPlexSession;
-import com.pmease.gitplex.web.component.comment.CommitCommentEditor;
-import com.pmease.gitplex.web.component.comment.CommitCommentPanel;
+import com.pmease.gitplex.web.component.comment.OldCommitCommentEditor;
+import com.pmease.gitplex.web.component.comment.OldCommitCommentPanel;
 import com.pmease.gitplex.web.component.comment.event.CommitCommentEvent;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
@@ -132,7 +132,7 @@ public class CommentListPanel extends Panel {
 			protected void populateItem(ListItem<OldCommitComment> item) {
 				OldCommitComment c = item.getModelObject();
 				item.add(new UserLink("author", Model.of(c.getAuthor()), AvatarMode.AVATAR));
-				item.add(new CommitCommentPanel("message", new CommitCommentModel(c)) {
+				item.add(new OldCommitCommentPanel("message", new CommitCommentModel(c)) {
 					@Override
 					protected Component createCommentHead(String id) {
 						
@@ -173,7 +173,7 @@ public class CommentListPanel extends Panel {
 		add(formHolder);
 		if (GitPlexSession.getCurrentUser().isPresent()) {
 			formHolder.add(new UserLink("author", Model.of(GitPlexSession.getCurrentUser().get()), AvatarMode.AVATAR));
-			formHolder.add(new CommitCommentEditor("form") {
+			formHolder.add(new OldCommitCommentEditor("form") {
 
 				@Override
 				protected void onCancel(AjaxRequestTarget target, Form<?> form) {

@@ -32,11 +32,12 @@ public class Tabbable extends Panel {
 			@Override
 			protected void populateItem(ListItem<Tab> item) {
 				Tab tab = item.getModelObject();
+				tab.setItem(item);
 				
-				if (tab.isActive(item))
+				if (tab.isSelected())
 					item.add(AttributeModifier.append("class", "active"));
 
-				tab.populate(item, "tab");
+				item.add(tab.render("tab"));
 			}
 			
 		});

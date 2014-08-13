@@ -1,38 +1,36 @@
-package com.pmease.gitplex.web.component.wiki;
+package com.pmease.gitplex.web.component.markdown;
+
+import static org.pegdown.Extensions.ALL;
+import static org.pegdown.Extensions.SMARTYPANTS;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.pegdown.LinkRenderer;
+import org.pegdown.PegDownProcessor;
 
-import com.google.common.base.Throwables;
 import com.pmease.gitplex.web.page.repository.info.code.blob.renderer.highlighter.AceHighlighter;
-import com.pmease.gitplex.web.util.MarkdownUtils;
 
 @SuppressWarnings("serial")
-public class WikiTextPanel extends Panel {
+public class MarkdownPanel extends Panel {
 	private static final long serialVersionUID = 1L;
 
-	public WikiTextPanel(String id, IModel<String> contentModel) {
-		super(id, contentModel);
+	public MarkdownPanel(String id, IModel<String> model) {
+		super(id, model);
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Label("wiki", new LoadableDetachableModel<String>() {
+		add(new Label("html", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
-				String markdown = WikiTextPanel.this.getDefaultModelObjectAsString();
-				String html;
-				try {
-					html = MarkdownUtils.transformMarkdown(markdown);
-					return html;
-				} catch (Exception e) {
-					throw Throwables.propagate(e);
-				} 
+				String markdown = MarkdownPanel.this.getDefaultModelObjectAsString();
+				PegDownProcessor pd = new PegDownProcessor(ALL & ~SMARTYPANTS);
+				return pd.markdownToHtml(markdown, new LinkRenderer());
 			}
 		}).setEscapeModelStrings(false));
 		

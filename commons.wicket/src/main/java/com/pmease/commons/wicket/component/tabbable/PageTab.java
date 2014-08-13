@@ -3,11 +3,11 @@ package com.pmease.commons.wicket.component.tabbable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.Page;
-import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.model.IModel;
 
-public class PageTab implements Tab {
+public class PageTab extends Tab {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -83,20 +83,17 @@ public class PageTab implements Tab {
 	/**
 	 * Override this to provide your own logic of populating tab item (the &lt;li&gt; element).
 	 * 
-	 * @param item
-	 * 			The item to populate.
 	 * @param componentId
 	 * 			Id of the component to add to the item. 
 	 */
 	@Override
-	public void populate(ListItem<Tab> item, String componentId) {
-		item.add(new PageTabLink(componentId, this));
+	public Component render(String componentId) {
+		return new PageTabLink(componentId, this);
 	}
-
 	
 	@Override
-	public final boolean isActive(ListItem<Tab> item) {
-		return isActive(item.getPage());
+	public final boolean isSelected() {
+		return isActive(getItem().getPage());
 	}
 
 	public boolean isActive(Page currentPage) {

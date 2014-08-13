@@ -32,15 +32,15 @@ import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.component.wiki.WikiTextPanel;
 
 @SuppressWarnings("serial")
-public abstract class CommitCommentEditor extends Panel {
+public abstract class OldCommitCommentEditor extends Panel {
 
 	protected Form<?> form;
 	
-	public CommitCommentEditor(String id) {
+	public OldCommitCommentEditor(String id) {
 		this(id, Model.of(""));
 	}
 	
-	public CommitCommentEditor(String id, IModel<String> textModel) {
+	public OldCommitCommentEditor(String id, IModel<String> textModel) {
 		super(id, textModel);
 		
 		form = createForm("form");
@@ -134,7 +134,7 @@ public abstract class CommitCommentEditor extends Panel {
 		AjaxButton btn = new AjaxButton(id, form) {
 			@Override
 			public void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				CommitCommentEditor.this.onSubmit(target, form);
+				OldCommitCommentEditor.this.onSubmit(target, form);
 			}
 		};
 		

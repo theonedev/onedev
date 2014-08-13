@@ -1,15 +1,18 @@
 package com.pmease.gitplex.web.page;
 
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.git.DiffTreeNode;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.diff.BlobDiffInfo;
 import com.pmease.gitplex.web.component.diff.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.DiffTreePanel;
@@ -18,6 +21,8 @@ import com.pmease.gitplex.web.component.diff.DiffTreePanel;
 public class TestPage extends BasePage {
 
 	private IModel<Repository> repoModel;
+	
+	private String comment;
 	
 	public TestPage(PageParameters params) {
 		super(params);
@@ -54,6 +59,23 @@ public class TestPage extends BasePage {
 		});
 		
 		add(new WebMarkupContainer("diff"));
+		
+		Form<?> form = new Form<Void>("form") {
+
+			@Override
+			protected void onSubmit() {
+				super.onSubmit();
+				System.out.println("comment: " + comment);
+			}
+
+			@Override
+			protected void onError() {
+				System.out.println("error");
+			}
+			
+		};
+		form.add(new CommentInput("comment", new PropertyModel<String>(this, "comment")));
+		add(form);
 	}
 
 	@Override

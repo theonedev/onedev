@@ -10,13 +10,11 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 
 import com.google.common.collect.ImmutableSet;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.wiki.WikiTextPanel;
-import com.pmease.gitplex.web.component.wiki.WikiType;
 import com.pmease.gitplex.web.page.repository.info.code.blob.language.Language;
 import com.pmease.gitplex.web.service.FileBlob;
 
@@ -92,7 +90,7 @@ public class ReadmePanel extends Panel {
 					
 					return blob.getStringContent(); 
 				}
-			}, Model.of(WikiType.MARKDOWN)));
+			}));
 		} else {
 			Fragment frag = new Fragment("readme", "rawfrag", this);
 			frag.add(new Label("text", new LoadableDetachableModel<String>() {

@@ -28,9 +28,9 @@ import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.component.wiki.WikiTextPanel;
 
 @SuppressWarnings("serial")
-public class CommitCommentPanel extends Panel {
+public class OldCommitCommentPanel extends Panel {
 
-	public CommitCommentPanel(String id, IModel<OldCommitComment> model) {
+	public OldCommitCommentPanel(String id, IModel<OldCommitComment> model) {
 		super(id, model);
 	
 		this.setOutputMarkupId(true);
@@ -136,11 +136,11 @@ public class CommitCommentPanel extends Panel {
 	}
 	
 	protected void onEdit(AjaxRequestTarget target) {
-		Component c = new CommitCommentEditor("content", Model.of(getCommitComment().getContent())) {
+		Component c = new OldCommitCommentEditor("content", Model.of(getCommitComment().getContent())) {
 			
 			private void updateCommentLabel(AjaxRequestTarget target) {
 				Component label = newCommentContent();
-				CommitCommentPanel.this.addOrReplace(label);
+				OldCommitCommentPanel.this.addOrReplace(label);
 				target.add(label);
 			}
 

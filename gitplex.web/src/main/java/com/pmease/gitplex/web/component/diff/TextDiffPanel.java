@@ -321,9 +321,9 @@ public class TextDiffPanel extends Panel {
 				DiffHunk hunk = item.getModelObject();
 				
 				RepeatingView hunkBody = new RepeatingView(HUNK_BODY_ID);
-				item.add(newHeadComponent(HUNK_HEAD_ID, item.getIndex()));
+				item.add(newHeadContainer(HUNK_HEAD_ID, item.getIndex()));
 				for (HunkLine line: hunk.getLines())
-					hunkBody.add(newLineComponent(hunkBody.newChildId(), line));
+					hunkBody.add(newLineContainer(hunkBody.newChildId(), line));
 				item.add(hunkBody);
 			}
 
@@ -365,8 +365,16 @@ public class TextDiffPanel extends Panel {
 		}.add(new TooltipBehavior(Model.of("Show more lines"))));
 	}
 	
-	private WebMarkupContainer newLineComponent(String id, HunkLine line) {
+	private WebMarkupContainer newLineContainer(String id, HunkLine line) {
 		WebMarkupContainer lineContainer = new WebMarkupContainer(id);
+		lineContainer.add(new AjaxLink<Void>("addComment") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				
+			}
+			
+		});
 		if (line.getDiffLine().getAction() == DiffLine.Action.ADD) {
 			lineContainer.add(AttributeAppender.append("class", " revised"));
 			lineContainer.add(new Label("originalLineNo"));
@@ -400,9 +408,9 @@ public class TextDiffPanel extends Panel {
 		return lineContainer;
 	}
 	
-	private WebMarkupContainer newHeadComponent(String id, final int index) {
+	private WebMarkupContainer newHeadContainer(String id, final int index) {
 		final DiffHunk hunk = hunks.get(index);
-		final WebMarkupContainer headComponent = new WebMarkupContainer(id) {
+		final WebMarkupContainer headContainer = new WebMarkupContainer(id) {
 
 			@Override
 			protected void onConfigure() {
@@ -411,13 +419,13 @@ public class TextDiffPanel extends Panel {
 			}
 			
 		};
-		headComponent.add(new AjaxLink<Void>("expand") {
+		headContainer.add(new AjaxLink<Void>("expand") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				if (index == 0) {
 					expandAbove(target, index, 0);
-					target.add(headComponent);
+					target.add(headContainer);
 				} else {
 					int diffPos = locateDiffPos(hunk.getHeader().getNewStart(), DiffLine.Action.DELETE);
 					expandBelow(target, index-1, diffPos);
@@ -425,7 +433,7 @@ public class TextDiffPanel extends Panel {
 					diffPos = locateDiffPos(hunks.get(index-1).getHeader().getNewEnd(), DiffLine.Action.DELETE);
 					expandAbove(target, index, diffPos);
 					
-					target.add(headComponent);
+					target.add(headContainer);
 					target.add(findPreviousVisibleHunkHead(index));
 				}
 				target.add(viewFullLink);
@@ -445,7 +453,7 @@ public class TextDiffPanel extends Panel {
 			
 		}.add(new TooltipBehavior(Model.of("Show more lines"))));
 		
-		headComponent.add(new Label("content", new AbstractReadOnlyModel<String>() {
+		headContainer.add(new Label("content", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -467,9 +475,9 @@ public class TextDiffPanel extends Panel {
 			
 		}));
 		
-		headComponent.setOutputMarkupId(true);
+		headContainer.setOutputMarkupId(true);
 		
-		return headComponent;
+		return headContainer;
 	}
 
 	private int locateDiffPos(int lineNo, DiffLine.Action excludeAction) {
@@ -499,7 +507,7 @@ public class TextDiffPanel extends Panel {
 				header.setNewEnd(header.getNewEnd()+1);
 				header.setOldEnd(header.getOldEnd()+1);
 				
-				WebMarkupContainer lineComponent = newLineComponent(hunkBody.newChildId(), line);
+				WebMarkupContainer lineComponent = newLineContainer(hunkBody.newChildId(), line);
 				JQuery script = $(String.format("<tr id=\"%s\"></tr>", lineComponent.getMarkupId()));
 				Component lastComponent = hunkBody.get(hunkBody.size()-1);
 				script.chain(new FunctionWithParams("insertAfter", "'#" + lastComponent.getMarkupId() + "'"));
@@ -534,7 +542,7 @@ public class TextDiffPanel extends Panel {
 				header.setNewStart(header.getNewStart()-1);
 				HunkLine line = new HunkLine(header.getOldStart(), header.getNewStart(), diffs.get(i));
 				hunk.getLines().add(0, line);
-				WebMarkupContainer lineComponent = newLineComponent(hunkBody.newChildId(), line);
+				WebMarkupContainer lineComponent = newLineContainer(hunkBody.newChildId(), line);
 				JQuery script = $(String.format("<tr id=\"%s\"></tr>", lineComponent.getMarkupId()));
 				script.chain(new FunctionWithParams("insertBefore", "'#" + hunkBody.get(0).getMarkupId() + "'"));
 				target.prependJavaScript(script.get());

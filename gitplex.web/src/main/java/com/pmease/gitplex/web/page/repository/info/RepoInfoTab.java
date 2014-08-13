@@ -1,11 +1,10 @@
 package com.pmease.gitplex.web.page.repository.info;
 
-import com.pmease.gitplex.web.page.repository.RepositoryPage;
-import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.tabbable.PageTab;
-import com.pmease.commons.wicket.component.tabbable.Tab;
+import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
 public class RepoInfoTab extends PageTab {
@@ -26,8 +25,8 @@ public class RepoInfoTab extends PageTab {
 	}
 
 	@Override
-	public void populate(ListItem<Tab> item, String componentId) {
-		item.add(new RepoInfoTabLink(componentId, (RepoInfoTab) item.getModelObject()));
+	public Component render(String componentId) {
+		return new RepoInfoTabLink(componentId, this);
 	}
 	
 	public String getIconClass() {
