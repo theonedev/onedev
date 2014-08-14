@@ -57,7 +57,8 @@ public class ScrollBehavior extends Behavior {
 				+ "  $component.attr('disabled', 'disabled');"
 				+ "else "
 				+ "  $component.removeAttr('disabled');"
-				+ "})", component.getMarkupId(), function, fixContainer.getMarkupId(), selector, margin);
+				+ "}); $(window).trigger('scroll');", 
+				component.getMarkupId(), function, fixContainer.getMarkupId(), selector, margin);
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}

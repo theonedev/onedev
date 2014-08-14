@@ -11,7 +11,7 @@ import org.apache.wicket.request.Response;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.google.common.collect.Lists;
-import com.pmease.commons.wicket.asset.Asset;
+import com.pmease.commons.wicket.asset.Assets;
 
 import de.agilecoders.wicket.core.Bootstrap;
 
@@ -35,7 +35,7 @@ class CommonResourceReference extends JavaScriptResourceReference {
 	private static CommonResourceReference INSTANCE = new CommonResourceReference();
 	
 	private CommonResourceReference() {
-		super(new Key(Asset.COMMON_JS));
+		super(new Key(Assets.COMMON_JS));
 		
 		Bootstrap.renderHead(new IHeaderResponse() {
 
@@ -82,13 +82,13 @@ class CommonResourceReference extends JavaScriptResourceReference {
 		dependencies.add(JavaScriptHeaderItem.forReference(Bootstrap.getSettings().getModernizrResourceReference()));
 		dependencies.addAll(bootstrapHeaderItems);
 
-		dependencies.add(JavaScriptHeaderItem.forReference(Asset.ALIGN_JS));
+		dependencies.add(JavaScriptHeaderItem.forReference(Assets.ALIGN_JS));
 
-		dependencies.add(JavaScriptHeaderItem.forReference(Asset.STICKY_JS));
+		dependencies.add(JavaScriptHeaderItem.forReference(Assets.STICKY_JS));
 
-		dependencies.add(JavaScriptHeaderItem.forReference(Asset.ARE_YOU_SURE_JS));
+		dependencies.add(JavaScriptHeaderItem.forReference(Assets.ARE_YOU_SURE_JS));
 		
-		dependencies.add(CssHeaderItem.forReference(Asset.COMMON_CSS));
+		dependencies.add(CssHeaderItem.forReference(Assets.COMMON_CSS));
 
 		return dependencies;
 	}

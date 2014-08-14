@@ -19,9 +19,9 @@ public class PageResourceReference extends JavaScriptResourceReference {
 	public Iterable<? extends HeaderItem> getDependencies() {
 		return Dependencies.combine(
 				super.getDependencies(),
-				JavaScriptHeaderItem.forReference(AssetLocator.LIVEFILTER_JS),
-				new PriorityHeaderItem(CssHeaderItem.forReference(AssetLocator.ICONS_CSS)),
-				CssHeaderItem.forReference(AssetLocator.PAGE_CSS));
+				JavaScriptHeaderItem.forReference(Assets.LIVEFILTER_JS),
+				new PriorityHeaderItem(CssHeaderItem.forReference(Assets.FONTS_CSS)),
+				CssHeaderItem.forReference(Assets.PAGE_CSS));
 	}
 	
 	private static final PageResourceReference instance = new PageResourceReference();

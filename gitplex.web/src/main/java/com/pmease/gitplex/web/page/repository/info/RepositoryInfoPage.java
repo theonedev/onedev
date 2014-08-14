@@ -61,7 +61,7 @@ public abstract class RepositoryInfoPage extends RepositoryPage {
 				}
 			
 		});
-		requestTabs.add(new RepoInfoTab(Model.of("Closed"), "fa fa-branch-merge", ClosedRequestsPage.class) {
+		requestTabs.add(new RepoInfoTab(Model.of("Closed"), "fa fa-pull-request-close", ClosedRequestsPage.class) {
 			
 				@Override
 				public boolean isActive(Page currentPage) {
@@ -74,7 +74,7 @@ public abstract class RepositoryInfoPage extends RepositoryPage {
 				}
 			
 		});
-		requestTabs.add(new RepoInfoTab(Model.of("Create"), "fa fa-branch-merge", NewRequestPage.class));		
+		requestTabs.add(new RepoInfoTab(Model.of("Create"), "fa fa-pull-request-add", NewRequestPage.class));		
 		
 		add(new StylelessTabbable("requestTabs", requestTabs));
 	}

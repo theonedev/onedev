@@ -1,43 +1,40 @@
 <wicket:panel>
 	<div class="text-diff panel panel-default">
-		<div class="panel-heading clearfix">
+		<div wicket:id="head" class="panel-heading clearfix">
 			<div class="pull-left">
 				<span wicket:id="diffStat"></span>
 				<span wicket:id="title" class="panel-title"></span>
 			</div>
 			<div class="pull-right">
-				<span wicket:id="identical"><i class="fa fa-info-circle fa-lg"></i> <em>content is identical</em></span>
-				<span wicket:id="firstDiffBlock" class="fa fa-file-diff fa-lg action" title="Go to first difference block"></span>
-				<span wicket:id="firstCommentLine" class="fa fa-comment fa-lg action" title="Go to first commented line"></span>
-				<span wicket:id="diffOptionsTrigger" class="fa fa-gear fa-lg action" title="Diff options"></span>
+				<span wicket:id="diffOptionsTrigger" class="btn btn-sm btn-default">Diff Options <i class="caret"></i></span>
 				<div wicket:id="diffOptions"></div>
+			</div>
+			<div class="btn-group pull-right">
+				<span wicket:id="prevComment" class="btn btn-default btn-sm"><i class="fa fa-arrow-up"></i> Prev Comment</span>
+				<span wicket:id="nextComment" class="btn btn-default btn-sm"><i class="fa fa-arrow-down"></i> Next Comment</span>
+			</div>
+			<div class="btn-group pull-right">
+				<span wicket:id="prevDiff" class="btn btn-default btn-sm"><i class="fa fa-arrow-up"></i> Prev Diff</span>
+				<span wicket:id="nextDiff" class="btn btn-default btn-sm"><i class="fa fa-arrow-down"></i> Next Diff</span>
+			</div>
+			<div class="pull-right">
+				<span wicket:id="identical" class="label label-warning">Identical Content</span>
 			</div>
 		</div>
 		<table class="table-diff">
-			<wicket:container wicket:id="hunks">
-				<tr wicket:id="hunkHead" class="hunk-head hunk-row">
-					<td colspan="2" class="info">
-						<a wicket:id="expand"><i class="fa fa-expand"></i></a>
-					</td>
-					<td class="content"><span wicket:id="content"></span></td>
-				</tr>
-				<tr wicket:id="hunkLines" class="hunk-line hunk-row">
-					<td class="original info">
+			<wicket:container wicket:id="lines">
+				<tr wicket:id="content" class="line content">
+					<td class="old line-no">
 						<a wicket:id="addComment" class="add-comment"><i class="fa fa-comment-add"></i></a>
-						<span wicket:id="originalLineNo"></span>
+						<span wicket:id="oldLineNo"></span>
 					</td>
-					<td class="revised info">
-						<span wicket:id="revisedLineNo"></span>
+					<td class="new line-no">
+						<span wicket:id="newLineNo"></span>
 					</td>
-					<td class="content">
-						<pre><wicket:container wicket:id="partials"><span wicket:id="partial"></span></wicket:container></pre>
-					</td>
+					<td class="text"><wicket:container wicket:id="partials"><span wicket:id="partial"></span></wicket:container></td>
 				</tr>
+				<tr wicket:id="comments" class="line comments"></tr>
 			</wicket:container>
-			<tr wicket:id="hunkFoot" class="hunk-head hunk-row">
-				<td colspan="2" class="info"><a wicket:id="expand"><i class="fa fa-expand"></i></a></td>
-				<td class="content">&nbsp;</td>
-			</tr>
 		</table>
 	</div>
 </wicket:panel>

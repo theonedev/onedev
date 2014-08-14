@@ -8,6 +8,7 @@ import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxRequestTarget.IJavaScriptResponse;
 import org.apache.wicket.application.IComponentInstantiationListener;
+import org.apache.wicket.markup.html.pages.AbstractErrorPage;
 import org.apache.wicket.protocol.http.WebApplication;
 
 import com.pmease.commons.bootstrap.Bootstrap;
@@ -42,7 +43,9 @@ public abstract class AbstractWicketConfig extends WebApplication {
 			
 			@Override
 			public void onInstantiation(Component component) {
-				if ((component instanceof Page) && !(component instanceof CommonPage)) {
+				if ((component instanceof Page) 
+						&& !(component instanceof AbstractErrorPage) 
+						&& !(component instanceof CommonPage)) {
 					throw new RuntimeException("All page classes should extend from CommonPage.");
 				}
 			}
