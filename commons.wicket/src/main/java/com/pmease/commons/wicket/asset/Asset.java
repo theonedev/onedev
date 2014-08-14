@@ -8,6 +8,12 @@ public class Asset {
 	public static final JavaScriptResourceReference ARE_YOU_SURE_JS = 
 			new JavaScriptResourceReference(Asset.class, "jquery.are-you-sure.patched.js");
 	
+	public static final JavaScriptResourceReference STICKY_JS = 
+			new JavaScriptResourceReference(Asset.class, "jquery.sticky-kit.js");
+
+	public static final JavaScriptResourceReference ALIGN_JS = 
+			new JavaScriptResourceReference(Asset.class, "jquery.align.js");
+
 	public static final JavaScriptResourceReference COMMON_JS = 
 			new JavaScriptResourceReference(Asset.class, "common.js");
 	

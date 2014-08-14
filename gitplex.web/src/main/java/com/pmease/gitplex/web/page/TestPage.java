@@ -10,6 +10,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.git.DiffTreeNode;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.wicket.behavior.ScrollBehavior;
+import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.comment.CommentInput;
@@ -76,6 +78,12 @@ public class TestPage extends BasePage {
 		};
 		form.add(new CommentInput("comment", new PropertyModel<String>(this, "comment")));
 		add(form);
+		
+		WebMarkupContainer head = new WebMarkupContainer("head");
+		head.add(new StickyBehavior());
+		head.add(new WebMarkupContainer("prev").add(new ScrollBehavior(head, ".diff", 200, false)));
+		head.add(new WebMarkupContainer("next").add(new ScrollBehavior(head, ".diff", 200, true)));
+		add(head);
 	}
 
 	@Override

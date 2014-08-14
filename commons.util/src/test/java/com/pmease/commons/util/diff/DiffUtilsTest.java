@@ -114,6 +114,11 @@ public class DiffUtilsTest {
 				" this is the 10th line\n" +
 				"+this is the 11th line\n", 
 				diffChunks.get(1).toString());
+		diffChunks = DiffUtils.diffAsChunks(text1, text2, null, 0);
+		assertEquals(3, diffChunks.size());
+		assertEquals(2, diffChunks.get(0).getDiffLines().size());
+		assertEquals(2, diffChunks.get(1).getDiffLines().size());
+		assertEquals(1, diffChunks.get(2).getDiffLines().size());
 		
 		text1 = new ArrayList<>();
 		text1.add("this is the 1st line");
@@ -140,8 +145,11 @@ public class DiffUtilsTest {
 		text2.add("this is the 10th line");
 		
 		diffChunks = DiffUtils.diffAsChunks(text1, text2, null, 3);
-
 		assertEquals(1, diffChunks.size());
+
+		diffChunks = DiffUtils.diffAsChunks(text1, text2, null, 0);
+		assertEquals(1, diffChunks.size());
+		assertEquals(2, diffChunks.get(0).getDiffLines().size());
 	}
 
 	@Test

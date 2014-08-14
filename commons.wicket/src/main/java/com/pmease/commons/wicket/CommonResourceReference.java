@@ -82,6 +82,10 @@ class CommonResourceReference extends JavaScriptResourceReference {
 		dependencies.add(JavaScriptHeaderItem.forReference(Bootstrap.getSettings().getModernizrResourceReference()));
 		dependencies.addAll(bootstrapHeaderItems);
 
+		dependencies.add(JavaScriptHeaderItem.forReference(Asset.ALIGN_JS));
+
+		dependencies.add(JavaScriptHeaderItem.forReference(Asset.STICKY_JS));
+
 		dependencies.add(JavaScriptHeaderItem.forReference(Asset.ARE_YOU_SURE_JS));
 		
 		dependencies.add(CssHeaderItem.forReference(Asset.COMMON_CSS));
