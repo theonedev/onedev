@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import com.google.inject.ImplementedBy;
 import com.pmease.gitplex.core.manager.impl.DefaultAuthorizationManager;
+import com.pmease.gitplex.core.model.CommitComment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
@@ -19,4 +20,5 @@ public interface AuthorizationManager {
 	
 	boolean canModify(Vote vote);
 	
+	boolean canModify(CommitComment comment);
 }

@@ -25,7 +25,7 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.pmease.commons.git.Commit;
-import com.pmease.gitplex.core.manager.CommitCommentManager;
+import com.pmease.gitplex.core.manager.OldCommitCommentManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.common.datatype.DataTypes;
 import com.pmease.gitplex.web.component.commit.CommitMessagePanel;
@@ -75,7 +75,7 @@ public class RepoCommitsPanel extends Panel {
 			@Override
 			protected Map<String, Integer> load() {
 				// XXX: this may slow, performance tuning later
-				return GitPlex.getInstance(CommitCommentManager.class).getCommitCommentStats(getRepository());
+				return GitPlex.getInstance(OldCommitCommentManager.class).getCommitCommentStats(getRepository());
 			}
 			
 		};

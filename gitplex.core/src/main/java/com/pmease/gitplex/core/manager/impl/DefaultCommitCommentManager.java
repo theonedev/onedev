@@ -1,16 +1,18 @@
 package com.pmease.gitplex.core.manager.impl;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.hibernate.Query;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 
-import com.google.common.collect.Maps;
+import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.manager.CommitCommentManager;
+import com.pmease.gitplex.core.model.CommitComment;
 import com.pmease.gitplex.core.model.Repository;
 
 @Singleton
@@ -23,22 +25,32 @@ public class DefaultCommitCommentManager implements CommitCommentManager {
 		this.dao = dao;
 	}
 
-	@SuppressWarnings("unchecked")
+	@Sessional
 	@Override
-	public Map<String, Integer> getCommitCommentStats(Repository repository) {
-		String sql = "SELECT c.commit, count(c.id) from OldCommitComment c "
-					+ "WHERE repository=:repository "
-				    + "GROUP BY c.commit";
-		
-		Query query = dao.getSession().createQuery(sql);
-		query.setParameter("repository", repository);
-		List<Object[]> list = query.list();
-		
-		Map<String, Integer> map = Maps.newHashMap();
-		for (Object[] each : list) {
-			map.put((String) each[0], ((Long) each[1]).intValue());
-		}
-		
-		return map;
+	public List<CommitComment> findByFile(Repository repository, String file) {
+		return dao.query(EntityCriteria.of(CommitComment.class)
+				.add(Restrictions.eq("repository", repository))
+				.add(Restrictions.eq("file", file))
+				.addOrder(Order.asc("id")), 0, 0);
 	}
+
+	@Sessional
+	@Override
+	public List<CommitComment> findByCommit(Repository repository, String commit) {
+		return dao.query(EntityCriteria.of(CommitComment.class)
+				.add(Restrictions.eq("repository", repository))
+				.add(Restrictions.eq("commit", commit))
+				.addOrder(Order.asc("id")), 0, 0);
+	}
+
+	@Override
+	public List<CommitComment> findByCommitAndFile(Repository repository,
+			String commit, String file) {
+		return dao.query(EntityCriteria.of(CommitComment.class)
+				.add(Restrictions.eq("repository", repository))
+				.add(Restrictions.eq("commit", commit))
+				.add(Restrictions.eq("file", file))
+				.addOrder(Order.asc("id")), 0, 0);
+	}
+
 }

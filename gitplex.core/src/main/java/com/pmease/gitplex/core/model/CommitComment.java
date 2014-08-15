@@ -13,6 +13,10 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @Entity
 public class CommitComment extends AbstractEntity {
 	
+	@ManyToOne
+	@JoinColumn(nullable=false)
+	private Repository repository;
+	
 	@Column(nullable=false)
 	private String commit;
 	
@@ -26,10 +30,18 @@ public class CommitComment extends AbstractEntity {
 	@Column(nullable=false)
 	private String content;
 	
-	private String filePath;
+	private String file;
 	
-	private Integer lineNo;
+	private Integer line;
 	
+	public Repository getRepository() {
+		return repository;
+	}
+
+	public void setRepository(Repository repository) {
+		this.repository = repository;
+	}
+
 	public User getUser() {
 		return user;
 	}
@@ -62,20 +74,20 @@ public class CommitComment extends AbstractEntity {
 		this.commit = commit;
 	}
 
-	public String getFilePath() {
-		return filePath;
+	public String getFile() {
+		return file;
 	}
 
-	public void setFilePath(String filePath) {
-		this.filePath = filePath;
+	public void setFile(String file) {
+		this.file = file;
 	}
 
-	public Integer getLineNo() {
-		return lineNo;
+	public Integer getLine() {
+		return line;
 	}
 
-	public void setLineNo(Integer lineNo) {
-		this.lineNo = lineNo;
+	public void setLine(Integer line) {
+		this.line = line;
 	}
 
 }

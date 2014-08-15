@@ -40,6 +40,9 @@ public class User extends AbstractUser implements ProtectedObject {
 	private Date avatarUpdateDate;
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	private Collection<CommitComment> commitComments = new ArrayList<CommitComment>();
+
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<Membership> memberships = new ArrayList<Membership>();
 	
 	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
@@ -113,6 +116,14 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	public void setAvatarUpdateDate(Date avatarUpdateDate) {
 		this.avatarUpdateDate = avatarUpdateDate;
+	}
+
+	public Collection<CommitComment> getCommitComments() {
+		return commitComments;
+	}
+
+	public void setCommitComments(Collection<CommitComment> commitComments) {
+		this.commitComments = commitComments;
 	}
 
 	public Collection<Membership> getMemberships() {

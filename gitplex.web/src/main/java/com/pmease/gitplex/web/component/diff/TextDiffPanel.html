@@ -23,7 +23,7 @@
 		</div>
 		<table class="table-diff">
 			<wicket:container wicket:id="lines">
-				<tr wicket:id="content" class="line content">
+				<tr wicket:id="contentRow" class="line content">
 					<td class="old line-no">
 						<a wicket:id="addComment" class="add-comment"><i class="fa fa-comment-add"></i></a>
 						<span wicket:id="oldLineNo"></span>
@@ -33,8 +33,51 @@
 					</td>
 					<td class="text"><wicket:container wicket:id="partials"><span wicket:id="partial"></span></wicket:container></td>
 				</tr>
-				<tr wicket:id="comments" class="line comments"></tr>
+				<tr wicket:id="commentsRow" class="line comments">
+					<div wicket:id="comments">
+						<div wicket:id="comment"></div>
+					</div>
+					<div wicket:id="newComment"></div>
+				</tr>
 			</wicket:container>
 		</table>
 	</div>
+	<wicket:fragment wicket:id="viewCommentFrag">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<div wicket:id="name" class="pull-left"></div>
+				<div wicket:id="age" class="pull-right"></div>
+				<div class="actions pull-right">
+					<a wicket:id="edit"><i class="fa fa-pencil"></i></a>
+					<a wicket:id="delete"><i class="fa fa-times"></i></a>
+				</div>
+			</div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="editCommentFrag">
+		<form wicket:id="form">
+			<div wicket:id="input"></div>
+			<div class="submits">
+				<div class="pull-left">
+					<button wicket:id="cancel" class="btn btn-sm btn-default">Close form</button>
+				</div>
+				<div class="pull-right">
+					<button wicket:id="save" class="btn btn-sm btn-primary">Update comment</button>
+				</div>
+			</div>
+		</form>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="newCommentFrag">
+		<form wicket:id="form">
+			<div wicket:id="input"></div>
+			<div class="submits">
+				<div class="pull-left">
+					<button wicket:id="cancel" class="btn btn-sm btn-default">Close form</button>
+				</div>
+				<div class="pull-right">
+					<button wicket:id="save" class="btn btn-sm btn-primary">Comment on this line</button>
+				</div>
+			</div>
+		</form>
+	</wicket:fragment>
 </wicket:panel>

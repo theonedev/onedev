@@ -140,11 +140,11 @@ public class BlobDiffPanel extends Panel {
 							break;
 					}
 					if (textConverter != null) {
-						GitText originalText = new GitText(textConverter.convert(oldContent), 
+						GitText oldText = new GitText(textConverter.convert(oldContent), 
 								true, Charsets.UTF_8.name());
-						GitText revisedText = new GitText(textConverter.convert(newContent), 
+						GitText newText = new GitText(textConverter.convert(newContent), 
 								true, Charsets.UTF_8.name());
-						diffPanel = new TextDiffPanel("blobContent", diffInfo, originalText, revisedText);
+						diffPanel = new TextDiffPanel("blobContent", repoModel, diffInfo, oldText, newText);
 					}
 				}
 				if (diffPanel == null) {
@@ -157,7 +157,7 @@ public class BlobDiffPanel extends Panel {
 							GitText newText = GitText.from(newContent);
 							if (newText != null) {
 								GitText oldText = new GitText(new ArrayList<String>(), true, newText.getCharset());
-								diffPanel = new TextDiffPanel("blobContent", diffInfo, oldText, newText);
+								diffPanel = new TextDiffPanel("blobContent", repoModel, diffInfo, oldText, newText);
 							} else {
 								Fragment fragment = new Fragment("blobContent", "binaryFileFrag", this);
 								fragment.add(new FileDiffTitle("summary", diffInfo));
@@ -169,7 +169,7 @@ public class BlobDiffPanel extends Panel {
 							GitText oldText = GitText.from(oldContent);
 							if (oldText != null) {
 								GitText newText = new GitText(new ArrayList<String>(), true, oldText.getCharset());
-								diffPanel = new TextDiffPanel("blobContent", diffInfo, oldText, newText);
+								diffPanel = new TextDiffPanel("blobContent", repoModel, diffInfo, oldText, newText);
 							} else {
 								Fragment fragment = new Fragment("blobContent", "binaryFileFrag", this);
 								fragment.add(new FileDiffTitle("summary", diffInfo));
@@ -179,7 +179,7 @@ public class BlobDiffPanel extends Panel {
 							GitText oldText = GitText.from(oldContent);
 							GitText newText = GitText.from(newContent);
 							if (oldText != null && newText != null) {
-								diffPanel = new TextDiffPanel("blobContent", diffInfo, oldText, newText);
+								diffPanel = new TextDiffPanel("blobContent", repoModel, diffInfo, oldText, newText);
 							} else {
 								Fragment fragment = new Fragment("blobContent", "binaryFileFrag", this);
 								fragment.add(new FileDiffTitle("summary", diffInfo));
