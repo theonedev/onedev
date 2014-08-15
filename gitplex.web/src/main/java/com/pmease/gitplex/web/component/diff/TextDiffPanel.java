@@ -23,7 +23,6 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.model.PropertyModel;
 
 import com.pmease.commons.git.GitText;
 import com.pmease.commons.git.GitUtils;
@@ -49,6 +48,7 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.label.AgeLabel;
+import com.pmease.gitplex.web.component.markdown.MarkdownPanel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
@@ -59,6 +59,16 @@ public class TextDiffPanel extends Panel {
 	private enum DiffOption {IGNORE_NOTHING, IGNORE_EOL, IGNORE_EOL_SPACES, IGNORE_CHANGE_SPACES};
 	
 	private static final int SCROLL_MARGIN = 50;
+	
+	private static final String COMMENTS_ROW_ID = "commentsRow";
+	
+	private static final String CONTENT_ROW_ID = "contentRow";
+	
+	private static final String COMMENT_ACTIONS_ID = "commentActions";
+	
+	private static final String NEW_COMMENT_ID = "newComment";
+	
+	private static final String HEAD_ID = "head";
 	
 	private final IModel<Repository> repoModel;
 	
@@ -72,15 +82,19 @@ public class TextDiffPanel extends Panel {
 	
 	private final IModel<Map<Integer, List<CommitComment>>> newCommentsModel;
 	
+	private final IModel<Boolean> allowToAddCommentModel;
+	
 	private GitText effectiveOldText;
 	
 	private GitText effectiveNewText;
 	
 	private DiffOption diffOption = DiffOption.IGNORE_NOTHING;
 	
+	private boolean showComments = true;
+	
 	private List<DiffLine> diffs;
 
-	public TextDiffPanel(String id, IModel<Repository> repoModel, 
+	public TextDiffPanel(String id, final IModel<Repository> repoModel, 
 			BlobDiffInfo diffInfo, GitText oldText, GitText newText) {
 		super(id);
 		
@@ -125,6 +139,18 @@ public class TextDiffPanel extends Panel {
 			
 		};
 
+		// cache add comment permission check in model to avoid recalculation for every line
+		allowToAddCommentModel = new LoadableDetachableModel<Boolean>() {
+
+			@Override
+			protected Boolean load() {
+				User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
+				ObjectPermission readPermission = ObjectPermission.ofRepositoryRead(repoModel.getObject());
+				return currentUser != null && SecurityUtils.getSubject().isPermitted(readPermission);
+			}
+			
+		};
+		
 		onDiffOptionChanged();
 	}
 	
@@ -173,7 +199,8 @@ public class TextDiffPanel extends Panel {
 		
 		setOutputMarkupId(true);
 		
-		WebMarkupContainer head = new WebMarkupContainer("head");
+		final WebMarkupContainer head = new WebMarkupContainer(HEAD_ID);
+		
 		head.add(new StickyBehavior());
 		
 		head.add(new DiffStatBar("diffStat", new AbstractReadOnlyModel<List<DiffLine>>() {
@@ -234,8 +261,61 @@ public class TextDiffPanel extends Panel {
 			
 		}.add(new ScrollBehavior(head, ".diff-block", SCROLL_MARGIN, true)));
 		
-		head.add(new WebMarkupContainer("prevComment").add(new ScrollBehavior(head, ".comments.line", 50, false)));
-		head.add(new WebMarkupContainer("nextComment").add(new ScrollBehavior(head, ".comments.line", 50, true)));
+		// add a separate comment actions container in order not to refresh the whole
+		// sticky head when show/hide comment actions (refreshing sticky head via Wicket 
+		// ajax has some displaying issues) 
+		WebMarkupContainer commentActions = new WebMarkupContainer(COMMENT_ACTIONS_ID);
+		commentActions.setOutputMarkupId(true);
+		
+		head.add(commentActions);
+		commentActions.add(new WebMarkupContainer("prevComment") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(showComments);
+			}
+			
+		}.add(new ScrollBehavior(head, ".comments.line", 50, false)));
+		
+		commentActions.add(new WebMarkupContainer("nextComment") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(showComments);
+			}
+			
+		}.add(new ScrollBehavior(head, ".comments.line", 50, true)));
+		
+		commentActions.add(new AjaxLink<Void>("showComments") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				showComments(target);
+			}
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!showComments);
+			}
+
+		});
+		commentActions.add(new AjaxLink<Void>("hideComments") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				hideComments(target);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(showComments);
+			}
+			
+		});
 
 		MenuPanel diffOptionMenuPanel = new MenuPanel("diffOptions") {
 
@@ -375,43 +455,19 @@ public class TextDiffPanel extends Panel {
 			
 		}) {
 
-			private int oldLineNo;
-			
-			private int newLineNo;
-			
 			@Override
-			protected void onBeforeRender() {
-				oldLineNo = newLineNo = 0;
-				super.onBeforeRender();
-			}
-
-			@Override
-			protected void populateItem(ListItem<DiffLine> item) {
-				final DiffLine diffLine = item.getModelObject();
-				final WebMarkupContainer contentRow = new WebMarkupContainer("contentRow");
+			protected void populateItem(ListItem<DiffLine> lineItem) {
+				final DiffLine diffLine = lineItem.getModelObject();
+				final WebMarkupContainer contentRow = new WebMarkupContainer(CONTENT_ROW_ID);
 				
-				final WebMarkupContainer commentsRow = new WebMarkupContainer("commentsRow") {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						if (!(get("newComment").getClass() == WebMarkupContainer.class))
-							setVisible(true);
-						else 
-							setVisible(((ListView<?>) get("comments")).size() != 0);
-					}
-					
-				};
-				commentsRow.setOutputMarkupId(true);
-				commentsRow.add(new ListView<CommitComment>("comments", 
-						new LoadableDetachableModel<List<CommitComment>>() {
+				final IModel<List<CommitComment>> lineCommentsModel = new LoadableDetachableModel<List<CommitComment>>() {
 
 					@Override
 					protected List<CommitComment> load() {
-						List<CommitComment> oldLineComments = oldCommentsModel.getObject().get(oldLineNo);
+						List<CommitComment> oldLineComments = oldCommentsModel.getObject().get(diffLine.getOldLineNo());
 						if (oldLineComments == null)
 							oldLineComments = new ArrayList<>();
-						List<CommitComment> newLineComments = newCommentsModel.getObject().get(newLineNo);
+						List<CommitComment> newLineComments = newCommentsModel.getObject().get(diffLine.getNewLineNo());
 						if (newLineComments == null)
 							newLineComments = new ArrayList<>();
 
@@ -428,21 +484,50 @@ public class TextDiffPanel extends Panel {
 						}
 					}
 					
-				}) {
+				};
+				
+				final WebMarkupContainer commentsRow = new WebMarkupContainer(COMMENTS_ROW_ID) {
 
 					@Override
-					protected void populateItem(final ListItem<CommitComment> item) {
-						CommitComment comment = item.getModelObject();
+					protected void onConfigure() {
+						super.onConfigure();
+						
+						if (showComments) {
+							if (isAddingComment(this))
+								setVisible(true);
+							else 
+								setVisible(!lineCommentsModel.getObject().isEmpty());
+						} else {
+							setVisible(false);
+						}
+					}
+					
+				};
+				
+				commentsRow.setOutputMarkupId(true);
+				commentsRow.add(new Label("commentCount", new AbstractReadOnlyModel<Integer> () {
+
+					@Override
+					public Integer getObject() {
+						return lineCommentsModel.getObject().size();
+					}
+					
+				}));
+				commentsRow.add(new ListView<CommitComment>("comments", lineCommentsModel) {
+
+					@Override
+					protected void populateItem(final ListItem<CommitComment> commentItem) {
+						CommitComment comment = commentItem.getModelObject();
 						
 						Fragment fragment = new Fragment("comment", "viewCommentFrag", TextDiffPanel.this);
-						item.add(fragment);
-						fragment.add(new UserLink("name", new UserModel(comment.getUser()), AvatarMode.NAME));
+						fragment.setOutputMarkupId(true);
+						fragment.add(new UserLink("name", new UserModel(comment.getUser()), AvatarMode.NAME_AND_AVATAR));
 						
 						fragment.add(new AgeLabel("age", new AbstractReadOnlyModel<Date>() {
 
 							@Override
 							public Date getObject() {
-								return item.getModelObject().getDate();
+								return commentItem.getModelObject().getDate();
 							}
 							
 						}));
@@ -452,15 +537,16 @@ public class TextDiffPanel extends Panel {
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								Fragment fragment = new Fragment("comment", "editCommentFrag", TextDiffPanel.this);
-								item.replace(fragment);
+								fragment.setOutputMarkupId(true);
 								Form<?> form = new Form<Void>("form");
+								form.setOutputMarkupId(true);
 								final CommentInput input;
-								form.add(input = new CommentInput("input", Model.of(item.getModelObject().getContent())));
+								form.add(input = new CommentInput("input", Model.of(commentItem.getModelObject().getContent())));
 								form.add(new AjaxLink<Void>("cancel") {
 
 									@Override
 									public void onClick(AjaxRequestTarget target) {
-										commentsRow.replace(new WebMarkupContainer("newComment"));
+										commentsRow.replace(new WebMarkupContainer(NEW_COMMENT_ID));
 										target.add(commentsRow);
 									}
 									
@@ -468,10 +554,16 @@ public class TextDiffPanel extends Panel {
 								form.add(new AjaxSubmitLink("save") {
 
 									@Override
+									protected void onError(AjaxRequestTarget target, Form<?> form) {
+										super.onError(target, form);
+										target.add(form);
+									}
+
+									@Override
 									protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 										super.onSubmit(target, form);
 										
-										CommitComment comment = item.getModelObject();
+										CommitComment comment = commentItem.getModelObject();
 										comment.setDate(new Date());
 										comment.setContent(input.getModelObject());
 										
@@ -481,22 +573,26 @@ public class TextDiffPanel extends Panel {
 
 								});
 								fragment.add(form);
-								target.add(commentsRow);
+								commentItem.replace(fragment);
+								
+								target.add(fragment);
 							}
 
 							@Override
 							protected void onConfigure() {
 								super.onConfigure();
 
-								setVisible(GitPlex.getInstance(AuthorizationManager.class).canModify(item.getModelObject()));
+								setVisible(GitPlex.getInstance(AuthorizationManager.class).canModify(commentItem.getModelObject()));
 							}
 							
 						});
+						final Long commentId = commentItem.getModelObject().getId();
 						fragment.add(new AjaxLink<Void>("delete") {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								GitPlex.getInstance(Dao.class).remove(item.getModelObject());
+								Dao dao = GitPlex.getInstance(Dao.class);
+								dao.remove(dao.load(CommitComment.class, commentId));
 								target.add(commentsRow);
 							}
 							
@@ -504,104 +600,54 @@ public class TextDiffPanel extends Panel {
 							protected void onConfigure() {
 								super.onConfigure();
 
-								setVisible(GitPlex.getInstance(AuthorizationManager.class).canModify(item.getModelObject()));
+								setVisible(GitPlex.getInstance(AuthorizationManager.class).canModify(commentItem.getModelObject()));
 							}
 
 						}.add(new ConfirmBehavior("Do you really want to delete this comment?")));
 						
+						fragment.add(new MarkdownPanel("content", Model.of(comment.getContent())));
+
+						commentItem.add(fragment);
 					}
 					
 				});
 
-				commentsRow.add(new WebMarkupContainer("newComment"));
-				
-				item.add(commentsRow);
-				
-				contentRow.add(new AjaxLink<Void>("addComment") {
-
-					private String newComment;
-					
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						Fragment frag = new Fragment("newComment", "newCommentFrag", TextDiffPanel.this);
-						Form<?> form = new Form<Void>("form");
-						form.add(new CommentInput("input", new PropertyModel<String>(this, "newComment")));
-						
-						form.add(new AjaxLink<Void>("cancel") {
-
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								commentsRow.replace(new WebMarkupContainer("newComment"));
-								target.add(commentsRow);
-							}
-							
-						});
-						form.add(new AjaxSubmitLink("save") {
-
-							@Override
-							protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-								super.onSubmit(target, form);
-								CommitComment comment = new CommitComment();
-								comment.setRepository(repoModel.getObject());
-								comment.setUser(GitPlex.getInstance(UserManager.class).getCurrent());
-								String commit;
-								if (diffLine.getAction() == DiffLine.Action.ADD 
-										|| diffLine.getAction() == DiffLine.Action.EQUAL) {
-									commit = diffInfo.getNewRevision(); 
-									comment.setFile(diffInfo.getNewPath());
-								} else {
-									commit = diffInfo.getOldRevision();
-									comment.setFile(diffInfo.getOldPath());
-								}
-								comment.setCommit(commit);
-								comment.setContent(newComment);
-								comment.setDate(new Date());
-								
-								GitPlex.getInstance(Dao.class).persist(comment);
-								
-								commentsRow.replace(new WebMarkupContainer("newComment"));
-								target.add(commentsRow);
-							}
-
-						});
-						frag.add(form);
-						commentsRow.replace(frag);
-						if (!commentsRow.isVisible()) {
-							String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
-									commentsRow.getMarkupId(), contentRow.getMarkupId());
-							target.prependJavaScript(script);
-						} 
-						target.add(commentsRow);
-					}
+				commentsRow.add(new AddCommentLink("addComment", lineItem) {
 
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
 						
-						User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
-						ObjectPermission readPermission = ObjectPermission.ofRepositoryRead(repoModel.getObject());
-						setVisible(currentUser != null && SecurityUtils.getSubject().isPermitted(readPermission));
+						if (isVisible() && isAddingComment(commentsRow))
+							setVisible(false);
 					}
 					
 				});
+				
+				commentsRow.add(new WebMarkupContainer(NEW_COMMENT_ID));
+				
+				lineItem.add(commentsRow);
+				
+				contentRow.add(new AddCommentLink("addComment", lineItem));
+				
 				if (diffLine.getAction() == DiffLine.Action.ADD) {
-					if (item.getIndex() == 0 || diffs.get(item.getIndex()-1).getAction() == DiffLine.Action.EQUAL)
+					if (lineItem.getIndex() == 0 || diffs.get(lineItem.getIndex()-1).getAction() == DiffLine.Action.EQUAL)
 						contentRow.add(AttributeAppender.append("class", " new diff-block"));
 					else
 						contentRow.add(AttributeAppender.append("class", " new"));
 					contentRow.add(new Label("oldLineNo"));
-					contentRow.add(new Label("newLineNo", "+ " + (++newLineNo)));
+					contentRow.add(new Label("newLineNo", "+ " + (diffLine.getNewLineNo()+1)));
 				} else if (diffLine.getAction() == DiffLine.Action.DELETE) {
-					if (item.getIndex() == 0 || diffs.get(item.getIndex()-1).getAction() == DiffLine.Action.EQUAL)
+					if (lineItem.getIndex() == 0 || diffs.get(lineItem.getIndex()-1).getAction() == DiffLine.Action.EQUAL)
 						contentRow.add(AttributeAppender.append("class", " old diff-block"));
 					else
 						contentRow.add(AttributeAppender.append("class", " old"));
-					contentRow.add(new Label("oldLineNo", "- " + (++oldLineNo)));
+					contentRow.add(new Label("oldLineNo", "- " + (diffLine.getOldLineNo()+1)));
 					contentRow.add(new Label("newLineNo"));
 				} else {
 					contentRow.add(AttributeAppender.append("class", " equal"));
-					contentRow.add(new Label("oldLineNo", "  " + (++oldLineNo)));
-					contentRow.add(new Label("newLineNo", "  " + (++newLineNo)));
+					contentRow.add(new Label("oldLineNo", "  " + (diffLine.getOldLineNo()+1)));
+					contentRow.add(new Label("newLineNo", "  " + (diffLine.getNewLineNo()+1)));
 				}
 				contentRow.add(new ListView<Partial>("partials", diffLine.getPartials()) {
 
@@ -621,10 +667,118 @@ public class TextDiffPanel extends Panel {
 				});
 				contentRow.setOutputMarkupId(true);
 				
-				item.add(contentRow);
+				lineItem.add(contentRow);
 			}
 			
 		});
+	}
+
+	private void showComments(AjaxRequestTarget target) {
+		showComments = true;
+		target.add(get(HEAD_ID).get(COMMENT_ACTIONS_ID));
+
+		target.appendJavaScript("$('.comments.line').show();");
+	}
+
+	private void hideComments(AjaxRequestTarget target) {
+		showComments = false;
+		target.add(get(HEAD_ID).get(COMMENT_ACTIONS_ID));
+		
+		target.appendJavaScript("$('.comments.line').hide();");
+	}
+	
+	private boolean isAddingComment(WebMarkupContainer commentsRow) {
+		return commentsRow.get(NEW_COMMENT_ID) instanceof Fragment;
+	}
+
+	private class AddCommentLink extends AjaxLink<Void> {
+		
+		private ListItem<DiffLine> item;
+		
+		public AddCommentLink(String id, ListItem<DiffLine> item) {
+			super(id);
+			this.item = item;
+		}
+		
+		@Override
+		public void onClick(AjaxRequestTarget target) {
+			if (!showComments)
+				showComments(target);
+			
+			Fragment frag = new Fragment(NEW_COMMENT_ID, "newCommentFrag", TextDiffPanel.this);
+			Form<?> form = new Form<Void>("form");
+			form.setOutputMarkupId(true);
+			
+			final CommentInput input;
+			form.add(input = new CommentInput("input", Model.of("")));
+			
+			final WebMarkupContainer contentRow = (WebMarkupContainer) item.get(CONTENT_ROW_ID);
+			final WebMarkupContainer commentsRow = (WebMarkupContainer) item.get(COMMENTS_ROW_ID);
+			final DiffLine diffLine = item.getModelObject();
+			
+			form.add(new AjaxLink<Void>("cancel") {
+
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					commentsRow.replace(new WebMarkupContainer(NEW_COMMENT_ID));
+					target.add(commentsRow);
+				}
+				
+			});
+			form.add(new AjaxSubmitLink("save") {
+
+				@Override
+				protected void onError(AjaxRequestTarget target, Form<?> form) {
+					super.onError(target, form);
+					target.add(form);
+				}
+
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+					super.onSubmit(target, form);
+					CommitComment comment = new CommitComment();
+					comment.setRepository(repoModel.getObject());
+					comment.setUser(GitPlex.getInstance(UserManager.class).getCurrent());
+					String commit;
+					if (diffLine.getAction() == DiffLine.Action.ADD 
+							|| diffLine.getAction() == DiffLine.Action.EQUAL) {
+						commit = diffInfo.getNewRevision(); 
+						comment.setFile(diffInfo.getNewPath());
+						comment.setLine(diffLine.getNewLineNo());
+					} else {
+						commit = diffInfo.getOldRevision();
+						comment.setFile(diffInfo.getOldPath());
+						comment.setLine(diffLine.getOldLineNo());
+					}
+					comment.setCommit(commit);
+					comment.setContent(input.getModelObject());
+					comment.setDate(new Date());
+					
+					GitPlex.getInstance(Dao.class).persist(comment);
+					
+					commentsRow.replace(new WebMarkupContainer(NEW_COMMENT_ID));
+					target.add(commentsRow);
+				}
+
+			});
+			frag.add(form);
+			commentsRow.replace(frag);
+			if (!commentsRow.isVisible()) {
+				String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
+						commentsRow.getMarkupId(), contentRow.getMarkupId());
+				target.prependJavaScript(script);
+				commentsRow.setVisible(true);
+			} 
+			target.add(commentsRow);
+		}
+
+		@Override
+		protected void onConfigure() {
+			super.onConfigure();
+			
+			setVisible(allowToAddCommentModel.getObject());
+		}
+
 	}
 
 	@Override
@@ -633,5 +787,5 @@ public class TextDiffPanel extends Panel {
 		newCommentsModel.detach();
 		super.onDetach();
 	}
-
+	
 }

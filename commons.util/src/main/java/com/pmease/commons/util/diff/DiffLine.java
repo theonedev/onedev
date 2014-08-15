@@ -35,16 +35,24 @@ public class DiffLine implements Serializable {
 	
 	private final Action action;
 	
+	private final int oldLineNo;
+	
+	private final int newLineNo;
+	
 	private final List<Partial> partials;
 	
-	public DiffLine(Action action, String line) {
+	public DiffLine(Action action, String line, int oldLineNo, int newLineNo) {
 		this.action = action;
+		this.oldLineNo = oldLineNo;
+		this.newLineNo = newLineNo;
 		this.partials = Lists.newArrayList(new Partial(line, false));
 	}
 	
-	public DiffLine(Action action, List<Partial> partials) {
+	public DiffLine(Action action, List<Partial> partials, int oldLineNo, int newLineNo) {
 		this.action = action;
 		this.partials = partials;
+		this.oldLineNo = oldLineNo;
+		this.newLineNo = newLineNo;
 	}
 	
 	public Action getAction() {
@@ -64,6 +72,14 @@ public class DiffLine implements Serializable {
 		return partials;
 	}
 	
+	public int getOldLineNo() {
+		return oldLineNo;
+	}
+
+	public int getNewLineNo() {
+		return newLineNo;
+	}
+
 	@Override
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();

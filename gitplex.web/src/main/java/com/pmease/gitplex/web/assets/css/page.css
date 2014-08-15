@@ -773,8 +773,20 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 .table-diff .line.content td.text {font-family: Consolas,"Liberation Mono",Menlo,Courier,monospace;
     color: #333; overflow: visible; white-space: pre;}
 .table-diff {font-size: 12px; position:relative;}
-.table-diff>tbody>tr>td {padding: 0 8px;}
-.table-diff>tbody>tr>td.text, .table-diff>tbody>tr>td.new {border-left: 1px solid #E5E5E5;}  
+.table-diff>tbody>tr>td {padding: 2px 8px;}
+.table-diff>tbody>tr>td.text, .table-diff>tbody>tr>td.detail, .table-diff>tbody>tr>td.new {
+	border-left: 1px solid #E5E5E5;}  
+.table-diff .line.comments>td {border-top: 1px solid #E5E5E5; border-bottom: 1px solid #E5E5E5;
+	padding: 12px 0;}
+.table-diff .line.comments .panel {margin: 0 12px 12px 12px;}
+.table-diff .line.comments .panel-heading {color: #999; font-size: 16px;}
+.table-diff .line.comments .panel-heading .actions a {margin-left: 8px;}
+.table-diff .line.comments .panel-heading a {color: #888;}
+.table-diff .line.comments .panel-heading a:hover {color: black;}
+.table-diff .line.comments form .actions {padding: 8px 12px;}
+.table-diff .line.comments form .actions button {margin-right: 16px;}
+.table-diff .line.comments .summary {padding: 12px; vertical-align: top;}
+.table-diff .line.comments .detail>a {padding: 0 12px;}
 .table-diff .old.line.content>td.line-no {background: #faa; color: #8f0000;}
 .table-diff .old.line.content {background: #fdd;}
 .table-diff .old.line.content .emphasize {background: #FC9090;}

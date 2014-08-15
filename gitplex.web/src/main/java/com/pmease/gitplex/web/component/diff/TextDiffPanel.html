@@ -6,16 +6,18 @@
 				<span wicket:id="title" class="panel-title"></span>
 			</div>
 			<div class="pull-right">
-				<span wicket:id="diffOptionsTrigger" class="btn btn-sm btn-default">Diff Options <i class="caret"></i></span>
+				<span wicket:id="diffOptionsTrigger" class="btn btn-sm btn-default" title="Diff options"><i class="fa fa-gear"></i> <i class="caret"></i></span>
 				<div wicket:id="diffOptions"></div>
 			</div>
-			<div class="btn-group pull-right">
-				<span wicket:id="prevComment" class="btn btn-default btn-sm"><i class="fa fa-arrow-up"></i> Prev Comment</span>
-				<span wicket:id="nextComment" class="btn btn-default btn-sm"><i class="fa fa-arrow-down"></i> Next Comment</span>
+			<div wicket:id="commentActions" class="btn-group pull-right">
+				<span wicket:id="prevComment" class="btn btn-default btn-sm comments-nav" title="Previous commented line"><i class="fa fa-arrow-up"></i> <i class="fa fa-comments"></i></span>
+				<span wicket:id="nextComment" class="btn btn-default btn-sm comments-nav" title="Next commented line"><i class="fa fa-arrow-down"></i> <i class="fa fa-comments"></i></span>
+				<span wicket:id="showComments" class="btn btn-default btn-sm show-comments" title="Show comments"><i class="fa fa-eye-open"></i> <i class="fa fa-comments"></i></span>
+				<span wicket:id="hideComments" class="btn btn-default btn-sm hide-comments" title="Hide comments"><i class="fa fa-eye-slash"></i> <i class="fa fa-comments"></i></span>
 			</div>
 			<div class="btn-group pull-right">
-				<span wicket:id="prevDiff" class="btn btn-default btn-sm"><i class="fa fa-arrow-up"></i> Prev Diff</span>
-				<span wicket:id="nextDiff" class="btn btn-default btn-sm"><i class="fa fa-arrow-down"></i> Next Diff</span>
+				<span wicket:id="prevDiff" class="btn btn-default btn-sm" title="Previous changed block"><i class="fa fa-arrow-up"></i> <i class="fa fa-diff"></i></span>
+				<span wicket:id="nextDiff" class="btn btn-default btn-sm" title="Next changed block"><i class="fa fa-arrow-down"></i> <i class="fa fa-diff"></i></span>
 			</div>
 			<div class="pull-right">
 				<span wicket:id="identical" class="label label-warning">Identical Content</span>
@@ -34,49 +36,48 @@
 					<td class="text"><wicket:container wicket:id="partials"><span wicket:id="partial"></span></wicket:container></td>
 				</tr>
 				<tr wicket:id="commentsRow" class="line comments">
-					<div wicket:id="comments">
-						<div wicket:id="comment"></div>
-					</div>
-					<div wicket:id="newComment"></div>
+					<td colspan="2" class="summary">
+						<i class="fa fa-comment"></i> <span wicket:id="commentCount"></span>
+					</td>
+					<td class="detail">
+						<div wicket:id="comments">
+							<div wicket:id="comment"></div>
+						</div>
+						<a wicket:id="addComment">Add a comment</a>
+						<div wicket:id="newComment"></div>
+					</td>
 				</tr>
 			</wicket:container>
 		</table>
 	</div>
 	<wicket:fragment wicket:id="viewCommentFrag">
 		<div class="panel panel-default">
-			<div class="panel-heading">
+			<div class="panel-heading clearfix">
 				<div wicket:id="name" class="pull-left"></div>
-				<div wicket:id="age" class="pull-right"></div>
 				<div class="actions pull-right">
-					<a wicket:id="edit"><i class="fa fa-pencil"></i></a>
-					<a wicket:id="delete"><i class="fa fa-times"></i></a>
+					<a wicket:id="edit" title="Edit this comment"><i class="fa fa-pencil"></i></a>
+					<a wicket:id="delete" title="Delete this comment"><i class="fa fa-times"></i></a>
 				</div>
+				<div wicket:id="age" class="pull-right small"></div>
 			</div>
+			<div wicket:id="content" class="panel-body"></div>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="editCommentFrag">
 		<form wicket:id="form">
 			<div wicket:id="input"></div>
-			<div class="submits">
-				<div class="pull-left">
-					<button wicket:id="cancel" class="btn btn-sm btn-default">Close form</button>
-				</div>
-				<div class="pull-right">
-					<button wicket:id="save" class="btn btn-sm btn-primary">Update comment</button>
-				</div>
+			<div class="actions">
+				<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware">Update comment</button>
+				<button wicket:id="cancel" class="btn btn-sm btn-default">Close form</button>
 			</div>
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="newCommentFrag">
 		<form wicket:id="form">
 			<div wicket:id="input"></div>
-			<div class="submits">
-				<div class="pull-left">
-					<button wicket:id="cancel" class="btn btn-sm btn-default">Close form</button>
-				</div>
-				<div class="pull-right">
-					<button wicket:id="save" class="btn btn-sm btn-primary">Comment on this line</button>
-				</div>
+			<div class="actions">
+				<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware">Comment on this line</button>
+				<button wicket:id="cancel" class="btn btn-sm btn-default">Close form</button>
 			</div>
 		</form>
 	</wicket:fragment>

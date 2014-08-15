@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.util;
+package com.pmease.commons.util;
 
 public class Triple<First, Second, Third> {
 	  private final First  first;

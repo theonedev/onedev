@@ -51,13 +51,13 @@ public class ScrollBehavior extends Behavior {
 		else
 			function = "getPrev";
 		
-		String script = String.format("$(window).scroll(function() {"
+		String script = String.format("$(window).on('scrollStopped', function() {"
 				+ "var $component = $('#%s');"
 				+ "if (pmease.commons.scroll.%s('%s', '%s', %d) == null)"
 				+ "  $component.attr('disabled', 'disabled');"
 				+ "else "
 				+ "  $component.removeAttr('disabled');"
-				+ "}); $(window).trigger('scroll');", 
+				+ "}); $(window).trigger('scrollStopped');", 
 				component.getMarkupId(), function, fixContainer.getMarkupId(), selector, margin);
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));

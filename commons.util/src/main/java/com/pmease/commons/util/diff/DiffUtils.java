@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.util.Triple;
 import com.pmease.commons.util.diff.DiffLine.Action;
 import com.pmease.commons.util.diff.DiffMatchPatch.Diff;
 
@@ -42,19 +43,22 @@ public class DiffUtils {
 		
 		if (partialSplitter != null) {
 			List<DiffLine> processedDiffLines = new ArrayList<>();
-			List<String> deletions = new ArrayList<>();
-			List<String> additions = new ArrayList<>();
+			List<Triple<String, Integer, Integer>> deletions = new ArrayList<>();
+			List<Triple<String, Integer, Integer>> additions = new ArrayList<>();
 			List<DiffLine> processedDeletions = new ArrayList<>();
 			List<DiffLine> processedAdditions = new ArrayList<>();
 			for (DiffLine diffLine: diffLines) {
 				Preconditions.checkState(diffLine.getPartials().size() == 1);
 				if (diffLine.getAction() == DiffLine.Action.DELETE) {
-					deletions.add(diffLine.getPartials().get(0).getContent());
+					deletions.add(new Triple<String, Integer, Integer>(
+							diffLine.getPartials().get(0).getContent(), diffLine.getOldLineNo(), diffLine.getNewLineNo()));
 				} else if (diffLine.getAction() == DiffLine.Action.ADD) {
-					additions.add(diffLine.getPartials().get(0).getContent());
+					additions.add(new Triple<String, Integer, Integer>(
+							diffLine.getPartials().get(0).getContent(), diffLine.getOldLineNo(), diffLine.getNewLineNo()));
 				} else {
 					process(processedDiffLines, deletions, additions, processedDeletions, processedAdditions, partialSplitter);
-					processedDiffLines.add(new DiffLine(DiffLine.Action.EQUAL, diffLine.getPartials().get(0).getContent()));
+					processedDiffLines.add(new DiffLine(DiffLine.Action.EQUAL, diffLine.getPartials().get(0).getContent(), 
+							diffLine.getOldLineNo(), diffLine.getNewLineNo()));
 				}
 			}
 			process(processedDiffLines, deletions, additions, processedDeletions, processedAdditions, partialSplitter);
@@ -74,25 +78,29 @@ public class DiffUtils {
 		return partials;
 	}
 	
-	private static void process(List<DiffLine> processedDiffLines, List<String> deletions, List<String> additions, 
-			List<DiffLine> processedDeletions, List<DiffLine> processedAdditions, PartialSplitter partialSplitter) {
+	private static void process(List<DiffLine> processedDiffLines, List<Triple<String, Integer, Integer>> deletions, 
+			List<Triple<String, Integer, Integer>> additions, List<DiffLine> processedDeletions, 
+			List<DiffLine> processedAdditions, PartialSplitter partialSplitter) {
 		Map<String, List<String>> partialsCache = new HashMap<String, List<String>>();
 		
-		for (String deletion: deletions) {
+		for (Triple<String, Integer, Integer> deletion: deletions) {
 			boolean matching = false;
 			for (int i=0; i<additions.size(); i++) {
-				String addition = additions.get(i);
+				Triple<String, Integer, Integer> addition = additions.get(i);
 				
-				List<DiffLine> diffPartials = diff(getPartials(deletion, partialSplitter, partialsCache), 
-						getPartials(addition, partialSplitter, partialsCache), null);
+				List<DiffLine> diffPartials = diff(getPartials(deletion.getFirst(), partialSplitter, partialsCache), 
+						getPartials(addition.getFirst(), partialSplitter, partialsCache), null);
 				int equals = 0;
 				for (DiffLine diffPartial: diffPartials) {
 					if (diffPartial.getAction() == DiffLine.Action.EQUAL)
 						equals++;
 				}
 				if (equals*3 >= diffPartials.size()) {
-					for (int j=0; j<i; j++)	
-						processedAdditions.add(new DiffLine(DiffLine.Action.ADD, additions.get(j)));
+					for (int j=0; j<i; j++)	{
+						Triple<String, Integer, Integer> prevAddition = additions.get(j);
+						processedAdditions.add(new DiffLine(DiffLine.Action.ADD, prevAddition.getFirst(), 
+								prevAddition.getSecond(), prevAddition.getThird()));
+					}
 					for (int j=0; j<=i; j++)
 						additions.remove(0);
 					List<Partial> addPartials = new ArrayList<>();
@@ -108,18 +116,24 @@ public class DiffUtils {
 							deletePartials.add(new Partial(diffPartial.getPartials().get(0).getContent(), false));
 						}
 					}
-					processedAdditions.add(new DiffLine(DiffLine.Action.ADD, addPartials));
-					processedDeletions.add(new DiffLine(DiffLine.Action.DELETE, deletePartials));
+					processedAdditions.add(new DiffLine(DiffLine.Action.ADD, addPartials, 
+							addition.getSecond(), addition.getThird()));
+					processedDeletions.add(new DiffLine(DiffLine.Action.DELETE, deletePartials, 
+							deletion.getSecond(), deletion.getThird()));
 					matching = true;
 					break;
 				}
 			}
-			if (!matching) 
-				processedDeletions.add(new DiffLine(DiffLine.Action.DELETE, deletion));
+			if (!matching) { 
+				processedDeletions.add(new DiffLine(DiffLine.Action.DELETE, 
+						deletion.getFirst(), deletion.getSecond(), deletion.getThird()));
+			}
 		}
 		
-		for (String addition: additions) 
-			processedAdditions.add(new DiffLine(DiffLine.Action.ADD, addition));
+		for (Triple<String, Integer, Integer> addition: additions) {
+			processedAdditions.add(new DiffLine(DiffLine.Action.ADD, 
+					addition.getFirst(), addition.getSecond(), addition.getThird()));
+		}
 		
 		additions.clear();
 		deletions.clear();
@@ -215,7 +229,8 @@ public class DiffUtils {
 		DiffChunkBuilder chunkBuilder = null;
 		for (String line : unifiedDiff) {
 			if (line.startsWith("@@")) {
-				if (chunkBuilder != null) chunks.add(chunkBuilder.build());
+				if (chunkBuilder != null) 
+					chunks.add(chunkBuilder.build());
 				chunkBuilder = new DiffChunkBuilder();
 				line = StringUtils.substringBefore(line.substring(4), " @@");
 				String first = StringUtils.substringBefore(line, " +");
@@ -230,13 +245,22 @@ public class DiffUtils {
 				} else {
 					chunkBuilder.start2 = Integer.parseInt(second) - 1;
 				}
+				chunkBuilder.current1 = chunkBuilder.start1;
+				chunkBuilder.current2 = chunkBuilder.start2;
 			} else if (chunkBuilder != null) {
 				if (line.startsWith("+")) {
-					chunkBuilder.diffUnits.add(new DiffLine(Action.ADD, line.substring(1)));
+					chunkBuilder.diffUnits.add(new DiffLine(Action.ADD, line.substring(1), 
+							chunkBuilder.current1, chunkBuilder.current2));
+					chunkBuilder.current2++;
 				} else if (line.startsWith("-")) {
-					chunkBuilder.diffUnits.add(new DiffLine(Action.DELETE, line.substring(1)));
+					chunkBuilder.diffUnits.add(new DiffLine(Action.DELETE, line.substring(1), 
+							chunkBuilder.current1, chunkBuilder.current2));
+					chunkBuilder.current1++;
 				} else if (line.startsWith(" ")) {
-					chunkBuilder.diffUnits.add(new DiffLine(Action.EQUAL, line.substring(1)));
+					chunkBuilder.diffUnits.add(new DiffLine(Action.EQUAL, line.substring(1), 
+							chunkBuilder.current1, chunkBuilder.current2));
+					chunkBuilder.current1++;
+					chunkBuilder.current2++;
 				}
 			}
 		}
@@ -277,10 +301,21 @@ public class DiffUtils {
 	
 	private static List<DiffLine> charsToTokens(List<Diff> diffs, List<String> tokenArray) {
 		List<DiffLine> diffTokens = new ArrayList<>();
+		int oldLineNo = 0;
+		int newLineNo = 0;
 		for (Diff diff : diffs) {
 			for (int i = 0; i < diff.text.length(); i++) {
+				Action action = Action.fromOperation(diff.operation);
 				diffTokens.add(new DiffLine(Action.fromOperation(diff.operation), 
-						tokenArray.get(diff.text.charAt(i))));
+						tokenArray.get(diff.text.charAt(i)), oldLineNo, newLineNo));
+				if (action == Action.ADD) {
+					newLineNo ++;
+				} else if (action == Action.DELETE) {
+					oldLineNo ++;
+				} else {
+					oldLineNo ++;
+					newLineNo ++;
+				}
 			}
 		}
 		return diffTokens;
@@ -301,10 +336,13 @@ public class DiffUtils {
 	private static class DiffChunkBuilder {
 		private int start1, start2;
 		
+		private int current1, current2;
+		
 		private List<DiffLine> diffUnits = new ArrayList<>();
 		
 		private DiffChunk build() {
 			return new DiffChunk(start1, start2, diffUnits);
 		}
 	}
+	
 }

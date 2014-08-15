@@ -526,6 +526,16 @@ pmease.commons = {
 	},
 	
 	scroll: {
+		setupScrollStop: function() {
+			var $window = $(window);
+		    $window.scroll(function() {
+		        if ($window.data('scrollTimeout')) {
+		          clearTimeout($window.data('scrollTimeout'));
+		        }
+		        $window.data('scrollTimeout', setTimeout("$(window).trigger('scrollStopped');",250));
+		    });
+		},
+		
 		next: function(fixContainerId, selector, margin) {
 			var next = pmease.commons.scroll.getNext(fixContainerId, selector, margin);
 			if (next != null) {
@@ -656,4 +666,5 @@ $(function() {
 	pmease.commons.setupAjaxLoadingIndicator();
 	pmease.commons.form.setupDirtyCheck();
 	pmease.commons.focus.setupAutoFocus();
+	pmease.commons.scroll.setupScrollStop();
 });
