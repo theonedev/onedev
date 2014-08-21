@@ -1,5 +1,11 @@
 package com.pmease.commons.git;
 
+import static com.pmease.commons.git.Change.Status.ADDED;
+import static com.pmease.commons.git.Change.Status.DELETED;
+import static com.pmease.commons.git.Change.Status.MODIFIED;
+import static com.pmease.commons.git.Change.Status.RENAMED;
+import static com.pmease.commons.git.Change.Status.UNCHANGED;
+
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -28,6 +34,7 @@ import com.pmease.commons.git.command.CheckoutCommand;
 import com.pmease.commons.git.command.CherryPickCommand;
 import com.pmease.commons.git.command.CloneCommand;
 import com.pmease.commons.git.command.CommitCommand;
+import com.pmease.commons.git.command.ConsumeCommand;
 import com.pmease.commons.git.command.DeleteRefCommand;
 import com.pmease.commons.git.command.FetchCommand;
 import com.pmease.commons.git.command.InitCommand;
@@ -49,7 +56,6 @@ import com.pmease.commons.git.command.PushCommand;
 import com.pmease.commons.git.command.RemoveCommand;
 import com.pmease.commons.git.command.ResetCommand;
 import com.pmease.commons.git.command.ShowCommand;
-import com.pmease.commons.git.command.ConsumeCommand;
 import com.pmease.commons.git.command.ShowRefCommand;
 import com.pmease.commons.git.command.ShowSymbolicRefCommand;
 import com.pmease.commons.git.command.UpdateRefCommand;
@@ -169,135 +175,87 @@ public class Git implements Serializable {
 	 * @param toRev
 	 * 			revision to calculate file differences since fromRev 
 	 * @param path
-	 * 			path to list tree for. Note that if path is not empty and does not end with slash, 
-	 * 			this method will diff this path itself between fromRev and toRev, instead of 
-	 * 			diffing child entries under this path
+	 * 			path to list tree under
+	 * @param changes
+	 * 			all changes between fromRev and toRev. This param is passed for performance reasons, 
+	 * 			in order not to calculate changes over and over again when expand nodes of a diff tree
 	 * @return
 	 * 			a list of tree node with appropriate actions set up to mark whether or not this 
 	 * 			tree node is modified, added, deleted or remaining the same
 	 */
-	public List<DiffTreeNode> listTreeWithDiff(String fromRev, String toRev, @Nullable String path) {
+	public List<Change> listTree(String fromRev, String toRev, @Nullable String path, List<Change> changes) {
 		if (path == null) 
 			path = "";
-
-		List<DiffTreeNode> diffs = new ArrayList<>();
 		
-		if (path.length() == 0 || path.endsWith("/")) {
-			Map<String, FileChange> changes = new HashMap<String, FileChange>();
-			
-			for (FileChange change: listFileChanges(fromRev, toRev, path, false)) {
-				if (change.getStatus() == FileChange.Status.ADD) {
-					changes.put(change.getNewPath(), change);
-				} else if (change.getStatus() == FileChange.Status.DELETE) {
-					changes.put(change.getOldPath(), change);
-				} else if (change.getStatus() == FileChange.Status.MODIFY 
-						|| change.getStatus() == FileChange.Status.TYPE) {
-					changes.put(change.getOldPath(), change);
-				} else {
-					throw new IllegalStateException("Unexpected action: " + change.getStatus());
-				}
-			}
-			
-			Set<String> nodePathsInToRev = new HashSet<>();
-			for (TreeNode each: listTree(toRev, path))
-				nodePathsInToRev.add(each.getPath());
+		if (path.length() != 0 && !path.endsWith("/"))
+			path += "/";
 
-			Set<String> coveredFiles = new HashSet<>();
-			for (TreeNode treeNode: listTree(fromRev, path)) {
-				if (FileMode.TREE.equals(treeNode.getMode())) {
-					String treePath = treeNode.getPath() + "/";
-					DiffTreeNode diff = null;
-					for (String changedFile: changes.keySet()) {
-						if (changedFile.startsWith(treePath)) {
-							coveredFiles.add(changedFile);
-							diff = new DiffTreeNode(DiffTreeNode.Status.MODIFY, treeNode.getPath(), 
+		List<Change> diffs = new ArrayList<>();
+		
+		Map<String, Change> changesMap = new HashMap<>();
+		
+		for (Change change: changes) { 
+			changesMap.put(change.getPath(), change);
+			if (change.getStatus() == RENAMED)
+				changesMap.put(change.getOldPath(), change);
+		}
+		
+		Set<String> nodePathsInToRev = new HashSet<>();
+		for (TreeNode each: listTree(toRev, path))
+			nodePathsInToRev.add(each.getPath());
+
+		Set<String> coveredFiles = new HashSet<>();
+		for (TreeNode treeNode: listTree(fromRev, path)) {
+			if (FileMode.TREE.equals(treeNode.getMode())) {
+				String treePath = treeNode.getPath() + "/";
+				Change diff = null;
+				for (String changedFile: changesMap.keySet()) {
+					if (changedFile.startsWith(treePath)) {
+						coveredFiles.add(changedFile);
+						if (diff == null) {
+							diff = new Change(MODIFIED, treeNode.getPath(), treeNode.getPath(), 
 									FileMode.TYPE_TREE, FileMode.TYPE_TREE);
-							break;
 						}
 					}
-					if (diff != null) {
-						if (!nodePathsInToRev.contains(treeNode.getPath()))
-							diff = new DiffTreeNode(DiffTreeNode.Status.DELETE, treeNode.getPath(), 
-									FileMode.TYPE_TREE, 0);
-					} else {
-						diff = new DiffTreeNode(DiffTreeNode.Status.UNCHANGE, treeNode.getPath(), 
-								FileMode.TYPE_TREE, FileMode.TYPE_TREE);
-					}
-					diffs.add(diff);
+				}
+				if (diff != null) {
+					if (!nodePathsInToRev.contains(treeNode.getPath()))
+						diff = new Change(DELETED, treeNode.getPath(), null,
+								FileMode.TYPE_TREE, 0);
 				} else {
-					DiffTreeNode diff;
-					FileChange change = changes.get(treeNode.getPath());
-					if (change != null) {
-						if (change.getStatus() == FileChange.Status.DELETE) {
-							diff = new DiffTreeNode(DiffTreeNode.Status.DELETE, treeNode.getPath(), 
-									change.getOldMode(), change.getNewMode());
-						} else {
-							diff = new DiffTreeNode(DiffTreeNode.Status.MODIFY, treeNode.getPath(), 
-									change.getOldMode(), change.getNewMode());
-						}
-					} else {
-						diff = new DiffTreeNode(DiffTreeNode.Status.UNCHANGE, treeNode.getPath(), 
-								treeNode.getMode(), treeNode.getMode());
-					}
-					diffs.add(diff);
+					diff = new Change(UNCHANGED, treeNode.getPath(), treeNode.getPath(), 
+							FileMode.TYPE_TREE, FileMode.TYPE_TREE);
 				}
-			}
-	
-			Set<String> addedDirs = new HashSet<>();
-			for (Map.Entry<String, FileChange> entry: changes.entrySet()) {
-				String file = entry.getKey();
-				FileChange change = entry.getValue();
-				if (change.getStatus() == FileChange.Status.ADD && !coveredFiles.contains(file)) {
-					String relativePath = file.substring(path.length());
-					int index = relativePath.indexOf('/');
-					if (index != -1) {
-						addedDirs.add(path + relativePath.substring(0, index));
-					} else {
-						diffs.add(new DiffTreeNode(DiffTreeNode.Status.ADD, file, 
-								change.getOldMode(), change.getNewMode()));
-					}
-				}
-			}
-			
-			for (String addedDir: addedDirs) {
-				diffs.add(new DiffTreeNode(DiffTreeNode.Status.ADD, addedDir, 
-						FileMode.TYPE_TREE, FileMode.TYPE_TREE));
-			}
-		} else {
-			List<TreeNode> oldTree = listTree(fromRev, path);
-			List<TreeNode> newTree = listTree(toRev, path);
-			if (!oldTree.isEmpty()) {
-				TreeNode oldNode = oldTree.iterator().next();
-				if (!newTree.isEmpty()) {
-					TreeNode newNode = newTree.iterator().next();
-					if (oldNode.getMode() == FileMode.TYPE_TREE) {
-						if (newNode.getMode() == FileMode.TYPE_TREE) {
-							if (!listChangedFiles(fromRev, toRev, path).isEmpty())
-								diffs.add(new DiffTreeNode(DiffTreeNode.Status.MODIFY, path, oldNode.getMode(), newNode.getMode()));
-							else
-								diffs.add(new DiffTreeNode(DiffTreeNode.Status.UNCHANGE, path, oldNode.getMode(), newNode.getMode()));
-						} else {
-							diffs.add(new DiffTreeNode(DiffTreeNode.Status.DELETE, path, oldNode.getMode(), 0));
-							diffs.add(new DiffTreeNode(DiffTreeNode.Status.ADD, path, 0, newNode.getMode()));
-						}
-					} else if (newNode.getMode() == FileMode.TYPE_TREE) {
-						diffs.add(new DiffTreeNode(DiffTreeNode.Status.DELETE, path, oldNode.getMode(), 0));
-						diffs.add(new DiffTreeNode(DiffTreeNode.Status.ADD, path, 0, newNode.getMode()));
-					} else if (oldNode.getMode() != newNode.getMode()) {
-						diffs.add(new DiffTreeNode(DiffTreeNode.Status.MODIFY, path, oldNode.getMode(), newNode.getMode()));
-					} else if (!listChangedFiles(fromRev, toRev, path).isEmpty()) {
-						diffs.add(new DiffTreeNode(DiffTreeNode.Status.MODIFY, path, oldNode.getMode(), newNode.getMode()));
-					} else {
-						diffs.add(new DiffTreeNode(DiffTreeNode.Status.UNCHANGE, path, oldNode.getMode(), newNode.getMode()));
-					}
+				diffs.add(diff);
+			} else {
+				Change change = changesMap.get(treeNode.getPath());
+				if (change != null) {
+					if (change.getStatus() != RENAMED || change.getNewPath().equals(treeNode.getPath())) 
+						diffs.add(change);
 				} else {
-					diffs.add(new DiffTreeNode(DiffTreeNode.Status.DELETE, path, oldNode.getMode(), 0));
+					diffs.add(new Change(UNCHANGED, treeNode.getPath(), treeNode.getPath(),  
+							treeNode.getMode(), treeNode.getMode()));
 				}
-			} else if (!newTree.isEmpty()) {
-				TreeNode newNode = newTree.iterator().next();
-				diffs.add(new DiffTreeNode(DiffTreeNode.Status.ADD, path, 0, newNode.getMode()));
 			}
 		}
+
+		Set<String> addedDirs = new HashSet<>();
+		for (Map.Entry<String, Change> entry: changesMap.entrySet()) {
+			String file = entry.getKey();
+			Change change = entry.getValue();
+			if ((change.getStatus() == ADDED || change.getStatus() == RENAMED && change.getNewPath().equals(file)) 
+					&& !coveredFiles.contains(file) && file.startsWith(path)) {
+				String relativePath = file.substring(path.length());
+				int index = relativePath.indexOf('/');
+				if (index != -1)
+					addedDirs.add(path + relativePath.substring(0, index));
+				else  
+					diffs.add(change);
+			}
+		}
+		
+		for (String addedDir: addedDirs) 
+			diffs.add(new Change(ADDED, null, addedDir, 0, FileMode.TYPE_TREE));
 		
 		Collections.sort(diffs);
 		return diffs;
@@ -344,7 +302,7 @@ public class Git implements Serializable {
 		return new ListChangedFilesCommand(repoDir).fromRev(fromRev).toRev(toRev).path(path).call();
 	}
 
-	public List<FileChange> listFileChanges(String fromRev, String toRev, @Nullable String path,
+	public List<Change> listFileChanges(String fromRev, String toRev, @Nullable String path,
 			boolean findRenames) {
 		return new ListFileChangesCommand(repoDir).fromRev(fromRev).toRev(toRev).path(path)
 				.findRenames(findRenames).call();

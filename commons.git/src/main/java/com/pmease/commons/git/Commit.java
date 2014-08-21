@@ -25,7 +25,7 @@ public class Commit extends BriefCommit {
     
     private final List<String> parentHashes;
     
-    private final List<FileChange> fileChanges;
+    private final List<Change> fileChanges;
 
     public static class Builder {
 		String hash;
@@ -35,7 +35,7 @@ public class Commit extends BriefCommit {
 		PersonIdent author;
 		PersonIdent committer;
 		List<String> parents = Lists.newArrayList();
-		List<FileChange> changes = Lists.newArrayList();
+		List<Change> changes = Lists.newArrayList();
 		
 		public Builder hash(String hash) {
 			this.hash = hash;
@@ -74,7 +74,7 @@ public class Commit extends BriefCommit {
 			return this;
 		}
 		
-		public Builder changes(List<FileChange> changes) {
+		public Builder changes(List<Change> changes) {
 			this.changes = changes;
 			return this;
 		}
@@ -93,7 +93,7 @@ public class Commit extends BriefCommit {
     public Commit(String hash, PersonIdent committer, PersonIdent author, 
     		String subject, @Nullable String body, 
     		@Nullable String note, List<String> parentHashes, 
-    		List<FileChange> fileChanges) {
+    		List<Change> fileChanges) {
     	super(hash, committer, author, subject);
     	
     	this.body = body;
@@ -118,7 +118,7 @@ public class Commit extends BriefCommit {
 		return Collections.unmodifiableList(parentHashes);
 	}
 	
-	public List<FileChange> getFileChanges() {
+	public List<Change> getFileChanges() {
 		return Collections.unmodifiableList(fileChanges);
 	}
 

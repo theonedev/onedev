@@ -41,7 +41,9 @@ public class RequestUpdatesPage extends RequestDetailPage {
 
 			@Override
 			public List<PullRequestUpdate> load() {
-				return getPullRequest().getSortedUpdates();
+				List<PullRequestUpdate> updates = new ArrayList<>(getPullRequest().getSortedUpdates());
+				Collections.reverse(updates);
+				return updates;
 			}
 			
 		}) {
@@ -58,10 +60,11 @@ public class RequestUpdatesPage extends RequestDetailPage {
 						Fragment fragment = new Fragment(componentId, "updateInfoFrag", RequestUpdatesPage.this);
 
 						PullRequestUpdate update = item.getModelObject();
-						PageParameters params = RequestChangesPage.params4(
-								update.getRequest(), update.getBaseCommit(), update.getHeadCommit());
-						Link<Void> updateLink = new BookmarkablePageLink<Void>("updateLink", RequestChangesPage.class, params);
-						updateLink.add(new Label("updateNo", update.getRequest().getSortedUpdates().indexOf(update) + 1));
+						PageParameters params = RequestComparePage.params4(
+								update.getRequest(), update.getBaseCommit(), update.getHeadCommit(), null);
+						Link<Void> updateLink = new BookmarkablePageLink<Void>("updateLink", RequestComparePage.class, params);
+						List<PullRequestUpdate> updates = update.getRequest().getSortedUpdates();
+						updateLink.add(new Label("updateNo", updates.size() - updates.indexOf(update)));
 						fragment.add(updateLink);
 						fragment.add(new Label("date", DateUtils.formatAge(update.getDate())));
 						

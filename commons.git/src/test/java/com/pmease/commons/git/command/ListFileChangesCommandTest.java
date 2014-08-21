@@ -8,7 +8,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.junit.Test;
 
 import com.pmease.commons.git.AbstractGitTest;
-import com.pmease.commons.git.FileChange;
+import com.pmease.commons.git.Change;
 
 public class ListFileChangesCommandTest extends AbstractGitTest {
 
@@ -19,13 +19,13 @@ public class ListFileChangesCommandTest extends AbstractGitTest {
 		removeFileAndCommit("file name with space", "2");
 		addFileAndCommit("another file name with space", "hello world", "3");
 		
-		List<FileChange> changes = git.listFileChanges("master~3", "master~2", null, true);
+		List<Change> changes = git.listFileChanges("master~3", "master~2", null, true);
 		assertEquals(1, changes.size());
 		assertEquals("file name with space", changes.get(0).getNewPath());
 		
 		changes = git.listFileChanges("master~2", "master", null, true);
 		assertEquals(1, changes.size());
-		assertEquals(FileChange.Status.RENAME, changes.get(0).getStatus());
+		assertEquals(Change.Status.RENAMED, changes.get(0).getStatus());
 		assertEquals("file name with space", changes.get(0).getOldPath());
 		assertEquals("another file name with space", changes.get(0).getNewPath());
 		
@@ -37,7 +37,7 @@ public class ListFileChangesCommandTest extends AbstractGitTest {
 			
 			changes = git.listFileChanges("master~1", "master", null, true);
 			assertEquals(1, changes.size());
-			assertEquals(FileChange.Status.RENAME, changes.get(0).getStatus());
+			assertEquals(Change.Status.RENAMED, changes.get(0).getStatus());
 			assertEquals("file name with \"quote\" ", changes.get(0).getOldPath());
 			assertEquals(" another file name with \"quote\" ", changes.get(0).getNewPath());
 		}

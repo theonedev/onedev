@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.git.Commit;
-import com.pmease.commons.git.FileChange;
+import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
@@ -143,7 +143,7 @@ public class LogCommand extends GitCommand<List<Commit>> {
             			commitBuilder.note += "\n" + line;
             	} else if (rawBlock[0]) {
             		if (line.startsWith(":"))
-            			commitBuilder.fileChanges.add(FileChange.parseRawLine(line));
+            			commitBuilder.fileChanges.add(Change.parseRawLine(line));
             	} else if (line.startsWith("subject:")) {
             		commitBuilder.summary = line.substring("subject:".length());
             	} else if (line.startsWith("hash:")) {
@@ -205,7 +205,7 @@ public class LogCommand extends GitCommand<List<Commit>> {
         
         private List<String> parentHashes = new ArrayList<>();
         
-        private List<FileChange> fileChanges = new ArrayList<>();
+        private List<Change> fileChanges = new ArrayList<>();
 
     	private Commit build() {
     		return new Commit(

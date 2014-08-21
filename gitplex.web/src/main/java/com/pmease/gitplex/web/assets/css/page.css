@@ -756,15 +756,22 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 .dropdown-panel .directory-chooser .title {font-weight: bold; border-bottom: 1px solid #888888;}
 .dropdown-panel .alert.empty-directory-choice {margin: 0px;}
 
-/* TREE DIFF */
-.diff-tree .added.dir {color: #05B505;}
-.diff-tree .deleted.dir {color: #FA7C7C;}
-.diff-tree .modified.dir {color: #DEB626;}
-.diff-tree .added.file {color: #05B505;}
-.diff-tree .deleted.file {color: #FA7C7C;}
-.diff-tree .modified.file {color: #DEB626;}
-.diff-tree .unchanged {color: #888;}
+/* TREE AND FILE DIFFS */
+.added.folder:before {content: "\f488"; color: #05B505;}
+.deleted.folder:before {content: "\f48a"; color: #FA7C7C;}
+.modified.folder:before {content: "\f489"; color: #DEB626;}
+.unchanged.folder:before {content: "\f486"; color: #888;}
+.added.file:before {content: "\f460"; color: #05B505;}
+.deleted.file:before {content: "\f462"; color: #FA7C7C;}
+.modified.file:before {content: "\f461"; color: #DEB626;}
+.renamed.file:before {content: "\f463"; color: #DEB626;}
+.unchanged.file:before {content: "\f45a"; color: #888;}
+
+.diff-tree .tree-content:before {font-family: "ponticons"; font-size: 17px;}
 .diff-tree em span {font-style: normal;}
+
+.changed-files li:before {font-family: "ponticons"; font-size: 17px;}
+.changed-files a {color: black;}
 
 /* TEXT DIFF */
 .text-diff>.panel-heading {z-index: 10;}
@@ -893,7 +900,7 @@ ul.status-help li:last-child .description {border-bottom: none;}
 
 .request-detail>.actions>div, .request-detail>.actions>.confirm>form>div {margin-bottom: 20px;}
 
-.request-detail .btn {margin-right: 8px;}
+.request-detail>.actions .btn {margin-right: 8px;}
 
 .request-detail .activities>tbody>tr>td {
 	padding: 8px; border-top-style: solid; border-top-width: 2px;}
@@ -909,12 +916,21 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail .activities .fa-frown-o {color: #D9534F;}
 .request-detail .activities td.detail {border-left: 2px solid #BBB;}
 
-.request-detail .changes .comparison-choices {margin-bottom: 16px; 
-	border-bottom: 1px dashed #CCC; padding-bottom: 16px;}
-.request-detail .changes .comparison-choices>div {font-weight: bold; margin-right: 36px;}
-.request-detail .changes .comparison-choices label {font-weight: bold; margin-top: 4px; 
-	margin-right: 8px; font-size: 16px; color: #666;}
-.request-detail .changes .comparison-choices select {font-weight: normal;}
+.request-detail .comparison-base {margin-right: 32px;}
+.request-detail .comparison-choices {border-bottom: 1px dashed #BBB; padding-bottom: 16px;}
+.content>.commit-choice {max-height: 600px; padding: 8px 0; overflow-y: scroll;}
+.content>.commit-choice a {text-decoration: none; color: #333; display: block; padding: 8px;}
+.content>.commit-choice li {border-bottom: 1px dotted #BBB;}
+.content>.commit-choice li:hover {background: #FDF2C3;}
+.content>.commit-choice a .name {font-family: Consolas, 'Liberation Mono', Courier, monospace;}
+.content>.commit-choice a .subject {font-size: 12px; color: #999;} 
+.request-detail .compare-result {margin-top: 16px;}
+.request-detail .compare-result>tbody>tr>td.nav {width: 1%;}
+.request-detail .compare-result>tbody>tr>td.nav .panel-heading {white-space: nowrap;}
+.request-detail .compare-result>tbody>tr>td.nav .panel-heading>span {margin-right: 16px;}
+.request-detail .compare-result>tbody>tr>td.content {padding-left: 16px;}
+.request-detail .compare-result a {padding: 2px;}
+.request-detail .compare-result a.active {background: #0F89E7; color: white; border-radius: 2px;}
 
 .update-commits {margin: 0 0 0 -14px;}
 .update-commits tr>td.handle {

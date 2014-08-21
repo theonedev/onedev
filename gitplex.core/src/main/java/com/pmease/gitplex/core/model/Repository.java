@@ -84,7 +84,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	@OneToMany(mappedBy="repository", cascade=CascadeType.REMOVE)
     private Collection<Branch> branches = new ArrayList<>();
 
-    @OneToMany(mappedBy="forkedFrom", cascade=CascadeType.REMOVE)
+    @OneToMany(mappedBy="forkedFrom")
 	private Collection<Repository> forks = new ArrayList<>();
     
 	public User getOwner() {

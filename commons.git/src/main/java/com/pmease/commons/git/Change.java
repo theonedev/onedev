@@ -3,14 +3,17 @@ package com.pmease.commons.git;
 import java.io.Serializable;
 import java.util.StringTokenizer;
 
+import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.util.QuotedString;
 
 import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")
-public class FileChange implements Serializable {
+public class Change implements Comparable<Change>, Serializable {
 
-	public enum Status {ADD, MODIFY, DELETE, RENAME, TYPE}
+	public enum Status {ADDED, MODIFIED, DELETED, RENAMED, UNCHANGED}
+	
+	private final Status status;
 	
 	private final String oldPath;
 	
@@ -20,9 +23,7 @@ public class FileChange implements Serializable {
 	
 	private final int newMode;
 	
-	private final Status status;
-	
-	public FileChange(Status status, String oldPath, String newPath, int oldMode, int newMode) {
+	public Change(Status status, String oldPath, String newPath, int oldMode, int newMode) {
 		this.status = status;
 		this.oldPath = oldPath;
 		this.newPath = newPath;
@@ -30,12 +31,12 @@ public class FileChange implements Serializable {
 		this.newMode = newMode;
 	}
 	
-	public FileChange(FileChange copy) {
-		this.status = copy.status;
-		this.oldPath = copy.oldPath;
-		this.newPath = copy.newPath;
-		this.oldMode = copy.oldMode;
-		this.newMode = copy.newMode;
+	public Change(Change change) {
+		this.status = change.status;
+		this.oldPath = change.oldPath;
+		this.newPath = change.newPath;
+		this.oldMode = change.oldMode;
+		this.newMode = change.newMode;
 	}
 
 	public String getOldPath() {
@@ -60,19 +61,44 @@ public class FileChange implements Serializable {
 
 	@Override
 	public String toString() {
-		if (status == Status.RENAME)
+		if (status == Status.RENAMED)
 			return status.name() + "\t" + oldPath + "->" + newPath;
-		else if (status == Status.DELETE)
+		else if (status == Status.DELETED)
 			return status.name() + "\t" + oldPath;
 		else 
 			return status.name() + "\t" + newPath;
 	}
 	
+	public boolean isFolder() {
+		return oldMode == FileMode.TYPE_TREE || newMode == FileMode.TYPE_TREE;
+	}
+	
+	@Override
+	public int compareTo(Change other) {
+		if (isFolder()) {
+			if (other.isFolder())
+				return getPath().compareTo(other.getPath());
+			else
+				return -1;
+		} else if (other.isFolder()) {
+			return 1;
+		} else {
+			return getPath().compareTo(other.getPath());
+		}
+	}
+	
+	public String getPath() {
+		if (status == Status.DELETED)
+			return oldPath;
+		else
+			return newPath;
+	}
+
 	private static String dequoteFileName(String quotedFileName) {
 		return QuotedString.GIT_PATH.dequote(quotedFileName);
 	}
 
-	public static FileChange parseRawLine(String rawLine) {
+	public static Change parseRawLine(String rawLine) {
 		Preconditions.checkArgument(rawLine.startsWith(":"));
 		
 		StringTokenizer tokenizer = new StringTokenizer(rawLine.substring(1));
@@ -84,21 +110,17 @@ public class FileChange implements Serializable {
 		if (statusCode.startsWith("R")) {
 			String oldPath = dequoteFileName(tokenizer.nextToken("\t"));
 			String newPath = dequoteFileName(tokenizer.nextToken("\t"));
-			return new FileChange(FileChange.Status.RENAME, oldPath, newPath, oldMode, newMode);
-		} else if (statusCode.equals("M")) {
+			return new Change(Change.Status.RENAMED, oldPath, newPath, oldMode, newMode);
+		} else if (statusCode.equals("M") || statusCode.equals("T")) {
 			String oldPath, newPath;
 			oldPath = newPath = dequoteFileName(tokenizer.nextToken("\t"));
-			return new FileChange(FileChange.Status.MODIFY, oldPath, newPath, oldMode, newMode);
+			return new Change(Change.Status.MODIFIED, oldPath, newPath, oldMode, newMode);
 		} else if (statusCode.equals("D")) {
 			String oldPath = dequoteFileName(tokenizer.nextToken("\t"));
-			return new FileChange(FileChange.Status.DELETE, oldPath, null, oldMode, newMode);
-		} else if (statusCode.equals("T")) {
-			String oldPath, newPath;
-			oldPath = newPath = dequoteFileName(tokenizer.nextToken("\t"));
-			return new FileChange(FileChange.Status.TYPE, oldPath, newPath, oldMode, newMode);
+			return new Change(Change.Status.DELETED, oldPath, null, oldMode, newMode);
 		} else if (statusCode.equals("A")) {
 			String newPath = dequoteFileName(tokenizer.nextToken("\t"));
-			return new FileChange(FileChange.Status.ADD, null, newPath, oldMode, newMode);
+			return new Change(Change.Status.ADDED, null, newPath, oldMode, newMode);
 		} else {
 			throw new RuntimeException("Unexpected status code: " + statusCode);
 		}

@@ -97,7 +97,7 @@ public class DefaultRepositoryManager implements RepositoryManager {
     	
         dao.remove(repository);
 
-        storageManager.getStorage(repository).delete();
+        FileUtils.deleteDir(storageManager.getStorage(repository));
     }
 
     @Sessional

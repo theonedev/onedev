@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.annotation.Nullable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -32,7 +33,7 @@ public class Branch extends AbstractEntity {
 	@ManyToOne
 	private User updater;
 	
-    @OneToMany(mappedBy="target")
+    @OneToMany(mappedBy="target", cascade=CascadeType.REMOVE)
     private Collection<PullRequest> incomingRequests = new ArrayList<PullRequest>();
 
     @OneToMany(mappedBy="source")

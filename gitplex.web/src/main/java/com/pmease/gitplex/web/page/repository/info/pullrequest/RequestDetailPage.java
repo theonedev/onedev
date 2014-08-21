@@ -391,7 +391,7 @@ public abstract class RequestDetailPage extends RepositoryInfoPage implements Co
 		
 		tabs.add(new RequestTab("Activities", RequestActivitiesPage.class));
 		tabs.add(new RequestTab("Updates", RequestUpdatesPage.class));
-		tabs.add(new RequestTab("Changes", RequestChangesPage.class));
+		tabs.add(new RequestTab("Compare", RequestComparePage.class));
 		
 		add(new Tabbable("tabs", tabs));
 	}
@@ -531,12 +531,13 @@ public abstract class RequestDetailPage extends RepositoryInfoPage implements Co
 			}
 			fragment.add(new Label("message", message));
 			
-			PageParameters params = RequestChangesPage.params4(
+			PageParameters params = RequestComparePage.params4(
 					request, 
 					request.getLatestUpdate().getHeadCommit(), 
-					request.getIntegrationInfo().getIntegrationHead());
+					request.getIntegrationInfo().getIntegrationHead(), 
+					null);
 			
-			Link<Void> link = new BookmarkablePageLink<Void>("preview", RequestChangesPage.class, params);
+			Link<Void> link = new BookmarkablePageLink<Void>("preview", RequestComparePage.class, params);
 			link.setVisible(!integrationInfo.getIntegrationHead().equals(integrationInfo.getRequestHead()));
 			fragment.add(link);
 			

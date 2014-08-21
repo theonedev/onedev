@@ -1,5 +1,4 @@
-@font-face { font-family: "ponticons"; src: url("../fonts/ponticons.eot?v=1.0.1"); src: url("../fonts/ponticons.eot?v=1.0.1#iefix") format("embedded-opentype"), url("../fonts/ponticons.ttf?v=1.0.1") format("truetype"), url("../fonts/ponticons.woff?v=1.0.1") format("woff"), url("../fonts/ponticons.svg?v=1.0.1#ponticons") format("svg"); font-weight: normal; font-style: normal; }
-
+@font-face { font-family: "ponticons"; src: url("../fonts/ponticons.eot?v=1.0.9"); src: url("../fonts/ponticons.eot?v=1.0.9#iefix") format("embedded-opentype"), url("../fonts/ponticons.ttf?v=1.0.9") format("truetype"), url("../fonts/ponticons.woff?v=1.0.9") format("woff"), url("../fonts/ponticons.svg?v=1.0.9#ponticons") format("svg"); font-weight: normal; font-style: normal; }
 .fa { font: normal normal 16px "ponticons"; display: inline-block; speak: none; text-transform: none; text-rendering: auto; line-height: 1; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
 
 /* makes the font 33% larger relative to the icon container */
@@ -37,16 +36,12 @@
 
 @-moz-keyframes spin { 0% { -moz-transform: rotate(0deg); }
   100% { -moz-transform: rotate(359deg); } }
-
 @-webkit-keyframes spin { 0% { -webkit-transform: rotate(0deg); }
   100% { -webkit-transform: rotate(359deg); } }
-
 @-o-keyframes spin { 0% { -o-transform: rotate(0deg); }
   100% { -o-transform: rotate(359deg); } }
-
 @keyframes spin { 0% { -webkit-transform: rotate(0deg); transform: rotate(0deg); }
   100% { -webkit-transform: rotate(359deg); transform: rotate(359deg); } }
-
 .fa-rotate-90 { filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=1); -webkit-transform: rotate(90deg); -moz-transform: rotate(90deg); -ms-transform: rotate(90deg); -o-transform: rotate(90deg); transform: rotate(90deg); }
 
 .fa-rotate-180 { filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2); -webkit-transform: rotate(180deg); -moz-transform: rotate(180deg); -ms-transform: rotate(180deg); -o-transform: rotate(180deg); transform: rotate(180deg); }
@@ -269,6 +264,8 @@
 
 .fa-triangle-right:before { content: "\f263"; }
 
+.fa-arrow-back:before { content: "\f264"; }
+
 .fa-tick-round:before { content: "\f300"; }
 
 .fa-times-round:before { content: "\f301"; }
@@ -427,11 +424,7 @@
 
 .fa-expand:before { content: "\f42b"; }
 
-.fa-expand-alt:before { content: "\f42c"; }
-
 .fa-collapse:before { content: "\f42d"; }
-
-.fa-collapse-alt:before { content: "\f42e"; }
 
 .fa-fold:before { content: "\f42f"; }
 
@@ -445,13 +438,13 @@
 
 .fa-share:before { content: "\f434"; }
 
+.fa-share-alt:before { content: "\f435"; }
+
 .fa-file-pdf:before { content: "\f451"; }
 
 .fa-file-audio:before { content: "\f452"; }
 
 .fa-file-binary:before { content: "\f453"; }
-
-.fa-file-chart:before { content: "\f454"; }
 
 .fa-file-code:before { content: "\f455"; }
 
@@ -459,9 +452,9 @@
 
 .fa-file-image:before { content: "\f457"; }
 
-.fa-file-link:before { content: "\f458"; }
+.fa-file-symlink:before { content: "\f458"; }
 
-.fa-file-openoffice:before { content: "\f459"; }
+.fa-file-media:before { content: "\f459"; }
 
 .fa-file-txt:before { content: "\f45a"; }
 
@@ -471,7 +464,7 @@
 
 .fa-file-excel:before { content: "\f45d"; }
 
-.fa-file-powerpoint:before { content: "\f45e"; }
+.fa-file-ppt:before { content: "\f45e"; }
 
 .fa-file-zip:before { content: "\f45f"; }
 
@@ -480,6 +473,8 @@
 .fa-file-modified:before { content: "\f461"; }
 
 .fa-file-removed:before { content: "\f462"; }
+
+.fa-file-renamed:before { content: "\f463"; }
 
 .fa-folder:before { content: "\f480"; }
 
@@ -502,6 +497,8 @@
 .fa-folder-modified-o:before { content: "\f489"; }
 
 .fa-folder-removed-o:before { content: "\f48a"; }
+
+.fa-folder-renamed-o:before { content: "\f48b"; }
 
 .fa-tag:before { content: "\f490"; }
 

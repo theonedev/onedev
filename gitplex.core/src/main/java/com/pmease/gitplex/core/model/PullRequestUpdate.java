@@ -219,8 +219,8 @@ public class PullRequestUpdate extends AbstractEntity {
 			PullRequest request = getRequest();
 
 			int index = request.getSortedUpdates().indexOf(this);
-			if (index > 0)
-				baseCommit = request.getSortedUpdates().get(index-1).getHeadCommit();
+			if (index < request.getSortedUpdates().size()-1)
+				baseCommit = request.getSortedUpdates().get(index+1).getHeadCommit();
 			else
 				baseCommit = request.getBaseCommit();
 		}
@@ -247,10 +247,10 @@ public class PullRequestUpdate extends AbstractEntity {
 	}
 	
 	/**
-	 * Get commits belonging to this update, descendantly ordered by commit date 
+	 * Get commits belonging to this update, ordered by commit date 
 	 * 
 	 * @return
-	 * 			commits belonging to this update
+	 * 			commits belonging to this update ordered by commit date
 	 */
 	public List<Commit> getCommits() {
 		if (commits == null) {

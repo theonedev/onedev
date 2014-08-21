@@ -3,8 +3,9 @@ package com.pmease.commons.git;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
-
 import org.junit.Test;
+
+import static com.pmease.commons.git.Change.Status.*;
 
 public class GitTest extends AbstractGitTest {
 
@@ -29,54 +30,53 @@ public class GitTest extends AbstractGitTest {
 		addFileAndCommit("dir3/file1", "dir3/file1", "dir3/file1");
 		addFileAndCommit("dir3/file2", "dir3/file2", "dir3/file2");
 		
-		List<DiffTreeNode> diffs = git.listTreeWithDiff("master", "dev", null);
+		List<Change> diffs = git.listTree("master", "dev", null, null);
 		assertEquals(7, diffs.size());
-		assertEquals("dir1", diffs.get(0).getPath());
-		assertEquals(DiffTreeNode.Status.MODIFY, diffs.get(0).getStatus());
-		assertEquals("dir2", diffs.get(1).getPath());
-		assertEquals(DiffTreeNode.Status.MODIFY, diffs.get(1).getStatus());
-		assertEquals("dir3", diffs.get(2).getPath());
-		assertEquals(DiffTreeNode.Status.ADD, diffs.get(2).getStatus());
-		assertEquals("dir2", diffs.get(3).getPath());
-		assertEquals(DiffTreeNode.Status.ADD, diffs.get(3).getStatus());
+		assertEquals("dir1", diffs.get(0).getNewPath());
+		assertEquals(MODIFIED, diffs.get(0).getStatus());
+		assertEquals("dir2", diffs.get(1).getNewPath());
+		assertEquals(MODIFIED, diffs.get(1).getStatus());
+		assertEquals("dir3", diffs.get(2).getNewPath());
+		assertEquals(ADDED, diffs.get(2).getStatus());
+		assertEquals("dir2", diffs.get(3).getNewPath());
+		assertEquals(ADDED, diffs.get(3).getStatus());
 		assertEquals(false, diffs.get(3).isFolder());
-		assertEquals("file1", diffs.get(4).getPath());
-		assertEquals(DiffTreeNode.Status.UNCHANGE, diffs.get(4).getStatus());
-		assertEquals("file2", diffs.get(5).getPath());
-		assertEquals(DiffTreeNode.Status.DELETE, diffs.get(5).getStatus());
-		assertEquals("file3", diffs.get(6).getPath());
-		assertEquals(DiffTreeNode.Status.ADD, diffs.get(6).getStatus());
+		assertEquals("file1", diffs.get(4).getNewPath());
+		assertEquals(UNCHANGED, diffs.get(4).getStatus());
+		assertEquals("file2", diffs.get(5).getOldPath());
+		assertEquals(DELETED, diffs.get(5).getStatus());
+		assertEquals("file3", diffs.get(6).getNewPath());
+		assertEquals(ADDED, diffs.get(6).getStatus());
 		
-		diffs = git.listTreeWithDiff("master", "dev", "dir2/");
+		diffs = git.listTree("master", "dev", "dir2/", null);
 		assertEquals(1, diffs.size());
-		assertEquals("dir2/file1", diffs.get(0).getPath());
-		assertEquals(DiffTreeNode.Status.DELETE, diffs.get(0).getStatus());
+		assertEquals("dir2/file1", diffs.get(0).getOldPath());
+		assertEquals(DELETED, diffs.get(0).getStatus());
 		
-		diffs = git.listTreeWithDiff("master", "dev", "dir3/");
+		diffs = git.listTree("master", "dev", "dir3/", null);
 		assertEquals(2, diffs.size());
-		assertEquals("dir3/file1", diffs.get(0).getPath());
-		assertEquals(DiffTreeNode.Status.ADD, diffs.get(0).getStatus());
-		assertEquals("dir3/file2", diffs.get(1).getPath());
-		assertEquals(DiffTreeNode.Status.ADD, diffs.get(1).getStatus());
+		assertEquals("dir3/file1", diffs.get(0).getNewPath());
+		assertEquals(ADDED, diffs.get(0).getStatus());
+		assertEquals("dir3/file2", diffs.get(1).getNewPath());
+		assertEquals(ADDED, diffs.get(1).getStatus());
 		
-		diffs = git.listTreeWithDiff("master", "dev", "dir3");
-		assertEquals(1, diffs.size());
-		assertEquals("dir3", diffs.get(0).getPath());
-		assertEquals(DiffTreeNode.Status.ADD, diffs.get(0).getStatus());
-
 		rm("dir3/file1");
 		rm("dir3/file2");
 		commit("delete dir3");
 
-		diffs = git.listTreeWithDiff("dev~1", "dev", null);
+		diffs = git.listTree("dev~1", "dev", null, null);
 		assertEquals(5, diffs.size());
-		assertEquals("dir3", diffs.get(1).getPath());
-		assertEquals(DiffTreeNode.Status.DELETE, diffs.get(1).getStatus());
+		assertEquals("dir3", diffs.get(1).getOldPath());
+		assertEquals(DELETED, diffs.get(1).getStatus());
 		
-		diffs = git.listTreeWithDiff("dev~1", "dev", "dir3");
-		assertEquals(1, diffs.size());
-		assertEquals("dir3", diffs.get(0).getPath());
-		assertEquals(DiffTreeNode.Status.DELETE, diffs.get(0).getStatus());
+		addFileAndCommit("dir1/somefile", "hello world", "commit1");
+		removeFileAndCommit("dir1/somefile", "commit2");
+		addFileAndCommit("somefile2", "hello world", "commit3");
+		
+		diffs = git.listTree("dev~2", "dev", null, null);
+		assertEquals(5, diffs.size());
+		assertEquals("somefile2", diffs.get(4).getNewPath());
+		assertEquals(RENAMED, diffs.get(4).getStatus());
 	}
 
 }

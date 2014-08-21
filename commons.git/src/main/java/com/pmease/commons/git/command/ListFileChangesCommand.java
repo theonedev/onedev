@@ -8,11 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.git.FileChange;
+import com.pmease.commons.git.Change;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
-public class ListFileChangesCommand extends GitCommand<List<FileChange>> {
+public class ListFileChangesCommand extends GitCommand<List<Change>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ListFileChangesCommand.class);
 	
@@ -49,11 +49,11 @@ public class ListFileChangesCommand extends GitCommand<List<FileChange>> {
 	}
 	
 	@Override
-	public List<FileChange> call() {
+	public List<Change> call() {
 		Preconditions.checkNotNull(toRev, "toRev has to be specified.");
 		Preconditions.checkNotNull(fromRev, "fromRev has to be specified.");
 		
-		final List<FileChange> fileChanges = new ArrayList<>();
+		final List<Change> fileChanges = new ArrayList<>();
 		
 		Commandline cmd = cmd();
 		
@@ -72,7 +72,7 @@ public class ListFileChangesCommand extends GitCommand<List<FileChange>> {
 			@Override
 			public void consume(String line) {
 				if (line.startsWith(":"))
-					fileChanges.add(FileChange.parseRawLine(line));
+					fileChanges.add(Change.parseRawLine(line));
 			}
 			
 		}, new LineConsumer() {

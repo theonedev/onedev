@@ -293,6 +293,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		request.git().updateRef(request.getBaseRef(), request.getBaseCommit(), null, null);
 		
 		for (PullRequestUpdate update: request.getUpdates()) {
+			update.setDate(new Date(System.currentTimeMillis() + 1000));
 			pullRequestUpdateManager.save(update);
 		}
 

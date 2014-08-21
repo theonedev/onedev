@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.Commit;
-import com.pmease.commons.git.FileChange;
+import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Git;
 
 public class LogCommandTest extends AbstractGitTest {
@@ -43,7 +43,7 @@ public class LogCommandTest extends AbstractGitTest {
 		assertEquals("hello\nworld", commits.get(0).getNote());
 		assertEquals(commits.get(0).getFileChanges().size(), 2);
 		assertEquals(commits.get(0).getFileChanges().get(0).getNewPath(), "dir/file");
-		assertEquals(commits.get(0).getFileChanges().get(0).getStatus(), FileChange.Status.ADD);
+		assertEquals(commits.get(0).getFileChanges().get(0).getStatus(), Change.Status.ADDED);
 		assertEquals(commits.get(0).getParentHashes().size(), 1);
 		assertEquals(commits.get(0).getParentHashes().iterator().next(), commits.get(1).getHash());
 		
@@ -80,9 +80,9 @@ public class LogCommandTest extends AbstractGitTest {
 	    addFileAndCommit("b2", "1111\n2222\n3333\n4444\n", "move b to b2");
 
 	    List<Commit> commits = git.log("master~3", "master", null, 0, 0);
-	    FileChange change = commits.get(0).getFileChanges().get(0);
-	    assertEquals("RENAME\tb->b2", change.toString());
+	    Change change = commits.get(0).getFileChanges().get(0);
+	    assertEquals("RENAMED\tb->b2", change.toString());
 	    change = commits.get(2).getFileChanges().get(1);
-	    assertEquals("ADD\ta2", change.toString());
+	    assertEquals("ADDED\ta2", change.toString());
 	}
 }

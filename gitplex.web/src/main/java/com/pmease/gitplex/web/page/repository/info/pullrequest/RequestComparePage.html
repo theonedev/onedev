@@ -1,0 +1,46 @@
+<wicket:extend>
+	<div class="compare">
+		<div class="comparison-choices clearfix">
+			<div class="comparison-base pull-left">
+				<label>Comparision Base:</label> 
+				<span class="btn btn-default" wicket:id="baseSelector">
+					<i class="fa fa-commit"></i> <span wicket:id="label"></span> <i class="caret"></i>
+				</span>
+				<div wicket:id="baseChoices"></div>
+			</div>
+			<div class="comparison-head pull-left">
+				<label>Comparision Head:</label> 
+				<span class="btn btn-default" wicket:id="headSelector">
+					<i class="fa fa-commit"></i> <span wicket:id="label"></span> <i class="caret"></i>
+				</span>
+				<div wicket:id="headChoices"></div>
+			</div>
+		</div>
+		<table class="compare-result">
+			<tr>
+				<td class="nav">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<span class="panel-title">Compare Result</span> <input wicket:id="changedOnly" type="checkbox"> changed only</input> 
+						</div>
+						<div wicket:id="compareResult" class="panel-body"></div>
+					</div>
+				</td>
+				<td wicket:id="blobDiff" class="content"></td>
+			</tr>
+		</table>
+	</div>
+	<wicket:fragment wicket:id="commitChoiceFrag">
+		<ul class="commit-choice list-unstyled">
+			<li wicket:id="commits">
+				<a wicket:id="commit">
+					<div>
+						<i class="fa fa-commit"></i>
+						<span wicket:id="label" class="name"></span>
+					</div>
+					<div wicket:id="subject" class="subject"></div>
+				</a>
+			</li>
+		</ul>
+	</wicket:fragment>
+</wicket:extend>

@@ -113,7 +113,7 @@ public class AccountTeamsPage extends AccountSettingPage {
 																	EditTeamPage.class,
 																	EditTeamPage.newParams(team));
 				link.add(new Label("name", Model.of(team.getName())));
-				link.add(new Icon("icon", "fa-edit"));
+				link.add(new Icon("icon", "fa-pencil"));
 				frag.add(link);
 				frag.add(new Label("summary", formatTeamDescription(team)));
 				frag.add(new Label("builtin", "built-in").setVisibilityAllowed(team.isBuiltIn()));

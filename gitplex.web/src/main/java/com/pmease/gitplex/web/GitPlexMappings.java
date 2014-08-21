@@ -52,7 +52,7 @@ import com.pmease.gitplex.web.page.repository.info.pullrequest.ClosedRequestsPag
 import com.pmease.gitplex.web.page.repository.info.pullrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.OpenRequestsPage;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.RequestActivitiesPage;
-import com.pmease.gitplex.web.page.repository.info.pullrequest.RequestChangesPage;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.RequestComparePage;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.RequestUpdatesPage;
 import com.pmease.gitplex.web.util.UrlUtils;
 
@@ -169,7 +169,7 @@ public class GitPlexMappings extends CompoundRequestMapper {
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/pull-requests/${request}/updates", RequestUpdatesPage.class));
 		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/pull-requests/${request}/changes", RequestChangesPage.class));
+				"${user}/${repo}/pull-requests/${request}/compare", RequestComparePage.class));
 
 		add(new PageParameterAwareMountedMapper("${user}/${repo}/contributors",
 				ContributorsPage.class));

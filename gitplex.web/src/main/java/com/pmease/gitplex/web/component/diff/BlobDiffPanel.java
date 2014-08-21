@@ -49,7 +49,7 @@ public class BlobDiffPanel extends Panel {
 			@Override
 			protected byte[] load() {
 				Git git = BlobDiffPanel.this.repoModel.getObject().git();
-				if (diffInfo.getStatus() == BlobDiffInfo.Status.ADD) 
+				if (diffInfo.getStatus() == BlobDiffInfo.Status.ADDED) 
 					return null;
 				else 
 					return git.read(diffInfo.getOldRevision(), diffInfo.getOldPath(), diffInfo.getOldMode());
@@ -62,15 +62,19 @@ public class BlobDiffPanel extends Panel {
 			@Override
 			protected byte[] load() {
 				Git git = BlobDiffPanel.this.repoModel.getObject().git();
-				if (diffInfo.getStatus() == BlobDiffInfo.Status.DELETE) 
+				if (diffInfo.getStatus() == BlobDiffInfo.Status.DELETED) 
 					return null;
-				else if (diffInfo.getStatus() != BlobDiffInfo.Status.UNCHANGE)
+				else if (diffInfo.getStatus() != BlobDiffInfo.Status.UNCHANGED)
 					return git.read(diffInfo.getNewRevision(), diffInfo.getNewPath(), diffInfo.getNewMode());
 				else
 					return oldContentModel.getObject();
 			}
 			
 		};
+	}
+	
+	public BlobDiffInfo getBlobDiffInfo() {
+		return diffInfo;
 	}
 
 	@Override
@@ -80,7 +84,7 @@ public class BlobDiffPanel extends Panel {
 		int oldBlobType = diffInfo.getOldMode() & FileMode.TYPE_MASK;
 		int newBlobType = diffInfo.getNewMode() & FileMode.TYPE_MASK;
 		
-		if (diffInfo.getStatus() == BlobDiffInfo.Status.UNCHANGE) {
+		if (diffInfo.getStatus() == BlobDiffInfo.Status.UNCHANGED) {
 			add(new WebMarkupContainer("originalContent").setVisible(false));
 			add(new WebMarkupContainer("revisedContent").setVisible(false));
 			Fragment fragment = new Fragment("blobContent", "notChangedFrag", this);

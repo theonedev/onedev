@@ -328,7 +328,8 @@ public class TextDiffPanel extends Panel {
 					@Override
 					protected void onUpdate(AjaxRequestTarget target) {
 						onDiffOptionChanged();
-						setResponsePage(getPage());
+						close(target);
+						target.add(TextDiffPanel.this);
 					}
 					
 					@Override
@@ -366,7 +367,8 @@ public class TextDiffPanel extends Panel {
 					@Override
 					protected void onUpdate(AjaxRequestTarget target) {
 						onDiffOptionChanged();
-						setResponsePage(getPage());
+						close(target);
+						target.add(TextDiffPanel.this);
 					}
 					
 					@Override
@@ -404,7 +406,8 @@ public class TextDiffPanel extends Panel {
 					@Override
 					protected void onUpdate(AjaxRequestTarget target) {
 						onDiffOptionChanged();
-						setResponsePage(getPage());
+						close(target);
+						target.add(TextDiffPanel.this);
 					}
 					
 					@Override

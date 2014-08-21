@@ -50,7 +50,7 @@ public class FileBlob implements Serializable {
 	}
 
 	public static FileBlob of(Repository repository, String revision, String file) {
-		return GitPlex.getInstance(FileBlobService.class).get(repository, revision, file);
+		return GitPlex.getInstance(FileBlobService.class).get(repository, repository.defaultBranchIfNull(revision), file);
 	}
 	
 	public boolean isText() {
