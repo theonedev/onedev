@@ -3,11 +3,14 @@
 		<table>
 			<tr wicket:id="commits">
 				<td class="handle"></td>
-				<td class="data overview">
-					<a wicket:id="shaLink"><span wicket:id="sha"></span></a>
-					, by <span wicket:id="author"></span>,
-					<span wicket:id="date"></span>
-					<div wicket:id="message" class="data message"></div>
+				<td class="data info">
+					<div class="summary">
+						<a wicket:id="shaLink"><span wicket:id="sha"></span></a>
+						, by <span wicket:id="author"></span>,
+						<span wicket:id="date"></span>
+					</div>
+					<div wicket:id="message" class="message"></div>
+					<div wicket:id="threads" class="threads"></div>
 				</td>
 				<td class="data status">
 					<div><span wicket:id="verification" class="verification"></span></div>

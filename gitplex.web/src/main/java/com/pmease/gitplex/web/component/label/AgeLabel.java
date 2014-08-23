@@ -2,12 +2,9 @@ package com.pmease.gitplex.web.component.label;
 
 import java.util.Date;
 
-import org.apache.tools.ant.util.DateUtils;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
-
-import com.pmease.gitplex.web.Constants;
 
 @SuppressWarnings("serial")
 public class AgeLabel extends Label {
@@ -19,7 +16,6 @@ public class AgeLabel extends Label {
 	@Override
 	protected void onComponentTag(ComponentTag tag) {
 		super.onComponentTag(tag);
-		tag.put("title", DateUtils.format(getDate(), Constants.DATETIME_FORMAT));
 		String classes = tag.getAttribute("class");
 		if (classes == null) {
 			classes = "";
@@ -34,8 +30,4 @@ public class AgeLabel extends Label {
 		tag.put("class", classes);
 	}
 	
-	private Date getDate() {
-		AgeModel model = (AgeModel) getDefaultModel();
-		return model.getDate();
-	}
 }

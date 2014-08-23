@@ -1,11 +1,15 @@
 package com.pmease.commons.git;
 
+import static com.pmease.commons.git.Change.Status.ADDED;
+import static com.pmease.commons.git.Change.Status.DELETED;
+import static com.pmease.commons.git.Change.Status.MODIFIED;
+import static com.pmease.commons.git.Change.Status.RENAMED;
+import static com.pmease.commons.git.Change.Status.UNCHANGED;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
-import org.junit.Test;
 
-import static com.pmease.commons.git.Change.Status.*;
+import org.junit.Test;
 
 public class GitTest extends AbstractGitTest {
 

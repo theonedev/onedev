@@ -40,13 +40,16 @@ public class User extends AbstractUser implements ProtectedObject {
 	private Date avatarUpdateDate;
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-	private Collection<CommitComment> commitComments = new ArrayList<CommitComment>();
+	private Collection<CommitComment> commitComments = new ArrayList<>();
 
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-	private Collection<Membership> memberships = new ArrayList<Membership>();
+	private Collection<ThreadVisit> threadVisits = new ArrayList<>();
+
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	private Collection<Membership> memberships = new ArrayList<>();
 	
 	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
-	private Collection<Repository> repositories = new ArrayList<Repository>();
+	private Collection<Repository> repositories = new ArrayList<>();
 
 	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
 	private Collection<Team> teams = new ArrayList<Team>();
@@ -64,7 +67,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	private Collection<Vote> votes = new ArrayList<Vote>();
 	
 	@OneToMany(mappedBy="voter", cascade=CascadeType.REMOVE)
-	private Collection<VoteInvitation> voteInvitations = new ArrayList<VoteInvitation>();
+	private Collection<VoteInvitation> voteInvitations = new ArrayList<>();
 
 	@Editable(order=100)
 	@UserName
@@ -124,6 +127,14 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	public void setCommitComments(Collection<CommitComment> commitComments) {
 		this.commitComments = commitComments;
+	}
+
+	public Collection<ThreadVisit> getThreadVisits() {
+		return threadVisits;
+	}
+
+	public void setThreadVisits(Collection<ThreadVisit> threadVisits) {
+		this.threadVisits = threadVisits;
 	}
 
 	public Collection<Membership> getMemberships() {

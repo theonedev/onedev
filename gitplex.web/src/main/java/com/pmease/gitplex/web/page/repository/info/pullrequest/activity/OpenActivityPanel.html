@@ -1,6 +1,12 @@
 <wicket:panel>
 	<div class="fa fa-2x fa-comment"></div>
 	<div wicket:id="description" class="comment"></div>
+	<wicket:enclosure child="baseThreads">
+		<div class="base-threads">
+			<div class="title"><i class="fa fa-comments"></i> There are comments on common ancestor commit of target branch and this pull request</div>
+			<div wicket:id="baseThreads" class="content"></div>
+		</div>
+	</wicket:enclosure>
 	<wicket:fragment wicket:id="viewFrag">
 		<div class="clearfix">
 			<div wicket:id="content" class="pull-left right-spacing"></div>

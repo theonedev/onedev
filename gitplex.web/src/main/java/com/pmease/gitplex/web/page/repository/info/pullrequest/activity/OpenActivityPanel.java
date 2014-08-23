@@ -1,5 +1,7 @@
 package com.pmease.gitplex.web.page.repository.info.pullrequest.activity;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -10,11 +12,15 @@ import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
+import com.pmease.gitplex.core.manager.CommitCommentManager;
+import com.pmease.gitplex.core.model.CommitComment;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.CommentThreadPanel;
 
 @SuppressWarnings("serial")
 public class OpenActivityPanel extends Panel {
@@ -121,6 +127,18 @@ public class OpenActivityPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		add(renderForView());
+
+		add(new CommentThreadPanel("baseThreads", new LoadableDetachableModel<List<CommitComment>>() {
+
+			@Override
+			protected List<CommitComment> load() {
+				CommitCommentManager manager = GitPlex.getInstance(CommitCommentManager.class);
+				return manager.findByCommit(getPullRequest().getTarget().getRepository(), 
+						getPullRequest().getBaseCommit());
+			}
+			
+		}));
+		
 	}
 
 	private PullRequest getPullRequest() {

@@ -13,7 +13,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 
 @SuppressWarnings("serial")
 @Entity
-public class CommitComment extends AbstractEntity {
+public class ThreadVisit extends AbstractEntity {
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
@@ -29,9 +29,6 @@ public class CommitComment extends AbstractEntity {
 	@Column(nullable=false)
 	private Date date = new Date();
 
-	@Column(nullable=false)
-	private String content;
-	
 	@Embedded
 	private CommentPosition position;
 	
@@ -49,14 +46,6 @@ public class CommitComment extends AbstractEntity {
 
 	public void setUser(User user) {
 		this.user = user;
-	}
-
-	public String getContent() {
-		return content;
-	}
-
-	public void setContent(String content) {
-		this.content = content;
 	}
 
 	public Date getDate() {

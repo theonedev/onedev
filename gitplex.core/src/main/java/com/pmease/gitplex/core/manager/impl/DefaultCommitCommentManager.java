@@ -30,7 +30,7 @@ public class DefaultCommitCommentManager implements CommitCommentManager {
 	public List<CommitComment> findByFile(Repository repository, String file) {
 		return dao.query(EntityCriteria.of(CommitComment.class)
 				.add(Restrictions.eq("repository", repository))
-				.add(Restrictions.eq("file", file))
+				.add(Restrictions.eq("position.filePath", file))
 				.addOrder(Order.asc("id")), 0, 0);
 	}
 
@@ -44,12 +44,11 @@ public class DefaultCommitCommentManager implements CommitCommentManager {
 	}
 
 	@Override
-	public List<CommitComment> findByCommitAndFile(Repository repository,
-			String commit, String file) {
+	public List<CommitComment> findByCommitAndFile(Repository repository, String commit, String filePath) {
 		return dao.query(EntityCriteria.of(CommitComment.class)
 				.add(Restrictions.eq("repository", repository))
 				.add(Restrictions.eq("commit", commit))
-				.add(Restrictions.eq("file", file))
+				.add(Restrictions.eq("position.filePath", filePath))
 				.addOrder(Order.asc("id")), 0, 0);
 	}
 

@@ -22,6 +22,9 @@ import org.apache.wicket.model.Model;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.manager.CommitCommentManager;
+import com.pmease.gitplex.core.model.CommitComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.web.component.user.AvatarMode;
@@ -71,8 +74,9 @@ public class UpdateCommitsPanel extends Panel {
 		}) {
 
 			@Override
-			protected void populateItem(ListItem<Commit> item) {
+			protected void populateItem(final ListItem<Commit> item) {
 				Commit commit = item.getModelObject();
+				
 				item.add(new PersonLink("author", Model.of(commit.getAuthor()), AvatarMode.NAME_AND_AVATAR));
 
 				item.add(new Label("message", commit.getSubject()));
@@ -86,6 +90,17 @@ public class UpdateCommitsPanel extends Panel {
 				link.add(new Label("sha", GitUtils.abbreviateSHA(commit.getHash())));
 				
 				item.add(link);
+				
+				item.add(new CommentThreadPanel("threads", new LoadableDetachableModel<List<CommitComment>>() {
+
+					@Override
+					protected List<CommitComment> load() {
+						CommitCommentManager manager = GitPlex.getInstance(CommitCommentManager.class);
+						return manager.findByCommit(getUpdate().getRequest().getTarget().getRepository(), 
+								item.getModelObject().getHash());
+					}
+					
+				}));
 				
 				final List<Verification> verifications = new ArrayList<>();
 				for (Verification verification: getUpdate().getRequest().getVerifications()) {

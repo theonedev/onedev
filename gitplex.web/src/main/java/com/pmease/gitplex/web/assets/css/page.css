@@ -801,7 +801,7 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 .table-diff .new.line.content>td.line-no {background: #89FB89; color: #007f00;}
 .table-diff .new.line.content .emphasize {background: #07C907;}
 .table-diff .line.content:hover {background: #fea; } 
-.table-diff .line.content:hover .line-no {background: #FBDE6D;}
+.table-diff .line.content:hover>td.line-no {background: #FBDE6D;}
 .table-diff .add-comment {position: absolute; left:0; margin-left: -20px; width: 20px; height: 20px;
 	text-decoration: none;}
 .table-diff .add-comment .fa {display:none;}
@@ -834,6 +834,11 @@ ul.diff-alerts {padding-left: 12px;}
 .comment-input>.tab-pane {padding: 12px;}
 .comment-input>.tab-head .nav-tabs {padding-left: 12px;}
 .comment-input>.tab-pane>.preview {display: none;}
+
+ul.threads li {border-left: 4px solid #F0F0F0; padding-left: 8px;}
+ul.threads li.unread {border-color: #70AEFA;}
+ul.threads li a {color: #444; cursor: pointer;}
+ul.threads li .markdown {color: #444; margin-top: 4px;}
 
 /* BRANCH CHOICE */
 .affinal-branch-choice .connector {margin: 4px 0 0 0; color: #BBB; font-weight: bold; 
@@ -915,6 +920,9 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail .activities .fa-smile-o {color: #5CB85C;}
 .request-detail .activities .fa-frown-o {color: #D9534F;}
 .request-detail .activities td.detail {border-left: 2px solid #BBB;}
+.request-detail .base-threads {margin: 16px 0 0 0; padding: 8px; border-top: 1px dashed #BBB;}
+.request-detail .base-threads>.title {margin-bottom: 12px;}
+.request-detail .base-threads>.content {margin-left: 6px;}
 
 .request-detail .comparison-base {margin-right: 32px;}
 .request-detail .comparison-choices {border-bottom: 1px dashed #BBB; padding-bottom: 16px;}
@@ -929,22 +937,23 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail .compare-result>tbody>tr>td.nav .panel-heading {white-space: nowrap;}
 .request-detail .compare-result>tbody>tr>td.nav .panel-heading>span {margin-right: 16px;}
 .request-detail .compare-result>tbody>tr>td.content {padding-left: 16px;}
-.request-detail .compare-result a {padding: 2px;}
-.request-detail .compare-result a.active {background: #0F89E7; color: white; border-radius: 2px;}
+.request-detail .compare-result>tbody>tr>td.nav a {padding: 2px;}
+.request-detail .compare-result>tbody>tr>td.nav a.active {background: #0F89E7; color: white; border-radius: 2px;}
 
 .update-commits {margin: 0 0 0 -14px;}
-.update-commits tr>td.handle {
-	background: url("/assets/img/commits.png") no-repeat 0 6px;
+.update-commits tbody>tr>td.handle {
+	background: url("/assets/img/commits.png") no-repeat 0 7px;
 	padding-left: 24px; width: 1px; position: relative;}
-.update-commits tr>td.data.status {width: 1%; text-align: right; vertical-align: middle;}
-.update-commits td.overview, .update-commits td.message {
-	font-family: monospace;}
-.update-commits tbody tr td {border-top: 1px dotted #CCC;}
-.update-commits tbody tr:FIRST-CHILD td, .update-commits tbody tr td.handle {
+.update-commits tbody>tr>td.data.status {width: 1%; text-align: right; vertical-align: top;}
+.update-commits tbody>tr>td.info>.summary {font-family: monospace;}
+.update-commits tbody>tr>td.info>.message {font-size: 12px;}
+.update-commits tbody>tr>td.info>.threads {margin-top: 8px;}
+.update-commits tbody>tr>td {border-top: 1px dotted #CCC; padding: 2px;}
+.update-commits tbody>tr:FIRST-CHILD>td, .update-commits tbody>tr>td.handle {
 	border-top: none;}
-.update-commits td.message, .update-commits td.status {padding-left: 8px;} 
-.update-commits tbody>tr:hover td.data {background: #FCF2CE;}
-.update-commits tr.rebased td, .update-commits tr.merged td {
+.update-commits tbody>tr>td.status {padding-left: 8px;} 
+.update-commits tbody>tr:hover>td.data {background: #FCF2CE;}
+.update-commits tbody>tr.rebased>td, .update-commits tbody>tr.merged>td {
 	color: #999;}  
 .label.verification {cursor: pointer;}
 .label.label-danger.verification:HOVER {background: #972521;}

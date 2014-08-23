@@ -42,6 +42,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.CommitCommentManager;
 import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.model.CommentPosition;
 import com.pmease.gitplex.core.model.CommitComment;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
@@ -157,12 +158,15 @@ public class TextDiffPanel extends Panel {
 	private Map<Integer, List<CommitComment>> mapCommentsToLines(List<CommitComment> comments) {
 		Map<Integer, List<CommitComment>> map = new HashMap<>();
 		for (CommitComment comment: comments) {
-			List<CommitComment> lineComments = map.get(comment.getLine());
-			if (lineComments == null) {
-				lineComments = new ArrayList<>();
-				map.put(comment.getLine(), lineComments);
+			Integer lineNo = comment.getPosition().getLineNo();
+			if (lineNo != null) {
+				List<CommitComment> lineComments = map.get(lineNo);
+				if (lineComments == null) {
+					lineComments = new ArrayList<>();
+					map.put(lineNo, lineComments);
+				}
+				lineComments.add(comment);
 			}
-			lineComments.add(comment);
 		}
 		return map;
 	}
@@ -742,16 +746,17 @@ public class TextDiffPanel extends Panel {
 					CommitComment comment = new CommitComment();
 					comment.setRepository(repoModel.getObject());
 					comment.setUser(GitPlex.getInstance(UserManager.class).getCurrent());
+					comment.setPosition(new CommentPosition());
 					String commit;
 					if (diffLine.getAction() == DiffLine.Action.ADD 
 							|| diffLine.getAction() == DiffLine.Action.EQUAL) {
 						commit = diffInfo.getNewRevision(); 
-						comment.setFile(diffInfo.getNewPath());
-						comment.setLine(diffLine.getNewLineNo());
+						comment.getPosition().setFilePath(diffInfo.getNewPath());
+						comment.getPosition().setLineNo(diffLine.getNewLineNo());
 					} else {
 						commit = diffInfo.getOldRevision();
-						comment.setFile(diffInfo.getOldPath());
-						comment.setLine(diffLine.getOldLineNo());
+						comment.getPosition().setFilePath(diffInfo.getOldPath());
+						comment.getPosition().setLineNo(diffLine.getOldLineNo());
 					}
 					comment.setCommit(commit);
 					comment.setContent(input.getModelObject());
