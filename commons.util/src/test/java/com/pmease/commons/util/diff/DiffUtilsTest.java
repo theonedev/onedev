@@ -224,11 +224,11 @@ public class DiffUtilsTest {
 				"line 6"
 		};
 		Map<Integer, Integer> map = DiffUtils.mapLines(Arrays.asList(original), Arrays.asList(revised));
-		assertTrue(map.get(1) == 1);
-		assertTrue(map.get(2) == null);
-		assertTrue(map.get(3) == 3);
+		assertTrue(map.get(0) == 0);
+		assertTrue(map.get(1) == null);
+		assertTrue(map.get(2) == 2);
+		assertTrue(map.get(3) == 4);
 		assertTrue(map.get(4) == 5);
 		assertTrue(map.get(5) == 6);
-		assertTrue(map.get(6) == 7);
 	}
 }

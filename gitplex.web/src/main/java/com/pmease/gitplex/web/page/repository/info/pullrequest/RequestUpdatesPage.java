@@ -61,7 +61,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 
 						PullRequestUpdate update = item.getModelObject();
 						PageParameters params = RequestComparePage.params4(
-								update.getRequest(), update.getBaseCommit(), update.getHeadCommit(), null);
+								update.getRequest(), update.getBaseCommit(), update.getHeadCommit(), null, null);
 						Link<Void> updateLink = new BookmarkablePageLink<Void>("updateLink", RequestComparePage.class, params);
 						List<PullRequestUpdate> updates = update.getRequest().getSortedUpdates();
 						updateLink.add(new Label("updateNo", updates.size() - updates.indexOf(update)));

@@ -110,7 +110,7 @@ public class GitUtils {
 		
 		String email = raw.substring(pos1 + 1, pos2 - 1);
 		
-		return Git.newPersonIdent(name, email, when);
+		return com.pmease.commons.git.GitUtils.newPersonIdent(name, email, when);
 	}
 	
 }

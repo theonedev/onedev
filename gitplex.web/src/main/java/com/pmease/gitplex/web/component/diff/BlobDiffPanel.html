@@ -1,18 +1,18 @@
 <wicket:panel>
-	<wicket:enclosure child="originalContent">
-		<div class="blob-diff original">
+	<wicket:enclosure child="oldContent">
+		<div class="blob-diff old">
 			<div class="head">
-				<i class="fa fa-minus"></i> <span wicket:id="originalTitle"></span>
+				<i class="fa fa-minus"></i> <span wicket:id="oldTitle"></span>
 			</div>
-			<div wicket:id="originalContent" class="body"></div>
+			<div wicket:id="oldContent" class="body"></div>
 		</div>
 	</wicket:enclosure>
-	<wicket:enclosure child="revisedContent">
-		<div class="blob-diff revised">
+	<wicket:enclosure child="newContent">
+		<div class="blob-diff new">
 			<div class="head">
-				<i class="fa fa-plus"></i> <span wicket:id="revisedTitle"></span>
+				<i class="fa fa-plus"></i> <span wicket:id="newTitle"></span>
 			</div>
-			<div wicket:id="revisedContent" class="body"></div>
+			<div wicket:id="newContent" class="body"></div>
 		</div>
 	</wicket:enclosure>
 	<div wicket:id="blobContent"></div>
@@ -50,11 +50,11 @@
 				<span wicket:id="title"></span>
 			</div>
 			<div class="body">
-				<div class="original line">
+				<div class="old line">
 					<i class="fa fa-minus"></i>
 					<span wicket:id="oldContent"></span>
 				</div>
-				<div class="revised line">
+				<div class="new line">
 					<i class="fa fa-plus"></i>
 					<span wicket:id="newContent"></span>
 				</div>

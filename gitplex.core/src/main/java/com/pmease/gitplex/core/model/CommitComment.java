@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import com.google.common.base.Objects;
 import com.pmease.commons.hibernate.AbstractEntity;
 
 @SuppressWarnings("serial")
@@ -22,12 +23,15 @@ public class CommitComment extends AbstractEntity {
 	@Column(nullable=false)
 	private String commit;
 	
+	@Column(nullable=false)
+	private Date commitDate;
+	
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private User user;
 	
 	@Column(nullable=false)
-	private Date date = new Date();
+	private Date commentDate = new Date();
 
 	@Column(nullable=false)
 	private String content;
@@ -59,12 +63,20 @@ public class CommitComment extends AbstractEntity {
 		this.content = content;
 	}
 
-	public Date getDate() {
-		return date;
+	public Date getCommitDate() {
+		return commitDate;
 	}
 
-	public void setDate(Date date) {
-		this.date = date;
+	public void setCommitDate(Date commitDate) {
+		this.commitDate = commitDate;
+	}
+
+	public Date getCommentDate() {
+		return commentDate;
+	}
+
+	public void setCommentDate(Date commentDate) {
+		this.commentDate = commentDate;
 	}
 
 	public String getCommit() {
@@ -84,4 +96,12 @@ public class CommitComment extends AbstractEntity {
 		this.position = position;
 	}
 
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(CommitComment.class)
+				.add("commit", commit)
+				.add("position", position)
+				.add("content", content)
+				.toString();
+	}
 }

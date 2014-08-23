@@ -81,7 +81,7 @@ public class BlobBlamePage extends RepositoryInfoPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new PathsBreadcrumb("paths", repositoryModel, currentRevision, currentPath));
+		add(new PathsBreadcrumb("paths", repoModel, currentRevision, currentPath));
 		
 		FileBlob blob = getBlob();
 		if (blob.isText()) {

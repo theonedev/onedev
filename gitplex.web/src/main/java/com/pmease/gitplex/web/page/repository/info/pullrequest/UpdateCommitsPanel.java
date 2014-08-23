@@ -1,8 +1,11 @@
 package com.pmease.gitplex.web.page.repository.info.pullrequest;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.wicket.Component;
@@ -22,9 +25,10 @@ import org.apache.wicket.model.Model;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.CommitCommentManager;
+import com.pmease.gitplex.core.comment.CommentThread;
+import com.pmease.gitplex.core.model.CommentPosition;
 import com.pmease.gitplex.core.model.CommitComment;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.web.component.user.AvatarMode;
@@ -91,13 +95,35 @@ public class UpdateCommitsPanel extends Panel {
 				
 				item.add(link);
 				
-				item.add(new CommentThreadPanel("threads", new LoadableDetachableModel<List<CommitComment>>() {
+				item.add(new CommentThreadPanel("threads", new AbstractReadOnlyModel<PullRequest>() {
 
 					@Override
-					protected List<CommitComment> load() {
-						CommitCommentManager manager = GitPlex.getInstance(CommitCommentManager.class);
-						return manager.findByCommit(getUpdate().getRequest().getTarget().getRepository(), 
-								item.getModelObject().getHash());
+					public PullRequest getObject() {
+						return getUpdate().getRequest();
+					}
+					
+				}, new LoadableDetachableModel<List<CommentThread>>() {
+
+					@Override
+					protected List<CommentThread> load() {
+						List<CommitComment> comments = getUpdate().getRequest().getCommitComments()
+								.get(item.getModelObject().getHash());
+						if (comments == null)
+							return new ArrayList<>();
+						else
+							return CommentThread.asThreads(comments);
+					}
+					
+				}, new LoadableDetachableModel<Map<CommentPosition, Date>>() {
+
+					@Override
+					protected Map<CommentPosition, Date> load() {
+						Map<CommentPosition, Date> visits = getUpdate().getRequest().getCommentVisits()
+								.get(item.getModelObject().getHash());
+						if (visits == null)
+							return new HashMap<>();
+						else
+							return visits;
 					}
 					
 				}));

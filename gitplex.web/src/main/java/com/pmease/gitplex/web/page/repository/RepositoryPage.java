@@ -45,7 +45,7 @@ public abstract class RepositoryPage extends AccountPage {
 	
 	public static final String PARAM_PATH = "path";
 
-	protected IModel<Repository> repositoryModel;
+	protected IModel<Repository> repoModel;
 	
 	protected final String currentRevision;
 	
@@ -86,7 +86,7 @@ public abstract class RepositoryPage extends AccountPage {
 						+ getAccount() + "/" + repositoryName);
 		}
 		
-		repositoryModel = new RepositoryModel(repository);
+		repoModel = new RepositoryModel(repository);
 		currentRevision = PathUtils.normalize(params.get(PARAM_REVISION).toString());
 		currentPath = PathUtils.normalize(params.get(PARAM_PATH).toString());
 	}
@@ -199,17 +199,17 @@ public abstract class RepositoryPage extends AccountPage {
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.getSubject().isPermitted(
-				ObjectPermission.ofRepositoryRead(repositoryModel.getObject()));
+				ObjectPermission.ofRepositoryRead(repoModel.getObject()));
 	}
 	
 	public Repository getRepository() {
-		return repositoryModel.getObject();
+		return repoModel.getObject();
 	}
 	
 	@Override
 	protected void onDetach() {
-		if (repositoryModel != null) 
-			repositoryModel.detach();
+		if (repoModel != null) 
+			repoModel.detach();
 		
 		super.onDetach();
 	}

@@ -33,19 +33,8 @@ public abstract class ChangedFilesPanel extends Panel {
 			protected void populateItem(ListItem<Change> item) {
 				Change change = item.getModelObject();
 				WebMarkupContainer link = newBlobLink("link", change);
-				if (change.getStatus() == Change.Status.ADDED) {
-					link.add(new Label("label", change.getNewPath()));
-					link.add(AttributeAppender.append("title", "Added"));
-				} else if (change.getStatus() == Change.Status.DELETED) {
-					link.add(new Label("label", change.getOldPath()));
-					link.add(AttributeAppender.append("title", "Deleted"));
-				} else if (change.getStatus() == Change.Status.MODIFIED) {
-					link.add(new Label("label", change.getNewPath()));
-					link.add(AttributeAppender.append("title", "Modified"));
-				} else {
-					link.add(new Label("label", change.getNewPath()));
-					link.add(AttributeAppender.append("title", "Renamed from " + change.getOldPath()));
-				}
+				link.add(new Label("label", change.getPath()));
+				link.add(AttributeAppender.append("title", change.getHint()));
 				item.add(link);
 				item.add(AttributeAppender.append("class", " file " + change.getStatus().name().toLowerCase()));
 			}

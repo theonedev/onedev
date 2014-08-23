@@ -43,7 +43,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	private Collection<CommitComment> commitComments = new ArrayList<>();
 
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-	private Collection<ThreadVisit> threadVisits = new ArrayList<>();
+	private Collection<CommentVisit> threadVisits = new ArrayList<>();
 
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<Membership> memberships = new ArrayList<>();
@@ -129,11 +129,11 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.commitComments = commitComments;
 	}
 
-	public Collection<ThreadVisit> getThreadVisits() {
+	public Collection<CommentVisit> getThreadVisits() {
 		return threadVisits;
 	}
 
-	public void setThreadVisits(Collection<ThreadVisit> threadVisits) {
+	public void setThreadVisits(Collection<CommentVisit> threadVisits) {
 		this.threadVisits = threadVisits;
 	}
 

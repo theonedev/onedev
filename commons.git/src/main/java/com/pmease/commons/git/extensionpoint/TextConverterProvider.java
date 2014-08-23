@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.extensionpoint;
+package com.pmease.commons.git.extensionpoint;
 
 import javax.annotation.Nullable;
 import org.apache.tika.mime.MediaType;

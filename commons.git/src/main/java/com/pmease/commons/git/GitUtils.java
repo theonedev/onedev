@@ -1,9 +1,12 @@
 package com.pmease.commons.git;
 
+import java.util.Date;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.util.SystemReader;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -42,6 +45,11 @@ public class GitUtils {
 			return "Symbol link";
 		else 
 			return "Folder";
+	}
+
+	public static PersonIdent newPersonIdent(String name, String email, Date when) {
+		return new PersonIdent(name, email, when.getTime(), 
+				SystemReader.getInstance().getTimezone(when.getTime()));
 	}
 	
 }

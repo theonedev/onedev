@@ -8,6 +8,8 @@ import javax.persistence.Embeddable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import com.google.common.base.Objects;
+
 @SuppressWarnings("serial")
 @Embeddable
 public class CommentPosition implements Serializable {
@@ -16,7 +18,15 @@ public class CommentPosition implements Serializable {
 	
 	private Integer lineNo;
 
-	@Nullable
+	public CommentPosition() {
+		
+	}
+	
+	public CommentPosition(String filePath, Integer lineNo) {
+		this.filePath = filePath;
+		this.lineNo = lineNo;
+	}
+	
 	public String getFilePath() {
 		return filePath;
 	}
@@ -55,4 +65,11 @@ public class CommentPosition implements Serializable {
 			.toHashCode();
 	}		
 	
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(CommentPosition.class)
+				.add("filePath", filePath)
+				.add("lineNo", lineNo)
+				.toString(); 
+	}
 }

@@ -9,7 +9,7 @@ public class GitTextTest {
 
 	@Test
 	public void test() {
-		GitText result = GitText.from(" hello \tworld \t \r".getBytes());
+		BlobText result = BlobText.from(" hello \tworld \t \r".getBytes());
 		assertNotNull(result);
 		assertEquals(" hello \tworld \t ", result.ignoreEOL().getLines().get(0));
 		assertEquals(" hello \tworld", result.ignoreEOLSpaces().getLines().get(0));

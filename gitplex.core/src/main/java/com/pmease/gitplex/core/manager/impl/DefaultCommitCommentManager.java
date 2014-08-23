@@ -1,10 +1,12 @@
 package com.pmease.gitplex.core.manager.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.hibernate.criterion.Conjunction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
@@ -50,6 +52,33 @@ public class DefaultCommitCommentManager implements CommitCommentManager {
 				.add(Restrictions.eq("commit", commit))
 				.add(Restrictions.eq("position.filePath", filePath))
 				.addOrder(Order.asc("id")), 0, 0);
+	}
+
+	@Override
+	public List<CommitComment> findByCommitDates(Repository repository, Date fromDate, Date toDate) {
+		EntityCriteria<CommitComment> criteria = EntityCriteria.of(CommitComment.class);
+		criteria.add(Restrictions.eq("repository", repository));
+		if (fromDate != null)
+			criteria.add(Restrictions.ge("commitDate", fromDate));
+		if (toDate != null)
+			criteria.add(Restrictions.le("commitDate", toDate));
+		criteria.addOrder(Order.asc("id"));
+		return dao.query(criteria, 0, 0);
+	}
+
+	@Override
+	public List<CommitComment> findByCommitOrDates(Repository repository,
+			String commit, Date fromDate, Date toDate) {
+		EntityCriteria<CommitComment> criteria = EntityCriteria.of(CommitComment.class);
+		criteria.add(Restrictions.eq("repository", repository));
+		Conjunction conjunction = Restrictions.conjunction();
+		if (fromDate != null)
+			conjunction.add(Restrictions.ge("commitDate", fromDate));
+		if (toDate != null)
+			conjunction.add(Restrictions.le("commitDate", toDate));
+		criteria.add(Restrictions.or(Restrictions.eq("commit", commit), conjunction));
+		criteria.addOrder(Order.asc("id"));
+		return dao.query(criteria, 0, 0);
 	}
 
 }

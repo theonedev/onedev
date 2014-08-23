@@ -1,6 +1,10 @@
 package com.pmease.gitplex.web.page.repository.info.pullrequest.activity;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -16,8 +20,9 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.comment.CommentThread;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
-import com.pmease.gitplex.core.manager.CommitCommentManager;
+import com.pmease.gitplex.core.model.CommentPosition;
 import com.pmease.gitplex.core.model.CommitComment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.CommentThreadPanel;
@@ -25,16 +30,19 @@ import com.pmease.gitplex.web.page.repository.info.pullrequest.CommentThreadPane
 @SuppressWarnings("serial")
 public class OpenActivityPanel extends Panel {
 
+	private IModel<PullRequest> requestModel;
+	
 	private String description;
 	
-	public OpenActivityPanel(String id, IModel<PullRequest> model) {
-		super(id, model);
+	public OpenActivityPanel(String id, IModel<PullRequest> requestModel) {
+		super(id);
+		this.requestModel = requestModel;
 	}
 	
 	private Fragment renderForView() {
 		Fragment fragment = new Fragment("description", "viewFrag", this);
 
-		description = getPullRequest().getDescription();
+		description = requestModel.getObject().getDescription();
 		if (StringUtils.isNotBlank(description))
 			fragment.add(new MultiLineLabel("content", description));
 		else
@@ -44,7 +52,7 @@ public class OpenActivityPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				description = getPullRequest().getDescription();
+				description = requestModel.getObject().getDescription();
 				
 				Fragment fragment = new Fragment("description", "editFrag", OpenActivityPanel.this);
 				
@@ -81,7 +89,7 @@ public class OpenActivityPanel extends Panel {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						PullRequest request = getPullRequest();
+						PullRequest request = requestModel.getObject();
 						request.setDescription(description);
 						GitPlex.getInstance(Dao.class).persist(request);
 
@@ -113,7 +121,7 @@ public class OpenActivityPanel extends Panel {
 				super.onConfigure();
 				
 				setVisible(GitPlex.getInstance(AuthorizationManager.class)
-						.canModify(getPullRequest()));
+						.canModify(requestModel.getObject()));
 			}
 
 		});
@@ -128,21 +136,39 @@ public class OpenActivityPanel extends Panel {
 		super.onInitialize();
 		add(renderForView());
 
-		add(new CommentThreadPanel("baseThreads", new LoadableDetachableModel<List<CommitComment>>() {
+		add(new CommentThreadPanel("baseThreads", requestModel, new LoadableDetachableModel<List<CommentThread>>() {
 
 			@Override
-			protected List<CommitComment> load() {
-				CommitCommentManager manager = GitPlex.getInstance(CommitCommentManager.class);
-				return manager.findByCommit(getPullRequest().getTarget().getRepository(), 
-						getPullRequest().getBaseCommit());
+			protected List<CommentThread> load() {
+				PullRequest request = requestModel.getObject();
+				List<CommitComment> comments = request.getCommitComments().get(request.getBaseCommit());
+				if (comments == null)
+					return new ArrayList<>();
+				else
+					return CommentThread.asThreads(comments);
+			}
+			
+		}, new LoadableDetachableModel<Map<CommentPosition, Date>>() {
+
+			@Override
+			protected Map<CommentPosition, Date> load() {
+				PullRequest request = requestModel.getObject();
+				Map<CommentPosition, Date> visits = request.getCommentVisits().get(request.getBaseCommit());
+				if (visits == null)
+					return new HashMap<>();
+				else
+					return visits;
 			}
 			
 		}));
 		
 	}
 
-	private PullRequest getPullRequest() {
-		return (PullRequest) getDefaultModelObject();
+	@Override
+	protected void onDetach() {
+		requestModel.detach();
+		
+		super.onDetach();
 	}
 	
 }

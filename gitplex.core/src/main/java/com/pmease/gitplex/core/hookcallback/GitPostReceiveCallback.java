@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.git.Commit;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.manager.BranchManager;
@@ -101,7 +101,7 @@ public class GitPostReceiveCallback extends HttpServlet {
     private void onRefUpdated(Repository repository, String refName, String oldCommitHash, final String newCommitHash) {
 		String branchName = Branch.parseName(refName);
 		if (branchName != null) {
-			if (oldCommitHash.equals(Commit.ZERO_HASH)) {
+			if (oldCommitHash.equals(GitUtils.NULL_SHA1)) {
 				Branch branch = new Branch();
 				branch.setRepository(repository);
 				branch.setName(branchName);
@@ -111,7 +111,7 @@ public class GitPostReceiveCallback extends HttpServlet {
 				dao.persist(branch);
 				if (repository.getBranches().size() == 1) 
 					repository.git().updateDefaultBranch(branchName);
-			} else if (newCommitHash.equals(Commit.ZERO_HASH)) {
+			} else if (newCommitHash.equals(GitUtils.NULL_SHA1)) {
 				Branch branch = branchManager.findBy(repository, branchName);
 				Preconditions.checkNotNull(branch);
 

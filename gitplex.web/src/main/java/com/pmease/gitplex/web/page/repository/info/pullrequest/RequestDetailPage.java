@@ -535,7 +535,7 @@ public abstract class RequestDetailPage extends RepositoryInfoPage implements Co
 					request, 
 					request.getLatestUpdate().getHeadCommit(), 
 					request.getIntegrationInfo().getIntegrationHead(), 
-					null);
+					null, null);
 			
 			Link<Void> link = new BookmarkablePageLink<Void>("preview", RequestComparePage.class, params);
 			link.setVisible(!integrationInfo.getIntegrationHead().equals(integrationInfo.getRequestHead()));

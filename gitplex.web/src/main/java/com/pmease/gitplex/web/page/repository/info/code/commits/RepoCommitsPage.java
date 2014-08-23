@@ -68,7 +68,7 @@ public class RepoCommitsPage extends RepositoryInfoPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new RevisionSelector("revselector", repositoryModel, currentRevision, currentPath));
+		add(new RevisionSelector("revselector", repoModel, currentRevision, currentPath));
 //		BookmarkablePageLink<Void> homeLink = new BookmarkablePageLink<Void>("home", 
 //				SourceTreePage.class, 
 //				PageSpec.forRepository(getRepository()).add(PageSpec.OBJECT_ID, getRevision()));
@@ -90,7 +90,7 @@ public class RepoCommitsPage extends RepositoryInfoPage {
 			}
 		});
 		
-		add(new RepoCommitsPanel("commits", commitsModel, repositoryModel));
+		add(new RepoCommitsPanel("commits", commitsModel, repoModel));
 		add(new BookmarkablePageLink<Void>("newer", RepoCommitsPage.class,
 				paramsOf(getRepository(), getCurrentRevision(), getCurrentPath(), page - 1)).setEnabled(page > 1));
 		add(new BookmarkablePageLink<Void>("older", RepoCommitsPage.class,

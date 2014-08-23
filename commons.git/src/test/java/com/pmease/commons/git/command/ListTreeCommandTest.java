@@ -10,6 +10,7 @@ import org.eclipse.jgit.lib.FileMode;
 import org.junit.Test;
 
 import com.pmease.commons.git.AbstractGitTest;
+import com.pmease.commons.git.BlobInfo;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.commons.util.FileUtils;
@@ -50,7 +51,8 @@ public class ListTreeCommandTest extends AbstractGitTest {
 		assertEquals(FileMode.TYPE_TREE, treeNodes.get(0).getMode());
 		
 		TreeNode node = treeNodes.get(6);
-		String submoduleInfo = new String(bareGit.read("master", node.getPath(), node.getMode()));
+		BlobInfo blobInfo = new BlobInfo("master", node.getPath(), node.getMode());
+		String submoduleInfo = new String(bareGit.readBlob(blobInfo));
 		String submodulePath = new File(StringUtils.substringBeforeLast(submoduleInfo, ":")).getCanonicalPath();
 		String submoduleCommit = StringUtils.substringAfterLast(submoduleInfo, ":");
 		assertEquals(moduleGit.repoDir().getAbsolutePath(), submodulePath);
@@ -64,7 +66,8 @@ public class ListTreeCommandTest extends AbstractGitTest {
 		assertEquals("file", treeNodes.get(0).getName());
 		
 		TreeNode fileNode = treeNodes.get(0);
-		assertEquals("hello world", new String(bareGit.read("master", fileNode.getPath(), fileNode.getMode())));
+		blobInfo = new BlobInfo("master", fileNode.getPath(), fileNode.getMode());
+		assertEquals("hello world", new String(bareGit.readBlob(blobInfo)));
 	}
 
 }

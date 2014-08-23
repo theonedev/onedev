@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.extensionpoint;
+package com.pmease.commons.git.extensionpoint;
 
 import java.util.List;
 

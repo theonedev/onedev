@@ -814,15 +814,15 @@ ul.diff-alerts {padding-left: 12px;}
 .blob-diff>.head {border-bottom: 1px solid #BBB; padding: 4px 8px; font-size: 16px; 
 	border-radius: 4px 4px 0 0; background: #F2F2F2;}
 .blob-diff>.body {padding: 8px;}
-.blob-diff.original {margin-bottom: 16px;}
-.blob-diff.original, .blob-diff.original>.head {border-color: #FC9494;}
-.blob-diff.revised, .blob-diff.revised>.head {border-color: #07C707;}
-.blob-diff.original>.head {color: #FA5A5A; background: #FDBFBF;}
-.blob-diff.revised>.head {color: #059505; background: #B6F8A2;}
+.blob-diff.old {margin-bottom: 16px;}
+.blob-diff.old, .blob-diff.old>.head {border-color: #FC9494;}
+.blob-diff.new, .blob-diff.new>.head {border-color: #07C707;}
+.blob-diff.old>.head {color: #FA5A5A; background: #FDBFBF;}
+.blob-diff.new>.head {color: #059505; background: #B6F8A2;}
 .blob-diff .line {padding: 4px 8px;}
 .blob-diff .line>.fa {width: 16px;}
-.blob-diff .original.line {background: #FCA6A6; color: #8f0000;}
-.blob-diff .revised.line {background: #B6F8A2; color: #007f00;}
+.blob-diff .old.line {background: #FCA6A6; color: #8f0000;}
+.blob-diff .new.line {background: #B6F8A2; color: #007f00;}
 
 /* DIFF STAT */
 .diff-stat {font-family: 'PontIcons'; color: #ddd; }
@@ -838,7 +838,7 @@ ul.diff-alerts {padding-left: 12px;}
 ul.threads li {border-left: 4px solid #F0F0F0; padding-left: 8px;}
 ul.threads li.unread {border-color: #70AEFA;}
 ul.threads li a {color: #444; cursor: pointer;}
-ul.threads li .markdown {color: #444; margin-top: 4px;}
+ul.threads li .markdown {color: #888; margin-top: 4px;}
 
 /* BRANCH CHOICE */
 .affinal-branch-choice .connector {margin: 4px 0 0 0; color: #BBB; font-weight: bold; 
@@ -924,21 +924,21 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail .base-threads>.title {margin-bottom: 12px;}
 .request-detail .base-threads>.content {margin-left: 6px;}
 
-.request-detail .comparison-base {margin-right: 32px;}
-.request-detail .comparison-choices {border-bottom: 1px dashed #BBB; padding-bottom: 16px;}
+.request-detail .compare>.head .original {margin-right: 32px;}
+.request-detail .compare>.head {border-bottom: 1px dashed #BBB; padding-bottom: 16px;}
 .content>.commit-choice {max-height: 600px; padding: 8px 0; overflow-y: scroll;}
 .content>.commit-choice a {text-decoration: none; color: #333; display: block; padding: 8px;}
 .content>.commit-choice li {border-bottom: 1px dotted #BBB;}
 .content>.commit-choice li:hover {background: #FDF2C3;}
 .content>.commit-choice a .name {font-family: Consolas, 'Liberation Mono', Courier, monospace;}
 .content>.commit-choice a .subject {font-size: 12px; color: #999;} 
-.request-detail .compare-result {margin-top: 16px;}
-.request-detail .compare-result>tbody>tr>td.nav {width: 1%;}
-.request-detail .compare-result>tbody>tr>td.nav .panel-heading {white-space: nowrap;}
-.request-detail .compare-result>tbody>tr>td.nav .panel-heading>span {margin-right: 16px;}
-.request-detail .compare-result>tbody>tr>td.content {padding-left: 16px;}
-.request-detail .compare-result>tbody>tr>td.nav a {padding: 2px;}
-.request-detail .compare-result>tbody>tr>td.nav a.active {background: #0F89E7; color: white; border-radius: 2px;}
+.request-detail .compare>.body {margin-top: 16px;}
+.request-detail .compare>.body>tbody>tr>td.nav {width: 1%;}
+.request-detail .compare>.body>tbody>tr>td.nav .panel-heading {white-space: nowrap;}
+.request-detail .compare>.body>tbody>tr>td.nav .panel-heading>span {margin-right: 16px;}
+.request-detail .compare>.body>tbody>tr>td.content {padding-left: 16px;}
+.request-detail .compare>.body>tbody>tr>td.nav a {padding: 2px;}
+.request-detail .compare>.body>tbody>tr>td.nav a.active {background: #0F89E7; color: white; border-radius: 2px;}
 
 .update-commits {margin: 0 0 0 -14px;}
 .update-commits tbody>tr>td.handle {

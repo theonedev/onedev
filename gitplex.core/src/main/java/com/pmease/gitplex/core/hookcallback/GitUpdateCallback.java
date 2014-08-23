@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.git.Commit;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
@@ -117,13 +117,13 @@ public class GitUpdateCallback extends HttpServlet {
 		} else {
 			String branchName = Branch.parseName(refName);
 			if (branchName != null) { // push branch ref 
-				if (oldCommitHash.equals(Commit.ZERO_HASH)) { // create new branch
+				if (oldCommitHash.equals(GitUtils.NULL_SHA1)) { // create new branch
 					checkRef(user, repository, refName, output);
 				} else {
 					Branch branch = branchManager.findBy(repository, branchName);
 					Preconditions.checkNotNull(branch);
 
-					if (newCommitHash.equals(Commit.ZERO_HASH)) { // deleting a branch ref
+					if (newCommitHash.equals(GitUtils.NULL_SHA1)) { // deleting a branch ref
 						GateKeeper gateKeeper = repository.getGateKeeper();
 						CheckResult checkResult = gateKeeper.checkBranch(user, branch);
 						
@@ -141,7 +141,7 @@ public class GitUpdateCallback extends HttpServlet {
 							List<String> messages = new ArrayList<>();
 							for (String each: checkResult.getReasons())
 								messages.add(each);
-							if (!newCommitHash.equals(Commit.ZERO_HASH) && !(checkResult instanceof Disapproved)) {
+							if (!newCommitHash.equals(GitUtils.NULL_SHA1) && !(checkResult instanceof Disapproved)) {
 								messages.add("");
 								messages.add("----------------------------------------------------");
 								messages.add("You may submit a pull request instead.");

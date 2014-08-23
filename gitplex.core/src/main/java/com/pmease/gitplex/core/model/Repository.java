@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -20,21 +22,24 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.validator.constraints.NotEmpty;
+
+import com.google.common.base.Optional;
+import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.git.BlobInfo;
+import com.pmease.commons.git.Git;
+import com.pmease.commons.git.BlobText;
+import com.pmease.commons.hibernate.AbstractEntity;
+import com.pmease.commons.loader.AppLoader;
+import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.AndGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
+import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.permission.object.ProtectedObject;
 import com.pmease.gitplex.core.permission.object.UserBelonging;
 import com.pmease.gitplex.core.validation.RepositoryName;
-
-import org.hibernate.validator.constraints.NotEmpty;
-
-import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.git.Git;
-import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.commons.loader.AppLoader;
-import com.pmease.commons.util.FileUtils;
 
 @Entity
 @Table(uniqueConstraints={
@@ -82,13 +87,17 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	private Collection<CommitComment> commitComments = new ArrayList<>();
 
 	@OneToMany(mappedBy="repository", cascade=CascadeType.REMOVE)
-	private Collection<ThreadVisit> threadVisits = new ArrayList<>();
+	private Collection<CommentVisit> threadVisits = new ArrayList<>();
 
 	@OneToMany(mappedBy="repository", cascade=CascadeType.REMOVE)
     private Collection<Branch> branches = new ArrayList<>();
 
     @OneToMany(mappedBy="forkedFrom")
 	private Collection<Repository> forks = new ArrayList<>();
+    
+    private transient Map<BlobInfo, byte[]> blobContents = new HashMap<>();
+    
+    private transient Map<BlobInfo, Optional<BlobText>> blobTexts = new HashMap<>(); 
     
 	public User getOwner() {
 		return owner;
@@ -177,11 +186,11 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		this.commitComments = commitComments;
 	}
 
-	public Collection<ThreadVisit> getThreadVisits() {
+	public Collection<CommentVisit> getThreadVisits() {
 		return threadVisits;
 	}
 
-	public void setThreadVisits(Collection<ThreadVisit> threadVisits) {
+	public void setThreadVisits(Collection<CommentVisit> threadVisits) {
 		this.threadVisits = threadVisits;
 	}
 
@@ -342,4 +351,47 @@ public class Repository extends AbstractEntity implements UserBelonging {
 			return getDefaultBranch();
 	}
 	
+	/**
+	 * Read blob content and cache result in repository in case the same blob 
+	 * content is requested again.
+	 * 
+	 * @param blobInfo
+	 * 			info of the blob
+	 * @return
+	 * 			content of the blob
+	 */
+	public byte[] getBlobContent(BlobInfo blobInfo) {
+		byte[] blobContent = blobContents.get(blobInfo);
+		if (blobContent == null) {
+			blobContent = git().readBlob(blobInfo);
+			blobContents.put(blobInfo, blobContent);
+		}
+		return blobContent;
+	}
+	
+	/**
+	 * Read blob content as text and cache result in repository in case the same 
+	 * blob text is requested again.
+	 * 
+	 * @param commit
+	 * 			commit of the blob
+	 * @param blobPath
+	 * 			path of the blob
+	 * @param blobMode
+	 * 			mode of the blob
+	 * @return
+	 * 			text of the blob, or <tt>null</tt> if the blob content can not be 
+	 * 			converted to text
+	 */
+	@Nullable
+	public BlobText getBlobText(BlobInfo blobInfo) {
+		Optional<BlobText> optional = blobTexts.get(blobInfo);
+		if (optional == null) {
+			byte[] blobContent = getBlobContent(blobInfo);
+			optional = Optional.fromNullable(BlobText.from(blobContent, blobInfo.getPath(), blobInfo.getMode()));
+			blobTexts.put(blobInfo, optional);
+		}
+		return optional.orNull();
+	}
+
 }

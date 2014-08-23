@@ -62,10 +62,10 @@ public class RepoTreePage extends RepositoryInfoPage {
 			}
 		};
 		
-		add(new RepoDescribePanel("description", repositoryModel).setVisible(getCurrentPath() != null));
-		add(new SourceBreadcrumbPanel("breadcrumb", repositoryModel, currentRevision, currentPath));
-		add(new RepoTreePanel("tree", repositoryModel, currentRevision, currentPath, nodesModel));
-		add(new ReadmePanel("readme", repositoryModel, currentRevision, nodesModel));
+		add(new RepoDescribePanel("description", repoModel).setVisible(getCurrentPath() != null));
+		add(new SourceBreadcrumbPanel("breadcrumb", repoModel, currentRevision, currentPath));
+		add(new RepoTreePanel("tree", repoModel, currentRevision, currentPath, nodesModel));
+		add(new ReadmePanel("readme", repoModel, currentRevision, nodesModel));
 	}
 	
 	@Override

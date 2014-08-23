@@ -2,18 +2,19 @@ package com.pmease.gitplex.web.component.view;
 
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.pmease.commons.git.GitText;
+import com.pmease.commons.git.BlobInfo;
+import com.pmease.commons.git.BlobText;
 
 @SuppressWarnings("serial")
 public class TextViewPanel extends Panel {
 
 	@SuppressWarnings("unused")
-	private final BlobRenderInfo blobInfo;
+	private final BlobInfo blobInfo;
 	
 	@SuppressWarnings("unused")
-	private final GitText blobText;
+	private final BlobText blobText;
 	
-	public TextViewPanel(String id, BlobRenderInfo blobInfo, GitText blobText) {
+	public TextViewPanel(String id, BlobInfo blobInfo, BlobText blobText) {
 		super(id);
 		
 		this.blobInfo = blobInfo;

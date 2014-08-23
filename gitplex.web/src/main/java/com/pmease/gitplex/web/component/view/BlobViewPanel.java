@@ -6,7 +6,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.lib.FileMode;
 
-import com.pmease.commons.git.GitText;
+import com.pmease.commons.git.BlobInfo;
+import com.pmease.commons.git.BlobText;
 import com.pmease.commons.util.MediaTypes;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
@@ -20,30 +21,26 @@ public class BlobViewPanel extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
-	private final BlobRenderInfo blobInfo;
+	private final BlobInfo blobInfo;
 	
-	private final IModel<byte[]> blobContentModel;
-	
-	public BlobViewPanel(String id, IModel<Repository> repoModel, BlobRenderInfo blobInfo, 
-			IModel<byte[]> blobContentModel) {
+	public BlobViewPanel(String id, IModel<Repository> repoModel, BlobInfo blobInfo) {
 		super(id);
 	
 		this.repoModel = repoModel;
 		this.blobInfo = blobInfo;
-		this.blobContentModel = blobContentModel;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		byte[] content = blobContentModel.getObject();
+		byte[] content = repoModel.getObject().getBlobContent(blobInfo);
 		if (blobInfo.getMode() == FileMode.TYPE_GITLINK) {
 			add(new GitLink("blob", new String(content)));
 		} else if (blobInfo.getMode() == FileMode.TYPE_SYMLINK) {
 			add(new SymbolLink("blob", repoModel, blobInfo.getRevision(), 
 					blobInfo.getPath(), new String(content)));
-		} else if (blobContentModel.getObject().length == 0) {
+		} else if (content.length == 0) {
 			add(new Label("blob", "<i class='fa fa-info-circle'></i> <em>File is empty</em>").setEscapeModelStrings(false));
 		} else {
 			final MediaType mediaType = MediaTypes.detectFrom(content, blobInfo.getPath());
@@ -54,9 +51,9 @@ public class BlobViewPanel extends Panel {
 					break;
 			}
 			if (renderer != null) {
-				add(renderer.render("blob", blobInfo, blobContentModel));
+				add(renderer.render("blob", repoModel, blobInfo));
 			} else {
-				GitText text = GitText.from(content);
+				BlobText text = repoModel.getObject().getBlobText(blobInfo);
 				if (text != null) {
 					add(new TextViewPanel("blob", blobInfo, text));
 				} else {
@@ -70,7 +67,6 @@ public class BlobViewPanel extends Panel {
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
-		blobContentModel.detach();
 		super.onDetach();
 	}
 

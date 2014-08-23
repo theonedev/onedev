@@ -78,7 +78,7 @@ public class RepoBlobPage extends RepositoryInfoPage {
 	public void onInitialize() {
 		super.onInitialize();
 		
-		add(new SourceBreadcrumbPanel("breadcrumb", repositoryModel, currentRevision, currentPath));
+		add(new SourceBreadcrumbPanel("breadcrumb", repoModel, currentRevision, currentPath));
 		
 		add(new Label("shortMessage", new AbstractReadOnlyModel<String>() {
 

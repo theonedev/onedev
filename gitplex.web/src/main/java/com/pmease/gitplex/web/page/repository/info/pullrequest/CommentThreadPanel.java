@@ -1,9 +1,6 @@
 package com.pmease.gitplex.web.page.repository.info.pullrequest;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,13 +11,13 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.ThreadVisitManager;
+import com.pmease.gitplex.core.comment.CommentThread;
 import com.pmease.gitplex.core.model.CommentPosition;
 import com.pmease.gitplex.core.model.CommitComment;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.markdown.MarkdownPanel;
 import com.pmease.gitplex.web.component.user.AvatarByUser;
@@ -29,51 +26,20 @@ import com.pmease.gitplex.web.model.UserModel;
 @SuppressWarnings("serial")
 public class CommentThreadPanel extends Panel {
 
-	private final IModel<List<CommitComment>> commentsModel;
+	private final IModel<PullRequest> requestModel;
 	
 	private final IModel<List<CommentThread>> threadsModel;
 	
 	private final IModel<Map<CommentPosition, Date>> visitsModel;
 	
-	public CommentThreadPanel(String id, final IModel<List<CommitComment>> commentsModel) {
+	public CommentThreadPanel(String id, final IModel<PullRequest> requestModel, 
+			final IModel<List<CommentThread>> threadsModel, 
+			final IModel<Map<CommentPosition, Date>> visitsModel) {
 		super(id);
 		
-		this.commentsModel = commentsModel;
-		
-		threadsModel = new LoadableDetachableModel<List<CommentThread>>() {
-
-			@Override
-			protected List<CommentThread> load() {
-				Map<CommentPosition, List<CommitComment>> threadMap = new HashMap<>(); 
-				for (CommitComment comment: commentsModel.getObject()) {
-					List<CommitComment> threadComments = threadMap.get(comment.getPosition());
-					if (threadComments == null) {
-						threadComments = new ArrayList<>();
-						threadMap.put(comment.getPosition(), threadComments);
-					}
-					threadComments.add(comment);
-				}
-				
-				List<CommentThread> threads = new ArrayList<>();
-				for (Map.Entry<CommentPosition, List<CommitComment>> entry: threadMap.entrySet()) 
-					threads.add(new CommentThread(entry.getKey(), entry.getValue()));
-				
-				Collections.sort(threads);
-				return threads;
-			}
-			
-		};
-		
-		visitsModel = new LoadableDetachableModel<Map<CommentPosition, Date>>() {
-
-			@Override
-			protected Map<CommentPosition, Date> load() {
-				CommitComment aComment = commentsModel.getObject().get(0);
-				return GitPlex.getInstance(ThreadVisitManager.class).calcVisitMap(
-						aComment.getRepository(), aComment.getCommit());
-			}
-			
-		};
+		this.requestModel = requestModel;
+		this.visitsModel = visitsModel;
+		this.threadsModel = threadsModel;
 	}
 
 	@Override
@@ -96,7 +62,10 @@ public class CommentThreadPanel extends Panel {
 						} else if (thread.getPosition().getLineNo() == null) {
 							// TODO: navigate to commit file comments page
 						} else {
-							
+							PageParameters params = RequestComparePage.params4(
+									requestModel.getObject(), 
+									null, null, null, thread.getLastComment().getId());
+							setResponsePage(RequestComparePage.class, params);
 						}
 					}
 					
@@ -113,12 +82,12 @@ public class CommentThreadPanel extends Panel {
 					link.add(new Label("position", "line " + thread.getPosition().getLineNo() + " of file " + thread.getPosition().getFilePath()));
 				}
 				
-				link.add(new AgeLabel("age", Model.of(thread.getLastComment().getDate())));
+				link.add(new AgeLabel("age", Model.of(thread.getLastComment().getCommentDate())));
 
 				int unread = 0;
 				for (CommitComment comment: thread.getComments()) {
 					Date lastVisit = visitsModel.getObject().get(thread.getPosition());
-					if (lastVisit == null || comment.getDate().after(lastVisit)) 
+					if (lastVisit == null || comment.getCommentDate().after(lastVisit)) 
 						unread++;
 				}
 				link.add(new Label("unread", unread));
@@ -143,7 +112,7 @@ public class CommentThreadPanel extends Panel {
 
 	@Override
 	protected void onDetach() {
-		commentsModel.detach();
+		requestModel.detach();
 		threadsModel.detach();
 		visitsModel.detach();
 		

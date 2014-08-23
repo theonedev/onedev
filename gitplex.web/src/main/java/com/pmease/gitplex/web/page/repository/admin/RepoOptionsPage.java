@@ -97,12 +97,12 @@ public class RepoOptionsPage extends RepoAdminPage {
 					}
 				}));
 		form.add(new TextFieldElement<String>("description", "Description", 
-				new PropertyModel<String>(repositoryModel, "description"))
+				new PropertyModel<String>(repoModel, "description"))
 				.add(new PropertyValidator<String>())
 				.setRequired(false));
 		
 		form.add(new CheckBoxElement("forkable", "Allow Forks",
-				new PropertyModel<Boolean>(repositoryModel, "forkable"),
+				new PropertyModel<Boolean>(repoModel, "forkable"),
 				Model.of("Enable/Disable whether this repository can be forked by others")));
 		
 		// Default branch is recorded in HEAD ref of the repository, since no any branches exist in 

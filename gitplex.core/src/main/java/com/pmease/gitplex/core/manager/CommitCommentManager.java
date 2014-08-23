@@ -1,6 +1,9 @@
 package com.pmease.gitplex.core.manager;
 
+import java.util.Date;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 import com.google.inject.ImplementedBy;
 import com.pmease.gitplex.core.manager.impl.DefaultCommitCommentManager;
@@ -47,4 +50,22 @@ public interface CommitCommentManager {
 	 * 			list of comments ordered by id
 	 */
 	List<CommitComment> findByCommitAndFile(Repository repository, String commit, String file);
+	
+	/**
+	 * Find comments by specified commit date range.
+	 * 
+	 * @param repository
+	 * 			repository to find comment inside
+	 * @param fromDate
+	 * 			from date of associated commit
+	 * @param toDate
+	 * 			to date of associated commit
+	 * @return
+	 * 			list of found comments ordered by id
+	 */
+	List<CommitComment> findByCommitDates(Repository repository, @Nullable Date fromDate, @Nullable Date toDate);
+	
+	List<CommitComment> findByCommitOrDates(Repository repository, String commit, 
+			@Nullable Date fromDate, @Nullable Date toDate);
+
 }

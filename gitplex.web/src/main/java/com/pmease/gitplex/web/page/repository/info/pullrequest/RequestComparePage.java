@@ -1,7 +1,10 @@
 package com.pmease.gitplex.web.page.repository.info.pullrequest;
 
+import static com.pmease.commons.git.Change.Status.UNCHANGED;
+
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,17 +34,25 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.git.BlobInfo;
+import com.pmease.commons.git.BlobText;
 import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.RevAwareChange;
 import com.pmease.commons.git.TreeNode;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.comment.BlobLoader;
+import com.pmease.gitplex.core.comment.ChangeComments;
+import com.pmease.gitplex.core.comment.CommentLoader;
+import com.pmease.gitplex.core.model.CommitComment;
 import com.pmease.gitplex.core.model.IntegrationInfo;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.web.component.diff.BlobDiffInfo;
 import com.pmease.gitplex.web.component.diff.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.ChangedFilesPanel;
 import com.pmease.gitplex.web.component.diff.DiffTreePanel;
@@ -49,15 +60,25 @@ import com.pmease.gitplex.web.component.diff.DiffTreePanel;
 @SuppressWarnings("serial")
 public class RequestComparePage extends RequestDetailPage {
 
-	// base commit represents comparison base
-	private String baseCommit;
+	private String originalCommit;
 	
-	// head commit represents comparison head
-	private String headCommit;
+	private String revisedCommit;
 	
 	private String filePath;
 	
+	private Long commentId;
+	
 	private boolean changedOnly = true;
+	
+	private IModel<CommitComment> commentModel = new LoadableDetachableModel<CommitComment>() {
+
+		@Override
+		protected CommitComment load() {
+			Preconditions.checkNotNull(commentId);
+			return GitPlex.getInstance(Dao.class).load(CommitComment.class, commentId);
+		}
+		
+	};
 	
 	// map commit name to comit hash
 	private IModel<Map<String, CommitDescription>> commitsModel = 
@@ -111,53 +132,61 @@ public class RequestComparePage extends RequestDetailPage {
 
 		@Override
 		protected List<Change> load() {
-			return getRepository().git().listFileChanges(baseCommit, headCommit, null, true);
+			return getRepository().git().listFileChanges(originalCommit, revisedCommit, null, true);
 		}
 		
 	};
 	
 	public RequestComparePage(PageParameters params) {
 		super(params);
-		
-		baseCommit = params.get("base").toString();
-		headCommit = params.get("head").toString();
-		
-		if (baseCommit != null) {
-			if (!commitsModel.getObject().containsKey(baseCommit))
-				throw new IllegalArgumentException("Commit '" + baseCommit + "' is not relevant to current pull request.");
-		} else {
-			baseCommit = getPullRequest().getBaseCommit();
-		}
-		if (headCommit != null) {
-			if (!commitsModel.getObject().containsKey(headCommit))
-				throw new IllegalArgumentException("Commit '" + headCommit + "' is not relevant to current pull request.");
-		} else {
-			headCommit = getPullRequest().getLatestUpdate().getHeadCommit();
-		}
-		
-		filePath = params.get("path").toString();
-	}
 
+		filePath = params.get("path").toString();
+		commentId = params.get("comment").toLongObject();
+		
+		originalCommit = params.get("original").toString();
+		revisedCommit = params.get("revised").toString();
+
+		if (!(originalCommit == null && revisedCommit == null || originalCommit != null && revisedCommit != null))
+			throw new IllegalArgumentException("Param 'original' and 'revised' should be specified both or none.");
+
+		if (originalCommit != null) {
+			if (!commitsModel.getObject().containsKey(originalCommit))
+				throw new IllegalArgumentException("Commit '" + originalCommit + "' is not relevant to current pull request.");
+		}
+
+		if (revisedCommit != null) {
+			if (!commitsModel.getObject().containsKey(revisedCommit))
+				throw new IllegalArgumentException("Commit '" + revisedCommit + "' is not relevant to current pull request.");
+		}
+		
+		if (filePath != null && originalCommit == null)
+			throw new IllegalArgumentException("Param 'path' can only be used together with param 'original' and 'revised'.");
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		WebMarkupContainer baseSelector = new WebMarkupContainer("baseSelector");
+		WebMarkupContainer commentActions = new WebMarkupContainer("commentActions");
+		commentActions.setOutputMarkupId(true);
+		add(commentActions);
+		
+		WebMarkupContainer baseSelector = new WebMarkupContainer("originalSelector");
 		add(baseSelector);
 		baseSelector.add(new Label("label", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
-				CommitDescription description = commitsModel.getObject().get(baseCommit);
+				CommitDescription description = commitsModel.getObject().get(originalCommit);
 				Preconditions.checkNotNull(description);
 				if (description.getName() != null)
-					return GitUtils.abbreviateSHA(baseCommit) + " - " + description.getName();
+					return GitUtils.abbreviateSHA(originalCommit) + " - " + description.getName();
 				else
-					return GitUtils.abbreviateSHA(baseCommit);
+					return GitUtils.abbreviateSHA(originalCommit);
 			}
 			
 		}));
-		DropdownPanel baseChoicesDropdown = new DropdownPanel("baseChoices", false) {
+		DropdownPanel baseChoicesDropdown = new DropdownPanel("originalChoices", false) {
 
 			@Override
 			protected Component newContent(String id) {
@@ -172,29 +201,29 @@ public class RequestComparePage extends RequestDetailPage {
 
 			@Override
 			protected String load() {
-				CommitDescription description = commitsModel.getObject().get(baseCommit);
+				CommitDescription description = commitsModel.getObject().get(originalCommit);
 				Preconditions.checkNotNull(description);
 				return description.getSubject();
 			}
 			
 		}));
 		
-		WebMarkupContainer headSelector = new WebMarkupContainer("headSelector");
+		WebMarkupContainer headSelector = new WebMarkupContainer("revisedSelector");
 		add(headSelector);
 		headSelector.add(new Label("label", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
-				CommitDescription description = commitsModel.getObject().get(headCommit);
+				CommitDescription description = commitsModel.getObject().get(revisedCommit);
 				Preconditions.checkNotNull(description);
 				if (description.getName() != null)
-					return GitUtils.abbreviateSHA(headCommit) + " - " + description.getName();
+					return GitUtils.abbreviateSHA(revisedCommit) + " - " + description.getName();
 				else
-					return GitUtils.abbreviateSHA(headCommit);
+					return GitUtils.abbreviateSHA(revisedCommit);
 			}
 			
 		}));
-		DropdownPanel headChoicesDropdown = new DropdownPanel("headChoices", false) {
+		DropdownPanel headChoicesDropdown = new DropdownPanel("revisedChoices", false) {
 
 			@Override
 			protected Component newContent(String id) {
@@ -209,7 +238,7 @@ public class RequestComparePage extends RequestDetailPage {
 
 			@Override
 			protected String load() {
-				CommitDescription description = commitsModel.getObject().get(headCommit);
+				CommitDescription description = commitsModel.getObject().get(revisedCommit);
 				Preconditions.checkNotNull(description);
 				return description.getSubject();
 			}
@@ -228,31 +257,49 @@ public class RequestComparePage extends RequestDetailPage {
 					
 				}));
 		
-		BlobDiffInfo blobDiffInfo = null;
-		List<Change> changes = changesModel.getObject();
-		if (filePath != null) {
-			for (Change change: changes) {
-				if (filePath.equals(change.getOldPath()) || filePath.equals(change.getNewPath())) {
-					blobDiffInfo = new BlobDiffInfo(change, baseCommit, headCommit);
-					break;
+		int lineNo = -1;
+		ChangeComments comments = null;
+		RevAwareChange change = null;
+		if (originalCommit != null) {
+			List<Change> changes = changesModel.getObject();
+			if (filePath != null) {
+				for (Change each: changes) {
+					if (filePath.equals(each.getOldPath()) || filePath.equals(each.getNewPath())) {
+						change = new RevAwareChange(each, originalCommit, revisedCommit);
+						break;
+					}
 				}
-			}
-			if (blobDiffInfo == null) {
-				List<TreeNode> result = getRepository().git().listTree(headCommit, filePath);
-				if (!result.isEmpty() && result.get(0).getMode() != FileMode.TYPE_TREE) {
-					TreeNode blobNode = result.get(0);
-					blobDiffInfo = new BlobDiffInfo(BlobDiffInfo.Status.UNCHANGED, filePath, filePath, 
-							blobNode.getMode(), blobNode.getMode(), baseCommit, headCommit);
+				if (change == null) {
+					List<TreeNode> result = getRepository().git().listTree(revisedCommit, filePath);
+					if (!result.isEmpty() && result.get(0).getMode() != FileMode.TYPE_TREE) {
+						TreeNode blobNode = result.get(0);
+						change = new RevAwareChange(UNCHANGED, filePath, filePath, 
+								blobNode.getMode(), blobNode.getMode(), originalCommit, revisedCommit);
+						changedOnly = false;
+					}
 				}
+			} else {
+				if (commentId != null) {
+					CommitComment comment = commentModel.getObject();
+				}				
+				if (change == null && !changes.isEmpty())
+					change = new RevAwareChange(changes.get(0), originalCommit, revisedCommit);
 			}
+		} else if (commentId == null) {
+			originalCommit = getPullRequest().getBaseCommit();
+			revisedCommit = getPullRequest().getLatestUpdate().getHeadCommit();
 		} else {
-			if (!changes.isEmpty())
-				blobDiffInfo = new BlobDiffInfo(changes.get(0), baseCommit, headCommit);
+			
 		}
-		if (blobDiffInfo != null) 
-			add(new BlobDiffPanel("blobDiff", repositoryModel, blobDiffInfo).setOutputMarkupId(true));
-		else
+
+		if (change != null) {
+			BlobDiffPanel blobDiffPanel = new BlobDiffPanel("blobDiff", repoModel, 
+					change, loadComments(change), lineNo);
+			blobDiffPanel.setOutputMarkupId(true);
+			add(blobDiffPanel);
+		} else {
 			add(new WebMarkupContainer("blobDiff").setOutputMarkupId(true));
+		}
 
 		add(newCompareResultComponent());
 	}
@@ -273,7 +320,7 @@ public class RequestComparePage extends RequestDetailPage {
 				compareResult.setEscapeModelStrings(false);
 			}
 		} else {
-			compareResult = new DiffTreePanel("compareResult", repositoryModel, changesModel, baseCommit, headCommit) {
+			compareResult = new DiffTreePanel("compareResult", repoModel, changesModel, originalCommit, revisedCommit) {
 
 				@Override
 				protected WebMarkupContainer newBlobLink(String id, final Change change) {
@@ -284,9 +331,9 @@ public class RequestComparePage extends RequestDetailPage {
 				protected void onInitialize() {
 					super.onInitialize();
 					
-					BlobDiffInfo blobDiffInfo = getBlobDiffInfo();
-					if (blobDiffInfo != null)
-						reveal(blobDiffInfo);
+					RevAwareChange activeChange = getActiveChange();
+					if (activeChange != null)
+						reveal(activeChange);
 				}
 				
 			};
@@ -295,10 +342,10 @@ public class RequestComparePage extends RequestDetailPage {
 		return compareResult;
 	}
 	
-	private BlobDiffInfo getBlobDiffInfo() {
+	private RevAwareChange getActiveChange() {
 		Component panel = getPage().get("blobDiff");
 		if (panel instanceof BlobDiffPanel)
-			return ((BlobDiffPanel) panel).getBlobDiffInfo();
+			return ((BlobDiffPanel) panel).getChange();
 		else
 			return null;
 	}
@@ -307,17 +354,56 @@ public class RequestComparePage extends RequestDetailPage {
 	public void onDetach() {
 		commitsModel.detach();
 		changesModel.detach();
+		commentModel.detach();
 		
 		super.onDetach();
 	}
+	
+	private ChangeComments loadComments(RevAwareChange change) {
+		BlobLoader blobLoader = new BlobLoader() {
 
-	public static PageParameters params4(PullRequest request, String baseCommit, String headCommit, @Nullable String filePath) {
+			@Override
+			public List<String> loadBlob(BlobInfo blobInfo) {
+				BlobText blobText = repoModel.getObject().getBlobText(blobInfo);
+				return blobText!=null?blobText.getLines():null;
+			}
+			
+		};
+		CommentLoader commentLoader = new CommentLoader() {
+
+			@Override
+			public List<CommitComment> loadComments(String commit) {
+				List<CommitComment> comments = getPullRequest().getCommitComments().get(commit);
+				if (comments == null)
+					return new ArrayList<>();
+				else
+					return comments;
+			}
+			
+		};
+		LinkedHashMap<String, Date> commits = new LinkedHashMap<>();
+		String baseCommit = getPullRequest().getBaseCommit();
+		commits.put(baseCommit, getRepository().git().showRevision(baseCommit).getCommitter().getWhen());
+		for (int i=getPullRequest().getSortedUpdates().size()-1; i>=0; i--) {
+			for (Commit commit: getPullRequest().getSortedUpdates().get(i).getCommits())
+				commits.put(commit.getHash(), commit.getCommitter().getWhen());
+		}
+		
+		return new ChangeComments(change, commits, commentLoader, blobLoader);  
+	}
+
+	public static PageParameters params4(PullRequest request, @Nullable String originalCommit, 
+			@Nullable String revisedCommit, @Nullable String filePath, @Nullable Long commentId) {
 		PageParameters params = RequestDetailPage.params4(request);
 		
-		params.set("base", baseCommit);
-		params.set("head", headCommit);
+		if (originalCommit != null)
+			params.set("original", originalCommit);
+		if (revisedCommit != null)
+			params.set("revised", revisedCommit);
 		if (filePath != null)
 			params.set("path", filePath);
+		if (commentId != null)
+			params.set("comment", commentId);
 		
 		return params;
 	}
@@ -380,10 +466,10 @@ public class RequestComparePage extends RequestDetailPage {
 							Map.Entry<String, CommitDescription> entry = item.getModelObject();
 							if (forBase) {
 								setResponsePage(RequestComparePage.class, 
-										params4(getPullRequest(), entry.getKey(), headCommit, null));
+										params4(getPullRequest(), entry.getKey(), revisedCommit, filePath, commentId));
 							} else {
 								setResponsePage(RequestComparePage.class, 
-										params4(getPullRequest(), baseCommit, entry.getKey(), null));
+										params4(getPullRequest(), originalCommit, entry.getKey(), filePath, commentId));
 							}
 						}
 						
@@ -430,18 +516,21 @@ public class RequestComparePage extends RequestDetailPage {
 		protected void onComponentTag(ComponentTag tag) {
 			super.onComponentTag(tag);
 			
-			BlobDiffInfo blobDiffInfo = getBlobDiffInfo();
-			if (blobDiffInfo != null 
-					&& Objects.equals(change.getOldPath(), blobDiffInfo.getOldPath()) 
-					&& Objects.equals(change.getNewPath(), blobDiffInfo.getNewPath())) {
+			Change activeChange = getActiveChange();
+			if (activeChange != null 
+					&& Objects.equals(change.getOldPath(), activeChange.getOldPath()) 
+					&& Objects.equals(change.getNewPath(), activeChange.getNewPath())) {
 				tag.put("class", "active");
 			}
 		}
 
 		@Override
 		public void onClick(AjaxRequestTarget target) {
-			BlobDiffPanel panel = new BlobDiffPanel("blobDiff", repositoryModel, 
-					new BlobDiffInfo(change, baseCommit, headCommit));
+			filePath = change.getPath();
+			
+			RevAwareChange revAwareChange = new RevAwareChange(change, originalCommit, revisedCommit);
+			BlobDiffPanel panel = new BlobDiffPanel("blobDiff", repoModel, 
+					revAwareChange, loadComments(revAwareChange), -1);
 			panel.setOutputMarkupId(true);
 			RequestComparePage.this.replace(panel);
 			
@@ -451,6 +540,7 @@ public class RequestComparePage extends RequestDetailPage {
 			
 			target.add(panel);
 			target.add(this);
+			target.add(getPage().get("commentActions"));
 		}
 		
 	}

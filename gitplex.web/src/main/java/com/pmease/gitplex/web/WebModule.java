@@ -3,6 +3,8 @@ package com.pmease.gitplex.web;
 import org.apache.tika.mime.MediaType;
 import org.glassfish.jersey.server.ResourceConfig;
 
+import com.pmease.commons.git.extensionpoint.TextConverter;
+import com.pmease.commons.git.extensionpoint.TextConverterProvider;
 import com.pmease.commons.jersey.JerseyConfigurator;
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
@@ -14,8 +16,6 @@ import com.pmease.gitplex.web.extensionpoint.DiffRenderer;
 import com.pmease.gitplex.web.extensionpoint.DiffRendererProvider;
 import com.pmease.gitplex.web.extensionpoint.MediaRenderer;
 import com.pmease.gitplex.web.extensionpoint.MediaRendererProvider;
-import com.pmease.gitplex.web.extensionpoint.TextConverter;
-import com.pmease.gitplex.web.extensionpoint.TextConverterProvider;
 import com.pmease.gitplex.web.page.repository.info.code.blob.renderer.BlobRendererFactory;
 import com.pmease.gitplex.web.resource.ResourceLocator;
 

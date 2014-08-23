@@ -60,7 +60,7 @@ public class RequestActivitiesPage extends RequestDetailPage {
 
 				activities.add(new OpenPullRequest(request));
 				
-				for (PullRequestComment comment: request.getComments()) {
+				for (PullRequestComment comment: request.getRequestComments()) {
 					activities.add(new CommentPullRequest(comment));
 				}
 				

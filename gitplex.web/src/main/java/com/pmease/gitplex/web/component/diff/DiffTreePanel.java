@@ -6,7 +6,6 @@ import java.util.List;
 
 import jersey.repackaged.com.google.common.base.Splitter;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -22,7 +21,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.commons.git.Change;
-import com.pmease.commons.util.WordUtils;
 import com.pmease.gitplex.core.model.Repository;
 
 @SuppressWarnings("serial")
@@ -130,22 +128,12 @@ public abstract class DiffTreePanel extends Panel {
 					link = newBlobLink("link", node.getChange());
 					fragment.add(AttributeAppender.append("class", " file "));
 				}
-				if (node.getChange().getStatus() == Change.Status.RENAMED) {
-					link.add(AttributeAppender.append("title", "Renamed from " + node.getChange().getOldPath()));
-				} else {
-					link.add(AttributeAppender.append("title", 
-							WordUtils.capitalize(node.getChange().getStatus().name().toLowerCase())));
-				}
+				link.add(AttributeAppender.append("title", node.getChange().getHint()));
+				
 				fragment.add(link);
 				fragment.add(AttributeAppender.append("class", node.getChange().getStatus().name().toLowerCase()));
 
-				String name;
-				if (node.getChange().getPath().contains("/"))
-					name = StringUtils.substringAfterLast(node.getChange().getPath(), "/");
-				else
-					name = node.getChange().getPath();
-				
-				link.add(new Label("label", name));
+				link.add(new Label("label", node.getChange().getName()));
 				
 				return fragment;
 			}

@@ -11,6 +11,7 @@ import org.apache.wicket.model.Model;
 import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.git.RevAwareChange;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
@@ -19,30 +20,30 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig
 @SuppressWarnings("serial")
 public class FileDiffTitle extends Panel {
 
-	private final BlobDiffInfo diffInfo;
+	private final RevAwareChange change;
 	
 	private final List<String> alerts;
 	
-	public FileDiffTitle(String id, BlobDiffInfo diffInfo, List<String> alerts) {
+	public FileDiffTitle(String id, RevAwareChange change, List<String> alerts) {
 		super(id);
 		
-		int oldBlobType = diffInfo.getOldMode() & FileMode.TYPE_MASK;
-		int newBlobType = diffInfo.getNewMode() & FileMode.TYPE_MASK;
+		int oldBlobType = change.getOldMode() & FileMode.TYPE_MASK;
+		int newBlobType = change.getNewMode() & FileMode.TYPE_MASK;
 		
 		Preconditions.checkArgument(oldBlobType == FileMode.TYPE_FILE && newBlobType == FileMode.TYPE_FILE);
 		
-		this.diffInfo = diffInfo;
+		this.change = change;
 		
 		this.alerts = new ArrayList<>();
-		if (diffInfo.getOldMode() != diffInfo.getNewMode()) {
-			this.alerts.add("File mode is changed from " + Integer.toString(diffInfo.getOldMode(), 8) 
-					+ " to " + Integer.toString(diffInfo.getNewMode(), 8));
+		if (change.getOldMode() != change.getNewMode()) {
+			this.alerts.add("File mode is changed from " + Integer.toString(change.getOldMode(), 8) 
+					+ " to " + Integer.toString(change.getNewMode(), 8));
 		}
 		if (alerts != null)
 			this.alerts.addAll(alerts);
 	}
 	
-	public FileDiffTitle(String id, BlobDiffInfo diffInfo) {
+	public FileDiffTitle(String id, RevAwareChange diffInfo) {
 		this(id, diffInfo, null);
 	}
 
@@ -50,9 +51,9 @@ public class FileDiffTitle extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Label("renamedTitle", diffInfo.getOldPath())
-				.setVisible(!diffInfo.getOldPath().equals(diffInfo.getNewPath())));
-		add(new Label("title", diffInfo.getNewPath()));
+		add(new Label("renamedTitle", change.getOldPath())
+				.setVisible(!change.getOldPath().equals(change.getNewPath())));
+		add(new Label("title", change.getNewPath()));
 		
 		if (alerts.size() == 0) {
 			add(new WebMarkupContainer("alerts").setVisible(false));

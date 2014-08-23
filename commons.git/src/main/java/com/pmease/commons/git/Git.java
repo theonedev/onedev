@@ -11,7 +11,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -21,8 +20,6 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.util.SystemReader;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.command.AddCommand;
@@ -50,6 +47,7 @@ import com.pmease.commons.git.command.ListTreeCommand;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.git.command.MergeCommand;
 import com.pmease.commons.git.command.MergeCommand.FastForwardMode;
+import com.pmease.commons.git.command.MoveCommand;
 import com.pmease.commons.git.command.ParseRevisionCommand;
 import com.pmease.commons.git.command.PullCommand;
 import com.pmease.commons.git.command.PushCommand;
@@ -276,6 +274,11 @@ public class Git implements Serializable {
 		return this;
 	}
 	
+	public Git mv(String source, String destination) {
+		new MoveCommand(repoDir).source(source).destination(destination).call();
+		return this;
+	}
+
 	public Git clone(String from, boolean bare, boolean shared, boolean noCheckout, @Nullable String branch) {
 		new CloneCommand(repoDir).from(from).bare(bare).shared(shared).noCheckout(noCheckout).branch(branch).call();
 		return this;
@@ -490,17 +493,15 @@ public class Git implements Serializable {
 		return new ShowCommand(repoDir).revision(revision).path(path).call();
 	}
 	
-	public String readSubModule(String revision, String path) {
-		String subModuleUrl = listSubModules(revision).get(path);
-		Preconditions.checkNotNull(subModuleUrl);
-		return subModuleUrl + ":" + listTree(revision, path).iterator().next().getHash();
-	}
-	
-	public byte[] read(String revision, String path, int mode) {
-		if (mode == FileMode.TYPE_GITLINK)
-			return readSubModule(revision, path).getBytes();
-		else
-			return show(revision, path);
+	public byte[] readBlob(BlobInfo blobInfo) {
+		if (blobInfo.getMode() == FileMode.TYPE_GITLINK) {
+			String subModuleUrl = listSubModules(blobInfo.getRevision()).get(blobInfo.getPath());
+			Preconditions.checkNotNull(subModuleUrl);
+			List<TreeNode> result = listTree(blobInfo.getRevision(), blobInfo.getPath());
+			return (subModuleUrl + ":" + result.iterator().next().getHash()).getBytes();
+		} else {
+			return show(blobInfo.getRevision(), blobInfo.getPath());
+		}
 	}
 
 	public List<Commit> log(@Nullable String fromRev, @Nullable String toRev, 
@@ -583,10 +584,5 @@ public class Git implements Serializable {
 	@Override
 	public String toString() {
 		return repoDir.toString();
-	}
-
-	public static PersonIdent newPersonIdent(String name, String email, Date when) {
-		return new PersonIdent(name, email, when.getTime(), 
-				SystemReader.getInstance().getTimezone(when.getTime()));
 	}
 }

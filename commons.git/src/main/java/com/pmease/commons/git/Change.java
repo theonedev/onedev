@@ -1,12 +1,18 @@
 package com.pmease.commons.git;
 
+import static com.pmease.commons.git.Change.Status.RENAMED;
+
 import java.io.Serializable;
 import java.util.StringTokenizer;
+
+import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.util.QuotedString;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.util.WordUtils;
 
 @SuppressWarnings("serial")
 public class Change implements Comparable<Change>, Serializable {
@@ -23,7 +29,7 @@ public class Change implements Comparable<Change>, Serializable {
 	
 	private final int newMode;
 	
-	public Change(Status status, String oldPath, String newPath, int oldMode, int newMode) {
+	public Change(Status status, @Nullable String oldPath, @Nullable String newPath, int oldMode, int newMode) {
 		this.status = status;
 		this.oldPath = oldPath;
 		this.newPath = newPath;
@@ -39,10 +45,12 @@ public class Change implements Comparable<Change>, Serializable {
 		this.newMode = change.newMode;
 	}
 
+	@Nullable
 	public String getOldPath() {
 		return oldPath;
 	}
 	
+	@Nullable
 	public String getNewPath() {
 		return newPath;
 	}
@@ -125,4 +133,19 @@ public class Change implements Comparable<Change>, Serializable {
 			throw new RuntimeException("Unexpected status code: " + statusCode);
 		}
 	}
+	
+	public String getHint() {
+		if (getStatus() == RENAMED)
+			return "Renamed from " + getOldPath();
+		else
+			return WordUtils.capitalize(getStatus().name().toLowerCase());
+	}
+
+	public String getName() {
+		if (getPath().contains("/"))
+			return StringUtils.substringAfterLast(getPath(), "/");
+		else
+			return getPath();
+	}
+	
 }

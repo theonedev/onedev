@@ -17,8 +17,6 @@ import com.google.common.collect.Lists;
 @SuppressWarnings("serial")
 public class Commit extends BriefCommit {
     
-	public static final String ZERO_HASH = "0000000000000000000000000000000000000000"; 
-	
     private final String body;
     
     private final String note;

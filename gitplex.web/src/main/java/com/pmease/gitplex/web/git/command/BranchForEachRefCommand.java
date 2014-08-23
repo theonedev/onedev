@@ -10,7 +10,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.pmease.commons.git.BriefCommit;
-import com.pmease.commons.git.Git;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.gitplex.web.git.GitUtils;
 
@@ -72,10 +71,10 @@ public class BranchForEachRefCommand extends ForEachRefCommand<Map<String, Brief
 			String refname = pieces[i++];
 			String sha = pieces[i++];
 			
-			PersonIdent committer = Git.newPersonIdent(pieces[i++], 
+			PersonIdent committer = com.pmease.commons.git.GitUtils.newPersonIdent(pieces[i++], 
 											  GitUtils.parseEmail(pieces[i++]), 
 											  GitUtils.parseRawDate(pieces[i++]));
-			PersonIdent author = Git.newPersonIdent(pieces[i++], 
+			PersonIdent author = com.pmease.commons.git.GitUtils.newPersonIdent(pieces[i++], 
 										   GitUtils.parseEmail(pieces[i++]), 
 										   GitUtils.parseRawDate(pieces[i++]));
 			

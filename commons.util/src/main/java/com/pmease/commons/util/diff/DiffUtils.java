@@ -153,9 +153,9 @@ public class DiffUtils {
 			} else if (diff.getAction() == DiffLine.Action.DELETE) {
 				originalLine++;
 			} else {
+				lineMapping.put(originalLine, revisedLine);
 				revisedLine++;
 				originalLine++;
-				lineMapping.put(originalLine, revisedLine);
 			}
 		}
 		return lineMapping;

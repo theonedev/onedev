@@ -8,12 +8,17 @@ import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 
 @SuppressWarnings("serial")
 @Entity
-public class ThreadVisit extends AbstractEntity {
+@Table(uniqueConstraints={
+		@UniqueConstraint(columnNames={"repository", "commit", "position.filePath", "position.lineNo"}) 
+})
+public class CommentVisit extends AbstractEntity {
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
@@ -22,12 +27,15 @@ public class ThreadVisit extends AbstractEntity {
 	@Column(nullable=false)
 	private String commit;
 	
+	@Column(nullable=false)
+	private Date commitDate;
+	
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private User user;
 	
 	@Column(nullable=false)
-	private Date date = new Date();
+	private Date visitDate = new Date();
 
 	@Embedded
 	private CommentPosition position;
@@ -48,12 +56,12 @@ public class ThreadVisit extends AbstractEntity {
 		this.user = user;
 	}
 
-	public Date getDate() {
-		return date;
+	public Date getVisitDate() {
+		return visitDate;
 	}
 
-	public void setDate(Date date) {
-		this.date = date;
+	public void setVisitDate(Date date) {
+		this.visitDate = date;
 	}
 
 	public String getCommit() {
@@ -62,6 +70,14 @@ public class ThreadVisit extends AbstractEntity {
 
 	public void setCommit(String commit) {
 		this.commit = commit;
+	}
+
+	public Date getCommitDate() {
+		return commitDate;
+	}
+
+	public void setCommitDate(Date commitDate) {
+		this.commitDate = commitDate;
 	}
 
 	@Nullable
