@@ -17,6 +17,8 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -27,9 +29,9 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
@@ -47,7 +49,7 @@ import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.BlobLoader;
-import com.pmease.gitplex.core.comment.ChangeComments;
+import com.pmease.gitplex.core.comment.CommentAwareChange;
 import com.pmease.gitplex.core.comment.CommentLoader;
 import com.pmease.gitplex.core.model.CommitComment;
 import com.pmease.gitplex.core.model.IntegrationInfo;
@@ -56,19 +58,26 @@ import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.web.component.diff.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.ChangedFilesPanel;
 import com.pmease.gitplex.web.component.diff.DiffTreePanel;
+import com.pmease.gitplex.web.event.CommitCommentRemoved;
 
 @SuppressWarnings("serial")
 public class RequestComparePage extends RequestDetailPage {
 
-	private String originalCommit;
+	private static final String HEAD_ID = "compareHead";
 	
-	private String revisedCommit;
+	private static final String LOCATE_COMMENT_ID = "locateComment";
+	
+	private static final String COMPARE_RESULT_ID = "compareResult";
+	
+	private static final String BLOB_DIFF_ID = "blobDiff";
+	
+	private String oldCommit;
+	
+	private String newCommit;
 	
 	private String filePath;
 	
 	private Long commentId;
-	
-	private boolean changedOnly = true;
 	
 	private IModel<CommitComment> commentModel = new LoadableDetachableModel<CommitComment>() {
 
@@ -80,7 +89,6 @@ public class RequestComparePage extends RequestDetailPage {
 		
 	};
 	
-	// map commit name to comit hash
 	private IModel<Map<String, CommitDescription>> commitsModel = 
 			new LoadableDetachableModel<Map<String, CommitDescription>>() {
 
@@ -88,8 +96,17 @@ public class RequestComparePage extends RequestDetailPage {
 		protected LinkedHashMap<String, CommitDescription> load() {
 			LinkedHashMap<String, CommitDescription> choices = new LinkedHashMap<>();
 			PullRequest request = getPullRequest();
-			
-			CommitDescription description = new CommitDescription("Base of Pull Request", 
+
+			String concernedCommit;
+			if (commentId != null)
+				concernedCommit = commentModel.getObject().getCommit();
+			else
+				concernedCommit = null;
+
+			String name = "Base of Pull Request";
+			if (request.getBaseCommit().equals(concernedCommit))
+				name += " - Concerned";
+			CommitDescription description = new CommitDescription(name, 
 					getRepository().git().showRevision(request.getBaseCommit()).getSubject());
 			choices.put(request.getBaseCommit(), description);
 			
@@ -98,10 +115,17 @@ public class RequestComparePage extends RequestDetailPage {
 				int updateNo = request.getSortedUpdates().size()-i;
 				int j = 0;
 				for (Commit commit: update.getCommits()) {
-					if (j == update.getCommits().size()-1)
-						description = new CommitDescription("Head of Update #" + updateNo, commit.getSubject());
-					else
-						description = new CommitDescription(null, commit.getSubject());
+					if (j == update.getCommits().size()-1) {
+						name = "Head of Update #" + updateNo;
+						if (commit.getHash().equals(concernedCommit))
+							name += " - Concerned";
+						description = new CommitDescription(name, commit.getSubject());
+					} else {
+						if (commit.getHash().equals(concernedCommit))
+							description = new CommitDescription("Concerned", commit.getSubject());
+						else
+							description = new CommitDescription(null, commit.getSubject());
+					}
 					j++;
 					choices.put(commit.getHash(), description);
 				}
@@ -128,38 +152,29 @@ public class RequestComparePage extends RequestDetailPage {
 		
 	};
 	
-	private IModel<List<Change>> changesModel = new LoadableDetachableModel<List<Change>>() {
-
-		@Override
-		protected List<Change> load() {
-			return getRepository().git().listFileChanges(originalCommit, revisedCommit, null, true);
-		}
-		
-	};
-	
 	public RequestComparePage(PageParameters params) {
 		super(params);
 
 		filePath = params.get("path").toString();
-		commentId = params.get("comment").toLongObject();
+		commentId = params.get("comment").toOptionalLong();
 		
-		originalCommit = params.get("original").toString();
-		revisedCommit = params.get("revised").toString();
+		oldCommit = params.get("original").toString();
+		newCommit = params.get("revised").toString();
 
-		if (!(originalCommit == null && revisedCommit == null || originalCommit != null && revisedCommit != null))
+		if (!(oldCommit == null && newCommit == null || oldCommit != null && newCommit != null))
 			throw new IllegalArgumentException("Param 'original' and 'revised' should be specified both or none.");
 
-		if (originalCommit != null) {
-			if (!commitsModel.getObject().containsKey(originalCommit))
-				throw new IllegalArgumentException("Commit '" + originalCommit + "' is not relevant to current pull request.");
+		if (oldCommit != null) {
+			if (!commitsModel.getObject().containsKey(oldCommit))
+				throw new IllegalArgumentException("Commit '" + oldCommit + "' is not relevant to current pull request.");
 		}
 
-		if (revisedCommit != null) {
-			if (!commitsModel.getObject().containsKey(revisedCommit))
-				throw new IllegalArgumentException("Commit '" + revisedCommit + "' is not relevant to current pull request.");
+		if (newCommit != null) {
+			if (!commitsModel.getObject().containsKey(newCommit))
+				throw new IllegalArgumentException("Commit '" + newCommit + "' is not relevant to current pull request.");
 		}
 		
-		if (filePath != null && originalCommit == null)
+		if (filePath != null && oldCommit == null)
 			throw new IllegalArgumentException("Param 'path' can only be used together with param 'original' and 'revised'.");
 	}
 	
@@ -167,26 +182,92 @@ public class RequestComparePage extends RequestDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		WebMarkupContainer commentActions = new WebMarkupContainer("commentActions");
-		commentActions.setOutputMarkupId(true);
-		add(commentActions);
-		
-		WebMarkupContainer baseSelector = new WebMarkupContainer("originalSelector");
-		add(baseSelector);
-		baseSelector.add(new Label("label", new LoadableDetachableModel<String>() {
+		WebMarkupContainer head = new WebMarkupContainer(HEAD_ID);
+		head.setOutputMarkupId(true);
+		add(head);
+
+		AjaxLink<Void> link = new AjaxLink<Void>(LOCATE_COMMENT_ID) {
 
 			@Override
-			protected String load() {
-				CommitDescription description = commitsModel.getObject().get(originalCommit);
-				Preconditions.checkNotNull(description);
-				if (description.getName() != null)
-					return GitUtils.abbreviateSHA(originalCommit) + " - " + description.getName();
-				else
-					return GitUtils.abbreviateSHA(originalCommit);
+			public void onClick(AjaxRequestTarget target) {
+				filePath = null;
+				CommitComment comment = commentModel.getObject();
+				CommentAwareChange change = getActiveChange();
+				if (change == null || !change.contains(comment)) {
+					change = locateChange(comment);
+					if (change != null) {
+						Component compareResult = newCompareResult(change.getStatus() != UNCHANGED);
+						getPage().replace(compareResult);
+						target.add(compareResult);
+						
+						BlobDiffPanel diffPanel = new BlobDiffPanel(BLOB_DIFF_ID, repoModel, change, -1);
+						getPage().replace(diffPanel);
+						target.add(diffPanel);
+						
+						target.add(this);
+					} else {
+						PageParameters params = params4(getPullRequest(), null, null, null, commentId);
+						setResponsePage(RequestComparePage.class, params);
+					}
+				}
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisible(commentId != null);
+			}
+			
+		};
+		link.add(new Label("label", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				Component panel = getPage().get(BLOB_DIFF_ID);
+				if (panel instanceof BlobDiffPanel) {
+					CommentAwareChange change = ((BlobDiffPanel) panel).getChange();
+					if (change.contains(commentModel.getObject())) 
+						return "Displaying concerned comment line by comparing";
+				}
+				
+				return "Click to display concerned comment line";
+			}
+
+		}));
+		link.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				Component panel = getPage().get(BLOB_DIFF_ID);
+				if (panel instanceof BlobDiffPanel) {
+					CommentAwareChange change = ((BlobDiffPanel) panel).getChange();
+					if (change.contains(commentModel.getObject())) 
+						return "btn-default";
+				}
+				
+				return "btn-warning";
 			}
 			
 		}));
-		DropdownPanel baseChoicesDropdown = new DropdownPanel("originalChoices", false) {
+		head.add(link);
+
+		WebMarkupContainer oldSelector = new WebMarkupContainer("oldSelector");
+		head.add(oldSelector);
+		oldSelector.add(new Label("label", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				CommitDescription description = commitsModel.getObject().get(oldCommit);
+				Preconditions.checkNotNull(description);
+				if (description.getName() != null)
+					return GitUtils.abbreviateSHA(oldCommit) + " - " + description.getName();
+				else
+					return GitUtils.abbreviateSHA(oldCommit);
+			}
+			
+		}));
+		DropdownPanel oldChoicesDropdown = new DropdownPanel("oldChoices", false) {
 
 			@Override
 			protected Component newContent(String id) {
@@ -194,36 +275,37 @@ public class RequestComparePage extends RequestDetailPage {
 			}
 			
 		}; 
-		add(baseChoicesDropdown);
-		baseSelector.add(new DropdownBehavior(baseChoicesDropdown).alignWithTrigger(0, 0, 0, 100));
+		head.add(oldChoicesDropdown);
+		oldSelector.add(new DropdownBehavior(oldChoicesDropdown).alignWithTrigger(0, 0, 0, 100));
 		
-		baseSelector.add(new TooltipBehavior(new LoadableDetachableModel<String>() {
+		oldSelector.add(new TooltipBehavior(new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
-				CommitDescription description = commitsModel.getObject().get(originalCommit);
+				CommitDescription description = commitsModel.getObject().get(oldCommit);
 				Preconditions.checkNotNull(description);
 				return description.getSubject();
 			}
 			
 		}));
 		
-		WebMarkupContainer headSelector = new WebMarkupContainer("revisedSelector");
-		add(headSelector);
-		headSelector.add(new Label("label", new LoadableDetachableModel<String>() {
+		WebMarkupContainer newSelector = new WebMarkupContainer("newSelector");
+		head.add(newSelector);
+		newSelector.add(new Label("label", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
-				CommitDescription description = commitsModel.getObject().get(revisedCommit);
+				CommitDescription description = commitsModel.getObject().get(newCommit);
 				Preconditions.checkNotNull(description);
+				
 				if (description.getName() != null)
-					return GitUtils.abbreviateSHA(revisedCommit) + " - " + description.getName();
+					return GitUtils.abbreviateSHA(newCommit) + " - " + description.getName();
 				else
-					return GitUtils.abbreviateSHA(revisedCommit);
+					return GitUtils.abbreviateSHA(newCommit);
 			}
 			
 		}));
-		DropdownPanel headChoicesDropdown = new DropdownPanel("revisedChoices", false) {
+		DropdownPanel newChoicesDropdown = new DropdownPanel("newChoices", false) {
 
 			@Override
 			protected Component newContent(String id) {
@@ -231,96 +313,132 @@ public class RequestComparePage extends RequestDetailPage {
 			}
 			
 		}; 
-		add(headChoicesDropdown);
-		headSelector.add(new DropdownBehavior(headChoicesDropdown).alignWithTrigger(0, 0, 0, 100));
+		head.add(newChoicesDropdown);
+		newSelector.add(new DropdownBehavior(newChoicesDropdown).alignWithTrigger(0, 0, 0, 100));
 		
-		headSelector.add(new TooltipBehavior(new LoadableDetachableModel<String>() {
+		newSelector.add(new TooltipBehavior(new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
-				CommitDescription description = commitsModel.getObject().get(revisedCommit);
+				CommitDescription description = commitsModel.getObject().get(newCommit);
 				Preconditions.checkNotNull(description);
 				return description.getSubject();
 			}
 			
 		}));
 
-		add(new CheckBox("changedOnly", new PropertyModel<Boolean>(this, "changedOnly"))
-				.add(new OnChangeAjaxBehavior() {
+		add(new CheckBox("changesOnly").add(new OnChangeAjaxBehavior() {
 					
-					@Override
-					protected void onUpdate(AjaxRequestTarget target) {
-						Component compareResult = newCompareResultComponent();
-						RequestComparePage.this.replace(compareResult);
-						target.add(compareResult);
-					}
-					
-				}));
-		
-		int lineNo = -1;
-		ChangeComments comments = null;
-		RevAwareChange change = null;
-		if (originalCommit != null) {
-			List<Change> changes = changesModel.getObject();
-			if (filePath != null) {
-				for (Change each: changes) {
-					if (filePath.equals(each.getOldPath()) || filePath.equals(each.getNewPath())) {
-						change = new RevAwareChange(each, originalCommit, revisedCommit);
-						break;
-					}
-				}
-				if (change == null) {
-					List<TreeNode> result = getRepository().git().listTree(revisedCommit, filePath);
-					if (!result.isEmpty() && result.get(0).getMode() != FileMode.TYPE_TREE) {
-						TreeNode blobNode = result.get(0);
-						change = new RevAwareChange(UNCHANGED, filePath, filePath, 
-								blobNode.getMode(), blobNode.getMode(), originalCommit, revisedCommit);
-						changedOnly = false;
-					}
-				}
-			} else {
-				if (commentId != null) {
-					CommitComment comment = commentModel.getObject();
-				}				
-				if (change == null && !changes.isEmpty())
-					change = new RevAwareChange(changes.get(0), originalCommit, revisedCommit);
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				Component compareResult = getPage().get(COMPARE_RESULT_ID);
+				compareResult = newCompareResult(!(compareResult instanceof ChangedFilesPanel));
+				RequestComparePage.this.replace(compareResult);
+				target.add(compareResult);
 			}
-		} else if (commentId == null) {
-			originalCommit = getPullRequest().getBaseCommit();
-			revisedCommit = getPullRequest().getLatestUpdate().getHeadCommit();
-		} else {
 			
-		}
+		}));
 
+		CommentAwareChange change = locateChange();
 		if (change != null) {
-			BlobDiffPanel blobDiffPanel = new BlobDiffPanel("blobDiff", repoModel, 
-					change, loadComments(change), lineNo);
+			BlobDiffPanel blobDiffPanel = new BlobDiffPanel(BLOB_DIFF_ID, repoModel, change, -1);
 			blobDiffPanel.setOutputMarkupId(true);
 			add(blobDiffPanel);
 		} else {
-			add(new WebMarkupContainer("blobDiff").setOutputMarkupId(true));
+			add(new WebMarkupContainer(BLOB_DIFF_ID).setOutputMarkupId(true));
 		}
 
-		add(newCompareResultComponent());
+		add(newCompareResult(change == null || change.getStatus() != UNCHANGED));
 	}
 	
-	private Component newCompareResultComponent() {
-		Component compareResult;
-		if (changedOnly) {
-			if (!changesModel.getObject().isEmpty()) {
-				compareResult = new ChangedFilesPanel("compareResult", changesModel) {
-					
-					@Override
-					protected WebMarkupContainer newBlobLink(String id, Change change) {
-						return new BlobLink(id, change);
-					}
-				};
+	private CommentAwareChange locateChange() {
+		CommentAwareChange change = null;
+		if (oldCommit != null) {
+			if (filePath != null) {
+				change = locateChange(filePath);
 			} else {
-				compareResult = new Label("compareResult", "<i class='fa fa-info-circle'></i> <em>Nothing changed</em>");
-				compareResult.setEscapeModelStrings(false);
+				if (commentId != null)
+					change = locateChange(commentModel.getObject());
+				if (change == null) {
+					List<Change> changes = getRepository().getChanges(oldCommit, newCommit);
+					if (!changes.isEmpty()) 
+						change = loadComments(new RevAwareChange(changes.get(0), oldCommit, newCommit));
+				}
 			}
+		} else if (commentId == null) {
+			oldCommit = getPullRequest().getBaseCommit();
+			newCommit = getPullRequest().getLatestUpdate().getHeadCommit();
+			List<Change> changes = getRepository().getChanges(oldCommit, newCommit);
+			if (!changes.isEmpty())
+				change = loadComments(new RevAwareChange(changes.get(0), oldCommit, newCommit));
 		} else {
-			compareResult = new DiffTreePanel("compareResult", repoModel, changesModel, originalCommit, revisedCommit) {
+			CommitComment comment = commentModel.getObject();
+			oldCommit = getPullRequest().getBaseCommit();
+			newCommit = getPullRequest().getLatestUpdate().getHeadCommit();
+			change = locateChange(comment);
+			if (change == null) {
+				oldCommit = comment.getCommit();
+				newCommit = getPullRequest().getLatestUpdate().getHeadCommit();
+				change = locateChange(comment);
+				Preconditions.checkNotNull(change);
+			}
+		}
+
+		return change;
+	}
+	
+	private CommentAwareChange locateChange(CommitComment comment) {
+		String path = comment.getPosition().getFilePath();
+		for (Change each: getRepository().getChanges(oldCommit, newCommit)) {
+			if (path.equals(each.getPath())) {
+				CommentAwareChange change = loadComments(new RevAwareChange(each, oldCommit, newCommit));
+				if (change.contains(comment))
+					return change;
+				else
+					return null;
+			}
+		}
+		List<TreeNode> nodes = getRepository().git().listTree(newCommit, comment.getPosition().getFilePath());
+		if (!nodes.isEmpty() && nodes.get(0).getMode() != FileMode.TYPE_TREE) {
+			RevAwareChange change = new RevAwareChange(UNCHANGED, path, path, 
+					nodes.get(0).getMode(), nodes.get(0).getMode(), oldCommit, newCommit);
+			CommentAwareChange commentAwareChange = loadComments(change);
+			if (commentAwareChange.contains(comment))
+				return commentAwareChange;
+			else
+				return null;
+		} else {
+			return null;
+		}
+	}
+	
+	private CommentAwareChange locateChange(String filePath) {
+		for (Change each: getRepository().getChanges(oldCommit, newCommit)) {
+			if (filePath.equals(each.getPath())) 
+				return loadComments(new RevAwareChange(each, oldCommit, newCommit));
+		}
+		List<TreeNode> result = getRepository().git().listTree(newCommit, filePath);
+		if (!result.isEmpty() && result.get(0).getMode() != FileMode.TYPE_TREE) {
+			TreeNode blobNode = result.get(0);
+			return loadComments(new RevAwareChange(UNCHANGED, filePath, filePath, 
+					blobNode.getMode(), blobNode.getMode(), oldCommit, newCommit));
+		} else {
+			return null;
+		}
+	}
+	
+	private Component newCompareResult(boolean changesOnly) {
+		Component compareResult;
+		if (changesOnly) {
+			compareResult = new ChangedFilesPanel(COMPARE_RESULT_ID, repoModel, oldCommit, newCommit) {
+				
+				@Override
+				protected WebMarkupContainer newBlobLink(String id, Change change) {
+					return new BlobLink(id, change);
+				}
+			};
+		} else {
+			compareResult = new DiffTreePanel(COMPARE_RESULT_ID, repoModel, oldCommit, newCommit) {
 
 				@Override
 				protected WebMarkupContainer newBlobLink(String id, final Change change) {
@@ -342,8 +460,9 @@ public class RequestComparePage extends RequestDetailPage {
 		return compareResult;
 	}
 	
-	private RevAwareChange getActiveChange() {
-		Component panel = getPage().get("blobDiff");
+	@Nullable
+	private CommentAwareChange getActiveChange() {
+		Component panel = getPage().get(BLOB_DIFF_ID);
 		if (panel instanceof BlobDiffPanel)
 			return ((BlobDiffPanel) panel).getChange();
 		else
@@ -353,13 +472,12 @@ public class RequestComparePage extends RequestDetailPage {
 	@Override
 	public void onDetach() {
 		commitsModel.detach();
-		changesModel.detach();
 		commentModel.detach();
 		
 		super.onDetach();
 	}
 	
-	private ChangeComments loadComments(RevAwareChange change) {
+	private CommentAwareChange loadComments(RevAwareChange change) {
 		BlobLoader blobLoader = new BlobLoader() {
 
 			@Override
@@ -389,17 +507,17 @@ public class RequestComparePage extends RequestDetailPage {
 				commits.put(commit.getHash(), commit.getCommitter().getWhen());
 		}
 		
-		return new ChangeComments(change, commits, commentLoader, blobLoader);  
+		return new CommentAwareChange(change, commits, commentLoader, blobLoader);  
 	}
-
-	public static PageParameters params4(PullRequest request, @Nullable String originalCommit, 
-			@Nullable String revisedCommit, @Nullable String filePath, @Nullable Long commentId) {
+	
+	public static PageParameters params4(PullRequest request, @Nullable String oldCommit, 
+			@Nullable String newCommit, @Nullable String filePath, @Nullable Long commentId) {
 		PageParameters params = RequestDetailPage.params4(request);
 		
-		if (originalCommit != null)
-			params.set("original", originalCommit);
-		if (revisedCommit != null)
-			params.set("revised", revisedCommit);
+		if (oldCommit != null)
+			params.set("original", oldCommit);
+		if (newCommit != null)
+			params.set("revised", newCommit);
 		if (filePath != null)
 			params.set("path", filePath);
 		if (commentId != null)
@@ -466,18 +584,31 @@ public class RequestComparePage extends RequestDetailPage {
 							Map.Entry<String, CommitDescription> entry = item.getModelObject();
 							if (forBase) {
 								setResponsePage(RequestComparePage.class, 
-										params4(getPullRequest(), entry.getKey(), revisedCommit, filePath, commentId));
+										params4(getPullRequest(), entry.getKey(), newCommit, filePath, commentId));
 							} else {
 								setResponsePage(RequestComparePage.class, 
-										params4(getPullRequest(), originalCommit, entry.getKey(), filePath, commentId));
+										params4(getPullRequest(), oldCommit, entry.getKey(), filePath, commentId));
 							}
 						}
 						
 					};
 					Map.Entry<String, CommitDescription> entry = item.getModelObject();
 					String label = GitUtils.abbreviateSHA(entry.getKey());
-					if (entry.getValue().getName() != null)
-						label += " - " + entry.getValue().getName();
+					String name = entry.getValue().getName();
+					if (name != null) {
+						label += " - " + name;
+						name = name.toLowerCase();
+						if (name.contains("base of "))
+							item.add(AttributeAppender.append("class", " base special"));
+						if (name.contains("concerned"))
+							item.add(AttributeAppender.append("class", " concerned special"));
+						if (name.contains("head of update"))
+							item.add(AttributeAppender.append("class", " update-head special"));
+						if (name.contains("integration preview"))
+							item.add(AttributeAppender.append("class", " integration-preview special"));
+						if (name.contains("head of target"))
+							item.add(AttributeAppender.append("class", " target-head special"));
+					}
 					link.add(new Label("label", label));
 					if (entry.getValue().getSubject() != null)
 						link.add(new Label("subject", entry.getValue().getSubject()));
@@ -527,21 +658,38 @@ public class RequestComparePage extends RequestDetailPage {
 		@Override
 		public void onClick(AjaxRequestTarget target) {
 			filePath = change.getPath();
+			RevAwareChange revAwareChange = new RevAwareChange(change, oldCommit, newCommit);
+
+			BlobDiffPanel diffPanel = new BlobDiffPanel(BLOB_DIFF_ID, repoModel, 
+					loadComments(revAwareChange), -1);
+			getPage().replace(diffPanel);
+			target.add(diffPanel);
 			
-			RevAwareChange revAwareChange = new RevAwareChange(change, originalCommit, revisedCommit);
-			BlobDiffPanel panel = new BlobDiffPanel("blobDiff", repoModel, 
-					revAwareChange, loadComments(revAwareChange), -1);
-			panel.setOutputMarkupId(true);
-			RequestComparePage.this.replace(panel);
-			
-			Component compareResult = getPage().get("compareResult");
-			String script = String.format("$('#%s').find('a.active').removeClass('active');", compareResult.getMarkupId());
+			Component compareResult = getPage().get(COMPARE_RESULT_ID);
+			String script = String.format("$('#%s').find('a.active').removeClass('active');", 
+					compareResult.getMarkupId());
 			target.prependJavaScript(script);
 			
-			target.add(panel);
 			target.add(this);
-			target.add(getPage().get("commentActions"));
+
+			if (commentId != null)
+				target.add(getPage().get(HEAD_ID).get(LOCATE_COMMENT_ID));
 		}
 		
 	}
+
+	@Override
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+		
+		if (event instanceof CommitCommentRemoved) {
+			CommitCommentRemoved commitCommentRemoved = (CommitCommentRemoved) event;
+			CommitComment comment = commitCommentRemoved.getComment();
+			if (comment.getId().equals(commentId)) {
+				commentId = null;
+				commitCommentRemoved.getTarget().add(get(HEAD_ID));
+			}
+		}
+	}
+	
 }

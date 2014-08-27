@@ -38,8 +38,8 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Disapproved;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Ignored;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.gatekeeper.checkresult.PendingAndBlock;
-import com.pmease.gitplex.core.manager.CommitCommentManager;
 import com.pmease.gitplex.core.manager.CommentVisitManager;
+import com.pmease.gitplex.core.manager.CommitCommentManager;
 
 @SuppressWarnings("serial")
 @Entity
@@ -545,7 +545,7 @@ public class PullRequest extends AbstractEntity {
 		}
 		return commitComments;
 	}
-	
+
 	public Map<String, Map<CommentPosition, Date>> getCommentVisits() {
 		if (commentVisits == null) {
 			commentVisits = new HashMap<>();
@@ -569,5 +569,5 @@ public class PullRequest extends AbstractEntity {
 		}
 		return commentVisits;
 	}
-
+	
 }

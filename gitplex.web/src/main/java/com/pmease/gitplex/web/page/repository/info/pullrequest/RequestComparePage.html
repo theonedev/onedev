@@ -1,30 +1,22 @@
 <wicket:extend>
 	<div class="compare">
-		<div class="head clearfix">
-			<div wicket:id="commentActions" class="comment pull-left btn-group">
-				<button wicket:id="prev" class="btn btn-default" title="Previous commented line in this pull request">
-					<i class="fa fa-arrow-left"></i>
-				</button>
-				<button wicket:id="current" class="btn">
-					<i class="fa fa-comments"></i> <span wicket:id="label"></span>
-				</button>
-				<button wicket:id="next" class="btn btn-default" title="Next commented line in this pull request">
-					<i class="fa fa-arrow-right"></i>
-				</button>
-			</div>
-			<div class="original pull-left">
+		<div wicket:id="compareHead" class="head clearfix">
+			<button wicket:id="locateComment" class="comment btn pull-left">
+				<i class="fa fa-comments"></i> <span wicket:id="label"></span>
+			</button>
+			<div class="old pull-left">
 				<label>Original:</label> 
-				<span class="btn btn-default" wicket:id="originalSelector">
+				<span class="btn btn-default" wicket:id="oldSelector">
 					<i class="fa fa-commit"></i> <span wicket:id="label"></span> <i class="caret"></i>
 				</span>
-				<div wicket:id="originalChoices"></div>
+				<div wicket:id="oldChoices"></div>
 			</div>
-			<div class="revised pull-left">
+			<div class="new pull-left">
 				<label>Revised:</label> 
-				<span class="btn btn-default" wicket:id="revisedSelector">
+				<span class="btn btn-default" wicket:id="newSelector">
 					<i class="fa fa-commit"></i> <span wicket:id="label"></span> <i class="caret"></i>
 				</span>
-				<div wicket:id="revisedChoices"></div>
+				<div wicket:id="newChoices"></div>
 			</div>
 		</div>
 		<table class="body">
@@ -32,7 +24,7 @@
 				<td class="nav">
 					<div class="panel panel-default">
 						<div class="panel-heading">
-							<span class="panel-title">Compare Result</span> <input wicket:id="changedOnly" type="checkbox"> changed only</input> 
+							<span class="panel-title">Compare Result</span> <input wicket:id="changesOnly" type="checkbox"> changes only</input> 
 						</div>
 						<div wicket:id="compareResult" class="panel-body"></div>
 					</div>

@@ -27,11 +27,13 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.google.common.base.Optional;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.BlobInfo;
+import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.BlobText;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.commons.util.Pair;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.AndGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
@@ -95,9 +97,11 @@ public class Repository extends AbstractEntity implements UserBelonging {
     @OneToMany(mappedBy="forkedFrom")
 	private Collection<Repository> forks = new ArrayList<>();
     
-    private transient Map<BlobInfo, byte[]> blobContents = new HashMap<>();
+    private transient Map<BlobInfo, byte[]> blobContentCache = new HashMap<>();
     
-    private transient Map<BlobInfo, Optional<BlobText>> blobTexts = new HashMap<>(); 
+    private transient Map<BlobInfo, Optional<BlobText>> blobTextCache = new HashMap<>(); 
+    
+    private transient Map<CommitRange, List<Change>> changesCache = new HashMap<>();
     
 	public User getOwner() {
 		return owner;
@@ -361,10 +365,10 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	 * 			content of the blob
 	 */
 	public byte[] getBlobContent(BlobInfo blobInfo) {
-		byte[] blobContent = blobContents.get(blobInfo);
+		byte[] blobContent = blobContentCache.get(blobInfo);
 		if (blobContent == null) {
 			blobContent = git().readBlob(blobInfo);
-			blobContents.put(blobInfo, blobContent);
+			blobContentCache.put(blobInfo, blobContent);
 		}
 		return blobContent;
 	}
@@ -385,13 +389,28 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	 */
 	@Nullable
 	public BlobText getBlobText(BlobInfo blobInfo) {
-		Optional<BlobText> optional = blobTexts.get(blobInfo);
+		Optional<BlobText> optional = blobTextCache.get(blobInfo);
 		if (optional == null) {
 			byte[] blobContent = getBlobContent(blobInfo);
 			optional = Optional.fromNullable(BlobText.from(blobContent, blobInfo.getPath(), blobInfo.getMode()));
-			blobTexts.put(blobInfo, optional);
+			blobTextCache.put(blobInfo, optional);
 		}
 		return optional.orNull();
 	}
+	
+	public List<Change> getChanges(String fromCommit, String toCommit) {
+		CommitRange range = new CommitRange(fromCommit, toCommit);
+		List<Change> changes = changesCache.get(range);
+		if (changes == null) {
+			changes = git().listFileChanges(fromCommit, toCommit, null, true);
+			changesCache.put(range, changes);
+		}
+		return changes;
+	}
 
+	private static class CommitRange extends Pair<String, String> {
+		CommitRange(String fromCommit, String toCommit) {
+			super(fromCommit, toCommit);
+		}
+	}
 }

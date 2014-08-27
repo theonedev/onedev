@@ -924,14 +924,19 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail .base-threads>.title {margin-bottom: 12px;}
 .request-detail .base-threads>.content {margin-left: 6px;}
 
-.request-detail .compare>.head .original {margin-right: 32px;}
+.request-detail .compare>.head .comment {margin-right: 20px;}
+.request-detail .compare>.head .old {margin-right: 20px;}
 .request-detail .compare>.head {border-bottom: 1px dashed #BBB; padding-bottom: 16px;}
+
 .content>.commit-choice {max-height: 600px; padding: 8px 0; overflow-y: scroll;}
 .content>.commit-choice a {text-decoration: none; color: #333; display: block; padding: 8px;}
 .content>.commit-choice li {border-bottom: 1px dotted #BBB;}
+.content>.commit-choice li.special {background: #F0F0F0;}
+.content>.commit-choice li.concerned {background: #B1D0FB;}
 .content>.commit-choice li:hover {background: #FDF2C3;}
 .content>.commit-choice a .name {font-family: Consolas, 'Liberation Mono', Courier, monospace;}
 .content>.commit-choice a .subject {font-size: 12px; color: #999;} 
+
 .request-detail .compare>.body {margin-top: 16px;}
 .request-detail .compare>.body>tbody>tr>td.nav {width: 1%;}
 .request-detail .compare>.body>tbody>tr>td.nav .panel-heading {white-space: nowrap;}
@@ -968,8 +973,7 @@ table.verifications tr.ongoing .fa-cog {display: inline; color: #F0AD4E;}
 .conflict-resolve-instruction {padding: 8px; width: 400px;}
 
 .integration-setting form {color: #666;}
-.branch-strategies.editor {
-	margin-bottom: 16px;}
+.branch-strategies.editor {margin-bottom: 16px;}
 .integration-setting fieldset {border: 1px solid #DDD !important; margin-bottom: 16px;
     padding: 16px !important;}
 .integration-setting legend {width:auto; margin-bottom: 0; border-bottom:none;

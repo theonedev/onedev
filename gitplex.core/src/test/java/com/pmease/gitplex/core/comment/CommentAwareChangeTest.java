@@ -20,7 +20,7 @@ import com.pmease.commons.git.RevAwareChange;
 import com.pmease.gitplex.core.model.CommentPosition;
 import com.pmease.gitplex.core.model.CommitComment;
 
-public class ChangeCommentsTest extends AbstractGitTest {
+public class CommentAwareChangeTest extends AbstractGitTest {
 
 	@Test
 	public void test() {
@@ -29,7 +29,7 @@ public class ChangeCommentsTest extends AbstractGitTest {
 				+ "11\n" //comment1
 				+ "22\n" 
 				+ "33\n"
-				+ "44\n" //comment5
+				+ "44\n"
 				+ "55\n" //comment3, comment6
 				+ "66\n"
 				+ "77\n"
@@ -59,7 +59,7 @@ public class ChangeCommentsTest extends AbstractGitTest {
 				+ "111\n"
 				+ "222\n" //comment2
 				+ "33\n"
-				+ "44\n"
+				+ "44\n" //comment5
 				+ "555\n"
 				+ "66\n"
 				+ "77\n"
@@ -178,16 +178,16 @@ public class ChangeCommentsTest extends AbstractGitTest {
 		RevAwareChange change = new RevAwareChange(Change.Status.MODIFIED, "file1", "file1", 
 				0, 0, commitHashes.get(0), commitHashes.get(3));
 		
-		ChangeComments comments = new ChangeComments(change, commits, commentLoader, fileLoader);
+		CommentAwareChange commentAwareChange = new CommentAwareChange(change, commits, commentLoader, fileLoader);
 		
-		assertEquals("comment1", comments.getOldComments().get(0).get(0).getContent()); 
-		assertEquals("comment2", comments.getNewComments().get(1).get(0).getContent()); 
-		assertEquals("comment3", comments.getOldComments().get(4).get(0).getContent()); 
-		assertEquals("comment4", comments.getOldComments().get(7).get(0).getContent());
-		assertEquals("comment5", comments.getOldComments().get(3).get(0).getContent());
-		assertEquals("comment6", comments.getOldComments().get(4).get(1).getContent()); 
-		assertEquals("comment8", comments.getNewComments().get(8).get(0).getContent());
-		assertEquals("comment9", comments.getNewComments().get(8).get(1).getContent()); 
+		assertEquals("comment1", commentAwareChange.getOldComments().get(0).get(0).getContent()); 
+		assertEquals("comment2", commentAwareChange.getNewComments().get(1).get(0).getContent()); 
+		assertEquals("comment3", commentAwareChange.getOldComments().get(4).get(0).getContent()); 
+		assertEquals("comment4", commentAwareChange.getOldComments().get(7).get(0).getContent());
+		assertEquals("comment5", commentAwareChange.getNewComments().get(3).get(0).getContent());
+		assertEquals("comment6", commentAwareChange.getOldComments().get(4).get(1).getContent()); 
+		assertEquals("comment8", commentAwareChange.getNewComments().get(8).get(0).getContent());
+		assertEquals("comment9", commentAwareChange.getNewComments().get(8).get(1).getContent()); 
 	}
 
 }

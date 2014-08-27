@@ -1,7 +1,13 @@
 <wicket:panel>
-	<ul class="changed-files list-unstyled">
-		<li wicket:id="changes">
-			<a wicket:id="link"><span wicket:id="label"></span></a>
-		</li>
-	</ul>
+	<div wicket:id="content"></div>
+	<wicket:fragment wicket:id="changesFrag">
+		<ul class="changed-files list-unstyled">
+			<li wicket:id="changes">
+				<a wicket:id="link"><span wicket:id="label"></span></a>
+			</li>
+		</ul>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="noChangesFrag">
+		<i class='fa fa-info-circle'></i> <em>Nothing changed</em>
+	</wicket:fragment>
 </wicket:panel>

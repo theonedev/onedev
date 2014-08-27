@@ -10,13 +10,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -30,8 +29,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.commons.git.BlobText;
-import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.git.RevAwareChange;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.diff.DiffLine;
 import com.pmease.commons.util.diff.DiffUtils;
@@ -45,7 +42,7 @@ import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.comment.ChangeComments;
+import com.pmease.gitplex.core.comment.CommentAwareChange;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.CommentPosition;
@@ -58,6 +55,7 @@ import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.markdown.MarkdownPanel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
+import com.pmease.gitplex.web.event.CommitCommentRemoved;
 import com.pmease.gitplex.web.model.UserModel;
 
 @SuppressWarnings("serial")
@@ -79,13 +77,11 @@ public class TextDiffPanel extends Panel {
 	
 	private final IModel<Repository> repoModel;
 	
-	private final RevAwareChange change;
-	
 	private final BlobText oldText;
 	
 	private final BlobText newText;
 	
-	private final ChangeComments comments;
+	private final CommentAwareChange change;
 	
 	private final IModel<Boolean> allowToAddCommentModel;
 	
@@ -99,22 +95,12 @@ public class TextDiffPanel extends Panel {
 	
 	private List<DiffLine> diffs;
 
-	public TextDiffPanel(String id, final IModel<Repository> repoModel, RevAwareChange change, 
-			BlobText oldText, BlobText newText, @Nullable ChangeComments comments) {
+	public TextDiffPanel(String id, final IModel<Repository> repoModel, BlobText oldText, BlobText newText, 
+			CommentAwareChange change) {
 		super(id);
 		
 		this.repoModel = repoModel;
-		this.comments = comments;
-		
-		String oldCommitHash = change.getOldRevision();
-		if (!GitUtils.isHash(oldCommitHash))
-			oldCommitHash = repoModel.getObject().git().parseRevision(oldCommitHash, true);
-		String newCommitHash = change.getNewRevision();
-		if (!GitUtils.isHash(newCommitHash))
-			newCommitHash = repoModel.getObject().git().parseRevision(newCommitHash, true);
-		
-		this.change = new RevAwareChange(change.getStatus(), change.getOldPath(), change.getNewPath(), 
-				change.getOldMode(), change.getNewMode(), oldCommitHash, newCommitHash);
+		this.change= change;
 		
 		this.oldText = oldText;
 		this.newText = newText;
@@ -240,7 +226,7 @@ public class TextDiffPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible((getOldComments() != null || getNewComments() != null) && showComments);
+				setVisible((change.getOldComments() != null || change.getNewComments() != null) && showComments);
 			}
 			
 		}.add(new ScrollBehavior(head, ".comments.line", 50, false)));
@@ -250,7 +236,7 @@ public class TextDiffPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible((getOldComments() != null || getNewComments() != null) && showComments);
+				setVisible((change.getOldComments() != null || change.getNewComments() != null) && showComments);
 			}
 			
 		}.add(new ScrollBehavior(head, ".comments.line", 50, true)));
@@ -265,7 +251,7 @@ public class TextDiffPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible((getOldComments() != null || getNewComments() != null) && !showComments);
+				setVisible((change.getOldComments() != null || change.getNewComments() != null) && !showComments);
 			}
 
 		});
@@ -279,7 +265,7 @@ public class TextDiffPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible((getOldComments() != null || getNewComments() != null) && showComments);
+				setVisible((change.getOldComments() != null || change.getNewComments() != null) && showComments);
 			}
 			
 		});
@@ -435,15 +421,15 @@ public class TextDiffPanel extends Panel {
 					@Override
 					protected List<CommitComment> load() {
 						List<CommitComment> oldLineComments = null;
-						if (getOldComments() != null)
-							oldLineComments = getOldComments().get(diffLine.getOldLineNo());
+						if (change.getOldComments() != null)
+							oldLineComments = change.getOldComments().get(diffLine.getOldLineNo());
 						
 						if (oldLineComments == null)
 							oldLineComments = new ArrayList<>();
 						
 						List<CommitComment> newLineComments = null;
-						if (getNewComments() != null)
-							newLineComments = getNewComments().get(diffLine.getNewLineNo());
+						if (change.getNewComments() != null)
+							newLineComments = change.getNewComments().get(diffLine.getNewLineNo());
 
 						if (newLineComments == null)
 							newLineComments = new ArrayList<>();
@@ -569,23 +555,24 @@ public class TextDiffPanel extends Panel {
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								GitPlex.getInstance(Dao.class).remove(comment);
-								if (comments.getOldComments() != null) {
-									List<CommitComment> lineComments = comments.getOldComments().get(diffLine.getOldLineNo());
+								if (change.getOldComments() != null) {
+									List<CommitComment> lineComments = change.getOldComments().get(diffLine.getOldLineNo());
 									if (lineComments != null) {
 										lineComments.remove(comment);
 										if (lineComments.isEmpty())
-											comments.getOldComments().remove(diffLine.getOldLineNo());
+											change.getOldComments().remove(diffLine.getOldLineNo());
 									}
 								}
-								if (comments.getNewComments() != null) {
-									List<CommitComment> lineComments = comments.getNewComments().get(diffLine.getNewLineNo());
+								if (change.getNewComments() != null) {
+									List<CommitComment> lineComments = change.getNewComments().get(diffLine.getNewLineNo());
 									if (lineComments != null) {
 										lineComments.remove(comment);
 										if (lineComments.isEmpty())
-											comments.getOldComments().remove(diffLine.getNewLineNo());
+											change.getOldComments().remove(diffLine.getNewLineNo());
 									}
 								}
 								target.add(commentsRow);
+								send(getPage(), Broadcast.BUBBLE, new CommitCommentRemoved(target, comment));
 							}
 							
 							@Override
@@ -739,7 +726,7 @@ public class TextDiffPanel extends Panel {
 					} else if (diffLine.getAction() == ADD) {
 						commit = change.getNewRevision();
 						position = new CommentPosition(change.getNewPath(), diffLine.getNewLineNo());
-					} else if (getNewComments() != null) {
+					} else if (change.getNewComments() != null) {
 						commit = change.getNewRevision();
 						position = new CommentPosition(change.getNewPath(), diffLine.getNewLineNo());
 					} else {
@@ -750,17 +737,17 @@ public class TextDiffPanel extends Panel {
 					comment.setPosition(position);
 					comment.setContent(input.getModelObject());
 					comment.setCommentDate(new Date());
-					comment.setCommitDate(comments.getCommits().get(commit));
+					comment.setCommitDate(change.getCommits().get(commit));
 					GitPlex.getInstance(Dao.class).persist(comment);
 					
 					if (diffLine.getAction() == DELETE) 
-						addToComments(getOldComments(), diffLine.getOldLineNo(), comment);
+						addToComments(change.getOldComments(), diffLine.getOldLineNo(), comment);
 					else if (diffLine.getAction() == ADD)  
-						addToComments(getNewComments(), diffLine.getNewLineNo(), comment);
-					else if (getNewComments() != null) 
-						addToComments(getNewComments(), diffLine.getNewLineNo(), comment);
+						addToComments(change.getNewComments(), diffLine.getNewLineNo(), comment);
+					else if (change.getNewComments() != null) 
+						addToComments(change.getNewComments(), diffLine.getNewLineNo(), comment);
 					else 
-						addToComments(getOldComments(), diffLine.getOldLineNo(), comment);
+						addToComments(change.getOldComments(), diffLine.getOldLineNo(), comment);
 					
 					commentsRow.replace(new WebMarkupContainer(NEW_COMMENT_ID));
 					target.add(commentsRow);
@@ -796,30 +783,16 @@ public class TextDiffPanel extends Panel {
 			} else {
 				DiffLine.Action action = item.getModelObject().getAction();
 				if (action == DELETE) 
-					setVisible(getOldComments() != null);
+					setVisible(change.getOldComments() != null);
 				else if (action == ADD)
-					setVisible(getNewComments() != null);
+					setVisible(change.getNewComments() != null);
 				else 
-					setVisible(getOldComments() != null || getNewComments() != null);
+					setVisible(change.getOldComments() != null || change.getNewComments() != null);
 			}
 		}
 
 	}
 	
-	private Map<Integer, List<CommitComment>> getOldComments() {
-		if (comments != null)
-			return comments.getOldComments();
-		else
-			return null;
-	}
-
-	private Map<Integer, List<CommitComment>> getNewComments() {
-		if (comments != null)
-			return comments.getNewComments();
-		else
-			return null;
-	}
-
 	@Override
 	protected void onDetach() {
 		repoModel.detach();

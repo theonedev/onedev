@@ -9,6 +9,10 @@ public class RevAwareChange extends Change {
 	
 	private final String newRevision;
 	
+	public RevAwareChange(RevAwareChange change) {
+		this(change, change.getOldRevision(), change.getNewRevision());
+	}
+	
 	public RevAwareChange(Change change, @Nullable String oldRevision, @Nullable String newRevision) {
 		super(change);
 		this.oldRevision = oldRevision;

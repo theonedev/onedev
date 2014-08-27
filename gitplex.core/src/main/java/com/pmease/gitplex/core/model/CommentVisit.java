@@ -16,7 +16,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"repository", "commit", "position.filePath", "position.lineNo"}) 
+		@UniqueConstraint(columnNames={"repository", "commit", "filePath", "lineNo"}) 
 })
 public class CommentVisit extends AbstractEntity {
 	

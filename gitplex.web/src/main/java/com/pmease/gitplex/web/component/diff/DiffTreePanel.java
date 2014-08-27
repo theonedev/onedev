@@ -28,20 +28,16 @@ public abstract class DiffTreePanel extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
-	private final IModel<List<Change>> changesModel;
-	
 	private final String fromRev;
 	
 	private final String toRev;
 	
 	private NestedTree<DiffTreeNode> tree;
 	
-	public DiffTreePanel(String id, IModel<Repository> repoModel, IModel<List<Change>> changesModel, 
-			String fromRev, String toRev) {
+	public DiffTreePanel(String id, IModel<Repository> repoModel, String fromRev, String toRev) {
 		super(id);
 		
 		this.repoModel = repoModel;
-		this.changesModel = changesModel;
 		this.fromRev = fromRev;
 		this.toRev = toRev;
 	}
@@ -71,7 +67,8 @@ public abstract class DiffTreePanel extends Panel {
 			@Override
 			public Iterator<? extends DiffTreeNode> getRoots() {
 				List<DiffTreeNode> roots = new ArrayList<>();
-				for (Change change: repoModel.getObject().git().listTree(fromRev, toRev, null, changesModel.getObject())) {
+				List<Change> changes = repoModel.getObject().getChanges(fromRev, toRev);
+				for (Change change: repoModel.getObject().git().listTree(fromRev, toRev, null, changes)) {
 					roots.add(new DiffTreeNode(change));
 				}
 				return roots.iterator();
@@ -85,8 +82,9 @@ public abstract class DiffTreePanel extends Panel {
 			@Override
 			public Iterator<? extends DiffTreeNode> getChildren(DiffTreeNode node) {
 				List<DiffTreeNode> children = new ArrayList<>();
+				List<Change> changes = repoModel.getObject().getChanges(fromRev, toRev);
 				for (Change change: repoModel.getObject().git().listTree(
-						fromRev, toRev, node.getChange().getPath(), changesModel.getObject())) {
+						fromRev, toRev, node.getChange().getPath(), changes)) {
 					children.add(new DiffTreeNode(change));
 				}
 				return children.iterator();
@@ -146,7 +144,6 @@ public abstract class DiffTreePanel extends Panel {
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
-		changesModel.detach();
 		
 		super.onDetach();
 	}
