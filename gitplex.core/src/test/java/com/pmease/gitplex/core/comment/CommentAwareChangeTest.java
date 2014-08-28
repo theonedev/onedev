@@ -1,21 +1,19 @@
 package com.pmease.gitplex.core.comment;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
 import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.BlobInfo;
 import com.pmease.commons.git.Change;
+import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.RevAwareChange;
 import com.pmease.gitplex.core.model.CommentPosition;
 import com.pmease.gitplex.core.model.CommitComment;
@@ -74,18 +72,21 @@ public class CommentAwareChangeTest extends AbstractGitTest {
 		
 		addFileAndCommit("file1", fileRevs.get(3), "modify file1");
 		
-		final LinkedHashMap<String, Date> commits = new LinkedHashMap<>();
-		commits.put(git.parseRevision("master~3", true), new Date());
-		commits.put(git.parseRevision("master~2", true), new Date());
-		commits.put(git.parseRevision("master~1", true), new Date());
-		commits.put(git.parseRevision("master", true), new Date());
+		final List<Commit> commits = new ArrayList<>();
+		commits.add(git.showRevision("master~3"));
+		commits.add(git.showRevision("master~2"));
+		commits.add(git.showRevision("master~1"));
+		commits.add(git.showRevision("master"));
 		
 		CommentLoader commentLoader = new CommentLoader() {
 
 			@Override
 			public List<CommitComment> loadComments(String commit) {
 				List<CommitComment> comments = new ArrayList<>();
-				List<String> commitHashes = new ArrayList<>(commits.keySet());
+				
+				List<String> commitHashes = new ArrayList<>();
+				for (Commit each: commits) 
+					commitHashes.add(each.getHash());
 				
 				int index = commitHashes.indexOf(commit);
 				if (index == 0) {
@@ -161,7 +162,9 @@ public class CommentAwareChangeTest extends AbstractGitTest {
 
 			@Override
 			public List<String> loadBlob(BlobInfo blobInfo) {
-				List<String> commitHashes = new ArrayList<>(commits.keySet());
+				List<String> commitHashes = new ArrayList<>();
+				for (Commit each: commits) 
+					commitHashes.add(each.getHash());
 			
 				int index = commitHashes.indexOf(blobInfo.getRevision());
 				String content = fileRevs.get(index);
@@ -174,9 +177,8 @@ public class CommentAwareChangeTest extends AbstractGitTest {
 			
 		};
 
-		List<String> commitHashes = new ArrayList<>(commits.keySet());
 		RevAwareChange change = new RevAwareChange(Change.Status.MODIFIED, "file1", "file1", 
-				0, 0, commitHashes.get(0), commitHashes.get(3));
+				0, 0, commits.get(0).getHash(), commits.get(3).getHash());
 		
 		CommentAwareChange commentAwareChange = new CommentAwareChange(change, commits, commentLoader, fileLoader);
 		

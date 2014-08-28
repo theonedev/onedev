@@ -531,7 +531,7 @@ public abstract class RequestDetailPage extends RepositoryInfoPage implements Co
 			}
 			fragment.add(new Label("message", message));
 			
-			PageParameters params = RequestComparePage.params4(
+			PageParameters params = RequestComparePage.paramsOf(
 					request, 
 					request.getLatestUpdate().getHeadCommit(), 
 					request.getIntegrationInfo().getIntegrationHead(), 

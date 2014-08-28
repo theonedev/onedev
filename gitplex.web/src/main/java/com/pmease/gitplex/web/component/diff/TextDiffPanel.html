@@ -40,34 +40,35 @@
 						<i class="fa fa-comment"></i> <span wicket:id="commentCount"></span>
 					</td>
 					<td class="detail">
-						<div wicket:id="comments">
-							<div wicket:id="comment"></div>
-						</div>
-						<a wicket:id="addComment">Add a comment</a>
+						<table class="line-comments">
+							<tr wicket:id="comments">
+								<td class="avatar">
+									<span wicket:id="avatar"></span>
+								</td>
+								<td class="content">
+									<div class="clearfix head">
+										<span wicket:id="name" class="pull-left"></span>
+										<a wicket:id="edit" class="pull-right" title="Edit this comment"><i class="fa fa-pencil"></i></a>
+										<a wicket:id="delete" class="pull-right" title="Delete this comment"><i class="fa fa-times"></i></a>
+										<span wicket:id="age" class="pull-right"></span>
+									</div>
+									<div wicket:id="content" class="body"></div>
+								</td>
+							</tr>
+						</table>
+						<a wicket:id="addComment" class="btn btn-sm btn-default">Add a comment</a>
 						<div wicket:id="newComment"></div>
 					</td>
 				</tr>
 			</wicket:container>
 		</table>
 	</div>
-	<wicket:fragment wicket:id="viewCommentFrag">
-		<div class="panel panel-default">
-			<div class="panel-heading clearfix">
-				<div wicket:id="name" class="pull-left"></div>
-				<div class="actions pull-right">
-					<a wicket:id="edit" title="Edit this comment"><i class="fa fa-pencil"></i></a>
-					<a wicket:id="delete" title="Delete this comment"><i class="fa fa-times"></i></a>
-				</div>
-				<div wicket:id="age" class="pull-right small"></div>
-			</div>
-			<div wicket:id="content" class="panel-body"></div>
-		</div>
-	</wicket:fragment>
 	<wicket:fragment wicket:id="editCommentFrag">
 		<form wicket:id="form">
 			<div wicket:id="input"></div>
 			<div class="actions">
 				<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware">Update comment</button>
+				&nbsp;&nbsp;&nbsp;&nbsp;
 				<button wicket:id="cancel" class="btn btn-sm btn-default">Close form</button>
 			</div>
 		</form>
@@ -77,6 +78,7 @@
 			<div wicket:id="input"></div>
 			<div class="actions">
 				<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware">Comment on this line</button>
+				&nbsp;&nbsp;&nbsp;&nbsp;
 				<button wicket:id="cancel" class="btn btn-sm btn-default">Close form</button>
 			</div>
 		</form>

@@ -39,7 +39,10 @@
 				<a wicket:id="commit">
 					<div>
 						<i class="fa fa-commit"></i>
-						<span wicket:id="label" class="name"></span>
+						<span wicket:id="commit" class="commit"></span> 
+						<wicket:enclosure child="name">
+						- <span wicket:id="name" class="name"></span>
+						</wicket:enclosure>
 					</div>
 					<div wicket:id="subject" class="subject"></div>
 				</a>

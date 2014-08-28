@@ -125,6 +125,8 @@ public class PullRequest extends AbstractEntity {
 	
 	private transient Map<String, Map<CommentPosition, Date>> commentVisits;
 	
+	private transient List<Commit> commits;
+	
 	/**
 	 * Get title of this merge request.
 	 * 
@@ -568,6 +570,26 @@ public class PullRequest extends AbstractEntity {
 			}
 		}
 		return commentVisits;
+	}
+
+	public List<Commit> getCommits() {
+		if (commits == null) {
+			commits = new ArrayList<>();
+			commits.add(getTarget().getRepository().git().showRevision(getBaseCommit()));
+			for (int i=getSortedUpdates().size()-1; i>=0; i--) {
+				for (Commit commit: getSortedUpdates().get(i).getCommits())
+					commits.add(commit);
+			}
+		}
+		return commits;
+	}
+	
+	public Commit getCommit(String hash) {
+		for (Commit each: getCommits()) {
+			if (hash.equals(each.getHash()))
+				return each;
+		}
+		throw new RuntimeException("Unable to find specified commit.");
 	}
 	
 }

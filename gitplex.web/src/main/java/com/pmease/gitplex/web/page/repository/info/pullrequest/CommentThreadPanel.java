@@ -9,15 +9,25 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.pmease.commons.git.BriefCommit;
+import com.pmease.commons.git.Commit;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.CommentThread;
+import com.pmease.gitplex.core.manager.CommentVisitManager;
+import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.CommentPosition;
+import com.pmease.gitplex.core.model.CommentVisit;
 import com.pmease.gitplex.core.model.CommitComment;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.markdown.MarkdownPanel;
 import com.pmease.gitplex.web.component.user.AvatarByUser;
@@ -28,15 +38,18 @@ public class CommentThreadPanel extends Panel {
 
 	private final IModel<PullRequest> requestModel;
 	
+	private final BriefCommit commit;
+	
 	private final IModel<List<CommentThread>> threadsModel;
 	
 	private final IModel<Map<CommentPosition, Date>> visitsModel;
 	
-	public CommentThreadPanel(String id, final IModel<PullRequest> requestModel, 
+	public CommentThreadPanel(String id, final IModel<PullRequest> requestModel, Commit commit, 
 			final IModel<List<CommentThread>> threadsModel, 
 			final IModel<Map<CommentPosition, Date>> visitsModel) {
 		super(id);
 		
+		this.commit = commit;
 		this.requestModel = requestModel;
 		this.visitsModel = visitsModel;
 		this.threadsModel = threadsModel;
@@ -45,6 +58,8 @@ public class CommentThreadPanel extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		final boolean isGuest = GitPlex.getInstance(UserManager.class).getCurrent() == null;
 		
 		add(new ListView<CommentThread>("threads", threadsModel) {
 
@@ -57,12 +72,28 @@ public class CommentThreadPanel extends Panel {
 					@Override
 					public void onClick() {
 						CommentThread thread = item.getModelObject();
+						User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
+						if (currentUser != null) {
+							Repository repo = requestModel.getObject().getTarget().getRepository();
+							CommentVisitManager manager = GitPlex.getInstance(CommentVisitManager.class);
+							CommentVisit visit = manager.find(repo, commit.getHash(), thread.getPosition());
+							if (visit == null) {
+								visit = new CommentVisit();
+								visit.setCommit(commit.getHash());
+								visit.setCommitDate(commit.getCommitter().getWhen());
+								visit.setPosition(thread.getPosition());
+								visit.setRepository(repo);
+								visit.setUser(currentUser);
+							}
+							visit.setVisitDate(thread.getLastComment().getCommentDate());
+							GitPlex.getInstance(Dao.class).persist(visit);
+						}
 						if (thread.getPosition() == null) {
 							// TODO: navigate to commit comments page
 						} else if (thread.getPosition().getLineNo() == null) {
 							// TODO: navigate to commit file comments page
 						} else {
-							PageParameters params = RequestComparePage.params4(
+							PageParameters params = RequestComparePage.paramsOf(
 									requestModel.getObject(), 
 									null, null, null, thread.getLastComment().getId());
 							setResponsePage(RequestComparePage.class, params);
@@ -84,20 +115,28 @@ public class CommentThreadPanel extends Panel {
 				
 				link.add(new AgeLabel("age", Model.of(thread.getLastComment().getCommentDate())));
 
-				int unread = 0;
-				for (CommitComment comment: thread.getComments()) {
-					Date lastVisit = visitsModel.getObject().get(thread.getPosition());
-					if (lastVisit == null || comment.getCommentDate().after(lastVisit)) 
-						unread++;
+				if (!isGuest) {
+					Fragment fragment = new Fragment("stats", "userStatsFrag", CommentThreadPanel.this);
+					int unread = 0;
+					for (CommitComment comment: thread.getComments()) {
+						Date lastVisit = visitsModel.getObject().get(thread.getPosition());
+						if (lastVisit == null || comment.getCommentDate().after(lastVisit)) 
+							unread++;
+					}
+					fragment.add(new Label("unread", unread));
+					fragment.add(new Label("total", thread.getComments().size()));
+					link.add(fragment);
+
+					if (unread != 0)
+						item.add(AttributeAppender.append("class", " unread"));
+				} else {
+					Fragment fragment = new Fragment("stats", "guestStatsFrag", CommentThreadPanel.this);
+					fragment.add(new Label("total", thread.getComments().size()));
+					link.add(fragment);
 				}
-				link.add(new Label("unread", unread));
-				link.add(new Label("total", thread.getComments().size()));
 				
 				item.add(link);
 			
-				if (unread != 0)
-					item.add(AttributeAppender.append("class", " unread"));
-				
 				item.add(new MarkdownPanel("lastComment", Model.of(thread.getLastComment().getContent())));
 			}
 			

@@ -785,15 +785,6 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 	border-left: 1px solid #E5E5E5;}  
 .table-diff .line.comments>td {border-top: 1px solid #E5E5E5; border-bottom: 1px solid #E5E5E5;
 	padding: 12px 0;}
-.table-diff .line.comments .panel {margin: 0 12px 12px 12px;}
-.table-diff .line.comments .panel-heading {color: #999; font-size: 16px;}
-.table-diff .line.comments .panel-heading .actions a {margin-left: 8px;}
-.table-diff .line.comments .panel-heading a {color: #888;}
-.table-diff .line.comments .panel-heading a:hover {color: black;}
-.table-diff .line.comments form .actions {padding: 8px 12px;}
-.table-diff .line.comments form .actions button {margin-right: 16px;}
-.table-diff .line.comments .summary {padding: 12px; vertical-align: top;}
-.table-diff .line.comments .detail>a {padding: 0 12px;}
 .table-diff .old.line.content>td.line-no {background: #faa; color: #8f0000;}
 .table-diff .old.line.content {background: #fdd;}
 .table-diff .old.line.content .emphasize {background: #FC9090;}
@@ -802,10 +793,26 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 .table-diff .new.line.content .emphasize {background: #07C907;}
 .table-diff .line.content:hover {background: #fea; } 
 .table-diff .line.content:hover>td.line-no {background: #FBDE6D;}
+.table-diff table.content {width: 100%;}
+
+.table-diff .line.comments>td.detail {padding: 12px;}
+
+table.line-comments>tbody>tr>td {border-top: 1px dotted #BBB; padding-top: 12px;}
+table.line-comments>tbody>tr:FIRST-CHILD>td {border-top: none; padding-top: 0;}
+table.line-comments>tbody>tr>.avatar {width: 1%;}
+table.line-comments>tbody>tr>.avatar img.avatar {width: 36px; height: 36px;}
+table.line-comments>tbody>tr>.content {padding-left: 8px;}
+table.line-comments>tbody>tr>.content>.head, table.line-comments>tbody>tr>.content>.head a {color: #888;}
+table.line-comments>tbody>tr>.content>.head .pull-right {margin-left: 8px; font-size: 11px;}
+table.line-comments>tbody>tr>.content>.head .pull-right i {font-size: 12px;}
+table.line-comments>tbody>tr>.content>.head .name {font-weight: bold;}
+table.line-comments>tbody>tr>.content>.body {margin: 12px 0 12px 0;}
+
 .table-diff .add-comment {position: absolute; left:0; margin-left: -20px; width: 20px; height: 20px;
 	text-decoration: none;}
 .table-diff .add-comment .fa {display:none;}
 .table-diff tr:hover .add-comment .fa {display:inline;}
+
 ul.diff-alerts li {text-align: left;}
 ul.diff-alerts {padding-left: 12px;}
 
@@ -831,8 +838,7 @@ ul.diff-alerts {padding-left: 12px;}
 
 /* COMMENT */
 .comment-input textarea {width: 100%; min-height: 80px;}
-.comment-input>.tab-pane {padding: 12px;}
-.comment-input>.tab-head .nav-tabs {padding-left: 12px;}
+.comment-input>.tab-pane {padding: 12px 0;}
 .comment-input>.tab-pane>.preview {display: none;}
 
 ul.threads li {border-left: 4px solid #F0F0F0; padding-left: 8px;}
@@ -931,10 +937,9 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .content>.commit-choice {max-height: 600px; padding: 8px 0; overflow-y: scroll;}
 .content>.commit-choice a {text-decoration: none; color: #333; display: block; padding: 8px;}
 .content>.commit-choice li {border-bottom: 1px dotted #BBB;}
-.content>.commit-choice li.special {background: #F0F0F0;}
-.content>.commit-choice li.concerned {background: #B1D0FB;}
 .content>.commit-choice li:hover {background: #FDF2C3;}
-.content>.commit-choice a .name {font-family: Consolas, 'Liberation Mono', Courier, monospace;}
+.content>.commit-choice a .commit {font-family: Consolas, 'Liberation Mono', Courier, monospace;}
+.content>.commit-choice a .name {font-weight: bold;}
 .content>.commit-choice a .subject {font-size: 12px; color: #999;} 
 
 .request-detail .compare>.body {margin-top: 16px;}

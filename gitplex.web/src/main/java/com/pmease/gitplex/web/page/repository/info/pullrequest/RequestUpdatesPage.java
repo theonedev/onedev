@@ -60,7 +60,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 						Fragment fragment = new Fragment(componentId, "updateInfoFrag", RequestUpdatesPage.this);
 
 						PullRequestUpdate update = item.getModelObject();
-						PageParameters params = RequestComparePage.params4(
+						PageParameters params = RequestComparePage.paramsOf(
 								update.getRequest(), update.getBaseCommit(), update.getHeadCommit(), null, null);
 						Link<Void> updateLink = new BookmarkablePageLink<Void>("updateLink", RequestComparePage.class, params);
 						List<PullRequestUpdate> updates = update.getRequest().getSortedUpdates();

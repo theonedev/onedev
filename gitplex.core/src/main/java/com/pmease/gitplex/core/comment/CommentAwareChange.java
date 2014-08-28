@@ -1,10 +1,8 @@
 package com.pmease.gitplex.core.comment;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,6 +10,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import com.pmease.commons.git.BlobInfo;
+import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.RevAwareChange;
 import com.pmease.commons.util.Pair;
 import com.pmease.commons.util.diff.DiffUtils;
@@ -21,13 +20,13 @@ import com.pmease.gitplex.core.model.CommitComment;
 @SuppressWarnings("serial")
 public class CommentAwareChange extends RevAwareChange {
 	
-	private final Map<String, Date> commits;
+	private final List<Commit> commits;
 	
 	private Map<Integer, List<CommitComment>> oldComments;
 	
 	private Map<Integer, List<CommitComment>> newComments;
 	
-	public CommentAwareChange(RevAwareChange change, LinkedHashMap<String, Date> commits, 
+	public CommentAwareChange(RevAwareChange change, List<Commit> commits, 
 			CommentLoader commentLoader, BlobLoader blobLoader) {
 		super(change);
 		
@@ -36,7 +35,10 @@ public class CommentAwareChange extends RevAwareChange {
 	
 		this.commits = commits;
 		
-		List<String> commitHashes = new ArrayList<>(commits.keySet());
+		List<String> commitHashes = new ArrayList<>();
+		for (Commit commit: commits) 
+			commitHashes.add(commit.getHash());
+		
 		int end = -1;
 		if (change.getNewPath() != null) {
 			end = commitHashes.indexOf(change.getNewRevision());
@@ -185,7 +187,7 @@ public class CommentAwareChange extends RevAwareChange {
 		return newComments;
 	}
 	
-	public Map<String, Date> getCommits() {
+	public List<Commit> getCommits() {
 		return commits;
 	}
 
@@ -220,6 +222,14 @@ public class CommentAwareChange extends RevAwareChange {
 		return false;
 	}
 
+	public Commit getCommit(String hash) {
+		for (Commit each: commits) {
+			if (hash.equals(each.getHash()))
+				return each;
+		}
+		throw new RuntimeException("Unable to find specified commit.");
+	}
+
 	private static class CommentKey extends Pair<String, CommentPosition> {
 		
 		public CommentKey(String commit, CommentPosition position) {
@@ -227,4 +237,5 @@ public class CommentAwareChange extends RevAwareChange {
 		}
 		
 	}
+
 }

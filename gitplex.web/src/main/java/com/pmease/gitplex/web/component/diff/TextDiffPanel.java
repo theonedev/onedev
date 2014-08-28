@@ -481,12 +481,10 @@ public class TextDiffPanel extends Panel {
 					@Override
 					protected void populateItem(final ListItem<CommitComment> commentItem) {
 						final CommitComment comment = commentItem.getModelObject();
+						commentItem.add(new UserLink("avatar", new UserModel(comment.getUser()), AvatarMode.AVATAR));
+						commentItem.add(new UserLink("name", new UserModel(comment.getUser()), AvatarMode.NAME));
 						
-						Fragment fragment = new Fragment("comment", "viewCommentFrag", TextDiffPanel.this);
-						fragment.setOutputMarkupId(true);
-						fragment.add(new UserLink("name", new UserModel(comment.getUser()), AvatarMode.NAME_AND_AVATAR));
-						
-						fragment.add(new AgeLabel("age", new AbstractReadOnlyModel<Date>() {
+						commentItem.add(new AgeLabel("age", new AbstractReadOnlyModel<Date>() {
 
 							@Override
 							public Date getObject() {
@@ -495,11 +493,11 @@ public class TextDiffPanel extends Panel {
 							
 						}));
 						
-						fragment.add(new AjaxLink<Void>("edit") {
+						commentItem.add(new AjaxLink<Void>("edit") {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								Fragment fragment = new Fragment("comment", "editCommentFrag", TextDiffPanel.this);
+								Fragment fragment = new Fragment("content", "editCommentFrag", TextDiffPanel.this);
 								fragment.setOutputMarkupId(true);
 								Form<?> form = new Form<Void>("form");
 								form.setOutputMarkupId(true);
@@ -550,7 +548,7 @@ public class TextDiffPanel extends Panel {
 							}
 							
 						});
-						fragment.add(new AjaxLink<Void>("delete") {
+						commentItem.add(new AjaxLink<Void>("delete") {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
@@ -584,9 +582,7 @@ public class TextDiffPanel extends Panel {
 
 						}.add(new ConfirmBehavior("Do you really want to delete this comment?")));
 						
-						fragment.add(new MarkdownPanel("content", Model.of(comment.getContent())));
-
-						commentItem.add(fragment);
+						commentItem.add(new MarkdownPanel("content", Model.of(comment.getContent())));
 					}
 					
 				});
@@ -737,7 +733,7 @@ public class TextDiffPanel extends Panel {
 					comment.setPosition(position);
 					comment.setContent(input.getModelObject());
 					comment.setCommentDate(new Date());
-					comment.setCommitDate(change.getCommits().get(commit));
+					comment.setCommitDate(change.getCommit(commit).getCommitter().getWhen());
 					GitPlex.getInstance(Dao.class).persist(comment);
 					
 					if (diffLine.getAction() == DELETE) 

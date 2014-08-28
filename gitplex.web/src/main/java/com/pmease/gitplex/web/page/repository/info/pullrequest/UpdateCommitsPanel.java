@@ -102,7 +102,7 @@ public class UpdateCommitsPanel extends Panel {
 						return getUpdate().getRequest();
 					}
 					
-				}, new LoadableDetachableModel<List<CommentThread>>() {
+				}, commit, new LoadableDetachableModel<List<CommentThread>>() {
 
 					@Override
 					protected List<CommentThread> load() {

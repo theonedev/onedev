@@ -4,7 +4,6 @@ import static com.pmease.commons.git.Change.Status.UNCHANGED;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -206,7 +205,7 @@ public class RequestComparePage extends RequestDetailPage {
 						
 						target.add(this);
 					} else {
-						PageParameters params = params4(getPullRequest(), null, null, null, commentId);
+						PageParameters params = paramsOf(getPullRequest(), null, null, null, commentId);
 						setResponsePage(RequestComparePage.class, params);
 					}
 				}
@@ -499,18 +498,11 @@ public class RequestComparePage extends RequestDetailPage {
 			}
 			
 		};
-		LinkedHashMap<String, Date> commits = new LinkedHashMap<>();
-		String baseCommit = getPullRequest().getBaseCommit();
-		commits.put(baseCommit, getRepository().git().showRevision(baseCommit).getCommitter().getWhen());
-		for (int i=getPullRequest().getSortedUpdates().size()-1; i>=0; i--) {
-			for (Commit commit: getPullRequest().getSortedUpdates().get(i).getCommits())
-				commits.put(commit.getHash(), commit.getCommitter().getWhen());
-		}
 		
-		return new CommentAwareChange(change, commits, commentLoader, blobLoader);  
+		return new CommentAwareChange(change, getPullRequest().getCommits(), commentLoader, blobLoader);  
 	}
 	
-	public static PageParameters params4(PullRequest request, @Nullable String oldCommit, 
+	public static PageParameters paramsOf(PullRequest request, @Nullable String oldCommit, 
 			@Nullable String newCommit, @Nullable String filePath, @Nullable Long commentId) {
 		PageParameters params = RequestDetailPage.params4(request);
 		
@@ -584,32 +576,19 @@ public class RequestComparePage extends RequestDetailPage {
 							Map.Entry<String, CommitDescription> entry = item.getModelObject();
 							if (forBase) {
 								setResponsePage(RequestComparePage.class, 
-										params4(getPullRequest(), entry.getKey(), newCommit, filePath, commentId));
+										paramsOf(getPullRequest(), entry.getKey(), newCommit, filePath, commentId));
 							} else {
 								setResponsePage(RequestComparePage.class, 
-										params4(getPullRequest(), oldCommit, entry.getKey(), filePath, commentId));
+										paramsOf(getPullRequest(), oldCommit, entry.getKey(), filePath, commentId));
 							}
 						}
 						
 					};
 					Map.Entry<String, CommitDescription> entry = item.getModelObject();
-					String label = GitUtils.abbreviateSHA(entry.getKey());
+					String hash = GitUtils.abbreviateSHA(entry.getKey());
 					String name = entry.getValue().getName();
-					if (name != null) {
-						label += " - " + name;
-						name = name.toLowerCase();
-						if (name.contains("base of "))
-							item.add(AttributeAppender.append("class", " base special"));
-						if (name.contains("concerned"))
-							item.add(AttributeAppender.append("class", " concerned special"));
-						if (name.contains("head of update"))
-							item.add(AttributeAppender.append("class", " update-head special"));
-						if (name.contains("integration preview"))
-							item.add(AttributeAppender.append("class", " integration-preview special"));
-						if (name.contains("head of target"))
-							item.add(AttributeAppender.append("class", " target-head special"));
-					}
-					link.add(new Label("label", label));
+					link.add(new Label("commit", hash));
+					link.add(new Label("name", name).setVisible(name != null));
 					if (entry.getValue().getSubject() != null)
 						link.add(new Label("subject", entry.getValue().getSubject()));
 					else
@@ -682,12 +661,13 @@ public class RequestComparePage extends RequestDetailPage {
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);
 		
-		if (event instanceof CommitCommentRemoved) {
-			CommitCommentRemoved commitCommentRemoved = (CommitCommentRemoved) event;
+		if (event.getPayload() instanceof CommitCommentRemoved) {
+			CommitCommentRemoved commitCommentRemoved = (CommitCommentRemoved) event.getPayload();
 			CommitComment comment = commitCommentRemoved.getComment();
 			if (comment.getId().equals(commentId)) {
-				commentId = null;
-				commitCommentRemoved.getTarget().add(get(HEAD_ID));
+				PageParameters params = paramsOf(getPullRequest(), oldCommit, newCommit, 
+						comment.getPosition().getFilePath(), null);
+				setResponsePage(RequestComparePage.class, params);
 			}
 		}
 	}

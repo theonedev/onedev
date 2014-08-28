@@ -18,6 +18,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import com.pmease.commons.git.Commit;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.CommentThread;
@@ -136,7 +137,10 @@ public class OpenActivityPanel extends Panel {
 		super.onInitialize();
 		add(renderForView());
 
-		add(new CommentThreadPanel("baseThreads", requestModel, new LoadableDetachableModel<List<CommentThread>>() {
+		PullRequest request = requestModel.getObject();
+		Commit baseCommit = request.getCommit(request.getBaseCommit());
+		
+		add(new CommentThreadPanel("baseThreads", requestModel, baseCommit, new LoadableDetachableModel<List<CommentThread>>() {
 
 			@Override
 			protected List<CommentThread> load() {

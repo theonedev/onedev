@@ -43,5 +43,5 @@ public class RevAwareChange extends Change {
 	public BlobInfo getNewBlobInfo() {
 		return new BlobInfo(newRevision, getNewPath(), getNewMode());
 	}
-	
+
 }
