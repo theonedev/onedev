@@ -12,11 +12,12 @@ import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.CommentVisitManager;
-import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.CommentPosition;
-import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.CommentVisit;
+import com.pmease.gitplex.core.model.CommitComment;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 @Singleton
@@ -24,18 +25,15 @@ public class DefaultCommentVisitManager implements CommentVisitManager {
 
 	private final Dao dao;
 	
-	private final UserManager userManager;
-	
 	@Inject
-	public DefaultCommentVisitManager(Dao dao, UserManager userManager) {
+	public DefaultCommentVisitManager(Dao dao) {
 		this.dao = dao;
-		this.userManager = userManager;
 	}
 
 	@Override
-	public List<CommentVisit> findByCommitDates(Repository repository, Date fromDate, Date toDate) {
+	public List<CommentVisit> findByCommitDates(Repository repository, User user, 
+			Date fromDate, Date toDate) {
 		EntityCriteria<CommentVisit> criteria = EntityCriteria.of(CommentVisit.class);
-		User user = userManager.getCurrent();
 		criteria.add(Restrictions.eq("user", user));
 		criteria.add(Restrictions.eq("repository", repository));
 		if (fromDate != null)
@@ -47,10 +45,9 @@ public class DefaultCommentVisitManager implements CommentVisitManager {
 	}
 
 	@Override
-	public List<CommentVisit> findByCommitOrDates(Repository repository,
+	public List<CommentVisit> findByCommitOrDates(Repository repository, User user,
 			String commit, Date fromDate, Date toDate) {
 		EntityCriteria<CommentVisit> criteria = EntityCriteria.of(CommentVisit.class);
-		User user = userManager.getCurrent();
 		criteria.add(Restrictions.eq("user", user));
 		criteria.add(Restrictions.eq("repository", repository));
 		Conjunction conjunction = Restrictions.conjunction();
@@ -64,9 +61,8 @@ public class DefaultCommentVisitManager implements CommentVisitManager {
 	}
 
 	@Override
-	public CommentVisit find(Repository repository, String commit, CommentPosition position) {
+	public CommentVisit find(Repository repository, User user, String commit, CommentPosition position) {
 		EntityCriteria<CommentVisit> criteria = EntityCriteria.of(CommentVisit.class);
-		User user = userManager.getCurrent();
 		criteria.add(Restrictions.eq("user", user));
 		criteria.add(Restrictions.eq("repository", repository));
 		criteria.add(Restrictions.eq("commit", commit));
@@ -75,4 +71,19 @@ public class DefaultCommentVisitManager implements CommentVisitManager {
 		return dao.find(criteria);
 	}
 
+	@Override
+	public void visitComment(Repository repository, User user, CommitComment comment) {
+		CommentVisitManager manager = GitPlex.getInstance(CommentVisitManager.class);
+		CommentVisit visit = manager.find(repository, user, comment.getCommit(), comment.getPosition());
+		if (visit == null) {
+			visit = new CommentVisit();
+			visit.setCommit(comment.getCommit());
+			visit.setCommitDate(repository.getCommit(comment.getCommit()).getCommitter().getWhen());
+			visit.setPosition(comment.getPosition());
+			visit.setRepository(repository);
+			visit.setUser(user);
+		}
+		visit.setVisitDate(comment.getCommentDate());
+		GitPlex.getInstance(Dao.class).persist(visit);
+	}
 }

@@ -27,9 +27,10 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.google.common.base.Optional;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.BlobInfo;
-import com.pmease.commons.git.Change;
-import com.pmease.commons.git.Git;
 import com.pmease.commons.git.BlobText;
+import com.pmease.commons.git.Change;
+import com.pmease.commons.git.Commit;
+import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
@@ -102,6 +103,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
     private transient Map<BlobInfo, Optional<BlobText>> blobTextCache = new HashMap<>(); 
     
     private transient Map<CommitRange, List<Change>> changesCache = new HashMap<>();
+    
+    private transient Map<String, Commit> commitCache = new HashMap<>();
     
 	public User getOwner() {
 		return owner;
@@ -407,10 +410,25 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		}
 		return changes;
 	}
+	
+	public Commit getCommit(String commitHash) {
+		Commit commit = commitCache.get(commitHash);
+		if (commit == null) {
+			commit = git().showRevision(commitHash);
+			commitCache.put(commitHash, commit);
+		}
+		return commit;
+	}
+	
+	public void cacheCommits(List<Commit> commits) {
+		for (Commit commit: commits)
+			commitCache.put(commit.getHash(), commit);
+	}
 
 	private static class CommitRange extends Pair<String, String> {
 		CommitRange(String fromCommit, String toCommit) {
 			super(fromCommit, toCommit);
 		}
 	}
+	
 }

@@ -306,6 +306,8 @@ public class PullRequestUpdate extends AbstractEntity {
 				} 
 			}
 			
+			getRequest().getTarget().getRepository().cacheCommits(commits);
+			
 			Collections.reverse(commits);
 		}
 		return commits;

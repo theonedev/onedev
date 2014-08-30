@@ -783,8 +783,6 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 .table-diff>tbody>tr>td {padding: 2px 8px;}
 .table-diff>tbody>tr>td.text, .table-diff>tbody>tr>td.detail, .table-diff>tbody>tr>td.new {
 	border-left: 1px solid #E5E5E5;}  
-.table-diff .line.comments>td {border-top: 1px solid #E5E5E5; border-bottom: 1px solid #E5E5E5;
-	padding: 12px 0;}
 .table-diff .old.line.content>td.line-no {background: #faa; color: #8f0000;}
 .table-diff .old.line.content {background: #fdd;}
 .table-diff .old.line.content .emphasize {background: #FC9090;}
@@ -795,8 +793,11 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 .table-diff .line.content:hover>td.line-no {background: #FBDE6D;}
 .table-diff table.content {width: 100%;}
 
+.table-diff .line.comments>td {border-top: 1px solid #E5E5E5; 
+	border-bottom: 1px solid #E5E5E5; padding: 12px 0;}
+.table-diff .line.comments>td.summary {padding: 12px;}
+.table-diff .line.comments>td.summary .fa-bookmark {margin-bottom: 12px; color: #3A88F6; font-size: 24px;}
 .table-diff .line.comments>td.detail {padding: 12px;}
-
 table.line-comments>tbody>tr>td {border-top: 1px dotted #BBB; padding-top: 12px;}
 table.line-comments>tbody>tr:FIRST-CHILD>td {border-top: none; padding-top: 0;}
 table.line-comments>tbody>tr>.avatar {width: 1%;}
@@ -841,7 +842,7 @@ ul.diff-alerts {padding-left: 12px;}
 .comment-input>.tab-pane {padding: 12px 0;}
 .comment-input>.tab-pane>.preview {display: none;}
 
-ul.threads li {border-left: 4px solid #F0F0F0; padding-left: 8px;}
+ul.threads li {border-left: 4px solid #E5E5E5; padding-left: 8px;}
 ul.threads li.unread {border-color: #70AEFA;}
 ul.threads li a {color: #444; cursor: pointer;}
 ul.threads li .markdown {color: #888; margin-top: 4px;}
@@ -910,7 +911,6 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.status .check-result.alert-info .fa.fa-info-circle {display: inline;}
 
 .request-detail>.actions>div, .request-detail>.actions>.confirm>form>div {margin-bottom: 20px;}
-
 .request-detail>.actions .btn {margin-right: 8px;}
 
 .request-detail .activities>tbody>tr>td {
@@ -931,9 +931,7 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail .base-threads>.content {margin-left: 6px;}
 
 .request-detail .compare>.head .comment {margin-right: 20px;}
-.request-detail .compare>.head .old {margin-right: 20px;}
 .request-detail .compare>.head {border-bottom: 1px dashed #BBB; padding-bottom: 16px;}
-
 .content>.commit-choice {max-height: 600px; padding: 8px 0; overflow-y: scroll;}
 .content>.commit-choice a {text-decoration: none; color: #333; display: block; padding: 8px;}
 .content>.commit-choice li {border-bottom: 1px dotted #BBB;}
@@ -941,6 +939,10 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .content>.commit-choice a .commit {font-family: Consolas, 'Liberation Mono', Courier, monospace;}
 .content>.commit-choice a .name {font-weight: bold;}
 .content>.commit-choice a .subject {font-size: 12px; color: #999;} 
+table.old-vs-new td {border-bottom: 1px dotted #BBB; padding: 0 8px;}
+table.old-vs-new td.old {width: 140px; text-align: left;}
+table.old-vs-new td.new {width: 140px; text-align: right;}
+table.old-vs-new td.vs {width: 1px; text-align: center; font-weight: bold;}
 
 .request-detail .compare>.body {margin-top: 16px;}
 .request-detail .compare>.body>tbody>tr>td.nav {width: 1%;}

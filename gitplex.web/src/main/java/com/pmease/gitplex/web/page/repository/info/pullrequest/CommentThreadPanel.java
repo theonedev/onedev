@@ -15,15 +15,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.commons.git.BriefCommit;
-import com.pmease.commons.git.Commit;
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.CommentThread;
 import com.pmease.gitplex.core.manager.CommentVisitManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.CommentPosition;
-import com.pmease.gitplex.core.model.CommentVisit;
 import com.pmease.gitplex.core.model.CommitComment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
@@ -38,18 +34,15 @@ public class CommentThreadPanel extends Panel {
 
 	private final IModel<PullRequest> requestModel;
 	
-	private final BriefCommit commit;
-	
 	private final IModel<List<CommentThread>> threadsModel;
 	
 	private final IModel<Map<CommentPosition, Date>> visitsModel;
 	
-	public CommentThreadPanel(String id, final IModel<PullRequest> requestModel, Commit commit, 
+	public CommentThreadPanel(String id, final IModel<PullRequest> requestModel, 
 			final IModel<List<CommentThread>> threadsModel, 
 			final IModel<Map<CommentPosition, Date>> visitsModel) {
 		super(id);
 		
-		this.commit = commit;
 		this.requestModel = requestModel;
 		this.visitsModel = visitsModel;
 		this.threadsModel = threadsModel;
@@ -76,17 +69,7 @@ public class CommentThreadPanel extends Panel {
 						if (currentUser != null) {
 							Repository repo = requestModel.getObject().getTarget().getRepository();
 							CommentVisitManager manager = GitPlex.getInstance(CommentVisitManager.class);
-							CommentVisit visit = manager.find(repo, commit.getHash(), thread.getPosition());
-							if (visit == null) {
-								visit = new CommentVisit();
-								visit.setCommit(commit.getHash());
-								visit.setCommitDate(commit.getCommitter().getWhen());
-								visit.setPosition(thread.getPosition());
-								visit.setRepository(repo);
-								visit.setUser(currentUser);
-							}
-							visit.setVisitDate(thread.getLastComment().getCommentDate());
-							GitPlex.getInstance(Dao.class).persist(visit);
+							manager.visitComment(repo, currentUser, thread.getLastComment());
 						}
 						if (thread.getPosition() == null) {
 							// TODO: navigate to commit comments page
@@ -95,7 +78,7 @@ public class CommentThreadPanel extends Panel {
 						} else {
 							PageParameters params = RequestComparePage.paramsOf(
 									requestModel.getObject(), 
-									null, null, null, thread.getLastComment().getId());
+									null, null, null, thread.getLastComment());
 							setResponsePage(RequestComparePage.class, params);
 						}
 					}

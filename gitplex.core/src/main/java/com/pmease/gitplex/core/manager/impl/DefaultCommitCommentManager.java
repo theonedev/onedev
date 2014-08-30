@@ -1,7 +1,10 @@
 package com.pmease.gitplex.core.manager.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -13,7 +16,9 @@ import org.hibernate.criterion.Restrictions;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.CommitCommentManager;
+import com.pmease.gitplex.core.model.CommentPosition;
 import com.pmease.gitplex.core.model.CommitComment;
 import com.pmease.gitplex.core.model.Repository;
 
@@ -81,4 +86,22 @@ public class DefaultCommitCommentManager implements CommitCommentManager {
 		return dao.query(criteria, 0, 0);
 	}
 
+	@Override
+	public Map<Integer, List<CommitComment>> findLineComments(Repository repository, 
+			String commit, String filePath) {
+		Map<Integer, List<CommitComment>> comments = new HashMap<>();
+		CommitCommentManager manager = GitPlex.getInstance(CommitCommentManager.class);
+		for (CommitComment comment: manager.findByCommitAndFile(repository, commit, filePath)) {
+			CommentPosition position = comment.getPosition();
+			if (position.getLineNo() != null && position.getFilePath().equals(filePath)) {
+				List<CommitComment> lineComments = comments.get(position.getLineNo());
+				if (lineComments == null) {
+					lineComments = new ArrayList<>();
+					comments.put(position.getLineNo(), lineComments);
+				}
+				lineComments.add(comment);
+			}
+		}
+		return comments;
+	}
 }

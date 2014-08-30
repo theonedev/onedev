@@ -229,7 +229,7 @@ pmease.commons = {
 			if (!trigger[0])
 				return;
 			
-			trigger.addClass("dropdown-toggle");
+			trigger.addClass("dropdown-trigger");
 			if (hoverDelay >= 0)
 				trigger.addClass("dropdown-hover");
 			
@@ -477,7 +477,7 @@ pmease.commons = {
 	setupDropdownAndModel: function() {
 		$(document).mousedown(function(event) {
 			var source = $(event.target);
-			if (!source.closest(".dropdown-toggle")[0])
+			if (!source.closest(".dropdown-trigger")[0])
 				pmease.commons.dropdown.hideExcept(source);
 		});
 		

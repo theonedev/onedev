@@ -2,6 +2,7 @@ package com.pmease.gitplex.core.manager;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -68,4 +69,5 @@ public interface CommitCommentManager {
 	List<CommitComment> findByCommitOrDates(Repository repository, String commit, 
 			@Nullable Date fromDate, @Nullable Date toDate);
 
+	Map<Integer, List<CommitComment>> findLineComments(Repository repository, String commit, String filePath);
 }

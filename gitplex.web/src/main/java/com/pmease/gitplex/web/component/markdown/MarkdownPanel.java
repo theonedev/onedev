@@ -10,6 +10,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.pegdown.LinkRenderer;
 import org.pegdown.PegDownProcessor;
 
+import com.google.common.base.Strings;
 import com.pmease.gitplex.web.page.repository.info.code.blob.renderer.highlighter.AceHighlighter;
 
 @SuppressWarnings("serial")
@@ -29,8 +30,12 @@ public class MarkdownPanel extends Panel {
 			@Override
 			protected String load() {
 				String markdown = MarkdownPanel.this.getDefaultModelObjectAsString();
-				PegDownProcessor pd = new PegDownProcessor(ALL & ~SMARTYPANTS);
-				return pd.markdownToHtml(markdown, new LinkRenderer());
+				if (!Strings.isNullOrEmpty(markdown)) {
+					PegDownProcessor pd = new PegDownProcessor(ALL & ~SMARTYPANTS);
+					return pd.markdownToHtml(markdown, new LinkRenderer());
+				} else {
+					return "<i>Nothing to preview.</i>";
+				}
 			}
 		}).setEscapeModelStrings(false));
 		

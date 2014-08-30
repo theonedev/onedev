@@ -40,6 +40,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.gatekeeper.checkresult.PendingAndBlock;
 import com.pmease.gitplex.core.manager.CommentVisitManager;
 import com.pmease.gitplex.core.manager.CommitCommentManager;
+import com.pmease.gitplex.core.manager.UserManager;
 
 @SuppressWarnings("serial")
 @Entity
@@ -125,7 +126,7 @@ public class PullRequest extends AbstractEntity {
 	
 	private transient Map<String, Map<CommentPosition, Date>> commentVisits;
 	
-	private transient List<Commit> commits;
+	private transient List<String> commits;
 	
 	/**
 	 * Get title of this merge request.
@@ -551,45 +552,41 @@ public class PullRequest extends AbstractEntity {
 	public Map<String, Map<CommentPosition, Date>> getCommentVisits() {
 		if (commentVisits == null) {
 			commentVisits = new HashMap<>();
-			Map<String, Date> commits = new HashMap<>();
-			for (PullRequestUpdate update: updates) {
-				for (Commit commit: update.getCommits())
-					commits.put(commit.getHash(), commit.getCommitter().getWhen());
-			}
-			CommentVisitManager manager = GitPlex.getInstance(CommentVisitManager.class);
-			for (CommentVisit visit: manager.findByCommitOrDates(getTarget().getRepository(), 
-					getBaseCommit(), Collections.min(commits.values()), Collections.max(commits.values()))) {
-				if (visit.getCommit().equals(getBaseCommit()) || commits.containsKey(visit.getCommit())) {
-					Map<CommentPosition, Date> visits = commentVisits.get(visit.getCommit());
-					if (visits == null) {
-						visits = new HashMap<>();
-						commentVisits.put(visit.getCommit(), visits);
+			
+			User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
+			if (currentUser != null) {
+				Map<String, Date> commits = new HashMap<>();
+				for (PullRequestUpdate update: updates) {
+					for (Commit commit: update.getCommits())
+						commits.put(commit.getHash(), commit.getCommitter().getWhen());
+				}
+				CommentVisitManager manager = GitPlex.getInstance(CommentVisitManager.class);
+				for (CommentVisit visit: manager.findByCommitOrDates(getTarget().getRepository(), currentUser, 
+						getBaseCommit(), Collections.min(commits.values()), Collections.max(commits.values()))) {
+					if (visit.getCommit().equals(getBaseCommit()) || commits.containsKey(visit.getCommit())) {
+						Map<CommentPosition, Date> visits = commentVisits.get(visit.getCommit());
+						if (visits == null) {
+							visits = new HashMap<>();
+							commentVisits.put(visit.getCommit(), visits);
+						}
+						visits.put(visit.getPosition(), visit.getVisitDate());
 					}
-					visits.put(visit.getPosition(), visit.getVisitDate());
 				}
 			}
 		}
 		return commentVisits;
 	}
 
-	public List<Commit> getCommits() {
+	public List<String> getCommits() {
 		if (commits == null) {
 			commits = new ArrayList<>();
-			commits.add(getTarget().getRepository().git().showRevision(getBaseCommit()));
+			commits.add(getBaseCommit());
 			for (int i=getSortedUpdates().size()-1; i>=0; i--) {
 				for (Commit commit: getSortedUpdates().get(i).getCommits())
-					commits.add(commit);
+					commits.add(commit.getHash());
 			}
 		}
 		return commits;
-	}
-	
-	public Commit getCommit(String hash) {
-		for (Commit each: getCommits()) {
-			if (hash.equals(each.getHash()))
-				return each;
-		}
-		throw new RuntimeException("Unable to find specified commit.");
 	}
 	
 }

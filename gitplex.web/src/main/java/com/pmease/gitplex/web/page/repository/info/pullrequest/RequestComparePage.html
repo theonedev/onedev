@@ -1,23 +1,23 @@
 <wicket:extend>
 	<div class="compare">
 		<div wicket:id="compareHead" class="head clearfix">
-			<button wicket:id="locateComment" class="comment btn pull-left">
-				<i class="fa fa-comments"></i> <span wicket:id="label"></span>
+			<button wicket:id="concernComment" class="comment btn pull-left">
+				<span wicket:id="label"></span>
 			</button>
-			<div class="old pull-left">
-				<label>Original:</label> 
-				<span class="btn btn-default" wicket:id="oldSelector">
+			<div class="pull-left btn-group">
+				<span class="btn btn-default old" wicket:id="oldSelector">
 					<i class="fa fa-commit"></i> <span wicket:id="label"></span> <i class="caret"></i>
 				</span>
-				<div wicket:id="oldChoices"></div>
-			</div>
-			<div class="new pull-left">
-				<label>Revised:</label> 
-				<span class="btn btn-default" wicket:id="newSelector">
+				<span wicket:id="comparisonSelector" class="btn btn-default" title="Commonly used comparisons">
+					<i class="fa fa-arrow-left"></i> <i class="caret"></i> <i class="fa fa-arrow-right"></i>				
+				</span>
+				<span class="btn btn-default new" wicket:id="newSelector">
 					<i class="fa fa-commit"></i> <span wicket:id="label"></span> <i class="caret"></i>
 				</span>
-				<div wicket:id="newChoices"></div>
 			</div>
+			<div wicket:id="oldChoices"></div>
+			<div wicket:id="newChoices"></div>
+			<div wicket:id="comparisonChoices"></div>
 		</div>
 		<table class="body">
 			<tr>
@@ -48,5 +48,16 @@
 				</a>
 			</li>
 		</ul>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="comparisonChoiceFrag">
+		<a wicket:id="link">
+			<table class="old-vs-new">
+				<tr>
+					<td wicket:id="old" class="old"></td>
+					<td class="vs">-vs-</td>
+					<td wicket:id="new" class="new"></td>
+				</tr>				
+			</table>
+		</a>
 	</wicket:fragment>
 </wicket:extend>

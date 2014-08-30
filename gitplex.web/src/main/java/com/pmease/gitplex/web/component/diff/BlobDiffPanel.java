@@ -29,7 +29,7 @@ public class BlobDiffPanel extends Panel {
 	
 	private final CommentAwareChange change;
 	
-	public BlobDiffPanel(String id, IModel<Repository> repoModel, CommentAwareChange change, int lineNo) {
+	public BlobDiffPanel(String id, IModel<Repository> repoModel, CommentAwareChange change) {
 		super(id);
 		
 		this.repoModel = repoModel;

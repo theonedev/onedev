@@ -9,7 +9,9 @@ import com.google.inject.ImplementedBy;
 import com.pmease.gitplex.core.manager.impl.DefaultCommentVisitManager;
 import com.pmease.gitplex.core.model.CommentPosition;
 import com.pmease.gitplex.core.model.CommentVisit;
+import com.pmease.gitplex.core.model.CommitComment;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.User;
 
 @ImplementedBy(DefaultCommentVisitManager.class)
 public interface CommentVisitManager {
@@ -26,10 +28,15 @@ public interface CommentVisitManager {
 	 * @return
 	 * 			list of found comment visits
 	 */
-	List<CommentVisit> findByCommitDates(Repository repository, @Nullable Date fromDate, @Nullable Date toDate);
-	
-	List<CommentVisit> findByCommitOrDates(Repository repository, String commit, 
+	List<CommentVisit> findByCommitDates(Repository repository, User user, 
 			@Nullable Date fromDate, @Nullable Date toDate);
+	
+	List<CommentVisit> findByCommitOrDates(Repository repository, User user, 
+			String commit, @Nullable Date fromDate, @Nullable Date toDate);
 
-	CommentVisit find(Repository repository, String commit, @Nullable CommentPosition position);
+	CommentVisit find(Repository repository, User user, 
+			String commit, @Nullable CommentPosition position);
+	
+	void visitComment(Repository repository, User user, CommitComment comment);
+	
 }
