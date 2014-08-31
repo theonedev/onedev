@@ -1,28 +1,14 @@
 package com.pmease.gitplex.web.page;
 
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.commons.jackson.JsonOptions;
 
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
 
-	private IModel<Repository> repoModel;
-	
 	public TestPage(PageParameters params) {
 		super(params);
-		
-		repoModel = new LoadableDetachableModel<Repository>() {
-
-			@Override
-			protected Repository load() {
-				return GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
-			}
-		};
 		
 	}
 	
@@ -30,13 +16,9 @@ public class TestPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		JsonOptions options = new JsonOptions();
+		options.put("offset_top", "$('.head').height();");
+		System.out.println(options);
 	}
 
-	@Override
-	protected void onDetach() {
-		repoModel.detach();
-		
-		super.onDetach();
-	}
-	
 }

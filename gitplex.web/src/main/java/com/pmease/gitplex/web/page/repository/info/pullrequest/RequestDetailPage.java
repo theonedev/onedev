@@ -392,7 +392,6 @@ public abstract class RequestDetailPage extends RepositoryInfoPage implements Co
 		tabs.add(new RequestTab("Activities", RequestActivitiesPage.class));
 		tabs.add(new RequestTab("Updates", RequestUpdatesPage.class));
 		tabs.add(new RequestTab("Compare", RequestComparePage.class));
-		
 		add(new Tabbable("tabs", tabs));
 	}
 	

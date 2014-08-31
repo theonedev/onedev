@@ -1,9 +1,6 @@
 <wicket:extend>
 	<div class="compare">
 		<div wicket:id="compareHead" class="head clearfix">
-			<button wicket:id="concernComment" class="comment btn pull-left">
-				<span wicket:id="label"></span>
-			</button>
 			<div class="pull-left btn-group">
 				<span class="btn btn-default old" wicket:id="oldSelector">
 					<i class="fa fa-commit"></i> <span wicket:id="label"></span> <i class="caret"></i>
@@ -18,20 +15,18 @@
 			<div wicket:id="oldChoices"></div>
 			<div wicket:id="newChoices"></div>
 			<div wicket:id="comparisonChoices"></div>
+			<div class="pull-left btn-group">
+				<button wicket:id="prevChange" class="btn btn-default" title="Previous changed file">
+					<i class="fa fa-arrow-slim-left"></i>
+				</button>
+				<button wicket:id="changesTrigger" class="btn btn-default">Changes: <span wicket:id="label"></span> <i class="caret"></i></button>
+				<button wicket:id="nextChange" class="btn btn-default" title="Next changed file">
+					<i class="fa fa-arrow-slim-right"></i>
+				</button>
+			</div>
+			<div wicket:id="changesDropdown"></div>
 		</div>
-		<table class="body">
-			<tr>
-				<td class="nav">
-					<div class="panel panel-default">
-						<div class="panel-heading">
-							<span class="panel-title">Compare Result</span> <input wicket:id="changesOnly" type="checkbox"> changes only</input> 
-						</div>
-						<div wicket:id="compareResult" class="panel-body"></div>
-					</div>
-				</td>
-				<td wicket:id="blobDiff" class="content"></td>
-			</tr>
-		</table>
+		<div wicket:id="blobDiff"></div>
 	</div>
 	<wicket:fragment wicket:id="commitChoiceFrag">
 		<ul class="commit-choice list-unstyled">
@@ -59,5 +54,16 @@
 				</tr>				
 			</table>
 		</a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="changesFrag">
+		<div class="panel panel-default compare-result">
+			<div class="panel-heading clearfix">
+				<div class="panel-title pull-left">Compare Result</div> 
+				<div class="pull-right">
+					<input wicket:id="changesOnly" type="checkbox"> changes only</input> 
+				</div>
+			</div>
+			<div wicket:id="changes" class="panel-body"></div>
+		</div>
 	</wicket:fragment>
 </wicket:extend>

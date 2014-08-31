@@ -279,7 +279,7 @@ ul.f-dropdown { padding: 0; }
 #main>table>tbody>tr>td.sidebar ul {margin:0 0 12px 0; padding:0; list-style: none;}
 #main>table>tbody>tr>td.sidebar li.active {border-color: #ccc; border-width: 1px 0; 
 	border-style: solid;}
-#main>table>tbody>tr>td.sidebar li a { padding: 8px 12px 8px 30px; display: block; }
+#main>table>tbody>tr>td.sidebar li a { padding: 8px 12px 8px 30px; display: block; white-space: nowrap;}
 #main>table>tbody>tr>td.sidebar li a:hover { color: #333; text-decoration: none; background: #f2f2f2; }
 #main>table>tbody>tr>td.sidebar li.active a,
 #main>table>tbody>tr>td.sidebar li.active a:hover { color: #222; background: #e5e5e5;  }
@@ -774,8 +774,9 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 .changed-files a {color: black;}
 
 /* TEXT DIFF */
-.text-diff>.panel-heading {z-index: 10;}
+.text-diff>.panel-heading {z-index: 10; border-top: 1px solid #DDD;}
 .text-diff>.panel-heading .pull-right {margin-left: 12px;}
+.text-diff>.body {overflow: auto;}
 .table-diff .line.content>td.line-no {color: #999; width: 1%; text-align: right; white-space: nowrap;}
 .table-diff .line.content td.text {font-family: Consolas,"Liberation Mono",Menlo,Courier,monospace;
     color: #333; overflow: visible; white-space: pre;}
@@ -913,6 +914,8 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.actions>div, .request-detail>.actions>.confirm>form>div {margin-bottom: 20px;}
 .request-detail>.actions .btn {margin-right: 8px;}
 
+.request-detail>.tabs {background: white; z-index: 100;}
+
 .request-detail .activities>tbody>tr>td {
 	padding: 8px; border-top-style: solid; border-top-width: 2px;}
 .request-detail .activities td.summary {width: 1px; white-space: nowrap; padding-right: 12px;}
@@ -930,8 +933,8 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail .base-threads>.title {margin-bottom: 12px;}
 .request-detail .base-threads>.content {margin-left: 6px;}
 
-.request-detail .compare>.head .comment {margin-right: 20px;}
-.request-detail .compare>.head {border-bottom: 1px dashed #BBB; padding-bottom: 16px;}
+.request-detail .compare>.head {background: white; z-index: 90; padding-bottom: 20px;}
+.request-detail .compare>.head .btn-group {margin-right: 20px;}
 .content>.commit-choice {max-height: 600px; padding: 8px 0; overflow-y: scroll;}
 .content>.commit-choice a {text-decoration: none; color: #333; display: block; padding: 8px;}
 .content>.commit-choice li {border-bottom: 1px dotted #BBB;}
@@ -944,13 +947,11 @@ table.old-vs-new td.old {width: 140px; text-align: left;}
 table.old-vs-new td.new {width: 140px; text-align: right;}
 table.old-vs-new td.vs {width: 1px; text-align: center; font-weight: bold;}
 
-.request-detail .compare>.body {margin-top: 16px;}
-.request-detail .compare>.body>tbody>tr>td.nav {width: 1%;}
-.request-detail .compare>.body>tbody>tr>td.nav .panel-heading {white-space: nowrap;}
-.request-detail .compare>.body>tbody>tr>td.nav .panel-heading>span {margin-right: 16px;}
-.request-detail .compare>.body>tbody>tr>td.content {padding-left: 16px;}
-.request-detail .compare>.body>tbody>tr>td.nav a {padding: 2px;}
-.request-detail .compare>.body>tbody>tr>td.nav a.active {background: #0F89E7; color: white; border-radius: 2px;}
+.content>.compare-result {overflow-y: auto; max-height: 600px; width: 400px; 
+	white-space: nowrap; border: none; margin-bottom: 0;}
+.content>.compare-result a {padding: 2px;}
+.content>.compare-result a.active {background: #0F89E7; color: white; border-radius: 2px;}
+.content>.compare-result>.panel-heading .pull-right {color: #888;}
 
 .update-commits {margin: 0 0 0 -14px;}
 .update-commits tbody>tr>td.handle {

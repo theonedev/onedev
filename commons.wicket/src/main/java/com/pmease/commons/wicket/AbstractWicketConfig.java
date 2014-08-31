@@ -61,6 +61,8 @@ public abstract class AbstractWicketConfig extends WebApplication {
 				
 				for (Component component: map.values())
 					target.appendJavaScript((String.format("$(document).trigger('replace', '%s');", component.getMarkupId())));
+				
+				target.appendJavaScript("$(document.body).trigger('sticky_kit:recalc')");
 			}
 
 			@Override

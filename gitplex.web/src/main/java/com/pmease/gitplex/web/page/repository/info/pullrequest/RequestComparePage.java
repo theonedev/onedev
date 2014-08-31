@@ -16,7 +16,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -28,12 +27,12 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
+import org.hibernate.Hibernate;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Change;
@@ -42,6 +41,7 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.RevAwareChange;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
@@ -59,14 +59,25 @@ import com.pmease.gitplex.web.component.diff.ChangedFilesPanel;
 import com.pmease.gitplex.web.component.diff.DiffTreePanel;
 import com.pmease.gitplex.web.event.CommitCommentRemoved;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
+
 @SuppressWarnings("serial")
 public class RequestComparePage extends RequestDetailPage {
 
 	private static final String HEAD_ID = "compareHead";
 	
-	private static final String CONCERN_COMMENT_ID = "concernComment";
+	private static final String CHANGES_TRIGGER_ID = "changesTrigger";
 	
-	private static final String COMPARE_RESULT_ID = "compareResult";
+	private static final String CHANGES_DROPDOWN_ID = "changesDropdown";
+	
+	private static final String LABEL_ID = "label";
+	
+	private static final String PREV_CHANGE_ID = "prevChange";
+	
+	private static final String NEXT_CHANGE_ID = "nextChange";
+
+	private static final String CHANGES_ID = "changes";
 	
 	private static final String BLOB_DIFF_ID = "blobDiff";
 	
@@ -151,10 +162,13 @@ public class RequestComparePage extends RequestDetailPage {
 
 			@Override
 			protected CommitComment load() {
-				if (concernedCommentId != null) 
-					return GitPlex.getInstance(Dao.class).load(CommitComment.class, concernedCommentId);
-				else
+				if (concernedCommentId != null) {
+					CommitComment comment = GitPlex.getInstance(Dao.class).load(CommitComment.class, concernedCommentId);
+					Hibernate.initialize(comment);
+					return comment;
+				} else {
 					return null;
+				}
 			}
 			
 		};
@@ -184,70 +198,9 @@ public class RequestComparePage extends RequestDetailPage {
 		super.onInitialize();
 		
 		WebMarkupContainer head = new WebMarkupContainer(HEAD_ID);
-		head.setOutputMarkupId(true);
+		head.add(new StickyBehavior());
+		
 		add(head);
-
-		AjaxLink<Void> link = new AjaxLink<Void>(CONCERN_COMMENT_ID) {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				filePath = null;
-				CommentAwareChange change = resolveChange(getConcernedComment());
-				if (change != null) {
-					Component compareResult = newCompareResult(change.getStatus() != UNCHANGED);
-					getPage().replace(compareResult);
-					target.add(compareResult);
-					
-					BlobDiffPanel diffPanel = new BlobDiffPanel(BLOB_DIFF_ID, repoModel, change);
-					getPage().replace(diffPanel);
-					target.add(diffPanel);
-					
-					target.add(this);
-				} else {
-					PageParameters params = paramsOf(getPullRequest(), null, null, null, getConcernedComment());
-					setResponsePage(RequestComparePage.class, params);
-				}
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				setVisible(getConcernedComment() != null);
-			}
-			
-		};
-		link.add(new Label("label", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				Component panel = getPage().get(BLOB_DIFF_ID);
-				if (panel instanceof BlobDiffPanel) {
-					CommentAwareChange change = ((BlobDiffPanel) panel).getChange();
-					if (change.contains(getConcernedComment())) 
-						return "Displaying concerned comments by comparing";
-				}
-				
-				return "Click to display concerned comments";
-			}
-
-		}));
-		link.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				Component panel = getPage().get(BLOB_DIFF_ID);
-				if (panel instanceof BlobDiffPanel) {
-					CommentAwareChange change = ((BlobDiffPanel) panel).getChange();
-					if (change.contains(getConcernedComment())) 
-						return "btn-primary";
-				}
-				
-				return "btn-warning";
-			}
-			
-		}));
-		head.add(link);
 
 		WebMarkupContainer oldSelector = new WebMarkupContainer("oldSelector");
 		head.add(oldSelector);
@@ -258,9 +211,9 @@ public class RequestComparePage extends RequestDetailPage {
 				CommitDescription description = commitsModel.getObject().get(oldCommit);
 				Preconditions.checkNotNull(description);
 				if (description.getName() != null)
-					return GitUtils.abbreviateSHA(oldCommit) + " - " + description.getName();
+					return GitUtils.abbreviateSHA(oldCommit, 7) + " - " + description.getName();
 				else
-					return GitUtils.abbreviateSHA(oldCommit);
+					return GitUtils.abbreviateSHA(oldCommit, 7);
 			}
 			
 		}).add(new TooltipBehavior(new LoadableDetachableModel<String>() {
@@ -272,7 +225,7 @@ public class RequestComparePage extends RequestDetailPage {
 				return description.getSubject();
 			}
 			
-		})));
+		}, new TooltipConfig().withPlacement(Placement.bottom))));
 		
 		DropdownPanel oldChoicesDropdown = new DropdownPanel("oldChoices", false) {
 
@@ -295,9 +248,9 @@ public class RequestComparePage extends RequestDetailPage {
 				Preconditions.checkNotNull(description);
 				
 				if (description.getName() != null)
-					return GitUtils.abbreviateSHA(newCommit) + " - " + description.getName();
+					return GitUtils.abbreviateSHA(newCommit, 7) + " - " + description.getName();
 				else
-					return GitUtils.abbreviateSHA(newCommit);
+					return GitUtils.abbreviateSHA(newCommit, 7);
 			}
 			
 		}).add(new TooltipBehavior(new LoadableDetachableModel<String>() {
@@ -309,7 +262,8 @@ public class RequestComparePage extends RequestDetailPage {
 				return description.getSubject();
 			}
 			
-		})));
+		}, new TooltipConfig().withPlacement(Placement.bottom))));
+		
 		DropdownPanel newChoicesDropdown = new DropdownPanel("newChoices", false) {
 
 			@Override
@@ -418,6 +372,86 @@ public class RequestComparePage extends RequestDetailPage {
 				.add(new MenuBehavior(commonComparisons)
 				.alignWithTrigger(50, 100, 50, 0)));
 		
+		DropdownPanel changesDropdown = new DropdownPanel("changesDropdown") {
+
+			@Override
+			protected Component newContent(String id) {
+				final Fragment fragment = new Fragment(id, "changesFrag", RequestComparePage.this);
+				
+				Change change = getActiveChange();
+				boolean changesOnly = (change == null || change.getStatus() != UNCHANGED);
+				fragment.add(new CheckBox("changesOnly", Model.of(changesOnly)).add(new OnChangeAjaxBehavior() {
+							
+					@Override
+					protected void onUpdate(AjaxRequestTarget target) {
+						Component changeLister = fragment.get(CHANGES_ID);
+						changeLister = newChangeLister(!(changeLister instanceof ChangedFilesPanel));
+						fragment.replace(changeLister);
+						target.add(changeLister);
+					}
+					
+				}));
+
+				fragment.add(newChangeLister(changesOnly));
+				return fragment;
+			}
+			
+		};
+		
+		head.add(changesDropdown);
+		WebMarkupContainer changesTrigger = new WebMarkupContainer(CHANGES_TRIGGER_ID);
+		changesTrigger.add(new DropdownBehavior(changesDropdown));
+		changesTrigger.add(new Label(LABEL_ID, new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				int index = getChangedFiles().indexOf(filePath);
+				if (index == -1)
+					return String.valueOf(getChanges().size());
+				else
+					return String.valueOf(index+1) + "/" + getChanges().size();
+			}
+			
+		}).setOutputMarkupId(true));
+		head.add(changesTrigger);
+		
+		head.add(new AjaxLink<Void>(PREV_CHANGE_ID) {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				int index = getChangedFiles().indexOf(filePath) - 1;
+				onChangeSelected(target, getChanges().get(index));
+			}
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				
+				if (getChangedFiles().indexOf(filePath) <= 0) 
+					tag.put("disabled", "disabled");
+			}
+			
+		}.setOutputMarkupId(true));
+
+		head.add(new AjaxLink<Void>(NEXT_CHANGE_ID) {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				int index = getChangedFiles().indexOf(filePath) + 1;
+				onChangeSelected(target, getChanges().get(index));
+			}
+			
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				
+				List<String> changedFiles = getChangedFiles();
+				if (changedFiles.isEmpty() || changedFiles.indexOf(filePath) >= changedFiles.size()-1) 
+					tag.put("disabled", "disabled");
+			}
+
+		}.setOutputMarkupId(true));
+
 		CommentAwareChange change = resolveChange();
 		if (change != null) {
 			BlobDiffPanel blobDiffPanel = new BlobDiffPanel(BLOB_DIFF_ID, repoModel, change);
@@ -427,44 +461,34 @@ public class RequestComparePage extends RequestDetailPage {
 			add(new WebMarkupContainer(BLOB_DIFF_ID).setOutputMarkupId(true));
 		}
 		
-		boolean changesOnly = (change == null || change.getStatus() != UNCHANGED);
-		add(new CheckBox("changesOnly", Model.of(changesOnly)).add(new OnChangeAjaxBehavior() {
-					
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				Component compareResult = getPage().get(COMPARE_RESULT_ID);
-				compareResult = newCompareResult(!(compareResult instanceof ChangedFilesPanel));
-				RequestComparePage.this.replace(compareResult);
-				target.add(compareResult);
-			}
-			
-		}));
-
-		add(newCompareResult(changesOnly));
+	}
+	
+	private List<Change> getChanges() {
+		return getRepository().getChanges(oldCommit, newCommit);
+	}
+	
+	private List<String> getChangedFiles() {
+		List<String> files = new ArrayList<>();
+		for (Change change: getChanges())
+			files.add(change.getPath());
+		return files;
 	}
 	
 	private CommentAwareChange resolveChange() {
 		CommentAwareChange change = null;
+		CommitComment comment = getConcernedComment();
 		if (oldCommit != null) {
 			if (filePath != null) {
 				change = resolveChange(filePath);
-			} else {
-				if (getConcernedComment() != null)
-					change = resolveChange(getConcernedComment());
-				if (change == null) {
-					List<Change> changes = getRepository().getChanges(oldCommit, newCommit);
-					if (!changes.isEmpty()) 
-						change = loadComments(new RevAwareChange(changes.get(0), oldCommit, newCommit));
-				}
+			} else if (comment != null) {
+				filePath = comment.getPosition().getFilePath();
+				change = resolveChange(filePath);
 			}
-		} else if (getConcernedComment() == null) {
+		} else if (comment == null) {
 			oldCommit = getPullRequest().getBaseCommit();
 			newCommit = getPullRequest().getLatestUpdate().getHeadCommit();
-			List<Change> changes = getRepository().getChanges(oldCommit, newCommit);
-			if (!changes.isEmpty())
-				change = loadComments(new RevAwareChange(changes.get(0), oldCommit, newCommit));
 		} else {
-			CommitComment comment = getConcernedComment();
+			filePath = comment.getPosition().getFilePath();
 			if (commitsModel.getObject().containsKey(comment.getOldCommit())) {
 				oldCommit = comment.getOldCommit();
 				newCommit = comment.getCommit();
@@ -478,44 +502,19 @@ public class RequestComparePage extends RequestDetailPage {
 				oldCommit = getPullRequest().getBaseCommit();
 				newCommit = comment.getCommit();
 			}
-			change = resolveChange(comment);
+			change = resolveChange(filePath);
+		}
+		if (change == null && !getChanges().isEmpty()) {
+			filePath = getChanges().get(0).getPath();
+			change = resolveChange(filePath);
 			Preconditions.checkNotNull(change);
 		}
 
 		return change;
 	}
 
-	@Nullable
-	private CommentAwareChange resolveChange(CommitComment comment) {
-		if (!comment.getCommit().equals(oldCommit) && !comment.getCommit().equals(newCommit))
-			return null;
-		
-		boolean enableOldComments = getPullRequest().getCommits().contains(oldCommit); 
-		
-		boolean enableNewComments = getPullRequest().getCommits().contains(newCommit);
-
-		String path = comment.getPosition().getFilePath();
-		for (Change each: getRepository().getChanges(oldCommit, newCommit)) {
-			if (path.equals(each.getPath())) {
-				CommentAwareChange change = new CommentAwareChange(
-						getPullRequest().getTarget().getRepository(),
-						new RevAwareChange(each, oldCommit, newCommit), 
-						enableOldComments, enableNewComments, comment);
-				return change;
-			}
-		}
-		List<TreeNode> nodes = getRepository().git().listTree(newCommit, comment.getPosition().getFilePath());
-		Preconditions.checkState(!nodes.isEmpty() && nodes.get(0).getMode() != FileMode.TYPE_TREE);
-		RevAwareChange change = new RevAwareChange(UNCHANGED, path, path, 
-				nodes.get(0).getMode(), nodes.get(0).getMode(), oldCommit, newCommit);
-		CommentAwareChange commentAwareChange = new CommentAwareChange(
-				getPullRequest().getTarget().getRepository(), change, 
-				enableOldComments, enableNewComments, comment);
-		return commentAwareChange;
-	}
-	
 	private CommentAwareChange resolveChange(String filePath) {
-		for (Change each: getRepository().getChanges(oldCommit, newCommit)) {
+		for (Change each: getChanges()) {
 			if (filePath.equals(each.getPath())) 
 				return loadComments(new RevAwareChange(each, oldCommit, newCommit));
 		}
@@ -529,10 +528,10 @@ public class RequestComparePage extends RequestDetailPage {
 		}
 	}
 	
-	private Component newCompareResult(boolean changesOnly) {
-		Component compareResult;
+	private Component newChangeLister(boolean changesOnly) {
+		Component changeLister;
 		if (changesOnly) {
-			compareResult = new ChangedFilesPanel(COMPARE_RESULT_ID, repoModel, oldCommit, newCommit) {
+			changeLister = new ChangedFilesPanel(CHANGES_ID, repoModel, oldCommit, newCommit) {
 				
 				@Override
 				protected WebMarkupContainer newBlobLink(String id, Change change) {
@@ -540,7 +539,7 @@ public class RequestComparePage extends RequestDetailPage {
 				}
 			};
 		} else {
-			compareResult = new DiffTreePanel(COMPARE_RESULT_ID, repoModel, oldCommit, newCommit) {
+			changeLister = new DiffTreePanel(CHANGES_ID, repoModel, oldCommit, newCommit) {
 
 				@Override
 				protected WebMarkupContainer newBlobLink(String id, final Change change) {
@@ -558,8 +557,8 @@ public class RequestComparePage extends RequestDetailPage {
 				
 			};
 		}
-		compareResult.setOutputMarkupId(true);
-		return compareResult;
+		changeLister.setOutputMarkupId(true);
+		return changeLister;
 	}
 	
 	@Nullable
@@ -688,7 +687,7 @@ public class RequestComparePage extends RequestDetailPage {
 						
 					};
 					Map.Entry<String, CommitDescription> entry = item.getModelObject();
-					String hash = GitUtils.abbreviateSHA(entry.getKey());
+					String hash = GitUtils.abbreviateSHA(entry.getKey(), 7);
 					String name = entry.getValue().getName();
 					link.add(new Label("commit", hash));
 					link.add(new Label("name", name).setVisible(name != null));
@@ -739,26 +738,30 @@ public class RequestComparePage extends RequestDetailPage {
 
 		@Override
 		public void onClick(AjaxRequestTarget target) {
-			filePath = change.getPath();
-			RevAwareChange revAwareChange = new RevAwareChange(change, oldCommit, newCommit);
-
-			BlobDiffPanel diffPanel = new BlobDiffPanel(BLOB_DIFF_ID, repoModel, loadComments(revAwareChange));
-			getPage().replace(diffPanel);
-			target.add(diffPanel);
-			
-			Component compareResult = getPage().get(COMPARE_RESULT_ID);
-			String script = String.format("$('#%s').find('a.active').removeClass('active');", 
-					compareResult.getMarkupId());
-			target.prependJavaScript(script);
-			
-			target.add(this);
-
-			if (getConcernedComment() != null)
-				target.add(getPage().get(HEAD_ID).get(CONCERN_COMMENT_ID));
+			onChangeSelected(target, change);
 		}
 		
 	}
 
+	private void onChangeSelected(AjaxRequestTarget target, Change change) {
+		filePath = change.getPath();
+		BlobDiffPanel diffPanel = new BlobDiffPanel(BLOB_DIFF_ID, repoModel, 
+				loadComments(new RevAwareChange(change, oldCommit, newCommit)));
+		getPage().replace(diffPanel);
+		target.add(diffPanel);
+
+		target.add(get(HEAD_ID).get(PREV_CHANGE_ID));
+		target.add(get(HEAD_ID).get(NEXT_CHANGE_ID));
+		target.add(get(HEAD_ID).get(CHANGES_TRIGGER_ID).get(LABEL_ID));
+		
+		Component changesDropdown = get(HEAD_ID).get(CHANGES_DROPDOWN_ID);
+		String script = String.format("$('#%s').find('a.active').removeClass('active');", 
+				changesDropdown.getMarkupId());
+		target.prependJavaScript(script);
+		
+		target.add(this);
+	}
+	
 	private abstract class ComparisonChoiceItem extends MenuItem {
 
 		private final String oldName;

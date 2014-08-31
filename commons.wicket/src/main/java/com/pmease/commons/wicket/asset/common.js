@@ -525,6 +525,30 @@ pmease.commons = {
 		});
 	},
 	
+	stick: function(sticky, parent) {
+		var $sticky = $(sticky);
+		var offset = 0;
+		var $parent;
+		if (parent != undefined)
+			$parent = $(parent);
+		else
+			$parent = $sticky.parent();
+		$parent.parents().each(function() {
+			var $this = $(this);
+			var maxHeight = 0;
+			$this.children(".sticky").each(function() {
+				var height = $(this).outerHeight();
+				if (height > maxHeight)
+					maxHeight = height;
+			});
+			offset += maxHeight;
+		});
+		if (parent != undefined)
+			$sticky.stick_in_parent({"offset_top": offset, "parent": parent, "inner_scrolling": false});
+		else
+			$sticky.stick_in_parent({"offset_top": offset, "inner_scrolling": false});
+	},
+	
 	scroll: {
 		setupScrollStop: function() {
 			var $window = $(window);
@@ -639,6 +663,16 @@ pmease.commons = {
 				$button.attr("disabled", "disabled");
 		});
 		$input.trigger("input");
+	},
+	
+	autoHeight: function(targetSelector, bottomOffset) {
+		var adjustHeight = function() {
+			$(targetSelector).css("max-height", $(document).scrollTop() + $(window).height()
+					- $(targetSelector).offset().top - bottomOffset + "px");
+		};
+		adjustHeight();
+		$(window).resize(adjustHeight);
+		$(window).scroll(adjustHeight);
 	},
 	
 	showSessionFeedback: function() {
