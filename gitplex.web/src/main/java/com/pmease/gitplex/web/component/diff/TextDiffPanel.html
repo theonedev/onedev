@@ -23,48 +23,46 @@
 				<span wicket:id="identical" class="label label-warning">Identical Content</span>
 			</div>
 		</div>
-		<div class="body">
-			<table class="table-diff">
-				<wicket:container wicket:id="lines">
-					<tr wicket:id="contentRow" class="line content">
-						<td class="old line-no">
-							<a wicket:id="addComment" class="add-comment"><i class="fa fa-comment-add"></i></a>
-							<span wicket:id="oldLineNo"></span>
-						</td>
-						<td class="new line-no">
-							<span wicket:id="newLineNo"></span>
-						</td>
-						<td class="text"><wicket:container wicket:id="partials"><span wicket:id="partial"></span></wicket:container></td>
-					</tr>
-					<tr wicket:id="commentsRow" class="line comments">
-						<td colspan="2" class="summary">
-							<div><i wicket:id="concernedFlag" class="fa fa-bookmark concerned-comments" title="Concerned"></i></div>
-							<div><i class="fa fa-comment"></i> <span wicket:id="commentCount"></span></div>
-						</td>
-						<td class="detail">
-							<table class="line-comments">
-								<tr wicket:id="comments">
-									<td class="avatar">
-										<span wicket:id="avatar"></span>
-									</td>
-									<td class="content">
-										<div class="clearfix head">
-											<span wicket:id="name" class="pull-left"></span>
-											<a wicket:id="edit" class="pull-right" title="Edit this comment"><i class="fa fa-pencil"></i></a>
-											<a wicket:id="delete" class="pull-right" title="Delete this comment"><i class="fa fa-times"></i></a>
-											<span wicket:id="age" class="pull-right"></span>
-										</div>
-										<div wicket:id="content" class="body"></div>
-									</td>
-								</tr>
-							</table>
-							<a wicket:id="addComment" class="btn btn-sm btn-default">Add a comment</a>
-							<div wicket:id="newComment"></div>
-						</td>
-					</tr>
-				</wicket:container>
-			</table>
-		</div>
+		<table class="table-diff">
+			<wicket:container wicket:id="lines">
+				<tr wicket:id="contentRow" class="line content">
+					<td class="old line-no">
+						<a wicket:id="addComment" class="add-comment"><i class="fa fa-comment-add"></i></a>
+						<span wicket:id="oldLineNo"></span>
+					</td>
+					<td class="new line-no">
+						<span wicket:id="newLineNo"></span>
+					</td>
+					<td class="text"><wicket:container wicket:id="partials"><span wicket:id="partial"></span></wicket:container></td>
+				</tr>
+				<tr wicket:id="commentsRow" class="line comments">
+					<td colspan="2" class="summary">
+						<div><i wicket:id="concernedTip" class="fa fa-light-bulb concerned-comments"></i></div>
+						<div><i class="fa fa-comment"></i> <span wicket:id="commentCount"></span></div>
+					</td>
+					<td class="detail">
+						<table class="line-comments">
+							<tr wicket:id="comments">
+								<td class="avatar">
+									<span wicket:id="avatar"></span>
+								</td>
+								<td class="content">
+									<div class="clearfix head">
+										<span wicket:id="name" class="pull-left"></span>
+										<a wicket:id="edit" class="pull-right" title="Edit this comment"><i class="fa fa-pencil"></i></a>
+										<a wicket:id="delete" class="pull-right" title="Delete this comment"><i class="fa fa-times"></i></a>
+										<span wicket:id="age" class="pull-right"></span>
+									</div>
+									<div wicket:id="content" class="body"></div>
+								</td>
+							</tr>
+						</table>
+						<a wicket:id="addComment" class="btn btn-sm btn-default">Add a comment</a>
+						<div wicket:id="newComment"></div>
+					</td>
+				</tr>
+			</wicket:container>
+		</table>
 	</div>
 	<wicket:fragment wicket:id="editCommentFrag">
 		<form wicket:id="form">

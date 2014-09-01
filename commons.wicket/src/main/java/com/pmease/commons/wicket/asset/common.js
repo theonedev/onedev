@@ -560,31 +560,44 @@ pmease.commons = {
 		    });
 		},
 		
-		next: function(fixContainerId, selector, margin) {
-			var next = pmease.commons.scroll.getNext(fixContainerId, selector, margin);
+		getTopOffset: function(selector) {
+			var offset = 0;
+			$(selector).first().parents().each(function() {
+				var $this = $(this);
+				var maxHeight = 0;
+				$this.children(".sticky").each(function() {
+					var height = $(this).outerHeight();
+					if (height > maxHeight)
+						maxHeight = height;
+				});
+				offset += maxHeight;
+			});
+			return offset;
+		},
+		
+		next: function(selector, margin) {
+			var next = pmease.commons.scroll.getNext(selector, margin);
 			if (next != null) {
-				var $fixContainer = $("#" + fixContainerId); 
-				var topMargin = margin+$fixContainer.outerHeight();
-				$('html, body').animate({scrollTop: $(next).offset().top-topMargin}, 500);			
+				var topOffset = margin + pmease.commons.scroll.getTopOffset(selector);
+				$('html, body').animate({scrollTop: $(next).offset().top - topOffset}, 500);			
 			}
 		},
 
-		prev: function(fixContainerId, selector, margin) {
-			var prev = pmease.commons.scroll.getPrev(fixContainerId, selector, margin);
+		prev: function(selector, margin) {
+			var prev = pmease.commons.scroll.getPrev(selector, margin);
 			if (prev != null) {
-				var $fixContainer = $("#" + fixContainerId); 
-				var topMargin = margin+$fixContainer.outerHeight();
-				$('html, body').animate({scrollTop: $(prev).offset().top-topMargin}, 500);				
+				var topOffset = margin + pmease.commons.scroll.getTopOffset(selector);
+				$('html, body').animate({scrollTop: $(prev).offset().top - topOffset}, 500);				
 			}
 		}, 
 		
-		getNext: function(fixContainerId, selector, margin) {
+		getNext: function(selector, margin) {
 			var next = null;
 			$(selector).each(function() {
 		        var bottom = $(window).scrollTop() + $(window).height() - margin;
 
 		        var thisTop = $(this).offset().top;
-		        if (bottom < thisTop && $(document).height()-thisTop>margin) {
+		        if (bottom < thisTop && $(document).height() - thisTop > margin) {
 		        	next = this;
 		        	return false;
 		        }
@@ -592,15 +605,14 @@ pmease.commons = {
 			return next;
 		},
 		
-		getPrev: function(fixContainerId, selector, margin) {
-			var $fixContainer = $("#" + fixContainerId); 
-			var topMargin = margin+$fixContainer.outerHeight();
+		getPrev: function(selector, margin) {
+			var topOffset = margin + pmease.commons.scroll.getTopOffset(selector);
 			var prev = null;
 			$($(selector).get().reverse()).each(function() {
-		        var top = $(window).scrollTop() + topMargin;
+		        var top = $(window).scrollTop() + topOffset;
 
 		        var thisTop = $(this).offset().top;
-		        if (top > thisTop && thisTop > topMargin) {
+		        if (top > thisTop && thisTop > topOffset) {
 		        	prev = this;
 		        	return false;
 		        }

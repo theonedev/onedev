@@ -40,6 +40,7 @@ import com.pmease.commons.util.diff.WordSplitter;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.commons.wicket.behavior.ScrollBehavior;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
+import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.menu.CheckMenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
@@ -61,6 +62,9 @@ import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.event.CommitCommentRemoved;
 import com.pmease.gitplex.web.model.UserModel;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 
 @SuppressWarnings("serial")
 public class TextDiffPanel extends Panel {
@@ -209,7 +213,7 @@ public class TextDiffPanel extends Panel {
 				setVisible(!isIdentical());
 			}
 			
-		}.add(new ScrollBehavior(head, ".diff-block", SCROLL_MARGIN, false)));
+		}.add(new ScrollBehavior(".diff-block", SCROLL_MARGIN, false)));
 
 		head.add(new WebMarkupContainer("nextDiff") {
 
@@ -219,7 +223,7 @@ public class TextDiffPanel extends Panel {
 				setVisible(!isIdentical());
 			}
 			
-		}.add(new ScrollBehavior(head, ".diff-block", SCROLL_MARGIN, true)));
+		}.add(new ScrollBehavior(".diff-block", SCROLL_MARGIN, true)));
 		
 		// add a separate comment actions container in order not to refresh the whole
 		// sticky head when show/hide comment actions (refreshing sticky head via Wicket 
@@ -236,7 +240,7 @@ public class TextDiffPanel extends Panel {
 				setVisible((getOldComments() != null || getNewComments() != null) && showComments);
 			}
 			
-		}.add(new ScrollBehavior(head, ".comments.line", 50, false)));
+		}.add(new ScrollBehavior(".comments.line", 50, false)));
 		
 		commentActions.add(new WebMarkupContainer("nextComment") {
 
@@ -246,7 +250,7 @@ public class TextDiffPanel extends Panel {
 				setVisible((getOldComments() != null || getNewComments() != null) && showComments);
 			}
 			
-		}.add(new ScrollBehavior(head, ".comments.line", 50, true)));
+		}.add(new ScrollBehavior(".comments.line", 50, true)));
 		
 		commentActions.add(new AjaxLink<Void>("showComments") {
 
@@ -459,7 +463,7 @@ public class TextDiffPanel extends Panel {
 					}
 					
 				}));
-				commentsRow.add(new WebMarkupContainer("concernedFlag") {
+				WebMarkupContainer concernedTip = new WebMarkupContainer("concernedTip") {
 
 					@Override
 					protected void onConfigure() {
@@ -468,7 +472,11 @@ public class TextDiffPanel extends Panel {
 						setVisible(lineCommentsModel.getObject().contains(change.getConcernedComment()));
 					}
 					
-				});
+				};
+				String message = "You may also view concerned comments by comparing concerned commit with other commits above";
+				concernedTip.add(new TooltipBehavior(Model.of(message), new TooltipConfig().withPlacement(Placement.right)));
+				commentsRow.add(concernedTip);
+				
 				commentsRow.add(new ListView<CommitComment>("comments", lineCommentsModel) {
 
 					@Override
@@ -803,12 +811,11 @@ public class TextDiffPanel extends Panel {
 		super.renderHead(response);
 		
 		String cssClass;
-		if (change.getConcernedComment() != null)
+		if (change.contains(change.getConcernedComment()))
 			cssClass = ".concerned-comments";
 		else
 			cssClass = ".diff-block:first";
-		String script = String.format("pmease.commons.scroll.next('%s', '%s', %d);", 
-				get(HEAD_ID).getMarkupId(), cssClass, SCROLL_MARGIN);
+		String script = String.format("pmease.commons.scroll.next('%s', %d);", cssClass, SCROLL_MARGIN);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

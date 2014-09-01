@@ -93,7 +93,8 @@ public class CommentThreadPanel extends Panel {
 				} else if (thread.getPosition().getLineNo() == null) { 
 					link.add(new Label("position", "file " + thread.getPosition().getFilePath()));
 				} else {
-					link.add(new Label("position", "line " + thread.getPosition().getLineNo() + " of file " + thread.getPosition().getFilePath()));
+					link.add(new Label("position", "line " + (thread.getPosition().getLineNo()+1) 
+							+ " of file " + thread.getPosition().getFilePath()));
 				}
 				
 				link.add(new AgeLabel("age", Model.of(thread.getLastComment().getCommentDate())));

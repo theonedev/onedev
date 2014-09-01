@@ -809,6 +809,7 @@ table.line-comments>tbody>tr>.content>.head .pull-right {margin-left: 8px; font-
 table.line-comments>tbody>tr>.content>.head .pull-right i {font-size: 12px;}
 table.line-comments>tbody>tr>.content>.head .name {font-weight: bold;}
 table.line-comments>tbody>tr>.content>.body {margin: 12px 0 12px 0;}
+.table-diff .concerned-comments {color: #E9CB43; font-size: 24px; margin-bottom: 12px;}
 
 .table-diff .add-comment {position: absolute; left:0; margin-left: -20px; width: 20px; height: 20px;
 	text-decoration: none;}
@@ -934,7 +935,6 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail .base-threads>.content {margin-left: 6px;}
 
 .request-detail .compare>.head {background: white; z-index: 90; padding-bottom: 20px;}
-.request-detail .compare>.head .btn-group {margin-right: 20px;}
 .content>.commit-choice {max-height: 600px; padding: 8px 0; overflow-y: scroll;}
 .content>.commit-choice a {text-decoration: none; color: #333; display: block; padding: 8px;}
 .content>.commit-choice li {border-bottom: 1px dotted #BBB;}
