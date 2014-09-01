@@ -117,7 +117,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 					closeInfo.setComment("Target branch already contains commit of source branch.");
 					request.setCloseInfo(closeInfo);
 					request.setCheckResult(new Approved("Already integrated."));
-					request.setIntegrationInfo(new IntegrationInfo(branchHead, requestHead, branchHead, null));
+					request.setIntegrationInfo(new IntegrationInfo(branchHead, requestHead, branchHead, null, true));
 				} else {
 					// Update head ref so that it can be pulled by build system
 					git.updateRef(request.getHeadRef(), requestHead, null, null);
@@ -132,7 +132,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 									&& !request.getIntegrationInfo().getIntegrationHead().equals(git.parseRevision(integrateRef, false))) {
 						
 						if (strategy == MERGE_IF_NECESSARY && git.isAncestor(branchHead, requestHead)) {
-							request.setIntegrationInfo(new IntegrationInfo(branchHead, requestHead, requestHead, strategy));
+							request.setIntegrationInfo(new IntegrationInfo(branchHead, requestHead, requestHead, strategy, false));
 							git.updateRef(integrateRef, requestHead, null, null);
 						} else {
 							File tempDir = FileUtils.createTempDir();
@@ -142,6 +142,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 										request.getTarget().getName());
 								
 								String integrateHead;
+
 								if (strategy == REBASE_TARGET) {
 									tempGit.updateRef("HEAD", requestHead, null, null);
 									tempGit.reset(null, null);
@@ -161,13 +162,17 @@ public class DefaultPullRequestManager implements PullRequestManager {
 												"Merge pull request: " + request.getTitle());
 									}
 								}
-								
-								request.setIntegrationInfo(new IntegrationInfo(branchHead, requestHead, integrateHead, strategy));
-								
-								if (integrateHead != null)
-									git.fetch(tempGit, "+HEAD:" + integrateRef);
-								else
+								 
+								if (integrateHead != null) {
+									request.setIntegrationInfo(new IntegrationInfo(
+											branchHead, requestHead, integrateHead, strategy, 
+											!tempGit.listChangedFiles(requestHead, integrateHead, null).isEmpty()));
+									git.fetch(tempGit, "+HEAD:" + integrateRef);									
+								} else {
+									request.setIntegrationInfo(new IntegrationInfo(branchHead, requestHead, 
+											integrateHead, strategy, false));
 									git.deleteRef(integrateRef, null, null);
+								}
 							} finally {
 								FileUtils.deleteDir(tempDir);
 							}

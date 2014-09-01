@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import jersey.repackaged.com.google.common.base.Splitter;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -40,7 +42,6 @@ import com.pmease.commons.util.diff.WordSplitter;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.commons.wicket.behavior.ScrollBehavior;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
-import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.menu.CheckMenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
@@ -62,9 +63,6 @@ import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.event.CommitCommentRemoved;
 import com.pmease.gitplex.web.model.UserModel;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 
 @SuppressWarnings("serial")
 public class TextDiffPanel extends Panel {
@@ -102,6 +100,8 @@ public class TextDiffPanel extends Panel {
 	private boolean showComments = true;
 	
 	private List<DiffLine> diffs;
+	
+	private String autoScrollScript;
 
 	public TextDiffPanel(String id, final IModel<Repository> repoModel, 
 			BlobText oldText, BlobText newText, CommentAwareChange change) {
@@ -423,7 +423,7 @@ public class TextDiffPanel extends Panel {
 		}) {
 
 			@Override
-			protected void populateItem(ListItem<DiffLine> lineItem) {
+			protected void populateItem(final ListItem<DiffLine> lineItem) {
 				final DiffLine diffLine = lineItem.getModelObject();
 				final WebMarkupContainer contentRow = new WebMarkupContainer(CONTENT_ROW_ID);
 				
@@ -463,7 +463,7 @@ public class TextDiffPanel extends Panel {
 					}
 					
 				}));
-				WebMarkupContainer concernedTip = new WebMarkupContainer("concernedTip") {
+				commentsRow.add(new WebMarkupContainer("concernedFlag") {
 
 					@Override
 					protected void onConfigure() {
@@ -472,10 +472,7 @@ public class TextDiffPanel extends Panel {
 						setVisible(lineCommentsModel.getObject().contains(change.getConcernedComment()));
 					}
 					
-				};
-				String message = "You may also view concerned comments by comparing concerned commit with other commits above";
-				concernedTip.add(new TooltipBehavior(Model.of(message), new TooltipConfig().withPlacement(Placement.right)));
-				commentsRow.add(concernedTip);
+				});
 				
 				commentsRow.add(new ListView<CommitComment>("comments", lineCommentsModel) {
 
@@ -494,6 +491,8 @@ public class TextDiffPanel extends Panel {
 							
 						}));
 						
+						commentItem.add(new AddCommentLink("reply", lineItem, comment));
+						
 						commentItem.add(new AjaxLink<Void>("edit") {
 
 							@Override
@@ -508,7 +507,6 @@ public class TextDiffPanel extends Panel {
 
 									@Override
 									public void onClick(AjaxRequestTarget target) {
-										commentsRow.replace(new WebMarkupContainer(NEW_COMMENT_ID));
 										target.add(commentsRow);
 									}
 									
@@ -588,7 +586,7 @@ public class TextDiffPanel extends Panel {
 					
 				});
 
-				commentsRow.add(new AddCommentLink("addComment", lineItem) {
+				commentsRow.add(new AddCommentLink("addComment", lineItem, null) {
 
 					@Override
 					protected void onConfigure() {
@@ -604,7 +602,7 @@ public class TextDiffPanel extends Panel {
 				
 				lineItem.add(commentsRow);
 				
-				contentRow.add(new AddCommentLink("addComment", lineItem));
+				contentRow.add(new AddCommentLink("addComment", lineItem, null));
 				
 				if (diffLine.getAction() == ADD) {
 					if (lineItem.getIndex() == 0 || diffs.get(lineItem.getIndex()-1).getAction() == EQUAL)
@@ -647,6 +645,13 @@ public class TextDiffPanel extends Panel {
 			}
 			
 		});
+		
+		String cssClass;
+		if (change.contains(change.getConcernedComment()))
+			cssClass = ".concerned-comments";
+		else
+			cssClass = ".diff-block:first";
+		autoScrollScript = String.format("pmease.commons.scroll.next('%s', %d);", cssClass, SCROLL_MARGIN);
 	}
 
 	private void showComments(AjaxRequestTarget target) {
@@ -687,9 +692,12 @@ public class TextDiffPanel extends Panel {
 		
 		private final ListItem<DiffLine> item;
 		
-		public AddCommentLink(String id, ListItem<DiffLine> item) {
+		private final CommitComment replyComment;
+		
+		public AddCommentLink(String id, ListItem<DiffLine> item, CommitComment replyComment) {
 			super(id);
 			this.item = item;
+			this.replyComment = replyComment;
 		}
 		
 		@Override
@@ -701,8 +709,14 @@ public class TextDiffPanel extends Panel {
 			Form<?> form = new Form<Void>("form");
 			form.setOutputMarkupId(true);
 			
+			String content = "";
+			if (replyComment != null) {
+				for (String line: Splitter.on('\n').split(replyComment.getContent()))
+					content += "> " + line + "\n";
+			}
+			
 			final CommentInput input;
-			form.add(input = new CommentInput("input", Model.of("")));
+			form.add(input = new CommentInput("input", Model.of(content)));
 			
 			final WebMarkupContainer contentRow = (WebMarkupContainer) item.get(CONTENT_ROW_ID);
 			final WebMarkupContainer commentsRow = (WebMarkupContainer) item.get(COMMENTS_ROW_ID);
@@ -734,37 +748,37 @@ public class TextDiffPanel extends Panel {
 					comment.setUser(currentUser);
 					String commit;
 					CommentPosition position;
-					if (diffLine.getAction() == DELETE) {
-						commit = change.getOldRevision();
-						position = new CommentPosition(change.getOldPath(), diffLine.getOldLineNo());
-					} else if (diffLine.getAction() == ADD) {
-						commit = change.getNewRevision();
-						position = new CommentPosition(change.getNewPath(), diffLine.getNewLineNo());
+					if (replyComment != null) {
+						commit = replyComment.getCommit();
+						position = replyComment.getPosition();
 					} else {
 						List<CommitComment> comments = getLineComments(diffLine);
-						if (comments.isEmpty()) {
-							if (getNewComments() != null) {
-								commit = change.getNewRevision();
-								position = new CommentPosition(change.getNewPath(), diffLine.getNewLineNo());
-							} else {
-								commit = change.getOldRevision();
-								position = new CommentPosition(change.getOldPath(), diffLine.getOldLineNo());
-							}							
-						} else {
+						if (!comments.isEmpty()) {
 							CommitComment lastComment = comments.get(comments.size()-1);
 							commit = lastComment.getCommit();
 							position = lastComment.getPosition();
-						}
+						} else if (diffLine.getAction() == DELETE) {
+							commit = change.getOldRevision();
+							position = new CommentPosition(change.getOldPath(), diffLine.getOldLineNo());
+						} else if (diffLine.getAction() == ADD) {
+							commit = change.getNewRevision();
+							position = new CommentPosition(change.getNewPath(), diffLine.getNewLineNo());
+						} else if (getNewComments() != null) {
+							commit = change.getNewRevision();
+							position = new CommentPosition(change.getNewPath(), diffLine.getNewLineNo());
+						} else {
+							commit = change.getOldRevision();
+							position = new CommentPosition(change.getOldPath(), diffLine.getOldLineNo());
+						}							
 					} 
+					
 					comment.setCommit(commit);
 					comment.setPosition(position);
 					comment.setContent(input.getModelObject());
 					comment.setCommentDate(new Date());
 					comment.setCommitDate(repoModel.getObject().getCommit(commit).getCommitter().getWhen());
-					if (commit.equals(change.getOldRevision())) 
-						comment.setNewCommit(change.getNewRevision());
-					else
-						comment.setOldCommit(change.getOldRevision());
+					comment.setNewCommit(change.getNewRevision());
+					comment.setOldCommit(change.getOldRevision());
 					
 					change.saveComment(comment);
 
@@ -809,14 +823,14 @@ public class TextDiffPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		
-		String cssClass;
-		if (change.contains(change.getConcernedComment()))
-			cssClass = ".concerned-comments";
-		else
-			cssClass = ".diff-block:first";
-		String script = String.format("pmease.commons.scroll.next('%s', %d);", cssClass, SCROLL_MARGIN);
-		response.render(OnDomReadyHeaderItem.forScript(script));
+
+		// only auto-scroll this panel once after it is created; otherwise page refreshing 
+		// caused by actions such as integrate/discard on request compare page will also 
+		// get scrolled
+		if (autoScrollScript != null) {
+			response.render(OnDomReadyHeaderItem.forScript(autoScrollScript));
+			autoScrollScript = null;
+		}
 	}
 
 	private Map<Integer, List<CommitComment>> getOldComments() {

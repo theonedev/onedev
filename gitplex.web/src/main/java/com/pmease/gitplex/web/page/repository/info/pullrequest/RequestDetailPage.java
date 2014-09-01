@@ -537,7 +537,8 @@ public abstract class RequestDetailPage extends RepositoryInfoPage implements Co
 					null, null);
 			
 			Link<Void> link = new BookmarkablePageLink<Void>("preview", RequestComparePage.class, params);
-			link.setVisible(!integrationInfo.getIntegrationHead().equals(integrationInfo.getRequestHead()));
+			link.setVisible(!integrationInfo.getIntegrationHead().equals(integrationInfo.getRequestHead())
+					&& integrationInfo.hasChanges());
 			fragment.add(link);
 			
 			DropdownPanel verificationDetails = new DropdownPanel("verificationDetails") {
@@ -606,7 +607,7 @@ public abstract class RequestDetailPage extends RepositoryInfoPage implements Co
 		return false;
 	}
 
-	public static PageParameters params4(PullRequest request) {
+	public static PageParameters paramsOf(PullRequest request) {
 		PageParameters params = RepositoryInfoPage.paramsOf(request.getTarget().getRepository());
 		params.set("request", request.getId());
 		return params;
@@ -624,7 +625,7 @@ public abstract class RequestDetailPage extends RepositoryInfoPage implements Co
 
 				@Override
 				protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-					return new BookmarkablePageLink<Void>(linkId, pageClass, params4(getPullRequest()));
+					return new BookmarkablePageLink<Void>(linkId, pageClass, paramsOf(getPullRequest()));
 				}
 				
 			};

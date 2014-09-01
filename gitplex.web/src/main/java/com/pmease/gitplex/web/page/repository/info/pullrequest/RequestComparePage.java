@@ -35,6 +35,8 @@ import org.eclipse.jgit.lib.FileMode;
 import org.hibernate.Hibernate;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.git.BlobInfo;
+import com.pmease.commons.git.BlobText;
 import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.GitUtils;
@@ -49,7 +51,9 @@ import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.comment.BlobLoader;
 import com.pmease.gitplex.core.comment.CommentAwareChange;
+import com.pmease.gitplex.core.comment.CommentLoader;
 import com.pmease.gitplex.core.model.CommitComment;
 import com.pmease.gitplex.core.model.IntegrationInfo;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -141,7 +145,8 @@ public class RequestComparePage extends RequestDetailPage {
 			IntegrationInfo integrationInfo = request.getIntegrationInfo();
 			if (request.isOpen() 
 					&& integrationInfo.getIntegrationHead() != null 
-					&& !integrationInfo.getIntegrationHead().equals(integrationInfo.getRequestHead())) { 
+					&& !integrationInfo.getIntegrationHead().equals(integrationInfo.getRequestHead())
+					&& integrationInfo.hasChanges()) { 
 				Commit commit = getRepository().git().showRevision(request.getIntegrationInfo().getIntegrationHead());
 				choices.put(request.getIntegrationInfo().getIntegrationHead(), 
 						new CommitDescription("Integration Preview", commit.getSubject()));
@@ -283,7 +288,7 @@ public class RequestComparePage extends RequestDetailPage {
 				if (getConcernedComment() != null) {
 					final String latestCommit = getPullRequest().getLatestUpdate().getHeadCommit();
 					if (!getConcernedComment().getCommit().equals(latestCommit)) {
-						items.add(new ComparisonChoiceItem("Concerned", "Latest") {
+						items.add(new ComparisonChoiceItem("Concerned", "Latest Update") {
 
 							@Override
 							protected void onSelect() {
@@ -308,7 +313,7 @@ public class RequestComparePage extends RequestDetailPage {
 						});
 					}
 				}
-				items.add(new ComparisonChoiceItem("Base", "Latest") {
+				items.add(new ComparisonChoiceItem("Base", "Latest Update") {
 
 					@Override
 					protected void onSelect() {
@@ -324,8 +329,9 @@ public class RequestComparePage extends RequestDetailPage {
 				final IntegrationInfo integrationInfo = getPullRequest().getIntegrationInfo();
 				if (getPullRequest().isOpen() 
 						&& integrationInfo.getIntegrationHead() != null 
-						&& !integrationInfo.getIntegrationHead().equals(integrationInfo.getRequestHead())) { 
-					items.add(new ComparisonChoiceItem("Latest", "Integration Preview") {
+						&& !integrationInfo.getIntegrationHead().equals(integrationInfo.getRequestHead())
+						&& integrationInfo.hasChanges()) { 
+					items.add(new ComparisonChoiceItem("Latest Update", "Integration Preview") {
 
 						@Override
 						protected void onSelect() {
@@ -489,12 +495,10 @@ public class RequestComparePage extends RequestDetailPage {
 			newCommit = getPullRequest().getLatestUpdate().getHeadCommit();
 		} else {
 			filePath = comment.getPosition().getFilePath();
-			if (commitsModel.getObject().containsKey(comment.getOldCommit())) {
+			if (commitsModel.getObject().containsKey(comment.getOldCommit()) 
+					&& commitsModel.getObject().containsKey(comment.getNewCommit())) {
 				oldCommit = comment.getOldCommit();
-				newCommit = comment.getCommit();
-			} else if (commitsModel.getObject().containsKey(comment.getNewCommit())) {
 				newCommit = comment.getNewCommit();
-				oldCommit = comment.getCommit();
 			} else if (!comment.getCommit().equals(getPullRequest().getLatestUpdate().getHeadCommit())) {
 				oldCommit = comment.getCommit();
 				newCommit = getPullRequest().getLatestUpdate().getHeadCommit();
@@ -502,6 +506,7 @@ public class RequestComparePage extends RequestDetailPage {
 				oldCommit = getPullRequest().getBaseCommit();
 				newCommit = comment.getCommit();
 			}
+
 			change = resolveChange(filePath);
 		}
 		if (change == null && !getChanges().isEmpty()) {
@@ -580,7 +585,7 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	public static PageParameters paramsOf(PullRequest request, @Nullable String oldCommit, 
 			@Nullable String newCommit, @Nullable String filePath, @Nullable CommitComment concernedComment) {
-		PageParameters params = RequestDetailPage.params4(request);
+		PageParameters params = RequestDetailPage.paramsOf(request);
 		
 		if (oldCommit != null)
 			params.set("original", oldCommit);
@@ -595,10 +600,30 @@ public class RequestComparePage extends RequestDetailPage {
 	}
 	
 	private CommentAwareChange loadComments(RevAwareChange change) {
-		boolean enableOldComments = getPullRequest().getCommits().contains(change.getOldRevision());
-		boolean enableNewComments = getPullRequest().getCommits().contains(change.getNewRevision());
-		return new CommentAwareChange(getRepository(), change, enableOldComments, 
-				enableNewComments, getConcernedComment());
+		BlobLoader blobLoader = new BlobLoader() {
+
+			@Override
+			public List<String> loadBlob(BlobInfo blobInfo) {
+				BlobText blobText = repoModel.getObject().getBlobText(blobInfo);
+				return blobText!=null?blobText.getLines():null;
+			}
+			
+		};
+		CommentLoader commentLoader = new CommentLoader() {
+
+			@Override
+			public List<CommitComment> loadComments(String commit) {
+				List<CommitComment> comments = getPullRequest().getCommitComments().get(commit);
+				if (comments == null)
+					return new ArrayList<>();
+				else
+					return comments;
+			}
+			
+		};
+		
+		return new CommentAwareChange(change, getPullRequest().getCommits(), 
+				commentLoader, blobLoader, getConcernedComment());
 	}
 	
 	@Override

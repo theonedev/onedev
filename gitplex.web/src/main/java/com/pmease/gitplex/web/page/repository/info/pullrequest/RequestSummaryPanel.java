@@ -32,7 +32,7 @@ public class RequestSummaryPanel extends Panel {
 
 			@Override
 			public void onClick() {
-				setResponsePage(RequestActivitiesPage.class, RequestActivitiesPage.params4(getPullRequest()));
+				setResponsePage(RequestActivitiesPage.class, RequestActivitiesPage.paramsOf(getPullRequest()));
 			}
 			
 		};

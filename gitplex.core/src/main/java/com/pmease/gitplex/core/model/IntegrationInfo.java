@@ -15,6 +15,10 @@ public class IntegrationInfo implements Serializable {
 	
 	private String integrationHead;
 	
+	// Use Boolean instead of boolean to avoid Hibernate limitation
+	// on embedded property
+	private Boolean hasChanges;
+	
 	private IntegrationStrategy integrationStrategy;
 	
 	@SuppressWarnings("unused")
@@ -22,11 +26,12 @@ public class IntegrationInfo implements Serializable {
 	}
 	
 	public IntegrationInfo(String branchHead, String requestHead, @Nullable String integrationHead, 
-			IntegrationStrategy integrationStrategy) {
+			@Nullable IntegrationStrategy integrationStrategy, boolean hasChanges) {
 		this.branchHead = branchHead;
 		this.requestHead = requestHead;
 		this.integrationHead = integrationHead;
 		this.integrationStrategy = integrationStrategy;
+		this.hasChanges = hasChanges;
 	}
 
 	public String getBranchHead() {
@@ -58,5 +63,9 @@ public class IntegrationInfo implements Serializable {
 	public @Nullable IntegrationStrategy getIntegrationStrategy() {
 		return integrationStrategy;
 	}
-
+	
+	public boolean hasChanges() {
+		return hasChanges != null && hasChanges;
+	}
+	
 }

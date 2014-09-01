@@ -277,7 +277,7 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 
 			@Override
 			public void onClick() {
-				PageParameters params = RequestDetailPage.params4(pullRequest);
+				PageParameters params = RequestDetailPage.paramsOf(pullRequest);
 				setResponsePage(RequestActivitiesPage.class, params);
 			}
 			
@@ -354,7 +354,7 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 					
 					GitPlex.getInstance(PullRequestManager.class).send(pullRequest);
 					
-					setResponsePage(OpenRequestsPage.class, paramsOf(pullRequest.getTarget().getRepository()));
+					setResponsePage(RequestActivitiesPage.class, RequestActivitiesPage.paramsOf(pullRequest));
 				}
 			}
 			
