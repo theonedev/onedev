@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 IFS=$'\r\n'; 
 lines=($(curl -k -s -S -f -X POST -d @- ${GITOP_URL}/git-postreceive-callback/${GITOP_REPOSITORY_ID}/${GITOP_USER_ID} 2>&1))
 
