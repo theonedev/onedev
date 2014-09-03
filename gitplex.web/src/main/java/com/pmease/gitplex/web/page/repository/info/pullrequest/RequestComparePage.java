@@ -54,14 +54,19 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.BlobLoader;
 import com.pmease.gitplex.core.comment.CommentAwareChange;
 import com.pmease.gitplex.core.comment.CommentLoader;
+import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.CommitComment;
 import com.pmease.gitplex.core.model.IntegrationInfo;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
+import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.diff.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.ChangedFilesPanel;
 import com.pmease.gitplex.web.component.diff.DiffTreePanel;
 import com.pmease.gitplex.web.event.CommitCommentRemoved;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.ActivitiesModel;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.PullRequestActivity;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.UpdatePullRequest;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
@@ -93,6 +98,14 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	private final IModel<CommitComment> concernedCommentModel;
 	
+	private final ActivitiesModel activitiesModel = new ActivitiesModel() {
+		
+		@Override
+		protected PullRequest getPullRequest() {
+			return RequestComparePage.this.getPullRequest();
+		}
+	};
+	
 	private final IModel<Map<String, CommitDescription>> commitsModel = 
 			new LoadableDetachableModel<Map<String, CommitDescription>>() {
 
@@ -101,15 +114,7 @@ public class RequestComparePage extends RequestDetailPage {
 			LinkedHashMap<String, CommitDescription> choices = new LinkedHashMap<>();
 			PullRequest request = getPullRequest();
 
-			String concernedCommit;
-			if (getConcernedComment() != null)
-				concernedCommit = getConcernedComment().getCommit();
-			else
-				concernedCommit = null;
-
 			String name = "Base of Pull Request";
-			if (request.getBaseCommit().equals(concernedCommit))
-				name += " - Concerned";
 			CommitDescription description = new CommitDescription(name, 
 					getRepository().git().showRevision(request.getBaseCommit()).getSubject());
 			choices.put(request.getBaseCommit(), description);
@@ -121,14 +126,9 @@ public class RequestComparePage extends RequestDetailPage {
 				for (Commit commit: update.getCommits()) {
 					if (j == update.getCommits().size()-1) {
 						name = "Head of Update #" + updateNo;
-						if (commit.getHash().equals(concernedCommit))
-							name += " - Concerned";
 						description = new CommitDescription(name, commit.getSubject());
 					} else {
-						if (commit.getHash().equals(concernedCommit))
-							description = new CommitDescription("Concerned", commit.getSubject());
-						else
-							description = new CommitDescription(null, commit.getSubject());
+						description = new CommitDescription(null, commit.getSubject());
 					}
 					j++;
 					choices.put(commit.getHash(), description);
@@ -285,34 +285,6 @@ public class RequestComparePage extends RequestDetailPage {
 			@Override
 			protected List<MenuItem> getMenuItems() {
 				List<MenuItem> items = new ArrayList<>();
-				if (getConcernedComment() != null) {
-					final String latestCommit = getPullRequest().getLatestUpdate().getHeadCommit();
-					if (!getConcernedComment().getCommit().equals(latestCommit)) {
-						items.add(new ComparisonChoiceItem("Concerned", "Latest Update") {
-
-							@Override
-							protected void onSelect() {
-								PageParameters params = paramsOf(getPullRequest(), 
-										getConcernedComment().getCommit(), latestCommit, null, getConcernedComment());
-								setResponsePage(RequestComparePage.class, params);
-							}
-							
-						});
-					}
-					final String baseCommit = getPullRequest().getBaseCommit();
-					if (!getConcernedComment().getCommit().equals(baseCommit)) {
-						items.add(new ComparisonChoiceItem("Base", "Concerned") {
-
-							@Override
-							protected void onSelect() {
-								PageParameters params = paramsOf(getPullRequest(), 
-										baseCommit, getConcernedComment().getCommit(), null, getConcernedComment());
-								setResponsePage(RequestComparePage.class, params);
-							}
-
-						});
-					}
-				}
 				items.add(new ComparisonChoiceItem("Base", "Latest Update") {
 
 					@Override
@@ -491,23 +463,42 @@ public class RequestComparePage extends RequestDetailPage {
 				change = resolveChange(filePath);
 			}
 		} else if (comment == null) {
-			oldCommit = getPullRequest().getBaseCommit();
+			User user = GitPlex.getInstance(UserManager.class).getCurrent();
 			newCommit = getPullRequest().getLatestUpdate().getHeadCommit();
+			if (user == null) {
+				oldCommit = getPullRequest().getBaseCommit();
+			} else {
+				List<PullRequestActivity> activities = activitiesModel.getObject();
+				boolean found = false;
+				for (int i=activities.size()-1; i>=0; i--) {
+					PullRequestActivity activity = activities.get(i);
+					if (found) {
+						if (activity instanceof UpdatePullRequest) {
+							oldCommit = ((UpdatePullRequest) activity).getUpdate().getHeadCommit();
+							break;
+						}
+					} else if (activity.getUser().equals(user)) {
+						found = true;
+					}
+				}
+				if (oldCommit == null || oldCommit.equals(newCommit))
+					oldCommit = getPullRequest().getBaseCommit();
+			}
 		} else {
 			filePath = comment.getPosition().getFilePath();
-			if (commitsModel.getObject().containsKey(comment.getOldCommit()) 
-					&& commitsModel.getObject().containsKey(comment.getNewCommit())) {
-				oldCommit = comment.getOldCommit();
-				newCommit = comment.getNewCommit();
-			} else if (!comment.getCommit().equals(getPullRequest().getLatestUpdate().getHeadCommit())) {
-				oldCommit = comment.getCommit();
-				newCommit = getPullRequest().getLatestUpdate().getHeadCommit();
-			} else {
-				oldCommit = getPullRequest().getBaseCommit();
-				newCommit = comment.getCommit();
-			}
-
+			oldCommit = getPullRequest().getBaseCommit();
+			newCommit = getPullRequest().getLatestUpdate().getHeadCommit();
 			change = resolveChange(filePath);
+			if (change == null || !change.contains(comment)) {
+				if (!comment.getCommit().equals(getPullRequest().getLatestUpdate().getHeadCommit())) {
+					oldCommit = comment.getCommit();
+					newCommit = getPullRequest().getLatestUpdate().getHeadCommit();
+				} else {
+					oldCommit = getPullRequest().getBaseCommit();
+					newCommit = comment.getCommit();
+				}
+				change = resolveChange(filePath);
+			}
 		}
 		if (change == null && !getChanges().isEmpty()) {
 			filePath = getChanges().get(0).getPath();
@@ -579,6 +570,7 @@ public class RequestComparePage extends RequestDetailPage {
 	public void onDetach() {
 		commitsModel.detach();
 		concernedCommentModel.detach();
+		activitiesModel.detach();
 		
 		super.onDetach();
 	}

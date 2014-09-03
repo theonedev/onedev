@@ -259,7 +259,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	
 	/**
 	 * Whether or not specified git represents a valid repository git. This can be used to tell 
-	 * apart a Gitop repository git from some other Git repositories.
+	 * apart a GitPlex repository git from some other Git repositories.
 	 * 
 	 * @return
 	 * 			<tt>true</tt> if valid; <tt>false</tt> otherwise

@@ -35,4 +35,8 @@ public class UpdatePullRequest implements PullRequestActivity {
 		return "Updated";
 	}
 
+	public PullRequestUpdate getUpdate() {
+		return update;
+	}
+
 }

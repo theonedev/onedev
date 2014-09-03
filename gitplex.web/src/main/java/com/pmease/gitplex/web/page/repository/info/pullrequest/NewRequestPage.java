@@ -112,7 +112,15 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 			pullRequest.setSource(source);
 			pullRequest.setSubmitter(currentUser);
 			
+			PullRequestUpdate update = new PullRequestUpdate();
+			pullRequest.getUpdates().add(update);
+			update.setRequest(pullRequest);
+			update.setUser(currentUser);
+			update.setHeadCommit(source.getHeadCommit());
+			pullRequest.setUpdateDate(new Date());
+
 			if (target.getRepository().equals(source.getRepository())) {
+				pullRequest.setBaseCommit(pullRequest.git().calcMergeBase(target.getHeadCommit(), source.getHeadCommit()));			
 				if (target.getRepository().git().isAncestor(source.getHeadCommit(), target.getHeadCommit())) {
 					CloseInfo closeInfo = new CloseInfo();
 					closeInfo.setClosedBy(null);
@@ -131,6 +139,8 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 
 				sandbox.fetch(source.getRepository().git());
 				
+				pullRequest.setBaseCommit(pullRequest.git().calcMergeBase(target.getHeadCommit(), source.getHeadCommit()));			
+
 				if (sandbox.isAncestor(source.getHeadCommit(), target.getHeadCommit())) {
 					CloseInfo closeInfo = new CloseInfo();
 					closeInfo.setClosedBy(null);
@@ -142,15 +152,6 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 					pullRequest.setCheckResult(target.getRepository().getGateKeeper().checkRequest(pullRequest));
 				}
 			}
-			
-			pullRequest.setBaseCommit(pullRequest.git().calcMergeBase(target.getHeadCommit(), source.getHeadCommit()));			
-
-			PullRequestUpdate update = new PullRequestUpdate();
-			pullRequest.getUpdates().add(update);
-			update.setRequest(pullRequest);
-			update.setUser(currentUser);
-			update.setHeadCommit(source.getHeadCommit());
-			pullRequest.setUpdateDate(new Date());
 		}
 		
 		commitsModel = new LoadableDetachableModel<List<Commit>>() {
@@ -349,6 +350,7 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 				} else {
 					pullRequest.setSource(source);
 					pullRequest.setTarget(target);
+					pullRequest.getVoteInvitations().clear();
 					
 					pullRequest.setAutoIntegrate(false);
 					

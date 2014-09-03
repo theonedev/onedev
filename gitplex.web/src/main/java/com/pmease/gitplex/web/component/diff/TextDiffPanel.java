@@ -777,8 +777,6 @@ public class TextDiffPanel extends Panel {
 					comment.setContent(input.getModelObject());
 					comment.setCommentDate(new Date());
 					comment.setCommitDate(repoModel.getObject().getCommit(commit).getCommitter().getWhen());
-					comment.setNewCommit(change.getNewRevision());
-					comment.setOldCommit(change.getOldRevision());
 					
 					change.saveComment(comment);
 

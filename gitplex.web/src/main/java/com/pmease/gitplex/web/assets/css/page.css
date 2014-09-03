@@ -928,8 +928,8 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail .activities .fa-check-circle {color: #5CB85C;}
 .request-detail .activities .fa-comment {color: #F9C733;}
 .request-detail .activities .fa-times-circle {color: #D9534F;}
-.request-detail .activities .fa-smile-o {color: #5CB85C;}
-.request-detail .activities .fa-frown-o {color: #D9534F;}
+.request-detail .activities .fa-thumb-up-o {color: #5CB85C;}
+.request-detail .activities .fa-thumb-down-o {color: #D9534F;}
 .request-detail .activities td.detail {border-left: 2px solid #BBB;}
 .request-detail .base-threads {margin: 16px 0 0 0; padding: 8px; border-top: 1px dashed #BBB;}
 .request-detail .base-threads>.title {margin-bottom: 12px;}

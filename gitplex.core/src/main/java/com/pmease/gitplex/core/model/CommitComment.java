@@ -33,10 +33,6 @@ public class CommitComment extends AbstractEntity {
 	@Column(nullable=false)
 	private Date commentDate = new Date();
 	
-	private String oldCommit;
-	
-	private String newCommit;
-
 	@Column(nullable=false)
 	private String content;
 	
@@ -98,22 +94,6 @@ public class CommitComment extends AbstractEntity {
 
 	public void setPosition(@Nullable CommentPosition position) {
 		this.position = position;
-	}
-
-	public String getOldCommit() {
-		return oldCommit;
-	}
-
-	public void setOldCommit(String oldCommit) {
-		this.oldCommit = oldCommit;
-	}
-
-	public String getNewCommit() {
-		return newCommit;
-	}
-
-	public void setNewCommit(String newCommit) {
-		this.newCommit = newCommit;
 	}
 
 	@Override
