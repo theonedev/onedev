@@ -103,16 +103,22 @@ public class PullRequest extends AbstractEntity {
 	private Date updateDate = new Date();
 
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
-	private Collection<PullRequestUpdate> updates = new ArrayList<PullRequestUpdate>();
+	private Collection<PullRequestUpdate> updates = new ArrayList<>();
 
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
-	private Collection<VoteInvitation> voteInvitations = new ArrayList<VoteInvitation>();
+	private Collection<VoteInvitation> voteInvitations = new ArrayList<>();
 	
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
-	private Collection<Verification> verifications = new ArrayList<Verification>();
+	private Collection<Verification> verifications = new ArrayList<>();
 
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
-	private Collection<PullRequestComment> requestComments = new ArrayList<PullRequestComment>();
+	private Collection<PullRequestComment> requestComments = new ArrayList<>();
+
+	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
+	private Collection<InlineComment> inlineComments = new ArrayList<>();
+
+	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
+	private Collection<PullRequestActivity> activities = new ArrayList<>();
 
 	private transient List<PullRequestUpdate> sortedUpdates;
 	
@@ -259,6 +265,22 @@ public class PullRequest extends AbstractEntity {
 
 	public void setRequestComments(Collection<PullRequestComment> requestComments) {
 		this.requestComments = requestComments;
+	}
+
+	public Collection<InlineComment> getInlineComments() {
+		return inlineComments;
+	}
+
+	public void setInlineComments(Collection<InlineComment> inlineComments) {
+		this.inlineComments = inlineComments;
+	}
+
+	public Collection<PullRequestActivity> getActivities() {
+		return activities;
+	}
+
+	public void setActivities(Collection<PullRequestActivity> activities) {
+		this.activities = activities;
 	}
 
 	public Status getStatus() {

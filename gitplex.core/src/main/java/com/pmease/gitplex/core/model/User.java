@@ -69,6 +69,15 @@ public class User extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="voter", cascade=CascadeType.REMOVE)
 	private Collection<VoteInvitation> voteInvitations = new ArrayList<>();
 
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	private Collection<PullRequestComment> requestComments = new ArrayList<>();
+
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	private Collection<InlineComment> inlineComments = new ArrayList<>();
+
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	private Collection<InlineCommentReply> commentReplies = new ArrayList<>();
+
 	@Editable(order=100)
 	@UserName
 	@NotEmpty
@@ -213,7 +222,31 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.voteInvitations = voteInvitations;
 	}
 
-    @Override
+    public Collection<PullRequestComment> getRequestComments() {
+		return requestComments;
+	}
+
+	public void setRequestComments(Collection<PullRequestComment> requestComments) {
+		this.requestComments = requestComments;
+	}
+
+	public Collection<InlineComment> getInlineComments() {
+		return inlineComments;
+	}
+
+	public void setInlineComments(Collection<InlineComment> inlineComments) {
+		this.inlineComments = inlineComments;
+	}
+
+	public Collection<InlineCommentReply> getCommentReplies() {
+		return commentReplies;
+	}
+
+	public void setCommentReplies(Collection<InlineCommentReply> commentReplies) {
+		this.commentReplies = commentReplies;
+	}
+
+	@Override
 	public boolean has(ProtectedObject object) {
 		if (object instanceof User) {
 			User user = (User) object;
