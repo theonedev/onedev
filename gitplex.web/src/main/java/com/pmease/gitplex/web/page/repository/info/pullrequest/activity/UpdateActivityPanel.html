@@ -1,3 +1,18 @@
 <wicket:panel>
-	<div wicket:id="commits" class="commits"></div>
+	<div class="update">
+		<span class="fa fa-repo-push"></span> <span wicket:id="user"></span> pushed below commits <span wicket:id="age"></span>
+	</div>
+	<table class="commits">
+		<tr wicket:id="commits">
+			<td class="icon"><span class="fa fa-commit"></span></td>
+			<td class="detail">
+				<span wicket:id="author"></span> 
+				<span wicket:id="message"></span> 
+			</td>
+			<td class="status">
+				<span wicket:id="status"></span>
+				<span wicket:id="hashLink"></span>
+			</td>
+		</tr>
+	</table>
 </wicket:panel>

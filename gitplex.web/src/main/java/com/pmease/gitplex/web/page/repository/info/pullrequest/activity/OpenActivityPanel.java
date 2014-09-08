@@ -1,38 +1,31 @@
 package com.pmease.gitplex.web.page.repository.info.pullrequest.activity;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.basic.MultiLineLabel;
-import org.apache.wicket.markup.html.form.TextArea;
+import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.comment.CommentThread;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
-import com.pmease.gitplex.core.model.CommentPosition;
-import com.pmease.gitplex.core.model.CommitComment;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.web.page.repository.info.pullrequest.CommentThreadPanel;
+import com.pmease.gitplex.web.component.comment.CommentInput;
+import com.pmease.gitplex.web.component.label.AgeLabel;
+import com.pmease.gitplex.web.component.markdown.MarkdownPanel;
+import com.pmease.gitplex.web.component.user.AvatarMode;
+import com.pmease.gitplex.web.component.user.UserLink;
+import com.pmease.gitplex.web.model.UserModel;
 
 @SuppressWarnings("serial")
 public class OpenActivityPanel extends Panel {
 
 	private IModel<PullRequest> requestModel;
-	
-	private String description;
 	
 	public OpenActivityPanel(String id, IModel<PullRequest> requestModel) {
 		super(id);
@@ -40,57 +33,50 @@ public class OpenActivityPanel extends Panel {
 	}
 	
 	private Fragment renderForView() {
-		Fragment fragment = new Fragment("description", "viewFrag", this);
+		Fragment fragment = new Fragment("content", "viewFrag", this);
 
-		description = requestModel.getObject().getDescription();
+		String description = requestModel.getObject().getDescription();
 		if (StringUtils.isNotBlank(description))
-			fragment.add(new MultiLineLabel("content", description));
+			fragment.add(new MarkdownPanel("description", Model.of(description)));
 		else
-			fragment.add(new Label("content", "<i>No description</i>").setEscapeModelStrings(false));
+			fragment.add(new Label("description", "<i>No description</i>").setEscapeModelStrings(false));
+		fragment.setOutputMarkupId(true);
 		
-		fragment.add(new AjaxLink<Void>("edit") {
+		return fragment;
+	}
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
+		add(new UserLink("user", new UserModel(requestModel.getObject().getSubmitter()), AvatarMode.NAME));
+		add(new AgeLabel("age", Model.of(requestModel.getObject().getCreateDate())));
+		
+		add(new AjaxLink<Void>("edit") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				description = requestModel.getObject().getDescription();
+				Fragment fragment = new Fragment("content", "editFrag", OpenActivityPanel.this);
 				
-				Fragment fragment = new Fragment("description", "editFrag", OpenActivityPanel.this);
+				Form<?> form = new Form<Void>("form");
+				form.setOutputMarkupId(true);
+				fragment.add(form);
+
+				final CommentInput input = new CommentInput("input", Model.of(requestModel.getObject().getDescription()));
+				form.add(input);
 				
-				final TextArea<String> descriptionArea = new TextArea<String>("content", new IModel<String>() {
+				form.add(new AjaxSubmitLink("save") {
 
 					@Override
-					public void detach() {
+					protected void onError(AjaxRequestTarget target, Form<?> form) {
+						super.onError(target, form);
+						target.add(form);
 					}
 
 					@Override
-					public String getObject() {
-						return description;
-					}
-
-					@Override
-					public void setObject(String object) {
-						description = object;
-					}
-
-				});
-				
-				descriptionArea.add(new AjaxFormComponentUpdatingBehavior("blur") {
-
-					@Override
-					protected void onUpdate(AjaxRequestTarget target) {
-						descriptionArea.processInput();
-					}
-					
-				});
-				
-				fragment.add(descriptionArea);
-				
-				fragment.add(new AjaxLink<Void>("save") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
+					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						PullRequest request = requestModel.getObject();
-						request.setDescription(description);
+						request.setDescription(input.getModelObject());
 						GitPlex.getInstance(Dao.class).persist(request);
 
 						Fragment fragment = renderForView();
@@ -100,7 +86,7 @@ public class OpenActivityPanel extends Panel {
 					
 				});
 				
-				fragment.add(new AjaxLink<Void>("cancel") {
+				form.add(new AjaxLink<Void>("cancel") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
@@ -126,42 +112,7 @@ public class OpenActivityPanel extends Panel {
 
 		});
 		
-		fragment.setOutputMarkupId(true);
-		
-		return fragment;
-	}
-
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
 		add(renderForView());
-
-		add(new CommentThreadPanel("baseThreads", requestModel, new LoadableDetachableModel<List<CommentThread>>() {
-
-			@Override
-			protected List<CommentThread> load() {
-				PullRequest request = requestModel.getObject();
-				List<CommitComment> comments = request.getCommitComments().get(request.getBaseCommit());
-				if (comments == null)
-					return new ArrayList<>();
-				else
-					return CommentThread.asThreads(comments);
-			}
-			
-		}, new LoadableDetachableModel<Map<CommentPosition, Date>>() {
-
-			@Override
-			protected Map<CommentPosition, Date> load() {
-				PullRequest request = requestModel.getObject();
-				Map<CommentPosition, Date> visits = request.getCommentVisits().get(request.getBaseCommit());
-				if (visits == null)
-					return new HashMap<>();
-				else
-					return visits;
-			}
-			
-		}));
-		
 	}
 
 	@Override

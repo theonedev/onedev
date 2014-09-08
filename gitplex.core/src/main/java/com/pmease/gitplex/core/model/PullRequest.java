@@ -46,6 +46,8 @@ import com.pmease.gitplex.core.manager.UserManager;
 @Entity
 public class PullRequest extends AbstractEntity {
 
+	public enum CloseStatus {INTEGRATED, DISCARDED};
+	
 	public enum Status {
 		PENDING_REFRESH("Pending Check"), PENDING_APPROVAL("Pending Approval"), 
 		PENDING_UPDATE("Pending Update"), PENDING_INTEGRATE("Pending Integration"), 
@@ -63,6 +65,9 @@ public class PullRequest extends AbstractEntity {
 		}
 		
 	}
+	
+	@Column
+	private CloseStatus closeStatus;
 
 	@Column(nullable=false)
 	private String title;
@@ -93,9 +98,6 @@ public class PullRequest extends AbstractEntity {
 	@Embedded
 	private IntegrationInfo integrationInfo;
 	
-	@Embedded
-	private CloseInfo closeInfo;
-
 	@Column(nullable=false)
 	private Date createDate = new Date();
 	
@@ -118,7 +120,7 @@ public class PullRequest extends AbstractEntity {
 	private Collection<InlineComment> inlineComments = new ArrayList<>();
 
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
-	private Collection<PullRequestActivity> activities = new ArrayList<>();
+	private Collection<PullRequestAudit> audits = new ArrayList<>();
 
 	private transient List<PullRequestUpdate> sortedUpdates;
 	
@@ -275,33 +277,40 @@ public class PullRequest extends AbstractEntity {
 		this.inlineComments = inlineComments;
 	}
 
-	public Collection<PullRequestActivity> getActivities() {
-		return activities;
+	public Collection<PullRequestAudit> getAudits() {
+		return audits;
 	}
 
-	public void setActivities(Collection<PullRequestActivity> activities) {
-		this.activities = activities;
+	public void setAudits(Collection<PullRequestAudit> audits) {
+		this.audits = audits;
 	}
 
 	public Status getStatus() {
-		if (closeInfo != null) {
-			if (closeInfo.getCloseStatus() == CloseInfo.Status.INTEGRATED)
-				return Status.INTEGRATED;
-			else
-				return Status.DISCARDED;
-		} else if (checkResult instanceof Pending || checkResult instanceof PendingAndBlock) {
+		if (closeStatus == CloseStatus.INTEGRATED) 
+			return Status.INTEGRATED;
+		else if (closeStatus == CloseStatus.DISCARDED) 
+			return Status.DISCARDED;
+		else if (checkResult instanceof Pending || checkResult instanceof PendingAndBlock) 
 			return Status.PENDING_APPROVAL;
-		} else if (checkResult instanceof Disapproved) {
+		else if (checkResult instanceof Disapproved) 
 			return Status.PENDING_UPDATE;
-		} else if (checkResult instanceof Ignored || checkResult instanceof Approved) {
+		else if (checkResult instanceof Ignored || checkResult instanceof Approved) 
 			return Status.PENDING_INTEGRATE;
-		} else {
+		else 
 			return Status.PENDING_REFRESH;
-		}
+	}
+
+	@Nullable
+	public CloseStatus getCloseStatus() {
+		return closeStatus;
+	}
+
+	public void setCloseStatus(@Nullable CloseStatus closeStatus) {
+		this.closeStatus = closeStatus;
 	}
 
 	public boolean isOpen() {
-		return closeInfo == null;
+		return closeStatus == null;
 	}
 	
 	public PullRequestUpdate getReferentialUpdate() {
@@ -343,14 +352,6 @@ public class PullRequest extends AbstractEntity {
 	
 	public void setIntegrationInfo(IntegrationInfo integrationInfo) {
 		this.integrationInfo = integrationInfo;
-	}
-
-	public @Nullable CloseInfo getCloseInfo() {
-		return closeInfo;
-	}
-
-	public void setCloseInfo(CloseInfo closeInfo) {
-		this.closeInfo = closeInfo;
 	}
 
 	/**
@@ -487,11 +488,11 @@ public class PullRequest extends AbstractEntity {
 	
 	public static class CriterionHelper {
 		public static Criterion ofOpen() {
-			return Restrictions.isNull("closeInfo");
+			return Restrictions.isNull("closeStatus");
 		}
 		
 		public static Criterion ofClosed() {
-			return Restrictions.isNotNull("closeInfo");
+			return Restrictions.isNotNull("closeStatus");
 		}
 		
 		public static Criterion ofTarget(Branch target) {

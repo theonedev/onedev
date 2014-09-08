@@ -1,5 +1,7 @@
 package com.pmease.gitplex.core.manager.impl;
 
+import java.util.Date;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -12,6 +14,9 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.VoteManager;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.PullRequestAction;
+import com.pmease.gitplex.core.model.PullRequestAudit;
+import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.model.Vote;
@@ -45,11 +50,29 @@ public class DefaultVoteManager implements VoteManager {
 		vote.setResult(result);
 		vote.setUpdate(request.getLatestUpdate());
 		vote.setVoter(user);
-		vote.setComment(comment);
 		
 		vote.getVoter().getVotes().add(vote);
 		vote.getUpdate().getVotes().add(vote);
-		dao.persist(vote);		
+		dao.persist(vote);	
+		
+		PullRequestAudit audit = new PullRequestAudit();
+		if (result == Vote.Result.APPROVE)
+			audit.setAction(new PullRequestAction.Approve());
+		else
+			audit.setAction(new PullRequestAction.Disapprove());
+		audit.setDate(new Date());
+		audit.setRequest(request);
+		audit.setUser(user);
+		dao.persist(audit);
+		
+		if (comment != null) {
+			PullRequestComment requestComment = new PullRequestComment();
+			requestComment.setRequest(request);
+			requestComment.setDate(audit.getDate());
+			requestComment.setUser(user);
+			requestComment.setContent(comment);
+			dao.persist(requestComment);
+		}
 
 		pullRequestManager.refresh(request);
 	}

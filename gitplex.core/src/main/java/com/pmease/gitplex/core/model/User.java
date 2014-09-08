@@ -57,9 +57,6 @@ public class User extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="submitter")
 	private Collection<PullRequest> submittedRequests = new ArrayList<>();
 
-	@OneToMany(mappedBy="closeInfo.closedBy")
-	private Collection<PullRequest> closedRequests = new ArrayList<>();
-	
 	@OneToMany(mappedBy="user")
 	private Collection<PullRequestUpdate> updates = new ArrayList<>();
 
@@ -181,17 +178,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	}
 
 	public void setSubmittedRequests(Collection<PullRequest> submittedRequests) {
-		this.closedRequests = submittedRequests;
-	}
-
-	/**
-	 * Get pull requests closed by this user.
-	 * 
-	 * @return
-	 * 			collection of pull requests closed by this user
-	 */
-	public Collection<PullRequest> getClosedRequests() {
-		return closedRequests;
+		this.submittedRequests = submittedRequests;
 	}
 
 	public Collection<PullRequestUpdate> getUpdates() {
@@ -200,10 +187,6 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	public void setUpdates(Collection<PullRequestUpdate> updates) {
 		this.updates = updates;
-	}
-
-	public void setClosedRequests(Collection<PullRequest> closedRequests) {
-		this.closedRequests = closedRequests;
 	}
 
 	public Collection<Vote> getVotes() {

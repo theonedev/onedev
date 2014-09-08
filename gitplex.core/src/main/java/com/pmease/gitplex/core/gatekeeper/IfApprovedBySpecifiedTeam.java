@@ -51,10 +51,10 @@ public class IfApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
         }
 
         if (approvals >= getLeastApprovals()) {
-            return approved("Get at least " + getLeastApprovals() + " approvals from team '"
+            return approved("Already get at least " + getLeastApprovals() + " approvals from team '"
                     + getTeam().getName() + "'.");
         } else if (getLeastApprovals() - approvals > pendings) {
-            return disapproved("Can not get at least " + getLeastApprovals()
+            return disapproved("Unable to get at least " + getLeastApprovals()
                     + " approvals from team '" + getTeam().getName() + "'.");
         } else {
             int lackApprovals = getLeastApprovals() - approvals;

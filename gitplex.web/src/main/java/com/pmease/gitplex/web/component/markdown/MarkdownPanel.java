@@ -11,7 +11,6 @@ import org.pegdown.LinkRenderer;
 import org.pegdown.PegDownProcessor;
 
 import com.google.common.base.Strings;
-import com.pmease.gitplex.web.page.repository.info.code.blob.renderer.highlighter.AceHighlighter;
 
 @SuppressWarnings("serial")
 public class MarkdownPanel extends Panel {
@@ -38,8 +37,7 @@ public class MarkdownPanel extends Panel {
 				}
 			}
 		}).setEscapeModelStrings(false));
-		
-		add(new AceHighlighter().withSelector("#" + getMarkupId() + " pre code").hasLineId(false));
+
 	}
 	
 }

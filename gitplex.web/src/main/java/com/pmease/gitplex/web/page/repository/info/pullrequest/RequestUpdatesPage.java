@@ -6,25 +6,33 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.AttributeModifier;
-import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.WebComponent;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.commons.wicket.behavior.TooltipBehavior;
+import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Vote;
-import com.pmease.gitplex.web.component.user.UserInfoSnippet;
+import com.pmease.gitplex.web.component.commit.CommitHashLink;
+import com.pmease.gitplex.web.component.commit.CommitMessagePanel;
+import com.pmease.gitplex.web.component.label.AgeLabel;
+import com.pmease.gitplex.web.component.user.AvatarMode;
+import com.pmease.gitplex.web.component.user.PersonLink;
+import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
-import com.pmease.gitplex.web.util.DateUtils;
+import com.pmease.gitplex.web.page.repository.info.code.tree.RepoTreePage;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
 @SuppressWarnings("serial")
 public class RequestUpdatesPage extends RequestDetailPage {
@@ -49,34 +57,31 @@ public class RequestUpdatesPage extends RequestDetailPage {
 		}) {
 
 			@Override
-			protected void populateItem(final ListItem<PullRequestUpdate> item) {
-				PullRequestUpdate update = item.getModelObject();
+			protected void populateItem(final ListItem<PullRequestUpdate> updateItem) {
+				PullRequestUpdate update = updateItem.getModelObject();
 
-				User user = update.getUser();
-				item.add(new UserInfoSnippet("updater", new UserModel(user)) {
-					
-					@Override
-					protected Component newInfoLine(String componentId) {
-						Fragment fragment = new Fragment(componentId, "updateInfoFrag", RequestUpdatesPage.this);
-
-						PullRequestUpdate update = item.getModelObject();
-						PageParameters params = RequestComparePage.paramsOf(
-								update.getRequest(), update.getBaseCommit(), update.getHeadCommit(), null, null);
-						Link<Void> updateLink = new BookmarkablePageLink<Void>("updateLink", RequestComparePage.class, params);
-						List<PullRequestUpdate> updates = update.getRequest().getSortedUpdates();
-						updateLink.add(new Label("updateNo", updates.size() - updates.indexOf(update)));
-						fragment.add(updateLink);
-						fragment.add(new Label("date", DateUtils.formatAge(update.getDate())));
-						
-						return fragment;
-					}
-				});
+				updateItem.add(new UserLink("avatar", new UserModel(update.getUser()), AvatarMode.AVATAR));
+				updateItem.add(new UserLink("name", new UserModel(update.getUser()), AvatarMode.NAME));
+				List<PullRequestUpdate> updates = update.getRequest().getSortedUpdates();
+				int updateNo = updates.size() - updates.indexOf(update);
+				updateItem.add(new Label("updateNo", updateNo));
+				PageParameters params = RequestComparePage.paramsOf(
+						update.getRequest(), update.getBaseCommit(), update.getHeadCommit(), null, null);
 				
-				item.add(new ListView<Vote>("votes", new LoadableDetachableModel<List<Vote>>() {
+				updateItem.add(new AgeLabel("age", Model.of(update.getDate())));
+				
+				Link<Void> compareLink = new BookmarkablePageLink<Void>("compare", RequestComparePage.class, params);
+				if (updateNo == 1)
+					compareLink.add(AttributeAppender.append("title", "Compare with request base"));
+				else
+					compareLink.add(AttributeAppender.append("title", "Compare with previous update"));
+				updateItem.add(compareLink);
+
+				updateItem.add(new ListView<Vote>("votes", new LoadableDetachableModel<List<Vote>>() {
 
 					@Override
 					protected List<Vote> load() {
-						List<Vote> votes = new ArrayList<>(item.getModelObject().getVotes());
+						List<Vote> votes = new ArrayList<>(updateItem.getModelObject().getVotes());
 						Collections.sort(votes, new Comparator<Vote>() {
 
 							@Override
@@ -94,36 +99,60 @@ public class RequestUpdatesPage extends RequestDetailPage {
 					protected void populateItem(final ListItem<Vote> item) {
 						Vote vote = item.getModelObject();
 
-						item.add(new UserInfoSnippet("voter", new UserModel(vote.getVoter())) {
-							
-							@Override
-							protected Component newInfoLine(String componentId) {
-								Fragment fragment = new Fragment(componentId, "voteInfoFrag", RequestUpdatesPage.this);
-
-								Vote vote = item.getModelObject();
-								if (vote.getResult() == Vote.Result.APPROVE)
-									fragment.add(new Label("vote", "Approved").add(AttributeModifier.append("class", " label-success")));
-								else
-									fragment.add(new Label("vote", "Disapproved").add(AttributeModifier.append("class", " label-danger")));
-								
-								Component commentIndicator = new WebComponent("comment");
-								if (vote.getComment() != null) {
-									commentIndicator.add(new TooltipBehavior(Model.of(vote.getComment())));
-								} else {
-									commentIndicator.setVisible(vote.getComment() != null);
-								}
-								fragment.add(commentIndicator);
-								fragment.add(new Label("date", DateUtils.formatAge(vote.getDate())));
-								
-								return fragment;
-							}
-							
-						});
+						item.add(new UserLink("user", new UserModel(vote.getVoter()), AvatarMode.AVATAR)
+									.withTooltipConfig(new TooltipConfig()));
+						WebMarkupContainer voteSpan = new WebMarkupContainer("vote");
+						item.add(voteSpan);
+						if (vote.getResult() == Vote.Result.APPROVE)
+							voteSpan.add(AttributeModifier.append("class", " approved"));
+						else
+							voteSpan.add(AttributeModifier.append("class", " disapproved"));
 					}
 					
 				});
 
-				item.add(new UpdateCommitsPanel("detail", item.getModel()));
+				updateItem.add(new ListView<Commit>("commits", new AbstractReadOnlyModel<List<Commit>>() {
+
+					@Override
+					public List<Commit> getObject() {
+						return updateItem.getModelObject().getCommits();
+					}
+					
+				}) {
+
+					@Override
+					protected void populateItem(final ListItem<Commit> commitItem) {
+						Commit commit = commitItem.getModelObject();
+						
+						commitItem.add(new PersonLink("avatar", Model.of(commit.getAuthor()), AvatarMode.AVATAR));
+
+						IModel<Repository> repoModel = new AbstractReadOnlyModel<Repository>() {
+
+							@Override
+							public Repository getObject() {
+								return updateItem.getModelObject().getRequest().getTarget().getRepository();
+							}
+							
+						};
+						commitItem.add(new CommitMessagePanel("message", repoModel, new AbstractReadOnlyModel<Commit>() {
+
+							@Override
+							public Commit getObject() {
+								return commitItem.getModelObject();
+							}
+							
+						}));
+
+						commitItem.add(new PersonLink("name", Model.of(commit.getAuthor()), AvatarMode.NAME));
+						commitItem.add(new AgeLabel("age", Model.of(commit.getAuthor().getWhen())));
+						
+						commitItem.add(new CommitHashLink("hashLink", repoModel, commit.getHash()));
+						commitItem.add(new BookmarkablePageLink<Void>("treeLink", RepoTreePage.class, 
+								RepoTreePage.paramsOf(repoModel.getObject(), commit.getHash())));
+						commitItem.add(new CommitStatusPanel("status", updateItem.getModel(), commit.getHash()));
+					}
+					
+				});
 			}
 			
 		});		

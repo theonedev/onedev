@@ -4,35 +4,38 @@ import java.util.Date;
 
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.web.model.UserModel;
 
-public class OpenPullRequest implements PullRequestActivity {
+public class ApprovePullRequest implements PullRequestActivity {
 
-	private final PullRequest request;
+	private final User user;
 	
-	public OpenPullRequest(PullRequest request) {
-		this.request = request;
+	private final Date date;
+	
+	public ApprovePullRequest(User user, Date date) {
+		this.user = user;
+		this.date = date;
 	}
 	
 	@Override
 	public Panel render(String panelId) {
-		return new OpenActivityPanel(panelId, new PullRequestModel(request.getId()));
+		return new ApproveActivityPanel(panelId, new UserModel(user), date);
 	}
 
 	@Override
 	public Date getDate() {
-		return request.getCreateDate();
+		return date;
 	}
 
 	@Override
 	public User getUser() {
-		return request.getSubmitter();
+		return user;
 	}
 
 	@Override
 	public boolean isDiscussion() {
-		return true;
+		return false;
 	}
 
 }

@@ -23,7 +23,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
@@ -34,7 +33,6 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.PersonIdent;
 
@@ -60,6 +58,7 @@ import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.pullrequest.RequestOperateException;
 import com.pmease.gitplex.core.pullrequest.RequestOperation;
 import com.pmease.gitplex.web.component.branch.BranchLink;
+import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.PersonLink;
@@ -77,8 +76,6 @@ public abstract class RequestDetailPage extends RepositoryInfoPage implements Co
 	private boolean editingTitle;
 	
 	private RequestOperation actionToConfirm;
-	
-	private String comment;
 	
 	public RequestDetailPage(final PageParameters params) {
 		super(params);
@@ -328,7 +325,8 @@ public abstract class RequestDetailPage extends RepositoryInfoPage implements Co
 		};
 		actionsContainer.add(confirmForm);
 		
-		confirmForm.add(new TextArea<String>("comment", new PropertyModel<String>(this, "comment")));
+		final CommentInput commentInput = new CommentInput("comment", Model.of(""));
+		confirmForm.add(commentInput);
 		confirmForm.add(new FeedbackPanel("feedback", confirmForm));
 		confirmForm.add(new Button("submit") {
 
@@ -336,17 +334,14 @@ public abstract class RequestDetailPage extends RepositoryInfoPage implements Co
 			public void onSubmit() {
 				super.onSubmit();
 				
-				if (StringUtils.isBlank(comment))
-					comment = null;
-
 				String actionName = actionToConfirm.name().toLowerCase();
 
 				PullRequest request = getPullRequest();
 				try {
 					actionToConfirm.checkOperate(request);
-					actionToConfirm.operate(request, comment);
+					actionToConfirm.operate(request, commentInput.getModelObject());
 					actionToConfirm = null;
-					comment = null;
+					commentInput.setModelObject(null);
 				} catch (UnauthorizedException e) {
 					error("Unable to " + actionName + ": Permission denied.");
 				} catch (RequestOperateException e) {
@@ -381,7 +376,7 @@ public abstract class RequestDetailPage extends RepositoryInfoPage implements Co
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				actionToConfirm = null;
-				comment = null;
+				commentInput.setModelObject(null);
 				target.add(actionsContainer);
 			}
 			
@@ -389,7 +384,7 @@ public abstract class RequestDetailPage extends RepositoryInfoPage implements Co
 		
 		List<Tab> tabs = new ArrayList<>();
 		
-		tabs.add(new RequestTab("Activities", RequestActivitiesPage.class));
+		tabs.add(new RequestTab("Discussions", RequestActivitiesPage.class));
 		tabs.add(new RequestTab("Updates", RequestUpdatesPage.class));
 		tabs.add(new RequestTab("Compare", RequestComparePage.class));
 		add(new Tabbable("tabs", tabs));

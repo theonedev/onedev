@@ -1,6 +1,5 @@
 package com.pmease.gitplex.core.model;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -8,9 +7,11 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import com.pmease.commons.hibernate.AbstractEntity;
+
 @SuppressWarnings("serial")
 @Entity
-public class InlineCommentReply implements Serializable {
+public class InlineCommentReply extends AbstractEntity {
 
 	@ManyToOne
 	@JoinColumn(nullable=false)

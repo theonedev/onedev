@@ -40,7 +40,8 @@ public class PullRequestUpdate extends AbstractEntity {
 	@ManyToOne
 	private User user;
 	
-	private Date date = new Date();
+	@Column(nullable=false)
+	private Date date;
 	
 	@OneToMany(mappedBy="update", cascade=CascadeType.REMOVE)
 	private Collection<Vote> votes = new ArrayList<Vote>();

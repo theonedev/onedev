@@ -1,85 +1,68 @@
 package com.pmease.gitplex.web.page.repository.info.pullrequest.activity;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.basic.MultiLineLabel;
-import org.apache.wicket.markup.html.form.TextArea;
-import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
-import com.pmease.commons.wicket.behavior.DisableIfBlankBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.web.component.comment.CommentInput;
+import com.pmease.gitplex.web.component.label.AgeLabel;
+import com.pmease.gitplex.web.component.markdown.MarkdownPanel;
+import com.pmease.gitplex.web.component.user.AvatarMode;
+import com.pmease.gitplex.web.component.user.UserLink;
+import com.pmease.gitplex.web.model.UserModel;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.RequestActivitiesPage;
 
 @SuppressWarnings("serial")
 public class CommentActivityPanel extends Panel {
 
-	private String content;
-	
 	public CommentActivityPanel(String id, IModel<PullRequestComment> model) {
 		super(id, model);
 	}
 	
 	private Fragment renderForView() {
-		Fragment fragment = new Fragment("body", "viewFrag", this);
+		Fragment fragment = new Fragment("content", "viewFrag", this);
 
-		content = getComment().getContent();
-		if (StringUtils.isNotBlank(content))
-			fragment.add(new MultiLineLabel("comment", content));
-		else
-			fragment.add(new Label("comment", "<i>No description</i>").setEscapeModelStrings(false));
+		fragment.add(new MarkdownPanel("comment", Model.of(getComment().getContent())));
 		
-		fragment.add(new AjaxLink<Void>("edit") {
+		return fragment;
+	}
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+
+		add(new UserLink("user", new UserModel(getComment().getUser()), AvatarMode.NAME));
+		add(new AgeLabel("age", Model.of(getComment().getDate())));
+
+		add(new AjaxLink<Void>("edit") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				content = getComment().getContent();
+				Fragment fragment = new Fragment("content", "editFrag", CommentActivityPanel.this);
+
+				Form<?> form = new Form<Void>("form");
+				fragment.add(form);
+				final CommentInput input = new CommentInput("input", Model.of(getComment().getContent()));
+				input.setRequired(true);
+				form.add(input);
 				
-				Fragment fragment = new Fragment("body", "editFrag", CommentActivityPanel.this);
-				
-				final TextArea<String> commentArea = new TextArea<String>("comment", new IModel<String>() {
+				form.add(new AjaxSubmitLink("save") {
 
 					@Override
-					public void detach() {
-					}
-
-					@Override
-					public String getObject() {
-						return content;
-					}
-
-					@Override
-					public void setObject(String object) {
-						content = object;
-					}
-
-				});
-				
-				commentArea.add(new AjaxFormComponentUpdatingBehavior("blur") {
-
-					@Override
-					protected void onUpdate(AjaxRequestTarget target) {
-						commentArea.processInput();
-					}
-					
-				});
-				
-				fragment.add(commentArea);
-				
-				fragment.add(new AjaxLink<Void>("save") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
+					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						PullRequestComment comment = getComment();
-						comment.setContent(content);
+						comment.setContent(input.getModelObject());
 						GitPlex.getInstance(Dao.class).persist(comment);
 
 						Fragment fragment = renderForView();
@@ -87,11 +70,15 @@ public class CommentActivityPanel extends Panel {
 						target.add(CommentActivityPanel.this);
 					}
 					
+					@Override
+					protected void onError(AjaxRequestTarget target, Form<?> form) {
+						super.onError(target, form);
+						target.add(form);
+					}
+					
 				});
 				
-				commentArea.add(new DisableIfBlankBehavior(fragment.get("save")));
-				
-				fragment.add(new AjaxLink<Void>("cancel") {
+				form.add(new AjaxLink<Void>("cancel") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
@@ -117,11 +104,12 @@ public class CommentActivityPanel extends Panel {
 
 		});
 		
-		fragment.add(new Link<Void>("delete") {
+		add(new AjaxLink<Void>("delete") {
 
 			@Override
-			public void onClick() {
+			public void onClick(AjaxRequestTarget target) {
 				GitPlex.getInstance(Dao.class).remove(getComment());
+				send(getPage(), Broadcast.BUBBLE, new RequestActivitiesPage.RefreshActivities(target));
 			}
 			
 			@Override
@@ -134,13 +122,6 @@ public class CommentActivityPanel extends Panel {
 
 		}.add(new ConfirmBehavior("Do you really want to delete this comment?")));
 		
-		return fragment;
-	}
-
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-
 		add(renderForView());
 
 		setOutputMarkupId(true);

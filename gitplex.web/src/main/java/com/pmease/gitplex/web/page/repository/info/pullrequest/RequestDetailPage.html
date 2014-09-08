@@ -4,7 +4,7 @@
 			<div wicket:id="title" class="pull-left"></div>
 			<div wicket:id="id" class="id pull-left"></div>
 			<wicket:enclosure child="editTitle">
-			<div class="pull-left">
+			<div class="pull-left actions">
 				<a wicket:id="editTitle" title="Edit title" class="fa fa-pencil" href="javascript:void(0);"></a>
 			</div>
 			</wicket:enclosure>
@@ -37,14 +37,10 @@
 			</div>
 			<div class="confirm">
 				<form wicket:id="confirm">
-					<div class="comment">
-						<textarea wicket:id="comment" rows="8" class="form-control" placeholder="Leave a comment"></textarea>
-					</div>
+					<div wicket:id="comment"></div>
 					<div wicket:id="feedback"></div>
-					<div class="actions">
-						<input wicket:id="submit" type="submit" value="Confirm" class="btn"></input> 
-						<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-default"></input>
-					</div>
+					<input wicket:id="submit" type="submit" value="Confirm" class="btn"></input> 
+					<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-default"></input>
 				</form>
 			</div>
 		</div>

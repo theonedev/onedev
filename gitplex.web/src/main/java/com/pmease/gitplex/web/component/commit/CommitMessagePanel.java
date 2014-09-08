@@ -29,12 +29,12 @@ public class CommitMessagePanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		AbstractLink link = new BookmarkablePageLink<Void>("commitlink",
+		AbstractLink link = new BookmarkablePageLink<Void>("link",
 				RepoCommitPage.class,
 				RepoCommitPage.paramsOf(repoModel.getObject(), getCommit().getHash(), null));
 		
 		add(link);
-		link.add(new Label("shortmessage", new AbstractReadOnlyModel<String>() {
+		link.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -42,24 +42,23 @@ public class CommitMessagePanel extends Panel {
 			}
 		}));
 
-		add(new Label("detailedmessage", Model.of(getCommit().getMessage())) {
+		add(new Label("full", Model.of(getCommit().getMessage())) {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				
 				Commit commit = getCommit();
-				setVisibilityAllowed(!Objects.equal(commit.getSubject(), commit.getMessage()));
+				setVisible(!Objects.equal(commit.getSubject(), commit.getMessage()));
 			}
 		});
 		
-		WebMarkupContainer detailedToggle = new WebMarkupContainer("detailedToggle") {
+		WebMarkupContainer detailedToggle = new WebMarkupContainer("toggle") {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				
 				Commit commit = getCommit();
-				boolean b = !Objects.equal(commit.getSubject(), commit.getMessage());
-				setVisibilityAllowed(b);
+				setVisible(!Objects.equal(commit.getSubject(), commit.getMessage()));
 			}
 		};
 		add(detailedToggle);

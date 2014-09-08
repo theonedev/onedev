@@ -31,8 +31,8 @@ public class CommentPullRequest implements PullRequestActivity {
 	}
 
 	@Override
-	public String getAction() {
-		return "Commented";
+	public boolean isDiscussion() {
+		return true;
 	}
-	
+
 }

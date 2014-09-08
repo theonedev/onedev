@@ -186,6 +186,7 @@ public class DefaultBranchManager implements BranchManager {
 									PullRequestUpdate update = new PullRequestUpdate();
 									update.setRequest(each);
 									update.setUser(branch.getUpdater());
+									update.setDate(new Date());
 									update.setHeadCommit(branch.getHeadCommit());
 									
 									each.getUpdates().add(update);

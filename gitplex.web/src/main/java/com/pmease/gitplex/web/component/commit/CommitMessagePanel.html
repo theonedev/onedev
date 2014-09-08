@@ -1,6 +1,11 @@
 <html xmlns:wicket>
 <wicket:panel>
-	<pre class="title-message"><a wicket:id="commitlink"><wicket:container wicket:id="shortmessage"></wicket:container></a> <a class="btn btn-mini btn-gray detailed-toggle" href="javascript:void(0)" wicket:id="detailedToggle"><i class="fa fa-ellipsis"></i></a></pre>
-	<pre class="detailed-message" wicket:id="detailedmessage"></pre>
+	<span class="commit-message">
+		<a wicket:id="link" class="subject"><span wicket:id="label"></span></a> 
+		<a class="toggle" href="javascript:void(0);" onclick="$(this).next().toggle();" wicket:id="toggle">
+			<i class="fa fa-ellipsis"></i>
+		</a>
+		<div class="full" wicket:id="full"></div>
+	</span>
 </wicket:panel>
 </html>

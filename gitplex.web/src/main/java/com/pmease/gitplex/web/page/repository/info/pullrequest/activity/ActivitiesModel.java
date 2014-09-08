@@ -8,9 +8,13 @@ import java.util.List;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.PullRequestAction.Approve;
+import com.pmease.gitplex.core.model.PullRequestAction.Disapprove;
+import com.pmease.gitplex.core.model.PullRequestAction.Discard;
+import com.pmease.gitplex.core.model.PullRequestAction.Integrate;
+import com.pmease.gitplex.core.model.PullRequestAudit;
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.Vote;
 
 @SuppressWarnings("serial")
 public abstract class ActivitiesModel extends LoadableDetachableModel<List<PullRequestActivity>> {
@@ -21,26 +25,41 @@ public abstract class ActivitiesModel extends LoadableDetachableModel<List<PullR
 		List<PullRequestActivity> activities = new ArrayList<>();
 
 		activities.add(new OpenPullRequest(request));
-		
-		for (PullRequestComment comment: request.getRequestComments()) {
-			activities.add(new CommentPullRequest(comment));
-		}
-		
-		for (PullRequestUpdate update: request.getUpdates()) {
+
+		for (PullRequestUpdate update: request.getUpdates())
 			activities.add(new UpdatePullRequest(update));
-			for (Vote vote: update.getVotes()) {
-				activities.add(new VotePullRequest(vote));
+		
+		for (PullRequestComment comment: request.getRequestComments()) 
+			activities.add(new CommentPullRequest(comment));
+		
+		for (PullRequestAudit audit: request.getAudits()) {
+			if (audit.getAction() instanceof Integrate) {
+				Integrate integrate = (Integrate) audit.getAction();
+				activities.add(new IntegratePullRequest(audit.getUser(), audit.getDate(), 
+						integrate.getReason()));
+			} else if (audit.getAction() instanceof Discard) { 
+				activities.add(new DiscardPullRequest(audit.getUser(), audit.getDate()));
+			} else if (audit.getAction() instanceof Approve) {
+				activities.add(new ApprovePullRequest(audit.getUser(), audit.getDate()));
+			} else if (audit.getAction() instanceof Disapprove) {
+				activities.add(new DisapprovePullRequest(audit.getUser(), audit.getDate()));
+			} else {
+				throw new IllegalStateException("Unexpected audit action: " + audit.getAction());
 			}
 		}
 		
-		if (!request.isOpen())
-			activities.add(new ClosePullRequest(request));
-
 		Collections.sort(activities, new Comparator<PullRequestActivity>() {
 
 			@Override
 			public int compare(PullRequestActivity o1, PullRequestActivity o2) {
-				return o1.getDate().compareTo(o2.getDate());
+				if (o1.getDate().before(o2.getDate()))
+					return -1;
+				else if (o1.getDate().after(o2.getDate()))
+					return 1;
+				else if (o1.isDiscussion())
+					return -1;
+				else
+					return 1;
 			}
 			
 		});

@@ -34,8 +34,6 @@ public class Vote extends AbstractEntity {
 	@Column(nullable=false)
 	private Result result;
 	
-	private String comment;
-
 	public Date getDate() {
 		return date;
 	}
@@ -66,14 +64,6 @@ public class Vote extends AbstractEntity {
 
 	public void setResult(Result result) {
 		this.result = result;
-	}
-
-	public String getComment() {
-		return comment;
-	}
-
-	public void setComment(String comment) {
-		this.comment = comment;
 	}
 
 }

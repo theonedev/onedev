@@ -12,7 +12,7 @@ public interface PullRequestActivity {
 	
 	User getUser();
 	
-	String getAction();
-
+	boolean isDiscussion();
+	
 	Panel render(String panelId);
 }

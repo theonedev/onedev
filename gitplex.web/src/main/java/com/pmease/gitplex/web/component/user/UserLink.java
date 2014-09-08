@@ -2,6 +2,8 @@ package com.pmease.gitplex.web.component.user;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -68,7 +70,7 @@ public class UserLink extends Panel {
 		if (user != null)
 			displayName = user.getDisplayName();
 		else
-			displayName = "Unknown User";
+			displayName = "GitPlex";
 
 		if (avatarMode == AvatarMode.NAME_AND_AVATAR || avatarMode == AvatarMode.AVATAR) {
 			Component avatar = new AvatarByUser("avatar", new UserModel(user));
@@ -90,4 +92,9 @@ public class UserLink extends Panel {
 		super.onBeforeRender();
 	}
 
+	public UserLink withTooltipConfig(@Nullable TooltipConfig tooltipConfig) {
+		this.tooltipConfig = tooltipConfig;
+		return this;
+	}
+	
 }

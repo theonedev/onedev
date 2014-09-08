@@ -2,14 +2,18 @@ package com.pmease.gitplex.core.model;
 
 import java.util.Date;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 
+import com.pmease.commons.hibernate.AbstractEntity;
+
+@SuppressWarnings("serial")
 @Entity
-public class PullRequestActivity {
+public class PullRequestAudit extends AbstractEntity {
 
 	@ManyToOne
 	@JoinColumn(nullable=false)
@@ -20,7 +24,6 @@ public class PullRequestActivity {
 	private PullRequestAction action;
 	
 	@ManyToOne
-	@JoinColumn(nullable=false)
 	private User user;
 	
 	@Column(nullable=false)
@@ -42,6 +45,7 @@ public class PullRequestActivity {
 		this.action = action;
 	}
 
+	@Nullable
 	public User getUser() {
 		return user;
 	}

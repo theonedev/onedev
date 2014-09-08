@@ -30,13 +30,13 @@ public class UpdatePullRequest implements PullRequestActivity {
 		return update.getUser();
 	}
 
-	@Override
-	public String getAction() {
-		return "Updated";
-	}
-
 	public PullRequestUpdate getUpdate() {
 		return update;
+	}
+
+	@Override
+	public boolean isDiscussion() {
+		return false;
 	}
 
 }

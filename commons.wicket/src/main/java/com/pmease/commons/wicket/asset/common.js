@@ -632,7 +632,13 @@ pmease.commons = {
 		},
 		
 		doFocus: function($containers) {
-			$containers.find(".focusable:visible:first").focus(); 
+			$containers.find(".focusable:visible").each(function() {
+				var $this = $(this);
+				if ($this.parents(".nofocus").length == 0) {
+					$this.focus();
+					return false;
+				}
+			});
 			$containers.find(".has-error:first .focusable").focus();
 		},
 		

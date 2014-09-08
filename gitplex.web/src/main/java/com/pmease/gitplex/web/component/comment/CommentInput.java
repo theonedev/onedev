@@ -2,11 +2,9 @@ package com.pmease.gitplex.web.component.comment;
 
 import static de.agilecoders.wicket.jquery.JQuery.$;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
@@ -14,10 +12,6 @@ import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.time.Duration;
-import org.apache.wicket.validation.IErrorMessageSource;
-import org.apache.wicket.validation.INullAcceptingValidator;
-import org.apache.wicket.validation.IValidatable;
-import org.apache.wicket.validation.IValidationError;
 
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
@@ -71,21 +65,6 @@ public class CommentInput extends FormComponentPanel<String> {
 		
 		add(input = new TextArea<String>("input", getModel()));
 		input.setOutputMarkupId(true);
-		input.add(new INullAcceptingValidator<String>() {
-
-			@Override
-			public void validate(IValidatable<String> validatable) {
-				if (StringUtils.isBlank(validatable.getValue()))
-					validatable.error(new IValidationError() {
-						
-						@Override
-						public Serializable getErrorMessage(IErrorMessageSource messageSource) {
-							return "Comment should not be empty";
-						}
-					});
-			}
-			
-		});
 		input.add(new AjaxFormComponentUpdatingBehavior("blur") {
 			
 			@Override
@@ -98,7 +77,7 @@ public class CommentInput extends FormComponentPanel<String> {
 		add(preview = new MarkdownPanel("preview", getModel()));
 		preview.setOutputMarkupId(true);
 
-		add(new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(3)));
+		add(new FeedbackPanel("feedback", this).hideAfter(Duration.seconds(3)));
 	}
 
 	@Override

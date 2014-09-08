@@ -1,16 +1,22 @@
 <wicket:panel>
-	<div class="fa fa-2x fa-comment"></div>
-	<div wicket:id="body" class="comment"></div>
+	<div class="head">
+		<span wicket:id="user" class="name"></span> commented <span wicket:id="age"></span>
+		<span class="actions">
+			<a wicket:id="edit" title="Edit comment"><span class="fa fa-pencil"></span></a>
+			<a wicket:id="delete" title="Delete comment"><span class="fa fa-times"></span></a>
+		</span>
+	</div>
+	<div wicket:id="content" class="body"></div>
 	<wicket:fragment wicket:id="viewFrag">
-		<div wicket:id="comment" class="pull-left right-spacing"></div>
-		<a wicket:id="edit" title="Edit comment" class="pull-left right-spacing"><span class="fa fa-pencil"></span></a>
-		<a wicket:id="delete" title="Delete comment" class="pull-left"><span class="fa fa-trash"></span></a>
+		<div wicket:id="comment"></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="editFrag">
-		<textarea wicket:id="comment" rows="6" class="form-control" placeholder="Leave a comment"></textarea>
-		<div class="top-spacing">
-			<a wicket:id="save" class="btn btn-sm btn-primary right-spacing">Save</a>
-			<a wicket:id="cancel" class="btn btn-sm btn-default">Cancel</a>
-		</div>
+		<form wicket:id="form">
+			<div wicket:id="input"></div>
+			<div class="actions">
+				<button wicket:id="save" class="btn btn-sm btn-primary">Save</button>
+				<button wicket:id="cancel" class="btn btn-sm btn-default">Cancel</button>
+			</div>
+		</form>
 	</wicket:fragment>
 </wicket:panel>

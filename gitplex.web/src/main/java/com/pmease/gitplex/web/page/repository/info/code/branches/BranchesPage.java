@@ -116,7 +116,7 @@ public class BranchesPage extends RepositoryInfoPage {
 				Branch base = GitPlex.getInstance(BranchManager.class).findBy(getRepository(), getBaseBranch());
 				
 				List<PullRequest> requests = GitPlex.getInstance(Dao.class).query(EntityCriteria.of(PullRequest.class)
-						.add(Restrictions.isNotNull("closeInfo"))
+						.add(Restrictions.isNotNull("closeStatus"))
 						.add(Restrictions.eq("target", base)));
 				
 				Map<String, PullRequest> result = Maps.newHashMap();

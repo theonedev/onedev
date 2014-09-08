@@ -36,9 +36,9 @@ import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Branch;
-import com.pmease.gitplex.core.model.CloseInfo;
 import com.pmease.gitplex.core.model.OldCommitComment;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.PullRequest.CloseStatus;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
@@ -122,11 +122,7 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 			if (target.getRepository().equals(source.getRepository())) {
 				pullRequest.setBaseCommit(pullRequest.git().calcMergeBase(target.getHeadCommit(), source.getHeadCommit()));			
 				if (target.getRepository().git().isAncestor(source.getHeadCommit(), target.getHeadCommit())) {
-					CloseInfo closeInfo = new CloseInfo();
-					closeInfo.setClosedBy(null);
-					closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
-					closeInfo.setComment("Target branch already contains commit of source branch.");
-					pullRequest.setCloseInfo(closeInfo);
+					pullRequest.setCloseStatus(CloseStatus.INTEGRATED);
 					pullRequest.setCheckResult(new Approved("Already integrated."));
 				} else {
 					pullRequest.setCheckResult(target.getRepository().getGateKeeper().checkRequest(pullRequest));
@@ -142,11 +138,7 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 				pullRequest.setBaseCommit(pullRequest.git().calcMergeBase(target.getHeadCommit(), source.getHeadCommit()));			
 
 				if (sandbox.isAncestor(source.getHeadCommit(), target.getHeadCommit())) {
-					CloseInfo closeInfo = new CloseInfo();
-					closeInfo.setClosedBy(null);
-					closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
-					closeInfo.setComment("Target branch already contains commit of source branch.");
-					pullRequest.setCloseInfo(closeInfo);
+					pullRequest.setCloseStatus(CloseStatus.INTEGRATED);
 					pullRequest.setCheckResult(new Approved("Already integrated."));
 				} else {
 					pullRequest.setCheckResult(target.getRepository().getGateKeeper().checkRequest(pullRequest));

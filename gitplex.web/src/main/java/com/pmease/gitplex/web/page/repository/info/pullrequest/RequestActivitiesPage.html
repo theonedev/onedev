@@ -1,26 +1,23 @@
 <wicket:extend>
-	<table class="activities table">
-		<tr wicket:id="activities">
-			<td class="summary">
+	<table wicket:id="activities" class="activities">
+		<tr wicket:id="activityRows">
+			<td class="avatar">
+				<div wicket:id="avatar"></div>
+			</td>
+			<td class="activity">
 				<div wicket:id="activity"></div>
 			</td>
-			<td class="detail">
-				<div wicket:id="detail"></div>
-			</td>
 		</tr>
-		<tr wicket:id="newCommentContainer">
-			<td class="summary">
-				<div wicket:id="newComment"></div>
+		<tr wicket:id="newCommentRow" class="discussion">
+			<td class="avatar">
+				<div wicket:id="avatar"></div>
 			</td>
-			<td class="detail">
-				<textarea wicket:id="content" rows="6" class="form-control" placeholder="Leave a comment"></textarea>
-				<div class="top-spacing">
-					<a wicket:id="save" class="btn btn-sm btn-primary" disabled="disabled">Post New Comment</a>
-				</div>
+			<td class="activity">
+				<form wicket:id="form">
+					<div wicket:id="input" class="nofocus"></div>
+					<button wicket:id="comment" class="btn btn-primary">Comment</button>
+				</form>
 			</td>
 		</tr>
 	</table>
-	<wicket:fragment wicket:id="actionInfoFrag">
-		<span wicket:id="action"></span> <span wicket:id="date"></span>	
-	</wicket:fragment>
 </wicket:extend>

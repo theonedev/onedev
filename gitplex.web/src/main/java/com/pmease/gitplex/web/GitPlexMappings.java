@@ -165,7 +165,7 @@ public class GitPlexMappings extends CompoundRequestMapper {
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/pull-requests/${request}", RequestActivitiesPage.class));
 		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/pull-requests/${request}/activities", RequestActivitiesPage.class));
+				"${user}/${repo}/pull-requests/${request}/discussions", RequestActivitiesPage.class));
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/pull-requests/${request}/updates", RequestUpdatesPage.class));
 		add(new PageParameterAwareMountedMapper(

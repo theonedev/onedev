@@ -119,11 +119,6 @@ public class DefaultUserManager implements UserManager {
     		dao.persist(request);
     	}
     	
-    	for (PullRequest request: user.getClosedRequests()) {
-    		request.getCloseInfo().setClosedBy(null);
-    		dao.persist(request);
-    	}
-    	
     	for (PullRequestUpdate update: user.getUpdates()) {
     		update.setUser(null);
     		dao.persist(update);

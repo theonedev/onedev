@@ -1,23 +1,48 @@
 <wicket:extend>
-	<table class="activities table">
+	<table class="updates">
 		<tr wicket:id="updates">
-			<td class="summary">
-				<div wicket:id="updater"></div>
-				<div wicket:id="votes" class="vote" data-html="true">
-					<div wicket:id="voter"></div>
-				</div>			
+			<td class="avatar">
+				<span wicket:id="avatar"></span>
 			</td>
-			<td class="detail">
-				<div wicket:id="detail"></div>
+			<td class="update">
+				<div class="head">
+					<span wicket:id="name" class="name"></span> pushed update #<span wicket:id="updateNo"></span> <span wicket:id="age"></span>
+					<span class="actions">
+						<a wicket:id="compare"><span class="fa fa-diff"></span></a>
+					</span>
+				</div>
+				<table class="commits">
+					<tr wicket:id="commits">
+						<td class="avatar">
+							<span wicket:id="avatar"></span>
+						</td>
+						<td class="detail">
+							<div wicket:id="message"></div> 
+							<div class="author">
+								<span wicket:id="name"></span> authored <span wicket:id="age"></span>
+							</div>
+						</td>
+						<td class="status">
+							<div>
+								<span wicket:id="hashLink"></span>
+								<a wicket:id="treeLink" title="Browse files of this commit"><span class="fa fa-file-txt"></span></a>
+							</div>
+							<div wicket:id="status"></div>
+						</td>
+					</tr>
+				</table>
+				<div class="votes clearfix">
+					<wicket:container wicket:id="votes">
+						<div class="vote pull-left">
+							<span wicket:id="user"></span>
+							<span wicket:id="vote" class="icons ">
+								<span class="fa fa-thumb-up-o"></span>
+								<span class="fa fa-thumb-down-o"></span>
+							</span>
+						</div>
+					</wicket:container>
+				</div>
 			</td>
 		</tr>
 	</table>
-	<wicket:fragment wicket:id="updateInfoFrag">
-		Made <a wicket:id="updateLink">update #<span wicket:id="updateNo"></span></a>, <span wicket:id="date"></span>	
-	</wicket:fragment>
-	<wicket:fragment wicket:id="voteInfoFrag">
-		<span wicket:id="vote" class="label"></span>	
-		<span wicket:id="comment" class="fa fa-comment-o"></span>
-		, <span wicket:id="date"></span>
-	</wicket:fragment>
 </wicket:extend>

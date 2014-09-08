@@ -35,11 +35,14 @@ import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.BranchStrategy;
-import com.pmease.gitplex.core.model.CloseInfo;
 import com.pmease.gitplex.core.model.IntegrationInfo;
 import com.pmease.gitplex.core.model.IntegrationSetting;
 import com.pmease.gitplex.core.model.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.PullRequest.CloseStatus;
+import com.pmease.gitplex.core.model.PullRequestAction;
+import com.pmease.gitplex.core.model.PullRequestAudit;
+import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.model.VoteInvitation;
@@ -98,7 +101,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	 * <li> Some one vote against it
 	 * <li> CI system reports completion of build against relevant commits
 	 */
-	@Sessional
+	@Transactional
 	public void refresh(final PullRequest request) {
 		request.lockAndCall(new Callable<Void>() {
 
@@ -111,11 +114,16 @@ public class DefaultPullRequestManager implements PullRequestManager {
 				String integrateRef = request.getIntegrateRef();
 				
 				if (git.isAncestor(requestHead, branchHead)) {
-					CloseInfo closeInfo = new CloseInfo();
-					closeInfo.setClosedBy(request.getTarget().getUpdater());
-					closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
-					closeInfo.setComment("Target branch already contains commit of source branch.");
-					request.setCloseInfo(closeInfo);
+					PullRequestAudit audit = new PullRequestAudit();
+					audit.setRequest(request);
+					audit.setAction(new PullRequestAction.Integrate(
+							"Mark as integrated as target branch already contains the head commit."));
+					audit.setDate(new Date());
+					audit.setUser(request.getTarget().getUpdater());
+					dao.persist(audit);
+					
+					request.setCloseStatus(CloseStatus.INTEGRATED);
+					request.setUpdateDate(new Date());
 					request.setCheckResult(new Approved("Already integrated."));
 					request.setIntegrationInfo(new IntegrationInfo(branchHead, requestHead, branchHead, null, true));
 				} else {
@@ -205,12 +213,25 @@ public class DefaultPullRequestManager implements PullRequestManager {
 
 			@Override
 			public Void call() throws Exception {
-				CloseInfo closeInfo = new CloseInfo();
-				closeInfo.setClosedBy(user);
-				closeInfo.setCloseStatus(CloseInfo.Status.DISCARDED);
-				closeInfo.setComment(comment);
-				request.setCloseInfo(closeInfo);
-				request.setUpdateDate(new Date());
+				PullRequestAudit audit = new PullRequestAudit();
+				audit.setRequest(request);
+				audit.setDate(new Date());
+				audit.setAction(new PullRequestAction.Discard());
+				audit.setUser(user);
+				
+				dao.persist(audit);
+
+				if (comment != null) {
+					PullRequestComment requestComment = new PullRequestComment();
+					requestComment.setContent(comment);
+					requestComment.setDate(audit.getDate());
+					requestComment.setRequest(request);
+					requestComment.setUser(user);
+					dao.persist(requestComment);
+				}
+
+				request.setCloseStatus(CloseStatus.DISCARDED);
+				request.setUpdateDate(audit.getDate());
 				dao.persist(request);
 				
 				deleteRefsUponClose(request);
@@ -260,11 +281,24 @@ public class DefaultPullRequestManager implements PullRequestManager {
 					request.getTarget().setUpdater(user);
 					branchManager.save(request.getTarget());
 					
-					CloseInfo closeInfo = new CloseInfo();
-					closeInfo.setClosedBy(user);
-					closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
-					closeInfo.setComment(comment);
-					request.setCloseInfo(closeInfo);
+					PullRequestAudit audit = new PullRequestAudit();
+					audit.setRequest(request);
+					audit.setDate(new Date());
+					audit.setAction(new PullRequestAction.Integrate(null));
+					audit.setUser(user);
+					
+					dao.persist(audit);
+
+					if (comment != null) {
+						PullRequestComment requestComment = new PullRequestComment();
+						requestComment.setContent(comment);
+						requestComment.setDate(audit.getDate());
+						requestComment.setRequest(request);
+						requestComment.setUser(user);
+						dao.persist(requestComment);
+					}
+
+					request.setCloseStatus(CloseStatus.INTEGRATED);
 					request.setUpdateDate(new Date());
 
 					dao.persist(request);
