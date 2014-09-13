@@ -108,6 +108,13 @@ public class RequestUpdatesPage extends RequestDetailPage {
 						else
 							voteSpan.add(AttributeModifier.append("class", " disapproved"));
 					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						
+						setVisible(!updateItem.getModelObject().getVotes().isEmpty());
+					}
 					
 				});
 

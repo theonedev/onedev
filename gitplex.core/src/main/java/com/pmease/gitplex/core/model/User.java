@@ -43,9 +43,6 @@ public class User extends AbstractUser implements ProtectedObject {
 	private Collection<CommitComment> commitComments = new ArrayList<>();
 
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-	private Collection<CommentVisit> commentVisits = new ArrayList<>();
-
-	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<Membership> memberships = new ArrayList<>();
 	
 	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
@@ -70,10 +67,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	private Collection<PullRequestComment> requestComments = new ArrayList<>();
 
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-	private Collection<InlineComment> inlineComments = new ArrayList<>();
-
-	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-	private Collection<InlineCommentReply> commentReplies = new ArrayList<>();
+	private Collection<PullRequestCommentReply> requestCommentReplies = new ArrayList<>();
 
 	@Editable(order=100)
 	@UserName
@@ -133,14 +127,6 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	public void setCommitComments(Collection<CommitComment> commitComments) {
 		this.commitComments = commitComments;
-	}
-
-	public Collection<CommentVisit> getCommentVisits() {
-		return commentVisits;
-	}
-
-	public void setCommentVisits(Collection<CommentVisit> commentVisits) {
-		this.commentVisits = commentVisits;
 	}
 
 	public Collection<Membership> getMemberships() {
@@ -213,20 +199,12 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.requestComments = requestComments;
 	}
 
-	public Collection<InlineComment> getInlineComments() {
-		return inlineComments;
+	public Collection<PullRequestCommentReply> getRequestCommentReplies() {
+		return requestCommentReplies;
 	}
 
-	public void setInlineComments(Collection<InlineComment> inlineComments) {
-		this.inlineComments = inlineComments;
-	}
-
-	public Collection<InlineCommentReply> getCommentReplies() {
-		return commentReplies;
-	}
-
-	public void setCommentReplies(Collection<InlineCommentReply> commentReplies) {
-		this.commentReplies = commentReplies;
+	public void setCommentReplies(Collection<PullRequestCommentReply> requestCommentReplies) {
+		this.requestCommentReplies = requestCommentReplies;
 	}
 
 	@Override

@@ -9,12 +9,12 @@ import javax.inject.Singleton;
 
 import org.apache.shiro.SecurityUtils;
 
-import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.comment.Comment;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.CommitComment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
@@ -67,7 +67,7 @@ public class DefaultAuthorizationManager implements AuthorizationManager {
 	}
 
 	@Override
-	public boolean canModify(CommitComment comment) {
+	public boolean canModify(Comment comment) {
 		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 		if (currentUser == null) {
 			return false;

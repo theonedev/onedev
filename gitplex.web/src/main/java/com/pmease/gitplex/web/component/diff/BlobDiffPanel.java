@@ -2,6 +2,8 @@ package com.pmease.gitplex.web.component.diff;
 
 import static com.pmease.commons.git.Change.Status.UNCHANGED;
 
+import java.util.List;
+
 import org.apache.tika.mime.MediaType;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -12,9 +14,12 @@ import org.eclipse.jgit.lib.FileMode;
 
 import com.pmease.commons.git.BlobInfo;
 import com.pmease.commons.git.BlobText;
+import com.pmease.commons.git.RevAwareChange;
 import com.pmease.commons.util.MediaTypes;
+import com.pmease.commons.util.diff.DiffLine;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.comment.CommentAwareChange;
+import com.pmease.gitplex.core.comment.LineComment;
+import com.pmease.gitplex.core.comment.LineCommentContext;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.gitlink.GitLink;
 import com.pmease.gitplex.web.component.symbollink.SymbolLink;
@@ -27,19 +32,19 @@ public class BlobDiffPanel extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
-	private final CommentAwareChange change;
+	private final RevAwareChange change;
 	
-	public BlobDiffPanel(String id, IModel<Repository> repoModel, CommentAwareChange change) {
+	private final LineCommentContext commentContext;
+	
+	public BlobDiffPanel(String id, IModel<Repository> repoModel, RevAwareChange change, 
+			LineCommentContext commentContext) {
 		super(id);
 		
 		this.repoModel = repoModel;
 		this.change = change;
+		this.commentContext = commentContext;
 	}
 	
-	public CommentAwareChange getChange() {
-		return change;
-	}
-
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -108,9 +113,9 @@ public class BlobDiffPanel extends Panel {
 				BlobText newText = repoModel.getObject().getBlobText(change.getNewBlobInfo());
 				if (oldText != null) {
 					if (newText != null) {
-						add(new TextDiffPanel("blobContent", repoModel, oldText, newText, change)); 
+						add(new TextDiffPanel("blobContent", repoModel, oldText, newText, change, commentContext)); 
 					} else if (newContent.length == 0) {
-						add(new TextDiffPanel("blobContent", repoModel, oldText, new BlobText(), change)); 
+						add(new TextDiffPanel("blobContent", repoModel, oldText, new BlobText(), change, commentContext)); 
 					} else {
 						Fragment fragment = new Fragment("blobContent", "binaryFileFrag", this);
 						fragment.add(new FileDiffTitle("summary", change));
@@ -118,7 +123,7 @@ public class BlobDiffPanel extends Panel {
 					}
 				} else if (newText != null) {
 					if (oldContent.length == 0) {
-						add(new TextDiffPanel("blobContent", repoModel, new BlobText(), newText, change)); 
+						add(new TextDiffPanel("blobContent", repoModel, new BlobText(), newText, change, commentContext)); 
 					} else {
 						Fragment fragment = new Fragment("blobContent", "binaryFileFrag", this);
 						fragment.add(new FileDiffTitle("summary", change));
@@ -166,6 +171,10 @@ public class BlobDiffPanel extends Panel {
 			add(new WebMarkupContainer("blobContent").setVisible(false));
 		}		
 		
+	}
+	
+	public List<DiffLine> getLineContext(LineComment comment) {
+		return null;
 	}
 	
 	protected void onDetach() {

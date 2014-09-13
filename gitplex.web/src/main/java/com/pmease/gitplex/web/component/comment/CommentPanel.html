@@ -1,0 +1,50 @@
+<wicket:panel>
+	<div class="comment">
+		<div class="head">
+			<span wicket:id="user" class="name"></span> commented <span wicket:id="age"></span>
+			<span class="actions">
+				<a wicket:id="edit" title="Edit comment"><span class="fa fa-pencil"></span></a>
+				<a wicket:id="delete" title="Delete comment"><span class="fa fa-times"></span></a>
+			</span>
+		</div>
+		<div wicket:id="content" class="body"></div>
+	</div>
+	<div class="replies">
+		<table>
+			<tr wicket:id="replies" class="reply">
+				<td class="avatar"><span wicket:id="avatar"></span></td>
+				<td class="detail">
+					<div class="head">
+						<span wicket:id="user" class="name"></span> replied <span wicket:id="age"></span>
+						<span class="actions">
+							<a wicket:id="edit" title="Edit reply"><span class="fa fa-pencil"></span></a>
+							<a wicket:id="delete" title="Delete reply"><span class="fa fa-times"></span></a>
+						</span>
+					</div>
+					<div wicket:id="content" class="body"></div>
+				</td>
+			</tr>
+			<tr wicket:id="addReply" class="add-reply">
+				<td colspan="2">
+					<div wicket:id="content"></div>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<wicket:fragment wicket:id="viewFrag">
+		<div wicket:id="comment"></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="editFrag">
+		<form wicket:id="form">
+			<div wicket:id="input"></div>
+			<div class="actions">
+				<button wicket:id="save" class="btn btn-sm btn-primary">Save</button>
+				&nbsp;&nbsp;&nbsp;&nbsp;
+				<button wicket:id="cancel" class="btn btn-sm btn-default">Cancel</button>
+			</div>
+		</form>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="addFrag">
+		<a wicket:id="addReply" class="btn btn-xs btn-default"><i class="fa fa-mail-reply"></i> Add reply</a>
+	</wicket:fragment>
+</wicket:panel>

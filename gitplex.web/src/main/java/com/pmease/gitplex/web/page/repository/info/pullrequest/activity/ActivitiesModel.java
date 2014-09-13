@@ -29,7 +29,7 @@ public abstract class ActivitiesModel extends LoadableDetachableModel<List<PullR
 		for (PullRequestUpdate update: request.getUpdates())
 			activities.add(new UpdatePullRequest(update));
 		
-		for (PullRequestComment comment: request.getRequestComments()) 
+		for (PullRequestComment comment: request.getComments()) 
 			activities.add(new CommentPullRequest(comment));
 		
 		for (PullRequestAudit audit: request.getAudits()) {

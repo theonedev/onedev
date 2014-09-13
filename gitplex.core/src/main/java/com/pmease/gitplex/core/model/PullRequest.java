@@ -5,10 +5,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -31,16 +29,12 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.util.LockUtils;
-import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Approved;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Disapproved;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Ignored;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.gatekeeper.checkresult.PendingAndBlock;
-import com.pmease.gitplex.core.manager.CommentVisitManager;
-import com.pmease.gitplex.core.manager.CommitCommentManager;
-import com.pmease.gitplex.core.manager.UserManager;
 
 @SuppressWarnings("serial")
 @Entity
@@ -114,10 +108,7 @@ public class PullRequest extends AbstractEntity {
 	private Collection<Verification> verifications = new ArrayList<>();
 
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
-	private Collection<PullRequestComment> requestComments = new ArrayList<>();
-
-	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
-	private Collection<InlineComment> inlineComments = new ArrayList<>();
+	private Collection<PullRequestComment> comments = new ArrayList<>();
 
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
 	private Collection<PullRequestAudit> audits = new ArrayList<>();
@@ -129,12 +120,6 @@ public class PullRequest extends AbstractEntity {
 	private transient PullRequestUpdate referentialUpdate;
 	
 	private transient Set<String> pendingCommits;
-	
-	private transient Map<String, List<CommitComment>> commitComments;
-	
-	private transient Map<String, Map<CommentPosition, Date>> commentVisits;
-	
-	private transient List<String> commits;
 	
 	/**
 	 * Get title of this merge request.
@@ -261,20 +246,12 @@ public class PullRequest extends AbstractEntity {
 		this.verifications = verifications;
 	}
 
-	public Collection<PullRequestComment> getRequestComments() {
-		return requestComments;
+	public Collection<PullRequestComment> getComments() {
+		return comments;
 	}
 
-	public void setRequestComments(Collection<PullRequestComment> requestComments) {
-		this.requestComments = requestComments;
-	}
-
-	public Collection<InlineComment> getInlineComments() {
-		return inlineComments;
-	}
-
-	public void setInlineComments(Collection<InlineComment> inlineComments) {
-		this.inlineComments = inlineComments;
+	public void setComments(Collection<PullRequestComment> comments) {
+		this.comments = comments;
 	}
 
 	public Collection<PullRequestAudit> getAudits() {
@@ -548,68 +525,4 @@ public class PullRequest extends AbstractEntity {
 				&& getIntegrationInfo().getIntegrationHead() != null;
 	}
 
-	public Map<String, List<CommitComment>> getCommitComments() {
-		if (commitComments == null) {
-			commitComments = new HashMap<>();
-			Map<String, Date> commits = new HashMap<>();
-			for (PullRequestUpdate update: updates) {
-				for (Commit commit: update.getCommits())
-					commits.put(commit.getHash(), commit.getCommitter().getWhen());
-			}
-			CommitCommentManager manager = GitPlex.getInstance(CommitCommentManager.class);
-			for (CommitComment comment: manager.findByCommitOrDates(getTarget().getRepository(), 
-					getBaseCommit(), Collections.min(commits.values()), Collections.max(commits.values()))) {
-				if (comment.getCommit().equals(getBaseCommit()) || commits.containsKey(comment.getCommit())) {
-					List<CommitComment> comments = commitComments.get(comment.getCommit());
-					if (comments == null) {
-						comments = new ArrayList<>();
-						commitComments.put(comment.getCommit(), comments);
-					}
-					comments.add(comment);
-				}
-			}
-		}
-		return commitComments;
-	}
-
-	public Map<String, Map<CommentPosition, Date>> getCommentVisits() {
-		if (commentVisits == null) {
-			commentVisits = new HashMap<>();
-			
-			User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
-			if (currentUser != null) {
-				Map<String, Date> commits = new HashMap<>();
-				for (PullRequestUpdate update: updates) {
-					for (Commit commit: update.getCommits())
-						commits.put(commit.getHash(), commit.getCommitter().getWhen());
-				}
-				CommentVisitManager manager = GitPlex.getInstance(CommentVisitManager.class);
-				for (CommentVisit visit: manager.findByCommitOrDates(getTarget().getRepository(), currentUser, 
-						getBaseCommit(), Collections.min(commits.values()), Collections.max(commits.values()))) {
-					if (visit.getCommit().equals(getBaseCommit()) || commits.containsKey(visit.getCommit())) {
-						Map<CommentPosition, Date> visits = commentVisits.get(visit.getCommit());
-						if (visits == null) {
-							visits = new HashMap<>();
-							commentVisits.put(visit.getCommit(), visits);
-						}
-						visits.put(visit.getPosition(), visit.getVisitDate());
-					}
-				}
-			}
-		}
-		return commentVisits;
-	}
-
-	public List<String> getCommits() {
-		if (commits == null) {
-			commits = new ArrayList<>();
-			commits.add(getBaseCommit());
-			for (int i=getSortedUpdates().size()-1; i>=0; i--) {
-				for (Commit commit: getSortedUpdates().get(i).getCommits())
-					commits.add(commit.getHash());
-			}
-		}
-		return commits;
-	}
-	
 }

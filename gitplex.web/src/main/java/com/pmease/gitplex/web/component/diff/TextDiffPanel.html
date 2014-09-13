@@ -36,51 +36,25 @@
 					<td class="text"><wicket:container wicket:id="partials"><span wicket:id="partial"></span></wicket:container></td>
 				</tr>
 				<tr wicket:id="commentsRow" class="line comments">
-					<td colspan="2" class="summary">
-						<div><i wicket:id="concernedFlag" class="fa fa-flag concerned-comments" title="Concerned comments"></i></div>
-						<div><i class="fa fa-comment"></i> <span wicket:id="commentCount"></span></div>
-					</td>
-					<td class="detail">
-						<table class="line-comments">
+					<td colspan="3">
+						<table class="comments">
 							<tr wicket:id="comments">
 								<td class="avatar">
 									<span wicket:id="avatar"></span>
 								</td>
-								<td class="content">
-									<div class="clearfix head">
-										<span wicket:id="name" class="pull-left"></span>
-										<a wicket:id="edit" class="pull-right" title="Edit this comment"><i class="fa fa-pencil"></i></a>
-										<a wicket:id="delete" class="pull-right" title="Delete this comment"><i class="fa fa-times"></i></a>
-										<a wicket:id="reply" class="pull-right" title="Reply this comment"><i class="fa fa-mail-reply"></i></a>
-										<span wicket:id="age" class="pull-right"></span>
-									</div>
-									<div wicket:id="content" class="body"></div>
+								<td class="comment">
+									<div wicket:id="comment"></div>
 								</td>
 							</tr>
 						</table>
-						<wicket:enclosure child="addComment">
-							<div class="add-comment">
-								<a wicket:id="addComment">Add a comment</a>
-							</div>
-						</wicket:enclosure>
-						<div wicket:id="newComment"></div>
+						<div wicket:id="addComment"></div>
 					</td>
 				</tr>
 			</wicket:container>
 		</table>
 	</div>
-	<wicket:fragment wicket:id="editCommentFrag">
-		<form wicket:id="form">
-			<div wicket:id="input"></div>
-			<div class="actions">
-				<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware">Update comment</button>
-				&nbsp;&nbsp;&nbsp;&nbsp;
-				<button wicket:id="cancel" class="btn btn-sm btn-default">Close form</button>
-			</div>
-		</form>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="newCommentFrag">
-		<form wicket:id="form">
+	<wicket:fragment wicket:id="addCommentFrag">
+		<form wicket:id="form" class="add-comment">
 			<div wicket:id="input"></div>
 			<div class="actions">
 				<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware">Comment on this line</button>

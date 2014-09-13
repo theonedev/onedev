@@ -2,30 +2,39 @@ package com.pmease.gitplex.core.model;
 
 import java.util.Date;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 import com.pmease.commons.hibernate.AbstractEntity;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.comment.CommentReply;
 
 @SuppressWarnings("serial")
 @Entity
-public class InlineCommentReply extends AbstractEntity {
+public class PullRequestCommentReply extends AbstractEntity implements CommentReply {
 
 	@ManyToOne
 	@JoinColumn(nullable=false)
-	private InlineComment comment;
-
+	private PullRequestComment comment;
+	
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private User user;
-
-	@Column(nullable=false)
+	
 	private Date date;
 	
-	@Column(nullable=false)
 	private String content;
+
+	@Override
+	public PullRequestComment getComment() {
+		return comment;
+	}
+
+	public void setComment(PullRequestComment comment) {
+		this.comment = comment;
+	}
 
 	public User getUser() {
 		return user;
@@ -49,6 +58,17 @@ public class InlineCommentReply extends AbstractEntity {
 
 	public void setContent(String content) {
 		this.content = content;
+	}
+
+	@Override
+	public void saveContent(String content) {
+		setContent(content);
+		GitPlex.getInstance(Dao.class).persist(this);
+	}
+
+	@Override
+	public void delete() {
+		GitPlex.getInstance(Dao.class).remove(this);
 	}
 	
 }
