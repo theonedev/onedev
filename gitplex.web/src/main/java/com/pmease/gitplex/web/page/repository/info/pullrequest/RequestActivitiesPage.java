@@ -1,13 +1,15 @@
 package com.pmease.gitplex.web.page.repository.info.pullrequest;
 
+import java.util.List;
+
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -16,60 +18,87 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestComment;
-import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.web.common.wicket.event.AjaxEvent;
 import com.pmease.gitplex.web.component.comment.CommentInput;
+import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.ActivitiesModel;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.CommentPullRequest;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.OpenPullRequest;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.PullRequestActivity;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.UpdatePullRequest;
 
 @SuppressWarnings("serial")
 public class RequestActivitiesPage extends RequestDetailPage {
 	
-	private WebMarkupContainer activitiesContainer;
+	private RepeatingView activitiesView;
 	
 	public RequestActivitiesPage(PageParameters params) {
 		super(params);
 	}
 	
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
+	private Component newActivityItem(String id, PullRequestActivity activity) {
+		WebMarkupContainer row = new WebMarkupContainer(id) {
+
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+				
+				if (event.getPayload() instanceof CommentRemoved) {
+					CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
+					remove();
+					commentRemoved.getTarget().appendJavaScript(String.format("$('#%s').remove();", getMarkupId()));
+				} 
+			}
+			
+		};
+		row.setOutputMarkupId(true);
+		row.add(new UserLink("avatar", new UserModel(activity.getUser()), AvatarMode.AVATAR));
 		
-		activitiesContainer = new WebMarkupContainer("activities");
-		activitiesContainer.setOutputMarkupId(true);
-		add(activitiesContainer);
+		row.add(activity.render("activity"));
+		if (activity instanceof OpenPullRequest || activity instanceof CommentPullRequest)
+			row.add(AttributeAppender.append("class", " discussion non-update"));
+		else if (activity instanceof UpdatePullRequest)
+			row.add(AttributeAppender.append("class", " non-discussion update"));
+		else
+			row.add(AttributeAppender.append("class", " non-discussion non-update"));
 		
-		activitiesContainer.add(new ListView<PullRequestActivity>("activityRows", new ActivitiesModel() {
+		return row;
+	}
+	
+	private Component newActivitiesView() {
+		activitiesView = new RepeatingView("activities");
+		activitiesView.setOutputMarkupId(true);
+		
+		List<PullRequestActivity> activities = new ActivitiesModel() {
 			
 			@Override
 			protected PullRequest getPullRequest() {
 				return RequestActivitiesPage.this.getPullRequest();
 			}
-			
-		}) {
+		}.getObject();
+		
+		for (PullRequestActivity activity: activities) 
+			activitiesView.add(newActivityItem(activitiesView.newChildId(), activity));
+		
+		return activitiesView;
+	}
+	
+	@Override
+	protected void onBeforeRender() {
+		replace(newActivitiesView());
+		
+		super.onBeforeRender();
+	}
 
-			@Override
-			protected void populateItem(final ListItem<PullRequestActivity> item) {
-				PullRequestActivity activity = item.getModelObject();
-				if (activity.isDiscussion()) {
-					item.add(AttributeAppender.append("class", " discussion"));
-					item.add(new UserLink("avatar", new UserModel(activity.getUser()), AvatarMode.AVATAR));
-				} else {
-					if (getModelObject().get(item.getIndex()-1).isDiscussion())
-						item.add(AttributeAppender.append("class", " first"));
-					item.add(AttributeAppender.append("class", " action"));
-					item.add(new WebMarkupContainer("avatar"));
-				}
-				
-				item.add(item.getModelObject().render("activity"));
-			}
-			
-		});
-
-		WebMarkupContainer newCommentRow = new WebMarkupContainer("newCommentRow") {
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
+		add(newActivitiesView());
+		
+		final WebMarkupContainer addComment = new WebMarkupContainer("addComment") {
 
 			@Override
 			protected void onConfigure() {
@@ -78,13 +107,11 @@ public class RequestActivitiesPage extends RequestDetailPage {
 			}
 			
 		};
-		activitiesContainer.add(newCommentRow);
+		addComment.setOutputMarkupId(true);
+		add(addComment);
 		
-		User user = GitPlex.getInstance(UserManager.class).getCurrent();
-		newCommentRow.add(new UserLink("avatar", new UserModel(user), AvatarMode.AVATAR));
-
 		Form<?> form = new Form<Void>("form");
-		newCommentRow.add(form);
+		addComment.add(form);
 		
 		final CommentInput input = new CommentInput("input", Model.of(""));
 		input.setRequired(true);
@@ -103,7 +130,16 @@ public class RequestActivitiesPage extends RequestDetailPage {
 				GitPlex.getInstance(Dao.class).persist(comment);
 				input.setModelObject("");
 				
-				target.add(activitiesContainer);
+				target.add(addComment);
+				
+				Component lastActivityItem = activitiesView.get(activitiesView.size()-1);
+				Component newActivityItem = newActivityItem(activitiesView.newChildId(), new CommentPullRequest(comment)); 
+				activitiesView.add(newActivityItem);
+				
+				String script = String.format("$(\"<li id='%s' class='activity discussion'></li>\").insertAfter('#%s');", 
+						newActivityItem.getMarkupId(), lastActivityItem.getMarkupId());
+				target.prependJavaScript(script);
+				target.add(newActivityItem);
 			}
 
 			@Override
@@ -115,21 +151,4 @@ public class RequestActivitiesPage extends RequestDetailPage {
 		});
 	}
 
-	@Override
-	public void onEvent(IEvent<?> event) {
-		super.onEvent(event);
-		
-		if (event.getPayload() instanceof RefreshActivities) {
-			RefreshActivities refresh = (RefreshActivities) event.getPayload();
-			refresh.getTarget().add(activitiesContainer);
-		}
-	}
-
-	public static class RefreshActivities extends AjaxEvent {
-
-		public RefreshActivities(AjaxRequestTarget target) {
-			super(target);
-		}
-		
-	}
 }

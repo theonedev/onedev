@@ -56,7 +56,7 @@ public abstract class ActivitiesModel extends LoadableDetachableModel<List<PullR
 					return -1;
 				else if (o1.getDate().after(o2.getDate()))
 					return 1;
-				else if (o1.isDiscussion())
+				else if (o1 instanceof OpenPullRequest || o1 instanceof CommentPullRequest)
 					return -1;
 				else
 					return 1;

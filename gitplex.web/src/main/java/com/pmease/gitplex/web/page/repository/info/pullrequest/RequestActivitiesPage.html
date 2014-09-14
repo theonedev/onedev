@@ -1,23 +1,14 @@
 <wicket:extend>
-	<table wicket:id="activities" class="activities">
-		<tr wicket:id="activityRows">
-			<td class="avatar">
-				<div wicket:id="avatar"></div>
-			</td>
-			<td class="activity">
-				<div wicket:id="activity"></div>
-			</td>
-		</tr>
-		<tr wicket:id="newCommentRow" class="discussion">
-			<td class="avatar">
-				<div wicket:id="avatar"></div>
-			</td>
-			<td class="activity">
-				<form wicket:id="form">
-					<div wicket:id="input" class="nofocus"></div>
-					<button wicket:id="comment" class="btn btn-primary">Comment</button>
-				</form>
-			</td>
+	<table class="activities">
+		<tr wicket:id="activities" class="activity">
+			<td wicket:id="avatar" class="avatar"></td>
+			<td wicket:id="activity" class="activity"></td>
 		</tr>
 	</table>
+	<div wicket:id="addComment" class="add-comment">
+		<form wicket:id="form">
+			<div wicket:id="input" class="nofocus"></div>
+			<button wicket:id="comment" class="btn btn-primary">Comment</button>
+		</form>
+	</div>
 </wicket:extend>

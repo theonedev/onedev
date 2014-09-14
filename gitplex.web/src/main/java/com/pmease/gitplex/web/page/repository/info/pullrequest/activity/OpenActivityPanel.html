@@ -1,6 +1,6 @@
 <wicket:panel>
-	<div class="head">
-		<span wicket:id="user" class="name"></span> opened <span wicket:id="age"></span>
+	<div class="summary">
+		<span wicket:id="user" class="user"></span> opened <span wicket:id="age"></span>
 		<span class="actions">
 			<a wicket:id="edit" title="Edit"><span class="fa fa-pencil"></span></a>
 		</span>
@@ -14,6 +14,7 @@
 			<div wicket:id="input"></div>
 			<div class="actions">
 				<button wicket:id="save" class="btn btn-sm btn-primary">Save</button>
+				&nbsp;&nbsp;
 				<button wicket:id="cancel" class="btn btn-sm btn-default">Cancel</button>
 			</div>
 		</form>

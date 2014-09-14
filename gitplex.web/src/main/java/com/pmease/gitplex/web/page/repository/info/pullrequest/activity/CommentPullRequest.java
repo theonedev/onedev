@@ -6,6 +6,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.web.component.comment.CommentPanel;
+import com.pmease.gitplex.web.model.EntityModel;
 
 public class CommentPullRequest implements PullRequestActivity {
 
@@ -22,17 +24,12 @@ public class CommentPullRequest implements PullRequestActivity {
 
 	@Override
 	public Panel render(String panelId) {
-		return new CommentActivityPanel(panelId, new PullRequestCommentModel(comment.getId()));
+		return new CommentPanel(panelId, new EntityModel<PullRequestComment>(comment));
 	}
 
 	@Override
 	public User getUser() {
 		return comment.getUser();
-	}
-
-	@Override
-	public boolean isDiscussion() {
-		return true;
 	}
 
 }

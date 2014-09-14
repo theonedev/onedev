@@ -30,9 +30,4 @@ public class OpenPullRequest implements PullRequestActivity {
 		return request.getSubmitter();
 	}
 
-	@Override
-	public boolean isDiscussion() {
-		return true;
-	}
-
 }

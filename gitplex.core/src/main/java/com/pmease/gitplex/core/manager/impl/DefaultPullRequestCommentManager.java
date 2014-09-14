@@ -42,8 +42,8 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 		oldConj.add(Restrictions.eq("inlineInfo.file", change.getOldPath()));
 		
 		Conjunction newConj = Restrictions.conjunction();
-		oldConj.add(Restrictions.eq("inlineInfo.commit", change.getNewRevision()));
-		oldConj.add(Restrictions.eq("inlineInfo.file", change.getNewPath()));
+		newConj.add(Restrictions.eq("inlineInfo.commit", change.getNewRevision()));
+		newConj.add(Restrictions.eq("inlineInfo.file", change.getNewPath()));
 		
 		if (change.getStatus() == ADDED) 
 			criteria.add(oldConj);

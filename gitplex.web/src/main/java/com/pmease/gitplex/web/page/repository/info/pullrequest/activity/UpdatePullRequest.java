@@ -34,9 +34,4 @@ public class UpdatePullRequest implements PullRequestActivity {
 		return update;
 	}
 
-	@Override
-	public boolean isDiscussion() {
-		return false;
-	}
-
 }

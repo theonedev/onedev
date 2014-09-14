@@ -3,9 +3,12 @@ package com.pmease.gitplex.web.page.repository.info.pullrequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -22,6 +25,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Verification;
+import com.pmease.gitplex.core.model.Verification.Status;
 import com.pmease.gitplex.core.model.Vote;
 import com.pmease.gitplex.web.component.commit.CommitHashLink;
 import com.pmease.gitplex.web.component.commit.CommitMessagePanel;
@@ -60,7 +65,6 @@ public class RequestUpdatesPage extends RequestDetailPage {
 			protected void populateItem(final ListItem<PullRequestUpdate> updateItem) {
 				PullRequestUpdate update = updateItem.getModelObject();
 
-				updateItem.add(new UserLink("avatar", new UserModel(update.getUser()), AvatarMode.AVATAR));
 				updateItem.add(new UserLink("name", new UserModel(update.getUser()), AvatarMode.NAME));
 				List<PullRequestUpdate> updates = update.getRequest().getSortedUpdates();
 				int updateNo = updates.size() - updates.indexOf(update);
@@ -101,12 +105,15 @@ public class RequestUpdatesPage extends RequestDetailPage {
 
 						item.add(new UserLink("user", new UserModel(vote.getVoter()), AvatarMode.AVATAR)
 									.withTooltipConfig(new TooltipConfig()));
-						WebMarkupContainer voteSpan = new WebMarkupContainer("vote");
-						item.add(voteSpan);
-						if (vote.getResult() == Vote.Result.APPROVE)
-							voteSpan.add(AttributeModifier.append("class", " approved"));
-						else
-							voteSpan.add(AttributeModifier.append("class", " disapproved"));
+						Label label;
+						if (vote.getResult() == Vote.Result.APPROVE) {
+							label = new Label("label", "Approved");
+							label.add(AttributeModifier.append("class", " label-success"));
+						} else {
+							label = new Label("label", "Disapproved");
+							label.add(AttributeModifier.append("class", " label-danger"));
+						}
+						item.add(label);
 					}
 
 					@Override
@@ -117,6 +124,11 @@ public class RequestUpdatesPage extends RequestDetailPage {
 					}
 					
 				});
+
+				final Set<String> mergedCommitHashes = new HashSet<>();
+
+				for (Commit commit: update.getMergedCommits())
+					mergedCommitHashes.add(commit.getHash());
 
 				updateItem.add(new ListView<Commit>("commits", new AbstractReadOnlyModel<List<Commit>>() {
 
@@ -156,7 +168,40 @@ public class RequestUpdatesPage extends RequestDetailPage {
 						commitItem.add(new CommitHashLink("hashLink", repoModel, commit.getHash()));
 						commitItem.add(new BookmarkablePageLink<Void>("treeLink", RepoTreePage.class, 
 								RepoTreePage.paramsOf(repoModel.getObject(), commit.getHash())));
-						commitItem.add(new CommitStatusPanel("status", updateItem.getModel(), commit.getHash()));
+						
+						commitItem.add(new VerificationStatusPanel("verification", requestModel, commit.getHash()) {
+
+							@Override
+							protected Component newStatusComponent(String id, Status status) {
+								if (status == Verification.Status.PASSED) {
+									return new Label(id, "build successful <i class='caret'></i>")
+										.setEscapeModelStrings(false)
+										.add(AttributeAppender.append("class", " label label-success"));
+								} else if (status == Verification.Status.ONGOING) {
+									return new Label(id, "build running <i class='caret'></i>")
+										.setEscapeModelStrings(false)
+										.add(AttributeAppender.append("class", " label label-warning"));
+								} else {
+									return new Label(id, "build failed <i class='caret'></i>")
+										.setEscapeModelStrings(false)
+										.add(AttributeAppender.append("class", " label label-danger"));
+								} 
+							}
+							
+						});
+
+						if (mergedCommitHashes.contains(commit.getHash())) {
+							commitItem.add(new Label("integration", "integrated")
+									.add(AttributeAppender.append("class", "label label-success")));
+							commitItem.add(AttributeAppender.append("class", " integrated"));
+						} else if (!getPullRequest().getPendingCommits().contains(commit.getHash())) {
+							commitItem.add(new Label("integration", "rebased")
+									.add(AttributeAppender.append("class", "label label-default")));
+							commitItem.add(AttributeAppender.append("class", " rebased"));
+						} else {
+							commitItem.add(new WebMarkupContainer("integration"));
+						}
+						
 					}
 					
 				});

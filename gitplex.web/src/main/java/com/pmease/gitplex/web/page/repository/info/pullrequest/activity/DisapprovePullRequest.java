@@ -31,9 +31,4 @@ public class DisapprovePullRequest implements PullRequestActivity {
 		return date;
 	}
 
-	@Override
-	public boolean isDiscussion() {
-		return false;
-	}
-
 }

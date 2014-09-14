@@ -181,7 +181,7 @@ public class RequestComparePage extends RequestDetailPage implements LineComment
 		protected Map<Integer, LineComment> load() {
 			Map<Integer, LineComment> oldComments = new HashMap<>();
 			for (LineComment comment: changeCommentsModel.getObject()) {
-				if (comment.getCommit().equals(change.getOldRevision()))
+				if (comment.getCommit().equals(oldCommit))
 					oldComments.put(comment.getLine(), comment);
 			}
 			return oldComments;
@@ -196,7 +196,7 @@ public class RequestComparePage extends RequestDetailPage implements LineComment
 		protected Map<Integer, LineComment> load() {
 			Map<Integer, LineComment> newComments = new HashMap<>();
 			for (LineComment comment: changeCommentsModel.getObject()) {
-				if (comment.getCommit().equals(change.getNewRevision()))
+				if (comment.getCommit().equals(newCommit))
 					newComments.put(comment.getLine(), comment);
 			}
 			return newComments;
@@ -334,20 +334,20 @@ public class RequestComparePage extends RequestDetailPage implements LineComment
 
 			@Override
 			protected String load() {
-				CommitDescription description = commitsModel.getObject().get(change.getNewRevision());
+				CommitDescription description = commitsModel.getObject().get(newCommit);
 				Preconditions.checkNotNull(description);
 				
 				if (description.getName() != null)
-					return GitUtils.abbreviateSHA(change.getNewRevision()) + " - " + description.getName();
+					return GitUtils.abbreviateSHA(newCommit) + " - " + description.getName();
 				else
-					return GitUtils.abbreviateSHA(change.getNewRevision());
+					return GitUtils.abbreviateSHA(newCommit);
 			}
 			
 		}).add(new TooltipBehavior(new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
-				CommitDescription description = commitsModel.getObject().get(change.getNewRevision());
+				CommitDescription description = commitsModel.getObject().get(newCommit);
 				Preconditions.checkNotNull(description);
 				return description.getSubject();
 			}

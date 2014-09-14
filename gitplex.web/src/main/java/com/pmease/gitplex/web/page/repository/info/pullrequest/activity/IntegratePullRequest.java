@@ -36,11 +36,6 @@ public class IntegratePullRequest implements PullRequestActivity {
 	}
 
 	@Override
-	public boolean isDiscussion() {
-		return false;
-	}
-
-	@Override
 	public Panel render(String panelId) {
 		return new IntegrateActivityPanel(panelId, new UserModel(user), date, reason);
 	}

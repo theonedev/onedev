@@ -29,11 +29,6 @@ public class DiscardPullRequest implements PullRequestActivity {
 	}
 
 	@Override
-	public boolean isDiscussion() {
-		return false;
-	}
-
-	@Override
 	public Panel render(String panelId) {
 		return new DiscardActivityPanel(panelId, new UserModel(user), date);
 	}

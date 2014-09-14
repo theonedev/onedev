@@ -46,7 +46,6 @@ import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
-import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.IntegrationInfo;
 import com.pmease.gitplex.core.model.IntegrationStrategy;
@@ -69,9 +68,7 @@ import com.pmease.gitplex.web.page.repository.info.code.commit.diff.CommitCommen
 @SuppressWarnings("serial")
 public abstract class RequestDetailPage extends RepositoryInfoPage implements CommitCommentsAware {
 
-	private IModel<PullRequest> requestModel;
-	
-	private IModel<List<Verification>> mergeVerificationsModel;
+	protected IModel<PullRequest> requestModel;
 	
 	private boolean editingTitle;
 	
@@ -85,20 +82,6 @@ public abstract class RequestDetailPage extends RepositoryInfoPage implements Co
 			@Override
 			protected PullRequest load() {
 				return GitPlex.getInstance(Dao.class).load(PullRequest.class, params.get("request").toLong());
-			}
-			
-		};
-
-		mergeVerificationsModel = new LoadableDetachableModel<List<Verification>>() {
-
-			@Override
-			protected List<Verification> load() {
-				List<Verification> verifications = new ArrayList<Verification>();
-				for (Verification verification: getPullRequest().getVerifications()) {
-					if (verification.getCommit().equals(getPullRequest().getIntegrationInfo().getIntegrationHead())) 
-						verifications.add(verification);
-				}
-				return verifications;
 			}
 			
 		};
@@ -535,55 +518,36 @@ public abstract class RequestDetailPage extends RepositoryInfoPage implements Co
 			link.setVisible(!integrationInfo.getIntegrationHead().equals(integrationInfo.getRequestHead())
 					&& integrationInfo.hasChanges());
 			fragment.add(link);
-			
-			DropdownPanel verificationDetails = new DropdownPanel("verificationDetails") {
+
+			String integrationHead = getPullRequest().getIntegrationInfo().getIntegrationHead();
+			fragment.add(new VerificationStatusPanel("verification", requestModel, integrationHead) {
 
 				@Override
-				protected Component newContent(String id) {
-					return new VerificationDetailPanel(id, mergeVerificationsModel);
+				protected Component newStatusComponent(String id,
+						com.pmease.gitplex.core.model.Verification.Status status) {
+					if (status == Verification.Status.PASSED) {
+						return new Label(id, "successful <i class='caret'></i>")
+							.setEscapeModelStrings(false)
+							.add(AttributeAppender.append("class", " label label-success"));
+					} else if (status == Verification.Status.ONGOING) {
+						return new Label(id, "running <i class='caret'></i>")
+							.setEscapeModelStrings(false)
+							.add(AttributeAppender.append("class", " label label-warning"));
+					} else {
+						return new Label(id, "failed <i class='caret'></i>")
+							.setEscapeModelStrings(false)
+							.add(AttributeAppender.append("class", " label label-danger"));
+					} 
 				}
 				
-			};
-			fragment.add(verificationDetails);
-			
-			VerificationManager verificationManager = GitPlex.getInstance(VerificationManager.class);
-			Verification.Status overallStatus = verificationManager.getOverallStatus(getMergeVerifications());
-			String verificationStatus;
-			if (overallStatus == Verification.Status.PASSED)
-				verificationStatus = "passed";
-			else if (overallStatus == Verification.Status.NOT_PASSED)
-				verificationStatus = "not passed";
-			else
-				verificationStatus = "ongoing";
-			verificationStatus += " <span class='fa fa-caret-down'/>";
-
-			Label verificationLabel = new Label("verification", verificationStatus);
-			fragment.add(verificationLabel);
-			verificationLabel.setVisible(!getMergeVerifications().isEmpty());
-			verificationLabel.setEscapeModelStrings(false);
-
-			String cssClass;
-			if (overallStatus == Verification.Status.PASSED)
-				cssClass = "label label-success verification";
-			else if (overallStatus == Verification.Status.NOT_PASSED)
-				cssClass = "label label-danger verification";
-			else
-				cssClass = "label label-warning verification";
-			verificationLabel.add(AttributeAppender.append("class", cssClass));
-			
-			verificationLabel.add(new DropdownBehavior(verificationDetails));
+			});
 		}
 		return fragment;
-	}
-	
-	private List<Verification> getMergeVerifications() {
-		return mergeVerificationsModel.getObject();
 	}
 	
 	@Override
 	protected void onDetach() {
 		requestModel.detach();
-		mergeVerificationsModel.detach();
 		super.onDetach();
 	}
 

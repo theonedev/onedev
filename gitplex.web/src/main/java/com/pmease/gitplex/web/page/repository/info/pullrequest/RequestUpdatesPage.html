@@ -1,50 +1,43 @@
 <wicket:extend>
-	<table class="updates">
-		<tr wicket:id="updates">
-			<td class="avatar">
-				<span wicket:id="avatar"></span>
-			</td>
-			<td class="update">
-				<div class="head">
-					<span wicket:id="name" class="name"></span> pushed update #<span wicket:id="updateNo"></span> <span wicket:id="age"></span>
-					<span class="actions">
-						<a wicket:id="compare"><span class="fa fa-diff"></span></a>
-					</span>
-				</div>
-				<table class="commits">
-					<tr wicket:id="commits">
-						<td class="avatar">
-							<span wicket:id="avatar"></span>
-						</td>
-						<td class="detail">
-							<div wicket:id="message"></div> 
-							<div class="author">
-								<span wicket:id="name"></span> authored <span wicket:id="age"></span>
-							</div>
-						</td>
-						<td class="status">
-							<div>
-								<span wicket:id="hashLink"></span>
-								<a wicket:id="treeLink" title="Browse files of this commit"><span class="fa fa-file-txt"></span></a>
-							</div>
-							<div wicket:id="status"></div>
-						</td>
-					</tr>
-				</table>
-				<wicket:enclosure child="votes">
-				<div class="votes clearfix">
+	<ul class="updates list-unstyled">
+		<li wicket:id="updates" class="update activity">
+			<div class="summary">
+				<span wicket:id="name" class="user"></span> pushed update #<span wicket:id="updateNo"></span> <span wicket:id="age"></span>
+				<span class="actions">
+					<a wicket:id="compare"><span class="fa fa-diff"></span></a>
+				</span>
+				<span class="votes">
 					<wicket:container wicket:id="votes">
-						<div class="vote pull-left">
+						<span class="vote">
 							<span wicket:id="user"></span>
-							<span wicket:id="vote" class="icons ">
-								<span class="fa fa-thumb-up-o"></span>
-								<span class="fa fa-thumb-down-o"></span>
-							</span>
-						</div>
+							<span wicket:id="label" class="label"></span>
+						</span>
 					</wicket:container>
-				</div>
-				</wicket:enclosure>
-			</td>
-		</tr>
-	</table>
+				</span>
+			</div>
+			<table class="commits">
+				<tr wicket:id="commits">
+					<td class="avatar">
+						<span wicket:id="avatar"></span>
+					</td>
+					<td class="detail">
+						<div wicket:id="message"></div> 
+						<div class="author">
+							<span wicket:id="name"></span> authored <span wicket:id="age"></span>
+						</div>
+					</td>
+					<td class="status">
+						<div>
+							<span wicket:id="hashLink"></span>
+							<a wicket:id="treeLink" title="Browse files of this commit"><span class="fa fa-file-txt"></span></a>
+						</div>
+						<div>
+							<span wicket:id="verification"></span>
+							<span wicket:id="integration"></span>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</li>
+	</ul>
 </wicket:extend>

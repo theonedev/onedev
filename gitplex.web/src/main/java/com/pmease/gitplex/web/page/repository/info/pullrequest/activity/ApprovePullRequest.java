@@ -33,9 +33,4 @@ public class ApprovePullRequest implements PullRequestActivity {
 		return user;
 	}
 
-	@Override
-	public boolean isDiscussion() {
-		return false;
-	}
-
 }

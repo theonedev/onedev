@@ -12,7 +12,5 @@ public interface PullRequestActivity {
 	
 	User getUser();
 	
-	boolean isDiscussion();
-	
 	Panel render(String panelId);
 }
