@@ -43,8 +43,10 @@ import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.comment.LineComment;
-import com.pmease.gitplex.core.comment.LineCommentContext;
+import com.pmease.gitplex.core.comment.InlineComment;
+import com.pmease.gitplex.core.comment.InlineCommentSupport;
+import com.pmease.gitplex.core.comment.InlineContext;
+import com.pmease.gitplex.core.comment.InlineContextAware;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
@@ -57,7 +59,7 @@ import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
 
 @SuppressWarnings("serial")
-public class TextDiffPanel extends Panel {
+public class TextDiffPanel extends Panel implements InlineContextAware {
 
 	private enum DiffOption {IGNORE_NOTHING, IGNORE_EOL, IGNORE_EOL_SPACES, IGNORE_CHANGE_SPACES};
 	
@@ -81,7 +83,7 @@ public class TextDiffPanel extends Panel {
 	
 	private final RevAwareChange change;
 	
-	private final LineCommentContext commentContext;
+	private final InlineCommentSupport commentContext;
 	
 	private final IModel<Boolean> allowToAddCommentModel;
 	
@@ -125,7 +127,7 @@ public class TextDiffPanel extends Panel {
 	
 	public TextDiffPanel(String id, final IModel<Repository> repoModel, 
 			BlobText oldText, BlobText newText, RevAwareChange change, 
-			@Nullable LineCommentContext commentContext) {
+			@Nullable InlineCommentSupport commentContext) {
 		super(id);
 		
 		this.repoModel = repoModel;
@@ -423,10 +425,10 @@ public class TextDiffPanel extends Panel {
 				final DiffLine diffLine = lineItem.getModelObject();
 				final WebMarkupContainer contentRow = new WebMarkupContainer(CONTENT_ROW_ID);
 
-				final IModel<List<LineComment>> lineCommentsModel = new LoadableDetachableModel<List<LineComment>>() {
+				final IModel<List<InlineComment>> lineCommentsModel = new LoadableDetachableModel<List<InlineComment>>() {
 
 					@Override
-					protected List<LineComment> load() {
+					protected List<InlineComment> load() {
 						return getLineComments(diffLine);
 					}
 					
@@ -461,11 +463,13 @@ public class TextDiffPanel extends Panel {
 				};
 				commentsRow.setOutputMarkupId(true);
 				
-				commentsRow.add(new ListView<LineComment>("comments", lineCommentsModel) {
+				commentsRow.add(new ListView<InlineComment>("comments", lineCommentsModel) {
 
 					@Override
-					protected void populateItem(final ListItem<LineComment> item) {
+					protected void populateItem(final ListItem<InlineComment> item) {
 						item.add(new UserLink("avatar", new UserModel(item.getModelObject().getUser()), AvatarMode.AVATAR));
+						item.add(new WebMarkupContainer("concerned")
+								.setVisible(item.getModelObject().equals(commentContext.getConcernedComment())));
 						item.add(new CommentPanel("comment", item.getModel()).setOutputMarkupId(true));
 					}
 					
@@ -523,7 +527,7 @@ public class TextDiffPanel extends Panel {
 				+ "if ($('.concerned-comment').length != 0) "
 				+ "  pmease.commons.scroll.next('.concerned-comment', %d);"
 				+ "else"
-				+ "  pmease.commons.scroll.next('.diff-block:first', %d);", SCROLL_MARGIN, SCROLL_MARGIN);
+				+ "  pmease.commons.scroll.next('.diff-block:first', %d);", SCROLL_MARGIN * 2, SCROLL_MARGIN);
 	}
 	
 	private void showComments(AjaxRequestTarget target) {
@@ -544,8 +548,8 @@ public class TextDiffPanel extends Panel {
 		return commentsRow.get(ADD_COMMENT_ID) instanceof Fragment;
 	}
 
-	private List<LineComment> getLineComments(DiffLine line) {
-		List<LineComment> lineComments = new ArrayList<>();
+	private List<InlineComment> getLineComments(DiffLine line) {
+		List<InlineComment> lineComments = new ArrayList<>();
 		if (commentContext != null
 				&& commentContext.getOldComments().containsKey(line.getOldLineNo()) 
 				&& line.getAction() != ADD) {
@@ -606,20 +610,17 @@ public class TextDiffPanel extends Panel {
 					super.onSubmit(target, form);
 
 					String commit;
-					String filePath;
 					int lineNo;
 					
 					if (diffLine.getAction() == DELETE) {
 						commit = change.getOldRevision();
-						filePath = change.getOldPath();
 						lineNo = diffLine.getOldLineNo();
 					} else {
 						commit = change.getNewRevision();
-						filePath = change.getNewPath();
 						lineNo = diffLine.getNewLineNo();
-					}						
+					}
 					
-					commentContext.addComment(commit, filePath, lineNo, input.getModelObject());
+					commentContext.addComment(commit, change.getPath(), lineNo, input.getModelObject());
 					
 					commentsRow.replace(new WebMarkupContainer(ADD_COMMENT_ID));
 					target.add(commentsRow);
@@ -678,4 +679,40 @@ public class TextDiffPanel extends Panel {
 		super.onDetach();
 	}
 	
+	@Override
+	public InlineContext getInlineContext(InlineComment comment) {
+		List<DiffLine> contextDiffs = new ArrayList<>();
+		int index = -1;
+		for (int i=0; i<diffs.size(); i++) {
+			DiffLine diff = diffs.get(i);
+			if (comment.getCommit().equals(change.getOldRevision())) {
+				if (diff.getOldLineNo() == comment.getLine()) {
+					index = i;
+					break;
+				}
+			} else if (comment.getCommit().equals(change.getNewRevision())){
+				if (diff.getNewLineNo() == comment.getLine()) {
+					index = i;
+					break;
+				}
+			} else {
+				throw new IllegalStateException();
+			}
+		}
+		
+		Preconditions.checkState(index != -1);
+		
+		int start = index - InlineComment.CONTEXT_SIZE;
+		if (start < 0)
+			start = 0;
+		int end = index + InlineComment.CONTEXT_SIZE;
+		if (end > diffs.size() - 1)
+			end = diffs.size() - 1;
+		
+		for (int i=start; i<=end; i++)
+			contextDiffs.add(diffs.get(i));
+		
+		return new InlineContext(contextDiffs, start>0, end<diffs.size()-1);
+	}
+
 }

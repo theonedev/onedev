@@ -770,6 +770,7 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 .text-diff>.panel-heading {z-index: 10; border-top: 1px solid #DDD;}
 .text-diff>.panel-heading .pull-right {margin-left: 12px;}
 .text-diff>.body {overflow: auto;}
+
 .table-diff .line.content>td.line-no {color: #999; width: 1%; text-align: right; white-space: nowrap;}
 .table-diff .line.content td.text {font-family: Consolas,"Liberation Mono",Menlo,Courier,monospace;
     color: #333; overflow: visible; white-space: pre;}
@@ -786,9 +787,10 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 .table-diff .line.content:hover {background: #fea; } 
 .table-diff .line.content:hover>td.line-no {background: #FBDE6D;}
 .table-diff table.content {width: 100%;}
-.table-diff .line.comments>td {padding: 0 12px 0 12px; border-top: 1px solid #DDD; border-bottom: 1px solid #DDD;}
+.table-diff .line.comments>td {padding: 0 12px; border: 3px solid #DDD;}
+	
+.table-diff .line.comments td.avatar .concerned-comment {margin-top: 12px; font-size: 36px; color: #E7C325;}
 .table-diff form.add-comment {margin: 8px;}
-
 .table-diff a.add-comment {position: absolute; left:0; margin-left: -20px; 
 	width: 20px; height: 20px; text-decoration: none;}
 .table-diff a.add-comment .fa {display:none;}
@@ -949,6 +951,12 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.activities .activity>.commits td.status .failed {color: #F93333;}
 .request-detail>.activities .activity>.commits td.status .running {color: #AFAD1F;}
 
+.request-detail>.activities .table-diff>tbody>.line.comments>td {padding: 12px;}
+.request-detail>.activities .table-diff>tbody>tr.omit>td .fa {font-size: 24px; color: #888; margin-left: 12px;}
+.request-detail>.activities .inline-comment.panel>.panel-heading {padding: 8px;}
+.request-detail>.activities .inline-comment.panel>.panel-heading .actions {margin-left: 12px;}
+.request-detail>.activities .inline-comment.panel>.panel-heading .actions a {color: #888; margin-right: 4px;}
+
 .request-detail>.activities .activity>.summary .fa {background: white;}
 .request-detail>.activities .activity>.discard .fa {margin-left: -19px; color: #F93333; font-size: 24px;}
 .request-detail>.activities .activity>.integrate .fa {margin-left: -19px; color: #35A612; font-size: 24px;}
@@ -972,6 +980,7 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.updates>.update>.commits .commit-message>.full {margin-bottom: 4px;}
 
 .request-detail .compare>.head {background: white; z-index: 90; padding-bottom: 20px;}
+.request-detail .compare>.head .tooltip-inner {max-width: 500px;}
 .content>.commit-choice {max-height: 600px; padding: 8px 0; overflow-y: scroll;}
 .content>.commit-choice a {text-decoration: none; color: #333; display: block; padding: 8px;}
 .content>.commit-choice li {border-bottom: 1px dotted #BBB;}

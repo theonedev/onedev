@@ -1,12 +1,11 @@
 package com.pmease.gitplex.core.model;
 
 import java.io.Serializable;
-import java.util.List;
 
 import javax.persistence.Embeddable;
 import javax.persistence.Lob;
 
-import com.pmease.commons.util.diff.DiffLine;
+import com.pmease.gitplex.core.comment.InlineContext;
 
 @SuppressWarnings("serial")
 @Embeddable
@@ -19,9 +18,11 @@ public class InlineInfo implements Serializable {
 	private Integer line;
 
 	@Lob
-	private List<DiffLine> context;
+	private InlineContext context;
 	
-	private String compareCommit;
+	private String oldCommit;
+	
+	private String newCommit;
 
 	public String getCommit() {
 		return commit;
@@ -47,20 +48,28 @@ public class InlineInfo implements Serializable {
 		this.line = line;
 	}
 
-	public List<DiffLine> getContext() {
+	public InlineContext getContext() {
 		return context;
 	}
 
-	public void setContext(List<DiffLine> context) {
+	public void setContext(InlineContext context) {
 		this.context = context;
 	}
 
-	public String getCompareCommit() {
-		return compareCommit;
+	public String getOldCommit() {
+		return oldCommit;
 	}
 
-	public void setCompareCommit(String compareCommit) {
-		this.compareCommit = compareCommit;
+	public void setOldCommit(String oldCommit) {
+		this.oldCommit = oldCommit;
+	}
+
+	public String getNewCommit() {
+		return newCommit;
+	}
+
+	public void setNewCommit(String newCommit) {
+		this.newCommit = newCommit;
 	}
 
 }

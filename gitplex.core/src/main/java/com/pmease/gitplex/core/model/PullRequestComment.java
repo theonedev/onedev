@@ -18,7 +18,8 @@ import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.CommentReply;
-import com.pmease.gitplex.core.comment.LineComment;
+import com.pmease.gitplex.core.comment.InlineComment;
+import com.pmease.gitplex.core.comment.InlineContext;
 import com.pmease.gitplex.core.manager.UserManager;
 
 @SuppressWarnings("serial")
@@ -26,7 +27,7 @@ import com.pmease.gitplex.core.manager.UserManager;
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"commit", "file", "line"})
 })
-public class PullRequestComment extends AbstractEntity implements LineComment {
+public class PullRequestComment extends AbstractEntity implements InlineComment {
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
@@ -133,6 +134,26 @@ public class PullRequestComment extends AbstractEntity implements LineComment {
 	@Override
 	public String getCommit() {
 		return Preconditions.checkNotNull(inlineInfo).getCommit();
+	}
+
+	@Override
+	public String getOldCommit() {
+		return Preconditions.checkNotNull(inlineInfo).getOldCommit();
+	}
+
+	@Override
+	public String getNewCommit() {
+		return Preconditions.checkNotNull(inlineInfo).getNewCommit();
+	}
+
+	@Override
+	public String getFile() {
+		return Preconditions.checkNotNull(inlineInfo).getFile();
+	}
+
+	@Override
+	public InlineContext getContext() {
+		return Preconditions.checkNotNull(inlineInfo).getContext();
 	}
 
 }

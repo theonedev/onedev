@@ -51,8 +51,8 @@ import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.comment.LineComment;
-import com.pmease.gitplex.core.comment.LineCommentContext;
+import com.pmease.gitplex.core.comment.InlineComment;
+import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.InlineInfo;
@@ -74,7 +74,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 
 @SuppressWarnings("serial")
-public class RequestComparePage extends RequestDetailPage implements LineCommentContext {
+public class RequestComparePage extends RequestDetailPage implements InlineCommentSupport {
 
 	private static final String HEAD_ID = "compareHead";
 	
@@ -91,6 +91,10 @@ public class RequestComparePage extends RequestDetailPage implements LineComment
 	private static final String CHANGES_ID = "changes";
 	
 	private static final String BLOB_DIFF_ID = "blobDiff";
+	
+	private static final String TARGET_BRANCH_HEAD = "Head of Target Branch";
+	
+	private static final String INTEGRATION_PREVIEW = "Integration Preview";
 
 	private String file;
 	
@@ -118,43 +122,44 @@ public class RequestComparePage extends RequestDetailPage implements LineComment
 			LinkedHashMap<String, CommitDescription> choices = new LinkedHashMap<>();
 			PullRequest request = getPullRequest();
 
+			String concernedCommit;
+			if (getConcernedComment() != null)
+				concernedCommit = getConcernedComment().getCommit();
+			else
+				concernedCommit = null;
+
 			String name = "Base of Pull Request";
+			if (request.getBaseCommit().equals(concernedCommit))
+				name += " - Concerned";
 			CommitDescription description = new CommitDescription(name, 
-					getRepository().getCommit(request.getBaseCommit()).getSubject());
+					getRepository().git().showRevision(request.getBaseCommit()).getSubject());
 			choices.put(request.getBaseCommit(), description);
 			
 			for (int i=request.getSortedUpdates().size()-1; i>=0; i--) {
 				PullRequestUpdate update = request.getSortedUpdates().get(i);
 				int updateNo = request.getSortedUpdates().size()-i;
-				int j = 0;
-				for (Commit commit: update.getCommits()) {
-					if (j == update.getCommits().size()-1) {
-						name = "Head of Update #" + updateNo;
-						description = new CommitDescription(name, commit.getSubject());
-					} else {
-						description = new CommitDescription(null, commit.getSubject());
-					}
-					j++;
-					choices.put(commit.getHash(), description);
-				}
+				name = "Head of Update #" + updateNo;
+				String commitHash = update.getHeadCommit();
+				if (commitHash.equals(concernedCommit))
+					name += " - Concerned";
+				description = new CommitDescription(name, getRepository().getCommit(commitHash).getSubject());
+				choices.put(commitHash, description);
 			}
 
 			String targetHead = request.getTarget().getHeadCommit();
 			if (!choices.containsKey(targetHead)) {
-				description = new CommitDescription("Head of Target Branch", 
-						getRepository().getCommit(targetHead).getSubject());
+				description = new CommitDescription(TARGET_BRANCH_HEAD, 
+						getRepository().git().showRevision(targetHead).getSubject());
 				choices.put(targetHead, description);
 			}
 
 			IntegrationInfo integrationInfo = request.getIntegrationInfo();
 			if (request.isOpen() 
 					&& integrationInfo.getIntegrationHead() != null 
-					&& !integrationInfo.getIntegrationHead().equals(integrationInfo.getRequestHead())
-					&& integrationInfo.hasChanges()) { 
-				Commit commit = getRepository().getCommit(
-						request.getIntegrationInfo().getIntegrationHead());
+					&& !integrationInfo.getIntegrationHead().equals(integrationInfo.getRequestHead())) { 
+				Commit commit = getRepository().git().showRevision(request.getIntegrationInfo().getIntegrationHead());
 				choices.put(request.getIntegrationInfo().getIntegrationHead(), 
-						new CommitDescription("Integration Preview", commit.getSubject()));
+						new CommitDescription(INTEGRATION_PREVIEW, commit.getSubject()));
 			}
 			
 			return choices;
@@ -168,19 +173,18 @@ public class RequestComparePage extends RequestDetailPage implements LineComment
 				@Override
 				protected Collection<PullRequestComment> load() {
 					Preconditions.checkNotNull(change);
-					PullRequestCommentManager manager = 
-							GitPlex.getInstance(PullRequestCommentManager.class);
+					PullRequestCommentManager manager = GitPlex.getInstance(PullRequestCommentManager.class);
 					return manager.findByChange(getPullRequest(), change);
 				}
 	};
 	
-	private final IModel<Map<Integer, LineComment>> oldCommentsModel = 
-			new LoadableDetachableModel<Map<Integer, LineComment>>() {
+	private final IModel<Map<Integer, InlineComment>> oldCommentsModel = 
+			new LoadableDetachableModel<Map<Integer, InlineComment>>() {
 
 		@Override
-		protected Map<Integer, LineComment> load() {
-			Map<Integer, LineComment> oldComments = new HashMap<>();
-			for (LineComment comment: changeCommentsModel.getObject()) {
+		protected Map<Integer, InlineComment> load() {
+			Map<Integer, InlineComment> oldComments = new HashMap<>();
+			for (InlineComment comment: changeCommentsModel.getObject()) {
 				if (comment.getCommit().equals(oldCommit))
 					oldComments.put(comment.getLine(), comment);
 			}
@@ -189,13 +193,13 @@ public class RequestComparePage extends RequestDetailPage implements LineComment
 		
 	};
 	
-	private final IModel<Map<Integer, LineComment>> newCommentsModel = 
-			new LoadableDetachableModel<Map<Integer, LineComment>>() {
+	private final IModel<Map<Integer, InlineComment>> newCommentsModel = 
+			new LoadableDetachableModel<Map<Integer, InlineComment>>() {
 
 		@Override
-		protected Map<Integer, LineComment> load() {
-			Map<Integer, LineComment> newComments = new HashMap<>();
-			for (LineComment comment: changeCommentsModel.getObject()) {
+		protected Map<Integer, InlineComment> load() {
+			Map<Integer, InlineComment> newComments = new HashMap<>();
+			for (InlineComment comment: changeCommentsModel.getObject()) {
 				if (comment.getCommit().equals(newCommit))
 					newComments.put(comment.getLine(), comment);
 			}
@@ -225,8 +229,11 @@ public class RequestComparePage extends RequestDetailPage implements LineComment
 		oldCommit = params.get("original").toString();
 		newCommit = params.get("revised").toString();
 
-		if (!(oldCommit == null && newCommit == null || oldCommit != null && newCommit != null))
-			throw new IllegalArgumentException("Param 'original' and 'revised' should be specified both or none.");
+		if (oldCommit != null && newCommit == null) {
+			newCommit = getPullRequest().getLatestUpdate().getHeadCommit();
+		} else if (oldCommit == null && newCommit != null) {
+			oldCommit = getPullRequest().getBaseCommit();
+		}
 
 		if (oldCommit != null) {
 			if (!commitsModel.getObject().containsKey(oldCommit))
@@ -273,13 +280,26 @@ public class RequestComparePage extends RequestDetailPage implements LineComment
 			}
 		} else {
 			file = comment.getInlineInfo().getFile();
-			oldCommit = comment.getInlineInfo().getCommit();
-			newCommit = getPullRequest().getLatestUpdate().getHeadCommit();
+			oldCommit = comment.getInlineInfo().getOldCommit();
+			newCommit = comment.getInlineInfo().getNewCommit();
 			change = resolveChange();
 		}
 		if (change == null && !getChanges().isEmpty()) {
 			file = getChanges().get(0).getPath();
 			change = resolveChange();
+		}
+	}
+	
+	@Nullable
+	private InlineCommentSupport getInlineCommentSupport() {
+		Map<String, CommitDescription> commits = commitsModel.getObject();
+		String oldCommitName = Preconditions.checkNotNull(commits.get(oldCommit)).getName();
+		String newCommitName = Preconditions.checkNotNull(commits.get(newCommit)).getName();
+		if (oldCommitName.equals(TARGET_BRANCH_HEAD) || oldCommitName.equals(INTEGRATION_PREVIEW)
+				|| newCommitName.equals(TARGET_BRANCH_HEAD) || newCommitName.equals(INTEGRATION_PREVIEW)) {
+			return null;
+		} else {
+			return this;
 		}
 	}
 	
@@ -370,6 +390,32 @@ public class RequestComparePage extends RequestDetailPage implements LineComment
 			@Override
 			protected List<MenuItem> getMenuItems() {
 				List<MenuItem> items = new ArrayList<>();
+				
+				if (getConcernedComment() != null) {
+					items.add(new ComparisonChoiceItem("Base", "Concerned") {
+	
+						@Override
+						protected void onSelect() {
+							PageParameters params = paramsOf(getPullRequest(), 
+									getPullRequest().getBaseCommit(), getConcernedComment().getCommit(), null,
+									getConcernedComment());
+							setResponsePage(RequestComparePage.class, params);
+						}
+	
+					});
+					items.add(new ComparisonChoiceItem("Concerned", "Latest Update") {
+						
+						@Override
+						protected void onSelect() {
+							PageParameters params = paramsOf(getPullRequest(), 
+									getConcernedComment().getCommit(), null, null,
+									getConcernedComment());
+							setResponsePage(RequestComparePage.class, params);
+						}
+	
+					});
+				}
+
 				items.add(new ComparisonChoiceItem("Base", "Latest Update") {
 
 					@Override
@@ -515,7 +561,7 @@ public class RequestComparePage extends RequestDetailPage implements LineComment
 		}.setOutputMarkupId(true));
 
 		if (change != null) {
-			BlobDiffPanel blobDiffPanel = new BlobDiffPanel(BLOB_DIFF_ID, repoModel, change, this);
+			BlobDiffPanel blobDiffPanel = new BlobDiffPanel(BLOB_DIFF_ID, repoModel, change, getInlineCommentSupport());
 			blobDiffPanel.setOutputMarkupId(true);
 			add(blobDiffPanel);
 		} else {
@@ -626,11 +672,9 @@ public class RequestComparePage extends RequestDetailPage implements LineComment
 		} else if (event.getPayload() instanceof CommentReplied) {
 			CommentReplied commentReplied = (CommentReplied) event.getPayload();
 			PullRequestComment comment = (PullRequestComment) commentReplied.getReply().getComment();
-			if (oldCommit.equals(comment.getCommit()))
-				comment.getInlineInfo().setCompareCommit(newCommit);
-			else
-				comment.getInlineInfo().setCompareCommit(oldCommit);
-			comment.getInlineInfo().setContext(getBlobDiffPanel().getLineContext(comment));
+			comment.getInlineInfo().setOldCommit(oldCommit);
+			comment.getInlineInfo().setNewCommit(newCommit);
+			comment.getInlineInfo().setContext(getBlobDiffPanel().getInlineContext(comment));
 			GitPlex.getInstance(Dao.class).persist(comment);
 		}
 	}
@@ -640,12 +684,12 @@ public class RequestComparePage extends RequestDetailPage implements LineComment
 		
 		private final String subject;
 		
-		CommitDescription(final @Nullable String name, final String subject) {
+		CommitDescription(final String name, final String subject) {
 			this.name = name;
 			this.subject = subject;
 		}
 
-		public @Nullable String getName() {
+		public String getName() {
 			return name;
 		}
 
@@ -744,8 +788,8 @@ public class RequestComparePage extends RequestDetailPage implements LineComment
 			super.onComponentTag(tag);
 			
 			if (change != null 
-					&& Objects.equals(change.getOldPath(), change.getOldPath()) 
-					&& Objects.equals(change.getNewPath(), change.getNewPath())) {
+					&& Objects.equals(change.getOldPath(), RequestComparePage.this.change.getOldPath()) 
+					&& Objects.equals(change.getNewPath(), RequestComparePage.this.change.getNewPath())) {
 				tag.put("class", "active");
 			}
 		}
@@ -760,7 +804,7 @@ public class RequestComparePage extends RequestDetailPage implements LineComment
 	private void onChangeSelected(AjaxRequestTarget target, Change change) {
 		file = change.getPath();
 		this.change = new RevAwareChange(change, oldCommit, newCommit);
-		BlobDiffPanel diffPanel = new BlobDiffPanel(BLOB_DIFF_ID, repoModel, this.change, this);
+		BlobDiffPanel diffPanel = new BlobDiffPanel(BLOB_DIFF_ID, repoModel, this.change, getInlineCommentSupport());
 		getPage().replace(diffPanel);
 		target.add(diffPanel);
 
@@ -810,17 +854,17 @@ public class RequestComparePage extends RequestDetailPage implements LineComment
 	}
 
 	@Override
-	public Map<Integer, LineComment> getOldComments() {
+	public Map<Integer, InlineComment> getOldComments() {
 		return oldCommentsModel.getObject();
 	}
 
 	@Override
-	public Map<Integer, LineComment> getNewComments() {
+	public Map<Integer, InlineComment> getNewComments() {
 		return newCommentsModel.getObject();
 	}
 
 	@Override
-	public LineComment addComment(String commit, String file, int line, String content) {
+	public InlineComment addComment(String commit, String file, int line, String content) {
 		User user = GitPlex.getInstance(UserManager.class).getCurrent();
 		Preconditions.checkNotNull(user);
 		PullRequestComment comment = new PullRequestComment();
@@ -829,14 +873,13 @@ public class RequestComparePage extends RequestDetailPage implements LineComment
 		comment.setContent(content);
 		comment.setRequest(getPullRequest());
 		InlineInfo inlineInfo = new InlineInfo();
+		comment.setInlineInfo(inlineInfo);
 		inlineInfo.setCommit(commit);
+		inlineInfo.setOldCommit(oldCommit);
+		inlineInfo.setNewCommit(newCommit);
 		inlineInfo.setFile(file);
 		inlineInfo.setLine(line);
-		if (commit.equals(oldCommit))
-			inlineInfo.setCompareCommit(newCommit);
-		else
-			inlineInfo.setCompareCommit(oldCommit);
-		inlineInfo.setContext(getBlobDiffPanel().getLineContext(comment));
+		inlineInfo.setContext(getBlobDiffPanel().getInlineContext(comment));
 		comment.setInlineInfo(inlineInfo);
 		GitPlex.getInstance(Dao.class).persist(comment);
 		return comment;

@@ -2,24 +2,27 @@ package com.pmease.gitplex.web.component.diff;
 
 import static com.pmease.commons.git.Change.Status.UNCHANGED;
 
-import java.util.List;
-
 import org.apache.tika.mime.MediaType;
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.util.visit.IVisit;
+import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jgit.lib.FileMode;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobInfo;
 import com.pmease.commons.git.BlobText;
 import com.pmease.commons.git.RevAwareChange;
 import com.pmease.commons.util.MediaTypes;
-import com.pmease.commons.util.diff.DiffLine;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.comment.LineComment;
-import com.pmease.gitplex.core.comment.LineCommentContext;
+import com.pmease.gitplex.core.comment.InlineComment;
+import com.pmease.gitplex.core.comment.InlineCommentSupport;
+import com.pmease.gitplex.core.comment.InlineContext;
+import com.pmease.gitplex.core.comment.InlineContextAware;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.gitlink.GitLink;
 import com.pmease.gitplex.web.component.symbollink.SymbolLink;
@@ -28,21 +31,21 @@ import com.pmease.gitplex.web.extensionpoint.DiffRenderer;
 import com.pmease.gitplex.web.extensionpoint.DiffRendererProvider;
 
 @SuppressWarnings("serial")
-public class BlobDiffPanel extends Panel {
+public class BlobDiffPanel extends Panel implements InlineContextAware {
 
 	private final IModel<Repository> repoModel;
 	
 	private final RevAwareChange change;
 	
-	private final LineCommentContext commentContext;
+	private final InlineCommentSupport commentSupport;
 	
 	public BlobDiffPanel(String id, IModel<Repository> repoModel, RevAwareChange change, 
-			LineCommentContext commentContext) {
+			InlineCommentSupport commentSupport) {
 		super(id);
 		
 		this.repoModel = repoModel;
 		this.change = change;
-		this.commentContext = commentContext;
+		this.commentSupport = commentSupport;
 	}
 	
 	@Override
@@ -113,9 +116,9 @@ public class BlobDiffPanel extends Panel {
 				BlobText newText = repoModel.getObject().getBlobText(change.getNewBlobInfo());
 				if (oldText != null) {
 					if (newText != null) {
-						add(new TextDiffPanel("blobContent", repoModel, oldText, newText, change, commentContext)); 
+						add(new TextDiffPanel("blobContent", repoModel, oldText, newText, change, commentSupport)); 
 					} else if (newContent.length == 0) {
-						add(new TextDiffPanel("blobContent", repoModel, oldText, new BlobText(), change, commentContext)); 
+						add(new TextDiffPanel("blobContent", repoModel, oldText, new BlobText(), change, commentSupport)); 
 					} else {
 						Fragment fragment = new Fragment("blobContent", "binaryFileFrag", this);
 						fragment.add(new FileDiffTitle("summary", change));
@@ -123,7 +126,7 @@ public class BlobDiffPanel extends Panel {
 					}
 				} else if (newText != null) {
 					if (oldContent.length == 0) {
-						add(new TextDiffPanel("blobContent", repoModel, new BlobText(), newText, change, commentContext)); 
+						add(new TextDiffPanel("blobContent", repoModel, new BlobText(), newText, change, commentSupport)); 
 					} else {
 						Fragment fragment = new Fragment("blobContent", "binaryFileFrag", this);
 						fragment.add(new FileDiffTitle("summary", change));
@@ -173,8 +176,18 @@ public class BlobDiffPanel extends Panel {
 		
 	}
 	
-	public List<DiffLine> getLineContext(LineComment comment) {
-		return null;
+	@Override
+	public InlineContext getInlineContext(final InlineComment comment) {
+		InlineContext context = visitChildren(InlineContextAware.class, new IVisitor<Component, InlineContext>() {
+
+			@Override
+			public void component(Component object, IVisit<InlineContext> visit) {
+				InlineContextAware inlineContextAware = (InlineContextAware) object;
+				visit.stop(inlineContextAware.getInlineContext(comment));
+			}
+
+		});
+		return Preconditions.checkNotNull(context);
 	}
 	
 	protected void onDetach() {
