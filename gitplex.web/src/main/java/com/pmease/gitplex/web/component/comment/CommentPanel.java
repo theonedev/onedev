@@ -10,6 +10,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -25,6 +26,7 @@ import com.pmease.gitplex.core.comment.CommentReply;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.comment.event.CommentReplied;
+import com.pmease.gitplex.web.component.comment.event.CommentCollapsed;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.markdown.MarkdownPanel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
@@ -131,6 +133,53 @@ public class CommentPanel extends Panel {
 			}
 
 		}.add(new ConfirmBehavior("Deleting this comment will also delete all its replies. Do you really want to continue?")));
+		
+		final AjaxLink<Void> resolveLink;
+		add(resolveLink = new AjaxLink<Void>("resolve") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				getComment().resolve(!getComment().isResolved());
+				if (getComment().isResolved())
+					send(CommentPanel.this, Broadcast.BUBBLE, new CommentCollapsed(target, getComment()));
+				if (findPage() != null) // only render this checkbox if the whole comment panel is not replaced
+					target.add(this);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisible(GitPlex.getInstance(AuthorizationManager.class).canModify(getComment()));
+			}
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				
+				if (getComment().isResolved()) {
+					tag.put("class", "fa fa-checkbox-checked resolve");
+					tag.put("title", "Mark this comment as unresolved");
+				} else {
+					tag.put("class", "fa fa-checkbox-unchecked resolve");
+					tag.put("title", "Mark this comment as resolved");
+				}
+			}
+			
+		});
+		resolveLink.setOutputMarkupId(true);
+		
+		add(new WebMarkupContainer("resolved") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				resolveLink.configure();
+				setVisible(!resolveLink.isVisible());
+			}
+			
+		});
 		
 		add(renderForView(getComment().getContent()));
 

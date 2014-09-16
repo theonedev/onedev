@@ -66,7 +66,7 @@ import com.pmease.gitplex.web.component.comment.event.CommentReplied;
 import com.pmease.gitplex.web.component.diff.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.ChangedFilesPanel;
 import com.pmease.gitplex.web.component.diff.DiffTreePanel;
-import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.ActivitiesModel;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.RequestActivitiesModel;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.PullRequestActivity;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.UpdatePullRequest;
 
@@ -106,7 +106,7 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 	
 	private final IModel<PullRequestComment> concernedCommentModel;
 	
-	private final ActivitiesModel activitiesModel = new ActivitiesModel() {
+	private final RequestActivitiesModel activitiesModel = new RequestActivitiesModel() {
 		
 		@Override
 		protected PullRequest getPullRequest() {

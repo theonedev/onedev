@@ -44,6 +44,8 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 	private Date date = new Date();
 	
 	private InlineInfo inlineInfo;
+	
+	private boolean resolved;
 
 	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestCommentReply> replies = new ArrayList<>();
@@ -154,6 +156,21 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 	@Override
 	public InlineContext getContext() {
 		return Preconditions.checkNotNull(inlineInfo).getContext();
+	}
+
+	@Override
+	public boolean isResolved() {
+		return resolved;
+	}
+
+	public void setResolved(boolean resolved) {
+		this.resolved = resolved;
+	}
+
+	@Override
+	public void resolve(boolean resolved) {
+		setResolved(resolved);
+		GitPlex.getInstance(Dao.class).persist(this);
 	}
 
 }

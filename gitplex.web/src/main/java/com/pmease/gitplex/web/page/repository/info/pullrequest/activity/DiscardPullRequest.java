@@ -3,18 +3,21 @@ package com.pmease.gitplex.web.page.repository.info.pullrequest.activity;
 import java.util.Date;
 
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.LoadableDetachableModel;
 
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.web.model.UserModel;
 
+@SuppressWarnings("serial")
 public class DiscardPullRequest implements PullRequestActivity {
 
-	private final User user;
+	private final Long userId;
 	
 	private final Date date;
 	
 	public DiscardPullRequest(User user, Date date) {
-		this.user = user;
+		this.userId = user.getId();
 		this.date = date;
 	}
 	
@@ -25,12 +28,19 @@ public class DiscardPullRequest implements PullRequestActivity {
 
 	@Override
 	public User getUser() {
-		return user;
+		return GitPlex.getInstance(Dao.class).load(User.class, userId);
 	}
 
 	@Override
 	public Panel render(String panelId) {
-		return new DiscardActivityPanel(panelId, new UserModel(user), date);
+		return new DiscardActivityPanel(panelId, new LoadableDetachableModel<User>() {
+
+			@Override
+			protected User load() {
+				return getUser();
+			}
+			
+		}, date);
 	}
 
 }

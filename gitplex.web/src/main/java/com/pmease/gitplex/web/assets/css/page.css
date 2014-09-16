@@ -825,9 +825,11 @@ ul.diff-alerts {padding-left: 12px;}
 .activity>div.summary a {color: #777;}
 .activity>div.summary .fa {font-size: 13px;}
 .activity>div.summary .actions {margin-left: 8px;}
-.activity>div.summary .actions a {margin-right: 4px;}
+.activity>div.summary .actions a {margin-right: 4px; color: #999;}
 .activity>div.summary .actions a .fa-times {font-size: 14px;}
 .activity>div.summary .user a {color: #333; font-weight: bold;}
+.activity>div.resolved.summary {margin: -6px 0;}
+.activity>div.resolved.summary .actions .fa-tick {color: #999; margin-right: 8px;}
 
 /* COMMENTS */
 .reply>.activity>div.summary {font-size: 13px;}

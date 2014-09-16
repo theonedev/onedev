@@ -3,20 +3,23 @@ package com.pmease.gitplex.web.page.repository.info.pullrequest.activity;
 import java.util.Date;
 
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.LoadableDetachableModel;
 
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.web.model.UserModel;
 
+@SuppressWarnings("serial")
 public class IntegratePullRequest implements PullRequestActivity {
 
-	private final User user;
+	private final Long userId;
 	
 	private final Date date;
 	
 	private final String reason;
 	
 	public IntegratePullRequest(User user, Date date, String reason) {
-		this.user = user;
+		this.userId = user.getId();
 		this.date = date;
 		this.reason = reason;
 	}
@@ -28,7 +31,7 @@ public class IntegratePullRequest implements PullRequestActivity {
 
 	@Override
 	public User getUser() {
-		return user;
+		return GitPlex.getInstance(Dao.class).load(User.class, userId);
 	}
 
 	public String getReason() {
@@ -37,7 +40,14 @@ public class IntegratePullRequest implements PullRequestActivity {
 
 	@Override
 	public Panel render(String panelId) {
-		return new IntegrateActivityPanel(panelId, new UserModel(user), date, reason);
+		return new IntegrateActivityPanel(panelId, new LoadableDetachableModel<User>() {
+
+			@Override
+			protected User load() {
+				return getUser();
+			}
+			
+		}, date, reason);
 	}
 
 }

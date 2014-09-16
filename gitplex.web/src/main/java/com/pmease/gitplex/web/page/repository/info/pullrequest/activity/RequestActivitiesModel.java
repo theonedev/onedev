@@ -17,7 +17,7 @@ import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 
 @SuppressWarnings("serial")
-public abstract class ActivitiesModel extends LoadableDetachableModel<List<PullRequestActivity>> {
+public abstract class RequestActivitiesModel extends LoadableDetachableModel<List<PullRequestActivity>> {
 
 	@Override
 	protected List<PullRequestActivity> load() {

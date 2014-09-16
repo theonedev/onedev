@@ -16,6 +16,10 @@ public interface Comment extends Serializable {
 	
 	void saveContent(String content);
 	
+	boolean isResolved();
+	
+	void resolve(boolean resolved);
+	
 	Repository getRepository();
 	
 	void delete();

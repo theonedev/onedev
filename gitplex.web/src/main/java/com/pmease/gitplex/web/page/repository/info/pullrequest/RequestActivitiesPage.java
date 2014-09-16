@@ -4,11 +4,14 @@ import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -19,11 +22,13 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.web.component.comment.CommentInput;
+import com.pmease.gitplex.web.component.comment.event.CommentCollapsed;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
+import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
-import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.ActivitiesModel;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.RequestActivitiesModel;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.CommentPullRequest;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.OpenPullRequest;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.PullRequestActivity;
@@ -38,8 +43,8 @@ public class RequestActivitiesPage extends RequestDetailPage {
 		super(params);
 	}
 	
-	private Component newActivityItem(String id, PullRequestActivity activity) {
-		WebMarkupContainer row = new WebMarkupContainer(id) {
+	private Component newActivityItem(final String id, final PullRequestActivity activity) {
+		final WebMarkupContainer row = new WebMarkupContainer(id) {
 
 			@Override
 			public void onEvent(IEvent<?> event) {
@@ -49,14 +54,46 @@ public class RequestActivitiesPage extends RequestDetailPage {
 					CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
 					remove();
 					commentRemoved.getTarget().appendJavaScript(String.format("$('#%s').remove();", getMarkupId()));
-				} 
+				} else if (event.getPayload() instanceof CommentCollapsed) {
+					Component row = newActivityItem(id, activity);
+					replaceWith(row);
+					((CommentCollapsed) event.getPayload()).getTarget().add(row);
+				}
 			}
 			
 		};
+		if (activity instanceof CommentPullRequest) {
+			PullRequestComment comment = ((CommentPullRequest) activity).getComment();
+			if (comment.isResolved()) {
+				row.add(new WebMarkupContainer("avatar"));
+
+				Fragment fragment = new Fragment("activity", "resolvedCommentFrag", RequestActivitiesPage.this);
+				fragment.add(new UserLink("user", new UserModel(comment.getUser())));
+				if (comment.getInlineInfo() != null)
+					fragment.add(new Label("activity", "added inline comment"));
+				else 
+					fragment.add(new Label("activity", "commented"));
+				fragment.add(new AgeLabel("age", Model.of(comment.getDate())));
+				fragment.add(new AjaxLink<Void>("expand") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						row.replace(new UserLink("avatar", new UserModel(activity.getUser()), AvatarMode.AVATAR));
+						row.replace(activity.render("activity"));
+						target.add(row);
+					}
+					
+				});
+				row.add(fragment);
+			}
+		}
+
 		row.setOutputMarkupId(true);
-		row.add(new UserLink("avatar", new UserModel(activity.getUser()), AvatarMode.AVATAR));
 		
-		row.add(activity.render("activity"));
+		if (row.get("activity") == null) {
+			row.add(new UserLink("avatar", new UserModel(activity.getUser()), AvatarMode.AVATAR));
+			row.add(activity.render("activity"));
+		}
 		if (activity instanceof OpenPullRequest || activity instanceof CommentPullRequest)
 			row.add(AttributeAppender.append("class", " discussion non-update"));
 		else if (activity instanceof UpdatePullRequest)
@@ -71,7 +108,7 @@ public class RequestActivitiesPage extends RequestDetailPage {
 		activitiesView = new RepeatingView("activities");
 		activitiesView.setOutputMarkupId(true);
 		
-		List<PullRequestActivity> activities = new ActivitiesModel() {
+		List<PullRequestActivity> activities = new RequestActivitiesModel() {
 			
 			@Override
 			protected PullRequest getPullRequest() {
