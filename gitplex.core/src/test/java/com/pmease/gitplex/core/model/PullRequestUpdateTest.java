@@ -69,7 +69,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         target.setHeadCommit(bareGit.parseRevision("master", true));
         
         Assert.assertEquals(bareGit.showRevision("dev~1").getHash(), request.getLatestUpdate().getReferentialCommit());
-        Assert.assertEquals(bareGit.showRevision("master~1").getHash(), request.getSortedUpdates().get(1).getReferentialCommit());
+        Assert.assertEquals(bareGit.showRevision("master~1").getHash(), request.getSortedUpdates().get(0).getReferentialCommit());
     }
 
     @Test
@@ -116,7 +116,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         Commit referentialCommit = bareGit.showRevision(request.getLatestUpdate().getReferentialCommit());
         Assert.assertTrue(referentialCommit.getParentHashes().contains(bareGit.showRevision("master").getHash()));
         Assert.assertTrue(referentialCommit.getParentHashes().contains(bareGit.showRevision("dev~2").getHash()));
-        Assert.assertEquals(bareGit.showRevision("master~1").getHash(), request.getSortedUpdates().get(1).getReferentialCommit());
+        Assert.assertEquals(bareGit.showRevision("master~1").getHash(), request.getSortedUpdates().get(0).getReferentialCommit());
     }
 
     @Test

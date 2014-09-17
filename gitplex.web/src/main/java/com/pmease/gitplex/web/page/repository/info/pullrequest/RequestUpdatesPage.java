@@ -54,9 +54,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 
 			@Override
 			public List<PullRequestUpdate> load() {
-				List<PullRequestUpdate> updates = new ArrayList<>(getPullRequest().getSortedUpdates());
-				Collections.reverse(updates);
-				return updates;
+				return getPullRequest().getSortedUpdates();
 			}
 			
 		}) {
@@ -67,7 +65,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 
 				updateItem.add(new UserLink("name", new UserModel(update.getUser()), AvatarMode.NAME));
 				List<PullRequestUpdate> updates = update.getRequest().getSortedUpdates();
-				int updateNo = updates.size() - updates.indexOf(update);
+				int updateNo = updates.indexOf(update) + 1;
 				updateItem.add(new Label("updateNo", updateNo));
 				PageParameters params = RequestComparePage.paramsOf(
 						update.getRequest(), update.getBaseCommit(), update.getHeadCommit(), null, null);

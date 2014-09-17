@@ -15,6 +15,7 @@ import com.pmease.commons.util.Triple;
 import com.pmease.commons.util.diff.DiffUtils;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
 
 @SuppressWarnings("serial")
@@ -27,8 +28,8 @@ public class ChangeComments implements Serializable {
 	public ChangeComments(PullRequest request, RevAwareChange change) {
 		List<String> commits = new ArrayList<>();
 		commits.add(request.getBaseCommit());
-		for (int i=request.getSortedUpdates().size()-1; i>=0; i--)
-			commits.add(request.getSortedUpdates().get(i).getHeadCommit());
+		for (PullRequestUpdate update: request.getSortedUpdates())
+			commits.add(update.getHeadCommit());
 		
 		Map<String, Map<String, List<InlineComment>>> comments = new HashMap<>();
 		Map<BlobInfo, List<String>> blobs = new HashMap<>();

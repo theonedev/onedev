@@ -19,8 +19,6 @@ import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
@@ -134,9 +132,9 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 					getRepository().git().showRevision(request.getBaseCommit()).getSubject());
 			choices.put(request.getBaseCommit(), description);
 			
-			for (int i=request.getSortedUpdates().size()-1; i>=0; i--) {
+			for (int i=0; i<request.getSortedUpdates().size(); i++) {
 				PullRequestUpdate update = request.getSortedUpdates().get(i);
-				int updateNo = request.getSortedUpdates().size()-i;
+				int updateNo = i+1;
 				name = "Head of Update #" + updateNo;
 				String commitHash = update.getHeadCommit();
 				if (commitHash.equals(concernedCommit))
@@ -420,7 +418,7 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 					PullRequestUpdate update = getPullRequest().getSortedUpdates().get(i);
 					final String baseCommit = update.getBaseCommit();
 					final String headCommit = update.getHeadCommit();
-					int index = getPullRequest().getSortedUpdates().size()-i;
+					int index = i+1;
 					String oldLabel;
 					if (index > 1) 
 						oldLabel = "Update #" + (index-1);
@@ -685,7 +683,8 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 			
 			setOutputMarkupId(true);
 			
-			IModel<List<Map.Entry<String, CommitDescription>>> model = new LoadableDetachableModel<List<Map.Entry<String, CommitDescription>>>() {
+			IModel<List<Map.Entry<String, CommitDescription>>> model = 
+					new LoadableDetachableModel<List<Map.Entry<String, CommitDescription>>>() {
 
 				@Override
 				protected List<Entry<String, CommitDescription>> load() {
@@ -730,17 +729,6 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 			});
 		}
 
-		@Override
-		public void renderHead(IHeaderResponse response) {
-			super.renderHead(response);
-			String script = String.format(""
-					+ "$('#%s').closest('.dropdown-panel').on('show', function() {"
-					+ "		var $ul = $(this).find('ul');"
-					+ "		$ul.scrollTop($ul[0].scrollHeight);"
-					+ "});", getMarkupId());
-			response.render(OnDomReadyHeaderItem.forScript(script));
-		}
-		
 	}
 	
 	private class BlobLink extends AjaxLink<Void> {

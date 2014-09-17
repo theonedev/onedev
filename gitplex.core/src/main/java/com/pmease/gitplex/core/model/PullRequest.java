@@ -332,17 +332,16 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	/**
-	 * Get list of reversely sorted updates.
+	 * Get list of sorted updates.
 	 * 
 	 * @return 
-	 * 			list of sorted updates ordered by id reversely
+	 * 			list of sorted updates ordered by id
 	 */
 	public List<PullRequestUpdate> getSortedUpdates() {
 		if (sortedUpdates == null) {
 			Preconditions.checkState(getUpdates().size() >= 1);
 			sortedUpdates = new ArrayList<PullRequestUpdate>(getUpdates());
 			Collections.sort(sortedUpdates);
-			Collections.reverse(sortedUpdates);
 		}
 		return sortedUpdates;
 	}
@@ -359,12 +358,12 @@ public class PullRequest extends AbstractEntity {
 			effectiveUpdates = new ArrayList<PullRequestUpdate>();
 
 			Git git = getTarget().getRepository().git();
-			for (PullRequestUpdate update: getSortedUpdates()) {
-				if (!git.isAncestor(update.getHeadCommit(), getTarget().getHeadCommit())) {
+			for (int i=getSortedUpdates().size()-1; i>=0; i--) {
+				PullRequestUpdate update = getSortedUpdates().get(i);
+				if (!git.isAncestor(update.getHeadCommit(), getTarget().getHeadCommit()))
 					effectiveUpdates.add(update);
-				} else {
+				else 
 					break;
-				}
 			}
 			
 			Preconditions.checkState(!effectiveUpdates.isEmpty());
@@ -373,7 +372,7 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	public PullRequestUpdate getLatestUpdate() {
-		return getSortedUpdates().get(0);
+		return getSortedUpdates().get(getSortedUpdates().size()-1);
 	}
 	
 	public Collection<String> findTouchedFiles() {

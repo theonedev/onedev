@@ -220,8 +220,8 @@ public class PullRequestUpdate extends AbstractEntity {
 			PullRequest request = getRequest();
 
 			int index = request.getSortedUpdates().indexOf(this);
-			if (index < request.getSortedUpdates().size()-1)
-				baseCommit = request.getSortedUpdates().get(index+1).getHeadCommit();
+			if (index > 0)
+				baseCommit = request.getSortedUpdates().get(index-1).getHeadCommit();
 			else
 				baseCommit = request.getBaseCommit();
 		}
