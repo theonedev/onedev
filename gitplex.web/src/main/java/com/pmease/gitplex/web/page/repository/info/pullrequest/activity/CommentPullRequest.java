@@ -14,6 +14,8 @@ import com.pmease.gitplex.core.model.User;
 public class CommentPullRequest implements PullRequestActivity {
 
 	private final Long commentId;
+	
+	private Boolean collapsed;
 
 	public CommentPullRequest(PullRequestComment comment) {
 		this.commentId = comment.getId();
@@ -43,6 +45,16 @@ public class CommentPullRequest implements PullRequestActivity {
 	@Override
 	public User getUser() {
 		return getComment().getUser();
+	}
+
+	public boolean isCollapsed() {
+		if (collapsed == null)
+			collapsed = getComment().isResolved();
+		return collapsed;
+	}
+
+	public void setCollapsed(boolean collapsed) {
+		this.collapsed = collapsed;
 	}
 
 }

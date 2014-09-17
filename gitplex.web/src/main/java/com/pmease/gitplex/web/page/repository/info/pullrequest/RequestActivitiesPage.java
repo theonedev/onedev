@@ -13,25 +13,27 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.web.component.comment.CommentInput;
-import com.pmease.gitplex.web.component.comment.event.CommentCollapsed;
+import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
-import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.RequestActivitiesModel;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.CommentPullRequest;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.OpenPullRequest;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.PullRequestActivity;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.RequestActivitiesModel;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.UpdatePullRequest;
 
 @SuppressWarnings("serial")
@@ -44,6 +46,12 @@ public class RequestActivitiesPage extends RequestDetailPage {
 	}
 	
 	private Component newActivityItem(final String id, final PullRequestActivity activity) {
+		final CommentPullRequest commentActivity;
+		if (activity instanceof CommentPullRequest)
+			commentActivity = (CommentPullRequest) activity;
+		else
+			commentActivity = null;
+		
 		final WebMarkupContainer row = new WebMarkupContainer(id) {
 
 			@Override
@@ -54,52 +62,73 @@ public class RequestActivitiesPage extends RequestDetailPage {
 					CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
 					remove();
 					commentRemoved.getTarget().appendJavaScript(String.format("$('#%s').remove();", getMarkupId()));
-				} else if (event.getPayload() instanceof CommentCollapsed) {
-					Component row = newActivityItem(id, activity);
+				} else if (event.getPayload() instanceof CommentCollapsing) {
+					Preconditions.checkNotNull(commentActivity);
+					commentActivity.setCollapsed(true);
+					Component row = newActivityItem(id, commentActivity);
 					replaceWith(row);
-					((CommentCollapsed) event.getPayload()).getTarget().add(row);
+					((CommentCollapsing) event.getPayload()).getTarget().add(row);
 				}
 			}
 			
 		};
-		if (activity instanceof CommentPullRequest) {
-			PullRequestComment comment = ((CommentPullRequest) activity).getComment();
-			if (comment.isResolved()) {
-				row.add(new WebMarkupContainer("avatar"));
+		if (commentActivity != null && commentActivity.isCollapsed()) {
+			PullRequestComment comment = commentActivity.getComment();
 
-				Fragment fragment = new Fragment("activity", "resolvedCommentFrag", RequestActivitiesPage.this);
-				fragment.add(new UserLink("user", new UserModel(comment.getUser())));
-				if (comment.getInlineInfo() != null)
-					fragment.add(new Label("activity", "added inline comment"));
-				else 
-					fragment.add(new Label("activity", "commented"));
-				fragment.add(new AgeLabel("age", Model.of(comment.getDate())));
-				fragment.add(new AjaxLink<Void>("expand") {
+			Fragment fragment = new Fragment("activity", "collapsedCommentFrag", RequestActivitiesPage.this);
 
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						row.replace(new UserLink("avatar", new UserModel(activity.getUser()), AvatarMode.AVATAR));
-						row.replace(activity.render("activity"));
-						target.add(row);
-					}
-					
-				});
-				row.add(fragment);
-			}
+			fragment.add(new UserLink("user", new UserModel(comment.getUser()), AvatarMode.NAME));
+			if (comment.getInlineInfo() != null)
+				fragment.add(new Label("activity", "added inline comment on file '" + comment.getFile() + "'"));
+			else 
+				fragment.add(new Label("activity", "commented"));
+			fragment.add(new AgeLabel("age", Model.of(comment.getDate())));
+			
+			fragment.add(new Label("detail", comment.getContent()));
+			
+			fragment.add(new AjaxLink<Void>("expand") {
+
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					row.replace(activity.render("activity"));
+					commentActivity.setCollapsed(false);
+					target.add(row);
+				}
+				
+			});
+			row.add(fragment);
 		}
 
 		row.setOutputMarkupId(true);
 		
-		if (row.get("activity") == null) {
-			row.add(new UserLink("avatar", new UserModel(activity.getUser()), AvatarMode.AVATAR));
+		row.add(new UserLink("avatar", new UserModel(activity.getUser()), AvatarMode.AVATAR));
+		
+		if (row.get("activity") == null) 
 			row.add(activity.render("activity"));
-		}
+		
 		if (activity instanceof OpenPullRequest || activity instanceof CommentPullRequest)
 			row.add(AttributeAppender.append("class", " discussion non-update"));
 		else if (activity instanceof UpdatePullRequest)
 			row.add(AttributeAppender.append("class", " non-discussion update"));
 		else
 			row.add(AttributeAppender.append("class", " non-discussion non-update"));
+		
+		row.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				String cssClasses = "";
+				if (activity instanceof CommentPullRequest) {
+					CommentPullRequest commentActivity = (CommentPullRequest) activity;
+					if (commentActivity.isCollapsed())
+						cssClasses += " collapsed";
+					if (commentActivity.getComment().isResolved())
+						cssClasses += " resolved";
+				} 
+				return cssClasses;
+			}
+			
+		}));
 		
 		return row;
 	}

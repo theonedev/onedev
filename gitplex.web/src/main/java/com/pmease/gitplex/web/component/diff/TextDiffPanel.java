@@ -5,6 +5,8 @@ import static com.pmease.commons.util.diff.DiffLine.Action.DELETE;
 import static com.pmease.commons.util.diff.DiffLine.Action.EQUAL;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -550,16 +552,22 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 
 	private List<InlineComment> getLineComments(DiffLine line) {
 		List<InlineComment> lineComments = new ArrayList<>();
-		if (commentContext != null
-				&& commentContext.getOldComments().containsKey(line.getOldLineNo()) 
+		if (commentContext.getOldComments().containsKey(line.getOldLineNo()) 
 				&& line.getAction() != ADD) {
-			lineComments.add(commentContext.getOldComments().get(line.getOldLineNo()));
+			lineComments.addAll(commentContext.getOldComments().get(line.getOldLineNo()));
 		}
-		if (commentContext != null 
-				&& commentContext.getNewComments().containsKey(line.getNewLineNo())
+		if (commentContext.getNewComments().containsKey(line.getNewLineNo())
 				&& line.getAction() != DELETE) {
-			lineComments.add(commentContext.getNewComments().get(line.getNewLineNo()));
+			lineComments.addAll(commentContext.getNewComments().get(line.getNewLineNo()));
 		}
+		Collections.sort(lineComments, new Comparator<InlineComment>() {
+
+			@Override
+			public int compare(InlineComment o1, InlineComment o2) {
+				return o1.getDate().compareTo(o2.getDate());
+			}
+			
+		});
 		return lineComments;
 	}
 	

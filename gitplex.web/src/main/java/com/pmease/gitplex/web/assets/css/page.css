@@ -828,8 +828,15 @@ ul.diff-alerts {padding-left: 12px;}
 .activity>div.summary .actions a {margin-right: 4px; color: #999;}
 .activity>div.summary .actions a .fa-times {font-size: 14px;}
 .activity>div.summary .user a {color: #333; font-weight: bold;}
-.activity>div.resolved.summary {margin: -6px 0;}
-.activity>div.resolved.summary .actions .fa-tick {color: #999; margin-right: 8px;}
+
+.collapsed>.avatar img {opacity: 0.5;}
+.collapsed>.activity>div.summary {margin-bottom: 0; color: #999;}
+.collapsed>.activity>div.summary .user a {color: #777;}
+.collapsed>.activity .actions .fa-tick {color: #999;}
+.collapsed>.activity .actions a {margin-left: 8px;}
+.collapsed>.activity>div.detail {
+	text-overflow: ellipsis; overflow: hidden; 
+	max-width: 600px; color: #777; white-space: nowrap;}
 
 /* COMMENTS */
 .reply>.activity>div.summary {font-size: 13px;}
@@ -925,6 +932,7 @@ ul.status-help li:last-child .description {border-bottom: none;}
 
 .request-detail>.activities {margin-bottom: 20px;}
 .request-detail>.activities>tbody>tr.discussion>td {border-top: 1px solid #DDD; padding: 12px 0;}
+.request-detail>.activities>tbody>tr.discussion.collapsed>td {padding: 8px 0;}
 .request-detail>.activities>tbody>tr.discussion>td.avatar {width: 1px; padding-right: 12px;}
 .request-detail>.activities>tbody>tr.discussion>td.activity {padding-left: 12px;}
 .request-detail>.activities>tbody>tr.activity>td.avatar {border-right: 1px dashed #CCC;}
@@ -988,7 +996,6 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .content>.commit-choice li {border-bottom: 1px dotted #BBB;}
 .content>.commit-choice li:hover {background: #FDF2C3;}
 .content>.commit-choice a .commit {font-family: Consolas, 'Liberation Mono', Courier, monospace;}
-.content>.commit-choice a .name {font-weight: bold;}
 .content>.commit-choice a .subject {font-size: 12px; color: #999;} 
 table.old-vs-new td {border-bottom: 1px dotted #BBB; padding: 0 8px;}
 table.old-vs-new td.old {width: 140px; text-align: left;}

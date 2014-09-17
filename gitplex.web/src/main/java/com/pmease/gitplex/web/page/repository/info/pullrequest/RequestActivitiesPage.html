@@ -11,13 +11,14 @@
 			<button wicket:id="comment" class="btn btn-primary">Comment</button>
 		</form>
 	</div>
-	<wicket:fragment wicket:id="resolvedCommentFrag">
-		<div class="resolved summary">
+	<wicket:fragment wicket:id="collapsedCommentFrag">
+		<div class="summary">
 			<span wicket:id="user" class="user"></span> <span wicket:id="activity"></span> <span wicket:id="age"></span> 
 			<span class="actions">
 				<i class="fa fa-tick" title="This comment is marked as resolved"></i>
 				<a wicket:id="expand" class="fa fa-expand" title="Expand this comment"></a>
 			</span>
 		</div>
+		<div wicket:id="detail" class="detail"></div>
 	</wicket:fragment>
 </wicket:extend>

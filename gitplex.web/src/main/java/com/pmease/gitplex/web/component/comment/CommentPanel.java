@@ -26,7 +26,7 @@ import com.pmease.gitplex.core.comment.CommentReply;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.comment.event.CommentReplied;
-import com.pmease.gitplex.web.component.comment.event.CommentCollapsed;
+import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.markdown.MarkdownPanel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
@@ -141,7 +141,7 @@ public class CommentPanel extends Panel {
 			public void onClick(AjaxRequestTarget target) {
 				getComment().resolve(!getComment().isResolved());
 				if (getComment().isResolved())
-					send(CommentPanel.this, Broadcast.BUBBLE, new CommentCollapsed(target, getComment()));
+					send(CommentPanel.this, Broadcast.BUBBLE, new CommentCollapsing(target, getComment()));
 				if (findPage() != null) // only render this checkbox if the whole comment panel is not replaced
 					target.add(this);
 			}

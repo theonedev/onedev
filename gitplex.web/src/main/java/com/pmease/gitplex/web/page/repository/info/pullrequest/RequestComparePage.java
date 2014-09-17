@@ -4,9 +4,7 @@ import static com.pmease.commons.git.Change.Status.UNCHANGED;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +40,7 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.RevAwareChange;
 import com.pmease.commons.git.TreeNode;
+import com.pmease.commons.hibernate.HibernateUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
@@ -51,9 +50,9 @@ import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.comment.ChangeComments;
 import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
-import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.InlineInfo;
 import com.pmease.gitplex.core.model.IntegrationInfo;
@@ -66,8 +65,8 @@ import com.pmease.gitplex.web.component.comment.event.CommentReplied;
 import com.pmease.gitplex.web.component.diff.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.ChangedFilesPanel;
 import com.pmease.gitplex.web.component.diff.DiffTreePanel;
-import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.RequestActivitiesModel;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.PullRequestActivity;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.RequestActivitiesModel;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.UpdatePullRequest;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
@@ -167,47 +166,16 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 		
 	};
 	
-	private final IModel<Collection<PullRequestComment>> changeCommentsModel = 
-			new LoadableDetachableModel<Collection<PullRequestComment>>() {
-
-				@Override
-				protected Collection<PullRequestComment> load() {
-					Preconditions.checkNotNull(change);
-					PullRequestCommentManager manager = GitPlex.getInstance(PullRequestCommentManager.class);
-					return manager.findByChange(getPullRequest(), change);
-				}
-	};
-	
-	private final IModel<Map<Integer, InlineComment>> oldCommentsModel = 
-			new LoadableDetachableModel<Map<Integer, InlineComment>>() {
+	private final IModel<ChangeComments> commentsModel = new LoadableDetachableModel<ChangeComments>() {
 
 		@Override
-		protected Map<Integer, InlineComment> load() {
-			Map<Integer, InlineComment> oldComments = new HashMap<>();
-			for (InlineComment comment: changeCommentsModel.getObject()) {
-				if (comment.getCommit().equals(oldCommit))
-					oldComments.put(comment.getLine(), comment);
-			}
-			return oldComments;
+		protected ChangeComments load() {
+			Preconditions.checkNotNull(change);
+			return new ChangeComments(getPullRequest(), change);
 		}
 		
 	};
 	
-	private final IModel<Map<Integer, InlineComment>> newCommentsModel = 
-			new LoadableDetachableModel<Map<Integer, InlineComment>>() {
-
-		@Override
-		protected Map<Integer, InlineComment> load() {
-			Map<Integer, InlineComment> newComments = new HashMap<>();
-			for (InlineComment comment: changeCommentsModel.getObject()) {
-				if (comment.getCommit().equals(newCommit))
-					newComments.put(comment.getLine(), comment);
-			}
-			return newComments;
-		}
-		
-	};
-
 	public RequestComparePage(PageParameters params) {
 		super(params);
 
@@ -633,9 +601,7 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 		commitsModel.detach();
 		concernedCommentModel.detach();
 		activitiesModel.detach();
-		changeCommentsModel.detach();
-		oldCommentsModel.detach();
-		newCommentsModel.detach();
+		commentsModel.detach();
 		
 		super.onDetach();
 	}
@@ -664,7 +630,11 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 		if (event.getPayload() instanceof CommentRemoved) {
 			CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
 			PullRequestComment comment = (PullRequestComment) commentRemoved.getComment();
-			if (comment.equals(getConcernedComment())) {
+			
+			// compare identifier instead of comment object as comment may have been deleted
+			// to cause LazyInitializationException
+			if (getConcernedComment() != null 
+					&& HibernateUtils.getId(comment).equals(HibernateUtils.getId(getConcernedComment()))) {
 				PageParameters params = paramsOf(getPullRequest(), oldCommit, newCommit, 
 						comment.getInlineInfo().getFile(), null);
 				setResponsePage(RequestComparePage.class, params);
@@ -854,13 +824,13 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 	}
 
 	@Override
-	public Map<Integer, InlineComment> getOldComments() {
-		return oldCommentsModel.getObject();
+	public Map<Integer, List<InlineComment>> getOldComments() {
+		return commentsModel.getObject().getOldComments();
 	}
 
 	@Override
-	public Map<Integer, InlineComment> getNewComments() {
-		return newCommentsModel.getObject();
+	public Map<Integer, List<InlineComment>> getNewComments() {
+		return commentsModel.getObject().getNewComments();
 	}
 
 	@Override
