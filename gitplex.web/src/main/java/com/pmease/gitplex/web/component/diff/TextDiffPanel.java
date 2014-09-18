@@ -7,15 +7,19 @@ import static com.pmease.commons.util.diff.DiffLine.Action.EQUAL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -24,12 +28,14 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.util.string.Strings;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobText;
@@ -67,13 +73,7 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 	
 	private static final int SCROLL_MARGIN = 50;
 	
-	private static final String COMMENTS_ROW_ID = "commentsRow";
-	
-	private static final String CONTENT_ROW_ID = "contentRow";
-	
 	private static final String COMMENT_ACTIONS_ID = "commentActions";
-	
-	private static final String ADD_COMMENT_ID = "addComment";
 	
 	private static final String HEAD_ID = "head";
 	
@@ -85,7 +85,7 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 	
 	private final RevAwareChange change;
 	
-	private final InlineCommentSupport commentContext;
+	private final InlineCommentSupport commentSupport;
 	
 	private final IModel<Boolean> allowToAddCommentModel;
 	
@@ -97,7 +97,62 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 	
 	private boolean showComments = true;
 	
+	private int index;
+	
 	private List<DiffLine> diffs;
+	
+	private final IModel<Map<Integer, List<InlineComment>>> commentsModel = 
+			new LoadableDetachableModel<Map<Integer, List<InlineComment>>>() {
+
+				@Override
+				protected Map<Integer, List<InlineComment>> load() {
+					Map<Integer, Integer> oldLinesMap = new HashMap<>();
+					Map<Integer, Integer> newLinesMap = new HashMap<>();
+
+					int index = 0;
+					for (DiffLine diff: diffs) {
+						oldLinesMap.put(diff.getOldLineNo(), index);
+						newLinesMap.put(diff.getNewLineNo(), index);
+						index++;
+					}
+					
+					Map<Integer, List<InlineComment>> comments = new HashMap<>();
+					for (Map.Entry<Integer, List<InlineComment>> entry: commentSupport.getOldComments().entrySet()) {
+						int diffLineNo = oldLinesMap.get(entry.getKey());
+						List<InlineComment> lineComments = comments.get(diffLineNo);
+						if (lineComments == null) {
+							lineComments = new ArrayList<>();
+							comments.put(diffLineNo, lineComments);
+						}
+						lineComments.addAll(entry.getValue());
+					}
+					for (Map.Entry<Integer, List<InlineComment>> entry: commentSupport.getNewComments().entrySet()) {
+						int diffLineNo = newLinesMap.get(entry.getKey());
+						List<InlineComment> lineComments = comments.get(diffLineNo);
+						if (lineComments == null) {
+							lineComments = new ArrayList<>();
+							comments.put(diffLineNo, lineComments);
+						}
+						lineComments.addAll(entry.getValue());
+					}
+					
+					for (List<InlineComment> lineComments: comments.values()) {
+						Collections.sort(lineComments, new Comparator<InlineComment>() {
+
+							@Override
+							public int compare(InlineComment o1, InlineComment o2) {
+								return o1.getDate().compareTo(o2.getDate());
+							}
+							
+						});
+					}
+					
+					return comments;
+				}
+		
+	};
+	
+	private RepeatingView commentsView;
 	
 	private String autoScrollScript;
 
@@ -137,7 +192,7 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 		Preconditions.checkArgument(!change.getOldRevision().equals(change.getNewRevision()));
 		
 		this.change = change;
-		this.commentContext = commentContext;
+		this.commentSupport = commentContext;
 		
 		this.oldText = oldText;
 		this.newText = newText;
@@ -237,7 +292,7 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(commentContext != null && showComments);
+				setVisible(commentSupport != null && showComments);
 			}
 			
 		}.add(new ScrollBehavior(".comments.line", 50, false)));
@@ -247,7 +302,7 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(commentContext != null && showComments);
+				setVisible(commentSupport != null && showComments);
 			}
 			
 		}.add(new ScrollBehavior(".comments.line", 50, true)));
@@ -262,7 +317,7 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(commentContext != null && !showComments);
+				setVisible(commentSupport != null && !showComments);
 			}
 
 		});
@@ -276,7 +331,7 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(commentContext != null && showComments);
+				setVisible(commentSupport != null && showComments);
 			}
 			
 		});
@@ -308,7 +363,7 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 							@Override
 							public void detach() {
 							}
-
+ 
 							@Override
 							public Boolean getObject() {
 								return diffOption == DiffOption.IGNORE_EOL;
@@ -412,118 +467,151 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 		head.add(diffOptionMenuPanel);
 		
 		head.add(new WebMarkupContainer("diffOptionsTrigger").add(new MenuBehavior(diffOptionMenuPanel)));
+
+		Form<?> form = new Form<Void>("addComment");
+		form.setOutputMarkupId(true);
 		
-		add(new ListView<DiffLine>("lines", new AbstractReadOnlyModel<List<DiffLine>>() {
+		final CommentInput input;
+		form.add(input = new CommentInput("input", Model.of("")));
+		input.setRequired(true);
+		
+		form.add(new AjaxLink<Void>("cancel") {
 
 			@Override
-			public List<DiffLine> getObject() {
-				return diffs;
-			}
-			
-		}) {
-
-			@Override
-			protected void populateItem(final ListItem<DiffLine> lineItem) {
-				final DiffLine diffLine = lineItem.getModelObject();
-				final WebMarkupContainer contentRow = new WebMarkupContainer(CONTENT_ROW_ID);
-
-				final IModel<List<InlineComment>> lineCommentsModel = new LoadableDetachableModel<List<InlineComment>>() {
-
-					@Override
-					protected List<InlineComment> load() {
-						return getLineComments(diffLine);
-					}
-					
-				};
-				final WebMarkupContainer commentsRow = new WebMarkupContainer(COMMENTS_ROW_ID) {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						
-						if (showComments) {
-							if (isAddingComment(this))
-								setVisible(true);
-							else 
-								setVisible(!lineCommentsModel.getObject().isEmpty());
-						} else {
-							setVisible(false);
-						}
-					}
-
-					@Override
-					public void onEvent(IEvent<?> event) {
-						super.onEvent(event);
-						
-						if (event.getPayload() instanceof CommentRemoved) {
-							CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
-							lineCommentsModel.getObject().remove(commentRemoved.getComment());
-							commentRemoved.getTarget().add(this);
-						} 
-					}
-					
-				};
-				commentsRow.setOutputMarkupId(true);
-				
-				commentsRow.add(new ListView<InlineComment>("comments", lineCommentsModel) {
-
-					@Override
-					protected void populateItem(final ListItem<InlineComment> item) {
-						item.add(new UserLink("avatar", new UserModel(item.getModelObject().getUser()), AvatarMode.AVATAR));
-						item.add(new WebMarkupContainer("concerned")
-								.setVisible(item.getModelObject().equals(commentContext.getConcernedComment())));
-						item.add(new CommentPanel("comment", item.getModel()).setOutputMarkupId(true));
-					}
-					
-				});
-
-				commentsRow.add(new WebMarkupContainer(ADD_COMMENT_ID));
-				
-				lineItem.add(commentsRow);
-				
-				contentRow.add(new AddCommentLink("addComment", lineItem));
-				
-				if (diffLine.getAction() == ADD) {
-					if (lineItem.getIndex() == 0 || diffs.get(lineItem.getIndex()-1).getAction() == EQUAL)
-						contentRow.add(AttributeAppender.append("class", " new diff-block"));
-					else
-						contentRow.add(AttributeAppender.append("class", " new"));
-					contentRow.add(new Label("oldLineNo"));
-					contentRow.add(new Label("newLineNo", "+ " + (diffLine.getNewLineNo()+1)));
-				} else if (diffLine.getAction() == DELETE) {
-					if (lineItem.getIndex() == 0 || diffs.get(lineItem.getIndex()-1).getAction() == EQUAL)
-						contentRow.add(AttributeAppender.append("class", " old diff-block"));
-					else
-						contentRow.add(AttributeAppender.append("class", " old"));
-					contentRow.add(new Label("oldLineNo", "- " + (diffLine.getOldLineNo()+1)));
-					contentRow.add(new Label("newLineNo"));
-				} else {
-					contentRow.add(AttributeAppender.append("class", " equal"));
-					contentRow.add(new Label("oldLineNo", "  " + (diffLine.getOldLineNo()+1)));
-					contentRow.add(new Label("newLineNo", "  " + (diffLine.getNewLineNo()+1)));
-				}
-				contentRow.add(new ListView<Partial>("partials", diffLine.getPartials()) {
-
-					@Override
-					protected void populateItem(ListItem<Partial> item) {
-						Partial partial = item.getModelObject();
-						Label label;
-						if (partial.getContent().equals("\r"))
-							label = new Label("partial", " ");
-						else
-							label = new Label("partial", partial.getContent());
-						if (partial.isEmphasized())
-							label.add(AttributeAppender.append("class", "emphasize"));
-						item.add(label);
-					}
-					
-				});
-				contentRow.setOutputMarkupId(true);
-				
-				lineItem.add(contentRow);
+			public void onClick(AjaxRequestTarget target) {
+				input.setModelObject("");
+				target.appendJavaScript(String.format("gitplex.comments.cancelAdd(%d);", index));
 			}
 			
 		});
+		form.add(new AjaxSubmitLink("save") {
+
+			@Override
+			protected void onError(AjaxRequestTarget target, Form<?> form) {
+				super.onError(target, form);
+				target.add(form);
+			}
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				super.onSubmit(target, form);
+
+				DiffLine diff = diffs.get(index);
+				String commit;
+				int lineNo;
+				
+				if (diff.getAction() == DELETE) {
+					commit = change.getOldRevision();
+					lineNo = diff.getOldLineNo();
+				} else {
+					commit = change.getNewRevision();
+					lineNo = diff.getNewLineNo();
+				}
+				
+				commentSupport.addComment(commit, change.getPath(), lineNo, input.getModelObject());
+				
+				Component commentsRow = newCommentsRow(commentsView.newChildId(), index);
+				commentsView.add(commentsRow);
+				target.add(commentsRow);
+				
+				input.setModelObject("");
+				String prependScript = String.format("$('#comments-placeholder').append('<table id=\"%s\"></table>')", 
+						commentsRow.getMarkupId());
+				target.prependJavaScript(prependScript);
+				target.appendJavaScript(String.format("gitplex.comments.afterAdd(%d);", index));
+			}
+
+		});
+		add(form);
+		
+		final AbstractDefaultAjaxBehavior addCommentBehavior;
+		add(addCommentBehavior = new AbstractDefaultAjaxBehavior() {
+			
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+
+				attributes.getDynamicExtraParameters().add("return {index: index}");
+			}
+
+			@Override
+			public boolean getStatelessHint(Component component) {
+				return false;
+			}
+
+			@Override
+			protected void respond(AjaxRequestTarget target) {
+				index = RequestCycle.get().getRequest().getQueryParameters()
+						.getParameterValue("index").toInt();
+
+				if (!showComments)
+					showComments(target);
+				
+				target.appendJavaScript(String.format("gitplex.comments.beforeAdd(%d);", index));
+			}
+			
+		});
+		
+		add(new Label("diffs", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				StringBuilder builder = new StringBuilder("<table id='diffs-table' class='table-diff'>");
+				int index = 0;
+				for (DiffLine diff: diffs) {
+					String addCommentLink;
+					if (allowToAddCommentModel.getObject() && commentSupport != null) {
+						addCommentLink = "<a href='javascript: var index=" + index + "; " 
+							+ addCommentBehavior.getCallbackScript() 
+							+ ";' class='add-comment'><i class='fa fa-comment-add'></i></a>";
+					} else {
+						addCommentLink = "";
+					}
+					builder.append("<tr id='diffline-").append(index).append("' class='line content ");
+					if (diff.getAction() == ADD) {
+						if (index == 0 || diffs.get(index-1).getAction() == EQUAL)
+							builder.append("new diff-block'>");
+						else
+							builder.append("new'>");
+						builder.append("<td class='old line-no'>").append(addCommentLink).append("</td>");
+						builder.append("<td class='new line-no'>");
+						builder.append("+ ").append(diff.getNewLineNo()+1).append("</td>");
+					} else if (diff.getAction() == DELETE) {
+						if (index == 0 || diffs.get(index-1).getAction() == EQUAL)
+							builder.append("old diff-block'>");
+						else
+							builder.append("old'>");
+						builder.append("<td class='old line-no'>").append(addCommentLink);
+						builder.append("- ").append(diff.getOldLineNo()+1).append("</td>");
+						builder.append("<td class='new line-no'></td>");
+					} else {
+						builder.append("equal'>");
+						builder.append("<td class='old line-no'>").append(addCommentLink)
+								.append("  ").append(diff.getOldLineNo()+1).append("</td>");
+						builder.append("<td class='new line-no'>  ").append(diff.getNewLineNo()+1).append("</td>");
+					}
+					builder.append("<td class='text'>");
+					
+					for (Partial partial: diff.getPartials()) {
+						if (partial.isEmphasized())
+							builder.append("<span class='emphasize'>");
+						else
+							builder.append("<span>");
+						if (partial.getContent().equals("\r"))
+							builder.append(" ");
+						else
+							builder.append(Strings.escapeMarkup(partial.getContent(), false, false));
+						builder.append("</span>");
+					}
+					builder.append("</td></tr>");
+					index++;
+				}
+				return builder.append("</table>").toString();
+			}
+			
+		}).setEscapeModelStrings(false));
+		
+		add(newCommentsView());
 		
 		autoScrollScript = String.format(""
 				+ "if ($('.concerned-comment').length != 0) "
@@ -532,6 +620,65 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 				+ "  pmease.commons.scroll.next('.diff-block:first', %d);", SCROLL_MARGIN * 2, SCROLL_MARGIN);
 	}
 	
+	private Component newCommentsRow(String id, final int index) {
+		WebMarkupContainer row = new WebMarkupContainer(commentsView.newChildId()) {
+
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+				
+				if (event.getPayload() instanceof CommentRemoved) {
+					CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
+					commentsModel.getObject().get(index).remove(commentRemoved.getComment());
+					commentRemoved.getTarget().appendJavaScript(
+							String.format("$('#%s').closest('tr').remove();", getMarkupId()));
+				} 
+			}
+			
+		};
+		row.setOutputMarkupId(true);
+		row.setMarkupId("comment-diffline-" + index);
+		
+		row.add(new ListView<InlineComment>("comments", new LoadableDetachableModel<List<InlineComment>>() {
+
+			@Override
+			protected List<InlineComment> load() {
+				return commentsModel.getObject().get(index); 
+			}
+			
+		}) {
+
+			@Override
+			protected void populateItem(ListItem<InlineComment> item) {
+				item.add(new UserLink("avatar", new UserModel(item.getModelObject().getUser()), AvatarMode.AVATAR));
+				item.add(new WebMarkupContainer("concerned")
+						.setVisible(item.getModelObject().equals(commentSupport.getConcernedComment())));
+				item.add(new CommentPanel("comment", item.getModel()).setOutputMarkupId(true));
+			}
+			
+		});
+		
+		return row;
+	}
+	
+	private Component newCommentsView() {
+		commentsView = new RepeatingView("lines");
+		
+		if (commentSupport != null) {
+			for (int index: commentsModel.getObject().keySet()) 
+				commentsView.add(newCommentsRow(commentsView.newChildId(), index));
+		}
+		
+		return commentsView;
+	}
+	
+	@Override
+	protected void onBeforeRender() {
+		replace(newCommentsView());
+		
+		super.onBeforeRender();
+	}
+
 	private void showComments(AjaxRequestTarget target) {
 		showComments = true;
 		target.add(get(HEAD_ID).get(COMMENT_ACTIONS_ID));
@@ -546,130 +693,12 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 		target.appendJavaScript("$('.comments.line').hide();");
 	}
 	
-	private boolean isAddingComment(WebMarkupContainer commentsRow) {
-		return commentsRow.get(ADD_COMMENT_ID) instanceof Fragment;
-	}
-
-	private List<InlineComment> getLineComments(DiffLine line) {
-		List<InlineComment> lineComments = new ArrayList<>();
-		if (commentContext.getOldComments().containsKey(line.getOldLineNo()) 
-				&& line.getAction() != ADD) {
-			lineComments.addAll(commentContext.getOldComments().get(line.getOldLineNo()));
-		}
-		if (commentContext.getNewComments().containsKey(line.getNewLineNo())
-				&& line.getAction() != DELETE) {
-			lineComments.addAll(commentContext.getNewComments().get(line.getNewLineNo()));
-		}
-		Collections.sort(lineComments, new Comparator<InlineComment>() {
-
-			@Override
-			public int compare(InlineComment o1, InlineComment o2) {
-				return o1.getDate().compareTo(o2.getDate());
-			}
-			
-		});
-		return lineComments;
-	}
-	
-	private class AddCommentLink extends AjaxLink<Void> {
-		
-		private final ListItem<DiffLine> item;
-		
-		public AddCommentLink(String id, ListItem<DiffLine> item) {
-			super(id);
-			this.item = item;
-		}
-		
-		@Override
-		public void onClick(AjaxRequestTarget target) {
-			if (!showComments)
-				showComments(target);
-			
-			Fragment frag = new Fragment(ADD_COMMENT_ID, "addCommentFrag", TextDiffPanel.this);
-			Form<?> form = new Form<Void>("form");
-			form.setOutputMarkupId(true);
-			
-			final CommentInput input;
-			form.add(input = new CommentInput("input", Model.of("")));
-			
-			final WebMarkupContainer contentRow = (WebMarkupContainer) item.get(CONTENT_ROW_ID);
-			final WebMarkupContainer commentsRow = (WebMarkupContainer) item.get(COMMENTS_ROW_ID);
-			final DiffLine diffLine = item.getModelObject();
-			
-			form.add(new AjaxLink<Void>("cancel") {
-
-				@Override
-				public void onClick(AjaxRequestTarget target) {
-					commentsRow.replace(new WebMarkupContainer(ADD_COMMENT_ID));
-					target.add(commentsRow);
-				}
-				
-			});
-			form.add(new AjaxSubmitLink("save") {
-
-				@Override
-				protected void onError(AjaxRequestTarget target, Form<?> form) {
-					super.onError(target, form);
-					target.add(form);
-				}
-
-				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-					super.onSubmit(target, form);
-
-					String commit;
-					int lineNo;
-					
-					if (diffLine.getAction() == DELETE) {
-						commit = change.getOldRevision();
-						lineNo = diffLine.getOldLineNo();
-					} else {
-						commit = change.getNewRevision();
-						lineNo = diffLine.getNewLineNo();
-					}
-					
-					commentContext.addComment(commit, change.getPath(), lineNo, input.getModelObject());
-					
-					commentsRow.replace(new WebMarkupContainer(ADD_COMMENT_ID));
-					target.add(commentsRow);
-					target.add(contentRow);
-				}
-
-			});
-			frag.add(form);
-			commentsRow.replace(frag);
-			if (!commentsRow.isVisible()) {
-				String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
-						commentsRow.getMarkupId(), contentRow.getMarkupId());
-				target.prependJavaScript(script);
-				commentsRow.setVisible(true);
-			} 
-			target.add(commentsRow);
-		}
-		
-		@Override
-		protected void onConfigure() {
-			super.onConfigure();
-
-			if (!allowToAddCommentModel.getObject() || commentContext == null) {
-				setVisible(false);
-			} else {
-				WebMarkupContainer commentsRow = (WebMarkupContainer) item.get(COMMENTS_ROW_ID);
-				if (isAddingComment(commentsRow)) {
-					setVisible(false);
-				} else {
-					DiffLine diffLine = item.getModelObject();
-					setVisible(getLineComments(diffLine).isEmpty());
-				}
-			}
-		}
-
-	}
-	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 
+		response.render(OnDomReadyHeaderItem.forScript("gitplex.comments.position();"));
+		
 		// only auto-scroll this panel once after it is created; otherwise page refreshing 
 		// caused by actions such as integrate/discard on request compare page will also 
 		// get scrolled
@@ -683,28 +712,44 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 	protected void onDetach() {
 		repoModel.detach();
 		allowToAddCommentModel.detach();
+		commentsModel.detach();
 		
 		super.onDetach();
 	}
 	
 	@Override
 	public InlineContext getInlineContext(InlineComment comment) {
+		int oldLine = -1;
+		if (comment.getCommit().equals(change.getOldRevision())) {
+			oldLine = comment.getLine();
+		} else {
+			for (Map.Entry<Integer, List<InlineComment>> entry: commentSupport.getOldComments().entrySet()) {
+				if (entry.getValue().contains(comment)) {
+					oldLine = entry.getKey();
+					break;
+				}
+			}
+		}
+				
+		int newLine = -1;
+		if (comment.getCommit().equals(change.getNewRevision())) {
+			newLine = comment.getLine();
+		} else {
+			for (Map.Entry<Integer, List<InlineComment>> entry: commentSupport.getNewComments().entrySet()) {
+				if (entry.getValue().contains(comment)
+					|| comment.getCommit().equals(change.getNewRevision()) && comment.getLine() == entry.getKey()) {
+					newLine = entry.getKey();
+					break;
+				}
+			}
+		}
 		List<DiffLine> contextDiffs = new ArrayList<>();
 		int index = -1;
 		for (int i=0; i<diffs.size(); i++) {
 			DiffLine diff = diffs.get(i);
-			if (comment.getCommit().equals(change.getOldRevision())) {
-				if (diff.getOldLineNo() == comment.getLine()) {
-					index = i;
-					break;
-				}
-			} else if (comment.getCommit().equals(change.getNewRevision())){
-				if (diff.getNewLineNo() == comment.getLine()) {
-					index = i;
-					break;
-				}
-			} else {
-				throw new IllegalStateException();
+			if (diff.getOldLineNo() == oldLine || diff.getNewLineNo() == newLine) {
+				index = i;
+				break;
 			}
 		}
 		
@@ -720,7 +765,7 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 		for (int i=start; i<=end; i++)
 			contextDiffs.add(diffs.get(i));
 		
-		return new InlineContext(contextDiffs, start>0, end<diffs.size()-1);
+		return new InlineContext(contextDiffs, index-start, start>0, end<diffs.size()-1);
 	}
 
 }

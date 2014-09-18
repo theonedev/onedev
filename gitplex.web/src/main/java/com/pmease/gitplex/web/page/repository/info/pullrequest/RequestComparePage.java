@@ -826,6 +826,7 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 		User user = GitPlex.getInstance(UserManager.class).getCurrent();
 		Preconditions.checkNotNull(user);
 		PullRequestComment comment = new PullRequestComment();
+		getPullRequest().getComments().add(comment);
 		comment.setUser(user);
 		comment.setDate(new Date());
 		comment.setContent(content);

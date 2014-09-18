@@ -23,7 +23,31 @@
 				<span wicket:id="identical" class="label label-warning">Identical Content</span>
 			</div>
 		</div>
-		<table class="table-diff">
+		
+		<wicket:container wicket:id="diffs"></wicket:container>
+		<div id="comments-placeholder" class="hidden">
+			<table wicket:id="lines" class="comments">
+				<tr wicket:id="comments">
+					<td class="avatar">
+						<div wicket:id="avatar"></div>
+						<div wicket:id="concerned" class="fa fa-flag concerned-comment" title="Concerned comment"></div>
+					</td>
+					<td class="comment">
+						<div wicket:id="comment"></div>
+					</td>
+				</tr>
+			</table>
+			<form wicket:id="addComment" id="add-comment">
+				<div wicket:id="input"></div>
+				<div class="actions">
+					<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware">Comment on this line</button>
+					&nbsp;&nbsp;&nbsp;&nbsp;
+					<button wicket:id="cancel" class="btn btn-sm btn-default">Close form</button>
+				</div>
+			</form>
+		</div>
+		
+		<!-- table class="table-diff">
 			<wicket:container wicket:id="lines">
 				<tr wicket:id="contentRow" class="line content">
 					<td class="old line-no">
@@ -52,16 +76,6 @@
 					</td>
 				</tr>
 			</wicket:container>
-		</table>
+		</table-->
 	</div>
-	<wicket:fragment wicket:id="addCommentFrag">
-		<form wicket:id="form" class="add-comment">
-			<div wicket:id="input"></div>
-			<div class="actions">
-				<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware">Comment on this line</button>
-				&nbsp;&nbsp;&nbsp;&nbsp;
-				<button wicket:id="cancel" class="btn btn-sm btn-default">Close form</button>
-			</div>
-		</form>
-	</wicket:fragment>
 </wicket:panel>

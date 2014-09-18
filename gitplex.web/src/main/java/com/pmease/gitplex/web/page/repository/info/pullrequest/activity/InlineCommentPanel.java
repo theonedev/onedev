@@ -98,12 +98,10 @@ public class InlineCommentPanel extends Panel {
 				});
 
 				InlineComment comment = commentModel.getObject();
-				if (comment.getCommit().equals(comment.getOldCommit()) && comment.getLine() == diffLine.getOldLineNo()
-						|| comment.getCommit().equals(comment.getNewCommit()) && comment.getLine() == diffLine.getNewLineNo()) {
+				if (item.getIndex() == comment.getContext().getCommentLine()) 
 					item.add(new CommentPanel("comment", commentModel));
-				} else {
+				else 
 					item.add(new WebMarkupContainer("comment").setVisible(false));
-				}
 			}
 			
 		});

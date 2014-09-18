@@ -412,32 +412,30 @@ pmease.commons = {
 			var $component = $("#" + componentId);
 			$component.closest("form").addClass("dirty").find(".dirty-aware").removeAttr("disabled");
 		},
-		
-		setupDirtyCheck: function() {
-			var initAYS = function(form) {
-				var $form = $(form);
-				var $dirtyAware = $form.find(".dirty-aware");
+		trackDirty: function(form) {
+			var $form = $(form);
+			var $dirtyAware = $form.find(".dirty-aware");
 
-				if ($dirtyAware.length != 0) {
-					$form.addClass("ays-inited");
-					$dirtyAware.attr("disabled", "disabled");
+			if ($dirtyAware.length != 0) {
+				$form.addClass("ays-inited");
+				$dirtyAware.attr("disabled", "disabled");
 
-					$form.areYouSure({
-						"silent": true,
-						"addRemoveFieldsMarksDirty": true,
-						change: function() {
-							if ($(this).hasClass("dirty")) {
-								$(this).find(".dirty-aware").removeAttr("disabled");
-							} else {
-								$(this).find(".dirty-aware").attr("disabled", "disabled")
-							}
+				$form.areYouSure({
+					"silent": true,
+					"addRemoveFieldsMarksDirty": true,
+					change: function() {
+						if ($(this).hasClass("dirty")) {
+							$(this).find(".dirty-aware").removeAttr("disabled");
+						} else {
+							$(this).find(".dirty-aware").attr("disabled", "disabled")
 						}
-					});
-				}
-			};
-			
+					}
+				});
+			}
+		},
+		setupDirtyCheck: function() {
 			$("form").each(function() {
-				initAYS(this);
+				pmease.commons.form.trackDirty(this);
 			});
 			
 			$(document).on("replace", function(event, componentId) {
@@ -446,7 +444,7 @@ pmease.commons = {
 				if ($component.is("form"))
 					$forms = $forms.add($component);
 				$forms.each(function() {
-					initAYS(this);
+					pmease.commons.form.trackDirty(this);
 				});
 				
 				$component.closest("form.ays-inited").not($component).trigger("checkform.areYouSure");
