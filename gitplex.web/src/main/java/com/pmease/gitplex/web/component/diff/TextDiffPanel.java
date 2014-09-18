@@ -543,7 +543,6 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 			protected void respond(AjaxRequestTarget target) {
 				index = RequestCycle.get().getRequest().getQueryParameters()
 						.getParameterValue("index").toInt();
-
 				if (!showComments)
 					showComments(target);
 				
