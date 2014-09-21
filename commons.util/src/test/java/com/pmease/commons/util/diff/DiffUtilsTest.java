@@ -5,11 +5,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
 
+import com.google.common.collect.Sets;
 import com.pmease.commons.util.diff.DiffLine.Action;
 
 public class DiffUtilsTest {
@@ -50,7 +52,7 @@ public class DiffUtilsTest {
 	}
 
 	@Test
-	public void shouldGenerateDiffChunksCorrectly() {
+	public void shouldGenerateDiffHunksCorrectly() {
 		List<String> text1 = new ArrayList<>();
 		text1.add("this is the 1st line");
 		text1.add("this is the 2nd line");
@@ -76,10 +78,10 @@ public class DiffUtilsTest {
 		text2.add("this is the 10th line");
 		text2.add("this is the 11th line");
 		
-		List<DiffChunk> diffChunks = DiffUtils.diffAsChunks(text1, text2, null, 3);
-		assertEquals(1, diffChunks.size());
+		List<DiffHunk> diffHunks = DiffUtils.diffAsHunks(text1, text2, null, 3);
+		assertEquals(1, diffHunks.size());
 		assertEquals(
-				"@@ -1 +1 @@\n" +
+				"@@ -1,10 +1,11 @@\n" +
 				" this is the 1st line\n" +
 				"-this is the 2nd line\n" +
 				"+this is the second line\n" +
@@ -93,32 +95,54 @@ public class DiffUtilsTest {
 				"+this is the nineth line\n" +
 				" this is the 10th line\n" +
 				"+this is the 11th line\n",
-				diffChunks.get(0).toString());
+				diffHunks.get(0).toString());
 		
-		diffChunks = DiffUtils.diffAsChunks(text1, text2, null, 2);
-		assertEquals(2, diffChunks.size());
+		diffHunks = DiffUtils.diffAsHunks(text1, text2, null, 2);
+		assertEquals(2, diffHunks.size());
 		assertEquals(
-				"@@ -1 +1 @@\n" +
+				"@@ -1,4 +1,4 @@\n" +
 				" this is the 1st line\n" +
 				"-this is the 2nd line\n" + 
 				"+this is the second line\n" +
 				" this is the 3rd line\n" +
 				" this is the 4th line\n", 
-				diffChunks.get(0).toString());
+				diffHunks.get(0).toString());
 		assertEquals(
-				"@@ -7 +7 @@\n" +
+				"@@ -7,4 +7,5 @@\n" +
 				" this is the 7th line\n" +
 				" this is the 8th line\n" +
 				"-this is the 9th line\n" + 
 				"+this is the nineth line\n" +
 				" this is the 10th line\n" +
 				"+this is the 11th line\n", 
-				diffChunks.get(1).toString());
-		diffChunks = DiffUtils.diffAsChunks(text1, text2, null, 0);
-		assertEquals(3, diffChunks.size());
-		assertEquals(2, diffChunks.get(0).getDiffLines().size());
-		assertEquals(2, diffChunks.get(1).getDiffLines().size());
-		assertEquals(1, diffChunks.get(2).getDiffLines().size());
+				diffHunks.get(1).toString());
+		
+		diffHunks = DiffUtils.diffAsHunks(text1, text2, null, new HashSet<Integer>(), Sets.newHashSet(4), 1);
+		assertEquals(2, diffHunks.size());
+		assertEquals(
+				"@@ -1,6 +1,6 @@\n" +
+				" this is the 1st line\n" +
+				"-this is the 2nd line\n" + 
+				"+this is the second line\n" +
+				" this is the 3rd line\n" +
+				" this is the 4th line\n" + 
+				" this is the 5th line\n" +
+				" this is the 6th line\n",
+				diffHunks.get(0).toString());
+		assertEquals(
+				"@@ -8,3 +8,4 @@\n" +
+				" this is the 8th line\n" +
+				"-this is the 9th line\n" + 
+				"+this is the nineth line\n" +
+				" this is the 10th line\n" +
+				"+this is the 11th line\n", 
+				diffHunks.get(1).toString());
+
+		diffHunks = DiffUtils.diffAsHunks(text1, text2, null, 0);
+		assertEquals(3, diffHunks.size());
+		assertEquals(2, diffHunks.get(0).getDiffLines().size());
+		assertEquals(2, diffHunks.get(1).getDiffLines().size());
+		assertEquals(1, diffHunks.get(2).getDiffLines().size());
 		
 		text1 = new ArrayList<>();
 		text1.add("this is the 1st line");
@@ -144,12 +168,12 @@ public class DiffUtilsTest {
 		text2.add("this is the 9th line");
 		text2.add("this is the 10th line");
 		
-		diffChunks = DiffUtils.diffAsChunks(text1, text2, null, 3);
-		assertEquals(1, diffChunks.size());
+		diffHunks = DiffUtils.diffAsHunks(text1, text2, null, 3);
+		assertEquals(1, diffHunks.size());
 
-		diffChunks = DiffUtils.diffAsChunks(text1, text2, null, 0);
-		assertEquals(1, diffChunks.size());
-		assertEquals(2, diffChunks.get(0).getDiffLines().size());
+		diffHunks = DiffUtils.diffAsHunks(text1, text2, null, 0);
+		assertEquals(1, diffHunks.size());
+		assertEquals(2, diffHunks.get(0).getDiffLines().size());
 	}
 
 	@Test
@@ -167,16 +191,16 @@ public class DiffUtilsTest {
 		text2.add("this is the 3rd line");
 		text2.add("this is the 4th line");
 		
-		List<DiffChunk> diffChunks = DiffUtils.diffAsChunks(text1, text2, new WordSplitter(), 100);
+		List<DiffHunk> diffHunks = DiffUtils.diffAsHunks(text1, text2, new WordSplitter(), 100);
 		assertEquals(
-				"@@ -1 +1 @@\n" +
+				"@@ -1,4 +1,5 @@\n" +
 				" this is the 1st line\n" +
 				"-this is the *2nd* line\n" + 
 				"+this is the *11th* line\n" +
 				"+this is the second line\n" +
 				" this is the 3rd line\n" +
 				" this is the 4th line\n", 
-				diffChunks.get(0).toString());
+				diffHunks.get(0).toString());
 		
 		text1 = new ArrayList<>();
 		text1.add("this is the 1st line");
@@ -191,17 +215,17 @@ public class DiffUtilsTest {
 		text2.add("this is the 3rd line");
 		text2.add("I do not think this works");
 		
-		diffChunks = DiffUtils.diffAsChunks(text1, text2, new WordSplitter(), 100);
+		diffHunks = DiffUtils.diffAsHunks(text1, text2, new WordSplitter(), 100);
 		assertEquals(
-				"@@ -1 +1 @@\n" +
+				"@@ -1,4 +1,5 @@\n" +
 				" this is the 1st line\n" +
 				"-this is the *2nd* line\n" + 
-				"+I do not think this is the 11th line\n" +
-				"+this is the *second* line\n" +
+				"+*I** **do** **not** **think** *this is the *11th* line\n" +
+				"+this is the second line\n" +
 				" this is the 3rd line\n" +
 				"-this is the 4th line\n" + 
 				"+I do not think this works\n", 
-				diffChunks.get(0).toString());
+				diffHunks.get(0).toString());
 	}
 
 	@Test

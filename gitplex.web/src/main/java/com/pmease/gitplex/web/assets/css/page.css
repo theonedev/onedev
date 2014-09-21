@@ -771,23 +771,31 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 .text-diff>.panel-heading .pull-right {margin-left: 12px;}
 .text-diff>.body {overflow: auto;}
 
-.table-diff .line.content>td.line-no {color: #999; width: 1%; text-align: right; white-space: nowrap;}
-.table-diff .line.content td.text {font-family: Consolas,"Liberation Mono",Menlo,Courier,monospace;
-    color: #333; overflow: visible; white-space: pre;}
+.table-diff .line.diff>td.line-no {color: #999; width: 1%; text-align: right; white-space: nowrap;}
+.table-diff .line.diff td.text, .table-diff .hunk-head td.content {
+	font-family: Consolas,"Liberation Mono",Menlo,Courier,monospace;}
+.table-diff .line.diff td.text {color: #333; overflow: visible; white-space: pre;}
 .table-diff {font-size: 12px; position:relative;}
 .table-diff>tbody>tr>td {padding: 2px 8px;}
 .table-diff>tbody>tr>td.text, .table-diff>tbody>tr>td.detail, .table-diff>tbody>tr>td.new {
 	border-left: 1px solid #E5E5E5;}  
-.table-diff .old.line.content>td.line-no {background: #faa; color: #8f0000;}
-.table-diff .old.line.content {background: #fdd;}
-.table-diff .old.line.content .emphasize {background: #FC9090;}
-.table-diff .new.line.content {background: #cfc;}
-.table-diff .new.line.content>td.line-no {background: #89FB89; color: #007f00;}
-.table-diff .new.line.content .emphasize {background: #07C907;}
-.table-diff .line.content:hover {background: #fea; } 
-.table-diff .line.content:hover>td.line-no {background: #FBDE6D;}
+.table-diff .old.line.diff>td.line-no {background: #faa; color: #8f0000;}
+.table-diff .old.line.diff {background: #fdd;}
+.table-diff .old.line.diff .emphasize {background: #FC9090;}
+.table-diff .new.line.diff {background: #cfc;}
+.table-diff .new.line.diff>td.line-no {background: #89FB89; color: #007f00;}
+.table-diff .new.line.diff .emphasize {background: #07C907;}
+.table-diff .line.diff:hover {background: #fea; } 
+.table-diff .line.diff:hover>td.line-no, .table-diff .line.hunk-head:hover .action {background: #FBDE6D;}
+.table-diff .hunk-head, .equal.hunk-line>td.info {color: #999;}
+.table-diff .hunk-head a {display: block; color: #999;}
+.table-diff .hunk-head a:hover {color: #444;}
+.table-diff .hunk-head td.action {text-align: center;}
+.table-diff .hunk-head {background: none repeat scroll 0 0 #eef;}
+
 .table-diff table.content {width: 100%;}
-.table-diff .line.comments>td {padding: 0 12px; border: 3px solid #DDD;}
+.table-diff .line.comments>td {padding: 0 12px; border-top: 1px solid #DDD; 
+	border-bottom: 1px solid #DDD; background: #FFFAF5;}
 	
 .table-diff .line.comments td.avatar .concerned-comment {margin-top: 12px; font-size: 36px; color: #E7C325;}
 form#add-comment {margin: 16px 4px;}

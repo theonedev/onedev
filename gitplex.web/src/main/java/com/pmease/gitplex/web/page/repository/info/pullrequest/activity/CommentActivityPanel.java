@@ -39,9 +39,7 @@ public class CommentActivityPanel extends Panel {
 			
 			fragment.add(new Label("file", comment.getFile()));
 			
-			PageParameters params = RequestComparePage.paramsOf(comment.getRequest(), null, null, null, comment);
-			fragment.add(new BookmarkablePageLink<>("displayFullContext", RequestComparePage.class, params));
-			params = RequestComparePage.paramsOf(comment.getRequest(), comment.getCommit(), null, null, comment);
+			PageParameters params = RequestComparePage.paramsOf(comment.getRequest(), comment.getCommit(), null, null, comment);
 			fragment.add(new BookmarkablePageLink<Void>("compareWithLatest", RequestComparePage.class, params));
 			
 			fragment.add(new InlineCommentPanel("comment", commentModel));

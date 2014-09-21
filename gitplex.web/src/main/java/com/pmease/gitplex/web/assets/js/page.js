@@ -155,6 +155,10 @@ var gitplex = {
 			var $line = $("#diffline-" + index);
 			$line.next().remove(); 
 			$line.find("a.add-comment").show();
+		},
+		afterRemove: function(index) {
+			$("#comment-diffline-" + index).closest("tr").remove();
+			$("#diffline-" + index).find("a.add-comment").show();
 		}
 	}
 };

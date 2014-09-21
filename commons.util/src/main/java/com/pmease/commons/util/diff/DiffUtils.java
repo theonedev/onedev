@@ -2,8 +2,10 @@ package com.pmease.commons.util.diff;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -161,113 +163,127 @@ public class DiffUtils {
 		return lineMapping;
 	}
 	
-	public static List<DiffChunk> diffAsChunks(List<String> original, List<String> revised, 
-			PartialSplitter wordSplitter, int chunkMargin) {
-		return chunksOf(diff(original, revised, wordSplitter), chunkMargin);
+	public static List<DiffHunk> diffAsHunks(List<String> original, List<String> revised, 
+			PartialSplitter wordSplitter, int contextSize) {
+		return hunksOf(diff(original, revised, wordSplitter), contextSize);
 	}
 
-	public static List<DiffChunk> chunksOf(List<DiffLine> diffLines, int contextLines) {
+	public static List<DiffHunk> diffAsHunks(List<String> original, List<String> revised, 
+			PartialSplitter wordSplitter, Set<Integer> additionalOldLinesToPreserve, 
+			Set<Integer> additionalNewLinesToPreserve, int contextSize) {
+		return hunksOf(diff(original, revised, wordSplitter), additionalOldLinesToPreserve, 
+				additionalNewLinesToPreserve, contextSize);
+	}
+
+	public static List<DiffHunk> hunksOf(List<DiffLine> diffLines, int contextSize) {
+		return hunksOf(diffLines, new HashSet<Integer>(), new HashSet<Integer>(), contextSize);
+	}
+	
+	public static List<DiffHunk> hunksOf(List<DiffLine> diffLines, Set<Integer> additionalOldLinesToPreserve, 
+			Set<Integer> additionalNewLinesToPreserve, int contextSize) {
 		List<RemovableDiffLine> removableDiffLines = new ArrayList<>();
 		for (DiffLine diffLine: diffLines)
 			removableDiffLines.add(new RemovableDiffLine(diffLine, false));
 		
-		int equalCount = 0;
+		int contextCount = 0;
 		int index = 0;
 		for (RemovableDiffLine each: removableDiffLines) {
-			if (each.diffLine.getAction() == Action.EQUAL) {
-				equalCount++;
-			} else if (index == equalCount) {
-				for (int i=index-equalCount; i<index-contextLines; i++)
+			if (each.diffLine.getAction() == Action.EQUAL 
+					&& !additionalOldLinesToPreserve.contains(each.diffLine.getOldLineNo())
+					&& !additionalNewLinesToPreserve.contains(each.diffLine.getNewLineNo())) {
+				contextCount++;
+			} else if (index == contextCount) {
+				for (int i=index-contextCount; i<index-contextSize; i++)
 					removableDiffLines.get(i).removed = true;
-				equalCount = 0;
+				contextCount = 0;
 			} else {
-				for (int i=index-equalCount+contextLines; i<index-contextLines; i++)
+				for (int i=index-contextCount+contextSize; i<index-contextSize; i++)
 					removableDiffLines.get(i).removed = true;
-				equalCount = 0;
+				contextCount = 0;
 			}
 			index++;
 		}
-		for (int i=index-equalCount+contextLines; i<index; i++)
+		for (int i=index-contextCount+contextSize; i<index; i++)
 			removableDiffLines.get(i).removed = true;
 		
-		List<DiffChunk> diffChunks = new ArrayList<>();
+		List<DiffHunk> hunks = new ArrayList<>();
 
-		int start1 = 0;
-		int start2 = 0;
-		DiffChunkBuilder chunkBuilder = new DiffChunkBuilder();
+		int oldStart = 0;
+		int newStart = 0;
+		DiffHunkBuilder hunkBuilder = new DiffHunkBuilder();
 		for (RemovableDiffLine each: removableDiffLines) {
 			if (!each.removed) {
-				if (chunkBuilder.diffUnits.isEmpty()) {
-					chunkBuilder.start1 = start1;
-					chunkBuilder.start2 = start2;
+				if (hunkBuilder.diffLines.isEmpty()) {
+					hunkBuilder.oldStart = oldStart;
+					hunkBuilder.newStart = newStart;
 				}
-				chunkBuilder.diffUnits.add(each.diffLine);
+				hunkBuilder.diffLines.add(each.diffLine);
 			} else {
-				if (!chunkBuilder.diffUnits.isEmpty()) {
-					diffChunks.add(chunkBuilder.build());
-					chunkBuilder = new DiffChunkBuilder();
+				if (!hunkBuilder.diffLines.isEmpty()) {
+					hunks.add(hunkBuilder.build());
+					hunkBuilder = new DiffHunkBuilder();
 				}
 			}
 			if (each.diffLine.getAction() == Action.ADD) {
-				start2++;
+				newStart++;
 			} else if (each.diffLine.getAction() == Action.DELETE) {
-				start1++;
+				oldStart++;
 			} else {
-				start1++; 
-				start2++;
+				oldStart++; 
+				newStart++;
 			}
 		}
-		if (!chunkBuilder.diffUnits.isEmpty())
-			diffChunks.add(chunkBuilder.build());
+		if (!hunkBuilder.diffLines.isEmpty())
+			hunks.add(hunkBuilder.build());
 		
-		return diffChunks;
+		return hunks;
 	}
 	
-	public static List<DiffChunk> parseUnifiedDiff(List<String> unifiedDiff) {
-		List<DiffChunk> chunks = new ArrayList<>();
+	public static List<DiffHunk> parseUnifiedDiff(List<String> unifiedDiff) {
+		List<DiffHunk> hunks = new ArrayList<>();
 
-		DiffChunkBuilder chunkBuilder = null;
+		DiffHunkBuilder hunkBuilder = null;
 		for (String line : unifiedDiff) {
 			if (line.startsWith("@@")) {
-				if (chunkBuilder != null) 
-					chunks.add(chunkBuilder.build());
-				chunkBuilder = new DiffChunkBuilder();
+				if (hunkBuilder != null) 
+					hunks.add(hunkBuilder.build());
+				hunkBuilder = new DiffHunkBuilder();
 				line = StringUtils.substringBefore(line.substring(4), " @@");
 				String first = StringUtils.substringBefore(line, " +");
 				String second = StringUtils.substringAfter(line, " +");
 				if (first.indexOf(",") != -1) {
-					chunkBuilder.start1 = Integer.parseInt(StringUtils.substringBefore(first, ",")) - 1;
+					hunkBuilder.oldStart = Integer.parseInt(StringUtils.substringBefore(first, ",")) - 1;
 				} else {
-					chunkBuilder.start1 = Integer.parseInt(first) - 1;
+					hunkBuilder.oldStart = Integer.parseInt(first) - 1;
 				}
 				if (second.indexOf(",") != -1) {
-					chunkBuilder.start2 = Integer.parseInt(StringUtils.substringBefore(second, ",")) - 1;
+					hunkBuilder.newStart = Integer.parseInt(StringUtils.substringBefore(second, ",")) - 1;
 				} else {
-					chunkBuilder.start2 = Integer.parseInt(second) - 1;
+					hunkBuilder.newStart = Integer.parseInt(second) - 1;
 				}
-				chunkBuilder.current1 = chunkBuilder.start1;
-				chunkBuilder.current2 = chunkBuilder.start2;
-			} else if (chunkBuilder != null) {
+				hunkBuilder.current1 = hunkBuilder.oldStart;
+				hunkBuilder.current2 = hunkBuilder.newStart;
+			} else if (hunkBuilder != null) {
 				if (line.startsWith("+")) {
-					chunkBuilder.diffUnits.add(new DiffLine(Action.ADD, line.substring(1), 
-							chunkBuilder.current1, chunkBuilder.current2));
-					chunkBuilder.current2++;
+					hunkBuilder.diffLines.add(new DiffLine(Action.ADD, line.substring(1), 
+							hunkBuilder.current1, hunkBuilder.current2));
+					hunkBuilder.current2++;
 				} else if (line.startsWith("-")) {
-					chunkBuilder.diffUnits.add(new DiffLine(Action.DELETE, line.substring(1), 
-							chunkBuilder.current1, chunkBuilder.current2));
-					chunkBuilder.current1++;
+					hunkBuilder.diffLines.add(new DiffLine(Action.DELETE, line.substring(1), 
+							hunkBuilder.current1, hunkBuilder.current2));
+					hunkBuilder.current1++;
 				} else if (line.startsWith(" ")) {
-					chunkBuilder.diffUnits.add(new DiffLine(Action.EQUAL, line.substring(1), 
-							chunkBuilder.current1, chunkBuilder.current2));
-					chunkBuilder.current1++;
-					chunkBuilder.current2++;
+					hunkBuilder.diffLines.add(new DiffLine(Action.EQUAL, line.substring(1), 
+							hunkBuilder.current1, hunkBuilder.current2));
+					hunkBuilder.current1++;
+					hunkBuilder.current2++;
 				}
 			}
 		}
 
-		if (chunkBuilder != null) chunks.add(chunkBuilder.build());
+		if (hunkBuilder != null) hunks.add(hunkBuilder.build());
 
-		return chunks;
+		return hunks;
 	}
 
 	private static TokensToCharsResult tokensToChars(List<String> tokens1, List<String> tokens2) {
@@ -333,15 +349,15 @@ public class DiffUtils {
 		}
 	}
 
-	private static class DiffChunkBuilder {
-		private int start1, start2;
+	private static class DiffHunkBuilder {
+		private int oldStart, newStart;
 		
 		private int current1, current2;
 		
-		private List<DiffLine> diffUnits = new ArrayList<>();
+		private List<DiffLine> diffLines = new ArrayList<>();
 		
-		private DiffChunk build() {
-			return new DiffChunk(start1, start2, diffUnits);
+		private DiffHunk build() {
+			return new DiffHunk(oldStart, newStart, diffLines);
 		}
 	}
 	

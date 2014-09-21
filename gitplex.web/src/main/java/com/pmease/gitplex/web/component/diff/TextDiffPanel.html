@@ -9,13 +9,16 @@
 				<span wicket:id="diffOptionsTrigger" class="btn btn-sm btn-default" title="Diff options"><i class="fa fa-gear"></i> <i class="caret"></i></span>
 				<div wicket:id="diffOptions"></div>
 			</div>
-			<div wicket:id="commentActions" class="btn-group pull-right">
+			<div class="pull-right">
+				<span wicket:id="displayFull" class="btn btn-sm btn-default" title="Expand to display full file"><i class="fa fa-file-txt"></i> </span>
+			</div>
+			<div class="btn-group pull-right">
 				<span wicket:id="prevComment" class="btn btn-default btn-sm comments-nav" title="Previous commented line"><i class="fa fa-arrow-up"></i> <i class="fa fa-comments"></i></span>
 				<span wicket:id="nextComment" class="btn btn-default btn-sm comments-nav" title="Next commented line"><i class="fa fa-arrow-down"></i> <i class="fa fa-comments"></i></span>
 				<span wicket:id="showComments" class="btn btn-default btn-sm show-comments" title="Show comments"><i class="fa fa-eye-open"></i> <i class="fa fa-comments"></i></span>
 				<span wicket:id="hideComments" class="btn btn-default btn-sm hide-comments" title="Hide comments"><i class="fa fa-eye-slash"></i> <i class="fa fa-comments"></i></span>
 			</div>
-			<div class="btn-group pull-right">
+			<div wicket:id="diffNavs" class="btn-group pull-right">
 				<span wicket:id="prevDiff" class="btn btn-default btn-sm" title="Previous changed block"><i class="fa fa-arrow-up"></i> <i class="fa fa-diff"></i></span>
 				<span wicket:id="nextDiff" class="btn btn-default btn-sm" title="Next changed block"><i class="fa fa-arrow-down"></i> <i class="fa fa-diff"></i></span>
 			</div>
@@ -24,7 +27,22 @@
 			</div>
 		</div>
 		
-		<wicket:container wicket:id="diffs"></wicket:container>
+		<table id="diffs-table" class="table-diff">
+			<wicket:container wicket:id="hunks">
+				<tr wicket:id="head" class="line hunk-head">
+					<td colspan="2" class="action">
+						<a wicket:id="expand"><i class="fa fa-expand"></i></a>
+					</td>
+					<td class="content"><span wicket:id="content"></span></td>
+				</tr>
+				<wicket:container wicket:id="body"></wicket:container>
+			</wicket:container>
+			<tr wicket:id="lastRow" class="line hunk-head">
+				<td colspan="2" class="action"><a wicket:id="expand"><i class="fa fa-expand"></i></a></td>
+				<td class="content">&nbsp;</td>
+			</tr>
+		</table>
+		
 		<div id="comments-placeholder" class="hidden">
 			<table wicket:id="lines" class="comments">
 				<tr wicket:id="comments">

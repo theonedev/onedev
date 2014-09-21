@@ -70,15 +70,18 @@ public class InlineCommentPanel extends Panel {
 				if (diffLine.getAction() == ADD) {
 					contentRow.add(AttributeAppender.append("class", " new"));
 					contentRow.add(new Label("oldLineNo"));
-					contentRow.add(new Label("newLineNo", "+ " + (diffLine.getNewLineNo() + 1)));
+					contentRow.add(new Label("newLineNo", diffLine.getNewLineNo() + 1));
+					contentRow.add(new Label("diffMark", "+"));
 				} else if (diffLine.getAction() == DELETE) {
 					contentRow.add(AttributeAppender.append("class", " old"));
-					contentRow.add(new Label("oldLineNo", "- " + (diffLine.getOldLineNo() + 1)));
+					contentRow.add(new Label("oldLineNo", diffLine.getOldLineNo() + 1));
 					contentRow.add(new Label("newLineNo"));
+					contentRow.add(new Label("diffMark", "-"));
 				} else {
 					contentRow.add(AttributeAppender.append("class", " equal"));
-					contentRow.add(new Label("oldLineNo", "  " + (diffLine.getOldLineNo()+1)));
-					contentRow.add(new Label("newLineNo", "  " + (diffLine.getNewLineNo()+1)));
+					contentRow.add(new Label("oldLineNo", diffLine.getOldLineNo()+1));
+					contentRow.add(new Label("newLineNo", diffLine.getNewLineNo()+1));
+					contentRow.add(new Label("diffMark", " "));
 				}
 				contentRow.add(new ListView<Partial>("partials", diffLine.getPartials()) {
 

@@ -32,6 +32,8 @@ public abstract class AbstractWicketConfig extends WebApplication {
 		getMarkupSettings().setDefaultMarkupEncoding("UTF-8");
 		getMarkupSettings().setStripComments(true);
 		getMarkupSettings().setStripWicketTags(true);
+
+		getPageSettings().setRecreateMountedPagesAfterExpiry(false);
 		
 		getStoreSettings().setFileStoreFolder(Bootstrap.getTempDir());
 
@@ -59,8 +61,10 @@ public abstract class AbstractWicketConfig extends WebApplication {
 				if (page.getSessionFeedback().anyMessage())
 					target.add(page.getSessionFeedback());
 				
-				for (Component component: map.values())
+				for (Component component: map.values()) {
+					target.prependJavaScript(String.format("$('#%s').trigger('sticky_kit:detach');", component.getMarkupId()));
 					target.appendJavaScript((String.format("$(document).trigger('replace', '%s');", component.getMarkupId())));
+				}
 				
 				target.appendJavaScript("$(document.body).trigger('sticky_kit:recalc')");
 			}

@@ -13,6 +13,9 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import jersey.repackaged.com.google.common.collect.Lists;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
@@ -40,12 +43,14 @@ import org.apache.wicket.util.string.Strings;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobText;
 import com.pmease.commons.git.RevAwareChange;
+import com.pmease.commons.util.diff.DiffHunk;
 import com.pmease.commons.util.diff.DiffLine;
 import com.pmease.commons.util.diff.DiffUtils;
 import com.pmease.commons.util.diff.Partial;
 import com.pmease.commons.util.diff.WordSplitter;
 import com.pmease.commons.wicket.behavior.ScrollBehavior;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
+import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.menu.CheckMenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
@@ -71,12 +76,10 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 
 	private enum DiffOption {IGNORE_NOTHING, IGNORE_EOL, IGNORE_EOL_SPACES, IGNORE_CHANGE_SPACES};
 	
-	private static final int SCROLL_MARGIN = 50;
+	private static final int SCROLL_MARGIN = 100;
 	
-	private static final String COMMENT_ACTIONS_ID = "commentActions";
-	
-	private static final String HEAD_ID = "head";
-	
+	private static final int CONTEXT_SIZE = 5;
+
 	private final IModel<Repository> repoModel;
 	
 	private final BlobText oldText;
@@ -101,98 +104,32 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 	
 	private List<DiffLine> diffs;
 	
-	private final IModel<Map<Integer, List<InlineComment>>> commentsModel = 
-			new LoadableDetachableModel<Map<Integer, List<InlineComment>>>() {
+	private List<DiffHunk> hunks;
+	
+	private boolean identical;
 
-				@Override
-				protected Map<Integer, List<InlineComment>> load() {
-					Map<Integer, Integer> oldLinesMap = new HashMap<>();
-					Map<Integer, Integer> newLinesMap = new HashMap<>();
-
-					int index = 0;
-					for (DiffLine diff: diffs) {
-						oldLinesMap.put(diff.getOldLineNo(), index);
-						newLinesMap.put(diff.getNewLineNo(), index);
-						index++;
-					}
-					
-					Map<Integer, List<InlineComment>> comments = new HashMap<>();
-					for (Map.Entry<Integer, List<InlineComment>> entry: commentSupport.getOldComments().entrySet()) {
-						int diffLineNo = oldLinesMap.get(entry.getKey());
-						List<InlineComment> lineComments = comments.get(diffLineNo);
-						if (lineComments == null) {
-							lineComments = new ArrayList<>();
-							comments.put(diffLineNo, lineComments);
-						}
-						lineComments.addAll(entry.getValue());
-					}
-					for (Map.Entry<Integer, List<InlineComment>> entry: commentSupport.getNewComments().entrySet()) {
-						int diffLineNo = newLinesMap.get(entry.getKey());
-						List<InlineComment> lineComments = comments.get(diffLineNo);
-						if (lineComments == null) {
-							lineComments = new ArrayList<>();
-							comments.put(diffLineNo, lineComments);
-						}
-						lineComments.addAll(entry.getValue());
-					}
-					
-					for (List<InlineComment> lineComments: comments.values()) {
-						Collections.sort(lineComments, new Comparator<InlineComment>() {
-
-							@Override
-							public int compare(InlineComment o1, InlineComment o2) {
-								return o1.getDate().compareTo(o2.getDate());
-							}
-							
-						});
-					}
-					
-					return comments;
-				}
-		
-	};
+	private final IModel<Map<Integer, List<InlineComment>>> commentsModel;
+	
+	private WebMarkupContainer head;
+	
+	private ListView<DiffHunk> hunksView;
 	
 	private RepeatingView commentsView;
 	
+	private AbstractDefaultAjaxBehavior addCommentBehavior;
+	
 	private String autoScrollScript;
 
-	private void onDiffOptionChanged() {
-		if (diffOption == DiffOption.IGNORE_EOL) {
-			effectiveOldText = oldText.ignoreEOL();
-			effectiveNewText = newText.ignoreEOL();
-		} else if (diffOption == DiffOption.IGNORE_EOL_SPACES) {
-			effectiveOldText = oldText.ignoreEOLSpaces();
-			effectiveNewText = newText.ignoreEOLSpaces();
-		} else if (diffOption == DiffOption.IGNORE_CHANGE_SPACES) {
-			effectiveOldText = oldText.ignoreChangeSpaces();
-			effectiveNewText = newText.ignoreChangeSpaces();
-		} else {
-			effectiveOldText = oldText;
-			effectiveNewText = newText;
-		}
-		
-		diffs = DiffUtils.diff(effectiveOldText.getLines(), effectiveNewText.getLines(), new WordSplitter());
-	}
-
-	private boolean isIdentical() {
-		for (DiffLine diffLine: diffs) {
-			if (diffLine.getAction() != EQUAL)
-				return false;
-		}
-		return true;
-	}
-	
 	public TextDiffPanel(String id, final IModel<Repository> repoModel, 
 			BlobText oldText, BlobText newText, RevAwareChange change, 
-			@Nullable InlineCommentSupport commentContext) {
+			final @Nullable InlineCommentSupport commentSupport) {
 		super(id);
 		
 		this.repoModel = repoModel;
-		
 		Preconditions.checkArgument(!change.getOldRevision().equals(change.getNewRevision()));
 		
 		this.change = change;
-		this.commentSupport = commentContext;
+		this.commentSupport = commentSupport;
 		
 		this.oldText = oldText;
 		this.newText = newText;
@@ -209,16 +146,109 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 			
 		};
 		
+		commentsModel = new LoadableDetachableModel<Map<Integer, List<InlineComment>>>() {
+
+			@Override
+			protected Map<Integer, List<InlineComment>> load() {
+				Preconditions.checkNotNull(commentSupport);
+				
+				Map<Integer, Integer> oldLinesMap = new HashMap<>();
+				Map<Integer, Integer> newLinesMap = new HashMap<>();
+
+				int index = 0;
+				for (DiffLine diff: diffs) {
+					oldLinesMap.put(diff.getOldLineNo(), index);
+					newLinesMap.put(diff.getNewLineNo(), index);
+					index++;
+				}
+				
+				Map<Integer, List<InlineComment>> comments = new HashMap<>();
+				for (Map.Entry<Integer, List<InlineComment>> entry: commentSupport.getOldComments().entrySet()) {
+					int diffLineNo = oldLinesMap.get(entry.getKey());
+					List<InlineComment> lineComments = comments.get(diffLineNo);
+					if (lineComments == null) {
+						lineComments = new ArrayList<>();
+						comments.put(diffLineNo, lineComments);
+					}
+					lineComments.addAll(entry.getValue());
+				}
+				for (Map.Entry<Integer, List<InlineComment>> entry: commentSupport.getNewComments().entrySet()) {
+					int diffLineNo = newLinesMap.get(entry.getKey());
+					List<InlineComment> lineComments = comments.get(diffLineNo);
+					if (lineComments == null) {
+						lineComments = new ArrayList<>();
+						comments.put(diffLineNo, lineComments);
+					}
+					lineComments.addAll(entry.getValue());
+				}
+				
+				for (List<InlineComment> lineComments: comments.values()) {
+					Collections.sort(lineComments, new Comparator<InlineComment>() {
+
+						@Override
+						public int compare(InlineComment o1, InlineComment o2) {
+							return o1.getDate().compareTo(o2.getDate());
+						}
+						
+					});
+				}
+				
+				return comments;
+			}
+			
+		};
+		
 		onDiffOptionChanged();
 	}
+	
+	private void onDiffOptionChanged() {
+		if (diffOption == DiffOption.IGNORE_EOL) {
+			effectiveOldText = oldText.ignoreEOL();
+			effectiveNewText = newText.ignoreEOL();
+		} else if (diffOption == DiffOption.IGNORE_EOL_SPACES) {
+			effectiveOldText = oldText.ignoreEOLSpaces();
+			effectiveNewText = newText.ignoreEOLSpaces();
+		} else if (diffOption == DiffOption.IGNORE_CHANGE_SPACES) {
+			effectiveOldText = oldText.ignoreChangeSpaces();
+			effectiveNewText = newText.ignoreChangeSpaces();
+		} else {
+			effectiveOldText = oldText;
+			effectiveNewText = newText;
+		}
+		
+		diffs = DiffUtils.diff(effectiveOldText.getLines(), effectiveNewText.getLines(), new WordSplitter());
+		
+		identical = true;
+		for (DiffLine diffLine: diffs) {
+			if (diffLine.getAction() != EQUAL) {
+				identical = false;
+				break;
+			}
+		}
 
+		if (commentSupport != null) {
+			hunks = DiffUtils.hunksOf(diffs, commentSupport.getOldComments().keySet(), 
+					commentSupport.getNewComments().keySet(), CONTEXT_SIZE);
+		} else {
+			hunks = DiffUtils.hunksOf(diffs, CONTEXT_SIZE);
+		}
+	}
+
+	private boolean isDisplayingFull() {
+		int lines = 0;
+		for (DiffHunk hunk: hunks)
+			lines += hunk.getDiffLines().size();
+		
+		return lines == diffs.size();
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
 		setOutputMarkupId(true);
 		
-		final WebMarkupContainer head = new WebMarkupContainer(HEAD_ID);
+		head = new WebMarkupContainer("head");
 		
 		head.add(new StickyBehavior());
 		
@@ -234,7 +264,7 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!isIdentical());
+				setVisible(!identical);
 			}
 			
 		});
@@ -255,59 +285,46 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(isIdentical());
+				setVisible(identical);
 			}
 			
 		});
 		
-		head.add(new WebMarkupContainer("prevDiff") {
+		WebMarkupContainer diffNavs = new WebMarkupContainer("diffNavs") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!isIdentical());
+				setVisible(!identical && isDisplayingFull());
 			}
 			
-		}.add(new ScrollBehavior(".diff-block", SCROLL_MARGIN, false)));
-
-		head.add(new WebMarkupContainer("nextDiff") {
+		};
+		head.add(diffNavs);
+		
+		diffNavs.add(new WebMarkupContainer("prevDiff").add(new ScrollBehavior(".diff-block", SCROLL_MARGIN, false)));
+		diffNavs.add(new WebMarkupContainer("nextDiff").add(new ScrollBehavior(".diff-block", SCROLL_MARGIN, true)));
+		
+		head.add(new WebMarkupContainer("prevComment") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!isIdentical());
-			}
-			
-		}.add(new ScrollBehavior(".diff-block", SCROLL_MARGIN, true)));
-		
-		// add a separate comment actions container in order not to refresh the whole
-		// sticky head when show/hide comment actions (refreshing sticky head via Wicket 
-		// ajax has some displaying issues) 
-		WebMarkupContainer commentActions = new WebMarkupContainer(COMMENT_ACTIONS_ID);
-		commentActions.setOutputMarkupId(true);
-		
-		head.add(commentActions);
-		commentActions.add(new WebMarkupContainer("prevComment") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(commentSupport != null && showComments);
+				setVisible(commentSupport != null && showComments && isDisplayingFull());
 			}
 			
 		}.add(new ScrollBehavior(".comments.line", 50, false)));
 		
-		commentActions.add(new WebMarkupContainer("nextComment") {
+		head.add(new WebMarkupContainer("nextComment") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(commentSupport != null && showComments);
+				setVisible(commentSupport != null && showComments && isDisplayingFull());
 			}
 			
 		}.add(new ScrollBehavior(".comments.line", 50, true)));
 		
-		commentActions.add(new AjaxLink<Void>("showComments") {
+		head.add(new AjaxLink<Void>("showComments") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -321,7 +338,7 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 			}
 
 		});
-		commentActions.add(new AjaxLink<Void>("hideComments") {
+		head.add(new AjaxLink<Void>("hideComments") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -332,6 +349,24 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(commentSupport != null && showComments);
+			}
+			
+		});
+		
+		head.add(new AjaxLink<Void>("displayFull") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				hunks = new ArrayList<>();
+				hunks.add(new DiffHunk(0, 0, diffs));
+				target.add(TextDiffPanel.this);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisible(!isDisplayingFull());
 			}
 			
 		});
@@ -524,13 +559,11 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 		});
 		add(form);
 		
-		final AbstractDefaultAjaxBehavior addCommentBehavior;
 		add(addCommentBehavior = new AbstractDefaultAjaxBehavior() {
 			
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-
 				attributes.getDynamicExtraParameters().add("return {index: index}");
 			}
 
@@ -551,74 +584,205 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 			
 		});
 		
-		add(new Label("diffs", new LoadableDetachableModel<String>() {
+		add(hunksView = new ListView<DiffHunk>("hunks", new AbstractReadOnlyModel<List<DiffHunk>>() {
 
 			@Override
-			protected String load() {
-				StringBuilder builder = new StringBuilder("<table id='diffs-table' class='table-diff'>");
-				int index = 0;
-				for (DiffLine diff: diffs) {
-					String addCommentLink;
-					if (allowToAddCommentModel.getObject() && commentSupport != null) {
-						addCommentLink = "<a href='javascript: var index=" + index + "; " 
-							+ addCommentBehavior.getCallbackScript() 
-							+ ";' class='add-comment'><i class='fa fa-comment-add'></i></a>";
-					} else {
-						addCommentLink = "";
-					}
-					builder.append("<tr id='diffline-").append(index).append("' class='line content ");
-					if (diff.getAction() == ADD) {
-						if (index == 0 || diffs.get(index-1).getAction() == EQUAL)
-							builder.append("new diff-block'>");
-						else
-							builder.append("new'>");
-						builder.append("<td class='old line-no'>").append(addCommentLink).append("</td>");
-						builder.append("<td class='new line-no'>");
-						builder.append("+ ").append(diff.getNewLineNo()+1).append("</td>");
-					} else if (diff.getAction() == DELETE) {
-						if (index == 0 || diffs.get(index-1).getAction() == EQUAL)
-							builder.append("old diff-block'>");
-						else
-							builder.append("old'>");
-						builder.append("<td class='old line-no'>").append(addCommentLink);
-						builder.append("- ").append(diff.getOldLineNo()+1).append("</td>");
-						builder.append("<td class='new line-no'></td>");
-					} else {
-						builder.append("equal'>");
-						builder.append("<td class='old line-no'>").append(addCommentLink)
-								.append("  ").append(diff.getOldLineNo()+1).append("</td>");
-						builder.append("<td class='new line-no'>  ").append(diff.getNewLineNo()+1).append("</td>");
-					}
-					builder.append("<td class='text'>");
-					
-					for (Partial partial: diff.getPartials()) {
-						if (partial.isEmphasized())
-							builder.append("<span class='emphasize'>");
-						else
-							builder.append("<span>");
-						if (partial.getContent().equals("\r"))
-							builder.append(" ");
-						else
-							builder.append(Strings.escapeMarkup(partial.getContent(), false, false));
-						builder.append("</span>");
-					}
-					builder.append("</td></tr>");
-					index++;
-				}
-				return builder.append("</table>").toString();
+			public List<DiffHunk> getObject() {
+				return hunks;
 			}
 			
-		}).setEscapeModelStrings(false));
+		}) {
+
+			@Override
+			protected void populateItem(final ListItem<DiffHunk> item) {
+				DiffHunk hunk = item.getModelObject();
+				
+				item.add(newHunkHead("head", item.getIndex()));
+				item.add(new Label("body", renderDiffs(hunk.getDiffLines())).setEscapeModelStrings(false));
+			}
+
+		});
 		
+		final WebMarkupContainer lastRow = new WebMarkupContainer("lastRow") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				if (hunks.isEmpty()) {
+					setVisible(false);
+				} else {
+					int lines = 0;
+					for (DiffLine diffLine: diffs) {
+						if (diffLine.getAction() != DiffLine.Action.DELETE)
+							lines++;
+					}
+					DiffHunk hunk = hunks.get(hunks.size()-1);
+					setVisible(hunk.getNewEnd() < lines);
+				}
+			}
+			
+		};
+		lastRow.setOutputMarkupId(true);
+		add(lastRow);
+		lastRow.add(new AjaxLink<Void>("expand") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				expandBelow(target, hunks.size()-1, diffs.size());
+				target.add(findPrevVisibleHunkHead(hunks.size()));
+				target.add(lastRow);
+				target.add(head);
+			}
+			
+		}.add(new TooltipBehavior(Model.of("Show more lines"))));
+
 		add(newCommentsView());
 		
-		autoScrollScript = String.format(""
-				+ "if ($('.concerned-comment').length != 0) "
-				+ "  pmease.commons.scroll.next('.concerned-comment', %d);"
-				+ "else"
-				+ "  pmease.commons.scroll.next('.diff-block:first', %d);", SCROLL_MARGIN * 2, SCROLL_MARGIN);
+		autoScrollScript = String.format("pmease.commons.scroll.next('.concerned-comment', %d);", SCROLL_MARGIN);
 	}
 	
+	private String renderDiffs(List<DiffLine> diffLines) {
+		Preconditions.checkArgument(!diffLines.isEmpty());
+		
+		StringBuilder builder = new StringBuilder();
+		
+		DiffLine firstLine = diffLines.get(0);
+		int index = 0;
+		for (DiffLine diff: diffs) {
+			if (diff.getOldLineNo() == firstLine.getOldLineNo() && diff.getNewLineNo() == firstLine.getNewLineNo())
+				break;
+			index++;
+		}
+		
+		for (DiffLine line: diffLines) {
+			String addCommentLink;
+			if (allowToAddCommentModel.getObject() && commentSupport != null) {
+				addCommentLink = "<a href='javascript: var index=" + index + "; " 
+					+ addCommentBehavior.getCallbackScript() 
+					+ ";' class='add-comment'><i class='fa fa-comment-add'></i></a>";
+			} else {
+				addCommentLink = "";
+			}
+			builder.append("<tr id='diffline-").append(index).append("' class='line diff ");
+			if (line.getAction() == ADD) {
+				if (index == 0 || diffs.get(index-1).getAction() == EQUAL)
+					builder.append("new diff-block'>");
+				else
+					builder.append("new'>");
+				builder.append("<td class='old line-no'>").append(addCommentLink).append("</td>");
+				builder.append("<td class='new line-no'>");
+				builder.append(line.getNewLineNo()+1).append("</td>");
+			} else if (line.getAction() == DELETE) {
+				if (index == 0 || diffs.get(index-1).getAction() == EQUAL)
+					builder.append("old diff-block'>");
+				else
+					builder.append("old'>");
+				builder.append("<td class='old line-no'>").append(addCommentLink);
+				builder.append(line.getOldLineNo()+1).append("</td>");
+				builder.append("<td class='new line-no'></td>");
+			} else {
+				builder.append("equal'>");
+				builder.append("<td class='old line-no'>").append(addCommentLink)
+						.append("  ").append(line.getOldLineNo()+1).append("</td>");
+				builder.append("<td class='new line-no'>  ").append(line.getNewLineNo()+1).append("</td>");
+			}
+			builder.append("<td class='text'>");
+			if (line.getAction() == ADD)
+				builder.append("+");
+			else if (line.getAction() == DELETE)
+				builder.append("-");
+			else
+				builder.append("&nbsp;");
+			for (Partial partial: line.getPartials()) {
+				if (partial.isEmphasized())
+					builder.append("<span class='emphasize'>");
+				else
+					builder.append("<span>");
+				if (partial.getContent().equals("\r"))
+					builder.append(" ");
+				else
+					builder.append(Strings.escapeMarkup(partial.getContent(), false, false));
+				builder.append("</span>");
+			}
+			builder.append("</td></tr>");
+			index++;
+		}
+		return builder.toString();
+	}
+	
+	private WebMarkupContainer newHunkHead(String id, final int index) {
+		final DiffHunk hunk = hunks.get(index);
+		final WebMarkupContainer hunkHead = new WebMarkupContainer(id) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(index == 0 || hunk.getNewStart() > hunks.get(index-1).getNewEnd());
+			}
+			
+		};
+		hunkHead.add(new AjaxLink<Void>("expand") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				if (index == 0) {
+					expandAbove(target, index, 0);
+					target.add(hunkHead);
+				} else {
+					int diffPos = locateDiffPos(hunk.getNewStart(), DiffLine.Action.DELETE);
+					expandBelow(target, index-1, diffPos);
+					
+					diffPos = locateDiffPos(hunks.get(index-1).getNewEnd(), DiffLine.Action.DELETE);
+					expandAbove(target, index, diffPos);
+					
+					target.add(hunkHead);
+					target.add(findPrevVisibleHunkHead(index));
+				}
+				target.add(head);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				if (index == 0) {
+					setVisible(hunk.getOldStart() != 0 && hunk.getNewStart() != 0);
+				} else {
+					DiffHunk previousHunk = hunks.get(index-1);
+					setVisible(previousHunk.getNewEnd() < hunk.getNewStart());
+				}
+			}
+			
+		}.add(new TooltipBehavior(Model.of("Show more lines"))));
+		
+		hunkHead.add(new Label("content", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				int oldStart = hunk.getOldStart();
+				int newStart = hunk.getNewStart();
+				int oldEnd = hunk.getOldEnd();
+				int newEnd = hunk.getNewEnd();
+				for (int i=index+1; i<hunks.size(); i++) {
+					DiffHunk nextHunk = hunks.get(i);
+					if (newEnd == nextHunk.getNewStart()) {
+						newEnd = nextHunk.getNewEnd();
+						oldEnd = nextHunk.getOldEnd();
+					} else {
+						break;
+					}
+				}
+				return DiffHunk.describe(oldStart, newStart, oldEnd, newEnd);
+			}
+			
+		}));
+		
+		hunkHead.setOutputMarkupId(true);
+		
+		return hunkHead;
+	}
+
 	private Component newCommentsRow(String id, final int index) {
 		WebMarkupContainer row = new WebMarkupContainer(commentsView.newChildId()) {
 
@@ -628,9 +792,9 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 				
 				if (event.getPayload() instanceof CommentRemoved) {
 					CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
+					commentsView.remove(this);
 					commentsModel.getObject().get(index).remove(commentRemoved.getComment());
-					commentRemoved.getTarget().appendJavaScript(
-							String.format("$('#%s').closest('tr').remove();", getMarkupId()));
+					commentRemoved.getTarget().appendJavaScript(String.format("gitplex.comments.afterRemove(%d);", index));
 				} 
 			}
 			
@@ -680,14 +844,14 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 
 	private void showComments(AjaxRequestTarget target) {
 		showComments = true;
-		target.add(get(HEAD_ID).get(COMMENT_ACTIONS_ID));
+		target.add(head);
 
 		target.appendJavaScript("$('.comments.line').show();");
 	}
 
 	private void hideComments(AjaxRequestTarget target) {
 		showComments = false;
-		target.add(get(HEAD_ID).get(COMMENT_ACTIONS_ID));
+		target.add(head);
 		
 		target.appendJavaScript("$('.comments.line').hide();");
 	}
@@ -767,4 +931,67 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 		return new InlineContext(contextDiffs, index-start, start>0, end<diffs.size()-1);
 	}
 
+
+	private int locateDiffPos(int lineNo, DiffLine.Action excludeAction) {
+		int index = 0;
+		for (int i=0; i<diffs.size(); i++) {
+			if (index < lineNo) {
+				if (diffs.get(i).getAction() != excludeAction)
+					index++;
+			} else {
+				return i;
+			}
+		}
+		throw new IllegalStateException();
+	}
+	
+	private void expandBelow(AjaxRequestTarget target, int hunkIndex, int diffLimit) {
+		DiffHunk hunk = hunks.get(hunkIndex);
+		
+		int diffPos = locateDiffPos(hunk.getNewEnd(), DiffLine.Action.DELETE);
+		for (int i = diffPos; i<diffs.size(); i++) {
+			if (i-diffPos < CONTEXT_SIZE*2 && i<diffLimit) {
+				DiffLine line = diffs.get(i);
+				hunk.getDiffLines().add(line);
+				hunk.setNewEnd(hunk.getNewEnd()+1);
+				hunk.setOldEnd(hunk.getOldEnd()+1);
+				
+				String row = renderDiffs(Lists.newArrayList(line));
+				row = StringUtils.replace(row, "\"", "\\\"");
+				String script = String.format("$(\"%s\").insertAfter('#diffline-%d')", row, i-1);
+				target.appendJavaScript(script);
+			} else {
+				break;
+			}			
+		}
+	}
+	
+	private Component findPrevVisibleHunkHead(int index) {
+		for (int i=index-1; i>=0; i--) {
+			Component hunkHead = hunksView.get(i).get("head");
+			hunkHead.configure();
+			if (hunkHead.isVisible())
+				return hunkHead;
+		}
+		throw new IllegalStateException();
+	}
+	
+	private void expandAbove(AjaxRequestTarget target, int hunkIndex, int diffLimit) {
+		DiffHunk hunk = hunks.get(hunkIndex);
+		int diffPos = locateDiffPos(hunk.getNewStart(), DiffLine.Action.DELETE);
+		for (int i=diffPos-1; i>=diffLimit; i--) {
+			if (diffPos-i <= CONTEXT_SIZE*2) {
+				hunk.setOldStart(hunk.getOldStart()-1);
+				hunk.setNewStart(hunk.getNewStart()-1);
+				DiffLine line = diffs.get(i);
+				hunk.getDiffLines().add(0, line);
+				String row = renderDiffs(Lists.newArrayList(line));
+				row = StringUtils.replace(row, "\"", "\\\"");
+				String script = String.format("$(\"%s\").insertBefore('#diffline-%d')", row, i+1);
+				target.appendJavaScript(script);
+			} else {
+				break;
+			}
+		}
+	}	
 }
