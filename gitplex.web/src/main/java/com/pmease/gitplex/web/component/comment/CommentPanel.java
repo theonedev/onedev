@@ -181,6 +181,8 @@ public class CommentPanel extends Panel {
 			
 		});
 		
+		add(newAdditionalCommentActions("additionalActions", getComment()));
+		
 		add(renderForView(getComment().getContent()));
 
 		add(repliesView = newRepliesView());
@@ -365,9 +367,19 @@ public class CommentPanel extends Panel {
 
 		}.add(new ConfirmBehavior("Do you really want to delete this reply?")));
 		
+		row.add(newAdditionalReplyActions("additionalActions", reply));
+		
 		row.add(renderForView(reply.getContent()));
 		
 		return row;
 	}
 
+	protected Component newAdditionalCommentActions(String id, Comment comment) {
+		return new WebMarkupContainer(id);
+	}
+	
+	protected Component newAdditionalReplyActions(String id, CommentReply reply) {
+		return new WebMarkupContainer(id);
+	}
+	
 }

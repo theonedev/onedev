@@ -15,6 +15,7 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.google.common.base.Objects;
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.Password;
@@ -235,7 +236,9 @@ public class User extends AbstractUser implements ProtectedObject {
 	
 	@Override
 	public String toString() {
-		return getName();
+		return Objects.toStringHelper(this)
+				.add("name", getName())
+				.toString();
 	}
 	
 	public PersonIdent asPerson() {

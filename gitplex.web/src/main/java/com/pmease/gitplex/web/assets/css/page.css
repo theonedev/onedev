@@ -842,6 +842,7 @@ ul.diff-alerts {padding-left: 12px;}
 .activity>div.summary .actions {margin-left: 8px;}
 .activity>div.summary .actions a {margin-right: 4px; color: #999;}
 .activity>div.summary .actions a .fa-times {font-size: 14px;}
+.activity>div.summary .actions a .fa-diff {font-size: 16px;}
 .activity>div.summary .user a {color: #333; font-weight: bold;}
 
 .collapsed>.avatar img {opacity: 0.5;}
@@ -985,10 +986,11 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.activities .inline-comment.panel>.panel-heading .actions a {color: #888; margin-right: 4px;}
 
 .request-detail>.activities .activity>.summary .fa {background: white;}
-.request-detail>.activities .activity>.discard .fa {margin: 0 6px 0 -19px; color: #F93333; font-size: 24px;}
-.request-detail>.activities .activity>.integrate .fa {margin: 0 6px 0 -19px; color: #35A612; font-size: 24px;}
-.request-detail>.activities .activity>.approve .fa {margin: 0 6px 0 -18px; color: #35A612; font-size: 24px;}
-.request-detail>.activities .activity>.disapprove .fa {margin: 0 6px 0 -18px; color: #F93333; font-size: 24px;}
+.request-detail>.activities .activity>.update>.fa {margin: 0 8px 0 -15px; font-size: 20px;}
+.request-detail>.activities .activity>.discard>.fa {margin: 0 6px 0 -19px; color: #F93333; font-size: 24px;}
+.request-detail>.activities .activity>.integrate>.fa {margin: 0 6px 0 -19px; color: #35A612; font-size: 24px;}
+.request-detail>.activities .activity>.approve>.fa {margin: 0 8px 0 -18px; color: #35A612; font-size: 24px;}
+.request-detail>.activities .activity>.disapprove>.fa {margin: 0 8px 0 -18px; color: #F93333; font-size: 24px;}
 
 .request-detail>.updates>.update {padding: 12px; margin: 20px 0; border: 1px solid #DDD; border-radius: 4px;}
 .request-detail>.updates>.update>.summary .fa {font-size: 16px;}

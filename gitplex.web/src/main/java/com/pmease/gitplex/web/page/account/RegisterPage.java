@@ -70,7 +70,7 @@ public class RegisterPage extends LayoutPage {
 					
 				// clear the form fields
 				user = new User();
-				form.replace(BeanContext.editBean("editor", user));
+				form.replace(beanEditor = BeanContext.editBean("editor", user));
 			}
 			
 		});

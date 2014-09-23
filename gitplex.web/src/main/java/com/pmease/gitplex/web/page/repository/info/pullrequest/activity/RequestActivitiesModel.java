@@ -40,9 +40,9 @@ public abstract class RequestActivitiesModel extends LoadableDetachableModel<Lis
 			} else if (audit.getAction() instanceof Discard) { 
 				activities.add(new DiscardPullRequest(audit.getUser(), audit.getDate()));
 			} else if (audit.getAction() instanceof Approve) {
-				activities.add(new ApprovePullRequest(audit.getUser(), audit.getDate()));
+				activities.add(new ApprovePullRequest(audit.getRequest(), audit.getUser(), audit.getDate()));
 			} else if (audit.getAction() instanceof Disapprove) {
-				activities.add(new DisapprovePullRequest(audit.getUser(), audit.getDate()));
+				activities.add(new DisapprovePullRequest(audit.getRequest(), audit.getUser(), audit.getDate()));
 			} else {
 				throw new IllegalStateException("Unexpected audit action: " + audit.getAction());
 			}

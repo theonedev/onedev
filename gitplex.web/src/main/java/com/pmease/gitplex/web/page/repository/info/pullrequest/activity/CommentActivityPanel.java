@@ -1,13 +1,18 @@
 package com.pmease.gitplex.web.page.repository.info.pullrequest.activity;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.pmease.gitplex.core.comment.Comment;
+import com.pmease.gitplex.core.comment.CommentReply;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 import com.pmease.gitplex.web.component.label.AgeLabel;
@@ -46,7 +51,33 @@ public class CommentActivityPanel extends Panel {
 			fragment.setRenderBodyOnly(true);
 			add(fragment);
 		} else {
-			add(new CommentPanel("content", commentModel));
+			add(new CommentPanel("content", commentModel) {
+
+				@Override
+				protected Component newAdditionalCommentActions(String id, Comment comment) {
+					return new SinceChangesPanel(id, new AbstractReadOnlyModel<PullRequest>() {
+
+						@Override
+						public PullRequest getObject() {
+							return commentModel.getObject().getRequest();
+						}
+						
+					}, comment.getDate(), "Changes since this comment");
+				}
+
+				@Override
+				protected Component newAdditionalReplyActions(String id, CommentReply reply) {
+					return new SinceChangesPanel(id, new AbstractReadOnlyModel<PullRequest>() {
+
+						@Override
+						public PullRequest getObject() {
+							return commentModel.getObject().getRequest();
+						}
+						
+					}, reply.getDate(), "Changes since this reply");
+				}
+				
+			});
 		}
 	}
 
