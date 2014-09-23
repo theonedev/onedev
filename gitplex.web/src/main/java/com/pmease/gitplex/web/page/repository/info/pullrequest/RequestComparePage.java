@@ -1,7 +1,5 @@
 package com.pmease.gitplex.web.page.repository.info.pullrequest;
 
-import static com.pmease.commons.git.Change.Status.UNCHANGED;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -9,16 +7,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.event.IEvent;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
@@ -28,16 +23,13 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.RevAwareChange;
-import com.pmease.commons.git.TreeNode;
 import com.pmease.commons.hibernate.HibernateUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
@@ -48,9 +40,9 @@ import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.comment.ChangeComments;
 import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
+import com.pmease.gitplex.core.comment.InlineContext;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.InlineInfo;
 import com.pmease.gitplex.core.model.IntegrationInfo;
@@ -60,46 +52,26 @@ import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.comment.event.CommentReplied;
-import com.pmease.gitplex.web.component.diff.BlobDiffPanel;
-import com.pmease.gitplex.web.component.diff.ChangedFilesPanel;
-import com.pmease.gitplex.web.component.diff.DiffTreePanel;
-import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.PullRequestActivity;
+import com.pmease.gitplex.web.component.diff.CompareResultPanel;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.RequestActivitiesModel;
-import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.UpdatePullRequest;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 
 @SuppressWarnings("serial")
-public class RequestComparePage extends RequestDetailPage implements InlineCommentSupport {
+public class RequestComparePage extends RequestDetailPage {
 
-	private static final String HEAD_ID = "compareHead";
-	
-	private static final String CHANGES_TRIGGER_ID = "changesTrigger";
-	
-	private static final String CHANGES_DROPDOWN_ID = "changesDropdown";
-	
-	private static final String LABEL_ID = "label";
-	
-	private static final String PREV_CHANGE_ID = "prevChange";
-	
-	private static final String NEXT_CHANGE_ID = "nextChange";
-
-	private static final String CHANGES_ID = "changes";
-	
-	private static final String BLOB_DIFF_ID = "blobDiff";
-	
 	private static final String TARGET_BRANCH_HEAD = "Head of Target Branch";
 	
 	private static final String INTEGRATION_PREVIEW = "Integration Preview";
+	
+	public static final String LATEST_COMMIT = "latest";
 
 	private String file;
 	
 	private String oldCommit;
 	
 	private String newCommit;
-	
-	private RevAwareChange change;
 	
 	private final IModel<PullRequestComment> concernedCommentModel;
 	
@@ -164,20 +136,12 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 		
 	};
 	
-	private final IModel<ChangeComments> commentsModel = new LoadableDetachableModel<ChangeComments>() {
-
-		@Override
-		protected ChangeComments load() {
-			Preconditions.checkNotNull(change);
-			return new ChangeComments(getPullRequest(), change);
-		}
-		
-	};
+	private CompareResultPanel compareResult;
 	
 	public RequestComparePage(PageParameters params) {
 		super(params);
 
-		file = params.get("path").toString();
+		file = params.get("file").toString();
 		final Long concernedCommentId = params.get("comment").toOptionalLong();
 		
 		concernedCommentModel = new LoadableDetachableModel<PullRequestComment>() {
@@ -195,77 +159,33 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 		oldCommit = params.get("original").toString();
 		newCommit = params.get("revised").toString();
 
-		if (oldCommit != null && newCommit == null) {
-			newCommit = getPullRequest().getLatestUpdate().getHeadCommit();
-		} else if (oldCommit == null && newCommit != null) {
-			oldCommit = getPullRequest().getBaseCommit();
-		}
-
 		if (oldCommit != null) {
-			if (!commitsModel.getObject().containsKey(oldCommit))
+			if (oldCommit.equals(LATEST_COMMIT))
+				oldCommit = getPullRequest().getLatestUpdate().getHeadCommit();
+			else if (!commitsModel.getObject().containsKey(oldCommit))
 				throw new IllegalArgumentException("Commit '" + oldCommit + "' is not relevant to current pull request.");
 		}
 
 		if (newCommit != null) {
-			if (!commitsModel.getObject().containsKey(newCommit))
+			if (newCommit.equals(LATEST_COMMIT))
+				newCommit = getPullRequest().getLatestUpdate().getHeadCommit();
+			else if (!commitsModel.getObject().containsKey(newCommit))
 				throw new IllegalArgumentException("Commit '" + newCommit + "' is not relevant to current pull request.");
 		}
 		
-		if (file != null && oldCommit == null)
-			throw new IllegalArgumentException("Param 'path' can only be used together with param 'original' and 'revised'.");
-		
 		PullRequestComment comment = getConcernedComment();
-		if (oldCommit != null) {
-			if (file != null) {
-				change = resolveChange();
-			} else if (comment != null) {
+		if (comment != null) {
+			if (file == null)
 				file = comment.getInlineInfo().getFile();
-				change = resolveChange();
-			}
-		} else if (comment == null) {
-			User user = GitPlex.getInstance(UserManager.class).getCurrent();
-			newCommit = getPullRequest().getLatestUpdate().getHeadCommit();
-			if (user == null) {
+			if (oldCommit == null)
+				oldCommit = comment.getInlineInfo().getOldCommit();
+			if (newCommit == null)
+				newCommit = comment.getInlineInfo().getNewCommit();
+		} else {
+			if (oldCommit == null)
 				oldCommit = getPullRequest().getBaseCommit();
-			} else {
-				List<PullRequestActivity> activities = activitiesModel.getObject();
-				boolean found = false;
-				for (int i=activities.size()-1; i>=0; i--) {
-					PullRequestActivity activity = activities.get(i);
-					if (found) {
-						if (activity instanceof UpdatePullRequest) {
-							oldCommit = ((UpdatePullRequest) activity).getUpdate().getHeadCommit();
-							break;
-						}
-					} else if (activity.getUser().equals(user)) {
-						found = true;
-					}
-				}
-				if (oldCommit == null || oldCommit.equals(newCommit))
-					oldCommit = getPullRequest().getBaseCommit();
-			}
-		} else {
-			file = comment.getInlineInfo().getFile();
-			oldCommit = comment.getInlineInfo().getOldCommit();
-			newCommit = comment.getInlineInfo().getNewCommit();
-			change = resolveChange();
-		}
-		if (change == null && !getChanges().isEmpty()) {
-			file = getChanges().get(0).getPath();
-			change = resolveChange();
-		}
-	}
-	
-	@Nullable
-	private InlineCommentSupport getInlineCommentSupport() {
-		Map<String, CommitDescription> commits = commitsModel.getObject();
-		String oldCommitName = Preconditions.checkNotNull(commits.get(oldCommit)).getName();
-		String newCommitName = Preconditions.checkNotNull(commits.get(newCommit)).getName();
-		if (oldCommitName.equals(TARGET_BRANCH_HEAD) || oldCommitName.equals(INTEGRATION_PREVIEW)
-				|| newCommitName.equals(TARGET_BRANCH_HEAD) || newCommitName.equals(INTEGRATION_PREVIEW)) {
-			return null;
-		} else {
-			return this;
+			if (newCommit == null)
+				newCommit = getPullRequest().getLatestUpdate().getHeadCommit();
 		}
 	}
 	
@@ -273,13 +193,13 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		WebMarkupContainer head = new WebMarkupContainer(HEAD_ID);
-		head.add(new StickyBehavior());
+		WebMarkupContainer options = new WebMarkupContainer("compareOptions");
+		options.add(new StickyBehavior());
 		
-		add(head);
+		add(options);
 
 		WebMarkupContainer oldSelector = new WebMarkupContainer("oldSelector");
-		head.add(oldSelector);
+		options.add(oldSelector);
 		oldSelector.add(new Label("label", new LoadableDetachableModel<String>() {
 
 			@Override
@@ -311,11 +231,11 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 			}
 			
 		}; 
-		head.add(oldChoicesDropdown);
+		options.add(oldChoicesDropdown);
 		oldSelector.add(new DropdownBehavior(oldChoicesDropdown).alignWithTrigger(0, 0, 0, 100));
 		
 		WebMarkupContainer newSelector = new WebMarkupContainer("newSelector");
-		head.add(newSelector);
+		options.add(newSelector);
 		newSelector.add(new Label("label", new LoadableDetachableModel<String>() {
 
 			@Override
@@ -348,7 +268,7 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 			}
 			
 		}; 
-		head.add(newChoicesDropdown);
+		options.add(newChoicesDropdown);
 		newSelector.add(new DropdownBehavior(newChoicesDropdown).alignWithTrigger(0, 0, 0, 100));
 
 		MenuPanel commonComparisons = new MenuPanel("comparisonChoices") {
@@ -389,7 +309,7 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 						PageParameters params = paramsOf(getPullRequest(), 
 								getPullRequest().getBaseCommit(), 
 								getPullRequest().getLatestUpdate().getHeadCommit(), 
-								change.getPath(), getConcernedComment());
+								file, getConcernedComment());
 						setResponsePage(RequestComparePage.class, params);
 					}
 
@@ -407,7 +327,7 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 							PageParameters params = paramsOf(getPullRequest(), 
 									getPullRequest().getLatestUpdate().getHeadCommit(), 
 									integrationInfo.getIntegrationHead(),
-									change.getPath(), getConcernedComment());
+									file, getConcernedComment());
 							setResponsePage(RequestComparePage.class, params);
 						}
 						
@@ -430,7 +350,7 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 						@Override
 						protected void onSelect() {
 							PageParameters params = paramsOf(getPullRequest(), baseCommit, headCommit, 
-									change.getPath(), getConcernedComment());
+									file, getConcernedComment());
 							setResponsePage(RequestComparePage.class, params);
 						}
 						
@@ -442,156 +362,92 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 			
 		};
 		
-		head.add(commonComparisons);
-		head.add(new WebMarkupContainer("comparisonSelector")
+		options.add(commonComparisons);
+		options.add(new WebMarkupContainer("comparisonSelector")
 				.add(new MenuBehavior(commonComparisons)
 				.alignWithTrigger(50, 100, 50, 0)));
 		
-		DropdownPanel changesDropdown = new DropdownPanel("changesDropdown") {
+		options.add(new CheckBox("changedOnly", new LoadableDetachableModel<Boolean>() {
 
 			@Override
-			protected Component newContent(String id) {
-				final Fragment fragment = new Fragment(id, "changesFrag", RequestComparePage.this);
-				
-				boolean changesOnly = (change == null || change.getStatus() != UNCHANGED);
-				fragment.add(new CheckBox("changesOnly", Model.of(changesOnly)).add(new OnChangeAjaxBehavior() {
-							
-					@Override
-					protected void onUpdate(AjaxRequestTarget target) {
-						Component changeLister = fragment.get(CHANGES_ID);
-						changeLister = newChangeLister(!(changeLister instanceof ChangedFilesPanel));
-						fragment.replace(changeLister);
-						target.add(changeLister);
-					}
-					
-				}));
-
-				fragment.add(newChangeLister(changesOnly));
-				return fragment;
+			protected Boolean load() {
+				return compareResult.isChangedOnly();
 			}
 			
-		};
-		
-		head.add(changesDropdown);
-		WebMarkupContainer changesTrigger = new WebMarkupContainer(CHANGES_TRIGGER_ID);
-		changesTrigger.add(new DropdownBehavior(changesDropdown));
-		changesTrigger.add(new Label(LABEL_ID, new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				int index = getChangedFiles().indexOf(file);
-				if (index == -1)
-					return String.valueOf(getChanges().size());
-				else
-					return String.valueOf(index+1) + "/" + getChanges().size();
-			}
-			
-		}).setOutputMarkupId(true));
-		head.add(changesTrigger);
-		
-		head.add(new AjaxLink<Void>(PREV_CHANGE_ID) {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				int index = getChangedFiles().indexOf(file) - 1;
-				onChangeSelected(target, getChanges().get(index));
-			}
-
-			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
-				
-				if (getChangedFiles().indexOf(file) <= 0) 
-					tag.put("disabled", "disabled");
-			}
-			
-		}.setOutputMarkupId(true));
-
-		head.add(new AjaxLink<Void>(NEXT_CHANGE_ID) {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				int index = getChangedFiles().indexOf(file) + 1;
-				onChangeSelected(target, getChanges().get(index));
-			}
+		}).add(new OnChangeAjaxBehavior() {
 			
 			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
-				
-				List<String> changedFiles = getChangedFiles();
-				if (changedFiles.isEmpty() || changedFiles.indexOf(file) >= changedFiles.size()-1) 
-					tag.put("disabled", "disabled");
+			protected void onUpdate(AjaxRequestTarget target) {
+				compareResult.toggleChangedOnly(target);
 			}
+			
+		}));
 
-		}.setOutputMarkupId(true));
-
-		if (change != null) {
-			BlobDiffPanel blobDiffPanel = new BlobDiffPanel(BLOB_DIFF_ID, repoModel, change, getInlineCommentSupport());
-			blobDiffPanel.setOutputMarkupId(true);
-			add(blobDiffPanel);
-		} else {
-			add(new WebMarkupContainer(BLOB_DIFF_ID).setOutputMarkupId(true));
-		}
-		
-	}
-	
-	private List<Change> getChanges() {
-		return getRepository().getChanges(oldCommit, newCommit);
-	}
-	
-	private List<String> getChangedFiles() {
-		List<String> files = new ArrayList<>();
-		for (Change change: getChanges())
-			files.add(change.getPath());
-		return files;
-	}
-	
-	private RevAwareChange resolveChange() {
-		for (Change each: getChanges()) {
-			if (file.equals(each.getPath())) 
-				return new RevAwareChange(each, oldCommit, newCommit);
-		}
-		List<TreeNode> result = getRepository().git().listTree(newCommit, file);
-		if (!result.isEmpty() && result.get(0).getMode() != FileMode.TYPE_TREE) {
-			TreeNode blobNode = result.get(0);
-			return new RevAwareChange(UNCHANGED, file, file, 
-					blobNode.getMode(), blobNode.getMode(), oldCommit, newCommit);
-		} else {
-			return null;
-		}
-	}
-	
-	private Component newChangeLister(boolean changesOnly) {
-		Component changeLister;
-		if (changesOnly) {
-			changeLister = new ChangedFilesPanel(CHANGES_ID, repoModel, oldCommit, newCommit) {
-				
-				@Override
-				protected WebMarkupContainer newBlobLink(String id, Change change) {
-					return new BlobLink(id, change);
+		add(compareResult = new CompareResultPanel("compareResult", repoModel, oldCommit, newCommit, file) {
+			
+			@Override
+			protected InlineCommentSupport getInlineCommentSupport(final Change change) {
+				Map<String, CommitDescription> commits = commitsModel.getObject();
+				String oldCommitName = Preconditions.checkNotNull(commits.get(oldCommit)).getName();
+				String newCommitName = Preconditions.checkNotNull(commits.get(newCommit)).getName();
+				if (oldCommitName.equals(TARGET_BRANCH_HEAD) || oldCommitName.equals(INTEGRATION_PREVIEW)
+						|| newCommitName.equals(TARGET_BRANCH_HEAD) || newCommitName.equals(INTEGRATION_PREVIEW)) {
+					return null;
+				} else {
+					return new InlineCommentSupport() {
+						
+						@Override
+						public Map<Integer, List<InlineComment>> getOldComments() {
+							RevAwareChange revAwareChange = new RevAwareChange(change, oldCommit, newCommit);
+							return getPullRequest().getComments(revAwareChange).getOldComments();
+						}
+						
+						@Override
+						public Map<Integer, List<InlineComment>> getNewComments() {
+							RevAwareChange revAwareChange = new RevAwareChange(change, oldCommit, newCommit);
+							return getPullRequest().getComments(revAwareChange).getNewComments();
+						}
+						
+						@Override
+						public InlineComment getConcernedComment() {
+							return RequestComparePage.this.getConcernedComment();
+						}
+						
+						@Override
+						public InlineComment addComment(String commit, String file, int line, String content) {
+							User user = GitPlex.getInstance(UserManager.class).getCurrent();
+							Preconditions.checkNotNull(user);
+							PullRequestComment comment = new PullRequestComment();
+							getPullRequest().getComments().add(comment);
+							comment.setUser(user);
+							comment.setDate(new Date());
+							comment.setContent(content);
+							comment.setRequest(getPullRequest());
+							InlineInfo inlineInfo = new InlineInfo();
+							comment.setInlineInfo(inlineInfo);
+							inlineInfo.setCommit(commit);
+							inlineInfo.setOldCommit(oldCommit);
+							inlineInfo.setNewCommit(newCommit);
+							inlineInfo.setFile(file);
+							inlineInfo.setLine(line);
+							InlineContext context = getInlineContext(comment);
+							Preconditions.checkNotNull(context);
+							inlineInfo.setContext(context);
+							comment.setInlineInfo(inlineInfo);
+							GitPlex.getInstance(Dao.class).persist(comment);
+							return comment;
+						}
+					};
 				}
-			};
-		} else {
-			changeLister = new DiffTreePanel(CHANGES_ID, repoModel, oldCommit, newCommit) {
+			}
 
-				@Override
-				protected WebMarkupContainer newBlobLink(String id, final Change change) {
-					return new BlobLink(id, change);
-				}
+			@Override
+			protected void onChangeSelection(AjaxRequestTarget target, Change change) {
+				file = change.getPath();
+			}
+			
+		});
 
-				@Override
-				protected void onInitialize() {
-					super.onInitialize();
-					
-					if (change != null)
-						reveal(change);
-				}
-				
-			};
-		}
-		changeLister.setOutputMarkupId(true);
-		return changeLister;
 	}
 	
 	@Override
@@ -599,22 +455,20 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 		commitsModel.detach();
 		concernedCommentModel.detach();
 		activitiesModel.detach();
-		commentsModel.detach();
 		
 		super.onDetach();
 	}
 	
 	public static PageParameters paramsOf(PullRequest request, @Nullable String oldCommit, 
-			@Nullable String newCommit, @Nullable String filePath, 
-			@Nullable PullRequestComment concernedComment) {
+			@Nullable String newCommit, @Nullable String file, @Nullable PullRequestComment concernedComment) {
 		PageParameters params = RequestDetailPage.paramsOf(request);
 		
 		if (oldCommit != null)
 			params.set("original", oldCommit);
 		if (newCommit != null)
 			params.set("revised", newCommit);
-		if (filePath != null)
-			params.set("path", filePath);
+		if (file != null)
+			params.set("file", file);
 		if (concernedComment != null)
 			params.set("comment", concernedComment.getId());
 		
@@ -642,7 +496,10 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 			PullRequestComment comment = (PullRequestComment) commentReplied.getReply().getComment();
 			comment.getInlineInfo().setOldCommit(oldCommit);
 			comment.getInlineInfo().setNewCommit(newCommit);
-			comment.getInlineInfo().setContext(getBlobDiffPanel().getInlineContext(comment));
+
+			InlineContext context = compareResult.getInlineContext(comment);
+			Preconditions.checkNotNull(context);
+			comment.getInlineInfo().setContext(context);
 			GitPlex.getInstance(Dao.class).persist(comment);
 		}
 	}
@@ -731,53 +588,6 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 
 	}
 	
-	private class BlobLink extends AjaxLink<Void> {
-		
-		private final Change change;
-		
-		BlobLink(String id, Change change) {
-			super(id);
-			
-			this.change = change;
-		}
-
-		@Override
-		protected void onComponentTag(ComponentTag tag) {
-			super.onComponentTag(tag);
-			
-			if (change != null 
-					&& Objects.equals(change.getOldPath(), RequestComparePage.this.change.getOldPath()) 
-					&& Objects.equals(change.getNewPath(), RequestComparePage.this.change.getNewPath())) {
-				tag.put("class", "active");
-			}
-		}
-
-		@Override
-		public void onClick(AjaxRequestTarget target) {
-			onChangeSelected(target, change);
-		}
-		
-	}
-
-	private void onChangeSelected(AjaxRequestTarget target, Change change) {
-		file = change.getPath();
-		this.change = new RevAwareChange(change, oldCommit, newCommit);
-		BlobDiffPanel diffPanel = new BlobDiffPanel(BLOB_DIFF_ID, repoModel, this.change, getInlineCommentSupport());
-		getPage().replace(diffPanel);
-		target.add(diffPanel);
-
-		target.add(get(HEAD_ID).get(PREV_CHANGE_ID));
-		target.add(get(HEAD_ID).get(NEXT_CHANGE_ID));
-		target.add(get(HEAD_ID).get(CHANGES_TRIGGER_ID).get(LABEL_ID));
-		
-		Component changesDropdown = get(HEAD_ID).get(CHANGES_DROPDOWN_ID);
-		String script = String.format("$('#%s').find('a.active').removeClass('active');", 
-				changesDropdown.getMarkupId());
-		target.prependJavaScript(script);
-		
-		target.add(this);
-	}
-	
 	private abstract class ComparisonChoiceItem extends MenuItem {
 
 		private final String oldName;
@@ -811,45 +621,7 @@ public class RequestComparePage extends RequestDetailPage implements InlineComme
 		}
 	}
 
-	@Override
-	public Map<Integer, List<InlineComment>> getOldComments() {
-		return commentsModel.getObject().getOldComments();
-	}
-
-	@Override
-	public Map<Integer, List<InlineComment>> getNewComments() {
-		return commentsModel.getObject().getNewComments();
-	}
-
-	@Override
-	public InlineComment addComment(String commit, String file, int line, String content) {
-		User user = GitPlex.getInstance(UserManager.class).getCurrent();
-		Preconditions.checkNotNull(user);
-		PullRequestComment comment = new PullRequestComment();
-		getPullRequest().getComments().add(comment);
-		comment.setUser(user);
-		comment.setDate(new Date());
-		comment.setContent(content);
-		comment.setRequest(getPullRequest());
-		InlineInfo inlineInfo = new InlineInfo();
-		comment.setInlineInfo(inlineInfo);
-		inlineInfo.setCommit(commit);
-		inlineInfo.setOldCommit(oldCommit);
-		inlineInfo.setNewCommit(newCommit);
-		inlineInfo.setFile(file);
-		inlineInfo.setLine(line);
-		inlineInfo.setContext(getBlobDiffPanel().getInlineContext(comment));
-		comment.setInlineInfo(inlineInfo);
-		GitPlex.getInstance(Dao.class).persist(comment);
-		return comment;
-	}
-	
-	private BlobDiffPanel getBlobDiffPanel() {
-		return (BlobDiffPanel) getPage().get(BLOB_DIFF_ID);
-	}
-
-	@Override
-	public PullRequestComment getConcernedComment() {
+	private PullRequestComment getConcernedComment() {
 		return concernedCommentModel.getObject();
 	}
 }

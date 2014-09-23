@@ -5,8 +5,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -27,8 +29,11 @@ import org.hibernate.criterion.Restrictions;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
+import com.pmease.commons.git.RevAwareChange;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.util.LockUtils;
+import com.pmease.commons.util.Triple;
+import com.pmease.gitplex.core.comment.ChangeComments;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Approved;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Disapproved;
@@ -120,6 +125,8 @@ public class PullRequest extends AbstractEntity {
 	private transient PullRequestUpdate referentialUpdate;
 	
 	private transient Set<String> pendingCommits;
+	
+	private transient Map<ChangeKey, ChangeComments> commentsCache = new HashMap<>();
 	
 	/**
 	 * Get title of this merge request.
@@ -523,5 +530,22 @@ public class PullRequest extends AbstractEntity {
 				&& getIntegrationInfo() != null 
 				&& getIntegrationInfo().getIntegrationHead() != null;
 	}
+	
+	public ChangeComments getComments(RevAwareChange change) {
+		ChangeKey key = new ChangeKey(change.getOldRevision(), change.getNewRevision(), change.getPath());
+		ChangeComments comments = commentsCache.get(key);
+		if (comments == null) {
+			comments = new ChangeComments(this, change);
+			commentsCache.put(key, comments);
+		}
+		return comments;
+	}
 
+	private static class ChangeKey extends Triple<String, String, String> {
+
+		public ChangeKey(String oldCommit, String newCommit, String file) {
+			super(oldCommit, newCommit, file);
+		}
+		
+	}
 }

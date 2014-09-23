@@ -766,10 +766,18 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 .changed-files li:before {font-family: "ponticons"; font-size: 17px;}
 .changed-files a {color: black;}
 
+/* COMPARE RESULT */
+.compare-result>tbody>tr>td {border: 1px solid #DDD;}
+.compare-result>tbody>tr>td.nav {width: 20%; padding: 8px;}
+.compare-result>tbody>tr>td.nav>div {overflow-x: auto;}
+.compare-result>tbody>tr>td.nav a.active {background: #0F89E7; color: white; border-radius: 2px; padding: 2px;}
+.compare-result>tbody>tr>td.content>div>div.error {padding: 20px; font-size: 24px; font-style: italic;}
+
 /* TEXT DIFF */
-.text-diff>.panel-heading {z-index: 10; border-top: 1px solid #DDD;}
-.text-diff>.panel-heading .pull-right {margin-left: 12px;}
-.text-diff>.body {overflow: auto;}
+.text-diff>.head {border: 1px solid #DDD; padding: 8px; z-index: 10; background: white;}
+.text-diff>.body {border: 1px solid #DDD; border-top: none;}
+.text-diff>.head .title {font-size: 16px;}
+.text-diff>.head .pull-right {margin-left: 12px;}
 
 .table-diff .line.diff>td.line-no {color: #999; width: 1%; text-align: right; white-space: nowrap;}
 .table-diff .line.diff td.text, .table-diff .hunk-head td.content {
@@ -999,8 +1007,12 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.updates>.update>.commits tr:hover td {background: #F7ECB9;}
 .request-detail>.updates>.update>.commits .commit-message>.full {margin-bottom: 4px;}
 
-.request-detail .compare>.head {background: white; z-index: 90; padding-bottom: 20px;}
+.request-detail .compare>.head {background: #F2F2F2; z-index: 90; padding: 8px; 
+	border: 1px solid #DDD;}
+.request-detail .compare>.head>.pull-left:FIRST-CHILD {margin-right: 16px;}
+.request-detail .compare>.head>.pull-left:LAST-CHILD {margin-top: 3px;}
 .request-detail .compare>.head .tooltip-inner {max-width: 500px;}
+
 .content>.commit-choice {max-height: 600px; padding: 8px 0; overflow-y: scroll;}
 .content>.commit-choice a {text-decoration: none; color: #333; display: block; padding: 8px;}
 .content>.commit-choice li {border-bottom: 1px dotted #BBB;}
@@ -1011,12 +1023,6 @@ table.old-vs-new td {border-bottom: 1px dotted #BBB; padding: 0 8px;}
 table.old-vs-new td.old {width: 140px; text-align: left;}
 table.old-vs-new td.new {width: 140px; text-align: right;}
 table.old-vs-new td.vs {width: 1px; text-align: center; font-weight: bold;}
-
-.content>.compare-result {overflow-y: auto; max-height: 600px; width: 400px; 
-	white-space: nowrap; border: none; margin-bottom: 0;}
-.content>.compare-result a {padding: 2px;}
-.content>.compare-result a.active {background: #0F89E7; color: white; border-radius: 2px;}
-.content>.compare-result>.panel-heading .pull-right {color: #888;}
 
 table.verifications td {vertical-align: top; white-space: nowrap; color: #444;}
 table.verifications {margin-bottom: 1px;}

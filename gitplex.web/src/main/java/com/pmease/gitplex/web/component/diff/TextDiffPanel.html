@@ -1,33 +1,32 @@
 <wicket:panel>
-	<div class="text-diff panel panel-default">
-		<div wicket:id="head" class="panel-heading clearfix">
+	<div class="text-diff">
+		<div wicket:id="head" class="head clearfix">
 			<div class="pull-left">
 				<span wicket:id="diffStat"></span>
-				<span wicket:id="title" class="panel-title"></span>
+				<span wicket:id="title" class="title"></span>
 			</div>
 			<div class="pull-right">
-				<span wicket:id="diffOptionsTrigger" class="btn btn-sm btn-default" title="Diff options"><i class="fa fa-gear"></i> <i class="caret"></i></span>
+				<span wicket:id="diffOptionsTrigger" class="btn btn-xs btn-default" title="Diff options"><i class="fa fa-gear"></i> <i class="caret"></i></span>
 				<div wicket:id="diffOptions"></div>
 			</div>
 			<div class="pull-right">
-				<span wicket:id="displayFull" class="btn btn-sm btn-default" title="Expand to display full file"><i class="fa fa-file-txt"></i> </span>
+				<span wicket:id="displayFull" class="btn btn-xs btn-default" title="Expand to display full file"><i class="fa fa-file-txt"></i> </span>
 			</div>
 			<div class="btn-group pull-right">
-				<span wicket:id="prevComment" class="btn btn-default btn-sm comments-nav" title="Previous commented line"><i class="fa fa-arrow-up"></i> <i class="fa fa-comments"></i></span>
-				<span wicket:id="nextComment" class="btn btn-default btn-sm comments-nav" title="Next commented line"><i class="fa fa-arrow-down"></i> <i class="fa fa-comments"></i></span>
-				<span wicket:id="showComments" class="btn btn-default btn-sm show-comments" title="Show comments"><i class="fa fa-eye-open"></i> <i class="fa fa-comments"></i></span>
-				<span wicket:id="hideComments" class="btn btn-default btn-sm hide-comments" title="Hide comments"><i class="fa fa-eye-slash"></i> <i class="fa fa-comments"></i></span>
+				<span wicket:id="prevComment" class="btn btn-default btn-xs comments-nav" title="Previous commented line"><i class="fa fa-arrow-up"></i> <i class="fa fa-comments"></i></span>
+				<span wicket:id="nextComment" class="btn btn-default btn-xs comments-nav" title="Next commented line"><i class="fa fa-arrow-down"></i> <i class="fa fa-comments"></i></span>
+				<span wicket:id="showComments" class="btn btn-default btn-xs show-comments" title="Show comments"><i class="fa fa-eye-open"></i> <i class="fa fa-comments"></i></span>
+				<span wicket:id="hideComments" class="btn btn-default btn-xs hide-comments" title="Hide comments"><i class="fa fa-eye-slash"></i> <i class="fa fa-comments"></i></span>
 			</div>
 			<div wicket:id="diffNavs" class="btn-group pull-right">
-				<span wicket:id="prevDiff" class="btn btn-default btn-sm" title="Previous changed block"><i class="fa fa-arrow-up"></i> <i class="fa fa-diff"></i></span>
-				<span wicket:id="nextDiff" class="btn btn-default btn-sm" title="Next changed block"><i class="fa fa-arrow-down"></i> <i class="fa fa-diff"></i></span>
+				<span wicket:id="prevDiff" class="btn btn-default btn-xs" title="Previous changed block"><i class="fa fa-arrow-up"></i> <i class="fa fa-diff"></i></span>
+				<span wicket:id="nextDiff" class="btn btn-default btn-xs" title="Next changed block"><i class="fa fa-arrow-down"></i> <i class="fa fa-diff"></i></span>
 			</div>
 			<div class="pull-right">
 				<span wicket:id="identical" class="label label-warning">Identical Content</span>
 			</div>
 		</div>
-		
-		<table id="diffs-table" class="table-diff">
+		<table id="diffs-table" class="table-diff body">
 			<wicket:container wicket:id="hunks">
 				<tr wicket:id="head" class="line hunk-head">
 					<td colspan="2" class="action">
@@ -64,36 +63,5 @@
 				</div>
 			</form>
 		</div>
-		
-		<!-- table class="table-diff">
-			<wicket:container wicket:id="lines">
-				<tr wicket:id="contentRow" class="line content">
-					<td class="old line-no">
-						<a wicket:id="addComment" class="add-comment"><i class="fa fa-comment-add"></i></a>
-						<span wicket:id="oldLineNo"></span>
-					</td>
-					<td class="new line-no">
-						<span wicket:id="newLineNo"></span>
-					</td>
-					<td class="text"><wicket:container wicket:id="partials"><span wicket:id="partial"></span></wicket:container></td>
-				</tr>
-				<tr wicket:id="commentsRow" class="line comments">
-					<td colspan="3">
-						<table class="comments">
-							<tr wicket:id="comments">
-								<td class="avatar">
-									<div wicket:id="avatar"></div>
-									<div wicket:id="concerned" class="fa fa-flag concerned-comment" title="Concerned comment"></div>
-								</td>
-								<td class="comment">
-									<div wicket:id="comment"></div>
-								</td>
-							</tr>
-						</table>
-						<div wicket:id="addComment"></div>
-					</td>
-				</tr>
-			</wicket:container>
-		</table-->
 	</div>
 </wicket:panel>

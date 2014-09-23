@@ -17,28 +17,22 @@
 	</wicket:enclosure>
 	<div wicket:id="blobContent"></div>
 	<wicket:fragment wicket:id="notChangedFrag">
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<div class="panel-title"><span wicket:id="title"></span> <span class="label label-warning">unchanged</span></div>
-			</div>
-			<div wicket:id="content" class="panel-body"></div>
+		<div class="head">
+			<div class="title"><span wicket:id="title"></span> <span class="label label-warning">unchanged</span></div>
+			<div wicket:id="content" class="body"></div>
 		</div>				
 	</wicket:fragment>
 	<wicket:fragment wicket:id="emptyFileFrag">
-		<div class="panel panel-default">
-			<div class="panel-heading"><span wicket:id="summary"></span></div>
-			<div class="panel-body">
-				<i class='fa fa-info-circle'></i> <em>File is empty</em>
-			</div>
-		</div>				
+		<div class="head"><span wicket:id="summary"></span></div>
+		<div class="body">
+			<i class='fa fa-info-circle'></i> <em>File is empty</em>
+		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="binaryFileFrag">
-		<div class="panel panel-default">
-			<div class="panel-heading"><span wicket:id="summary"></span></div>
-			<div class="panel-body">
-				<i class='fa fa-info-circle'></i> <em>Binary files</em>
-			</div>
-		</div>				
+		<div class="head"><span wicket:id="summary"></span></div>
+		<div class="body">
+			<i class='fa fa-info-circle'></i> <em>Binary files</em>
+		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="nonFileDiffFrag">
 		<div class="blob-diff">

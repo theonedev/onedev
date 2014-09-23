@@ -12,6 +12,7 @@ import org.apache.wicket.markup.html.pages.AbstractErrorPage;
 import org.apache.wicket.protocol.http.WebApplication;
 
 import com.pmease.commons.bootstrap.Bootstrap;
+import com.pmease.commons.wicket.behavior.StickyBehavior;
 
 import de.agilecoders.wicket.core.settings.BootstrapSettings;
 
@@ -62,7 +63,8 @@ public abstract class AbstractWicketConfig extends WebApplication {
 					target.add(page.getSessionFeedback());
 				
 				for (Component component: map.values()) {
-					target.prependJavaScript(String.format("$('#%s').trigger('sticky_kit:detach');", component.getMarkupId()));
+					if (!component.getBehaviors(StickyBehavior.class).isEmpty())
+						target.prependJavaScript(String.format("$('#%s').trigger('sticky_kit:detach');", component.getMarkupId()));
 					target.appendJavaScript((String.format("$(document).trigger('replace', '%s');", component.getMarkupId())));
 				}
 				

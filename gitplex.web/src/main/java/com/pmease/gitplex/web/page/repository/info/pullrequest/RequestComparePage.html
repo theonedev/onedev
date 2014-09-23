@@ -1,32 +1,25 @@
 <wicket:extend>
 	<div class="compare">
-		<div wicket:id="compareHead" class="head clearfix">
+		<div wicket:id="compareOptions" class="head clearfix">
 			<div class="pull-left btn-group">
-				<span class="btn btn-default old" wicket:id="oldSelector">
+				<span class="btn btn-sm btn-default old" wicket:id="oldSelector">
 					<i class="fa fa-commit"></i> <span wicket:id="label"></span> <i class="caret"></i>
 				</span>
-				<span wicket:id="comparisonSelector" class="btn btn-default" title="Commonly used comparisons">
+				<span wicket:id="comparisonSelector" class="btn btn-sm btn-default" title="Commonly used comparisons">
 					<i class="fa fa-arrow-left"></i> <i class="caret"></i> <i class="fa fa-arrow-right"></i>				
 				</span>
-				<span class="btn btn-default new" wicket:id="newSelector">
+				<span class="btn btn-sm btn-default new" wicket:id="newSelector">
 					<i class="fa fa-commit"></i> <span wicket:id="label"></span> <i class="caret"></i>
 				</span>
 			</div>
 			<div wicket:id="oldChoices"></div>
 			<div wicket:id="newChoices"></div>
 			<div wicket:id="comparisonChoices"></div>
-			<div class="pull-right btn-group">
-				<button wicket:id="prevChange" class="btn btn-default" title="Previous changed file">
-					<i class="fa fa-arrow-slim-left"></i>
-				</button>
-				<button wicket:id="changesTrigger" class="btn btn-default">Changes: <span wicket:id="label"></span> <i class="caret"></i></button>
-				<button wicket:id="nextChange" class="btn btn-default" title="Next changed file">
-					<i class="fa fa-arrow-slim-right"></i>
-				</button>
+			<div class="pull-left">
+				<input wicket:id="changedOnly" type="checkbox"> Show changed files only</input> 
 			</div>
-			<div wicket:id="changesDropdown"></div>
 		</div>
-		<div wicket:id="blobDiff"></div>
+		<div wicket:id="compareResult" class="body"></div>
 	</div>
 	<wicket:fragment wicket:id="commitChoiceFrag">
 		<ul class="commit-choice list-unstyled">
@@ -54,16 +47,5 @@
 				</tr>				
 			</table>
 		</a>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="changesFrag">
-		<div class="panel panel-default compare-result">
-			<div class="panel-heading clearfix">
-				<div class="panel-title pull-left">Compare Result</div> 
-				<div class="pull-right">
-					<input wicket:id="changesOnly" type="checkbox"> changes only</input> 
-				</div>
-			</div>
-			<div wicket:id="changes" class="panel-body"></div>
-		</div>
 	</wicket:fragment>
 </wicket:extend>
