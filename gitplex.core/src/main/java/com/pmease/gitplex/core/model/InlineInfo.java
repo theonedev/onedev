@@ -11,7 +11,7 @@ import com.pmease.gitplex.core.comment.InlineContext;
 @Embeddable
 public class InlineInfo implements Serializable {
 
-	private String commit;
+	private String commitHash;
 	
 	private String file;
 	
@@ -20,16 +20,16 @@ public class InlineInfo implements Serializable {
 	@Lob
 	private InlineContext context;
 	
-	private String oldCommit;
+	private String oldCommitHash;
 	
-	private String newCommit;
+	private String newCommitHash;
 
-	public String getCommit() {
-		return commit;
+	public String getCommitHash() {
+		return commitHash;
 	}
 
-	public void setCommit(String commit) {
-		this.commit = commit;
+	public void setCommitHash(String commitHash) {
+		this.commitHash = commitHash;
 	}
 
 	public String getFile() {
@@ -56,20 +56,20 @@ public class InlineInfo implements Serializable {
 		this.context = context;
 	}
 
-	public String getOldCommit() {
-		return oldCommit;
+	public String getOldCommitHash() {
+		return oldCommitHash;
 	}
 
-	public void setOldCommit(String oldCommit) {
-		this.oldCommit = oldCommit;
+	public void setOldCommitHash(String oldCommitHash) {
+		this.oldCommitHash = oldCommitHash;
 	}
 
-	public String getNewCommit() {
-		return newCommit;
+	public String getNewCommitHash() {
+		return newCommitHash;
 	}
 
-	public void setNewCommit(String newCommit) {
-		this.newCommit = newCommit;
+	public void setNewCommitHash(String newCommitHash) {
+		this.newCommitHash = newCommitHash;
 	}
 
 }

@@ -3,10 +3,12 @@ package com.pmease.gitplex.web.page.repository.info.pullrequest;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -64,13 +66,13 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	private static final String INTEGRATION_PREVIEW = "Integration Preview";
 	
-	public static final String LATEST_COMMIT = "latest";
+	public static final String LATEST_COMMIT_NAME = "latest";
 	
 	private String file;
 	
-	private String oldCommit;
+	private String oldCommitHash;
 	
-	private String newCommit;
+	private String newCommitHash;
 	
 	private final IModel<PullRequestComment> concernedCommentModel;
 	
@@ -82,34 +84,33 @@ public class RequestComparePage extends RequestDetailPage {
 			LinkedHashMap<String, CommitDescription> choices = new LinkedHashMap<>();
 			PullRequest request = getPullRequest();
 
-			String concernedCommit;
+			String concernedCommitHash;
 			if (getConcernedComment() != null)
-				concernedCommit = getConcernedComment().getCommit();
+				concernedCommitHash = getConcernedComment().getCommitHash();
 			else
-				concernedCommit = null;
+				concernedCommitHash = null;
 
 			String name = "Base of Pull Request";
-			if (request.getBaseCommit().equals(concernedCommit))
+			if (request.getBaseCommitHash().equals(concernedCommitHash))
 				name += " - Concerned";
-			CommitDescription description = new CommitDescription(name, 
-					getRepository().git().showRevision(request.getBaseCommit()).getSubject());
-			choices.put(request.getBaseCommit(), description);
+			CommitDescription description = new CommitDescription(name, request.getBaseCommit().getSubject());
+			choices.put(request.getBaseCommitHash(), description);
 			
 			for (int i=0; i<request.getSortedUpdates().size(); i++) {
 				PullRequestUpdate update = request.getSortedUpdates().get(i);
 				int updateNo = i+1;
 				name = "Head of Update #" + updateNo;
-				String commitHash = update.getHeadCommit();
-				if (commitHash.equals(concernedCommit))
+				Commit commit = update.getHeadCommit();
+				if (commit.getHash().equals(concernedCommitHash))
 					name += " - Concerned";
-				description = new CommitDescription(name, getRepository().getCommit(commitHash).getSubject());
-				choices.put(commitHash, description);
+				description = new CommitDescription(name, commit.getSubject());
+				choices.put(commit.getHash(), description);
 			}
 
-			String targetHead = request.getTarget().getHeadCommit();
+			String targetHead = request.getTarget().getHeadCommitHash();
 			if (!choices.containsKey(targetHead)) {
 				description = new CommitDescription(TARGET_BRANCH_HEAD, 
-						getRepository().git().showRevision(targetHead).getSubject());
+						getRepository().getCommit(targetHead).getSubject());
 				choices.put(targetHead, description);
 			}
 
@@ -117,7 +118,7 @@ public class RequestComparePage extends RequestDetailPage {
 			if (request.isOpen() 
 					&& integrationInfo.getIntegrationHead() != null 
 					&& !integrationInfo.getIntegrationHead().equals(integrationInfo.getRequestHead())) { 
-				Commit commit = getRepository().git().showRevision(request.getIntegrationInfo().getIntegrationHead());
+				Commit commit = getRepository().getCommit(request.getIntegrationInfo().getIntegrationHead());
 				choices.put(request.getIntegrationInfo().getIntegrationHead(), 
 						new CommitDescription(INTEGRATION_PREVIEW, commit.getSubject()));
 			}
@@ -147,36 +148,36 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		};
 		
-		oldCommit = params.get("original").toString();
-		newCommit = params.get("revised").toString();
+		oldCommitHash = params.get("original").toString();
+		newCommitHash = params.get("revised").toString();
 
-		if (oldCommit != null) {
-			if (oldCommit.equals(LATEST_COMMIT))
-				oldCommit = getPullRequest().getLatestUpdate().getHeadCommit();
-			else if (!commitsModel.getObject().containsKey(oldCommit))
-				throw new IllegalArgumentException("Commit '" + oldCommit + "' is not relevant to current pull request.");
+		if (oldCommitHash != null) {
+			if (oldCommitHash.equals(LATEST_COMMIT_NAME))
+				oldCommitHash = getPullRequest().getLatestUpdate().getHeadCommitHash();
+			else if (!commitsModel.getObject().containsKey(oldCommitHash))
+				throw new IllegalArgumentException("Commit '" + oldCommitHash + "' is not relevant to current pull request.");
 		}
 
-		if (newCommit != null) {
-			if (newCommit.equals(LATEST_COMMIT))
-				newCommit = getPullRequest().getLatestUpdate().getHeadCommit();
-			else if (!commitsModel.getObject().containsKey(newCommit))
-				throw new IllegalArgumentException("Commit '" + newCommit + "' is not relevant to current pull request.");
+		if (newCommitHash != null) {
+			if (newCommitHash.equals(LATEST_COMMIT_NAME))
+				newCommitHash = getPullRequest().getLatestUpdate().getHeadCommitHash();
+			else if (!commitsModel.getObject().containsKey(newCommitHash))
+				throw new IllegalArgumentException("Commit '" + newCommitHash + "' is not relevant to current pull request.");
 		}
 		
 		PullRequestComment comment = getConcernedComment();
 		if (comment != null) {
 			if (file == null)
 				file = comment.getInlineInfo().getFile();
-			if (oldCommit == null)
-				oldCommit = comment.getInlineInfo().getOldCommit();
-			if (newCommit == null)
-				newCommit = comment.getInlineInfo().getNewCommit();
+			if (oldCommitHash == null)
+				oldCommitHash = comment.getInlineInfo().getOldCommitHash();
+			if (newCommitHash == null)
+				newCommitHash = comment.getInlineInfo().getNewCommitHash();
 		} else {
-			if (oldCommit == null)
-				oldCommit = getPullRequest().getBaseCommit();
-			if (newCommit == null)
-				newCommit = getPullRequest().getLatestUpdate().getHeadCommit();
+			if (oldCommitHash == null)
+				oldCommitHash = getPullRequest().getBaseCommitHash();
+			if (newCommitHash == null)
+				newCommitHash = getPullRequest().getLatestUpdate().getHeadCommitHash();
 		}
 	}
 	
@@ -195,19 +196,19 @@ public class RequestComparePage extends RequestDetailPage {
 
 			@Override
 			protected String load() {
-				CommitDescription description = commitsModel.getObject().get(oldCommit);
+				CommitDescription description = commitsModel.getObject().get(oldCommitHash);
 				Preconditions.checkNotNull(description);
 				if (description.getName() != null)
-					return GitUtils.abbreviateSHA(oldCommit) + " - " + description.getName();
+					return GitUtils.abbreviateSHA(oldCommitHash) + " - " + description.getName();
 				else
-					return GitUtils.abbreviateSHA(oldCommit);
+					return GitUtils.abbreviateSHA(oldCommitHash);
 			}
 			
 		}).add(new TooltipBehavior(new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
-				CommitDescription description = commitsModel.getObject().get(oldCommit);
+				CommitDescription description = commitsModel.getObject().get(oldCommitHash);
 				Preconditions.checkNotNull(description);
 				return description.getSubject();
 			}
@@ -231,20 +232,20 @@ public class RequestComparePage extends RequestDetailPage {
 
 			@Override
 			protected String load() {
-				CommitDescription description = commitsModel.getObject().get(newCommit);
+				CommitDescription description = commitsModel.getObject().get(newCommitHash);
 				Preconditions.checkNotNull(description);
 				
 				if (description.getName() != null)
-					return GitUtils.abbreviateSHA(newCommit) + " - " + description.getName();
+					return GitUtils.abbreviateSHA(newCommitHash) + " - " + description.getName();
 				else
-					return GitUtils.abbreviateSHA(newCommit);
+					return GitUtils.abbreviateSHA(newCommitHash);
 			}
 			
 		}).add(new TooltipBehavior(new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
-				CommitDescription description = commitsModel.getObject().get(newCommit);
+				CommitDescription description = commitsModel.getObject().get(newCommitHash);
 				Preconditions.checkNotNull(description);
 				return description.getSubject();
 			}
@@ -274,7 +275,7 @@ public class RequestComparePage extends RequestDetailPage {
 						@Override
 						protected void onSelect() {
 							PageParameters params = paramsOf(getPullRequest(), 
-									getPullRequest().getBaseCommit(), getConcernedComment().getCommit(), null,
+									getPullRequest().getBaseCommitHash(), getConcernedComment().getCommitHash(), null,
 									getConcernedComment());
 							setResponsePage(RequestComparePage.class, params);
 						}
@@ -285,7 +286,7 @@ public class RequestComparePage extends RequestDetailPage {
 						@Override
 						protected void onSelect() {
 							PageParameters params = paramsOf(getPullRequest(), 
-									getConcernedComment().getCommit(), LATEST_COMMIT, null,
+									getConcernedComment().getCommitHash(), LATEST_COMMIT_NAME, null,
 									getConcernedComment());
 							setResponsePage(RequestComparePage.class, params);
 						}
@@ -298,7 +299,7 @@ public class RequestComparePage extends RequestDetailPage {
 					@Override
 					protected void onSelect() {
 						PageParameters params = paramsOf(getPullRequest(), 
-								getPullRequest().getBaseCommit(), LATEST_COMMIT, 
+								getPullRequest().getBaseCommitHash(), LATEST_COMMIT_NAME, 
 								file, getConcernedComment());
 						setResponsePage(RequestComparePage.class, params);
 					}
@@ -315,7 +316,7 @@ public class RequestComparePage extends RequestDetailPage {
 						@Override
 						protected void onSelect() {
 							PageParameters params = paramsOf(getPullRequest(), 
-									getPullRequest().getLatestUpdate().getHeadCommit(), 
+									getPullRequest().getLatestUpdate().getHeadCommitHash(), 
 									integrationInfo.getIntegrationHead(),
 									file, getConcernedComment());
 							setResponsePage(RequestComparePage.class, params);
@@ -326,8 +327,8 @@ public class RequestComparePage extends RequestDetailPage {
 				
 				for (int i=0; i<getPullRequest().getSortedUpdates().size(); i++) {
 					PullRequestUpdate update = getPullRequest().getSortedUpdates().get(i);
-					final String baseCommit = update.getBaseCommit();
-					final String headCommit = update.getHeadCommit();
+					final String baseCommit = update.getBaseCommitHash();
+					final String headCommit = update.getHeadCommitHash();
 					int index = i+1;
 					String oldLabel;
 					if (index > 1) 
@@ -373,28 +374,28 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		}));
 
-		add(compareResult = new CompareResultPanel("compareResult", repoModel, oldCommit, newCommit, file) {
+		add(compareResult = new CompareResultPanel("compareResult", repoModel, oldCommitHash, newCommitHash, file) {
 			
 			@Override
 			protected InlineCommentSupport getInlineCommentSupport(final Change change) {
-				Map<String, CommitDescription> commits = commitsModel.getObject();
-				String oldCommitName = Preconditions.checkNotNull(commits.get(oldCommit)).getName();
-				String newCommitName = Preconditions.checkNotNull(commits.get(newCommit)).getName();
-				if (oldCommitName.equals(TARGET_BRANCH_HEAD) || oldCommitName.equals(INTEGRATION_PREVIEW)
-						|| newCommitName.equals(TARGET_BRANCH_HEAD) || newCommitName.equals(INTEGRATION_PREVIEW)) {
+				Set<String> commentables = new HashSet<>();
+				commentables.add(getPullRequest().getBaseCommitHash());
+				for (PullRequestUpdate update: getPullRequest().getUpdates())
+					commentables.add(update.getHeadCommitHash());
+				if (!commentables.contains(oldCommitHash) || !commentables.contains(newCommitHash)) {
 					return null;
 				} else {
 					return new InlineCommentSupport() {
 						
 						@Override
 						public Map<Integer, List<InlineComment>> getOldComments() {
-							RevAwareChange revAwareChange = new RevAwareChange(change, oldCommit, newCommit);
+							RevAwareChange revAwareChange = new RevAwareChange(change, oldCommitHash, newCommitHash);
 							return getPullRequest().getComments(revAwareChange).getOldComments();
 						}
 						
 						@Override
 						public Map<Integer, List<InlineComment>> getNewComments() {
-							RevAwareChange revAwareChange = new RevAwareChange(change, oldCommit, newCommit);
+							RevAwareChange revAwareChange = new RevAwareChange(change, oldCommitHash, newCommitHash);
 							return getPullRequest().getComments(revAwareChange).getNewComments();
 						}
 						
@@ -415,9 +416,9 @@ public class RequestComparePage extends RequestDetailPage {
 							comment.setRequest(getPullRequest());
 							InlineInfo inlineInfo = new InlineInfo();
 							comment.setInlineInfo(inlineInfo);
-							inlineInfo.setCommit(commit);
-							inlineInfo.setOldCommit(oldCommit);
-							inlineInfo.setNewCommit(newCommit);
+							inlineInfo.setCommitHash(commit);
+							inlineInfo.setOldCommitHash(oldCommitHash);
+							inlineInfo.setNewCommitHash(newCommitHash);
 							inlineInfo.setFile(file);
 							inlineInfo.setLine(line);
 							InlineContext context = getInlineContext(comment);
@@ -476,15 +477,15 @@ public class RequestComparePage extends RequestDetailPage {
 			// to cause LazyInitializationException
 			if (getConcernedComment() != null 
 					&& HibernateUtils.getId(comment).equals(HibernateUtils.getId(getConcernedComment()))) {
-				PageParameters params = paramsOf(getPullRequest(), oldCommit, newCommit, 
+				PageParameters params = paramsOf(getPullRequest(), oldCommitHash, newCommitHash, 
 						comment.getInlineInfo().getFile(), null);
 				setResponsePage(RequestComparePage.class, params);
 			}
 		} else if (event.getPayload() instanceof CommentReplied) {
 			CommentReplied commentReplied = (CommentReplied) event.getPayload();
 			PullRequestComment comment = (PullRequestComment) commentReplied.getReply().getComment();
-			comment.getInlineInfo().setOldCommit(oldCommit);
-			comment.getInlineInfo().setNewCommit(newCommit);
+			comment.getInlineInfo().setOldCommitHash(oldCommitHash);
+			comment.getInlineInfo().setNewCommitHash(newCommitHash);
 
 			InlineContext context = compareResult.getInlineContext(comment);
 			Preconditions.checkNotNull(context);
@@ -552,10 +553,10 @@ public class RequestComparePage extends RequestDetailPage {
 							Map.Entry<String, CommitDescription> entry = item.getModelObject();
 							if (forBase) {
 								setResponsePage(RequestComparePage.class, 
-										paramsOf(getPullRequest(), entry.getKey(), newCommit, file, getConcernedComment()));
+										paramsOf(getPullRequest(), entry.getKey(), newCommitHash, file, getConcernedComment()));
 							} else {
 								setResponsePage(RequestComparePage.class, 
-										paramsOf(getPullRequest(), oldCommit, entry.getKey(), file, getConcernedComment()));
+										paramsOf(getPullRequest(), oldCommitHash, entry.getKey(), file, getConcernedComment()));
 							}
 						}
 						

@@ -86,7 +86,7 @@ public class PullRequest extends AbstractEntity {
 	private Branch source;
 	
 	@Column(nullable=false)
-	private String baseCommit;
+	private String baseCommitHash;
 	
 	@Transient
 	private Git sandbox;
@@ -125,6 +125,8 @@ public class PullRequest extends AbstractEntity {
 	private transient PullRequestUpdate referentialUpdate;
 	
 	private transient Set<String> pendingCommits;
+	
+	private transient Collection<Commit> mergedCommits;
 	
 	private transient Map<ChangeKey, ChangeComments> commentsCache = new HashMap<>();
 	
@@ -206,14 +208,18 @@ public class PullRequest extends AbstractEntity {
 		this.source = source;
 	}
 
-	public String getBaseCommit() {
-		return baseCommit;
+	public String getBaseCommitHash() {
+		return baseCommitHash;
 	}
 
-	public void setBaseCommit(String baseCommit) {
-		this.baseCommit = baseCommit;
+	public void setBaseCommitHash(String baseCommitHash) {
+		this.baseCommitHash = baseCommitHash;
 	}
-
+	
+	public Commit getBaseCommit() {
+		return getTarget().getRepository().getCommit(getBaseCommitHash());
+	}
+	
 	public Git git() {
 		if (sandbox == null)
 			return getTarget().getRepository().git();
@@ -367,7 +373,7 @@ public class PullRequest extends AbstractEntity {
 			Git git = getTarget().getRepository().git();
 			for (int i=getSortedUpdates().size()-1; i>=0; i--) {
 				PullRequestUpdate update = getSortedUpdates().get(i);
-				if (!git.isAncestor(update.getHeadCommit(), getTarget().getHeadCommit()))
+				if (!git.isAncestor(update.getHeadCommitHash(), getTarget().getHeadCommitHash()))
 					effectiveUpdates.add(update);
 				else 
 					break;
@@ -384,7 +390,7 @@ public class PullRequest extends AbstractEntity {
 	
 	public Collection<String> findTouchedFiles() {
 		Git git = getTarget().getRepository().git();
-		return git.listChangedFiles(getTarget().getHeadCommit(), getLatestUpdate().getHeadCommit(), null);
+		return git.listChangedFiles(getTarget().getHeadCommitHash(), getLatestUpdate().getHeadCommitHash(), null);
 	}
 
 	public String getBaseRef() {
@@ -518,9 +524,8 @@ public class PullRequest extends AbstractEntity {
 		if (pendingCommits == null) {
 			pendingCommits = new HashSet<>();
 			Repository repo = getTarget().getRepository();
-			for (Commit commit: repo.git().log(getTarget().getHeadCommit(), getLatestUpdate().getHeadCommit(), null, 0, 0)) {
+			for (Commit commit: repo.git().log(getTarget().getHeadCommitHash(), getLatestUpdate().getHeadCommitHash(), null, 0, 0))
 				pendingCommits.add(commit.getHash());
-			}
 		}
 		return pendingCommits;
 	}
@@ -541,6 +546,24 @@ public class PullRequest extends AbstractEntity {
 		return comments;
 	}
 
+	/**
+	 * Merged commits represent commits already merged to target branch since base commit.
+	 * 
+	 * @return
+	 * 			commits already merged to target branch since base commit
+	 */
+	public Collection<Commit> getMergedCommits() {
+		if (mergedCommits == null) {
+			mergedCommits = new HashSet<>();
+
+			Branch target = getTarget();
+			Repository repo = target.getRepository();
+			for (Commit commit: repo.git().log(getBaseCommitHash(), target.getHeadCommitHash(), null, 0, 0))
+				mergedCommits.add(commit);
+		}
+		return mergedCommits;
+	}
+
 	private static class ChangeKey extends Triple<String, String, String> {
 
 		public ChangeKey(String oldCommit, String newCommit, String file) {
@@ -548,4 +571,5 @@ public class PullRequest extends AbstractEntity {
 		}
 		
 	}
+	
 }

@@ -1,12 +1,12 @@
 package com.pmease.gitplex.core.model;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,12 +19,17 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import org.apache.commons.lang3.SerializationUtils;
+
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.LockUtils;
+import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.manager.StorageManager;
 
 @SuppressWarnings("serial")
 @Entity
@@ -35,7 +40,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	private PullRequest request;
 	
 	@Column(nullable=false)
-	private String headCommit;
+	private String headCommitHash;
 
 	@ManyToOne
 	private User user;
@@ -46,11 +51,9 @@ public class PullRequestUpdate extends AbstractEntity {
 	@OneToMany(mappedBy="update", cascade=CascadeType.REMOVE)
 	private Collection<Vote> votes = new ArrayList<Vote>();
 	
-	private transient String referentialCommit;
-	
-	private transient String baseCommit;
-	
-	private transient Collection<Commit> mergedCommits;
+	private transient String referentialCommitHash;
+
+	private transient List<Commit> logCommits;
 	
 	private transient List<Commit> commits;
 	
@@ -64,12 +67,12 @@ public class PullRequestUpdate extends AbstractEntity {
 		this.request = request;
 	}
 
-	public String getHeadCommit() {
-		return headCommit;
+	public String getHeadCommitHash() {
+		return headCommitHash;
 	}
 	
-	public void setHeadCommit(String headCommit) {
-		this.headCommit = headCommit;
+	public void setHeadCommitHash(String headCommitHash) {
+		this.headCommitHash = headCommitHash;
 	}
 	
     public User getUser() {
@@ -120,28 +123,29 @@ public class PullRequestUpdate extends AbstractEntity {
 	 * @return
 	 * 			referential commit used for change calculation of current update
 	 */
-	public String getReferentialCommit() {
-		if (referentialCommit == null) {
+	public String getReferentialCommitHash() {
+		if (referentialCommitHash == null) {
 			Git git = getRequest().getTarget().getRepository().git();
-			String mergeBase = git.calcMergeBase(getHeadCommit(), getRequest().getTarget().getHeadCommit());
+			String mergeBase = git.calcMergeBase(getHeadCommitHash(), getRequest().getTarget().getHeadCommitHash());
 
-			if (git.isAncestor(getBaseCommit(), mergeBase)) { 
-				referentialCommit = mergeBase;
-			} else if (git.isAncestor(mergeBase, getBaseCommit())) {
-				referentialCommit = getBaseCommit();
+			if (git.isAncestor(getBaseCommitHash(), mergeBase)) { 
+				referentialCommitHash = mergeBase;
+			} else if (git.isAncestor(mergeBase, getBaseCommitHash())) {
+				referentialCommitHash = getBaseCommitHash();
 			} else {
-				Lock lock = LockUtils.lock(getLockName());
+				Lock lock = LockUtils.getLock("update.getReferentialCommit." + getId());
 				try {
+					lock.lockInterruptibly();
 					String changeRef = getChangeRef();
-					referentialCommit = git.parseRevision(changeRef, false);
+					referentialCommitHash = git.parseRevision(changeRef, false);
 	
-					if (referentialCommit != null) {
-						Commit commit = git.showRevision(referentialCommit);
-						if (!commit.getParentHashes().contains(mergeBase) || !commit.getParentHashes().contains(getBaseCommit())) 
-							referentialCommit = null;
+					if (referentialCommitHash != null) {
+						Commit commit = git.showRevision(referentialCommitHash);
+						if (!commit.getParentHashes().contains(mergeBase) || !commit.getParentHashes().contains(getBaseCommitHash())) 
+							referentialCommitHash = null;
 					} 
 					
-					if (referentialCommit == null) {
+					if (referentialCommitHash == null) {
 						File tempDir = FileUtils.createTempDir();
 						try {
 							Git tempGit = new Git(tempDir);
@@ -155,20 +159,22 @@ public class PullRequestUpdate extends AbstractEntity {
 							tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, branchName);
 							tempGit.updateRef("HEAD", mergeBase, null, null);
 							tempGit.reset(null, null);
-							Preconditions.checkState(tempGit.merge(getBaseCommit(), null, null, "ours", null) != null);
+							Preconditions.checkState(tempGit.merge(getBaseCommitHash(), null, null, "ours", null) != null);
 							git.fetch(tempGit, "+HEAD:" + changeRef);
-							referentialCommit = git.parseRevision(changeRef, true);
+							referentialCommitHash = git.parseRevision(changeRef, true);
 						} finally {
 							FileUtils.deleteDir(tempDir);
 						}
 					}
+				} catch (InterruptedException e) {
+					throw new RuntimeException(e);
 				} finally {
 					lock.unlock();
 				}
 			}
 		}
 		
-		return referentialCommit;
+		return referentialCommitHash;
 	}
 	
 	/**
@@ -196,15 +202,20 @@ public class PullRequestUpdate extends AbstractEntity {
 		git.deleteRef(getChangeRef(), null, null);
 	}	
 	
-	public String getLockName() {
-		Preconditions.checkNotNull(getId());
-		return "pull request update: " + getId();
-	}
-	
 	public Collection<String> getChangedFiles() {
 		if (changedFiles == null) 
-			changedFiles = getRequest().git().listChangedFiles(getReferentialCommit(), getHeadCommit(), null);
+			changedFiles = getRequest().git().listChangedFiles(getReferentialCommitHash(), getHeadCommitHash(), null);
 		return changedFiles;
+	}
+	
+	public String getBaseCommitHash() {
+		PullRequest request = getRequest();
+
+		int index = request.getSortedUpdates().indexOf(this);
+		if (index > 0)
+			return request.getSortedUpdates().get(index-1).getHeadCommitHash();
+		else
+			return request.getBaseCommitHash();
 	}
 	
 	/**
@@ -215,43 +226,62 @@ public class PullRequestUpdate extends AbstractEntity {
 	 * @return
 	 * 			base commit of this update
 	 */
-	public String getBaseCommit() {
-		if (baseCommit == null) {
-			PullRequest request = getRequest();
+	public Commit getBaseCommit() {
+		PullRequest request = getRequest();
 
-			int index = request.getSortedUpdates().indexOf(this);
-			if (index > 0)
-				baseCommit = request.getSortedUpdates().get(index-1).getHeadCommit();
-			else
-				baseCommit = request.getBaseCommit();
-		}
-		return baseCommit;
+		int index = request.getSortedUpdates().indexOf(this);
+		if (index > 0)
+			return request.getSortedUpdates().get(index-1).getHeadCommit();
+		else
+			return request.getBaseCommit();
 	}
 	
-	/**
-	 * Merged commits represent commits already merged to target branch since base commit.
-	 * 
-	 * @return
-	 * 			commits already merged to target branch since base commit
-	 */
-	public Collection<Commit> getMergedCommits() {
-		if (mergedCommits == null) {
-			mergedCommits = new HashSet<>();
-
-			Branch target = getRequest().getTarget();
-			Repository repo = target.getRepository();
-			for (Commit commit: repo.git().log(getBaseCommit(), target.getHeadCommit(), null, 0, 0)) {
-				mergedCommits.add(commit);
+	@SuppressWarnings("unchecked")
+	private List<Commit> getLogCommits() {
+		if (logCommits == null) {
+			StorageManager storageManager = GitPlex.getInstance(StorageManager.class);
+			String lockName = "update.getCommits." + getId();
+			File logFile = new File(storageManager.getCacheDir(this), "log");
+			Lock lock = LockUtils.getReadWriteLock(lockName).readLock();
+			try {
+				lock.lockInterruptibly();
+				if (logFile.exists()) {
+					byte[] bytes = FileUtils.readFileToByteArray(logFile);
+					logCommits = (List<Commit>) SerializationUtils.deserialize(bytes);
+				}
+			} catch (Exception e) {
+				Throwables.propagate(e);
+			} finally {
+				lock.unlock();
+			}
+			
+			if (logCommits == null) {
+				lock = LockUtils.getReadWriteLock(lockName).writeLock();
+				try {
+					lock.lockInterruptibly();
+					if (logFile.exists()) {
+						byte[] bytes = FileUtils.readFileToByteArray(logFile);
+						logCommits = (List<Commit>) SerializationUtils.deserialize(bytes);
+					} else {
+						Git git = getRequest().getTarget().getRepository().git();
+						logCommits = git.log(getBaseCommitHash(), getHeadCommitHash(), null, 0, 0);
+						FileUtils.writeByteArrayToFile(logFile, SerializationUtils.serialize((Serializable) logCommits));
+					}
+				} catch (Exception e) {
+					Throwables.propagate(e);
+				} finally {
+					lock.unlock();
+				}
 			}
 		}
-		return mergedCommits;
+		return logCommits;
 	}
-	
+
 	/**
-	 * Get commits belonging to this update, ordered by commit date 
+	 * Get commits belonging to this update, ordered by commit id
 	 * 
 	 * @return
-	 * 			commits belonging to this update ordered by commit date
+	 * 			commits belonging to this update ordered by commit id
 	 */
 	public List<Commit> getCommits() {
 		if (commits == null) {
@@ -274,27 +304,26 @@ public class PullRequestUpdate extends AbstractEntity {
 			commits = new ArrayList<>();
 
 			Map<String, ScoreAwareCommit> allCommits = new LinkedHashMap<>(); 
-			Git git = getRequest().getTarget().getRepository().git();
-			for (Commit commit: git.log(getBaseCommit(), getHeadCommit(), null, 0, 0)) {
+			for (Commit commit: getLogCommits()) {
 				ScoreAwareCommit scoreAwareCommit = new ScoreAwareCommit();
 				scoreAwareCommit.setCommit(commit);
 				allCommits.put(commit.getHash(), scoreAwareCommit);
 			}
 
-			ScoreAwareCommit headCommit = allCommits.get(getHeadCommit());
+			ScoreAwareCommit headCommit = allCommits.get(getHeadCommitHash());
 			if (headCommit != null) {
 				headCommit.setScore(0);
 				updateAffinityScores(allCommits, headCommit);
 			}
 			
 			Map<String, ScoreAwareCommit> mergedCommits = new HashMap<>();
-			for (Commit commit: getMergedCommits()) {
+			for (Commit commit: getRequest().getMergedCommits()) {
 				ScoreAwareCommit scoredCommit = new ScoreAwareCommit();
 				scoredCommit.setCommit(commit);
 				mergedCommits.put(commit.getHash(), scoredCommit);
 			}
 			
-			headCommit = mergedCommits.get(getRequest().getTarget().getHeadCommit());
+			headCommit = mergedCommits.get(getRequest().getTarget().getHeadCommitHash());
 			if (headCommit != null) {
 				headCommit.setScore(0);
 				updateAffinityScores(mergedCommits, headCommit);
@@ -302,9 +331,8 @@ public class PullRequestUpdate extends AbstractEntity {
 			
 			for (ScoreAwareCommit commit: allCommits.values()) {
 				ScoreAwareCommit mergedCommit = mergedCommits.get(commit.getCommit().getHash());
-				if (mergedCommit == null || mergedCommit.getScore() >= commit.getScore()) {
+				if (mergedCommit == null || mergedCommit.getScore() >= commit.getScore())
 					commits.add(commit.getCommit());
-				} 
 			}
 			
 			getRequest().getTarget().getRepository().cacheCommits(commits);
@@ -312,6 +340,12 @@ public class PullRequestUpdate extends AbstractEntity {
 			Collections.reverse(commits);
 		}
 		return commits;
+	}
+	
+	public Commit getHeadCommit() {
+		Commit headCommit = getLogCommits().get(0);
+		Preconditions.checkState(headCommit.getHash().equals(getHeadCommitHash()));
+		return headCommit;
 	}
 	
 	/*

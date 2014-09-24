@@ -108,8 +108,8 @@ public class DefaultPullRequestManager implements PullRequestManager {
 			@Override
 			public Void call() throws Exception {
 				Git git = request.getTarget().getRepository().git();
-				String branchHead = request.getTarget().getHeadCommit();
-				String requestHead = request.getLatestUpdate().getHeadCommit();
+				String branchHead = request.getTarget().getHeadCommitHash();
+				String requestHead = request.getLatestUpdate().getHeadCommitHash();
 				
 				String integrateRef = request.getIntegrateRef();
 				
@@ -256,14 +256,14 @@ public class DefaultPullRequestManager implements PullRequestManager {
 							request.getIntegrationInfo().getIntegrationHead(), 
 							request.getIntegrationInfo().getRequestHead(), "Rebase for pull request: " +request.getId())) {
 
-						request.getSource().setHeadCommit(request.getIntegrationInfo().getIntegrationHead());
+						request.getSource().setHeadCommitHash(request.getIntegrationInfo().getIntegrationHead());
 						request.getSource().setUpdater(user);
 						branchManager.save(request.getSource());
 
 						PullRequestUpdate update = new PullRequestUpdate();
 						update.setRequest(request);
 						update.setUser(user);
-						update.setHeadCommit(request.getIntegrationInfo().getIntegrationHead());
+						update.setHeadCommitHash(request.getIntegrationInfo().getIntegrationHead());
 						request.getUpdates().add(update);
 
 						pullRequestUpdateManager.save(update);
@@ -277,7 +277,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 						request.getIntegrationInfo().getIntegrationHead(), 
 						request.getIntegrationInfo().getBranchHead(), 
 						comment!=null?comment:"Pull request #" + request.getId())) {
-					request.getTarget().setHeadCommit(request.getIntegrationInfo().getIntegrationHead());
+					request.getTarget().setHeadCommitHash(request.getIntegrationInfo().getIntegrationHead());
 					request.getTarget().setUpdater(user);
 					branchManager.save(request.getTarget());
 					
@@ -329,7 +329,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	public void send(PullRequest request) {
 		dao.persist(request);
 
-		request.git().updateRef(request.getBaseRef(), request.getBaseCommit(), null, null);
+		request.git().updateRef(request.getBaseRef(), request.getBaseCommitHash(), null, null);
 		
 		for (PullRequestUpdate update: request.getUpdates()) {
 			update.setDate(new Date(System.currentTimeMillis() + 1000));

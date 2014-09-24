@@ -59,7 +59,7 @@ public class IfTouchSpecifiedFilePatterns extends FileGateKeeper {
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		for (String file: branch.getRepository().git().listChangedFiles(branch.getHeadCommit(), commit, null)) {
+		for (String file: branch.getRepository().git().listChangedFiles(branch.getHeadCommitHash(), commit, null)) {
 			if (WildcardUtils.matchPath(filePatterns, file))
 					return approved("Touched files match patterns '" + filePatterns + "'.");
 		}

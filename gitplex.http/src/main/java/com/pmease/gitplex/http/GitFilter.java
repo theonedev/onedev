@@ -118,7 +118,7 @@ public class GitFilter implements Filter {
 		environments.put("GITOP_URL", serverUrl);
 		environments.put("GITOP_USER_ID", User.getCurrentId().toString());
 		environments.put("GITOP_REPOSITORY_ID", repository.getId().toString());
-		File gitDir = storageManager.getStorage(repository);
+		File gitDir = storageManager.getRepoDir(repository);
 
 		if (GitSmartHttpTools.isUploadPack(request)) {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(repository))) {
@@ -151,7 +151,7 @@ public class GitFilter implements Filter {
 		Repository repository = getRepository(request, response, repoInfo);
 		String service = request.getParameter("service");
 		
-		File gitDir = storageManager.getStorage(repository);
+		File gitDir = storageManager.getRepoDir(repository);
 
 		if (service.contains("upload")) {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(repository))) {

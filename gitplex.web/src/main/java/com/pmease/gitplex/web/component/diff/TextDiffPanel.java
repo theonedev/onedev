@@ -883,7 +883,7 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 	@Override
 	public InlineContext getInlineContext(InlineComment comment) {
 		int oldLine = -1;
-		if (comment.getCommit().equals(change.getOldRevision())) {
+		if (comment.getCommitHash().equals(change.getOldRevision())) {
 			oldLine = comment.getLine();
 		} else {
 			for (Map.Entry<Integer, List<InlineComment>> entry: commentSupport.getOldComments().entrySet()) {
@@ -895,12 +895,12 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 		}
 				
 		int newLine = -1;
-		if (comment.getCommit().equals(change.getNewRevision())) {
+		if (comment.getCommitHash().equals(change.getNewRevision())) {
 			newLine = comment.getLine();
 		} else {
 			for (Map.Entry<Integer, List<InlineComment>> entry: commentSupport.getNewComments().entrySet()) {
 				if (entry.getValue().contains(comment)
-					|| comment.getCommit().equals(change.getNewRevision()) && comment.getLine() == entry.getKey()) {
+					|| comment.getCommitHash().equals(change.getNewRevision()) && comment.getLine() == entry.getKey()) {
 					newLine = entry.getKey();
 					break;
 				}

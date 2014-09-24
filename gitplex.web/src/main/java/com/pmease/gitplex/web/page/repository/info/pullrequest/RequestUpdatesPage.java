@@ -68,7 +68,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 				int updateNo = updates.indexOf(update) + 1;
 				updateItem.add(new Label("updateNo", updateNo));
 				PageParameters params = RequestComparePage.paramsOf(
-						update.getRequest(), update.getBaseCommit(), update.getHeadCommit(), null, null);
+						update.getRequest(), update.getBaseCommitHash(), update.getHeadCommitHash(), null, null);
 				
 				updateItem.add(new AgeLabel("age", Model.of(update.getDate())));
 				
@@ -125,7 +125,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 
 				final Set<String> mergedCommitHashes = new HashSet<>();
 
-				for (Commit commit: update.getMergedCommits())
+				for (Commit commit: update.getRequest().getMergedCommits())
 					mergedCommitHashes.add(commit.getHash());
 
 				updateItem.add(new ListView<Commit>("commits", new AbstractReadOnlyModel<List<Commit>>() {

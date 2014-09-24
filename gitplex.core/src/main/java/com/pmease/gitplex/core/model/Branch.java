@@ -13,6 +13,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
 
@@ -39,7 +40,7 @@ public class Branch extends AbstractEntity {
     @OneToMany(mappedBy="source")
     private Collection<PullRequest> outgoingRequests = new ArrayList<PullRequest>();
     
-    private String headCommit;
+    private String headCommitHash;
 
     public Repository getRepository() {
 		return repository;
@@ -94,12 +95,16 @@ public class Branch extends AbstractEntity {
      * @return
      * 			head commit of this branch
      */
-    public String getHeadCommit() {
-    	return headCommit;
+    public String getHeadCommitHash() {
+    	return headCommitHash;
     }
 
-    public void setHeadCommit(String headCommit) {
-    	this.headCommit = headCommit;
+    public void setHeadCommitHash(String headCommitHash) {
+    	this.headCommitHash = headCommitHash;
+    }
+    
+    public Commit getHeadCommit() {
+    	return getRepository().getCommit(getHeadCommitHash());
     }
     
     public String getHeadRef() {

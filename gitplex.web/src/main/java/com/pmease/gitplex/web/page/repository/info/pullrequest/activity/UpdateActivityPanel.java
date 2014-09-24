@@ -40,7 +40,7 @@ public class UpdateActivityPanel extends Panel {
 		protected Set<String> load() {
 			Set<String> hashes = new HashSet<>();
 
-			for (Commit commit: updateModel.getObject().getMergedCommits())
+			for (Commit commit: updateModel.getObject().getRequest().getMergedCommits())
 				hashes.add(commit.getHash());
 			return hashes;
 		}

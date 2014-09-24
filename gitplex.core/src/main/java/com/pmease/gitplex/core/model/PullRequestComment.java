@@ -25,7 +25,7 @@ import com.pmease.gitplex.core.manager.UserManager;
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"commit", "file", "line"})
+		@UniqueConstraint(columnNames={"commitHash", "file", "line"})
 })
 public class PullRequestComment extends AbstractEntity implements InlineComment {
 	
@@ -134,18 +134,18 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 	}
 
 	@Override
-	public String getCommit() {
-		return Preconditions.checkNotNull(inlineInfo).getCommit();
+	public String getCommitHash() {
+		return Preconditions.checkNotNull(inlineInfo).getCommitHash();
 	}
 
 	@Override
-	public String getOldCommit() {
-		return Preconditions.checkNotNull(inlineInfo).getOldCommit();
+	public String getOldCommitHash() {
+		return Preconditions.checkNotNull(inlineInfo).getOldCommitHash();
 	}
 
 	@Override
-	public String getNewCommit() {
-		return Preconditions.checkNotNull(inlineInfo).getNewCommit();
+	public String getNewCommitHash() {
+		return Preconditions.checkNotNull(inlineInfo).getNewCommitHash();
 	}
 
 	@Override

@@ -94,7 +94,7 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 		request.setId(1L);
 		request.setTarget(new Branch());
 		request.getTarget().setName("master");
-		request.getTarget().setHeadCommit(git.parseRevision("master", true));
+		request.getTarget().setHeadCommitHash(git.parseRevision("master", true));
 		request.getTarget().setRepository(new Repository() {
 
 			@Override
@@ -109,7 +109,7 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 		
 		request.setSource(new Branch());
 		request.getSource().setName("dev");
-		request.getSource().setHeadCommit(git.parseRevision("dev", true));
+		request.getSource().setHeadCommitHash(git.parseRevision("dev", true));
 		request.getSource().setRepository(new Repository() {
 
 			@Override
@@ -122,10 +122,10 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 		request.setSubmitter(new User());
 		request.getSubmitter().setId(2L);
 		request.getSubmitter().setName("user2");
-		request.setBaseCommit(git.calcMergeBase("dev", "master"));
+		request.setBaseCommitHash(git.calcMergeBase("dev", "master"));
 
 		PullRequestUpdate update = new PullRequestUpdate();
-		update.setHeadCommit(git.parseRevision("dev", true));
+		update.setHeadCommitHash(git.parseRevision("dev", true));
 		update.setId(1L);
 		update.setRequest(request);
 		request.getUpdates().add(update);

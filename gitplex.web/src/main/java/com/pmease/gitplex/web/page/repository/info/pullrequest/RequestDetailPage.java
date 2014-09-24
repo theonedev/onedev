@@ -513,7 +513,7 @@ public abstract class RequestDetailPage extends RepositoryInfoPage implements Co
 			
 			PageParameters params = RequestComparePage.paramsOf(
 					request, 
-					request.getLatestUpdate().getHeadCommit(), 
+					request.getLatestUpdate().getHeadCommitHash(), 
 					request.getIntegrationInfo().getIntegrationHead(), 
 					null, null);
 			

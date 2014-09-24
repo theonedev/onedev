@@ -97,7 +97,7 @@ public class DefaultRepositoryManager implements RepositoryManager {
     	
         dao.remove(repository);
 
-        FileUtils.deleteDir(storageManager.getStorage(repository));
+        FileUtils.deleteDir(storageManager.getRepoDir(repository));
     }
 
     @Sessional
@@ -218,11 +218,11 @@ public class DefaultRepositoryManager implements RepositoryManager {
 			if (branch == null) {
 				branch = new Branch();
 				branch.setName(entry.getKey());
-				branch.setHeadCommit(entry.getValue());
+				branch.setHeadCommitHash(entry.getValue());
 				branch.setRepository(repository);
 				dao.persist(branch);
-			} else if (!branch.getHeadCommit().equals(entry.getValue()))	 {
-				branch.setHeadCommit(entry.getValue());
+			} else if (!branch.getHeadCommitHash().equals(entry.getValue()))	 {
+				branch.setHeadCommitHash(entry.getValue());
 				branch.setUpdater(null);
 				dao.persist(branch);
 			}

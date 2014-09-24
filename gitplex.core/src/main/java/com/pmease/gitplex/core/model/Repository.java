@@ -243,7 +243,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	public Git git() {
-		return new Git(AppLoader.getInstance(StorageManager.class).getStorage(this));
+		return new Git(AppLoader.getInstance(StorageManager.class).getRepoDir(this));
 	}
 	
 	/**

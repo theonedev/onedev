@@ -106,7 +106,7 @@ public class DirectionProtectionTest extends AbstractGitTest {
 		
 		Branch master = new Branch();
 		master.setName("master");
-		master.setHeadCommit(git.parseRevision("master", true));
+		master.setHeadCommitHash(git.parseRevision("master", true));
 		master.setId(1L);
 		master.setRepository(new Repository() {
 

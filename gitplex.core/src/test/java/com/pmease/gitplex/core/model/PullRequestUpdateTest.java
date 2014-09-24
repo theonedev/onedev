@@ -50,26 +50,26 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         git.push(bareGit.repoDir().getAbsolutePath(), "master:master");
         git.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
         
-        request.setBaseCommit(bareGit.showRevision("master~1").getHash());
+        request.setBaseCommitHash(bareGit.showRevision("master~1").getHash());
 
         PullRequestUpdate update1 = new PullRequestUpdate();
         update1.setId(1L);
         update1.setRequest(request);
-        update1.setHeadCommit(bareGit.showRevision("dev~1").getHash());
-        bareGit.updateRef(update1.getHeadRef(), update1.getHeadCommit(), null, null);
+        update1.setHeadCommitHash(bareGit.showRevision("dev~1").getHash());
+        bareGit.updateRef(update1.getHeadRef(), update1.getHeadCommitHash(), null, null);
         request.getUpdates().add(update1);
         
         PullRequestUpdate update2 = new PullRequestUpdate();
         update2.setId(2L);
         update2.setRequest(request);
-        update2.setHeadCommit(bareGit.showRevision("dev").getHash());
-        bareGit.updateRef(update2.getHeadRef(), update2.getHeadCommit(), null, null);
+        update2.setHeadCommitHash(bareGit.showRevision("dev").getHash());
+        bareGit.updateRef(update2.getHeadRef(), update2.getHeadCommitHash(), null, null);
         request.getUpdates().add(update2);
 
-        target.setHeadCommit(bareGit.parseRevision("master", true));
+        target.setHeadCommitHash(bareGit.parseRevision("master", true));
         
-        Assert.assertEquals(bareGit.showRevision("dev~1").getHash(), request.getLatestUpdate().getReferentialCommit());
-        Assert.assertEquals(bareGit.showRevision("master~1").getHash(), request.getSortedUpdates().get(0).getReferentialCommit());
+        Assert.assertEquals(bareGit.showRevision("dev~1").getHash(), request.getLatestUpdate().getReferentialCommitHash());
+        Assert.assertEquals(bareGit.showRevision("master~1").getHash(), request.getSortedUpdates().get(0).getReferentialCommitHash());
     }
 
     @Test
@@ -95,28 +95,28 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         git.push(bareGit.repoDir().getAbsolutePath(), "master:master");
         git.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
 
-        request.setBaseCommit(bareGit.calcMergeBase("dev~2", "master"));
+        request.setBaseCommitHash(bareGit.calcMergeBase("dev~2", "master"));
 
         PullRequestUpdate update1 = new PullRequestUpdate();
         update1.setId(1L);
         update1.setRequest(request);
-        update1.setHeadCommit(bareGit.showRevision("dev~2").getHash());
-        bareGit.updateRef(update1.getHeadRef(), update1.getHeadCommit(), null, null);
+        update1.setHeadCommitHash(bareGit.showRevision("dev~2").getHash());
+        bareGit.updateRef(update1.getHeadRef(), update1.getHeadCommitHash(), null, null);
         request.getUpdates().add(update1);
         
         PullRequestUpdate update2 = new PullRequestUpdate();
         update2.setId(2L);
         update2.setRequest(request);
-        update2.setHeadCommit(bareGit.showRevision("dev").getHash());
-        bareGit.updateRef(update2.getHeadRef(), update2.getHeadCommit(), null, null);
+        update2.setHeadCommitHash(bareGit.showRevision("dev").getHash());
+        bareGit.updateRef(update2.getHeadRef(), update2.getHeadCommitHash(), null, null);
         request.getUpdates().add(update2);
 
-        target.setHeadCommit(bareGit.parseRevision("master", true));
+        target.setHeadCommitHash(bareGit.parseRevision("master", true));
         
-        Commit referentialCommit = bareGit.showRevision(request.getLatestUpdate().getReferentialCommit());
+        Commit referentialCommit = bareGit.showRevision(request.getLatestUpdate().getReferentialCommitHash());
         Assert.assertTrue(referentialCommit.getParentHashes().contains(bareGit.showRevision("master").getHash()));
         Assert.assertTrue(referentialCommit.getParentHashes().contains(bareGit.showRevision("dev~2").getHash()));
-        Assert.assertEquals(bareGit.showRevision("master~1").getHash(), request.getSortedUpdates().get(0).getReferentialCommit());
+        Assert.assertEquals(bareGit.showRevision("master~1").getHash(), request.getSortedUpdates().get(0).getReferentialCommitHash());
     }
 
     @Test
@@ -143,13 +143,13 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         git.push(bareGit.repoDir().getAbsolutePath(), "master:master");
         git.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
         
-        request.setBaseCommit(bareGit.calcMergeBase("master", "dev"));
+        request.setBaseCommitHash(bareGit.calcMergeBase("master", "dev"));
 
         PullRequestUpdate update1 = new PullRequestUpdate();
         update1.setId(1L);
         update1.setRequest(request);
-        update1.setHeadCommit(bareGit.showRevision("dev").getHash());
-        bareGit.updateRef(update1.getHeadRef(), update1.getHeadCommit(), null, null);
+        update1.setHeadCommitHash(bareGit.showRevision("dev").getHash());
+        bareGit.updateRef(update1.getHeadRef(), update1.getHeadCommitHash(), null, null);
         request.getUpdates().add(update1);
 
         git.merge("master", null, null, null, "merge master to dev");
@@ -158,11 +158,11 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         PullRequestUpdate update2 = new PullRequestUpdate();
         update2.setId(2L);
         update2.setRequest(request);
-        update2.setHeadCommit(bareGit.showRevision("dev").getHash());
-        bareGit.updateRef(update2.getHeadRef(), update2.getHeadCommit(), null, null);
+        update2.setHeadCommitHash(bareGit.showRevision("dev").getHash());
+        bareGit.updateRef(update2.getHeadRef(), update2.getHeadCommitHash(), null, null);
         request.getUpdates().add(update2);
         
-        target.setHeadCommit(bareGit.parseRevision("master", true));
+        target.setHeadCommitHash(bareGit.parseRevision("master", true));
         
         Assert.assertEquals(2, update1.getCommits().size());
         Assert.assertEquals("d1", update1.getCommits().get(0).getMessage());
@@ -191,12 +191,12 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 
         addFileAndCommit("d1", "", "d1");
         
-        request.setBaseCommit(git.parseRevision("master", true));
+        request.setBaseCommitHash(git.parseRevision("master", true));
 
         PullRequestUpdate update1 = new PullRequestUpdate();
         update1.setId(1L);
         update1.setRequest(request);
-        update1.setHeadCommit(git.showRevision("dev").getHash());
+        update1.setHeadCommitHash(git.showRevision("dev").getHash());
         request.getUpdates().add(update1);
 
         addFileAndCommit("d2", "", "d2");
@@ -211,13 +211,13 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         git.push(bareGit.repoDir().getAbsolutePath(), "master:master");
         git.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
         
-        bareGit.updateRef(update1.getHeadRef(), update1.getHeadCommit(), null, null);
+        bareGit.updateRef(update1.getHeadRef(), update1.getHeadCommitHash(), null, null);
 
         PullRequestUpdate update2 = new PullRequestUpdate();
         update2.setId(2L);
         update2.setRequest(request);
-        update2.setHeadCommit(bareGit.showRevision("dev").getHash());
-        bareGit.updateRef(update2.getHeadRef(), update2.getHeadCommit(), null, null);
+        update2.setHeadCommitHash(bareGit.showRevision("dev").getHash());
+        bareGit.updateRef(update2.getHeadRef(), update2.getHeadCommitHash(), null, null);
         
         request.getUpdates().add(update2);
         

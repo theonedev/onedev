@@ -25,7 +25,7 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 		dao.persist(update);
 
 		PullRequest request = update.getRequest();
-		String sourceHead = request.getSource().getHeadCommit();
+		String sourceHead = request.getSource().getHeadCommitHash();
 
 		if (!request.getTarget().getRepository().equals(request.getSource().getRepository())) {
 			request.getTarget().getRepository().git().fetch(

@@ -116,12 +116,12 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 			pullRequest.getUpdates().add(update);
 			update.setRequest(pullRequest);
 			update.setUser(currentUser);
-			update.setHeadCommit(source.getHeadCommit());
+			update.setHeadCommitHash(source.getHeadCommitHash());
 			pullRequest.setUpdateDate(new Date());
 
 			if (target.getRepository().equals(source.getRepository())) {
-				pullRequest.setBaseCommit(pullRequest.git().calcMergeBase(target.getHeadCommit(), source.getHeadCommit()));			
-				if (target.getRepository().git().isAncestor(source.getHeadCommit(), target.getHeadCommit())) {
+				pullRequest.setBaseCommitHash(pullRequest.git().calcMergeBase(target.getHeadCommitHash(), source.getHeadCommitHash()));			
+				if (target.getRepository().git().isAncestor(source.getHeadCommitHash(), target.getHeadCommitHash())) {
 					pullRequest.setCloseStatus(CloseStatus.INTEGRATED);
 					pullRequest.setCheckResult(new Approved("Already integrated."));
 				} else {
@@ -135,9 +135,9 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 
 				sandbox.fetch(source.getRepository().git());
 				
-				pullRequest.setBaseCommit(pullRequest.git().calcMergeBase(target.getHeadCommit(), source.getHeadCommit()));			
+				pullRequest.setBaseCommitHash(pullRequest.git().calcMergeBase(target.getHeadCommitHash(), source.getHeadCommitHash()));			
 
-				if (sandbox.isAncestor(source.getHeadCommit(), target.getHeadCommit())) {
+				if (sandbox.isAncestor(source.getHeadCommitHash(), target.getHeadCommitHash())) {
 					pullRequest.setCloseStatus(CloseStatus.INTEGRATED);
 					pullRequest.setCheckResult(new Approved("Already integrated."));
 				} else {
@@ -150,8 +150,8 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 
 			@Override
 			protected List<Commit> load() {
-				return pullRequest.git().log(pullRequest.getBaseCommit(), 
-						pullRequest.getLatestUpdate().getHeadCommit(), null, 0, 0);
+				return pullRequest.git().log(pullRequest.getBaseCommitHash(), 
+						pullRequest.getLatestUpdate().getHeadCommitHash(), null, 0, 0);
 			}
 			
 		};
@@ -250,8 +250,8 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 		
 		IModel<Repository> sourceRepoModel = new RepositoryModel(pullRequest.getSource().getRepository());
 		add(new DiffViewPanel("changes", sourceRepoModel, 
-				pullRequest.getBaseCommit(),
-				pullRequest.getLatestUpdate().getHeadCommit()) {
+				pullRequest.getBaseCommitHash(),
+				pullRequest.getLatestUpdate().getHeadCommitHash()) {
 
 			@Override
 			protected void onConfigure() {
@@ -335,8 +335,8 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 				Dao dao = GitPlex.getInstance(Dao.class);
 				Branch target = dao.load(Branch.class, pullRequest.getTarget().getId());
 				Branch source = dao.load(Branch.class, pullRequest.getSource().getId());
-				if (!target.getHeadCommit().equals(pullRequest.getTarget().getHeadCommit()) 
-						|| !source.getHeadCommit().equals(pullRequest.getSource().getHeadCommit())) {
+				if (!target.getHeadCommitHash().equals(pullRequest.getTarget().getHeadCommitHash()) 
+						|| !source.getHeadCommitHash().equals(pullRequest.getSource().getHeadCommitHash())) {
 					getSession().warn("Either target branch or source branch has new commits just now, please re-check.");
 					setResponsePage(NewRequestPage.class, paramsOf(getRepository(), source, target));
 				} else {

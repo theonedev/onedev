@@ -113,7 +113,7 @@ public class ChangeCommentsTest extends AbstractGitTest {
 		PullRequestComment comment = new PullRequestComment();
 		comment.setId(1L);
 		comment.setInlineInfo(new InlineInfo());
-		comment.getInlineInfo().setCommit(commits.get(0).getHash());
+		comment.getInlineInfo().setCommitHash(commits.get(0).getHash());
 		comment.getInlineInfo().setFile("file1");
 		comment.getInlineInfo().setLine(0);
 		comment.setContent("comment1");
@@ -122,7 +122,7 @@ public class ChangeCommentsTest extends AbstractGitTest {
 		comment = new PullRequestComment();
 		comment.setId(2L);
 		comment.setInlineInfo(new InlineInfo());
-		comment.getInlineInfo().setCommit(commits.get(1).getHash());
+		comment.getInlineInfo().setCommitHash(commits.get(1).getHash());
 		comment.getInlineInfo().setFile("file1");
 		comment.getInlineInfo().setLine(1);
 		comment.setContent("comment2");
@@ -131,7 +131,7 @@ public class ChangeCommentsTest extends AbstractGitTest {
 		comment = new PullRequestComment();
 		comment.setId(3L);
 		comment.setInlineInfo(new InlineInfo());
-		comment.getInlineInfo().setCommit(commits.get(1).getHash());
+		comment.getInlineInfo().setCommitHash(commits.get(1).getHash());
 		comment.getInlineInfo().setFile("file1");
 		comment.getInlineInfo().setLine(4);
 		comment.setContent("comment3");
@@ -140,7 +140,7 @@ public class ChangeCommentsTest extends AbstractGitTest {
 		comment = new PullRequestComment();
 		comment.setId(4L);
 		comment.setInlineInfo(new InlineInfo());
-		comment.getInlineInfo().setCommit(commits.get(1).getHash());
+		comment.getInlineInfo().setCommitHash(commits.get(1).getHash());
 		comment.getInlineInfo().setFile("file1");
 		comment.getInlineInfo().setLine(7);
 		comment.setContent("comment4");
@@ -149,7 +149,7 @@ public class ChangeCommentsTest extends AbstractGitTest {
 		comment = new PullRequestComment();
 		comment.setId(5L);
 		comment.setInlineInfo(new InlineInfo());
-		comment.getInlineInfo().setCommit(commits.get(2).getHash());
+		comment.getInlineInfo().setCommitHash(commits.get(2).getHash());
 		comment.getInlineInfo().setFile("file1");
 		comment.getInlineInfo().setLine(3);
 		comment.setContent("comment5");
@@ -158,7 +158,7 @@ public class ChangeCommentsTest extends AbstractGitTest {
 		comment = new PullRequestComment();
 		comment.setId(6L);
 		comment.setInlineInfo(new InlineInfo());
-		comment.getInlineInfo().setCommit(commits.get(2).getHash());
+		comment.getInlineInfo().setCommitHash(commits.get(2).getHash());
 		comment.getInlineInfo().setFile("file1");
 		comment.getInlineInfo().setLine(4);
 		comment.setContent("comment6");
@@ -167,7 +167,7 @@ public class ChangeCommentsTest extends AbstractGitTest {
 		comment = new PullRequestComment();
 		comment.setId(7L);
 		comment.setInlineInfo(new InlineInfo());
-		comment.getInlineInfo().setCommit(commits.get(2).getHash());
+		comment.getInlineInfo().setCommitHash(commits.get(2).getHash());
 		comment.getInlineInfo().setFile("file1");
 		comment.getInlineInfo().setLine(7);
 		comment.setContent("comment7");
@@ -176,7 +176,7 @@ public class ChangeCommentsTest extends AbstractGitTest {
 		comment = new PullRequestComment();
 		comment.setId(8L);
 		comment.setInlineInfo(new InlineInfo());
-		comment.getInlineInfo().setCommit(commits.get(2).getHash());
+		comment.getInlineInfo().setCommitHash(commits.get(2).getHash());
 		comment.getInlineInfo().setFile("file1");
 		comment.getInlineInfo().setLine(8);
 		comment.setContent("comment8");
@@ -185,7 +185,7 @@ public class ChangeCommentsTest extends AbstractGitTest {
 		comment = new PullRequestComment();
 		comment.setId(9L);
 		comment.setInlineInfo(new InlineInfo());
-		comment.getInlineInfo().setCommit(commits.get(3).getHash());
+		comment.getInlineInfo().setCommitHash(commits.get(3).getHash());
 		comment.getInlineInfo().setFile("file1");
 		comment.getInlineInfo().setLine(8);
 		comment.setContent("comment9");
@@ -193,22 +193,22 @@ public class ChangeCommentsTest extends AbstractGitTest {
 
 		request.setComments(comments);
 		
-		request.setBaseCommit(commits.get(0).getHash());
+		request.setBaseCommitHash(commits.get(0).getHash());
 		Collection<PullRequestUpdate> updates = new ArrayList<>();
 		
 		PullRequestUpdate update = new PullRequestUpdate();
 		update.setId(1L);
-		update.setHeadCommit(commits.get(1).getHash());
+		update.setHeadCommitHash(commits.get(1).getHash());
 		updates.add(update);
 		
 		update = new PullRequestUpdate();
 		update.setId(2L);
-		update.setHeadCommit(commits.get(2).getHash());
+		update.setHeadCommitHash(commits.get(2).getHash());
 		updates.add(update);
 		
 		update = new PullRequestUpdate();
 		update.setId(3L);
-		update.setHeadCommit(commits.get(3).getHash());
+		update.setHeadCommitHash(commits.get(3).getHash());
 		updates.add(update);
 
 		request.setUpdates(updates);

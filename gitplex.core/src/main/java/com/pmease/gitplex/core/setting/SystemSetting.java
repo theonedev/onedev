@@ -11,20 +11,21 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.GitConfig;
 import com.pmease.commons.validation.Directory;
 
-@SuppressWarnings("serial")
 @Editable
 public class SystemSetting implements Serializable {
 	
+	private static final long serialVersionUID = -5181868087749961733L;
+
 	private String repoPath;
 	
 	private GitConfig gitConfig = new SystemGit();
 	
 	private boolean gravatarEnabled = true;
 	
-	@Editable(name="Directory to Store Repositories", order=100, description="Specify directory to store Git repositories.")
+	@Editable(name="Storage Directory", order=100, description="Specify directory to store GitPlex data such as Git repositories.")
 	@Directory
 	@NotEmpty
-	public String getRepoPath() {
+	public String getStoragePath() {
 		return repoPath;
 	}
 

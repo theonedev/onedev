@@ -32,15 +32,15 @@ public class PullRequestTest extends AbstractGitTest {
 
         addFileAndCommit("b", "", "commit");
 
-        target.setHeadCommit(git.parseRevision("master", true));
+        target.setHeadCommitHash(git.parseRevision("master", true));
         
-        request.setBaseCommit(git.parseRevision("master", true));
+        request.setBaseCommitHash(git.parseRevision("master", true));
 
         PullRequestUpdate update1 = new PullRequestUpdate();
         update1.setId(1L);
         update1.setRequest(request);
         git.updateRef(update1.getHeadRef(), "HEAD", null, null);
-        update1.setHeadCommit(git.parseRevision(update1.getHeadRef(), true));
+        update1.setHeadCommitHash(git.parseRevision(update1.getHeadRef(), true));
         request.getUpdates().add(update1);
 
         addFileAndCommit("c", "", "commit");
@@ -49,7 +49,7 @@ public class PullRequestTest extends AbstractGitTest {
         update2.setId(2L);
         update2.setRequest(request);
         git.updateRef(update2.getHeadRef(), "HEAD", null, null);
-        update2.setHeadCommit(git.parseRevision(update2.getHeadRef(), true));
+        update2.setHeadCommitHash(git.parseRevision(update2.getHeadRef(), true));
         request.getUpdates().add(update2);
         
         Assert.assertEquals(request.getEffectiveUpdates().size(), 2);
@@ -69,7 +69,7 @@ public class PullRequestTest extends AbstractGitTest {
 
         addFileAndCommit("b", "", "dev:2");
         
-        request.setBaseCommit(git.parseRevision("master", true));
+        request.setBaseCommitHash(git.parseRevision("master", true));
 
         addFileAndCommit("c", "", "dev:3");
         
@@ -77,7 +77,7 @@ public class PullRequestTest extends AbstractGitTest {
         update1.setId(1L);
         update1.setRequest(request);
         git.updateRef(update1.getHeadRef(), "HEAD", null, null);
-        update1.setHeadCommit(git.parseRevision(update1.getHeadRef(), true));
+        update1.setHeadCommitHash(git.parseRevision(update1.getHeadRef(), true));
         String secondRef = update1.getHeadRef();
         request.getUpdates().add(update1);
 
@@ -87,7 +87,7 @@ public class PullRequestTest extends AbstractGitTest {
         update2.setId(2L);
         update2.setRequest(request);
         git.updateRef(update2.getHeadRef(), "HEAD", null, null);
-        update2.setHeadCommit(git.parseRevision(update2.getHeadRef(), true));
+        update2.setHeadCommitHash(git.parseRevision(update2.getHeadRef(), true));
         request.getUpdates().add(update2);
         
         git.checkout("master", null);
@@ -96,7 +96,7 @@ public class PullRequestTest extends AbstractGitTest {
         
         git.merge(secondRef, null, null, null, null);
 
-        target.setHeadCommit(git.parseRevision("master", true));
+        target.setHeadCommitHash(git.parseRevision("master", true));
 
         Assert.assertEquals(1, request.getEffectiveUpdates().size());
         Assert.assertEquals(2L, request.getEffectiveUpdates().get(0).getId().longValue());

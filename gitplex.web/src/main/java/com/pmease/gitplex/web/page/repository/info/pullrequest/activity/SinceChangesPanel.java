@@ -35,22 +35,22 @@ public class SinceChangesPanel extends Panel {
 		super.onInitialize();
 		
 		PullRequest request = requestModel.getObject();
-		String oldCommit = request.getBaseCommit();
+		String oldCommit = request.getBaseCommitHash();
 		for (int i=request.getSortedUpdates().size()-1; i>=0; i--) {
 			PullRequestUpdate update = request.getSortedUpdates().get(i);
 			if (update.getDate().before(sinceDate)) {
-				oldCommit = update.getHeadCommit();
+				oldCommit = update.getHeadCommitHash();
 				break;
 			}
 		}
 		PageParameters params = RequestComparePage.paramsOf(request, oldCommit, 
-				request.getLatestUpdate().getHeadCommit(), null, null);
+				request.getLatestUpdate().getHeadCommitHash(), null, null);
 		
 		Link<Void> link = new BookmarkablePageLink<>("link", RequestComparePage.class, params);
 		link.add(AttributeAppender.append("title", tooltip));
 		add(link);
 
-		setVisible(!oldCommit.equals(request.getLatestUpdate().getHeadCommit()));
+		setVisible(!oldCommit.equals(request.getLatestUpdate().getHeadCommitHash()));
 	}
 
 	@Override

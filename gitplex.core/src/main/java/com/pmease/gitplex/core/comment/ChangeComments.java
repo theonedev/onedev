@@ -27,9 +27,9 @@ public class ChangeComments implements Serializable {
 	
 	public ChangeComments(PullRequest request, RevAwareChange change) {
 		List<String> commits = new ArrayList<>();
-		commits.add(request.getBaseCommit());
+		commits.add(request.getBaseCommitHash());
 		for (PullRequestUpdate update: request.getSortedUpdates())
-			commits.add(update.getHeadCommit());
+			commits.add(update.getHeadCommitHash());
 		
 		Map<String, Map<String, List<InlineComment>>> comments = new HashMap<>();
 		Map<BlobInfo, List<String>> blobs = new HashMap<>();
@@ -87,7 +87,7 @@ public class ChangeComments implements Serializable {
 			Set<CommentKey> appliedComments = new HashSet<>();
 			for (List<InlineComment> list: newComments.values()) {
 				for (InlineComment comment: list)
-					appliedComments.add(new CommentKey(comment.getCommit(), comment.getFile(), comment.getLine()));
+					appliedComments.add(new CommentKey(comment.getCommitHash(), comment.getFile(), comment.getLine()));
 			}
 
 			for (int i=begin+1; i<(end!=-1?end:commits.size()); i++) {
@@ -106,7 +106,7 @@ public class ChangeComments implements Serializable {
 				if (blobInfo != null) {
 					boolean allApplied = true;
 					for (InlineComment comment: commentsOnFile) {
-						CommentKey key = new CommentKey(comment.getCommit(), comment.getFile(), comment.getLine());
+						CommentKey key = new CommentKey(comment.getCommitHash(), comment.getFile(), comment.getLine());
 						if (!appliedComments.contains(key)) {
 							allApplied = false;
 							break;
@@ -118,7 +118,7 @@ public class ChangeComments implements Serializable {
 							List<String> oldContent = getContent(blobs, change.getOldBlobInfo(), request.getTarget().getRepository());
 							Map<Integer, Integer> lineMap = DiffUtils.mapLines(fileContent, oldContent);
 							for (InlineComment comment: commentsOnFile) {
-								CommentKey key = new CommentKey(comment.getCommit(), comment.getFile(), comment.getLine());
+								CommentKey key = new CommentKey(comment.getCommitHash(), comment.getFile(), comment.getLine());
 								Integer line = lineMap.get(comment.getLine());
 								if (!appliedComments.contains(key) && line != null)
 									addLineComment(oldComments, line, comment);
@@ -153,7 +153,7 @@ public class ChangeComments implements Serializable {
 			commentsOnCommit = new HashMap<>();
 
 			for (PullRequestComment each: request.getComments()) {
-				if (each.getInlineInfo() != null && each.getInlineInfo().getCommit().equals(commit)) {
+				if (each.getInlineInfo() != null && each.getInlineInfo().getCommitHash().equals(commit)) {
 					List<InlineComment> commentsOnFile = commentsOnCommit.get(each.getFile());
 					if (commentsOnFile == null) {
 						commentsOnFile = new ArrayList<>();

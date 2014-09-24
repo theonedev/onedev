@@ -4,11 +4,11 @@ public interface InlineComment extends Comment {
 
 	int CONTEXT_SIZE = 10;
 	
-	String getCommit();
+	String getCommitHash();
 	
-	String getOldCommit();
+	String getOldCommitHash();
 	
-	String getNewCommit();
+	String getNewCommitHash();
 	
 	int getLine();
 	

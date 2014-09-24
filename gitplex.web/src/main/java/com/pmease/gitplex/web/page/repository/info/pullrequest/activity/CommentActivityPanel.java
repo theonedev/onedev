@@ -48,8 +48,8 @@ public class CommentActivityPanel extends Panel {
 			
 			fragment.add(new Label("file", comment.getFile()));
 			
-			PageParameters params = RequestComparePage.paramsOf(comment.getRequest(), comment.getOldCommit(), 
-					comment.getNewCommit(), null, comment);
+			PageParameters params = RequestComparePage.paramsOf(comment.getRequest(), comment.getOldCommitHash(), 
+					comment.getNewCommitHash(), null, comment);
 			fragment.add(new BookmarkablePageLink<Void>("compareView", RequestComparePage.class, params));
 			
 			fragment.add(new InlineCommentPanel("comment", commentModel));

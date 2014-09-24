@@ -78,7 +78,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 			if (commit == null) 
 				return disapproved("Can not build against integration result due to conflicts.");
 		} else {
-			commit = request.getLatestUpdate().getHeadCommit();
+			commit = request.getLatestUpdate().getHeadCommitHash();
 		}
 
 		int passedCount = 0;

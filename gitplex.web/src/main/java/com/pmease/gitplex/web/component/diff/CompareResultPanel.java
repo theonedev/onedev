@@ -34,9 +34,9 @@ public abstract class CompareResultPanel extends Panel implements InlineContextA
 
 	private final IModel<Repository> repoModel;
 	
-	private final String oldCommit;
+	private final String oldCommitHash;
 	
-	private final String newCommit;
+	private final String newCommitHash;
 	
 	private Change activeChange;
 	
@@ -49,8 +49,8 @@ public abstract class CompareResultPanel extends Panel implements InlineContextA
 		super(id);
 		
 		this.repoModel = repoModel;
-		this.oldCommit = oldCommit;
-		this.newCommit = newCommit;
+		this.oldCommitHash = oldCommit;
+		this.newCommitHash = newCommit;
 
 		List<Change> changes = repoModel.getObject().getChanges(oldCommit, newCommit);
 		if (file != null) {
@@ -80,7 +80,7 @@ public abstract class CompareResultPanel extends Panel implements InlineContextA
 
 		if (activeChange != null) {
 			changeContent = new BlobDiffPanel("content", repoModel, 
-					new RevAwareChange(activeChange, oldCommit, newCommit), 
+					new RevAwareChange(activeChange, oldCommitHash, newCommitHash), 
 					getInlineCommentSupport(activeChange));
 		} else {
 			changeContent = new Label("content", "<div class='error fa fa-alert-o'> File not exist.</div>");
@@ -92,7 +92,7 @@ public abstract class CompareResultPanel extends Panel implements InlineContextA
 
 	private WebMarkupContainer newChangeNav(boolean changedOnly) {
 		if (changedOnly) {
-			changeNav = new ChangedFilesPanel("nav", repoModel, oldCommit, newCommit) {
+			changeNav = new ChangedFilesPanel("nav", repoModel, oldCommitHash, newCommitHash) {
 				
 				@Override
 				protected WebMarkupContainer newBlobLink(String id, Change change) {
@@ -100,7 +100,7 @@ public abstract class CompareResultPanel extends Panel implements InlineContextA
 				}
 			};
 		} else {
-			changeNav = new DiffTreePanel("nav", repoModel, oldCommit, newCommit) {
+			changeNav = new DiffTreePanel("nav", repoModel, oldCommitHash, newCommitHash) {
 
 				@Override
 				protected WebMarkupContainer newBlobLink(String id, final Change change) {
@@ -158,7 +158,7 @@ public abstract class CompareResultPanel extends Panel implements InlineContextA
 		public void onClick(AjaxRequestTarget target) {
 			activeChange = change;
 			changeContent = new BlobDiffPanel(changeContent.getId(), repoModel, 
-					new RevAwareChange(change, oldCommit, newCommit), getInlineCommentSupport(change));
+					new RevAwareChange(change, oldCommitHash, newCommitHash), getInlineCommentSupport(change));
 			CompareResultPanel.this.replace(changeContent);
 			target.add(changeContent);
 
