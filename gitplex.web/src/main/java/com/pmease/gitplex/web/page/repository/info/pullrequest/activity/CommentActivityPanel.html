@@ -10,10 +10,14 @@
 			<div class="panel-heading">
 				<span wicket:id="file"></span> 
 				<span class="actions">
-					<a wicket:id="compareWithLatest" class="fa fa-diff" title="Display comment by comparing with latest commit"></a>
+					<a wicket:id="compareView" class="fa fa-diff" title="Display comment in compare view"></a>
 				</span>
 			</div>
 			<div wicket:id="comment"></div>
 		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="commentActionsFrag">
+		<a wicket:id="collapse" class="fa fa-collapse" title="Collapse this comment"></a>
+		<span wicket:id="changes"></span>
 	</wicket:fragment>
 </wicket:panel>

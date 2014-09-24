@@ -53,7 +53,6 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.comment.event.CommentReplied;
 import com.pmease.gitplex.web.component.diff.CompareResultPanel;
-import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.RequestActivitiesModel;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
@@ -66,7 +65,7 @@ public class RequestComparePage extends RequestDetailPage {
 	private static final String INTEGRATION_PREVIEW = "Integration Preview";
 	
 	public static final String LATEST_COMMIT = "latest";
-
+	
 	private String file;
 	
 	private String oldCommit;
@@ -74,14 +73,6 @@ public class RequestComparePage extends RequestDetailPage {
 	private String newCommit;
 	
 	private final IModel<PullRequestComment> concernedCommentModel;
-	
-	private final RequestActivitiesModel activitiesModel = new RequestActivitiesModel() {
-		
-		@Override
-		protected PullRequest getPullRequest() {
-			return RequestComparePage.this.getPullRequest();
-		}
-	};
 	
 	private final IModel<Map<String, CommitDescription>> commitsModel = 
 			new LoadableDetachableModel<Map<String, CommitDescription>>() {
@@ -294,7 +285,7 @@ public class RequestComparePage extends RequestDetailPage {
 						@Override
 						protected void onSelect() {
 							PageParameters params = paramsOf(getPullRequest(), 
-									getConcernedComment().getCommit(), null, null,
+									getConcernedComment().getCommit(), LATEST_COMMIT, null,
 									getConcernedComment());
 							setResponsePage(RequestComparePage.class, params);
 						}
@@ -307,8 +298,7 @@ public class RequestComparePage extends RequestDetailPage {
 					@Override
 					protected void onSelect() {
 						PageParameters params = paramsOf(getPullRequest(), 
-								getPullRequest().getBaseCommit(), 
-								getPullRequest().getLatestUpdate().getHeadCommit(), 
+								getPullRequest().getBaseCommit(), LATEST_COMMIT, 
 								file, getConcernedComment());
 						setResponsePage(RequestComparePage.class, params);
 					}
@@ -454,7 +444,6 @@ public class RequestComparePage extends RequestDetailPage {
 	public void onDetach() {
 		commitsModel.detach();
 		concernedCommentModel.detach();
-		activitiesModel.detach();
 		
 		super.onDetach();
 	}

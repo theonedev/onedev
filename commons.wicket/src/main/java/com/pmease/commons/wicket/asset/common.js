@@ -616,7 +616,7 @@ pmease.commons = {
 		        }
 			});
 			return prev;
-		}, 
+		}
 		
 	},
 	
@@ -708,7 +708,22 @@ pmease.commons = {
 			}, 5000);
 		}
 	},
-
+	
+	backToTop: function(backToTop) {
+		var $backToTop = $(backToTop);
+        $backToTop.hide();
+        $(window).scroll(function(){
+        	if ($(window).scrollTop()>500)
+        		$backToTop.fadeIn(1000);
+        	else
+        		$backToTop.fadeOut(1000);
+        });
+        $backToTop.click(function(){
+        	$("body, html").animate({scrollTop:0}, 700);
+        	return false;
+        });
+	}
+	
 };
 
 $(function() {

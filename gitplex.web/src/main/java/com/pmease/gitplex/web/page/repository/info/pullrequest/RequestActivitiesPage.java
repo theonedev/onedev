@@ -1,5 +1,8 @@
 package com.pmease.gitplex.web.page.repository.info.pullrequest;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -22,7 +25,13 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.PullRequestAction.Approve;
+import com.pmease.gitplex.core.model.PullRequestAction.Disapprove;
+import com.pmease.gitplex.core.model.PullRequestAction.Discard;
+import com.pmease.gitplex.core.model.PullRequestAction.Integrate;
+import com.pmease.gitplex.core.model.PullRequestAudit;
 import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
@@ -30,10 +39,13 @@ import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.ApprovePullRequest;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.CommentPullRequest;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.DisapprovePullRequest;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.DiscardPullRequest;
+import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.IntegratePullRequest;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.OpenPullRequest;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.PullRequestActivity;
-import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.RequestActivitiesModel;
 import com.pmease.gitplex.web.page.repository.info.pullrequest.activity.UpdatePullRequest;
 
 @SuppressWarnings("serial")
@@ -137,16 +149,57 @@ public class RequestActivitiesPage extends RequestDetailPage {
 		activitiesView = new RepeatingView("activities");
 		activitiesView.setOutputMarkupId(true);
 		
-		List<PullRequestActivity> activities = new RequestActivitiesModel() {
-			
-			@Override
-			protected PullRequest getPullRequest() {
-				return RequestActivitiesPage.this.getPullRequest();
-			}
-		}.getObject();
+		PullRequest request = getPullRequest();
+		List<PullRequestActivity> activities = new ArrayList<>();
+
+		activities.add(new OpenPullRequest(request));
+
+		for (PullRequestUpdate update: request.getUpdates())
+			activities.add(new UpdatePullRequest(update));
 		
-		for (PullRequestActivity activity: activities) 
-			activitiesView.add(newActivityItem(activitiesView.newChildId(), activity));
+		for (PullRequestComment comment: request.getComments()) 
+			activities.add(new CommentPullRequest(comment));
+		
+		for (PullRequestAudit audit: request.getAudits()) {
+			if (audit.getAction() instanceof Integrate) {
+				Integrate integrate = (Integrate) audit.getAction();
+				activities.add(new IntegratePullRequest(audit.getUser(), audit.getDate(), 
+						integrate.getReason()));
+			} else if (audit.getAction() instanceof Discard) { 
+				activities.add(new DiscardPullRequest(audit.getUser(), audit.getDate()));
+			} else if (audit.getAction() instanceof Approve) {
+				activities.add(new ApprovePullRequest(audit.getRequest(), audit.getUser(), audit.getDate()));
+			} else if (audit.getAction() instanceof Disapprove) {
+				activities.add(new DisapprovePullRequest(audit.getRequest(), audit.getUser(), audit.getDate()));
+			} else {
+				throw new IllegalStateException("Unexpected audit action: " + audit.getAction());
+			}
+		}
+		
+		Collections.sort(activities, new Comparator<PullRequestActivity>() {
+
+			@Override
+			public int compare(PullRequestActivity o1, PullRequestActivity o2) {
+				if (o1.getDate().before(o2.getDate()))
+					return -1;
+				else if (o1.getDate().after(o2.getDate()))
+					return 1;
+				else if (o1 instanceof OpenPullRequest || o1 instanceof CommentPullRequest)
+					return -1;
+				else
+					return 1;
+			}
+			
+		});
+		
+		int index = 0;
+		for (PullRequestActivity activity: activities) { 
+			Component activityItem = newActivityItem(activitiesView.newChildId(), activity);
+			if (index == activities.size()-1 || activities.get(index+1) instanceof CommentPullRequest)
+				activityItem.add(AttributeAppender.append("class", " pre-discussion"));
+			activitiesView.add(activityItem);
+			index++;
+		}
 		
 		return activitiesView;
 	}

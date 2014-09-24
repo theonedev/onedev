@@ -5,7 +5,12 @@ import static com.pmease.commons.util.diff.DiffLine.Action.DELETE;
 
 import java.util.List;
 
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -16,8 +21,10 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.util.diff.DiffLine;
 import com.pmease.commons.util.diff.Partial;
+import com.pmease.gitplex.core.comment.Comment;
 import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
+import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
 
 @SuppressWarnings("serial")
 public class InlineCommentPanel extends Panel {
@@ -101,10 +108,42 @@ public class InlineCommentPanel extends Panel {
 				});
 
 				InlineComment comment = commentModel.getObject();
-				if (item.getIndex() == comment.getContext().getCommentLine()) 
-					item.add(new CommentPanel("comment", commentModel));
-				else 
+				if (item.getIndex() == comment.getContext().getCommentLine()) {
+					item.add(new CommentPanel("comment", commentModel) {
+
+						@Override
+						protected Component newAdditionalCommentActions(String id, IModel<Comment> comment) {
+							return new AjaxLink<Void>(id) {
+
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									send(InlineCommentPanel.this, Broadcast.BUBBLE, 
+											new CommentCollapsing(target, commentModel.getObject()));
+								}
+
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									
+									setVisible(commentModel.getObject().isResolved());
+								}
+
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									tag.put("class", "fa fa-collapse");
+									tag.put("title", "Collapse this comment");
+									tag.put("style", "cursor:pointer;");
+								}
+								
+							};
+							
+						}
+						
+					});
+				} else { 
 					item.add(new WebMarkupContainer("comment").setVisible(false));
+				}
 			}
 			
 		});

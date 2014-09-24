@@ -769,7 +769,6 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 /* COMPARE RESULT */
 .compare-result>tbody>tr>td {border: 1px solid #DDD;}
 .compare-result>tbody>tr>td.nav {width: 20%; padding: 8px;}
-.compare-result>tbody>tr>td.nav>div {overflow-x: auto;}
 .compare-result>tbody>tr>td.nav a.active {background: #0F89E7; color: white; border-radius: 2px; padding: 2px;}
 .compare-result>tbody>tr>td.content>div>div.error {padding: 20px; font-size: 24px; font-style: italic;}
 
@@ -803,7 +802,7 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 
 .table-diff table.content {width: 100%;}
 .table-diff .line.comments>td {padding: 0 12px; border-top: 1px solid #DDD; 
-	border-bottom: 1px solid #DDD; background: #FFFAF5;}
+	border-bottom: 1px solid #DDD;}
 	
 .table-diff .line.comments td.avatar .concerned-comment {margin-top: 12px; font-size: 36px; color: #E7C325;}
 form#add-comment {margin: 16px 4px;}
@@ -946,15 +945,16 @@ ul.status-help li:last-child .description {border-bottom: none;}
 
 .request-detail>.tabs {background: white; z-index: 100;}
 
-.request-detail>.activities {margin-bottom: 20px;}
+.request-detail>.activities {margin-bottom: 20px; border-bottom: 1px solid #DDD;}
 .request-detail>.activities>tbody>tr.discussion>td {border-top: 1px solid #DDD; padding: 12px 0;}
 .request-detail>.activities>tbody>tr.discussion.collapsed>td {padding: 8px 0;}
 .request-detail>.activities>tbody>tr.discussion>td.avatar {width: 1px; padding-right: 12px;}
 .request-detail>.activities>tbody>tr.discussion>td.activity {padding-left: 12px;}
 .request-detail>.activities>tbody>tr.activity>td.avatar {border-right: 1px dashed #CCC;}
-.request-detail>.activities>tbody>tr.discussion+.non-discussion>td {border-top: 1px solid #DDD; padding-top: 12px;}
+.request-detail>.activities>tbody>tr.discussion+.non-discussion>td {border-top: 1px solid #DDD; padding-top: 8px;}
+.request-detail>.activities>tbody>tr.update.pre-discussion>td {padding-bottom: 8px;}
 .request-detail>.activities>tbody>tr.discussion>.avatar img {width: 40px; height: 40px;}
-.request-detail>.activities>tbody>tr.non-discussion>td {padding: 0 6px;}
+.request-detail>.activities>tbody>tr.non-discussion>td {padding-left: 6px;}
 .request-detail>.activities>tbody>tr.non-discussion.non-update>td {padding: 6px;}
 .request-detail>.activities>tbody>tr.non-discussion>td.avatar img {display: none;}
 .request-detail>.activities>tbody>tr.non-discussion>.activity>div.summary .user a {font-weight: normal;}

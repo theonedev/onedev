@@ -128,4 +128,5 @@ public abstract class CommonPage extends WebPage {
 		super.renderHead(response);
 		response.render(new PriorityHeaderItem(JavaScriptHeaderItem.forReference(CommonResourceReference.get())));
 	}
+
 }

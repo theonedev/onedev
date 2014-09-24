@@ -196,3 +196,7 @@ table td, table th {text-align: left;}
 div.table {display: table;}
 div.tr {display: table-row;}    
 div.td {display: table-cell;}
+
+/* BACK TO TOP */
+.back-to-top {position: fixed; right: 20px; bottom: 40px; cursor: pointer; padding: 24px; 
+	background: url("back-to-top.png") no-repeat 0 0; z-index: 100;}

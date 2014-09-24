@@ -6,7 +6,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.head.OnLoadHeaderItem;
 
 @SuppressWarnings("serial")
 public class StickyBehavior extends Behavior {
@@ -42,7 +42,9 @@ public class StickyBehavior extends Behavior {
 			script = String.format("pmease.commons.stick('#%s', undefined);", 
 					component.getMarkupId());
 		}
-		response.render(OnDomReadyHeaderItem.forScript(script));
+		// execute this script OnLoad instead of OnDomReady here, as sticky
+		// calculation will not be accurate if images are not loaded
+		response.render(OnLoadHeaderItem.forScript(script));
 	}
 
 }

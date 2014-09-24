@@ -39,6 +39,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.PageTabLink;
@@ -371,6 +372,8 @@ public abstract class RequestDetailPage extends RepositoryInfoPage implements Co
 		tabs.add(new RequestTab("Updates", RequestUpdatesPage.class));
 		tabs.add(new RequestTab("Compare", RequestComparePage.class));
 		add(new Tabbable("tabs", tabs));
+		
+		add(new BackToTop("backToTop"));
 	}
 	
 	private Component newStatusComponent(String id) {

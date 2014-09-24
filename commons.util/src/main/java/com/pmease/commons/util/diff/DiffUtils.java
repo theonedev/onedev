@@ -93,11 +93,15 @@ public class DiffUtils {
 				List<DiffLine> diffPartials = diff(getPartials(deletion.getFirst(), partialSplitter, partialsCache), 
 						getPartials(addition.getFirst(), partialSplitter, partialsCache), null);
 				int equals = 0;
+				int total = 0;
 				for (DiffLine diffPartial: diffPartials) {
-					if (diffPartial.getAction() == DiffLine.Action.EQUAL)
-						equals++;
+					if (StringUtils.isNotBlank(diffPartial.getPartials().get(0).getContent())) {
+						total ++;
+						if (diffPartial.getAction() == DiffLine.Action.EQUAL)
+							equals++;
+					}
 				}
-				if (equals*3 >= diffPartials.size()) {
+				if (equals*3 >= total) {
 					for (int j=0; j<i; j++)	{
 						Triple<String, Integer, Integer> prevAddition = additions.get(j);
 						processedAdditions.add(new DiffLine(DiffLine.Action.ADD, prevAddition.getFirst(), 
