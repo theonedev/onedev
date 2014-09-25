@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
@@ -24,13 +25,19 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.wicket.behavior.DisableIfBlankBehavior;
+import com.pmease.commons.wicket.component.backtotop.BackToTop;
+import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
+import com.pmease.commons.wicket.component.tabbable.Tab;
+import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Approved;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
@@ -45,11 +52,10 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.branch.AffinalBranchSingleChoice;
 import com.pmease.gitplex.web.component.branch.BranchLink;
 import com.pmease.gitplex.web.component.commit.CommitsTablePanel;
-import com.pmease.gitplex.web.model.RepositoryModel;
+import com.pmease.gitplex.web.component.diff.CompareResultPanel;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.info.RepositoryInfoPage;
 import com.pmease.gitplex.web.page.repository.info.code.commit.diff.CommitCommentsAware;
-import com.pmease.gitplex.web.page.repository.info.code.commit.diff.DiffViewPanel;
 
 @SuppressWarnings("serial")
 public class NewRequestPage extends RepositoryInfoPage implements CommitCommentsAware {
@@ -229,7 +235,7 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 		}
 		add(fragment);
 
-		IModel<Repository> repositoryModel = new AbstractReadOnlyModel<Repository>() {
+		final IModel<Repository> repositoryModel = new AbstractReadOnlyModel<Repository>() {
 
 			@Override
 			public Repository getObject() {
@@ -237,7 +243,32 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 			}
 			
 		};
-		add(new CommitsTablePanel("commits", commitsModel, repositoryModel) {
+		
+		List<Tab> tabs = new ArrayList<>();
+		
+		tabs.add(new AjaxActionTab(Model.of("Commits")) {
+			
+			@Override
+			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+				Component panel = newCommitsPanel();
+				getPage().replace(panel);
+				target.add(panel);
+			}
+			
+		});
+
+		tabs.add(new AjaxActionTab(Model.of("Changed Files")) {
+			
+			@Override
+			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+				Component panel = newChangedFilesPanel();
+				getPage().replace(panel);
+				target.add(panel);
+			}
+			
+		});
+
+		add(new Tabbable("tabs", tabs) {
 
 			@Override
 			protected void onConfigure() {
@@ -248,21 +279,30 @@ public class NewRequestPage extends RepositoryInfoPage implements CommitComments
 			
 		});
 		
-		IModel<Repository> sourceRepoModel = new RepositoryModel(pullRequest.getSource().getRepository());
-		add(new DiffViewPanel("changes", sourceRepoModel, 
-				pullRequest.getBaseCommitHash(),
-				pullRequest.getLatestUpdate().getHeadCommitHash()) {
+		add(new CommitsTablePanel("tabPanel", commitsModel, repositoryModel).setOutputMarkupId(true));
 
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				setVisible(pullRequest.getStatus() != INTEGRATED);
-			}
-			
-		});
+		add(new BackToTop("backToTop"));
 	}
 	
+	private Component newCommitsPanel() {
+		return new CommitsTablePanel("tabPanel", commitsModel, repoModel).setOutputMarkupId(true);
+	}
+	
+	private Component newChangedFilesPanel() {
+		return new CompareResultPanel("tabPanel", repoModel, pullRequest.getBaseCommitHash(), 
+				pullRequest.getLatestUpdate().getHeadCommitHash(), null) {
+			
+			@Override
+			protected void onChangeSelection(AjaxRequestTarget target, Change change) {
+			}
+			
+			@Override
+			protected InlineCommentSupport getInlineCommentSupport(Change change) {
+				return null;
+			}
+		}.setOutputMarkupId(true);
+	}
+
 	private Fragment newOpenedFrag() {
 		Fragment fragment = new Fragment("status", "openedFrag", this);
 		fragment.add(new Label("requestInfo", "#" + pullRequest.getId() + ": " + pullRequest.getTitle()));

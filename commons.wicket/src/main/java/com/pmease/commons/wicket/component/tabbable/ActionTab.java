@@ -42,8 +42,9 @@ public abstract class ActionTab extends Tab {
 			each.setSelected(false);
 		
 		setSelected(true);
-		onSelect();
+		
+		onSelect(tabLink);
 	}
 
-	protected abstract void onSelect();
+	protected abstract void onSelect(Component tabLink);
 }

@@ -5,6 +5,7 @@ import static de.agilecoders.wicket.jquery.JQuery.$;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
@@ -40,7 +41,7 @@ public class CommentInput extends FormComponentPanel<String> {
 		tabs.add(new AjaxActionTab(Model.of("Write")) {
 
 			@Override
-			protected void onSelect(AjaxRequestTarget target) {
+			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 				target.appendJavaScript($(input).chain("show").get());
 				target.appendJavaScript($(preview).chain("hide").get());
 				target.add(CommentInput.this.get(TABS_ID));
@@ -51,7 +52,7 @@ public class CommentInput extends FormComponentPanel<String> {
 		tabs.add(new AjaxActionTab(Model.of("Preview")){
 
 			@Override
-			protected void onSelect(AjaxRequestTarget target) {
+			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 				// show/hide textarea at client side in order not to reset its height 
 				// in case user adjusted the height
 				target.appendJavaScript($(input).chain("hide").get());

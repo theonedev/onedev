@@ -141,7 +141,8 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 
 			@Override
 			protected Map<Integer, List<InlineComment>> load() {
-				Preconditions.checkNotNull(commentSupport);
+				if (commentSupport == null)
+					return new HashMap<>();
 				
 				Map<Integer, Integer> oldLinesMap = new HashMap<>();
 				Map<Integer, Integer> newLinesMap = new HashMap<>();

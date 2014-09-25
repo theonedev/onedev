@@ -7,6 +7,8 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
+import com.google.common.base.Preconditions;
+
 @SuppressWarnings("serial")
 public abstract class AjaxActionTab extends ActionTab {
 
@@ -34,10 +36,11 @@ public abstract class AjaxActionTab extends ActionTab {
 	}
 
 	@Override
-	protected final void onSelect() {
+	protected final void onSelect(Component tabLink) {
 		AjaxRequestTarget target = (AjaxRequestTarget) RequestCycle.get().getRequestHandlerScheduledAfterCurrent();
-		onSelect(target);
+		target.add(Preconditions.checkNotNull(tabLink.findParent(Tabbable.class)));
+		onSelect(target, tabLink);
 	}
 
-	protected abstract void onSelect(AjaxRequestTarget target);
+	protected abstract void onSelect(AjaxRequestTarget target, Component tabLink);
 }

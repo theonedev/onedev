@@ -1,5 +1,6 @@
 package com.pmease.commons.wicket.component.tabbable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.AttributeModifier;
@@ -26,6 +27,23 @@ public class Tabbable extends Panel {
 		WebMarkupContainer container = new WebMarkupContainer("container");
 		container.add(AttributeModifier.replace("class", getCssClasses()));
 		add(container);
+
+		List<ActionTab> actionTabs = new ArrayList<>();
+		for (Tab tab: tabs) {
+			if (tab instanceof ActionTab)
+				actionTabs.add((ActionTab) tab);
+		}
+		if (!actionTabs.isEmpty()) {
+			boolean hasSelection = false;
+			for (Tab tab: actionTabs) {
+				if (tab.isSelected()) {
+					hasSelection = true;
+					break;
+				}
+			}
+			if (!hasSelection)
+				actionTabs.get(0).setSelected(true);
+		}
 		
 		container.add(new ListView<Tab>("tabs", tabs){
 
@@ -41,6 +59,8 @@ public class Tabbable extends Panel {
 			}
 			
 		});
+		
+		setOutputMarkupId(true);
 	}
 	
 	/**
