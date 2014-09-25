@@ -23,9 +23,11 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -321,7 +323,7 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 				setVisible(commentSupport != null && showComments && isDisplayingFull());
 			}
 			
-		}.add(new ScrollBehavior(".comments.line", 50, false)));
+		}.add(new ScrollBehavior("table.comments>tbody>tr", SCROLL_MARGIN, false)));
 		
 		commentNavs.add(new WebMarkupContainer("nextComment") {
 
@@ -331,7 +333,7 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 				setVisible(commentSupport != null && showComments && isDisplayingFull());
 			}
 			
-		}.add(new ScrollBehavior(".comments.line", 50, true)));
+		}.add(new ScrollBehavior("table.comments>tbody>tr", SCROLL_MARGIN, true)));
 		
 		commentNavs.add(new AjaxLink<Void>("showComments") {
 
@@ -651,7 +653,7 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 
 		add(newCommentsView());
 		
-		autoScrollScript = String.format("pmease.commons.scroll.next('.concerned-comment', %d);", SCROLL_MARGIN);
+		autoScrollScript = String.format("pmease.commons.scroll.next('table.comments>tbody>tr.concerned', %d);", SCROLL_MARGIN);
 	}
 	
 	private String renderDiffs(List<DiffLine> diffLines) {
@@ -827,9 +829,9 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 			@Override
 			protected void populateItem(ListItem<InlineComment> item) {
 				item.add(new UserLink("avatar", new UserModel(item.getModelObject().getUser()), AvatarMode.AVATAR));
-				item.add(new WebMarkupContainer("concerned")
-						.setVisible(item.getModelObject().equals(commentSupport.getConcernedComment())));
 				item.add(new CommentPanel("comment", item.getModel()).setOutputMarkupId(true));
+				if (item.getModelObject().equals(commentSupport.getConcernedComment()))
+					item.add(AttributeAppender.append("class", " concerned"));
 			}
 			
 		});
@@ -879,7 +881,7 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 		// caused by actions such as integrate/discard on request compare page will also 
 		// get scrolled
 		if (autoScrollScript != null) {
-			response.render(OnDomReadyHeaderItem.forScript(autoScrollScript));
+			response.render(OnLoadHeaderItem.forScript(autoScrollScript));
 			autoScrollScript = null;
 		}
 	}

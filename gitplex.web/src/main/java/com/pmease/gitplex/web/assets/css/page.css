@@ -805,7 +805,8 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 .table-diff .line.comments>td {padding: 0 12px; border-top: 1px solid #DDD; 
 	border-bottom: 1px solid #DDD;}
 	
-.table-diff .line.comments td.avatar .concerned-comment {margin-top: 12px; font-size: 36px; color: #E7C325;}
+.table-diff .line.comments td.avatar .fa-flag {display: none; margin-top: 12px; font-size: 36px; color: #E7C325;}	
+.table-diff .line.comments .concerned td.avatar .fa-flag {display: block;}
 form#add-comment {margin: 16px 4px;}
 .table-diff a.add-comment {position: absolute; left:0; margin-left: -20px; 
 	width: 20px; height: 20px; text-decoration: none;}
