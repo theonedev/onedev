@@ -34,10 +34,14 @@ public class Charsets extends org.apache.commons.io.Charsets {
 	 * 			charset of the content, or <tt>null</tt> if charset can not be detected
 	 */
 	public static @Nullable Charset detectFrom(byte[] contentBytes) {
-		try {
-			return UniversalEncodingDetector.detect(contentBytes);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+		if (contentBytes.length != 0) {
+			try {
+				return UniversalEncodingDetector.detect(contentBytes);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			return Charsets.UTF_8;
 		}
 	}
 
@@ -50,10 +54,14 @@ public class Charsets extends org.apache.commons.io.Charsets {
 	}
 
 	public static boolean isBinary(byte[] contentBytes) {
-		try {
-			return UniversalEncodingDetector.isBinary(contentBytes);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+		if (contentBytes.length != 0) {
+			try {
+				return UniversalEncodingDetector.isBinary(contentBytes);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			return false;
 		}
 	}
 	

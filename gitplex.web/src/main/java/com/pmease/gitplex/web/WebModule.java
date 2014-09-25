@@ -59,7 +59,7 @@ public class WebModule extends AbstractPluginModule {
 		contribute(DiffRendererProvider.class, new DiffRendererProvider() {
 
 			@Override
-			public DiffRenderer getDiffRenderer(MediaType originalMediaType, MediaType revisedMediaType) {
+			public DiffRenderer getDiffRenderer(MediaType mediaType) {
 				return null;
 			}
 			

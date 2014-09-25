@@ -82,19 +82,15 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 
 	private final IModel<Repository> repoModel;
 	
-	private final BlobText oldText;
-	
-	private final BlobText newText;
-	
 	private final RevAwareChange change;
 	
 	private final InlineCommentSupport commentSupport;
 	
 	private final IModel<Boolean> allowToAddCommentModel;
 	
-	private BlobText effectiveOldText;
+	private BlobText oldText;
 	
-	private BlobText effectiveNewText;
+	private BlobText newText;
 	
 	private DiffOption diffOption = DiffOption.IGNORE_NOTHING;
 	
@@ -120,19 +116,14 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 	
 	private String autoScrollScript;
 
-	public TextDiffPanel(String id, final IModel<Repository> repoModel, 
-			BlobText oldText, BlobText newText, RevAwareChange change, 
+	public TextDiffPanel(String id, final IModel<Repository> repoModel, RevAwareChange change, 
 			final @Nullable InlineCommentSupport commentSupport) {
 		super(id);
 		
 		this.repoModel = repoModel;
-		Preconditions.checkArgument(!change.getOldRevision().equals(change.getNewRevision()));
 		
 		this.change = change;
 		this.commentSupport = commentSupport;
-		
-		this.oldText = oldText;
-		this.newText = newText;
 		
 		// cache add comment permission check in model to avoid recalculation for every line
 		allowToAddCommentModel = new LoadableDetachableModel<Boolean>() {
@@ -203,20 +194,20 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 	
 	private void onDiffOptionChanged() {
 		if (diffOption == DiffOption.IGNORE_EOL) {
-			effectiveOldText = oldText.ignoreEOL();
-			effectiveNewText = newText.ignoreEOL();
+			oldText = readOldText().ignoreEOL();
+			newText = readNewText().ignoreEOL();
 		} else if (diffOption == DiffOption.IGNORE_EOL_SPACES) {
-			effectiveOldText = oldText.ignoreEOLSpaces();
-			effectiveNewText = newText.ignoreEOLSpaces();
+			oldText = readOldText().ignoreEOLSpaces();
+			newText = readNewText().ignoreEOLSpaces();
 		} else if (diffOption == DiffOption.IGNORE_CHANGE_SPACES) {
-			effectiveOldText = oldText.ignoreChangeSpaces();
-			effectiveNewText = newText.ignoreChangeSpaces();
+			oldText = readOldText().ignoreChangeSpaces();
+			newText = readNewText().ignoreChangeSpaces();
 		} else {
-			effectiveOldText = oldText;
-			effectiveNewText = newText;
+			oldText = readOldText();
+			newText = readNewText();
 		}
 		
-		diffs = DiffUtils.diff(effectiveOldText.getLines(), effectiveNewText.getLines(), new WordSplitter());
+		diffs = DiffUtils.diff(oldText.getLines(), newText.getLines(), new WordSplitter());
 		
 		identical = true;
 		for (DiffLine diffLine: diffs) {
@@ -225,12 +216,17 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 				break;
 			}
 		}
-
-		if (commentSupport != null) {
-			hunks = DiffUtils.hunksOf(diffs, commentSupport.getOldComments().keySet(), 
-					commentSupport.getNewComments().keySet(), CONTEXT_SIZE);
+		
+		if (!identical) {
+			if (commentSupport != null) {
+				hunks = DiffUtils.hunksOf(diffs, commentSupport.getOldComments().keySet(), 
+						commentSupport.getNewComments().keySet(), CONTEXT_SIZE);
+			} else {
+				hunks = DiffUtils.hunksOf(diffs, CONTEXT_SIZE);
+			}
 		} else {
-			hunks = DiffUtils.hunksOf(diffs, CONTEXT_SIZE);
+			hunks = new ArrayList<>();
+			hunks.add(new DiffHunk(0, 0, diffs));
 		}
 	}
 
@@ -271,7 +267,8 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 		add(head);
 		
 		List<String> alerts = new ArrayList<>();
-		if (!oldText.getCharset().equals(newText.getCharset()))
+		if (change.getOldPath() != null && change.getNewPath() != null 
+				&& !oldText.getCharset().equals(newText.getCharset()))
 			alerts.add("Charset is changed from " + oldText.getCharset() + " to " + newText.getCharset());
 		if (!oldText.isHasEolAtEof())
 			alerts.add("Original text does not have EOL character at EOF");
@@ -303,8 +300,19 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 		
 		diffNavs.add(new WebMarkupContainer("prevDiff").add(new ScrollBehavior(".diff-block", SCROLL_MARGIN, false)));
 		diffNavs.add(new WebMarkupContainer("nextDiff").add(new ScrollBehavior(".diff-block", SCROLL_MARGIN, true)));
+
+		WebMarkupContainer commentNavs = new WebMarkupContainer("commentNavs") {
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!commentsModel.getObject().isEmpty());
+			}
+
+		};
+		head.add(commentNavs);
 		
-		head.add(new WebMarkupContainer("prevComment") {
+		commentNavs.add(new WebMarkupContainer("prevComment") {
 
 			@Override
 			protected void onConfigure() {
@@ -314,7 +322,7 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 			
 		}.add(new ScrollBehavior(".comments.line", 50, false)));
 		
-		head.add(new WebMarkupContainer("nextComment") {
+		commentNavs.add(new WebMarkupContainer("nextComment") {
 
 			@Override
 			protected void onConfigure() {
@@ -324,7 +332,7 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 			
 		}.add(new ScrollBehavior(".comments.line", 50, true)));
 		
-		head.add(new AjaxLink<Void>("showComments") {
+		commentNavs.add(new AjaxLink<Void>("showComments") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -338,7 +346,7 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 			}
 
 		});
-		head.add(new AjaxLink<Void>("hideComments") {
+		commentNavs.add(new AjaxLink<Void>("hideComments") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -554,6 +562,9 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 						commentsRow.getMarkupId());
 				target.prependJavaScript(prependScript);
 				target.appendJavaScript(String.format("gitplex.comments.afterAdd(%d);", index));
+				
+				if (commentsView.size() == 1)
+					target.add(head);
 			}
 
 		});
@@ -643,7 +654,8 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 	}
 	
 	private String renderDiffs(List<DiffLine> diffLines) {
-		Preconditions.checkArgument(!diffLines.isEmpty());
+		if (diffLines.isEmpty())
+			return "";
 		
 		StringBuilder builder = new StringBuilder();
 		
@@ -880,6 +892,20 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 		super.onDetach();
 	}
 	
+	private BlobText readOldText() {
+		if (change.getOldPath() != null) 
+			return Preconditions.checkNotNull(repoModel.getObject().getBlobText(change.getOldBlobInfo()));
+		else
+			return new BlobText();
+	}
+	
+	private BlobText readNewText() {
+		if (change.getNewPath() != null) 
+			return Preconditions.checkNotNull(repoModel.getObject().getBlobText(change.getNewBlobInfo()));
+		else
+			return new BlobText();
+	}
+	
 	@Override
 	public InlineContext getInlineContext(InlineComment comment) {
 		int oldLine = -1;
@@ -930,7 +956,6 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 		
 		return new InlineContext(contextDiffs, index-start, start>0, end<diffs.size()-1);
 	}
-
 
 	private int locateDiffPos(int lineNo, DiffLine.Action excludeAction) {
 		int index = 0;

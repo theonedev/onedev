@@ -128,10 +128,12 @@ public class ChangeComments implements Serializable {
 				}
 			}
 
-			List<InlineComment> commentsOnFile = getCommentsOnCommit(comments, change.getOldRevision(), request).get(change.getOldPath());
-			if (commentsOnFile != null) {
-				for (InlineComment comment: commentsOnFile)
-					addLineComment(oldComments, comment.getLine(), comment);
+			if (!change.getOldRevision().equals(change.getNewRevision())) {
+				List<InlineComment> commentsOnFile = getCommentsOnCommit(comments, change.getOldRevision(), request).get(change.getOldPath());
+				if (commentsOnFile != null) {
+					for (InlineComment comment: commentsOnFile)
+						addLineComment(oldComments, comment.getLine(), comment);
+				}
 			}
 		}
 		

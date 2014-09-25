@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.eclipse.jgit.util.QuotedString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +63,7 @@ public class ListTreeCommand extends GitCommand<List<TreeNode>> {
 				String sizeStr = StringUtils.substringBefore(line.trim(), "\t");
 				if (NumberUtils.isNumber(sizeStr))
 					size = Integer.parseInt(sizeStr);
-				String path = StringUtils.substringAfter(line.trim(), "\t");
+				String path = QuotedString.GIT_PATH.dequote(StringUtils.substringAfter(line.trim(), "\t"));
 				
 				treeNodes.add(new TreeNode(Integer.parseInt(mode, 8), path, hash, size));
 			}

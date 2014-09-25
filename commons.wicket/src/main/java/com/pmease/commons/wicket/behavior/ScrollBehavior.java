@@ -4,7 +4,7 @@ import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.head.OnLoadHeaderItem;
 
 @SuppressWarnings("serial")
 public class ScrollBehavior extends Behavior {
@@ -58,7 +58,7 @@ public class ScrollBehavior extends Behavior {
 				+ "$(window).trigger('scrollStopped');", 
 				component.getMarkupId(), function, selector, margin);
 		
-		response.render(OnDomReadyHeaderItem.forScript(script));
+		response.render(OnLoadHeaderItem.forScript(script));
 	}
 
 }

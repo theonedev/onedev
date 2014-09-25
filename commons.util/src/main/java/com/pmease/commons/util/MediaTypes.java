@@ -51,7 +51,7 @@ public class MediaTypes {
 			mediaType = MediaType.parse(type);
 		else
 			mediaType = MediaType.OCTET_STREAM;
-
+		
 		if (mediaType.equals(MediaType.OCTET_STREAM)) {
 			Charset charset = Charsets.detectFrom(contentBytes);
 			if (charset != null)

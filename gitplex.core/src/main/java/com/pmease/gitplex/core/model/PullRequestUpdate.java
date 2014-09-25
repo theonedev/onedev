@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 
+import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -75,6 +76,7 @@ public class PullRequestUpdate extends AbstractEntity {
 		this.headCommitHash = headCommitHash;
 	}
 	
+	@Nullable
     public User getUser() {
 		return user;
 	}

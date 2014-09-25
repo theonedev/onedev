@@ -8,5 +8,5 @@ import com.pmease.commons.loader.ExtensionPoint;
 
 @ExtensionPoint
 public interface DiffRendererProvider {
-	@Nullable DiffRenderer getDiffRenderer(MediaType originalMediaType, MediaType revisedMediaType);
+	@Nullable DiffRenderer getDiffRenderer(MediaType mediaType);
 }

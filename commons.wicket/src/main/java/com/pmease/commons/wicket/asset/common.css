@@ -87,6 +87,8 @@ table td, table th {text-align: left;}
     background-color: #999; border-color: #999; color: #FFF;}
 .nav li.dropdown .dropdown-hover:hover .caret {border-bottom-color: #FFF; border-top-color: #FFF; opacity: 1;}
 
+.dropdown-trigger {cursor: pointer;}
+
 .dropdown-trigger.pill {border-radius: 4px; margin: 2px 2px 2px 0; padding: 4px 6px; line-height: 12px;}
 .dropdown-trigger.pill .caret {border-bottom-color: #0088CC; border-top-color: #0088CC; margin-top: 8px;}
 .dropdown-trigger.pill:hover {background-color: #EEE; text-decoration: none;}

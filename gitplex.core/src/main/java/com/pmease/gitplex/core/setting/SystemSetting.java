@@ -16,7 +16,7 @@ public class SystemSetting implements Serializable {
 	
 	private static final long serialVersionUID = -5181868087749961733L;
 
-	private String repoPath;
+	private String storagePath;
 	
 	private GitConfig gitConfig = new SystemGit();
 	
@@ -26,11 +26,11 @@ public class SystemSetting implements Serializable {
 	@Directory
 	@NotEmpty
 	public String getStoragePath() {
-		return repoPath;
+		return storagePath;
 	}
 
-	public void setRepoPath(String repoPath) {
-		this.repoPath = repoPath;
+	public void setStoragePath(String storagePath) {
+		this.storagePath = storagePath;
 	}
 
 	@Editable(order=200, description="GitPlex relies on git command line to operate managed repositories. The minimum "

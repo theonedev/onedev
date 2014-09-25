@@ -1,11 +1,7 @@
 package com.pmease.gitplex.web.component.diff;
 
-import static com.pmease.commons.git.Change.Status.UNCHANGED;
-
 import org.apache.tika.mime.MediaType;
 import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
@@ -14,7 +10,6 @@ import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.git.BlobInfo;
 import com.pmease.commons.git.BlobText;
 import com.pmease.commons.git.RevAwareChange;
 import com.pmease.commons.util.MediaTypes;
@@ -24,9 +19,6 @@ import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.comment.InlineContext;
 import com.pmease.gitplex.core.comment.InlineContextAware;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.component.gitlink.GitLink;
-import com.pmease.gitplex.web.component.symbollink.SymbolLink;
-import com.pmease.gitplex.web.component.view.BlobViewPanel;
 import com.pmease.gitplex.web.extensionpoint.DiffRenderer;
 import com.pmease.gitplex.web.extensionpoint.DiffRendererProvider;
 
@@ -53,126 +45,79 @@ public class BlobDiffPanel extends Panel implements InlineContextAware {
 		super.onInitialize();
 		
 		setOutputMarkupId(true);
-		
+
 		int oldBlobType = change.getOldMode() & FileMode.TYPE_MASK;
 		int newBlobType = change.getNewMode() & FileMode.TYPE_MASK;
+
+		MediaType oldMediaType, newMediaType;
 		
-		if (change.getStatus() == UNCHANGED) {
-			add(new WebMarkupContainer("oldContent").setVisible(false));
-			add(new WebMarkupContainer("newContent").setVisible(false));
-			Fragment fragment = new Fragment("blobContent", "notChangedFrag", this);
-			fragment.add(new Label("title", change.getOldPath()));
-			BlobInfo renderInfo = new BlobInfo(change.getNewRevision(), 
-					change.getNewPath(), change.getNewMode());
-			fragment.add(new BlobViewPanel("content", repoModel, renderInfo));
-			add(fragment);
-		} else if (oldBlobType == FileMode.TYPE_GITLINK && newBlobType == FileMode.TYPE_GITLINK) {
-			add(new WebMarkupContainer("oldContent").setVisible(false));
-			add(new WebMarkupContainer("newContent").setVisible(false));
-
-			Fragment fragment = new Fragment("blobContent", "nonFileDiffFrag", this);
-			fragment.add(new Label("renamedTitle", change.getOldPath())
-					.setVisible(!change.getOldPath().equals(change.getNewPath())));
-			fragment.add(new Label("title", change.getNewPath()));
-			BlobText oldText = repoModel.getObject().getBlobText(change.getOldBlobInfo());
-			BlobText newText = repoModel.getObject().getBlobText(change.getNewBlobInfo());
-			fragment.add(new GitLink("oldContent", oldText.getLines().get(0)));
-			fragment.add(new GitLink("newContent", newText.getLines().get(0)));
-			add(fragment);
-		} else if (oldBlobType == FileMode.TYPE_SYMLINK && newBlobType == FileMode.TYPE_SYMLINK) {
-			add(new WebMarkupContainer("oldContent").setVisible(false));
-			add(new WebMarkupContainer("newContent").setVisible(false));
-
-			Fragment fragment = new Fragment("blobContent", "nonFileDiffFrag", this);
-			fragment.add(new Label("renamedTitle", change.getOldPath())
-					.setVisible(!change.getOldPath().equals(change.getNewPath())));
-			fragment.add(new Label("title", change.getNewPath()));
-			BlobText oldText = repoModel.getObject().getBlobText(change.getOldBlobInfo());
-			BlobText newText = repoModel.getObject().getBlobText(change.getNewBlobInfo());
-			fragment.add(new SymbolLink("oldContent", repoModel, change.getOldRevision(), 
-					change.getOldPath(), oldText.getLines().get(0)));
-			fragment.add(new SymbolLink("newContent", repoModel, change.getNewRevision(), 
-					change.getNewPath(), newText.getLines().get(0)));
-			add(fragment);
-		} else if (oldBlobType == FileMode.TYPE_FILE && newBlobType == FileMode.TYPE_FILE) {
-			add(new WebMarkupContainer("oldContent").setVisible(false));
-			add(new WebMarkupContainer("newContent").setVisible(false));
-			
+		if (oldBlobType == FileMode.TYPE_GITLINK || oldBlobType == FileMode.TYPE_SYMLINK) {
+			oldMediaType = MediaType.TEXT_PLAIN;
+		} else if (oldBlobType == FileMode.TYPE_FILE) {
 			byte[] oldContent = repoModel.getObject().getBlobContent(change.getOldBlobInfo());
+			oldMediaType = MediaTypes.detectFrom(oldContent, change.getOldPath());
+		} else {
+			oldMediaType = null;
+		}
+		
+		if (newBlobType == FileMode.TYPE_GITLINK || newBlobType == FileMode.TYPE_SYMLINK) {
+			newMediaType = MediaType.TEXT_PLAIN;
+		} else if (newBlobType == FileMode.TYPE_FILE) {
 			byte[] newContent = repoModel.getObject().getBlobContent(change.getNewBlobInfo());
-			MediaType oldMediaType = MediaTypes.detectFrom(oldContent, change.getOldPath());
-			MediaType newMediaType = MediaTypes.detectFrom(newContent, change.getNewPath());
-			
+			newMediaType = MediaTypes.detectFrom(newContent, change.getNewPath());
+		} else {
+			newMediaType = null;
+		}
+
+		MediaType mediaType;
+		if (oldMediaType != null) {
+			if (newMediaType != null) {
+				if (oldMediaType.equals(newMediaType)) 
+					mediaType = oldMediaType;
+				else
+					mediaType = null;
+			} else {
+				mediaType = oldMediaType;
+			}
+		} else {
+			mediaType = newMediaType;
+		}
+
+		boolean rendered = false;
+		if (mediaType != null) {
 			DiffRenderer renderer = null;
 			for (DiffRendererProvider provider: GitPlex.getExtensions(DiffRendererProvider.class)) {
-				renderer = provider.getDiffRenderer(oldMediaType, newMediaType);
+				renderer = provider.getDiffRenderer(mediaType);
 				if (renderer != null)
 					break;
 			}
 			if (renderer != null) {
-				add(renderer.render("blobContent", repoModel, change));
-			} else {
-				BlobText oldText = repoModel.getObject().getBlobText(change.getOldBlobInfo());
-				BlobText newText = repoModel.getObject().getBlobText(change.getNewBlobInfo());
-				if (oldText != null) {
-					if (newText != null) {
-						add(new TextDiffPanel("blobContent", repoModel, oldText, newText, change, commentSupport)); 
-					} else if (newContent.length == 0) {
-						add(new TextDiffPanel("blobContent", repoModel, oldText, new BlobText(), change, commentSupport)); 
-					} else {
-						Fragment fragment = new Fragment("blobContent", "binaryFileFrag", this);
-						fragment.add(new FileDiffTitle("summary", change));
-						add(fragment);
-					}
-				} else if (newText != null) {
-					if (oldContent.length == 0) {
-						add(new TextDiffPanel("blobContent", repoModel, new BlobText(), newText, change, commentSupport)); 
-					} else {
-						Fragment fragment = new Fragment("blobContent", "binaryFileFrag", this);
-						fragment.add(new FileDiffTitle("summary", change));
-						add(fragment);
-					}
-				} else if (oldContent.length == 0 && newContent.length == 0) {
-					Fragment fragment = new Fragment("blobContent", "emptyFileFrag", this);
-					fragment.add(new FileDiffTitle("summary", change));
-					add(fragment);
-				} else {
-					Fragment fragment = new Fragment("blobContent", "binaryFileFrag", this);
-					fragment.add(new FileDiffTitle("summary", change));
-					add(fragment);
-				}
+				add(renderer.render("content", repoModel, change));
+				rendered = true;
 			}
-		} else {
-			if (oldBlobType == FileMode.TYPE_SYMLINK) {
-				BlobText oldText = repoModel.getObject().getBlobText(change.getOldBlobInfo());
-				add(new SymbolLink("oldContent", repoModel, change.getOldRevision(), 
-						change.getOldPath(), oldText.getLines().get(0)));
-			} else if (oldBlobType == FileMode.TYPE_GITLINK) {
-				BlobText oldText = repoModel.getObject().getBlobText(change.getOldBlobInfo());
-				add(new GitLink("oldContent", oldText.getLines().get(0)));
-			} else if (oldBlobType == FileMode.TYPE_FILE) {
-				add(new BlobViewPanel("oldContent", repoModel, change.getOldBlobInfo()));
-			} else {
-				add(new WebMarkupContainer("oldContent").setVisible(false));
-			}
-			add(new Label("oldTitle", change.getOldPath()));
+		}
+		
+		if (!rendered) {
+			BlobText oldText;
+			if (change.getOldPath() != null)
+				oldText = repoModel.getObject().getBlobText(change.getOldBlobInfo());
+			else
+				oldText = null;
 			
-			if (newBlobType == FileMode.TYPE_SYMLINK) {
-				BlobText newText = repoModel.getObject().getBlobText(change.getNewBlobInfo());
-				add(new SymbolLink("newContent", repoModel, change.getNewRevision(), 
-						change.getNewPath(), newText.getLines().get(0)));
-			} else if (newBlobType == FileMode.TYPE_GITLINK) {
-				BlobText newText = repoModel.getObject().getBlobText(change.getNewBlobInfo());
-				add(new GitLink("newContent", newText.getLines().get(0)));
-			} else if (newBlobType == FileMode.TYPE_FILE) {
-				add(new BlobViewPanel("newContent", repoModel, change.getNewBlobInfo()));
+			BlobText newText;
+			if (change.getNewPath() != null)
+				newText = repoModel.getObject().getBlobText(change.getNewBlobInfo());
+			else
+				newText = null;
+
+			if (change.getOldPath() != null && oldText == null || change.getNewPath() != null && newText == null) {
+				Fragment fragment = new Fragment("content", "binaryFrag", this);
+				fragment.add(new FileDiffTitle("title", change));
+				add(fragment);
 			} else {
-				add(new WebMarkupContainer("newContent").setVisible(false));
+				add(new TextDiffPanel("content", repoModel, change, commentSupport));
 			}
-			add(new Label("newTitle", change.getNewPath()));
-			
-			add(new WebMarkupContainer("blobContent").setVisible(false));
-		}		
+		}
 		
 	}
 	

@@ -1,58 +1,13 @@
 <wicket:panel>
-	<wicket:enclosure child="oldContent">
-		<div class="blob-diff old">
+	<div wicket:id="content"></div>
+	<wicket:fragment wicket:id="binaryFrag">
+		<div class="binary-file">
 			<div class="head">
-				<i class="fa fa-minus"></i> <span wicket:id="oldTitle"></span>
-			</div>
-			<div wicket:id="oldContent" class="body"></div>
-		</div>
-	</wicket:enclosure>
-	<wicket:enclosure child="newContent">
-		<div class="blob-diff new">
-			<div class="head">
-				<i class="fa fa-plus"></i> <span wicket:id="newTitle"></span>
-			</div>
-			<div wicket:id="newContent" class="body"></div>
-		</div>
-	</wicket:enclosure>
-	<div wicket:id="blobContent"></div>
-	<wicket:fragment wicket:id="notChangedFrag">
-		<div class="head">
-			<div class="title"><span wicket:id="title"></span> <span class="label label-warning">unchanged</span></div>
-			<div wicket:id="content" class="body"></div>
-		</div>				
-	</wicket:fragment>
-	<wicket:fragment wicket:id="emptyFileFrag">
-		<div class="head"><span wicket:id="summary"></span></div>
-		<div class="body">
-			<i class='fa fa-info-circle'></i> <em>File is empty</em>
-		</div>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="binaryFileFrag">
-		<div class="head"><span wicket:id="summary"></span></div>
-		<div class="body">
-			<i class='fa fa-info-circle'></i> <em>Binary files</em>
-		</div>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="nonFileDiffFrag">
-		<div class="blob-diff">
-			<div class="head">
-				<wicket:enclosure child="renamedTitle">
-					<span wicket:id="renamedTitle"></span>
-					<i class="fa fa-arrow-slim-right"></i>
-				</wicket:enclosure>
-				<span wicket:id="title"></span>
+				<div wicket:id="title"></div>
 			</div>
 			<div class="body">
-				<div class="old line">
-					<i class="fa fa-minus"></i>
-					<span wicket:id="oldContent"></span>
-				</div>
-				<div class="new line">
-					<i class="fa fa-plus"></i>
-					<span wicket:id="newContent"></span>
-				</div>
+				<div class="fa fa-info-circle"> Binary file</div>
 			</div>
-		</div>				
+		</div>
 	</wicket:fragment>
 </wicket:panel>

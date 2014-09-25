@@ -8,9 +8,8 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
-import org.eclipse.jgit.lib.FileMode;
 
-import com.google.common.base.Preconditions;
+import com.pmease.commons.git.Change;
 import com.pmease.commons.git.RevAwareChange;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 
@@ -26,17 +25,12 @@ public class FileDiffTitle extends Panel {
 	
 	public FileDiffTitle(String id, RevAwareChange change, List<String> alerts) {
 		super(id);
-		
-		int oldBlobType = change.getOldMode() & FileMode.TYPE_MASK;
-		int newBlobType = change.getNewMode() & FileMode.TYPE_MASK;
-		
-		Preconditions.checkArgument(oldBlobType == FileMode.TYPE_FILE && newBlobType == FileMode.TYPE_FILE);
-		
+
 		this.change = change;
 		
 		this.alerts = new ArrayList<>();
-		if (change.getOldMode() != change.getNewMode()) {
-			this.alerts.add("File mode is changed from " + Integer.toString(change.getOldMode(), 8) 
+		if (change.getOldMode() != 0 && change.getNewMode() != 0 && change.getOldMode() != change.getNewMode()) {
+			this.alerts.add("Blob mode is changed from " + Integer.toString(change.getOldMode(), 8) 
 					+ " to " + Integer.toString(change.getNewMode(), 8));
 		}
 		if (alerts != null)
@@ -52,8 +46,8 @@ public class FileDiffTitle extends Panel {
 		super.onInitialize();
 		
 		add(new Label("renamedTitle", change.getOldPath())
-				.setVisible(!change.getOldPath().equals(change.getNewPath())));
-		add(new Label("title", change.getNewPath()));
+				.setVisible(change.getStatus() == Change.Status.RENAMED));
+		add(new Label("title", change.getPath()));
 		
 		if (alerts.size() == 0) {
 			add(new WebMarkupContainer("alerts").setVisible(false));

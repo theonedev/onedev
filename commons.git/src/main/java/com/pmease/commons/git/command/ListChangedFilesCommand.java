@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.jgit.util.QuotedString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +61,7 @@ public class ListChangedFilesCommand extends GitCommand<Collection<String>> {
 			@Override
 			public void consume(String line) {
 				if (line.trim().length() != 0)
-					changedFiles.add(line);
+					changedFiles.add(QuotedString.GIT_PATH.dequote(line));
 			}
 			
 		}, new LineConsumer() {
