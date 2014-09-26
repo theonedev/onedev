@@ -722,8 +722,23 @@ pmease.commons = {
         	$("body, html").animate({scrollTop:0}, 700);
         	return false;
         });
-	}
+	},
 	
+	choiceFormatter: {
+		id: {
+			formatSelection: function(choice) {
+				return choice.id;
+			},
+			
+			formatResult: function(choice) {
+				return choice.id;
+			},
+			
+			escapeMarkup: function(m) {
+				return m;
+			}
+		}
+	},	
 };
 
 $(function() {

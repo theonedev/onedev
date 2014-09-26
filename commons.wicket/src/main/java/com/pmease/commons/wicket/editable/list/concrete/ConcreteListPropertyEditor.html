@@ -22,16 +22,14 @@
 					<div wicket:id="feedback"></div>
 				</td>
 				<td class="actions">
-					<!-- float elements here in order to adjust icon position easily as these two icons are not 
-					of the same size under same font -->
-					<a wicket:id="deleteElement" class="fa fa-2x fa-times pull-left" title="Delete this element"></a>
-					<div class="fa fa-arrows handle pull-left" title="Drag to reorder elements"></div>
+					<a wicket:id="deleteElement" title="Delete this element"><span class="delete icon"></span></a>
+					<span class="handle move icon" title="Drag to reorder elements"></span>
 				</td>
 			</tr>
 		</tbody>
 		<tfoot>
 			<tr class="add-element">
-				<td wicket:id="newRow" class="add-element"><a wicket:id="addElement" class="fa fa-2x fa-plus" title="Add new element"></a></td>
+				<td wicket:id="newRow" class="add-element"><a wicket:id="addElement" title="Add new element"><span class="add icon"></span></a></td>
 			</tr>
 		</tfoot>
 	</table>

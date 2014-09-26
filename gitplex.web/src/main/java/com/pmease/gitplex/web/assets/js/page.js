@@ -62,11 +62,11 @@ var gitplex = {
 
 		repository: {
 			formatSelection: function(repository) {
-				return repository.name
+				return repository.name;
 			},
 			
 			formatResult: function(repository) {
-				return repository.owner + '/' + repository.name
+				return repository.owner + '/' + repository.name;
 			},
 			
 			escapeMarkup: function(m) {
@@ -87,6 +87,7 @@ var gitplex = {
 				return m;
 			}
 		},
+		
 	},
 	
 	commitMessage: {

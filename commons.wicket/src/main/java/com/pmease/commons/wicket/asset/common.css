@@ -15,12 +15,6 @@
 .bottom-spacing {margin-bottom: 10px;}
 .spacing {margin: 10px;}
 
-/* Links */
-a {cursor: pointer;}
-a.fa {text-decoration: none;}
-a.fa-times {color: #FF2A68;}
-a.fa-times:hover {color: #BD2E29;}
-
 /* Feedback */
 #session-feedback {position:absolute; background:#FFFFDE; max-width:75%;
 	border:1px solid #9C9E9C; border-top:none; padding: 6px; z-index:10000; 
@@ -198,6 +192,11 @@ table td, table th {text-align: left;}
 div.table {display: table;}
 div.tr {display: table-row;}    
 div.td {display: table-cell;}
+
+/* ICONS */
+span.add.icon {padding: 12px; background: url("add.png") no-repeat 50% 50%;}
+span.delete.icon {padding: 12px; background: url("delete.png") no-repeat 50% 50%;}
+span.move.icon {padding: 12px; background: url("move.png") no-repeat 50% 50%;}
 
 /* BACK TO TOP */
 .back-to-top {position: fixed; right: 20px; bottom: 40px; cursor: pointer; padding: 25px; 

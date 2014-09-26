@@ -1,6 +1,10 @@
 html, body { background: #f0f2f4; }
 
-a { color: #09f; }
+a {color: #09f; cursor: pointer;}
+a.fa {text-decoration: none;}
+a.fa-times {color: #FF2A68;}
+a.fa-times:hover {color: #BD2E29;}
+
 textarea {resize: vertical;}
 
 /**

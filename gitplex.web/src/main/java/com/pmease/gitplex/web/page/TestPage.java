@@ -7,7 +7,6 @@ public class TestPage extends BasePage {
 
 	public TestPage(PageParameters params) {
 		super(params);
-		
 	}
 	
 	@Override

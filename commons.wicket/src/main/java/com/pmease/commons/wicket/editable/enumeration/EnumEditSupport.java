@@ -34,11 +34,10 @@ public class EnumEditSupport implements EditSupport {
 
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-					        if (model.getObject() != null) {
+					        if (model.getObject() != null)
 					            return new Label(id, model.getObject().toString());
-					        } else {
+					        else 
 								return new NotDefinedLabel(id);
-					        }
 						}
 						
 					};

@@ -4,11 +4,13 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.editable.PropertyDescriptorImpl;
+import com.pmease.commons.editable.annotation.ChoiceProvider;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.commons.wicket.editable.BeanContext;
@@ -37,7 +39,74 @@ public class ListEditSupport implements EditSupport {
 		if (List.class.isAssignableFrom(propertyDescriptor.getPropertyClass())) {
 			final Class<?> elementClass = EditableUtils.getElementClass(propertyDescriptor.getPropertyGetter().getGenericReturnType());
 			if (elementClass != null) {
-				if (ClassUtils.isConcrete(elementClass)) {
+				if (Enum.class.isAssignableFrom(elementClass)) {
+		            return new PropertyContext<List<Enum<?>>>(propertyDescriptor) {
+
+						@Override
+						public PropertyViewer renderForView(String componentId, final IModel<List<Enum<?>>> model) {
+
+							return new PropertyViewer(componentId, this) {
+
+								@Override
+								protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
+							        if (model.getObject() != null && !model.getObject().isEmpty()) {
+							            String content = "";
+							            for (Enum<?> each: model.getObject()) {
+							            	if (content.length() == 0)
+							            		content += each.toString();
+							            	else
+							            		content += ", " + each.toString();
+							            }
+							            return new Label(id, content);
+							        } else { 
+										return new NotDefinedLabel(id);
+							        }
+								}
+								
+							};
+						}
+
+						@Override
+						public PropertyEditor<List<Enum<?>>> renderForEdit(String componentId, IModel<List<Enum<?>>> model) {
+							return new EnumListPropertyEditor(componentId, this, model);
+						}
+		            	
+		            };
+				} else if (elementClass == String.class 
+						&& propertyDescriptor.getPropertyGetter().getAnnotation(ChoiceProvider.class) != null) {
+		            return new PropertyContext<List<String>>(propertyDescriptor) {
+
+						@Override
+						public PropertyViewer renderForView(String componentId, final IModel<List<String>> model) {
+
+							return new PropertyViewer(componentId, this) {
+
+								@Override
+								protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
+							        if (model.getObject() != null && !model.getObject().isEmpty()) {
+							            String content = "";
+							            for (String each: model.getObject()) {
+							            	if (content.length() == 0)
+							            		content += each.toString();
+							            	else
+							            		content += ", " + each.toString();
+							            }
+							            return new Label(id, content);
+							        } else { 
+										return new NotDefinedLabel(id);
+							        }
+								}
+								
+							};
+						}
+
+						@Override
+						public PropertyEditor<List<String>> renderForEdit(String componentId, IModel<List<String>> model) {
+							return new StringListPropertyEditor(componentId, this, model);
+						}
+		            	
+		            };
+				} else if (ClassUtils.isConcrete(elementClass)) {
 					if (elementClass.getAnnotation(Editable.class) != null) {
 						return new PropertyContext<List<Serializable>>(propertyDescriptor) {
 
