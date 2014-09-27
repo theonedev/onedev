@@ -24,11 +24,26 @@
 				</div>
 			</li>
 			</wicket:container>
-			<li>
-				<a wicket:id="adminRepo" class="btn btn-default"><i class="fa fa-tools"> Administration</i></a>
-			</li>
 		</ul>
 	</div>
-	<wicket:child></wicket:child>
+	<table>
+		<tbody>
+			<tr>
+				<td class="sidebar">
+					<label class="group">CODE</label>
+					<wicket:container wicket:id="codeTabs"></wicket:container>
+					<label class="group">PULL REQUESTS</label>
+					<wicket:container wicket:id="requestTabs"></wicket:container>
+					<wicket:enclosure child="settingTabs">
+					<label class="group">SETTINGS</label>
+					<wicket:container wicket:id="settingTabs"></wicket:container>
+					</wicket:enclosure>
+				</td>
+				<td class="content">
+					<wicket:child></wicket:child>
+				</td>
+			</tr>
+		</tbody>
+	</table>
 </wicket:extend>
 </html>

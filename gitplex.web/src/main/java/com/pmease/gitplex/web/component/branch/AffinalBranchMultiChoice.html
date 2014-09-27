@@ -1,17 +1,16 @@
 <wicket:panel>
-	<div class="affinal-branch-choice clearfix">
-		<div class="repository pull-left">
-			<div class="input-group">
-				<span class="input-group-addon"><span class="fa fa-repo"></span></span> 
+	<table class="affinal-branch-choice">
+		<tr class="repository">
+			<td class="name"><span>Repository</span></td>
+			<td class="value">
 				<input wicket:id="repositoryChoice" type="hidden" class="form-control"></input> 
-			</div>
-		</div>
-		<div class="connector pull-left fa fa-chevron-right"></div>
-		<div class="branch pull-left">
-			<div class="input-group">
-				<span class="input-group-addon"><span class="fa fa-branch"></span></span> 
+			</td>
+		</tr>
+		<tr class="branch">
+			<td class="name"><span>Branches</span></td>
+			<td class="value">
 				<input wicket:id="branchChoice" type="hidden" class="form-control"></input> 
-			</div>
-		</div>
-	</div>
+			</td>
+		</tr>
+	</table>
 </wicket:panel>

@@ -126,11 +126,10 @@ div.terminal {background: black; color: white; border-radius: 4px; padding: 8px;
 .form-feedback.has-success { color: #468847; background-color: #dff0d8; border-color: #d6e9c6 #d6e9c6 #d6e9c6 #468847; }
 .form-feedback.has-info { color: #3a87ad; background-color: #d9edf7; border-color: #bce8f1 #bce8f1 #bce8f1 #3a87ad;}
 
-.submits { margin-top: 20px; padding-top: 18px; text-align: right; }
+.submits { margin-top: 12px; padding-top: 18px;}
 .submits:before, .submits:after { display: table; content: " "; }
 .submits:after { clear: both; }
 .submits .btn + .btn { margin-bottom: 0; margin-left: 5px; }
-
 
 .form-sm { width: 400px; }
 .form-md { width: 600px; }
@@ -216,13 +215,13 @@ ul.f-dropdown { padding: 0; }
 /**
  * LAYOUT
  */
-#global-header, #main, #global-footer {position: relative;}
-#global-header:before, #global-header:after, #main:before, 
-#main:after, #global-footer:before, #global-footer:after { 
+header, #main, footer {position: relative;}
+header:before, header:after, #main:before, 
+#main:after, footer:before, footer:after { 
   display: table;
   content: " ";
 }
-#global-header:after, #main:after, #global-footer:after { clear: both; }
+header:after, #main:after, footer:after { clear: both; }
 
 .navbar-brand .fa { font-size: 32px; color: #333; }
 .navbar-brand:hover .fa { color: #08f;}
@@ -232,9 +231,9 @@ ul.f-dropdown { padding: 0; }
 /**
  * GLOBAL HEADER
  */
-#global-header .navbar { border-width: 0 0 1px 0; border-color: #ddd; border-radius: 0; margin: 0; background: #f0f2f4; }
-#global-header .navbar-brand { padding: 10px 10px 10px 20px; }
-#global-header .search-form { margin-top: 12px; margin-bottom: 0;}
+header .navbar { border-width: 0 0 1px 0; border-color: #ddd; border-radius: 0; margin: 0; background: #f0f2f4; }
+header .navbar-brand { padding: 10px 10px 10px 20px; }
+header .search-form { margin-top: 12px; margin-bottom: 0;}
 .search-form input.text-field {
 	height: 30px;
 	width: 200px;
@@ -247,9 +246,9 @@ ul.f-dropdown { padding: 0; }
 	background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAEJWlDQ1BJQ0MgUHJvZmlsZQAAOBGFVd9v21QUPolvUqQWPyBYR4eKxa9VU1u5GxqtxgZJk6XpShal6dgqJJQ6N4mpmxjb6baqT3uBNwb8AUDZAw9IPCGNX2J72fYA2qSpoIpqEtIeOvFDiEl7QVX4rp3YDoqYo15/Pec753zn3GubqO+zkmkaUYVope5YhUxSOX1mUenboig9Sf00RP0lzTYT+fwc4RJccQ9dEaIHPxFWottjPfwhak/YX+a2RhR5BN5G2dZWgM8RxQzNtByi+F3YJ886JnDfU8CPWxAIrApc9XBK4CUPn3Y5xcI0OEKrrNVKZeB14NGlkL0awp4GMJAnw+vc0jVFzCJvNSq6wV2HtzzEHWL+H1wxmujZvYaxDtjL8ydwHxG916yZQht/rJXS88DPwX7DdJLC/gLw783lhQTwAaLoYxXr+ILHj768Viu+DrwH9rLuZItt+1p9KXcSGLHRjeXGCZFHcG5o9jRmSc8A36nxrNhj6JGozFNp4FHg4Vpzpp1fmrVX54XdzbNWm84BI49kvVWazQMPAb9rNQqiFjRLG9zIiFrIL10znXxbg7RTN3KiFvplMrfdHpFT2nFqxRkvlh12rGI7li1W9OPZNn/dNNyzCG3sktUsCG3Iz26VrHQGGHnY37y+IOYGHNtbLqXEbMeBj9GpSIk4NWgJq0Z12iWFCpShJO4mWfBUSCcDFg4vh0WPPErLsPXm5V2OFxMwqm70johGld4cr8K9NqfBBpnKDuHvCJtjR9kkmyKFvcJeZcdYCtYpdsRXkA/pVKhK96DUy/M2NVFZ6DhFyYtDzRE/RrlgvalrN9/7C2qCLhuBH3n8jqG5EZ4A2ZhAp7ux8Jyur3+71/com+zyG7cHrq/TyYfNN3Y3thPbxLoV2w7iY7/EtvHbogR2wHAVrUCV7u6E7fPGunq4CqZDJay/gteA1o7Srh2t1C8OBR4xCf5O7kGOLowGVvVn9Q91U/1EvaT+1lUjyNg1JelD6UvpO+kr6WvpB1KkK9JV6XvpmvSF9I2fs/fee1n8vXf7FTbRrdiFTr3wrDkZclLeJz8rp+Sn5eflOZ+lyIPyhDwj74dnn79vRuDv6kWnM5hVZ6q9a4knQKcFKNHpLLgWpiomXKfzyBp+TtpK2TCbYNn/nNpJcZY7KuLpeCqeICV+ID4Vn4jPCtx58uL74ZvCmvbVe0+Oz+jqgIdYmIqfZ8w9deKsiuhV6Dagmzv8HL4dRNMN87ylV2uOclBVX1IS+JRxJVvXxkeVkmEorstWLG5za5WXx0l8B0Uc0f2C+32L7LkZ2JzXiI7+iXfWrcC22CT63CYafDGwjeCd+MRHRJcPa01r1ctHkciPRHbl0EH3/8hAEu+mO63Wfbyv+j4g2n2/1fpno9Xa/RT5t4muGP8CYGVxecXFpEEAAAEiSURBVCgVhZG9SsRAFIVnkhBwSZ7AYGUXlDSCrYVYaCFKirBZCfgOamvrGySdkGwKEQRXO7XQxiKFINjrvsB2QoT4jThhENELh7nnnHvm5kd2XSeKohh4nncghBiBAEzRT9u2Pcmy7B3elx2G4ZzjODcoQynlA5jQu5z7tm2vNU0zjqLoQyccbjmErDKwkyTJhTbKsty1LOvMdV3lH2vdohkxfGkOKzNN03P0a9o9xXWpQMDzvmjBPNGf4AumpgJTEJmi0S/TvxlcWKwtEdbrut42DfUO8E2g/L5knucD3/dvWb9CeML5jLsEtgCSfOQrbsRxPFMpyYD+D0fwIZgHr2D8zRfN0FcA49eqqipg+A6zD/0ZULf8CN3/GzBCV2ybfQLGkGWtzcDkHAAAAABJRU5ErkJggg==') white no-repeat 180px 8px; 
 }
 .search-form input.text-field:focus { width: 300px; background: white; }
-#global-header .tooltip { white-space: nowrap; }
-#global-header .navbar-right { margin-right: 20px; }
-#global-header .user-links { margin: 0; }
+header .tooltip { white-space: nowrap; }
+header .navbar-right { margin-right: 20px; }
+header .user-links { margin: 0; }
 .user-links > li { margin: 0; height: 52px; line-height: 52px; }
 .user-links > li.separator { border-left: 1px solid #d5d5d5; border-right: 1px solid #fefefe; margin: 0 6px;}
 .user-links a {  padding: 0 10px; }
@@ -262,7 +261,7 @@ ul.f-dropdown { padding: 0; }
 /**
  * GLOBAL FOOTER
  */
-#global-footer { padding: 20px; border-top: 1px solid #ddd; font-size: 11.9px; }
+footer { padding: 20px; border-top: 1px solid #ddd; font-size: 11.9px; }
 
 /**
  * OVERRIDES
@@ -295,25 +294,14 @@ ul.f-dropdown { padding: 0; }
 #main>table>tbody>tr>td.sidebar .head > a { color: #666; font-weight:bold; line-height: 24px; }
 #main>table>tbody>tr>td.sidebar .head > a:hover { text-decoration: none; color: #09F; }
 
-.content section > .head { border-style: solid; border-width: 1px 0; border-color: #ddd; margin-bottom: 0; position: relative; z-index: 10; overflow: visible; }
-section:first-child > .head { border-top: none; }
-section>.head h2, section>.head h3 { margin: 0; font-size: 18px; line-height: 24px; color: #6f6f6f; font-weight: 300; text-transform: uppercase; float: left; }
-section .padder, section > .body { padding: 20px 20px; }
-section > .well { border-radius: 0; border-width: 0 0 1px 0; margin: 0; }
-section>.head .actions { float: left; }
-section .actionbar { padding: 8px 20px; border-bottom: 1px solid #ddd; background: #f7f9fa; position: relative; }
-.actionbar .btn { color: #666;} 
-.actionbar .btn:hover { color: #08f; }
-.actionbar .btn:focus,
-.actionbar .btn:active {
-	background: transparent;
-	box-shadow: none;
-}
-
-.actionbar .btn-delete-team:hover { color: #900; }
+/* SECTION */
+section:first-child>.head { border-top: none; }
+section>.head {margin: 0; font-size: 18px; line-height: 24px; color: #6f6f6f; font-weight: 300; 
+	text-transform: uppercase; border-bottom: 1px solid #DDD;}
+section>.body { padding: 20px;}
+section>.body>.actions {margin-bottom: 20px;}
 
 /** TABLE */
-
 th.wicket_orderUp, th.wicket_orderDown, th.wicket_orderNone { position: relative; }
 .wicket_orderUp:before, .wicket_orderDown:before, .wicket_orderNone:before { 
     font-family: pmease-icons;
@@ -449,14 +437,16 @@ table.user-info {width: auto !important; font-size: 13px; color: #666;}
 table.user-info .avatar {width: 36px; height: 36px;}
 table.user-info>tbody>tr>td:first-child {padding-right: 4px;}  
 
-.repository-list .list-group-item { position: relative; padding-left: 48px; }
-.repository-list .list-group-item i { position: absolute; left: 0; top: 10px; font-size: 48px; width: 48px; color: #ddd; }
-.repository-list h4 { margin: 0 0 9px; }
-.repository-list p { margin: 0 0 6px; font-size: 12px;}
-.repository-list .age { color: #999; }
+/* ACCOUNT PAGES */
+.account.sidebar>.head img.avatar {width: 160px; height: 160px;}
+.account.sidebar>.head>.name {font-size: 18px; margin-top: 16px; color: #666;}
+.account.sidebar>.head>.name a {color: #444;}
 
-.repository-info .age { color: #999; font-size: 12px; }
-.repository-info .fork-info { color: #999; margin: 0 0 0 1em; font-size: 12px; }
+.repositories>.body>.actions>.pull-left {margin-right: 20px;}
+.repositories>.body>ul>li { position: relative; padding: 12px 0 12px 48px; border-top: 1px dashed #BBB;}
+.repositories>.body>ul>li i { position: absolute; left: 0; top: 12px; font-size: 48px; width: 48px; color: #ddd; }
+.repositories>.body .repo-link { margin: 0 0 9px; font-size: 20px;}
+.repositories>.body .age { color: #999; }
 
 .members-summary, .repos-summary { border-bottom: 1px solid #ddd; margin: 0; padding-bottom: 10px; }
 .members-summary > b, .repos-summary > b { color: #333; }
@@ -485,9 +475,10 @@ table.user-info>tbody>tr>td:first-child {padding-right: 4px;}
 .list-group-item.repo:hover > .list-group-item-actions > .img-link { color: #990000; }
 .list-members .list-group-item-actions { top: 20px; margin-top: 0;}
 
-/**
- * REPOSITORY PAGE
- */
+/* ADMINISTRATION PAGES */
+.administration.sidebar>.head {font-size: 17px;}
+
+/* REPOSITORY PAGE */
 .page-nav.repo-head {padding-bottom: 10px; }
 
 a > .ind { font-weight: 300; color: #888; float: right; }
@@ -871,8 +862,10 @@ ul.threads li a {color: #444; cursor: pointer;}
 ul.threads li .markdown {color: #888; margin-top: 4px;}
 
 /* BRANCH CHOICE */
-.affinal-branch-choice .connector {margin: 4px 0 0 0; color: #BBB; font-weight: bold; 
-	font-size: 26px;}
+.affinal-branch-choice {width: 100%;}
+.affinal-branch-choice td {padding: 12px; white-space: nowrap;}
+.affinal-branch-choice td.name {text-align: right; padding-right: 0; font-size: 16px; width: 1%; padding-top: 16px;}
+.affinal-branch-choice .select2-choice {width: 100%;}
 
 /* PULL REQUEST LIST PANEL */
 .request-list>.head {padding: 12px 10px !important; font-size: 16px;}
@@ -892,15 +885,12 @@ ul.status-help li:last-child .description {border-bottom: none;}
 
 /* NEW PULL REQUEST PANEL */
 .new-request {padding: 20px;}
-.new-request>.title {font-size: 20px; font-weight: bold; margin-bottom: 20px;}
-.new-request>.branches {background: #F2F2F2; padding: 8px; border-radius: 4px;}
+.new-request>.branches {margin-bottom: 20px;}
+.new-request>.branches td {background: #F2F2F2; border-radius: 4px; vertical-align: top;}
+.new-request>.branches .actions {width: 1%; background: none; padding: 0 12px 0 8px;}
+.new-request>.branches .direction {font-size: 48px; color: #999;}
+.new-request>.branches .status {background: none;}
 
-/* Fix the issue that branch selectors can not be displayed in a single line in Chrome */
-.new-request>.branches .input-group-addon {width: auto;} 
-
-.new-request>.branches>.label {font-size: 16px; color: #444; margin-top: 4px;}
-.new-request>.branches>.target {margin-right: 12px;}
-.new-request>.branches>.source {margin-right: 24px;}
 .new-request>div {margin-bottom: 20px;}
 .new-request .status .summary {font-size: 16px; padding: 0; margin-bottom: 8px;}
 .new-request .can-send {border-radius: 4px; background: #F2F2F2; padding: 4px;}

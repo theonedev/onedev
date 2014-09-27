@@ -1,9 +1,13 @@
 package com.pmease.gitplex.web.page.repository;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.wicket.Page;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -18,7 +22,10 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.Constants;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.pmease.commons.git.PathUtils;
+import com.pmease.commons.wicket.component.tabbable.Tab;
+import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.manager.TeamManager;
@@ -31,12 +38,26 @@ import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.permission.operation.GeneralOperation;
 import com.pmease.gitplex.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitplex.web.model.RepositoryModel;
-import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.home.AccountHomePage;
-import com.pmease.gitplex.web.page.repository.admin.RepoOptionsPage;
+import com.pmease.gitplex.web.page.account.AccountBasePage;
+import com.pmease.gitplex.web.page.account.AccountHomePage;
+import com.pmease.gitplex.web.page.repository.admin.GateKeeperPage;
+import com.pmease.gitplex.web.page.repository.admin.GeneralSettingPage;
+import com.pmease.gitplex.web.page.repository.admin.IntegrationSettingPage;
+import com.pmease.gitplex.web.page.repository.admin.PermissionSettingPage;
+import com.pmease.gitplex.web.page.repository.code.blob.RepoBlobPage;
+import com.pmease.gitplex.web.page.repository.code.branches.BranchesPage;
+import com.pmease.gitplex.web.page.repository.code.commit.RepoCommitPage;
+import com.pmease.gitplex.web.page.repository.code.commits.RepoCommitsPage;
+import com.pmease.gitplex.web.page.repository.code.contributors.ContributorsPage;
+import com.pmease.gitplex.web.page.repository.code.tags.TagsPage;
+import com.pmease.gitplex.web.page.repository.code.tree.RepoTreePage;
+import com.pmease.gitplex.web.page.repository.pullrequest.ClosedRequestsPage;
+import com.pmease.gitplex.web.page.repository.pullrequest.NewRequestPage;
+import com.pmease.gitplex.web.page.repository.pullrequest.OpenRequestsPage;
+import com.pmease.gitplex.web.page.repository.pullrequest.RequestDetailPage;
 
 @SuppressWarnings("serial")
-public abstract class RepositoryPage extends AccountPage {
+public abstract class RepositoryPage extends AccountBasePage {
 
 	public static final String PARAM_REPO = "repo";
 
@@ -171,12 +192,68 @@ public abstract class RepositoryPage extends AccountPage {
 		});
 		
 		add(new BookmarkablePageLink<Void>("adminRepo", 
-				RepoOptionsPage.class, paramsOf(getRepository())) {
+				GeneralSettingPage.class, paramsOf(getRepository())) {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisibilityAllowed(SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(getRepository())));
 			}
+		});
+		
+		List<Tab> codeTabs = new ArrayList<>();
+		codeTabs.add(new RepositoryTab(Model.of("Files"), "fa fa-file-code", RepoTreePage.class, RepoBlobPage.class));
+		codeTabs.add(new RepositoryTab(Model.of("Commits"), "fa fa-commit", RepoCommitsPage.class, RepoCommitPage.class));
+		codeTabs.add(new RepositoryTab(Model.of("Branches"), "fa fa-branch", BranchesPage.class));
+		codeTabs.add(new RepositoryTab(Model.of("Tags"), "fa fa-tags", TagsPage.class));
+		codeTabs.add(new RepositoryTab(Model.of("Contributors"), "fa fa-group-o", ContributorsPage.class));
+		
+		add(new Tabbable("codeTabs", codeTabs));
+		
+		List<Tab> requestTabs = new ArrayList<>();
+		requestTabs.add(new RepositoryTab(Model.of("Open"), "fa fa-branch-merge", OpenRequestsPage.class) {
+
+				@Override
+				public boolean isActive(Page currentPage) {
+					if (currentPage instanceof RequestDetailPage) {
+						RequestDetailPage detailPage = (RequestDetailPage) currentPage;
+						if (detailPage.getPullRequest().isOpen())
+							return true;
+					}
+					return super.isActive(currentPage);
+				}
+			
+		});
+		requestTabs.add(new RepositoryTab(Model.of("Closed"), "fa fa-pull-request-close", ClosedRequestsPage.class) {
+			
+				@Override
+				public boolean isActive(Page currentPage) {
+					if (currentPage instanceof RequestDetailPage) {
+						RequestDetailPage detailPage = (RequestDetailPage) currentPage;
+						if (!detailPage.getPullRequest().isOpen())
+							return true;
+					}
+					return super.isActive(currentPage);
+				}
+			
+		});
+		requestTabs.add(new RepositoryTab(Model.of("Create"), "fa fa-pull-request-add", NewRequestPage.class));		
+		
+		add(new Tabbable("requestTabs", requestTabs));		
+		
+		List<Tab> settingTabs = Lists.newArrayList();
+		settingTabs.add(new RepositoryTab(Model.of("General"), "fa fa-tools", GeneralSettingPage.class));
+		settingTabs.add(new RepositoryTab(Model.of("Permissions"), "fa fa-lock", PermissionSettingPage.class));
+		settingTabs.add(new RepositoryTab(Model.of("Gate Keepers"), "fa fa-eye-open", GateKeeperPage.class));
+		settingTabs.add(new RepositoryTab(Model.of("Integration"), "fa fa-puzzle", IntegrationSettingPage.class));
+
+		add(new Tabbable("settingTabs", settingTabs) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(getRepository())));
+			}
+			
 		});
 	}
 	

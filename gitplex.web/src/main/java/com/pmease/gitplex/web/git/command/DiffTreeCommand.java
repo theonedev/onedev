@@ -13,7 +13,7 @@ import com.google.common.base.Throwables;
 import com.google.common.io.ByteSource;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
-import com.pmease.gitplex.web.page.repository.info.code.commit.diff.patch.Patch;
+import com.pmease.gitplex.web.page.repository.code.commit.diff.patch.Patch;
 
 public class DiffTreeCommand extends AbstractDiffCommand<Patch, DiffTreeCommand> {
 

@@ -16,7 +16,7 @@ import com.pmease.gitplex.web.extensionpoint.DiffRenderer;
 import com.pmease.gitplex.web.extensionpoint.DiffRendererProvider;
 import com.pmease.gitplex.web.extensionpoint.MediaRenderer;
 import com.pmease.gitplex.web.extensionpoint.MediaRendererProvider;
-import com.pmease.gitplex.web.page.repository.info.code.blob.renderer.BlobRendererFactory;
+import com.pmease.gitplex.web.page.repository.code.blob.renderer.BlobRendererFactory;
 import com.pmease.gitplex.web.resource.ResourceLocator;
 
 /**

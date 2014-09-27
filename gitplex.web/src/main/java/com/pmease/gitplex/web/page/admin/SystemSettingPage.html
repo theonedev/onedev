@@ -1,16 +1,16 @@
 <html xmlns:wicket>
 <wicket:extend>
-	<div class="panel panel-default">
-		<div class="panel-heading"><div class="panel-title">System Setting</div></div>
-		<form wicket:id="form">
-			<div class="panel-body">
+	<section>
+		<div class="head">System Setting</div>
+		<div class="body">
+			<form wicket:id="form">
 				<div wicket:id="feedback"></div>
 				<div wicket:id="editor"></div>
-			</div>
-			<div class="panel-footer">
-				<input wicket:id="update" type="submit" class="btn btn-primary" value="Update Setting"></input>
-			</div>
-		</form>
-	</div>
+				<div class="submits">
+					<input wicket:id="update" type="submit" class="btn btn-primary dirty-aware" value="Update Setting"></input>
+				</div>
+			</form>
+		</div>
+	</section>
 </wicket:extend>
 </html>

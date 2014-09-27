@@ -1,0 +1,16 @@
+<html xmlns:wicket>
+<wicket:extend>
+	<section class="members">
+		<div class="head">Members</div>
+		<div class="body">
+			<p>Manage your members/collaborators with <a wicket:id="teamlink">teams</a></p>
+			<hr/>
+			<div wicket:id="members"></div>
+		</div>
+	</section>
+	
+	<wicket:fragment wicket:id="memberactionfrag">
+		<a class="img-link remove-link" wicket:id="remove" title="Remove this member"><i class="fa fa-times-round"></i></a>
+	</wicket:fragment>
+</wicket:extend>
+</html>

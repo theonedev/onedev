@@ -1,0 +1,77 @@
+<wicket:extend>
+	<div class="new-request">
+		<table class="branches">
+			<tr>
+				<td class="target">
+					<div wicket:id="target"></div>
+				</td>
+				<td class="actions">
+					<a wicket:id="swap" class="swap btn btn-xs btn-default">swap</a>
+					<div class="direction"><span class="fa fa-arrow-left fa-lg"></span></div>
+				</td>
+				<td class="source">
+					<div wicket:id="source"></div>
+				</td>
+			</tr>
+		</table>
+		<div wicket:id="status" class="status"></div>
+		<div wicket:id="tabs"></div>
+		<div wicket:id="tabPanel"></div>
+		<div wicket:id="backToTop"></div>
+	</div>
+	<wicket:fragment wicket:id="openedFrag">
+		<div class="alert alert-info">
+			<div class="summary">
+				<span class="fa fa-lg fa-info-circle"></span>
+				<span>
+					Below integration request is already open for selected branches.
+					<a wicket:id="viewRequest">View Request <span class="fa fa-arrow-right"></span></a>
+				</span>
+			</div>
+			<div wicket:id="requestInfo" class="detail" ></div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="sameBranchFrag">
+		<div class="alert alert-warning">
+			<div class="summary">
+				<span class="fa fa-lg fa-warning"></span>
+				<span>Please select different branches to integrate.</span>
+			</div>
+		</div>		
+	</wicket:fragment>
+	<wicket:fragment wicket:id="integratedFrag">
+		<div class="alert alert-success">
+			<div class="summary">
+				<span class="fa fa-lg fa-check-circle"></span>
+				<span wicket:id="targetBranch"></span> is up to date with all commits from <span wicket:id="sourceBranch"></span>.
+				Try <a wicket:id="swapBranches">swap source and target</a> for the comparison.
+			</div>
+		</div>		
+	</wicket:fragment>
+	<wicket:fragment wicket:id="rejectedFrag">
+		<div class="alert alert-danger">
+			<div class="summary">
+				<span class="fa fa-lg fa-ban"></span>
+				<span class="message">Gate keeper of target repository rejects the integration request for below reasons:</span>
+			</div>
+			<ul class="detail">
+				<li wicket:id="reasons"><span wicket:id="reason"></span></li>
+			</ul>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="canSendFrag">
+		<div class="can-send">
+			<form wicket:id="form">
+				<div class="title">
+					<input wicket:id="title" type="text" class="form-control" placeholder="Title has to be specified">
+				</div>
+				<div class="comment">
+					<textarea wicket:id="comment" class="form-control" rows="8" placeholder="Leave a comment"></textarea>
+				</div>
+				<div class="foot">
+					<input wicket:id="send" type="submit" class="btn btn-primary btn-lg" value="Send Integration Request"></input>
+				</div>
+			</form>
+		</div>	
+	</wicket:fragment>
+</wicket:extend>

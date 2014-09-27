@@ -16,7 +16,7 @@ import org.apache.wicket.model.Model;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.model.UserModel;
-import com.pmease.gitplex.web.page.account.home.AccountHomePage;
+import com.pmease.gitplex.web.page.account.AccountHomePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 

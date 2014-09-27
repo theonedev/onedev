@@ -8,7 +8,7 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.git.GitUtils;
-import com.pmease.gitplex.web.page.repository.info.code.commit.RepoCommitPage;
+import com.pmease.gitplex.web.page.repository.code.commit.RepoCommitPage;
 
 @SuppressWarnings("serial")
 public class CommitHashLink extends Panel {

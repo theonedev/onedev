@@ -31,7 +31,7 @@ import com.pmease.gitplex.web.common.wicket.bootstrap.Alert;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.PersonLink;
 import com.pmease.gitplex.web.git.GitUtils;
-import com.pmease.gitplex.web.page.repository.info.code.commit.RepoCommitPage;
+import com.pmease.gitplex.web.page.repository.code.commit.RepoCommitPage;
 
 @SuppressWarnings("serial")
 public class CommitsTablePanel extends Panel {

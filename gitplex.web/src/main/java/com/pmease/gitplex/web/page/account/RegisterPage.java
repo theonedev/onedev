@@ -3,6 +3,7 @@ package com.pmease.gitplex.web.page.account;
 import java.io.Serializable;
 
 import com.pmease.gitplex.core.GitPlex;
+
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.SubmitLink;
 
@@ -14,7 +15,7 @@ import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.ValuePath;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.web.page.layout.LayoutPage;
+import com.pmease.gitplex.web.page.LayoutPage;
 
 @SuppressWarnings("serial")
 public class RegisterPage extends LayoutPage {

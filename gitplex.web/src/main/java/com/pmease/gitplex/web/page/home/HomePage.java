@@ -2,7 +2,7 @@ package com.pmease.gitplex.web.page.home;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
 
-import com.pmease.gitplex.web.page.layout.LayoutPage;
+import com.pmease.gitplex.web.page.LayoutPage;
 
 public class HomePage extends LayoutPage {
 

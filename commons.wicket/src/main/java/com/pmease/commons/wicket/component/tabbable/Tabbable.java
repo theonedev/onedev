@@ -25,7 +25,8 @@ public class Tabbable extends Panel {
 		super.onInitialize();
 		
 		WebMarkupContainer container = new WebMarkupContainer("container");
-		container.add(AttributeModifier.replace("class", getCssClasses()));
+		if (getCssClasses() != null)
+			container.add(AttributeModifier.replace("class", getCssClasses()));
 		add(container);
 
 		List<ActionTab> actionTabs = new ArrayList<>();
@@ -67,10 +68,10 @@ public class Tabbable extends Panel {
 	 * Get css classes applied to the outer &lt;ul&gt; element.
 	 * 
 	 * @return
-	 * 			Css classes applied to the outer &lt;ul&gt; elemnet.
+	 * 			Css classes applied to the outer &lt;ul&gt; element.
 	 */
 	protected String getCssClasses() {
-		return "nav nav-tabs";
+		return null;
 	}
 	
 }

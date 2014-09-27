@@ -62,7 +62,14 @@ public class CommentInput extends FormComponentPanel<String> {
 			}
 			
 		});
-		add(new Tabbable(TABS_ID, tabs).setOutputMarkupId(true));
+		add(new Tabbable(TABS_ID, tabs) {
+
+			@Override
+			protected String getCssClasses() {
+				return "nav nav-tabs";
+			}
+			
+		}.setOutputMarkupId(true));
 		
 		add(input = new TextArea<String>("input", getModel()));
 		input.setOutputMarkupId(true);

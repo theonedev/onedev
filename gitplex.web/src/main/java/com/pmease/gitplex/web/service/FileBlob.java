@@ -23,8 +23,8 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.MediaTypes;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.common.quantity.Data;
-import com.pmease.gitplex.web.page.repository.info.code.blob.language.Language;
-import com.pmease.gitplex.web.page.repository.info.code.blob.language.Languages;
+import com.pmease.gitplex.web.page.repository.code.blob.language.Language;
+import com.pmease.gitplex.web.page.repository.code.blob.language.Languages;
 
 public class FileBlob implements Serializable {
 	private static final long serialVersionUID = 1L;

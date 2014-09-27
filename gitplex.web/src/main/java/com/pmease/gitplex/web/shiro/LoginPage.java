@@ -16,8 +16,8 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.web.GitPlexSession;
 import com.pmease.gitplex.web.common.wicket.form.checkbox.CheckBoxElement;
-import com.pmease.gitplex.web.page.account.home.AccountHomePage;
-import com.pmease.gitplex.web.page.layout.LayoutPage;
+import com.pmease.gitplex.web.page.LayoutPage;
+import com.pmease.gitplex.web.page.account.AccountHomePage;
 
 @SuppressWarnings("serial")
 public class LoginPage extends LayoutPage {
@@ -81,7 +81,6 @@ public class LoginPage extends LayoutPage {
 			}
 		}
 
-		
 		protected boolean loginShiro(String loginName, String password, boolean remember) {
 			try {
 				GitPlexSession.get().login(loginName, password, remember);

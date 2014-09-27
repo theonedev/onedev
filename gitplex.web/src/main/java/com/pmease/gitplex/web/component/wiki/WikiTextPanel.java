@@ -6,7 +6,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.google.common.base.Throwables;
-import com.pmease.gitplex.web.page.repository.info.code.blob.renderer.highlighter.AceHighlighter;
+import com.pmease.gitplex.web.page.repository.code.blob.renderer.highlighter.AceHighlighter;
 import com.pmease.gitplex.web.util.MarkdownUtils;
 
 @SuppressWarnings("serial")
