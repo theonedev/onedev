@@ -45,8 +45,8 @@ public abstract class AccountPage extends AccountBasePage {
 		List<Tab> tabs = new ArrayList<>();
 		tabs.add(new AccountTab(Model.of("Repositories"), "fa fa-repo", RepositoriesPage.class));
 		tabs.add(new AccountTab(Model.of("Teams"), "fa fa-group-o", AccountTeamsPage.class, EditTeamPage.class));
-		tabs.add(new AccountTab(Model.of("Members"), "fa fa-group-o", MemberSettingPage.class));
-		tabs.add(new AccountTab(Model.of("Profile"), "fa fa-user-o", AccountProfilePage.class));
+		tabs.add(new AccountTab(Model.of("Members"), "fa fa-user-o", MemberSettingPage.class));
+		tabs.add(new AccountTab(Model.of("Profile"), "fa fa-gear", AccountProfilePage.class));
 
 		add(new Tabbable("tabs", tabs));
 		
