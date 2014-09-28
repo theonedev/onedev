@@ -22,6 +22,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.wicket.component.markdown.MarkdownInput;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -32,7 +33,6 @@ import com.pmease.gitplex.core.model.PullRequestAction.Integrate;
 import com.pmease.gitplex.core.model.PullRequestAudit;
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.label.AgeLabel;
@@ -232,7 +232,7 @@ public class RequestActivitiesPage extends RequestDetailPage {
 		Form<?> form = new Form<Void>("form");
 		addComment.add(form);
 		
-		final CommentInput input = new CommentInput("input", Model.of(""));
+		final MarkdownInput input = new MarkdownInput("input", Model.of(""));
 		input.setRequired(true);
 		form.add(input);
 		

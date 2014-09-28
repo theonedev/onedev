@@ -5,7 +5,9 @@ import javax.inject.Singleton;
 
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
+import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 
@@ -14,15 +16,20 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 	
 	private final Dao dao;
 	
+	private final StorageManager storageManager;
+	
 	@Inject
-	public DefaultPullRequestUpdateManager(Dao dao) {
+	public DefaultPullRequestUpdateManager(Dao dao, StorageManager storageManager) {
 		this.dao = dao;
+		this.storageManager = storageManager;
 	}
 
 	@Transactional
 	@Override
 	public void save(PullRequestUpdate update) {
 		dao.persist(update);
+		
+		FileUtils.cleanDir(storageManager.getCacheDir(update));
 
 		PullRequest request = update.getRequest();
 		String sourceHead = request.getSource().getHeadCommitHash();

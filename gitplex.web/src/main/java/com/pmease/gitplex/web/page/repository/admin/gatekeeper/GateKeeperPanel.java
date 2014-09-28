@@ -15,7 +15,6 @@ import org.apache.wicket.model.Model;
 
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.util.ReflectionUtils;
-import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.modal.ModalPanel;
 import com.pmease.commons.wicket.editable.BeanContext;
@@ -30,7 +29,7 @@ import com.pmease.gitplex.core.gatekeeper.NotGateKeeper;
 @SuppressWarnings("serial")
 public abstract class GateKeeperPanel extends Panel {
 	
-	private GateKeeper gateKeeper;
+	private final GateKeeper gateKeeper;
 
 	public GateKeeperPanel(String id, GateKeeper gateKeeper) {
 		super(id);
@@ -85,7 +84,8 @@ public abstract class GateKeeperPanel extends Panel {
 				target.add(modalPanel);
 			}
 			
-		}.add(new TooltipBehavior()));
+		});
+			
 		container.add(new AjaxLink<Void>("delete") {
 
 			@Override
@@ -93,7 +93,8 @@ public abstract class GateKeeperPanel extends Panel {
 				onDelete(target);
 			}
 			
-		}.add(new TooltipBehavior()));
+		});
+		
 		container.add(new AjaxLink<Void>("enable") {
 
 			@Override
@@ -112,7 +113,7 @@ public abstract class GateKeeperPanel extends Panel {
 				}
 			}
 			
-		}.add(new TooltipBehavior(Model.of(gateKeeper.isEnabled()?"Disable this gate keeper":"Enable this gate keeper"))));
+		}.add(AttributeAppender.append("title", Model.of(gateKeeper.isEnabled()?"Disable this gate keeper":"Enable this gate keeper"))));
 		
 		container.add(new WebMarkupContainer("editor").setOutputMarkupPlaceholderTag(true).setVisible(false));
 		

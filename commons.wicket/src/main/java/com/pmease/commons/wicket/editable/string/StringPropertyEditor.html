@@ -1,3 +1,9 @@
 <wicket:panel>
-	<input wicket:id="input" type="text" class="form-control focusable"></input>
+	<div wicket:id="content"></div>
+	<wicket:fragment wicket:id="singleLineFrag">
+		<input wicket:id="input" type="text" class="form-control focusable"></input>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="multiLineFrag">
+		<textarea wicket:id="input" class="form-control focusable" rows="4"></textarea>
+	</wicket:fragment>
 </wicket:panel>

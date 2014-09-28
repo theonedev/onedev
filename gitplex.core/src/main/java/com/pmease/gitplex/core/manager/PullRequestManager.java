@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import com.google.inject.ImplementedBy;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestManager;
 import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
@@ -61,5 +62,7 @@ public interface PullRequestManager {
     void send(PullRequest request);
     
     void delete(PullRequest request);
+    
+	List<IntegrationStrategy> getApplicableIntegrationStrategies(PullRequest request);
     
 }

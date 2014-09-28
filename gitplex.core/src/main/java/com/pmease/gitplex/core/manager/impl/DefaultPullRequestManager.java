@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.command.MergeCommand.FastForwardMode;
 import com.pmease.commons.hibernate.Sessional;
@@ -33,10 +34,10 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Approved;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
+import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.Branch;
-import com.pmease.gitplex.core.model.BranchStrategy;
 import com.pmease.gitplex.core.model.IntegrationInfo;
-import com.pmease.gitplex.core.model.IntegrationSetting;
+import com.pmease.gitplex.core.model.IntegrationPolicy;
 import com.pmease.gitplex.core.model.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.CloseStatus;
@@ -58,12 +59,15 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	
 	private final BranchManager branchManager;
 	
+	private final StorageManager storageManager;
+	
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager, 
-			BranchManager branchManager) {
+			BranchManager branchManager, StorageManager storageManager) {
 		this.dao = dao;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.branchManager = branchManager;
+		this.storageManager = storageManager;
 	}
 
 	@Sessional
@@ -125,22 +129,21 @@ public class DefaultPullRequestManager implements PullRequestManager {
 					request.setCloseStatus(CloseStatus.INTEGRATED);
 					request.setUpdateDate(new Date());
 					request.setCheckResult(new Approved("Already integrated."));
-					request.setIntegrationInfo(new IntegrationInfo(branchHead, requestHead, branchHead, null, true));
+					request.setIntegrationInfo(new IntegrationInfo(branchHead, requestHead, branchHead, true));
 				} else {
 					// Update head ref so that it can be pulled by build system
 					git.updateRef(request.getHeadRef(), requestHead, null, null);
 					
-					IntegrationStrategy strategy = getIntegrationStrategy(request);
+					IntegrationStrategy strategy = request.getIntegrationStrategy();
 					
 					if (request.getIntegrationInfo() == null 
 							|| !branchHead.equals(request.getIntegrationInfo().getBranchHead())
 							|| !requestHead.equals(request.getIntegrationInfo().getRequestHead())
-							|| strategy != request.getIntegrationInfo().getIntegrationStrategy()
 							|| request.getIntegrationInfo().getIntegrationHead() != null 
 									&& !request.getIntegrationInfo().getIntegrationHead().equals(git.parseRevision(integrateRef, false))) {
 						
 						if (strategy == MERGE_IF_NECESSARY && git.isAncestor(branchHead, requestHead)) {
-							request.setIntegrationInfo(new IntegrationInfo(branchHead, requestHead, requestHead, strategy, false));
+							request.setIntegrationInfo(new IntegrationInfo(branchHead, requestHead, requestHead, false));
 							git.updateRef(integrateRef, requestHead, null, null);
 						} else {
 							File tempDir = FileUtils.createTempDir();
@@ -173,12 +176,12 @@ public class DefaultPullRequestManager implements PullRequestManager {
 								 
 								if (integrateHead != null) {
 									request.setIntegrationInfo(new IntegrationInfo(
-											branchHead, requestHead, integrateHead, strategy, 
+											branchHead, requestHead, integrateHead, 
 											!tempGit.listChangedFiles(requestHead, integrateHead, null).isEmpty()));
 									git.fetch(tempGit, "+HEAD:" + integrateRef);									
 								} else {
 									request.setIntegrationInfo(new IntegrationInfo(branchHead, requestHead, 
-											integrateHead, strategy, false));
+											integrateHead, false));
 									git.deleteRef(integrateRef, null, null);
 								}
 							} finally {
@@ -250,7 +253,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 
 			@Override
 			public Boolean call() throws Exception {
-				if (request.getIntegrationInfo().getIntegrationStrategy() == REBASE_SOURCE) {
+				if (request.getIntegrationStrategy() == REBASE_SOURCE) {
 					Git sourceGit = request.getSource().getRepository().git();
 					if (sourceGit.updateRef(request.getSource().getHeadRef(), 
 							request.getIntegrationInfo().getIntegrationHead(), 
@@ -329,6 +332,8 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	public void send(PullRequest request) {
 		dao.persist(request);
 
+		FileUtils.cleanDir(storageManager.getCacheDir(request));
+		
 		request.git().updateRef(request.getBaseRef(), request.getBaseCommitHash(), null, null);
 		
 		for (PullRequestUpdate update: request.getUpdates()) {
@@ -339,19 +344,19 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		refresh(request);
 	}
 
-	private IntegrationStrategy getIntegrationStrategy(PullRequest request) {
-		IntegrationSetting integrationSetting = request.getTarget().getRepository().getIntegrationSetting();
-		IntegrationStrategy strategy = null;
-		for (BranchStrategy branchStrategy: integrationSetting.getBranchStrategies()) {
-			if (branchStrategy.getTargetBranches().matches(request.getTarget()) 
-					&& branchStrategy.getSourceBranches().matches(request.getSource())) {
-				strategy = branchStrategy.getIntegrationStrategy();
+	@Override
+	public List<IntegrationStrategy> getApplicableIntegrationStrategies(PullRequest request) {
+		List<IntegrationStrategy> strategies = null;
+		for (IntegrationPolicy policy: request.getTarget().getRepository().getIntegrationPolicies()) {
+			if (policy.getTargetBranches().matches(request.getTarget()) 
+					&& policy.getSourceBranches().matches(request.getSource())) {
+				strategies = policy.getIntegrationStrategies();
 				break;
 			}
 		}
-		if (strategy == null) 
-			strategy = integrationSetting.getDefaultStrategy();
-		return strategy;
+		if (strategies == null) 
+			strategies = Lists.newArrayList(IntegrationStrategy.MERGE_ALWAYS);
+		return strategies;
 	}
 
 	private void deleteRefsUponClose(PullRequest request) {

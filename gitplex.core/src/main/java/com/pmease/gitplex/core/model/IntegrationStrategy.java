@@ -1,9 +1,10 @@
 package com.pmease.gitplex.core.model;
 
 public enum IntegrationStrategy {
-	MERGE_ALWAYS("Merge (always create merge commit)"), 
-	MERGE_IF_NECESSARY("Merge (create merge commit if diverged)"),
-	REBASE_SOURCE("Rebase source and fast forward target"), 
+	MERGE_ALWAYS("Merge always"), 
+	MERGE_IF_NECESSARY("Merge if necessary"),
+	MERGE_WITH_SQUASH("Merge with squash"),
+	REBASE_SOURCE("Rebase source on top of target"), 
 	REBASE_TARGET("Rebase target on top of source");
 	
 	private String displayName;

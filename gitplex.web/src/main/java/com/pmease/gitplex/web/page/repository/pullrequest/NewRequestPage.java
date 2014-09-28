@@ -44,6 +44,7 @@ import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.IntegrationStrategy;
 import com.pmease.gitplex.core.model.OldCommitComment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.CloseStatus;
@@ -128,6 +129,11 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 			update.setUser(currentUser);
 			update.setHeadCommitHash(source.getHeadCommitHash());
 			pullRequest.setUpdateDate(new Date());
+			
+			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
+			List<IntegrationStrategy> strategies = pullRequestManager.getApplicableIntegrationStrategies(pullRequest);
+			Preconditions.checkState(!strategies.isEmpty());
+			pullRequest.setIntegrationStrategy(strategies.get(0));
 
 			if (target.getRepository().equals(source.getRepository())) {
 				pullRequest.setBaseCommitHash(pullRequest.git().calcMergeBase(target.getHeadCommitHash(), source.getHeadCommitHash()));			

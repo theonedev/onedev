@@ -172,7 +172,7 @@ public class GeneralSettingPage extends RepositoryPage {
 
 	@Override
 	protected String getPageTitle() {
-		return "Options - " + getRepository();
+		return "General Setting - " + getRepository();
 	}
 
 	@Override

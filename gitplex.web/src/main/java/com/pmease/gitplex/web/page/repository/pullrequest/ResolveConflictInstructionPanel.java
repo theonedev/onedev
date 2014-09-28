@@ -36,7 +36,7 @@ public class ResolveConflictInstructionPanel extends Panel {
 		User user = GitPlex.getInstance(UserManager.class).getCurrent();
 		IntegrationInfo integrationInfo = request.getIntegrationInfo();
 		String requestHead = integrationInfo.getRequestHead();
-		IntegrationStrategy strategy = integrationInfo.getIntegrationStrategy();
+		IntegrationStrategy strategy = request.getIntegrationStrategy();
 		boolean sameRepo = request.getTarget().getRepository().equals(request.getSource().getRepository());					
 		if (strategy == REBASE_SOURCE) {
 			fragment = new Fragment("content", "rebaseInSourceFrag", this);

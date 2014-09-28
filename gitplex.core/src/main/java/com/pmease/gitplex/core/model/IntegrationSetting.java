@@ -13,18 +13,18 @@ import com.pmease.commons.editable.annotation.Editable;
 @Editable
 public class IntegrationSetting implements Serializable {
 
-	private List<BranchStrategy> branchStrategies = new ArrayList<>();
+	private List<IntegrationPolicy> branchStrategies = new ArrayList<>();
 
 	private IntegrationStrategy defaultStrategy = IntegrationStrategy.MERGE_ALWAYS;
 
 	@Editable
 	@Valid
 	@NotNull
-	public List<BranchStrategy> getBranchStrategies() {
+	public List<IntegrationPolicy> getBranchStrategies() {
 		return branchStrategies;
 	}
 
-	public void setBranchStrategies(List<BranchStrategy> branchStrategies) {
+	public void setBranchStrategies(List<IntegrationPolicy> branchStrategies) {
 		this.branchStrategies = branchStrategies;
 	}
 

@@ -672,9 +672,7 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 .statbar .ahead p { padding-left: 4px; }
 .statbar .behind p { text-align: right; padding-right: 4px; }
 
-/*
- * TAGS PAGE
- */
+/* TAGS PAGE */
 .table-tags { border-bottom: 1px solid #ddd; }
 .table-tags .meta h3 { margin: 0 0 6px; font-size: 16px; font-weight: bold; }
 .meta h3 a { color: #333; }
@@ -686,51 +684,6 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 .table-tags .list-inline a:hover { color: #09F; text-decoration: none; }
 .table-tags .avatar { width: 64px; height: 64px; }
 
-/**
- * GATE KEEPER SETTING PAGE
- */
-.gate-keeper-tip {margin: 0 20px 20px 20px;}
-.gate-keeper-add.well {font-size:16px;}
-.gate-keeper-add .fa {margin-left: 8px;}
-.gate-keeper-add:hover, .gate-keeper-add:focus {background-color: #EBEBEB; border-color: #ADADAD; cursor: pointer;}
-.gate-keeper-selector {width: 600px; max-height: 600px; overflow: auto;}
-.gate-keeper-selector .panel {border: none; border-radius: 0;}
-.gate-keeper-selector .panel-heading {border-top: 1px solid #CCCCCC; border-radius: 0;}
-.gate-keeper-selector .panel-group>.panel:first-child>.panel-heading {border-top: none;}
-.gate-keeper-selector .panel-heading.collapsed:hover, .gate-keeper-selector .panel-heading.collapsed:focus {
-	border-color: #999999; background-color: #E0E0E0; cursor: pointer;}
-.gate-keeper-selector .panel-group .panel + .panel {margin-top: 0px;}
-.gate-keeper-selector .fa {width: 20px;}
-.gate-keeper-description {font-size: 13px; color: #888888;}
-.gate-keeper-item {margin-bottom: 6px; padding: 4px; border: 1px solid white;}
-.gate-keeper-item:hover, .gate-keeper-item:focus {background-color: #EBEBEB; cursor: pointer; 
-		border: 1px solid #ADADAD; border-radius: 4px;}
-.gate-keeper-name {font-size: 15px; margin-top: -4px;}
-.gate-keeper-editor {max-height: 600px; overflow: auto;}
-.gate-keeper-editor .gate-keeper-name {font-weight: bold; font-size: 16px; margin-top: 0; margin-bottom: 4px;}
-.gate-keeper-editor .fa {width: 20px; margin-right: 8px; margin-top: 4px;}
-.gate-keeper .panel-title {font-size: 14px;}
-.gate-keeper .panel-heading {padding: 8px;}
-.gate-keeper .fa {margin-left: 8px; cursor: pointer;}
-.gate-keeper .gate-keeper-add {margin: 0px; padding: 8px; font-size: 14px;}
-.gate-keeper .reflection {margin-bottom: 0;}
-
-.gate-keeper.panel {border: 2px solid #888888;}
-.gate-keeper.panel>.panel-heading {border-color: #888888;}
-.gate-keeper.panel.disabled, .gate-keeper.panel.disabled .panel {border-color: #DDDDDD;}
-.gate-keeper.panel.disabled>.panel-heading, .gate-keeper.panel.disabled .panel-heading {border-color: #DDDDDD;}
-.gate-keeper.panel.disabled .fa {color: inherit;} 
-.gate-keeper td.name {font-weight: normal !important; background-color: #F0F0F0 !important;}
-.gate-keeper table.viewer {font-size: 13px !important; color: #444444;}
-.gate-keeper table.children {width: 100%;}
-.gate-keeper td.child {vertical-align: top; padding-right: 12px;}
-.gate-keeper table.children>tbody>tr>td.child:last-child {padding-right: 0;}
-.gate-keeper.panel .panel-body {overflow:auto;}
-.gate-keeper table.ifthen {width: 100%;}
-.gate-keeper td.ifthen {vertical-align: top;}
-.gate-keeper td.ifthen.connector {width:1px;}
-.gate-keeper td.ifthen.connector .fa {margin: 0; color: #666666; font-size: 36px;}
-
 /* COMMITS */
 .commit-message>.full {display: none; margin-top: 4px;}
 .commit-message>.toggle {background: #DDD; padding: 0px 6px; border-radius: 2px;}
@@ -739,7 +692,7 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 
 .commit-hash {font-family: Consolas, 'Liberation Mono', Courier, monospace; }
 
-/* DROPDOWN PANEL */
+/* DIRECTORY CHOOSER */
 .dropdown-panel .directory-chooser {max-height: 650px; overflow: auto; padding: 12px 24px 12px 12px;}
 .dropdown-panel .directory-chooser .title {font-weight: bold; border-bottom: 1px solid #888888;}
 .dropdown-panel .alert.empty-directory-choice {margin: 0px;}
@@ -1020,14 +973,55 @@ table.verifications tr.not-passed .fa-times {display: inline; color: #D9534F;}
 table.verifications tr.ongoing .fa-cog {display: inline; color: #F0AD4E;}
 .conflict-resolve-instruction {padding: 8px; width: 400px;}
 
-.integration-setting form {color: #666;}
-.branch-strategies.editor {margin-bottom: 16px;}
-.integration-setting fieldset {border: 1px solid #DDD !important; margin-bottom: 16px;
-    padding: 16px !important;}
-.integration-setting legend {width:auto; margin-bottom: 0; border-bottom:none;
-	font-size: 20px; color: #666;}
+/* GATE KEEPER SETTING PAGE */
+.gate-keeper-tip {margin: 0 20px 20px 20px;}
+.gate-keeper-add.well {font-size:16px;}
+.gate-keeper-add .fa {margin-left: 8px;}
+.gate-keeper-add:hover, .gate-keeper-add:focus {background-color: #EBEBEB; border-color: #ADADAD; cursor: pointer;}
+.gate-keeper-selector {width: 600px; max-height: 600px; overflow: auto;}
+.gate-keeper-selector .panel {border: none; border-radius: 0;}
+.gate-keeper-selector .panel-heading {border-top: 1px solid #CCCCCC; border-radius: 0;}
+.gate-keeper-selector .panel-group>.panel:first-child>.panel-heading {border-top: none;}
+.gate-keeper-selector .panel-heading.collapsed:hover, .gate-keeper-selector .panel-heading.collapsed:focus {
+	border-color: #999999; background-color: #E0E0E0; cursor: pointer;}
+.gate-keeper-selector .panel-group .panel + .panel {margin-top: 0px;}
+.gate-keeper-selector .fa {width: 20px;}
+.gate-keeper-description {font-size: 13px; color: #888888;}
+.gate-keeper-item {margin-bottom: 6px; padding: 4px; border: 1px solid white;}
+.gate-keeper-item:hover, .gate-keeper-item:focus {background-color: #EBEBEB; cursor: pointer; 
+		border: 1px solid #ADADAD; border-radius: 4px;}
+.gate-keeper-name {font-size: 15px; margin-top: -4px;}
+.gate-keeper-editor {max-height: 600px; overflow: auto;}
+.gate-keeper-editor .gate-keeper-name {font-weight: bold; font-size: 16px; margin-top: 0; margin-bottom: 4px;}
+.gate-keeper-editor .fa {width: 20px; margin-right: 8px; margin-top: 4px;}
+.gate-keeper .panel-title {font-size: 14px;}
+.gate-keeper .panel-heading {padding: 8px;}
+.gate-keeper .fa {margin-left: 8px; cursor: pointer;}
+.gate-keeper .gate-keeper-add {margin: 0px; padding: 8px; font-size: 14px;}
+.gate-keeper .reflection {margin-bottom: 0;}
 
-.integration-setting .affinal-branch-choice .branch {min-width: 240px;}
-.integration-setting th.integrationStrategy, 
-.integration-setting fieldset.default-strategy select {width:320px;}
+.gate-keeper.panel {border: 2px solid #888888;}
+.gate-keeper.panel>.panel-heading {border-color: #888888;}
+.gate-keeper.panel.disabled, .gate-keeper.panel.disabled .panel {border-color: #DDDDDD;}
+.gate-keeper.panel.disabled>.panel-heading, .gate-keeper.panel.disabled .panel-heading {border-color: #DDDDDD;}
+.gate-keeper.panel.disabled .fa {color: inherit;} 
+.gate-keeper td.name {font-weight: normal !important; background-color: #F0F0F0 !important;}
+.gate-keeper table.viewer {font-size: 13px !important; color: #444444;}
+.gate-keeper table.children {width: 100%;}
+.gate-keeper td.child {vertical-align: top; padding-right: 12px;}
+.gate-keeper table.children>tbody>tr>td.child:last-child {padding-right: 0;}
+.gate-keeper.panel .panel-body {overflow:auto;}
+.gate-keeper table.ifthen {width: 100%;}
+.gate-keeper td.ifthen {vertical-align: top;}
+.gate-keeper td.ifthen.connector {width:1px;}
+.gate-keeper td.ifthen.connector .fa {margin: 0; color: #666666; font-size: 36px;}
 
+/* INTEGRATION POLICY PAGE */
+.integration-policies .handle {cursor: move; margin-right: 8px;}
+.integration-policies .panel-heading a {color: #444; margin-right: 8px;}
+.integration-policies .add-new {display: block; padding: 16px; background: #F2F2F2; 
+	border: 1px solid #DDD; border-radius: 4px; font-size: 16px; color: #444; margin-bottom: 16px;}
+.integration-policies a.add-new:hover {text-decoration: none; background-color: #EBEBEB; border-color: #ADADAD;}
+.integration-policies a.add-new .fa {margin-left: 8px;}
+.integration-policies>.body>.help-block .fa {position: absolute; font-size: 40px; color: #E6AF42;}
+.integration-policies>.body>.help-block p {margin-left: 32px;}

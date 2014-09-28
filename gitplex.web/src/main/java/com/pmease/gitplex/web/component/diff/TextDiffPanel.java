@@ -57,6 +57,7 @@ import com.pmease.commons.wicket.behavior.menu.CheckMenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
+import com.pmease.commons.wicket.component.markdown.MarkdownInput;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
@@ -66,7 +67,6 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
-import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.user.AvatarMode;
@@ -517,8 +517,8 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 		Form<?> form = new Form<Void>("addComment");
 		form.setOutputMarkupId(true);
 		
-		final CommentInput input;
-		form.add(input = new CommentInput("input", Model.of("")));
+		final MarkdownInput input;
+		form.add(input = new MarkdownInput("input", Model.of("")));
 		input.setRequired(true);
 		
 		form.add(new AjaxLink<Void>("cancel") {

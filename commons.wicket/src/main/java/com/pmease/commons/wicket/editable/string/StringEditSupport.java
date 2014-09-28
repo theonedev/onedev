@@ -6,7 +6,11 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.editable.PropertyDescriptorImpl;
+import com.pmease.commons.editable.annotation.Markdown;
+import com.pmease.commons.editable.annotation.Multiline;
 import com.pmease.commons.editable.annotation.Password;
+import com.pmease.commons.wicket.component.MultilineText;
+import com.pmease.commons.wicket.component.markdown.MarkdownViewer;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.commons.wicket.editable.NotDefinedLabel;
@@ -37,7 +41,12 @@ public class StringEditSupport implements EditSupport {
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 							if (model.getObject() != null) {
-								return new Label(id, model.getObject());
+								if (propertyDescriptor.getPropertyGetter().getAnnotation(Multiline.class) != null)
+									return new MultilineText(id, model.getObject());
+								else if (propertyDescriptor.getPropertyGetter().getAnnotation(Markdown.class) != null)
+									return new MarkdownViewer(id, model);
+								else 
+									return new Label(id, model.getObject());
 							} else {
 								return new NotDefinedLabel(id);
 							}

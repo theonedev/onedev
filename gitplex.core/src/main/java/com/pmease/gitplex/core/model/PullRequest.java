@@ -102,6 +102,9 @@ public class PullRequest extends AbstractEntity {
 	
 	@Column(nullable=false)
 	private Date updateDate = new Date();
+	
+	@Column(nullable=false)
+	private IntegrationStrategy integrationStrategy;
 
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
 	private Collection<PullRequestUpdate> updates = new ArrayList<>();
@@ -382,6 +385,14 @@ public class PullRequest extends AbstractEntity {
 			Preconditions.checkState(!effectiveUpdates.isEmpty());
 		}
 		return effectiveUpdates;
+	}
+
+	public IntegrationStrategy getIntegrationStrategy() {
+		return integrationStrategy;
+	}
+
+	public void setIntegrationStrategy(IntegrationStrategy integrationStrategy) {
+		this.integrationStrategy = integrationStrategy;
 	}
 
 	public PullRequestUpdate getLatestUpdate() {

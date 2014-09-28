@@ -32,10 +32,10 @@ import com.pmease.gitplex.web.page.error.PageNotFoundPage;
 import com.pmease.gitplex.web.page.init.ServerInitPage;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryHomePage;
-import com.pmease.gitplex.web.page.repository.admin.GateKeeperPage;
 import com.pmease.gitplex.web.page.repository.admin.GeneralSettingPage;
-import com.pmease.gitplex.web.page.repository.admin.IntegrationSettingPage;
 import com.pmease.gitplex.web.page.repository.admin.PermissionSettingPage;
+import com.pmease.gitplex.web.page.repository.admin.gatekeeper.GateKeeperPage;
+import com.pmease.gitplex.web.page.repository.admin.integrationpolicy.IntegrationPolicyPage;
 import com.pmease.gitplex.web.page.repository.code.blame.BlobBlamePage;
 import com.pmease.gitplex.web.page.repository.code.blob.RepoBlobPage;
 import com.pmease.gitplex.web.page.repository.code.blob.renderer.RawBlobResourceReference;
@@ -179,7 +179,7 @@ public class GitPlexMappings extends CompoundRequestMapper {
 				GateKeeperPage.class));
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/settings/integration-setting",
-				IntegrationSettingPage.class));
+				IntegrationPolicyPage.class));
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/settings/permissions",
 				PermissionSettingPage.class));

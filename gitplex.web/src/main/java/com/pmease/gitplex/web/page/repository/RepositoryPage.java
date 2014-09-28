@@ -40,10 +40,10 @@ import com.pmease.gitplex.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitplex.web.model.RepositoryModel;
 import com.pmease.gitplex.web.page.account.AccountBasePage;
 import com.pmease.gitplex.web.page.account.AccountHomePage;
-import com.pmease.gitplex.web.page.repository.admin.GateKeeperPage;
 import com.pmease.gitplex.web.page.repository.admin.GeneralSettingPage;
-import com.pmease.gitplex.web.page.repository.admin.IntegrationSettingPage;
 import com.pmease.gitplex.web.page.repository.admin.PermissionSettingPage;
+import com.pmease.gitplex.web.page.repository.admin.gatekeeper.GateKeeperPage;
+import com.pmease.gitplex.web.page.repository.admin.integrationpolicy.IntegrationPolicyPage;
 import com.pmease.gitplex.web.page.repository.code.blob.RepoBlobPage;
 import com.pmease.gitplex.web.page.repository.code.branches.BranchesPage;
 import com.pmease.gitplex.web.page.repository.code.commit.RepoCommitPage;
@@ -240,13 +240,13 @@ public abstract class RepositoryPage extends AccountBasePage {
 		
 		add(new Tabbable("requestTabs", requestTabs));		
 		
-		List<Tab> settingTabs = Lists.newArrayList();
-		settingTabs.add(new RepositoryTab(Model.of("General"), "fa fa-tools", GeneralSettingPage.class));
-		settingTabs.add(new RepositoryTab(Model.of("Permissions"), "fa fa-lock", PermissionSettingPage.class));
-		settingTabs.add(new RepositoryTab(Model.of("Gate Keepers"), "fa fa-eye-open", GateKeeperPage.class));
-		settingTabs.add(new RepositoryTab(Model.of("Integration"), "fa fa-puzzle", IntegrationSettingPage.class));
+		List<Tab> adminTabs = Lists.newArrayList();
+		adminTabs.add(new RepositoryTab(Model.of("General Settings"), "fa fa-tools", GeneralSettingPage.class));
+		adminTabs.add(new RepositoryTab(Model.of("Permissions"), "fa fa-lock", PermissionSettingPage.class));
+		adminTabs.add(new RepositoryTab(Model.of("Gate Keepers"), "fa fa-eye-open", GateKeeperPage.class));
+		adminTabs.add(new RepositoryTab(Model.of("Integration Policies"), "fa fa-puzzle", IntegrationPolicyPage.class));
 
-		add(new Tabbable("settingTabs", settingTabs) {
+		add(new Tabbable("adminTabs", adminTabs) {
 
 			@Override
 			protected void onConfigure() {

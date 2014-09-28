@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.comment;
+package com.pmease.commons.wicket.component.markdown;
 
 import static de.agilecoders.wicket.jquery.JQuery.$;
 
@@ -18,18 +18,17 @@ import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
-import com.pmease.gitplex.web.component.markdown.MarkdownPanel;
 
 @SuppressWarnings("serial")
-public class CommentInput extends FormComponentPanel<String> {
+public class MarkdownInput extends FormComponentPanel<String> {
 
 	private static final String TABS_ID = "tabs";
 	
 	private TextArea<String> input;
 	
-	private MarkdownPanel preview;
+	private MarkdownViewer preview;
 	
-	public CommentInput(String id, IModel<String> model) {
+	public MarkdownInput(String id, IModel<String> model) {
 		super(id, model);
 	}
 
@@ -44,7 +43,7 @@ public class CommentInput extends FormComponentPanel<String> {
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 				target.appendJavaScript($(input).chain("show").get());
 				target.appendJavaScript($(preview).chain("hide").get());
-				target.add(CommentInput.this.get(TABS_ID));
+				target.add(MarkdownInput.this.get(TABS_ID));
 			}
 			
 		}.setSelected(true));
@@ -58,7 +57,7 @@ public class CommentInput extends FormComponentPanel<String> {
 				target.appendJavaScript($(input).chain("hide").get());
 				target.add(preview);
 				target.appendJavaScript($(preview).chain("show").get());
-				target.add(CommentInput.this.get(TABS_ID));
+				target.add(MarkdownInput.this.get(TABS_ID));
 			}
 			
 		});
@@ -82,7 +81,7 @@ public class CommentInput extends FormComponentPanel<String> {
 			
 		});
 		
-		add(preview = new MarkdownPanel("preview", getModel()));
+		add(preview = new MarkdownViewer("preview", getModel()));
 		preview.setOutputMarkupId(true);
 
 		add(new FeedbackPanel("feedback", this).hideAfter(Duration.seconds(3)));

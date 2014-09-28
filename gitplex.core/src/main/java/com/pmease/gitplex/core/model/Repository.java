@@ -26,6 +26,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Optional;
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.annotation.Multiline;
 import com.pmease.commons.git.BlobInfo;
 import com.pmease.commons.git.BlobText;
 import com.pmease.commons.git.Change;
@@ -78,7 +79,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	
 	@Lob
 	@Column(nullable=false)
-	private IntegrationSetting integrationSetting = new IntegrationSetting();
+	private ArrayList<IntegrationPolicy> integrationPolicies = new ArrayList<>();
 	
 	@Column(nullable=false)
 	private Date createdAt = new Date();
@@ -124,6 +125,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 
 	@Editable(order=200, description="Specify description of the repository.")
+	@Multiline
 	public String getDescription() {
 		return description;
 	}
@@ -151,14 +153,13 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		this.gateKeepers = gateKeepers;
 	}
 
-	@NotNull
 	@Valid
-	public IntegrationSetting getIntegrationSetting() {
-		return integrationSetting;
+	public List<IntegrationPolicy> getIntegrationPolicies() {
+		return integrationPolicies;
 	}
 
-	public void setIntegrationSetting(IntegrationSetting integrationSetting) {
-		this.integrationSetting = integrationSetting;
+	public void setIntegrationPolicies(ArrayList<IntegrationPolicy> integrationPolicies) {
+		this.integrationPolicies = integrationPolicies;
 	}
 
 	public Date getCreatedAt() {

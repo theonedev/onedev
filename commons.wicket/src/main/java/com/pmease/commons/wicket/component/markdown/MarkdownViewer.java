@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.markdown;
+package com.pmease.commons.wicket.component.markdown;
 
 import static org.pegdown.Extensions.ALL;
 import static org.pegdown.Extensions.SMARTYPANTS;
@@ -13,10 +13,10 @@ import org.pegdown.PegDownProcessor;
 import com.google.common.base.Strings;
 
 @SuppressWarnings("serial")
-public class MarkdownPanel extends Panel {
+public class MarkdownViewer extends Panel {
 	private static final long serialVersionUID = 1L;
 
-	public MarkdownPanel(String id, IModel<String> model) {
+	public MarkdownViewer(String id, IModel<String> model) {
 		super(id, model);
 	}
 	
@@ -28,7 +28,7 @@ public class MarkdownPanel extends Panel {
 
 			@Override
 			protected String load() {
-				String markdown = MarkdownPanel.this.getDefaultModelObjectAsString();
+				String markdown = MarkdownViewer.this.getDefaultModelObjectAsString();
 				if (!Strings.isNullOrEmpty(markdown)) {
 					PegDownProcessor pd = new PegDownProcessor(ALL & ~SMARTYPANTS);
 					return pd.markdownToHtml(markdown, new LinkRenderer());

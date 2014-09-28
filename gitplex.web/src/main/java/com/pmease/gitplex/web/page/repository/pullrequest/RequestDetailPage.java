@@ -42,6 +42,7 @@ import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
+import com.pmease.commons.wicket.component.markdown.MarkdownInput;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.PageTabLink;
 import com.pmease.commons.wicket.component.tabbable.Tab;
@@ -59,7 +60,6 @@ import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.pullrequest.RequestOperateException;
 import com.pmease.gitplex.core.pullrequest.RequestOperation;
 import com.pmease.gitplex.web.component.branch.BranchLink;
-import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.PersonLink;
@@ -314,7 +314,7 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 		};
 		actionsContainer.add(confirmForm);
 		
-		final CommentInput commentInput = new CommentInput("comment", Model.of(""));
+		final MarkdownInput commentInput = new MarkdownInput("comment", Model.of(""));
 		confirmForm.add(commentInput);
 		confirmForm.add(new FeedbackPanel("feedback", confirmForm));
 		confirmForm.add(new Button("submit") {
@@ -398,7 +398,7 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 				fragment.add(new Label("detail", 
 						"Target branch was fast forwarded to this request per the integration strategy."));
 			} else {
-				IntegrationStrategy strategy = integrationInfo.getIntegrationStrategy();
+				IntegrationStrategy strategy = request.getIntegrationStrategy();
 				if (strategy == MERGE_ALWAYS || strategy == MERGE_IF_NECESSARY) { 
 					fragment.add(new Label("detail", 
 							"Target branch was merged with this request per the integration strategy."));
@@ -466,7 +466,7 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 			fragment.add(AttributeAppender.append("class", " alert alert-warning"));
 			
 			String message;
-			IntegrationStrategy strategy = integrationInfo.getIntegrationStrategy();
+			IntegrationStrategy strategy = request.getIntegrationStrategy();
 			if (strategy == MERGE_ALWAYS || strategy == MERGE_IF_NECESSARY) {
 				message = "Per the integration strategy, this request will be merged with target branch. "
 						+ "However there are merge conflicts.";
@@ -506,7 +506,7 @@ public abstract class RequestDetailPage extends RepositoryPage implements Commit
 			if (integrationInfo.getIntegrationHead().equals(integrationInfo.getRequestHead())) {
 				message = "Per the integration strategy, target branch will be fast forwarded to this request.";
 			} else {
-				IntegrationStrategy strategy = integrationInfo.getIntegrationStrategy();
+				IntegrationStrategy strategy = request.getIntegrationStrategy();
 				if (strategy == MERGE_ALWAYS || strategy == MERGE_IF_NECESSARY) {
 					message = "Per the integration strategy, target branch will be merged with this request.";
 				} else if (strategy == REBASE_SOURCE) {

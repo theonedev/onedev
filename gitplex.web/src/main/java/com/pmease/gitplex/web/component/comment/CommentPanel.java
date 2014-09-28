@@ -22,6 +22,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
+import com.pmease.commons.wicket.component.markdown.MarkdownInput;
+import com.pmease.commons.wicket.component.markdown.MarkdownViewer;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.Comment;
 import com.pmease.gitplex.core.comment.CommentReply;
@@ -30,7 +32,6 @@ import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.comment.event.CommentReplied;
 import com.pmease.gitplex.web.component.label.AgeLabel;
-import com.pmease.gitplex.web.component.markdown.MarkdownPanel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
@@ -68,7 +69,7 @@ public class CommentPanel extends Panel {
 	
 	private Fragment renderForView(String content) {
 		Fragment fragment = new Fragment("content", "viewFrag", this);
-		fragment.add(new MarkdownPanel("comment", Model.of(content)));
+		fragment.add(new MarkdownViewer("comment", Model.of(content)));
 		fragment.setOutputMarkupId(true);
 		return fragment;
 	}
@@ -92,7 +93,7 @@ public class CommentPanel extends Panel {
 
 				Form<?> form = new Form<Void>("form");
 				fragment.add(form);
-				final CommentInput input = new CommentInput("input", Model.of(getComment().getContent()));
+				final MarkdownInput input = new MarkdownInput("input", Model.of(getComment().getContent()));
 				input.setRequired(true);
 				form.add(input);
 				
@@ -239,7 +240,7 @@ public class CommentPanel extends Panel {
 				
 				Form<?> form = new Form<Void>("form");
 				fragment.add(form);
-				final CommentInput input = new CommentInput("input", Model.of(""));
+				final MarkdownInput input = new MarkdownInput("input", Model.of(""));
 				input.setRequired(true);
 				form.add(input);
 				
@@ -325,7 +326,7 @@ public class CommentPanel extends Panel {
 				Form<?> form = new Form<Void>("form");
 				fragment.add(form);
 				CommentReply reply = repliesModel.getObject().get((int)row.getDefaultModelObject());
-				final CommentInput input = new CommentInput("input", Model.of(reply.getContent()));
+				final MarkdownInput input = new MarkdownInput("input", Model.of(reply.getContent()));
 				input.setRequired(true);
 				form.add(input);
 				

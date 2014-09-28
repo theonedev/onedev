@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.admin;
+package com.pmease.gitplex.web.page.repository.admin.gatekeeper;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.Component;
@@ -17,9 +17,6 @@ import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
-import com.pmease.gitplex.web.page.repository.admin.gatekeeper.GateKeeperDropdown;
-import com.pmease.gitplex.web.page.repository.admin.gatekeeper.GateKeeperEditor;
-import com.pmease.gitplex.web.page.repository.admin.gatekeeper.GateKeeperPanel;
 
 @SuppressWarnings("serial")
 public class GateKeeperPage extends RepositoryPage {

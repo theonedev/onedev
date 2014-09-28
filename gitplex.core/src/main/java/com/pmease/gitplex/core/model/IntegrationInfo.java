@@ -19,18 +19,14 @@ public class IntegrationInfo implements Serializable {
 	// on embedded property
 	private Boolean hasChanges;
 	
-	private IntegrationStrategy integrationStrategy;
-	
 	@SuppressWarnings("unused")
 	private IntegrationInfo() {
 	}
 	
-	public IntegrationInfo(String branchHead, String requestHead, @Nullable String integrationHead, 
-			@Nullable IntegrationStrategy integrationStrategy, boolean hasChanges) {
+	public IntegrationInfo(String branchHead, String requestHead, @Nullable String integrationHead, boolean hasChanges) {
 		this.branchHead = branchHead;
 		this.requestHead = requestHead;
 		this.integrationHead = integrationHead;
-		this.integrationStrategy = integrationStrategy;
 		this.hasChanges = hasChanges;
 	}
 
@@ -52,18 +48,6 @@ public class IntegrationInfo implements Serializable {
 		return integrationHead;
 	}
 
-	/**
-	 * Get strategy used to do integration. 
-	 * 
-	 * @return
-	 * 			strategy used to do integration. <tt>null</tt> will be returned if integration approach 
-	 * 			is unknown, for instance when request head is already ancestor of branch head while the 
-	 * 			request is being refreshed
-	 */
-	public @Nullable IntegrationStrategy getIntegrationStrategy() {
-		return integrationStrategy;
-	}
-	
 	public boolean hasChanges() {
 		return hasChanges != null && hasChanges;
 	}

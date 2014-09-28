@@ -55,6 +55,11 @@
 			<version>2.2.3</version>
 		</dependency>
 		<dependency>
+			<groupId>org.pegdown</groupId>
+			<artifactId>pegdown</artifactId>
+			<version>1.4.2</version>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.wicket</groupId>
 			<artifactId>wicket-bean-validation</artifactId>
 			<version>0.11</version>
