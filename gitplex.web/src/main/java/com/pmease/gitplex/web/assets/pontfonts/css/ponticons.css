@@ -1,4 +1,4 @@
-@font-face { font-family: "ponticons"; src: url("../fonts/ponticons.eot?v=1.0.9"); src: url("../fonts/ponticons.eot?v=1.0.9#iefix") format("embedded-opentype"), url("../fonts/ponticons.ttf?v=1.0.9") format("truetype"), url("../fonts/ponticons.woff?v=1.0.9") format("woff"), url("../fonts/ponticons.svg?v=1.0.9#ponticons") format("svg"); font-weight: normal; font-style: normal; }
+@font-face { font-family: "ponticons"; src: url("../fonts/ponticons.eot?v=1.0.13"); src: url("../fonts/ponticons.eot?v=1.0.13#iefix") format("embedded-opentype"), url("../fonts/ponticons.ttf?v=1.0.13") format("truetype"), url("../fonts/ponticons.woff?v=1.0.13") format("woff"), url("../fonts/ponticons.svg?v=1.0.13#ponticons") format("svg"); font-weight: normal; font-style: normal; }
 .fa { font: normal normal 16px "ponticons"; display: inline-block; speak: none; text-transform: none; text-rendering: auto; line-height: 1; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
 
 /* makes the font 33% larger relative to the icon container */
@@ -62,7 +62,7 @@
 
 .fa-inverse { color: #ffffff; }
 
-.fa-logo-gitplex:before { content: "\f000"; }
+.fa-logo-gitplex:before { content: "\f100"; }
 
 .fa-calendar-month:before { content: "\f110"; }
 
@@ -224,87 +224,87 @@
 
 .fa-os-android:before { content: "\f183"; }
 
-.fa-arrow-up:before { content: "\f250"; }
+.fa-arrow-up:before { content: "\f200"; }
 
-.fa-arrow-down:before { content: "\f251"; }
+.fa-arrow-down:before { content: "\f201"; }
 
-.fa-arrow-left:before { content: "\f252"; }
+.fa-arrow-left:before { content: "\f202"; }
 
-.fa-arrow-right:before { content: "\f253"; }
+.fa-arrow-right:before { content: "\f203"; }
 
-.fa-arrow-small-up:before { content: "\f254"; }
+.fa-arrow-small-up:before { content: "\f204"; }
 
-.fa-arrow-small-down:before { content: "\f255"; }
+.fa-arrow-small-down:before { content: "\f205"; }
 
-.fa-arrow-small-left:before { content: "\f256"; }
+.fa-arrow-small-left:before { content: "\f206"; }
 
-.fa-arrow-small-right:before { content: "\f257"; }
+.fa-arrow-small-right:before { content: "\f207"; }
 
-.fa-arrow-slim-up:before { content: "\f258"; }
+.fa-arrow-slim-up:before { content: "\f208"; }
 
-.fa-arrow-slim-down:before { content: "\f259"; }
+.fa-arrow-slim-down:before { content: "\f209"; }
 
-.fa-arrow-slim-left:before { content: "\f25a"; }
+.fa-arrow-slim-left:before { content: "\f20a"; }
 
-.fa-arrow-slim-right:before { content: "\f25b"; }
+.fa-arrow-slim-right:before { content: "\f20b"; }
 
-.fa-chevron-up:before { content: "\f25c"; }
+.fa-chevron-up:before { content: "\f20c"; }
 
-.fa-chevron-down:before { content: "\f25d"; }
+.fa-chevron-down:before { content: "\f20d"; }
 
-.fa-chevron-left:before { content: "\f25e"; }
+.fa-chevron-left:before { content: "\f20e"; }
 
-.fa-chevron-right:before { content: "\f25f"; }
+.fa-chevron-right:before { content: "\f20f"; }
 
-.fa-triangle-up:before { content: "\f260"; }
+.fa-triangle-up:before { content: "\f210"; }
 
-.fa-triangle-down:before { content: "\f261"; }
+.fa-triangle-down:before { content: "\f211"; }
 
-.fa-triangle-left:before { content: "\f262"; }
+.fa-triangle-left:before { content: "\f212"; }
 
-.fa-triangle-right:before { content: "\f263"; }
+.fa-triangle-right:before { content: "\f213"; }
 
-.fa-arrow-back:before { content: "\f264"; }
+.fa-arrow-back:before { content: "\f214"; }
 
-.fa-tick-round:before { content: "\f300"; }
+.fa-tick-round:before { content: "\f250"; }
 
-.fa-times-round:before { content: "\f301"; }
+.fa-times-round:before { content: "\f251"; }
 
-.fa-question-round:before { content: "\f302"; }
+.fa-question-round:before { content: "\f252"; }
 
-.fa-plus-round:before { content: "\f303"; }
+.fa-plus-round:before { content: "\f253"; }
 
-.fa-minus-round:before { content: "\f304"; }
+.fa-minus-round:before { content: "\f254"; }
 
-.fa-info-round:before { content: "\f305"; }
+.fa-info-round:before { content: "\f255"; }
 
-.fa-warning-round:before { content: "\f306"; }
+.fa-warning-round:before { content: "\f256"; }
 
-.fa-tick-circle:before { content: "\f307"; }
+.fa-tick-circle:before { content: "\f257"; }
 
-.fa-times-circle:before { content: "\f308"; }
+.fa-times-circle:before { content: "\f258"; }
 
-.fa-question-circle:before { content: "\f309"; }
+.fa-question-circle:before { content: "\f259"; }
 
-.fa-plus-circle:before { content: "\f30a"; }
+.fa-plus-circle:before { content: "\f25a"; }
 
-.fa-minus-circle:before { content: "\f30b"; }
+.fa-minus-circle:before { content: "\f25b"; }
 
-.fa-info-circle:before { content: "\f30c"; }
+.fa-info-circle:before { content: "\f25c"; }
 
-.fa-warning-circle:before { content: "\f30d"; }
+.fa-warning-circle:before { content: "\f25d"; }
 
-.fa-warning-block:before { content: "\f30e"; }
+.fa-warning-block:before { content: "\f25e"; }
 
-.fa-warning-block-o:before { content: "\f30f"; }
+.fa-warning-block-o:before { content: "\f25f"; }
 
-.fa-alert:before { content: "\f310"; }
+.fa-alert:before { content: "\f260"; }
 
-.fa-alert-o:before { content: "\f311"; }
+.fa-alert-o:before { content: "\f261"; }
 
-.fa-plus-square-o:before { content: "\f312"; }
+.fa-plus-square-o:before { content: "\f262"; }
 
-.fa-minus-square-o:before { content: "\f313"; }
+.fa-minus-square-o:before { content: "\f263"; }
 
 .fa-mail:before { content: "\f340"; }
 
@@ -424,11 +424,11 @@
 
 .fa-expand:before { content: "\f42b"; }
 
-.fa-collapse:before { content: "\f42d"; }
+.fa-collapse:before { content: "\f42c"; }
 
-.fa-fold:before { content: "\f42f"; }
+.fa-fold:before { content: "\f42d"; }
 
-.fa-unfold:before { content: "\f430"; }
+.fa-unfold:before { content: "\f42e"; }
 
 .fa-contrast:before { content: "\f431"; }
 
@@ -499,32 +499,6 @@
 .fa-folder-removed-o:before { content: "\f48a"; }
 
 .fa-folder-renamed-o:before { content: "\f48b"; }
-
-.fa-tag:before { content: "\f490"; }
-
-.fa-tag-o:before { content: "\f491"; }
-
-.fa-tag-add:before { content: "\f492"; }
-
-.fa-tag-remove:before { content: "\f493"; }
-
-.fa-tag-alt:before { content: "\f494"; }
-
-.fa-tags:before { content: "\f495"; }
-
-.fa-comment:before { content: "\f496"; }
-
-.fa-comments:before { content: "\f497"; }
-
-.fa-comment-add:before { content: "\f498"; }
-
-.fa-eye-open:before { content: "\f499"; }
-
-.fa-eye-plus:before { content: "\f49a"; }
-
-.fa-eye-times:before { content: "\f49b"; }
-
-.fa-eye-slash:before { content: "\f49c"; }
 
 .fa-commit:before { content: "\f500"; }
 
@@ -598,6 +572,32 @@
 
 .fa-issue-closed:before { content: "\f554"; }
 
+.fa-tag:before { content: "\f560"; }
+
+.fa-tag-o:before { content: "\f561"; }
+
+.fa-tag-add:before { content: "\f562"; }
+
+.fa-tag-remove:before { content: "\f563"; }
+
+.fa-tag-alt:before { content: "\f564"; }
+
+.fa-tags:before { content: "\f565"; }
+
+.fa-comment:before { content: "\f566"; }
+
+.fa-comments:before { content: "\f567"; }
+
+.fa-comment-add:before { content: "\f568"; }
+
+.fa-eye-open:before { content: "\f569"; }
+
+.fa-eye-plus:before { content: "\f56a"; }
+
+.fa-eye-times:before { content: "\f56b"; }
+
+.fa-eye-slash:before { content: "\f56c"; }
+
 .fa-font:before { content: "\f600"; }
 
 .fa-font-bold:before { content: "\f601"; }
@@ -667,3 +667,5 @@
 .fa-bars-two:before { content: "\f65a"; }
 
 .fa-bars-three:before { content: "\f65b"; }
+
+.fa-grip:before { content: "\f660"; }

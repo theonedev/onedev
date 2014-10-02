@@ -1,8 +1,6 @@
 package com.pmease.gitplex.web.page.repository.pullrequest;
 
-import static com.pmease.gitplex.core.model.IntegrationStrategy.*;
-
-import com.pmease.gitplex.core.GitPlex;
+import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.*;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -11,16 +9,18 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
+import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.IntegrationInfo;
-import com.pmease.gitplex.core.model.IntegrationStrategy;
+import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
 @SuppressWarnings("serial")
-public class ResolveConflictInstructionPanel extends Panel {
+class ResolveConflictInstructionPanel extends Panel {
 
 	public ResolveConflictInstructionPanel(String id, IModel<PullRequest> model) {
 		super(id, model);
@@ -34,11 +34,11 @@ public class ResolveConflictInstructionPanel extends Panel {
 		Fragment fragment;
 		Repository targetRepo = request.getTarget().getRepository();
 		User user = GitPlex.getInstance(UserManager.class).getCurrent();
-		IntegrationInfo integrationInfo = request.getIntegrationInfo();
-		String requestHead = integrationInfo.getRequestHead();
+		IntegrationPreview preview = GitPlex.getInstance(PullRequestManager.class).previewIntegration(request);
+		String sourceHead = preview.getRequestHead();
 		IntegrationStrategy strategy = request.getIntegrationStrategy();
 		boolean sameRepo = request.getTarget().getRepository().equals(request.getSource().getRepository());					
-		if (strategy == REBASE_SOURCE) {
+		if (strategy == REBASE_SOURCE_BRANCH) {
 			fragment = new Fragment("content", "rebaseInSourceFrag", this);
 			fragment.add(new Label("srcRepoName", request.getSource().getRepository()));
 			fragment.add(new Label("srcBranchNameForCheckout", request.getSource().getName()));
@@ -52,7 +52,7 @@ public class ResolveConflictInstructionPanel extends Panel {
 			differentRepoContainer.add(new Label("destBranchName", request.getTarget().getName()));
 			differentRepoContainer.setVisible(!sameRepo);
 			fragment.add(differentRepoContainer);
-		} else if (strategy == REBASE_TARGET) {
+		} else if (strategy == REBASE_TARGET_BRANCH) {
 			fragment = new Fragment("content", "rebaseInTargetFrag", this);
 			fragment.add(new Label("destRepoName", request.getTarget().getRepository()));
 			fragment.add(new Label("destBranchNameForCheckout", request.getTarget().getName()));
@@ -68,7 +68,7 @@ public class ResolveConflictInstructionPanel extends Panel {
 			fragment.add(differentRepoContainer);
 		} else if (user != null 
 						&& SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryWrite(targetRepo))
-						&& targetRepo.getGateKeeper().checkCommit(user, request.getTarget(), requestHead).allowIntegration()) {
+						&& targetRepo.getGateKeeper().checkCommit(user, request.getTarget(), sourceHead).allowIntegration()) {
 			fragment = new Fragment("content", "mergeInTargetFrag", this);
 			fragment.add(new Label("destRepoName", request.getTarget().getRepository()));
 			fragment.add(new Label("destBranchNameForCheckout", request.getTarget().getName()));

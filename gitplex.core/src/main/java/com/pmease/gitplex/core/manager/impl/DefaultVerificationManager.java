@@ -5,13 +5,14 @@ import java.util.Collection;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.manager.VerificationManager;
 import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.Sessional;
+import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.gitplex.core.manager.PullRequestManager;
+import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.model.Verification.Status;
@@ -46,25 +47,25 @@ public class DefaultVerificationManager implements VerificationManager {
 				.add(Restrictions.eq("configuration", configuration)));
 	}
 
+	@Transactional
 	@Override
-	public void save(Verification result) {
-		dao.persist(result);
+	public void save(Verification verification) {
+		dao.persist(verification);
 
-		for (PullRequest request : pullRequestManager.findByCommit(result.getCommit())) {
-			if (request.isOpen())
-				pullRequestManager.refresh(request);
-		}
-
+		onVerificationChange(verification.getCommit());
 	}
 
+	@Transactional
 	@Override
-	public void delete(Verification result) {
-		dao.remove(result);
+	public void delete(Verification verification) {
+		dao.remove(verification);
 		
-		for (PullRequest request : pullRequestManager.findByCommit(result.getCommit())) {
-			if (request.isOpen())
-				pullRequestManager.refresh(request);
-		}
+		onVerificationChange(verification.getCommit());
+	}
+	
+	private void onVerificationChange(String commit) {
+		for (PullRequest request : pullRequestManager.findByCommit(commit))
+			pullRequestManager.onGateKeeperUpdate(request);
 	}
 
 	@Override

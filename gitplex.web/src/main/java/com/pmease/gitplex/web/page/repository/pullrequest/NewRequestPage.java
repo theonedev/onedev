@@ -39,15 +39,14 @@ import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Approved;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Branch;
-import com.pmease.gitplex.core.model.IntegrationStrategy;
 import com.pmease.gitplex.core.model.OldCommitComment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.CloseStatus;
+import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
@@ -136,13 +135,10 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 			pullRequest.setIntegrationStrategy(strategies.get(0));
 
 			if (target.getRepository().equals(source.getRepository())) {
-				pullRequest.setBaseCommitHash(pullRequest.git().calcMergeBase(target.getHeadCommitHash(), source.getHeadCommitHash()));			
-				if (target.getRepository().git().isAncestor(source.getHeadCommitHash(), target.getHeadCommitHash())) {
+				pullRequest.setBaseCommitHash(pullRequest.git().calcMergeBase(
+						target.getHeadCommitHash(), source.getHeadCommitHash()));			
+				if (target.getRepository().git().isAncestor(source.getHeadCommitHash(), target.getHeadCommitHash())) 
 					pullRequest.setCloseStatus(CloseStatus.INTEGRATED);
-					pullRequest.setCheckResult(new Approved("Already integrated."));
-				} else {
-					pullRequest.setCheckResult(target.getRepository().getGateKeeper().checkRequest(pullRequest));
-				}
 			} else {
 				Git sandbox = new Git(FileUtils.createTempDir());
 				pullRequest.setSandbox(sandbox);
@@ -153,12 +149,8 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 				
 				pullRequest.setBaseCommitHash(pullRequest.git().calcMergeBase(target.getHeadCommitHash(), source.getHeadCommitHash()));			
 
-				if (sandbox.isAncestor(source.getHeadCommitHash(), target.getHeadCommitHash())) {
+				if (sandbox.isAncestor(source.getHeadCommitHash(), target.getHeadCommitHash()))
 					pullRequest.setCloseStatus(CloseStatus.INTEGRATED);
-					pullRequest.setCheckResult(new Approved("Already integrated."));
-				} else {
-					pullRequest.setCheckResult(target.getRepository().getGateKeeper().checkRequest(pullRequest));
-				}
 			}
 		}
 		

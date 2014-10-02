@@ -92,11 +92,21 @@ public class EditableUtils {
 	 */
 	public static @Nullable String getDescription(AnnotatedElement element) {
 		Editable editable = element.getAnnotation(Editable.class);
-		if (editable != null && editable.description().trim().length() != 0) {
-			return editable.description().trim();
-		} else {
-			return null;
+		if (editable != null) {
+			if (editable.description().length() != 0)
+				return editable.description();
+			if (editable.descriptionProvider().length() != 0) {
+				Class<?> clazz;
+				if (element instanceof Method)
+					clazz = ((Method) element).getDeclaringClass();
+				else if (element instanceof Class) 
+					clazz = (Class<?>) element;
+				else 
+					clazz = ((Field) element).getDeclaringClass();
+				return (String) ReflectionUtils.invokeStaticMethod(clazz, editable.descriptionProvider());
+			}
 		}
+		return null;
 	}
 
 	/**

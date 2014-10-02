@@ -16,12 +16,9 @@ public class IntegratePullRequest implements PullRequestActivity {
 	
 	private final Date date;
 	
-	private final String reason;
-	
-	public IntegratePullRequest(User user, Date date, String reason) {
+	public IntegratePullRequest(User user, Date date) {
 		this.userId = user.getId();
 		this.date = date;
-		this.reason = reason;
 	}
 	
 	@Override
@@ -34,10 +31,6 @@ public class IntegratePullRequest implements PullRequestActivity {
 		return GitPlex.getInstance(Dao.class).load(User.class, userId);
 	}
 
-	public String getReason() {
-		return reason;
-	}
-
 	@Override
 	public Panel render(String panelId) {
 		return new IntegrateActivityPanel(panelId, new LoadableDetachableModel<User>() {
@@ -47,7 +40,7 @@ public class IntegratePullRequest implements PullRequestActivity {
 				return getUser();
 			}
 			
-		}, date, reason);
+		}, date);
 	}
 
 }

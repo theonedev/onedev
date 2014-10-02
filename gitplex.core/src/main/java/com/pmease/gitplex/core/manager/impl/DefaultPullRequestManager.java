@@ -1,17 +1,21 @@
 package com.pmease.gitplex.core.manager.impl;
 
-import static com.pmease.gitplex.core.model.IntegrationStrategy.MERGE_ALWAYS;
-import static com.pmease.gitplex.core.model.IntegrationStrategy.MERGE_IF_NECESSARY;
-import static com.pmease.gitplex.core.model.IntegrationStrategy.REBASE_SOURCE;
-import static com.pmease.gitplex.core.model.IntegrationStrategy.REBASE_TARGET;
 import static com.pmease.gitplex.core.model.PullRequest.CriterionHelper.ofOpen;
 import static com.pmease.gitplex.core.model.PullRequest.CriterionHelper.ofSource;
 import static com.pmease.gitplex.core.model.PullRequest.CriterionHelper.ofTarget;
+import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_ALWAYS;
+import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_IF_NECESSARY;
+import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_SOURCE_BRANCH;
+import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_TARGET_BRANCH;
 
 import java.io.File;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -21,32 +25,30 @@ import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.command.MergeCommand.FastForwardMode;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
+import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Approved;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.Branch;
-import com.pmease.gitplex.core.model.IntegrationInfo;
 import com.pmease.gitplex.core.model.IntegrationPolicy;
-import com.pmease.gitplex.core.model.IntegrationStrategy;
+import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.CloseStatus;
-import com.pmease.gitplex.core.model.PullRequestAction;
+import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequestAudit;
 import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.PullRequestOperation;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.model.VoteInvitation;
 
 @Singleton
 public class DefaultPullRequestManager implements PullRequestManager {
@@ -61,13 +63,22 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	
 	private final StorageManager storageManager;
 	
+	private final ExecutorService executorService;
+	
+	private final UnitOfWork unitOfWork;
+	
+	private final Map<Long, Future<Void>> integrationFutures = new ConcurrentHashMap<>();
+	
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager, 
-			BranchManager branchManager, StorageManager storageManager) {
+			BranchManager branchManager, StorageManager storageManager, 
+			ExecutorService executorService, UnitOfWork unitOfWork) {
 		this.dao = dao;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.branchManager = branchManager;
 		this.storageManager = storageManager;
+		this.executorService = executorService;
+		this.unitOfWork = unitOfWork;
 	}
 
 	@Sessional
@@ -96,226 +107,104 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		
 		request.deleteRefs();
 	}
-	
-	/**
-	 * Refresh internal state of this pull request. Pull request should be refreshed when:
-	 * 
-	 * <li> It is updated 
-	 * <li> Head of target branch changes
-	 * <li> Some one vote against it
-	 * <li> CI system reports completion of build against relevant commits
-	 */
-	@Transactional
-	public void refresh(final PullRequest request) {
-		request.lockAndCall(new Callable<Void>() {
-
-			@Override
-			public Void call() throws Exception {
-				Git git = request.getTarget().getRepository().git();
-				String branchHead = request.getTarget().getHeadCommitHash();
-				String requestHead = request.getLatestUpdate().getHeadCommitHash();
-				
-				String integrateRef = request.getIntegrateRef();
-				
-				if (git.isAncestor(requestHead, branchHead)) {
-					PullRequestAudit audit = new PullRequestAudit();
-					audit.setRequest(request);
-					audit.setAction(new PullRequestAction.Integrate(
-							"Mark as integrated as target branch already contains the head commit."));
-					audit.setDate(new Date());
-					audit.setUser(request.getTarget().getUpdater());
-					dao.persist(audit);
-					
-					request.setCloseStatus(CloseStatus.INTEGRATED);
-					request.setUpdateDate(new Date());
-					request.setCheckResult(new Approved("Already integrated."));
-					request.setIntegrationInfo(new IntegrationInfo(branchHead, requestHead, branchHead, true));
-				} else {
-					// Update head ref so that it can be pulled by build system
-					git.updateRef(request.getHeadRef(), requestHead, null, null);
-					
-					IntegrationStrategy strategy = request.getIntegrationStrategy();
-					
-					if (request.getIntegrationInfo() == null 
-							|| !branchHead.equals(request.getIntegrationInfo().getBranchHead())
-							|| !requestHead.equals(request.getIntegrationInfo().getRequestHead())
-							|| request.getIntegrationInfo().getIntegrationHead() != null 
-									&& !request.getIntegrationInfo().getIntegrationHead().equals(git.parseRevision(integrateRef, false))) {
-						
-						if (strategy == MERGE_IF_NECESSARY && git.isAncestor(branchHead, requestHead)) {
-							request.setIntegrationInfo(new IntegrationInfo(branchHead, requestHead, requestHead, false));
-							git.updateRef(integrateRef, requestHead, null, null);
-						} else {
-							File tempDir = FileUtils.createTempDir();
-							try {
-								Git tempGit = new Git(tempDir);
-								tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, 
-										request.getTarget().getName());
-								
-								String integrateHead;
-
-								if (strategy == REBASE_TARGET) {
-									tempGit.updateRef("HEAD", requestHead, null, null);
-									tempGit.reset(null, null);
-									integrateHead = tempGit.cherryPick(".." + branchHead);
-								} else {
-									tempGit.updateRef("HEAD", branchHead, null, null);
-									tempGit.reset(null, null);
-									if (strategy == REBASE_SOURCE) {
-										integrateHead = tempGit.cherryPick(".." + requestHead);
-									} else {
-										FastForwardMode fastForwardMode;
-										if (strategy == MERGE_ALWAYS)
-											fastForwardMode = FastForwardMode.NO_FF;
-										else 
-											fastForwardMode = FastForwardMode.FF;
-										integrateHead = tempGit.merge(requestHead, fastForwardMode, null, null, 
-												"Merge pull request: " + request.getTitle());
-									}
-								}
-								 
-								if (integrateHead != null) {
-									request.setIntegrationInfo(new IntegrationInfo(
-											branchHead, requestHead, integrateHead, 
-											!tempGit.listChangedFiles(requestHead, integrateHead, null).isEmpty()));
-									git.fetch(tempGit, "+HEAD:" + integrateRef);									
-								} else {
-									request.setIntegrationInfo(new IntegrationInfo(branchHead, requestHead, 
-											integrateHead, false));
-									git.deleteRef(integrateRef, null, null);
-								}
-							} finally {
-								FileUtils.deleteDir(tempDir);
-							}
-						}
-					}
-					request.setCheckResult(request.getTarget().getRepository().getGateKeeper().checkRequest(request));
-
-					for (VoteInvitation invitation : request.getVoteInvitations()) {
-						if (!request.getCheckResult().canVote(invitation.getVoter(), request))
-							dao.remove(invitation);
-						else if (invitation.getId() == null)
-							dao.persist(invitation);
-					}
-				}
-		
-				dao.persist(request);
-				
-				if (request.isAutoIntegrate() && request.canIntegrate())
-					integrate(request, null, "Integrated automatically by system.");
-
-				return null;
-			}
-			
-		});
-	}
 
 	@Transactional
+	@Override
  	public void discard(final PullRequest request, final User user, final String comment) {
-		request.lockAndCall(new Callable<Void>() {
+		PullRequestAudit audit = new PullRequestAudit();
+		audit.setRequest(request);
+		audit.setDate(new Date());
+		audit.setOperation(PullRequestOperation.DISCARD);
+		audit.setUser(user);
+		
+		dao.persist(audit);
 
-			@Override
-			public Void call() throws Exception {
-				PullRequestAudit audit = new PullRequestAudit();
-				audit.setRequest(request);
-				audit.setDate(new Date());
-				audit.setAction(new PullRequestAction.Discard());
-				audit.setUser(user);
-				
-				dao.persist(audit);
+		if (comment != null) {
+			PullRequestComment requestComment = new PullRequestComment();
+			requestComment.setContent(comment);
+			requestComment.setDate(audit.getDate());
+			requestComment.setRequest(request);
+			requestComment.setUser(user);
+			dao.persist(requestComment);
+		}
 
-				if (comment != null) {
-					PullRequestComment requestComment = new PullRequestComment();
-					requestComment.setContent(comment);
-					requestComment.setDate(audit.getDate());
-					requestComment.setRequest(request);
-					requestComment.setUser(user);
-					dao.persist(requestComment);
-				}
-
-				request.setCloseStatus(CloseStatus.DISCARDED);
-				request.setUpdateDate(audit.getDate());
-				dao.persist(request);
-				
-				deleteRefsUponClose(request);
-				
-				return null;
-			}
-			
-		});
+		request.setCloseStatus(CloseStatus.DISCARDED);
+		request.setUpdateDate(audit.getDate());
+		dao.persist(request);
+		
+		deleteRefsUponClose(request);
 	}
-
+	
 	@Transactional
-	public boolean integrate(final PullRequest request, final User user, final String comment) {
-		Preconditions.checkArgument(request.canIntegrate(), "request can not be integrated.");
+	@Override
+	public void integrate(PullRequest request, User user, String comment) {
+		if (request.getStatus() != PullRequest.Status.PENDING_INTEGRATE)
+			throw new IllegalStateException("Gate keeper disallows integration right now.");
+	
+		IntegrationPreview preview = previewIntegration(request);
+		if (preview == null)
+			throw new IllegalStateException("Integration preview has not been calculated yet.");
 
-		return request.lockAndCall(new Callable<Boolean>() {
+		String previewIntegrated = preview.getIntegrated();
+		if (previewIntegrated == null)
+			throw new IllegalStateException("There are integration conflicts.");
+		
+		if (request.getIntegrationStrategy() == REBASE_SOURCE_BRANCH) {
+			Git sourceGit = request.getSource().getRepository().git();
+			if (sourceGit.updateRef(request.getSource().getHeadRef(), 
+					previewIntegrated, preview.getRequestHead(), 
+					"Rebase for pull request: " + request.getId())) {
 
-			@Override
-			public Boolean call() throws Exception {
-				if (request.getIntegrationStrategy() == REBASE_SOURCE) {
-					Git sourceGit = request.getSource().getRepository().git();
-					if (sourceGit.updateRef(request.getSource().getHeadRef(), 
-							request.getIntegrationInfo().getIntegrationHead(), 
-							request.getIntegrationInfo().getRequestHead(), "Rebase for pull request: " +request.getId())) {
+				request.getSource().setHeadCommitHash(previewIntegrated);
+				request.getSource().setUpdater(user);
+				branchManager.save(request.getSource());
 
-						request.getSource().setHeadCommitHash(request.getIntegrationInfo().getIntegrationHead());
-						request.getSource().setUpdater(user);
-						branchManager.save(request.getSource());
+				PullRequestUpdate update = new PullRequestUpdate();
+				update.setRequest(request);
+				update.setUser(user);
+				update.setHeadCommitHash(previewIntegrated);
+				request.getUpdates().add(update);
 
-						PullRequestUpdate update = new PullRequestUpdate();
-						update.setRequest(request);
-						update.setUser(user);
-						update.setHeadCommitHash(request.getIntegrationInfo().getIntegrationHead());
-						request.getUpdates().add(update);
-
-						pullRequestUpdateManager.save(update);
-					} else {
-						logger.warn("Unable to update source branch '{}' due to lock failure.", request.getSource());
-						return false;
-					}
-				}
-				Git git = request.getTarget().getRepository().git();
-				if (git.updateRef(request.getTarget().getHeadRef(), 
-						request.getIntegrationInfo().getIntegrationHead(), 
-						request.getIntegrationInfo().getBranchHead(), 
-						comment!=null?comment:"Pull request #" + request.getId())) {
-					request.getTarget().setHeadCommitHash(request.getIntegrationInfo().getIntegrationHead());
-					request.getTarget().setUpdater(user);
-					branchManager.save(request.getTarget());
-					
-					PullRequestAudit audit = new PullRequestAudit();
-					audit.setRequest(request);
-					audit.setDate(new Date());
-					audit.setAction(new PullRequestAction.Integrate(null));
-					audit.setUser(user);
-					
-					dao.persist(audit);
-
-					if (comment != null) {
-						PullRequestComment requestComment = new PullRequestComment();
-						requestComment.setContent(comment);
-						requestComment.setDate(audit.getDate());
-						requestComment.setRequest(request);
-						requestComment.setUser(user);
-						dao.persist(requestComment);
-					}
-
-					request.setCloseStatus(CloseStatus.INTEGRATED);
-					request.setUpdateDate(new Date());
-
-					dao.persist(request);
-
-					deleteRefsUponClose(request);
-					
-					return true;
-				} else {
-					logger.warn("Unable to target branch '{}' due to lock failure.", request.getTarget());
-					return false;
-				}
+				pullRequestUpdateManager.save(update);
+			} else {
+				throw new RuntimeException(String.format(
+						"Unable to target branch '%s' due to lock failure.", request.getTarget()));
 			}
+		}
+		Git git = request.getTarget().getRepository().git();
+		if (git.updateRef(request.getTarget().getHeadRef(), previewIntegrated, 
+				preview.getTargetHead(), comment!=null?comment:"Pull request #" + request.getId())) {
+			request.getTarget().setHeadCommitHash(previewIntegrated);
+			request.getTarget().setUpdater(user);
+			branchManager.save(request.getTarget());
 			
-		});
+			PullRequestAudit audit = new PullRequestAudit();
+			audit.setRequest(request);
+			audit.setDate(new Date());
+			audit.setOperation(PullRequestOperation.INTEGRATE);
+			audit.setUser(user);
+			
+			dao.persist(audit);
+
+			if (comment != null) {
+				PullRequestComment requestComment = new PullRequestComment();
+				requestComment.setContent(comment);
+				requestComment.setDate(audit.getDate());
+				requestComment.setRequest(request);
+				requestComment.setUser(user);
+				dao.persist(requestComment);
+			}
+
+			request.setCloseStatus(CloseStatus.INTEGRATED);
+			request.setUpdateDate(new Date());
+
+			dao.persist(request);
+
+			deleteRefsUponClose(request);
+		} else {
+			throw new RuntimeException(String.format(
+					"Unable to target branch '%s' due to lock failure.", request.getTarget()));
+		}
 	}
 	
 	@Sessional
@@ -323,8 +212,8 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	public List<PullRequest> findByCommit(String commit) {
 		return dao.query(EntityCriteria.of(PullRequest.class)
 				.add(Restrictions.or(
-						Restrictions.eq("integrationInfo.requestHead", commit), 
-						Restrictions.eq("integrationInfo.integrationHead", commit))), 0, 0);
+						Restrictions.eq("integrationPreview.requestHead", commit), 
+						Restrictions.eq("integrationPreview.integrated", commit))), 0, 0);
 	}
 
 	@Transactional
@@ -340,8 +229,6 @@ public class DefaultPullRequestManager implements PullRequestManager {
 			update.setDate(new Date(System.currentTimeMillis() + 1000));
 			pullRequestUpdateManager.save(update);
 		}
-
-		refresh(request);
 	}
 
 	@Override
@@ -361,9 +248,145 @@ public class DefaultPullRequestManager implements PullRequestManager {
 
 	private void deleteRefsUponClose(PullRequest request) {
 		Git git = request.getTarget().getRepository().git();
-		for (PullRequestUpdate update: request.getUpdates()) {
-			git.deleteRef(update.getChangeRef(), null, null);
-		}
+		for (PullRequestUpdate update: request.getUpdates()) 
+			git.deleteRef(update.getReferentialRef(), null, null);
 		git.deleteRef(request.getIntegrateRef(), null, null);
 	}
+
+	@Transactional
+	@Override
+	public void onTargetBranchUpdate(PullRequest request) {
+		Git git = request.getTarget().getRepository().git();
+		if (git.isAncestor(request.getLatestUpdate().getHeadCommitHash(), request.getTarget().getHeadCommitHash())) {
+			PullRequestAudit audit = new PullRequestAudit();
+			audit.setRequest(request);
+			audit.setOperation(PullRequestOperation.INTEGRATE);
+			audit.setDate(new Date());
+			audit.setUser(request.getTarget().getUpdater());
+			dao.persist(audit);
+			
+			request.setIntegrationPreview(null);
+			request.setCloseStatus(CloseStatus.INTEGRATED);
+			request.setUpdateDate(new Date());
+			
+			dao.persist(request);
+		} 
+	}
+
+	@Transactional
+	@Override
+	public void onSourceBranchUpdate(PullRequest request) {
+		PullRequestUpdate update = new PullRequestUpdate();
+		update.setRequest(request);
+		update.setUser(request.getSource().getUpdater());
+		update.setDate(new Date());
+		update.setHeadCommitHash(request.getSource().getHeadCommitHash());
+		
+		request.getUpdates().add(update);
+		pullRequestUpdateManager.save(update);
+	}
+
+	@Transactional
+	@Override
+	public void onGateKeeperUpdate(PullRequest request) {
+		if (request.isAutoIntegrate() && canIntegrate(request)) 
+			integrate(request, null, "Integrated automatically by system");
+	}
+
+	@Override
+	public IntegrationPreview previewIntegration(PullRequest request) {
+		IntegrationPreview preview = request.getIntegrationPreview();
+		if (preview != null 
+				&& preview.getRequestHead().equals(request.getLatestUpdate().getHeadCommitHash())
+				&& preview.getTargetHead().equals(request.getTarget().getHeadCommitHash())
+				&& preview.getIntegrationStrategy() == request.getIntegrationStrategy()
+				&& (preview.getIntegrated() == null || preview.getIntegrated().equals(request.getTarget().getRepository().getRefValue(request.getIntegrateRef())))) {
+			return preview;
+		} else {
+			final Long requestId = request.getId();
+			if (!integrationFutures.containsKey(requestId)) {
+				integrationFutures.put(request.getId(), executorService.submit(new Callable<Void>() {
+
+					@Override
+					public Void call() throws Exception {
+						unitOfWork.begin();
+						try {
+							PullRequest request = dao.load(PullRequest.class, requestId);
+							String requestHead = request.getLatestUpdate().getHeadCommitHash();
+							String targetHead = request.getTarget().getHeadCommitHash();
+							Git git = request.getTarget().getRepository().git();
+							IntegrationPreview preview = new IntegrationPreview(request.getTarget().getHeadCommitHash(), 
+									request.getLatestUpdate().getHeadCommitHash(), request.getIntegrationStrategy(), null);
+							request.setIntegrationPreview(preview);
+							String integrateRef = request.getIntegrateRef();
+							if (preview.getIntegrationStrategy() == MERGE_IF_NECESSARY && git.isAncestor(targetHead, requestHead)) {
+								preview.setIntegrated(requestHead);
+								git.updateRef(integrateRef, requestHead, null, null);
+							} else {
+								File tempDir = FileUtils.createTempDir();
+								try {
+									Git tempGit = new Git(tempDir);
+									tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, 
+											request.getTarget().getName());
+									
+									String integrated;
+	
+									if (preview.getIntegrationStrategy() == REBASE_TARGET_BRANCH) {
+										tempGit.updateRef("HEAD", requestHead, null, null);
+										tempGit.reset(null, null);
+										integrated = tempGit.cherryPick(".." + targetHead);
+									} else {
+										tempGit.updateRef("HEAD", targetHead, null, null);
+										tempGit.reset(null, null);
+										if (preview.getIntegrationStrategy() == REBASE_SOURCE_BRANCH) {
+											integrated = tempGit.cherryPick(".." + requestHead);
+										} else {
+											FastForwardMode fastForwardMode;
+											if (preview.getIntegrationStrategy() == MERGE_ALWAYS)
+												fastForwardMode = FastForwardMode.NO_FF;
+											else 
+												fastForwardMode = FastForwardMode.FF;
+											integrated = tempGit.merge(requestHead, fastForwardMode, null, null, 
+													"Merge pull request: " + request.getTitle());
+										}
+									}
+									 
+									if (integrated != null) {
+										preview.setIntegrated(integrated);
+										git.fetch(tempGit, "+HEAD:" + integrateRef);									
+									} else {
+										git.deleteRef(integrateRef, null, null);
+									}
+								} finally {
+									FileUtils.deleteDir(tempDir);
+								}
+							}
+							dao.persist(request);
+							
+							onGateKeeperUpdate(request);
+						} catch (Exception e) {
+							logger.error("Error previewing integration of pull request #" + requestId, e);
+						} finally {
+							integrationFutures.remove(requestId);
+							unitOfWork.end();
+						}
+						return null;
+					}
+					
+				}));
+			}
+			return null;
+		}
+	}
+
+	@Override
+	public boolean canIntegrate(PullRequest request) {
+		if (request.getStatus() != PullRequest.Status.PENDING_INTEGRATE) {
+			return false;
+		} else {
+			IntegrationPreview integrationPreview = previewIntegration(request);
+			return integrationPreview != null && integrationPreview.getIntegrated() != null;
+		}
+	}
+	
 }

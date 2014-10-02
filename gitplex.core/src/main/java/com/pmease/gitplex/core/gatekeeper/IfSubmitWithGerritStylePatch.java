@@ -15,7 +15,7 @@ public class IfSubmitWithGerritStylePatch extends AbstractGateKeeper {
 
 	@Override
 	protected CheckResult doCheckRequest(PullRequest request) {
-		String branchHead = request.getTarget().getHeadCommitHash();
+		String branchHead = request.getBaseCommitHash();
 		String requestHead = request.getLatestUpdate().getHeadCommitHash();
 		if (request.git().log(branchHead, requestHead, null, 0, 0).size() > 1) {
 			return disapproved("Please squash/rebase your commits.");

@@ -12,7 +12,7 @@ import org.apache.wicket.model.IModel;
 import com.pmease.gitplex.core.model.Verification;
 
 @SuppressWarnings("serial")
-public class VerificationDetailPanel extends Panel {
+class VerificationDetailPanel extends Panel {
 
 	private IModel<List<Verification>> model;
 	

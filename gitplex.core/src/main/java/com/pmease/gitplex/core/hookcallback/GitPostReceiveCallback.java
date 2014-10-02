@@ -123,7 +123,7 @@ public class GitPostReceiveCallback extends HttpServlet {
 			} else {
 				logger.debug("Executing post-receive hook against branch {}...", branchName);
 				
-				final Branch branch = branchManager.findBy(repository, branchName);
+				Branch branch = branchManager.findBy(repository, branchName);
 				Preconditions.checkNotNull(branch);
 
 				branch.setHeadCommitHash(newCommitHash);

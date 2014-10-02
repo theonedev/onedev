@@ -17,13 +17,10 @@ public class IntegrateActivityPanel extends Panel {
 	
 	private final Date date;
 	
-	private final String reason;
-	
-	public IntegrateActivityPanel(String id, IModel<User> userModel, Date date, String reason) {
+	public IntegrateActivityPanel(String id, IModel<User> userModel, Date date) {
 		super(id);
 		this.userModel = userModel;
 		this.date = date;
-		this.reason = reason;
 	}
 
 	@Override
@@ -32,8 +29,6 @@ public class IntegrateActivityPanel extends Panel {
 		
 		add(new UserLink("user", userModel));
 		add(new Label("age", Model.of(date)));
-
-		add(new Label("reason", reason).setVisible(reason != null));
 	}
 
 	@Override

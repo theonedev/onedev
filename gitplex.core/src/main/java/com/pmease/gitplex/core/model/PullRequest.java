@@ -18,7 +18,6 @@ import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
@@ -34,10 +33,8 @@ import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.util.LockUtils;
 import com.pmease.commons.util.Triple;
 import com.pmease.gitplex.core.comment.ChangeComments;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Approved;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Disapproved;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Ignored;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.gatekeeper.checkresult.PendingAndBlock;
 
@@ -48,7 +45,7 @@ public class PullRequest extends AbstractEntity {
 	public enum CloseStatus {INTEGRATED, DISCARDED};
 	
 	public enum Status {
-		PENDING_REFRESH("Pending Check"), PENDING_APPROVAL("Pending Approval"), 
+		PENDING_APPROVAL("Pending Approval"), 
 		PENDING_UPDATE("Pending Update"), PENDING_INTEGRATE("Pending Integration"), 
 		INTEGRATED("Integrated"), DISCARDED("Discarded");
 
@@ -63,6 +60,37 @@ public class PullRequest extends AbstractEntity {
 			return displayName;
 		}
 		
+	}
+	
+	public enum IntegrationStrategy {
+		MERGE_ALWAYS("Merge always", "Always create merge commit when integrate into target branch"), 
+		MERGE_IF_NECESSARY("Merge if necessary", "Create merge commit only if target branch can not be fast-forwarded to the pull request"), 
+		MERGE_WITH_SQUASH("Merge with squash", "Squash all commits in the pull request and then merge with target branch"),
+		REBASE_SOURCE_BRANCH("Rebase source branch", "Rebase source branch on top of target branch and then fast-forward target branch to source branch"), 
+		REBASE_TARGET_BRANCH("Rebase target branch", "Rebase target branch on top of source branch");
+
+		private final String displayName;
+		
+		private final String description;
+		
+		IntegrationStrategy(String displayName, String description) {
+			this.displayName = displayName;
+			this.description = description;
+		}
+		
+		public String getDisplayName() {
+			return displayName;
+		}
+
+		public String getDescription() {
+			return description;
+		}
+
+		@Override
+		public String toString() {
+			return displayName;
+		}
+
 	}
 	
 	@Column
@@ -91,11 +119,8 @@ public class PullRequest extends AbstractEntity {
 	@Transient
 	private Git sandbox;
 	
-	@Lob
-	private CheckResult checkResult;
-
 	@Embedded
-	private IntegrationInfo integrationInfo;
+	private IntegrationPreview integrationPreview;
 	
 	@Column(nullable=false)
 	private Date createDate = new Date();
@@ -120,6 +145,8 @@ public class PullRequest extends AbstractEntity {
 
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
 	private Collection<PullRequestAudit> audits = new ArrayList<>();
+	
+	private transient CheckResult checkResult;
 
 	private transient List<PullRequestUpdate> sortedUpdates;
 	
@@ -283,14 +310,12 @@ public class PullRequest extends AbstractEntity {
 			return Status.INTEGRATED;
 		else if (closeStatus == CloseStatus.DISCARDED) 
 			return Status.DISCARDED;
-		else if (checkResult instanceof Pending || checkResult instanceof PendingAndBlock) 
+		else if (getCheckResult() instanceof Pending || getCheckResult() instanceof PendingAndBlock) 
 			return Status.PENDING_APPROVAL;
-		else if (checkResult instanceof Disapproved) 
+		else if (getCheckResult() instanceof Disapproved) 
 			return Status.PENDING_UPDATE;
-		else if (checkResult instanceof Ignored || checkResult instanceof Approved) 
+		else  
 			return Status.PENDING_INTEGRATE;
-		else 
-			return Status.PENDING_REFRESH;
 	}
 
 	@Nullable
@@ -325,28 +350,26 @@ public class PullRequest extends AbstractEntity {
 	 * 			check result of this pull request has not been refreshed yet
 	 */
 	public CheckResult getCheckResult() {
+		if (checkResult == null) 
+			checkResult = getTarget().getRepository().getGateKeeper().checkRequest(this);
 		return checkResult;
 	}
 	
-	public void setCheckResult(CheckResult checkResult) {
-		this.checkResult = checkResult;
-	}
-	
 	/**
-	 * Get integration info of this pull request.
+	 * Get integration preview of this pull request.
 	 *  
 	 * @return
-	 * 			integration info of this pull request, or <tt>null</tt> if integration 
-	 * 			info has not been calculated yet
+	 * 			integration preview of this pull request, or <tt>null</tt> if integration 
+	 * 			preview has not been calculated yet
 	 */
-	public @Nullable IntegrationInfo getIntegrationInfo() {
-		return integrationInfo;
+	public @Nullable IntegrationPreview getIntegrationPreview() {
+		return integrationPreview;
 	}
 	
-	public void setIntegrationInfo(IntegrationInfo integrationInfo) {
-		this.integrationInfo = integrationInfo;
+	public void setIntegrationPreview(IntegrationPreview integrationPreview) {
+		this.integrationPreview = integrationPreview;
 	}
-
+	
 	/**
 	 * Get list of sorted updates.
 	 * 
@@ -541,12 +564,6 @@ public class PullRequest extends AbstractEntity {
 		return pendingCommits;
 	}
 
-	public boolean canIntegrate() {
-		return getStatus() == Status.PENDING_INTEGRATE 
-				&& getIntegrationInfo() != null 
-				&& getIntegrationInfo().getIntegrationHead() != null;
-	}
-	
 	public ChangeComments getComments(RevAwareChange change) {
 		ChangeKey key = new ChangeKey(change.getOldRevision(), change.getNewRevision(), change.getPath());
 		ChangeComments comments = commentsCache.get(key);
@@ -574,7 +591,7 @@ public class PullRequest extends AbstractEntity {
 		}
 		return mergedCommits;
 	}
-
+	
 	private static class ChangeKey extends Triple<String, String, String> {
 
 		public ChangeKey(String oldCommit, String newCommit, String file) {

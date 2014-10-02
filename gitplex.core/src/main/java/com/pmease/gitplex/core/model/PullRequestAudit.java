@@ -21,7 +21,7 @@ public class PullRequestAudit extends AbstractEntity {
 	
 	@Lob
 	@Column(nullable=false)
-	private PullRequestAction action;
+	private PullRequestOperation operation;
 	
 	@ManyToOne
 	private User user;
@@ -37,12 +37,12 @@ public class PullRequestAudit extends AbstractEntity {
 		this.request = request;
 	}
 
-	public PullRequestAction getAction() {
-		return action;
+	public PullRequestOperation getOperation() {
+		return operation;
 	}
 
-	public void setAction(PullRequestAction action) {
-		this.action = action;
+	public void setOperation(PullRequestOperation operation) {
+		this.operation = operation;
 	}
 
 	@Nullable

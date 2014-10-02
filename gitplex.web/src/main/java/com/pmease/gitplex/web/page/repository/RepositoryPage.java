@@ -209,8 +209,8 @@ public abstract class RepositoryPage extends AccountBasePage {
 		
 		add(new Tabbable("codeTabs", codeTabs));
 		
-		List<Tab> requestTabs = new ArrayList<>();
-		requestTabs.add(new RepositoryTab(Model.of("Open"), "fa fa-branch-merge", OpenRequestsPage.class) {
+		List<Tab> requestsTabs = new ArrayList<>();
+		requestsTabs.add(new RepositoryTab(Model.of("Open"), "fa fa-branch-merge", OpenRequestsPage.class) {
 
 				@Override
 				public boolean isActive(Page currentPage) {
@@ -223,7 +223,7 @@ public abstract class RepositoryPage extends AccountBasePage {
 				}
 			
 		});
-		requestTabs.add(new RepositoryTab(Model.of("Closed"), "fa fa-pull-request-close", ClosedRequestsPage.class) {
+		requestsTabs.add(new RepositoryTab(Model.of("Closed"), "fa fa-pull-request-close", ClosedRequestsPage.class) {
 			
 				@Override
 				public boolean isActive(Page currentPage) {
@@ -236,9 +236,9 @@ public abstract class RepositoryPage extends AccountBasePage {
 				}
 			
 		});
-		requestTabs.add(new RepositoryTab(Model.of("Create"), "fa fa-pull-request-add", NewRequestPage.class));		
+		requestsTabs.add(new RepositoryTab(Model.of("Create"), "fa fa-pull-request-add", NewRequestPage.class));		
 		
-		add(new Tabbable("requestTabs", requestTabs));		
+		add(new Tabbable("requestsTabs", requestsTabs));		
 		
 		List<Tab> adminTabs = Lists.newArrayList();
 		adminTabs.add(new RepositoryTab(Model.of("General Settings"), "fa fa-tools", GeneralSettingPage.class));

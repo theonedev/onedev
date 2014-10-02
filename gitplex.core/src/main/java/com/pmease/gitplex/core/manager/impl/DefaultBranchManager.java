@@ -1,20 +1,16 @@
 package com.pmease.gitplex.core.manager.impl;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 
-import com.pmease.gitplex.core.manager.BranchManager;
-import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.Sessional;
@@ -22,9 +18,10 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.gitplex.core.manager.BranchManager;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
@@ -35,20 +32,16 @@ public class DefaultBranchManager implements BranchManager {
 	
 	private final PullRequestManager pullRequestManager;
 	
-	private final PullRequestUpdateManager pullRequestUpdateManager;
-	
-	private final Executor executor;
+	private final ExecutorService executorService;
 	
 	private final UnitOfWork unitOfWork;
 	
 	@Inject
 	public DefaultBranchManager(Dao dao, PullRequestManager pullRequestManager, 
-			PullRequestUpdateManager pullRequestUpdateManager, Executor executor, 
-			UnitOfWork unitOfWork) {
+			ExecutorService executorService, UnitOfWork unitOfWork) {
 		this.dao = dao;
 		this.pullRequestManager = pullRequestManager;
-		this.pullRequestUpdateManager = pullRequestUpdateManager;
-		this.executor = executor;
+		this.executorService = executorService;
 		this.unitOfWork = unitOfWork;
 	}
 
@@ -142,9 +135,10 @@ public class DefaultBranchManager implements BranchManager {
 
 	@Transactional
 	@Override
-	public void save(final Branch branch) {
+	public void save(Branch branch) {
 		dao.persist(branch);
 		
+		final Long branchId = branch.getId();
 		dao.getSession().getTransaction().registerSynchronization(new Synchronization() {
 			
 			@Override
@@ -154,19 +148,19 @@ public class DefaultBranchManager implements BranchManager {
 			@Override
 			public void afterCompletion(int status) {
 				if (status == Status.STATUS_COMMITTED) {
-					final Long branchId = branch.getId();
-					executor.execute(new Runnable() {
+					executorService.execute(new Runnable() {
 
 						@Override
 						public void run() {
 							unitOfWork.begin();
 							try {
 								Branch branch = dao.load(Branch.class, branchId);
-								for (PullRequest each: branch.getIncomingRequests()) {
-									if (each.isOpen())
-										pullRequestManager.refresh(each);
-								}
 								
+								for (PullRequest request: branch.getIncomingRequests()) {
+									if (request.isOpen()) 
+										pullRequestManager.onTargetBranchUpdate(request);
+								}
+
 								// Calculates most recent open pull request for each branch. Note that although 
 								// we do not allow multiple opened requests for a single branch, there still 
 								// exist some chances multiple requests are opening for same branch, so we need 
@@ -182,20 +176,8 @@ public class DefaultBranchManager implements BranchManager {
 									}
 								}
 								
-								for (PullRequest each: branchRequests.values()) {
-									PullRequestUpdate update = new PullRequestUpdate();
-									update.setRequest(each);
-									update.setUser(branch.getUpdater());
-									update.setDate(new Date());
-									update.setHeadCommitHash(branch.getHeadCommitHash());
-									
-									each.getUpdates().add(update);
-									
-									pullRequestUpdateManager.save(update);
-	
-									each.setUpdateDate(new Date());
-									pullRequestManager.refresh(each);
-								}	
+								for (PullRequest request: branchRequests.values())
+									pullRequestManager.onSourceBranchUpdate(request);
 							} finally {
 								unitOfWork.end();
 							}

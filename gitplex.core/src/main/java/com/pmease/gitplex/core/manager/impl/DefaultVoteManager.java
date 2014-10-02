@@ -14,9 +14,9 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.VoteManager;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestAction;
 import com.pmease.gitplex.core.model.PullRequestAudit;
 import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.PullRequestOperation;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.model.Vote;
@@ -57,9 +57,9 @@ public class DefaultVoteManager implements VoteManager {
 		
 		PullRequestAudit audit = new PullRequestAudit();
 		if (result == Vote.Result.APPROVE)
-			audit.setAction(new PullRequestAction.Approve());
+			audit.setOperation(PullRequestOperation.APPROVE);
 		else
-			audit.setAction(new PullRequestAction.Disapprove());
+			audit.setOperation(PullRequestOperation.DISAPPROVE);
 		audit.setDate(new Date());
 		audit.setRequest(request);
 		audit.setUser(user);
@@ -74,7 +74,7 @@ public class DefaultVoteManager implements VoteManager {
 			dao.persist(requestComment);
 		}
 
-		pullRequestManager.refresh(request);
+		pullRequestManager.onGateKeeperUpdate(request);
 	}
 
 }

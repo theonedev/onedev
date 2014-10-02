@@ -1,7 +1,7 @@
 package com.pmease.commons.loader;
 
 import java.util.Collection;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -42,10 +42,10 @@ public class AppLoaderModule extends AbstractModule {
 	    
 	    bind(EventBus.class).toInstance(new EventBus());
 	    
-	    bind(Executor.class).toProvider(new Provider<Executor>() {
+	    bind(ExecutorService.class).toProvider(new Provider<ExecutorService>() {
 
 			@Override
-			public Executor get() {
+			public ExecutorService get() {
 				return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
 			            300L, TimeUnit.SECONDS,
 			            new SynchronousQueue<Runnable>());

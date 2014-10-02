@@ -26,10 +26,7 @@ import com.pmease.commons.wicket.component.markdown.MarkdownInput;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestAction.Approve;
-import com.pmease.gitplex.core.model.PullRequestAction.Disapprove;
-import com.pmease.gitplex.core.model.PullRequestAction.Discard;
-import com.pmease.gitplex.core.model.PullRequestAction.Integrate;
+import static com.pmease.gitplex.core.model.PullRequestOperation.*;
 import com.pmease.gitplex.core.model.PullRequestAudit;
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
@@ -146,7 +143,7 @@ public class RequestActivitiesPage extends RequestDetailPage {
 	}
 	
 	private Component newActivitiesView() {
-		activitiesView = new RepeatingView("activities");
+		activitiesView = new RepeatingView("requestActivities");
 		activitiesView.setOutputMarkupId(true);
 		
 		PullRequest request = getPullRequest();
@@ -161,18 +158,16 @@ public class RequestActivitiesPage extends RequestDetailPage {
 			activities.add(new CommentPullRequest(comment));
 		
 		for (PullRequestAudit audit: request.getAudits()) {
-			if (audit.getAction() instanceof Integrate) {
-				Integrate integrate = (Integrate) audit.getAction();
-				activities.add(new IntegratePullRequest(audit.getUser(), audit.getDate(), 
-						integrate.getReason()));
-			} else if (audit.getAction() instanceof Discard) { 
+			if (audit.getOperation() == INTEGRATE) {
+				activities.add(new IntegratePullRequest(audit.getUser(), audit.getDate()));
+			} else if (audit.getOperation() == DISCARD) { 
 				activities.add(new DiscardPullRequest(audit.getUser(), audit.getDate()));
-			} else if (audit.getAction() instanceof Approve) {
+			} else if (audit.getOperation() == APPROVE) {
 				activities.add(new ApprovePullRequest(audit.getRequest(), audit.getUser(), audit.getDate()));
-			} else if (audit.getAction() instanceof Disapprove) {
+			} else if (audit.getOperation() == DISAPPROVE) {
 				activities.add(new DisapprovePullRequest(audit.getRequest(), audit.getUser(), audit.getDate()));
 			} else {
-				throw new IllegalStateException("Unexpected audit action: " + audit.getAction());
+				throw new IllegalStateException("Unexpected audit operation: " + audit.getOperation());
 			}
 		}
 		

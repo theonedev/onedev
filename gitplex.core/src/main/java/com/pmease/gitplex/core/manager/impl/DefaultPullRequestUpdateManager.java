@@ -38,9 +38,10 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 			request.getTarget().getRepository().git().fetch(
 					request.getSource().getRepository().git(), 
 					"+" + request.getSource().getHeadRef() + ":" + update.getHeadRef()); 
+		} else {
+			request.getTarget().getRepository().git().updateRef(update.getHeadRef(), 
+					sourceHead, null, null);
 		}
-		request.getTarget().getRepository().git().updateRef(update.getHeadRef(), 
-				sourceHead, null, null);
 	}
 
 	@Transactional

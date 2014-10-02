@@ -101,9 +101,9 @@ public class PullRequestUpdate extends AbstractEntity {
 		this.votes = votes;
 	}
 	
-	public String getChangeRef() {
+	public String getReferentialRef() {
 		Preconditions.checkNotNull(getId());
-		return Repository.REFS_GITPLEX + "updates/" + getId() + "/change";
+		return Repository.REFS_GITPLEX + "updates/" + getId() + "/referential";
 	}
 	
 	public String getHeadRef() {
@@ -138,7 +138,7 @@ public class PullRequestUpdate extends AbstractEntity {
 				Lock lock = LockUtils.getLock("update.getReferentialCommit." + getId());
 				try {
 					lock.lockInterruptibly();
-					String changeRef = getChangeRef();
+					String changeRef = getReferentialRef();
 					referentialCommitHash = git.parseRevision(changeRef, false);
 	
 					if (referentialCommitHash != null) {
@@ -201,7 +201,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	public void deleteRefs() {
 		Git git = getRequest().getTarget().getRepository().git();
 		git.deleteRef(getHeadRef(), null, null);
-		git.deleteRef(getChangeRef(), null, null);
+		git.deleteRef(getReferentialRef(), null, null);
 	}	
 	
 	public Collection<String> getChangedFiles() {

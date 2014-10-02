@@ -12,6 +12,7 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.Horizontal;
 import com.pmease.gitplex.core.branchmatcher.AffinalBranchMatcher;
 import com.pmease.gitplex.core.branchmatcher.BranchMatcher;
+import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 
 @SuppressWarnings("serial")
 @Editable
@@ -48,23 +49,7 @@ public class IntegrationPolicy implements Serializable {
 		this.sourceBranches = sourceBranches;
 	}
 
-	@Editable(order=300, description="<p>Choose one or more integration strategies applicable for pull requests "
-			+ "matching branch criterias specified above. User can decide to use one of the applicable "
-			+ "strategy to integrate pull request into target branch. Note that the first selected strategy "
-			+ "here will appear as default strategy of the pull request. GitPlex for now provides below "
-			+ "integration strategies:</p>"
-			+ "<dl>"
-			+ "<dt>Merge always</dt>"
-			+ "<dd>Always create merge commit when integrate into target branch</dd>"
-			+ "<dt>Merge if necessary</dt>"
-			+ "<dd>Create merge commit only if target branch can not be fast-forwarded to the pull request</dd>"
-			+ "<dt>Merge with squash</dt>"
-			+ "<dd>Squash all commits in the pull request and then merge with target branch</dd>"
-			+ "<dt>Rebase source on top of target</dt>"
-			+ "<dd>Rebase source branch on top of target branch and then fast-forward target branch to source branch</dd>"
-			+ "<dt>Rebase target on top of source</dt>"
-			+ "<dd>Rebase target branch on top of source branch</dd>"
-			+ "</dl>")
+	@Editable(order=300, descriptionProvider="getIntegrationStrategyHelp")
 	@Size(min=1, message="At least one integration strategy should be specified")
 	public List<IntegrationStrategy> getIntegrationStrategies() {
 		return integrationStrategies;
@@ -74,4 +59,23 @@ public class IntegrationPolicy implements Serializable {
 		this.integrationStrategies = integrationStrategies;
 	}
 
+	@SuppressWarnings("unused")
+	private static String getIntegrationStrategyHelp() {
+		StringBuilder help = new StringBuilder("<p>Choose one or more integration strategies applicable for pull requests "
+				+ "matching branch criterias specified above. User can decide to use one of the applicable "
+				+ "strategy to integrate pull request into target branch. Note that the first selected strategy "
+				+ "here will appear as default strategy of the pull request. GitPlex for now provides below "
+				+ "integration strategies:</p>");
+		
+		help.append("<dl>");
+		
+		for (IntegrationStrategy strategy: IntegrationStrategy.values()) {
+			help.append("<dt>").append(strategy.toString()).append("</dt>");
+			help.append("<dd>").append(strategy.getDescription()).append("</dd>");
+		}
+
+		help.append("</dl>");
+		
+		return help.toString();
+	}
 }

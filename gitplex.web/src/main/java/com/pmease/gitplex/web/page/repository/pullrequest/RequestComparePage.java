@@ -45,9 +45,10 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.comment.InlineContext;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.InlineInfo;
-import com.pmease.gitplex.core.model.IntegrationInfo;
+import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
@@ -114,13 +115,13 @@ public class RequestComparePage extends RequestDetailPage {
 				choices.put(targetHead, description);
 			}
 
-			IntegrationInfo integrationInfo = request.getIntegrationInfo();
-			if (request.isOpen() 
-					&& integrationInfo.getIntegrationHead() != null 
-					&& !integrationInfo.getIntegrationHead().equals(integrationInfo.getRequestHead())) { 
-				Commit commit = getRepository().getCommit(request.getIntegrationInfo().getIntegrationHead());
-				choices.put(request.getIntegrationInfo().getIntegrationHead(), 
-						new CommitDescription(INTEGRATION_PREVIEW, commit.getSubject()));
+			if (request.isOpen()) {
+				IntegrationPreview preview = GitPlex.getInstance(PullRequestManager.class).previewIntegration(request);
+				if (preview != null && preview.getIntegrated() != null 
+						&& !getRepository().getChanges(preview.getRequestHead(), preview.getIntegrated()).isEmpty()) {
+					Commit commit = getRepository().getCommit(preview.getIntegrated());
+					choices.put(commit.getHash(), new CommitDescription(INTEGRATION_PREVIEW, commit.getSubject()));
+				}
 			}
 			
 			return choices;
@@ -185,13 +186,13 @@ public class RequestComparePage extends RequestDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		WebMarkupContainer options = new WebMarkupContainer("compareOptions");
-		options.add(new StickyBehavior());
+		WebMarkupContainer optionsContainer = new WebMarkupContainer("compareOptions");
+		optionsContainer.add(new StickyBehavior());
 		
-		add(options);
+		add(optionsContainer);
 
 		WebMarkupContainer oldSelector = new WebMarkupContainer("oldSelector");
-		options.add(oldSelector);
+		optionsContainer.add(oldSelector);
 		oldSelector.add(new Label("label", new LoadableDetachableModel<String>() {
 
 			@Override
@@ -223,11 +224,11 @@ public class RequestComparePage extends RequestDetailPage {
 			}
 			
 		}; 
-		options.add(oldChoicesDropdown);
+		optionsContainer.add(oldChoicesDropdown);
 		oldSelector.add(new DropdownBehavior(oldChoicesDropdown).alignWithTrigger(0, 0, 0, 100));
 		
 		WebMarkupContainer newSelector = new WebMarkupContainer("newSelector");
-		options.add(newSelector);
+		optionsContainer.add(newSelector);
 		newSelector.add(new Label("label", new LoadableDetachableModel<String>() {
 
 			@Override
@@ -260,7 +261,7 @@ public class RequestComparePage extends RequestDetailPage {
 			}
 			
 		}; 
-		options.add(newChoicesDropdown);
+		optionsContainer.add(newChoicesDropdown);
 		newSelector.add(new DropdownBehavior(newChoicesDropdown).alignWithTrigger(0, 0, 0, 100));
 
 		MenuPanel commonComparisons = new MenuPanel("comparisonChoices") {
@@ -305,26 +306,27 @@ public class RequestComparePage extends RequestDetailPage {
 					}
 
 				});
-				
-				final IntegrationInfo integrationInfo = getPullRequest().getIntegrationInfo();
-				if (getPullRequest().isOpen() 
-						&& integrationInfo.getIntegrationHead() != null 
-						&& !integrationInfo.getIntegrationHead().equals(integrationInfo.getRequestHead())
-						&& integrationInfo.hasChanges()) { 
-					items.add(new ComparisonChoiceItem("Latest Update", "Integration Preview") {
 
-						@Override
-						protected void onSelect() {
-							PageParameters params = paramsOf(getPullRequest(), 
-									getPullRequest().getLatestUpdate().getHeadCommitHash(), 
-									integrationInfo.getIntegrationHead(),
-									file, getConcernedComment());
-							setResponsePage(RequestComparePage.class, params);
-						}
-						
-					});
+				PullRequest request = getPullRequest();
+				if (request.isOpen()) {
+					final IntegrationPreview preview = GitPlex.getInstance(PullRequestManager.class).previewIntegration(request);
+					if (preview != null && preview.getIntegrated() != null 
+							&& !getRepository().getChanges(preview.getRequestHead(), preview.getIntegrated()).isEmpty()) {
+						items.add(new ComparisonChoiceItem("Latest Update", "Integration Preview") {
+
+							@Override
+							protected void onSelect() {
+								PageParameters params = paramsOf(getPullRequest(), 
+										getPullRequest().getLatestUpdate().getHeadCommitHash(), 
+										preview.getIntegrated(),
+										file, getConcernedComment());
+								setResponsePage(RequestComparePage.class, params);
+							}
+							
+						});
+					}
 				}
-				
+
 				for (int i=0; i<getPullRequest().getSortedUpdates().size(); i++) {
 					PullRequestUpdate update = getPullRequest().getSortedUpdates().get(i);
 					final String baseCommit = update.getBaseCommitHash();
@@ -353,12 +355,12 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		};
 		
-		options.add(commonComparisons);
-		options.add(new WebMarkupContainer("comparisonSelector")
+		optionsContainer.add(commonComparisons);
+		optionsContainer.add(new WebMarkupContainer("comparisonSelector")
 				.add(new MenuBehavior(commonComparisons)
 				.alignWithTrigger(50, 100, 50, 0)));
 		
-		options.add(new CheckBox("changedOnly", new LoadableDetachableModel<Boolean>() {
+		optionsContainer.add(new CheckBox("changedOnly", new LoadableDetachableModel<Boolean>() {
 
 			@Override
 			protected Boolean load() {

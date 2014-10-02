@@ -15,6 +15,14 @@
 .bottom-spacing {margin-bottom: 10px;}
 .spacing {margin: 10px;}
 
+/* Cursors */
+.pointer {cursor: pointer;}
+
+/* Tooltips */
+.tooltip-inner {max-width: 400px;}
+.tooltip .tooltip-inner dl {text-align: left;}
+.tooltip .tooltip-inner dl dt {font-size: 15px;}
+
 /* Feedback */
 #session-feedback {position:absolute; background:#FFFFDE; max-width:75%;
 	border:1px solid #9C9E9C; border-top:none; padding: 6px; z-index:10000; 

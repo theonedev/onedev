@@ -8,8 +8,10 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.voteeligibility.NoneCanVote;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
@@ -62,24 +64,32 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 
 	@Override
 	protected CheckResult doCheckRequest(PullRequest request) {
-		VerificationManager verificationManager = GitPlex.getInstance(VerificationManager.class);
-
-		if (request.getIntegrationInfo() == null) {
-			if (blockMode) {
+		if (request.isNew()) {
+			if (blockMode)
 				return pendingAndBlock("To be verified by build", new NoneCanVote());
-			} else {
+			else
 				return pending("To be verified by build", new NoneCanVote());
-			}
 		}
 		
 		String commit;
 		if (isCheckIntegrated()) {
-			commit = request.getIntegrationInfo().getIntegrationHead();
+			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
+			
+			IntegrationPreview preview = pullRequestManager.previewIntegration(request);
+			if (preview == null) {
+				if (blockMode)
+					return pendingAndBlock("To be verified by build", new NoneCanVote());
+				else
+					return pending("To be verified by build", new NoneCanVote());
+			}
+			commit = preview.getIntegrated();
 			if (commit == null) 
 				return disapproved("Can not build against integration result due to conflicts.");
 		} else {
 			commit = request.getLatestUpdate().getHeadCommitHash();
 		}
+
+		VerificationManager verificationManager = GitPlex.getInstance(VerificationManager.class);
 
 		int passedCount = 0;
 		Collection<Verification> verifications = verificationManager.findBy(request, commit);

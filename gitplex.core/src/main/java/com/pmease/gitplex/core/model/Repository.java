@@ -104,6 +104,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
     
     private transient Map<String, Commit> commitCache = new HashMap<>();
     
+    private transient Map<String, Optional<String>> refValueCache = new HashMap<>();
+    
 	public User getOwner() {
 		return owner;
 	}
@@ -391,6 +393,16 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		return optional.orNull();
 	}
 	
+	@Nullable
+	public String getRefValue(String refName) {
+		Optional<String> optional = refValueCache.get(refName);
+		if (optional == null) {
+			optional = Optional.fromNullable(git().parseRevision(refName, false));
+			refValueCache.put(refName, optional);
+		}
+		return optional.orNull();
+	}
+
 	public List<Change> getChanges(String fromCommit, String toCommit) {
 		CommitRange range = new CommitRange(fromCommit, toCommit);
 		List<Change> changes = changesCache.get(range);

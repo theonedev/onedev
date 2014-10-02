@@ -10,6 +10,7 @@ import java.util.Set;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -26,7 +27,6 @@ import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Verification;
-import com.pmease.gitplex.core.model.Verification.Status;
 import com.pmease.gitplex.core.model.Vote;
 import com.pmease.gitplex.web.component.commit.CommitHashLink;
 import com.pmease.gitplex.web.component.commit.CommitMessagePanel;
@@ -50,7 +50,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ListView<PullRequestUpdate>("updates", new LoadableDetachableModel<List<PullRequestUpdate>>() {
+		add(new ListView<PullRequestUpdate>("requestUpdates", new LoadableDetachableModel<List<PullRequestUpdate>>() {
 
 			@Override
 			public List<PullRequestUpdate> load() {
@@ -167,23 +167,46 @@ public class RequestUpdatesPage extends RequestDetailPage {
 						commitItem.add(new BookmarkablePageLink<Void>("treeLink", RepoTreePage.class, 
 								RepoTreePage.paramsOf(repoModel.getObject(), commit.getHash())));
 						
-						commitItem.add(new VerificationStatusPanel("verification", requestModel, commit.getHash()) {
+						commitItem.add(new VerificationStatusPanel("verification", requestModel, Model.of(commit.getHash())) {
 
 							@Override
-							protected Component newStatusComponent(String id, Status status) {
-								if (status == Verification.Status.PASSED) {
-									return new Label(id, "build successful <i class='caret'></i>")
-										.setEscapeModelStrings(false)
-										.add(AttributeAppender.append("class", " label label-success"));
-								} else if (status == Verification.Status.ONGOING) {
-									return new Label(id, "build running <i class='caret'></i>")
-										.setEscapeModelStrings(false)
-										.add(AttributeAppender.append("class", " label label-warning"));
-								} else {
-									return new Label(id, "build failed <i class='caret'></i>")
-										.setEscapeModelStrings(false)
-										.add(AttributeAppender.append("class", " label label-danger"));
-								} 
+							protected Component newStatusComponent(String id, final IModel<Verification.Status> statusModel) {
+								return new Label(id, new AbstractReadOnlyModel<String>() {
+
+									@Override
+									public String getObject() {
+										if (statusModel.getObject() == Verification.Status.PASSED)
+											return "build successful <i class='caret'></i>";
+										else if (statusModel.getObject() == Verification.Status.ONGOING)
+											return "build running <i class='caret'></i>";
+										else if (statusModel.getObject() == Verification.Status.NOT_PASSED) 
+											return "build failed <i class='caret'></i>";
+										else 
+											return "";
+									}
+									
+								}) {
+
+									@Override
+									protected void onComponentTag(ComponentTag tag) {
+										super.onComponentTag(tag);
+										
+										if (statusModel.getObject() == Verification.Status.PASSED)
+											tag.put("class", "label label-success");
+										else if (statusModel.getObject() == Verification.Status.ONGOING)
+											tag.put("class", "label label-warning");
+										else if (statusModel.getObject() == Verification.Status.NOT_PASSED) 
+											tag.put("class", "label label-danger");
+									}
+
+									@Override
+									protected void onDetach() {
+										statusModel.detach();
+										
+										super.onDetach();
+									}
+									
+								}.setEscapeModelStrings(false);
 							}
 							
 						});

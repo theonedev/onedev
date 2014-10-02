@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -20,7 +21,6 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Verification;
-import com.pmease.gitplex.core.model.Verification.Status;
 import com.pmease.gitplex.web.component.commit.CommitHashLink;
 import com.pmease.gitplex.web.component.commit.CommitMessagePanel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
@@ -98,28 +98,52 @@ public class UpdateActivityPanel extends Panel {
 					}
 					
 				};
-				item.add(new VerificationStatusPanel("verification", requestModel, commit.getHash()) {
+				item.add(new VerificationStatusPanel("verification", requestModel, Model.of(commit.getHash())) {
 
 					@Override
-					protected Component newStatusComponent(String id, Status status) {
-						if (status == Verification.Status.PASSED) {
-							return new Label(id, "<i class='fa fa-tick'></i><i class='caret'></i> ")
-								.setEscapeModelStrings(false)
-								.add(AttributeAppender.append("class", " successful"))
-								.add(AttributeAppender.append("title", "Build is successful"));
-						} else if (status == Verification.Status.ONGOING) {
-							return new Label(id, "<i class='fa fa-clock'></i><i class='caret'></i> ")
-								.setEscapeModelStrings(false)
-								.add(AttributeAppender.append("class", " running"))
-								.add(AttributeAppender.append("title", "Build is running"));
-						} else {
-							return new Label(id, "<i class='fa fa-times'></i><i class='caret'></i>")
-								.setEscapeModelStrings(false)
-								.add(AttributeAppender.append("class", " failed"))
-								.add(AttributeAppender.append("title", "Build is failed"));
-						} 
+					protected Component newStatusComponent(String id, final IModel<Verification.Status> statusModel) {
+						return new Label(id, new AbstractReadOnlyModel<String>() {
+
+							@Override
+							public String getObject() {
+								if (statusModel.getObject() == Verification.Status.PASSED)
+									return "<i class='fa fa-tick'></i><i class='caret'></i> ";
+								else if (statusModel.getObject() == Verification.Status.ONGOING)
+									return "<i class='fa fa-clock'></i><i class='caret'></i> ";
+								else if (statusModel.getObject() == Verification.Status.NOT_PASSED) 
+									return "<i class='fa fa-times'></i><i class='caret'></i>";
+								else 
+									return "";
+							}
+							
+						}) {
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								
+								if (statusModel.getObject() == Verification.Status.PASSED) {
+									tag.put("class", "successful");
+									tag.put("title", "Build is successful");
+								} else if (statusModel.getObject() == Verification.Status.ONGOING) {
+									tag.put("class", "running");
+									tag.put("title", "Build is running");
+								} else if (statusModel.getObject() == Verification.Status.NOT_PASSED) { 
+									tag.put("class", "failed");
+									tag.put("title", "Build is failed");
+								}
+							}
+
+							@Override
+							protected void onDetach() {
+								statusModel.detach();
+								
+								super.onDetach();
+							}
+							
+						}.setEscapeModelStrings(false);
 					}
-					
+
 				});
 				
 				CommitHashLink link = new CommitHashLink("hashLink", repoModel, commit.getHash());

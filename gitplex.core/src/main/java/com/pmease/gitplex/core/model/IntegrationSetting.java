@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 
 @SuppressWarnings("serial")
 @Editable
