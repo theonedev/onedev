@@ -88,4 +88,27 @@
 			</div>
 		</div>
 	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="squashFrag">
+		<div class="conflict-resolve-instruction">
+			<p>From working directory of repository <em wicket:id="destRepoName"></em>,
+			check out target branch and merge with source branch with squash option.</p>
+			<div class="terminal">
+				<div>git checkout <span wicket:id="destBranchNameForCheckout"></span></div>	
+				<div wicket:id="sameRepo">
+					<div>git fetch origin</div>
+					<div>git merge --squash origin/<span wicket:id="srcBranchName"></span></div>
+				</div>
+				<div wicket:id="differentRepo">
+					<div>git pull --squash <span wicket:id="srcRepoUrl"></span> <span wicket:id="srcBranchName"></span></div> 
+				</div>
+			</div>
+			<p>				
+			<p>Step 2: Resolve merge conflicts, commit merge result, test changes and force push result commit to GitPlex.</p>
+			<div class="terminal">  
+				git commit 
+				git push -f origin <span wicket:id="destBranchNameForPush"></span>
+			</div>
+		</div>
+	</wicket:fragment>
 </wicket:panel>

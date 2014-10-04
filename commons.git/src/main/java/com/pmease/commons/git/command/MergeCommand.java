@@ -22,6 +22,8 @@ public class MergeCommand extends GitCommand<String> {
     
     private FastForwardMode fastForwardMode;
     
+    private boolean squash;
+    
     private String strategy;
     
     private String strategyOption;
@@ -51,6 +53,11 @@ public class MergeCommand extends GitCommand<String> {
 		this.strategyOption = strategyOption;
 		return this;
 	}
+	
+	public MergeCommand squash(boolean squash) {
+		this.squash = squash;
+		return this;
+	}
 
 	public MergeCommand message(String message) {
 		this.message = message;
@@ -77,7 +84,9 @@ public class MergeCommand extends GitCommand<String> {
 		if (strategyOption != null)
 			cmd.addArgs("--strategy-option=" + strategyOption);
 		
-		if (message != null)
+		if (squash)
+			cmd.addArgs("--squash");
+		else if (message != null)
 			cmd.addArgs("-m", message);
 		
 		cmd.addArgs(revision);
@@ -106,7 +115,10 @@ public class MergeCommand extends GitCommand<String> {
 		
 		result.checkReturnCode();
 		
-		return new Git(repoDir).parseRevision("HEAD", true);
+		Git git = new Git(repoDir);
+		if (squash) 
+			git.commit(message, false, false);
+		return git.parseRevision("HEAD", true);
 	}
 
 }

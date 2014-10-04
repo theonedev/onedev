@@ -5,8 +5,9 @@ import static com.pmease.gitplex.core.model.PullRequest.CriterionHelper.ofSource
 import static com.pmease.gitplex.core.model.PullRequest.CriterionHelper.ofTarget;
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_ALWAYS;
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_IF_NECESSARY;
-import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_SOURCE_BRANCH;
-import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_TARGET_BRANCH;
+import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_SOURCE_ONTO_TARGET;
+import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_TARGET_ONTO_SOURCE;
+import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_WITH_SQUASH;
 
 import java.io.File;
 import java.util.Date;
@@ -145,24 +146,42 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		if (preview == null)
 			throw new IllegalStateException("Integration preview has not been calculated yet.");
 
-		String previewIntegrated = preview.getIntegrated();
-		if (previewIntegrated == null)
+		String integrated = preview.getIntegrated();
+		if (integrated == null)
 			throw new IllegalStateException("There are integration conflicts.");
-		
-		if (request.getIntegrationStrategy() == REBASE_SOURCE_BRANCH) {
+
+		Git git = request.getTarget().getRepository().git();
+		IntegrationStrategy strategy = request.getIntegrationStrategy();
+		if ((strategy == MERGE_ALWAYS || strategy == MERGE_IF_NECESSARY || strategy == MERGE_WITH_SQUASH) 
+				&& !integrated.equals(preview.getRequestHead()) && comment != null) {
+			File tempDir = FileUtils.createTempDir();
+			try {
+				Git tempGit = new Git(tempDir);
+				tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, request.getTarget().getName());
+				tempGit.reset(null, null);
+				
+				tempGit.updateRef("HEAD", integrated, null, null);
+				tempGit.commit(comment, false, true);
+				preview.setIntegrated(tempGit.parseRevision("HEAD", true));
+				git.fetch(tempGit, "+HEAD:" + request.getIntegrateRef());									
+			} finally {
+				FileUtils.deleteDir(tempDir);
+			}
+		}
+		if (strategy == REBASE_SOURCE_ONTO_TARGET || strategy == MERGE_WITH_SQUASH) {
 			Git sourceGit = request.getSource().getRepository().git();
 			if (sourceGit.updateRef(request.getSource().getHeadRef(), 
-					previewIntegrated, preview.getRequestHead(), 
-					"Rebase for pull request: " + request.getId())) {
+					integrated, preview.getRequestHead(), 
+					"Pull request #" + request.getId())) {
 
-				request.getSource().setHeadCommitHash(previewIntegrated);
+				request.getSource().setHeadCommitHash(integrated);
 				request.getSource().setUpdater(user);
 				branchManager.save(request.getSource());
 
 				PullRequestUpdate update = new PullRequestUpdate();
 				update.setRequest(request);
 				update.setUser(user);
-				update.setHeadCommitHash(previewIntegrated);
+				update.setHeadCommitHash(integrated);
 				request.getUpdates().add(update);
 
 				pullRequestUpdateManager.save(update);
@@ -171,10 +190,9 @@ public class DefaultPullRequestManager implements PullRequestManager {
 						"Unable to target branch '%s' due to lock failure.", request.getTarget()));
 			}
 		}
-		Git git = request.getTarget().getRepository().git();
-		if (git.updateRef(request.getTarget().getHeadRef(), previewIntegrated, 
-				preview.getTargetHead(), comment!=null?comment:"Pull request #" + request.getId())) {
-			request.getTarget().setHeadCommitHash(previewIntegrated);
+		if (git.updateRef(request.getTarget().getHeadRef(), integrated, 
+				preview.getTargetHead(), "Pull request #" + request.getId())) {
+			request.getTarget().setHeadCommitHash(integrated);
 			request.getTarget().setUpdater(user);
 			branchManager.save(request.getTarget());
 			
@@ -319,7 +337,9 @@ public class DefaultPullRequestManager implements PullRequestManager {
 									request.getLatestUpdate().getHeadCommitHash(), request.getIntegrationStrategy(), null);
 							request.setIntegrationPreview(preview);
 							String integrateRef = request.getIntegrateRef();
-							if (preview.getIntegrationStrategy() == MERGE_IF_NECESSARY && git.isAncestor(targetHead, requestHead)) {
+							if (preview.getIntegrationStrategy() == MERGE_IF_NECESSARY && git.isAncestor(targetHead, requestHead)
+									|| preview.getIntegrationStrategy() == MERGE_WITH_SQUASH && git.isAncestor(targetHead, requestHead)
+											&& git.log(targetHead, requestHead, null, 0, 0).size() == 1) {
 								preview.setIntegrated(requestHead);
 								git.updateRef(integrateRef, requestHead, null, null);
 							} else {
@@ -331,23 +351,30 @@ public class DefaultPullRequestManager implements PullRequestManager {
 									
 									String integrated;
 	
-									if (preview.getIntegrationStrategy() == REBASE_TARGET_BRANCH) {
+									if (preview.getIntegrationStrategy() == REBASE_TARGET_ONTO_SOURCE) {
 										tempGit.updateRef("HEAD", requestHead, null, null);
 										tempGit.reset(null, null);
 										integrated = tempGit.cherryPick(".." + targetHead);
 									} else {
 										tempGit.updateRef("HEAD", targetHead, null, null);
 										tempGit.reset(null, null);
-										if (preview.getIntegrationStrategy() == REBASE_SOURCE_BRANCH) {
+										if (preview.getIntegrationStrategy() == REBASE_SOURCE_ONTO_TARGET) {
 											integrated = tempGit.cherryPick(".." + requestHead);
+										} else if (preview.getIntegrationStrategy() == MERGE_WITH_SQUASH) {
+											String commitMessage = request.getTitle() + "\n\n";
+											if (request.getDescription() != null)
+												commitMessage += request.getDescription() + "\n\n";
+											commitMessage += "(squashed commit of pull request #" + request.getId() + ")\n";
+											integrated = tempGit.squash(requestHead, null, null, commitMessage);
 										} else {
 											FastForwardMode fastForwardMode;
 											if (preview.getIntegrationStrategy() == MERGE_ALWAYS)
 												fastForwardMode = FastForwardMode.NO_FF;
 											else 
 												fastForwardMode = FastForwardMode.FF;
-											integrated = tempGit.merge(requestHead, fastForwardMode, null, null, 
-													"Merge pull request: " + request.getTitle());
+											String commitMessage = "Merge pull request #" + request.getId() 
+													+ "\n\n" + request.getTitle() + "\n";
+											integrated = tempGit.merge(requestHead, fastForwardMode, null, null, commitMessage);
 										}
 									}
 									 

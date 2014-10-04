@@ -377,6 +377,12 @@ public class Git implements Serializable {
 				.strategy(strategy).strategyOption(strategyOption).message(message).call();
 	}
 
+	public String squash(String revision, @Nullable String strategy, @Nullable String strategyOption, 
+			@Nullable String message) {
+		return new MergeCommand(repoDir).revision(revision).squash(true)
+				.strategy(strategy).strategyOption(strategyOption).message(message).call();
+	}
+
 	public Git fetch(String from, String... refspec) {
 		new FetchCommand(repoDir).from(from).refspec(refspec).call();
 		return this;

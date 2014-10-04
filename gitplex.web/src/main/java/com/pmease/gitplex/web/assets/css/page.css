@@ -856,30 +856,31 @@ ul.status-help li:last-child .description {border-bottom: none;}
 /* PULL REQUEST DETAIL PANEL */
 .request-detail {padding: 20px;}
 .request-detail>div {margin-bottom: 20px;}
+.request-detail>div.title {margin-bottom: 10px;}
 .request-detail>div:last-child {margin-bottom: 0;}
 .request-detail table {width: 100%;}
 .request-detail td {vertical-align: top;}
 .request-detail .verification-status {cursor: pointer;}
 
-.request-detail>.overview {margin-bottom: 20px;}
-.request-detail>.overview>div {margin-bottom: 20px;}
-.request-detail>.overview>div:last-child {margin-bottom: 0;}
-.request-detail>.overview>.title {font-size: 24px; font-weight: bold; padding: 0;}
-.request-detail>.overview>.title input[type="text"] {width: 600px;}
-.request-detail>.overview>.title a i {color: #999; font-size: 19px;}
-.request-detail>.overview>.title>div {margin-right: 8px;}
-.request-detail>.overview>.title {margin-bottom: 12px;}
-.request-detail>.overview>.title>.id {color: #999;}
+.request-detail>.title {font-size: 24px; font-weight: bold; padding: 0;}
+.request-detail>.title input[type="text"] {width: 600px;}
+.request-detail>.title a i {color: #999; font-size: 19px;}
+.request-detail>.title>div {margin-right: 8px;}
+.request-detail>.title>.id {color: #999;}
 
-.request-detail>.overview>.status {font-size: 18px;}
+.request-detail>.overview>.panel-body>div {padding: 12px 0; border-bottom: 1px dotted #BBB;}
+.request-detail>.overview>.panel-body>div:last-child {padding: 8px 0 0 0; border-bottom: none;}
+.request-detail>.overview>.panel-body>div:first-child {padding: 0 0 8px 0;}
+.request-detail>.overview>.panel-body>div:first-child:last-child {padding: 0; border-bottom: none;}
 
-.request-detail>.overview>.integration .preview>div:FIRST-CHILD:BEFORE {font-family: "ponticons"; 
-	margin-right: 4px; font-size: 16px;}
-.request-detail>.overview>.integration .preview.alert-success>div:FIRST-CHILD:BEFORE {content: "\f250";}
-.request-detail>.overview>.integration .preview.alert-warning>div:FIRST-CHILD:BEFORE {content: "\f260";}
- 
-.request-detail>.overview>.operations a {margin-right: 8px;} 
-.request-detail>.overview>.operations .confirm {margin-top: 12px;} 
+.request-detail>.overview>.panel-body>.status>.reasons>.reason .fa {font-size: 10px; vertical-align: middle;}
+.request-detail>.overview>.panel-body>.integration>.preview>div {padding: 8px; margin: 8px 0 0 0; 
+	border: none; box-shadow: none;}
+.request-detail>.overview>.panel-body>.integration>.preview>.well img {width: 20px; height: 20px;}
+
+.request-detail>.overview>.panel-body>.operations>.buttons>a, 
+.request-detail>.overview>.panel-body>.operations>.confirm>form>input {margin-right: 8px;} 
+.request-detail>.overview>.panel-body>.operations>.confirm>form>div>textarea {margin-bottom: 12px;} 
 
 .request-detail>.activities {margin-bottom: 20px; border-bottom: 1px solid #DDD;}
 .request-detail>.activities>tbody>tr.discussion>td {border-top: 1px solid #DDD; padding: 12px 0;}

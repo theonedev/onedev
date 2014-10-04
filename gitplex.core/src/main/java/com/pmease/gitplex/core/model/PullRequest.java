@@ -66,8 +66,8 @@ public class PullRequest extends AbstractEntity {
 		MERGE_ALWAYS("Merge always", "Always create merge commit when integrate into target branch"), 
 		MERGE_IF_NECESSARY("Merge if necessary", "Create merge commit only if target branch can not be fast-forwarded to the pull request"), 
 		MERGE_WITH_SQUASH("Merge with squash", "Squash all commits in the pull request and then merge with target branch"),
-		REBASE_SOURCE_BRANCH("Rebase source branch", "Rebase source branch on top of target branch and then fast-forward target branch to source branch"), 
-		REBASE_TARGET_BRANCH("Rebase target branch", "Rebase target branch on top of source branch");
+		REBASE_SOURCE_ONTO_TARGET("Rebase source onto target", "Rebase source branch onto target branch and then fast-forward target branch to source branch"), 
+		REBASE_TARGET_ONTO_SOURCE("Rebase target onto source", "Rebase target branch onto source branch");
 
 		private final String displayName;
 		
