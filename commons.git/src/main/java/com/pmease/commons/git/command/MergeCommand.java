@@ -70,7 +70,7 @@ public class MergeCommand extends GitCommand<String> {
 	    
 		Commandline cmd = cmd().addArgs("merge");
 		
-		cmd.addArgs("--no-edit", "--log", "--quiet");
+		cmd.addArgs("--no-edit", "--quiet");
 		
 		if (fastForwardMode == FastForwardMode.FF_ONLY)
 			cmd.addArgs("--ff-only");

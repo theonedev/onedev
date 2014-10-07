@@ -684,6 +684,9 @@ h2.section-title { margin: 18px 0; font-size: 16px; }
 .table-tags .list-inline a:hover { color: #09F; text-decoration: none; }
 .table-tags .avatar { width: 64px; height: 64px; }
 
+/* BRANCH LINK */
+.branch-link .fa {margin-right: 2px;}
+
 /* COMMITS */
 .commit-message>.full {display: none; margin-top: 4px;}
 .commit-message>.toggle {background: #DDD; padding: 0px 6px; border-radius: 2px;}
@@ -872,6 +875,17 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.overview>.panel-body>div:last-child {padding: 8px 0 0 0; border-bottom: none;}
 .request-detail>.overview>.panel-body>div:first-child {padding: 0 0 8px 0;}
 .request-detail>.overview>.panel-body>div:first-child:last-child {padding: 0; border-bottom: none;}
+
+.request-detail>.overview>.panel-heading {padding: 8px 12px;}
+.request-detail>.overview>.panel-body {padding: 12px;}
+.request-detail>.overview>.panel-heading>span:before {font-family: "ponticons"; margin-right: 8px; font-size: 18px;}
+.request-detail>.overview.panel-success, .request-detail>.overview.panel-success>.panel-heading {border-color: #5EC01C;}
+.request-detail>.overview.panel-danger, .request-detail>.overview.panel-danger>.panel-heading {border-color: #E67E7E;}
+.request-detail>.overview.integrated>.panel-heading>span:before {content: "\f52A";}
+.request-detail>.overview.discarded>.panel-heading>span:before {content: "\f529";}
+.request-detail>.overview.pending-integrate>.panel-heading>span:before {content: "\f526";}
+.request-detail>.overview.pending-approval>.panel-heading>span:before {content: "\f11A";}
+.request-detail>.overview.pending-update>.panel-heading>span:before {content: "\f455";}
 
 .request-detail>.overview>.panel-body>.status>.reasons>.reason .fa {font-size: 10px; vertical-align: middle;}
 .request-detail>.overview>.panel-body>.integration>.preview>div {padding: 8px; margin: 8px 0 0 0; 

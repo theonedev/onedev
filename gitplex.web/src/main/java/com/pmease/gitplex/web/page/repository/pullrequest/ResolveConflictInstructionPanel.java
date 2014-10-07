@@ -38,22 +38,7 @@ class ResolveConflictInstructionPanel extends Panel {
 		String sourceHead = preview.getRequestHead();
 		IntegrationStrategy strategy = request.getIntegrationStrategy();
 		boolean sameRepo = request.getTarget().getRepository().equals(request.getSource().getRepository());					
-		if (strategy == MERGE_WITH_SQUASH) {
-			fragment = new Fragment("content", "squashFrag", this);
-			fragment.add(new Label("destRepoName", request.getTarget().getRepository()));
-			fragment.add(new Label("destBranchNameForCheckout", request.getTarget().getName()));
-			fragment.add(new Label("destBranchNameForPush", request.getTarget().getName()));
-			WebMarkupContainer sameRepoContainer = new WebMarkupContainer("sameRepo");
-			sameRepoContainer.add(new Label("srcBranchName", request.getSource().getName()));
-			sameRepoContainer.setVisible(sameRepo);
-			fragment.add(sameRepoContainer);
-			WebMarkupContainer differentRepoContainer = new WebMarkupContainer("differentRepo");
-			differentRepoContainer.add(new Label("srcRepoUrl", request.getSource().getRepository().getUrl()));
-			differentRepoContainer.add(new Label("srcBranchName", request.getSource().getName()));
-			differentRepoContainer.setVisible(!sameRepo);
-			fragment.add(differentRepoContainer);
-		}
-		if (strategy == REBASE_SOURCE_ONTO_TARGET) {
+		if (strategy == MERGE_WITH_SQUASH || strategy == REBASE_SOURCE_ONTO_TARGET) {
 			fragment = new Fragment("content", "rebaseInSourceFrag", this);
 			fragment.add(new Label("srcRepoName", request.getSource().getRepository()));
 			fragment.add(new Label("srcBranchNameForCheckout", request.getSource().getName()));

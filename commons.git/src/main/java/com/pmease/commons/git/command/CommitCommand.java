@@ -37,7 +37,7 @@ public class CommitCommand extends GitCommand<Void> {
 		this.add = add;
 		return this;
 	}
-
+	
 	@Override
 	public Void call() {
 		Preconditions.checkNotNull(message, "Commit message has to be specified.");
@@ -54,13 +54,17 @@ public class CommitCommand extends GitCommand<Void> {
 
 			@Override
 			public void consume(String line) {
-				logger.debug(line);
+				if (line.startsWith("no changes added to commit"))
+					logger.error(line);
+				else
+					logger.debug(line);
 			}
 			
 		}, new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
+				System.err.println(line);
 				if (line.startsWith("warning: "))
 					logger.warn(line.substring("warning: ".length()));
 				else if (line.startsWith("The file will have its original line endings"))

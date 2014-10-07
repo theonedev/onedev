@@ -273,12 +273,17 @@ public abstract class RequestDetailPage extends RepositoryPage {
 
 			@Override
 			public String getObject() {
-				if (getPullRequest().getStatus() == INTEGRATED)
-					return "panel-success";
-				else if (getPullRequest().getStatus() == DISCARDED)
-					return "panel-danger";
-				else
-					return "panel-default";
+				PullRequest.Status status = getPullRequest().getStatus();
+				if (status == INTEGRATED)
+					return "panel-success integrated";
+				else if (status == DISCARDED)
+					return "panel-danger discarded";
+				else if (status == PENDING_INTEGRATE)
+					return "panel-default pending-integrate";
+				else if (status == PENDING_UPDATE)
+					return "panel-default pending-update";
+				else 
+					return "panel-default pending-approval";
 			}
 			
 		}));

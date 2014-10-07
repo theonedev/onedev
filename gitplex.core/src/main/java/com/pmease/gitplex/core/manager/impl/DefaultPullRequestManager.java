@@ -5,9 +5,9 @@ import static com.pmease.gitplex.core.model.PullRequest.CriterionHelper.ofSource
 import static com.pmease.gitplex.core.model.PullRequest.CriterionHelper.ofTarget;
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_ALWAYS;
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_IF_NECESSARY;
+import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_WITH_SQUASH;
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_SOURCE_ONTO_TARGET;
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_TARGET_ONTO_SOURCE;
-import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_WITH_SQUASH;
 
 import java.io.File;
 import java.util.Date;
@@ -153,17 +153,18 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		Git git = request.getTarget().getRepository().git();
 		IntegrationStrategy strategy = request.getIntegrationStrategy();
 		if ((strategy == MERGE_ALWAYS || strategy == MERGE_IF_NECESSARY || strategy == MERGE_WITH_SQUASH) 
-				&& !integrated.equals(preview.getRequestHead()) && comment != null) {
+				&& !preview.getIntegrated().equals(preview.getRequestHead()) && comment != null) {
 			File tempDir = FileUtils.createTempDir();
 			try {
 				Git tempGit = new Git(tempDir);
 				tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, request.getTarget().getName());
+				tempGit.updateRef("HEAD", preview.getIntegrated(), null, null);
 				tempGit.reset(null, null);
 				
-				tempGit.updateRef("HEAD", integrated, null, null);
 				tempGit.commit(comment, false, true);
-				preview.setIntegrated(tempGit.parseRevision("HEAD", true));
+				integrated = tempGit.parseRevision("HEAD", true);
 				git.fetch(tempGit, "+HEAD:" + request.getIntegrateRef());									
+				comment = null;
 			} finally {
 				FileUtils.deleteDir(tempDir);
 			}
@@ -173,13 +174,13 @@ public class DefaultPullRequestManager implements PullRequestManager {
 			if (sourceGit.updateRef(request.getSource().getHeadRef(), 
 					integrated, preview.getRequestHead(), 
 					"Pull request #" + request.getId())) {
-
 				request.getSource().setHeadCommitHash(integrated);
 				request.getSource().setUpdater(user);
 				branchManager.save(request.getSource());
 
 				PullRequestUpdate update = new PullRequestUpdate();
 				update.setRequest(request);
+				update.setDate(new Date());
 				update.setUser(user);
 				update.setHeadCommitHash(integrated);
 				request.getUpdates().add(update);
@@ -314,7 +315,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	@Override
 	public IntegrationPreview previewIntegration(PullRequest request) {
 		IntegrationPreview preview = request.getIntegrationPreview();
-		if (preview != null 
+		if (!request.isOpen() || preview != null 
 				&& preview.getRequestHead().equals(request.getLatestUpdate().getHeadCommitHash())
 				&& preview.getTargetHead().equals(request.getTarget().getHeadCommitHash())
 				&& preview.getIntegrationStrategy() == request.getIntegrationStrategy()

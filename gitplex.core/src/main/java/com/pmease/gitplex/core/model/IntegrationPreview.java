@@ -48,6 +48,18 @@ public class IntegrationPreview implements Serializable {
 		return integrationStrategy;
 	}
 
+	public void setTargetHead(String targetHead) {
+		this.targetHead = targetHead;
+	}
+
+	public void setRequestHead(String requestHead) {
+		this.requestHead = requestHead;
+	}
+
+	public void setIntegrationStrategy(IntegrationStrategy integrationStrategy) {
+		this.integrationStrategy = integrationStrategy;
+	}
+
 	public String getIntegrated() {
 		return integrated;
 	}
