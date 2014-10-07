@@ -51,6 +51,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.PersonIdent;
 
+import com.google.common.base.Objects;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
@@ -62,7 +63,9 @@ import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.PageTabLink;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
+import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.model.Branch;
@@ -249,7 +252,6 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		}));
 
 		overviewContainer = new WebMarkupContainer("requestOverview");
-		overviewContainer.setOutputMarkupId(true);
 		
 		add(overviewContainer);
 		overviewContainer.add(new Label("title", new AbstractReadOnlyModel<String>() {
@@ -292,6 +294,19 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		overviewContainer.add(newIntegrationContainer());
 		overviewContainer.add(newOperationsContainer());
 		
+		overviewContainer.add(new WebSocketRenderBehavior() {
+
+			@Override
+			protected Object getTrait() {
+				IntegrationPreviewUpdateTrait trait = new IntegrationPreviewUpdateTrait();
+				trait.requestId = getPullRequest().getId();
+				return trait;
+			}
+			
+		});
+		
+		overviewContainer.add(new PullRequestChangeBehavior(getPullRequest().getId()));
+
 		List<Tab> tabs = new ArrayList<>();
 		
 		tabs.add(new RequestTab("Discussions", RequestActivitiesPage.class));
@@ -424,6 +439,13 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			} else {
 				Fragment noteFragment = new Fragment("note", "commitMessageFrag", this);
 				noteFragment.add(noteInput = new TextArea<String>("commitMessage", Model.of("")));
+				noteInput.add(new OnChangeAjaxBehavior() {
+
+					@Override
+					protected void onUpdate(AjaxRequestTarget target) {
+					}
+					
+				});
 				form.add(noteFragment);
 			}
 		}
@@ -921,5 +943,90 @@ public abstract class RequestDetailPage extends RepositoryPage {
 	public PullRequest getPullRequest() {
 		return requestModel.getObject();
 	}
+	
+	protected static class PullRequestChangeBehavior extends WebSocketRenderBehavior {
 
+		private final Long requestId;
+		
+		public PullRequestChangeBehavior(Long requestId) {
+			this.requestId = requestId;
+		}
+		
+		@Override
+		protected Object getTrait() {
+			PullRequestChangeTrait trait = new PullRequestChangeTrait();
+			trait.requestId = requestId;
+			return trait;
+		}
+		
+	}
+
+	protected static class PullRequestChangeTrait {
+		
+		private Long requestId;
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == null || getClass() != obj.getClass())  
+				return false;  
+			final PullRequestChangeTrait other = (PullRequestChangeTrait) obj;  
+		    return Objects.equal(requestId, other.requestId);
+		}
+		
+	}
+
+	private static class IntegrationPreviewUpdateTrait {
+		
+		private Long requestId;
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == null || getClass() != obj.getClass())  
+				return false;  
+			final IntegrationPreviewUpdateTrait other = (IntegrationPreviewUpdateTrait) obj;  
+		    return Objects.equal(requestId, other.requestId);
+		}
+		
+	}
+	
+	public static class Updater implements PullRequestListener {
+		
+		@Override
+		public void onOpened(PullRequest request) {
+		}
+
+		@Override
+		public void onUpdated(PullRequest request) {
+			onChange(request);
+		}
+
+		@Override
+		public void onVoted(PullRequest request) {
+			onChange(request);
+		}
+
+		@Override
+		public void onIntegrated(PullRequest request) {
+			onChange(request);
+		}
+
+		@Override
+		public void onDiscarded(PullRequest request) {
+			onChange(request);
+		}
+
+		private void onChange(PullRequest request) {
+			PullRequestChangeTrait trait = new PullRequestChangeTrait();
+			trait.requestId = request.getId();
+			WebSocketRenderBehavior.requestToRender(trait);
+		}
+		
+		@Override
+		public void onIntegrationPreviewCalculated(PullRequest request) {
+			IntegrationPreviewUpdateTrait trait = new IntegrationPreviewUpdateTrait();
+			trait.requestId = request.getId();
+			WebSocketRenderBehavior.requestToRender(trait);
+		}
+		
+	}
 }

@@ -188,6 +188,7 @@ public class RequestComparePage extends RequestDetailPage {
 		
 		WebMarkupContainer optionsContainer = new WebMarkupContainer("compareOptions");
 		optionsContainer.add(new StickyBehavior());
+		optionsContainer.add(new PullRequestChangeBehavior(getPullRequest().getId()));
 		
 		add(optionsContainer);
 

@@ -1011,10 +1011,10 @@ table.verifications tr.ongoing .fa-cog {display: inline; color: #F0AD4E;}
 .gate-keeper .gate-keeper-add {margin: 0px; padding: 8px; font-size: 14px;}
 .gate-keeper .reflection {margin-bottom: 0;}
 
-.gate-keeper.panel {border: 2px solid #888888;}
-.gate-keeper.panel>.panel-heading {border-color: #888888;}
-.gate-keeper.panel.disabled, .gate-keeper.panel.disabled .panel {border-color: #DDDDDD;}
-.gate-keeper.panel.disabled>.panel-heading, .gate-keeper.panel.disabled .panel-heading {border-color: #DDDDDD;}
+.gate-keeper.panel {border: 1px solid #BBBBBB;}
+.gate-keeper.panel>.panel-heading {border-color: #BBBBBB;}
+.gate-keeper.panel.disabled, .gate-keeper.panel.disabled .panel {color: #AAA;}
+.gate-keeper.panel.disabled>.panel-heading, .gate-keeper.panel.disabled .panel-heading {color: #AAA;}
 .gate-keeper.panel.disabled .fa {color: inherit;} 
 .gate-keeper td.name {font-weight: normal !important; background-color: #F0F0F0 !important;}
 .gate-keeper table.viewer {font-size: 13px !important; color: #444444;}
@@ -1025,7 +1025,7 @@ table.verifications tr.ongoing .fa-cog {display: inline; color: #F0AD4E;}
 .gate-keeper table.ifthen {width: 100%;}
 .gate-keeper td.ifthen {vertical-align: top;}
 .gate-keeper td.ifthen.connector {width:1px;}
-.gate-keeper td.ifthen.connector .fa {margin: 0; color: #666666; font-size: 36px;}
+.gate-keeper td.ifthen.connector .fa {margin: 0 6px 0 8px; color: #666666; font-size: 36px;}
 
 /* INTEGRATION POLICY PAGE */
 .integration-policies .handle {cursor: move; margin-right: 8px;}

@@ -527,6 +527,6 @@
 		<jettyVersion>9.2.3.v20140905</jettyVersion>
 		<jacksonVersion>2.3.3</jacksonVersion>
 		<powermockVersion>1.5.1</powermockVersion>
-		<servletVersion>3.1-b09</servletVersion>
+		<servletVersion>3.1.0</servletVersion>
 	</properties>
 </project>

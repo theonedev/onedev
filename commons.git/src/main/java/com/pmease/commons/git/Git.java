@@ -173,7 +173,7 @@ public class Git implements Serializable {
 	 * @param toRev
 	 * 			revision to calculate file differences since fromRev 
 	 * @param path
-	 * 			path to list tree under
+	 * 			path to list tree under5
 	 * @param changes
 	 * 			all changes between fromRev and toRev. This param is passed for performance reasons, 
 	 * 			in order not to calculate changes over and over again when expand nodes of a diff tree
@@ -181,12 +181,15 @@ public class Git implements Serializable {
 	 * 			a list of tree node with appropriate actions set up to mark whether or not this 
 	 * 			tree node is modified, added, deleted or remaining the same
 	 */
-	public List<Change> listTree(String fromRev, String toRev, @Nullable String path, List<Change> changes) {
+	public List<Change> listTree(String fromRev, String toRev, @Nullable String path, @Nullable List<Change> changes) {
 		if (path == null) 
 			path = "";
 		
 		if (path.length() != 0 && !path.endsWith("/"))
 			path += "/";
+		
+		if (changes == null)
+			changes = listFileChanges(fromRev, toRev, path, true);
 
 		List<Change> diffs = new ArrayList<>();
 		

@@ -1,6 +1,8 @@
 package com.pmease.gitplex.web;
 
 import org.apache.tika.mime.MediaType;
+import org.apache.wicket.Application;
+import org.apache.wicket.protocol.http.WebApplication;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import com.pmease.commons.git.extensionpoint.TextConverter;
@@ -10,6 +12,7 @@ import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.commons.wicket.editable.EditSupport;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.validation.UserNameReservation;
 import com.pmease.gitplex.web.editable.EditSupportLocator;
 import com.pmease.gitplex.web.extensionpoint.DiffRenderer;
@@ -17,6 +20,7 @@ import com.pmease.gitplex.web.extensionpoint.DiffRendererProvider;
 import com.pmease.gitplex.web.extensionpoint.MediaRenderer;
 import com.pmease.gitplex.web.extensionpoint.MediaRendererProvider;
 import com.pmease.gitplex.web.page.repository.code.blob.renderer.BlobRendererFactory;
+import com.pmease.gitplex.web.page.repository.pullrequest.RequestDetailPage;
 import com.pmease.gitplex.web.resource.ResourceLocator;
 
 /**
@@ -31,6 +35,9 @@ public class WebModule extends AbstractPluginModule {
 		
 		// put your guice bindings here
 		bind(AbstractWicketConfig.class).to(WicketConfig.class);		
+		bind(WebApplication.class).to(WicketConfig.class);
+		bind(Application.class).to(WicketConfig.class);
+		
 		contribute(ServletConfigurator.class, WebServletConfigurator.class);
 		contribute(UserNameReservation.class, WebUserNameReservation.class);
 		
@@ -44,6 +51,8 @@ public class WebModule extends AbstractPluginModule {
 		});
 		
 		contributeFromPackage(EditSupport.class, EditSupportLocator.class);
+		
+		contribute(PullRequestListener.class, RequestDetailPage.Updater.class);
 
 		bind(BlobRendererFactory.class);
 		

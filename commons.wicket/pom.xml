@@ -51,7 +51,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.wicket</groupId>
-			<artifactId>wicket-native-websocket-jetty9</artifactId>
+			<artifactId>wicket-native-websocket-core</artifactId>
 			<version>${wicketVersion}</version>
 		</dependency>
 		<dependency>
@@ -108,7 +108,7 @@
 	</dependencies>
 	<properties>
 		<moduleClass>com.pmease.commons.wicket.WicketModule</moduleClass>
-		<wicketVersion>6.17.0</wicketVersion>
+		<wicketVersion>6.15.0</wicketVersion>
 		<wicketBootstrapVersion>0.9.3</wicketBootstrapVersion>
 	</properties>
 	<repositories>

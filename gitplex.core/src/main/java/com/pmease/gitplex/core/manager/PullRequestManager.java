@@ -59,7 +59,7 @@ public interface PullRequestManager {
      */
     void deleteRefs(PullRequest request);
     
-    void send(PullRequest request);
+    void open(PullRequest request);
     
     void delete(PullRequest request);
     

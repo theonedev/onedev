@@ -1,15 +1,10 @@
 package com.pmease.gitplex.core.manager.impl;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
 
 import org.hibernate.criterion.Restrictions;
 
@@ -32,16 +27,12 @@ public class DefaultBranchManager implements BranchManager {
 	
 	private final PullRequestManager pullRequestManager;
 	
-	private final ExecutorService executorService;
-	
 	private final UnitOfWork unitOfWork;
 	
 	@Inject
-	public DefaultBranchManager(Dao dao, PullRequestManager pullRequestManager, 
-			ExecutorService executorService, UnitOfWork unitOfWork) {
+	public DefaultBranchManager(Dao dao, PullRequestManager pullRequestManager, UnitOfWork unitOfWork) {
 		this.dao = dao;
 		this.pullRequestManager = pullRequestManager;
-		this.executorService = executorService;
 		this.unitOfWork = unitOfWork;
 	}
 
@@ -86,43 +77,17 @@ public class DefaultBranchManager implements BranchManager {
 	@Override
 	public void create(final Branch branch, final String commitHash) {
 		dao.persist(branch);
-
-		dao.getSession().getTransaction().registerSynchronization(new Synchronization() {
-
-			public void afterCompletion(int status) {
-				if (status == Status.STATUS_COMMITTED) { 
-					branch.getRepository().git().createBranch(branch.getName(), commitHash);
-				}
-			}
-
-			public void beforeCompletion() {
-				
-			}
-			
-		});
-		
+		branch.getRepository().git().createBranch(branch.getName(), commitHash);
 	}
 
     @Transactional
 	@Override
 	public void rename(final Branch branch, String newName) {
-    	final String oldName = branch.getName(); 
+    	String oldName = branch.getName(); 
     	branch.setName(newName);
     	
 		dao.persist(branch);
-
-		dao.getSession().getTransaction().registerSynchronization(new Synchronization() {
-
-			public void afterCompletion(int status) {
-				if (status == Status.STATUS_COMMITTED)  
-					branch.getRepository().git().renameBranch(oldName, branch.getName());
-			}
-
-			public void beforeCompletion() {
-				
-			}
-			
-		});
+		branch.getRepository().git().renameBranch(oldName, branch.getName());
 	}
 
 	@Override
@@ -137,54 +102,30 @@ public class DefaultBranchManager implements BranchManager {
 	@Override
 	public void save(Branch branch) {
 		dao.persist(branch);
+
+		for (PullRequest request: branch.getOutgoingRequests()) {
+			if (request.isOpen())
+				pullRequestManager.onSourceBranchUpdate(request);
+		}
 		
 		final Long branchId = branch.getId();
-		dao.getSession().getTransaction().registerSynchronization(new Synchronization() {
-			
-			@Override
-			public void beforeCompletion() {
-			}
-			
-			@Override
-			public void afterCompletion(int status) {
-				if (status == Status.STATUS_COMMITTED) {
-					executorService.execute(new Runnable() {
+		dao.afterCommit(new Runnable() {
 
-						@Override
-						public void run() {
-							unitOfWork.begin();
-							try {
-								Branch branch = dao.load(Branch.class, branchId);
-								
-								for (PullRequest request: branch.getIncomingRequests()) {
-									if (request.isOpen()) 
-										pullRequestManager.onTargetBranchUpdate(request);
-								}
+			@Override
+			public void run() {
+				unitOfWork.asyncCall(new Runnable() {
 
-								// Calculates most recent open pull request for each branch. Note that although 
-								// we do not allow multiple opened requests for a single branch, there still 
-								// exist some chances multiple requests are opening for same branch, so we need 
-								// to handle this case here.
-								Map<Branch, PullRequest> branchRequests = new HashMap<>();
-								for (PullRequest each: branch.getOutgoingRequests()) {
-									if (each.isOpen()) {
-										PullRequest branchRequest = branchRequests.get(each.getTarget());
-										if (branchRequest == null)
-											branchRequests.put(each.getTarget(), each);
-										else if (each.getId() > branchRequest.getId())
-											branchRequests.put(each.getTarget(), each);
-									}
-								}
-								
-								for (PullRequest request: branchRequests.values())
-									pullRequestManager.onSourceBranchUpdate(request);
-							} finally {
-								unitOfWork.end();
-							}
-						}
+					@Override
+					public void run() {
+						Branch branch = dao.load(Branch.class, branchId);
 						
-					});
-				}
+						for (PullRequest request: branch.getIncomingRequests()) {
+							if (request.isOpen()) 
+								pullRequestManager.onTargetBranchUpdate(request);
+						}
+					}
+					
+				});
 			}
 			
 		});

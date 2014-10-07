@@ -34,8 +34,6 @@ public abstract class AbstractWicketConfig extends WebApplication {
 		getMarkupSettings().setStripComments(true);
 		getMarkupSettings().setStripWicketTags(true);
 
-		getPageSettings().setRecreateMountedPagesAfterExpiry(false);
-		
 		getStoreSettings().setFileStoreFolder(Bootstrap.getTempDir());
 
 		BootstrapSettings bootstrapSettings = new BootstrapSettings();

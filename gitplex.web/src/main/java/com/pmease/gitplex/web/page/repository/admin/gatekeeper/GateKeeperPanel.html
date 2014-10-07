@@ -1,10 +1,10 @@
 <wicket:panel>
 	<div wicket:id="container" class="gate-keeper panel panel-default ">
-		<div class="panel-heading clearfix">
-			<div wicket:id="title" class="panel-title pull-left"></div>
-			<div wicket:id="edit" class="fa fa-pencil pull-left" title="Edit this gate keeper"></div>
-			<div wicket:id="delete" class="fa fa-trash pull-left" title="Delete this gate keeper"></div>
-			<div wicket:id="enable" class="fa pull-left "></div>
+		<div class="panel-heading">
+			<span wicket:id="title" class="panel-title"></span>
+			<span wicket:id="edit" class="fa fa-pencil" title="Edit this gate keeper"></span>
+			<span wicket:id="delete" class="fa fa-times" title="Delete this gate keeper"></span>
+			<span wicket:id="enable" class="fa "></span>
 			<div wicket:id="editor"></div>
 		</div>
 		<div class="panel-body">
@@ -36,11 +36,11 @@
 			<tr>
 				<td class="ifthen if">
 					<div wicket:id="if"></div>
-					<div wicket:id="ifTypeSelectorTrigger" class="well gate-keeper-add">Define First Condition<i class="fa fa-plus-found"></i></div>
+					<div wicket:id="ifTypeSelectorTrigger" class="well gate-keeper-add">Define First Condition<i class="fa fa-plus-round"></i></div>
 					<div wicket:id="ifTypeSelector"></div>
 					<div wicket:id="ifEditor"></div>
 				</td>
-				<td class="ifthen connector"><div class="fa fa-arrow-slim-right"></div></td>
+				<td class="ifthen connector"><div class="fa fa-arrow-right"></div></td>
 				<td class="ifthen then">
 					<div wicket:id="then"></div>
 					<div wicket:id="thenTypeSelectorTrigger" class="well gate-keeper-add">Define Second Condition<i class="fa fa-plus-round"></i></div>

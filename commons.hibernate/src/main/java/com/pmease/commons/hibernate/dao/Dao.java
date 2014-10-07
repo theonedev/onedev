@@ -94,5 +94,7 @@ public interface Dao {
 	 */
 	<T extends AbstractEntity> int count(EntityCriteria<T> detachedCriteria);
 
+	void afterCommit(Runnable runnable);
+	
 	Session getSession();
 }

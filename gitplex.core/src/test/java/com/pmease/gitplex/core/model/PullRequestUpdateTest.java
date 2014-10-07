@@ -9,6 +9,8 @@ import org.mockito.Mockito;
 import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
+import com.pmease.commons.loader.AppLoader;
+import com.pmease.gitplex.core.manager.StorageManager;
 
 public class PullRequestUpdateTest extends AbstractGitTest {
 
@@ -25,6 +27,31 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         
         repository = Mockito.mock(Repository.class);
         Mockito.when(repository.git()).thenReturn(bareGit);
+        
+		Mockito.when(AppLoader.getInstance(StorageManager.class)).thenReturn(new StorageManager() {
+			
+			@Override
+			public File getRepoDir(Repository repository) {
+				return null;
+			}
+			
+			@Override
+			public File getCacheDir(PullRequestUpdate update) {
+				File cacheDir = new File(tempDir, "updates/" + update.getId());
+				cacheDir.mkdirs();
+				return cacheDir;
+			}
+			
+			@Override
+			public File getCacheDir(PullRequest request) {
+				return null;
+			}
+			
+			@Override
+			public File getCacheDir(Repository repository) {
+				return null;
+			}
+		});
     }
     
     @Test

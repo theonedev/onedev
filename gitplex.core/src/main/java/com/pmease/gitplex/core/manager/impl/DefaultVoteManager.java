@@ -11,6 +11,8 @@ import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListeners;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.VoteManager;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -29,10 +31,14 @@ public class DefaultVoteManager implements VoteManager {
 	
 	private final PullRequestManager pullRequestManager;
 	
+	private final PullRequestListeners pullRequestListeners;
+	
 	@Inject
-	public DefaultVoteManager(Dao dao, PullRequestManager pullRequestManager) {
+	public DefaultVoteManager(Dao dao, PullRequestManager pullRequestManager, 
+			PullRequestListeners pullRequestListeners) {
 		this.dao = dao;
 		this.pullRequestManager = pullRequestManager;
+		this.pullRequestListeners = pullRequestListeners;
 	}
 
 	@Sessional
@@ -75,6 +81,24 @@ public class DefaultVoteManager implements VoteManager {
 		}
 
 		pullRequestManager.onGateKeeperUpdate(request);
+		
+		final Long requestId = request.getId();
+		
+		dao.afterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				pullRequestListeners.call(requestId, new PullRequestListeners.Callback() {
+
+					@Override
+					protected void call(PullRequestListener listener, PullRequest request) {
+						listener.onVoted(request);
+					}
+					
+				});
+			}
+			
+		});
 	}
 
 }

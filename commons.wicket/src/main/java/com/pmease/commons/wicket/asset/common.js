@@ -739,6 +739,17 @@ pmease.commons = {
 			}
 		}
 	},	
+	
+	websocket: {
+		setupRenderCallback: function() {
+			Wicket.Event.subscribe("/websocket/message", function(jqEvent, message) {
+				var json = JSON.parse(message);
+				if (json.type == "RenderCallback")
+					Wicket.WebSocket.send(message);
+			});
+		}
+	},
+	
 };
 
 $(function() {
@@ -747,4 +758,5 @@ $(function() {
 	pmease.commons.form.setupDirtyCheck();
 	pmease.commons.focus.setupAutoFocus();
 	pmease.commons.scroll.setupScrollStop();
+	pmease.commons.websocket.setupRenderCallback();
 });

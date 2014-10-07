@@ -12,15 +12,12 @@ import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBA
 import java.io.File;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
@@ -35,6 +32,8 @@ import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListeners;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
@@ -64,22 +63,22 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	
 	private final StorageManager storageManager;
 	
-	private final ExecutorService executorService;
-	
 	private final UnitOfWork unitOfWork;
 	
-	private final Map<Long, Future<Void>> integrationFutures = new ConcurrentHashMap<>();
+	private final PullRequestListeners pullRequestListeners;
+	
+	private final Set<Long> calculatingRequestIds = new ConcurrentHashSet<>();
 	
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager, 
-			BranchManager branchManager, StorageManager storageManager, 
-			ExecutorService executorService, UnitOfWork unitOfWork) {
+			BranchManager branchManager, StorageManager storageManager,  
+			UnitOfWork unitOfWork, PullRequestListeners pullRequestListeners) {
 		this.dao = dao;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.branchManager = branchManager;
 		this.storageManager = storageManager;
-		this.executorService = executorService;
 		this.unitOfWork = unitOfWork;
+		this.pullRequestListeners = pullRequestListeners;
 	}
 
 	@Sessional
@@ -134,6 +133,24 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		dao.persist(request);
 		
 		deleteRefsUponClose(request);
+		
+		final Long requestId = request.getId();
+
+		dao.afterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				pullRequestListeners.call(requestId, new PullRequestListeners.Callback() {
+					
+					@Override
+					protected void call(PullRequestListener listener, PullRequest request) {
+						listener.onDiscarded(request);
+					}
+					
+				});
+			}
+			
+		});
 	}
 	
 	@Transactional
@@ -177,15 +194,6 @@ public class DefaultPullRequestManager implements PullRequestManager {
 				request.getSource().setHeadCommitHash(integrated);
 				request.getSource().setUpdater(user);
 				branchManager.save(request.getSource());
-
-				PullRequestUpdate update = new PullRequestUpdate();
-				update.setRequest(request);
-				update.setDate(new Date());
-				update.setUser(user);
-				update.setHeadCommitHash(integrated);
-				request.getUpdates().add(update);
-
-				pullRequestUpdateManager.save(update);
 			} else {
 				throw new RuntimeException(String.format(
 						"Unable to target branch '%s' due to lock failure.", request.getTarget()));
@@ -220,6 +228,24 @@ public class DefaultPullRequestManager implements PullRequestManager {
 			dao.persist(request);
 
 			deleteRefsUponClose(request);
+			
+			final Long requestId = request.getId();
+			
+			dao.afterCommit(new Runnable() {
+
+				@Override
+				public void run() {
+					pullRequestListeners.call(requestId, new PullRequestListeners.Callback() {
+						
+						@Override
+						protected void call(PullRequestListener listener, PullRequest request) {
+							listener.onIntegrated(request);
+						}
+						
+					});
+				}
+				
+			});
 		} else {
 			throw new RuntimeException(String.format(
 					"Unable to target branch '%s' due to lock failure.", request.getTarget()));
@@ -237,7 +263,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 
 	@Transactional
 	@Override
-	public void send(PullRequest request) {
+	public void open(PullRequest request) {
 		dao.persist(request);
 
 		FileUtils.cleanDir(storageManager.getCacheDir(request));
@@ -248,6 +274,24 @@ public class DefaultPullRequestManager implements PullRequestManager {
 			update.setDate(new Date(System.currentTimeMillis() + 1000));
 			pullRequestUpdateManager.save(update);
 		}
+		
+		final Long requestId = request.getId();
+		
+		dao.afterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				pullRequestListeners.call(requestId, new PullRequestListeners.Callback() {
+					
+					@Override
+					protected void call(PullRequestListener listener, PullRequest request) {
+						listener.onOpened(request);
+					}
+					
+				});
+			}
+			
+		});
 	}
 
 	@Override
@@ -289,6 +333,24 @@ public class DefaultPullRequestManager implements PullRequestManager {
 			request.setUpdateDate(new Date());
 			
 			dao.persist(request);
+			
+			final Long requestId = request.getId();
+			
+			dao.afterCommit(new Runnable() {
+
+				@Override
+				public void run() {
+					pullRequestListeners.call(requestId, new PullRequestListeners.Callback() {
+						
+						@Override
+						protected void call(PullRequestListener listener, PullRequest request) {
+							listener.onIntegrated(request);
+						}
+						
+					});
+				}
+				
+			});
 		} 
 	}
 
@@ -303,6 +365,24 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		
 		request.getUpdates().add(update);
 		pullRequestUpdateManager.save(update);
+		
+		final Long requestId = request.getId();
+		
+		dao.afterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				pullRequestListeners.call(requestId, new PullRequestListeners.Callback() {
+					
+					@Override
+					protected void call(PullRequestListener listener, PullRequest request) {
+						listener.onUpdated(request);
+					}
+					
+				});
+			}
+			
+		});
 	}
 
 	@Transactional
@@ -323,12 +403,11 @@ public class DefaultPullRequestManager implements PullRequestManager {
 			return preview;
 		} else {
 			final Long requestId = request.getId();
-			if (!integrationFutures.containsKey(requestId)) {
-				integrationFutures.put(request.getId(), executorService.submit(new Callable<Void>() {
+			if (!calculatingRequestIds.contains(requestId)) {
+				unitOfWork.asyncCall(new Runnable() {
 
 					@Override
-					public Void call() throws Exception {
-						unitOfWork.begin();
+					public void run() {
 						try {
 							PullRequest request = dao.load(PullRequest.class, requestId);
 							String requestHead = request.getLatestUpdate().getHeadCommitHash();
@@ -392,16 +471,24 @@ public class DefaultPullRequestManager implements PullRequestManager {
 							dao.persist(request);
 							
 							onGateKeeperUpdate(request);
+							
+							pullRequestListeners.call(requestId, new PullRequestListeners.Callback() {
+								
+								@Override
+								protected void call(PullRequestListener listener, PullRequest request) {
+									listener.onIntegrationPreviewCalculated(request);
+								}
+								
+							});
 						} catch (Exception e) {
 							logger.error("Error previewing integration of pull request #" + requestId, e);
 						} finally {
-							integrationFutures.remove(requestId);
-							unitOfWork.end();
+							calculatingRequestIds.remove(requestId);
 						}
-						return null;
 					}
 					
-				}));
+				});
+				calculatingRequestIds.add(requestId);
 			}
 			return null;
 		}

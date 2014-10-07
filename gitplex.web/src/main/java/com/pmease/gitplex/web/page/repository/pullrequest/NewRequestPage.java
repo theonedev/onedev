@@ -43,7 +43,6 @@ import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Branch;
-import com.pmease.gitplex.core.model.OldCommitComment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.CloseStatus;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
@@ -56,10 +55,9 @@ import com.pmease.gitplex.web.component.commit.CommitsTablePanel;
 import com.pmease.gitplex.web.component.diff.CompareResultPanel;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
-import com.pmease.gitplex.web.page.repository.code.commit.diff.CommitCommentsAware;
 
 @SuppressWarnings("serial")
-public class NewRequestPage extends RepositoryPage implements CommitCommentsAware {
+public class NewRequestPage extends RepositoryPage {
 
 	private AffinalBranchSingleChoice targetChoice, sourceChoice;
 	
@@ -73,7 +71,7 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 		params.set("target", target.getId());
 		return params;
 	}
-	
+
 	public NewRequestPage(PageParameters params) {
 		super(params);
 		
@@ -393,7 +391,7 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 					
 					pullRequest.setAutoIntegrate(false);
 					
-					GitPlex.getInstance(PullRequestManager.class).send(pullRequest);
+					GitPlex.getInstance(PullRequestManager.class).open(pullRequest);
 					
 					setResponsePage(RequestActivitiesPage.class, RequestActivitiesPage.paramsOf(pullRequest));
 				}
@@ -460,18 +458,4 @@ public class NewRequestPage extends RepositoryPage implements CommitCommentsAwar
 		super.onDetach();
 	}
 
-	@Override
-	public List<OldCommitComment> getCommitComments() {
-		return new ArrayList<>();
-	}
-
-	@Override
-	public boolean isShowInlineComments() {
-		return false;
-	}
-
-	@Override
-	public boolean canAddComments() {
-		return false;
-	}
 }

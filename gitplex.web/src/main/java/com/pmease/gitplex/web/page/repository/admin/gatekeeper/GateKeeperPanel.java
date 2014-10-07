@@ -15,6 +15,7 @@ import org.apache.wicket.model.Model;
 
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.util.ReflectionUtils;
+import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.modal.ModalPanel;
 import com.pmease.commons.wicket.editable.BeanContext;
@@ -93,7 +94,7 @@ public abstract class GateKeeperPanel extends Panel {
 				onDelete(target);
 			}
 			
-		});
+		}.add(new ConfirmBehavior("Do you really want to delete this gate keeper?")));
 		
 		container.add(new AjaxLink<Void>("enable") {
 
@@ -107,9 +108,9 @@ public abstract class GateKeeperPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				if (gateKeeper.isEnabled()) {
-					tag.append("class", "fa-check-checked", " ");
+					tag.append("class", "fa-checkbox-checked", " ");
 				} else {
-					tag.append("class", "fa-check-empty", " ");
+					tag.append("class", "fa-checkbox-unchecked", " ");
 				}
 			}
 			

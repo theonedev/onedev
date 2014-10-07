@@ -4,6 +4,9 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
+
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -116,6 +119,23 @@ public class DefaultDao implements Dao, Serializable {
 	@Override
 	public <T extends AbstractEntity> List<T> allOf(Class<T> entityClass) {
 		return query(EntityCriteria.of(entityClass), 0, 0);
+	}
+
+	@Override
+	public void afterCommit(final Runnable runnable) {
+		getSession().getTransaction().registerSynchronization(new Synchronization() {
+			
+			@Override
+			public void beforeCompletion() {
+			}
+			
+			@Override
+			public void afterCompletion(int status) {
+				if (status == Status.STATUS_COMMITTED) {
+					runnable.run();
+				}
+			}
+		});
 	}	
 
 }

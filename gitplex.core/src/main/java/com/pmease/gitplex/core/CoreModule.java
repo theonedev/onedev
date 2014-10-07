@@ -16,9 +16,12 @@ import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.loader.ImplementationProvider;
 import com.pmease.commons.util.ClassUtils;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListeners;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.impl.DefaultStorageManager;
 import com.pmease.gitplex.core.model.ModelLocator;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.setting.SpecifiedGit;
 import com.pmease.gitplex.core.setting.SystemGit;
 import com.pmease.gitplex.core.validation.RepositoryNameReservation;
@@ -69,6 +72,36 @@ public class CoreModule extends AbstractPluginModule {
 				return Sets.newHashSet();
 			}
 		});
+		
+		contribute(PullRequestListener.class, new PullRequestListener() {
+
+			@Override
+			public void onOpened(PullRequest request) {
+			}
+
+			@Override
+			public void onUpdated(PullRequest request) {
+			}
+
+			@Override
+			public void onVoted(PullRequest request) {
+			}
+
+			@Override
+			public void onIntegrated(PullRequest request) {
+			}
+
+			@Override
+			public void onDiscarded(PullRequest request) {
+			}
+
+			@Override
+			public void onIntegrationPreviewCalculated(PullRequest request) {
+			}
+			
+		});
+		
+		bind(PullRequestListeners.class);
 		
 		contribute(ServletConfigurator.class, CoreServletConfigurator.class);
 		

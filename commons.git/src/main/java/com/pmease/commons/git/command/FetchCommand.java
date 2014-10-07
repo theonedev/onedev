@@ -52,12 +52,14 @@ public class FetchCommand extends GitCommand<Void> {
 
 			@Override
 			public void consume(String line) {
-				if (line.startsWith("From ") || line.startsWith(" * branch"))
+				if (line.startsWith("From ") 
+						|| line.startsWith(" * branch") 
+						|| line.startsWith(" * [new ref]") 
+						|| line.contains("..") && line.contains("->")) {
 					logger.info(line);
-				else if (line.startsWith(" * [new ref]"))
-					logger.info(line);
-				else
+				} else {
 					logger.error(line);
+				}
 			}
 			
 		}).checkReturnCode();

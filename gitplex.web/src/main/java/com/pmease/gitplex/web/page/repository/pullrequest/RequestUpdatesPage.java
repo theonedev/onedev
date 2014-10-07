@@ -50,7 +50,11 @@ public class RequestUpdatesPage extends RequestDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ListView<PullRequestUpdate>("requestUpdates", new LoadableDetachableModel<List<PullRequestUpdate>>() {
+		WebMarkupContainer updatesContainer = new WebMarkupContainer("requestUpdatesContainer");
+		updatesContainer.add(new PullRequestChangeBehavior(getPullRequest().getId()));
+		add(updatesContainer);
+		
+		updatesContainer.add(new ListView<PullRequestUpdate>("updates", new LoadableDetachableModel<List<PullRequestUpdate>>() {
 
 			@Override
 			public List<PullRequestUpdate> load() {

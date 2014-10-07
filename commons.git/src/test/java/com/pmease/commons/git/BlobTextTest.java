@@ -3,12 +3,20 @@ package com.pmease.commons.git;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import org.junit.Test;
+import java.util.HashSet;
 
-public class GitTextTest {
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import com.pmease.commons.git.extensionpoint.TextConverterProvider;
+import com.pmease.commons.loader.AppLoader;
+
+public class BlobTextTest extends AbstractGitTest {
 
 	@Test
 	public void test() {
+		Mockito.when(AppLoader.getExtensions(TextConverterProvider.class)).thenReturn(new HashSet<TextConverterProvider>());
+		
 		BlobText result = BlobText.from(" hello \tworld \t \r".getBytes());
 		assertNotNull(result);
 		assertEquals(" hello \tworld \t ", result.ignoreEOL().getLines().get(0));

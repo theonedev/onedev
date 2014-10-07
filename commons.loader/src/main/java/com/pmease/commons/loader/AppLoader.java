@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 import javassist.ClassClassPath;
 import javassist.ClassPool;
@@ -83,6 +84,9 @@ public class AppLoader implements Lifecycle {
 
 	@Override
 	public void stop() {
+		logger.info("Shutting down executor...");
+		injector.getInstance(ExecutorService.class).shutdown();
+		
 		logger.info("Stopping plugin manager...");
 		injector.getInstance(PluginManager.class).stop();
 	}

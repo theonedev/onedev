@@ -6,9 +6,10 @@ import org.apache.wicket.protocol.http.WicketFilter;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.pmease.commons.wicket.websocket.WebSocketFilter;
 
 @Singleton
-public class DefaultWicketFilter extends WicketFilter {
+public class DefaultWicketFilter extends WebSocketFilter {
 
 	private final AbstractWicketConfig wicketConfig;
 	

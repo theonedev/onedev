@@ -24,22 +24,23 @@ public class ProductConfigurator implements ServerConfigurator {
 	public void configure(Server server) {
 		if (serverConfig.getHttpPort() != 0) {
 			ServerConnector connector = new ServerConnector(server);
-			connector.addConnectionFactory(new HttpConnectionFactory());
 			connector.setPort(serverConfig.getHttpPort());
+			connector.addConnectionFactory(new HttpConnectionFactory());
 			server.addConnector(connector);
 		}
 
 		SslConfig sslConfig = serverConfig.getSslConfig();
 		if (sslConfig != null) {
-			ServerConnector sslConnector = new ServerConnector(server);
-			sslConnector.setPort(sslConfig.getPort());
+			ServerConnector connector = new ServerConnector(server);
+			connector.setPort(sslConfig.getPort());
 			
 			SslConnectionFactory sslConnectionFactory = new SslConnectionFactory();
 			sslConnectionFactory.getSslContextFactory().setKeyStorePath(sslConfig.getKeystorePath());
 			sslConnectionFactory.getSslContextFactory().setKeyStorePassword(sslConfig.getKeystorePassword());
 			sslConnectionFactory.getSslContextFactory().setKeyManagerPassword(sslConfig.getKeystoreKeyPassword());
+			connector.addConnectionFactory(sslConnectionFactory);
 			
-			server.addConnector(sslConnector);
+			server.addConnector(connector);
 		}
 	}
 

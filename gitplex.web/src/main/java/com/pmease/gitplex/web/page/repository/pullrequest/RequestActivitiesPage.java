@@ -1,5 +1,10 @@
 package com.pmease.gitplex.web.page.repository.pullrequest;
 
+import static com.pmease.gitplex.core.model.PullRequestOperation.APPROVE;
+import static com.pmease.gitplex.core.model.PullRequestOperation.DISAPPROVE;
+import static com.pmease.gitplex.core.model.PullRequestOperation.DISCARD;
+import static com.pmease.gitplex.core.model.PullRequestOperation.INTEGRATE;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -18,6 +23,7 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
@@ -26,7 +32,6 @@ import com.pmease.commons.wicket.component.markdown.MarkdownInput;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.PullRequest;
-import static com.pmease.gitplex.core.model.PullRequestOperation.*;
 import com.pmease.gitplex.core.model.PullRequestAudit;
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
@@ -54,14 +59,14 @@ public class RequestActivitiesPage extends RequestDetailPage {
 		super(params);
 	}
 	
-	private Component newActivityItem(final String id, final PullRequestActivity activity) {
+	private Component newActivityRow(final String id, PullRequestActivity activity) {
 		final CommentPullRequest commentActivity;
 		if (activity instanceof CommentPullRequest)
 			commentActivity = (CommentPullRequest) activity;
 		else
 			commentActivity = null;
 		
-		final WebMarkupContainer row = new WebMarkupContainer(id) {
+		final WebMarkupContainer row = new WebMarkupContainer(id, Model.of(activity)) {
 
 			@Override
 			public void onEvent(IEvent<?> event) {
@@ -74,7 +79,7 @@ public class RequestActivitiesPage extends RequestDetailPage {
 				} else if (event.getPayload() instanceof CommentCollapsing) {
 					Preconditions.checkNotNull(commentActivity);
 					commentActivity.setCollapsed(true);
-					Component row = newActivityItem(id, commentActivity);
+					Component row = newActivityRow(id, commentActivity);
 					replaceWith(row);
 					((CommentCollapsing) event.getPayload()).getTarget().add(row);
 				}
@@ -99,6 +104,7 @@ public class RequestActivitiesPage extends RequestDetailPage {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
+					PullRequestActivity activity = (PullRequestActivity) row.getDefaultModelObject();
 					row.replace(activity.render("activity"));
 					commentActivity.setCollapsed(false);
 					target.add(row);
@@ -127,6 +133,7 @@ public class RequestActivitiesPage extends RequestDetailPage {
 			@Override
 			protected String load() {
 				String cssClasses = "";
+				PullRequestActivity activity = (PullRequestActivity) row.getDefaultModelObject();
 				if (activity instanceof CommentPullRequest) {
 					CommentPullRequest commentActivity = (CommentPullRequest) activity;
 					if (commentActivity.isCollapsed())
@@ -142,10 +149,7 @@ public class RequestActivitiesPage extends RequestDetailPage {
 		return row;
 	}
 	
-	private Component newActivitiesView() {
-		activitiesView = new RepeatingView("requestActivities");
-		activitiesView.setOutputMarkupId(true);
-		
+	private List<PullRequestActivity> getActivities() {
 		PullRequest request = getPullRequest();
 		List<PullRequestActivity> activities = new ArrayList<>();
 
@@ -187,12 +191,21 @@ public class RequestActivitiesPage extends RequestDetailPage {
 			
 		});
 		
+		return activities;
+	}
+	
+	private Component newActivitiesView() {
+		activitiesView = new RepeatingView("requestActivities");
+		activitiesView.setOutputMarkupId(true);
+		
+		List<PullRequestActivity> activities = getActivities();
+		
 		int index = 0;
 		for (PullRequestActivity activity: activities) { 
-			Component activityItem = newActivityItem(activitiesView.newChildId(), activity);
+			Component activityRow = newActivityRow(activitiesView.newChildId(), activity);
 			if (index == activities.size()-1 || activities.get(index+1) instanceof CommentPullRequest)
-				activityItem.add(AttributeAppender.append("class", " pre-discussion"));
-			activitiesView.add(activityItem);
+				activityRow.add(AttributeAppender.append("class", " pre-discussion"));
+			activitiesView.add(activityRow);
 			index++;
 		}
 		
@@ -246,14 +259,14 @@ public class RequestActivitiesPage extends RequestDetailPage {
 				
 				target.add(addComment);
 				
-				Component lastActivityItem = activitiesView.get(activitiesView.size()-1);
-				Component newActivityItem = newActivityItem(activitiesView.newChildId(), new CommentPullRequest(comment)); 
-				activitiesView.add(newActivityItem);
+				Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
+				Component newActivityRow = newActivityRow(activitiesView.newChildId(), new CommentPullRequest(comment)); 
+				activitiesView.add(newActivityRow);
 				
-				String script = String.format("$(\"<li id='%s' class='activity discussion'></li>\").insertAfter('#%s');", 
-						newActivityItem.getMarkupId(), lastActivityItem.getMarkupId());
+				String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
+						newActivityRow.getMarkupId(), lastActivityRow.getMarkupId());
 				target.prependJavaScript(script);
-				target.add(newActivityItem);
+				target.add(newActivityRow);
 			}
 
 			@Override
@@ -262,6 +275,34 @@ public class RequestActivitiesPage extends RequestDetailPage {
 				target.add(form);
 			}
 
+		});
+		
+		add(new PullRequestChangeBehavior(getPullRequest().getId()) {
+
+			@Override
+			protected void onRender(WebSocketRequestHandler handler) {
+				List<PullRequestActivity> activities = getActivities();
+				Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
+				PullRequestActivity lastAcvitity = (PullRequestActivity) lastActivityRow.getDefaultModelObject();
+				int index = 0;
+				for (PullRequestActivity activity: activities) {
+					if (activity.getDate().after(lastAcvitity.getDate())) {
+						Component newActivityRow = newActivityRow(activitiesView.newChildId(), activity); 
+						if (index == activities.size()-1 || activities.get(index+1) instanceof CommentPullRequest)
+							newActivityRow.add(AttributeAppender.append("class", " pre-discussion"));
+						
+						activitiesView.add(newActivityRow);
+						
+						String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
+								newActivityRow.getMarkupId(), lastActivityRow.getMarkupId());
+						handler.prependJavaScript(script);
+						handler.add(newActivityRow);
+						lastActivityRow = newActivityRow;
+					}
+					index++;
+				}
+			}
+			
 		});
 	}
 

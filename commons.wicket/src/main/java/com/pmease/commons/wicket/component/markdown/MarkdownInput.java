@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
+import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.IModel;
@@ -72,11 +72,10 @@ public class MarkdownInput extends FormComponentPanel<String> {
 		
 		add(input = new TextArea<String>("input", getModel()));
 		input.setOutputMarkupId(true);
-		input.add(new AjaxFormComponentUpdatingBehavior("blur") {
-			
+		input.add(new OnChangeAjaxBehavior() {
+
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				
 			}
 			
 		});
