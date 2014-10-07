@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.http.HttpFields;
-import org.eclipse.jetty.http.HttpHeaders;
+import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletMapping;
@@ -77,13 +77,9 @@ public abstract class AssetServlet extends DefaultServlet {
 					}
 					if (relativePath != null) {
 						relativePath = StringUtils.stripStart(relativePath, "/");
-						try {
-							Resource resource = Resource.newResource(loadResource(relativePath));
-							if (resource != null && resource.exists())
-								return resource;
-						} catch (IOException e) {
-							throw new RuntimeException(e);
-						}
+						Resource resource = Resource.newResource(loadResource(relativePath));
+						if (resource != null && resource.exists())
+							return resource;
 					}
 				}
 			}
@@ -106,7 +102,7 @@ public abstract class AssetServlet extends DefaultServlet {
 	protected abstract URL loadResource(String relativePath);
 	
 	@Override
-	protected void writeOptionHeaders(HttpFields fields) throws IOException {
+	protected void writeOptionHeaders(HttpFields fields) {
 		super.writeOptionHeaders(fields);
 		
 		if (requestHolder.get().getDispatcherType() == DispatcherType.ERROR) {
@@ -114,13 +110,13 @@ public abstract class AssetServlet extends DefaultServlet {
 			 * Do not cache error page and also makes sure that error page is not eligible for 
 			 * modification check. That is, error page will be always retrieved.
 			 */
-            fields.put(HttpHeaders.CACHE_CONTROL_BUFFER, "must-revalidate,no-cache,no-store");
+            fields.put(HttpHeader.CACHE_CONTROL, "must-revalidate,no-cache,no-store");
 		} else if (requestHolder.get().getRequestURI().equals("/favicon.ico")) {
 			/*
 			 * Make sure favicon request is cached. Otherwise, it will be requested for every 
 			 * page request.
 			 */
-			fields.put(HttpHeaders.CACHE_CONTROL_BUFFER, "max-age=86400,public");
+			fields.put(HttpHeader.CACHE_CONTROL, "max-age=86400,public");
 		}
 	}
 

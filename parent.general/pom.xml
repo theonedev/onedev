@@ -384,6 +384,11 @@
 				<version>${jettyVersion}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.eclipse.jetty.websocket</groupId>
+				<artifactId>websocket-server</artifactId>
+				<version>${jettyVersion}</version>
+			</dependency>
+			<dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>javax.servlet-api</artifactId>
 				<version>${servletVersion}</version>
@@ -519,7 +524,7 @@
 		<slf4jVersion>1.7.5</slf4jVersion>
 		<logbackVersion>1.0.11</logbackVersion>
 		<jerseyVersion>2.9</jerseyVersion>
-		<jettyVersion>8.1.10.v20130312</jettyVersion>
+		<jettyVersion>9.2.3.v20140905</jettyVersion>
 		<jacksonVersion>2.3.3</jacksonVersion>
 		<powermockVersion>1.5.1</powermockVersion>
 		<servletVersion>3.1-b09</servletVersion>

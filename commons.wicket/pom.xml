@@ -50,6 +50,11 @@
 			<version>${wicketVersion}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.wicket</groupId>
+			<artifactId>wicket-native-websocket-jetty9</artifactId>
+			<version>${wicketVersion}</version>
+		</dependency>
+		<dependency>
 			<groupId>com.vaynberg.wicket.select2</groupId>
 			<artifactId>wicket-select2</artifactId>
 			<version>2.2.3</version>
@@ -103,7 +108,7 @@
 	</dependencies>
 	<properties>
 		<moduleClass>com.pmease.commons.wicket.WicketModule</moduleClass>
-		<wicketVersion>6.16.0</wicketVersion>
+		<wicketVersion>6.17.0</wicketVersion>
 		<wicketBootstrapVersion>0.9.3</wicketBootstrapVersion>
 	</properties>
 	<repositories>

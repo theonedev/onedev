@@ -41,8 +41,8 @@
             <artifactId>jetty-servlet</artifactId>  
         </dependency>  
         <dependency> 
-            <groupId>org.eclipse.jetty</groupId>  
-            <artifactId>jetty-websocket</artifactId>  
+            <groupId>org.eclipse.jetty.websocket</groupId>  
+            <artifactId>websocket-server</artifactId>  
         </dependency> 
     </dependencies>  
     <repositories> 
