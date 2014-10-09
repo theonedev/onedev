@@ -1,6 +1,5 @@
 package com.pmease.commons.jetty;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -9,14 +8,6 @@ import java.util.Set;
 
 import javax.inject.Provider;
 import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
@@ -80,11 +71,10 @@ public class JettyPlugin extends AbstractPlugin {
 		server = new Server();
 
         contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        
+
         contextHandler.setClassLoader(JettyPlugin.class.getClassLoader());
         
         contextHandler.setErrorHandler(new ErrorPageErrorHandler());
-        
         contextHandler.addFilter(DisableTraceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
         
         /*
@@ -110,30 +100,6 @@ public class JettyPlugin extends AbstractPlugin {
         	configurator.configure(server);
 		
         return server;
-	}
-
-	public static class DisableTraceFilter implements Filter {
-
-		@Override
-		public void init(FilterConfig filterConfig) throws ServletException {
-		}
-
-		@Override
-		public void doFilter(ServletRequest request, ServletResponse response,
-				FilterChain chain) throws IOException, ServletException {
-			HttpServletRequest httpRequest = (HttpServletRequest) request;
-			if (httpRequest.getMethod().equals("TRACE")) {
-				HttpServletResponse httpResponse = (HttpServletResponse) response;
-				httpResponse.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-			} else {
-				chain.doFilter(request, response);
-			}
-		}
-
-		@Override
-		public void destroy() {
-		}
-		
 	}
 
 }

@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -74,7 +74,7 @@ public class AffinalBranchMultiChoice extends FormComponentPanel<Collection<Bran
 		
 		setOutputMarkupId(true);
 		
-		add(new ComparableRepositoryChoice("repositoryChoice", currentRepositoryModel, selectedRepositoryModel).add(new OnChangeAjaxBehavior() {
+		add(new ComparableRepositoryChoice("repositoryChoice", currentRepositoryModel, selectedRepositoryModel).add(new AjaxFormComponentUpdatingBehavior("change") {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
@@ -96,7 +96,7 @@ public class AffinalBranchMultiChoice extends FormComponentPanel<Collection<Bran
 		});
 		
 		add(branchChoicer = new BranchMultiChoice("branchChoice", getModel(), choiceProvider));
-		branchChoicer.add(new OnChangeAjaxBehavior() {
+		branchChoicer.add(new AjaxFormComponentUpdatingBehavior("change") {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {

@@ -1,12 +1,18 @@
 package com.pmease.commons.wicket;
 
+import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.PriorityHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.util.time.Duration;
+import org.eclipse.jetty.server.SessionManager;
+
+import com.pmease.commons.loader.AppLoader;
 
 @SuppressWarnings("serial")
 public abstract class CommonPage extends WebPage {
@@ -31,6 +37,10 @@ public abstract class CommonPage extends WebPage {
 		sessionFeedback = new SessionFeedbackPanel("sessionFeedback");
 		add(sessionFeedback);			
 		sessionFeedback.setOutputMarkupId(true);
+		
+		int sessionTimeout = AppLoader.getInstance(SessionManager.class).getMaxInactiveInterval();
+		add(new WebMarkupContainer("keepSessionAlive").add(
+				new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(sessionTimeout*500L))));
 	}
 	
 	public FeedbackPanel getSessionFeedback() {

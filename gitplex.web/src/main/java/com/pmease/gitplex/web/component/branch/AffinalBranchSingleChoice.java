@@ -1,14 +1,14 @@
 package com.pmease.gitplex.web.component.branch;
 
-import com.pmease.gitplex.core.GitPlex;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.Repository;
@@ -72,7 +72,7 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<Branch> {
 		
 		setOutputMarkupId(true);
 		
-		add(new ComparableRepositoryChoice("repositoryChoice", currentRepositoryModel, selectedRepositoryModel).add(new OnChangeAjaxBehavior() {
+		add(new ComparableRepositoryChoice("repositoryChoice", currentRepositoryModel, selectedRepositoryModel).add(new AjaxFormComponentUpdatingBehavior("change") {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
@@ -93,7 +93,7 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<Branch> {
 			
 		});
 		add(branchChoicer = new BranchSingleChoice("branchChoice", getModel(), choiceProvider));
-		branchChoicer.add(new OnChangeAjaxBehavior() {
+		branchChoicer.add(new AjaxFormComponentUpdatingBehavior("change") {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {

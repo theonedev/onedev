@@ -29,7 +29,7 @@ public class ProductModule extends AbstractPluginModule {
 		bind(Properties.class).annotatedWith(Names.named("server")).toInstance(serverProps);
 		
 		bind(ServerConfig.class).to(DefaultServerConfig.class);
-		
+
 		contribute(ServerConfigurator.class, ProductConfigurator.class);
 		contribute(ServletConfigurator.class, ProductServletConfigurator.class);
 		

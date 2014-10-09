@@ -2,6 +2,7 @@ package com.pmease.commons.wicket;
 
 import org.apache.wicket.protocol.http.WicketFilter;
 import org.apache.wicket.protocol.http.WicketServlet;
+import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
@@ -16,6 +17,7 @@ public class WicketModule extends AbstractPluginModule {
 		
 		bind(WicketServlet.class).to(DefaultWicketServlet.class);
 		bind(WicketFilter.class).to(DefaultWicketFilter.class);
+		bind(WebSocketPolicy.class).toInstance(WebSocketPolicy.newServerPolicy());
 
 		contribute(ServletConfigurator.class, WicketServletConfigurator.class);
 		

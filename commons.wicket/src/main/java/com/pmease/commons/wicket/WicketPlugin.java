@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import org.apache.wicket.Application;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.apache.wicket.protocol.ws.api.registry.SimpleWebSocketConnectionRegistry;
+import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,10 +25,13 @@ public class WicketPlugin extends AbstractPlugin {
 	
 	private final ObjectMapper objectMapper;
 	
+	private final WebSocketPolicy webSocketPolicy;
+	
 	@Inject
-	public WicketPlugin(Application application, ObjectMapper objectMapper) {
+	public WicketPlugin(Application application, ObjectMapper objectMapper, WebSocketPolicy webSocketPolicy) {
 		this.application = application;
 		this.objectMapper = objectMapper;
+		this.webSocketPolicy = webSocketPolicy;
 	}
 	
 	@Override
@@ -55,7 +59,7 @@ public class WicketPlugin extends AbstractPlugin {
 				}
 			}
 			
-		}, 0, 1, TimeUnit.MINUTES);
+		}, 0, webSocketPolicy.getIdleTimeout()/2, TimeUnit.MILLISECONDS);
 	}
 
 	@Override

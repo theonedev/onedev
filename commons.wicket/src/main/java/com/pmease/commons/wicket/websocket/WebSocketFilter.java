@@ -41,6 +41,12 @@ public class WebSocketFilter extends AbstractUpgradeFilter
 
 	private WebSocketServerFactory _webSocketFactory;
 
+	private final WebSocketPolicy webSocketPolicy;
+	
+	public WebSocketFilter(WebSocketPolicy webSocketPolicy) {
+		this.webSocketPolicy = webSocketPolicy;
+	}
+	
 	@Override
 	public void init(final boolean isServlet, final FilterConfig filterConfig)
 		throws ServletException
@@ -49,21 +55,7 @@ public class WebSocketFilter extends AbstractUpgradeFilter
 
 		try
 		{
-			WebSocketPolicy serverPolicy = WebSocketPolicy.newServerPolicy();
-			String bs = filterConfig.getInitParameter("inputBufferSize");
-			if (bs != null)
-				serverPolicy.setInputBufferSize(Integer.parseInt(bs));
-			String max = filterConfig.getInitParameter("maxIdleTime");
-			if (max != null)
-				serverPolicy.setIdleTimeout(Integer.parseInt(max));
-
-			max = filterConfig.getInitParameter("maxMessageSize");
-			if (max != null) {
-				serverPolicy.setMaxTextMessageSize(Integer.parseInt(max));
-				serverPolicy.setMaxBinaryMessageSize(Integer.parseInt(max));
-			}
-
-			_webSocketFactory = new WebSocketServerFactory(serverPolicy);
+			_webSocketFactory = new WebSocketServerFactory(webSocketPolicy);
 
 			_webSocketFactory.setCreator(new WebSocketCreator()
 			{

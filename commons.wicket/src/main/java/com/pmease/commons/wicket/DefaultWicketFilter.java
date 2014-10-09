@@ -3,6 +3,7 @@ package com.pmease.commons.wicket;
 import org.apache.wicket.protocol.http.IWebApplicationFactory;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.protocol.http.WicketFilter;
+import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -14,7 +15,9 @@ public class DefaultWicketFilter extends WebSocketFilter {
 	private final AbstractWicketConfig wicketConfig;
 	
 	@Inject
-	public DefaultWicketFilter(AbstractWicketConfig wicketConfig) {
+	public DefaultWicketFilter(AbstractWicketConfig wicketConfig, WebSocketPolicy webSocketPolicy) {
+		super(webSocketPolicy);
+		
 		this.wicketConfig = wicketConfig;
 		setFilterPath("");
 	}

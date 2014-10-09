@@ -108,8 +108,8 @@
 	</dependencies>
 	<properties>
 		<moduleClass>com.pmease.commons.wicket.WicketModule</moduleClass>
-		<wicketVersion>6.15.0</wicketVersion>
-		<wicketBootstrapVersion>0.9.3</wicketBootstrapVersion>
+		<wicketVersion>6.17.0</wicketVersion>
+		<wicketBootstrapVersion>0.9.6</wicketBootstrapVersion>
 	</properties>
 	<repositories>
 		<repository>
