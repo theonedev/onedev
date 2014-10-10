@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
+import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -20,15 +20,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
-import org.apache.commons.lang3.SerializationUtils;
-
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.commons.util.LockUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.StorageManager;
 
@@ -52,13 +48,9 @@ public class PullRequestUpdate extends AbstractEntity {
 	@OneToMany(mappedBy="update", cascade=CascadeType.REMOVE)
 	private Collection<Vote> votes = new ArrayList<Vote>();
 	
-	private transient String referentialCommitHash;
-
-	private transient List<Commit> logCommits;
-	
 	private transient List<Commit> commits;
-	
-	private transient Collection<String> changedFiles;
+
+	private transient CachedInfo cachedInfo;
 	
 	public PullRequest getRequest() {
 		return request;
@@ -101,84 +93,11 @@ public class PullRequestUpdate extends AbstractEntity {
 		this.votes = votes;
 	}
 	
-	public String getReferentialRef() {
-		Preconditions.checkNotNull(getId());
-		return Repository.REFS_GITPLEX + "updates/" + getId() + "/referential";
-	}
-	
 	public String getHeadRef() {
 		Preconditions.checkNotNull(getId());
 		return Repository.REFS_GITPLEX + "updates/" + getId() + "/head";
 	}
 
-	/**
-	 * Calculate referential commit for change calculation of this update. Referential commit is merged 
-	 * commit of:
-	 * 
-	 * <li> merge base of update head and target branch head
-	 * <li> head of previous update
-	 * 
-	 * Changed files of this update will be calculated between referential commit and head commit 
-	 * and this effectively represents changes made since previous update with merged changes 
-	 * from target branch excluded if there is any.  
-	 *  
-	 * @return
-	 * 			referential commit used for change calculation of current update
-	 */
-	public String getReferentialCommitHash() {
-		if (referentialCommitHash == null) {
-			Git git = getRequest().getTarget().getRepository().git();
-			String mergeBase = git.calcMergeBase(getHeadCommitHash(), getRequest().getTarget().getHeadCommitHash());
-
-			if (git.isAncestor(getBaseCommitHash(), mergeBase)) { 
-				referentialCommitHash = mergeBase;
-			} else if (git.isAncestor(mergeBase, getBaseCommitHash())) {
-				referentialCommitHash = getBaseCommitHash();
-			} else {
-				Lock lock = LockUtils.getLock("update.getReferentialCommit." + getId());
-				try {
-					lock.lockInterruptibly();
-					String changeRef = getReferentialRef();
-					referentialCommitHash = git.parseRevision(changeRef, false);
-	
-					if (referentialCommitHash != null) {
-						Commit commit = git.showRevision(referentialCommitHash);
-						if (!commit.getParentHashes().contains(mergeBase) || !commit.getParentHashes().contains(getBaseCommitHash())) 
-							referentialCommitHash = null;
-					} 
-					
-					if (referentialCommitHash == null) {
-						File tempDir = FileUtils.createTempDir();
-						try {
-							Git tempGit = new Git(tempDir);
-							
-							/*
-							 * Branch name here is not significant, we just use an existing branch
-							 * in cloned repository to hold mergeBase, so that we can merge with 
-							 * previousUpdate 
-							 */
-							String branchName = getRequest().getTarget().getName();
-							tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, branchName);
-							tempGit.updateRef("HEAD", mergeBase, null, null);
-							tempGit.reset(null, null);
-							Preconditions.checkState(tempGit.merge(getBaseCommitHash(), null, null, "ours", null) != null);
-							git.fetch(tempGit, "+HEAD:" + changeRef);
-							referentialCommitHash = git.parseRevision(changeRef, true);
-						} finally {
-							FileUtils.deleteDir(tempDir);
-						}
-					}
-				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
-				} finally {
-					lock.unlock();
-				}
-			}
-		}
-		
-		return referentialCommitHash;
-	}
-	
 	/**
 	 * List votes against this update and all subsequent updates.
 	 * <p>
@@ -201,13 +120,10 @@ public class PullRequestUpdate extends AbstractEntity {
 	public void deleteRefs() {
 		Git git = getRequest().getTarget().getRepository().git();
 		git.deleteRef(getHeadRef(), null, null);
-		git.deleteRef(getReferentialRef(), null, null);
 	}	
 	
 	public Collection<String> getChangedFiles() {
-		if (changedFiles == null) 
-			changedFiles = getRequest().git().listChangedFiles(getReferentialCommitHash(), getHeadCommitHash(), null);
-		return changedFiles;
+		return getCachedInfo().getChangedFiles();
 	}
 	
 	public String getBaseCommitHash() {
@@ -238,45 +154,58 @@ public class PullRequestUpdate extends AbstractEntity {
 			return request.getBaseCommit();
 	}
 	
-	@SuppressWarnings("unchecked")
-	private List<Commit> getLogCommits() {
-		if (logCommits == null) {
+	private CachedInfo getCachedInfo() {
+		if (cachedInfo == null) {
 			StorageManager storageManager = GitPlex.getInstance(StorageManager.class);
-			String lockName = "update.getCommits." + getId();
-			File logFile = new File(storageManager.getCacheDir(this), "log");
-			Lock lock = LockUtils.getReadWriteLock(lockName).readLock();
-			try {
-				lock.lockInterruptibly();
-				if (logFile.exists()) {
-					byte[] bytes = FileUtils.readFileToByteArray(logFile);
-					logCommits = (List<Commit>) SerializationUtils.deserialize(bytes);
-				}
-			} catch (Exception e) {
-				Throwables.propagate(e);
-			} finally {
-				lock.unlock();
-			}
-			
-			if (logCommits == null) {
-				lock = LockUtils.getReadWriteLock(lockName).writeLock();
-				try {
-					lock.lockInterruptibly();
-					if (logFile.exists()) {
-						byte[] bytes = FileUtils.readFileToByteArray(logFile);
-						logCommits = (List<Commit>) SerializationUtils.deserialize(bytes);
+			File cacheFile = new File(storageManager.getCacheDir(this), "cachedInfo");
+			cachedInfo = FileUtils.readFile(cacheFile, new Callable<CachedInfo>() {
+
+				@Override
+				public CachedInfo call() throws Exception {
+					CachedInfo cachedInfo = new CachedInfo();
+
+					Git git = getRequest().getTarget().getRepository().git();
+					cachedInfo.setLogCommits(git.log(getBaseCommitHash(), getHeadCommitHash(), null, 0, 0));
+					
+					String mergeBase = git.calcMergeBase(getHeadCommitHash(), getRequest().getTarget().getHeadCommitHash());
+
+					if (git.isAncestor(getBaseCommitHash(), mergeBase)) { 
+						cachedInfo.setChangedFiles(git.listChangedFiles(mergeBase, getHeadCommitHash(), null));					
+					} else if (git.isAncestor(mergeBase, getBaseCommitHash())) {
+						cachedInfo.setChangedFiles(git.listChangedFiles(getBaseCommitHash(), getHeadCommitHash(), null));					
 					} else {
-						Git git = getRequest().getTarget().getRepository().git();
-						logCommits = git.log(getBaseCommitHash(), getHeadCommitHash(), null, 0, 0);
-						FileUtils.writeByteArrayToFile(logFile, SerializationUtils.serialize((Serializable) logCommits));
+						File tempDir = FileUtils.createTempDir();
+						try {
+							Git tempGit = new Git(tempDir);
+							
+							/*
+							 * Calculate changed files of this update since merged commit of:
+							 * 
+							 * 1. merge base of update head and target branch head
+							 * 2. head of previous update
+							 * 
+							 * This way changed files of this update will exclude merged changes 
+							 * from target branch if there is any.  
+							 */
+							String branchName = getRequest().getTarget().getName();
+							tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, branchName);
+							tempGit.updateRef("HEAD", mergeBase, null, null);
+							tempGit.reset(null, null);
+							Preconditions.checkNotNull(tempGit.merge(getBaseCommitHash(), null, null, "ours", null));
+
+							cachedInfo.setChangedFiles(tempGit.listChangedFiles(
+									tempGit.parseRevision("HEAD", true), getHeadCommitHash(), null));					
+						} finally {
+							FileUtils.deleteDir(tempDir);
+						}
 					}
-				} catch (Exception e) {
-					Throwables.propagate(e);
-				} finally {
-					lock.unlock();
+
+					return cachedInfo;
 				}
-			}
+				
+			});
 		}
-		return logCommits;
+		return cachedInfo;
 	}
 
 	/**
@@ -306,7 +235,7 @@ public class PullRequestUpdate extends AbstractEntity {
 			commits = new ArrayList<>();
 
 			Map<String, ScoreAwareCommit> allCommits = new LinkedHashMap<>(); 
-			for (Commit commit: getLogCommits()) {
+			for (Commit commit: getCachedInfo().getLogCommits()) {
 				ScoreAwareCommit scoreAwareCommit = new ScoreAwareCommit();
 				scoreAwareCommit.setCommit(commit);
 				allCommits.put(commit.getHash(), scoreAwareCommit);
@@ -345,7 +274,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	}
 	
 	public Commit getHeadCommit() {
-		Commit headCommit = getLogCommits().get(0);
+		Commit headCommit = getCachedInfo().getLogCommits().get(0);
 		Preconditions.checkState(headCommit.getHash().equals(getHeadCommitHash()));
 		return headCommit;
 	}
@@ -399,4 +328,27 @@ public class PullRequestUpdate extends AbstractEntity {
 		
 	}
 	
+	private static class CachedInfo implements Serializable {
+		
+		private Collection<String> changedFiles;
+		
+		private List<Commit> logCommits;
+
+		public Collection<String> getChangedFiles() {
+			return changedFiles;
+		}
+
+		public void setChangedFiles(Collection<String> changedFiles) {
+			this.changedFiles = changedFiles;
+		}
+
+		public List<Commit> getLogCommits() {
+			return logCommits;
+		}
+
+		public void setLogCommits(List<Commit> logCommits) {
+			this.logCommits = logCommits;
+		}
+		
+	}
 }

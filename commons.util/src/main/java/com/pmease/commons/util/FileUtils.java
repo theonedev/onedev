@@ -6,20 +6,30 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.concurrent.Callable;
+import java.util.concurrent.locks.Lock;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.tools.ant.DirectoryScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import com.pmease.commons.bootstrap.BootstrapUtils;
 
 public class FileUtils extends org.apache.commons.io.FileUtils {
+	
+	private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);
 	
 	/**
 	 * Load properties from specified file. Surrounding white spaces of property values will 
@@ -270,5 +280,47 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
 		} else {
 			createDir(dir);
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T extends Serializable> T readFile(File file, Callable<T> callable) {
+		T result = null;
+		String lockName;
+		try {
+			lockName = file.getCanonicalPath();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		Lock lock = LockUtils.getReadWriteLock(lockName).readLock();
+		try {
+			lock.lockInterruptibly();
+			if (file.exists()) {
+				byte[] bytes = FileUtils.readFileToByteArray(file);
+				result = (T) SerializationUtils.deserialize(bytes);
+			}
+		} catch (Exception e) {
+			logger.error("Error reading callable result from file '" + file.getAbsolutePath() 
+					+ "', fall back to execute callable.", e);
+		} finally {
+			lock.unlock();
+		}
+		
+		if (result == null) {
+			FileUtils.createDir(file.getParentFile());
+			
+			lock = LockUtils.getReadWriteLock(lockName).writeLock();
+			try {
+				lock.lockInterruptibly();
+				Preconditions.checkNotNull(result = callable.call());
+				
+				FileUtils.writeByteArrayToFile(file, SerializationUtils.serialize(result));
+			} catch (Exception e) {
+				Throwables.propagate(e);
+			} finally {
+				lock.unlock();
+			}
+		}
+		
+		return result;
 	}
 }

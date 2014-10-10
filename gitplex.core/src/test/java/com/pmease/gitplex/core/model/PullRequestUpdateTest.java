@@ -6,8 +6,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.google.common.collect.Sets;
 import com.pmease.commons.git.AbstractGitTest;
-import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitplex.core.manager.StorageManager;
@@ -55,7 +55,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
     }
     
     @Test
-    public void testResolveChangeCommitWhenThereIsNoMerge() {
+    public void testResolveChangedFilesWhenThereIsNoMerge() {
         PullRequest request = new PullRequest();
         Branch target = new Branch();
         target.setRepository(repository);
@@ -95,12 +95,12 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 
         target.setHeadCommitHash(bareGit.parseRevision("master", true));
         
-        Assert.assertEquals(bareGit.showRevision("dev~1").getHash(), request.getLatestUpdate().getReferentialCommitHash());
-        Assert.assertEquals(bareGit.showRevision("master~1").getHash(), request.getSortedUpdates().get(0).getReferentialCommitHash());
+        Assert.assertEquals(Sets.newHashSet("c"), update2.getChangedFiles());
+        Assert.assertEquals(Sets.newHashSet("b"), update1.getChangedFiles());
     }
 
     @Test
-    public void testResolveChangeCommitWhenThereIsMerge() {
+    public void testResolveChangedFilesWhenThereIsMerge() {
         PullRequest request = new PullRequest();
         Branch target = new Branch();
         target.setRepository(repository);
@@ -140,10 +140,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 
         target.setHeadCommitHash(bareGit.parseRevision("master", true));
         
-        Commit referentialCommit = bareGit.showRevision(request.getLatestUpdate().getReferentialCommitHash());
-        Assert.assertTrue(referentialCommit.getParentHashes().contains(bareGit.showRevision("master").getHash()));
-        Assert.assertTrue(referentialCommit.getParentHashes().contains(bareGit.showRevision("dev~2").getHash()));
-        Assert.assertEquals(bareGit.showRevision("master~1").getHash(), request.getSortedUpdates().get(0).getReferentialCommitHash());
+        Assert.assertEquals(Sets.newHashSet("4"), update2.getChangedFiles());
     }
 
     @Test
@@ -247,6 +244,8 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         bareGit.updateRef(update2.getHeadRef(), update2.getHeadCommitHash(), null, null);
         
         request.getUpdates().add(update2);
+        
+        target.setHeadCommitHash(bareGit.parseRevision("master", true));
         
         Assert.assertEquals(2, update2.getCommits().size());
         Assert.assertEquals("d2", update2.getCommits().get(0).getMessage());

@@ -132,8 +132,6 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		request.setUpdateDate(audit.getDate());
 		dao.persist(request);
 		
-		deleteRefsUponClose(request);
-		
 		final Long requestId = request.getId();
 
 		dao.afterCommit(new Runnable() {
@@ -227,8 +225,6 @@ public class DefaultPullRequestManager implements PullRequestManager {
 
 			dao.persist(request);
 
-			deleteRefsUponClose(request);
-			
 			final Long requestId = request.getId();
 			
 			dao.afterCommit(new Runnable() {
@@ -307,13 +303,6 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		if (strategies == null) 
 			strategies = Lists.newArrayList(IntegrationStrategy.MERGE_ALWAYS);
 		return strategies;
-	}
-
-	private void deleteRefsUponClose(PullRequest request) {
-		Git git = request.getTarget().getRepository().git();
-		for (PullRequestUpdate update: request.getUpdates()) 
-			git.deleteRef(update.getReferentialRef(), null, null);
-		git.deleteRef(request.getIntegrateRef(), null, null);
 	}
 
 	@Transactional

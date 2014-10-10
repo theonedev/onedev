@@ -47,9 +47,8 @@ public class DefaultStorageManager implements StorageManager {
 	}
 
 	private File createIfNotExist(File dir) {
-		if (!dir.exists()) synchronized(this) {
+		if (!dir.exists()) 
 			FileUtils.createDir(dir);
-		}
 		return dir;
 	}
 }
