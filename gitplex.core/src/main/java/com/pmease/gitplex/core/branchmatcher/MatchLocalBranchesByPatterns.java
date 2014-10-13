@@ -9,14 +9,12 @@ import com.pmease.gitplex.core.model.Branch;
 
 @SuppressWarnings("serial")
 @Editable(order=200, name="Specify Branch Patterns")
-public class MatchAffinalBranchesByPatterns implements AffinalBranchMatcher {
+public class MatchLocalBranchesByPatterns implements LocalBranchMatcher {
 
 	private String branchPatterns;
 	
 	@Editable(name="Branch Patterns", description=
-			"Patterns should be specified following the <a href='http://wiki.pmease.com/display/gp/Pattern+Set'>pattern set</a> format. "
-			+ "When matching a branch agains the patterns, the fully qualified name will be used, which will be "
-			+ "&lt;user name&gt;/&lt;repository name&gt;:&lt;branch name&gt;")
+			"Patterns should be specified following the <a href='http://wiki.pmease.com/display/gp/Pattern+Set'>pattern set</a> format.")
 	@OmitName
 	@NotEmpty
 	public String getBranchPatterns() {
@@ -34,7 +32,7 @@ public class MatchAffinalBranchesByPatterns implements AffinalBranchMatcher {
 
 	@Override
 	public boolean matches(Branch branch) {
-		return WildcardUtils.matchPath(getBranchPatterns(), branch.getFullName());
+		return WildcardUtils.matchPath(getBranchPatterns(), branch.getName());
 	}
 
 }

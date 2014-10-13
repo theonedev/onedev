@@ -5,30 +5,29 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.pmease.gitplex.core.GitPlex;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
-import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.branch.BranchChoiceProvider;
 import com.pmease.gitplex.web.component.branch.BranchMultiChoice;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
-public class BranchMultiChoiceEditor extends PropertyEditor<List<Long>> {
+public class LocalBranchMultiChoiceEditor extends PropertyEditor<List<Long>> {
 	
 	private BranchMultiChoice input;
 	
-	public BranchMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<Long>> propertyModel) {
+	public LocalBranchMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<Long>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -37,14 +36,12 @@ public class BranchMultiChoiceEditor extends PropertyEditor<List<Long>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-    	BranchChoiceProvider branchProvider = new BranchChoiceProvider(new LoadableDetachableModel<EntityCriteria<Branch>>() {
+    	BranchChoiceProvider branchProvider = new BranchChoiceProvider(new LoadableDetachableModel<Repository>() {
 
 			@Override
-			protected EntityCriteria<Branch> load() {
-				EntityCriteria<Branch> criteria = EntityCriteria.of(Branch.class);
+			protected Repository load() {
 				RepositoryPage page = (RepositoryPage) getPage();
-				criteria.add(Restrictions.eq("repository", page.getRepository()));
-				return criteria;
+				return page.getRepository();
 			}
     		
     	});

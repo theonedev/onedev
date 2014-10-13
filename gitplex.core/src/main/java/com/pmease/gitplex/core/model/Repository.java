@@ -320,17 +320,17 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	 * 			comparable repositories of current repository, with current repository also 
 	 * 			included in the collection
 	 */
-	public List<Repository> findComparables() {
-		List<Repository> comparables = new ArrayList<Repository>();
+	public List<Repository> findAffinals() {
+		List<Repository> affinals = new ArrayList<Repository>();
 		Repository forkRoot = findForkRoot();
 		if (forkRoot != null) {
-			comparables.add(forkRoot);
-			comparables.addAll(forkRoot.findForkDescendants());
+			affinals.add(forkRoot);
+			affinals.addAll(forkRoot.findForkDescendants());
 		} else {
-			comparables.add(this);
-			comparables.addAll(findForkDescendants());
+			affinals.add(this);
+			affinals.addAll(findForkDescendants());
 		}
-		return comparables;
+		return affinals;
 	}
 
 	public String getUrl() {

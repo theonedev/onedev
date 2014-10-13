@@ -1,29 +1,24 @@
 package com.pmease.gitplex.web.editable.branch;
 
-import com.pmease.gitplex.core.GitPlex;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
-import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Branch;
-import com.pmease.gitplex.web.component.branch.BranchChoiceProvider;
-import com.pmease.gitplex.web.component.branch.BranchSingleChoice;
-import com.pmease.gitplex.web.page.repository.RepositoryPage;
+import com.pmease.gitplex.web.component.branch.GlobalBranchSingleChoice;
 
 @SuppressWarnings("serial")
-public class BranchSingleChoiceEditor extends PropertyEditor<Long> {
+public class GlobalBranchSingleChoiceEditor extends PropertyEditor<Long> {
 	
-	private BranchSingleChoice input;
+	private GlobalBranchSingleChoice input;
 	
-	public BranchSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<Long> propertyModel) {
+	public GlobalBranchSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<Long> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -31,24 +26,13 @@ public class BranchSingleChoiceEditor extends PropertyEditor<Long> {
 	protected void onInitialize() {
 		super.onInitialize();
     	
-    	BranchChoiceProvider branchProvider = new BranchChoiceProvider(new LoadableDetachableModel<EntityCriteria<Branch>>() {
-
-			@Override
-			protected EntityCriteria<Branch> load() {
-				EntityCriteria<Branch> criteria = EntityCriteria.of(Branch.class);
-				RepositoryPage page = (RepositoryPage) getPage();
-				criteria.add(Restrictions.eq("repository", page.getRepository()));
-				return criteria;
-			}
-    		
-    	});
-
     	Branch branch;
 		if (getModelObject() != null)
 			branch =  GitPlex.getInstance(Dao.class).load(Branch.class, getModelObject());
 		else
 			branch = null;
-    	input = new BranchSingleChoice("input", Model.of(branch), branchProvider);
+
+		input = new GlobalBranchSingleChoice("input", Model.of(branch));
         
         add(input);
 	}

@@ -243,7 +243,7 @@ public abstract class RepositoryPage extends AccountBasePage {
 		List<Tab> adminTabs = Lists.newArrayList();
 		adminTabs.add(new RepositoryTab(Model.of("General Settings"), "fa fa-tools", GeneralSettingPage.class));
 		adminTabs.add(new RepositoryTab(Model.of("Permissions"), "fa fa-lock", PermissionSettingPage.class));
-		adminTabs.add(new RepositoryTab(Model.of("Gate Keepers"), "fa fa-eye-open", GateKeeperPage.class));
+		adminTabs.add(new RepositoryTab(Model.of("Gate Keepers"), "fa fa-gate", GateKeeperPage.class));
 		adminTabs.add(new RepositoryTab(Model.of("Integration Policies"), "fa fa-puzzle", IntegrationPolicyPage.class));
 
 		add(new Tabbable("adminTabs", adminTabs) {

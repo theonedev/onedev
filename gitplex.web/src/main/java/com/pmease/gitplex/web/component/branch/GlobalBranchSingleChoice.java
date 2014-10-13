@@ -9,33 +9,27 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.component.repository.AffinalRepositoryChoice;
+import com.pmease.gitplex.web.component.repository.RepositoryChoice;
 
 @SuppressWarnings("serial")
-public class AffinalBranchSingleChoice extends FormComponentPanel<Branch> {
+public class GlobalBranchSingleChoice extends FormComponentPanel<Branch> {
 
-	private IModel<Repository> currentRepositoryModel;
-	
-	private IModel<Repository> selectedRepositoryModel;
+	private IModel<Repository> repositoryModel;
 	
 	private BranchSingleChoice branchChoice;
 	
 	/**
-	 * Construct with current repository model and selected branch model.
+	 * Construct with selected branch model.
 	 * 
 	 * @param id
 	 * 			id of the component
-	 * @param currentRepositoryModel
-	 * 			model of current repository. Note that the model object should never be null
-	 * @param selectedBranchModel
+	 * @param branchModel
 	 * 			model of selected branch
 	 */
-	public AffinalBranchSingleChoice(String id, IModel<Repository> currentRepositoryModel, IModel<Branch> selectedBranchModel) {
-		super(id, selectedBranchModel);
+	public GlobalBranchSingleChoice(String id, IModel<Branch> branchModel) {
+		super(id, branchModel);
 		
-		this.currentRepositoryModel = currentRepositoryModel;
-		
-		selectedRepositoryModel = new IModel<Repository>() {
+		repositoryModel = new IModel<Repository>() {
 
 			@Override
 			public void detach() {
@@ -44,11 +38,10 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<Branch> {
 			@Override
 			public Repository getObject() {
 				Branch branch = getBranch();
-				if (branch == null) {
-					return AffinalBranchSingleChoice.this.currentRepositoryModel.getObject();
-				} else {
+				if (branch != null) 
 					return branch.getRepository();
-				}
+				else 
+					return null;
 			}
 
 			@Override
@@ -69,7 +62,7 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<Branch> {
 		
 		setOutputMarkupId(true);
 		
-		add(new AffinalRepositoryChoice("repositoryChoice", currentRepositoryModel, selectedRepositoryModel).add(new AjaxFormComponentUpdatingBehavior("change") {
+		add(new RepositoryChoice("repositoryChoice", repositoryModel, null).add(new AjaxFormComponentUpdatingBehavior("change") {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
@@ -79,7 +72,7 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<Branch> {
 
 		}));
 		
-		BranchChoiceProvider choiceProvider = new BranchChoiceProvider(selectedRepositoryModel);
+		BranchChoiceProvider choiceProvider = new BranchChoiceProvider(repositoryModel);
 		add(branchChoice = new BranchSingleChoice("branchChoice", getModel(), choiceProvider));
 		branchChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
 			
@@ -106,8 +99,7 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<Branch> {
 
 	@Override
 	protected void onDetach() {
-		currentRepositoryModel.detach();
-		selectedRepositoryModel.detach();
+		repositoryModel.detach();
 		
 		super.onDetach();
 	}

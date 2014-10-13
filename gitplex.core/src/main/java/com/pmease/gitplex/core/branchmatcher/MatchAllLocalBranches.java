@@ -5,7 +5,7 @@ import com.pmease.gitplex.core.model.Branch;
 
 @SuppressWarnings("serial")
 @Editable(name="All Branches", order=300)
-public class MatchAllBranches implements BranchMatcher {
+public class MatchAllLocalBranches implements LocalBranchMatcher {
 
 	@Override
 	public boolean matches(Branch branch) {

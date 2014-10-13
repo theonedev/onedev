@@ -32,7 +32,7 @@ var gitplex = {
 			},
 		}, 
 		
-		comparableRepository: {
+		repository: {
 			formatSelection: function(repository) {
 				return repository.name;
 			},
@@ -60,20 +60,6 @@ var gitplex = {
 			}
 		},
 
-		repository: {
-			formatSelection: function(repository) {
-				return repository.name;
-			},
-			
-			formatResult: function(repository) {
-				return repository.owner + '/' + repository.name;
-			},
-			
-			escapeMarkup: function(m) {
-				return m;
-			}
-		},
-		
 		team: {
 			formatSelection: function(team) {
 				return team.name;

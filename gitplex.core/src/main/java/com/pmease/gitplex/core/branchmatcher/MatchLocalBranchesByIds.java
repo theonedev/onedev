@@ -15,7 +15,7 @@ import com.pmease.gitplex.core.model.Branch;
 
 @SuppressWarnings("serial")
 @Editable(name="Specify Branch Names", order=100)
-public class MatchBranchesByIds implements BranchMatcher {
+public class MatchLocalBranchesByIds implements LocalBranchMatcher {
 
 	private List<Long> branchIds = new ArrayList<>();
 	

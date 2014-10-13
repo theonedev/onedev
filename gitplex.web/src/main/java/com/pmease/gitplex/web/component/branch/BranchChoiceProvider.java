@@ -16,31 +16,30 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.Constants;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 
+@SuppressWarnings("serial")
 public class BranchChoiceProvider extends ChoiceProvider<Branch> {
 
-	private static final long serialVersionUID = 1L;
+	private IModel<Repository> repoModel;
 
-	IModel<EntityCriteria<Branch>> criteria;
-
-	public BranchChoiceProvider(IModel<EntityCriteria<Branch>> criteria) {
-		this.criteria = criteria;
+	public BranchChoiceProvider(IModel<Repository> repoModel) {
+		this.repoModel = repoModel;
 	}
 
 	@Override
 	public void query(String term, int page, Response<Branch> response) {
-		EntityCriteria<Branch> crit = criteria == null ? null : criteria.getObject();
-		if (crit == null) {
-			crit = EntityCriteria.of(Branch.class);
-		}
+		EntityCriteria<Branch> criteria = EntityCriteria.of(Branch.class);
+		criteria.add(Restrictions.eq("repository", repoModel.getObject()));
+		
+		criteria.add(Restrictions.ilike("name", term, MatchMode.START));
+		criteria.addOrder(Order.asc("name"));
+		int first = page * Constants.DEFAULT_PAGE_SIZE;
 
-		crit.add(Restrictions.ilike("name", term, MatchMode.START));
-		crit.addOrder(Order.asc("name"));
-		int first = page * 10;
-
-		List<Branch> branches = GitPlex.getInstance(Dao.class).query(crit, first, 10);
+		List<Branch> branches = GitPlex.getInstance(Dao.class).query(criteria, first, Constants.DEFAULT_PAGE_SIZE);
 		
 		response.addAll(branches);
 	}
@@ -64,10 +63,8 @@ public class BranchChoiceProvider extends ChoiceProvider<Branch> {
 
 	@Override
 	public void detach() {
+		repoModel.detach();
+		
 		super.detach();
-
-		if (criteria != null) {
-			criteria.detach();
-		}
 	}
 }

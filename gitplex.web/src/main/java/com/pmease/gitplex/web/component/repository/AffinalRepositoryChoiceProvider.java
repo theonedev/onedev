@@ -7,8 +7,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import com.pmease.gitplex.core.GitPlex;
-
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.model.IModel;
@@ -18,32 +16,33 @@ import org.json.JSONWriter;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.wicket.component.select2.ListChoiceProvider;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.permission.ObjectPermission;
-import com.vaynberg.wicket.select2.ChoiceProvider;
-import com.vaynberg.wicket.select2.Response;
+import com.pmease.gitplex.web.Constants;
 
 @SuppressWarnings("serial")
-public class ComparableRepositoryChoiceProvider extends ChoiceProvider<Repository> {
+public class AffinalRepositoryChoiceProvider extends ListChoiceProvider<Repository> {
 
-	private static final int PAGE_SIZE = 25;
-	
 	private IModel<Repository> currentRepositoryModel;
 	
-	private IModel<List<Repository>> comparableRepositoriesModel;
+	private IModel<List<Repository>> affinalRepositoriesModel;
 
-	public ComparableRepositoryChoiceProvider(IModel<Repository> currentRepositoryModel) {
+	public AffinalRepositoryChoiceProvider(IModel<Repository> currentRepositoryModel) {
+		super(Constants.DEFAULT_PAGE_SIZE);
+		
 		this.currentRepositoryModel = currentRepositoryModel;
 		
-		comparableRepositoriesModel = new LoadableDetachableModel<List<Repository>>() {
+		affinalRepositoriesModel = new LoadableDetachableModel<List<Repository>>() {
 
 			@Override
 			protected List<Repository> load() {
-				List<Repository> comparableRepositories = getCurrentRepository().findComparables();
-				comparableRepositories.remove(getCurrentRepository());
+				List<Repository> affinalRepositories = getCurrentRepository().findAffinals();
+				affinalRepositories.remove(getCurrentRepository());
 				if (getCurrentRepository().getForkedFrom() != null)
-					comparableRepositories.remove(getCurrentRepository().getForkedFrom());
-				Collections.sort(comparableRepositories, new Comparator<Repository>() {
+					affinalRepositories.remove(getCurrentRepository().getForkedFrom());
+				Collections.sort(affinalRepositories, new Comparator<Repository>() {
 
 					@Override
 					public int compare(Repository repository1, Repository repository2) {
@@ -52,38 +51,18 @@ public class ComparableRepositoryChoiceProvider extends ChoiceProvider<Repositor
 					
 				});
 				if (getCurrentRepository().getForkedFrom() != null)
-					comparableRepositories.add(0, getCurrentRepository().getForkedFrom());
-				comparableRepositories.add(0, getCurrentRepository());
-				for (Iterator<Repository> it = comparableRepositories.iterator(); it.hasNext();) {
+					affinalRepositories.add(0, getCurrentRepository().getForkedFrom());
+				affinalRepositories.add(0, getCurrentRepository());
+				for (Iterator<Repository> it = affinalRepositories.iterator(); it.hasNext();) {
 					if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(it.next())))
 						it.remove();
 				}
-				return comparableRepositories;
+				return affinalRepositories;
 			}
 			
 		};
 	}
 	
-	@Override
-	public void query(String term, int page, Response<Repository> response) {
-		List<Repository> repositories = new ArrayList<>();
-		for (Repository repository: getComparableRepositories()) {
-			if (repository.getOwner().getName().contains(term))
-				repositories.add(repository);
-		}
-		int first = page * PAGE_SIZE;
-		if (first + PAGE_SIZE < repositories.size()) {
-			response.addAll(repositories.subList(first, first + PAGE_SIZE));
-			response.setHasMore(true);
-		} else if (first + PAGE_SIZE == repositories.size()) {
-			response.addAll(repositories.subList(first, first + PAGE_SIZE));
-			response.setHasMore(false);
-		} else {
-			response.addAll(repositories.subList(first, repositories.size()));
-			response.setHasMore(false);
-		}
-	}
-
 	@Override
 	public void toJson(Repository choice, JSONWriter writer) throws JSONException {
 		writer.key("id").value(choice.getId());
@@ -114,15 +93,26 @@ public class ComparableRepositoryChoiceProvider extends ChoiceProvider<Repositor
 		return currentRepositoryModel.getObject();
 	}
 	
-	private List<Repository> getComparableRepositories() {
-		return comparableRepositoriesModel.getObject();
+	private List<Repository> getAffinalRepositories() {
+		return affinalRepositoriesModel.getObject();
 	}
 
 	@Override
 	public void detach() {
 		super.detach();
 		currentRepositoryModel.detach();
-		comparableRepositoriesModel.detach();
+		affinalRepositoriesModel.detach();
+	}
+
+	@Override
+	protected List<Repository> filterList(String term) {
+		term = term.toLowerCase();
+		List<Repository> repositories = new ArrayList<>();
+		for (Repository repository: getAffinalRepositories()) {
+			if (repository.getOwner().getName().toLowerCase().startsWith(term))
+				repositories.add(repository);
+		}
+		return repositories;
 	}
 	
 }

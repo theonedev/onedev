@@ -9,7 +9,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BranchChoice {
 
-	public enum Scope {AFFINAL, LOCAL};
+	public enum Scope {
+		GLOBAL, // choose from all accessible branches in the system  
+		AFFINAL, // choose from accessible branches with forking relationship with current repository  
+		LOCAL // choose from branches in current repository
+	};
 	
 	Scope value() default Scope.LOCAL; 
 }

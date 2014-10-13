@@ -1,17 +1,15 @@
 package com.pmease.gitplex.web.component.repository;
 
-import java.util.Collection;
-
 import javax.annotation.Nullable;
 
 import org.apache.wicket.model.IModel;
 
-import com.pmease.commons.wicket.component.select2.Select2MultiChoice;
+import com.pmease.commons.wicket.component.select2.Select2Choice;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-public class RepositoryMultiChoice extends Select2MultiChoice<Repository> {
+public class RepositoryChoice extends Select2Choice<Repository> {
 
 	/**
 	 * Constructor with model.
@@ -23,8 +21,8 @@ public class RepositoryMultiChoice extends Select2MultiChoice<Repository> {
 	 * @param userModel
 	 * 			model of user to choose repository under, <tt>null</tt> to choose all accessible repositories
 	 */
-	public RepositoryMultiChoice(String id, IModel<Collection<Repository>> repositoriesModel, @Nullable IModel<User> userModel) {
-		super(id, repositoriesModel, new RepositoryChoiceProvider(userModel));
+	public RepositoryChoice(String id, IModel<Repository> repositoryModel, @Nullable IModel<User> userModel) {
+		super(id, repositoryModel, new RepositoryChoiceProvider(userModel));
 	}
 
 	@Override

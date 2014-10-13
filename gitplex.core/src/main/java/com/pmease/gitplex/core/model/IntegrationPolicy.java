@@ -11,7 +11,7 @@ import javax.validation.constraints.Size;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.Horizontal;
 import com.pmease.gitplex.core.branchmatcher.AffinalBranchMatcher;
-import com.pmease.gitplex.core.branchmatcher.BranchMatcher;
+import com.pmease.gitplex.core.branchmatcher.LocalBranchMatcher;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 
 @SuppressWarnings("serial")
@@ -19,7 +19,7 @@ import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 @Horizontal
 public class IntegrationPolicy implements Serializable {
 	
-	private BranchMatcher targetBranches;
+	private LocalBranchMatcher targetBranches;
 
 	private AffinalBranchMatcher sourceBranches;
 	
@@ -29,11 +29,11 @@ public class IntegrationPolicy implements Serializable {
 			+ "this policy applies to.")
 	@NotNull
 	@Valid
-	public BranchMatcher getTargetBranches() {
+	public LocalBranchMatcher getTargetBranches() {
 		return targetBranches;
 	}
 
-	public void setTargetBranches(BranchMatcher targetBranches) {
+	public void setTargetBranches(LocalBranchMatcher targetBranches) {
 		this.targetBranches = targetBranches;
 	}
 

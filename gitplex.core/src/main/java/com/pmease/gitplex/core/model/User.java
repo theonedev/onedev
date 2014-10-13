@@ -8,6 +8,7 @@ import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 
 import org.eclipse.jgit.lib.PersonIdent;
@@ -69,6 +70,10 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestCommentReply> requestCommentReplies = new ArrayList<>();
+	
+	@Lob
+	@Column(nullable=false)
+	private ArrayList<ChangeSubscription> changeSubscriptions = new ArrayList<>();
 
 	@Editable(order=100)
 	@UserName
@@ -206,6 +211,15 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	public void setCommentReplies(Collection<PullRequestCommentReply> requestCommentReplies) {
 		this.requestCommentReplies = requestCommentReplies;
+	}
+
+	public ArrayList<ChangeSubscription> getChangeSubscriptions() {
+		return changeSubscriptions;
+	}
+
+	public void setChangeSubscriptions(
+			ArrayList<ChangeSubscription> changeSubscriptions) {
+		this.changeSubscriptions = changeSubscriptions;
 	}
 
 	@Override

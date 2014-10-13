@@ -818,10 +818,10 @@ ul.threads li a {color: #444; cursor: pointer;}
 ul.threads li .markdown {color: #888; margin-top: 4px;}
 
 /* BRANCH CHOICE */
-.affinal-branch-choice {width: 100%;}
-.affinal-branch-choice td {padding: 12px; white-space: nowrap;}
-.affinal-branch-choice td.name {text-align: right; padding-right: 0; font-size: 16px; width: 1%; padding-top: 16px;}
-.affinal-branch-choice .select2-choice {width: 100%;}
+.repository-and-branch {width: 100%;}
+.repository-and-branch td {padding: 12px; white-space: nowrap;}
+.repository-and-branch td.name {text-align: right; padding-right: 0; font-size: 16px; width: 1%; padding-top: 16px;}
+.repository-and-branch .select2-choice {width: 100%;}
 
 /* PULL REQUEST LIST PANEL */
 .request-list>.head {padding: 12px 10px !important; font-size: 16px;}
@@ -1027,12 +1027,14 @@ table.verifications tr.ongoing .fa-cog {display: inline; color: #F0AD4E;}
 .gate-keeper td.ifthen.connector {width:1px;}
 .gate-keeper td.ifthen.connector .fa {margin: 0 6px 0 8px; color: #666666; font-size: 36px;}
 
-/* INTEGRATION POLICY PAGE */
-.integration-policies .handle {cursor: move; margin-right: 8px;}
-.integration-policies .panel-heading a {color: #444; margin-right: 8px;}
-.integration-policies .add-new {display: block; padding: 16px; background: #F2F2F2; 
+/* INTEGRATION POLICY AND CHANGE SUBSCRIPTION PAGE */
+.integration-policies .handle, .change-subscriptions .handle {cursor: move; margin-right: 8px;}
+.integration-policies .panel-heading a, .change-subscriptions .panel-heading a  {color: #444; margin-right: 8px;}
+.integration-policies .add-new, .change-subscriptions .add-new {display: block; padding: 16px; background: #F2F2F2; 
 	border: 1px solid #DDD; border-radius: 4px; font-size: 16px; color: #444; margin-bottom: 16px;}
-.integration-policies a.add-new:hover {text-decoration: none; background-color: #EBEBEB; border-color: #ADADAD;}
-.integration-policies a.add-new .fa {margin-left: 8px;}
-.integration-policies>.body>.help-block .fa {position: absolute; font-size: 40px; color: #E6AF42;}
-.integration-policies>.body>.help-block p {margin-left: 32px;}
+.integration-policies a.add-new:hover, .change-subscriptions a.add-new:hover {
+	text-decoration: none; background-color: #EBEBEB; border-color: #ADADAD;}
+.integration-policies a.add-new .fa, .change-subscriptions a.add-new .fa {margin-left: 8px;}
+.integration-policies>.body>.help-block .fa, .change-subscriptions>.body>.help-block .fa {
+	position: absolute; font-size: 20px; color: #E6AF42; margin-top: 2px;}
+.integration-policies>.body>.help-block p, .change-subscriptions>.body>.help-block p {margin-left: 18px;}

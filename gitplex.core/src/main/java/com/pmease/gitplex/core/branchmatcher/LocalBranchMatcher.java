@@ -7,6 +7,6 @@ import com.pmease.commons.util.trimmable.Trimmable;
 import com.pmease.gitplex.core.model.Branch;
 
 @Editable
-public interface BranchMatcher extends Trimmable, Serializable {
+public interface LocalBranchMatcher extends Trimmable, Serializable {
 	boolean matches(Branch branch);
 }

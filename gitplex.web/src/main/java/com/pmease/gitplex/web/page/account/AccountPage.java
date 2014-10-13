@@ -25,6 +25,7 @@ import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.account.repository.RepositoriesPage;
+import com.pmease.gitplex.web.page.account.subscription.ChangeSubscriptionPage;
 import com.pmease.gitplex.web.page.account.team.AccountTeamsPage;
 import com.pmease.gitplex.web.page.account.team.EditTeamPage;
 
@@ -46,6 +47,7 @@ public abstract class AccountPage extends AccountBasePage {
 		tabs.add(new AccountTab(Model.of("Repositories"), "fa fa-repo", RepositoriesPage.class));
 		tabs.add(new AccountTab(Model.of("Teams"), "fa fa-group-o", AccountTeamsPage.class, EditTeamPage.class));
 		tabs.add(new AccountTab(Model.of("Members"), "fa fa-user-o", MemberSettingPage.class));
+		tabs.add(new AccountTab(Model.of("Subscriptions"), "fa fa-eye-open", ChangeSubscriptionPage.class));
 		tabs.add(new AccountTab(Model.of("Profile"), "fa fa-gear", AccountProfilePage.class));
 
 		add(new Tabbable("tabs", tabs));

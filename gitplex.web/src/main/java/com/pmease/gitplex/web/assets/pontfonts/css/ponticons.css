@@ -1,4 +1,4 @@
-@font-face { font-family: "ponticons"; src: url("../fonts/ponticons.eot?v=1.0.13"); src: url("../fonts/ponticons.eot?v=1.0.13#iefix") format("embedded-opentype"), url("../fonts/ponticons.ttf?v=1.0.13") format("truetype"), url("../fonts/ponticons.woff?v=1.0.13") format("woff"), url("../fonts/ponticons.svg?v=1.0.13#ponticons") format("svg"); font-weight: normal; font-style: normal; }
+@font-face { font-family: "ponticons"; src: url("../fonts/ponticons.eot?v=1.0.15"); src: url("../fonts/ponticons.eot?v=1.0.15#iefix") format("embedded-opentype"), url("../fonts/ponticons.ttf?v=1.0.15") format("truetype"), url("../fonts/ponticons.woff?v=1.0.15") format("woff"), url("../fonts/ponticons.svg?v=1.0.15#ponticons") format("svg"); font-weight: normal; font-style: normal; }
 .fa { font: normal normal 16px "ponticons"; display: inline-block; speak: none; text-transform: none; text-rendering: auto; line-height: 1; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
 
 /* makes the font 33% larger relative to the icon container */
@@ -223,6 +223,12 @@
 .fa-os-windows:before { content: "\f182"; }
 
 .fa-os-android:before { content: "\f183"; }
+
+.fa-radio:before { content: "\f190"; }
+
+.fa-gate:before { content: "\f191"; }
+
+.fa-door:before { content: "\f192"; }
 
 .fa-arrow-up:before { content: "\f200"; }
 

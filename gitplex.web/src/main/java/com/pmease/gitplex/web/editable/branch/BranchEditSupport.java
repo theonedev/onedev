@@ -52,7 +52,7 @@ public class BranchEditSupport implements EditSupport {
 						        	Dao dao = GitPlex.getInstance(Dao.class);
 						        	List<String> branchNames = new ArrayList<>();
 						        	for (Long branchId: branchIds) {
-										if (isAffinal(getPropertyGetter()))
+										if (isAffinal(getPropertyGetter()) || isGlobal(getPropertyGetter()))
 						        			branchNames.add(dao.load(Branch.class, branchId).getFullName());
 						        		else
 						        			branchNames.add(dao.load(Branch.class, branchId).getName());
@@ -70,8 +70,10 @@ public class BranchEditSupport implements EditSupport {
 					public PropertyEditor<List<Long>> renderForEdit(String componentId, IModel<List<Long>> model) {
 						if (isAffinal(getPropertyGetter()))
 			        		return new AffinalBranchMultiChoiceEditor(componentId, this, model);
+						else if (isGlobal(getPropertyGetter()))
+							return new GlobalBranchMultiChoiceEditor(componentId, this, model);
 			        	else
-			        		return new BranchMultiChoiceEditor(componentId, this, model);
+			        		return new LocalBranchMultiChoiceEditor(componentId, this, model);
 					}
         			
         		};
@@ -87,7 +89,7 @@ public class BranchEditSupport implements EditSupport {
 						        Long branchId = model.getObject();
 						        if (branchId != null) {
 						        	Branch branch = GitPlex.getInstance(Dao.class).load(Branch.class, branchId);
-									if (isAffinal(getPropertyGetter()))
+									if (isAffinal(getPropertyGetter()) || isGlobal(getPropertyGetter()))
 						        		return new Label(id, branch.getFullName());
 						        	else
 						        		return new Label(id, branch.getName());
@@ -103,8 +105,10 @@ public class BranchEditSupport implements EditSupport {
 					public PropertyEditor<Long> renderForEdit(String componentId, IModel<Long> model) {
 						if (isAffinal(getPropertyGetter()))
 			        		return new AffinalBranchSingleChoiceEditor(componentId, this, model);
+						else if (isGlobal(getPropertyGetter()))
+							return new GlobalBranchSingleChoiceEditor(componentId, this, model);
 			        	else
-			        		return new BranchSingleChoiceEditor(componentId, this, model);
+			        		return new LocalBranchSingleChoiceEditor(componentId, this, model);
 					}
         			
         		};
@@ -115,6 +119,12 @@ public class BranchEditSupport implements EditSupport {
         } else {
             return null;
         }
+	}
+
+	private boolean isGlobal(Method propertyGetter) {
+    	BranchChoice branchChoice = propertyGetter.getAnnotation(BranchChoice.class);
+    	Preconditions.checkNotNull(branchChoice);
+    	return branchChoice.value() == BranchChoice.Scope.GLOBAL;
 	}
 
 	private boolean isAffinal(Method propertyGetter) {

@@ -6,7 +6,7 @@ import com.pmease.commons.wicket.component.select2.Select2Choice;
 import com.pmease.gitplex.core.model.Repository;
 
 @SuppressWarnings("serial")
-public class ComparableRepositoryChoice extends Select2Choice<Repository> {
+public class AffinalRepositoryChoice extends Select2Choice<Repository> {
 
 	/**
 	 * Constructor with model.
@@ -19,17 +19,17 @@ public class ComparableRepositoryChoice extends Select2Choice<Repository> {
 	 * @param selectedRepositoryModel
 	 * 			model of selected repository
 	 */
-	public ComparableRepositoryChoice(String id, IModel<Repository> currentRepositoryModel, IModel<Repository> selectedRepositoryModel) {
-		super(id, selectedRepositoryModel, new ComparableRepositoryChoiceProvider(currentRepositoryModel));
+	public AffinalRepositoryChoice(String id, IModel<Repository> currentRepositoryModel, IModel<Repository> selectedRepositoryModel) {
+		super(id, selectedRepositoryModel, new AffinalRepositoryChoiceProvider(currentRepositoryModel));
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		getSettings().setPlaceholder("Typing to find a repository...");
-		getSettings().setFormatResult("gitplex.choiceFormatter.comparableRepository.formatResult");
-		getSettings().setFormatSelection("gitplex.choiceFormatter.comparableRepository.formatSelection");
-		getSettings().setEscapeMarkup("gitplex.choiceFormatter.comparableRepository.escapeMarkup");
+		getSettings().setFormatResult("gitplex.choiceFormatter.repository.formatResult");
+		getSettings().setFormatSelection("gitplex.choiceFormatter.repository.formatSelection");
+		getSettings().setEscapeMarkup("gitplex.choiceFormatter.repository.escapeMarkup");
 	}
 
 }
