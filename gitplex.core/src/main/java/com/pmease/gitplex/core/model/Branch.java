@@ -31,15 +31,23 @@ public class Branch extends AbstractEntity {
 	@Column(nullable=false)
 	private String name;
 	
+	private boolean isDefault;
+	
 	@ManyToOne
 	private User updater;
 	
     @OneToMany(mappedBy="target", cascade=CascadeType.REMOVE)
-    private Collection<PullRequest> incomingRequests = new ArrayList<PullRequest>();
+    private Collection<PullRequest> incomingRequests = new ArrayList<>();
 
     @OneToMany(mappedBy="source")
-    private Collection<PullRequest> outgoingRequests = new ArrayList<PullRequest>();
+    private Collection<PullRequest> outgoingRequests = new ArrayList<>();
     
+    @OneToMany(mappedBy="branch", cascade=CascadeType.REMOVE)
+    private Collection<CommitWatch> commitWatches = new ArrayList<>();
+
+    @OneToMany(mappedBy="branch", cascade=CascadeType.REMOVE)
+    private Collection<PullRequestWatch> requestWatches = new ArrayList<>();
+
     private String headCommitHash;
 
     public Repository getRepository() {
@@ -58,21 +66,6 @@ public class Branch extends AbstractEntity {
 		this.name = name;
 	}
 	
-	/**
-	 * Get user who updates this branch ref last time.
-	 * 
-	 * @return
-	 * 			<tt>null</tt> if updater is unknown
-	 */
-	@Nullable
-	public User getUpdater() {
-		return updater;
-	}
-
-	public void setUpdater(User updater) {
-		this.updater = updater;
-	}
-
 	public Collection<PullRequest> getIncomingRequests() {
         return incomingRequests;
     }
@@ -89,7 +82,23 @@ public class Branch extends AbstractEntity {
         this.outgoingRequests = outgoingRequests;
     }
     
-    /**
+    public Collection<CommitWatch> getCommitWatches() {
+		return commitWatches;
+	}
+
+	public void setCommitWatches(Collection<CommitWatch> commitWatches) {
+		this.commitWatches = commitWatches;
+	}
+
+	public Collection<PullRequestWatch> getRequestWatches() {
+		return requestWatches;
+	}
+
+	public void setRequestWatches(Collection<PullRequestWatch> requestWatches) {
+		this.requestWatches = requestWatches;
+	}
+
+	/**
      * Get head commit this branch pointing to.
      * 
      * @return
@@ -115,7 +124,15 @@ public class Branch extends AbstractEntity {
     	return getRepository().getFullName() + ":" + getName();
     }
     
-    /**
+    public boolean isDefault() {
+		return isDefault;
+	}
+
+	public void setDefault(boolean isDefault) {
+		this.isDefault = isDefault;
+	}
+
+	/**
      * Convert a git reference name to branch name.
      * 
      * @param refName

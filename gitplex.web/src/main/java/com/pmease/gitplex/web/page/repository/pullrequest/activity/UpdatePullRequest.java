@@ -38,7 +38,7 @@ public class UpdatePullRequest implements PullRequestActivity {
 
 	@Override
 	public User getUser() {
-		return getUpdate().getUser();
+		return null;
 	}
 
 	public PullRequestUpdate getUpdate() {

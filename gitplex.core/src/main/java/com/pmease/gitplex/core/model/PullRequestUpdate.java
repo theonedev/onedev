@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -39,9 +38,6 @@ public class PullRequestUpdate extends AbstractEntity {
 	@Column(nullable=false)
 	private String headCommitHash;
 
-	@ManyToOne
-	private User user;
-	
 	@Column(nullable=false)
 	private Date date;
 	
@@ -68,15 +64,6 @@ public class PullRequestUpdate extends AbstractEntity {
 		this.headCommitHash = headCommitHash;
 	}
 	
-	@Nullable
-    public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
-
 	public Date getDate() {
 		return date;
 	}

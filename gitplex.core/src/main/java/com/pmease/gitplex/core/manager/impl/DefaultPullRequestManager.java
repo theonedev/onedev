@@ -190,7 +190,6 @@ public class DefaultPullRequestManager implements PullRequestManager {
 					integrated, preview.getRequestHead(), 
 					"Pull request #" + request.getId())) {
 				request.getSource().setHeadCommitHash(integrated);
-				request.getSource().setUpdater(user);
 				branchManager.save(request.getSource());
 			} else {
 				throw new RuntimeException(String.format(
@@ -200,7 +199,6 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		if (git.updateRef(request.getTarget().getHeadRef(), integrated, 
 				preview.getTargetHead(), "Pull request #" + request.getId())) {
 			request.getTarget().setHeadCommitHash(integrated);
-			request.getTarget().setUpdater(user);
 			branchManager.save(request.getTarget());
 			
 			PullRequestAudit audit = new PullRequestAudit();
@@ -314,7 +312,6 @@ public class DefaultPullRequestManager implements PullRequestManager {
 			audit.setRequest(request);
 			audit.setOperation(PullRequestOperation.INTEGRATE);
 			audit.setDate(new Date());
-			audit.setUser(request.getTarget().getUpdater());
 			dao.persist(audit);
 			
 			request.setIntegrationPreview(null);
@@ -346,9 +343,11 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	@Transactional
 	@Override
 	public void onSourceBranchUpdate(PullRequest request) {
+		if (request.getLatestUpdate().getHeadCommitHash().equals(request.getSource().getHeadCommitHash()))
+			return;
+		
 		PullRequestUpdate update = new PullRequestUpdate();
 		update.setRequest(request);
-		update.setUser(request.getSource().getUpdater());
 		update.setDate(new Date());
 		update.setHeadCommitHash(request.getSource().getHeadCommitHash());
 		

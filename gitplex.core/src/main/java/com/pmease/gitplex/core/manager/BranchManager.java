@@ -8,7 +8,6 @@ import com.google.inject.ImplementedBy;
 import com.pmease.gitplex.core.manager.impl.DefaultBranchManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.core.model.User;
 
 @ImplementedBy(DefaultBranchManager.class)
 public interface BranchManager {
@@ -52,10 +51,8 @@ public interface BranchManager {
      * 
      * @param branch
      * 			branch to be deleted
-     * @param user
-     * 			user deleting the branch
      */
-    public void delete(Branch branch, @Nullable User user);
+    public void delete(Branch branch);
     
     /**
      * Create specified branch record in database, and update corresponding git repository to 
@@ -67,17 +64,6 @@ public interface BranchManager {
      * 			commit hash of the branch
      */
     public void create(Branch branch, String commitHash);
-    
-    /**
-     * Rename specified branch record in database, and update corresponding git repository to 
-     * reflect the renaming.
-     *   
-     * @param branch
-     * 			branch to be renamed
-     * @param newName
-     * 			new name of the branch
-     */
-    public void rename(Branch branch, String newName);
     
     public void save(Branch branch);
     

@@ -21,7 +21,10 @@
 				<td class="">
 				</td>
 				<td class="actions">
-					Base branch
+					<button wicket:id="unwatchCommits" class="btn btn-default" title="You are watching commits of this branch, click to unwatch"><i class="fa fa-eye-open"></i> <i class="fa fa-commit"></i> </button>
+					<button wicket:id="unwatchRequests" class="btn btn-default" title="You are watching pull requests of this branch, click to unwatch"><i class="fa fa-eye-open"></i> <i class="fa fa-branch-merge"></i> </button>
+					<button wicket:id="watchCommits" class="btn btn-default" title="You are not watching commits of this branch, click to watch"><i class="fa fa-eye-slash"></i> <i class="fa fa-commit"></i> </button>
+					<button wicket:id="watchRequests" class="btn btn-default" title="You are not watching pull requests of this branch, click to watch"><i class="fa fa-eye-slash"></i> <i class="fa fa-branch-merge"></i> </button>
 				</td>
 			</tr>
 			<tr class="branch" wicket:id="branches">
@@ -32,6 +35,10 @@
 					<wicket:container wicket:id="statbar"></wicket:container>
 				</td>
 				<td class="actions">
+					<button wicket:id="unwatchCommits" class="btn btn-default" title="You are watching commits of this branch, click to unwatch"><i class="fa fa-eye-open"></i> <i class="fa fa-commit"></i> </button>
+					<button wicket:id="unwatchRequests" class="btn btn-default" title="You are watching pull requests of this branch, click to unwatch"><i class="fa fa-eye-open"></i> <i class="fa fa-branch-merge"></i> </button>
+					<button wicket:id="watchCommits" class="btn btn-default" title="You are not watching commits of this branch, click to watch"><i class="fa fa-eye-slash"></i> <i class="fa fa-commit"></i> </button>
+					<button wicket:id="watchRequests" class="btn btn-default" title="You are not watching pull requests of this branch, click to watch"><i class="fa fa-eye-slash"></i> <i class="fa fa-branch-merge"></i> </button>
 					<button wicket:id="compareLink" class="btn btn-default"><i class="fa fa-branch-compare"></i> Compare</button>
 					<span wicket:id="pullName"></span>
 				</td>

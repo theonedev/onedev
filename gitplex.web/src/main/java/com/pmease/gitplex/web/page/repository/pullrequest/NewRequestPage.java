@@ -123,7 +123,6 @@ public class NewRequestPage extends RepositoryPage {
 			PullRequestUpdate update = new PullRequestUpdate();
 			pullRequest.getUpdates().add(update);
 			update.setRequest(pullRequest);
-			update.setUser(currentUser);
 			update.setHeadCommitHash(source.getHeadCommitHash());
 			pullRequest.setUpdateDate(new Date());
 			

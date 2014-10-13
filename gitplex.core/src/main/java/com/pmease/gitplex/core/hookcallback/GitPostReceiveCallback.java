@@ -22,7 +22,6 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.manager.BranchManager;
-import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
@@ -39,13 +38,10 @@ public class GitPostReceiveCallback extends HttpServlet {
     
     private final BranchManager branchManager;
     
-    private final UserManager userManager;
-    
     @Inject
-    public GitPostReceiveCallback(Dao dao, BranchManager branchManager, UserManager userManager) {
+    public GitPostReceiveCallback(Dao dao, BranchManager branchManager) {
     	this.dao = dao;
         this.branchManager = branchManager;
-        this.userManager = userManager;
     }
 
     @Override
@@ -106,7 +102,6 @@ public class GitPostReceiveCallback extends HttpServlet {
 				branch.setRepository(repository);
 				branch.setName(branchName);
 				branch.setHeadCommitHash(newCommitHash);
-				branch.setUpdater(userManager.getCurrent());
 				repository.getBranches().add(branch);
 				dao.persist(branch);
 				if (repository.getBranches().size() == 1) 
@@ -115,9 +110,8 @@ public class GitPostReceiveCallback extends HttpServlet {
 				Branch branch = branchManager.findBy(repository, branchName);
 				Preconditions.checkNotNull(branch);
 
-				User currentUser = userManager.getCurrent();
 				repository.getBranches().remove(branch);
-				branchManager.delete(branch, currentUser);
+				branchManager.delete(branch);
 				if (repository.git().resolveDefaultBranch().equals(branchName) && !repository.getBranches().isEmpty()) 
 						repository.git().updateDefaultBranch(repository.getBranches().iterator().next().getName());
 			} else {
@@ -127,7 +121,6 @@ public class GitPostReceiveCallback extends HttpServlet {
 				Preconditions.checkNotNull(branch);
 
 				branch.setHeadCommitHash(newCommitHash);
-				branch.setUpdater(userManager.getCurrent());
 				branchManager.save(branch);
 			}
 		}

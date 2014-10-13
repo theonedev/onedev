@@ -8,7 +8,6 @@ import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 
 import org.eclipse.jgit.lib.PersonIdent;
@@ -71,11 +70,13 @@ public class User extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestCommentReply> requestCommentReplies = new ArrayList<>();
 	
-	@Lob
-	@Column(nullable=false)
-	private ArrayList<ChangeSubscription> changeSubscriptions = new ArrayList<>();
+    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+    private Collection<CommitWatch> commitWatches = new ArrayList<>();
 
-	@Editable(order=100)
+    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+    private Collection<PullRequestWatch> requestWatches = new ArrayList<>();
+
+    @Editable(order=100)
 	@UserName
 	@NotEmpty
 	@Override
@@ -209,17 +210,25 @@ public class User extends AbstractUser implements ProtectedObject {
 		return requestCommentReplies;
 	}
 
-	public void setCommentReplies(Collection<PullRequestCommentReply> requestCommentReplies) {
+	public void setRequestCommentReplies(
+			Collection<PullRequestCommentReply> requestCommentReplies) {
 		this.requestCommentReplies = requestCommentReplies;
 	}
 
-	public ArrayList<ChangeSubscription> getChangeSubscriptions() {
-		return changeSubscriptions;
+	public Collection<CommitWatch> getCommitWatches() {
+		return commitWatches;
 	}
 
-	public void setChangeSubscriptions(
-			ArrayList<ChangeSubscription> changeSubscriptions) {
-		this.changeSubscriptions = changeSubscriptions;
+	public void setCommitWatches(Collection<CommitWatch> commitWatches) {
+		this.commitWatches = commitWatches;
+	}
+
+	public Collection<PullRequestWatch> getRequestWatches() {
+		return requestWatches;
+	}
+
+	public void setRequestWatches(Collection<PullRequestWatch> requestWatches) {
+		this.requestWatches = requestWatches;
 	}
 
 	@Override

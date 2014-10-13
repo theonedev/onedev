@@ -208,7 +208,7 @@ public class DefaultRepositoryManager implements RepositoryManager {
 			if (branchesInGit.containsKey(branch.getName())) {
 				branchesInDB.put(branch.getName(), branch);
 			} else {
-				branchManager.delete(branch, null);
+				branchManager.delete(branch);
 				it.remove();
 			}
 		}
@@ -220,17 +220,31 @@ public class DefaultRepositoryManager implements RepositoryManager {
 				branch.setName(entry.getKey());
 				branch.setHeadCommitHash(entry.getValue());
 				branch.setRepository(repository);
-				dao.persist(branch);
+				repository.getBranches().add(branch);
+				branchManager.save(branch);
 			} else if (!branch.getHeadCommitHash().equals(entry.getValue()))	 {
 				branch.setHeadCommitHash(entry.getValue());
-				branch.setUpdater(null);
-				dao.persist(branch);
+				branchManager.save(branch);
 			}
 		}
 		
 		String defaultBranchName = repository.git().resolveDefaultBranch();
-		if (!branchesInGit.isEmpty() && !branchesInGit.containsKey(defaultBranchName))
-			repository.git().updateDefaultBranch(branchesInGit.keySet().iterator().next());
+		if (!branchesInGit.isEmpty() && !branchesInGit.containsKey(defaultBranchName)) {
+			defaultBranchName = branchesInGit.keySet().iterator().next();
+			repository.git().updateDefaultBranch(defaultBranchName);
+		}
+		
+		for (Branch branch: repository.getBranches()) {
+			if (branch.getName().equals(defaultBranchName)) {
+				if (!branch.isDefault()) {
+					branch.setDefault(true);
+					branchManager.save(branch);
+				}
+			} else if (branch.isDefault()) {
+				branch.setDefault(false);
+				branchManager.save(branch);
+			}
+		}
 	}
 	
 }

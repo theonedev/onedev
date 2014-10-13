@@ -21,7 +21,6 @@ import com.pmease.gitplex.web.page.account.MemberSettingPage;
 import com.pmease.gitplex.web.page.account.RegisterPage;
 import com.pmease.gitplex.web.page.account.repository.NewRepositoryPage;
 import com.pmease.gitplex.web.page.account.repository.RepositoriesPage;
-import com.pmease.gitplex.web.page.account.subscription.ChangeSubscriptionPage;
 import com.pmease.gitplex.web.page.account.team.AccountTeamsPage;
 import com.pmease.gitplex.web.page.account.team.AddTeamPage;
 import com.pmease.gitplex.web.page.account.team.EditTeamPage;
@@ -113,7 +112,6 @@ public class GitPlexMappings extends CompoundRequestMapper {
 		addPage("${user}/settings/teams", AccountTeamsPage.class);
 		addPage("${user}/settings/teams/new", AddTeamPage.class);
 		addPage("${user}/settings/teams/${teamId}", EditTeamPage.class);
-		addPage("${user}/settings/subscriptions", ChangeSubscriptionPage.class);
 	}
 
 	private void addRepositoryPages() {

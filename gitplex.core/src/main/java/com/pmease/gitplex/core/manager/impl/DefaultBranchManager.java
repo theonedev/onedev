@@ -18,7 +18,6 @@ import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.core.model.User;
 
 @Singleton
 public class DefaultBranchManager implements BranchManager {
@@ -52,7 +51,7 @@ public class DefaultBranchManager implements BranchManager {
 
     @Transactional
 	@Override
-	public void delete(Branch branch, User user) {
+	public void delete(Branch branch) {
     	deleteRefs(branch);
     	
     	for (PullRequest request: branch.getIncomingRequests()) { 
@@ -60,7 +59,7 @@ public class DefaultBranchManager implements BranchManager {
     	}
     	
     	for (PullRequest request: branch.getOutgoingRequests()) {
-    		pullRequestManager.discard(request, user, "Source branch is deleted.");
+    		pullRequestManager.discard(request, null, "Source branch is deleted.");
     		request.setSource(null);
     		dao.persist(request);
     	}
@@ -78,16 +77,6 @@ public class DefaultBranchManager implements BranchManager {
 	public void create(final Branch branch, final String commitHash) {
 		dao.persist(branch);
 		branch.getRepository().git().createBranch(branch.getName(), commitHash);
-	}
-
-    @Transactional
-	@Override
-	public void rename(final Branch branch, String newName) {
-    	String oldName = branch.getName(); 
-    	branch.setName(newName);
-    	
-		dao.persist(branch);
-		branch.getRepository().git().renameBranch(oldName, branch.getName());
 	}
 
 	@Override

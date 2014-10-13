@@ -99,26 +99,6 @@ public class Git implements Serializable {
 	}
 
 	/**
-	 * Rename specified branch. Default branch will be updated if necessary.
-	 * 
-	 * @param oldName
-	 *			old name of the branch 	
-	 * @param newName
-	 * 			new name of the branch
-	 * @return
-	 * 			this git object
-	 */
-	public Git renameBranch(String oldName, String newName) {
-		String commitHash = parseRevision(oldName, true);
-		createBranch(newName, commitHash);
-		if (resolveDefaultBranch().equals(oldName))
-			updateDefaultBranch(newName);
-		deleteBranch(oldName);
-		
-		return this;
-	}
-
-	/**
 	 * delete branch even in a bare repository.
 	 * 
 	 * @param branchName

@@ -71,8 +71,6 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	
 	private String description;
 	
-	private transient String defaultBranch;
-
 	@Lob
 	@Column(nullable=false)
 	private ArrayList<GateKeeper> gateKeepers = new ArrayList<>();
@@ -337,17 +335,19 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		return GitPlex.getInstance().getServerUrl() + "/" + getFullName();
 	}
 	
-	public String getDefaultBranch() {
-		if (defaultBranch == null)
-			defaultBranch = git().resolveDefaultBranch();
-		return defaultBranch;
+	public Branch getDefaultBranch() {
+		for (Branch branch: getBranches()) {
+			if (branch.isDefault())
+				return branch;
+		}
+		throw new IllegalStateException();
 	}
 	
 	public String defaultBranchIfNull(@Nullable String revision) {
 		if (revision != null)
 			return revision;
 		else
-			return getDefaultBranch();
+			return getDefaultBranch().getName();
 	}
 	
 	/**

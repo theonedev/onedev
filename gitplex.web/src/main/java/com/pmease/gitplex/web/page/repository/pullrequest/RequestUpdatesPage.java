@@ -67,7 +67,6 @@ public class RequestUpdatesPage extends RequestDetailPage {
 			protected void populateItem(final ListItem<PullRequestUpdate> updateItem) {
 				PullRequestUpdate update = updateItem.getModelObject();
 
-				updateItem.add(new UserLink("name", new UserModel(update.getUser()), AvatarMode.NAME));
 				List<PullRequestUpdate> updates = update.getRequest().getSortedUpdates();
 				int updateNo = updates.indexOf(update) + 1;
 				updateItem.add(new Label("updateNo", updateNo));

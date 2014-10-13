@@ -12,7 +12,6 @@ import javax.transaction.Status;
 import javax.transaction.Synchronization;
 
 import org.hibernate.ReplicationMode;
-import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
@@ -21,12 +20,9 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.Membership;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.operation.GeneralOperation;
@@ -117,16 +113,6 @@ public class DefaultUserManager implements UserManager {
     	for (PullRequest request: user.getSubmittedRequests()) {
     		request.setSubmitter(null);
     		dao.persist(request);
-    	}
-    	
-    	for (PullRequestUpdate update: user.getUpdates()) {
-    		update.setUser(null);
-    		dao.persist(update);
-    	}
-    	
-    	for (Branch branch: dao.query(EntityCriteria.of(Branch.class).add(Restrictions.eq("updater", user)))) {
-    		branch.setUpdater(null);
-    		dao.persist(branch);
     	}
     	
 		dao.remove(user);

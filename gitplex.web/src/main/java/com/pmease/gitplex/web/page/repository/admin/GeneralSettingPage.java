@@ -1,7 +1,5 @@
 package com.pmease.gitplex.web.page.repository.admin;
 
-import java.util.List;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -12,7 +10,6 @@ import org.apache.wicket.feedback.ComponentFeedbackMessageFilter;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -22,9 +19,6 @@ import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitplex.core.GitPlex;
@@ -33,7 +27,6 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.common.quantity.Data;
 import com.pmease.gitplex.web.common.wicket.form.checkbox.CheckBoxElement;
-import com.pmease.gitplex.web.common.wicket.form.select.DropDownChoiceElement;
 import com.pmease.gitplex.web.common.wicket.form.textfield.TextFieldElement;
 import com.pmease.gitplex.web.page.account.AccountHomePage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
@@ -46,7 +39,6 @@ public class GeneralSettingPage extends RepositoryPage {
 	}
 
 	private String repositoryName;
-	private String defaultBranchName;
 	
 	@Override
 	protected void onInitialize() {
@@ -108,27 +100,6 @@ public class GeneralSettingPage extends RepositoryPage {
 				new PropertyModel<Boolean>(repoModel, "forkable"),
 				Model.of("Enable/Disable whether this repository can be forked by others")));
 		
-		// Default branch is recorded in HEAD ref of the repository, since no any branches exist in 
-		// repository when it is created, it might be more appropriate to assign default branch directly 
-		// via branches page.
-		IModel<List<? extends String>> branchesModel = new AbstractReadOnlyModel<List<? extends String>>() {
-
-			@Override
-			public List<String> getObject() {
-				Repository repository = getRepository();
-				Git git = repository.git();
-				return Lists.newArrayList(git.listBranches().keySet());
-			}
-		};
-		
-		defaultBranchName = getRepository().git().resolveDefaultBranch();
-		form.add(new DropDownChoiceElement<String>(
-				"defaultBranch", 
-				"Default Branch",
-				new PropertyModel<String>(this, "defaultBranchName"),
-				branchesModel)
-				.setHelp("Set default branch for browsing. By default, it is \"master\"." ));
-		
 		form.add(new AjaxButton("submit", form) {
 			@Override
 			protected void onError(AjaxRequestTarget target, Form<?> form) {
@@ -141,11 +112,6 @@ public class GeneralSettingPage extends RepositoryPage {
 				boolean nameChanged = !Objects.equal(repository.getName(), repositoryName);
 				if (nameChanged) {
 					repository.setName(repositoryName);
-				}
-//				repository.setDefaultBranchName(defaultBranch);
-				
-				if (!Strings.isNullOrEmpty(defaultBranchName)) {
-					repository.git().updateDefaultBranch(defaultBranchName);
 				}
 				
 				GitPlex.getInstance(RepositoryManager.class).save(repository);

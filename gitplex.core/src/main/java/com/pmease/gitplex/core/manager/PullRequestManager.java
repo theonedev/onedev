@@ -31,7 +31,7 @@ public interface PullRequestManager {
      */
     void integrate(PullRequest request, @Nullable User user, @Nullable String comment);
     
-    void discard(PullRequest request, User user, @Nullable String comment);
+    void discard(PullRequest request, @Nullable User user, @Nullable String comment);
     
     void onTargetBranchUpdate(PullRequest request);
     

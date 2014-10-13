@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
+import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -34,7 +35,6 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 	private PullRequest request;
 	
 	@ManyToOne
-	@JoinColumn(nullable=false)
 	private User user;
 	
 	@Column(nullable=false)
@@ -58,11 +58,12 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 		this.request = request;
 	}
 
+	@Nullable
 	public User getUser() {
 		return user;
 	}
 
-	public void setUser(User user) {
+	public void setUser(@Nullable User user) {
 		this.user = user;
 	}
 
