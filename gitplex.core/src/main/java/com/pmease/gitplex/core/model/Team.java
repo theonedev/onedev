@@ -6,12 +6,15 @@ import java.util.Collection;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Objects;
@@ -23,6 +26,7 @@ import com.pmease.gitplex.core.validation.TeamName;
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"owner", "name"})
 })
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @SuppressWarnings("serial")
 public class Team extends AbstractEntity {
 
@@ -30,7 +34,7 @@ public class Team extends AbstractEntity {
 	public static final String OWNERS = "Owners";
 	public static final String LOGGEDIN = "Logged-In";
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private User owner;
 

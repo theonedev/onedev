@@ -1,5 +1,6 @@
 package com.pmease.gitplex.core.manager;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -10,12 +11,17 @@ import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 @ImplementedBy(DefaultPullRequestManager.class)
 public interface PullRequestManager {
     
-    @Nullable PullRequest findOpen(Branch target, Branch source);
+    @Nullable PullRequest findLatest(Branch target, Branch source);
+    
+    Collection<PullRequest> findOpenTo(Branch target, Repository source);
+
+    Collection<PullRequest> findOpenFrom(Branch source, Repository target);
 
     boolean canIntegrate(PullRequest request);
     

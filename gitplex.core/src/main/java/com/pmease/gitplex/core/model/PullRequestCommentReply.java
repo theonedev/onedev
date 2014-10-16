@@ -3,6 +3,7 @@ package com.pmease.gitplex.core.model;
 import java.util.Date;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
@@ -19,7 +20,7 @@ public class PullRequestCommentReply extends AbstractEntity implements CommentRe
 	@JoinColumn(nullable=false)
 	private PullRequestComment comment;
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private User user;
 	

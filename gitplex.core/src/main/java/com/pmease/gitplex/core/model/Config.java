@@ -6,6 +6,9 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import com.pmease.commons.hibernate.AbstractEntity;
 
 /**
@@ -15,6 +18,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
  */
 @SuppressWarnings("serial")
 @Entity
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Config extends AbstractEntity {
 
 	public enum Key {SYSTEM, MAIL};

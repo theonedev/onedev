@@ -49,24 +49,26 @@ public class ConfirmBehavior extends Behavior {
 					@Override
 					public void onComponentTag(Component component, ComponentTag tag) {
 						super.onComponentTag(component, tag);
-						String message = StringEscapeUtils.escapeEcmaScript(messageModel.getObject());
-						CharSequence script = tag.getAttribute("onclick");
-						if (script == null) {
-							String href = tag.getAttribute("href");
-							if (href != null) {
-								script = "window.location.href='" + href + "';";
-								tag.put("href", "javascript:void(0);");
-							} else { 
-								script = String.format("$('#%s').closest('form').submit();", component.getMarkupId());
+						if (component.isEnabled()) {
+							String message = StringEscapeUtils.escapeEcmaScript(messageModel.getObject());
+							CharSequence script = tag.getAttribute("onclick");
+							if (script == null) {
+								String href = tag.getAttribute("href");
+								if (href != null) {
+									script = "window.location.href='" + href + "';";
+									tag.put("href", "javascript:void(0);");
+								} else { 
+									script = String.format("$('#%s').closest('form').submit();", component.getMarkupId());
+								}
 							}
+			
+							String decoratedScript = String.format(
+									"pmease.commons.confirm.show($('#%s'), '%s', function() {%s}); return false;",
+									component.getMarkupId(), message, script);
+							decoratedScript = StringUtils.replace(decoratedScript, 
+									"this.", "document.getElementById('" + component.getMarkupId() + "').");
+							tag.put("onclick", decoratedScript);
 						}
-		
-						String decoratedScript = String.format(
-								"pmease.commons.confirm.show($('#%s'), '%s', function() {%s}); return false;",
-								component.getMarkupId(), message, script);
-						decoratedScript = StringUtils.replace(decoratedScript, 
-								"this.", "document.getElementById('" + component.getMarkupId() + "').");
-						tag.put("onclick", decoratedScript);
 					}
 					
 				});
@@ -77,15 +79,17 @@ public class ConfirmBehavior extends Behavior {
 					public void renderHead(Component component, IHeaderResponse response) {
 						super.renderHead(component, response);
 
-						String message = StringEscapeUtils.escapeEcmaScript(messageModel.getObject());
+						if (component.isEnabled()) {
+							String message = StringEscapeUtils.escapeEcmaScript(messageModel.getObject());
 
-						String script = String.format("pmease.commons.confirm.setup('%s', '%s')", component.getMarkupId(), message);
+							String script = String.format("pmease.commons.confirm.setup('%s', '%s')", component.getMarkupId(), message);
 
-						AjaxRequestTarget target = component.getRequestCycle().find(AjaxRequestTarget.class);
-						if (target == null) 
-							response.render(OnDomReadyHeaderItem.forScript(script));
-						else
-							target.appendJavaScript(script);
+							AjaxRequestTarget target = component.getRequestCycle().find(AjaxRequestTarget.class);
+							if (target == null) 
+								response.render(OnDomReadyHeaderItem.forScript(script));
+							else
+								target.appendJavaScript(script);
+						}
 					}
 					
 				});

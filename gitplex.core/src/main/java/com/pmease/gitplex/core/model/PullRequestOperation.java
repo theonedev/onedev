@@ -60,7 +60,7 @@ public enum PullRequestOperation {
 		@Override
 		public void operate(PullRequest request, String comment) {
 			User user = GitPlex.getInstance(UserManager.class).getCurrent();
-			GitPlex.getInstance(VoteManager.class).vote(request, user, Vote.Result.APPROVE, comment);
+			GitPlex.getInstance(VoteManager.class).vote(request, user, PullRequestVote.Result.APPROVE, comment);
 		}		
 		
 	},
@@ -74,7 +74,7 @@ public enum PullRequestOperation {
 		@Override
 		public void operate(PullRequest request, String comment) {
 			User user = GitPlex.getInstance(UserManager.class).getCurrent();
-			GitPlex.getInstance(VoteManager.class).vote(request, user, Vote.Result.DISAPPROVE, comment);
+			GitPlex.getInstance(VoteManager.class).vote(request, user, PullRequestVote.Result.DISAPPROVE, comment);
 		}
 		
 	};

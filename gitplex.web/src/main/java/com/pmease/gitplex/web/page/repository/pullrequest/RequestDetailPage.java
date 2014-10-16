@@ -74,7 +74,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequestOperation;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.model.Verification;
+import com.pmease.gitplex.core.model.PullRequestVerification;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.component.branch.BranchLink;
 import com.pmease.gitplex.web.component.label.AgeLabel;
@@ -684,16 +684,16 @@ public abstract class RequestDetailPage extends RepositoryPage {
 				}) {
 
 					@Override
-					protected Component newStatusComponent(String id, final IModel<Verification.Status> statusModel) {
+					protected Component newStatusComponent(String id, final IModel<PullRequestVerification.Status> statusModel) {
 						return new Label(id, new AbstractReadOnlyModel<String>() {
 
 							@Override
 							public String getObject() {
-								if (statusModel.getObject() == Verification.Status.PASSED)
+								if (statusModel.getObject() == PullRequestVerification.Status.PASSED)
 									return "successful <i class='caret'></i>";
-								else if (statusModel.getObject() == Verification.Status.ONGOING)
+								else if (statusModel.getObject() == PullRequestVerification.Status.ONGOING)
 									return "running <i class='caret'></i>";
-								else if (statusModel.getObject() == Verification.Status.NOT_PASSED) 
+								else if (statusModel.getObject() == PullRequestVerification.Status.NOT_PASSED) 
 									return "failed <i class='caret'></i>";
 								else 
 									return "";
@@ -705,11 +705,11 @@ public abstract class RequestDetailPage extends RepositoryPage {
 							protected void onComponentTag(ComponentTag tag) {
 								super.onComponentTag(tag);
 								
-								if (statusModel.getObject() == Verification.Status.PASSED)
+								if (statusModel.getObject() == PullRequestVerification.Status.PASSED)
 									tag.put("class", "label label-success");
-								else if (statusModel.getObject() == Verification.Status.ONGOING)
+								else if (statusModel.getObject() == PullRequestVerification.Status.ONGOING)
 									tag.put("class", "label label-warning");
-								else if (statusModel.getObject() == Verification.Status.NOT_PASSED) 
+								else if (statusModel.getObject() == PullRequestVerification.Status.NOT_PASSED) 
 									tag.put("class", "label label-danger");
 							}
 

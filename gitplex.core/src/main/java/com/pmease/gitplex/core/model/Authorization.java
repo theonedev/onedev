@@ -1,6 +1,7 @@
 package com.pmease.gitplex.core.model;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -16,11 +17,11 @@ import com.pmease.gitplex.core.permission.operation.GeneralOperation;
 })
 public class Authorization extends AbstractEntity {
 
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Team team;	
 
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Repository repository;
 	

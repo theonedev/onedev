@@ -461,8 +461,9 @@ pmease.commons = {
 		Wicket.Event.subscribe('/ajax/call/beforeSend', function() {
 			var ajaxLoadingIndicator = $("#ajax-loading-indicator");
 			ajaxLoadingIndicator[0].timer = setTimeout(function() {
-				ajaxLoadingIndicator.show();
-			}, 1000);		
+				if (!$(".ajax-indicator").is(":visible"))
+					ajaxLoadingIndicator.show();
+			}, 500);		
 		});
 		
 		Wicket.Event.subscribe('/ajax/call/complete', function() {
@@ -750,6 +751,23 @@ pmease.commons = {
 		}
 	},
 
+	setupClearableInput: function(inputId) {
+		var $input = $("#" + inputId);
+		$input.after("<span class='input-clear'>x</span>");
+		$input.next().click(function() {
+			$input.val("");
+			$(this).hide();
+			$input.trigger("inputchange");
+		});
+		$input.keyup(function() {
+			var value = $(this).val();
+			if (value.trim().length != 0)
+				$input.next().show();
+			else
+				$input.next().hide();
+		});
+	}
+	
 };
 
 $(function() {

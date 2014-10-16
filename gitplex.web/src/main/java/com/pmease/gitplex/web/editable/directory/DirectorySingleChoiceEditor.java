@@ -1,6 +1,5 @@
 package com.pmease.gitplex.web.editable.directory;
 
-import com.pmease.gitplex.core.GitPlex;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
@@ -19,7 +18,6 @@ import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
-import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.web.component.directory.DirectoryChooser;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
@@ -45,7 +43,7 @@ public class DirectorySingleChoiceEditor extends PropertyEditor<String> {
 			@Override
 			protected Component newContent(String id) {
 				RepositoryPage page = (RepositoryPage) getPage();
-				Branch defaultBranch = GitPlex.getInstance(BranchManager.class).findDefault(page.getRepository());
+				Branch defaultBranch = page.getRepository().getDefaultBranch();
 				
 				if (defaultBranch != null) {
 					return new DirectoryChooser(id, Model.of(defaultBranch)) {

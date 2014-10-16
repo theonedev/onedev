@@ -13,7 +13,7 @@ import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.model.Vote;
+import com.pmease.gitplex.core.model.PullRequestVote;
 
 @SuppressWarnings("serial")
 @Editable(order=200, icon="fa-user-o", description=
@@ -37,13 +37,13 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
     public CheckResult doCheckRequest(PullRequest request) {
         User user = GitPlex.getInstance(Dao.class).load(User.class, getUserId());
 
-        Vote.Result result = user.checkVoteSince(request.getReferentialUpdate());
+        PullRequestVote.Result result = user.checkVoteSince(request.getReferentialUpdate());
         if (result == null) {
             request.pickVoters(Sets.newHashSet(user), 1);
 
             return pending("To be approved by " + user.getDisplayName() + ".",
                     new CanVoteBySpecifiedUser(user));
-        } else if (result == Vote.Result.APPROVE) {
+        } else if (result == PullRequestVote.Result.APPROVE) {
             return approved("Approved by " + user.getDisplayName() + ".");
         } else {
             return disapproved("Rejected by " + user.getDisplayName() + ".");

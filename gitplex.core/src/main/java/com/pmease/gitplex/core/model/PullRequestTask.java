@@ -1,13 +1,19 @@
 package com.pmease.gitplex.core.model;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 
 @SuppressWarnings("serial")
 @Entity
+@Table(uniqueConstraints={
+		@UniqueConstraint(columnNames={"request", "user"})
+})
 public class PullRequestTask extends AbstractEntity {
 
 	public enum TaskType {VOTE, UPDATE, INTEGRATE};
@@ -16,7 +22,7 @@ public class PullRequestTask extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private PullRequest request;
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private User user;
 	

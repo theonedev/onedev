@@ -1,4 +1,4 @@
-package com.pmease.commons.wicket.component.datatablesupport;
+package com.pmease.commons.wicket.component.datatable;
 
 import java.util.List;
 
@@ -11,14 +11,14 @@ import org.apache.wicket.markup.repeater.OddEvenItem;
 import org.apache.wicket.model.IModel;
 
 @SuppressWarnings("serial")
-public class CustomDataTable<T, S> extends DataTable<T, S> {
+public class DefaultDataTable<T, S> extends DataTable<T, S> {
 
-	public CustomDataTable(final String id, final List<? extends IColumn<T, S>> columns,
+	public DefaultDataTable(final String id, final List<? extends IColumn<T, S>> columns,
 			final ISortableDataProvider<T, S> dataProvider, final int rowsPerPage) {
 		super(id, columns, dataProvider, rowsPerPage);
 
-		addBottomToolbar(new CustomAjaxNavigationToolbar(this));
-		addTopToolbar(new CustomAjaxHeadersToolbar<S>(this, dataProvider));
+		addBottomToolbar(new AjaxNavigationToolbar(this));
+		addTopToolbar(new AjaxHeadersToolbar<S>(this, dataProvider));
 		addBottomToolbar(new NoRecordsToolbar(this));
 	}
 

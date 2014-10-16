@@ -39,7 +39,6 @@ import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
-import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Branch;
@@ -78,7 +77,6 @@ public class NewRequestPage extends RepositoryPage {
 		if (!getRepository().git().hasCommits()) 
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));
 
-		BranchManager branchManager = GitPlex.getInstance(BranchManager.class);
 		Dao dao = AppLoader.getInstance(Dao.class);
 		
 		RepositoryPage page = (RepositoryPage) getPage();
@@ -87,17 +85,16 @@ public class NewRequestPage extends RepositoryPage {
 		if (params.get("target").toString() != null) {
 			target = dao.load(Branch.class, params.get("target").toLongObject());
 		} else {
-			if (page.getRepository().getForkedFrom() != null) {
-				target = branchManager.findDefault(page.getRepository().getForkedFrom());
-			} else {
-				target = branchManager.findDefault(page.getRepository());
-			}
+			if (page.getRepository().getForkedFrom() != null)
+				target = page.getRepository().getForkedFrom().getDefaultBranch();
+			else
+				target = page.getRepository().getDefaultBranch();
 		}
 		if (params.get("source").toString() != null) {
 			source = dao.load(Branch.class, params.get("source").toLongObject());
 		} else {
 			if (page.getRepository().getForkedFrom() != null) {
-				source = branchManager.findDefault(page.getRepository());
+				source = page.getRepository().getDefaultBranch();
 			} else {
 				for (Branch each: page.getRepository().getBranches()) {
 					if (!each.equals(target)) {
@@ -112,9 +109,9 @@ public class NewRequestPage extends RepositoryPage {
 
 		User currentUser = AppLoader.getInstance(UserManager.class).getCurrent();
 		
-		pullRequest = GitPlex.getInstance(PullRequestManager.class).findOpen(target, source);
+		pullRequest = GitPlex.getInstance(PullRequestManager.class).findLatest(target, source);
 		
-		if (pullRequest == null) {
+		if (pullRequest == null || !pullRequest.isOpen()) {
 			pullRequest = new PullRequest();
 			pullRequest.setTarget(target);
 			pullRequest.setSource(source);
@@ -142,7 +139,7 @@ public class NewRequestPage extends RepositoryPage {
 				sandbox.clone(target.getRepository().git(), false, true, true, pullRequest.getTarget().getName());
 				sandbox.reset(null, null);
 
-				sandbox.fetch(source.getRepository().git());
+				sandbox.fetch(source.getRepository().git(), source.getName());
 				
 				pullRequest.setBaseCommitHash(pullRequest.git().calcMergeBase(target.getHeadCommitHash(), source.getHeadCommitHash()));			
 

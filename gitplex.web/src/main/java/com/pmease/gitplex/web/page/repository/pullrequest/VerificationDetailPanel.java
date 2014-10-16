@@ -9,14 +9,14 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.gitplex.core.model.Verification;
+import com.pmease.gitplex.core.model.PullRequestVerification;
 
 @SuppressWarnings("serial")
 class VerificationDetailPanel extends Panel {
 
-	private IModel<List<Verification>> model;
+	private IModel<List<PullRequestVerification>> model;
 	
-	public VerificationDetailPanel(String id, IModel<List<Verification>> model) {
+	public VerificationDetailPanel(String id, IModel<List<PullRequestVerification>> model) {
 		super(id);
 		
 		this.model = model;
@@ -26,17 +26,17 @@ class VerificationDetailPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ListView<Verification>("verifications", model) {
+		add(new ListView<PullRequestVerification>("verifications", model) {
 
 			@Override
-			protected void populateItem(ListItem<Verification> item) {
-				Verification verification = item.getModelObject();
+			protected void populateItem(ListItem<PullRequestVerification> item) {
+				PullRequestVerification verification = item.getModelObject();
 				item.add(new Label("configuration", verification.getConfiguration()));
 				item.add(new Label("message", verification.getMessage()).setEscapeModelStrings(false));
 				
-				if (verification.getStatus() == Verification.Status.NOT_PASSED)
+				if (verification.getStatus() == PullRequestVerification.Status.NOT_PASSED)
 					item.add(AttributeAppender.append("class", "not-passed"));
-				else if (verification.getStatus() == Verification.Status.PASSED)
+				else if (verification.getStatus() == PullRequestVerification.Status.PASSED)
 					item.add(AttributeAppender.append("class", "passed"));
 				else
 					item.add(AttributeAppender.append("class", "ongoing"));

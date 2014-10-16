@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -34,7 +35,7 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 	@JoinColumn(nullable=false)
 	private PullRequest request;
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	private User user;
 	
 	@Column(nullable=false)

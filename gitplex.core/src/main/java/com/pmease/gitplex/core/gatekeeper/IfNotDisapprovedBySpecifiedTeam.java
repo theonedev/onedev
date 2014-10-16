@@ -7,7 +7,7 @@ import com.pmease.gitplex.core.model.Membership;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.model.Vote;
+import com.pmease.gitplex.core.model.PullRequestVote;
 
 @SuppressWarnings("serial")
 @Editable(order=600, icon="fa-group-o", description=
@@ -17,8 +17,8 @@ public class IfNotDisapprovedBySpecifiedTeam extends TeamAwareGateKeeper {
 	@Override
 	public CheckResult doCheckRequest(PullRequest request) {
 		for (Membership membership: getTeam().getMemberships()) {
-			Vote.Result result = membership.getUser().checkVoteSince(request.getReferentialUpdate());
-			if (result == Vote.Result.DISAPPROVE) {
+			PullRequestVote.Result result = membership.getUser().checkVoteSince(request.getReferentialUpdate());
+			if (result == PullRequestVote.Result.DISAPPROVE) {
 				return disapproved("Disapproved by user '" + membership.getUser().getName() + "'.");
 			}
 		}

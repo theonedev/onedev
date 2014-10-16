@@ -12,8 +12,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Verification;
-import com.pmease.gitplex.core.model.Verification.Status;
+import com.pmease.gitplex.core.model.PullRequestVerification;
+import com.pmease.gitplex.core.model.PullRequestVerification.Status;
 
 @SuppressWarnings("serial")
 public abstract class VerificationStatusPanel extends Panel {
@@ -29,9 +29,9 @@ public abstract class VerificationStatusPanel extends Panel {
 		this.commitHashModel = commitHashModel;
 	}
 	
-	private List<Verification> getVerifications() {
-		List<Verification> verifications = new ArrayList<>();
-		for (Verification verification: requestModel.getObject().getVerifications()) {
+	private List<PullRequestVerification> getVerifications() {
+		List<PullRequestVerification> verifications = new ArrayList<>();
+		for (PullRequestVerification verification: requestModel.getObject().getVerifications()) {
 			if (verification.getCommit().equals(commitHashModel.getObject()))
 				verifications.add(verification);
 		}
@@ -46,10 +46,10 @@ public abstract class VerificationStatusPanel extends Panel {
 
 			@Override
 			protected Component newContent(String id) {
-				return new VerificationDetailPanel(id, new AbstractReadOnlyModel<List<Verification>>() {
+				return new VerificationDetailPanel(id, new AbstractReadOnlyModel<List<PullRequestVerification>>() {
 
 					@Override
-					public List<Verification> getObject() {
+					public List<PullRequestVerification> getObject() {
 						return getVerifications();
 					}
 					
@@ -59,19 +59,19 @@ public abstract class VerificationStatusPanel extends Panel {
 		};
 		add(dropdown);
 		
-		Component statusComponent = newStatusComponent("overall", new LoadableDetachableModel<Verification.Status>() {
+		Component statusComponent = newStatusComponent("overall", new LoadableDetachableModel<PullRequestVerification.Status>() {
 
 			@Override
 			protected Status load() {
-				Verification.Status overallStatus = null;
-				for (Verification verification: getVerifications()) {
-					if (verification.getStatus() == Verification.Status.NOT_PASSED) {
-						overallStatus = Verification.Status.NOT_PASSED;
+				PullRequestVerification.Status overallStatus = null;
+				for (PullRequestVerification verification: getVerifications()) {
+					if (verification.getStatus() == PullRequestVerification.Status.NOT_PASSED) {
+						overallStatus = PullRequestVerification.Status.NOT_PASSED;
 						break;
-					} else if (verification.getStatus() == Verification.Status.ONGOING) {
-						overallStatus = Verification.Status.ONGOING;
+					} else if (verification.getStatus() == PullRequestVerification.Status.ONGOING) {
+						overallStatus = PullRequestVerification.Status.ONGOING;
 					} else if (overallStatus == null) {
-						overallStatus = Verification.Status.PASSED;
+						overallStatus = PullRequestVerification.Status.PASSED;
 					}
 				}
 				return overallStatus;
@@ -82,7 +82,7 @@ public abstract class VerificationStatusPanel extends Panel {
 		add(statusComponent);
 	}
 	
-	protected abstract Component newStatusComponent(String id, IModel<Verification.Status> statusModel);
+	protected abstract Component newStatusComponent(String id, IModel<PullRequestVerification.Status> statusModel);
 	
 	@Override
 	protected void onDetach() {

@@ -7,11 +7,15 @@ import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
@@ -22,9 +26,10 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"repository", "name"})
 })
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Branch extends AbstractEntity {
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Repository repository;
 
@@ -32,9 +37,6 @@ public class Branch extends AbstractEntity {
 	private String name;
 	
 	private boolean isDefault;
-	
-	@ManyToOne
-	private User updater;
 	
     @OneToMany(mappedBy="target", cascade=CascadeType.REMOVE)
     private Collection<PullRequest> incomingRequests = new ArrayList<>();

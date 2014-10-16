@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
@@ -16,7 +17,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @Entity
 public class CommitComment extends AbstractEntity {
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Repository repository;
 	
@@ -26,7 +27,7 @@ public class CommitComment extends AbstractEntity {
 	@Column(nullable=false)
 	private Date commitDate;
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private User user;
 	

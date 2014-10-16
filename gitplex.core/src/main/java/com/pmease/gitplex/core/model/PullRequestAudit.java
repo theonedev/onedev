@@ -5,6 +5,7 @@ import java.util.Date;
 import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
@@ -23,7 +24,7 @@ public class PullRequestAudit extends AbstractEntity {
 	@Column(nullable=false)
 	private PullRequestOperation operation;
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	private User user;
 	
 	@Column(nullable=false)

@@ -1,6 +1,7 @@
 package com.pmease.gitplex.core.model;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -15,7 +16,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 })
 public class VoteInvitation extends AbstractEntity {
 
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private User voter;
 	

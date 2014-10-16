@@ -13,6 +13,7 @@ import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
@@ -22,9 +23,12 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.Multiline;
 import com.pmease.commons.git.BlobInfo;
@@ -50,19 +54,20 @@ import com.pmease.gitplex.core.validation.RepositoryName;
 		@UniqueConstraint(columnNames={"owner", "name"}), 
 		@UniqueConstraint(columnNames={"owner", "forkedFrom"})
 })
-@SuppressWarnings("serial")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
+@SuppressWarnings("serial")
 public class Repository extends AbstractEntity implements UserBelonging {
 
 	public static final String REFS_GITPLEX = "refs/gitplex/";
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private User owner;
 
 	private boolean forkable = true;
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=true)
 	private Repository forkedFrom;
 
@@ -103,6 +108,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
     private transient Map<String, Commit> commitCache = new HashMap<>();
     
     private transient Map<String, Optional<String>> refValueCache = new HashMap<>();
+    
+    private transient Branch defaultBranch;
     
 	public User getOwner() {
 		return owner;
@@ -336,11 +343,16 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	public Branch getDefaultBranch() {
-		for (Branch branch: getBranches()) {
-			if (branch.isDefault())
-				return branch;
+		if (defaultBranch == null) {
+			for (Branch branch: getBranches()) {
+				if (branch.isDefault()) {
+					defaultBranch = branch;
+					break;
+				}
+			}
+			Preconditions.checkNotNull(defaultBranch);
 		}
-		throw new IllegalStateException();
+		return defaultBranch;
 	}
 	
 	public String defaultBranchIfNull(@Nullable String revision) {

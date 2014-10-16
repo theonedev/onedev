@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -16,11 +17,11 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"voter", "update"})
 })
-public class Vote extends AbstractEntity {
+public class PullRequestVote extends AbstractEntity {
 
 	public static enum Result {APPROVE, DISAPPROVE};
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private User voter;
 

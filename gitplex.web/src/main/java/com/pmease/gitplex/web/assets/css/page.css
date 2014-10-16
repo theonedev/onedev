@@ -4,6 +4,7 @@ a {color: #09f; cursor: pointer;}
 a.fa {text-decoration: none;}
 a.fa-times {color: #FF2A68;}
 a.fa-times:hover {color: #BD2E29;}
+span.fa-times {color: #999;}
 
 textarea {resize: vertical;}
 
@@ -112,9 +113,6 @@ div.terminal {background: black; color: white; border-radius: 4px; padding: 8px;
 .form-inline select.form-control { width: 100%; }
 
 /* FORM COMPONENT */
-/* Comment out since rendering is correct after applying bootstrap3 style to select2
-.select2-container .select2-choice { padding-top: 4px; padding-bottom: 4px; height: auto; }
-*/
 .select2-highlighted .user-choice-row p.text-muted { color: #ccc; }
 
 .required { color: #a00; margin-left: 3px; line-height: 1;}
@@ -647,30 +645,27 @@ table.table-blob { width: 100%; }
 .blame-msg .blame-row:last-child { padding-bottom: 9px; }
 .blame-row .section-first > i { color: #888; }
 
-/**
- * BRANCHES PAGE
- */
-h2.section-title { margin: 18px 0; font-size: 16px; }
+/* BRANCHES PAGE */
+.branches>.body>.options {margin-bottom: 16px;}
+.branches>.body>.options>div {margin-right: 24px;}
+.branches>.body>.options>div.base {width: 240px;}
+.branches>.body>.options>div.search input {width: 240px;}
+.branches>.body>.options .pagination {margin: 0;}
+table.branches td {white-space: nowrap;}
+table.branches td.watch {width: 160px;}
+table.branches td.actions {width: 1px;}
+table.branches td.behind-ahead {width: 25%;}
+table.branches td.behind-ahead a, table.branches td.behind-ahead em {font-size: 13px;}
+table.branches td.behind {padding-right: 0;}
+table.branches td.ahead {padding-left: 0;}
+table.branches td.behind>div {border-right: 1px solid #333;}
+table.branches td.behind-ahead div.text {margin: 0 4px;}
+table.branches .bar {height: 12px;}
+table.branches .ahead .bar {background: #666;}
+table.branches .behind .bar {background: #ccc;}
+table.branches td.summary>div, table.branches td.summary>div .name a {font-size: 13px; color: #666;}
 
-.table-branches td.actions { text-align: right; vertical-align: middle; }
-.table-branches p { margin: 0;}
-.table-branches td.meta a { font-size: 16px; font-weight: bold; } 
-.table-branches td.meta p { color: #666;}
-.table-branches tr.default-branch { background: #333; color: white; }
-.table-branches .default-branch .meta a { color: white; }
-.table-branches .default-branch .meta p { color: #ccc; }
-
-.bar { display: block; }
-.statbar { position: relative; width: 220px; }
-.statbar .ahead { position: absolute; left: 50%; right: 0; border-left: 1px solid #666; }
-.statbar .behind { position: absolute; left: 0; right: 50%; border-right: 1px solid #666; }
-.statbar .bar { height: 14px; }
-.statbar .bar.bar-empty { min-width: 1px; background: #fff; }
-.statbar .ahead .bar { background: #666; float: left; }
-.statbar .behind .bar { background: #ccc; float: right; }
-.statbar p { clear: both; margin: 0; color: #999; }
-.statbar .ahead p { padding-left: 4px; }
-.statbar .behind p { text-align: right; padding-right: 4px; }
+#searching-branches {position: absolute; left: 50%; top: 250px; z-index: 100; display: none;}
 
 /* TAGS PAGE */
 .table-tags { border-bottom: 1px solid #ddd; }
@@ -839,15 +834,15 @@ ul.status-help .description {color: #444; margin: 4px 0 8px 0; border-bottom: 1p
 	padding-bottom: 4px; font-size: 14px;}
 ul.status-help li:last-child .description {border-bottom: none;}
 
-/* NEW PULL REQUEST PANEL */
+/* NEW PULL REQUEST AND BRANCH COMPARE PAGE */
 .new-request {padding: 20px;}
-.new-request>.branches {margin-bottom: 20px;}
-.new-request>.branches td {background: #F2F2F2; border-radius: 4px; vertical-align: top;}
-.new-request>.branches .actions {width: 1%; background: none; padding: 0 12px 0 8px;}
-.new-request>.branches .direction {font-size: 48px; color: #999;}
+.new-request>.branches, .compare>.body>.branches {margin-bottom: 20px;}
+.new-request>.branches td, .compare>.body>.branches td {background: #F2F2F2; border-radius: 4px; vertical-align: top;}
+.new-request>.branches .actions, .compare>.body>.branches .actions {width: 1%; background: none; padding: 0 12px 0 8px;}
+.new-request>.branches .direction, .compare>.body>.branches .direction {font-size: 48px; color: #999;}
 .new-request>.branches .status {background: none;}
 
-.new-request>div {margin-bottom: 20px;}
+.new-request>div, .compare>.body>div {margin-bottom: 20px;}
 .new-request .status .summary {font-size: 16px; padding: 0; margin-bottom: 8px;}
 .new-request .can-send {border-radius: 4px; background: #F2F2F2; padding: 4px;}
 .new-request .can-send form .title, .new-request .can-send form .comment {margin-bottom: 12px;}
@@ -890,7 +885,7 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.overview>.panel-body>.status>.reasons>.reason .fa {font-size: 10px; vertical-align: middle;}
 .request-detail>.overview>.panel-body>.integration>.preview>div {padding: 8px; margin: 8px 0 0 0; 
 	border: none; box-shadow: none;}
-.request-detail>.overview>.panel-body>.integration>.preview>.well img {width: 20px; height: 20px;}
+.request-detail>.overview>.panel-body>.integration>.preview>.well img {width: 20px; height: 20px; vertical-align: bottom;}
 
 .request-detail>.overview>.panel-body>.operations>.buttons>a, 
 .request-detail>.overview>.panel-body>.operations>.confirm>form>input {margin-right: 8px;} 

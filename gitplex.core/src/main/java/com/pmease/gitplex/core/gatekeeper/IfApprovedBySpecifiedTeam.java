@@ -13,7 +13,7 @@ import com.pmease.gitplex.core.model.Membership;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.model.Vote;
+import com.pmease.gitplex.core.model.PullRequestVote;
 
 @SuppressWarnings("serial")
 @Editable(order=100, icon="fa-group-o", description=
@@ -42,10 +42,10 @@ public class IfApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
         int approvals = 0;
         int pendings = 0;
         for (User member : members) {
-            Vote.Result result = member.checkVoteSince(request.getReferentialUpdate());
+            PullRequestVote.Result result = member.checkVoteSince(request.getReferentialUpdate());
             if (result == null) {
                 pendings++;
-            } else if (result == Vote.Result.APPROVE) {
+            } else if (result == PullRequestVote.Result.APPROVE) {
                 approvals++;
             }
         }

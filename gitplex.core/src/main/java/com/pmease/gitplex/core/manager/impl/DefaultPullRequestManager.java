@@ -1,6 +1,5 @@
 package com.pmease.gitplex.core.manager.impl;
 
-import static com.pmease.gitplex.core.model.PullRequest.CriterionHelper.ofOpen;
 import static com.pmease.gitplex.core.model.PullRequest.CriterionHelper.ofSource;
 import static com.pmease.gitplex.core.model.PullRequest.CriterionHelper.ofTarget;
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_ALWAYS;
@@ -10,6 +9,7 @@ import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBA
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_TARGET_ONTO_SOURCE;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -48,6 +48,7 @@ import com.pmease.gitplex.core.model.PullRequestAudit;
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestOperation;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 @Singleton
@@ -83,9 +84,8 @@ public class DefaultPullRequestManager implements PullRequestManager {
 
 	@Sessional
 	@Override
-	public PullRequest findOpen(Branch target, Branch source) {
+	public PullRequest findLatest(Branch target, Branch source) {
 		return dao.find(EntityCriteria.of(PullRequest.class)
-				.add(ofOpen())
 				.add(ofTarget(target))
 				.add(ofSource(source))
 				.addOrder(Order.desc("id")));
@@ -491,5 +491,25 @@ public class DefaultPullRequestManager implements PullRequestManager {
 			return integrationPreview != null && integrationPreview.getIntegrated() != null;
 		}
 	}
+
+	@Sessional
+	@Override
+	public Collection<PullRequest> findOpenTo(Branch target, Repository source) {
+		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
+		criteria.add(Restrictions.eq("target", target));
+		criteria.add(Restrictions.isNull("closeStatus"));
+		criteria.createCriteria("source").add(Restrictions.eq("repository", source));
+		return dao.query(criteria);
+	}
 	
+	@Sessional
+	@Override
+	public Collection<PullRequest> findOpenFrom(Branch source, Repository target) {
+		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
+		criteria.add(Restrictions.eq("source", source));
+		criteria.add(Restrictions.isNull("closeStatus"));
+		criteria.createCriteria("target").add(Restrictions.eq("repository", target));
+		return dao.query(criteria);
+	}
+
 }

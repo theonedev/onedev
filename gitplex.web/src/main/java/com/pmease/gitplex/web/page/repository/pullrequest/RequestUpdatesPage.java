@@ -26,8 +26,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.core.model.Verification;
-import com.pmease.gitplex.core.model.Vote;
+import com.pmease.gitplex.core.model.PullRequestVerification;
+import com.pmease.gitplex.core.model.PullRequestVote;
 import com.pmease.gitplex.web.component.commit.CommitHashLink;
 import com.pmease.gitplex.web.component.commit.CommitMessagePanel;
 import com.pmease.gitplex.web.component.label.AgeLabel;
@@ -82,15 +82,15 @@ public class RequestUpdatesPage extends RequestDetailPage {
 					compareLink.add(AttributeAppender.append("title", "Compare with previous update"));
 				updateItem.add(compareLink);
 
-				updateItem.add(new ListView<Vote>("votes", new LoadableDetachableModel<List<Vote>>() {
+				updateItem.add(new ListView<PullRequestVote>("votes", new LoadableDetachableModel<List<PullRequestVote>>() {
 
 					@Override
-					protected List<Vote> load() {
-						List<Vote> votes = new ArrayList<>(updateItem.getModelObject().getVotes());
-						Collections.sort(votes, new Comparator<Vote>() {
+					protected List<PullRequestVote> load() {
+						List<PullRequestVote> votes = new ArrayList<>(updateItem.getModelObject().getVotes());
+						Collections.sort(votes, new Comparator<PullRequestVote>() {
 
 							@Override
-							public int compare(Vote vote1, Vote vote2) {
+							public int compare(PullRequestVote vote1, PullRequestVote vote2) {
 								return vote1.getDate().compareTo(vote2.getDate());
 							}
 							
@@ -101,13 +101,13 @@ public class RequestUpdatesPage extends RequestDetailPage {
 				}) {
 
 					@Override
-					protected void populateItem(final ListItem<Vote> item) {
-						Vote vote = item.getModelObject();
+					protected void populateItem(final ListItem<PullRequestVote> item) {
+						PullRequestVote vote = item.getModelObject();
 
 						item.add(new UserLink("user", new UserModel(vote.getVoter()), AvatarMode.AVATAR)
 									.withTooltipConfig(new TooltipConfig()));
 						Label label;
-						if (vote.getResult() == Vote.Result.APPROVE) {
+						if (vote.getResult() == PullRequestVote.Result.APPROVE) {
 							label = new Label("label", "Approved");
 							label.add(AttributeModifier.append("class", " label-success"));
 						} else {
@@ -173,16 +173,16 @@ public class RequestUpdatesPage extends RequestDetailPage {
 						commitItem.add(new VerificationStatusPanel("verification", requestModel, Model.of(commit.getHash())) {
 
 							@Override
-							protected Component newStatusComponent(String id, final IModel<Verification.Status> statusModel) {
+							protected Component newStatusComponent(String id, final IModel<PullRequestVerification.Status> statusModel) {
 								return new Label(id, new AbstractReadOnlyModel<String>() {
 
 									@Override
 									public String getObject() {
-										if (statusModel.getObject() == Verification.Status.PASSED)
+										if (statusModel.getObject() == PullRequestVerification.Status.PASSED)
 											return "build successful <i class='caret'></i>";
-										else if (statusModel.getObject() == Verification.Status.ONGOING)
+										else if (statusModel.getObject() == PullRequestVerification.Status.ONGOING)
 											return "build running <i class='caret'></i>";
-										else if (statusModel.getObject() == Verification.Status.NOT_PASSED) 
+										else if (statusModel.getObject() == PullRequestVerification.Status.NOT_PASSED) 
 											return "build failed <i class='caret'></i>";
 										else 
 											return "";
@@ -194,11 +194,11 @@ public class RequestUpdatesPage extends RequestDetailPage {
 									protected void onComponentTag(ComponentTag tag) {
 										super.onComponentTag(tag);
 										
-										if (statusModel.getObject() == Verification.Status.PASSED)
+										if (statusModel.getObject() == PullRequestVerification.Status.PASSED)
 											tag.put("class", "label label-success");
-										else if (statusModel.getObject() == Verification.Status.ONGOING)
+										else if (statusModel.getObject() == PullRequestVerification.Status.ONGOING)
 											tag.put("class", "label label-warning");
-										else if (statusModel.getObject() == Verification.Status.NOT_PASSED) 
+										else if (statusModel.getObject() == PullRequestVerification.Status.NOT_PASSED) 
 											tag.put("class", "label label-danger");
 									}
 

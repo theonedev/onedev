@@ -11,6 +11,8 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
 import org.eclipse.jgit.lib.PersonIdent;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -26,6 +28,7 @@ import com.pmease.gitplex.core.validation.UserName;
 
 @SuppressWarnings("serial")
 @Entity
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 public class User extends AbstractUser implements ProtectedObject {
 
@@ -55,11 +58,8 @@ public class User extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="submitter")
 	private Collection<PullRequest> submittedRequests = new ArrayList<>();
 
-	@OneToMany(mappedBy="user")
-	private Collection<PullRequestUpdate> updates = new ArrayList<>();
-
 	@OneToMany(mappedBy="voter", cascade=CascadeType.REMOVE)
-	private Collection<Vote> votes = new ArrayList<Vote>();
+	private Collection<PullRequestVote> requestVotes = new ArrayList<PullRequestVote>();
 	
 	@OneToMany(mappedBy="voter", cascade=CascadeType.REMOVE)
 	private Collection<VoteInvitation> voteInvitations = new ArrayList<>();
@@ -75,6 +75,12 @@ public class User extends AbstractUser implements ProtectedObject {
 
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<PullRequestWatch> requestWatches = new ArrayList<>();
+
+    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+    private Collection<PullRequestTask> requestTasks = new ArrayList<>();
+
+    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+    private Collection<PullRequestNotification> requestNotifications = new ArrayList<>();
 
     @Editable(order=100)
 	@UserName
@@ -174,20 +180,12 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.submittedRequests = submittedRequests;
 	}
 
-	public Collection<PullRequestUpdate> getUpdates() {
-		return updates;
+	public Collection<PullRequestVote> getRequestVotes() {
+		return requestVotes;
 	}
 
-	public void setUpdates(Collection<PullRequestUpdate> updates) {
-		this.updates = updates;
-	}
-
-	public Collection<Vote> getVotes() {
-		return votes;
-	}
-
-	public void setVotes(Collection<Vote> votes) {
-		this.votes = votes;
+	public void setRequestVotes(Collection<PullRequestVote> requestVotes) {
+		this.requestVotes = requestVotes;
 	}
 
 	public Collection<VoteInvitation> getVoteInvitations() {
@@ -231,6 +229,23 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.requestWatches = requestWatches;
 	}
 
+	public Collection<PullRequestTask> getRequestTasks() {
+		return requestTasks;
+	}
+
+	public void setRequestTasks(Collection<PullRequestTask> requestTasks) {
+		this.requestTasks = requestTasks;
+	}
+
+	public Collection<PullRequestNotification> getRequestNotifications() {
+		return requestNotifications;
+	}
+
+	public void setRequestNotifications(
+			Collection<PullRequestNotification> requestNotifications) {
+		this.requestNotifications = requestNotifications;
+	}
+
 	@Override
 	public boolean has(ProtectedObject object) {
 		if (object instanceof User) {
@@ -244,11 +259,11 @@ public class User extends AbstractUser implements ProtectedObject {
 		}
 	}
 	
-	public Vote.Result checkVoteSince(PullRequestUpdate update) {
+	public PullRequestVote.Result checkVoteSince(PullRequestUpdate update) {
 		if (this.equals(update.getRequest().getSubmitter()))
-			return Vote.Result.APPROVE;
+			return PullRequestVote.Result.APPROVE;
 		
-		for (Vote vote: update.listVotesOnwards()) {
+		for (PullRequestVote vote: update.listVotesOnwards()) {
 			if (vote.getVoter().equals(this)) {
 				return vote.getResult();
 			}

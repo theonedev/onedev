@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 import java.util.concurrent.Callable;
 
 import javax.persistence.CascadeType;
@@ -42,7 +43,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	private Date date;
 	
 	@OneToMany(mappedBy="update", cascade=CascadeType.REMOVE)
-	private Collection<Vote> votes = new ArrayList<Vote>();
+	private Collection<PullRequestVote> votes = new ArrayList<PullRequestVote>();
 	
 	private transient List<Commit> commits;
 
@@ -72,11 +73,11 @@ public class PullRequestUpdate extends AbstractEntity {
 		this.date = date;
 	}
 
-    public Collection<Vote> getVotes() {
+    public Collection<PullRequestVote> getVotes() {
 		return votes;
 	}
 
-	public void setVotes(Collection<Vote> votes) {
+	public void setVotes(Collection<PullRequestVote> votes) {
 		this.votes = votes;
 	}
 	
@@ -91,8 +92,8 @@ public class PullRequestUpdate extends AbstractEntity {
 	 * @return
 	 * 			list of found votes, ordered by associated updates reversely
 	 */
-	public List<Vote> listVotesOnwards() {
-		List<Vote> votes = new ArrayList<Vote>();
+	public List<PullRequestVote> listVotesOnwards() {
+		List<PullRequestVote> votes = new ArrayList<PullRequestVote>();
 		
 		for (PullRequestUpdate update: getRequest().getEffectiveUpdates()) {
 			votes.addAll(update.getVotes());
@@ -240,7 +241,7 @@ public class PullRequestUpdate extends AbstractEntity {
 				scoredCommit.setCommit(commit);
 				mergedCommits.put(commit.getHash(), scoredCommit);
 			}
-			
+
 			headCommit = mergedCommits.get(getRequest().getTarget().getHeadCommitHash());
 			if (headCommit != null) {
 				headCommit.setScore(0);
@@ -273,20 +274,21 @@ public class PullRequestUpdate extends AbstractEntity {
 	 * affinity score will be 0.     
 	 */
 	private void updateAffinityScores(Map<String, ScoreAwareCommit> commits, ScoreAwareCommit headCommit) {
-		for (int i=0; i<headCommit.getCommit().getParentHashes().size(); i++) {
-			String parentCommitHash = headCommit.getCommit().getParentHashes().get(i);
-			ScoreAwareCommit parentCommit = commits.get(parentCommitHash);
-			if (parentCommit != null) {
-				/*
-				 * Parent hashes of a commit is ordered in parent number. For instance first-parent is at index 0. 
-				 * So the parent score is calculated simply by adding current parent index to the head commit score.
-				 */
-				int parentScore = i + headCommit.getScore();
-				if (parentScore < parentCommit.getScore()) {
-					parentCommit.setScore(parentScore);
+		Stack<ScoreAwareCommit> stack = new Stack<>();
+		stack.push(headCommit);
+		while (!stack.isEmpty()) {
+			ScoreAwareCommit currentCommit = stack.pop();
+			for (int i=0; i<currentCommit.getCommit().getParentHashes().size(); i++) {
+				String parentCommitHash = currentCommit.getCommit().getParentHashes().get(i);
+				ScoreAwareCommit parentCommit = commits.get(parentCommitHash);
+				if (parentCommit != null && parentCommit.getScore() == Integer.MAX_VALUE) {
+					/*
+					 * Parent hashes of a commit is ordered in parent number. For instance first-parent is at index 0. 
+					 * So the parent score is calculated simply by adding current parent index to the head commit score.
+					 */
+					parentCommit.setScore(i + currentCommit.getScore());
+					stack.push(parentCommit);
 				}
-				
-				updateAffinityScores(commits, parentCommit);
 			}
 		}
 	}

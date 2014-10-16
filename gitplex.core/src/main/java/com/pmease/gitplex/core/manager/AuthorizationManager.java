@@ -8,7 +8,7 @@ import com.pmease.gitplex.core.manager.impl.DefaultAuthorizationManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.model.Vote;
+import com.pmease.gitplex.core.model.PullRequestVote;
 import com.pmease.gitplex.core.permission.operation.GeneralOperation;
 
 @ImplementedBy(DefaultAuthorizationManager.class)
@@ -18,7 +18,7 @@ public interface AuthorizationManager {
 	
 	boolean canModify(PullRequest request);
 	
-	boolean canModify(Vote vote);
+	boolean canModify(PullRequestVote vote);
 	
 	boolean canModify(Comment comment);
 }

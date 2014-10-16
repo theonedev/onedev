@@ -14,7 +14,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"request", "commit", "configuration"})
 })
-public class Verification extends AbstractEntity {
+public class PullRequestVerification extends AbstractEntity {
 	
 	public enum Status {ONGOING, PASSED, NOT_PASSED}
 	

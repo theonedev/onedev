@@ -1,4 +1,4 @@
-package com.pmease.commons.wicket.component.datatablesupport;
+package com.pmease.commons.wicket.component.datatable;
 
 import java.util.HashSet;
 import java.util.Set;

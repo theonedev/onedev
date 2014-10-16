@@ -13,7 +13,7 @@ import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.model.Vote;
+import com.pmease.gitplex.core.model.PullRequestVote;
 import com.pmease.gitplex.core.permission.operation.GeneralOperation;
 
 @SuppressWarnings("serial")
@@ -43,10 +43,10 @@ public class IfApprovedByRepositoryWriters extends ApprovalGateKeeper {
         int approvals = 0;
         int pendings = 0;
         for (User user: authorizedUsers) {
-            Vote.Result result = user.checkVoteSince(request.getReferentialUpdate());
+            PullRequestVote.Result result = user.checkVoteSince(request.getReferentialUpdate());
             if (result == null) {
                 pendings++;
-            } else if (result == Vote.Result.APPROVE) {
+            } else if (result == PullRequestVote.Result.APPROVE) {
                 approvals++;
             }
         }

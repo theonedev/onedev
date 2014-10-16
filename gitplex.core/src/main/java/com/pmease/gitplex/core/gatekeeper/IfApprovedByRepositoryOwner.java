@@ -8,7 +8,7 @@ import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.model.Vote;
+import com.pmease.gitplex.core.model.PullRequestVote;
 
 @SuppressWarnings("serial")
 @Editable(order=300, icon="fa-user-o", description=
@@ -19,13 +19,13 @@ public class IfApprovedByRepositoryOwner extends ApprovalGateKeeper {
     public CheckResult doCheckRequest(PullRequest request) {
         User repoOwner = request.getTarget().getRepository().getOwner();
 
-        Vote.Result result = repoOwner.checkVoteSince(request.getReferentialUpdate());
+        PullRequestVote.Result result = repoOwner.checkVoteSince(request.getReferentialUpdate());
 
         if (result == null) {
             request.pickVoters(Sets.newHashSet(repoOwner), 1);
             return pending("To be approved by " + repoOwner.getName() + ".",
                     new CanVoteBySpecifiedUser(repoOwner));
-        } else if (result == Vote.Result.APPROVE) {
+        } else if (result == PullRequestVote.Result.APPROVE) {
             return approved("Approved by " + repoOwner.getName() + ".");
         } else {
             return disapproved("Rejected by " + repoOwner.getName() + ".");

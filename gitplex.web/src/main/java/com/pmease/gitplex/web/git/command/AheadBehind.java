@@ -4,11 +4,11 @@ import java.io.Serializable;
 
 import com.google.common.base.Objects;
 
-
 @SuppressWarnings("serial")
 public class AheadBehind implements Serializable {
 
 	private int ahead;
+	
 	private int behind;
 
 	public int getAhead() {
@@ -36,4 +36,5 @@ public class AheadBehind implements Serializable {
 	public int hashCode() {
 		return Objects.hashCode(ahead, behind);
 	}
+	
 }

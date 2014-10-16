@@ -1,67 +1,65 @@
 <html xmlns:wicket>
 <wicket:extend>
-	<div class="padder">
-		<div class="page-heading">
-			<h2 class="section-title">Branches</h2>
-		</div>
-		
-		<wicket:container wicket:id="content"></wicket:container>
-	</div>
-	
-	<wicket:fragment wicket:id="nobranch">
-		<div class="alert alert-warning">There is no branches in this repository</div>
-	</wicket:fragment>
-	
-	<wicket:fragment wicket:id="branchesFrag">
-		<table class="table table-branches">
-			<tr class="default-branch">
-				<td class="meta">
-					<wicket:container wicket:id="baseMeta"></wicket:container>
-				</td>
-				<td class="">
-				</td>
-				<td class="actions">
-					<button wicket:id="unwatchCommits" class="btn btn-default" title="You are watching commits of this branch, click to unwatch"><i class="fa fa-eye-open"></i> <i class="fa fa-commit"></i> </button>
-					<button wicket:id="unwatchRequests" class="btn btn-default" title="You are watching pull requests of this branch, click to unwatch"><i class="fa fa-eye-open"></i> <i class="fa fa-branch-merge"></i> </button>
-					<button wicket:id="watchCommits" class="btn btn-default" title="You are not watching commits of this branch, click to watch"><i class="fa fa-eye-slash"></i> <i class="fa fa-commit"></i> </button>
-					<button wicket:id="watchRequests" class="btn btn-default" title="You are not watching pull requests of this branch, click to watch"><i class="fa fa-eye-slash"></i> <i class="fa fa-branch-merge"></i> </button>
-				</td>
-			</tr>
-			<tr class="branch" wicket:id="branches">
-				<td class="meta">
-					<wicket:container wicket:id="meta"></wicket:container>
-				</td>
-				<td class="">
-					<wicket:container wicket:id="statbar"></wicket:container>
-				</td>
-				<td class="actions">
-					<button wicket:id="unwatchCommits" class="btn btn-default" title="You are watching commits of this branch, click to unwatch"><i class="fa fa-eye-open"></i> <i class="fa fa-commit"></i> </button>
-					<button wicket:id="unwatchRequests" class="btn btn-default" title="You are watching pull requests of this branch, click to unwatch"><i class="fa fa-eye-open"></i> <i class="fa fa-branch-merge"></i> </button>
-					<button wicket:id="watchCommits" class="btn btn-default" title="You are not watching commits of this branch, click to watch"><i class="fa fa-eye-slash"></i> <i class="fa fa-commit"></i> </button>
-					<button wicket:id="watchRequests" class="btn btn-default" title="You are not watching pull requests of this branch, click to watch"><i class="fa fa-eye-slash"></i> <i class="fa fa-branch-merge"></i> </button>
-					<button wicket:id="compareLink" class="btn btn-default"><i class="fa fa-branch-compare"></i> Compare</button>
-					<span wicket:id="pullName"></span>
-				</td>
-			</tr>
-		</table>
-	</wicket:fragment>
-	
-	<wicket:fragment wicket:id="metaFrag">
-		<a wicket:id="branchlink"><span wicket:id="name"></span></a> <span class="label" wicket:id="default">default</span>
-		<p>Last updated <span class="age" wicket:id="updatedTime"></span> by <span wicket:id="author"></span></p>
-	</wicket:fragment>
-	
-	<wicket:fragment wicket:id="statBarFrag">
-		<div class="statbar">
-			<div class="ahead">
-				<span class="bar bar-ahead" wicket:id="aheadbar"></span>
-				<p><span wicket:id="aheadnum"></span> ahead</p>
+	<section class="branches">
+		<div class="head">Branches</div>
+		<div class="body">
+			<div class="options clearfix">
+				<div class="pull-left base">
+					<div class="input-group">
+						<span class="input-group-addon">Base</span> <input wicket:id="baseBranch" type="hidden" class="form-control select2-container"></input>					
+					</div>
+				</div>
+				<div class="pull-left search">
+					<div class="input-group">
+						<span class="input-group-addon"><i class="fa fa-search"></i></span>
+						<input wicket:id="searchBranches" class="form-control" placeholder="Search branches"></input>
+					</div>
+				</div>
+				<ul wicket:id="branchesPageNav" class="pull-right"></ul>
 			</div>
-			<div class="behind">
-				<span class="bar bar-behind" wicket:id="behindbar"></span>
-				<p><span wicket:id="behindnum"></span> behind</p>
-			</div>
+			<table wicket:id="branchesContainer" class="branches table table-hover table-condensed">
+				<tr wicket:id="branches">
+					<td class="summary">
+						<a wicket:id="branchLink"><span wicket:id="name"></span></a> <span class="label label-default" wicket:id="default">default</span>
+						<div>Last updated <span wicket:id="lastUpdateTime"></span> by <span wicket:id="lastAuthor"></span></div>
+					</td>
+					<td class="behind behind-ahead">
+						<div align="right">
+							<div class="text">
+								<a wicket:id="behindLink">
+									<span wicket:id="count"></span> behind
+									<span class="status" wicket:id="status"></span>
+								</a>
+							</div>
+							<div class="bar" wicket:id="behindBar"></div>
+						</div>
+					</td>
+					<td class="ahead behind-ahead">
+						<div>
+							<div class="text">
+								<a wicket:id="aheadLink">
+									<span wicket:id="count"></span> ahead
+									<span class="status" wicket:id="status"></span>
+								</a>
+							</div>
+							<div class="bar" wicket:id="aheadBar"></div>
+						</div>
+					</td>
+					<td wicket:id="watch" class="watch">
+						<div class="btn-group">
+							<button wicket:id="unwatchCommits" class="btn btn-default" title="You are watching commits of this branch, click to unwatch"><i class="fa fa-eye-open"></i> <i class="fa fa-commit"></i> </button>
+							<button wicket:id="watchCommits" class="btn btn-default" title="You are not watching commits of this branch, click to watch"><i class="fa fa-eye-slash"></i> <i class="fa fa-commit"></i> </button>
+							<button wicket:id="unwatchRequests" class="btn btn-default" title="You are watching pull requests of this branch, click to unwatch"><i class="fa fa-eye-open"></i> <i class="fa fa-branch-merge"></i> </button>
+							<button wicket:id="watchRequests" class="btn btn-default" title="You are not watching pull requests of this branch, click to watch"><i class="fa fa-eye-slash"></i> <i class="fa fa-branch-merge"></i> </button>
+						</div>
+					</td>
+					<td class="actions">
+						<a wicket:id="delete" class="fa fa-times fa-2x" title="Delete this branch"></a>
+					</td>
+				</tr>
+			</table>		
+			<div id="searching-branches" class="ajax-indicator"><img src="/assets/img/ajax-indicator.gif"></img></div>
 		</div>
-	</wicket:fragment>
+	</section>
 </wicket:extend>
 </html>

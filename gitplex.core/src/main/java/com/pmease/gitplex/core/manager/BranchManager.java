@@ -24,17 +24,6 @@ public interface BranchManager {
 	 */
 	public @Nullable Branch findBy(Repository repository, String branchName);
 	
-	/**
-	 * Find default branch in specified repository.
-	 * 
-	 * @param repository
-	 * 			repository to find default branch
-	 * @return
-	 * 			found default branch, or <tt>null</tt> if default branch 
-	 * 			can not be found
-	 */
-    public @Nullable Branch findDefault(Repository repository);
-    
     /**
      * Delete all refs pointed to this branch and its associated pull requests and 
      * pull request updates.

@@ -5,8 +5,6 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.repository.RepositoryChoice;
@@ -46,7 +44,7 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<Branch> {
 
 			@Override
 			public void setObject(Repository object) {
-				setBranch(GitPlex.getInstance(BranchManager.class).findDefault(object));
+				setBranch(object.getDefaultBranch());
 			}
 			
 		};

@@ -43,12 +43,6 @@ public class DefaultBranchManager implements BranchManager {
         		.add(Restrictions.eq("name", name)));
     }
 
-    @Sessional
-	@Override
-	public Branch findDefault(Repository repository) {
-		return findBy(repository, repository.git().resolveDefaultBranch());
-	}
-
     @Transactional
 	@Override
 	public void delete(Branch branch) {

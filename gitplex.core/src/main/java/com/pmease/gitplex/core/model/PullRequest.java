@@ -17,6 +17,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -103,14 +104,14 @@ public class PullRequest extends AbstractEntity {
 	
 	private boolean autoIntegrate;
 
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	private User submitter;
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable = false)
 	private Branch target;
 
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	private Branch source;
 	
 	@Column(nullable=false)
@@ -138,7 +139,7 @@ public class PullRequest extends AbstractEntity {
 	private Collection<VoteInvitation> voteInvitations = new ArrayList<>();
 	
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
-	private Collection<Verification> verifications = new ArrayList<>();
+	private Collection<PullRequestVerification> verifications = new ArrayList<>();
 
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
 	private Collection<PullRequestComment> comments = new ArrayList<>();
@@ -146,6 +147,12 @@ public class PullRequest extends AbstractEntity {
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
 	private Collection<PullRequestAudit> audits = new ArrayList<>();
 	
+	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
+	private Collection<PullRequestNotification> notifications = new ArrayList<>();
+
+	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
+	private Collection<PullRequestTask> tasks = new ArrayList<>();
+
 	private transient CheckResult checkResult;
 
 	private transient List<PullRequestUpdate> sortedUpdates;
@@ -281,11 +288,11 @@ public class PullRequest extends AbstractEntity {
 		this.voteInvitations = voteInvitations;
 	}
 
-	public Collection<Verification> getVerifications() {
+	public Collection<PullRequestVerification> getVerifications() {
 		return verifications;
 	}
 
-	public void setVerifications(Collection<Verification> verifications) {
+	public void setVerifications(Collection<PullRequestVerification> verifications) {
 		this.verifications = verifications;
 	}
 
@@ -303,6 +310,22 @@ public class PullRequest extends AbstractEntity {
 
 	public void setAudits(Collection<PullRequestAudit> audits) {
 		this.audits = audits;
+	}
+
+	public Collection<PullRequestNotification> getNotifications() {
+		return notifications;
+	}
+
+	public void setNotifications(Collection<PullRequestNotification> notifications) {
+		this.notifications = notifications;
+	}
+
+	public Collection<PullRequestTask> getTasks() {
+		return tasks;
+	}
+
+	public void setTasks(Collection<PullRequestTask> tasks) {
+		this.tasks = tasks;
 	}
 
 	public Status getStatus() {
@@ -478,7 +501,7 @@ public class PullRequest extends AbstractEntity {
 		 * users already voted since base update should be excluded from
 		 * invitation list as their votes are still valid
 		 */
-		for (Vote vote : getReferentialUpdate().listVotesOnwards()) {
+		for (PullRequestVote vote : getReferentialUpdate().listVotesOnwards()) {
 			copyOfCandidates.remove(vote.getVoter());
 		}
 
@@ -493,7 +516,7 @@ public class PullRequest extends AbstractEntity {
 
 				@Override
 				public int compare(User user1, User user2) {
-					return user1.getVotes().size() - user2.getVotes().size();
+					return user1.getRequestVotes().size() - user2.getRequestVotes().size();
 				}
 
 			});

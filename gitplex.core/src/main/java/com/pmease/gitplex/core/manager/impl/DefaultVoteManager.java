@@ -21,8 +21,8 @@ import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestOperation;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.model.Vote;
-import com.pmease.gitplex.core.model.Vote.Result;
+import com.pmease.gitplex.core.model.PullRequestVote;
+import com.pmease.gitplex.core.model.PullRequestVote.Result;
 
 @Singleton
 public class DefaultVoteManager implements VoteManager {
@@ -43,8 +43,8 @@ public class DefaultVoteManager implements VoteManager {
 
 	@Sessional
 	@Override
-	public Vote find(User reviewer, PullRequestUpdate update) {
-		return dao.find(EntityCriteria.of(Vote.class)
+	public PullRequestVote find(User reviewer, PullRequestUpdate update) {
+		return dao.find(EntityCriteria.of(PullRequestVote.class)
 				.add(Restrictions.eq("voter", reviewer)) 
 				.add(Restrictions.eq("update", update)));
 	}
@@ -52,17 +52,17 @@ public class DefaultVoteManager implements VoteManager {
 	@Transactional
 	@Override
 	public void vote(PullRequest request, User user, Result result, String comment) {
-		Vote vote = new Vote();
+		PullRequestVote vote = new PullRequestVote();
 		vote.setResult(result);
 		vote.setUpdate(request.getLatestUpdate());
 		vote.setVoter(user);
 		
-		vote.getVoter().getVotes().add(vote);
+		vote.getVoter().getRequestVotes().add(vote);
 		vote.getUpdate().getVotes().add(vote);
 		dao.persist(vote);	
 		
 		PullRequestAudit audit = new PullRequestAudit();
-		if (result == Vote.Result.APPROVE)
+		if (result == PullRequestVote.Result.APPROVE)
 			audit.setOperation(PullRequestOperation.APPROVE);
 		else
 			audit.setOperation(PullRequestOperation.DISAPPROVE);

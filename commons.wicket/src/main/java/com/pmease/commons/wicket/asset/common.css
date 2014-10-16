@@ -20,8 +20,9 @@
 
 /* Tooltips */
 .tooltip-inner {max-width: 400px;}
-.tooltip .tooltip-inner dl {text-align: left;}
+.tooltip .tooltip-inner {text-align: left;}
 .tooltip .tooltip-inner dl dt {font-size: 15px;}
+.tooltip .tooltip-inner dl {margin-bottom: 0;}
 
 /* Feedback */
 #session-feedback {position:absolute; background:#FFFFDE; max-width:75%;
@@ -30,7 +31,7 @@
 #session-feedback ul {padding: 0; margin: 0;}
 #session-feedback li {list-style: none;}
 
-/* Table */
+/* Table navigator */
 table .navigator {border-radius: 4px 4px 4px 4px; margin-bottom: 0px; margin-left: 0; float: right;}
 table thead .navigatorLabel, table tfoot .navigatorLabel {padding-top: 2px; padding-right: 8px; float: left;}
 table thead tr.navigation td, table tfoot tr.navigation td {vertical-align: middle; padding-top: 12px; 
@@ -52,6 +53,11 @@ table .navigator>div .goto em, table .navigator>div>span>em {color: #999999; cur
 table .navigator>div>span>em, table .navigator>div>span>em:hover, table .navigator>div>span>em:focus {background-color: transparent;}
 table .row-selector {width: 24px;}
 table td, table th {text-align: left;}
+
+.pagination em {font-style: normal;}
+.pagination .first, .pagination .last, .pagination .prev, .pagination .next {font-family: monospace inherit;} 
+.pagination>li>span>em {color: #BBB;}
+.pagination>li.active>span>em {color: white;}
 
 /* Tree */
 .tree-theme-windows .tree-node span.tree-content a {color: #444444;}
@@ -196,15 +202,14 @@ table td, table th {text-align: left;}
     background: white; /* This will be overwritten by browsers that support rgba */
     background: rgba(255,255,255,0.0); /* IE ignores this since it's not supported */}
     
-/* div table */
-div.table {display: table;}
-div.tr {display: table-row;}    
-div.td {display: table-cell;}
-
 /* ICONS */
 span.add.icon {padding: 12px; background: url("add.png") no-repeat 50% 50%;}
 span.delete.icon {padding: 12px; background: url("delete.png") no-repeat 50% 50%;}
 span.move.icon {padding: 12px; background: url("move.png") no-repeat 50% 50%;}
+
+/* CLEARABLE TEXT FIELD */
+.input-clear {font-size: 18px; margin-left: -16px; z-index: 1000; position: relative; 
+	cursor: pointer; top: 4px; color: #999; display: none;}	
 
 /* BACK TO TOP */
 .back-to-top {position: fixed; right: 20px; bottom: 40px; cursor: pointer; padding: 25px; 
