@@ -655,7 +655,6 @@ table.branches td {white-space: nowrap;}
 table.branches td.watch {width: 160px;}
 table.branches td.actions {width: 1px;}
 table.branches td.behind-ahead {width: 25%;}
-table.branches td.behind-ahead a, table.branches td.behind-ahead em {font-size: 13px;}
 table.branches td.behind {padding-right: 0;}
 table.branches td.ahead {padding-left: 0;}
 table.branches td.behind>div {border-right: 1px solid #333;}

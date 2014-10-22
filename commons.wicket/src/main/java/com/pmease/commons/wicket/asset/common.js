@@ -748,7 +748,15 @@ pmease.commons = {
 				if (json.type == "RenderCallback")
 					Wicket.WebSocket.send(message);
 			});
-		}
+			Wicket.Event.subscribe("/websocket/open", function(jqEvent, message) {
+				// Request to render via web socket right away after a web socket is opened 
+				// in case we missed the message sent by WebSocketRender.requestToRender
+				// at Java side if web socket connection is not established at that time
+				for (var i in pmease.commons.websocket.renderTraits) 
+					Wicket.WebSocket.send(JSON.stringify(pmease.commons.websocket.renderTraits[i]));
+			});
+		},
+		renderTraits:[]
 	},
 
 	setupClearableInput: function(inputId) {

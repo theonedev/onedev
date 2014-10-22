@@ -322,18 +322,27 @@ public class BranchesPage extends RepositoryPage {
 					protected void onInitialize() {
 						super.onInitialize();
 						add(new Label("count", ab.getBehind()));
-						add(new Label("status", new LoadableDetachableModel<String>() {
+						add(new WebMarkupContainer("pullRequest") {
 
 							@Override
-							protected String load() {
-								PullRequest request = behindOpenRequestsModel.getObject().get(item.getModelObject().getName());
-								if (request != null)
-									return "- " + request.getStatus().toString().toLowerCase();
-								else
-									return "";
+							protected void onConfigure() {
+								super.onConfigure();
+								setVisible(behindOpenRequestsModel.getObject().get(item.getModelObject().getName()) != null);
 							}
 							
-						}));
+						});
+					}
+
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						
+						if (behindOpenRequestsModel.getObject().get(item.getModelObject().getName()) != null) { 
+							tag.put("title", "" + ab.getBehind() + " commits behind of base branch, and there is an "
+									+ "open pull request fetching those commits");
+						} else {
+							tag.put("title", "" + ab.getBehind() + " commits ahead of base branch");
+						}
 					}
 
 					@Override
@@ -372,18 +381,27 @@ public class BranchesPage extends RepositoryPage {
 					protected void onInitialize() {
 						super.onInitialize();
 						add(new Label("count", ab.getAhead()));
-						add(new Label("status", new LoadableDetachableModel<String>() {
+						add(new WebMarkupContainer("pullRequest") {
 
 							@Override
-							protected String load() {
-								PullRequest request = aheadOpenRequestsModel.getObject().get(item.getModelObject().getName());
-								if (request != null)
-									return "- " + request.getStatus().toString().toLowerCase();
-								else
-									return "";
+							protected void onConfigure() {
+								super.onConfigure();
+								setVisible(aheadOpenRequestsModel.getObject().get(item.getModelObject().getName()) != null);
 							}
 							
-						}).setEscapeModelStrings(false));
+						});
+					}
+
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						
+						if (aheadOpenRequestsModel.getObject().get(item.getModelObject().getName()) != null) { 
+							tag.put("title", "" + ab.getAhead() + " commits ahead of base branch, and there is an "
+									+ "open pull request sending these commits to base branch");
+						} else {
+							tag.put("title", "" + ab.getAhead() + " commits ahead of base branch");
+						}
 					}
 
 					@Override

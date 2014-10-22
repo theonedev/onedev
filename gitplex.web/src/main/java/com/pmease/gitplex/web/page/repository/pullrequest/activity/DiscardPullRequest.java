@@ -2,6 +2,8 @@ package com.pmease.gitplex.web.page.repository.pullrequest.activity;
 
 import java.util.Date;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
@@ -16,8 +18,8 @@ public class DiscardPullRequest implements PullRequestActivity {
 	
 	private final Date date;
 	
-	public DiscardPullRequest(User user, Date date) {
-		this.userId = user.getId();
+	public DiscardPullRequest(@Nullable User user, Date date) {
+		this.userId = user!=null?user.getId():null;
 		this.date = date;
 	}
 	
@@ -28,7 +30,10 @@ public class DiscardPullRequest implements PullRequestActivity {
 
 	@Override
 	public User getUser() {
-		return GitPlex.getInstance(Dao.class).load(User.class, userId);
+		if (userId != null)
+			return GitPlex.getInstance(Dao.class).load(User.class, userId);
+		else
+			return null;
 	}
 
 	@Override

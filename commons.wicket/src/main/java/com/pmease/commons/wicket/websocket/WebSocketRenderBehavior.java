@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.apache.wicket.protocol.ws.api.WebSocketBehavior;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
@@ -24,7 +26,7 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 
 	private final static Map<IWebSocketConnection, List<Object>> connections = 
 			new MapMaker().concurrencyLevel(16).weakKeys().makeMap();
-
+	
     private Component component;
 	
 	@Override
@@ -33,6 +35,13 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 		
 		component.setOutputMarkupId(true);
 		this.component = component;
+	}
+
+	@Override
+	public void renderHead(Component component, IHeaderResponse response) {
+		super.renderHead(component, response);
+		String script = String.format("pmease.commons.websocket.renderTraits.push(%s);", asMessage(getTrait()));
+		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
 	@Override
@@ -74,23 +83,26 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 		}
 	}
 	
-	public static void requestToRender(Object trait) {
-		String textMessage; 
+	private static String asMessage(Object trait) {
 		try {
 			ObjectMapper mapper = AppLoader.getInstance(ObjectMapper.class);
 			WebSocketMessage webSocketMessage = new WebSocketMessage(WebSocketMessage.RENDER_CALLBACK, trait);
-			textMessage = mapper.writeValueAsString(webSocketMessage);
+			return mapper.writeValueAsString(webSocketMessage);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
-		
+	}
+	
+	public static void requestToRender(Object trait) {
+		String message = asMessage(trait); 
+
 		for (Iterator<Map.Entry<IWebSocketConnection, List<Object>>> it = connections.entrySet().iterator(); it.hasNext();) {
 			Map.Entry<IWebSocketConnection, List<Object>> entry = it.next();
 			IWebSocketConnection connection = entry.getKey();
 			if (connection != null && connection.isOpen()) {
 				if (entry.getValue().contains(trait)) {
 					try {
-						connection.sendMessage(textMessage);
+						connection.sendMessage(message);
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}

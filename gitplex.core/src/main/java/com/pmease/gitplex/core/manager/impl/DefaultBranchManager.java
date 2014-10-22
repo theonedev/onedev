@@ -53,9 +53,9 @@ public class DefaultBranchManager implements BranchManager {
     	}
     	
     	for (PullRequest request: branch.getOutgoingRequests()) {
-    		pullRequestManager.discard(request, null, "Source branch is deleted.");
     		request.setSource(null);
     		dao.persist(request);
+    		pullRequestManager.discard(request, null, "Source branch is deleted.");
     	}
 		dao.remove(branch);
 	}

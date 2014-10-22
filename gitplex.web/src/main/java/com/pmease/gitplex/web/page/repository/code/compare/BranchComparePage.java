@@ -213,6 +213,13 @@ public class BranchComparePage extends RepositoryPage {
 				Branch source = sourceModel.getObject();
 				setResponsePage(NewRequestPage.class, NewRequestPage.paramsOf(target.getRepository(), source, target));
 			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				PullRequest request = requestModel.getObject();
+				setVisible((request == null || !request.isOpen()) && !commitsModel.getObject().isEmpty());
+			}
 			
 		});
 		

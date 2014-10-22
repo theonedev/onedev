@@ -103,9 +103,11 @@ public class GitPostReceiveCallback extends HttpServlet {
 				branch.setName(branchName);
 				branch.setHeadCommitHash(newCommitHash);
 				repository.getBranches().add(branch);
-				dao.persist(branch);
-				if (repository.getBranches().size() == 1) 
+				if (repository.getBranches().size() == 1) { 
 					repository.git().updateDefaultBranch(branchName);
+					branch.setDefault(true);
+				}
+				dao.persist(branch);
 			} else if (newCommitHash.equals(GitUtils.NULL_SHA1)) {
 				Branch branch = branchManager.findBy(repository, branchName);
 				Preconditions.checkNotNull(branch);

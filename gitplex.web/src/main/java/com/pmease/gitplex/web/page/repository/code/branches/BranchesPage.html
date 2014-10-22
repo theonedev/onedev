@@ -27,8 +27,8 @@
 						<div align="right">
 							<div class="text">
 								<a wicket:id="behindLink">
+									<span class="fa fa-download" wicket:id="pullRequest"></span>
 									<span wicket:id="count"></span> behind
-									<span class="status" wicket:id="status"></span>
 								</a>
 							</div>
 							<div class="bar" wicket:id="behindBar"></div>
@@ -39,7 +39,7 @@
 							<div class="text">
 								<a wicket:id="aheadLink">
 									<span wicket:id="count"></span> ahead
-									<span class="status" wicket:id="status"></span>
+									<span class="fa fa-upload" wicket:id="pullRequest"></span>
 								</a>
 							</div>
 							<div class="bar" wicket:id="aheadBar"></div>
@@ -54,7 +54,7 @@
 						</div>
 					</td>
 					<td class="actions">
-						<a wicket:id="delete" class="fa fa-times fa-2x" title="Delete this branch"></a>
+						<a wicket:id="delete" class="fa fa-times fa-lg" title="Delete this branch"></a>
 					</td>
 				</tr>
 			</table>		

@@ -17,7 +17,7 @@ public class IntegratePullRequest implements PullRequestActivity {
 	private final Date date;
 	
 	public IntegratePullRequest(User user, Date date) {
-		this.userId = user.getId();
+		this.userId = user!=null?user.getId():null;
 		this.date = date;
 	}
 	
@@ -28,7 +28,10 @@ public class IntegratePullRequest implements PullRequestActivity {
 
 	@Override
 	public User getUser() {
-		return GitPlex.getInstance(Dao.class).load(User.class, userId);
+		if (userId != null)
+			return GitPlex.getInstance(Dao.class).load(User.class, userId);
+		else
+			return null;
 	}
 
 	@Override
