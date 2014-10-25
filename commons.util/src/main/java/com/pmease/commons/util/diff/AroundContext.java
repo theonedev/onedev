@@ -1,14 +1,12 @@
-package com.pmease.gitplex.core.comment;
+package com.pmease.commons.util.diff;
 
 import java.io.Serializable;
 import java.util.List;
 
-import com.pmease.commons.util.diff.DiffLine;
-
 @SuppressWarnings("serial")
-public class InlineContext implements Serializable {
+public class AroundContext implements Serializable {
 	
-	private final List<DiffLine> diffs;
+	private List<DiffLine> diffs;
 	
 	private final int line;
 	
@@ -16,7 +14,7 @@ public class InlineContext implements Serializable {
 	
 	private final boolean belowOmitted;
 	
-	public InlineContext(List<DiffLine> diffs, int line, boolean aboveOmitted, boolean belowOmitted) {
+	public AroundContext(List<DiffLine> diffs, int line, boolean aboveOmitted, boolean belowOmitted) {
 		this.diffs = diffs;
 		this.line = line;
 		this.aboveOmitted = aboveOmitted;
@@ -25,6 +23,10 @@ public class InlineContext implements Serializable {
 
 	public List<DiffLine> getDiffs() {
 		return diffs;
+	}
+
+	public void setDiffs(List<DiffLine> diffs) {
+		this.diffs = diffs;
 	}
 
 	public int getCommentLine() {

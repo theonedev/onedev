@@ -44,13 +44,11 @@ public class SinceChangesPanel extends Panel {
 			}
 		}
 		PageParameters params = RequestComparePage.paramsOf(request, oldCommit, 
-				request.getLatestUpdate().getHeadCommitHash(), null, null);
+				request.getLatestUpdate().getHeadCommitHash(), null);
 		
 		Link<Void> link = new BookmarkablePageLink<>("link", RequestComparePage.class, params);
 		link.add(AttributeAppender.append("title", tooltip));
 		add(link);
-
-		setVisible(!oldCommit.equals(request.getLatestUpdate().getHeadCommitHash()));
 	}
 
 	@Override

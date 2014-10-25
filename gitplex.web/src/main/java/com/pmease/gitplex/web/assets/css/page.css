@@ -908,8 +908,6 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.activities .activity>.commits {color: #777; margin-left: -31px;}
 .request-detail>.activities .activity>.commits a {color: #555;}
 .request-detail>.activities .activity>.commits td {padding-top: 4px; padding-bottom: 4px;}
-.request-detail>.activities .activity>.commits td.detail, 
-.request-detail>.activities .activity>.commits td.status {border-top: 1px dotted #CCC;}
 .request-detail>.activities .non-update+.update>td tr:first-child td {border-top: none;}
 .request-detail>.activities .activity>.commits td.icon {width: 32px; white-space: nowrap; text-align: right;}
 .request-detail>.activities .activity>.commits tr.integrated td.icon .fa {color: #35A612;}
@@ -929,6 +927,7 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.activities .inline-comment.panel>.panel-heading {padding: 8px;}
 .request-detail>.activities .inline-comment.panel>.panel-heading .actions {margin-left: 12px;}
 .request-detail>.activities .inline-comment.panel>.panel-heading .actions a {color: #888; margin-right: 4px;}
+.request-detail>.activities .inline-comment.panel {margin-bottom: 4px;}
 
 .request-detail>.activities .activity>.summary .fa {background: white;}
 .request-detail>.activities .activity>.update>.fa {margin: 0 8px 0 -15px; font-size: 20px;}

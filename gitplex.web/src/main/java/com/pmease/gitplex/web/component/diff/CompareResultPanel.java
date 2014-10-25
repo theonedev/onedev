@@ -12,25 +12,19 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.util.visit.IVisit;
-import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jgit.lib.FileMode;
 
 import com.pmease.commons.git.Change;
 import com.pmease.commons.git.RevAwareChange;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
-import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
-import com.pmease.gitplex.core.comment.InlineContext;
-import com.pmease.gitplex.core.comment.InlineContextAware;
 import com.pmease.gitplex.core.model.Repository;
 
 @SuppressWarnings("serial")
-public abstract class CompareResultPanel extends Panel implements InlineContextAware {
+public abstract class CompareResultPanel extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
@@ -55,7 +49,7 @@ public abstract class CompareResultPanel extends Panel implements InlineContextA
 		List<Change> changes = repoModel.getObject().getChanges(oldCommit, newCommit);
 		if (file != null) {
 			for (Change each: repoModel.getObject().getChanges(oldCommit, newCommit)) {
-				if (each.getPath().equals(file)) { 
+				if (file.equals(each.getOldPath()) || file.equals(each.getNewPath())) { 
 					activeChange = each;
 					break;
 				}
@@ -83,8 +77,7 @@ public abstract class CompareResultPanel extends Panel implements InlineContextA
 					new RevAwareChange(activeChange, oldCommitHash, newCommitHash), 
 					getInlineCommentSupport(activeChange));
 		} else {
-			changeContent = new Label("content", "<div class='error fa fa-alert-o'> File not exist.</div>");
-			changeContent.setEscapeModelStrings(false);
+			changeContent = new WebMarkupContainer("content");
 		}
 		changeContent.setOutputMarkupId(true);
 		add(changeContent);
@@ -180,17 +173,4 @@ public abstract class CompareResultPanel extends Panel implements InlineContextA
 		target.add(changeNav);
 	}
 
-	@Override
-	public InlineContext getInlineContext(final InlineComment comment) {
-		return visitChildren(InlineContextAware.class, new IVisitor<Component, InlineContext>() {
-
-			@Override
-			public void component(Component object, IVisit<InlineContext> visit) {
-				InlineContextAware inlineContextAware = (InlineContextAware) object;
-				visit.stop(inlineContextAware.getInlineContext(comment));
-			}
-
-		});
-	}
-	
 }

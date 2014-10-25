@@ -48,12 +48,10 @@ import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Approved;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.manager.BranchManager;
-import com.pmease.gitplex.core.manager.CommitWatchManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestWatchManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Branch;
-import com.pmease.gitplex.core.model.CommitWatch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestWatch;
 import com.pmease.gitplex.core.model.User;
@@ -166,20 +164,6 @@ public class BranchesPage extends RepositoryPage {
 			for (PullRequest request: GitPlex.getInstance(PullRequestManager.class).findOpenFrom(getBaseBranch(), getRepository())) 
 				requests.put(request.getTarget().getName(), request);
 			return requests;
-		}
-		
-	};
-
-	private final IModel<Map<String, CommitWatch>> commitWatchesModel = 
-			new LoadableDetachableModel<Map<String, CommitWatch>>() {
-
-		@Override
-		protected Map<String, CommitWatch> load() {
-			Map<String, CommitWatch> commitWatches = new HashMap<>();
-			for (CommitWatch watch: GitPlex.getInstance(CommitWatchManager.class).findBy(
-					Preconditions.checkNotNull(getCurrentUser()), getRepository()))
-				commitWatches.put(watch.getBranch().getName(), watch);
-			return commitWatches;
 		}
 		
 	};
@@ -431,27 +415,6 @@ public class BranchesPage extends RepositoryPage {
 				final WebMarkupContainer watchContainer = new WebMarkupContainer("watch");
 				item.add(watchContainer.setOutputMarkupId(true));
 				
-				watchContainer.add(new AjaxLink<Void>("unwatchCommits") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						String branchName = item.getModelObject().getName();
-						CommitWatch watch = commitWatchesModel.getObject().get(branchName);
-						if (watch != null) {
-							GitPlex.getInstance(Dao.class).remove(watch);
-							commitWatchesModel.getObject().remove(branchName);
-						}
-						target.add(watchContainer);
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(getCurrentUser() != null 
-								&& commitWatchesModel.getObject().containsKey(item.getModelObject().getName()));
-					}
-					
-				});
 				watchContainer.add(new AjaxLink<Void>("unwatchRequests") {
 
 					@Override
@@ -470,25 +433,6 @@ public class BranchesPage extends RepositoryPage {
 						super.onConfigure();
 						setVisible(getCurrentUser() != null 
 								&& requestWatchesModel.getObject().containsKey(item.getModelObject().getName()));
-					}
-
-				});
-				watchContainer.add(new AjaxLink<Void>("watchCommits") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						CommitWatch watch = new CommitWatch();
-						watch.setBranch(item.getModelObject());
-						watch.setUser(getCurrentUser());
-						GitPlex.getInstance(Dao.class).persist(watch);
-						target.add(watchContainer);
-					}
-					
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(getCurrentUser() != null 
-								&& !commitWatchesModel.getObject().containsKey(item.getModelObject().getName()));
 					}
 
 				});
@@ -580,7 +524,6 @@ public class BranchesPage extends RepositoryPage {
 		aheadOpenRequestsModel.detach();
 		behindOpenRequestsModel.detach();
 		requestWatchesModel.detach();
-		commitWatchesModel.detach();
 		aheadBehindsModel.detach();
 		aheadBehindWidthModel.detach();
 		

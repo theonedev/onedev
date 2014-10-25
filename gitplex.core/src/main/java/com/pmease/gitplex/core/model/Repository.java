@@ -91,9 +91,6 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	private Collection<Authorization> authorizations = new ArrayList<>();
 
 	@OneToMany(mappedBy="repository", cascade=CascadeType.REMOVE)
-	private Collection<CommitComment> commitComments = new ArrayList<>();
-
-	@OneToMany(mappedBy="repository", cascade=CascadeType.REMOVE)
     private Collection<Branch> branches = new ArrayList<>();
 
     @OneToMany(mappedBy="forkedFrom")
@@ -188,14 +185,6 @@ public class Repository extends AbstractEntity implements UserBelonging {
 
 	public void setAuthorizations(Collection<Authorization> authorizations) {
 		this.authorizations = authorizations;
-	}
-
-    public Collection<CommitComment> getCommitComments() {
-		return commitComments;
-	}
-
-	public void setCommitComments(Collection<CommitComment> commitComments) {
-		this.commitComments = commitComments;
 	}
 
 	public Repository getForkedFrom() {

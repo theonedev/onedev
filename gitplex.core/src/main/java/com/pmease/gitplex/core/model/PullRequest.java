@@ -145,6 +145,9 @@ public class PullRequest extends AbstractEntity {
 	private Collection<PullRequestComment> comments = new ArrayList<>();
 
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
+	private Collection<PullRequestInlineComment> inlineComments = new ArrayList<>();
+
+	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
 	private Collection<PullRequestAudit> audits = new ArrayList<>();
 	
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
@@ -296,12 +299,27 @@ public class PullRequest extends AbstractEntity {
 		this.verifications = verifications;
 	}
 
+	/**
+	 * Get all non-inline comments of the pull request.
+	 *  
+	 * @return
+	 * 			all non-inline comments
+	 */
 	public Collection<PullRequestComment> getComments() {
 		return comments;
 	}
 
 	public void setComments(Collection<PullRequestComment> comments) {
 		this.comments = comments;
+	}
+
+	public Collection<PullRequestInlineComment> getInlineComments() {
+		return inlineComments;
+	}
+
+	public void setInlineComments(
+			Collection<PullRequestInlineComment> inlineComments) {
+		this.inlineComments = inlineComments;
 	}
 
 	public Collection<PullRequestAudit> getAudits() {
@@ -587,7 +605,7 @@ public class PullRequest extends AbstractEntity {
 		return pendingCommits;
 	}
 
-	public ChangeComments getComments(RevAwareChange change) {
+	public ChangeComments getChangeComments(RevAwareChange change) {
 		ChangeKey key = new ChangeKey(change.getOldRevision(), change.getNewRevision(), change.getPath());
 		ChangeComments comments = commentsCache.get(key);
 		if (comments == null) {
@@ -596,7 +614,15 @@ public class PullRequest extends AbstractEntity {
 		}
 		return comments;
 	}
-
+	
+	public List<String> getCommentables() {
+		List<String> commentables = new ArrayList<>();
+		commentables.add(getBaseCommitHash());
+		for (PullRequestUpdate update: getSortedUpdates())
+			commentables.add(update.getHeadCommitHash());
+		return commentables;
+	}
+	
 	/**
 	 * Merged commits represent commits already merged to target branch since base commit.
 	 * 

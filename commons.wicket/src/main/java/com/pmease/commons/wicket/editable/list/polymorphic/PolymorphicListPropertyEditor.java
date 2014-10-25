@@ -38,9 +38,6 @@ import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
-import com.pmease.commons.wicket.jquery.FunctionWithParams;
-
-import de.agilecoders.wicket.jquery.JQuery;
 
 @SuppressWarnings("serial")
 public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializable>> {
@@ -181,13 +178,13 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 				}
 				Component newRow = addRow(rows, newElement);
 				
-				JQuery script = $(String.format("<tr id=\"%s\"></tr>", newRow.getMarkupId()));
+				String script = String.format("$('<tr id=\"%s\"></tr>')", newRow.getMarkupId());
 				if (lastRow != null)
-					script.chain(new FunctionWithParams("insertAfter", "'#" + lastRow.getMarkupId() + "'"));
+					script += ".insertAfter('#" + lastRow.getMarkupId() + "');";
 				else
-					script.chain(new FunctionWithParams("appendTo", "'#" + table.getMarkupId() + ">tbody'"));
+					script += ".appendTo('#" + table.getMarkupId() + ">tbody');";
 
-				target.prependJavaScript(script.get());
+				target.prependJavaScript(script);
 				target.add(newRow);
 				
 				if (rows.size() == 1)

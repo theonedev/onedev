@@ -1,0 +1,48 @@
+<wicket:panel>
+	<div class="inline-comment summary">
+		<span wicket:id="name" class="user"></span> 
+		added inline comment
+		<span wicket:id="age"></span>
+	</div>
+	<div class="inline-comment panel panel-default">
+		<div class="panel-heading">
+			<span wicket:id="file"></span> 
+			<span class="actions">
+				<a wicket:id="compareView" class="fa fa-diff" title="Display comment in compare view"></a>
+			</span>
+		</div>
+		<div wicket:id="context"></div>
+	</div>
+	<wicket:fragment wicket:id="withoutContextFrag">
+		<div class="alert alert-warning">Comment context is not available for binary content</div>
+		<div wicket:id="comment"></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="withContextFrag">
+		<table class="table-diff">
+			<tr wicket:id="aboveOmitted" class="omit">
+				<td colspan="3"><i class="fa fa-ellipsis"></i></td>
+			</tr>
+			<wicket:container wicket:id="lines">
+				<tr wicket:id="contentRow" class="line diff">
+					<td class="old line-no">
+						<span wicket:id="oldLineNo"></span>
+					</td>
+					<td class="new line-no">
+						<span wicket:id="newLineNo"></span>
+					</td>
+					<td class="text"><wicket:container wicket:id="diffMark"></wicket:container><wicket:container wicket:id="partials"><span wicket:id="partial"></span></wicket:container></td>
+				</tr>
+				<wicket:enclosure child="comment">
+				<tr class="line comments">
+					<td colspan="3">
+						<div wicket:id="comment"></div>
+					</td>
+				</tr>
+				</wicket:enclosure>
+			</wicket:container>
+			<tr wicket:id="belowOmitted" class="omit">
+				<td colspan="3"><i class="fa fa-ellipsis"></i></td>
+			</tr>
+		</table>
+	</wicket:fragment>
+</wicket:panel>

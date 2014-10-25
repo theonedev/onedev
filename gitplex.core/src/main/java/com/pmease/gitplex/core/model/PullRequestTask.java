@@ -1,5 +1,6 @@
 package com.pmease.gitplex.core.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -26,6 +27,7 @@ public class PullRequestTask extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private User user;
 	
+	@Column(nullable=false)
 	private TaskType taskType;
 
 	public PullRequest getRequest() {

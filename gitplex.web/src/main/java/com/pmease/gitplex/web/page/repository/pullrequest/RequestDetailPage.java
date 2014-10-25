@@ -649,8 +649,8 @@ public abstract class RequestDetailPage extends RepositoryPage {
 				IntegrationPreview preview = manager.previewIntegration(request);
 				
 				PageParameters params = RequestComparePage.paramsOf(
-						request, request.getLatestUpdate().getHeadCommitHash(), 
-						preview!=null?preview.getIntegrated():null, null, null);
+						request, request.getTarget().getHeadCommitHash(), 
+						preview!=null?preview.getIntegrated():null, null);
 				
 				Link<Void> link = new BookmarkablePageLink<Void>("preview", RequestComparePage.class, params) {
 					

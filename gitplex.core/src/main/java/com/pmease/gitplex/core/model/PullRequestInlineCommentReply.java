@@ -6,18 +6,18 @@ import javax.persistence.ManyToOne;
 
 @SuppressWarnings("serial")
 @Entity
-public class PullRequestCommentReply extends AbstractPullRequestCommentReply {
+public class PullRequestInlineCommentReply extends AbstractPullRequestCommentReply {
 
 	@ManyToOne
 	@JoinColumn(nullable=false)
-	private PullRequestComment comment;
+	private PullRequestInlineComment comment;
 	
 	@Override
-	public PullRequestComment getComment() {
+	public PullRequestInlineComment getComment() {
 		return comment;
 	}
 
-	public void setComment(PullRequestComment comment) {
+	public void setComment(PullRequestInlineComment comment) {
 		this.comment = comment;
 	}
 

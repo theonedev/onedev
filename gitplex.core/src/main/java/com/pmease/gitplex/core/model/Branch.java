@@ -45,9 +45,6 @@ public class Branch extends AbstractEntity {
     private Collection<PullRequest> outgoingRequests = new ArrayList<>();
     
     @OneToMany(mappedBy="branch", cascade=CascadeType.REMOVE)
-    private Collection<CommitWatch> commitWatches = new ArrayList<>();
-
-    @OneToMany(mappedBy="branch", cascade=CascadeType.REMOVE)
     private Collection<PullRequestWatch> requestWatches = new ArrayList<>();
 
     private String headCommitHash;
@@ -84,14 +81,6 @@ public class Branch extends AbstractEntity {
         this.outgoingRequests = outgoingRequests;
     }
     
-    public Collection<CommitWatch> getCommitWatches() {
-		return commitWatches;
-	}
-
-	public void setCommitWatches(Collection<CommitWatch> commitWatches) {
-		this.commitWatches = commitWatches;
-	}
-
 	public Collection<PullRequestWatch> getRequestWatches() {
 		return requestWatches;
 	}

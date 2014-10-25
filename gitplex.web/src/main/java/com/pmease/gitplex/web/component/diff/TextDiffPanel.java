@@ -43,12 +43,14 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.string.Strings;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.git.BlobInfo;
 import com.pmease.commons.git.BlobText;
 import com.pmease.commons.git.RevAwareChange;
+import com.pmease.commons.util.diff.AroundContext;
 import com.pmease.commons.util.diff.DiffHunk;
 import com.pmease.commons.util.diff.DiffLine;
 import com.pmease.commons.util.diff.DiffUtils;
-import com.pmease.commons.util.diff.Partial;
+import com.pmease.commons.util.diff.Token;
 import com.pmease.commons.util.diff.WordSplitter;
 import com.pmease.commons.wicket.behavior.ScrollBehavior;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
@@ -61,8 +63,6 @@ import com.pmease.commons.wicket.component.markdown.MarkdownInput;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
-import com.pmease.gitplex.core.comment.InlineContext;
-import com.pmease.gitplex.core.comment.InlineContextAware;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
@@ -74,7 +74,7 @@ import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
 
 @SuppressWarnings("serial")
-public class TextDiffPanel extends Panel implements InlineContextAware {
+public class TextDiffPanel extends Panel {
 
 	private enum DiffOption {IGNORE_NOTHING, IGNORE_EOL, IGNORE_EOL_SPACES, IGNORE_CHANGE_SPACES};
 	
@@ -543,18 +543,24 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 				super.onSubmit(target, form);
 
 				DiffLine diff = diffs.get(index);
-				String commit;
+				BlobInfo commentAt;
+				BlobInfo compareWith;
 				int lineNo;
+				AroundContext commentContext; 
 				
 				if (diff.getAction() == DELETE) {
-					commit = change.getOldRevision();
+					commentAt = change.getOldBlobInfo();
+					compareWith = change.getNewBlobInfo();
 					lineNo = diff.getOldLineNo();
+					commentContext = DiffUtils.around(diffs, lineNo, -1, InlineComment.CONTEXT_SIZE); 
 				} else {
-					commit = change.getNewRevision();
+					commentAt = change.getNewBlobInfo();
+					compareWith = change.getOldBlobInfo();
 					lineNo = diff.getNewLineNo();
+					commentContext = DiffUtils.around(diffs, -1, lineNo, InlineComment.CONTEXT_SIZE); 
 				}
 				
-				commentSupport.addComment(commit, change.getPath(), lineNo, input.getModelObject());
+				commentSupport.addComment(commentAt, compareWith, commentContext, lineNo, input.getModelObject());
 				
 				Component commentsRow = newCommentsRow(commentsView.newChildId(), index);
 				commentsView.add(commentsRow);
@@ -709,7 +715,7 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 				builder.append("-");
 			else
 				builder.append("&nbsp;");
-			for (Partial partial: line.getPartials()) {
+			for (Token partial: line.getTokens()) {
 				if (partial.isEmphasized())
 					builder.append("<span class='emphasize'>");
 				else
@@ -909,57 +915,6 @@ public class TextDiffPanel extends Panel implements InlineContextAware {
 			return new BlobText();
 	}
 	
-	@Override
-	public InlineContext getInlineContext(InlineComment comment) {
-		int oldLine = -1;
-		if (comment.getCommitHash().equals(change.getOldRevision())) {
-			oldLine = comment.getLine();
-		} else {
-			for (Map.Entry<Integer, List<InlineComment>> entry: commentSupport.getOldComments().entrySet()) {
-				if (entry.getValue().contains(comment)) {
-					oldLine = entry.getKey();
-					break;
-				}
-			}
-		}
-				
-		int newLine = -1;
-		if (comment.getCommitHash().equals(change.getNewRevision())) {
-			newLine = comment.getLine();
-		} else {
-			for (Map.Entry<Integer, List<InlineComment>> entry: commentSupport.getNewComments().entrySet()) {
-				if (entry.getValue().contains(comment)
-					|| comment.getCommitHash().equals(change.getNewRevision()) && comment.getLine() == entry.getKey()) {
-					newLine = entry.getKey();
-					break;
-				}
-			}
-		}
-		List<DiffLine> contextDiffs = new ArrayList<>();
-		int index = -1;
-		for (int i=0; i<diffs.size(); i++) {
-			DiffLine diff = diffs.get(i);
-			if (diff.getOldLineNo() == oldLine || diff.getNewLineNo() == newLine) {
-				index = i;
-				break;
-			}
-		}
-		
-		Preconditions.checkState(index != -1);
-		
-		int start = index - InlineComment.CONTEXT_SIZE;
-		if (start < 0)
-			start = 0;
-		int end = index + InlineComment.CONTEXT_SIZE;
-		if (end > diffs.size() - 1)
-			end = diffs.size() - 1;
-		
-		for (int i=start; i<=end; i++)
-			contextDiffs.add(diffs.get(i));
-		
-		return new InlineContext(contextDiffs, index-start, start>0, end<diffs.size()-1);
-	}
-
 	private int locateDiffPos(int lineNo, DiffLine.Action excludeAction) {
 		int index = 0;
 		for (int i=0; i<diffs.size(); i++) {

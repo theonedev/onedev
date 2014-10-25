@@ -3,12 +3,10 @@ package com.pmease.gitplex.web.page.repository.pullrequest;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -28,12 +26,14 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.git.BlobInfo;
 import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.RevAwareChange;
 import com.pmease.commons.hibernate.HibernateUtils;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.util.diff.AroundContext;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
@@ -44,17 +44,15 @@ import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
-import com.pmease.gitplex.core.comment.InlineContext;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.InlineInfo;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.PullRequestInlineComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
-import com.pmease.gitplex.web.component.comment.event.CommentReplied;
 import com.pmease.gitplex.web.component.diff.CompareResultPanel;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
@@ -67,15 +65,13 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	private static final String INTEGRATION_PREVIEW = "Integration Preview";
 	
-	public static final String LATEST_COMMIT_NAME = "latest";
-	
 	private String file;
 	
 	private String oldCommitHash;
 	
 	private String newCommitHash;
 	
-	private final IModel<PullRequestComment> concernedCommentModel;
+	private final IModel<PullRequestInlineComment> commentModel;
 	
 	private final IModel<Map<String, CommitDescription>> commitsModel = 
 			new LoadableDetachableModel<Map<String, CommitDescription>>() {
@@ -85,15 +81,7 @@ public class RequestComparePage extends RequestDetailPage {
 			LinkedHashMap<String, CommitDescription> choices = new LinkedHashMap<>();
 			PullRequest request = getPullRequest();
 
-			String concernedCommitHash;
-			if (getConcernedComment() != null)
-				concernedCommitHash = getConcernedComment().getCommitHash();
-			else
-				concernedCommitHash = null;
-
 			String name = "Base of Pull Request";
-			if (request.getBaseCommitHash().equals(concernedCommitHash))
-				name += " - Concerned";
 			CommitDescription description = new CommitDescription(name, request.getBaseCommit().getSubject());
 			choices.put(request.getBaseCommitHash(), description);
 			
@@ -102,8 +90,6 @@ public class RequestComparePage extends RequestDetailPage {
 				int updateNo = i+1;
 				name = "Head of Update #" + updateNo;
 				Commit commit = update.getHeadCommit();
-				if (commit.getHash().equals(concernedCommitHash))
-					name += " - Concerned";
 				description = new CommitDescription(name, commit.getSubject());
 				choices.put(commit.getHash(), description);
 			}
@@ -131,18 +117,16 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	private CompareResultPanel compareResult;
 	
-	public RequestComparePage(PageParameters params) {
+	public RequestComparePage(final PageParameters params) {
 		super(params);
 
-		file = params.get("file").toString();
-		final Long concernedCommentId = params.get("comment").toOptionalLong();
-		
-		concernedCommentModel = new LoadableDetachableModel<PullRequestComment>() {
+		commentModel = new LoadableDetachableModel<PullRequestInlineComment>() {
 
 			@Override
-			protected PullRequestComment load() {
-				if (concernedCommentId != null)
-					return GitPlex.getInstance(Dao.class).load(PullRequestComment.class, concernedCommentId);
+			protected PullRequestInlineComment load() {
+				Long commentId = params.get("comment").toOptionalLong();
+				if (commentId != null)
+					return GitPlex.getInstance(Dao.class).load(PullRequestInlineComment.class, commentId);
 				else 
 					return null;
 			}
@@ -151,35 +135,29 @@ public class RequestComparePage extends RequestDetailPage {
 		
 		oldCommitHash = params.get("original").toString();
 		newCommitHash = params.get("revised").toString();
-
-		if (oldCommitHash != null) {
-			if (oldCommitHash.equals(LATEST_COMMIT_NAME))
-				oldCommitHash = getPullRequest().getLatestUpdate().getHeadCommitHash();
-			else if (!commitsModel.getObject().containsKey(oldCommitHash))
-				throw new IllegalArgumentException("Commit '" + oldCommitHash + "' is not relevant to current pull request.");
-		}
-
-		if (newCommitHash != null) {
-			if (newCommitHash.equals(LATEST_COMMIT_NAME))
-				newCommitHash = getPullRequest().getLatestUpdate().getHeadCommitHash();
-			else if (!commitsModel.getObject().containsKey(newCommitHash))
-				throw new IllegalArgumentException("Commit '" + newCommitHash + "' is not relevant to current pull request.");
-		}
+		file = params.get("file").toString();
 		
-		PullRequestComment comment = getConcernedComment();
+		PullRequestInlineComment comment = getComment();
 		if (comment != null) {
-			if (file == null)
-				file = comment.getInlineInfo().getFile();
-			if (oldCommitHash == null)
-				oldCommitHash = comment.getInlineInfo().getOldCommitHash();
-			if (newCommitHash == null)
-				newCommitHash = comment.getInlineInfo().getNewCommitHash();
+			if (oldCommitHash != null || newCommitHash != null || file != null) {
+				throw new IllegalArgumentException("Parameter 'original', 'revised', and 'file' "
+						+ "should not be specified if parameter 'comment' is specified.");
+			}
+
+			oldCommitHash = comment.getOldCommitHash();
+			newCommitHash = comment.getNewCommitHash();
+			file = comment.getBlobInfo().getPath();
 		} else {
 			if (oldCommitHash == null)
 				oldCommitHash = getPullRequest().getBaseCommitHash();
 			if (newCommitHash == null)
 				newCommitHash = getPullRequest().getLatestUpdate().getHeadCommitHash();
 		}
+		if (oldCommitHash != null && !commitsModel.getObject().containsKey(oldCommitHash))
+			throw new IllegalArgumentException("Commit '" + oldCommitHash + "' is not relevant to current pull request.");
+
+		if (newCommitHash != null && !commitsModel.getObject().containsKey(newCommitHash))
+			throw new IllegalArgumentException("Commit '" + newCommitHash + "' is not relevant to current pull request.");
 	}
 	
 	@Override
@@ -271,38 +249,11 @@ public class RequestComparePage extends RequestDetailPage {
 			protected List<MenuItem> getMenuItems() {
 				List<MenuItem> items = new ArrayList<>();
 				
-				if (getConcernedComment() != null) {
-					items.add(new ComparisonChoiceItem("Base", "Concerned") {
-	
-						@Override
-						protected void onSelect() {
-							PageParameters params = paramsOf(getPullRequest(), 
-									getPullRequest().getBaseCommitHash(), getConcernedComment().getCommitHash(), null,
-									getConcernedComment());
-							setResponsePage(RequestComparePage.class, params);
-						}
-	
-					});
-					items.add(new ComparisonChoiceItem("Concerned", "Latest Update") {
-						
-						@Override
-						protected void onSelect() {
-							PageParameters params = paramsOf(getPullRequest(), 
-									getConcernedComment().getCommitHash(), LATEST_COMMIT_NAME, null,
-									getConcernedComment());
-							setResponsePage(RequestComparePage.class, params);
-						}
-	
-					});
-				}
-
 				items.add(new ComparisonChoiceItem("Base", "Latest Update") {
 
 					@Override
 					protected void onSelect() {
-						PageParameters params = paramsOf(getPullRequest(), 
-								getPullRequest().getBaseCommitHash(), LATEST_COMMIT_NAME, 
-								file, getConcernedComment());
+						PageParameters params = paramsOf(getPullRequest(), null, null, file);
 						setResponsePage(RequestComparePage.class, params);
 					}
 
@@ -313,14 +264,12 @@ public class RequestComparePage extends RequestDetailPage {
 					final IntegrationPreview preview = GitPlex.getInstance(PullRequestManager.class).previewIntegration(request);
 					if (preview != null && preview.getIntegrated() != null 
 							&& !getRepository().getChanges(preview.getRequestHead(), preview.getIntegrated()).isEmpty()) {
-						items.add(new ComparisonChoiceItem("Latest Update", "Integration Preview") {
+						items.add(new ComparisonChoiceItem("Target Branch", "Integration Preview") {
 
 							@Override
 							protected void onSelect() {
 								PageParameters params = paramsOf(getPullRequest(), 
-										getPullRequest().getLatestUpdate().getHeadCommitHash(), 
-										preview.getIntegrated(),
-										file, getConcernedComment());
+										getPullRequest().getTarget().getHeadCommitHash(), preview.getIntegrated(), file);
 								setResponsePage(RequestComparePage.class, params);
 							}
 							
@@ -343,8 +292,7 @@ public class RequestComparePage extends RequestDetailPage {
 
 						@Override
 						protected void onSelect() {
-							PageParameters params = paramsOf(getPullRequest(), baseCommit, headCommit, 
-									file, getConcernedComment());
+							PageParameters params = paramsOf(getPullRequest(), baseCommit, headCommit, file);
 							setResponsePage(RequestComparePage.class, params);
 						}
 						
@@ -381,11 +329,10 @@ public class RequestComparePage extends RequestDetailPage {
 			
 			@Override
 			protected InlineCommentSupport getInlineCommentSupport(final Change change) {
-				Set<String> commentables = new HashSet<>();
-				commentables.add(getPullRequest().getBaseCommitHash());
-				for (PullRequestUpdate update: getPullRequest().getUpdates())
-					commentables.add(update.getHeadCommitHash());
-				if (!commentables.contains(oldCommitHash) || !commentables.contains(newCommitHash)) {
+				List<String> commentables = getPullRequest().getCommentables();
+				int oldCommitIndex = commentables.indexOf(oldCommitHash);
+				int newCommitIndex = commentables.indexOf(newCommitHash);
+				if (oldCommitIndex == -1 || newCommitIndex == -1 || oldCommitIndex > newCommitIndex) {
 					return null;
 				} else {
 					return new InlineCommentSupport() {
@@ -393,41 +340,35 @@ public class RequestComparePage extends RequestDetailPage {
 						@Override
 						public Map<Integer, List<InlineComment>> getOldComments() {
 							RevAwareChange revAwareChange = new RevAwareChange(change, oldCommitHash, newCommitHash);
-							return getPullRequest().getComments(revAwareChange).getOldComments();
+							return getPullRequest().getChangeComments(revAwareChange).getOldComments();
 						}
 						
 						@Override
 						public Map<Integer, List<InlineComment>> getNewComments() {
 							RevAwareChange revAwareChange = new RevAwareChange(change, oldCommitHash, newCommitHash);
-							return getPullRequest().getComments(revAwareChange).getNewComments();
+							return getPullRequest().getChangeComments(revAwareChange).getNewComments();
 						}
 						
 						@Override
 						public InlineComment getConcernedComment() {
-							return RequestComparePage.this.getConcernedComment();
+							return RequestComparePage.this.getComment();
 						}
 						
 						@Override
-						public InlineComment addComment(String commit, String file, int line, String content) {
+						public InlineComment addComment(BlobInfo blobInfo, BlobInfo compareWith, 
+								AroundContext commentContext, int line, String content) {
 							User user = GitPlex.getInstance(UserManager.class).getCurrent();
 							Preconditions.checkNotNull(user);
-							PullRequestComment comment = new PullRequestComment();
-							getPullRequest().getComments().add(comment);
+							PullRequestInlineComment comment = new PullRequestInlineComment();
+							getPullRequest().getInlineComments().add(comment);
 							comment.setUser(user);
 							comment.setDate(new Date());
 							comment.setContent(content);
 							comment.setRequest(getPullRequest());
-							InlineInfo inlineInfo = new InlineInfo();
-							comment.setInlineInfo(inlineInfo);
-							inlineInfo.setCommitHash(commit);
-							inlineInfo.setOldCommitHash(oldCommitHash);
-							inlineInfo.setNewCommitHash(newCommitHash);
-							inlineInfo.setFile(file);
-							inlineInfo.setLine(line);
-							InlineContext context = getInlineContext(comment);
-							Preconditions.checkNotNull(context);
-							inlineInfo.setContext(context);
-							comment.setInlineInfo(inlineInfo);
+							comment.setBlobInfo(blobInfo);
+							comment.setCompareWith(compareWith);
+							comment.setLine(line);
+							comment.setContext(commentContext);
 							GitPlex.getInstance(Dao.class).persist(comment);
 							return comment;
 						}
@@ -447,13 +388,20 @@ public class RequestComparePage extends RequestDetailPage {
 	@Override
 	public void onDetach() {
 		commitsModel.detach();
-		concernedCommentModel.detach();
+		commentModel.detach();
 		
 		super.onDetach();
 	}
 	
+	public static PageParameters paramsOf(PullRequestInlineComment concernedComment) {
+		PageParameters params = RequestDetailPage.paramsOf(concernedComment.getRequest());
+		params.set("comment", concernedComment.getId());
+		
+		return params;
+	}
+	
 	public static PageParameters paramsOf(PullRequest request, @Nullable String oldCommit, 
-			@Nullable String newCommit, @Nullable String file, @Nullable PullRequestComment concernedComment) {
+			@Nullable String newCommit, @Nullable String file) {
 		PageParameters params = RequestDetailPage.paramsOf(request);
 		
 		if (oldCommit != null)
@@ -462,12 +410,10 @@ public class RequestComparePage extends RequestDetailPage {
 			params.set("revised", newCommit);
 		if (file != null)
 			params.set("file", file);
-		if (concernedComment != null)
-			params.set("comment", concernedComment.getId());
 		
 		return params;
 	}
-	
+
 	@Override
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);
@@ -478,22 +424,11 @@ public class RequestComparePage extends RequestDetailPage {
 			
 			// compare identifier instead of comment object as comment may have been deleted
 			// to cause LazyInitializationException
-			if (getConcernedComment() != null 
-					&& HibernateUtils.getId(comment).equals(HibernateUtils.getId(getConcernedComment()))) {
-				PageParameters params = paramsOf(getPullRequest(), oldCommitHash, newCommitHash, 
-						comment.getInlineInfo().getFile(), null);
+			if (getComment() != null 
+					&& HibernateUtils.getId(comment).equals(HibernateUtils.getId(getComment()))) {
+				PageParameters params = paramsOf(getPullRequest(), oldCommitHash, newCommitHash, file);
 				setResponsePage(RequestComparePage.class, params);
 			}
-		} else if (event.getPayload() instanceof CommentReplied) {
-			CommentReplied commentReplied = (CommentReplied) event.getPayload();
-			PullRequestComment comment = (PullRequestComment) commentReplied.getReply().getComment();
-			comment.getInlineInfo().setOldCommitHash(oldCommitHash);
-			comment.getInlineInfo().setNewCommitHash(newCommitHash);
-
-			InlineContext context = compareResult.getInlineContext(comment);
-			Preconditions.checkNotNull(context);
-			comment.getInlineInfo().setContext(context);
-			GitPlex.getInstance(Dao.class).persist(comment);
 		}
 	}
 
@@ -556,10 +491,10 @@ public class RequestComparePage extends RequestDetailPage {
 							Map.Entry<String, CommitDescription> entry = item.getModelObject();
 							if (forBase) {
 								setResponsePage(RequestComparePage.class, 
-										paramsOf(getPullRequest(), entry.getKey(), newCommitHash, file, getConcernedComment()));
+										paramsOf(getPullRequest(), entry.getKey(), newCommitHash, file));
 							} else {
 								setResponsePage(RequestComparePage.class, 
-										paramsOf(getPullRequest(), oldCommitHash, entry.getKey(), file, getConcernedComment()));
+										paramsOf(getPullRequest(), oldCommitHash, entry.getKey(), file));
 							}
 						}
 						
@@ -614,7 +549,7 @@ public class RequestComparePage extends RequestDetailPage {
 		}
 	}
 
-	private PullRequestComment getConcernedComment() {
-		return concernedCommentModel.getObject();
+	private PullRequestInlineComment getComment() {
+		return commentModel.getObject();
 	}
 }

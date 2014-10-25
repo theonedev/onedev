@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class WordSplitter implements PartialSplitter {
+public class WordSplitter implements TokenSplitter {
 
 	private static final Pattern pattern = Pattern.compile("\\w+");
 	

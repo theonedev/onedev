@@ -1,29 +1,22 @@
 package com.pmease.gitplex.web.component.diff;
 
 import org.apache.tika.mime.MediaType;
-import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.util.visit.IVisit;
-import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jgit.lib.FileMode;
 
-import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobText;
 import com.pmease.commons.git.RevAwareChange;
 import com.pmease.commons.util.MediaTypes;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
-import com.pmease.gitplex.core.comment.InlineContext;
-import com.pmease.gitplex.core.comment.InlineContextAware;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.extensionpoint.DiffRenderer;
 import com.pmease.gitplex.web.extensionpoint.DiffRendererProvider;
 
 @SuppressWarnings("serial")
-public class BlobDiffPanel extends Panel implements InlineContextAware {
+public class BlobDiffPanel extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
@@ -119,20 +112,6 @@ public class BlobDiffPanel extends Panel implements InlineContextAware {
 			}
 		}
 		
-	}
-	
-	@Override
-	public InlineContext getInlineContext(final InlineComment comment) {
-		InlineContext context = visitChildren(InlineContextAware.class, new IVisitor<Component, InlineContext>() {
-
-			@Override
-			public void component(Component object, IVisit<InlineContext> visit) {
-				InlineContextAware inlineContextAware = (InlineContextAware) object;
-				visit.stop(inlineContextAware.getInlineContext(comment));
-			}
-
-		});
-		return Preconditions.checkNotNull(context);
 	}
 	
 	protected void onDetach() {

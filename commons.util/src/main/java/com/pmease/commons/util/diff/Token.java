@@ -3,13 +3,13 @@ package com.pmease.commons.util.diff;
 import java.io.Serializable;
 
 @SuppressWarnings("serial")
-public class Partial implements Serializable {
+public class Token implements Serializable {
 	
 	private final String content;
 	
 	private final boolean emphasized;
 	
-	public Partial(final String content, final boolean emphasized) {
+	public Token(final String content, final boolean emphasized) {
 		this.content = content;
 		this.emphasized = emphasized;
 	}

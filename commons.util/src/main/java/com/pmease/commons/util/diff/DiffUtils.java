@@ -25,15 +25,15 @@ public class DiffUtils {
 	 * 			original list of tokens. 
 	 * @param revised 
 	 * 			revised list of tokens
-	 * @param partialSplitter
-	 * 			pass a not null partial splitter to split line into partials, in order to 
-	 * 			identify modified lines in diff result, so that modified partials can be 
-	 * 			marked via {@link Partial#isEmphasized()} 
+	 * @param tokenSplitter
+	 * 			pass a not null token splitter to split line into tokens, in order to 
+	 * 			identify modified lines in diff result, so that modified tokens can be 
+	 * 			marked via {@link Token#isEmphasized()} 
 	 * @return
-	 *			list of difference tokens 				
+	 *			list of diff lines 				
 	 */
 	public static List<DiffLine> diff(List<String> original, List<String> revised, 
-			@Nullable PartialSplitter partialSplitter) {
+			@Nullable TokenSplitter tokenSplitter) {
 		Preconditions.checkArgument(original.size() + revised.size() <= 65535, 
 				"Total size of original and revised list should be less than 65535.");
 		DiffMatchPatch dmp = new DiffMatchPatch();
@@ -43,61 +43,64 @@ public class DiffUtils {
 
 		List<DiffLine> diffLines = charsToTokens(diffs, result.tokenArray);
 		
-		if (partialSplitter != null) {
-			List<DiffLine> processedDiffLines = new ArrayList<>();
-			List<Triple<String, Integer, Integer>> deletions = new ArrayList<>();
-			List<Triple<String, Integer, Integer>> additions = new ArrayList<>();
-			List<DiffLine> processedDeletions = new ArrayList<>();
-			List<DiffLine> processedAdditions = new ArrayList<>();
-			for (DiffLine diffLine: diffLines) {
-				Preconditions.checkState(diffLine.getPartials().size() == 1);
-				if (diffLine.getAction() == DiffLine.Action.DELETE) {
-					deletions.add(new Triple<String, Integer, Integer>(
-							diffLine.getPartials().get(0).getContent(), diffLine.getOldLineNo(), diffLine.getNewLineNo()));
-				} else if (diffLine.getAction() == DiffLine.Action.ADD) {
-					additions.add(new Triple<String, Integer, Integer>(
-							diffLine.getPartials().get(0).getContent(), diffLine.getOldLineNo(), diffLine.getNewLineNo()));
-				} else {
-					process(processedDiffLines, deletions, additions, processedDeletions, processedAdditions, partialSplitter);
-					processedDiffLines.add(new DiffLine(DiffLine.Action.EQUAL, diffLine.getPartials().get(0).getContent(), 
-							diffLine.getOldLineNo(), diffLine.getNewLineNo()));
-				}
-			}
-			process(processedDiffLines, deletions, additions, processedDeletions, processedAdditions, partialSplitter);
-			
-			return processedDiffLines;
-		} else {
+		if (tokenSplitter != null)
+			return diffTokens(diffLines, tokenSplitter);
+		else 
 			return diffLines;
+	}
+
+	public static List<DiffLine> diffTokens(List<DiffLine> diffs, TokenSplitter tokenSplitter) {
+		List<DiffLine> processedDiffs = new ArrayList<>();
+		List<Triple<String, Integer, Integer>> deletions = new ArrayList<>();
+		List<Triple<String, Integer, Integer>> additions = new ArrayList<>();
+		List<DiffLine> processedDeletions = new ArrayList<>();
+		List<DiffLine> processedAdditions = new ArrayList<>();
+		for (DiffLine diffLine: diffs) {
+			Preconditions.checkState(diffLine.getTokens().size() == 1);
+			if (diffLine.getAction() == DiffLine.Action.DELETE) {
+				deletions.add(new Triple<String, Integer, Integer>(
+						diffLine.getTokens().get(0).getContent(), diffLine.getOldLineNo(), diffLine.getNewLineNo()));
+			} else if (diffLine.getAction() == DiffLine.Action.ADD) {
+				additions.add(new Triple<String, Integer, Integer>(
+						diffLine.getTokens().get(0).getContent(), diffLine.getOldLineNo(), diffLine.getNewLineNo()));
+			} else {
+				process(processedDiffs, deletions, additions, processedDeletions, processedAdditions, tokenSplitter);
+				processedDiffs.add(new DiffLine(DiffLine.Action.EQUAL, diffLine.getTokens().get(0).getContent(), 
+						diffLine.getOldLineNo(), diffLine.getNewLineNo()));
+			}
 		}
+		process(processedDiffs, deletions, additions, processedDeletions, processedAdditions, tokenSplitter);
+		
+		return processedDiffs;
 	}
 	
-	private static List<String> getPartials(String line, PartialSplitter splitter, Map<String, List<String>> partialsCache) {
-		List<String> partials = partialsCache.get(line);
-		if (partials == null) {
-			partials = splitter.split(line);
-			partialsCache.put(line, partials);
+	private static List<String> getTokens(String line, TokenSplitter splitter, Map<String, List<String>> tokensCache) {
+		List<String> tokens = tokensCache.get(line);
+		if (tokens == null) {
+			tokens = splitter.split(line);
+			tokensCache.put(line, tokens);
 		}
-		return partials;
+		return tokens;
 	}
 	
 	private static void process(List<DiffLine> processedDiffLines, List<Triple<String, Integer, Integer>> deletions, 
 			List<Triple<String, Integer, Integer>> additions, List<DiffLine> processedDeletions, 
-			List<DiffLine> processedAdditions, PartialSplitter partialSplitter) {
-		Map<String, List<String>> partialsCache = new HashMap<String, List<String>>();
+			List<DiffLine> processedAdditions, TokenSplitter tokenSplitter) {
+		Map<String, List<String>> tokensCache = new HashMap<String, List<String>>();
 		
 		for (Triple<String, Integer, Integer> deletion: deletions) {
 			boolean matching = false;
 			for (int i=0; i<additions.size(); i++) {
 				Triple<String, Integer, Integer> addition = additions.get(i);
 				
-				List<DiffLine> diffPartials = diff(getPartials(deletion.getFirst(), partialSplitter, partialsCache), 
-						getPartials(addition.getFirst(), partialSplitter, partialsCache), null);
+				List<DiffLine> diffTokens = diff(getTokens(deletion.getFirst(), tokenSplitter, tokensCache), 
+						getTokens(addition.getFirst(), tokenSplitter, tokensCache), null);
 				int equals = 0;
 				int total = 0;
-				for (DiffLine diffPartial: diffPartials) {
-					if (StringUtils.isNotBlank(diffPartial.getPartials().get(0).getContent())) {
+				for (DiffLine diffToken: diffTokens) {
+					if (StringUtils.isNotBlank(diffToken.getTokens().get(0).getContent())) {
 						total ++;
-						if (diffPartial.getAction() == DiffLine.Action.EQUAL)
+						if (diffToken.getAction() == DiffLine.Action.EQUAL)
 							equals++;
 					}
 				}
@@ -109,22 +112,22 @@ public class DiffUtils {
 					}
 					for (int j=0; j<=i; j++)
 						additions.remove(0);
-					List<Partial> addPartials = new ArrayList<>();
-					List<Partial> deletePartials = new ArrayList<>();
-					for (DiffLine diffPartial: diffPartials) {
-						Preconditions.checkState(diffPartial.getPartials().size() == 1);
-						if (diffPartial.getAction() == DiffLine.Action.ADD) {
-							addPartials.add(new Partial(diffPartial.getPartials().get(0).getContent(), true));
-						} else if (diffPartial.getAction() == DiffLine.Action.DELETE) {
-							deletePartials.add(new Partial(diffPartial.getPartials().get(0).getContent(), true));
+					List<Token> addTokens = new ArrayList<>();
+					List<Token> deleteTokens = new ArrayList<>();
+					for (DiffLine diffToken: diffTokens) {
+						Preconditions.checkState(diffToken.getTokens().size() == 1);
+						if (diffToken.getAction() == DiffLine.Action.ADD) {
+							addTokens.add(new Token(diffToken.getTokens().get(0).getContent(), true));
+						} else if (diffToken.getAction() == DiffLine.Action.DELETE) {
+							deleteTokens.add(new Token(diffToken.getTokens().get(0).getContent(), true));
 						} else {
-							addPartials.add(new Partial(diffPartial.getPartials().get(0).getContent(), false));
-							deletePartials.add(new Partial(diffPartial.getPartials().get(0).getContent(), false));
+							addTokens.add(new Token(diffToken.getTokens().get(0).getContent(), false));
+							deleteTokens.add(new Token(diffToken.getTokens().get(0).getContent(), false));
 						}
 					}
-					processedAdditions.add(new DiffLine(DiffLine.Action.ADD, addPartials, 
+					processedAdditions.add(new DiffLine(DiffLine.Action.ADD, addTokens, 
 							addition.getSecond(), addition.getThird()));
-					processedDeletions.add(new DiffLine(DiffLine.Action.DELETE, deletePartials, 
+					processedDeletions.add(new DiffLine(DiffLine.Action.DELETE, deleteTokens, 
 							deletion.getSecond(), deletion.getThird()));
 					matching = true;
 					break;
@@ -150,10 +153,14 @@ public class DiffUtils {
 	}
 	
 	public static Map<Integer, Integer> mapLines(List<String> original, List<String> revised) {
+		return mapLines(diff(original, revised, null));
+	}
+	
+	public static Map<Integer, Integer> mapLines(List<DiffLine> diffs) {
 		Map<Integer, Integer> lineMapping = new HashMap<Integer, Integer>();
 		int originalLine = 0;
 		int revisedLine = 0;
-		for (DiffLine diff: diff(original, revised, null)) {
+		for (DiffLine diff: diffs) {
 			if (diff.getAction() == DiffLine.Action.ADD) {
 				revisedLine++;
 			} else if (diff.getAction() == DiffLine.Action.DELETE) {
@@ -166,14 +173,40 @@ public class DiffUtils {
 		}
 		return lineMapping;
 	}
+
+	public static AroundContext around(List<DiffLine> diffs, int oldLine, int newLine, int contextSize) {
+		List<DiffLine> contextDiffs = new ArrayList<>();
+		int index = -1;
+		for (int i=0; i<diffs.size(); i++) {
+			DiffLine diff = diffs.get(i);
+			if (diff.getOldLineNo() == oldLine || diff.getNewLineNo() == newLine) {
+				index = i;
+				break;
+			}
+		}
+		
+		Preconditions.checkState(index != -1);
+		
+		int start = index - contextSize;
+		if (start < 0)
+			start = 0;
+		int end = index + contextSize;
+		if (end > diffs.size() - 1)
+			end = diffs.size() - 1;
+		
+		for (int i=start; i<=end; i++)
+			contextDiffs.add(diffs.get(i));
+		
+		return new AroundContext(contextDiffs, index-start, start>0, end<diffs.size()-1);
+	}
 	
 	public static List<DiffHunk> diffAsHunks(List<String> original, List<String> revised, 
-			PartialSplitter wordSplitter, int contextSize) {
+			TokenSplitter wordSplitter, int contextSize) {
 		return hunksOf(diff(original, revised, wordSplitter), contextSize);
 	}
 
 	public static List<DiffHunk> diffAsHunks(List<String> original, List<String> revised, 
-			PartialSplitter wordSplitter, Set<Integer> additionalOldLinesToPreserve, 
+			TokenSplitter wordSplitter, Set<Integer> additionalOldLinesToPreserve, 
 			Set<Integer> additionalNewLinesToPreserve, int contextSize) {
 		return hunksOf(diff(original, revised, wordSplitter), additionalOldLinesToPreserve, 
 				additionalNewLinesToPreserve, contextSize);

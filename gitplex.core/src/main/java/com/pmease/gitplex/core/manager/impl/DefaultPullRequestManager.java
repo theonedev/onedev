@@ -35,6 +35,7 @@ import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListeners;
 import com.pmease.gitplex.core.manager.BranchManager;
+import com.pmease.gitplex.core.manager.PullRequestInlineCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.StorageManager;
@@ -46,6 +47,7 @@ import com.pmease.gitplex.core.model.PullRequest.CloseStatus;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequestAudit;
 import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.PullRequestInlineComment;
 import com.pmease.gitplex.core.model.PullRequestOperation;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
@@ -66,6 +68,8 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	
 	private final UnitOfWork unitOfWork;
 	
+	private final PullRequestInlineCommentManager pullRequestInlineCommentManager;
+	
 	private final PullRequestListeners pullRequestListeners;
 	
 	private final Set<Long> calculatingRequestIds = new ConcurrentHashSet<>();
@@ -73,13 +77,15 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager, 
 			BranchManager branchManager, StorageManager storageManager,  
-			UnitOfWork unitOfWork, PullRequestListeners pullRequestListeners) {
+			UnitOfWork unitOfWork, PullRequestListeners pullRequestListeners, 
+			PullRequestInlineCommentManager pullRequestInlineCommentManager) {
 		this.dao = dao;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.branchManager = branchManager;
 		this.storageManager = storageManager;
 		this.unitOfWork = unitOfWork;
 		this.pullRequestListeners = pullRequestListeners;
+		this.pullRequestInlineCommentManager = pullRequestInlineCommentManager;
 	}
 
 	@Sessional
@@ -365,6 +371,17 @@ public class DefaultPullRequestManager implements PullRequestManager {
 					@Override
 					protected void call(PullRequestListener listener, PullRequest request) {
 						listener.onUpdated(request);
+					}
+					
+				});
+				
+				unitOfWork.asyncCall(new Runnable() {
+
+					@Override
+					public void run() {
+						PullRequest request = dao.load(PullRequest.class, requestId);
+						for (PullRequestInlineComment comment: request.getInlineComments())
+							pullRequestInlineCommentManager.update((PullRequestInlineComment) comment);
 					}
 					
 				});

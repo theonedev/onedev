@@ -2,19 +2,29 @@ package com.pmease.commons.git;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.google.common.base.Objects;
 
+@Embeddable
 @SuppressWarnings("serial")
 public class BlobInfo implements Serializable {
 
-	private final String path;
+	private String path;
+
+	@Column(nullable=false)
+	private String revision;
 	
-	private final String revision;
-	
-	private final int mode;
+	@Column(nullable=false)
+	private int mode;
+
+	public BlobInfo() {
+		
+	};
 
 	public BlobInfo(String revision, String path, int mode) {
 		this.revision = revision;
@@ -34,6 +44,18 @@ public class BlobInfo implements Serializable {
 		return mode;
 	}
 	
+	public void setPath(String path) {
+		this.path = path;
+	}
+
+	public void setRevision(String revision) {
+		this.revision = revision;
+	}
+
+	public void setMode(int mode) {
+		this.mode = mode;
+	}
+
 	@Override
 	public boolean equals(Object other) {
 		if (!(other instanceof BlobInfo)) 

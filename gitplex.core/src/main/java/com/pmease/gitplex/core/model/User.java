@@ -44,9 +44,6 @@ public class User extends AbstractUser implements ProtectedObject {
 	private Date avatarUpdateDate;
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-	private Collection<CommitComment> commitComments = new ArrayList<>();
-
-	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<Membership> memberships = new ArrayList<>();
 	
 	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
@@ -70,9 +67,6 @@ public class User extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestCommentReply> requestCommentReplies = new ArrayList<>();
 	
-    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<CommitWatch> commitWatches = new ArrayList<>();
-
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<PullRequestWatch> requestWatches = new ArrayList<>();
 
@@ -132,14 +126,6 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	public void setAvatarUpdateDate(Date avatarUpdateDate) {
 		this.avatarUpdateDate = avatarUpdateDate;
-	}
-
-	public Collection<CommitComment> getCommitComments() {
-		return commitComments;
-	}
-
-	public void setCommitComments(Collection<CommitComment> commitComments) {
-		this.commitComments = commitComments;
 	}
 
 	public Collection<Membership> getMemberships() {
@@ -211,14 +197,6 @@ public class User extends AbstractUser implements ProtectedObject {
 	public void setRequestCommentReplies(
 			Collection<PullRequestCommentReply> requestCommentReplies) {
 		this.requestCommentReplies = requestCommentReplies;
-	}
-
-	public Collection<CommitWatch> getCommitWatches() {
-		return commitWatches;
-	}
-
-	public void setCommitWatches(Collection<CommitWatch> commitWatches) {
-		this.commitWatches = commitWatches;
 	}
 
 	public Collection<PullRequestWatch> getRequestWatches() {

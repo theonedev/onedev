@@ -31,9 +31,11 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.component.markdown.MarkdownInput;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.model.AbstractPullRequestComment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestAudit;
 import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.PullRequestInlineComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
@@ -41,8 +43,10 @@ import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
+import com.pmease.gitplex.web.page.repository.pullrequest.activity.AbstractCommentPullRequest;
 import com.pmease.gitplex.web.page.repository.pullrequest.activity.ApprovePullRequest;
 import com.pmease.gitplex.web.page.repository.pullrequest.activity.CommentPullRequest;
+import com.pmease.gitplex.web.page.repository.pullrequest.activity.InlineCommentPullRequest;
 import com.pmease.gitplex.web.page.repository.pullrequest.activity.DisapprovePullRequest;
 import com.pmease.gitplex.web.page.repository.pullrequest.activity.DiscardPullRequest;
 import com.pmease.gitplex.web.page.repository.pullrequest.activity.IntegratePullRequest;
@@ -60,9 +64,9 @@ public class RequestActivitiesPage extends RequestDetailPage {
 	}
 	
 	private Component newActivityRow(final String id, PullRequestActivity activity) {
-		final CommentPullRequest commentActivity;
-		if (activity instanceof CommentPullRequest)
-			commentActivity = (CommentPullRequest) activity;
+		final AbstractCommentPullRequest commentActivity;
+		if (activity instanceof AbstractCommentPullRequest)
+			commentActivity = (AbstractCommentPullRequest) activity;
 		else
 			commentActivity = null;
 		
@@ -87,15 +91,17 @@ public class RequestActivitiesPage extends RequestDetailPage {
 			
 		};
 		if (commentActivity != null && commentActivity.isCollapsed()) {
-			PullRequestComment comment = commentActivity.getComment();
+			AbstractPullRequestComment comment = commentActivity.getComment();
 
 			Fragment fragment = new Fragment("activity", "collapsedCommentFrag", RequestActivitiesPage.this);
 
 			fragment.add(new UserLink("user", new UserModel(comment.getUser()), AvatarMode.NAME));
-			if (comment.getInlineInfo() != null)
-				fragment.add(new Label("activity", "added inline comment on file '" + comment.getFile() + "'"));
-			else 
+			if (comment instanceof PullRequestInlineComment) {
+				PullRequestInlineComment inlineComment = (PullRequestInlineComment) comment;
+				fragment.add(new Label("activity", "added inline comment on file '" + inlineComment.getBlobInfo().getPath() + "'"));
+			} else { 
 				fragment.add(new Label("activity", "commented"));
+			}
 			fragment.add(new AgeLabel("age", Model.of(comment.getDate())));
 			
 			fragment.add(new Label("detail", comment.getContent()));
@@ -121,7 +127,7 @@ public class RequestActivitiesPage extends RequestDetailPage {
 		if (row.get("activity") == null) 
 			row.add(activity.render("activity"));
 		
-		if (activity instanceof OpenPullRequest || activity instanceof CommentPullRequest)
+		if (activity instanceof OpenPullRequest || activity instanceof AbstractCommentPullRequest)
 			row.add(AttributeAppender.append("class", " discussion non-update"));
 		else if (activity instanceof UpdatePullRequest)
 			row.add(AttributeAppender.append("class", " non-discussion update"));
@@ -134,8 +140,8 @@ public class RequestActivitiesPage extends RequestDetailPage {
 			protected String load() {
 				String cssClasses = "";
 				PullRequestActivity activity = (PullRequestActivity) row.getDefaultModelObject();
-				if (activity instanceof CommentPullRequest) {
-					CommentPullRequest commentActivity = (CommentPullRequest) activity;
+				if (activity instanceof AbstractCommentPullRequest) {
+					AbstractCommentPullRequest commentActivity = (AbstractCommentPullRequest) activity;
 					if (commentActivity.isCollapsed())
 						cssClasses += " collapsed";
 					if (commentActivity.getComment().isResolved())
@@ -161,6 +167,9 @@ public class RequestActivitiesPage extends RequestDetailPage {
 		for (PullRequestComment comment: request.getComments()) 
 			activities.add(new CommentPullRequest(comment));
 		
+		for (PullRequestInlineComment comment: request.getInlineComments()) 
+			activities.add(new InlineCommentPullRequest(comment));
+
 		for (PullRequestAudit audit: request.getAudits()) {
 			if (audit.getOperation() == INTEGRATE) {
 				activities.add(new IntegratePullRequest(audit.getUser(), audit.getDate()));
@@ -183,7 +192,7 @@ public class RequestActivitiesPage extends RequestDetailPage {
 					return -1;
 				else if (o1.getDate().after(o2.getDate()))
 					return 1;
-				else if (o1 instanceof OpenPullRequest || o1 instanceof CommentPullRequest)
+				else if (o1 instanceof OpenPullRequest || o1 instanceof AbstractCommentPullRequest)
 					return -1;
 				else
 					return 1;
@@ -203,7 +212,7 @@ public class RequestActivitiesPage extends RequestDetailPage {
 		int index = 0;
 		for (PullRequestActivity activity: activities) { 
 			Component activityRow = newActivityRow(activitiesView.newChildId(), activity);
-			if (index == activities.size()-1 || activities.get(index+1) instanceof CommentPullRequest)
+			if (index == activities.size()-1 || activities.get(index+1) instanceof AbstractCommentPullRequest)
 				activityRow.add(AttributeAppender.append("class", " pre-discussion"));
 			activitiesView.add(activityRow);
 			index++;
@@ -288,7 +297,7 @@ public class RequestActivitiesPage extends RequestDetailPage {
 				for (PullRequestActivity activity: activities) {
 					if (activity.getDate().after(lastAcvitity.getDate())) {
 						Component newActivityRow = newActivityRow(activitiesView.newChildId(), activity); 
-						if (index == activities.size()-1 || activities.get(index+1) instanceof CommentPullRequest)
+						if (index == activities.size()-1 || activities.get(index+1) instanceof AbstractCommentPullRequest)
 							newActivityRow.add(AttributeAppender.append("class", " pre-discussion"));
 						
 						activitiesView.add(newActivityRow);

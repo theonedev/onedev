@@ -30,7 +30,6 @@ import com.pmease.gitplex.core.comment.CommentReply;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
-import com.pmease.gitplex.web.component.comment.event.CommentReplied;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
@@ -252,9 +251,7 @@ public class CommentPanel extends Panel {
 						CommentPanel.this.replace(row);
 						target.add(row);
 						
-						CommentReply newReply = getComment().addReply(input.getModelObject());
-						send(CommentPanel.this, Broadcast.BUBBLE, new CommentReplied(target, newReply));
-						
+						getComment().addReply(input.getModelObject());
 						Component newReplyRow = newReplyRow(repliesView.newChildId(), repliesModel.getObject().size()-1); 
 						repliesView.add(newReplyRow);
 						String script = String.format("$(\"<tr id='%s' class='reply'></tr>\").insertBefore('#%s');", 

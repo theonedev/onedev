@@ -39,16 +39,16 @@ public class DiffLine implements Serializable {
 	
 	private final int newLineNo;
 	
-	private final List<Partial> partials;
+	private final List<Token> partials;
 	
 	public DiffLine(Action action, String line, int oldLineNo, int newLineNo) {
 		this.action = action;
 		this.oldLineNo = oldLineNo;
 		this.newLineNo = newLineNo;
-		this.partials = Lists.newArrayList(new Partial(line, false));
+		this.partials = Lists.newArrayList(new Token(line, false));
 	}
 	
-	public DiffLine(Action action, List<Partial> partials, int oldLineNo, int newLineNo) {
+	public DiffLine(Action action, List<Token> partials, int oldLineNo, int newLineNo) {
 		this.action = action;
 		this.partials = partials;
 		this.oldLineNo = oldLineNo;
@@ -61,14 +61,14 @@ public class DiffLine implements Serializable {
 	
 	/**
 	 * Get list of partials of this diff line. Concatenate all partial contents will 
-	 * form a line, and partials with {@link Partial#isEmphasized()} indicates 
+	 * form a line, and partials with {@link Token#isEmphasized()} indicates 
 	 * whether or not a partial should be emphasized when displayed as they cause 
 	 * the line to be considered as a diff line.
 	 * 
 	 * @return
 	 * 			list of partials of this diff line
 	 */
-	public List<Partial> getPartials() {
+	public List<Token> getTokens() {
 		return partials;
 	}
 	
@@ -83,7 +83,7 @@ public class DiffLine implements Serializable {
 	@Override
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
-		for (Partial word: partials) 
+		for (Token word: partials) 
 			buffer.append(word.toString());
 		
 		if (action == Action.DELETE)
