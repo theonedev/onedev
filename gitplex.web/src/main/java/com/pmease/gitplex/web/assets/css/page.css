@@ -896,8 +896,7 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.activities>tbody>tr.discussion>td.avatar {width: 1px; padding-right: 12px;}
 .request-detail>.activities>tbody>tr.discussion>td.activity {padding-left: 12px;}
 .request-detail>.activities>tbody>tr.activity>td.avatar {border-right: 1px dashed #CCC;}
-.request-detail>.activities>tbody>tr.discussion+.non-discussion>td {border-top: 1px solid #DDD; padding-top: 8px;}
-.request-detail>.activities>tbody>tr.update.pre-discussion>td {padding-bottom: 8px;}
+.request-detail>.activities>tbody>tr.discussion+.non-discussion>td {border-top: 1px solid #DDD;}
 .request-detail>.activities>tbody>tr.discussion>.avatar img {width: 40px; height: 40px;}
 .request-detail>.activities>tbody>tr.non-discussion>td {padding-left: 6px;}
 .request-detail>.activities>tbody>tr.non-discussion.non-update>td {padding: 6px;}
@@ -907,7 +906,7 @@ ul.status-help li:last-child .description {border-bottom: none;}
 
 .request-detail>.activities .activity>.commits {color: #777; margin-left: -31px;}
 .request-detail>.activities .activity>.commits a {color: #555;}
-.request-detail>.activities .activity>.commits td {padding-top: 4px; padding-bottom: 4px;}
+.request-detail>.activities .activity>.commits td {padding-top: 8px; padding-bottom: 8px;}
 .request-detail>.activities .non-update+.update>td tr:first-child td {border-top: none;}
 .request-detail>.activities .activity>.commits td.icon {width: 32px; white-space: nowrap; text-align: right;}
 .request-detail>.activities .activity>.commits tr.integrated td.icon .fa {color: #35A612;}

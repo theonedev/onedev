@@ -3,10 +3,10 @@ package com.pmease.gitplex.web.page.repository.pullrequest.activity;
 import java.util.Date;
 
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitplex.core.model.PullRequest;
@@ -17,6 +17,24 @@ import com.pmease.gitplex.web.page.repository.pullrequest.RequestComparePage;
 public class SinceChangesPanel extends Panel {
 
 	private final IModel<PullRequest> requestModel;
+	
+	private final IModel<String> oldCommitModel = new LoadableDetachableModel<String>() {
+
+		@Override
+		protected String load() {
+			PullRequest request = requestModel.getObject();
+			String oldCommit = request.getBaseCommitHash();
+			for (int i=request.getSortedUpdates().size()-1; i>=0; i--) {
+				PullRequestUpdate update = request.getSortedUpdates().get(i);
+				if (update.getDate().before(sinceDate)) {
+					oldCommit = update.getHeadCommitHash();
+					break;
+				}
+			}
+			return oldCommit;
+		}
+		
+	};
 	
 	private final Date sinceDate;
 	
@@ -34,26 +52,31 @@ public class SinceChangesPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		PullRequest request = requestModel.getObject();
-		String oldCommit = request.getBaseCommitHash();
-		for (int i=request.getSortedUpdates().size()-1; i>=0; i--) {
-			PullRequestUpdate update = request.getSortedUpdates().get(i);
-			if (update.getDate().before(sinceDate)) {
-				oldCommit = update.getHeadCommitHash();
-				break;
+		Link<Void> link = new Link<Void>("link") {
+
+			@Override
+			public void onClick() {
+				PullRequest request = requestModel.getObject();
+				PageParameters params = RequestComparePage.paramsOf(request, oldCommitModel.getObject(), 
+						request.getLatestUpdate().getHeadCommitHash(), null);
+				setResponsePage(RequestComparePage.class, params);
 			}
-		}
-		PageParameters params = RequestComparePage.paramsOf(request, oldCommit, 
-				request.getLatestUpdate().getHeadCommitHash(), null);
-		
-		Link<Void> link = new BookmarkablePageLink<>("link", RequestComparePage.class, params);
+			
+		};
 		link.add(AttributeAppender.append("title", tooltip));
 		add(link);
 	}
 
 	@Override
+	protected void onConfigure() {
+		super.onConfigure();
+		setVisible(!oldCommitModel.getObject().equals(requestModel.getObject().getLatestUpdate().getHeadCommitHash()));
+	}
+
+	@Override
 	protected void onDetach() {
 		requestModel.detach();
+		oldCommitModel.detach();
 		
 		super.onDetach();
 	}

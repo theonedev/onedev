@@ -144,7 +144,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 
 			@Override
 			public void run() {
-				pullRequestListeners.call(requestId, new PullRequestListeners.Callback() {
+				pullRequestListeners.asyncCall(requestId, new PullRequestListeners.Callback() {
 					
 					@Override
 					protected void call(PullRequestListener listener, PullRequest request) {
@@ -235,7 +235,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 
 				@Override
 				public void run() {
-					pullRequestListeners.call(requestId, new PullRequestListeners.Callback() {
+					pullRequestListeners.asyncCall(requestId, new PullRequestListeners.Callback() {
 						
 						@Override
 						protected void call(PullRequestListener listener, PullRequest request) {
@@ -281,7 +281,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 
 			@Override
 			public void run() {
-				pullRequestListeners.call(requestId, new PullRequestListeners.Callback() {
+				pullRequestListeners.asyncCall(requestId, new PullRequestListeners.Callback() {
 					
 					@Override
 					protected void call(PullRequestListener listener, PullRequest request) {
@@ -332,7 +332,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 
 				@Override
 				public void run() {
-					pullRequestListeners.call(requestId, new PullRequestListeners.Callback() {
+					pullRequestListeners.asyncCall(requestId, new PullRequestListeners.Callback() {
 						
 						@Override
 						protected void call(PullRequestListener listener, PullRequest request) {
@@ -366,15 +366,6 @@ public class DefaultPullRequestManager implements PullRequestManager {
 
 			@Override
 			public void run() {
-				pullRequestListeners.call(requestId, new PullRequestListeners.Callback() {
-					
-					@Override
-					protected void call(PullRequestListener listener, PullRequest request) {
-						listener.onUpdated(request);
-					}
-					
-				});
-				
 				unitOfWork.asyncCall(new Runnable() {
 
 					@Override
@@ -382,6 +373,15 @@ public class DefaultPullRequestManager implements PullRequestManager {
 						PullRequest request = dao.load(PullRequest.class, requestId);
 						for (PullRequestInlineComment comment: request.getInlineComments())
 							pullRequestInlineCommentManager.update((PullRequestInlineComment) comment);
+
+						pullRequestListeners.call(request, new PullRequestListeners.Callback() {
+							
+							@Override
+							protected void call(PullRequestListener listener, PullRequest request) {
+								listener.onUpdated(request);
+							}
+							
+						});
 					}
 					
 				});
@@ -477,7 +477,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 							
 							onGateKeeperUpdate(request);
 							
-							pullRequestListeners.call(requestId, new PullRequestListeners.Callback() {
+							pullRequestListeners.asyncCall(requestId, new PullRequestListeners.Callback() {
 								
 								@Override
 								protected void call(PullRequestListener listener, PullRequest request) {

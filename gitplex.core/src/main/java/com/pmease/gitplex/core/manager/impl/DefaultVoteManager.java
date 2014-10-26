@@ -88,7 +88,7 @@ public class DefaultVoteManager implements VoteManager {
 
 			@Override
 			public void run() {
-				pullRequestListeners.call(requestId, new PullRequestListeners.Callback() {
+				pullRequestListeners.asyncCall(requestId, new PullRequestListeners.Callback() {
 
 					@Override
 					protected void call(PullRequestListener listener, PullRequest request) {

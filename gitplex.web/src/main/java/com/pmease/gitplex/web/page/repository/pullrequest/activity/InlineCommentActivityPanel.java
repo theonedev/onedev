@@ -11,23 +11,22 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.util.diff.DiffLine;
 import com.pmease.commons.util.diff.Token;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.Comment;
-import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.manager.PullRequestInlineCommentManager;
 import com.pmease.gitplex.core.model.PullRequestInlineComment;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
@@ -61,155 +60,159 @@ public class InlineCommentActivityPanel extends Panel {
 		
 		add(new Label("file", inlineComment.getBlobInfo().getPath()));
 		
-		PageParameters params = RequestComparePage.paramsOf(comment);
-		add(new BookmarkablePageLink<Void>("compareView", RequestComparePage.class, params));
+		add(new Link<Void>("compareView") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(commentModel.getObject().getContext() != null);
+			}
+
+			@Override
+			public void onClick() {
+				setResponsePage(RequestComparePage.class, RequestComparePage.paramsOf(commentModel.getObject()));
+			}
+			
+		});
 		
-		if (commentModel.getObject().getContext() != null) {
-			Fragment fragment = new Fragment("context", "withContextFrag", this);
-			fragment.add(new WebMarkupContainer("aboveOmitted") {
+		WebMarkupContainer contextContainer = new WebMarkupContainer("context") {
 
-				@Override
-				protected void onConfigure() {
-					super.onConfigure();
-					setVisible(commentModel.getObject().getContext().isAboveOmitted());
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(commentModel.getObject().getContext() != null);
+			}
+			
+		};
+		add(contextContainer);
+		
+		contextContainer.add(new WebMarkupContainer("aboveOmitted") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(commentModel.getObject().getContext().isAboveOmitted());
+			}
+			
+		});
+		contextContainer.add(new WebMarkupContainer("belowOmitted") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(commentModel.getObject().getContext().isBelowOmitted());
+			}
+			
+		});
+		contextContainer.add(new ListView<DiffLine>("lines", new AbstractReadOnlyModel<List<DiffLine>>() {
+
+			@Override
+			public List<DiffLine> getObject() {
+				return commentModel.getObject().getContext().getDiffs();
+			}
+			
+		}) {
+
+			@Override
+			protected void populateItem(final ListItem<DiffLine> item) {
+				DiffLine diffLine = item.getModelObject();
+
+				if (diffLine.getAction() == ADD) {
+					item.add(AttributeAppender.append("class", " new"));
+					item.add(new Label("oldLineNo"));
+					item.add(new Label("newLineNo", diffLine.getNewLineNo() + 1));
+					item.add(new Label("diffMark", "+"));
+				} else if (diffLine.getAction() == DELETE) {
+					item.add(AttributeAppender.append("class", " old"));
+					item.add(new Label("oldLineNo", diffLine.getOldLineNo() + 1));
+					item.add(new Label("newLineNo"));
+					item.add(new Label("diffMark", "-"));
+				} else {
+					item.add(AttributeAppender.append("class", " equal"));
+					item.add(new Label("oldLineNo", diffLine.getOldLineNo()+1));
+					item.add(new Label("newLineNo", diffLine.getNewLineNo()+1));
+					item.add(new Label("diffMark", " "));
 				}
-				
-			});
-			fragment.add(new WebMarkupContainer("belowOmitted") {
+				item.add(new ListView<Token>("partials", diffLine.getTokens()) {
 
-				@Override
-				protected void onConfigure() {
-					super.onConfigure();
-					setVisible(commentModel.getObject().getContext().isBelowOmitted());
-				}
-				
-			});
-			fragment.add(new ListView<DiffLine>("lines", new AbstractReadOnlyModel<List<DiffLine>>() {
-
-				@Override
-				public List<DiffLine> getObject() {
-					return commentModel.getObject().getContext().getDiffs();
-				}
-				
-			}) {
-
-				@Override
-				protected void populateItem(final ListItem<DiffLine> item) {
-					DiffLine diffLine = item.getModelObject();
-
-					WebMarkupContainer contentRow = new WebMarkupContainer("contentRow");
-					item.add(contentRow);
-					if (diffLine.getAction() == ADD) {
-						contentRow.add(AttributeAppender.append("class", " new"));
-						contentRow.add(new Label("oldLineNo"));
-						contentRow.add(new Label("newLineNo", diffLine.getNewLineNo() + 1));
-						contentRow.add(new Label("diffMark", "+"));
-					} else if (diffLine.getAction() == DELETE) {
-						contentRow.add(AttributeAppender.append("class", " old"));
-						contentRow.add(new Label("oldLineNo", diffLine.getOldLineNo() + 1));
-						contentRow.add(new Label("newLineNo"));
-						contentRow.add(new Label("diffMark", "-"));
-					} else {
-						contentRow.add(AttributeAppender.append("class", " equal"));
-						contentRow.add(new Label("oldLineNo", diffLine.getOldLineNo()+1));
-						contentRow.add(new Label("newLineNo", diffLine.getNewLineNo()+1));
-						contentRow.add(new Label("diffMark", " "));
+					@Override
+					protected void populateItem(ListItem<Token> item) {
+						Token partial = item.getModelObject();
+						Label label;
+						if (partial.getContent().equals("\r"))
+							label = new Label("partial", " ");
+						else
+							label = new Label("partial", partial.getContent());
+						if (partial.isEmphasized())
+							label.add(AttributeAppender.append("class", "emphasize"));
+						item.add(label);
 					}
-					contentRow.add(new ListView<Token>("partials", diffLine.getTokens()) {
-
-						@Override
-						protected void populateItem(ListItem<Token> item) {
-							Token partial = item.getModelObject();
-							Label label;
-							if (partial.getContent().equals("\r"))
-								label = new Label("partial", " ");
-							else
-								label = new Label("partial", partial.getContent());
-							if (partial.isEmphasized())
-								label.add(AttributeAppender.append("class", "emphasize"));
-							item.add(label);
-						}
-						
-					});
-
-					InlineComment comment = commentModel.getObject();
-					if (item.getIndex() == comment.getContext().getCommentLine()) {
-						item.add(new CommentPanel("comment", commentModel) {
-
-							@Override
-							protected Component newAdditionalCommentActions(String id, IModel<Comment> comment) {
-								return new AjaxLink<Void>(id) {
-
-									@Override
-									public void onClick(AjaxRequestTarget target) {
-										send(InlineCommentActivityPanel.this, Broadcast.BUBBLE, 
-												new CommentCollapsing(target, commentModel.getObject()));
-									}
-
-									@Override
-									protected void onConfigure() {
-										super.onConfigure();
-										
-										setVisible(commentModel.getObject().isResolved());
-									}
-
-									@Override
-									protected void onComponentTag(ComponentTag tag) {
-										super.onComponentTag(tag);
-										tag.put("class", "fa fa-collapse");
-										tag.put("title", "Collapse this comment");
-										tag.put("style", "cursor:pointer;");
-									}
-									
-								};
-								
-							}
-							
-						});
-					} else { 
-						item.add(new WebMarkupContainer("comment").setVisible(false));
-					}
-				}
-				
-			});
-			add(fragment);
-		} else {
-			Fragment fragment = new Fragment("context", "withoutContextFrag", this);
-			fragment.add(AttributeAppender.append("class", " panel-body"));
-			fragment.add(new CommentPanel("comment", commentModel) {
-
-				@Override
-				protected Component newAdditionalCommentActions(String id, IModel<Comment> comment) {
-					return new AjaxLink<Void>(id) {
-
-						@Override
-						public void onClick(AjaxRequestTarget target) {
-							send(InlineCommentActivityPanel.this, Broadcast.BUBBLE, 
-									new CommentCollapsing(target, commentModel.getObject()));
-						}
-
-						@Override
-						protected void onConfigure() {
-							super.onConfigure();
-							
-							setVisible(commentModel.getObject().isResolved());
-						}
-
-						@Override
-						protected void onComponentTag(ComponentTag tag) {
-							super.onComponentTag(tag);
-							tag.put("class", "fa fa-collapse");
-							tag.put("title", "Collapse this comment");
-							tag.put("style", "cursor:pointer;");
-						}
-						
-					};
 					
-				}
+				});
+
+				if (item.getIndex() == commentModel.getObject().getContext().getLine())
+					item.add(AttributeAppender.append("class", " before-comment"));
+			}
+			
+		});
+		add(new WebMarkupContainer("noContext") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(commentModel.getObject().getContext() == null);
+			}
+			
+		});
+		
+		add(new CommentPanel("comment", commentModel) {
+
+			@Override
+			protected Component newAdditionalCommentActions(String id, IModel<Comment> comment) {
+				return new AjaxLink<Void>(id) {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						send(InlineCommentActivityPanel.this, Broadcast.BUBBLE, 
+								new CommentCollapsing(target, commentModel.getObject()));
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						
+						setVisible(commentModel.getObject().isResolved());
+					}
+
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						tag.put("class", "fa fa-collapse");
+						tag.put("title", "Collapse this comment");
+						tag.put("style", "cursor:pointer;");
+					}
+					
+				};
 				
-			});
-			add(fragment);
-		}
+			}
+
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				
+				String script = String.format(""
+						+ "var $beforeComment = $('#%s .before-comment');"
+						+ "if ($beforeComment.hasClass('line')) {"
+						+ "  var $tr = $('<tr class=\"line comments\"><td colspan=\"3\"></td></tr>').insertAfter($beforeComment);"
+						+ "  $tr.children().append($('#%s'));"
+						+ "} else {"
+						+ "  $('#%s').insertAfter($beforeComment);"
+						+ "}", 
+						InlineCommentActivityPanel.this.getMarkupId(true), getMarkupId(true), getMarkupId(true));
+				response.render(OnDomReadyHeaderItem.forScript(script));
+			}
+			
+		});
 	}
 
 	@Override

@@ -29,7 +29,7 @@ public class AroundContext implements Serializable {
 		this.diffs = diffs;
 	}
 
-	public int getCommentLine() {
+	public int getLine() {
 		return line;
 	}
 

@@ -113,7 +113,7 @@ var gitplex = {
 				var id = $lineComments.attr("id");
 				var lineId = id.substring("comment-".length);
 				var $line = $("#" + lineId);
-				$tr = $("<tr class='line comments'><td colspan='3'></td></tr>").insertAfter($line);
+				var $tr = $("<tr class='line comments'><td colspan='3'></td></tr>").insertAfter($line);
 				$tr.children().append($lineComments);
 				$line.find("a.add-comment").hide();
 			});
@@ -121,7 +121,7 @@ var gitplex = {
 		beforeAdd: function(index) {
 			var $line = $("#diffline-" + index); 
 
-			$tr = $("<tr class='line comments'><td colspan='3'></td></tr>").insertAfter($line);
+			var $tr = $("<tr class='line comments'><td colspan='3'></td></tr>").insertAfter($line);
 			var $addComment = $("#add-comment");
 			var $commentsRow = $addComment.closest("tr.line.comments");
 			$addComment.find("textarea").val("");

@@ -209,14 +209,8 @@ public class RequestActivitiesPage extends RequestDetailPage {
 		
 		List<PullRequestActivity> activities = getActivities();
 		
-		int index = 0;
-		for (PullRequestActivity activity: activities) { 
-			Component activityRow = newActivityRow(activitiesView.newChildId(), activity);
-			if (index == activities.size()-1 || activities.get(index+1) instanceof AbstractCommentPullRequest)
-				activityRow.add(AttributeAppender.append("class", " pre-discussion"));
-			activitiesView.add(activityRow);
-			index++;
-		}
+		for (PullRequestActivity activity: activities) 
+			activitiesView.add(newActivityRow(activitiesView.newChildId(), activity));
 		
 		return activitiesView;
 	}
@@ -290,16 +284,15 @@ public class RequestActivitiesPage extends RequestDetailPage {
 
 			@Override
 			protected void onRender(WebSocketRequestHandler handler) {
+				for (int i=0; i<activitiesView.size(); i++)
+					handler.add(activitiesView.get(i));
+				
 				List<PullRequestActivity> activities = getActivities();
 				Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
 				PullRequestActivity lastAcvitity = (PullRequestActivity) lastActivityRow.getDefaultModelObject();
-				int index = 0;
 				for (PullRequestActivity activity: activities) {
 					if (activity.getDate().after(lastAcvitity.getDate())) {
 						Component newActivityRow = newActivityRow(activitiesView.newChildId(), activity); 
-						if (index == activities.size()-1 || activities.get(index+1) instanceof AbstractCommentPullRequest)
-							newActivityRow.add(AttributeAppender.append("class", " pre-discussion"));
-						
 						activitiesView.add(newActivityRow);
 						
 						String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
@@ -308,7 +301,6 @@ public class RequestActivitiesPage extends RequestDetailPage {
 						handler.add(newActivityRow);
 						lastActivityRow = newActivityRow;
 					}
-					index++;
 				}
 			}
 			

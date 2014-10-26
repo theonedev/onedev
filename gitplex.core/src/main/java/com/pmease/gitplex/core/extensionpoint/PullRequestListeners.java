@@ -25,7 +25,7 @@ public class PullRequestListeners {
 		this.unitOfWork = unitOfWork;
 	}
 	
-	public void call(final Long requestId, final Callback callback) {
+	public void asyncCall(final Long requestId, final Callback callback) {
 		unitOfWork.asyncCall(new Runnable() {
 
 			@Override
@@ -36,6 +36,11 @@ public class PullRequestListeners {
 			}
 			
 		});
+	}
+	
+	public void call(PullRequest request, Callback callback) {
+		for (PullRequestListener listener: listeners)
+			callback.call(listener, request);
 	}
 	
 	public static abstract class Callback {
