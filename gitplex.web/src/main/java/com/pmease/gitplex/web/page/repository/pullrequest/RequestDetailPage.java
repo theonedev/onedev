@@ -53,6 +53,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.base.Objects;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.wicket.behavior.AllowLeaveBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
@@ -451,6 +452,13 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		}
 		form.add(new FeedbackPanel("feedback", form));
 		form.add(new AjaxButton("submit") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				add(new AllowLeaveBehavior());
+			}
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

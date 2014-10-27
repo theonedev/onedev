@@ -412,6 +412,27 @@ pmease.commons = {
 			var $component = $("#" + componentId);
 			$component.closest("form").addClass("dirty").find(".dirty-aware").removeAttr("disabled");
 		},
+		removeDirty: function(triggerId) {
+			$(function() {
+				var $trigger = $("#" + triggerId);
+				
+				var previousClick;
+
+				var handlers = $._data($trigger[0], 'events').click;
+
+				$.each(handlers, function(i,f) {
+					previousClick = f.handler; 
+					return false; 
+				});
+				
+				$trigger.unbind('click');
+
+				$trigger.click(function(event){
+					$trigger.closest("form").removeClass("dirty");
+					previousClick(event);
+				});
+			});
+		},
 		trackDirty: function(form) {
 			var $form = $(form);
 			var $dirtyAware = $form.find(".dirty-aware");
@@ -421,7 +442,7 @@ pmease.commons = {
 				$dirtyAware.attr("disabled", "disabled");
 
 				$form.areYouSure({
-					"silent": !$dirtyAware.hasClass("leave-confirm"),
+					"silent": !$form.hasClass("leave-confirm"),
 					"addRemoveFieldsMarksDirty": true,
 					change: function() {
 						if ($(this).hasClass("dirty")) {
@@ -431,6 +452,8 @@ pmease.commons = {
 						}
 					}
 				});
+			} else if ($form.hasClass("leave-confirm")) {
+				$form.areYouSure({"addRemoveFieldsMarksDirty": true});
 			}
 		},
 		setupDirtyCheck: function() {
