@@ -421,7 +421,7 @@ pmease.commons = {
 				$dirtyAware.attr("disabled", "disabled");
 
 				$form.areYouSure({
-					"silent": true,
+					"silent": !$dirtyAware.hasClass("leave-confirm"),
 					"addRemoveFieldsMarksDirty": true,
 					change: function() {
 						if ($(this).hasClass("dirty")) {
@@ -752,8 +752,15 @@ pmease.commons = {
 				// Request to render via web socket right away after a web socket is opened 
 				// in case we missed the message sent by WebSocketRender.requestToRender
 				// at Java side if web socket connection is not established at that time
-				for (var i in pmease.commons.websocket.renderTraits) 
-					Wicket.WebSocket.send(JSON.stringify(pmease.commons.websocket.renderTraits[i]));
+				var messages = [];
+				for (var i in pmease.commons.websocket.renderTraits) {
+					var message = JSON.stringify(pmease.commons.websocket.renderTraits[i]);
+					// filter out duplicate messages
+					if (messages.indexOf(message) == -1)
+						messages.push(message);
+				} 
+				for (var i in messages)
+					Wicket.WebSocket.send(messages[i]);
 			});
 		},
 		renderTraits:[]

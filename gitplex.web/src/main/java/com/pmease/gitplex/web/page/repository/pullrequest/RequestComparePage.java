@@ -23,7 +23,10 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.util.visit.IVisit;
+import org.apache.wicket.util.visit.IVisitor;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobInfo;
@@ -64,6 +67,14 @@ public class RequestComparePage extends RequestDetailPage {
 	private static final String TARGET_BRANCH_HEAD = "Head of Target Branch";
 	
 	private static final String INTEGRATION_PREVIEW = "Integration Preview";
+
+	private static final String COMMENT_PARAM = "comment";
+	
+	private static final String ORIGINAL_PARAM = "original";
+	
+	private static final String REVISED_PARAM = "revised";
+	
+	private static final String FILE_PARAM = "file";
 	
 	private String file;
 	
@@ -124,7 +135,7 @@ public class RequestComparePage extends RequestDetailPage {
 
 			@Override
 			protected PullRequestInlineComment load() {
-				Long commentId = params.get("comment").toOptionalLong();
+				Long commentId = params.get(COMMENT_PARAM).toOptionalLong();
 				if (commentId != null)
 					return GitPlex.getInstance(Dao.class).load(PullRequestInlineComment.class, commentId);
 				else 
@@ -133,20 +144,21 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		};
 		
-		oldCommitHash = params.get("original").toString();
-		newCommitHash = params.get("revised").toString();
-		file = params.get("file").toString();
+		oldCommitHash = params.get(ORIGINAL_PARAM).toString();
+		newCommitHash = params.get(REVISED_PARAM).toString();
+		file = params.get(FILE_PARAM).toString();
 		
 		PullRequestInlineComment comment = getComment();
 		if (comment != null) {
-			if (oldCommitHash != null || newCommitHash != null || file != null) {
-				throw new IllegalArgumentException("Parameter 'original', 'revised', and 'file' "
+			if (oldCommitHash != null || newCommitHash != null) {
+				throw new IllegalArgumentException("Parameter 'original' or 'revised' "
 						+ "should not be specified if parameter 'comment' is specified.");
 			}
 
 			oldCommitHash = comment.getOldCommitHash();
 			newCommitHash = comment.getNewCommitHash();
-			file = comment.getBlobInfo().getPath();
+			if (file == null)
+				file = comment.getBlobInfo().getPath();
 		} else {
 			if (oldCommitHash == null)
 				oldCommitHash = getPullRequest().getBaseCommitHash();
@@ -166,7 +178,6 @@ public class RequestComparePage extends RequestDetailPage {
 		
 		WebMarkupContainer optionsContainer = new WebMarkupContainer("compareOptions");
 		optionsContainer.add(new StickyBehavior());
-		optionsContainer.add(new PullRequestChangeBehavior(getPullRequest().getId()));
 		
 		add(optionsContainer);
 
@@ -324,6 +335,48 @@ public class RequestComparePage extends RequestDetailPage {
 			}
 			
 		}));
+		optionsContainer.add(new Link<Void>("refresh") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				add(new PullRequestChangeBehavior(getPullRequest().getId()) {
+
+					@Override
+					protected void onRender(final WebSocketRequestHandler handler) {
+						PageParameters params = getPageParameters();
+						if (params.get(COMMENT_PARAM).toOptionalLong() != null || getPageParameters().get(REVISED_PARAM).toString() == null) {
+							setVisible(true);
+							super.onRender(handler);
+							
+							compareResult.visitChildren(new IVisitor<Component, Void>() {
+
+								@Override
+								public void component(Component object, IVisit<Void> visit) {
+									for (StickyBehavior behavior: object.getBehaviors(StickyBehavior.class))
+										behavior.restick(handler);
+								}
+								
+							});
+						}
+					}
+					
+				});
+				
+				setVisible(false);
+				setOutputMarkupPlaceholderTag(true);
+			}
+
+			@Override
+			public void onClick() {
+				PageParameters params = getPageParameters();
+				if (file != null)
+					params.set(FILE_PARAM, file);
+				setResponsePage(RequestComparePage.class, params);
+			}
+			
+		});
 
 		add(compareResult = new CompareResultPanel("compareResult", repoModel, oldCommitHash, newCommitHash, file) {
 			

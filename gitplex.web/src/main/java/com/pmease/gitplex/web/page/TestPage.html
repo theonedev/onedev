@@ -1,6 +1,9 @@
 <wicket:extend>
-	<div class="notice" style="display:none;">Notice</div>
+	<form wicket:id="form" id="test">
+		<input wicket:id="name"></input>
+		<input wicket:id="save" type="button" value="save"></input>
+	</form>
 	<script type="text/javascript">
-		$(".notice").highlight();
+		$("#test").areYouSure();
 	</script>
 </wicket:extend>

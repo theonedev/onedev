@@ -294,7 +294,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		overviewContainer.add(newIntegrationContainer());
 		overviewContainer.add(newOperationsContainer());
 		
-		overviewContainer.add(new WebSocketRenderBehavior() {
+		overviewContainer.add(new WebSocketRenderBehavior(true) {
 
 			@Override
 			protected Object getTrait() {
@@ -949,6 +949,8 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		private final Long requestId;
 		
 		public PullRequestChangeBehavior(Long requestId) {
+			super(false);
+			
 			this.requestId = requestId;
 		}
 		

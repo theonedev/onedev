@@ -652,7 +652,7 @@ table.table-blob { width: 100%; }
 .branches>.body>.options>div.search input {width: 240px;}
 .branches>.body>.options .pagination {margin: 0;}
 table.branches td {white-space: nowrap;}
-table.branches td.watch {width: 160px;}
+table.branches td.watch {width: 60px;}
 table.branches td.actions {width: 1px;}
 table.branches td.behind-ahead {width: 25%;}
 table.branches td.behind {padding-right: 0;}
@@ -714,7 +714,7 @@ table.branches td.summary>div, table.branches td.summary>div .name a {font-size:
 /* COMPARE RESULT */
 .compare-result {width: 100%;}
 .compare-result>tbody>tr>td {border: 1px solid #DDD; vertical-align: top;}
-.compare-result>tbody>tr>td.nav {width: 20%; padding: 8px; white-space: nowrap;}
+.compare-result>tbody>tr>td.nav {width: 20%; padding: 12px; white-space: nowrap;}
 .compare-result>tbody>tr>td.nav a.active {background: #0F89E7; color: white; border-radius: 2px; padding: 2px;}
 .compare-result>tbody>tr>td.content>div>div.error {padding: 20px; font-size: 24px; font-style: italic;}
 
@@ -797,13 +797,13 @@ ul.diff-alerts {margin: 0 0 0 8px; padding: 4px 8px 4px 12px;}
 .comment-input>.tab-pane>.preview {display: none;}
 
 div.replies {padding-top: 8px;}
-div.replies>table>tbody>tr>td {vertical-align: top; border-top: 1px dashed #CCC; padding: 8px 0 8px 0;}
+div.replies>table>tbody>tr>td {vertical-align: top; border-top: 1px dashed #DDD; padding: 8px 0 8px 0;}
 div.replies>table>tbody>tr>td.avatar {width: 1px; padding: 10px 12px 0 0;}
 div.replies>table>tbody>tr>td.avatar img {width: 26px; height: 26px;}
 div.replies>table>tbody>tr.add-reply>td {padding-top: 12px;}
 table.comments>tbody>tr>td.avatar {width: 1px; padding-right: 16px;}
 table.comments>tbody>tr>td.avatar img {width: 36px; height: 36px;}
-table.comments>tbody>tr>td {border-top: 1px solid #DDD; padding: 12px 0 12px 0;}
+table.comments>tbody>tr>td {border-top: 1px solid #E5E5E5; padding: 12px 0 12px 0;}
 table.comments>tbody>tr:first-child>td {border-top: none;}
 
 ul.threads li {border-left: 4px solid #E5E5E5; padding-left: 8px;}
@@ -865,14 +865,14 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.title>div {margin-right: 8px;}
 .request-detail>.title>.id {color: #999;}
 
-.request-detail>.overview>.panel-body>div {padding: 12px 0; border-bottom: 1px dotted #BBB;}
-.request-detail>.overview>.panel-body>div:last-child {padding: 8px 0 0 0; border-bottom: none;}
-.request-detail>.overview>.panel-body>div:first-child {padding: 0 0 8px 0;}
+.request-detail>.overview>.panel-body>div {padding: 16px 0; border-bottom: 1px dotted #BBB;}
+.request-detail>.overview>.panel-body>div:last-child {padding: 12px 0 0 0; border-bottom: none;}
+.request-detail>.overview>.panel-body>div:first-child {padding: 0 0 12px 0;}
 .request-detail>.overview>.panel-body>div:first-child:last-child {padding: 0; border-bottom: none;}
 
 .request-detail>.overview>.panel-heading {padding: 8px 12px;}
-.request-detail>.overview>.panel-body {padding: 12px;}
-.request-detail>.overview>.panel-heading>span:before {font-family: "ponticons"; margin-right: 8px; font-size: 18px;}
+.request-detail>.overview>.panel-body {padding: 16px;}
+.request-detail>.overview>.panel-heading>span:before {font-family: "ponticons"; margin-right: 12px; font-size: 18px;}
 .request-detail>.overview.panel-success, .request-detail>.overview.panel-success>.panel-heading {border-color: #5EC01C;}
 .request-detail>.overview.panel-danger, .request-detail>.overview.panel-danger>.panel-heading {border-color: #E67E7E;}
 .request-detail>.overview.integrated>.panel-heading>span:before {content: "\f52A";}
@@ -882,21 +882,21 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.overview.pending-update>.panel-heading>span:before {content: "\f455";}
 
 .request-detail>.overview>.panel-body>.status>.reasons>.reason .fa {font-size: 10px; vertical-align: middle;}
-.request-detail>.overview>.panel-body>.integration>.preview>div {padding: 8px; margin: 8px 0 0 0; 
+.request-detail>.overview>.panel-body>.integration>.preview>div {padding: 8px; margin: 12px 0 0 0; 
 	border: none; box-shadow: none;}
 .request-detail>.overview>.panel-body>.integration>.preview>.well img {width: 20px; height: 20px; vertical-align: bottom;}
 
 .request-detail>.overview>.panel-body>.operations>.buttons>a, 
-.request-detail>.overview>.panel-body>.operations>.confirm>form>input {margin-right: 8px;} 
-.request-detail>.overview>.panel-body>.operations>.confirm>form>div>textarea {margin-bottom: 12px;} 
+.request-detail>.overview>.panel-body>.operations>.confirm>form>input {margin-right: 12px;} 
+.request-detail>.overview>.panel-body>.operations>.confirm>form>div>textarea {margin-bottom: 16px;} 
 
-.request-detail>.activities {margin-bottom: 20px; border-bottom: 1px solid #DDD;}
-.request-detail>.activities>tbody>tr.discussion>td {border-top: 1px solid #DDD; padding: 12px 0;}
+.request-detail>.activities {margin-bottom: 20px; border-bottom: 1px solid #E5E5E5;}
+.request-detail>.activities>tbody>tr.discussion>td {border-top: 1px solid #E5E5E5; padding: 12px 0;}
 .request-detail>.activities>tbody>tr.discussion.collapsed>td {padding: 8px 0;}
 .request-detail>.activities>tbody>tr.discussion>td.avatar {width: 1px; padding-right: 12px;}
 .request-detail>.activities>tbody>tr.discussion>td.activity {padding-left: 12px;}
-.request-detail>.activities>tbody>tr.activity>td.avatar {border-right: 1px dashed #CCC;}
-.request-detail>.activities>tbody>tr.discussion+.non-discussion>td {border-top: 1px solid #DDD;}
+.request-detail>.activities>tbody>tr.activity>td.avatar {border-right: 1px dashed #DDD;}
+.request-detail>.activities>tbody>tr.discussion+.non-discussion>td {border-top: 1px solid #E5E5E5;}
 .request-detail>.activities>tbody>tr.discussion>.avatar img {width: 40px; height: 40px;}
 .request-detail>.activities>tbody>tr.non-discussion>td {padding-left: 6px;}
 .request-detail>.activities>tbody>tr.non-discussion.non-update>td {padding: 6px;}
@@ -954,6 +954,8 @@ ul.status-help li:last-child .description {border-bottom: none;}
 
 .request-detail .compare>.head {background: #F2F2F2; z-index: 90; padding: 8px; 
 	border: 1px solid #DDD;}
+.request-detail .compare>.head>.changed-toggle {margin-right: 12px; padding-top: 4px;}
+.request-detail .compare>.head>.outdated-alert {padding-top: 2px; color: #CF9115; font-size: 16px;}
 .request-detail .compare>.head>.pull-left:FIRST-CHILD {margin-right: 16px;}
 .request-detail .compare>.head>.pull-left:LAST-CHILD {margin-top: 3px;}
 

@@ -5,7 +5,7 @@
 			<div wicket:id="id" class="id pull-left"></div>
 			<a wicket:id="editLink" title="Edit title" class="edit"><i class="fa fa-pencil"></i></a>
 			<form wicket:id="editForm" class="pull-left form-inline">
-				<input wicket:id="title" type="text" placeholder="Input title" class="form-control input-sm"></input>
+				<input wicket:id="title" type="text" placeholder="Input title" class="form-control input-sm focusable"></input>
 				<input wicket:id="save" type="submit" value="Save" class="btn btn-sm btn-primary"/>
 				<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-sm btn-default"/>
 			</form>
@@ -109,7 +109,7 @@
 		<div wicket:id="backToTop"></div>
 	</div>
 	<wicket:fragment wicket:id="commitMessageFrag">
-		<textarea wicket:id="commitMessage" class="form-control" placeholder="Commit message"></textarea>
+		<textarea wicket:id="commitMessage" class="form-control focusable" placeholder="Commit message"></textarea>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="operationConfirmFrag">
 		<form wicket:id="form">

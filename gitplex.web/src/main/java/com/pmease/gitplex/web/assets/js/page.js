@@ -136,12 +136,14 @@ var gitplex = {
 			$("#comments-placeholder").append($("#add-comment"));
 			var $line = $("#diffline-" + index);
 			$line.next().find("td").append($("#comment-diffline-" + index));
+			$("#add-comment").areYouSure({"silent": "true"});
 		},
 		cancelAdd: function(index) {
 			$("#comments-placeholder").append($("#add-comment"));
 			var $line = $("#diffline-" + index);
 			$line.next().remove(); 
 			$line.find("a.add-comment").show();
+			$("#add-comment").areYouSure({"silent": "true"});
 		},
 		afterRemove: function(index) {
 			$("#comment-diffline-" + index).closest("tr").remove();

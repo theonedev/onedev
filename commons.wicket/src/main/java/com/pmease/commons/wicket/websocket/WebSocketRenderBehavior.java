@@ -28,7 +28,13 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 			new MapMaker().concurrencyLevel(16).weakKeys().makeMap();
 	
     private Component component;
+    
+    private final boolean renderOnConnect;
 	
+    public WebSocketRenderBehavior(boolean renderOnConnect) {
+    	this.renderOnConnect = renderOnConnect;
+	}
+    
 	@Override
 	public void bind(Component component) {
 		super.bind(component);
@@ -40,8 +46,10 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
-		String script = String.format("pmease.commons.websocket.renderTraits.push(%s);", asMessage(getTrait()));
-		response.render(OnDomReadyHeaderItem.forScript(script));
+		if (renderOnConnect) {
+			String script = String.format("pmease.commons.websocket.renderTraits.push(%s);", asMessage(getTrait()));
+			response.render(OnDomReadyHeaderItem.forScript(script));
+		}
 	}
 
 	@Override
