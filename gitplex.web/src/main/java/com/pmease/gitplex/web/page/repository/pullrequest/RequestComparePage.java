@@ -44,6 +44,7 @@ import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
+import com.pmease.commons.wicket.component.history.HistoryAwarePanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
@@ -176,7 +177,7 @@ public class RequestComparePage extends RequestDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		WebMarkupContainer optionsContainer = new WebMarkupContainer("compareOptions");
+		final WebMarkupContainer optionsContainer = new WebMarkupContainer("compareOptions");
 		optionsContainer.add(new StickyBehavior());
 		
 		add(optionsContainer);
@@ -378,64 +379,92 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		});
 
-		add(compareResult = new CompareResultPanel("compareResult", repoModel, oldCommitHash, newCommitHash, file) {
+		add(new HistoryAwarePanel("compareResult") {
 			
 			@Override
-			protected InlineCommentSupport getInlineCommentSupport(final Change change) {
-				List<String> commentables = getPullRequest().getCommentables();
-				int oldCommitIndex = commentables.indexOf(oldCommitHash);
-				int newCommitIndex = commentables.indexOf(newCommitHash);
-				if (oldCommitIndex == -1 || newCommitIndex == -1 || oldCommitIndex > newCommitIndex) {
-					return null;
-				} else {
-					return new InlineCommentSupport() {
-						
-						@Override
-						public Map<Integer, List<InlineComment>> getOldComments() {
-							RevAwareChange revAwareChange = new RevAwareChange(change, oldCommitHash, newCommitHash);
-							return getPullRequest().getChangeComments(revAwareChange).getOldComments();
-						}
-						
-						@Override
-						public Map<Integer, List<InlineComment>> getNewComments() {
-							RevAwareChange revAwareChange = new RevAwareChange(change, oldCommitHash, newCommitHash);
-							return getPullRequest().getChangeComments(revAwareChange).getNewComments();
-						}
-						
-						@Override
-						public InlineComment getConcernedComment() {
-							return RequestComparePage.this.getComment();
-						}
-						
-						@Override
-						public InlineComment addComment(BlobInfo blobInfo, BlobInfo compareWith, 
-								AroundContext commentContext, int line, String content) {
-							User user = GitPlex.getInstance(UserManager.class).getCurrent();
-							Preconditions.checkNotNull(user);
-							PullRequestInlineComment comment = new PullRequestInlineComment();
-							getPullRequest().getInlineComments().add(comment);
-							comment.setUser(user);
-							comment.setDate(new Date());
-							comment.setContent(content);
-							comment.setRequest(getPullRequest());
-							comment.setBlobInfo(blobInfo);
-							comment.setCompareWith(compareWith);
-							comment.setLine(line);
-							comment.setContext(commentContext);
-							GitPlex.getInstance(Dao.class).persist(comment);
-							return comment;
-						}
-					};
-				}
+			public void onPopState(AjaxRequestTarget target, Serializable state) {
+				compareResult.select(target, (String) state);
+				target.add(optionsContainer);
 			}
 
 			@Override
-			protected void onChangeSelection(AjaxRequestTarget target, Change change) {
-				file = change.getPath();
+			protected Component newContent(String id) {
+				compareResult = new CompareResultPanel(id, repoModel, oldCommitHash, newCommitHash, file) {
+					
+					@Override
+					protected InlineCommentSupport getInlineCommentSupport(final Change change) {
+						List<String> commentables = getPullRequest().getCommentables();
+						int oldCommitIndex = commentables.indexOf(oldCommitHash);
+						int newCommitIndex = commentables.indexOf(newCommitHash);
+						if (oldCommitIndex == -1 || newCommitIndex == -1 || oldCommitIndex > newCommitIndex) {
+							return null;
+						} else {
+							return new InlineCommentSupport() {
+								
+								@Override
+								public Map<Integer, List<InlineComment>> getOldComments() {
+									RevAwareChange revAwareChange = new RevAwareChange(change, oldCommitHash, newCommitHash);
+									return getPullRequest().getChangeComments(revAwareChange).getOldComments();
+								}
+								
+								@Override
+								public Map<Integer, List<InlineComment>> getNewComments() {
+									RevAwareChange revAwareChange = new RevAwareChange(change, oldCommitHash, newCommitHash);
+									return getPullRequest().getChangeComments(revAwareChange).getNewComments();
+								}
+								
+								@Override
+								public InlineComment getConcernedComment() {
+									return RequestComparePage.this.getComment();
+								}
+								
+								@Override
+								public InlineComment addComment(BlobInfo blobInfo, BlobInfo compareWith, 
+										AroundContext commentContext, int line, String content) {
+									User user = GitPlex.getInstance(UserManager.class).getCurrent();
+									Preconditions.checkNotNull(user);
+									PullRequestInlineComment comment = new PullRequestInlineComment();
+									getPullRequest().getInlineComments().add(comment);
+									comment.setUser(user);
+									comment.setDate(new Date());
+									comment.setContent(content);
+									comment.setRequest(getPullRequest());
+									comment.setBlobInfo(blobInfo);
+									comment.setCompareWith(compareWith);
+									comment.setLine(line);
+									comment.setContext(commentContext);
+									GitPlex.getInstance(Dao.class).persist(comment);
+									return comment;
+								}
+							};
+						}
+					}
+
+					@Override
+					protected void onSelection(AjaxRequestTarget target, Change change) {
+						file = change.getPath();
+
+						String original = getPageParameters().get(ORIGINAL_PARAM).toString();
+						String revised = getPageParameters().get(REVISED_PARAM).toString();
+						Long commentId = getPageParameters().get(COMMENT_PARAM).toOptionalLong();
+						
+						StringBuilder url = new StringBuilder("compare?file=");
+						url.append(file);
+						if (original != null)
+							url.append("&original=").append(original);
+						if (revised != null)
+							url.append("&revised=").append(revised);
+						if (commentId != null)
+							url.append("&comment=").append(commentId);
+						
+						pushState(target, url.toString(), file);
+					}
+					
+				};
+				return compareResult;
 			}
-			
+
 		});
-
 	}
 	
 	@Override

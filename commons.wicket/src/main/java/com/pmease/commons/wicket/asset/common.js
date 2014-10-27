@@ -804,7 +804,7 @@ pmease.commons = {
 			else
 				$input.next().hide();
 		});
-	}
+	},
 	
 };
 

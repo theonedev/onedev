@@ -350,7 +350,7 @@ public class BranchComparePage extends RepositoryPage {
 				sourceModel.getObject().getHeadCommitHash(), null) {
 			
 			@Override
-			protected void onChangeSelection(AjaxRequestTarget target, Change change) {
+			protected void onSelection(AjaxRequestTarget target, Change change) {
 			}
 			
 			@Override

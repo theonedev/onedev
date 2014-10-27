@@ -46,24 +46,31 @@ public abstract class CompareResultPanel extends Panel {
 		this.oldCommitHash = oldCommit;
 		this.newCommitHash = newCommit;
 
-		List<Change> changes = repoModel.getObject().getChanges(oldCommit, newCommit);
 		if (file != null) {
-			for (Change each: repoModel.getObject().getChanges(oldCommit, newCommit)) {
-				if (file.equals(each.getOldPath()) || file.equals(each.getNewPath())) { 
-					activeChange = each;
-					break;
-				}
-			}
-			if (activeChange == null) {
-				List<TreeNode> result = repoModel.getObject().git().listTree(newCommit, file);
-				if (!result.isEmpty() && result.get(0).getMode() != FileMode.TYPE_TREE) {
-					activeChange = new Change(UNCHANGED, file, file, 
-							result.get(0).getMode(), result.get(0).getMode());
-				}
-			}
-		} else if (!changes.isEmpty()) {
-			activeChange = changes.get(0);
+			activeChange = findChange(file);
+		} else {
+			List<Change> changes = repoModel.getObject().getChanges(oldCommit, newCommit);
+			if (!changes.isEmpty())
+				activeChange = changes.get(0);
 		}
+	}
+	
+	private Change findChange(String file) {
+		Change change = null;
+		for (Change each: repoModel.getObject().getChanges(oldCommitHash, newCommitHash)) {
+			if (file.equals(each.getOldPath()) || file.equals(each.getNewPath())) { 
+				change = each;
+				break;
+			}
+		}
+		if (change == null) {
+			List<TreeNode> result = repoModel.getObject().git().listTree(newCommitHash, file);
+			if (!result.isEmpty() && result.get(0).getMode() != FileMode.TYPE_TREE) {
+				change = new Change(UNCHANGED, file, file, 
+						result.get(0).getMode(), result.get(0).getMode());
+			}
+		}
+		return change;
 	}
 
 	@Override
@@ -160,12 +167,32 @@ public abstract class CompareResultPanel extends Panel {
 			
 			target.add(this);
 			
-			onChangeSelection(target, change);
+			onSelection(target, change);
 		}
 		
 	}
 	
-	protected abstract void onChangeSelection(AjaxRequestTarget target, Change change);
+	protected abstract void onSelection(AjaxRequestTarget target, Change change);
+	
+	public void select(AjaxRequestTarget target, String file) {
+		activeChange = findChange(file);
+		if (activeChange != null) {
+			if (changeNav instanceof DiffTreePanel) {
+				((DiffTreePanel) changeNav).reveal(activeChange);
+			} else if (activeChange.getStatus() == UNCHANGED) {
+				replace(changeNav = newChangeNav(false));
+			}
+			changeContent = new BlobDiffPanel(changeContent.getId(), repoModel, 
+					new RevAwareChange(activeChange, oldCommitHash, newCommitHash), 
+					getInlineCommentSupport(activeChange));
+		} else {
+			changeContent = new WebMarkupContainer(changeContent.getId());
+			changeContent.setOutputMarkupId(true);
+		}
+		target.add(changeNav);
+		replace(changeContent);
+		target.add(changeContent);
+	}
 	
 	public void toggleChangedOnly(AjaxRequestTarget target) {
 		changeNav = newChangeNav(!(changeNav instanceof ChangedFilesPanel));
