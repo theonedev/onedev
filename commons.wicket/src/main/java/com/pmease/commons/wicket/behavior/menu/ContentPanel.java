@@ -56,7 +56,7 @@ abstract class ContentPanel extends Panel {
 						DropdownAlignment alignment = new DropdownAlignment(target, 0, 0, -1, false);
 						item.add(new MenuBehavior(menuPanel).hoverDelay(0).alignment(alignment));
 					} else {
-						item.add(new WebMarkupContainer("itemMenu"));
+						item.add(new WebMarkupContainer("itemMenu").setVisible(false));
 					}
 				} else {
 					item.add(new AttributeModifier("class", "divider"));
