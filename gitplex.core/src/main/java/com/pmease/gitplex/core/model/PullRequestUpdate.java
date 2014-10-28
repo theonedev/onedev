@@ -21,6 +21,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
@@ -153,7 +154,10 @@ public class PullRequestUpdate extends AbstractEntity {
 					CachedInfo cachedInfo = new CachedInfo();
 
 					Git git = getRequest().getTarget().getRepository().git();
-					cachedInfo.setLogCommits(git.log(getBaseCommitHash(), getHeadCommitHash(), null, 0, 0));
+					List<Commit> log = git.log(getBaseCommitHash(), getHeadCommitHash(), null, 0, 0);
+					if (log.isEmpty())
+						log = Lists.newArrayList(getRequest().getTarget().getRepository().getCommit(getHeadCommitHash()));
+					cachedInfo.setLogCommits(log);
 					
 					String mergeBase = git.calcMergeBase(getHeadCommitHash(), getRequest().getTarget().getHeadCommitHash());
 
@@ -262,13 +266,8 @@ public class PullRequestUpdate extends AbstractEntity {
 	}
 	
 	public Commit getHeadCommit() {
-		Commit headCommit;
-		if (!getCachedInfo().getLogCommits().isEmpty()) {
-			headCommit = getCachedInfo().getLogCommits().get(0);
-			Preconditions.checkState(headCommit.getHash().equals(getHeadCommitHash()));
-		} else {
-			headCommit = getRequest().getTarget().getRepository().getCommit(getHeadCommitHash());
-		}
+		Commit headCommit = getCachedInfo().getLogCommits().get(0);
+		Preconditions.checkState(headCommit.getHash().equals(getHeadCommitHash()));
 		return headCommit;
 	}
 	
