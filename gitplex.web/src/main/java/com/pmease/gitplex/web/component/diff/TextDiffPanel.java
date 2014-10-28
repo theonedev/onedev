@@ -720,10 +720,8 @@ public class TextDiffPanel extends Panel {
 					builder.append("<span class='emphasize'>");
 				else
 					builder.append("<span>");
-				if (partial.getContent().equals("\r"))
-					builder.append(" ");
-				else
-					builder.append(Strings.escapeMarkup(partial.getContent(), false, false));
+				String content = StringUtils.replaceChars(partial.getContent(), '\r', ' ');
+				builder.append(Strings.escapeMarkup(content, false, false));
 				builder.append("</span>");
 			}
 			builder.append("</td></tr>");

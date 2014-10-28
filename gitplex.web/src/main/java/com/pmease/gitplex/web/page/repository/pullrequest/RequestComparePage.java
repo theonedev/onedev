@@ -349,8 +349,6 @@ public class RequestComparePage extends RequestDetailPage {
 						PageParameters params = getPageParameters();
 						if (params.get(COMMENT_PARAM).toOptionalLong() != null || getPageParameters().get(REVISED_PARAM).toString() == null) {
 							setVisible(true);
-							super.onRender(handler);
-							
 							compareResult.visitChildren(new IVisitor<Component, Void>() {
 
 								@Override
@@ -361,6 +359,7 @@ public class RequestComparePage extends RequestDetailPage {
 								
 							});
 						}
+						handler.add(optionsContainer);
 					}
 					
 				});

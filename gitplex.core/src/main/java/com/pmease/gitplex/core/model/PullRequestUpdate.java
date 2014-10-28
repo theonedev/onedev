@@ -262,8 +262,13 @@ public class PullRequestUpdate extends AbstractEntity {
 	}
 	
 	public Commit getHeadCommit() {
-		Commit headCommit = getCachedInfo().getLogCommits().get(0);
-		Preconditions.checkState(headCommit.getHash().equals(getHeadCommitHash()));
+		Commit headCommit;
+		if (!getCachedInfo().getLogCommits().isEmpty()) {
+			headCommit = getCachedInfo().getLogCommits().get(0);
+			Preconditions.checkState(headCommit.getHash().equals(getHeadCommitHash()));
+		} else {
+			headCommit = getRequest().getTarget().getRepository().getCommit(getHeadCommitHash());
+		}
 		return headCommit;
 	}
 	
