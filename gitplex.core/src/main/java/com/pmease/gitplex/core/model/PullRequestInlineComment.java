@@ -17,12 +17,12 @@ import javax.persistence.OneToMany;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobInfo;
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.Pair;
 import com.pmease.commons.util.diff.AroundContext;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.CommentReply;
 import com.pmease.gitplex.core.comment.InlineComment;
+import com.pmease.gitplex.core.manager.PullRequestInlineCommentReplyManager;
 import com.pmease.gitplex.core.manager.UserManager;
 
 @Entity
@@ -139,7 +139,7 @@ public class PullRequestInlineComment extends AbstractPullRequestComment impleme
 		reply.setDate(new Date());
 		reply.setContent(content);
 		reply.setComment(this);
-		GitPlex.getInstance(Dao.class).persist(reply);
+		GitPlex.getInstance(PullRequestInlineCommentReplyManager.class).save(reply);
 		return reply;
 	}
 

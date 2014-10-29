@@ -10,6 +10,7 @@ import java.util.Set;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -28,6 +29,7 @@ import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.PullRequestVerification;
 import com.pmease.gitplex.core.model.PullRequestVote;
+import com.pmease.gitplex.web.component.comment.event.PullRequestChanged;
 import com.pmease.gitplex.web.component.commit.CommitHashLink;
 import com.pmease.gitplex.web.component.commit.CommitMessagePanel;
 import com.pmease.gitplex.web.component.label.AgeLabel;
@@ -50,8 +52,19 @@ public class RequestUpdatesPage extends RequestDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		WebMarkupContainer updatesContainer = new WebMarkupContainer("requestUpdatesContainer");
-		updatesContainer.add(new PullRequestChangeBehavior(getPullRequest().getId()));
+		WebMarkupContainer updatesContainer = new WebMarkupContainer("requestUpdatesContainer") {
+
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+
+				if (event.getPayload() instanceof PullRequestChanged) {
+					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
+					pullRequestChanged.getTarget().add(this);
+				}
+			}
+			
+		};
 		add(updatesContainer);
 		
 		updatesContainer.add(new ListView<PullRequestUpdate>("updates", new LoadableDetachableModel<List<PullRequestUpdate>>() {

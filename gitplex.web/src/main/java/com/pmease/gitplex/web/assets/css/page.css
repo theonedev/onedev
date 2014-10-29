@@ -2,9 +2,6 @@ html, body { background: #f0f2f4; }
 
 a {color: #09f; cursor: pointer;}
 a.fa {text-decoration: none;}
-a.fa-times {color: #FF2A68;}
-a.fa-times:hover {color: #BD2E29;}
-span.fa-times {color: #999;}
 
 textarea {resize: vertical;}
 
@@ -727,7 +724,7 @@ table.branches td.summary>div, table.branches td.summary>div .name a {font-size:
 .table-diff .line.diff>td.line-no {color: #999; width: 1%; text-align: right; white-space: nowrap;}
 .table-diff .line.diff td.text, .table-diff .hunk-head td.content {
 	font-family: Consolas,"Liberation Mono",Menlo,Courier,monospace;}
-.table-diff .line.diff td.text {color: #333; overflow: visible; white-space: pre;}
+.table-diff .line.diff td.text {overflow: visible; white-space: pre;}
 .table-diff {font-size: 12px; position:relative;}
 .table-diff>tbody>tr>td {padding: 2px 8px;}
 .table-diff>tbody>tr>td.text, .table-diff>tbody>tr>td.detail, .table-diff>tbody>tr>td.new {
@@ -772,20 +769,20 @@ ul.diff-alerts {margin: 0 0 0 8px; padding: 4px 8px 4px 12px;}
 .diff-stat .deletions {color: #c33535; font-style: normal; }
 
 /* ACTIVITY */
-.activity>div.summary {color: #777; margin-bottom: 8px;}
-.activity>div.summary a {color: #777;}
+.activity>div.summary {color: #999; margin-bottom: 8px;}
+.activity>div.summary a {color: #999;}
 .activity>div.summary .fa {font-size: 13px;}
 .activity>div.summary .actions {margin-left: 8px;}
-.activity>div.summary .actions a {margin-right: 4px; color: #999;}
+.activity>div.summary .actions>a, .activity>div.summary .actions>span {margin-right: 6px; color: #DDD;}
+.activity>div.summary .actions a, .activity>div.summary .actions span {color: #DDD;}
+.activity:hover>div.summary .actions a, .activity:hover>div.summary .actions span {color: #999;}
 .activity>div.summary .actions a .fa-times {font-size: 14px;}
-.activity>div.summary .actions a .fa-diff {font-size: 16px;}
-.activity>div.summary .user a {color: #333; font-weight: bold;}
+.activity>div.summary .actions a .fa-diff {font-size: 14px;}
+.activity>div.summary .user a, .activity>div.summary em {color: #666; font-weight: bold; font-style: normal;}
 
-.collapsed>.avatar img {opacity: 0.5;}
-.collapsed>.activity>div.summary {margin-bottom: 0; color: #999;}
-.collapsed>.activity>div.summary .user a {color: #777;}
-.collapsed>.activity .actions .fa-tick {color: #999;}
-.collapsed>.activity .actions a {margin-left: 8px;}
+.collapsed>.avatar img {opacity: 0.3;}
+.collapsed>.activity>div.summary {margin-bottom: 0; color: #AAA;}
+.collapsed>.activity>div.summary .user a {color: #888;}
 .collapsed>.activity>div.detail {
 	text-overflow: ellipsis; overflow: hidden; 
 	max-width: 600px; color: #777; white-space: nowrap;}
@@ -797,10 +794,12 @@ ul.diff-alerts {margin: 0 0 0 8px; padding: 4px 8px 4px 12px;}
 .comment-input>.tab-pane>.preview {display: none;}
 
 div.replies {padding-top: 8px;}
-div.replies>table>tbody>tr>td {vertical-align: top; border-top: 1px dashed #DDD; padding: 8px 0 8px 0;}
+div.replies>table>tbody>tr>td {vertical-align: top; border-top: 1px dotted #DDD; padding: 8px 0 8px 0;}
 div.replies>table>tbody>tr>td.avatar {width: 1px; padding: 10px 12px 0 0;}
 div.replies>table>tbody>tr>td.avatar img {width: 26px; height: 26px;}
-div.replies>table>tbody>tr.add-reply>td {padding-top: 12px;}
+div.replies>table>tbody>tr.add-reply>td {padding-top: 12px; color: #999;}
+div.replies>table>tbody>tr.add-reply>td>div>a {color: #999;}
+div.replies>table>tbody>tr.add-reply>td:hover>div>a {color: #333;}
 table.comments>tbody>tr>td.avatar {width: 1px; padding-right: 16px;}
 table.comments>tbody>tr>td.avatar img {width: 36px; height: 36px;}
 table.comments>tbody>tr>td {border-top: 1px solid #E5E5E5; padding: 12px 0 12px 0;}
@@ -925,7 +924,8 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.activities .table-diff>tbody>tr.omit>td .fa {font-size: 24px; color: #888; margin-left: 12px;}
 .request-detail>.activities .inline-comment.panel>.panel-heading {padding: 8px;}
 .request-detail>.activities .inline-comment.panel>.panel-heading .actions {margin-left: 12px;}
-.request-detail>.activities .inline-comment.panel>.panel-heading .actions a {color: #888; margin-right: 4px;}
+.request-detail>.activities .inline-comment.panel>.panel-heading .actions a {color: #BBB; margin-right: 4px;}
+.request-detail>.activities .inline-comment.panel>.panel-heading:hover .actions a {color: #666;}
 .request-detail>.activities .inline-comment.panel {margin-bottom: 4px;}
 
 .request-detail>.activities .activity>.summary .fa {background: white;}

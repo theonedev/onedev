@@ -23,7 +23,6 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
@@ -48,6 +47,7 @@ import com.pmease.commons.wicket.component.history.HistoryAwarePanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
+import com.pmease.gitplex.core.manager.PullRequestInlineCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.IntegrationPreview;
@@ -57,6 +57,7 @@ import com.pmease.gitplex.core.model.PullRequestInlineComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
+import com.pmease.gitplex.web.component.comment.event.PullRequestChanged;
 import com.pmease.gitplex.web.component.diff.CompareResultPanel;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
@@ -177,7 +178,19 @@ public class RequestComparePage extends RequestDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		final WebMarkupContainer optionsContainer = new WebMarkupContainer("compareOptions");
+		final WebMarkupContainer optionsContainer = new WebMarkupContainer("compareOptions") {
+			
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+
+				if (event.getPayload() instanceof PullRequestChanged) {
+					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
+					pullRequestChanged.getTarget().add(this);
+				}
+			}
+
+		};
 		optionsContainer.add(new StickyBehavior());
 		
 		add(optionsContainer);
@@ -339,30 +352,31 @@ public class RequestComparePage extends RequestDetailPage {
 		optionsContainer.add(new Link<Void>("refresh") {
 
 			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				
-				add(new PullRequestChangeBehavior(getPullRequest().getId()) {
+			public void onEvent(final IEvent<?> event) {
+				super.onEvent(event);
 
-					@Override
-					protected void onRender(final WebSocketRequestHandler handler) {
-						PageParameters params = getPageParameters();
-						if (params.get(COMMENT_PARAM).toOptionalLong() != null || getPageParameters().get(REVISED_PARAM).toString() == null) {
-							setVisible(true);
-							compareResult.visitChildren(new IVisitor<Component, Void>() {
+				if (event.getPayload() instanceof PullRequestChanged) {
+					PageParameters params = getPageParameters();
+					if (params.get(COMMENT_PARAM).toOptionalLong() != null || getPageParameters().get(REVISED_PARAM).toString() == null) {
+						setVisible(true);
+						compareResult.visitChildren(new IVisitor<Component, Void>() {
 
-								@Override
-								public void component(Component object, IVisit<Void> visit) {
-									for (StickyBehavior behavior: object.getBehaviors(StickyBehavior.class))
-										behavior.restick(handler);
-								}
-								
-							});
-						}
-						handler.add(optionsContainer);
+							@Override
+							public void component(Component object, IVisit<Void> visit) {
+								AjaxRequestTarget target = ((PullRequestChanged) event.getPayload()).getTarget();
+								for (StickyBehavior behavior: object.getBehaviors(StickyBehavior.class))
+									behavior.restick(target);
+							}
+							
+						});
 					}
 					
-				});
+				}
+			}
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
 				
 				setVisible(false);
 				setOutputMarkupPlaceholderTag(true);
@@ -432,7 +446,7 @@ public class RequestComparePage extends RequestDetailPage {
 									comment.setCompareWith(compareWith);
 									comment.setLine(line);
 									comment.setContext(commentContext);
-									GitPlex.getInstance(Dao.class).persist(comment);
+									GitPlex.getInstance(PullRequestInlineCommentManager.class).save(comment);
 									return comment;
 								}
 							};

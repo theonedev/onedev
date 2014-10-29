@@ -61,9 +61,11 @@ import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.commons.wicket.component.markdown.MarkdownInput;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.comment.CommentReply;
 import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.model.PullRequestInlineCommentReply;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
@@ -71,6 +73,8 @@ import com.pmease.gitplex.web.component.comment.CommentPanel;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
+import com.pmease.gitplex.web.model.EntityModel;
+import com.pmease.gitplex.web.model.ModelWrapper;
 import com.pmease.gitplex.web.model.UserModel;
 
 @SuppressWarnings("serial")
@@ -833,7 +837,14 @@ public class TextDiffPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<InlineComment> item) {
 				item.add(new UserLink("avatar", new UserModel(item.getModelObject().getUser()), AvatarMode.AVATAR));
-				item.add(new CommentPanel("comment", item.getModel()).setOutputMarkupId(true));
+				item.add(new CommentPanel("comment", item.getModel(), new ModelWrapper<CommentReply>() {
+
+					@Override
+					public IModel<PullRequestInlineCommentReply> asModel(CommentReply object) {
+						return new EntityModel<PullRequestInlineCommentReply>((PullRequestInlineCommentReply) object);
+					}
+					
+				}).setOutputMarkupId(true));
 				if (item.getModelObject().equals(commentSupport.getConcernedComment()))
 					item.add(AttributeAppender.append("class", " concerned"));
 			}

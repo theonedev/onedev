@@ -23,13 +23,12 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.component.markdown.MarkdownInput;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.AbstractPullRequestComment;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -39,6 +38,7 @@ import com.pmease.gitplex.core.model.PullRequestInlineComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
+import com.pmease.gitplex.web.component.comment.event.PullRequestChanged;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
@@ -46,9 +46,9 @@ import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.pullrequest.activity.AbstractCommentPullRequest;
 import com.pmease.gitplex.web.page.repository.pullrequest.activity.ApprovePullRequest;
 import com.pmease.gitplex.web.page.repository.pullrequest.activity.CommentPullRequest;
-import com.pmease.gitplex.web.page.repository.pullrequest.activity.InlineCommentPullRequest;
 import com.pmease.gitplex.web.page.repository.pullrequest.activity.DisapprovePullRequest;
 import com.pmease.gitplex.web.page.repository.pullrequest.activity.DiscardPullRequest;
+import com.pmease.gitplex.web.page.repository.pullrequest.activity.InlineCommentPullRequest;
 import com.pmease.gitplex.web.page.repository.pullrequest.activity.IntegratePullRequest;
 import com.pmease.gitplex.web.page.repository.pullrequest.activity.OpenPullRequest;
 import com.pmease.gitplex.web.page.repository.pullrequest.activity.PullRequestActivity;
@@ -223,6 +223,31 @@ public class RequestActivitiesPage extends RequestDetailPage {
 	}
 
 	@Override
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+
+		if (event.getPayload() instanceof PullRequestChanged) {
+			PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
+			AjaxRequestTarget target = pullRequestChanged.getTarget();
+			List<PullRequestActivity> activities = getActivities();
+			Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
+			PullRequestActivity lastAcvitity = (PullRequestActivity) lastActivityRow.getDefaultModelObject();
+			for (PullRequestActivity activity: activities) {
+				if (activity.getDate().after(lastAcvitity.getDate())) {
+					Component newActivityRow = newActivityRow(activitiesView.newChildId(), activity); 
+					activitiesView.add(newActivityRow);
+					
+					String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
+							newActivityRow.getMarkupId(), lastActivityRow.getMarkupId());
+					target.prependJavaScript(script);
+					target.add(newActivityRow);
+					lastActivityRow = newActivityRow;
+				}
+			}
+		}
+	}
+
+	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
@@ -257,7 +282,7 @@ public class RequestActivitiesPage extends RequestDetailPage {
 				comment.setRequest(getPullRequest());
 				comment.setUser(GitPlex.getInstance(UserManager.class).getCurrent());
 				comment.setContent(input.getModelObject());
-				GitPlex.getInstance(Dao.class).persist(comment);
+				GitPlex.getInstance(PullRequestCommentManager.class).save(comment);
 				input.setModelObject("");
 				
 				target.add(addComment);
@@ -278,32 +303,6 @@ public class RequestActivitiesPage extends RequestDetailPage {
 				target.add(form);
 			}
 
-		});
-		
-		add(new PullRequestChangeBehavior(getPullRequest().getId()) {
-
-			@Override
-			protected void onRender(WebSocketRequestHandler handler) {
-				for (int i=0; i<activitiesView.size(); i++)
-					handler.add(activitiesView.get(i));
-				
-				List<PullRequestActivity> activities = getActivities();
-				Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
-				PullRequestActivity lastAcvitity = (PullRequestActivity) lastActivityRow.getDefaultModelObject();
-				for (PullRequestActivity activity: activities) {
-					if (activity.getDate().after(lastAcvitity.getDate())) {
-						Component newActivityRow = newActivityRow(activitiesView.newChildId(), activity); 
-						activitiesView.add(newActivityRow);
-						
-						String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
-								newActivityRow.getMarkupId(), lastActivityRow.getMarkupId());
-						handler.prependJavaScript(script);
-						handler.add(newActivityRow);
-						lastActivityRow = newActivityRow;
-					}
-				}
-			}
-			
 		});
 	}
 

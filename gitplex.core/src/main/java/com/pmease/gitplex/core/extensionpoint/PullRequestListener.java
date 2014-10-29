@@ -9,6 +9,8 @@ public interface PullRequestListener {
 	
 	void onUpdated(PullRequest request);
 	
+	void onCommented(PullRequest request);
+	
 	void onVoted(PullRequest request);
 	
 	void onIntegrated(PullRequest request);

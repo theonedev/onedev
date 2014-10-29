@@ -10,7 +10,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
-import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -18,6 +18,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -27,13 +28,18 @@ import com.pmease.commons.util.diff.DiffLine;
 import com.pmease.commons.util.diff.Token;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.Comment;
+import com.pmease.gitplex.core.comment.CommentReply;
 import com.pmease.gitplex.core.manager.PullRequestInlineCommentManager;
 import com.pmease.gitplex.core.model.PullRequestInlineComment;
+import com.pmease.gitplex.core.model.PullRequestInlineCommentReply;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
+import com.pmease.gitplex.web.component.comment.event.PullRequestChanged;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
+import com.pmease.gitplex.web.model.EntityModel;
+import com.pmease.gitplex.web.model.ModelWrapper;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestComparePage;
 
@@ -53,12 +59,24 @@ public class InlineCommentActivityPanel extends Panel {
 		super.onInitialize();
 
 		PullRequestInlineComment comment = commentModel.getObject();
-		PullRequestInlineComment inlineComment = (PullRequestInlineComment) comment;
-		GitPlex.getInstance(PullRequestInlineCommentManager.class).update(inlineComment);
+		GitPlex.getInstance(PullRequestInlineCommentManager.class).update(comment);
 		add(new UserLink("name", new UserModel(comment.getUser()), AvatarMode.NAME));
 		add(new AgeLabel("age", Model.of(comment.getDate())));
 		
-		add(new Label("file", inlineComment.getBlobInfo().getPath()));
+		add(new Label("file", comment.getBlobInfo().getPath()) {
+
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+
+				if (event.getPayload() instanceof PullRequestChanged) {
+					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
+					AjaxRequestTarget target = pullRequestChanged.getTarget();
+					target.add(this);
+				}
+			}
+			
+		}.setOutputMarkupId(true));
 		
 		add(new Link<Void>("compareView") {
 
@@ -83,7 +101,19 @@ public class InlineCommentActivityPanel extends Panel {
 				setVisible(commentModel.getObject().getContext() != null);
 			}
 			
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+
+				if (event.getPayload() instanceof PullRequestChanged) {
+					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
+					AjaxRequestTarget target = pullRequestChanged.getTarget();
+					target.add(this);
+				}
+			}
+
 		};
+		contextContainer.setOutputMarkupPlaceholderTag(true);
 		add(contextContainer);
 		
 		contextContainer.add(new WebMarkupContainer("aboveOmitted") {
@@ -163,13 +193,36 @@ public class InlineCommentActivityPanel extends Panel {
 				setVisible(commentModel.getObject().getContext() == null);
 			}
 			
-		});
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+
+				if (event.getPayload() instanceof PullRequestChanged) {
+					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
+					AjaxRequestTarget target = pullRequestChanged.getTarget();
+					target.add(this);
+				}
+			}
+
+		}.setOutputMarkupPlaceholderTag(true));
 		
-		add(new CommentPanel("comment", commentModel) {
+		/*
+		 * Make comment panel independent of context in order not to reset comment content while editing
+		 * when we update context of the inline comment
+		 */
+		add(new CommentPanel("comment", commentModel, new ModelWrapper<CommentReply>() {
+
+			@Override
+			public IModel<PullRequestInlineCommentReply> asModel(CommentReply object) {
+				return new EntityModel<PullRequestInlineCommentReply>((PullRequestInlineCommentReply) object);
+			}
+			
+		}) {
 
 			@Override
 			protected Component newAdditionalCommentActions(String id, IModel<Comment> comment) {
-				return new AjaxLink<Void>(id) {
+				Fragment fragment = new Fragment(id, "actionsFrag", InlineCommentActivityPanel.this);
+				fragment.add(new AjaxLink<Void>("collapse") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
@@ -184,23 +237,25 @@ public class InlineCommentActivityPanel extends Panel {
 						setVisible(commentModel.getObject().isResolved());
 					}
 
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						tag.put("class", "fa fa-collapse");
-						tag.put("title", "Collapse this comment");
-						tag.put("style", "cursor:pointer;");
-					}
-					
-				};
-				
+				});
+				fragment.setRenderBodyOnly(true);
+				return fragment;
 			}
 
 			@Override
-			public void renderHead(IHeaderResponse response) {
-				super.renderHead(response);
-				
-				String script = String.format(""
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+
+				if (event.getPayload() instanceof PullRequestChanged) {
+					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
+					AjaxRequestTarget target = pullRequestChanged.getTarget();
+					target.prependJavaScript(String.format("$('body').append($('#%s'));", getMarkupId(true)));
+					target.appendJavaScript(getAppendScript());
+				}
+			}
+			
+			private String getAppendScript() {
+				return String.format(""
 						+ "var $beforeComment = $('#%s .before-comment');"
 						+ "if ($beforeComment.hasClass('line')) {"
 						+ "  var $tr = $('<tr class=\"line comments\"><td colspan=\"3\"></td></tr>').insertAfter($beforeComment);"
@@ -209,7 +264,13 @@ public class InlineCommentActivityPanel extends Panel {
 						+ "  $('#%s').insertAfter($beforeComment);"
 						+ "}", 
 						InlineCommentActivityPanel.this.getMarkupId(true), getMarkupId(true), getMarkupId(true));
-				response.render(OnDomReadyHeaderItem.forScript(script));
+			}
+
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				
+				response.render(OnDomReadyHeaderItem.forScript(getAppendScript()));
 			}
 			
 		});

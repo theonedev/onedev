@@ -98,6 +98,10 @@ public class CoreModule extends AbstractPluginModule {
 			@Override
 			public void onIntegrationPreviewCalculated(PullRequest request) {
 			}
+
+			@Override
+			public void onCommented(PullRequest request) {
+			}
 			
 		});
 		

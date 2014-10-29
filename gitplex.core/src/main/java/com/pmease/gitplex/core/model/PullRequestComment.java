@@ -9,9 +9,9 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.CommentReply;
+import com.pmease.gitplex.core.manager.PullRequestCommentReplyManager;
 import com.pmease.gitplex.core.manager.UserManager;
 
 @SuppressWarnings("serial")
@@ -39,7 +39,7 @@ public class PullRequestComment extends AbstractPullRequestComment {
 		reply.setDate(new Date());
 		reply.setContent(content);
 		reply.setComment(this);
-		GitPlex.getInstance(Dao.class).persist(reply);
+		GitPlex.getInstance(PullRequestCommentReplyManager.class).save(reply);
 		return reply;
 	}
 

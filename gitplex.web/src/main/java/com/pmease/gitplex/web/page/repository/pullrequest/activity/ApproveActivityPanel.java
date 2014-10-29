@@ -33,7 +33,7 @@ public class ApproveActivityPanel extends Panel {
 		
 		add(new UserLink("user", userModel));
 		add(new Label("age", Model.of(date)));
-		add(new SinceChangesPanel("changes", requestModel, date, "Changes since this approval"));
+		add(new SinceChangesLink("changes", requestModel, date, "Changes since this approval"));
 	}
 
 	@Override

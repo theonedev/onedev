@@ -31,6 +31,8 @@ import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -48,6 +50,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.PersonIdent;
 
@@ -74,10 +77,11 @@ import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequestOperation;
-import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.model.PullRequestVerification;
+import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.component.branch.BranchLink;
+import com.pmease.gitplex.web.component.comment.event.PullRequestChanged;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.PersonLink;
@@ -252,7 +256,19 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			
 		}));
 
-		overviewContainer = new WebMarkupContainer("requestOverview");
+		overviewContainer = new WebMarkupContainer("requestOverview") {
+
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+
+				if (event.getPayload() instanceof PullRequestChanged) {
+					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
+					pullRequestChanged.getTarget().add(this);
+				}
+			}
+			
+		};
 		
 		add(overviewContainer);
 		overviewContainer.add(new Label("title", new AbstractReadOnlyModel<String>() {
@@ -306,8 +322,6 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			
 		});
 		
-		overviewContainer.add(new PullRequestChangeBehavior(getPullRequest().getId()));
-
 		List<Tab> tabs = new ArrayList<>();
 		
 		tabs.add(new RequestTab("Discussions", RequestActivitiesPage.class));
@@ -324,6 +338,22 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		}.setOutputMarkupId(true));
 		
 		add(new BackToTop("backToTop"));
+		
+		add(new WebSocketRenderBehavior(false) {
+
+			@Override
+			protected Object getTrait() {
+				PullRequestChangeTrait trait = new PullRequestChangeTrait();
+				trait.requestId = getPullRequest().getId();
+				return trait;
+			}
+
+			@Override
+			protected void onRender(WebSocketRequestHandler handler) {
+				send(getPage(), Broadcast.BREADTH, new PullRequestChanged(handler, getPullRequest()));
+			}
+
+		});
 	}
 	
 	private WebMarkupContainer newOperationsContainer() {
@@ -952,26 +982,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		return requestModel.getObject();
 	}
 	
-	protected static class PullRequestChangeBehavior extends WebSocketRenderBehavior {
-
-		private final Long requestId;
-		
-		public PullRequestChangeBehavior(Long requestId) {
-			super(false);
-			
-			this.requestId = requestId;
-		}
-		
-		@Override
-		protected Object getTrait() {
-			PullRequestChangeTrait trait = new PullRequestChangeTrait();
-			trait.requestId = requestId;
-			return trait;
-		}
-		
-	}
-
-	protected static class PullRequestChangeTrait {
+	private static class PullRequestChangeTrait {
 		
 		private Long requestId;
 
@@ -1036,6 +1047,11 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			IntegrationPreviewUpdateTrait trait = new IntegrationPreviewUpdateTrait();
 			trait.requestId = request.getId();
 			WebSocketRenderBehavior.requestToRender(trait);
+		}
+
+		@Override
+		public void onCommented(PullRequest request) {
+			onChange(request);
 		}
 		
 	}

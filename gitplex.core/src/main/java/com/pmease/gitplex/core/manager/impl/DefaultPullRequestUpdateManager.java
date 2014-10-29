@@ -4,11 +4,16 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.pmease.commons.hibernate.Transactional;
+import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListeners;
+import com.pmease.gitplex.core.manager.PullRequestInlineCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.PullRequestInlineComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 
 @Singleton
@@ -18,10 +23,21 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 	
 	private final StorageManager storageManager;
 	
+	private final PullRequestListeners pullRequestListeners;
+	
+	private final UnitOfWork unitOfWork;
+	
+	private final PullRequestInlineCommentManager pullRequestInlineCommentManager;
+	
 	@Inject
-	public DefaultPullRequestUpdateManager(Dao dao, StorageManager storageManager) {
+	public DefaultPullRequestUpdateManager(Dao dao, StorageManager storageManager, 
+			PullRequestListeners pullRequestListeners, UnitOfWork unitOfWork, 
+			PullRequestInlineCommentManager pullRequestInlineCommentManager) {
 		this.dao = dao;
 		this.storageManager = storageManager;
+		this.pullRequestListeners = pullRequestListeners;
+		this.unitOfWork = unitOfWork;
+		this.pullRequestInlineCommentManager = pullRequestInlineCommentManager;
 	}
 
 	@Transactional
@@ -42,6 +58,36 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 			request.getTarget().getRepository().git().updateRef(update.getHeadRef(), 
 					sourceHead, null, null);
 		}
+		
+		final Long requestId = request.getId();
+		
+		dao.afterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				unitOfWork.asyncCall(new Runnable() {
+
+					@Override
+					public void run() {
+						PullRequest request = dao.load(PullRequest.class, requestId);
+						for (PullRequestInlineComment comment: request.getInlineComments())
+							pullRequestInlineCommentManager.update((PullRequestInlineComment) comment);
+
+						pullRequestListeners.call(request, new PullRequestListeners.Callback() {
+							
+							@Override
+							protected void call(PullRequestListener listener, PullRequest request) {
+								listener.onUpdated(request);
+							}
+							
+						});
+					}
+					
+				});
+			}
+			
+		});
+		
 	}
 
 	@Transactional

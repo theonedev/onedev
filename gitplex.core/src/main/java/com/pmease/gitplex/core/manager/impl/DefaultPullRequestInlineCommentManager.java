@@ -10,13 +10,17 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobInfo;
 import com.pmease.commons.git.BlobText;
 import com.pmease.commons.git.Change;
+import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.diff.AroundContext;
 import com.pmease.commons.util.diff.DiffLine;
 import com.pmease.commons.util.diff.DiffUtils;
 import com.pmease.commons.util.diff.WordSplitter;
 import com.pmease.gitplex.core.comment.InlineComment;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListeners;
 import com.pmease.gitplex.core.manager.PullRequestInlineCommentManager;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestInlineComment;
 
 @Singleton
@@ -24,9 +28,12 @@ public class DefaultPullRequestInlineCommentManager implements PullRequestInline
 
 	private final Dao dao;
 	
+	private final PullRequestListeners pullRequestListeners;
+	
 	@Inject
-	public DefaultPullRequestInlineCommentManager(Dao dao) {
+	public DefaultPullRequestInlineCommentManager(Dao dao, PullRequestListeners pullRequestListeners) {
 		this.dao = dao;
+		this.pullRequestListeners = pullRequestListeners;
 	}
 
 	@Override
@@ -143,6 +150,30 @@ public class DefaultPullRequestInlineCommentManager implements PullRequestInline
 			}
 			dao.persist(comment);
 		}
+	}
+
+	@Transactional
+	@Override
+	public void save(PullRequestInlineComment comment) {
+		dao.persist(comment);
+
+		final Long requestId = comment.getRequest().getId();
+		
+		dao.afterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				pullRequestListeners.asyncCall(requestId, new PullRequestListeners.Callback() {
+					
+					@Override
+					protected void call(PullRequestListener listener, PullRequest request) {
+						listener.onCommented(request);
+					}
+					
+				});
+			}
+			
+		});
 	}
 
 }

@@ -2,7 +2,9 @@ package com.pmease.gitplex.web.page.repository.pullrequest.activity;
 
 import java.util.Date;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
@@ -11,10 +13,11 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
+import com.pmease.gitplex.web.component.comment.event.PullRequestChanged;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestComparePage;
 
 @SuppressWarnings("serial")
-public class SinceChangesPanel extends Panel {
+public class SinceChangesLink extends Panel {
 
 	private final IModel<PullRequest> requestModel;
 	
@@ -40,7 +43,7 @@ public class SinceChangesPanel extends Panel {
 	
 	private final String tooltip;
 	
-	public SinceChangesPanel(String id, IModel<PullRequest> requestModel, Date sinceDate, String tooltip) {
+	public SinceChangesLink(String id, IModel<PullRequest> requestModel, Date sinceDate, String tooltip) {
 		super(id);
 		
 		this.requestModel = requestModel;
@@ -65,6 +68,19 @@ public class SinceChangesPanel extends Panel {
 		};
 		link.add(AttributeAppender.append("title", tooltip));
 		add(link);
+		
+		setOutputMarkupPlaceholderTag(true);
+	}
+
+	@Override
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+
+		if (event.getPayload() instanceof PullRequestChanged) {
+			PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
+			AjaxRequestTarget target = pullRequestChanged.getTarget();
+			target.add(this);
+		}
 	}
 
 	@Override

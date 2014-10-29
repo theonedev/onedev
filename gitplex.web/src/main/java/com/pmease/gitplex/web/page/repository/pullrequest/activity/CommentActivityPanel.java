@@ -13,8 +13,11 @@ import com.pmease.gitplex.core.comment.Comment;
 import com.pmease.gitplex.core.comment.CommentReply;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.PullRequestCommentReply;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
+import com.pmease.gitplex.web.model.EntityModel;
+import com.pmease.gitplex.web.model.ModelWrapper;
 
 @SuppressWarnings("serial")
 public class CommentActivityPanel extends Panel {
@@ -31,7 +34,14 @@ public class CommentActivityPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new CommentPanel("content", commentModel) {
+		add(new CommentPanel("content", commentModel, new ModelWrapper<CommentReply>() {
+
+			@Override
+			public IModel<PullRequestCommentReply> asModel(CommentReply object) {
+				return new EntityModel<PullRequestCommentReply>((PullRequestCommentReply) object);
+			}
+			
+		}) {
 
 			@Override
 			protected Component newAdditionalCommentActions(String id, final IModel<Comment> commentModel) {
@@ -62,7 +72,7 @@ public class CommentActivityPanel extends Panel {
 					
 				});
 				
-				fragment.add(new SinceChangesPanel("changes", new AbstractReadOnlyModel<PullRequest>() {
+				fragment.add(new SinceChangesLink("changes", new AbstractReadOnlyModel<PullRequest>() {
 
 					@Override
 					public PullRequest getObject() {
@@ -71,12 +81,14 @@ public class CommentActivityPanel extends Panel {
 					
 				}, CommentActivityPanel.this.commentModel.getObject().getDate(), "Changes since this comment"));
 				
+				fragment.setRenderBodyOnly(true);
+				
 				return fragment;
 			}
 
 			@Override
 			protected Component newAdditionalReplyActions(String id, final IModel<CommentReply> replyModel) {
-				return new SinceChangesPanel(id, new AbstractReadOnlyModel<PullRequest>() {
+				return new SinceChangesLink(id, new AbstractReadOnlyModel<PullRequest>() {
 
 					@Override
 					public PullRequest getObject() {

@@ -19,6 +19,7 @@ package com.pmease.commons.wicket.websocket;
 import java.util.concurrent.Callable;
 
 import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.support.DefaultSubjectContext;
 import org.apache.shiro.util.ThreadContext;
@@ -84,6 +85,8 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 		try {
 			PrincipalCollection principals = (PrincipalCollection) request.getSession().getAttribute(
 					DefaultSubjectContext.PRINCIPALS_SESSION_KEY);
+			if (principals == null)
+				principals = new SimplePrincipalCollection(0L, "");
 	    	WebSecurityManager securityManager = AppLoader.getInstance(WebSecurityManager.class);
 	        ThreadContext.bind(new Subject.Builder(securityManager).principals(principals).buildSubject());
 

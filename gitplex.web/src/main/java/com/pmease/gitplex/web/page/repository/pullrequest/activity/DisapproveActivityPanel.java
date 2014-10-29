@@ -33,7 +33,7 @@ public class DisapproveActivityPanel extends Panel {
 		
 		add(new UserLink("user", userModel));
 		add(new Label("age", Model.of(date)));
-		add(new SinceChangesPanel("changes", requestModel, date, "Changes since this disapproval"));
+		add(new SinceChangesLink("changes", requestModel, date, "Changes since this disapproval"));
 	}
 
 	@Override

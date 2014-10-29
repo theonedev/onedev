@@ -3,6 +3,7 @@ package com.pmease.gitplex.web.component.comment;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -10,6 +11,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
@@ -28,17 +30,24 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.Comment;
 import com.pmease.gitplex.core.comment.CommentReply;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
+import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
+import com.pmease.gitplex.web.component.comment.event.PullRequestChanged;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
+import com.pmease.gitplex.web.model.ModelWrapper;
 import com.pmease.gitplex.web.model.UserModel;
 
 @SuppressWarnings("serial")
 public class CommentPanel extends Panel {
 
+	private static final String ADD_REPLY_ID = "addReply";
+	
 	private RepeatingView repliesView;
+	
+	private ModelWrapper<CommentReply> replyModelWrapper;
 	
 	private IModel<List<CommentReply>> repliesModel = new LoadableDetachableModel<List<CommentReply>>() {
 
@@ -58,8 +67,10 @@ public class CommentPanel extends Panel {
 		
 	};
 	
-	public CommentPanel(String id, IModel<? extends Comment> commentModel) {
+	public CommentPanel(String id, IModel<? extends Comment> commentModel, ModelWrapper<CommentReply> replyModelWrapper) {
 		super(id, commentModel);
+		
+		this.replyModelWrapper = replyModelWrapper;
 	}
 
 	private Comment getComment() {
@@ -158,7 +169,7 @@ public class CommentPanel extends Panel {
 
 		}.add(new ConfirmBehavior("Deleting this comment will also delete all its replies. Do you really want to continue?")));
 		
-		final AjaxLink<Void> resolveLink;
+		AjaxLink<Void> resolveLink;
 		summary.add(resolveLink = new AjaxLink<Void>("resolve") {
 
 			@Override
@@ -199,8 +210,7 @@ public class CommentPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				resolveLink.configure();
-				setVisible(!resolveLink.isVisible());
+				setVisible(getComment().isResolved() && !GitPlex.getInstance(AuthorizationManager.class).canModify(getComment()));
 			}
 			
 		});
@@ -219,11 +229,52 @@ public class CommentPanel extends Panel {
 		add(repliesView = newRepliesView());
 		
 		add(newAddReplyRow());
+		
+		setOutputMarkupId(true);
 	}
 	
+	@Override
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+
+		if (event.getPayload() instanceof PullRequestChanged) {
+			System.out.println("pull request changed");
+			
+			PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
+			AjaxRequestTarget target = pullRequestChanged.getTarget();
+			List<CommentReply> replies = repliesModel.getObject();
+			Date lastReplyDate;
+			if (repliesView.size() != 0) {
+				Component lastReplyRow = repliesView.get(repliesView.size()-1);
+				lastReplyDate = ((CommentReply)lastReplyRow.getDefaultModelObject()).getDate();
+			} else {
+				lastReplyDate = getComment().getDate();
+			}
+			for (CommentReply reply: replies) {
+				if (reply.getDate().after(lastReplyDate)) {
+					Component newReplyRow = newReplyRow(repliesView.newChildId(), reply); 
+					repliesView.add(newReplyRow);
+					String script;
+					Component addReplyRow = get(ADD_REPLY_ID);
+					if (addReplyRow.isVisible()) {
+						script = String.format("$(\"<tr id='%s' class='reply'></tr>\").insertBefore('#%s');", 
+								newReplyRow.getMarkupId(), addReplyRow.getMarkupId());
+					} else {
+						script = String.format("$('#%s>.replies>table>tbody').append(\"<tr id='%s' class='reply'></tr>\");", 
+								getMarkupId(), newReplyRow.getMarkupId());
+					}
+					target.prependJavaScript(script);
+					target.add(newReplyRow);
+				}
+			}
+			
+		}
+	}
+
 	private Component newAddReplyRow() {
-		WebMarkupContainer row = new WebMarkupContainer("addReply");
-		row.setOutputMarkupId(true);
+		WebMarkupContainer addReplyRow = new WebMarkupContainer(ADD_REPLY_ID);
+		addReplyRow.setOutputMarkupId(true);
+		addReplyRow.setVisible(GitPlex.getInstance(UserManager.class).getCurrent() != null);
 		
 		Fragment fragment = new Fragment("content", "addFrag", this);
 		fragment.add(new AjaxLink<Void>("addReply") {
@@ -247,15 +298,15 @@ public class CommentPanel extends Panel {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						Component row = newAddReplyRow();
-						CommentPanel.this.replace(row);
-						target.add(row);
+						Component addReplyRow = newAddReplyRow();
+						CommentPanel.this.replace(addReplyRow);
+						target.add(addReplyRow);
 						
-						getComment().addReply(input.getModelObject());
-						Component newReplyRow = newReplyRow(repliesView.newChildId(), repliesModel.getObject().size()-1); 
+						CommentReply reply = getComment().addReply(input.getModelObject());
+						Component newReplyRow = newReplyRow(repliesView.newChildId(), reply); 
 						repliesView.add(newReplyRow);
 						String script = String.format("$(\"<tr id='%s' class='reply'></tr>\").insertBefore('#%s');", 
-								newReplyRow.getMarkupId(), row.getMarkupId());
+								newReplyRow.getMarkupId(), addReplyRow.getMarkupId());
 						target.prependJavaScript(script);
 						target.add(newReplyRow);
 					}
@@ -272,9 +323,9 @@ public class CommentPanel extends Panel {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						Component row = newAddReplyRow();
-						CommentPanel.this.replace(row);
-						target.add(row);
+						Component addReplyRow = newAddReplyRow();
+						CommentPanel.this.replace(addReplyRow);
+						target.add(addReplyRow);
 					}
 					
 				});
@@ -284,16 +335,16 @@ public class CommentPanel extends Panel {
 			}
 			
 		});
-		row.add(fragment);
+		addReplyRow.add(fragment);
 		
-		return row;
+		return addReplyRow;
 	}
 	
 	private RepeatingView newRepliesView() {
 		RepeatingView repliesView = new RepeatingView("replies");
 
-		for (int i=0; i<repliesModel.getObject().size(); i++)
-			repliesView.add(newReplyRow(repliesView.newChildId(), i));
+		for (CommentReply reply: repliesModel.getObject())
+			repliesView.add(newReplyRow(repliesView.newChildId(), reply));
 		
 		return repliesView;
 	}
@@ -305,11 +356,9 @@ public class CommentPanel extends Panel {
 		super.onBeforeRender();
 	}
 
-	private Component newReplyRow(String id, int index) {
-		final WebMarkupContainer row = new WebMarkupContainer(id, Model.of(index));
+	private Component newReplyRow(String id, CommentReply reply) {
+		final WebMarkupContainer row = new WebMarkupContainer(id, replyModelWrapper.asModel(reply));
 		row.setOutputMarkupId(true);
-		
-		CommentReply reply = repliesModel.getObject().get(index);
 		row.add(new UserLink("avatar", new UserModel(reply.getUser()), AvatarMode.AVATAR));
 		row.add(new UserLink("user", new UserModel(reply.getUser()), AvatarMode.NAME));
 		row.add(new AgeLabel("age", Model.of(reply.getDate())));
@@ -322,7 +371,7 @@ public class CommentPanel extends Panel {
 
 				Form<?> form = new Form<Void>("form");
 				fragment.add(form);
-				CommentReply reply = repliesModel.getObject().get((int)row.getDefaultModelObject());
+				CommentReply reply = (CommentReply) row.getDefaultModelObject();
 				final MarkdownInput input = new MarkdownInput("input", Model.of(reply.getContent()));
 				input.setRequired(true);
 				form.add(input);
@@ -331,7 +380,7 @@ public class CommentPanel extends Panel {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						CommentReply reply = repliesModel.getObject().get((int)row.getDefaultModelObject());
+						CommentReply reply = (CommentReply) row.getDefaultModelObject();
 						reply.saveContent(input.getModelObject());
 
 						Fragment fragment = renderForView(reply.getContent());
@@ -351,7 +400,7 @@ public class CommentPanel extends Panel {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						CommentReply reply = repliesModel.getObject().get((int)row.getDefaultModelObject());
+						CommentReply reply = (CommentReply) row.getDefaultModelObject();
 						Fragment fragment = renderForView(reply.getContent());
 						row.replace(fragment);
 						target.add(fragment);
@@ -377,16 +426,9 @@ public class CommentPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				int index = (int)row.getDefaultModelObject();
-				CommentReply reply = repliesModel.getObject().get(index);
-				repliesModel.getObject().remove(index);
+				CommentReply reply = (CommentReply) row.getDefaultModelObject();
 				reply.delete();
 				row.remove();
-				for (int i=index; i<repliesView.size(); i++) {
-					Component child = repliesView.get(i); 
-					child.setDefaultModelObject((int)child.getDefaultModelObject()-1);
-				}
-				
 				target.appendJavaScript(String.format("$('#%s').remove();", row.getMarkupId()));
 			}
 			
@@ -403,7 +445,7 @@ public class CommentPanel extends Panel {
 
 			@Override
 			public CommentReply getObject() {
-				return repliesModel.getObject().get((int)row.getDefaultModelObject());
+				return (CommentReply) row.getDefaultModelObject();
 			}
 			
 		}));
