@@ -35,7 +35,11 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
     	this.renderOnConnect = renderOnConnect;
 	}
     
-	@Override
+    public WebSocketRenderBehavior() {
+    	this(false);
+	}
+
+    @Override
 	public void bind(Component component) {
 		super.bind(component);
 		

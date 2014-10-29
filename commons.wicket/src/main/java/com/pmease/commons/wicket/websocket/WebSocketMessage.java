@@ -6,6 +6,8 @@ public class WebSocketMessage {
 	
 	public static final String RENDER_CALLBACK = "RenderCallback";
 	
+	public static final String ERROR_MESSAGE = "ErrorMessage";
+	
 	private String type;
 	
 	private Object payload;

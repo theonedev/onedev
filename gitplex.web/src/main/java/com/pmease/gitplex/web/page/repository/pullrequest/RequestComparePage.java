@@ -349,7 +349,7 @@ public class RequestComparePage extends RequestDetailPage {
 			}
 			
 		}));
-		optionsContainer.add(new Link<Void>("refresh") {
+		optionsContainer.add(new WebMarkupContainer("outdatedAlert") {
 
 			@Override
 			public void onEvent(final IEvent<?> event) {
@@ -382,14 +382,6 @@ public class RequestComparePage extends RequestDetailPage {
 				setOutputMarkupPlaceholderTag(true);
 			}
 
-			@Override
-			public void onClick() {
-				PageParameters params = getPageParameters();
-				if (file != null)
-					params.set(FILE_PARAM, file);
-				setResponsePage(RequestComparePage.class, params);
-			}
-			
 		});
 
 		add(new HistoryAwarePanel("compareResult") {

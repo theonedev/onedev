@@ -215,3 +215,8 @@ span.move.icon {padding: 12px; background: url("move.png") no-repeat 50% 50%;}
 /* BACK TO TOP */
 .back-to-top {position: fixed; right: 20px; bottom: 40px; cursor: pointer; padding: 25px; 
 	background: url("back-to-top.png") no-repeat 0 0; z-index: 100; opacity: 0.8;}
+	
+/* WEB SOCKET ERROR */
+#websocket-error {display: none; position: fixed; left: 50%; top: 0; background: #f2dede; 
+	border: 1px solid #ebccd1; color: #a94442; padding: 4px 8px; margin-left: -120px;}	
+#websocket-error span {width: 16px; height: 16px; background: url("error.png") 0 0 no-repeat;}

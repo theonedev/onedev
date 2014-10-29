@@ -16,8 +16,6 @@
  */
 package com.pmease.commons.wicket.websocket;
 
-import java.util.concurrent.Callable;
-
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
@@ -33,7 +31,6 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Throwables;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.loader.AppLoader;
 
@@ -68,18 +65,17 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 
 	@Override
 	public void onWebSocketConnect(final Session session) {
-		call(new Callable<Void>() {
+		run(new Runnable() {
 
 			@Override
-			public Void call() throws Exception {
+			public void run() {
 				onConnect(new WebSocketConnection(session, WebSocketProcessor.this));
-				return null;
 			}
 			
 		});
 	}
 	
-	private void call(Callable<Void> callable) {
+	private void run(Runnable runnable) {
 		UnitOfWork unitOfWork = AppLoader.getInstance(UnitOfWork.class);
 		unitOfWork.begin();
 		try {
@@ -90,9 +86,7 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 	    	WebSecurityManager securityManager = AppLoader.getInstance(WebSecurityManager.class);
 	        ThreadContext.bind(new Subject.Builder(securityManager).principals(principals).buildSubject());
 
-	        callable.call();
-		} catch (Exception e) {
-			Throwables.propagate(e);
+	        runnable.run();
 		} finally {
 			ThreadContext.unbindSubject();
 			unitOfWork.end();
@@ -101,12 +95,11 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 	
 	@Override
 	public void onWebSocketText(final String message) {
-		call(new Callable<Void>() {
+		run(new Runnable() {
 
 			@Override
-			public Void call() throws Exception {
+			public void run() {
 				onMessage(message);
-				return null;
 			}
 			
 		});
@@ -114,12 +107,11 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 
 	@Override
 	public void onWebSocketBinary(final byte[] payload, final int offset, final int len) {
-		call(new Callable<Void>() {
+		run(new Runnable() {
 
 			@Override
-			public Void call() throws Exception {
+			public void run() {
 				onMessage(payload, offset, len);
-				return null;
 			}
 			
 		});
@@ -127,12 +119,11 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 
 	@Override
 	public void onWebSocketClose(final int statusCode, final String reason) {
-		call(new Callable<Void>() {
+		run(new Runnable() {
 
 			@Override
-			public Void call() throws Exception {
+			public void run() {
 				onClose(statusCode, reason);
-				return null;
 			}
 			
 		});

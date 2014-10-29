@@ -765,11 +765,13 @@ pmease.commons = {
 	},	
 	
 	websocket: {
-		setupRenderCallback: function() {
+		setupCallback: function() {
 			Wicket.Event.subscribe("/websocket/message", function(jqEvent, message) {
 				var json = JSON.parse(message);
 				if (json.type == "RenderCallback")
 					Wicket.WebSocket.send(message);
+				else if (json.type == "ErrorMessage")
+					$("#websocket-error").show();
 			});
 			Wicket.Event.subscribe("/websocket/open", function(jqEvent, message) {
 				// Request to render via web socket right away after a web socket is opened 
@@ -814,5 +816,5 @@ $(function() {
 	pmease.commons.form.setupDirtyCheck();
 	pmease.commons.focus.setupAutoFocus();
 	pmease.commons.scroll.setupScrollStop();
-	pmease.commons.websocket.setupRenderCallback();
+	pmease.commons.websocket.setupCallback();
 });

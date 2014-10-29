@@ -238,8 +238,6 @@ public class CommentPanel extends Panel {
 		super.onEvent(event);
 
 		if (event.getPayload() instanceof PullRequestChanged) {
-			System.out.println("pull request changed");
-			
 			PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
 			AjaxRequestTarget target = pullRequestChanged.getTarget();
 			List<CommentReply> replies = repliesModel.getObject();
