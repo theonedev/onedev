@@ -37,6 +37,7 @@ import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
+import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.manager.PullRequestManager;
@@ -387,7 +388,7 @@ public class NewRequestPage extends RepositoryPage {
 					
 					pullRequest.setAutoIntegrate(false);
 					
-					GitPlex.getInstance(PullRequestManager.class).open(pullRequest);
+					GitPlex.getInstance(PullRequestManager.class).open(pullRequest, new PageId(getPageId()));
 					
 					setResponsePage(RequestActivitiesPage.class, RequestActivitiesPage.paramsOf(pullRequest));
 				}

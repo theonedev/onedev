@@ -23,9 +23,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
+import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.commons.wicket.component.markdown.MarkdownInput;
 import com.pmease.commons.wicket.component.markdown.MarkdownViewer;
+import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.Comment;
 import com.pmease.gitplex.core.comment.CommentReply;
@@ -292,6 +294,7 @@ public class CommentPanel extends Panel {
 				input.setRequired(true);
 				form.add(input);
 				
+				final int pageId = getPage().getPageId();
 				form.add(new AjaxSubmitLink("save") {
 
 					@Override
@@ -300,7 +303,13 @@ public class CommentPanel extends Panel {
 						CommentPanel.this.replace(addReplyRow);
 						target.add(addReplyRow);
 						
-						CommentReply reply = getComment().addReply(input.getModelObject());
+						CommentReply reply; 
+						InheritableThreadLocalData.set(new PageId(pageId));
+						try {
+							reply = getComment().addReply(input.getModelObject());
+						} finally {
+							InheritableThreadLocalData.clear();
+						}
 						Component newReplyRow = newReplyRow(repliesView.newChildId(), reply); 
 						repliesView.add(newReplyRow);
 						String script = String.format("$(\"<tr id='%s' class='reply'></tr>\").insertBefore('#%s');", 

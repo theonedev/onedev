@@ -65,7 +65,7 @@ public interface PullRequestManager {
      */
     void deleteRefs(PullRequest request);
     
-    void open(PullRequest request);
+    void open(PullRequest request, @Nullable Object listenerData);
     
     void delete(PullRequest request);
     

@@ -35,6 +35,7 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.RevAwareChange;
 import com.pmease.commons.hibernate.HibernateUtils;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.util.diff.AroundContext;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
@@ -44,6 +45,7 @@ import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.commons.wicket.component.history.HistoryAwarePanel;
+import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
@@ -186,7 +188,10 @@ public class RequestComparePage extends RequestDetailPage {
 
 				if (event.getPayload() instanceof PullRequestChanged) {
 					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
-					pullRequestChanged.getTarget().add(this);
+					AjaxRequestTarget target = pullRequestChanged.getTarget();
+					for (StickyBehavior behavior: getBehaviors(StickyBehavior.class))
+						behavior.unstick(target);
+					target.add(this);
 				}
 			}
 
@@ -438,7 +443,12 @@ public class RequestComparePage extends RequestDetailPage {
 									comment.setCompareWith(compareWith);
 									comment.setLine(line);
 									comment.setContext(commentContext);
-									GitPlex.getInstance(PullRequestInlineCommentManager.class).save(comment);
+									InheritableThreadLocalData.set(new PageId(getPageId()));
+									try {
+										GitPlex.getInstance(PullRequestInlineCommentManager.class).save(comment);
+									} finally {
+										InheritableThreadLocalData.clear();
+									}
 									return comment;
 								}
 							};

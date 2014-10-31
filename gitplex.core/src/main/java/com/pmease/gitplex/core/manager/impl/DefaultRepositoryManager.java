@@ -12,10 +12,6 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.pmease.gitplex.core.manager.BranchManager;
-import com.pmease.gitplex.core.manager.RepositoryManager;
-import com.pmease.gitplex.core.manager.StorageManager;
-
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
@@ -30,6 +26,9 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.gitplex.core.manager.BranchManager;
+import com.pmease.gitplex.core.manager.RepositoryManager;
+import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;

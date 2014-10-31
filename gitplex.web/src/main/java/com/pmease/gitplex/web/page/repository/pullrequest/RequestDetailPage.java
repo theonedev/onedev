@@ -56,6 +56,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.base.Objects;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.behavior.AllowLeaveBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
@@ -68,6 +69,7 @@ import com.pmease.commons.wicket.component.tabbable.PageTabLink;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
+import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
@@ -496,6 +498,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 				
 				String actionName = operation.name().toLowerCase();
 
+				InheritableThreadLocalData.set(new PageId(getPage().getPageId()));
 				PullRequest request = getPullRequest();
 				try {
 					operation.operate(request, noteInput.getModelObject());
@@ -503,6 +506,8 @@ public abstract class RequestDetailPage extends RepositoryPage {
 				} catch (Exception e) {
 					error("Unable to " + actionName + ": " + e.getMessage());
 					target.add(overviewContainer);
+				} finally {
+					InheritableThreadLocalData.clear();
 				}
 			}
 
@@ -1039,14 +1044,14 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		private void onChange(PullRequest request) {
 			PullRequestChangeTrait trait = new PullRequestChangeTrait();
 			trait.requestId = request.getId();
-			WebSocketRenderBehavior.requestToRender(trait);
+			WebSocketRenderBehavior.requestToRender(trait, PageId.fromObj(InheritableThreadLocalData.get()));
 		}
 		
 		@Override
 		public void onIntegrationPreviewCalculated(PullRequest request) {
 			IntegrationPreviewUpdateTrait trait = new IntegrationPreviewUpdateTrait();
 			trait.requestId = request.getId();
-			WebSocketRenderBehavior.requestToRender(trait);
+			WebSocketRenderBehavior.requestToRender(trait, null);
 		}
 
 		@Override

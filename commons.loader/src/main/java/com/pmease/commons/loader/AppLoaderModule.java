@@ -46,9 +46,27 @@ public class AppLoaderModule extends AbstractModule {
 
 			@Override
 			public ExecutorService get() {
-				return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
-			            300L, TimeUnit.SECONDS,
-			            new SynchronousQueue<Runnable>());
+				return new ThreadPoolExecutor(0, Integer.MAX_VALUE, 300L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>()) {
+
+					@Override
+					public void execute(final Runnable command) {
+						final Object inheritableThreadLocalData = InheritableThreadLocalData.get();
+						super.execute(new Runnable() {
+
+							@Override
+							public void run() {
+								InheritableThreadLocalData.set(inheritableThreadLocalData);
+								try {
+									command.run();
+								} finally {
+									InheritableThreadLocalData.clear();
+								}
+							}
+							
+						});
+					}
+					
+				};
 			}
 	    	
 	    }).in(Singleton.class);

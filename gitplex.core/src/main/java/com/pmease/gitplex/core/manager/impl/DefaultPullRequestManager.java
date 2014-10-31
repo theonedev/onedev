@@ -257,7 +257,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 
 	@Transactional
 	@Override
-	public void open(PullRequest request) {
+	public void open(PullRequest request, final Object listenerData) {
 		dao.persist(request);
 
 		FileUtils.cleanDir(storageManager.getCacheDir(request));

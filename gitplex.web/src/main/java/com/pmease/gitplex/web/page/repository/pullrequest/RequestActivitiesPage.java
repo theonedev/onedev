@@ -26,7 +26,9 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.component.markdown.MarkdownInput;
+import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.UserManager;
@@ -282,7 +284,12 @@ public class RequestActivitiesPage extends RequestDetailPage {
 				comment.setRequest(getPullRequest());
 				comment.setUser(GitPlex.getInstance(UserManager.class).getCurrent());
 				comment.setContent(input.getModelObject());
-				GitPlex.getInstance(PullRequestCommentManager.class).save(comment);
+				InheritableThreadLocalData.set(new PageId(getPage().getPageId()));
+				try {
+					GitPlex.getInstance(PullRequestCommentManager.class).save(comment);
+				} finally {
+					InheritableThreadLocalData.clear();
+				}
 				input.setModelObject("");
 				
 				target.add(addComment);

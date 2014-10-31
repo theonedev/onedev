@@ -179,7 +179,8 @@ public class DiffUtils {
 		int index = -1;
 		for (int i=0; i<diffs.size(); i++) {
 			DiffLine diff = diffs.get(i);
-			if (diff.getOldLineNo() == oldLine || diff.getNewLineNo() == newLine) {
+			if (oldLine != -1 && diff.getAction() != DiffLine.Action.ADD && diff.getOldLineNo() == oldLine
+					|| newLine != -1 && diff.getAction() != DiffLine.Action.DELETE && diff.getNewLineNo() == newLine) {
 				index = i;
 				break;
 			}

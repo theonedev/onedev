@@ -35,8 +35,12 @@ public class StickyBehavior extends Behavior {
 		this.component = component;
 	}
 
-	public void restick(AjaxRequestTarget target) {
+	public void unstick(AjaxRequestTarget target) {
 		target.prependJavaScript(String.format("$('#%s').trigger('sticky_kit:detach');", component.getMarkupId()));
+	}
+
+	public void restick(AjaxRequestTarget target) {
+		unstick(target);
 		target.appendJavaScript(getStickScript());
 	}
 	

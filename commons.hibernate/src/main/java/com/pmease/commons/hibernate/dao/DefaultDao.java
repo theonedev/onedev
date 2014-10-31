@@ -131,9 +131,8 @@ public class DefaultDao implements Dao, Serializable {
 			
 			@Override
 			public void afterCompletion(int status) {
-				if (status == Status.STATUS_COMMITTED) {
+				if (status == Status.STATUS_COMMITTED)
 					runnable.run();
-				}
 			}
 		});
 	}	
