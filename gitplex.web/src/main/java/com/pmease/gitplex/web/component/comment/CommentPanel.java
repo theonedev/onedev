@@ -24,6 +24,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.commons.loader.InheritableThreadLocalData;
+import com.pmease.commons.wicket.behavior.AllowLeaveBehavior;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.commons.wicket.component.markdown.MarkdownInput;
 import com.pmease.commons.wicket.component.markdown.MarkdownViewer;
@@ -324,7 +325,7 @@ public class CommentPanel extends Panel {
 						target.add(form);
 					}
 					
-				});
+				}.add(new AllowLeaveBehavior()));
 				
 				form.add(new AjaxLink<Void>("cancel") {
 
@@ -335,7 +336,7 @@ public class CommentPanel extends Panel {
 						target.add(addReplyRow);
 					}
 					
-				});
+				}.add(new AllowLeaveBehavior()));
 
 				CommentPanel.this.replace(row);
 				target.add(row);

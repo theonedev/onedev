@@ -2,7 +2,6 @@ package com.pmease.commons.git;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -16,17 +15,17 @@ public class BlobInfo implements Serializable {
 
 	private String path;
 
-	@Column(nullable=false)
 	private String revision;
 	
-	@Column(nullable=false)
-	private int mode;
+	// Use Integer instead of int here in order to allow this class to be 
+	// embedded as nullable property of JPA entities 
+	private Integer mode;
 
 	public BlobInfo() {
 		
 	};
 
-	public BlobInfo(String revision, String path, int mode) {
+	public BlobInfo(String revision, String path, Integer mode) {
 		this.revision = revision;
 		this.path = path;
 		this.mode = mode;
@@ -44,16 +43,16 @@ public class BlobInfo implements Serializable {
 		return mode;
 	}
 	
+	public void setMode(int mode) {
+		this.mode = mode;
+	}
+
 	public void setPath(String path) {
 		this.path = path;
 	}
 
 	public void setRevision(String revision) {
 		this.revision = revision;
-	}
-
-	public void setMode(int mode) {
-		this.mode = mode;
 	}
 
 	@Override

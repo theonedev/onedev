@@ -145,9 +145,6 @@ public class PullRequest extends AbstractEntity {
 	private Collection<PullRequestComment> comments = new ArrayList<>();
 
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
-	private Collection<PullRequestInlineComment> inlineComments = new ArrayList<>();
-
-	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
 	private Collection<PullRequestAudit> audits = new ArrayList<>();
 	
 	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
@@ -311,15 +308,6 @@ public class PullRequest extends AbstractEntity {
 
 	public void setComments(Collection<PullRequestComment> comments) {
 		this.comments = comments;
-	}
-
-	public Collection<PullRequestInlineComment> getInlineComments() {
-		return inlineComments;
-	}
-
-	public void setInlineComments(
-			Collection<PullRequestInlineComment> inlineComments) {
-		this.inlineComments = inlineComments;
 	}
 
 	public Collection<PullRequestAudit> getAudits() {

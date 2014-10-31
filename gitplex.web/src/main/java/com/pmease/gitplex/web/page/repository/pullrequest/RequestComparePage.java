@@ -49,13 +49,12 @@ import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
-import com.pmease.gitplex.core.manager.PullRequestInlineCommentManager;
+import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestComment;
-import com.pmease.gitplex.core.model.PullRequestInlineComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
@@ -86,7 +85,7 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	private String newCommitHash;
 	
-	private final IModel<PullRequestInlineComment> commentModel;
+	private final IModel<PullRequestComment> commentModel;
 	
 	private final IModel<Map<String, CommitDescription>> commitsModel = 
 			new LoadableDetachableModel<Map<String, CommitDescription>>() {
@@ -135,13 +134,13 @@ public class RequestComparePage extends RequestDetailPage {
 	public RequestComparePage(final PageParameters params) {
 		super(params);
 
-		commentModel = new LoadableDetachableModel<PullRequestInlineComment>() {
+		commentModel = new LoadableDetachableModel<PullRequestComment>() {
 
 			@Override
-			protected PullRequestInlineComment load() {
+			protected PullRequestComment load() {
 				Long commentId = params.get(COMMENT_PARAM).toOptionalLong();
 				if (commentId != null)
-					return GitPlex.getInstance(Dao.class).load(PullRequestInlineComment.class, commentId);
+					return GitPlex.getInstance(Dao.class).load(PullRequestComment.class, commentId);
 				else 
 					return null;
 			}
@@ -152,7 +151,7 @@ public class RequestComparePage extends RequestDetailPage {
 		newCommitHash = params.get(REVISED_PARAM).toString();
 		file = params.get(FILE_PARAM).toString();
 		
-		PullRequestInlineComment comment = getComment();
+		PullRequestComment comment = getComment();
 		if (comment != null) {
 			if (oldCommitHash != null || newCommitHash != null) {
 				throw new IllegalArgumentException("Parameter 'original' or 'revised' "
@@ -433,8 +432,8 @@ public class RequestComparePage extends RequestDetailPage {
 										AroundContext commentContext, int line, String content) {
 									User user = GitPlex.getInstance(UserManager.class).getCurrent();
 									Preconditions.checkNotNull(user);
-									PullRequestInlineComment comment = new PullRequestInlineComment();
-									getPullRequest().getInlineComments().add(comment);
+									PullRequestComment comment = new PullRequestComment();
+									getPullRequest().getComments().add(comment);
 									comment.setUser(user);
 									comment.setDate(new Date());
 									comment.setContent(content);
@@ -445,7 +444,7 @@ public class RequestComparePage extends RequestDetailPage {
 									comment.setContext(commentContext);
 									InheritableThreadLocalData.set(new PageId(getPageId()));
 									try {
-										GitPlex.getInstance(PullRequestInlineCommentManager.class).save(comment);
+										GitPlex.getInstance(PullRequestCommentManager.class).save(comment);
 									} finally {
 										InheritableThreadLocalData.clear();
 									}
@@ -490,7 +489,7 @@ public class RequestComparePage extends RequestDetailPage {
 		super.onDetach();
 	}
 	
-	public static PageParameters paramsOf(PullRequestInlineComment concernedComment) {
+	public static PageParameters paramsOf(PullRequestComment concernedComment) {
 		PageParameters params = RequestDetailPage.paramsOf(concernedComment.getRequest());
 		params.set("comment", concernedComment.getId());
 		
@@ -646,7 +645,7 @@ public class RequestComparePage extends RequestDetailPage {
 		}
 	}
 
-	private PullRequestInlineComment getComment() {
+	private PullRequestComment getComment() {
 		return commentModel.getObject();
 	}
 }

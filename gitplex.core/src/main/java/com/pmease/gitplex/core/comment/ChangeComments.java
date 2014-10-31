@@ -12,9 +12,9 @@ import com.pmease.commons.git.BlobText;
 import com.pmease.commons.git.RevAwareChange;
 import com.pmease.commons.util.diff.DiffUtils;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.PullRequestInlineCommentManager;
+import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestInlineComment;
+import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
 
@@ -96,15 +96,17 @@ public class ChangeComments implements Serializable {
 		if (commentsOnCommit == null) {
 			commentsOnCommit = new HashMap<>();
 
-			for (PullRequestInlineComment comment: request.getInlineComments()) {
-				GitPlex.getInstance(PullRequestInlineCommentManager.class).update(comment);
-				if (comment.getBlobInfo().getRevision().equals(commit)) {
-					List<InlineComment> commentsOnFile = commentsOnCommit.get(comment.getBlobInfo().getPath());
-					if (commentsOnFile == null) {
-						commentsOnFile = new ArrayList<>();
-						commentsOnCommit.put(comment.getBlobInfo().getPath(), commentsOnFile);
+			for (PullRequestComment comment: request.getComments()) {
+				if (comment.getInlineInfo() != null) {
+					GitPlex.getInstance(PullRequestCommentManager.class).updateInline(comment);
+					if (comment.getBlobInfo().getRevision().equals(commit)) {
+						List<InlineComment> commentsOnFile = commentsOnCommit.get(comment.getBlobInfo().getPath());
+						if (commentsOnFile == null) {
+							commentsOnFile = new ArrayList<>();
+							commentsOnCommit.put(comment.getBlobInfo().getPath(), commentsOnFile);
+						}
+						commentsOnFile.add(comment);
 					}
-					commentsOnFile.add(comment);
 				}
 			}
 			comments.put(commit, commentsOnCommit);

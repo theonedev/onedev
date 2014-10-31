@@ -52,6 +52,7 @@ import com.pmease.commons.util.diff.DiffLine;
 import com.pmease.commons.util.diff.DiffUtils;
 import com.pmease.commons.util.diff.Token;
 import com.pmease.commons.util.diff.WordSplitter;
+import com.pmease.commons.wicket.behavior.AllowLeaveBehavior;
 import com.pmease.commons.wicket.behavior.ScrollBehavior;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
@@ -65,7 +66,7 @@ import com.pmease.gitplex.core.comment.CommentReply;
 import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.PullRequestInlineCommentReply;
+import com.pmease.gitplex.core.model.PullRequestCommentReply;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
@@ -533,7 +534,8 @@ public class TextDiffPanel extends Panel {
 				target.appendJavaScript(String.format("gitplex.comments.cancelAdd(%d);", index));
 			}
 			
-		});
+		}.add(new AllowLeaveBehavior()));
+		
 		form.add(new AjaxSubmitLink("save") {
 
 			@Override
@@ -580,7 +582,7 @@ public class TextDiffPanel extends Panel {
 					target.add(head);
 			}
 
-		});
+		}.add(new AllowLeaveBehavior()));
 		add(form);
 		
 		add(addCommentBehavior = new AbstractDefaultAjaxBehavior() {
@@ -840,8 +842,8 @@ public class TextDiffPanel extends Panel {
 				item.add(new CommentPanel("comment", item.getModel(), new ModelWrapper<CommentReply>() {
 
 					@Override
-					public IModel<PullRequestInlineCommentReply> asModel(CommentReply object) {
-						return new EntityModel<PullRequestInlineCommentReply>((PullRequestInlineCommentReply) object);
+					public IModel<PullRequestCommentReply> asModel(CommentReply object) {
+						return new EntityModel<PullRequestCommentReply>((PullRequestCommentReply) object);
 					}
 					
 				}).setOutputMarkupId(true));

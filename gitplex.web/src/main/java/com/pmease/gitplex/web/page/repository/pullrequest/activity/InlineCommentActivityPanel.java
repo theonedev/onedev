@@ -29,9 +29,9 @@ import com.pmease.commons.util.diff.Token;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.Comment;
 import com.pmease.gitplex.core.comment.CommentReply;
-import com.pmease.gitplex.core.manager.PullRequestInlineCommentManager;
-import com.pmease.gitplex.core.model.PullRequestInlineComment;
-import com.pmease.gitplex.core.model.PullRequestInlineCommentReply;
+import com.pmease.gitplex.core.manager.PullRequestCommentManager;
+import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.PullRequestCommentReply;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
 import com.pmease.gitplex.web.component.comment.event.PullRequestChanged;
@@ -46,9 +46,9 @@ import com.pmease.gitplex.web.page.repository.pullrequest.RequestComparePage;
 @SuppressWarnings("serial")
 public class InlineCommentActivityPanel extends Panel {
 
-	private final IModel<PullRequestInlineComment> commentModel;
+	private final IModel<PullRequestComment> commentModel;
 	
-	public InlineCommentActivityPanel(String id, IModel<PullRequestInlineComment> commentModel) {
+	public InlineCommentActivityPanel(String id, IModel<PullRequestComment> commentModel) {
 		super(id);
 		
 		this.commentModel = commentModel;
@@ -58,8 +58,8 @@ public class InlineCommentActivityPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		PullRequestInlineComment comment = commentModel.getObject();
-		GitPlex.getInstance(PullRequestInlineCommentManager.class).update(comment);
+		PullRequestComment comment = commentModel.getObject();
+		GitPlex.getInstance(PullRequestCommentManager.class).updateInline(comment);
 		add(new UserLink("name", new UserModel(comment.getUser()), AvatarMode.NAME));
 		add(new AgeLabel("age", Model.of(comment.getDate())));
 		
@@ -213,8 +213,8 @@ public class InlineCommentActivityPanel extends Panel {
 		add(new CommentPanel("comment", commentModel, new ModelWrapper<CommentReply>() {
 
 			@Override
-			public IModel<PullRequestInlineCommentReply> asModel(CommentReply object) {
-				return new EntityModel<PullRequestInlineCommentReply>((PullRequestInlineCommentReply) object);
+			public IModel<PullRequestCommentReply> asModel(CommentReply object) {
+				return new EntityModel<PullRequestCommentReply>((PullRequestCommentReply) object);
 			}
 			
 		}) {

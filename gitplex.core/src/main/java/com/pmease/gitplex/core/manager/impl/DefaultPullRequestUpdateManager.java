@@ -9,11 +9,11 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListeners;
-import com.pmease.gitplex.core.manager.PullRequestInlineCommentManager;
+import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestInlineComment;
+import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 
 @Singleton
@@ -27,17 +27,17 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 	
 	private final UnitOfWork unitOfWork;
 	
-	private final PullRequestInlineCommentManager pullRequestInlineCommentManager;
+	private final PullRequestCommentManager pullRequestCommentManager;
 	
 	@Inject
 	public DefaultPullRequestUpdateManager(Dao dao, StorageManager storageManager, 
 			PullRequestListeners pullRequestListeners, UnitOfWork unitOfWork, 
-			PullRequestInlineCommentManager pullRequestInlineCommentManager) {
+			PullRequestCommentManager pullRequestCommentManager) {
 		this.dao = dao;
 		this.storageManager = storageManager;
 		this.pullRequestListeners = pullRequestListeners;
 		this.unitOfWork = unitOfWork;
-		this.pullRequestInlineCommentManager = pullRequestInlineCommentManager;
+		this.pullRequestCommentManager = pullRequestCommentManager;
 	}
 
 	@Transactional
@@ -70,8 +70,10 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 					@Override
 					public void run() {
 						PullRequest request = dao.load(PullRequest.class, requestId);
-						for (PullRequestInlineComment comment: request.getInlineComments())
-							pullRequestInlineCommentManager.update((PullRequestInlineComment) comment);
+						for (PullRequestComment comment: request.getComments()) {
+							if (comment.getInlineInfo() != null)
+								pullRequestCommentManager.updateInline(comment);
+						}
 
 						pullRequestListeners.call(request, new PullRequestListeners.Callback() {
 							
