@@ -70,5 +70,5 @@ public interface PullRequestManager {
     void delete(PullRequest request);
     
 	List<IntegrationStrategy> getApplicableIntegrationStrategies(PullRequest request);
-    
+
 }

@@ -1,18 +1,16 @@
 package com.pmease.gitplex.web.page;
 
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.SubmitLink;
-import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.commons.wicket.behavior.AllowLeaveBehavior;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.model.PullRequestCommentReply;
 
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
 
-	private String name;
-	
 	public TestPage(PageParameters params) {
 		super(params);
 	}
@@ -20,32 +18,15 @@ public class TestPage extends BasePage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		add(new Form<Void>("form") {
+
+		add(new Link<Void>("test") {
 
 			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				
-				add(new TextField<String>("name", new PropertyModel<String>(TestPage.this, "name")));
-				
-				add(new SubmitLink("save") {
-
-					@Override
-					public void onSubmit() {
-						super.onSubmit();
-					}
-					
-				}.add(new AllowLeaveBehavior()));
-			}
-
-			@Override
-			protected void onSubmit() {
-				super.onSubmit();
-				System.out.println(name);
+			public void onClick() {
+				Dao dao = GitPlex.getInstance(Dao.class);
+				System.out.println(dao.query(EntityCriteria.of(PullRequestCommentReply.class)).size());
 			}
 			
 		});
 	}
-
 }

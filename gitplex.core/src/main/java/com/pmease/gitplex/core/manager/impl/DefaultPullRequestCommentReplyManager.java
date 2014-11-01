@@ -1,10 +1,16 @@
 package com.pmease.gitplex.core.manager.impl;
 
+import java.util.Collection;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.hibernate.criterion.Restrictions;
+
+import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListeners;
 import com.pmease.gitplex.core.manager.PullRequestCommentReplyManager;
@@ -46,6 +52,14 @@ public class DefaultPullRequestCommentReplyManager implements PullRequestComment
 			}
 			
 		});
+	}
+
+	@Sessional
+	@Override
+	public Collection<PullRequestCommentReply> findBy(PullRequest request) {
+		EntityCriteria<PullRequestCommentReply> criteria = EntityCriteria.of(PullRequestCommentReply.class);
+		criteria.createCriteria("comment").add(Restrictions.eq("request", request));
+		return dao.query(criteria);
 	}
 
 }

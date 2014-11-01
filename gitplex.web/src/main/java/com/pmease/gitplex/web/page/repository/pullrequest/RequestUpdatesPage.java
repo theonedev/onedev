@@ -65,6 +65,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 			}
 			
 		};
+		updatesContainer.setOutputMarkupId(true);
 		add(updatesContainer);
 		
 		updatesContainer.add(new ListView<PullRequestUpdate>("updates", new LoadableDetachableModel<List<PullRequestUpdate>>() {

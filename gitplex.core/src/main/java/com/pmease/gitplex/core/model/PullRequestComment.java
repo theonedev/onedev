@@ -15,6 +15,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobInfo;
 import com.pmease.commons.hibernate.AbstractEntity;
@@ -33,6 +36,7 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
+	@Fetch(FetchMode.JOIN)
 	private PullRequest request;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -123,11 +127,7 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 
 	@Override
 	public Collection<PullRequestCommentReply> getReplies() {
-		return replies;
-	}
-
-	public void setReplies(Collection<PullRequestCommentReply> replies) {
-		this.replies = replies;
+		return request.getCommentReplies(this);
 	}
 
 	@Override

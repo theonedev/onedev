@@ -31,8 +31,11 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.RevAwareChange;
 import com.pmease.commons.hibernate.AbstractEntity;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.util.LockUtils;
 import com.pmease.commons.util.Triple;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.ChangeComments;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Disapproved;
@@ -132,25 +135,25 @@ public class PullRequest extends AbstractEntity {
 	@Column(nullable=false)
 	private IntegrationStrategy integrationStrategy;
 
-	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestUpdate> updates = new ArrayList<>();
 
-	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<VoteInvitation> voteInvitations = new ArrayList<>();
 	
-	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestVerification> verifications = new ArrayList<>();
 
-	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestComment> comments = new ArrayList<>();
 
-	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestAudit> audits = new ArrayList<>();
 	
-	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestNotification> notifications = new ArrayList<>();
 
-	@OneToMany(mappedBy = "request", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestTask> tasks = new ArrayList<>();
 
 	private transient CheckResult checkResult;
@@ -166,6 +169,8 @@ public class PullRequest extends AbstractEntity {
 	private transient Collection<Commit> mergedCommits;
 	
 	private transient Map<ChangeKey, ChangeComments> commentsCache = new HashMap<>();
+	
+	private transient Collection<PullRequestCommentReply> commentReplies;
 	
 	/**
 	 * Get title of this merge request.
@@ -296,12 +301,6 @@ public class PullRequest extends AbstractEntity {
 		this.verifications = verifications;
 	}
 
-	/**
-	 * Get all non-inline comments of the pull request.
-	 *  
-	 * @return
-	 * 			all non-inline comments
-	 */
 	public Collection<PullRequestComment> getComments() {
 		return comments;
 	}
@@ -627,6 +626,24 @@ public class PullRequest extends AbstractEntity {
 				mergedCommits.add(commit);
 		}
 		return mergedCommits;
+	}
+	
+	private Collection<PullRequestCommentReply> getCommentReplies() {
+		if (commentReplies == null) {
+			EntityCriteria<PullRequestCommentReply> criteria = EntityCriteria.of(PullRequestCommentReply.class);
+			criteria.createCriteria("comment").add(Restrictions.eq("request", this));
+			commentReplies = GitPlex.getInstance(Dao.class).query(criteria);
+		}
+		return commentReplies;
+	}
+	
+	public Collection<PullRequestCommentReply> getCommentReplies(PullRequestComment comment) {
+		List<PullRequestCommentReply> replies = new ArrayList<>();
+		for (PullRequestCommentReply reply: getCommentReplies()) {
+			if (reply.getComment().equals(comment))
+				replies.add(reply);
+		}
+		return replies;
 	}
 	
 	private static class ChangeKey extends Triple<String, String, String> {
