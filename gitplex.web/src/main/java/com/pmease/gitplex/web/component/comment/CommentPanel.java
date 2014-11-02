@@ -255,15 +255,8 @@ public class CommentPanel extends Panel {
 				if (reply.getDate().after(lastReplyDate)) {
 					Component newReplyRow = newReplyRow(repliesView.newChildId(), reply); 
 					repliesView.add(newReplyRow);
-					String script;
-					Component addReplyRow = get(ADD_REPLY_ID);
-					if (addReplyRow.isVisible()) {
-						script = String.format("$(\"<tr id='%s' class='reply'></tr>\").insertBefore('#%s');", 
-								newReplyRow.getMarkupId(), addReplyRow.getMarkupId());
-					} else {
-						script = String.format("$('#%s>.replies>table>tbody').append(\"<tr id='%s' class='reply'></tr>\");", 
-								getMarkupId(), newReplyRow.getMarkupId());
-					}
+					String script = String.format("$('#%s>.replies>table>tbody').append(\"<tr id='%s' class='reply'></tr>\");", 
+							getMarkupId(), newReplyRow.getMarkupId());
 					target.prependJavaScript(script);
 					target.add(newReplyRow);
 				}
@@ -313,8 +306,8 @@ public class CommentPanel extends Panel {
 						}
 						Component newReplyRow = newReplyRow(repliesView.newChildId(), reply); 
 						repliesView.add(newReplyRow);
-						String script = String.format("$(\"<tr id='%s' class='reply'></tr>\").insertBefore('#%s');", 
-								newReplyRow.getMarkupId(), addReplyRow.getMarkupId());
+						String script = String.format("$('#%s>.replies>table>tbody').append(\"<tr id='%s' class='reply'></tr>\");", 
+								CommentPanel.this.getMarkupId(), newReplyRow.getMarkupId());
 						target.prependJavaScript(script);
 						target.add(newReplyRow);
 					}

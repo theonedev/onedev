@@ -793,13 +793,15 @@ ul.diff-alerts {margin: 0 0 0 8px; padding: 4px 8px 4px 12px;}
 .comment-input>.tab-pane {padding: 12px 0;}
 .comment-input>.tab-pane>.preview {display: none;}
 
-div.replies {padding-top: 8px;}
-div.replies>table>tbody>tr>td {vertical-align: top; border-top: 1px dotted #DDD; padding: 8px 0 8px 0;}
-div.replies>table>tbody>tr>td.avatar {width: 1px; padding: 10px 12px 0 0;}
+div.replies {padding-top: 8px; padding-left: 16px;}
+div.replies>table>tbody>tr>td {vertical-align: top; border-top: 1px dashed #CCC; padding: 8px 0 8px 0;
+	background: #F5F5F5;}
+div.replies>table>tbody>tr:first-child>td {border-top: none;}
+div.replies>table>tbody>tr>td.avatar {width: 1px; padding: 10px;}
 div.replies>table>tbody>tr>td.avatar img {width: 26px; height: 26px;}
-div.replies>table>tbody>tr.add-reply>td {padding-top: 12px; color: #999;}
-div.replies>table>tbody>tr.add-reply>td>div>a {color: #999;}
-div.replies>table>tbody>tr.add-reply>td:hover>div>a {color: #333;}
+div.replies>.add-reply {padding-top: 10px; color: #999;}
+div.replies>.add-reply>div>a {color: #999;}
+div.replies>.add-reply:hover>div>a {color: #333;}
 table.comments>tbody>tr>td.avatar {width: 1px; padding-right: 16px;}
 table.comments>tbody>tr>td.avatar img {width: 36px; height: 36px;}
 table.comments>tbody>tr>td {border-top: 1px solid #E5E5E5; padding: 12px 0 12px 0;}
@@ -895,10 +897,11 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.activities>tbody>tr.discussion>td.avatar {width: 1px; padding-right: 12px;}
 .request-detail>.activities>tbody>tr.discussion>td.activity {padding-left: 12px;}
 .request-detail>.activities>tbody>tr.activity>td.avatar {border-right: 1px dashed #DDD;}
+.request-detail>.activities>tbody>tr.activity.discussion>td.avatar {border-right: none;}
 .request-detail>.activities>tbody>tr.discussion+.non-discussion>td {border-top: 1px solid #E5E5E5;}
 .request-detail>.activities>tbody>tr.discussion>.avatar img {width: 40px; height: 40px;}
 .request-detail>.activities>tbody>tr.non-discussion>td {padding-left: 6px;}
-.request-detail>.activities>tbody>tr.non-discussion.non-update>td {padding: 6px;}
+.request-detail>.activities>tbody>tr.non-discussion.non-update>td {padding: 6px; padding-top: 12px;}
 .request-detail>.activities>tbody>tr.non-discussion>td.avatar img {display: none;}
 .request-detail>.activities>tbody>tr.non-discussion>.activity>div.summary .user a {font-weight: normal;}
 .request-detail>.activities>tbody>tr.update+.update>td>table {margin-top: -12px;}
@@ -928,7 +931,7 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.activities .inline-comment.panel>.panel-heading:hover .actions a {color: #666;}
 .request-detail>.activities .inline-comment.panel {margin-bottom: 4px;}
 
-.request-detail>.activities .activity>.summary .fa {background: white;}
+.request-detail>.activities .activity.non-discussion>.activity>.summary .fa {background: white;}
 .request-detail>.activities .activity>.update>.fa {margin: 0 8px 0 -15px; font-size: 20px;}
 .request-detail>.activities .activity>.discard>.fa {margin: 0 6px 0 -19px; color: #F93333; font-size: 24px;}
 .request-detail>.activities .activity>.integrate>.fa {margin: 0 6px 0 -19px; color: #35A612; font-size: 24px;}
