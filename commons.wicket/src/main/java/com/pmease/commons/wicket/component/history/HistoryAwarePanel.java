@@ -36,7 +36,7 @@ public abstract class HistoryAwarePanel extends Panel {
 	public void pushState(AjaxRequestTarget target, String url, Serializable state) {
 		HistoryState historyState = new HistoryState(getPageRelativePath(), state);
 		String encodedHistoryState = new String(Base64.encodeBase64(SerializationUtils.serialize(historyState)));
-		target.appendJavaScript(String.format("history.pushState('%s', '', '%s');", encodedHistoryState, url));
+		target.appendJavaScript(String.format("History.pushState({state:'%s'}, '', '%s');", encodedHistoryState, url));
 	}
 
 }

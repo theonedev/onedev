@@ -80,15 +80,18 @@ public abstract class CommonPage extends WebPage {
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 				
+				// Use history.js instead of native history API to solve the problem that Safari 
+				// (and previous versions of Chrome) fires event "onpopstate" on initial page load 
+				// and this causes the page to reload infinitely with below code  
 				String script = String.format(""
-						+ "window.onpopstate=function(e) {"
-						+ "  if (e.state != null) {"
+						+ "History.Adapter.bind(window, 'statechange', function() {"
+						+ "  if (History.getState().data.state != null) {"
 						+ "    %s"
 						+ "  } else {"
 						+ "    location.reload();"
 						+ "  }"
-						+ "};", 
-						getCallbackFunctionBody(CallbackParameter.resolved("state", "e.state"))); 
+						+ "});", 
+						getCallbackFunctionBody(CallbackParameter.resolved("state", "History.getState().data.state"))); 
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			

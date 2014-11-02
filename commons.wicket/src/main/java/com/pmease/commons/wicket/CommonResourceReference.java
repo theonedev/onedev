@@ -14,6 +14,7 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.asset.Assets;
 
 import de.agilecoders.wicket.core.Bootstrap;
+import de.agilecoders.wicket.webjars.request.resource.WebjarsJavaScriptResourceReference;
 
 /**
  * Common resource is intended to provide a common look&feel for all products using 
@@ -81,6 +82,9 @@ class CommonResourceReference extends JavaScriptResourceReference {
 
 		dependencies.add(JavaScriptHeaderItem.forReference(Bootstrap.getSettings().getModernizrResourceReference()));
 		dependencies.addAll(bootstrapHeaderItems);
+		
+		dependencies.add(JavaScriptHeaderItem.forReference(
+				new WebjarsJavaScriptResourceReference("historyjs/current/scripts/bundled/html5/jquery.history.js")));
 
 		dependencies.add(JavaScriptHeaderItem.forReference(Assets.ALIGN_JS));
 
