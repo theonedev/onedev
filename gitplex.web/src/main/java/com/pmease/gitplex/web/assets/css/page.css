@@ -648,18 +648,21 @@ table.table-blob { width: 100%; }
 .branches>.body>.options>div.base {width: 240px;}
 .branches>.body>.options>div.search input {width: 240px;}
 .branches>.body>.options .pagination {margin: 0;}
-table.branches td {white-space: nowrap;}
-table.branches td.watch {width: 60px;}
-table.branches td.actions {width: 1px;}
-table.branches td.behind-ahead {width: 25%;}
-table.branches td.behind {padding-right: 0;}
-table.branches td.ahead {padding-left: 0;}
-table.branches td.behind>div {border-right: 1px solid #333;}
-table.branches td.behind-ahead div.text {margin: 0 4px;}
-table.branches .bar {height: 12px;}
-table.branches .ahead .bar {background: #666;}
-table.branches .behind .bar {background: #ccc;}
-table.branches td.summary>div, table.branches td.summary>div .name a {font-size: 13px; color: #666;}
+.branches>.body>table.branches td {white-space: nowrap;}
+.branches>.body>table.branches td.summary, .branches>.body>table.branches td.actions {width: 1%;}
+.branches>.body>table.branches td.actions .fa.fa-times {color: red; margin-left: 8px;}
+.branches>.body>table.branches td.actions span.fa.fa-times {color: #888;}
+.branches>.body>table.branches td.behind {padding-right: 0;}
+.branches>.body>table.branches td.ahead {padding-left: 0;}
+.branches>.body>table.branches td.behind>div {border-right: 1px solid #333;}
+.branches>.body>table.branches td.behind-ahead div.text {margin: 0 4px;}
+.branches>.body>table.branches .bar {height: 12px;}
+.branches>.body>table.branches .ahead .bar {background: #666;}
+.branches>.body>table.branches .ahead .bar.request {background: #F1D763;}
+.branches>.body>table.branches .behind .bar {background: #ccc;}
+.branches>.body>table.branches .behind .bar.request {background: #F1D763;}
+.branches>.body>.help-block .bar.request {background: #F1D763; font-size: 10px;}
+.branches>.body>table.branches td.summary>div, table.branches td.summary>div .name a {font-size: 13px; color: #666;}
 
 #searching-branches {position: absolute; left: 50%; top: 250px; z-index: 100; display: none;}
 
@@ -835,21 +838,18 @@ ul.status-help .description {color: #444; margin: 4px 0 8px 0; border-bottom: 1p
 ul.status-help li:last-child .description {border-bottom: none;}
 
 /* NEW PULL REQUEST AND BRANCH COMPARE PAGE */
-.new-request {padding: 20px;}
-.new-request>.branches, .compare>.body>.branches {margin-bottom: 20px;}
-.new-request>.branches td, .compare>.body>.branches td {background: #F2F2F2; border-radius: 4px; vertical-align: top;}
-.new-request>.branches .actions, .compare>.body>.branches .actions {width: 1%; background: none; padding: 0 12px 0 8px;}
-.new-request>.branches .direction, .compare>.body>.branches .direction {font-size: 48px; color: #999;}
-.new-request>.branches .status {background: none;}
+.branch-compare>.body>div {margin-bottom: 20px;}
+.branch-compare>.body>.branches {margin-bottom: 20px;}
+.branch-compare>.body>.branches td {vertical-align: top;}
+.branch-compare>.body>.branches td>div.title {font-size: 18px; margin-bottom: 8px;}
+.branch-compare>.body>.branches td>div.branch {background: #F2F2F2; border-radius: 4px; vertical-align: top;}
+.branch-compare>.body>.branches .actions {width: 1%; background: none; padding: 77px 10px 0 10px;}
 
-.new-request>div, .compare>.body>div {margin-bottom: 20px;}
-.new-request .status .summary {font-size: 16px; padding: 0; margin-bottom: 8px;}
-.new-request .can-send {border-radius: 4px; background: #F2F2F2; padding: 4px;}
-.new-request .can-send form .title, .new-request .can-send form .comment {margin-bottom: 12px;}
-.new-request .can-send textarea {min-height: 64px;}
-.new-request .can-send .foot>div {margin-right: 12px;}
-.new-request .can-send .foot label {font-weight: normal;}
-.new-request .can-send .foot .help-block {margin: 0;}
+.branch-compare>.body>.status .summary {font-size: 16px; padding: 0; margin-bottom: 8px;}
+.new-request>.body>.status>.can-send form .title {margin-bottom: 20px;}
+.new-request>.body>.status>.can-send form .description {margin-bottom: 8px;}
+.new-request>.body>.status>.can-send form .description>h4 {margin-right: 24px;}
+
 
 /* PULL REQUEST DETAIL PANEL */
 .request-detail {padding: 20px;}

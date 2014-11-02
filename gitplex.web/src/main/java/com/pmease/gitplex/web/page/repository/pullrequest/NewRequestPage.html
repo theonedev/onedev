@@ -1,34 +1,34 @@
 <wicket:extend>
-	<div class="new-request">
-		<table class="branches">
-			<tr>
-				<td class="target">
-					<div wicket:id="target"></div>
-				</td>
-				<td class="actions">
-					<a wicket:id="swap" class="swap btn btn-xs btn-default">swap</a>
-					<div class="direction"><span class="fa fa-arrow-left fa-lg"></span></div>
-				</td>
-				<td class="source">
-					<div wicket:id="source"></div>
-				</td>
-			</tr>
-		</table>
-		<div wicket:id="status" class="status"></div>
-		<div wicket:id="tabs"></div>
-		<div wicket:id="tabPanel"></div>
-		<div wicket:id="backToTop"></div>
-	</div>
+	<section class="new-request branch-compare">
+		<div class="head">Create Pull Request</div>
+		<div class="body">
+			<table class="branches">
+				<tr>
+					<td class="target">
+						<div class="title">To</div>
+						<div wicket:id="target" class="branch"></div>
+					</td>
+					<td class="actions">
+						<a wicket:id="swap" class="swap btn btn-sm btn-default"><i class="fa fa-key-tab"></i> swap</a>
+					</td>
+					<td class="source">
+						<div class="title">From</div>
+						<div wicket:id="source" class="branch"></div>
+					</td>
+				</tr>
+			</table>
+			<div wicket:id="status" class="status"></div>
+			<div wicket:id="tabs"></div>
+			<div wicket:id="tabPanel"></div>
+			<div wicket:id="backToTop"></div>
+		</div>
+	</section>
 	<wicket:fragment wicket:id="openedFrag">
 		<div class="alert alert-info">
 			<div class="summary">
-				<span class="fa fa-lg fa-info-circle"></span>
-				<span>
-					Below integration request is already open for selected branches.
-					<a wicket:id="viewRequest">View Request <span class="fa fa-arrow-right"></span></a>
-				</span>
+				<a wicket:id="view">Pull request #<span wicket:id="no"></span></a> is already open for this comparison: 
 			</div>
-			<div wicket:id="requestInfo" class="detail" ></div>
+			<div wicket:id="title" class="detail"></div>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="sameBranchFrag">
@@ -63,14 +63,16 @@
 		<div class="can-send">
 			<form wicket:id="form">
 				<div class="title">
-					<input wicket:id="title" type="text" class="form-control" placeholder="Title has to be specified">
+					<h4>Title</h4>
+					<div>
+						<input wicket:id="title" type="text" class="form-control" placeholder="Title has to be specified">
+					</div>
 				</div>
-				<div class="comment">
-					<textarea wicket:id="comment" class="form-control" rows="8" placeholder="Leave a comment"></textarea>
+				<div class="description">
+					<h4 class="pull-left">Description</h4>
+					<div wicket:id="comment"></div>
 				</div>
-				<div class="foot">
-					<input wicket:id="send" type="submit" class="btn btn-primary btn-lg" value="Send Integration Request"></input>
-				</div>
+				<input wicket:id="send" type="submit" class="btn btn-primary" value="Send Pull Request"></input>
 			</form>
 		</div>	
 	</wicket:fragment>

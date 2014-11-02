@@ -67,7 +67,6 @@ import com.pmease.gitplex.web.git.command.AheadBehindCommand;
 import com.pmease.gitplex.web.git.command.BranchForEachRefCommand;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
-import com.pmease.gitplex.web.page.repository.code.compare.BranchComparePage;
 import com.pmease.gitplex.web.page.repository.code.tree.RepoTreePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestActivitiesPage;
 
@@ -75,7 +74,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 
 @SuppressWarnings("serial")
-public class BranchesPage extends RepositoryPage {
+public class RepoBranchesPage extends RepositoryPage {
 
 	private Long baseBranchId;
 	
@@ -182,7 +181,7 @@ public class BranchesPage extends RepositoryPage {
 		
 	};
 
-	public BranchesPage(PageParameters params) {
+	public RepoBranchesPage(PageParameters params) {
 		super(params);
 		
 		if (!getRepository().git().hasCommits()) 
@@ -218,7 +217,7 @@ public class BranchesPage extends RepositoryPage {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				setResponsePage(BranchesPage.this);
+				setResponsePage(RepoBranchesPage.this);
 			}
 			
 		}));
@@ -230,7 +229,7 @@ public class BranchesPage extends RepositoryPage {
 		branchesContainer.setOutputMarkupId(true);
 		add(branchesContainer);
 		
-		PageableListView<Branch> branchesView;
+		final PageableListView<Branch> branchesView;
 		branchesContainer.add(branchesView = new PageableListView<Branch>("branches", new AbstractReadOnlyModel<List<Branch>>() {
 
 			@Override
@@ -306,15 +305,6 @@ public class BranchesPage extends RepositoryPage {
 					protected void onInitialize() {
 						super.onInitialize();
 						add(new Label("count", ab.getBehind()));
-						add(new WebMarkupContainer("pullRequest") {
-
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setVisible(behindOpenRequestsModel.getObject().get(item.getModelObject().getName()) != null);
-							}
-							
-						});
 					}
 
 					@Override
@@ -345,6 +335,13 @@ public class BranchesPage extends RepositoryPage {
 				item.add(new Label("behindBar") {
 
 					@Override
+					protected void onInitialize() {
+						super.onInitialize();
+						if (behindOpenRequestsModel.getObject().get(item.getModelObject().getName()) != null)
+							add(AttributeAppender.append("class", " request"));
+					}
+
+					@Override
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 						
@@ -365,15 +362,6 @@ public class BranchesPage extends RepositoryPage {
 					protected void onInitialize() {
 						super.onInitialize();
 						add(new Label("count", ab.getAhead()));
-						add(new WebMarkupContainer("pullRequest") {
-
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setVisible(aheadOpenRequestsModel.getObject().get(item.getModelObject().getName()) != null);
-							}
-							
-						});
 					}
 
 					@Override
@@ -404,6 +392,13 @@ public class BranchesPage extends RepositoryPage {
 				item.add(new Label("aheadBar") {
 
 					@Override
+					protected void onInitialize() {
+						super.onInitialize();
+						if (aheadOpenRequestsModel.getObject().get(item.getModelObject().getName()) != null)
+							add(AttributeAppender.append("class", " request"));
+					}
+
+					@Override
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 						
@@ -412,10 +407,10 @@ public class BranchesPage extends RepositoryPage {
 					
 				});
 
-				final WebMarkupContainer watchContainer = new WebMarkupContainer("watch");
-				item.add(watchContainer.setOutputMarkupId(true));
+				final WebMarkupContainer actionsContainer = new WebMarkupContainer("actions");
+				item.add(actionsContainer.setOutputMarkupId(true));
 				
-				watchContainer.add(new AjaxLink<Void>("unwatchRequests") {
+				actionsContainer.add(new AjaxLink<Void>("unwatchRequests") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
@@ -425,7 +420,7 @@ public class BranchesPage extends RepositoryPage {
 							GitPlex.getInstance(Dao.class).remove(watch);
 							requestWatchesModel.getObject().remove(branchName);
 						}
-						target.add(watchContainer);
+						target.add(actionsContainer);
 					}
 					
 					@Override
@@ -436,7 +431,7 @@ public class BranchesPage extends RepositoryPage {
 					}
 
 				});
-				watchContainer.add(new AjaxLink<Void>("watchRequests") {
+				actionsContainer.add(new AjaxLink<Void>("watchRequests") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
@@ -444,7 +439,7 @@ public class BranchesPage extends RepositoryPage {
 						watch.setBranch(item.getModelObject());
 						watch.setUser(getCurrentUser());
 						GitPlex.getInstance(Dao.class).persist(watch);
-						target.add(watchContainer);
+						target.add(actionsContainer);
 					}
 					
 					@Override
@@ -457,7 +452,7 @@ public class BranchesPage extends RepositoryPage {
 				});
 
 				Link<Void> deleteLink;
-				item.add(deleteLink = new Link<Void>("delete") {
+				actionsContainer.add(deleteLink = new Link<Void>("delete") {
 
 					@Override
 					public void onClick() {
@@ -495,7 +490,7 @@ public class BranchesPage extends RepositoryPage {
 				PullRequest aheadOpen = aheadOpenRequestsModel.getObject().get(branch.getName());
 				PullRequest behindOpen = behindOpenRequestsModel.getObject().get(branch.getName());
 				if (aheadOpen != null || behindOpen != null) {
-					String hint = "This branch can not be deleted as there are <br>pull request openning against it."; 
+					String hint = "This branch can not be deleted as there are <br>pull request opening against it."; 
 					deleteLink.add(new TooltipBehavior(Model.of(hint), new TooltipConfig().withPlacement(Placement.left)));
 					deleteLink.add(AttributeAppender.append("data-html", "true"));
 				}
@@ -503,7 +498,15 @@ public class BranchesPage extends RepositoryPage {
 			
 		});
 
-		add(pagingNavigator = new PagingNavigator("branchesPageNav", branchesView));
+		add(pagingNavigator = new PagingNavigator("branchesPageNav", branchesView) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(branchesView.getPageCount() > 1);
+			}
+			
+		});
 		pagingNavigator.setOutputMarkupPlaceholderTag(true);
 	}
 	

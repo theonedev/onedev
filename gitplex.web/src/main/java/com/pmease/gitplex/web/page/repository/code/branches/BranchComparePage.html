@@ -1,0 +1,46 @@
+<wicket:extend>
+	<section class="branch-compare">
+		<div class="head">Compare Branches</div>
+		<div class="body">
+			<table class="branches">
+				<tr>
+					<td class="target">
+						<div class="title">Base</div>
+						<div wicket:id="target" class="branch"></div>
+					</td>
+					<td class="actions">
+						<a wicket:id="swap" class="swap btn btn-sm btn-default"><i class="fa fa-key-tab"></i> swap</a>
+					</td>
+					<td class="source">
+						<div class="title">Compare</div>
+						<div wicket:id="source" class="branch"></div>
+					</td>
+				</tr>
+			</table>
+			<div wicket:id="sameBranch" class="alert alert-warning status">
+				<div class="summary">
+					<span class="fa fa-lg fa-warning"></span>
+					<span>Please select different branches to compare.</span>
+				</div>
+			</div>		
+			<div wicket:id="openedRequest" class="alert alert-info status">
+				<div class="summary">
+					<a wicket:id="view">Pull request #<span wicket:id="no"></span></a> is already open for this comparison: 
+				</div>
+				<div wicket:id="title" class="detail"></div>
+			</div>
+			<div wicket:id="upToDate" class="alert alert-success status">
+				<div class="summary">
+					<span class="fa fa-lg fa-check-circle"></span>
+					<span wicket:id="targetBranch"></span> is up to date with all commits from <span wicket:id="sourceBranch"></span>.
+				</div>
+			</div>		
+			<div>
+				<a wicket:id="createRequest" class="btn btn-primary">Create Pull Request</a>
+			</div>
+			<div wicket:id="tabs"></div>
+			<div wicket:id="tabPanel"></div>
+		</div>
+	</section>
+	<div wicket:id="backToTop"></div>
+</wicket:extend>

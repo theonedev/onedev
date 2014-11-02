@@ -45,7 +45,8 @@ import com.pmease.gitplex.web.page.repository.admin.PermissionSettingPage;
 import com.pmease.gitplex.web.page.repository.admin.gatekeeper.GateKeeperPage;
 import com.pmease.gitplex.web.page.repository.admin.integrationpolicy.IntegrationPolicyPage;
 import com.pmease.gitplex.web.page.repository.code.blob.RepoBlobPage;
-import com.pmease.gitplex.web.page.repository.code.branches.BranchesPage;
+import com.pmease.gitplex.web.page.repository.code.branches.BranchComparePage;
+import com.pmease.gitplex.web.page.repository.code.branches.RepoBranchesPage;
 import com.pmease.gitplex.web.page.repository.code.commit.RepoCommitPage;
 import com.pmease.gitplex.web.page.repository.code.commits.RepoCommitsPage;
 import com.pmease.gitplex.web.page.repository.code.contributors.ContributorsPage;
@@ -203,7 +204,7 @@ public abstract class RepositoryPage extends AccountBasePage {
 		List<Tab> codeTabs = new ArrayList<>();
 		codeTabs.add(new RepositoryTab(Model.of("Files"), "fa fa-file-code", RepoTreePage.class, RepoBlobPage.class));
 		codeTabs.add(new RepositoryTab(Model.of("Commits"), "fa fa-commit", RepoCommitsPage.class, RepoCommitPage.class));
-		codeTabs.add(new RepositoryTab(Model.of("Branches"), "fa fa-branch", BranchesPage.class));
+		codeTabs.add(new RepositoryTab(Model.of("Branches"), "fa fa-branch", RepoBranchesPage.class, BranchComparePage.class));
 		codeTabs.add(new RepositoryTab(Model.of("Tags"), "fa fa-tags", TagsPage.class));
 		codeTabs.add(new RepositoryTab(Model.of("Contributors"), "fa fa-group-o", ContributorsPage.class));
 		

@@ -39,10 +39,10 @@ import com.pmease.gitplex.web.page.repository.admin.integrationpolicy.Integratio
 import com.pmease.gitplex.web.page.repository.code.blame.BlobBlamePage;
 import com.pmease.gitplex.web.page.repository.code.blob.RepoBlobPage;
 import com.pmease.gitplex.web.page.repository.code.blob.renderer.RawBlobResourceReference;
-import com.pmease.gitplex.web.page.repository.code.branches.BranchesPage;
+import com.pmease.gitplex.web.page.repository.code.branches.BranchComparePage;
+import com.pmease.gitplex.web.page.repository.code.branches.RepoBranchesPage;
 import com.pmease.gitplex.web.page.repository.code.commit.RepoCommitPage;
 import com.pmease.gitplex.web.page.repository.code.commits.RepoCommitsPage;
-import com.pmease.gitplex.web.page.repository.code.compare.BranchComparePage;
 import com.pmease.gitplex.web.page.repository.code.contributors.ContributorsPage;
 import com.pmease.gitplex.web.page.repository.code.tags.GitArchiveResourceReference;
 import com.pmease.gitplex.web.page.repository.code.tags.TagsPage;
@@ -152,7 +152,7 @@ public class GitPlexMappings extends CompoundRequestMapper {
 				"${user}/${repo}/compare", BranchComparePage.class));
 
 		add(new PageParameterAwareMountedMapper("${user}/${repo}/branches",
-				BranchesPage.class));
+				RepoBranchesPage.class));
 		add(new PageParameterAwareMountedMapper("${user}/${repo}/tags",
 				TagsPage.class));
 

@@ -13,7 +13,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -34,6 +33,7 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.wicket.behavior.DisableIfBlankBehavior;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
+import com.pmease.commons.wicket.component.markdown.MarkdownInput;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
@@ -243,7 +243,7 @@ public class NewRequestPage extends RepositoryPage {
 		
 		List<Tab> tabs = new ArrayList<>();
 		
-		tabs.add(new AjaxActionTab(Model.of("Commits")) {
+		tabs.add(new AjaxActionTab(Model.of("Pending Commits")) {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -307,8 +307,19 @@ public class NewRequestPage extends RepositoryPage {
 
 	private Fragment newOpenedFrag() {
 		Fragment fragment = new Fragment("status", "openedFrag", this);
-		fragment.add(new Label("requestInfo", "#" + pullRequest.getId() + ": " + pullRequest.getTitle()));
-		fragment.add(new Link<Void>("viewRequest") {
+		fragment.add(new Link<Void>("view") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new Label("no", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						return pullRequest.getId().toString();
+					}
+				}));
+			}
 
 			@Override
 			public void onClick() {
@@ -317,6 +328,14 @@ public class NewRequestPage extends RepositoryPage {
 			}
 			
 		});
+		
+		fragment.add(new Label("title", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return pullRequest.getTitle();
+			}
+		}));
 		
 		return fragment;
 	}
@@ -422,7 +441,7 @@ public class NewRequestPage extends RepositoryPage {
 			
 		}).setRequired(true).add(new DisableIfBlankBehavior(form.get("send"))));
 		
-		form.add(new TextArea<String>("comment", new IModel<String>() {
+		form.add(new MarkdownInput("comment", new IModel<String>() {
 
 			@Override
 			public void detach() {

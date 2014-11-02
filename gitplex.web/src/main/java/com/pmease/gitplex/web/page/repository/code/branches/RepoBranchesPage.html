@@ -26,10 +26,7 @@
 					<td class="behind behind-ahead">
 						<div align="right">
 							<div class="text">
-								<a wicket:id="behindLink">
-									<span class="fa fa-download" wicket:id="pullRequest"></span>
-									<span wicket:id="count"></span> behind
-								</a>
+								<a wicket:id="behindLink"><span wicket:id="count"></span> behind</a>
 							</div>
 							<div class="bar" wicket:id="behindBar"></div>
 						</div>
@@ -37,25 +34,23 @@
 					<td class="ahead behind-ahead">
 						<div>
 							<div class="text">
-								<a wicket:id="aheadLink">
-									<span wicket:id="count"></span> ahead
-									<span class="fa fa-upload" wicket:id="pullRequest"></span>
-								</a>
+								<a wicket:id="aheadLink"><span wicket:id="count"></span> ahead</a>
 							</div>
 							<div class="bar" wicket:id="aheadBar"></div>
 						</div>
 					</td>
-					<td wicket:id="watch" class="watch">
-						<div class="btn-group">
-							<button wicket:id="unwatchRequests" class="btn btn-default" title="You are watching pull requests of this branch, click to unwatch"><i class="fa fa-eye-open"></i></button>
-							<button wicket:id="watchRequests" class="btn btn-default" title="You are not watching pull requests of this branch, click to watch"><i class="fa fa-eye-slash"></i></button>
-						</div>
-					</td>
-					<td class="actions">
+					<td wicket:id="actions" class="actions">
+						<button wicket:id="unwatchRequests" class="btn btn-default" title="You are watching pull requests of this branch, click to unwatch"><i class="fa fa-eye-slash"></i> Unwatch</button>
+						<button wicket:id="watchRequests" class="btn btn-default" title="You are not watching pull requests of this branch, click to watch"><i class="fa fa-eye-open"></i> Watch</button>
 						<a wicket:id="delete" class="fa fa-times fa-lg" title="Delete this branch"></a>
 					</td>
 				</tr>
 			</table>		
+			<div class="help-block">
+				<i class="fa fa-info-circle"></i> Yellow bars 
+				<span class="bar request">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> 
+				represent ahead/behind commits with a pull request opening.
+			</div>
 			<div id="searching-branches" class="ajax-indicator"><img src="/assets/img/ajax-indicator.gif"></img></div>
 		</div>
 	</section>

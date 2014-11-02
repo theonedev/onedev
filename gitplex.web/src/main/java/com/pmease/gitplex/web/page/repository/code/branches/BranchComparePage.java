@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.code.compare;
+package com.pmease.gitplex.web.page.repository.code.branches;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -133,7 +133,7 @@ public class BranchComparePage extends RepositoryPage {
 			@Override
 			protected String load() {
 				Branch target = targetModel.getObject();
-				Branch source = targetModel.getObject();
+				Branch source = sourceModel.getObject();
 				if (!target.getRepository().equals(source.getRepository())) {
 					Git sandbox = new Git(FileUtils.createTempDir());
 					try {
@@ -246,16 +246,19 @@ public class BranchComparePage extends RepositoryPage {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				new Label("requestInfo", new AbstractReadOnlyModel<String>() {
+				add(new Link<Void>("view") {
 
 					@Override
-					public String getObject() {
-						PullRequest request = requestModel.getObject();
-						return "#" + request.getId() + ": " + request.getTitle();
+					protected void onInitialize() {
+						super.onInitialize();
+						add(new Label("no", new AbstractReadOnlyModel<String>() {
+
+							@Override
+							public String getObject() {
+								return requestModel.getObject().getId().toString();
+							}
+						}));
 					}
-					
-				});
-				add(new Link<Void>("viewRequest") {
 
 					@Override
 					public void onClick() {
@@ -265,6 +268,13 @@ public class BranchComparePage extends RepositoryPage {
 					
 				});
 				
+				add(new Label("title", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						return requestModel.getObject().getTitle();
+					}
+				}));
 			}
 			
 		});
@@ -274,7 +284,8 @@ public class BranchComparePage extends RepositoryPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(mergeBaseModel.getObject().equals(sourceModel.getObject().getHeadCommitHash()));
+				setVisible(!targetModel.getObject().equals(sourceModel.getObject()) 
+						&& mergeBaseModel.getObject().equals(sourceModel.getObject().getHeadCommitHash()));
 			}
 
 			@Override
@@ -283,16 +294,6 @@ public class BranchComparePage extends RepositoryPage {
 				
 				add(new BranchLink("sourceBranch", sourceModel));
 				add(new BranchLink("targetBranch", targetModel));
-				add(new Link<Void>("swapBranches") {
-
-					@Override
-					public void onClick() {
-						setResponsePage(
-								NewRequestPage.class, 
-								paramsOf(getRepository(), targetModel.getObject(), sourceModel.getObject()));
-					}
-					
-				});
 			}
 
 		});
