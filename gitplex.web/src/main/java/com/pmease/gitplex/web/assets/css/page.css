@@ -645,8 +645,9 @@ table.table-blob { width: 100%; }
 /* BRANCHES PAGE */
 .branches>.body>.options {margin-bottom: 16px;}
 .branches>.body>.options>div {margin-right: 24px;}
-.branches>.body>.options>div.base {width: 240px;}
-.branches>.body>.options>div.search input {width: 240px;}
+
+.branches>.body>.options>div.base .input-group {width: 240px;}
+.branches>.body>.options>div.search .input-group {width: 240px;}
 .branches>.body>.options .pagination {margin: 0;}
 .branches>.body>table.branches td {white-space: nowrap;}
 .branches>.body>table.branches td.summary, .branches>.body>table.branches td.actions {width: 1%;}
@@ -663,6 +664,7 @@ table.table-blob { width: 100%; }
 .branches>.body>table.branches .behind .bar.request {background: #F1D763;}
 .branches>.body>.help-block .bar.request {background: #F1D763; font-size: 10px;}
 .branches>.body>table.branches td.summary>div, table.branches td.summary>div .name a {font-size: 13px; color: #666;}
+.branches>.body>table.branches td.summary>div {margin-top: 4px;}
 
 #searching-branches {position: absolute; left: 50%; top: 250px; z-index: 100; display: none;}
 
