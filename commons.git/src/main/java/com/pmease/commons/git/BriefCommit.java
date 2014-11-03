@@ -14,21 +14,21 @@ public class BriefCommit implements Serializable {
 
     private final String hash;
     
-    private final String messageSummary;
+    private final String subject;
     
     private final PersonIdent committer;
     
     private final PersonIdent author;
     
-    public BriefCommit(String hash, PersonIdent committer, PersonIdent author, String messageSummary) {
+    public BriefCommit(String hash, PersonIdent committer, PersonIdent author, String subject) {
     	this.hash = checkNotNull(hash, "hash");
     	this.committer = checkNotNull(committer, "committer");
     	this.author = checkNotNull(author, "author");
-    	this.messageSummary = checkNotNull(messageSummary, "messageSummary");
+    	this.subject = checkNotNull(subject, "subject");
     }
 
     public BriefCommit(BriefCommit commit) {
-    	this(commit.getHash(), commit.getCommitter(), commit.getAuthor(), commit.getMessageSummary());
+    	this(commit.getHash(), commit.getCommitter(), commit.getAuthor(), commit.getSubject());
     }
 
     public String getHash() {
@@ -43,8 +43,8 @@ public class BriefCommit implements Serializable {
 		return author;
 	}
 
-	public String getMessageSummary() {
-		return messageSummary;
+	public String getSubject() {
+		return subject;
 	}
 
 	@Override
@@ -67,7 +67,7 @@ public class BriefCommit implements Serializable {
 				.add("hash", hash)
 				.add("committer", committer.getName())
 				.add("date", committer.getWhen())
-				.add("messageSummary", messageSummary)
+				.add("messageSummary", subject)
 				.toString();
 	}
 
@@ -87,12 +87,12 @@ public class BriefCommit implements Serializable {
         
         public String authorEmail;
         
-        public String messageSummary;
+        public String subject;
 		
 		public BriefCommit build() {
 			PersonIdent committer = GitUtils.newPersonIdent(committerName, committerEmail, committerDate);
 			PersonIdent author = GitUtils.newPersonIdent(authorName, authorEmail, authorDate);
-			return new BriefCommit(hash, committer, author, messageSummary.trim());
+			return new BriefCommit(hash, committer, author, subject.trim());
 		}
     }
 }

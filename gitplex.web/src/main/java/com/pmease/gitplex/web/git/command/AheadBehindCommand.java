@@ -72,11 +72,4 @@ public class AheadBehindCommand extends GitCommand<AheadBehind> {
 		return counter;
 	}
 
-	public static void main(String[] args) {
-		String str = "68	4";
-		Matcher m = pLeftRight.matcher(str);
-		if (m.find()) {
-			System.out.println(m.group(1) + "\t" + m.group(2));
-		}
-	}
 }

@@ -252,10 +252,10 @@ public class RepoCommitPage extends RepositoryPage implements CommitCommentsAwar
 	protected String getPageTitle() {
 		String revision = getRepository().defaultBranchIfNull(getCurrentRevision());
 		if (GitUtils.isHash(revision)) {
-			return getCommit().getMessageSummary() + " - " + GitUtils.abbreviateSHA(revision, 8) 
+			return getCommit().getSubject() + " - " + GitUtils.abbreviateSHA(revision, 8) 
 					+ " - " + getRepository().getFullName();
 		} else {
-			return getCommit().getMessageSummary() + " - " + revision 
+			return getCommit().getSubject() + " - " + revision 
 					+ " - " + getRepository().getFullName();
 		}
 	}

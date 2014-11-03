@@ -109,8 +109,8 @@ public class LogCommand extends GitCommand<List<Commit>> {
             		if (commitBuilder.hash!= null) {
 	            		commits.add(commitBuilder.build());
 	            		commitBuilder.parentHashes.clear();
-	            		commitBuilder.messageSummary = null;
-	            		commitBuilder.messageBody = null;
+	            		commitBuilder.subject = null;
+	            		commitBuilder.body = null;
 	            		commitBuilder.note = null;
             		}
             		commitMessageBlock.set(true);
@@ -120,12 +120,12 @@ public class LogCommand extends GitCommand<List<Commit>> {
             	} else if (line.equals("*** commit_note_end ***")) {
             		commitNoteBlock.set(false);
             	} else if (commitMessageBlock.get()) {
-            		if (commitBuilder.messageSummary == null)
-            			commitBuilder.messageSummary = line;
-            		else if (commitBuilder.messageBody == null)
-            			commitBuilder.messageBody = line;
+            		if (commitBuilder.subject == null)
+            			commitBuilder.subject = line;
+            		else if (commitBuilder.body == null)
+            			commitBuilder.body = line;
             		else 
-            			commitBuilder.messageBody += "\n" + line;
+            			commitBuilder.body += "\n" + line;
             	} else if (commitNoteBlock.get()) {
             		if (commitBuilder.note == null)
             			commitBuilder.note = line;

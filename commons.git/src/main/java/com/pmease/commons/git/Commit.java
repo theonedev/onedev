@@ -14,35 +14,35 @@ import org.eclipse.jgit.lib.PersonIdent;
 @SuppressWarnings("serial")
 public class Commit extends BriefCommit {
 
-    private final String messageBody;
+    private final String body;
     
     private final String note;
     
     private final List<String> parentHashes;
 
-    public Commit(String hash, PersonIdent committer, PersonIdent author, String messageSummary, 
-    		@Nullable String messageBody, List<String> parentHashes, @Nullable String note) {
-    	super(hash, committer, author, messageSummary);
+    public Commit(String hash, PersonIdent committer, PersonIdent author, String subject, 
+    		@Nullable String body, List<String> parentHashes, @Nullable String note) {
+    	super(hash, committer, author, subject);
     	
-    	this.messageBody = messageBody;
+    	this.body = body;
     	this.parentHashes = new ArrayList<>(checkNotNull(parentHashes, "parentHashes"));
     	this.note = note;
     }
     
-    public Commit(BriefCommit briefCommit, @Nullable String messageBody, 
+    public Commit(BriefCommit briefCommit, @Nullable String body, 
     		List<String> parentHashes, @Nullable String note) {
     	super(briefCommit);
     	
-    	this.messageBody = messageBody;
+    	this.body = body;
     	this.parentHashes = new ArrayList<>(checkNotNull(parentHashes, "parentHashes"));
     	this.note = note;
     }
     
 	public String getMessage() {
-		if (messageBody != null)
-			return getMessageSummary() + "\n\n" + messageBody;
+		if (body != null)
+			return getSubject() + "\n\n" + body;
 		else
-			return getMessageSummary();
+			return getSubject();
 	}
 
 	@Nullable
@@ -55,20 +55,20 @@ public class Commit extends BriefCommit {
 	}
 	
 	@Nullable
-	public String getMessageBody() {
-		return messageBody;
+	public String getBody() {
+		return body;
 	}
 
     public static class Builder extends BriefCommit.Builder {
     	
-    	public String messageBody;
+    	public String body;
 		
     	public List<String> parentHashes = new ArrayList<>();
 		
     	public String note;
 		
 		public Commit build() {
-			return new Commit(super.build(), StringUtils.isNotBlank(messageBody)?messageBody.trim():null, parentHashes, note);
+			return new Commit(super.build(), StringUtils.isNotBlank(body)?body.trim():null, parentHashes, note);
 		}
 	}
 	

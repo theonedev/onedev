@@ -38,7 +38,7 @@ public class CommitMessagePanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return getCommit().getMessageSummary();
+				return getCommit().getSubject();
 			}
 		}));
 
@@ -48,7 +48,7 @@ public class CommitMessagePanel extends Panel {
 				super.onConfigure();
 				
 				Commit commit = getCommit();
-				setVisible(!Objects.equal(commit.getMessageSummary(), commit.getMessage()));
+				setVisible(!Objects.equal(commit.getSubject(), commit.getMessage()));
 			}
 		});
 		
@@ -58,7 +58,7 @@ public class CommitMessagePanel extends Panel {
 				super.onConfigure();
 				
 				Commit commit = getCommit();
-				setVisible(!Objects.equal(commit.getMessageSummary(), commit.getMessage()));
+				setVisible(!Objects.equal(commit.getSubject(), commit.getMessage()));
 			}
 		};
 		add(detailedToggle);
