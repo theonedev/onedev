@@ -24,6 +24,7 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.pmease.commons.git.Commit;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.OldCommitCommentManager;
 import com.pmease.gitplex.core.model.Repository;
@@ -32,7 +33,6 @@ import com.pmease.gitplex.web.component.commit.CommitMessagePanel;
 import com.pmease.gitplex.web.component.commit.CommitMetaPanel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.PersonLink;
-import com.pmease.gitplex.web.git.GitUtils;
 import com.pmease.gitplex.web.page.repository.code.commit.RepoCommitPage;
 import com.pmease.gitplex.web.page.repository.code.tree.RepoTreePage;
 

@@ -6,8 +6,8 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
+import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.git.GitUtils;
 import com.pmease.gitplex.web.page.repository.code.commit.RepoCommitPage;
 
 @SuppressWarnings("serial")

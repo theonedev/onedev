@@ -22,6 +22,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.google.common.collect.Iterables;
 import com.pmease.commons.git.Commit;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.GitPlex;
@@ -31,7 +32,6 @@ import com.pmease.gitplex.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitplex.web.component.commit.CommitMetaPanel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.PersonLink;
-import com.pmease.gitplex.web.git.GitUtils;
 import com.pmease.gitplex.web.git.command.CommitInCommand;
 import com.pmease.gitplex.web.git.command.CommitInCommand.RefType;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;

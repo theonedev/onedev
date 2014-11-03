@@ -17,12 +17,12 @@ import org.apache.wicket.model.Model;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.parboiled.common.Preconditions;
 
+import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.OldCommitComment;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.comment.event.CommitCommentAdded;
 import com.pmease.gitplex.web.component.comment.event.CommitCommentRemoved;
-import com.pmease.gitplex.web.git.GitUtils;
 import com.pmease.gitplex.web.page.repository.code.commit.diff.CommitCommentsAware;
 import com.pmease.gitplex.web.page.repository.code.commit.diff.patch.FileHeader;
 import com.pmease.gitplex.web.page.repository.code.commit.diff.patch.HunkHeader;

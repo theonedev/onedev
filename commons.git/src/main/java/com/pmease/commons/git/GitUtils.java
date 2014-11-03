@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.util.SystemReader;
@@ -30,6 +31,10 @@ public class GitUtils {
     
     public static boolean isNullHash(String sha) {
     	return Objects.equal(NULL_SHA1, sha);
+    }
+    
+    public static boolean isEmptyPath(String path) {
+    	return Strings.isNullOrEmpty(path) || Objects.equal(path, DiffEntry.DEV_NULL);
     }
     
     public static String abbreviateSHA(String sha, int length) {

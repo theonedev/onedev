@@ -31,6 +31,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.OldCommitComment;
@@ -42,7 +43,6 @@ import com.pmease.gitplex.web.component.comment.event.CommitCommentEvent;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
-import com.pmease.gitplex.web.git.GitUtils;
 import com.pmease.gitplex.web.model.CommitCommentModel;
 import com.pmease.gitplex.web.page.repository.code.commit.RepoCommitPage;
 
