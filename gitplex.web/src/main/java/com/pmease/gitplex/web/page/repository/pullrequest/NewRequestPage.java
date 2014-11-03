@@ -427,7 +427,7 @@ public class NewRequestPage extends RepositoryPage {
 					List<Commit> commits = commitsModel.getObject();
 					Preconditions.checkState(!commits.isEmpty());
 					if (commits.size() == 1)
-						pullRequest.setTitle(commits.get(0).getSubject());
+						pullRequest.setTitle(commits.get(0).getMessageSummary());
 					else
 						pullRequest.setTitle(pullRequest.getSource().getName());
 				}

@@ -7,6 +7,7 @@ import static com.pmease.commons.git.Change.Status.RENAMED;
 import static com.pmease.commons.git.Change.Status.UNCHANGED;
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.util.List;
 
 import org.junit.Test;
@@ -83,4 +84,11 @@ public class GitTest extends AbstractGitTest {
 		assertEquals(RENAMED, diffs.get(4).getStatus());
 	}
 
+	@Test
+	public void test() {
+		Git git = new Git(new File("w:\\linux\\.git"));
+		long time = System.currentTimeMillis();
+		git.log("master~1000", "master", null, 0, 0);
+		System.out.println(System.currentTimeMillis()-time);
+	}
 }

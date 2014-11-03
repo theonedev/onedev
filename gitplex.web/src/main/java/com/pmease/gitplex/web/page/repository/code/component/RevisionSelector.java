@@ -64,7 +64,7 @@ public class RevisionSelector extends Panel {
 			protected Map<RefType, List<String>> load() {
 				Git git = RevisionSelector.this.repoModel.getObject().git();
 				Map<RefType, List<String>> map = Maps.newHashMapWithExpectedSize(RefType.values().length);
-				map.put(RefType.BRANCH, Lists.newArrayList(git.listBranches().keySet()));
+				map.put(RefType.BRANCH, Lists.newArrayList(git.listBranches()));
 				List<String> tags = Lists.newArrayList(git.listTags());
 				Collections.reverse(tags);
 				map.put(RefType.TAG, tags);

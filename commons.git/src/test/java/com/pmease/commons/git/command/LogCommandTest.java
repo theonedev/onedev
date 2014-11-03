@@ -9,7 +9,6 @@ import org.junit.Test;
 
 import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.Commit;
-import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Git;
 
 public class LogCommandTest extends AbstractGitTest {
@@ -38,12 +37,9 @@ public class LogCommandTest extends AbstractGitTest {
 
 		List<Commit> commits = bareGit.log(null, "master", null, 0, 0);
 		assertEquals(commits.size(), 6);
-		assertEquals(commits.get(0).getSubject(), "add dir/file");
+		assertEquals(commits.get(0).getMessageSummary(), "add dir/file");
 		assertEquals(commits.get(0).getMessage(), "add dir/file\nadd dir/file to test files under a directory");
 		assertEquals("hello\nworld", commits.get(0).getNote());
-		assertEquals(commits.get(0).getFileChanges().size(), 2);
-		assertEquals(commits.get(0).getFileChanges().get(0).getNewPath(), "dir/file");
-		assertEquals(commits.get(0).getFileChanges().get(0).getStatus(), Change.Status.ADDED);
 		assertEquals(commits.get(0).getParentHashes().size(), 1);
 		assertEquals(commits.get(0).getParentHashes().iterator().next(), commits.get(1).getHash());
 		
@@ -67,22 +63,4 @@ public class LogCommandTest extends AbstractGitTest {
 		assertEquals(git.showRevision(commits.get(1).getHash()).getHash(), commits.get(1).getHash()); 
 	}
 
-	@Test
-	public void shouldHandleRenameAndCopyCorrectly() {
-		addFileAndCommit("a", "1111\n2222\n3333\n", "add a");
-		addFile("a", "1111\n2222\n3333\n4444\n");
-		addFile("a2", "1111\n2222\n3333\n4444\n");
-	    commit("copy a to a2");
-
-	    addFileAndCommit("b", "1111\n2222\n3333\n4444\n", "add b");
-	    
-	    rm("b");
-	    addFileAndCommit("b2", "1111\n2222\n3333\n4444\n", "move b to b2");
-
-	    List<Commit> commits = git.log("master~3", "master", null, 0, 0);
-	    Change change = commits.get(0).getFileChanges().get(0);
-	    assertEquals("RENAMED\tb->b2", change.toString());
-	    change = commits.get(2).getFileChanges().get(1);
-	    assertEquals("ADDED\ta2", change.toString());
-	}
 }

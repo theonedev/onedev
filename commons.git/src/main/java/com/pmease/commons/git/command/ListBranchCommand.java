@@ -1,9 +1,8 @@
 package com.pmease.commons.git.command;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -12,28 +11,26 @@ import org.slf4j.LoggerFactory;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
-public class ListBranchesCommand extends GitCommand<Map<String, String>> {
+public class ListBranchCommand extends GitCommand<Collection<String>> {
 
-	private static final Logger logger = LoggerFactory.getLogger(ListBranchesCommand.class);
+	private static final Logger logger = LoggerFactory.getLogger(ListBranchCommand.class);
 	
-    public ListBranchesCommand(File repoDir) {
+    public ListBranchCommand(File repoDir) {
         super(repoDir);
     }
 
     @Override
-    public Map<String, String> call() {
+    public Collection<String> call() {
         Commandline cmd = cmd();
-        cmd.addArgs("branch", "--verbose", "--no-abbrev");
+        cmd.addArgs("branch");
         
-        final Map<String, String> branches = new HashMap<String, String>();
+        final Collection<String> branches = new ArrayList<String>();
         
         cmd.execute(new LineConsumer() {
 
             @Override
             public void consume(String line) {
-            	line = StringUtils.stripStart(line, "*").trim();
-            	StringTokenizer tokenizer = new StringTokenizer(line);
-            	branches.put(tokenizer.nextToken(), tokenizer.nextToken());
+            	branches.add(StringUtils.stripStart(line, "*").trim());
             }
             
         }, new LineConsumer() {

@@ -38,7 +38,8 @@ import com.pmease.commons.git.command.InitCommand;
 import com.pmease.commons.git.command.IsAncestorCommand;
 import com.pmease.commons.git.command.IsBinaryCommand;
 import com.pmease.commons.git.command.IsTreeLinkCommand;
-import com.pmease.commons.git.command.ListBranchesCommand;
+import com.pmease.commons.git.command.ListBranchCommand;
+import com.pmease.commons.git.command.ListHeadCommitCommand;
 import com.pmease.commons.git.command.ListChangedFilesCommand;
 import com.pmease.commons.git.command.ListFileChangesCommand;
 import com.pmease.commons.git.command.ListSubModulesCommand;
@@ -89,7 +90,7 @@ public class Git implements Serializable {
 	 * 			this git object
 	 */
 	public Git createBranch(String branchName, String commitHash) {
-		if (new ListBranchesCommand(repoDir).call().containsKey(branchName))
+		if (new ListBranchCommand(repoDir).call().contains(branchName))
 			throw new GeneralException(String.format("Branch %s already exists.", branchName));
 
 		new UpdateRefCommand(repoDir).refName(Git.REFS_HEADS + branchName).revision(commitHash)
@@ -452,12 +453,22 @@ public class Git implements Serializable {
 	 * List all local branches in git repository.
 
 	 * @return
-	 * 			a map from branch name to head commit
+	 * 			a collection of branch names
 	 */
-	public Map<String, String> listBranches() {
-		return new ListBranchesCommand(repoDir).call();
+	public Collection<String> listBranches() {
+		return new ListBranchCommand(repoDir).call();
 	}
 	
+	/**
+	 * List head commits of all local branches.
+
+	 * @return
+	 * 			a map from branch name to brief head commit
+	 */
+	public Map<String, BriefCommit> listHeadCommits() {
+		return new ListHeadCommitCommand(repoDir).call();
+	}
+
 	public Collection<String> listTags() {
 		return new ListTagsCommand(repoDir).call();
 	}

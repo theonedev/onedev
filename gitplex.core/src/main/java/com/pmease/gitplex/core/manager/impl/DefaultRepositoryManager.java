@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.git.BriefCommit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
@@ -201,7 +202,7 @@ public class DefaultRepositoryManager implements RepositoryManager {
 		logger.debug("Syncing branches of repository '{}'...", repository);
 
 		Map<String, Branch> branchesInDB = new HashMap<String, Branch>();
-		Map<String, String> branchesInGit = repository.git().listBranches();
+		Map<String, BriefCommit> branchesInGit = repository.git().listHeadCommits();
 		for (Iterator<Branch> it = repository.getBranches().iterator(); it.hasNext();) {
 			Branch branch = it.next();
 			if (branchesInGit.containsKey(branch.getName())) {
@@ -212,17 +213,17 @@ public class DefaultRepositoryManager implements RepositoryManager {
 			}
 		}
 		
-		for (Map.Entry<String, String> entry: branchesInGit.entrySet()) {
+		for (Map.Entry<String, BriefCommit> entry: branchesInGit.entrySet()) {
 			Branch branch = branchesInDB.get(entry.getKey());
 			if (branch == null) {
 				branch = new Branch();
 				branch.setName(entry.getKey());
-				branch.setHeadCommitHash(entry.getValue());
+				branch.setHeadCommitHash(entry.getValue().getHash());
 				branch.setRepository(repository);
 				repository.getBranches().add(branch);
 				branchManager.save(branch);
 			} else if (!branch.getHeadCommitHash().equals(entry.getValue()))	 {
-				branch.setHeadCommitHash(entry.getValue());
+				branch.setHeadCommitHash(entry.getValue().getHash());
 				branchManager.save(branch);
 			}
 		}

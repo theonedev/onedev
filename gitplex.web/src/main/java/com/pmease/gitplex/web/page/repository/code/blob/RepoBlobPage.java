@@ -89,7 +89,7 @@ public class RepoBlobPage extends RepositoryPage {
 
 			@Override
 			public String getObject() {
-				return getLastCommit().getSubject();
+				return getLastCommit().getMessageSummary();
 			}
 		}));
 		
@@ -104,7 +104,7 @@ public class RepoBlobPage extends RepositoryPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				if (Objects.equal(getLastCommit().getSubject(), getLastCommit().getMessage())) {
+				if (Objects.equal(getLastCommit().getMessageSummary(), getLastCommit().getMessage())) {
 					this.setVisibilityAllowed(false);
 				}
 			}

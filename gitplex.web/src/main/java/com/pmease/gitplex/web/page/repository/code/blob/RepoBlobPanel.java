@@ -16,7 +16,6 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.common.quantity.Data;
 import com.pmease.gitplex.web.common.wicket.bootstrap.Icon;
-import com.pmease.gitplex.web.page.repository.code.blame.BlobBlamePage;
 import com.pmease.gitplex.web.page.repository.code.blob.renderer.BlobRenderer;
 import com.pmease.gitplex.web.page.repository.code.blob.renderer.BlobRendererFactory;
 import com.pmease.gitplex.web.page.repository.code.blob.renderer.RawBlobResourceReference;
@@ -103,10 +102,6 @@ public class RepoBlobPanel extends Panel {
 						blob.getRevision(), 
 						blob.getFilePath(),
 						0)));
-		
-		add(new BookmarkablePageLink<Void>("blamelink",
-						BlobBlamePage.class,
-						BlobBlamePage.paramsOf(repository, blob.getRevision(), blob.getFilePath())).setVisibilityAllowed(blob.isText()));
 		
 		add(new ResourceLink<Void>("rawlink", new RawBlobResourceReference(),
 				RawBlobResourceReference.paramsOf(blob)));

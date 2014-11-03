@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.pmease.gitplex.core.GitPlex;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -25,6 +24,7 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.pmease.commons.git.Commit;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.OldCommitCommentManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.common.datatype.DataTypes;

@@ -26,9 +26,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.PullRequestVerification;
 import com.pmease.gitplex.core.model.PullRequestVote;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.comment.event.PullRequestChanged;
 import com.pmease.gitplex.web.component.commit.CommitHashLink;
 import com.pmease.gitplex.web.component.commit.CommitMessagePanel;

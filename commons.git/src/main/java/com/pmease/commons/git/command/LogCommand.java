@@ -2,17 +2,14 @@ package com.pmease.commons.git.command;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.git.Commit;
-import com.pmease.commons.git.Change;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
@@ -21,8 +18,6 @@ public class LogCommand extends GitCommand<List<Commit>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(LogCommand.class); 
 	
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss Z");
-    
     private String fromRev;
     
     private String toRev;
@@ -76,8 +71,8 @@ public class LogCommand extends GitCommand<List<Commit>> {
                         "--format=*** commit_begin ***%n%B%n*** commit_message_end ***%n%N"
                         + "*** commit_note_end ***%nhash:%H%nauthor:%aN%nauthorEmail:%aE%n"
                         + "committerEmail:%cE%ncommitter:%cN%nparents:%P%ncommitterDate:%cd %n"
-                        + "authorDate:%ad %n*** commit_info_end ***",
-                        "--raw", "--find-renames", "--date=iso");
+                        + "authorDate:%ad %n",
+                        "--date=raw");
         if (fromRev != null) {
         	if (toRev != null)
         		cmd.addArgs(fromRev + ".." + toRev);
@@ -101,51 +96,41 @@ public class LogCommand extends GitCommand<List<Commit>> {
 
         final List<Commit> commits = new ArrayList<>();
         
-        final CommitBuilder commitBuilder = new CommitBuilder();
+        final Commit.Builder commitBuilder = Commit.builder();
         
-        final boolean[] commitNoteBlock = new boolean[1];
-        final boolean[] commitMessageBlock = new boolean[1];
-        final boolean[] rawBlock = new boolean[1];
+        final AtomicBoolean commitMessageBlock = new AtomicBoolean();
+        final AtomicBoolean commitNoteBlock = new AtomicBoolean();
         
         cmd.execute(new LineConsumer() {
 
             @Override
             public void consume(String line) {
             	if (line.equals("*** commit_begin ***")) {
-            		if (commitBuilder.hash != null) {
+            		if (commitBuilder.hash!= null) {
 	            		commits.add(commitBuilder.build());
 	            		commitBuilder.parentHashes.clear();
-	            		commitBuilder.fileChanges.clear();
-	            		commitBuilder.summary = null;
-	            		commitBuilder.message = null;
+	            		commitBuilder.messageSummary = null;
+	            		commitBuilder.messageBody = null;
 	            		commitBuilder.note = null;
             		}
-            		commitMessageBlock[0] = true;
-            		rawBlock[0] = false;
+            		commitMessageBlock.set(true);
             	} else if (line.equals("*** commit_message_end ***")) {
-            		commitMessageBlock[0] = false;
-            		commitNoteBlock[0] = true;
+            		commitMessageBlock.set(false);
+            		commitNoteBlock.set(true);
             	} else if (line.equals("*** commit_note_end ***")) {
-            		commitNoteBlock[0] = false;
-            	} else if (line.equals("*** commit_info_end ***")) {
-            		rawBlock[0] = true;
-            	} else if (commitMessageBlock[0]) {
-            		if (commitBuilder.summary == null)
-            			commitBuilder.summary = line;
-            		else if (commitBuilder.message == null)
-            			commitBuilder.message = line;
+            		commitNoteBlock.set(false);
+            	} else if (commitMessageBlock.get()) {
+            		if (commitBuilder.messageSummary == null)
+            			commitBuilder.messageSummary = line;
+            		else if (commitBuilder.messageBody == null)
+            			commitBuilder.messageBody = line;
             		else 
-            			commitBuilder.message += "\n" + line;
-            	} else if (commitNoteBlock[0]) {
+            			commitBuilder.messageBody += "\n" + line;
+            	} else if (commitNoteBlock.get()) {
             		if (commitBuilder.note == null)
             			commitBuilder.note = line;
             		else
             			commitBuilder.note += "\n" + line;
-            	} else if (rawBlock[0]) {
-            		if (line.startsWith(":"))
-            			commitBuilder.fileChanges.add(Change.parseRawLine(line));
-            	} else if (line.startsWith("subject:")) {
-            		commitBuilder.summary = line.substring("subject:".length());
             	} else if (line.startsWith("hash:")) {
                 	commitBuilder.hash = line.substring("hash:".length());
             	} else if (line.startsWith("author:")) {
@@ -153,9 +138,9 @@ public class LogCommand extends GitCommand<List<Commit>> {
             	} else if (line.startsWith("committer:")) {
                 	commitBuilder.committerName = line.substring("committer:".length());
             	} else if (line.startsWith("authorDate:")) {
-                	commitBuilder.authorDate = DATE_FORMATTER.parseDateTime(line.substring("authorDate:".length()).trim()).toDate();
+                	commitBuilder.authorDate = GitUtils.parseRawDate(line.substring("authorDate:".length()).trim());
             	} else if (line.startsWith("committerDate:")) {
-                	commitBuilder.committerDate = DATE_FORMATTER.parseDateTime(line.substring("committerDate:".length()).trim()).toDate();
+                	commitBuilder.committerDate = GitUtils.parseRawDate(line.substring("committerDate:".length()).trim());
             	} else if (line.startsWith("authorEmail:")) {
                 	commitBuilder.authorEmail = line.substring("authorEmail:".length());
             	} else if (line.startsWith("committerEmail:")) {
@@ -179,44 +164,6 @@ public class LogCommand extends GitCommand<List<Commit>> {
         	commits.add(commitBuilder.build());
 
         return commits;
-    }
-
-    private static class CommitBuilder {
-        
-    	private Date committerDate;
-    	
-        private Date authorDate;
-        
-        private String authorName;
-        
-        private String committerName;
-        
-        private String authorEmail;
-        
-        private String committerEmail;
-        
-        private String hash;
-        
-        private String summary;
-        
-        private String message;
-        
-        private String note;
-        
-        private List<String> parentHashes = new ArrayList<>();
-        
-        private List<Change> fileChanges = new ArrayList<>();
-
-    	private Commit build() {
-    		return new Commit(
-    				hash, 
-    				GitUtils.newPersonIdent(committerName, committerEmail, committerDate), 
-    				GitUtils.newPersonIdent(authorName, authorEmail, authorDate),
-    				summary.trim(), 
-    				StringUtils.isNotBlank(message)?message.trim():null, 
-    				StringUtils.isNotBlank(note)?note.trim():null, 
-    				parentHashes, fileChanges);
-    	}
     }
     
 }

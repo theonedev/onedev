@@ -3,6 +3,7 @@ package com.pmease.commons.git;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import org.eclipse.jgit.lib.PersonIdent;
 
@@ -13,17 +14,17 @@ public class BriefCommit implements Serializable {
 
     private final String hash;
     
+    private final String messageSummary;
+    
     private final PersonIdent committer;
     
     private final PersonIdent author;
     
-    private final String subject;
-
-    public BriefCommit(String hash, PersonIdent committer, PersonIdent author, String subject) {
+    public BriefCommit(String hash, PersonIdent committer, PersonIdent author, String messageSummary) {
     	this.hash = checkNotNull(hash, "hash");
     	this.committer = checkNotNull(committer, "committer");
     	this.author = checkNotNull(author, "author");
-    	this.subject = checkNotNull(subject, "subject");
+    	this.messageSummary = checkNotNull(messageSummary, "messageSummary");
     }
 
 	public String getHash() {
@@ -38,8 +39,8 @@ public class BriefCommit implements Serializable {
 		return author;
 	}
 
-	public String getSubject() {
-		return subject;
+	public String getMessageSummary() {
+		return messageSummary;
 	}
 
 	@Override
@@ -62,8 +63,32 @@ public class BriefCommit implements Serializable {
 				.add("hash", hash)
 				.add("committer", committer.getName())
 				.add("date", committer.getWhen())
-				.add("subject", subject)
+				.add("messageSummary", messageSummary)
 				.toString();
 	}
-    
+
+    public static class Builder {
+    	
+		public String hash;
+		
+        public String committerName;
+        
+        public String committerEmail;
+		
+        public Date committerDate;
+    	
+        public String authorName;
+        
+        public Date authorDate;
+        
+        public String authorEmail;
+        
+        public String messageSummary;
+		
+		public BriefCommit build() {
+			PersonIdent committer = GitUtils.newPersonIdent(committerName, committerEmail, committerDate);
+			PersonIdent author = GitUtils.newPersonIdent(authorName, authorEmail, authorDate);
+			return new BriefCommit(hash, committer, author, messageSummary);
+		}
+    }
 }

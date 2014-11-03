@@ -36,7 +36,6 @@ import com.pmease.gitplex.web.page.repository.admin.GeneralSettingPage;
 import com.pmease.gitplex.web.page.repository.admin.PermissionSettingPage;
 import com.pmease.gitplex.web.page.repository.admin.gatekeeper.GateKeeperPage;
 import com.pmease.gitplex.web.page.repository.admin.integrationpolicy.IntegrationPolicyPage;
-import com.pmease.gitplex.web.page.repository.code.blame.BlobBlamePage;
 import com.pmease.gitplex.web.page.repository.code.blob.RepoBlobPage;
 import com.pmease.gitplex.web.page.repository.code.blob.renderer.RawBlobResourceReference;
 import com.pmease.gitplex.web.page.repository.code.branches.BranchComparePage;
@@ -45,7 +44,6 @@ import com.pmease.gitplex.web.page.repository.code.commit.RepoCommitPage;
 import com.pmease.gitplex.web.page.repository.code.commits.RepoCommitsPage;
 import com.pmease.gitplex.web.page.repository.code.contributors.ContributorsPage;
 import com.pmease.gitplex.web.page.repository.code.tags.GitArchiveResourceReference;
-import com.pmease.gitplex.web.page.repository.code.tags.TagsPage;
 import com.pmease.gitplex.web.page.repository.code.tree.RepoTreePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.ClosedRequestsPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.NewRequestPage;
@@ -143,8 +141,6 @@ public class GitPlexMappings extends CompoundRequestMapper {
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/blob", RepoBlobPage.class));
 		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/blame", BlobBlamePage.class));
-		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/commit", RepoCommitPage.class));
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/commits", RepoCommitsPage.class));
@@ -153,8 +149,6 @@ public class GitPlexMappings extends CompoundRequestMapper {
 
 		add(new PageParameterAwareMountedMapper("${user}/${repo}/branches",
 				RepoBranchesPage.class));
-		add(new PageParameterAwareMountedMapper("${user}/${repo}/tags",
-				TagsPage.class));
 
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/pull-requests/open", OpenRequestsPage.class));

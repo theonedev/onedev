@@ -50,7 +50,6 @@ import com.pmease.gitplex.web.page.repository.code.branches.RepoBranchesPage;
 import com.pmease.gitplex.web.page.repository.code.commit.RepoCommitPage;
 import com.pmease.gitplex.web.page.repository.code.commits.RepoCommitsPage;
 import com.pmease.gitplex.web.page.repository.code.contributors.ContributorsPage;
-import com.pmease.gitplex.web.page.repository.code.tags.TagsPage;
 import com.pmease.gitplex.web.page.repository.code.tree.RepoTreePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.ClosedRequestsPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.NewRequestPage;
@@ -205,7 +204,6 @@ public abstract class RepositoryPage extends AccountBasePage {
 		codeTabs.add(new RepositoryTab(Model.of("Files"), "fa fa-file-code", RepoTreePage.class, RepoBlobPage.class));
 		codeTabs.add(new RepositoryTab(Model.of("Commits"), "fa fa-commit", RepoCommitsPage.class, RepoCommitPage.class));
 		codeTabs.add(new RepositoryTab(Model.of("Branches"), "fa fa-branch", RepoBranchesPage.class, BranchComparePage.class));
-		codeTabs.add(new RepositoryTab(Model.of("Tags"), "fa fa-tags", TagsPage.class));
 		codeTabs.add(new RepositoryTab(Model.of("Contributors"), "fa fa-group-o", ContributorsPage.class));
 		
 		add(new Tabbable("codeTabs", codeTabs));

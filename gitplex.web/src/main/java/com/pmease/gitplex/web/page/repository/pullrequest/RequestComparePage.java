@@ -96,7 +96,7 @@ public class RequestComparePage extends RequestDetailPage {
 			PullRequest request = getPullRequest();
 
 			String name = "Base of Pull Request";
-			CommitDescription description = new CommitDescription(name, request.getBaseCommit().getSubject());
+			CommitDescription description = new CommitDescription(name, request.getBaseCommit().getMessageSummary());
 			choices.put(request.getBaseCommitHash(), description);
 			
 			for (int i=0; i<request.getSortedUpdates().size(); i++) {
@@ -104,14 +104,14 @@ public class RequestComparePage extends RequestDetailPage {
 				int updateNo = i+1;
 				name = "Head of Update #" + updateNo;
 				Commit commit = update.getHeadCommit();
-				description = new CommitDescription(name, commit.getSubject());
+				description = new CommitDescription(name, commit.getMessageSummary());
 				choices.put(commit.getHash(), description);
 			}
 
 			String targetHead = request.getTarget().getHeadCommitHash();
 			if (!choices.containsKey(targetHead)) {
 				description = new CommitDescription(TARGET_BRANCH_HEAD, 
-						getRepository().getCommit(targetHead).getSubject());
+						getRepository().getCommit(targetHead).getMessageSummary());
 				choices.put(targetHead, description);
 			}
 
@@ -120,7 +120,7 @@ public class RequestComparePage extends RequestDetailPage {
 				if (preview != null && preview.getIntegrated() != null 
 						&& !getRepository().getChanges(preview.getRequestHead(), preview.getIntegrated()).isEmpty()) {
 					Commit commit = getRepository().getCommit(preview.getIntegrated());
-					choices.put(commit.getHash(), new CommitDescription(INTEGRATION_PREVIEW, commit.getSubject()));
+					choices.put(commit.getHash(), new CommitDescription(INTEGRATION_PREVIEW, commit.getMessageSummary()));
 				}
 			}
 			

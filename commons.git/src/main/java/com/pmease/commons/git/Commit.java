@@ -3,121 +3,68 @@ package com.pmease.commons.git;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.PersonIdent;
-
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 
 @SuppressWarnings("serial")
 public class Commit extends BriefCommit {
-    
-    private final String body;
+
+    private final String messageBody;
     
     private final String note;
     
     private final List<String> parentHashes;
-    
-    private final List<Change> fileChanges;
 
-    public static class Builder {
-		String hash;
-		String subject;
-		String body;
-		String note;
-		PersonIdent author;
-		PersonIdent committer;
-		List<String> parents = Lists.newArrayList();
-		List<Change> changes = Lists.newArrayList();
+    public Commit(String hash, PersonIdent committer, PersonIdent author, String messageSummary, 
+    		@Nullable String messageBody, List<String> parentHashes, @Nullable String note) {
+    	super(hash, committer, author, messageSummary);
+    	
+    	this.parentHashes = checkNotNull(parentHashes, "parentHashes");
+    	this.messageBody = messageBody;
+    	this.note = note;
+    }
+    
+	public String getMessage() {
+		if (messageBody != null)
+			return getMessageSummary() + "\n\n" + messageBody;
+		else
+			return getMessageSummary();
+	}
+
+	@Nullable
+	public String getNote() {
+		return note;
+	}
+
+	public List<String> getParentHashes() {
+		return parentHashes;
+	}
+	
+	@Nullable
+	public String getMessageBody() {
+		return messageBody;
+	}
+
+    public static class Builder extends BriefCommit.Builder {
+    	
+    	public String messageBody;
 		
-		public Builder hash(String hash) {
-			this.hash = hash;
-			return this;
-		}
+    	public List<String> parentHashes = new ArrayList<>();
 		
-		public Builder subject(String subject) {
-			this.subject = subject;
-			return this;
-		}
-		
-		public Builder body(String body) {
-			if (!StringUtils.isBlank(body))
-				this.body = body;
-			
-			return this;
-		}
-		
-		public Builder note(String note) {
-			this.note = note;
-			return this;
-		}
-		
-		public Builder author(PersonIdent author) {
-			this.author = author;
-			return this;
-		}
-		
-		public Builder committer(PersonIdent committer) {
-			this.committer = committer;
-			return this;
-		}
-		
-		public Builder parents(List<String> parents) {
-			this.parents = parents;
-			return this;
-		}
-		
-		public Builder changes(List<Change> changes) {
-			this.changes = changes;
-			return this;
-		}
+    	public String note;
 		
 		public Commit build() {
-			return new Commit(
-					hash, committer, author, subject,  
-					body, note, parents, changes);
+			BriefCommit briefCommit = super.build();
+			return new Commit(briefCommit.getHash(), briefCommit.getCommitter(), briefCommit.getAuthor(), 
+					briefCommit.getMessageSummary(), messageBody, parentHashes, note);
 		}
 	}
 	
     public static Builder builder() {
     	return new Builder();
     }
-    
-    public Commit(String hash, PersonIdent committer, PersonIdent author, 
-    		String subject, @Nullable String body, 
-    		@Nullable String note, List<String> parentHashes, 
-    		List<Change> fileChanges) {
-    	super(hash, committer, author, subject);
-    	
-    	this.body = body;
-    	this.note = note;
-    	this.parentHashes = new ArrayList<>(checkNotNull(parentHashes, "parentHashes"));
-    	this.fileChanges = new ArrayList<>(checkNotNull(fileChanges, "fileChanges"));
-    }
-    
-	public String getMessage() {
-		return Strings.isNullOrEmpty(body) ? getSubject() : getSubject() + "\n" + body;
-	}
-
-	public @Nullable String getMessageBody() {
-		return body;
-	}
-	
-	public @Nullable String getNote() {
-		return note;
-	}
-
-	public List<String> getParentHashes() {
-		return Collections.unmodifiableList(parentHashes);
-	}
-	
-	public List<Change> getFileChanges() {
-		return Collections.unmodifiableList(fileChanges);
-	}
 
 }

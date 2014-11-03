@@ -64,7 +64,6 @@ import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.PersonLink;
 import com.pmease.gitplex.web.git.command.AheadBehind;
 import com.pmease.gitplex.web.git.command.AheadBehindCommand;
-import com.pmease.gitplex.web.git.command.BranchForEachRefCommand;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.code.tree.RepoTreePage;
@@ -89,8 +88,7 @@ public class RepoBranchesPage extends RepositoryPage {
 
 		@Override
 		protected Map<String, BriefCommit> load() {
-			BranchForEachRefCommand cmd = new BranchForEachRefCommand(getRepository().git().repoDir());
-			return cmd.call();
+			return getRepository().git().listHeadCommits();
 		}
 		
 	};
