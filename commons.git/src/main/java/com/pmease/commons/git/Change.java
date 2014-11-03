@@ -21,6 +21,10 @@ public class Change implements Comparable<Change>, Serializable {
 	
 	private final Status status;
 	
+	private final String oldRev;
+	
+	private final String newRev;
+
 	private final String oldPath;
 	
 	private final String newPath;
@@ -29,20 +33,23 @@ public class Change implements Comparable<Change>, Serializable {
 	
 	private final int newMode;
 	
-	public Change(Status status, @Nullable String oldPath, @Nullable String newPath, int oldMode, int newMode) {
+	public Change(Status status, String oldRev, String newRev, 
+			@Nullable String oldPath, @Nullable String newPath, int oldMode, int newMode) {
 		this.status = status;
+		this.oldRev = oldRev;
+		this.newRev = newRev;
 		this.oldPath = oldPath;
 		this.newPath = newPath;
 		this.oldMode = oldMode;
 		this.newMode = newMode;
 	}
 	
-	public Change(Change change) {
-		this.status = change.status;
-		this.oldPath = change.oldPath;
-		this.newPath = change.newPath;
-		this.oldMode = change.oldMode;
-		this.newMode = change.newMode;
+	public String getOldRev() {
+		return oldRev;
+	}
+
+	public String getNewRev() {
+		return newRev;
 	}
 
 	@Nullable
@@ -106,7 +113,7 @@ public class Change implements Comparable<Change>, Serializable {
 		return QuotedString.GIT_PATH.dequote(quotedFileName);
 	}
 
-	public static Change parseRawLine(String rawLine) {
+	public static Change parseRawLine(String oldRev, String newRev, String rawLine) {
 		Preconditions.checkArgument(rawLine.startsWith(":"));
 		
 		StringTokenizer tokenizer = new StringTokenizer(rawLine.substring(1));
@@ -118,17 +125,17 @@ public class Change implements Comparable<Change>, Serializable {
 		if (statusCode.startsWith("R")) {
 			String oldPath = dequoteFileName(tokenizer.nextToken("\t"));
 			String newPath = dequoteFileName(tokenizer.nextToken("\t"));
-			return new Change(Change.Status.RENAMED, oldPath, newPath, oldMode, newMode);
+			return new Change(Change.Status.RENAMED, oldRev, newRev, oldPath, newPath, oldMode, newMode);
 		} else if (statusCode.equals("M") || statusCode.equals("T")) {
 			String oldPath, newPath;
 			oldPath = newPath = dequoteFileName(tokenizer.nextToken("\t"));
-			return new Change(Change.Status.MODIFIED, oldPath, newPath, oldMode, newMode);
+			return new Change(Change.Status.MODIFIED, oldRev, newRev, oldPath, newPath, oldMode, newMode);
 		} else if (statusCode.equals("D")) {
 			String oldPath = dequoteFileName(tokenizer.nextToken("\t"));
-			return new Change(Change.Status.DELETED, oldPath, null, oldMode, newMode);
+			return new Change(Change.Status.DELETED, oldRev, newRev, oldPath, null, oldMode, newMode);
 		} else if (statusCode.equals("A")) {
 			String newPath = dequoteFileName(tokenizer.nextToken("\t"));
-			return new Change(Change.Status.ADDED, null, newPath, oldMode, newMode);
+			return new Change(Change.Status.ADDED, oldRev, newRev, null, newPath, oldMode, newMode);
 		} else {
 			throw new RuntimeException("Unexpected status code: " + statusCode);
 		}
@@ -146,6 +153,14 @@ public class Change implements Comparable<Change>, Serializable {
 			return StringUtils.substringAfterLast(getPath(), "/");
 		else
 			return getPath();
+	}
+	
+	public BlobInfo getOldBlobInfo() {
+		return new BlobInfo(getOldRev(), getOldPath(), getOldMode());
+	}
+	
+	public BlobInfo getNewBlobInfo() {
+		return new BlobInfo(getNewRev(), getNewPath(), getNewMode());
 	}
 	
 }

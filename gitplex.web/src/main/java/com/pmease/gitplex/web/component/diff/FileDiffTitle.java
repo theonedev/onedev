@@ -10,7 +10,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.commons.git.Change;
-import com.pmease.commons.git.RevAwareChange;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
@@ -19,11 +18,11 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig
 @SuppressWarnings("serial")
 public class FileDiffTitle extends Panel {
 
-	private final RevAwareChange change;
+	private final Change change;
 	
 	private final List<String> alerts;
 	
-	public FileDiffTitle(String id, RevAwareChange change, List<String> alerts) {
+	public FileDiffTitle(String id, Change change, List<String> alerts) {
 		super(id);
 
 		this.change = change;
@@ -37,7 +36,7 @@ public class FileDiffTitle extends Panel {
 			this.alerts.addAll(alerts);
 	}
 	
-	public FileDiffTitle(String id, RevAwareChange diffInfo) {
+	public FileDiffTitle(String id, Change diffInfo) {
 		this(id, diffInfo, null);
 	}
 

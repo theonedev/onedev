@@ -27,7 +27,11 @@ public class BriefCommit implements Serializable {
     	this.messageSummary = checkNotNull(messageSummary, "messageSummary");
     }
 
-	public String getHash() {
+    public BriefCommit(BriefCommit commit) {
+    	this(commit.getHash(), commit.getCommitter(), commit.getAuthor(), commit.getMessageSummary());
+    }
+
+    public String getHash() {
 		return hash;
 	}
 
@@ -88,7 +92,7 @@ public class BriefCommit implements Serializable {
 		public BriefCommit build() {
 			PersonIdent committer = GitUtils.newPersonIdent(committerName, committerEmail, committerDate);
 			PersonIdent author = GitUtils.newPersonIdent(authorName, authorEmail, authorDate);
-			return new BriefCommit(hash, committer, author, messageSummary);
+			return new BriefCommit(hash, committer, author, messageSummary.trim());
 		}
     }
 }

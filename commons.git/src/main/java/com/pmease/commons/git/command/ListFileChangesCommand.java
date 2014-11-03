@@ -72,7 +72,7 @@ public class ListFileChangesCommand extends GitCommand<List<Change>> {
 			@Override
 			public void consume(String line) {
 				if (line.startsWith(":"))
-					fileChanges.add(Change.parseRawLine(line));
+					fileChanges.add(Change.parseRawLine(fromRev, toRev, line));
 			}
 			
 		}, new LineConsumer() {

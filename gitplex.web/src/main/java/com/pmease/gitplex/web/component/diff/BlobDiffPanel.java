@@ -7,7 +7,7 @@ import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.lib.FileMode;
 
 import com.pmease.commons.git.BlobText;
-import com.pmease.commons.git.RevAwareChange;
+import com.pmease.commons.git.Change;
 import com.pmease.commons.util.MediaTypes;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
@@ -20,12 +20,11 @@ public class BlobDiffPanel extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
-	private final RevAwareChange change;
+	private final Change change;
 	
 	private final InlineCommentSupport commentSupport;
 	
-	public BlobDiffPanel(String id, IModel<Repository> repoModel, RevAwareChange change, 
-			InlineCommentSupport commentSupport) {
+	public BlobDiffPanel(String id, IModel<Repository> repoModel, Change change, InlineCommentSupport commentSupport) {
 		super(id);
 		
 		this.repoModel = repoModel;

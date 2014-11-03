@@ -9,7 +9,7 @@ import java.util.Map;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobInfo;
 import com.pmease.commons.git.BlobText;
-import com.pmease.commons.git.RevAwareChange;
+import com.pmease.commons.git.Change;
 import com.pmease.commons.util.diff.DiffUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
@@ -25,7 +25,7 @@ public class ChangeComments implements Serializable {
 	
 	private final Map<Integer, List<InlineComment>> newComments = new HashMap<>();
 	
-	public ChangeComments(PullRequest request, RevAwareChange change) {
+	public ChangeComments(PullRequest request, Change change) {
 		List<String> commits = new ArrayList<>();
 		commits.add(request.getBaseCommitHash());
 		for (PullRequestUpdate update: request.getSortedUpdates())
@@ -35,7 +35,7 @@ public class ChangeComments implements Serializable {
 		Map<BlobInfo, List<String>> blobs = new HashMap<>();
 	
 		if (change.getNewPath() != null) {
-			int end = commits.indexOf(change.getNewRevision());
+			int end = commits.indexOf(change.getNewRev());
 			Preconditions.checkState(end != -1);
 			if (!getContent(blobs, change.getNewBlobInfo(), request.getTarget().getRepository()).isEmpty()) {
 				for (int i=commits.size()-1; i>end; i--) {
@@ -58,7 +58,7 @@ public class ChangeComments implements Serializable {
 					}
 				}
 
-				List<InlineComment> commentsOnFile = getCommentsOnCommit(comments, change.getNewRevision(), request).get(change.getNewPath());
+				List<InlineComment> commentsOnFile = getCommentsOnCommit(comments, change.getNewRev(), request).get(change.getNewPath());
 				if (commentsOnFile != null) {
 					for (InlineComment comment: commentsOnFile)
 						addLineComment(newComments, comment.getLine(), comment);
@@ -67,11 +67,11 @@ public class ChangeComments implements Serializable {
 		}
 
 		if (change.getOldPath() != null) { 
-			int begin = commits.indexOf(change.getOldRevision());
+			int begin = commits.indexOf(change.getOldRev());
 			Preconditions.checkState(begin != -1);
 			if (!getContent(blobs, change.getOldBlobInfo(), request.getTarget().getRepository()).isEmpty()
-					&& !change.getOldRevision().equals(change.getNewRevision())) {
-				List<InlineComment> commentsOnFile = getCommentsOnCommit(comments, change.getOldRevision(), request).get(change.getOldPath());
+					&& !change.getOldRev().equals(change.getNewRev())) {
+				List<InlineComment> commentsOnFile = getCommentsOnCommit(comments, change.getOldRev(), request).get(change.getOldPath());
 				if (commentsOnFile != null) {
 					for (InlineComment comment: commentsOnFile)
 						addLineComment(oldComments, comment.getLine(), comment);

@@ -195,17 +195,17 @@ public class Git implements Serializable {
 					if (changedFile.startsWith(treePath)) {
 						coveredFiles.add(changedFile);
 						if (diff == null) {
-							diff = new Change(MODIFIED, treeNode.getPath(), treeNode.getPath(), 
+							diff = new Change(MODIFIED, fromRev, toRev, treeNode.getPath(), treeNode.getPath(), 
 									FileMode.TYPE_TREE, FileMode.TYPE_TREE);
 						}
 					}
 				}
 				if (diff != null) {
 					if (!nodePathsInToRev.contains(treeNode.getPath()))
-						diff = new Change(DELETED, treeNode.getPath(), null,
+						diff = new Change(DELETED, fromRev, toRev, treeNode.getPath(), null,
 								FileMode.TYPE_TREE, 0);
 				} else {
-					diff = new Change(UNCHANGED, treeNode.getPath(), treeNode.getPath(), 
+					diff = new Change(UNCHANGED, fromRev, toRev, treeNode.getPath(), treeNode.getPath(), 
 							FileMode.TYPE_TREE, FileMode.TYPE_TREE);
 				}
 				diffs.add(diff);
@@ -215,7 +215,7 @@ public class Git implements Serializable {
 					if (change.getStatus() != RENAMED || change.getNewPath().equals(treeNode.getPath())) 
 						diffs.add(change);
 				} else {
-					diffs.add(new Change(UNCHANGED, treeNode.getPath(), treeNode.getPath(),  
+					diffs.add(new Change(UNCHANGED, fromRev, toRev, treeNode.getPath(), treeNode.getPath(),  
 							treeNode.getMode(), treeNode.getMode()));
 				}
 			}
@@ -237,7 +237,7 @@ public class Git implements Serializable {
 		}
 		
 		for (String addedDir: addedDirs) 
-			diffs.add(new Change(ADDED, null, addedDir, 0, FileMode.TYPE_TREE));
+			diffs.add(new Change(ADDED, fromRev, toRev, null, addedDir, 0, FileMode.TYPE_TREE));
 		
 		Collections.sort(diffs);
 		return diffs;

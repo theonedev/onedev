@@ -3,10 +3,12 @@ package com.pmease.commons.git;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.PersonIdent;
 
 @SuppressWarnings("serial")
@@ -22,8 +24,17 @@ public class Commit extends BriefCommit {
     		@Nullable String messageBody, List<String> parentHashes, @Nullable String note) {
     	super(hash, committer, author, messageSummary);
     	
-    	this.parentHashes = checkNotNull(parentHashes, "parentHashes");
     	this.messageBody = messageBody;
+    	this.parentHashes = new ArrayList<>(checkNotNull(parentHashes, "parentHashes"));
+    	this.note = note;
+    }
+    
+    public Commit(BriefCommit briefCommit, @Nullable String messageBody, 
+    		List<String> parentHashes, @Nullable String note) {
+    	super(briefCommit);
+    	
+    	this.messageBody = messageBody;
+    	this.parentHashes = new ArrayList<>(checkNotNull(parentHashes, "parentHashes"));
     	this.note = note;
     }
     
@@ -40,7 +51,7 @@ public class Commit extends BriefCommit {
 	}
 
 	public List<String> getParentHashes() {
-		return parentHashes;
+		return Collections.unmodifiableList(parentHashes);
 	}
 	
 	@Nullable
@@ -57,9 +68,7 @@ public class Commit extends BriefCommit {
     	public String note;
 		
 		public Commit build() {
-			BriefCommit briefCommit = super.build();
-			return new Commit(briefCommit.getHash(), briefCommit.getCommitter(), briefCommit.getAuthor(), 
-					briefCommit.getMessageSummary(), messageBody, parentHashes, note);
+			return new Commit(super.build(), StringUtils.isNotBlank(messageBody)?messageBody.trim():null, parentHashes, note);
 		}
 	}
 	

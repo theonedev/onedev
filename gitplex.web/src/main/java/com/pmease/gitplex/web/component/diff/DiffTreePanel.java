@@ -49,7 +49,8 @@ public abstract class DiffTreePanel extends Panel {
 			if (expandPath.length() != 0)
 				expandPath.append('/');
 			expandPath.append(segment);
-			Change expandChange = new Change(Change.Status.UNCHANGED, expandPath.toString(), expandPath.toString(), 0, 0);
+			Change expandChange = new Change(Change.Status.UNCHANGED, change.getOldRev(), change.getNewRev(), 
+					expandPath.toString(), expandPath.toString(), 0, 0);
 			tree.expand(new DiffTreeNode(expandChange));
 		}
 	}

@@ -45,7 +45,7 @@ import org.apache.wicket.util.string.Strings;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobInfo;
 import com.pmease.commons.git.BlobText;
-import com.pmease.commons.git.RevAwareChange;
+import com.pmease.commons.git.Change;
 import com.pmease.commons.util.diff.AroundContext;
 import com.pmease.commons.util.diff.DiffHunk;
 import com.pmease.commons.util.diff.DiffLine;
@@ -89,7 +89,7 @@ public class TextDiffPanel extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
-	private final RevAwareChange change;
+	private final Change change;
 	
 	private final InlineCommentSupport commentSupport;
 	
@@ -123,7 +123,7 @@ public class TextDiffPanel extends Panel {
 	
 	private String autoScrollScript;
 
-	public TextDiffPanel(String id, final IModel<Repository> repoModel, RevAwareChange change, 
+	public TextDiffPanel(String id, final IModel<Repository> repoModel, Change change, 
 			final @Nullable InlineCommentSupport commentSupport) {
 		super(id);
 		

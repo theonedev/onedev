@@ -27,9 +27,9 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
-import com.pmease.commons.git.RevAwareChange;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
@@ -592,8 +592,8 @@ public class PullRequest extends AbstractEntity {
 		return pendingCommits;
 	}
 
-	public ChangeComments getChangeComments(RevAwareChange change) {
-		ChangeKey key = new ChangeKey(change.getOldRevision(), change.getNewRevision(), change.getPath());
+	public ChangeComments getChangeComments(Change change) {
+		ChangeKey key = new ChangeKey(change.getOldRev(), change.getNewRev(), change.getPath());
 		ChangeComments comments = commentsCache.get(key);
 		if (comments == null) {
 			comments = new ChangeComments(this, change);

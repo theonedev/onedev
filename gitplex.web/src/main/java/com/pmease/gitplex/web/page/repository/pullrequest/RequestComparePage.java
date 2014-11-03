@@ -32,7 +32,6 @@ import com.pmease.commons.git.BlobInfo;
 import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.git.RevAwareChange;
 import com.pmease.commons.hibernate.HibernateUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
@@ -412,14 +411,12 @@ public class RequestComparePage extends RequestDetailPage {
 								
 								@Override
 								public Map<Integer, List<InlineComment>> getOldComments() {
-									RevAwareChange revAwareChange = new RevAwareChange(change, oldCommitHash, newCommitHash);
-									return getPullRequest().getChangeComments(revAwareChange).getOldComments();
+									return getPullRequest().getChangeComments(change).getOldComments();
 								}
 								
 								@Override
 								public Map<Integer, List<InlineComment>> getNewComments() {
-									RevAwareChange revAwareChange = new RevAwareChange(change, oldCommitHash, newCommitHash);
-									return getPullRequest().getChangeComments(revAwareChange).getNewComments();
+									return getPullRequest().getChangeComments(change).getNewComments();
 								}
 								
 								@Override

@@ -14,20 +14,22 @@
 	</div>
 	<div class="comment replies">
 		<table>
-			<tr wicket:id="replies" class="reply">
-				<td class="avatar"><span wicket:id="avatar"></span></td>
-				<td class="detail activity">
-					<div class="summary">
-						<span wicket:id="user" class="user"></span> replied <span wicket:id="age"></span>
-						<span class="actions">
-							<a wicket:id="edit" title="Edit reply"><span class="fa fa-pencil"></span></a>
-							<a wicket:id="delete" title="Delete reply"><span class="fa fa-times"></span></a>
-							<span wicket:id="additionalActions"></span>
-						</span>
-					</div>
-					<div wicket:id="content" class="body"></div>
-				</td>
-			</tr>
+			<tbody>
+				<tr wicket:id="replies" class="reply">
+					<td class="avatar"><span wicket:id="avatar"></span></td>
+					<td class="detail activity">
+						<div class="summary">
+							<span wicket:id="user" class="user"></span> replied <span wicket:id="age"></span>
+							<span class="actions">
+								<a wicket:id="edit" title="Edit reply"><span class="fa fa-pencil"></span></a>
+								<a wicket:id="delete" title="Delete reply"><span class="fa fa-times"></span></a>
+								<span wicket:id="additionalActions"></span>
+							</span>
+						</div>
+						<div wicket:id="content" class="body"></div>
+					</td>
+				</tr>
+			</tbody>
 		</table>
 		<div wicket:id="addReply" class="add-reply"><div wicket:id="content"></div></div>
 	</div>

@@ -17,7 +17,6 @@ import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.lib.FileMode;
 
 import com.pmease.commons.git.Change;
-import com.pmease.commons.git.RevAwareChange;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
@@ -66,7 +65,7 @@ public abstract class CompareResultPanel extends Panel {
 		if (change == null) {
 			List<TreeNode> result = repoModel.getObject().git().listTree(newCommitHash, file);
 			if (!result.isEmpty() && result.get(0).getMode() != FileMode.TYPE_TREE) {
-				change = new Change(UNCHANGED, file, file, 
+				change = new Change(UNCHANGED, oldCommitHash, newCommitHash, file, file, 
 						result.get(0).getMode(), result.get(0).getMode());
 			}
 		}
@@ -79,13 +78,10 @@ public abstract class CompareResultPanel extends Panel {
 		
 		add(changeNav = newChangeNav(activeChange == null || activeChange.getStatus() != UNCHANGED));
 
-		if (activeChange != null) {
-			changeContent = new BlobDiffPanel("content", repoModel, 
-					new RevAwareChange(activeChange, oldCommitHash, newCommitHash), 
-					getInlineCommentSupport(activeChange));
-		} else {
+		if (activeChange != null) 
+			changeContent = new BlobDiffPanel("content", repoModel, activeChange, getInlineCommentSupport(activeChange));
+		else 
 			changeContent = new WebMarkupContainer("content");
-		}
 		changeContent.setOutputMarkupId(true);
 		add(changeContent);
 	}
@@ -158,7 +154,7 @@ public abstract class CompareResultPanel extends Panel {
 		public void onClick(AjaxRequestTarget target) {
 			activeChange = change;
 			changeContent = new BlobDiffPanel(changeContent.getId(), repoModel, 
-					new RevAwareChange(change, oldCommitHash, newCommitHash), getInlineCommentSupport(change));
+					change, getInlineCommentSupport(change));
 			CompareResultPanel.this.replace(changeContent);
 			target.add(changeContent);
 
@@ -183,8 +179,7 @@ public abstract class CompareResultPanel extends Panel {
 				replace(changeNav = newChangeNav(false));
 			}
 			changeContent = new BlobDiffPanel(changeContent.getId(), repoModel, 
-					new RevAwareChange(activeChange, oldCommitHash, newCommitHash), 
-					getInlineCommentSupport(activeChange));
+					activeChange, getInlineCommentSupport(activeChange));
 		} else {
 			changeContent = new WebMarkupContainer(changeContent.getId());
 			changeContent.setOutputMarkupId(true);
