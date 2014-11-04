@@ -210,8 +210,11 @@ span.move.icon {padding: 12px; background: url("move.png") no-repeat 50% 50%;}
 
 /* CLEARABLE TEXT FIELD */
 input.clearable::-ms-clear {display: none;}
-.input-clear {font-size: 18px; margin-left: -16px; z-index: 1000; position: relative; 
-	cursor: pointer; top: 4px; color: #999; display: none;}	
+.input-clear {background: url("clear.png") no-repeat; margin-left: -20px; z-index: 1000; position: relative; 
+	cursor: pointer; top: 8px; color: #333; display: none;}	
+@-moz-document url-prefix() {
+    .input-clear {top: 7px;}
+}
 
 /* BACK TO TOP */
 .back-to-top {position: fixed; right: 20px; bottom: 40px; cursor: pointer; padding: 25px; 

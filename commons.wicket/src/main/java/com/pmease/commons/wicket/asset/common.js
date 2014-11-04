@@ -794,7 +794,7 @@ pmease.commons = {
 	setupClearableInput: function(inputId) {
 		var $input = $("#" + inputId);
 		$input.addClass("clearable");
-		$input.after("<span class='input-clear'>x</span>");
+		$input.after("<span class='input-clear'>&nbsp;&nbsp;&nbsp;&nbsp;</span>");
 		$input.next().click(function() {
 			$input.val("");
 			$(this).hide();
