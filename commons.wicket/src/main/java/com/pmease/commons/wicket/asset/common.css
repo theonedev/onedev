@@ -209,6 +209,7 @@ span.delete.icon {padding: 12px; background: url("delete.png") no-repeat 50% 50%
 span.move.icon {padding: 12px; background: url("move.png") no-repeat 50% 50%;}
 
 /* CLEARABLE TEXT FIELD */
+input.clearable::-ms-clear {display: none;}
 .input-clear {font-size: 18px; margin-left: -16px; z-index: 1000; position: relative; 
 	cursor: pointer; top: 4px; color: #999; display: none;}	
 

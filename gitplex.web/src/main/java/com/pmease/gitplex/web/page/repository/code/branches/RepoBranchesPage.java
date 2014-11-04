@@ -1,6 +1,5 @@
 package com.pmease.gitplex.web.page.repository.code.branches;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -10,13 +9,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.validator.routines.PercentValidator;
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.IAjaxIndicatorAware;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
-import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
@@ -36,10 +35,12 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import com.pmease.commons.git.AheadBehind;
 import com.pmease.commons.git.BriefCommit;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
+import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.commons.wicket.component.navigator.PagingNavigator;
@@ -62,8 +63,6 @@ import com.pmease.gitplex.web.component.branch.BranchSingleChoice;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.PersonLink;
-import com.pmease.gitplex.web.git.command.AheadBehind;
-import com.pmease.gitplex.web.git.command.AheadBehindCommand;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.code.tree.RepoTreePage;
@@ -77,11 +76,15 @@ public class RepoBranchesPage extends RepositoryPage {
 
 	private Long baseBranchId;
 	
+	private PageableListView<Branch> branchesView;
+	
 	private PagingNavigator pagingNavigator;
 	
 	private WebMarkupContainer branchesContainer; 
 	
 	private TextField<String> searchInput;
+	
+	private String searchFor;
 	
 	private final IModel<Map<String, BriefCommit>> lastCommitsModel = 
 			new LoadableDetachableModel<Map<String, BriefCommit>>() {
@@ -99,14 +102,16 @@ public class RepoBranchesPage extends RepositoryPage {
 		@Override
 		protected Map<String, AheadBehind> load() {
 			Map<String, AheadBehind> map = Maps.newHashMap();
-			File repoDir = getRepository().git().repoDir();
-			for (Branch branch: getRepository().getBranches()) {
+			List<Branch> branches = branchesView.getModelObject();
+			for (long i=branchesView.getFirstItemOffset(); i<branches.size(); i++) {
+				if (i-branchesView.getFirstItemOffset() >= branchesView.getItemsPerPage())
+					break;
+				Branch branch = branches.get((int)i);
 				if (branch.equals(getBaseBranch())) {
 					map.put(branch.getName(), new AheadBehind());
 				} else {
-					AheadBehindCommand command = new AheadBehindCommand(repoDir);
-					AheadBehind ab = command.leftBranch(branch.getName()).rightBranch(getBaseBranch().getName()).call();
-					map.put(branch.getName(), ab);
+					map.put(branch.getName(), 
+							getRepository().git().getAheadBehind(branch.getName(), getBaseBranch().getName()));
 				}
 			}
 			
@@ -128,7 +133,10 @@ public class RepoBranchesPage extends RepositoryPage {
 				map.put(ab.getBehind(), "0");
 			}
 			List<Integer> abValues = new ArrayList<>(map.keySet());
-			abValues.remove(0);
+			for (Iterator<Integer> it = abValues.iterator(); it.hasNext();) {
+				if (it.next().equals(0))
+					it.remove();
+			}
 			Collections.sort(abValues);
 			for (int i=0; i<abValues.size(); i++) {
 				double percent = (i+1.0d)/abValues.size();
@@ -190,7 +198,7 @@ public class RepoBranchesPage extends RepositoryPage {
 	protected String getPageTitle() {
 		return getRepository() + " - Branches";
 	}
-
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -221,19 +229,35 @@ public class RepoBranchesPage extends RepositoryPage {
 		}));
 		
 		add(searchInput = new ClearableTextField<String>("searchBranches", Model.of("")));
-		searchInput.add(new OnSearchingBehavior());
+		searchInput.add(new OnSearchingBehavior() {
+
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				// IE triggers "input" event when the focused on the search input even if nothing is 
+				// input into search box yet. To work around this issue, we compare search string 
+				// against previous value to only update the branches table if there is an actual 
+				// change.
+				String newSearchFor = searchInput.getInput();
+				if (StringUtils.isNotBlank(newSearchFor))
+					newSearchFor = newSearchFor.trim().toLowerCase();
+				else
+					newSearchFor = null;
+				if (!ObjectUtils.equals(newSearchFor, searchFor))
+					super.onUpdate(target);
+			}
+			
+		});
 		
 		branchesContainer = new WebMarkupContainer("branchesContainer");
 		branchesContainer.setOutputMarkupId(true);
 		add(branchesContainer);
 		
-		final PageableListView<Branch> branchesView;
 		branchesContainer.add(branchesView = new PageableListView<Branch>("branches", new AbstractReadOnlyModel<List<Branch>>() {
 
 			@Override
 			public List<Branch> getObject() {
 				List<Branch> branches = new ArrayList<>(getRepository().getBranches());
-				String searchFor = searchInput.getInput();
+				searchFor = searchInput.getInput();
 				if (StringUtils.isNotBlank(searchFor)) {
 					searchFor = searchFor.trim().toLowerCase();
 					for (Iterator<Branch> it = branches.iterator(); it.hasNext();) {
@@ -241,6 +265,8 @@ public class RepoBranchesPage extends RepositoryPage {
 						if (!branch.getName().toLowerCase().contains(searchFor))
 							it.remove();
 					}
+				} else {
+					searchFor = null;
 				}
 				Collections.sort(branches, new Comparator<Branch>() {
 
@@ -531,7 +557,11 @@ public class RepoBranchesPage extends RepositoryPage {
 		super.onDetach();
 	}
 	
-	private class OnSearchingBehavior extends OnChangeAjaxBehavior implements IAjaxIndicatorAware {
+	private class OnSearchingBehavior extends OnTypingDoneBehavior implements IAjaxIndicatorAware {
+
+		public OnSearchingBehavior() {
+			super(1000);
+		}
 
 		@Override
 		protected void onUpdate(AjaxRequestTarget target) {

@@ -1,12 +1,11 @@
 package com.pmease.gitplex.web.page;
 
+import java.io.File;
+
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.PullRequestCommentReply;
+import com.pmease.commons.git.Git;
 
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
@@ -23,8 +22,9 @@ public class TestPage extends BasePage {
 
 			@Override
 			public void onClick() {
-				Dao dao = GitPlex.getInstance(Dao.class);
-				System.out.println(dao.query(EntityCriteria.of(PullRequestCommentReply.class)).size());
+				Git git = new Git(new File("W:\\temp\\gitplex_storage\\repositories\\1"));
+				for (int i=1; i<100; i++)
+					git.createBranch("dev" + i, "master~" + i*10);
 			}
 			
 		});

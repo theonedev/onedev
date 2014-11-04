@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.git.command;
+package com.pmease.commons.git;
 
 import java.io.Serializable;
 

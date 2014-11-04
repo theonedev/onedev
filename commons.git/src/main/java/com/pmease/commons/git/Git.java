@@ -25,6 +25,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.command.AddCommand;
 import com.pmease.commons.git.command.AddNoteCommand;
 import com.pmease.commons.git.command.AddSubModuleCommand;
+import com.pmease.commons.git.command.AheadBehindCommand;
 import com.pmease.commons.git.command.BlameCommand;
 import com.pmease.commons.git.command.CalcMergeBaseCommand;
 import com.pmease.commons.git.command.CheckoutCommand;
@@ -457,6 +458,11 @@ public class Git implements Serializable {
 	 */
 	public Collection<String> listBranches() {
 		return new ListBranchCommand(repoDir).call();
+	}
+	
+	public AheadBehind getAheadBehind(String leftRev, String rightRev) {
+		AheadBehindCommand cmd = new AheadBehindCommand(repoDir);
+		return cmd.leftRev(leftRev).rightRev(rightRev).call();
 	}
 	
 	/**

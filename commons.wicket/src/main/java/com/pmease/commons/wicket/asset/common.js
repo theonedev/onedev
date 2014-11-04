@@ -793,11 +793,12 @@ pmease.commons = {
 
 	setupClearableInput: function(inputId) {
 		var $input = $("#" + inputId);
+		$input.addClass("clearable");
 		$input.after("<span class='input-clear'>x</span>");
 		$input.next().click(function() {
 			$input.val("");
 			$(this).hide();
-			$input.trigger("inputchange");
+			$input.trigger("donetyping");
 		});
 		$input.keyup(function() {
 			var value = $(this).val();
@@ -807,7 +808,17 @@ pmease.commons = {
 				$input.next().hide();
 		});
 	},
-	
+
+	setupDoneTyping: function(inputId, timeout) {
+		var $input = $("#" + inputId);
+		$input.on("input", function() {
+			if ($input[0].typingTimer) 
+				clearTimeout($input[0].typingTimer);
+			$input[0].typingTimer = setTimeout(function() {
+				$input.trigger("donetyping");
+			}, timeout);
+		});
+	},
 };
 
 $(function() {
