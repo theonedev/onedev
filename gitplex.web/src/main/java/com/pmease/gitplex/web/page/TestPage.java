@@ -23,8 +23,7 @@ public class TestPage extends BasePage {
 			@Override
 			public void onClick() {
 				Git git = new Git(new File("W:\\temp\\gitplex_storage\\repositories\\1"));
-				for (int i=1; i<100; i++)
-					git.createBranch("dev" + i, "master~" + i*10);
+				System.out.println(git.getAheadBehinds("master", "dev2", "dev3"));
 			}
 			
 		});

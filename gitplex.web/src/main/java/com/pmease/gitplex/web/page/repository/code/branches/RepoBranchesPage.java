@@ -34,7 +34,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 import com.pmease.commons.git.AheadBehind;
 import com.pmease.commons.git.BriefCommit;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -101,21 +100,23 @@ public class RepoBranchesPage extends RepositoryPage {
 
 		@Override
 		protected Map<String, AheadBehind> load() {
-			Map<String, AheadBehind> map = Maps.newHashMap();
-			List<Branch> branches = branchesView.getModelObject();
-			for (long i=branchesView.getFirstItemOffset(); i<branches.size(); i++) {
+			List<String> compareHashes = new ArrayList<>(); 
+			List<Branch> branchesInView = branchesView.getModelObject();
+			for (long i=branchesView.getFirstItemOffset(); i<branchesInView.size(); i++) {
 				if (i-branchesView.getFirstItemOffset() >= branchesView.getItemsPerPage())
 					break;
-				Branch branch = branches.get((int)i);
-				if (branch.equals(getBaseBranch())) {
-					map.put(branch.getName(), new AheadBehind());
-				} else {
-					map.put(branch.getName(), 
-							getRepository().git().getAheadBehind(branch.getName(), getBaseBranch().getName()));
-				}
+				Branch branch = branchesInView.get((int)i); 
+				if (!branch.equals(getBaseBranch()))
+					compareHashes.add(lastCommitsModel.getObject().get(branch.getName()).getHash());
 			}
 			
-			return map;
+			String baseHash = lastCommitsModel.getObject().get(getBaseBranch().getName()).getHash();
+			Map<String, AheadBehind> aheadBehinds = getRepository().git().getAheadBehinds(
+					baseHash, 
+					compareHashes.toArray(new String[compareHashes.size()]));
+			aheadBehinds.put(baseHash, new AheadBehind());
+			
+			return aheadBehinds;
 		}
 	};
 	
@@ -315,7 +316,8 @@ public class RepoBranchesPage extends RepositoryPage {
 					
 				});
 				
-				final AheadBehind ab = Preconditions.checkNotNull(aheadBehindsModel.getObject().get(branch.getName()));
+				String branchHash = lastCommitsModel.getObject().get(branch.getName()).getHash();
+				final AheadBehind ab = Preconditions.checkNotNull(aheadBehindsModel.getObject().get(branchHash));
 				
 				item.add(new Link<Void>("behindLink") {
 

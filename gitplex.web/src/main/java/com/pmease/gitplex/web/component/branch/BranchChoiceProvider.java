@@ -39,9 +39,15 @@ public class BranchChoiceProvider extends ChoiceProvider<Branch> {
 		criteria.addOrder(Order.asc("name"));
 		int first = page * Constants.DEFAULT_PAGE_SIZE;
 
-		List<Branch> branches = GitPlex.getInstance(Dao.class).query(criteria, first, Constants.DEFAULT_PAGE_SIZE);
-		
-		response.addAll(branches);
+		List<Branch> branches = GitPlex.getInstance(Dao.class).query(criteria, first, Constants.DEFAULT_PAGE_SIZE+1);
+		if (branches.size() > Constants.DEFAULT_PAGE_SIZE) {
+			branches.remove(branches.size()-1);
+			response.addAll(branches);
+			response.setHasMore(true);
+		} else {
+			response.addAll(branches);
+			response.setHasMore(false);
+		}
 	}
 
 	@Override

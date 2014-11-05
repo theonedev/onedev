@@ -460,9 +460,9 @@ public class Git implements Serializable {
 		return new ListBranchCommand(repoDir).call();
 	}
 	
-	public AheadBehind getAheadBehind(String leftRev, String rightRev) {
+	public Map<String, AheadBehind> getAheadBehinds(String baseRev, String... compareRevs) {
 		AheadBehindCommand cmd = new AheadBehindCommand(repoDir);
-		return cmd.leftRev(leftRev).rightRev(rightRev).call();
+		return cmd.baseCommit(baseRev).compareRevs(compareRevs).call();
 	}
 	
 	/**
