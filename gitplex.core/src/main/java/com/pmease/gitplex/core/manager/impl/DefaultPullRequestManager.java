@@ -404,12 +404,14 @@ public class DefaultPullRequestManager implements PullRequestManager {
 									if (preview.getIntegrationStrategy() == REBASE_TARGET_ONTO_SOURCE) {
 										tempGit.updateRef("HEAD", requestHead, null, null);
 										tempGit.reset(null, null);
-										integrated = tempGit.cherryPick(".." + targetHead);
+										List<String> cherries = tempGit.listCherries("HEAD", targetHead);
+										integrated = tempGit.cherryPick(cherries.toArray(new String[cherries.size()]));
 									} else {
 										tempGit.updateRef("HEAD", targetHead, null, null);
 										tempGit.reset(null, null);
 										if (preview.getIntegrationStrategy() == REBASE_SOURCE_ONTO_TARGET) {
-											integrated = tempGit.cherryPick(".." + requestHead);
+											List<String> cherries = tempGit.listCherries("HEAD", requestHead);
+											integrated = tempGit.cherryPick(cherries.toArray(new String[cherries.size()]));
 										} else if (preview.getIntegrationStrategy() == MERGE_WITH_SQUASH) {
 											String commitMessage = request.getTitle() + "\n\n";
 											if (request.getDescription() != null)

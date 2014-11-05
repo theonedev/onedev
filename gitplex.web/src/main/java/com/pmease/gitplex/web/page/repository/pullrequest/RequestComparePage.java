@@ -116,8 +116,7 @@ public class RequestComparePage extends RequestDetailPage {
 
 			if (request.isOpen()) {
 				IntegrationPreview preview = GitPlex.getInstance(PullRequestManager.class).previewIntegration(request);
-				if (preview != null && preview.getIntegrated() != null 
-						&& !getRepository().getChanges(preview.getRequestHead(), preview.getIntegrated()).isEmpty()) {
+				if (preview != null && preview.getIntegrated() != null && !preview.getIntegrated().equals(preview.getRequestHead())) {
 					Commit commit = getRepository().getCommit(preview.getIntegrated());
 					choices.put(commit.getHash(), new CommitDescription(INTEGRATION_PREVIEW, commit.getSubject()));
 				}

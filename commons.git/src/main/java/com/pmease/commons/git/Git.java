@@ -40,9 +40,10 @@ import com.pmease.commons.git.command.IsAncestorCommand;
 import com.pmease.commons.git.command.IsBinaryCommand;
 import com.pmease.commons.git.command.IsTreeLinkCommand;
 import com.pmease.commons.git.command.ListBranchCommand;
-import com.pmease.commons.git.command.ListHeadCommitCommand;
 import com.pmease.commons.git.command.ListChangedFilesCommand;
+import com.pmease.commons.git.command.ListCherriesCommand;
 import com.pmease.commons.git.command.ListFileChangesCommand;
+import com.pmease.commons.git.command.ListHeadCommitCommand;
 import com.pmease.commons.git.command.ListSubModulesCommand;
 import com.pmease.commons.git.command.ListTagsCommand;
 import com.pmease.commons.git.command.ListTreeCommand;
@@ -574,8 +575,12 @@ public class Git implements Serializable {
 		updateSymbolicRef("HEAD", Git.REFS_HEADS + defaultBranch, null);
 	}
 	
-	public String cherryPick(String revisions) {
+	public String cherryPick(String...revisions) {
 		return new CherryPickCommand(repoDir).revisions(revisions).call();
+	}
+
+	public List<String> listCherries(String fromRev, String toRev) {
+		return new ListCherriesCommand(repoDir).fromRev(fromRev).toRev(toRev).call();
 	}
 
 	public boolean hasCommits() {

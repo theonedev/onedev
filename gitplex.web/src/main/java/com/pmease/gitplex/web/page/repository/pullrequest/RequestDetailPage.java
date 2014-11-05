@@ -561,6 +561,10 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		
 		final List<IntegrationStrategy> strategies = 
 				GitPlex.getInstance(PullRequestManager.class).getApplicableIntegrationStrategies(request);
+		if (!strategies.contains(request.getIntegrationStrategy())) {
+			request.setIntegrationStrategy(strategies.get(0));
+			GitPlex.getInstance(Dao.class).persist(request);
+		}
 		IModel<IntegrationStrategy> strategyModel = new IModel<IntegrationStrategy>() {
 
 			@Override
@@ -704,8 +708,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 						PullRequest request = getPullRequest();
 						PullRequestManager manager = GitPlex.getInstance(PullRequestManager.class);
 						IntegrationPreview preview = manager.previewIntegration(request);
-						setVisible(!preview.getIntegrated().equals(preview.getRequestHead())
-								&& !getRepository().getChanges(preview.getRequestHead(), preview.getIntegrated()).isEmpty());
+						setVisible(!preview.getIntegrated().equals(preview.getRequestHead()));
 					}
 					
 				};
