@@ -2,14 +2,11 @@ package com.pmease.gitplex.core.manager;
 
 import javax.annotation.Nullable;
 
-import com.google.inject.ImplementedBy;
-import com.pmease.gitplex.core.manager.impl.DefaultVoteManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.PullRequestVote;
 import com.pmease.gitplex.core.model.User;
 
-@ImplementedBy(DefaultVoteManager.class)
 public interface VoteManager {
 
 	PullRequestVote find(User reviewer, PullRequestUpdate update);

@@ -18,8 +18,40 @@ import com.pmease.commons.loader.ImplementationProvider;
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListeners;
+import com.pmease.gitplex.core.manager.AuthorizationManager;
+import com.pmease.gitplex.core.manager.BranchManager;
+import com.pmease.gitplex.core.manager.ConfigManager;
+import com.pmease.gitplex.core.manager.DataManager;
+import com.pmease.gitplex.core.manager.OldCommitCommentManager;
+import com.pmease.gitplex.core.manager.PullRequestCommentManager;
+import com.pmease.gitplex.core.manager.PullRequestCommentReplyManager;
+import com.pmease.gitplex.core.manager.PullRequestManager;
+import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
+import com.pmease.gitplex.core.manager.PullRequestWatchManager;
+import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.manager.StorageManager;
+import com.pmease.gitplex.core.manager.TeamManager;
+import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.manager.VerificationManager;
+import com.pmease.gitplex.core.manager.VoteInvitationManager;
+import com.pmease.gitplex.core.manager.VoteManager;
+import com.pmease.gitplex.core.manager.impl.DefaultAuthorizationManager;
+import com.pmease.gitplex.core.manager.impl.DefaultBranchManager;
+import com.pmease.gitplex.core.manager.impl.DefaultConfigManager;
+import com.pmease.gitplex.core.manager.impl.DefaultDataManager;
+import com.pmease.gitplex.core.manager.impl.DefaultOldCommitCommentManager;
+import com.pmease.gitplex.core.manager.impl.DefaultPullRequestCommentManager;
+import com.pmease.gitplex.core.manager.impl.DefaultPullRequestCommentReplyManager;
+import com.pmease.gitplex.core.manager.impl.DefaultPullRequestManager;
+import com.pmease.gitplex.core.manager.impl.DefaultPullRequestUpdateManager;
+import com.pmease.gitplex.core.manager.impl.DefaultPullRequestWatchManager;
+import com.pmease.gitplex.core.manager.impl.DefaultRepositoryManager;
 import com.pmease.gitplex.core.manager.impl.DefaultStorageManager;
+import com.pmease.gitplex.core.manager.impl.DefaultTeamManager;
+import com.pmease.gitplex.core.manager.impl.DefaultUserManager;
+import com.pmease.gitplex.core.manager.impl.DefaultVerificationManager;
+import com.pmease.gitplex.core.manager.impl.DefaultVoteInvitationManager;
+import com.pmease.gitplex.core.manager.impl.DefaultVoteManager;
 import com.pmease.gitplex.core.model.ModelLocator;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.setting.SpecifiedGit;
@@ -102,6 +134,10 @@ public class CoreModule extends AbstractPluginModule {
 			@Override
 			public void onCommented(PullRequest request) {
 			}
+
+			@Override
+			public void onVerified(PullRequest request) {
+			}
 			
 		});
 		
@@ -127,7 +163,27 @@ public class CoreModule extends AbstractPluginModule {
 		
 		bind(GitConfig.class).toProvider(GitConfigProvider.class);
 
+		/*
+		 * Declare bindings explicitly instead of using ImplementedBy annotation as
+		 * HK2 to guice bridge can only search in explicit bindings in Guice   
+		 */
 		bind(StorageManager.class).to(DefaultStorageManager.class);
+		bind(AuthorizationManager.class).to(DefaultAuthorizationManager.class);
+		bind(BranchManager.class).to(DefaultBranchManager.class);
+		bind(ConfigManager.class).to(DefaultConfigManager.class);
+		bind(DataManager.class).to(DefaultDataManager.class);
+		bind(PullRequestCommentManager.class).to(DefaultPullRequestCommentManager.class);
+		bind(PullRequestCommentReplyManager.class).to(DefaultPullRequestCommentReplyManager.class);
+		bind(PullRequestManager.class).to(DefaultPullRequestManager.class);
+		bind(PullRequestUpdateManager.class).to(DefaultPullRequestUpdateManager.class);
+		bind(PullRequestWatchManager.class).to(DefaultPullRequestWatchManager.class);
+		bind(RepositoryManager.class).to(DefaultRepositoryManager.class);
+		bind(TeamManager.class).to(DefaultTeamManager.class);
+		bind(UserManager.class).to(DefaultUserManager.class);
+		bind(VerificationManager.class).to(DefaultVerificationManager.class);
+		bind(VoteInvitationManager.class).to(DefaultVoteInvitationManager.class);
+		bind(VoteManager.class).to(DefaultVoteManager.class);
+		bind(OldCommitCommentManager.class).to(DefaultOldCommitCommentManager.class);
 	}
 
 	@Override

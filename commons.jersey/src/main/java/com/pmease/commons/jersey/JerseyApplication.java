@@ -31,8 +31,6 @@ public class JerseyApplication extends ResourceConfig {
         property(disableMoxy, true);
         property(ServerProperties.BV_SEND_ERROR_IN_RESPONSE, true);
 
-//        register(ValidationConfigurationContextResolver.class);
-        
         // add the default Jackson exception mappers
         register(JsonParseExceptionMapper.class);
         register(JsonMappingExceptionMapper.class);

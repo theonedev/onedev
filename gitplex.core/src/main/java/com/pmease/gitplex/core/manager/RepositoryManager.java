@@ -2,12 +2,9 @@ package com.pmease.gitplex.core.manager;
 
 import javax.annotation.Nullable;
 
-import com.google.inject.ImplementedBy;
-import com.pmease.gitplex.core.manager.impl.DefaultRepositoryManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
-@ImplementedBy(DefaultRepositoryManager.class)
 public interface RepositoryManager {
 	
 	@Nullable Repository findBy(String ownerName, String repositoryName);

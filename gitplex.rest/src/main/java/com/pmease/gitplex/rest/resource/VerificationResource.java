@@ -24,6 +24,7 @@ import org.hibernate.criterion.Restrictions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jersey.ValidQueryParams;
+import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.model.PullRequestVerification;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
@@ -35,9 +36,12 @@ public class VerificationResource {
 
 	private final Dao dao;
 	
+	private final VerificationManager verificationManager;
+	
 	@Inject
-	public VerificationResource(Dao dao) {
+	public VerificationResource(Dao dao, VerificationManager verificationManager) {
 		this.dao = dao;
+		this.verificationManager = verificationManager;
 	}
 	
     @GET
@@ -83,7 +87,7 @@ public class VerificationResource {
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryWrite(verification.getRequest().getTarget().getRepository())))
     		throw new UnauthorizedException();
     	
-    	dao.remove(verification);
+    	verificationManager.delete(verification);
     }
 
     @POST
@@ -91,7 +95,7 @@ public class VerificationResource {
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryWrite(verification.getRequest().getTarget().getRepository())))
     		throw new UnauthorizedException();
     	
-    	dao.persist(verification);
+    	verificationManager.save(verification);
     	
     	return verification.getId();
     }

@@ -237,15 +237,6 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		});
 	}
 	
-	@Sessional
-	@Override
-	public List<PullRequest> findByCommit(String commit) {
-		return dao.query(EntityCriteria.of(PullRequest.class)
-				.add(Restrictions.or(
-						Restrictions.eq("integrationPreview.requestHead", commit), 
-						Restrictions.eq("integrationPreview.integrated", commit))), 0, 0);
-	}
-
 	@Transactional
 	@Override
 	public void open(PullRequest request, final Object listenerData) {

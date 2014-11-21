@@ -3,12 +3,8 @@ package com.pmease.gitplex.web.page;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.jackson.DefaultView;
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.commons.loader.AppLoader;
+import com.pmease.gitplex.core.manager.VerificationManager;
 
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
@@ -25,15 +21,7 @@ public class TestPage extends BasePage {
 
 			@Override
 			public void onClick() {
-				ObjectMapper mapper = GitPlex.getInstance(ObjectMapper.class);
-				mapper.setConfig(mapper.getSerializationConfig().withView(DefaultView.class));
-				PullRequest request = GitPlex.getInstance(Dao.class).load(PullRequest.class, 11L);
-				try {
-					System.out.println(mapper.writeValueAsString(request));
-				} catch (JsonProcessingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				System.out.println(AppLoader.injector.getInstance(VerificationManager.class));
 			}
 			
 		});

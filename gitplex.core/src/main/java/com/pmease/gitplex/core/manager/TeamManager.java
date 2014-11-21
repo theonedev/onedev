@@ -2,13 +2,10 @@ package com.pmease.gitplex.core.manager;
 
 import java.util.Collection;
 
-import com.google.inject.ImplementedBy;
-import com.pmease.gitplex.core.manager.impl.DefaultTeamManager;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.operation.GeneralOperation;
 
-@ImplementedBy(DefaultTeamManager.class)
 public interface TeamManager {
 
 	/**

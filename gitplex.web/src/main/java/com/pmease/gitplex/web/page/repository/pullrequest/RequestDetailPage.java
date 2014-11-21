@@ -1054,6 +1054,11 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		public void onCommented(PullRequest request) {
 			onChange(request);
 		}
+
+		@Override
+		public void onVerified(PullRequest request) {
+			onChange(request);
+		}
 		
 	}
 }

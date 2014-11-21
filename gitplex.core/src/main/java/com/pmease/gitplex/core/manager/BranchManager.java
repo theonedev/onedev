@@ -4,12 +4,9 @@ import java.util.Collection;
 
 import javax.annotation.Nullable;
 
-import com.google.inject.ImplementedBy;
-import com.pmease.gitplex.core.manager.impl.DefaultBranchManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.Repository;
 
-@ImplementedBy(DefaultBranchManager.class)
 public interface BranchManager {
 
 	/**

@@ -88,6 +88,6 @@
 		</repository>
 	</repositories>
 	<properties>
-		<guiceVersion>4.0-beta4</guiceVersion>
+		<guiceVersion>4.0-beta5</guiceVersion>
 	</properties>
 </project>

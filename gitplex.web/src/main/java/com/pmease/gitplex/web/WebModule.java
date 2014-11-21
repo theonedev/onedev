@@ -22,6 +22,10 @@ import com.pmease.gitplex.web.extensionpoint.MediaRendererProvider;
 import com.pmease.gitplex.web.page.repository.code.blob.renderer.BlobRendererFactory;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestDetailPage;
 import com.pmease.gitplex.web.resource.ResourceLocator;
+import com.pmease.gitplex.web.service.AvatarManager;
+import com.pmease.gitplex.web.service.FileBlobService;
+import com.pmease.gitplex.web.service.impl.DefaultAvatarManager;
+import com.pmease.gitplex.web.service.impl.DefaultFileBlobService;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -37,6 +41,8 @@ public class WebModule extends AbstractPluginModule {
 		bind(AbstractWicketConfig.class).to(WicketConfig.class);		
 		bind(WebApplication.class).to(WicketConfig.class);
 		bind(Application.class).to(WicketConfig.class);
+		bind(AvatarManager.class).to(DefaultAvatarManager.class);
+		bind(FileBlobService.class).to(DefaultFileBlobService.class);
 		
 		contribute(ServletConfigurator.class, WebServletConfigurator.class);
 		contribute(UserNameReservation.class, WebUserNameReservation.class);

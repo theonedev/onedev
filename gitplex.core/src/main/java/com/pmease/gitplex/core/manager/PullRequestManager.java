@@ -5,8 +5,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.google.inject.ImplementedBy;
-import com.pmease.gitplex.core.manager.impl.DefaultPullRequestManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -14,7 +12,6 @@ import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
-@ImplementedBy(DefaultPullRequestManager.class)
 public interface PullRequestManager {
     
     @Nullable PullRequest findLatest(Branch target, Branch source);
@@ -55,16 +52,6 @@ public interface PullRequestManager {
      */
     IntegrationPreview previewIntegration(PullRequest request);
     
-    /**
-     * Find pull requests whose head commit or merge commit equals to specified commit.
-     * 
-     * @param commit
-     * 			head commit or merge commit to match
-     * @return
-     * 			collection of matching pull requests
-     */
-    List<PullRequest> findByCommit(String commit);
-
     /**
      * Delete git refs of this pull request and all its updates.
      * 

@@ -5,12 +5,9 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.google.inject.ImplementedBy;
 import com.pmease.commons.bootstrap.Lifecycle;
-import com.pmease.gitplex.core.manager.impl.DefaultUserManager;
 import com.pmease.gitplex.core.model.User;
 
-@ImplementedBy(DefaultUserManager.class)
 public interface UserManager extends Lifecycle {
 	
 	void save(User user);

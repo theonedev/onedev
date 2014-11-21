@@ -41,6 +41,8 @@ public class AppLoaderModule extends AbstractModule {
 		});
 	    
 	    bind(EventBus.class).toInstance(new EventBus());
+	    bind(PluginManager.class).to(DefaultPluginManager.class);
+	    bind(ImplementationRegistry.class).to(DefaultImplementationRegistry.class);
 	    
 	    bind(ExecutorService.class).toProvider(new Provider<ExecutorService>() {
 

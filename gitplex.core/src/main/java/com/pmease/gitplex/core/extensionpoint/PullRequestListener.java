@@ -13,6 +13,8 @@ public interface PullRequestListener {
 	
 	void onVoted(PullRequest request);
 	
+	void onVerified(PullRequest request);
+	
 	void onIntegrated(PullRequest request);
 	
 	void onDiscarded(PullRequest request);

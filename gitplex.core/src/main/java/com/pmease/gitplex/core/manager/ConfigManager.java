@@ -2,13 +2,10 @@ package com.pmease.gitplex.core.manager;
 
 import javax.annotation.Nullable;
 
-import com.google.inject.ImplementedBy;
-import com.pmease.gitplex.core.manager.impl.DefaultConfigManager;
+import com.pmease.gitplex.core.model.Config;
 import com.pmease.gitplex.core.setting.MailSetting;
 import com.pmease.gitplex.core.setting.SystemSetting;
-import com.pmease.gitplex.core.model.Config;
 
-@ImplementedBy(DefaultConfigManager.class)
 public interface ConfigManager {
 	
 	/**

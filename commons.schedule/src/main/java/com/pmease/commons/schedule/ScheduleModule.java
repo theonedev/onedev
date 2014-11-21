@@ -14,6 +14,7 @@ public class ScheduleModule extends AbstractPluginModule {
 		super.configure();
 		
 		// put your guice bindings here
+		bind(TaskScheduler.class).to(DefaultTaskScheduler.class);
 	}
 
 	@Override
