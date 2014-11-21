@@ -45,6 +45,14 @@ public interface PullRequestManager {
     
     void onGateKeeperUpdate(PullRequest request);
     
+    /**
+     * Preview integration of this pull request.
+     * 
+     * @param request
+     * 			pull request to preview integration of
+     * @return
+     * 			integration preview, or <tt>null</tt> if preview is being calculating
+     */
     IntegrationPreview previewIntegration(PullRequest request);
     
     /**

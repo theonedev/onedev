@@ -20,6 +20,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.Commit;
@@ -81,12 +82,13 @@ public class PullRequestUpdate extends AbstractEntity {
 	public void setVotes(Collection<PullRequestVote> votes) {
 		this.votes = votes;
 	}
-	
+
+	@JsonProperty
 	public String getHeadRef() {
 		Preconditions.checkNotNull(getId());
-		return Repository.REFS_GITPLEX + "updates/" + getId() + "/head";
+		return Repository.REFS_GITPLEX + "updates/" + getId();
 	}
-
+	
 	/**
 	 * List votes against this update and all subsequent updates.
 	 * <p>

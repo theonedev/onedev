@@ -30,6 +30,7 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.manager.StorageManager;
+import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
@@ -46,16 +47,20 @@ public class DefaultRepositoryManager implements RepositoryManager {
     
     private final StorageManager storageManager;
     
+    private final UserManager userManager;
+    
     private final String gitUpdateHook;
     
     private final String gitPostReceiveHook;
     
     @Inject
-    public DefaultRepositoryManager(Dao dao, BranchManager branchManager, StorageManager storageManager) {
+    public DefaultRepositoryManager(Dao dao, BranchManager branchManager, 
+    		UserManager userManager, StorageManager storageManager) {
     	this.dao = dao;
     	
         this.branchManager = branchManager;
         this.storageManager = storageManager;
+        this.userManager = userManager;
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-update-hook")) {
         	Preconditions.checkNotNull(is);
@@ -120,7 +125,18 @@ public class DefaultRepositoryManager implements RepositoryManager {
         		.add(Restrictions.eq("name", repositoryName)));
     }
 
-	@Transactional
+    @Sessional
+    @Override
+    public Repository findBy(String repositoryPath) {
+    	String userName = StringUtils.substringBefore(repositoryPath, "/");
+    	User user = userManager.findByName(userName);
+    	if (user != null)
+    		return findBy(user, StringUtils.substringAfter(repositoryPath, "/"));
+    	else
+    		return null;
+    }
+
+    @Transactional
 	@Override
 	public Repository fork(Repository repository, User user) {
 		if (repository.getOwner().equals(user))

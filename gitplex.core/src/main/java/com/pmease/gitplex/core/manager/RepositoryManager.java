@@ -14,6 +14,8 @@ public interface RepositoryManager {
 	
 	@Nullable Repository findBy(User owner, String repositoryName);
 
+	@Nullable Repository findBy(String repositoryPath);
+
 	/**
 	 * Fork specified repository as specified user.
 	 * 

@@ -74,6 +74,8 @@ public class ObjectMapperProvider implements Provider<ObjectMapper> {
 		for (ObjectMapperConfigurator each: configurators)
 			each.configure(mapper);
 		
+		mapper.setConfig(mapper.getSerializationConfig().withView(DefaultView.class));
+		
 		return mapper;
 	}
 

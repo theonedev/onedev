@@ -20,7 +20,7 @@ public class EntitySerializer extends BeanSerializer {
 			throws IOException, JsonGenerationException {
 		if (bean instanceof HibernateProxy)
 			bean = ((HibernateProxy) bean).getHibernateLazyInitializer().getImplementation();
-		
+
 		super.serializeFields(bean, jgen, provider);
 	}
 

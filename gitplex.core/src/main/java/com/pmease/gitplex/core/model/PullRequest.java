@@ -26,6 +26,7 @@ import javax.persistence.Transient;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Commit;
@@ -33,6 +34,7 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.commons.jackson.ExternalView;
 import com.pmease.commons.util.LockUtils;
 import com.pmease.commons.util.Triple;
 import com.pmease.gitplex.core.GitPlex;
@@ -455,20 +457,17 @@ public class PullRequest extends AbstractEntity {
 		return git.listChangedFiles(getTarget().getHeadCommitHash(), getLatestUpdate().getHeadCommitHash(), null);
 	}
 
+	@JsonView(ExternalView.class)
 	public String getBaseRef() {
 		Preconditions.checkNotNull(getId());
 		return Repository.REFS_GITPLEX + "pulls/" + getId() + "/base";
 	}
 
-	public String getHeadRef() {
-		Preconditions.checkNotNull(getId());
-		return Repository.REFS_GITPLEX + "pulls/" + getId() + "/head";
-	}
-	
+	@JsonView(ExternalView.class)
 	public String getIntegrateRef() {
 		Preconditions.checkNotNull(getId());
 		return Repository.REFS_GITPLEX + "pulls/" + getId() + "/integrate";
-	};
+	}
 
 	/**
 	 * Delete refs of this pull request, without touching refs of its updates.
@@ -476,7 +475,6 @@ public class PullRequest extends AbstractEntity {
 	public void deleteRefs() {
 		Git git = getTarget().getRepository().git();
 		git.deleteRef(getBaseRef(), null, null);
-		git.deleteRef(getHeadRef(), null, null);
 		git.deleteRef(getIntegrateRef(), null, null);
 	}
 	

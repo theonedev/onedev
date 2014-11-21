@@ -23,6 +23,8 @@ public interface BranchManager {
 	 * 			found branch, or <tt>null</tt> if not found
 	 */
 	public @Nullable Branch findBy(Repository repository, String branchName);
+
+	public @Nullable Branch findBy(String branchPath);
 	
     /**
      * Delete all refs pointed to this branch and its associated pull requests and 

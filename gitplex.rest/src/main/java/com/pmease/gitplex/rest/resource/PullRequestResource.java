@@ -5,12 +5,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -24,7 +21,12 @@ import org.hibernate.criterion.Restrictions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jersey.ValidQueryParams;
+import com.pmease.gitplex.core.manager.BranchManager;
+import com.pmease.gitplex.core.manager.PullRequestManager;
+import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
 @Path("/pull_requests")
@@ -35,11 +37,17 @@ public class PullRequestResource {
 
 	private final Dao dao;
 	
-	@Inject
-	public PullRequestResource(Dao dao) {
-		this.dao = dao;
-	}
+	private final BranchManager branchManager;
 	
+	private final PullRequestManager pullRequestManager;
+	
+	@Inject
+	public PullRequestResource(Dao dao, BranchManager branchManager, PullRequestManager pullRequestManager) {
+		this.dao = dao;
+		this.branchManager = branchManager;
+		this.pullRequestManager = pullRequestManager;
+	}
+
     @GET
     @Path("/{id}")
     public PullRequest get(@PathParam("id") Long id) {
@@ -51,16 +59,60 @@ public class PullRequestResource {
     	return request;
     }
         
+    @GET
+    @Path("/{id}/latest_update")
+    public PullRequestUpdate getLatestUpdate(@PathParam("id") Long id) {
+    	PullRequest request = dao.load(PullRequest.class, id);
+    	
+    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(request.getTarget().getRepository())))
+    		throw new UnauthorizedException();
+    	
+    	return request.getLatestUpdate();
+    }
+
+    @GET
+    @Path("/{id}/integrated_commit")
+    public String getIntegratedCommit(@PathParam("id") Long id) {
+    	PullRequest request = dao.load(PullRequest.class, id);
+    	
+    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(request.getTarget().getRepository())))
+    		throw new UnauthorizedException();
+    	
+    	IntegrationPreview preview = pullRequestManager.previewIntegration(request);
+    	if (preview != null)
+    		return preview.getIntegrated();
+    	else
+    		return null;
+    }
+
     @ValidQueryParams
     @GET
     public Collection<PullRequest> query(
-    		@QueryParam("target") Long targetId, @QueryParam("source") Long sourceId, 
+    		@QueryParam("target") Long targetId, @QueryParam("targetPath") String targetPath, 
+    		@QueryParam("source") Long sourceId, @QueryParam("sourcePath") String sourcePath, 
     		@QueryParam("submitter") Long submitterId, @QueryParam("status") String status) {
     	EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
-		if (targetId != null)
+
+    	if (targetId != null) {
 			criteria.add(Restrictions.eq("target.id", targetId));
-		if (sourceId != null)
+		} else if (targetPath != null) {
+			Branch target = branchManager.findBy(targetPath);
+			if (target != null)
+				criteria.add(Restrictions.eq("target.id", target.getId()));
+			else
+				throw new NotFoundException("Unable to find target branch: " + targetPath);
+		}
+
+    	if (sourceId != null) {
 			criteria.add(Restrictions.eq("source.id", sourceId));
+		} else if (sourcePath != null) {
+			Branch source = branchManager.findBy(sourcePath);
+			if (source != null)
+				criteria.add(Restrictions.eq("source.id", source.getId()));
+			else
+				throw new NotFoundException("Unable to find source branch: " + targetPath);
+		}
+    	
 		if (submitterId != null)
 			criteria.add(Restrictions.eq("submitter.id", submitterId));
 		if (status != null) {
@@ -79,27 +131,6 @@ public class PullRequestResource {
 	    		throw new UnauthorizedException("Unauthorized access to pull request " + request.getTarget() + "/" + request.getId());
 		}
 		return requests;
-    }
-    
-    @POST
-    public Long save(@NotNull @Valid PullRequest pullRequest) {
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(pullRequest.getTarget().getRepository())))
-    		throw new UnauthorizedException();
-    	
-    	dao.persist(pullRequest);
-    	
-    	return pullRequest.getId();
-    }
-
-    @DELETE
-    @Path("/{id}")
-    public void delete(@PathParam("id") Long id) {
-    	PullRequest pullRequest = dao.load(PullRequest.class, id);
-
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(pullRequest.getTarget().getRepository())))
-    		throw new UnauthorizedException();
-    	
-    	dao.remove(pullRequest);
     }
     
 }

@@ -5,6 +5,7 @@ import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pmease.commons.jackson.ExternalView;
 
 @Provider
 public class JacksonContextResolver implements ContextResolver<ObjectMapper> {
@@ -13,7 +14,8 @@ public class JacksonContextResolver implements ContextResolver<ObjectMapper> {
 	
 	@Inject
 	public JacksonContextResolver(ObjectMapper objectMapper) {
-		this.objectMapper = objectMapper;
+		this.objectMapper = objectMapper.copy();
+		this.objectMapper.setConfig(this.objectMapper.getSerializationConfig().withView(ExternalView.class));
 	}
 	
 	@Override

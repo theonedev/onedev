@@ -525,7 +525,7 @@
 		<logbackVersion>1.0.11</logbackVersion>
 		<jerseyVersion>2.9</jerseyVersion>
 		<jettyVersion>9.2.3.v20140905</jettyVersion>
-		<jacksonVersion>2.3.3</jacksonVersion>
+		<jacksonVersion>2.4.3</jacksonVersion>
 		<powermockVersion>1.5.1</powermockVersion>
 		<servletVersion>3.1.0</servletVersion>
 	</properties>

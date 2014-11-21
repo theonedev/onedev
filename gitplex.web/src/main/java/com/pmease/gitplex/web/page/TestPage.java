@@ -1,11 +1,14 @@
 package com.pmease.gitplex.web.page;
 
-import java.io.File;
-
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.commons.git.Git;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.jackson.ExternalView;
+import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.model.PullRequest;
 
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
@@ -22,10 +25,18 @@ public class TestPage extends BasePage {
 
 			@Override
 			public void onClick() {
-				Git git = new Git(new File("W:\\temp\\gitplex_storage\\repositories\\1"));
-				System.out.println(git.getAheadBehinds("master", "dev2", "dev3"));
+				ObjectMapper mapper = GitPlex.getInstance(ObjectMapper.class);
+				mapper.setConfig(mapper.getSerializationConfig().withView(ExternalView.class));
+				PullRequest request = GitPlex.getInstance(Dao.class).load(PullRequest.class, 11L);
+				try {
+					mapper.writeValueAsString(request);
+				} catch (JsonProcessingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			
 		});
 	}
+
 }
