@@ -3,17 +3,19 @@ package com.pmease.commons.hibernate.jackson;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.hibernate.proxy.HibernateProxy;
+
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.deser.BeanDeserializer;
 import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
-import com.fasterxml.jackson.databind.ser.BeanSerializer;
-import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
+import com.fasterxml.jackson.databind.ser.Serializers;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
 
@@ -33,21 +35,19 @@ public class HibernateObjectMapperModule extends Module {
 		
 		context.appendAnnotationIntrospector(new HibernateAnnotationIntrospector());
 
-		context.addBeanSerializerModifier(new BeanSerializerModifier() {
+		context.addSerializers(new Serializers.Base(){
 
 			@Override
-			public JsonSerializer<?> modifySerializer(
-					SerializationConfig config, BeanDescription beanDesc,
-					JsonSerializer<?> serializer) {
-				if (AbstractEntity.class.isAssignableFrom(beanDesc.getBeanClass())) {
-					return new EntitySerializer((BeanSerializer) serializer);
-				} else {
-					return super.modifySerializer(config, beanDesc, serializer);
-				}
-			}
+		    public JsonSerializer<?> findSerializer(SerializationConfig config, JavaType type, BeanDescription beanDesc) {
+		        Class<?> raw = type.getRawClass();
+		        if (HibernateProxy.class.isAssignableFrom(raw)) 
+		            return new HibernateProxySerializer();
+		        else
+		        	return null;
+		    }
 			
 		});
-
+		
 		context.addBeanDeserializerModifier(new BeanDeserializerModifier() {
 
 			@Override

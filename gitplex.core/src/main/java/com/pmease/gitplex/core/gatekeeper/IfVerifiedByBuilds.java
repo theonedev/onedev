@@ -8,14 +8,13 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.voteeligibility.NoneCanVote;
-import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.PullRequestVerification;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.model.PullRequestVerification;
 
 @Editable(icon="fa-checkbox-checked", order=1000, 
 		description="This gate keeper will be satisfied if commit is verified successfully "
@@ -73,9 +72,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 		
 		String commit;
 		if (isCheckIntegrated()) {
-			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
-			
-			IntegrationPreview preview = pullRequestManager.previewIntegration(request);
+			IntegrationPreview preview = request.getIntegrationPreview();
 			if (preview == null) {
 				if (blockMode)
 					return pendingAndBlock("To be verified by build", new NoneCanVote());

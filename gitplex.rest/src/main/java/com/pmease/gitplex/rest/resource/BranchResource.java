@@ -1,5 +1,6 @@
 package com.pmease.gitplex.rest.resource;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -21,9 +22,11 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 
+import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jersey.ValidQueryParams;
+import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
@@ -35,9 +38,12 @@ public class BranchResource {
 
 	private final Dao dao;
 	
+	private final BranchManager branchManager;
+	
 	@Inject
-	public BranchResource(Dao dao) {
+	public BranchResource(Dao dao, BranchManager branchManager) {
 		this.dao = dao;
+		this.branchManager = branchManager;
 	}
 	
     @GET
@@ -51,9 +57,16 @@ public class BranchResource {
     
     @ValidQueryParams
     @GET
-    public Collection<Branch> query(
-    		@QueryParam("repository") Long repositoryId,
-    		@QueryParam("name") String name) {
+    public Collection<Branch> query(@QueryParam("repository") Long repositoryId, @QueryParam("name") String name, 
+    		@QueryParam("path") String path) {
+    	if (path != null) {
+    		Branch branch = branchManager.findBy(path);
+    		if (branch != null)
+    			return Lists.newArrayList(branch);
+    		else
+    			return new ArrayList<>();
+    	}
+    	
 		EntityCriteria<Branch> criteria = EntityCriteria.of(Branch.class);
 		if (repositoryId != null)
 			criteria.add(Restrictions.eq("repository.id", repositoryId));

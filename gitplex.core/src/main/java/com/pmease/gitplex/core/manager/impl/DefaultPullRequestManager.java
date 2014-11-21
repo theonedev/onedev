@@ -157,7 +157,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		if (request.getStatus() != PullRequest.Status.PENDING_INTEGRATE)
 			throw new IllegalStateException("Gate keeper disallows integration right now.");
 	
-		IntegrationPreview preview = previewIntegration(request);
+		IntegrationPreview preview = request.getIntegrationPreview();
 		if (preview == null)
 			throw new IllegalStateException("Integration preview has not been calculated yet.");
 
@@ -186,64 +186,55 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		}
 		if (strategy == REBASE_SOURCE_ONTO_TARGET || strategy == MERGE_WITH_SQUASH) {
 			Git sourceGit = request.getSource().getRepository().git();
-			if (sourceGit.updateRef(request.getSource().getHeadRef(), 
-					integrated, preview.getRequestHead(), 
-					"Pull request #" + request.getId())) {
-				request.getSource().setHeadCommitHash(integrated);
-				branchManager.save(request.getSource());
-			} else {
-				throw new RuntimeException(String.format(
-						"Unable to target branch '%s' due to lock failure.", request.getTarget()));
-			}
+			sourceGit.updateRef(request.getSource().getHeadRef(), integrated, preview.getRequestHead(), 
+					"Pull request #" + request.getId());
+			request.getSource().setHeadCommitHash(integrated);
+			branchManager.save(request.getSource());
 		}
-		if (git.updateRef(request.getTarget().getHeadRef(), integrated, 
-				preview.getTargetHead(), "Pull request #" + request.getId())) {
-			request.getTarget().setHeadCommitHash(integrated);
-			branchManager.save(request.getTarget());
-			
-			PullRequestAudit audit = new PullRequestAudit();
-			audit.setRequest(request);
-			audit.setDate(new Date());
-			audit.setOperation(PullRequestOperation.INTEGRATE);
-			audit.setUser(user);
-			
-			dao.persist(audit);
+		git.updateRef(request.getTarget().getHeadRef(), integrated, 
+				preview.getTargetHead(), "Pull request #" + request.getId());
+		request.getTarget().setHeadCommitHash(integrated);
+		branchManager.save(request.getTarget());
+		
+		PullRequestAudit audit = new PullRequestAudit();
+		audit.setRequest(request);
+		audit.setDate(new Date());
+		audit.setOperation(PullRequestOperation.INTEGRATE);
+		audit.setUser(user);
+		
+		dao.persist(audit);
 
-			if (comment != null) {
-				PullRequestComment requestComment = new PullRequestComment();
-				requestComment.setContent(comment);
-				requestComment.setDate(audit.getDate());
-				requestComment.setRequest(request);
-				requestComment.setUser(user);
-				dao.persist(requestComment);
-			}
-
-			request.setCloseStatus(CloseStatus.INTEGRATED);
-			request.setUpdateDate(new Date());
-
-			dao.persist(request);
-
-			final Long requestId = request.getId();
-			
-			dao.afterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					pullRequestListeners.asyncCall(requestId, new PullRequestListeners.Callback() {
-						
-						@Override
-						protected void call(PullRequestListener listener, PullRequest request) {
-							listener.onIntegrated(request);
-						}
-						
-					});
-				}
-				
-			});
-		} else {
-			throw new RuntimeException(String.format(
-					"Unable to target branch '%s' due to lock failure.", request.getTarget()));
+		if (comment != null) {
+			PullRequestComment requestComment = new PullRequestComment();
+			requestComment.setContent(comment);
+			requestComment.setDate(audit.getDate());
+			requestComment.setRequest(request);
+			requestComment.setUser(user);
+			dao.persist(requestComment);
 		}
+
+		request.setCloseStatus(CloseStatus.INTEGRATED);
+		request.setUpdateDate(new Date());
+
+		dao.persist(request);
+
+		final Long requestId = request.getId();
+		
+		dao.afterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				pullRequestListeners.asyncCall(requestId, new PullRequestListeners.Callback() {
+					
+					@Override
+					protected void call(PullRequestListener listener, PullRequest request) {
+						listener.onIntegrated(request);
+					}
+					
+				});
+			}
+			
+		});
 	}
 	
 	@Sessional
@@ -314,7 +305,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 			audit.setDate(new Date());
 			dao.persist(audit);
 			
-			request.setIntegrationPreview(null);
+			request.setLastIntegrationPreview(null);
 			request.setCloseStatus(CloseStatus.INTEGRATED);
 			request.setUpdateDate(new Date());
 			
@@ -364,7 +355,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 
 	@Override
 	public IntegrationPreview previewIntegration(PullRequest request) {
-		IntegrationPreview preview = request.getIntegrationPreview();
+		IntegrationPreview preview = request.getLastIntegrationPreview();
 		if (!request.isOpen() || preview != null 
 				&& preview.getRequestHead().equals(request.getLatestUpdate().getHeadCommitHash())
 				&& preview.getTargetHead().equals(request.getTarget().getHeadCommitHash())
@@ -385,7 +376,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 							Git git = request.getTarget().getRepository().git();
 							IntegrationPreview preview = new IntegrationPreview(request.getTarget().getHeadCommitHash(), 
 									request.getLatestUpdate().getHeadCommitHash(), request.getIntegrationStrategy(), null);
-							request.setIntegrationPreview(preview);
+							request.setLastIntegrationPreview(preview);
 							String integrateRef = request.getIntegrateRef();
 							if (preview.getIntegrationStrategy() == MERGE_IF_NECESSARY && git.isAncestor(targetHead, requestHead)
 									|| preview.getIntegrationStrategy() == MERGE_WITH_SQUASH && git.isAncestor(targetHead, requestHead)
@@ -471,7 +462,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		if (request.getStatus() != PullRequest.Status.PENDING_INTEGRATE) {
 			return false;
 		} else {
-			IntegrationPreview integrationPreview = previewIntegration(request);
+			IntegrationPreview integrationPreview = request.getIntegrationPreview();
 			return integrationPreview != null && integrationPreview.getIntegrated() != null;
 		}
 	}

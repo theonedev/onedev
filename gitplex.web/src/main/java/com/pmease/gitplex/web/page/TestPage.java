@@ -6,7 +6,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.jackson.ExternalView;
+import com.pmease.commons.jackson.DefaultView;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.PullRequest;
 
@@ -26,10 +26,10 @@ public class TestPage extends BasePage {
 			@Override
 			public void onClick() {
 				ObjectMapper mapper = GitPlex.getInstance(ObjectMapper.class);
-				mapper.setConfig(mapper.getSerializationConfig().withView(ExternalView.class));
+				mapper.setConfig(mapper.getSerializationConfig().withView(DefaultView.class));
 				PullRequest request = GitPlex.getInstance(Dao.class).load(PullRequest.class, 11L);
 				try {
-					mapper.writeValueAsString(request);
+					System.out.println(mapper.writeValueAsString(request));
 				} catch (JsonProcessingException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

@@ -49,7 +49,6 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
-import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -115,7 +114,7 @@ public class RequestComparePage extends RequestDetailPage {
 			}
 
 			if (request.isOpen()) {
-				IntegrationPreview preview = GitPlex.getInstance(PullRequestManager.class).previewIntegration(request);
+				IntegrationPreview preview = request.getIntegrationPreview();
 				if (preview != null && preview.getIntegrated() != null && !preview.getIntegrated().equals(preview.getRequestHead())) {
 					Commit commit = getRepository().getCommit(preview.getIntegrated());
 					choices.put(commit.getHash(), new CommitDescription(INTEGRATION_PREVIEW, commit.getSubject()));
@@ -288,7 +287,7 @@ public class RequestComparePage extends RequestDetailPage {
 
 				PullRequest request = getPullRequest();
 				if (request.isOpen()) {
-					final IntegrationPreview preview = GitPlex.getInstance(PullRequestManager.class).previewIntegration(request);
+					final IntegrationPreview preview = request.getIntegrationPreview();
 					if (preview != null && preview.getIntegrated() != null 
 							&& !getRepository().getChanges(preview.getRequestHead(), preview.getIntegrated()).isEmpty()) {
 						items.add(new ComparisonChoiceItem("Target Branch", "Integration Preview") {

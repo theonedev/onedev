@@ -28,12 +28,12 @@ public class IntegrationPreview implements Serializable {
 	private IntegrationPreview() {
 	}
 	
-	public IntegrationPreview(String targetHead, String requestHead, IntegrationStrategy integrationStrategy, 
-			@Nullable String previewIntegrated) {
+	public IntegrationPreview(String targetHead, String requestHead, 
+			IntegrationStrategy integrationStrategy, @Nullable String integrated) {
 		this.targetHead = targetHead;
 		this.requestHead = requestHead;
 		this.integrationStrategy = integrationStrategy;
-		this.integrated = previewIntegrated;
+		this.integrated = integrated;
 	}
 
 	public String getTargetHead() {
@@ -60,6 +60,13 @@ public class IntegrationPreview implements Serializable {
 		this.integrationStrategy = integrationStrategy;
 	}
 
+	/**
+	 * Integrated commit hash 
+	 * 
+	 * @return
+	 * 			null if there are conflicts
+	 */
+	@Nullable
 	public String getIntegrated() {
 		return integrated;
 	}

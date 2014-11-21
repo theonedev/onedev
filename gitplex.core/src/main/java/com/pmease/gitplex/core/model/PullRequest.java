@@ -43,6 +43,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Disapproved;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.gatekeeper.checkresult.PendingAndBlock;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 
 @SuppressWarnings("serial")
 @Entity
@@ -126,7 +127,7 @@ public class PullRequest extends AbstractEntity {
 	private Git sandbox;
 	
 	@Embedded
-	private IntegrationPreview integrationPreview;
+	private IntegrationPreview lastIntegrationPreview;
 	
 	@Column(nullable=false)
 	private Date createDate = new Date();
@@ -386,18 +387,36 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	/**
-	 * Get integration preview of this pull request.
+	 * Get last integration preview of this pull request. Note that this method may return an 
+	 * out dated integration preview. Refer to {@link this#getIntegrationPreview()}
+	 * if you'd like to get an update-to-date integration preview
 	 *  
 	 * @return
 	 * 			integration preview of this pull request, or <tt>null</tt> if integration 
-	 * 			preview has not been calculated yet
+	 * 			preview has not been calculated yet. 
 	 */
-	public @Nullable IntegrationPreview getIntegrationPreview() {
-		return integrationPreview;
+	@Nullable
+	public IntegrationPreview getLastIntegrationPreview() {
+		return lastIntegrationPreview;
 	}
 	
-	public void setIntegrationPreview(IntegrationPreview integrationPreview) {
-		this.integrationPreview = integrationPreview;
+	public void setLastIntegrationPreview(IntegrationPreview lastIntegrationPreview) {
+		this.lastIntegrationPreview = lastIntegrationPreview;
+	}
+
+	/**
+	 * Get effective integration preview of this pull request.
+	 * 
+	 * @return
+	 * 			update to date integration preview of this pull request, or <tt>null</tt> if 
+	 * 			the integration preview has not been calculated or out dated. In both cases, 
+	 * 			it will trigger a re-calculation, and client should call this method later 
+	 * 			to get the calculated result 
+	 */
+	@JsonView(ExternalView.class)
+	@Nullable
+	public IntegrationPreview getIntegrationPreview() {
+		return GitPlex.getInstance(PullRequestManager.class).previewIntegration(this);
 	}
 	
 	/**
@@ -448,6 +467,7 @@ public class PullRequest extends AbstractEntity {
 		this.integrationStrategy = integrationStrategy;
 	}
 
+	@JsonView(ExternalView.class)
 	public PullRequestUpdate getLatestUpdate() {
 		return getSortedUpdates().get(getSortedUpdates().size()-1);
 	}

@@ -458,8 +458,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		if (operation != INTEGRATE) {
 			form.add(noteInput = new MarkdownInput("note", Model.of("")));
 		} else {
-			PullRequestManager manager = GitPlex.getInstance(PullRequestManager.class);
-			IntegrationPreview preview = manager.previewIntegration(getPullRequest());
+			IntegrationPreview preview = getPullRequest().getIntegrationPreview();
 			if (preview == null || preview.getIntegrated() == null) {
 				Session.get().warn("Unable to integrate now as integration preview has to be recalculated");
 				return new WebMarkupContainer(id).setVisible(false);
@@ -643,8 +642,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				PullRequestManager manager = GitPlex.getInstance(PullRequestManager.class);
-				setVisible(manager.previewIntegration(getPullRequest()) == null);
+				setVisible(getPullRequest().getIntegrationPreview() == null);
 			}
 			
 		});
@@ -679,8 +677,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				PullRequestManager manager = GitPlex.getInstance(PullRequestManager.class);
-				IntegrationPreview preview = manager.previewIntegration(getPullRequest());
+				IntegrationPreview preview = getPullRequest().getIntegrationPreview();
 				setVisible(preview != null && preview.getIntegrated() == null);
 			}
 
@@ -692,8 +689,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 				super.onInitialize();
 
 				PullRequest request = getPullRequest();
-				PullRequestManager manager = GitPlex.getInstance(PullRequestManager.class);
-				IntegrationPreview preview = manager.previewIntegration(request);
+				IntegrationPreview preview = request.getIntegrationPreview();
 				
 				PageParameters params = RequestComparePage.paramsOf(
 						request, request.getTarget().getHeadCommitHash(), 
@@ -706,8 +702,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 						super.onConfigure();
 
 						PullRequest request = getPullRequest();
-						PullRequestManager manager = GitPlex.getInstance(PullRequestManager.class);
-						IntegrationPreview preview = manager.previewIntegration(request);
+						IntegrationPreview preview = request.getIntegrationPreview();
 						setVisible(!preview.getIntegrated().equals(preview.getRequestHead()));
 					}
 					
@@ -719,8 +714,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 					@Override
 					public String getObject() {
 						PullRequest request = getPullRequest();
-						PullRequestManager manager = GitPlex.getInstance(PullRequestManager.class);
-						IntegrationPreview preview = manager.previewIntegration(request);
+						IntegrationPreview preview = request.getIntegrationPreview();
 						if (preview != null)
 							return preview.getIntegrated();
 						else
@@ -775,8 +769,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				PullRequestManager manager = GitPlex.getInstance(PullRequestManager.class);
-				IntegrationPreview preview = manager.previewIntegration(getPullRequest());
+				IntegrationPreview preview = getPullRequest().getIntegrationPreview();
 				setVisible(preview != null && preview.getIntegrated() != null);
 			}
 
@@ -813,7 +806,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 				super.onConfigure();
 				
 				PullRequest request = getPullRequest();
-				IntegrationPreview preview = request.getIntegrationPreview();
+				IntegrationPreview preview = request.getLastIntegrationPreview();
 				setVisible(request.getStatus() == INTEGRATED && preview != null 
 						&& preview.getRequestHead().equals(preview.getIntegrated()));
 			}
@@ -826,7 +819,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 				super.onConfigure();
 				
 				PullRequest request = getPullRequest();
-				IntegrationPreview preview = request.getIntegrationPreview();
+				IntegrationPreview preview = request.getLastIntegrationPreview();
 				setVisible(request.getStatus() == INTEGRATED && preview != null 
 						&& !preview.getRequestHead().equals(preview.getIntegrated())
 						&& (preview.getIntegrationStrategy() == MERGE_ALWAYS || preview.getIntegrationStrategy() == MERGE_IF_NECESSARY));
@@ -840,7 +833,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 				super.onConfigure();
 				
 				PullRequest request = getPullRequest();
-				IntegrationPreview preview = request.getIntegrationPreview();
+				IntegrationPreview preview = request.getLastIntegrationPreview();
 				setVisible(request.getStatus() == INTEGRATED && preview == null);
 			}
 			
@@ -852,7 +845,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 				super.onConfigure();
 				
 				PullRequest request = getPullRequest();
-				IntegrationPreview preview = request.getIntegrationPreview();
+				IntegrationPreview preview = request.getLastIntegrationPreview();
 				setVisible(request.getStatus() == INTEGRATED && preview != null 
 						&& !preview.getRequestHead().equals(preview.getIntegrated())
 						&& preview.getIntegrationStrategy() == MERGE_WITH_SQUASH);
@@ -885,7 +878,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 				super.onConfigure();
 				
 				PullRequest request = getPullRequest();
-				IntegrationPreview preview = request.getIntegrationPreview();
+				IntegrationPreview preview = request.getLastIntegrationPreview();
 				setVisible(request.getStatus() == INTEGRATED && preview != null 
 						&& !preview.getRequestHead().equals(preview.getIntegrated())
 						&& preview.getIntegrationStrategy() == REBASE_SOURCE_ONTO_TARGET);
@@ -918,7 +911,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 				super.onConfigure();
 				
 				PullRequest request = getPullRequest();
-				IntegrationPreview preview = request.getIntegrationPreview();
+				IntegrationPreview preview = request.getLastIntegrationPreview();
 				setVisible(request.getStatus() == INTEGRATED && preview != null 
 						&& !preview.getRequestHead().equals(preview.getIntegrated())
 						&& preview.getIntegrationStrategy() == REBASE_TARGET_ONTO_SOURCE);

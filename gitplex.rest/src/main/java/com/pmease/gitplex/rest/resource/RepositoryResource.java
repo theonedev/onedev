@@ -1,5 +1,6 @@
 package com.pmease.gitplex.rest.resource;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -22,9 +23,11 @@ import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 
+import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jersey.ValidQueryParams;
+import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
@@ -36,9 +39,12 @@ public class RepositoryResource {
 
 	private final Dao dao;
 	
+	private final RepositoryManager repositoryManager;
+	
 	@Inject
-	public RepositoryResource(Dao dao) {
+	public RepositoryResource(Dao dao, RepositoryManager repositoryManager) {
 		this.dao = dao;
+		this.repositoryManager = repositoryManager;
 	}
 	
 	@Path("/{id}")
@@ -54,10 +60,17 @@ public class RepositoryResource {
     
 	@ValidQueryParams
 	@GET
-	public Collection<Repository> query(
-			@QueryParam("user") Long userId, 
-			@QueryParam("name") String name) {
+	public Collection<Repository> query(@QueryParam("user") Long userId, @QueryParam("name") String name, 
+			@QueryParam("path") String path) {
 		EntityCriteria<Repository> criteria = EntityCriteria.of(Repository.class);
+		if (path != null) {
+			Repository repository = repositoryManager.findBy(path);
+			if (repository != null)
+				return Lists.newArrayList(repository);
+			else
+				return new ArrayList<>();
+		}
+		
 		if (userId != null)
 			criteria.add(Restrictions.eq("owner.id", userId));
 		if (name != null)

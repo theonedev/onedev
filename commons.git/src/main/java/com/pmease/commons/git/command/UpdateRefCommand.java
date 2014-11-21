@@ -1,17 +1,15 @@
 package com.pmease.commons.git.command;
 
 import java.io.File;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.execution.Commandline;
-import com.pmease.commons.util.execution.ExecuteResult;
 import com.pmease.commons.util.execution.LineConsumer;
 
-public class UpdateRefCommand extends GitCommand<Boolean> {
+public class UpdateRefCommand extends GitCommand<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(UpdateRefCommand.class);
 	
@@ -48,7 +46,7 @@ public class UpdateRefCommand extends GitCommand<Boolean> {
 	}
 
 	@Override
-	public Boolean call() {
+	public Void call() {
 	    Preconditions.checkNotNull(refName, "refName has to be specified.");
 	    Preconditions.checkNotNull(revision, "revision has to be specified.");
 	    
@@ -59,8 +57,7 @@ public class UpdateRefCommand extends GitCommand<Boolean> {
 		if (reason != null)
             cmd.addArgs("-m", reason);
 		
-		final AtomicBoolean refLockError = new AtomicBoolean(false);
-		ExecuteResult result = cmd.execute(new LineConsumer() {
+		cmd.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
@@ -75,19 +72,11 @@ public class UpdateRefCommand extends GitCommand<Boolean> {
 					logger.info(line);
 				else
 					logger.error(line);
-				
-				if (line.startsWith("fatal: Cannot lock the ref")) 
-					refLockError.set(true);
 			} 
 			
-		});
+		}).checkReturnCode();
 		
-		if (refLockError.get())
-			return false;
-		
-		result.checkReturnCode();
-		
-		return true;
+		return null;
 	}
 
 }

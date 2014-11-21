@@ -1,6 +1,9 @@
 package com.pmease.gitplex.web.page.repository.pullrequest;
 
-import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.*;
+import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_ALWAYS;
+import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_WITH_SQUASH;
+import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_SOURCE_ONTO_TARGET;
+import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_TARGET_ONTO_SOURCE;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -10,7 +13,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -34,7 +36,7 @@ class ResolveConflictInstructionPanel extends Panel {
 		Fragment fragment;
 		Repository targetRepo = request.getTarget().getRepository();
 		User user = GitPlex.getInstance(UserManager.class).getCurrent();
-		IntegrationPreview preview = GitPlex.getInstance(PullRequestManager.class).previewIntegration(request);
+		IntegrationPreview preview = request.getIntegrationPreview();
 		String sourceHead = preview.getRequestHead();
 		IntegrationStrategy strategy = request.getIntegrationStrategy();
 		boolean sameRepo = request.getTarget().getRepository().equals(request.getSource().getRepository());					
