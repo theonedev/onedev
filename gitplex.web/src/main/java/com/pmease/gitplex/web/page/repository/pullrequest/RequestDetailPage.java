@@ -1023,7 +1023,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		}
 
 		@Override
-		public void onVoted(PullRequest request) {
+		public void onReviewed(PullRequest request) {
 			onChange(request);
 		}
 

@@ -403,9 +403,9 @@ public class NewRequestPage extends RepositoryPage {
 				} else {
 					pullRequest.setSource(source);
 					pullRequest.setTarget(target);
-					pullRequest.getVoteInvitations().clear();
+					pullRequest.getReviewInvitations().clear();
 					
-					pullRequest.setAutoIntegrate(false);
+					pullRequest.setAssignee(pullRequest.getTarget().getRepository().getOwner());
 					
 					GitPlex.getInstance(PullRequestManager.class).open(pullRequest, new PageId(getPageId()));
 					

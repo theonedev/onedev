@@ -11,7 +11,7 @@ public interface PullRequestListener {
 	
 	void onCommented(PullRequest request);
 	
-	void onVoted(PullRequest request);
+	void onReviewed(PullRequest request);
 	
 	void onVerified(PullRequest request);
 	

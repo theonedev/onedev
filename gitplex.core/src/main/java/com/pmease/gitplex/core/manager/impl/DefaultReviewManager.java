@@ -51,34 +51,37 @@ public class DefaultReviewManager implements ReviewManager {
 
 	@Transactional
 	@Override
-	public void review(PullRequest request, User user, Result opinion, String comment) {
-		Review review = new Review();
-		review.setResult(opinion);
-		review.setUpdate(request.getLatestUpdate());
-		review.setReviewer(user);
+	public void review(PullRequest request, User reviewer, Result result, String comment) {
+		reviewer.setReviewEffort(reviewer.getReviewEffort()+1);
 		
-		review.getReviewer().getReviews().add(review);
+		Review review = new Review();
+		review.setResult(result);
+		review.setUpdate(request.getLatestUpdate());
+		review.setReviewer(reviewer);
+		
 		review.getUpdate().getReviews().add(review);
 		dao.persist(review);	
 		
 		PullRequestAudit audit = new PullRequestAudit();
-		if (opinion == Review.Result.APPROVE)
+		if (result == Review.Result.APPROVE)
 			audit.setOperation(PullRequestOperation.APPROVE);
 		else
 			audit.setOperation(PullRequestOperation.DISAPPROVE);
 		audit.setDate(new Date());
 		audit.setRequest(request);
-		audit.setUser(user);
+		audit.setUser(reviewer);
 		dao.persist(audit);
 		
 		if (comment != null) {
 			PullRequestComment requestComment = new PullRequestComment();
 			requestComment.setRequest(request);
 			requestComment.setDate(audit.getDate());
-			requestComment.setUser(user);
+			requestComment.setUser(reviewer);
 			requestComment.setContent(comment);
 			dao.persist(requestComment);
 		}
+		
+		
 
 		pullRequestManager.onGateKeeperUpdate(request);
 		
@@ -92,7 +95,7 @@ public class DefaultReviewManager implements ReviewManager {
 
 					@Override
 					protected void call(PullRequestListener listener, PullRequest request) {
-						listener.onVoted(request);
+						listener.onReviewed(request);
 					}
 					
 				});

@@ -15,7 +15,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"request", "user"})
+		@UniqueConstraint(columnNames={"request", "user", "type"})
 })
 public class PullRequestNotification extends AbstractEntity {
 

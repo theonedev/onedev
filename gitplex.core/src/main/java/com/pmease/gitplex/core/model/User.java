@@ -43,6 +43,8 @@ public class User extends AbstractUser implements ProtectedObject {
 	
 	private Date avatarUpdateDate;
 	
+	private int reviewEffort;
+	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<Membership> memberships = new ArrayList<>();
 	
@@ -133,6 +135,14 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.memberships = memberships;
 	}
 
+	public int getReviewEffort() {
+		return reviewEffort;
+	}
+
+	public void setReviewEffort(int reviewEffort) {
+		this.reviewEffort = reviewEffort;
+	}
+
 	public Collection<Repository> getRepositories() {
 		return repositories;
 	}
@@ -161,22 +171,6 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	public void setSubmittedRequests(Collection<PullRequest> submittedRequests) {
 		this.submittedRequests = submittedRequests;
-	}
-
-	public Collection<Review> getReviews() {
-		return reviews;
-	}
-
-	public void setReviews(Collection<Review> reviews) {
-		this.reviews = reviews;
-	}
-
-	public Collection<ReviewInvitation> getReviewInvitations() {
-		return reviewInvitations;
-	}
-
-	public void setReviewInvitations(Collection<ReviewInvitation> reviewInvitations) {
-		this.reviewInvitations = reviewInvitations;
 	}
 
     public Collection<PullRequestComment> getRequestComments() {

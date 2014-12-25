@@ -39,17 +39,19 @@ public class RegisterPage extends LayoutPage {
 			protected void onValidate() {
 				super.onValidate();
 
-				User user = (User) beanEditor.getConvertedInput();
-				
-				ErrorContext nameContext = beanEditor.getErrorContext(new ValuePath(new PathSegment.Property("name")));
-				ErrorContext emailContext = beanEditor.getErrorContext(new ValuePath(new PathSegment.Property("email")));
-				
-				UserManager userManager = GitPlex.getInstance(UserManager.class);
-
-				if (!nameContext.hasError(true) && userManager.findByName(user.getName()) != null) 
-					nameContext.addError("This name is already used by another user.");
-				if (!emailContext.hasError(true) && userManager.findByEmail(user.getEmail()) != null) 
-					emailContext.addError("This email address is already used by another user.");
+				if (beanEditor.isValid()) {
+					User user = (User) beanEditor.getConvertedInput();
+					
+					ErrorContext nameContext = beanEditor.getErrorContext(new ValuePath(new PathSegment.Property("name")));
+					ErrorContext emailContext = beanEditor.getErrorContext(new ValuePath(new PathSegment.Property("email")));
+					
+					UserManager userManager = GitPlex.getInstance(UserManager.class);
+	
+					if (!nameContext.hasError(true) && userManager.findByName(user.getName()) != null) 
+						nameContext.addError("This name is already used by another user.");
+					if (!emailContext.hasError(true) && userManager.findByEmail(user.getEmail()) != null) 
+						emailContext.addError("This email address is already used by another user.");
+				}
 			}
 			
 		};

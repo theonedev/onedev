@@ -116,7 +116,7 @@ public class CoreModule extends AbstractPluginModule {
 			}
 
 			@Override
-			public void onVoted(PullRequest request) {
+			public void onReviewed(PullRequest request) {
 			}
 
 			@Override

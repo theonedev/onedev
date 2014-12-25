@@ -108,8 +108,6 @@ public class PullRequest extends AbstractEntity {
 	
 	private String description;
 	
-	private boolean autoIntegrate;
-
 	@ManyToOne(fetch=FetchType.LAZY)
 	private User submitter;
 	
@@ -122,6 +120,9 @@ public class PullRequest extends AbstractEntity {
 	
 	@Column(nullable=false)
 	private String baseCommitHash;
+
+	@ManyToOne(fetch=FetchType.LAZY)
+	private User assignee;
 	
 	@Transient
 	private Git sandbox;
@@ -142,7 +143,7 @@ public class PullRequest extends AbstractEntity {
 	private Collection<PullRequestUpdate> updates = new ArrayList<>();
 
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<ReviewInvitation> voteInvitations = new ArrayList<>();
+	private Collection<ReviewInvitation> reviewInvitations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestVerification> verifications = new ArrayList<>();
@@ -194,14 +195,6 @@ public class PullRequest extends AbstractEntity {
 		this.description = description;
 	}
 
-	public boolean isAutoIntegrate() {
-		return autoIntegrate;
-	}
-
-	public void setAutoIntegrate(boolean autoIntegrate) {
-		this.autoIntegrate = autoIntegrate;
-	}
-
 	/**
 	 * Get the user submitting the pull request.
 	 * 
@@ -216,6 +209,22 @@ public class PullRequest extends AbstractEntity {
 
 	public void setSubmitter(@Nullable User submitter) {
 		this.submitter = submitter;
+	}
+
+	/**
+	 * Get the user responsible for integration of the pull request.
+	 * 
+	 * @return
+	 * 			the user responsible for integration of this pull request, or <tt>null</tt> to have the 
+	 * 			system integrate the pull request automatically
+	 */
+	@Nullable
+	public User getAssignee() {
+		return assignee;
+	}
+
+	public void setAssignee(User assignee) {
+		this.assignee = assignee;
 	}
 
 	/**
@@ -285,12 +294,12 @@ public class PullRequest extends AbstractEntity {
 		this.updates = updates;
 	}
 
-	public Collection<ReviewInvitation> getVoteInvitations() {
-		return voteInvitations;
+	public Collection<ReviewInvitation> getReviewInvitations() {
+		return reviewInvitations;
 	}
 
-	public void setVoteInvitations(Collection<ReviewInvitation> voteInvitations) {
-		this.voteInvitations = voteInvitations;
+	public void setReviewInvitations(Collection<ReviewInvitation> reviewInvitations) {
+		this.reviewInvitations = reviewInvitations;
 	}
 
 	public Collection<PullRequestVerification> getVerifications() {
@@ -503,43 +512,86 @@ public class PullRequest extends AbstractEntity {
 	 * 			number of users to invite
 	 */
 	public void pickReviewers(Collection<User> candidates, int count) {
-		Collection<User> copyOfCandidates = new HashSet<User>(candidates);
+		List<User> pickList = new ArrayList<User>(candidates);
 
-		// submitter is not allowed to vote for this request
+		// submitter is not allowed to review this request
 		if (getSubmitter() != null)
-			copyOfCandidates.remove(getSubmitter());
+			pickList.remove(getSubmitter());
 
 		/*
 		 * users already reviewed since base update should be excluded from
 		 * invitation list as their reviews are still valid
 		 */
-		for (Review vote : getReferentialUpdate().listReviewsOnwards()) {
-			copyOfCandidates.remove(vote.getReviewer());
+		for (Review review: getReferentialUpdate().listReviewsOnwards())
+			pickList.remove(review.getReviewer());
+
+		final Set<User> invited = new HashSet<>();
+		final Set<User> inviteExcluded = new HashSet<>();
+		
+		for (ReviewInvitation invitation: getReviewInvitations()) {
+			if (!invitation.isExcluded())
+				invited.add(invitation.getReviewer());
+			else
+				inviteExcluded.add(invitation.getReviewer());
 		}
 
-		Set<User> invited = new HashSet<User>();
-		for (ReviewInvitation each : getVoteInvitations())
-			invited.add(each.getReviewer());
+		/* Follow below rules to pick reviewers:
+		 * 1. If user is excluded previously, it will be considered last.
+		 * 2. If user is already a reviewer, it will be considered first.
+		 * 3. Otherwise pick user with least reviews.
+		 */
+		Collections.sort(pickList, new Comparator<User>() {
 
-		invited.retainAll(copyOfCandidates);
-
-		for (int i = 0; i < count - invited.size(); i++) {
-			User selected = Collections.min(copyOfCandidates, new Comparator<User>() {
-
-				@Override
-				public int compare(User user1, User user2) {
-					return user1.getReviews().size() - user2.getReviews().size();
+			@Override
+			public int compare(User user1, User user2) {
+				if (invited.contains(user1)) {
+					if (invited.contains(user2))
+						return user1.getReviewEffort() - user2.getReviewEffort();
+					else
+						return -1;
+				} else if (invited.contains(user2)) {
+					return 1;
+				} else if (inviteExcluded.contains(user1)) {
+					if (inviteExcluded.contains(user2)) 
+						return user1.getReviewEffort() - user2.getReviewEffort();
+					else
+						return 1;
+				} else if (inviteExcluded.contains(user2)) {
+					return -1;
+				} else {
+					return user1.getReviewEffort() - user2.getReviewEffort();
 				}
+			}
+			
+		});
 
-			});
+		List<User> picked;
+		if (count <= pickList.size())
+			picked = pickList.subList(0, count);
+		else
+			picked = pickList;
 
-			copyOfCandidates.remove(selected);
-
-			ReviewInvitation invitation = new ReviewInvitation();
-			invitation.setRequest(this);
-			invitation.setReviewer(selected);
-			invitation.getRequest().getVoteInvitations().add(invitation);
-			invitation.getReviewer().getReviewInvitations().add(invitation);
+		Set<User> notified = new HashSet<>();
+		for (PullRequestNotification notification: getNotifications()) {
+			if (notification.getType() == PullRequestNotification.Type.REVIEW)
+				notified.add(notification.getUser());
+		}
+		for (User each: picked) {
+			if (!invited.contains(each)) {
+				ReviewInvitation invitation = new ReviewInvitation();
+				invitation.setRequest(this);
+				invitation.setReviewer(each);
+				getReviewInvitations().add(invitation);
+			}
+			
+			if (!notified.contains(each)) {
+				PullRequestNotification notification = new PullRequestNotification();
+				notification.setRequest(this);
+				notification.setUser(each);
+				notification.setType(PullRequestNotification.Type.REVIEW);
+				notification.setDate(new Date());
+				getNotifications().add(notification);
+			}
 		}
 
 	}

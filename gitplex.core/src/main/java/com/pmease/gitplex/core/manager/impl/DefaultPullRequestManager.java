@@ -340,7 +340,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	@Transactional
 	@Override
 	public void onGateKeeperUpdate(PullRequest request) {
-		if (request.isAutoIntegrate() && canIntegrate(request)) 
+		if (request.getAssignee() == null && canIntegrate(request)) 
 			integrate(request, null, "Integrated automatically by system");
 	}
 

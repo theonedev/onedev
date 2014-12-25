@@ -144,7 +144,7 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 		user.setId(3L);
 		user.setName("user3");
 		candidates.add(user);
-		Assert.assertEquals("user1", request.getVoteInvitations().iterator().next().getReviewer().getName());
+		Assert.assertEquals("user1", request.getReviewInvitations().iterator().next().getReviewer().getName());
 		
 		Review vote = new Review();
 		vote.setId(1L);

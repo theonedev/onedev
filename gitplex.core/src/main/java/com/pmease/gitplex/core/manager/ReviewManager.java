@@ -11,5 +11,5 @@ public interface ReviewManager {
 
 	Review find(User reviewer, PullRequestUpdate update);
 
-	void review(PullRequest request, User user, Review.Result opinion, @Nullable String comment);
+	void review(PullRequest request, User reviewer, Review.Result result, @Nullable String comment);
 }
