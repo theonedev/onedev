@@ -33,8 +33,8 @@ import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.manager.VerificationManager;
-import com.pmease.gitplex.core.manager.VoteInvitationManager;
-import com.pmease.gitplex.core.manager.VoteManager;
+import com.pmease.gitplex.core.manager.ReviewInvitationManager;
+import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.manager.impl.DefaultAuthorizationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultBranchManager;
 import com.pmease.gitplex.core.manager.impl.DefaultConfigManager;
@@ -50,8 +50,8 @@ import com.pmease.gitplex.core.manager.impl.DefaultStorageManager;
 import com.pmease.gitplex.core.manager.impl.DefaultTeamManager;
 import com.pmease.gitplex.core.manager.impl.DefaultUserManager;
 import com.pmease.gitplex.core.manager.impl.DefaultVerificationManager;
-import com.pmease.gitplex.core.manager.impl.DefaultVoteInvitationManager;
-import com.pmease.gitplex.core.manager.impl.DefaultVoteManager;
+import com.pmease.gitplex.core.manager.impl.DefaultReviewInvitationManager;
+import com.pmease.gitplex.core.manager.impl.DefaultReviewManager;
 import com.pmease.gitplex.core.model.ModelLocator;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.setting.SpecifiedGit;
@@ -181,8 +181,8 @@ public class CoreModule extends AbstractPluginModule {
 		bind(TeamManager.class).to(DefaultTeamManager.class);
 		bind(UserManager.class).to(DefaultUserManager.class);
 		bind(VerificationManager.class).to(DefaultVerificationManager.class);
-		bind(VoteInvitationManager.class).to(DefaultVoteInvitationManager.class);
-		bind(VoteManager.class).to(DefaultVoteManager.class);
+		bind(ReviewInvitationManager.class).to(DefaultReviewInvitationManager.class);
+		bind(ReviewManager.class).to(DefaultReviewManager.class);
 		bind(OldCommitCommentManager.class).to(DefaultOldCommitCommentManager.class);
 	}
 

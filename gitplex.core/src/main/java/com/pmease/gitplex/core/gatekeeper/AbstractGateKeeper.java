@@ -1,6 +1,5 @@
 package com.pmease.gitplex.core.gatekeeper;
 
-import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -13,10 +12,9 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Disapproved;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Ignored;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.gatekeeper.checkresult.PendingAndBlock;
-import com.pmease.gitplex.core.gatekeeper.voteeligibility.VoteEligibility;
 import com.pmease.gitplex.core.model.Branch;
-import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
@@ -144,12 +142,12 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 		return new Disapproved(reason);
 	}
 
-	protected CheckResult pending(String reason, VoteEligibility voteEligibility) {
-		return new Pending(reason, voteEligibility);
+	protected CheckResult pending(String reason) {
+		return new Pending(reason);
 	}
 
-	protected CheckResult pendingAndBlock(String reason, VoteEligibility voteEligibility) {
-		return new PendingAndBlock(reason, voteEligibility);
+	protected CheckResult pendingAndBlock(String reason) {
+		return new PendingAndBlock(reason);
 	}
 
 	protected CheckResult ignored() {
@@ -164,12 +162,12 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 		return new Disapproved(reasons);
 	}
 
-	protected CheckResult pending(List<String> reasons, Collection<VoteEligibility> voteEligibilies) {
-		return new Pending(reasons, voteEligibilies);
+	protected CheckResult pending(List<String> reasons) {
+		return new Pending(reasons);
 	}
 
-	protected CheckResult pendingAndBlock(List<String> reasons, Collection<VoteEligibility> voteEligibilities) {
-		return new PendingAndBlock(reasons, voteEligibilities);
+	protected CheckResult pendingAndBlock(List<String> reasons) {
+		return new PendingAndBlock(reasons);
 	}
 
 }

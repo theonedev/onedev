@@ -19,6 +19,8 @@ import com.pmease.commons.hibernate.AbstractEntity;
 })
 public class PullRequestNotification extends AbstractEntity {
 
+	public enum Type {REVIEW, UPDATE, INTEGRATE, CHANGED};
+	
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private PullRequest request;
@@ -26,7 +28,10 @@ public class PullRequestNotification extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private User user;
-
+	
+	@Column(nullable=false)
+	private Type type;
+	
 	@Column(nullable=false)
 	private Date date;
 
@@ -46,6 +51,14 @@ public class PullRequestNotification extends AbstractEntity {
 		this.user = user;
 	}
 
+	public Type getType() {
+		return type;
+	}
+
+	public void setType(Type type) {
+		this.type = type;
+	}
+
 	public Date getDate() {
 		return date;
 	}
@@ -53,5 +66,5 @@ public class PullRequestNotification extends AbstractEntity {
 	public void setDate(Date date) {
 		this.date = date;
 	}
-	
+
 }

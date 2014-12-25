@@ -3,12 +3,11 @@ package com.pmease.gitplex.core.gatekeeper;
 import com.google.common.collect.Sets;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.gatekeeper.voteeligibility.CanVoteBySpecifiedUser;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.model.PullRequestVote;
 
 @SuppressWarnings("serial")
 @Editable(order=300, icon="fa-user-o", description=
@@ -19,13 +18,12 @@ public class IfApprovedByRepositoryOwner extends ApprovalGateKeeper {
     public CheckResult doCheckRequest(PullRequest request) {
         User repoOwner = request.getTarget().getRepository().getOwner();
 
-        PullRequestVote.Result result = repoOwner.checkVoteSince(request.getReferentialUpdate());
+        Review.Result result = repoOwner.checkReviewSince(request.getReferentialUpdate());
 
         if (result == null) {
-            request.pickVoters(Sets.newHashSet(repoOwner), 1);
-            return pending("To be approved by " + repoOwner.getName() + ".",
-                    new CanVoteBySpecifiedUser(repoOwner));
-        } else if (result == PullRequestVote.Result.APPROVE) {
+            request.pickReviewers(Sets.newHashSet(repoOwner), 1);
+            return pending("To be approved by " + repoOwner.getName() + ".");
+        } else if (result == Review.Result.APPROVE) {
             return approved("Approved by " + repoOwner.getName() + ".");
         } else {
             return disapproved("Rejected by " + repoOwner.getName() + ".");
@@ -36,7 +34,7 @@ public class IfApprovedByRepositoryOwner extends ApprovalGateKeeper {
 		if (user.equals(repository.getOwner()))
 			return approved("Approved by repository owner.");
 		else
-			return pending("Not approved by repository owner.", new CanVoteBySpecifiedUser(repository.getOwner()));
+			return pending("Not approved by repository owner.");
     }
     
 	@Override

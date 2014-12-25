@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import com.pmease.gitplex.core.comment.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestVote;
+import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.operation.GeneralOperation;
@@ -15,7 +15,7 @@ public interface AuthorizationManager {
 	
 	boolean canModify(PullRequest request);
 	
-	boolean canModify(PullRequestVote vote);
+	boolean canModify(Review vote);
 	
 	boolean canModify(Comment comment);
 }

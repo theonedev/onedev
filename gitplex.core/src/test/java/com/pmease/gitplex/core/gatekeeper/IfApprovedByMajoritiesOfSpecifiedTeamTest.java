@@ -19,7 +19,7 @@ import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.model.PullRequestVote;
+import com.pmease.gitplex.core.model.Review;
 
 public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 
@@ -144,16 +144,16 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 		user.setId(3L);
 		user.setName("user3");
 		candidates.add(user);
-		Assert.assertEquals("user1", request.getVoteInvitations().iterator().next().getVoter().getName());
+		Assert.assertEquals("user1", request.getVoteInvitations().iterator().next().getReviewer().getName());
 		
-		PullRequestVote vote = new PullRequestVote();
+		Review vote = new Review();
 		vote.setId(1L);
-		vote.setResult(PullRequestVote.Result.APPROVE);
+		vote.setResult(Review.Result.APPROVE);
 		vote.setUpdate(update);
-		vote.setVoter(new User());
-		vote.getVoter().setId(1L);
-		vote.getVoter().setName("user1");
-		update.getVotes().add(vote);
+		vote.setReviewer(new User());
+		vote.getReviewer().setId(1L);
+		vote.getReviewer().setName("user1");
+		update.getReviews().add(vote);
 		
 		Assert.assertTrue(gateKeeper.checkRequest(request).isApproved());
 	}

@@ -7,13 +7,12 @@ import javax.validation.constraints.Min;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.gatekeeper.voteeligibility.CanVoteBySpecifiedTeam;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.Membership;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.model.PullRequestVote;
 
 @SuppressWarnings("serial")
 @Editable(order=100, icon="fa-group-o", description=
@@ -42,10 +41,10 @@ public class IfApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
         int approvals = 0;
         int pendings = 0;
         for (User member : members) {
-            PullRequestVote.Result result = member.checkVoteSince(request.getReferentialUpdate());
+            Review.Result result = member.checkReviewSince(request.getReferentialUpdate());
             if (result == null) {
                 pendings++;
-            } else if (result == PullRequestVote.Result.APPROVE) {
+            } else if (result == Review.Result.APPROVE) {
                 approvals++;
             }
         }
@@ -59,10 +58,10 @@ public class IfApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
         } else {
             int lackApprovals = getLeastApprovals() - approvals;
 
-            request.pickVoters(members, lackApprovals);
+            request.pickReviewers(members, lackApprovals);
 
             return pending("To be approved by " + lackApprovals + " user(s) from team '"
-                    + getTeam().getName() + "'.", new CanVoteBySpecifiedTeam(getTeam()));
+                    + getTeam().getName() + "'.");
         }
     }
 
@@ -89,7 +88,7 @@ public class IfApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
             int lackApprovals = getLeastApprovals() - approvals;
 
             return pending("Lack " + lackApprovals + " approvals from team '"
-                    + getTeam().getName() + "'.", new CanVoteBySpecifiedTeam(getTeam()));
+                    + getTeam().getName() + "'.");
         }
 	}
 

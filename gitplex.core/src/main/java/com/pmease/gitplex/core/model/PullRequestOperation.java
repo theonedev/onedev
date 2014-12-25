@@ -5,11 +5,10 @@ import javax.annotation.Nullable;
 import org.apache.shiro.SecurityUtils;
 
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.gatekeeper.voteeligibility.VoteEligibility;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
+import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.manager.VoteManager;
 import com.pmease.gitplex.core.model.PullRequest.Status;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
@@ -60,8 +59,8 @@ public enum PullRequestOperation {
 		@Override
 		public void operate(PullRequest request, String comment) {
 			User user = GitPlex.getInstance(UserManager.class).getCurrent();
-			GitPlex.getInstance(VoteManager.class).vote(
-					request, user, PullRequestVote.Result.APPROVE, comment);
+			GitPlex.getInstance(ReviewManager.class).review(
+					request, user, Review.Result.APPROVE, comment);
 		}		
 		
 	},
@@ -75,8 +74,8 @@ public enum PullRequestOperation {
 		@Override
 		public void operate(PullRequest request, String comment) {
 			User user = GitPlex.getInstance(UserManager.class).getCurrent();
-			GitPlex.getInstance(VoteManager.class).vote(
-					request, user, PullRequestVote.Result.DISAPPROVE, comment);
+			GitPlex.getInstance(ReviewManager.class).review(
+					request, user, Review.Result.DISAPPROVE, comment);
 		}
 		
 	};
@@ -89,17 +88,10 @@ public enum PullRequestOperation {
 		if (request.getStatus() != Status.PENDING_APPROVAL)
 			return false;
 		
-		if (GitPlex.getInstance(VoteManager.class).find(user, request.getLatestUpdate()) != null)
+		if (GitPlex.getInstance(ReviewManager.class).find(user, request.getLatestUpdate()) != null)
 			return false;
-		
-		boolean canVote = false;
-		for (VoteEligibility each: request.getCheckResult().getVoteEligibilities()) {
-			if (each.canVote(user, request)) {
-				canVote = true;
-				break;
-			}
-		}
-		return canVote;
+		else
+			return true;
 	}
 
 	public abstract void operate(PullRequest request, @Nullable String comment);

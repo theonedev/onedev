@@ -1,7 +1,6 @@
 package com.pmease.gitplex.core.gatekeeper;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import com.pmease.commons.editable.annotation.Editable;
@@ -11,7 +10,6 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Disapproved;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.gatekeeper.checkresult.PendingAndBlock;
-import com.pmease.gitplex.core.gatekeeper.voteeligibility.VoteEligibility;
 
 @SuppressWarnings("serial")
 @Editable(name="If All Contained Gate Keepers Are Passed", icon="fa-servers", order=100, 
@@ -24,8 +22,6 @@ public class AndGateKeeper extends AndOrGateKeeper {
 		List<String> pendingReasons = new ArrayList<String>();
 		List<String> acceptReasons = new ArrayList<String>();
 		
-		Collection<VoteEligibility> voteEligibilities = new ArrayList<>();
-		
 		for (GateKeeper each: getGateKeepers()) {
 			CheckResult result = checker.check(each);
 			if (result instanceof Approved) {
@@ -34,16 +30,14 @@ public class AndGateKeeper extends AndOrGateKeeper {
 				return result;
 			} else if (result instanceof PendingAndBlock) {
 				result.getReasons().addAll(pendingReasons);
-				result.getVoteEligibilities().addAll(voteEligibilities);
 				return result;
 			} else if (result instanceof Pending) {
 				pendingReasons.addAll(result.getReasons());
-				voteEligibilities.addAll(result.getVoteEligibilities());
 			}
 		}
 		
 		if (!pendingReasons.isEmpty())
-			return pending(pendingReasons, voteEligibilities);
+			return pending(pendingReasons);
 		else
 			return approved(acceptReasons);
 	}

@@ -27,7 +27,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.PullRequestVerification;
-import com.pmease.gitplex.core.model.PullRequestVote;
+import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.comment.event.PullRequestChanged;
 import com.pmease.gitplex.web.component.commit.CommitHashLink;
@@ -96,15 +96,15 @@ public class RequestUpdatesPage extends RequestDetailPage {
 					compareLink.add(AttributeAppender.append("title", "Compare with previous update"));
 				updateItem.add(compareLink);
 
-				updateItem.add(new ListView<PullRequestVote>("votes", new LoadableDetachableModel<List<PullRequestVote>>() {
+				updateItem.add(new ListView<Review>("votes", new LoadableDetachableModel<List<Review>>() {
 
 					@Override
-					protected List<PullRequestVote> load() {
-						List<PullRequestVote> votes = new ArrayList<>(updateItem.getModelObject().getVotes());
-						Collections.sort(votes, new Comparator<PullRequestVote>() {
+					protected List<Review> load() {
+						List<Review> votes = new ArrayList<>(updateItem.getModelObject().getReviews());
+						Collections.sort(votes, new Comparator<Review>() {
 
 							@Override
-							public int compare(PullRequestVote vote1, PullRequestVote vote2) {
+							public int compare(Review vote1, Review vote2) {
 								return vote1.getDate().compareTo(vote2.getDate());
 							}
 							
@@ -115,13 +115,13 @@ public class RequestUpdatesPage extends RequestDetailPage {
 				}) {
 
 					@Override
-					protected void populateItem(final ListItem<PullRequestVote> item) {
-						PullRequestVote vote = item.getModelObject();
+					protected void populateItem(final ListItem<Review> item) {
+						Review vote = item.getModelObject();
 
-						item.add(new UserLink("user", new UserModel(vote.getVoter()), AvatarMode.AVATAR)
+						item.add(new UserLink("user", new UserModel(vote.getReviewer()), AvatarMode.AVATAR)
 									.withTooltipConfig(new TooltipConfig()));
 						Label label;
-						if (vote.getResult() == PullRequestVote.Result.APPROVE) {
+						if (vote.getResult() == Review.Result.APPROVE) {
 							label = new Label("label", "Approved");
 							label.add(AttributeModifier.append("class", " label-success"));
 						} else {
@@ -135,7 +135,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 					protected void onConfigure() {
 						super.onConfigure();
 						
-						setVisible(!updateItem.getModelObject().getVotes().isEmpty());
+						setVisible(!updateItem.getModelObject().getReviews().isEmpty());
 					}
 					
 				});

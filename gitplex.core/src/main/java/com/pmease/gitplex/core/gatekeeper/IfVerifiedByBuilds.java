@@ -7,7 +7,6 @@ import javax.validation.constraints.Min;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.gatekeeper.voteeligibility.NoneCanVote;
 import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.IntegrationPreview;
@@ -65,9 +64,9 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 	protected CheckResult doCheckRequest(PullRequest request) {
 		if (request.isNew()) {
 			if (blockMode)
-				return pendingAndBlock("To be verified by build", new NoneCanVote());
+				return pendingAndBlock("To be verified by build");
 			else
-				return pending("To be verified by build", new NoneCanVote());
+				return pending("To be verified by build");
 		}
 		
 		String commit;
@@ -75,9 +74,9 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 			IntegrationPreview preview = request.getIntegrationPreview();
 			if (preview == null) {
 				if (blockMode)
-					return pendingAndBlock("To be verified by build", new NoneCanVote());
+					return pendingAndBlock("To be verified by build");
 				else
-					return pending("To be verified by build", new NoneCanVote());
+					return pending("To be verified by build");
 			}
 			commit = preview.getIntegrated();
 			if (commit == null) 
@@ -101,14 +100,14 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 		if (lacks > 0) {
 			if (blockMode) {
 				if (leastPassCount > 1)
-					return pendingAndBlock("To be verified by " + lacks + " more build(s)", new NoneCanVote());
+					return pendingAndBlock("To be verified by " + lacks + " more build(s)");
 				else
-					return pendingAndBlock("To be verified by build", new NoneCanVote());
+					return pendingAndBlock("To be verified by build");
 			} else {
 				if (leastPassCount > 1)
-					return pending("To be verified by " + lacks + " more build(s)", new NoneCanVote());
+					return pending("To be verified by " + lacks + " more build(s)");
 				else
-					return pending("To be verified by build", new NoneCanVote());
+					return pending("To be verified by build");
 			}
 		} else {
 			return approved("Builds passed");
@@ -118,17 +117,17 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 	@Override
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
 		if (blockMode)
-			return pendingAndBlock("Not verified by build.", new NoneCanVote());
+			return pendingAndBlock("Not verified by build.");
 		else
-			return pending("Not verified by build.", new NoneCanVote());
+			return pending("Not verified by build.");
 	}
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
 		if (blockMode) {
-			return pendingAndBlock("Has to be verified by builds.", new NoneCanVote());
+			return pendingAndBlock("Has to be verified by builds.");
 		} else {
-			return pendingAndBlock("Has to be verified by builds.", new NoneCanVote());
+			return pendingAndBlock("Has to be verified by builds.");
 		}
 	}
 

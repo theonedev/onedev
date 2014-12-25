@@ -8,12 +8,11 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.editable.UserChoice;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.gatekeeper.voteeligibility.CanVoteBySpecifiedUser;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.model.PullRequestVote;
 
 @SuppressWarnings("serial")
 @Editable(order=200, icon="fa-user-o", description=
@@ -37,13 +36,12 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
     public CheckResult doCheckRequest(PullRequest request) {
         User user = GitPlex.getInstance(Dao.class).load(User.class, getUserId());
 
-        PullRequestVote.Result result = user.checkVoteSince(request.getReferentialUpdate());
+        Review.Result result = user.checkReviewSince(request.getReferentialUpdate());
         if (result == null) {
-            request.pickVoters(Sets.newHashSet(user), 1);
+            request.pickReviewers(Sets.newHashSet(user), 1);
 
-            return pending("To be approved by " + user.getDisplayName() + ".",
-                    new CanVoteBySpecifiedUser(user));
-        } else if (result == PullRequestVote.Result.APPROVE) {
+            return pending("To be approved by " + user.getDisplayName() + ".");
+        } else if (result == Review.Result.APPROVE) {
             return approved("Approved by " + user.getDisplayName() + ".");
         } else {
             return disapproved("Rejected by " + user.getDisplayName() + ".");
@@ -63,8 +61,7 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
         if (approver.getId().equals(user.getId())) {
         	return approved("Approved by " + approver.getName() + ".");
         } else {
-        	return pending("Not approved by " + approver.getName() + ".", 
-        			new CanVoteBySpecifiedUser(approver)); 
+        	return pending("Not approved by " + approver.getName() + "."); 
         }
     }
     

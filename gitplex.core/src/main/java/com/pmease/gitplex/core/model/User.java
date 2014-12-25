@@ -55,11 +55,11 @@ public class User extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="submitter")
 	private Collection<PullRequest> submittedRequests = new ArrayList<>();
 
-	@OneToMany(mappedBy="voter", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestVote> requestVotes = new ArrayList<PullRequestVote>();
+	@OneToMany(mappedBy="reviewer", cascade=CascadeType.REMOVE)
+	private Collection<Review> reviews = new ArrayList<Review>();
 	
-	@OneToMany(mappedBy="voter", cascade=CascadeType.REMOVE)
-	private Collection<VoteInvitation> voteInvitations = new ArrayList<>();
+	@OneToMany(mappedBy="reviewer", cascade=CascadeType.REMOVE)
+	private Collection<ReviewInvitation> reviewInvitations = new ArrayList<>();
 
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestComment> requestComments = new ArrayList<>();
@@ -69,9 +69,6 @@ public class User extends AbstractUser implements ProtectedObject {
 	
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<PullRequestWatch> requestWatches = new ArrayList<>();
-
-    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<PullRequestTask> requestTasks = new ArrayList<>();
 
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<PullRequestNotification> requestNotifications = new ArrayList<>();
@@ -166,20 +163,20 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.submittedRequests = submittedRequests;
 	}
 
-	public Collection<PullRequestVote> getRequestVotes() {
-		return requestVotes;
+	public Collection<Review> getReviews() {
+		return reviews;
 	}
 
-	public void setRequestVotes(Collection<PullRequestVote> requestVotes) {
-		this.requestVotes = requestVotes;
+	public void setReviews(Collection<Review> reviews) {
+		this.reviews = reviews;
 	}
 
-	public Collection<VoteInvitation> getVoteInvitations() {
-		return voteInvitations;
+	public Collection<ReviewInvitation> getReviewInvitations() {
+		return reviewInvitations;
 	}
 
-	public void setVoteInvitations(Collection<VoteInvitation> voteInvitations) {
-		this.voteInvitations = voteInvitations;
+	public void setReviewInvitations(Collection<ReviewInvitation> reviewInvitations) {
+		this.reviewInvitations = reviewInvitations;
 	}
 
     public Collection<PullRequestComment> getRequestComments() {
@@ -207,20 +204,11 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.requestWatches = requestWatches;
 	}
 
-	public Collection<PullRequestTask> getRequestTasks() {
-		return requestTasks;
-	}
-
-	public void setRequestTasks(Collection<PullRequestTask> requestTasks) {
-		this.requestTasks = requestTasks;
-	}
-
 	public Collection<PullRequestNotification> getRequestNotifications() {
 		return requestNotifications;
 	}
 
-	public void setRequestNotifications(
-			Collection<PullRequestNotification> requestNotifications) {
+	public void setRequestNotifications(Collection<PullRequestNotification> requestNotifications) {
 		this.requestNotifications = requestNotifications;
 	}
 
@@ -237,14 +225,13 @@ public class User extends AbstractUser implements ProtectedObject {
 		}
 	}
 	
-	public PullRequestVote.Result checkVoteSince(PullRequestUpdate update) {
+	public Review.Result checkReviewSince(PullRequestUpdate update) {
 		if (this.equals(update.getRequest().getSubmitter()))
-			return PullRequestVote.Result.APPROVE;
+			return Review.Result.APPROVE;
 		
-		for (PullRequestVote vote: update.listVotesOnwards()) {
-			if (vote.getVoter().equals(this)) {
+		for (Review vote: update.listReviewsOnwards()) {
+			if (vote.getReviewer().equals(this))
 				return vote.getResult();
-			}
 		}
 		
 		return null;

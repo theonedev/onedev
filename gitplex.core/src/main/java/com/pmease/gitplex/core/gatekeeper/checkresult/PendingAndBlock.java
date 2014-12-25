@@ -1,9 +1,6 @@
 package com.pmease.gitplex.core.gatekeeper.checkresult;
 
-import java.util.Collection;
 import java.util.List;
-
-import com.pmease.gitplex.core.gatekeeper.voteeligibility.VoteEligibility;
 
 /* 
  * Same as Pending, but followed gate keeper should not be checked unless result 
@@ -12,12 +9,12 @@ import com.pmease.gitplex.core.gatekeeper.voteeligibility.VoteEligibility;
 @SuppressWarnings("serial")
 public class PendingAndBlock extends CheckResult {
 	
-	public PendingAndBlock(List<String> reasons, Collection<VoteEligibility> voteEligibilities) {
-		super(reasons, voteEligibilities);
+	public PendingAndBlock(List<String> reasons) {
+		super(reasons);
 	}
 
-	public PendingAndBlock(String reason, VoteEligibility voteEligibility) {
-		super(reason, voteEligibility);
+	public PendingAndBlock(String reason) {
+		super(reason);
 	}
 
 	@Override

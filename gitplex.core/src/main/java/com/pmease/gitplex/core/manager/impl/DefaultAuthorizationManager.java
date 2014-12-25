@@ -18,7 +18,7 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.model.PullRequestVote;
+import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.permission.operation.GeneralOperation;
 
@@ -57,12 +57,12 @@ public class DefaultAuthorizationManager implements AuthorizationManager {
 	}
 	
 	@Override
-	public boolean canModify(PullRequestVote vote) {
+	public boolean canModify(Review vote) {
 		Repository repository = vote.getUpdate().getRequest().getTarget().getRepository();
 		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(repository))) {
 			return true;
 		} else {
-			return vote.getVoter().equals(userManager.getCurrent());
+			return vote.getReviewer().equals(userManager.getCurrent());
 		}
 	}
 

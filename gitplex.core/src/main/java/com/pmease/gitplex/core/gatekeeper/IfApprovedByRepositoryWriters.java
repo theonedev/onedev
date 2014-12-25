@@ -7,13 +7,12 @@ import javax.validation.constraints.Min;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.gatekeeper.voteeligibility.CanVoteByAuthorizedUser;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.model.PullRequestVote;
 import com.pmease.gitplex.core.permission.operation.GeneralOperation;
 
 @SuppressWarnings("serial")
@@ -43,10 +42,10 @@ public class IfApprovedByRepositoryWriters extends ApprovalGateKeeper {
         int approvals = 0;
         int pendings = 0;
         for (User user: authorizedUsers) {
-            PullRequestVote.Result result = user.checkVoteSince(request.getReferentialUpdate());
+            Review.Result result = user.checkReviewSince(request.getReferentialUpdate());
             if (result == null) {
                 pendings++;
-            } else if (result == PullRequestVote.Result.APPROVE) {
+            } else if (result == Review.Result.APPROVE) {
                 approvals++;
             }
         }
@@ -59,10 +58,9 @@ public class IfApprovedByRepositoryWriters extends ApprovalGateKeeper {
         } else {
             int lackApprovals = getLeastApprovals() - approvals;
 
-            request.pickVoters(authorizedUsers, lackApprovals);
+            request.pickReviewers(authorizedUsers, lackApprovals);
 
-            return pending("To be approved by " + lackApprovals + " authorized user(s).", 
-            		new CanVoteByAuthorizedUser());
+            return pending("To be approved by " + lackApprovals + " authorized user(s).");
         }
 	}
 	
@@ -86,8 +84,7 @@ public class IfApprovedByRepositoryWriters extends ApprovalGateKeeper {
             return disapproved("Can not get at least " + leastApprovals + " approvals from authorized users.");
         } else {
             int lackApprovals = getLeastApprovals() - approvals;
-            return pending("Lack " + lackApprovals + " approvals from authorized users.", 
-            		new CanVoteByAuthorizedUser());
+            return pending("Lack " + lackApprovals + " approvals from authorized users.");
         }
 	}
 	

@@ -12,24 +12,26 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"voter", "request"})
+		@UniqueConstraint(columnNames={"reviewer", "request"})
 })
-public class VoteInvitation extends AbstractEntity {
+public class ReviewInvitation extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private User voter;
+	private User reviewer;
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private PullRequest request;
 	
-	public User getVoter() {
-		return voter;
+	private boolean excluded;
+	
+	public User getReviewer() {
+		return reviewer;
 	}
 
-	public void setVoter(User voter) {
-		this.voter = voter;
+	public void setReviewer(User reviewer) {
+		this.reviewer = reviewer;
 	}
 	
 	public PullRequest getRequest() {
@@ -38,6 +40,14 @@ public class VoteInvitation extends AbstractEntity {
 
 	public void setRequest(PullRequest request) {
 		this.request = request;
+	}
+
+	public boolean isExcluded() {
+		return excluded;
+	}
+
+	public void setExcluded(boolean excluded) {
+		this.excluded = excluded;
 	}
 
 }

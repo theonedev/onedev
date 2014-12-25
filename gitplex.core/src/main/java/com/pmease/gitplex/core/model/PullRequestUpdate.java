@@ -45,7 +45,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	private Date date;
 	
 	@OneToMany(mappedBy="update", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestVote> votes = new ArrayList<PullRequestVote>();
+	private Collection<Review> reviews = new ArrayList<Review>();
 	
 	private transient List<Commit> commits;
 
@@ -75,12 +75,12 @@ public class PullRequestUpdate extends AbstractEntity {
 		this.date = date;
 	}
 
-    public Collection<PullRequestVote> getVotes() {
-		return votes;
+    public Collection<Review> getReviews() {
+		return reviews;
 	}
 
-	public void setVotes(Collection<PullRequestVote> votes) {
-		this.votes = votes;
+	public void setReviews(Collection<Review> reviews) {
+		this.reviews = reviews;
 	}
 
 	@JsonProperty
@@ -90,22 +90,21 @@ public class PullRequestUpdate extends AbstractEntity {
 	}
 	
 	/**
-	 * List votes against this update and all subsequent updates.
+	 * List reviews against this update and all subsequent updates.
 	 * <p>
 	 * @return
-	 * 			list of found votes, ordered by associated updates reversely
+	 * 			list of found reviews, ordered by associated updates reversely
 	 */
-	public List<PullRequestVote> listVotesOnwards() {
-		List<PullRequestVote> votes = new ArrayList<PullRequestVote>();
+	public List<Review> listReviewsOnwards() {
+		List<Review> reviews = new ArrayList<Review>();
 		
 		for (PullRequestUpdate update: getRequest().getEffectiveUpdates()) {
-			votes.addAll(update.getVotes());
-			if (update.equals(this)) {
+			reviews.addAll(update.getReviews());
+			if (update.equals(this))
 				break;
-			}
 		}
 		
-		return votes;
+		return reviews;
 	}
 
 	public void deleteRefs() {

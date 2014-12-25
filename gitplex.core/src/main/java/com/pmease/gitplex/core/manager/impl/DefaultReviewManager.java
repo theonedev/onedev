@@ -14,18 +14,18 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListeners;
 import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.manager.VoteManager;
+import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestAudit;
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestOperation;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.model.PullRequestVote;
-import com.pmease.gitplex.core.model.PullRequestVote.Result;
+import com.pmease.gitplex.core.model.Review;
+import com.pmease.gitplex.core.model.Review.Result;
 
 @Singleton
-public class DefaultVoteManager implements VoteManager {
+public class DefaultReviewManager implements ReviewManager {
 
 	private final Dao dao;
 	
@@ -34,7 +34,7 @@ public class DefaultVoteManager implements VoteManager {
 	private final PullRequestListeners pullRequestListeners;
 	
 	@Inject
-	public DefaultVoteManager(Dao dao, PullRequestManager pullRequestManager, 
+	public DefaultReviewManager(Dao dao, PullRequestManager pullRequestManager, 
 			PullRequestListeners pullRequestListeners) {
 		this.dao = dao;
 		this.pullRequestManager = pullRequestManager;
@@ -43,26 +43,26 @@ public class DefaultVoteManager implements VoteManager {
 
 	@Sessional
 	@Override
-	public PullRequestVote find(User reviewer, PullRequestUpdate update) {
-		return dao.find(EntityCriteria.of(PullRequestVote.class)
-				.add(Restrictions.eq("voter", reviewer)) 
+	public Review find(User reviewer, PullRequestUpdate update) {
+		return dao.find(EntityCriteria.of(Review.class)
+				.add(Restrictions.eq("redviewer", reviewer)) 
 				.add(Restrictions.eq("update", update)));
 	}
 
 	@Transactional
 	@Override
-	public void vote(PullRequest request, User user, Result result, String comment) {
-		PullRequestVote vote = new PullRequestVote();
-		vote.setResult(result);
-		vote.setUpdate(request.getLatestUpdate());
-		vote.setVoter(user);
+	public void review(PullRequest request, User user, Result opinion, String comment) {
+		Review review = new Review();
+		review.setResult(opinion);
+		review.setUpdate(request.getLatestUpdate());
+		review.setReviewer(user);
 		
-		vote.getVoter().getRequestVotes().add(vote);
-		vote.getUpdate().getVotes().add(vote);
-		dao.persist(vote);	
+		review.getReviewer().getReviews().add(review);
+		review.getUpdate().getReviews().add(review);
+		dao.persist(review);	
 		
 		PullRequestAudit audit = new PullRequestAudit();
-		if (result == PullRequestVote.Result.APPROVE)
+		if (opinion == Review.Result.APPROVE)
 			audit.setOperation(PullRequestOperation.APPROVE);
 		else
 			audit.setOperation(PullRequestOperation.DISAPPROVE);

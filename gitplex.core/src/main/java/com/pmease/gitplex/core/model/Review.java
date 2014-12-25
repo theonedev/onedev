@@ -15,15 +15,15 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"voter", "update"})
+		@UniqueConstraint(columnNames={"reviewer", "update"})
 })
-public class PullRequestVote extends AbstractEntity {
+public class Review extends AbstractEntity {
 
 	public static enum Result {APPROVE, DISAPPROVE};
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private User voter;
+	private User reviewer;
 
 	@Column(nullable=false)
 	private Date date = new Date();
@@ -43,12 +43,12 @@ public class PullRequestVote extends AbstractEntity {
 		this.date = date;
 	}
 
-	public User getVoter() {
-		return voter;
+	public User getReviewer() {
+		return reviewer;
 	}
 
-	public void setVoter(User voter) {
-		this.voter = voter;
+	public void setReviewer(User reviewer) {
+		this.reviewer = reviewer;
 	}
 	
 	public PullRequestUpdate getUpdate() {

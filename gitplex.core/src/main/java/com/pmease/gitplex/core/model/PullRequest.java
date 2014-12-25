@@ -142,7 +142,7 @@ public class PullRequest extends AbstractEntity {
 	private Collection<PullRequestUpdate> updates = new ArrayList<>();
 
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<VoteInvitation> voteInvitations = new ArrayList<>();
+	private Collection<ReviewInvitation> voteInvitations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestVerification> verifications = new ArrayList<>();
@@ -155,9 +155,6 @@ public class PullRequest extends AbstractEntity {
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestNotification> notifications = new ArrayList<>();
-
-	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestTask> tasks = new ArrayList<>();
 
 	private transient CheckResult checkResult;
 
@@ -288,11 +285,11 @@ public class PullRequest extends AbstractEntity {
 		this.updates = updates;
 	}
 
-	public Collection<VoteInvitation> getVoteInvitations() {
+	public Collection<ReviewInvitation> getVoteInvitations() {
 		return voteInvitations;
 	}
 
-	public void setVoteInvitations(Collection<VoteInvitation> voteInvitations) {
+	public void setVoteInvitations(Collection<ReviewInvitation> voteInvitations) {
 		this.voteInvitations = voteInvitations;
 	}
 
@@ -326,14 +323,6 @@ public class PullRequest extends AbstractEntity {
 
 	public void setNotifications(Collection<PullRequestNotification> notifications) {
 		this.notifications = notifications;
-	}
-
-	public Collection<PullRequestTask> getTasks() {
-		return tasks;
-	}
-
-	public void setTasks(Collection<PullRequestTask> tasks) {
-		this.tasks = tasks;
 	}
 
 	public Status getStatus() {
@@ -505,7 +494,7 @@ public class PullRequest extends AbstractEntity {
     }
 	
 	/**
-	 * Invite specified number of users in candidates to vote for this request.
+	 * Invite specified number of users in candidates to review this request.
 	 * <p>
 	 * 
 	 * @param candidates 
@@ -513,7 +502,7 @@ public class PullRequest extends AbstractEntity {
 	 * @param count 
 	 * 			number of users to invite
 	 */
-	public void pickVoters(Collection<User> candidates, int count) {
+	public void pickReviewers(Collection<User> candidates, int count) {
 		Collection<User> copyOfCandidates = new HashSet<User>(candidates);
 
 		// submitter is not allowed to vote for this request
@@ -521,16 +510,16 @@ public class PullRequest extends AbstractEntity {
 			copyOfCandidates.remove(getSubmitter());
 
 		/*
-		 * users already voted since base update should be excluded from
-		 * invitation list as their votes are still valid
+		 * users already reviewed since base update should be excluded from
+		 * invitation list as their reviews are still valid
 		 */
-		for (PullRequestVote vote : getReferentialUpdate().listVotesOnwards()) {
-			copyOfCandidates.remove(vote.getVoter());
+		for (Review vote : getReferentialUpdate().listReviewsOnwards()) {
+			copyOfCandidates.remove(vote.getReviewer());
 		}
 
 		Set<User> invited = new HashSet<User>();
-		for (VoteInvitation each : getVoteInvitations())
-			invited.add(each.getVoter());
+		for (ReviewInvitation each : getVoteInvitations())
+			invited.add(each.getReviewer());
 
 		invited.retainAll(copyOfCandidates);
 
@@ -539,18 +528,18 @@ public class PullRequest extends AbstractEntity {
 
 				@Override
 				public int compare(User user1, User user2) {
-					return user1.getRequestVotes().size() - user2.getRequestVotes().size();
+					return user1.getReviews().size() - user2.getReviews().size();
 				}
 
 			});
 
 			copyOfCandidates.remove(selected);
 
-			VoteInvitation invitation = new VoteInvitation();
+			ReviewInvitation invitation = new ReviewInvitation();
 			invitation.setRequest(this);
-			invitation.setVoter(selected);
+			invitation.setReviewer(selected);
 			invitation.getRequest().getVoteInvitations().add(invitation);
-			invitation.getVoter().getVoteInvitations().add(invitation);
+			invitation.getReviewer().getReviewInvitations().add(invitation);
 		}
 
 	}
