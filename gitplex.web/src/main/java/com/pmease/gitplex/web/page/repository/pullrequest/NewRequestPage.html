@@ -62,16 +62,36 @@
 	<wicket:fragment wicket:id="canSendFrag">
 		<div class="can-send">
 			<form wicket:id="form">
-				<div class="title">
-					<h4>Title</h4>
-					<div>
-						<input wicket:id="title" type="text" class="form-control" placeholder="Title has to be specified">
-					</div>
-				</div>
-				<div class="description">
-					<h4 class="pull-left">Description</h4>
-					<div wicket:id="comment"></div>
-				</div>
+				<table>
+					<tr class="title">
+						<td class="name">Title <span class="required"></span></td>
+						<td wicket:id="title" class="value">
+							<input wicket:id="title" type="text" class="form-control focusable" placeholder="Input title here">
+							<div wicket:id="feedback"></div>
+						</td>
+					</tr>
+					<tr class="description">
+						<td class="name">Description</td>
+						<td class="value"><div wicket:id="comment"></div></td>
+					</tr>
+					<tr class="assignee">
+						<td class="name">Assignee <span class="required"></span></td>
+						<td wicket:id="assignee" class="value">
+							<input wicket:id="assignee" type="hidden"></input>
+							<div wicket:id="feedback"></div>
+						</td>
+					</tr>
+					<tr class="reviewers">
+						<td class="name">Reviewers</td>
+						<td wicket:id="reviewers" class="value">
+							<ul class="clearfix list-unstyled">
+								<li wicket:id="reviewers" class="pull-left">
+									<a wicket:id="remove"><img wicket:id="avatar"></img><i class="fa fa-times"></i></a>
+								</li>
+							</ul>
+						</td>
+					</tr>
+				</table>
 				<input wicket:id="send" type="submit" class="btn btn-primary" value="Send Pull Request"></input>
 			</form>
 		</div>	

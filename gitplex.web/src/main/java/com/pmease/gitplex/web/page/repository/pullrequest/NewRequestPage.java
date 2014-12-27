@@ -8,8 +8,12 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
@@ -22,6 +26,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
@@ -31,8 +36,9 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.commons.wicket.behavior.DisableIfBlankBehavior;
+import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.component.markdown.MarkdownInput;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
@@ -41,20 +47,24 @@ import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.CloseStatus;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.component.branch.AffinalBranchSingleChoice;
 import com.pmease.gitplex.web.component.branch.BranchLink;
 import com.pmease.gitplex.web.component.commit.CommitsTablePanel;
 import com.pmease.gitplex.web.component.diff.CompareResultPanel;
+import com.pmease.gitplex.web.component.user.AvatarByUser;
+import com.pmease.gitplex.web.component.user.RequestAssigneeChoice;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
+import com.pmease.gitplex.web.shiro.LoginPage;
 
 @SuppressWarnings("serial")
 public class NewRequestPage extends RepositoryPage {
@@ -108,7 +118,9 @@ public class NewRequestPage extends RepositoryPage {
 			}
 		}
 
-		User currentUser = AppLoader.getInstance(UserManager.class).getCurrent();
+		User currentUser = getCurrentUser();
+		if (currentUser == null)
+			throw new RestartResponseAtInterceptPageException(LoginPage.class);
 		
 		pullRequest = GitPlex.getInstance(PullRequestManager.class).findLatest(target, source);
 		
@@ -128,6 +140,12 @@ public class NewRequestPage extends RepositoryPage {
 			List<IntegrationStrategy> strategies = pullRequestManager.getApplicableIntegrationStrategies(pullRequest);
 			Preconditions.checkState(!strategies.isEmpty());
 			pullRequest.setIntegrationStrategy(strategies.get(0));
+			
+			ObjectPermission writePermission = ObjectPermission.ofRepositoryWrite(getRepository());
+			if (currentUser.asSubject().isPermitted(writePermission))
+				pullRequest.setAssignee(currentUser);
+			else
+				pullRequest.setAssignee(getRepository().getOwner());
 
 			if (target.getRepository().equals(source.getRepository())) {
 				pullRequest.setBaseCommitHash(pullRequest.git().calcMergeBase(
@@ -384,7 +402,7 @@ public class NewRequestPage extends RepositoryPage {
 
 	private Fragment newCanSendFrag() {
 		Fragment fragment = new Fragment("status", "canSendFrag", this);
-		Form<?> form = new Form<Void>("form");
+		final Form<?> form = new Form<Void>("form");
 		fragment.add(form);
 		
 		form.add(new Button("send") {
@@ -415,7 +433,9 @@ public class NewRequestPage extends RepositoryPage {
 			
 		});
 		
-		form.add(new TextField<String>("title", new IModel<String>() {
+		WebMarkupContainer titleContainer = new WebMarkupContainer("title");
+		form.add(titleContainer);
+		final TextField<String> titleInput = new TextField<String>("title", new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -439,8 +459,21 @@ public class NewRequestPage extends RepositoryPage {
 				pullRequest.setTitle(object);
 			}
 			
-		}).setRequired(true).add(new DisableIfBlankBehavior(form.get("send"))));
+		});
+		titleInput.setRequired(true);
+		titleContainer.add(titleInput);
 		
+		titleContainer.add(new FeedbackPanel("feedback", titleInput));
+		
+		titleContainer.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return !titleInput.isValid()?" has-error":"";
+			}
+			
+		}));
+
 		form.add(new MarkdownInput("comment", new IModel<String>() {
 
 			@Override
@@ -459,6 +492,78 @@ public class NewRequestPage extends RepositoryPage {
 			
 		}));
 
+		WebMarkupContainer assigneeContainer = new WebMarkupContainer("assignee");
+		form.add(assigneeContainer);
+		IModel<User> assigneeModel = new PropertyModel<>(pullRequest, "assignee");
+		final RequestAssigneeChoice assigneeChoice = new RequestAssigneeChoice("assignee", repoModel, assigneeModel);
+		assigneeChoice.setRequired(true);
+		assigneeContainer.add(assigneeChoice);
+		
+		assigneeContainer.add(new FeedbackPanel("feedback", assigneeChoice));
+		
+		assigneeContainer.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return !assigneeChoice.isValid()?" has-error":"";
+			}
+			
+		}));
+		
+		final WebMarkupContainer reviewersContainer = new WebMarkupContainer("reviewers");
+		reviewersContainer.setOutputMarkupId(true);
+		form.add(reviewersContainer);
+		reviewersContainer.add(new ListView<ReviewInvitation>("reviewers", new LoadableDetachableModel<List<ReviewInvitation>>() {
+
+			@Override
+			protected List<ReviewInvitation> load() {
+				List<ReviewInvitation> invitations = new ArrayList<>();
+				for (ReviewInvitation invitation: pullRequest.getReviewInvitations()) {
+					if (!invitation.isExcluded())
+						invitations.add(invitation);
+				}
+				return invitations;
+			}
+			
+		}) {
+
+			@Override
+			protected void populateItem(ListItem<ReviewInvitation> item) {
+				final ReviewInvitation invitation = item.getModelObject();
+				item.add(new AjaxLink<Void>("remove") {
+
+					@Override
+					protected void onInitialize() {
+						super.onInitialize();
+						add(new AvatarByUser("avatar", new AbstractReadOnlyModel<User>() {
+
+							@Override
+							public User getObject() {
+								return invitation.getReviewer();
+							}
+							
+						}));
+						add(new TooltipBehavior(Model.of("Remove " + invitation.getReviewer().getDisplayName())));
+					}
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						invitation.setExcluded(true);
+						pullRequest.getTarget().getRepository().getGateKeeper().checkRequest(pullRequest);
+						for (ReviewInvitation each: pullRequest.getReviewInvitations()) {
+							if (!each.isExcluded() && each.getReviewer().equals(invitation.getReviewer())) {
+								getSession().warn("Reviewer '" + invitation.getReviewer().getDisplayName() + "' is required and can not be removed");
+								break;
+							}
+						}
+						target.add(reviewersContainer);
+					}
+					
+				});
+			}
+			
+		});
+		
 		return fragment;
 	}
 

@@ -50,7 +50,6 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestWatchManager;
-import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestWatch;
@@ -536,10 +535,6 @@ public class RepoBranchesPage extends RepositoryPage {
 		pagingNavigator.setOutputMarkupPlaceholderTag(true);
 	}
 	
-	private User getCurrentUser() {
-		return GitPlex.getInstance(UserManager.class).getCurrent();
-	}
-
 	private Branch getBaseBranch() {
 		if (baseBranchId != null)
 			return GitPlex.getInstance(Dao.class).load(Branch.class, baseBranchId);

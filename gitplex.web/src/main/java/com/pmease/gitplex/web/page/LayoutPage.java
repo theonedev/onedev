@@ -7,7 +7,6 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.google.common.base.Optional;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
@@ -95,12 +94,8 @@ public abstract class LayoutPage extends BasePage {
 		}.add(new TooltipBehavior()));
 	}
 	
-	protected Optional<User> currentUser() {
-	    return Optional.<User>fromNullable(GitPlex.getInstance(UserManager.class).getCurrent());
-	}
-	
 	protected boolean isLoggedIn() {
-		return currentUser().isPresent();
+		return getCurrentUser() != null;
 	}
 	
 	protected boolean isRemembered() {

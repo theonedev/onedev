@@ -27,6 +27,8 @@ public class Constants {
 	
 	public static final int DEFAULT_PAGE_SIZE = 25;
 	
+	public static final int DEFAULT_SELECT2_PAGE_SIZE = 25;
+	
 	public static final String COOKIE_CREDENTIAL = "gitplex.login";
 
 	public static final int DEFAULT_CONTEXT_LINES = 3;

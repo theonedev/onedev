@@ -176,6 +176,8 @@ img.avatar {
 img.avatar-big { width: 32px; height: 32px; }
 img.avatar-xlarge { width: 128px; height: 128px; }
 
+.select2-results .avatar.img-thumbnail {padding: 0; border: none;} 
+
 /* MISC */
 .img-link:hover { text-decoration: none; }
 
@@ -848,10 +850,22 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .branch-compare>.body>.branches .actions {width: 1%; background: none; padding: 77px 10px 0 10px;}
 
 .branch-compare>.body>.status .summary {font-size: 16px; padding: 0; margin-bottom: 8px;}
-.new-request>.body>.status>.can-send form .title {margin-bottom: 20px;}
-.new-request>.body>.status>.can-send form .description {margin-bottom: 8px;}
-.new-request>.body>.status>.can-send form .description>h4 {margin-right: 24px;}
-
+.new-request>.body>.status>.can-send form>table {width: 100%;}
+.new-request>.body>.status>.can-send form>table td {vertical-align: top; padding: 16px 0; 
+	border-top: 1px dashed #BBB; border-bottom: 1px dashed #BBB;}
+.new-request>.body>.status>.can-send form>table tr.description td {padding-bottom: 8px;}
+.new-request>.body>.status>.can-send form>table td.name {width: 120px; font-size: 18px; padding-right: 8px;}
+.new-request>.body>.status>.can-send form>table td.value {padding-left: 8px;}
+.new-request>.body>.status>.can-send form>table {margin-bottom: 16px;}
+.new-request>.body>.status>.can-send form>table tr.assignee .select2-container {width: 100%;}
+.new-request>.body>.status>.can-send form>table td.name .required:BEFORE {content: "*"; color: red;}
+.new-request>.body>.status>.can-send form>table .reviewers li {margin-right: 10px; position: relative;}
+.new-request>.body>.status>.can-send form>table .reviewers li a:hover {text-decoration: none;}
+.new-request>.body>.status>.can-send form>table .reviewers li img {width: 32px; height: 32px;}
+.new-request>.body>.status>.can-send form>table .reviewers li i {display: none; color: red; font-size: 32px; 
+	position: absolute; left: 6px; top: 0px;}
+.new-request>.body>.status>.can-send form>table .reviewers li a:hover i {display: inline;}
+.new-request>.body>.status>.can-send form .feedbackPanelERROR>.alert {margin-bottom: 0; margin-top: 16px;}
 
 /* PULL REQUEST DETAIL PANEL */
 .request-detail {padding: 20px;}

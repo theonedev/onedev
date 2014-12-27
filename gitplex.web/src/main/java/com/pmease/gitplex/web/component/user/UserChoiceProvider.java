@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.pmease.gitplex.core.GitPlex;
+
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.MatchMode;
@@ -16,6 +17,7 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.service.AvatarManager;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
@@ -24,22 +26,20 @@ public class UserChoiceProvider extends ChoiceProvider<User> {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final int PAGE_SIZE = 25;
-
 	@Override
 	public void query(String term, int page, Response<User> response) {
 		Dao dao = GitPlex.getInstance(Dao.class);
-		int first = page * PAGE_SIZE;
+		int first = page * Constants.DEFAULT_SELECT2_PAGE_SIZE;
 		Criterion criterion = Restrictions.and(Restrictions.or(
 				Restrictions.ilike("name", term, MatchMode.START),
 				Restrictions.ilike("fullName", term, MatchMode.START)));
 		List<User> users = dao.query(EntityCriteria.of(User.class)
-				.add(criterion).addOrder(Order.asc("name")), first, PAGE_SIZE + 1);
+				.add(criterion).addOrder(Order.asc("name")), first, Constants.DEFAULT_SELECT2_PAGE_SIZE + 1);
 
-		if (users.size() <= PAGE_SIZE) {
+		if (users.size() <= Constants.DEFAULT_SELECT2_PAGE_SIZE) {
 			response.addAll(users);
 		} else {
-			response.addAll(users.subList(0, PAGE_SIZE));
+			response.addAll(users.subList(0, Constants.DEFAULT_SELECT2_PAGE_SIZE));
 			response.setHasMore(true);
 		}
 	}

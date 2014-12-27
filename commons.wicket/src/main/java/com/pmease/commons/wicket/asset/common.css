@@ -19,7 +19,7 @@
 .pointer {cursor: pointer;}
 
 /* Tooltips */
-.tooltip-inner {max-width: 400px;}
+.tooltip-inner {max-width: 400px; white-space: nowrap;}
 .tooltip .tooltip-inner {text-align: left;}
 .tooltip .tooltip-inner dl dt {font-size: 15px;}
 .tooltip .tooltip-inner dl {margin-bottom: 0;}

@@ -577,7 +577,14 @@ public class PullRequest extends AbstractEntity {
 				notified.add(notification.getUser());
 		}
 		for (User each: picked) {
-			if (!invited.contains(each)) {
+			boolean found = false;
+			for (ReviewInvitation invitation: getReviewInvitations()) {
+				if (invitation.getReviewer().equals(each)) {
+					invitation.setExcluded(false);
+					found = true;
+				}
+			}
+			if (!found) {
 				ReviewInvitation invitation = new ReviewInvitation();
 				invitation.setRequest(this);
 				invitation.setReviewer(each);

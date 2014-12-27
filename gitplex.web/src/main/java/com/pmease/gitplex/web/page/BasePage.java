@@ -1,6 +1,5 @@
 package com.pmease.gitplex.web.page;
 
-import com.pmease.gitplex.core.GitPlex;
 import org.apache.wicket.Application;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.markup.ComponentTag;
@@ -12,8 +11,8 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.base.Optional;
 import com.pmease.commons.wicket.CommonPage;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.assets.PageResourceReference;
@@ -48,8 +47,8 @@ public abstract class BasePage extends CommonPage {
 		return true;
 	}
 	
-	protected Optional<User> currentUser() {
-		return Optional.fromNullable(GitPlex.getInstance(UserManager.class).getCurrent());
+	protected User getCurrentUser() {
+		return GitPlex.getInstance(UserManager.class).getCurrent();
 	}
 	
 	@Override
@@ -57,7 +56,7 @@ public abstract class BasePage extends CommonPage {
 		super.onInitialize();
 
 		if (!isPermitted()) {
-			if (currentUser().isPresent()) {
+			if (getCurrentUser() != null) {
 				throw new AccessDeniedException("Access denied");
 			} else {
 				throw new RestartResponseAtInterceptPageException(LoginPage.class);
