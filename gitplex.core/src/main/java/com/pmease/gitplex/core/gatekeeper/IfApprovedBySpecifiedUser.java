@@ -15,7 +15,7 @@ import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=200, icon="fa-user-o", description=
+@Editable(order=200, icon="pa-user-o", description=
 		"This gate keeper will be passed if the commit is approved by specified user.")
 public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
 
@@ -42,9 +42,9 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
 
             return pending("To be approved by " + user.getDisplayName() + ".");
         } else if (result == Review.Result.APPROVE) {
-            return approved("Approved by " + user.getDisplayName() + ".");
+            return passed("Approved by " + user.getDisplayName() + ".");
         } else {
-            return disapproved("Rejected by " + user.getDisplayName() + ".");
+            return failed("Rejected by " + user.getDisplayName() + ".");
         }
     }
 
@@ -56,10 +56,10 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
             return this;
     }
 
-    private CheckResult checkApproval(User user) {
+    private CheckResult check(User user) {
 		User approver = GitPlex.getInstance(Dao.class).load(User.class, userId);
         if (approver.getId().equals(user.getId())) {
-        	return approved("Approved by " + approver.getName() + ".");
+        	return passed("Approved by " + approver.getName() + ".");
         } else {
         	return pending("Not approved by " + approver.getName() + "."); 
         }
@@ -67,17 +67,17 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
     
 	@Override
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		return checkApproval(user);
+		return check(user);
 	}
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		return checkApproval(user);
+		return check(user);
 	}
 
 	@Override
 	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
-		return checkApproval(user);
+		return check(user);
 	}
 
 }

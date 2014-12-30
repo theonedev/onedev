@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.user;
+package com.pmease.gitplex.web.component.pullrequest;
 
 import org.apache.wicket.model.IModel;
 
@@ -7,33 +7,33 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-public class RequestAssigneeChoice extends Select2Choice<RequestAssignee> {
+public class AssigneeChoice extends Select2Choice<Assignee> {
 
-	public RequestAssigneeChoice(String id, IModel<Repository> repoModel, final IModel<User> assigneeModel) {
-		super(id, new IModel<RequestAssignee>() {
+	public AssigneeChoice(String id, IModel<Repository> repoModel, final IModel<User> assigneeModel) {
+		super(id, new IModel<Assignee>() {
 
 			@Override
 			public void detach() {
 			}
 
 			@Override
-			public RequestAssignee getObject() {
+			public Assignee getObject() {
 				User user = assigneeModel.getObject();
 				if (user != null)
-					return new RequestAssignee(user, null);
+					return new Assignee(user, null);
 				else
 					return null;
 			}
 
 			@Override
-			public void setObject(RequestAssignee object) {
+			public void setObject(Assignee object) {
 				if (object != null)
 					assigneeModel.setObject(object.getUser());
 				else
 					assigneeModel.setObject(null);
 			}
 			
-		}, new RequestAssigneeProvider(repoModel));
+		}, new AssigneeProvider(repoModel));
 	}
 
 	@Override

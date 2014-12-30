@@ -10,7 +10,7 @@ import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=300, icon="fa-user-o", description=
+@Editable(order=300, icon="pa-user-o", description=
 		"This gate keeper will be passed if the commit is approved by owner of the repository.")
 public class IfApprovedByRepositoryOwner extends ApprovalGateKeeper {
 
@@ -24,35 +24,35 @@ public class IfApprovedByRepositoryOwner extends ApprovalGateKeeper {
             request.pickReviewers(Sets.newHashSet(repoOwner), 1);
             return pending("To be approved by " + repoOwner.getName() + ".");
         } else if (result == Review.Result.APPROVE) {
-            return approved("Approved by " + repoOwner.getName() + ".");
+            return passed("Approved by " + repoOwner.getName() + ".");
         } else {
-            return disapproved("Rejected by " + repoOwner.getName() + ".");
+            return failed("Rejected by " + repoOwner.getName() + ".");
         }
     }
 
-    private CheckResult checkApproval(User user, Repository repository) {
+    private CheckResult check(User user, Repository repository) {
 		if (user.equals(repository.getOwner()))
-			return approved("Approved by repository owner.");
+			return passed("Approved by repository owner.");
 		else
 			return pending("Not approved by repository owner.");
     }
     
 	@Override
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		return checkApproval(user, branch.getRepository());
+		return check(user, branch.getRepository());
 	}
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		return checkApproval(user, branch.getRepository());
+		return check(user, branch.getRepository());
 	}
 
 	@Override
 	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
 		if (user.equals(repository.getOwner()))
-			return approved("Approved by repository owner.");
+			return passed("Approved by repository owner.");
 		else
-			return disapproved("Not approved by repository owner.");
+			return failed("Not approved by repository owner.");
 	}
 
 }

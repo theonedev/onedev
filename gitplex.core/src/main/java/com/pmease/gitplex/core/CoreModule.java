@@ -17,43 +17,49 @@ import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.loader.ImplementationProvider;
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
-import com.pmease.gitplex.core.extensionpoint.PullRequestListeners;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DataManager;
+import com.pmease.gitplex.core.manager.MailManager;
 import com.pmease.gitplex.core.manager.OldCommitCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentReplyManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
+import com.pmease.gitplex.core.manager.PullRequestNotificationManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.PullRequestWatchManager;
 import com.pmease.gitplex.core.manager.RepositoryManager;
+import com.pmease.gitplex.core.manager.ReviewInvitationManager;
+import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.manager.VerificationManager;
-import com.pmease.gitplex.core.manager.ReviewInvitationManager;
-import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.manager.impl.DefaultAuthorizationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultBranchManager;
 import com.pmease.gitplex.core.manager.impl.DefaultConfigManager;
 import com.pmease.gitplex.core.manager.impl.DefaultDataManager;
+import com.pmease.gitplex.core.manager.impl.DefaultMailManager;
 import com.pmease.gitplex.core.manager.impl.DefaultOldCommitCommentManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestCommentManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestCommentReplyManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestManager;
+import com.pmease.gitplex.core.manager.impl.DefaultPullRequestNotificationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestWatchManager;
 import com.pmease.gitplex.core.manager.impl.DefaultRepositoryManager;
+import com.pmease.gitplex.core.manager.impl.DefaultReviewInvitationManager;
+import com.pmease.gitplex.core.manager.impl.DefaultReviewManager;
 import com.pmease.gitplex.core.manager.impl.DefaultStorageManager;
 import com.pmease.gitplex.core.manager.impl.DefaultTeamManager;
 import com.pmease.gitplex.core.manager.impl.DefaultUserManager;
 import com.pmease.gitplex.core.manager.impl.DefaultVerificationManager;
-import com.pmease.gitplex.core.manager.impl.DefaultReviewInvitationManager;
-import com.pmease.gitplex.core.manager.impl.DefaultReviewManager;
 import com.pmease.gitplex.core.model.ModelLocator;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.PullRequestCommentReply;
+import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.setting.SpecifiedGit;
 import com.pmease.gitplex.core.setting.SystemGit;
 import com.pmease.gitplex.core.validation.RepositoryNameReservation;
@@ -116,7 +122,7 @@ public class CoreModule extends AbstractPluginModule {
 			}
 
 			@Override
-			public void onReviewed(PullRequest request) {
+			public void onReviewed(Review review) {
 			}
 
 			@Override
@@ -132,16 +138,22 @@ public class CoreModule extends AbstractPluginModule {
 			}
 
 			@Override
-			public void onCommented(PullRequest request) {
+			public void onCommented(PullRequestComment comment) {
 			}
 
 			@Override
 			public void onVerified(PullRequest request) {
 			}
+
+			@Override
+			public void onAssigned(PullRequest request) {
+			}
+
+			@Override
+			public void onCommentReplied(PullRequestCommentReply reply) {
+			}
 			
 		});
-		
-		bind(PullRequestListeners.class);
 		
 		contribute(ServletConfigurator.class, CoreServletConfigurator.class);
 		
@@ -183,7 +195,11 @@ public class CoreModule extends AbstractPluginModule {
 		bind(VerificationManager.class).to(DefaultVerificationManager.class);
 		bind(ReviewInvitationManager.class).to(DefaultReviewInvitationManager.class);
 		bind(ReviewManager.class).to(DefaultReviewManager.class);
+		bind(PullRequestNotificationManager.class).to(DefaultPullRequestNotificationManager.class);
 		bind(OldCommitCommentManager.class).to(DefaultOldCommitCommentManager.class);
+		bind(MailManager.class).to(DefaultMailManager.class);
+		
+		contribute(PullRequestListener.class, DefaultPullRequestNotificationManager.class);
 	}
 
 	@Override

@@ -19,7 +19,6 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.label.AgeLabel;
@@ -37,16 +36,20 @@ public class RepositoriesPage extends AccountPage {
 
 	@Override
 	protected String getPageTitle() {
-		return "Repositories";
+		return "Repositories - " + getAccount();
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
-		add(new BookmarkablePageLink<Void>("newAccountRepo", NewRepositoryPage.class, 
-				NewRepositoryPage.paramsOf(currentUser)));
+		User currentUser = getCurrentUser();
+		if (getAccount().equals(currentUser)) {
+			add(new BookmarkablePageLink<Void>("newRepo", NewRepositoryPage.class, 
+					NewRepositoryPage.paramsOf(currentUser)));
+		} else {
+			add(new WebMarkupContainer("newRepo").setVisible(false));
+		}
 		
 		ListView<Repository> repositoriesView = new ListView<Repository>("repositories", new AbstractReadOnlyModel<List<Repository>>() {
 

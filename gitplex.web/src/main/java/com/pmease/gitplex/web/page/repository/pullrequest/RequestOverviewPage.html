@@ -1,0 +1,93 @@
+<wicket:extend>
+	<table class="overview">
+		<tr>
+			<td class="activities">
+				<table>
+					<tr wicket:id="requestActivities" class="activity">
+						<td wicket:id="avatar" class="avatar"></td>
+						<td wicket:id="activity" class="activity"></td>
+					</tr>
+				</table>
+				<div wicket:id="addComment" class="add-comment">
+					<form wicket:id="form" class="leave-confirm">
+						<div wicket:id="input" class="nofocus"></div>
+						<button wicket:id="comment" class="dirty-aware btn btn-primary">Comment</button>
+					</form>
+				</div>
+			</td>
+			<td class="others">
+				<div wicket:id="integration" class="integration">
+					<div class="strategy">
+						<label>
+							Integration Strategy: 						
+							<span wicket:id="strategyHelp" class="pa pa-question-circle pointer"></span>
+						</label>
+						<div>
+							<select wicket:id="strategySelect"></select> 
+							<span wicket:id="strategyLabel"></span>
+						</div>
+					</div>
+					<div class="preview">
+						<div wicket:id="calculating" class="well">
+							<img src="/assets/img/ajax-indicator.gif"></img> Calculating integration preview...
+						</div>
+						<div wicket:id="noConflict" class="alert alert-success">
+							<label><i class="pa pa-tick-round"></i> Able to integrate without conflicts.</label> 
+							<wicket:enclosure child="preview">
+								<div class="detail"><span class="pa pa-arrow-right"></span> <a wicket:id="preview">Preview</a> the integration result.</div>
+							</wicket:enclosure>
+							<wicket:enclosure child="verification">
+								<div class="detail"><span class="pa pa-arrow-right"></span> Build of the integration is <span wicket:id="verification"></span></div>
+							</wicket:enclosure>
+						</div>
+						<div wicket:id="conflict" class="alert alert-warning">
+							<span><i class="pa pa-alert-o"></i> There are integration conflicts.</span>
+							<wicket:enclosure child="resolveInstructionsTrigger">
+								Please follow <a wicket:id="resolveInstructionsTrigger" href="javascript:void(0);">this instruction</a> to resolve the conflicts.
+								<div wicket:id="resolveInstructions"></div>
+							</wicket:enclosure>
+						</div>
+					</div>
+				</div>
+				<div wicket:id="assignee" class="assignee"></div>
+				<div wicket:id="reviewers" class="reviewers">
+					<label>Reviewers:</label>
+					<ul class="clearfix list-unstyled">
+						<li wicket:id="reviewers" class="pull-left">
+							<span wicket:id="avatar"></span>
+							<span wicket:id="result"></span>
+						</li>
+					</ul>
+					<wicket:enclosure child="addReviewer">
+					<div>
+						<input wicket:id="addReviewer" type="hidden"></input>
+					</div>
+					</wicket:enclosure>
+				</div>
+			</td>
+		</tr>
+	</table>
+	<wicket:fragment wicket:id="collapsedCommentFrag">
+		<div class="summary">
+			<span wicket:id="user" class="user"></span> <span wicket:id="activity"></span> <span wicket:id="age"></span> 
+			<span class="actions">
+				<span class="pa pa-tick" title="This comment is marked as resolved"></span>
+				<a wicket:id="expand" class="pa pa-expand" title="Expand this comment"></a>
+			</span>
+		</div>
+		<div wicket:id="detail" class="detail"></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="assigneeEditFrag">
+		<label>Assigned To: <span wicket:id="help" class="pa pa-question-circle pointer"></span></label>
+		<div>
+			<input wicket:id="assignee" type="hidden"></input>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="assigneeViewFrag">
+		<label>Assigned To: <span wicket:id="help" class="pa pa-question-circle pointer"></span></label> 
+		<span wicket:id="assignee"></span> 
+	</wicket:fragment>
+	<wicket:fragment wicket:id="noAssigneeFrag">
+		This pull request will be integrated automatically as long as it passes gate keeper check. 
+	</wicket:fragment>
+</wicket:extend>

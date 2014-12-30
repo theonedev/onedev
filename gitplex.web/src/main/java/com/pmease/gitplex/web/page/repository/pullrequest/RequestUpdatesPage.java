@@ -1,14 +1,13 @@
 package com.pmease.gitplex.web.page.repository.pullrequest;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.wicket.AttributeModifier;
+import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
@@ -25,29 +24,40 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.git.Commit;
+import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.PullRequestVerification;
-import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Review;
+import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.component.comment.event.PullRequestChanged;
 import com.pmease.gitplex.web.component.commit.CommitHashLink;
 import com.pmease.gitplex.web.component.commit.CommitMessagePanel;
 import com.pmease.gitplex.web.component.label.AgeLabel;
+import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.PersonLink;
-import com.pmease.gitplex.web.component.user.UserLink;
+import com.pmease.gitplex.web.component.user.RemoveableAvatar;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.code.tree.RepoTreePage;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
 @SuppressWarnings("serial")
 public class RequestUpdatesPage extends RequestDetailPage {
 
+	private final IModel<List<Review>> reviewsModel = new LoadableDetachableModel<List<Review>>() {
+
+		@Override
+		protected List<Review> load() {
+			return GitPlex.getInstance(ReviewManager.class).findBy(getPullRequest());
+		}
+		
+	};
+
 	public RequestUpdatesPage(PageParameters params) {
 		super(params);
 	}
-
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -96,48 +106,48 @@ public class RequestUpdatesPage extends RequestDetailPage {
 					compareLink.add(AttributeAppender.append("title", "Compare with previous update"));
 				updateItem.add(compareLink);
 
-				updateItem.add(new ListView<Review>("votes", new LoadableDetachableModel<List<Review>>() {
+				final WebMarkupContainer reviewsContainer = new WebMarkupContainer("reviews");
+				reviewsContainer.setOutputMarkupId(true);
+				updateItem.add(reviewsContainer);
+				reviewsContainer.add(new ListView<Review>("reviews", new LoadableDetachableModel<List<Review>>() {
 
 					@Override
 					protected List<Review> load() {
-						List<Review> votes = new ArrayList<>(updateItem.getModelObject().getReviews());
-						Collections.sort(votes, new Comparator<Review>() {
-
-							@Override
-							public int compare(Review vote1, Review vote2) {
-								return vote1.getDate().compareTo(vote2.getDate());
-							}
-							
-						});
-						return votes;
+						List<Review> reviewsOfUpdate = new ArrayList<>();
+						for (Review review: reviewsModel.getObject()) {
+							if (review.getUpdate().equals(updateItem.getModelObject()))
+								reviewsOfUpdate.add(review);
+						}
+						return reviewsOfUpdate;
 					}
 					
 				}) {
 
 					@Override
 					protected void populateItem(final ListItem<Review> item) {
-						Review vote = item.getModelObject();
+						final Review review = item.getModelObject();
+						item.add(new RemoveableAvatar("avatar", new UserModel(review.getReviewer())) {
+							
+							@Override
+							protected void onAvatarRemove(AjaxRequestTarget target) {
+								GitPlex.getInstance(ReviewManager.class).delete(review);
+								target.add(summaryContainer);
+								target.add(reviewsContainer);
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								
+								setEnabled(getPullRequest().isOpen() 
+										&& (item.getModelObject().getReviewer().equals(getCurrentUser()) 
+												|| SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(getRepository()))));
+							}
 
-						item.add(new UserLink("user", new UserModel(vote.getReviewer()), AvatarMode.AVATAR)
-									.withTooltipConfig(new TooltipConfig()));
-						Label label;
-						if (vote.getResult() == Review.Result.APPROVE) {
-							label = new Label("label", "Approved");
-							label.add(AttributeModifier.append("class", " label-success"));
-						} else {
-							label = new Label("label", "Disapproved");
-							label.add(AttributeModifier.append("class", " label-danger"));
-						}
-						item.add(label);
+						});
+						item.add(new ReviewResultIcon("result", item.getModel()));
 					}
 
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						
-						setVisible(!updateItem.getModelObject().getReviews().isEmpty());
-					}
-					
 				});
 
 				final Set<String> mergedCommitHashes = new HashSet<>();
@@ -246,6 +256,13 @@ public class RequestUpdatesPage extends RequestDetailPage {
 			}
 			
 		});		
+	}
+
+	@Override
+	protected void onDetach() {
+		reviewsModel.detach();
+		
+		super.onDetach();
 	}
 
 }

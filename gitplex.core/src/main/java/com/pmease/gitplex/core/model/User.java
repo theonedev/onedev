@@ -220,9 +220,6 @@ public class User extends AbstractUser implements ProtectedObject {
 	}
 	
 	public Review.Result checkReviewSince(PullRequestUpdate update) {
-		if (this.equals(update.getRequest().getSubmitter()))
-			return Review.Result.APPROVE;
-		
 		for (Review vote: update.listReviewsOnwards()) {
 			if (vote.getReviewer().equals(this))
 				return vote.getResult();

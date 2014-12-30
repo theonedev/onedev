@@ -8,12 +8,12 @@
 		<div class="panel-heading">
 			<span wicket:id="file"></span> 
 			<span class="actions">
-				<a wicket:id="compareView" class="fa fa-file-txt" title="View full context"></a>
+				<a wicket:id="compareView" class="pa pa-file-txt" title="View full context"></a>
 			</span>
 		</div>
 		<table wicket:id="context" class="table-diff">
 			<tr wicket:id="aboveOmitted" class="omit">
-				<td colspan="3"><i class="fa fa-ellipsis"></i></td>
+				<td colspan="3"><i class="pa pa-ellipsis"></i></td>
 			</tr>
 			<tr wicket:id="lines" class="line diff">
 				<td class="old line-no">
@@ -25,7 +25,7 @@
 				<td class="text"><wicket:container wicket:id="diffMark"></wicket:container><wicket:container wicket:id="partials"><span wicket:id="partial"></span></wicket:container></td>
 			</tr>
 			<tr wicket:id="belowOmitted" class="omit">
-				<td colspan="3"><i class="fa fa-ellipsis"></i></td>
+				<td colspan="3"><i class="pa pa-ellipsis"></i></td>
 			</tr>
 		</table>
 		<div wicket:id="noContext" class="panel-body">
@@ -34,6 +34,6 @@
 		<div wicket:id="comment"></div>
 	</div>
 	<wicket:fragment wicket:id="actionsFrag">
-		<a wicket:id="collapse" class="fa fa-collapse" title="Collapse this comment"></a>
+		<a wicket:id="collapse" class="pa pa-collapse" title="Collapse this comment"></a>
 	</wicket:fragment>
 </wicket:panel>

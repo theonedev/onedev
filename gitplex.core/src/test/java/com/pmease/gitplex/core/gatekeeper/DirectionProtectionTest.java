@@ -80,10 +80,10 @@ public class DirectionProtectionTest extends AbstractGitTest {
 		branch1.setId(1L);
 		Branch branch2 = new Branch();
 		branch2.setId(2L);
-		assertTrue(pathProtection.checkFile(user1, branch1, "src/test.java").isApproved());
-		assertTrue(pathProtection.checkFile(user1, branch1, "doc/test.pdf").isApproved());
+		assertTrue(pathProtection.checkFile(user1, branch1, "src/test.java").isPassed());
+		assertTrue(pathProtection.checkFile(user1, branch1, "doc/test.pdf").isPassed());
 		assertTrue(pathProtection.checkFile(user2, branch1, "src/test.java").isPending());
-		assertTrue(pathProtection.checkFile(user2, branch2, "src/test.java").isApproved());
+		assertTrue(pathProtection.checkFile(user2, branch2, "src/test.java").isPassed());
 	}
 
 	@SuppressWarnings("serial")
@@ -125,15 +125,15 @@ public class DirectionProtectionTest extends AbstractGitTest {
 
 		addFileAndCommit("src/file2", "", "add src/file2");
 		
-		assertTrue(pathProtection.checkCommit(user1, master, git.parseRevision("branch1", true)).isApproved());
+		assertTrue(pathProtection.checkCommit(user1, master, git.parseRevision("branch1", true)).isPassed());
 		assertTrue(pathProtection.checkCommit(user2, master, git.parseRevision("branch1", true)).isPending());
 		
 		git.checkout("master", "branch2");
 
 		addFileAndCommit("docs/file2", "", "add docs/file2");
 		
-		assertTrue(pathProtection.checkCommit(user1, master, git.parseRevision("branch2", true)).isApproved());
-		assertTrue(pathProtection.checkCommit(user2, master, git.parseRevision("branch2", true)).isApproved());
+		assertTrue(pathProtection.checkCommit(user1, master, git.parseRevision("branch2", true)).isPassed());
+		assertTrue(pathProtection.checkCommit(user2, master, git.parseRevision("branch2", true)).isPassed());
 	}
 
 }

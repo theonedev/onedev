@@ -17,7 +17,7 @@ public class Ignored extends CheckResult {
 
     @Override
     public String toString() {
-        return "Ignore";
+        return "Ignored";
     }
     
 }

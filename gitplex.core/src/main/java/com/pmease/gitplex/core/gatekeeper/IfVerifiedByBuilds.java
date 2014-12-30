@@ -15,7 +15,7 @@ import com.pmease.gitplex.core.model.PullRequestVerification;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
-@Editable(icon="fa-checkbox-checked", order=1000, 
+@Editable(icon="pa-checkbox-checked", order=1000, 
 		description="This gate keeper will be satisfied if commit is verified successfully "
 				+ "by specified number of builds. To make this working, your CI system has to "
 				+ "be configured to build against GitPlex pull requests.")
@@ -80,7 +80,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 			}
 			commit = preview.getIntegrated();
 			if (commit == null) 
-				return disapproved("Can not build against integration result due to conflicts.");
+				return failed("Can not build against integration result due to conflicts.");
 		} else {
 			commit = request.getLatestUpdate().getHeadCommitHash();
 		}
@@ -91,7 +91,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 		Collection<PullRequestVerification> verifications = verificationManager.findBy(request, commit);
 		for (PullRequestVerification each: verifications) {
 			if (each.getStatus() == PullRequestVerification.Status.NOT_PASSED)
-				return disapproved("At least one build is not passed for the commit.");
+				return failed("At least one build is not passed for the commit.");
 			else if (each.getStatus() == PullRequestVerification.Status.PASSED)
 				passedCount++;
 		}
@@ -110,7 +110,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 					return pending("To be verified by build");
 			}
 		} else {
-			return approved("Builds passed");
+			return passed("Builds passed");
 		}
 	}
 

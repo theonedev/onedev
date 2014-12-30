@@ -6,9 +6,9 @@ import javax.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Approved;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Disapproved;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Ignored;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.gatekeeper.checkresult.PendingAndBlock;
@@ -134,12 +134,12 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 		return this;
 	}
 
-	protected CheckResult approved(String reason) {
-		return new Approved(reason);
+	protected CheckResult passed(String reason) {
+		return new Passed(reason);
 	}
 
-	protected CheckResult disapproved(String reason) {
-		return new Disapproved(reason);
+	protected CheckResult failed(String reason) {
+		return new Failed(reason);
 	}
 
 	protected CheckResult pending(String reason) {
@@ -154,12 +154,12 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 		return new Ignored();
 	}
 
-	protected CheckResult approved(List<String> reasons) {
-		return new Approved(reasons);
+	protected CheckResult passed(List<String> reasons) {
+		return new Passed(reasons);
 	}
 	
-	protected CheckResult disapproved(List<String> reasons) {
-		return new Disapproved(reasons);
+	protected CheckResult failed(List<String> reasons) {
+		return new Failed(reasons);
 	}
 
 	protected CheckResult pending(List<String> reasons) {

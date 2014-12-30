@@ -4,15 +4,13 @@
 			<div class="summary">
 				<em>Update #<span wicket:id="updateNo"></span></em>, pushed <span wicket:id="age"></span>
 				<span class="actions">
-					<a wicket:id="compare"><span class="fa fa-diff"></span></a>
+					<a wicket:id="compare"><span class="pa pa-diff"></span></a>
 				</span>
-				<span class="votes">
-					<wicket:container wicket:id="votes">
-						<span class="vote">
-							<span wicket:id="user"></span>
-							<span wicket:id="label" class="label"></span>
-						</span>
-					</wicket:container>
+				<span wicket:id="reviews" class="reviews">
+					<span wicket:id="reviews" class="review">
+						<span wicket:id="avatar"></span>
+						<span wicket:id="result"></span>
+					</span>
 				</span>
 			</div>
 			<table class="commits">
@@ -29,7 +27,7 @@
 					<td class="status">
 						<div>
 							<span wicket:id="hashLink"></span>
-							<a wicket:id="treeLink" title="Browse files of this commit"><span class="fa fa-file-txt"></span></a>
+							<a wicket:id="treeLink" title="Browse files of this commit"><span class="pa pa-file-txt"></span></a>
 						</div>
 						<div>
 							<span wicket:id="verification"></span>

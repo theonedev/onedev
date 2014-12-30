@@ -8,4 +8,5 @@ public interface ReviewInvitationManager {
 	
 	ReviewInvitation find(User reviewer, PullRequest request);
 	
+	void save(ReviewInvitation reviewInvitation);
 }

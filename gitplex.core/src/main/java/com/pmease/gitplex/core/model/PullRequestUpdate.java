@@ -22,6 +22,7 @@ import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
@@ -146,9 +147,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	
 	private CachedInfo getCachedInfo() {
 		if (cachedInfo == null) {
-			StorageManager storageManager = GitPlex.getInstance(StorageManager.class);
-			File cacheFile = new File(storageManager.getCacheDir(this), "cachedInfo");
-			cachedInfo = FileUtils.readFile(cacheFile, new Callable<CachedInfo>() {
+			Callable<CachedInfo> callable = new Callable<CachedInfo>() {
 
 				@Override
 				public CachedInfo call() throws Exception {
@@ -196,7 +195,18 @@ public class PullRequestUpdate extends AbstractEntity {
 					return cachedInfo;
 				}
 				
-			});
+			};
+			if (isNew()) {
+				try {
+					cachedInfo = callable.call();
+				} catch (Exception e) {
+					Throwables.propagate(e);
+				}
+			} else {
+				StorageManager storageManager = GitPlex.getInstance(StorageManager.class);
+				File cacheFile = new File(storageManager.getCacheDir(this), "cachedInfo");
+				cachedInfo = FileUtils.readFile(cacheFile, callable);
+			}
 		}
 		return cachedInfo;
 	}

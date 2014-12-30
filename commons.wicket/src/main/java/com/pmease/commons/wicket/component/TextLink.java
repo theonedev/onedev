@@ -10,8 +10,8 @@ public abstract class TextLink<T> extends Link<T> {
 
 	private final IModel<String> labelModel;
 
-	public TextLink(String id, IModel<String> nameModel) {
-		this(id, null, nameModel);
+	public TextLink(String id, IModel<String> labelModel) {
+		this(id, null, labelModel);
 	}
 
 	public TextLink(String id, IModel<T> linkModel, IModel<String> labelModel) {

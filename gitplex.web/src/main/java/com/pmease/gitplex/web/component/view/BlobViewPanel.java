@@ -41,7 +41,7 @@ public class BlobViewPanel extends Panel {
 			add(new SymbolLink("blob", repoModel, blobInfo.getRevision(), 
 					blobInfo.getPath(), new String(content)));
 		} else if (content.length == 0) {
-			add(new Label("blob", "<i class='fa fa-info-circle'></i> <em>File is empty</em>").setEscapeModelStrings(false));
+			add(new Label("blob", "<i class='pa pa-info-circle'></i> <em>File is empty</em>").setEscapeModelStrings(false));
 		} else {
 			final MediaType mediaType = MediaTypes.detectFrom(content, blobInfo.getPath());
 			MediaRenderer renderer = null;
@@ -58,7 +58,7 @@ public class BlobViewPanel extends Panel {
 					add(new TextViewPanel("blob", blobInfo, text));
 				} else {
 					add(new Label("blob", 
-							"<i class='fa fa-info-circle'></i> <em>Binary file</em>").setEscapeModelStrings(false));
+							"<i class='pa pa-info-circle'></i> <em>Binary file</em>").setEscapeModelStrings(false));
 				}
 			}
 		}

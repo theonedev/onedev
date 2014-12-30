@@ -1,6 +1,7 @@
 package com.pmease.gitplex.core.manager.impl;
 
 import java.util.Collection;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -9,10 +10,10 @@ import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
+import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
-import com.pmease.gitplex.core.extensionpoint.PullRequestListeners;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -26,12 +27,16 @@ public class DefaultVerificationManager implements VerificationManager {
 	
 	private final PullRequestManager pullRequestManager;
 	
-	private final PullRequestListeners pullRequestListeners;
+	private final UnitOfWork unitOfWork;
+	
+	private final Set<PullRequestListener> pullRequestListeners;
 
 	@Inject
-	public DefaultVerificationManager(Dao dao, PullRequestManager pullRequestManager, PullRequestListeners pullRequestListeners) {
+	public DefaultVerificationManager(Dao dao, PullRequestManager pullRequestManager, UnitOfWork unitOfWork, 
+			Set<PullRequestListener> pullRequestListeners) {
 		this.dao = dao;
 		this.pullRequestManager = pullRequestManager;
+		this.unitOfWork = unitOfWork;
 		this.pullRequestListeners = pullRequestListeners;
 	}
 
@@ -69,26 +74,25 @@ public class DefaultVerificationManager implements VerificationManager {
 	}
 	
 	private void onVerificationChange(PullRequest request) {
-		pullRequestManager.onGateKeeperUpdate(request);
+		for (PullRequestListener listener: pullRequestListeners)
+			listener.onVerified(request);
 
 		final Long requestId = request.getId();
-		
 		dao.afterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				pullRequestListeners.asyncCall(requestId, new PullRequestListeners.Callback() {
+				unitOfWork.asyncCall(new Runnable() {
 
 					@Override
-					protected void call(PullRequestListener listener, PullRequest request) {
-						listener.onVerified(request);
+					public void run() {
+						pullRequestManager.check(dao.load(PullRequest.class, requestId));
 					}
 					
 				});
 			}
 			
 		});
-		
 	}
 
 	@Override

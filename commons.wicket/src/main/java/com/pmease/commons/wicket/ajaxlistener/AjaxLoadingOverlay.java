@@ -1,5 +1,7 @@
 package com.pmease.commons.wicket.ajaxlistener;
 
+import java.io.Serializable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.attributes.IAjaxCallListener;
 
@@ -14,7 +16,8 @@ import org.apache.wicket.ajax.attributes.IAjaxCallListener;
  * @author robin
  *
  */
-public class AjaxLoadingOverlay implements IAjaxCallListener {
+@SuppressWarnings("serial")
+public class AjaxLoadingOverlay implements IAjaxCallListener, Serializable {
 
 	@Override
 	public CharSequence getBeforeHandler(Component component) {

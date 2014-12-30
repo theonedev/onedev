@@ -11,7 +11,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -36,7 +35,6 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.component.markdown.MarkdownInput;
@@ -51,6 +49,7 @@ import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.CloseStatus;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
+import com.pmease.gitplex.core.model.PullRequest.Status;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.ReviewInvitation;
@@ -60,8 +59,10 @@ import com.pmease.gitplex.web.component.branch.AffinalBranchSingleChoice;
 import com.pmease.gitplex.web.component.branch.BranchLink;
 import com.pmease.gitplex.web.component.commit.CommitsTablePanel;
 import com.pmease.gitplex.web.component.diff.CompareResultPanel;
-import com.pmease.gitplex.web.component.user.AvatarByUser;
-import com.pmease.gitplex.web.component.user.RequestAssigneeChoice;
+import com.pmease.gitplex.web.component.pullrequest.AssigneeChoice;
+import com.pmease.gitplex.web.component.pullrequest.ReviewerAvatar;
+import com.pmease.gitplex.web.component.pullrequest.ReviewerChoice;
+import com.pmease.gitplex.web.model.ReviewersModel;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.shiro.LoginPage;
@@ -342,7 +343,7 @@ public class NewRequestPage extends RepositoryPage {
 			@Override
 			public void onClick() {
 				PageParameters params = RequestDetailPage.paramsOf(pullRequest);
-				setResponsePage(RequestActivitiesPage.class, params);
+				setResponsePage(RequestOverviewPage.class, params);
 			}
 			
 		});
@@ -421,13 +422,14 @@ public class NewRequestPage extends RepositoryPage {
 				} else {
 					pullRequest.setSource(source);
 					pullRequest.setTarget(target);
-					pullRequest.getReviewInvitations().clear();
+					for (ReviewInvitation invitation: pullRequest.getReviewInvitations())
+						invitation.setReviewer(dao.load(User.class, invitation.getReviewer().getId()));
 					
 					pullRequest.setAssignee(pullRequest.getTarget().getRepository().getOwner());
 					
 					GitPlex.getInstance(PullRequestManager.class).open(pullRequest, new PageId(getPageId()));
 					
-					setResponsePage(RequestActivitiesPage.class, RequestActivitiesPage.paramsOf(pullRequest));
+					setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(pullRequest));
 				}
 			}
 			
@@ -495,7 +497,7 @@ public class NewRequestPage extends RepositoryPage {
 		WebMarkupContainer assigneeContainer = new WebMarkupContainer("assignee");
 		form.add(assigneeContainer);
 		IModel<User> assigneeModel = new PropertyModel<>(pullRequest, "assignee");
-		final RequestAssigneeChoice assigneeChoice = new RequestAssigneeChoice("assignee", repoModel, assigneeModel);
+		final AssigneeChoice assigneeChoice = new AssigneeChoice("assignee", repoModel, assigneeModel);
 		assigneeChoice.setRequired(true);
 		assigneeContainer.add(assigneeChoice);
 		
@@ -510,56 +512,53 @@ public class NewRequestPage extends RepositoryPage {
 			
 		}));
 		
-		final WebMarkupContainer reviewersContainer = new WebMarkupContainer("reviewers");
-		reviewersContainer.setOutputMarkupId(true);
-		form.add(reviewersContainer);
-		reviewersContainer.add(new ListView<ReviewInvitation>("reviewers", new LoadableDetachableModel<List<ReviewInvitation>>() {
+		final WebMarkupContainer reviewersContainer = new WebMarkupContainer("reviewers") {
 
 			@Override
-			protected List<ReviewInvitation> load() {
-				List<ReviewInvitation> invitations = new ArrayList<>();
-				for (ReviewInvitation invitation: pullRequest.getReviewInvitations()) {
-					if (!invitation.isExcluded())
-						invitations.add(invitation);
-				}
-				return invitations;
+			protected void onBeforeRender() {
+				super.onBeforeRender();
 			}
 			
-		}) {
+		};
+		reviewersContainer.setOutputMarkupId(true);
+		form.add(reviewersContainer);
+		reviewersContainer.add(new ListView<ReviewInvitation>("reviewers", new ReviewersModel(Model.of(pullRequest))) {
 
 			@Override
 			protected void populateItem(ListItem<ReviewInvitation> item) {
-				final ReviewInvitation invitation = item.getModelObject();
-				item.add(new AjaxLink<Void>("remove") {
-
+				ReviewInvitation invitation = item.getModelObject();
+				
+				item.add(new ReviewerAvatar("avatar", invitation) {
+					
 					@Override
-					protected void onInitialize() {
-						super.onInitialize();
-						add(new AvatarByUser("avatar", new AbstractReadOnlyModel<User>() {
-
-							@Override
-							public User getObject() {
-								return invitation.getReviewer();
-							}
-							
-						}));
-						add(new TooltipBehavior(Model.of("Remove " + invitation.getReviewer().getDisplayName())));
-					}
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						invitation.setExcluded(true);
-						pullRequest.getTarget().getRepository().getGateKeeper().checkRequest(pullRequest);
-						for (ReviewInvitation each: pullRequest.getReviewInvitations()) {
-							if (!each.isExcluded() && each.getReviewer().equals(invitation.getReviewer())) {
-								getSession().warn("Reviewer '" + invitation.getReviewer().getDisplayName() + "' is required and can not be removed");
-								break;
-							}
-						}
+					protected void onAvatarRemove(AjaxRequestTarget target) {
+						super.onAvatarRemove(target);
+						
 						target.add(reviewersContainer);
 					}
 					
 				});
+			}
+			
+		});
+		
+		reviewersContainer.add(new ReviewerChoice("addReviewer", Model.of(pullRequest)) {
+
+			@Override
+			protected void onSelect(AjaxRequestTarget target, User user) {
+				super.onSelect(target, user);
+				
+				target.add(reviewersContainer);
+			}
+			
+		});
+		
+		reviewersContainer.add(new WebMarkupContainer("prePopulateHint") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(pullRequest.getStatus() == Status.PENDING_APPROVAL);
 			}
 			
 		});

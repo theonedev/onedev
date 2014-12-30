@@ -16,6 +16,7 @@ import com.pmease.gitplex.web.common.wicket.mapper.PageParameterAwareMountedMapp
 import com.pmease.gitplex.web.common.wicket.mapper.PatternMountedMapper;
 import com.pmease.gitplex.web.page.TestPage;
 import com.pmease.gitplex.web.page.account.AccountHomePage;
+import com.pmease.gitplex.web.page.account.AccountNotificationsPage;
 import com.pmease.gitplex.web.page.account.AccountProfilePage;
 import com.pmease.gitplex.web.page.account.MemberSettingPage;
 import com.pmease.gitplex.web.page.account.RegisterPage;
@@ -48,8 +49,8 @@ import com.pmease.gitplex.web.page.repository.code.tree.RepoTreePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.ClosedRequestsPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.OpenRequestsPage;
-import com.pmease.gitplex.web.page.repository.pullrequest.RequestActivitiesPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestComparePage;
+import com.pmease.gitplex.web.page.repository.pullrequest.RequestOverviewPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestUpdatesPage;
 import com.pmease.gitplex.web.util.UrlUtils;
 
@@ -103,6 +104,8 @@ public class GitPlexMappings extends CompoundRequestMapper {
 			}
 
 		});
+
+		addPage("${user}/notifications", AccountNotificationsPage.class);
 
 		// account settings
 		addPage("${user}/settings", AccountProfilePage.class);
@@ -158,9 +161,9 @@ public class GitPlexMappings extends CompoundRequestMapper {
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/pull-requests/new", NewRequestPage.class));
 		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/pull-requests/${request}", RequestActivitiesPage.class));
+				"${user}/${repo}/pull-requests/${request}", RequestOverviewPage.class));
 		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/pull-requests/${request}/discussions", RequestActivitiesPage.class));
+				"${user}/${repo}/pull-requests/${request}/overview", RequestOverviewPage.class));
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/pull-requests/${request}/updates", RequestUpdatesPage.class));
 		add(new PageParameterAwareMountedMapper(

@@ -15,11 +15,11 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"request", "user", "type"})
+		@UniqueConstraint(columnNames={"request", "user", "task"})
 })
 public class PullRequestNotification extends AbstractEntity {
 
-	public enum Type {REVIEW, UPDATE, INTEGRATE, CHANGED};
+	public enum Task {REVIEW, UPDATE, INTEGRATE};
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
@@ -29,11 +29,10 @@ public class PullRequestNotification extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private User user;
 	
-	@Column(nullable=false)
-	private Type type;
+	private Task task;
 	
 	@Column(nullable=false)
-	private Date date;
+	private Date date = new Date();
 
 	public PullRequest getRequest() {
 		return request;
@@ -51,12 +50,12 @@ public class PullRequestNotification extends AbstractEntity {
 		this.user = user;
 	}
 
-	public Type getType() {
-		return type;
+	public Task getTask() {
+		return task;
 	}
 
-	public void setType(Type type) {
-		this.type = type;
+	public void setTask(Task task) {
+		this.task = task;
 	}
 
 	public Date getDate() {

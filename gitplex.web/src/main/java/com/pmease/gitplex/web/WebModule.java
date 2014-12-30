@@ -59,7 +59,7 @@ public class WebModule extends AbstractPluginModule {
 		contributeFromPackage(EditSupport.class, EditSupportLocator.class);
 		
 		contribute(PullRequestListener.class, RequestDetailPage.Updater.class);
-
+		
 		bind(BlobRendererFactory.class);
 		
 		contribute(MediaRendererProvider.class, new MediaRendererProvider() {

@@ -5,13 +5,13 @@ import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.Horizontal;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Approved;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Disapproved;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.model.Repository;
 
 @SuppressWarnings("serial")
-@Editable(name="If Contained Gate Keeper Is Not Passed", order=400, icon="fa-servers",  
+@Editable(name="If Contained Gate Keeper Is Not Passed", order=400, icon="pa-servers",  
 		description="This gate keeper will be passed if contained gate keeper is not passed.")
 @Horizontal
 public class NotGateKeeper extends CompositeGateKeeper {
@@ -37,10 +37,10 @@ public class NotGateKeeper extends CompositeGateKeeper {
 	protected CheckResult aggregate(Checker checker) {
 		CheckResult result = checker.check(getGateKeeper());
 		
-		if (result instanceof Approved)
-			return disapproved(result.getReasons());
-		else if (result instanceof Disapproved)
-			return approved(result.getReasons());
+		if (result instanceof Passed)
+			return failed(result.getReasons());
+		else if (result instanceof Failed)
+			return passed(result.getReasons());
 		else
 			return result;
 	}

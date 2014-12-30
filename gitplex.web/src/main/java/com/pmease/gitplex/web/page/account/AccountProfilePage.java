@@ -38,7 +38,7 @@ public class AccountProfilePage extends AccountPage {
 	
 	@Override
 	protected String getPageTitle() {
-		return "Your Profile";
+		return "Profile - " + getAccount();
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public class AccountProfilePage extends AccountPage {
 		IModel<User> userModel = new UserModel(getAccount());
 		add(new ProfileForm("form", userModel));
 
-		add(new AvatarByUser("currentavatar", userModel));
+		add(new AvatarByUser("currentavatar", userModel, false));
 		add(new AvatarForm("avatarForm", userModel));
 	}
 

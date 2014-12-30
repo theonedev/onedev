@@ -15,7 +15,7 @@ import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=500, icon="fa-group-o", description=
+@Editable(order=500, icon="pa-group-o", description=
 		"This gate keeper will be passed if specified score can be get from specified team, the score "
 		+ "starts at zero, and will increase by one for each approval, and decrease by one for each "
 		+ "rejection.")
@@ -70,9 +70,9 @@ public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
         int lackApprovals = calcLackApprovals(score, pendings);
 
         if (lackApprovals == 0) {
-            return approved("Get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
+            return passed("Get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
         } else if (lackApprovals < 0) {
-            return disapproved("Can not get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
+            return failed("Can not get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
         } else {
             request.pickReviewers(members, lackApprovals);
 
@@ -103,7 +103,7 @@ public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
         }
     }
 
-	private CheckResult checkApproval(User user) {
+	private CheckResult check(User user) {
         Collection<User> members = new HashSet<User>();
         for (Membership membership : getTeam().getMemberships())
             members.add(membership.getUser());
@@ -119,9 +119,9 @@ public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
         int lackApprovals = calcLackApprovals(score, pendings);
 
         if (lackApprovals == 0) {
-            return approved("Get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
+            return passed("Get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
         } else if (lackApprovals < 0) {
-            return disapproved("Can not get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
+            return failed("Can not get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
         } else {
             return pending("Lack " + lackApprovals + " approvals from team '"
                     + getTeam().getName() + ".");
@@ -130,17 +130,17 @@ public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
 
 	@Override
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		return checkApproval(user);
+		return check(user);
 	}
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		return checkApproval(user);
+		return check(user);
 	}
 
 	@Override
 	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
-		return checkApproval(user);
+		return check(user);
 	}
 
 }

@@ -73,7 +73,7 @@ public interface Dao {
 	<T extends AbstractEntity> List<T> query(EntityCriteria<T> criteria, int firstResult, int maxResults);
 	
 	<T extends AbstractEntity> List<T> query(EntityCriteria<T> criteria);
-
+	
 	<T extends AbstractEntity> List<T> allOf(Class<T> entityClass);
 	
 	/**

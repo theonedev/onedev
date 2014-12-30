@@ -18,9 +18,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
-import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
@@ -33,10 +34,8 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.TextArea;
@@ -58,9 +57,6 @@ import com.google.common.base.Objects;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.behavior.AllowLeaveBehavior;
-import com.pmease.commons.wicket.behavior.TooltipBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.component.markdown.MarkdownInput;
@@ -73,15 +69,15 @@ import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
-import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
+import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.PullRequestCommentReply;
 import com.pmease.gitplex.core.model.PullRequestOperation;
-import com.pmease.gitplex.core.model.PullRequestVerification;
+import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.component.branch.BranchLink;
 import com.pmease.gitplex.web.component.comment.event.PullRequestChanged;
 import com.pmease.gitplex.web.component.label.AgeLabel;
@@ -91,9 +87,6 @@ import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
-
 @SuppressWarnings("serial")
 public abstract class RequestDetailPage extends RepositoryPage {
 
@@ -101,7 +94,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 	
 	private boolean editingTitle;
 	
-	private WebMarkupContainer overviewContainer;
+	protected WebMarkupContainer summaryContainer;
 	
 	public RequestDetailPage(final PageParameters params) {
 		super(params);
@@ -258,7 +251,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			
 		}));
 
-		overviewContainer = new WebMarkupContainer("requestOverview") {
+		summaryContainer = new WebMarkupContainer("requestSummary") {
 
 			@Override
 			public void onEvent(IEvent<?> event) {
@@ -272,8 +265,8 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			
 		};
 		
-		add(overviewContainer);
-		overviewContainer.add(new Label("title", new AbstractReadOnlyModel<String>() {
+		add(summaryContainer);
+		summaryContainer.add(new Label("title", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -290,7 +283,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			}
 			
 		}));
-		overviewContainer.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+		summaryContainer.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -308,12 +301,11 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			}
 			
 		}));
-		overviewContainer.setOutputMarkupId(true);
-		overviewContainer.add(newStatusContainer());
-		overviewContainer.add(newIntegrationContainer());
-		overviewContainer.add(newOperationsContainer());
+		summaryContainer.setOutputMarkupId(true);
+		summaryContainer.add(newStatusContainer());
+		summaryContainer.add(newOperationsContainer());
 		
-		overviewContainer.add(new WebSocketRenderBehavior(true) {
+		summaryContainer.add(new WebSocketRenderBehavior(true) {
 
 			@Override
 			protected Object getTrait() {
@@ -326,7 +318,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		
 		List<Tab> tabs = new ArrayList<>();
 		
-		tabs.add(new RequestTab("Discussions", RequestActivitiesPage.class));
+		tabs.add(new RequestTab("Overview", RequestOverviewPage.class));
 		tabs.add(new RequestTab("Updates", RequestUpdatesPage.class));
 		tabs.add(new RequestTab("Compare", RequestComparePage.class));
 		
@@ -387,7 +379,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				operationsContainer.replace(newOperationConfirm(confirmId, APPROVE));
-				target.add(overviewContainer);
+				target.add(summaryContainer);
 			}
 
 			@Override
@@ -403,7 +395,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				operationsContainer.replace(newOperationConfirm(confirmId, DISAPPROVE));
-				target.add(overviewContainer);
+				target.add(summaryContainer);
 			}
 
 			@Override
@@ -419,7 +411,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				operationsContainer.replace(newOperationConfirm(confirmId, INTEGRATE));
-				target.add(overviewContainer);
+				target.add(summaryContainer);
 			}
 			
 			@Override
@@ -435,7 +427,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				operationsContainer.replace(newOperationConfirm(confirmId, DISCARD));
-				target.add(overviewContainer);
+				target.add(summaryContainer);
 			}
 			
 			@Override
@@ -504,7 +496,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 					setResponsePage(getPage().getClass(), paramsOf(getPullRequest()));
 				} catch (Exception e) {
 					error("Unable to " + actionName + ": " + e.getMessage());
-					target.add(overviewContainer);
+					target.add(summaryContainer);
 				} finally {
 					InheritableThreadLocalData.clear();
 				}
@@ -537,245 +529,12 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				fragment.replaceWith(new WebMarkupContainer(id).setVisible(false));
-				target.add(overviewContainer);
+				target.add(summaryContainer);
 			}
 			
 		});		
 		
 		return fragment;
-	}
-	
-	private WebMarkupContainer newIntegrationContainer() {
-		WebMarkupContainer integrationContainer = new WebMarkupContainer("integration") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getPullRequest().isOpen());
-			}
-			
-		};
-		
-		PullRequest request = getPullRequest();
-		
-		final List<IntegrationStrategy> strategies = 
-				GitPlex.getInstance(PullRequestManager.class).getApplicableIntegrationStrategies(request);
-		if (!strategies.contains(request.getIntegrationStrategy())) {
-			request.setIntegrationStrategy(strategies.get(0));
-			GitPlex.getInstance(Dao.class).persist(request);
-		}
-		IModel<IntegrationStrategy> strategyModel = new IModel<IntegrationStrategy>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public IntegrationStrategy getObject() {
-				return getPullRequest().getIntegrationStrategy();
-			}
-
-			@Override
-			public void setObject(IntegrationStrategy object) {
-				getPullRequest().setIntegrationStrategy(object);
-			}
-			
-		};
-		
-		DropDownChoice<IntegrationStrategy> strategySelect = 
-				new DropDownChoice<IntegrationStrategy>("strategySelect", strategyModel, strategies) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				ObjectPermission writePermission = ObjectPermission.ofRepositoryWrite(getRepository());
-				setVisible(SecurityUtils.getSubject().isPermitted(writePermission) && strategies.size() > 1);						
-			}
-			
-		};
-		strategySelect.add(new OnChangeAjaxBehavior() {
-					
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				GitPlex.getInstance(Dao.class).persist(getPullRequest());
-				target.add(overviewContainer);
-			}
-			
-		});
-		integrationContainer.add(strategySelect);
-		
-		integrationContainer.add(new Label("strategyLabel", request.getIntegrationStrategy()) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				ObjectPermission writePermission = ObjectPermission.ofRepositoryWrite(getRepository());
-				setVisible(!SecurityUtils.getSubject().isPermitted(writePermission) || strategies.size() == 1);						
-			}
-			
-		});
-
-		ObjectPermission writePermission = ObjectPermission.ofRepositoryWrite(getRepository());
-
-		if (!SecurityUtils.getSubject().isPermitted(writePermission) || strategies.size() == 1) {
-			integrationContainer.add(new WebMarkupContainer("strategyHelp").add(
-					new TooltipBehavior(Model.of(getPullRequest().getIntegrationStrategy().getDescription()))));
-		} else {
-			StringBuilder strategyHelp = new StringBuilder("<dl class='integration-strategy-help'>");
-			
-			for (IntegrationStrategy strategy: strategies) {
-				strategyHelp.append("<dt>").append(strategy.toString()).append("</dt>");
-				strategyHelp.append("<dd>").append(strategy.getDescription()).append("</dd>");
-			}
-
-			strategyHelp.append("</dl>");
-			
-			integrationContainer.add(new WebMarkupContainer("strategyHelp")
-						.add(AttributeAppender.append("data-html", "true"))
-						.add(new TooltipBehavior(Model.of(strategyHelp.toString()), new TooltipConfig().withPlacement(Placement.right))));
-		}
-
-		integrationContainer.add(new WebMarkupContainer("calculating") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getPullRequest().getIntegrationPreview() == null);
-			}
-			
-		});
-		integrationContainer.add(new WebMarkupContainer("conflict") {
-			
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				
-				DropdownPanel resolveInstructions = new DropdownPanel("resolveInstructions", true) {
-
-					@Override
-					protected Component newContent(String id) {
-						return new ResolveConflictInstructionPanel(id, new EntityModel<PullRequest>(getPullRequest()));
-					}
-					
-				};
-				add(resolveInstructions);
-				WebMarkupContainer resolveInstructionsTrigger = new WebMarkupContainer("resolveInstructionsTrigger") {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(getPullRequest().getSource() != null);
-					}
-					
-				};
-				resolveInstructionsTrigger.add(new DropdownBehavior(resolveInstructions));
-				add(resolveInstructionsTrigger);
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				IntegrationPreview preview = getPullRequest().getIntegrationPreview();
-				setVisible(preview != null && preview.getIntegrated() == null);
-			}
-
-		});
-		integrationContainer.add(new WebMarkupContainer("noConflict") {
-			
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-
-				PullRequest request = getPullRequest();
-				IntegrationPreview preview = request.getIntegrationPreview();
-				
-				PageParameters params = RequestComparePage.paramsOf(
-						request, request.getTarget().getHeadCommitHash(), 
-						preview!=null?preview.getIntegrated():null, null);
-				
-				Link<Void> link = new BookmarkablePageLink<Void>("preview", RequestComparePage.class, params) {
-					
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-
-						PullRequest request = getPullRequest();
-						IntegrationPreview preview = request.getIntegrationPreview();
-						setVisible(!preview.getIntegrated().equals(preview.getRequestHead()));
-					}
-					
-				};
-				add(link);
-
-				add(new VerificationStatusPanel("verification", requestModel, new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						PullRequest request = getPullRequest();
-						IntegrationPreview preview = request.getIntegrationPreview();
-						if (preview != null)
-							return preview.getIntegrated();
-						else
-							return null;
-					}
-					
-				}) {
-
-					@Override
-					protected Component newStatusComponent(String id, final IModel<PullRequestVerification.Status> statusModel) {
-						return new Label(id, new AbstractReadOnlyModel<String>() {
-
-							@Override
-							public String getObject() {
-								if (statusModel.getObject() == PullRequestVerification.Status.PASSED)
-									return "successful <i class='caret'></i>";
-								else if (statusModel.getObject() == PullRequestVerification.Status.ONGOING)
-									return "running <i class='caret'></i>";
-								else if (statusModel.getObject() == PullRequestVerification.Status.NOT_PASSED) 
-									return "failed <i class='caret'></i>";
-								else 
-									return "";
-							}
-							
-						}) {
-
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								
-								if (statusModel.getObject() == PullRequestVerification.Status.PASSED)
-									tag.put("class", "label label-success");
-								else if (statusModel.getObject() == PullRequestVerification.Status.ONGOING)
-									tag.put("class", "label label-warning");
-								else if (statusModel.getObject() == PullRequestVerification.Status.NOT_PASSED) 
-									tag.put("class", "label label-danger");
-							}
-
-							@Override
-							protected void onDetach() {
-								statusModel.detach();
-								
-								super.onDetach();
-							}
-							
-						}.setEscapeModelStrings(false);
-					}
-					
-				});
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				IntegrationPreview preview = getPullRequest().getIntegrationPreview();
-				setVisible(preview != null && preview.getIntegrated() != null);
-			}
-
-		});
-		
-		return integrationContainer;
 	}
 	
 	private WebMarkupContainer newStatusContainer() {
@@ -997,9 +756,9 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		
 	}
 
-	private static class IntegrationPreviewUpdateTrait {
+	protected static class IntegrationPreviewUpdateTrait {
 		
-		private Long requestId;
+		protected Long requestId;
 
 		@Override
 		public boolean equals(Object obj) {
@@ -1013,6 +772,13 @@ public abstract class RequestDetailPage extends RepositoryPage {
 	
 	public static class Updater implements PullRequestListener {
 		
+		private final Dao dao;
+		
+		@Inject
+		public Updater(Dao dao) {
+			this.dao = dao;
+		}
+		
 		@Override
 		public void onOpened(PullRequest request) {
 		}
@@ -1023,8 +789,8 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		}
 
 		@Override
-		public void onReviewed(PullRequest request) {
-			onChange(request);
+		public void onReviewed(Review review) {
+			onChange(review.getUpdate().getRequest());
 		}
 
 		@Override
@@ -1037,10 +803,23 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			onChange(request);
 		}
 
-		private void onChange(PullRequest request) {
-			PullRequestChangeTrait trait = new PullRequestChangeTrait();
-			trait.requestId = request.getId();
-			WebSocketRenderBehavior.requestToRender(trait, PageId.fromObj(InheritableThreadLocalData.get()));
+		private void onChange(final PullRequest request) {
+			/*
+			 * Make sure that pull request and associated objects are committed before
+			 * sending render request; otherwise rendering request may not reflect
+			 * expected status as rendering happens in another thread which may get
+			 * executed before pull request modification is committed.
+			 */
+			dao.afterCommit(new Runnable() {
+
+				@Override
+				public void run() {
+					PullRequestChangeTrait trait = new PullRequestChangeTrait();
+					trait.requestId = request.getId();
+					WebSocketRenderBehavior.requestToRender(trait, PageId.fromObj(InheritableThreadLocalData.get()));
+				}
+				
+			});
 		}
 		
 		@Override
@@ -1051,13 +830,23 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		}
 
 		@Override
-		public void onCommented(PullRequest request) {
-			onChange(request);
+		public void onCommented(PullRequestComment comment) {
+			onChange(comment.getRequest());
 		}
 
 		@Override
 		public void onVerified(PullRequest request) {
 			onChange(request);
+		}
+
+		@Override
+		public void onAssigned(PullRequest request) {
+			onChange(request);
+		}
+
+		@Override
+		public void onCommentReplied(PullRequestCommentReply reply) {
+			onChange(reply.getComment().getRequest());
 		}
 		
 	}

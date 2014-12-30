@@ -76,7 +76,7 @@ public class MemberListPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<User> item) {
 				User user = item.getModelObject();
-				item.add(new AvatarByUser("avatar", item.getModel()));
+				item.add(new AvatarByUser("avatar", item.getModel(), false));
 				AbstractLink link = new BookmarkablePageLink<>("userLink", 
 						AccountHomePage.class, AccountHomePage.paramsOf(user));
 				item.add(link);

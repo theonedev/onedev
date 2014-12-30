@@ -37,7 +37,7 @@ import com.pmease.gitplex.web.component.diff.CompareResultPanel;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.NewRequestPage;
-import com.pmease.gitplex.web.page.repository.pullrequest.RequestActivitiesPage;
+import com.pmease.gitplex.web.page.repository.pullrequest.RequestOverviewPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestDetailPage;
 
 @SuppressWarnings("serial")
@@ -263,7 +263,7 @@ public class BranchComparePage extends RepositoryPage {
 					@Override
 					public void onClick() {
 						PageParameters params = RequestDetailPage.paramsOf(requestModel.getObject());
-						setResponsePage(RequestActivitiesPage.class, params);
+						setResponsePage(RequestOverviewPage.class, params);
 					}
 					
 				});

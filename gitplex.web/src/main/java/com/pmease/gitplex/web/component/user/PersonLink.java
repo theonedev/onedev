@@ -78,7 +78,7 @@ public class PersonLink extends Panel {
 					return getPerson().getEmailAddress();
 				}
 				
-			});
+			}, false);
 			if (tooltipConfig != null)
 				avatar.add(new TooltipBehavior(Model.of(displayName), tooltipConfig));
 			link.add(avatar);

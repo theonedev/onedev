@@ -11,7 +11,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
-@Editable(order=210, icon="fa-branch-pattern", description=
+@Editable(order=210, icon="pa-branch-pattern", description=
 		"This gate keeper will be passed if the branch to be created matches specified patterns.")
 @SuppressWarnings("serial")
 public class IfCreateSpecifiedBranches extends BranchGateKeeper {
@@ -54,9 +54,9 @@ public class IfCreateSpecifiedBranches extends BranchGateKeeper {
 	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
 		if (refName.startsWith(Git.REFS_HEADS)) {
 			if (WildcardUtils.matchPath(Git.REFS_HEADS + getBranchPatterns(), refName))
-				return approved("Branch to be created matches pattern '" + branchPatterns + "'.");
+				return passed("Branch to be created matches pattern '" + branchPatterns + "'.");
 			else
-				return disapproved("Branch to be created does not match pattern '" + branchPatterns + "'.");
+				return failed("Branch to be created does not match pattern '" + branchPatterns + "'.");
 		} else {
 			return ignored();
 		}

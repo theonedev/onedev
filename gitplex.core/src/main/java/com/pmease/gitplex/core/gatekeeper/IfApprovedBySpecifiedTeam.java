@@ -15,7 +15,7 @@ import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=100, icon="fa-group-o", description=
+@Editable(order=100, icon="pa-group-o", description=
 		"This gate keeper will be passed if the commit is approved by specified number of users "
 		+ "from specified team.")
 public class IfApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
@@ -50,10 +50,10 @@ public class IfApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
         }
 
         if (approvals >= getLeastApprovals()) {
-            return approved("Already get at least " + getLeastApprovals() + " approvals from team '"
+            return passed("Already get at least " + getLeastApprovals() + " approvals from team '"
                     + getTeam().getName() + "'.");
         } else if (getLeastApprovals() - approvals > pendings) {
-            return disapproved("Unable to get at least " + getLeastApprovals()
+            return failed("Unable to get at least " + getLeastApprovals()
                     + " approvals from team '" + getTeam().getName() + "'.");
         } else {
             int lackApprovals = getLeastApprovals() - approvals;
@@ -65,7 +65,7 @@ public class IfApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
         }
     }
 
-	private CheckResult checkApproval(User user) {
+	private CheckResult check(User user) {
         Collection<User> members = new HashSet<User>();
         for (Membership membership : getTeam().getMemberships())
             members.add(membership.getUser());
@@ -79,10 +79,10 @@ public class IfApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
         }
 
         if (approvals >= getLeastApprovals()) {
-            return approved("Get at least " + leastApprovals + " approvals from team '"
+            return passed("Get at least " + leastApprovals + " approvals from team '"
                     + getTeam().getName() + "'.");
         } else if (getLeastApprovals() - approvals > pendings) {
-            return disapproved("Can not get at least " + leastApprovals 
+            return failed("Can not get at least " + leastApprovals 
                     + " approvals from team '" + getTeam().getName() + "'.");
         } else {
             int lackApprovals = getLeastApprovals() - approvals;
@@ -94,17 +94,17 @@ public class IfApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		return checkApproval(user);
+		return check(user);
 	}
 
 	@Override
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		return checkApproval(user);
+		return check(user);
 	}
 
 	@Override
 	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
-		return checkApproval(user);
+		return check(user);
 	}
 
 }

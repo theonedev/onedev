@@ -23,7 +23,7 @@ public class Icon extends WebMarkupContainer {
 
 					@Override
 					public String getObject() {
-						return "fa " + iconClass.getObject();
+						return "pa " + iconClass.getObject();
 					}
 				}));
 	}

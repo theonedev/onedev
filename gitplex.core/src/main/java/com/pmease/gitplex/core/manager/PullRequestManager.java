@@ -40,7 +40,9 @@ public interface PullRequestManager {
     
     void onSourceBranchUpdate(PullRequest request);
     
-    void onGateKeeperUpdate(PullRequest request);
+    void onAssigneeChange(PullRequest request);
+    
+    void check(PullRequest request);
     
     /**
      * Preview integration of this pull request.

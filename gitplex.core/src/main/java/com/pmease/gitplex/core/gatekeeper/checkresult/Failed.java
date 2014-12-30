@@ -4,19 +4,19 @@ import java.util.List;
 
 /* Reject the merge request. */
 @SuppressWarnings("serial")
-public class Disapproved extends CheckResult {
+public class Failed extends CheckResult {
 
-	public Disapproved(List<String> reasons) {
+	public Failed(List<String> reasons) {
 		super(reasons);
 	}
 
-	public Disapproved(String reason) {
+	public Failed(String reason) {
 		super(reason);
 	}
 
     @Override
     public String toString() {
-        return "Disapproved";
+        return "Failed";
     }
     
 }

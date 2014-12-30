@@ -6,15 +6,23 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 
+import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.web.service.AvatarManager;
 
 @SuppressWarnings("serial")
 public class AvatarByEmail extends WebComponent {
 
-	private IModel<String> avatarUrlModel;
+	private final IModel<String> avatarUrlModel;
+	
+	private final boolean withTooltip;
 
+	public AvatarByEmail(String id, IModel<String> emailModel) {
+		this(id, emailModel, true);
+	}
+	
 	/**
 	 * Display avatar of specified email model.
 	 * 
@@ -24,17 +32,31 @@ public class AvatarByEmail extends WebComponent {
 	 * 			model of the user to display avatar for. This model allows to return <tt>null</tt> 
 	 * 			to display avatar for unknown user 
 	 */
-	public AvatarByEmail(String id, IModel<String> emailModel) {
+	public AvatarByEmail(String id, IModel<String> emailModel, boolean withTooltip) {
 		super(id, emailModel);
 		
 		avatarUrlModel = new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
-				return GitPlex.getInstance(AvatarManager.class).getAvatarUrl((String)getDefaultModelObject());
+				return GitPlex.getInstance(AvatarManager.class).getAvatarUrl(getEmail());
 			}
 			
 		};
+		
+		this.withTooltip = withTooltip;
+	}
+
+	private String getEmail() {
+		return getDefaultModelObjectAsString();
+	}
+	
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
+		if (withTooltip)
+			add(new TooltipBehavior(Model.of(getEmail())));
 	}
 
 	@Override

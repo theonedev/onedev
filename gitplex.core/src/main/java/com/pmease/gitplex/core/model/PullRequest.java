@@ -40,10 +40,12 @@ import com.pmease.commons.util.Triple;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.ChangeComments;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Disapproved;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.gatekeeper.checkresult.PendingAndBlock;
 import com.pmease.gitplex.core.manager.PullRequestManager;
+import com.pmease.gitplex.core.manager.ReviewManager;
+import com.pmease.gitplex.core.permission.ObjectPermission;
 
 @SuppressWarnings("serial")
 @Entity
@@ -172,6 +174,8 @@ public class PullRequest extends AbstractEntity {
 	private transient Map<ChangeKey, ChangeComments> commentsCache = new HashMap<>();
 	
 	private transient Collection<PullRequestCommentReply> commentReplies;
+	
+	private transient List<Review> reviews;
 	
 	/**
 	 * Get title of this merge request.
@@ -341,7 +345,7 @@ public class PullRequest extends AbstractEntity {
 			return Status.DISCARDED;
 		else if (getCheckResult() instanceof Pending || getCheckResult() instanceof PendingAndBlock) 
 			return Status.PENDING_APPROVAL;
-		else if (getCheckResult() instanceof Disapproved) 
+		else if (getCheckResult() instanceof Failed) 
 			return Status.PENDING_UPDATE;
 		else  
 			return Status.PENDING_INTEGRATE;
@@ -525,16 +529,16 @@ public class PullRequest extends AbstractEntity {
 		for (Review review: getReferentialUpdate().listReviewsOnwards())
 			pickList.remove(review.getReviewer());
 
-		final Set<User> invited = new HashSet<>();
-		final Set<User> inviteExcluded = new HashSet<>();
+		final Map<User, Date> invited = new HashMap<>();
+		final Map<User, Date> excluded = new HashMap<>();
 		
 		for (ReviewInvitation invitation: getReviewInvitations()) {
 			if (!invitation.isExcluded())
-				invited.add(invitation.getReviewer());
+				invited.put(invitation.getReviewer(), invitation.getDate());
 			else
-				inviteExcluded.add(invitation.getReviewer());
+				excluded.put(invitation.getReviewer(), invitation.getDate());
 		}
-
+		
 		/* Follow below rules to pick reviewers:
 		 * 1. If user is excluded previously, it will be considered last.
 		 * 2. If user is already a reviewer, it will be considered first.
@@ -544,19 +548,19 @@ public class PullRequest extends AbstractEntity {
 
 			@Override
 			public int compare(User user1, User user2) {
-				if (invited.contains(user1)) {
-					if (invited.contains(user2))
+				if (invited.containsKey(user1)) {
+					if (invited.containsKey(user2)) 
 						return user1.getReviewEffort() - user2.getReviewEffort();
 					else
 						return -1;
-				} else if (invited.contains(user2)) {
+				} else if (invited.containsKey(user2)) {
 					return 1;
-				} else if (inviteExcluded.contains(user1)) {
-					if (inviteExcluded.contains(user2)) 
-						return user1.getReviewEffort() - user2.getReviewEffort();
+				} else if (excluded.containsKey(user1)) {
+					if (excluded.containsKey(user2)) 
+						return excluded.get(user1).compareTo(excluded.get(user2));
 					else
 						return 1;
-				} else if (inviteExcluded.contains(user2)) {
+				} else if (excluded.containsKey(user2)) {
 					return -1;
 				} else {
 					return user1.getReviewEffort() - user2.getReviewEffort();
@@ -571,15 +575,11 @@ public class PullRequest extends AbstractEntity {
 		else
 			picked = pickList;
 
-		Set<User> notified = new HashSet<>();
-		for (PullRequestNotification notification: getNotifications()) {
-			if (notification.getType() == PullRequestNotification.Type.REVIEW)
-				notified.add(notification.getUser());
-		}
-		for (User each: picked) {
+		for (User user: picked) {
 			boolean found = false;
 			for (ReviewInvitation invitation: getReviewInvitations()) {
-				if (invitation.getReviewer().equals(each)) {
+				if (invitation.getReviewer().equals(user)) {
+					invitation.setDate(new Date());
 					invitation.setExcluded(false);
 					found = true;
 				}
@@ -587,17 +587,8 @@ public class PullRequest extends AbstractEntity {
 			if (!found) {
 				ReviewInvitation invitation = new ReviewInvitation();
 				invitation.setRequest(this);
-				invitation.setReviewer(each);
+				invitation.setReviewer(user);
 				getReviewInvitations().add(invitation);
-			}
-			
-			if (!notified.contains(each)) {
-				PullRequestNotification notification = new PullRequestNotification();
-				notification.setRequest(this);
-				notification.setUser(each);
-				notification.setType(PullRequestNotification.Type.REVIEW);
-				notification.setDate(new Date());
-				getNotifications().add(notification);
 			}
 		}
 
@@ -710,6 +701,41 @@ public class PullRequest extends AbstractEntity {
 				replies.add(reply);
 		}
 		return replies;
+	}
+	
+	public List<Review> getReviews() {
+		if (reviews == null) 
+			reviews = GitPlex.getInstance(ReviewManager.class).findBy(this);
+		return reviews;
+	}
+	
+	public boolean isReviewEffective(User user) {
+		for (Review review: getReviews()) {
+			if (review.getUpdate().equals(getLatestUpdate()) && review.getReviewer().equals(user)) 
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Calculate list of users can be added as reviewers of this pull request.
+	 *  
+	 * @return
+	 * 			list of potential reviewers
+	 */
+	public List<User> getPotentialReviewers() {
+		List<User> reviewers = new ArrayList<>();
+		Set<User> alreadyInvited = new HashSet<>();
+		for (ReviewInvitation invitation: getReviewInvitations()) {
+			if (!invitation.isExcluded())
+				alreadyInvited.add(invitation.getReviewer());
+		}
+		ObjectPermission readPerm = ObjectPermission.ofRepositoryRead(getTarget().getRepository());
+		for (User user: GitPlex.getInstance(Dao.class).allOf(User.class)) {
+			if (user.asSubject().isPermitted(readPerm) && !alreadyInvited.contains(user))
+				reviewers.add(user);
+		}
+		return reviewers;
 	}
 	
 	private static class ChangeKey extends Triple<String, String, String> {

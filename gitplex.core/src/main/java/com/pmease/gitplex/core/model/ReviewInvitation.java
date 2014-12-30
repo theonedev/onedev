@@ -1,5 +1,8 @@
 package com.pmease.gitplex.core.model;
 
+import java.util.Date;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -26,6 +29,9 @@ public class ReviewInvitation extends AbstractEntity {
 	
 	private boolean excluded;
 	
+	@Column(nullable=false)
+	private Date date = new Date();
+	
 	public User getReviewer() {
 		return reviewer;
 	}
@@ -48,6 +54,14 @@ public class ReviewInvitation extends AbstractEntity {
 
 	public void setExcluded(boolean excluded) {
 		this.excluded = excluded;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
 	}
 
 }

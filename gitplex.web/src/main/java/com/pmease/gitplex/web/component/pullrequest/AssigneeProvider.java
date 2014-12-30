@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.user;
+package com.pmease.gitplex.web.component.pullrequest;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,41 +27,41 @@ import com.pmease.gitplex.web.service.AvatarManager;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 
-public class RequestAssigneeProvider extends ChoiceProvider<RequestAssignee> {
+public class AssigneeProvider extends ChoiceProvider<Assignee> {
 
 	private static final long serialVersionUID = 1L;
 
 	private final IModel<Repository> repoModel;
 	
-	public RequestAssigneeProvider(IModel<Repository> repoModel) {
+	public AssigneeProvider(IModel<Repository> repoModel) {
 		this.repoModel = repoModel;
 	}
 	
 	@Override
-	public void query(String term, int page, Response<RequestAssignee> response) {
-		List<RequestAssignee> assignees = new ArrayList<>();
+	public void query(String term, int page, Response<Assignee> response) {
+		List<Assignee> assignees = new ArrayList<>();
 		for (User user: GitPlex.getInstance(AuthorizationManager.class)
 				.listAuthorizedUsers(repoModel.getObject(), GeneralOperation.WRITE)) {
 			if (StringUtils.isBlank(term) 
 					|| user.getName().startsWith(term) 
 					|| user.getDisplayName().startsWith(term)) {
-				assignees.add(new RequestAssignee(user, null));
+				assignees.add(new Assignee(user, null));
 			}
 		}
-		Collections.sort(assignees, new Comparator<RequestAssignee>() {
+		Collections.sort(assignees, new Comparator<Assignee>() {
 
 			@Override
-			public int compare(RequestAssignee assignee1, RequestAssignee assignee2) {
+			public int compare(Assignee assignee1, Assignee assignee2) {
 				return assignee1.getUser().getDisplayName().compareTo(assignee2.getUser().getDisplayName());
 			}
 			
 		});
 		if (StringUtils.isBlank(term)) {
-			assignees.add(0, new RequestAssignee(repoModel.getObject().getOwner(), "Repository Owner"));
+			assignees.add(0, new Assignee(repoModel.getObject().getOwner(), "Repository Owner"));
 			Permission writePermission = ObjectPermission.ofRepositoryWrite(repoModel.getObject());
 			User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 			if (currentUser != null && currentUser.asSubject().isPermitted(writePermission))
-				assignees.add(0, new RequestAssignee(currentUser, "Me"));
+				assignees.add(0, new Assignee(currentUser, "Me"));
 		}
 
 		int first = page * Constants.DEFAULT_SELECT2_PAGE_SIZE;
@@ -75,7 +75,7 @@ public class RequestAssigneeProvider extends ChoiceProvider<RequestAssignee> {
 	}
 
 	@Override
-	public void toJson(RequestAssignee choice, JSONWriter writer) throws JSONException {
+	public void toJson(Assignee choice, JSONWriter writer) throws JSONException {
 		writer.key("id").value(choice.getUser().getId())
 			.key("name").value(StringEscapeUtils.escapeHtml4(choice.getUser().getName()));
 		if (choice.getUser().getFullName() != null)
@@ -87,12 +87,12 @@ public class RequestAssigneeProvider extends ChoiceProvider<RequestAssignee> {
 	}
 
 	@Override
-	public Collection<RequestAssignee> toChoices(Collection<String> ids) {
-		List<RequestAssignee> assignees = Lists.newArrayList();
+	public Collection<Assignee> toChoices(Collection<String> ids) {
+		List<Assignee> assignees = Lists.newArrayList();
 		Dao dao = GitPlex.getInstance(Dao.class);
 		for (String each : ids) {
 			Long id = Long.valueOf(each);
-			assignees.add(new RequestAssignee(dao.load(User.class, id), null));
+			assignees.add(new Assignee(dao.load(User.class, id), null));
 		}
 
 		return assignees;

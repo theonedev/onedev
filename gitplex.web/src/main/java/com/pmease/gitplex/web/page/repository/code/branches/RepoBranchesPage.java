@@ -45,7 +45,7 @@ import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.commons.wicket.component.navigator.PagingNavigator;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Approved;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
@@ -64,7 +64,7 @@ import com.pmease.gitplex.web.component.user.PersonLink;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.code.tree.RepoTreePage;
-import com.pmease.gitplex.web.page.repository.pullrequest.RequestActivitiesPage;
+import com.pmease.gitplex.web.page.repository.pullrequest.RequestOverviewPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
@@ -349,7 +349,7 @@ public class RepoBranchesPage extends RepositoryPage {
 						Branch branch = item.getModelObject();
 						PullRequest request = behindOpenRequestsModel.getObject().get(branch.getName());
 						if (request != null) {
-							setResponsePage(RequestActivitiesPage.class, RequestActivitiesPage.paramsOf(request));
+							setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(request));
 						} else {
 							setResponsePage(BranchComparePage.class, 
 									BranchComparePage.paramsOf(getRepository(), getBaseBranch(), branch));
@@ -406,7 +406,7 @@ public class RepoBranchesPage extends RepositoryPage {
 						Branch branch = item.getModelObject();
 						PullRequest request = aheadOpenRequestsModel.getObject().get(branch.getName());
 						if (request != null) {
-							setResponsePage(RequestActivitiesPage.class, RequestActivitiesPage.paramsOf(request));
+							setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(request));
 						} else {
 							setResponsePage(BranchComparePage.class, 
 									BranchComparePage.paramsOf(getRepository(), branch, getBaseBranch()));
@@ -494,7 +494,7 @@ public class RepoBranchesPage extends RepositoryPage {
 							if (currentUser != null) {
 								GateKeeper gateKeeper = getRepository().getGateKeeper();
 								CheckResult checkResult = gateKeeper.checkBranch(currentUser, branch);
-								if (checkResult instanceof Approved) {
+								if (checkResult instanceof Passed) {
 									setVisible(true);
 									PullRequest aheadOpen = aheadOpenRequestsModel.getObject().get(branch.getName());
 									PullRequest behindOpen = behindOpenRequestsModel.getObject().get(branch.getName());

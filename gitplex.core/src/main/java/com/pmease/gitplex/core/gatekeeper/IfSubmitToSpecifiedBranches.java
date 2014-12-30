@@ -21,7 +21,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=100, icon="fa-branch", description=
+@Editable(order=100, icon="pa-branch", description=
 		"This gate keeper will be passed if the commit is submitted to specified branches.")
 public class IfSubmitToSpecifiedBranches extends BranchGateKeeper {
 
@@ -61,14 +61,14 @@ public class IfSubmitToSpecifiedBranches extends BranchGateKeeper {
 		
 		if (branchIds.size() > 1) {
 			if (branchIds.contains(branch.getId()))
-				return approved("Target branch is one of '" + StringUtils.join(branchNames, ", ") + "'.");
+				return passed("Target branch is one of '" + StringUtils.join(branchNames, ", ") + "'.");
 			else
-				return disapproved("Target branch is not any one of '" + StringUtils.join(branchNames, ", ") + "'.");
+				return failed("Target branch is not any one of '" + StringUtils.join(branchNames, ", ") + "'.");
 		} else {
 			if (branchIds.contains(branch.getId()))
-				return approved("Target branch is '" + branchNames.get(0) + "'.");
+				return passed("Target branch is '" + branchNames.get(0) + "'.");
 			else
-				return disapproved("Target branch is not '" + branchNames.get(0) + "'.");
+				return failed("Target branch is not '" + branchNames.get(0) + "'.");
 		}
 	}
 	

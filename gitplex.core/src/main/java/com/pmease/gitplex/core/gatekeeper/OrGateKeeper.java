@@ -5,14 +5,14 @@ import java.util.List;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.Horizontal;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Approved;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Disapproved;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.gatekeeper.checkresult.PendingAndBlock;
 
 @SuppressWarnings("serial")
-@Editable(name="If Any Of Contained Gate Keepers Is Passed", order=200, icon="fa-servers",  
+@Editable(name="If Any Of Contained Gate Keepers Is Passed", order=200, icon="pa-servers",  
 		description="This gate keeper will be passed if any of the contained gate keepers is passed.")
 @Horizontal
 public class OrGateKeeper extends AndOrGateKeeper {
@@ -24,9 +24,9 @@ public class OrGateKeeper extends AndOrGateKeeper {
 		
 		for (GateKeeper each: getGateKeepers()) {
 			CheckResult result = checker.check(each);
-			if (result instanceof Disapproved) {
+			if (result instanceof Failed) {
 				rejectReasons.addAll(result.getReasons());
-			} else if (result instanceof Approved) {
+			} else if (result instanceof Passed) {
 				return result;
 			} else if (result instanceof PendingAndBlock) {
 				result.getReasons().addAll(pendingReasons);
@@ -39,7 +39,7 @@ public class OrGateKeeper extends AndOrGateKeeper {
 		if (!pendingReasons.isEmpty())
 			return pending(pendingReasons);
 		else
-			return disapproved(rejectReasons);
+			return failed(rejectReasons);
 	}
 
 }

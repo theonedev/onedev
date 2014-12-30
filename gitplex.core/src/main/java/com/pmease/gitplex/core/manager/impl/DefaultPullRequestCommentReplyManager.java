@@ -1,6 +1,7 @@
 package com.pmease.gitplex.core.manager.impl;
 
 import java.util.Collection;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -12,7 +13,6 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
-import com.pmease.gitplex.core.extensionpoint.PullRequestListeners;
 import com.pmease.gitplex.core.manager.PullRequestCommentReplyManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestCommentReply;
@@ -22,36 +22,21 @@ public class DefaultPullRequestCommentReplyManager implements PullRequestComment
 
 	private final Dao dao;
 	
-	private final PullRequestListeners pullRequestListeners;
+	private final Set<PullRequestListener> pullRequestListeners;
 	
 	@Inject
-	public DefaultPullRequestCommentReplyManager(Dao dao, PullRequestListeners pullRequestListeners) {
+	public DefaultPullRequestCommentReplyManager(Dao dao, Set<PullRequestListener> pullRequestListeners) {
 		this.dao = dao;
 		this.pullRequestListeners = pullRequestListeners;
 	}
 
 	@Transactional
 	@Override
-	public void save(PullRequestCommentReply reply) {
+	public void save(final PullRequestCommentReply reply) {
 		dao.persist(reply);
 
-		final Long requestId = reply.getComment().getRequest().getId();
-		
-		dao.afterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				pullRequestListeners.asyncCall(requestId, new PullRequestListeners.Callback() {
-					
-					@Override
-					protected void call(PullRequestListener listener, PullRequest request) {
-						listener.onCommented(request);
-					}
-					
-				});
-			}
-			
-		});
+		for (PullRequestListener listener: pullRequestListeners)
+			listener.onCommentReplied(reply);
 	}
 
 	@Sessional

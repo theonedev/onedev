@@ -11,7 +11,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=200, icon="fa-branch-pattern", description=
+@Editable(order=200, icon="pa-branch-pattern", description=
 		"This gate keeper will be passed if the commit is submitted to specified branch pattern.")
 public class IfSubmitToSpecifiedBranchPatterns extends BranchGateKeeper {
 
@@ -36,9 +36,9 @@ public class IfSubmitToSpecifiedBranchPatterns extends BranchGateKeeper {
 
 	private CheckResult checkBranch(Branch branch) {
 		if (WildcardUtils.matchPath(getBranchPatterns(), branch.getName()))
-			return approved("Target branch matches pattern '" + branchPatterns + "'.");
+			return passed("Target branch matches pattern '" + branchPatterns + "'.");
 		else
-			return disapproved("Target branch does not match pattern '" + branchPatterns + "'.");
+			return failed("Target branch does not match pattern '" + branchPatterns + "'.");
 	}
 	
 	@Override

@@ -14,6 +14,7 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.asset.Assets;
 
 import de.agilecoders.wicket.core.Bootstrap;
+import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
 import de.agilecoders.wicket.webjars.request.resource.WebjarsJavaScriptResourceReference;
 
 /**
@@ -85,6 +86,8 @@ class CommonResourceReference extends JavaScriptResourceReference {
 		
 		dependencies.add(JavaScriptHeaderItem.forReference(
 				new WebjarsJavaScriptResourceReference("historyjs/current/scripts/bundled/html5/jquery.history.js")));
+		dependencies.add(CssHeaderItem.forReference(
+				new WebjarsCssResourceReference("font-awesome/current/css/font-awesome.min.css")));
 
 		dependencies.add(JavaScriptHeaderItem.forReference(Assets.ALIGN_JS));
 

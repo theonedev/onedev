@@ -17,7 +17,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=90, icon="fa-folder-o", description=
+@Editable(order=90, icon="pa-folder-o", description=
 		"This gate keeper will be passed if any commit files are under specified directories.")
 public class IfTouchSpecifiedDirectories extends FileGateKeeper {
 
@@ -42,22 +42,22 @@ public class IfTouchSpecifiedDirectories extends FileGateKeeper {
 				for (String each: directories) {
 					if (WildcardUtils.matchPath(each + "/**", file)) {
 						request.setReferentialUpdate(update);
-						return approved("Touched directory '" + each + "'.");
+						return passed("Touched directory '" + each + "'.");
 					}
 				}
 			}
 		}
 
-		return disapproved("Not touched directories '" + getDirectories() + "'.");
+		return failed("Not touched directories '" + getDirectories() + "'.");
 	}
 
 	@Override
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
 		for (String each: directories) {
 			if (file == null || WildcardUtils.matchPath(each + "/**", file)) 
-				return approved("Touched directory '" + each + "'.");
+				return passed("Touched directory '" + each + "'.");
 		}
-		return disapproved("Not touched directories '" + getDirectories() + "'.");
+		return failed("Not touched directories '" + getDirectories() + "'.");
 	}
 
 	@Override
@@ -65,11 +65,11 @@ public class IfTouchSpecifiedDirectories extends FileGateKeeper {
 		for (String file: branch.getRepository().git().listChangedFiles(branch.getHeadCommitHash(), commit, null)) {
 			for (String each: directories) {
 				if (WildcardUtils.matchPath(each + "/**", file))
-					return approved("Touched directory '" + each + "'.");
+					return passed("Touched directory '" + each + "'.");
 			}
 		}
 
-		return disapproved("Not touched directories '" + getDirectories() + "'.");
+		return failed("Not touched directories '" + getDirectories() + "'.");
 	}
 
 	@Override

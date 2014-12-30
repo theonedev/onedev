@@ -43,10 +43,11 @@ public abstract class AccountPage extends AccountBasePage {
 		add(new UserLink("userName", new UserModel(getAccount()), AvatarMode.NAME));
 		
 		List<Tab> tabs = new ArrayList<>();
-		tabs.add(new AccountTab(Model.of("Repositories"), "fa fa-repo", RepositoriesPage.class));
-		tabs.add(new AccountTab(Model.of("Teams"), "fa fa-group-o", AccountTeamsPage.class, EditTeamPage.class));
-		tabs.add(new AccountTab(Model.of("Members"), "fa fa-user-o", MemberSettingPage.class));
-		tabs.add(new AccountTab(Model.of("Profile"), "fa fa-gear", AccountProfilePage.class));
+		tabs.add(new AccountTab(Model.of("Repositories"), "pa pa-repo", RepositoriesPage.class));
+		tabs.add(new AccountTab(Model.of("Teams"), "pa pa-group-o", AccountTeamsPage.class, EditTeamPage.class));
+		tabs.add(new AccountTab(Model.of("Members"), "pa pa-user-o", MemberSettingPage.class));
+		tabs.add(new AccountTab(Model.of("Notifications"), "pa pa-volume-medium", AccountNotificationsPage.class));
+		tabs.add(new AccountTab(Model.of("Profile"), "pa pa-gear", AccountProfilePage.class));
 
 		add(new Tabbable("tabs", tabs));
 		
@@ -54,19 +55,22 @@ public abstract class AccountPage extends AccountBasePage {
 
 			@Override
 			protected List<User> load() {
-				UserManager um = GitPlex.getInstance(UserManager.class);
-				List<User> users = 
-							um.getManagableAccounts(um.getCurrent());
-				
-				List<User> result = Lists.newArrayList();
-				
-				for (User each : users) {
-					if (!Objects.equal(each, getAccount())) {
-						result.add(each);
+				User currentUser = getCurrentUser();
+				if (currentUser != null) {
+					List<User> users = GitPlex.getInstance(UserManager.class).getManagableAccounts(currentUser);
+					
+					List<User> result = Lists.newArrayList();
+					
+					for (User each : users) {
+						if (!Objects.equal(each, getAccount())) {
+							result.add(each);
+						}
 					}
+					
+					return result;
+				} else {
+					return new ArrayList<User>();
 				}
-				
-				return result;
 			}
 			
 		};
@@ -81,7 +85,7 @@ public abstract class AccountPage extends AccountBasePage {
 				AbstractLink link = new BookmarkablePageLink<Void>("link",
 						AccountProfilePage.class,
 						params);
-				link.add(new AvatarByUser("avatar", item.getModel()));
+				link.add(new AvatarByUser("avatar", item.getModel(), false));
 				item.add(link);
 				link.add(new Label("name", user.getName()));
 			}

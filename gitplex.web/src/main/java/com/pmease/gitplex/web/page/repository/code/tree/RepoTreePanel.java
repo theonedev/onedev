@@ -125,17 +125,17 @@ public class RepoTreePanel extends Panel {
 					@Override
 					public String getObject() {
 						if (bits == FileMode.TYPE_TREE) 
-							return "fa-folder";
+							return "pa-folder";
 						else if (bits == FileMode.TYPE_GITLINK)
-							return "fa-folder-submodule";
+							return "pa-folder-submodule";
 						else if (bits == FileMode.TYPE_SYMLINK) {
 							Git git = repoModel.getObject().git();
 							if (git.isTreeLink(path, repoModel.getObject().defaultBranchIfNull(currentRevision)))
-								return "fa-folder-link";
+								return "pa-folder-link";
 							else
-								return "fa-file-link";
+								return "pa-file-link";
 						} else 
-							return "fa-file-txt";
+							return "pa-file-txt";
 					}
 				});
 				

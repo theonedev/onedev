@@ -70,6 +70,17 @@
 			<version>1.8.0</version>
 		</dependency>
 		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>font-awesome</artifactId>
+			<version>4.2.0</version>
+			<exclusions>
+				<exclusion>
+		            <groupId>org.webjars</groupId>
+		            <artifactId>bootstrap</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.wicket</groupId>
 			<artifactId>wicket-bean-validation</artifactId>
 			<version>0.11</version>
@@ -109,6 +120,11 @@
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.jetty</artifactId>
 			<version>1.0.31</version>
+		</dependency>
+		<dependency>
+			<groupId>com.pmease</groupId>
+			<artifactId>commons.hibernate</artifactId>
+			<version>1.0.30</version>
 		</dependency>
 	</dependencies>
 	<properties>

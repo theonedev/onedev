@@ -3,7 +3,7 @@
 		<div wicket:id="requestTitle" class="title clearfix">
 			<div wicket:id="title" class="title pull-left"></div>
 			<div wicket:id="id" class="id pull-left"></div>
-			<a wicket:id="editLink" title="Edit title" class="edit"><i class="fa fa-pencil"></i></a>
+			<a wicket:id="editLink" title="Edit title" class="edit"><i class="pa pa-pencil"></i></a>
 			<form wicket:id="editForm" class="pull-left form-inline">
 				<input wicket:id="title" type="text" placeholder="Input title" class="form-control input-sm focusable"></input>
 				<input wicket:id="save" type="submit" value="Save" class="btn btn-sm btn-primary"/>
@@ -20,7 +20,7 @@
 			</wicket:enclosure>
 			<span wicket:id="requestDate"></span>
 		</div>
-		<div wicket:id="requestOverview" class="overview panel">
+		<div wicket:id="requestSummary" class="summary panel">
 			<div class="panel-heading"><span wicket:id="title" class="panel-title"></span></div>
 			<div class="panel-body">
 				<div wicket:id="status" class="status">
@@ -59,39 +59,9 @@
 					</div>
 					<wicket:enclosure child="reasons">
 					<div class="reasons">
-						<div wicket:id="reasons" class="reason"><i class="fa fa-primitive-square"></i> <span wicket:id="reason"></span></div>
+						<div wicket:id="reasons" class="reason"><i class="pa pa-primitive-square"></i> <span wicket:id="reason"></span></div>
 					</div>
 					</wicket:enclosure>
-				</div>
-				<div wicket:id="integration" class="integration">
-					<div class="strategy">
-						<i class="fa fa-chevron-right"></i>
-						Integration Strategy: 
-						<select wicket:id="strategySelect"></select> 
-						<span wicket:id="strategyLabel"></span>
-						<span wicket:id="strategyHelp" class="fa fa-question-circle pointer"></span>
-					</div>
-					<div class="preview">
-						<div wicket:id="calculating" class="well">
-							<img src="/assets/img/ajax-indicator.gif"></img> Calculating integration preview...
-						</div>
-						<div wicket:id="noConflict" class="alert alert-success">
-							<span><i class="fa fa-tick-round"></i> Able to integrate without conflicts.</span> 
-							<wicket:enclosure child="preview">
-								<span class="fa fa-arrow-right"></span> <a wicket:id="preview">Preview</a> the integration result.
-							</wicket:enclosure>
-							<wicket:enclosure child="verification">
-								<span class="fa fa-arrow-right"></span> Build of the integration is <span wicket:id="verification"></span>
-							</wicket:enclosure>
-						</div>
-						<div wicket:id="conflict" class="alert alert-warning">
-							<span><i class="fa fa-alert-o"></i> There are integration conflicts.</span>
-							<wicket:enclosure child="resolveInstructionsTrigger">
-								Please follow <a wicket:id="resolveInstructionsTrigger" href="javascript:void(0);">this instruction</a> to resolve the conflicts.
-								<div wicket:id="resolveInstructions"></div>
-							</wicket:enclosure>
-						</div>
-					</div>
 				</div>
 				<div wicket:id="operations" class="operations">
 					<div class="buttons">

@@ -317,7 +317,7 @@ public class PermissionSettingPage extends RepositoryPage {
 				@Override
 				public String getObject() {
 					return operation.ordinal() > getTeamPermission(rowModel.getObject()).ordinal() ?
-							"fa-check-empty" : "fa-check-checked";
+							"pa-check-empty" : "pa-check-checked";
 				}
 				
 			}));

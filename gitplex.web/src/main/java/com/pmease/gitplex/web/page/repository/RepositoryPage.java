@@ -118,9 +118,9 @@ public abstract class RepositoryPage extends AccountBasePage {
 		
 		Repository repository = getRepository();
 		if (repository.getForkedFrom() != null)
-			add(new Icon("repoIcon", "fa-repo-forked"));
+			add(new Icon("repoIcon", "pa-repo-forked"));
 		else
-			add(new Icon("repoIcon", "fa-repo"));
+			add(new Icon("repoIcon", "pa-repo"));
 		
 		AbstractLink userlink = new BookmarkablePageLink<Void>("userlink", 
 				AccountHomePage.class, AccountHomePage.paramsOf(repository.getOwner()));
@@ -201,15 +201,15 @@ public abstract class RepositoryPage extends AccountBasePage {
 		});
 		
 		List<Tab> codeTabs = new ArrayList<>();
-		codeTabs.add(new RepositoryTab(Model.of("Files"), "fa fa-file-code", RepoTreePage.class, RepoBlobPage.class));
-		codeTabs.add(new RepositoryTab(Model.of("Commits"), "fa fa-commit", RepoCommitsPage.class, RepoCommitPage.class));
-		codeTabs.add(new RepositoryTab(Model.of("Branches"), "fa fa-branch", RepoBranchesPage.class, BranchComparePage.class));
-		codeTabs.add(new RepositoryTab(Model.of("Contributors"), "fa fa-group-o", ContributorsPage.class));
+		codeTabs.add(new RepositoryTab(Model.of("Files"), "pa pa-file-code", RepoTreePage.class, RepoBlobPage.class));
+		codeTabs.add(new RepositoryTab(Model.of("Commits"), "pa pa-commit", RepoCommitsPage.class, RepoCommitPage.class));
+		codeTabs.add(new RepositoryTab(Model.of("Branches"), "pa pa-branch", RepoBranchesPage.class, BranchComparePage.class));
+		codeTabs.add(new RepositoryTab(Model.of("Contributors"), "pa pa-group-o", ContributorsPage.class));
 		
 		add(new Tabbable("codeTabs", codeTabs));
 		
 		List<Tab> requestsTabs = new ArrayList<>();
-		requestsTabs.add(new RepositoryTab(Model.of("Open"), "fa fa-branch-merge", OpenRequestsPage.class) {
+		requestsTabs.add(new RepositoryTab(Model.of("Open"), "pa pa-branch-merge", OpenRequestsPage.class) {
 
 				@Override
 				public boolean isActive(Page currentPage) {
@@ -222,7 +222,7 @@ public abstract class RepositoryPage extends AccountBasePage {
 				}
 			
 		});
-		requestsTabs.add(new RepositoryTab(Model.of("Closed"), "fa fa-pull-request-close", ClosedRequestsPage.class) {
+		requestsTabs.add(new RepositoryTab(Model.of("Closed"), "pa pa-pull-request-close", ClosedRequestsPage.class) {
 			
 				@Override
 				public boolean isActive(Page currentPage) {
@@ -235,15 +235,15 @@ public abstract class RepositoryPage extends AccountBasePage {
 				}
 			
 		});
-		requestsTabs.add(new RepositoryTab(Model.of("Create"), "fa fa-pull-request-add", NewRequestPage.class));		
+		requestsTabs.add(new RepositoryTab(Model.of("Create"), "pa pa-pull-request-add", NewRequestPage.class));		
 		
 		add(new Tabbable("requestsTabs", requestsTabs));		
 		
 		List<Tab> adminTabs = Lists.newArrayList();
-		adminTabs.add(new RepositoryTab(Model.of("General Settings"), "fa fa-tools", GeneralSettingPage.class));
-		adminTabs.add(new RepositoryTab(Model.of("Permissions"), "fa fa-lock", PermissionSettingPage.class));
-		adminTabs.add(new RepositoryTab(Model.of("Gate Keepers"), "fa fa-gate", GateKeeperPage.class));
-		adminTabs.add(new RepositoryTab(Model.of("Integration Policies"), "fa fa-puzzle", IntegrationPolicyPage.class));
+		adminTabs.add(new RepositoryTab(Model.of("General Settings"), "pa pa-tools", GeneralSettingPage.class));
+		adminTabs.add(new RepositoryTab(Model.of("Permissions"), "pa pa-lock", PermissionSettingPage.class));
+		adminTabs.add(new RepositoryTab(Model.of("Gate Keepers"), "pa pa-gate", GateKeeperPage.class));
+		adminTabs.add(new RepositoryTab(Model.of("Integration Policies"), "pa pa-puzzle", IntegrationPolicyPage.class));
 
 		add(new Tabbable("adminTabs", adminTabs) {
 

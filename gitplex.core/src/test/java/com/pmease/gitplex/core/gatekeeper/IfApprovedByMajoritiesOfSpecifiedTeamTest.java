@@ -155,7 +155,7 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 		vote.getReviewer().setName("user1");
 		update.getReviews().add(vote);
 		
-		Assert.assertTrue(gateKeeper.checkRequest(request).isApproved());
+		Assert.assertTrue(gateKeeper.checkRequest(request).isPassed());
 	}
 
 }

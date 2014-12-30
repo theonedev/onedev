@@ -5,14 +5,14 @@ import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.Horizontal;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Approved;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Disapproved;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.gatekeeper.checkresult.PendingAndBlock;
 
 @SuppressWarnings("serial")
-@Editable(name="Check Second Gate Keeper If First Gate Keeper Is Passed", order=300, icon="fa-servers",  
+@Editable(name="Check Second Gate Keeper If First Gate Keeper Is Passed", order=300, icon="pa-servers",  
 		description="If first gate keeper is passed, go ahead to check second gate keeper; otherwise, consider "
 				+ "the whole gate keeper as passed.")
 @Horizontal
@@ -45,15 +45,15 @@ public class IfThenGateKeeper extends CompositeGateKeeper {
 	@Override
 	protected CheckResult aggregate(Checker checker) {
 		CheckResult ifResult = checker.check(getIfGate());
-		if (ifResult instanceof Approved) {
+		if (ifResult instanceof Passed) {
 			return checker.check(getThenGate());
-		} else if (ifResult instanceof Disapproved) {
-			return approved(ifResult.getReasons());
+		} else if (ifResult instanceof Failed) {
+			return passed(ifResult.getReasons());
 		} else if (ifResult instanceof PendingAndBlock) {
 			return ifResult;
 		} else if (ifResult instanceof Pending) {
 			CheckResult thenResult = checker.check(getThenGate());
-			if (thenResult instanceof Approved)
+			if (thenResult instanceof Passed)
 				return thenResult;
 			else 
 				return ifResult;

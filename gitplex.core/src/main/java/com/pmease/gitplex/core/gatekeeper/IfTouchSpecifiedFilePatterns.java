@@ -12,7 +12,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=100, icon="fa-file-txt", description=
+@Editable(order=100, icon="pa-file-txt", description=
 		"This gate keeper will be passed if any commit file maches specified file patterns.")
 public class IfTouchSpecifiedFilePatterns extends FileGateKeeper {
 
@@ -34,30 +34,30 @@ public class IfTouchSpecifiedFilePatterns extends FileGateKeeper {
 			for (String file: update.getChangedFiles()) {
 				if (WildcardUtils.matchPath(getFilePatterns(), file)) {
 					request.setReferentialUpdate(update);
-					return approved("Touched files match patterns '" + getFilePatterns() + "'.");
+					return passed("Touched files match patterns '" + getFilePatterns() + "'.");
 				}
 			}
 		}
 
-		return disapproved("No touched files match patterns '" + getFilePatterns() + "'.");
+		return failed("No touched files match patterns '" + getFilePatterns() + "'.");
 	}
 
 	@Override
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
 		if (file == null || WildcardUtils.matchPath(filePatterns, file)) 
-			return approved("Touched files match patterns '" + filePatterns + "'.");
+			return passed("Touched files match patterns '" + filePatterns + "'.");
 		else
-			return disapproved("No touched files match patterns '" + filePatterns + "'.");
+			return failed("No touched files match patterns '" + filePatterns + "'.");
 	}
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
 		for (String file: branch.getRepository().git().listChangedFiles(branch.getHeadCommitHash(), commit, null)) {
 			if (WildcardUtils.matchPath(filePatterns, file))
-					return approved("Touched files match patterns '" + filePatterns + "'.");
+					return passed("Touched files match patterns '" + filePatterns + "'.");
 		}
 		
-		return disapproved("No touched files match patterns '" + filePatterns + "'.");
+		return failed("No touched files match patterns '" + filePatterns + "'.");
 	}
 
 	@Override

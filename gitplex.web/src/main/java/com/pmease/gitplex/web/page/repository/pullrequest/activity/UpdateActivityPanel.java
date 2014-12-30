@@ -107,11 +107,11 @@ public class UpdateActivityPanel extends Panel {
 							@Override
 							public String getObject() {
 								if (statusModel.getObject() == PullRequestVerification.Status.PASSED)
-									return "<i class='fa fa-tick'></i><i class='caret'></i> ";
+									return "<i class='pa pa-tick'></i><i class='caret'></i> ";
 								else if (statusModel.getObject() == PullRequestVerification.Status.ONGOING)
-									return "<i class='fa fa-clock'></i><i class='caret'></i> ";
+									return "<i class='pa pa-clock'></i><i class='caret'></i> ";
 								else if (statusModel.getObject() == PullRequestVerification.Status.NOT_PASSED) 
-									return "<i class='fa fa-times'></i><i class='caret'></i>";
+									return "<i class='pa pa-times'></i><i class='caret'></i>";
 								else 
 									return "";
 							}

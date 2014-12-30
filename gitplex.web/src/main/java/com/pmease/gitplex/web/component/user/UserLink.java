@@ -73,10 +73,9 @@ public class UserLink extends Panel {
 			displayName = "GitPlex";
 
 		if (avatarMode == AvatarMode.NAME_AND_AVATAR || avatarMode == AvatarMode.AVATAR) {
-			Component avatar = new AvatarByUser("avatar", new UserModel(user));
-			if (tooltipConfig != null) {
+			Component avatar = new AvatarByUser("avatar", new UserModel(user), false);
+			if (tooltipConfig != null) 
 				avatar.add(new TooltipBehavior(Model.of(displayName), tooltipConfig));
-			}
 			link.add(avatar);
 		} else {
 			link.add(new WebMarkupContainer("avatar").setVisible(false));

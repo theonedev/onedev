@@ -72,7 +72,8 @@ public class DefaultBranchManager implements BranchManager {
     	for (PullRequest request: branch.getOutgoingRequests()) {
     		request.setSource(null);
     		dao.persist(request);
-    		pullRequestManager.discard(request, null, "Source branch is deleted.");
+    		if (request.isOpen())
+    			pullRequestManager.discard(request, null, "Source branch is deleted.");
     	}
 		dao.remove(branch);
 	}
@@ -103,6 +104,11 @@ public class DefaultBranchManager implements BranchManager {
 	public void save(Branch branch) {
 		dao.persist(branch);
 
+		/**
+		 * Source branch update is key to the logic as it has to create 
+		 * pull request update, so we should not postpone it to be executed
+		 * in a executor service like target branch update below
+		 */
 		for (PullRequest request: branch.getOutgoingRequests()) {
 			if (request.isOpen())
 				pullRequestManager.onSourceBranchUpdate(request);

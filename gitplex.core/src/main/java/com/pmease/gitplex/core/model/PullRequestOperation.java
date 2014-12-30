@@ -9,7 +9,6 @@ import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.PullRequest.Status;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
 public enum PullRequestOperation {
@@ -53,7 +52,7 @@ public enum PullRequestOperation {
 
 		@Override
 		public boolean canOperate(PullRequest request) {
-			return canVote(request);
+			return canReview(request);
 		}
 
 		@Override
@@ -68,7 +67,7 @@ public enum PullRequestOperation {
 
 		@Override
 		public boolean canOperate(PullRequest request) {
-			return canVote(request);
+			return canReview(request);
 		}
 
 		@Override
@@ -80,18 +79,20 @@ public enum PullRequestOperation {
 		
 	};
 	
-	private static boolean canVote(PullRequest request) {
+	private static boolean canReview(PullRequest request) {
 		User user = GitPlex.getInstance(UserManager.class).getCurrent();
-		if (user == null)
+		if (user == null 
+				|| user.equals(request.getSubmitter()) 
+				|| !request.isOpen() 
+				|| request.isReviewEffective(user)) { 
 			return false;
-
-		if (request.getStatus() != Status.PENDING_APPROVAL)
+		} else {
+			for (ReviewInvitation invitation: request.getReviewInvitations()) {
+				if (!invitation.isExcluded() && invitation.getReviewer().equals(user))
+					return true;
+			}
 			return false;
-		
-		if (GitPlex.getInstance(ReviewManager.class).find(user, request.getLatestUpdate()) != null)
-			return false;
-		else
-			return true;
+		}
 	}
 
 	public abstract void operate(PullRequest request, @Nullable String comment);

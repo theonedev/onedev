@@ -37,7 +37,10 @@ public class TransactionInterceptor implements MethodInterceptor {
 					tx.commit();
 					return result;
 				} catch (Throwable t) {
-					tx.rollback();
+					try {
+						tx.rollback();
+					} catch (Throwable t2) {
+					}
 					throw t;
 				} finally {
 					session.setFlushMode(previousMode);

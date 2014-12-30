@@ -23,9 +23,9 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Approved;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Disapproved;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Branch;
@@ -70,7 +70,7 @@ public class GitUpdateCallback extends HttpServlet {
 		GateKeeper gateKeeper = repository.getGateKeeper();
 		CheckResult checkResult = gateKeeper.checkRef(user, repository, refName);
 
-		if (!(checkResult instanceof Approved)) {
+		if (!(checkResult instanceof Passed)) {
 			List<String> messages = new ArrayList<>();
 			for (String each: checkResult.getReasons())
 				messages.add(each);
@@ -127,7 +127,7 @@ public class GitUpdateCallback extends HttpServlet {
 						GateKeeper gateKeeper = repository.getGateKeeper();
 						CheckResult checkResult = gateKeeper.checkBranch(user, branch);
 						
-						if (!(checkResult instanceof Approved)) {
+						if (!(checkResult instanceof Passed)) {
 							List<String> messages = new ArrayList<>();
 							for (String each: checkResult.getReasons())
 								messages.add(each);
@@ -137,11 +137,11 @@ public class GitUpdateCallback extends HttpServlet {
 						GateKeeper gateKeeper = repository.getGateKeeper();
 						CheckResult checkResult = gateKeeper.checkCommit(user, branch, newCommitHash);
 				
-						if (!(checkResult instanceof Approved)) {
+						if (!(checkResult instanceof Passed)) {
 							List<String> messages = new ArrayList<>();
 							for (String each: checkResult.getReasons())
 								messages.add(each);
-							if (!newCommitHash.equals(GitUtils.NULL_SHA1) && !(checkResult instanceof Disapproved)) {
+							if (!newCommitHash.equals(GitUtils.NULL_SHA1) && !(checkResult instanceof Failed)) {
 								messages.add("");
 								messages.add("----------------------------------------------------");
 								messages.add("You may submit a pull request instead.");
