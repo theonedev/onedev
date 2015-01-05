@@ -16,41 +16,29 @@
 				</div>
 			</td>
 			<td class="others">
-				<div wicket:id="integration" class="integration">
-					<div class="strategy">
-						<label>
-							Integration Strategy: 						
-							<span wicket:id="strategyHelp" class="pa pa-question-circle pointer"></span>
-						</label>
-						<div>
-							<select wicket:id="strategySelect"></select> 
-							<span wicket:id="strategyLabel"></span>
-						</div>
+				<div wicket:id="branches" class="branches well">
+					<div class="target">
+						<label>Target Branch:</label>
+						<span wicket:id="target"></span>
 					</div>
-					<div class="preview">
-						<div wicket:id="calculating" class="well">
-							<img src="/assets/img/ajax-indicator.gif"></img> Calculating integration preview...
-						</div>
-						<div wicket:id="noConflict" class="alert alert-success">
-							<label><i class="pa pa-tick-round"></i> Able to integrate without conflicts.</label> 
-							<wicket:enclosure child="preview">
-								<div class="detail"><span class="pa pa-arrow-right"></span> <a wicket:id="preview">Preview</a> the integration result.</div>
-							</wicket:enclosure>
-							<wicket:enclosure child="verification">
-								<div class="detail"><span class="pa pa-arrow-right"></span> Build of the integration is <span wicket:id="verification"></span></div>
-							</wicket:enclosure>
-						</div>
-						<div wicket:id="conflict" class="alert alert-warning">
-							<span><i class="pa pa-alert-o"></i> There are integration conflicts.</span>
-							<wicket:enclosure child="resolveInstructionsTrigger">
-								Please follow <a wicket:id="resolveInstructionsTrigger" href="javascript:void(0);">this instruction</a> to resolve the conflicts.
-								<div wicket:id="resolveInstructions"></div>
-							</wicket:enclosure>
-						</div>
+					<div class="source">
+						<label>Source Branch:</label>
+						<span wicket:id="sourceLink"></span>
+						<span wicket:id="sourceName"></span>
 					</div>
 				</div>
-				<div wicket:id="assignee" class="assignee"></div>
-				<div wicket:id="reviewers" class="reviewers">
+				<div wicket:id="integrationStrategy" class="integration-strategy well">
+					<label>
+						Integration Strategy: 						
+						<span wicket:id="help" class="pa pa-question-circle pointer"></span>
+					</label>
+					<div>
+						<select wicket:id="editor"></select> 
+						<span wicket:id="viewer"></span>
+					</div>
+				</div>
+				<div wicket:id="assignee" class="assignee well"></div>
+				<div wicket:id="reviewers" class="reviewers well">
 					<label>Reviewers:</label>
 					<ul class="clearfix list-unstyled">
 						<li wicket:id="reviewers" class="pull-left">

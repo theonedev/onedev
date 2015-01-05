@@ -81,14 +81,13 @@ public enum PullRequestOperation {
 	
 	private static boolean canReview(PullRequest request) {
 		User user = GitPlex.getInstance(UserManager.class).getCurrent();
-		if (user == null 
-				|| user.equals(request.getSubmitter()) 
+		if (user == null  
 				|| !request.isOpen() 
 				|| request.isReviewEffective(user)) { 
 			return false;
 		} else {
 			for (ReviewInvitation invitation: request.getReviewInvitations()) {
-				if (!invitation.isExcluded() && invitation.getReviewer().equals(user))
+				if (invitation.isPreferred() && invitation.getReviewer().equals(user))
 					return true;
 			}
 			return false;

@@ -131,7 +131,7 @@ public class DefaultPullRequestNotificationManager implements PullRequestNotific
 	@Transactional
 	@Override
 	public void notifyReview(ReviewInvitation invitation) {
-		if (invitation.isExcluded()) {
+		if (!invitation.isPreferred()) {
 			Query query = dao.getSession().createQuery("delete from PullRequestNotification "
 					+ "where request=:request and user=:user and task=:task");
 			query.setParameter("request", invitation.getRequest());

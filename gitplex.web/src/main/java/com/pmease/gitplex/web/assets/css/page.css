@@ -661,9 +661,6 @@ table.table-blob { width: 100%; }
 .table-tags .list-inline a:hover { color: #09F; text-decoration: none; }
 .table-tags .avatar { width: 64px; height: 64px; }
 
-/* BRANCH LINK */
-.branch-link .pa {margin-right: 2px;}
-
 /* COMMITS */
 .commit-message>.full {display: none; margin-top: 4px;}
 .commit-message>.toggle {background: #DDD; padding: 0px 6px; border-radius: 2px;}
@@ -854,39 +851,29 @@ ul.status-help li:last-child .description {border-bottom: none;}
 /* PULL REQUEST DETAIL PANEL */
 .request-detail {padding: 20px;}
 .request-detail>div {margin-bottom: 20px;}
-.request-detail>div.title {margin-bottom: 10px;}
 .request-detail>div:last-child {margin-bottom: 0;}
 .request-detail table {width: 100%;}
 .request-detail td {vertical-align: top;}
 .request-detail .verification-status {cursor: pointer;}
 
-.request-detail>.title {font-size: 24px; font-weight: bold; padding: 0;}
-.request-detail>.title input[type="text"] {width: 600px;}
-.request-detail>.title a i {color: #999; font-size: 19px;}
-.request-detail>.title>div {margin-right: 8px;}
-.request-detail>.title>.id {color: #999;}
+.request-detail>.head {font-size: 24px; font-weight: bold; padding: 0;}
+.request-detail>.head input[type="text"] {width: 600px;}
+.request-detail>.head a i {color: #999; font-size: 19px;}
+.request-detail>.head>div {margin-right: 8px;}
+.request-detail>.head>.id {color: #999;}
+.request-detail>.head>.label {margin-top: 3px;}
 
-.request-detail>.summary>.panel-body>div {padding: 16px 0; border-bottom: 1px dotted #BBB;}
-.request-detail>.summary>.panel-body>div:last-child {padding: 12px 0 0 0; border-bottom: none;}
-.request-detail>.summary>.panel-body>div:first-child {padding: 0 0 12px 0;}
-.request-detail>.summary>.panel-body>div:first-child:last-child {padding: 0; border-bottom: none;}
+.request-detail>.summary>div {border-bottom: 1px dotted #BBB; margin-bottom: 12px; padding-bottom: 8px;}
+.request-detail>.summary>div:last-child {border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
+.request-detail>.summary>.status-reasons ul {margin-bottom: 0; padding-left: 16px;} 
 
-.request-detail>.summary>.panel-heading {padding: 8px 12px;}
-.request-detail>.summary>.panel-body {padding: 16px;}
-.request-detail>.summary>.panel-heading>span:before {font-family: "ponticons"; margin-right: 12px; font-size: 18px;}
-.request-detail>.summary.panel-success, .request-detail>.summary.panel-success>.panel-heading {border-color: #5EC01C;}
-.request-detail>.summary.panel-danger, .request-detail>.summary.panel-danger>.panel-heading {border-color: #E67E7E;}
-.request-detail>.summary.integrated>.panel-heading>span:before {content: "\f52A";}
-.request-detail>.summary.discarded>.panel-heading>span:before {content: "\f529";}
-.request-detail>.summary.pending-integrate>.panel-heading>span:before {content: "\f526";}
-.request-detail>.summary.pending-approval>.panel-heading>span:before {content: "\f11A";}
-.request-detail>.summary.pending-update>.panel-heading>span:before {content: "\f455";}
+.request-detail>.summary img {width: 24px; height: 24px; vertical-align: middle;}
+.request-detail>.summary .conflict {color: #DD4B4B;} 
+.request-detail>.summary .no-conflict {color: #399529;}
 
-.request-detail>.summary>.panel-body>.status>.reasons>.reason .pa {font-size: 10px; vertical-align: middle;}
-
-.request-detail>.summary>.panel-body>.operations>.buttons>a, 
-.request-detail>.summary>.panel-body>.operations>.confirm>form>input {margin-right: 12px;} 
-.request-detail>.summary>.panel-body>.operations>.confirm>form>div>textarea {margin-bottom: 16px;} 
+.request-detail>.summary>.operations>.buttons>a, 
+.request-detail>.summary>.operations>.confirm>form>input {margin-right: 12px;} 
+.request-detail>.summary>.operations>.confirm>form>div>textarea {margin-bottom: 16px;} 
 
 /* COMMON CSS FOR REVIEW RESULT ICON */
 .request-detail .review-result {font-size: 24px; position: absolute; left: 30px; 
@@ -928,14 +915,10 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail .activities .activity>.commits td.status .failed {color: #F93333;}
 .request-detail .activities .activity>.commits td.status .running {color: #AFAD1F;}
 
-.request-detail .others>div {border: 1px solid #DDD; padding: 8px; 
-	border-radius: 4px; background: #F5F5F5; margin-bottom: 20px;}
-
-.request-detail .others>div.integration {border: none; padding: 0; margin: 0;}
-.request-detail .others>.integration>.strategy {border: 1px solid #DDD; padding: 8px 8px 12px 8px; 
-	border-radius: 4px 4px 0 0; background: #F5F5F5;}
-.request-detail .others>.integration>.preview>.alert, 
-.request-detail .others>.integration>.preview>.well {border-radius: 0 0 4px 4px;}
+.request-detail .others>.branches>.target {margin-bottom: 4px;}
+.request-detail .others label {margin-right: 4px; font-weight: normal;}
+	
+.request-detail .others>.integration>.preview>.alert {border-radius: 0 0 4px 4px; margin: 10px -20px -20px -20px;}
 .request-detail .others>.integration>.preview .detail {margin-left: 6px;}
 .request-detail .others>.integration>.preview img {width: 20px; height: 20px; vertical-align: bottom;}
 

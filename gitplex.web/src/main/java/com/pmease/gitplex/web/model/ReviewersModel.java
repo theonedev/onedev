@@ -24,7 +24,7 @@ public class ReviewersModel extends LoadableDetachableModel<List<ReviewInvitatio
 	protected List<ReviewInvitation> load() {
 		List<ReviewInvitation> invitations = new ArrayList<>();
 		for (ReviewInvitation invitation: requestModel.getObject().getReviewInvitations()) {
-			if (!invitation.isExcluded())
+			if (invitation.isPreferred())
 				invitations.add(invitation);
 		}
 		Collections.sort(invitations, new Comparator<ReviewInvitation>() {

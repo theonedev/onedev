@@ -114,11 +114,15 @@ public class PullRequest extends AbstractEntity {
 	private User submitter;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(nullable = false)
+	@JoinColumn(nullable=false)
 	private Branch target;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	private Branch source;
+	
+	// record name of source branch so that we can restore it even after source branch is deleted
+	@Column(nullable=false)
+	private String sourceFullName;
 	
 	@Column(nullable=false)
 	private String baseCommitHash;
@@ -260,7 +264,19 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	public void setSource(@Nullable Branch source) {
+		if (source != null)
+			sourceFullName = source.getFullName();
+		else if (this.source != null)
+			sourceFullName = this.source.getFullName();
 		this.source = source;
+	}
+
+	public String getSourceFullName() {
+		return sourceFullName;
+	}
+
+	public void setSourceFullName(String sourceFullName) {
+		this.sourceFullName = sourceFullName;
 	}
 
 	public String getBaseCommitHash() {
@@ -518,10 +534,6 @@ public class PullRequest extends AbstractEntity {
 	public void pickReviewers(Collection<User> candidates, int count) {
 		List<User> pickList = new ArrayList<User>(candidates);
 
-		// submitter is not allowed to review this request
-		if (getSubmitter() != null)
-			pickList.remove(getSubmitter());
-
 		/*
 		 * users already reviewed since base update should be excluded from
 		 * invitation list as their reviews are still valid
@@ -529,15 +541,18 @@ public class PullRequest extends AbstractEntity {
 		for (Review review: getReferentialUpdate().listReviewsOnwards())
 			pickList.remove(review.getReviewer());
 
-		final Map<User, Date> invited = new HashMap<>();
-		final Map<User, Date> excluded = new HashMap<>();
+		final Map<User, Date> firstChoices = new HashMap<>();
+		final Map<User, Date> secondChoices = new HashMap<>();
 		
 		for (ReviewInvitation invitation: getReviewInvitations()) {
-			if (!invitation.isExcluded())
-				invited.put(invitation.getReviewer(), invitation.getDate());
+			if (invitation.isPreferred())
+				firstChoices.put(invitation.getReviewer(), invitation.getDate());
 			else
-				excluded.put(invitation.getReviewer(), invitation.getDate());
+				secondChoices.put(invitation.getReviewer(), invitation.getDate());
 		}
+		
+		// submitter is not preferred
+		secondChoices.put(getSubmitter(), new Date());
 		
 		/* Follow below rules to pick reviewers:
 		 * 1. If user is excluded previously, it will be considered last.
@@ -548,19 +563,19 @@ public class PullRequest extends AbstractEntity {
 
 			@Override
 			public int compare(User user1, User user2) {
-				if (invited.containsKey(user1)) {
-					if (invited.containsKey(user2)) 
+				if (firstChoices.containsKey(user1)) {
+					if (firstChoices.containsKey(user2)) 
 						return user1.getReviewEffort() - user2.getReviewEffort();
 					else
 						return -1;
-				} else if (invited.containsKey(user2)) {
+				} else if (firstChoices.containsKey(user2)) {
 					return 1;
-				} else if (excluded.containsKey(user1)) {
-					if (excluded.containsKey(user2)) 
-						return excluded.get(user1).compareTo(excluded.get(user2));
+				} else if (secondChoices.containsKey(user1)) {
+					if (secondChoices.containsKey(user2)) 
+						return secondChoices.get(user1).compareTo(secondChoices.get(user2));
 					else
 						return 1;
-				} else if (excluded.containsKey(user2)) {
+				} else if (secondChoices.containsKey(user2)) {
 					return -1;
 				} else {
 					return user1.getReviewEffort() - user2.getReviewEffort();
@@ -580,7 +595,7 @@ public class PullRequest extends AbstractEntity {
 			for (ReviewInvitation invitation: getReviewInvitations()) {
 				if (invitation.getReviewer().equals(user)) {
 					invitation.setDate(new Date());
-					invitation.setExcluded(false);
+					invitation.setPerferred(false);
 					found = true;
 				}
 			}
@@ -727,7 +742,7 @@ public class PullRequest extends AbstractEntity {
 		List<User> reviewers = new ArrayList<>();
 		Set<User> alreadyInvited = new HashSet<>();
 		for (ReviewInvitation invitation: getReviewInvitations()) {
-			if (!invitation.isExcluded())
+			if (invitation.isPreferred())
 				alreadyInvited.add(invitation.getReviewer());
 		}
 		ObjectPermission readPerm = ObjectPermission.ofRepositoryRead(getTarget().getRepository());

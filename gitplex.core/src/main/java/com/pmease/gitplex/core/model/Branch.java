@@ -28,6 +28,8 @@ import com.pmease.commons.hibernate.AbstractEntity;
 })
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Branch extends AbstractEntity {
+
+	public static final String REPO_BRANCH_SEPARATOR = ":";
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -112,7 +114,7 @@ public class Branch extends AbstractEntity {
     }
     
     public String getFullName() {
-    	return getRepository().getFullName() + ":" + getName();
+    	return getRepository().getFullName() + REPO_BRANCH_SEPARATOR + getName();
     }
     
     public boolean isDefault() {

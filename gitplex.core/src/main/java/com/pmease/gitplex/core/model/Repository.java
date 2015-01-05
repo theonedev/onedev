@@ -59,6 +59,8 @@ import com.pmease.gitplex.core.validation.RepositoryName;
 @SuppressWarnings("serial")
 public class Repository extends AbstractEntity implements UserBelonging {
 
+	public static final String USER_REPO_SEPARATOR = "/";
+	
 	public static final String REFS_GITPLEX = "refs/gitplex/";
 	
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -231,7 +233,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 
 	public String getFullName() {
-		return getOwner().getName() + "/" + getName();
+		return getOwner().getName() + USER_REPO_SEPARATOR + getName();
 	}
 	
 	@Override

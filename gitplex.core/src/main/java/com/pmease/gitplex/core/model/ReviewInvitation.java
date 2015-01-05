@@ -27,7 +27,7 @@ public class ReviewInvitation extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private PullRequest request;
 	
-	private boolean excluded;
+	private boolean perferred = true;
 	
 	@Column(nullable=false)
 	private Date date = new Date();
@@ -48,12 +48,12 @@ public class ReviewInvitation extends AbstractEntity {
 		this.request = request;
 	}
 
-	public boolean isExcluded() {
-		return excluded;
+	public boolean isPreferred() {
+		return perferred;
 	}
 
-	public void setExcluded(boolean excluded) {
-		this.excluded = excluded;
+	public void setPerferred(boolean preferred) {
+		this.perferred = preferred;
 	}
 
 	public Date getDate() {

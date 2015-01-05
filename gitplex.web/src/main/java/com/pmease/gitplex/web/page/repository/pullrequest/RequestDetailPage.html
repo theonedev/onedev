@@ -1,6 +1,7 @@
 <wicket:extend>
 	<div class="request-detail">
-		<div wicket:id="requestTitle" class="title clearfix">
+		<div wicket:id="requestHead" class="head clearfix">
+			<div wicket:id="status" class="label pull-left "></div>
 			<div wicket:id="title" class="title pull-left"></div>
 			<div wicket:id="id" class="id pull-left"></div>
 			<a wicket:id="editLink" title="Edit title" class="edit"><i class="pa pa-pencil"></i></a>
@@ -10,68 +11,74 @@
 				<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-sm btn-default"/>
 			</form>
 		</div>
-		<div class="originate">
-			<span wicket:id="requestSubmitter"></span> 
-			wants to pull into
-			<span wicket:id="targetBranch"></span>
-			<wicket:enclosure child="sourceBranch">
-				from
-				<span wicket:id="sourceBranch"></span>
-			</wicket:enclosure>
-			<span wicket:id="requestDate"></span>
-		</div>
-		<div wicket:id="requestSummary" class="summary panel">
-			<div class="panel-heading"><span wicket:id="title" class="panel-title"></span></div>
-			<div class="panel-body">
-				<div wicket:id="status" class="status">
-					<div wicket:id="fastForwarded">
-						Target branch was fast forwarded to this request.
-					</div>
-					<div wicket:id="merged">
-						Target branch was merged with this request.
-					</div>
-					<div wicket:id="mergedOutside">
-						Head commit of this request was merged into target branch outside of this pull request.
-					</div>
-					<div wicket:id="squashed">
-						<p>Per the integration strategy, commits in this pull request from source branch <span wicket:id="source"></span> 
-						was squashed before merging into target branch <span wicket:id="target"></span>.</p> 
-						<p>If you have a local branch whose upstream tracking branch 
-						points to source branch, please run this command to do the sync:
-						<kbd>git fetch origin && git rebase</kbd>
-						</p>
-					</div>
-					<div wicket:id="sourceRebased">
-						<p>Per the integration strategy, source branch <span wicket:id="source"></span> was rebased on top 
-						of target branch <span wicket:id="target"></span>, and then target 
-						branch was fast forwarded to the rebase result.</p> 
-						<p>If you have a local branch whose upstream tracking branch 
-						points to source branch, please run this command to do the sync:
-						<kbd>git fetch origin && git rebase</kbd>
-						</p>
-					</div>
-					<div wicket:id="targetRebased">
-						<p>Per the integration strategy, target branch <span wicket:id="target"></span> was rebased on top of this request.</p>
-						<p>If you have a local branch whose upstream tracking 
-						branch points to target branch, please run this command to do the sync:
-						<kbd>git fetch origin && git rebase</kbd>
-						</p>
-					</div>
-					<wicket:enclosure child="reasons">
-					<div class="reasons">
-						<div wicket:id="reasons" class="reason"><i class="pa pa-primitive-square"></i> <span wicket:id="reason"></span></div>
-					</div>
+		<div wicket:id="requestSummary" class="summary well">
+			<div wicket:id="integratedNote" class="integrated-note">
+				<div wicket:id="fastForwarded">
+					Target branch was fast forwarded to this request.
+				</div>
+				<div wicket:id="merged">
+					Target branch was merged with this request.
+				</div>
+				<div wicket:id="mergedOutside">
+					Head commit of this request was merged into target branch outside of this pull request.
+				</div>
+				<div wicket:id="squashed">
+					<p>Per the integration strategy, commits in this pull request from source branch <span wicket:id="source"></span> 
+					was squashed before merging into target branch <span wicket:id="target"></span>.</p> 
+					<p>If you have a local branch whose upstream tracking branch 
+					points to source branch, please run this command to do the sync:
+					<kbd>git fetch origin && git rebase</kbd>
+					</p>
+				</div>
+				<div wicket:id="sourceRebased">
+					<p>Per the integration strategy, source branch <span wicket:id="source"></span> was rebased on top 
+					of target branch <span wicket:id="target"></span>, and then target 
+					branch was fast forwarded to the rebase result.</p> 
+					<p>If you have a local branch whose upstream tracking branch 
+					points to source branch, please run this command to do the sync:
+					<kbd>git fetch origin && git rebase</kbd>
+					</p>
+				</div>
+				<div wicket:id="targetRebased">
+					<p>Per the integration strategy, target branch <span wicket:id="target"></span> was rebased on top of this request.</p>
+					<p>If you have a local branch whose upstream tracking 
+					branch points to target branch, please run this command to do the sync:
+					<kbd>git fetch origin && git rebase</kbd>
+					</p>
+				</div>
+			</div>
+			<div wicket:id="statusReasons" class="status-reasons">
+				<ul><li wicket:id="reasons" class="reason"><span wicket:id="reason"></span></li></ul>
+			</div>
+			<div wicket:id="integrationPreview" class="integration-preview">
+				<div wicket:id="calculating">
+					<img src="/assets/img/ajax-indicator.gif"></img> Calculating integration preview...
+				</div>
+				<div wicket:id="noConflict" class="no-conflict">
+					<label><i class="pa pa-tick-round"></i> Able to integrate without conflicts.</label> 
+					<wicket:enclosure child="preview">
+						<span class="pa pa-arrow-right"></span> <a wicket:id="preview">Preview</a> the integration result.
+					</wicket:enclosure>
+					<wicket:enclosure child="verification">
+						<span class="pa pa-arrow-right"></span> Build of the integration is <span wicket:id="verification"></span>
 					</wicket:enclosure>
 				</div>
-				<div wicket:id="operations" class="operations">
-					<div class="buttons">
-						<a wicket:id="approve" class="btn btn-primary" href="javascript:void(0);">Approve</a>
-						<a wicket:id="disapprove" class="btn btn-primary" href="javascript:void(0);">Disapprove</a>
-						<a wicket:id="integrate" class="btn btn-success">Integrate</a>
-						<a wicket:id="discard" class="btn btn-danger">Discard</a>
-					</div>
-					<div wicket:id="confirm" class="confirm"></div>
+				<div wicket:id="conflict" class="conflict">
+					<span><i class="pa pa-alert-o"></i> There are integration conflicts.</span>
+					<wicket:enclosure child="resolveInstructionsTrigger">
+						Please follow <a wicket:id="resolveInstructionsTrigger" href="javascript:void(0);">this instruction</a> to resolve the conflicts.
+						<div wicket:id="resolveInstructions"></div>
+					</wicket:enclosure>
 				</div>
+			</div>
+			<div wicket:id="operations" class="operations">
+				<div class="buttons">
+					<a wicket:id="approve" class="btn btn-sm btn-primary" href="javascript:void(0);">Approve</a>
+					<a wicket:id="disapprove" class="btn btn-sm btn-primary" href="javascript:void(0);">Disapprove</a>
+					<a wicket:id="integrate" class="btn btn-sm btn-success">Integrate</a>
+					<a wicket:id="discard" class="btn btn-sm btn-danger">Discard</a>
+				</div>
+				<div wicket:id="confirm" class="confirm"></div>
 			</div>
 		</div>
 		<div wicket:id="requestTabs" class="tabs"></div>
@@ -85,8 +92,8 @@
 		<form wicket:id="form" class="leave-confirm">
 			<div wicket:id="note"></div>
 			<div wicket:id="feedback"></div>
-			<input wicket:id="submit" type="submit" value="Confirm" class="btn"></input> 
-			<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-default"></input>
+			<input wicket:id="submit" type="submit" value="Confirm" class="btn btn-sm"></input> 
+			<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-sm btn-default"></input>
 		</form>
 	</wicket:fragment>
 </wicket:extend>

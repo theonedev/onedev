@@ -36,10 +36,10 @@ import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
-import com.pmease.gitplex.web.component.comment.event.PullRequestChanged;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
+import com.pmease.gitplex.web.event.PullRequestChanged;
 import com.pmease.gitplex.web.model.ModelWrapper;
 import com.pmease.gitplex.web.model.UserModel;
 

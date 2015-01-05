@@ -67,7 +67,7 @@ public abstract class ReviewerChoice extends SelectToAddChoice<User> {
 			}
 		}
 		if (invitation != null) {
-			invitation.setExcluded(false);
+			invitation.setPerferred(false);
 			invitation.setDate(new Date());
 		} else {
 			invitation = new ReviewInvitation();

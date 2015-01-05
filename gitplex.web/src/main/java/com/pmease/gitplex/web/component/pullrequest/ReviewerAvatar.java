@@ -53,10 +53,10 @@ public class ReviewerAvatar extends RemoveableAvatar {
 		PullRequest request = requestModel.getObject();
 		Set<User> prevInvited = new HashSet<>();
 		for (ReviewInvitation each: request.getReviewInvitations()) {
-			if (!each.isExcluded())
+			if (each.isPreferred())
 				prevInvited.add(each.getReviewer());
 			if (each.getReviewer().equals(invitation.getReviewer())) {
-				each.setExcluded(true);
+				each.setPerferred(true);
 				each.setDate(new Date());
 			}
 		}
@@ -64,7 +64,7 @@ public class ReviewerAvatar extends RemoveableAvatar {
 
 		Set<User> nowInvited = new HashSet<>();
 		for (ReviewInvitation each: request.getReviewInvitations()) {
-			if (!each.isExcluded())
+			if (each.isPreferred())
 				nowInvited.add(each.getReviewer());
 		}
 		

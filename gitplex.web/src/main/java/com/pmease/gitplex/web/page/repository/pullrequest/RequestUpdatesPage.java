@@ -9,6 +9,7 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -31,7 +32,6 @@ import com.pmease.gitplex.core.model.PullRequestVerification;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.permission.ObjectPermission;
-import com.pmease.gitplex.web.component.comment.event.PullRequestChanged;
 import com.pmease.gitplex.web.component.commit.CommitHashLink;
 import com.pmease.gitplex.web.component.commit.CommitMessagePanel;
 import com.pmease.gitplex.web.component.label.AgeLabel;
@@ -39,6 +39,7 @@ import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.PersonLink;
 import com.pmease.gitplex.web.component.user.RemoveableAvatar;
+import com.pmease.gitplex.web.event.PullRequestChanged;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.code.tree.RepoTreePage;
 
@@ -131,8 +132,8 @@ public class RequestUpdatesPage extends RequestDetailPage {
 							@Override
 							protected void onAvatarRemove(AjaxRequestTarget target) {
 								GitPlex.getInstance(ReviewManager.class).delete(review);
-								target.add(summaryContainer);
 								target.add(reviewsContainer);
+								send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target, getPullRequest()));								
 							}
 							
 							@Override

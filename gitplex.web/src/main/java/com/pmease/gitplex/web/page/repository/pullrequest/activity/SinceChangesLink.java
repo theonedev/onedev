@@ -13,7 +13,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.web.component.comment.event.PullRequestChanged;
+import com.pmease.gitplex.web.event.PullRequestChanged;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestComparePage;
 
 @SuppressWarnings("serial")
