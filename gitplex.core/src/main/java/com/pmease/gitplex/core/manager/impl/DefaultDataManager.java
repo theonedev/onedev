@@ -21,6 +21,7 @@ import com.pmease.gitplex.core.model.Config;
 import com.pmease.gitplex.core.model.Config.Key;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.setting.MailSetting;
+import com.pmease.gitplex.core.setting.QosSetting;
 import com.pmease.gitplex.core.setting.SystemSetting;
 
 @Singleton
@@ -123,6 +124,10 @@ public class DefaultDataManager implements DataManager, Serializable {
 			});
 		}
 		
+		Config qosConfig = configManager.getConfig(Key.QOS);
+		if (qosConfig == null)
+			configManager.saveQosSetting(new QosSetting());
+
 		return manualConfigs;
 	}
 

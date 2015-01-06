@@ -25,6 +25,7 @@ import com.pmease.commons.schedule.TaskScheduler;
 import com.pmease.commons.util.init.InitStage;
 import com.pmease.commons.util.init.ManualConfig;
 import com.pmease.gitplex.core.manager.DataManager;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.setting.ServerConfig;
@@ -38,6 +39,8 @@ public class GitPlex extends AbstractPlugin {
 	private final RepositoryManager repositoryManager;
 	
 	private final UserManager userManager;
+	
+	private final PullRequestManager pullRequestManager;
 	
 	private final ServerConfig serverConfig;
 
@@ -54,13 +57,15 @@ public class GitPlex extends AbstractPlugin {
 	private String gitCheckTaskId;
 	
 	@Inject
-	public GitPlex(ServerConfig serverConfig, DataManager dataManager,
-                   RepositoryManager repositoryManager, UserManager userManager,
-                   TaskScheduler taskScheduler, Provider<GitConfig> gitConfigProvider,
-                   @AppName String appName) {
+	public GitPlex(ServerConfig serverConfig, DataManager dataManager, 
+			PullRequestManager pullRequestManager,
+            RepositoryManager repositoryManager, UserManager userManager,
+            TaskScheduler taskScheduler, Provider<GitConfig> gitConfigProvider,
+            @AppName String appName) {
 		this.dataManager = dataManager;
 		this.repositoryManager = repositoryManager;
 		this.userManager = userManager;
+		this.pullRequestManager = pullRequestManager;
 		this.serverConfig = serverConfig;
 		this.taskScheduler = taskScheduler;
 		this.gitConfigProvider = gitConfigProvider;
@@ -72,8 +77,6 @@ public class GitPlex extends AbstractPlugin {
 	
 	@Override
 	public void start() {
-		userManager.start();
-		
 		List<ManualConfig> manualConfigs = dataManager.init();
 		
 		if (!manualConfigs.isEmpty()) {
@@ -82,6 +85,9 @@ public class GitPlex extends AbstractPlugin {
 			
 			initStage.waitFor();
 		}
+
+		userManager.start();
+		pullRequestManager.start();
 		
 		gitCheckTaskId = taskScheduler.schedule(new SchedulableTask() {
 			
@@ -190,6 +196,7 @@ public class GitPlex extends AbstractPlugin {
 	@Override
 	public void stop() {
 		taskScheduler.unschedule(gitCheckTaskId);
+		pullRequestManager.stop();
 		userManager.stop();
 	}
 	

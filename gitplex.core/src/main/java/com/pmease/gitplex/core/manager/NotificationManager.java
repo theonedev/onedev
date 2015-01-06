@@ -1,10 +1,9 @@
 package com.pmease.gitplex.core.manager;
 
-import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 
-public interface PullRequestNotificationManager extends PullRequestListener {
+public interface NotificationManager {
 	
 	void notifyReview(ReviewInvitation invitation);
 	

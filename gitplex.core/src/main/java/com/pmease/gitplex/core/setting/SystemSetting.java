@@ -14,7 +14,7 @@ import com.pmease.commons.validation.Directory;
 @Editable
 public class SystemSetting implements Serializable {
 	
-	private static final long serialVersionUID = -5181868087749961733L;
+	private static final long serialVersionUID = 1;
 
 	private String storagePath;
 	

@@ -6,10 +6,11 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.editable.annotation.Editable;
 
-@SuppressWarnings("serial")
 @Editable
 public class MailSetting implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	private String smtpHost;
 	
 	private int smtpPort = 25;

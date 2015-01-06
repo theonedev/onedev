@@ -16,17 +16,18 @@ import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.loader.ImplementationProvider;
 import com.pmease.commons.util.ClassUtils;
+import com.pmease.gitplex.core.extensionpoint.ConfigChangeListener;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DataManager;
 import com.pmease.gitplex.core.manager.MailManager;
+import com.pmease.gitplex.core.manager.NotificationManager;
 import com.pmease.gitplex.core.manager.OldCommitCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentReplyManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.manager.PullRequestNotificationManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.PullRequestWatchManager;
 import com.pmease.gitplex.core.manager.RepositoryManager;
@@ -41,11 +42,11 @@ import com.pmease.gitplex.core.manager.impl.DefaultBranchManager;
 import com.pmease.gitplex.core.manager.impl.DefaultConfigManager;
 import com.pmease.gitplex.core.manager.impl.DefaultDataManager;
 import com.pmease.gitplex.core.manager.impl.DefaultMailManager;
+import com.pmease.gitplex.core.manager.impl.DefaultNotificationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultOldCommitCommentManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestCommentManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestCommentReplyManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestManager;
-import com.pmease.gitplex.core.manager.impl.DefaultPullRequestNotificationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestWatchManager;
 import com.pmease.gitplex.core.manager.impl.DefaultRepositoryManager;
@@ -195,11 +196,12 @@ public class CoreModule extends AbstractPluginModule {
 		bind(VerificationManager.class).to(DefaultVerificationManager.class);
 		bind(ReviewInvitationManager.class).to(DefaultReviewInvitationManager.class);
 		bind(ReviewManager.class).to(DefaultReviewManager.class);
-		bind(PullRequestNotificationManager.class).to(DefaultPullRequestNotificationManager.class);
+		bind(NotificationManager.class).to(DefaultNotificationManager.class);
 		bind(OldCommitCommentManager.class).to(DefaultOldCommitCommentManager.class);
 		bind(MailManager.class).to(DefaultMailManager.class);
 		
-		contribute(PullRequestListener.class, DefaultPullRequestNotificationManager.class);
+		contribute(PullRequestListener.class, DefaultNotificationManager.class);
+		contribute(ConfigChangeListener.class, DefaultPullRequestManager.class);
 	}
 
 	@Override

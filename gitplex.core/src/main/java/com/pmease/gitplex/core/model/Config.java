@@ -21,7 +21,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Config extends AbstractEntity {
 
-	public enum Key {SYSTEM, MAIL};
+	public enum Key {SYSTEM, MAIL, QOS};
 	
 	@Column(nullable=false, unique=true)
 	private Key key;

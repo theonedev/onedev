@@ -1,9 +1,10 @@
 package com.pmease.gitplex.core.manager.impl;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.pmease.gitplex.core.manager.ConfigManager;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
@@ -11,23 +12,31 @@ import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.gitplex.core.setting.MailSetting;
-import com.pmease.gitplex.core.setting.SystemSetting;
+import com.pmease.gitplex.core.extensionpoint.ConfigChangeListener;
+import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.model.Config;
 import com.pmease.gitplex.core.model.Config.Key;
+import com.pmease.gitplex.core.setting.MailSetting;
+import com.pmease.gitplex.core.setting.QosSetting;
+import com.pmease.gitplex.core.setting.SystemSetting;
 
 @Singleton
 public class DefaultConfigManager implements ConfigManager {
 	
 	private final Dao dao;
 	
+	private final Set<ConfigChangeListener> changeListeners;
+	
 	private volatile Long systemSettingConfigId;
 	
 	private volatile Long mailSettingConfigId;
 	
+	private volatile Long qosSettingConfigId;
+	
 	@Inject
-	public DefaultConfigManager(Dao dao) {
+	public DefaultConfigManager(Dao dao, Set<ConfigChangeListener> changeListeners) {
 		this.dao = dao;
+		this.changeListeners = changeListeners;
 	}
 
 	@Sessional
@@ -58,6 +67,9 @@ public class DefaultConfigManager implements ConfigManager {
 		}
 		config.setSetting(systemSetting);
 		dao.persist(config);
+		
+		for (ConfigChangeListener listener: changeListeners)
+			listener.systemSettingChanged();
 	}
 
 	@Sessional
@@ -90,6 +102,42 @@ public class DefaultConfigManager implements ConfigManager {
 		}
 		config.setSetting(mailSetting);
 		dao.persist(config);
+
+		for (ConfigChangeListener listener: changeListeners)
+			listener.mailSettingChanged();
+	}
+
+	@Sessional
+	@Override
+	public QosSetting getQosSetting() {
+        Config config;
+        if (qosSettingConfigId == null) {
+    		config = getConfig(Key.QOS);
+    		Preconditions.checkNotNull(config);
+            qosSettingConfigId = config.getId();
+        } else {
+            config = dao.load(Config.class, qosSettingConfigId);
+        }
+        QosSetting setting = (QosSetting) config.getSetting();
+        Preconditions.checkNotNull(setting);
+        return setting;
+	}
+
+	@Transactional
+	@Override
+	public void saveQosSetting(QosSetting qosSetting) {
+		Preconditions.checkNotNull(qosSetting);
+		
+		Config config = getConfig(Key.QOS);
+		if (config == null) {
+			config = new Config();
+			config.setKey(Key.QOS);
+		}
+		config.setSetting(qosSetting);
+		dao.persist(config);
+
+		for (ConfigChangeListener listener: changeListeners)
+			listener.qosSettingChanged();
 	}
 
 }

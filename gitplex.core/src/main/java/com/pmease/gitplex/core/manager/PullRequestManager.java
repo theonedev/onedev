@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import com.pmease.commons.bootstrap.Lifecycle;
+import com.pmease.gitplex.core.extensionpoint.ConfigChangeListener;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -12,7 +14,7 @@ import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
-public interface PullRequestManager {
+public interface PullRequestManager extends Lifecycle, ConfigChangeListener {
     
     @Nullable PullRequest findLatest(Branch target, Branch source);
     
@@ -44,7 +46,7 @@ public interface PullRequestManager {
     
     void check(PullRequest request);
     
-    /**
+	/**
      * Preview integration of this pull request.
      * 
      * @param request
@@ -53,7 +55,7 @@ public interface PullRequestManager {
      * 			integration preview, or <tt>null</tt> if preview is being calculating
      */
     IntegrationPreview previewIntegration(PullRequest request);
-    
+
     /**
      * Delete git refs of this pull request and all its updates.
      * 

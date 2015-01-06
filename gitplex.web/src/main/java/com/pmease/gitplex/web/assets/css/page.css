@@ -283,7 +283,8 @@ footer { padding: 20px; border-top: 1px solid #ddd; font-size: 11.9px; }
 #main>table>tbody>tr>td.sidebar li a:hover { color: #333; text-decoration: none; background: #f2f2f2; }
 #main>table>tbody>tr>td.sidebar li.active a,
 #main>table>tbody>tr>td.sidebar li.active a:hover { color: #222; background: #e5e5e5;  }
-#main>table>tbody>tr>td.sidebar li .pa {color: #999; width: 20px;}
+#main>table>tbody>tr>td.sidebar li .pa, 
+#main>table>tbody>tr>td.sidebar li .fa {color: #999; width: 20px;}
 #main>table>tbody>tr>td.sidebar li.active .pa {color: #333;}
 #main>table>tbody>tr>td.sidebar .head, #main>table>tbody>tr>td.content>section>.head {
 	padding: 15px 20px; white-space: nowrap; }
@@ -868,8 +869,8 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail>.summary>.status-reasons ul {margin-bottom: 0; padding-left: 16px;} 
 
 .request-detail>.summary img {width: 24px; height: 24px; vertical-align: middle;}
-.request-detail>.summary .conflict {color: #DD4B4B;} 
-.request-detail>.summary .no-conflict {color: #399529;}
+.request-detail>.summary .conflict {color: #DD4B4B; font-size: 16px;} 
+.request-detail>.summary .no-conflict {color: #399529; font-size: 16px;}
 
 .request-detail>.summary>.operations>.buttons>a, 
 .request-detail>.summary>.operations>.confirm>form>input {margin-right: 12px;} 

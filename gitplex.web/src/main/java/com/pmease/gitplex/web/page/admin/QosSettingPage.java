@@ -8,36 +8,35 @@ import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.ConfigManager;
-import com.pmease.gitplex.core.setting.MailSetting;
+import com.pmease.gitplex.core.setting.QosSetting;
 
 @SuppressWarnings("serial")
-public class MailSettingPage extends AdministrationPage {
+public class QosSettingPage extends AdministrationPage {
 
-	private MailSetting mailSetting;
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
 		setOutputMarkupId(true);
 		
-		mailSetting = GitPlex.getInstance(ConfigManager.class).getMailSetting();
-		if (mailSetting == null)
-			mailSetting = new MailSetting();
+		final QosSetting qosSetting = GitPlex.getInstance(ConfigManager.class).getQosSetting();
 
 		Form<?> form = new Form<Void>("form"); 
 		form.setOutputMarkupId(true);
-		form.add(BeanContext.editBean("editor", mailSetting));
+		form.add(BeanContext.editBean("editor", qosSetting));
 		form.add(new FeedbackPanel("feedback", form));
 		form.add(new AjaxSubmitLink("update") {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				GitPlex.getInstance(ConfigManager.class).saveMailSetting(mailSetting);
-				success("Mail setting has been updated");
+				super.onSubmit(target, form);
+
+				GitPlex.getInstance(ConfigManager.class).saveQosSetting(qosSetting);
+				success("QoS settings has been updated");
+				
 				target.add(form);
 			}
-
+			
 			@Override
 			protected void onError(AjaxRequestTarget target, Form<?> form) {
 				error("Fix errors below");
@@ -51,6 +50,6 @@ public class MailSettingPage extends AdministrationPage {
 
 	@Override
 	protected String getPageTitle() {
-		return "Administration - Mail Server";
+		return "Administration - QoS Settings";
 	}
 }

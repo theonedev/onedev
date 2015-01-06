@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import com.pmease.gitplex.core.model.Config;
 import com.pmease.gitplex.core.setting.MailSetting;
+import com.pmease.gitplex.core.setting.QosSetting;
 import com.pmease.gitplex.core.setting.SystemSetting;
 
 public interface ConfigManager {
@@ -58,4 +59,20 @@ public interface ConfigManager {
 	 * 			setting record will still be remained in database)
 	 */
 	void saveMailSetting(@Nullable MailSetting mailSetting);
+	
+	/**
+	 * Get QOS setting.
+	 * 
+	 * @return
+	 * 			QOS setting
+	 */
+	QosSetting getQosSetting();
+	
+	/**
+	 * Save QOS setting.
+	 * 
+	 * @param qosSetting
+	 * 			setting of QOS
+	 */
+	void saveQosSetting(QosSetting qosSetting);
 }

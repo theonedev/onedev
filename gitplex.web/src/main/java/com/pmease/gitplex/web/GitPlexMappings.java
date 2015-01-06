@@ -26,6 +26,7 @@ import com.pmease.gitplex.web.page.account.team.AccountTeamsPage;
 import com.pmease.gitplex.web.page.account.team.AddTeamPage;
 import com.pmease.gitplex.web.page.account.team.EditTeamPage;
 import com.pmease.gitplex.web.page.admin.MailSettingPage;
+import com.pmease.gitplex.web.page.admin.QosSettingPage;
 import com.pmease.gitplex.web.page.admin.SystemSettingPage;
 import com.pmease.gitplex.web.page.error.AccessDeniedPage;
 import com.pmease.gitplex.web.page.error.InternalServerErrorPage;
@@ -88,6 +89,7 @@ public class GitPlexMappings extends CompoundRequestMapper {
 	private void addAdministrationPages() {
 		addPage("administration/mail-settings", MailSettingPage.class);
 		addPage("administration/system-settings", SystemSettingPage.class);
+		addPage("administration/qos-settings", QosSettingPage.class);
 	}
 
 	private void addAccountPages() {

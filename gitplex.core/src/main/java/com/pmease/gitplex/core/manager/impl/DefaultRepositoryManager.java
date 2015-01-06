@@ -238,7 +238,7 @@ public class DefaultRepositoryManager implements RepositoryManager {
 				branch.setRepository(repository);
 				repository.getBranches().add(branch);
 				branchManager.save(branch);
-			} else if (!branch.getHeadCommitHash().equals(entry.getValue()))	 {
+			} else if (!branch.getHeadCommitHash().equals(entry.getValue().getHash()))	 {
 				branch.setHeadCommitHash(entry.getValue().getHash());
 				branchManager.save(branch);
 			}

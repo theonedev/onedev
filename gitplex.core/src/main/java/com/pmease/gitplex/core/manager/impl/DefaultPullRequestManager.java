@@ -13,10 +13,16 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -34,8 +40,9 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.manager.BranchManager;
+import com.pmease.gitplex.core.manager.ConfigManager;
+import com.pmease.gitplex.core.manager.NotificationManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.manager.PullRequestNotificationManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.manager.StorageManager;
@@ -60,6 +67,8 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	
 	private final Dao dao;
 	
+	private final ConfigManager configManager;
+	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
 	private final BranchManager branchManager;
@@ -72,23 +81,36 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	
 	private final ReviewInvitationManager reviewInvitationManager;
 	
-	private final PullRequestNotificationManager pullRequestNotificationManager;
+	private final NotificationManager notificationManager;
 	
-	private final Set<Long> calculatingRequestIds = new ConcurrentHashSet<>();
-	
+	private final Set<Long> integrationPreviewRequestIds = new ConcurrentHashSet<>();
+
+	private ThreadPoolExecutor integrationPreviewExecutor;
+
+	@SuppressWarnings("serial")
+	private final BlockingDeque<Runnable> integrationPreviewQueue = new LinkedBlockingDeque<Runnable>() {
+
+		@Override
+		public boolean offer(Runnable e) {
+			return super.offerFirst(e);
+		}
+		
+	};
+
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager, 
 			BranchManager branchManager, StorageManager storageManager, 
 			ReviewInvitationManager reviewInvitationManager, 
-			PullRequestNotificationManager pullRequestNotificationManager,
+			NotificationManager notificationManager, ConfigManager configManager,
 			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners) {
 		this.dao = dao;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.branchManager = branchManager;
 		this.storageManager = storageManager;
 		this.reviewInvitationManager = reviewInvitationManager;
-		this.pullRequestNotificationManager = pullRequestNotificationManager;
+		this.notificationManager = notificationManager;
 		this.unitOfWork = unitOfWork;
+		this.configManager = configManager;
 		this.pullRequestListeners = pullRequestListeners;
 	}
 
@@ -241,7 +263,9 @@ public class DefaultPullRequestManager implements PullRequestManager {
 
 			@Override
 			public void run() {
-				asyncCalcIntegrationPreview(request.getId());
+				IntegrationPreviewTask task = new IntegrationPreviewTask(request.getId());
+				integrationPreviewExecutor.remove(task);
+				integrationPreviewExecutor.execute(task);
 			}
 			
 		});
@@ -274,6 +298,11 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	@Override
 	public void onTargetBranchUpdate(PullRequest request) {
 		closeIfMerged(request);
+		if (request.isOpen()) {
+			IntegrationPreviewTask task = new IntegrationPreviewTask(request.getId());
+			integrationPreviewExecutor.remove(task);
+			integrationPreviewExecutor.execute(task);
+		}
 	}
 
 	@Transactional
@@ -342,133 +371,25 @@ public class DefaultPullRequestManager implements PullRequestManager {
 			closeIfMerged(request);
 			if (request.isOpen()) {
 				if (request.getStatus() == PullRequest.Status.PENDING_UPDATE) {
-					pullRequestNotificationManager.notifyUpdate(request, false);
+					notificationManager.notifyUpdate(request, false);
 				} else if (request.getStatus() == PullRequest.Status.PENDING_INTEGRATE) {
 					IntegrationPreview integrationPreview = request.getIntegrationPreview();
 					if (integrationPreview != null) {
 						if (integrationPreview.getIntegrated() != null) {
 							if (request.getAssignee() != null)
-								pullRequestNotificationManager.notifyIntegration(request);
+								notificationManager.notifyIntegration(request);
 							else 
 								integrate(request, null, "Integrated automatically by system");
 						}
 					}
 				} else if (request.getStatus() == PullRequest.Status.PENDING_APPROVAL) {
-					pullRequestNotificationManager.pendingApproval(request);
+					notificationManager.pendingApproval(request);
 					for (ReviewInvitation invitation: request.getReviewInvitations()) { 
 						if (!invitation.getDate().before(now))
 							reviewInvitationManager.save(invitation);
 					}
 				}
 			}
-		}
-	}
-
-	private void asyncCalcIntegrationPreview(final Long requestId) {
-		if (!calculatingRequestIds.contains(requestId)) {
-			unitOfWork.asyncCall(new Runnable() {
-
-				@Override
-				public void run() {
-					try {
-						PullRequest request = dao.load(PullRequest.class, requestId);
-
-						String requestHead = request.getLatestUpdate().getHeadCommitHash();
-						String targetHead = request.getTarget().getHeadCommitHash();
-						Git git = request.getTarget().getRepository().git();
-						IntegrationPreview preview = new IntegrationPreview(request.getTarget().getHeadCommitHash(), 
-								request.getLatestUpdate().getHeadCommitHash(), request.getIntegrationStrategy(), null);
-						request.setLastIntegrationPreview(preview);
-						String integrateRef = request.getIntegrateRef();
-						if (preview.getIntegrationStrategy() == MERGE_IF_NECESSARY && git.isAncestor(targetHead, requestHead)
-								|| preview.getIntegrationStrategy() == MERGE_WITH_SQUASH && git.isAncestor(targetHead, requestHead)
-										&& git.log(targetHead, requestHead, null, 0, 0).size() == 1) {
-							preview.setIntegrated(requestHead);
-							git.updateRef(integrateRef, requestHead, null, null);
-						} else {
-							File tempDir = FileUtils.createTempDir();
-							try {
-								Git tempGit = new Git(tempDir);
-								tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, 
-										request.getTarget().getName());
-								
-								String integrated;
-
-								if (preview.getIntegrationStrategy() == REBASE_TARGET_ONTO_SOURCE) {
-									tempGit.updateRef("HEAD", requestHead, null, null);
-									tempGit.reset(null, null);
-									List<String> cherries = tempGit.listCherries("HEAD", targetHead);
-									integrated = tempGit.cherryPick(cherries.toArray(new String[cherries.size()]));
-								} else {
-									tempGit.updateRef("HEAD", targetHead, null, null);
-									tempGit.reset(null, null);
-									if (preview.getIntegrationStrategy() == REBASE_SOURCE_ONTO_TARGET) {
-										List<String> cherries = tempGit.listCherries("HEAD", requestHead);
-										integrated = tempGit.cherryPick(cherries.toArray(new String[cherries.size()]));
-									} else if (preview.getIntegrationStrategy() == MERGE_WITH_SQUASH) {
-										String commitMessage = request.getTitle() + "\n\n";
-										if (request.getDescription() != null)
-											commitMessage += request.getDescription() + "\n\n";
-										commitMessage += "(squashed commit of pull request #" + request.getId() + ")\n";
-										integrated = tempGit.squash(requestHead, null, null, commitMessage);
-									} else {
-										FastForwardMode fastForwardMode;
-										if (preview.getIntegrationStrategy() == MERGE_ALWAYS)
-											fastForwardMode = FastForwardMode.NO_FF;
-										else 
-											fastForwardMode = FastForwardMode.FF;
-										String commitMessage = "Merge pull request #" + request.getId() 
-												+ "\n\n" + request.getTitle() + "\n";
-										integrated = tempGit.merge(requestHead, fastForwardMode, null, null, commitMessage);
-									}
-								}
-								 
-								if (integrated != null) {
-									preview.setIntegrated(integrated);
-									git.fetch(tempGit, "+HEAD:" + integrateRef);									
-								} else {
-									git.deleteRef(integrateRef, null, null);
-								}
-							} finally {
-								FileUtils.deleteDir(tempDir);
-							}
-						}
-						dao.persist(request);
-
-						if (request.getStatus() == PullRequest.Status.PENDING_INTEGRATE 
-								&& preview.getIntegrated() != null) {
-							if (request.getAssignee() != null)
-								pullRequestNotificationManager.notifyIntegration(request);
-							else 
-								integrate(request, null, "Integrated automatically by system");
-						}
-						
-						for (PullRequestListener listener: pullRequestListeners)
-							listener.onIntegrationPreviewCalculated(request);
-					} catch (Exception e) {
-						logger.error("Error previewing integration of pull request #" + requestId, e);
-					} finally {
-						calculatingRequestIds.remove(requestId);
-					}
-				}
-				
-			});
-			calculatingRequestIds.add(requestId);
-		}
-	}
-	
-	@Override
-	public IntegrationPreview previewIntegration(PullRequest request) {
-		IntegrationPreview preview = request.getLastIntegrationPreview();
-		if (!request.isOpen() || preview != null 
-				&& preview.getRequestHead().equals(request.getLatestUpdate().getHeadCommitHash())
-				&& preview.getTargetHead().equals(request.getTarget().getHeadCommitHash())
-				&& preview.getIntegrationStrategy() == request.getIntegrationStrategy()
-				&& (preview.getIntegrated() == null || preview.getIntegrated().equals(request.getTarget().getRepository().getRefValue(request.getIntegrateRef())))) {
-			return preview;
-		} else {
-			asyncCalcIntegrationPreview(request.getId());
-			return null;
 		}
 	}
 
@@ -500,6 +421,175 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		criteria.add(Restrictions.isNull("closeStatus"));
 		criteria.createCriteria("target").add(Restrictions.eq("repository", target));
 		return dao.query(criteria);
+	}
+
+	private int getIntegrationPreviewWorkers() {
+		Integer workers = configManager.getQosSetting().getIntegrationPreviewWorkers();
+		if (workers == null)
+			workers = Runtime.getRuntime().availableProcessors();
+		return workers;
+	}
+
+	@Override
+	public void systemSettingChanged() {
+	}
+
+	@Override
+	public void mailSettingChanged() {
+	}
+
+	@Override
+	public void qosSettingChanged() {
+		if (integrationPreviewExecutor != null) {
+			int integrationPreviewWorkers = getIntegrationPreviewWorkers();
+			integrationPreviewExecutor.setCorePoolSize(integrationPreviewWorkers);
+			integrationPreviewExecutor.setMaximumPoolSize(integrationPreviewWorkers);
+		}
+	}
+
+	@Override
+	public void start() {
+		int previewWorkers = getIntegrationPreviewWorkers();
+		integrationPreviewExecutor = new ThreadPoolExecutor(previewWorkers, previewWorkers, 
+				0L, TimeUnit.MILLISECONDS, integrationPreviewQueue);
+	}
+
+	@Override
+	public void stop() {
+		if (integrationPreviewExecutor != null)
+			integrationPreviewExecutor.shutdown();
+	}
+
+	@Override
+	public IntegrationPreview previewIntegration(PullRequest request) {
+		IntegrationPreview preview = request.getLastIntegrationPreview();
+		if (request.isOpen() && (preview == null || preview.isObsolete(request))) {
+			IntegrationPreviewTask task = new IntegrationPreviewTask(request.getId());
+			integrationPreviewExecutor.remove(task);
+			integrationPreviewExecutor.execute(task);
+			return null;
+		} else {
+			return preview;
+		}
+	}
+	
+	private class IntegrationPreviewTask implements Runnable {
+
+		private final Long requestId;
+		
+		public IntegrationPreviewTask(Long requestId) {
+			this.requestId = requestId;
+		}
+		
+		@Override
+		public void run() {
+			unitOfWork.begin();
+			try {
+				if (!integrationPreviewRequestIds.contains(requestId)) {
+					integrationPreviewRequestIds.add(requestId);
+					try {
+						PullRequest request = dao.load(PullRequest.class, requestId);
+						IntegrationPreview preview = request.getLastIntegrationPreview();
+						if (request.isOpen() && (preview == null || preview.isObsolete(request))) {
+							String requestHead = request.getLatestUpdate().getHeadCommitHash();
+							String targetHead = request.getTarget().getHeadCommitHash();
+							Git git = request.getTarget().getRepository().git();
+							preview = new IntegrationPreview(request.getTarget().getHeadCommitHash(), 
+									request.getLatestUpdate().getHeadCommitHash(), request.getIntegrationStrategy(), null);
+							request.setLastIntegrationPreview(preview);
+							String integrateRef = request.getIntegrateRef();
+							if (preview.getIntegrationStrategy() == MERGE_IF_NECESSARY && git.isAncestor(targetHead, requestHead)
+									|| preview.getIntegrationStrategy() == MERGE_WITH_SQUASH && git.isAncestor(targetHead, requestHead)
+											&& git.log(targetHead, requestHead, null, 0, 0).size() == 1) {
+								preview.setIntegrated(requestHead);
+								git.updateRef(integrateRef, requestHead, null, null);
+							} else {
+								File tempDir = FileUtils.createTempDir();
+								try {
+									Git tempGit = new Git(tempDir);
+									tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, 
+											request.getTarget().getName());
+									
+									String integrated;
+
+									if (preview.getIntegrationStrategy() == REBASE_TARGET_ONTO_SOURCE) {
+										tempGit.updateRef("HEAD", requestHead, null, null);
+										tempGit.reset(null, null);
+										List<String> cherries = tempGit.listCherries("HEAD", targetHead);
+										integrated = tempGit.cherryPick(cherries.toArray(new String[cherries.size()]));
+									} else {
+										tempGit.updateRef("HEAD", targetHead, null, null);
+										tempGit.reset(null, null);
+										if (preview.getIntegrationStrategy() == REBASE_SOURCE_ONTO_TARGET) {
+											List<String> cherries = tempGit.listCherries("HEAD", requestHead);
+											integrated = tempGit.cherryPick(cherries.toArray(new String[cherries.size()]));
+										} else if (preview.getIntegrationStrategy() == MERGE_WITH_SQUASH) {
+											String commitMessage = request.getTitle() + "\n\n";
+											if (request.getDescription() != null)
+												commitMessage += request.getDescription() + "\n\n";
+											commitMessage += "(squashed commit of pull request #" + request.getId() + ")\n";
+											integrated = tempGit.squash(requestHead, null, null, commitMessage);
+										} else {
+											FastForwardMode fastForwardMode;
+											if (preview.getIntegrationStrategy() == MERGE_ALWAYS)
+												fastForwardMode = FastForwardMode.NO_FF;
+											else 
+												fastForwardMode = FastForwardMode.FF;
+											String commitMessage = "Merge pull request #" + request.getId() 
+													+ "\n\n" + request.getTitle() + "\n";
+											integrated = tempGit.merge(requestHead, fastForwardMode, null, null, commitMessage);
+										}
+									}
+									 
+									if (integrated != null) {
+										preview.setIntegrated(integrated);
+										git.fetch(tempGit, "+HEAD:" + integrateRef);									
+									} else {
+										git.deleteRef(integrateRef, null, null);
+									}
+								} finally {
+									FileUtils.deleteDir(tempDir);
+								}
+							}
+							dao.persist(request);
+
+							if (request.getStatus() == PullRequest.Status.PENDING_INTEGRATE 
+									&& preview.getIntegrated() != null) {
+								if (request.getAssignee() != null)
+									notificationManager.notifyIntegration(request);
+								else 
+									integrate(request, null, "Integrated automatically by system");
+							}
+							
+							for (PullRequestListener listener: pullRequestListeners)
+								listener.onIntegrationPreviewCalculated(request);
+						}
+					} finally {
+						integrationPreviewRequestIds.remove(requestId);
+					}
+				}
+			} catch (Exception e) {
+				logger.error("Error calculating integration preview of pull request #" + requestId, e);
+			} finally {
+				unitOfWork.end();
+			}
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			if (!(other instanceof IntegrationPreviewTask))
+				return false;
+			if (this == other)
+				return true;
+			IntegrationPreviewTask otherRunnable = (IntegrationPreviewTask) other;
+			return new EqualsBuilder().append(requestId, otherRunnable.requestId).isEquals();
+		}
+
+		@Override
+		public int hashCode() {
+			return new HashCodeBuilder(17, 37).append(requestId).toHashCode();
+		}
+		
 	}
 
 }

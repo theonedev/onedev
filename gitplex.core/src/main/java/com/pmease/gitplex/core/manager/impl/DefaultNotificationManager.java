@@ -10,8 +10,9 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.manager.MailManager;
-import com.pmease.gitplex.core.manager.PullRequestNotificationManager;
+import com.pmease.gitplex.core.manager.NotificationManager;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestComment;
@@ -22,14 +23,14 @@ import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 
 @Singleton
-public class DefaultPullRequestNotificationManager implements PullRequestNotificationManager {
+public class DefaultNotificationManager implements NotificationManager, PullRequestListener {
 
 	private final Dao dao;
 	
 	private final MailManager mailManager;
 	
 	@Inject
-	public DefaultPullRequestNotificationManager(Dao dao, MailManager mailManager) {
+	public DefaultNotificationManager(Dao dao, MailManager mailManager) {
 		this.dao = dao;
 		this.mailManager = mailManager;
 	}

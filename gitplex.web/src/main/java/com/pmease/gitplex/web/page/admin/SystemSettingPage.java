@@ -21,31 +21,25 @@ public class SystemSettingPage extends AdministrationPage {
 		
 		final SystemSetting systemSetting = GitPlex.getInstance(ConfigManager.class).getSystemSetting();
 
-		Form<?> form = new Form<Void>("form"){
-
-			@Override
-			protected void onSubmit() {
-				GitPlex.getInstance(ConfigManager.class).saveSystemSetting(systemSetting);
-				success("System setting has been updated");
-			}
-
-			@Override
-			protected void onError() {
-				super.onError();
-				error("Fix errors below");
-			}
-			
-		}; 
+		Form<?> form = new Form<Void>("form");
 		form.add(BeanContext.editBean("editor", systemSetting));
 		form.add(new FeedbackPanel("feedback", form));
 		form.add(new AjaxSubmitLink("update") {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
-				target.add(SystemSettingPage.this);
+				GitPlex.getInstance(ConfigManager.class).saveSystemSetting(systemSetting);
+				success("System setting has been updated");
+				target.add(form);
 			}
-			
+
+			@Override
+			protected void onError(AjaxRequestTarget target, Form<?> form) {
+				super.onError();
+				error("Fix errors below");
+				target.add(form);
+			}
+
 		});
 		
 		add(form);
