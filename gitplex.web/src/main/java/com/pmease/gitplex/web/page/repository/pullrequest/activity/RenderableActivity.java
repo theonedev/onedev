@@ -9,7 +9,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import com.pmease.gitplex.core.model.User;
 
-public interface PullRequestActivity extends Serializable {
+public interface RenderableActivity extends Serializable {
 	
 	Date getDate();
 	

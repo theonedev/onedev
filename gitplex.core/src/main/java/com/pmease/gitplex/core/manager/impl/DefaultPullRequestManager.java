@@ -52,9 +52,8 @@ import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.CloseStatus;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
-import com.pmease.gitplex.core.model.PullRequestAudit;
+import com.pmease.gitplex.core.model.PullRequestActivity;
 import com.pmease.gitplex.core.model.PullRequestComment;
-import com.pmease.gitplex.core.model.PullRequestOperation;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.ReviewInvitation;
@@ -143,25 +142,25 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	@Transactional
 	@Override
  	public void discard(PullRequest request, final User user, final String comment) {
-		PullRequestAudit audit = new PullRequestAudit();
-		audit.setRequest(request);
-		audit.setDate(new Date());
-		audit.setOperation(PullRequestOperation.DISCARD);
-		audit.setUser(user);
+		PullRequestActivity activity = new PullRequestActivity();
+		activity.setRequest(request);
+		activity.setDate(new Date());
+		activity.setAction(PullRequestActivity.Action.DISCARD);
+		activity.setUser(user);
 		
-		dao.persist(audit);
+		dao.persist(activity);
 
 		if (comment != null) {
 			PullRequestComment requestComment = new PullRequestComment();
 			requestComment.setContent(comment);
-			requestComment.setDate(audit.getDate());
+			requestComment.setDate(activity.getDate());
 			requestComment.setRequest(request);
 			requestComment.setUser(user);
 			dao.persist(requestComment);
 		}
 
 		request.setCloseStatus(CloseStatus.DISCARDED);
-		request.setUpdateDate(audit.getDate());
+		request.setUpdateDate(activity.getDate());
 		dao.persist(request);
 		
 		for (PullRequestListener listener: pullRequestListeners)
@@ -213,18 +212,18 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		request.getTarget().setHeadCommitHash(integrated);
 		branchManager.save(request.getTarget());
 		
-		PullRequestAudit audit = new PullRequestAudit();
-		audit.setRequest(request);
-		audit.setDate(new Date());
-		audit.setOperation(PullRequestOperation.INTEGRATE);
-		audit.setUser(user);
+		PullRequestActivity activity = new PullRequestActivity();
+		activity.setRequest(request);
+		activity.setDate(new Date());
+		activity.setAction(PullRequestActivity.Action.INTEGRATE);
+		activity.setUser(user);
 		
-		dao.persist(audit);
+		dao.persist(activity);
 
 		if (comment != null) {
 			PullRequestComment requestComment = new PullRequestComment();
 			requestComment.setContent(comment);
-			requestComment.setDate(audit.getDate());
+			requestComment.setDate(activity.getDate());
 			requestComment.setRequest(request);
 			requestComment.setUser(user);
 			dao.persist(requestComment);
@@ -309,11 +308,11 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	private void closeIfMerged(PullRequest request) {
 		Git git = request.getTarget().getRepository().git();
 		if (git.isAncestor(request.getLatestUpdate().getHeadCommitHash(), request.getTarget().getHeadCommitHash())) {
-			PullRequestAudit audit = new PullRequestAudit();
-			audit.setRequest(request);
-			audit.setOperation(PullRequestOperation.INTEGRATE);
-			audit.setDate(new Date());
-			dao.persist(audit);
+			PullRequestActivity activity = new PullRequestActivity();
+			activity.setRequest(request);
+			activity.setAction(PullRequestActivity.Action.INTEGRATE);
+			activity.setDate(new Date());
+			dao.persist(activity);
 			
 			request.setLastIntegrationPreview(null);
 			request.setCloseStatus(CloseStatus.INTEGRATED);

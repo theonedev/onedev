@@ -10,7 +10,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-public class IntegratePullRequest implements PullRequestActivity {
+public class IntegratePullRequest implements RenderableActivity {
 
 	private final Long userId;
 	

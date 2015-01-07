@@ -11,7 +11,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-public class ApprovePullRequest implements PullRequestActivity {
+public class ApprovePullRequest implements RenderableActivity {
 
 	private final Long requestId;
 	

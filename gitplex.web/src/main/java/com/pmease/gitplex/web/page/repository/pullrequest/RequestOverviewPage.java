@@ -1,10 +1,5 @@
 package com.pmease.gitplex.web.page.repository.pullrequest;
 
-import static com.pmease.gitplex.core.model.PullRequestOperation.APPROVE;
-import static com.pmease.gitplex.core.model.PullRequestOperation.DISAPPROVE;
-import static com.pmease.gitplex.core.model.PullRequestOperation.DISCARD;
-import static com.pmease.gitplex.core.model.PullRequestOperation.INTEGRATE;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -48,7 +43,7 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
-import com.pmease.gitplex.core.model.PullRequestAudit;
+import com.pmease.gitplex.core.model.PullRequestActivity;
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Review;
@@ -76,7 +71,8 @@ import com.pmease.gitplex.web.page.repository.pullrequest.activity.DisapprovePul
 import com.pmease.gitplex.web.page.repository.pullrequest.activity.DiscardPullRequest;
 import com.pmease.gitplex.web.page.repository.pullrequest.activity.IntegratePullRequest;
 import com.pmease.gitplex.web.page.repository.pullrequest.activity.OpenPullRequest;
-import com.pmease.gitplex.web.page.repository.pullrequest.activity.PullRequestActivity;
+import com.pmease.gitplex.web.page.repository.pullrequest.activity.RenderableActivity;
+import com.pmease.gitplex.web.page.repository.pullrequest.activity.UnreviewPullRequest;
 import com.pmease.gitplex.web.page.repository.pullrequest.activity.UpdatePullRequest;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
@@ -94,7 +90,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 		super(params);
 	}
 	
-	private Component newActivityRow(final String id, PullRequestActivity activity) {
+	private Component newActivityRow(final String id, RenderableActivity activity) {
 		final CommentPullRequest commentActivity;
 		if (activity instanceof CommentPullRequest)
 			commentActivity = (CommentPullRequest) activity;
@@ -139,7 +135,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					PullRequestActivity activity = (PullRequestActivity) row.getDefaultModelObject();
+					RenderableActivity activity = (RenderableActivity) row.getDefaultModelObject();
 					row.replace(activity.render("activity"));
 					commentActivity.setCollapsed(false);
 					target.add(row);
@@ -168,7 +164,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			@Override
 			protected String load() {
 				String cssClasses = "";
-				PullRequestActivity activity = (PullRequestActivity) row.getDefaultModelObject();
+				RenderableActivity activity = (RenderableActivity) row.getDefaultModelObject();
 				if (activity instanceof CommentPullRequest) {
 					CommentPullRequest commentActivity = (CommentPullRequest) activity;
 					if (commentActivity.isCollapsed())
@@ -184,36 +180,38 @@ public class RequestOverviewPage extends RequestDetailPage {
 		return row;
 	}
 	
-	private List<PullRequestActivity> getActivities() {
+	private List<RenderableActivity> getActivities() {
 		PullRequest request = getPullRequest();
-		List<PullRequestActivity> activities = new ArrayList<>();
+		List<RenderableActivity> renderableActivities = new ArrayList<>();
 
-		activities.add(new OpenPullRequest(request));
+		renderableActivities.add(new OpenPullRequest(request));
 
 		for (PullRequestUpdate update: request.getUpdates())
-			activities.add(new UpdatePullRequest(update));
+			renderableActivities.add(new UpdatePullRequest(update));
 		
 		for (PullRequestComment comment: request.getComments()) 
-			activities.add(new CommentPullRequest(comment));
+			renderableActivities.add(new CommentPullRequest(comment));
 		
-		for (PullRequestAudit audit: request.getAudits()) {
-			if (audit.getOperation() == INTEGRATE) {
-				activities.add(new IntegratePullRequest(audit.getUser(), audit.getDate()));
-			} else if (audit.getOperation() == DISCARD) { 
-				activities.add(new DiscardPullRequest(audit.getUser(), audit.getDate()));
-			} else if (audit.getOperation() == APPROVE) {
-				activities.add(new ApprovePullRequest(audit.getRequest(), audit.getUser(), audit.getDate()));
-			} else if (audit.getOperation() == DISAPPROVE) {
-				activities.add(new DisapprovePullRequest(audit.getRequest(), audit.getUser(), audit.getDate()));
+		for (PullRequestActivity activity: request.getActivities()) {
+			if (activity.getAction() == PullRequestActivity.Action.INTEGRATE) {
+				renderableActivities.add(new IntegratePullRequest(activity.getUser(), activity.getDate()));
+			} else if (activity.getAction() == PullRequestActivity.Action.DISCARD) { 
+				renderableActivities.add(new DiscardPullRequest(activity.getUser(), activity.getDate()));
+			} else if (activity.getAction() == PullRequestActivity.Action.APPROVE) {
+				renderableActivities.add(new ApprovePullRequest(activity.getRequest(), activity.getUser(), activity.getDate()));
+			} else if (activity.getAction() == PullRequestActivity.Action.DISAPPROVE) {
+				renderableActivities.add(new DisapprovePullRequest(activity.getRequest(), activity.getUser(), activity.getDate()));
+			} else if (activity.getAction() == PullRequestActivity.Action.UNREVIEW) {
+				renderableActivities.add(new UnreviewPullRequest(activity.getRequest(), activity.getUser(), activity.getDate()));
 			} else {
-				throw new IllegalStateException("Unexpected audit operation: " + audit.getOperation());
+				throw new IllegalStateException("Unexpected acvitity: " + activity.getAction());
 			}
 		}
 		
-		Collections.sort(activities, new Comparator<PullRequestActivity>() {
+		Collections.sort(renderableActivities, new Comparator<RenderableActivity>() {
 
 			@Override
-			public int compare(PullRequestActivity o1, PullRequestActivity o2) {
+			public int compare(RenderableActivity o1, RenderableActivity o2) {
 				if (o1.getDate().before(o2.getDate()))
 					return -1;
 				else if (o1.getDate().after(o2.getDate()))
@@ -226,16 +224,16 @@ public class RequestOverviewPage extends RequestDetailPage {
 			
 		});
 		
-		return activities;
+		return renderableActivities;
 	}
 	
 	private Component newActivitiesView() {
 		activitiesView = new RepeatingView("requestActivities");
 		activitiesView.setOutputMarkupId(true);
 		
-		List<PullRequestActivity> activities = getActivities();
+		List<RenderableActivity> activities = getActivities();
 		
-		for (PullRequestActivity activity: activities) 
+		for (RenderableActivity activity: activities) 
 			activitiesView.add(newActivityRow(activitiesView.newChildId(), activity));
 		
 		return activitiesView;
@@ -255,10 +253,10 @@ public class RequestOverviewPage extends RequestDetailPage {
 		if (event.getPayload() instanceof PullRequestChanged) {
 			PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
 			AjaxRequestTarget target = pullRequestChanged.getTarget();
-			List<PullRequestActivity> activities = getActivities();
+			List<RenderableActivity> activities = getActivities();
 			Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
-			PullRequestActivity lastAcvitity = (PullRequestActivity) lastActivityRow.getDefaultModelObject();
-			for (PullRequestActivity activity: activities) {
+			RenderableActivity lastAcvitity = (RenderableActivity) lastActivityRow.getDefaultModelObject();
+			for (RenderableActivity activity: activities) {
 				if (activity.getDate().after(lastAcvitity.getDate())) {
 					Component newActivityRow = newActivityRow(activitiesView.newChildId(), activity); 
 					activitiesView.add(newActivityRow);

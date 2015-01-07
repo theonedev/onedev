@@ -14,15 +14,17 @@ import com.pmease.commons.hibernate.AbstractEntity;
 
 @SuppressWarnings("serial")
 @Entity
-public class PullRequestAudit extends AbstractEntity {
+public class PullRequestActivity extends AbstractEntity {
 
+	public enum Action {INTEGRATE, DISCARD, APPROVE, DISAPPROVE, UNREVIEW};
+	
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private PullRequest request;
 	
 	@Lob
 	@Column(nullable=false)
-	private PullRequestOperation operation;
+	private Action action;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	private User user;
@@ -38,12 +40,12 @@ public class PullRequestAudit extends AbstractEntity {
 		this.request = request;
 	}
 
-	public PullRequestOperation getOperation() {
-		return operation;
+	public Action getAction() {
+		return action;
 	}
 
-	public void setOperation(PullRequestOperation operation) {
-		this.operation = operation;
+	public void setAction(Action action) {
+		this.action = action;
 	}
 
 	@Nullable

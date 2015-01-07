@@ -12,7 +12,7 @@ import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-public class CommentPullRequest implements PullRequestActivity {
+public class CommentPullRequest implements RenderableActivity {
 
 	private final Long commentId;
 	

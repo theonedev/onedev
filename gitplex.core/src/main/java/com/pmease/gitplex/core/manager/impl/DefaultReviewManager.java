@@ -15,13 +15,14 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
+import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestAudit;
+import com.pmease.gitplex.core.model.PullRequestActivity;
 import com.pmease.gitplex.core.model.PullRequestComment;
-import com.pmease.gitplex.core.model.PullRequestOperation;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.Review.Result;
@@ -68,20 +69,20 @@ public class DefaultReviewManager implements ReviewManager {
 		review.getUpdate().getReviews().add(review);
 		dao.persist(review);	
 		
-		PullRequestAudit audit = new PullRequestAudit();
+		PullRequestActivity activity = new PullRequestActivity();
 		if (result == Review.Result.APPROVE)
-			audit.setOperation(PullRequestOperation.APPROVE);
+			activity.setAction(PullRequestActivity.Action.APPROVE);
 		else
-			audit.setOperation(PullRequestOperation.DISAPPROVE);
-		audit.setDate(new Date());
-		audit.setRequest(request);
-		audit.setUser(reviewer);
-		dao.persist(audit);
+			activity.setAction(PullRequestActivity.Action.DISAPPROVE);
+		activity.setDate(new Date());
+		activity.setRequest(request);
+		activity.setUser(reviewer);
+		dao.persist(activity);
 		
 		if (comment != null) {
 			PullRequestComment requestComment = new PullRequestComment();
 			requestComment.setRequest(request);
-			requestComment.setDate(audit.getDate());
+			requestComment.setDate(activity.getDate());
 			requestComment.setUser(reviewer);
 			requestComment.setContent(comment);
 			dao.persist(requestComment);
@@ -122,6 +123,14 @@ public class DefaultReviewManager implements ReviewManager {
 	@Override
 	public void delete(Review review) {
 		dao.remove(review);
+		
+		PullRequestActivity activity = new PullRequestActivity();
+		activity.setAction(PullRequestActivity.Action.UNREVIEW);
+		activity.setDate(new Date());
+		activity.setRequest(review.getUpdate().getRequest());
+		activity.setUser(GitPlex.getInstance(UserManager.class).getCurrent());
+		dao.persist(activity);
+
 		final Long requestId = review.getUpdate().getRequest().getId();
 		dao.afterCommit(new Runnable() {
 

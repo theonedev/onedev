@@ -948,6 +948,7 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail .activities .activity>.integrate>.pa {color: #35A612; margin-left: -20px;}
 .request-detail .activities .activity>.approve>.pa {color: #35A612;}
 .request-detail .activities .activity>.disapprove>.pa {color: #F93333;}
+.request-detail .activities .activity>.unreview>.pa {color: #999; margin-left: -14px;}
 
 .request-detail>.updates>.update {padding: 12px; margin: 20px 0; border: 1px solid #DDD; border-radius: 4px;}
 .request-detail>.updates>.update>.summary .actions .pa {font-size: 16px;}

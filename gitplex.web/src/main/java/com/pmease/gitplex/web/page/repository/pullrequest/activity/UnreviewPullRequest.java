@@ -11,38 +11,47 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-public class OpenPullRequest implements RenderableActivity {
+public class UnreviewPullRequest implements RenderableActivity {
 
 	private final Long requestId;
 	
-	public OpenPullRequest(PullRequest request) {
+	private final Long userId;
+	
+	private final Date date;
+	
+	public UnreviewPullRequest(PullRequest request, User user, Date date) {
 		this.requestId = request.getId();
+		this.userId = user.getId();
+		this.date = date;
 	}
 	
 	@Override
 	public Panel render(String panelId) {
-		return new OpenActivityPanel(panelId, new LoadableDetachableModel<PullRequest>() {
+		return new UnreviewActivityPanel(panelId, new LoadableDetachableModel<PullRequest>() {
 
 			@Override
 			protected PullRequest load() {
-				return getRequest();
+				return GitPlex.getInstance(Dao.class).load(PullRequest.class, requestId);
 			}
 			
-		});
+		}, new LoadableDetachableModel<User>() {
+
+			@Override
+			protected User load() {
+				return getUser();
+			}
+			
+		}, date);
 	}
 
-	public PullRequest getRequest() {
-		return GitPlex.getInstance(Dao.class).load(PullRequest.class, requestId);
-	}
-	
 	@Override
 	public Date getDate() {
-		return getRequest().getCreateDate();
+		return date;
 	}
 
 	@Override
 	public User getUser() {
-		return getRequest().getSubmitter();
+		return GitPlex.getInstance(Dao.class).load(User.class, userId);
 	}
 
 }
