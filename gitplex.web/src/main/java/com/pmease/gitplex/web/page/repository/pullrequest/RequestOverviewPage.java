@@ -559,6 +559,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 						super.onAvatarRemove(target);
 						
 						target.add(reviewersContainer);
+						send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target, getPullRequest()));								
 					}
 					
 				});
@@ -585,6 +586,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 				super.onSelect(target, user);
 				
 				target.add(reviewersContainer);
+				send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target, getPullRequest()));								
 			}
 			
 		});

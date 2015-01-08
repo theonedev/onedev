@@ -91,6 +91,7 @@ public class DefaultRepositoryManager implements RepositoryManager {
     	for (Branch branch: repository.getBranches()) {
 	    	for (PullRequest request: branch.getOutgoingRequests()) {
 	    		request.setSource(null);
+	    		request.setSourceFullName(branch.getFullName());
 	    		dao.persist(request);
 	    	}
     	}

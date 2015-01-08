@@ -297,11 +297,6 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	@Override
 	public void onTargetBranchUpdate(PullRequest request) {
 		closeIfMerged(request);
-		if (request.isOpen()) {
-			IntegrationPreviewTask task = new IntegrationPreviewTask(request.getId());
-			integrationPreviewExecutor.remove(task);
-			integrationPreviewExecutor.execute(task);
-		}
 	}
 
 	@Transactional

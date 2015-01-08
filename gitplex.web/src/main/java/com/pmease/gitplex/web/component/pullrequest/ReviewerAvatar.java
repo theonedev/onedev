@@ -56,7 +56,7 @@ public class ReviewerAvatar extends RemoveableAvatar {
 			if (each.isPreferred())
 				prevInvited.add(each.getReviewer());
 			if (each.getReviewer().equals(invitation.getReviewer())) {
-				each.setPerferred(true);
+				each.setPerferred(false);
 				each.setDate(new Date());
 			}
 		}

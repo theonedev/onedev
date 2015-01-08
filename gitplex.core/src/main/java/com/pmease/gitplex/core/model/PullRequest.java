@@ -121,7 +121,6 @@ public class PullRequest extends AbstractEntity {
 	private Branch source;
 	
 	// record name of source branch so that we can restore it even after source branch is deleted
-	@Column(nullable=false)
 	private String sourceFullName;
 	
 	@Column(nullable=false)
@@ -264,13 +263,10 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	public void setSource(@Nullable Branch source) {
-		if (source != null)
-			sourceFullName = source.getFullName();
-		else if (this.source != null)
-			sourceFullName = this.source.getFullName();
 		this.source = source;
 	}
 
+	@Nullable
 	public String getSourceFullName() {
 		return sourceFullName;
 	}
@@ -595,7 +591,7 @@ public class PullRequest extends AbstractEntity {
 			for (ReviewInvitation invitation: getReviewInvitations()) {
 				if (invitation.getReviewer().equals(user)) {
 					invitation.setDate(new Date());
-					invitation.setPerferred(false);
+					invitation.setPerferred(true);
 					found = true;
 				}
 			}
@@ -709,6 +705,14 @@ public class PullRequest extends AbstractEntity {
 		return commentReplies;
 	}
 	
+	/**
+	 * This method is here for performance consideration. Often we need to load replies of 
+	 * different comments in a pull request. And we optimize it to load all replies at once 
+	 * for all comments in a pull request to reduce SQL queries. 
+	 *  
+	 * @param comment
+	 * @return
+	 */
 	public Collection<PullRequestCommentReply> getCommentReplies(PullRequestComment comment) {
 		List<PullRequestCommentReply> replies = new ArrayList<>();
 		for (PullRequestCommentReply reply: getCommentReplies()) {
@@ -724,6 +728,23 @@ public class PullRequest extends AbstractEntity {
 		return reviews;
 	}
 	
+	/**
+	 * This method is here for performance consideration. Often we need to load reviews of 
+	 * different updates in a pull request. And we optimize it to load all reviews at once 
+	 * for all updates in a pull request to reduce SQL queries. 
+	 * 
+	 * @param update
+	 * @return
+	 */
+	public List<Review> getReviews(PullRequestUpdate update) {
+		List<Review> reviews = new ArrayList<>();
+		for (Review review: getReviews()) {
+			if (review.getUpdate().equals(update))
+				reviews.add(review);
+		}
+		return reviews;
+	}
+
 	public boolean isReviewEffective(User user) {
 		for (Review review: getReviews()) {
 			if (review.getUpdate().equals(getLatestUpdate()) && review.getReviewer().equals(user)) 

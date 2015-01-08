@@ -70,6 +70,7 @@ public class DefaultBranchManager implements BranchManager {
     	}
     	
     	for (PullRequest request: branch.getOutgoingRequests()) {
+    		request.setSourceFullName(branch.getFullName());
     		request.setSource(null);
     		dao.persist(request);
     		if (request.isOpen())

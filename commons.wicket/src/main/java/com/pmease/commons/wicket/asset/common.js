@@ -773,22 +773,7 @@ pmease.commons = {
 				else if (json.type == "ErrorMessage")
 					$("#websocket-error").show();
 			});
-			Wicket.Event.subscribe("/websocket/open", function(jqEvent, message) {
-				// Request to render via web socket right away after a web socket is opened 
-				// in case we missed the message sent by WebSocketRender.requestToRender
-				// at Java side if web socket connection is not established at that time
-				var messages = [];
-				for (var i in pmease.commons.websocket.renderTraits) {
-					var message = JSON.stringify(pmease.commons.websocket.renderTraits[i]);
-					// filter out duplicate messages
-					if (messages.indexOf(message) == -1)
-						messages.push(message);
-				} 
-				for (var i in messages)
-					Wicket.WebSocket.send(messages[i]);
-			});
 		},
-		renderTraits:[]
 	},
 
 	setupClearableInput: function(inputId) {

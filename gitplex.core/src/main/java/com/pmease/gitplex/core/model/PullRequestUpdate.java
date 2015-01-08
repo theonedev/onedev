@@ -77,11 +77,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	}
 
     public Collection<Review> getReviews() {
-		return reviews;
-	}
-
-	public void setReviews(Collection<Review> reviews) {
-		this.reviews = reviews;
+		return getRequest().getReviews(this);
 	}
 
 	@JsonProperty

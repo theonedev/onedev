@@ -46,15 +46,6 @@ import com.pmease.gitplex.web.page.repository.code.tree.RepoTreePage;
 @SuppressWarnings("serial")
 public class RequestUpdatesPage extends RequestDetailPage {
 
-	private final IModel<List<Review>> reviewsModel = new LoadableDetachableModel<List<Review>>() {
-
-		@Override
-		protected List<Review> load() {
-			return GitPlex.getInstance(ReviewManager.class).findBy(getPullRequest());
-		}
-		
-	};
-
 	public RequestUpdatesPage(PageParameters params) {
 		super(params);
 	}
@@ -115,7 +106,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 					@Override
 					protected List<Review> load() {
 						List<Review> reviewsOfUpdate = new ArrayList<>();
-						for (Review review: reviewsModel.getObject()) {
+						for (Review review: getPullRequest().getReviews()) {
 							if (review.getUpdate().equals(updateItem.getModelObject()))
 								reviewsOfUpdate.add(review);
 						}
@@ -257,13 +248,6 @@ public class RequestUpdatesPage extends RequestDetailPage {
 			}
 			
 		});		
-	}
-
-	@Override
-	protected void onDetach() {
-		reviewsModel.detach();
-		
-		super.onDetach();
 	}
 
 }

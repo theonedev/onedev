@@ -66,7 +66,6 @@ public class DefaultReviewManager implements ReviewManager {
 		review.setUpdate(request.getLatestUpdate());
 		review.setReviewer(reviewer);
 		
-		review.getUpdate().getReviews().add(review);
 		dao.persist(review);	
 		
 		PullRequestActivity activity = new PullRequestActivity();

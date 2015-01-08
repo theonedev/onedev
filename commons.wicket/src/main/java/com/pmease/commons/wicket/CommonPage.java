@@ -26,6 +26,7 @@ import org.eclipse.jetty.server.SessionManager;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.wicket.component.history.HistoryAwarePanel;
 import com.pmease.commons.wicket.component.history.HistoryState;
+import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 
 @SuppressWarnings("serial")
 public abstract class CommonPage extends WebPage {
@@ -103,6 +104,12 @@ public abstract class CommonPage extends WebPage {
 		return sessionFeedback;
 	}
 	
+	@Override
+	protected void onBeforeRender() {
+		WebSocketRenderBehavior.onPageRender(getPageId());
+		super.onBeforeRender();
+	}
+
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

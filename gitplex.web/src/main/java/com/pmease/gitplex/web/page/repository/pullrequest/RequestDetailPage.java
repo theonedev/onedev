@@ -307,7 +307,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		
 		add(new BackToTop("backToTop"));
 		
-		add(new WebSocketRenderBehavior(false) {
+		add(new WebSocketRenderBehavior() {
 
 			@Override
 			protected Object getTrait() {

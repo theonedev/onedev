@@ -1,7 +1,7 @@
 package com.pmease.gitplex.core.gatekeeper;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -17,9 +17,9 @@ import com.pmease.gitplex.core.model.Membership;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.model.Review;
 
 public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 
@@ -124,37 +124,43 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 		request.getSubmitter().setName("user2");
 		request.setBaseCommitHash(git.calcMergeBase("dev", "master"));
 
-		PullRequestUpdate update = new PullRequestUpdate();
+		final Collection<Review> reviews = new ArrayList<>();
+
+		PullRequestUpdate update = new PullRequestUpdate() {
+
+			@Override
+			public Collection<Review> getReviews() {
+				return reviews;
+			}
+			
+		};
 		update.setHeadCommitHash(git.parseRevision("dev", true));
 		update.setId(1L);
 		update.setRequest(request);
 		request.getUpdates().add(update);
 		
+		Review review = new Review();
+		review.setId(1L);
+		review.setResult(Review.Result.APPROVE);
+		review.setUpdate(update);
+		review.setReviewer(new User());
+		review.getReviewer().setId(1L);
+		review.getReviewer().setName("user1");
+		reviews.add(review);
+
 		Assert.assertTrue(gateKeeper.checkRequest(request).isPending());
-		Collection<User> candidates = new HashSet<>();
-		User user = new User();
-		user.setId(1L);
-		user.setName("user1");
-		candidates.add(user);
-		user = new User();
-		user.setId(2L);
-		user.setName("user2");
-		candidates.add(user);
-		user = new User();
-		user.setId(3L);
-		user.setName("user3");
-		candidates.add(user);
-		Assert.assertEquals("user1", request.getReviewInvitations().iterator().next().getReviewer().getName());
+
+		Assert.assertEquals("user3", request.getReviewInvitations().iterator().next().getReviewer().getName());
 		
-		Review vote = new Review();
-		vote.setId(1L);
-		vote.setResult(Review.Result.APPROVE);
-		vote.setUpdate(update);
-		vote.setReviewer(new User());
-		vote.getReviewer().setId(1L);
-		vote.getReviewer().setName("user1");
-		update.getReviews().add(vote);
-		
+		review = new Review();
+		review.setId(2L);
+		review.setResult(Review.Result.APPROVE);
+		review.setUpdate(update);
+		review.setReviewer(new User());
+		review.getReviewer().setId(3L);
+		review.getReviewer().setName("user3");
+		reviews.add(review);
+
 		Assert.assertTrue(gateKeeper.checkRequest(request).isPassed());
 	}
 
