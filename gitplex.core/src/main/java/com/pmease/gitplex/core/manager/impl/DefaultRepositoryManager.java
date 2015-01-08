@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.pmease.commons.git.BriefCommit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.Sessional;
@@ -26,6 +30,7 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.commons.util.Pair;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.RepositoryManager;
@@ -53,6 +58,10 @@ public class DefaultRepositoryManager implements RepositoryManager {
     
     private final String gitPostReceiveHook;
     
+	private final BiMap<Pair<Long, String>, Long> nameToId = HashBiMap.create();
+	
+	private final ReadWriteLock idLock = new ReentrantReadWriteLock();
+    
     @Inject
     public DefaultRepositoryManager(Dao dao, BranchManager branchManager, 
     		UserManager userManager, StorageManager storageManager) {
@@ -79,15 +88,29 @@ public class DefaultRepositoryManager implements RepositoryManager {
     
     @Transactional
     @Override
-    public void save(Repository repository) {
+    public void save(final Repository repository) {
     	dao.persist(repository);
     	
         checkSanity(repository);
+        
+        dao.afterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				idLock.writeLock().lock();
+				try {
+					nameToId.inverse().put(repository.getId(), new Pair<>(repository.getUser().getId(), repository.getName()));
+				} finally {
+					idLock.writeLock().unlock();
+				}
+			}
+        	
+        });
     }
 
     @Transactional
     @Override
-    public void delete(Repository repository) {
+    public void delete(final Repository repository) {
     	for (Branch branch: repository.getBranches()) {
 	    	for (PullRequest request: branch.getOutgoingRequests()) {
 	    		request.setSource(null);
@@ -104,6 +127,20 @@ public class DefaultRepositoryManager implements RepositoryManager {
         dao.remove(repository);
 
         FileUtils.deleteDir(storageManager.getRepoDir(repository));
+        
+		dao.afterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				idLock.writeLock().lock();
+				try {
+					nameToId.inverse().remove(repository.getId());
+				} finally {
+					idLock.writeLock().unlock();
+				}
+			}
+			
+		});
     }
 
     @Sessional
@@ -121,9 +158,16 @@ public class DefaultRepositoryManager implements RepositoryManager {
     @Sessional
     @Override
     public Repository findBy(User owner, String repositoryName) {
-        return dao.find(EntityCriteria.of(Repository.class)
-        		.add(Restrictions.eq("owner.id", owner.getId()))
-        		.add(Restrictions.eq("name", repositoryName)));
+    	idLock.readLock().lock();
+    	try {
+    		Long id = nameToId.get(new Pair<>(owner.getId(), repositoryName));
+    		if (id != null)
+    			return dao.load(Repository.class, id);
+    		else
+    			return null;
+    	} finally {
+    		idLock.readLock().unlock();
+    	}
     }
 
     @Sessional
@@ -263,5 +307,17 @@ public class DefaultRepositoryManager implements RepositoryManager {
 			}
 		}
 	}
-	
+
+	@Sessional
+	@Override
+	public void start() {
+        for (Repository repository: dao.allOf(Repository.class)) 
+        	nameToId.inverse().put(repository.getId(), new Pair<>(repository.getUser().getId(), repository.getName()));
+	}
+
+	@Override
+	public void stop() {
+		
+	}
+
 }

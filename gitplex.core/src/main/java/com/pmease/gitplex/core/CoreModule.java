@@ -199,11 +199,11 @@ public class CoreModule extends AbstractPluginModule {
 		bind(NotificationManager.class).to(DefaultNotificationManager.class);
 		bind(OldCommitCommentManager.class).to(DefaultOldCommitCommentManager.class);
 		bind(MailManager.class).to(DefaultMailManager.class);
-		
+
 		contribute(PullRequestListener.class, DefaultNotificationManager.class);
 		contribute(ConfigChangeListener.class, DefaultPullRequestManager.class);
 	}
-
+	
 	@Override
 	protected Class<? extends AbstractPlugin> getPluginClass() {
 		return GitPlex.class;

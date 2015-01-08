@@ -54,7 +54,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
 	private Collection<Team> teams = new ArrayList<Team>();
 	
-	@OneToMany(mappedBy="submitter")
+	@OneToMany(mappedBy="submitter", cascade=CascadeType.REMOVE)
 	private Collection<PullRequest> submittedRequests = new ArrayList<>();
 
 	@OneToMany(mappedBy="reviewer", cascade=CascadeType.REMOVE)

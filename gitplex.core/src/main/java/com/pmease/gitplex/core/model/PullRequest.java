@@ -111,6 +111,7 @@ public class PullRequest extends AbstractEntity {
 	private String description;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=false)
 	private User submitter;
 	
 	@ManyToOne(fetch=FetchType.LAZY)

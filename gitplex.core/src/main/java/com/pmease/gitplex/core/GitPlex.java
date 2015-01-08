@@ -87,6 +87,7 @@ public class GitPlex extends AbstractPlugin {
 		}
 
 		userManager.start();
+		repositoryManager.start();
 		pullRequestManager.start();
 		
 		gitCheckTaskId = taskScheduler.schedule(new SchedulableTask() {
@@ -198,6 +199,7 @@ public class GitPlex extends AbstractPlugin {
 		taskScheduler.unschedule(gitCheckTaskId);
 		pullRequestManager.stop();
 		userManager.stop();
+		repositoryManager.stop();
 	}
 	
 	public String getGitError() {

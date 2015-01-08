@@ -49,6 +49,7 @@ import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Objects;
+import com.pmease.commons.hibernate.HibernateUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.behavior.AllowLeaveBehavior;
@@ -312,7 +313,9 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			@Override
 			protected Object getTrait() {
 				PullRequestChangeTrait trait = new PullRequestChangeTrait();
-				trait.requestId = getPullRequest().getId();
+
+				// Do not call getPullRequest().getId() here to avoid unnecessary SQL query
+				trait.requestId = HibernateUtils.getId(getPullRequest());
 				return trait;
 			}
 

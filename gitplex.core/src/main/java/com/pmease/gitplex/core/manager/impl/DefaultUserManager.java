@@ -8,8 +8,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
 
 import org.hibernate.ReplicationMode;
 
@@ -20,9 +18,12 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitplex.core.manager.PullRequestManager;
+import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Membership;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.operation.GeneralOperation;
@@ -31,6 +32,10 @@ import com.pmease.gitplex.core.permission.operation.GeneralOperation;
 public class DefaultUserManager implements UserManager {
 
     private final Dao dao;
+
+    private final RepositoryManager repositoryManager;
+    
+    private final PullRequestManager pullRequestManager;
     
     private final ReadWriteLock idLock = new ReentrantReadWriteLock();
     		
@@ -39,8 +44,10 @@ public class DefaultUserManager implements UserManager {
 	private final BiMap<String, Long> nameToId = HashBiMap.create();
 	
 	@Inject
-    public DefaultUserManager(Dao dao) {
+    public DefaultUserManager(Dao dao, RepositoryManager repositoryManager, PullRequestManager pullRequestManager) {
         this.dao = dao;
+        this.repositoryManager = repositoryManager;
+        this.pullRequestManager = pullRequestManager;
     }
 
     @Transactional
@@ -80,25 +87,20 @@ public class DefaultUserManager implements UserManager {
         	dao.persist(membership);
     	}
 
-    	dao.getSession().getTransaction().registerSynchronization(new Synchronization() {
+    	dao.afterCommit(new Runnable() {
 
-			public void afterCompletion(int status) {
-				if (status == Status.STATUS_COMMITTED) { 
-					idLock.writeLock().lock();
-					try {
-						emailToId.inverse().put(user.getId(), user.getEmail());
-						nameToId.inverse().put(user.getId(), user.getName());
-					} finally {
-						idLock.writeLock().unlock();
-					}
+			@Override
+			public void run() {
+				idLock.writeLock().lock();
+				try {
+					emailToId.inverse().put(user.getId(), user.getEmail());
+					nameToId.inverse().put(user.getId(), user.getName());
+				} finally {
+					idLock.writeLock().unlock();
 				}
 			}
-
-			public void beforeCompletion() {
-				
-			}
-			
-		});
+    		
+    	});
     }
 
     @Sessional
@@ -110,29 +112,25 @@ public class DefaultUserManager implements UserManager {
     @Transactional
     @Override
 	public void delete(final User user) {
-    	for (PullRequest request: user.getSubmittedRequests()) {
-    		request.setSubmitter(null);
-    		dao.persist(request);
-    	}
+    	for (Repository repository: user.getRepositories())
+    		repositoryManager.delete(repository);
+    	
+    	for (PullRequest request: user.getSubmittedRequests())
+    		pullRequestManager.delete(request);
     	
 		dao.remove(user);
-		
-    	dao.getSession().getTransaction().registerSynchronization(new Synchronization() {
 
-			public void afterCompletion(int status) {
-				if (status == Status.STATUS_COMMITTED) { 
-					idLock.writeLock().lock();
-					try {
-						emailToId.inverse().remove(user.getId());
-						nameToId.inverse().remove(user.getId());
-					} finally {
-						idLock.writeLock().unlock();
-					}
+		dao.afterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				idLock.writeLock().lock();
+				try {
+					emailToId.inverse().remove(user.getId());
+					nameToId.inverse().remove(user.getId());
+				} finally {
+					idLock.writeLock().unlock();
 				}
-			}
-
-			public void beforeCompletion() {
-				
 			}
 			
 		});
@@ -202,6 +200,7 @@ public class DefaultUserManager implements UserManager {
 		return result;
 	}
 
+	@Sessional
 	@Override
 	public void start() {
         for (User user: dao.allOf(User.class)) {

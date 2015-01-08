@@ -3,6 +3,7 @@ package com.pmease.gitplex.core.manager.impl;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.hibernate.criterion.Restrictions;
@@ -25,7 +26,7 @@ public class DefaultConfigManager implements ConfigManager {
 	
 	private final Dao dao;
 	
-	private final Set<ConfigChangeListener> changeListeners;
+	private final Provider<Set<ConfigChangeListener>> changeListenersProvider;
 	
 	private volatile Long systemSettingConfigId;
 	
@@ -34,9 +35,9 @@ public class DefaultConfigManager implements ConfigManager {
 	private volatile Long qosSettingConfigId;
 	
 	@Inject
-	public DefaultConfigManager(Dao dao, Set<ConfigChangeListener> changeListeners) {
+	public DefaultConfigManager(Dao dao, Provider<Set<ConfigChangeListener>> changeListenersProvider) {
 		this.dao = dao;
-		this.changeListeners = changeListeners;
+		this.changeListenersProvider = changeListenersProvider;
 	}
 
 	@Sessional
@@ -68,7 +69,7 @@ public class DefaultConfigManager implements ConfigManager {
 		config.setSetting(systemSetting);
 		dao.persist(config);
 		
-		for (ConfigChangeListener listener: changeListeners)
+		for (ConfigChangeListener listener: changeListenersProvider.get())
 			listener.systemSettingChanged();
 	}
 
@@ -103,7 +104,7 @@ public class DefaultConfigManager implements ConfigManager {
 		config.setSetting(mailSetting);
 		dao.persist(config);
 
-		for (ConfigChangeListener listener: changeListeners)
+		for (ConfigChangeListener listener: changeListenersProvider.get())
 			listener.mailSettingChanged();
 	}
 
@@ -136,7 +137,7 @@ public class DefaultConfigManager implements ConfigManager {
 		config.setSetting(qosSetting);
 		dao.persist(config);
 
-		for (ConfigChangeListener listener: changeListeners)
+		for (ConfigChangeListener listener: changeListenersProvider.get())
 			listener.qosSettingChanged();
 	}
 
