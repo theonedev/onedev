@@ -26,6 +26,7 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jersey.ValidQueryParams;
+import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.permission.ObjectPermission;
@@ -40,10 +41,13 @@ public class BranchResource {
 	
 	private final BranchManager branchManager;
 	
+	private final AuthorizationManager authorizationManager;
+	
 	@Inject
-	public BranchResource(Dao dao, BranchManager branchManager) {
+	public BranchResource(Dao dao, BranchManager branchManager, AuthorizationManager authorizationManager) {
 		this.dao = dao;
 		this.branchManager = branchManager;
+		this.authorizationManager = authorizationManager;
 	}
 	
     @GET
@@ -88,14 +92,15 @@ public class BranchResource {
 	public void delete(@PathParam("id") Long id) {
 		Branch branch = dao.load(Branch.class, id);
 		
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(branch.getRepository())))
+    	if (!authorizationManager.canModifyBranch(branch))
     		throw new UnauthorizedException();
+    	
     	dao.remove(branch);
 	}
 	
     @POST
     public Long save(@NotNull @Valid Branch branch) {
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(branch.getRepository())))
+    	if (!authorizationManager.canModifyBranch(branch))
     		throw new UnauthorizedException();
     	
     	dao.persist(branch);

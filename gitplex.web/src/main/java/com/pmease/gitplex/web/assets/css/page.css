@@ -874,7 +874,8 @@ ul.status-help li:last-child .description {border-bottom: none;}
 
 .request-detail>.summary>.operations>.buttons>a, 
 .request-detail>.summary>.operations>.confirm>form>input {margin-right: 12px;} 
-.request-detail>.summary>.operations>.confirm>form>div>textarea {margin-bottom: 16px;} 
+.request-detail>.summary>.operations>.confirm>form>div>textarea, 
+.request-detail>.summary>.operations>.confirm>form>.delete-source {margin-bottom: 16px;} 
 
 /* COMMON CSS FOR REVIEW RESULT ICON */
 .request-detail .review-result {font-size: 24px; position: absolute; left: 30px; 
@@ -916,7 +917,9 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail .activities .activity>.commits td.status .failed {color: #F93333;}
 .request-detail .activities .activity>.commits td.status .running {color: #AFAD1F;}
 
-.request-detail .others>.branches>.target {margin-bottom: 4px;}
+.request-detail .others>.branches>.target {padding-bottom: 4px; border-bottom: 1px dotted #BBB; margin-bottom: 4px;}
+.request-detail .others>.branches span, .request-detail .others>.branches a {white-space: nowrap;}
+.request-detail .others>.branches>.source>a {margin-left: 4px;}
 .request-detail .others label {margin-right: 4px; font-weight: normal;}
 	
 .request-detail .others>.integration>.preview>.alert {border-radius: 0 0 4px 4px; margin: 10px -20px -20px -20px;}
@@ -949,6 +952,8 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail .activities .activity>.approve>.pa {color: #35A612;}
 .request-detail .activities .activity>.disapprove>.pa {color: #F93333;}
 .request-detail .activities .activity>.unreview>.pa {color: #999; margin-left: -14px;}
+.request-detail .activities .activity>.delete-source>.pa {color: #F93333; margin-left: -14px; font-size: 24px;}
+.request-detail .activities .activity>.restore-source>.pa {color: #35A612; margin-left: -14px; font-size: 24px;}
 
 .request-detail>.updates>.update {padding: 12px; margin: 20px 0; border: 1px solid #DDD; border-radius: 4px;}
 .request-detail>.updates>.update>.summary .actions .pa {font-size: 16px;}

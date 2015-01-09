@@ -9,12 +9,14 @@ import javax.inject.Singleton;
 
 import org.apache.shiro.SecurityUtils;
 
+import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.Comment;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
@@ -45,29 +47,29 @@ public class DefaultAuthorizationManager implements AuthorizationManager {
 	}
 
 	@Override
-	public boolean canModify(PullRequest request) {
+	public boolean canModifyRequest(PullRequest request) {
 		Repository repository = request.getTarget().getRepository();
 		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(repository))) {
 			return true;
 		} else {
 			User currentUser = userManager.getCurrent();
 			User submitter = request.getSubmitter();
-			return submitter != null && submitter.equals(currentUser);
+			return submitter.equals(currentUser);
 		}
 	}
 	
 	@Override
-	public boolean canModify(Review vote) {
-		Repository repository = vote.getUpdate().getRequest().getTarget().getRepository();
+	public boolean canModifyReview(Review review) {
+		Repository repository = review.getUpdate().getRequest().getTarget().getRepository();
 		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(repository))) {
 			return true;
 		} else {
-			return vote.getReviewer().equals(userManager.getCurrent());
+			return review.getReviewer().equals(userManager.getCurrent());
 		}
 	}
 
 	@Override
-	public boolean canModify(Comment comment) {
+	public boolean canModifyComment(Comment comment) {
 		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 		if (currentUser == null) {
 			return false;
@@ -79,6 +81,23 @@ public class DefaultAuthorizationManager implements AuthorizationManager {
 				return SecurityUtils.getSubject().isPermitted(adminPermission);
 			}
 		}
+	}
+
+	@Override
+	public boolean canCreateBranch(Repository repository, String branchName) {
+		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
+		return currentUser != null 
+				&& currentUser.asSubject().isPermitted(ObjectPermission.ofRepositoryWrite(repository))	
+				&& repository.getGateKeeper().checkRef(currentUser, repository, Git.REFS_HEADS + branchName).isPassed();
+	}
+
+	@Override
+	public boolean canModifyBranch(Branch branch) {
+		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
+		Repository repository = branch.getRepository();
+		return currentUser != null 
+				&& currentUser.asSubject().isPermitted(ObjectPermission.ofRepositoryWrite(repository))	
+				&& repository.getGateKeeper().checkRef(currentUser, repository, Git.REFS_HEADS + branch.getName()).isPassed();
 	}
 
 }

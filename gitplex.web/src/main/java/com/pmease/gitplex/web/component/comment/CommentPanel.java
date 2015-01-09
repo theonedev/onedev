@@ -150,7 +150,7 @@ public class CommentPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(GitPlex.getInstance(AuthorizationManager.class).canModify(getComment()));
+				setVisible(GitPlex.getInstance(AuthorizationManager.class).canModifyComment(getComment()));
 			}
 
 		});
@@ -167,7 +167,7 @@ public class CommentPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(GitPlex.getInstance(AuthorizationManager.class).canModify(getComment()));
+				setVisible(GitPlex.getInstance(AuthorizationManager.class).canModifyComment(getComment()));
 			}
 
 		}.add(new ConfirmBehavior("Deleting this comment will also delete all its replies. Do you really want to continue?")));
@@ -188,7 +188,7 @@ public class CommentPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(GitPlex.getInstance(AuthorizationManager.class).canModify(getComment()));
+				setVisible(GitPlex.getInstance(AuthorizationManager.class).canModifyComment(getComment()));
 			}
 
 			@Override
@@ -213,7 +213,7 @@ public class CommentPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(getComment().isResolved() && !GitPlex.getInstance(AuthorizationManager.class).canModify(getComment()));
+				setVisible(getComment().isResolved() && !GitPlex.getInstance(AuthorizationManager.class).canModifyComment(getComment()));
 			}
 			
 		});
@@ -418,7 +418,7 @@ public class CommentPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(GitPlex.getInstance(AuthorizationManager.class).canModify(getComment()));
+				setVisible(GitPlex.getInstance(AuthorizationManager.class).canModifyComment(getComment()));
 			}
 
 		});
@@ -437,7 +437,7 @@ public class CommentPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(GitPlex.getInstance(AuthorizationManager.class).canModify(getComment()));
+				setVisible(GitPlex.getInstance(AuthorizationManager.class).canModifyComment(getComment()));
 			}
 
 		}.add(new ConfirmBehavior("Do you really want to delete this reply?")));

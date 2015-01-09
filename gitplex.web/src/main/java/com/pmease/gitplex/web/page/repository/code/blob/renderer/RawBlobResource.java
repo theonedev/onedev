@@ -56,7 +56,7 @@ public class RawBlobResource extends AbstractResource {
 		if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(repository))) {
 			throw new AccessDeniedException("User " + SecurityUtils.getSubject() 
 					+ " have no permission to access repository " 
-					+ repository.getFullName());
+					+ repository.getFQN());
 		}
 		
 		ResourceResponse response = new ResourceResponse();

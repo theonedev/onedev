@@ -11,7 +11,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.validator.routines.PercentValidator;
-import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.IAjaxIndicatorAware;
@@ -45,8 +44,9 @@ import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.commons.wicket.component.navigator.PagingNavigator;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
+import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestWatchManager;
@@ -54,7 +54,6 @@ import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestWatch;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.branch.BranchChoiceProvider;
 import com.pmease.gitplex.web.component.branch.BranchSingleChoice;
@@ -292,7 +291,7 @@ public class RepoBranchesPage extends RepositoryPage {
 
 			@Override
 			protected void populateItem(final ListItem<Branch> item) {
-				Branch branch = item.getModelObject();
+				final Branch branch = item.getModelObject();
 				
 				AbstractLink link = new BookmarkablePageLink<Void>("branchLink", 
 						RepoTreePage.class,
@@ -477,11 +476,13 @@ public class RepoBranchesPage extends RepositoryPage {
 				});
 
 				Link<Void> deleteLink;
+				final Long branchId = branch.getId();
 				actionsContainer.add(deleteLink = new Link<Void>("delete") {
 
 					@Override
 					public void onClick() {
-						GitPlex.getInstance(BranchManager.class).delete(item.getModelObject());
+						Dao dao = GitPlex.getInstance(Dao.class);
+						GitPlex.getInstance(BranchManager.class).delete(dao.load(Branch.class, branchId));
 					}
 
 					@Override
@@ -489,7 +490,7 @@ public class RepoBranchesPage extends RepositoryPage {
 						super.onConfigure();
 
 						Branch branch = item.getModelObject();
-						if (!branch.isDefault() && SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryWrite(getRepository()))) {
+						if (!branch.isDefault() && GitPlex.getInstance(AuthorizationManager.class).canModifyBranch(branch)) {
 							User currentUser = getCurrentUser();
 							if (currentUser != null) {
 								GateKeeper gateKeeper = getRepository().getGateKeeper();

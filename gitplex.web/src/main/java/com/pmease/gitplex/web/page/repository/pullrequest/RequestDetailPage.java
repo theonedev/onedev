@@ -32,6 +32,7 @@ import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.TextArea;
@@ -49,6 +50,7 @@ import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.HibernateUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
@@ -67,6 +69,7 @@ import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
+import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -200,7 +203,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 				super.onConfigure();
 
 				AuthorizationManager authorizationManager = GitPlex.getInstance(AuthorizationManager.class);
-				setVisible(!editingTitle && authorizationManager.canModify(getPullRequest()));
+				setVisible(!editingTitle && authorizationManager.canModifyRequest(getPullRequest()));
 			}
 			
 		});
@@ -575,14 +578,28 @@ public abstract class RequestDetailPage extends RepositoryPage {
 	
 	private Component newOperationConfirm(final String id, final PullRequestOperation operation, 
 			final WebMarkupContainer operationsContainer) {
+		PullRequest request = getPullRequest();
+
 		final Fragment fragment = new Fragment(id, "operationConfirmFrag", this);
 		Form<?> form = new Form<Void>("form");
 		fragment.add(form);
 		final FormComponent<String> noteInput;
+		final FormComponent<Boolean> deleteSourceCheck = new CheckBox("deleteSource", Model.of(false));
+
+		Branch source = request.getSource();
+		Preconditions.checkNotNull(source);
+		if (operation != INTEGRATE 
+				|| source.isDefault() 
+				|| !GitPlex.getInstance(AuthorizationManager.class).canModifyBranch(source)) {
+			deleteSourceCheck.setVisible(false);
+		}
+		
+		form.add(deleteSourceCheck);
 		if (operation != INTEGRATE) {
 			form.add(noteInput = new MarkdownInput("note", Model.of("")));
+			deleteSourceCheck.setVisible(false);
 		} else {
-			IntegrationPreview preview = getPullRequest().getIntegrationPreview();
+			IntegrationPreview preview = request.getIntegrationPreview();
 			if (preview == null || preview.getIntegrated() == null) {
 				Session.get().warn("Unable to integrate now as integration preview has to be recalculated");
 				return new WebMarkupContainer(id).setVisible(false);
@@ -625,6 +642,19 @@ public abstract class RequestDetailPage extends RepositoryPage {
 				PullRequest request = getPullRequest();
 				try {
 					operation.operate(request, noteInput.getModelObject());
+					if (deleteSourceCheck.getModelObject()) {
+						boolean hasOpen = false;
+						for (PullRequest each: request.getSource().getIncomingRequests()) {
+							if (each.isOpen()) {
+								hasOpen = true;
+								break;
+							}
+						}
+						if (hasOpen)
+							Session.get().warn("Source branch is not deleted as there are pull requests opening against it.");
+						else
+							GitPlex.getInstance(BranchManager.class).delete(request.getSource());
+					}
 					setResponsePage(getPage().getClass(), paramsOf(getPullRequest()));
 				} catch (Exception e) {
 					error("Unable to " + actionName + ": " + e.getMessage());

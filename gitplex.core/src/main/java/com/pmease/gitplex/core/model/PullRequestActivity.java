@@ -16,7 +16,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @Entity
 public class PullRequestActivity extends AbstractEntity {
 
-	public enum Action {INTEGRATE, DISCARD, APPROVE, DISAPPROVE, UNREVIEW};
+	public enum Action {INTEGRATE, DISCARD, APPROVE, DISAPPROVE, UNREVIEW, DELETE_SOURCE, RESTORE_SOURCE};
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
@@ -30,7 +30,7 @@ public class PullRequestActivity extends AbstractEntity {
 	private User user;
 	
 	@Column(nullable=false)
-	private Date date;
+	private Date date = new Date();
 
 	public PullRequest getRequest() {
 		return request;

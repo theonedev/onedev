@@ -13,7 +13,7 @@ public class RepositoryHomePage extends RepoTreePage {
 
 	@Override
 	protected String getPageTitle() {
-		return getRepository().getFullName();
+		return getRepository().getFQN();
 	}
 	
 }

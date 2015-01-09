@@ -148,7 +148,7 @@ public class RepoBlobPage extends RepositoryPage {
 
 	@Override
 	protected String getPageTitle() {
-		return getCurrentPath() + " at " + getRepository().defaultBranchIfNull(getCurrentRevision()) + " " + getRepository().getFullName();
+		return getCurrentPath() + " at " + getRepository().defaultBranchIfNull(getCurrentRevision()) + " " + getRepository().getFQN();
 	}
 	
 	protected Commit getLastCommit() {

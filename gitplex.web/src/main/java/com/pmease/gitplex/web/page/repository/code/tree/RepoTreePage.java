@@ -78,12 +78,12 @@ public class RepoTreePage extends RepositoryPage {
 		Repository repository = getRepository();
 		
 		if (getCurrentPath() == null) {
-			return repository.getFullName();
+			return repository.getFQN();
 		} else {
 			StringBuffer sb = new StringBuffer();
 			sb.append(getCurrentPath())
 				.append(" at ").append(repository.defaultBranchIfNull(getCurrentRevision()))
-				.append(" - ").append(repository.getFullName());
+				.append(" - ").append(repository.getFQN());
 			
 			return sb.toString();
 		}

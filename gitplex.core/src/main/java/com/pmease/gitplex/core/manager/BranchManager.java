@@ -4,10 +4,11 @@ import java.util.Collection;
 
 import javax.annotation.Nullable;
 
+import com.pmease.commons.bootstrap.Lifecycle;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.Repository;
 
-public interface BranchManager {
+public interface BranchManager extends Lifecycle {
 
 	/**
 	 * Find branch by repository and branch name.
@@ -21,7 +22,7 @@ public interface BranchManager {
 	 */
 	public @Nullable Branch findBy(Repository repository, String branchName);
 
-	public @Nullable Branch findBy(String branchPath);
+	public @Nullable Branch findBy(String branchFQN);
 	
     /**
      * Delete all refs pointed to this branch and its associated pull requests and 
@@ -35,23 +36,16 @@ public interface BranchManager {
     
     /**
      * Delete the branch record from database, as well as removing the branch from 
-     * corresponding git repository.
+     * corresponding git repository. This method will proceed even if there are 
+     * open pull requests associating with the branch. This is designed to be so 
+     * in order to make sure branch deletion always succeeds as otherwise repository
+     * sanity check might encounter difficulties if the branch ref does not exist 
+     * in Git.
      * 
      * @param branch
      * 			branch to be deleted
      */
     public void delete(Branch branch);
-    
-    /**
-     * Create specified branch record in database, and update corresponding git repository to 
-     * add the branch.
-     * 
-     * @param branch
-     * 			branch to be created
-     * @param commitHash
-     * 			commit hash of the branch
-     */
-    public void create(Branch branch, String commitHash);
     
     public void save(Branch branch);
     

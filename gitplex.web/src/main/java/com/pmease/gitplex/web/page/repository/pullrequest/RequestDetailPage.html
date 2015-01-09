@@ -90,8 +90,13 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="operationConfirmFrag">
 		<form wicket:id="form" class="leave-confirm">
-			<div wicket:id="note"></div>
 			<div wicket:id="feedback"></div>
+			<div wicket:id="note"></div>
+			<wicket:enclosure child="deleteSource">
+			<div class="delete-source">
+				<input wicket:id="deleteSource" type="checkbox"></input> Delete source branch after integration			
+			</div>
+			</wicket:enclosure>
 			<input wicket:id="submit" type="submit" value="Confirm" class="btn btn-sm"></input> 
 			<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-sm btn-default"></input>
 		</form>

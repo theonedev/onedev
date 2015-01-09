@@ -14,6 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -29,7 +30,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Branch extends AbstractEntity {
 
-	public static final String REPO_BRANCH_SEPARATOR = ":";
+	private static final String FQN_SEPARATOR = ":";
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -113,8 +114,8 @@ public class Branch extends AbstractEntity {
     	return Git.REFS_HEADS + name; 
     }
     
-    public String getFullName() {
-    	return getRepository().getFullName() + REPO_BRANCH_SEPARATOR + getName();
+    public String getFQN() {
+    	return getRepository().getFQN() + FQN_SEPARATOR + getName();
     }
     
     public boolean isDefault() {
@@ -143,7 +144,14 @@ public class Branch extends AbstractEntity {
     
     @Override
 	public String toString() {
-    	return getFullName();
+    	return getFQN();
 	}
 
+    public static String getNameByFQN(String branchFQN) {
+    	return StringUtils.substringAfterLast(branchFQN, FQN_SEPARATOR);
+    }
+    
+    public static String getRepositoryFQNByFQN(String branchFQN) {
+    	return StringUtils.substringBeforeLast(branchFQN, FQN_SEPARATOR);
+    }
 }

@@ -40,6 +40,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.Pair;
+import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.AndGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
@@ -59,7 +60,7 @@ import com.pmease.gitplex.core.validation.RepositoryName;
 @SuppressWarnings("serial")
 public class Repository extends AbstractEntity implements UserBelonging {
 
-	public static final String USER_REPO_SEPARATOR = "/";
+	private static final String FQN_SEPARATOR = "/";
 	
 	public static final String REFS_GITPLEX = "refs/gitplex/";
 	
@@ -232,13 +233,21 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		}
 	}
 
-	public String getFullName() {
-		return getOwner().getName() + USER_REPO_SEPARATOR + getName();
+	public String getFQN() {
+		return getOwner().getName() + FQN_SEPARATOR + getName();
+	}
+	
+	public static String getNameByFQN(String repositoryFQN) {
+		return StringUtils.substringAfterLast(repositoryFQN, FQN_SEPARATOR);
+	}
+	
+	public static String getUserNameByFQN(String repositoryFQN) {
+		return StringUtils.substringBeforeLast(repositoryFQN, FQN_SEPARATOR);
 	}
 	
 	@Override
 	public String toString() {
-		return getFullName();
+		return getFQN();
 	}
 	
 	public Git git() {
@@ -330,7 +339,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 
 	public String getUrl() {
-		return GitPlex.getInstance().getServerUrl() + "/" + getFullName();
+		return GitPlex.getInstance().getServerUrl() + "/" + getFQN();
 	}
 	
 	public Branch getDefaultBranch() {

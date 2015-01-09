@@ -21,6 +21,8 @@ public interface PullRequestManager extends Lifecycle, ConfigChangeListener {
     Collection<PullRequest> findOpenTo(Branch target, Repository source);
 
     Collection<PullRequest> findOpenFrom(Branch source, Repository target);
+   
+    Collection<PullRequest> findOpen(Branch sourceOrTarget);
 
     boolean canIntegrate(PullRequest request);
     
@@ -70,4 +72,5 @@ public interface PullRequestManager extends Lifecycle, ConfigChangeListener {
     
 	List<IntegrationStrategy> getApplicableIntegrationStrategies(PullRequest request);
 
+	void restoreSource(PullRequest request);
 }

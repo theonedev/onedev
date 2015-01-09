@@ -107,7 +107,7 @@ public class OpenActivityPanel extends Panel {
 				super.onConfigure();
 				
 				setVisible(GitPlex.getInstance(AuthorizationManager.class)
-						.canModify(requestModel.getObject()));
+						.canModifyRequest(requestModel.getObject()));
 			}
 
 		});

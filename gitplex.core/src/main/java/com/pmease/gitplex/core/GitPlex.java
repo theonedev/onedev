@@ -24,6 +24,7 @@ import com.pmease.commons.schedule.SchedulableTask;
 import com.pmease.commons.schedule.TaskScheduler;
 import com.pmease.commons.util.init.InitStage;
 import com.pmease.commons.util.init.ManualConfig;
+import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.DataManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.RepositoryManager;
@@ -37,6 +38,8 @@ public class GitPlex extends AbstractPlugin {
 	private final DataManager dataManager;
 	
 	private final RepositoryManager repositoryManager;
+	
+	private final BranchManager branchManager;
 	
 	private final UserManager userManager;
 	
@@ -58,13 +61,14 @@ public class GitPlex extends AbstractPlugin {
 	
 	@Inject
 	public GitPlex(ServerConfig serverConfig, DataManager dataManager, 
-			PullRequestManager pullRequestManager,
+			PullRequestManager pullRequestManager, BranchManager branchManager,
             RepositoryManager repositoryManager, UserManager userManager,
             TaskScheduler taskScheduler, Provider<GitConfig> gitConfigProvider,
             @AppName String appName) {
 		this.dataManager = dataManager;
 		this.repositoryManager = repositoryManager;
 		this.userManager = userManager;
+		this.branchManager = branchManager;
 		this.pullRequestManager = pullRequestManager;
 		this.serverConfig = serverConfig;
 		this.taskScheduler = taskScheduler;
@@ -88,6 +92,7 @@ public class GitPlex extends AbstractPlugin {
 
 		userManager.start();
 		repositoryManager.start();
+		branchManager.start();
 		pullRequestManager.start();
 		
 		gitCheckTaskId = taskScheduler.schedule(new SchedulableTask() {
@@ -200,6 +205,7 @@ public class GitPlex extends AbstractPlugin {
 		pullRequestManager.stop();
 		userManager.stop();
 		repositoryManager.stop();
+		branchManager.stop();
 	}
 	
 	public String getGitError() {

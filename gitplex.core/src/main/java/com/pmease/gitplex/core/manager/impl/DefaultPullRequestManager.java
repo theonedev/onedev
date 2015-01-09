@@ -1,5 +1,6 @@
 package com.pmease.gitplex.core.manager.impl;
 
+import static com.pmease.gitplex.core.model.PullRequest.CriterionHelper.ofOpen;
 import static com.pmease.gitplex.core.model.PullRequest.CriterionHelper.ofSource;
 import static com.pmease.gitplex.core.model.PullRequest.CriterionHelper.ofTarget;
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_ALWAYS;
@@ -29,6 +30,7 @@ import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.command.MergeCommand.FastForwardMode;
@@ -38,12 +40,14 @@ import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.NotificationManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
+import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.Branch;
@@ -297,6 +301,11 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	@Override
 	public void onTargetBranchUpdate(PullRequest request) {
 		closeIfMerged(request);
+		if (request.isOpen()) {
+			IntegrationPreviewTask task = new IntegrationPreviewTask(request.getId());
+			integrationPreviewExecutor.remove(task);
+			integrationPreviewExecutor.execute(task);
+		}
 	}
 
 	@Transactional
@@ -584,6 +593,39 @@ public class DefaultPullRequestManager implements PullRequestManager {
 			return new HashCodeBuilder(17, 37).append(requestId).toHashCode();
 		}
 		
+	}
+
+	@Sessional
+	@Override
+	public Collection<PullRequest> findOpen(Branch sourceOrTarget) {
+		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
+		criteria.add(ofOpen());
+		criteria.add(Restrictions.or(ofSource(sourceOrTarget), ofTarget(sourceOrTarget)));
+		return dao.query(criteria);
+	}
+
+	@Transactional
+	@Override
+	public void restoreSource(PullRequest request) {
+		Preconditions.checkState(request.getSourceFQN() != null && request.getSource() == null && !request.isOpen());
+
+		String repositoryFQN = Branch.getRepositoryFQNByFQN(request.getSourceFQN());
+		Repository repository = GitPlex.getInstance(RepositoryManager.class).findBy(repositoryFQN);
+		if (repository == null)
+			throw new RuntimeException("Unable to find repository: " + repositoryFQN);
+		String branchName = Branch.getNameByFQN(request.getSourceFQN());
+		Branch branch = GitPlex.getInstance(BranchManager.class).findBy(repository, branchName);
+		if (branch == null) {
+			branch = new Branch();
+			branch.setRepository(repository);
+			branch.setName(branchName);
+			branch.setHeadCommitHash(request.getLatestUpdate().getHeadCommitHash());
+			branchManager.save(branch);
+			repository.git().createBranch(branch.getName(), branch.getHeadCommitHash());
+		}
+		
+		request.setSource(branch);
+		dao.persist(request);
 	}
 
 }

@@ -34,7 +34,7 @@ public class MatchGlobalBranchesByPatterns implements GlobalBranchMatcher {
 
 	@Override
 	public boolean matches(Branch branch) {
-		return WildcardUtils.matchPath(getBranchPatterns(), branch.getFullName());
+		return WildcardUtils.matchPath(getBranchPatterns(), branch.getFQN());
 	}
 
 }

@@ -122,7 +122,7 @@ public class PullRequest extends AbstractEntity {
 	private Branch source;
 	
 	// record name of source branch so that we can restore it even after source branch is deleted
-	private String sourceFullName;
+	private String sourceFQN;
 	
 	@Column(nullable=false)
 	private String baseCommitHash;
@@ -162,7 +162,7 @@ public class PullRequest extends AbstractEntity {
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestNotification> notifications = new ArrayList<>();
-
+	
 	private transient CheckResult checkResult;
 
 	private transient List<PullRequestUpdate> sortedUpdates;
@@ -268,12 +268,12 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	@Nullable
-	public String getSourceFullName() {
-		return sourceFullName;
+	public String getSourceFQN() {
+		return sourceFQN;
 	}
 
-	public void setSourceFullName(String sourceFullName) {
-		this.sourceFullName = sourceFullName;
+	public void setSourceFQN(String sourceFQN) {
+		this.sourceFQN = sourceFQN;
 	}
 
 	public String getBaseCommitHash() {

@@ -53,7 +53,7 @@ public class BranchEditSupport implements EditSupport {
 						        	List<String> branchNames = new ArrayList<>();
 						        	for (Long branchId: branchIds) {
 										if (isAffinal(getPropertyGetter()) || isGlobal(getPropertyGetter()))
-						        			branchNames.add(dao.load(Branch.class, branchId).getFullName());
+						        			branchNames.add(dao.load(Branch.class, branchId).getFQN());
 						        		else
 						        			branchNames.add(dao.load(Branch.class, branchId).getName());
 						        	}
@@ -90,7 +90,7 @@ public class BranchEditSupport implements EditSupport {
 						        if (branchId != null) {
 						        	Branch branch = GitPlex.getInstance(Dao.class).load(Branch.class, branchId);
 									if (isAffinal(getPropertyGetter()) || isGlobal(getPropertyGetter()))
-						        		return new Label(id, branch.getFullName());
+						        		return new Label(id, branch.getFQN());
 						        	else
 						        		return new Label(id, branch.getName());
 						        } else {

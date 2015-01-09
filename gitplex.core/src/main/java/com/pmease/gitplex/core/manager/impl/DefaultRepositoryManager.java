@@ -15,8 +15,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,7 +112,7 @@ public class DefaultRepositoryManager implements RepositoryManager {
     	for (Branch branch: repository.getBranches()) {
 	    	for (PullRequest request: branch.getOutgoingRequests()) {
 	    		request.setSource(null);
-	    		request.setSourceFullName(branch.getFullName());
+	    		request.setSourceFQN(branch.getFQN());
 	    		dao.persist(request);
 	    	}
     	}
@@ -146,13 +144,11 @@ public class DefaultRepositoryManager implements RepositoryManager {
     @Sessional
     @Override
     public Repository findBy(String ownerName, String repositoryName) {
-        Criteria criteria = dao.getSession().createCriteria(Repository.class);
-        criteria.add(Restrictions.eq("name", repositoryName));
-        criteria.createAlias("owner", "owner");
-        criteria.add(Restrictions.eq("owner.name", ownerName));
-
-        criteria.setMaxResults(1);
-        return (Repository) criteria.uniqueResult();
+    	User user = userManager.findByName(ownerName);
+    	if (user != null)
+    		return findBy(user, repositoryName);
+    	else
+    		return null;
     }
 
     @Sessional
@@ -172,11 +168,11 @@ public class DefaultRepositoryManager implements RepositoryManager {
 
     @Sessional
     @Override
-    public Repository findBy(String repositoryPath) {
-    	String userName = StringUtils.substringBefore(repositoryPath, "/");
+    public Repository findBy(String repositoryFQN) {
+    	String userName = StringUtils.substringBefore(repositoryFQN, "/");
     	User user = userManager.findByName(userName);
     	if (user != null)
-    		return findBy(user, StringUtils.substringAfter(repositoryPath, "/"));
+    		return findBy(user, StringUtils.substringAfter(repositoryFQN, "/"));
     	else
     		return null;
     }

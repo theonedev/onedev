@@ -66,7 +66,16 @@ public class RequestSummaryPanel extends Panel {
 		
 		add(new UserLink("user", Model.of(getPullRequest().getSubmitter()), AvatarMode.NAME_AND_AVATAR));
 		
-		add(new BranchLink("branch", new AbstractReadOnlyModel<Branch>() {
+		add(new BranchLink("target", new AbstractReadOnlyModel<Branch>() {
+
+			@Override
+			public Branch getObject() {
+				return getPullRequest().getTarget();
+			}
+			
+		}));
+
+		add(new BranchLink("source", new AbstractReadOnlyModel<Branch>() {
 
 			@Override
 			public Branch getObject() {

@@ -35,7 +35,7 @@ public enum PullRequestOperation {
 
 		@Override
 		public boolean canOperate(PullRequest request) {
-			if (!GitPlex.getInstance(AuthorizationManager.class).canModify(request))
+			if (!GitPlex.getInstance(AuthorizationManager.class).canModifyRequest(request))
 				return false;
 			else 
 				return request.isOpen();
