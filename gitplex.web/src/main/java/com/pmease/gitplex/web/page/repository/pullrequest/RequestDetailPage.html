@@ -12,6 +12,9 @@
 			</form>
 		</div>
 		<div wicket:id="requestSummary" class="summary well">
+			<div wicket:id="discardedNote">
+				This pull request has been discarded.
+			</div>
 			<div wicket:id="integratedNote" class="integrated-note">
 				<div wicket:id="fastForwarded">
 					Target branch was fast forwarded to this request.
@@ -73,10 +76,11 @@
 			</div>
 			<div wicket:id="operations" class="operations">
 				<div class="buttons">
-					<a wicket:id="approve" class="btn btn-sm btn-primary" href="javascript:void(0);">Approve</a>
-					<a wicket:id="disapprove" class="btn btn-sm btn-primary" href="javascript:void(0);">Disapprove</a>
+					<a wicket:id="approve" class="btn btn-sm btn-primary">Approve</a>
+					<a wicket:id="disapprove" class="btn btn-sm btn-primary">Disapprove</a>
 					<a wicket:id="integrate" class="btn btn-sm btn-success">Integrate</a>
 					<a wicket:id="discard" class="btn btn-sm btn-danger">Discard</a>
+					<a wicket:id="reopen" class="btn btn-sm btn-primary">Reopen</a>
 				</div>
 				<div wicket:id="confirm" class="confirm"></div>
 			</div>

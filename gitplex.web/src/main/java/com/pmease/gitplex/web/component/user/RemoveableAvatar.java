@@ -15,10 +15,13 @@ public abstract class RemoveableAvatar extends Panel {
 
 	private final IModel<User> userModel;
 	
-	public RemoveableAvatar(String id, IModel<User> userModel) {
+	private final String actionName;
+	
+	public RemoveableAvatar(String id, IModel<User> userModel, String actionName) {
 		super(id);
 		
 		this.userModel = userModel;
+		this.actionName = actionName;
 	}
 
 	@Override
@@ -41,8 +44,12 @@ public abstract class RemoveableAvatar extends Panel {
 			protected String load() {
 				// Force nowrap here when display tooltip as otherwise user name will be wrapped inside 
 				// an element with position set to relative
-				String escapedDisplayName = StringEscapeUtils.escapeHtml4(userModel.getObject().getDisplayName());
-				return "<span style='white-space: nowrap;'>" + escapedDisplayName + "</span>";
+				String tooltip;
+				if (isEnabled())
+					tooltip = actionName!=null?actionName:"" + " " + userModel.getObject().getDisplayName();
+				else
+					tooltip = userModel.getObject().getDisplayName();
+				return "<span style='white-space: nowrap;'>" + StringEscapeUtils.escapeHtml4(tooltip) + "</span>";
 			}
 			
 		}));

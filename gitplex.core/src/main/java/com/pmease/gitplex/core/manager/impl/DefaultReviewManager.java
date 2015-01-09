@@ -124,7 +124,7 @@ public class DefaultReviewManager implements ReviewManager {
 		dao.remove(review);
 		
 		PullRequestActivity activity = new PullRequestActivity();
-		activity.setAction(PullRequestActivity.Action.UNREVIEW);
+		activity.setAction(PullRequestActivity.Action.UNDO_REVIEW);
 		activity.setDate(new Date());
 		activity.setRequest(review.getUpdate().getRequest());
 		activity.setUser(GitPlex.getInstance(UserManager.class).getCurrent());

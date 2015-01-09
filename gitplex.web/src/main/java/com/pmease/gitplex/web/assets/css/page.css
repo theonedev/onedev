@@ -894,6 +894,7 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail .activities>table>tbody>tr.activity>td.avatar {border-right: 1px dashed #DDD;}
 .request-detail .activities>table>tbody>tr.activity.discussion>td.avatar {border-right: none;}
 .request-detail .activities>table>tbody>tr.discussion+.non-discussion>td {border-top: 1px solid #E5E5E5;}
+.request-detail .activities>table>tbody>tr.discussion+.non-update>td {padding-top: 8px;}
 .request-detail .activities>table>tbody>tr.discussion>.avatar img {width: 40px; height: 40px;}
 .request-detail .activities>table>tbody>tr.non-discussion>td {padding-left: 6px;}
 .request-detail .activities>table>tbody>tr.non-discussion>td.avatar img {display: none;}
@@ -951,9 +952,8 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail .activities .activity>.integrate>.pa {color: #35A612; margin-left: -20px;}
 .request-detail .activities .activity>.approve>.pa {color: #35A612;}
 .request-detail .activities .activity>.disapprove>.pa {color: #F93333;}
-.request-detail .activities .activity>.unreview>.pa {color: #999; margin-left: -14px;}
-.request-detail .activities .activity>.delete-source>.pa {color: #F93333; margin-left: -14px; font-size: 24px;}
-.request-detail .activities .activity>.restore-source>.pa {color: #35A612; margin-left: -14px; font-size: 24px;}
+.request-detail .activities .activity>.undo-review>.pa {color: #666; margin-left: -14px;}
+.request-detail .activities .activity>.reopen>.pa {color: #666; font-size: 30px; margin-left: -20px; margin-right: 7px;}
 
 .request-detail>.updates>.update {padding: 12px; margin: 20px 0; border: 1px solid #DDD; border-radius: 4px;}
 .request-detail>.updates>.update>.summary .actions .pa {font-size: 16px;}

@@ -16,7 +16,7 @@ import com.pmease.gitplex.core.model.User;
 
 public interface PullRequestManager extends Lifecycle, ConfigChangeListener {
     
-    @Nullable PullRequest findLatest(Branch target, Branch source);
+    @Nullable PullRequest findOpen(Branch target, Branch source);
     
     Collection<PullRequest> findOpenTo(Branch target, Repository source);
 
@@ -40,6 +40,8 @@ public interface PullRequestManager extends Lifecycle, ConfigChangeListener {
     
     void discard(PullRequest request, @Nullable User user, @Nullable String comment);
     
+    void reopen(PullRequest request, User user, @Nullable String comment);
+
     void onTargetBranchUpdate(PullRequest request);
     
     void onSourceBranchUpdate(PullRequest request);

@@ -77,7 +77,8 @@ import com.pmease.gitplex.web.page.repository.pullrequest.activity.DiscardPullRe
 import com.pmease.gitplex.web.page.repository.pullrequest.activity.IntegratePullRequest;
 import com.pmease.gitplex.web.page.repository.pullrequest.activity.OpenPullRequest;
 import com.pmease.gitplex.web.page.repository.pullrequest.activity.RenderableActivity;
-import com.pmease.gitplex.web.page.repository.pullrequest.activity.UnreviewPullRequest;
+import com.pmease.gitplex.web.page.repository.pullrequest.activity.ReopenPullRequest;
+import com.pmease.gitplex.web.page.repository.pullrequest.activity.UndoReviewPullRequest;
 import com.pmease.gitplex.web.page.repository.pullrequest.activity.UpdatePullRequest;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
@@ -206,8 +207,10 @@ public class RequestOverviewPage extends RequestDetailPage {
 				renderableActivities.add(new ApprovePullRequest(activity.getRequest(), activity.getUser(), activity.getDate()));
 			} else if (activity.getAction() == PullRequestActivity.Action.DISAPPROVE) {
 				renderableActivities.add(new DisapprovePullRequest(activity.getRequest(), activity.getUser(), activity.getDate()));
-			} else if (activity.getAction() == PullRequestActivity.Action.UNREVIEW) {
-				renderableActivities.add(new UnreviewPullRequest(activity.getRequest(), activity.getUser(), activity.getDate()));
+			} else if (activity.getAction() == PullRequestActivity.Action.UNDO_REVIEW) {
+				renderableActivities.add(new UndoReviewPullRequest(activity.getRequest(), activity.getUser(), activity.getDate()));
+			} else if (activity.getAction() == PullRequestActivity.Action.REOPEN) {
+				renderableActivities.add(new ReopenPullRequest(activity.getRequest(), activity.getUser(), activity.getDate()));
 			} else {
 				throw new IllegalStateException("Unexpected acvitity: " + activity.getAction());
 			}

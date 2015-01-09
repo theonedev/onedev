@@ -122,7 +122,7 @@ public class BranchComparePage extends RepositoryPage {
 
 			@Override
 			protected PullRequest load() {
-				return GitPlex.getInstance(PullRequestManager.class).findLatest(
+				return GitPlex.getInstance(PullRequestManager.class).findOpen(
 						targetModel.getObject(), sourceModel.getObject());
 			}
 			
@@ -218,7 +218,7 @@ public class BranchComparePage extends RepositoryPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				PullRequest request = requestModel.getObject();
-				setVisible((request == null || !request.isOpen()) && !commitsModel.getObject().isEmpty());
+				setVisible(request == null && !commitsModel.getObject().isEmpty());
 			}
 			
 		});
@@ -239,7 +239,7 @@ public class BranchComparePage extends RepositoryPage {
 				super.onConfigure();
 				
 				PullRequest request = requestModel.getObject();
-				setVisible(request != null && request.isOpen());
+				setVisible(request != null);
 			}
 
 			@Override

@@ -123,9 +123,9 @@ public class NewRequestPage extends RepositoryPage {
 		if (currentUser == null)
 			throw new RestartResponseAtInterceptPageException(LoginPage.class);
 		
-		pullRequest = GitPlex.getInstance(PullRequestManager.class).findLatest(target, source);
+		pullRequest = GitPlex.getInstance(PullRequestManager.class).findOpen(target, source);
 		
-		if (pullRequest == null || !pullRequest.isOpen()) {
+		if (pullRequest == null) {
 			pullRequest = new PullRequest();
 			pullRequest.setTarget(target);
 			pullRequest.setSource(source);

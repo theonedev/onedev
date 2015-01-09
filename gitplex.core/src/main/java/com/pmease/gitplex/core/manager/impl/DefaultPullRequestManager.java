@@ -25,8 +25,8 @@ import javax.inject.Singleton;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.jetty.util.ConcurrentHashSet;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,11 +119,11 @@ public class DefaultPullRequestManager implements PullRequestManager {
 
 	@Sessional
 	@Override
-	public PullRequest findLatest(Branch target, Branch source) {
+	public PullRequest findOpen(Branch target, Branch source) {
 		return dao.find(EntityCriteria.of(PullRequest.class)
 				.add(ofTarget(target))
 				.add(ofSource(source))
-				.addOrder(Order.desc("id")));
+				.add(ofOpen()));
 	}
 
 	@Transactional
@@ -141,6 +141,67 @@ public class DefaultPullRequestManager implements PullRequestManager {
 			update.deleteRefs();
 		
 		request.deleteRefs();
+	}
+
+	@Sessional
+	@Override
+	public Collection<PullRequest> findOpen(Branch sourceOrTarget) {
+		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
+		criteria.add(ofOpen());
+		criteria.add(Restrictions.or(ofSource(sourceOrTarget), ofTarget(sourceOrTarget)));
+		return dao.query(criteria);
+	}
+
+	@Transactional
+	@Override
+	public void restoreSource(PullRequest request) {
+		Preconditions.checkState(request.getSourceFQN() != null && request.getSource() == null && !request.isOpen());
+
+		String repositoryFQN = Branch.getRepositoryFQNByFQN(request.getSourceFQN());
+		Repository repository = GitPlex.getInstance(RepositoryManager.class).findBy(repositoryFQN);
+		if (repository == null)
+			throw new RuntimeException("Unable to find repository: " + repositoryFQN);
+		String branchName = Branch.getNameByFQN(request.getSourceFQN());
+		Branch branch = GitPlex.getInstance(BranchManager.class).findBy(repository, branchName);
+		if (branch == null) {
+			branch = new Branch();
+			branch.setRepository(repository);
+			branch.setName(branchName);
+			branch.setHeadCommitHash(request.getLatestUpdate().getHeadCommitHash());
+			branchManager.save(branch);
+			repository.git().createBranch(branch.getName(), branch.getHeadCommitHash());
+		}
+		
+		request.setSource(branch);
+		dao.persist(request);
+	}
+
+	@Transactional
+	@Override
+	public void reopen(PullRequest request, User user, String comment) {
+		Preconditions.checkState(!request.isOpen());
+		
+		request.setCloseStatus(null);
+		dao.persist(request);
+		
+		PullRequestActivity activity = new PullRequestActivity();
+		activity.setRequest(request);
+		activity.setDate(new DateTime().minusSeconds(1).toDate());
+		activity.setAction(PullRequestActivity.Action.REOPEN);
+		activity.setUser(user);
+		
+		dao.persist(activity);
+
+		if (comment != null) {
+			PullRequestComment requestComment = new PullRequestComment();
+			requestComment.setContent(comment);
+			requestComment.setDate(activity.getDate());
+			requestComment.setRequest(request);
+			requestComment.setUser(user);
+			dao.persist(requestComment);
+		}
+
+		onSourceBranchUpdate(request);
 	}
 
 	@Transactional
@@ -593,39 +654,6 @@ public class DefaultPullRequestManager implements PullRequestManager {
 			return new HashCodeBuilder(17, 37).append(requestId).toHashCode();
 		}
 		
-	}
-
-	@Sessional
-	@Override
-	public Collection<PullRequest> findOpen(Branch sourceOrTarget) {
-		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
-		criteria.add(ofOpen());
-		criteria.add(Restrictions.or(ofSource(sourceOrTarget), ofTarget(sourceOrTarget)));
-		return dao.query(criteria);
-	}
-
-	@Transactional
-	@Override
-	public void restoreSource(PullRequest request) {
-		Preconditions.checkState(request.getSourceFQN() != null && request.getSource() == null && !request.isOpen());
-
-		String repositoryFQN = Branch.getRepositoryFQNByFQN(request.getSourceFQN());
-		Repository repository = GitPlex.getInstance(RepositoryManager.class).findBy(repositoryFQN);
-		if (repository == null)
-			throw new RuntimeException("Unable to find repository: " + repositoryFQN);
-		String branchName = Branch.getNameByFQN(request.getSourceFQN());
-		Branch branch = GitPlex.getInstance(BranchManager.class).findBy(repository, branchName);
-		if (branch == null) {
-			branch = new Branch();
-			branch.setRepository(repository);
-			branch.setName(branchName);
-			branch.setHeadCommitHash(request.getLatestUpdate().getHeadCommitHash());
-			branchManager.save(branch);
-			repository.git().createBranch(branch.getName(), branch.getHeadCommitHash());
-		}
-		
-		request.setSource(branch);
-		dao.persist(request);
 	}
 
 }

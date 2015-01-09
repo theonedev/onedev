@@ -11,7 +11,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-public class UnreviewPullRequest implements RenderableActivity {
+public class UndoReviewPullRequest implements RenderableActivity {
 
 	private final Long requestId;
 	
@@ -19,7 +19,7 @@ public class UnreviewPullRequest implements RenderableActivity {
 	
 	private final Date date;
 	
-	public UnreviewPullRequest(PullRequest request, User user, Date date) {
+	public UndoReviewPullRequest(PullRequest request, User user, Date date) {
 		this.requestId = request.getId();
 		this.userId = user.getId();
 		this.date = date;
@@ -27,7 +27,7 @@ public class UnreviewPullRequest implements RenderableActivity {
 	
 	@Override
 	public Panel render(String panelId) {
-		return new UnreviewActivityPanel(panelId, new LoadableDetachableModel<PullRequest>() {
+		return new UndoReviewActivityPanel(panelId, new LoadableDetachableModel<PullRequest>() {
 
 			@Override
 			protected PullRequest load() {

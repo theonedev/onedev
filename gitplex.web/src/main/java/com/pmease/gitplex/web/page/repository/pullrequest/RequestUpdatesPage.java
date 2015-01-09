@@ -118,7 +118,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 					@Override
 					protected void populateItem(final ListItem<Review> item) {
 						final Review review = item.getModelObject();
-						item.add(new RemoveableAvatar("avatar", new UserModel(review.getReviewer())) {
+						item.add(new RemoveableAvatar("avatar", new UserModel(review.getReviewer()), "Remove review by") {
 							
 							@Override
 							protected void onAvatarRemove(AjaxRequestTarget target) {

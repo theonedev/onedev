@@ -27,7 +27,7 @@ public class ReviewerAvatar extends RemoveableAvatar {
 	private final IModel<PullRequest> requestModel;
 	
 	public ReviewerAvatar(String id, ReviewInvitation invitation) {
-		super(id, new UserModel(invitation.getReviewer()));
+		super(id, new UserModel(invitation.getReviewer()), "Remove reviewer");
 		
 		this.invitation = invitation;
 		requestModel = new EntityModel<PullRequest>(invitation.getRequest());		

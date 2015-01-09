@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import org.apache.shiro.SecurityUtils;
 
+import com.pmease.commons.git.Git;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
@@ -75,6 +76,33 @@ public enum PullRequestOperation {
 			User user = GitPlex.getInstance(UserManager.class).getCurrent();
 			GitPlex.getInstance(ReviewManager.class).review(
 					request, user, Review.Result.DISAPPROVE, comment);
+		}
+		
+	},
+	REOPEN {
+
+		@Override
+		public boolean canOperate(PullRequest request) {
+			AuthorizationManager authorizationManager = GitPlex.getInstance(AuthorizationManager.class);
+			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
+			if (request.isOpen() 
+					|| !authorizationManager.canModifyRequest(request)
+					|| request.getSource() == null 
+					|| pullRequestManager.findOpen(request.getTarget(), request.getSource()) != null) {
+				return false;
+			}
+			
+			// now check if source branch is integrated into target branch
+			Git git = request.getTarget().getRepository().git();
+			String sourceHead = request.getSource().getHeadCommitHash();
+			return git.parseRevision(sourceHead, false) == null 
+					|| !git.isAncestor(sourceHead, request.getTarget().getHeadCommitHash());
+		}
+
+		@Override
+		public void operate(PullRequest request, String comment) {
+			User user = GitPlex.getInstance(UserManager.class).getCurrent();
+			GitPlex.getInstance(PullRequestManager.class).reopen(request, user, comment);
 		}
 		
 	};

@@ -5,10 +5,7 @@ import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERG
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_WITH_SQUASH;
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_SOURCE_ONTO_TARGET;
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_TARGET_ONTO_SOURCE;
-import static com.pmease.gitplex.core.model.PullRequestOperation.APPROVE;
-import static com.pmease.gitplex.core.model.PullRequestOperation.DISAPPROVE;
-import static com.pmease.gitplex.core.model.PullRequestOperation.DISCARD;
-import static com.pmease.gitplex.core.model.PullRequestOperation.INTEGRATE;
+import static com.pmease.gitplex.core.model.PullRequestOperation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -282,7 +279,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getPullRequest().getStatus() != Status.DISCARDED);
+//				setVisible(getPullRequest().getStatus() != Status.DISCARDED);
 			}
 			
 		};
@@ -290,6 +287,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		add(summaryContainer);
 		
 		summaryContainer.add(newIntegratedNoteContainer());
+		summaryContainer.add(newDiscardedNoteContainer());
 		summaryContainer.add(newStatusReasonsContainer());
 		summaryContainer.add(newIntegrationPreviewContainer());
 		summaryContainer.add(newOperationsContainer());
@@ -571,6 +569,21 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			}
 
 		});
+		operationsContainer.add(new AjaxLink<Void>("reopen") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				operationsContainer.replace(newOperationConfirm(confirmId, REOPEN, operationsContainer));
+				target.add(operationsContainer);
+			}
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(REOPEN.canOperate(getPullRequest()) && !operationsContainer.get(confirmId).isVisible());
+			}
+
+		});
 		operationsContainer.add(new WebMarkupContainer(confirmId).setVisible(false));
 		
 		return operationsContainer;
@@ -675,14 +688,12 @@ public abstract class RequestDetailPage extends RepositoryPage {
 
 			@Override
 			public String getObject() {
-				if (operation == APPROVE)
-					return "btn-primary";
-				else if (operation == DISAPPROVE)
-					return "btn-primary";
-				else if (operation == INTEGRATE)
+				if (operation == INTEGRATE)
 					return "btn-success";
-				else
+				else if (operation == DISCARD)
 					return "btn-danger";
+				else 
+					return "btn-primary";
 			}
 			
 		})));
@@ -697,6 +708,19 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		});		
 		
 		return fragment;
+	}
+	
+	private WebMarkupContainer newDiscardedNoteContainer() {
+		WebMarkupContainer discardedNoteContainer = new WebMarkupContainer("discardedNote") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getPullRequest().getStatus() == Status.DISCARDED);
+			}
+			
+		};
+		return discardedNoteContainer;
 	}
 	
 	private WebMarkupContainer newIntegratedNoteContainer() {
