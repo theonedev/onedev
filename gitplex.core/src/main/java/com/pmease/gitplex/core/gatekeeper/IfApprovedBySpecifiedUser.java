@@ -2,6 +2,7 @@ package com.pmease.gitplex.core.gatekeeper;
 
 import javax.validation.constraints.NotNull;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -15,9 +16,9 @@ import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=200, icon="pa-user-o", description=
+@Editable(order=200, icon="pa-user-o", category=GateKeeper.CATEGROY_CHECK_REVIEW, description=
 		"This gate keeper will be passed if the commit is approved by specified user.")
-public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
+public class IfApprovedBySpecifiedUser extends AbstractGateKeeper {
 
     private Long userId;
 
@@ -40,11 +41,11 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
         if (result == null) {
             request.pickReviewers(Sets.newHashSet(user), 1);
 
-            return pending("To be approved by " + user.getDisplayName() + ".");
+            return pending(Lists.newArrayList("To be approved by " + user.getDisplayName() + "."));
         } else if (result == Review.Result.APPROVE) {
-            return passed("Approved by " + user.getDisplayName() + ".");
+            return passed(Lists.newArrayList("Approved by " + user.getDisplayName() + "."));
         } else {
-            return failed("Rejected by " + user.getDisplayName() + ".");
+            return failed(Lists.newArrayList("Rejected by " + user.getDisplayName() + "."));
         }
     }
 
@@ -59,9 +60,9 @@ public class IfApprovedBySpecifiedUser extends ApprovalGateKeeper {
     private CheckResult check(User user) {
 		User approver = GitPlex.getInstance(Dao.class).load(User.class, userId);
         if (approver.getId().equals(user.getId())) {
-        	return passed("Approved by " + approver.getName() + ".");
+        	return passed(Lists.newArrayList("Approved by " + approver.getName() + "."));
         } else {
-        	return pending("Not approved by " + approver.getName() + "."); 
+        	return pending(Lists.newArrayList("Not approved by " + approver.getName() + ".")); 
         }
     }
     

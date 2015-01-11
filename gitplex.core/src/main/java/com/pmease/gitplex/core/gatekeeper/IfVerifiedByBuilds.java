@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import javax.validation.constraints.Min;
 
+import com.google.common.collect.Lists;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
@@ -15,7 +16,7 @@ import com.pmease.gitplex.core.model.PullRequestVerification;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
-@Editable(icon="pa-checkbox-checked", order=1000, 
+@Editable(icon="pa-checkbox-checked", order=1000, category=GateKeeper.CATEGORY_COMMONLY_USED,
 		description="This gate keeper will be satisfied if commit is verified successfully "
 				+ "by specified number of builds. To make this working, your CI system has to "
 				+ "be configured to build against GitPlex pull requests.")
@@ -64,9 +65,9 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 	protected CheckResult doCheckRequest(PullRequest request) {
 		if (request.isNew()) {
 			if (blockMode)
-				return pendingAndBlock("To be verified by build");
+				return blocking(Lists.newArrayList("To be verified by build"));
 			else
-				return pending("To be verified by build");
+				return pending(Lists.newArrayList("To be verified by build"));
 		}
 		
 		String commit;
@@ -74,13 +75,13 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 			IntegrationPreview preview = request.getIntegrationPreview();
 			if (preview == null) {
 				if (blockMode)
-					return pendingAndBlock("To be verified by build");
+					return blocking(Lists.newArrayList("To be verified by build"));
 				else
-					return pending("To be verified by build");
+					return pending(Lists.newArrayList("To be verified by build"));
 			}
 			commit = preview.getIntegrated();
 			if (commit == null) 
-				return failed("Can not build against integration result due to conflicts.");
+				return failed(Lists.newArrayList("Can not build against integration result due to conflicts."));
 		} else {
 			commit = request.getLatestUpdate().getHeadCommitHash();
 		}
@@ -91,7 +92,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 		Collection<PullRequestVerification> verifications = verificationManager.findBy(request, commit);
 		for (PullRequestVerification each: verifications) {
 			if (each.getStatus() == PullRequestVerification.Status.NOT_PASSED)
-				return failed("At least one build is not passed for the commit.");
+				return failed(Lists.newArrayList("At least one build is not passed for the commit."));
 			else if (each.getStatus() == PullRequestVerification.Status.PASSED)
 				passedCount++;
 		}
@@ -100,34 +101,34 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 		if (lacks > 0) {
 			if (blockMode) {
 				if (leastPassCount > 1)
-					return pendingAndBlock("To be verified by " + lacks + " more build(s)");
+					return blocking(Lists.newArrayList("To be verified by " + lacks + " more build(s)"));
 				else
-					return pendingAndBlock("To be verified by build");
+					return blocking(Lists.newArrayList("To be verified by build"));
 			} else {
 				if (leastPassCount > 1)
-					return pending("To be verified by " + lacks + " more build(s)");
+					return pending(Lists.newArrayList("To be verified by " + lacks + " more build(s)"));
 				else
-					return pending("To be verified by build");
+					return pending(Lists.newArrayList("To be verified by build"));
 			}
 		} else {
-			return passed("Builds passed");
+			return passed(Lists.newArrayList("Builds passed"));
 		}
 	}
 
 	@Override
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
 		if (blockMode)
-			return pendingAndBlock("Not verified by build.");
+			return blocking(Lists.newArrayList("Not verified by build."));
 		else
-			return pending("Not verified by build.");
+			return pending(Lists.newArrayList("Not verified by build."));
 	}
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
 		if (blockMode) {
-			return pendingAndBlock("Has to be verified by builds.");
+			return blocking(Lists.newArrayList("Has to be verified by builds."));
 		} else {
-			return pendingAndBlock("Has to be verified by builds.");
+			return blocking(Lists.newArrayList("Has to be verified by builds."));
 		}
 	}
 

@@ -6,6 +6,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.google.common.collect.Lists;
 import com.pmease.gitplex.core.GitPlex;
 
 import org.apache.commons.lang3.StringUtils;
@@ -21,9 +22,9 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=100, icon="pa-branch", description=
+@Editable(order=100, icon="pa-branch", category=GateKeeper.CATEGROY_CHECK_BRANCH, description=
 		"This gate keeper will be passed if the commit is submitted to specified branches.")
-public class IfSubmitToSpecifiedBranches extends BranchGateKeeper {
+public class IfSubmitToSpecifiedBranches extends AbstractGateKeeper {
 
 	private List<Long> branchIds = new ArrayList<>();
 	
@@ -41,7 +42,7 @@ public class IfSubmitToSpecifiedBranches extends BranchGateKeeper {
 
 	@Override
 	public CheckResult doCheckRequest(PullRequest request) {
-		return checkBranch(request.getTarget());
+		return checkBranch(request.getTarget().getName());
 	}
 
 	@Override
@@ -53,38 +54,42 @@ public class IfSubmitToSpecifiedBranches extends BranchGateKeeper {
 			return this;
 	}
 
-	private CheckResult checkBranch(Branch branch) {
+	private CheckResult checkBranch(String branchName) {
 		List<String> branchNames = new ArrayList<>();
 		Dao dao = GitPlex.getInstance(Dao.class);
 		for (Long branchId: branchIds)
 			branchNames.add(dao.load(Branch.class, branchId).getName());
 		
 		if (branchIds.size() > 1) {
-			if (branchIds.contains(branch.getId()))
-				return passed("Target branch is one of '" + StringUtils.join(branchNames, ", ") + "'.");
+			if (branchNames.contains(branchName))
+				return passed(Lists.newArrayList("Target branch is one of '" + StringUtils.join(branchNames, ", ") + "'."));
 			else
-				return failed("Target branch is not any one of '" + StringUtils.join(branchNames, ", ") + "'.");
+				return failed(Lists.newArrayList("Target branch is not any one of '" + StringUtils.join(branchNames, ", ") + "'."));
 		} else {
-			if (branchIds.contains(branch.getId()))
-				return passed("Target branch is '" + branchNames.get(0) + "'.");
+			if (branchNames.contains(branchName))
+				return passed(Lists.newArrayList("Target branch is '" + branchNames.get(0) + "'."));
 			else
-				return failed("Target branch is not '" + branchNames.get(0) + "'.");
+				return failed(Lists.newArrayList("Target branch is not '" + branchNames.get(0) + "'."));
 		}
 	}
 	
 	@Override
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		return checkBranch(branch);
+		return checkBranch(branch.getName());
 	}
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		return checkBranch(branch);
+		return checkBranch(branch.getName());
 	}
 
 	@Override
 	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
-		return ignored();
+		String branchName = Branch.parseName(refName);
+		if (branchName != null)
+			return checkBranch(branchName);
+		else 
+			return ignored();
 	}
 
 }

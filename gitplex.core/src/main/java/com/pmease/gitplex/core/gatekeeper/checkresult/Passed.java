@@ -9,10 +9,6 @@ public class Passed extends CheckResult {
         super(reasons);
     }
     
-    public Passed(String reason) {
-        super(reason);
-    }
-
     @Override
     public String toString() {
         return "Passed";

@@ -10,7 +10,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Team;
 
 @SuppressWarnings("serial")
-public abstract class TeamAwareGateKeeper extends ApprovalGateKeeper {
+public abstract class TeamAwareGateKeeper extends AbstractGateKeeper {
 	
 	private Long teamId;
 	

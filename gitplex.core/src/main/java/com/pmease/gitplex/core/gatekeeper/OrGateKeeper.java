@@ -9,10 +9,11 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
-import com.pmease.gitplex.core.gatekeeper.checkresult.PendingAndBlock;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 
 @SuppressWarnings("serial")
-@Editable(name="If Any Of Contained Gate Keepers Is Passed", order=200, icon="pa-servers",  
+@Editable(name="Or Composition", order=200, icon="pa-servers",  
+		category=GateKeeper.CATEGROY_COMPOSITION,
 		description="This gate keeper will be passed if any of the contained gate keepers is passed.")
 @Horizontal
 public class OrGateKeeper extends AndOrGateKeeper {
@@ -28,7 +29,7 @@ public class OrGateKeeper extends AndOrGateKeeper {
 				rejectReasons.addAll(result.getReasons());
 			} else if (result instanceof Passed) {
 				return result;
-			} else if (result instanceof PendingAndBlock) {
+			} else if (result instanceof Blocking) {
 				result.getReasons().addAll(pendingReasons);
 				return result;
 			} else if (result instanceof Pending) {

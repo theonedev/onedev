@@ -1,5 +1,6 @@
 package com.pmease.gitplex.core.gatekeeper;
 
+import com.google.common.collect.Lists;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.model.Branch;
@@ -10,7 +11,7 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.model.Review;
 
 @SuppressWarnings("serial")
-@Editable(order=600, icon="pa-group-o", description=
+@Editable(order=600, icon="pa-group-o", category=GateKeeper.CATEGROY_CHECK_REVIEW, description=
 		"This gate keeper will be passed if the commit is not disapproved by specified team.")
 public class IfNotDisapprovedBySpecifiedTeam extends TeamAwareGateKeeper {
 
@@ -19,26 +20,26 @@ public class IfNotDisapprovedBySpecifiedTeam extends TeamAwareGateKeeper {
 		for (Membership membership: getTeam().getMemberships()) {
 			Review.Result result = membership.getUser().checkReviewSince(request.getReferentialUpdate());
 			if (result == Review.Result.DISAPPROVE) {
-				return failed("Disapproved by user '" + membership.getUser().getName() + "'.");
+				return failed(Lists.newArrayList("Disapproved by user '" + membership.getUser().getName() + "'."));
 			}
 		}
 		
-		return passed("Not disapproved by anyone from team '" + getTeam().getName() + ".");
+		return passed(Lists.newArrayList("Not disapproved by anyone from team '" + getTeam().getName() + "."));
 	}
 
 	@Override
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		return passed("Not disapproved by anyone from team '" + getTeam().getName() + "'.");
+		return passed(Lists.newArrayList("Not disapproved by anyone from team '" + getTeam().getName() + "'."));
 	}
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		return passed("Not disapproved by anyone from team '" + getTeam().getName() + "'.");
+		return passed(Lists.newArrayList("Not disapproved by anyone from team '" + getTeam().getName() + "'."));
 	}
 
 	@Override
 	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
-		return passed("Not disapproved by anyone from team '" + getTeam().getName() + "'.");
+		return passed(Lists.newArrayList("Not disapproved by anyone from team '" + getTeam().getName() + "'."));
 	}
 
 }

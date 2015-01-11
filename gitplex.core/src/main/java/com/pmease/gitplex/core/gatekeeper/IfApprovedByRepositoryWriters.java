@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import javax.validation.constraints.Min;
 
+import com.google.common.collect.Lists;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
@@ -16,10 +17,10 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.operation.GeneralOperation;
 
 @SuppressWarnings("serial")
-@Editable(order=50, icon="pa-group-o", description=
+@Editable(order=50, icon="pa-group-o", category=GateKeeper.CATEGROY_CHECK_REVIEW, description=
 		"This gate keeper will be passed if the commit is approved by specified number of users with "
 		+ "writing permission.")
-public class IfApprovedByRepositoryWriters extends ApprovalGateKeeper {
+public class IfApprovedByRepositoryWriters extends AbstractGateKeeper {
 
     private int leastApprovals = 1;
 
@@ -51,16 +52,16 @@ public class IfApprovedByRepositoryWriters extends ApprovalGateKeeper {
         }
 
         if (approvals >= getLeastApprovals()) {
-            return passed("Get at least " + getLeastApprovals() + " approvals from authorized users.");
+            return passed(Lists.newArrayList("Get at least " + getLeastApprovals() + " approvals from authorized users."));
         } else if (getLeastApprovals() - approvals > pendings) {
-            return failed("Can not get at least " + getLeastApprovals()
-                    + " approvals from authorized users.");
+            return failed(Lists.newArrayList("Can not get at least " + getLeastApprovals()
+                    + " approvals from authorized users."));
         } else {
             int lackApprovals = getLeastApprovals() - approvals;
 
             request.pickReviewers(authorizedUsers, lackApprovals);
 
-            return pending("To be approved by " + lackApprovals + " authorized user(s).");
+            return pending(Lists.newArrayList("To be approved by " + lackApprovals + " authorized user(s)."));
         }
 	}
 	
@@ -79,12 +80,12 @@ public class IfApprovedByRepositoryWriters extends ApprovalGateKeeper {
         }
         
         if (approvals >= leastApprovals) {
-            return passed("Get at least " + leastApprovals + " approvals from authorized users.");
+            return passed(Lists.newArrayList("Get at least " + leastApprovals + " approvals from authorized users."));
         } else if (leastApprovals - approvals > pendings) {
-            return failed("Can not get at least " + leastApprovals + " approvals from authorized users.");
+            return failed(Lists.newArrayList("Can not get at least " + leastApprovals + " approvals from authorized users."));
         } else {
             int lackApprovals = getLeastApprovals() - approvals;
-            return pending("Lack " + lackApprovals + " approvals from authorized users.");
+            return pending(Lists.newArrayList("Lack " + lackApprovals + " approvals from authorized users."));
         }
 	}
 	

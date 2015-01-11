@@ -21,10 +21,11 @@ import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=100, icon="pa-lock", description="By default, users with write permission of "
-		+ "the repository can push code to all branches. Use this gate keeper to restrict write "
-		+ "access of specified branches to specified teams.")
-public class BranchProtection extends CommonGateKeeper {
+@Editable(order=100, icon="pa-lock", category=GateKeeper.CATEGORY_COMMONLY_USED, 
+		description="By default, users with write permission of the repository can push "
+				+ "code to all branches. Use this gate keeper to restrict write access of "
+				+ "specified branches to specified teams.")
+public class BranchProtection extends AbstractGateKeeper {
 	
 	private TargetBranchSelection branchSelection = new SpecifyTargetBranchesByIds();
 	

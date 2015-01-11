@@ -9,12 +9,12 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
-import com.pmease.gitplex.core.gatekeeper.checkresult.PendingAndBlock;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 
 @SuppressWarnings("serial")
-@Editable(name="Check Second Gate Keeper If First Gate Keeper Is Passed", order=300, icon="pa-servers",  
-		description="If first gate keeper is passed, go ahead to check second gate keeper; otherwise, consider "
-				+ "the whole gate keeper as passed.")
+@Editable(name="If...Then... Composition", order=300, icon="pa-servers",  
+		category=GateKeeper.CATEGROY_COMPOSITION, 
+		description="If first gate keeper is passed, then go ahead to check second gate keeper;")
 @Horizontal
 public class IfThenGateKeeper extends CompositeGateKeeper {
 
@@ -49,7 +49,7 @@ public class IfThenGateKeeper extends CompositeGateKeeper {
 			return checker.check(getThenGate());
 		} else if (ifResult instanceof Failed) {
 			return passed(ifResult.getReasons());
-		} else if (ifResult instanceof PendingAndBlock) {
+		} else if (ifResult instanceof Blocking) {
 			return ifResult;
 		} else if (ifResult instanceof Pending) {
 			CheckResult thenResult = checker.check(getThenGate());

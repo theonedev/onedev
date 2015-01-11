@@ -10,10 +10,6 @@ public class Failed extends CheckResult {
 		super(reasons);
 	}
 
-	public Failed(String reason) {
-		super(reason);
-	}
-
     @Override
     public String toString() {
         return "Failed";

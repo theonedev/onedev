@@ -1,5 +1,6 @@
 package com.pmease.gitplex.core.gatekeeper;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
@@ -10,9 +11,9 @@ import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=300, icon="pa-user-o", description=
+@Editable(order=300, icon="pa-user-o", category=GateKeeper.CATEGROY_CHECK_REVIEW, description=
 		"This gate keeper will be passed if the commit is approved by owner of the repository.")
-public class IfApprovedByRepositoryOwner extends ApprovalGateKeeper {
+public class IfApprovedByRepositoryOwner extends AbstractGateKeeper {
 
     @Override
     public CheckResult doCheckRequest(PullRequest request) {
@@ -22,19 +23,19 @@ public class IfApprovedByRepositoryOwner extends ApprovalGateKeeper {
 
         if (result == null) {
             request.pickReviewers(Sets.newHashSet(repoOwner), 1);
-            return pending("To be approved by " + repoOwner.getName() + ".");
+            return pending(Lists.newArrayList("To be approved by " + repoOwner.getName() + "."));
         } else if (result == Review.Result.APPROVE) {
-            return passed("Approved by " + repoOwner.getName() + ".");
+            return passed(Lists.newArrayList("Approved by " + repoOwner.getName() + "."));
         } else {
-            return failed("Rejected by " + repoOwner.getName() + ".");
+            return failed(Lists.newArrayList("Rejected by " + repoOwner.getName() + "."));
         }
     }
 
     private CheckResult check(User user, Repository repository) {
 		if (user.equals(repository.getOwner()))
-			return passed("Approved by repository owner.");
+			return passed(Lists.newArrayList("Approved by repository owner."));
 		else
-			return pending("Not approved by repository owner.");
+			return pending(Lists.newArrayList("Not approved by repository owner."));
     }
     
 	@Override
@@ -50,9 +51,9 @@ public class IfApprovedByRepositoryOwner extends ApprovalGateKeeper {
 	@Override
 	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
 		if (user.equals(repository.getOwner()))
-			return passed("Approved by repository owner.");
+			return passed(Lists.newArrayList("Approved by repository owner."));
 		else
-			return failed("Not approved by repository owner.");
+			return failed(Lists.newArrayList("Not approved by repository owner."));
 	}
 
 }

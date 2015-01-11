@@ -494,7 +494,7 @@ public class RepoBranchesPage extends RepositoryPage {
 							User currentUser = getCurrentUser();
 							if (currentUser != null) {
 								GateKeeper gateKeeper = getRepository().getGateKeeper();
-								CheckResult checkResult = gateKeeper.checkBranch(currentUser, branch);
+								CheckResult checkResult = gateKeeper.checkFile(currentUser, branch, null);
 								if (checkResult instanceof Passed) {
 									setVisible(true);
 									PullRequest aheadOpen = aheadOpenRequestsModel.getObject().get(branch.getName());

@@ -6,12 +6,12 @@ import javax.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Ignored;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
-import com.pmease.gitplex.core.gatekeeper.checkresult.PendingAndBlock;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
@@ -43,13 +43,6 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	public CheckResult checkFile(User user, Branch branch, String file) {
 		if (isEnabled())
 			return doCheckFile(user, branch, file);
-		else
-			return ignored();
-	}
-	
-	public CheckResult checkBranch(User user, Branch branch) {
-		if (isEnabled())
-			return doCheckFile(user, branch, null);
 		else
 			return ignored();
 	}
@@ -89,11 +82,11 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	 * @param branch
 	 * 			branch to be checked
 	 * @param file
-	 * 			file to be checked, pass <tt>null</tt> to check for any file
+	 * 			file to be checked
 	 * @return
 	 * 			result of the check
 	 */
-	protected abstract CheckResult doCheckFile(User user, Branch branch, @Nullable String file);
+	protected abstract CheckResult doCheckFile(User user, Branch branch, String file);
 
 	/**
 	 * Check if specified user can push specified commit to specified branch, without considering enable flag.
@@ -134,22 +127,6 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 		return this;
 	}
 
-	protected CheckResult passed(String reason) {
-		return new Passed(reason);
-	}
-
-	protected CheckResult failed(String reason) {
-		return new Failed(reason);
-	}
-
-	protected CheckResult pending(String reason) {
-		return new Pending(reason);
-	}
-
-	protected CheckResult pendingAndBlock(String reason) {
-		return new PendingAndBlock(reason);
-	}
-
 	protected CheckResult ignored() {
 		return new Ignored();
 	}
@@ -166,8 +143,8 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 		return new Pending(reasons);
 	}
 
-	protected CheckResult pendingAndBlock(List<String> reasons) {
-		return new PendingAndBlock(reasons);
+	protected CheckResult blocking(List<String> reasons) {
+		return new Blocking(reasons);
 	}
 
 }

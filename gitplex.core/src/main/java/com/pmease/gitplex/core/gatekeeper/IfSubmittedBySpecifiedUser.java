@@ -2,6 +2,7 @@ package com.pmease.gitplex.core.gatekeeper;
 
 import javax.validation.constraints.NotNull;
 
+import com.google.common.collect.Lists;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
@@ -13,9 +14,9 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=200, icon="pa-user-o", description=
+@Editable(order=200, icon="pa-user-o", category=GateKeeper.CATEGROY_CHECK_SUBMITTER, description=
 		"This gate keeper will be passed if the commit is submitted by specified user.")
-public class IfSubmittedBySpecifiedUser extends ApprovalGateKeeper {
+public class IfSubmittedBySpecifiedUser extends AbstractGateKeeper {
 
     private Long userId;
 
@@ -46,9 +47,9 @@ public class IfSubmittedBySpecifiedUser extends ApprovalGateKeeper {
     private CheckResult check(User user) {
 		User expectedUser = GitPlex.getInstance(Dao.class).load(User.class, userId);
         if (expectedUser.getId().equals(user.getId())) 
-        	return passed("Submitted by " + expectedUser.getDisplayName() + ".");
+        	return passed(Lists.newArrayList("Submitted by " + expectedUser.getDisplayName() + "."));
         else 
-        	return failed("Not submitted by " + expectedUser.getDisplayName() + "."); 
+        	return failed(Lists.newArrayList("Not submitted by " + expectedUser.getDisplayName() + ".")); 
     }
     
 	@Override

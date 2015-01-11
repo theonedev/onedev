@@ -1,5 +1,7 @@
 package com.pmease.gitplex.core.gatekeeper.checkresult;
 
+import java.util.ArrayList;
+
 
 /**
  * Represents an ignored result, for instance if some check is not applicable, or if 
@@ -12,7 +14,7 @@ package com.pmease.gitplex.core.gatekeeper.checkresult;
 public class Ignored extends CheckResult {
     
     public Ignored() {
-        super("Ignored");
+        super(new ArrayList<String>());
     }
 
     @Override

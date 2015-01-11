@@ -42,7 +42,7 @@ import com.pmease.gitplex.core.comment.ChangeComments;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
-import com.pmease.gitplex.core.gatekeeper.checkresult.PendingAndBlock;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.permission.ObjectPermission;
@@ -356,7 +356,7 @@ public class PullRequest extends AbstractEntity {
 			return Status.INTEGRATED;
 		else if (closeStatus == CloseStatus.DISCARDED) 
 			return Status.DISCARDED;
-		else if (getCheckResult() instanceof Pending || getCheckResult() instanceof PendingAndBlock) 
+		else if (getCheckResult() instanceof Pending || getCheckResult() instanceof Blocking) 
 			return Status.PENDING_APPROVAL;
 		else if (getCheckResult() instanceof Failed) 
 			return Status.PENDING_UPDATE;

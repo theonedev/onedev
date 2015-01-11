@@ -3,8 +3,6 @@ package com.pmease.gitplex.core.gatekeeper.checkresult;
 import java.io.Serializable;
 import java.util.List;
 
-import com.google.common.collect.Lists;
-
 @SuppressWarnings("serial")
 public abstract class CheckResult implements Serializable {
 	
@@ -12,10 +10,6 @@ public abstract class CheckResult implements Serializable {
 
     public CheckResult(List<String> reasons) {
         this.reasons = reasons;
-    }
-
-    public CheckResult(String reason) {
-        this.reasons = Lists.newArrayList(reason);
     }
 
     public List<String> getReasons() {
@@ -34,8 +28,8 @@ public abstract class CheckResult implements Serializable {
     	return this instanceof Pending;
     }
 
-    public boolean isPendingAndBlock() {
-    	return this instanceof PendingAndBlock;
+    public boolean isBlocking() {
+    	return this instanceof Blocking;
     }
     
     public boolean isIgnored() {

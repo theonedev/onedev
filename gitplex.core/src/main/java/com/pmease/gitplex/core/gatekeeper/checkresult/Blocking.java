@@ -7,14 +7,10 @@ import java.util.List;
  * of this gate keeper has been determined.
  */
 @SuppressWarnings("serial")
-public class PendingAndBlock extends CheckResult {
+public class Blocking extends CheckResult {
 	
-	public PendingAndBlock(List<String> reasons) {
+	public Blocking(List<String> reasons) {
 		super(reasons);
-	}
-
-	public PendingAndBlock(String reason) {
-		super(reason);
 	}
 
 	@Override

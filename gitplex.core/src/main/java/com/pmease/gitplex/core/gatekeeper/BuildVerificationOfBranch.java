@@ -13,10 +13,11 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
-@Editable(icon="pa-lock", order=300, description="This gate keeper can be used to configure certain branches "
-		+ "to only accept commits passing specified build criteria.")
+@Editable(icon="pa-lock", order=300, category=GateKeeper.CATEGORY_COMMONLY_USED, 
+		description="This gate keeper can be used to configure certain branches to "
+				+ "only accept commits passing specified build criteria.")
 @SuppressWarnings("serial")
-public class BuildVerificationOfBranch extends CommonGateKeeper {
+public class BuildVerificationOfBranch extends AbstractGateKeeper {
 
 	private TargetBranchSelection branchSelection = new SpecifyTargetBranchesByIds();
 	

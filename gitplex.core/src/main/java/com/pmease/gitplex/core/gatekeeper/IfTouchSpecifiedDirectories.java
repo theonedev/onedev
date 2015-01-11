@@ -6,6 +6,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.google.common.collect.Lists;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.gitplex.core.editable.DirectoryChoice;
@@ -17,9 +18,9 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=90, icon="pa-folder-o", description=
+@Editable(order=90, icon="pa-folder-o", category=GateKeeper.CATEGROY_CHECK_FILES, description=
 		"This gate keeper will be passed if any commit files are under specified directories.")
-public class IfTouchSpecifiedDirectories extends FileGateKeeper {
+public class IfTouchSpecifiedDirectories extends AbstractGateKeeper {
 
 	private List<String> directories = new ArrayList<>();
 	
@@ -42,22 +43,24 @@ public class IfTouchSpecifiedDirectories extends FileGateKeeper {
 				for (String each: directories) {
 					if (WildcardUtils.matchPath(each + "/**", file)) {
 						request.setReferentialUpdate(update);
-						return passed("Touched directory '" + each + "'.");
+						return passed(Lists.newArrayList("Touched directory '" + each + "'."));
 					}
 				}
 			}
 		}
 
-		return failed("Not touched directories '" + getDirectories() + "'.");
+		return failed(Lists.newArrayList("Not touched directories '" + getDirectories() + "'."));
 	}
 
 	@Override
 	protected CheckResult doCheckFile(User user, Branch branch, String file) {
+		if (file == null)
+			return passed(new ArrayList<String>());
 		for (String each: directories) {
-			if (file == null || WildcardUtils.matchPath(each + "/**", file)) 
-				return passed("Touched directory '" + each + "'.");
+			if (WildcardUtils.matchPath(each + "/**", file)) 
+				return passed(Lists.newArrayList("Touched directory '" + each + "'."));
 		}
-		return failed("Not touched directories '" + getDirectories() + "'.");
+		return failed(Lists.newArrayList("Not touched directories '" + getDirectories() + "'."));
 	}
 
 	@Override
@@ -65,11 +68,11 @@ public class IfTouchSpecifiedDirectories extends FileGateKeeper {
 		for (String file: branch.getRepository().git().listChangedFiles(branch.getHeadCommitHash(), commit, null)) {
 			for (String each: directories) {
 				if (WildcardUtils.matchPath(each + "/**", file))
-					return passed("Touched directory '" + each + "'.");
+					return passed(Lists.newArrayList("Touched directory '" + each + "'."));
 			}
 		}
 
-		return failed("Not touched directories '" + getDirectories() + "'.");
+		return failed(Lists.newArrayList("Not touched directories '" + getDirectories() + "'."));
 	}
 
 	@Override

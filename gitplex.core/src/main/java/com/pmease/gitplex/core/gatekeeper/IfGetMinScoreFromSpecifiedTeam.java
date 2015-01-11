@@ -5,6 +5,7 @@ import java.util.HashSet;
 
 import javax.validation.constraints.Min;
 
+import com.google.common.collect.Lists;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.model.Branch;
@@ -15,7 +16,7 @@ import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=500, icon="pa-group-o", description=
+@Editable(order=500, icon="pa-group-o", category=GateKeeper.CATEGROY_CHECK_REVIEW, description=
 		"This gate keeper will be passed if specified score can be get from specified team, the score "
 		+ "starts at zero, and will increase by one for each approval, and decrease by one for each "
 		+ "rejection.")
@@ -70,14 +71,14 @@ public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
         int lackApprovals = calcLackApprovals(score, pendings);
 
         if (lackApprovals == 0) {
-            return passed("Get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
+            return passed(Lists.newArrayList("Get min score " + getMinScore() + " from team '" + getTeam().getName() + "'."));
         } else if (lackApprovals < 0) {
-            return failed("Can not get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
+            return failed(Lists.newArrayList("Can not get min score " + getMinScore() + " from team '" + getTeam().getName() + "'."));
         } else {
             request.pickReviewers(members, lackApprovals);
 
-            return pending("To be approved by " + lackApprovals + " users from team '"
-                    + getTeam().getName() + ".");
+            return pending(Lists.newArrayList("To be approved by " + lackApprovals + " users from team '"
+                    + getTeam().getName() + "."));
         }
     }
 
@@ -119,12 +120,12 @@ public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
         int lackApprovals = calcLackApprovals(score, pendings);
 
         if (lackApprovals == 0) {
-            return passed("Get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
+            return passed(Lists.newArrayList("Get min score " + getMinScore() + " from team '" + getTeam().getName() + "'."));
         } else if (lackApprovals < 0) {
-            return failed("Can not get min score " + getMinScore() + " from team '" + getTeam().getName() + "'.");
+            return failed(Lists.newArrayList("Can not get min score " + getMinScore() + " from team '" + getTeam().getName() + "'."));
         } else {
-            return pending("Lack " + lackApprovals + " approvals from team '"
-                    + getTeam().getName() + ".");
+            return pending(Lists.newArrayList("Lack " + lackApprovals + " approvals from team '"
+                    + getTeam().getName() + "."));
         }
 	}
 

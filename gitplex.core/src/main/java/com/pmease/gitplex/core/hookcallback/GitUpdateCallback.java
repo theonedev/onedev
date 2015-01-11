@@ -125,7 +125,7 @@ public class GitUpdateCallback extends HttpServlet {
 
 					if (newCommitHash.equals(GitUtils.NULL_SHA1)) { // deleting a branch ref
 						GateKeeper gateKeeper = repository.getGateKeeper();
-						CheckResult checkResult = gateKeeper.checkBranch(user, branch);
+						CheckResult checkResult = gateKeeper.checkFile(user, branch, null);
 						
 						if (!(checkResult instanceof Passed)) {
 							List<String> messages = new ArrayList<>();

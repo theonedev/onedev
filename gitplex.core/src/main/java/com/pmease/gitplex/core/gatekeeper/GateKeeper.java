@@ -13,6 +13,20 @@ import com.pmease.gitplex.core.model.Repository;
 @Editable(name="Misc")
 public interface GateKeeper extends Trimmable, Serializable {
 	
+	String CATEGORY_COMMONLY_USED = "Commonly Used";
+	
+	String CATEGROY_CHECK_BRANCH = "Check Destination Branch";
+	
+	String CATEGROY_CHECK_FILES = "Check Touched Files";
+
+	String CATEGROY_CHECK_REVIEW = "Check Reviews";
+
+	String CATEGROY_CHECK_SUBMITTER = "Check Submitter";
+
+	String CATEGROY_COMPOSITION = "Gate Keeper Composition";
+	
+	String CATEGROY_OTHERS = "Misc Gate Keepers";
+	
 	/**
 	 * Check the gate keeper against specified request. This is typically used to determine 
 	 * whether or not to accept a pull request. 
@@ -32,24 +46,12 @@ public interface GateKeeper extends Trimmable, Serializable {
 	 * @param branch
 	 * 			branch to be checked
 	 * @param file
-	 * 			file to be checked
+	 * 			file to be checked, pass <tt>null</tt> to check any file
 	 * @return
 	 * 			result of the check. 
 	 */
 	CheckResult checkFile(User user, Branch branch, String file);
 	
-	/**
-	 * Check if specified user can modify/delete specified branch.
-	 *
-	 * @param user
-	 * 			user to be checked
-	 * @param branch
-	 * 			branch to be checked
-	 * @return
-	 * 			result of the check. 
-	 */
-	CheckResult checkBranch(User user, Branch branch);
-
 	/**
 	 * Check if specified user can push specified commit to specified branch.
 	 *

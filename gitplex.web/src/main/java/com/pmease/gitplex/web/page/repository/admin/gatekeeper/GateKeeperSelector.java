@@ -23,12 +23,7 @@ import com.pmease.commons.loader.ImplementationRegistry;
 import com.pmease.commons.wicket.behavior.CollapseBehavior;
 import com.pmease.commons.wicket.component.AccordionPanel;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.gatekeeper.ApprovalGateKeeper;
-import com.pmease.gitplex.core.gatekeeper.BranchGateKeeper;
-import com.pmease.gitplex.core.gatekeeper.CommonGateKeeper;
-import com.pmease.gitplex.core.gatekeeper.CompositeGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.DefaultGateKeeper;
-import com.pmease.gitplex.core.gatekeeper.FileGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 
 @SuppressWarnings("serial")
@@ -42,18 +37,19 @@ public abstract class GateKeeperSelector extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		final Map<Class<?>, List<Class<?>>> gateKeeperClasses = new LinkedHashMap<>();
-		gateKeeperClasses.put(CommonGateKeeper.class, new ArrayList<Class<?>>());
-		gateKeeperClasses.put(CompositeGateKeeper.class, new ArrayList<Class<?>>());
-		gateKeeperClasses.put(BranchGateKeeper.class, new ArrayList<Class<?>>());
-		gateKeeperClasses.put(FileGateKeeper.class, new ArrayList<Class<?>>());
-		gateKeeperClasses.put(ApprovalGateKeeper.class, new ArrayList<Class<?>>());
-		gateKeeperClasses.put(GateKeeper.class, new ArrayList<Class<?>>());
+		final Map<String, List<Class<?>>> gateKeeperClasses = new LinkedHashMap<>();
+		gateKeeperClasses.put(GateKeeper.CATEGORY_COMMONLY_USED, new ArrayList<Class<?>>());
+		gateKeeperClasses.put(GateKeeper.CATEGROY_CHECK_BRANCH, new ArrayList<Class<?>>());
+		gateKeeperClasses.put(GateKeeper.CATEGROY_CHECK_FILES, new ArrayList<Class<?>>());
+		gateKeeperClasses.put(GateKeeper.CATEGROY_CHECK_REVIEW, new ArrayList<Class<?>>());
+		gateKeeperClasses.put(GateKeeper.CATEGROY_CHECK_SUBMITTER, new ArrayList<Class<?>>());
+		gateKeeperClasses.put(GateKeeper.CATEGROY_COMPOSITION, new ArrayList<Class<?>>());
+		gateKeeperClasses.put(GateKeeper.CATEGROY_OTHERS, new ArrayList<Class<?>>());
 		
 		List<Class<?>> implementations = new ArrayList<>();
-		for (Class<?> clazz: GitPlex.getInstance(ImplementationRegistry.class).getImplementations(GateKeeper.class)) {
+		for (Class<?> clazz: GitPlex.getInstance(ImplementationRegistry.class).getImplementations(GateKeeper.class)) 
 			implementations.add(clazz);
-		}
+		
 		implementations.remove(DefaultGateKeeper.class);
 		Collections.sort(implementations, new Comparator<Class<?>>() {
 
@@ -65,26 +61,30 @@ public abstract class GateKeeperSelector extends Panel {
 		});
 		
 		for (Class<?> implementation: implementations) {
-			for (Map.Entry<Class<?>, List<Class<?>>> entry: gateKeeperClasses.entrySet()) {
-				if (entry.getKey().isAssignableFrom(implementation)) {
-					entry.getValue().add(implementation);
+			List<Class<?>> categoryClasses = null;
+			for (Map.Entry<String, List<Class<?>>> entry: gateKeeperClasses.entrySet()) {
+				if (entry.getKey().equals(EditableUtils.getCategory(implementation))) {
+					categoryClasses = entry.getValue();
 					break;
 				}
 			}
+			if (categoryClasses == null)
+				categoryClasses = gateKeeperClasses.get(GateKeeper.CATEGROY_OTHERS);
+			categoryClasses.add(implementation);
 		}
 		
-		for (Iterator<Map.Entry<Class<?>, List<Class<?>>>> it = gateKeeperClasses.entrySet().iterator(); it.hasNext();) {
+		for (Iterator<Map.Entry<String, List<Class<?>>>> it = gateKeeperClasses.entrySet().iterator(); it.hasNext();) {
 			if (it.next().getValue().isEmpty())
 				it.remove();
 		}
 		
 		AccordionPanel accordion = new AccordionPanel("accordion");
 		add(accordion);
-		accordion.add(new ListView<Class<?>>("categories", new ArrayList<Class<?>>(gateKeeperClasses.keySet())) {
+		accordion.add(new ListView<String>("categories", new ArrayList<String>(gateKeeperClasses.keySet())) {
 
 			@Override
-			protected void populateItem(ListItem<Class<?>> categoryItem) {
-				final Class<?> category = categoryItem.getModelObject();
+			protected void populateItem(ListItem<String> categoryItem) {
+				final String category = categoryItem.getModelObject();
 
 				List<Class<?>> gateKeepersOfCategory = gateKeeperClasses.get(category);
 				Preconditions.checkNotNull(gateKeepersOfCategory);
@@ -118,7 +118,7 @@ public abstract class GateKeeperSelector extends Panel {
 
 				WebMarkupContainer collapseTrigger = new WebMarkupContainer("collapseTrigger");
 				categoryItem.add(collapseTrigger);
-				collapseTrigger.add(new Label("name", EditableUtils.getName(category))).add(new CollapseBehavior(collapsible));
+				collapseTrigger.add(new Label("name", category)).add(new CollapseBehavior(collapsible));
 			}
 			
 		});

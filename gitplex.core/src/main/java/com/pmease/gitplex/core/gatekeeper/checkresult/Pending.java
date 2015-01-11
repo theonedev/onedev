@@ -10,10 +10,6 @@ public class Pending extends CheckResult {
 		super(reasons);
 	}
 
-	public Pending(String reason) {
-		super(reason);
-	}
-
 	@Override
     public String toString() {
         return "Pending";
