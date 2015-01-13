@@ -75,6 +75,9 @@ public class BranchProtection extends AbstractGateKeeper {
 			IfApprovedBySpecifiedTeam ifApprovedBySpecifiedTeam = new IfApprovedBySpecifiedTeam();
 			ifApprovedBySpecifiedTeam.setTeamId(teamId);
 			orGateKeeper.getGateKeepers().add(ifApprovedBySpecifiedTeam);
+			IfSubmittedBySpecifiedTeam ifSubmittedBySpecifiedTeam = new IfSubmittedBySpecifiedTeam();
+			ifSubmittedBySpecifiedTeam.setTeamId(teamId);
+			orGateKeeper.getGateKeepers().add(ifSubmittedBySpecifiedTeam);
 		}
 		ifThenGate.setThenGate(orGateKeeper);
 		

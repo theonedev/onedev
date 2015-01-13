@@ -46,11 +46,15 @@ public class BranchLink extends Panel {
 
 			@Override
 			public String getObject() {
-				RepositoryPage page = (RepositoryPage) getPage();
-				if (page.getRepository().equals(getBranch().getRepository())) 
-					return getBranch().getName();
-				else 
+				if (getPage() instanceof RepositoryPage) {
+					RepositoryPage page = (RepositoryPage) getPage();
+					if (page.getRepository().equals(getBranch().getRepository())) 
+						return getBranch().getName();
+					else 
+						return getBranch().getFQN();
+				} else {
 					return getBranch().getFQN();
+				}
 			}
 			
 		}));

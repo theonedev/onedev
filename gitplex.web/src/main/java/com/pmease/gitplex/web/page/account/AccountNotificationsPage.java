@@ -23,9 +23,13 @@ import com.pmease.commons.wicket.component.datatable.DefaultDataTable;
 import com.pmease.commons.wicket.component.datatable.EntityDataProvider;
 import com.pmease.commons.wicket.component.datatable.SelectionColumn;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestNotification;
 import com.pmease.gitplex.web.Constants;
+import com.pmease.gitplex.web.component.branch.BranchLink;
 import com.pmease.gitplex.web.component.pullrequest.RequestLink;
+import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")
@@ -67,7 +71,7 @@ public class AccountNotificationsPage extends AccountPage {
 					Item<ICellPopulator<PullRequestNotification>> cellItem,
 					String componentId, IModel<PullRequestNotification> rowModel) {
 				PullRequestNotification notification = rowModel.getObject();
-				cellItem.add(new RequestLink(componentId, notification.getRequest()) {
+				cellItem.add(new RequestLink(componentId, new EntityModel<PullRequest>(notification.getRequest())) {
 
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
@@ -79,25 +83,60 @@ public class AccountNotificationsPage extends AccountPage {
 			}
 			
 		});
-		columns.add(new AbstractColumn<PullRequestNotification, String>(Model.of("Message"), "task") {
+		columns.add(new AbstractColumn<PullRequestNotification, String>(Model.of("To Branch")) {
+
+			@Override
+			public void populateItem(
+					Item<ICellPopulator<PullRequestNotification>> cellItem,
+					String componentId, IModel<PullRequestNotification> rowModel) {
+				PullRequest request = rowModel.getObject().getRequest();
+				cellItem.add(new BranchLink(componentId, new EntityModel<Branch>(request.getTarget())) {
+
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						tag.setName("a");
+					}
+					
+				});
+			}
+			
+		});
+		columns.add(new AbstractColumn<PullRequestNotification, String>(Model.of("From Branch")) {
+
+			@Override
+			public void populateItem(
+					Item<ICellPopulator<PullRequestNotification>> cellItem,
+					String componentId, IModel<PullRequestNotification> rowModel) {
+				PullRequest request = rowModel.getObject().getRequest();
+				if (request.getSource() != null) {
+					cellItem.add(new BranchLink(componentId, new EntityModel<Branch>(request.getSource())) {
+	
+						@Override
+						protected void onComponentTag(ComponentTag tag) {
+							super.onComponentTag(tag);
+							tag.setName("a");
+						}
+						
+					});
+				} else {
+					cellItem.add(new Label(componentId, request.getSourceFQN()));
+				}
+			}
+			
+		});
+		columns.add(new AbstractColumn<PullRequestNotification, String>(Model.of("Task"), "task") {
 
 			@Override
 			public void populateItem(
 					Item<ICellPopulator<PullRequestNotification>> cellItem,
 					String componentId, IModel<PullRequestNotification> rowModel) {
 				PullRequestNotification notification = rowModel.getObject();
-				if (notification.getTask() == PullRequestNotification.Task.INTEGRATE)
-					cellItem.add(new Label(componentId, "Integration required"));
-				else if (notification.getTask() == PullRequestNotification.Task.REVIEW)
-					cellItem.add(new Label(componentId, "Review required"));
-				else if (notification.getTask() == PullRequestNotification.Task.UPDATE)
-					cellItem.add(new Label(componentId, "Update required"));
-				else
-					cellItem.add(new Label(componentId, "There are new comments/updates"));
+				cellItem.add(new Label(componentId, notification.getTask().toString()));
 			}
 			
 		});
-		columns.add(new AbstractColumn<PullRequestNotification, String>(Model.of("Date"), "date") {
+		columns.add(new AbstractColumn<PullRequestNotification, String>(Model.of("When"), "date") {
 
 			@Override
 			public void populateItem(

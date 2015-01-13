@@ -24,7 +24,8 @@ public class BlobDiffPanel extends Panel {
 	
 	private final InlineCommentSupport commentSupport;
 	
-	public BlobDiffPanel(String id, IModel<Repository> repoModel, Change change, InlineCommentSupport commentSupport) {
+	public BlobDiffPanel(String id, IModel<Repository> repoModel, 
+			Change change, InlineCommentSupport commentSupport) {
 		super(id);
 		
 		this.repoModel = repoModel;

@@ -13,11 +13,8 @@ import com.pmease.gitplex.core.comment.Comment;
 import com.pmease.gitplex.core.comment.CommentReply;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestComment;
-import com.pmease.gitplex.core.model.PullRequestCommentReply;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
-import com.pmease.gitplex.web.model.EntityModel;
-import com.pmease.gitplex.web.model.ModelWrapper;
 
 @SuppressWarnings("serial")
 public class CommentActivityPanel extends Panel {
@@ -34,14 +31,7 @@ public class CommentActivityPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new CommentPanel("content", commentModel, new ModelWrapper<CommentReply>() {
-
-			@Override
-			public IModel<PullRequestCommentReply> asModel(CommentReply object) {
-				return new EntityModel<PullRequestCommentReply>((PullRequestCommentReply) object);
-			}
-			
-		}) {
+		add(new CommentPanel("content", commentModel) {
 
 			@Override
 			protected Component newAdditionalCommentActions(String id, final IModel<Comment> commentModel) {
@@ -87,7 +77,7 @@ public class CommentActivityPanel extends Panel {
 			}
 
 			@Override
-			protected Component newAdditionalReplyActions(String id, final IModel<CommentReply> replyModel) {
+			protected Component newAdditionalReplyActions(String id, CommentReply reply) {
 				return new SinceChangesLink(id, new AbstractReadOnlyModel<PullRequest>() {
 
 					@Override
@@ -95,15 +85,7 @@ public class CommentActivityPanel extends Panel {
 						return commentModel.getObject().getRequest();
 					}
 					
-				}, replyModel.getObject().getDate(), "Changes since this reply") {
-
-					@Override
-					protected void onDetach() {
-						replyModel.detach();
-						super.onDetach();
-					}
-					
-				};
+				}, reply.getDate(), "Changes since this reply");
 			}
 			
 		});

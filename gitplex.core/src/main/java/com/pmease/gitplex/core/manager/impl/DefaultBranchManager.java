@@ -19,6 +19,7 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.RepositoryManager;
+import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
@@ -30,6 +31,8 @@ public class DefaultBranchManager implements BranchManager {
 	
 	private final PullRequestManager pullRequestManager;
 	
+	private final UserManager userManager;
+	
 	private final RepositoryManager repositoryManager;
 	
 	private final UnitOfWork unitOfWork;
@@ -39,10 +42,11 @@ public class DefaultBranchManager implements BranchManager {
 	private final ReadWriteLock idLock = new ReentrantReadWriteLock();
 
 	@Inject
-	public DefaultBranchManager(Dao dao, PullRequestManager pullRequestManager, 
+	public DefaultBranchManager(Dao dao, PullRequestManager pullRequestManager, UserManager userManager,
 			RepositoryManager repositoryManager, UnitOfWork unitOfWork) {
 		this.dao = dao;
 		this.pullRequestManager = pullRequestManager;
+		this.userManager = userManager;
 		this.repositoryManager = repositoryManager;
 		this.unitOfWork = unitOfWork;
 	}
@@ -81,7 +85,7 @@ public class DefaultBranchManager implements BranchManager {
     	
     	for (PullRequest request: branch.getOutgoingRequests()) {
     		if (request.isOpen())
-    			pullRequestManager.discard(request, null, "Source branch is deleted.");
+    			pullRequestManager.discard(request, "Source branch is deleted.");
     		request.setSourceFQN(branch.getFQN());
     		request.setSource(null);
     		dao.persist(request);
@@ -122,6 +126,8 @@ public class DefaultBranchManager implements BranchManager {
 	@Transactional
 	@Override
 	public void save(final Branch branch) {
+		branch.setLastUpdater(userManager.getCurrent());
+		
 		dao.persist(branch);
 
 		/**
@@ -131,7 +137,7 @@ public class DefaultBranchManager implements BranchManager {
 		 */
 		for (PullRequest request: branch.getOutgoingRequests()) {
 			if (request.isOpen())
-				pullRequestManager.onSourceBranchUpdate(request);
+				pullRequestManager.onSourceBranchUpdate(request, true);
 		}
 		
 		final Long branchId = branch.getId();

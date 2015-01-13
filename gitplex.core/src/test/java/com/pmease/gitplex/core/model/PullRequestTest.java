@@ -41,7 +41,7 @@ public class PullRequestTest extends AbstractGitTest {
         update1.setRequest(request);
         git.updateRef(update1.getHeadRef(), "HEAD", null, null);
         update1.setHeadCommitHash(git.parseRevision(update1.getHeadRef(), true));
-        request.getUpdates().add(update1);
+        request.addUpdate(update1);
 
         addFileAndCommit("c", "", "commit");
         
@@ -50,7 +50,7 @@ public class PullRequestTest extends AbstractGitTest {
         update2.setRequest(request);
         git.updateRef(update2.getHeadRef(), "HEAD", null, null);
         update2.setHeadCommitHash(git.parseRevision(update2.getHeadRef(), true));
-        request.getUpdates().add(update2);
+        request.addUpdate(update2);
         
         Assert.assertEquals(request.getEffectiveUpdates().size(), 2);
     }
@@ -79,7 +79,7 @@ public class PullRequestTest extends AbstractGitTest {
         git.updateRef(update1.getHeadRef(), "HEAD", null, null);
         update1.setHeadCommitHash(git.parseRevision(update1.getHeadRef(), true));
         String secondRef = update1.getHeadRef();
-        request.getUpdates().add(update1);
+        request.addUpdate(update1);
 
         addFileAndCommit("d", "", "dev:4");
         
@@ -88,7 +88,7 @@ public class PullRequestTest extends AbstractGitTest {
         update2.setRequest(request);
         git.updateRef(update2.getHeadRef(), "HEAD", null, null);
         update2.setHeadCommitHash(git.parseRevision(update2.getHeadRef(), true));
-        request.getUpdates().add(update2);
+        request.addUpdate(update2);
         
         git.checkout("master", null);
 

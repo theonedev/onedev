@@ -17,6 +17,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
+import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.manager.UserManager;
@@ -34,16 +35,20 @@ public class DefaultReviewManager implements ReviewManager {
 	private final Dao dao;
 	
 	private final PullRequestManager pullRequestManager;
+	
+	private final PullRequestCommentManager pullRequestCommentManager;
 
 	private final UnitOfWork unitOfWork;
 	
 	private final Set<PullRequestListener> pullRequestListeners;
 	
 	@Inject
-	public DefaultReviewManager(Dao dao, PullRequestManager pullRequestManager, 
+	public DefaultReviewManager(Dao dao, PullRequestManager pullRequestManager,
+			PullRequestCommentManager pullRequestCommentManager,
 			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners) {
 		this.dao = dao;
 		this.pullRequestManager = pullRequestManager;
+		this.pullRequestCommentManager = pullRequestCommentManager;
 		this.unitOfWork = unitOfWork;
 		this.pullRequestListeners = pullRequestListeners;
 	}
@@ -84,11 +89,12 @@ public class DefaultReviewManager implements ReviewManager {
 			requestComment.setDate(activity.getDate());
 			requestComment.setUser(reviewer);
 			requestComment.setContent(comment);
-			dao.persist(requestComment);
+			
+			pullRequestCommentManager.save(requestComment, false);
 		}
 		
 		for (PullRequestListener listener: pullRequestListeners)
-			listener.onReviewed(review);
+			listener.onReviewed(review, comment);
 
 		final Long requestId = request.getId();
 		

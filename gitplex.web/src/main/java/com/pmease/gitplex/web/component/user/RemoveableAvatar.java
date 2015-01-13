@@ -45,10 +45,14 @@ public abstract class RemoveableAvatar extends Panel {
 				// Force nowrap here when display tooltip as otherwise user name will be wrapped inside 
 				// an element with position set to relative
 				String tooltip;
-				if (isEnabled())
-					tooltip = actionName!=null?actionName:"" + " " + userModel.getObject().getDisplayName();
-				else
+				if (isEnabled()) {
+					if (actionName != null)
+						tooltip = actionName + " " + userModel.getObject().getDisplayName();
+					else
+						tooltip = userModel.getObject().getDisplayName();
+				} else {
 					tooltip = userModel.getObject().getDisplayName();
+				}
 				return "<span style='white-space: nowrap;'>" + StringEscapeUtils.escapeHtml4(tooltip) + "</span>";
 			}
 			

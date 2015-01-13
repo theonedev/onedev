@@ -4,7 +4,7 @@
 			<td class="activities">
 				<table>
 					<tr wicket:id="requestActivities" class="activity">
-						<td wicket:id="avatar" class="avatar"></td>
+						<td wicket:id="avatar" class="avatar"><div wicket:id="avatar"></div></td>
 						<td wicket:id="activity" class="activity"></td>
 					</tr>
 				</table>
@@ -16,42 +16,54 @@
 				</div>
 			</td>
 			<td class="others">
-				<div wicket:id="branches" class="branches well">
-					<div class="target">
-						<label>Target Branch:</label>
-						<span wicket:id="target"></span>
+				<div class="well">
+					<div wicket:id="basicInfo" class="basic-info">
+						<div class="submitter">
+							<label>Submitted By: </label> <span wicket:id="submitter" class="avatar"></span>
+						</div>
+						<div class="target">
+							<label>To Branch:</label>
+							<span wicket:id="target"></span>
+						</div>
+						<div class="source">
+							<label>From Branch:</label>
+							<span wicket:id="sourceLink"></span>
+							<span wicket:id="sourceName"></span> 
+							<a wicket:id="restoreSource"><span class="fa fa-undo"></span> Restore</a>
+						</div>
 					</div>
-					<div class="source">
-						<label>Source Branch:</label>
-						<span wicket:id="sourceLink"></span>
-						<span wicket:id="sourceName"></span> 
-						<a wicket:id="restoreSource"><span class="fa fa-undo"></span> Restore</a>
+					<div wicket:id="assignee" class="assignee"></div>
+					<div wicket:id="reviewers" class="reviewers">
+						<label>Reviewers:</label>
+						<ul class="clearfix list-unstyled">
+							<li wicket:id="reviewers" class="pull-left">
+								<span wicket:id="avatar"></span>
+								<span wicket:id="result"></span>
+							</li>
+						</ul>
+						<wicket:enclosure child="addReviewer">
+						<div>
+							<input wicket:id="addReviewer" type="hidden"></input>
+						</div>
+						</wicket:enclosure>
 					</div>
-				</div>
-				<div wicket:id="integrationStrategy" class="integration-strategy well">
-					<label>
-						Integration Strategy: 						
-						<span wicket:id="help" class="pa pa-question-circle pointer"></span>
-					</label>
-					<div>
-						<select wicket:id="editor"></select> 
-						<span wicket:id="viewer"></span>
+					<div wicket:id="integrationStrategy" class="integration-strategy">
+						<label>
+							Integration Strategy: 						
+							<span wicket:id="help" class="fa fa-question-circle pointer"></span>
+						</label>
+						<div>
+							<select wicket:id="editor"></select> 
+							<span wicket:id="viewer"></span>
+						</div>
 					</div>
-				</div>
-				<div wicket:id="assignee" class="assignee well"></div>
-				<div wicket:id="reviewers" class="reviewers well">
-					<label>Reviewers:</label>
-					<ul class="clearfix list-unstyled">
-						<li wicket:id="reviewers" class="pull-left">
-							<span wicket:id="avatar"></span>
-							<span wicket:id="result"></span>
-						</li>
-					</ul>
-					<wicket:enclosure child="addReviewer">
-					<div>
-						<input wicket:id="addReviewer" type="hidden"></input>
+					<div wicket:id="watch" class="watch">
+						<div>
+							<label>Watch Status:</label>
+							<select wicket:id="option"></select>
+						</div>
+						<div class="help-block"><i class="fa fa-info-circle"></i> <span wicket:id="help"></span></div>
 					</div>
-					</wicket:enclosure>
 				</div>
 			</td>
 		</tr>
@@ -67,14 +79,14 @@
 		<div wicket:id="detail" class="detail"></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="assigneeEditFrag">
-		<label>Assigned To: <span wicket:id="help" class="pa pa-question-circle pointer"></span></label>
+		<label>Assigned To: <span wicket:id="help" class="fa fa-question-circle pointer"></span></label>
 		<div>
 			<input wicket:id="assignee" type="hidden"></input>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="assigneeViewFrag">
-		<label>Assigned To: <span wicket:id="help" class="pa pa-question-circle pointer"></span></label> 
-		<span wicket:id="assignee"></span> 
+		<label>Assigned To: <span wicket:id="help" class="fa fa-question-circle pointer"></span></label> 
+		<span wicket:id="assignee" class="avatar"></span> 
 	</wicket:fragment>
 	<wicket:fragment wicket:id="noAssigneeFrag">
 		This pull request will be integrated automatically as long as it passes gate keeper check. 

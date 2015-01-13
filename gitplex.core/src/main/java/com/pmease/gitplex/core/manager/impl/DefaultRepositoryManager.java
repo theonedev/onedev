@@ -35,7 +35,6 @@ import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Branch;
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
@@ -109,13 +108,8 @@ public class DefaultRepositoryManager implements RepositoryManager {
     @Transactional
     @Override
     public void delete(final Repository repository) {
-    	for (Branch branch: repository.getBranches()) {
-	    	for (PullRequest request: branch.getOutgoingRequests()) {
-	    		request.setSource(null);
-	    		request.setSourceFQN(branch.getFQN());
-	    		dao.persist(request);
-	    	}
-    	}
+    	for (Branch branch: repository.getBranches())
+	    	branchManager.delete(branch);
     	
     	for (Repository each: repository.getForks()) {
     		each.setForkedFrom(null);

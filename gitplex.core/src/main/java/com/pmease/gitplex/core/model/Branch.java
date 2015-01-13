@@ -36,20 +36,23 @@ public class Branch extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private Repository repository;
 
+	@ManyToOne(fetch=FetchType.LAZY)
+    private User lastUpdater;
+
 	@Column(nullable=false)
 	private String name;
 	
 	private boolean isDefault;
 	
-    @OneToMany(mappedBy="target", cascade=CascadeType.REMOVE)
+    @OneToMany(mappedBy="target")
     private Collection<PullRequest> incomingRequests = new ArrayList<>();
 
     @OneToMany(mappedBy="source")
     private Collection<PullRequest> outgoingRequests = new ArrayList<>();
     
     @OneToMany(mappedBy="branch", cascade=CascadeType.REMOVE)
-    private Collection<PullRequestWatch> requestWatches = new ArrayList<>();
-
+    private Collection<BranchWatch> watches = new ArrayList<>();
+    
     private String headCommitHash;
 
     public Repository getRepository() {
@@ -58,6 +61,14 @@ public class Branch extends AbstractEntity {
 
 	public void setRepository(Repository repository) {
 		this.repository = repository;
+	}
+
+	public User getLastUpdater() {
+		return lastUpdater;
+	}
+
+	public void setLastUpdater(User lastUpdater) {
+		this.lastUpdater = lastUpdater;
 	}
 
 	public String getName() {
@@ -84,12 +95,12 @@ public class Branch extends AbstractEntity {
         this.outgoingRequests = outgoingRequests;
     }
     
-	public Collection<PullRequestWatch> getRequestWatches() {
-		return requestWatches;
+	public Collection<BranchWatch> getWatches() {
+		return watches;
 	}
 
-	public void setRequestWatches(Collection<PullRequestWatch> requestWatches) {
-		this.requestWatches = requestWatches;
+	public void setWatches(Collection<BranchWatch> watches) {
+		this.watches = watches;
 	}
 
 	/**

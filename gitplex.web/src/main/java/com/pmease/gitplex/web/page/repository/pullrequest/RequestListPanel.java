@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.pmease.gitplex.core.GitPlex;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
@@ -34,10 +33,15 @@ import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
+import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.Constants;
+import com.pmease.gitplex.web.component.branch.BranchLink;
+import com.pmease.gitplex.web.component.pullrequest.RequestLink;
 import com.pmease.gitplex.web.component.user.UserSingleChoice;
+import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
@@ -240,12 +244,45 @@ public class RequestListPanel extends Panel {
 			
 		});
 		List<IColumn<PullRequest, Void>> columns = new ArrayList<>();
-		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Summary")) {
+		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Id")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem,
 					String componentId, IModel<PullRequest> rowModel) {
-				cellItem.add(new RequestSummaryPanel(componentId, rowModel));
+				PullRequest request = rowModel.getObject();
+				cellItem.add(new Label(componentId, "#" + request.getId()));
+				cellItem.add(AttributeAppender.append("class", "narrow"));
+			}
+			
+		});
+		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Title")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem,
+					String componentId, IModel<PullRequest> rowModel) {
+				cellItem.add(new RequestLink(componentId, rowModel));
+			}
+			
+		});
+		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("To Branch")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem,
+					String componentId, IModel<PullRequest> rowModel) {
+				cellItem.add(new BranchLink(componentId, new EntityModel<Branch>(rowModel.getObject().getTarget())));
+			}
+			
+		});
+		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("From Branch")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem,
+					String componentId, IModel<PullRequest> rowModel) {
+				PullRequest request = rowModel.getObject();
+				if (request.getSource() != null)
+					cellItem.add(new BranchLink(componentId, new EntityModel<Branch>(request.getSource())));
+				else
+					cellItem.add(new Label(componentId, request.getSourceFQN()));
 			}
 			
 		});
@@ -279,16 +316,6 @@ public class RequestListPanel extends Panel {
 			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem,
 					String componentId, IModel<PullRequest> rowModel) {
 				cellItem.add(new RequestStatusPanel(componentId, rowModel));
-				cellItem.add(AttributeAppender.append("class", "narrow"));
-			}
-			
-		});
-		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Id")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem,
-					String componentId, IModel<PullRequest> rowModel) {
-				cellItem.add(new Label(componentId, "#" + rowModel.getObject().getId()));
 				cellItem.add(AttributeAppender.append("class", "narrow"));
 			}
 			

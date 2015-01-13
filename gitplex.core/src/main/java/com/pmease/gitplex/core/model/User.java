@@ -48,13 +48,13 @@ public class User extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<Membership> memberships = new ArrayList<>();
 	
-	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="owner")
 	private Collection<Repository> repositories = new ArrayList<>();
 
 	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
 	private Collection<Team> teams = new ArrayList<Team>();
 	
-	@OneToMany(mappedBy="submitter", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="submitter")
 	private Collection<PullRequest> submittedRequests = new ArrayList<>();
 
 	@OneToMany(mappedBy="reviewer", cascade=CascadeType.REMOVE)
@@ -70,10 +70,16 @@ public class User extends AbstractUser implements ProtectedObject {
 	private Collection<PullRequestCommentReply> requestCommentReplies = new ArrayList<>();
 	
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+    private Collection<BranchWatch> branchWatches = new ArrayList<>();
+
+    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<PullRequestWatch> requestWatches = new ArrayList<>();
 
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<PullRequestNotification> requestNotifications = new ArrayList<>();
+
+    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+    private Collection<PullRequestVisit> requestVisits = new ArrayList<>();
 
     @Editable(order=100)
 	@UserName
@@ -190,12 +196,12 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.requestCommentReplies = requestCommentReplies;
 	}
 
-	public Collection<PullRequestWatch> getRequestWatches() {
-		return requestWatches;
+	public Collection<BranchWatch> getBranchWatches() {
+		return branchWatches;
 	}
 
-	public void setRequestWatches(Collection<PullRequestWatch> requestWatches) {
-		this.requestWatches = requestWatches;
+	public void setBranchWatches(Collection<BranchWatch> branchWatches) {
+		this.branchWatches = branchWatches;
 	}
 
 	public Collection<PullRequestNotification> getRequestNotifications() {

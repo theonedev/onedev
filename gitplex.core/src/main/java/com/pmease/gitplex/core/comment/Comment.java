@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 
+import javax.annotation.Nullable;
+
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
@@ -27,4 +29,14 @@ public interface Comment extends Serializable {
 	Collection<? extends CommentReply> getReplies();
 	
 	CommentReply addReply(String content);
+	
+	/**
+	 * Get last visit date of this comment for current user.
+	 * 
+	 * @return
+	 * 			last visit date of this comment for current user, or <tt>null</tt>
+	 * 			if current user is anonymous or has never visited the comment
+	 */
+	@Nullable
+	Date getLastVisitDate();
 }

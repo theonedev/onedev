@@ -2,6 +2,7 @@ package com.pmease.gitplex.core.model;
 
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -20,8 +21,10 @@ public class PullRequestCommentReply extends AbstractEntity implements CommentRe
 	@JoinColumn(nullable=false)
 	private User user;
 	
+	@Column(nullable=false)
 	private Date date;
 	
+	@Column(nullable=false, length=65535)
 	private String content;
 
 	@ManyToOne

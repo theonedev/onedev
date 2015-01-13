@@ -9,6 +9,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.hibernate.Query;
 import org.hibernate.ReplicationMode;
 
 import com.google.common.base.Preconditions;
@@ -112,6 +113,14 @@ public class DefaultUserManager implements UserManager {
     @Transactional
     @Override
 	public void delete(final User user) {
+    	Query query = dao.getSession().createQuery("update Branch set lastUpdater=null where lastUpdater=:lastUpdater");
+    	query.setParameter("lastUpdater", user);
+    	query.executeUpdate();
+    	
+    	query = dao.getSession().createQuery("update PullRequestUpdate set user=null where user=:user");
+    	query.setParameter("user", user);
+    	query.executeUpdate();
+
     	for (Repository repository: user.getRepositories())
     		repositoryManager.delete(repository);
     	

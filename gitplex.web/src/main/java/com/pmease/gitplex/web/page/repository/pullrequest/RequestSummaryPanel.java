@@ -4,11 +4,12 @@ import java.util.Date;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
-import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -28,14 +29,15 @@ public class RequestSummaryPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Link<Void> titleLink = new Link<Void>("titleLink") {
+		BookmarkablePageLink<Void> titleLink = new BookmarkablePageLink<Void>("titleLink", RequestOverviewPage.class) {
 
-			@Override
-			public void onClick() {
-				setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(getPullRequest()));
-			}
+				@Override
+				public PageParameters getPageParameters() {
+					return RequestOverviewPage.paramsOf(getPullRequest());
+				}
 			
 		};
+
 		add(titleLink);
 		
 		titleLink.add(new Label("titleLabel", new AbstractReadOnlyModel<String>() {

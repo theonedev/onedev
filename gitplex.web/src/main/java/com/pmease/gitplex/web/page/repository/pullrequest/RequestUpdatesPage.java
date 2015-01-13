@@ -147,10 +147,10 @@ public class RequestUpdatesPage extends RequestDetailPage {
 				for (Commit commit: update.getRequest().getMergedCommits())
 					mergedCommitHashes.add(commit.getHash());
 
-				updateItem.add(new ListView<Commit>("commits", new AbstractReadOnlyModel<List<Commit>>() {
+				updateItem.add(new ListView<Commit>("commits", new LoadableDetachableModel<List<Commit>>() {
 
 					@Override
-					public List<Commit> getObject() {
+					protected List<Commit> load() {
 						return updateItem.getModelObject().getCommits();
 					}
 					

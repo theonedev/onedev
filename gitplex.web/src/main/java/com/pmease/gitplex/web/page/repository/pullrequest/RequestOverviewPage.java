@@ -1,8 +1,10 @@
 package com.pmease.gitplex.web.page.repository.pullrequest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.shiro.SecurityUtils;
@@ -19,6 +21,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -50,6 +53,8 @@ import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequestActivity;
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
+import com.pmease.gitplex.core.model.PullRequestVisit;
+import com.pmease.gitplex.core.model.PullRequestWatch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.ReviewInvitation;
@@ -87,9 +92,28 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig
 @SuppressWarnings("serial")
 public class RequestOverviewPage extends RequestDetailPage {
 	
-	private static final String ASSIGNEE_HELP = "Assignee is resonsible for integrating "
-			+ "the pull request into target branch after it passes gate keeper check.";
+	private static final String ASSIGNEE_HELP = "Assignee has write permission to the "
+			+ "repository and is resonsible for integrating the pull request into "
+			+ "target branch after it passes gate keeper check.";
 
+	private enum WatchStatus {
+		WATCHING("Watching"), 
+		NOT_WATCHING("Not Watching"), 
+		IGNORE("Ignore");
+		
+		private final String displayName;
+		
+		WatchStatus(String displayName) {
+			this.displayName = displayName;
+		}
+		
+		@Override
+		public String toString() {
+			return displayName;
+		}
+		
+	};
+	
 	private RepeatingView activitiesView;
 	
 	public RequestOverviewPage(PageParameters params) {
@@ -153,7 +177,9 @@ public class RequestOverviewPage extends RequestDetailPage {
 
 		row.setOutputMarkupId(true);
 		
-		row.add(new UserLink("avatar", new UserModel(activity.getUser()), AvatarMode.AVATAR));
+		WebMarkupContainer avatarColumn = new WebMarkupContainer("avatar");
+		avatarColumn.add(new UserLink("avatar", new UserModel(activity.getUser()), AvatarMode.AVATAR));
+		row.add(avatarColumn);
 		
 		if (row.get("activity") == null) 
 			row.add(activity.render("activity"));
@@ -164,6 +190,9 @@ public class RequestOverviewPage extends RequestDetailPage {
 			row.add(AttributeAppender.append("class", " non-discussion update"));
 		else
 			row.add(AttributeAppender.append("class", " non-discussion non-update"));
+		
+		PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
+		final Date lastVisitDate = pullRequestManager.getLastVisitDate(getPullRequest());
 		
 		row.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 
@@ -178,10 +207,15 @@ public class RequestOverviewPage extends RequestDetailPage {
 					if (commentActivity.getComment().isResolved())
 						cssClasses += " resolved";
 				} 
+				if (lastVisitDate != null && lastVisitDate.before(activity.getDate()))
+					cssClasses += " new";
 				return cssClasses;
 			}
 			
 		}));
+		
+		if (lastVisitDate != null && lastVisitDate.before(activity.getDate()))
+			avatarColumn.add(AttributeAppender.append("title", "New activity since your last visit"));
 		
 		return row;
 	}
@@ -236,7 +270,32 @@ public class RequestOverviewPage extends RequestDetailPage {
 	}
 	
 	private Component newActivitiesView() {
-		activitiesView = new RepeatingView("requestActivities");
+		activitiesView = new RepeatingView("requestActivities") {
+			
+			@Override
+			protected void onDetach() {
+				/*
+				 * Put the visit save logic here instead of page wide as the page.onDetach
+				 * can be called sometimes before the page has not been rendered.   
+				 */
+				User user = getCurrentUser();
+				if (user != null) {
+					PullRequestVisit visit = getPullRequest().getVisit(user);
+					if (visit == null) {
+						visit = new PullRequestVisit();
+						visit.setRequest(getPullRequest());
+						visit.setUser(user);
+						getPullRequest().getVisits().add(visit);
+					} else {
+						visit.setDate(new Date());
+					}
+					GitPlex.getInstance(Dao.class).persist(visit);
+				}
+				
+				super.onDetach();
+			}
+			
+		};
 		activitiesView.setOutputMarkupId(true);
 		
 		List<RenderableActivity> activities = getActivities();
@@ -316,7 +375,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 				comment.setContent(input.getModelObject());
 				InheritableThreadLocalData.set(new PageId(getPage().getPageId()));
 				try {
-					GitPlex.getInstance(PullRequestCommentManager.class).save(comment);
+					GitPlex.getInstance(PullRequestCommentManager.class).save(comment, true);
 				} finally {
 					InheritableThreadLocalData.clear();
 				}
@@ -342,17 +401,20 @@ public class RequestOverviewPage extends RequestDetailPage {
 
 		}.add(new AllowLeaveBehavior()));
 		
-		add(newBranchesContainer());
+		add(newBasicInfoContainer());
 		add(newIntegrationStrategyContainer());
 		add(newAssigneeContainer());
 		add(newReviewersContainer());
+		add(newWatchContainer());
 	}
 
-	private WebMarkupContainer newBranchesContainer() {
-		WebMarkupContainer branchesContainer = new WebMarkupContainer("branches");
+	private WebMarkupContainer newBasicInfoContainer() {
 		PullRequest request = getPullRequest();
-		branchesContainer.add(new BranchLink("target", new EntityModel<Branch>(request.getTarget())));
-		branchesContainer.add(new BranchLink("sourceLink", new AbstractReadOnlyModel<Branch>() {
+		WebMarkupContainer basicInfoContainer = new WebMarkupContainer("basicInfo");
+		basicInfoContainer.add(new AvatarByUser("submitter", new UserModel(request.getSubmitter()), true));
+		
+		basicInfoContainer.add(new BranchLink("target", new EntityModel<Branch>(request.getTarget())));
+		basicInfoContainer.add(new BranchLink("sourceLink", new AbstractReadOnlyModel<Branch>() {
 
 			@Override
 			public Branch getObject() {
@@ -368,7 +430,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			}
 			
 		});
-		branchesContainer.add(new Label("sourceName", new LoadableDetachableModel<String>() {
+		basicInfoContainer.add(new Label("sourceName", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
@@ -391,7 +453,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			
 		});
 		
-		branchesContainer.add(new Link<Void>("restoreSource") {
+		basicInfoContainer.add(new Link<Void>("restoreSource") {
 
 			@Override
 			protected void onConfigure() {
@@ -426,7 +488,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			
 		});
 		
-		return branchesContainer;
+		return basicInfoContainer;
 	}
 	
 	private WebMarkupContainer newIntegrationStrategyContainer() {
@@ -524,9 +586,120 @@ public class RequestOverviewPage extends RequestDetailPage {
 		return integrationStrategyContainer;
 	}
 	
+	private WebMarkupContainer newWatchContainer() {
+		final WebMarkupContainer watchContainer = new WebMarkupContainer("watch") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getCurrentUser() != null);
+			}
+
+		};
+		
+		watchContainer.setOutputMarkupId(true);
+
+		final IModel<WatchStatus> optionModel = new LoadableDetachableModel<WatchStatus>() {
+
+			@Override
+			protected WatchStatus load() {
+				PullRequestWatch watch = getPullRequest().getWatch(getCurrentUser());
+				if (watch != null) {
+					if (watch.isIgnore())
+						return WatchStatus.IGNORE;
+					else
+						return WatchStatus.WATCHING;
+				} else {
+					return WatchStatus.NOT_WATCHING;
+				}
+			}
+			
+		};
+		
+		List<WatchStatus> options = Arrays.asList(WatchStatus.values());
+		
+		IChoiceRenderer<WatchStatus> choiceRenderer = new IChoiceRenderer<WatchStatus>() {
+
+			@Override
+			public Object getDisplayValue(WatchStatus object) {
+				return object.toString();
+			}
+
+			@Override
+			public String getIdValue(WatchStatus object, int index) {
+				return String.valueOf(index);
+			}
+			
+		};
+		DropDownChoice<WatchStatus> choice = new DropDownChoice<>("option", optionModel, 
+				options, choiceRenderer);
+		
+		choice.add(new OnChangeAjaxBehavior() {
+					
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				PullRequestWatch watch = getPullRequest().getWatch(getCurrentUser());
+				Dao dao = GitPlex.getInstance(Dao.class);
+				if (optionModel.getObject() == WatchStatus.WATCHING) {
+					if (watch != null) {
+						watch.setIgnore(false);
+						watch.setReason(null);
+					} else {
+						watch = new PullRequestWatch();
+						watch.setRequest(getPullRequest());
+						watch.setUser(getCurrentUser());
+						getPullRequest().getWatches().add(watch);
+					}
+					dao.persist(watch);
+				} else if (optionModel.getObject() == WatchStatus.NOT_WATCHING) {
+					if (watch != null) {
+						dao.remove(watch);
+						getPullRequest().getWatches().remove(watch);
+					}
+				} else {
+					if (watch != null) {
+						watch.setIgnore(true);
+					} else {
+						watch = new PullRequestWatch();
+						watch.setRequest(getPullRequest());
+						watch.setUser(getCurrentUser());
+						watch.setIgnore(true);
+						getPullRequest().getWatches().add(watch);
+					}
+					dao.persist(watch);
+				}
+				target.add(watchContainer);
+			}
+			
+		});
+		watchContainer.add(choice);
+		watchContainer.add(new Label("help", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				PullRequestWatch watch = getPullRequest().getWatch(getCurrentUser());
+				if (watch != null) {
+					if (watch.isIgnore()) {
+						return "Ignore notifications irrelevant to me.";
+					} else if (watch.getReason() != null) {
+						return watch.getReason();
+					} else {
+						return "You will be notified of any activities.";
+					}
+				} else {
+					return "Ignore notifications irrelevant to me, but start to watch once I am involved."; 
+				}
+			}
+			
+		}));
+		
+		return watchContainer;
+	}
+
 	private Component newAssigneeContainer() {
-		Fragment assigneeContainer;
 		PullRequest request = getPullRequest();
+		
+		Fragment assigneeContainer;
 		User assignee = request.getAssignee();
 		boolean canChangeAssignee = request.isOpen() 
 				&& (request.getSubmitter().equals(getCurrentUser()) 
@@ -643,5 +816,5 @@ public class RequestOverviewPage extends RequestDetailPage {
 		
 		return reviewersContainer;
 	}
-	
+
 }

@@ -28,6 +28,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.CommentReply;
 import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.manager.PullRequestCommentReplyManager;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.UserManager;
 
 @SuppressWarnings("serial")
@@ -42,7 +43,7 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 	@ManyToOne(fetch=FetchType.LAZY)
 	private User user;
 	
-	@Column(nullable=false)
+	@Column(nullable=false, length=65535)
 	private String content;
 	
 	@Column(nullable=false)
@@ -214,6 +215,11 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 		if (inlineInfo == null)
 			inlineInfo = new InlineInfo();
 		inlineInfo.setContext(context);
+	}
+
+	@Override
+	public Date getLastVisitDate() {
+		return GitPlex.getInstance(PullRequestManager.class).getLastVisitDate(getRequest());
 	}
 	
 }

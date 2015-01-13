@@ -132,10 +132,10 @@ public class NewRequestPage extends RepositoryPage {
 			pullRequest.setSubmitter(currentUser);
 			
 			PullRequestUpdate update = new PullRequestUpdate();
-			pullRequest.getUpdates().add(update);
+			pullRequest.addUpdate(update);
 			update.setRequest(pullRequest);
 			update.setHeadCommitHash(source.getHeadCommitHash());
-			pullRequest.setUpdateDate(new Date());
+			pullRequest.setLastEventDate(new Date());
 			
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
 			List<IntegrationStrategy> strategies = pullRequestManager.getApplicableIntegrationStrategies(pullRequest);
@@ -425,7 +425,7 @@ public class NewRequestPage extends RepositoryPage {
 					for (ReviewInvitation invitation: pullRequest.getReviewInvitations())
 						invitation.setReviewer(dao.load(User.class, invitation.getReviewer().getId()));
 					
-					pullRequest.setAssignee(pullRequest.getTarget().getRepository().getOwner());
+					pullRequest.setAssignee(dao.load(User.class, pullRequest.getAssignee().getId()));
 					
 					GitPlex.getInstance(PullRequestManager.class).open(pullRequest, new PageId(getPageId()));
 					

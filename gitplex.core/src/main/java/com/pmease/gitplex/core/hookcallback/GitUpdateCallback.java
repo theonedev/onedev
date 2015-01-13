@@ -29,6 +29,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
@@ -132,6 +133,16 @@ public class GitUpdateCallback extends HttpServlet {
 							for (String each: checkResult.getReasons())
 								messages.add(each);
 							error(output, messages.toArray(new String[messages.size()]));
+						} else {
+							boolean hasOpen = false;
+							for (PullRequest each: branch.getIncomingRequests()) {
+								if (each.isOpen()) {
+									hasOpen = true;
+									break;
+								}
+							}
+							if (hasOpen)
+								error(output, "There are pull requests opening against this branch.");
 						}
 					} else {
 						GateKeeper gateKeeper = repository.getGateKeeper();

@@ -1,6 +1,7 @@
 package com.pmease.gitplex.core.manager;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -12,7 +13,6 @@ import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.core.model.User;
 
 public interface PullRequestManager extends Lifecycle, ConfigChangeListener {
     
@@ -31,20 +31,18 @@ public interface PullRequestManager extends Lifecycle, ConfigChangeListener {
      * 
      * @param request
      * 			pull request to be integrated
-     * @param user
-     * 			user initiating the integration, <tt>null</tt> to indicate system user
      * @param comment
      * 			comment for the integration
      */
-    void integrate(PullRequest request, @Nullable User user, @Nullable String comment);
+    void integrate(PullRequest request, @Nullable String comment);
     
-    void discard(PullRequest request, @Nullable User user, @Nullable String comment);
+    void discard(PullRequest request, @Nullable String comment);
     
-    void reopen(PullRequest request, User user, @Nullable String comment);
+    void reopen(PullRequest request, @Nullable String comment);
 
     void onTargetBranchUpdate(PullRequest request);
     
-    void onSourceBranchUpdate(PullRequest request);
+    void onSourceBranchUpdate(PullRequest request, boolean notify);
     
     void onAssigneeChange(PullRequest request);
     
@@ -75,4 +73,14 @@ public interface PullRequestManager extends Lifecycle, ConfigChangeListener {
 	List<IntegrationStrategy> getApplicableIntegrationStrategies(PullRequest request);
 
 	void restoreSource(PullRequest request);
+	
+	/**
+	 * Get last visit date of specified pull request for current user.
+	 * 
+	 * @return
+	 * 			last visit date of specified pull request for current user, or <tt>null</tt>
+	 * 			if current user is anonymous or has never visited the pull request
+	 */
+	@Nullable
+	Date getLastVisitDate(PullRequest request);
 }

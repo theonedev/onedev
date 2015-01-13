@@ -14,6 +14,7 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
+import com.pmease.gitplex.web.page.account.AccountNotificationsPage;
 import com.pmease.gitplex.web.page.account.AccountProfilePage;
 import com.pmease.gitplex.web.page.account.RegisterPage;
 import com.pmease.gitplex.web.page.account.repository.NewRepositoryPage;
@@ -29,13 +30,28 @@ public abstract class LayoutPage extends BasePage {
 		super.onInitialize();
 		
 		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
-		boolean signedIn = currentUser != null;
+		final boolean signedIn = currentUser != null;
 		
 		add(new BookmarkablePageLink<Void>("homeLink", getApplication().getHomePage()));
 		
 		add(new BookmarkablePageLink<Void>("loginLink", LoginPage.class).setVisible(!signedIn));
 		add(new BookmarkablePageLink<Void>("registerLink", RegisterPage.class).setVisible(!signedIn));
 		add(new BookmarkablePageLink<Void>("logoutLink", LogoutPage.class).setVisible(signedIn));
+		if (currentUser != null) {
+			add(new BookmarkablePageLink<Void>("notificationLink", 
+					AccountNotificationsPage.class, 
+					AccountNotificationsPage.paramsOf(currentUser)) {
+	
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(!getCurrentUser().getRequestNotifications().isEmpty());
+				}
+				
+			});
+		} else {
+			add(new WebMarkupContainer("notificationLink").setVisible(false));
+		}
 		
 		if (signedIn) {
 			add(new UserLink("userLink", new UserModel(currentUser)));

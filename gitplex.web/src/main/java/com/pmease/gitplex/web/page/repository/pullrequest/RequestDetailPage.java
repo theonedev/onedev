@@ -5,10 +5,15 @@ import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERG
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_WITH_SQUASH;
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_SOURCE_ONTO_TARGET;
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_TARGET_ONTO_SOURCE;
-import static com.pmease.gitplex.core.model.PullRequestOperation.*;
+import static com.pmease.gitplex.core.model.PullRequestOperation.APPROVE;
+import static com.pmease.gitplex.core.model.PullRequestOperation.DISAPPROVE;
+import static com.pmease.gitplex.core.model.PullRequestOperation.DISCARD;
+import static com.pmease.gitplex.core.model.PullRequestOperation.INTEGRATE;
+import static com.pmease.gitplex.core.model.PullRequestOperation.REOPEN;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 
@@ -75,8 +80,11 @@ import com.pmease.gitplex.core.model.PullRequest.Status;
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestCommentReply;
 import com.pmease.gitplex.core.model.PullRequestOperation;
+import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.PullRequestVerification;
 import com.pmease.gitplex.core.model.Review;
+import com.pmease.gitplex.core.model.ReviewInvitation;
+import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.branch.BranchLink;
 import com.pmease.gitplex.web.event.PullRequestChanged;
 import com.pmease.gitplex.web.model.EntityModel;
@@ -933,7 +941,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		public boolean equals(Object obj) {
 			if (obj == null || getClass() != obj.getClass())  
 				return false;  
-			final PullRequestChangeTrait other = (PullRequestChangeTrait) obj;  
+			PullRequestChangeTrait other = (PullRequestChangeTrait) obj;  
 		    return Objects.equal(requestId, other.requestId);
 		}
 		
@@ -953,39 +961,47 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		}
 
 		@Override
-		public void onUpdated(PullRequest request) {
-			onChange(request);
+		public void onUpdated(PullRequestUpdate update) {
+			onChange(update.getRequest());
 		}
 
 		@Override
-		public void onReviewed(Review review) {
+		public void onReviewed(Review review, String comment) {
 			onChange(review.getUpdate().getRequest());
 		}
 
 		@Override
-		public void onIntegrated(PullRequest request) {
+		public void onIntegrated(PullRequest request, User user, String comment) {
 			onChange(request);
 		}
 
 		@Override
-		public void onDiscarded(PullRequest request) {
+		public void onDiscarded(PullRequest request, User user, String comment) {
 			onChange(request);
 		}
 
-		private void onChange(final PullRequest request) {
+		private void onChange(PullRequest request) {
 			/*
 			 * Make sure that pull request and associated objects are committed before
 			 * sending render request; otherwise rendering request may not reflect
 			 * expected status as rendering happens in another thread which may get
 			 * executed before pull request modification is committed.
 			 */
+			final PullRequestChangeTrait trait = new PullRequestChangeTrait();
+			trait.requestId = request.getId();
 			dao.afterCommit(new Runnable() {
 
 				@Override
 				public void run() {
-					PullRequestChangeTrait trait = new PullRequestChangeTrait();
-					trait.requestId = request.getId();
-					WebSocketRenderBehavior.requestToRender(trait, PageId.fromObj(InheritableThreadLocalData.get()));
+					// Send web socket message in a thread in order not to blocking UI operations
+					GitPlex.getInstance(ExecutorService.class).execute(new Runnable() {
+
+						@Override
+						public void run() {
+							WebSocketRenderBehavior.requestToRender(trait, PageId.fromObj(InheritableThreadLocalData.get()));
+						}
+						
+					});
 				}
 				
 			});
@@ -1014,6 +1030,30 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		@Override
 		public void onCommentReplied(PullRequestCommentReply reply) {
 			onChange(reply.getComment().getRequest());
+		}
+
+		@Override
+		public void onReopened(PullRequest request, User user, String comment) {
+		}
+
+		@Override
+		public void onMentioned(PullRequest request, User user, String content) {
+		}
+
+		@Override
+		public void onInvitingReview(ReviewInvitation invitation) {
+		}
+
+		@Override
+		public void pendingIntegration(PullRequest request) {
+		}
+
+		@Override
+		public void pendingUpdate(PullRequest request) {
+		}
+
+		@Override
+		public void pendingApproval(PullRequest request) {
 		}
 		
 	}

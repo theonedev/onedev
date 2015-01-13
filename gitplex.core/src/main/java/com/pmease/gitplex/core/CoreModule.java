@@ -20,10 +20,11 @@ import com.pmease.gitplex.core.extensionpoint.ConfigChangeListener;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.BranchManager;
+import com.pmease.gitplex.core.manager.BranchWatchManager;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DataManager;
 import com.pmease.gitplex.core.manager.MailManager;
-import com.pmease.gitplex.core.manager.NotificationManager;
+import com.pmease.gitplex.core.manager.PullRequestNotificationManager;
 import com.pmease.gitplex.core.manager.OldCommitCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentReplyManager;
@@ -39,10 +40,11 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultAuthorizationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultBranchManager;
+import com.pmease.gitplex.core.manager.impl.DefaultBranchWatchManager;
 import com.pmease.gitplex.core.manager.impl.DefaultConfigManager;
 import com.pmease.gitplex.core.manager.impl.DefaultDataManager;
 import com.pmease.gitplex.core.manager.impl.DefaultMailManager;
-import com.pmease.gitplex.core.manager.impl.DefaultNotificationManager;
+import com.pmease.gitplex.core.manager.impl.DefaultPullRequestNotificationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultOldCommitCommentManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestCommentManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestCommentReplyManager;
@@ -57,10 +59,6 @@ import com.pmease.gitplex.core.manager.impl.DefaultTeamManager;
 import com.pmease.gitplex.core.manager.impl.DefaultUserManager;
 import com.pmease.gitplex.core.manager.impl.DefaultVerificationManager;
 import com.pmease.gitplex.core.model.ModelLocator;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestComment;
-import com.pmease.gitplex.core.model.PullRequestCommentReply;
-import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.setting.SpecifiedGit;
 import com.pmease.gitplex.core.setting.SystemGit;
 import com.pmease.gitplex.core.validation.RepositoryNameReservation;
@@ -112,50 +110,6 @@ public class CoreModule extends AbstractPluginModule {
 			}
 		});
 		
-		contribute(PullRequestListener.class, new PullRequestListener() {
-
-			@Override
-			public void onOpened(PullRequest request) {
-			}
-
-			@Override
-			public void onUpdated(PullRequest request) {
-			}
-
-			@Override
-			public void onReviewed(Review review) {
-			}
-
-			@Override
-			public void onIntegrated(PullRequest request) {
-			}
-
-			@Override
-			public void onDiscarded(PullRequest request) {
-			}
-
-			@Override
-			public void onIntegrationPreviewCalculated(PullRequest request) {
-			}
-
-			@Override
-			public void onCommented(PullRequestComment comment) {
-			}
-
-			@Override
-			public void onVerified(PullRequest request) {
-			}
-
-			@Override
-			public void onAssigned(PullRequest request) {
-			}
-
-			@Override
-			public void onCommentReplied(PullRequestCommentReply reply) {
-			}
-			
-		});
-		
 		contribute(ServletConfigurator.class, CoreServletConfigurator.class);
 		
 		contribute(ImplementationProvider.class, new ImplementationProvider() {
@@ -189,18 +143,20 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestCommentReplyManager.class).to(DefaultPullRequestCommentReplyManager.class);
 		bind(PullRequestManager.class).to(DefaultPullRequestManager.class);
 		bind(PullRequestUpdateManager.class).to(DefaultPullRequestUpdateManager.class);
-		bind(PullRequestWatchManager.class).to(DefaultPullRequestWatchManager.class);
 		bind(RepositoryManager.class).to(DefaultRepositoryManager.class);
 		bind(TeamManager.class).to(DefaultTeamManager.class);
 		bind(UserManager.class).to(DefaultUserManager.class);
 		bind(VerificationManager.class).to(DefaultVerificationManager.class);
 		bind(ReviewInvitationManager.class).to(DefaultReviewInvitationManager.class);
 		bind(ReviewManager.class).to(DefaultReviewManager.class);
-		bind(NotificationManager.class).to(DefaultNotificationManager.class);
 		bind(OldCommitCommentManager.class).to(DefaultOldCommitCommentManager.class);
 		bind(MailManager.class).to(DefaultMailManager.class);
+		bind(BranchWatchManager.class).to(DefaultBranchWatchManager.class);
+		bind(PullRequestWatchManager.class).to(DefaultPullRequestWatchManager.class);
+		bind(PullRequestNotificationManager.class).to(DefaultPullRequestNotificationManager.class);
 
-		contribute(PullRequestListener.class, DefaultNotificationManager.class);
+		contribute(PullRequestListener.class, DefaultPullRequestNotificationManager.class);
+		contribute(PullRequestListener.class, DefaultPullRequestWatchManager.class);
 		contribute(ConfigChangeListener.class, DefaultPullRequestManager.class);
 	}
 	

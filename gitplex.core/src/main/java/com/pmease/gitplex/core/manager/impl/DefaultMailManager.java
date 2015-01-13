@@ -1,11 +1,11 @@
 package com.pmease.gitplex.core.manager.impl;
 
-import java.util.List;
+import java.util.Collection;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.MailManager;
 import com.pmease.gitplex.core.model.User;
@@ -21,13 +21,13 @@ public class DefaultMailManager implements MailManager {
 	}
 	
 	@Override
-	public void sendMail(List<User> toList, String subject, String body) {
+	public void sendMail(Collection<User> toList, String subject, String body) {
 		System.out.println("sending email to: " + toList + ", subject: " + subject);
 	}
 
 	@Override
 	public void sendMail(User toUser, String subject, String body) {
-		sendMail(Lists.newArrayList(toUser), subject, body);
+		sendMail(Sets.newHashSet(toUser), subject, body);
 	}
 
 }

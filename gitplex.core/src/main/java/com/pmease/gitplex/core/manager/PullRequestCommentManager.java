@@ -12,6 +12,6 @@ public interface PullRequestCommentManager {
 	 */
 	void updateInline(PullRequestComment comment);
 	
-	void save(PullRequestComment comment);
+	void save(PullRequestComment comment, boolean notify);
 	
 }

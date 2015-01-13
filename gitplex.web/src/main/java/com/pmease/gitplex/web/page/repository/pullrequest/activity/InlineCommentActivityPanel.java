@@ -28,18 +28,14 @@ import com.pmease.commons.util.diff.DiffLine;
 import com.pmease.commons.util.diff.Token;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.Comment;
-import com.pmease.gitplex.core.comment.CommentReply;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.model.PullRequestComment;
-import com.pmease.gitplex.core.model.PullRequestCommentReply;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.event.PullRequestChanged;
-import com.pmease.gitplex.web.model.EntityModel;
-import com.pmease.gitplex.web.model.ModelWrapper;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestComparePage;
 
@@ -210,14 +206,7 @@ public class InlineCommentActivityPanel extends Panel {
 		 * Make comment panel independent of context in order not to reset comment content while editing
 		 * when we update context of the inline comment
 		 */
-		add(new CommentPanel("comment", commentModel, new ModelWrapper<CommentReply>() {
-
-			@Override
-			public IModel<PullRequestCommentReply> asModel(CommentReply object) {
-				return new EntityModel<PullRequestCommentReply>((PullRequestCommentReply) object);
-			}
-			
-		}) {
+		add(new CommentPanel("comment", commentModel) {
 
 			@Override
 			protected Component newAdditionalCommentActions(String id, IModel<Comment> comment) {

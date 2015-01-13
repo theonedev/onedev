@@ -1,5 +1,7 @@
 package com.pmease.gitplex.core.manager.impl;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -9,7 +11,7 @@ import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.gitplex.core.manager.NotificationManager;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.ReviewInvitation;
@@ -20,12 +22,12 @@ public class DefaultReviewInvitationManager implements ReviewInvitationManager {
 
 	private final Dao dao;
 	
-	private final NotificationManager notificationManager;
+	private final Set<PullRequestListener> pullRequestListeners;
 	
 	@Inject
-	public DefaultReviewInvitationManager(Dao dao, NotificationManager notificationManager) {
+	public DefaultReviewInvitationManager(Dao dao, Set<PullRequestListener> pullRequestListeners) {
 		this.dao = dao;
-		this.notificationManager = notificationManager;
+		this.pullRequestListeners = pullRequestListeners;
 	}
 
 	@Sessional
@@ -40,7 +42,9 @@ public class DefaultReviewInvitationManager implements ReviewInvitationManager {
 	@Override
 	public void save(ReviewInvitation invitation) {
 		dao.persist(invitation);
-		notificationManager.notifyReview(invitation);
+		
+		for (PullRequestListener listener: pullRequestListeners)
+			listener.onInvitingReview(invitation);
 	}
 
 }

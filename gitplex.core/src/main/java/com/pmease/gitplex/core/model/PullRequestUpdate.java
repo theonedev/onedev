@@ -39,6 +39,9 @@ public class PullRequestUpdate extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private PullRequest request;
 	
+	@ManyToOne
+	private User user;
+	
 	@Column(nullable=false)
 	private String headCommitHash;
 
@@ -58,6 +61,14 @@ public class PullRequestUpdate extends AbstractEntity {
 
 	public void setRequest(PullRequest request) {
 		this.request = request;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 	public String getHeadCommitHash() {

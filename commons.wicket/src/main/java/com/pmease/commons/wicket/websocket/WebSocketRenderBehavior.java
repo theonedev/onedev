@@ -178,7 +178,7 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 
 	public static void requestToRender(Object trait, @Nullable PageId pageId) {
 		String message = asMessage(trait); 
-
+		
 		for (Iterator<Map.Entry<IWebSocketConnection, ConnectionData>> it = connections.entrySet().iterator(); it.hasNext();) {
 			Map.Entry<IWebSocketConnection, ConnectionData> entry = it.next();
 			IWebSocketConnection connection = entry.getKey();

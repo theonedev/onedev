@@ -19,7 +19,22 @@ import com.pmease.commons.hibernate.AbstractEntity;
 })
 public class PullRequestNotification extends AbstractEntity {
 
-	public enum Task {REVIEW, UPDATE, INTEGRATE};
+	public enum Task {
+		REVIEW("Please review this pull request."), 
+		UPDATE("Please update this pull request."), 
+		INTEGRATE("Please integrate this pull request.");
+
+		private final String displayName;
+		
+		Task(String displayName) {
+			this.displayName = displayName;
+		}
+		
+		@Override
+		public String toString() {
+			return displayName;
+		}
+	};
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
@@ -29,6 +44,7 @@ public class PullRequestNotification extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private User user;
 	
+	@Column(nullable=false)
 	private Task task;
 	
 	@Column(nullable=false)

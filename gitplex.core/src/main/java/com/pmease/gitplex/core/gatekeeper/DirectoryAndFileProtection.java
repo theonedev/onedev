@@ -103,6 +103,9 @@ public class DirectoryAndFileProtection extends AbstractGateKeeper {
 			IfApprovedBySpecifiedTeam ifApprovedBySpecifiedTeam = new IfApprovedBySpecifiedTeam();
 			ifApprovedBySpecifiedTeam.setTeamId(teamId);
 			approvalGate.getGateKeepers().add(ifApprovedBySpecifiedTeam);
+			IfSubmittedBySpecifiedTeam ifSubmittedBySpecifiedTeam = new IfSubmittedBySpecifiedTeam();
+			ifSubmittedBySpecifiedTeam.setTeamId(teamId);
+			approvalGate.getGateKeepers().add(ifSubmittedBySpecifiedTeam);
 		}
 		return approvalGate;
 	}

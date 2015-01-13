@@ -17,4 +17,5 @@ public interface InlineCommentSupport extends Serializable {
 			AroundContext commentContext, int line, String content);
 	
 	InlineComment getConcernedComment();
+
 }

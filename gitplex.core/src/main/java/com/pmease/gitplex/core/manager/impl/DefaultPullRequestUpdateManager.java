@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.pmease.commons.hibernate.Transactional;
+import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
@@ -27,19 +28,22 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 	
 	private final PullRequestCommentManager pullRequestCommentManager;
 	
+	private final UnitOfWork unitOfWork;
+	
 	@Inject
 	public DefaultPullRequestUpdateManager(Dao dao, StorageManager storageManager, 
-			Set<PullRequestListener> pullRequestListeners, 
+			Set<PullRequestListener> pullRequestListeners, UnitOfWork unitOfWork,
 			PullRequestCommentManager pullRequestCommentManager) {
 		this.dao = dao;
 		this.storageManager = storageManager;
 		this.pullRequestListeners = pullRequestListeners;
+		this.unitOfWork = unitOfWork;
 		this.pullRequestCommentManager = pullRequestCommentManager;
 	}
 
 	@Transactional
 	@Override
-	public void save(PullRequestUpdate update) {
+	public void save(PullRequestUpdate update, boolean notify) {
 		dao.persist(update);
 		
 		FileUtils.cleanDir(storageManager.getCacheDir(update));
@@ -56,13 +60,33 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 					sourceHead, null, null);
 		}
 		
-		for (PullRequestComment comment: request.getComments()) {
-			if (comment.getInlineInfo() != null)
-				pullRequestCommentManager.updateInline(comment);
+		if (notify) { 
+			for (PullRequestListener listener: pullRequestListeners)
+				listener.onUpdated(update);
 		}
 
-		for (PullRequestListener listener: pullRequestListeners)
-			listener.onUpdated(request);
+		// Inline comment update can be time consuming and we do it inside a separate thread 
+		// in order not to blocking the push operation
+		final Long requestId = request.getId();
+		dao.afterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				unitOfWork.asyncCall(new Runnable() {
+
+					@Override
+					public void run() {
+						PullRequest request = dao.load(PullRequest.class, requestId);
+						for (PullRequestComment comment: request.getComments()) {
+							if (comment.getInlineInfo() != null)
+								pullRequestCommentManager.updateInline(comment);
+						}
+					}
+					
+				});
+			}
+			
+		});
 	}
 
 	@Transactional

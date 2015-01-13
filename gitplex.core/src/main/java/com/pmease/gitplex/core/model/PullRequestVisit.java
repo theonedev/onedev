@@ -1,6 +1,8 @@
 package com.pmease.gitplex.core.model;
 
-import javax.annotation.Nullable;
+import java.util.Date;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -12,12 +14,10 @@ import com.pmease.commons.hibernate.AbstractEntity;
 
 @SuppressWarnings("serial")
 @Entity
-@Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"request", "user"})
-})
-public class PullRequestWatch extends AbstractEntity {
+@Table(uniqueConstraints={@UniqueConstraint(columnNames={"request", "user"})})
+public class PullRequestVisit extends AbstractEntity {
 
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(nullable=false)
 	private PullRequest request;
 	
@@ -25,10 +25,9 @@ public class PullRequestWatch extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private User user;
 	
-	private String reason;
-	
-	private boolean ignore;
-	
+	@Column(nullable=false)
+	private Date date = new Date();
+
 	public PullRequest getRequest() {
 		return request;
 	}
@@ -45,21 +44,12 @@ public class PullRequestWatch extends AbstractEntity {
 		this.user = user;
 	}
 
-	@Nullable
-	public String getReason() {
-		return reason;
+	public Date getDate() {
+		return date;
 	}
 
-	public void setReason(String reason) {
-		this.reason = reason;
-	}
-
-	public boolean isIgnore() {
-		return ignore;
-	}
-
-	public void setIgnore(boolean ignore) {
-		this.ignore = ignore;
+	public void setDate(Date date) {
+		this.date = date;
 	}
 
 }

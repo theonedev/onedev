@@ -439,7 +439,7 @@ public class RequestComparePage extends RequestDetailPage {
 									comment.setContext(commentContext);
 									InheritableThreadLocalData.set(new PageId(getPageId()));
 									try {
-										GitPlex.getInstance(PullRequestCommentManager.class).save(comment);
+										GitPlex.getInstance(PullRequestCommentManager.class).save(comment, true);
 									} finally {
 										InheritableThreadLocalData.clear();
 									}

@@ -39,10 +39,10 @@ import com.pmease.commons.util.LockUtils;
 import com.pmease.commons.util.Triple;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.ChangeComments;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.permission.ObjectPermission;
@@ -72,11 +72,16 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	public enum IntegrationStrategy {
-		MERGE_ALWAYS("Merge always", "Always create merge commit when integrate into target branch"), 
-		MERGE_IF_NECESSARY("Merge if necessary", "Create merge commit only if target branch can not be fast-forwarded to the pull request"), 
-		MERGE_WITH_SQUASH("Merge with squash", "Squash all commits in the pull request and then merge with target branch"),
-		REBASE_SOURCE_ONTO_TARGET("Rebase source onto target", "Rebase source branch onto target branch and then fast-forward target branch to source branch"), 
-		REBASE_TARGET_ONTO_SOURCE("Rebase target onto source", "Rebase target branch onto source branch");
+		MERGE_ALWAYS("Merge always", 
+				"Always create merge commit when integrate into target branch"), 
+		MERGE_IF_NECESSARY("Merge if necessary", 
+				"Create merge commit only if target branch can not be fast-forwarded to the pull request"), 
+		MERGE_WITH_SQUASH("Merge with squash", 
+				"Squash all commits in the pull request and then merge with target branch"),
+		REBASE_SOURCE_ONTO_TARGET("Rebase source onto target", 
+				"Rebase source branch onto target branch and then fast-forward target branch to source branch"), 
+		REBASE_TARGET_ONTO_SOURCE("Rebase target onto source", 
+				"Rebase target branch onto source branch");
 
 		private final String displayName;
 		
@@ -102,12 +107,15 @@ public class PullRequest extends AbstractEntity {
 
 	}
 	
+	public enum Event {OPENED, REVIEWED, VERIFIED, UPDATED, COMMENTED, INTEGRATED, DISCARDED, REOPENED};
+	
 	@Column
 	private CloseStatus closeStatus;
 
 	@Column(nullable=false)
 	private String title;
 	
+	@Column(length=65535)
 	private String description;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -140,7 +148,10 @@ public class PullRequest extends AbstractEntity {
 	private Date createDate = new Date();
 	
 	@Column(nullable=false)
-	private Date updateDate = new Date();
+	private Date lastEventDate = new Date();
+	
+	@Column(nullable=false)
+	private Event lastEvent = Event.OPENED;
 	
 	@Column(nullable=false)
 	private IntegrationStrategy integrationStrategy;
@@ -162,6 +173,12 @@ public class PullRequest extends AbstractEntity {
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestNotification> notifications = new ArrayList<>();
+	
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	private Collection<PullRequestVisit> visits = new ArrayList<>();
+
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	private Collection<PullRequestWatch> watches = new ArrayList<>();
 	
 	private transient CheckResult checkResult;
 
@@ -303,12 +320,27 @@ public class PullRequest extends AbstractEntity {
 		this.sandbox = sandbox;
 	}
 
+	/**
+	 * Get unmodifiable collection of updates of this pull request. To add update 
+	 * to the pull request, call {@link this#addUpdate(PullRequestUpdate)} instead.
+	 * 
+	 * @return
+	 * 			unmodifiable collection of updates
+	 */
 	public Collection<PullRequestUpdate> getUpdates() {
-		return updates;
+		return Collections.unmodifiableCollection(updates);
 	}
-
+	
 	public void setUpdates(Collection<PullRequestUpdate> updates) {
 		this.updates = updates;
+		sortedUpdates = null;
+		effectiveUpdates = null;
+	}
+
+	public void addUpdate(PullRequestUpdate update) {
+		updates.add(update);
+		sortedUpdates = null;
+		effectiveUpdates = null;
 	}
 
 	public Collection<ReviewInvitation> getReviewInvitations() {
@@ -349,6 +381,22 @@ public class PullRequest extends AbstractEntity {
 
 	public void setNotifications(Collection<PullRequestNotification> notifications) {
 		this.notifications = notifications;
+	}
+
+	public Collection<PullRequestVisit> getVisits() {
+		return visits;
+	}
+
+	public void setVisits(Collection<PullRequestVisit> visits) {
+		this.visits = visits;
+	}
+
+	public Collection<PullRequestWatch> getWatches() {
+		return watches;
+	}
+
+	public void setWatches(Collection<PullRequestWatch> watches) {
+		this.watches = watches;
 	}
 
 	public Status getStatus() {
@@ -442,8 +490,8 @@ public class PullRequest extends AbstractEntity {
 	 */
 	public List<PullRequestUpdate> getSortedUpdates() {
 		if (sortedUpdates == null) {
-			Preconditions.checkState(getUpdates().size() >= 1);
-			sortedUpdates = new ArrayList<PullRequestUpdate>(getUpdates());
+			Preconditions.checkState(updates.size() >= 1);
+			sortedUpdates = new ArrayList<PullRequestUpdate>(updates);
 			Collections.sort(sortedUpdates);
 		}
 		return sortedUpdates;
@@ -637,12 +685,20 @@ public class PullRequest extends AbstractEntity {
 		this.createDate = createDate;
 	}
 
-	public Date getUpdateDate() {
-		return updateDate;
+	public Date getLastEventDate() {
+		return lastEventDate;
 	}
 
-	public void setUpdateDate(Date updateDate) {
-		this.updateDate = updateDate;
+	public void setLastEventDate(Date lastEventDate) {
+		this.lastEventDate = lastEventDate;
+	}
+
+	public Event getLastEvent() {
+		return lastEvent;
+	}
+
+	public void setLastEvent(Event lastEvent) {
+		this.lastEvent = lastEvent;
 	}
 
 	/**
@@ -724,8 +780,12 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	public List<Review> getReviews() {
-		if (reviews == null) 
-			reviews = GitPlex.getInstance(ReviewManager.class).findBy(this);
+		if (reviews == null) { 
+			if (!isNew())
+				reviews = GitPlex.getInstance(ReviewManager.class).findBy(this);
+			else
+				reviews = new ArrayList<>();
+		}
 		return reviews;
 	}
 	
@@ -773,6 +833,29 @@ public class PullRequest extends AbstractEntity {
 				reviewers.add(user);
 		}
 		return reviewers;
+	}
+
+	@Nullable
+	public PullRequestWatch getWatch(User user) {
+		for (PullRequestWatch watch: getWatches()) {
+			if (watch.getUser().equals(user))
+				return watch;
+		}
+		return null;
+	}
+
+	@Nullable
+	public PullRequestVisit getVisit(User user) {
+		for (PullRequestVisit visit: getVisits()) {
+			if (visit.getUser().equals(user))
+				return visit;
+		}
+		return null;
+	}
+	
+	public String getUrl() {
+		return GitPlex.getInstance().getServerUrl() + "/" + getTarget().getRepository().getFQN() 
+				+ "/pull_requests/" + getId() + "/overview";
 	}
 	
 	private static class ChangeKey extends Triple<String, String, String> {

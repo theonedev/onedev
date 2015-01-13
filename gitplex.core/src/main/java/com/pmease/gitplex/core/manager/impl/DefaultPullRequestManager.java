@@ -8,6 +8,9 @@ import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERG
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_WITH_SQUASH;
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_SOURCE_ONTO_TARGET;
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_TARGET_ONTO_SOURCE;
+import static com.pmease.gitplex.core.model.PullRequest.Status.PENDING_APPROVAL;
+import static com.pmease.gitplex.core.model.PullRequest.Status.PENDING_INTEGRATE;
+import static com.pmease.gitplex.core.model.PullRequest.Status.PENDING_UPDATE;
 
 import java.io.File;
 import java.util.Collection;
@@ -44,12 +47,14 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.ConfigManager;
-import com.pmease.gitplex.core.manager.NotificationManager;
+import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
+import com.pmease.gitplex.core.manager.PullRequestNotificationManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.manager.StorageManager;
+import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.IntegrationPolicy;
 import com.pmease.gitplex.core.model.IntegrationPreview;
@@ -59,6 +64,7 @@ import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequestActivity;
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
+import com.pmease.gitplex.core.model.PullRequestVisit;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
@@ -74,7 +80,11 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
+	private final PullRequestCommentManager pullRequestCommentManager;
+	
 	private final BranchManager branchManager;
+	
+	private final UserManager userManager;
 	
 	private final StorageManager storageManager;
 	
@@ -83,8 +93,6 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	private final Set<PullRequestListener> pullRequestListeners;
 	
 	private final ReviewInvitationManager reviewInvitationManager;
-	
-	private final NotificationManager notificationManager;
 	
 	private final Set<Long> integrationPreviewRequestIds = new ConcurrentHashSet<>();
 
@@ -103,15 +111,17 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager, 
 			BranchManager branchManager, StorageManager storageManager, 
-			ReviewInvitationManager reviewInvitationManager, 
-			NotificationManager notificationManager, ConfigManager configManager,
+			ReviewInvitationManager reviewInvitationManager, UserManager userManager,
+			PullRequestNotificationManager notificationManager, ConfigManager configManager,
+			PullRequestCommentManager pullRequestCommentManager,
 			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners) {
 		this.dao = dao;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.branchManager = branchManager;
 		this.storageManager = storageManager;
 		this.reviewInvitationManager = reviewInvitationManager;
-		this.notificationManager = notificationManager;
+		this.pullRequestCommentManager = pullRequestCommentManager;
+		this.userManager = userManager;
 		this.unitOfWork = unitOfWork;
 		this.configManager = configManager;
 		this.pullRequestListeners = pullRequestListeners;
@@ -178,12 +188,13 @@ public class DefaultPullRequestManager implements PullRequestManager {
 
 	@Transactional
 	@Override
-	public void reopen(PullRequest request, User user, String comment) {
+	public void reopen(PullRequest request, String comment) {
 		Preconditions.checkState(!request.isOpen());
 		
 		request.setCloseStatus(null);
 		dao.persist(request);
 		
+		User user = userManager.getCurrent();
 		PullRequestActivity activity = new PullRequestActivity();
 		activity.setRequest(request);
 		activity.setDate(new DateTime().minusSeconds(1).toDate());
@@ -198,15 +209,19 @@ public class DefaultPullRequestManager implements PullRequestManager {
 			requestComment.setDate(activity.getDate());
 			requestComment.setRequest(request);
 			requestComment.setUser(user);
-			dao.persist(requestComment);
+			pullRequestCommentManager.save(requestComment, false);
 		}
 
-		onSourceBranchUpdate(request);
+		onSourceBranchUpdate(request, false);
+		
+		for (PullRequestListener listener: pullRequestListeners)
+			listener.onReopened(request, user, comment);
 	}
 
 	@Transactional
 	@Override
- 	public void discard(PullRequest request, final User user, final String comment) {
+ 	public void discard(PullRequest request, final String comment) {
+		User user = userManager.getCurrent();
 		PullRequestActivity activity = new PullRequestActivity();
 		activity.setRequest(request);
 		activity.setDate(new Date());
@@ -221,21 +236,22 @@ public class DefaultPullRequestManager implements PullRequestManager {
 			requestComment.setDate(activity.getDate());
 			requestComment.setRequest(request);
 			requestComment.setUser(user);
-			dao.persist(requestComment);
+			
+			pullRequestCommentManager.save(requestComment, false);
 		}
 
 		request.setCloseStatus(CloseStatus.DISCARDED);
-		request.setUpdateDate(activity.getDate());
+		request.setLastEventDate(activity.getDate());
 		dao.persist(request);
 		
 		for (PullRequestListener listener: pullRequestListeners)
-			listener.onDiscarded(request);
+			listener.onDiscarded(request, user, comment);
 	}
 	
 	@Transactional
 	@Override
-	public void integrate(PullRequest request, User user, String comment) {
-		if (request.getStatus() != PullRequest.Status.PENDING_INTEGRATE)
+	public void integrate(PullRequest request, String comment) {
+		if (request.getStatus() != PENDING_INTEGRATE)
 			throw new IllegalStateException("Gate keeper disallows integration right now.");
 	
 		IntegrationPreview preview = request.getIntegrationPreview();
@@ -245,6 +261,8 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		String integrated = preview.getIntegrated();
 		if (integrated == null)
 			throw new IllegalStateException("There are integration conflicts.");
+		
+		User user = userManager.getCurrent();
 
 		Git git = request.getTarget().getRepository().git();
 		IntegrationStrategy strategy = request.getIntegrationStrategy();
@@ -291,16 +309,16 @@ public class DefaultPullRequestManager implements PullRequestManager {
 			requestComment.setDate(activity.getDate());
 			requestComment.setRequest(request);
 			requestComment.setUser(user);
-			dao.persist(requestComment);
+			pullRequestCommentManager.save(requestComment, false);
 		}
 
 		request.setCloseStatus(CloseStatus.INTEGRATED);
-		request.setUpdateDate(new Date());
+		request.setLastEventDate(new Date());
 
 		dao.persist(request);
 
 		for (PullRequestListener listener: pullRequestListeners)
-			listener.onIntegrated(request);
+			listener.onIntegrated(request, user, comment);
 	}
 	
 	@Transactional
@@ -314,9 +332,9 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		
 		for (PullRequestUpdate update: request.getUpdates()) {
 			update.setDate(new Date(System.currentTimeMillis() + 1000));
-			pullRequestUpdateManager.save(update);
+			pullRequestUpdateManager.save(update, false);
 		}
-
+		
 		for (ReviewInvitation invitation: request.getReviewInvitations())
 			reviewInvitationManager.save(invitation);
 
@@ -381,18 +399,18 @@ public class DefaultPullRequestManager implements PullRequestManager {
 			
 			request.setLastIntegrationPreview(null);
 			request.setCloseStatus(CloseStatus.INTEGRATED);
-			request.setUpdateDate(new Date());
+			request.setLastEventDate(new Date());
 			
 			dao.persist(request);
 			
 			for (PullRequestListener listener: pullRequestListeners)
-				listener.onIntegrated(request);
+				listener.onIntegrated(request, null, null);
 		} 
 	}
 
 	@Transactional
 	@Override
-	public void onSourceBranchUpdate(PullRequest request) {
+	public void onSourceBranchUpdate(PullRequest request, boolean notify) {
 		if (request.getLatestUpdate().getHeadCommitHash().equals(request.getSource().getHeadCommitHash()))
 			return;
 		
@@ -400,9 +418,10 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		update.setRequest(request);
 		update.setDate(new Date());
 		update.setHeadCommitHash(request.getSource().getHeadCommitHash());
+		update.setUser(request.getSource().getLastUpdater());
 		
-		request.getUpdates().add(update);
-		pullRequestUpdateManager.save(update);
+		request.addUpdate(update);
+		pullRequestUpdateManager.save(update, notify);
 
 		final Long requestId = request.getId();
 		dao.afterCommit(new Runnable() {
@@ -434,20 +453,23 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		if (request.isOpen()) {
 			closeIfMerged(request);
 			if (request.isOpen()) {
-				if (request.getStatus() == PullRequest.Status.PENDING_UPDATE) {
-					notificationManager.notifyUpdate(request, false);
-				} else if (request.getStatus() == PullRequest.Status.PENDING_INTEGRATE) {
+				if (request.getStatus() == PENDING_UPDATE) {
+					for (PullRequestListener listener: pullRequestListeners)
+						listener.pendingUpdate(request);
+				} else if (request.getStatus() == PENDING_INTEGRATE) {
+					for (PullRequestListener listener: pullRequestListeners)
+						listener.pendingIntegration(request);
+					
 					IntegrationPreview integrationPreview = request.getIntegrationPreview();
-					if (integrationPreview != null) {
-						if (integrationPreview.getIntegrated() != null) {
-							if (request.getAssignee() != null)
-								notificationManager.notifyIntegration(request);
-							else 
-								integrate(request, null, "Integrated automatically by system");
-						}
+					if (integrationPreview != null 
+							&& integrationPreview.getIntegrated() != null 
+							&& request.getAssignee() == null) {
+						integrate(request, "Integrated automatically by system");
 					}
-				} else if (request.getStatus() == PullRequest.Status.PENDING_APPROVAL) {
-					notificationManager.pendingApproval(request);
+				} else if (request.getStatus() == PENDING_APPROVAL) {
+					for (PullRequestListener listener: pullRequestListeners)
+						listener.pendingApproval(request);
+					
 					for (ReviewInvitation invitation: request.getReviewInvitations()) { 
 						if (!invitation.getDate().before(now))
 							reviewInvitationManager.save(invitation);
@@ -459,7 +481,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 
 	@Override
 	public boolean canIntegrate(PullRequest request) {
-		if (request.getStatus() != PullRequest.Status.PENDING_INTEGRATE) {
+		if (request.getStatus() != PENDING_INTEGRATE) {
 			return false;
 		} else {
 			IntegrationPreview integrationPreview = request.getIntegrationPreview();
@@ -617,12 +639,10 @@ public class DefaultPullRequestManager implements PullRequestManager {
 							}
 							dao.persist(request);
 
-							if (request.getStatus() == PullRequest.Status.PENDING_INTEGRATE 
-									&& preview.getIntegrated() != null) {
-								if (request.getAssignee() != null)
-									notificationManager.notifyIntegration(request);
-								else 
-									integrate(request, null, "Integrated automatically by system");
+							if (request.getStatus() == PENDING_INTEGRATE 
+									&& preview.getIntegrated() != null
+									&& request.getAssignee() == null) {
+								integrate(request, "Integrated automatically by system");
 							}
 							
 							for (PullRequestListener listener: pullRequestListeners)
@@ -654,6 +674,20 @@ public class DefaultPullRequestManager implements PullRequestManager {
 			return new HashCodeBuilder(17, 37).append(requestId).toHashCode();
 		}
 		
+	}
+
+	@Override
+	public Date getLastVisitDate(PullRequest request) {
+		User user = userManager.getCurrent();
+		if (user != null) {
+			PullRequestVisit visit = request.getVisit(user);
+			if (visit != null)
+				return visit.getDate();
+			else 
+				return null;
+		} else {
+			return null;
+		}
 	}
 
 }

@@ -78,10 +78,11 @@ public abstract class CompareResultPanel extends Panel {
 		
 		add(changeNav = newChangeNav(activeChange == null || activeChange.getStatus() != UNCHANGED));
 
-		if (activeChange != null) 
+		if (activeChange != null) {
 			changeContent = new BlobDiffPanel("content", repoModel, activeChange, getInlineCommentSupport(activeChange));
-		else 
+		} else { 
 			changeContent = new WebMarkupContainer("content");
+		}
 		changeContent.setOutputMarkupId(true);
 		add(changeContent);
 	}

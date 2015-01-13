@@ -35,6 +35,7 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 		this.pullRequestListeners = pullRequestListeners;
 	}
 
+	@Transactional
 	@Override
 	public void updateInline(PullRequestComment comment) {
 		Preconditions.checkNotNull(comment.getInlineInfo());
@@ -155,11 +156,13 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 	
 	@Transactional
 	@Override
-	public void save(final PullRequestComment comment) {
+	public void save(PullRequestComment comment, boolean notify) {
 		dao.persist(comment);
 		
-		for (PullRequestListener listener: pullRequestListeners)
-			listener.onCommented(comment);
+		if (notify) {
+			for (PullRequestListener listener: pullRequestListeners)
+				listener.onCommented(comment);
+		}
 	}
 
 }

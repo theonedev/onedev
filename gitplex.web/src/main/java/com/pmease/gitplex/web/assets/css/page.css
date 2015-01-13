@@ -772,7 +772,9 @@ ul.diff-alerts {margin: 0 0 0 8px; padding: 4px 8px 4px 12px;}
 	max-width: 600px; color: #777; white-space: nowrap;}
 
 /* COMMENTS */
+.reply>.activity {padding-left: 4px;}
 .reply>.activity>div.summary {font-size: 13px;}
+.reply.new>.avatar {background: #FCF6D6;}
 .comment-input textarea {width: 100%; min-height: 80px;}
 .comment-input>.tab-pane {padding: 12px 0;}
 .comment-input>.tab-pane>.preview {display: none;}
@@ -889,14 +891,15 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail .activities>table {margin-bottom: 20px; border-bottom: 1px solid #E5E5E5;}
 .request-detail .activities>table>tbody>tr.discussion>td {border-top: 1px solid #E5E5E5; padding: 12px 0;}
 .request-detail .activities>table>tbody>tr.discussion.collapsed>td {padding: 8px 0;}
-.request-detail .activities>table>tbody>tr.discussion>td.avatar {width: 1px; padding-right: 12px;}
+.request-detail .activities>table>tbody>tr.discussion>td.avatar {width: 1px; padding-left: 12px; padding-right: 12px;}
 .request-detail .activities>table>tbody>tr.discussion>td.activity {padding-left: 12px;}
 .request-detail .activities>table>tbody>tr.activity>td.avatar {border-right: 1px dashed #DDD;}
+
 .request-detail .activities>table>tbody>tr.activity.discussion>td.avatar {border-right: none;}
 .request-detail .activities>table>tbody>tr.discussion+.non-discussion>td {border-top: 1px solid #E5E5E5;}
 .request-detail .activities>table>tbody>tr.discussion+.non-update>td {padding-top: 8px;}
 .request-detail .activities>table>tbody>tr.discussion>.avatar img {width: 40px; height: 40px;}
-.request-detail .activities>table>tbody>tr.non-discussion>td {padding-left: 6px;}
+.request-detail .activities>table>tbody>tr.non-discussion>td {padding-left: 6px; font-size: 13px;}
 .request-detail .activities>table>tbody>tr.non-discussion>td.avatar img {display: none;}
 .request-detail .activities>table>tbody>tr.non-discussion>.activity>div.summary .user a {font-weight: normal;}
 .request-detail .activities>table>tbody>tr.update+.update>td>table {margin-top: -12px;}
@@ -910,33 +913,34 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail .activities .activity>.commits td.detail {padding-left: 15px; padding-right: 8px;}
 .request-detail .activities .activity>.commits td.status {text-align: right;}
 .request-detail .activities .activity>.commits tr:hover td.detail, 
-.request-detail .activities .activity>.commits tr:hover td.status {background: #F7ECB9;}
+.request-detail .activities .activity>.commits tr:hover td.status {background: #F5F5F5;}
 .request-detail .activities .activity>.commits tr.rebased td a {color: #AAA;}
 .request-detail .activities .activity>.commits tr.rebased td.icon .pa {color: #CCC;}
 .request-detail .activities .activity>.commits tr.rebased img.avatar {opacity: 0.5;}
 .request-detail .activities .activity>.commits td.status .successful {color: #35A612;}
 .request-detail .activities .activity>.commits td.status .failed {color: #F93333;}
 .request-detail .activities .activity>.commits td.status .running {color: #AFAD1F;}
+.request-detail .activities .activity.new>.avatar {background: #FCF6D6;}
 
-.request-detail .others>.branches>.target {padding-bottom: 4px; border-bottom: 1px dotted #BBB; margin-bottom: 4px;}
-.request-detail .others>.branches span, .request-detail .others>.branches a {white-space: nowrap;}
-.request-detail .others>.branches>.source>a {margin-left: 4px;}
+.request-detail .others>div>div {border-bottom: 1px dotted #BBB; margin-bottom: 16px; 
+	padding-bottom: 16px; font-size: 13px; color: #666;}
+.request-detail .others>div>div:last-child {border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
+.request-detail .others .help-block {margin-bottom: 0; color: #888}
+.request-detail .others .fa {font-size: 14px; vertical-align: middle;}
 .request-detail .others label {margin-right: 4px; font-weight: normal;}
-	
-.request-detail .others>.integration>.preview>.alert {border-radius: 0 0 4px 4px; margin: 10px -20px -20px -20px;}
-.request-detail .others>.integration>.preview .detail {margin-left: 6px;}
-.request-detail .others>.integration>.preview img {width: 20px; height: 20px; vertical-align: bottom;}
-
-.request-detail .others>.assignee>img {width: 32px; height: 32px;}
-
-.request-detail .others>.reviewers ul {margin-bottom: 0;}
-.request-detail .others>.reviewers li {margin-right: 20px; margin-bottom: 10px; position: relative;}
-.request-detail .others>.reviewers li a:hover {text-decoration: none;}
-.request-detail .others>.reviewers .review-result {top: 12px;}
-	
-.request-detail .others>.assignee>label {margin-right: 8px;}
 .request-detail .others .select2-container {width: 100%;}
+.request-detail .others .avatar {width: 24px; height: 24px;}
+.request-detail .others .select2-container .avatar {width: 20px; height: 20px;}
 
+.request-detail .others .basic-info .submitter, .request-detail .others .basic-info .target {margin-bottom: 4px;}
+.request-detail .others .basic-info span, .request-detail .others .basic-info a {white-space: nowrap;}
+.request-detail .others .basic-info .source>a {margin-left: 4px;}
+
+.request-detail .others .reviewers ul {margin-bottom: 0;}
+.request-detail .others .reviewers li {margin-right: 20px; margin-bottom: 10px; position: relative;}
+.request-detail .others .reviewers li a:hover {text-decoration: none;}
+.request-detail .others .reviewers .review-result {top: 12px;}
+	
 .request-detail .activities .table-diff>tbody>.line.comments>td {padding: 12px;}
 .request-detail .activities .table-diff>tbody>tr.omit>td .pa {font-size: 24px; color: #888; margin-left: 12px;}
 .request-detail .activities .inline-comment.panel>.panel-heading {padding: 8px;}

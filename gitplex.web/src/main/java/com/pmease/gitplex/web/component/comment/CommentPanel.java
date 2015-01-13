@@ -10,6 +10,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
@@ -40,7 +41,6 @@ import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.event.PullRequestChanged;
-import com.pmease.gitplex.web.model.ModelWrapper;
 import com.pmease.gitplex.web.model.UserModel;
 
 @SuppressWarnings("serial")
@@ -50,9 +50,7 @@ public class CommentPanel extends Panel {
 	
 	private RepeatingView repliesView;
 	
-	private ModelWrapper<CommentReply> replyModelWrapper;
-	
-	private IModel<List<CommentReply>> repliesModel = new LoadableDetachableModel<List<CommentReply>>() {
+	private final IModel<List<CommentReply>> repliesModel = new LoadableDetachableModel<List<CommentReply>>() {
 
 		@Override
 		protected List<CommentReply> load() {
@@ -70,10 +68,8 @@ public class CommentPanel extends Panel {
 		
 	};
 	
-	public CommentPanel(String id, IModel<? extends Comment> commentModel, ModelWrapper<CommentReply> replyModelWrapper) {
+	public CommentPanel(String id, IModel<? extends Comment> commentModel) {
 		super(id, commentModel);
-		
-		this.replyModelWrapper = replyModelWrapper;
 	}
 
 	private Comment getComment() {
@@ -358,9 +354,12 @@ public class CommentPanel extends Panel {
 	}
 
 	private Component newReplyRow(String id, CommentReply reply) {
-		final WebMarkupContainer row = new WebMarkupContainer(id, replyModelWrapper.asModel(reply));
+		final WebMarkupContainer row = new WebMarkupContainer(id, Model.of(reply));
 		row.setOutputMarkupId(true);
-		row.add(new UserLink("avatar", new UserModel(reply.getUser()), AvatarMode.AVATAR));
+		
+		WebMarkupContainer avatarColumn = new WebMarkupContainer("avatar");
+		avatarColumn.add(new UserLink("avatar", new UserModel(reply.getUser()), AvatarMode.AVATAR));
+		row.add(avatarColumn);
 		row.add(new UserLink("user", new UserModel(reply.getUser()), AvatarMode.NAME));
 		row.add(new AgeLabel("age", Model.of(reply.getDate())));
 
@@ -442,16 +441,15 @@ public class CommentPanel extends Panel {
 
 		}.add(new ConfirmBehavior("Do you really want to delete this reply?")));
 		
-		row.add(newAdditionalReplyActions("additionalActions", new AbstractReadOnlyModel<CommentReply>() {
-
-			@Override
-			public CommentReply getObject() {
-				return (CommentReply) row.getDefaultModelObject();
-			}
-			
-		}));
+		row.add(newAdditionalReplyActions("additionalActions", (CommentReply) row.getDefaultModelObject()));
 		
 		row.add(renderForView(reply.getContent()));
+		
+		Date lastVisitDate = getComment().getLastVisitDate();
+		if (lastVisitDate != null && lastVisitDate.before(reply.getDate())) {
+			row.add(AttributeAppender.append("class", " new"));
+			avatarColumn.add(AttributeAppender.append("title", "New reply since your last visit"));
+		}
 		
 		return row;
 	}
@@ -460,7 +458,7 @@ public class CommentPanel extends Panel {
 		return new WebMarkupContainer(id);
 	}
 	
-	protected Component newAdditionalReplyActions(String id, IModel<CommentReply> reply) {
+	protected Component newAdditionalReplyActions(String id, CommentReply reply) {
 		return new WebMarkupContainer(id);
 	}
 

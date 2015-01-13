@@ -1,5 +1,7 @@
 package com.pmease.gitplex.core.model;
 
+import java.io.Serializable;
+
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
@@ -11,7 +13,9 @@ import com.pmease.commons.git.BlobInfo;
 import com.pmease.commons.util.diff.AroundContext;
 
 @Embeddable
-public class InlineInfo {
+public class InlineInfo implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	@Embedded
     @AttributeOverrides({
@@ -34,6 +38,7 @@ public class InlineInfo {
 	private Integer line;
 
 	@Lob
+	@Column(length=65535)
 	private AroundContext context;
 
 	public BlobInfo getBlobInfo() {

@@ -1,38 +1,52 @@
 package com.pmease.gitplex.web.component.pullrequest;
 
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.MarkupStream;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestOverviewPage;
 
 @SuppressWarnings("serial")
-public class RequestLink extends BookmarkablePageLink<Void> {
+public class RequestLink extends Panel {
 
-	private String title;
-	
-	public RequestLink(String id, PullRequest request) {
-		super(id, RequestOverviewPage.class, RequestOverviewPage.paramsOf(request));
-		
-		title = request.getTitle();
+	public RequestLink(String id, IModel<PullRequest> model) {
+		super(id, model);
 	}
 
 	@Override
-	public void onComponentTagBody(final MarkupStream markupStream,
-			final ComponentTag openTag) {
-
-		// Draw anything before the body?
-		if (!isLinkEnabled() && (getBeforeDisabledLink() != null)) {
-			getResponse().write(getBeforeDisabledLink());
-		}
+	protected void onInitialize() {
+		super.onInitialize();
 		
-		replaceComponentTagBody(markupStream, openTag, title);
+		add(new BookmarkablePageLink<Void>("link", RequestOverviewPage.class) {
 
-		// Draw anything after the body?
-		if (!isLinkEnabled() && (getAfterDisabledLink() != null)) {
-			getResponse().write(getAfterDisabledLink());
-		}
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				add(new Label("label", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						return getPullRequest().getTitle();
+					}
+					
+				}));
+			}
+
+			@Override
+			public PageParameters getPageParameters() {
+				return RequestOverviewPage.paramsOf(getPullRequest());
+			}
+			
+		});
 	}
 	
+	private PullRequest getPullRequest() {
+		return (PullRequest) getDefaultModelObject();
+	}
+
 }

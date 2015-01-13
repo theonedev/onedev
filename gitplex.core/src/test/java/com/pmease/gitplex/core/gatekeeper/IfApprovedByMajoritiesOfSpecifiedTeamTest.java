@@ -137,7 +137,7 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 		update.setHeadCommitHash(git.parseRevision("dev", true));
 		update.setId(1L);
 		update.setRequest(request);
-		request.getUpdates().add(update);
+		request.addUpdate(update);
 		
 		Review review = new Review();
 		review.setId(1L);

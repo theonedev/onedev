@@ -80,11 +80,11 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	private String description;
 	
 	@Lob
-	@Column(nullable=false)
+	@Column(nullable=false, length=65535)
 	private ArrayList<GateKeeper> gateKeepers = new ArrayList<>();
 	
 	@Lob
-	@Column(nullable=false)
+	@Column(nullable=false, length=65535)
 	private ArrayList<IntegrationPolicy> integrationPolicies = new ArrayList<>();
 	
 	@Column(nullable=false)
@@ -93,7 +93,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	@OneToMany(mappedBy="repository", cascade=CascadeType.REMOVE)
 	private Collection<Authorization> authorizations = new ArrayList<>();
 
-	@OneToMany(mappedBy="repository", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="repository")
     private Collection<Branch> branches = new ArrayList<>();
 
     @OneToMany(mappedBy="forkedFrom")
