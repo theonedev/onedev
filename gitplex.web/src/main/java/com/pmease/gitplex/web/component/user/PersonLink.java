@@ -71,11 +71,11 @@ public class PersonLink extends Panel {
 			displayName = person.getName();
 		
 		if (avatarMode == AvatarMode.NAME_AND_AVATAR || avatarMode == AvatarMode.AVATAR) {
-			Component avatar = new AvatarByEmail("avatar", new AbstractReadOnlyModel<String>(){
+			Component avatar = new AvatarByPerson("avatar", new AbstractReadOnlyModel<PersonIdent>(){
 
 				@Override
-				public String getObject() {
-					return getPerson().getEmailAddress();
+				public PersonIdent getObject() {
+					return getPerson();
 				}
 				
 			}, false);

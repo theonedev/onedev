@@ -1,8 +1,5 @@
 package com.pmease.gitplex.web.page.account;
 
-import java.io.IOException;
-import java.util.Date;
-
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.bean.validation.PropertyValidator;
@@ -14,14 +11,13 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.lang.Bytes;
 
-import com.google.common.base.Throwables;
 import com.pmease.commons.loader.AppLoader;
-import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.common.wicket.form.textfield.TextFieldElement;
 import com.pmease.gitplex.web.component.user.AvatarByUser;
 import com.pmease.gitplex.web.component.user.AvatarChanged;
@@ -83,6 +79,7 @@ public class AccountProfilePage extends AccountPage {
 				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 					User user = model.getObject();
 					AppLoader.getInstance(UserManager.class).save(user);
+					send(getPage(), Broadcast.BREADTH, new AvatarChanged(target));
 					form.success("Account profile has been updated.");
 					target.add(form);
 				}
@@ -125,13 +122,7 @@ public class AccountProfilePage extends AccountPage {
 					
 					User user = getUser();
 					if (upload != null) {
-						try {
-							upload.writeTo(user.getLocalAvatar());
-							user.setAvatarUpdateDate(new Date());
-							GitPlex.getInstance(UserManager.class).save(user);
-						} catch (IOException e) {
-							throw Throwables.propagate(e);
-						}
+						GitPlex.getInstance(AvatarManager.class).useAvatar(user, upload);
 
 						send(getPage(), Broadcast.BREADTH, new AvatarChanged(target));
 						form.success("Your avatar has been updated successfully");
@@ -144,9 +135,7 @@ public class AccountProfilePage extends AccountPage {
 				@Override
 				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 					User user = getUser();
-					FileUtils.deleteFile(user.getLocalAvatar());
-					user.setAvatarUpdateDate(null);
-					GitPlex.getInstance(UserManager.class).save(user);
+					GitPlex.getInstance(AvatarManager.class).resetAvatar(user);
 			        
 					send(getPage(), Broadcast.BREADTH, new AvatarChanged(target));
 			        form.success("Your avatar has been reset to the default.");

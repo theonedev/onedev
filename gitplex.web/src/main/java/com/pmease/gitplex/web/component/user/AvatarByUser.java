@@ -11,7 +11,7 @@ import org.apache.wicket.model.Model;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.web.service.AvatarManager;
+import com.pmease.gitplex.web.avatar.AvatarManager;
 
 @SuppressWarnings("serial")
 public class AvatarByUser extends WebComponent {

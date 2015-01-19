@@ -45,7 +45,8 @@ public class DefaultUserManager implements UserManager {
 	private final BiMap<String, Long> nameToId = HashBiMap.create();
 	
 	@Inject
-    public DefaultUserManager(Dao dao, RepositoryManager repositoryManager, PullRequestManager pullRequestManager) {
+    public DefaultUserManager(Dao dao, RepositoryManager repositoryManager, 
+    		PullRequestManager pullRequestManager) {
         this.dao = dao;
         this.repositoryManager = repositoryManager;
         this.pullRequestManager = pullRequestManager;
@@ -87,7 +88,7 @@ public class DefaultUserManager implements UserManager {
         	membership.setUser(user);
         	dao.persist(membership);
     	}
-
+    	
     	dao.afterCommit(new Runnable() {
 
 			@Override
@@ -128,7 +129,7 @@ public class DefaultUserManager implements UserManager {
     		pullRequestManager.delete(request);
     	
 		dao.remove(user);
-
+		
 		dao.afterCommit(new Runnable() {
 
 			@Override

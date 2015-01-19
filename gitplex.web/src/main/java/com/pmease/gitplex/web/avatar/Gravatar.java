@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.util;
+package com.pmease.gitplex.web.avatar;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;

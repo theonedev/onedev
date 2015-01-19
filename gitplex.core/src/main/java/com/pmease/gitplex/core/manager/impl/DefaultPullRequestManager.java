@@ -56,6 +56,7 @@ import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.Config;
 import com.pmease.gitplex.core.model.IntegrationPolicy;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -517,16 +518,8 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	}
 
 	@Override
-	public void systemSettingChanged() {
-	}
-
-	@Override
-	public void mailSettingChanged() {
-	}
-
-	@Override
-	public void qosSettingChanged() {
-		if (integrationPreviewExecutor != null) {
+	public void onSave(Config config) {
+		if (config.getKey() == Config.Key.QOS && integrationPreviewExecutor != null) {
 			int integrationPreviewWorkers = getIntegrationPreviewWorkers();
 			integrationPreviewExecutor.setCorePoolSize(integrationPreviewWorkers);
 			integrationPreviewExecutor.setMaximumPoolSize(integrationPreviewWorkers);

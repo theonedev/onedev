@@ -1,6 +1,5 @@
 package com.pmease.gitplex.core.model;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -18,7 +17,6 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Objects;
-import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.Password;
 import com.pmease.commons.shiro.AbstractUser;
@@ -41,7 +39,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	
 	private boolean admin;
 	
-	private Date avatarUpdateDate;
+	private Date avatarUploadDate;
 	
 	private int reviewEffort;
 	
@@ -125,12 +123,12 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.admin = admin;
 	}
 
-	public Date getAvatarUpdateDate() {
-		return avatarUpdateDate;
+	public Date getAvatarUploadDate() {
+		return avatarUploadDate;
 	}
 
-	public void setAvatarUpdateDate(Date avatarUpdateDate) {
-		this.avatarUpdateDate = avatarUpdateDate;
+	public void setAvatarUploadDate(Date avatarUploadDate) {
+		this.avatarUploadDate = avatarUploadDate;
 	}
 
 	public Collection<Membership> getMemberships() {
@@ -243,10 +241,6 @@ public class User extends AbstractUser implements ProtectedObject {
 	
 	public PersonIdent asPerson() {
 		return new PersonIdent(getName(), getEmail());
-	}
-	
-	public File getLocalAvatar() {
-		return new File(Bootstrap.getSiteDir(), "avatars/" + getId());
 	}
 	
 	public String getDisplayName() {

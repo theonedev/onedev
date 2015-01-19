@@ -7,14 +7,14 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.pmease.commons.bootstrap.Lifecycle;
-import com.pmease.gitplex.core.extensionpoint.ConfigChangeListener;
+import com.pmease.gitplex.core.extensionpoint.ConfigListener;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.Repository;
 
-public interface PullRequestManager extends Lifecycle, ConfigChangeListener {
+public interface PullRequestManager extends Lifecycle, ConfigListener {
     
     @Nullable PullRequest findOpen(Branch target, Branch source);
     

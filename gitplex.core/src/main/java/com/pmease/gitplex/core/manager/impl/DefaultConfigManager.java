@@ -13,7 +13,7 @@ import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.gitplex.core.extensionpoint.ConfigChangeListener;
+import com.pmease.gitplex.core.extensionpoint.ConfigListener;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.model.Config;
 import com.pmease.gitplex.core.model.Config.Key;
@@ -26,7 +26,7 @@ public class DefaultConfigManager implements ConfigManager {
 	
 	private final Dao dao;
 	
-	private final Provider<Set<ConfigChangeListener>> changeListenersProvider;
+	private final Provider<Set<ConfigListener>> listenersProvider;
 	
 	private volatile Long systemSettingConfigId;
 	
@@ -35,9 +35,9 @@ public class DefaultConfigManager implements ConfigManager {
 	private volatile Long qosSettingConfigId;
 	
 	@Inject
-	public DefaultConfigManager(Dao dao, Provider<Set<ConfigChangeListener>> changeListenersProvider) {
+	public DefaultConfigManager(Dao dao, Provider<Set<ConfigListener>> listenersProvider) {
 		this.dao = dao;
-		this.changeListenersProvider = changeListenersProvider;
+		this.listenersProvider = listenersProvider;
 	}
 
 	@Sessional
@@ -69,8 +69,8 @@ public class DefaultConfigManager implements ConfigManager {
 		config.setSetting(systemSetting);
 		dao.persist(config);
 		
-		for (ConfigChangeListener listener: changeListenersProvider.get())
-			listener.systemSettingChanged();
+		for (ConfigListener listener: listenersProvider.get())
+			listener.onSave(config);
 	}
 
 	@Sessional
@@ -104,8 +104,8 @@ public class DefaultConfigManager implements ConfigManager {
 		config.setSetting(mailSetting);
 		dao.persist(config);
 
-		for (ConfigChangeListener listener: changeListenersProvider.get())
-			listener.mailSettingChanged();
+		for (ConfigListener listener: listenersProvider.get())
+			listener.onSave(config);
 	}
 
 	@Sessional
@@ -137,8 +137,8 @@ public class DefaultConfigManager implements ConfigManager {
 		config.setSetting(qosSetting);
 		dao.persist(config);
 
-		for (ConfigChangeListener listener: changeListenersProvider.get())
-			listener.qosSettingChanged();
+		for (ConfigListener listener: listenersProvider.get())
+			listener.onSave(config);
 	}
 
 }

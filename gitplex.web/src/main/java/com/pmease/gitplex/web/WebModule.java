@@ -14,6 +14,8 @@ import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.validation.UserNameReservation;
+import com.pmease.gitplex.web.avatar.AvatarManager;
+import com.pmease.gitplex.web.avatar.DefaultAvatarManager;
 import com.pmease.gitplex.web.editable.EditSupportLocator;
 import com.pmease.gitplex.web.extensionpoint.DiffRenderer;
 import com.pmease.gitplex.web.extensionpoint.DiffRendererProvider;
@@ -22,9 +24,7 @@ import com.pmease.gitplex.web.extensionpoint.MediaRendererProvider;
 import com.pmease.gitplex.web.page.repository.code.blob.renderer.BlobRendererFactory;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestDetailPage;
 import com.pmease.gitplex.web.resource.ResourceLocator;
-import com.pmease.gitplex.web.service.AvatarManager;
 import com.pmease.gitplex.web.service.FileBlobService;
-import com.pmease.gitplex.web.service.impl.DefaultAvatarManager;
 import com.pmease.gitplex.web.service.impl.DefaultFileBlobService;
 
 /**

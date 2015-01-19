@@ -18,7 +18,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.service.AvatarManager;
+import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 
