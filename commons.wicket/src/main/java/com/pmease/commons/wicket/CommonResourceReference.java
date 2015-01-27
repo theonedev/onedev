@@ -24,17 +24,13 @@ import de.agilecoders.wicket.webjars.request.resource.WebjarsJavaScriptResourceR
  * @author robin
  *
  */
-class CommonResourceReference extends JavaScriptResourceReference {
+public class CommonResourceReference extends JavaScriptResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
 	private List<HeaderItem> bootstrapHeaderItems = new ArrayList<>();
 	
-	public static CommonResourceReference get() {
-		return INSTANCE;
-	}
-	
-	private static CommonResourceReference INSTANCE = new CommonResourceReference();
+	public static final CommonResourceReference INSTANCE = new CommonResourceReference();
 	
 	private CommonResourceReference() {
 		super(new Key(Assets.COMMON_JS));

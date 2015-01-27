@@ -60,11 +60,6 @@
 			<version>2.2.3</version>
 		</dependency>
 		<dependency>
-			<groupId>org.pegdown</groupId>
-			<artifactId>pegdown</artifactId>
-			<version>1.4.2</version>
-		</dependency>
-		<dependency>
 			<groupId>org.webjars</groupId>
 			<artifactId>historyjs</artifactId>
 			<version>1.8.0</version>

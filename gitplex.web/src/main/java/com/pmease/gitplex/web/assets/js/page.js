@@ -154,6 +154,7 @@ var gitplex = {
 			$("#diffline-" + index).find("a.add-comment").show();
 		}
 	}
+	
 };
 
 $(document).ready(function() {

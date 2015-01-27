@@ -113,7 +113,7 @@ public abstract class CommonPage extends WebPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(new PriorityHeaderItem(JavaScriptHeaderItem.forReference(CommonResourceReference.get())));
+		response.render(new PriorityHeaderItem(JavaScriptHeaderItem.forReference(CommonResourceReference.INSTANCE)));
 	}
 	
 }

@@ -94,7 +94,7 @@ public class WicketConfig extends AbstractWicketConfig {
 		configureResources();
 		
 		// mount all pages and resources
-		mount(new GitPlexMappings(this));
+		mount(new GitPlexMounting(this));
 	}
 
 	private void configureResources() {

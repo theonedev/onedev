@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.hibernate.cfg.NamingStrategy;
+import org.pegdown.Parser;
+import org.pegdown.plugins.ToHtmlSerializerPlugin;
 
 import com.google.common.collect.Sets;
 import com.pmease.commons.git.GitConfig;
@@ -17,6 +19,8 @@ import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.loader.ImplementationProvider;
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.gitplex.core.extensionpoint.ConfigListener;
+import com.pmease.gitplex.core.extensionpoint.HtmlTransformer;
+import com.pmease.gitplex.core.extensionpoint.MarkdownExtension;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.BranchManager;
@@ -24,11 +28,12 @@ import com.pmease.gitplex.core.manager.BranchWatchManager;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DataManager;
 import com.pmease.gitplex.core.manager.MailManager;
-import com.pmease.gitplex.core.manager.PullRequestNotificationManager;
+import com.pmease.gitplex.core.manager.MarkdownManager;
 import com.pmease.gitplex.core.manager.OldCommitCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentReplyManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
+import com.pmease.gitplex.core.manager.PullRequestNotificationManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.PullRequestWatchManager;
 import com.pmease.gitplex.core.manager.RepositoryManager;
@@ -44,11 +49,12 @@ import com.pmease.gitplex.core.manager.impl.DefaultBranchWatchManager;
 import com.pmease.gitplex.core.manager.impl.DefaultConfigManager;
 import com.pmease.gitplex.core.manager.impl.DefaultDataManager;
 import com.pmease.gitplex.core.manager.impl.DefaultMailManager;
-import com.pmease.gitplex.core.manager.impl.DefaultPullRequestNotificationManager;
+import com.pmease.gitplex.core.manager.impl.DefaultMarkdownManager;
 import com.pmease.gitplex.core.manager.impl.DefaultOldCommitCommentManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestCommentManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestCommentReplyManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestManager;
+import com.pmease.gitplex.core.manager.impl.DefaultPullRequestNotificationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestWatchManager;
 import com.pmease.gitplex.core.manager.impl.DefaultRepositoryManager;
@@ -110,6 +116,30 @@ public class CoreModule extends AbstractPluginModule {
 			}
 		});
 		
+		contribute(MarkdownExtension.class, new MarkdownExtension() {
+			
+			@Override
+			public Collection<Class<? extends Parser>> getInlineParsers() {
+				return null;
+			}
+			
+			@Override
+			public Collection<ToHtmlSerializerPlugin> getHtmlSerializers() {
+				return null;
+			}
+			
+			@Override
+			public Collection<Class<? extends Parser>> getBlockParsers() {
+				return null;
+			}
+
+			@Override
+			public Collection<HtmlTransformer> getHtmlTransformers() {
+				return null;
+			}
+			
+		});
+		
 		contribute(ServletConfigurator.class, CoreServletConfigurator.class);
 		
 		contribute(ImplementationProvider.class, new ImplementationProvider() {
@@ -154,6 +184,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(BranchWatchManager.class).to(DefaultBranchWatchManager.class);
 		bind(PullRequestWatchManager.class).to(DefaultPullRequestWatchManager.class);
 		bind(PullRequestNotificationManager.class).to(DefaultPullRequestNotificationManager.class);
+		bind(MarkdownManager.class).to(DefaultMarkdownManager.class);
 
 		contribute(PullRequestListener.class, DefaultPullRequestNotificationManager.class);
 		contribute(PullRequestListener.class, DefaultPullRequestWatchManager.class);

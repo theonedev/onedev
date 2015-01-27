@@ -1,0 +1,5 @@
+/* MARKDOWN */
+.md-preview .emoji {width: 20px; height: 20px;}
+.atwho-view .emoji {display: inline-block; height: 20px; width: 20px; vertical-align: middle; 
+	background-repeat: no-repeat; background-size: 20px 20px;}
+.atwho-view .avatar img {display: inline-block; width: 20px; height: 20px; vertical-align: middle;}

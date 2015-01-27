@@ -60,4 +60,5 @@ public interface UserManager extends Lifecycle {
 	 * @return all accounts can be managed
 	 */
 	List<User> getManagableAccounts(User user);
+	
 }

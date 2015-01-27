@@ -1,10 +1,15 @@
 package com.pmease.gitplex.web;
 
+import java.util.Collection;
+
 import org.apache.tika.mime.MediaType;
 import org.apache.wicket.Application;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.pegdown.Parser;
+import org.pegdown.plugins.ToHtmlSerializerPlugin;
 
+import com.google.common.collect.Lists;
 import com.pmease.commons.git.extensionpoint.TextConverter;
 import com.pmease.commons.git.extensionpoint.TextConverterProvider;
 import com.pmease.commons.jersey.JerseyConfigurator;
@@ -12,10 +17,15 @@ import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.commons.wicket.editable.EditSupport;
+import com.pmease.gitplex.core.extensionpoint.HtmlTransformer;
+import com.pmease.gitplex.core.extensionpoint.MarkdownExtension;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.validation.UserNameReservation;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.avatar.DefaultAvatarManager;
+import com.pmease.gitplex.web.component.markdown.EmojiTransformer;
+import com.pmease.gitplex.web.component.markdown.MentionTransformer;
+import com.pmease.gitplex.web.component.markdown.NormalizeTransformer;
 import com.pmease.gitplex.web.editable.EditSupportLocator;
 import com.pmease.gitplex.web.extensionpoint.DiffRenderer;
 import com.pmease.gitplex.web.extensionpoint.DiffRendererProvider;
@@ -87,6 +97,30 @@ public class WebModule extends AbstractPluginModule {
 				return null;
 			}
 
+		});
+		
+		contribute(MarkdownExtension.class, new MarkdownExtension() {
+			
+			@Override
+			public Collection<Class<? extends Parser>> getInlineParsers() {
+				return null;
+			}
+			
+			@Override
+			public Collection<ToHtmlSerializerPlugin> getHtmlSerializers() {
+				return null;
+			}
+			
+			@Override
+			public Collection<Class<? extends Parser>> getBlockParsers() {
+				return null;
+			}
+
+			@Override
+			public Collection<HtmlTransformer> getHtmlTransformers() {
+				return Lists.newArrayList(new EmojiTransformer(), new MentionTransformer(), new NormalizeTransformer());
+			}
+			
 		});
 	}
 

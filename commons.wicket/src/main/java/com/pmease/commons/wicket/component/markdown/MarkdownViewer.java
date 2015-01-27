@@ -1,16 +1,9 @@
 package com.pmease.commons.wicket.component.markdown;
 
-import static org.pegdown.Extensions.ALL;
-import static org.pegdown.Extensions.SMARTYPANTS;
-
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.pegdown.LinkRenderer;
-import org.pegdown.PegDownProcessor;
-
-import com.google.common.base.Strings;
 
 @SuppressWarnings("serial")
 public class MarkdownViewer extends Panel {
@@ -28,13 +21,7 @@ public class MarkdownViewer extends Panel {
 
 			@Override
 			protected String load() {
-				String markdown = MarkdownViewer.this.getDefaultModelObjectAsString();
-				if (!Strings.isNullOrEmpty(markdown)) {
-					PegDownProcessor pd = new PegDownProcessor(ALL & ~SMARTYPANTS);
-					return pd.markdownToHtml(markdown, new LinkRenderer());
-				} else {
-					return "<i>Nothing to preview.</i>";
-				}
+				return "";
 			}
 		}).setEscapeModelStrings(false));
 
