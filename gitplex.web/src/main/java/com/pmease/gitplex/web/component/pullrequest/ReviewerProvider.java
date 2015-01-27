@@ -9,6 +9,8 @@ import java.util.List;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.Url;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
@@ -70,7 +72,8 @@ public class ReviewerProvider extends ChoiceProvider<User> {
 		if (choice.getFullName() != null)
 			writer.key("fullName").value(StringEscapeUtils.escapeHtml4(choice.getFullName()));
 		writer.key("email").value(StringEscapeUtils.escapeHtml4(choice.getEmail()));
-		writer.key("avatar").value(GitPlex.getInstance(AvatarManager.class).getAvatarUrl(choice));
+		String avatarUrl = GitPlex.getInstance(AvatarManager.class).getAvatarUrl(choice);
+		writer.key("avatar").value(RequestCycle.get().getUrlRenderer().renderUrl(Url.parse(avatarUrl)));
 	}
 
 	@Override

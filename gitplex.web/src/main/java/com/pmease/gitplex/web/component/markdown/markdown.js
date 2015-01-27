@@ -3,7 +3,7 @@ gitplex.markdown = function(elementId, atWhoLimit, callback) {
 
 	$element.markdown({
 		onPreview: function(e) {
-			callback("previewMarkdown", e.getContent());
+			callback("markdownPreview", e.getContent());
 			return "Loading...";
 		}				
 	});

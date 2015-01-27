@@ -6,6 +6,8 @@ import java.util.List;
 import com.pmease.gitplex.core.GitPlex;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.wicket.request.Url;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
@@ -50,7 +52,8 @@ public class UserChoiceProvider extends ChoiceProvider<User> {
 		if (choice.getFullName() != null)
 			writer.key("fullName").value(StringEscapeUtils.escapeHtml4(choice.getFullName()));
 		writer.key("email").value(StringEscapeUtils.escapeHtml4(choice.getEmail()));
-		writer.key("avatar").value(GitPlex.getInstance(AvatarManager.class).getAvatarUrl(choice));
+		String avatarUrl = GitPlex.getInstance(AvatarManager.class).getAvatarUrl(choice);
+		writer.key("avatar").value(RequestCycle.get().getUrlRenderer().renderUrl(Url.parse(avatarUrl)));
 	}
 
 	@Override

@@ -10,6 +10,8 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.Permission;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.Url;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
@@ -81,7 +83,8 @@ public class AssigneeProvider extends ChoiceProvider<Assignee> {
 		if (choice.getUser().getFullName() != null)
 			writer.key("fullName").value(StringEscapeUtils.escapeHtml4(choice.getUser().getFullName()));
 		writer.key("email").value(StringEscapeUtils.escapeHtml4(choice.getUser().getEmail()));
-		writer.key("avatar").value(GitPlex.getInstance(AvatarManager.class).getAvatarUrl(choice.getUser()));
+		String avatarUrl =  GitPlex.getInstance(AvatarManager.class).getAvatarUrl(choice.getUser());
+		writer.key("avatar").value(RequestCycle.get().getUrlRenderer().renderUrl(Url.parse(avatarUrl)));
 		if (choice.getAlias() != null)
 			writer.key("alias").value(StringEscapeUtils.escapeHtml4(choice.getAlias()));
 	}

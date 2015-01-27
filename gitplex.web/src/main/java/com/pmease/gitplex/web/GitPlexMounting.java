@@ -66,7 +66,7 @@ public class GitPlexMounting extends CompoundRequestMapper {
 		
 		addPage("init", ServerInitPage.class);
 		addPage("register", RegisterPage.class);
-		addPage("/test", TestPage.class);
+		addPage("/test/hello", TestPage.class);
 	}
 
 	private void addErrorPages() {

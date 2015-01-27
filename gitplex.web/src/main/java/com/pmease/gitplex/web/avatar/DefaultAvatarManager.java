@@ -29,7 +29,7 @@ public class DefaultAvatarManager implements AvatarManager {
 
 	private static final int GRAVATAR_SIZE = 256;
 	
-	private static final String AVATARS_BASE_URL = "/site/avatars/";
+	private static final String AVATARS_BASE_URL = "site/avatars/";
 	
 	private final ConfigManager configManager;
 	

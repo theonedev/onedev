@@ -34,6 +34,7 @@ public class Config extends AbstractEntity {
 	 * a null setting.
 	 */
 	@Lob
+	@Column(length=65535)
 	private Serializable setting;
 
 	public Key getKey() {
