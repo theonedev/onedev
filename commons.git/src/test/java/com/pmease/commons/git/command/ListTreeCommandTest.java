@@ -36,7 +36,7 @@ public class ListTreeCommandTest extends AbstractGitTest {
 		git.addSubModule(moduleGit.repoDir().getAbsolutePath(), "module");
 		git.commit("commit", false, false);
 
-		git.checkout("head", "dev");
+		git.checkout("HEAD", "dev");
 		rm("dir/file");
 		commit("commit");
 		

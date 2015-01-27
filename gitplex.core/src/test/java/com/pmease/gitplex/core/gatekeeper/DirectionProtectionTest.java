@@ -78,8 +78,10 @@ public class DirectionProtectionTest extends AbstractGitTest {
 		
 		Branch branch1 = new Branch();
 		branch1.setId(1L);
+		branch1.setName("branch1");
 		Branch branch2 = new Branch();
 		branch2.setId(2L);
+		branch2.setName("branch2");
 		assertTrue(pathProtection.checkFile(user1, branch1, "src/test.java").isPassed());
 		assertTrue(pathProtection.checkFile(user1, branch1, "doc/test.pdf").isPassed());
 		assertTrue(pathProtection.checkFile(user2, branch1, "src/test.java").isPending());
@@ -103,12 +105,13 @@ public class DirectionProtectionTest extends AbstractGitTest {
 		addFileAndCommit("src/file1", "", "add src/file1");
 
 		git.checkout("master", "branch1");
+		git.checkout("master", "branch2");
 		
-		Branch master = new Branch();
-		master.setName("master");
-		master.setHeadCommitHash(git.parseRevision("master", true));
-		master.setId(1L);
-		master.setRepository(new Repository() {
+		Branch branch1 = new Branch();
+		branch1.setName("branch1");
+		branch1.setHeadCommitHash(git.parseRevision("branch1", true));
+		branch1.setId(1L);
+		branch1.setRepository(new Repository() {
 
 			@Override
 			public Git git() {
@@ -125,15 +128,15 @@ public class DirectionProtectionTest extends AbstractGitTest {
 
 		addFileAndCommit("src/file2", "", "add src/file2");
 		
-		assertTrue(pathProtection.checkCommit(user1, master, git.parseRevision("branch1", true)).isPassed());
-		assertTrue(pathProtection.checkCommit(user2, master, git.parseRevision("branch1", true)).isPending());
-		
-		git.checkout("master", "branch2");
+		assertTrue(pathProtection.checkCommit(user1, branch1, git.parseRevision("branch2", true)).isPassed());
+		assertTrue(pathProtection.checkCommit(user2, branch1, git.parseRevision("branch2", true)).isPending());
+
+		git.checkout("master", "branch3");
 
 		addFileAndCommit("docs/file2", "", "add docs/file2");
 		
-		assertTrue(pathProtection.checkCommit(user1, master, git.parseRevision("branch2", true)).isPassed());
-		assertTrue(pathProtection.checkCommit(user2, master, git.parseRevision("branch2", true)).isPassed());
+		assertTrue(pathProtection.checkCommit(user1, branch1, git.parseRevision("branch3", true)).isPassed());
+		assertTrue(pathProtection.checkCommit(user2, branch1, git.parseRevision("branch3", true)).isPassed());
 	}
 
 }

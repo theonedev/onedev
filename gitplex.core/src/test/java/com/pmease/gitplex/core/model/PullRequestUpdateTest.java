@@ -64,7 +64,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 
         addFileAndCommit("a", "", "master:1");
         
-        git.checkout("head", "dev");
+        git.checkout("HEAD", "dev");
 
         addFileAndCommit("b", "", "dev:2");
         
@@ -153,7 +153,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 
         addFileAndCommit("0", "", "0");
         
-        git.checkout("head", "dev");
+        git.checkout("HEAD", "dev");
         git.checkout("master", null);
 
         addFileAndCommit("m1", "", "m1");
@@ -206,7 +206,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 
         addFileAndCommit("0", "", "0");
         
-        git.checkout("head", "dev");
+        git.checkout("HEAD", "dev");
         git.checkout("master", null);
 
         addFileAndCommit("m1", "", "m1");

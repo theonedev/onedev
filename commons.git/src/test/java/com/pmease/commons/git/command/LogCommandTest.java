@@ -26,7 +26,7 @@ public class LogCommandTest extends AbstractGitTest {
 		addFile("dir/file2", "hello world");
 		commit("add dir/file\nadd dir/file to test files under a directory");
 		
-		git.checkout("head", "dev");
+		git.checkout("HEAD", "dev");
 		rm("dir/file");
 		commit("remove dir/file");
 
