@@ -4,7 +4,7 @@
 	<header>
 		<nav class="navbar navbar-default" role="navigation">
 			<div class="navbar-left">
-				<a class="navbar-brand" wicket:id="homeLink"><i class="pa pa-logo-gitplex"></i></a>
+				<a class="navbar-brand" wicket:id="homeLink"><i class="fa fa-ext fa-gitplex-logo"></i></a>
 				<form class="navbar-form navbar-left search-form" role="search">
 				    <div class="form-group">
 				      <input type="text" class="form-control text-field" placeholder="Search">
@@ -22,10 +22,10 @@
 					
 					<wicket:enclosure child="logoutLink">
 						<wicket:enclosure child="adminLink">
-						<li><a class="has-tip" wicket:id="adminLink" data-toggle="tooltip" title="System administration"><i class="pa pa-tools"></i></a></li>
+						<li><a class="has-tip" wicket:id="adminLink" data-toggle="tooltip" title="System administration"><i class="fa fa-wrench"></i></a></li>
 						</wicket:enclosure>
-						<li><a class="has-tip" data-toggle="tooltip" title="Create a new repository" wicket:id="newRepoLink"><i class="pa pa-repo-add"></i></a></li>
-				  		<li><a class="has-tip" data-toggle="tooltip" title="Sign out" wicket:id="logoutLink"><i class="pa pa-sign-out"></i></a></li>
+						<li><a class="has-tip" data-toggle="tooltip" title="Create a new repository" wicket:id="newRepoLink"><i class="fa fa-ext fa-repo-add"></i></a></li>
+				  		<li><a class="has-tip" data-toggle="tooltip" title="Sign out" wicket:id="logoutLink"><i class="fa fa-sign-out"></i></a></li>
 				  		<li class="separator"></li>
 				  		<li><a class="has-tip" data-toggle="tooltip" title="You've got tasks" wicket:id="notificationLink"><i class="fa fa-circle"></i></a></li>
 				  		<li class="avatar-user"><wicket:container wicket:id="userLink"></wicket:container></li>
@@ -37,8 +37,8 @@
 	<wicket:enclosure child="gitError">
 		<div class="alert alert-danger git-error text-center">
 			<span wicket:id="gitError"></span>
-			<a wicket:id="checkGit" title="Check again"><i class="pa pa-redo"></i></a>
-			<a wicket:id="configureGit" title="Configure git"><i class="pa pa-tools"></i></a>
+			<a wicket:id="checkGit" title="Check again"><i class="fa fa-undo"></i></a>
+			<a wicket:id="configureGit" title="Configure git"><i class="fa fa-wrench"></i></a>
 		</div>
 	</wicket:enclosure>
 	

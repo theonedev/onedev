@@ -5,7 +5,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 public class Assets {
 
-	public static final CssResourceReference FONTS_CSS = newCssResourceReference("pontfonts/css/ponticons.css");
+	public static final CssResourceReference PONTICONS_CSS = newCssResourceReference("ponticons/css/ponticons.css");
 	
 	public static final JavaScriptResourceReference LIVEFILTER_JS = newJavaScriptResourceReference("js/jquery.livefilter.js");
 	

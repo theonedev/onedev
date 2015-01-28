@@ -43,11 +43,11 @@ public abstract class AccountPage extends AccountBasePage {
 		add(new UserLink("userName", new UserModel(getAccount()), AvatarMode.NAME));
 		
 		List<Tab> tabs = new ArrayList<>();
-		tabs.add(new AccountTab(Model.of("Repositories"), "pa pa-repo", RepositoriesPage.class));
-		tabs.add(new AccountTab(Model.of("Teams"), "pa pa-group-o", AccountTeamsPage.class, EditTeamPage.class));
-		tabs.add(new AccountTab(Model.of("Members"), "pa pa-user-o", MemberSettingPage.class));
-		tabs.add(new AccountTab(Model.of("Notifications"), "pa pa-volume-medium", AccountNotificationsPage.class));
-		tabs.add(new AccountTab(Model.of("Profile"), "pa pa-gear", AccountProfilePage.class));
+		tabs.add(new AccountTab(Model.of("Repositories"), "fa fa-ext fa-repo", RepositoriesPage.class));
+		tabs.add(new AccountTab(Model.of("Teams"), "fa fa-group", AccountTeamsPage.class, EditTeamPage.class));
+		tabs.add(new AccountTab(Model.of("Members"), "fa fa-user", MemberSettingPage.class));
+		tabs.add(new AccountTab(Model.of("Notifications"), "fa fa-volume-up", AccountNotificationsPage.class));
+		tabs.add(new AccountTab(Model.of("Profile"), "fa fa-gear", AccountProfilePage.class));
 
 		add(new Tabbable("tabs", tabs));
 		

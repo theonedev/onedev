@@ -108,9 +108,9 @@ public abstract class GateKeeperPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				if (gateKeeper.isEnabled()) {
-					tag.append("class", "pa-checkbox-checked", " ");
+					tag.append("class", "fa-check-square-o", " ");
 				} else {
-					tag.append("class", "pa-checkbox-unchecked", " ");
+					tag.append("class", "fa-square-o", " ");
 				}
 			}
 			

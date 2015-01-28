@@ -3,7 +3,7 @@
 	<div class="panel panel-default panel-sourcetree">
 		<div class="panel-heading panel-message">
 			<wicket:container wicket:id="message"></wicket:container>
-			<a class="history-link" wicket:id="history"><i class="pa pa-history"></i> History</a>
+			<a class="history-link" wicket:id="history"><i class="fa fa-history"></i> History</a>
 		</div>
 		<div class="panel-body">
 			<div class="last-commit clearfix">
@@ -16,14 +16,14 @@
 			<table class="table table-files">
 				<wicket:enclosure>
 				<tr>
-					<td class="file-icon"><i class="pa pa-arrow-up"></i></td>
+					<td class="file-icon"><i class="fa fa-arrow-up"></i></td>
 					<td class="file-name"><a wicket:id="parent" title="go to up level">..</a></td>
 					<td class="message"></td>
 					<td class="age"></td>
 				</tr>
 				</wicket:enclosure>
 				<tr wicket:id="files">
-					<td class="file-icon"><i class="" wicket:id="icon"></i></td>
+					<td class="file-icon"><i wicket:id="icon" class="fa "></i></td>
 					<td class="file-name"><a wicket:id="file"><span wicket:id="name"></span></a></td>
 					<td class="message"></td>
 					<td class="age"></td>

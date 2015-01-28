@@ -108,7 +108,7 @@ public abstract class GateKeeperSelector extends Panel {
 						gateKeeperItem.add(link);
 						String icon = EditableUtils.getIcon(gateKeeperClass);
 						if (icon == null)
-							icon = "pa-lock";
+							icon = "fa-lock";
 						link.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", icon)));
 						link.add(new Label("name", EditableUtils.getName(gateKeeperClass)));
 						link.add(new Label("description", EditableUtils.getDescription(gateKeeperClass)).setEscapeModelStrings(false));

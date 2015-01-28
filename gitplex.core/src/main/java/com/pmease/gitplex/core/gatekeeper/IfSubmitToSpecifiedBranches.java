@@ -22,7 +22,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=100, icon="pa-branch", category=GateKeeper.CATEGROY_CHECK_BRANCH, description=
+@Editable(order=100, icon="fa-ext fa-branch", category=GateKeeper.CATEGROY_CHECK_BRANCH, description=
 		"This gate keeper will be passed if the commit is submitted to specified branches.")
 public class IfSubmitToSpecifiedBranches extends AbstractGateKeeper {
 

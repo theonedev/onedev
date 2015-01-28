@@ -24,8 +24,8 @@ public abstract class AdministrationPage extends LayoutPage {
 		super.onInitialize();
 
 		List<Tab> tabs = new ArrayList<>();
-		tabs.add(new AdministrationTab(Model.of("System Setting"), "pa pa-gear", SystemSettingPage.class));
-		tabs.add(new AdministrationTab(Model.of("Mail Setting"), "pa pa-mail-alt", MailSettingPage.class));
+		tabs.add(new AdministrationTab(Model.of("System Setting"), "fa fa-gear", SystemSettingPage.class));
+		tabs.add(new AdministrationTab(Model.of("Mail Setting"), "fa fa-envelope", MailSettingPage.class));
 		tabs.add(new AdministrationTab(Model.of("QoS Setting"), "fa fa-signal", QosSettingPage.class));
 		add(new Tabbable("tabs", tabs));
 	}

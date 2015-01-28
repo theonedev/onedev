@@ -10,7 +10,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=100, icon="pa-group-o", category=GateKeeper.CATEGROY_CHECK_SUBMITTER, description=
+@Editable(order=100, icon="fa-group", category=GateKeeper.CATEGROY_CHECK_SUBMITTER, description=
 		"This gate keeper will be passed if the commit is submitted by a member of specified team.")
 public class IfSubmittedBySpecifiedTeam extends TeamAwareGateKeeper {
 

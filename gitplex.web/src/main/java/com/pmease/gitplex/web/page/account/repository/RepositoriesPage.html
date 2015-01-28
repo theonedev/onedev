@@ -9,18 +9,18 @@
 						<div class="form-group">
 							<input type="search" class="form-control" placeholder="Find a repository ..." />
 						</div>
-						<button class="btn btn-default"><i class="pa pa-search"></i> Search</button>
+						<button class="btn btn-default"><i class="fa fa-search"></i> Search</button>
 					</form>
 				</div>
 				<wicket:enclosure child="newRepo">
 				<div class="pull-left">
-					<a wicket:id="newRepo" class="btn btn-default"><i class="pa pa-plus"></i> Add New</a>
+					<a wicket:id="newRepo" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
 				</div>
 				</wicket:enclosure>
 			</div>
 			<ul class="list-unstyled">
 				<li wicket:id="repositories">
-					<i class="pa pa-repo"></i>
+					<i class="fa fa-ext fa-repo"></i>
 					<a wicket:id="repositorylink" class="repo-link"><span wicket:id="name"></span></a>
 					<wicket:enclosure>
 						forked from <span wicket:id="forklink"></span>

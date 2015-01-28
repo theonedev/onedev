@@ -23,7 +23,7 @@ import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=200, icon="pa-lock", category=GateKeeper.CATEGORY_COMMONLY_USED, 
+@Editable(order=200, icon="fa-lock", category=GateKeeper.CATEGORY_COMMONLY_USED, 
 		description="By default, users with write permission of the repository can write to "
 				+ "all directories/files. Use this gate keeper to restrict write access of "
 				+ "certain directories/files of specified branches to certain teams. Note "

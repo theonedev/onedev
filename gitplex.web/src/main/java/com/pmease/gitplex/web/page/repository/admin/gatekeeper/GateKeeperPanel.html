@@ -2,9 +2,9 @@
 	<div wicket:id="container" class="gate-keeper panel panel-default ">
 		<div class="panel-heading">
 			<span wicket:id="title" class="panel-title"></span>
-			<span wicket:id="edit" class="pa pa-pencil" title="Edit this gate keeper"></span>
-			<span wicket:id="delete" class="pa pa-times" title="Delete this gate keeper"></span>
-			<span wicket:id="enable" class="pa "></span>
+			<span wicket:id="edit" class="fa fa-pencil" title="Edit this gate keeper"></span>
+			<span wicket:id="delete" class="fa fa-times" title="Delete this gate keeper"></span>
+			<span wicket:id="enable" class="fa "></span>
 			<div wicket:id="editor"></div>
 		</div>
 		<div class="panel-body">
@@ -15,7 +15,7 @@
 		<div wicket:id="children">
 			<div wicket:id="child"></div>
 		</div>
-		<div wicket:id="childTypeSelectorTrigger" class="well gate-keeper-add">Add Child Gate Keeper<i class="pa pa-plus-round"></i></div>
+		<div wicket:id="childTypeSelectorTrigger" class="well gate-keeper-add">Add Child Gate Keeper<i class="fa fa-plus-circle"></i></div>
 		<div wicket:id="childTypeSelector"></div>
 		<div wicket:id="childEditor"></div>
 	</wicket:fragment>
@@ -27,7 +27,7 @@
 				</td>
 			</tr>
 		</table>
-		<div wicket:id="childTypeSelectorTrigger" class="well gate-keeper-add">Add Child Gate Keeper<i class="pa pa-times-round"></i></div>
+		<div wicket:id="childTypeSelectorTrigger" class="well gate-keeper-add">Add Child Gate Keeper<i class="fa fa-plus-circle"></i></div>
 		<div wicket:id="childTypeSelector"></div>
 		<div wicket:id="childEditor"></div>
 	</wicket:fragment>
@@ -36,14 +36,14 @@
 			<tr>
 				<td class="ifthen if">
 					<div wicket:id="if"></div>
-					<div wicket:id="ifTypeSelectorTrigger" class="well gate-keeper-add">Define If Gate Keeper<i class="pa pa-plus-round"></i></div>
+					<div wicket:id="ifTypeSelectorTrigger" class="well gate-keeper-add">Define If Gate Keeper<i class="fa fa-plus-circle"></i></div>
 					<div wicket:id="ifTypeSelector"></div>
 					<div wicket:id="ifEditor"></div>
 				</td>
-				<td class="ifthen connector"><div class="pa pa-arrow-right"></div></td>
+				<td class="ifthen connector"><div class="fa fa-arrow-right"></div></td>
 				<td class="ifthen then">
 					<div wicket:id="then"></div>
-					<div wicket:id="thenTypeSelectorTrigger" class="well gate-keeper-add">Define Then Gate Keeper<i class="pa pa-plus-round"></i></div>
+					<div wicket:id="thenTypeSelectorTrigger" class="well gate-keeper-add">Define Then Gate Keeper<i class="fa fa-plus-circle"></i></div>
 					<div wicket:id="thenTypeSelector"></div>
 					<div wicket:id="thenEditor"></div>
 				</td>
@@ -52,7 +52,7 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="notFrag">
 		<div wicket:id="gateKeeper"></div>
-		<div wicket:id="gateKeeperTypeSelectorTrigger" class="well gate-keeper-add">Define Contained Condition<i class="pa pa-plus-round"></i></div>
+		<div wicket:id="gateKeeperTypeSelectorTrigger" class="well gate-keeper-add">Define Contained Condition<i class="fa fa-plus-circle"></i></div>
 		<div wicket:id="gateKeeperTypeSelector"></div>
 		<div wicket:id="gateKeeperEditor"></div>
 	</wicket:fragment>

@@ -12,8 +12,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 
 @SuppressWarnings("serial")
-@Editable(name="Or Composition", order=200, icon="pa-servers",  
-		category=GateKeeper.CATEGROY_COMPOSITION,
+@Editable(name="Or Composition", order=200, icon="fa-sitemap", category=GateKeeper.CATEGROY_COMPOSITION,
 		description="This gate keeper will be passed if any of the contained gate keepers is passed.")
 @Horizontal
 public class OrGateKeeper extends AndOrGateKeeper {

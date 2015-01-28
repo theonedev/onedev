@@ -12,7 +12,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 
 @SuppressWarnings("serial")
-@Editable(name="And Composition", icon="pa-servers", order=100, 
+@Editable(name="And Composition", icon="fa-sitemap", order=100, 
 		category=GateKeeper.CATEGROY_COMPOSITION, 
 		description="This gate keeper will be passed if all contained gate keepers are passed.")
 @Horizontal

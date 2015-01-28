@@ -2,7 +2,7 @@
 <wicket:panel>
 	<tr class="diff-line hunk-head" wicket:id="aboveexpander">
 		<td class="diff-line-num expander" colspan="2">
-			<a class="has-tip" data-toggle="tooltip" title="show more lines" wicket:id="expander"><i class="pa pa-expand"></i></a>
+			<a class="has-tip" data-toggle="tooltip" title="show more lines" wicket:id="expander"><i class="fa fa-sort"></i></a>
 		</td>
 		<td class="diff-line-code">
 			<pre wicket:id="header">@@ xxx @@ context func</pre>
@@ -13,14 +13,14 @@
 	</tr>
 	<tr class="diff-line hunk-head" wicket:id="belowexpander">
 		<td class="diff-line-num expander" colspan="2">
-			<a class="has-tip" data-toggle="tooltip" data-placement="bottom" title="show more lines" wicket:id="expander"><i class="pa pa-expand"></i></a>
+			<a class="has-tip" data-toggle="tooltip" data-placement="bottom" title="show more lines" wicket:id="expander"><i class="fa fa-sort"></i></a>
 		</td>
 		<td class="diff-line-code"></td>
 	</tr>
 	
 	<wicket:fragment wicket:id="linefrag">
 		<td class="diff-line-num old">
-			<a class="add-comment" wicket:id="commentlink"><i class="pa pa-comment-add"></i></a>
+			<a class="add-comment" wicket:id="commentlink"><i class="fa fa-comments"></i></a>
 			<span wicket:id="oldnum"></span>
 		</td>
 		<td class="diff-line-num new">
@@ -33,7 +33,7 @@
 	
 	<wicket:fragment wicket:id="commentfrag">
 		<td class="comment-count" colspan="2">
-			<i class="pa pa-comment"></i> <b wicket:id="count"></b>
+			<i class="fa fa-comment"></i> <b wicket:id="count"></b>
 		</td>
 		
 		<td class="line-comment">

@@ -192,10 +192,10 @@ public class CommentPanel extends Panel {
 				super.onComponentTag(tag);
 				
 				if (getComment().isResolved()) {
-					tag.put("class", "pa pa-checkbox-checked resolve");
+					tag.put("class", "fa fa-check-square-o resolve");
 					tag.put("title", "Mark this comment as unresolved");
 				} else {
-					tag.put("class", "pa pa-checkbox-unchecked resolve");
+					tag.put("class", "fa fa-square-o resolve");
 					tag.put("title", "Mark this comment as resolved");
 				}
 			}

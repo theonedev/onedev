@@ -20,7 +20,7 @@ public class PageResourceReference extends JavaScriptResourceReference {
 		return Dependencies.combine(
 				super.getDependencies(),
 				JavaScriptHeaderItem.forReference(Assets.LIVEFILTER_JS),
-				new PriorityHeaderItem(CssHeaderItem.forReference(Assets.FONTS_CSS)),
+				new PriorityHeaderItem(CssHeaderItem.forReference(Assets.PONTICONS_CSS)),
 				CssHeaderItem.forReference(Assets.PAGE_CSS));
 	}
 	

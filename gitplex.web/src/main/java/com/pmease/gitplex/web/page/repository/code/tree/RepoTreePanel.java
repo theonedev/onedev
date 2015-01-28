@@ -5,6 +5,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -27,7 +28,6 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.PathUtils;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitplex.web.component.commit.CommitMessagePanel;
 import com.pmease.gitplex.web.component.commit.CommitMetaPanel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
@@ -120,26 +120,23 @@ public class RepoTreePanel extends Panel {
 				TreeNode node = item.getModelObject();
 				final int bits = node.getMode();
 				final String path = node.getPath();
-				Icon icon = new Icon("icon", new AbstractReadOnlyModel<String>() {
+				item.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
 					@Override
 					public String getObject() {
 						if (bits == FileMode.TYPE_TREE) 
-							return "pa-folder";
+							return "fa-ext fa-folder-o";
 						else if (bits == FileMode.TYPE_GITLINK)
-							return "pa-folder-submodule";
+							return "fa-ext fa-folder-submodule-o";
 						else if (bits == FileMode.TYPE_SYMLINK) {
 							Git git = repoModel.getObject().git();
 							if (git.isTreeLink(path, repoModel.getObject().defaultBranchIfNull(currentRevision)))
-								return "pa-folder-link";
+								return "fa-ext fa-folder-symbol-link-o";
 							else
-								return "pa-file-link";
+								return "fa-ext fa-file-symbol-link";
 						} else 
-							return "pa-file-txt";
-					}
-				});
-				
-				item.add(icon);
+							return "fa-file-text-o";
+					}})));
 				
 				List<String> pathElements = PathUtils.split(currentPath);
 				pathElements.add(node.getName());

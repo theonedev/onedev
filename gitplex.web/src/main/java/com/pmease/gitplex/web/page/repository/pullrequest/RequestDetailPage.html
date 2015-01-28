@@ -4,7 +4,7 @@
 			<div wicket:id="status" class="label pull-left "></div>
 			<div wicket:id="title" class="title pull-left"></div>
 			<div wicket:id="id" class="id pull-left"></div>
-			<a wicket:id="editLink" title="Edit title" class="edit"><i class="pa pa-pencil"></i></a>
+			<a wicket:id="editLink" title="Edit title" class="edit"><i class="fa fa-pencil"></i></a>
 			<form wicket:id="editForm" class="pull-left form-inline">
 				<input wicket:id="title" type="text" placeholder="Input title" class="form-control input-sm focusable"></input>
 				<input wicket:id="save" type="submit" value="Save" class="btn btn-sm btn-primary"/>
@@ -58,12 +58,12 @@
 					<img src="/assets/img/ajax-indicator.gif"></img> Calculating integration preview...
 				</div>
 				<div wicket:id="noConflict" class="no-conflict">
-					<label><i class="pa pa-tick-round"></i> Able to integrate without conflicts.</label> 
+					<label><i class="fa fa-check-circle"></i> Able to integrate without conflicts.</label> 
 					<wicket:enclosure child="preview">
-						<span class="pa pa-arrow-right"></span> <a wicket:id="preview">Preview</a> the integration result.
+						<span class="fa fa-arrow-right"></span> <a wicket:id="preview">Preview</a> the integration result.
 					</wicket:enclosure>
 					<wicket:enclosure child="verification">
-						<span class="pa pa-arrow-right"></span> Build of the integration is <span wicket:id="verification"></span>
+						<span class="fa fa-arrow-right"></span> Build of the integration is <span wicket:id="verification"></span>
 					</wicket:enclosure>
 				</div>
 				<div wicket:id="conflict" class="conflict">

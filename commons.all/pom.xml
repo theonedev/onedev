@@ -29,6 +29,7 @@
         <module>../gitplex.http</module>
         <module>../gitplex.security</module>
         <module>../gitplex.product</module>
+        <module>../commons.schedule</module>
     </modules>  
     <repositories> 
         <repository> 

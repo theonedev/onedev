@@ -9,7 +9,7 @@
 						<div wicket:id="target" class="branch"></div>
 					</td>
 					<td class="actions">
-						<a wicket:id="swap" class="swap btn btn-sm btn-default"><i class="pa pa-key-tab"></i> swap</a>
+						<a wicket:id="swap" class="swap btn btn-sm btn-default"><i class="fa fa-arrows-h"></i> swap</a>
 					</td>
 					<td class="source">
 						<div class="title">From</div>
@@ -34,7 +34,7 @@
 	<wicket:fragment wicket:id="sameBranchFrag">
 		<div class="alert alert-warning">
 			<div class="summary">
-				<span class="pa pa-lg pa-warning"></span>
+				<span class="fa fa-lg fa-warning"></span>
 				<span>Please select different branches to integrate.</span>
 			</div>
 		</div>		
@@ -42,7 +42,7 @@
 	<wicket:fragment wicket:id="integratedFrag">
 		<div class="alert alert-success">
 			<div class="summary">
-				<span class="pa pa-lg pa-check-circle"></span>
+				<span class="fa fa-lg fa-check-circle"></span>
 				<span wicket:id="targetBranch"></span> is up to date with all commits from <span wicket:id="sourceBranch"></span>.
 				Try <a wicket:id="swapBranches">swap source and target</a> for the comparison.
 			</div>
@@ -51,7 +51,7 @@
 	<wicket:fragment wicket:id="rejectedFrag">
 		<div class="alert alert-danger">
 			<div class="summary">
-				<span class="pa pa-lg pa-ban"></span>
+				<span class="fa fa-lg fa-ban"></span>
 				<span class="message">Gate keeper of target repository rejects the integration request for below reasons:</span>
 			</div>
 			<ul class="detail">
@@ -80,7 +80,7 @@
 							<input wicket:id="assignee" type="hidden"></input>
 							<div wicket:id="feedback"></div>
 							<div class="help-block">
-								<i class="pa pa-info-circle"></i> Assignee is responsible for integration of the 
+								<i class="fa fa-info-circle"></i> Assignee is responsible for integration of the 
 								pull request after it passes gate keeper check.
 							</div>
 						</td>
@@ -97,7 +97,7 @@
 								</wicket:enclosure>
 							</ul>
 							<div wicket:id="prePopulateHint" class="help-block">
-								<i class="pa pa-info-circle"></i> GitPlex pre-populated some reviewers above as suggested 
+								<i class="fa fa-info-circle"></i> GitPlex pre-populated some reviewers above as suggested 
 								by gate keeper of the repository. You may adjust the list by removing existing (hovering mouse 
 								over reviewer avatar) or adding more.
 							</div>

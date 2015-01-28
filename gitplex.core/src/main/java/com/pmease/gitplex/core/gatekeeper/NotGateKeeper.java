@@ -11,8 +11,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.model.Repository;
 
 @SuppressWarnings("serial")
-@Editable(name="Not Composition", order=400, icon="pa-servers", 
-		category=GateKeeper.CATEGROY_COMPOSITION,
+@Editable(name="Not Composition", order=400, icon="fa-sitemap", category=GateKeeper.CATEGROY_COMPOSITION,
 		description="This gate keeper will be passed if contained gate keeper is not passed.")
 @Horizontal
 public class NotGateKeeper extends CompositeGateKeeper {

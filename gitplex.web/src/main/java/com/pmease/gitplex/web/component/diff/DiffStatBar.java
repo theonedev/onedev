@@ -78,7 +78,7 @@ public class DiffStatBar extends Panel {
 				int i = getAdditionBlocks();
 				StringBuffer sb = new StringBuffer();
 				while (i-- > 0) 
-					sb.append("&#63057;");
+					sb.append("&#xf0c8; ");
 				return sb.toString();
 			}
 			
@@ -92,7 +92,7 @@ public class DiffStatBar extends Panel {
 				
 				StringBuffer sb = new StringBuffer();
 				while (i-- > 0) {
-					sb.append("&#63057;");
+					sb.append("&#xf0c8; ");
 				}
 				return sb.toString();
 			}
@@ -106,7 +106,7 @@ public class DiffStatBar extends Panel {
 				
 				StringBuffer sb = new StringBuffer();
 				while (i-- > 0) 
-					sb.append("&#63057;");
+					sb.append("&#xf0c8; ");
 				
 				return sb.toString();
 			}

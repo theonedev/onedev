@@ -11,7 +11,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
-@Editable(order=200, icon="pa-branch-pattern", description="This gate keeper will be passed if push to specified references.")
+@Editable(order=200, icon="fa-ext fa-branch-pattern", description="This gate keeper will be passed if push to specified references.")
 @SuppressWarnings("serial")
 public class IfPushToSpecifiedRefs extends AbstractGateKeeper {
 

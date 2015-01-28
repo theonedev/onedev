@@ -9,7 +9,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=300, icon="pa-user-o", category=GateKeeper.CATEGROY_CHECK_SUBMITTER, description=
+@Editable(order=300, icon="fa-user", category=GateKeeper.CATEGROY_CHECK_SUBMITTER, description=
 		"This gate keeper will be passed if the commit is submitted by owner of the repository.")
 public class IfSubmittedByRepositoryOwner extends AbstractGateKeeper {
 

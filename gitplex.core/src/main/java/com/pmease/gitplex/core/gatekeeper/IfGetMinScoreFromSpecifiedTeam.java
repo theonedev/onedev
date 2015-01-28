@@ -16,7 +16,7 @@ import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=500, icon="pa-group-o", category=GateKeeper.CATEGROY_CHECK_REVIEW, description=
+@Editable(order=500, icon="fa-group", category=GateKeeper.CATEGROY_CHECK_REVIEW, description=
 		"This gate keeper will be passed if specified score can be get from specified team, the score "
 		+ "starts at zero, and will increase by one for each approval, and decrease by one for each "
 		+ "rejection.")

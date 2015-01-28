@@ -8,6 +8,7 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
@@ -41,7 +42,6 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.permission.operation.GeneralOperation;
-import com.pmease.gitplex.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitplex.web.common.wicket.component.datagrid.DataGrid;
 import com.pmease.gitplex.web.common.wicket.component.datagrid.hibernate.EntityListProvider;
 import com.pmease.gitplex.web.page.account.team.AccountTeamsPage;
@@ -312,15 +312,15 @@ public class PermissionSettingPage extends RepositoryPage {
 				
 			};
 			
-			link.add(new Icon("icon", new AbstractReadOnlyModel<String>() {
+			link.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
 				@Override
 				public String getObject() {
 					return operation.ordinal() > getTeamPermission(rowModel.getObject()).ordinal() ?
-							"pa-check-empty" : "pa-check-checked";
+							"fa fa-check-square-o" : "fa fa-square-o";
 				}
 				
-			}));
+			})));
 			
 			link.setEnabled(enabled);
 			frag.add(link);

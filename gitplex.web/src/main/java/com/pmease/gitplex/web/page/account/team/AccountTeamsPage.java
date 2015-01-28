@@ -112,7 +112,7 @@ public class AccountTeamsPage extends AccountPage {
 																	EditTeamPage.class,
 																	EditTeamPage.newParams(team));
 				link.add(new Label("name", Model.of(team.getName())));
-				link.add(new Icon("icon", "pa-pencil"));
+				link.add(new Icon("icon", "fa-pencil"));
 				frag.add(link);
 				frag.add(new Label("summary", formatTeamDescription(team)));
 				frag.add(new Label("builtin", "built-in").setVisibilityAllowed(team.isBuiltIn()));
@@ -257,7 +257,7 @@ public class AccountTeamsPage extends AccountPage {
 				public String getObject() {
 					Team team = GitPlex.getInstance(Dao.class).load(Team.class, teamId);
 					return getTeamPermission(team).can(operation) ?
-							"pa-check-checked" : "pa-check-empty";
+							"fa-check-square-o" : "fa-square-o";
 				}
 				
 			}));

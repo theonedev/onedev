@@ -683,7 +683,7 @@ public class TextDiffPanel extends Panel {
 			if (allowToAddCommentModel.getObject() && commentSupport != null) {
 				addCommentLink = "<a href='javascript: var index=" + index + "; " 
 					+ addCommentBehavior.getCallbackScript() 
-					+ ";' class='add-comment'><i class='pa pa-comment-add'></i></a>";
+					+ ";' class='add-comment' title='Add comment'><i class='fa fa-comments'></i></a>";
 			} else {
 				addCommentLink = "";
 			}

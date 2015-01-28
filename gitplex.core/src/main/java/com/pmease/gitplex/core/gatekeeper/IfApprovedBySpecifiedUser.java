@@ -16,7 +16,7 @@ import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=200, icon="pa-user-o", category=GateKeeper.CATEGROY_CHECK_REVIEW, description=
+@Editable(order=200, icon="fa-user", category=GateKeeper.CATEGROY_CHECK_REVIEW, description=
 		"This gate keeper will be passed if the commit is approved by specified user.")
 public class IfApprovedBySpecifiedUser extends AbstractGateKeeper {
 

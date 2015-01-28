@@ -12,7 +12,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=200, icon="pa-branch-pattern", category=GateKeeper.CATEGROY_CHECK_BRANCH, description=
+@Editable(order=200, icon="fa-ext fa-branch-pattern", category=GateKeeper.CATEGROY_CHECK_BRANCH, description=
 		"This gate keeper will be passed if the commit is submitted to specified branch pattern.")
 public class IfSubmitToSpecifiedBranchPatterns extends AbstractGateKeeper {
 
