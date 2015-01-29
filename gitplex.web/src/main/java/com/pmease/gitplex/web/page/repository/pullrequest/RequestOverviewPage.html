@@ -50,7 +50,7 @@
 					<div wicket:id="integrationStrategy" class="integration-strategy">
 						<label>
 							Integration Strategy: 						
-							<span wicket:id="help" class="fa fa-question-circle pointer"></span>
+							<span wicket:id="help" class="fa fa-question-circle pointer small"></span>
 						</label>
 						<div>
 							<select wicket:id="editor"></select> 
@@ -62,7 +62,7 @@
 							<label>Watch Status:</label>
 							<select wicket:id="option"></select>
 						</div>
-						<div class="help-block"><i class="fa fa-info-circle"></i> <span wicket:id="help"></span></div>
+						<div class="help-block"><i class="fa fa-info-circle small"></i> <span wicket:id="help"></span></div>
 					</div>
 				</div>
 			</td>
@@ -73,19 +73,19 @@
 			<span wicket:id="user" class="user"></span> <span wicket:id="activity"></span> <span wicket:id="age"></span> 
 			<span class="actions">
 				<span class="fa fa-check" title="This comment is marked as resolved"></span>
-				<a wicket:id="expand" class="fa fa-chevron-down" title="Expand this comment"></a>
+				<a wicket:id="expand" class="fa fa-expand" title="Expand this comment"></a>
 			</span>
 		</div>
 		<div wicket:id="detail" class="detail"></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="assigneeEditFrag">
-		<label>Assigned To: <span wicket:id="help" class="fa fa-question-circle pointer"></span></label>
+		<label>Assigned To: <span wicket:id="help" class="fa fa-question-circle pointer small"></span></label>
 		<div>
 			<input wicket:id="assignee" type="hidden"></input>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="assigneeViewFrag">
-		<label>Assigned To: <span wicket:id="help" class="fa fa-question-circle pointer"></span></label> 
+		<label>Assigned To: <span wicket:id="help" class="fa fa-question-circle pointer small"></span></label> 
 		<span wicket:id="assignee" class="avatar"></span> 
 	</wicket:fragment>
 	<wicket:fragment wicket:id="noAssigneeFrag">

@@ -201,15 +201,15 @@ public abstract class RepositoryPage extends AccountBasePage {
 		});
 		
 		List<Tab> codeTabs = new ArrayList<>();
-		codeTabs.add(new RepositoryTab(Model.of("Files"), "fa fa-file-code-o", RepoTreePage.class, RepoBlobPage.class));
-		codeTabs.add(new RepositoryTab(Model.of("Commits"), "fa fa-ext fa-commit", RepoCommitsPage.class, RepoCommitPage.class));
-		codeTabs.add(new RepositoryTab(Model.of("Branches"), "fa fa-ext fa-branch", RepoBranchesPage.class, BranchComparePage.class));
-		codeTabs.add(new RepositoryTab(Model.of("Contributors"), "fa fa-group", ContributorsPage.class));
+		codeTabs.add(new RepositoryTab(Model.of("Files"), "fa fa-file-code-o fa-fw", RepoTreePage.class, RepoBlobPage.class));
+		codeTabs.add(new RepositoryTab(Model.of("Commits"), "fa fa-ext fa-commit fa-fw", RepoCommitsPage.class, RepoCommitPage.class));
+		codeTabs.add(new RepositoryTab(Model.of("Branches"), "fa fa-ext fa-branch fa-fw", RepoBranchesPage.class, BranchComparePage.class));
+		codeTabs.add(new RepositoryTab(Model.of("Contributors"), "fa fa-group fa-fw", ContributorsPage.class));
 		
 		add(new Tabbable("codeTabs", codeTabs));
 		
 		List<Tab> requestsTabs = new ArrayList<>();
-		requestsTabs.add(new RepositoryTab(Model.of("Open"), "fa fa-ext fa-diff-renamed", OpenRequestsPage.class) {
+		requestsTabs.add(new RepositoryTab(Model.of("Open"), "fa fa-ext fa-diff-renamed fa-fw", OpenRequestsPage.class) {
 
 				@Override
 				public boolean isActive(Page currentPage) {
@@ -222,7 +222,7 @@ public abstract class RepositoryPage extends AccountBasePage {
 				}
 			
 		});
-		requestsTabs.add(new RepositoryTab(Model.of("Closed"), "fa fa-circle-o", ClosedRequestsPage.class) {
+		requestsTabs.add(new RepositoryTab(Model.of("Closed"), "fa fa-circle-o fa-fw", ClosedRequestsPage.class) {
 			
 				@Override
 				public boolean isActive(Page currentPage) {
@@ -235,15 +235,15 @@ public abstract class RepositoryPage extends AccountBasePage {
 				}
 			
 		});
-		requestsTabs.add(new RepositoryTab(Model.of("Create"), "fa fa-plus", NewRequestPage.class));		
+		requestsTabs.add(new RepositoryTab(Model.of("Create"), "fa fa-plus fa-fw", NewRequestPage.class));		
 		
 		add(new Tabbable("requestsTabs", requestsTabs));		
 		
 		List<Tab> adminTabs = Lists.newArrayList();
-		adminTabs.add(new RepositoryTab(Model.of("General Settings"), "fa fa-gear", GeneralSettingPage.class));
-		adminTabs.add(new RepositoryTab(Model.of("Permissions"), "fa fa-lock", PermissionSettingPage.class));
-		adminTabs.add(new RepositoryTab(Model.of("Gate Keepers"), "fa fa-ext fa-gatekeeper", GateKeeperPage.class));
-		adminTabs.add(new RepositoryTab(Model.of("Integration Policies"), "fa fa-puzzle-piece", IntegrationPolicyPage.class));
+		adminTabs.add(new RepositoryTab(Model.of("General Settings"), "fa fa-gear fa-fw", GeneralSettingPage.class));
+		adminTabs.add(new RepositoryTab(Model.of("Permissions"), "fa fa-lock fa-fw", PermissionSettingPage.class));
+		adminTabs.add(new RepositoryTab(Model.of("Gate Keepers"), "fa fa-ext fa-gatekeeper fa-fw", GateKeeperPage.class));
+		adminTabs.add(new RepositoryTab(Model.of("Integration Policies"), "fa fa-puzzle-piece fa-fw", IntegrationPolicyPage.class));
 
 		add(new Tabbable("adminTabs", adminTabs) {
 

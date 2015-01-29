@@ -927,7 +927,7 @@ ul.status-help li:last-child .description {border-bottom: none;}
 	padding-bottom: 16px; font-size: 13px; color: #666;}
 .request-detail .others>div>div:last-child {border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
 .request-detail .others .help-block {margin-bottom: 0; color: #888}
-.request-detail .others .fa {font-size: 14px; vertical-align: middle;}
+.request-detail .others .fa.small {font-size: 14px; vertical-align: middle;}
 .request-detail .others label {margin-right: 4px; font-weight: normal;}
 .request-detail .others .select2-container {width: 100%;}
 .request-detail .others .avatar {width: 24px; height: 24px;}
