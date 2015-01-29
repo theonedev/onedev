@@ -3,11 +3,7 @@ package com.pmease.gitplex.web.component.user;
 import java.util.Collection;
 import java.util.List;
 
-import com.pmease.gitplex.core.GitPlex;
-
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.wicket.request.Url;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
@@ -18,6 +14,7 @@ import org.json.JSONWriter;
 import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.avatar.AvatarManager;
@@ -53,7 +50,7 @@ public class UserChoiceProvider extends ChoiceProvider<User> {
 			writer.key("fullName").value(StringEscapeUtils.escapeHtml4(choice.getFullName()));
 		writer.key("email").value(StringEscapeUtils.escapeHtml4(choice.getEmail()));
 		String avatarUrl = GitPlex.getInstance(AvatarManager.class).getAvatarUrl(choice);
-		writer.key("avatar").value(RequestCycle.get().getUrlRenderer().renderUrl(Url.parse(avatarUrl)));
+		writer.key("avatar").value(avatarUrl);
 	}
 
 	@Override

@@ -7,8 +7,6 @@ import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.Url;
-import org.apache.wicket.request.cycle.RequestCycle;
 
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitplex.core.GitPlex;
@@ -42,8 +40,7 @@ public class AvatarByUser extends WebComponent {
 
 			@Override
 			protected String load() {
-				return RequestCycle.get().getUrlRenderer().renderUrl(Url.parse(
-						GitPlex.getInstance(AvatarManager.class).getAvatarUrl(getUser())));
+				return GitPlex.getInstance(AvatarManager.class).getAvatarUrl(getUser());
 			}
 			
 		};

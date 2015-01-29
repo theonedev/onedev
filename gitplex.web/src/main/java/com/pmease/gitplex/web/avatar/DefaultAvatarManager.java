@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.wicket.markup.html.form.upload.FileUpload;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.glassfish.jersey.internal.util.Base64;
 
@@ -29,7 +30,7 @@ public class DefaultAvatarManager implements AvatarManager {
 
 	private static final int GRAVATAR_SIZE = 256;
 	
-	private static final String AVATARS_BASE_URL = "site/avatars/";
+	private static final String AVATARS_BASE_URL = "/site/avatars/";
 	
 	private final ConfigManager configManager;
 	
@@ -67,22 +68,21 @@ public class DefaultAvatarManager implements AvatarManager {
 		String encoded = encode(name, email, AvatarGenerator.version());
 		
 		File avatarFile = new File(Bootstrap.getSiteDir(), "avatars/" + encoded);
-		if (avatarFile.exists()) {
-			return AVATARS_BASE_URL + encoded;
-		} else {
+		if (!avatarFile.exists()) {
 			Lock avatarLock = LockUtils.getLock("avatars:" + encoded);
 			avatarLock.lock();
 			try {
 				String letters = getLetter(name);
 				BufferedImage bi = AvatarGenerator.generate(letters, email);
 				ImageIO.write(bi, "PNG", avatarFile);
-				return AVATARS_BASE_URL + encoded;
 			} catch (NoSuchAlgorithmException | IOException e) {
 				throw new RuntimeException(e);
 			} finally {
 				avatarLock.unlock();
 			}
 		}
+		
+		return RequestCycle.get().getUrlRenderer().renderContextRelativeUrl(AVATARS_BASE_URL + encoded);
 	}
 	
 	private String encode(String name, String email, int version) {

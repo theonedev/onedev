@@ -18,8 +18,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.IRequestParameters;
-import org.apache.wicket.request.Url;
-import org.apache.wicket.request.UrlRenderer;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
@@ -75,12 +73,11 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 
 			AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
 			List<Map<String, String>> items = new ArrayList<>();
-			UrlRenderer urlRenderer = RequestCycle.get().getUrlRenderer();
 			for (User user: dao.query(criteria, 0, ATWHO_LIMIT)) {
 				Map<String, String> item = new HashMap<>();
 				item.put("name", user.getName());
 				item.put("fullName", user.getFullName());
-				String avatarUrl = urlRenderer.renderUrl(Url.parse(avatarManager.getAvatarUrl(user)));
+				String avatarUrl = avatarManager.getAvatarUrl(user);
 				item.put("avatarUrl", avatarUrl);
 				items.add(item);
 			}
