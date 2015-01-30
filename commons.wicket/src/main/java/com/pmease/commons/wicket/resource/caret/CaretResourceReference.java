@@ -9,7 +9,7 @@ public class CaretResourceReference extends JavaScriptResourceReference {
 	public static final CaretResourceReference INSTANCE = new CaretResourceReference();
 	
 	private CaretResourceReference() {
-		super(CaretResourceReference.class, "jquery.caret.js");
+		super(CaretResourceReference.class, "jquery.caret-1.5.2.js");
 	}
 
 }

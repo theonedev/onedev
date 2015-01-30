@@ -200,7 +200,6 @@ App = (function() {
     switch (e.keyCode) {
       case KEY_CODE.ESC:
         e.preventDefault();
-        e.stopPropagation();
         view.hide(e);
         break;
       case KEY_CODE.UP:
@@ -328,6 +327,25 @@ Controller = (function() {
     return this.view.render(data.slice(0, this.getOpt('limit')));
   };
 
+  Controller.arrayToDefaultHash = function(data) {
+    var item, _i, _len, _results;
+    if (!$.isArray(data)) {
+      return data;
+    }
+    _results = [];
+    for (_i = 0, _len = data.length; _i < _len; _i++) {
+      item = data[_i];
+      if ($.isPlainObject(item)) {
+        _results.push(item);
+      } else {
+        _results.push({
+          name: item
+        });
+      }
+    }
+    return _results;
+  };
+
   Controller.prototype.lookUp = function(e) {
     var query, _callback;
     if (!(query = this.catchQuery(e))) {
@@ -335,7 +353,7 @@ Controller = (function() {
     }
     _callback = function(data) {
       if (data && data.length > 0) {
-        return this.renderView(data);
+        return this.renderView(this.constructor.arrayToDefaultHash(data));
       } else {
         return this.view.hide();
       }
@@ -358,7 +376,7 @@ TextareaController = (function(_super) {
   TextareaController.prototype.catchQuery = function() {
     var caretPos, content, end, query, start, subtext;
     content = this.$inputor.val();
-    caretPos = this.$inputor.caret('pos', {
+    caretPos = this.$inputor.atwhocaret('pos', {
       iframe: this.app.iframe
     });
     subtext = content.slice(0, caretPos);
@@ -382,7 +400,7 @@ TextareaController = (function(_super) {
 
   TextareaController.prototype.rect = function() {
     var c, iframeOffset, scaleBottom;
-    if (!(c = this.$inputor.caret('offset', this.pos - 1, {
+    if (!(c = this.$inputor.atwhocaret('offset', this.pos - 1, {
       iframe: this.app.iframe
     }))) {
       return;
@@ -409,7 +427,7 @@ TextareaController = (function(_super) {
     content += suffix;
     text = "" + startStr + content + (source.slice(this.query['endPos'] || 0));
     $inputor.val(text);
-    $inputor.caret('pos', startStr.length + content.length, {
+    $inputor.atwhocaret('pos', startStr.length + content.length, {
       iframe: this.app.iframe
     });
     if (!$inputor.is(':focus')) {
@@ -834,22 +852,7 @@ KEY_CODE = {
 
 DEFAULT_CALLBACKS = {
   beforeSave: function(data) {
-    var item, _i, _len, _results;
-    if (!$.isArray(data)) {
-      return data;
-    }
-    _results = [];
-    for (_i = 0, _len = data.length; _i < _len; _i++) {
-      item = data[_i];
-      if ($.isPlainObject(item)) {
-        _results.push(item);
-      } else {
-        _results.push({
-          name: item
-        });
-      }
-    }
-    return _results;
+    return Controller.arrayToDefaultHash(data);
   },
   matcher: function(flag, subtext, should_startWithSpace) {
     var match, regexp, _a, _y;
@@ -935,7 +938,7 @@ Api = {
   },
   isSelecting: function() {
     var _ref;
-    return (_ref = this.controller()) != null ? _ref.view.visiable() : void 0;
+    return (_ref = this.controller()) != null ? _ref.view.visible() : void 0;
   },
   setIframe: function(iframe, asRoot) {
     this.setupRootElement(iframe, asRoot);
@@ -964,7 +967,7 @@ $.fn.atwho = function(method) {
     } else if (Api[method] && app) {
       return result = Api[method].apply(app, Array.prototype.slice.call(_args, 1));
     } else {
-      return $.error("Method " + method + " does not exist on jQuery.caret");
+      return $.error("Method " + method + " does not exist on jQuery.atwhocaret");
     }
   });
   return result || this;

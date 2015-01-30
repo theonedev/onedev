@@ -3,3 +3,15 @@
 .atwho-view .emoji {display: inline-block; height: 20px; width: 20px; vertical-align: middle; 
 	background-repeat: no-repeat; background-size: 20px 20px;}
 .atwho-view .avatar img {display: inline-block; width: 20px; height: 20px; vertical-align: middle;}
+.md-help, .md-emojis {padding: 0 8px 8px 8px; display: none;}
+
+.md-emojis {position: relative;}
+.md-emojis .emoji {margin-right: 12px;}
+.md-emojis .emoji img {width: 16px; height: 16px;}
+.md-emojis .emojis {font-size: 12px; line-height: 24px; height: 200px; overflow: auto;}
+.md-emojis .mask {position: absolute; height: 208px; width: 100%; left: 0; top: 0; 
+	background-color: rgba(0, 0, 0, 0.2); display: none;}
+
+.md-preview table th, .md-preview table td {padding: 4px 8px; border: 1px solid #C8C8C8;}
+.md-preview table tr:nth-child(even) td {background: #F5F5F5;}
+.md-preview blockquote {font-size: 15px; border-left: 4px solid #ddd; color: #777; padding: 0 16px;}

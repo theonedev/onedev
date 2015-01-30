@@ -24,7 +24,7 @@ public class MentionTransformer implements HtmlTransformer {
 	
 	private static final Collection<String> IGNORED_TAGS = ImmutableSet.of("pre", "code", "a");
 	
-	private static final Pattern PATTERN = Pattern.compile("(^|\\s+)@(\\S+)($|\\s+)");
+	private static final Pattern PATTERN = Pattern.compile("(^|\\s+)@(\\S+)(?=($|\\s+))");
 
 	private Collection<User> mentions = new HashSet<>();
 	

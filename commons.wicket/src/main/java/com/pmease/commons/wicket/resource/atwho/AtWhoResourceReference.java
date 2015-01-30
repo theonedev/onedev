@@ -8,7 +8,6 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.pmease.commons.wicket.resource.caret.CaretResourceReference;
 
 public class AtWhoResourceReference extends JavaScriptResourceReference {
 
@@ -23,7 +22,7 @@ public class AtWhoResourceReference extends JavaScriptResourceReference {
 	@Override
 	public Iterable<? extends HeaderItem> getDependencies() {
 		return Iterables.concat(super.getDependencies(), ImmutableList.<HeaderItem>of(
-				JavaScriptHeaderItem.forReference(CaretResourceReference.INSTANCE),
+				JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(AtWhoResourceReference.class, "jquery.atwho-caret.js")),
 				CssHeaderItem.forReference(new CssResourceReference(AtWhoResourceReference.class, "jquery.atwho.css"))));
 	}
 

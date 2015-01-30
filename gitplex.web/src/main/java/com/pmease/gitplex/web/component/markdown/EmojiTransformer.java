@@ -21,7 +21,7 @@ public class EmojiTransformer implements HtmlTransformer {
 
 	private static final Collection<String> IGNORED_TAGS = ImmutableSet.of("pre", "code", "tt", "img");
 	
-	private static final Pattern PATTERN = Pattern.compile("(^|\\s+)\\:([^\\s\\:]+)\\:($|\\s+)");
+	private static final Pattern PATTERN = Pattern.compile("(?<=(^|\\s+))\\:([^\\s\\:]+)\\:(?=($|\\s+))");
 
 	@Override
 	public Element transform(Element body) {
