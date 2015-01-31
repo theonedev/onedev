@@ -61,7 +61,7 @@ import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
-import com.pmease.commons.wicket.component.markdown.MarkdownInput;
+import com.pmease.commons.wicket.component.markdown2.MarkdownInput;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.PageTabLink;
 import com.pmease.commons.wicket.component.tabbable.Tab;

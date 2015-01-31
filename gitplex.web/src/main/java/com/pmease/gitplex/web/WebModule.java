@@ -23,9 +23,7 @@ import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.validation.UserNameReservation;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.avatar.DefaultAvatarManager;
-import com.pmease.gitplex.web.component.markdown.EmojiTransformer;
-import com.pmease.gitplex.web.component.markdown.MentionTransformer;
-import com.pmease.gitplex.web.component.markdown.NormalizeTransformer;
+import com.pmease.gitplex.web.component.comment.MentionTransformer;
 import com.pmease.gitplex.web.editable.EditSupportLocator;
 import com.pmease.gitplex.web.extensionpoint.DiffRenderer;
 import com.pmease.gitplex.web.extensionpoint.DiffRendererProvider;
@@ -118,7 +116,7 @@ public class WebModule extends AbstractPluginModule {
 
 			@Override
 			public Collection<HtmlTransformer> getHtmlTransformers() {
-				return Lists.newArrayList(new EmojiTransformer(), new MentionTransformer(), new NormalizeTransformer());
+				return Lists.newArrayList((HtmlTransformer)new MentionTransformer());
 			}
 			
 		});

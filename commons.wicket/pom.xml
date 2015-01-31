@@ -121,6 +121,11 @@
 			<artifactId>commons.hibernate</artifactId>
 			<version>1.0.30</version>
 		</dependency>
+		<dependency>
+			<groupId>com.pmease</groupId>
+			<artifactId>commons.markdown</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 	</dependencies>
 	<properties>
 		<moduleClass>com.pmease.commons.wicket.WicketModule</moduleClass>

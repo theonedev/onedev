@@ -1,4 +1,3 @@
-
 var gitplex = {
 	selectDirectory: function(inputId, triggerId, path, append) {
 		var input = $("#" + inputId);

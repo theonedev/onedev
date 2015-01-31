@@ -30,6 +30,7 @@
         <module>../gitplex.security</module>
         <module>../gitplex.product</module>
         <module>../commons.schedule</module>
+        <module>../commons.markdown</module>
     </modules>  
     <repositories> 
         <repository> 

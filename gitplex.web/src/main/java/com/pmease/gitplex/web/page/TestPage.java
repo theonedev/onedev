@@ -3,10 +3,11 @@ package com.pmease.gitplex.web.page;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.gitplex.web.component.markdown.MarkdownInput;
+import com.pmease.gitplex.web.behavior.comment.CommentMarkdownBehavior;
 
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
@@ -22,7 +23,7 @@ public class TestPage extends BasePage {
 		super.onInitialize();
 		
 		Form<?> form = new Form<Void>("form");
-		form.add(new MarkdownInput("input", new PropertyModel<String>(this, "markdown")));
+		form.add(new TextArea<String>("input", new PropertyModel<String>(this, "markdown")).add(new CommentMarkdownBehavior()));
 		form.add(new AjaxSubmitLink("save", form) {
 
 			@Override

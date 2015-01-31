@@ -60,7 +60,7 @@ import com.pmease.commons.wicket.behavior.menu.CheckMenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
-import com.pmease.commons.wicket.component.markdown.MarkdownInput;
+import com.pmease.commons.wicket.component.markdown2.MarkdownInput;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;

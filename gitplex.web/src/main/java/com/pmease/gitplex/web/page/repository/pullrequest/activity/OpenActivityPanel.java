@@ -12,8 +12,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.wicket.component.markdown.MarkdownInput;
-import com.pmease.commons.wicket.component.markdown.MarkdownViewer;
+import com.pmease.commons.wicket.component.markdown2.MarkdownInput;
+import com.pmease.commons.wicket.component.markdown2.MarkdownViewer;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.model.PullRequest;

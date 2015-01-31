@@ -38,7 +38,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.behavior.AllowLeaveBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
-import com.pmease.commons.wicket.component.markdown.MarkdownInput;
+import com.pmease.commons.wicket.component.markdown2.MarkdownInput;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.AuthorizationManager;

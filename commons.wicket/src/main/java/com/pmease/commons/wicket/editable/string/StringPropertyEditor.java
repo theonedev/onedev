@@ -18,7 +18,7 @@ import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.editable.annotation.Markdown;
 import com.pmease.commons.editable.annotation.Multiline;
 import com.pmease.commons.editable.annotation.OmitName;
-import com.pmease.commons.wicket.component.markdown.MarkdownInput;
+import com.pmease.commons.wicket.behavior.markdown.MarkdownBehavior;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
@@ -38,7 +38,8 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 		
 		Method getter = getPropertyDescriptor().getPropertyGetter();
 		if (getter.getAnnotation(Markdown.class) != null) {
-			add(input = new MarkdownInput("content", Model.of(getModelObject())));
+			add(input = new TextArea<String>("content", Model.of(getModelObject())));
+			input.add(new MarkdownBehavior());
 		} else if (getter.getAnnotation(Multiline.class) != null) {
 			Fragment fragment = new Fragment("content", "multiLineFrag", this);
 			fragment.add(input = new TextArea<String>("input", Model.of(getModelObject())));
