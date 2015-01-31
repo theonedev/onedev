@@ -14,6 +14,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.ManagedSerializedForm;
 import com.pmease.commons.util.init.ManualConfig;
 import com.pmease.commons.util.init.Skippable;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DataManager;
 import com.pmease.gitplex.core.manager.UserManager;
@@ -68,13 +69,14 @@ public class DefaultDataManager implements DataManager, Serializable {
 		}
 
 		Config systemConfig = configManager.getConfig(Key.SYSTEM);
-		Serializable systemSetting = null;
+		SystemSetting systemSetting = null;
 		
 		if (systemConfig == null || systemConfig.getSetting() == null) {
 			systemSetting = new SystemSetting();
+			systemSetting.setServerUrl(GitPlex.getInstance().guessServerUrl());
 		} else {
 			if (!validator.validate(systemConfig.getSetting()).isEmpty())
-				systemSetting = systemConfig.getSetting();
+				systemSetting = (SystemSetting) systemConfig.getSetting();
 		}
 		if (systemSetting != null) {
 			manualConfigs.add(new ManualConfig("Specify System Setting", systemSetting) {

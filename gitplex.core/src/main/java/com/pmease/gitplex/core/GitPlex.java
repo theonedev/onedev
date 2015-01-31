@@ -84,7 +84,7 @@ public class GitPlex extends AbstractPlugin {
 		List<ManualConfig> manualConfigs = dataManager.init();
 		
 		if (!manualConfigs.isEmpty()) {
-			logger.warn("Please set up the server at " + GitPlex.getInstance().getServerUrl() + ".");
+			logger.warn("Please set up the server at " + GitPlex.getInstance().guessServerUrl() + ".");
 			initStage = new InitStage("Server Setup", manualConfigs);
 			
 			initStage.waitFor();
@@ -123,10 +123,10 @@ public class GitPlex extends AbstractPlugin {
 	public void postStart() {
 		initStage = null;
 		
-		logger.info("Server is ready at " + getServerUrl() + ".");
+		logger.info("Server is ready at " + guessServerUrl() + ".");
 	}
 
-	public String getServerUrl() {
+	public String guessServerUrl() {
 		String hostName;
 		try {
 			hostName = InetAddress.getLocalHost().getHostName();
@@ -140,28 +140,7 @@ public class GitPlex extends AbstractPlugin {
 		else 
 			serverUrl = "https://" + hostName + ":" + serverConfig.getSslConfig().getPort();
 
-		return StringUtils.stripEnd(serverUrl + serverConfig.getContextPath(), "/");
-	}
-	
-	/**
-	 * Get context aware servlet request path given path inside context. For instance if 
-	 * pathInContext is &quot;/images/ok.png&quot;, this method will return 
-	 * &quot;/gitplex/images/ok.png&quot; if GitPlex web UI is configured to run under
-	 * context path &quot;/gitplex&quot;
-	 *  
-	 * @param pathInContext
-	 * 			servlet request path inside servlet context. It does not matter whether or 
-	 * 			not this path starts with slash 
-	 * @return
-	 * 			absolute path prepending servlet context path
-	 */
-	public String getContextAwarePath(String pathInContext) {
-		String contextAwarePath = serverConfig.getContextPath();
-		contextAwarePath = StringUtils.stripEnd(contextAwarePath, "/");
-		if (pathInContext.startsWith("/"))
-			return contextAwarePath + pathInContext;
-		else
-			return contextAwarePath + "/" + pathInContext;
+		return StringUtils.stripEnd(serverUrl, "/");
 	}
 	
 	public String getAppName() {

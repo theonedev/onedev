@@ -1,8 +1,9 @@
 package com.pmease.gitplex.web.component.markdown;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -96,8 +97,8 @@ public class MarkdownInput extends FormComponentPanel<String> {
 					EntityCriteria<User> criteria = EntityCriteria.of(User.class);
 					if (StringUtils.isNotBlank(userQuery)) {
 						criteria.add(Restrictions.or(
-								Restrictions.ilike("name", userQuery, MatchMode.START), 
-								Restrictions.ilike("fullName", userQuery, MatchMode.START)));
+								Restrictions.ilike("name", userQuery, MatchMode.ANYWHERE), 
+								Restrictions.ilike("fullName", userQuery, MatchMode.ANYWHERE)));
 					}
 					criteria.addOrder(Order.asc("name"));
 
@@ -107,6 +108,10 @@ public class MarkdownInput extends FormComponentPanel<String> {
 						Map<String, String> item = new HashMap<>();
 						item.put("name", user.getName());
 						item.put("fullName", user.getFullName());
+						if (user.getFullName() != null)
+							item.put("searchKey", user.getName() + "~" + user.getFullName());
+						else
+							item.put("searchKey", user.getName());
 						String avatarUrl = avatarManager.getAvatarUrl(user);
 						item.put("avatarUrl", avatarUrl);
 						items.add(item);
@@ -120,29 +125,45 @@ public class MarkdownInput extends FormComponentPanel<String> {
 					}
 					String script = String.format("var $element = $('#%s');"
 							+ "$element[0].atWhoUserRenderCallback(%s);"
-							+ "$element[0].cachedMentions[$element[0].atWhoUserQuery] = %s;", 
+							+ "$element[0].cachedUsers[$element[0].atWhoUserQuery] = %s;", 
 							input.getMarkupId(), json, json);
 					target.appendJavaScript(script);
 				} else if (type.equals("emojiQuery")){
-					Map<String, String> emojiCodes = new LinkedHashMap<>();
+					List<String> emojiNames = new ArrayList<>();
 					String emojiQuery = params.getParameterValue("param").toOptionalString();
-					if (emojiQuery != null)
+					if (StringUtils.isNotBlank(emojiQuery)) {
 						emojiQuery = emojiQuery.toLowerCase();
-					for (Map.Entry<String, String> entry: EmojiOnes.getInstance().all().entrySet()) {
-						if (emojiCodes.size() < ATWHO_LIMIT 
-								&& (StringUtils.isBlank(emojiQuery) || entry.getKey().toLowerCase().startsWith(emojiQuery))) {
-							emojiCodes.put(entry.getKey(), entry.getValue());
+						for (String emojiName: EmojiOnes.getInstance().all().keySet()) {
+							if (emojiName.toLowerCase().contains(emojiQuery))
+								emojiNames.add(emojiName);
 						}
+						Collections.sort(emojiNames, new Comparator<String>() {
+
+							@Override
+							public int compare(String name1, String name2) {
+								return name1.length() - name2.length();
+							}
+							
+						});
+					} else {
+						emojiNames.add("smile");
+						emojiNames.add("satisfied");
+						emojiNames.add("blush");
+						emojiNames.add("+1");
+						emojiNames.add("-1");
 					}
-					
+
 					List<Map<String, String>> items = new ArrayList<>();
-					for (Map.Entry<String, String> entry: emojiCodes.entrySet()) {
-						CharSequence url = RequestCycle.get().urlFor(new PackageResourceReference(
-								EmojiOnes.class, "emoji/" + entry.getValue() + ".png"), new PageParameters());
-						Map<String, String> item = new HashMap<>();
-						item.put("name", entry.getKey());
-						item.put("url", url.toString());
-						items.add(item);
+					for (String emojiName: emojiNames) {
+						if (items.size() < ATWHO_LIMIT) {
+							String emojiCode = EmojiOnes.getInstance().all().get(emojiName);
+							CharSequence url = RequestCycle.get().urlFor(new PackageResourceReference(
+									EmojiOnes.class, "emoji/" + emojiCode + ".png"), new PageParameters());
+							Map<String, String> item = new HashMap<>();
+							item.put("name", emojiName);
+							item.put("url", url.toString());
+							items.add(item);
+						}
 					}
 					String json;
 					try {

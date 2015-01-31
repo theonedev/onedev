@@ -339,7 +339,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 
 	public String getUrl() {
-		return GitPlex.getInstance().getServerUrl() + "/" + getFQN();
+		return GitPlex.getInstance().guessServerUrl() + "/" + getFQN();
 	}
 	
 	public Branch getDefaultBranch() {

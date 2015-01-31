@@ -21,7 +21,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 	
 	@Override
 	public void configure(ServletContextHandler context) {
-		context.setContextPath(serverConfig.getContextPath());
+		context.setContextPath("/");
 		
 		context.getSessionHandler().getSessionManager().setMaxInactiveInterval(serverConfig.getSessionTimeout());
 		

@@ -19,16 +19,13 @@ public class DefaultServerConfig implements ServerConfig {
 	
 	private int sessionTimeout;
 
-	private String contextPath;
-	
 	private SslConfig sslConfig;
 	
 	@Inject
 	public DefaultServerConfig(@Named("server") Properties props) {
 		String httpPortStr = props.getProperty("httpPort");
-		if (StringUtils.isNotBlank(httpPortStr)) {
+		if (StringUtils.isNotBlank(httpPortStr)) 
 			httpPort = Integer.parseInt(httpPortStr.trim());
-		}
 		
 		String httpsPortStr = props.getProperty("httpsPort");
 		
@@ -74,15 +71,6 @@ public class DefaultServerConfig implements ServerConfig {
 		else
 			throw new RuntimeException("sessionTimeout is not specified.");
 		
-		contextPath = props.getProperty("contextPath");
-		if (StringUtils.isNotBlank(contextPath)) {
-			contextPath = StringUtils.stripStart(contextPath.trim(), "/ ");
-			contextPath = StringUtils.stripEnd(contextPath, "/ ");
-			contextPath = "/" + contextPath;
-		} else {
-			contextPath = "/";
-		}
-		
 	}
 	
 	@Override
@@ -100,8 +88,4 @@ public class DefaultServerConfig implements ServerConfig {
 		return sessionTimeout;
 	}
 
-	@Override
-	public String getContextPath() {
-		return contextPath;
-	}
 }

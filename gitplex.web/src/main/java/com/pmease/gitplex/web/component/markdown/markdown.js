@@ -42,26 +42,25 @@ gitplex.markdown = {
 		$element.before($parent.parent().find(".md-emojis"));
 		$parent.find(".md-header .btn-group:nth-child(2)").append($parent.find(".md-header .fa-smile-o").parent()); 	
 		
-		$element[0].cachedMentions = [];
+		$element[0].cachedUsers = [];
 		$element[0].cachedEmojis = [];
 
 	    $element.atwho({
 	    	at: ':',
 	        callbacks: {
 	        	remoteFilter: function(query, renderCallback) {
-	        		var $this = $(this);
-	                if(!$this.data('active')){
-	                    $this.data('active', true);                            
-	                    var queryEmojis = $element[0].cachedEmojis[query];
-	                    if(typeof queryEmojis == "object") {
-	                        renderCallback(queryEmojis);
-	                    } else {
-	                		$element[0].atWhoEmojiRenderCallback = renderCallback;
-	                		$element[0].atWhoEmojiQuery = query;
-	                    	callback("emojiQuery", query);
-	                    }                             
-	                    $this.data('active', false);                            
-	                }                    
+                    var queryEmojis = $element[0].cachedEmojis[query];
+                    if(typeof queryEmojis == "object") {
+                        renderCallback(queryEmojis);
+                    } else if (typeof queryEmojis != "string") {
+                    	// indicates that emoji query is ongoing and subsequent 
+                    	// query using same query string should be waiting
+	                    $element[0].cachedEmojis[query] = "";
+	                    
+                		$element[0].atWhoEmojiRenderCallback = renderCallback;
+                		$element[0].atWhoEmojiQuery = query;
+                    	callback("emojiQuery", query);
+                    }                             
 	        	}
 	        },
 	        displayTpl: "<li><i class='emoji' style='background-image:url(${url})'></i> ${name} </li>",
@@ -69,21 +68,21 @@ gitplex.markdown = {
 	        limit: atWhoLimit
 	    }).atwho({
 	    	at: '@',
+	    	searchKey: "searchKey",
 	        callbacks: {
 	        	remoteFilter: function(query, renderCallback) {
-	        		var $this = $(this);
-	                if(!$this.data('active')){
-	                    $this.data('active', true);                            
-	                    var queryMentions = $element[0].cachedMentions[query];
-	                    if(typeof queryMentions == "object") {
-	                        renderCallback(queryMentions);
-	                    } else {
-	                		$element[0].atWhoUserRenderCallback = renderCallback;
-	                		$element[0].atWhoUserQuery = query;
-	                    	callback("userQuery", query);
-	                    }                             
-	                    $this.data('active', false);                            
-	                }                    
+                    var queryUsers = $element[0].cachedUsers[query];
+                    if(typeof queryUsers == "object") {
+                        renderCallback(queryUsers);
+                    } else if (typeof queryUsers != "string") {
+                    	// indicates that user query is ongoing and subsequent 
+                    	// query using same query string should be waiting
+	                    $element[0].cachedUsers[query] = "";
+	                    
+                		$element[0].atWhoUserRenderCallback = renderCallback;
+                		$element[0].atWhoUserQuery = query;
+                    	callback("userQuery", query);
+                    }                             
 	        	}
 	        },
 	        displayTpl: "<li><span class='avatar'><img src='${avatarUrl}'/></span> ${name} <small>${fullName}</small></li>",

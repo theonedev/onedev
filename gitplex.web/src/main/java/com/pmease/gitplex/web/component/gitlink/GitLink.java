@@ -28,7 +28,7 @@ public class GitLink extends Panel {
 		super.onInitialize();
 
 		WebMarkupContainer link;
-		if (repoUrl.startsWith(GitPlex.getInstance().getServerUrl() + "/")) {
+		if (repoUrl.startsWith(GitPlex.getInstance().guessServerUrl() + "/")) {
 			link = new WebMarkupContainer("link");
 			link.add(AttributeModifier.replace("href", repoUrl + "?revision=" + commit));
 		} else {

@@ -30,8 +30,8 @@ public class UserChoiceProvider extends ChoiceProvider<User> {
 		Dao dao = GitPlex.getInstance(Dao.class);
 		int first = page * Constants.DEFAULT_SELECT2_PAGE_SIZE;
 		Criterion criterion = Restrictions.and(Restrictions.or(
-				Restrictions.ilike("name", term, MatchMode.START),
-				Restrictions.ilike("fullName", term, MatchMode.START)));
+				Restrictions.ilike("name", term, MatchMode.ANYWHERE),
+				Restrictions.ilike("fullName", term, MatchMode.ANYWHERE)));
 		List<User> users = dao.query(EntityCriteria.of(User.class)
 				.add(criterion).addOrder(Order.asc("name")), first, Constants.DEFAULT_SELECT2_PAGE_SIZE + 1);
 
