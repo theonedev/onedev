@@ -12,11 +12,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.wicket.component.markdown2.MarkdownInput;
-import com.pmease.commons.wicket.component.markdown2.MarkdownViewer;
+import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
@@ -37,7 +37,7 @@ public class OpenActivityPanel extends Panel {
 
 		String description = requestModel.getObject().getDescription();
 		if (StringUtils.isNotBlank(description))
-			fragment.add(new MarkdownViewer("description", Model.of(description)));
+			fragment.add(new MarkdownPanel("description", Model.of(description)));
 		else
 			fragment.add(new Label("description", "<i>No description</i>").setEscapeModelStrings(false));
 		fragment.setOutputMarkupId(true);
@@ -62,7 +62,7 @@ public class OpenActivityPanel extends Panel {
 				form.setOutputMarkupId(true);
 				fragment.add(form);
 
-				final MarkdownInput input = new MarkdownInput("input", Model.of(requestModel.getObject().getDescription()));
+				final CommentInput input = new CommentInput("input", Model.of(requestModel.getObject().getDescription()));
 				form.add(input);
 				
 				form.add(new AjaxSubmitLink("save") {

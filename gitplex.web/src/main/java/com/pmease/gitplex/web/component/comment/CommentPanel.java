@@ -23,12 +23,13 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.util.time.Duration;
 
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.behavior.AllowLeaveBehavior;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
-import com.pmease.commons.wicket.component.markdown2.MarkdownInput;
-import com.pmease.commons.wicket.component.markdown2.MarkdownViewer;
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
+import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.Comment;
@@ -78,7 +79,7 @@ public class CommentPanel extends Panel {
 	
 	private Fragment renderForView(String content) {
 		Fragment fragment = new Fragment("content", "viewFrag", this);
-		fragment.add(new MarkdownViewer("comment", Model.of(content)));
+		fragment.add(new MarkdownPanel("comment", Model.of(content)));
 		fragment.setOutputMarkupId(true);
 		return fragment;
 	}
@@ -102,9 +103,10 @@ public class CommentPanel extends Panel {
 
 				Form<?> form = new Form<Void>("form");
 				fragment.add(form);
-				final MarkdownInput input = new MarkdownInput("input", Model.of(getComment().getContent()));
+				final CommentInput input = new CommentInput("input", Model.of(getComment().getContent()));
 				input.setRequired(true);
 				form.add(input);
+				form.add(new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)));
 				
 				form.add(new AjaxSubmitLink("save") {
 
@@ -280,9 +282,11 @@ public class CommentPanel extends Panel {
 				
 				Form<?> form = new Form<Void>("form");
 				fragment.add(form);
-				final MarkdownInput input = new MarkdownInput("input", Model.of(""));
+				final CommentInput input = new CommentInput("input", Model.of(""));
 				input.setRequired(true);
 				form.add(input);
+
+				form.add(new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)));
 				
 				final int pageId = getPage().getPageId();
 				form.add(new AjaxSubmitLink("save") {
@@ -372,9 +376,10 @@ public class CommentPanel extends Panel {
 				Form<?> form = new Form<Void>("form");
 				fragment.add(form);
 				CommentReply reply = (CommentReply) row.getDefaultModelObject();
-				final MarkdownInput input = new MarkdownInput("input", Model.of(reply.getContent()));
+				final CommentInput input = new CommentInput("input", Model.of(reply.getContent()));
 				input.setRequired(true);
 				form.add(input);
+				form.add(new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)));
 				
 				form.add(new AjaxSubmitLink("save") {
 

@@ -40,6 +40,7 @@ gitplex.markdown = {
 			iconlibrary: "fa"
 		});
 		
+		$input.css({resize: "vertical"});
 		$input.before(
 				"<div class='md-help'>" +
 				"  <a href='https://help.github.com/articles/github-flavored-markdown/' target='_blank'>GitHub flavored markdown</a> " +
@@ -84,7 +85,7 @@ gitplex.markdown = {
 		var html = "";
 		for (var i in emojis) {
 			var emoji = emojis[i];
-			html += "<a class='emoji' name='" + emoji.name + "'><img src='" + emoji.url + "'></img></a> ";
+			html += "<a class='emoji' title='" + emoji.name + "'><img src='" + emoji.url + "'></img></a> ";
 		}
 		var $emojis = $input.prevAll(".md-emojis").find(".emojis");
 		$emojis.html(html);
@@ -92,7 +93,7 @@ gitplex.markdown = {
 			if (!$input.is(":visible")) 
 				return;
 			
-			var emojiName = $(this).attr("name");
+			var emojiName = $(this).attr("title");
 			
 			var beforeChar, afterChar;
 			var index = $input.caret();

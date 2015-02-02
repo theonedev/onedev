@@ -25,7 +25,6 @@ import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -61,7 +60,6 @@ import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
-import com.pmease.commons.wicket.component.markdown2.MarkdownInput;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.PageTabLink;
 import com.pmease.commons.wicket.component.tabbable.Tab;
@@ -86,6 +84,7 @@ import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.branch.BranchLink;
+import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.event.PullRequestChanged;
 import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
@@ -617,7 +616,8 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		
 		form.add(deleteSourceCheck);
 		if (operation != INTEGRATE) {
-			form.add(noteInput = new MarkdownInput("note", Model.of("")));
+			form.add(noteInput = new CommentInput("note", Model.of("")));
+			noteInput.add(AttributeModifier.replace("placeholder", "Leave a comment"));
 			deleteSourceCheck.setVisible(false);
 		} else {
 			IntegrationPreview preview = request.getIntegrationPreview();
@@ -629,18 +629,11 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			if (strategy == REBASE_SOURCE_ONTO_TARGET 
 					|| strategy == REBASE_TARGET_ONTO_SOURCE
 					|| preview.getIntegrated().equals(preview.getRequestHead())) {
-				form.add(noteInput = new MarkdownInput("note", Model.of("")));
+				form.add(noteInput = new CommentInput("note", Model.of("")));
+				noteInput.add(AttributeModifier.replace("placeholder", "Leave a comment"));
 			} else {
-				Fragment noteFragment = new Fragment("note", "commitMessageFrag", this);
-				noteFragment.add(noteInput = new TextArea<String>("commitMessage", Model.of("")));
-				noteInput.add(new OnChangeAjaxBehavior() {
-
-					@Override
-					protected void onUpdate(AjaxRequestTarget target) {
-					}
-					
-				});
-				form.add(noteFragment);
+				form.add(noteInput = new TextArea<String>("note", Model.of("")));
+				noteInput.add(AttributeModifier.replace("placeholder", "Commit message"));
 			}
 		}
 		form.add(new FeedbackPanel("feedback", form));

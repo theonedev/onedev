@@ -52,7 +52,6 @@ table .navigator>div .goto em {background-color: #F5F5F5;}
 table .navigator>div .goto em, table .navigator>div>span>em {color: #999999; cursor: default;}
 table .navigator>div>span>em, table .navigator>div>span>em:hover, table .navigator>div>span>em:focus {background-color: transparent;}
 table .row-selector {width: 24px;}
-table td, table th {text-align: left;}
 
 /* TABLE SORTER */
 a.wicket_orderUp:after, a.wicket_orderDown:after, a.wicket_orderNone:after { 

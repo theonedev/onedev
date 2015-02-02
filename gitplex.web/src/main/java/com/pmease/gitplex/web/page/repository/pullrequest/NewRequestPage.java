@@ -37,7 +37,6 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
-import com.pmease.commons.wicket.component.markdown2.MarkdownInput;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
@@ -57,6 +56,7 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.component.branch.AffinalBranchSingleChoice;
 import com.pmease.gitplex.web.component.branch.BranchLink;
+import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.commit.CommitsTablePanel;
 import com.pmease.gitplex.web.component.diff.CompareResultPanel;
 import com.pmease.gitplex.web.component.pullrequest.AssigneeChoice;
@@ -476,7 +476,7 @@ public class NewRequestPage extends RepositoryPage {
 			
 		}));
 
-		form.add(new MarkdownInput("comment", new IModel<String>() {
+		form.add(new CommentInput("comment", new IModel<String>() {
 
 			@Override
 			public void detach() {

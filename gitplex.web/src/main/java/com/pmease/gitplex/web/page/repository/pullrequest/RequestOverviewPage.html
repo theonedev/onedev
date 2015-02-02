@@ -10,7 +10,8 @@
 				</table>
 				<div wicket:id="addComment" class="add-comment">
 					<form wicket:id="form" class="leave-confirm">
-						<div wicket:id="input" class="nofocus"></div>
+						<textarea wicket:id="input" class="form-control" rows="10" placeholder="Leave a comment"></textarea>
+						<div wicket:id="feedback"></div>
 						<button wicket:id="comment" class="dirty-aware btn btn-primary">Comment</button>
 					</form>
 				</div>

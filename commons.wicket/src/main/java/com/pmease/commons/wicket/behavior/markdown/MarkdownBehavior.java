@@ -74,7 +74,7 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 				});
 			} else {
 				emojiNames.add("smile");
-				emojiNames.add("satisfied");
+				emojiNames.add("worried");
 				emojiNames.add("blush");
 				emojiNames.add("+1");
 				emojiNames.add("-1");

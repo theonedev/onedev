@@ -41,6 +41,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.string.Strings;
+import org.apache.wicket.util.time.Duration;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobInfo;
@@ -60,7 +61,7 @@ import com.pmease.commons.wicket.behavior.menu.CheckMenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
-import com.pmease.commons.wicket.component.markdown2.MarkdownInput;
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
@@ -68,6 +69,7 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.user.AvatarMode;
@@ -518,9 +520,10 @@ public class TextDiffPanel extends Panel {
 		Form<?> form = new Form<Void>("addComment");
 		form.setOutputMarkupId(true);
 		
-		final MarkdownInput input;
-		form.add(input = new MarkdownInput("input", Model.of("")));
+		final CommentInput input;
+		form.add(input = new CommentInput("input", Model.of("")));
 		input.setRequired(true);
+		form.add(new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)));
 		
 		form.add(new AjaxLink<Void>("cancel") {
 
