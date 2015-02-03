@@ -879,7 +879,7 @@ ul.status-help li:last-child .description {border-bottom: none;}
 
 .request-detail>.summary>.operations>.buttons>a, 
 .request-detail>.summary>.operations>.confirm>form>input {margin-right: 12px;} 
-.request-detail>.summary>.operations>.confirm>form>div>textarea, 
+.request-detail>.summary>.operations>.confirm>form>textarea, 
 .request-detail>.summary>.operations>.confirm>form>.delete-source {margin-bottom: 16px;} 
 
 /* COMMON CSS FOR REVIEW RESULT ICON */
@@ -907,7 +907,7 @@ ul.status-help li:last-child .description {border-bottom: none;}
 .request-detail .activities>table>tbody>tr.non-discussion>.activity>div.summary .user a {font-weight: normal;}
 .request-detail .activities>table>tbody>tr.update+.update>td>table {margin-top: -12px;}
 
-.request-detail .activities .activity>.commits {color: #777; margin-left: -31px;}
+.request-detail .activities .activity>.commits {color: #777; margin-left: -32px;}
 .request-detail .activities .activity>.commits a {color: #555;}
 .request-detail .activities .activity>.commits td {padding-top: 8px; padding-bottom: 8px;}
 .request-detail .activities .non-update+.update>td tr:first-child td {border-top: none;}

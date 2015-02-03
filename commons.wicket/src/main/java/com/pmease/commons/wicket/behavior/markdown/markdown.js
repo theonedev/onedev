@@ -46,13 +46,11 @@ gitplex.markdown = {
 				"  <a href='https://help.github.com/articles/github-flavored-markdown/' target='_blank'>GitHub flavored markdown</a> " +
 				"  is accepted here. You can also input <b>:<em>emoji</em>:</b> to insert an emoji." +
 				"</div>");
-
 		$input.before(
 				"<div class='md-emojis'>" +
-				"  <div class='mask'></div>" +
-				"  <div class='emojis'><div>" +
+				"  <div class='loading'>Loading emojis...</div>" +
 				"</div>");
-		
+
 		$input.parent().find(".md-header .btn-group:nth-child(2)").append($input.parent().find(".md-header .fa-smile-o").parent()); 	
 		
 		$input[0].cachedEmojis = [];
@@ -82,14 +80,16 @@ gitplex.markdown = {
 	},
 	onEmojisLoaded: function(inputId, emojis) {
 		var $input = $("#" + inputId);
-		var html = "";
+		var $emojis = $input.prevAll(".md-emojis");
+		$emojis.html("<div class='mask'></div><div class='content'><div>");
+		var contentHtml = "";
 		for (var i in emojis) {
 			var emoji = emojis[i];
-			html += "<a class='emoji' title='" + emoji.name + "'><img src='" + emoji.url + "'></img></a> ";
+			contentHtml += "<a class='emoji' title='" + emoji.name + "'><img src='" + emoji.url + "'></img></a> ";
 		}
-		var $emojis = $input.prevAll(".md-emojis").find(".emojis");
-		$emojis.html(html);
-		$emojis.find(".emoji").click(function() {
+		var $content = $emojis.find(".content");
+		$content.html(contentHtml);
+		$content.find(".emoji").click(function() {
 			if (!$input.is(":visible")) 
 				return;
 			

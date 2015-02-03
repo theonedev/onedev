@@ -1,6 +1,7 @@
 package com.pmease.gitplex.core.manager.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -13,14 +14,17 @@ import com.pmease.commons.git.BlobText;
 import com.pmease.commons.git.Change;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.commons.util.diff.AroundContext;
 import com.pmease.commons.util.diff.DiffLine;
 import com.pmease.commons.util.diff.DiffUtils;
 import com.pmease.commons.util.diff.WordSplitter;
 import com.pmease.gitplex.core.comment.InlineComment;
+import com.pmease.gitplex.core.comment.MentionParser;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.User;
 
 @Singleton
 public class DefaultPullRequestCommentManager implements PullRequestCommentManager {
@@ -29,9 +33,13 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 	
 	private final Set<PullRequestListener> pullRequestListeners;
 	
+	private final MarkdownManager markdownManager;
+	
 	@Inject
-	public DefaultPullRequestCommentManager(Dao dao, Set<PullRequestListener> pullRequestListeners) {
+	public DefaultPullRequestCommentManager(Dao dao, MarkdownManager markdownManager, 
+			Set<PullRequestListener> pullRequestListeners) {
 		this.dao = dao;
+		this.markdownManager = markdownManager;
 		this.pullRequestListeners = pullRequestListeners;
 	}
 
@@ -157,7 +165,17 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 	@Transactional
 	@Override
 	public void save(PullRequestComment comment, boolean notify) {
+		boolean isNew = comment.isNew();
 		dao.persist(comment);
+		
+		if (isNew) {
+			String rawHtml = markdownManager.parse(comment.getContent());
+			Collection<User> mentions = new MentionParser().parseMentions(rawHtml);
+			for (User user: mentions) {
+				for (PullRequestListener listener: pullRequestListeners)
+					listener.onMentioned(comment, user);
+			}
+		}
 		
 		if (notify) {
 			for (PullRequestListener listener: pullRequestListeners)

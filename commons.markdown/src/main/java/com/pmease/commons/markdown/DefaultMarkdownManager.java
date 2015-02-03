@@ -9,6 +9,8 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.pegdown.LinkRenderer;
@@ -89,6 +91,13 @@ public class DefaultMarkdownManager implements MarkdownManager {
 			return html;
 		}
 		
+	}
+
+	@Override
+	public String escape(String markdown) {
+		markdown = StringEscapeUtils.escapeHtml4(markdown);
+		markdown = StringUtils.replace(markdown, "\n", "<br>");
+		return markdown;
 	}
 
 }

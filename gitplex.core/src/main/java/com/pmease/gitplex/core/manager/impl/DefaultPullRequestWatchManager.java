@@ -233,12 +233,12 @@ public class DefaultPullRequestWatchManager implements PullRequestWatchManager {
 			String subject = String.format("%s pull request #%d (%s)", 
 					event.toString(), request.getId(), request.getTitle()); 
 			String url = urlManager.urlFor(request);
-			String body = String.format("Dear Users,<p>"
-					+ "%s pull request #%d (%s). Visit <a href='%s'>%s</a> for details.<p>"
-					+ "-- Sent by GitPlex<p>"
-					+ "<p style='font-size: 12px; color: #888;'>"
-					+ "You receive this email as you are watching the branch or pull request."
-					+ "</p>", 
+			String body = String.format("Dear Users,"
+					+ "<p style='margin: 16px 0;'>%s pull request #%d (%s). "
+					+ "<p style='margin: 16px 0;'>Visit <a href='%s'>%s</a> for details."
+					+ "<p style='margin: 16px 0;'>-- Sent by GitPlex"
+					+ "<p style='margin: 16px 0; font-size: 12px; color: #888;'>"
+					+ "You receive this email as you are watching the branch or pull request.",
 					event.toString(), request.getId(), request.getTitle(), url, url);
 			mailManager.sendMail(usersToNotify, subject, body);
 		}

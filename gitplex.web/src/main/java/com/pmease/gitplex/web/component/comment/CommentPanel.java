@@ -230,8 +230,6 @@ public class CommentPanel extends Panel {
 		
 		add(renderForView(getComment().getContent()));
 
-		add(repliesView = newRepliesView());
-		
 		add(newAddReplyRow());
 		
 		setOutputMarkupId(true);
@@ -355,7 +353,7 @@ public class CommentPanel extends Panel {
 
 	@Override
 	protected void onBeforeRender() {
-		replace(repliesView = newRepliesView());
+		addOrReplace(repliesView = newRepliesView());
 		
 		super.onBeforeRender();
 	}
@@ -450,7 +448,7 @@ public class CommentPanel extends Panel {
 		}.add(new ConfirmBehavior("Do you really want to delete this reply?")));
 		
 		row.add(newAdditionalReplyActions("additionalActions", (CommentReply) row.getDefaultModelObject()));
-		row.add(new WebMarkupContainer("anchor").add(AttributeModifier.replace("name", "comment" + getComment().getId())));		
+		row.add(new WebMarkupContainer("anchor").add(AttributeModifier.replace("name", "reply" + reply.getId())));		
 		
 		row.add(renderForView(reply.getContent()));
 		

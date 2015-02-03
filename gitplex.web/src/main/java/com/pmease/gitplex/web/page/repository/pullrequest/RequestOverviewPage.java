@@ -310,7 +310,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 	
 	@Override
 	protected void onBeforeRender() {
-		replace(newActivitiesView());
+		addOrReplace(newActivitiesView());
 		
 		super.onBeforeRender();
 	}
@@ -343,8 +343,6 @@ public class RequestOverviewPage extends RequestDetailPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		add(newActivitiesView());
 		
 		final WebMarkupContainer addComment = new WebMarkupContainer("addComment") {
 

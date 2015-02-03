@@ -16,7 +16,7 @@ import com.google.common.collect.Sets;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.commons.util.JsoupUtils;
+import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.gitplex.core.manager.MailManager;
 import com.pmease.gitplex.core.manager.PullRequestNotificationManager;
 import com.pmease.gitplex.core.manager.UrlManager;
@@ -46,11 +46,15 @@ public class DefaultPullRequestNotificationManager implements PullRequestNotific
 	
 	private final UrlManager urlManager;
 	
+	private final MarkdownManager markdownManager;
+	
 	@Inject
-	public DefaultPullRequestNotificationManager(Dao dao, MailManager mailManager, UrlManager urlManager) {
+	public DefaultPullRequestNotificationManager(Dao dao, MailManager mailManager, 
+			UrlManager urlManager, MarkdownManager markdownManager) {
 		this.dao = dao;
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
+		this.markdownManager = markdownManager;
 	}
 
 	@Transactional
@@ -77,7 +81,7 @@ public class DefaultPullRequestNotificationManager implements PullRequestNotific
 	@Override
 	public void onCommentReplied(PullRequestCommentReply reply) {
 	}
-
+	
 	@Transactional
 	@Override
 	public void onReviewed(Review review, String comment) {
@@ -170,9 +174,9 @@ public class DefaultPullRequestNotificationManager implements PullRequestNotific
 	
 	private String decorateMail(User user, String body) {
 		return String.format("Dear %s, "
-				+ "<p>"
+				+ "<p style='margin: 16px 0;'>"
 				+ "%s"
-				+ "<p>"
+				+ "<p style='margin: 16px 0;'>"
 				+ "-- Sent by GitPlex", 
 				user.getDisplayName(), body);
 	}
@@ -194,10 +198,11 @@ public class DefaultPullRequestNotificationManager implements PullRequestNotific
 		String subject = String.format("You are mentioned in pull request #%d (%s)", 
 				request.getId(), request.getTitle());
 		String url = urlManager.urlFor(request);
-		String body = String.format("<pre>%s</pre>"
-				+ "<p>"
+		String body = String.format("%s."
+				+ "<p style='margin: 16px 0; padding-left: 16px; border-left: 4px solid #CCC;'>%s"
+				+ "<p style='margin: 16px 0;'>"
 				+ "For details, please visit <a href='%s'>%s</a>", 
-				JsoupUtils.sanitize(request.getDescription()), url, url);
+				subject, markdownManager.escape(request.getDescription()), url, url);
 		
 		mailManager.sendMail(Sets.newHashSet(user), subject, decorateMail(user, body));
 	}
@@ -208,10 +213,11 @@ public class DefaultPullRequestNotificationManager implements PullRequestNotific
 		String subject = String.format("You are mentioned in comment of pull request #%d (%s)", 
 				comment.getRequest().getId(), comment.getRequest().getTitle());
 		String url = urlManager.urlFor(comment);
-		String body = String.format("<pre>%s</pre>"
-				+ "<p>"
+		String body = String.format("%s."
+				+ "<p style='margin: 16px 0; padding-left: 16px; border-left: 4px solid #CCC;'>%s"
+				+ "<p style='margin: 16px 0;'>"
 				+ "For details, please visit <a href='%s'>%s</a>", 
-				JsoupUtils.sanitize(comment.getContent()), url, url);
+				subject, markdownManager.escape(comment.getContent()), url, url);
 		
 		mailManager.sendMail(Sets.newHashSet(user), subject, decorateMail(user, body));
 	}
@@ -222,10 +228,11 @@ public class DefaultPullRequestNotificationManager implements PullRequestNotific
 		String subject = String.format("You are mentioned in comment of pull request #%d (%s)", 
 				reply.getComment().getRequest().getId(), reply.getComment().getRequest().getTitle());
 		String url = urlManager.urlFor(reply);
-		String body = String.format("<pre>%s</pre>"
-				+ "<p>"
+		String body = String.format("%s."
+				+ "<p style='margin: 16px 0; padding-left: 16px; border-left: 4px solid #CCC;'>%s"
+				+ "<p style='margin: 16px 0;'>"
 				+ "For details, please visit <a href='%s'>%s</a>", 
-				JsoupUtils.sanitize(reply.getContent()), url, url);
+				subject, markdownManager.escape(reply.getContent()), url, url);
 		
 		mailManager.sendMail(Sets.newHashSet(user), subject, decorateMail(user, body));
 	}

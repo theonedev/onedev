@@ -13,6 +13,7 @@ import com.pmease.gitplex.web.component.comment.CommentInput;
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
 
+	@SuppressWarnings("unused")
 	private String markdown;
 	
 	public TestPage(PageParameters params) {

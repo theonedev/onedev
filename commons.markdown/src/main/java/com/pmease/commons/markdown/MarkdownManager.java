@@ -33,4 +33,14 @@ public interface MarkdownManager {
 	 */
 	String parseAndProcess(String markdown);
 
+	/**
+	 * Escape html characters in specified markdown so that the markdown plain text 
+	 * can be embedded in html content such as html email.
+	 * 
+	 * @param markdown
+	 * 			markdown to be escaped
+	 * @return
+	 * 			escaped markdown plain text
+	 */
+	String escape(String markdown);
 }
