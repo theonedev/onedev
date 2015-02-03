@@ -10,6 +10,8 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 public interface Comment extends Serializable {
+	Long getId();
+	
 	User getUser();
 	
 	Date getDate();

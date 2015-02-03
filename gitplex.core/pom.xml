@@ -77,9 +77,9 @@
 			<version>1.0.30</version>
 		</dependency>
 		<dependency>
-			<groupId>org.pegdown</groupId>
-			<artifactId>pegdown</artifactId>
-			<version>1.4.2</version>
+			<groupId>com.pmease</groupId>
+			<artifactId>commons.markdown</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 	</dependencies>
 	<repositories>

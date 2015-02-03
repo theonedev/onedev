@@ -1030,9 +1030,17 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		}
 
 		@Override
-		public void onMentioned(PullRequest request, User user, String content) {
+		public void onMentioned(PullRequest request, User user) {
 		}
 
+		@Override
+		public void onMentioned(PullRequestComment comment, User user) {
+		}
+
+		@Override
+		public void onMentioned(PullRequestCommentReply reply, User user) {
+		}
+		
 		@Override
 		public void onInvitingReview(ReviewInvitation invitation) {
 		}
@@ -1048,6 +1056,6 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		@Override
 		public void pendingApproval(PullRequest request) {
 		}
-		
+
 	}
 }

@@ -6,6 +6,8 @@ import java.util.Date;
 import com.pmease.gitplex.core.model.User;
 
 public interface CommentReply extends Serializable {
+	Long getId();
+	
 	Comment getComment();
 	
 	User getUser();

@@ -121,10 +121,12 @@ div.terminal {background: black; color: white; border-radius: 4px; padding: 8px;
 .form-feedback.has-success { color: #468847; background-color: #dff0d8; border-color: #d6e9c6 #d6e9c6 #d6e9c6 #468847; }
 .form-feedback.has-info { color: #3a87ad; background-color: #d9edf7; border-color: #bce8f1 #bce8f1 #bce8f1 #3a87ad;}
 
-.submits { margin-top: 12px; padding-top: 18px;}
+.submits {margin-top: 18px;}
 .submits:before, .submits:after { display: table; content: " "; }
 .submits:after { clear: both; }
 .submits .btn + .btn { margin-bottom: 0; margin-left: 5px; }
+
+form+div>ul>li>.alert {margin-top: 18px;}
 
 .form-sm { width: 400px; }
 .form-md { width: 600px; }

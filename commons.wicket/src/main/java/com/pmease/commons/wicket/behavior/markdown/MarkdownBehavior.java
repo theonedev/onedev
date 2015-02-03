@@ -46,7 +46,7 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 			String markdown = params.getParameterValue("param").toOptionalString();
 			String preview;
 			if (StringUtils.isNotBlank(markdown)) {
-				preview = AppLoader.getInstance(MarkdownManager.class).toHtml(markdown, true, true);
+				preview = AppLoader.getInstance(MarkdownManager.class).parseAndProcess(markdown);
 				preview = StringUtils.replace(preview, "'", "\\'");
 				preview = StringUtils.replace(preview, "\n", " ");
 			} else { 

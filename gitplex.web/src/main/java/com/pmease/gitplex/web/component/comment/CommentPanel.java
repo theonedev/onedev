@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -224,6 +225,8 @@ public class CommentPanel extends Panel {
 			}
 			
 		}));
+		
+		summary.add(new WebMarkupContainer("anchor").add(AttributeModifier.replace("name", "comment" + getComment().getId())));
 		
 		add(renderForView(getComment().getContent()));
 
@@ -447,6 +450,7 @@ public class CommentPanel extends Panel {
 		}.add(new ConfirmBehavior("Do you really want to delete this reply?")));
 		
 		row.add(newAdditionalReplyActions("additionalActions", (CommentReply) row.getDefaultModelObject()));
+		row.add(new WebMarkupContainer("anchor").add(AttributeModifier.replace("name", "comment" + getComment().getId())));		
 		
 		row.add(renderForView(reply.getContent()));
 		

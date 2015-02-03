@@ -28,6 +28,8 @@ public class Bootstrap {
 
 	private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
 	
+	public static final int SOCKET_CONNECT_TIMEOUT = 60000;
+	
 	public static final String APP_LOADER_PROPERTY_NAME = "appLoader";
 	
 	public static final String LOGBACK_CONFIG_FILE_PROPERTY_NAME = "logback.configurationFile";

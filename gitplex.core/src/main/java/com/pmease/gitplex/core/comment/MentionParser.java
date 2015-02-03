@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.DataNode;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.TextNode;
@@ -23,6 +24,10 @@ public class MentionParser {
 	
 	private static final Pattern PATTERN = Pattern.compile("(^|\\s+)@(\\S+)(?=($|\\s+))");
 
+	public Collection<User> parseMentions(String html) {
+		return parseMentions(Jsoup.parseBodyFragment(html).body());		
+	}
+	
 	public Collection<User> parseMentions(Element body) {
 		Collection<User> mentions = new HashSet<>();
 		

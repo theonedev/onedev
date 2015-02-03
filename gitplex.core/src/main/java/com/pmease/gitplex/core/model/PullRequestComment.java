@@ -58,7 +58,7 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 	private InlineInfo inlineInfo;
 	
 	private transient Pair<String, String> oldCommitAndNewCommit;
-
+	
 	public PullRequest getRequest() {
 		return request;
 	}
@@ -221,5 +221,5 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 	public Date getLastVisitDate() {
 		return GitPlex.getInstance(PullRequestManager.class).getLastVisitDate(getRequest());
 	}
-	
+
 }

@@ -20,6 +20,7 @@ import com.pmease.commons.markdown.extensionpoint.MarkdownExtension;
 import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
+import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.validation.UserNameReservation;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.avatar.DefaultAvatarManager;
@@ -120,6 +121,8 @@ public class WebModule extends AbstractPluginModule {
 			}
 			
 		});
-	}
 
+		bind(UrlManager.class).to(WebUrlManager.class);
+	}
+	
 }

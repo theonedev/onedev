@@ -20,7 +20,11 @@ public interface PullRequestListener {
 	
 	void onUpdated(PullRequestUpdate update);
 	
-	void onMentioned(PullRequest request, User user, String content);
+	void onMentioned(PullRequest request, User user);
+	
+	void onMentioned(PullRequestComment comment, User user);
+
+	void onMentioned(PullRequestCommentReply reply, User user);
 	
 	void onCommented(PullRequestComment comment);
 	

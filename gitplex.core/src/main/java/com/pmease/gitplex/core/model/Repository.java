@@ -30,7 +30,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.editable.annotation.Multiline;
+import com.pmease.commons.editable.annotation.Markdown;
 import com.pmease.commons.git.BlobInfo;
 import com.pmease.commons.git.BlobText;
 import com.pmease.commons.git.Change;
@@ -132,7 +132,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 
 	@Editable(order=200, description="Specify description of the repository.")
-	@Multiline
+	@Markdown
 	public String getDescription() {
 		return description;
 	}

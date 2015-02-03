@@ -25,6 +25,7 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.manager.MailManager;
 import com.pmease.gitplex.core.manager.PullRequestWatchManager;
+import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.BranchWatch;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -47,11 +48,15 @@ public class DefaultPullRequestWatchManager implements PullRequestWatchManager {
 	
 	private final MailManager mailManager;
 	
+	private final UrlManager urlManager;
+	
 	@Inject
-	public DefaultPullRequestWatchManager(Dao dao, UserManager userManager, MailManager mailManager) {
+	public DefaultPullRequestWatchManager(Dao dao, UserManager userManager, MailManager mailManager, 
+			UrlManager urlManager) {
 		this.dao = dao;
 		this.userManager = userManager;
 		this.mailManager = mailManager;
+		this.urlManager = urlManager;
 	}
 	
 	@Transactional
@@ -113,12 +118,6 @@ public class DefaultPullRequestWatchManager implements PullRequestWatchManager {
 			notify(update.getRequest(), Sets.newHashSet(update.getUser()), UPDATED);
 		else
 			notify(update.getRequest(), new HashSet<User>(), UPDATED);
-	}
-
-	@Transactional
-	@Override
-	public void onMentioned(PullRequest request, User user, String content) {
-		watch(request, user, "You are set to watch this pull request as you are mentioned in comment.");
 	}
 
 	@Transactional
@@ -231,15 +230,39 @@ public class DefaultPullRequestWatchManager implements PullRequestWatchManager {
 		}
 		
 		if (!usersToNotify.isEmpty()) {
-			mailManager.sendMail(usersToNotify, 
-					event + ": Pull request #" + request.getId() + " (" + request.getTitle() + ")", 
-					"Visit url for details");
+			String subject = String.format("%s pull request #%d (%s)", 
+					event.toString(), request.getId(), request.getTitle()); 
+			String url = urlManager.urlFor(request);
+			String body = String.format("Dear Users,<p>"
+					+ "%s pull request #%d (%s). Visit <a href='%s'>%s</a> for details.<p>"
+					+ "-- Sent by GitPlex<p>"
+					+ "<p style='font-size: 12px; color: #888;'>"
+					+ "You receive this email as you are watching the branch or pull request."
+					+ "</p>", 
+					event.toString(), request.getId(), request.getTitle(), url, url);
+			mailManager.sendMail(usersToNotify, subject, body);
 		}
 		
 		request.setLastEventDate(new Date());
 		request.setLastEvent(event);
 		
 		dao.persist(request);
+	}
+
+	@Transactional
+	@Override
+	public void onMentioned(PullRequest request, User user) {
+		watch(request, user, "You are set to watch this pull request as you are mentioned.");
+	}
+
+	@Override
+	public void onMentioned(PullRequestComment comment, User user) {
+		watch(comment.getRequest(), user, "You are set to watch this pull request as you are mentioned.");
+	}
+
+	@Override
+	public void onMentioned(PullRequestCommentReply reply, User user) {
+		watch(reply.getComment().getRequest(), user, "You are set to watch this pull request as you are mentioned.");
 	}
 	
 }

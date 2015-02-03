@@ -34,7 +34,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 	}
 
 	@Override
-	public RootNode toAST(String markdown) {
+	public String parse(String markdown) {
 		PegDownPlugins.Builder builder = new PegDownPlugins.Builder();
 		for (MarkdownExtension extension: extensions) {
 			if (extension.getInlineParsers() != null) {
@@ -48,11 +48,9 @@ public class DefaultMarkdownManager implements MarkdownManager {
 		}
 		PegDownPlugins plugins = builder.build();
 		PegDownProcessor processor = new PegDownProcessor(ALL, plugins);
-		return processor.parseMarkdown(markdown.toCharArray());
-	}
 
-	@Override
-	public String toHtml(RootNode ast, boolean sanitizeHtml, boolean applyTransformers) {
+		RootNode ast = processor.parseMarkdown(markdown.toCharArray());
+		
 		List<ToHtmlSerializerPlugin> serializers = new ArrayList<>();
 		for (MarkdownExtension extension: extensions) {
 			if (extension.getHtmlSerializers() != null) {
@@ -61,26 +59,31 @@ public class DefaultMarkdownManager implements MarkdownManager {
 			}
 		}
 
-		String html = new ToHtmlSerializer(new LinkRenderer(), serializers).toHtml(ast);	
-		
-		if (sanitizeHtml)
-			html = JsoupUtils.sanitize(html);
+		return new ToHtmlSerializer(new LinkRenderer(), serializers).toHtml(ast);	
+	}
+
+	@Override
+	public String parseAndProcess(String markdown) {
+		String rawHtml = parse(markdown);
+		return process(rawHtml);
+	}
+	
+	@Override
+	public String process(String rawHtml) {
+		String html = JsoupUtils.sanitize(rawHtml);
 
 		List<HtmlTransformer> transformers = new ArrayList<>();
-		if (applyTransformers) {
-			for (MarkdownExtension extension: extensions) {
-				if (extension.getHtmlTransformers() != null) {
-					for (HtmlTransformer transformer: extension.getHtmlTransformers())
-						transformers.add(transformer);
-				}
+		for (MarkdownExtension extension: extensions) {
+			if (extension.getHtmlTransformers() != null) {
+				for (HtmlTransformer transformer: extension.getHtmlTransformers())
+					transformers.add(transformer);
 			}
 		}
 		
 		if (!transformers.isEmpty()) {
 			Element body = Jsoup.parseBodyFragment(html).body();
-			for (HtmlTransformer transformer: transformers) {
+			for (HtmlTransformer transformer: transformers)
 				body = transformer.transform(body);
-			}
 			return body.html();
 		} else {
 			return html;
@@ -88,9 +91,4 @@ public class DefaultMarkdownManager implements MarkdownManager {
 		
 	}
 
-	@Override
-	public String toHtml(String markdown, boolean sanitizeHtml, boolean applyTransformers) {
-		return toHtml(toAST(markdown), sanitizeHtml, applyTransformers);
-	}
-	
 }

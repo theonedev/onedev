@@ -42,8 +42,10 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.comment.MentionParser;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.ConfigManager;
@@ -87,6 +89,8 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	
 	private final UserManager userManager;
 	
+	private final MarkdownManager markdownManager;
+	
 	private final StorageManager storageManager;
 	
 	private final UnitOfWork unitOfWork;
@@ -114,7 +118,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 			BranchManager branchManager, StorageManager storageManager, 
 			ReviewInvitationManager reviewInvitationManager, UserManager userManager,
 			PullRequestNotificationManager notificationManager, ConfigManager configManager,
-			PullRequestCommentManager pullRequestCommentManager,
+			PullRequestCommentManager pullRequestCommentManager, MarkdownManager markdownManager,
 			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners) {
 		this.dao = dao;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
@@ -125,6 +129,7 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		this.userManager = userManager;
 		this.unitOfWork = unitOfWork;
 		this.configManager = configManager;
+		this.markdownManager = markdownManager;
 		this.pullRequestListeners = pullRequestListeners;
 	}
 
@@ -341,6 +346,15 @@ public class DefaultPullRequestManager implements PullRequestManager {
 
 		for (PullRequestListener listener: pullRequestListeners)
 			listener.onOpened(request);
+		
+		if (request.getDescription() != null) {
+			String rawHtml = markdownManager.parse(request.getDescription());
+			Collection<User> mentions = new MentionParser().parseMentions(rawHtml);
+			for (User user: mentions) {
+				for (PullRequestListener listener: pullRequestListeners)
+					listener.onMentioned(request, user);
+			}
+		}
 		
 		dao.afterCommit(new Runnable() {
 

@@ -107,7 +107,27 @@ public class PullRequest extends AbstractEntity {
 
 	}
 	
-	public enum Event {OPENED, REVIEWED, VERIFIED, UPDATED, COMMENTED, INTEGRATED, DISCARDED, REOPENED};
+	public enum Event {
+		OPENED("Newly opened"), 
+		REVIEWED("New reviews in"), 
+		VERIFIED("Build verification is finished for"), 
+		UPDATED("New commits in"), 
+		COMMENTED("New comments in"), 
+		INTEGRATED("Integration is done for"), 
+		DISCARDED("Discarded"), 
+		REOPENED("Reopened");
+
+		private final String displayName;
+		
+		Event(String displayName) {
+			this.displayName = displayName;
+		}
+		
+		public String toString() {
+			return displayName;
+		}
+		
+	};
 	
 	@Column
 	private CloseStatus closeStatus;
@@ -219,15 +239,13 @@ public class PullRequest extends AbstractEntity {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-
+	
 	/**
 	 * Get the user submitting the pull request.
 	 * 
 	 * @return
-	 * 			the user submitting the pull request, or <tt>null</tt> if the user 
-	 * 			submitting the request is removed.
+	 * 			the user submitting the pull request
 	 */
-	@Nullable
 	public User getSubmitter() {
 		return submitter;
 	}
@@ -865,5 +883,5 @@ public class PullRequest extends AbstractEntity {
 		}
 		
 	}
-	
+
 }

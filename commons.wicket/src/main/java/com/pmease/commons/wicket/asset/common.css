@@ -3,18 +3,6 @@
  * 
  **************************************************************/
 
-/* Alignments */
-.tac {text-align: center;}
-.tal {text-align: left;}
-.tar {text-align: right;}
-
-/* Spacings */
-.left-spacing {margin-left: 10px;}
-.right-spacing {margin-right: 10px;}
-.top-spacing {margin-top: 10px;}
-.bottom-spacing {margin-bottom: 10px;}
-.spacing {margin: 10px;}
-
 /* CURSORS */
 .pointer {cursor: pointer;}
 
@@ -30,6 +18,7 @@
 	border-radius:0 0 4px 4px; box-shadow:2px 2px 5px #888; display: none;}
 #session-feedback ul {padding: 0; margin: 0;}
 #session-feedback li {list-style: none;}
+form>.test-feedback {margin-top: 16px;}
 
 /* Table navigator */
 table .navigator {border-radius: 4px 4px 4px 4px; margin-bottom: 0px; margin-left: 0; float: right;}

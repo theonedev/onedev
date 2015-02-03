@@ -29,7 +29,7 @@ public class MarkdownPanel extends GenericPanel<String> {
 			@Override
 			protected String load() {
 				return AppLoader.getInstance(MarkdownManager.class)
-						.toHtml(MarkdownPanel.this.getModelObject(), true, true);
+						.parseAndProcess(MarkdownPanel.this.getModelObject());
 			}
 		}).setEscapeModelStrings(false));
 
