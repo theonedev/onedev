@@ -443,6 +443,11 @@
 				<artifactId>hibernate-validator</artifactId>
 				<version>5.1.0.Final</version>
 			</dependency>
+			<dependency>
+				<groupId>org.reflections</groupId>
+				<artifactId>reflections</artifactId>
+				<version>0.9.9</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>

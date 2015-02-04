@@ -130,7 +130,7 @@
 	<properties>
 		<moduleClass>com.pmease.commons.wicket.WicketModule</moduleClass>
 		<wicketVersion>6.18.0</wicketVersion>
-		<wicketBootstrapVersion>0.9.6</wicketBootstrapVersion>
+		<wicketBootstrapVersion>0.9.7</wicketBootstrapVersion>
 	</properties>
 	<repositories>
 		<repository>
