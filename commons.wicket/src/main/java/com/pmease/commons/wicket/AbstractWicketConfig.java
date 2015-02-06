@@ -30,6 +30,7 @@ public abstract class AbstractWicketConfig extends WebApplication {
 	protected void init() {
 		super.init();
 
+		getResourceSettings().getCachingStrategy();
 		getMarkupSettings().setDefaultMarkupEncoding("UTF-8");
 		getMarkupSettings().setStripComments(true);
 		getMarkupSettings().setStripWicketTags(true);

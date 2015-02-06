@@ -1,43 +1,21 @@
 package com.pmease.gitplex.web.page;
 
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.request.Url;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 
-import com.pmease.gitplex.web.component.comment.CommentInput;
+import com.pmease.commons.wicket.CommonPage;
+import com.pmease.commons.wicket.assets.ace.HighlightResourceReference;
 
 @SuppressWarnings("serial")
-public class TestPage extends BasePage {
+public class TestPage extends CommonPage {
 
-	@SuppressWarnings("unused")
-	private String markdown;
-	
-	public TestPage(PageParameters params) {
-		super(params);
-	}
-	
 	@Override
-	protected void onInitialize() {
-		super.onInitialize();
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
 		
-		Form<?> form = new Form<Void>("form");
-		form.add(new CommentInput("input", new PropertyModel<String>(this, "markdown")));
-		form.add(new AjaxSubmitLink("save", form) {
-
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
-
-				System.out.println(RequestCycle.get().getUrlRenderer().renderFullUrl(
-						Url.parse(RequestCycle.get().urlFor(TestPage.class, new PageParameters()))));
-			}
-			
-		});
-		add(form);
+		response.render(JavaScriptHeaderItem.forReference(HighlightResourceReference.INSTANCE));
+		response.render(OnDomReadyHeaderItem.forScript("$('.lang-java').highlight({theme: 'ace/theme/github'}).addClass('hello');"));
 	}
 
 }

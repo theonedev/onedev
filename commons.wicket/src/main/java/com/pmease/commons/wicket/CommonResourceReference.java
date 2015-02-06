@@ -11,7 +11,7 @@ import org.apache.wicket.request.Response;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.google.common.collect.Lists;
-import com.pmease.commons.wicket.asset.Assets;
+import com.pmease.commons.wicket.assets.Assets;
 
 import de.agilecoders.wicket.core.Bootstrap;
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;

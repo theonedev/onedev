@@ -29,8 +29,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.markdown.MarkdownManager;
-import com.pmease.commons.wicket.resource.atwho.AtWhoResourceReference;
-import com.pmease.commons.wicket.resource.caret.CaretResourceReference;
+import com.pmease.commons.wicket.assets.atwho.AtWhoResourceReference;
+import com.pmease.commons.wicket.assets.caret.CaretResourceReference;
 
 @SuppressWarnings("serial")
 public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
