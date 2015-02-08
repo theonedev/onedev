@@ -1,25 +1,18 @@
 <wicket:extend>
-		<pre><code class="lang-java">import java.util.*;</code></pre>
-
-		<pre><code class="lang-java">public class HelloWorld {</code></pre>
-		<pre><code class="lang-java">  public static void main(String[] args) {</code></pre>
-		<pre><code class="lang-java">    List&lt;String&gt; list = new ArrayList&lt;&gt;();</code></pre>		
-		<pre><code class="lang-java">    list.add("hello world");</code></pre>		
-		<pre><code class="lang-java">    System.out.println(list.get(0));</code></pre>		
-		<pre><code class="lang-java">  }</code></pre>		
-		<pre><code class="lang-java">}</code></pre>		
-	
-	<div class="lang-java">
-		import java.util.*;
-		/*
-		public class HelloWorld {
-			public static void main(String[] args) {
-				List&lt;String&gt; list = new ArrayList&lt;&gt;();
-				list.add("hello world");
-				System.out.println(list.get(0));				
-			}
-		}
-		*/
-	</div>
-	
+		<script type="text/javascript">
+		$.ajax({
+            url: '/assets/test/cgroup.c',
+            type: 'get',
+            async: false,
+            success: function(code) {
+            	var start = new Date().getTime();
+				CodeMirror.runMode(code, "text/x-c", function(token) {
+							//console.log(token);
+						});
+            	var end = new Date().getTime();
+            	var time = end - start;
+            	alert('Execution time: ' + time);            	
+            }
+		});
+		</script>
 </wicket:extend>

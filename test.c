@@ -4,7 +4,7 @@
  *
  */
 
-#include <linux/mm.h>
+#include <linux/mm2.h>
 #include <linux/proc_ns.h>
 #include <linux/proc_fs.h>
 
