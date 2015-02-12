@@ -14,6 +14,7 @@ import com.pmease.gitplex.core.validation.RepositoryNameValidator;
 import com.pmease.gitplex.core.validation.UserNameValidator;
 import com.pmease.gitplex.web.common.wicket.mapper.PageParameterAwareMountedMapper;
 import com.pmease.gitplex.web.common.wicket.mapper.PatternMountedMapper;
+import com.pmease.gitplex.web.page.RunModePage;
 import com.pmease.gitplex.web.page.TestPage;
 import com.pmease.gitplex.web.page.account.AccountHomePage;
 import com.pmease.gitplex.web.page.account.AccountNotificationsPage;
@@ -67,6 +68,7 @@ public class GitPlexMounting extends CompoundRequestMapper {
 		addPage("init", ServerInitPage.class);
 		addPage("register", RegisterPage.class);
 		addPage("/test", TestPage.class);
+		addPage("run-mode", RunModePage.class);
 	}
 
 	private void addErrorPages() {

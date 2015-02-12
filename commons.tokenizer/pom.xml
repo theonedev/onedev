@@ -1,23 +1,23 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>gitplex.core</artifactId>
+	<artifactId>commons.tokenizer</artifactId>
+	<version>1.0.0</version>
 	<parent>
 		<groupId>com.pmease</groupId>
 		<artifactId>parent.general</artifactId>
 		<version>1.0.31</version>
 	</parent>
+
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>com.pmease</groupId>
 				<artifactId>plugin.maven</artifactId>
 			</plugin>
-			<plugin>
-				<artifactId>maven-archetype-plugin</artifactId>
-			</plugin>
+			<!-- Uncomment below if you'd like to publish an archetype based on your 
+				plugin -->
+			<!--plugin> <artifactId>maven-archetype-plugin</artifactId> </plugin -->
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
 			</plugin>
@@ -26,6 +26,7 @@
 			</plugin>
 		</plugins>
 	</build>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.pmease</groupId>
@@ -33,21 +34,9 @@
 			<version>1.0.31</version>
 		</dependency>
 		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.git</artifactId>
-			<version>1.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.git</artifactId>
-			<version>1.0.0</version>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.jetty</artifactId>
-			<version>1.0.31</version>
+			<groupId>org.webjars</groupId>
+			<artifactId>codemirror</artifactId>
+			<version>4.12</version>
 		</dependency>
 		<dependency>
 			<groupId>com.pmease</groupId>
@@ -56,37 +45,8 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.schedule</artifactId>
-			<version>1.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.editable</artifactId>
-			<version>1.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.hibernate</artifactId>
-			<version>1.0.30</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.shiro</artifactId>
-			<version>1.0.30</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.markdown</artifactId>
-			<version>1.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.tokenizer</artifactId>
-			<version>1.0.0</version>
-		</dependency>
 	</dependencies>
+
 	<repositories>
 		<repository>
 			<id>pmeaseRepo</id>
@@ -104,7 +64,9 @@
 			<url>http://artifact.pmease.com/</url>
 		</repository>
 	</repositories>
+
 	<properties>
-		<moduleClass>com.pmease.gitplex.core.CoreModule</moduleClass>
+		<moduleClass>com.pmease.commons.tokenizer.TokenizerModule</moduleClass>
 	</properties>
+
 </project>

@@ -1,18 +1,17 @@
 <wicket:extend>
-		<script type="text/javascript">
-		$.ajax({
-            url: '/assets/test/cgroup.c',
-            type: 'get',
-            async: false,
-            success: function(code) {
-            	var start = new Date().getTime();
-				CodeMirror.runMode(code, "text/x-c", function(token) {
-							//console.log(token);
-						});
-            	var end = new Date().getTime();
-            	var time = end - start;
-            	alert('Execution time: ' + time);            	
-            }
+	<!-- div class="CodeMirror cm-s-eclipse">
+		<div wicket:id="lines">
+			<div wicket:id="line"></div>
+		</div>
+	</div-->
+	<!-- script type="text/javascript">
+		$(function() {
+		    var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+				lineNumbers: true
+		    });
+		    var info = CodeMirror.findModeByExtension("java");
+		    editor.setOption("mode", info.mime);
+			CodeMirror.autoLoadMode(editor, info.mode);
 		});
-		</script>
+	</script-->
 </wicket:extend>
