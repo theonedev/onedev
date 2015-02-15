@@ -93,7 +93,7 @@ public class StringStream {
 			++pos;
 			return ch;
 		} else {
-			return null;
+			return "";
 		}
 	}
 	
@@ -105,7 +105,7 @@ public class StringStream {
 	
 	public boolean eatWhile(Pattern pattern) {
 		int start = pos;
-		while (eat(pattern) != null);
+		while (eat(pattern).length() != 0);
 		return pos>start;
 	}
 	

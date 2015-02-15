@@ -29,9 +29,7 @@ public abstract class AbstractTokenizer<S> implements Tokenizer {
 		return tokenizedLines;
 	}
 
-	protected S startState() {
-		return null;
-	}
+	protected abstract S startState();
  	
 	protected abstract String token(StringStream stream, S state);
 	

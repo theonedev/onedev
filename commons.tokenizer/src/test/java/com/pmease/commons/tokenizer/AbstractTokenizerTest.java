@@ -1,4 +1,4 @@
-package commons.tokenizer;
+package com.pmease.commons.tokenizer;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
