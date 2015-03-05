@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
-import com.pmease.commons.lang.analyzer.TokenStream;
-import com.pmease.commons.lang.tokenizer.TokenizedLine;
-import com.pmease.commons.lang.tokenizer.lang.clike.JavaTokenizer;
+import com.pmease.commons.lang.TokenStream;
+import com.pmease.commons.lang.TokenizedLine;
+import com.pmease.commons.lang.tokenizers.clike.JavaTokenizer;
 
 public class Test {
 
