@@ -8,7 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
-import com.pmease.commons.tokenizer.Tokenizers;
+import com.pmease.commons.lang.tokenizer.Tokenizers;
 import com.pmease.commons.wicket.CommonPage;
 import com.pmease.commons.wicket.assets.CodeMirrorResourceReference;
 import com.pmease.gitplex.core.GitPlex;

@@ -4,18 +4,24 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import com.pmease.commons.git.AbstractGitTest;
-import com.pmease.commons.tokenizer.JavascriptTokenizer;
-import com.pmease.commons.util.FileUtils;
+import org.apache.commons.io.FileUtils;
 
-public class Test extends AbstractGitTest {
+import com.pmease.commons.lang.analyzer.TokenStream;
+import com.pmease.commons.lang.tokenizer.TokenizedLine;
+import com.pmease.commons.lang.tokenizer.lang.clike.JavaTokenizer;
+
+public class Test {
 
 	@org.junit.Test
 	public void test() throws IOException {
-		List<String> lines = FileUtils.readLines(new File("W:\\commons\\commons.tokenizer\\src\\test\\java\\com\\pmease\\commons\\tokenizer\\testfiles\\test.js"));		
-		for (int i=1; i<=100; i++) {
+		JavaTokenizer java = new JavaTokenizer();		
+
+		List<String> lines = FileUtils.readLines(new File("w:\\temp\\Component.java"));
+		for (int i=0; i<100; i++) {
 			long time = System.currentTimeMillis();
-			new JavascriptTokenizer.JavaScript().tokenize(lines);
+			List<TokenizedLine> tokenizedLines = java.tokenize(lines);
+			TokenStream tokenStream = new TokenStream(tokenizedLines, false);
+			System.out.println(tokenStream.nextBalanced(tokenStream.next("{")));
 			System.out.println(System.currentTimeMillis()-time);
 		}
 	}

@@ -18,6 +18,7 @@
         <module>../commons.editable</module>  
         <module>../commons.git</module>  
         <module>../commons.hibernate</module>  
+        <module>../commons.lang</module>  
         <module>../commons.jersey</module>  
         <module>../commons.shiro</module>  
         <module>../commons.wicket</module>  
