@@ -1,12 +1,11 @@
 package com.pmease.commons.lang;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.pmease.commons.lang.TokenStream;
-import com.pmease.commons.lang.TokenizedLine;
 import com.pmease.commons.lang.tokenizers.clike.JavaTokenizer;
 
 public class TokenStreamTest {
@@ -17,9 +16,9 @@ public class TokenStreamTest {
 				+ "  public void sayHello() {System.out.println(\"hello\");}"
 				+ "}";
 		
-		List<TokenizedLine> tokenizedLines = new JavaTokenizer().tokenize(text);
-		TokenStream tokenStream = new TokenStream(tokenizedLines, false);
-		Assert.assertEquals("}", tokenStream.nextBalanced(tokenStream.next("{")).text());
+		TokenStream tokenStream = new TokenStream(getTokens(text));
+		
+		Assert.assertEquals("}", tokenStream.nextBalanced(tokenStream.nextSymbol("{")).text());
 	}
 
 	@Test
@@ -27,9 +26,21 @@ public class TokenStreamTest {
 		String text = "public class MyClass {"
 				+ "  public void sayHello() {System.out.println(\"hello\");}";
 		
-		List<TokenizedLine> tokenizedLines = new JavaTokenizer().tokenize(text);
-		TokenStream tokenStream = new TokenStream(tokenizedLines, false);
-		Assert.assertTrue(tokenStream.nextBalanced(tokenStream.next("{")).isEof());
+		TokenStream tokenStream = new TokenStream(getTokens(text));
+		Assert.assertTrue(tokenStream.nextBalanced(tokenStream.nextSymbol("{")).isEof());
+	}
+	
+	private List<LineAwareToken> getTokens(String text) {
+		List<LineAwareToken> tokens = new ArrayList<>();
+		int linePos = 0;
+		for (TokenizedLine line: new JavaTokenizer().tokenize(text)) {
+			for (Token token: line.getTokens()) {
+				if (!token.isComment() && !token.isWhitespace())
+					tokens.add(new LineAwareToken(token, linePos));
+			}
+			linePos++;
+		}
+		return tokens;
 	}
 	
 }

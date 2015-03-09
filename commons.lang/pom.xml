@@ -71,7 +71,7 @@
 	</repositories>
 
 	<properties>
-		<moduleClass>com.pmease.commons.lang.TokenizerModule</moduleClass>
+		<moduleClass>com.pmease.commons.lang.LangModule</moduleClass>
 	</properties>
 
 </project>

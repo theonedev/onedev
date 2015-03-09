@@ -104,7 +104,7 @@ public class PullRequest extends AbstractEntity {
 		public String toString() {
 			return displayName;
 		}
-
+		
 	}
 	
 	public enum Event {

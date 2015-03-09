@@ -26,75 +26,71 @@ public class Token implements Serializable {
 	}
 
 	public boolean isComment() {
-		return style.contains("cm-comment");
+		return style.contains("comment");
 	}
 	
 	public boolean isKeyword() {
-		return style.contains("cm-keyword");
+		return style.contains("keyword");
 	}
 	
 	public boolean isNumber() {
-		return style.contains("cm-number");
+		return style.contains("number");
 	}
 	
 	public boolean isIdentifier() {
-		return style.contains("cm-variable");
+		return style.contains("variable");
 	}
 	
 	public boolean isString() {
-		return style.contains("cm-string");
+		return style.contains("string");
 	}
 	
 	public boolean isMeta() {
-		return style.contains("cm-meta");
+		return style.contains("meta");
 	}
 	
 	public boolean isTag() {
-		return style.contains("cm-tag");
+		return style.contains("tag");
 	}
 	
 	public boolean isBracket() {
-		return style.contains("cm-bracket");
+		return style.contains("bracket");
 	}
 	
 	public boolean isOperator() {
-		return style.contains("cm-operator");
+		return style.contains("operator");
 	}
 	
 	public boolean isAtom() {
-		return style.contains("cm-atom");
+		return style.contains("atom");
 	}
 	
 	public boolean isDef() {
-		return style.contains("cm-def");
+		return style.contains("def");
 	}
 	
 	public boolean isQualifier() {
-		return style.contains("cm-qualifier");
+		return style.contains("qualifier");
 	}
 	
 	public boolean isAttribute() {
-		return style.contains("cm-attribute");
+		return style.contains("attribute");
 	}
 	
 	public boolean isProperty() {
-		return style.contains("cm-property");
+		return style.contains("property");
 	}
 	
 	public boolean isBuiltin() {
-		return style.contains("cm-builtin");
+		return style.contains("builtin");
 	}
 	
 	public boolean isLink() {
-		return style.contains("cm-link");
+		return style.contains("link");
 	}
 	
 	public boolean isError() {
-		return style.contains("cm-error");
-	}
-	
-	public boolean isNotCommentOrString() {
-		return !isComment() && !isString();
+		return style.contains("error");
 	}
 	
 	public boolean isEof() {
@@ -105,7 +101,17 @@ public class Token implements Serializable {
 		return style.length() == 0 && text.equals("\n");
 	}
 	
-	public boolean isWhitespace() {
+	public boolean is(String... anySymbols) {
+		if (isComment() || isString())
+			return false;
+		for (String symbol: anySymbols) {
+			if (symbol.equals(text))
+				return true;
+		}
+		return false;
+	}
+	
+	public  boolean isWhitespace() {
 		if (style.length() != 0)
 			return false;
 		for (char ch: text.toCharArray()) {
