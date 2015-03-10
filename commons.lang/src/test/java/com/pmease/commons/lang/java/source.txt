@@ -1,0 +1,123 @@
+package com.example;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+enum MyEnum {
+	@SuppressWarnings("unused")
+	@MyAnn(values = { "" })
+	ENUM1(2 > 1 ? "Robin" : "Steve", new String[] { "value1", "value2" }), @SuppressWarnings("unused")
+	ENUM2(2 > 1 ? "Robin" : "Steve", new String[] { "value1", "value2" }) {
+
+		@Override
+		public String getName() {
+			// TODO Auto-generated method stub
+			return super.getName();
+		}
+
+	},
+	;
+	private String name;
+
+	private String values[];
+
+	MyEnum(String name, String... values) {
+		this.name = name;
+		this.values = values;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String[] getValues() {
+		return values;
+	}
+
+	public void setValues(String[] values) {
+		this.values = values;
+	}
+
+};;
+
+@Target({ ElementType.TYPE_PARAMETER, ElementType.FIELD,
+		ElementType.CONSTRUCTOR, ElementType.LOCAL_VARIABLE,
+		ElementType.METHOD, ElementType.TYPE, ElementType.PARAMETER })
+@interface MyAnn {
+	String[] values() default { "1", "2" };
+}
+
+@Target({ ElementType.TYPE_PARAMETER, ElementType.TYPE_USE, ElementType.FIELD,
+		ElementType.CONSTRUCTOR, ElementType.LOCAL_VARIABLE,
+		ElementType.METHOD, ElementType.TYPE, ElementType.PARAMETER })
+@interface MyAnotherAnn {
+	String[] values() default { "1", "2" };
+}
+
+@SuppressWarnings("serial")
+public class Test<@MyAnn(values = { "a" }) K, V> extends HashMap<K, V> {
+
+	@SuppressWarnings("unused")
+	private Map<String, @MyAnotherAnn(values = { "value1", "value2" }) String> map1 = 2 < 1 ? new HashMap<String, @MyAnotherAnn String>()
+			: new HashMap<String, String>(),
+			map2 = (2 < 1 ? new HashMap<String, @MyAnotherAnn String>()
+					: new HashMap<String, String>()),
+			map3 = new HashMap<String, String>();
+
+	{
+		map1.put("a", "b");
+		map2.put("c", "d");
+		map3.put("e", "f");
+	}
+
+	static final java.util.List<String> values;
+
+	static {
+		values = new ArrayList<>();
+	}
+	
+	static interface MyRunnable {
+		void run(int a, int b);
+	}
+
+	class Inner {
+		Runnable r1 = () -> System.out.println("Hello world two!");
+		
+		MyRunnable r2 = (a, b) -> {System.out.println(a+b);};
+		
+		public MyRunnable doSomething(Integer a, @MyAnn() @MyAnotherAnn String b) throws RuntimeException, Throwable {
+			return null;
+		}
+		
+	}
+	
+	public static void main(String[] args) {
+		
+		System.out.println("=== RunnableTest ===");
+
+		// Anonymous Runnable
+		Runnable r1 = new Runnable() {
+
+			@Override
+			public void run() {
+				System.out.println("Hello world one!");
+			}
+		};
+
+		// Lambda Runnable
+		Runnable r2 = () -> System.out.println("Hello world two!");
+
+		// Run em!
+		r1.run();
+		r2.run();
+
+	}
+}

@@ -31,7 +31,7 @@ public class Bootstrap {
 	public static final int SOCKET_CONNECT_TIMEOUT = 60000;
 	
 	public static final String APP_LOADER_PROPERTY_NAME = "appLoader";
-	
+		
 	public static final String LOGBACK_CONFIG_FILE_PROPERTY_NAME = "logback.configurationFile";
 	
 	public static final String DEFAULT_APP_LOADER = "com.pmease.commons.loader.AppLoader";
@@ -279,7 +279,7 @@ public class Bootstrap {
 	public static File getSiteDir() {
 		return new File(installDir, "site");
 	}
-
+	
 	private static class CachedUrl {
 		private final URL url;
 		

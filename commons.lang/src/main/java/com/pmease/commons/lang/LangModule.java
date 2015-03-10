@@ -11,11 +11,6 @@ public class LangModule extends AbstractPluginModule {
 	@Override
 	protected void configure() {
 		super.configure();
-		
-		// put your guice bindings here
-		bind(Tokenizers.class).to(DefaultTokenizers.class);
-		
-		contributeFromPackage(Tokenizer.class, Tokenizer.class);
 	}
 
 }

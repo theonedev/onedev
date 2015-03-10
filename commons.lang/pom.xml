@@ -24,6 +24,10 @@
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<groupId>org.antlr</groupId>
+				<artifactId>antlr4-maven-plugin</artifactId>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -32,6 +36,11 @@
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.loader</artifactId>
 			<version>1.0.31</version>
+		</dependency>
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr4-runtime</artifactId>
+			<version>4.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.webjars</groupId>
