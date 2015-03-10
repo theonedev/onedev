@@ -3,6 +3,7 @@ package com.pmease.commons.lang;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Token;
 
@@ -10,10 +11,11 @@ public class AnalyzeStream {
 
 	private final List<AnalyzeToken> tokens;
 	
-	private int tokenPos = 0; // 0-indexed position of current token 
+	private int pos = -1; // 0-indexed position of current token 
 	
 	public AnalyzeStream(List<AnalyzeToken> tokens) {
 		this.tokens = tokens;
+		this.tokens.add(AnalyzeToken.EOF);
 	}
 	
 	public AnalyzeStream(Lexer lexer, TokenFilter filter) {
@@ -24,48 +26,43 @@ public class AnalyzeStream {
 				tokens.add(new AnalyzeToken(token));
 			token = lexer.nextToken();
 		}
+		tokens.add(AnalyzeToken.EOF);
 	}
 	
-	public AnalyzeToken at(int tokenPos) {
-		if (tokenPos >=0 && tokenPos < tokens.size())
-			return tokens.get(tokenPos);
+	public AnalyzeToken at(int pos) {
+		if (pos >=0 && pos < tokens.size())
+			return tokens.get(pos);
 		else
-			return AnalyzeToken.EOF;
+			throw new AnalyzeException("Invalid token position: " + pos);
 	}
 	
 	public AnalyzeToken next() {
-		return nextCount(1);
-	}
-	
-	public AnalyzeToken nextCount(int count) {
-		tokenPos += count;
-		return at(tokenPos);
+		return at(++pos);
 	}
 	
 	public AnalyzeToken lookAhead(int ahead) {
-		return at(tokenPos+ahead);
+		return at(pos+ahead);
 	}
 	
 	public AnalyzeToken lookBehind(int behind) {
-		return at(tokenPos-behind);
+		return at(pos-behind);
 	}
 	
 	public AnalyzeToken nextType(int...anyTypes) {
 		AnalyzeToken token = next();
-		while(!token.isEof()) {
+		while(true) {
 			for (int type: anyTypes) {
 				if (token.is(type))
 					return token;
 			}
 			token = next();
 		}
-		return token;
 	}
 
 	public AnalyzeToken nextClosed(int openType, int closeType) {
 		int nestingLevel = 1;
 		AnalyzeToken balanced = nextType(openType, closeType);
-		while (!balanced.isEof()) {
+		while (true) {
 			if (balanced.is(closeType)) {
 				if (--nestingLevel == 0)
 					return balanced;
@@ -74,13 +71,16 @@ public class AnalyzeStream {
 			}
 			balanced = nextType(openType, closeType);
 		}
-		return balanced;
 	}
 	
-	public int tokenPos() {
-		return tokenPos;
+	public int pos() {
+		return pos;
 	}
 
+	public void pos(int pos) {
+		this.pos = pos;
+	}
+	
 	/**
 	 * Get tokens between startPos and endPos
 	 * 
@@ -99,7 +99,11 @@ public class AnalyzeStream {
 	}
 
 	public AnalyzeToken current() {
-		return nextCount(0);
+		return at(pos);
+	}
+	
+	public void seek(int index) {
+		this.pos = index;
 	}
 	
 }

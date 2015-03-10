@@ -1,12 +1,14 @@
 package com.pmease.commons.lang;
 
+import static org.junit.Assert.fail;
+
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.pmease.commons.lang.java.JavaLexer;
 
-public class LangTokenStreamTest {
+public class AnalyzeTokenStreamTest {
 
 	@Test
 	public void testBalanced() {
@@ -29,7 +31,11 @@ public class LangTokenStreamTest {
 		AnalyzeStream tokenStream = new AnalyzeStream(
 				new JavaLexer(new ANTLRInputStream(text)), TokenFilter.DEFAULT_CHANNEL);
 		tokenStream.nextType(JavaLexer.LBRACE);
-		Assert.assertTrue(tokenStream.nextClosed(JavaLexer.LBRACE, JavaLexer.RBRACE).isEof());
+		try {
+			tokenStream.nextClosed(JavaLexer.LBRACE, JavaLexer.RBRACE);
+			fail();
+		} catch (UnexpectedTokenException e) {
+		}
 	}
 	
 }

@@ -1,6 +1,39 @@
 package com.pmease.commons.lang.java;
 
-import static com.pmease.commons.lang.java.JavaLexer.*;
+import static com.pmease.commons.lang.java.JavaLexer.ASSIGN;
+import static com.pmease.commons.lang.java.JavaLexer.AT;
+import static com.pmease.commons.lang.java.JavaLexer.BOOLEAN;
+import static com.pmease.commons.lang.java.JavaLexer.BYTE;
+import static com.pmease.commons.lang.java.JavaLexer.CHAR;
+import static com.pmease.commons.lang.java.JavaLexer.CLASS;
+import static com.pmease.commons.lang.java.JavaLexer.COMMA;
+import static com.pmease.commons.lang.java.JavaLexer.DEFAULT;
+import static com.pmease.commons.lang.java.JavaLexer.DOT;
+import static com.pmease.commons.lang.java.JavaLexer.DOUBLE;
+import static com.pmease.commons.lang.java.JavaLexer.ELLIPSIS;
+import static com.pmease.commons.lang.java.JavaLexer.ENUM;
+import static com.pmease.commons.lang.java.JavaLexer.FLOAT;
+import static com.pmease.commons.lang.java.JavaLexer.GT;
+import static com.pmease.commons.lang.java.JavaLexer.IMPORT;
+import static com.pmease.commons.lang.java.JavaLexer.INT;
+import static com.pmease.commons.lang.java.JavaLexer.INTERFACE;
+import static com.pmease.commons.lang.java.JavaLexer.Identifier;
+import static com.pmease.commons.lang.java.JavaLexer.LBRACE;
+import static com.pmease.commons.lang.java.JavaLexer.LBRACK;
+import static com.pmease.commons.lang.java.JavaLexer.LONG;
+import static com.pmease.commons.lang.java.JavaLexer.LPAREN;
+import static com.pmease.commons.lang.java.JavaLexer.LT;
+import static com.pmease.commons.lang.java.JavaLexer.PACKAGE;
+import static com.pmease.commons.lang.java.JavaLexer.RBRACE;
+import static com.pmease.commons.lang.java.JavaLexer.RBRACK;
+import static com.pmease.commons.lang.java.JavaLexer.RPAREN;
+import static com.pmease.commons.lang.java.JavaLexer.SEMI;
+import static com.pmease.commons.lang.java.JavaLexer.SHORT;
+import static com.pmease.commons.lang.java.JavaLexer.STATIC;
+import static com.pmease.commons.lang.java.JavaLexer.StringLiteral;
+import static com.pmease.commons.lang.java.JavaLexer.THIS;
+import static com.pmease.commons.lang.java.JavaLexer.THROWS;
+import static com.pmease.commons.lang.java.JavaLexer.VOID;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,12 +45,14 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.pmease.commons.lang.AnalyzeToken;
 import com.pmease.commons.lang.AnalyzeStream;
+import com.pmease.commons.lang.AnalyzeToken;
+import com.pmease.commons.lang.Analyzer;
 import com.pmease.commons.lang.Outline;
 import com.pmease.commons.lang.TokenFilter;
+import com.pmease.commons.lang.UnexpectedTokenException;
 
-public class JavaAnalyzer {
+public class JavaAnalyzer implements Analyzer {
 	
 	private static final int[] PRIMITIVES = new int[]{
 		FLOAT, INT, LONG, BOOLEAN, CHAR, BYTE, SHORT, DOUBLE, VOID};
@@ -38,7 +73,7 @@ public class JavaAnalyzer {
 
 		JavaOutline outline = new JavaOutline();
 		
-		AnalyzeToken token = stream.current();
+		AnalyzeToken token = stream.next();
 		
 		while (token.is(AT) && !stream.lookAhead(1).is(INTERFACE))
 			skipAnnotation(stream);
@@ -87,7 +122,7 @@ public class JavaAnalyzer {
 				stream.next();
 				stream.nextClosed(LBRACE, RBRACE);
 				token = stream.next();
-			} else if (token.is(RBRACE) || token.isEof()) {
+			} else if (token.is(RBRACE)) {
 				break;
 			} else {
 				List<Modifier> modifiers = skipModifiers(stream);
@@ -154,7 +189,7 @@ public class JavaAnalyzer {
 					// skip scopes and the only case for comma inside a value is inside type arguments like below:
 					// ... new HashMap<String, String>...
 					stream.nextClosed(token.getType(), CLOSED_TYPES.get(token.getType()));
-				} else if (token.is(SEMI) || token.isEof()) {
+				} else if (token.is(SEMI)) {
 					break;
 				} else { // token is ','
 					List<String> subsequentFieldNames = assumeFieldSeparator(stream);
@@ -271,10 +306,10 @@ public class JavaAnalyzer {
 		String identifier = stream.current().getText();
 		AnalyzeToken token = stream.next();
 		if (token.is(LT)) {
-			int tokenPos = stream.tokenPos();
+			int tokenPos = stream.pos();
 			stream.nextClosed(LT, GT);
-			AnalyzeStream typeArgStream = new AnalyzeStream(stream.between(tokenPos, stream.tokenPos()));
-			token = typeArgStream.current();
+			AnalyzeStream typeArgStream = new AnalyzeStream(stream.between(tokenPos, stream.pos()));
+			token = typeArgStream.next();
 			while (true) {
 				skipModifiers(typeArgStream);
 				token = typeArgStream.current();
@@ -300,9 +335,9 @@ public class JavaAnalyzer {
 		MethodDef methodDef = new MethodDef();
 		methodDef.modifiers = modifiers;
 		methodDef.name = token.getText();
-		stream.next(); // '('
+		stream.next().checkType(LPAREN); // '('
 		token = stream.next();
-		while (!token.is(RPAREN) && !token.isEof()) {
+		while (!token.is(RPAREN)) {
 			skipModifiers(stream);
 			String paramType = skipTypeRef(stream);
 			skipModifiers(stream); // skip possible annotation applied to '...'
@@ -369,7 +404,7 @@ public class JavaAnalyzer {
 	private List<FieldDef> defineFields(AnalyzeStream stream, List<Modifier> modifiers, String typeRef) {
 		AnalyzeToken token = stream.current();
 		List<FieldDef> fieldDefs = new ArrayList<>();
-		while (!token.is(SEMI) && !token.isEof()) {
+		while (!token.is(SEMI)) {
 			FieldDef fieldDef = new FieldDef();
 			fieldDefs.add(fieldDef);
 			fieldDef.name = token.getText();
@@ -437,7 +472,7 @@ public class JavaAnalyzer {
 			// process enum constants
 			token = stream.next();
 			while (true) {
-				if (token.is(SEMI, RBRACE) || token.isEof()) {
+				if (token.is(SEMI, RBRACE)) {
 					break;
 				} else if (token.is(COMMA)) {
 					token = stream.next();

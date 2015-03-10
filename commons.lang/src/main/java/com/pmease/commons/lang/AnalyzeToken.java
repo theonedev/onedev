@@ -34,6 +34,10 @@ public class AnalyzeToken {
 		return false;
 	}
 	
+	public boolean is(String text) {
+		return text.equals(this.text);
+	}
+	
 	public boolean isEof() {
 		return type == Token.EOF;
 	}
@@ -49,24 +53,26 @@ public class AnalyzeToken {
 	public int getLine() {
 		return line;
 	}
-
-	public void expectType(int... expectedTypes) {
-		for (int expectedType: expectedTypes) {
-			if (expectedType == type)
-				return;
-		}
-		
-		throw new UnexpectedTokenException(this);
+	
+	public AnalyzeToken checkType(int... expectedTypes) {
+		if (!is(expectedTypes))
+			throw new UnexpectedTokenException(this);
+		return this;
 	}
 	
-	public void expectText(String expectedText) {
+	public AnalyzeToken checkText(String expectedText) {
 		if (!text.equals(expectedText))
 			throw new UnexpectedTokenException(this);
+		return this;
 	}
 	
 	@Override
 	public String toString() {
-		return Objects.toStringHelper("Token").add("type", type).add("text", text).add("line", line).toString();
+		return Objects.toStringHelper("Token")
+				.add("type", type)
+				.add("text", text)
+				.add("line", line)
+				.toString();
 	}
-	
+
 }
