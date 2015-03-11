@@ -3,6 +3,7 @@ package com.pmease.commons.lang.java;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
 public class TypeDef {
@@ -42,8 +43,20 @@ public class TypeDef {
 			builder.append(modifier.name().toLowerCase()).append(" ");
 		builder.append(kind.toString().toLowerCase()).append(" ");
 		builder.append(name).append(" {\n\n");
-		for (FieldDef fieldDef: fieldDefs) 
-			builder.append("  ").append(fieldDef).append("\n\n");
+		
+		List<String> enumConstants = new ArrayList<>();
+		for (FieldDef fieldDef: fieldDefs) {
+			if (fieldDef.type == null)  
+				enumConstants.add(fieldDef.name);
+		}
+		if (!enumConstants.isEmpty())
+			builder.append("  ").append(Joiner.on(", ").join(enumConstants)).append(";\n\n");
+		else if (kind == Kind.ENUM)
+			builder.append("  ;\n\n");
+		for (FieldDef fieldDef: fieldDefs) {
+			if (fieldDef.type != null)
+				builder.append("  ").append(fieldDef).append("\n\n");
+		}
 		for (MethodDef methodDef: methodDefs) 
 			builder.append("  ").append(methodDef).append("\n\n");
 		for (TypeDef typeDef: typeDefs) {

@@ -1,0 +1,18 @@
+package com.sun.org.apache.xerces.internal.dom;
+
+class LCount {
+
+  static java.util.Hashtable lCounts;
+
+  public int captures;
+
+  public int bubbles;
+
+  public int defaults;
+
+  public int total;
+
+  static LCount lookup(String);
+
+}
+

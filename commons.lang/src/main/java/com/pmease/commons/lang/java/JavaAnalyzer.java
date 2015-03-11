@@ -75,8 +75,10 @@ public class JavaAnalyzer implements Analyzer {
 		
 		AnalyzeToken token = stream.next();
 		
-		while (token.is(AT) && !stream.lookAhead(1).is(INTERFACE))
+		while (token.is(AT) && !stream.lookAhead(1).is(INTERFACE)) {
 			skipAnnotation(stream);
+			token = stream.current();
+		}
 		
 		if (token.is(PACKAGE)) {
 			token = stream.next();
@@ -192,6 +194,7 @@ public class JavaAnalyzer implements Analyzer {
 				} else if (token.is(SEMI)) {
 					break;
 				} else { // token is ','
+					token.checkType(COMMA);
 					List<String> subsequentFieldNames = assumeFieldSeparator(stream);
 					if (subsequentFieldNames != null) { // assumption is correct
 						fieldNames.addAll(subsequentFieldNames);
@@ -207,7 +210,7 @@ public class JavaAnalyzer implements Analyzer {
 	 * Assume current token is field separator and continue to analyze the stream. Upon 
 	 * analyzing surprise, we return a null value to indicate the assumption is incorrect. 
 	 * 
-	 * @before-token: ',' 
+	 * @before-token: ','
 	 * @after-token: next field separator (',') or ';' if assumption is 
 	 * 					correct; or any position in middle of value if 
 	 * 					assumption is incorrect
@@ -235,10 +238,12 @@ public class JavaAnalyzer implements Analyzer {
 					return fieldNames;
 				} else if (token.is(COMMA)) { // assumption still not convinced 
 					List<String> subsequentFieldNames = assumeFieldSeparator(stream);
-					if (subsequentFieldNames != null)
+					if (subsequentFieldNames != null) {
 						fieldNames.addAll(subsequentFieldNames);
-					else 
+						return fieldNames;
+					} else { 
 						return null;
+					}
 				} else { // assumption is incorrect
 					return null;
 				}
@@ -257,7 +262,7 @@ public class JavaAnalyzer implements Analyzer {
 	private String skipDims(AnalyzeStream stream) {
 		String dims = "";
 		while (true) {
-			skipModifiers(stream);
+			skipAnnotations(stream);
 			AnalyzeToken token = stream.current();
 			if (token.is(LBRACK)) {
 				dims += "[]";
@@ -344,20 +349,23 @@ public class JavaAnalyzer implements Analyzer {
 			token = stream.current();
 			if (token.is(ELLIPSIS)) { // varargs
 				paramType += "...";
-				stream.next(); // identifier
 				token = stream.next();
+				if (token.is(Identifier))
+					token = stream.next();
 			} else if (token.is(THIS)) { // Receiver parameter
 				token = stream.next();
 				paramType = null;
 			} else if (token.is(Identifier) && stream.lookAhead(1).is(DOT)) { // Receiver parameter
-				stream.next(); // '.'
-				stream.next(); // 'this'
+				stream.next().checkType(DOT); // '.'
+				stream.next().checkType(THIS); // 'this'
 				token = stream.next();
 				paramType = null;
-			} else { // normal parameter
-				stream.next();
+			} else if (token.is(Identifier)) {
+				token = stream.next();
 				paramType += skipDims(stream);
 				token = stream.current();
+			} else { // No identifier, this is toString() version of MethodDef
+				
 			}
 			if (paramType != null) {
 				if (methodDef.params != null)
@@ -447,26 +455,26 @@ public class JavaAnalyzer implements Analyzer {
 		AnalyzeToken token = stream.current();
 		if (token.is(AT) && stream.lookAhead(1).is(INTERFACE)) {
 			typeDef.kind = TypeDef.Kind.ANNOTATION;
-			stream.next(); // 'interface'
-			stream.next(); // identifier
+			stream.next().checkType(INTERFACE); // 'interface'
+			stream.next().checkType(Identifier); // identifier
 			defineTypeHead(stream, typeDef);
 			defineTypeBody(stream, typeDef);
 			return typeDef;
 		} else if (token.is(CLASS)) {
 			typeDef.kind = TypeDef.Kind.CLASS;
-			stream.next(); // identifier
+			stream.next().checkType(Identifier); // identifier
 			defineTypeHead(stream, typeDef);
 			defineTypeBody(stream, typeDef);
 			return typeDef;
 		} else if (token.is(INTERFACE)) {
 			typeDef.kind = TypeDef.Kind.INTERFACE;
-			stream.next(); // identifier
+			stream.next().checkType(Identifier); // identifier
 			defineTypeHead(stream, typeDef);
 			defineTypeBody(stream, typeDef);
 			return typeDef;
 		} else { 
 			typeDef.kind = TypeDef.Kind.ENUM;
-			stream.next(); // identifier
+			stream.next().checkType(Identifier); // identifier
 			defineTypeHead(stream, typeDef);
 			
 			// process enum constants
@@ -554,6 +562,24 @@ public class JavaAnalyzer implements Analyzer {
 			}
 		}
 		return modifiers;
+	}
+	
+	/*
+	 * This method skips possible annotations from current stream position. 
+	 * 
+	 * @before-token: possible start of annotations
+	 * @after-token: remain unchanged or token after the annotations if there are annotations
+	 */
+	private void skipAnnotations(AnalyzeStream stream) {
+		AnalyzeToken token = stream.current();
+		while (true) {
+			if (token.is(AT) && !stream.lookAhead(1).is(INTERFACE)) {
+				skipAnnotation(stream);
+				token = stream.current();
+			} else {
+				break;
+			}
+		}
 	}
 	
 	/*

@@ -2,9 +2,7 @@ package com.example;
 
 enum MyEnum {
 
-  public static final ENUM1;
-
-  public static final ENUM2;
+  ENUM1, ENUM2;
 
   private String name;
 

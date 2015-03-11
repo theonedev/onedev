@@ -59,6 +59,19 @@ public class AnalyzeStream {
 		}
 	}
 
+	/**
+	 * Seek to next closed type, with balancing open/close considered, that is, all open/close pair 
+	 * of the same type will be skipped. Below is an example of start position and stop position 
+	 * when calling this method.
+	 *  
+	 * text { text { text }  } 
+	 *      ^                ^
+	 *      seek here        stop here
+	 *                         
+	 * @param openType
+	 * @param closeType
+	 * @return
+	 */
 	public AnalyzeToken nextClosed(int openType, int closeType) {
 		int nestingLevel = 1;
 		AnalyzeToken balanced = nextType(openType, closeType);
