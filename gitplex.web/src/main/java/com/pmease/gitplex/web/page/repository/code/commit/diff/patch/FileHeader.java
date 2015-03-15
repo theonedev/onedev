@@ -223,6 +223,7 @@ public class FileHeader extends DiffEntry {
 		return true;
 	}
 
+	@SuppressWarnings("deprecation")
 	private String[] extractFileLines(final Charset[] csGuess) {
 		final TemporaryBuffer[] tmp = new TemporaryBuffer[getParentCount() + 1];
 		try {

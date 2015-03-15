@@ -52,4 +52,10 @@ public class DefaultStorageManager implements StorageManager {
 		return dir;
 	}
 
+	@Override
+	public File getIndexDir(Repository repository) {
+    	File storageDir = new File(configManager.getSystemSetting().getStoragePath());
+        return createIfNotExist(new File(storageDir, "indexes/repositories/" + repository.getId()));
+	}
+
 }

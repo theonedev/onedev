@@ -5,9 +5,11 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import com.pmease.commons.lang.LangToken;
+
 public class MethodDef {
 
-	public String name;
+	public LangToken name;
 	
 	@Nullable
 	public String returnType; // null for constructor

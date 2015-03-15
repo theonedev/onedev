@@ -3,7 +3,7 @@ package com.pmease.commons.lang;
 @SuppressWarnings("serial")
 public class UnexpectedTokenException extends AnalyzeException {
 
-	public UnexpectedTokenException(AnalyzeToken token) {
+	public UnexpectedTokenException(LangToken token) {
 		super("Unexpected token: " + token);
 	}
 

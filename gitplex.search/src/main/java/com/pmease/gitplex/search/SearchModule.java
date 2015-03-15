@@ -1,20 +1,20 @@
-package com.pmease.commons.lang;
+package com.pmease.gitplex.search;
 
 import com.pmease.commons.loader.AbstractPluginModule;
+import com.pmease.gitplex.core.manager.IndexManager;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
  *
  */
-public class LangModule extends AbstractPluginModule {
+public class SearchModule extends AbstractPluginModule {
 
 	@Override
 	protected void configure() {
 		super.configure();
 		
-		contributeFromPackage(Analyzer.class, Analyzer.class);
-		
-		bind(Analyzers.class).to(DefaultAnalyzers.class);
+		// put your guice bindings here
+		bind(IndexManager.class).to(DefaultIndexManager.class);
 	}
 
 }

@@ -7,54 +7,61 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Token;
 
-public class AnalyzeStream {
+public class LangStream {
 
-	private final List<AnalyzeToken> tokens;
+	private final List<LangToken> tokens;
 	
 	private int pos = -1; // 0-indexed position of current token 
 	
-	public AnalyzeStream(List<AnalyzeToken> tokens) {
+	public LangStream(List<LangToken> tokens) {
 		this.tokens = tokens;
-		this.tokens.add(AnalyzeToken.EOF);
+		this.tokens.add(LangToken.EOF);
 	}
 	
-	public AnalyzeStream(Lexer lexer, TokenFilter filter) {
+	public LangStream(Lexer lexer, TokenFilter filter) {
 		tokens = new ArrayList<>();
 		Token token = lexer.nextToken();
 		while (token.getType() != Token.EOF) {
 			if (filter.accept(token))
-				tokens.add(new AnalyzeToken(token));
+				tokens.add(new LangToken(token));
 			token = lexer.nextToken();
 		}
-		tokens.add(AnalyzeToken.EOF);
+		tokens.add(LangToken.EOF);
 	}
 	
-	public AnalyzeToken at(int pos) {
+	public LangToken at(int pos) {
 		if (pos >=0 && pos < tokens.size())
 			return tokens.get(pos);
 		else
 			throw new AnalyzeException("Invalid token position: " + pos);
 	}
 	
-	public AnalyzeToken next() {
+	public LangToken next() {
 		return at(++pos);
 	}
 	
-	public AnalyzeToken lookAhead(int ahead) {
+	public LangToken lookAhead(int ahead) {
 		return at(pos+ahead);
 	}
 	
-	public AnalyzeToken lookBehind(int behind) {
+	public LangToken lookBehind(int behind) {
 		return at(pos-behind);
 	}
 	
-	public AnalyzeToken nextType(int...anyTypes) {
-		AnalyzeToken token = next();
+	public LangToken nextType(int type) {
+		LangToken token = next();
 		while(true) {
-			for (int type: anyTypes) {
-				if (token.is(type))
-					return token;
-			}
+			if (token.is(type))
+				return token;
+			token = next();
+		}
+	}
+	
+	public LangToken nextType(int...types) {
+		LangToken token = next();
+		while(true) {
+			if (token.is(types))
+				return token;
 			token = next();
 		}
 	}
@@ -72,9 +79,9 @@ public class AnalyzeStream {
 	 * @param closeType
 	 * @return
 	 */
-	public AnalyzeToken nextClosed(int openType, int closeType) {
+	public LangToken nextClosed(int openType, int closeType) {
 		int nestingLevel = 1;
-		AnalyzeToken balanced = nextType(openType, closeType);
+		LangToken balanced = nextType(openType, closeType);
 		while (true) {
 			if (balanced.is(closeType)) {
 				if (--nestingLevel == 0)
@@ -104,14 +111,32 @@ public class AnalyzeStream {
 	 * @return 
 	 * 			list of tokens between startPos and endPos 
 	 */
-	public List<AnalyzeToken> between(int startPos, int endPos) {
-		List<AnalyzeToken> tokens = new ArrayList<>();
+	public List<LangToken> between(int startPos, int endPos) {
+		List<LangToken> tokens = new ArrayList<>();
 		for (int i=startPos; i<=endPos; i++) 
 			tokens.add(at(i));
 		return tokens;
 	}
-
-	public AnalyzeToken current() {
+	
+	public List<LangToken> allType(int...types) {
+		List<LangToken> typeTokens = new ArrayList<>();
+		for (LangToken token: tokens) {
+			if (token.is(types))
+				typeTokens.add(token);
+		}
+		return typeTokens;
+	}
+	
+	public List<LangToken> allType(int type) {
+		List<LangToken> typeTokens = new ArrayList<>();
+		for (LangToken token: tokens) {
+			if (token.is(type))
+				typeTokens.add(token);
+		}
+		return typeTokens;
+	}
+	
+	public LangToken current() {
 		return at(pos);
 	}
 	

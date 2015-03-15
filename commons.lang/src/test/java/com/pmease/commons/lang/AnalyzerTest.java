@@ -11,8 +11,8 @@ import com.pmease.commons.lang.java.JavaAnalyzerTest;
 
 public class AnalyzerTest {
 
-	protected void assertOutline(String expected, Outline outline) {
-		Assert.assertEquals(StringUtils.replace(expected, "\r", "").trim(), outline.toString().trim());
+	protected void assertOutline(String expected, AnalyzeResult result) {
+		Assert.assertEquals(StringUtils.replace(expected, "\r", "").trim(), result.getOutline().toString().trim());
 	}
 
 	protected String readFile(String fileName) {

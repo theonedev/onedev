@@ -1,33 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>commons.git</artifactId>
+	<artifactId>gitplex.search</artifactId>
 	<version>1.0.0</version>
 	<parent>
 		<groupId>com.pmease</groupId>
 		<artifactId>parent.general</artifactId>
 		<version>1.0.31</version>
 	</parent>
+
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>com.pmease</groupId>
 				<artifactId>plugin.maven</artifactId>
-			</plugin>
-			<!-- Uncomment below if you'd like to publish an archetype based on your 
-				plugin -->
-			<!--plugin> <artifactId>maven-archetype-plugin</artifactId> </plugin -->
-			<plugin>
-				<artifactId>maven-jar-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
@@ -37,35 +23,49 @@
 			</plugin>
 		</plugins>
 	</build>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.pmease</groupId>
-			<artifactId>commons.loader</artifactId>
+			<artifactId>gitplex.core</artifactId>
 			<version>1.0.31</version>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jgit</groupId>
-			<artifactId>org.eclipse.jgit.http.server</artifactId>
-			<version>3.7.0.201502260915-r</version>
+			<artifactId>lucene-core</artifactId>
+			<groupId>org.apache.lucene</groupId>
+			<type>jar</type>
+			<version>${luceneVersion}</version>
 		</dependency>
+
 		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.util</artifactId>
-			<version>1.0.31</version>
+			<artifactId>lucene-queries</artifactId>
+			<groupId>org.apache.lucene</groupId>
+			<type>jar</type>
+			<version>${luceneVersion}</version>
 		</dependency>
+
 		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.loader</artifactId>
-			<version>1.0.31</version>
-			<type>test-jar</type>
-			<scope>test</scope>
+			<artifactId>lucene-queryparser</artifactId>
+			<groupId>org.apache.lucene</groupId>
+			<type>jar</type>
+			<version>${luceneVersion}</version>
 		</dependency>
+
 		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.editable</artifactId>
-			<version>1.0.0</version>
+			<artifactId>lucene-analyzers-common</artifactId>
+			<groupId>org.apache.lucene</groupId>
+			<type>jar</type>
+			<version>${luceneVersion}</version>
+		</dependency>
+
+		<dependency>
+			<artifactId>lucene-facet</artifactId>
+			<groupId>org.apache.lucene</groupId>
+			<type>jar</type>
+			<version>${luceneVersion}</version>
 		</dependency>
 	</dependencies>
+
 	<repositories>
 		<repository>
 			<id>pmeaseRepo</id>
@@ -83,7 +83,10 @@
 			<url>http://artifact.pmease.com/</url>
 		</repository>
 	</repositories>
+
 	<properties>
-		<moduleClass>com.pmease.commons.git.GitModule</moduleClass>
+		<moduleClass>com.pmease.gitplex.search.SearchModule</moduleClass>
+		<luceneVersion>4.10.3</luceneVersion>
 	</properties>
+
 </project>

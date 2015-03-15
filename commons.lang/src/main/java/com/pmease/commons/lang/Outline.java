@@ -1,5 +1,8 @@
 package com.pmease.commons.lang;
 
-public interface Outline {
+import java.util.Collection;
+import java.util.List;
 
+public interface Outline {
+	List<LangToken> getSymbols();
 }

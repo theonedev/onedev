@@ -33,6 +33,7 @@
         <module>../commons.schedule</module>
         <module>../commons.markdown</module>
         <module>../commons.tokenizer</module>
+        <module>../gitplex.search</module>
     </modules>  
     <repositories> 
         <repository> 

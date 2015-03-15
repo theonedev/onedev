@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import com.pmease.commons.lang.LangToken;
 
 public class TypeDef {
 
@@ -22,7 +23,7 @@ public class TypeDef {
 		ENUM
 	};
 	
-	public String name;
+	public LangToken name;
 	
 	public Kind kind;
 
@@ -42,12 +43,12 @@ public class TypeDef {
 		for (Modifier modifier: modifiers) 
 			builder.append(modifier.name().toLowerCase()).append(" ");
 		builder.append(kind.toString().toLowerCase()).append(" ");
-		builder.append(name).append(" {\n\n");
+		builder.append(name.getText()).append(" {\n\n");
 		
 		List<String> enumConstants = new ArrayList<>();
 		for (FieldDef fieldDef: fieldDefs) {
 			if (fieldDef.type == null)  
-				enumConstants.add(fieldDef.name);
+				enumConstants.add(fieldDef.name.getText());
 		}
 		if (!enumConstants.isEmpty())
 			builder.append("  ").append(Joiner.on(", ").join(enumConstants)).append(";\n\n");
@@ -69,4 +70,15 @@ public class TypeDef {
 		return builder.toString();
 	}
 	
+	public List<LangToken> getSymbols() {
+		List<LangToken> symbols = new ArrayList<>();
+		symbols.add(name);
+		for (FieldDef fieldDef: fieldDefs)
+			symbols.add(fieldDef.name);
+		for (MethodDef methodDef: methodDefs)
+			symbols.add(methodDef.name);
+		for (TypeDef typeDef: typeDefs)
+			symbols.addAll(typeDef.getSymbols());
+		return symbols;
+	}
 }

@@ -16,7 +16,7 @@ public class AnalyzeTokenStreamTest {
 				+ "  public void sayHello() {System.out.println(\"hello\");}"
 				+ "}";
 		
-		AnalyzeStream tokenStream = new AnalyzeStream(
+		LangStream tokenStream = new LangStream(
 				new JavaLexer(new ANTLRInputStream(text)), TokenFilter.DEFAULT_CHANNEL);
 		
 		tokenStream.nextType(JavaLexer.LBRACE);
@@ -28,7 +28,7 @@ public class AnalyzeTokenStreamTest {
 		String text = "public class MyClass {"
 				+ "  public void sayHello() {System.out.println(\"hello\");}";
 		
-		AnalyzeStream tokenStream = new AnalyzeStream(
+		LangStream tokenStream = new LangStream(
 				new JavaLexer(new ANTLRInputStream(text)), TokenFilter.DEFAULT_CHANNEL);
 		tokenStream.nextType(JavaLexer.LBRACE);
 		try {

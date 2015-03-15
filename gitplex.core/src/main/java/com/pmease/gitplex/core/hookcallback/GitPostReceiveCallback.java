@@ -19,9 +19,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.manager.BranchManager;
+import com.pmease.gitplex.core.manager.IndexManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
@@ -33,15 +35,22 @@ public class GitPostReceiveCallback extends HttpServlet {
     public static final String PATH = "/git-postreceive-callback";
     
     private static final Logger logger = LoggerFactory.getLogger(GitPostReceiveCallback.class);
-
+    
     private final Dao dao;
     
     private final BranchManager branchManager;
     
+    private final IndexManager indexManager;
+    
+    private final UnitOfWork unitOfWork;
+    
     @Inject
-    public GitPostReceiveCallback(Dao dao, BranchManager branchManager) {
+    public GitPostReceiveCallback(Dao dao, BranchManager branchManager, IndexManager indexManager, 
+    		UnitOfWork unitOfWork) {
     	this.dao = dao;
         this.branchManager = branchManager;
+        this.indexManager = indexManager;
+        this.unitOfWork = unitOfWork;
     }
 
     @Override
@@ -94,7 +103,7 @@ public class GitPostReceiveCallback extends HttpServlet {
     	
 	}
 
-    private void onRefUpdated(Repository repository, String refName, String oldCommitHash, final String newCommitHash) {
+    private void onRefUpdated(final Repository repository, String refName, String oldCommitHash, final String newCommitHash) {
 		String branchName = Branch.parseName(refName);
 		if (branchName != null) {
 			if (oldCommitHash.equals(GitUtils.NULL_SHA1)) {
@@ -117,14 +126,27 @@ public class GitPostReceiveCallback extends HttpServlet {
 				if (repository.git().resolveDefaultBranch().equals(branchName) && !repository.getBranches().isEmpty()) 
 						repository.git().updateDefaultBranch(repository.getBranches().iterator().next().getName());
 			} else {
-				logger.debug("Executing post-receive hook against branch {}...", branchName);
-				
 				Branch branch = branchManager.findBy(repository, branchName);
 				Preconditions.checkNotNull(branch);
 
 				branch.setHeadCommitHash(newCommitHash);
 				branchManager.save(branch);
 			}
+		}
+		
+		if (!newCommitHash.equals(GitUtils.NULL_SHA1)) {
+			unitOfWork.asyncCall(new Runnable() {
+
+				@Override
+				public void run() {			
+					try {
+						indexManager.index(dao.load(Repository.class, repository.getId()), newCommitHash);
+					} catch (Exception e) {
+						logger.error("Error indexing repository '" + repository + "'", e);
+					}
+				}
+				
+			});
 		}
     }
 }

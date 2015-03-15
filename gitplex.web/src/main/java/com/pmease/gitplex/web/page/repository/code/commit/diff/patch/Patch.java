@@ -96,6 +96,7 @@ public class Patch {
 		parse(buf, 0, buf.length);
 	}
 
+	@SuppressWarnings("deprecation")
 	private static byte[] readFully(final InputStream is) throws IOException {
 		final TemporaryBuffer b = new TemporaryBuffer.LocalFile();
 		try {

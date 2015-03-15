@@ -32,7 +32,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 			
 			@Override
 			public File getRepoDir(Repository repository) {
-				return null;
+				throw new UnsupportedOperationException();
 			}
 			
 			@Override
@@ -44,12 +44,17 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 			
 			@Override
 			public File getCacheDir(PullRequest request) {
-				return null;
+				throw new UnsupportedOperationException();
 			}
 			
 			@Override
 			public File getCacheDir(Repository repository) {
-				return null;
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public File getIndexDir(Repository repository) {
+				throw new UnsupportedOperationException();
 			}
 		});
     }

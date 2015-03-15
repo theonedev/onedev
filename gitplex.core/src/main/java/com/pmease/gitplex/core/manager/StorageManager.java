@@ -10,6 +10,8 @@ public interface StorageManager {
     
     File getRepoDir(Repository repository);
     
+    File getIndexDir(Repository repository);
+    
     File getCacheDir(Repository repository);
     
     File getCacheDir(PullRequest request);

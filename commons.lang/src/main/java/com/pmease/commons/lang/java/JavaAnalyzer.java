@@ -1,39 +1,6 @@
 package com.pmease.commons.lang.java;
 
-import static com.pmease.commons.lang.java.JavaLexer.ASSIGN;
-import static com.pmease.commons.lang.java.JavaLexer.AT;
-import static com.pmease.commons.lang.java.JavaLexer.BOOLEAN;
-import static com.pmease.commons.lang.java.JavaLexer.BYTE;
-import static com.pmease.commons.lang.java.JavaLexer.CHAR;
-import static com.pmease.commons.lang.java.JavaLexer.CLASS;
-import static com.pmease.commons.lang.java.JavaLexer.COMMA;
-import static com.pmease.commons.lang.java.JavaLexer.DEFAULT;
-import static com.pmease.commons.lang.java.JavaLexer.DOT;
-import static com.pmease.commons.lang.java.JavaLexer.DOUBLE;
-import static com.pmease.commons.lang.java.JavaLexer.ELLIPSIS;
-import static com.pmease.commons.lang.java.JavaLexer.ENUM;
-import static com.pmease.commons.lang.java.JavaLexer.FLOAT;
-import static com.pmease.commons.lang.java.JavaLexer.GT;
-import static com.pmease.commons.lang.java.JavaLexer.IMPORT;
-import static com.pmease.commons.lang.java.JavaLexer.INT;
-import static com.pmease.commons.lang.java.JavaLexer.INTERFACE;
-import static com.pmease.commons.lang.java.JavaLexer.Identifier;
-import static com.pmease.commons.lang.java.JavaLexer.LBRACE;
-import static com.pmease.commons.lang.java.JavaLexer.LBRACK;
-import static com.pmease.commons.lang.java.JavaLexer.LONG;
-import static com.pmease.commons.lang.java.JavaLexer.LPAREN;
-import static com.pmease.commons.lang.java.JavaLexer.LT;
-import static com.pmease.commons.lang.java.JavaLexer.PACKAGE;
-import static com.pmease.commons.lang.java.JavaLexer.RBRACE;
-import static com.pmease.commons.lang.java.JavaLexer.RBRACK;
-import static com.pmease.commons.lang.java.JavaLexer.RPAREN;
-import static com.pmease.commons.lang.java.JavaLexer.SEMI;
-import static com.pmease.commons.lang.java.JavaLexer.SHORT;
-import static com.pmease.commons.lang.java.JavaLexer.STATIC;
-import static com.pmease.commons.lang.java.JavaLexer.StringLiteral;
-import static com.pmease.commons.lang.java.JavaLexer.THIS;
-import static com.pmease.commons.lang.java.JavaLexer.THROWS;
-import static com.pmease.commons.lang.java.JavaLexer.VOID;
+import static com.pmease.commons.lang.java.JavaLexer.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,14 +12,14 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.pmease.commons.lang.AnalyzeStream;
-import com.pmease.commons.lang.AnalyzeToken;
-import com.pmease.commons.lang.Analyzer;
-import com.pmease.commons.lang.Outline;
+import com.pmease.commons.lang.AbstractAnalyzer;
+import com.pmease.commons.lang.AnalyzeResult;
+import com.pmease.commons.lang.LangStream;
+import com.pmease.commons.lang.LangToken;
 import com.pmease.commons.lang.TokenFilter;
-import com.pmease.commons.lang.UnexpectedTokenException;
+import com.pmease.commons.util.Pair;
 
-public class JavaAnalyzer implements Analyzer {
+public class JavaAnalyzer extends AbstractAnalyzer {
 	
 	private static final int[] PRIMITIVES = new int[]{
 		FLOAT, INT, LONG, BOOLEAN, CHAR, BYTE, SHORT, DOUBLE, VOID};
@@ -67,13 +34,13 @@ public class JavaAnalyzer implements Analyzer {
 	 * @after-token: EOF
 	 * 
 	 */
-	public Outline analyze(String text) {
-		AnalyzeStream stream = new AnalyzeStream(
+	public AnalyzeResult analyze(String text) {
+		LangStream stream = new LangStream(
 				new JavaLexer(new ANTLRInputStream(text)), TokenFilter.DEFAULT_CHANNEL);
-
-		JavaOutline outline = new JavaOutline();
 		
-		AnalyzeToken token = stream.next();
+		JavaOutline outline = new JavaOutline();
+
+		LangToken token = stream.next();
 		
 		while (token.is(AT) && !stream.lookAhead(1).is(INTERFACE)) {
 			skipAnnotation(stream);
@@ -103,7 +70,7 @@ public class JavaAnalyzer implements Analyzer {
 			}
 		}
 		
-		return outline;
+		return new AnalyzeResult(stream.allType(Identifier), outline);
 	}
 	
 	/*
@@ -112,8 +79,8 @@ public class JavaAnalyzer implements Analyzer {
 	 * @before-token: '{' or ';' (';' occurs inside of a enum definition)
 	 * @after-token: '}'
 	 */
-	private void defineTypeBody(AnalyzeStream stream, TypeDef typeDef) {
-		AnalyzeToken token = stream.next();
+	private void defineTypeBody(LangStream stream, TypeDef typeDef) {
+		LangToken token = stream.next();
 		while(true) {
 			while (token.is(SEMI))
 				token = stream.next();
@@ -177,13 +144,13 @@ public class JavaAnalyzer implements Analyzer {
 	 * 			fields to be consumed
 	 * 
 	 */
-	private List<String> skipValue(AnalyzeStream stream) {
-		List<String> fieldNames = new ArrayList<>();
-		AnalyzeToken token = stream.current();
+	private List<Pair<LangToken, String>> skipValue(LangStream stream) {
+		List<Pair<LangToken, String>> fieldInfos = new ArrayList<>();
+		LangToken token = stream.current();
 		if (token.is(LBRACE)) { // array value
 			stream.nextClosed(LBRACE, RBRACE);
 			stream.next();
-			return fieldNames;
+			return fieldInfos;
 		} else {
 			while (true) {
 				token = stream.nextType(COMMA, SEMI, LBRACE, LBRACK, LPAREN);
@@ -195,14 +162,14 @@ public class JavaAnalyzer implements Analyzer {
 					break;
 				} else { // token is ','
 					token.checkType(COMMA);
-					List<String> subsequentFieldNames = assumeFieldSeparator(stream);
-					if (subsequentFieldNames != null) { // assumption is correct
-						fieldNames.addAll(subsequentFieldNames);
+					List<Pair<LangToken, String>> subsequentFieldTokens = assumeFieldSeparator(stream);
+					if (subsequentFieldTokens != null) { // assumption is correct
+						fieldInfos.addAll(subsequentFieldTokens);
 						break;
 					}
 				}
 			}
-			return fieldNames;
+			return fieldInfos;
 		}
 	}
 
@@ -216,31 +183,29 @@ public class JavaAnalyzer implements Analyzer {
 	 * 					assumption is incorrect
 	 * 
 	 * @return 
-	 * 			list of encountered subsequent field names if assumption is correct, or 
+	 * 			list of encountered subsequent field tokens and array indicators if assumption is correct, or 
 	 * 			null if assumption is incorrect 
 	 * 
 	 */
-	private List<String> assumeFieldSeparator(AnalyzeStream stream) {
+	private List<Pair<LangToken, String>> assumeFieldSeparator(LangStream stream) {
 		while (true) {
-			AnalyzeToken token = stream.next();
+			LangToken token = stream.next();
 			if (token.is(Identifier)) {
-				List<String> fieldNames = new ArrayList<>();
-				String identifier = token.getText();
+				List<Pair<LangToken, String>> fieldInfos = new ArrayList<>();
 				stream.next();
-				identifier += skipDims(stream);
-				fieldNames.add(identifier);
+				fieldInfos.add(new Pair<LangToken, String>(token, skipDims(stream)));
 				token = stream.current();
 				if (token.is(ASSIGN)) { // assumption convinced
 					stream.next();
-					fieldNames.addAll(skipValue(stream));
-					return fieldNames;
+					fieldInfos.addAll(skipValue(stream));
+					return fieldInfos;
 				} else if (token.is(SEMI)) { // assumption convinced
-					return fieldNames;
+					return fieldInfos;
 				} else if (token.is(COMMA)) { // assumption still not convinced 
-					List<String> subsequentFieldNames = assumeFieldSeparator(stream);
-					if (subsequentFieldNames != null) {
-						fieldNames.addAll(subsequentFieldNames);
-						return fieldNames;
+					List<Pair<LangToken, String>> subsequentFieldInfos = assumeFieldSeparator(stream);
+					if (subsequentFieldInfos != null) {
+						fieldInfos.addAll(subsequentFieldInfos);
+						return fieldInfos;
 					} else { 
 						return null;
 					}
@@ -259,11 +224,11 @@ public class JavaAnalyzer implements Analyzer {
 	 * @before-token: start of possible dims
 	 * @after-token: next token after dims, or remain unchanged if no dims  
 	 */
-	private String skipDims(AnalyzeStream stream) {
+	private String skipDims(LangStream stream) {
 		String dims = "";
 		while (true) {
 			skipAnnotations(stream);
-			AnalyzeToken token = stream.current();
+			LangToken token = stream.current();
 			if (token.is(LBRACK)) {
 				dims += "[]";
 				stream.nextClosed(LBRACK, RBRACK);
@@ -281,8 +246,8 @@ public class JavaAnalyzer implements Analyzer {
 	 * @before-token: start of type ref
 	 * @after-token: next token after type ref
 	 */
-	private String skipTypeRef(AnalyzeStream stream) {
-		AnalyzeToken token = stream.current();
+	private String skipTypeRef(LangStream stream) {
+		LangToken token = stream.current();
 		String typeRef = token.getText();
 		if (token.is(PRIMITIVES)) {
 			stream.next();
@@ -306,14 +271,14 @@ public class JavaAnalyzer implements Analyzer {
 	 * @begin-token: start of a type ref segment including possible annotations
 	 * @end-token: next token after type ref segment
 	 */
-	private String skipTypeRefSegment(AnalyzeStream stream) {
+	private String skipTypeRefSegment(LangStream stream) {
 		skipModifiers(stream);
 		String identifier = stream.current().getText();
-		AnalyzeToken token = stream.next();
+		LangToken token = stream.next();
 		if (token.is(LT)) {
 			int tokenPos = stream.pos();
 			stream.nextClosed(LT, GT);
-			AnalyzeStream typeArgStream = new AnalyzeStream(stream.between(tokenPos, stream.pos()));
+			LangStream typeArgStream = new LangStream(stream.between(tokenPos, stream.pos()));
 			token = typeArgStream.next();
 			while (true) {
 				skipModifiers(typeArgStream);
@@ -335,11 +300,11 @@ public class JavaAnalyzer implements Analyzer {
 	 * @before-token: identifier of the method
 	 * @after-token: '}' for class method, ';' for interface method or annotation attribute
 	 */
-	private MethodDef defineMethod(AnalyzeStream stream, List<Modifier> modifiers, @Nullable String typeRef) {
-		AnalyzeToken token = stream.current();
+	private MethodDef defineMethod(LangStream stream, List<Modifier> modifiers, @Nullable String typeRef) {
+		LangToken token = stream.current();
 		MethodDef methodDef = new MethodDef();
 		methodDef.modifiers = modifiers;
-		methodDef.name = token.getText();
+		methodDef.name = token;
 		stream.next().checkType(LPAREN); // '('
 		token = stream.next();
 		while (!token.is(RPAREN)) {
@@ -409,28 +374,27 @@ public class JavaAnalyzer implements Analyzer {
 	 * @before-token: identifier of field declaration statement
 	 * @after-token: end of fields declaration statement, which is ';'
 	 */
-	private List<FieldDef> defineFields(AnalyzeStream stream, List<Modifier> modifiers, String typeRef) {
-		AnalyzeToken token = stream.current();
+	private List<FieldDef> defineFields(LangStream stream, List<Modifier> modifiers, String typeRef) {
+		LangToken token = stream.current();
 		List<FieldDef> fieldDefs = new ArrayList<>();
 		while (!token.is(SEMI)) {
 			FieldDef fieldDef = new FieldDef();
 			fieldDefs.add(fieldDef);
-			fieldDef.name = token.getText();
+			fieldDef.name = token;
 			fieldDef.modifiers = modifiers;
 			stream.next();
 			fieldDef.type = typeRef + skipDims(stream);
 			token = stream.current();
 			if (token.is(ASSIGN)) {
 				stream.next();
-				for (String fieldName: skipValue(stream)) {
+				for (Pair<LangToken, String> fieldInfo: skipValue(stream)) {
 					fieldDef = new FieldDef();
-					int index = fieldName.indexOf('[');
-					if (index != -1) {
-						fieldDef.type = typeRef + fieldName.substring(index);
-						fieldDef.name = fieldName.substring(0, index);
+					if (fieldInfo.getSecond().length() != 0) {
+						fieldDef.type = typeRef + fieldInfo.getSecond();
+						fieldDef.name = fieldInfo.getFirst();
 					} else {
 						fieldDef.type = typeRef;
-						fieldDef.name = fieldName;
+						fieldDef.name = fieldInfo.getFirst();
 					}
 					fieldDef.modifiers = modifiers;
 					fieldDefs.add(fieldDef);
@@ -449,10 +413,10 @@ public class JavaAnalyzer implements Analyzer {
 	 * @before-token: 'class', 'interface', 'enum', or '@interface'
 	 * @after-token: '}'
 	 */
-	private TypeDef defineType(AnalyzeStream stream, List<Modifier> modifiers) {
+	private TypeDef defineType(LangStream stream, List<Modifier> modifiers) {
 		TypeDef typeDef = new TypeDef();
 		typeDef.modifiers = modifiers;
-		AnalyzeToken token = stream.current();
+		LangToken token = stream.current();
 		if (token.is(AT) && stream.lookAhead(1).is(INTERFACE)) {
 			typeDef.kind = TypeDef.Kind.ANNOTATION;
 			stream.next().checkType(INTERFACE); // 'interface'
@@ -488,7 +452,7 @@ public class JavaAnalyzer implements Analyzer {
 					FieldDef fieldDef = new FieldDef();
 					skipModifiers(stream); // skip annotations
 					fieldDef.modifiers = Lists.newArrayList(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL);
-					fieldDef.name = stream.current().getText();
+					fieldDef.name = stream.current();
 					token = stream.next();
 					if (token.is(LPAREN)) { // enum constant arguments
 						stream.nextClosed(LPAREN, RPAREN);
@@ -515,9 +479,9 @@ public class JavaAnalyzer implements Analyzer {
 	 * @before-token: type identifier 
 	 * @after-token: start of type body which is '{' 
 	 */
-	private void defineTypeHead(AnalyzeStream stream, TypeDef typeDef) {
-		AnalyzeToken token = stream.current();
-		typeDef.name = token.getText();
+	private void defineTypeHead(LangStream stream, TypeDef typeDef) {
+		LangToken token = stream.current();
+		typeDef.name = token;
 		
 		while (true) {
 			token = stream.nextType(LBRACE, LPAREN);
@@ -536,9 +500,9 @@ public class JavaAnalyzer implements Analyzer {
 	 * @before-token: possible start of modifiers
 	 * @after-token: remain unchanged or token after the modifiers if there are modifiers 
 	 */
-	private List<Modifier> skipModifiers(AnalyzeStream stream) {
+	private List<Modifier> skipModifiers(LangStream stream) {
 		List<Modifier> modifiers = new ArrayList<>();
-		AnalyzeToken token = stream.current();
+		LangToken token = stream.current();
 		while (true) {
 			if (token.is(AT) && !stream.lookAhead(1).is(INTERFACE)) {
 				skipAnnotation(stream);
@@ -570,8 +534,8 @@ public class JavaAnalyzer implements Analyzer {
 	 * @before-token: possible start of annotations
 	 * @after-token: remain unchanged or token after the annotations if there are annotations
 	 */
-	private void skipAnnotations(AnalyzeStream stream) {
-		AnalyzeToken token = stream.current();
+	private void skipAnnotations(LangStream stream) {
+		LangToken token = stream.current();
 		while (true) {
 			if (token.is(AT) && !stream.lookAhead(1).is(INTERFACE)) {
 				skipAnnotation(stream);
@@ -588,10 +552,10 @@ public class JavaAnalyzer implements Analyzer {
 	 * @before-token: '@'
 	 * @after-token: token after the annotation
 	 */
-	private void skipAnnotation(AnalyzeStream stream) {
+	private void skipAnnotation(LangStream stream) {
 		stream.next();
 		skipTypeName(stream);
-		AnalyzeToken token = stream.current();
+		LangToken token = stream.current();
 		if (token.is(LPAREN)) {
 			token = stream.nextClosed(LPAREN, RPAREN);
 			token = stream.next();
@@ -604,9 +568,9 @@ public class JavaAnalyzer implements Analyzer {
 	 * @before-token: first section of type name
 	 * @after-token: token after type name  
 	 */
-	private String skipTypeName(AnalyzeStream stream) {
+	private String skipTypeName(LangStream stream) {
 		String typeName = stream.current().getText();
-		AnalyzeToken token = stream.next();
+		LangToken token = stream.next();
 		while (token.is(DOT)) {
 			typeName += ".";
 			token = stream.next();
@@ -614,6 +578,16 @@ public class JavaAnalyzer implements Analyzer {
 			token = stream.next();
 		}
 		return typeName;
+	}
+
+	@Override
+	public String getVersion() {
+		return "1";
+	}
+
+	@Override
+	public boolean accept(String fileName) {
+		return acceptExtensions(fileName, "java");
 	}
 	
 }

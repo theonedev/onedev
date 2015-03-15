@@ -4,9 +4,9 @@ import org.antlr.v4.runtime.Token;
 
 import com.google.common.base.Objects;
 
-public class AnalyzeToken {
+public class LangToken  {
 
-	public static final AnalyzeToken EOF = new AnalyzeToken(Token.EOF, "", -1);
+	public static final LangToken EOF = new LangToken(Token.EOF, "", -1, -1);
 	
 	private final int type;
 	
@@ -14,21 +14,29 @@ public class AnalyzeToken {
 	
 	private final int line;
 	
-	public AnalyzeToken(Token antlrToken) {
+	private final int posInLine;
+	
+	public LangToken(Token antlrToken) {
 		this.type = antlrToken.getType();
 		this.text = antlrToken.getText();
 		this.line = antlrToken.getLine();
+		this.posInLine = antlrToken.getCharPositionInLine();
 	}
 
-	public AnalyzeToken(int type, String text, int line) {
+	public LangToken(int type, String text, int line, int posInLine) {
 		this.type = type;
 		this.text = text;
 		this.line = line;
+		this.posInLine = posInLine;
 	}
 	
-	public boolean is(int...tokenTypes) {
-		for (int tokenType: tokenTypes) {
-			if (type == tokenType)
+	public boolean is(int type) {
+		return this.type == type; 
+	}
+	
+	public boolean is(int...types) {
+		for (int type: types) {
+			if (this.type == type)
 				return true;
 		}
 		return false;
@@ -54,13 +62,17 @@ public class AnalyzeToken {
 		return line;
 	}
 	
-	public AnalyzeToken checkType(int... expectedTypes) {
+	public int getPosInLine() {
+		return posInLine;
+	}
+
+	public LangToken checkType(int... expectedTypes) {
 		if (!is(expectedTypes))
 			throw new UnexpectedTokenException(this);
 		return this;
 	}
 	
-	public AnalyzeToken checkText(String expectedText) {
+	public LangToken checkText(String expectedText) {
 		if (!text.equals(expectedText))
 			throw new UnexpectedTokenException(this);
 		return this;
@@ -68,11 +80,7 @@ public class AnalyzeToken {
 	
 	@Override
 	public String toString() {
-		return Objects.toStringHelper("Token")
-				.add("type", type)
-				.add("text", text)
-				.add("line", line)
-				.toString();
+		return text;
 	}
 
 }

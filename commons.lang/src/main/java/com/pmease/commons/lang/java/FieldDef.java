@@ -5,9 +5,11 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import com.pmease.commons.lang.LangToken;
+
 public class FieldDef {
 	
-	public String name;
+	public LangToken name;
 
 	/**
 	 * This field will be null for a enum constant
@@ -26,7 +28,7 @@ public class FieldDef {
 			builder.append(modifier.name().toLowerCase()).append(" ");
 		if (type != null)
 			builder.append(type).append(" ");
-		builder.append(name).append(";");
+		builder.append(name.getText()).append(";");
 		return builder.toString();
 	}
 	
