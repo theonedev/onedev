@@ -874,7 +874,7 @@ PragmaDirective
     :   '#' Whitespace? 'pragma' Whitespace ~[\r\n]*
         -> skip
     ;
-
+    
 Whitespace
     :   [ \t]+
         -> skip
@@ -895,4 +895,8 @@ BlockComment
 LineComment
     :   '//' ~[\r\n]*
         -> skip
-    ;
+    ;    
+    
+Other
+	:	. -> skip
+	;    

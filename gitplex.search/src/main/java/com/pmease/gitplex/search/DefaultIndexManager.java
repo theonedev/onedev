@@ -16,6 +16,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
@@ -86,7 +87,7 @@ public class DefaultIndexManager implements IndexManager {
 		RevWalk revWalk = new RevWalk(repo);
 		TreeWalk treeWalk = new TreeWalk(repo);
 		
-		treeWalk.addTree(revWalk.parseCommit(repo.resolve(commitHash)));
+		treeWalk.addTree(revWalk.parseCommit(repo.resolve(commitHash)).getTree());
 		treeWalk.setRecursive(true);
 		
 		if (searcher != null) {
@@ -114,16 +115,17 @@ public class DefaultIndexManager implements IndexManager {
 				ObjectId blobId = treeWalk.getObjectId(0);
 				String path = treeWalk.getPathString();
 				
-				String blobAnalyzerVersion;
-				
 				BooleanQuery query = new BooleanQuery();
 				query.add(BLOB_HASH.query(blobId.name()), Occur.MUST);
 				query.add(BLOB_PATH.query(path), Occur.MUST);
-				TopDocs topDocs = searcher.search(query, 1);
-				if (topDocs.scoreDocs.length != 0)
-					blobAnalyzerVersion = searcher.doc(topDocs.scoreDocs[0].doc).get(BLOB_ANALYZER_VERSION.name());
-				else
-					blobAnalyzerVersion = null;
+				
+				String blobAnalyzerVersion = null;
+				
+				if (searcher != null) {
+					TopDocs topDocs = searcher.search(query, 1);
+					if (topDocs.scoreDocs.length != 0)
+						blobAnalyzerVersion = searcher.doc(topDocs.scoreDocs[0].doc).get(BLOB_ANALYZER_VERSION.name());
+				}
 
 				String currentAnalyzerVersion = analyzers.getVersion(path);
 
@@ -172,12 +174,12 @@ public class DefaultIndexManager implements IndexManager {
 				document.add(new Field(
 						BLOB_SYMBOLS.name(), 
 						new LangTokenStream(analyzeResult.getSymbols()), 
-						StringField.TYPE_NOT_STORED));
+						TextField.TYPE_NOT_STORED));
 				if (analyzeResult.getOutline() != null) {
 					document.add(new Field(
 							BLOB_DEFS_SYMBOLS.name(), 
 							new LangTokenStream(analyzeResult.getOutline().getSymbols()), 
-							StringField.TYPE_NOT_STORED));
+							TextField.TYPE_NOT_STORED));
 				}
 				writer.addDocument(document);
 			} else {
@@ -196,7 +198,7 @@ public class DefaultIndexManager implements IndexManager {
 			public Void call() throws Exception {
 				File indexDir = storageManager.getIndexDir(repository);
 				try (Directory directory = FSDirectory.open(indexDir)) {
-					if (indexDir.exists()) {
+					if (DirectoryReader.indexExists(directory)) {
 						try (IndexReader reader = DirectoryReader.open(directory)) {
 							IndexSearcher searcher = new IndexSearcher(reader);
 							try (IndexWriter writer = new IndexWriter(directory, newWriterConfig())) {

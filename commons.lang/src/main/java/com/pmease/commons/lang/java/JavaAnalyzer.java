@@ -582,7 +582,7 @@ public class JavaAnalyzer extends AbstractAnalyzer {
 
 	@Override
 	public String getVersion() {
-		return "1";
+		return "1.0";
 	}
 
 	@Override

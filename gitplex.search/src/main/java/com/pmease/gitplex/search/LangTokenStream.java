@@ -32,6 +32,7 @@ public class LangTokenStream extends TokenStream {
 		 if (index < tokens.size()) {
 			 termAttr.setEmpty();
 			 termAttr.append(tokens.get(index).getText());
+			 index++;
 			 return true;
 		 } else {
 			 return false;

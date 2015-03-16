@@ -64,6 +64,20 @@
 			<type>jar</type>
 			<version>${luceneVersion}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.pmease</groupId>
+			<artifactId>commons.loader</artifactId>
+			<version>1.0.31</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.pmease</groupId>
+			<artifactId>commons.git</artifactId>
+			<version>1.0.0</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<repositories>
