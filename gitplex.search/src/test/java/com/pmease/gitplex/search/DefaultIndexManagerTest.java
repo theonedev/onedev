@@ -23,16 +23,14 @@ import org.mockito.stubbing.Answer;
 
 import com.google.common.base.Throwables;
 import com.pmease.commons.git.AbstractGitTest;
-import com.pmease.commons.git.Commit;
-import com.pmease.commons.git.Git;
 import com.pmease.commons.lang.AnalyzeResult;
 import com.pmease.commons.lang.Analyzers;
 import com.pmease.commons.lang.LangToken;
 import com.pmease.commons.lang.Outline;
-import com.pmease.commons.lang.c.CAnalyzer;
 import com.pmease.commons.lang.java.JavaAnalyzer;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.manager.IndexManager;
+import com.pmease.gitplex.core.manager.IndexResult;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.Repository;
 
@@ -79,24 +77,24 @@ public class DefaultIndexManagerTest extends AbstractGitTest {
 	@Test
 	public void test() {
 		String code = ""
-				+ "public class Hello {"
-				+ "  public String message;"
+				+ "public class Dog {"
+				+ "  public String name;"
 				+ "}";
-		addFileAndCommit("Hello.java", code, "1");
+		addFileAndCommit("Dog.java", code, "add dog");
 		
 		code = ""
-				+ "public class World {"
-				+ "  public String message;"
+				+ "public class Cat {"
+				+ "  public String name;"
 				+ "}";
-		addFileAndCommit("World.java", code, "2");
+		addFileAndCommit("Cat.java", code, "add cat");
 		
 		String commitHash = git.parseRevision("master", true);
-		indexManager.index(repository, commitHash);
+		assertEquals(2, indexManager.index(repository, commitHash).getIndexed());
 		
 		try (Directory directory = FSDirectory.open(indexDir)) {
 			try (IndexReader reader = DirectoryReader.open(directory)) {
 				IndexSearcher searcher = new IndexSearcher(reader);
-				TopDocs topDocs = searcher.search(BLOB_DEFS_SYMBOLS.query("message"), Integer.MAX_VALUE);
+				TopDocs topDocs = searcher.search(BLOB_DEFS_SYMBOLS.query("name"), Integer.MAX_VALUE);
 				assertEquals(2, topDocs.totalHits);
 			}
 		} catch (Exception e) {
@@ -104,28 +102,51 @@ public class DefaultIndexManagerTest extends AbstractGitTest {
 		}
 		
 		code = ""
-				+ "public class Hello2 {"
-				+ "  public String message;"
+				+ "public class Dog {"
+				+ "  public String name;"
+				+ "  public int age;"
 				+ "}";
-		addFileAndCommit("Hello.java", code, "3");		
+		addFileAndCommit("Dog.java", code, "add dog age");		
 
 		commitHash = git.parseRevision("master", true);
-		indexManager.index(repository, commitHash);
+		assertEquals(1, indexManager.index(repository, commitHash).getIndexed());
 		
 		try (Directory directory = FSDirectory.open(indexDir)) {
 			try (IndexReader reader = DirectoryReader.open(directory)) {
 				IndexSearcher searcher = new IndexSearcher(reader);
-				TopDocs topDocs = searcher.search(BLOB_DEFS_SYMBOLS.query("message"), Integer.MAX_VALUE);
+				TopDocs topDocs = searcher.search(BLOB_DEFS_SYMBOLS.query("name"), Integer.MAX_VALUE);
 				assertEquals(3, topDocs.totalHits);
 			}
 		} catch (Exception e) {
 			throw Throwables.propagate(e);
 		}
 		
+		code = ""
+				+ "public class Dog {"
+				+ "  public String name;"
+				+ "}";
+		addFileAndCommit("Dog.java", code, "remove dog age");
+		
+		code = ""
+				+ "public class Cat {"
+				+ "  public String name;"
+				+ "  public int age;"
+				+ "}";
+		addFileAndCommit("Cat.java", code, "add cat age");
+		
+		commitHash = git.parseRevision("master", true);
+		
+		IndexResult indexResult = indexManager.index(repository, commitHash);
+		assertEquals(2, indexResult.getChecked());
+		assertEquals(1, indexResult.getIndexed());
+		
+		commitHash = git.parseRevision("master~2", true);
+		assertEquals(0, indexManager.index(repository, commitHash).getChecked());
+		
 		when(analyzers.getVersion()).thenReturn("java:2.0");
 		when(analyzers.getVersion(anyString())).thenReturn("2.0");
 		final List<LangToken> symbols = new ArrayList<>();
-		symbols.add(new LangToken(0, "value", 0, 0));
+		symbols.add(new LangToken(0, "tiger", 0, 0));
 		AnalyzeResult analyzeResult = new AnalyzeResult(symbols, new Outline() {
 
 			@Override
@@ -136,39 +157,16 @@ public class DefaultIndexManagerTest extends AbstractGitTest {
 		});
 		when(analyzers.analyze(anyString(), anyString())).thenReturn(analyzeResult);
 		
-		indexManager.index(repository, commitHash);
+		assertEquals(2, indexManager.index(repository, commitHash).getIndexed());
 		
 		try (Directory directory = FSDirectory.open(indexDir)) {
 			try (IndexReader reader = DirectoryReader.open(directory)) {
 				IndexSearcher searcher = new IndexSearcher(reader);
-				TopDocs topDocs = searcher.search(BLOB_DEFS_SYMBOLS.query("value"), Integer.MAX_VALUE);
+				TopDocs topDocs = searcher.search(BLOB_DEFS_SYMBOLS.query("tiger"), Integer.MAX_VALUE);
 				assertEquals(2, topDocs.totalHits);
 			}
 		} catch (Exception e) {
 			throw Throwables.propagate(e);
-		}
-	}
-	
-	@Test
-	public void test2() {
-		Git linuxGit = new Git(new File("w:\\linux\\.git"));
-		when(repository.git()).thenReturn(linuxGit);
-		when(storageManager.getIndexDir(Mockito.any(Repository.class))).thenReturn(new File("w:\\temp\\index"));
-		
-		when(analyzers.analyze(anyString(), anyString())).thenAnswer(new Answer<AnalyzeResult>() {
-
-			@Override
-			public AnalyzeResult answer(InvocationOnMock invocation) throws Throwable {
-				String fileContent = (String) invocation.getArguments()[0];
-				return new CAnalyzer().analyze(fileContent);
-			}
-			
-		});
-		
-		int count = 0;
-		for (Commit commit: linuxGit.log("master~1000", "master", null, 0, 0)) {
-			System.out.println(++count);
-			indexManager.index(repository, commit.getHash());			
 		}
 	}
 	

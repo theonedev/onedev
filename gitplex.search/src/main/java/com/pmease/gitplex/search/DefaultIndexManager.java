@@ -1,6 +1,16 @@
 package com.pmease.gitplex.search;
 
-import static com.pmease.gitplex.search.FieldConstants.*;
+import static com.pmease.gitplex.search.FieldConstants.BLOB_ANALYZER_VERSION;
+import static com.pmease.gitplex.search.FieldConstants.BLOB_DEFS_SYMBOLS;
+import static com.pmease.gitplex.search.FieldConstants.BLOB_HASH;
+import static com.pmease.gitplex.search.FieldConstants.BLOB_PATH;
+import static com.pmease.gitplex.search.FieldConstants.BLOB_SYMBOLS;
+import static com.pmease.gitplex.search.FieldConstants.COMMIT_ANALYZERS_VERSION;
+import static com.pmease.gitplex.search.FieldConstants.COMMIT_HASH;
+import static com.pmease.gitplex.search.FieldConstants.LAST_COMMIT;
+import static com.pmease.gitplex.search.FieldConstants.LAST_COMMIT_ANALYZERS_VERSION;
+import static com.pmease.gitplex.search.FieldConstants.LAST_COMMIT_HASH;
+import static com.pmease.gitplex.search.FieldConstants.META;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +25,7 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
@@ -22,7 +33,6 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
@@ -42,11 +52,13 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.AnalyzeResult;
 import com.pmease.commons.lang.Analyzers;
 import com.pmease.commons.util.Charsets;
 import com.pmease.commons.util.LockUtils;
 import com.pmease.gitplex.core.manager.IndexManager;
+import com.pmease.gitplex.core.manager.IndexResult;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.Repository;
 
@@ -82,7 +94,7 @@ public class DefaultIndexManager implements IndexManager {
 			return null;
 	}
 	
-	private void index(org.eclipse.jgit.lib.Repository repo, String commitHash, 
+	private IndexResult index(org.eclipse.jgit.lib.Repository repo, String commitHash, 
 			IndexWriter writer, IndexSearcher searcher) throws Exception {
 		RevWalk revWalk = new RevWalk(repo);
 		TreeWalk treeWalk = new TreeWalk(repo);
@@ -92,7 +104,7 @@ public class DefaultIndexManager implements IndexManager {
 		
 		if (searcher != null) {
 			if (analyzers.getVersion().equals(getAnalyzersVersion(searcher, commitHash)))
-				return;
+				return new IndexResult(0, 0);
 			
 			TopDocs topDocs = searcher.search(META.query(LAST_COMMIT.name()), 1);
 			if (topDocs.scoreDocs.length != 0) {
@@ -109,6 +121,8 @@ public class DefaultIndexManager implements IndexManager {
 			}
 		}
 
+		int indexed = 0;
+		int checked = 0;
 		while (treeWalk.next()) {
 			if ((treeWalk.getRawMode(0) & FileMode.TYPE_MASK) == FileMode.TYPE_FILE 
 					&& (treeWalk.getTreeCount() == 1 || !treeWalk.idEqual(0, 1))) {
@@ -125,6 +139,7 @@ public class DefaultIndexManager implements IndexManager {
 					TopDocs topDocs = searcher.search(query, 1);
 					if (topDocs.scoreDocs.length != 0)
 						blobAnalyzerVersion = searcher.doc(topDocs.scoreDocs[0].doc).get(BLOB_ANALYZER_VERSION.name());
+					checked++;
 				}
 
 				String currentAnalyzerVersion = analyzers.getVersion(path);
@@ -133,33 +148,37 @@ public class DefaultIndexManager implements IndexManager {
 					if (currentAnalyzerVersion != null) {
 						if (!blobAnalyzerVersion.equals(currentAnalyzerVersion)) {
 							writer.deleteDocuments(query);
-							indexBlob(writer, repo, blobId, path);
+							if (indexBlob(writer, repo, currentAnalyzerVersion, blobId, path))
+								indexed++;
 						}
 					} else {
 						writer.deleteDocuments(query);
 					}
 				} else if (currentAnalyzerVersion != null) {
-					indexBlob(writer, repo, blobId, path);
+					if (indexBlob(writer, repo, currentAnalyzerVersion, blobId, path))
+						indexed++;
 				}
 			}
 		}
 
 		// record current commit so that we know which commit has been indexed
 		Document document = new Document();
-		document.add(new StringField(COMMIT_HASH.name(), commitHash, Store.YES));
-		document.add(new StringField(COMMIT_ANALYZERS_VERSION.name(), analyzers.getVersion(), Store.YES));
-		writer.updateDocument(new Term(COMMIT_HASH.name(), commitHash), document);
+		document.add(new StringField(COMMIT_HASH.name(), commitHash, Store.NO));
+		document.add(new StoredField(COMMIT_ANALYZERS_VERSION.name(), analyzers.getVersion()));
+		writer.updateDocument(COMMIT_HASH.term(commitHash), document);
 		
 		// record last commit so that we only need to indexing changed files for subsequent commits
 		document = new Document();
-		document.add(new StringField(META.name(), LAST_COMMIT.name(), Store.YES));
-		document.add(new StringField(LAST_COMMIT_ANALYZERS_VERSION.name(), analyzers.getVersion(), Store.YES));
-		document.add(new StringField(LAST_COMMIT_HASH.name(), commitHash, Store.YES));
-		writer.updateDocument(new Term(META.name(), LAST_COMMIT.name()), document);
+		document.add(new StringField(META.name(), LAST_COMMIT.name(), Store.NO));
+		document.add(new StoredField(LAST_COMMIT_ANALYZERS_VERSION.name(), analyzers.getVersion()));
+		document.add(new StoredField(LAST_COMMIT_HASH.name(), commitHash));
+		writer.updateDocument(META.term(LAST_COMMIT.name()), document);
+		
+		return new IndexResult(checked, indexed);
 	}
 	
-	private void indexBlob(IndexWriter writer, org.eclipse.jgit.lib.Repository repo, 
-			ObjectId blobId, String path) throws IOException {
+	private boolean indexBlob(IndexWriter writer, org.eclipse.jgit.lib.Repository repo, 
+			String analyzerVersion, ObjectId blobId, String path) throws IOException {
 		ObjectLoader objectLoader = repo.open(blobId);
 		if (objectLoader.getSize() <= MAX_INDEXABLE_SIZE) {
 			byte[] bytes = objectLoader.getCachedBytes();
@@ -181,21 +200,28 @@ public class DefaultIndexManager implements IndexManager {
 							new LangTokenStream(analyzeResult.getOutline().getSymbols()), 
 							TextField.TYPE_NOT_STORED));
 				}
+				document.add(new StoredField(BLOB_ANALYZER_VERSION.name(), analyzerVersion));
 				writer.addDocument(document);
+				return true;
 			} else {
-				logger.debug("File '{}' is not indexed as its charset can not be detected.", path);
+				logger.debug("Ignoring binary file '{}'.", path);
+				return false;
 			}
 		} else {
-			logger.debug("File '{}' is not indexed as it is too large.", path);
+			logger.debug("Ignoring too large file '{}'.", path);
+			return false;
 		}
 	}
 	
 	@Override
-	public void index(final Repository repository, final String commitHash) {
-		LockUtils.call("index:" + repository.getId(), new Callable<Void>() {
+	public IndexResult index(final Repository repository, final String commitHash) {
+		Preconditions.checkArgument(GitUtils.isHash(commitHash));
+		
+		return LockUtils.call("index:" + repository.getId(), new Callable<IndexResult>() {
 
 			@Override
-			public Void call() throws Exception {
+			public IndexResult call() throws Exception {
+				IndexResult indexResult;
 				File indexDir = storageManager.getIndexDir(repository);
 				try (Directory directory = FSDirectory.open(indexDir)) {
 					if (DirectoryReader.indexExists(directory)) {
@@ -204,11 +230,11 @@ public class DefaultIndexManager implements IndexManager {
 							try (IndexWriter writer = new IndexWriter(directory, newWriterConfig())) {
 								Git git = Git.open(repository.git().repoDir());
 								try {
-									index(git.getRepository(), commitHash, writer, searcher);
+									indexResult = index(git.getRepository(), commitHash, writer, searcher);
 									writer.commit();
 								} catch (Exception e) {
 									writer.rollback();
-									Throwables.propagate(e);
+									throw Throwables.propagate(e);
 								} finally {
 									git.close();
 								}
@@ -218,18 +244,21 @@ public class DefaultIndexManager implements IndexManager {
 						try (IndexWriter writer = new IndexWriter(directory, newWriterConfig())) {
 							Git git = Git.open(repository.git().repoDir());
 							try {
-								index(git.getRepository(), commitHash, writer, null);
+								indexResult = index(git.getRepository(), commitHash, writer, null);
 								writer.commit();
 							} catch (Exception e) {
 								writer.rollback();
-								Throwables.propagate(e);
+								throw Throwables.propagate(e);
 							} finally {
 								git.close();
 							}
 						}
 					}
 				}
-				return null;
+				logger.info("Commit {} indexed (checked blobs: {}, indexed blobs: {})", 
+						commitHash, indexResult.getChecked(), indexResult.getIndexed());
+				
+				return indexResult;
 			}
 			
 		});
@@ -237,6 +266,7 @@ public class DefaultIndexManager implements IndexManager {
 
 	@Override
 	public String getAnalyzersVersion(Repository repository, String commitHash) {
+		Preconditions.checkArgument(GitUtils.isHash(commitHash));
 		File indexDir = storageManager.getIndexDir(repository);
 		if (indexDir.exists()) {
 			try (Directory directory = FSDirectory.open(indexDir)) {

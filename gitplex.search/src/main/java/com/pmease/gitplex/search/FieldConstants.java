@@ -9,6 +9,11 @@ public enum FieldConstants {
 	META, LAST_COMMIT, LAST_COMMIT_HASH, LAST_COMMIT_ANALYZERS_VERSION;
 	
 	public TermQuery query(String value) {
-		return new TermQuery(new Term(name(), value));
+		return new TermQuery(term(value));
 	}
+	
+	public Term term(String value) {
+		return new Term(name(), value);
+	}
+	
 }
