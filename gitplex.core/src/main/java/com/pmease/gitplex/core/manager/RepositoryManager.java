@@ -2,11 +2,10 @@ package com.pmease.gitplex.core.manager;
 
 import javax.annotation.Nullable;
 
-import com.pmease.commons.bootstrap.Lifecycle;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
-public interface RepositoryManager extends Lifecycle {
+public interface RepositoryManager {
 	
 	@Nullable Repository findBy(String ownerName, String repositoryName);
 	

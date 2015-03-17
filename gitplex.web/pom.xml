@@ -120,6 +120,11 @@
 		   <version>3.2.4.Final</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.pmease</groupId>
+			<artifactId>gitplex.search</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 	</dependencies>
 
 	<repositories>

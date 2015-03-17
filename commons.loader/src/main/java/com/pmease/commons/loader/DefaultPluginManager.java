@@ -36,6 +36,7 @@ public class DefaultPluginManager implements PluginManager {
 		}
 	}
 
+	@Override
 	public void start() {
 		for (Plugin plugin: pluginMap.values())
 			plugin.start();
@@ -45,6 +46,7 @@ public class DefaultPluginManager implements PluginManager {
 			plugin.postStart();
 	}
 
+	@Override
 	public void stop() {
 		for (Plugin plugin: pluginMap.values())
 			plugin.preStop();
@@ -69,6 +71,7 @@ public class DefaultPluginManager implements PluginManager {
 		throw new RuntimeException("Unable to find plugin with class '" + pluginClass + "'.");
 	}
 	
+	@Override
 	public Plugin getPlugin(String pluginId) {
 		if (pluginMap.containsKey(pluginId))
 			return pluginMap.get(pluginId);

@@ -15,6 +15,7 @@ public class SearchModule extends AbstractPluginModule {
 		
 		// put your guice bindings here
 		bind(IndexManager.class).to(DefaultIndexManager.class);
+		bind(SearchManager.class).to(DefaultSearchManager.class);
 	}
 
 }

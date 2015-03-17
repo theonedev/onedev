@@ -16,9 +16,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitplex.core.events.SystemStarting;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.manager.UserManager;
@@ -45,8 +48,9 @@ public class DefaultUserManager implements UserManager {
 	private final BiMap<String, Long> nameToId = HashBiMap.create();
 	
 	@Inject
-    public DefaultUserManager(Dao dao, RepositoryManager repositoryManager, 
-    		PullRequestManager pullRequestManager) {
+    public DefaultUserManager(EventBus eventBus, Dao dao, 
+    		RepositoryManager repositoryManager, PullRequestManager pullRequestManager) {
+		eventBus.register(this);
         this.dao = dao;
         this.repositoryManager = repositoryManager;
         this.pullRequestManager = pullRequestManager;
@@ -210,17 +214,13 @@ public class DefaultUserManager implements UserManager {
 		return result;
 	}
 
+	@Subscribe
 	@Sessional
-	@Override
-	public void start() {
+	public void systemStarting(SystemStarting event) {
         for (User user: dao.allOf(User.class)) {
         	emailToId.inverse().put(user.getId(), user.getEmail());
         	nameToId.inverse().put(user.getId(), user.getName());
         }
-	}
-
-	@Override
-	public void stop() {
 	}
 
 }

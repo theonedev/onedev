@@ -1,7 +1,7 @@
 package com.pmease.commons.hibernate;
 
-import com.pmease.commons.bootstrap.Lifecycle;
-
-public interface PersistService extends Lifecycle {
+public interface PersistService {
+	void start();
 	
+	void stop();
 }

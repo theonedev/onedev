@@ -15,6 +15,7 @@ import org.quartz.SimpleScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.EventBus;
 import com.pmease.commons.git.GitConfig;
 import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.loader.AbstractPlugin;
@@ -24,26 +25,20 @@ import com.pmease.commons.schedule.SchedulableTask;
 import com.pmease.commons.schedule.TaskScheduler;
 import com.pmease.commons.util.init.InitStage;
 import com.pmease.commons.util.init.ManualConfig;
-import com.pmease.gitplex.core.manager.BranchManager;
+import com.pmease.gitplex.core.events.SystemStarted;
+import com.pmease.gitplex.core.events.SystemStarting;
+import com.pmease.gitplex.core.events.SystemStopped;
+import com.pmease.gitplex.core.events.SystemStopping;
 import com.pmease.gitplex.core.manager.DataManager;
-import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.manager.RepositoryManager;
-import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.setting.ServerConfig;
 
 public class GitPlex extends AbstractPlugin {
 
 	private static final Logger logger = LoggerFactory.getLogger(GitPlex.class);
 	
+	private final EventBus eventBus;
+	
 	private final DataManager dataManager;
-	
-	private final RepositoryManager repositoryManager;
-	
-	private final BranchManager branchManager;
-	
-	private final UserManager userManager;
-	
-	private final PullRequestManager pullRequestManager;
 	
 	private final ServerConfig serverConfig;
 
@@ -60,16 +55,11 @@ public class GitPlex extends AbstractPlugin {
 	private String gitCheckTaskId;
 	
 	@Inject
-	public GitPlex(ServerConfig serverConfig, DataManager dataManager, 
-			PullRequestManager pullRequestManager, BranchManager branchManager,
-            RepositoryManager repositoryManager, UserManager userManager,
+	public GitPlex(EventBus eventBus, ServerConfig serverConfig, DataManager dataManager, 
             TaskScheduler taskScheduler, Provider<GitConfig> gitConfigProvider,
             @AppName String appName) {
+		this.eventBus = eventBus;
 		this.dataManager = dataManager;
-		this.repositoryManager = repositoryManager;
-		this.userManager = userManager;
-		this.branchManager = branchManager;
-		this.pullRequestManager = pullRequestManager;
 		this.serverConfig = serverConfig;
 		this.taskScheduler = taskScheduler;
 		this.gitConfigProvider = gitConfigProvider;
@@ -90,10 +80,7 @@ public class GitPlex extends AbstractPlugin {
 			initStage.waitFor();
 		}
 
-		userManager.start();
-		repositoryManager.start();
-		branchManager.start();
-		pullRequestManager.start();
+		eventBus.post(new SystemStarting());
 		
 		gitCheckTaskId = taskScheduler.schedule(new SchedulableTask() {
 			
@@ -109,10 +96,6 @@ public class GitPlex extends AbstractPlugin {
 			
 		});
 		checkGit();
-		
-		logger.info("Checking repositories...");
-		
-		repositoryManager.checkSanity();
 	}
 	
 	public void checkGit() {
@@ -122,6 +105,8 @@ public class GitPlex extends AbstractPlugin {
 	@Override
 	public void postStart() {
 		initStage = null;
+		
+		eventBus.post(new SystemStarted());
 		
 		logger.info("Server is ready at " + guessServerUrl() + ".");
 	}
@@ -179,12 +164,14 @@ public class GitPlex extends AbstractPlugin {
 	}
 
 	@Override
+	public void preStop() {
+		eventBus.post(new SystemStopping());
+	}
+
+	@Override
 	public void stop() {
 		taskScheduler.unschedule(gitCheckTaskId);
-		pullRequestManager.stop();
-		userManager.stop();
-		repositoryManager.stop();
-		branchManager.stop();
+		eventBus.post(new SystemStopped());
 	}
 	
 	public String getGitError() {

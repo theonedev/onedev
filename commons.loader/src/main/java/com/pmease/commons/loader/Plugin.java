@@ -2,10 +2,9 @@ package com.pmease.commons.loader;
 
 import java.util.Set;
 
-import com.pmease.commons.bootstrap.Lifecycle;
 import com.pmease.commons.util.dependency.Dependency;
 
-public interface Plugin extends Dependency, Lifecycle {
+public interface Plugin extends Dependency {
 	
 	String getId();
 

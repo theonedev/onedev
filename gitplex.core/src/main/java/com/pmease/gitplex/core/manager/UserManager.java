@@ -5,10 +5,9 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.pmease.commons.bootstrap.Lifecycle;
 import com.pmease.gitplex.core.model.User;
 
-public interface UserManager extends Lifecycle {
+public interface UserManager {
 	
 	void save(User user);
 	

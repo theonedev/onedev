@@ -52,11 +52,15 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.AnalyzeResult;
 import com.pmease.commons.lang.Analyzers;
 import com.pmease.commons.util.Charsets;
+import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.LockUtils;
+import com.pmease.gitplex.core.events.RepositoryRemoved;
 import com.pmease.gitplex.core.manager.IndexManager;
 import com.pmease.gitplex.core.manager.IndexResult;
 import com.pmease.gitplex.core.manager.StorageManager;
@@ -69,12 +73,16 @@ public class DefaultIndexManager implements IndexManager {
 	
 	private static final int MAX_INDEXABLE_SIZE = 1024*1024;
 	
+	private final EventBus eventBus;
+	
 	private final StorageManager storageManager;
 	
 	private final Analyzers analyzers;
 	
 	@Inject
-	public DefaultIndexManager(StorageManager storageManager, Analyzers analyzers) {
+	public DefaultIndexManager(EventBus eventBus, StorageManager storageManager, Analyzers analyzers) {
+		this.eventBus = eventBus;
+		eventBus.register(this);
 		this.storageManager = storageManager;
 		this.analyzers = analyzers;
 	}
@@ -258,6 +266,9 @@ public class DefaultIndexManager implements IndexManager {
 				logger.info("Commit {} indexed (checked blobs: {}, indexed blobs: {})", 
 						commitHash, indexResult.getChecked(), indexResult.getIndexed());
 				
+				if (indexResult.getIndexed() != 0)
+					eventBus.post(new CommitIndexed(repository, commitHash));
+				
 				return indexResult;
 			}
 			
@@ -279,6 +290,12 @@ public class DefaultIndexManager implements IndexManager {
 		} else {
 			return null;
 		}
+	}
+	
+	@Subscribe
+	public void repositoryRemoved(RepositoryRemoved event) {
+		eventBus.post(new IndexRemoving(event.getRepository()));
+		FileUtils.deleteDir(storageManager.getIndexDir(event.getRepository()));
 	}
 
 }

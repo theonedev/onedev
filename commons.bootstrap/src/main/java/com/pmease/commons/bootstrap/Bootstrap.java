@@ -206,10 +206,10 @@ public class Bootstrap {
 			if (appLoaderClassName == null)
 				appLoaderClassName = DEFAULT_APP_LOADER;
 			
-			final Lifecycle appLoader;
+			final Startable appLoader;
 			try {
 				Class<?> appLoaderClass = appClassLoader.loadClass(appLoaderClassName);
-				appLoader = (Lifecycle) appLoaderClass.newInstance();
+				appLoader = (Startable) appLoaderClass.newInstance();
 				appLoader.start();
 			} catch (Exception e) {
 				throw BootstrapUtils.unchecked(e);

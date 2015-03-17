@@ -1,6 +1,6 @@
 package com.pmease.commons.bootstrap;
 
-public interface Lifecycle {
+public interface Startable {
 	void start();
 	
 	void stop();

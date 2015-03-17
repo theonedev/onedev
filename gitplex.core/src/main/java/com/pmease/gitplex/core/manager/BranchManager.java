@@ -4,11 +4,10 @@ import java.util.Collection;
 
 import javax.annotation.Nullable;
 
-import com.pmease.commons.bootstrap.Lifecycle;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.Repository;
 
-public interface BranchManager extends Lifecycle {
+public interface BranchManager {
 
 	/**
 	 * Find branch by repository and branch name.

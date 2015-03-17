@@ -22,6 +22,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.google.common.base.Throwables;
+import com.google.common.eventbus.EventBus;
 import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.lang.AnalyzeResult;
 import com.pmease.commons.lang.Analyzers;
@@ -71,7 +72,7 @@ public class DefaultIndexManagerTest extends AbstractGitTest {
 			
 		});
 		
-		indexManager = new DefaultIndexManager(storageManager, analyzers);
+		indexManager = new DefaultIndexManager(new EventBus(), storageManager, analyzers);
 	}
 
 	@Test
