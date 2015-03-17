@@ -51,10 +51,7 @@ import com.pmease.gitplex.core.permission.object.UserBelonging;
 import com.pmease.gitplex.core.validation.RepositoryName;
 
 @Entity
-@Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"owner", "name"}), 
-		@UniqueConstraint(columnNames={"owner", "forkedFrom"})
-})
+@Table(uniqueConstraints={@UniqueConstraint(columnNames={"owner", "name"})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 @SuppressWarnings("serial")

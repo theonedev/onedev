@@ -40,7 +40,7 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
-import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
@@ -55,6 +55,7 @@ import com.google.common.base.Throwables;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.lang.AnalyzeException;
 import com.pmease.commons.lang.AnalyzeResult;
 import com.pmease.commons.lang.Analyzers;
 import com.pmease.commons.util.Charsets;
@@ -102,7 +103,7 @@ public class DefaultIndexManager implements IndexManager {
 			return null;
 	}
 	
-	private IndexResult index(org.eclipse.jgit.lib.Repository repo, String commitHash, 
+	private IndexResult index(FileRepository repo, String commitHash, 
 			IndexWriter writer, IndexSearcher searcher) throws Exception {
 		RevWalk revWalk = new RevWalk(repo);
 		TreeWalk treeWalk = new TreeWalk(repo);
@@ -193,7 +194,13 @@ public class DefaultIndexManager implements IndexManager {
 			Charset charset = Charsets.detectFrom(bytes);
 			if (charset != null) {
 				String content = new String(bytes, charset);
-				AnalyzeResult analyzeResult = analyzers.analyze(content, path);
+				AnalyzeResult analyzeResult;
+				try {
+					 analyzeResult = analyzers.analyze(content, path);
+				} catch (AnalyzeException e) {
+					logger.error("Error analyzing (blobId:" + blobId.name() + ", file:" + path + ")", e);
+					return false;
+				}
 				Preconditions.checkNotNull(analyzeResult);
 				Document document = new Document();
 				document.add(new StringField(BLOB_HASH.name(), blobId.name(), Store.YES));
@@ -225,6 +232,8 @@ public class DefaultIndexManager implements IndexManager {
 	public IndexResult index(final Repository repository, final String commitHash) {
 		Preconditions.checkArgument(GitUtils.isHash(commitHash));
 		
+		logger.info("Indexing commit '{}' of repository '{}'...", commitHash, repository);
+		
 		return LockUtils.call("index:" + repository.getId(), new Callable<IndexResult>() {
 
 			@Override
@@ -236,29 +245,29 @@ public class DefaultIndexManager implements IndexManager {
 						try (IndexReader reader = DirectoryReader.open(directory)) {
 							IndexSearcher searcher = new IndexSearcher(reader);
 							try (IndexWriter writer = new IndexWriter(directory, newWriterConfig())) {
-								Git git = Git.open(repository.git().repoDir());
+								FileRepository repo = new FileRepository(repository.git().repoDir());
 								try {
-									indexResult = index(git.getRepository(), commitHash, writer, searcher);
+									indexResult = index(repo, commitHash, writer, searcher);
 									writer.commit();
 								} catch (Exception e) {
 									writer.rollback();
 									throw Throwables.propagate(e);
 								} finally {
-									git.close();
+									repo.close();
 								}
 							}
 						}
 					} else {
 						try (IndexWriter writer = new IndexWriter(directory, newWriterConfig())) {
-							Git git = Git.open(repository.git().repoDir());
+							FileRepository repo = new FileRepository(repository.git().repoDir());
 							try {
-								indexResult = index(git.getRepository(), commitHash, writer, null);
+								indexResult = index(repo, commitHash, writer, null);
 								writer.commit();
 							} catch (Exception e) {
 								writer.rollback();
 								throw Throwables.propagate(e);
 							} finally {
-								git.close();
+								repo.close();
 							}
 						}
 					}
@@ -294,7 +303,6 @@ public class DefaultIndexManager implements IndexManager {
 	
 	@Subscribe
 	public void repositoryRemoved(RepositoryRemoved event) {
-		eventBus.post(new IndexRemoving(event.getRepository()));
 		FileUtils.deleteDir(storageManager.getIndexDir(event.getRepository()));
 	}
 

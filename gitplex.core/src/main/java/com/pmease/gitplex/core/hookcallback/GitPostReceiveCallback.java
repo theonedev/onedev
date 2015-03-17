@@ -103,7 +103,7 @@ public class GitPostReceiveCallback extends HttpServlet {
     	
 	}
 
-    private void onRefUpdated(final Repository repository, String refName, String oldCommitHash, final String newCommitHash) {
+    private void onRefUpdated(Repository repository, String refName, String oldCommitHash, final String newCommitHash) {
 		String branchName = Branch.parseName(refName);
 		if (branchName != null) {
 			if (oldCommitHash.equals(GitUtils.NULL_SHA1)) {
@@ -135,10 +135,12 @@ public class GitPostReceiveCallback extends HttpServlet {
 		}
 		
 		if (!newCommitHash.equals(GitUtils.NULL_SHA1)) {
+			final Long repositoryId = repository.getId();
 			unitOfWork.asyncCall(new Runnable() {
 
 				@Override
 				public void run() {			
+					Repository repository = dao.load(Repository.class, repositoryId);
 					try {
 						indexManager.index(dao.load(Repository.class, repository.getId()), newCommitHash);
 					} catch (Exception e) {

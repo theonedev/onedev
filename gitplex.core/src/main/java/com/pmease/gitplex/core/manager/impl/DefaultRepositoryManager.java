@@ -70,6 +70,7 @@ public class DefaultRepositoryManager implements RepositoryManager {
     public DefaultRepositoryManager(EventBus eventBus, Dao dao, BranchManager branchManager, 
     		UserManager userManager, StorageManager storageManager) {
     	this.eventBus = eventBus;
+    	eventBus.register(this);
     	this.dao = dao;
         this.branchManager = branchManager;
         this.storageManager = storageManager;
