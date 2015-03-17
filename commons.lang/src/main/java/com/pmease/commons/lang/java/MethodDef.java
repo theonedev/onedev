@@ -1,5 +1,6 @@
 package com.pmease.commons.lang.java;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,7 +8,9 @@ import javax.annotation.Nullable;
 
 import com.pmease.commons.lang.LangToken;
 
-public class MethodDef {
+public class MethodDef implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public LangToken name;
 	

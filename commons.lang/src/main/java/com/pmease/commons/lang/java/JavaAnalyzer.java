@@ -105,7 +105,7 @@ public class JavaAnalyzer extends AbstractAnalyzer {
 				} else {
 					skipModifiers(stream); // skip annotations applied to method return type
 					token = stream.current();
-					if (token.getText().equals(typeDef.name) && stream.lookAhead(1).is(LPAREN)) { 
+					if (token.getText().equals(typeDef.name.getText()) && stream.lookAhead(1).is(LPAREN)) { 
 						// this is a constructor
 						typeDef.methodDefs.add(defineMethod(stream, modifiers, null));
 					} else {

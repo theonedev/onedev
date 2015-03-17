@@ -1,5 +1,6 @@
 package com.pmease.commons.lang.java;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,7 +8,9 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.pmease.commons.lang.LangToken;
 
-public class TypeDef {
+public class TypeDef implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public enum Kind {
 		CLASS, 

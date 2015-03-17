@@ -150,6 +150,8 @@ public class DefaultIndexManagerTest extends AbstractGitTest {
 		symbols.add(new LangToken(0, "tiger", 0, 0));
 		AnalyzeResult analyzeResult = new AnalyzeResult(symbols, new Outline() {
 
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public List<LangToken> getSymbols() {
 				return symbols;

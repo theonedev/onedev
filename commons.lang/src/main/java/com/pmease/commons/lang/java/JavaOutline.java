@@ -11,6 +11,8 @@ import com.pmease.commons.lang.Outline;
 
 public class JavaOutline implements Outline {
 	
+	private static final long serialVersionUID = 1L;
+
 	@Nullable
 	public String packageName;
 	

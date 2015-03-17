@@ -1,10 +1,14 @@
 package com.pmease.commons.lang;
 
+import java.io.Serializable;
+
 import org.antlr.v4.runtime.Token;
 
 import com.google.common.base.Objects;
 
-public class LangToken  {
+public class LangToken implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public static final LangToken EOF = new LangToken(Token.EOF, "", -1, -1);
 	

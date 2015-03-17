@@ -28,7 +28,6 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
-import com.google.common.eventbus.EventBus;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.Analyzers;
 import com.pmease.commons.util.Charsets;
@@ -43,8 +42,7 @@ public class DefaultSearchManager implements SearchManager {
 	private final Analyzers analyzers;
 	
 	@Inject
-	public DefaultSearchManager(EventBus eventBus, StorageManager storageManager, Analyzers analyzers) {
-		eventBus.register(this);
+	public DefaultSearchManager(StorageManager storageManager, Analyzers analyzers) {
 		this.storageManager = storageManager;
 		this.analyzers = analyzers;
 	}

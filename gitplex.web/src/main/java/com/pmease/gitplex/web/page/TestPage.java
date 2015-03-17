@@ -44,7 +44,7 @@ public class TestPage extends CommonPage {
 				
 				long time = System.currentTimeMillis();
 				System.out.println(searchManager.search(repo, repo.git().parseRevision("master", true), 
-						FieldConstants.BLOB_SYMBOLS.query("ext2_acl_from_disk"), null, 0).size());
+						FieldConstants.BLOB_SYMBOLS.query("string"), null, 0).size());
 				System.out.println("time: " + (System.currentTimeMillis()-time));
 			}
 			
