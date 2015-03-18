@@ -1,5 +1,6 @@
 package com.pmease.gitplex.web.page;
 
+import org.apache.lucene.search.NGramPhraseQuery;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.Link;
 
@@ -26,9 +27,12 @@ public class TestPage extends CommonPage {
 				Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
 				IndexManager indexManager = GitPlex.getInstance(IndexManager.class);
 				int count = 0;
-				for (Commit commit: repo.git().log("master~500", "master", null, 0, 0)) {
-					System.out.println(++count);
-					indexManager.index(repo, commit.getHash());			
+				for (Commit commit: repo.git().log("master~1", "master", null, 0, 0)) {
+					count++;
+//					if (count % 100 == 0) {
+						System.out.println(++count);
+						indexManager.index(repo, commit.getHash());			
+//					}
 				}
 				
 			}
@@ -43,8 +47,12 @@ public class TestPage extends CommonPage {
 				SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 				
 				long time = System.currentTimeMillis();
-				System.out.println(searchManager.search(repo, repo.git().parseRevision("master", true), 
-						FieldConstants.BLOB_SYMBOLS.query("string"), null, 0).size());
+				NGramPhraseQuery query = new NGramPhraseQuery(3);
+//				query.add(FieldConstants.BLOB_CONTENT.term("cryptd_alloc_aead"));
+				query.add(FieldConstants.BLOB_CONTENT.term("mai"));
+				query.add(FieldConstants.BLOB_CONTENT.term("ain"));
+				System.out.println("found: " + searchManager.search(repo, repo.git().parseRevision("master", true), 
+						query, null, 0).size());
 				System.out.println("time: " + (System.currentTimeMillis()-time));
 			}
 			

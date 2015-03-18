@@ -1,6 +1,6 @@
 package com.pmease.gitplex.search;
 
-import static com.pmease.gitplex.search.FieldConstants.BLOB_DEFS_SYMBOLS;
+import static com.pmease.gitplex.search.FieldConstants.BLOB_SYMBOLS;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -95,7 +95,7 @@ public class DefaultIndexManagerTest extends AbstractGitTest {
 		try (Directory directory = FSDirectory.open(indexDir)) {
 			try (IndexReader reader = DirectoryReader.open(directory)) {
 				IndexSearcher searcher = new IndexSearcher(reader);
-				TopDocs topDocs = searcher.search(BLOB_DEFS_SYMBOLS.query("name"), Integer.MAX_VALUE);
+				TopDocs topDocs = searcher.search(BLOB_SYMBOLS.query("name"), Integer.MAX_VALUE);
 				assertEquals(2, topDocs.totalHits);
 			}
 		} catch (Exception e) {
@@ -115,7 +115,7 @@ public class DefaultIndexManagerTest extends AbstractGitTest {
 		try (Directory directory = FSDirectory.open(indexDir)) {
 			try (IndexReader reader = DirectoryReader.open(directory)) {
 				IndexSearcher searcher = new IndexSearcher(reader);
-				TopDocs topDocs = searcher.search(BLOB_DEFS_SYMBOLS.query("name"), Integer.MAX_VALUE);
+				TopDocs topDocs = searcher.search(BLOB_SYMBOLS.query("name"), Integer.MAX_VALUE);
 				assertEquals(3, topDocs.totalHits);
 			}
 		} catch (Exception e) {
@@ -165,7 +165,7 @@ public class DefaultIndexManagerTest extends AbstractGitTest {
 		try (Directory directory = FSDirectory.open(indexDir)) {
 			try (IndexReader reader = DirectoryReader.open(directory)) {
 				IndexSearcher searcher = new IndexSearcher(reader);
-				TopDocs topDocs = searcher.search(BLOB_DEFS_SYMBOLS.query("tiger"), Integer.MAX_VALUE);
+				TopDocs topDocs = searcher.search(BLOB_SYMBOLS.query("tiger"), Integer.MAX_VALUE);
 				assertEquals(2, topDocs.totalHits);
 			}
 		} catch (Exception e) {

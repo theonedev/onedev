@@ -1,7 +1,7 @@
 package com.pmease.gitplex.search;
 
 import static com.pmease.gitplex.search.FieldConstants.BLOB_ANALYZER_VERSION;
-import static com.pmease.gitplex.search.FieldConstants.BLOB_DEFS_SYMBOLS;
+import static com.pmease.gitplex.search.FieldConstants.BLOB_CONTENT;
 import static com.pmease.gitplex.search.FieldConstants.BLOB_HASH;
 import static com.pmease.gitplex.search.FieldConstants.BLOB_PATH;
 import static com.pmease.gitplex.search.FieldConstants.BLOB_SYMBOLS;
@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -40,18 +41,21 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
+import org.eclipse.jgit.lib.RepositoryCache;
+import org.eclipse.jgit.lib.RepositoryCache.FileKey;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
+import org.eclipse.jgit.util.FS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.pmease.commons.git.GitUtils;
@@ -78,7 +82,7 @@ public class DefaultIndexManager implements IndexManager {
 	
 	private final StorageManager storageManager;
 	
-	private final Analyzers analyzers;
+	private final Analyzers analyzers; // language analyzers, different from lucene analyzer
 	
 	@Inject
 	public DefaultIndexManager(EventBus eventBus, StorageManager storageManager, Analyzers analyzers) {
@@ -89,7 +93,9 @@ public class DefaultIndexManager implements IndexManager {
 	}
 
 	private IndexWriterConfig newWriterConfig() {
-		Analyzer analyzer = new StandardAnalyzer();					
+		PerFieldAnalyzerWrapper analyzer = new PerFieldAnalyzerWrapper(new StandardAnalyzer(), 
+				ImmutableMap.<String, Analyzer>of(FieldConstants.BLOB_CONTENT.name(), new TriGramAnalyzer()));
+		
 		IndexWriterConfig iwc = new IndexWriterConfig(Version.LATEST, analyzer);
 		iwc.setOpenMode(OpenMode.CREATE_OR_APPEND);
 		return iwc;
@@ -103,7 +109,7 @@ public class DefaultIndexManager implements IndexManager {
 			return null;
 	}
 	
-	private IndexResult index(FileRepository repo, String commitHash, 
+	private IndexResult index(org.eclipse.jgit.lib.Repository repo, String commitHash, 
 			IndexWriter writer, IndexSearcher searcher) throws Exception {
 		RevWalk revWalk = new RevWalk(repo);
 		TreeWalk treeWalk = new TreeWalk(repo);
@@ -205,13 +211,10 @@ public class DefaultIndexManager implements IndexManager {
 				Document document = new Document();
 				document.add(new StringField(BLOB_HASH.name(), blobId.name(), Store.YES));
 				document.add(new StringField(BLOB_PATH.name(), path, Store.YES));
-				document.add(new Field(
-						BLOB_SYMBOLS.name(), 
-						new LangTokenStream(analyzeResult.getSymbols()), 
-						TextField.TYPE_NOT_STORED));
+				document.add(new TextField(BLOB_CONTENT.name(), content, Store.YES));
 				if (analyzeResult.getOutline() != null) {
 					document.add(new Field(
-							BLOB_DEFS_SYMBOLS.name(), 
+							BLOB_SYMBOLS.name(), 
 							new LangTokenStream(analyzeResult.getOutline().getSymbols()), 
 							TextField.TYPE_NOT_STORED));
 				}
@@ -245,7 +248,8 @@ public class DefaultIndexManager implements IndexManager {
 						try (IndexReader reader = DirectoryReader.open(directory)) {
 							IndexSearcher searcher = new IndexSearcher(reader);
 							try (IndexWriter writer = new IndexWriter(directory, newWriterConfig())) {
-								FileRepository repo = new FileRepository(repository.git().repoDir());
+								org.eclipse.jgit.lib.Repository repo = 
+										RepositoryCache.open(FileKey.exact(repository.git().repoDir(), FS.DETECTED));
 								try {
 									indexResult = index(repo, commitHash, writer, searcher);
 									writer.commit();
@@ -259,7 +263,8 @@ public class DefaultIndexManager implements IndexManager {
 						}
 					} else {
 						try (IndexWriter writer = new IndexWriter(directory, newWriterConfig())) {
-							FileRepository repo = new FileRepository(repository.git().repoDir());
+							org.eclipse.jgit.lib.Repository repo = 
+									RepositoryCache.open(FileKey.exact(repository.git().repoDir(), FS.DETECTED));
 							try {
 								indexResult = index(repo, commitHash, writer, null);
 								writer.commit();
@@ -303,6 +308,7 @@ public class DefaultIndexManager implements IndexManager {
 	
 	@Subscribe
 	public void repositoryRemoved(RepositoryRemoved event) {
+		eventBus.post(new IndexRemoving(event.getRepository()));
 		FileUtils.deleteDir(storageManager.getIndexDir(event.getRepository()));
 	}
 
