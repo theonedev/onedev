@@ -1,10 +1,12 @@
 package com.pmease.gitplex.search;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,6 +25,7 @@ import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryCache.FileKey;
 import org.eclipse.jgit.revwalk.RevTree;
@@ -36,6 +39,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.Analyzers;
+import com.pmease.commons.util.Charsets;
 import com.pmease.gitplex.core.events.SystemStopping;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.Repository;
@@ -125,7 +129,7 @@ public class DefaultSearchManager implements SearchManager {
 					try {
 						final RevTree revTree = new RevWalk(repo).parseCommit(repo.resolve(commitHash)).getTree();
 						final List<SearchHit> hits = new ArrayList<>();
-						final Map<String, String> blobHashes = new HashMap<>();
+						final Set<String> checkedPaths = new HashSet<>();
 						final AtomicInteger skipped = new AtomicInteger(0);
 						searcher.search(query, new Collector() {
 	
@@ -137,37 +141,37 @@ public class DefaultSearchManager implements SearchManager {
 	
 							@Override
 							public void collect(int doc) throws IOException {
-								if (hits.size() > 20)
+								if (hits.size() > 3)
 									return;
 								
-								BinaryDocValues cachedBlobHashes = FieldCache.DEFAULT.getTerms(
-										context.reader(), FieldConstants.BLOB_HASH.name(), false);
 								BinaryDocValues cachedBlobPaths = FieldCache.DEFAULT.getTerms(
 										context.reader(), FieldConstants.BLOB_PATH.name(), false);
-								
-								String blobHash = cachedBlobHashes.get(doc).utf8ToString();
 								String blobPath = cachedBlobPaths.get(doc).utf8ToString();
+								
+								skipped.incrementAndGet();
+								if (!checkedPaths.contains(blobPath)) {
+									TreeWalk treeWalk = TreeWalk.forPath(repo, blobPath, revTree);									
+									if (treeWalk != null) { 
+										ObjectLoader objectLoader = repo.open(treeWalk.getObjectId(0));
+										if (objectLoader.getSize() <= DefaultIndexManager.MAX_INDEXABLE_SIZE) {
+											byte[] bytes = objectLoader.getCachedBytes();
+											Charset charset = Charsets.detectFrom(bytes);
+											if (charset != null) {
+												String content = new String(bytes, charset);
+												if (content.contains("main")) {
+													hits.add(new SearchHit(blobPath, 0, 0, "", null));
+													skipped.decrementAndGet();
+												}
+											}
+										}
+									}  
+									checkedPaths.add(blobPath);
+								}
 								/*
 								Document document = searcher.doc(context.docBase + doc);
 								String blobHash = document.get(FieldConstants.BLOB_HASH.name());
 								String blobPath = document.get(FieldConstants.BLOB_PATH.name());
 								*/
-								String blobHashOfCommit = blobHashes.get(blobPath);
-								if (blobHashOfCommit == null) {
-									TreeWalk treeWalk = TreeWalk.forPath(repo, blobPath, revTree);									
-									
-									if (treeWalk == null) 
-										blobHashOfCommit = "";
-									else 
-										blobHashOfCommit = treeWalk.getObjectId(0).name();
-									
-									blobHashes.put(blobPath, blobHashOfCommit);
-								}
-								if (blobHashOfCommit.equals(blobHash)) {
-									hits.add(new SearchHit(blobPath, 0, 0, null, null));
-								} else {
-									skipped.incrementAndGet();
-								}
 							}
 	
 							@Override
@@ -184,7 +188,7 @@ public class DefaultSearchManager implements SearchManager {
 						
 						System.out.println();
 						System.out.println();
-						System.out.println("paths: " + blobHashes.size());
+						System.out.println("checked paths: " + checkedPaths.size());
 						System.out.println("skipped: " + skipped.get());
 						return hits;
 					} finally {

@@ -76,7 +76,7 @@ public class DefaultIndexManager implements IndexManager {
 	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultIndexManager.class);
 	
-	private static final int MAX_INDEXABLE_SIZE = 1024*1024;
+	public static final int MAX_INDEXABLE_SIZE = 1024*1024;
 	
 	private final EventBus eventBus;
 	
