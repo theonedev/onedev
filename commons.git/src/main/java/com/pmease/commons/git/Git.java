@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -515,6 +516,12 @@ public class Git implements Serializable {
 	public List<Commit> log(@Nullable String fromRev, @Nullable String toRev, 
 			@Nullable String path, int maxCount, int skip) {
 		return new LogCommand(repoDir).fromRev(fromRev).toRev(toRev)
+				.path(path).maxCount(maxCount).skip(skip).call();
+	}
+	
+	public List<Commit> log(@Nullable Date sinceDate, @Nullable Date untilDate, 
+			@Nullable String path, int maxCount, int skip) {
+		return new LogCommand(repoDir).sinceDate(sinceDate).untilDate(untilDate)
 				.path(path).maxCount(maxCount).skip(skip).call();
 	}
 	

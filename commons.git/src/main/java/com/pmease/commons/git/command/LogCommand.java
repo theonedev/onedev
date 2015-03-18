@@ -2,10 +2,12 @@ package com.pmease.commons.git.command;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +22,11 @@ public class LogCommand extends GitCommand<List<Commit>> {
 	
     private String fromRev;
     
+    private Date sinceDate;
+    
     private String toRev;
+    
+    private Date untilDate;
     
     private String path;
     
@@ -42,6 +48,16 @@ public class LogCommand extends GitCommand<List<Commit>> {
     public LogCommand toRev(String toRev) {
         this.toRev = toRev;
         return this;
+    }
+    
+    public LogCommand sinceDate(Date sinceDate) {
+    	this.sinceDate = sinceDate;
+    	return this;
+    }
+    
+    public LogCommand untilDate(Date untilDate) {
+    	this.untilDate = untilDate;
+    	return this;
     }
     
     public LogCommand path(String path) {
@@ -81,6 +97,12 @@ public class LogCommand extends GitCommand<List<Commit>> {
         } else if (toRev != null) {
         	cmd.addArgs(toRev);
         }
+        
+        if (sinceDate != null) 
+        	cmd.addArgs("--since").addArgs(DateFormatUtils.ISO_DATE_FORMAT.format(sinceDate));
+        
+        if (untilDate != null)
+        	cmd.addArgs("--until").addArgs(DateFormatUtils.ISO_DATE_FORMAT.format(untilDate));
         
         if (maxCount != 0)
         	cmd.addArgs("-" + maxCount);

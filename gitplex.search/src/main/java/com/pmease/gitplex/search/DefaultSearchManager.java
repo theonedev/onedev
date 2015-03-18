@@ -141,7 +141,7 @@ public class DefaultSearchManager implements SearchManager {
 	
 							@Override
 							public void collect(int doc) throws IOException {
-								if (hits.size() > 3)
+								if (hits.size() > 500)
 									return;
 								
 								BinaryDocValues cachedBlobPaths = FieldCache.DEFAULT.getTerms(
@@ -158,7 +158,7 @@ public class DefaultSearchManager implements SearchManager {
 											Charset charset = Charsets.detectFrom(bytes);
 											if (charset != null) {
 												String content = new String(bytes, charset);
-												if (content.contains("main")) {
+												if (content.contains("ret_val")) {
 													hits.add(new SearchHit(blobPath, 0, 0, "", null));
 													skipped.decrementAndGet();
 												}

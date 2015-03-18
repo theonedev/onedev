@@ -95,6 +95,7 @@ public class DefaultIndexManager implements IndexManager {
 	private IndexWriterConfig newWriterConfig() {
 		PerFieldAnalyzerWrapper analyzer = new PerFieldAnalyzerWrapper(new StandardAnalyzer(), 
 				ImmutableMap.<String, Analyzer>of(FieldConstants.BLOB_CONTENT.name(), new TriGramAnalyzer()));
+//		Analyzer analyzer = new StandardAnalyzer();
 		
 		IndexWriterConfig iwc = new IndexWriterConfig(Version.LATEST, analyzer);
 		iwc.setOpenMode(OpenMode.CREATE_OR_APPEND);
@@ -209,9 +210,9 @@ public class DefaultIndexManager implements IndexManager {
 				}
 				Preconditions.checkNotNull(analyzeResult);
 				Document document = new Document();
-				document.add(new StringField(BLOB_HASH.name(), blobId.name(), Store.YES));
+				document.add(new StringField(BLOB_HASH.name(), blobId.name(), Store.NO));
 				document.add(new StringField(BLOB_PATH.name(), path, Store.YES));
-				document.add(new TextField(BLOB_CONTENT.name(), content, Store.YES));
+				document.add(new TextField(BLOB_CONTENT.name(), content, Store.NO));
 				if (analyzeResult.getOutline() != null) {
 					document.add(new Field(
 							BLOB_SYMBOLS.name(), 
