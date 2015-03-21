@@ -59,6 +59,11 @@
 			<artifactId>commons.util</artifactId>
 			<version>1.0.31</version>
 		</dependency>
+		<dependency>
+			<groupId>com.pmease</groupId>
+			<artifactId>commons.wicket</artifactId>
+			<version>1.0.29</version>
+		</dependency>
 	</dependencies>
 
 	<repositories>

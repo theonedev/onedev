@@ -6,21 +6,18 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.apache.wicket.Component;
+
 import com.pmease.commons.lang.LangToken;
+import com.pmease.commons.lang.Symbol;
 
-public class FieldDef implements Serializable {
-	
-	private static final long serialVersionUID = 1L;
-
-	public LangToken name;
+public class FieldDef extends Symbol {
 
 	/**
 	 * This field will be null for a enum constant
 	 */
 	@Nullable
 	public String type;
-	
-	public int line;
 	
 	public List<Modifier> modifiers = new ArrayList<>();
 	
@@ -31,8 +28,13 @@ public class FieldDef implements Serializable {
 			builder.append(modifier.name().toLowerCase()).append(" ");
 		if (type != null)
 			builder.append(type).append(" ");
-		builder.append(name.getText()).append(";");
+		builder.append(name).append(";");
 		return builder.toString();
+	}
+
+	@Override
+	public Component render(String componentId) {
+		return null;
 	}
 	
 }

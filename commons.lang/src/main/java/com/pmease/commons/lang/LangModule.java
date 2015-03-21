@@ -12,9 +12,9 @@ public class LangModule extends AbstractPluginModule {
 	protected void configure() {
 		super.configure();
 		
-		contributeFromPackage(Analyzer.class, Analyzer.class);
+		contributeFromPackage(Extractor.class, Extractor.class);
 		
-		bind(Analyzers.class).to(DefaultAnalyzers.class);
+		bind(Extractors.class).to(DefaultExtractors.class);
 	}
 
 }

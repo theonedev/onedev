@@ -1,14 +1,10 @@
 package com.pmease.gitplex.search;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -20,12 +16,10 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryCache.FileKey;
 import org.eclipse.jgit.revwalk.RevTree;
@@ -35,25 +29,22 @@ import org.eclipse.jgit.util.FS;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
-import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.lang.Analyzers;
-import com.pmease.commons.util.Charsets;
 import com.pmease.gitplex.core.events.SystemStopping;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.search.query.BlobQuery;
 
 @Singleton
-public class DefaultSearchManager implements SearchManager {
+public class DefaultSearchManager implements SearchManager, IndexListener {
 
 	private final StorageManager storageManager;
 	
 	private final Map<Long, SearcherManager> searcherManagers = new ConcurrentHashMap<>();
 	
 	@Inject
-	public DefaultSearchManager(EventBus eventBus, StorageManager storageManager, Analyzers analyzers) {
-		eventBus.register(this);
+	public DefaultSearchManager(StorageManager storageManager) {
 		this.storageManager = storageManager;
 	}
 	
@@ -76,31 +67,7 @@ public class DefaultSearchManager implements SearchManager {
 			throw Throwables.propagate(e);
 		}
 	}
-	
-	@Subscribe
-	public void indexRemoving(IndexRemoving event) {
-		synchronized (searcherManagers) {
-			SearcherManager searcherManager = searcherManagers.get(event.getRepository().getId());
-			if (searcherManager != null) {
-				try {
-					searcherManager.close();
-				} catch (IOException e) {
-					Throwables.propagate(e);
-				}
-				searcherManagers.remove(event.getRepository().getId());
-			}
-		}
-	}
 
-	@Subscribe
-	public void commitIndexed(CommitIndexed event) {
-		try {
-			getSearcherManager(event.getRepository()).maybeRefresh();
-		} catch (IOException e) {
-			Throwables.propagate(e);
-		}
-	}
-	
 	@Subscribe
 	public void systemStopping(SystemStopping event) {
 		synchronized (searcherManagers) {
@@ -116,9 +83,10 @@ public class DefaultSearchManager implements SearchManager {
 	}
 	
 	@Override
-	public List<SearchHit> search(Repository repository, String commitHash,
-			Query query, SearchHit after, int count) {
+	public void search(Repository repository, String commitHash, final BlobQuery query) {
 		Preconditions.checkArgument(GitUtils.isHash(commitHash));
+		query.getHits().clear();
+		
 		SearcherManager searcherManager = getSearcherManager(repository);
 		if (searcherManager != null) {
 			try {
@@ -128,9 +96,8 @@ public class DefaultSearchManager implements SearchManager {
 							RepositoryCache.open(FileKey.exact(repository.git().repoDir(), FS.DETECTED));
 					try {
 						final RevTree revTree = new RevWalk(repo).parseCommit(repo.resolve(commitHash)).getTree();
-						final List<SearchHit> hits = new ArrayList<>();
-						final Set<String> checkedPaths = new HashSet<>();
-						final AtomicInteger skipped = new AtomicInteger(0);
+						final Set<String> checkedBlobPaths = new HashSet<>();
+						
 						searcher.search(query, new Collector() {
 	
 							private AtomicReaderContext context;
@@ -141,37 +108,18 @@ public class DefaultSearchManager implements SearchManager {
 	
 							@Override
 							public void collect(int doc) throws IOException {
-								if (hits.size() > 500)
-									return;
-								
-								BinaryDocValues cachedBlobPaths = FieldCache.DEFAULT.getTerms(
-										context.reader(), FieldConstants.BLOB_PATH.name(), false);
-								String blobPath = cachedBlobPaths.get(doc).utf8ToString();
-								
-								skipped.incrementAndGet();
-								if (!checkedPaths.contains(blobPath)) {
-									TreeWalk treeWalk = TreeWalk.forPath(repo, blobPath, revTree);									
-									if (treeWalk != null) { 
-										ObjectLoader objectLoader = repo.open(treeWalk.getObjectId(0));
-										if (objectLoader.getSize() <= DefaultIndexManager.MAX_INDEXABLE_SIZE) {
-											byte[] bytes = objectLoader.getCachedBytes();
-											Charset charset = Charsets.detectFrom(bytes);
-											if (charset != null) {
-												String content = new String(bytes, charset);
-												if (content.contains("ret_val")) {
-													hits.add(new SearchHit(blobPath, 0, 0, "", null));
-													skipped.decrementAndGet();
-												}
-											}
-										}
-									}  
-									checkedPaths.add(blobPath);
+								if (query.getHits().size() < query.getCount()) {
+									BinaryDocValues cachedBlobPaths = FieldCache.DEFAULT.getTerms(
+											context.reader(), FieldConstants.BLOB_PATH.name(), false);
+									String blobPath = cachedBlobPaths.get(doc).utf8ToString();
+									
+									if (!checkedBlobPaths.contains(blobPath)) {
+										TreeWalk treeWalk = TreeWalk.forPath(repo, blobPath, revTree);									
+										if (treeWalk != null) 
+											query.hit(treeWalk);
+										checkedBlobPaths.add(blobPath);
+									}
 								}
-								/*
-								Document document = searcher.doc(context.docBase + doc);
-								String blobHash = document.get(FieldConstants.BLOB_HASH.name());
-								String blobPath = document.get(FieldConstants.BLOB_PATH.name());
-								*/
 							}
 	
 							@Override
@@ -186,11 +134,6 @@ public class DefaultSearchManager implements SearchManager {
 							
 						});
 						
-						System.out.println();
-						System.out.println();
-						System.out.println("checked paths: " + checkedPaths.size());
-						System.out.println("skipped: " + skipped.get());
-						return hits;
 					} finally {
 						repo.close();
 					}
@@ -200,8 +143,30 @@ public class DefaultSearchManager implements SearchManager {
 			} catch (IOException e) {
 				throw Throwables.propagate(e);
 			}
-		} else {
-			return new ArrayList<>();
+		}
+	}
+
+	@Override
+	public void commitIndexed(Repository repository, String commitHash) {
+		try {
+			getSearcherManager(repository).maybeRefresh();
+		} catch (IOException e) {
+			Throwables.propagate(e);
+		}
+	}
+
+	@Override
+	public void removingIndex(Repository repository) {
+		synchronized (searcherManagers) {
+			SearcherManager searcherManager = searcherManagers.get(repository.getId());
+			if (searcherManager != null) {
+				try {
+					searcherManager.close();
+				} catch (IOException e) {
+					Throwables.propagate(e);
+				}
+				searcherManagers.remove(repository.getId());
+			}
 		}
 	}
 

@@ -3,7 +3,6 @@ package com.pmease.commons.lang;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Token;
 
@@ -33,7 +32,7 @@ public class LangStream {
 		if (pos >=0 && pos < tokens.size())
 			return tokens.get(pos);
 		else
-			throw new AnalyzeException("Invalid token position: " + pos);
+			throw new ExtractException("Invalid token position: " + pos);
 	}
 	
 	public LangToken next() {
@@ -116,24 +115,6 @@ public class LangStream {
 		for (int i=startPos; i<=endPos; i++) 
 			tokens.add(at(i));
 		return tokens;
-	}
-	
-	public List<LangToken> allType(int...types) {
-		List<LangToken> typeTokens = new ArrayList<>();
-		for (LangToken token: tokens) {
-			if (token.is(types))
-				typeTokens.add(token);
-		}
-		return typeTokens;
-	}
-	
-	public List<LangToken> allType(int type) {
-		List<LangToken> typeTokens = new ArrayList<>();
-		for (LangToken token: tokens) {
-			if (token.is(type))
-				typeTokens.add(token);
-		}
-		return typeTokens;
 	}
 	
 	public LangToken current() {
