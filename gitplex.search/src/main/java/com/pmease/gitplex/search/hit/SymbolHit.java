@@ -1,5 +1,7 @@
 package com.pmease.gitplex.search.hit;
 
+import org.apache.wicket.Component;
+
 import com.pmease.commons.lang.Symbol;
 
 public class SymbolHit extends QueryHit {
@@ -14,6 +16,11 @@ public class SymbolHit extends QueryHit {
 	@Override
 	public String toString() {
 		return symbol.toString();
+	}
+
+	@Override
+	public Component render(String componentId) {
+		return symbol.render(componentId);
 	}
 
 }

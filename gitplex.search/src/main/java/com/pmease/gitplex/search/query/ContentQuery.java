@@ -13,16 +13,17 @@ import com.pmease.commons.util.Charsets;
 import com.pmease.gitplex.search.FieldConstants;
 import com.pmease.gitplex.search.IndexConstants;
 import com.pmease.gitplex.search.hit.ContentHit;
+import com.pmease.gitplex.search.hit.QueryHit;
 
 public class ContentQuery extends BlobQuery {
 
 	public ContentQuery(String searchFor, boolean caseSensitive, int count) {
-		super(FieldConstants.BLOB_CONTENT.name(), searchFor, false, caseSensitive, count, 
-				IndexConstants.MIN_CONTENT_GRAM, IndexConstants.MAX_CONTENT_GRAM);
+		super(FieldConstants.BLOB_CONTENT.name(), searchFor, false, 
+				caseSensitive, count, IndexConstants.CONTENT_GRAM_SIZE);
 	}
 
 	@Override
-	public void hit(TreeWalk treeWalk) {
+	public void check(TreeWalk treeWalk, List<QueryHit> hits) {
 		ObjectLoader objectLoader;
 		try {
 			objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));
@@ -50,8 +51,8 @@ public class ContentQuery extends BlobQuery {
 						}
 						if (!matches.isEmpty()) {
 							ContentHit hit = new ContentHit(blobPath, line, lineNo, matches);
-							getHits().add(hit);
-							if (getHits().size() >= getCount())
+							hits.add(hit);
+							if (hits.size() >= getCount())
 								break;
 						}
 						

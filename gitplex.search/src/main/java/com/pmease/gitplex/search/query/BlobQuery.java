@@ -2,7 +2,6 @@ package com.pmease.gitplex.search.query;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.lucene.analysis.ngram.NGramTokenizer;
@@ -25,14 +24,12 @@ public abstract class BlobQuery extends NGramPhraseQuery {
 	
 	private final boolean caseSensitive;
 	
-	private final List<QueryHit> hits = new ArrayList<>();
-	
 	public BlobQuery(String fieldName, String searchFor, boolean exactMatch, 
-			boolean caseSensitive, int count, int minGram, int maxGram) {
-		super(minGram);
+			boolean caseSensitive, int count, int gramSize) {
+		super(gramSize);
 		
 		try (NGramTokenizer tokenizer = new NGramTokenizer(
-				new StringReader(searchFor.toLowerCase()), minGram, maxGram)) {
+				new StringReader(searchFor.toLowerCase()), gramSize, gramSize)) {
 			tokenizer.reset();
 			while (tokenizer.incrementToken()) {
 				add(new Term(fieldName, tokenizer.getAttribute(CharTermAttribute.class).toString()));
@@ -68,10 +65,6 @@ public abstract class BlobQuery extends NGramPhraseQuery {
 		return caseSensitive;
 	}
 
-	public List<QueryHit> getHits() {
-		return hits;
-	}
-	
-	public abstract void hit(TreeWalk treeWalk);
+	public abstract void check(TreeWalk treeWalk, List<QueryHit> hits);
 	
 }

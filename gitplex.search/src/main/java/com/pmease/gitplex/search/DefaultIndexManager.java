@@ -257,7 +257,7 @@ public class DefaultIndexManager implements IndexManager {
 			if (charset != null) {
 				String content = new String(bytes, charset);
 				TokenStream tokens = new NGramTokenizer(new StringReader(content), 
-						IndexConstants.MIN_CONTENT_GRAM, IndexConstants.MAX_CONTENT_GRAM);
+						IndexConstants.CONTENT_GRAM_SIZE, IndexConstants.CONTENT_GRAM_SIZE);
 				tokens = new LowerCaseFilter(tokens);
 				document.add(new Field(BLOB_CONTENT.name(), tokens, TextField.TYPE_NOT_STORED));
 				
@@ -265,7 +265,7 @@ public class DefaultIndexManager implements IndexManager {
 					try {
 						symbols.addAll(extractor.extract(content).getSearchables());
 					} catch (ExtractException e) {
-						logger.error("Error analyzing content of blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
+						logger.error("Error extracting symbols of blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
 					}
 				} 
 			} else {
@@ -277,7 +277,7 @@ public class DefaultIndexManager implements IndexManager {
 
 		for (String symbol: symbols) {
 			TokenStream tokens = new NGramTokenizer(new StringReader(symbol), 
-					IndexConstants.MIN_SYMBOLS_GRAM, IndexConstants.MAX_SYMBOLS_GRAM);
+					IndexConstants.SYMBOL_GRAM_SIZE, IndexConstants.SYMBOL_GRAM_SIZE);
 			tokens = new LowerCaseFilter(tokens);
 			document.add(new Field(BLOB_SYMBOLS.name(), tokens, TextField.TYPE_NOT_STORED));
 		}

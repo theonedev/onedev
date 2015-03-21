@@ -2,34 +2,27 @@ package gitplex.product;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.NGramPhraseQuery;
-import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
-
-import com.google.common.base.Throwables;
-import com.pmease.gitplex.search.FieldConstants;
+import com.pmease.commons.lang.tokenizers.clike.CTokenizer;
+import com.pmease.commons.util.FileUtils;
 
 public class Test {
 
 	@org.junit.Test
 	public void test() throws IOException {
-		try (Directory directory = FSDirectory.open(new File("w:\\temp\\index"))) {
-			try (IndexReader reader = DirectoryReader.open(directory)) {
-				IndexSearcher searcher = new IndexSearcher(reader);
-//				SymbolQuery query = new SymbolQuery("tiger", true, false, Integer.MAX_VALUE);
-				NGramPhraseQuery query = new NGramPhraseQuery(3);
-				query.add(FieldConstants.BLOB_SYMBOLS.term("tig"));
-				query.add(FieldConstants.BLOB_SYMBOLS.term("ige"));
-				TopDocs topDocs = searcher.search(query, Integer.MAX_VALUE);
-				System.out.println(topDocs.totalHits);
-			}
-		} catch (Exception e) {
-			throw Throwables.propagate(e);
+		Collection<File> files = FileUtils.listFiles(new File("w:\\linux"), "**/*.c");
+		long time = System.currentTimeMillis();
+		int i=0;
+		for (File file: files) {
+			String content = FileUtils.readFileToString(file);
+//			new LangStream(new CLexer(new ANTLRInputStream(content)), TokenFilter.DEFAULT_CHANNEL);
+			new CTokenizer().tokenize(content);
+			i++;
+			if (i % 1000 == 0)
+				System.out.println(i);
 		}
+		System.out.println((System.currentTimeMillis()-time)*1.0/files.size());
 	}	
+	
 }

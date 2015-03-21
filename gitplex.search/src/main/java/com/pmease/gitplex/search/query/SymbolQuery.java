@@ -2,6 +2,7 @@ package com.pmease.gitplex.search.query;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.List;
 
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -14,17 +15,18 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.search.FieldConstants;
 import com.pmease.gitplex.search.IndexConstants;
 import com.pmease.gitplex.search.hit.FileHit;
+import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.SymbolHit;
 
 public class SymbolQuery extends BlobQuery {
 
 	public SymbolQuery(String searchFor, boolean exactMatch, boolean caseSensitive, int count) {
-		super(FieldConstants.BLOB_SYMBOLS.name(), searchFor, exactMatch, caseSensitive, 
-				count, IndexConstants.MIN_SYMBOLS_GRAM, IndexConstants.MAX_SYMBOLS_GRAM);
+		super(FieldConstants.BLOB_SYMBOLS.name(), searchFor, exactMatch, 
+				caseSensitive, count, IndexConstants.SYMBOL_GRAM_SIZE);
 	}
 
 	@Override
-	public void hit(TreeWalk treeWalk) {
+	public void check(TreeWalk treeWalk, List<QueryHit> hits) {
 		String blobPath = treeWalk.getPathString();
 		String searchFor = getSearchFor();
 		
@@ -40,8 +42,8 @@ public class SymbolQuery extends BlobQuery {
 						String content = new String(bytes, charset);
 						Symbol symbol = extractor.extract(content);
 						for (Symbol match: symbol.search(getSearchFor(), isExactMatch(), isCaseSensitive())) {
-							getHits().add(new SymbolHit(blobPath, match));
-							if (getHits().size() >= getCount())
+							hits.add(new SymbolHit(blobPath, match));
+							if (hits.size() >= getCount())
 								break;
 						}
 					}
@@ -56,7 +58,7 @@ public class SymbolQuery extends BlobQuery {
 			searchFor = searchFor.toLowerCase();
 		}
 		if (blobPath.startsWith(searchFor))
-			getHits().add(new FileHit(treeWalk.getPathString()));
+			hits.add(new FileHit(treeWalk.getPathString()));
 	}
 
 }

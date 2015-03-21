@@ -1,7 +1,9 @@
 package com.pmease.gitplex.search;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,6 +36,7 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.events.SystemStopping;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 
 @Singleton
@@ -83,9 +86,10 @@ public class DefaultSearchManager implements SearchManager, IndexListener {
 	}
 	
 	@Override
-	public void search(Repository repository, String commitHash, final BlobQuery query) {
+	public List<QueryHit> search(Repository repository, String commitHash, final BlobQuery query) {
 		Preconditions.checkArgument(GitUtils.isHash(commitHash));
-		query.getHits().clear();
+		
+		final List<QueryHit> hits = new ArrayList<>();
 		
 		SearcherManager searcherManager = getSearcherManager(repository);
 		if (searcherManager != null) {
@@ -108,7 +112,7 @@ public class DefaultSearchManager implements SearchManager, IndexListener {
 	
 							@Override
 							public void collect(int doc) throws IOException {
-								if (query.getHits().size() < query.getCount()) {
+								if (hits.size() < query.getCount()) {
 									BinaryDocValues cachedBlobPaths = FieldCache.DEFAULT.getTerms(
 											context.reader(), FieldConstants.BLOB_PATH.name(), false);
 									String blobPath = cachedBlobPaths.get(doc).utf8ToString();
@@ -116,7 +120,7 @@ public class DefaultSearchManager implements SearchManager, IndexListener {
 									if (!checkedBlobPaths.contains(blobPath)) {
 										TreeWalk treeWalk = TreeWalk.forPath(repo, blobPath, revTree);									
 										if (treeWalk != null) 
-											query.hit(treeWalk);
+											query.check(treeWalk, hits);
 										checkedBlobPaths.add(blobPath);
 									}
 								}
@@ -144,6 +148,8 @@ public class DefaultSearchManager implements SearchManager, IndexListener {
 				throw Throwables.propagate(e);
 			}
 		}
+		
+		return hits;
 	}
 
 	@Override

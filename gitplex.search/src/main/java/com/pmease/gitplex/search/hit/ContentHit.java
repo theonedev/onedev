@@ -2,6 +2,9 @@ package com.pmease.gitplex.search.hit;
 
 import java.util.List;
 
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.basic.Label;
+
 import com.google.common.base.Preconditions;
 
 public class ContentHit extends QueryHit {
@@ -60,5 +63,10 @@ public class ContentHit extends QueryHit {
 			return end;
 		}
 		
+	}
+
+	@Override
+	public Component render(String componentId) {
+		return new Label(componentId, toString());
 	}
 }

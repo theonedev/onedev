@@ -1,5 +1,7 @@
 package com.pmease.gitplex.search.hit;
 
+import org.apache.wicket.Component;
+
 public abstract class QueryHit {
 	
 	private final String blobPath;
@@ -11,5 +13,7 @@ public abstract class QueryHit {
 	public String getBlobPath() {
 		return blobPath;
 	}
+	
+	public abstract Component render(String componentId);
 	
 }

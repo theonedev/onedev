@@ -2,12 +2,14 @@ package com.pmease.gitplex.web.page;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.Model;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.CommonPage;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.IndexManager;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.component.search.BlobSearcher;
 
 @SuppressWarnings("serial")
 public class TestPage extends CommonPage {
@@ -45,13 +47,8 @@ public class TestPage extends CommonPage {
 			
 		});
 		
-		add(new Link<Void>("testSearch") {
-
-			@Override
-			public void onClick() {
-			}
-			
-		});
+		Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
+		add(new BlobSearcher("searcher", Model.of(repo), Model.of(repo.git().parseRevision("master", true))));
 	}
 
 	@Override

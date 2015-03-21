@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.util.List;
 
 import org.apache.wicket.Component;
 import org.junit.Test;
@@ -26,6 +27,7 @@ import com.pmease.gitplex.core.manager.IndexManager;
 import com.pmease.gitplex.core.manager.IndexResult;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.ContentQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
 
@@ -89,16 +91,16 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		assertEquals(2, indexManager.index(repository, commitHash).getIndexed());
 		
 		ContentQuery contentQuery = new ContentQuery("public", false, Integer.MAX_VALUE);
-		searchManager.search(repository, commitHash, contentQuery);
-		assertEquals(4, contentQuery.getHits().size());
+		List<QueryHit> hits = searchManager.search(repository, commitHash, contentQuery);
+		assertEquals(4, hits.size());
 
 		SymbolQuery symbolQuery = new SymbolQuery("nam", false, false, Integer.MAX_VALUE);
-		searchManager.search(repository, commitHash, symbolQuery);
-		assertEquals(2, symbolQuery.getHits().size());
+		hits = searchManager.search(repository, commitHash, symbolQuery);
+		assertEquals(2, hits.size());
 		
 		symbolQuery = new SymbolQuery("name", true, false, Integer.MAX_VALUE);
-		searchManager.search(repository, commitHash, symbolQuery);
-		assertEquals(2, symbolQuery.getHits().size());
+		hits = searchManager.search(repository, commitHash, symbolQuery);
+		assertEquals(2, hits.size());
 		
 		code = ""
 				+ "public class Dog {\n"
@@ -111,12 +113,12 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		assertEquals(1, indexManager.index(repository, commitHash).getIndexed());
 
 		contentQuery = new ContentQuery("strin", false, Integer.MAX_VALUE);
-		searchManager.search(repository, commitHash, contentQuery);
-		assertEquals(2, contentQuery.getHits().size());
+		hits = searchManager.search(repository, commitHash, contentQuery);
+		assertEquals(2, hits.size());
 		
 		symbolQuery = new SymbolQuery("Age", true, false, Integer.MAX_VALUE);
-		searchManager.search(repository, commitHash, symbolQuery);
-		assertEquals(1, symbolQuery.getHits().size());
+		hits = searchManager.search(repository, commitHash, symbolQuery);
+		assertEquals(1, hits.size());
 		
 		code = ""
 				+ "public class Dog {\n"
@@ -172,8 +174,8 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		assertEquals(2, indexManager.index(repository, commitHash).getIndexed());
 		
 		symbolQuery = new SymbolQuery("tiger", true, false, Integer.MAX_VALUE);
-		searchManager.search(repository, commitHash, symbolQuery);
-		assertEquals(2, symbolQuery.getHits().size());
+		hits = searchManager.search(repository, commitHash, symbolQuery);
+		assertEquals(2, hits.size());
 	}
 	
 	@Override
