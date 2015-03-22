@@ -12,14 +12,14 @@ import com.google.common.base.Splitter;
 import com.pmease.commons.util.Charsets;
 import com.pmease.gitplex.search.FieldConstants;
 import com.pmease.gitplex.search.IndexConstants;
-import com.pmease.gitplex.search.hit.ContentHit;
+import com.pmease.gitplex.search.hit.TextHit;
 import com.pmease.gitplex.search.hit.QueryHit;
 
-public class ContentQuery extends BlobQuery {
+public class TextQuery extends BlobQuery {
 
-	public ContentQuery(String searchFor, boolean caseSensitive, int count) {
-		super(FieldConstants.BLOB_CONTENT.name(), searchFor, false, 
-				caseSensitive, count, IndexConstants.CONTENT_GRAM_SIZE);
+	public TextQuery(String searchFor, boolean caseSensitive, int count) {
+		super(FieldConstants.BLOB_TEXT.name(), searchFor, false, 
+				caseSensitive, count, IndexConstants.TEXT_GRAM_SIZE);
 	}
 
 	@Override
@@ -39,18 +39,18 @@ public class ContentQuery extends BlobQuery {
 					
 					int lineNo = 0;
 					for (String line: Splitter.on("\n").split(content)) {
-						List<ContentHit.Match> matches = new ArrayList<>();
+						List<TextHit.Match> matches = new ArrayList<>();
 						String normalizedLine = line;
 						if (!isCaseSensitive())
 							normalizedLine = line.toLowerCase();
 						int start = normalizedLine.indexOf(searchFor, 0);
 						while (start != -1) {
 							int end = start + searchFor.length();
-							matches.add(new ContentHit.Match(start, end));
+							matches.add(new TextHit.Match(start, end));
 							start = normalizedLine.indexOf(searchFor, end);
 						}
 						if (!matches.isEmpty()) {
-							ContentHit hit = new ContentHit(blobPath, line, lineNo, matches);
+							TextHit hit = new TextHit(blobPath, line, lineNo, matches);
 							hits.add(hit);
 							if (hits.size() >= getCount())
 								break;

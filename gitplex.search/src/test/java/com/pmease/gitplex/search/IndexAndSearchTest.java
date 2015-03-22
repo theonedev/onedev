@@ -29,7 +29,7 @@ import com.pmease.gitplex.core.manager.IndexResult;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.hit.QueryHit;
-import com.pmease.gitplex.search.query.ContentQuery;
+import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
 
 public class IndexAndSearchTest extends AbstractGitTest {
@@ -89,7 +89,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		String commitHash = git.parseRevision("master", true);
 		assertEquals(2, indexManager.index(repository, commitHash).getIndexed());
 		
-		ContentQuery contentQuery = new ContentQuery("public", false, Integer.MAX_VALUE);
+		TextQuery contentQuery = new TextQuery("public", false, Integer.MAX_VALUE);
 		List<QueryHit> hits = searchManager.search(repository, commitHash, contentQuery);
 		assertEquals(4, hits.size());
 
@@ -111,7 +111,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		commitHash = git.parseRevision("master", true);
 		assertEquals(1, indexManager.index(repository, commitHash).getIndexed());
 
-		contentQuery = new ContentQuery("strin", false, Integer.MAX_VALUE);
+		contentQuery = new TextQuery("strin", false, Integer.MAX_VALUE);
 		hits = searchManager.search(repository, commitHash, contentQuery);
 		assertEquals(2, hits.size());
 		

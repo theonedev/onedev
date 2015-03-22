@@ -7,7 +7,7 @@ import org.apache.wicket.markup.html.basic.Label;
 
 import com.google.common.base.Preconditions;
 
-public class ContentHit extends QueryHit {
+public class TextHit extends QueryHit {
 
 	private final int lineNo;
 	
@@ -15,7 +15,7 @@ public class ContentHit extends QueryHit {
 	
 	private final List<Match> matches;
 	
-	public ContentHit(String blobPath, String line, int lineNo, List<Match> matches) {
+	public TextHit(String blobPath, String line, int lineNo, List<Match> matches) {
 		super(blobPath);
 		
 		Preconditions.checkArgument(!matches.isEmpty(), "Matches should not be empty");

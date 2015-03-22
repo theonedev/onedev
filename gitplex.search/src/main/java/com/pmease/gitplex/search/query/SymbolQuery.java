@@ -11,6 +11,7 @@ import com.pmease.commons.lang.Extractor;
 import com.pmease.commons.lang.Extractors;
 import com.pmease.commons.lang.Symbol;
 import com.pmease.commons.util.Charsets;
+import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.search.FieldConstants;
 import com.pmease.gitplex.search.IndexConstants;
@@ -53,12 +54,18 @@ public class SymbolQuery extends BlobQuery {
 			}
 		} 
 
+		String blobName;
+		int index = blobPath.indexOf('/');
+		if (index != -1)
+			blobName = StringUtils.substringAfterLast(blobPath, "/");
+		else
+			blobName = blobPath;
 		if (!isCaseSensitive()) {
-			blobPath = blobPath.toLowerCase();
+			blobName = blobName.toLowerCase();
 			searchFor = searchFor.toLowerCase();
 		}
-		if (blobPath.startsWith(searchFor))
-			hits.add(new FileHit(treeWalk.getPathString()));
+		if (blobName.startsWith(searchFor))
+			hits.add(new FileHit(blobPath));
 	}
 
 }

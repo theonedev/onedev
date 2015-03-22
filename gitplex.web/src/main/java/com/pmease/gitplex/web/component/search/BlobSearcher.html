@@ -1,6 +1,10 @@
 <wicket:panel>
 	<input wicket:id="input"></input>
-	<ul wicket:id="matchesContainer">
-		<li wicket:id="matches"><span wicket:id="match"></span></li>
-	</ul>
+	
+	<ul wicket:id="symbols"></ul>
+	<ul wicket:id="texts"></ul>		
+	
+	<wicket:fragment wicket:id="hitsFrag">
+		<li wicket:id="hits"><span wicket:id="hit"></span></li>
+	</wicket:fragment>
 </wicket:panel>

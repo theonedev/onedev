@@ -48,7 +48,8 @@ public class TestPage extends CommonPage {
 		});
 		
 		Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
-		add(new BlobSearcher("searcher", Model.of(repo), Model.of(repo.git().parseRevision("master", true))));
+		String commitHash = repo.git().parseRevision("master", true);
+		add(new BlobSearcher("searcher", Model.of(repo), commitHash, false));
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package com.pmease.gitplex.search;
 
 import java.io.IOException;
+import java.nio.channels.ClosedByInterruptException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -52,7 +53,7 @@ public class DefaultSearchManager implements SearchManager, IndexListener {
 	}
 	
 	@Nullable
-	private SearcherManager getSearcherManager(Repository repository) {
+	private SearcherManager getSearcherManager(Repository repository) throws InterruptedException {
 		try {
 			SearcherManager searcherManager = searcherManagers.get(repository.getId());
 			if (searcherManager == null) synchronized (searcherManagers) {
@@ -66,6 +67,13 @@ public class DefaultSearchManager implements SearchManager, IndexListener {
 				}
 			}
 			return searcherManager;
+		} catch (ClosedByInterruptException e) {
+			// catch this exception and convert to normal InterruptedException as 
+			// we do not want to throw the original exception to surprise the user
+			// when they searches by typing fast (and subsequent typing will cancel 
+			// search of previous typing by interrupting previous search thread 
+			// which may creating the searcher manager if it does not exist yet
+			throw new InterruptedException();
 		} catch (IOException e) {
 			throw Throwables.propagate(e);
 		}
@@ -91,7 +99,9 @@ public class DefaultSearchManager implements SearchManager, IndexListener {
 		Preconditions.checkArgument(GitUtils.isHash(commitHash));
 		
 		final List<QueryHit> hits = new ArrayList<>();
-		SearcherManager searcherManager = getSearcherManager(repository);
+
+		SearcherManager searcherManager;
+		searcherManager = getSearcherManager(repository);
 		if (searcherManager != null) {
 			try {
 				final IndexSearcher searcher = searcherManager.acquire();
@@ -157,7 +167,7 @@ public class DefaultSearchManager implements SearchManager, IndexListener {
 	public void commitIndexed(Repository repository, String commitHash) {
 		try {
 			getSearcherManager(repository).maybeRefresh();
-		} catch (IOException e) {
+		} catch (InterruptedException | IOException e) {
 			Throwables.propagate(e);
 		}
 	}

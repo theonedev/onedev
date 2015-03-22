@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.Page;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.apache.wicket.protocol.ws.api.WebSocketBehavior;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
@@ -142,6 +143,14 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 		});
 	}	
 	
+	/**
+	 * Return trait object of this behavior. When method {@link #requestToRender(Object, PageId)} gets 
+	 * called, its first parameter will be compared with this trait via <tt>equals</tt> method, and if 
+	 * equals, method {@link #onRender(WebSocketRequestHandler)} will be called to render this behavior.    
+	 * 
+	 * @return 
+	 * 			trait of this behavior
+	 */
 	protected abstract Object getTrait();
 	
 	protected void onRender(WebSocketRequestHandler handler) {
@@ -176,13 +185,17 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 		}
 	}
 
+	public static void requestToRender(Object trait, Page page) {
+		requestToRender(trait, PageId.fromObj(page.getId()));
+	}
+	
 	public static void requestToRender(Object trait, @Nullable PageId pageId) {
 		String message = asMessage(trait); 
 		
 		for (Iterator<Map.Entry<IWebSocketConnection, ConnectionData>> it = connections.entrySet().iterator(); it.hasNext();) {
 			Map.Entry<IWebSocketConnection, ConnectionData> entry = it.next();
 			IWebSocketConnection connection = entry.getKey();
-			if (connection != null && connection.isOpen()) {
+			if (connection != null && connection.isOpen()) synchronized (connection) {
 				ConnectionData data = entry.getValue();
 				if ((pageId == null || !pageId.equals(data.getPageId())) && data.getTraits().contains(trait)) {
 					try {

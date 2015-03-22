@@ -1,6 +1,6 @@
 package com.pmease.gitplex.search;
 
-import static com.pmease.gitplex.search.FieldConstants.BLOB_CONTENT;
+import static com.pmease.gitplex.search.FieldConstants.BLOB_TEXT;
 import static com.pmease.gitplex.search.FieldConstants.BLOB_HASH;
 import static com.pmease.gitplex.search.FieldConstants.BLOB_INDEX_VERSION;
 import static com.pmease.gitplex.search.FieldConstants.BLOB_PATH;
@@ -257,9 +257,9 @@ public class DefaultIndexManager implements IndexManager {
 			if (charset != null) {
 				String content = new String(bytes, charset);
 				TokenStream tokens = new NGramTokenizer(new StringReader(content), 
-						IndexConstants.CONTENT_GRAM_SIZE, IndexConstants.CONTENT_GRAM_SIZE);
+						IndexConstants.TEXT_GRAM_SIZE, IndexConstants.TEXT_GRAM_SIZE);
 				tokens = new LowerCaseFilter(tokens);
-				document.add(new Field(BLOB_CONTENT.name(), tokens, TextField.TYPE_NOT_STORED));
+				document.add(new Field(BLOB_TEXT.name(), tokens, TextField.TYPE_NOT_STORED));
 				
 				if (extractor != null) {
 					try {
