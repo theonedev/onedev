@@ -26,7 +26,7 @@ public class SymbolQuery extends BlobQuery {
 	}
 
 	@Override
-	public void check(TreeWalk treeWalk, List<QueryHit> hits) {
+	public void collect(TreeWalk treeWalk, List<QueryHit> hits) {
 		String blobPath = treeWalk.getPathString();
 		String searchFor = getSearchFor();
 		

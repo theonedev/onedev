@@ -65,6 +65,6 @@ public abstract class BlobQuery extends NGramPhraseQuery {
 		return caseSensitive;
 	}
 
-	public abstract void check(TreeWalk treeWalk, List<QueryHit> hits);
+	public abstract void collect(TreeWalk treeWalk, List<QueryHit> hits);
 	
 }

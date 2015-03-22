@@ -23,7 +23,7 @@ public class ContentQuery extends BlobQuery {
 	}
 
 	@Override
-	public void check(TreeWalk treeWalk, List<QueryHit> hits) {
+	public void collect(TreeWalk treeWalk, List<QueryHit> hits) {
 		ObjectLoader objectLoader;
 		try {
 			objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));

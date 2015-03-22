@@ -2,9 +2,6 @@ package com.pmease.gitplex.web.component.search;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
@@ -55,13 +52,9 @@ public class BlobSearcher extends Panel {
 				if (StringUtils.isNotBlank(symbol)) {
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 					ContentQuery query = new ContentQuery(symbol, true, 100);
-					Future<List<QueryHit>> future = searchManager.search(repoModel.getObject(), commitHashModel.getObject(), query);
 					try {
-						return future.get(1000, TimeUnit.MILLISECONDS);
-					} catch (TimeoutException e) {
-						future.cancel(true);
-						return new ArrayList<>();
-					} catch (Exception e) {
+						return searchManager.search(repoModel.getObject(), commitHashModel.getObject(), query);
+					} catch (InterruptedException e) {
 						throw new RuntimeException(e);
 					}
 				} else {
