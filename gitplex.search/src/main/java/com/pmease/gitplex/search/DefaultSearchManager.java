@@ -112,7 +112,7 @@ public class DefaultSearchManager implements SearchManager, IndexListener {
 						final RevTree revTree = new RevWalk(repo).parseCommit(repo.resolve(commitHash)).getTree();
 						final Set<String> checkedBlobPaths = new HashSet<>();
 						
-						searcher.search(query, new Collector() {
+						searcher.search(query.asLuceneQuery(), new Collector() {
 	
 							private AtomicReaderContext context;
 							

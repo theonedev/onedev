@@ -1,0 +1,9 @@
+.blob-search-results>.content {padding: 8px;}
+.blob-search-results a {color: #444;}
+.blob-search-results a:hover {text-decoration: none;}
+.blob-search-results .section>.title {font-size: 15px; margin-bottom: 4px; background: #F2F2F2;}
+.blob-search-results li.hit:hover {background: #E8E8E8;} 
+.blob-search-results li.hit.active {background: #888; color: white;} 
+.blob-search-results li.hit.active {background: #888; color: white;} 
+.blob-search-results li.hit.active a {color: white;}
+.blob-search-results .no-matches {margin-bottom: 8px; font-style: italic;}

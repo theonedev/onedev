@@ -5,6 +5,8 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
@@ -17,11 +19,16 @@ import com.pmease.gitplex.search.hit.QueryHit;
 
 public class TextQuery extends BlobQuery {
 
-	public TextQuery(String searchFor, boolean caseSensitive, int count) {
-		super(FieldConstants.BLOB_TEXT.name(), searchFor, false, 
-				caseSensitive, count, IndexConstants.TEXT_GRAM_SIZE);
+	public TextQuery(String searchFor, @Nullable String pathPrefix, @Nullable String pathSuffix, 
+			boolean caseSensitive, boolean regex, int count) {
+		super(FieldConstants.BLOB_TEXT.name(), searchFor, pathPrefix, pathSuffix, false, 
+				caseSensitive, regex, count, IndexConstants.NGRAM_SIZE);
 	}
 
+	public TextQuery(String searchFor, boolean caseSensitive, boolean regex, int count) {
+		this(searchFor, null, null, caseSensitive, regex, count);
+	}
+	
 	@Override
 	public void collect(TreeWalk treeWalk, List<QueryHit> hits) {
 		ObjectLoader objectLoader;

@@ -5,6 +5,8 @@ import org.apache.wicket.markup.html.basic.Label;
 
 public class FileHit extends QueryHit {
 
+	private static final long serialVersionUID = 1L;
+
 	public FileHit(String blobPath) {
 		super(blobPath);
 	}
@@ -17,6 +19,11 @@ public class FileHit extends QueryHit {
 	@Override
 	public Component render(String componentId) {
 		return new Label(componentId, getBlobPath());
+	}
+
+	@Override
+	public int getLineNo() {
+		return 0;
 	}
 
 }

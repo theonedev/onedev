@@ -1,6 +1,5 @@
 package com.pmease.commons.lang.java;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,10 +7,11 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 
-import com.pmease.commons.lang.LangToken;
 import com.pmease.commons.lang.Symbol;
 
 public class FieldDef extends Symbol {
+
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * This field will be null for a enum constant

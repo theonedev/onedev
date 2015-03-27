@@ -7,7 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 
 import com.google.common.io.Resources;
-import com.pmease.commons.lang.java.JavaExtractorTest;
 
 public class ExtractorTest {
 

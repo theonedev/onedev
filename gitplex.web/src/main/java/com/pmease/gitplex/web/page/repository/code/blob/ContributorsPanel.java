@@ -97,7 +97,7 @@ public class ContributorsPanel extends Panel {
 				return frag;
 			}
 		};
-		more.add(new DropdownBehavior(dropdownPanel).clickMode(true));
+		more.add(new DropdownBehavior(dropdownPanel));
 		
 		EnclosureContainer moreContainer = new EnclosureContainer("morecontainer", more);
 		moreContainer.add(more);

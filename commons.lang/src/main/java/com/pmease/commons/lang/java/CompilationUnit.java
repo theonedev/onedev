@@ -1,16 +1,13 @@
 package com.pmease.commons.lang.java;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import org.apache.wicket.Component;
 
 import com.pmease.commons.lang.Symbol;
 
 public class CompilationUnit extends Symbol {
 	
+	private static final long serialVersionUID = 1L;
+
 	@Override
 	public String toString() {
 		StringBuilder builder =  new StringBuilder();

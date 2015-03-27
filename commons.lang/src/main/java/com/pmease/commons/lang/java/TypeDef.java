@@ -7,10 +7,11 @@ import org.apache.wicket.Component;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import com.pmease.commons.lang.LangToken;
 import com.pmease.commons.lang.Symbol;
 
 public class TypeDef extends Symbol {
+
+	private static final long serialVersionUID = 1L;
 
 	public enum Kind {CLASS, INTERFACE, ANNOTATION, ENUM};
 

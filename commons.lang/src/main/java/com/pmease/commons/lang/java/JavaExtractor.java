@@ -48,7 +48,6 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.lang.AbstractExtractor;
 import com.pmease.commons.lang.LangStream;
 import com.pmease.commons.lang.LangToken;
-import com.pmease.commons.lang.Symbol;
 import com.pmease.commons.lang.TokenFilter;
 import com.pmease.commons.util.Pair;
 

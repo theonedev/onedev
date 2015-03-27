@@ -12,6 +12,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.commons.wicket.behavior.dropdown.AlignmentTarget;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownAlignment;
+import com.pmease.commons.wicket.behavior.dropdown.DropdownMode;
 
 @SuppressWarnings("serial")
 abstract class ContentPanel extends Panel {
@@ -54,7 +55,7 @@ abstract class ContentPanel extends Panel {
 						item.add(menuPanel);
 						AlignmentTarget target = new AlignmentTarget(menuItemComponent, 100, 0);
 						DropdownAlignment alignment = new DropdownAlignment(target, 0, 0, -1, false);
-						item.add(new MenuBehavior(menuPanel).hoverDelay(0).alignment(alignment));
+						item.add(new MenuBehavior(menuPanel).mode(new DropdownMode.Hover(0)).alignment(alignment));
 					} else {
 						item.add(new WebMarkupContainer("itemMenu").setVisible(false));
 					}

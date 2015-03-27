@@ -1,10 +1,24 @@
 <wicket:panel>
-	<input wicket:id="input"></input>
-	
-	<ul wicket:id="symbols"></ul>
-	<ul wicket:id="texts"></ul>		
-	
-	<wicket:fragment wicket:id="hitsFrag">
-		<li wicket:id="hits"><span wicket:id="hit"></span></li>
+	<input wicket:id="input" class="form-control input-sm"></input>
+	<div wicket:id="dropdown" class="blob-search-results"></div>
+	<wicket:fragment wicket:id="resultsFrag">
+		<div class="symbols section">
+			<div class="title">Files and symbols</div>
+			<wicket:enclosure child="symbolHits">
+			<ul class="list-unstyled">
+				<li wicket:id="symbolHits" class="hit"><a wicket:id="link"><span wicket:id="label"></span></a></li>
+			</ul>
+			</wicket:enclosure>
+			<div wicket:id="noSymbolHits" class="no-matches">No matches</div>
+		</div>
+		<div class="texts section">
+			<div class="title">Text occurrences</div>
+			<wicket:enclosure child="textHits">
+			<ul class="list-unstyled">
+				<li wicket:id="textHits" class="hit"><a wicket:id="link"><span wicket:id="label"></span></a></li>
+			</ul>
+			</wicket:enclosure>
+			<div wicket:id="noTextHits" class="no-matches">No matches</div>
+		</div>
 	</wicket:fragment>
 </wicket:panel>

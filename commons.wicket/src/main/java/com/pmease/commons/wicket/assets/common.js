@@ -212,7 +212,7 @@ pmease.commons = {
 	},
 	
 	dropdown: {
-		setup: function(triggerId, dropdownId, hoverDelay, alignment, dropdownLoader) {
+		setup: function(triggerId, dropdownId, mode, alignment, dropdownLoader) {
 			if (alignment.target) {
 				var target = $("#" + alignment.target.id);
 				if (!target[0])
@@ -230,7 +230,7 @@ pmease.commons = {
 				return;
 			
 			trigger.addClass("dropdown-trigger");
-			if (hoverDelay >= 0)
+			if (typeof mode === "number")
 				trigger.addClass("dropdown-hover");
 			
 			var dropdown = $("#" + dropdownId);
@@ -238,11 +238,18 @@ pmease.commons = {
 			if (!dropdown[0])
 				return;
 					
+			dropdown[0].showMe = function() {
+				pmease.commons.dropdown.show(trigger, dropdown, alignment, dropdownLoader);
+			};
+			dropdown[0].hideMe = function() {
+				pmease.commons.dropdown.hide(dropdownId);
+			};
+			
 			// Dropdown can associate with multiple triggers, and we should initialize it only once.
 			if (!$("#" + dropdownId + "-placeholder")[0]) 
 				dropdown.before("<div id='" + dropdownId + "-placeholder' class='hide'></div>");
 
-			if (hoverDelay >= 0) {
+			if (typeof mode === "number") {
 				function hide() {
 					var topmostDropdown = $("body>.dropdown-panel:visible:last");
 					if (topmostDropdown[0] == dropdown[0]) 
@@ -298,7 +305,7 @@ pmease.commons = {
 						prepareToHide();
 					}
 				});
-			} else {
+			} else if (mode != undefined) {
 				trigger.click(function(mouse) {
 					if (!trigger.hasClass("open")) {
 						if (alignment.target == undefined || alignment.target.id == undefined)

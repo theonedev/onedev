@@ -1,5 +1,6 @@
 package com.pmease.gitplex.search.hit;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -9,6 +10,8 @@ import com.google.common.base.Preconditions;
 
 public class TextHit extends QueryHit {
 
+	private static final long serialVersionUID = 1L;
+	
 	private final int lineNo;
 	
 	private final String line;
@@ -24,6 +27,7 @@ public class TextHit extends QueryHit {
 		this.matches = matches;
 	}
 
+	@Override
 	public int getLineNo() {
 		return lineNo;
 	}
@@ -44,8 +48,10 @@ public class TextHit extends QueryHit {
 		return builder.toString();
 	}
 
-	public static class Match {
+	public static class Match implements Serializable {
 		
+		private static final long serialVersionUID = 1L;
+
 		private final int start;
 		
 		private final int end;

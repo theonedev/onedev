@@ -89,15 +89,15 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		String commitHash = git.parseRevision("master", true);
 		assertEquals(2, indexManager.index(repository, commitHash).getIndexed());
 		
-		TextQuery contentQuery = new TextQuery("public", false, Integer.MAX_VALUE);
+		TextQuery contentQuery = new TextQuery("public", false, false, Integer.MAX_VALUE);
 		List<QueryHit> hits = searchManager.search(repository, commitHash, contentQuery);
 		assertEquals(4, hits.size());
 
-		SymbolQuery symbolQuery = new SymbolQuery("nam", false, false, Integer.MAX_VALUE);
+		SymbolQuery symbolQuery = new SymbolQuery("nam", false, false, false, Integer.MAX_VALUE);
 		hits = searchManager.search(repository, commitHash, symbolQuery);
 		assertEquals(2, hits.size());
 		
-		symbolQuery = new SymbolQuery("name", true, false, Integer.MAX_VALUE);
+		symbolQuery = new SymbolQuery("name", true, false, false, Integer.MAX_VALUE);
 		hits = searchManager.search(repository, commitHash, symbolQuery);
 		assertEquals(2, hits.size());
 		
@@ -111,11 +111,11 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		commitHash = git.parseRevision("master", true);
 		assertEquals(1, indexManager.index(repository, commitHash).getIndexed());
 
-		contentQuery = new TextQuery("strin", false, Integer.MAX_VALUE);
+		contentQuery = new TextQuery("strin", false, false, Integer.MAX_VALUE);
 		hits = searchManager.search(repository, commitHash, contentQuery);
 		assertEquals(2, hits.size());
 		
-		symbolQuery = new SymbolQuery("Age", true, false, Integer.MAX_VALUE);
+		symbolQuery = new SymbolQuery("Age", true, false, false, Integer.MAX_VALUE);
 		hits = searchManager.search(repository, commitHash, symbolQuery);
 		assertEquals(1, hits.size());
 		
@@ -148,6 +148,8 @@ public class IndexAndSearchTest extends AbstractGitTest {
 			public Symbol extract(String text) throws ExtractException {
 				Symbol symbol = new Symbol() {
 
+					private static final long serialVersionUID = 1L;
+
 					@Override
 					public Component render(String componentId) {
 						return null;
@@ -172,7 +174,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		
 		assertEquals(2, indexManager.index(repository, commitHash).getIndexed());
 		
-		symbolQuery = new SymbolQuery("tiger", true, false, Integer.MAX_VALUE);
+		symbolQuery = new SymbolQuery("tiger", true, false, false, Integer.MAX_VALUE);
 		hits = searchManager.search(repository, commitHash, symbolQuery);
 		assertEquals(2, hits.size());
 	}

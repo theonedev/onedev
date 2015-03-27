@@ -1,5 +1,6 @@
 package com.pmease.commons.lang;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,8 +8,10 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 
-public abstract class Symbol {
+public abstract class Symbol implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	@Nullable
 	public Symbol parent;
 	

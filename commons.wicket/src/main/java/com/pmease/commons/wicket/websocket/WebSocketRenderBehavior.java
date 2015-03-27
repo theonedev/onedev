@@ -195,7 +195,7 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 		for (Iterator<Map.Entry<IWebSocketConnection, ConnectionData>> it = connections.entrySet().iterator(); it.hasNext();) {
 			Map.Entry<IWebSocketConnection, ConnectionData> entry = it.next();
 			IWebSocketConnection connection = entry.getKey();
-			if (connection != null && connection.isOpen()) synchronized (connection) {
+			if (connection != null && connection.isOpen()) {
 				ConnectionData data = entry.getValue();
 				if ((pageId == null || !pageId.equals(data.getPageId())) && data.getTraits().contains(trait)) {
 					try {

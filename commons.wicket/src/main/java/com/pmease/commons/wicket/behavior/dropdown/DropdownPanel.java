@@ -45,13 +45,25 @@ public abstract class DropdownPanel extends Panel {
 	}
 	
 	/**
-	 * Close this popup.
+	 * Hide this dropdown.
 	 * 
 	 * @param target
 	 * 			target of this ajax request
 	 */
-	public void close(AjaxRequestTarget target) {
-		target.prependJavaScript(String.format("pmease.commons.dropdown.hide('%s');", getMarkupId()));
+	public void hide(AjaxRequestTarget target) {
+		target.prependJavaScript(String.format("if ($('#%s').is(':visible')) $('#%s')[0].hideMe();", 
+				getMarkupId(), getMarkupId()));
+	}
+	
+	/**
+	 * Show this dropdown.
+	 * 
+	 * @param target
+	 * 			target of this ajax request
+	 */
+	public void show(AjaxRequestTarget target) {
+		target.prependJavaScript(String.format("if (!$('#%s').is(':visible')) $('#%s')[0].showMe();", 
+				getMarkupId(), getMarkupId()));
 	}
 	
 	void load(AjaxRequestTarget target) {

@@ -1,23 +1,22 @@
 package com.pmease.gitplex.search;
 
-import static com.pmease.gitplex.search.FieldConstants.BLOB_TEXT;
 import static com.pmease.gitplex.search.FieldConstants.BLOB_HASH;
 import static com.pmease.gitplex.search.FieldConstants.BLOB_INDEX_VERSION;
 import static com.pmease.gitplex.search.FieldConstants.BLOB_PATH;
 import static com.pmease.gitplex.search.FieldConstants.BLOB_SYMBOLS;
+import static com.pmease.gitplex.search.FieldConstants.BLOB_TEXT;
 import static com.pmease.gitplex.search.FieldConstants.COMMIT_HASH;
 import static com.pmease.gitplex.search.FieldConstants.COMMIT_INDEX_VERSION;
 import static com.pmease.gitplex.search.FieldConstants.LAST_COMMIT;
 import static com.pmease.gitplex.search.FieldConstants.LAST_COMMIT_HASH;
 import static com.pmease.gitplex.search.FieldConstants.LAST_COMMIT_INDEX_VERSION;
 import static com.pmease.gitplex.search.FieldConstants.META;
+import static com.pmease.gitplex.search.IndexConstants.MAX_INDEXABLE_SIZE;
+import static com.pmease.gitplex.search.IndexConstants.NGRAM_SIZE;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
@@ -26,12 +25,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.core.LowerCaseFilter;
-import org.apache.lucene.analysis.ngram.NGramTokenizer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
@@ -242,28 +236,25 @@ public class DefaultIndexManager implements IndexManager {
 		
 		document.add(new StoredField(BLOB_INDEX_VERSION.name(), getCurrentBlobIndexVersion(extractor)));
 		document.add(new StringField(BLOB_HASH.name(), blobId.name(), Store.NO));
-		document.add(new StringField(BLOB_PATH.name(), blobPath, Store.YES));
+		document.add(new TextField(BLOB_PATH.name(), blobPath, Store.YES));
 		
-		List<String> symbols = new ArrayList<>();
-		if (blobPath.indexOf('/') != -1)
-			symbols.add(StringUtils.substringAfterLast(blobPath, "/"));
+		if (blobPath.indexOf('/') != -1) 
+			document.add(new TextField(BLOB_SYMBOLS.name(), StringUtils.substringAfterLast(blobPath, "/"), Store.NO));
 		else
-			symbols.add(blobPath);
+			document.add(new TextField(BLOB_SYMBOLS.name(), blobPath, Store.NO));
 		
 		ObjectLoader objectLoader = repo.open(blobId);
-		if (objectLoader.getSize() <= IndexConstants.MAX_INDEXABLE_SIZE) {
+		if (objectLoader.getSize() <= MAX_INDEXABLE_SIZE) {
 			byte[] bytes = objectLoader.getCachedBytes();
 			Charset charset = Charsets.detectFrom(bytes);
 			if (charset != null) {
 				String content = new String(bytes, charset);
-				TokenStream tokens = new NGramTokenizer(new StringReader(content), 
-						IndexConstants.TEXT_GRAM_SIZE, IndexConstants.TEXT_GRAM_SIZE);
-				tokens = new LowerCaseFilter(tokens);
-				document.add(new Field(BLOB_TEXT.name(), tokens, TextField.TYPE_NOT_STORED));
+				document.add(new TextField(BLOB_TEXT.name(), content, Store.NO));
 				
 				if (extractor != null) {
 					try {
-						symbols.addAll(extractor.extract(content).getSearchables());
+						for (String searchable: extractor.extract(content).getSearchables()) 
+							document.add(new TextField(BLOB_SYMBOLS.name(), searchable, Store.NO));
 					} catch (ExtractException e) {
 						logger.error("Error extracting symbols of blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
 					}
@@ -275,18 +266,11 @@ public class DefaultIndexManager implements IndexManager {
 			logger.debug("Ignore content of large file '{}'.", blobPath);
 		}
 
-		for (String symbol: symbols) {
-			TokenStream tokens = new NGramTokenizer(new StringReader(symbol), 
-					IndexConstants.SYMBOL_GRAM_SIZE, IndexConstants.SYMBOL_GRAM_SIZE);
-			tokens = new LowerCaseFilter(tokens);
-			document.add(new Field(BLOB_SYMBOLS.name(), tokens, TextField.TYPE_NOT_STORED));
-		}
-		
 		writer.addDocument(document);
 	}
 	
 	private IndexWriterConfig newIndexWriterConfig() {
-		IndexWriterConfig config = new IndexWriterConfig(Version.LATEST, new StandardAnalyzer());
+		IndexWriterConfig config = new IndexWriterConfig(Version.LATEST, new NGramAnalyzer(NGRAM_SIZE, NGRAM_SIZE));
 		config.setOpenMode(OpenMode.CREATE_OR_APPEND);
 		return config;
 	}
