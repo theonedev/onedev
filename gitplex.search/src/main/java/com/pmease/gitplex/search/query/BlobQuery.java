@@ -1,5 +1,6 @@
 package com.pmease.gitplex.search.query;
 
+import static com.pmease.gitplex.search.FieldConstants.*;
 import static com.pmease.gitplex.search.IndexConstants.NGRAM_SIZE;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import javax.annotation.Nullable;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -32,17 +34,16 @@ public abstract class BlobQuery {
 	
 	private final String pathSuffix;
 	
-	public BlobQuery(String fieldName, String searchFor, @Nullable String pathPrefix, 
-			@Nullable String pathSuffix, boolean wordMatch, boolean caseSensitive, 
-			boolean regex, int count) {
+	public BlobQuery(String fieldName, String searchFor, boolean regex, boolean wordMatch, boolean caseSensitive, 
+			@Nullable String pathPrefix, @Nullable String pathSuffix, int count) {
 		this.fieldName = fieldName;
 		this.searchFor = searchFor;
+		this.regex = regex;
+		this.wordMatch = wordMatch;
+		this.caseSensitive = caseSensitive;
 		this.pathPrefix = pathPrefix;
 		this.pathSuffix = pathSuffix;
 		this.count = count;
-		this.caseSensitive = caseSensitive;
-		this.wordMatch = wordMatch;
-		this.regex = regex;
 	}
 
 	public String getFieldName() {
@@ -81,17 +82,31 @@ public abstract class BlobQuery {
 
 	public Query asLuceneQuery() {
 		BooleanQuery query = new BooleanQuery(true);
-		if (regex) 
-			query.add(new RegexLiterals(searchFor).asLuceneQuery(fieldName), Occur.MUST);
-		else if (searchFor.length() >= NGRAM_SIZE) 
+		if (regex) {
+			Query literalsQuery = new RegexLiterals(searchFor).asLuceneQuery(fieldName);
+			if (literalsQuery != null)
+				query.add(literalsQuery, Occur.MUST);
+		} else if (searchFor.length() >= NGRAM_SIZE) { 
 			query.add(new NGramLuceneQuery(fieldName, searchFor), Occur.MUST);
-
+		}
+		
+		/*
 		if (pathPrefix != null && pathPrefix.length() >= NGRAM_SIZE)
 			query.add(new NGramLuceneQuery(fieldName, pathPrefix), Occur.MUST);
 
 		if (pathSuffix != null && pathSuffix.length() >= NGRAM_SIZE)
 			query.add(new NGramLuceneQuery(fieldName, pathSuffix), Occur.MUST);
+		*/
 		
-		return query;
+		if (pathPrefix != null)
+			query.add(new WildcardQuery(BLOB_PATH.term(pathPrefix + "*")), Occur.MUST);
+		if (pathSuffix != null)
+			query.add(new WildcardQuery(BLOB_PATH.term("*" + pathSuffix)), Occur.MUST);
+		
+		if (query.getClauses().length != 0)
+			return query;
+		else
+			return new WildcardQuery(BLOB_PATH.term("*"));
 	}
+	
 }

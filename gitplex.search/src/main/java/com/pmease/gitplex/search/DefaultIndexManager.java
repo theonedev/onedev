@@ -236,7 +236,7 @@ public class DefaultIndexManager implements IndexManager {
 		
 		document.add(new StoredField(BLOB_INDEX_VERSION.name(), getCurrentBlobIndexVersion(extractor)));
 		document.add(new StringField(BLOB_HASH.name(), blobId.name(), Store.NO));
-		document.add(new TextField(BLOB_PATH.name(), blobPath, Store.YES));
+		document.add(new StringField(BLOB_PATH.name(), blobPath, Store.YES));
 		
 		if (blobPath.indexOf('/') != -1) 
 			document.add(new TextField(BLOB_SYMBOLS.name(), StringUtils.substringAfterLast(blobPath, "/"), Store.NO));

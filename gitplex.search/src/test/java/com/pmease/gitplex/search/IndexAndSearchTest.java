@@ -29,8 +29,9 @@ import com.pmease.gitplex.core.manager.IndexResult;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.hit.QueryHit;
-import com.pmease.gitplex.search.query.TextQuery;
+import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
+import com.pmease.gitplex.search.query.TextQuery;
 
 public class IndexAndSearchTest extends AbstractGitTest {
 
@@ -89,16 +90,16 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		String commitHash = git.parseRevision("master", true);
 		assertEquals(2, indexManager.index(repository, commitHash).getIndexed());
 		
-		TextQuery contentQuery = new TextQuery("public", false, false, Integer.MAX_VALUE);
-		List<QueryHit> hits = searchManager.search(repository, commitHash, contentQuery);
+		BlobQuery query = new TextQuery("public", false, false, false, Integer.MAX_VALUE);
+		List<QueryHit> hits = searchManager.search(repository, commitHash, query);
 		assertEquals(4, hits.size());
 
-		SymbolQuery symbolQuery = new SymbolQuery("nam", false, false, false, Integer.MAX_VALUE);
-		hits = searchManager.search(repository, commitHash, symbolQuery);
+		query = new SymbolQuery("nam", false, false, false, Integer.MAX_VALUE);
+		hits = searchManager.search(repository, commitHash, query);
 		assertEquals(2, hits.size());
 		
-		symbolQuery = new SymbolQuery("name", true, false, false, Integer.MAX_VALUE);
-		hits = searchManager.search(repository, commitHash, symbolQuery);
+		query = new SymbolQuery("name", true, false, false, Integer.MAX_VALUE);
+		hits = searchManager.search(repository, commitHash, query);
 		assertEquals(2, hits.size());
 		
 		code = ""
@@ -111,12 +112,12 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		commitHash = git.parseRevision("master", true);
 		assertEquals(1, indexManager.index(repository, commitHash).getIndexed());
 
-		contentQuery = new TextQuery("strin", false, false, Integer.MAX_VALUE);
-		hits = searchManager.search(repository, commitHash, contentQuery);
+		query = new TextQuery("strin", false, false, false, Integer.MAX_VALUE);
+		hits = searchManager.search(repository, commitHash, query);
 		assertEquals(2, hits.size());
 		
-		symbolQuery = new SymbolQuery("Age", true, false, false, Integer.MAX_VALUE);
-		hits = searchManager.search(repository, commitHash, symbolQuery);
+		query = new SymbolQuery("Age", true, false, false, Integer.MAX_VALUE);
+		hits = searchManager.search(repository, commitHash, query);
 		assertEquals(1, hits.size());
 		
 		code = ""
@@ -174,8 +175,8 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		
 		assertEquals(2, indexManager.index(repository, commitHash).getIndexed());
 		
-		symbolQuery = new SymbolQuery("tiger", true, false, false, Integer.MAX_VALUE);
-		hits = searchManager.search(repository, commitHash, symbolQuery);
+		query = new SymbolQuery("tiger", true, false, false, Integer.MAX_VALUE);
+		hits = searchManager.search(repository, commitHash, query);
 		assertEquals(2, hits.size());
 	}
 	
@@ -184,6 +185,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		String code = ""
 				+ "public class Dog {\n"
 				+ "  public String name;\n"
+				+ "  public String nam;\n"
 				+ "}";
 		addFileAndCommit("Dog.java", code, "add dog");
 		
@@ -194,11 +196,63 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		addFileAndCommit("Cat.java", code, "add cat");
 		
 		String commitHash = git.parseRevision("master", true);
-		assertEquals(2, indexManager.index(repository, commitHash).getIndexed());
+		indexManager.index(repository, commitHash);
+
+		BlobQuery query = new TextQuery("public|}", true, false, false, Integer.MAX_VALUE);
+		List<QueryHit> hits = searchManager.search(repository, commitHash, query);
+		assertEquals(7, hits.size());
 		
-		TextQuery contentQuery = new TextQuery("public", false, false, Integer.MAX_VALUE);
-		List<QueryHit> hits = searchManager.search(repository, commitHash, contentQuery);
-		assertEquals(4, hits.size());
+		query = new TextQuery("nam", true, false, false, Integer.MAX_VALUE);
+		hits = searchManager.search(repository, commitHash, query);
+		assertEquals(3, hits.size());
+		
+		query = new TextQuery("nam", true, true, false, Integer.MAX_VALUE);
+		hits = searchManager.search(repository, commitHash, query);
+		assertEquals(1, hits.size());
+		
+		query = new SymbolQuery("\\w+", true, false, false, Integer.MAX_VALUE);
+		hits = searchManager.search(repository, commitHash, query);
+		assertEquals(5, hits.size());
+
+		query = new SymbolQuery("nam", true, false, false, Integer.MAX_VALUE);
+		hits = searchManager.search(repository, commitHash, query);
+		assertEquals(3, hits.size());
+		
+		query = new SymbolQuery("nam", true, true, false, Integer.MAX_VALUE);
+		hits = searchManager.search(repository, commitHash, query);
+		assertEquals(1, hits.size());
+	}
+	
+	@Test
+	public void testPath() throws InterruptedException {
+		String code = ""
+				+ "public class Dog {\n"
+				+ "  public String name;\n"
+				+ "}";
+		addFileAndCommit("animals/Dog.c", code, "add dog");
+		
+		code = ""
+				+ "public class Cat {\n"
+				+ "  public String name;\n"
+				+ "}";
+		addFileAndCommit("aminals/Cat.c", code, "add cat");
+		
+		code = ""
+				+ "public class Pine {\n"
+				+ "  public String name;\n"
+				+ "}";
+		addFileAndCommit("plants/Pine.java", code, "add pine");
+		
+		String commitHash = git.parseRevision("master", true);
+		indexManager.index(repository, commitHash);
+
+		BlobQuery query = new TextQuery("name", false, false, true, "plants/", null, Integer.MAX_VALUE);
+		List<QueryHit> hits = searchManager.search(repository, commitHash, query);
+		assertEquals(1, hits.size());
+		
+		query = new TextQuery("name", false, false, true, null, ".c", Integer.MAX_VALUE);
+		hits = searchManager.search(repository, commitHash, query);
+		assertEquals(2, hits.size());
 	}
 	
 	@Override

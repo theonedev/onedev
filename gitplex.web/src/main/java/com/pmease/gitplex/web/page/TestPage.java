@@ -1,5 +1,7 @@
 package com.pmease.gitplex.web.page;
 
+import java.util.List;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.Link;
@@ -9,7 +11,10 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.IndexManager;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
+import com.pmease.gitplex.search.query.BlobQuery;
+import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.web.component.search.BlobSearcher;
 
 @SuppressWarnings("serial")
@@ -48,6 +53,24 @@ public class TestPage extends BasePage {
 			
 		});
 		
+		add(new Link<Void>("testSearch") {
+
+			@Override
+			public void onClick() {
+				Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
+				SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
+				try {
+					long time = System.currentTimeMillis();
+					String commitHash = repo.git().parseRevision("master", true);
+					BlobQuery query = new TextQuery("(s.*g)+w", true, false, false, null, null, 1000);
+					List<QueryHit> hits = searchManager.search(repo, commitHash, query);
+					System.out.println(hits.size());
+					System.out.println(System.currentTimeMillis()-time);
+				} catch (InterruptedException e) {
+				}
+			}
+			
+		});
 		Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
 		String commitHash = repo.git().parseRevision("master", true);
 		add(new BlobSearcher("searcher", Model.of(repo), commitHash, false) {

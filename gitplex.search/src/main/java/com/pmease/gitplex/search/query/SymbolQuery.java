@@ -3,6 +3,7 @@ package com.pmease.gitplex.search.query;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
@@ -23,14 +24,14 @@ import com.pmease.gitplex.search.hit.SymbolHit;
 
 public class SymbolQuery extends BlobQuery {
 
-	public SymbolQuery(String searchFor, @Nullable String pathPrefix, @Nullable String pathSuffix, 
-			boolean exactMatch, boolean caseSensitive, boolean regex, int count) {
-		super(FieldConstants.BLOB_SYMBOLS.name(), pathPrefix, pathSuffix, searchFor, exactMatch, 
-				caseSensitive, regex, count);
+	public SymbolQuery(String searchFor, boolean regex, boolean exactMatch, boolean caseSensitive, 
+			@Nullable String pathPrefix, @Nullable String pathSuffix, int count) {
+		super(FieldConstants.BLOB_SYMBOLS.name(), searchFor, regex, exactMatch, 
+				caseSensitive, pathPrefix, pathSuffix, count);
 	}
 
-	public SymbolQuery(String searchFor, boolean exactMatch, boolean caseSensitive, boolean regex, int count) {
-		this(searchFor, null, null, exactMatch, caseSensitive, regex, count);
+	public SymbolQuery(String searchFor, boolean regex, boolean exactMatch, boolean caseSensitive, int count) {
+		this(searchFor, regex, exactMatch, caseSensitive, null, null, count);
 	}
 	
 	@Override
@@ -49,10 +50,27 @@ public class SymbolQuery extends BlobQuery {
 					if (charset != null) {
 						String content = new String(bytes, charset);
 						Symbol symbol = extractor.extract(content);
-						for (Symbol match: symbol.search(getSearchFor(), isWordMatch(), isCaseSensitive())) {
-							hits.add(new SymbolHit(blobPath, match));
-							if (hits.size() >= getCount())
-								break;
+						int count = getCount()-hits.size();
+						if (isRegex()) {
+							String regex = getSearchFor();
+							
+							if (isWordMatch()) {
+								if (!regex.startsWith("^"))
+									regex = "^" + regex;
+								if (!regex.endsWith("$"))
+									regex = regex + "$";
+							}
+							Pattern pattern;
+							if (isCaseSensitive())
+								pattern = Pattern.compile(regex);
+							else
+								pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+							
+							for (Symbol match: symbol.search(pattern, count))
+								hits.add(new SymbolHit(blobPath, match));
+						} else {
+							for (Symbol match: symbol.search(getSearchFor(), isWordMatch(), isCaseSensitive(), count))
+								hits.add(new SymbolHit(blobPath, match));
 						}
 					}
 				}

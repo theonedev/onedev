@@ -3,6 +3,7 @@ package com.pmease.commons.lang;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
@@ -38,7 +39,22 @@ public abstract class Symbol implements Serializable {
 		return searchables;
 	}
 	
-	public List<Symbol> search(String searchFor, boolean exactMatch, boolean caseSensitive) {
+	public List<Symbol> search(Pattern pattern, int count) {
+		List<Symbol> matches = new ArrayList<>();
+		String searchable = getSearchable();
+		if (searchable != null) {
+			if (pattern.matcher(searchable).find())
+				matches.add(this);
+		}
+		for (Symbol child: children) {
+			if (matches.size() < count)
+				matches.addAll(child.search(pattern, count-matches.size()));
+		}
+		
+		return matches;
+	}
+	
+	public List<Symbol> search(String searchFor, boolean exactMatch, boolean caseSensitive, int count) {
 		List<Symbol> matches = new ArrayList<>();
 		String searchable = getSearchable();
 		if (searchable != null) {
@@ -58,8 +74,10 @@ public abstract class Symbol implements Serializable {
 				}
 			}
 		}
-		for (Symbol child: children)
-			matches.addAll(child.search(searchFor, exactMatch, caseSensitive));
+		for (Symbol child: children) {
+			if (matches.size() < count)
+				matches.addAll(child.search(searchFor, exactMatch, caseSensitive, count-matches.size()));
+		}
 		
 		return matches;
 	}

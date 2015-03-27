@@ -190,7 +190,7 @@ public abstract class BlobSearcher extends Panel {
 						throw new RuntimeException(e);
 					}
 					
-					query = new TextQuery(input.getInput(), caseSensitive, false, MAX_QUERY_ENTRIES);
+					query = new TextQuery(input.getInput(), false, caseSensitive, false, MAX_QUERY_ENTRIES);
 					try {
 						textHits = searchManager.search(repoModel.getObject(), commitHash, query);
 					} catch (InterruptedException e) {

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
@@ -19,14 +21,14 @@ import com.pmease.gitplex.search.hit.QueryHit;
 
 public class TextQuery extends BlobQuery {
 
-	public TextQuery(String searchFor, @Nullable String pathPrefix, @Nullable String pathSuffix, 
-			boolean caseSensitive, boolean regex, int count) {
-		super(FieldConstants.BLOB_TEXT.name(), searchFor, pathPrefix, pathSuffix, false, 
-				caseSensitive, regex, count);
+	public TextQuery(String searchFor, boolean regex, boolean matchWord, boolean caseSensitive, 
+			@Nullable String pathPrefix, @Nullable String pathSuffix, int count) {
+		super(FieldConstants.BLOB_TEXT.name(), searchFor, regex, matchWord, caseSensitive, 
+				pathPrefix, pathSuffix, count);
 	}
 
-	public TextQuery(String searchFor, boolean caseSensitive, boolean regex, int count) {
-		this(searchFor, null, null, caseSensitive, regex, count);
+	public TextQuery(String searchFor, boolean regex, boolean matchWord, boolean caseSensitive, int count) {
+		this(searchFor, regex, matchWord, caseSensitive, null, null, count);
 	}
 	
 	@Override
@@ -40,30 +42,61 @@ public class TextQuery extends BlobQuery {
 				if (charset != null) {
 					String blobPath = treeWalk.getPathString();
 					String content = new String(bytes, charset);
-					String searchFor = getSearchFor();
-					if (!isCaseSensitive())
-						searchFor = searchFor.toLowerCase();
-					
-					int lineNo = 0;
-					for (String line: Splitter.on("\n").split(content)) {
-						List<TextHit.Match> matches = new ArrayList<>();
-						String normalizedLine = line;
+
+					if (isRegex()) {
+						String regex = getSearchFor();
+						if (isWordMatch()) {
+							if (!regex.startsWith("\\b"))
+								regex = "\\b" + regex;
+							if (!regex.endsWith("\\b"))
+								regex = regex + "\\b";
+						}
+						Pattern pattern;
+						if (isCaseSensitive())
+							pattern = Pattern.compile(regex);
+						else
+							pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+						int lineNo = 0;
+						for (String line: Splitter.on("\n").split(content)) {
+							List<TextHit.Match> matches = new ArrayList<>();
+							Matcher matcher = pattern.matcher(line);
+							while (matcher.find())
+								matches.add(new TextHit.Match(matcher.start(), matcher.end()));
+							
+							if (!matches.isEmpty()) {
+								TextHit hit = new TextHit(blobPath, line, lineNo, matches);
+								hits.add(hit);
+								if (hits.size() >= getCount())
+									break;
+							}
+							lineNo++;
+						}
+					} else {
+						String searchFor = getSearchFor();
 						if (!isCaseSensitive())
-							normalizedLine = line.toLowerCase();
-						int start = normalizedLine.indexOf(searchFor, 0);
-						while (start != -1) {
-							int end = start + searchFor.length();
-							matches.add(new TextHit.Match(start, end));
-							start = normalizedLine.indexOf(searchFor, end);
-						}
-						if (!matches.isEmpty()) {
-							TextHit hit = new TextHit(blobPath, line, lineNo, matches);
-							hits.add(hit);
-							if (hits.size() >= getCount())
-								break;
-						}
+							searchFor = searchFor.toLowerCase();
 						
-						lineNo++;
+						int lineNo = 0;
+						for (String line: Splitter.on("\n").split(content)) {
+							List<TextHit.Match> matches = new ArrayList<>();
+							String normalizedLine = line;
+							if (!isCaseSensitive())
+								normalizedLine = line.toLowerCase();
+							int start = normalizedLine.indexOf(searchFor, 0);
+							while (start != -1) {
+								int end = start + searchFor.length();
+								matches.add(new TextHit.Match(start, end));
+								start = normalizedLine.indexOf(searchFor, end);
+							}
+							if (!matches.isEmpty()) {
+								TextHit hit = new TextHit(blobPath, line, lineNo, matches);
+								hits.add(hit);
+								if (hits.size() >= getCount())
+									break;
+							}
+							
+							lineNo++;
+						}
 					}
 				}
 			}

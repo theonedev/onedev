@@ -4,10 +4,13 @@ import static com.pmease.gitplex.search.IndexConstants.NGRAM_SIZE;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.Query;
 
 import com.google.common.base.Strings;
 import com.pmease.gitplex.search.query.NGramLuceneQuery;
@@ -25,7 +28,8 @@ public class RegexLiterals {
 		rows = orLiterals.flattern(true);
 	}
 	
-	public BooleanQuery asLuceneQuery(String fieldName) {
+	@Nullable
+	public Query asLuceneQuery(String fieldName) {
 		BooleanQuery orQuery = new BooleanQuery();
 		for (List<LeafLiterals> row: rows) {
 			BooleanQuery andQuery = new BooleanQuery();
@@ -33,9 +37,13 @@ public class RegexLiterals {
 				if (literals.getLiteral() != null && literals.getLiteral().length()>=NGRAM_SIZE)
 					andQuery.add(new NGramLuceneQuery(fieldName, literals.getLiteral()), Occur.MUST);
 			}
-			orQuery.add(andQuery, Occur.SHOULD);
+			if (andQuery.getClauses().length != 0)
+				orQuery.add(andQuery, Occur.SHOULD);
 		}
-		return orQuery;
+		if (orQuery.getClauses().length != 0)
+			return orQuery;
+		else
+			return null;
 	}
 
 	@Override
