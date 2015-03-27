@@ -26,7 +26,7 @@ public class SymbolQuery extends BlobQuery {
 	public SymbolQuery(String searchFor, @Nullable String pathPrefix, @Nullable String pathSuffix, 
 			boolean exactMatch, boolean caseSensitive, boolean regex, int count) {
 		super(FieldConstants.BLOB_SYMBOLS.name(), pathPrefix, pathSuffix, searchFor, exactMatch, 
-				caseSensitive, regex, count, IndexConstants.NGRAM_SIZE);
+				caseSensitive, regex, count);
 	}
 
 	public SymbolQuery(String searchFor, boolean exactMatch, boolean caseSensitive, boolean regex, int count) {

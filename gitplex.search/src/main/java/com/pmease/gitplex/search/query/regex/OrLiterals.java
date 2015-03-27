@@ -18,7 +18,6 @@ public class OrLiterals extends LogicalLiterals {
 		List<List<LeafLiterals>> rows = new ArrayList<>();
 		for (Literals element: getElements())
 			rows.addAll(element.flattern(outmost));
-		// we must add trim here, otherwise, the resulting production will be increased exponentially
 		LiteralUtils.trim(rows, outmost);
 		return rows;
 	}

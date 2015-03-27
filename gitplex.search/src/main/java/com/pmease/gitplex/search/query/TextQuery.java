@@ -22,7 +22,7 @@ public class TextQuery extends BlobQuery {
 	public TextQuery(String searchFor, @Nullable String pathPrefix, @Nullable String pathSuffix, 
 			boolean caseSensitive, boolean regex, int count) {
 		super(FieldConstants.BLOB_TEXT.name(), searchFor, pathPrefix, pathSuffix, false, 
-				caseSensitive, regex, count, IndexConstants.NGRAM_SIZE);
+				caseSensitive, regex, count);
 	}
 
 	public TextQuery(String searchFor, boolean caseSensitive, boolean regex, int count) {

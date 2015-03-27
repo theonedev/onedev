@@ -73,7 +73,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 	}
 
 	@Test
-	public void test() throws InterruptedException {
+	public void testBasic() throws InterruptedException {
 		String code = ""
 				+ "public class Dog {\n"
 				+ "  public String name;\n"
@@ -177,6 +177,28 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		symbolQuery = new SymbolQuery("tiger", true, false, false, Integer.MAX_VALUE);
 		hits = searchManager.search(repository, commitHash, symbolQuery);
 		assertEquals(2, hits.size());
+	}
+	
+	@Test
+	public void testRegex() throws InterruptedException {
+		String code = ""
+				+ "public class Dog {\n"
+				+ "  public String name;\n"
+				+ "}";
+		addFileAndCommit("Dog.java", code, "add dog");
+		
+		code = ""
+				+ "public class Cat {\n"
+				+ "  public String name;\n"
+				+ "}";
+		addFileAndCommit("Cat.java", code, "add cat");
+		
+		String commitHash = git.parseRevision("master", true);
+		assertEquals(2, indexManager.index(repository, commitHash).getIndexed());
+		
+		TextQuery contentQuery = new TextQuery("public", false, false, Integer.MAX_VALUE);
+		List<QueryHit> hits = searchManager.search(repository, commitHash, contentQuery);
+		assertEquals(4, hits.size());
 	}
 	
 	@Override
