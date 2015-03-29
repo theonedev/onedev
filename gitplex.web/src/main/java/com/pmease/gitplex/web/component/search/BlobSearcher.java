@@ -41,6 +41,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
+import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.behavior.modal.ModalBehavior;
@@ -333,6 +334,57 @@ public abstract class BlobSearcher extends Panel {
 				
 				form.add(new AjaxSubmitLink("search") {
 
+					private RunTaskBehavior runTaskBehavior;
+					
+					@Override
+					protected void onInitialize() {
+						super.onInitialize();
+						
+						add(runTaskBehavior = new RunTaskBehavior() {
+							
+							@Override
+							protected void runTask(AjaxRequestTarget target) {
+								List<String> pathSuffixes = new ArrayList<>();
+								if (fileTypes != null) {
+									for (String fileType: Splitter.on(CharMatcher.anyOf(", \t")).trimResults().omitEmptyStrings().split(fileTypes)) {
+										if (fileType.startsWith("*"))
+											fileType = fileType.substring(1);
+										if (!fileType.startsWith("."))
+											fileType = "." + fileType;
+										pathSuffixes.add(fileType);
+									}
+								}
+								
+								String pathPrefix;
+								if (getCurrentDir() != null && insideCurrentDir) {
+									pathPrefix = getCurrentDir();
+									if (!pathPrefix.endsWith("/"))
+										pathPrefix = pathPrefix + "/";
+								} else {
+									pathPrefix = null;
+								}
+								
+								BlobQuery query;
+								if (searchType.equals(SEARCH_SYMBOLS)) {
+									query = new SymbolQuery(searchFor, regex, wholeWord, caseSensitive, 
+											pathPrefix, pathSuffixes, MAX_ADVANCED_QUERY_ENTRIES);
+								} else {
+									query = new TextQuery(searchFor, regex, wholeWord, caseSensitive, 
+											pathPrefix, pathSuffixes, MAX_ADVANCED_QUERY_ENTRIES);
+								}
+								
+								try {
+									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
+									List<QueryHit> hits = searchManager.search(repoModel.getObject(), getCurrentCommit(), query);
+									onCompleteAdvancedSearch(target, QueryHit.groupByPath(hits));
+								} catch (InterruptedException e) {
+									throw new RuntimeException(e);
+								}								
+							}
+							
+						});
+					}
+
 					@Override
 					protected void onError(AjaxRequestTarget target, Form<?> form) {
 						super.onError(target, form);
@@ -343,42 +395,7 @@ public abstract class BlobSearcher extends Panel {
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
 						
-						List<String> pathSuffixes = new ArrayList<>();
-						if (fileTypes != null) {
-							for (String fileType: Splitter.on(CharMatcher.anyOf(", \t")).trimResults().omitEmptyStrings().split(fileTypes)) {
-								if (fileType.startsWith("*"))
-									fileType = fileType.substring(1);
-								if (!fileType.startsWith("."))
-									fileType = "." + fileType;
-								pathSuffixes.add(fileType);
-							}
-						}
-						
-						String pathPrefix;
-						if (getCurrentDir() != null && insideCurrentDir) {
-							pathPrefix = getCurrentDir();
-							if (!pathPrefix.endsWith("/"))
-								pathPrefix = pathPrefix + "/";
-						} else {
-							pathPrefix = null;
-						}
-						
-						BlobQuery query;
-						if (searchType.equals(SEARCH_SYMBOLS)) {
-							query = new SymbolQuery(searchFor, regex, wholeWord, caseSensitive, 
-									pathPrefix, pathSuffixes, MAX_ADVANCED_QUERY_ENTRIES);
-						} else {
-							query = new TextQuery(searchFor, regex, wholeWord, caseSensitive, 
-									pathPrefix, pathSuffixes, MAX_ADVANCED_QUERY_ENTRIES);
-						}
-						
-						try {
-							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-							List<QueryHit> hits = searchManager.search(repoModel.getObject(), getCurrentCommit(), query);
-							onCompleteAdvancedSearch(target, QueryHit.groupByPath(hits));
-						} catch (InterruptedException e) {
-							throw new RuntimeException(e);
-						}
+						runTaskBehavior.requestRun(target);
 					}
 					
 				});
