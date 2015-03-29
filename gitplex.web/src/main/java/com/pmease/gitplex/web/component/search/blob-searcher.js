@@ -1,7 +1,28 @@
 gitplex.blobSearcher = {
-	init: function(inputId, dropdownId, callback) {
+	initInstantSearch: function(inputId, dropdownId, callback) {
 		var $input = $("#" + inputId);
 		var $dropdown = $("#" + dropdownId);
+		$dropdown.on("hide", function() {
+			if (!$input.is(":focus") && $input.is(":visible")) {
+				// in case user clicks advanced button while the 
+				// instant input is shown, we need to hide the 
+				// input after a timeout in order not to make 
+				// the advanced button moving to lost the click
+				setTimeout(function(){$input.hide();}, 100);
+			}
+		});
+		$input.on("blur", function() {
+			if (!$dropdown.is(":visible") && $input.is(":visible")) {
+				// in case user clicks advanced button while the 
+				// instant input is shown, we need to hide the 
+				// input after a timeout in order not to make 
+				// the advanced button moving to lost the click
+				setTimeout(function(){$input.hide();}, 100);
+			}
+		});
+		$input.bind("keydown", "esc", function() {
+			$input.hide();
+		});
 		$input.bind("keydown", "return", function() {
 			callback("return");
 		});

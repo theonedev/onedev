@@ -2,6 +2,7 @@ package com.pmease.gitplex.search.query;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -25,9 +26,9 @@ import com.pmease.gitplex.search.hit.SymbolHit;
 public class SymbolQuery extends BlobQuery {
 
 	public SymbolQuery(String searchFor, boolean regex, boolean exactMatch, boolean caseSensitive, 
-			@Nullable String pathPrefix, @Nullable String pathSuffix, int count) {
+			@Nullable String pathPrefix, Collection<String> pathSuffixes, int count) {
 		super(FieldConstants.BLOB_SYMBOLS.name(), searchFor, regex, exactMatch, 
-				caseSensitive, pathPrefix, pathSuffix, count);
+				caseSensitive, pathPrefix, pathSuffixes, count);
 	}
 
 	public SymbolQuery(String searchFor, boolean regex, boolean exactMatch, boolean caseSensitive, int count) {

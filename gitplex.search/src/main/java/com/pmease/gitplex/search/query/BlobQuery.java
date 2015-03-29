@@ -3,6 +3,7 @@ package com.pmease.gitplex.search.query;
 import static com.pmease.gitplex.search.FieldConstants.*;
 import static com.pmease.gitplex.search.IndexConstants.NGRAM_SIZE;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -32,17 +33,17 @@ public abstract class BlobQuery {
 	
 	private final String pathPrefix;
 	
-	private final String pathSuffix;
+	private final Collection<String> pathSuffixes;
 	
 	public BlobQuery(String fieldName, String searchFor, boolean regex, boolean wordMatch, boolean caseSensitive, 
-			@Nullable String pathPrefix, @Nullable String pathSuffix, int count) {
+			@Nullable String pathPrefix, @Nullable Collection<String> pathSuffixes, int count) {
 		this.fieldName = fieldName;
 		this.searchFor = searchFor;
 		this.regex = regex;
 		this.wordMatch = wordMatch;
 		this.caseSensitive = caseSensitive;
 		this.pathPrefix = pathPrefix;
-		this.pathSuffix = pathSuffix;
+		this.pathSuffixes = pathSuffixes;
 		this.count = count;
 	}
 
@@ -70,8 +71,8 @@ public abstract class BlobQuery {
 		return pathPrefix;
 	}
 
-	public String getPathSuffix() {
-		return pathSuffix;
+	public Collection<String> getPathSuffixes() {
+		return pathSuffixes;
 	}
 
 	public boolean isRegex() {
@@ -90,18 +91,14 @@ public abstract class BlobQuery {
 			query.add(new NGramLuceneQuery(fieldName, searchFor), Occur.MUST);
 		}
 		
-		/*
-		if (pathPrefix != null && pathPrefix.length() >= NGRAM_SIZE)
-			query.add(new NGramLuceneQuery(fieldName, pathPrefix), Occur.MUST);
-
-		if (pathSuffix != null && pathSuffix.length() >= NGRAM_SIZE)
-			query.add(new NGramLuceneQuery(fieldName, pathSuffix), Occur.MUST);
-		*/
-		
 		if (pathPrefix != null)
 			query.add(new WildcardQuery(BLOB_PATH.term(pathPrefix + "*")), Occur.MUST);
-		if (pathSuffix != null)
-			query.add(new WildcardQuery(BLOB_PATH.term("*" + pathSuffix)), Occur.MUST);
+		if (pathSuffixes != null && !pathSuffixes.isEmpty()) {
+			BooleanQuery suffixQuery = new BooleanQuery(true);
+			for (String suffix: pathSuffixes)
+				suffixQuery.add(new WildcardQuery(BLOB_PATH.term("*" + suffix)), Occur.SHOULD);
+			query.add(suffixQuery, Occur.MUST);
+		}
 		
 		if (query.getClauses().length != 0)
 			return query;

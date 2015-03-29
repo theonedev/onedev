@@ -9,7 +9,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.commons.git.PathUtils;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.code.tree.RepoTreePage;
@@ -47,7 +47,7 @@ public class PathsBreadcrumb extends Panel {
 			}
 		}));
 		
-		ListView<String> pathsView = new ListView<String>("paths", PathUtils.split(currentPath)) {
+		ListView<String> pathsView = new ListView<String>("paths", GitUtils.splitPath(currentPath)) {
 
 			@Override
 			protected void populateItem(ListItem<String> item) {
@@ -58,7 +58,7 @@ public class PathsBreadcrumb extends Panel {
 						RepoTreePage.class,
 						RepoTreePage.paramsOf(repoModel.getObject(), 
 													 currentRevision, 
-													 PathUtils.join(PathUtils.split(currentPath).subList(0, item.getIndex() + 1))));
+													 GitUtils.joinPath(GitUtils.splitPath(currentPath).subList(0, item.getIndex() + 1))));
 				
 				item.add(link);
 				link.add(new Label("name", path));

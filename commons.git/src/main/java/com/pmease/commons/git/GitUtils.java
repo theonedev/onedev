@@ -1,6 +1,8 @@
 package com.pmease.commons.git;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
@@ -11,6 +13,7 @@ import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.util.SystemReader;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
@@ -105,5 +108,54 @@ public class GitUtils {
 		String email = raw.substring(pos1 + 1, pos2 - 1);
 		
 		return newPersonIdent(name, email, when);
+	}
+
+	public static List<String> splitPath(@Nullable String path) {
+		List<String> pathElements = new ArrayList<>();
+		if (path != null) {
+			for (String element: Splitter.on("/").split(path)) {
+				if (element.length() != 0)
+					pathElements.add(element);
+			}
+		}
+		return pathElements;
+	}
+
+	public static @Nullable String joinPath(List<String> pathElements) {
+		List<String> nonEmptyElements = new ArrayList<>();
+		for (String element: pathElements){
+			if (element.length() != 0)
+				nonEmptyElements.add(element);
+		}
+		if (!nonEmptyElements.isEmpty()) {
+			return Joiner.on("/").join(nonEmptyElements);
+		} else {
+			return null;
+		}
+	}
+
+	public static @Nullable String normalizePath(@Nullable String path) {
+		return joinPath(splitPath(path));
+	}
+	
+	public static int comparePath(@Nullable String path1, @Nullable String path2) {
+		List<String> segments1 = GitUtils.splitPath(path1);
+		List<String> segments2 = GitUtils.splitPath(path2);
+
+		int index = 0;
+		for (String segment1: segments1) {
+			if (index<segments2.size()) {
+				int result = segment1.compareTo(segments2.get(index));
+				if (result != 0)
+					return result;
+			} else {
+				return 1;
+			}
+			index++;
+		}
+		if (index<segments2.size())
+			return -1;
+		else
+			return 0;
 	}
 }

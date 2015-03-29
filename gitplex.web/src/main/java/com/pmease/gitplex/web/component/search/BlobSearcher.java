@@ -3,6 +3,8 @@ package com.pmease.gitplex.web.component.search;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
@@ -10,11 +12,17 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.form.CheckBox;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.Radio;
+import org.apache.wicket.markup.html.form.RadioGroup;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -22,19 +30,27 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Splitter;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.commons.wicket.behavior.modal.ModalBehavior;
+import com.pmease.commons.wicket.behavior.modal.ModalPanel;
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.IndexConstants;
 import com.pmease.gitplex.search.SearchManager;
+import com.pmease.gitplex.search.hit.PathHits;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
@@ -43,13 +59,11 @@ import com.pmease.gitplex.search.query.TextQuery;
 @SuppressWarnings("serial")
 public abstract class BlobSearcher extends Panel {
 
-	private static final int MAX_QUERY_ENTRIES = 20;
+	private static final int MAX_INSTANT_QUERY_ENTRIES = 20;
+	
+	private static final int MAX_ADVANCED_QUERY_ENTRIES = 1000;
 	
 	private final IModel<Repository> repoModel;
-	
-	private final String commitHash;
-	
-	private final boolean caseSensitive;
 	
 	private TextField<String> input;
 	
@@ -63,12 +77,10 @@ public abstract class BlobSearcher extends Panel {
 	
 	private int activeHitIndex;
 	
-	public BlobSearcher(String id, IModel<Repository> repoModel, String commitHash, boolean caseSensitive) {
+	public BlobSearcher(String id, IModel<Repository> repoModel) {
 		super(id);
 		
 		this.repoModel = repoModel;
-		this.commitHash = commitHash;
-		this.caseSensitive = caseSensitive;
 	}
 
 	@Override
@@ -104,8 +116,7 @@ public abstract class BlobSearcher extends Panel {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								onSelect(target, hit);
-								dropdown.hide(target);
+								selectHit(target, hit);
 							}
 							
 						};
@@ -143,8 +154,7 @@ public abstract class BlobSearcher extends Panel {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								onSelect(target, hit);
-								dropdown.hide(target);
+								selectHit(target, hit);
 							}
 							
 						};
@@ -183,16 +193,16 @@ public abstract class BlobSearcher extends Panel {
 				if (inputValue != null && inputValue.length() >= IndexConstants.NGRAM_SIZE) {
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 
-					BlobQuery query = new SymbolQuery(input.getInput(), false, caseSensitive, false, MAX_QUERY_ENTRIES);
+					BlobQuery query = new SymbolQuery(input.getInput(), false, false, false, MAX_INSTANT_QUERY_ENTRIES);
 					try {
-						symbolHits = searchManager.search(repoModel.getObject(), commitHash, query);
+						symbolHits = searchManager.search(repoModel.getObject(), getCurrentCommit(), query);
 					} catch (InterruptedException e) {
 						throw new RuntimeException(e);
 					}
 					
-					query = new TextQuery(input.getInput(), false, caseSensitive, false, MAX_QUERY_ENTRIES);
+					query = new TextQuery(input.getInput(), false, false, false, MAX_INSTANT_QUERY_ENTRIES);
 					try {
-						textHits = searchManager.search(repoModel.getObject(), commitHash, query);
+						textHits = searchManager.search(repoModel.getObject(), getCurrentCommit(), query);
 					} catch (InterruptedException e) {
 						throw new RuntimeException(e);
 					}
@@ -218,10 +228,8 @@ public abstract class BlobSearcher extends Panel {
 				
 				if (key.equals("return")) {
 					QueryHit activeHit = getActiveHit();
-					if (activeHit != null) {
-						onSelect(target, activeHit);
-						dropdown.hide(target);
-					}
+					if (activeHit != null)
+						selectHit(target, activeHit);
 				} else if (key.equals("up")) {
 					activeHitIndex--;
 				} else if (key.equals("down")) {
@@ -240,7 +248,7 @@ public abstract class BlobSearcher extends Panel {
 						new JavaScriptResourceReference(BlobSearcher.class, "blob-searcher.js")));
 				
 				String script = String.format(
-						"gitplex.blobSearcher.init('%s', '%s', %s);", 
+						"gitplex.blobSearcher.initInstantSearch('%s', '%s', %s);", 
 						input.getMarkupId(true), dropdown.getMarkupId(true),
 						getCallbackFunction(CallbackParameter.explicit("key")));
 				
@@ -249,6 +257,147 @@ public abstract class BlobSearcher extends Panel {
 			
 		});
 		add(input);
+		
+		ModalPanel modal = new ModalPanel("modal") {
+
+			private static final String SEARCH_TEXTS = "texts";
+			
+			private static final String SEARCH_SYMBOLS = "symbols";
+			
+			private String searchFor = input.getInput();
+			
+			private boolean regex;
+			
+			private boolean wholeWord;
+			
+			private boolean caseSensitive;
+			
+			private String searchType = SEARCH_TEXTS;
+			
+			private boolean insideCurrentDir;
+			
+			private String fileTypes;
+			
+			@Override
+			protected Component newContent(String id) {
+				Fragment fragment = new Fragment(id, "advancedSearchFrag", BlobSearcher.this);
+				Form<?> form = new Form<Void>("form");
+				form.setOutputMarkupId(true);
+				fragment.add(form);
+				
+				WebMarkupContainer searchForContainer = new WebMarkupContainer("searchFor");
+				form.add(searchForContainer);
+				final TextField<String> input = new TextField<String>("input", new PropertyModel<String>(this, "searchFor"));
+				input.setRequired(true);
+				searchForContainer.add(input);
+				searchForContainer.add(new FeedbackPanel("feedback", input));
+				searchForContainer.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+
+					@Override
+					protected String load() {
+						if (input.hasErrorMessage())
+							return " has-error";
+						else
+							return "";
+					}
+					
+				}));
+				
+				form.add(new CheckBox("regex", new PropertyModel<Boolean>(this, "regex")));
+				form.add(new CheckBox("wholeWord", new PropertyModel<Boolean>(this, "wholeWord")));
+				form.add(new CheckBox("caseSensitive", new PropertyModel<Boolean>(this, "caseSensitive")));
+				
+				form.add(new RadioGroup<String>("searchType", new PropertyModel<String>(this, "searchType")) {
+
+					@Override
+					protected void onInitialize() {
+						super.onInitialize();
+						
+						add(new Radio<String>("texts", Model.of(SEARCH_TEXTS)));
+						add(new Radio<String>("symbols", Model.of(SEARCH_SYMBOLS)));
+					}
+					
+				});
+				
+				form.add(new CheckBox("insideCurrentDir", new PropertyModel<Boolean>(this, "insideCurrentDir")) {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getCurrentDir() != null);
+					}
+					
+				});
+				
+				form.add(new TextField<String>("fileTypes", new PropertyModel<String>(this, "fileTypes")));
+				
+				form.add(new AjaxSubmitLink("search") {
+
+					@Override
+					protected void onError(AjaxRequestTarget target, Form<?> form) {
+						super.onError(target, form);
+						target.add(form);
+					}
+
+					@Override
+					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+						super.onSubmit(target, form);
+						
+						List<String> pathSuffixes = new ArrayList<>();
+						if (fileTypes != null) {
+							for (String fileType: Splitter.on(CharMatcher.anyOf(", \t")).trimResults().omitEmptyStrings().split(fileTypes)) {
+								if (fileType.startsWith("*"))
+									fileType = fileType.substring(1);
+								if (!fileType.startsWith("."))
+									fileType = "." + fileType;
+								pathSuffixes.add(fileType);
+							}
+						}
+						
+						String pathPrefix;
+						if (getCurrentDir() != null && insideCurrentDir) {
+							pathPrefix = getCurrentDir();
+							if (!pathPrefix.endsWith("/"))
+								pathPrefix = pathPrefix + "/";
+						} else {
+							pathPrefix = null;
+						}
+						
+						BlobQuery query;
+						if (searchType.equals(SEARCH_SYMBOLS)) {
+							query = new SymbolQuery(searchFor, regex, wholeWord, caseSensitive, 
+									pathPrefix, pathSuffixes, MAX_ADVANCED_QUERY_ENTRIES);
+						} else {
+							query = new TextQuery(searchFor, regex, wholeWord, caseSensitive, 
+									pathPrefix, pathSuffixes, MAX_ADVANCED_QUERY_ENTRIES);
+						}
+						
+						try {
+							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
+							List<QueryHit> hits = searchManager.search(repoModel.getObject(), getCurrentCommit(), query);
+							onCompleteAdvancedSearch(target, QueryHit.groupByPath(hits));
+						} catch (InterruptedException e) {
+							throw new RuntimeException(e);
+						}
+					}
+					
+				});
+				
+				form.add(new AjaxLink<Void>("cancel") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						close(target);
+					}
+					
+				});
+				
+				return fragment;
+			}
+			
+		};
+		add(modal);
+		add(new WebMarkupContainer("advanced").add(new ModalBehavior(modal)));
 	}
 	
 	private List<QueryHit> getHits() {
@@ -284,5 +433,21 @@ public abstract class BlobSearcher extends Panel {
 		super.onDetach();
 	}
 
+	private void selectHit(AjaxRequestTarget target, QueryHit hit) {
+		target.appendJavaScript(String.format("$('#%s').hide();", input.getMarkupId(true)));
+		dropdown.hide(target);
+		onSelect(target, hit);
+	}
+	
+	protected abstract String getCurrentCommit();
+	
+	@Nullable
+	protected String getCurrentDir() {
+		return null;
+	}
+	
 	protected abstract void onSelect(AjaxRequestTarget target, QueryHit hit);
+	
+	protected abstract void onCompleteAdvancedSearch(AjaxRequestTarget target, List<PathHits> groupedHits);
+	
 }

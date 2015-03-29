@@ -23,7 +23,7 @@ import org.eclipse.jgit.lib.Constants;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.pmease.commons.git.PathUtils;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
@@ -108,8 +108,8 @@ public abstract class RepositoryPage extends AccountBasePage {
 		}
 		
 		repoModel = new RepositoryModel(repository);
-		currentRevision = PathUtils.normalize(params.get(PARAM_REVISION).toString());
-		currentPath = PathUtils.normalize(params.get(PARAM_PATH).toString());
+		currentRevision = GitUtils.normalizePath(params.get(PARAM_REVISION).toString());
+		currentPath = GitUtils.normalizePath(params.get(PARAM_PATH).toString());
 	}
 	
 	@Override

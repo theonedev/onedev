@@ -12,6 +12,7 @@ import org.apache.wicket.Component;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.pmease.commons.git.AbstractGitTest;
@@ -250,7 +251,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		List<QueryHit> hits = searchManager.search(repository, commitHash, query);
 		assertEquals(1, hits.size());
 		
-		query = new TextQuery("name", false, false, true, null, ".c", Integer.MAX_VALUE);
+		query = new TextQuery("name", false, false, true, null, Lists.newArrayList(".c"), Integer.MAX_VALUE);
 		hits = searchManager.search(repository, commitHash, query);
 		assertEquals(2, hits.size());
 	}

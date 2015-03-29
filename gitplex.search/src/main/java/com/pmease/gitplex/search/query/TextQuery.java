@@ -3,6 +3,7 @@ package com.pmease.gitplex.search.query;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,9 +23,9 @@ import com.pmease.gitplex.search.hit.QueryHit;
 public class TextQuery extends BlobQuery {
 
 	public TextQuery(String searchFor, boolean regex, boolean matchWord, boolean caseSensitive, 
-			@Nullable String pathPrefix, @Nullable String pathSuffix, int count) {
+			@Nullable String pathPrefix, @Nullable Collection<String> pathSuffixes, int count) {
 		super(FieldConstants.BLOB_TEXT.name(), searchFor, regex, matchWord, caseSensitive, 
-				pathPrefix, pathSuffix, count);
+				pathPrefix, pathSuffixes, count);
 	}
 
 	public TextQuery(String searchFor, boolean regex, boolean matchWord, boolean caseSensitive, int count) {

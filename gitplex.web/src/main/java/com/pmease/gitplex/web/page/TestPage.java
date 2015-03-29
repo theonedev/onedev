@@ -12,6 +12,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.IndexManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.SearchManager;
+import com.pmease.gitplex.search.hit.PathHits;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.TextQuery;
@@ -61,8 +62,8 @@ public class TestPage extends BasePage {
 				SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 				try {
 					long time = System.currentTimeMillis();
-					String commitHash = repo.git().parseRevision("master", true);
-					BlobQuery query = new TextQuery("(s.*g)+w", true, false, false, null, null, 1000);
+					String commitHash = repo.git().parseRevision("master~10", true);
+					BlobQuery query = new TextQuery("windows", true, false, false, null, null, 1000);
 					List<QueryHit> hits = searchManager.search(repo, commitHash, query);
 					System.out.println(hits.size());
 					System.out.println(System.currentTimeMillis()-time);
@@ -72,12 +73,27 @@ public class TestPage extends BasePage {
 			
 		});
 		Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
-		String commitHash = repo.git().parseRevision("master", true);
-		add(new BlobSearcher("searcher", Model.of(repo), commitHash, false) {
+		final String commitHash = repo.git().parseRevision("master", true);
+		add(new BlobSearcher("searcher", Model.of(repo)) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
 				System.out.println(hit.getBlobPath() + ": " + hit.getLineNo());
+			}
+
+			@Override
+			protected String getCurrentDir() {
+				return "src";
+			}
+
+			@Override
+			protected String getCurrentCommit() {
+				return commitHash;
+			}
+
+			@Override
+			protected void onCompleteAdvancedSearch(AjaxRequestTarget target, List<PathHits> groupedHits) {
+				
 			}
 			
 		});
