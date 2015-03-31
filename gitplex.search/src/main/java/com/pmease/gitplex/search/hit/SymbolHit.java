@@ -27,7 +27,7 @@ public class SymbolHit extends QueryHit {
 
 	@Override
 	public int getLineNo() {
-		return symbol.lineNo;
+		return symbol.getLineNo();
 	}
 
 }

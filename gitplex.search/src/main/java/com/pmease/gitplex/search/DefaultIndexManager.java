@@ -65,6 +65,7 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.ExtractException;
 import com.pmease.commons.lang.Extractor;
 import com.pmease.commons.lang.Extractors;
+import com.pmease.commons.lang.Symbol;
 import com.pmease.commons.util.Charsets;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.LockUtils;
@@ -253,8 +254,11 @@ public class DefaultIndexManager implements IndexManager {
 				
 				if (extractor != null) {
 					try {
-						for (String searchable: extractor.extract(content).getSearchables()) 
-							document.add(new TextField(BLOB_SYMBOLS.name(), searchable, Store.NO));
+						for (Symbol symbol: extractor.extract(content)) {
+							String name = symbol.getName();
+							if (name != null)
+								document.add(new TextField(BLOB_SYMBOLS.name(), name, Store.NO));
+						}
 					} catch (ExtractException e) {
 						logger.error("Error extracting symbols of blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
 					}

@@ -2,6 +2,7 @@ package com.pmease.commons.lang;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
@@ -10,8 +11,14 @@ import com.google.common.io.Resources;
 
 public class ExtractorTest {
 
-	protected void assertSymbol(String expected, Symbol symbol) {
-		Assert.assertEquals(StringUtils.replace(expected, "\r", "").trim(), symbol.toString().trim());
+	protected void assertSymbol(String expected, List<Symbol> symbols) {
+		StringBuilder builder = new StringBuilder();
+		for (Symbol symbol: symbols) {
+			if (symbol.getParent() == null)
+				builder.append(symbol.describe(symbols));
+		}
+		
+		Assert.assertEquals(StringUtils.replace(expected, "\r", "").trim(), builder.toString().toString().trim());
 	}
 
 	protected String readFile(String fileName) {

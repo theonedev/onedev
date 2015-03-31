@@ -3,6 +3,8 @@ package com.pmease.commons.lang.java;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 
 import com.google.common.base.Joiner;
@@ -15,12 +17,32 @@ public class TypeDef extends Symbol {
 
 	public enum Kind {CLASS, INTERFACE, ANNOTATION, ENUM};
 
-	public Kind kind;
+	private final Kind kind;
 	
-	public List<Modifier> modifiers = new ArrayList<>();
+	private final List<Modifier> modifiers;
+
+	public TypeDef(@Nullable Symbol parent, String name, int lineNo, Kind kind, List<Modifier> modifiers) {
+		super(parent, name, lineNo);
+		
+		this.kind = kind;
+		this.modifiers = modifiers;
+	}
+	
+	public Kind getKind() {
+		return kind;
+	}
+
+	public List<Modifier> getModifiers() {
+		return modifiers;
+	}
 
 	@Override
-	public String toString() {
+	public Component render(String componentId) {
+		return null;
+	}
+
+	@Override
+	public String describe(List<Symbol> symbols) {
 		StringBuilder builder = new StringBuilder();
 		for (Modifier modifier: modifiers) 
 			builder.append(modifier.name().toLowerCase()).append(" ");
@@ -29,37 +51,40 @@ public class TypeDef extends Symbol {
 			builder.append("@interface").append(" ");
 		else
 			builder.append(kind.toString().toLowerCase()).append(" ");
-		builder.append(name).append(" {\n\n");
+		builder.append(getName()).append(" {\n\n");
 		
 		List<String> enumConstants = new ArrayList<>();
-		for (Symbol child: children) {
-			if (child instanceof FieldDef) {
-				FieldDef fieldDef = (FieldDef) child;
-				if (fieldDef.type == null)  
-					enumConstants.add(fieldDef.name);
+		for (Symbol symbol: symbols) {
+			if (symbol.getParent() == this && (symbol instanceof FieldDef)) {
+				FieldDef fieldDef = (FieldDef) symbol;
+				if (fieldDef.getType() == null)  
+					enumConstants.add(fieldDef.getName());
 			}
 		}
 		if (!enumConstants.isEmpty())
 			builder.append("  ").append(Joiner.on(", ").join(enumConstants)).append(";\n\n");
 		else if (kind == Kind.ENUM)
 			builder.append("  ;\n\n");
-		for (Symbol child: children) {
-			if (child instanceof FieldDef) {
-				FieldDef fieldDef = (FieldDef) child;
-				if (fieldDef.type != null)
-					builder.append("  ").append(fieldDef).append("\n\n");
+		
+		for (Symbol symbol: symbols) {
+			if (symbol.getParent() == this && (symbol instanceof FieldDef)) {
+				FieldDef fieldDef = (FieldDef) symbol;
+				if (fieldDef.getType() != null)
+					builder.append("  ").append(fieldDef.describe(symbols)).append("\n\n");
 			}
 		}
-		for (Symbol child: children) { 
-			if (child instanceof MethodDef) {
-				MethodDef methodDef = (MethodDef) child;
-				builder.append("  ").append(methodDef).append("\n\n");
+		
+		for (Symbol symbol: symbols) { 
+			if (symbol.getParent() == this && (symbol instanceof MethodDef)) {
+				MethodDef methodDef = (MethodDef) symbol;
+				builder.append("  ").append(methodDef.describe(symbols)).append("\n\n");
 			}
 		}
-		for (Symbol child: children) {
-			if (child instanceof TypeDef) {
-				TypeDef typeDef = (TypeDef) child;
-				for (String line: Splitter.on('\n').omitEmptyStrings().split(typeDef.toString()))
+
+		for (Symbol symbol: symbols) { 
+			if (symbol.getParent() == this && (symbol instanceof TypeDef)) {
+				TypeDef typeDef = (TypeDef) symbol;
+				for (String line: Splitter.on('\n').omitEmptyStrings().split(typeDef.describe(symbols)))
 					builder.append("  ").append(line).append("\n\n");
 			}
 		}
@@ -67,10 +92,5 @@ public class TypeDef extends Symbol {
 		builder.append("}");
 		
 		return builder.toString();
-	}
-	
-	@Override
-	public Component render(String componentId) {
-		return null;
 	}
 }

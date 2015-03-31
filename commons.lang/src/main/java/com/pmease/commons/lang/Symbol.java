@@ -1,9 +1,7 @@
 package com.pmease.commons.lang;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
@@ -13,78 +11,40 @@ public abstract class Symbol implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	@Nullable
-	public Symbol parent;
+	private final Symbol parent;
 	
-	@Nullable
-	public String name;
+	private final String name;
 	
-	public int lineNo;
+	private final int lineNo;
 
-	public List<Symbol> children = new ArrayList<>();
+	public Symbol(@Nullable Symbol parent, @Nullable String name, int lineNo) {
+		this.parent = parent;
+		this.name = name;
+		this.lineNo = lineNo;
+	}
+	
+	public Symbol getParent() {
+		return parent;
+	}
 
-	protected String getSearchable() {
+	/**
+	 * Get name of this symbol.
+	 * 
+	 * @return
+	 * 			name of this symbol, or <tt>null</tt> if this symbol 
+	 * 			does not have a name
+	 */
+	@Nullable
+	public String getName() {
 		return name;
+	}
+	
+	public int getLineNo() {
+		return lineNo;
 	}
 	
 	public abstract Component render(String componentId);
 	
-	public List<String> getSearchables() {
-		List<String> searchables = new ArrayList<>();
-		String searchable = getSearchable();
-		if (searchable != null)
-			searchables.add(searchable);
-		for (Symbol child: children) 
-			searchables.addAll(child.getSearchables());
-		return searchables;
-	}
-	
-	public List<Symbol> search(Pattern pattern, int count) {
-		List<Symbol> matches = new ArrayList<>();
-		String searchable = getSearchable();
-		if (searchable != null) {
-			if (pattern.matcher(searchable).find())
-				matches.add(this);
-		}
-		for (Symbol child: children) {
-			if (matches.size() < count)
-				matches.addAll(child.search(pattern, count-matches.size()));
-		}
-		
-		return matches;
-	}
-	
-	public List<Symbol> search(String searchFor, boolean exactMatch, boolean caseSensitive, int count) {
-		List<Symbol> matches = new ArrayList<>();
-		String searchable = getSearchable();
-		if (searchable != null) {
-			if (exactMatch) {
-				if (caseSensitive) {
-					if (searchable.equals(searchFor))
-						matches.add(this);
-				} else if (searchable.toLowerCase().equals(searchFor.toLowerCase())) {
-					matches.add(this);
-				}
-			} else {
-				if (caseSensitive) {
-					if (searchable.startsWith(searchFor))
-						matches.add(this);
-				} else if (searchable.toLowerCase().startsWith(searchFor.toLowerCase())) {
-					matches.add(this);
-				}
-			}
-		}
-		for (Symbol child: children) {
-			if (matches.size() < count)
-				matches.addAll(child.search(searchFor, exactMatch, caseSensitive, count-matches.size()));
-		}
-		
-		return matches;
-	}
-
-	@Override
-	public String toString() {
-		return lineNo + ":" + name;
-	}
+	public abstract String describe(List<Symbol> symbols);
 	
 }

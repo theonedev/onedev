@@ -50,8 +50,7 @@ public class SymbolQuery extends BlobQuery {
 					Charset charset = Charsets.detectFrom(bytes);
 					if (charset != null) {
 						String content = new String(bytes, charset);
-						Symbol symbol = extractor.extract(content);
-						int count = getCount()-hits.size();
+						List<Symbol> symbols = extractor.extract(content);
 						if (isRegex()) {
 							String regex = getSearchFor();
 							
@@ -67,11 +66,42 @@ public class SymbolQuery extends BlobQuery {
 							else
 								pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
 							
-							for (Symbol match: symbol.search(pattern, count))
-								hits.add(new SymbolHit(blobPath, match));
+							for (Symbol symbol: symbols) {
+								if (hits.size() < getCount()) {
+									String name = symbol.getName();
+									if (name != null) {
+										if (pattern.matcher(name).find())
+											hits.add(new SymbolHit(blobPath, symbol));
+									}
+								} else {
+									break;
+								}
+							}
 						} else {
-							for (Symbol match: symbol.search(getSearchFor(), isWordMatch(), isCaseSensitive(), count))
-								hits.add(new SymbolHit(blobPath, match));
+							for (Symbol symbol: symbols) {
+								if (hits.size() < getCount()) {
+									String name = symbol.getName();
+									if (name != null) {
+										if (isWordMatch()) {
+											if (isCaseSensitive()) {
+												if (name.equals(searchFor))
+													hits.add(new SymbolHit(blobPath, symbol));
+											} else if (name.toLowerCase().equals(searchFor.toLowerCase())) {
+												hits.add(new SymbolHit(blobPath, symbol));
+											}
+										} else {
+											if (isCaseSensitive()) {
+												if (name.startsWith(searchFor))
+													hits.add(new SymbolHit(blobPath, symbol));
+											} else if (name.toLowerCase().startsWith(searchFor.toLowerCase())) {
+												hits.add(new SymbolHit(blobPath, symbol));
+											}
+										}
+									}
+								} else {
+									break;
+								}
+							}
 						}
 					}
 				}

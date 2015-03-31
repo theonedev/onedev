@@ -147,19 +147,22 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		when(extractors.getExtractor(anyString())).thenReturn(new Extractor() {
 
 			@Override
-			public Symbol extract(String text) throws ExtractException {
-				Symbol symbol = new Symbol() {
+			public List<Symbol> extract(String text) throws ExtractException {
+				return Lists.<Symbol>newArrayList(new Symbol(null, "tiger", 0) {
 
 					private static final long serialVersionUID = 1L;
 
 					@Override
 					public Component render(String componentId) {
-						return null;
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public String describe(List<Symbol> symbols) {
+						throw new UnsupportedOperationException();
 					}
 					
-				};
-				symbol.name = "tiger";
-				return symbol;
+				});
 			}
 
 			@Override
