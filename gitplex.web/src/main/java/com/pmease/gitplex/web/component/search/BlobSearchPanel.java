@@ -544,7 +544,7 @@ public abstract class BlobSearchPanel extends Panel {
 			SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 			List<QueryHit> hits = searchManager.search(repoModel.getObject(), getCurrentCommit(), query);
 			if (hits.size() > MAX_ADVANCED_QUERY_ENTRIES) {
-				String hasMoreMessage = "Too many results, displaying " + MAX_ADVANCED_QUERY_ENTRIES + " of them.";
+				String hasMoreMessage = "Too many matches, displaying " + MAX_ADVANCED_QUERY_ENTRIES + " of them.";
 				onCompleteAdvancedSearch(target, QueryHit.groupByBlob(hits.subList(0, MAX_ADVANCED_QUERY_ENTRIES)), hasMoreMessage);
 			} else {
 				onCompleteAdvancedSearch(target, QueryHit.groupByBlob(hits), null);

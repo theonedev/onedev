@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.basic.Label;
 
 import com.google.common.base.Preconditions;
 
@@ -32,10 +31,18 @@ public class TextHit extends QueryHit {
 		return lineNo;
 	}
 	
+	public String getLine() {
+		return line;
+	}
+	
+	public List<Range> getRanges() {
+		return ranges;
+	}
+	
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append(getBlobPath()).append(":").append(getLineNo()).append(":");
+		builder.append(getLineNo()).append(": ");
 		builder.append(line.substring(0, ranges.get(0).getStart()));
 		for (int i=0; i<ranges.size(); i++) {
 			Range range = ranges.get(i);
@@ -73,6 +80,7 @@ public class TextHit extends QueryHit {
 
 	@Override
 	public Component render(String componentId) {
-		return new Label(componentId, toString());
+		return new TextHitPanel(componentId, this);
 	}
+	
 }

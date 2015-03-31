@@ -103,7 +103,7 @@ public abstract class BlobAdvancedSearchResultPanel extends Panel {
 							@Override
 							protected String load() {
 								if (item.getModelObject().getHits().isEmpty())
-									return "fa fa-fw fa-angle-right";
+									return "fa fa-fw fa-angle-right fa-none";
 								else if (hitsContainer.isVisibilityAllowed())
 									return "fa fa-fw fa-caret-down";
 								else

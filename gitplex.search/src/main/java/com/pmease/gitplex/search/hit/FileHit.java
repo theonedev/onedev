@@ -1,7 +1,6 @@
 package com.pmease.gitplex.search.hit;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.basic.Label;
 
 public class FileHit extends QueryHit {
 
@@ -18,7 +17,7 @@ public class FileHit extends QueryHit {
 
 	@Override
 	public Component render(String componentId) {
-		return new Label(componentId, getBlobPath());
+		return new FileHitPanel(componentId, this);
 	}
 
 	@Override
