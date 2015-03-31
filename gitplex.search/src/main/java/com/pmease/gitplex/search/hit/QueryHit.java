@@ -28,30 +28,31 @@ public abstract class QueryHit implements Serializable {
 
 	public abstract Component render(String componentId);
 	
-	public static List<PathHits> groupByPath(List<QueryHit> hits) {
-		Map<String, PathHits> hitsByPath = new HashMap<>();
+	public static List<MatchedBlob> groupByBlob(List<QueryHit> hits) {
+		Map<String, MatchedBlob> hitsByBlob = new HashMap<>();
 
 		for (QueryHit hit: hits) {
-			PathHits pathHits = hitsByPath.get(hit.getBlobPath());
-			if (pathHits == null) {
-				pathHits = new PathHits(hit.getBlobPath(), new ArrayList<QueryHit>());
-				hitsByPath.put(hit.getBlobPath(), pathHits);
+			MatchedBlob blob = hitsByBlob.get(hit.getBlobPath());
+			if (blob == null) {
+				blob = new MatchedBlob(hit.getBlobPath(), new ArrayList<QueryHit>());
+				hitsByBlob.put(hit.getBlobPath(), blob);
 			}
-			pathHits.getHits().add(hit);
+			if (!(hit instanceof FileHit))
+				blob.getHits().add(hit);
 		}
 		
-		List<PathHits> groupedHits = new ArrayList<>(hitsByPath.values());
+		List<MatchedBlob> matchedBlobs = new ArrayList<>(hitsByBlob.values());
 		
-		Collections.sort(groupedHits, new Comparator<PathHits>() {
+		Collections.sort(matchedBlobs, new Comparator<MatchedBlob>() {
 
 			@Override
-			public int compare(PathHits hits1, PathHits hits2) {
+			public int compare(MatchedBlob hits1, MatchedBlob hits2) {
 				return hits1.getBlobPath().compareTo(hits2.getBlobPath());
 			}
 			
 		});
 		
-		return groupedHits;
+		return matchedBlobs;
 	}
 	
 }

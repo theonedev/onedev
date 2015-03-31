@@ -2,7 +2,7 @@ package com.pmease.gitplex.web.page.repository.code.commit.diff.renderer.text;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
-import com.pmease.gitplex.web.common.wicket.event.AjaxEvent;
+import com.pmease.commons.wicket.AjaxEvent;
 
 public class ExpandContextLines extends AjaxEvent {
 

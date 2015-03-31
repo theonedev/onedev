@@ -127,13 +127,6 @@ public class DefaultSearchManager implements SearchManager, IndexListener {
 											context.reader(), FieldConstants.BLOB_PATH.name(), false);
 									String blobPath = cachedBlobPaths.get(doc).utf8ToString();
 									
-									/*
-									if (query.getPathPrefix() != null && !blobPath.startsWith(query.getPathPrefix()))
-										return;
-									if (query.getPathSuffix() != null && !blobPath.endsWith(query.getPathSuffix()))
-										return;
-									*/
-									
 									if (!checkedBlobPaths.contains(blobPath)) {
 										TreeWalk treeWalk = TreeWalk.forPath(repo, blobPath, revTree);									
 										if (treeWalk != null) 

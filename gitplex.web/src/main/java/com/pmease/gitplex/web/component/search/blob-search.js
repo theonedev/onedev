@@ -1,4 +1,4 @@
-gitplex.blobSearcher = {
+gitplex.blobSearch = {
 	initInstantSearch: function(inputId, dropdownId, callback) {
 		var $input = $("#" + inputId);
 		var $dropdown = $("#" + dropdownId);
@@ -73,5 +73,5 @@ gitplex.blobSearcher = {
 		$dropdown.bind("keydown", "down", function() {
 			keydown();
 		});
-	}	
+	}
 };

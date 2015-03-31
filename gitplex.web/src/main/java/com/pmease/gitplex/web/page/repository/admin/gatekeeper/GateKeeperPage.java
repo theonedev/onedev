@@ -68,12 +68,12 @@ public class GateKeeperPage extends RepositoryPage {
 
 								@Override
 								protected void onCancel(AjaxRequestTarget target) {
-									close(target);
+									hide(target);
 								}
 
 								@Override
 								protected void onSave(AjaxRequestTarget target, GateKeeper gateKeeper) {
-									close(target);
+									hide(target);
 									getRepository().getGateKeepers().add(gateKeeper);
 									onGateKeeperChanged(target);
 								}

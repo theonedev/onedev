@@ -1,0 +1,20 @@
+<wicket:panel>
+	<wicket:enclosure child="hasMoreMessage">
+		<div class="blob-advanced-search-result-hasmore">
+			<i class="fa fa-warning"></i> <span wicket:id="hasMoreMessage"></span>
+		</div>
+	</wicket:enclosure>
+	<ul class="blob-advanced-search-result list-unstyled">
+		<li wicket:id="blobs" class="blob">
+			<a wicket:id="expandLink" class="expand"><i wicket:id="icon"></i></a> 
+			<i class="fa fa-file-o icon"></i>
+			<a wicket:id="pathLink" class="path"><span wicket:id="label"></span></a> 
+			<ul wicket:id="hits" class="list-unstyled">
+				<li wicket:id="hits" class="hit">
+					<span wicket:id="lineNo" class="line-no"></span>
+					<a wicket:id="lineLink"><span wicket:id="label"></span></a>
+				</li>
+			</ul>
+		</li>
+	</ul>
+</wicket:panel>

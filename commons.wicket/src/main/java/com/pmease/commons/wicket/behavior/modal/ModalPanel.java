@@ -56,7 +56,7 @@ public abstract class ModalPanel extends Panel {
 	 * @param target
 	 * 			Wicket ajax request target 
 	 */
-	public void close(AjaxRequestTarget target) {
+	public void hide(AjaxRequestTarget target) {
 		target.prependJavaScript(String.format("pmease.commons.modal.hide('%s');", getMarkupId()));
 	}
 	

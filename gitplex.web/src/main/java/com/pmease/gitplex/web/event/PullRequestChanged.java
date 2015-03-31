@@ -2,8 +2,8 @@ package com.pmease.gitplex.web.event;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
+import com.pmease.commons.wicket.AjaxEvent;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.web.common.wicket.event.AjaxEvent;
 
 public class PullRequestChanged extends AjaxEvent {
 

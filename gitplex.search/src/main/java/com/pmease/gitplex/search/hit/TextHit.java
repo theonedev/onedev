@@ -16,15 +16,15 @@ public class TextHit extends QueryHit {
 	
 	private final String line;
 	
-	private final List<Match> matches;
+	private final List<Range> ranges;
 	
-	public TextHit(String blobPath, String line, int lineNo, List<Match> matches) {
+	public TextHit(String blobPath, String line, int lineNo, List<Range> ranges) {
 		super(blobPath);
 		
-		Preconditions.checkArgument(!matches.isEmpty(), "Matches should not be empty");
+		Preconditions.checkArgument(!ranges.isEmpty(), "Ranges should not be empty");
 		this.line = line;
 		this.lineNo = lineNo;
-		this.matches = matches;
+		this.ranges = ranges;
 	}
 
 	@Override
@@ -36,19 +36,19 @@ public class TextHit extends QueryHit {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(getBlobPath()).append(":").append(getLineNo()).append(":");
-		builder.append(line.substring(0, matches.get(0).getStart()));
-		for (int i=0; i<matches.size(); i++) {
-			Match match = matches.get(i);
-			builder.append("[").append(line.substring(match.start, match.end)).append("]");
-			if (i+1<matches.size())
-				builder.append(line.substring(match.end, matches.get(i+1).start));
+		builder.append(line.substring(0, ranges.get(0).getStart()));
+		for (int i=0; i<ranges.size(); i++) {
+			Range range = ranges.get(i);
+			builder.append("[").append(line.substring(range.start, range.end)).append("]");
+			if (i+1<ranges.size())
+				builder.append(line.substring(range.end, ranges.get(i+1).start));
 			else
-				builder.append(line.substring(match.end));
+				builder.append(line.substring(range.end));
 		}
 		return builder.toString();
 	}
 
-	public static class Match implements Serializable {
+	public static class Range implements Serializable {
 		
 		private static final long serialVersionUID = 1L;
 
@@ -56,7 +56,7 @@ public class TextHit extends QueryHit {
 		
 		private final int end;
 		
-		public Match(int start, int end) {
+		public Range(int start, int end) {
 			this.start = start;
 			this.end = end;
 		}

@@ -59,10 +59,10 @@ public class TextQuery extends BlobQuery {
 							pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
 						int lineNo = 0;
 						for (String line: Splitter.on("\n").split(content)) {
-							List<TextHit.Match> matches = new ArrayList<>();
+							List<TextHit.Range> matches = new ArrayList<>();
 							Matcher matcher = pattern.matcher(line);
 							while (matcher.find())
-								matches.add(new TextHit.Match(matcher.start(), matcher.end()));
+								matches.add(new TextHit.Range(matcher.start(), matcher.end()));
 							
 							if (!matches.isEmpty()) {
 								TextHit hit = new TextHit(blobPath, line, lineNo, matches);
@@ -79,14 +79,14 @@ public class TextQuery extends BlobQuery {
 						
 						int lineNo = 0;
 						for (String line: Splitter.on("\n").split(content)) {
-							List<TextHit.Match> matches = new ArrayList<>();
+							List<TextHit.Range> matches = new ArrayList<>();
 							String normalizedLine = line;
 							if (!isCaseSensitive())
 								normalizedLine = line.toLowerCase();
 							int start = normalizedLine.indexOf(searchFor, 0);
 							while (start != -1) {
 								int end = start + searchFor.length();
-								matches.add(new TextHit.Match(start, end));
+								matches.add(new TextHit.Range(start, end));
 								start = normalizedLine.indexOf(searchFor, end);
 							}
 							if (!matches.isEmpty()) {

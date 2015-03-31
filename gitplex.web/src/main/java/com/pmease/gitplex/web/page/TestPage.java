@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.Model;
 
@@ -12,11 +13,12 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.IndexManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.SearchManager;
-import com.pmease.gitplex.search.hit.PathHits;
+import com.pmease.gitplex.search.hit.MatchedBlob;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.TextQuery;
-import com.pmease.gitplex.web.component.search.BlobSearcher;
+import com.pmease.gitplex.web.component.search.BlobSearchPanel;
+import com.pmease.gitplex.web.component.search.BlobAdvancedSearchResultPanel;
 
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
@@ -72,18 +74,16 @@ public class TestPage extends BasePage {
 			}
 			
 		});
+		
+		add(new WebMarkupContainer("searchResult").setOutputMarkupId(true));
+		
 		Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
 		final String commitHash = repo.git().parseRevision("master", true);
-		add(new BlobSearcher("searcher", Model.of(repo)) {
+		add(new BlobSearchPanel("searcher", Model.of(repo)) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
 				System.out.println(hit.getBlobPath() + ": " + hit.getLineNo());
-			}
-
-			@Override
-			protected String getCurrentDir() {
-				return "src";
 			}
 
 			@Override
@@ -92,8 +92,18 @@ public class TestPage extends BasePage {
 			}
 
 			@Override
-			protected void onCompleteAdvancedSearch(AjaxRequestTarget target, List<PathHits> groupedHits) {
-				
+			protected void onCompleteAdvancedSearch(AjaxRequestTarget target, List<MatchedBlob> blobs, String hasMoreMessage) {
+				BlobAdvancedSearchResultPanel searchResult = new BlobAdvancedSearchResultPanel("searchResult", blobs, hasMoreMessage) {
+
+					@Override
+					protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
+						System.out.println(hit.getBlobPath() + ": " + hit.getLineNo());
+					}
+					
+				};
+				searchResult.setOutputMarkupId(true);
+				getPage().get("searchResult").replaceWith(searchResult);
+				target.add(searchResult);
 			}
 			
 		});

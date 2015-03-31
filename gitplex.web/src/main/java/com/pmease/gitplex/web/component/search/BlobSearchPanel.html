@@ -1,14 +1,14 @@
 <wicket:panel>
-	<div class="blob-searcher form-inline">
-		<input wicket:id="input" placeholder="File names, symbols, contents" class="form-control input-sm"></input> 
+	<div class="blob-search form-inline">
+		<input wicket:id="instantSearchInput" placeholder="File names, symbols, contents" class="form-control input-sm"></input> 
 		<div class="btn btn-group">
 			<a title="Instant search" class="btn btn-default btn-sm" onclick="$(this).parent().prev().show().focus();"><i class="fa fa-search"></i></a>
-			<a wicket:id="advanced" title="Advanced search" class="btn btn-default btn-sm"><i class="fa fa-binoculars"></i></a>
+			<a wicket:id="advancedSearch" title="Advanced search" class="btn btn-default btn-sm"><i class="fa fa-binoculars"></i></a>
 		</div>
 	</div>		
-	<div wicket:id="dropdown" class="blob-instant-search-results"></div>
-	<div wicket:id="modal" class="blob-advanced-search"></div>
-	<wicket:fragment wicket:id="resultsFrag">
+	<div wicket:id="instantSearchResult" class="blob-instant-search-result"></div>
+	<div wicket:id="advancedSearchDlg" class="blob-advanced-search"></div>
+	<wicket:fragment wicket:id="instantSearchResultFrag">
 		<div class="symbols section">
 			<div class="title">File names and symbols</div>
 			<wicket:enclosure child="symbolHits">
@@ -16,7 +16,13 @@
 				<li wicket:id="symbolHits" class="hit"><a wicket:id="link"><span wicket:id="label"></span></a></li>
 			</ul>
 			</wicket:enclosure>
-			<div wicket:id="noSymbolHits" class="no-matches">No matches</div>
+			<wicket:enclosure child="moreSymbolHits">
+			<div class="more-matches">
+				<a wicket:id="moreSymbolHits">Show more</a>
+				<i class="fa fa-long-arrow-right"></i>
+			</div>
+			</wicket:enclosure>
+			<div wicket:id="noSymbolHits" class="no-matches"><i class="fa fa-info-circle"></i> No matches</div>
 		</div>
 		<div class="texts section">
 			<div class="title">Text occurrences</div>
@@ -25,7 +31,13 @@
 				<li wicket:id="textHits" class="hit"><a wicket:id="link"><span wicket:id="label"></span></a></li>
 			</ul>
 			</wicket:enclosure>
-			<div wicket:id="noTextHits" class="no-matches">No matches</div>
+			<wicket:enclosure child="moreTextHits">
+			<div class="more-matches">
+				<a wicket:id="moreTextHits">Show more</a>
+				<i class="fa fa-long-arrow-right"></i>
+			</div>
+			</wicket:enclosure>
+			<div wicket:id="noTextHits" class="no-matches"><i class="fa fa-info-circle"></i> No matches</div>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="advancedSearchFrag">
@@ -47,13 +59,6 @@
 				<fieldset>
 					<legend>Search Scope</legend>
 					<div>
-						<wicket:enclosure child="insideCurrentDir">
-						<div class="checkbox">
-							<label><input wicket:id="insideCurrentDir" type="checkbox"></input> Under current directory</label>
-							<p class="help-block">If checked, search will be performed recursively under current directory
-							instead of the whole repository.</p>
-						</div>
-						</wicket:enclosure>
 						<div class="form-group">
 							<label>File types (separated by comma or space)</label>
 							<input wicket:id="fileTypes" class="form-control" type="text" placeholder="File types such as *.java, *.c"></input>
