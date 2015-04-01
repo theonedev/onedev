@@ -9,6 +9,7 @@ import java.io.File;
 import java.util.List;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.request.resource.ResourceReference;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -159,6 +160,16 @@ public class IndexAndSearchTest extends AbstractGitTest {
 
 					@Override
 					public String describe(List<Symbol> symbols) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public ResourceReference getIcon() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public String getScope() {
 						throw new UnsupportedOperationException();
 					}
 					

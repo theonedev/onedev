@@ -13,12 +13,11 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.IndexManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.SearchManager;
-import com.pmease.gitplex.search.hit.MatchedBlob;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.TextQuery;
-import com.pmease.gitplex.web.component.search.BlobSearchPanel;
 import com.pmease.gitplex.web.component.search.BlobAdvancedSearchResultPanel;
+import com.pmease.gitplex.web.component.search.BlobSearchPanel;
 
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
@@ -31,7 +30,7 @@ public class TestPage extends BasePage {
 
 			@Override
 			public void onClick() {
-				Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
+				Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 2L);
 				IndexManager indexManager = GitPlex.getInstance(IndexManager.class);
 				/*
 				Date since;
@@ -77,7 +76,7 @@ public class TestPage extends BasePage {
 		
 		add(new WebMarkupContainer("searchResult").setOutputMarkupId(true));
 		
-		Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
+		Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 2L);
 		final String commitHash = repo.git().parseRevision("master", true);
 		add(new BlobSearchPanel("searcher", Model.of(repo)) {
 
@@ -92,8 +91,8 @@ public class TestPage extends BasePage {
 			}
 
 			@Override
-			protected void onCompleteAdvancedSearch(AjaxRequestTarget target, List<MatchedBlob> blobs, String hasMoreMessage) {
-				BlobAdvancedSearchResultPanel searchResult = new BlobAdvancedSearchResultPanel("searchResult", blobs, hasMoreMessage) {
+			protected void onCompleteAdvancedSearch(AjaxRequestTarget target, List<QueryHit> hits) {
+				BlobAdvancedSearchResultPanel searchResult = new BlobAdvancedSearchResultPanel("searchResult", hits) {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, QueryHit hit) {

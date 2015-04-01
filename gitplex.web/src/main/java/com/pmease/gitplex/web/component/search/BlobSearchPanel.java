@@ -1,6 +1,8 @@
 package com.pmease.gitplex.web.component.search;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.AttributeModifier;
@@ -19,15 +21,18 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.Radio;
 import org.apache.wicket.markup.html.form.RadioGroup;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -51,8 +56,8 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.IndexConstants;
 import com.pmease.gitplex.search.SearchManager;
-import com.pmease.gitplex.search.hit.MatchedBlob;
 import com.pmease.gitplex.search.hit.QueryHit;
+import com.pmease.gitplex.search.hit.SymbolHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
@@ -62,7 +67,7 @@ public abstract class BlobSearchPanel extends Panel {
 
 	private static final int MAX_INSTANT_QUERY_ENTRIES = 15;
 	
-	private static final int MAX_ADVANCED_QUERY_ENTRIES = 1000;
+	public static final int MAX_ADVANCED_QUERY_ENTRIES = 1000;
 	
 	private final IModel<Repository> repoModel;
 	
@@ -97,14 +102,11 @@ public abstract class BlobSearchPanel extends Panel {
 				instantSearchResultContainer = new Fragment(id, "instantSearchResultFrag", BlobSearchPanel.this);
 				instantSearchResultContainer.setOutputMarkupId(true);
 				
-				instantSearchResultContainer.add(new ListView<QueryHit>("symbolHits", new LoadableDetachableModel<List<QueryHit>>() {
+				instantSearchResultContainer.add(new ListView<QueryHit>("symbolHits", new AbstractReadOnlyModel<List<QueryHit>>() {
 
 					@Override
-					protected List<QueryHit> load() {
-						if (symbolHits.size() > MAX_INSTANT_QUERY_ENTRIES)
-							return symbolHits.subList(0, MAX_INSTANT_QUERY_ENTRIES);
-						else
-							return symbolHits;
+					public List<QueryHit> getObject() {
+						return symbolHits;
 					}
 					
 				}) {
@@ -118,6 +120,14 @@ public abstract class BlobSearchPanel extends Panel {
 					@Override
 					protected void populateItem(ListItem<QueryHit> item) {
 						final QueryHit hit = item.getModelObject();
+						item.add(new Image("icon", hit.getIcon()) {
+
+							@Override
+							protected boolean shouldAddAntiCacheParameter() {
+								return false;
+							}
+							
+						});
 						AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
 							@Override
@@ -128,6 +138,8 @@ public abstract class BlobSearchPanel extends Panel {
 						};
 						link.add(hit.render("label"));
 						item.add(link);
+						
+						item.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
 
 						if (item.getIndex() == activeHitIndex)
 							item.add(AttributeModifier.append("class", "active"));
@@ -146,8 +158,15 @@ public abstract class BlobSearchPanel extends Panel {
 							@Override
 							protected void runTask(AjaxRequestTarget target) {
 								SymbolQuery query = new SymbolQuery(
-										instantSearchFor, false, false, false, MAX_ADVANCED_QUERY_ENTRIES+1);
-								submitAdvancedQuery(target, query);
+										instantSearchFor, false, false, false, MAX_ADVANCED_QUERY_ENTRIES);
+								try {
+									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
+									List<QueryHit> hits = searchManager.search(repoModel.getObject(), getCurrentCommit(), query);
+									sortSymbolHits(hits);
+									onCompleteAdvancedSearch(target, hits);
+								} catch (InterruptedException e) {
+									throw new RuntimeException(e);
+								}								
 								instantSearchResultDropdown.hide(target);
 							}
 							
@@ -157,7 +176,7 @@ public abstract class BlobSearchPanel extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(symbolHits.size()>MAX_INSTANT_QUERY_ENTRIES);
+						setVisible(symbolHits.size()==MAX_INSTANT_QUERY_ENTRIES);
 					}
 
 					@Override
@@ -176,14 +195,11 @@ public abstract class BlobSearchPanel extends Panel {
 					
 				});
 				
-				instantSearchResultContainer.add(new ListView<QueryHit>("textHits", new LoadableDetachableModel<List<QueryHit>>() {
+				instantSearchResultContainer.add(new ListView<QueryHit>("textHits", new AbstractReadOnlyModel<List<QueryHit>>() {
 
 					@Override
-					protected List<QueryHit> load() {
-						if (textHits.size() > MAX_INSTANT_QUERY_ENTRIES)
-							return textHits.subList(0, MAX_INSTANT_QUERY_ENTRIES);
-						else
-							return textHits;
+					public List<QueryHit> getObject() {
+						return textHits;
 					}
 					
 				}) {
@@ -197,6 +213,14 @@ public abstract class BlobSearchPanel extends Panel {
 					@Override
 					protected void populateItem(ListItem<QueryHit> item) {
 						final QueryHit hit = item.getModelObject();
+						item.add(new Image("icon", hit.getIcon()) {
+
+							@Override
+							protected boolean shouldAddAntiCacheParameter() {
+								return false;
+							}
+							
+						});
 						AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
 							@Override
@@ -225,8 +249,14 @@ public abstract class BlobSearchPanel extends Panel {
 							@Override
 							protected void runTask(AjaxRequestTarget target) {
 								TextQuery query = new TextQuery(
-										instantSearchFor, false, false, false, MAX_ADVANCED_QUERY_ENTRIES+1);
-								submitAdvancedQuery(target, query);
+										instantSearchFor, false, false, false, MAX_ADVANCED_QUERY_ENTRIES);
+								try {
+									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
+									List<QueryHit> hits = searchManager.search(repoModel.getObject(), getCurrentCommit(), query);
+									onCompleteAdvancedSearch(target, hits);
+								} catch (InterruptedException e) {
+									throw new RuntimeException(e);
+								}								
 								instantSearchResultDropdown.hide(target);
 							}
 							
@@ -236,7 +266,7 @@ public abstract class BlobSearchPanel extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(textHits.size()>MAX_INSTANT_QUERY_ENTRIES);
+						setVisible(textHits.size()==MAX_INSTANT_QUERY_ENTRIES);
 					}
 
 					@Override
@@ -273,14 +303,16 @@ public abstract class BlobSearchPanel extends Panel {
 				if (instantSearchFor != null && instantSearchFor.length() >= IndexConstants.NGRAM_SIZE) {
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 
-					BlobQuery query = new SymbolQuery(instantSearchInput.getInput(), false, false, false, MAX_INSTANT_QUERY_ENTRIES+1);
+					BlobQuery query = new SymbolQuery(instantSearchInput.getInput(), false, false, false, MAX_INSTANT_QUERY_ENTRIES);
 					try {
 						symbolHits = searchManager.search(repoModel.getObject(), getCurrentCommit(), query);
 					} catch (InterruptedException e) {
 						throw new RuntimeException(e);
 					}
 					
-					query = new TextQuery(instantSearchInput.getInput(), false, false, false, MAX_INSTANT_QUERY_ENTRIES+1);
+					sortSymbolHits(symbolHits);
+					
+					query = new TextQuery(instantSearchInput.getInput(), false, false, false, MAX_INSTANT_QUERY_ENTRIES);
 					try {
 						textHits = searchManager.search(repoModel.getObject(), getCurrentCommit(), query);
 					} catch (InterruptedException e) {
@@ -388,8 +420,7 @@ public abstract class BlobSearchPanel extends Panel {
 	
 	protected abstract void onSelect(AjaxRequestTarget target, QueryHit hit);
 	
-	protected abstract void onCompleteAdvancedSearch(AjaxRequestTarget target, 
-			List<MatchedBlob> blobs, String hasMoreMessage);
+	protected abstract void onCompleteAdvancedSearch(AjaxRequestTarget target, List<QueryHit> blobs);
 	
 	private class AdvancedSearchDlg extends ModalPanel {
 
@@ -497,13 +528,20 @@ public abstract class BlobSearchPanel extends Panel {
 							BlobQuery query;
 							if (searchType.equals(SEARCH_SYMBOLS)) {
 								query = new SymbolQuery(searchFor, regex, wholeWord, caseSensitive, 
-										null, pathSuffixes, MAX_ADVANCED_QUERY_ENTRIES+1);
+										null, pathSuffixes, MAX_ADVANCED_QUERY_ENTRIES);
 							} else {
 								query = new TextQuery(searchFor, regex, wholeWord, caseSensitive, 
-										null, pathSuffixes, MAX_ADVANCED_QUERY_ENTRIES+1);
+										null, pathSuffixes, MAX_ADVANCED_QUERY_ENTRIES);
 							}
 							
-							submitAdvancedQuery(target, query);
+							try {
+								SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
+								List<QueryHit> hits = searchManager.search(repoModel.getObject(), getCurrentCommit(), query);
+								onCompleteAdvancedSearch(target, hits);
+							} catch (InterruptedException e) {
+								throw new RuntimeException(e);
+							}								
+							
 							hide(target);
 						}
 						
@@ -539,19 +577,29 @@ public abstract class BlobSearchPanel extends Panel {
 		
 	};
 	
-	private void submitAdvancedQuery(AjaxRequestTarget target, BlobQuery query) {
-		try {
-			SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-			List<QueryHit> hits = searchManager.search(repoModel.getObject(), getCurrentCommit(), query);
-			if (hits.size() > MAX_ADVANCED_QUERY_ENTRIES) {
-				String hasMoreMessage = "Too many matches, displaying " + MAX_ADVANCED_QUERY_ENTRIES + " of them.";
-				onCompleteAdvancedSearch(target, QueryHit.groupByBlob(hits.subList(0, MAX_ADVANCED_QUERY_ENTRIES)), hasMoreMessage);
-			} else {
-				onCompleteAdvancedSearch(target, QueryHit.groupByBlob(hits), null);
+	private void sortSymbolHits(List<QueryHit> hits) {
+		Collections.sort(hits, new Comparator<QueryHit>() {
+
+			@Override
+			public int compare(QueryHit hit1, QueryHit hit2) {
+				if (hit1 instanceof SymbolHit) {
+					if (hit2 instanceof SymbolHit) {
+						SymbolHit symbolHit1 = (SymbolHit) hit1;
+						SymbolHit symbolHit2 = (SymbolHit) hit2;
+						return symbolHit1.getSymbol().getImportance() - symbolHit2.getSymbol().getImportance();
+					} else {
+						return -1;
+					}
+				} else {
+					if (hit2 instanceof SymbolHit) {
+						return 1;
+					} else {
+						return hit1.getBlobPath().length()-hit2.getBlobPath().length();
+					}
+				}
 			}
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}								
+			
+		});
 	}
 	
 	private static class InstantSearchInputUpdated extends AjaxEvent {

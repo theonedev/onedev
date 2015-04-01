@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.request.resource.PackageResourceReference;
+import org.apache.wicket.request.resource.ResourceReference;
 
 import com.google.common.base.Preconditions;
 
@@ -82,5 +84,15 @@ public class TextHit extends QueryHit {
 	public Component render(String componentId) {
 		return new TextHitPanel(componentId, this);
 	}
-	
+
+	@Override
+	public ResourceReference getIcon() {
+		return new PackageResourceReference(FileHit.class, "bullet.png");
+	}
+
+	@Override
+	public String getScope() {
+		throw new UnsupportedOperationException();
+	}
+
 }

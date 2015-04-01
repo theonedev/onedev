@@ -160,6 +160,7 @@ public class DefaultSearchManager implements SearchManager, IndexListener {
 		}
 		if (Thread.interrupted())
 			throw new InterruptedException();
+
 		return hits;
 	}
 

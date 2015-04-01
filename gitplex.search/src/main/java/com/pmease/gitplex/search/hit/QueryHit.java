@@ -1,14 +1,11 @@
 package com.pmease.gitplex.search.hit;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.request.resource.ResourceReference;
 
 public abstract class QueryHit implements Serializable {
 	
@@ -28,31 +25,9 @@ public abstract class QueryHit implements Serializable {
 
 	public abstract Component render(String componentId);
 	
-	public static List<MatchedBlob> groupByBlob(List<QueryHit> hits) {
-		Map<String, MatchedBlob> hitsByBlob = new HashMap<>();
-
-		for (QueryHit hit: hits) {
-			MatchedBlob blob = hitsByBlob.get(hit.getBlobPath());
-			if (blob == null) {
-				blob = new MatchedBlob(hit.getBlobPath(), new ArrayList<QueryHit>());
-				hitsByBlob.put(hit.getBlobPath(), blob);
-			}
-			if (!(hit instanceof FileHit))
-				blob.getHits().add(hit);
-		}
-		
-		List<MatchedBlob> matchedBlobs = new ArrayList<>(hitsByBlob.values());
-		
-		Collections.sort(matchedBlobs, new Comparator<MatchedBlob>() {
-
-			@Override
-			public int compare(MatchedBlob hits1, MatchedBlob hits2) {
-				return hits1.getBlobPath().compareTo(hits2.getBlobPath());
-			}
-			
-		});
-		
-		return matchedBlobs;
-	}
+	@Nullable
+	public abstract String getScope();
+	
+	public abstract ResourceReference getIcon();
 	
 }

@@ -11,8 +11,14 @@
 			<a wicket:id="pathLink" class="path"><span wicket:id="label"></span></a> 
 			<ul wicket:id="hits" class="list-unstyled">
 				<li wicket:id="hits" class="hit">
+					<img wicket:id="icon"></img>
 					<span wicket:id="lineNo" class="line-no"></span>
 					<a wicket:id="lineLink"><span wicket:id="label"></span></a>
+					<wicket:enclosure child="scope">
+						<span class="scope">
+						- <span wicket:id="scope"></span> 
+						</span>
+					</wicket:enclosure>
 				</li>
 			</ul>
 		</li>

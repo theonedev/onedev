@@ -1,8 +1,11 @@
 package com.pmease.gitplex.web.component.search;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
-
-import javax.annotation.Nullable;
+import java.util.Map;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -11,6 +14,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -26,13 +30,35 @@ public abstract class BlobAdvancedSearchResultPanel extends Panel {
 
 	private final List<MatchedBlob> blobs;
 	
-	private final String hasMoreMessage;
+	private final boolean hasMore;
 	
-	public BlobAdvancedSearchResultPanel(String id, List<MatchedBlob> blobs, @Nullable String hasMoreMessage) {
+	public BlobAdvancedSearchResultPanel(String id, List<QueryHit> hits) {
 		super(id);
 		
-		this.blobs = blobs;
-		this.hasMoreMessage = hasMoreMessage;
+		hasMore = (hits.size() == BlobSearchPanel.MAX_ADVANCED_QUERY_ENTRIES);
+		
+		Map<String, MatchedBlob> hitsByBlob = new HashMap<>();
+
+		for (QueryHit hit: hits) {
+			MatchedBlob blob = hitsByBlob.get(hit.getBlobPath());
+			if (blob == null) {
+				blob = new MatchedBlob(hit.getBlobPath(), new ArrayList<QueryHit>());
+				hitsByBlob.put(hit.getBlobPath(), blob);
+			}
+			if (!(hit instanceof FileHit))
+				blob.getHits().add(hit);
+		}
+		
+		blobs = new ArrayList<>(hitsByBlob.values());
+		
+		Collections.sort(blobs, new Comparator<MatchedBlob>() {
+
+			@Override
+			public int compare(MatchedBlob hits1, MatchedBlob hits2) {
+				return hits1.getBlobPath().compareTo(hits2.getBlobPath());
+			}
+			
+		});
 	}
 
 	@Override
@@ -41,7 +67,8 @@ public abstract class BlobAdvancedSearchResultPanel extends Panel {
 		
 		setOutputMarkupId(true);
 		
-		add(new Label("hasMoreMessage", hasMoreMessage).setVisible(hasMoreMessage!=null));
+		String hasMoreMessage = "Too many matches, displaying " + BlobSearchPanel.MAX_ADVANCED_QUERY_ENTRIES + " of them";
+		add(new Label("hasMoreMessage", hasMoreMessage).setVisible(hasMore));
 		
 		add(new ListView<MatchedBlob>("blobs", blobs) {
 
@@ -64,22 +91,33 @@ public abstract class BlobAdvancedSearchResultPanel extends Panel {
 				hitsContainer.add(new ListView<QueryHit>("hits", item.getModelObject().getHits()) {
 
 					@Override
-					protected void populateItem(final ListItem<QueryHit> item) {
-						item.add(new Label("lineNo", String.valueOf(item.getModelObject().getLineNo()+1) + ":"));
+					protected void populateItem(ListItem<QueryHit> item) {
+						final QueryHit hit = item.getModelObject();
+						item.add(new Image("icon", hit.getIcon()) {
+
+							@Override
+							protected boolean shouldAddAntiCacheParameter() {
+								return false;
+							}
+							
+						});
+						item.add(new Label("lineNo", String.valueOf(hit.getLineNo()+1) + ":"));
 						item.add(new AjaxLink<Void>("lineLink") {
 
 							@Override
 							protected void onInitialize() {
 								super.onInitialize();
-								add(item.getModelObject().render("label"));
+								add(hit.render("label"));
 							}
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								onSelect(target, item.getModelObject());
+								onSelect(target, hit);
 							}
 							
 						});
+						
+						item.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
 					}
 					
 				});

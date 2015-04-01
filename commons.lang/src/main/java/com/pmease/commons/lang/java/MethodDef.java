@@ -5,10 +5,13 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.request.resource.PackageResourceReference;
+import org.apache.wicket.request.resource.ResourceReference;
 
 import com.pmease.commons.lang.Symbol;
+import com.pmease.commons.lang.java.icons.Icons;
 
-public class MethodDef extends Symbol {
+public class MethodDef extends JavaSymbol {
 
 	private static final long serialVersionUID = 1L;
 
@@ -55,7 +58,7 @@ public class MethodDef extends Symbol {
 
 	@Override
 	public Component render(String componentId) {
-		return null;
+		return new MethodDefPanel(componentId, this);
 	}
 
 	@Override
@@ -71,6 +74,20 @@ public class MethodDef extends Symbol {
 		else
 			builder.append("();");
 		return builder.toString();
+	}
+
+	@Override
+	public ResourceReference getIcon() {
+		String icon;
+		if (modifiers.contains(Modifier.PRIVATE))
+			icon = "methpri_obj.png";
+		else if (modifiers.contains(Modifier.PROTECTED))
+			icon = "methpro_obj.png";
+		else if (modifiers.contains(Modifier.PUBLIC))
+			icon = "methpub_obj.png";
+		else
+			icon = "methdef_obj.png";
+		return new PackageResourceReference(Icons.class, icon);
 	}
 	
 }

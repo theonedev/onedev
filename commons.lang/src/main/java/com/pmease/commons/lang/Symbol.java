@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.request.resource.ResourceReference;
 
 public abstract class Symbol implements Serializable {
 	
@@ -16,6 +17,8 @@ public abstract class Symbol implements Serializable {
 	private final String name;
 	
 	private final int lineNo;
+	
+	private transient Integer importance;
 
 	public Symbol(@Nullable Symbol parent, @Nullable String name, int lineNo) {
 		this.parent = parent;
@@ -45,6 +48,23 @@ public abstract class Symbol implements Serializable {
 	
 	public abstract Component render(String componentId);
 	
+	public abstract ResourceReference getIcon();
+	
 	public abstract String describe(List<Symbol> symbols);
+
+	public int getImportance() {
+		if (importance == null) {
+			importance = 0;
+			Symbol parent = this.parent;
+			while (parent != null) {
+				importance++;
+				parent = parent.parent;
+			}
+		}
+		return importance;
+	}
+	
+	@Nullable
+	public abstract String getScope();
 	
 }

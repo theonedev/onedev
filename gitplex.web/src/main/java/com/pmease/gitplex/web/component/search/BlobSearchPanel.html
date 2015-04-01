@@ -12,9 +12,19 @@
 		<div class="symbols section">
 			<div class="title">File names and symbols</div>
 			<wicket:enclosure child="symbolHits">
-			<ul class="list-unstyled">
-				<li wicket:id="symbolHits" class="hit"><a wicket:id="link"><span wicket:id="label"></span></a></li>
-			</ul>
+			<table>
+				<tr wicket:id="symbolHits" class="hit">
+					<td class="icon"><img wicket:id="icon"></img></td>
+					<td class="content">
+						<a wicket:id="link"><span wicket:id="label"></span></a>
+						<wicket:enclosure child="scope">
+							<span class="scope">
+							- <span wicket:id="scope"></span> 
+							</span>
+						</wicket:enclosure>
+					</td>
+				</tr>
+			</table>
 			</wicket:enclosure>
 			<wicket:enclosure child="moreSymbolHits">
 			<div class="more-matches">
@@ -27,9 +37,12 @@
 		<div class="texts section">
 			<div class="title">Text occurrences</div>
 			<wicket:enclosure child="textHits">
-			<ul class="list-unstyled">
-				<li wicket:id="textHits" class="hit"><a wicket:id="link"><span wicket:id="label"></span></a></li>
-			</ul>
+			<table>
+				<tr wicket:id="textHits" class="hit">
+					<td class="icon"><img wicket:id="icon"></img></td>
+					<td class="content"><a wicket:id="link"><span wicket:id="label"></span></a></td>
+				</tr>
+			</table>
 			</wicket:enclosure>
 			<wicket:enclosure child="moreTextHits">
 			<div class="more-matches">

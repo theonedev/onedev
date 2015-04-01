@@ -10,7 +10,10 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.pmease.commons.lang.ExtractException;
 import com.pmease.commons.lang.Extractor;
 import com.pmease.commons.lang.Extractors;
 import com.pmease.commons.lang.Symbol;
@@ -25,6 +28,8 @@ import com.pmease.gitplex.search.hit.SymbolHit;
 
 public class SymbolQuery extends BlobQuery {
 
+	private static final Logger logger = LoggerFactory.getLogger(SymbolQuery.class);
+	
 	public SymbolQuery(String searchFor, boolean regex, boolean exactMatch, boolean caseSensitive, 
 			@Nullable String pathPrefix, Collection<String> pathSuffixes, int count) {
 		super(FieldConstants.BLOB_SYMBOLS.name(), searchFor, regex, exactMatch, 
@@ -50,58 +55,63 @@ public class SymbolQuery extends BlobQuery {
 					Charset charset = Charsets.detectFrom(bytes);
 					if (charset != null) {
 						String content = new String(bytes, charset);
-						List<Symbol> symbols = extractor.extract(content);
-						if (isRegex()) {
-							String regex = getSearchFor();
-							
-							if (isWordMatch()) {
-								if (!regex.startsWith("^"))
-									regex = "^" + regex;
-								if (!regex.endsWith("$"))
-									regex = regex + "$";
-							}
-							Pattern pattern;
-							if (isCaseSensitive())
-								pattern = Pattern.compile(regex);
-							else
-								pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-							
-							for (Symbol symbol: symbols) {
-								if (hits.size() < getCount()) {
-									String name = symbol.getName();
-									if (name != null) {
-										if (pattern.matcher(name).find())
-											hits.add(new SymbolHit(blobPath, symbol));
-									}
-								} else {
-									break;
+						try {
+							List<Symbol> symbols = extractor.extract(content);
+							if (isRegex()) {
+								String regex = getSearchFor();
+								
+								if (isWordMatch()) {
+									if (!regex.startsWith("^"))
+										regex = "^" + regex;
+									if (!regex.endsWith("$"))
+										regex = regex + "$";
 								}
-							}
-						} else {
-							for (Symbol symbol: symbols) {
-								if (hits.size() < getCount()) {
-									String name = symbol.getName();
-									if (name != null) {
-										if (isWordMatch()) {
-											if (isCaseSensitive()) {
-												if (name.equals(searchFor))
-													hits.add(new SymbolHit(blobPath, symbol));
-											} else if (name.toLowerCase().equals(searchFor.toLowerCase())) {
+								Pattern pattern;
+								if (isCaseSensitive())
+									pattern = Pattern.compile(regex);
+								else
+									pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+								
+								for (Symbol symbol: symbols) {
+									if (hits.size() < getCount()) {
+										String name = symbol.getName();
+										if (name != null) {
+											if (pattern.matcher(name).find())
 												hits.add(new SymbolHit(blobPath, symbol));
-											}
-										} else {
-											if (isCaseSensitive()) {
-												if (name.startsWith(searchFor))
+										}
+									} else {
+										break;
+									}
+								}
+							} else {
+								for (Symbol symbol: symbols) {
+									if (hits.size() < getCount()) {
+										String name = symbol.getName();
+										if (name != null) {
+											if (isWordMatch()) {
+												if (isCaseSensitive()) {
+													if (name.equals(searchFor))
+														hits.add(new SymbolHit(blobPath, symbol));
+												} else if (name.toLowerCase().equals(searchFor.toLowerCase())) {
 													hits.add(new SymbolHit(blobPath, symbol));
-											} else if (name.toLowerCase().startsWith(searchFor.toLowerCase())) {
-												hits.add(new SymbolHit(blobPath, symbol));
+												}
+											} else {
+												if (isCaseSensitive()) {
+													if (name.startsWith(searchFor))
+														hits.add(new SymbolHit(blobPath, symbol));
+												} else if (name.toLowerCase().startsWith(searchFor.toLowerCase())) {
+													hits.add(new SymbolHit(blobPath, symbol));
+												}
 											}
 										}
+									} else {
+										break;
 									}
-								} else {
-									break;
 								}
 							}
+						} catch (ExtractException e) {
+							logger.error("Error extracting symbols from blob (hash:" 
+									+ treeWalk.getObjectId(0).getName() + ", path:" + blobPath + ")", e);
 						}
 					}
 				}

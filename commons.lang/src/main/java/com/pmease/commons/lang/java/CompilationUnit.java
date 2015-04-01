@@ -5,10 +5,11 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.request.resource.ResourceReference;
 
 import com.pmease.commons.lang.Symbol;
 
-public class CompilationUnit extends Symbol {
+public class CompilationUnit extends JavaSymbol {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -45,6 +46,16 @@ public class CompilationUnit extends Symbol {
 
 	@Override
 	public Component render(String componentId) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public ResourceReference getIcon() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String getScope() {
 		throw new UnsupportedOperationException();
 	}
 	

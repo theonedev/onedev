@@ -1,6 +1,10 @@
 package com.pmease.gitplex.search.hit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.request.resource.PackageResourceReference;
+import org.apache.wicket.request.resource.ResourceReference;
 
 public class FileHit extends QueryHit {
 
@@ -17,12 +21,29 @@ public class FileHit extends QueryHit {
 
 	@Override
 	public Component render(String componentId) {
-		return new FileHitPanel(componentId, this);
+		String fileName = getBlobPath();
+		if (fileName.contains("/")) 
+			fileName = StringUtils.substringAfterLast(fileName, "/");
+		
+		return new Label(componentId, fileName);
 	}
 
 	@Override
 	public int getLineNo() {
 		return 0;
+	}
+
+	@Override
+	public ResourceReference getIcon() {
+		return new PackageResourceReference(FileHit.class, "file.png");
+	}
+
+	@Override
+	public String getScope() {
+		if (getBlobPath().contains("/")) 
+			return StringUtils.substringBeforeLast(getBlobPath(), "/");
+		else 
+			return null;
 	}
 
 }

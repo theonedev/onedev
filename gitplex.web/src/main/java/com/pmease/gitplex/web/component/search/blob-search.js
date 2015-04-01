@@ -30,14 +30,14 @@ gitplex.blobSearch = {
 			callback("return");
 		});
 		function keyup() {
-			var $active = $dropdown.find("li.hit.active");
-			var $prev = $active.prev("li.hit");
+			var $active = $dropdown.find("tr.hit.active");
+			var $prev = $active.prev("tr.hit");
 			if ($prev.length != 0) {
 				$active.removeClass("active");
 				$prev.addClass("active");
 				callback("up");
 			} else if ($active.closest(".texts.section").length != 0) {
-				var $lastSymbolHit = $dropdown.find(".symbols.section li.hit:last-child");
+				var $lastSymbolHit = $dropdown.find(".symbols.section tr.hit:last-child");
 				if ($lastSymbolHit.length != 0) {
 					$active.removeClass("active");
 					$lastSymbolHit.addClass("active");
@@ -46,14 +46,14 @@ gitplex.blobSearch = {
 			}
 		};
 		function keydown() {
-			var $active = $dropdown.find("li.hit.active");
-			var $next = $active.next("li.hit");
+			var $active = $dropdown.find("tr.hit.active");
+			var $next = $active.next("tr.hit");
 			if ($next.length != 0) {
 				$active.removeClass("active");
 				$next.addClass("active");
 				callback("down");
 			} else if ($active.closest(".symbols.section").length != 0) {
-				var $firstTextHit = $dropdown.find(".texts.section li.hit:first-child");
+				var $firstTextHit = $dropdown.find(".texts.section tr.hit:first-child");
 				if ($firstTextHit.length != 0) {
 					$active.removeClass("active");
 					$firstTextHit.addClass("active");

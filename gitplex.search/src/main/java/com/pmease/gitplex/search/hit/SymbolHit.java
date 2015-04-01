@@ -1,6 +1,7 @@
 package com.pmease.gitplex.search.hit;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.request.resource.ResourceReference;
 
 import com.pmease.commons.lang.Symbol;
 
@@ -13,6 +14,10 @@ public class SymbolHit extends QueryHit {
 	public SymbolHit(String blobPath, Symbol symbol) {
 		super(blobPath);
 		this.symbol = symbol;
+	}
+
+	public Symbol getSymbol() {
+		return symbol;
 	}
 
 	@Override
@@ -28,6 +33,16 @@ public class SymbolHit extends QueryHit {
 	@Override
 	public int getLineNo() {
 		return symbol.getLineNo();
+	}
+
+	@Override
+	public ResourceReference getIcon() {
+		return symbol.getIcon();
+	}
+
+	@Override
+	public String getScope() {
+		return symbol.getScope();
 	}
 
 }
