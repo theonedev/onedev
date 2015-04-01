@@ -24,13 +24,13 @@
 						</wicket:enclosure>
 					</td>
 				</tr>
+				<wicket:enclosure child="moreSymbolHits">
+				<tr class="hit more-matches">
+					<td class="icon"><i class="fa fa-arrow-circle-right fa-fw"></i></td>
+					<td><a wicket:id="moreSymbolHits">Show more</a></td>
+				</tr>
+				</wicket:enclosure>
 			</table>
-			</wicket:enclosure>
-			<wicket:enclosure child="moreSymbolHits">
-			<div class="more-matches">
-				<a wicket:id="moreSymbolHits">Show more</a>
-				<i class="fa fa-long-arrow-right"></i>
-			</div>
 			</wicket:enclosure>
 			<div wicket:id="noSymbolHits" class="no-matches"><i class="fa fa-info-circle"></i> No matches</div>
 		</div>
@@ -42,13 +42,13 @@
 					<td class="icon"><img wicket:id="icon"></img></td>
 					<td class="content"><a wicket:id="link"><span wicket:id="label"></span></a></td>
 				</tr>
+				<wicket:enclosure child="moreTextHits">
+				<tr class="hit more-matches">
+					<td class="icon"><i class="fa fa-arrow-circle-right fa-fw"></i></td>
+					<td><a wicket:id="moreTextHits">Show more</a></td>
+				</tr>
+				</wicket:enclosure>
 			</table>
-			</wicket:enclosure>
-			<wicket:enclosure child="moreTextHits">
-			<div class="more-matches">
-				<a wicket:id="moreTextHits">Show more</a>
-				<i class="fa fa-long-arrow-right"></i>
-			</div>
 			</wicket:enclosure>
 			<div wicket:id="noTextHits" class="no-matches"><i class="fa fa-info-circle"></i> No matches</div>
 		</div>

@@ -41,6 +41,7 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.apache.wicket.request.resource.ResourceReference;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
@@ -82,6 +83,10 @@ public abstract class BlobSearchPanel extends Panel {
 	private List<QueryHit> symbolHits;
 	
 	private List<QueryHit> textHits;
+	
+	private RunTaskBehavior moreSymbolHitsBehavior;
+	
+	private RunTaskBehavior moreTextHitsBehavior;
 	
 	private int activeHitIndex;
 	
@@ -148,12 +153,10 @@ public abstract class BlobSearchPanel extends Panel {
 				});
 				instantSearchResultContainer.add(new AjaxLink<Void>("moreSymbolHits") {
 
-					private RunTaskBehavior runTaskBehavior;
-
 					@Override
 					protected void onInitialize() {
 						super.onInitialize();
-						add(runTaskBehavior = new RunTaskBehavior() {
+						add(moreSymbolHitsBehavior = new RunTaskBehavior() {
 							
 							@Override
 							protected void runTask(AjaxRequestTarget target) {
@@ -181,7 +184,7 @@ public abstract class BlobSearchPanel extends Panel {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						runTaskBehavior.requestRun(target);
+						moreSymbolHitsBehavior.requestRun(target);
 					}
 					
 				});
@@ -239,12 +242,10 @@ public abstract class BlobSearchPanel extends Panel {
 				});
 				instantSearchResultContainer.add(new AjaxLink<Void>("moreTextHits") {
 
-					private RunTaskBehavior runTaskBehavior;
-
 					@Override
 					protected void onInitialize() {
 						super.onInitialize();
-						add(runTaskBehavior = new RunTaskBehavior() {
+						add(moreTextHitsBehavior = new RunTaskBehavior() {
 							
 							@Override
 							protected void runTask(AjaxRequestTarget target) {
@@ -271,7 +272,7 @@ public abstract class BlobSearchPanel extends Panel {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						runTaskBehavior.requestRun(target);
+						moreTextHitsBehavior.requestRun(target);
 					}
 					
 				});
@@ -342,8 +343,14 @@ public abstract class BlobSearchPanel extends Panel {
 				
 				if (key.equals("return")) {
 					QueryHit activeHit = getActiveHit();
-					if (activeHit != null)
-						selectHit(target, activeHit);
+					if (activeHit != null) {
+						if (activeHit instanceof MoreSymbolHit) 
+							moreSymbolHitsBehavior.requestRun(target);
+						else if (activeHit instanceof MoreTextHit) 
+							moreTextHitsBehavior.requestRun(target);
+						else 
+							selectHit(target, activeHit);
+					}
 				} else if (key.equals("up")) {
 					activeHitIndex--;
 				} else if (key.equals("down")) {
@@ -377,15 +384,14 @@ public abstract class BlobSearchPanel extends Panel {
 		add(new WebMarkupContainer("advancedSearch").add(new ModalBehavior(advancedSearchDlg)));
 	}
 	
-	private List<QueryHit> getHits() {
+	private QueryHit getActiveHit() {
 		List<QueryHit> hits = new ArrayList<>();
 		hits.addAll(symbolHits);
+		if (symbolHits.size() == MAX_INSTANT_QUERY_ENTRIES)
+			hits.add(new MoreSymbolHit(null));
 		hits.addAll(textHits);
-		return hits;
-	}
-	
-	private QueryHit getActiveHit() {
-		List<QueryHit> hits = getHits();
+		if (textHits.size() == MAX_INSTANT_QUERY_ENTRIES)
+			hits.add(new MoreTextHit(null));
 		
 		if (activeHitIndex >=0 && activeHitIndex<hits.size())
 			return hits.get(activeHitIndex);
@@ -609,4 +615,61 @@ public abstract class BlobSearchPanel extends Panel {
 		}
 
 	}
+	
+	private static class MoreSymbolHit extends QueryHit {
+
+		public MoreSymbolHit(String blobPath) {
+			super(blobPath);
+		}
+
+		@Override
+		public int getLineNo() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Component render(String componentId) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public String getScope() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public ResourceReference getIcon() {
+			throw new UnsupportedOperationException();
+		}
+		
+	}
+	
+	private static class MoreTextHit extends QueryHit {
+
+		public MoreTextHit(String blobPath) {
+			super(blobPath);
+		}
+
+		@Override
+		public int getLineNo() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Component render(String componentId) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public String getScope() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public ResourceReference getIcon() {
+			throw new UnsupportedOperationException();
+		}
+		
+	}
+	
 }

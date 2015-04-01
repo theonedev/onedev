@@ -120,18 +120,20 @@ public class SymbolQuery extends BlobQuery {
 			}
 		} 
 
-		String blobName;
-		int index = blobPath.indexOf('/');
-		if (index != -1)
-			blobName = StringUtils.substringAfterLast(blobPath, "/");
-		else
-			blobName = blobPath;
-		if (!isCaseSensitive()) {
-			blobName = blobName.toLowerCase();
-			searchFor = searchFor.toLowerCase();
+		if (hits.size() < getCount()) {
+			String blobName;
+			int index = blobPath.indexOf('/');
+			if (index != -1)
+				blobName = StringUtils.substringAfterLast(blobPath, "/");
+			else
+				blobName = blobPath;
+			if (!isCaseSensitive()) {
+				blobName = blobName.toLowerCase();
+				searchFor = searchFor.toLowerCase();
+			}
+			if (blobName.startsWith(searchFor))
+				hits.add(new FileHit(blobPath));
 		}
-		if (blobName.startsWith(searchFor))
-			hits.add(new FileHit(blobPath));
 	}
 
 }

@@ -92,7 +92,7 @@ public class TextHit extends QueryHit {
 
 	@Override
 	public String getScope() {
-		throw new UnsupportedOperationException();
+		return null;
 	}
 
 }
