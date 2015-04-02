@@ -18,8 +18,6 @@ public abstract class Symbol implements Serializable {
 	
 	private final int lineNo;
 	
-	private transient Integer importance;
-
 	public Symbol(@Nullable Symbol parent, @Nullable String name, int lineNo) {
 		this.parent = parent;
 		this.name = name;
@@ -52,16 +50,15 @@ public abstract class Symbol implements Serializable {
 	
 	public abstract String describe(List<Symbol> symbols);
 
-	public int getImportance() {
-		if (importance == null) {
-			importance = 0;
-			Symbol parent = this.parent;
-			while (parent != null) {
-				importance++;
-				parent = parent.parent;
-			}
+	public int score() {
+		int relevance = 1;
+		Symbol parent = this.parent;
+		while (parent != null) {
+			if (parent.getName() != null)
+				relevance++;
+			parent = parent.parent;
 		}
-		return importance;
+		return relevance*name.length();
 	}
 	
 	@Nullable

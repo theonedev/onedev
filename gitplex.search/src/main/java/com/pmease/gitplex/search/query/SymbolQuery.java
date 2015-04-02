@@ -43,7 +43,6 @@ public class SymbolQuery extends BlobQuery {
 	@Override
 	public void collect(TreeWalk treeWalk, List<QueryHit> hits) {
 		String blobPath = treeWalk.getPathString();
-		String searchFor = getSearchFor();
 		
 		Extractor extractor = GitPlex.getInstance(Extractors.class).getExtractor(blobPath);
 		if (extractor != null) {
@@ -56,61 +55,19 @@ public class SymbolQuery extends BlobQuery {
 					if (charset != null) {
 						String content = new String(bytes, charset);
 						try {
-							List<Symbol> symbols = extractor.extract(content);
-							if (isRegex()) {
-								String regex = getSearchFor();
-								
-								if (isWordMatch()) {
-									if (!regex.startsWith("^"))
-										regex = "^" + regex;
-									if (!regex.endsWith("$"))
-										regex = regex + "$";
-								}
-								Pattern pattern;
-								if (isCaseSensitive())
-									pattern = Pattern.compile(regex);
-								else
-									pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-								
-								for (Symbol symbol: symbols) {
-									if (hits.size() < getCount()) {
-										String name = symbol.getName();
-										if (name != null) {
-											if (pattern.matcher(name).find())
-												hits.add(new SymbolHit(blobPath, symbol));
-										}
-									} else {
-										break;
+							for (Symbol symbol: extractor.extract(content)) {
+								if (hits.size() < getCount()) {
+									String name = symbol.getName();
+									if (name != null) {
+										if (matches(name))
+											hits.add(new SymbolHit(blobPath, symbol));
 									}
-								}
-							} else {
-								for (Symbol symbol: symbols) {
-									if (hits.size() < getCount()) {
-										String name = symbol.getName();
-										if (name != null) {
-											if (isWordMatch()) {
-												if (isCaseSensitive()) {
-													if (name.equals(searchFor))
-														hits.add(new SymbolHit(blobPath, symbol));
-												} else if (name.toLowerCase().equals(searchFor.toLowerCase())) {
-													hits.add(new SymbolHit(blobPath, symbol));
-												}
-											} else {
-												if (isCaseSensitive()) {
-													if (name.startsWith(searchFor))
-														hits.add(new SymbolHit(blobPath, symbol));
-												} else if (name.toLowerCase().startsWith(searchFor.toLowerCase())) {
-													hits.add(new SymbolHit(blobPath, symbol));
-												}
-											}
-										}
-									} else {
-										break;
-									}
+								} else {
+									break;
 								}
 							}
 						} catch (ExtractException e) {
-							logger.error("Error extracting symbols from blob (hash:" 
+							logger.debug("Error extracting symbols from blob (hash:" 
 									+ treeWalk.getObjectId(0).getName() + ", path:" + blobPath + ")", e);
 						}
 					}
@@ -127,13 +84,23 @@ public class SymbolQuery extends BlobQuery {
 				blobName = StringUtils.substringAfterLast(blobPath, "/");
 			else
 				blobName = blobPath;
-			if (!isCaseSensitive()) {
-				blobName = blobName.toLowerCase();
-				searchFor = searchFor.toLowerCase();
-			}
-			if (blobName.startsWith(searchFor))
+			
+			if (matches(blobName))
 				hits.add(new FileHit(blobPath));
 		}
 	}
 
+	private boolean matches(String text) {
+		Pattern pattern = getPattern();
+		String searchFor = getCasedSearchFor();
+		if (pattern != null) {
+			return pattern.matcher(text).find();
+		} else {
+			if (isWordMatch()) 
+				return getCasedText(text).equals(searchFor);
+			else 
+				return getCasedText(text).startsWith(searchFor);
+		}
+		
+	}
 }

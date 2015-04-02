@@ -35,7 +35,7 @@ public class TestPage extends BasePage {
 				/*
 				Date since;
 				try {
-					since = new SimpleDateFormat("yyyy-MM-dd").parse("2013-07-01");
+					since = new SimpleDateFormat("yyyy-MM-dd").parse("2014-01-01");
 				} catch (ParseException e) {
 					throw new RuntimeException(e);
 				}

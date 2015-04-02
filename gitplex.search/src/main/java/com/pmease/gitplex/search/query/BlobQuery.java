@@ -5,6 +5,7 @@ import static com.pmease.gitplex.search.IndexConstants.NGRAM_SIZE;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
@@ -34,6 +35,10 @@ public abstract class BlobQuery {
 	private final String pathPrefix;
 	
 	private final Collection<String> pathSuffixes;
+	
+	private transient Pattern pattern;
+	
+	private transient String casedSearchFor;
 	
 	public BlobQuery(String fieldName, String searchFor, boolean regex, boolean wordMatch, boolean caseSensitive, 
 			@Nullable String pathPrefix, @Nullable Collection<String> pathSuffixes, int count) {
@@ -104,6 +109,44 @@ public abstract class BlobQuery {
 			return query;
 		else
 			return new WildcardQuery(BLOB_PATH.term("*"));
+	}
+
+	protected Pattern getPattern() {
+		if (regex) {
+			if (pattern == null) {
+				String expression = getSearchFor();
+				if (isWordMatch()) {
+					if (!expression.startsWith("\\b"))
+						expression = "\\b" + expression;
+					if (!expression.endsWith("\\b"))
+						expression = expression + "\\b";
+				}
+				if (isCaseSensitive())
+					pattern = Pattern.compile(expression);
+				else
+					pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
+			}
+			return pattern;
+		} else {
+			return null;
+		}
+	}
+	
+	protected String getCasedSearchFor() {
+		if (casedSearchFor == null) {
+			if (caseSensitive)
+				casedSearchFor = searchFor;
+			else
+				casedSearchFor = searchFor.toLowerCase();
+		}
+		return casedSearchFor;
+	}
+	
+	protected String getCasedText(String text) {
+		if (caseSensitive)
+			return text;
+		else
+			return text.toLowerCase();
 	}
 	
 }

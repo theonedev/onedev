@@ -3,6 +3,7 @@ package com.pmease.gitplex.search.hit;
 import java.io.Serializable;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
@@ -92,7 +93,15 @@ public class TextHit extends QueryHit {
 
 	@Override
 	public String getScope() {
-		return null;
+		String fileName = getBlobPath();
+		if (fileName.contains("/")) 
+			fileName = StringUtils.substringAfterLast(fileName, "/");
+		return fileName;
+	}
+
+	@Override
+	protected int score() {
+		return line.length()/ranges.size();
 	}
 
 }

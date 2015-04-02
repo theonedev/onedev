@@ -19,7 +19,7 @@
 						<a wicket:id="link"><span wicket:id="label"></span></a>
 						<wicket:enclosure child="scope">
 							<span class="scope">
-							- <span wicket:id="scope"></span> 
+							-- <span wicket:id="scope"></span> 
 							</span>
 						</wicket:enclosure>
 					</td>
@@ -40,7 +40,14 @@
 			<table>
 				<tr wicket:id="textHits" class="hit">
 					<td class="icon"><img wicket:id="icon"></img></td>
-					<td class="content"><a wicket:id="link"><span wicket:id="label"></span></a></td>
+					<td class="content">
+						<a wicket:id="link"><span wicket:id="label"></span></a>
+						<wicket:enclosure child="scope">
+							<span class="scope">
+							-- <span wicket:id="scope"></span> 
+							</span>
+						</wicket:enclosure>
+					</td>
 				</tr>
 				<wicket:enclosure child="moreTextHits">
 				<tr class="hit more-matches">

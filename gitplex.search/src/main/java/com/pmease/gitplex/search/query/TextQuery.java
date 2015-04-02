@@ -44,19 +44,8 @@ public class TextQuery extends BlobQuery {
 					String blobPath = treeWalk.getPathString();
 					String content = new String(bytes, charset);
 
-					if (isRegex()) {
-						String regex = getSearchFor();
-						if (isWordMatch()) {
-							if (!regex.startsWith("\\b"))
-								regex = "\\b" + regex;
-							if (!regex.endsWith("\\b"))
-								regex = regex + "\\b";
-						}
-						Pattern pattern;
-						if (isCaseSensitive())
-							pattern = Pattern.compile(regex);
-						else
-							pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+					Pattern pattern = getPattern();
+					if (pattern != null) {
 						int lineNo = 0;
 						for (String line: Splitter.on("\n").split(content)) {
 							List<TextHit.Range> matches = new ArrayList<>();
@@ -73,21 +62,17 @@ public class TextQuery extends BlobQuery {
 							lineNo++;
 						}
 					} else {
-						String searchFor = getSearchFor();
-						if (!isCaseSensitive())
-							searchFor = searchFor.toLowerCase();
+						String searchFor = getCasedSearchFor();
 						
 						int lineNo = 0;
 						for (String line: Splitter.on("\n").split(content)) {
 							List<TextHit.Range> matches = new ArrayList<>();
-							String normalizedLine = line;
-							if (!isCaseSensitive())
-								normalizedLine = line.toLowerCase();
-							int start = normalizedLine.indexOf(searchFor, 0);
+							String casedLine = getCasedText(line);
+							int start = casedLine.indexOf(searchFor, 0);
 							while (start != -1) {
 								int end = start + searchFor.length();
 								matches.add(new TextHit.Range(start, end));
-								start = normalizedLine.indexOf(searchFor, end);
+								start = casedLine.indexOf(searchFor, end);
 							}
 							if (!matches.isEmpty()) {
 								TextHit hit = new TextHit(blobPath, line, lineNo, matches);

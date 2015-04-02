@@ -8,7 +8,7 @@ gitplex.blobSearch = {
 				// instant input is shown, we need to hide the 
 				// input after a timeout in order not to make 
 				// the advanced button moving to lost the click
-				setTimeout(function(){$input.hide();}, 100);
+				setTimeout(function(){$input.hide();}, 250);
 			}
 		});
 		$input.on("blur", function() {
@@ -17,7 +17,7 @@ gitplex.blobSearch = {
 				// instant input is shown, we need to hide the 
 				// input after a timeout in order not to make 
 				// the advanced button moving to lost the click
-				setTimeout(function(){$input.hide();}, 100);
+				setTimeout(function(){$input.hide();}, 250);
 			}
 		});
 		$input.bind("keydown", "esc", function() {

@@ -260,7 +260,7 @@ public class DefaultIndexManager implements IndexManager {
 								document.add(new TextField(BLOB_SYMBOLS.name(), name, Store.NO));
 						}
 					} catch (ExtractException e) {
-						logger.error("Error extracting symbols from blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
+						logger.debug("Error extracting symbols from blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
 					}
 				} 
 			} else {

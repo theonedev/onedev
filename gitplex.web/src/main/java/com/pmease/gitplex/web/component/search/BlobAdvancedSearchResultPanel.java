@@ -1,9 +1,7 @@
 package com.pmease.gitplex.web.component.search;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +22,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import com.pmease.gitplex.search.hit.FileHit;
 import com.pmease.gitplex.search.hit.MatchedBlob;
 import com.pmease.gitplex.search.hit.QueryHit;
+import com.pmease.gitplex.search.hit.TextHit;
 
 @SuppressWarnings("serial")
 public abstract class BlobAdvancedSearchResultPanel extends Panel {
@@ -37,7 +36,7 @@ public abstract class BlobAdvancedSearchResultPanel extends Panel {
 		
 		hasMore = (hits.size() == BlobSearchPanel.MAX_ADVANCED_QUERY_ENTRIES);
 		
-		Map<String, MatchedBlob> hitsByBlob = new HashMap<>();
+		Map<String, MatchedBlob> hitsByBlob = new LinkedHashMap<>();
 
 		for (QueryHit hit: hits) {
 			MatchedBlob blob = hitsByBlob.get(hit.getBlobPath());
@@ -50,15 +49,6 @@ public abstract class BlobAdvancedSearchResultPanel extends Panel {
 		}
 		
 		blobs = new ArrayList<>(hitsByBlob.values());
-		
-		Collections.sort(blobs, new Comparator<MatchedBlob>() {
-
-			@Override
-			public int compare(MatchedBlob hits1, MatchedBlob hits2) {
-				return hits1.getBlobPath().compareTo(hits2.getBlobPath());
-			}
-			
-		});
 	}
 
 	@Override
@@ -117,7 +107,8 @@ public abstract class BlobAdvancedSearchResultPanel extends Panel {
 							
 						});
 						
-						item.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
+						item.add(new Label("scope", hit.getScope())
+								.setVisible(!(hit instanceof TextHit) && hit.getScope()!=null));
 					}
 					
 				});

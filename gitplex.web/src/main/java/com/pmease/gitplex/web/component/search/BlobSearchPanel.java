@@ -1,8 +1,6 @@
 package com.pmease.gitplex.web.component.search;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.AttributeModifier;
@@ -58,7 +56,6 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.IndexConstants;
 import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
-import com.pmease.gitplex.search.hit.SymbolHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
@@ -165,7 +162,6 @@ public abstract class BlobSearchPanel extends Panel {
 								try {
 									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 									List<QueryHit> hits = searchManager.search(repoModel.getObject(), getCurrentCommit(), query);
-									sortSymbolHits(hits);
 									onCompleteAdvancedSearch(target, hits);
 								} catch (InterruptedException e) {
 									throw new RuntimeException(e);
@@ -234,6 +230,7 @@ public abstract class BlobSearchPanel extends Panel {
 						};
 						link.add(hit.render("label"));
 						item.add(link);
+						item.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
 
 						if (item.getIndex() + symbolHits.size() == activeHitIndex)
 							item.add(AttributeModifier.append("class", " active"));
@@ -310,8 +307,6 @@ public abstract class BlobSearchPanel extends Panel {
 					} catch (InterruptedException e) {
 						throw new RuntimeException(e);
 					}
-					
-					sortSymbolHits(symbolHits);
 					
 					query = new TextQuery(instantSearchInput.getInput(), false, false, false, MAX_INSTANT_QUERY_ENTRIES);
 					try {
@@ -583,31 +578,6 @@ public abstract class BlobSearchPanel extends Panel {
 		
 	};
 	
-	private void sortSymbolHits(List<QueryHit> hits) {
-		Collections.sort(hits, new Comparator<QueryHit>() {
-
-			@Override
-			public int compare(QueryHit hit1, QueryHit hit2) {
-				if (hit1 instanceof SymbolHit) {
-					if (hit2 instanceof SymbolHit) {
-						SymbolHit symbolHit1 = (SymbolHit) hit1;
-						SymbolHit symbolHit2 = (SymbolHit) hit2;
-						return symbolHit1.getSymbol().getImportance() - symbolHit2.getSymbol().getImportance();
-					} else {
-						return -1;
-					}
-				} else {
-					if (hit2 instanceof SymbolHit) {
-						return 1;
-					} else {
-						return hit1.getBlobPath().length()-hit2.getBlobPath().length();
-					}
-				}
-			}
-			
-		});
-	}
-	
 	private static class InstantSearchInputUpdated extends AjaxEvent {
 
 		public InstantSearchInputUpdated(AjaxRequestTarget target) {
@@ -641,6 +611,11 @@ public abstract class BlobSearchPanel extends Panel {
 		public ResourceReference getIcon() {
 			throw new UnsupportedOperationException();
 		}
+
+		@Override
+		protected int score() {
+			throw new UnsupportedOperationException();
+		}
 		
 	}
 	
@@ -667,6 +642,11 @@ public abstract class BlobSearchPanel extends Panel {
 
 		@Override
 		public ResourceReference getIcon() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		protected int score() {
 			throw new UnsupportedOperationException();
 		}
 		

@@ -3,6 +3,7 @@ package com.pmease.gitplex.search;
 import java.io.IOException;
 import java.nio.channels.ClosedByInterruptException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -161,6 +162,8 @@ public class DefaultSearchManager implements SearchManager, IndexListener {
 		if (Thread.interrupted())
 			throw new InterruptedException();
 
+		Collections.sort(hits);
+		
 		return hits;
 	}
 

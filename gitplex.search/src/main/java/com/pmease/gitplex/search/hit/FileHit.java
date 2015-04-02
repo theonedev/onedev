@@ -46,4 +46,12 @@ public class FileHit extends QueryHit {
 			return null;
 	}
 
+	@Override
+	protected int score() {
+		if (getBlobPath().contains("/")) 
+			return StringUtils.substringAfterLast(getBlobPath(), "/").length();
+		else 
+			return getBlobPath().length();
+	}
+
 }

@@ -45,4 +45,9 @@ public class SymbolHit extends QueryHit {
 		return symbol.getScope();
 	}
 
+	@Override
+	protected int score() {
+		return symbol.score();
+	}
+
 }
