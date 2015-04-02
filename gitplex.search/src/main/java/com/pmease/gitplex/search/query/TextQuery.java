@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.CharUtils;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
@@ -71,7 +72,24 @@ public class TextQuery extends BlobQuery {
 							int start = casedLine.indexOf(searchFor, 0);
 							while (start != -1) {
 								int end = start + searchFor.length();
-								matches.add(new TextHit.Range(start, end));
+								if (isWordMatch()) {
+									char beforeChar;
+									if (start == 0)
+										beforeChar = ' ';
+									else 
+										beforeChar = line.charAt(start-1);
+									
+									char afterChar;
+									if (end == line.length())
+										afterChar = ' ';
+									else
+										afterChar = line.charAt(end);
+									
+									if (!isWordChar(beforeChar) && !isWordChar(afterChar))
+										matches.add(new TextHit.Range(start, end));
+								} else {
+									matches.add(new TextHit.Range(start, end));
+								}
 								start = casedLine.indexOf(searchFor, end);
 							}
 							if (!matches.isEmpty()) {
@@ -91,4 +109,8 @@ public class TextQuery extends BlobQuery {
 		}
 	}
 
+	private boolean isWordChar(char ch) {
+		return CharUtils.isAsciiAlphanumeric(ch) || ch == '_';
+	}
+	
 }

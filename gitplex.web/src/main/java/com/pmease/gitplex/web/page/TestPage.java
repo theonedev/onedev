@@ -1,5 +1,8 @@
 package com.pmease.gitplex.web.page;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -8,6 +11,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.Model;
 
+import com.pmease.commons.git.Commit;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.IndexManager;
@@ -30,12 +34,11 @@ public class TestPage extends BasePage {
 
 			@Override
 			public void onClick() {
-				Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 2L);
+				Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
 				IndexManager indexManager = GitPlex.getInstance(IndexManager.class);
-				/*
 				Date since;
 				try {
-					since = new SimpleDateFormat("yyyy-MM-dd").parse("2014-01-01");
+					since = new SimpleDateFormat("yyyy-MM-dd").parse("2010-01-01");
 				} catch (ParseException e) {
 					throw new RuntimeException(e);
 				}
@@ -49,8 +52,7 @@ public class TestPage extends BasePage {
 					indexManager.index(repo, commit.getHash());			
 				}
 				System.out.println("Total Minutes: " + (System.currentTimeMillis()-time)/1000/60);
-				*/
-				indexManager.index(repo, repo.git().parseRevision("master", true));
+//				indexManager.index(repo, repo.git().parseRevision("master", true));
 			}
 			
 		});
