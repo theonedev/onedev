@@ -301,16 +301,16 @@ public abstract class BlobSearchPanel extends Panel {
 				if (instantSearchFor != null && instantSearchFor.length() >= IndexConstants.NGRAM_SIZE) {
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 
-					BlobQuery query = new SymbolQuery(instantSearchInput.getInput(), false, false, false, MAX_INSTANT_QUERY_ENTRIES);
+					BlobQuery blobQuery = new SymbolQuery(instantSearchInput.getInput(), false, false, false, MAX_INSTANT_QUERY_ENTRIES);
 					try {
-						symbolHits = searchManager.search(repoModel.getObject(), getCurrentCommit(), query);
+						symbolHits = searchManager.search(repoModel.getObject(), getCurrentCommit(), blobQuery);
 					} catch (InterruptedException e) {
 						throw new RuntimeException(e);
 					}
 					
-					query = new TextQuery(instantSearchInput.getInput(), false, false, false, MAX_INSTANT_QUERY_ENTRIES);
+					TextQuery textQuery = new TextQuery(instantSearchInput.getInput(), false, false, false, MAX_INSTANT_QUERY_ENTRIES);
 					try {
-						textHits = searchManager.search(repoModel.getObject(), getCurrentCommit(), query);
+						textHits = searchManager.search(repoModel.getObject(), getCurrentCommit(), textQuery);
 					} catch (InterruptedException e) {
 						throw new RuntimeException(e);
 					}

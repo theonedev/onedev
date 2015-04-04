@@ -48,7 +48,7 @@ public class TestPage extends BasePage {
 				System.out.println("Total commits to index: " + commits.size());
 				int count = 0;
 				for (Commit commit: commits) {
-					System.out.println(count++);
+					System.out.println("" + (count++) + ": " + commit.getCommitter().getWhen());
 					indexManager.index(repo, commit.getHash());			
 				}
 				System.out.println("Total Minutes: " + (System.currentTimeMillis()-time)/1000/60);
@@ -78,8 +78,8 @@ public class TestPage extends BasePage {
 		
 		add(new WebMarkupContainer("searchResult").setOutputMarkupId(true));
 		
-		Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 2L);
-		final String commitHash = repo.git().parseRevision("master", true);
+		Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
+		final String commitHash = repo.git().parseRevision("master~100", true);
 		add(new BlobSearchPanel("searcher", Model.of(repo)) {
 
 			@Override

@@ -191,6 +191,7 @@ public class DiffUtilsTest {
 		text2.add("this is the 3rd line");
 		text2.add("this is the 4th line");
 		
+		
 		List<DiffHunk> diffHunks = DiffUtils.diffAsHunks(text1, text2, new WordSplitter(), 100);
 		assertEquals(
 				"@@ -1,4 +1,5 @@\n" +

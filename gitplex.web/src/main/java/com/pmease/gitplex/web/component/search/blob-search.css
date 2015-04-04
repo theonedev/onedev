@@ -5,7 +5,7 @@
 .blob-search .input-group-addon {padding: 6px;}
 
 .blob-instant-search-result .section {margin-bottom: 8px;}
-.blob-instant-search-result>.content {padding: 8px; max-width: 900px; max-height: 600px; overflow: auto;}
+.blob-instant-search-result>.content {padding: 8px; min-width: 600px; max-width: 900px; max-height: 600px; overflow: auto;}
 .blob-instant-search-result a {color: #444;}
 .blob-instant-search-result .section>.title {font-weight: bold; margin-bottom: 4px;}
 .blob-instant-search-result tr.hit>td {vertical-align: top; padding: 1px 0;} 
