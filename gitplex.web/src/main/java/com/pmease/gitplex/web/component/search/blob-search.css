@@ -11,8 +11,8 @@
 .blob-instant-search-result tr.hit>td {vertical-align: top; padding: 1px 0;} 
 .blob-instant-search-result tr.hit>td.icon {width: 24px;}
 .blob-instant-search-result tr.hit.active>td {background: #E8E8E8;} 
-.blob-instant-search-result .more-matches .fa {font-size: 16px;}
-.blob-instant-search-result .more-matches {margin: 8px 0; font-style: italic;}
+.blob-instant-search-result tr.more-matches .fa {font-size: 16px;}
+.blob-instant-search-result tr.more-matches>td {padding: 8px 0; font-style: italic;}
 .blob-instant-search-result .no-matches {font-style: italic;}
 .blob-instant-search-result td.content .scope {color: #666; font-size: 12px;}
 

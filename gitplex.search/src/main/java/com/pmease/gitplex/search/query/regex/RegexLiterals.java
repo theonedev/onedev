@@ -8,9 +8,11 @@ import javax.annotation.Nullable;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.WildcardQuery;
 
 import com.google.common.base.Strings;
 import com.pmease.gitplex.search.query.NGramLuceneQuery;
@@ -29,13 +31,13 @@ public class RegexLiterals {
 	}
 	
 	@Nullable
-	public Query asLuceneQuery(String fieldName) {
+	public Query asNGramQuery(String fieldName, int gramSize) {
 		BooleanQuery orQuery = new BooleanQuery();
 		for (List<LeafLiterals> row: rows) {
 			BooleanQuery andQuery = new BooleanQuery();
 			for (LeafLiterals literals: row) {
 				if (literals.getLiteral() != null && literals.getLiteral().length()>=NGRAM_SIZE)
-					andQuery.add(new NGramLuceneQuery(fieldName, literals.getLiteral()), Occur.MUST);
+					andQuery.add(new NGramLuceneQuery(fieldName, literals.getLiteral(), gramSize), Occur.MUST);
 			}
 			if (andQuery.getClauses().length != 0)
 				orQuery.add(andQuery, Occur.SHOULD);
@@ -46,6 +48,24 @@ public class RegexLiterals {
 			return null;
 	}
 
+	@Nullable
+	public Query asWildcardQuery(String fieldName) {
+		BooleanQuery orQuery = new BooleanQuery();
+		for (List<LeafLiterals> row: rows) {
+			BooleanQuery andQuery = new BooleanQuery();
+			for (LeafLiterals literals: row) {
+				if (literals.getLiteral() != null && literals.getLiteral().length() != 0)
+					andQuery.add(new WildcardQuery(new Term(fieldName, literals.getLiteral() + "*")), Occur.MUST);
+			}
+			if (andQuery.getClauses().length != 0)
+				orQuery.add(andQuery, Occur.SHOULD);
+		}
+		if (orQuery.getClauses().length != 0)
+			return orQuery;
+		else
+			return null;
+	}
+	
 	@Override
 	public String toString() {
 		StringBuilder orBuilder = new StringBuilder();

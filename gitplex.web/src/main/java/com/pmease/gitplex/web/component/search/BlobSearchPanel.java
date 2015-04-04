@@ -43,6 +43,7 @@ import org.apache.wicket.request.resource.ResourceReference;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.pmease.commons.wicket.AjaxEvent;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
@@ -194,7 +195,17 @@ public abstract class BlobSearchPanel extends Panel {
 					
 				});
 				
-				instantSearchResultContainer.add(new ListView<QueryHit>("textHits", new AbstractReadOnlyModel<List<QueryHit>>() {
+				WebMarkupContainer textSection = new WebMarkupContainer("texts") {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(instantSearchFor != null && instantSearchFor.length() >= IndexConstants.NGRAM_SIZE);
+					}
+					
+				};
+				instantSearchResultContainer.add(textSection);
+				textSection.add(new ListView<QueryHit>("textHits", new AbstractReadOnlyModel<List<QueryHit>>() {
 
 					@Override
 					public List<QueryHit> getObject() {
@@ -237,7 +248,7 @@ public abstract class BlobSearchPanel extends Panel {
 					}
 					
 				});
-				instantSearchResultContainer.add(new AjaxLink<Void>("moreTextHits") {
+				textSection.add(new AjaxLink<Void>("moreTextHits") {
 
 					@Override
 					protected void onInitialize() {
@@ -273,7 +284,7 @@ public abstract class BlobSearchPanel extends Panel {
 					}
 					
 				});
-				instantSearchResultContainer.add(new WebMarkupContainer("noTextHits") {
+				textSection.add(new WebMarkupContainer("noTextHits") {
 
 					@Override
 					protected void onConfigure() {
@@ -298,21 +309,27 @@ public abstract class BlobSearchPanel extends Panel {
 					target.add(instantSearchResultContainer);
 				
 				instantSearchFor = instantSearchInput.getInput();
-				if (instantSearchFor != null && instantSearchFor.length() >= IndexConstants.NGRAM_SIZE) {
+				if (!Strings.isNullOrEmpty(instantSearchFor)) {
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 
-					BlobQuery blobQuery = new SymbolQuery(instantSearchInput.getInput(), false, false, false, MAX_INSTANT_QUERY_ENTRIES);
+					BlobQuery blobQuery = new SymbolQuery(instantSearchInput.getInput(), 
+							false, false, false, MAX_INSTANT_QUERY_ENTRIES);
 					try {
 						symbolHits = searchManager.search(repoModel.getObject(), getCurrentCommit(), blobQuery);
 					} catch (InterruptedException e) {
 						throw new RuntimeException(e);
 					}
-					
-					TextQuery textQuery = new TextQuery(instantSearchInput.getInput(), false, false, false, MAX_INSTANT_QUERY_ENTRIES);
-					try {
-						textHits = searchManager.search(repoModel.getObject(), getCurrentCommit(), textQuery);
-					} catch (InterruptedException e) {
-						throw new RuntimeException(e);
+
+					if (instantSearchFor.length() >= IndexConstants.NGRAM_SIZE) {
+						TextQuery textQuery = new TextQuery(instantSearchInput.getInput(), 
+								false, false, false, MAX_INSTANT_QUERY_ENTRIES);
+						try {
+							textHits = searchManager.search(repoModel.getObject(), getCurrentCommit(), textQuery);
+						} catch (InterruptedException e) {
+							throw new RuntimeException(e);
+						}
+					} else {
+						textHits = new ArrayList<>();
 					}
 					
 					instantSearchResultDropdown.show(target);

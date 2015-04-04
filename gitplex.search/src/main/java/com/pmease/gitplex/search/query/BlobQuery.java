@@ -1,7 +1,6 @@
 package com.pmease.gitplex.search.query;
 
-import static com.pmease.gitplex.search.FieldConstants.*;
-import static com.pmease.gitplex.search.IndexConstants.NGRAM_SIZE;
+import static com.pmease.gitplex.search.FieldConstants.BLOB_PATH;
 
 import java.util.Collection;
 import java.util.List;
@@ -16,7 +15,6 @@ import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.pmease.gitplex.search.hit.QueryHit;
-import com.pmease.gitplex.search.query.regex.RegexLiterals;
 
 public abstract class BlobQuery {
 
@@ -88,13 +86,9 @@ public abstract class BlobQuery {
 
 	public Query asLuceneQuery() {
 		BooleanQuery query = new BooleanQuery(true);
-		if (regex) {
-			Query literalsQuery = new RegexLiterals(searchFor).asLuceneQuery(fieldName);
-			if (literalsQuery != null)
-				query.add(literalsQuery, Occur.MUST);
-		} else if (searchFor.length() >= NGRAM_SIZE) { 
-			query.add(new NGramLuceneQuery(fieldName, searchFor), Occur.MUST);
-		}
+		Query searchForQuery = getLuceneQueryOfSearchFor();
+		if (searchForQuery != null)
+			query.add(searchForQuery, Occur.MUST);
 		
 		if (pathPrefix != null)
 			query.add(new WildcardQuery(BLOB_PATH.term(pathPrefix + "*")), Occur.MUST);
@@ -111,6 +105,9 @@ public abstract class BlobQuery {
 			return new WildcardQuery(BLOB_PATH.term("*"));
 	}
 
+	@Nullable
+	protected abstract Query getLuceneQueryOfSearchFor();
+	
 	protected Pattern getPattern() {
 		if (regex) {
 			if (pattern == null) {

@@ -26,7 +26,7 @@
 				</tr>
 				<wicket:enclosure child="moreSymbolHits">
 				<tr class="hit more-matches">
-					<td class="icon"><i class="fa fa-arrow-circle-right fa-fw"></i></td>
+					<td class="icon"><i class="fa fa-arrow-circle-right"></i></td>
 					<td><a wicket:id="moreSymbolHits">Show more</a></td>
 				</tr>
 				</wicket:enclosure>
@@ -34,7 +34,7 @@
 			</wicket:enclosure>
 			<div wicket:id="noSymbolHits" class="no-matches"><i class="fa fa-info-circle"></i> No matches</div>
 		</div>
-		<div class="texts section">
+		<div wicket:id="texts" class="texts section">
 			<div class="title">Text occurrences</div>
 			<wicket:enclosure child="textHits">
 			<table>

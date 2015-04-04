@@ -8,6 +8,9 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.slf4j.Logger;
@@ -25,6 +28,7 @@ import com.pmease.gitplex.search.IndexConstants;
 import com.pmease.gitplex.search.hit.FileHit;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.SymbolHit;
+import com.pmease.gitplex.search.query.regex.RegexLiterals;
 
 public class SymbolQuery extends BlobQuery {
 
@@ -103,4 +107,15 @@ public class SymbolQuery extends BlobQuery {
 		}
 		
 	}
+
+	@Override
+	protected Query getLuceneQueryOfSearchFor() {
+		if (isRegex()) 
+			return new RegexLiterals(getSearchFor()).asWildcardQuery(getFieldName());
+		else if (getSearchFor().length() != 0) 
+			return new WildcardQuery(new Term(getFieldName(), getSearchFor() + "*"));
+		else
+			return null;
+	}
+	
 }

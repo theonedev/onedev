@@ -240,9 +240,9 @@ public class DefaultIndexManager implements IndexManager {
 		document.add(new StringField(BLOB_PATH.name(), blobPath, Store.YES));
 		
 		if (blobPath.indexOf('/') != -1) 
-			document.add(new TextField(BLOB_SYMBOLS.name(), StringUtils.substringAfterLast(blobPath, "/"), Store.NO));
+			document.add(new StringField(BLOB_SYMBOLS.name(), StringUtils.substringAfterLast(blobPath, "/"), Store.NO));
 		else
-			document.add(new TextField(BLOB_SYMBOLS.name(), blobPath, Store.NO));
+			document.add(new StringField(BLOB_SYMBOLS.name(), blobPath, Store.NO));
 		
 		ObjectLoader objectLoader = repo.open(blobId);
 		if (objectLoader.getSize() <= MAX_INDEXABLE_SIZE) {
@@ -257,7 +257,7 @@ public class DefaultIndexManager implements IndexManager {
 						for (Symbol symbol: extractor.extract(content)) {
 							String name = symbol.getName();
 							if (name != null)
-								document.add(new TextField(BLOB_SYMBOLS.name(), name, Store.NO));
+								document.add(new StringField(BLOB_SYMBOLS.name(), name, Store.NO));
 						}
 					} catch (ExtractException e) {
 						logger.debug("Error extracting symbols from blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);

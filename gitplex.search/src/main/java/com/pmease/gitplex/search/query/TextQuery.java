@@ -1,5 +1,7 @@
 package com.pmease.gitplex.search.query;
 
+import static com.pmease.gitplex.search.IndexConstants.NGRAM_SIZE;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -11,6 +13,7 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.CharUtils;
+import org.apache.lucene.search.Query;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
@@ -18,8 +21,9 @@ import com.google.common.base.Splitter;
 import com.pmease.commons.util.Charsets;
 import com.pmease.gitplex.search.FieldConstants;
 import com.pmease.gitplex.search.IndexConstants;
-import com.pmease.gitplex.search.hit.TextHit;
 import com.pmease.gitplex.search.hit.QueryHit;
+import com.pmease.gitplex.search.hit.TextHit;
+import com.pmease.gitplex.search.query.regex.RegexLiterals;
 
 public class TextQuery extends BlobQuery {
 
@@ -111,6 +115,16 @@ public class TextQuery extends BlobQuery {
 
 	private boolean isWordChar(char ch) {
 		return CharUtils.isAsciiAlphanumeric(ch) || ch == '_';
+	}
+
+	@Override
+	protected Query getLuceneQueryOfSearchFor() {
+		if (isRegex()) 
+			return new RegexLiterals(getSearchFor()).asNGramQuery(getFieldName(), NGRAM_SIZE);
+		else if (getSearchFor().length() >= NGRAM_SIZE)  
+			return new NGramLuceneQuery(getFieldName(), getSearchFor(), NGRAM_SIZE);
+		else 
+			return null;
 	}
 	
 }
