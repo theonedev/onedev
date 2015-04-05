@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -110,12 +111,16 @@ public class SymbolQuery extends BlobQuery {
 
 	@Override
 	protected Query getLuceneQueryOfSearchFor() {
-		if (isRegex()) 
+		if (isRegex()) { 
 			return new RegexLiterals(getSearchFor()).asWildcardQuery(getFieldName());
-		else if (getSearchFor().length() != 0) 
-			return new WildcardQuery(new Term(getFieldName(), getSearchFor() + "*"));
-		else
+		} else if (getSearchFor().length() != 0) { 
+			if (isWordMatch())
+				return new TermQuery(new Term(getFieldName(), getSearchFor()));
+			else
+				return new WildcardQuery(new Term(getFieldName(), getSearchFor() + "*"));
+		} else {
 			return null;
+		}
 	}
 	
 }
