@@ -45,6 +45,7 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
@@ -58,7 +59,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.ExtractException;
 import com.pmease.commons.lang.Extractor;
 import com.pmease.commons.lang.Extractors;
@@ -94,10 +94,10 @@ public class DefaultIndexManager implements IndexManager {
 		this.extractors = extractors;
 	}
 
-	private String getCommitIndexVersion(final IndexSearcher searcher, String commitHash) throws IOException {
+	private String getCommitIndexVersion(final IndexSearcher searcher, AnyObjectId commitId) throws IOException {
 		final AtomicReference<String> indexVersion = new AtomicReference<>(null);
 		
-		searcher.search(COMMIT_HASH.query(commitHash), new Collector() {
+		searcher.search(COMMIT_HASH.query(commitId.getName()), new Collector() {
 
 			private int docBase;
 			
@@ -124,16 +124,16 @@ public class DefaultIndexManager implements IndexManager {
 		return indexVersion.get();
 	}
 	
-	private IndexResult index(org.eclipse.jgit.lib.Repository jgitRepo, String commitHash, 
+	private IndexResult index(org.eclipse.jgit.lib.Repository jgitRepo, AnyObjectId commitId, 
 			IndexWriter writer, final IndexSearcher searcher) throws Exception {
 		RevWalk revWalk = new RevWalk(jgitRepo);
 		TreeWalk treeWalk = new TreeWalk(jgitRepo);
 		
-		treeWalk.addTree(revWalk.parseCommit(jgitRepo.resolve(commitHash)).getTree());
+		treeWalk.addTree(revWalk.parseCommit(commitId).getTree());
 		treeWalk.setRecursive(true);
 		
 		if (searcher != null) {
-			if (getCurrentCommitIndexVersion().equals(getCommitIndexVersion(searcher, commitHash)))
+			if (getCurrentCommitIndexVersion().equals(getCommitIndexVersion(searcher, commitId)))
 				return new IndexResult(0, 0);
 			
 			TopDocs topDocs = searcher.search(META.query(LAST_COMMIT.name()), 1);
@@ -214,15 +214,15 @@ public class DefaultIndexManager implements IndexManager {
 
 		// record current commit so that we know which commit has been indexed
 		Document document = new Document();
-		document.add(new StringField(COMMIT_HASH.name(), commitHash, Store.NO));
+		document.add(new StringField(COMMIT_HASH.name(), commitId.getName(), Store.NO));
 		document.add(new StoredField(COMMIT_INDEX_VERSION.name(), getCurrentCommitIndexVersion()));
-		writer.updateDocument(COMMIT_HASH.term(commitHash), document);
+		writer.updateDocument(COMMIT_HASH.term(commitId.getName()), document);
 		
 		// record last commit so that we only need to indexing changed files for subsequent commits
 		document = new Document();
 		document.add(new StringField(META.name(), LAST_COMMIT.name(), Store.NO));
 		document.add(new StoredField(LAST_COMMIT_INDEX_VERSION.name(), extractors.getVersion()));
-		document.add(new StoredField(LAST_COMMIT_HASH.name(), commitHash));
+		document.add(new StoredField(LAST_COMMIT_HASH.name(), commitId.getName()));
 		writer.updateDocument(META.term(LAST_COMMIT.name()), document);
 		
 		return new IndexResult(checked, indexed);
@@ -237,9 +237,9 @@ public class DefaultIndexManager implements IndexManager {
 		document.add(new StringField(BLOB_PATH.name(), blobPath, Store.YES));
 		
 		if (blobPath.indexOf('/') != -1) 
-			document.add(new StringField(BLOB_SYMBOLS.name(), StringUtils.substringAfterLast(blobPath, "/"), Store.NO));
+			document.add(new StringField(BLOB_SYMBOLS.name(), StringUtils.substringAfterLast(blobPath, "/").toLowerCase(), Store.NO));
 		else
-			document.add(new StringField(BLOB_SYMBOLS.name(), blobPath, Store.NO));
+			document.add(new StringField(BLOB_SYMBOLS.name(), blobPath.toLowerCase(), Store.NO));
 		
 		ObjectLoader objectLoader = repo.open(blobId);
 		if (objectLoader.getSize() <= MAX_INDEXABLE_SIZE) {
@@ -254,7 +254,7 @@ public class DefaultIndexManager implements IndexManager {
 						for (Symbol symbol: extractor.extract(content)) {
 							String name = symbol.getName();
 							if (name != null)
-								document.add(new StringField(BLOB_SYMBOLS.name(), name, Store.NO));
+								document.add(new StringField(BLOB_SYMBOLS.name(), name.toLowerCase(), Store.NO));
 						}
 					} catch (ExtractException e) {
 						logger.debug("Error extracting symbols from blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
@@ -277,10 +277,10 @@ public class DefaultIndexManager implements IndexManager {
 	}
 	
 	@Override
-	public IndexResult index(final Repository repository, final String commitHash) {
-		Preconditions.checkArgument(GitUtils.isHash(commitHash));
+	public IndexResult index(final Repository repository, final String revision) {
+		final AnyObjectId commitId = Preconditions.checkNotNull(repository.resolveRevision(revision));
 		
-		logger.info("Indexing commit '{}' of repository '{}'...", commitHash, repository);
+		logger.info("Indexing commit '{}' of repository '{}'...", commitId.getName(), repository);
 		
 		return LockUtils.call("index:" + repository.getId(), new Callable<IndexResult>() {
 
@@ -295,7 +295,7 @@ public class DefaultIndexManager implements IndexManager {
 							try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
 								org.eclipse.jgit.lib.Repository jgitRepo = repository.openAsJGitRepo();
 								try {
-									indexResult = index(jgitRepo, commitHash, writer, searcher);
+									indexResult = index(jgitRepo, commitId, writer, searcher);
 									writer.commit();
 								} catch (Exception e) {
 									writer.rollback();
@@ -309,7 +309,7 @@ public class DefaultIndexManager implements IndexManager {
 						try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
 							org.eclipse.jgit.lib.Repository jgitRepo = repository.openAsJGitRepo();
 							try {
-								indexResult = index(jgitRepo, commitHash, writer, null);
+								indexResult = index(jgitRepo, commitId, writer, null);
 								writer.commit();
 							} catch (Exception e) {
 								writer.rollback();
@@ -321,11 +321,11 @@ public class DefaultIndexManager implements IndexManager {
 					}
 				}
 				logger.info("Commit {} indexed (checked blobs: {}, indexed blobs: {})", 
-						commitHash, indexResult.getChecked(), indexResult.getIndexed());
+						commitId.getName(), indexResult.getChecked(), indexResult.getIndexed());
 				
 				if (indexResult.getIndexed() != 0) {
 					for (IndexListener listener: listeners)
-						listener.commitIndexed(repository, commitHash);
+						listener.commitIndexed(repository, revision);
 				}
 				
 				return indexResult;

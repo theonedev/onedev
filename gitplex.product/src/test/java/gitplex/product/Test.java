@@ -13,15 +13,8 @@ public class Test {
 	@org.junit.Test
 	public void test() throws IOException {
 		Repository repo = RepositoryCache.open(FileKey.exact(new File("w:\\linux\\.git"), FS.DETECTED));
-		repo.resolve("master~1000");
+		System.out.println(repo.resolve("ff4b285827060ef2fc3a29a6a8155a8db89b4863"));
 		repo.close();
-		
-		long time = System.currentTimeMillis();
-		for (int i=0; i<1000; i++) {
-			repo = RepositoryCache.open(FileKey.exact(new File("w:\\linux\\.git"), FS.DETECTED));
-			repo.close();
-		}
-		System.out.println(System.currentTimeMillis()-time);
 	}	
 
 }

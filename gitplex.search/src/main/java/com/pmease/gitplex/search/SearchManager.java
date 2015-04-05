@@ -8,6 +8,6 @@ import com.pmease.gitplex.search.query.BlobQuery;
 
 public interface SearchManager extends IndexListener {
 	
-	List<QueryHit> search(Repository repository, String commitHash, BlobQuery query) throws InterruptedException;
+	List<QueryHit> search(Repository repository, String revision, BlobQuery query) throws InterruptedException;
 	
 }

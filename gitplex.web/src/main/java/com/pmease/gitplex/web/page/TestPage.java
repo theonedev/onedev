@@ -1,17 +1,14 @@
 package com.pmease.gitplex.web.page;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
-import com.pmease.commons.git.Commit;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.IndexManager;
@@ -36,6 +33,7 @@ public class TestPage extends BasePage {
 			public void onClick() {
 				Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 2L);
 				IndexManager indexManager = GitPlex.getInstance(IndexManager.class);
+				/*
 				Date since;
 				try {
 					since = new SimpleDateFormat("yyyy-MM-dd").parse("2010-01-01");
@@ -52,7 +50,8 @@ public class TestPage extends BasePage {
 					indexManager.index(repo, commit.getHash());			
 				}
 				System.out.println("Total Minutes: " + (System.currentTimeMillis()-time)/1000/60);
-//				indexManager.index(repo, repo.git().parseRevision("master", true));
+				*/
+				indexManager.index(repo, "master");
 			}
 			
 		});
@@ -78,9 +77,14 @@ public class TestPage extends BasePage {
 		
 		add(new WebMarkupContainer("searchResult").setOutputMarkupId(true));
 		
-		Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
-		String commitHash = repo.git().parseRevision("master", true);
-		add(new BlobSearchPanel("searcher", Model.of(repo), Model.of(commitHash)) {
+		add(new BlobSearchPanel("searcher", new LoadableDetachableModel<Repository>() {
+
+			@Override
+			protected Repository load() {
+				return GitPlex.getInstance(Dao.class).load(Repository.class, 2L);
+			}
+			
+		}, Model.of("master")) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {

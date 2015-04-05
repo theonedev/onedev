@@ -115,9 +115,9 @@ public class SymbolQuery extends BlobQuery {
 			return new RegexLiterals(getSearchFor()).asWildcardQuery(getFieldName());
 		} else if (getSearchFor().length() != 0) { 
 			if (isWordMatch())
-				return new TermQuery(new Term(getFieldName(), getSearchFor()));
+				return new TermQuery(new Term(getFieldName(), getSearchFor().toLowerCase()));
 			else
-				return new WildcardQuery(new Term(getFieldName(), getSearchFor() + "*"));
+				return new WildcardQuery(new Term(getFieldName(), getSearchFor().toLowerCase() + "*"));
 		} else {
 			return null;
 		}

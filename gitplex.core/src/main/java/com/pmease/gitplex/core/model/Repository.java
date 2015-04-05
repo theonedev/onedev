@@ -23,6 +23,8 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.jgit.errors.RevisionSyntaxException;
+import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryCache.FileKey;
 import org.eclipse.jgit.util.FS;
@@ -107,7 +109,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
     
     private transient Map<String, Commit> commitCache = new HashMap<>();
     
-    private transient Map<String, Optional<String>> refValueCache = new HashMap<>();
+    private transient Map<String, Optional<AnyObjectId>> objectIdCache = new HashMap<>();
     
     private transient Branch defaultBranch;
     
@@ -406,11 +408,19 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	@Nullable
-	public String getRefValue(String refName) {
-		Optional<String> optional = refValueCache.get(refName);
+	public AnyObjectId resolveRevision(String revision) {
+		Optional<AnyObjectId> optional = objectIdCache.get(revision);
 		if (optional == null) {
-			optional = Optional.fromNullable(git().parseRevision(refName, false));
-			refValueCache.put(refName, optional);
+			org.eclipse.jgit.lib.Repository jgitRepo = openAsJGitRepo();
+			try {
+				AnyObjectId objectId = jgitRepo.resolve(revision);
+				optional = Optional.fromNullable(objectId);
+				objectIdCache.put(revision, optional);
+			} catch (RevisionSyntaxException | IOException e) {
+				throw new RuntimeException(e);
+			} finally {
+				jgitRepo.close();
+			}
 		}
 		return optional.orNull();
 	}

@@ -24,6 +24,7 @@ import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -31,7 +32,6 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.eventbus.Subscribe;
-import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.events.SystemStopping;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.Repository;
@@ -92,21 +92,20 @@ public class DefaultSearchManager implements SearchManager, IndexListener {
 	}
 	
 	@Override
-	public List<QueryHit> search(final Repository repository, final String commitHash, final BlobQuery query) 
+	public List<QueryHit> search(final Repository repository, final String revision, final BlobQuery query) 
 			throws InterruptedException {
-		Preconditions.checkArgument(GitUtils.isHash(commitHash));
+		final AnyObjectId commitId = Preconditions.checkNotNull(repository.resolveRevision(revision));
 		
 		final List<QueryHit> hits = new ArrayList<>();
 
-		SearcherManager searcherManager;
-		searcherManager = getSearcherManager(repository);
+		SearcherManager searcherManager = getSearcherManager(repository);
 		if (searcherManager != null) {
 			try {
 				final IndexSearcher searcher = searcherManager.acquire();
 				try {
 					final org.eclipse.jgit.lib.Repository jgitRepo = repository.openAsJGitRepo();
 					try {
-						final RevTree revTree = new RevWalk(jgitRepo).parseCommit(jgitRepo.resolve(commitHash)).getTree();
+						final RevTree revTree = new RevWalk(jgitRepo).parseCommit(commitId).getTree();
 						final Set<String> checkedBlobPaths = new HashSet<>();
 						
 						searcher.search(query.asLuceneQuery(), new Collector() {
@@ -164,7 +163,7 @@ public class DefaultSearchManager implements SearchManager, IndexListener {
 	}
 
 	@Override
-	public void commitIndexed(Repository repository, String commitHash) {
+	public void commitIndexed(Repository repository, String revision) {
 		try {
 			getSearcherManager(repository).maybeRefresh();
 		} catch (InterruptedException | IOException e) {
