@@ -29,7 +29,7 @@ import com.pmease.commons.jersey.ValidQueryParams;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.model.Branch;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 
 @Path("/branches")
 @Consumes(MediaType.WILDCARD)
@@ -54,7 +54,7 @@ public class BranchResource {
     @Path("/{id}")
     public Branch get(@PathParam("id") Long id) {
     	Branch branch = dao.load(Branch.class, id);
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(branch.getRepository())))
+    	if (!SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryRead(branch.getRepository())))
     		throw new UnauthorizedException();
     	return branch;
     }
@@ -79,7 +79,7 @@ public class BranchResource {
 		List<Branch> branches = dao.query(criteria);
 		
     	for (Branch branch: branches) {
-    		if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(branch.getRepository()))) {
+    		if (!SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryRead(branch.getRepository()))) {
     			throw new UnauthorizedException("Unauthorized access to branch " + branch);
     		}
     	}

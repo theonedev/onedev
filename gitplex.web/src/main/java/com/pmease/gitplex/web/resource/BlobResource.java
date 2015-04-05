@@ -21,7 +21,7 @@ import com.pmease.commons.util.MediaTypes;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 import com.pmease.gitplex.web.service.FileBlob;
 import com.pmease.gitplex.web.service.FileBlobService;
 
@@ -47,7 +47,7 @@ public class BlobResource {
 				.build();
 		}
 		
-		if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(repository))) {
+		if (!SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryRead(repository))) {
 			return Response.status(Status.FORBIDDEN)
 					.entity("You have no permission to access this resource")
 					.build();

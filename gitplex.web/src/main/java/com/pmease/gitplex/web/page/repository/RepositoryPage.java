@@ -34,7 +34,7 @@ import com.pmease.gitplex.core.model.Authorization;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 import com.pmease.gitplex.core.permission.operation.GeneralOperation;
 import com.pmease.gitplex.web.common.wicket.bootstrap.Icon;
 import com.pmease.gitplex.web.model.RepositoryModel;
@@ -196,7 +196,7 @@ public abstract class RepositoryPage extends AccountBasePage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisibilityAllowed(SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(getRepository())));
+				setVisibilityAllowed(SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryAdmin(getRepository())));
 			}
 		});
 		
@@ -250,7 +250,7 @@ public abstract class RepositoryPage extends AccountBasePage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(getRepository())));
+				setVisible(SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryAdmin(getRepository())));
 			}
 			
 		});
@@ -275,7 +275,7 @@ public abstract class RepositoryPage extends AccountBasePage {
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.getSubject().isPermitted(
-				ObjectPermission.ofRepositoryRead(repoModel.getObject()));
+				Permission.ofRepositoryRead(repoModel.getObject()));
 	}
 	
 	public Repository getRepository() {

@@ -23,6 +23,9 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.jgit.lib.RepositoryCache;
+import org.eclipse.jgit.lib.RepositoryCache.FileKey;
+import org.eclipse.jgit.util.FS;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -442,4 +445,11 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		}
 	}
 	
+	public org.eclipse.jgit.lib.Repository openAsJGitRepo() {
+		try {
+			return RepositoryCache.open(FileKey.exact(git().repoDir(), FS.DETECTED), true);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 }

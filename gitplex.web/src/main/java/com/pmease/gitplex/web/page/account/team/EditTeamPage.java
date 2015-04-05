@@ -28,7 +28,7 @@ import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 import com.pmease.gitplex.web.model.TeamModel;
 import com.pmease.gitplex.web.page.account.AccountPage;
 
@@ -68,7 +68,7 @@ public class EditTeamPage extends AccountPage {
 	@Override
 	public boolean isPermitted() {
 		Team team = getTeam();
-		return SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserAdmin(team.getOwner()));
+		return SecurityUtils.getSubject().isPermitted(Permission.ofUserAdmin(team.getOwner()));
 	}
 	
 	@Override

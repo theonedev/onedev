@@ -70,6 +70,8 @@ public abstract class BlobSearchPanel extends Panel {
 	
 	private final IModel<Repository> repoModel;
 	
+	private final IModel<String> commitHashModel;
+	
 	private TextField<String> instantSearchInput;
 	
 	private String instantSearchFor;
@@ -88,10 +90,11 @@ public abstract class BlobSearchPanel extends Panel {
 	
 	private int activeHitIndex;
 	
-	public BlobSearchPanel(String id, IModel<Repository> repoModel) {
+	public BlobSearchPanel(String id, IModel<Repository> repoModel, IModel<String> commitHashModel) {
 		super(id);
 		
 		this.repoModel = repoModel;
+		this.commitHashModel = commitHashModel;
 	}
 
 	@Override
@@ -162,7 +165,7 @@ public abstract class BlobSearchPanel extends Panel {
 										instantSearchFor, false, false, false, MAX_ADVANCED_QUERY_ENTRIES);
 								try {
 									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-									List<QueryHit> hits = searchManager.search(repoModel.getObject(), getCurrentCommit(), query);
+									List<QueryHit> hits = searchManager.search(repoModel.getObject(), commitHashModel.getObject(), query);
 									onCompleteAdvancedSearch(target, hits);
 								} catch (InterruptedException e) {
 									throw new RuntimeException(e);
@@ -261,7 +264,7 @@ public abstract class BlobSearchPanel extends Panel {
 										instantSearchFor, false, false, false, MAX_ADVANCED_QUERY_ENTRIES);
 								try {
 									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-									List<QueryHit> hits = searchManager.search(repoModel.getObject(), getCurrentCommit(), query);
+									List<QueryHit> hits = searchManager.search(repoModel.getObject(), commitHashModel.getObject(), query);
 									onCompleteAdvancedSearch(target, hits);
 								} catch (InterruptedException e) {
 									throw new RuntimeException(e);
@@ -315,7 +318,7 @@ public abstract class BlobSearchPanel extends Panel {
 					BlobQuery blobQuery = new SymbolQuery(instantSearchInput.getInput(), 
 							false, false, false, MAX_INSTANT_QUERY_ENTRIES);
 					try {
-						symbolHits = searchManager.search(repoModel.getObject(), getCurrentCommit(), blobQuery);
+						symbolHits = searchManager.search(repoModel.getObject(), commitHashModel.getObject(), blobQuery);
 					} catch (InterruptedException e) {
 						throw new RuntimeException(e);
 					}
@@ -324,7 +327,7 @@ public abstract class BlobSearchPanel extends Panel {
 						TextQuery textQuery = new TextQuery(instantSearchInput.getInput(), 
 								false, false, false, MAX_INSTANT_QUERY_ENTRIES);
 						try {
-							textHits = searchManager.search(repoModel.getObject(), getCurrentCommit(), textQuery);
+							textHits = searchManager.search(repoModel.getObject(), commitHashModel.getObject(), textQuery);
 						} catch (InterruptedException e) {
 							throw new RuntimeException(e);
 						}
@@ -424,6 +427,7 @@ public abstract class BlobSearchPanel extends Panel {
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
+		commitHashModel.detach();
 		
 		super.onDetach();
 	}
@@ -433,8 +437,6 @@ public abstract class BlobSearchPanel extends Panel {
 		instantSearchResultDropdown.hide(target);
 		onSelect(target, hit);
 	}
-	
-	protected abstract String getCurrentCommit();
 	
 	protected abstract void onSelect(AjaxRequestTarget target, QueryHit hit);
 	
@@ -554,7 +556,7 @@ public abstract class BlobSearchPanel extends Panel {
 							
 							try {
 								SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-								List<QueryHit> hits = searchManager.search(repoModel.getObject(), getCurrentCommit(), query);
+								List<QueryHit> hits = searchManager.search(repoModel.getObject(), commitHashModel.getObject(), query);
 								onCompleteAdvancedSearch(target, hits);
 							} catch (InterruptedException e) {
 								throw new RuntimeException(e);

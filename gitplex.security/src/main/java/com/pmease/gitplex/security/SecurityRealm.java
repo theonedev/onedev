@@ -6,8 +6,6 @@ import java.util.Collection;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.shiro.authz.Permission;
-
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.shiro.AbstractUser;
@@ -19,7 +17,7 @@ import com.pmease.gitplex.core.model.Membership;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 import com.pmease.gitplex.core.permission.operation.PrivilegedOperation;
 
 @Singleton
@@ -44,8 +42,8 @@ public class SecurityRealm extends AbstractRealm {
     }
 
     @Override
-    protected Collection<Permission> permissionsOf(final Long userId) {
-        Collection<Permission> permissions = new ArrayList<Permission>();
+    protected Collection<org.apache.shiro.authz.Permission> permissionsOf(final Long userId) {
+        Collection<org.apache.shiro.authz.Permission> permissions = new ArrayList<org.apache.shiro.authz.Permission>();
 
         /*
          * Instead of returning all permissions of the user, we return a customized
@@ -54,12 +52,12 @@ public class SecurityRealm extends AbstractRealm {
          * in the permission being checked and if it means authorization of certain 
          * object, we can then only load authorization information of that object.
          */
-        permissions.add(new Permission() {
+        permissions.add(new org.apache.shiro.authz.Permission() {
 
             @Override
-            public boolean implies(Permission permission) {
-            	if (permission instanceof ObjectPermission) {
-            		ObjectPermission objectPermission = (ObjectPermission) permission;
+            public boolean implies(org.apache.shiro.authz.Permission permission) {
+            	if (permission instanceof Permission) {
+            		Permission objectPermission = (Permission) permission;
             		Collection<Team> teams = new ArrayList<>();
 	                if (userId != 0L) {
 	                    User user = dao.get(User.class, userId);
@@ -102,7 +100,7 @@ public class SecurityRealm extends AbstractRealm {
         return permissions;        
     }
     
-    private User getUser(ObjectPermission permission) {
+    private User getUser(Permission permission) {
         if (permission.getObject() instanceof Repository) {
         	Repository repository = (Repository) permission.getObject();
         	return repository.getOwner();

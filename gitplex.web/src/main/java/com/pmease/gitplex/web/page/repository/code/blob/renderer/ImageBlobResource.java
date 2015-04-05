@@ -25,7 +25,7 @@ import com.google.common.io.Files;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 import com.pmease.gitplex.web.exception.AccessDeniedException;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
@@ -80,7 +80,7 @@ public class ImageBlobResource extends DynamicImageResource {
 		Preconditions.checkState(!Strings.isNullOrEmpty(path));
 
 		if (!SecurityUtils.getSubject().isPermitted(
-				ObjectPermission.ofRepositoryRead(repository))) {
+				Permission.ofRepositoryRead(repository))) {
 			throw new AccessDeniedException("Permission denied to access "
 					+ repository.getFQN() + " for user "
 					+ SecurityUtils.getSubject());

@@ -40,7 +40,7 @@ import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.core.model.Authorization;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Team;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 import com.pmease.gitplex.core.permission.operation.GeneralOperation;
 import com.pmease.gitplex.web.common.wicket.component.datagrid.DataGrid;
 import com.pmease.gitplex.web.common.wicket.component.datagrid.hibernate.EntityListProvider;
@@ -82,7 +82,7 @@ public class PermissionSettingPage extends RepositoryPage {
 		}.add(new ConfirmBehavior("Are you sure you want to reset to the default permissions?")));
 		
 		add(new BookmarkablePageLink<Void>("teamslink", AccountTeamsPage.class)
-				.setVisibilityAllowed(SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserAdmin(getAccount()))));
+				.setVisibilityAllowed(SecurityUtils.getSubject().isPermitted(Permission.ofUserAdmin(getAccount()))));
 	}
 	
 	private Authorization getAuthorization(Team team) {
@@ -139,7 +139,7 @@ public class PermissionSettingPage extends RepositoryPage {
 				AbstractLink link = new BookmarkablePageLink<Void>("editlink", 
 																	EditTeamPage.class,
 																	EditTeamPage.newParams(team));
-				boolean enabled = SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserAdmin(getAccount()));
+				boolean enabled = SecurityUtils.getSubject().isPermitted(Permission.ofUserAdmin(getAccount()));
 				link.setEnabled(enabled);
 				link.add(new Label("name", team.getName()));
 				link.add(new WebMarkupContainer("icon").setVisibilityAllowed(enabled));
@@ -353,6 +353,6 @@ public class PermissionSettingPage extends RepositoryPage {
 	@Override
 	protected boolean isPermitted() {
 		return super.isPermitted() 
-				&& SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(getRepository()));
+				&& SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryAdmin(getRepository()));
 	}
 }

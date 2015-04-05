@@ -13,7 +13,7 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 
 @SuppressWarnings("serial")
 public abstract class ReviewerChoice extends SelectToAddChoice<User> {
@@ -36,7 +36,7 @@ public abstract class ReviewerChoice extends SelectToAddChoice<User> {
 		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 		setVisible(request.isOpen() 
 				&& !request.getPotentialReviewers().isEmpty()
-				&& (request.getSubmitter().equals(currentUser) || SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(request.getTarget().getRepository()))));
+				&& (request.getSubmitter().equals(currentUser) || SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryAdmin(request.getTarget().getRepository()))));
 	}
 
 	@Override

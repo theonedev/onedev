@@ -10,7 +10,7 @@ import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 
 public enum PullRequestOperation {
 	INTEGRATE {
@@ -18,7 +18,7 @@ public enum PullRequestOperation {
 		@Override
 		public boolean canOperate(PullRequest request) {
 			if (!SecurityUtils.getSubject().isPermitted(
-					ObjectPermission.ofRepositoryWrite(request.getTarget().getRepository()))) {
+					Permission.ofRepositoryWrite(request.getTarget().getRepository()))) {
 				return false;
 			} else {
 				return GitPlex.getInstance(PullRequestManager.class).canIntegrate(request);

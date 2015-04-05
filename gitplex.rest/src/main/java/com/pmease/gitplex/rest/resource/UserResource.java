@@ -26,7 +26,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jersey.ValidQueryParams;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 
 @Path("/users")
 @Consumes(MediaType.WILDCARD)
@@ -57,7 +57,7 @@ public class UserResource {
 		List<User> users = dao.query(criteria);
 		
 		for (User user: users) {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserRead(user))) {
+			if (!SecurityUtils.getSubject().isPermitted(Permission.ofUserRead(user))) {
 				throw new UnauthorizedException("Unauthorized access to user " + user.getDisplayName());
 			}
 		}
@@ -68,7 +68,7 @@ public class UserResource {
     @Path("/{id}")
     public User get(@PathParam("id") Long id) {
     	User user = dao.load(User.class, id);
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserRead(user)))
+    	if (!SecurityUtils.getSubject().isPermitted(Permission.ofUserRead(user)))
     		throw new UnauthorizedException();
     	else
     		return user;
@@ -76,7 +76,7 @@ public class UserResource {
     
     @POST
     public Long save(@NotNull @Valid User user) {
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserAdmin(user)))
+    	if (!SecurityUtils.getSubject().isPermitted(Permission.ofUserAdmin(user)))
     		throw new UnauthorizedException();
 
     	dao.persist(user);
@@ -88,7 +88,7 @@ public class UserResource {
     public void delete(@PathParam("id") Long id) {
     	User user = dao.load(User.class, id);
     	
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofUserAdmin(user)))
+    	if (!SecurityUtils.getSubject().isPermitted(Permission.ofUserAdmin(user)))
     		throw new UnauthorizedException();
     	
     	dao.remove(user);

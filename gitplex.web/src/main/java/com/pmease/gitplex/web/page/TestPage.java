@@ -79,17 +79,12 @@ public class TestPage extends BasePage {
 		add(new WebMarkupContainer("searchResult").setOutputMarkupId(true));
 		
 		Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
-		final String commitHash = repo.git().parseRevision("master~100", true);
-		add(new BlobSearchPanel("searcher", Model.of(repo)) {
+		String commitHash = repo.git().parseRevision("master", true);
+		add(new BlobSearchPanel("searcher", Model.of(repo), Model.of(commitHash)) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
 				System.out.println(hit.getBlobPath() + ": " + hit.getLineNo());
-			}
-
-			@Override
-			protected String getCurrentCommit() {
-				return commitHash;
 			}
 
 			@Override

@@ -68,7 +68,7 @@ import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
@@ -136,7 +136,7 @@ public class TextDiffPanel extends Panel {
 			@Override
 			protected Boolean load() {
 				User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
-				ObjectPermission readPermission = ObjectPermission.ofRepositoryRead(repoModel.getObject());
+				Permission readPermission = Permission.ofRepositoryRead(repoModel.getObject());
 				return currentUser != null && SecurityUtils.getSubject().isPermitted(readPermission);
 			}
 			

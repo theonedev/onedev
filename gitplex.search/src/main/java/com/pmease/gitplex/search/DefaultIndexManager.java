@@ -48,12 +48,9 @@ import org.apache.lucene.util.Version;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
-import org.eclipse.jgit.lib.RepositoryCache;
-import org.eclipse.jgit.lib.RepositoryCache.FileKey;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
-import org.eclipse.jgit.util.FS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,12 +124,12 @@ public class DefaultIndexManager implements IndexManager {
 		return indexVersion.get();
 	}
 	
-	private IndexResult index(org.eclipse.jgit.lib.Repository repo, String commitHash, 
+	private IndexResult index(org.eclipse.jgit.lib.Repository jgitRepo, String commitHash, 
 			IndexWriter writer, final IndexSearcher searcher) throws Exception {
-		RevWalk revWalk = new RevWalk(repo);
-		TreeWalk treeWalk = new TreeWalk(repo);
+		RevWalk revWalk = new RevWalk(jgitRepo);
+		TreeWalk treeWalk = new TreeWalk(jgitRepo);
 		
-		treeWalk.addTree(revWalk.parseCommit(repo.resolve(commitHash)).getTree());
+		treeWalk.addTree(revWalk.parseCommit(jgitRepo.resolve(commitHash)).getTree());
 		treeWalk.setRecursive(true);
 		
 		if (searcher != null) {
@@ -145,8 +142,8 @@ public class DefaultIndexManager implements IndexManager {
 				String lastCommitAnalyzersVersion = doc.get(LAST_COMMIT_INDEX_VERSION.name());
 				if (lastCommitAnalyzersVersion.equals(extractors.getVersion())) {
 					String lastCommitHash = doc.get(LAST_COMMIT_HASH.name());
-					ObjectId lastCommitId = repo.resolve(lastCommitHash);
-					if (repo.hasObject(lastCommitId)) { 
+					ObjectId lastCommitId = jgitRepo.resolve(lastCommitHash);
+					if (jgitRepo.hasObject(lastCommitId)) { 
 						treeWalk.addTree(revWalk.parseCommit(lastCommitId).getTree());
 						treeWalk.setFilter(TreeFilter.ANY_DIFF);
 					}
@@ -202,14 +199,14 @@ public class DefaultIndexManager implements IndexManager {
 					if (currentBlobIndexVersion != null) {
 						if (!blobIndexVersion.equals(currentBlobIndexVersion)) {
 							writer.deleteDocuments(query);
-							indexBlob(writer, repo, extractor, blobId, blobPath);
+							indexBlob(writer, jgitRepo, extractor, blobId, blobPath);
 							indexed++;
 						}
 					} else {
 						writer.deleteDocuments(query);
 					}
 				} else if (currentBlobIndexVersion != null) {
-					indexBlob(writer, repo, extractor, blobId, blobPath);
+					indexBlob(writer, jgitRepo, extractor, blobId, blobPath);
 					indexed++;
 				}
 			}
@@ -296,31 +293,29 @@ public class DefaultIndexManager implements IndexManager {
 						try (IndexReader reader = DirectoryReader.open(directory)) {
 							IndexSearcher searcher = new IndexSearcher(reader);
 							try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
-								org.eclipse.jgit.lib.Repository repo = 
-										RepositoryCache.open(FileKey.exact(repository.git().repoDir(), FS.DETECTED));
+								org.eclipse.jgit.lib.Repository jgitRepo = repository.openAsJGitRepo();
 								try {
-									indexResult = index(repo, commitHash, writer, searcher);
+									indexResult = index(jgitRepo, commitHash, writer, searcher);
 									writer.commit();
 								} catch (Exception e) {
 									writer.rollback();
 									throw Throwables.propagate(e);
 								} finally {
-									repo.close();
+									jgitRepo.close();
 								}
 							}
 						}
 					} else {
 						try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
-							org.eclipse.jgit.lib.Repository repo = 
-									RepositoryCache.open(FileKey.exact(repository.git().repoDir(), FS.DETECTED));
+							org.eclipse.jgit.lib.Repository jgitRepo = repository.openAsJGitRepo();
 							try {
-								indexResult = index(repo, commitHash, writer, null);
+								indexResult = index(jgitRepo, commitHash, writer, null);
 								writer.commit();
 							} catch (Exception e) {
 								writer.rollback();
 								throw Throwables.propagate(e);
 							} finally {
-								repo.close();
+								jgitRepo.close();
 							}
 						}
 					}

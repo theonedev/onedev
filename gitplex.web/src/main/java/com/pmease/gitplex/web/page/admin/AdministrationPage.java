@@ -8,7 +8,7 @@ import org.apache.wicket.model.Model;
 
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 import com.pmease.gitplex.web.page.LayoutPage;
 
 @SuppressWarnings("serial")
@@ -16,7 +16,7 @@ public abstract class AdministrationPage extends LayoutPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.getSubject().isPermitted(ObjectPermission.ofSystemAdmin());
+		return SecurityUtils.getSubject().isPermitted(Permission.ofSystemAdmin());
 	}
 	
 	@Override

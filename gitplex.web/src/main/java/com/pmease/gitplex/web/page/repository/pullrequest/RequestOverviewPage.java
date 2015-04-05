@@ -60,7 +60,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 import com.pmease.gitplex.web.component.branch.BranchLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
@@ -537,7 +537,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				ObjectPermission writePermission = ObjectPermission.ofRepositoryWrite(getRepository());
+				Permission writePermission = Permission.ofRepositoryWrite(getRepository());
 				setVisible(SecurityUtils.getSubject().isPermitted(writePermission) && strategies.size() > 1);						
 			}
 			
@@ -559,13 +559,13 @@ public class RequestOverviewPage extends RequestDetailPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				ObjectPermission writePermission = ObjectPermission.ofRepositoryWrite(getRepository());
+				Permission writePermission = Permission.ofRepositoryWrite(getRepository());
 				setVisible(!SecurityUtils.getSubject().isPermitted(writePermission) || strategies.size() == 1);						
 			}
 			
 		});
 
-		ObjectPermission writePermission = ObjectPermission.ofRepositoryWrite(getRepository());
+		Permission writePermission = Permission.ofRepositoryWrite(getRepository());
 
 		if (!SecurityUtils.getSubject().isPermitted(writePermission) || strategies.size() == 1) {
 			integrationStrategyContainer.add(new WebMarkupContainer("help").add(
@@ -705,7 +705,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 		User assignee = request.getAssignee();
 		boolean canChangeAssignee = request.isOpen() 
 				&& (request.getSubmitter().equals(getCurrentUser()) 
-					|| SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(getRepository())));
+					|| SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryAdmin(getRepository())));
 		if (assignee != null) {
 			
 			if (canChangeAssignee) {
@@ -764,7 +764,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 					User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 					setVisible(request.isOpen() 
 							&& !request.getPotentialReviewers().isEmpty()
-							&& (request.getSubmitter().equals(currentUser) || SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(request.getTarget().getRepository()))));
+							&& (request.getSubmitter().equals(currentUser) || SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryAdmin(request.getTarget().getRepository()))));
 				} else {
 					setVisible(true);
 				}

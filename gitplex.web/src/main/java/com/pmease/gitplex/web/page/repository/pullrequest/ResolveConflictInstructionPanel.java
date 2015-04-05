@@ -19,7 +19,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 
 @SuppressWarnings("serial")
 class ResolveConflictInstructionPanel extends Panel {
@@ -69,7 +69,7 @@ class ResolveConflictInstructionPanel extends Panel {
 			differentRepoContainer.setVisible(!sameRepo);
 			fragment.add(differentRepoContainer);
 		} else if (user != null 
-						&& SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryWrite(targetRepo))
+						&& SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryWrite(targetRepo))
 						&& targetRepo.getGateKeeper().checkCommit(user, request.getTarget(), sourceHead).allowIntegration()) {
 			fragment = new Fragment("content", "mergeInTargetFrag", this);
 			fragment.add(new Label("destRepoName", request.getTarget().getRepository()));

@@ -24,12 +24,9 @@ import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.eclipse.jgit.lib.RepositoryCache;
-import org.eclipse.jgit.lib.RepositoryCache.FileKey;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
-import org.eclipse.jgit.util.FS;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
@@ -107,10 +104,9 @@ public class DefaultSearchManager implements SearchManager, IndexListener {
 			try {
 				final IndexSearcher searcher = searcherManager.acquire();
 				try {
-					final org.eclipse.jgit.lib.Repository repo = 
-							RepositoryCache.open(FileKey.exact(repository.git().repoDir(), FS.DETECTED));
+					final org.eclipse.jgit.lib.Repository jgitRepo = repository.openAsJGitRepo();
 					try {
-						final RevTree revTree = new RevWalk(repo).parseCommit(repo.resolve(commitHash)).getTree();
+						final RevTree revTree = new RevWalk(jgitRepo).parseCommit(jgitRepo.resolve(commitHash)).getTree();
 						final Set<String> checkedBlobPaths = new HashSet<>();
 						
 						searcher.search(query.asLuceneQuery(), new Collector() {
@@ -129,7 +125,7 @@ public class DefaultSearchManager implements SearchManager, IndexListener {
 									String blobPath = cachedBlobPaths.get(doc).utf8ToString();
 									
 									if (!checkedBlobPaths.contains(blobPath)) {
-										TreeWalk treeWalk = TreeWalk.forPath(repo, blobPath, revTree);									
+										TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobPath, revTree);									
 										if (treeWalk != null) 
 											query.collect(treeWalk, hits);
 										checkedBlobPaths.add(blobPath);
@@ -150,7 +146,7 @@ public class DefaultSearchManager implements SearchManager, IndexListener {
 						});
 						
 					} finally {
-						repo.close();
+						jgitRepo.close();
 					}
 				} finally {
 					searcherManager.release(searcher);

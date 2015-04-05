@@ -29,7 +29,7 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jersey.ValidQueryParams;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 
 @Path("/repositories")
 @Consumes(MediaType.WILDCARD)
@@ -52,7 +52,7 @@ public class RepositoryResource {
     public Repository get(@PathParam("id") Long id) {
     	Repository repository = dao.load(Repository.class, id);
 
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(repository)))
+    	if (!SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryRead(repository)))
     		throw new UnauthenticatedException();
     	else
     		return repository;
@@ -78,7 +78,7 @@ public class RepositoryResource {
 		List<Repository> repositories = dao.query(criteria);
 		
 		for (Repository repository: repositories) {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(repository))) {
+			if (!SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryRead(repository))) {
 				throw new UnauthorizedException("Unauthorized access to repository " + repository.getFQN());
 			}
 		}
@@ -87,7 +87,7 @@ public class RepositoryResource {
 
 	@POST
     public Long save(@NotNull @Valid Repository repository) {
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(repository)))
+    	if (!SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryAdmin(repository)))
     		throw new UnauthorizedException();
     	
     	dao.persist(repository);
@@ -99,7 +99,7 @@ public class RepositoryResource {
     public void delete(@PathParam("id") Long id) {
     	Repository repository = dao.load(Repository.class, id);
 
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(repository)))
+    	if (!SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryAdmin(repository)))
     		throw new UnauthorizedException();
     	
     	dao.remove(repository);

@@ -14,7 +14,7 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 import com.pmease.gitplex.web.component.user.RemoveableAvatar;
 import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.model.UserModel;
@@ -44,7 +44,7 @@ public class ReviewerAvatar extends RemoveableAvatar {
 		if (!request.isNew())
 			reviewEffective = request.isReviewEffective(getUser());
 		setEnabled(request.isOpen() && !reviewEffective 
-				&& (request.getSubmitter().equals(currentUser) || SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(request.getTarget().getRepository()))));
+				&& (request.getSubmitter().equals(currentUser) || SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryAdmin(request.getTarget().getRepository()))));
 	}
 
 	@Override

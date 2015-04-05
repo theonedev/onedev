@@ -24,7 +24,7 @@ import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 import com.pmease.gitplex.web.common.quantity.Data;
 import com.pmease.gitplex.web.common.wicket.form.checkbox.CheckBoxElement;
 import com.pmease.gitplex.web.common.wicket.form.textfield.TextFieldElement;
@@ -144,7 +144,7 @@ public class GeneralSettingPage extends RepositoryPage {
 	@Override
 	protected boolean isPermitted() {
 		return super.isPermitted() 
-				&& SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(getRepository()));
+				&& SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryAdmin(getRepository()));
 	}
 
 }

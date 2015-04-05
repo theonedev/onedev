@@ -21,7 +21,7 @@ import com.pmease.commons.util.MediaTypes;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 import com.pmease.gitplex.web.exception.AccessDeniedException;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
@@ -53,7 +53,7 @@ public class RawBlobResource extends AbstractResource {
 			throw new EntityNotFoundException("Repository " + username + "/" + repositoryName + " doesn't exist");
 		}
 		
-		if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(repository))) {
+		if (!SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryRead(repository))) {
 			throw new AccessDeniedException("User " + SecurityUtils.getSubject() 
 					+ " have no permission to access repository " 
 					+ repository.getFQN());

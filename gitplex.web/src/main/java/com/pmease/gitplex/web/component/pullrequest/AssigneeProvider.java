@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authz.Permission;
 import org.apache.wicket.model.IModel;
 import org.json.JSONException;
 import org.json.JSONWriter;
@@ -20,7 +19,7 @@ import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 import com.pmease.gitplex.core.permission.operation.GeneralOperation;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.avatar.AvatarManager;
@@ -58,7 +57,7 @@ public class AssigneeProvider extends ChoiceProvider<Assignee> {
 		});
 		if (StringUtils.isBlank(term)) {
 			assignees.add(0, new Assignee(repoModel.getObject().getOwner(), "Repository Owner"));
-			Permission writePermission = ObjectPermission.ofRepositoryWrite(repoModel.getObject());
+			Permission writePermission = Permission.ofRepositoryWrite(repoModel.getObject());
 			User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 			if (currentUser != null && currentUser.asSubject().isPermitted(writePermission))
 				assignees.add(0, new Assignee(currentUser, "Me"));

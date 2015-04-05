@@ -32,7 +32,7 @@ import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 
 @SuppressWarnings("serial")
 @Singleton
@@ -113,7 +113,7 @@ public class GitUpdateCallback extends HttpServlet {
 		Preconditions.checkNotNull(user);
 
 		if (refName.startsWith(Repository.REFS_GITPLEX)) {
-			if (!user.asSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(repository)))
+			if (!user.asSubject().isPermitted(Permission.ofRepositoryAdmin(repository)))
 				error(output, "Only repository administrators can update gitplex refs.");
 		} else {
 			String branchName = Branch.parseName(refName);

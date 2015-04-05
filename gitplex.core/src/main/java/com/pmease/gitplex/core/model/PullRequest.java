@@ -45,7 +45,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 
 @SuppressWarnings("serial")
 @Entity
@@ -845,7 +845,7 @@ public class PullRequest extends AbstractEntity {
 			if (invitation.isPreferred())
 				alreadyInvited.add(invitation.getReviewer());
 		}
-		ObjectPermission readPerm = ObjectPermission.ofRepositoryRead(getTarget().getRepository());
+		Permission readPerm = Permission.ofRepositoryRead(getTarget().getRepository());
 		for (User user: GitPlex.getInstance(Dao.class).allOf(User.class)) {
 			if (user.asSubject().isPermitted(readPerm) && !alreadyInvited.contains(user))
 				reviewers.add(user);

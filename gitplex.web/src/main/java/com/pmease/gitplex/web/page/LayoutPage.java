@@ -11,7 +11,7 @@ import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.account.AccountNotificationsPage;
@@ -64,7 +64,7 @@ public abstract class LayoutPage extends BasePage {
 			add(new BookmarkablePageLink<Void>("adminLink", SystemSettingPage.class) {
 				@Override
 				protected void onConfigure() {
-					setVisible(SecurityUtils.getSubject().isPermitted(ObjectPermission.ofSystemAdmin()));
+					setVisible(SecurityUtils.getSubject().isPermitted(Permission.ofSystemAdmin()));
 				}
 			});
 		} else {
@@ -104,7 +104,7 @@ public abstract class LayoutPage extends BasePage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getSubject().isPermitted(ObjectPermission.ofSystemAdmin()));
+				setVisible(SecurityUtils.getSubject().isPermitted(Permission.ofSystemAdmin()));
 			}
 			
 		}.add(new TooltipBehavior()));

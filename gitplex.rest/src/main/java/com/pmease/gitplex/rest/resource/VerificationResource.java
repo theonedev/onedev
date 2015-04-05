@@ -26,7 +26,7 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jersey.ValidQueryParams;
 import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.model.PullRequestVerification;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 
 @Path("/verifications")
 @Consumes(MediaType.WILDCARD)
@@ -48,7 +48,7 @@ public class VerificationResource {
     @Path("/{id}")
     public PullRequestVerification get(@PathParam("id") Long id) {
     	PullRequestVerification verification  = dao.load(PullRequestVerification.class, id);
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(verification.getRequest().getTarget().getRepository())))
+    	if (!SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryRead(verification.getRequest().getTarget().getRepository())))
     		throw new UnauthorizedException();
     	return verification;
     }
@@ -71,7 +71,7 @@ public class VerificationResource {
 		
     	for (PullRequestVerification verification: verifications) {
     		if (!SecurityUtils.getSubject().isPermitted(
-    				ObjectPermission.ofRepositoryRead(verification.getRequest().getTarget().getRepository()))) {
+    				Permission.ofRepositoryRead(verification.getRequest().getTarget().getRepository()))) {
     			throw new UnauthorizedException("Unauthorized access to verification " 
     					+ verification.getRequest() + "/" + verification.getId());
     		}
@@ -84,7 +84,7 @@ public class VerificationResource {
     @Path("/{id}")
     public void delete(@PathParam("id") Long id) {
     	PullRequestVerification verification = dao.load(PullRequestVerification.class, id);
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryWrite(verification.getRequest().getTarget().getRepository())))
+    	if (!SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryWrite(verification.getRequest().getTarget().getRepository())))
     		throw new UnauthorizedException();
     	
     	verificationManager.delete(verification);
@@ -92,7 +92,7 @@ public class VerificationResource {
 
     @POST
     public Long save(@NotNull @Valid PullRequestVerification verification) {
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryWrite(verification.getRequest().getTarget().getRepository())))
+    	if (!SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryWrite(verification.getRequest().getTarget().getRepository())))
     		throw new UnauthorizedException();
     	
     	verificationManager.save(verification);

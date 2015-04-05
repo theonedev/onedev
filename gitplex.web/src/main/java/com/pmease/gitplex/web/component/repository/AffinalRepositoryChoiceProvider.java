@@ -19,7 +19,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.component.select2.ListChoiceProvider;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 import com.pmease.gitplex.web.Constants;
 
 @SuppressWarnings("serial")
@@ -54,7 +54,7 @@ public class AffinalRepositoryChoiceProvider extends ListChoiceProvider<Reposito
 					affinalRepositories.add(0, getCurrentRepository().getForkedFrom());
 				affinalRepositories.add(0, getCurrentRepository());
 				for (Iterator<Repository> it = affinalRepositories.iterator(); it.hasNext();) {
-					if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryRead(it.next())))
+					if (!SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryRead(it.next())))
 						it.remove();
 				}
 				return affinalRepositories;

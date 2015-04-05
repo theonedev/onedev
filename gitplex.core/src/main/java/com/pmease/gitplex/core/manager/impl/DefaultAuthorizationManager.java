@@ -21,7 +21,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.model.Review;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.Permission;
 import com.pmease.gitplex.core.permission.operation.GeneralOperation;
 
 @Singleton
@@ -40,7 +40,7 @@ public class DefaultAuthorizationManager implements AuthorizationManager {
 	public Collection<User> listAuthorizedUsers(Repository repository, GeneralOperation operation) {
 		Set<User> authorizedUsers = new HashSet<User>();
 		for (User user: dao.query(EntityCriteria.of(User.class), 0, 0)) {
-			if (user.asSubject().isPermitted(new ObjectPermission(repository, operation)))
+			if (user.asSubject().isPermitted(new Permission(repository, operation)))
 				authorizedUsers.add(user);
 		}
 		return authorizedUsers;
@@ -49,7 +49,7 @@ public class DefaultAuthorizationManager implements AuthorizationManager {
 	@Override
 	public boolean canModifyRequest(PullRequest request) {
 		Repository repository = request.getTarget().getRepository();
-		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(repository))) {
+		if (SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryAdmin(repository))) {
 			return true;
 		} else {
 			User currentUser = userManager.getCurrent();
@@ -61,7 +61,7 @@ public class DefaultAuthorizationManager implements AuthorizationManager {
 	@Override
 	public boolean canModifyReview(Review review) {
 		Repository repository = review.getUpdate().getRequest().getTarget().getRepository();
-		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepositoryAdmin(repository))) {
+		if (SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryAdmin(repository))) {
 			return true;
 		} else {
 			return review.getReviewer().equals(userManager.getCurrent());
@@ -77,7 +77,7 @@ public class DefaultAuthorizationManager implements AuthorizationManager {
 			if (currentUser.equals(comment.getUser())) {
 				return true;
 			} else {
-				ObjectPermission adminPermission = ObjectPermission.ofRepositoryAdmin(comment.getRepository());
+				Permission adminPermission = Permission.ofRepositoryAdmin(comment.getRepository());
 				return SecurityUtils.getSubject().isPermitted(adminPermission);
 			}
 		}
@@ -87,7 +87,7 @@ public class DefaultAuthorizationManager implements AuthorizationManager {
 	public boolean canCreateBranch(Repository repository, String branchName) {
 		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 		return currentUser != null 
-				&& currentUser.asSubject().isPermitted(ObjectPermission.ofRepositoryWrite(repository))	
+				&& currentUser.asSubject().isPermitted(Permission.ofRepositoryWrite(repository))	
 				&& repository.getGateKeeper().checkRef(currentUser, repository, Git.REFS_HEADS + branchName).isPassed();
 	}
 
@@ -96,7 +96,7 @@ public class DefaultAuthorizationManager implements AuthorizationManager {
 		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 		Repository repository = branch.getRepository();
 		return currentUser != null 
-				&& currentUser.asSubject().isPermitted(ObjectPermission.ofRepositoryWrite(repository))	
+				&& currentUser.asSubject().isPermitted(Permission.ofRepositoryWrite(repository))	
 				&& repository.getGateKeeper().checkRef(currentUser, repository, Git.REFS_HEADS + branch.getName()).isPassed();
 	}
 
