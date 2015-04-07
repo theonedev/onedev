@@ -1,5 +1,5 @@
 gitplex.blobSearch = {
-	initInstantSearch: function(inputId, dropdownId, callback) {
+	init: function(inputId, dropdownId, callback) {
 		var $input = $("#" + inputId);
 		var $dropdown = $("#" + dropdownId);
 		$dropdown.on("hide", function() {

@@ -3,8 +3,6 @@ package com.pmease.gitplex.web;
 import java.util.Date;
 
 public class Constants {
-	private Constants() {
-	}
 
 	public static final Date NULL_DATE = new Date(0);
 	public static final String DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";

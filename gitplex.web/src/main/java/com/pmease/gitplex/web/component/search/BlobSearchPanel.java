@@ -384,7 +384,7 @@ public abstract class BlobSearchPanel extends Panel {
 						new JavaScriptResourceReference(BlobSearchPanel.class, "blob-search.js")));
 				
 				String script = String.format(
-						"gitplex.blobSearch.initInstantSearch('%s', '%s', %s);", 
+						"gitplex.blobSearch.init('%s', '%s', %s);", 
 						instantSearchInput.getMarkupId(true), instantSearchResultDropdown.getMarkupId(true),
 						getCallbackFunction(CallbackParameter.explicit("key")));
 				
