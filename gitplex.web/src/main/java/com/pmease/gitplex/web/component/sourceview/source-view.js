@@ -13,14 +13,15 @@ gitplex.sourceview = {
 		var $code = $("#" + codeId);
 		var options = {
 			value: fileContent, 
-			readOnly: true,
+			readOnly: false,
 			theme: "eclipse",
 			lineNumbers: true,
 			lineWrapping: true,
+			styleActiveLine: true,
+			styleSelectedText: true,
 			foldGutter: true,
 			matchBrackets: true,
-			scrollbarStyle: "simple",
-			highlightSelectionMatches: {showToken: /\w/, delay: 300},
+			highlightIdentifiers: {delay: 300},
 			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
 		};
 		var editor = CodeMirror($code[0], options);

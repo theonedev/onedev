@@ -1,6 +1,5 @@
-.CodeMirror-focused .cm-matchhighlight {background: #CCC;}
-.CodeMirror-simplescroll-horizontal {height: 12px;}
-.CodeMirror-simplescroll-vertical {width: 12px;}
-.CodeMirror-simplescroll-horizontal div, .CodeMirror-simplescroll-vertical div {
-	background: none repeat scroll 0 0 #bbb; border: 1px solid #aaa;}
+.cm-identifierhighlight {background: #D4D4D4;}
+.CodeMirror-selected {background-color: #3399FF !important;}
+.CodeMirror-selectedtext {color: white !important;}
 .cm-s-eclipse .CodeMirror-matchingbracket {outline: none; color: black !important; font-weight: bold;}
+.cm-s-eclipse span.cm-meta {color: #888;}
