@@ -12,7 +12,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import com.pmease.commons.wicket.assets.CodeMirrorResourceReference;
+import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.gitplex.core.model.Repository;
 
 @SuppressWarnings("serial")

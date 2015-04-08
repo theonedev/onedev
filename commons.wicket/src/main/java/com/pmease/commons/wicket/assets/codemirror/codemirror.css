@@ -1,0 +1,6 @@
+.CodeMirror-focused .cm-matchhighlight {background: #CCC;}
+.CodeMirror-simplescroll-horizontal {height: 12px;}
+.CodeMirror-simplescroll-vertical {width: 12px;}
+.CodeMirror-simplescroll-horizontal div, .CodeMirror-simplescroll-vertical div {
+	background: none repeat scroll 0 0 #bbb; border: 1px solid #aaa;}
+.cm-s-eclipse .CodeMirror-matchingbracket {outline: none; color: black !important; font-weight: bold;}
