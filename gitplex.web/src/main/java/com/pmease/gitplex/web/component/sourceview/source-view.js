@@ -21,6 +21,7 @@ gitplex.sourceview = {
 			styleSelectedText: true,
 			foldGutter: true,
 			matchBrackets: true,
+			scrollbarStyle: "simple",
 			highlightIdentifiers: {delay: 300},
 			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
 		};
