@@ -117,7 +117,7 @@ public class TestPage extends BasePage {
 				try {
 					RevTree revTree = new RevWalk(jgitRepo).parseCommit(repository.resolveRevision("master")).getTree();
 					TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, 
-							"gitplex.web/src/main/java/com/pmease/gitplex/web/component/search/BlobSearchPanel.java", 
+							"gitplex.core/src/main/java/com/pmease/gitplex/core/manager/impl/DefaultPullRequestManager.java", 
 							revTree);
 					ObjectLoader objectLoader = jgitRepo.open(treeWalk.getObjectId(0));
 					String content = new String(objectLoader.getCachedBytes());
@@ -129,8 +129,8 @@ public class TestPage extends BasePage {
 				}
 				*/
 				try {
-					String content = FileUtils.readFileToString(new File("w:\\temp\\Component.java"));
-					return new Source("master", "Component.java", content);
+					String content = FileUtils.readFileToString(new File("W:\\temp\\com\\sun\\org\\apache\\regexp\\internal\\RE.java"));
+					return new Source("master", "RE.java", content);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}

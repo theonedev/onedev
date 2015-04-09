@@ -55,7 +55,6 @@
     	if (self.inner == e.target)
     		return;
     	
-    	console.log("down");
         CodeMirror.e_preventDefault(e);
         var innerBox = self.inner.getBoundingClientRect(), where;
         if (self.orientation == "horizontal")
@@ -67,18 +66,12 @@
         	self.originWhere = where;
 
         if (self.originWhere<0 && where<0 || self.originWhere>0 && where>0) {
-        	self.moveTo(self.pos + where * self.screen * self.downRepeat);
+        	self.moveTo(self.pos + where * self.screen);
 
-        	var timeout;
-            if (self.downRepeat == 1)
-            	timeout = 500;
-            else
-            	timeout = 100;
-            
             self.downRepeatTimer = setTimeout(function() {
             	self.downRepeat++;
             	onBarMouseDown(e);
-            }, timeout);
+            }, 500/self.downRepeat/self.downRepeat);
         }
     }
 
