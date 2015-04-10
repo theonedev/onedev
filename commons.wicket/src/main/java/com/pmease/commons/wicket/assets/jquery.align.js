@@ -150,6 +150,6 @@ jQuery.fn.align = function(alignment) {
 				top -= alignment.offset;
 		}
 	}
-	this.css({left:left, top:top});		
+	this.css({left:left, top:top, position: "absolute"});		
 	return this;
 };

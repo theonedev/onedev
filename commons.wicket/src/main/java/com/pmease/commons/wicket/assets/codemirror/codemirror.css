@@ -7,3 +7,10 @@
 	background: none repeat scroll 0 0 #bbb; border: 1px solid #aaa;}
 .cm-s-eclipse .CodeMirror-matchingbracket {outline: none; color: black !important; font-weight: bold;}
 .cm-s-eclipse span.cm-meta {color: #888;}
+
+.CodeMirror-tokentooltip {
+	background-color: infobackground; border: 1px solid black;
+	border-radius: 4px; color: infotext; font-family: monospace;
+	font-size: 10pt; overflow: hidden; padding: 2px 5px; z-index: 100;
+	max-width: 600px;
+}

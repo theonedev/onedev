@@ -13,7 +13,7 @@ gitplex.sourceview = {
 		var $code = $("#" + codeId);
 		var options = {
 			value: fileContent, 
-			readOnly: false,
+			readOnly: true,
 			theme: "eclipse",
 			lineNumbers: true,
 			lineWrapping: true,
@@ -23,6 +23,13 @@ gitplex.sourceview = {
 			matchBrackets: true,
 			scrollbarStyle: "simple",
 			highlightIdentifiers: {delay: 300},
+			tokenHover: {
+				getTooltip: function(tokenEl) {
+					var tooltip = document.createElement("div");
+					$(tooltip).html($(tokenEl).html());
+					return tooltip;
+				}
+			},
 			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
 		};
 		var editor = CodeMirror($code[0], options);
