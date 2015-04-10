@@ -8,20 +8,9 @@
 })(function(CodeMirror) {
 	"use strict";
 
-	var DEFAULT_TOOLTIP_CLASS = " CodeMirror-tokentooltip";
+	var DEFAULT_TOOLTIP_CLASS = "CodeMirror-tokentooltip";
 	var DEFAULT_DELAY = 250;
 
-	function showTooltip(tokenEl, content, state) {
-		var tooltip = document.createElement("div");
-		tooltip.className = state.options.tooltipClass;
-		tooltip.appendChild(content);
-		document.body.appendChild(tooltip);
-		tooltip.alignment = {x: 0, y:0, offset:2, showIndicator: false, target: {element: tokenEl, x: 0, y: 100}};
-		$(tooltip).align();
-		
-		return tooltip;
-	}
-	
 	function TokenHoverState(cm, options) {
 		this.options = options;
 		if (!this.options.delay)
@@ -95,9 +84,15 @@
 				
 				state.showTimeout = setTimeout(function() {
 					if (!state.tooltip) {
-						state.tooltip = $(showTooltip(node, state.options.getTooltip(node), state));
+						state.tooltip = state.options.getTooltip(node);
 						state.tooltip.node = node;
+						
 						var $tooltip = $(state.tooltip);
+						$tooltip.addClass(state.options.tooltipClass);
+						document.body.appendChild(state.tooltip);
+						state.tooltip.alignment = {x: 0, y:0, offset:2, showIndicator: false, target: {element: node, x: 0, y: 100}};
+						$tooltip.align();
+						
 						$tooltip.mouseover(function() {
 							cancelHide(state);
 						});

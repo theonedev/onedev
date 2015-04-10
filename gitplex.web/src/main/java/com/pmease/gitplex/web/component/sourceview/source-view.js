@@ -1,5 +1,5 @@
 gitplex.sourceview = {
-	init: function(codeId, fileContent, filePath) {
+	init: function(codeContainerId, fileContent, filePath, ajaxIndicatorUrl, symbolQuery) {
 		/*
 		var editor = ace.edit(codeId);
 		var modeList = ace.require("ace/ext/modelist");
@@ -10,7 +10,7 @@ gitplex.sourceview = {
 		}); 		
 		*/
 		
-		var $code = $("#" + codeId);
+		var $codeContainer = $("#" + codeContainerId);
 		var options = {
 			value: fileContent, 
 			readOnly: true,
@@ -26,16 +26,26 @@ gitplex.sourceview = {
 			tokenHover: {
 				getTooltip: function(tokenEl) {
 					var tooltip = document.createElement("div");
-					$(tooltip).html($(tokenEl).html());
+					var $tooltip = $(tooltip);
+					$tooltip.html("<img src=" + ajaxIndicatorUrl + "></img>");
+					$tooltip.attr("id", codeContainerId + "-symbolstooltip");
+					symbolQuery($(tokenEl).text());
 					return tooltip;
 				}
 			},
 			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
 		};
-		var editor = CodeMirror($code[0], options);
+		var editor = CodeMirror($codeContainer[0], options);
 		
 	    var modeInfo = CodeMirror.findModeByFileName(filePath);
 	    editor.setOption("mode", modeInfo.mime);
 		CodeMirror.autoLoadMode(editor, modeInfo.mode);
+	}, 
+	
+	symbolsQueried: function(codeContainerId, symbolsContainerId) {
+		var $symbolsContainer = $("#" + symbolsContainerId);
+		var $tooltipContainer = $("#" + codeContainerId + "-symbolstooltip");
+		$tooltipContainer.children().remove();
+		$symbolsContainer.children().appendTo($tooltipContainer);
 	}
 }

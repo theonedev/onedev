@@ -1,11 +1,13 @@
 package com.pmease.gitplex.web.page;
 
-import java.io.File;
 import java.io.IOException;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.eclipse.jgit.lib.ObjectLoader;
+import org.eclipse.jgit.revwalk.RevTree;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
@@ -111,7 +113,6 @@ public class TestPage extends BasePage {
 
 			@Override
 			protected Source load() {
-				/*
 				Repository repository = GitPlex.getInstance(Dao.class).load(Repository.class, 2L);
 				org.eclipse.jgit.lib.Repository jgitRepo = repository.openAsJGitRepo();
 				try {
@@ -127,13 +128,15 @@ public class TestPage extends BasePage {
 				} finally {
 					jgitRepo.close();
 				}
-				*/
+				
+				/*
 				try {
 					String content = FileUtils.readFileToString(new File("W:\\temp\\com\\sun\\org\\apache\\regexp\\internal\\RE.java"));
 					return new Source("master", "RE.java", content);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
+				*/
 			}
 			
 		}));
