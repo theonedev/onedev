@@ -79,21 +79,19 @@
 				|| $node.hasClass("cm-variable-2") || $node.hasClass("cm-variable-3")
 				|| $node.hasClass("cm-def")) {
 			if (!isMouseNearbyCursor(e) && !state.showTimeout) {
-				state.onNodeMouseOut = function(e) {
+				state.onMouseOutOrClick = function(e) {
 					prepareToHide(state);
 					cancelShow(state);
-					$node.off("mouseout", state.onNodeMouseOut);
-					$node.off("click", state.onNodeMouseOut);
-					$node.off("mousemove", state.onNodeMouseMove);
+					$node.off("mouseout click", state.onMouseOutOrClick);
+					$node.off("mousemove", state.onMouseMove);
 				};
-				$node.on("mouseout", state.onNodeMouseOut);
-				$node.on("click", state.onNodeMouseOut);
+				$node.on("mouseout click", state.onMouseOutOrClick);
 				
-				state.onNodeMouseMove = function() {
+				state.onMouseMove = function() {
 					if (state.tooltip && state.tooltip.node == node)
 						cancelHide(state);
 				};
-				$node.on("mousemove", state.onNodeMouseMove);
+				$node.on("mousemove", state.onMouseMove);
 				
 				state.showTimeout = setTimeout(function() {
 					if (!state.tooltip) {
