@@ -31,7 +31,7 @@ gitplex.sourceview = {
 					$tooltip.attr("id", codeContainerId + "-symbolstooltip");
 					symbolQuery($(tokenEl).text());
 					return tooltip;
-				}
+				} 
 			},
 			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
 		};
@@ -47,5 +47,6 @@ gitplex.sourceview = {
 		var $tooltipContainer = $("#" + codeContainerId + "-symbolstooltip");
 		$tooltipContainer.children().remove();
 		$symbolsContainer.children().appendTo($tooltipContainer);
+		$tooltipContainer.align();
 	}
 }

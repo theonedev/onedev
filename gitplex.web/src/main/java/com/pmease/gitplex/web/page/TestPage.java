@@ -1,17 +1,33 @@
 package com.pmease.gitplex.web.page;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
+import com.pmease.commons.git.Commit;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.manager.IndexManager;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.search.SearchManager;
+import com.pmease.gitplex.search.hit.QueryHit;
+import com.pmease.gitplex.search.query.BlobQuery;
+import com.pmease.gitplex.search.query.TextQuery;
+import com.pmease.gitplex.web.component.search.BlobAdvancedSearchResultPanel;
+import com.pmease.gitplex.web.component.search.BlobSearchPanel;
 import com.pmease.gitplex.web.component.sourceview.Source;
 import com.pmease.gitplex.web.component.sourceview.SourceViewPanel;
 
@@ -22,7 +38,6 @@ public class TestPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		/*
 		add(new Link<Void>("testIndex") {
 
 			@Override
@@ -100,7 +115,6 @@ public class TestPage extends BasePage {
 			}
 			
 		});
-		*/
 		
 		add(new SourceViewPanel("sourceView", new LoadableDetachableModel<Repository>() {
 
@@ -129,17 +143,26 @@ public class TestPage extends BasePage {
 					jgitRepo.close();
 				}
 				
-				/*
-				try {
-					String content = FileUtils.readFileToString(new File("W:\\temp\\com\\sun\\org\\apache\\regexp\\internal\\RE.java"));
-					return new Source("master", "RE.java", content);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-				*/
 			}
 			
-		}));
+		}) {
+
+			@Override
+			protected void onCompleteOccurrencesSearch(AjaxRequestTarget target, List<QueryHit> hits) {
+				BlobAdvancedSearchResultPanel searchResult = new BlobAdvancedSearchResultPanel("searchResult", hits) {
+
+					@Override
+					protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
+						System.out.println(hit.getBlobPath() + ": " + hit.getLineNo());
+					}
+					
+				};
+				searchResult.setOutputMarkupId(true);
+				getPage().get("searchResult").replaceWith(searchResult);
+				target.add(searchResult);
+			}
+			
+		});
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-.blob-search input.form-control {width: 300px; display: none;}
+.blob-search input.form-control {width: 300px; display: none; cursor: text;}
 .blob-search .btn-group {margin-left: -8px;}
 .blob-search a {color: #666;}
 .blob-search .input-group-addon {padding: 6px;}
