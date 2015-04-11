@@ -21,7 +21,7 @@ public class LangToken implements Serializable {
 	public LangToken(Token antlrToken) {
 		this.type = antlrToken.getType();
 		this.text = antlrToken.getText();
-		this.line = antlrToken.getLine();
+		this.line = antlrToken.getLine()-1;
 		this.posInLine = antlrToken.getCharPositionInLine();
 	}
 

@@ -123,4 +123,8 @@
 		}
 	});
 	
+	CodeMirror.defineExtension("hideTokenHover", function() {
+		prepareToHide(this.state.tokenHover);
+	});
+	
 });

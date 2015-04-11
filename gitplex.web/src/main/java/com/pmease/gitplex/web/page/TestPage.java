@@ -34,6 +34,12 @@ import com.pmease.gitplex.web.component.sourceview.SourceViewPanel;
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
 
+	private String blobPath = "gitplex.core/src/main/java/com/pmease/gitplex/core/manager/impl/DefaultPullRequestManager.java";
+	
+	private Integer activeLine;
+	
+	private SourceViewPanel sourceView;
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -105,7 +111,9 @@ public class TestPage extends BasePage {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-						System.out.println(hit.getBlobPath() + ": " + hit.getLineNo());
+						blobPath = hit.getBlobPath();
+						activeLine = hit.getLineNo();
+						target.add(sourceView);
 					}
 					
 				};
@@ -116,7 +124,7 @@ public class TestPage extends BasePage {
 			
 		});
 		
-		add(new SourceViewPanel("sourceView", new LoadableDetachableModel<Repository>() {
+		add(sourceView = new SourceViewPanel("sourceView", new LoadableDetachableModel<Repository>() {
 
 			@Override
 			protected Repository load() {
@@ -127,22 +135,7 @@ public class TestPage extends BasePage {
 
 			@Override
 			protected Source load() {
-				Repository repository = GitPlex.getInstance(Dao.class).load(Repository.class, 2L);
-				org.eclipse.jgit.lib.Repository jgitRepo = repository.openAsJGitRepo();
-				try {
-					RevTree revTree = new RevWalk(jgitRepo).parseCommit(repository.resolveRevision("master")).getTree();
-					TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, 
-							"gitplex.core/src/main/java/com/pmease/gitplex/core/manager/impl/DefaultPullRequestManager.java", 
-							revTree);
-					ObjectLoader objectLoader = jgitRepo.open(treeWalk.getObjectId(0));
-					String content = new String(objectLoader.getCachedBytes());
-					return new Source("master", treeWalk.getPathString(), content);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				} finally {
-					jgitRepo.close();
-				}
-				
+				return openBlob(blobPath);
 			}
 			
 		}) {
@@ -153,7 +146,9 @@ public class TestPage extends BasePage {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-						System.out.println(hit.getBlobPath() + ": " + hit.getLineNo());
+						blobPath = hit.getBlobPath();
+						activeLine = hit.getLineNo();
+						target.add(sourceView);
 					}
 					
 				};
@@ -161,8 +156,31 @@ public class TestPage extends BasePage {
 				getPage().get("searchResult").replaceWith(searchResult);
 				target.add(searchResult);
 			}
+
+			@Override
+			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
+				blobPath = hit.getBlobPath();
+				activeLine = hit.getLineNo();
+				target.add(this);
+			}
 			
 		});
+	}
+	
+	private Source openBlob(String blobPath) {
+		Repository repository = GitPlex.getInstance(Dao.class).load(Repository.class, 2L);
+		org.eclipse.jgit.lib.Repository jgitRepo = repository.openAsJGitRepo();
+		try {
+			RevTree revTree = new RevWalk(jgitRepo).parseCommit(repository.resolveRevision("master")).getTree();
+			TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobPath, revTree);
+			ObjectLoader objectLoader = jgitRepo.open(treeWalk.getObjectId(0));
+			String content = new String(objectLoader.getCachedBytes());
+			return new Source("master", treeWalk.getPathString(), content, activeLine);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} finally {
+			jgitRepo.close();
+		}
 	}
 
 	@Override

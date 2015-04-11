@@ -1,15 +1,5 @@
 gitplex.sourceview = {
-	init: function(codeContainerId, fileContent, filePath, ajaxIndicatorUrl, symbolQuery) {
-		/*
-		var editor = ace.edit(codeId);
-		var modeList = ace.require("ace/ext/modelist");
-		editor.setTheme("ace/theme/eclipse");
-		editor.setReadOnly(true);
-		editor.getSession().setMode(modeList.getModeForPath(filePath).mode);
-		editor.getSession().selection.on("changeCursor", function(e) {
-		}); 		
-		*/
-		
+	init: function(codeContainerId, fileContent, filePath, activeLine, ajaxIndicatorUrl, symbolQuery) {
 		var $codeContainer = $("#" + codeContainerId);
 		var options = {
 			value: fileContent, 
@@ -40,6 +30,13 @@ gitplex.sourceview = {
 	    var modeInfo = CodeMirror.findModeByFileName(filePath);
 	    editor.setOption("mode", modeInfo.mime);
 		CodeMirror.autoLoadMode(editor, modeInfo.mode);
+		
+		if (activeLine) {
+			editor.setCursor(activeLine);
+			var h = editor.getScrollInfo().clientHeight;
+			var coords = editor.charCoords({line: activeLine, ch: 0}, "local");
+			editor.scrollTo(null, (coords.top + coords.bottom - h) / 2); 			
+		}
 	}, 
 	
 	symbolsQueried: function(codeContainerId, symbolsContainerId) {
@@ -49,4 +46,5 @@ gitplex.sourceview = {
 		$symbolsContainer.children().appendTo($tooltipContainer);
 		$tooltipContainer.align();
 	}
+	
 }

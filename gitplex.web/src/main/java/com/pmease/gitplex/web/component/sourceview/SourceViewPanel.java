@@ -84,7 +84,7 @@ public abstract class SourceViewPanel extends Panel {
 
 			@Override
 			protected void populateItem(ListItem<QueryHit> item) {
-				QueryHit hit = item.getModelObject();
+				final QueryHit hit = item.getModelObject();
 				item.add(new Image("icon", hit.getIcon()) {
 
 					@Override
@@ -97,6 +97,11 @@ public abstract class SourceViewPanel extends Panel {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
+						String script = String.format(
+								"$('#%s .CodeMirror')[0].CodeMirror.hideTokenHover();", 
+								codeContainer.getMarkupId());
+						target.prependJavaScript(script);
+						onSelect(target, hit);
 					}
 					
 				};
@@ -179,18 +184,24 @@ public abstract class SourceViewPanel extends Panel {
 				response.render(CssHeaderItem.forReference(
 						new CssResourceReference(SourceViewPanel.class, "source-view.css")));
 				
+				Source source = sourceModel.getObject();
 				ResourceReference ajaxIndicator =  new PackageResourceReference(SourceViewPanel.class, "ajax-indicator.gif");
-				String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', '%s', %s);", 
+				String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', %s);", 
 						codeContainer.getMarkupId(), 
-						StringEscapeUtils.escapeEcmaScript(sourceModel.getObject().getContent()),
-						sourceModel.getObject().getPath(), 
+						StringEscapeUtils.escapeEcmaScript(source.getContent()),
+						source.getPath(), 
+						source.getActiveLine()!=null?source.getActiveLine():"undefined",
 						RequestCycle.get().urlFor(ajaxIndicator, new PageParameters()), 
 						getCallbackFunction(CallbackParameter.explicit("symbol")));
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			
 		});		
+		
+		setOutputMarkupId(true);
 	}
+	
+	protected abstract void onSelect(AjaxRequestTarget target, QueryHit hit);
 	
 	protected abstract void onCompleteOccurrencesSearch(AjaxRequestTarget target, List<QueryHit> hits);
 	
