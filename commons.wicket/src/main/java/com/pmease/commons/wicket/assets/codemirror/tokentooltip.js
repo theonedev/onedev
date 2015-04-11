@@ -9,6 +9,7 @@
 	"use strict";
 
 	var DEFAULT_TOOLTIP_CLASS = "CodeMirror-tokentooltip";
+	var DEFAULT_HOVER_CLASS = "CodeMirror-tokenhover";
 	var DEFAULT_DELAY = 250;
 
 	function TokenHoverState(cm, options) {
@@ -17,6 +18,8 @@
 			this.options.delay = DEFAULT_DELAY;
 		if (!this.options.tooltipClass)
 			this.options.tooltipClass = DEFAULT_TOOLTIP_CLASS;
+		if (!this.options.hoverClass)
+			this.options.hoverClass = DEFAULT_HOVER_CLASS;
 		this.onMouseOver = function(e) {onMouseOver(cm, e);};	
 	}
 
@@ -27,6 +30,7 @@
 			state.tooltip.hideTimeout = setTimeout(function(){
 				if (state.tooltip) {
 					$(state.tooltip).remove();
+					$(state.tooltip.node).removeClass(state.options.hoverClass);
 					state.tooltip = null;
 				}
 			}, state.options.delay);
@@ -47,34 +51,32 @@
 		}
 	}
 	
-	function isMouseNearbyCursor(e) {
-		var $cursor = $(".CodeMirror-cursor");
-		if ($cursor.length != 0) {
-			var offset = $cursor.offset();
-			var left = offset.left, top = offset.top;
-			var width = $cursor.outerWidth(), height = $cursor.outerHeight();
-			var tolerance = 2;
-			return e.clientX>=left-tolerance && e.clientX<=left+width+tolerance 
-					&& e.clientY>=top-tolerance && e.clientY<=top+height+tolerance;
-		} else {
-			return false;
-		}
+	function isMouseNearbyCursor(cm, e) {
+		return isMouseNearbyCoords(e, cm.cursorCoords(true)) || isMouseNearbyCoords(e, cm.cursorCoords(false)); 
+	}
+	
+	function isMouseNearbyCoords(e, coords) {
+		var left = coords.left, top = coords.top, right = coords.right, bottom = coords.bottom;
+		var tolerance = 2;
+		return e.clientX>=left-tolerance && e.clientX<=right+tolerance 
+				&& e.clientY>=top-tolerance && e.clientY<=bottom+tolerance;
 	}
 	
 	function onMouseOver(cm, e) {
 		var state = cm.state.tokenHover;
 		var node = e.target || e.srcElement, $node = $(node);
-		if ($node.hasClass("cm-property") || $node.hasClass("cm-variable") 
-				|| $node.hasClass("cm-variable-2") || $node.hasClass("cm-variable-3")
-				|| $node.hasClass("cm-def")) {
-			if (!isMouseNearbyCursor(e) && !state.showTimeout) {
-				state.onMouseOutOrClick = function(e) {
+		if ($node.hasClass("cm-property") || $node.hasClass("cm-variable") || $node.hasClass("cm-variable-2") 
+				|| $node.hasClass("cm-variable-3") || $node.hasClass("cm-def")) {
+			// only show tooltip when mouse is not nearby cursor as otherwise blink of the 
+			// cursor may cause many mouseover/mouseout events to underlying token
+			if (!isMouseNearbyCursor(cm, e) && !state.showTimeout) {
+				state.onMouseOutOrUpOrDown = function(e) {
 					prepareToHide(state);
 					cancelShow(state);
-					$node.off("mouseout click", state.onMouseOutOrClick);
+					$node.off("mouseout mousedown mouseup", state.onMouseOutOrUpOrDown);
 					$node.off("mousemove", state.onMouseMove);
 				};
-				$node.on("mouseout click", state.onMouseOutOrClick);
+				$node.on("mouseout mousedown mouseup", state.onMouseOutOrUpOrDown);
 				
 				state.onMouseMove = function() {
 					if (state.tooltip && state.tooltip.node == node)
@@ -83,9 +85,12 @@
 				$node.on("mousemove", state.onMouseMove);
 				
 				state.showTimeout = setTimeout(function() {
-					if (!state.tooltip) {
+					// node is not visible for some reason when we triple click to select a line, in this case
+					// we should not display the tooltip as we can not align to an invisible node
+					if (!state.tooltip && $node.is(":visible")) {  
 						state.tooltip = state.options.getTooltip(node);
 						state.tooltip.node = node;
+						$node.addClass(state.options.hoverClass);
 						
 						var $tooltip = $(state.tooltip);
 						$tooltip.addClass(state.options.tooltipClass);
