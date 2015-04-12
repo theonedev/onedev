@@ -5,9 +5,12 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
 import com.pmease.commons.lang.Symbol;
+import com.pmease.commons.lang.java.icons.Icons;
 
 public class CompilationUnit extends JavaSymbol {
 	
@@ -27,11 +30,6 @@ public class CompilationUnit extends JavaSymbol {
 		if (packageName != null)
 			builder.append("package ").append(packageName).append(";\n\n");
 		
-		for (Symbol symbol: symbols) {
-			if (symbol.getParent() == this)
-				builder.append(symbol.describe(symbols)).append("\n\n");
-		}
-		
 		return builder.toString();
 	}
 
@@ -46,17 +44,17 @@ public class CompilationUnit extends JavaSymbol {
 
 	@Override
 	public Component render(String componentId) {
-		throw new UnsupportedOperationException();
+		return new Label(componentId, packageName);
 	}
 
 	@Override
 	public ResourceReference getIcon() {
-		throw new UnsupportedOperationException();
+		return new PackageResourceReference(Icons.class, "package_obj.png");
 	}
 
 	@Override
 	public String getScope() {
-		throw new UnsupportedOperationException();
+		return packageName;
 	}
-	
+
 }

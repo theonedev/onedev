@@ -23,11 +23,15 @@ public class TypeDef extends JavaSymbol {
 
 	private final Kind kind;
 	
+	private final String packageName;
+	
 	private final List<Modifier> modifiers;
 
-	public TypeDef(@Nullable Symbol parent, String name, int lineNo, Kind kind, List<Modifier> modifiers) {
+	public TypeDef(@Nullable Symbol parent, @Nullable String packageName, 
+			String name, int lineNo, Kind kind, List<Modifier> modifiers) {
 		super(parent, name, lineNo);
-		
+
+		this.packageName = packageName;
 		this.kind = kind;
 		this.modifiers = modifiers;
 	}
@@ -43,6 +47,10 @@ public class TypeDef extends JavaSymbol {
 	@Override
 	public Component render(String componentId) {
 		return new Label(componentId, getName());
+	}
+
+	public String getPackageName() {
+		return packageName;
 	}
 
 	@Override
@@ -93,9 +101,25 @@ public class TypeDef extends JavaSymbol {
 			}
 		}
 		
-		builder.append("}");
+		builder.append("}\n\n");
 		
 		return builder.toString();
+	}
+
+	@Override
+	public String getScope() {
+		if (getParent() != null) {
+			String scope = getParent().getScope();
+			if (scope != null)
+				return scope + "." + getParent().getName();
+			else
+				return getParent().getName();
+		} else {
+			if (packageName != null)
+				return packageName;
+			else
+				return null;
+		}
 	}
 
 	@Override

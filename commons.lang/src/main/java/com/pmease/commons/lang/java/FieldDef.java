@@ -72,4 +72,13 @@ public class FieldDef extends JavaSymbol {
 		return new PackageResourceReference(Icons.class, icon);
 	}
 
+	@Override
+	public String getScope() {
+		String scope = getParent().getScope();
+		if (scope != null)
+			return scope + "." + getParent().getName();
+		else
+			return getParent().getName();
+	}
+
 }

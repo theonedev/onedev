@@ -103,7 +103,7 @@ public class JavaExtractor extends AbstractExtractor {
 				token = stream.next();
 			if (!token.isEof()) {
 				List<Modifier> modifiers = skipModifiers(stream);
-				defineType(stream, symbols, compilationUnit, modifiers);
+				defineType(stream, symbols, null, compilationUnit.getPackageName(), modifiers);
 				token = stream.next();
 			} else {
 				break;
@@ -119,7 +119,7 @@ public class JavaExtractor extends AbstractExtractor {
 	 * @before-token: '{' or ';' (';' occurs inside of a enum definition)
 	 * @after-token: '}'
 	 */
-	private void defineTypeBody(LangStream stream, List<Symbol> symbols, TypeDef parent) {
+	private void defineTypeBody(LangStream stream, List<Symbol> symbols, TypeDef parent, String packageName) {
 		LangToken token = stream.next();
 		while(true) {
 			while (token.is(SEMI))
@@ -141,7 +141,7 @@ public class JavaExtractor extends AbstractExtractor {
 					token = stream.next();
 				}
 				if (token.is(CLASS, INTERFACE, ENUM) || token.is(AT) && stream.lookAhead(1).is(INTERFACE)) {
-					defineType(stream, symbols, parent, modifiers);
+					defineType(stream, symbols, parent, packageName, modifiers);
 				} else {
 					skipModifiers(stream); // skip annotations applied to method return type
 					token = stream.current();
@@ -443,31 +443,31 @@ public class JavaExtractor extends AbstractExtractor {
 	 * @before-token: 'class', 'interface', 'enum', or '@interface'
 	 * @after-token: '}'
 	 */
-	private void defineType(LangStream stream, List<Symbol> symbols, Symbol parent, List<Modifier> modifiers) {
+	private void defineType(LangStream stream, List<Symbol> symbols, Symbol parent, String packageName, List<Modifier> modifiers) {
 		LangToken token = stream.current();
 		if (token.is(AT) && stream.lookAhead(1).is(INTERFACE)) {
 			stream.next().checkType(INTERFACE); // 'interface'
 			stream.next().checkType(Identifier); // identifier
 			token = defineTypeHead(stream);
-			TypeDef typeDef = new TypeDef(parent, token.getText(), token.getLine(), TypeDef.Kind.ANNOTATION, modifiers);			
+			TypeDef typeDef = new TypeDef(parent, packageName, token.getText(), token.getLine(), TypeDef.Kind.ANNOTATION, modifiers);			
 			symbols.add(typeDef);
-			defineTypeBody(stream, symbols, typeDef);
+			defineTypeBody(stream, symbols, typeDef, packageName);
 		} else if (token.is(CLASS)) {
 			stream.next().checkType(Identifier); // identifier
 			token = defineTypeHead(stream);
-			TypeDef typeDef = new TypeDef(parent, token.getText(), token.getLine(), TypeDef.Kind.CLASS, modifiers);			
+			TypeDef typeDef = new TypeDef(parent, packageName, token.getText(), token.getLine(), TypeDef.Kind.CLASS, modifiers);			
 			symbols.add(typeDef);
-			defineTypeBody(stream, symbols, typeDef);
+			defineTypeBody(stream, symbols, typeDef, packageName);
 		} else if (token.is(INTERFACE)) {
 			stream.next().checkType(Identifier); // identifier
 			token = defineTypeHead(stream);
-			TypeDef typeDef = new TypeDef(parent, token.getText(), token.getLine(), TypeDef.Kind.INTERFACE, modifiers);			
+			TypeDef typeDef = new TypeDef(parent, packageName, token.getText(), token.getLine(), TypeDef.Kind.INTERFACE, modifiers);			
 			symbols.add(typeDef);
-			defineTypeBody(stream, symbols, typeDef);
+			defineTypeBody(stream, symbols, typeDef, packageName);
 		} else { 
 			stream.next().checkType(Identifier); // identifier
 			token = defineTypeHead(stream);
-			TypeDef typeDef = new TypeDef(parent, token.getText(), token.getLine(), TypeDef.Kind.ENUM, modifiers);			
+			TypeDef typeDef = new TypeDef(parent, packageName, token.getText(), token.getLine(), TypeDef.Kind.ENUM, modifiers);			
 			symbols.add(typeDef);
 			
 			// process enum constants
@@ -495,7 +495,7 @@ public class JavaExtractor extends AbstractExtractor {
 			}
 			
 			if (token.is(SEMI))
-				defineTypeBody(stream, symbols, typeDef);
+				defineTypeBody(stream, symbols, typeDef, packageName);
 		}
 	}
 	

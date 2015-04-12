@@ -89,5 +89,14 @@ public class MethodDef extends JavaSymbol {
 			icon = "methdef_obj.png";
 		return new PackageResourceReference(Icons.class, icon);
 	}
+
+	@Override
+	public String getScope() {
+		String scope = getParent().getScope();
+		if (scope != null)
+			return scope + "." + getParent().getName();
+		else
+			return getParent().getName();
+	}
 	
 }

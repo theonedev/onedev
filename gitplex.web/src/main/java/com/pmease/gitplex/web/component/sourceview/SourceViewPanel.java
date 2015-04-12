@@ -29,6 +29,9 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
+import com.pmease.commons.lang.Extractor;
+import com.pmease.commons.lang.Extractors;
+import com.pmease.commons.lang.Symbol;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.gitplex.core.GitPlex;
@@ -48,9 +51,11 @@ public abstract class SourceViewPanel extends Panel {
 	
 	private final IModel<Repository> repoModel;
 	
-	private final IModel<Source> sourceModel;
+	private final Source source;
 	
 	private Component codeContainer;
+	
+	private OutlinePanel outlinePanel;
 	
 	private WebMarkupContainer symbolsContainer;
 	
@@ -58,19 +63,59 @@ public abstract class SourceViewPanel extends Panel {
 	
 	private List<QueryHit> symbolHits = new ArrayList<>();
 	
-	public SourceViewPanel(String id, IModel<Repository> repoModel, IModel<Source> sourceModel) {
+	private boolean displayOutline;
+	
+	private final List<Symbol> symbols;
+	
+	public SourceViewPanel(String id, IModel<Repository> repoModel, Source source) {
 		super(id);
 		
 		this.repoModel = repoModel;
-		this.sourceModel = sourceModel;
+		this.source = source;
+		
+		Extractor extractor = GitPlex.getInstance(Extractors.class).getExtractor(source.getPath());
+		if (extractor != null)
+			symbols = extractor.extract(source.getContent());
+		else
+			symbols = new ArrayList<>();
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+
+		add(new AjaxLink<Void>("outlineToggle") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				displayOutline = !displayOutline;
+				target.add(outlinePanel);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisible(!symbols.isEmpty());
+			}
+			
+		});
 		
 		add(codeContainer = new WebMarkupContainer("code"));
 		codeContainer.setOutputMarkupId(true);
+		
+		add(outlinePanel = new OutlinePanel("outline", symbols) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisible(displayOutline);
+			}
+			
+		}); 
+		outlinePanel.setOutputMarkupPlaceholderTag(true);
+		
 		add(symbolsContainer = new WebMarkupContainer("symbols"));
 		symbolsContainer.setOutputMarkupId(true);
 		symbolsContainer.add(new ListView<QueryHit>("declarations", new AbstractReadOnlyModel<List<QueryHit>>() {
@@ -136,7 +181,7 @@ public abstract class SourceViewPanel extends Panel {
 						try {
 							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 							List<QueryHit> hits = searchManager.search(repoModel.getObject(), 
-									sourceModel.getObject().getRevision(), query);
+									source.getRevision(), query);
 							onCompleteOccurrencesSearch(target, hits);
 						} catch (InterruptedException e) {
 							throw new RuntimeException(e);
@@ -163,7 +208,7 @@ public abstract class SourceViewPanel extends Panel {
 				SymbolQuery query = new SymbolQuery(symbol, false, true, true, MAX_DECLARATION_QUERY_ENTRIES);
 				try {
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-					symbolHits = searchManager.search(repoModel.getObject(), sourceModel.getObject().getRevision(), query);
+					symbolHits = searchManager.search(repoModel.getObject(), source.getRevision(), query);
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
 				}								
@@ -184,7 +229,6 @@ public abstract class SourceViewPanel extends Panel {
 				response.render(CssHeaderItem.forReference(
 						new CssResourceReference(SourceViewPanel.class, "source-view.css")));
 				
-				Source source = sourceModel.getObject();
 				ResourceReference ajaxIndicator =  new PackageResourceReference(SourceViewPanel.class, "ajax-indicator.gif");
 				String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', %s);", 
 						codeContainer.getMarkupId(), 
@@ -208,9 +252,16 @@ public abstract class SourceViewPanel extends Panel {
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
-		sourceModel.detach();
 		
 		super.onDetach();
+	}
+
+	public boolean isDisplayOutline() {
+		return displayOutline;
+	}
+
+	public void setDisplayOutline(boolean displayOutline) {
+		this.displayOutline = displayOutline;
 	}
 
 }

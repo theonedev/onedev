@@ -1,54 +1,50 @@
 package com.pmease.gitplex.web.page;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import com.pmease.commons.git.Commit;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.IndexManager;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
-import com.pmease.gitplex.search.query.BlobQuery;
-import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.web.component.search.BlobAdvancedSearchResultPanel;
-import com.pmease.gitplex.web.component.search.BlobSearchPanel;
 import com.pmease.gitplex.web.component.sourceview.Source;
 import com.pmease.gitplex.web.component.sourceview.SourceViewPanel;
 
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
 
+	private IModel<Repository> repoModel = new LoadableDetachableModel<Repository>() {
+
+		@Override
+		protected Repository load() {
+			return GitPlex.getInstance(Dao.class).load(Repository.class, 2L);
+		}
+		
+	};
+
+	private String revision = "master";
+	
 	private String blobPath = "gitplex.core/src/main/java/com/pmease/gitplex/core/manager/impl/DefaultPullRequestManager.java";
-	
-	private Integer activeLine;
-	
-	private SourceViewPanel sourceView;
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		/*
 		add(new Link<Void>("testIndex") {
 
 			@Override
 			public void onClick() {
-				Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 2L);
 				IndexManager indexManager = GitPlex.getInstance(IndexManager.class);
 				Date since;
 				try {
@@ -58,12 +54,12 @@ public class TestPage extends BasePage {
 				}
 				
 				long time = System.currentTimeMillis();
-				List<Commit> commits = repo.git().log(since, null, null, 0, 0);
+				List<Commit> commits = repoModel.getObject().git().log(since, null, null, 0, 0);
 				System.out.println("Total commits to index: " + commits.size());
 				int count = 0;
 				for (Commit commit: commits) {
 					System.out.println("" + (count++) + ": " + commit.getCommitter().getWhen());
-					indexManager.index(repo, commit.getHash());			
+					indexManager.index(repoModel.getObject(), commit.getHash());			
 				}
 				System.out.println("Total Minutes: " + (System.currentTimeMillis()-time)/1000/60);
 			}
@@ -102,7 +98,14 @@ public class TestPage extends BasePage {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-				System.out.println(hit.getBlobPath() + ": " + hit.getLineNo());
+				Source newSource = openBlob(hit.getBlobPath(), hit.getLineNo());
+				SourceViewPanel newSourceView = new SourceViewPanel(sourceView.getId(), repoModel, newSource) {
+					
+				};
+				sourceView.replaceWith(replacement);
+				blobPath = hit.getBlobPath();
+				activeLine = hit.getLineNo();
+				target.add(sourceView);
 			}
 
 			@Override
@@ -123,22 +126,20 @@ public class TestPage extends BasePage {
 			}
 			
 		});
+		*/
 		
-		add(sourceView = new SourceViewPanel("sourceView", new LoadableDetachableModel<Repository>() {
+		add(newSourceView("sourceView", blobPath, null));
+		add(new WebMarkupContainer("searchResult").setOutputMarkupId(true));
+	}
+	
+	private SourceViewPanel newSourceView(final String id, String blobPath, Integer activeLine) {
+		Source source = openBlob(blobPath, activeLine);
+		SourceViewPanel sourceView = new SourceViewPanel(id, repoModel, source) {
 
 			@Override
-			protected Repository load() {
-				return GitPlex.getInstance(Dao.class).load(Repository.class, 2L);
+			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
+				target.add(getPage().replace(newSourceView(id, hit.getBlobPath(), hit.getLineNo())));
 			}
-			
-		}, new LoadableDetachableModel<Source>() {
-
-			@Override
-			protected Source load() {
-				return openBlob(blobPath);
-			}
-			
-		}) {
 
 			@Override
 			protected void onCompleteOccurrencesSearch(AjaxRequestTarget target, List<QueryHit> hits) {
@@ -146,36 +147,28 @@ public class TestPage extends BasePage {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-						blobPath = hit.getBlobPath();
-						activeLine = hit.getLineNo();
-						target.add(sourceView);
+						target.add(newSourceView(id, hit.getBlobPath(), hit.getLineNo()));
 					}
 					
 				};
 				searchResult.setOutputMarkupId(true);
-				getPage().get("searchResult").replaceWith(searchResult);
+				getPage().replace(searchResult);
 				target.add(searchResult);
 			}
-
-			@Override
-			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-				blobPath = hit.getBlobPath();
-				activeLine = hit.getLineNo();
-				target.add(this);
-			}
 			
-		});
+		};
+		sourceView.setOutputMarkupId(true);
+		return sourceView;
 	}
 	
-	private Source openBlob(String blobPath) {
-		Repository repository = GitPlex.getInstance(Dao.class).load(Repository.class, 2L);
-		org.eclipse.jgit.lib.Repository jgitRepo = repository.openAsJGitRepo();
+	private Source openBlob(String blobPath, Integer activeLine) {
+		org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
 		try {
-			RevTree revTree = new RevWalk(jgitRepo).parseCommit(repository.resolveRevision("master")).getTree();
+			RevTree revTree = new RevWalk(jgitRepo).parseCommit(repoModel.getObject().resolveRevision(revision)).getTree();
 			TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobPath, revTree);
 			ObjectLoader objectLoader = jgitRepo.open(treeWalk.getObjectId(0));
 			String content = new String(objectLoader.getCachedBytes());
-			return new Source("master", treeWalk.getPathString(), content, activeLine);
+			return new Source(revision, treeWalk.getPathString(), content, activeLine);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} finally {
@@ -184,8 +177,9 @@ public class TestPage extends BasePage {
 	}
 
 	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
+	protected void onDetach() {
+		repoModel.detach();
+		super.onDetach();
 	}
 
 }
