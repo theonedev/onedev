@@ -128,11 +128,11 @@ public class TestPage extends BasePage {
 		});
 		*/
 		
-		add(newSourceView("sourceView", blobPath, null));
+		add(newSourceView("sourceView", blobPath, 0));
 		add(new WebMarkupContainer("searchResult").setOutputMarkupId(true));
 	}
 	
-	private SourceViewPanel newSourceView(final String id, String blobPath, Integer activeLine) {
+	private SourceViewPanel newSourceView(final String id, String blobPath, int activeLine) {
 		Source source = openBlob(blobPath, activeLine);
 		SourceViewPanel sourceView = new SourceViewPanel(id, repoModel, source) {
 
@@ -161,7 +161,7 @@ public class TestPage extends BasePage {
 		return sourceView;
 	}
 	
-	private Source openBlob(String blobPath, Integer activeLine) {
+	private Source openBlob(String blobPath, int activeLine) {
 		org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
 		try {
 			RevTree revTree = new RevWalk(jgitRepo).parseCommit(repoModel.getObject().resolveRevision(revision)).getTree();

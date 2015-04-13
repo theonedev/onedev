@@ -2,8 +2,6 @@ package com.pmease.gitplex.web.component.sourceview;
 
 import java.io.Serializable;
 
-import javax.annotation.Nullable;
-
 @SuppressWarnings("serial")
 public class Source implements Serializable {
 
@@ -13,9 +11,9 @@ public class Source implements Serializable {
 	
 	private final String content;
 	
-	private final Integer activeLine;
+	private final int activeLine;
 	
-	public Source(String revision, String path, String content, @Nullable Integer activeLine) {
+	public Source(String revision, String path, String content, int activeLine) {
 		this.revision = revision;
 		this.path = path;
 		this.content = content;
@@ -34,7 +32,7 @@ public class Source implements Serializable {
 		return content;
 	}
 
-	public Integer getActiveLine() {
+	public int getActiveLine() {
 		return activeLine;
 	}
 	

@@ -9,6 +9,7 @@ import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -41,6 +42,7 @@ import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
+import com.pmease.gitplex.web.GitPlexSession;
 
 @SuppressWarnings("serial")
 public abstract class SourceViewPanel extends Panel {
@@ -62,8 +64,6 @@ public abstract class SourceViewPanel extends Panel {
 	private String symbol = "";
 	
 	private List<QueryHit> symbolHits = new ArrayList<>();
-	
-	private boolean displayOutline;
 	
 	private final List<Symbol> symbols;
 	
@@ -88,8 +88,9 @@ public abstract class SourceViewPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				displayOutline = !displayOutline;
-				target.add(outlinePanel);
+				GitPlexSession session = GitPlexSession.get();
+				session.setDisplayOutline(!session.isDisplayOutline());
+				target.appendJavaScript(String.format("gitplex.sourceview.toggleOutline('%s');", outlinePanel.getMarkupId()));
 			}
 
 			@Override
@@ -104,17 +105,9 @@ public abstract class SourceViewPanel extends Panel {
 		add(codeContainer = new WebMarkupContainer("code"));
 		codeContainer.setOutputMarkupId(true);
 		
-		add(outlinePanel = new OutlinePanel("outline", symbols) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				setVisible(displayOutline);
-			}
-			
-		}); 
-		outlinePanel.setOutputMarkupPlaceholderTag(true);
+		add(outlinePanel = new OutlinePanel("outline", symbols)); 
+		if (!GitPlexSession.get().isDisplayOutline())
+			outlinePanel.add(AttributeAppender.append("style", "display:none;"));
 		
 		add(symbolsContainer = new WebMarkupContainer("symbols"));
 		symbolsContainer.setOutputMarkupId(true);
@@ -234,7 +227,7 @@ public abstract class SourceViewPanel extends Panel {
 						codeContainer.getMarkupId(), 
 						StringEscapeUtils.escapeEcmaScript(source.getContent()),
 						source.getPath(), 
-						source.getActiveLine()!=null?source.getActiveLine():"undefined",
+						source.getActiveLine(),
 						RequestCycle.get().urlFor(ajaxIndicator, new PageParameters()), 
 						getCallbackFunction(CallbackParameter.explicit("symbol")));
 				response.render(OnDomReadyHeaderItem.forScript(script));
@@ -254,14 +247,6 @@ public abstract class SourceViewPanel extends Panel {
 		repoModel.detach();
 		
 		super.onDetach();
-	}
-
-	public boolean isDisplayOutline() {
-		return displayOutline;
-	}
-
-	public void setDisplayOutline(boolean displayOutline) {
-		this.displayOutline = displayOutline;
 	}
 
 }

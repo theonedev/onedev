@@ -16,6 +16,8 @@ public class GitPlexSession extends WebSession {
 
 	private static final long serialVersionUID = 1L;
 
+	private boolean displayOutline;
+	
 	public GitPlexSession(Request request) {
 		super(request);
 	}
@@ -55,6 +57,14 @@ public class GitPlexSession extends WebSession {
 		UsernamePasswordToken token;
 		token = new UsernamePasswordToken(loginName, password, remember);
 		currentUser.login(token);
+	}
+
+	public boolean isDisplayOutline() {
+		return displayOutline;
+	}
+
+	public void setDisplayOutline(boolean displayOutline) {
+		this.displayOutline = displayOutline;
 	}
 
 }

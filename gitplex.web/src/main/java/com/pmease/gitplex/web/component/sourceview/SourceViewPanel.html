@@ -3,12 +3,10 @@
 		<div class="head">
 			<a wicket:id="outlineToggle" title="Toggle outline"><i class="fa fa-list-ul"></i></a>
 		</div>
-		<table class="body">
-			<tr>
-				<td class="code"><div wicket:id="code"></div></td>
-				<td class="outline"><div wicket:id="outline"></div></td>
-			</tr>
-		</table>
+		<div class="body clearfix">
+			<div wicket:id="code" class="code pull-left"></div>
+			<div wicket:id="outline" class="outline pull-left"></div>
+		</div>
 		<div wicket:id="symbols" class="hidden">
 			<wicket:enclosure child="declarations">
 			<div>Declaration occurrences of this name</div>

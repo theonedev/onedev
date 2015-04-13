@@ -12,19 +12,16 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.lang.Symbol;
 
 @SuppressWarnings("serial")
-public class OutlinePanel extends Panel {
+class OutlinePanel extends Panel {
 
 	private final List<Symbol> symbols;
 	
@@ -84,7 +81,7 @@ public class OutlinePanel extends Panel {
 			@Override
 			protected Component newContentComponent(String id, IModel<Symbol> nodeModel) {
 				Fragment fragment = new Fragment(id, "nodeFrag", OutlinePanel.this);
-				Symbol symbol = nodeModel.getObject();
+				final Symbol symbol = nodeModel.getObject();
 				
 				fragment.add(new Image("icon", symbol.getIcon()));
 				
@@ -92,6 +89,9 @@ public class OutlinePanel extends Panel {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
+						String script = String.format("gitplex.sourceview.gotoSymbol('%s', %d);", 
+								OutlinePanel.this.getMarkupId(), symbol.getLineNo());
+						target.appendJavaScript(script);
 					}
 					
 				};
@@ -105,14 +105,8 @@ public class OutlinePanel extends Panel {
 		
 		for (Symbol root: getChildSymbols(null))
 			tree.expand(root);
+		
+		setOutputMarkupId(true);
 	}
 	
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(SourceViewPanel.class, "source-view.css")));
-	}
-
 }
