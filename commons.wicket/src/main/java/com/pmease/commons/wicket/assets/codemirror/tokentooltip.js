@@ -21,6 +21,13 @@
 		if (!this.options.hoverClass)
 			this.options.hoverClass = DEFAULT_HOVER_CLASS;
 		this.onMouseOver = function(e) {onMouseOver(cm, e);};	
+		
+		var self = this;
+		self.mousePressed = 0;
+		this.onMouseMove = function(e) {self.mouseMoved = true;};
+		this.onMouseDown = function(e) {self.mousePressed++; self.mouseMoved=false;};
+		this.onMouseUp = function(e) {self.mousePressed--; self.mouseMoved=false;};
+		this.onScroll = function(e) {self.mouseMoved = false;};
 	}
 
 	function prepareToHide(state) {
@@ -51,38 +58,28 @@
 		}
 	}
 	
-	function isMouseNearbyCursor(cm, e) {
-		return isMouseNearbyCoords(e, cm.cursorCoords(true)) || isMouseNearbyCoords(e, cm.cursorCoords(false)); 
-	}
-	
-	function isMouseNearbyCoords(e, coords) {
-		var left = coords.left, top = coords.top, right = coords.right, bottom = coords.bottom;
-		var tolerance = 2;
-		return e.clientX>=left-tolerance && e.clientX<=right+tolerance 
-				&& e.clientY>=top-tolerance && e.clientY<=bottom+tolerance;
-	}
-	
 	function onMouseOver(cm, e) {
 		var state = cm.state.tokenHover;
 		var node = e.target || e.srcElement, $node = $(node);
 		if ($node.hasClass("cm-property") || $node.hasClass("cm-variable") || $node.hasClass("cm-variable-2") 
 				|| $node.hasClass("cm-variable-3") || $node.hasClass("cm-def")) {
-			// only show tooltip when mouse is not nearby cursor as otherwise blink of the 
-			// cursor may cause many mouseover/mouseout events to underlying token
-			if (!isMouseNearbyCursor(cm, e) && !state.showTimeout) {
-				state.onMouseOutOrUpOrDown = function(e) {
+			// we do not want to show token tooltip too frequently to trouble the user, so only display 
+			// it if you moves the mouse intentionally over to the element without pressing the mouse
+			// button
+			if (!state.mousePressed && state.mouseMoved && !state.showTimeout) {
+				state.onNodeMouseOutOrUpOrDown = function(e) {
 					prepareToHide(state);
 					cancelShow(state);
-					$node.off("mouseout mousedown mouseup", state.onMouseOutOrUpOrDown);
-					$node.off("mousemove", state.onMouseMove);
+					$node.off("mouseout mousedown mouseup", state.onNodeMouseOutOrUpOrDown);
+					$node.off("mousemove", state.onNodeMouseMove);
 				};
-				$node.on("mouseout mousedown mouseup", state.onMouseOutOrUpOrDown);
+				$node.on("mouseout mousedown mouseup", state.onNodeMouseOutOrUpOrDown);
 				
-				state.onMouseMove = function() {
+				state.onNodeMouseMove = function() {
 					if (state.tooltip && state.tooltip.node == node)
 						cancelHide(state);
 				};
-				$node.on("mousemove", state.onMouseMove);
+				$node.on("mousemove", state.onNodeMouseMove);
 				
 				state.showTimeout = setTimeout(function() {
 					// node is not visible for some reason when we triple click to select a line, in this case
@@ -119,12 +116,20 @@
 	CodeMirror.defineOption("tokenHover", false, function(cm, val, old) {
 		if (old && old != CodeMirror.Init) {
 			CodeMirror.off(cm.getWrapperElement(), "mouseover", cm.state.tokenHover.onMouseOver);
+			CodeMirror.off(cm.getWrapperElement(), "mousemove", cm.state.tokenHover.onMouseMove);
+			CodeMirror.off(cm.getWrapperElement(), "mousedown", cm.state.tokenHover.onMouseDown);
+			CodeMirror.off(cm.getWrapperElement(), "mouseup", cm.state.tokenHover.onMouseUp);
+			cm.off("scroll", state.onScroll);
 			delete cm.state.tokenHover;
 		}
 
 		if (val) {
 			var state = cm.state.tokenHover = new TokenHoverState(cm, val);
 			CodeMirror.on(cm.getWrapperElement(), "mouseover", state.onMouseOver);
+			CodeMirror.on(cm.getWrapperElement(), "mousemove", state.onMouseMove);
+			CodeMirror.on(cm.getWrapperElement(), "mousedown", state.onMouseDown);
+			CodeMirror.on(cm.getWrapperElement(), "mouseup", state.onMouseUp);
+			cm.on("scroll", state.onScroll);
 		}
 	});
 	
