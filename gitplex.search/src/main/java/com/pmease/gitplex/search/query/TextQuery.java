@@ -17,6 +17,7 @@ import org.apache.lucene.search.Query;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.pmease.commons.util.Charsets;
 import com.pmease.gitplex.search.FieldConstants;
@@ -27,6 +28,8 @@ import com.pmease.gitplex.search.query.regex.RegexLiterals;
 
 public class TextQuery extends BlobQuery {
 
+	private static int MAX_LINE_LEN = 1024;
+	
 	public TextQuery(String searchFor, boolean regex, boolean matchWord, boolean caseSensitive, 
 			@Nullable String pathPrefix, @Nullable Collection<String> pathSuffixes, int count) {
 		super(FieldConstants.BLOB_TEXT.name(), searchFor, regex, matchWord, caseSensitive, 
@@ -52,17 +55,19 @@ public class TextQuery extends BlobQuery {
 					Pattern pattern = getPattern();
 					if (pattern != null) {
 						int lineNo = 0;
-						for (String line: Splitter.on("\n").split(content)) {
-							List<TextHit.Range> matches = new ArrayList<>();
-							Matcher matcher = pattern.matcher(line);
-							while (matcher.find())
-								matches.add(new TextHit.Range(matcher.start(), matcher.end()));
-							
-							if (!matches.isEmpty()) {
-								TextHit hit = new TextHit(blobPath, line, lineNo, matches);
-								hits.add(hit);
-								if (hits.size() >= getCount())
-									break;
+						for (String line: Splitter.on(CharMatcher.anyOf("\n\r")).split(content)) {
+							if (line.length() <= MAX_LINE_LEN) {
+								List<TextHit.Range> matches = new ArrayList<>();
+								Matcher matcher = pattern.matcher(line);
+								while (matcher.find())
+									matches.add(new TextHit.Range(matcher.start(), matcher.end()));
+								
+								if (!matches.isEmpty()) {
+									TextHit hit = new TextHit(blobPath, line, lineNo, matches);
+									hits.add(hit);
+									if (hits.size() >= getCount())
+										break;
+								}
 							}
 							lineNo++;
 						}

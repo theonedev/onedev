@@ -10,7 +10,7 @@
 
 	var DEFAULT_TOOLTIP_CLASS = "CodeMirror-tokentooltip";
 	var DEFAULT_HOVER_CLASS = "CodeMirror-tokenhover";
-	var DEFAULT_DELAY = 250;
+	var DEFAULT_DELAY = 500;
 
 	function TokenHoverState(cm, options) {
 		this.options = options;
@@ -33,7 +33,7 @@
 					$(state.tooltip.node).removeClass(state.options.hoverClass);
 					state.tooltip = null;
 				}
-			}, state.options.delay);
+			}, 200);
 		}
 	}
 	

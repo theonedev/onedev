@@ -1,7 +1,14 @@
 <wicket:panel>
 	<div class="source-view">
-		<div class="head">
-			<a wicket:id="outlineToggle" title="Toggle outline"><i class="fa fa-list-ul"></i></a>
+		<div class="head clearfix">
+			<div class="pull-left">
+				<span wicket:id="title" class="title"></span>
+			</div>
+			<div class="pull-right">
+				<a wicket:id="outlineToggle" title="Toggle outline" class="btn btn-sm btn-default outline-toggle">
+					<i class="fa fa-list-ul"></i>
+				</a>
+			</div>
 		</div>
 		<div class="body clearfix">
 			<div wicket:id="code" class="code pull-left"></div>

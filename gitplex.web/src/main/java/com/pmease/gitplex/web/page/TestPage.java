@@ -7,6 +7,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -17,6 +18,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.web.component.search.BlobAdvancedSearchResultPanel;
+import com.pmease.gitplex.web.component.search.BlobSearchPanel;
 import com.pmease.gitplex.web.component.sourceview.Source;
 import com.pmease.gitplex.web.component.sourceview.SourceViewPanel;
 
@@ -86,6 +88,7 @@ public class TestPage extends BasePage {
 		});
 		
 		add(new WebMarkupContainer("searchResult").setOutputMarkupId(true));
+		*/
 		
 		add(new BlobSearchPanel("searcher", new LoadableDetachableModel<Repository>() {
 
@@ -98,14 +101,7 @@ public class TestPage extends BasePage {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-				Source newSource = openBlob(hit.getBlobPath(), hit.getLineNo());
-				SourceViewPanel newSourceView = new SourceViewPanel(sourceView.getId(), repoModel, newSource) {
-					
-				};
-				sourceView.replaceWith(replacement);
-				blobPath = hit.getBlobPath();
-				activeLine = hit.getLineNo();
-				target.add(sourceView);
+				target.add(getPage().replace(newSourceView("sourceView", hit.getBlobPath(), hit.getLineNo())));
 			}
 
 			@Override
@@ -114,9 +110,7 @@ public class TestPage extends BasePage {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-						blobPath = hit.getBlobPath();
-						activeLine = hit.getLineNo();
-						target.add(sourceView);
+						target.add(getPage().replace(newSourceView("sourceView", hit.getBlobPath(), hit.getLineNo())));
 					}
 					
 				};
@@ -126,7 +120,6 @@ public class TestPage extends BasePage {
 			}
 			
 		});
-		*/
 		
 		add(newSourceView("sourceView", blobPath, 0));
 		add(new WebMarkupContainer("searchResult").setOutputMarkupId(true));

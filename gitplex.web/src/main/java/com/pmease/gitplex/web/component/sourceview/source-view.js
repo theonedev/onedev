@@ -38,7 +38,7 @@ gitplex.sourceview = {
 			var $outline = $body.find(">.outline");
 			if ($outline.is(":visible")) {
 				$code.width($body.width()/4.0*3);
-				$outline.width($body.width() - $code.width()-1);
+				$outline.width($body.width() - $code.width()-6);
 			} else {
 				$code.width($body.width());
 			}
@@ -62,6 +62,12 @@ gitplex.sourceview = {
 	toggleOutline: function(outlineId) {
 		var $outline = $("#" + outlineId);
 		$outline.toggle();
+		
+		var outlineToggleBtn = $('#'+ outlineId).closest(".source-view").find(".outline-toggle");
+		if ($outline.is(":visible"))
+			outlineToggleBtn.addClass("active");
+		else
+			outlineToggleBtn.removeClass("active");
 		$outline.closest(".source-view").resize();
 	},
 	

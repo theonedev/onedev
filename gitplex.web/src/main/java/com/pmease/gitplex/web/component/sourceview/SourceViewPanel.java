@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -84,7 +85,20 @@ public abstract class SourceViewPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		String fileName = source.getPath();
+		if (fileName.indexOf('/') != -1)
+			fileName = StringUtils.substringAfterLast(fileName, "/");
+		add(new Label("title", fileName));
+		
 		add(new AjaxLink<Void>("outlineToggle") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				if (GitPlexSession.get().isDisplayOutline())
+					add(AttributeAppender.append("class", " active"));
+			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -106,7 +120,7 @@ public abstract class SourceViewPanel extends Panel {
 		codeContainer.setOutputMarkupId(true);
 		
 		add(outlinePanel = new OutlinePanel("outline", symbols)); 
-		if (!GitPlexSession.get().isDisplayOutline())
+		if (symbols.isEmpty() || !GitPlexSession.get().isDisplayOutline())
 			outlinePanel.add(AttributeAppender.append("style", "display:none;"));
 		
 		add(symbolsContainer = new WebMarkupContainer("symbols"));

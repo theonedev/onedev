@@ -1,5 +1,7 @@
-.source-view>.body>.outline {overflow: auto;}
-.source-view {height: 600px; border: 1px solid red;}
+.source-view>.head {background: #F2F2F2; border-bottom: 1px solid #DDD; padding: 4px;}
+.source-view>.head .title {font-size: 16px;}
+.source-view>.body>.outline {overflow: auto; background: white; padding-left: 4px; border-left: 1px solid #DDD;}
+.source-view {height: 600px;}
 .CodeMirror-tokentooltip table.declarations td {vertical-align: top; padding: 2px 4px; white-space: nowrap;}
 .CodeMirror-tokentooltip table.declarations .scope {color: #666;}
 .CodeMirror-tokentooltip>div {font-weight: bold;}
