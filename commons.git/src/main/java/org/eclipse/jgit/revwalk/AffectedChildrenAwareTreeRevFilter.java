@@ -30,9 +30,20 @@ public class AffectedChildrenAwareTreeRevFilter extends RevFilter {
 	public boolean include(RevWalk revWalker, RevCommit commit)
 			throws StopWalkException, MissingObjectException,
 			IncorrectObjectTypeException, IOException {
-		final RevCommit[] pList = commit.getParents();
-		final int nParents = pList.length;
-		final TreeWalk treeWalker = new TreeWalk(revWalker.reader);
+		RevCommit[] pList = commit.getParents();
+		int nParents = pList.length;
+		TreeWalk treeWalker = new TreeWalk(revWalker.reader);
+		treeWalker.setRecursive(true);
+		ObjectId[] trees = new ObjectId[nParents + 1];
+		for (int i = 0; i < nParents; i++) {
+			RevCommit p = commit.parents[i];
+			if ((p.flags & PARSED) == 0)
+				p.parseHeaders(revWalker);
+			trees[i] = p.getTree();
+		}
+		trees[nParents] = commit.getTree();
+		treeWalker.reset(trees);
+		
 		treeWalker.setFilter(new TreeFilter() {
 
 			@Override
@@ -42,38 +53,34 @@ public class AffectedChildrenAwareTreeRevFilter extends RevFilter {
 				if (treePathRaw.length == 0 || walker.isPathPrefix(treePathRaw, treePathRaw.length) == 0) {
 					int walkPathLen = walker.getPathLength();
 					if (walkPathLen <= treePathRaw.length) {
-						boolean modified = false;
-						
-						final int n = walker.getTreeCount();
+						int n = walker.getTreeCount();
 						if (n == 1) {
-							modified = true;
+							walker.setRecursive(true);
+							return true;
 						} else {
 							final int m = walker.getRawMode(n-1);
 							for (int i = 0; i < n-1; i++) {
 								if (walker.getRawMode(i) != m || !walker.idEqual(i, n-1)) {
-									modified = true;
-									break;
+									walker.setRecursive(true);
+									return true;
 								}
 							}
 						}
-						if (modified) {
-							walker.setRecursive(true);
-							return true;
-						} else {
-							return false;
-						}
+						return false;
 					} else {
 						boolean modified = false;
 						boolean same = false;
-						final int n = walker.getTreeCount();
+						int n = walker.getTreeCount();
 						if (n == 1) {
 							modified = true;
 						} else {
-							final int m = walker.getRawMode(n-1);
+							int m = walker.getRawMode(n-1);
 							for (int i = 0; i < n-1; i++) {
-								if (walker.getRawMode(i) != m || !walker.idEqual(i, n-1))
+								boolean modeEquals = walker.getRawMode(i) == m;
+								boolean idEquals = walker.idEqual(i, n-1);
+								if (!modeEquals || !idEquals)
 									modified = true;
-								if (walker.getRawMode(i) == m && walker.idEqual(i, n-1))
+								if (modeEquals && idEquals)
 									same = true;
 							}
 						}
@@ -99,25 +106,15 @@ public class AffectedChildrenAwareTreeRevFilter extends RevFilter {
 
 			@Override
 			public boolean shouldBeRecursive() {
-				return true;
+				throw new UnsupportedOperationException();
 			}
 
 			@Override
 			public TreeFilter clone() {
-				return this;
+				throw new UnsupportedOperationException();
 			}
 			
 		});
-		treeWalker.setRecursive(true);
-		final ObjectId[] trees = new ObjectId[nParents + 1];
-		for (int i = 0; i < nParents; i++) {
-			final RevCommit p = commit.parents[i];
-			if ((p.flags & PARSED) == 0)
-				p.parseHeaders(revWalker);
-			trees[i] = p.getTree();
-		}
-		trees[nParents] = commit.getTree();
-		treeWalker.reset(trees);
 
 		if (nParents <= 1) {
 			boolean chged = false;
@@ -127,7 +124,7 @@ public class AffectedChildrenAwareTreeRevFilter extends RevFilter {
 			return chged;
 		}
 
-		final int[] chgs = new int[nParents];
+		int[] chgs = new int[nParents];
 		while (treeWalker.next()) {
 			final int myMode = treeWalker.getRawMode(nParents);
 			for (int i = 0; i < nParents; i++) {
@@ -141,8 +138,8 @@ public class AffectedChildrenAwareTreeRevFilter extends RevFilter {
 
 		for (int i = 0; i < nParents; i++) {
 			if (chgs[i] == 0) {
-				final RevCommit p = pList[i];
-				commit.parents = new RevCommit[] {p};
+				RevCommit p = pList[i];
+				commit.parents = new RevCommit[]{p};
 				return false;
 			}
 		}

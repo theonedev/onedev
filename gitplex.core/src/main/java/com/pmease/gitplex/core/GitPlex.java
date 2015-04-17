@@ -1,5 +1,6 @@
 package com.pmease.gitplex.core;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.EventBus;
+import com.pmease.commons.git.Git;
 import com.pmease.commons.git.GitConfig;
 import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.loader.AbstractPlugin;
@@ -96,6 +98,22 @@ public class GitPlex extends AbstractPlugin {
 			
 		});
 		checkGit();
+
+		/*
+		String gitDir = "w:\\linux";
+		String folder = "kernel";
+		Git git = new Git(new File(gitDir + "/.git"));
+		long time = System.currentTimeMillis();
+		int size = 0;
+		for (File file: new File(gitDir + "/" + folder).listFiles()) {
+			if (folder.length() != 0)
+				size += git.log(null, "master", folder + "/" + file.getName(), 1, 0).size();
+			else
+				size += git.log(null, "master", file.getName(), 1, 0).size();
+//			System.out.println(size);
+		}
+		System.out.println(System.currentTimeMillis()-time);
+		*/
 	}
 	
 	public void checkGit() {
