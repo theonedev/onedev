@@ -99,9 +99,8 @@ public class GitPlex extends AbstractPlugin {
 		});
 		checkGit();
 
-		/*
-		String gitDir = "w:\\linux";
-		String folder = "kernel";
+		String gitDir = "w:\\mozilla";
+		String folder = "build";
 		Git git = new Git(new File(gitDir + "/.git"));
 		long time = System.currentTimeMillis();
 		int size = 0;
@@ -110,10 +109,9 @@ public class GitPlex extends AbstractPlugin {
 				size += git.log(null, "master", folder + "/" + file.getName(), 1, 0).size();
 			else
 				size += git.log(null, "master", file.getName(), 1, 0).size();
-//			System.out.println(size);
+			System.out.println(size);
 		}
 		System.out.println(System.currentTimeMillis()-time);
-		*/
 	}
 	
 	public void checkGit() {

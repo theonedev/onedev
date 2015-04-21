@@ -45,7 +45,7 @@ public class IsAncestorCommand extends GitCommand<Boolean> {
 
 			@Override
 			public void consume(String line) {
-				logger.info(line);
+				//logger.info(line);
 			}
 			
 		}, new LineConsumer() {

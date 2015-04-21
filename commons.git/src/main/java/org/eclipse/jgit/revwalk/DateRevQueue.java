@@ -53,7 +53,7 @@ import org.eclipse.jgit.errors.MissingObjectException;
 public class DateRevQueue extends AbstractRevQueue {
 	private static final int REBUILD_INDEX_COUNT = 1000;
 
-	private Entry head;
+	Entry head;
 
 	private Entry free;
 
