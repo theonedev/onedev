@@ -26,6 +26,12 @@ import org.eclipse.jgit.util.RawParseUtils;
 import com.google.common.base.Throwables;
 import com.pmease.commons.git.GitUtils;
 
+/**
+ * This class calculates last commits of children of a git tree.
+ * 
+ * @author robin
+ *
+ */
 public final class LastCommitsOfChildren extends HashMap<String, Value> {
 
 	private static final long serialVersionUID = 1L;
@@ -39,7 +45,21 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 	public LastCommitsOfChildren(Repository repo, AnyObjectId until, @Nullable String treePath) {
 		this(repo, until, treePath, null);
 	}
-	
+
+	/**
+	 * Constructs a hashmap with key representing child name under specified tree, and value 
+	 * represents last commit info of the child.
+	 * 
+	 * @param repo
+	 * 			repository to get last commits info
+	 * @param until
+	 * 			get last commits no newer than this commit
+	 * @param treePath
+	 * 			parent directory to get children commit info under, use 
+	 * 			empty string or <tt>null</tt> to refer to repository root
+	 * @param cache
+	 * 			optional cache to speed up calculation
+	 */
 	public LastCommitsOfChildren(final Repository repo, AnyObjectId until, 
 			@Nullable String treePath, @Nullable final Cache cache) {
 		try {
@@ -53,9 +73,14 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 
 			RevWalk revWalk = new RevWalk(repo);
 			RevCommit untilCommit = revWalk.parseCommit(until);
-			
+
+			/*
+			 * Find out child directory or file names under the tree
+			 */
 			if (treePath.length() != 0) {
 				TreeWalk treeWalk = TreeWalk.forPath(repo, treePath, untilCommit.getTree());
+				if (treeWalk == null)
+					throw new IllegalArgumentException("Non-existent path: " + treePath);
 				treeWalk.enterSubtree();
 				treeWalk.setRecursive(false);
 				while (treeWalk.next())
@@ -71,8 +96,16 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 			revWalk.markStart(untilCommit);
 			revWalk.setRewriteParents(false);
 
+			/* 
+			 * Records last commits info of first encountered commit in cache, and we 
+			 * will mark this commit and all its ancestor commits with cached flag
+			 */
 			final AtomicReference<Map<String, Value>> lastCommitsRef = new AtomicReference<>();
+			
+			// flag to mark visited commits
 			final RevFlag visited = revWalk.newFlag("visited");
+			
+			// flag to mark cached commits
 			final RevFlag cached = revWalk.newFlag("cached");
 			
 			revWalk.setRevFilter(new RevFilter() {
@@ -91,9 +124,25 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 						}
 					}
 					
+					/*
+					 * If a commit is marked as cached, then mark all its parents as
+					 * cached, and when those parents are visited, parents of those
+					 * parents will be marked as cached in turn. This way we can
+					 * mark the whole tree (may leave some part inevitably) rooted 
+					 * at the commit whose last commits are already cached.
+					 */
 					if (commit.has(cached))
 						cacheParents(commit.parents, cached, visited);
-					
+
+					/*
+					 * Check if current commit and all pending commits in queue 
+					 * are all marked as cached, if yes, we will be confident that
+					 * cached last commits info can complement our last commits 
+					 * info. Note that if some of the queued commit is not marked 
+					 * as cached, then we can not do the complement as ancestors of 
+					 * those non-cached commits in queue affecting some children 
+					 * might be newer than last commit being cached
+					 */
 					DateRevQueue queue = (DateRevQueue) revWalker.queue;
 					if (commit.has(cached) && queue.everbodyHasFlag(cached.mask)) {
 						for (Map.Entry<String, Value> entry: lastCommits.entrySet()) {
@@ -130,21 +179,29 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 						public boolean include(TreeWalk walker) 
 								throws MissingObjectException, IncorrectObjectTypeException, IOException {
 							if (treePathRaw.length == 0 || walker.isPathPrefix(treePathRaw, treePathRaw.length) == 0) {
+								// we will enter into this block if current walking path is either parent of 
+								// tree path, or the same as tree path, or child of tree path 
+								
 								int walkPathLen = walker.getPathLength();
 								if (walkPathLen <= treePathRaw.length) {
 									int n = walker.getTreeCount();
 									if (n == 1) {
+										// we are comparing against an empty tree, so current commit
+										// is the initial commit
 										walker.setRecursive(true);
 										return true;
 									} else {
 										int m = walker.getRawMode(n-1);
 										for (int i = 0; i < n-1; i++) {
 											if (walker.getRawMode(i) != m || !walker.idEqual(i, n-1)) {
+												// current path has been changed since its parents, and 
+												// we need to walk down to further check the children
 												walker.setRecursive(true);
 												return true;
 											}
 										}
 									}
+									// otherwise this path is not relevant
 									return false;
 								} else {
 									boolean modified = false;
@@ -168,6 +225,8 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 												walker.getRawPath(), 
 												treePathRaw.length!=0?treePathRaw.length+1:0, 
 												walkPathLen));
+										// this child has been modified, and this info is sufficient to 
+										// us and we no longer need to recurse into the sub tree
 										walker.setRecursive(false);
 										return true;
 									} else {
@@ -209,21 +268,32 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 									else
 										same = true;
 								}
+								
+								// consider child as modified only if it is different
+								// from all parents; otherwise, postpone checking of 
+								// child to parents of this commit
 								if (!same)
 									modifiedChildren.add(child);
 							}
 						}
 
-						if (!commit.has(cached)) {
-							for (int i = 0; i < nParents; i++) {
-								if (changes[i] == 0) {
-									RevCommit p = pList[i];
-									commit.parents = new RevCommit[]{p};
-									return false;
-								}
+						for (int i = 0; i < nParents; i++) {
+							/*
+							 * Jump to parent whose children we care about are 
+							 * the same as current commit. This will speed up 
+							 * the calculation as we no longer need to walk 
+							 * unnecessary branches
+							 */
+							if (changes[i] == 0) {
+								RevCommit p = pList[i];
+								commit.parents = new RevCommit[]{p};
+								return false;
 							}
 						}
 					}
+					
+					// include current commit only if it is determined as last commit
+					// of some children
 					return !modifiedChildren.isEmpty();
 				}
 
@@ -256,6 +326,12 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 		for (RevCommit p: parents) {
 			if (!p.has(cached)) {
 				p.add(cached);
+				
+				/*
+				 * Further caches parent of parent if the parent has already been 
+				 * visited as otherwise it will not have a chance to get its parents 
+				 * cached 
+				 */
 				if (p.has(visited))
 					cacheParents(p.parents, cached, visited);
 			}
