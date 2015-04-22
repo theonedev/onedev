@@ -39,13 +39,17 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 	private static final int PARSED = RevWalk.PARSED;
 	
 	public LastCommitsOfChildren(Repository repo, AnyObjectId until) {
-		this(repo, until, null);
+		this(repo, until, null, null);
 	}
 	
 	public LastCommitsOfChildren(Repository repo, AnyObjectId until, @Nullable String treePath) {
 		this(repo, until, treePath, null);
 	}
 
+	public LastCommitsOfChildren(Repository repo, AnyObjectId until, @Nullable Cache cache) {
+		this(repo, until, null, cache);
+	}
+	
 	/**
 	 * Constructs a hashmap with key representing child name under specified tree, and value 
 	 * represents last commit info of the child.
