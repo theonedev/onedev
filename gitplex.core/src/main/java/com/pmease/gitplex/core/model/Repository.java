@@ -6,8 +6,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -23,10 +26,14 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.AnyObjectId;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryCache.FileKey;
+import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
+import org.eclipse.jgit.revwalk.LastCommitsOfChildren.Value;
 import org.eclipse.jgit.util.FS;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -44,6 +51,7 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.commons.util.LockUtils;
 import com.pmease.commons.util.Pair;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.GitPlex;
@@ -66,6 +74,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	
 	public static final String REFS_GITPLEX = "refs/gitplex/";
 	
+	private static final int LAST_COMMITS_CACHE_THRESHOLD = 1000;
+
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private User owner;
@@ -109,7 +119,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
     
     private transient Map<String, Commit> commitCache = new HashMap<>();
     
-    private transient Map<String, Optional<AnyObjectId>> objectIdCache = new HashMap<>();
+    private transient Map<String, Optional<ObjectId>> objectIdCache = new HashMap<>();
     
     private transient Branch defaultBranch;
     
@@ -408,12 +418,12 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	@Nullable
-	public AnyObjectId resolveRevision(String revision) {
-		Optional<AnyObjectId> optional = objectIdCache.get(revision);
+	public ObjectId resolveRevision(String revision) {
+		Optional<ObjectId> optional = objectIdCache.get(revision);
 		if (optional == null) {
 			org.eclipse.jgit.lib.Repository jgitRepo = openAsJGitRepo();
 			try {
-				AnyObjectId objectId = jgitRepo.resolve(revision);
+				ObjectId objectId = jgitRepo.resolve(revision);
 				optional = Optional.fromNullable(objectId);
 				objectIdCache.put(revision, optional);
 			} catch (RevisionSyntaxException | IOException e) {
@@ -424,7 +434,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		}
 		return optional.orNull();
 	}
-
+	
 	public List<Change> getChanges(String fromCommit, String toCommit) {
 		CommitRange range = new CommitRange(fromCommit, toCommit);
 		List<Change> changes = changesCache.get(range);
@@ -462,4 +472,86 @@ public class Repository extends AbstractEntity implements UserBelonging {
 			throw new RuntimeException(e);
 		}
 	}
+
+	public LastCommitsOfChildren getLastCommitsOfChildren(String revision, String path) {
+		if (path == null)
+			path = "";
+		
+		final File cacheDir = new File(
+				GitPlex.getInstance(StorageManager.class).getCacheDir(this), 
+				"last_commits/" + path + "/gitplex_last_commits");
+		
+		final ReadWriteLock lock;
+		try {
+			lock = LockUtils.getReadWriteLock(cacheDir.getCanonicalPath());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		
+		final Set<ObjectId> commitIds = new HashSet<>(); 
+		
+		lock.readLock().lock();
+		try {
+			if (cacheDir.exists()) {
+				for (String each: cacheDir.list()) 
+					commitIds.add(ObjectId.fromString(each));
+			} 	
+		} finally {
+			lock.readLock().unlock();
+		}
+		
+		org.eclipse.jgit.revwalk.LastCommitsOfChildren.Cache cache;
+		if (!commitIds.isEmpty()) {
+			cache = new org.eclipse.jgit.revwalk.LastCommitsOfChildren.Cache() {
+	
+				@SuppressWarnings("unchecked")
+				@Override
+				public Map<String, Value> getLastCommitsOfChildren(ObjectId commitId) {
+					if (commitIds.contains(commitId)) {
+						lock.readLock().lock();
+						try {
+							byte[] bytes = FileUtils.readFileToByteArray(new File(cacheDir, commitId.name()));
+							return (Map<String, Value>) SerializationUtils.deserialize(bytes);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						} finally {
+							lock.readLock().unlock();
+						}
+					} else {
+						return null;
+					}
+				}
+				
+			};
+		} else {
+			cache = null;
+		}
+
+		final AnyObjectId commitId = resolveRevision(revision);
+		
+		org.eclipse.jgit.lib.Repository jgitRepo = openAsJGitRepo();
+		try {
+			long time = System.currentTimeMillis();
+			LastCommitsOfChildren lastCommits = new LastCommitsOfChildren(jgitRepo, commitId, path, cache);
+			long elapsed = System.currentTimeMillis()-time;
+			if (elapsed > LAST_COMMITS_CACHE_THRESHOLD) {
+				lock.writeLock().lock();
+				try {
+					if (!cacheDir.exists())
+						FileUtils.createDir(cacheDir);
+					FileUtils.writeByteArrayToFile(
+							new File(cacheDir, commitId.name()), 
+							SerializationUtils.serialize(lastCommits));
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				} finally {
+					lock.writeLock().unlock();
+				}
+			}
+			return lastCommits;
+		} finally {
+			jgitRepo.close();
+		}
+	}
+	
 }

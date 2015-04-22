@@ -47,7 +47,7 @@ import com.pmease.gitplex.core.model.User;
 public class DefaultRepositoryManager implements RepositoryManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultRepositoryManager.class);
-
+	
 	private final Dao dao;
 	
 	private final EventBus eventBus;
@@ -321,5 +321,5 @@ public class DefaultRepositoryManager implements RepositoryManager {
 		
 		checkSanity();
 	}
-	
+
 }

@@ -379,6 +379,11 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 				return false;
 			}
 		}
+
+		@Override
+		public String toString() {
+			return id.name();
+		}
 		
 	}
 	

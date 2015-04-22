@@ -28,8 +28,10 @@ gitplex.sourceview = {
 		var editor = CodeMirror($code[0], options);
 		
 	    var modeInfo = CodeMirror.findModeByFileName(filePath);
-	    editor.setOption("mode", modeInfo.mime);
-		CodeMirror.autoLoadMode(editor, modeInfo.mode);
+	    if (modeInfo) {
+		    editor.setOption("mode", modeInfo.mime);
+			CodeMirror.autoLoadMode(editor, modeInfo.mode);
+	    }
 		
 		var $sourceView = $code.closest(".source-view");
 		$sourceView.resize(function() {

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -29,19 +30,29 @@ public class TestPage extends BasePage {
 
 		@Override
 		protected Repository load() {
-			return GitPlex.getInstance(Dao.class).load(Repository.class, 2L);
+			return GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
 		}
 		
 	};
 
 	private String revision = "master";
 	
-	private String blobPath = "gitplex.core/src/main/java/com/pmease/gitplex/core/manager/impl/DefaultPullRequestManager.java";
+	private String blobPath = "MAINTAINERS";
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		add(new Link<Void>("test") {
+
+			@Override
+			public void onClick() {
+				long time = System.currentTimeMillis();
+				repoModel.getObject().getLastCommitsOfChildren("master~4000", "Documentation");
+				System.out.println(System.currentTimeMillis()-time);
+			}
+			
+		});
 		/*
 		add(new Link<Void>("testIndex") {
 
