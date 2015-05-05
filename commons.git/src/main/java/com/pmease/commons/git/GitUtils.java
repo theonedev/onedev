@@ -28,10 +28,6 @@ public class GitUtils {
     
     public static final int SHORT_SHA_LENGTH = 7;
     
-    public static final String REF_PREFIX_BRANCH = "refs/heads/";
-
-    public static final String REF_PREFIX_TAG = "refs/tags/";
-    
     public static boolean isHash(String sha) {
     	return PATTERN_HASH.matcher(sha).matches();
     }

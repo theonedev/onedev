@@ -35,7 +35,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.google.common.base.Throwables;
-import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
@@ -89,9 +89,9 @@ public abstract class RevisionSelector extends Panel {
 			protected String load() {
 				org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
 				try {
-					if (jgitRepo.getRefDatabase().getRef(GitUtils.REF_PREFIX_BRANCH + revision) != null)
+					if (jgitRepo.getRefDatabase().getRef(Git.REFS_HEADS + revision) != null)
 						return "fa fa-ext fa-branch";
-					else if (jgitRepo.getRefDatabase().getRef(GitUtils.REF_PREFIX_TAG + revision) != null)
+					else if (jgitRepo.getRefDatabase().getRef(Git.REFS_TAGS + revision) != null)
 						return "fa fa-tag";
 					else
 						return "fa fa-ext fa-commit";
@@ -123,9 +123,9 @@ public abstract class RevisionSelector extends Panel {
 				org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
 				try {
 					if (branchesActive)
-						refs.addAll(jgitRepo.getRefDatabase().getRefs(GitUtils.REF_PREFIX_BRANCH).keySet());
+						refs.addAll(jgitRepo.getRefDatabase().getRefs(Git.REFS_HEADS).keySet());
 					else
-						refs.addAll(jgitRepo.getRefDatabase().getRefs(GitUtils.REF_PREFIX_TAG).keySet());
+						refs.addAll(jgitRepo.getRefDatabase().getRefs(Git.REFS_TAGS).keySet());
 					Collections.sort(refs);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
