@@ -1,0 +1,13 @@
+.revision-selector-dropdown ul.refs {width: 400px; max-height: 200px; overflow: auto;}
+.revision-selector-dropdown input.revision {margin-bottom: 12px;}
+.revision-selector-dropdown .nav-tabs {margin-bottom: 8px;}
+.revision-selector-dropdown .nav-tabs>li>a {padding: 2px 4px; color: #666; font-size: 12px;}
+.revision-selector-dropdown .nav-tabs>li.active>a {color: #333; font-weight: bold;}
+.revision-selector-dropdown {padding: 12px;}
+.revision-selector-dropdown ul.refs {margin-bottom: 0;}
+.revision-selector-dropdown ul.refs li {padding: 2px 4px;} 
+.revision-selector-dropdown ul.refs li:hover {background: #F0F0F0;}
+.revision-selector-dropdown ul.refs li a {color: #333; display: block; text-decoration: none;}
+.revision-selector-dropdown ul.refs li.active {background: #F0F0F0;}
+.revision-selector-dropdown .feedback {color: #F94949; margin-bottom: 12px;}
+.revision-selector-dropdown .feedback:before {font-family: "FontAwesome"; content: "\f071"; margin-right: 4px;}   

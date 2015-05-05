@@ -1,0 +1,19 @@
+<wicket:panel>
+	<button wicket:id="button" class="btn btn-default btn-sm revision-selector">
+		<span wicket:id="revInfo">
+			<i wicket:id="icon"></i> <span wicket:id="label"></span> 
+		</span>
+		<i class="fa fa-caret-down"></i>
+	</button>
+	<div wicket:id="dropdown" class="revision-selector-dropdown"></div>
+	<wicket:fragment wicket:id="dropdownContentFrag">
+		<input wicket:id="revision" class="form-control input-sm revision" placeholder="Input revision"></input>
+		<div wicket:id="feedback" class="feedback"></div>
+		<div wicket:id="tabs"></div>
+		<ul wicket:id="refs" class="refs list-unstyled">
+			<li wicket:id="refs">
+				<a wicket:id="link"><span wicket:id="label"></span></a>
+			</li>			
+		</ul>
+	</wicket:fragment>
+</wicket:panel>
