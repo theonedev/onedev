@@ -262,7 +262,7 @@ pmease.commons = {
 					trigger.hideTimer = setTimeout(function(){
 						if (trigger.hasClass("open"))
 							hide();
-					}, hoverDelay);
+					}, mode);
 				}
 				function cancelHide() {
 					if (trigger.hideTimer != null) {
@@ -286,7 +286,7 @@ pmease.commons = {
 								cancelHide();
 							}
 							trigger.showTimer = null;
-						}, hoverDelay);
+						}, mode);
 					}
 				});
 				dropdown.mouseover(function() {

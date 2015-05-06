@@ -12,7 +12,7 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 
 	private final DropdownPanel dropdownPanel;
 	
-	private DropdownMode displayMode = new DropdownMode.Click();
+	private DropdownMode dropdownMode = new DropdownMode.Click();
 	
 	private DropdownAlignment alignment = new DropdownAlignment(new AlignmentTarget(null, 0, 100), 0, 0, -1, false);
 	
@@ -21,7 +21,7 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 	}
 	
 	public DropdownBehavior mode(DropdownMode dropdownMode) {
-		this.displayMode = dropdownMode;
+		this.dropdownMode = dropdownMode;
 		return this;
 	}
 	
@@ -183,9 +183,9 @@ public class DropdownBehavior extends AbstractDefaultAjaxBehavior {
 		super.renderHead(component, response);
 		
 		String mode;
-		if (displayMode instanceof DropdownMode.Hover)
-			mode = String.valueOf(((DropdownMode.Hover) displayMode).getDelay());
-		else if (displayMode instanceof DropdownMode.Click)
+		if (dropdownMode instanceof DropdownMode.Hover)
+			mode = String.valueOf(((DropdownMode.Hover) dropdownMode).getDelay());
+		else if (dropdownMode instanceof DropdownMode.Click)
 			mode = "'click'";
 		else
 			mode = "undefined";
