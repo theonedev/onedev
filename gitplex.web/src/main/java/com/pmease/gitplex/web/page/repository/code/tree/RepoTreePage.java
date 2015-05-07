@@ -1,28 +1,38 @@
 package com.pmease.gitplex.web.page.repository.code.tree;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.io.IOException;
+
+import javax.annotation.Nullable;
 
 import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevTree;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.treewalk.TreeWalk;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import com.pmease.commons.git.Git;
-import com.pmease.commons.git.TreeNode;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.component.pathnavigator.PathNavigator;
+import com.pmease.gitplex.web.component.revisionselector.RevisionSelector;
+import com.pmease.gitplex.web.component.treelist.TreeList;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
-import com.pmease.gitplex.web.page.repository.code.component.SourceBreadcrumbPanel;
-import com.pmease.gitplex.web.util.UrlUtils;
 
 @SuppressWarnings("serial")
 public class RepoTreePage extends RepositoryPage {
 
+	private String revision = "master";
+	
+	@Nullable
+	private String path;
+	
+	private PathNavigator pathNavigator;
+	
+	private TreeList treeList;
+	
 	public RepoTreePage(PageParameters params) {
 		super(params);
 		
@@ -34,59 +44,135 @@ public class RepoTreePage extends RepositoryPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		IModel<List<TreeNode>> nodesModel = new LoadableDetachableModel<List<TreeNode>>() {
+		add(new RevisionSelector("revSelector", new IModel<String>() {
 
 			@Override
-			protected List<TreeNode> load() {
-				Git git = getRepository().git();
-				String path = getCurrentPath();
-				if (!Strings.isNullOrEmpty(path)) {
-					path = UrlUtils.removeRedundantSlashes(path + "/");
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return revision;
+			}
+
+			@Override
+			public void setObject(String object) {
+				revision = object;
+			}
+			
+		}) {
+
+			@Override
+			protected Repository getRepository() {
+				return repoModel.getObject();
+			}
+
+			@Override
+			protected void onModelChanged() {
+				super.onModelChanged();
+				
+				if (path != null) {
+					org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
+					try {
+						ObjectId commitId = getRepository().resolveRevision(revision);
+						RevTree revTree = new RevWalk(jgitRepo).parseCommit(commitId).getTree();
+						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, path, revTree);
+						if (treeWalk == null)
+							path = null;
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					} finally {
+						jgitRepo.close();
+					}
 				}
 				
-				List<TreeNode> nodes = Lists.newArrayList(git.listTree(getRepository().defaultBranchIfNull(getCurrentRevision()), path));
-				
-				Collections.sort(nodes, new Comparator<TreeNode>() {
-
-					@Override
-					public int compare(TreeNode o1, TreeNode o2) {
-						if (o1.getMode() == o2.getMode()) {
-							return o1.getName().compareTo(o2.getName());
-						} else if (o1.getMode() == FileMode.TYPE_TREE) {
-							return -1;
-						} else if (o2.getMode() == FileMode.TYPE_TREE) {
-							return 1;
-						} else {
-							return o1.getName().compareTo(o2.getName());
-						}
-					}
-					
-				});
-				
-				return nodes;
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				if (target != null) {
+					target.add(pathNavigator);
+					target.add(treeList);
+				}
 			}
-		};
+
+		});
 		
-		add(new RepoDescribePanel("description", repoModel).setVisible(getCurrentPath() != null));
-		add(new SourceBreadcrumbPanel("breadcrumb", repoModel, currentRevision, currentPath));
-		add(new RepoTreePanel("tree", repoModel, currentRevision, currentPath, nodesModel));
-		add(new ReadmePanel("readme", repoModel, currentRevision, nodesModel));
+		add(pathNavigator = new PathNavigator("pathSelector", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return path;
+			}
+
+			@Override
+			public void setObject(String object) {
+				path = object;
+			}
+			
+		}) {
+
+			@Override
+			protected Repository getRepository() {
+				return repoModel.getObject();
+			}
+
+			@Override
+			protected String getRevision() {
+				return revision;
+			}
+
+			@Override
+			protected void onModelChanged() {
+				super.onModelChanged();
+				
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				if (target != null)
+					target.add(treeList);
+			}
+			
+		});
+		
+		add(treeList = new TreeList("treeList", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return path;
+			}
+
+			@Override
+			public void setObject(String object) {
+				path = object;
+			}
+			
+		}) {
+
+			@Override
+			protected Repository getRepository() {
+				return repoModel.getObject();
+			}
+
+			@Override
+			protected String getRevision() {
+				return revision;
+			}
+			
+			@Override
+			protected void onModelChanged() {
+				super.onModelChanged();
+				
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				if (target != null)
+					target.add(pathNavigator);
+			}
+			
+		});
+		
 	}
 	
-	@Override
-	protected String getPageTitle() {
-		Repository repository = getRepository();
-		
-		if (getCurrentPath() == null) {
-			return repository.getFQN();
-		} else {
-			StringBuffer sb = new StringBuffer();
-			sb.append(getCurrentPath())
-				.append(" at ").append(repository.defaultBranchIfNull(getCurrentRevision()))
-				.append(" - ").append(repository.getFQN());
-			
-			return sb.toString();
-		}
-	}
-
 }

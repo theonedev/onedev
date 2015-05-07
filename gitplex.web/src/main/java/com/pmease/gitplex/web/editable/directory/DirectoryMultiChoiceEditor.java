@@ -24,7 +24,7 @@ import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitplex.core.model.Branch;
-import com.pmease.gitplex.web.component.directory.DirectoryChooser;
+import com.pmease.gitplex.web.component.directorychooser.DirectoryChooser;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")

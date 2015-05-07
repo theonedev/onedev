@@ -24,7 +24,8 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -45,13 +46,9 @@ import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.model.Repository;
 
 @SuppressWarnings("serial")
-public abstract class RevisionSelector extends Panel {
-
-	private final IModel<Repository> repoModel;
+public abstract class RevisionSelector extends GenericPanel<String> {
 	
 	private boolean branchesActive = true;
-	
-	private String revision;
 	
 	private int activeRefIndex;
 	
@@ -65,11 +62,8 @@ public abstract class RevisionSelector extends Panel {
 	
 	private String feedbackMessage;
 	
-	public RevisionSelector(String id, IModel<Repository> repoModel, String initialRev) {
-		super(id);
-		
-		this.repoModel = repoModel;
-		this.revision = initialRev;
+	public RevisionSelector(String id, IModel<String> revModel) {
+		super(id, revModel);
 	}
 
 	@Override
@@ -87,11 +81,11 @@ public abstract class RevisionSelector extends Panel {
 
 			@Override
 			protected String load() {
-				org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
+				org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
 				try {
-					if (jgitRepo.getRefDatabase().getRef(Git.REFS_HEADS + revision) != null)
+					if (jgitRepo.getRefDatabase().getRef(Git.REFS_HEADS + getModelObject()) != null)
 						return "fa fa-ext fa-branch";
-					else if (jgitRepo.getRefDatabase().getRef(Git.REFS_TAGS + revision) != null)
+					else if (jgitRepo.getRefDatabase().getRef(Git.REFS_TAGS + getModelObject()) != null)
 						return "fa fa-tag";
 					else
 						return "fa fa-ext fa-commit";
@@ -103,7 +97,14 @@ public abstract class RevisionSelector extends Panel {
 			}
 			
 		})));
-		revInfo.add(new Label("label", new PropertyModel<String>(this, "revision")));
+		revInfo.add(new Label("label", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getModelObject();
+			}
+			
+		}));
 		
 		dropdown = new DropdownPanel("dropdown", true) {
 
@@ -120,7 +121,7 @@ public abstract class RevisionSelector extends Panel {
 			private List<String> findRefs() {
 				List<String> refs = new ArrayList<>();
 				
-				org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
+				org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
 				try {
 					if (branchesActive)
 						refs.addAll(jgitRepo.getRefDatabase().getRefs(Git.REFS_HEADS).keySet());
@@ -285,13 +286,6 @@ public abstract class RevisionSelector extends Panel {
 		button.add(new DropdownBehavior(dropdown));
 	}
 	
-	@Override
-	protected void onDetach() {
-		repoModel.detach();
-		
-		super.onDetach();
-	}
-	
 	private Component newRefList(final DropdownPanel dropdown, List<String> refs) {
 		WebMarkupContainer refsContainer = new WebMarkupContainer("refs");
 		refsContainer.add(new ListView<String>("refs", refs) {
@@ -320,13 +314,12 @@ public abstract class RevisionSelector extends Panel {
 	
 	private void selectRevision(AjaxRequestTarget target, String revision) {
 		try {
-			if (repoModel.getObject().resolveRevision(revision) != null) {
-				this.revision = revision;
+			if (getRepository().resolveRevision(revision) != null) {
+				setModelObject(revision);
 				target.add(revInfo);
 				feedbackMessage = null;
 				target.add(feedback);
 				dropdown.hide(target);
-				onSelect(target, revision);
 			} else {
 				feedbackMessage = "Can not find revision " + revision + "";
 				target.add(feedback);
@@ -337,5 +330,5 @@ public abstract class RevisionSelector extends Panel {
 		}
 	}
 	
-	protected abstract void onSelect(AjaxRequestTarget target, String revision);
+	protected abstract Repository getRepository();
 }

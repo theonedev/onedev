@@ -1,12 +1,9 @@
 package com.pmease.gitplex.web.component.pathnavigator;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
@@ -22,7 +19,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -33,86 +30,80 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.PathInfo;
 
 @SuppressWarnings("serial")
-public abstract class PathNavigator extends Panel {
+public abstract class PathNavigator extends GenericPanel<String> {
 
-	private final IModel<Repository> repoModel;
-	
-	private final IModel<String> revModel;
-	
-	private final List<String> pathSegments = new ArrayList<>();
-	
-	public PathNavigator(String id, IModel<Repository> repoModel, IModel<String> revModel, @Nullable String initialPath) {
-		super(id);
-		
-		this.repoModel = repoModel;
-		this.revModel = revModel;
-		
-		if (StringUtils.isNotBlank(initialPath))
-			pathSegments.addAll(Splitter.on('/').omitEmptyStrings().splitToList(initialPath));
-		pathSegments.add(0, repoModel.getObject().getName());
+	public PathNavigator(String id, IModel<String> pathModel) {
+		super(id, pathModel);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new ListView<String>("pathSegments", new LoadableDetachableModel<List<String>>() {
+		add(new ListView<String>("paths", new LoadableDetachableModel<List<String>>() {
 
 			@Override
 			protected List<String> load() {
-				String path = Joiner.on('/').join(pathSegments.subList(1, pathSegments.size()));
-				if (path.length() != 0) {
-					org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
-					try {
-						RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
-						if (TreeWalk.forPath(jgitRepo, path, revTree) == null) {
-							pathSegments.clear();
-							pathSegments.add(repoModel.getObject().getName());
-						}
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					} finally {
-						jgitRepo.close();
+				List<String> paths = new ArrayList<>();
+				paths.add("");
+				
+				String path = PathNavigator.this.getModelObject();
+				if (path != null) {
+					for (String segment: Splitter.on('/').omitEmptyStrings().split(path)) { 
+						String parent = paths.get(paths.size()-1);
+						if (parent.length() != 0)
+							paths.add(parent + "/" + segment);
+						else
+							paths.add(segment);
 					}
 				}
 				
-				return pathSegments;
+				return paths;
 			}
 			
 		}) {
 
 			@Override
 			protected void populateItem(final ListItem<String> item) {
-				final String currentPath = Joiner.on('/').join(pathSegments.subList(1, item.getIndex()+1));
+				final String path = item.getModelObject();
 				
 				AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						selectPath(target, currentPath);
+						selectPath(target, path);
 					}
 					
 				};
-				link.setEnabled(item.getIndex() != pathSegments.size()-1);
-				link.add(new Label("label", item.getModelObject()));
+				link.setEnabled(item.getIndex() != size()-1);
+				
+				if (path.length() != 0) {
+					if (path.indexOf('/') != -1)
+						link.add(new Label("label", StringUtils.substringAfterLast(path, "/")));
+					else
+						link.add(new Label("label", path));
+				} else {
+					link.add(new Label("label", getRepository().getName()));
+				}
+				
 				item.add(link);
 				
 				WebMarkupContainer subtreeDropdownTrigger = new WebMarkupContainer("subtreeDropdownTrigger");
 				
-				if (currentPath.length() != 0 && item.getIndex() == pathSegments.size()-1) {
-					org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
+				if (path.length() != 0 && item.getIndex() == size()-1) {
+					org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
 					try {
 						RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
-						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, currentPath, revTree);
+						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, path, revTree);
 						if (!treeWalk.isSubtree())
 							subtreeDropdownTrigger.setVisible(false);
 					} catch (IOException e) {
@@ -134,12 +125,12 @@ public abstract class PathNavigator extends Panel {
 
 							@Override
 							public Iterator<? extends PathInfo> getRoots() {
-								org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
+								org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
 								try {
 									RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
 									TreeWalk treeWalk;
-									if (currentPath.length() != 0) {
-										treeWalk = TreeWalk.forPath(jgitRepo, currentPath, revTree);
+									if (path.length() != 0) {
+										treeWalk = TreeWalk.forPath(jgitRepo, path, revTree);
 										treeWalk.enterSubtree();
 									} else {
 										treeWalk = new TreeWalk(jgitRepo);
@@ -248,28 +239,19 @@ public abstract class PathNavigator extends Panel {
 	}
 
 	private ObjectId getCommitId() {
-		return Preconditions.checkNotNull(repoModel.getObject().resolveRevision(revModel.getObject()));
+		return Preconditions.checkNotNull(getRepository().resolveRevision(getRevision()));
 	}
 
-	@Override
-	protected void onDetach() {
-		repoModel.detach();
-		revModel.detach();
-		
-		super.onDetach();
-	}
-	
 	private void selectPath(AjaxRequestTarget target, String path) {
-		pathSegments.clear();
-		pathSegments.addAll(Splitter.on('/').omitEmptyStrings().splitToList(path));
-		pathSegments.add(0, repoModel.getObject().getName());
-		target.add(PathNavigator.this);
+		if (path.length() == 0)
+			path = null;
 		
-		onSelect(target, path);
+		setModelObject(path);
+		target.add(this);
 	}
 	
 	private List<PathInfo> getChildren(PathInfo pathInfo) {
-		org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
+		org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
 		try {
 			RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
 			TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, pathInfo.getPath(), revTree);
@@ -287,39 +269,8 @@ public abstract class PathNavigator extends Panel {
 		}
 	}
 	
-	protected abstract void onSelect(AjaxRequestTarget target, String path);
-
-	private static class PathInfo implements Serializable {
-		
-		private final String path;
-		
-		private final int mode;
-		
-		public PathInfo(String path, int mode) {
-			this.path = path;
-			this.mode = mode;
-		}
-
-		public String getPath() {
-			return path;
-		}
-
-		public int getMode() {
-			return mode;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj instanceof PathInfo) 
-				return path.equals(((PathInfo)obj).getPath());
-			else 
-				return false;
-		}
-
-		@Override
-		public int hashCode() {
-			return path.hashCode();
-		}
-		
-	}
+	protected abstract Repository getRepository();
+	
+	protected abstract String getRevision();
+	
 }

@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.directory;
+package com.pmease.gitplex.web.component.directorychooser;
 
 import java.util.ArrayList;
 import java.util.Iterator;
