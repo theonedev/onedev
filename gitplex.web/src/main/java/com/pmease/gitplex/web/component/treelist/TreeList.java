@@ -2,12 +2,22 @@ package com.pmease.gitplex.web.component.treelist;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -15,16 +25,25 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.CssResourceReference;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.GitPath;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.PathInfo;
+import com.pmease.gitplex.web.page.repository.code.commit.RepoCommitPage;
+import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")
 public abstract class TreeList extends GenericPanel<String> {
@@ -34,7 +53,7 @@ public abstract class TreeList extends GenericPanel<String> {
 	}
 
 	private String getNormalizedPath() {
-		return GitUtils.normalizePath(getModelObject());
+		return GitPath.normalize(getModelObject());
 	}
 	
 	@Override
@@ -65,10 +84,10 @@ public abstract class TreeList extends GenericPanel<String> {
 		});
 		add(parent);
 		
-		add(new ListView<PathInfo>("children", new LoadableDetachableModel<List<PathInfo>>() {
+		add(new ListView<GitPath>("children", new LoadableDetachableModel<List<GitPath>>() {
 
 			@Override
-			protected List<PathInfo> load() {
+			protected List<GitPath> load() {
 				String path = getNormalizedPath();
 				org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
 				try {
@@ -87,9 +106,29 @@ public abstract class TreeList extends GenericPanel<String> {
 						treeWalk = new TreeWalk(jgitRepo);
 						treeWalk.addTree(revTree);
 					}
-					List<PathInfo> children = new ArrayList<>();
+					List<GitPath> children = new ArrayList<>();
 					while (treeWalk.next())
-						children.add(new PathInfo(treeWalk.getPathString(), treeWalk.getRawMode(0)));
+						children.add(new GitPath(treeWalk.getPathString(), treeWalk.getRawMode(0)));
+					for (int i=0; i<children.size(); i++) {
+						GitPath gitPath = children.get(i);
+						while (FileMode.TREE.equals(gitPath.getMode())) {
+							treeWalk = TreeWalk.forPath(jgitRepo, gitPath.getName(), revTree);
+							Preconditions.checkNotNull(treeWalk);
+							treeWalk.enterSubtree();
+							if (treeWalk.next()) {
+								GitPath childGitPath = new GitPath(treeWalk.getPathString(), treeWalk.getRawMode(0));
+								if (treeWalk.next()) 
+									break;
+								else
+									gitPath = childGitPath;
+							} else {
+								break;
+							}
+						}
+						children.set(i, gitPath);
+					}
+					
+					Collections.sort(children);
 					return children;
 				} catch (IOException e) {
 					throw new RuntimeException(e);
@@ -101,8 +140,8 @@ public abstract class TreeList extends GenericPanel<String> {
 		}) {
 
 			@Override
-			protected void populateItem(ListItem<PathInfo> item) {
-				final PathInfo pathInfo = item.getModelObject();
+			protected void populateItem(ListItem<GitPath> item) {
+				final GitPath pathInfo = item.getModelObject();
 				
 				WebMarkupContainer pathIcon = new WebMarkupContainer("pathIcon");
 				String iconClass;
@@ -122,17 +161,58 @@ public abstract class TreeList extends GenericPanel<String> {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						selectPath(target, pathInfo.getPath());
+						selectPath(target, pathInfo.getName());
 					}
 					
 				}; 
-				if (pathInfo.getPath().indexOf('/') != -1)
-					pathLink.add(new Label("label", StringUtils.substringAfterLast(pathInfo.getPath(), "/")));
+				
+				String parentPath = getNormalizedPath();
+				if (parentPath != null)
+					pathLink.add(new Label("label", pathInfo.getName().substring(parentPath.length()+1)));
 				else
-					pathLink.add(new Label("label", pathInfo.getPath()));
+					pathLink.add(new Label("label", pathInfo.getName()));
 				item.add(pathLink);
 			}
 			
+		});
+		
+		add(new AbstractDefaultAjaxBehavior() {
+			
+			@Override
+			protected void respond(AjaxRequestTarget target) {
+				LastCommitsOfChildren lastCommits = getRepository().getLastCommitsOfChildren(
+						getRevision(), getModelObject());
+				
+				Map<String, LastCommitInfo> map = new HashMap<>();
+				for (Map.Entry<String, LastCommitsOfChildren.Value> entry: lastCommits.entrySet()) {
+					LastCommitInfo info = new LastCommitInfo();
+					PageParameters params = RepoCommitPage.paramsOf(
+							getRepository(), entry.getValue().getId().name());
+					info.url = RequestCycle.get().urlFor(RepoCommitPage.class, params).toString();
+					info.summary = entry.getValue().getSummary();
+					info.age = DateUtils.formatAge(new Date(entry.getValue().getTimestamp()*1000L));
+					map.put(entry.getKey(), info);
+				}
+				String json;
+				try {
+					json = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(map);
+				} catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				}
+				String script = String.format("gitplex.treelist.renderLastCommits('%s', %s);", 
+						getMarkupId(), json);
+				target.appendJavaScript(script);
+			}
+			
+			@Override
+			public void renderHead(Component component, IHeaderResponse response) {
+				super.renderHead(component, response);
+				
+				response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(TreeList.class, "tree-list.js")));
+				response.render(CssHeaderItem.forReference(new CssResourceReference(TreeList.class, "tree-list.css")));
+				response.render(OnDomReadyHeaderItem.forScript(getCallbackScript()));
+			}
+
 		});
 		
 		setOutputMarkupId(true);
@@ -152,5 +232,13 @@ public abstract class TreeList extends GenericPanel<String> {
 	protected abstract Repository getRepository();
 	
 	protected abstract String getRevision();
-	
+
+	@SuppressWarnings("unused")
+	private static class LastCommitInfo {
+		String url;
+		
+		String summary;
+		
+		String age;
+	}
 }

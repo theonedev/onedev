@@ -15,7 +15,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
-import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.GitPath;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
@@ -87,7 +87,7 @@ public class RepoCommitsPage extends RepositoryPage {
 //		}));
 
 		add(newNavLink("home", -1));
-		add(new ListView<String>("pathSegments", GitUtils.splitPath(currentPath)) {
+		add(new ListView<String>("pathSegments", GitPath.split(currentPath)) {
 
 			@Override
 			protected void populateItem(ListItem<String> item) {
@@ -110,7 +110,7 @@ public class RepoCommitsPage extends RepositoryPage {
 	}
 	
 	private Component newNavLink(String id, final int pathNum) {
-		List<String> all = GitUtils.splitPath(currentPath);
+		List<String> all = GitPath.split(currentPath);
 		
 		BookmarkablePageLink<Void> link = new BookmarkablePageLink<Void>(id,
 				RepoCommitsPage.class,
@@ -123,7 +123,7 @@ public class RepoCommitsPage extends RepositoryPage {
 				if (pathNum < 0) {
 					return getRepository().getName();
 				} else {
-					List<String> all = GitUtils.splitPath(currentPath);
+					List<String> all = GitPath.split(currentPath);
 					return all.get(pathNum);
 				}
 			}

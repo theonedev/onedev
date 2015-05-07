@@ -22,12 +22,12 @@ public class GitUtilsTest extends AbstractGitTest {
 	
 	@Test
 	public void testComparePath() {
-		assertTrue(GitUtils.comparePath("dir1", "dir1/")==0);
-		assertTrue(GitUtils.comparePath("/dir1", "dir1/")==0);
-		assertTrue(GitUtils.comparePath("dir1", "dir2")<0);
-		assertTrue(GitUtils.comparePath("dir1", "dir1/dir2")<0);
-		assertTrue(GitUtils.comparePath("dir1/dir2/dir3/file", "dir1/dir3/file")<0);
-		assertTrue(GitUtils.comparePath("dir12", "dir1/dir2")>0);
+		assertTrue(GitPath.compare("dir1", "dir1/")==0);
+		assertTrue(GitPath.compare("/dir1", "dir1/")==0);
+		assertTrue(GitPath.compare("dir1", "dir2")<0);
+		assertTrue(GitPath.compare("dir1", "dir1/dir2")<0);
+		assertTrue(GitPath.compare("dir1/dir2/dir3/file", "dir1/dir3/file")<0);
+		assertTrue(GitPath.compare("dir12", "dir1/dir2")>0);
 	}
 	
 }

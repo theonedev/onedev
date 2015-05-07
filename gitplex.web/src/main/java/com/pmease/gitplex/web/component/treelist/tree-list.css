@@ -1,0 +1,5 @@
+table.tree-list {width: 100%; border: 1px solid #DDD;}
+table.tree-list>tbody>tr>td {padding: 6px 8px; background: #F9F9F9; border-top: 1px solid #EEE; vertical-align: top;}
+table.tree-list>tbody>tr:first-child>td {border-top: none;}
+table.tree-list .last-commit a, .tree-list .last-commit {color: #666;}
+table.tree-list tr.parent td a span {font-size: 18px;}

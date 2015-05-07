@@ -473,7 +473,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		}
 	}
 
-	public LastCommitsOfChildren getLastCommitsOfChildren(String revision, String path) {
+	public LastCommitsOfChildren getLastCommitsOfChildren(String revision, @Nullable String path) {
 		if (path == null)
 			path = "";
 		

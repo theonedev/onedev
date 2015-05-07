@@ -2,6 +2,7 @@ package com.pmease.gitplex.web.component.pathnavigator;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -32,11 +33,11 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import com.pmease.commons.git.GitPath;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.PathInfo;
 
 @SuppressWarnings("serial")
 public abstract class PathNavigator extends GenericPanel<String> {
@@ -84,7 +85,7 @@ public abstract class PathNavigator extends GenericPanel<String> {
 					}
 					
 				};
-				link.setEnabled(item.getIndex() != size()-1);
+				link.setEnabled(item.getIndex() != getViewSize()-1);
 				
 				if (path.length() != 0) {
 					if (path.indexOf('/') != -1)
@@ -117,14 +118,14 @@ public abstract class PathNavigator extends GenericPanel<String> {
 
 					@Override
 					protected Component newContent(String id) {
-						return new NestedTree<PathInfo>(id, new ITreeProvider<PathInfo>() {
+						return new NestedTree<GitPath>(id, new ITreeProvider<GitPath>() {
 
 							@Override
 							public void detach() {
 							}
 
 							@Override
-							public Iterator<? extends PathInfo> getRoots() {
+							public Iterator<? extends GitPath> getRoots() {
 								org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
 								try {
 									RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
@@ -138,9 +139,10 @@ public abstract class PathNavigator extends GenericPanel<String> {
 									}
 									treeWalk.setRecursive(false);
 									
-									List<PathInfo> roots = new ArrayList<>();
+									List<GitPath> roots = new ArrayList<>();
 									while (treeWalk.next()) 
-										roots.add(new PathInfo(treeWalk.getPathString(), treeWalk.getRawMode(0)));
+										roots.add(new GitPath(treeWalk.getPathString(), treeWalk.getRawMode(0)));
+									Collections.sort(roots);
 									return roots.iterator();
 								} catch (IOException e) {
 									throw new RuntimeException(e);
@@ -150,18 +152,18 @@ public abstract class PathNavigator extends GenericPanel<String> {
 							}
 
 							@Override
-							public boolean hasChildren(PathInfo pathInfo) {
-								return FileMode.TREE.equals(pathInfo.getMode());
+							public boolean hasChildren(GitPath path) {
+								return FileMode.TREE.equals(path.getMode());
 							}
 
 							@Override
-							public Iterator<? extends PathInfo> getChildren(PathInfo pathInfo) {
-								return PathNavigator.this.getChildren(pathInfo).iterator();
+							public Iterator<? extends GitPath> getChildren(GitPath path) {
+								return PathNavigator.this.getChildren(path).iterator();
 							}
 
 							@Override
-							public IModel<PathInfo> model(PathInfo pathInfo) {
-								return Model.of(pathInfo);
+							public IModel<GitPath> model(GitPath path) {
+								return Model.of(path);
 							}
 							
 						}) {
@@ -173,17 +175,17 @@ public abstract class PathNavigator extends GenericPanel<String> {
 							}
 
 							@Override
-							public void expand(PathInfo pathInfo) {
+							public void expand(GitPath pathInfo) {
 								super.expand(pathInfo);
 								
-								List<PathInfo> children = getChildren(pathInfo);
+								List<GitPath> children = getChildren(pathInfo);
 								if (children.size() == 1 && FileMode.TREE.equals(children.get(0).getMode())) 
 									expand(children.get(0));
 							}
 
 							@Override
-							protected Component newContentComponent(String id, final IModel<PathInfo> model) {
-								PathInfo pathInfo = model.getObject();
+							protected Component newContentComponent(String id, final IModel<GitPath> model) {
+								GitPath pathInfo = model.getObject();
 								Fragment fragment = new Fragment(id, "treeNodeFrag", PathNavigator.this);
 								
 								WebMarkupContainer icon = new WebMarkupContainer("icon");
@@ -204,15 +206,15 @@ public abstract class PathNavigator extends GenericPanel<String> {
 
 									@Override
 									public void onClick(AjaxRequestTarget target) {
-										selectPath(target, model.getObject().getPath());
+										selectPath(target, model.getObject().getName());
 										hide(target);
 									}
 									
 								};
-								if (pathInfo.getPath().indexOf('/') != -1)
-									link.add(new Label("label", StringUtils.substringAfterLast(pathInfo.getPath(), "/")));
+								if (pathInfo.getName().indexOf('/') != -1)
+									link.add(new Label("label", StringUtils.substringAfterLast(pathInfo.getName(), "/")));
 								else
-									link.add(new Label("label", pathInfo.getPath()));
+									link.add(new Label("label", pathInfo.getName()));
 								fragment.add(link);
 								
 								return fragment;
@@ -250,17 +252,18 @@ public abstract class PathNavigator extends GenericPanel<String> {
 		target.add(this);
 	}
 	
-	private List<PathInfo> getChildren(PathInfo pathInfo) {
+	private List<GitPath> getChildren(GitPath pathInfo) {
 		org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
 		try {
 			RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
-			TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, pathInfo.getPath(), revTree);
+			TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, pathInfo.getName(), revTree);
 			treeWalk.setRecursive(false);
 			treeWalk.enterSubtree();
 			
-			List<PathInfo> children = new ArrayList<>();
+			List<GitPath> children = new ArrayList<>();
 			while (treeWalk.next()) 
-				children.add(new PathInfo(treeWalk.getPathString(), treeWalk.getRawMode(0)));
+				children.add(new GitPath(treeWalk.getPathString(), treeWalk.getRawMode(0)));
+			Collections.sort(children);
 			return children;
 		} catch (IOException e) {
 			throw new RuntimeException(e);

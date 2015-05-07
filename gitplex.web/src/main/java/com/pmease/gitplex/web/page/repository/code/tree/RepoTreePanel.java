@@ -24,6 +24,7 @@ import org.eclipse.jgit.lib.FileMode;
 import com.google.common.collect.Iterables;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
+import com.pmease.commons.git.GitPath;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.gitplex.core.model.Repository;
@@ -101,13 +102,13 @@ public class RepoTreePanel extends Panel {
 			}
 		}));
 		
-		List<String> pathElements = GitUtils.splitPath(currentPath);
+		List<String> pathElements = GitPath.split(currentPath);
 		if (pathElements.isEmpty()) {
 			add(new WebMarkupContainer("parent").setVisibilityAllowed(false));
 		} else {
 			BookmarkablePageLink<Void> link = new BookmarkablePageLink<Void>("parent",
 					RepoTreePage.class,
-					RepoTreePage.paramsOf(repoModel.getObject(), currentRevision, GitUtils.joinPath(pathElements.subList(0, pathElements.size() - 1))));
+					RepoTreePage.paramsOf(repoModel.getObject(), currentRevision, GitPath.join(pathElements.subList(0, pathElements.size() - 1))));
 			
 			add(link);
 		}
@@ -137,11 +138,11 @@ public class RepoTreePanel extends Panel {
 							return "fa-file-text-o";
 					}})));
 				
-				List<String> pathElements = GitUtils.splitPath(currentPath);
+				List<String> pathElements = GitPath.split(currentPath);
 				pathElements.add(node.getName());
 				
 				PageParameters params = RepositoryPage.paramsOf(repoModel.getObject(), 
-						currentRevision, GitUtils.joinPath(pathElements));
+						currentRevision, GitPath.join(pathElements));
 				
 				AbstractLink link;
 				if (node.getMode() == FileMode.TYPE_TREE) {
