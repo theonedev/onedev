@@ -668,11 +668,6 @@ table.table-blob { width: 100%; }
 .table-tags .avatar { width: 64px; height: 64px; }
 
 /* COMMITS */
-.commit-message>.full {display: none; margin-top: 4px;}
-.commit-message>.toggle {background: #DDD; padding: 0px 6px; border-radius: 2px;}
-.commit-message>.toggle:hover {background: #888;}
-.commit-message>.toggle:hover .fa {color: white;}
-
 .commit-hash {font-family: Consolas, 'Liberation Mono', Courier, monospace; }
 
 /* DIRECTORY CHOOSER */

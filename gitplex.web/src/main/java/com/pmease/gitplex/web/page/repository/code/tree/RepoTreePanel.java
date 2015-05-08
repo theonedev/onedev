@@ -28,7 +28,7 @@ import com.pmease.commons.git.GitPath;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.component.commit.CommitMessagePanel;
+import com.pmease.gitplex.web.component.commit.OldCommitMessagePanel;
 import com.pmease.gitplex.web.component.commit.CommitMetaPanel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
@@ -80,7 +80,7 @@ public class RepoTreePanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new CommitMessagePanel("message", repoModel, lastCommitModel));
+		add(new OldCommitMessagePanel("message", repoModel, lastCommitModel));
 		add(new CommitMetaPanel("meta", lastCommitModel).setAuthorMode(AvatarMode.NAME_AND_AVATAR));
 		
 		BookmarkablePageLink<Void> historyLink = new BookmarkablePageLink<Void>(

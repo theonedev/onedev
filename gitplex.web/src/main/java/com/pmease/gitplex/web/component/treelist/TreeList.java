@@ -14,24 +14,37 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.LogCommand;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -40,16 +53,27 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitPath;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
+import com.pmease.gitplex.web.component.user.PersonLink;
+import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.code.commit.RepoCommitPage;
 import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")
-public abstract class TreeList extends GenericPanel<String> {
+public class TreeList extends GenericPanel<String> {
 
-	public TreeList(String id, IModel<String> pathModel) {
+	private final IModel<Repository> repoModel;
+	
+	private final IModel<String> revModel;
+	
+	public TreeList(String id, IModel<Repository> repoModel, IModel<String> revModel, IModel<String> pathModel) {
 		super(id, pathModel);
+
+		this.repoModel = repoModel;
+		this.revModel = revModel;
 	}
 
 	private String getNormalizedPath() {
@@ -89,7 +113,7 @@ public abstract class TreeList extends GenericPanel<String> {
 			@Override
 			protected List<GitPath> load() {
 				String path = getNormalizedPath();
-				org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
+				org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
 				try {
 					RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
 					TreeWalk treeWalk;
@@ -180,14 +204,14 @@ public abstract class TreeList extends GenericPanel<String> {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {
-				LastCommitsOfChildren lastCommits = getRepository().getLastCommitsOfChildren(
-						getRevision(), getModelObject());
+				LastCommitsOfChildren lastCommits = repoModel.getObject().getLastCommitsOfChildren(
+						revModel.getObject(), getModelObject());
 				
 				Map<String, LastCommitInfo> map = new HashMap<>();
 				for (Map.Entry<String, LastCommitsOfChildren.Value> entry: lastCommits.entrySet()) {
 					LastCommitInfo info = new LastCommitInfo();
 					PageParameters params = RepoCommitPage.paramsOf(
-							getRepository(), entry.getValue().getId().name());
+							repoModel.getObject(), entry.getValue().getId().name());
 					info.url = RequestCycle.get().urlFor(RepoCommitPage.class, params).toString();
 					info.summary = entry.getValue().getSummary();
 					info.age = DateUtils.formatAge(new Date(entry.getValue().getTimestamp()*1000L));
@@ -218,6 +242,96 @@ public abstract class TreeList extends GenericPanel<String> {
 		setOutputMarkupId(true);
 	}
 	
+	@Override
+	protected void onBeforeRender() {
+		addOrReplace(new AjaxLazyLoadPanel("lastCommit") {
+			
+			@Override
+			public Component getLoadingComponent(String markupId) {
+				IRequestHandler handler = new ResourceReferenceRequestHandler(
+						AbstractDefaultAjaxBehavior.INDICATOR);
+				return new Label(markupId, "<img src=\"" +
+					RequestCycle.get().urlFor(handler) + "\"/> Loading latest commit...").setEscapeModelStrings(false);
+			}
+
+			@Override
+			public Component getLazyLoadComponent(String id) {
+				final IModel<RevCommit> commitModel = new LoadableDetachableModel<RevCommit>(){
+
+					@Override
+					protected RevCommit load() {
+						Git git = Git.wrap(repoModel.getObject().openAsJGitRepo());
+						try {
+							LogCommand log = git.log();
+							log.setMaxCount(1);
+							String path = getNormalizedPath();
+							if (path != null)
+								log.addPath(path);
+							log.add(getCommitId());
+							return log.call().iterator().next();
+						} catch (MissingObjectException | IncorrectObjectTypeException | GitAPIException e) {
+							throw new RuntimeException(e);
+						} finally {
+							git.close();
+						}
+					}
+					
+				};				
+				Fragment fragment = new Fragment(id, "lastCommitFrag", TreeList.this) {
+
+					@Override
+					protected void onDetach() {
+						commitModel.detach();
+						
+						super.onDetach();
+					}
+					
+				};
+				
+				fragment.add(new CommitMessagePanel("message", repoModel, commitModel));
+				
+				fragment.add(new PersonLink("author", new AbstractReadOnlyModel<PersonIdent>() {
+
+					@Override
+					public PersonIdent getObject() {
+						return commitModel.getObject().getAuthorIdent();
+					}
+					
+				}));
+				
+				fragment.add(new Label("date", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						return DateUtils.formatAge(commitModel.getObject().getAuthorIdent().getWhen());
+					}
+					
+				}));
+				
+				PageParameters params = RepositoryPage.paramsOf(
+						repoModel.getObject(), commitModel.getObject().name());
+				BookmarkablePageLink<Void> commitLink = new BookmarkablePageLink<Void>(
+						"commitLink", RepoCommitPage.class, params);
+				commitLink.add(new Label("commitId", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						return GitUtils.abbreviateSHA(commitModel.getObject().name());
+					}
+					
+				}));
+
+				
+				fragment.add(commitLink);
+				
+				return fragment;
+			}
+			
+		});
+		
+		super.onBeforeRender();
+	}
+
 	private void selectPath(AjaxRequestTarget target, String path) {
 		if (path.length() == 0)
 			path = null;
@@ -226,12 +340,16 @@ public abstract class TreeList extends GenericPanel<String> {
 	}
 	
 	private ObjectId getCommitId() {
-		return Preconditions.checkNotNull(getRepository().resolveRevision(getRevision()));
+		return Preconditions.checkNotNull(repoModel.getObject().resolveRevision(revModel.getObject()));
 	}
-	
-	protected abstract Repository getRepository();
-	
-	protected abstract String getRevision();
+
+	@Override
+	protected void onDetach() {
+		repoModel.detach();
+		revModel.detach();
+		
+		super.onDetach();
+	}
 
 	@SuppressWarnings("unused")
 	private static class LastCommitInfo {

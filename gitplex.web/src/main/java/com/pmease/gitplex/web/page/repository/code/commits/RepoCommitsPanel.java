@@ -29,7 +29,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.OldCommitCommentManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.common.datatype.DataTypes;
-import com.pmease.gitplex.web.component.commit.CommitMessagePanel;
+import com.pmease.gitplex.web.component.commit.OldCommitMessagePanel;
 import com.pmease.gitplex.web.component.commit.CommitMetaPanel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.PersonLink;
@@ -120,7 +120,7 @@ public class RepoCommitsPanel extends Panel {
 						item.add(new PersonLink("avatar", Model.of(commit.getAuthor()), AvatarMode.AVATAR)
 									.withTooltipConfig(new TooltipConfig().withPlacement(Placement.right)));
 						
-						item.add(new CommitMessagePanel("message", repositoryModel, item.getModel()));
+						item.add(new OldCommitMessagePanel("message", repositoryModel, item.getModel()));
 						item.add(new CommitMetaPanel("meta", item.getModel()));
 						
 						AbstractLink shalink =new BookmarkablePageLink<Void>(

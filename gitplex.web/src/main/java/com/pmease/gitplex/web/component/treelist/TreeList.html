@@ -1,5 +1,10 @@
 <wicket:panel>
 	<table class="tree-list">
+		<tr class="last-commit">
+			<td colspan="3">
+				<div wicket:id="lastCommit"></div>
+			</td>
+		</tr>
 		<tr wicket:id="parent" class="parent">
 			<td colspan="3">
 				<a wicket:id="link"><i class="fa fa-level-up"></i> <span>..</span></a>
@@ -16,4 +21,15 @@
 			</td>
 		</tr>
 	</table>
+	<wicket:fragment wicket:id="lastCommitFrag">
+		<div wicket:id="message" class="message"></div>
+		<div class="other-info clearfix">
+			<span class="pull-left">
+				<span wicket:id="author"></span> authored <span wicket:id="date"></span>
+			</span>
+			<span class="pull-right">
+				latest commit <a wicket:id="commitLink"><span wicket:id="commitId"></span></a>
+			</span>
+		</div>
+	</wicket:fragment>
 </wicket:panel>

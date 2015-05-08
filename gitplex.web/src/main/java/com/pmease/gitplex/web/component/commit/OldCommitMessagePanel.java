@@ -15,11 +15,11 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.code.commit.RepoCommitPage;
 
 @SuppressWarnings("serial")
-public class CommitMessagePanel extends Panel {
+public class OldCommitMessagePanel extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
-	public CommitMessagePanel(String id, IModel<Repository> repoModel, IModel<Commit> commitModel) {
+	public OldCommitMessagePanel(String id, IModel<Repository> repoModel, IModel<Commit> commitModel) {
 		super(id, commitModel);
 		
 		this.repoModel = repoModel;

@@ -36,14 +36,22 @@ import com.google.common.base.Splitter;
 import com.pmease.commons.git.GitPath;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
+import com.pmease.commons.wicket.behavior.dropdown.DropdownMode;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitplex.core.model.Repository;
 
 @SuppressWarnings("serial")
-public abstract class PathNavigator extends GenericPanel<String> {
+public class PathNavigator extends GenericPanel<String> {
 
-	public PathNavigator(String id, IModel<String> pathModel) {
+	private final IModel<Repository> repoModel;
+	
+	private final IModel<String> revModel;
+	
+	public PathNavigator(String id, IModel<Repository> repoModel, IModel<String> revModel, IModel<String> pathModel) {
 		super(id, pathModel);
+
+		this.repoModel = repoModel;
+		this.revModel = revModel;
 	}
 
 	@Override
@@ -93,7 +101,7 @@ public abstract class PathNavigator extends GenericPanel<String> {
 					else
 						link.add(new Label("label", path));
 				} else {
-					link.add(new Label("label", getRepository().getName()));
+					link.add(new Label("label", repoModel.getObject().getName()));
 				}
 				
 				item.add(link);
@@ -101,7 +109,7 @@ public abstract class PathNavigator extends GenericPanel<String> {
 				WebMarkupContainer subtreeDropdownTrigger = new WebMarkupContainer("subtreeDropdownTrigger");
 				
 				if (path.length() != 0 && item.getIndex() == size()-1) {
-					org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
+					org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
 					try {
 						RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
 						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, path, revTree);
@@ -126,7 +134,7 @@ public abstract class PathNavigator extends GenericPanel<String> {
 
 							@Override
 							public Iterator<? extends GitPath> getRoots() {
-								org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
+								org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
 								try {
 									RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
 									TreeWalk treeWalk;
@@ -225,7 +233,7 @@ public abstract class PathNavigator extends GenericPanel<String> {
 					
 				};
 				item.add(subtreeDropdown);
-				subtreeDropdownTrigger.add(new DropdownBehavior(subtreeDropdown)/*.mode(new DropdownMode.Hover())*/);
+				subtreeDropdownTrigger.add(new DropdownBehavior(subtreeDropdown).mode(new DropdownMode.Hover()));
 				item.add(subtreeDropdownTrigger);
 			}
 			
@@ -241,7 +249,7 @@ public abstract class PathNavigator extends GenericPanel<String> {
 	}
 
 	private ObjectId getCommitId() {
-		return Preconditions.checkNotNull(getRepository().resolveRevision(getRevision()));
+		return Preconditions.checkNotNull(repoModel.getObject().resolveRevision(revModel.getObject()));
 	}
 
 	private void selectPath(AjaxRequestTarget target, String path) {
@@ -253,7 +261,7 @@ public abstract class PathNavigator extends GenericPanel<String> {
 	}
 	
 	private List<GitPath> getChildren(GitPath pathInfo) {
-		org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
+		org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
 		try {
 			RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
 			TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, pathInfo.getName(), revTree);
@@ -271,9 +279,13 @@ public abstract class PathNavigator extends GenericPanel<String> {
 			jgitRepo.close();
 		}
 	}
-	
-	protected abstract Repository getRepository();
-	
-	protected abstract String getRevision();
+
+	@Override
+	protected void onDetach() {
+		repoModel.detach();
+		revModel.detach();
+		
+		super.onDetach();
+	}
 	
 }

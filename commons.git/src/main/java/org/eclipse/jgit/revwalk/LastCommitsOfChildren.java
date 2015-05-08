@@ -15,6 +15,7 @@ import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.StopWalkException;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren.Value;
@@ -83,8 +84,8 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 			 */
 			if (treePath.length() != 0) {
 				TreeWalk treeWalk = TreeWalk.forPath(repo, treePath, untilCommit.getTree());
-				if (treeWalk == null)
-					throw new IllegalArgumentException("Non-existent path: " + treePath);
+				if (treeWalk == null || !FileMode.TREE.equals(treeWalk.getFileMode(0)))
+					throw new IllegalArgumentException("Path '" + treePath + "' does not exist or is not a tree.");
 				treeWalk.enterSubtree();
 				treeWalk.setRecursive(false);
 				while (treeWalk.next())

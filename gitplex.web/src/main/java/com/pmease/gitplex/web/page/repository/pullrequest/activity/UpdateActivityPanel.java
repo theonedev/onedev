@@ -22,7 +22,7 @@ import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.PullRequestVerification;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.commit.CommitHashLink;
-import com.pmease.gitplex.web.component.commit.CommitMessagePanel;
+import com.pmease.gitplex.web.component.commit.OldCommitMessagePanel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.PersonLink;
 import com.pmease.gitplex.web.page.repository.pullrequest.VerificationStatusPanel;
@@ -81,7 +81,7 @@ public class UpdateActivityPanel extends Panel {
 					}
 					
 				};
-				item.add(new CommitMessagePanel("message", repoModel, new AbstractReadOnlyModel<Commit>() {
+				item.add(new OldCommitMessagePanel("message", repoModel, new AbstractReadOnlyModel<Commit>() {
 
 					@Override
 					public Commit getObject() {

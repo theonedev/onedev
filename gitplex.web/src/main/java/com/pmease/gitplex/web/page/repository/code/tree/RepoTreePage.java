@@ -6,9 +6,13 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -95,7 +99,14 @@ public class RepoTreePage extends RepositoryPage {
 
 		});
 		
-		add(pathNavigator = new PathNavigator("pathSelector", new IModel<String>() {
+		add(pathNavigator = new PathNavigator("pathSelector", repoModel, new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return revision;
+			}
+			
+		}, new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -112,16 +123,6 @@ public class RepoTreePage extends RepositoryPage {
 			}
 			
 		}) {
-
-			@Override
-			protected Repository getRepository() {
-				return repoModel.getObject();
-			}
-
-			@Override
-			protected String getRevision() {
-				return revision;
-			}
 
 			@Override
 			protected void onModelChanged() {
@@ -134,7 +135,14 @@ public class RepoTreePage extends RepositoryPage {
 			
 		});
 		
-		add(treeList = new TreeList("treeList", new IModel<String>() {
+		add(treeList = new TreeList("treeList", repoModel, new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return revision;
+			}
+			
+		}, new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -153,16 +161,6 @@ public class RepoTreePage extends RepositoryPage {
 		}) {
 
 			@Override
-			protected Repository getRepository() {
-				return repoModel.getObject();
-			}
-
-			@Override
-			protected String getRevision() {
-				return revision;
-			}
-			
-			@Override
 			protected void onModelChanged() {
 				super.onModelChanged();
 				
@@ -174,5 +172,12 @@ public class RepoTreePage extends RepositoryPage {
 		});
 		
 	}
-	
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		
+		response.render(CssHeaderItem.forReference(new CssResourceReference(RepoTreePage.class, "repo-tree-page.css")));
+	}
+
 }

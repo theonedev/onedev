@@ -33,7 +33,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.permission.Permission;
 import com.pmease.gitplex.web.component.commit.CommitHashLink;
-import com.pmease.gitplex.web.component.commit.CommitMessagePanel;
+import com.pmease.gitplex.web.component.commit.OldCommitMessagePanel;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
 import com.pmease.gitplex.web.component.user.AvatarMode;
@@ -170,7 +170,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 							}
 							
 						};
-						commitItem.add(new CommitMessagePanel("message", repoModel, new AbstractReadOnlyModel<Commit>() {
+						commitItem.add(new OldCommitMessagePanel("message", repoModel, new AbstractReadOnlyModel<Commit>() {
 
 							@Override
 							public Commit getObject() {

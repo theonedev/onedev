@@ -1,5 +1,12 @@
 table.tree-list {width: 100%; border: 1px solid #DDD;}
-table.tree-list>tbody>tr>td {padding: 6px 8px; background: #F9F9F9; border-top: 1px solid #EEE; vertical-align: top;}
+table.tree-list>tbody>tr>td {padding: 6px 8px; border-top: 1px solid #EEE; vertical-align: top;}
 table.tree-list>tbody>tr:first-child>td {border-top: none;}
-table.tree-list .last-commit a, .tree-list .last-commit {color: #666;}
+table.tree-list tr.child .last-commit a, .tree-list .last-commit {color: #666;}
+table.tree-list tr.parent td {padding: 3px 12px;}
+table.tree-list tr.parent td a i {margin-right: 2px;}
 table.tree-list tr.parent td a span {font-size: 18px;}
+table.tree-list tr.last-commit td {background: #F2F2F2;}
+table.tree-list tr.last-commit td .message {margin-bottom: 16px;}
+table.tree-list tr.last-commit td .other-info {background: white; margin: -6px -8px; padding: 6px 8px; color: #888;}
+table.tree-list tr.last-commit td .other-info .name {font-weight: bold; color: #555;}
+table.tree-list tr.last-commit td .other-info a {color: #555;}
