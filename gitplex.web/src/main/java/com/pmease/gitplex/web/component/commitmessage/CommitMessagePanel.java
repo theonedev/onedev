@@ -15,7 +15,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import com.google.common.base.Objects;
 import com.pmease.commons.wicket.component.MultilineText;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.page.repository.code.commit.RepoCommitPage;
+import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 
 @SuppressWarnings("serial")
 public class CommitMessagePanel extends Panel {
@@ -37,7 +37,7 @@ public class CommitMessagePanel extends Panel {
 		
 		AbstractLink link = new BookmarkablePageLink<Void>("link",
 				RepoCommitPage.class,
-				RepoCommitPage.paramsOf(repoModel.getObject(), commitModel.getObject().name(), null));
+				RepoCommitPage.paramsOf(repoModel.getObject(), commitModel.getObject().name()));
 		
 		add(link);
 		link.add(new Label("label", new AbstractReadOnlyModel<String>() {

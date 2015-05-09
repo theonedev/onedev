@@ -57,15 +57,14 @@ import com.pmease.gitplex.core.permission.Permission;
 import com.pmease.gitplex.web.component.branch.AffinalBranchSingleChoice;
 import com.pmease.gitplex.web.component.branch.BranchLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
-import com.pmease.gitplex.web.component.commit.CommitsTablePanel;
 import com.pmease.gitplex.web.component.diff.CompareResultPanel;
 import com.pmease.gitplex.web.component.pullrequest.AssigneeChoice;
 import com.pmease.gitplex.web.component.pullrequest.ReviewerAvatar;
 import com.pmease.gitplex.web.component.pullrequest.ReviewerChoice;
 import com.pmease.gitplex.web.model.ReviewersModel;
+import com.pmease.gitplex.web.page.LoginPage;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
-import com.pmease.gitplex.web.shiro.LoginPage;
 
 @SuppressWarnings("serial")
 public class NewRequestPage extends RepositoryPage {
@@ -251,15 +250,6 @@ public class NewRequestPage extends RepositoryPage {
 		}
 		add(fragment);
 
-		final IModel<Repository> repositoryModel = new AbstractReadOnlyModel<Repository>() {
-
-			@Override
-			public Repository getObject() {
-				return pullRequest.getTarget().getRepository();
-			}
-			
-		};
-		
 		List<Tab> tabs = new ArrayList<>();
 		
 		tabs.add(new AjaxActionTab(Model.of("Pending Commits")) {
@@ -300,13 +290,13 @@ public class NewRequestPage extends RepositoryPage {
 			
 		});
 		
-		add(new CommitsTablePanel("tabPanel", commitsModel, repositoryModel).setOutputMarkupId(true));
+		add(new WebMarkupContainer("tabPanel").setOutputMarkupId(true));
 
 		add(new BackToTop("backToTop"));
 	}
 	
 	private Component newCommitsPanel() {
-		return new CommitsTablePanel("tabPanel", commitsModel, repoModel).setOutputMarkupId(true);
+		return new WebMarkupContainer("tabPanel").setOutputMarkupId(true);
 	}
 	
 	private Component newChangedFilesPanel() {

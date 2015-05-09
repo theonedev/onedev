@@ -5,14 +5,12 @@ import java.util.Collection;
 import org.apache.tika.mime.MediaType;
 import org.apache.wicket.Application;
 import org.apache.wicket.protocol.http.WebApplication;
-import org.glassfish.jersey.server.ResourceConfig;
 import org.pegdown.Parser;
 import org.pegdown.plugins.ToHtmlSerializerPlugin;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.extensionpoint.TextConverter;
 import com.pmease.commons.git.extensionpoint.TextConverterProvider;
-import com.pmease.commons.jersey.JerseyConfigurator;
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.markdown.extensionpoint.HtmlTransformer;
@@ -30,11 +28,7 @@ import com.pmease.gitplex.web.extensionpoint.DiffRenderer;
 import com.pmease.gitplex.web.extensionpoint.DiffRendererProvider;
 import com.pmease.gitplex.web.extensionpoint.MediaRenderer;
 import com.pmease.gitplex.web.extensionpoint.MediaRendererProvider;
-import com.pmease.gitplex.web.page.repository.code.blob.renderer.BlobRendererFactory;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestDetailPage;
-import com.pmease.gitplex.web.resource.ResourceLocator;
-import com.pmease.gitplex.web.service.FileBlobService;
-import com.pmease.gitplex.web.service.impl.DefaultFileBlobService;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -51,25 +45,13 @@ public class WebModule extends AbstractPluginModule {
 		bind(WebApplication.class).to(WicketConfig.class);
 		bind(Application.class).to(WicketConfig.class);
 		bind(AvatarManager.class).to(DefaultAvatarManager.class);
-		bind(FileBlobService.class).to(DefaultFileBlobService.class);
 		
 		contribute(ServletConfigurator.class, WebServletConfigurator.class);
 		contribute(UserNameReservation.class, WebUserNameReservation.class);
 		
-		contribute(JerseyConfigurator.class, new JerseyConfigurator() {
-			
-			@Override
-			public void configure(ResourceConfig resourceConfig) {
-				resourceConfig.packages(true, ResourceLocator.class.getPackage().getName());
-			}
-			
-		});
-		
 		contributeFromPackage(EditSupport.class, EditSupportLocator.class);
 		
 		contribute(PullRequestListener.class, RequestDetailPage.Updater.class);
-		
-		bind(BlobRendererFactory.class);
 		
 		contribute(MediaRendererProvider.class, new MediaRendererProvider() {
 

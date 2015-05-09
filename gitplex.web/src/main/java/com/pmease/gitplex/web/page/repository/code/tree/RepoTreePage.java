@@ -1,6 +1,7 @@
 package com.pmease.gitplex.web.page.repository.code.tree;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
@@ -18,6 +19,8 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
+import com.pmease.commons.git.GitPath;
+import com.pmease.commons.wicket.behavior.HistoryBehavior;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.pathnavigator.PathNavigator;
 import com.pmease.gitplex.web.component.revisionselector.RevisionSelector;
@@ -28,27 +31,39 @@ import com.pmease.gitplex.web.page.repository.RepositoryPage;
 @SuppressWarnings("serial")
 public class RepoTreePage extends RepositoryPage {
 
+	private static final String PARAM_REVISION = "revision";
+	
+	private static final String PARAM_PATH = "path";
+
+	protected IModel<Repository> repoModel;
+	
 	private String revision = "master";
 	
-	@Nullable
 	private String path;
+	
+	private RevisionSelector revisionSelector;
 	
 	private PathNavigator pathNavigator;
 	
 	private TreeList treeList;
+	
+	private HistoryBehavior historyBehavior;
 	
 	public RepoTreePage(PageParameters params) {
 		super(params);
 		
 		if (!getRepository().git().hasCommits()) 
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));
+		
+		revision = GitPath.normalize(params.get(PARAM_REVISION).toString());
+		path = GitPath.normalize(params.get(PARAM_PATH).toString());
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new RevisionSelector("revSelector", new IModel<String>() {
+		add(revisionSelector = new RevisionSelector("revSelector", new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -94,6 +109,8 @@ public class RepoTreePage extends RepositoryPage {
 				if (target != null) {
 					target.add(pathNavigator);
 					target.add(treeList);
+					
+					pushState(target);
 				}
 			}
 
@@ -129,8 +146,10 @@ public class RepoTreePage extends RepositoryPage {
 				super.onModelChanged();
 				
 				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
-				if (target != null)
+				if (target != null) {
 					target.add(treeList);
+					pushState(target);
+				}
 			}
 			
 		});
@@ -165,12 +184,37 @@ public class RepoTreePage extends RepositoryPage {
 				super.onModelChanged();
 				
 				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
-				if (target != null)
+				if (target != null) {
 					target.add(pathNavigator);
+					pushState(target);
+				}
 			}
 			
 		});
 		
+		add(historyBehavior = new HistoryBehavior() {
+
+			@Override
+			protected void onPopState(AjaxRequestTarget target, Serializable state) {
+				HistoryState historyState = (HistoryState) state;
+				revision = historyState.revision;
+				path = historyState.path;
+				
+				target.add(revisionSelector);
+				target.add(pathNavigator);
+				target.add(treeList);
+			}
+			
+		});
+	}
+	
+	private void pushState(AjaxRequestTarget target) {
+		HistoryState state = new HistoryState();
+		state.revision = revision;
+		state.path = path;
+		PageParameters params = paramsOf(getRepository(), revision, path);
+		String url = RequestCycle.get().urlFor(RepoTreePage.class, params).toString();
+		historyBehavior.pushState(target, url, state);
 	}
 
 	@Override
@@ -180,4 +224,18 @@ public class RepoTreePage extends RepositoryPage {
 		response.render(CssHeaderItem.forReference(new CssResourceReference(RepoTreePage.class, "repo-tree-page.css")));
 	}
 
+	public static PageParameters paramsOf(Repository repository, @Nullable String revision, @Nullable String path) {
+		PageParameters params = paramsOf(repository);
+		if (revision != null)
+			params.set(PARAM_REVISION, revision);
+		if (path != null)
+			params.set(PARAM_PATH, path);
+		return params;
+	}
+	
+	private static class HistoryState implements Serializable {
+		String revision;
+		
+		String path;
+	}
 }

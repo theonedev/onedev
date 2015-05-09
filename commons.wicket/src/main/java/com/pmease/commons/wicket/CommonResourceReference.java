@@ -15,7 +15,6 @@ import com.pmease.commons.wicket.assets.Assets;
 
 import de.agilecoders.wicket.core.Bootstrap;
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
-import de.agilecoders.wicket.webjars.request.resource.WebjarsJavaScriptResourceReference;
 
 /**
  * Common resource is intended to provide a common look&feel for all products using 
@@ -80,8 +79,6 @@ public class CommonResourceReference extends JavaScriptResourceReference {
 		dependencies.add(JavaScriptHeaderItem.forReference(Bootstrap.getSettings().getModernizrResourceReference()));
 		dependencies.addAll(bootstrapHeaderItems);
 		
-		dependencies.add(JavaScriptHeaderItem.forReference(
-				new WebjarsJavaScriptResourceReference("historyjs/current/scripts/bundled/html5/jquery.history.js")));
 		dependencies.add(CssHeaderItem.forReference(
 				new WebjarsCssResourceReference("font-awesome/current/css/font-awesome.min.css")));
 

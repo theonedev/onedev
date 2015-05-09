@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.code.blob;
+package com.pmease.gitplex.web.page.repository.commit;
 
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.model.IModel;
@@ -10,26 +10,21 @@ import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
-public class RepoBlobPage extends RepositoryPage {
+public class RepoCommitPage extends RepositoryPage {
 
 	private static final String PARAM_REVISION = "revision";
-	
-	private static final String PARAM_PATH = "path";
 	
 	protected IModel<Repository> repoModel;
 	
 	protected String revision;
 	
-	protected String path;
-	
-	public RepoBlobPage(PageParameters params) {
+	public RepoCommitPage(PageParameters params) {
 		super(params);
 		
 		if (!getRepository().git().hasCommits()) 
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));
 		
 		revision = GitPath.normalize(params.get(PARAM_REVISION).toString());
-		path = GitPath.normalize(params.get(PARAM_PATH).toString());
 	}
 
 	@Override
@@ -37,10 +32,9 @@ public class RepoBlobPage extends RepositoryPage {
 		super.onInitialize();
 	}
 	
-	public static PageParameters paramsOf(Repository repository, String revision, String path) {
+	public static PageParameters paramsOf(Repository repository, String revision) {
 		PageParameters params = paramsOf(repository);
 		params.set(PARAM_REVISION, revision);
-		params.set(PARAM_PATH, path);
 		return params;
 	}
 	

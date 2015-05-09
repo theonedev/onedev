@@ -32,13 +32,12 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.branch.AffinalBranchSingleChoice;
 import com.pmease.gitplex.web.component.branch.BranchLink;
-import com.pmease.gitplex.web.component.commit.CommitsTablePanel;
 import com.pmease.gitplex.web.component.diff.CompareResultPanel;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.NewRequestPage;
-import com.pmease.gitplex.web.page.repository.pullrequest.RequestOverviewPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestDetailPage;
+import com.pmease.gitplex.web.page.repository.pullrequest.RequestOverviewPage;
 
 @SuppressWarnings("serial")
 public class BranchComparePage extends RepositoryPage {
@@ -337,13 +336,11 @@ public class BranchComparePage extends RepositoryPage {
 
 		});
 		
-		add(new CommitsTablePanel("tabPanel", commitsModel, repoModel).setOutputMarkupId(true));
-
 		add(new BackToTop("backToTop"));
 	}
 	
 	private Component newCommitsPanel() {
-		return new CommitsTablePanel("tabPanel", commitsModel, repoModel).setOutputMarkupId(true);
+		return new WebMarkupContainer("tabPanel").setOutputMarkupId(true);
 	}
 	
 	private Component newChangedFilesPanel() {

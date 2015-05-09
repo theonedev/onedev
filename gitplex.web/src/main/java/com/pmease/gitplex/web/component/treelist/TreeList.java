@@ -58,8 +58,8 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.user.PersonLink;
-import com.pmease.gitplex.web.page.repository.RepositoryPage;
-import com.pmease.gitplex.web.page.repository.code.commit.RepoCommitPage;
+import com.pmease.gitplex.web.page.repository.code.blob.RepoBlobPage;
+import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")
@@ -212,7 +212,7 @@ public class TreeList extends GenericPanel<String> {
 					LastCommitInfo info = new LastCommitInfo();
 					PageParameters params = RepoCommitPage.paramsOf(
 							repoModel.getObject(), entry.getValue().getId().name());
-					info.url = RequestCycle.get().urlFor(RepoCommitPage.class, params).toString();
+					info.url = RequestCycle.get().urlFor(RepoBlobPage.class, params).toString();
 					info.summary = entry.getValue().getSummary();
 					info.age = DateUtils.formatAge(new Date(entry.getValue().getTimestamp()*1000L));
 					map.put(entry.getKey(), info);
@@ -308,10 +308,10 @@ public class TreeList extends GenericPanel<String> {
 					
 				}));
 				
-				PageParameters params = RepositoryPage.paramsOf(
+				PageParameters params = RepoCommitPage.paramsOf(
 						repoModel.getObject(), commitModel.getObject().name());
 				BookmarkablePageLink<Void> commitLink = new BookmarkablePageLink<Void>(
-						"commitLink", RepoCommitPage.class, params);
+						"commitLink", RepoBlobPage.class, params);
 				commitLink.add(new Label("commitId", new AbstractReadOnlyModel<String>() {
 
 					@Override

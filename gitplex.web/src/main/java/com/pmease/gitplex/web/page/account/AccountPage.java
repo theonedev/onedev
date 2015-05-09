@@ -25,8 +25,6 @@ import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.account.repository.RepositoriesPage;
-import com.pmease.gitplex.web.page.account.team.AccountTeamsPage;
-import com.pmease.gitplex.web.page.account.team.EditTeamPage;
 
 @SuppressWarnings("serial")
 public abstract class AccountPage extends AccountBasePage {
@@ -44,7 +42,6 @@ public abstract class AccountPage extends AccountBasePage {
 		
 		List<Tab> tabs = new ArrayList<>();
 		tabs.add(new AccountTab(Model.of("Repositories"), "fa fa-ext fa-repo", RepositoriesPage.class));
-		tabs.add(new AccountTab(Model.of("Teams"), "fa fa-group", AccountTeamsPage.class, EditTeamPage.class));
 		tabs.add(new AccountTab(Model.of("Members"), "fa fa-user", MemberSettingPage.class));
 		tabs.add(new AccountTab(Model.of("Notifications"), "fa fa-volume-up", AccountNotificationsPage.class));
 		tabs.add(new AccountTab(Model.of("Profile"), "fa fa-gear", AccountProfilePage.class));

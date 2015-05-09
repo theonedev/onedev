@@ -36,6 +36,7 @@ import com.pmease.commons.hibernate.HibernateUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.util.diff.AroundContext;
+import com.pmease.commons.wicket.behavior.HistoryBehavior;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
@@ -43,7 +44,6 @@ import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
-import com.pmease.commons.wicket.component.history.HistoryAwarePanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineComment;
@@ -385,94 +385,97 @@ public class RequestComparePage extends RequestDetailPage {
 
 		});
 
-		add(new HistoryAwarePanel("compareResult") {
+		add(compareResult = new CompareResultPanel("compareResult", repoModel, oldCommitHash, newCommitHash, file) {
+			
+			private HistoryBehavior historyBehavior;
 			
 			@Override
-			public void onPopState(AjaxRequestTarget target, Serializable state) {
-				compareResult.select(target, (String) state);
-				target.add(optionsContainer);
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				add(historyBehavior = new HistoryBehavior() {
+
+					@Override
+					protected void onPopState(AjaxRequestTarget target, Serializable state) {
+						compareResult.select(target, (String) state);
+						target.add(optionsContainer);
+					}
+					
+				});
 			}
 
 			@Override
-			protected Component newContent(String id) {
-				compareResult = new CompareResultPanel(id, repoModel, oldCommitHash, newCommitHash, file) {
-					
-					@Override
-					protected InlineCommentSupport getInlineCommentSupport(final Change change) {
-						List<String> commentables = getPullRequest().getCommentables();
-						int oldCommitIndex = commentables.indexOf(oldCommitHash);
-						int newCommitIndex = commentables.indexOf(newCommitHash);
-						if (oldCommitIndex == -1 || newCommitIndex == -1 || oldCommitIndex > newCommitIndex) {
-							return null;
-						} else {
-							return new InlineCommentSupport() {
-								
-								@Override
-								public Map<Integer, List<InlineComment>> getOldComments() {
-									return getPullRequest().getChangeComments(change).getOldComments();
-								}
-								
-								@Override
-								public Map<Integer, List<InlineComment>> getNewComments() {
-									return getPullRequest().getChangeComments(change).getNewComments();
-								}
-								
-								@Override
-								public InlineComment getConcernedComment() {
-									return RequestComparePage.this.getComment();
-								}
-								
-								@Override
-								public InlineComment addComment(BlobInfo blobInfo, BlobInfo compareWith, 
-										AroundContext commentContext, int line, String content) {
-									User user = GitPlex.getInstance(UserManager.class).getCurrent();
-									Preconditions.checkNotNull(user);
-									PullRequestComment comment = new PullRequestComment();
-									getPullRequest().getComments().add(comment);
-									comment.setUser(user);
-									comment.setDate(new Date());
-									comment.setContent(content);
-									comment.setRequest(getPullRequest());
-									comment.setBlobInfo(blobInfo);
-									comment.setCompareWith(compareWith);
-									comment.setLine(line);
-									comment.setContext(commentContext);
-									InheritableThreadLocalData.set(new PageId(getPageId()));
-									try {
-										GitPlex.getInstance(PullRequestCommentManager.class).save(comment, true);
-									} finally {
-										InheritableThreadLocalData.clear();
-									}
-									return comment;
-								}
-							};
+			protected InlineCommentSupport getInlineCommentSupport(final Change change) {
+				List<String> commentables = getPullRequest().getCommentables();
+				int oldCommitIndex = commentables.indexOf(oldCommitHash);
+				int newCommitIndex = commentables.indexOf(newCommitHash);
+				if (oldCommitIndex == -1 || newCommitIndex == -1 || oldCommitIndex > newCommitIndex) {
+					return null;
+				} else {
+					return new InlineCommentSupport() {
+						
+						@Override
+						public Map<Integer, List<InlineComment>> getOldComments() {
+							return getPullRequest().getChangeComments(change).getOldComments();
 						}
-					}
-
-					@Override
-					protected void onSelection(AjaxRequestTarget target, Change change) {
-						file = change.getPath();
-
-						String original = getPageParameters().get(ORIGINAL_PARAM).toString();
-						String revised = getPageParameters().get(REVISED_PARAM).toString();
-						Long commentId = getPageParameters().get(COMMENT_PARAM).toOptionalLong();
 						
-						StringBuilder url = new StringBuilder("compare?file=");
-						url.append(file);
-						if (original != null)
-							url.append("&original=").append(original);
-						if (revised != null)
-							url.append("&revised=").append(revised);
-						if (commentId != null)
-							url.append("&comment=").append(commentId);
+						@Override
+						public Map<Integer, List<InlineComment>> getNewComments() {
+							return getPullRequest().getChangeComments(change).getNewComments();
+						}
 						
-						pushState(target, url.toString(), file);
-					}
-					
-				};
-				return compareResult;
+						@Override
+						public InlineComment getConcernedComment() {
+							return RequestComparePage.this.getComment();
+						}
+						
+						@Override
+						public InlineComment addComment(BlobInfo blobInfo, BlobInfo compareWith, 
+								AroundContext commentContext, int line, String content) {
+							User user = GitPlex.getInstance(UserManager.class).getCurrent();
+							Preconditions.checkNotNull(user);
+							PullRequestComment comment = new PullRequestComment();
+							getPullRequest().getComments().add(comment);
+							comment.setUser(user);
+							comment.setDate(new Date());
+							comment.setContent(content);
+							comment.setRequest(getPullRequest());
+							comment.setBlobInfo(blobInfo);
+							comment.setCompareWith(compareWith);
+							comment.setLine(line);
+							comment.setContext(commentContext);
+							InheritableThreadLocalData.set(new PageId(getPageId()));
+							try {
+								GitPlex.getInstance(PullRequestCommentManager.class).save(comment, true);
+							} finally {
+								InheritableThreadLocalData.clear();
+							}
+							return comment;
+						}
+					};
+				}
 			}
 
+			@Override
+			protected void onSelection(AjaxRequestTarget target, Change change) {
+				file = change.getPath();
+
+				String original = getPageParameters().get(ORIGINAL_PARAM).toString();
+				String revised = getPageParameters().get(REVISED_PARAM).toString();
+				Long commentId = getPageParameters().get(COMMENT_PARAM).toOptionalLong();
+				
+				StringBuilder url = new StringBuilder("compare?file=");
+				url.append(file);
+				if (original != null)
+					url.append("&original=").append(original);
+				if (revised != null)
+					url.append("&revised=").append(revised);
+				if (commentId != null)
+					url.append("&comment=").append(commentId);
+				
+				historyBehavior.pushState(target, url.toString(), file);
+			}
+			
 		});
 	}
 	
