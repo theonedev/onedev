@@ -1,5 +1,5 @@
-@font-face { font-family: "ponticons"; src: url("../fonts/ponticons.eot?v=1.0.19"); src: url("../fonts/ponticons.eot?v=1.0.19#iefix") format("embedded-opentype"), url("../fonts/ponticons.ttf?v=1.0.19") format("truetype"), url("../fonts/ponticons.woff?v=1.0.19") format("woff"), url("../fonts/ponticons.svg?v=1.0.19#ponticons") format("svg"); font-weight: normal; font-style: normal; }
-.fa-ext {font: normal 14px "ponticons"; display: inline-block; speak: none; text-transform: none; text-rendering: auto; line-height: 1; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;}
+@font-face { font-family: "fontext"; src: url("fontext.eot?v=1.0.19"); src: url("fontext.eot?v=1.0.19#iefix") format("embedded-opentype"), url("fontext.ttf?v=1.0.19") format("truetype"), url("../fonts/ponticons.woff?v=1.0.19") format("woff"), url("fontext.svg?v=1.0.19#fontext") format("svg"); font-weight: normal; font-style: normal; }
+.fa-ext {font: normal 14px "fontext"; display: inline-block; speak: none; text-transform: none; text-rendering: auto; line-height: 1; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;}
 
 .fa-gitplex-logo:before { content: "\f100"; }
 

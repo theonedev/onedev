@@ -62,9 +62,9 @@ import com.pmease.gitplex.web.component.pullrequest.AssigneeChoice;
 import com.pmease.gitplex.web.component.pullrequest.ReviewerAvatar;
 import com.pmease.gitplex.web.component.pullrequest.ReviewerChoice;
 import com.pmease.gitplex.web.model.ReviewersModel;
-import com.pmease.gitplex.web.page.LoginPage;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
+import com.pmease.gitplex.web.page.security.LoginPage;
 
 @SuppressWarnings("serial")
 public class NewRequestPage extends RepositoryPage {

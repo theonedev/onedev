@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web;
+package com.pmease.gitplex.web.mapper;
 
 import org.apache.wicket.Page;
 import org.apache.wicket.core.request.mapper.MountedMapper;
@@ -8,9 +8,6 @@ import org.apache.wicket.request.mapper.CompoundRequestMapper;
 
 import com.pmease.gitplex.core.validation.RepositoryNameValidator;
 import com.pmease.gitplex.core.validation.UserNameValidator;
-import com.pmease.gitplex.web.mapper.PageParameterAwareMountedMapper;
-import com.pmease.gitplex.web.mapper.PatternMountedMapper;
-import com.pmease.gitplex.web.page.ServerInitPage;
 import com.pmease.gitplex.web.page.account.AccountHomePage;
 import com.pmease.gitplex.web.page.account.AccountNotificationsPage;
 import com.pmease.gitplex.web.page.account.AccountProfilePage;
@@ -22,6 +19,7 @@ import com.pmease.gitplex.web.page.account.team.AccountTeamsPage;
 import com.pmease.gitplex.web.page.admin.MailSettingPage;
 import com.pmease.gitplex.web.page.admin.QosSettingPage;
 import com.pmease.gitplex.web.page.admin.SystemSettingPage;
+import com.pmease.gitplex.web.page.init.ServerInitPage;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryHomePage;
 import com.pmease.gitplex.web.page.repository.admin.GeneralSettingPage;
@@ -43,9 +41,9 @@ import com.pmease.gitplex.web.page.repository.pullrequest.RequestUpdatesPage;
 import com.pmease.gitplex.web.page.test.RunModePage;
 import com.pmease.gitplex.web.page.test.TestPage;
 
-public class GitPlexMounting extends CompoundRequestMapper {
+public class RootMapper extends CompoundRequestMapper {
 
-	public GitPlexMounting(WebApplication app) {
+	public RootMapper(WebApplication app) {
 		addAdministrationPages();
 		addAccountPages();
 		addRepositoryPages();

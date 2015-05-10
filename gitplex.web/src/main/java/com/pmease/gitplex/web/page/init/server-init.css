@@ -1,0 +1,9 @@
+.server-init {
+	text-align: center;
+	width: 50%;
+	margin: 0 auto;
+}
+
+.server-init .message {
+	margin: 40px;
+}

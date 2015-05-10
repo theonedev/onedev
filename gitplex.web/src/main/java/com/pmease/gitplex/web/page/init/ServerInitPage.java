@@ -1,17 +1,21 @@
-package com.pmease.gitplex.web.page;
+package com.pmease.gitplex.web.page.init;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.util.init.InitStage;
 import com.pmease.commons.util.init.ManualConfig;
 import com.pmease.commons.wicket.component.wizard.ManualConfigStep;
 import com.pmease.commons.wicket.component.wizard.Wizard;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
 public class ServerInitPage extends BasePage {
@@ -53,6 +57,12 @@ public class ServerInitPage extends BasePage {
 	@Override
 	protected String getPageTitle() {
 		return "Server Initialization";
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new CssResourceReference(ServerInitPage.class, "server-init.css")));
 	}
 
 	@Override

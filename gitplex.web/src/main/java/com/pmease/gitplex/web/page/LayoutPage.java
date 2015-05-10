@@ -2,6 +2,8 @@ package com.pmease.gitplex.web.page;
 
 import org.apache.shiro.SecurityUtils;
 
+import com.pmease.gitplex.web.page.base.BasePage;
+
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
 

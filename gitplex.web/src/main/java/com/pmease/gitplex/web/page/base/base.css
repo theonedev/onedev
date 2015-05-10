@@ -1,0 +1,422 @@
+html, body { background: #f0f2f4; }
+
+a {color: #09f; cursor: pointer;}
+a.fa {text-decoration: none;}
+
+textarea {resize: vertical;}
+
+/* BRANCHES PAGE */
+.branches>.body>.options {margin-bottom: 16px;}
+.branches>.body>.options>div {margin-right: 24px;}
+
+.branches>.body>.options>div.base .input-group {width: 240px;}
+.branches>.body>.options>div.search .input-group {width: 240px;}
+.branches>.body>.options .pagination {margin: 0;}
+.branches>.body>table.branches td {white-space: nowrap;}
+.branches>.body>table.branches td.summary, .branches>.body>table.branches td.actions {width: 1%;}
+.branches>.body>table.branches td.actions .fa.fa-times {color: red; margin-left: 8px;}
+.branches>.body>table.branches td.actions span.fa.fa-times {color: #888;}
+.branches>.body>table.branches td.behind {padding-right: 0;}
+.branches>.body>table.branches td.ahead {padding-left: 0;}
+.branches>.body>table.branches td.behind>div {border-right: 1px solid #333;}
+.branches>.body>table.branches td.behind-ahead div.text {margin: 0 4px;}
+.branches>.body>table.branches .bar {height: 12px;}
+.branches>.body>table.branches .ahead .bar {background: #666;}
+.branches>.body>table.branches .ahead .bar.request {background: #F1D763;}
+.branches>.body>table.branches .behind .bar {background: #ccc;}
+.branches>.body>table.branches .behind .bar.request {background: #F1D763;}
+.branches>.body>.help-block .bar.request {background: #F1D763; font-size: 10px;}
+.branches>.body>table.branches td.summary>div, table.branches td.summary>div .name a {font-size: 13px; color: #666;}
+.branches>.body>table.branches td.summary>div {margin-top: 4px;}
+
+#searching-branches {position: absolute; left: 50%; top: 250px; z-index: 100; display: none;}
+
+/* DIRECTORY CHOOSER */
+.dropdown-panel .directory-chooser {max-height: 650px; overflow: auto; padding: 12px 24px 12px 12px;}
+.dropdown-panel .directory-chooser .title {font-weight: bold; border-bottom: 1px solid #888888;}
+.dropdown-panel .alert.empty-directory-choice {margin: 0px;}
+
+/* TREE AND FILE DIFFS */
+.added.folder:before {content: "\f21a"; color: #05B505;}
+.deleted.folder:before {content: "\f21b"; color: #FA7C7C;}
+.modified.folder:before {content: "\f21c"; color: #DEB626;}
+.unchanged.folder:before {content: "\f114"; color: #888;}
+.added.file:before {content: "\f216"; color: #05B505;}
+.deleted.file:before {content: "\f217"; color: #FA7C7C;}
+.modified.file:before {content: "\f218"; color: #DEB626;}
+.renamed.file:before {content: "\f219"; color: #DEB626;}
+.unchanged.file:before {content: "\f0f6"; color: #888;}
+.diff-tree .tree-content.unchanged.file:before {font-family: "FontAwesome";}
+
+.diff-tree .tree-content:before {font-family: "ponticons"; font-size: 17px;}
+.diff-tree em span {font-style: normal;}
+
+.changed-files li:before {font-family: "ponticons"; font-size: 17px;}
+.changed-files a {color: black;}
+
+/* COMPARE RESULT */
+.compare-result {width: 100%;}
+.compare-result>tbody>tr>td {border: 1px solid #DDD; vertical-align: top;}
+.compare-result>tbody>tr>td.nav {width: 20%; padding: 12px; white-space: nowrap;}
+.compare-result>tbody>tr>td.nav a.active {background: #0F89E7; color: white; border-radius: 2px; padding: 2px;}
+.compare-result>tbody>tr>td.content>div>div.error {padding: 20px; font-size: 24px; font-style: italic;}
+
+/* TEXT DIFF */
+.text-diff>.head {border: 1px solid #DDD; padding: 8px; z-index: 10; background: white;}
+.text-diff>.body {border: 1px solid #DDD; border-top: none;}
+.text-diff>.head .title {font-size: 16px;}
+.text-diff>.head .pull-right {margin-left: 12px;}
+
+.table-diff .line.diff>td.line-no {color: #999; width: 1%; text-align: right; white-space: nowrap;}
+.table-diff .line.diff td.text, .table-diff .hunk-head td.content {
+	font-family: Consolas,"Liberation Mono",Menlo,Courier,monospace;}
+.table-diff .line.diff td.text {overflow: visible; white-space: pre;}
+.table-diff {font-size: 12px; position:relative;}
+.table-diff>tbody>tr>td {padding: 2px 8px;}
+.table-diff>tbody>tr>td.text, .table-diff>tbody>tr>td.detail, .table-diff>tbody>tr>td.new {
+	border-left: 1px solid #E5E5E5;}  
+.table-diff .old.line.diff>td.line-no {background: #faa; color: #8f0000;}
+.table-diff .old.line.diff {background: #fdd;}
+.table-diff .old.line.diff .emphasize {background: #FC9090;}
+.table-diff .new.line.diff {background: #cfc;}
+.table-diff .new.line.diff>td.line-no {background: #89FB89; color: #007f00;}
+.table-diff .new.line.diff .emphasize {background: #07C907;}
+.table-diff .line.diff:hover {background: #fea; } 
+.table-diff .line.diff:hover>td.line-no, .table-diff .line.hunk-head:hover .action {background: #FBDE6D;}
+.table-diff .hunk-head, .equal.hunk-line>td.info {color: #999;}
+.table-diff .hunk-head a {display: block; color: #999;}
+.table-diff .hunk-head a:hover {color: #444;}
+.table-diff .hunk-head td.action {text-align: center;}
+.table-diff .hunk-head {background: none repeat scroll 0 0 #eef;}
+
+.table-diff table.content {width: 100%;}
+.table-diff .line.comments>td {padding: 0 12px; border-top: 1px solid #DDD; 
+	border-bottom: 1px solid #DDD;}
+	
+.table-diff .line.comments td.avatar .fa-flag {display: none; margin-top: 12px; font-size: 36px; color: #E7C325;}	
+.table-diff .line.comments .concerned td.avatar .fa-flag {display: block;}
+form#add-comment {margin: 16px 4px;}
+.table-diff a.add-comment {position: absolute; left:0; margin-left: -20px; 
+	width: 20px; height: 20px; text-decoration: none;}
+.table-diff a.add-comment .fa {display:none; font-size: 18px;}
+.table-diff tr:hover a.add-comment .fa {display:inline;}
+.table-diff .md-editor {margin-bottom: 16px;}
+
+ul.diff-alerts li {text-align: left;}
+ul.diff-alerts {margin: 0 0 0 8px; padding: 4px 8px 4px 12px;}
+
+/* BLOB DIFF */
+.binary-file {border: 1px solid #DDD;}
+.binary-file>.head {padding: 8px; font-size: 16px; border-bottom: 1px solid #DDD;}
+.binary-file>.body {padding: 8px;}
+
+/* DIFF STAT */
+.diff-stat {font-family: 'FontAwesome'; color: #ddd; }
+.diff-stat>i {font-style: normal; word-spacing: -2px;}
+.diff-stat .additions {color: #35c335;}
+.diff-stat .deletions {color: #c33535;}
+
+/* ACTIVITY */
+.activity>div.summary {color: #999; margin-bottom: 8px;}
+.activity>div.summary a {color: #999;}
+.activity>div.summary .actions .fa {font-size: 13px;}
+.activity>div.summary .actions {margin-left: 8px;}
+.activity>div.summary .actions>a, .activity>div.summary .actions>span {margin-right: 6px; color: #DDD;}
+.activity>div.summary .actions a, .activity>div.summary .actions span {color: #DDD;}
+.activity:hover>div.summary .actions a, .activity:hover>div.summary .actions span {color: #999;}
+.activity>div.summary .actions a .fa-times {font-size: 14px;}
+.activity>div.summary .actions a .fa-diff {font-size: 14px;}
+.activity>div.summary .user a, .activity>div.summary em {color: #666; font-weight: bold; font-style: normal;}
+
+.collapsed>.avatar img {opacity: 0.3;}
+.collapsed>.activity>div.summary {margin-bottom: 0; color: #AAA;}
+.collapsed>.activity>div.summary .user a {color: #888;}
+.collapsed>.activity>div.detail {
+	text-overflow: ellipsis; overflow: hidden; 
+	max-width: 600px; color: #777; white-space: nowrap;}
+
+/* COMMENTS */
+.comment .md-editor {margin-bottom: 16px;}
+.reply>.activity {padding: 8px;}
+.reply>.activity>div.summary {font-size: 13px;}
+.reply.new>.avatar {background: #FCF6D6;}
+
+div.replies {padding-top: 8px; padding-left: 16px;}
+div.replies>table>tbody>tr>td {vertical-align: top; border-top: 1px dashed #CCC; 
+	padding: 8px 0 8px 0; background: #F5F5F5;}
+div.replies>table>tbody>tr:first-child>td {border-top: none;}
+div.replies>table>tbody>tr>td.avatar {width: 1px; padding: 10px;}
+div.replies>table>tbody>tr>td.avatar img {width: 26px; height: 26px;}
+div.replies>.add-reply {padding-top: 10px; color: #999;}
+div.replies>.add-reply>div>a {color: #999;}
+div.replies>.add-reply:hover>div>a {color: #333;}
+table.comments>tbody>tr>td.avatar {width: 1px; padding-right: 16px;}
+table.comments>tbody>tr>td.avatar img {width: 36px; height: 36px;}
+table.comments>tbody>tr>td {border-top: 1px solid #E5E5E5; padding: 12px 0 12px 0;}
+table.comments>tbody>tr:first-child>td {border-top: none;}
+
+ul.threads li {border-left: 4px solid #E5E5E5; padding-left: 8px;}
+ul.threads li.unread {border-color: #70AEFA;}
+ul.threads li a {color: #444; cursor: pointer;}
+ul.threads li .markdown {color: #888; margin-top: 4px;}
+
+/* BRANCH CHOICE */
+.repository-and-branch {width: 100%;}
+.repository-and-branch td {padding: 12px; white-space: nowrap;}
+.repository-and-branch td.name {text-align: right; padding-right: 0; font-size: 16px; width: 1%; padding-top: 16px;}
+.repository-and-branch .select2-choice {width: 100%;}
+
+/* REMOVEABLE AVATAR */
+.removeable-avatar {position: relative;}
+.removeable-avatar img {width: 32px; height: 32px;}
+.removeable-avatar i {display: none; color: red; font-size: 30px; 
+	position: absolute; left: 4px; top: -6px;}
+a.removeable-avatar:hover i {display: inline;}
+
+/* PULL REQUEST LIST PANEL */
+.request-list>.head {padding: 12px 10px !important; font-size: 16px;}
+.request-list>.head>div {margin-right: 20px;}
+.request-list>.head>div:last-child {margin-right: 0;}
+.request-list>.head .filters>div:first-child {margin-right: 8px;}
+.request-list table td {vertical-align: top; color: #666;}
+.request-list table td.narrow {width: 1%;}
+.request-list table .title {vertical-align: top; color: black; font-size: 16px; 
+	margin-bottom: 6px; font-weight: bold;}
+.request-list table .source>div {margin-right: 6px;}
+.request-list table thead .fa {cursor: pointer;}
+ul.status-help {margin: 16px; padding: 0; width: 400px; list-style: none;}
+ul.status-help .description {color: #444; margin: 4px 0 8px 0; border-bottom: 1px solid #DDD; 
+	padding-bottom: 4px; font-size: 14px;}
+ul.status-help li:last-child .description {border-bottom: none;}
+
+/* NEW PULL REQUEST AND BRANCH COMPARE PAGE */
+.branch-compare>.body>div {margin-bottom: 20px;}
+.branch-compare>.body>.branches {margin-bottom: 20px;}
+.branch-compare>.body>.branches td {vertical-align: top;}
+.branch-compare>.body>.branches td>div.title {font-size: 18px; margin-bottom: 8px;}
+.branch-compare>.body>.branches td>div.branch {background: #F2F2F2; border-radius: 4px; vertical-align: top;}
+.branch-compare>.body>.branches .actions {width: 1%; background: none; padding: 77px 10px 0 10px;}
+
+.branch-compare>.body>.status .summary {font-size: 16px; padding: 0; margin-bottom: 8px;}
+.new-request>.body>.status>.can-send form>table {width: 100%;}
+.new-request>.body>.status>.can-send form>table td {vertical-align: top; padding: 16px 0; 
+	border-top: 1px dashed #BBB; border-bottom: 1px dashed #BBB;}
+.new-request>.body>.status>.can-send form>table tr.description td {padding-bottom: 8px;}
+.new-request>.body>.status>.can-send form>table td.name {width: 120px; font-size: 18px; padding-right: 8px;}
+.new-request>.body>.status>.can-send form>table td.value {padding-left: 8px;}
+.new-request>.body>.status>.can-send form>table {margin-bottom: 16px;}
+.new-request>.body>.status>.can-send form>table .select2-container {min-width: 250px;}
+.new-request>.body>.status>.can-send form>table td.name .required:BEFORE {content: "*"; color: red;}
+.new-request>.body>.status>.can-send form>table .reviewers li {margin-right: 10px;}
+.new-request>.body>.status>.can-send form>table .reviewers li a:hover {text-decoration: none;}
+.new-request>.body>.status>.can-send form .feedbackPanelERROR>.alert {margin-bottom: 0; margin-top: 16px;}
+.new-request>.body>.status>.can-send form .assignee .help-block {margin-top: 12px;}
+.new-request>.body>.status>.can-send form .help-block {margin-bottom: 0;}
+
+/* PULL REQUEST DETAIL PANEL */
+.request-detail {padding: 20px;}
+.request-detail>div {margin-bottom: 20px;}
+.request-detail>div:last-child {margin-bottom: 0;}
+.request-detail table {width: 100%;}
+.request-detail td {vertical-align: top;}
+.request-detail .verification-status {cursor: pointer;}
+.request-detail .md-editor {margin-bottom: 16px;}
+
+.request-detail>.head {font-size: 24px; font-weight: bold; padding: 0;}
+.request-detail>.head input[type="text"] {width: 600px;}
+.request-detail>.head a i {color: #999; font-size: 19px;}
+.request-detail>.head>div {margin-right: 8px;}
+.request-detail>.head>.id {color: #999;}
+.request-detail>.head>.label {margin-top: 3px;}
+
+.request-detail>.summary>div {border-bottom: 1px dotted #BBB; margin-bottom: 12px; padding-bottom: 8px;}
+.request-detail>.summary>div:last-child {border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
+.request-detail>.summary>.status-reasons ul {margin-bottom: 0; padding-left: 16px;} 
+
+.request-detail>.summary img {width: 24px; height: 24px; vertical-align: middle;}
+.request-detail>.summary .conflict {color: #DD4B4B; font-size: 16px;} 
+.request-detail>.summary .no-conflict {color: #399529; font-size: 16px;}
+
+.request-detail>.summary>.operations>.buttons>a, 
+.request-detail>.summary>.operations>.confirm>form>input {margin-right: 12px;} 
+.request-detail>.summary>.operations>.confirm>form>textarea, 
+.request-detail>.summary>.operations>.confirm>form>.delete-source {margin-bottom: 16px;} 
+
+/* COMMON CSS FOR REVIEW RESULT ICON */
+.request-detail .review-result {font-size: 24px; position: absolute; left: 30px; 
+	top: 6px; cursor: pointer;}
+.request-detail .review-result.current.approved {color: #35A612;}
+.request-detail .review-result.current.disapproved {color: #F93333;}
+.request-detail .review-result.previous.approved, 
+.request-detail .review-result.previous.disapproved {color: #888;}
+
+.request-detail>.overview>tbody>tr>td.activities {width: 75%; padding-right: 16px;}
+.request-detail .activities>table {margin-bottom: 20px; border-bottom: 1px solid #E5E5E5;}
+.request-detail .activities>table>tbody>tr.discussion>td {border-top: 1px solid #E5E5E5; padding: 12px 0;}
+.request-detail .activities>table>tbody>tr.discussion.collapsed>td {padding: 8px 0;}
+.request-detail .activities>table>tbody>tr.discussion>td.avatar {width: 1px; padding-left: 12px; padding-right: 12px;}
+.request-detail .activities>table>tbody>tr.discussion>td.activity {padding-left: 12px;}
+.request-detail .activities>table>tbody>tr.activity>td.avatar {border-right: 1px dashed #DDD;}
+
+.request-detail .activities>table>tbody>tr.activity.discussion>td.avatar {border-right: none;}
+.request-detail .activities>table>tbody>tr.discussion+.non-discussion>td {border-top: 1px solid #E5E5E5;}
+.request-detail .activities>table>tbody>tr.discussion+.non-update>td {padding-top: 8px;}
+.request-detail .activities>table>tbody>tr.discussion>.avatar img {width: 40px; height: 40px;}
+.request-detail .activities>table>tbody>tr.non-discussion>td {padding-left: 6px; font-size: 13px;}
+.request-detail .activities>table>tbody>tr.non-discussion>td.avatar img {display: none;}
+.request-detail .activities>table>tbody>tr.non-discussion>.activity>div.summary .user a {font-weight: normal;}
+.request-detail .activities>table>tbody>tr.update+.update>td>table {margin-top: -12px;}
+
+.request-detail .activities .activity>.commits {color: #777; margin-left: -32px;}
+.request-detail .activities .activity>.commits a {color: #555;}
+.request-detail .activities .activity>.commits td {padding-top: 8px; padding-bottom: 8px;}
+.request-detail .activities .non-update+.update>td tr:first-child td {border-top: none;}
+.request-detail .activities .activity>.commits td.icon {width: 32px; white-space: nowrap; text-align: right;}
+.request-detail .activities .activity>.commits tr.integrated td.icon .fa {color: #35A612;}
+.request-detail .activities .activity>.commits td.detail {padding-left: 15px; padding-right: 8px;}
+.request-detail .activities .activity>.commits td.status {text-align: right;}
+.request-detail .activities .activity>.commits tr:hover td.detail, 
+.request-detail .activities .activity>.commits tr:hover td.status {background: #F5F5F5;}
+.request-detail .activities .activity>.commits tr.rebased td a {color: #AAA;}
+.request-detail .activities .activity>.commits tr.rebased td.icon .fa {color: #CCC;}
+.request-detail .activities .activity>.commits tr.rebased img.avatar {opacity: 0.5;}
+.request-detail .activities .activity>.commits td.status .successful {color: #35A612;}
+.request-detail .activities .activity>.commits td.status .failed {color: #F93333;}
+.request-detail .activities .activity>.commits td.status .running {color: #AFAD1F;}
+.request-detail .activities .activity.new>.avatar {background: #FCF6D6;}
+
+.request-detail .others>div>div {border-bottom: 1px dotted #BBB; margin-bottom: 16px; 
+	padding-bottom: 16px; font-size: 13px; color: #666;}
+.request-detail .others>div>div:last-child {border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
+.request-detail .others .help-block {margin-bottom: 0; color: #888}
+.request-detail .others .fa.small {font-size: 14px; vertical-align: middle;}
+.request-detail .others label {margin-right: 4px; font-weight: normal;}
+.request-detail .others .select2-container {width: 100%;}
+.request-detail .others .avatar {width: 24px; height: 24px;}
+.request-detail .others .select2-container .avatar {width: 20px; height: 20px;}
+
+.request-detail .others .basic-info .submitter, .request-detail .others .basic-info .target {margin-bottom: 4px;}
+.request-detail .others .basic-info span, .request-detail .others .basic-info a {white-space: nowrap;}
+.request-detail .others .basic-info .source>a {margin-left: 4px;}
+
+.request-detail .others .reviewers ul {margin-bottom: 0;}
+.request-detail .others .reviewers li {margin-right: 20px; margin-bottom: 10px; position: relative;}
+.request-detail .others .reviewers li a:hover {text-decoration: none;}
+.request-detail .others .reviewers .review-result {top: 12px;}
+	
+.request-detail .activities .table-diff>tbody>.line.comments>td {padding: 12px;}
+.request-detail .activities .table-diff>tbody>tr.omit>td .fa {font-size: 24px; color: #888; margin-left: 12px;}
+.request-detail .activities .inline-comment.panel>.panel-heading {padding: 8px;}
+.request-detail .activities .inline-comment.panel>.panel-heading .actions {margin-left: 12px;}
+.request-detail .activities .inline-comment.panel>.panel-heading .actions a {color: #BBB; margin-right: 4px;}
+.request-detail .activities .inline-comment.panel>.panel-heading:hover .actions a {color: #666;}
+.request-detail .activities .inline-comment.panel {margin-bottom: 4px;}
+
+.request-detail .activities .activity.non-discussion>.activity>.summary .fa {background: white;}
+.request-detail .activities .activity>div>.fa {vertical-align: middle; margin: 0 8px 0 -16px; font-size: 24px;}
+.request-detail .activities .activity>.update>.fa {margin: 0 8px 0 -15px; font-size: 20px;}
+.request-detail .activities .activity>.discard>.fa {color: #F93333;}
+.request-detail .activities .activity>.integrate>.fa {color: #35A612; margin-left: -20px;}
+.request-detail .activities .activity>.approve>.fa {color: #35A612; margin-left: -18px;}
+.request-detail .activities .activity>.disapprove>.fa {color: #F93333; margin-left: -18px;}
+.request-detail .activities .activity>.undo-review>.fa {color: #666; margin-left: -14px;}
+.request-detail .activities .activity>.reopen>.fa {color: #666; font-size: 30px; margin-left: -20px; margin-right: 7px;}
+
+.request-detail>.updates>.update {padding: 12px; margin: 20px 0; border: 1px solid #DDD; border-radius: 4px;}
+.request-detail>.updates>.update>.summary .actions .fa {font-size: 16px;}
+.request-detail>.updates>.update>.summary>.reviews>.review {margin-left: 12px; white-space: nowrap; position: relative;}
+
+.request-detail>.updates>.update>.commits td {padding-top: 8px; padding-bottom: 8px; 
+	color: #999; border-top: 1px dashed #CCC;}
+.request-detail>.updates>.update>.commits tr.rebased td a {color: #AAA;}
+.request-detail>.updates>.update>.commits tr.rebased img.avatar {opacity: 0.5;}
+.request-detail>.updates>.update>.commits td.avatar {width: 1px;}
+.request-detail>.updates>.update>.commits td.avatar img {width: 36px; height: 36px;}
+.request-detail>.updates>.update>.commits a {color: #666;}
+.request-detail>.updates>.update>.commits a.subject {font-weight: bold;}
+.request-detail>.updates>.update>.commits td.detail {padding-left: 8px; padding-right: 8px;}
+.request-detail>.updates>.update>.commits td.status {text-align: right;}
+.request-detail>.updates>.update>.commits td.status>div:first-child {white-space: nowrap;}
+.request-detail>.updates>.update>.commits tr:hover td {background: #F7ECB9;}
+.request-detail>.updates>.update>.commits .commit-message>.full {margin-bottom: 4px;}
+
+.request-detail .compare>.head {background: #F2F2F2; z-index: 90; padding: 8px; 
+	border: 1px solid #DDD;}
+.request-detail .compare>.head>.changed-toggle {margin-right: 12px; padding-top: 4px;}
+.request-detail .compare>.head>.outdated-alert {padding-top: 2px; color: #CF9115; font-size: 16px;}
+.request-detail .compare>.head>.pull-left:FIRST-CHILD {margin-right: 16px;}
+.request-detail .compare>.head>.pull-left:LAST-CHILD {margin-top: 3px;}
+
+.content>.commit-choice {max-height: 600px; padding: 8px 0; overflow-y: scroll;}
+.content>.commit-choice a {text-decoration: none; color: #333; display: block; padding: 8px;}
+.content>.commit-choice li {border-bottom: 1px dotted #BBB;}
+.content>.commit-choice li:hover {background: #FDF2C3;}
+.content>.commit-choice a .commit {font-family: Consolas, 'Liberation Mono', Courier, monospace;}
+.content>.commit-choice a .subject {font-size: 12px; color: #999;} 
+table.old-vs-new td {padding: 0 8px;}
+table.old-vs-new td.old {width: 140px; text-align: left;}
+table.old-vs-new td.new {width: 140px; text-align: right;}
+table.old-vs-new td.vs {width: 1px; text-align: center; font-weight: bold;}
+
+table.verifications td {vertical-align: top; white-space: nowrap; color: #444;}
+table.verifications {margin-bottom: 1px;}
+table.verifications .fa {display: none;}
+table.verifications tr.passed .fa-check {display: inline; color: #5CB85C;}
+table.verifications tr.not-passed .fa-times {display: inline; color: #D9534F;}
+table.verifications tr.ongoing .fa-cog {display: inline; color: #F0AD4E;}
+.conflict-resolve-instruction {padding: 8px; width: 400px;}
+
+/* GATE KEEPER SETTING PAGE */
+.gate-keeper-tip {margin: 0 20px 20px 20px;}
+.gate-keeper-add.well {font-size:16px;}
+.gate-keeper-add .fa {margin-left: 8px;}
+.gate-keeper-add:hover, .gate-keeper-add:focus {background-color: #EBEBEB; border-color: #ADADAD; cursor: pointer;}
+.gate-keeper-selector {width: 600px; max-height: 600px; overflow: auto;}
+.gate-keeper-selector .panel {border: none; border-radius: 0;}
+.gate-keeper-selector .panel-heading {border-top: 1px solid #CCCCCC; border-radius: 0;}
+.gate-keeper-selector .panel-group>.panel:first-child>.panel-heading {border-top: none;}
+.gate-keeper-selector .panel-heading.collapsed:hover, .gate-keeper-selector .panel-heading.collapsed:focus {
+	border-color: #999999; background-color: #E0E0E0; cursor: pointer;}
+.gate-keeper-selector .panel-group .panel + .panel {margin-top: 0px;}
+.gate-keeper-selector .fa {width: 20px;}
+.gate-keeper-description {font-size: 13px; color: #888888;}
+.gate-keeper-item {margin-bottom: 6px; padding: 4px; border: 1px solid white;}
+.gate-keeper-item:hover, .gate-keeper-item:focus {background-color: #EBEBEB; cursor: pointer; 
+		border: 1px solid #ADADAD; border-radius: 4px;}
+.gate-keeper-name {font-size: 15px; margin-top: -4px;}
+.gate-keeper-editor {max-height: 600px; overflow: auto;}
+.gate-keeper-editor .gate-keeper-name {font-weight: bold; font-size: 16px; margin-top: 0; margin-bottom: 4px;}
+.gate-keeper-editor .fa {width: 20px; margin-right: 8px; margin-top: 4px;}
+.gate-keeper .panel-title {font-size: 14px;}
+.gate-keeper .panel-heading {padding: 8px;}
+.gate-keeper .fa {margin-left: 8px; cursor: pointer;}
+.gate-keeper .gate-keeper-add {margin: 0px; padding: 8px; font-size: 14px;}
+.gate-keeper .reflection {margin-bottom: 0;}
+
+.gate-keeper.panel {border: 1px solid #BBBBBB;}
+.gate-keeper.panel>.panel-heading {border-color: #BBBBBB;}
+.gate-keeper.panel.disabled, .gate-keeper.panel.disabled .panel {color: #AAA;}
+.gate-keeper.panel.disabled>.panel-heading, .gate-keeper.panel.disabled .panel-heading {color: #AAA;}
+.gate-keeper.panel.disabled .fa {color: inherit;} 
+.gate-keeper td.name {font-weight: normal !important; background-color: #F0F0F0 !important;}
+.gate-keeper table.viewer {font-size: 13px !important; color: #444444;}
+.gate-keeper table.children {width: 100%;}
+.gate-keeper td.child {vertical-align: top; padding-right: 12px;}
+.gate-keeper table.children>tbody>tr>td.child:last-child {padding-right: 0;}
+.gate-keeper.panel .panel-body {overflow:auto;}
+.gate-keeper table.ifthen {width: 100%;}
+.gate-keeper td.ifthen {vertical-align: top;}
+.gate-keeper td.ifthen.connector {width:1px;}
+.gate-keeper td.ifthen.connector .fa {margin: 0 6px 0 8px; color: #666666; font-size: 36px;}
+
+/* INTEGRATION POLICY AND CHANGE SUBSCRIPTION PAGE */
+.integration-policies .handle, .change-subscriptions .handle {cursor: move; margin-right: 8px;}
+.integration-policies .panel-heading a, .change-subscriptions .panel-heading a  {color: #444; margin-right: 8px;}
+.integration-policies .add-new, .change-subscriptions .add-new {display: block; padding: 16px; background: #F2F2F2; 
+	border: 1px solid #DDD; border-radius: 4px; font-size: 16px; color: #444; margin-bottom: 16px;}
+.integration-policies a.add-new:hover, .change-subscriptions a.add-new:hover {
+	text-decoration: none; background-color: #EBEBEB; border-color: #ADADAD;}
+.integration-policies a.add-new .fa {margin-left: 8px;}
+.integration-policies>.body>.help-block .fa {
+	position: absolute; font-size: 20px; color: #E6AF42; margin-top: 2px;}
+.integration-policies>.body>.help-block p, .change-subscriptions>.body>.help-block p {margin-left: 18px;}

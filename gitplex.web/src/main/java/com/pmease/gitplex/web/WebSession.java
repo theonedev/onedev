@@ -4,7 +4,6 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
-import org.apache.wicket.protocol.http.WebSession;
 import org.apache.wicket.request.Request;
 
 import com.google.common.base.Optional;
@@ -12,18 +11,18 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 
-public class GitPlexSession extends WebSession {
+public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 
 	private static final long serialVersionUID = 1L;
 
 	private boolean displayOutline;
 	
-	public GitPlexSession(Request request) {
+	public WebSession(Request request) {
 		super(request);
 	}
 
-	public static GitPlexSession get() {
-		return (GitPlexSession) WebSession.get();
+	public static WebSession get() {
+		return (WebSession) org.apache.wicket.protocol.http.WebSession.get();
 	}
 
 	public static Optional<User> getCurrentUser() {

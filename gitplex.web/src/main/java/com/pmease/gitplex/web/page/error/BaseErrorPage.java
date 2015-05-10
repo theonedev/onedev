@@ -2,7 +2,7 @@ package com.pmease.gitplex.web.page.error;
 
 import org.apache.wicket.request.http.WebResponse;
 
-import com.pmease.gitplex.web.page.BasePage;
+import com.pmease.gitplex.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
 public abstract class BaseErrorPage extends BasePage {

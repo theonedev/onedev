@@ -43,7 +43,7 @@ import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
-import com.pmease.gitplex.web.GitPlexSession;
+import com.pmease.gitplex.web.WebSession;
 
 @SuppressWarnings("serial")
 public abstract class SourceViewPanel extends Panel {
@@ -96,13 +96,13 @@ public abstract class SourceViewPanel extends Panel {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				if (GitPlexSession.get().isDisplayOutline())
+				if (WebSession.get().isDisplayOutline())
 					add(AttributeAppender.append("class", " active"));
 			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				GitPlexSession session = GitPlexSession.get();
+				WebSession session = WebSession.get();
 				session.setDisplayOutline(!session.isDisplayOutline());
 				target.appendJavaScript(String.format("gitplex.sourceview.toggleOutline('%s');", outlinePanel.getMarkupId()));
 			}
@@ -120,7 +120,7 @@ public abstract class SourceViewPanel extends Panel {
 		codeContainer.setOutputMarkupId(true);
 		
 		add(outlinePanel = new OutlinePanel("outline", symbols)); 
-		if (symbols.isEmpty() || !GitPlexSession.get().isDisplayOutline())
+		if (symbols.isEmpty() || !WebSession.get().isDisplayOutline())
 			outlinePanel.add(AttributeAppender.append("style", "display:none;"));
 		
 		add(symbolsContainer = new WebMarkupContainer("symbols"));

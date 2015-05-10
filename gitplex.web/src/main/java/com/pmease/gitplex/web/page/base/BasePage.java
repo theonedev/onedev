@@ -1,16 +1,21 @@
-package com.pmease.gitplex.web.page;
+package com.pmease.gitplex.web.page.base;
 
 import org.apache.wicket.RestartResponseAtInterceptPageException;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.PriorityHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.CssResourceReference;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.pmease.commons.wicket.CommonPage;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.web.assets.PageResourceReference;
+import com.pmease.gitplex.web.page.init.ServerInitPage;
 
 @SuppressWarnings("serial")
 public abstract class BasePage extends CommonPage {
@@ -25,9 +30,8 @@ public abstract class BasePage extends CommonPage {
 	}
 
 	private void checkReady() {
-		if (!GitPlex.getInstance().isReady() && getClass() != ServerInitPage.class) {
+		if (!GitPlex.getInstance().isReady() && getClass() != ServerInitPage.class)
 			throw new RestartResponseAtInterceptPageException(ServerInitPage.class);
-		}
 	}
 
 	protected boolean isPermitted() {
@@ -41,6 +45,24 @@ public abstract class BasePage extends CommonPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+
+		add(new Label("title", getPageTitle()));
+
+		add(new WebMarkupContainer("refresh") {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				tag.put("content", getPageRefreshInterval());
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getPageRefreshInterval() != 0);
+			}
+
+		});
 	}
 	
 	protected String getPageTitle() {
@@ -55,6 +77,8 @@ public abstract class BasePage extends CommonPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(new PriorityHeaderItem(JavaScriptHeaderItem.forReference(PageResourceReference.get())));
+		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(BasePage.class, "base.js")));
+		response.render(CssHeaderItem.forReference(new CssResourceReference(BasePage.class, "base.css")));
+		response.render(CssHeaderItem.forReference(new CssResourceReference(BasePage.class, "fontext/fontext.css")));
 	}
 }
