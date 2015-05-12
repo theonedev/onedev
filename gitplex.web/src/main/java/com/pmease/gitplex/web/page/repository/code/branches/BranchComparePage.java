@@ -324,11 +324,6 @@ public class BranchComparePage extends RepositoryPage {
 		add(new Tabbable("tabs", tabs) {
 
 			@Override
-			protected String getCssClasses() {
-				return "nav nav-tabs";
-			}
-
-			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(!commitsModel.getObject().isEmpty());

@@ -25,7 +25,7 @@ public class RepositoryTab extends PageTab {
 
 	@Override
 	public Component render(String componentId) {
-		return new RepositoryTabLink(componentId, this);
+		return new RepoTabLink(componentId, this);
 	}
 	
 	public String getIconClass() {

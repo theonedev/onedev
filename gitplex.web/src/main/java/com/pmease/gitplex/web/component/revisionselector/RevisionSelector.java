@@ -267,14 +267,7 @@ public abstract class RevisionSelector extends GenericPanel<String> {
 					
 				});
 				
-				fragment.add(new Tabbable("tabs", tabs) {
-
-					@Override
-					protected String getCssClasses() {
-						return "nav nav-tabs";
-					}
-					
-				});
+				fragment.add(new Tabbable("tabs", tabs));
 				fragment.add(newRefList(this, filteredRefs));
 				
 				return fragment;

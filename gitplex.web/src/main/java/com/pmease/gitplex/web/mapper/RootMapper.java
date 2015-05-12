@@ -8,22 +8,13 @@ import org.apache.wicket.request.mapper.CompoundRequestMapper;
 
 import com.pmease.gitplex.core.validation.RepositoryNameValidator;
 import com.pmease.gitplex.core.validation.UserNameValidator;
-import com.pmease.gitplex.web.page.account.AccountHomePage;
-import com.pmease.gitplex.web.page.account.AccountNotificationsPage;
-import com.pmease.gitplex.web.page.account.AccountProfilePage;
-import com.pmease.gitplex.web.page.account.MemberSettingPage;
-import com.pmease.gitplex.web.page.account.RegisterPage;
-import com.pmease.gitplex.web.page.account.repository.NewRepositoryPage;
-import com.pmease.gitplex.web.page.account.repository.RepositoriesPage;
-import com.pmease.gitplex.web.page.account.team.AccountTeamsPage;
+import com.pmease.gitplex.web.page.account.overview.AccountHomePage;
 import com.pmease.gitplex.web.page.admin.MailSettingPage;
 import com.pmease.gitplex.web.page.admin.QosSettingPage;
 import com.pmease.gitplex.web.page.admin.SystemSettingPage;
 import com.pmease.gitplex.web.page.init.ServerInitPage;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
-import com.pmease.gitplex.web.page.repository.RepositoryHomePage;
 import com.pmease.gitplex.web.page.repository.admin.GeneralSettingPage;
-import com.pmease.gitplex.web.page.repository.admin.PermissionSettingPage;
 import com.pmease.gitplex.web.page.repository.admin.gatekeeper.GateKeeperPage;
 import com.pmease.gitplex.web.page.repository.admin.integrationpolicy.IntegrationPolicyPage;
 import com.pmease.gitplex.web.page.repository.code.blob.RepoBlobPage;
@@ -32,6 +23,7 @@ import com.pmease.gitplex.web.page.repository.code.branches.RepoBranchesPage;
 import com.pmease.gitplex.web.page.repository.code.tree.RepoTreePage;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitsPage;
+import com.pmease.gitplex.web.page.repository.home.RepoHomePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.ClosedRequestsPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.OpenRequestsPage;
@@ -46,10 +38,9 @@ public class RootMapper extends CompoundRequestMapper {
 	public RootMapper(WebApplication app) {
 		addAdministrationPages();
 		addAccountPages();
-		addRepositoryPages();
+		addRepoPages();
 		
 		addPage("init", ServerInitPage.class);
-		addPage("register", RegisterPage.class);
 		addPage("/test", TestPage.class);
 		addPage("run-mode", RunModePage.class);
 	}
@@ -74,17 +65,10 @@ public class RootMapper extends CompoundRequestMapper {
 
 		});
 
-		addPage("${user}/notifications", AccountNotificationsPage.class);
-
-		// account settings
-		addPage("${user}/settings", AccountProfilePage.class);
-		addPage("${user}/settings/repositories", RepositoriesPage.class);
-		addPage("${user}/settings/members", MemberSettingPage.class);
-		addPage("${user}/settings/teams", AccountTeamsPage.class);
 	}
 
-	private void addRepositoryPages() {
-		add(new MountedMapper("${user}/${repo}", RepositoryHomePage.class) {
+	private void addRepoPages() {
+		add(new MountedMapper("${user}/${repo}", RepoHomePage.class) {
 
 			@Override
 			protected boolean urlStartsWith(Url url, String... segments) {
@@ -100,9 +84,6 @@ public class RootMapper extends CompoundRequestMapper {
 			}
 
 		});
-
-		// create repository
-		addPage("new", NewRepositoryPage.class);
 
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/tree", RepoTreePage.class));
@@ -142,9 +123,6 @@ public class RootMapper extends CompoundRequestMapper {
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/settings/integration-setting",
 				IntegrationPolicyPage.class));
-		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/settings/permissions",
-				PermissionSettingPage.class));
 		
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/no-commits", NoCommitsPage.class));

@@ -1,6 +1,6 @@
 html, body { background: #f0f2f4; }
 
-a {color: #09f; cursor: pointer;}
+a {cursor: pointer;}
 a.fa {text-decoration: none;}
 
 textarea {resize: vertical;}

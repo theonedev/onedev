@@ -1,0 +1,32 @@
+<wicket:extend>
+	<div id="main">
+		<div class="head clearfix">
+			<div id="topnav" class="pull-left">
+				<a wicket:id="navHome" class="home"><i class="fa fa-ext fa-gitplex-logo"></i> GitPlex</a>
+				<wicket:enclosure child="navAccount">
+				<span class="seperator"><i class="fa fa-caret-right"></i></span>
+				<a wicket:id="navAccount" class="account">Admin</a>
+				</wicket:enclosure>
+				<wicket:enclosure child="navRepo">
+				<span class="seperator"><i class="fa fa-caret-right"></i></span>
+				<a wicket:id="navRepo" class="repo">Linux</a>
+				</wicket:enclosure>
+			</div>
+			<div id="account-info" class="pull-right">
+				<a class="help">Help</a> <span class="separator">|</span>
+				<a>Robin</a> <span class="separator">|</span>
+				<a>Logout</a> 
+			</div>
+		</div>
+		<div class="body">
+			<div class="head clearfix">
+				<ul wicket:id="mainTabs" id="maintab" class="list-unstyled pull-left"></ul>
+				<div wicket:id="mainActions" class="actions pull-left"></div>
+			</div>
+			<div class="content">
+				<wicket:child></wicket:child>
+			</div>
+		</div>
+		<div class="foot">PMEase GitPlex 1.0.0, copy right 2016</div>
+	</div>
+</wicket:extend>

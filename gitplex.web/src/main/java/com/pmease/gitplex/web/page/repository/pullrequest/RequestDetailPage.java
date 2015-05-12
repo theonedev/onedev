@@ -305,14 +305,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		tabs.add(new RequestTab("Updates", RequestUpdatesPage.class));
 		tabs.add(new RequestTab("Compare", RequestComparePage.class));
 		
-		add(new Tabbable("requestTabs", tabs) {
-
-			@Override
-			protected String getCssClasses() {
-				return "nav nav-tabs";
-			}
-			
-		}.setOutputMarkupId(true));
+		add(new Tabbable("requestTabs", tabs).setOutputMarkupId(true));
 		
 		add(new BackToTop("backToTop"));
 		

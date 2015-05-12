@@ -277,11 +277,6 @@ public class NewRequestPage extends RepositoryPage {
 		add(new Tabbable("tabs", tabs) {
 
 			@Override
-			protected String getCssClasses() {
-				return "nav nav-tabs";
-			}
-
-			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				

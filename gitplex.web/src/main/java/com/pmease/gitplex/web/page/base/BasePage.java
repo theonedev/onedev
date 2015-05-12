@@ -10,6 +10,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.apache.wicket.request.resource.PackageResourceReference;
 
 import com.pmease.commons.wicket.CommonPage;
 import com.pmease.gitplex.core.GitPlex;
@@ -60,6 +61,16 @@ public abstract class BasePage extends CommonPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(getPageRefreshInterval() != 0);
+			}
+
+		});
+		
+		add(new WebMarkupContainer("favicon") {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				tag.put("href", urlFor(new PackageResourceReference(BasePage.class, "favicon.ico"), new PageParameters()));
 			}
 
 		});

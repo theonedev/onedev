@@ -1,0 +1,86 @@
+#main>.head {
+	padding: 8px 16px;
+}
+#topnav>a {
+	color: #333; 
+	font-size: 18px; 
+	margin-right: 8px;
+}
+#account-info a, #account-info span {
+	color: #333; 
+}
+#account-info span {
+	color: #666; 
+}
+
+#topnav>.home .fa {
+	font-size: 24px;
+}
+
+#main>.body>.head {
+	background: #DDD;
+	border: 1px solid #BBB;
+	border-left: none;
+	border-right: none;
+}
+#maintab {
+	margin: 0 16px;
+}
+#maintab>li {
+	float: left;
+	margin-right: 3px;
+}
+#maintab>li>a {
+	display: block; 
+	text-decoration: none; 
+	padding: 6px 10px;
+	color: #333; 
+}
+#maintab>li.active>a {
+	font-weight: bold; 
+	color: black;
+}
+#main>.body>.content {
+	background: white;
+	border-bottom: 1px solid #BBB;
+}
+
+#sidebar {
+	width: 100%;
+}
+#sidebar>tbody>tr>td {
+	vertical-align: top;
+}
+#sidebar>tbody>tr>td.tabs {
+	padding: 16px 0 0 16px;
+	width: 200px;
+	border-right: 1px solid #BBB;
+}
+#sidebar>tbody>tr>td.tabs ul {
+	position: relative;
+}
+#sidebar>tbody>tr>td.tabs a {
+	color: #666;
+	display: block;
+	text-decoration: none;
+	padding: 4px 8px;
+}
+#sidebar>tbody>tr>td.tabs li.active a {
+	border: 1px solid #BBB;
+	border-right-color: white;
+	color: black;
+	margin-right: -1px;
+}
+#sidebar>tbody>tr>td.content {
+	padding: 16px;
+}
+
+#main>.foot {
+	font-size: 11px;
+	padding: 8px; 
+}
+
+section>.head {
+	font-size: 18px;
+	margin-bottom: 16px;
+}

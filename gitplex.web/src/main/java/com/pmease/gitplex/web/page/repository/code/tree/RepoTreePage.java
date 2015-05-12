@@ -221,7 +221,7 @@ public class RepoTreePage extends RepositoryPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(CssHeaderItem.forReference(new CssResourceReference(RepoTreePage.class, "repo-tree-page.css")));
+		response.render(CssHeaderItem.forReference(new CssResourceReference(RepoTreePage.class, "repo-tree.css")));
 	}
 
 	public static PageParameters paramsOf(Repository repository, @Nullable String revision, @Nullable String path) {

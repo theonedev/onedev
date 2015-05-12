@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.AttributeModifier;
-import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.MarkupStream;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -12,23 +13,23 @@ import org.apache.wicket.markup.html.panel.Panel;
 @SuppressWarnings("serial")
 public class Tabbable extends Panel {
 	
-	private final List<Tab> tabs;
+	private final List<? extends Tab> tabs;
 	
-	public Tabbable(String id, List<Tab> tabs) {
+	public Tabbable(String id, List<? extends Tab> tabs) {
 		super(id);
 		
 		this.tabs = tabs;
+	}
+
+	@Override
+	public void onComponentTagBody(MarkupStream markupStream, ComponentTag openTag) {
+		checkComponentTag(openTag, "ul");
 	}
 	
 	@Override
 	public void onInitialize() {
 		super.onInitialize();
 		
-		WebMarkupContainer container = new WebMarkupContainer("container");
-		if (getCssClasses() != null)
-			container.add(AttributeModifier.replace("class", getCssClasses()));
-		add(container);
-
 		List<ActionTab> actionTabs = new ArrayList<>();
 		for (Tab tab: tabs) {
 			if (tab instanceof ActionTab)
@@ -46,7 +47,7 @@ public class Tabbable extends Panel {
 				actionTabs.get(0).setSelected(true);
 		}
 		
-		container.add(new ListView<Tab>("tabs", tabs){
+		add(new ListView<Tab>("tabs", tabs){
 
 			@Override
 			protected void populateItem(ListItem<Tab> item) {
@@ -62,16 +63,6 @@ public class Tabbable extends Panel {
 		});
 		
 		setOutputMarkupId(true);
-	}
-	
-	/**
-	 * Get css classes applied to the outer &lt;ul&gt; element.
-	 * 
-	 * @return
-	 * 			Css classes applied to the outer &lt;ul&gt; element.
-	 */
-	protected String getCssClasses() {
-		return null;
 	}
 	
 }

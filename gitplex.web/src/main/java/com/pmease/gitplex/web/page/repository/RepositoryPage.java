@@ -13,12 +13,12 @@ import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.permission.Permission;
 import com.pmease.gitplex.web.model.RepositoryModel;
-import com.pmease.gitplex.web.page.account.AccountBasePage;
+import com.pmease.gitplex.web.page.account.AccountPage;
 
 @SuppressWarnings("serial")
-public abstract class RepositoryPage extends AccountBasePage {
+public abstract class RepositoryPage extends AccountPage {
 
-	public static final String PARAM_REPO = "repo";
+	private static final String PARAM_REPO = "repo";
 
 	protected IModel<Repository> repoModel;
 	

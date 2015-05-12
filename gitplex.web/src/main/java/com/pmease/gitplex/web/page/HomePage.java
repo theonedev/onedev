@@ -2,7 +2,9 @@ package com.pmease.gitplex.web.page;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
 
-public class HomePage extends LayoutPage {
+import com.pmease.gitplex.web.page.layout.MaintabPage;
+
+public class HomePage extends MaintabPage {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -24,4 +26,5 @@ public class HomePage extends LayoutPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 	}
+
 }
