@@ -1,9 +1,25 @@
-html, body { background: #f0f2f4; }
+html, body {
+	background: #f0f2f4; 
+}
 
-a {cursor: pointer;}
-a.fa {text-decoration: none;}
+a {
+	cursor: pointer;
+}
+a.fa {
+	text-decoration: none; 
+	color: #666;
+}
 
-textarea {resize: vertical;}
+textarea {
+	resize: vertical;
+}
+form>.actions {
+	margin-top: 20px;
+}
+form>.actions>.btn {
+	margin-right: 8px;
+}
+.actions>a {margin-right: 8px;}
 
 /* BRANCHES PAGE */
 .branches>.body>.options {margin-bottom: 16px;}

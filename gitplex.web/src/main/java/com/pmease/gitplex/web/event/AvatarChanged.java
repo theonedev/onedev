@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.user;
+package com.pmease.gitplex.web.event;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 

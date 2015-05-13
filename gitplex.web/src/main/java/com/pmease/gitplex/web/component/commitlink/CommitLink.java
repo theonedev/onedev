@@ -11,13 +11,13 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 
 @SuppressWarnings("serial")
-public class CommitHashLink extends Panel {
+public class CommitLink extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
 	private final String hash;
 	
-	public CommitHashLink(String id, IModel<Repository> repoModel, String hash) {
+	public CommitLink(String id, IModel<Repository> repoModel, String hash) {
 		super(id);
 		this.repoModel = repoModel;
 		this.hash = hash;

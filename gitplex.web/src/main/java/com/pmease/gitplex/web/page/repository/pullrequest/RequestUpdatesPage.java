@@ -32,13 +32,13 @@ import com.pmease.gitplex.core.model.PullRequestVerification;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.permission.Permission;
-import com.pmease.gitplex.web.component.commitlink.CommitHashLink;
+import com.pmease.gitplex.web.component.avatar.RemoveableAvatar;
+import com.pmease.gitplex.web.component.commitlink.CommitLink;
 import com.pmease.gitplex.web.component.commitmessage.OldCommitMessagePanel;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.PersonLink;
-import com.pmease.gitplex.web.component.user.RemoveableAvatar;
 import com.pmease.gitplex.web.event.PullRequestChanged;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.code.tree.RepoTreePage;
@@ -182,7 +182,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 						commitItem.add(new PersonLink("name", Model.of(commit.getAuthor()), AvatarMode.NAME));
 						commitItem.add(new AgeLabel("age", Model.of(commit.getAuthor().getWhen())));
 						
-						commitItem.add(new CommitHashLink("hashLink", repoModel, commit.getHash()));
+						commitItem.add(new CommitLink("hashLink", repoModel, commit.getHash()));
 						commitItem.add(new BookmarkablePageLink<Void>("treeLink", RepoTreePage.class, 
 								RepoTreePage.paramsOf(repoModel.getObject(), commit.getHash(), null)));
 						

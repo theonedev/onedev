@@ -19,8 +19,9 @@ import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.web.component.avatar.AvatarByPerson;
 import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.overview.AccountHomePage;
+import com.pmease.gitplex.web.page.account.home.AccountHomePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 

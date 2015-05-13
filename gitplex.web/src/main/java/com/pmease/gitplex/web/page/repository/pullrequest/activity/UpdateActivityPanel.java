@@ -21,7 +21,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.PullRequestVerification;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.component.commitlink.CommitHashLink;
+import com.pmease.gitplex.web.component.commitlink.CommitLink;
 import com.pmease.gitplex.web.component.commitmessage.OldCommitMessagePanel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.PersonLink;
@@ -146,7 +146,7 @@ public class UpdateActivityPanel extends Panel {
 
 				});
 				
-				CommitHashLink link = new CommitHashLink("hashLink", repoModel, commit.getHash());
+				CommitLink link = new CommitLink("hashLink", repoModel, commit.getHash());
 				if (mergedCommitsModel.getObject().contains(commit.getHash())) {
 					item.add(AttributeAppender.append("class", " integrated"));
 					item.add(AttributeAppender.append("title", "This commit has been integrated"));

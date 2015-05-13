@@ -7,16 +7,16 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.string.AppendingStringBuffer;
 
 @SuppressWarnings("serial")
-public class MultilineText extends MultiLineLabel {
-	public MultilineText(String id) {
+public class MultilineLabel extends MultiLineLabel {
+	public MultilineLabel(String id) {
 		super(id);
 	}
 
-	public MultilineText(String id, String label) {
+	public MultilineLabel(String id, String label) {
 		super(id, label);
 	}
 
-	public MultilineText(String id, IModel<String> model) {
+	public MultilineLabel(String id, IModel<String> model) {
 		super(id, model);
 	}
 

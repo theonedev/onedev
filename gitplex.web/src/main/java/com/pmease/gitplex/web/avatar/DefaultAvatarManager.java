@@ -124,23 +124,20 @@ public class DefaultAvatarManager implements AvatarManager {
 	@Transactional
 	@Override
 	public void useAvatar(User user, FileUpload upload) {
-		Lock avatarLock = LockUtils.getLock("avatars:" + user.getId());
-		avatarLock.lock();
-		try {
-			upload.writeTo(new File(Bootstrap.getSiteDir(), "avatars/" + user.getId()));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} finally {
-			avatarLock.unlock();
+		if (upload != null) {
+			Lock avatarLock = LockUtils.getLock("avatars:" + user.getId());
+			avatarLock.lock();
+			try {
+				upload.writeTo(new File(Bootstrap.getSiteDir(), "avatars/" + user.getId()));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			} finally {
+				avatarLock.unlock();
+			}
+			user.setAvatarUploadDate(new Date());
+		} else {
+			user.setAvatarUploadDate(null);
 		}
-		user.setAvatarUploadDate(new Date());
-		userManager.save(user);
-	}
-
-	@Transactional
-	@Override
-	public void resetAvatar(User user) {
-		user.setAvatarUploadDate(null);
 		userManager.save(user);
 	}
 

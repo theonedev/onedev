@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.account.overview;
+package com.pmease.gitplex.web.page.account.home;
 
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 

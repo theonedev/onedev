@@ -1,63 +1,69 @@
-package com.pmease.gitplex.web.component.user;
+package com.pmease.gitplex.web.component.avatar;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.eclipse.jgit.lib.PersonIdent;
+import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.avatar.AvatarManager;
+import com.pmease.gitplex.web.event.AvatarChanged;
 
 @SuppressWarnings("serial")
-public class AvatarByPerson extends WebComponent {
+public class AvatarByUser extends WebComponent {
 
 	private final IModel<String> avatarUrlModel;
 	
 	private final boolean withTooltip;
-
-	public AvatarByPerson(String id, IModel<PersonIdent> personModel) {
-		this(id, personModel, true);
+	
+	public AvatarByUser(String id, IModel<User> userModel) {
+		this(id, userModel, true);
 	}
 	
 	/**
-	 * Display avatar of specified email model.
+	 * Display avatar of specified user model.
 	 * 
 	 * @param id
 	 * 			component id
 	 * @param userModel
-	 * 			model of the user to display avatar for. This model allows to return <tt>null</tt> 
-	 * 			to display avatar for unknown user 
+	 * 			model of the user to display avatar for. If <tt>userModel.getObject()</tt>
+	 * 			returns <tt>null</tt>, avatar of unknown user will be displayed
 	 */
-	public AvatarByPerson(String id, IModel<PersonIdent> personModel, boolean withTooltip) {
-		super(id, personModel);
+	public AvatarByUser(String id, IModel<User> userModel, boolean withTooltip) {
+		super(id, userModel);
 		
 		avatarUrlModel = new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
-				return GitPlex.getInstance(AvatarManager.class).getAvatarUrl(getPerson());
+				return GitPlex.getInstance(AvatarManager.class).getAvatarUrl(getUser());
 			}
 			
 		};
 		
 		this.withTooltip = withTooltip;
 	}
-
-	private PersonIdent getPerson() {
-		return (PersonIdent) getDefaultModelObject();
-	}
 	
+	private User getUser() {
+		return (User) getDefaultModelObject();
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		setOutputMarkupId(true);
+		
 		if (withTooltip)
-			add(new TooltipBehavior(Model.of(getPerson().getName())));
+			add(new TooltipBehavior(Model.of(getUser().getDisplayName())));
 	}
 
 	@Override
@@ -78,6 +84,13 @@ public class AvatarByPerson extends WebComponent {
 		}
 	}
 
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		
+		response.render(CssHeaderItem.forReference(new CssResourceReference(AvatarByPerson.class, "avatar.css")));
+	}
+	
 	@Override
 	protected void onDetach() {
 		avatarUrlModel.detach();

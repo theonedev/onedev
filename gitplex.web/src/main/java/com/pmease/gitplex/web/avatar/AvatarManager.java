@@ -30,9 +30,7 @@ public interface AvatarManager {
 	 */
 	String getAvatarUrl(PersonIdent person);
 
-	void useAvatar(User user, FileUpload avatar);
-	
-	void resetAvatar(User user);
+	void useAvatar(User user, @Nullable FileUpload avatar);
 	
 }
 

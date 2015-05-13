@@ -6,15 +6,15 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 
 @SuppressWarnings("serial")
-public abstract class TextLink<T> extends Link<T> {
+public abstract class LabelLink<T> extends Link<T> {
 
 	private final IModel<String> labelModel;
 
-	public TextLink(String id, IModel<String> labelModel) {
+	public LabelLink(String id, IModel<String> labelModel) {
 		this(id, null, labelModel);
 	}
 
-	public TextLink(String id, IModel<T> linkModel, IModel<String> labelModel) {
+	public LabelLink(String id, IModel<T> linkModel, IModel<String> labelModel) {
 		super(id, linkModel);
 		this.labelModel = labelModel;
 	}

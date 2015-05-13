@@ -8,7 +8,10 @@ import org.apache.wicket.request.mapper.CompoundRequestMapper;
 
 import com.pmease.gitplex.core.validation.RepositoryNameValidator;
 import com.pmease.gitplex.core.validation.UserNameValidator;
-import com.pmease.gitplex.web.page.account.overview.AccountHomePage;
+import com.pmease.gitplex.web.page.account.home.AccountHomePage;
+import com.pmease.gitplex.web.page.account.list.AccountEditPage;
+import com.pmease.gitplex.web.page.account.list.AccountListPage;
+import com.pmease.gitplex.web.page.account.list.AvatarEditPage;
 import com.pmease.gitplex.web.page.admin.MailSettingPage;
 import com.pmease.gitplex.web.page.admin.QosSettingPage;
 import com.pmease.gitplex.web.page.admin.SystemSettingPage;
@@ -24,6 +27,7 @@ import com.pmease.gitplex.web.page.repository.code.tree.RepoTreePage;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitsPage;
 import com.pmease.gitplex.web.page.repository.home.RepoHomePage;
+import com.pmease.gitplex.web.page.repository.list.RepoListPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.ClosedRequestsPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.OpenRequestsPage;
@@ -52,6 +56,10 @@ public class RootMapper extends CompoundRequestMapper {
 	}
 
 	private void addAccountPages() {
+		addPage("accounts", AccountListPage.class);
+		addPage("accounts/edit", AccountEditPage.class);
+		addPage("accounts/edit/avatar", AvatarEditPage.class);
+		
 		add(new MountedMapper("${user}", AccountHomePage.class) {
 
 			@Override
@@ -68,6 +76,8 @@ public class RootMapper extends CompoundRequestMapper {
 	}
 
 	private void addRepoPages() {
+		addPage("repositories", RepoListPage.class);
+		
 		add(new MountedMapper("${user}/${repo}", RepoHomePage.class) {
 
 			@Override

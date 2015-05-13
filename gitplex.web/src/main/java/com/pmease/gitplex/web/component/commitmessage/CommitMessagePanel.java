@@ -13,7 +13,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.base.Objects;
-import com.pmease.commons.wicket.component.MultilineText;
+import com.pmease.commons.wicket.component.MultilineLabel;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 
@@ -48,7 +48,7 @@ public class CommitMessagePanel extends Panel {
 			}
 		}));
 
-		add(new MultilineText("detail", new AbstractReadOnlyModel<String>() {
+		add(new MultilineLabel("detail", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {

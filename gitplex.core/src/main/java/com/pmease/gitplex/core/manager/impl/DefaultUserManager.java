@@ -2,7 +2,6 @@ package com.pmease.gitplex.core.manager.impl;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -12,10 +11,8 @@ import javax.inject.Singleton;
 import org.hibernate.Query;
 import org.hibernate.ReplicationMode;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.pmease.commons.hibernate.Sessional;
@@ -197,21 +194,6 @@ public class DefaultUserManager implements UserManager {
 			if (dao.get(User.class, it.next()) == null)
 				it.remove();
 		}
-	}
-
-	@Override
-	@Sessional
-	public List<User> getManagableAccounts(User user) {
-		Preconditions.checkNotNull(user);
-		Collection<Membership> memberships = user.getMemberships();
-		List<User> result = Lists.newArrayList();
-		for (Membership each : memberships) {
-			if (each.getTeam().isOwners()) {
-				result.add(each.getTeam().getOwner());
-			}
-		}
-		
-		return result;
 	}
 
 	@Subscribe

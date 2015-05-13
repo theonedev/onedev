@@ -42,4 +42,6 @@ public interface AuthorizationManager {
 	 */
 	boolean canCreateBranch(Repository repository, String branchName);
 	
+	boolean canManageAccount(User account);
+	
 }

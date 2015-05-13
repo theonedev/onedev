@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page;
+package com.pmease.gitplex.web.page.home;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
 

@@ -13,12 +13,10 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.Email;
-import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Objects;
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.editable.annotation.Password;
 import com.pmease.commons.shiro.AbstractUser;
 import com.pmease.gitplex.core.permission.object.ProtectedObject;
 import com.pmease.gitplex.core.permission.object.UserBelonging;
@@ -105,14 +103,6 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	public void setEmail(String email) {
 		this.email = email;
-	}
-
-	@Editable(order=400)
-	@Password(confirmative=true)
-	@NotEmpty
-	@Length(min=5)
-	public String getPassword() {
-		return super.getPassword();
 	}
 
 	public boolean isAdmin() {

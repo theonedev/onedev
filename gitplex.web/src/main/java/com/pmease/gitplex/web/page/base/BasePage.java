@@ -47,9 +47,9 @@ public abstract class BasePage extends CommonPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new Label("title", getPageTitle()));
+		add(new Label("pageTitle", getPageTitle()));
 
-		add(new WebMarkupContainer("refresh") {
+		add(new WebMarkupContainer("pageRefresh") {
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {

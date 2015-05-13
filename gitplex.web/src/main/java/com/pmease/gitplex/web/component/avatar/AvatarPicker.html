@@ -1,0 +1,16 @@
+<wicket:panel>
+	<div class="avatar-picker clearfix">
+		<div wicket:id="currentAvatar" class="current-avatar pull-left"></div>
+		<div class="fileupload fileupload-new pull-left" data-provides="fileupload">
+			<div class="fileupload-preview thumbnail" data-trigger="fileupload"></div>
+			<div class="actions">
+				<a class="btn btn-default btn-file"><span class="fileupload-new">Select image</span><span class="fileupload-exists">Change image</span>
+				<input type="file" wicket:id="fileInput" name="..."></a>
+				<a wicket:id="reset" class="btn btn-default" data-dismiss="fileupload">Use default</a>
+			</div>
+		</div>	
+	</div>
+	<div class="help-block">
+		Supported image types are png, gif, jpg and jpeg. The image size should be less than <span wicket:id="maxSize"></span>M bytes.
+	</div>
+</wicket:panel>

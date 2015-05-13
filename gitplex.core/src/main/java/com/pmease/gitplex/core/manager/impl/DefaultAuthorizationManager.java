@@ -100,4 +100,13 @@ public class DefaultAuthorizationManager implements AuthorizationManager {
 				&& repository.getGateKeeper().checkRef(currentUser, repository, Git.REFS_HEADS + branch.getName()).isPassed();
 	}
 
+	@Override
+	public boolean canManageAccount(User account) {
+		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
+		if (currentUser != null)
+			return currentUser.asSubject().isPermitted(Permission.ofUserAdmin(account));
+		else 
+			return false;
+	}
+
 }

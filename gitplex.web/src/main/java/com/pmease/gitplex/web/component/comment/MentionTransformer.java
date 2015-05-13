@@ -7,7 +7,7 @@ import com.pmease.commons.markdown.extensionpoint.HtmlTransformer;
 import com.pmease.gitplex.core.comment.MentionParser;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.overview.AccountHomePage;
+import com.pmease.gitplex.web.page.account.home.AccountHomePage;
 
 public class MentionTransformer extends MentionParser implements HtmlTransformer {
 	
