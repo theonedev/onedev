@@ -18,8 +18,9 @@
 				<thead>
 					<tr>
 						<th class="name">Name</th>
-						<th class="name">Description</th>
-						<th class="actions"></th>
+						<th class="description">Description</th>
+						<th class="login-allowed">Login Allowed</th>
+						<th class="actions">Actions</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -31,11 +32,20 @@
 						<td class="description">
 							<span wicket:id="description"></span>
 						</td>
+						<td class="login-allowed">
+							<span wicket:id="loginAllowed"></span>
+							<wicket:enclosure child="allowLogin">
+							- <a wicket:id="allowLogin">set password to allow</a>
+							</wicket:enclosure>
+							<wicket:enclosure child="disallowLogin">
+							- <a wicket:id="disallowLogin">clear password to disallow</a>
+							</wicket:enclosure>
+						</td>
 						<td class="actions">
-							<a wicket:id="edit" class="fa fa-pencil" title="Edit this account"></a>
+							<a wicket:id="editProfile" class="fa fa-pencil" title="Edit account profile"></a>
 							<a wicket:id="changePassword" class="fa fa-key" title="Change account password"></a>
 							<a wicket:id="changeAvatar" class="fa fa-user" title="Change account avatar"></a>
-							<a wicket:id="delete" class="fa fa-times" title="Delete this account"></a>
+							<a wicket:id="delete" class="fa fa-trash" title="Delete this account"></a>
 						</td>
 					</tr>
 				</tbody>

@@ -2,9 +2,9 @@ package com.pmease.gitplex.web.page.home;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
 
-import com.pmease.gitplex.web.page.layout.MaintabPage;
+import com.pmease.gitplex.web.page.main.MainPage;
 
-public class HomePage extends MaintabPage {
+public class HomePage extends MainPage {
 
 	private static final long serialVersionUID = 1L;
 	

@@ -42,9 +42,29 @@ public class PageTab extends Tab {
 			Class<? extends Page> additionalPageClass1, 
 			Class<? extends Page> additionalPageClass2,
 			Class<? extends Page> additionalPageClass3) {
-		this(titleModel, mainPageClass, asList(additionalPageClass1, additionalPageClass2, additionalPageClass3));
+		this(titleModel, mainPageClass, asList(additionalPageClass1, 
+				additionalPageClass2, additionalPageClass3));
 	}
 
+	public PageTab(IModel<String> titleModel, Class<? extends Page> mainPageClass, 
+			Class<? extends Page> additionalPageClass1, 
+			Class<? extends Page> additionalPageClass2,
+			Class<? extends Page> additionalPageClass3, 
+			Class<? extends Page> additionalPageClass4) {
+		this(titleModel, mainPageClass, asList(additionalPageClass1, 
+				additionalPageClass2, additionalPageClass3, additionalPageClass4));
+	}
+	
+	public PageTab(IModel<String> titleModel, Class<? extends Page> mainPageClass, 
+			Class<? extends Page> additionalPageClass1, 
+			Class<? extends Page> additionalPageClass2,
+			Class<? extends Page> additionalPageClass3, 
+			Class<? extends Page> additionalPageClass4, 
+			Class<? extends Page> additionalPageClass5) {
+		this(titleModel, mainPageClass, asList(additionalPageClass1, 
+				additionalPageClass2, additionalPageClass3, additionalPageClass4, additionalPageClass5));
+	}
+	
 	private static List<Class<? extends Page>> asList(Class<? extends Page> pageClass) {
 		List<Class<? extends Page>> pageClasses = new ArrayList<Class<? extends Page>>();
 		pageClasses.add(pageClass);
@@ -68,6 +88,30 @@ public class PageTab extends Tab {
 		return pageClasses;
 	}
 
+	private static List<Class<? extends Page>> asList(
+			Class<? extends Page> pageClass1, Class<? extends Page> pageClass2, 
+			Class<? extends Page> pageClass3, Class<? extends Page> pageClass4) {
+		List<Class<? extends Page>> pageClasses = new ArrayList<Class<? extends Page>>();
+		pageClasses.add(pageClass1);
+		pageClasses.add(pageClass2);
+		pageClasses.add(pageClass3);
+		pageClasses.add(pageClass4);
+		return pageClasses;
+	}
+	
+	private static List<Class<? extends Page>> asList(
+			Class<? extends Page> pageClass1, Class<? extends Page> pageClass2, 
+			Class<? extends Page> pageClass3, Class<? extends Page> pageClass4, 
+			Class<? extends Page> pageClass5) {
+		List<Class<? extends Page>> pageClasses = new ArrayList<Class<? extends Page>>();
+		pageClasses.add(pageClass1);
+		pageClasses.add(pageClass2);
+		pageClasses.add(pageClass3);
+		pageClasses.add(pageClass4);
+		pageClasses.add(pageClass5);
+		return pageClasses;
+	}
+	
 	public final IModel<String> getTitleModel() {
 		return titleModel;
 	}

@@ -1,8 +1,8 @@
 package com.pmease.gitplex.web.page.repository.list;
 
-import com.pmease.gitplex.web.page.layout.MaintabPage;
+import com.pmease.gitplex.web.page.main.MainPage;
 
 @SuppressWarnings("serial")
-public class RepoListPage extends MaintabPage {
+public class RepoListPage extends MainPage {
 
 }

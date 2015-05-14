@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -19,6 +20,7 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.hibernate.dao.Dao;
@@ -36,11 +38,14 @@ import com.pmease.gitplex.core.permission.Permission;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarByUser;
 import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.home.AccountHomePage;
-import com.pmease.gitplex.web.page.layout.MaintabPage;
+import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
+import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
+import com.pmease.gitplex.web.page.account.setting.PasswordEditPage;
+import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
+import com.pmease.gitplex.web.page.main.MainPage;
 
 @SuppressWarnings("serial")
-public class AccountListPage extends MaintabPage {
+public class AccountListPage extends MainPage {
 
 	private PageableListView<User> accountsView;
 	
@@ -85,14 +90,7 @@ public class AccountListPage extends MaintabPage {
 
 			@Override
 			public void onClick() {
-				setResponsePage(new AccountEditPage(new User()) {
-
-					@Override
-					protected void onComplete() {
-						setResponsePage(AccountListPage.this);
-					}
-					
-				});
+				setResponsePage(new NewAccountPage(new User()));
 			}
 			
 		});
@@ -142,24 +140,63 @@ public class AccountListPage extends MaintabPage {
 				User user = item.getModelObject();
 
 				item.add(new AvatarByUser("avatar", item.getModel(), false));
-				Link<Void> link = new BookmarkablePageLink<>("accountLink", AccountHomePage.class, AccountPage.paramsOf(user)); 
+				Link<Void> link = new BookmarkablePageLink<>("accountLink", AccountOverviewPage.class, AccountPage.paramsOf(user)); 
 				link.add(new Label("accountName", user.getName()));
 				item.add(link);
 						
 				item.add(new MultilineLabel("description", user.getFullName()));
+				
+				if (user.getPassword() != null) {
+					item.add(new Label("loginAllowed").add(AttributeAppender.append("class", "fa fa-check")));
+					item.add(new Link<Void>("disallowLogin") {
 
-				item.add(new Link<Void>("edit") {
+						@Override
+						protected void onConfigure() {
+							super.onConfigure();
+							
+							User account = item.getModelObject();
+							setVisible(GitPlex.getInstance(AuthorizationManager.class).canManageAccount(account));
+						}
+
+						@Override
+						public void onClick() {
+							User account = item.getModelObject();
+							account.setPassword(null);
+							GitPlex.getInstance(UserManager.class).save(account);
+						}
+						
+					});
+					item.add(new WebMarkupContainer("allowLogin").setVisible(false));
+				} else { 
+					item.add(new Label("loginAllowed").add(AttributeAppender.append("class", "fa fa-times")));
+					item.add(new Link<Void>("allowLogin") {
+
+						@Override
+						protected void onConfigure() {
+							super.onConfigure();
+							
+							User account = item.getModelObject();
+							setVisible(GitPlex.getInstance(AuthorizationManager.class).canManageAccount(account));
+						}
+
+						@Override
+						public void onClick() {
+							PageParameters params = AccountPage.paramsOf(item.getModelObject());
+							addPrevPageParam(params);
+							setResponsePage(PasswordEditPage.class, params);
+						}
+						
+					});
+					item.add(new WebMarkupContainer("disallowLogin").setVisible(false));
+				}
+
+				item.add(new Link<Void>("editProfile") {
 
 					@Override
 					public void onClick() {
-						setResponsePage(new AccountEditPage(item.getModelObject()) {
-
-							@Override
-							protected void onComplete() {
-								setResponsePage(AccountListPage.this);
-							}
-							
-						});
+						PageParameters params = AccountPage.paramsOf(item.getModelObject());
+						addPrevPageParam(params);
+						setResponsePage(ProfileEditPage.class, params);
 					}
 
 					@Override
@@ -174,20 +211,18 @@ public class AccountListPage extends MaintabPage {
 
 					@Override
 					public void onClick() {
-						setResponsePage(new PasswordEditPage(item.getModelObject()) {
-
-							@Override
-							protected void onComplete() {
-								setResponsePage(AccountListPage.this);
-							}
-							
-						});
+						PageParameters params = AccountPage.paramsOf(item.getModelObject());
+						addPrevPageParam(params);
+						setResponsePage(PasswordEditPage.class, params);
 					}
 
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(SecurityUtils.getSubject().isPermitted(Permission.ofUserAdmin(item.getModelObject())));
+						
+						User account = item.getModelObject();
+						setVisible(account.getPassword() != null 
+								&& SecurityUtils.getSubject().isPermitted(Permission.ofUserAdmin(account)));
 					}
 					
 				});
@@ -196,14 +231,9 @@ public class AccountListPage extends MaintabPage {
 
 					@Override
 					public void onClick() {
-						setResponsePage(new AvatarEditPage(item.getModelObject()) {
-
-							@Override
-							protected void onComplete() {
-								setResponsePage(AccountListPage.this);
-							}
-							
-						});
+						PageParameters params = AccountPage.paramsOf(item.getModelObject());
+						addPrevPageParam(params);
+						setResponsePage(AvatarEditPage.class, params);
 					}
 
 					@Override

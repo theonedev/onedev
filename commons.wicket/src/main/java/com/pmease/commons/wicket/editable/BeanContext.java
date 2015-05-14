@@ -9,6 +9,7 @@ import org.apache.wicket.model.Model;
 import com.pmease.commons.editable.BeanDescriptor;
 import com.pmease.commons.editable.BeanDescriptorImpl;
 import com.pmease.commons.loader.AppLoader;
+import com.pmease.commons.util.ClassUtils;
 
 @SuppressWarnings("serial")
 public abstract class BeanContext<T> extends BeanDescriptorImpl {
@@ -46,10 +47,12 @@ public abstract class BeanContext<T> extends BeanDescriptorImpl {
 		};
 	}
 
-	public static BeanEditor<Serializable> editModel(String componentId, IModel<Serializable> beanModel) {
+	@SuppressWarnings("unchecked")
+	public static BeanEditor<Serializable> editModel(String componentId, IModel<? extends Serializable> beanModel) {
 		EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
-		BeanContext<Serializable> editContext = registry.getBeanEditContext(beanModel.getObject().getClass());
-		return editContext.renderForEdit(componentId, beanModel);
+		Class<?> beanClass = ClassUtils.unproxy(beanModel.getObject().getClass());
+		BeanContext<Serializable> editContext = registry.getBeanEditContext(beanClass);
+		return editContext.renderForEdit(componentId, (IModel<Serializable>)beanModel);
 	}
 	
 	public static BeanEditor<Serializable> editBean(String componentId, final Serializable bean) {
@@ -71,7 +74,8 @@ public abstract class BeanContext<T> extends BeanDescriptorImpl {
 			
 		};
 		EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
-		BeanContext<Serializable> editContext = registry.getBeanEditContext(beanModel.getObject().getClass());
+		Class<?> beanClass = ClassUtils.unproxy(beanModel.getObject().getClass());
+		BeanContext<Serializable> editContext = registry.getBeanEditContext(beanClass);
 		beanModel = editContext.wrapAsSelfUpdating(beanModel);
 		return editContext.renderForEdit(componentId, beanModel);
 	}

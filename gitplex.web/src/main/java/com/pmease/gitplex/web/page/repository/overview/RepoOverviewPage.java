@@ -1,13 +1,13 @@
-package com.pmease.gitplex.web.page.repository.home;
+package com.pmease.gitplex.web.page.repository.overview;
 
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
-public class RepoHomePage extends RepositoryPage {
+public class RepoOverviewPage extends RepositoryPage {
 
-	public RepoHomePage(PageParameters params) {
+	public RepoOverviewPage(PageParameters params) {
 		super(params);
 	}
 

@@ -99,7 +99,7 @@ public class MailSettingPage extends AdministrationPage {
 
 		});
 		
-		add(form);
+		sidebar.add(form);
 	}
 
 	@Override

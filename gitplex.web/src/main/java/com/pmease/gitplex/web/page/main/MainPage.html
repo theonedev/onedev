@@ -5,11 +5,11 @@
 				<a wicket:id="navHome" class="home"><i class="fa fa-ext fa-gitplex-logo"></i> GitPlex</a>
 				<wicket:enclosure child="navAccount">
 				<span class="seperator"><i class="fa fa-caret-right"></i></span>
-				<a wicket:id="navAccount" class="account">Admin</a>
+				<a wicket:id="navAccount" class="account"><span wicket:id="name"></span></a>
 				</wicket:enclosure>
 				<wicket:enclosure child="navRepo">
 				<span class="seperator"><i class="fa fa-caret-right"></i></span>
-				<a wicket:id="navRepo" class="repo">Linux</a>
+				<a wicket:id="navRepo" class="repo"><span wicket:id="name"></span></a>
 				</wicket:enclosure>
 			</div>
 			<div id="account-info" class="pull-right">

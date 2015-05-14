@@ -42,7 +42,7 @@ public class SystemSettingPage extends AdministrationPage {
 
 		});
 		
-		add(form);
+		sidebar.add(form);
 	}
 
 	@Override

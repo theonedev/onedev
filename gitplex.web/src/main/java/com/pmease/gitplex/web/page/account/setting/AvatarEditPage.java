@@ -1,33 +1,31 @@
-package com.pmease.gitplex.web.page.account.list;
+package com.pmease.gitplex.web.page.account.setting;
 
+import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.component.avatar.AvatarPicker;
-import com.pmease.gitplex.web.page.layout.MaintabPage;
 
 @SuppressWarnings("serial")
-public abstract class AvatarEditPage extends MaintabPage {
+public class AvatarEditPage extends AccountSettingPage {
 
-	private final User account;
-	
 	private FileUpload upload;
 	
-	public AvatarEditPage(User account) {
-		this.account = account;
+	public AvatarEditPage(PageParameters params) {
+		super(params);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 	
-		add(new Label("title", "Change Avatar of " + account.getDisplayName()));
+		sidebar.add(new Label("title", "Change Avatar of " + getAccount().getDisplayName()));
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -35,14 +33,15 @@ public abstract class AvatarEditPage extends MaintabPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				GitPlex.getInstance(AvatarManager.class).useAvatar(account, upload);
-				onComplete();
+				GitPlex.getInstance(AvatarManager.class).useAvatar(getAccount(), upload);
+				Session.get().info("Avatar has been updated");
+				backToPrevPage();
 			}
 			
 		};
-		add(form);
+		sidebar.add(form);
 		
-		form.add(new AvatarPicker("avatarPicker", account, new IModel<FileUpload>() {
+		form.add(new AvatarPicker("avatarPicker", getAccount(), new IModel<FileUpload>() {
 
 			@Override
 			public void detach() {
@@ -62,12 +61,17 @@ public abstract class AvatarEditPage extends MaintabPage {
 		form.add(new Link<Void>("cancel") {
 
 			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(prevPageRef != null);
+			}
+
+			@Override
 			public void onClick() {
-				onComplete();
+				backToPrevPage();
 			}
 			
 		});
 	}
 
-	protected abstract void onComplete();
 }

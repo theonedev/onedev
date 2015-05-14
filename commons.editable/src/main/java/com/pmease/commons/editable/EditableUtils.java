@@ -16,8 +16,8 @@ import javax.validation.Validator;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.BeanUtils;
+import com.pmease.commons.util.ClassUtils;
 import com.pmease.commons.util.GeneralException;
-import com.pmease.commons.util.JavassistUtils;
 import com.pmease.commons.util.ReflectionUtils;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.WordUtils;
@@ -159,7 +159,7 @@ public class EditableUtils {
 	}
 	
 	public static boolean hasEditableProperties(Class<?> beanClass) {
-	    for (Method getter: BeanUtils.findGetters(JavassistUtils.unproxy(beanClass))) {
+	    for (Method getter: BeanUtils.findGetters(ClassUtils.unproxy(beanClass))) {
 	        Method setter = BeanUtils.findSetter(getter);
 	        if (setter != null && getter.getAnnotation(Editable.class) != null) {
 	        	return true;

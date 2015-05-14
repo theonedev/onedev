@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.admin;
+package com.pmease.gitplex.web.page.account.setting;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +25,6 @@ public abstract class AdministrationPage extends MainPage {
 		super.onInitialize();
 		
 		List<PageTab> tabs = new ArrayList<>();
-		tabs.add(new AdministrationTab("System Setting", "fa fa-gear", SystemSettingPage.class));
-		tabs.add(new AdministrationTab("Mail Setting", "fa fa-envelope", MailSettingPage.class));
-		tabs.add(new AdministrationTab("QoS Setting", "fa fa-signal", QosSettingPage.class));
 		
 		add(sidebar = new SidebarBorder("sidebar", tabs));
 	}

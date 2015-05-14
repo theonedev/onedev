@@ -7,6 +7,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
@@ -25,6 +26,10 @@ public abstract class BasePage extends CommonPage {
 		checkReady();
 	}
 
+	public BasePage(IModel<?> model) {
+		super(model);
+	}
+	
 	public BasePage(PageParameters params) {
 		super(params);
 		checkReady();

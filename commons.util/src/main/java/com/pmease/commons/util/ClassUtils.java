@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import javassist.util.proxy.ProxyFactory;
+
 import javax.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
@@ -116,5 +118,12 @@ public class ClassUtils extends org.apache.commons.lang3.ClassUtils {
 			return ClassUtils.class.getClassLoader().getResourceAsStream(path);
 		else
 			return locator.getClassLoader().getResourceAsStream(locator.getPackage().getName().replace(".", "/") + "/" + path);
+	}
+
+	public static Class<?> unproxy(Class<?> clazz) {
+		Class<?> superClass = clazz;
+		while (ProxyFactory.isProxyClass(superClass))
+			superClass = clazz.getSuperclass();
+		return superClass;
 	}
 }

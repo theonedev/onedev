@@ -7,7 +7,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.AppLoader;
-import com.pmease.commons.util.JavassistUtils;
+import com.pmease.commons.util.ClassUtils;
 
 public class EntityModel<T extends AbstractEntity> extends LoadableDetachableModel<T> {
 
@@ -38,7 +38,7 @@ public class EntityModel<T extends AbstractEntity> extends LoadableDetachableMod
 		super.setObject(object);
 
 		if (object != null) {
-			entityClass = (Class<T>) JavassistUtils.unproxy(object.getClass());
+			entityClass = (Class<T>) ClassUtils.unproxy(object.getClass());
 			entityId = object.getId();
 		} else {
 			entityClass = null;

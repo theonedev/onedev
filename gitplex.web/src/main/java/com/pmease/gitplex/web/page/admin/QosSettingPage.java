@@ -45,7 +45,7 @@ public class QosSettingPage extends AdministrationPage {
 			
 		});
 		
-		add(form);
+		sidebar.add(form);
 	}
 
 	@Override

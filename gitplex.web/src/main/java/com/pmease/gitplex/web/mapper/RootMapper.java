@@ -1,5 +1,7 @@
 package com.pmease.gitplex.web.mapper;
 
+import java.util.List;
+
 import org.apache.wicket.Page;
 import org.apache.wicket.core.request.mapper.MountedMapper;
 import org.apache.wicket.protocol.http.WebApplication;
@@ -8,10 +10,12 @@ import org.apache.wicket.request.mapper.CompoundRequestMapper;
 
 import com.pmease.gitplex.core.validation.RepositoryNameValidator;
 import com.pmease.gitplex.core.validation.UserNameValidator;
-import com.pmease.gitplex.web.page.account.home.AccountHomePage;
-import com.pmease.gitplex.web.page.account.list.AccountEditPage;
 import com.pmease.gitplex.web.page.account.list.AccountListPage;
-import com.pmease.gitplex.web.page.account.list.AvatarEditPage;
+import com.pmease.gitplex.web.page.account.list.NewAccountPage;
+import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
+import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
+import com.pmease.gitplex.web.page.account.setting.PasswordEditPage;
+import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 import com.pmease.gitplex.web.page.admin.MailSettingPage;
 import com.pmease.gitplex.web.page.admin.QosSettingPage;
 import com.pmease.gitplex.web.page.admin.SystemSettingPage;
@@ -26,8 +30,8 @@ import com.pmease.gitplex.web.page.repository.code.branches.RepoBranchesPage;
 import com.pmease.gitplex.web.page.repository.code.tree.RepoTreePage;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitsPage;
-import com.pmease.gitplex.web.page.repository.home.RepoHomePage;
 import com.pmease.gitplex.web.page.repository.list.RepoListPage;
+import com.pmease.gitplex.web.page.repository.overview.RepoOverviewPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.ClosedRequestsPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.OpenRequestsPage;
@@ -57,38 +61,42 @@ public class RootMapper extends CompoundRequestMapper {
 
 	private void addAccountPages() {
 		addPage("accounts", AccountListPage.class);
-		addPage("accounts/edit", AccountEditPage.class);
-		addPage("accounts/edit/avatar", AvatarEditPage.class);
+		addPage("accounts/new", NewAccountPage.class);
 		
-		add(new MountedMapper("${user}", AccountHomePage.class) {
+		add(new MountedMapper("${user}", AccountOverviewPage.class) {
 
 			@Override
 			protected boolean urlStartsWith(Url url, String... segments) {
-				if (segments.length < 1)
+				List<String> urlSegments = url.getSegments();
+				if (urlSegments.size() < 1)
 					return false;
-				String userName = segments[0];
+				String userName = urlSegments.get(0);
 				
 				return !UserNameValidator.getReservedNames().contains(userName);
 			}
 
 		});
 
+		addPage("${user}/settings/profile", ProfileEditPage.class);
+		addPage("${user}/settings/avatar", AvatarEditPage.class);
+		addPage("${user}/settings/password", PasswordEditPage.class);
 	}
 
 	private void addRepoPages() {
 		addPage("repositories", RepoListPage.class);
 		
-		add(new MountedMapper("${user}/${repo}", RepoHomePage.class) {
+		add(new MountedMapper("${user}/${repo}", RepoOverviewPage.class) {
 
 			@Override
 			protected boolean urlStartsWith(Url url, String... segments) {
-				if (segments.length < 2)
+				List<String> urlSegments = url.getSegments();
+				if (urlSegments.size() < 2)
 					return false;
-				String userName = segments[0];
+				String userName = urlSegments.get(0);
 				if (UserNameValidator.getReservedNames().contains(userName))
 					return false;
 
-				String repositoryName = segments[1];
+				String repositoryName = urlSegments.get(1);
 				return !RepositoryNameValidator.getReservedNames().contains(
 						repositoryName);
 			}

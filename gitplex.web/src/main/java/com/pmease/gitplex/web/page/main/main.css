@@ -1,16 +1,18 @@
 #main>.head {
 	padding: 16px;
+	background: #333;
 }
-#topnav>a {
-	color: #333; 
+#topnav>a, #topnav>span {
+	color: white; 
 	font-size: 18px; 
 	margin-right: 8px;
 }
+
 #account-info a, #account-info span {
-	color: #333; 
+	color: white; 
 }
 #account-info span {
-	color: #666; 
+	color: white; 
 }
 
 #topnav>.home .fa {
@@ -44,40 +46,6 @@
 #main>.body>.content {
 	background: white;
 	border-bottom: 1px solid #BBB;
-	padding: 20px;
-}
-
-#sidebar {
-	margin: -20px;
-}
-#sidebar>table {
-	width: 100%;
-}
-#sidebar>table>tbody>tr>td {
-	vertical-align: top;
-}
-#sidebar>table>tbody>tr>td.tabs {
-	padding: 20px 0 0 20px;
-	width: 200px;
-	border-right: 1px solid #BBB;
-}
-#sidebar>table>tbody>tr>td.tabs ul {
-	position: relative;
-}
-#sidebar>table>tbody>tr>td.tabs a {
-	border: 1px solid white;
-	color: #666;
-	display: block;
-	text-decoration: none;
-	padding: 6px 12px;
-}
-#sidebar>table>tbody>tr>td.tabs li.active a {
-	border: 1px solid #BBB;
-	border-right-color: white;
-	color: black;
-	margin-right: -1px;
-}
-#sidebar>table>tbody>tr>td.content {
 	padding: 20px;
 }
 

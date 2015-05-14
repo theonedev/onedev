@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.editable.bean;
+package com.pmease.gitplex.web.page.account.setting;
 
 import java.io.Serializable;
 

@@ -1,57 +1,80 @@
-package com.pmease.gitplex.web.page.layout;
+package com.pmease.gitplex.web.page.main;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.shiro.SecurityUtils;
-import org.apache.wicket.Page;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.home.AccountHomePage;
-import com.pmease.gitplex.web.page.account.list.AccountEditPage;
 import com.pmease.gitplex.web.page.account.list.AccountListPage;
-import com.pmease.gitplex.web.page.account.list.AvatarEditPage;
-import com.pmease.gitplex.web.page.account.list.PasswordEditPage;
+import com.pmease.gitplex.web.page.account.list.NewAccountPage;
+import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.pmease.gitplex.web.page.admin.AdministrationPage;
 import com.pmease.gitplex.web.page.admin.SystemSettingPage;
 import com.pmease.gitplex.web.page.base.BasePage;
 import com.pmease.gitplex.web.page.home.HomePage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
-import com.pmease.gitplex.web.page.repository.home.RepoHomePage;
 import com.pmease.gitplex.web.page.repository.list.RepoListPage;
+import com.pmease.gitplex.web.page.repository.overview.RepoOverviewPage;
 
 @SuppressWarnings("serial")
-public abstract class MaintabPage extends BasePage {
+public abstract class MainPage extends BasePage {
 
+	public MainPage() {
+	}
+	
+	public MainPage(IModel<?> model) {
+		super(model);
+	}
+	
+	public MainPage(PageParameters params) {
+		super(params);
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
 		add(new BookmarkablePageLink<Void>("navHome", HomePage.class));
 
+		WebMarkupContainer accountLink;
 		if (this instanceof AccountPage) {
 			AccountPage accountPage = (AccountPage) this;
-			add(new BookmarkablePageLink<Void>("navAccount", AccountHomePage.class, 
-					AccountPage.paramsOf(accountPage.getAccount())));
+			accountLink = new BookmarkablePageLink<Void>("navAccount", 
+					AccountOverviewPage.class, 
+					AccountPage.paramsOf(accountPage.getAccount()));
+			accountLink.add(new Label("name", accountPage.getAccount().getName()));
 		} else {
-			add(new WebMarkupContainer("navAccount").setVisible(false));
+			accountLink = new WebMarkupContainer("navAccount");
+			accountLink.add(new Label("name"));
+			accountLink.setVisible(false);
 		}
-		
+		add(accountLink);
+
+		WebMarkupContainer repoLink;
 		if (this instanceof RepositoryPage) {
 			RepositoryPage repoPage = (RepositoryPage) this;
-			add(new BookmarkablePageLink<Void>("navRepo", RepoHomePage.class, 
-					RepositoryPage.paramsOf(repoPage.getRepository())));
+			repoLink = new BookmarkablePageLink<Void>("navRepo", 
+					RepoOverviewPage.class, 
+					RepositoryPage.paramsOf(repoPage.getRepository()));
+			repoLink.add(new Label("name", repoPage.getRepository().getName()));
 		} else {
-			add(new WebMarkupContainer("navRepo").setVisible(false));
+			repoLink = new WebMarkupContainer("navRepo");
+			repoLink.add(new Label("name"));
+			repoLink.setVisible(false);
 		}
+		add(repoLink);
 		
 		add(new Tabbable("mainTabs", newMainTabs()));
 		add(newMainActions("mainActions"));
@@ -61,11 +84,7 @@ public abstract class MaintabPage extends BasePage {
 		List<PageTab> tabs = new ArrayList<>();
 		tabs.add(new PageTab(Model.of("Home"), HomePage.class));
 		
-		List<Class<? extends Page>> accountPages = new ArrayList<>();
-		accountPages.add(AccountEditPage.class);
-		accountPages.add(AvatarEditPage.class);
-		accountPages.add(PasswordEditPage.class); 
-		tabs.add(new PageTab(Model.of("Accounts"), AccountListPage.class, accountPages));
+		tabs.add(new PageTab(Model.of("Accounts"), AccountListPage.class, NewAccountPage.class));
 		
 		tabs.add(new PageTab(Model.of("Repositories"), RepoListPage.class));
 		tabs.add(new PageTab(Model.of("Administration"), SystemSettingPage.class, AdministrationPage.class));
@@ -92,7 +111,7 @@ public abstract class MaintabPage extends BasePage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(CssHeaderItem.forReference(new CssResourceReference(MaintabPage.class, "layout.css")));
+		response.render(CssHeaderItem.forReference(new CssResourceReference(MainPage.class, "main.css")));
 	}
 	
 }
