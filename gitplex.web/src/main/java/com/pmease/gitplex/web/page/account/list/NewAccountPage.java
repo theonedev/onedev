@@ -1,7 +1,6 @@
 package com.pmease.gitplex.web.page.account.list;
 
-import java.io.Serializable;
-
+import org.apache.wicket.Session;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
@@ -9,14 +8,14 @@ import org.apache.wicket.markup.html.form.SubmitLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.web.page.account.setting.PasswordBean;
+import com.pmease.gitplex.web.page.account.AccountPage;
+import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.main.MainPage;
 
 @SuppressWarnings("serial")
@@ -33,7 +32,6 @@ public class NewAccountPage extends MainPage {
 		super.onInitialize();
 		
 		final BeanEditor<?> editor = BeanContext.editBean("editor", account);
-		final AllowLoginBean allowLoginBean = new AllowLoginBean();
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -62,16 +60,14 @@ public class NewAccountPage extends MainPage {
 				}
 				
 				if (!hasError) {
-					if (allowLoginBean.getPasswordBean() != null)
-						account.setPassword(allowLoginBean.getPasswordBean().getPassword());
 					userManager.save(account);
-					continueToOriginalDestination();
+					Session.get().info("New account created");
+					setResponsePage(AvatarEditPage.class, AccountPage.paramsOf(account));
 				}
 			}
 			
 		};
 		form.add(editor);
-		form.add(BeanContext.editBean("passwordEditor", allowLoginBean));
 		
 		form.add(new SubmitLink("save"));
 		form.add(new Link<Void>("cancel") {
@@ -91,19 +87,4 @@ public class NewAccountPage extends MainPage {
 		response.render(CssHeaderItem.forReference(new CssResourceReference(NewAccountPage.class, "account-list.css")));
 	}
 
-	@Editable
-	public static class AllowLoginBean implements Serializable {
-		
-		private PasswordBean passwordBean = new PasswordBean();
-
-		@Editable(name="Allow this Account to Login")
-		public PasswordBean getPasswordBean() {
-			return passwordBean;
-		}
-
-		public void setPasswordBean(PasswordBean passwordBean) {
-			this.passwordBean = passwordBean;
-		}
-		
-	}
 }

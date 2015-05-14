@@ -1,11 +1,17 @@
 package com.pmease.gitplex.web.page.account.setting;
 
+import java.io.Serializable;
+
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.NotEmpty;
 
+import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.editable.annotation.Password;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
@@ -62,4 +68,25 @@ public class PasswordEditPage extends AccountSettingPage {
 		});
 	}
 	
+	@Editable
+	public static class PasswordBean implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+
+		private String password;
+		
+		@Editable
+		@Password(confirmative=true)
+		@NotEmpty
+		@Length(min=5)
+		public String getPassword() {
+			return password;
+		}
+
+		public void setPassword(String password) {
+			this.password = password;
+		}
+		
+	}
+
 }
