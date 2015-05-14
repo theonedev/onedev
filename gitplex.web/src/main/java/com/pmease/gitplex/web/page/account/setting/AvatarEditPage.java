@@ -8,6 +8,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.component.avatar.AvatarPicker;
@@ -26,6 +27,7 @@ public class AvatarEditPage extends AccountSettingPage {
 		super.onInitialize();
 	
 		sidebar.add(new Label("title", "Change Avatar of " + getAccount().getDisplayName()));
+		sidebar.add(new FeedbackPanel("feedback"));
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -41,7 +43,7 @@ public class AvatarEditPage extends AccountSettingPage {
 		};
 		sidebar.add(form);
 		
-		form.add(new AvatarPicker("avatarPicker", getAccount(), new IModel<FileUpload>() {
+		form.add(new AvatarPicker("avatarPicker", accountModel, new IModel<FileUpload>() {
 
 			@Override
 			public void detach() {
