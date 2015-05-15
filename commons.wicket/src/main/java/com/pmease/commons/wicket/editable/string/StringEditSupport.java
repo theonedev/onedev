@@ -6,7 +6,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.commons.editable.PropertyDescriptor;
-import com.pmease.commons.editable.PropertyDescriptorImpl;
+import com.pmease.commons.editable.DefaultPropertyDescriptor;
 import com.pmease.commons.editable.annotation.Markdown;
 import com.pmease.commons.editable.annotation.Multiline;
 import com.pmease.commons.editable.annotation.Password;
@@ -29,7 +29,7 @@ public class StringEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getPropertyEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptorImpl(beanClass, propertyName);
+		PropertyDescriptor propertyDescriptor = new DefaultPropertyDescriptor(beanClass, propertyName);
 
 		Class<?> propertyClass = propertyDescriptor.getPropertyGetter().getReturnType();
 		if (propertyClass == String.class && propertyDescriptor.getPropertyGetter().getAnnotation(Password.class) == null) {

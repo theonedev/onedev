@@ -7,12 +7,12 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.commons.editable.BeanDescriptor;
-import com.pmease.commons.editable.BeanDescriptorImpl;
+import com.pmease.commons.editable.DefaultBeanDescriptor;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.ClassUtils;
 
 @SuppressWarnings("serial")
-public abstract class BeanContext<T> extends BeanDescriptorImpl {
+public abstract class BeanContext<T> extends DefaultBeanDescriptor {
 	
 	public BeanContext(Class<?> beanClass) {
 		super(beanClass);

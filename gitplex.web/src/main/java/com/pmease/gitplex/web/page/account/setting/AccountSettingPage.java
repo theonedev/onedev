@@ -31,8 +31,8 @@ public class AccountSettingPage extends AccountPage {
 		
 		List<PageTab> tabs = new ArrayList<>();
 		tabs.add(new AccountSettingTab("Profile", "fa fa-pencil", ProfileEditPage.class));
-		tabs.add(new AccountSettingTab("Avatar", "fa fa-user", AvatarEditPage.class));
 		tabs.add(new AccountSettingTab("Password", "fa fa-key", PasswordEditPage.class));
+		tabs.add(new AccountSettingTab("Avatar", "fa fa-user", AvatarEditPage.class));
 		
 		add(sidebar = new SidebarBorder("sidebar", tabs));
 	}

@@ -1,7 +1,6 @@
 package com.pmease.gitplex.web;
 
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
 import org.apache.wicket.request.Request;
@@ -29,35 +28,6 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 		return Optional.fromNullable(GitPlex.getInstance(UserManager.class).getCurrent());
 	}
 	
-	/**
-	 * Peform the actual authentication using Shiro's {@link Subject#login
-	 * login()}.
-	 * <p>
-	 * <b>Important:</b> this method is written to ensure that the user's
-	 * session is replaced with a new session before authentication is
-	 * performed. This is to prevent a <a
-	 * href="https://www.owasp.org/index.php/Session_Fixation">session
-	 * fixation</a> attack. As a side effect, any existing session data will
-	 * therefore be lost.
-	 * 
-	 * @return {@code true} if authentication succeeded
-	 */
-	public void login(String loginName, String password, boolean remember)
-			throws AuthenticationException {
-		
-		Subject currentUser = SecurityUtils.getSubject();
-
-		// Force a new session to prevent fixation attack.
-		// We have to invalidate via both Shiro and Wicket; otherwise it doesn't
-		// work.
-		currentUser.getSession().stop(); // Shiro
-		replaceSession(); // Wicket
-
-		UsernamePasswordToken token;
-		token = new UsernamePasswordToken(loginName, password, remember);
-		currentUser.login(token);
-	}
-
 	public boolean isDisplayOutline() {
 		return displayOutline;
 	}
@@ -66,4 +36,26 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 		this.displayOutline = displayOutline;
 	}
 
+	public void runAs(User user) {
+		Subject subject = SecurityUtils.getSubject();
+		subject.getSession().stop();
+		WebSession.get().replaceSession(); 
+		
+		subject.runAs(user.getPrincipals());
+	}
+	
+	public void login(String userName, String password, boolean rememberMe) {
+		Subject subject = SecurityUtils.getSubject();
+
+		// Force a new session to prevent fixation attack.
+		// We have to invalidate via both Shiro and Wicket; otherwise it doesn't
+		// work.
+		subject.getSession().stop();
+		WebSession.get().replaceSession(); 
+
+		UsernamePasswordToken token;
+		token = new UsernamePasswordToken(userName, password, rememberMe);
+		
+		subject.login(token);
+	}
 }

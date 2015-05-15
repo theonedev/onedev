@@ -12,7 +12,7 @@ import org.eclipse.jgit.util.StringUtils;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyDescriptor;
-import com.pmease.commons.editable.PropertyDescriptorImpl;
+import com.pmease.commons.editable.DefaultPropertyDescriptor;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.EditSupport;
@@ -34,7 +34,7 @@ public class BranchEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getPropertyEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptorImpl(beanClass, propertyName);
+		PropertyDescriptor propertyDescriptor = new DefaultPropertyDescriptor(beanClass, propertyName);
 		Method propertyGetter = propertyDescriptor.getPropertyGetter();
         if (propertyGetter.getAnnotation(BranchChoice.class) != null) {
         	if (List.class.isAssignableFrom(propertyGetter.getReturnType()) 

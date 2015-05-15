@@ -38,6 +38,10 @@ import com.pmease.gitplex.web.page.repository.pullrequest.OpenRequestsPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestComparePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestOverviewPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestUpdatesPage;
+import com.pmease.gitplex.web.page.security.ForgetPage;
+import com.pmease.gitplex.web.page.security.LoginPage;
+import com.pmease.gitplex.web.page.security.LogoutPage;
+import com.pmease.gitplex.web.page.security.RegisterPage;
 import com.pmease.gitplex.web.page.test.RunModePage;
 import com.pmease.gitplex.web.page.test.TestPage;
 
@@ -49,6 +53,11 @@ public class RootMapper extends CompoundRequestMapper {
 		addRepoPages();
 		
 		addPage("init", ServerInitPage.class);
+		addPage("login", LoginPage.class);
+		addPage("logout", LogoutPage.class);
+		addPage("register", RegisterPage.class);
+		addPage("forget", ForgetPage.class);
+		
 		addPage("/test", TestPage.class);
 		addPage("run-mode", RunModePage.class);
 	}

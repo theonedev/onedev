@@ -1,18 +1,18 @@
 package com.pmease.gitplex.web.page.account.setting;
 
 import java.io.Serializable;
+import java.util.Iterator;
 
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.NotEmpty;
 
-import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.editable.annotation.Password;
-import com.pmease.commons.wicket.editable.BeanContext;
+import com.pmease.commons.editable.DefaultBeanDescriptor;
+import com.pmease.commons.editable.PropertyDescriptor;
+import com.pmease.commons.wicket.editable.reflection.ReflectionBeanEditor;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
@@ -32,25 +32,38 @@ public class PasswordEditPage extends AccountSettingPage {
 		
 		sidebar.add(new Label("title", "Change Password of " + account.getDisplayName()));
 		
-		final PasswordBean bean = new PasswordBean();
-		
 		Form<?> form = new Form<Void>("form") {
 
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
 
-				User account = getAccount();
-				account.setPassword(bean.getPassword());
-				GitPlex.getInstance(UserManager.class).save(account);
-				Session.get().info("Password has been updated");
+				GitPlex.getInstance(UserManager.class).save(getAccount());
+				Session.get().success("Password has been changed");
 				backToPrevPage();
 			}
 			
 		};
 		sidebar.add(form);
 		
-		form.add(BeanContext.editBean("editor", bean));
+		final PasswordDescriptor descriptor = new PasswordDescriptor();
+		form.add(new ReflectionBeanEditor("editor", descriptor, new IModel<Serializable>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public Serializable getObject() {
+				return getAccount();
+			}
+
+			@Override
+			public void setObject(Serializable object) {
+				descriptor.copyProperties(object, getAccount());
+			}
+			
+		}));
 		
 		form.add(new Link<Void>("cancel") {
 
@@ -67,26 +80,18 @@ public class PasswordEditPage extends AccountSettingPage {
 			
 		});
 	}
-	
-	@Editable
-	public static class PasswordBean implements Serializable {
 
-		private static final long serialVersionUID = 1L;
+	private static class PasswordDescriptor extends DefaultBeanDescriptor {
 
-		private String password;
-		
-		@Editable
-		@Password(confirmative=true)
-		@NotEmpty
-		@Length(min=5)
-		public String getPassword() {
-			return password;
-		}
-
-		public void setPassword(String password) {
-			this.password = password;
+		public PasswordDescriptor() {
+			super(User.class);
+			
+			for (Iterator<PropertyDescriptor> it = propertyDescriptors.iterator(); it.hasNext();) {
+				if (!it.next().getPropertyName().equals("password"))
+					it.remove();
+			}
 		}
 		
 	}
-
+	
 }

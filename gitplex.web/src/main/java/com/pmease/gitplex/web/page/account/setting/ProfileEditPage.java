@@ -1,15 +1,21 @@
 package com.pmease.gitplex.web.page.account.setting;
 
+import java.io.Serializable;
+import java.util.Iterator;
+
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.SubmitLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.commons.wicket.editable.BeanContext;
+import com.pmease.commons.editable.DefaultBeanDescriptor;
+import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.PathSegment;
+import com.pmease.commons.wicket.editable.reflection.ReflectionBeanEditor;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
@@ -26,11 +32,26 @@ public class ProfileEditPage extends AccountSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		sidebar.add(new Label("title", "Edit Profile of " + getAccount().getDisplayName()));
+		sidebar.add(new Label("title", "Profile of " + getAccount().getDisplayName()));
 		
-		final User account = getAccount();
-		
-		final BeanEditor<?> editor = BeanContext.editBean("editor", account);
+		final ProfileDescriptor profileDesciptor = new ProfileDescriptor();
+		final BeanEditor<?> editor = new ReflectionBeanEditor("editor", profileDesciptor, new IModel<Serializable>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public Serializable getObject() {
+				return getAccount();
+			}
+
+			@Override
+			public void setObject(Serializable object) {
+				profileDesciptor.copyProperties(object, getAccount());
+			}
+			
+		});
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -43,6 +64,7 @@ public class ProfileEditPage extends AccountSettingPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
+				User account = getAccount();
 				UserManager userManager = GitPlex.getInstance(UserManager.class);
 				User accountWithSameEmail = userManager.findByEmail(account.getEmail());
 				User accountWithSameName = userManager.findByName(account.getName());
@@ -59,10 +81,9 @@ public class ProfileEditPage extends AccountSettingPage {
 				}
 				
 				if (!hasError) {
-					editor.getBeanDescriptor().copyProperties(account, getAccount());
-					userManager.save(getAccount());
-					Session.get().info("Profile has been updated");
-					setResponsePage(ProfileEditPage.class, AccountPage.paramsOf(getAccount()));
+					userManager.save(account);
+					Session.get().success("Profile has been updated");
+					setResponsePage(ProfileEditPage.class, AccountPage.paramsOf(account));
 					backToPrevPage();
 				}
 			}
@@ -88,4 +109,16 @@ public class ProfileEditPage extends AccountSettingPage {
 		sidebar.add(form);
 	}
 
+	private static class ProfileDescriptor extends DefaultBeanDescriptor {
+
+		public ProfileDescriptor() {
+			super(User.class);
+			
+			for (Iterator<PropertyDescriptor> it = propertyDescriptors.iterator(); it.hasNext();) {
+				if (it.next().getPropertyName().equals("password"))
+					it.remove();
+			}
+		}
+		
+	}
 }

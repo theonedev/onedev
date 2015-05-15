@@ -89,6 +89,12 @@ public class AccountListPage extends MainPage {
 		add(new Link<Void>("addNew") {
 
 			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.getSubject().isPermitted(Permission.ofSystemAdmin()));
+			}
+
+			@Override
 			public void onClick() {
 				setResponsePage(new NewAccountPage(new User()));
 			}

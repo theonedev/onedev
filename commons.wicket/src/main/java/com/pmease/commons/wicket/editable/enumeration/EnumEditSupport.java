@@ -5,7 +5,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.editable.PropertyDescriptor;
-import com.pmease.commons.editable.PropertyDescriptorImpl;
+import com.pmease.commons.editable.DefaultPropertyDescriptor;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.commons.wicket.editable.NotDefinedLabel;
@@ -23,7 +23,7 @@ public class EnumEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getPropertyEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptorImpl(beanClass, propertyName);
+		PropertyDescriptor propertyDescriptor = new DefaultPropertyDescriptor(beanClass, propertyName);
 		
         if (Enum.class.isAssignableFrom(propertyDescriptor.getPropertyClass())) {
             return new PropertyContext<Enum<?>>(propertyDescriptor) {

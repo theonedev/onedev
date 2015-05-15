@@ -8,13 +8,13 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.BeanUtils;
 
 @SuppressWarnings("serial")
-public class BeanDescriptorImpl implements BeanDescriptor {
+public class DefaultBeanDescriptor implements BeanDescriptor {
 
 	private final Class<?> beanClass;
 	
-	private final List<PropertyDescriptor> propertyDescriptors;
+	protected final List<PropertyDescriptor> propertyDescriptors;
 	
-	public BeanDescriptorImpl(Class<?> beanClass) {
+	public DefaultBeanDescriptor(Class<?> beanClass) {
 		this.beanClass = beanClass;
 		
 		propertyDescriptors = new ArrayList<>();
@@ -28,11 +28,11 @@ public class BeanDescriptorImpl implements BeanDescriptor {
 			Method propertySetter = BeanUtils.findSetter(propertyGetter);
 			if (propertySetter == null)
 				continue;
-			propertyDescriptors.add(new PropertyDescriptorImpl(propertyGetter, propertySetter));
+			propertyDescriptors.add(new DefaultPropertyDescriptor(propertyGetter, propertySetter));
 		}
 	}
 	
-	public BeanDescriptorImpl(BeanDescriptor beanDescriptor) {
+	public DefaultBeanDescriptor(BeanDescriptor beanDescriptor) {
 		this.beanClass = beanDescriptor.getBeanClass();
 		this.propertyDescriptors = beanDescriptor.getPropertyDescriptors();
 	}

@@ -11,12 +11,15 @@ package com.pmease.commons.wicket.component.wizard;
 import java.util.List;
 
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
@@ -41,7 +44,8 @@ public abstract class Wizard extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new Label("title", new AbstractReadOnlyModel<String>() {
+		final Form<?> form = new Form<Void>("form");
+		form.add(new Label("title", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -51,7 +55,6 @@ public abstract class Wizard extends Panel {
 			
 		}));
 		
-		final Form<?> form = new Form<Void>("form");
 		form.add(new FeedbackPanel("feedback", form));
 		form.add(getActiveStep().render(STEP_CONTENT_ID));
 		form.add(new Link<Void>("previous") {
@@ -143,6 +146,12 @@ public abstract class Wizard extends Panel {
 		add(form);
 	}
 	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new CssResourceReference(Wizard.class, "wizard.css")));
+	}
+
 	private WizardStep getActiveStep() {
 		return steps.get(activeStepIndex);
 	}

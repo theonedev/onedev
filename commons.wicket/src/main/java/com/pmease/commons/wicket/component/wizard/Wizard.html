@@ -1,17 +1,15 @@
 <wicket:panel>
-	<div class="wizard panel panel-default">
-		<div class="panel-heading"><div wicket:id="title" class="panel-title"></div></div>
-		<form wicket:id="form">
-			<div class="panel-body">
-				<div wicket:id="feedback"></div>
-				<div wicket:id="content"></div>
-			</div>
-			<div class="panel-footer">
-				<a wicket:id="previous" class="btn btn-default previous">Previous</a> &nbsp;
-				<a wicket:id="skip" class="btn btn-default skip">Skip</a> &nbsp;
-				<input type="submit" value="Next" wicket:id="next" class="btn btn-primary next"></input> &nbsp; 
-				<input type="submit" value="Finish" wicket:id="finish" class="btn btn-primary finish"></input>
-			</div>
-		</form>
-	</div>
+	<form wicket:id="form" class="wizard">
+		<div wicket:id="title" class="head"></div>
+		<div class="body">
+			<div wicket:id="feedback"></div>
+			<div wicket:id="content"></div>
+		</div>
+		<div class="foot">
+			<a wicket:id="previous" class="btn btn-default previous">Previous</a> &nbsp;
+			<a wicket:id="skip" class="btn btn-default skip">Skip</a> &nbsp;
+			<input type="submit" value="Next" wicket:id="next" class="btn btn-primary next"></input> &nbsp; 
+			<input type="submit" value="Finish" wicket:id="finish" class="btn btn-primary finish"></input>
+		</div>
+	</form>
 </wicket:panel>

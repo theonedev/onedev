@@ -1,0 +1,10 @@
+.wizard>.head {
+	font-size: 16px;
+	margin-bottom: 20px;
+}
+.wizard>.body {
+	margin-bottom: 20px;
+}
+.wizard span.disabled>em {
+	font-style: normal;
+}

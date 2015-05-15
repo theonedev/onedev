@@ -1,0 +1,30 @@
+#login h1 { 
+	font-size: 32px; 
+	margin: 0 0 30px; 
+	font-weight: 300; 
+}
+#login h1 .fa {
+	font-size: 32px;
+}
+#login .input-group-addon { 
+	font-size: 18px; 
+	color: #666; 
+}
+#login .username .input-group-addon { 
+	border-bottom-left-radius: 0; 
+}
+#login .username input.form-control { 
+	border-bottom-right-radius: 0; 
+}
+#login .password .input-group-addon { 
+	border-top-left-radius: 0; 
+}
+#login .password input.form-control { 
+	border-top-right-radius: 0; 
+}
+#login .row { 
+	margin-top: 18px; 
+}
+#login .btn { 
+	width: 100%;
+}

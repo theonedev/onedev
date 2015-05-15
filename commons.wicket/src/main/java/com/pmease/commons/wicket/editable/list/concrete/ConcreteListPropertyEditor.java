@@ -26,7 +26,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import com.pmease.commons.editable.BeanDescriptorImpl;
+import com.pmease.commons.editable.DefaultBeanDescriptor;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.util.ClassUtils;
@@ -52,7 +52,7 @@ public class ConcreteListPropertyEditor extends PropertyEditor<List<Serializable
 
 		propertyContexts = new ArrayList<>();
 		
-		for (PropertyDescriptor each: new BeanDescriptorImpl(elementClass).getPropertyDescriptors()) {
+		for (PropertyDescriptor each: new DefaultBeanDescriptor(elementClass).getPropertyDescriptors()) {
 			propertyContexts.add(PropertyContext.of(each));
 		}
 

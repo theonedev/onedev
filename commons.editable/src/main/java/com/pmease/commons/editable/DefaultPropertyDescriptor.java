@@ -10,7 +10,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.pmease.commons.util.BeanUtils;
 
 @SuppressWarnings("serial")
-public class PropertyDescriptorImpl implements PropertyDescriptor {
+public class DefaultPropertyDescriptor implements PropertyDescriptor {
 
 	private final Class<?> beanClass;
 	
@@ -20,25 +20,25 @@ public class PropertyDescriptorImpl implements PropertyDescriptor {
 	
 	private transient Method propertySetter;
 	
-	public PropertyDescriptorImpl(Class<?> beanClass, String propertyName) {
+	public DefaultPropertyDescriptor(Class<?> beanClass, String propertyName) {
 		this.beanClass = beanClass;
 		this.propertyName = propertyName;
 	}
 	
-	public PropertyDescriptorImpl(Method propertyGetter) {
+	public DefaultPropertyDescriptor(Method propertyGetter) {
 		this.beanClass = propertyGetter.getDeclaringClass();
 		this.propertyName = BeanUtils.getPropertyName(propertyGetter);
 		this.propertyGetter = propertyGetter;
 	}
 	
-	public PropertyDescriptorImpl(Method propertyGetter, Method propertySetter) {
+	public DefaultPropertyDescriptor(Method propertyGetter, Method propertySetter) {
 		this.beanClass = propertyGetter.getDeclaringClass();
 		this.propertyName = BeanUtils.getPropertyName(propertyGetter);
 		this.propertyGetter = propertyGetter;
 		this.propertySetter = propertySetter;
 	}
 
-	public PropertyDescriptorImpl(PropertyDescriptor propertyDescriptor) {
+	public DefaultPropertyDescriptor(PropertyDescriptor propertyDescriptor) {
 		this.beanClass = propertyDescriptor.getBeanClass();
 		this.propertyName = propertyDescriptor.getPropertyName();
 		this.propertyGetter = propertyDescriptor.getPropertyGetter();

@@ -1,0 +1,9 @@
+a.user-link {
+	text-decoration: none;
+}
+a.user-link>span:hover {
+	text-decoration: underline;
+}
+a.user-link>img+span {
+	margin-left: 4px;
+}

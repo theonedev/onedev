@@ -8,11 +8,11 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.commons.editable.PropertyDescriptor;
-import com.pmease.commons.editable.PropertyDescriptorImpl;
+import com.pmease.commons.editable.DefaultPropertyDescriptor;
 import com.pmease.commons.loader.AppLoader;
 
 @SuppressWarnings("serial")
-public abstract class PropertyContext<T> extends PropertyDescriptorImpl {
+public abstract class PropertyContext<T> extends DefaultPropertyDescriptor {
 
 	public PropertyContext(Class<?> beanClass, String propertyName) {
 		super(beanClass, propertyName);

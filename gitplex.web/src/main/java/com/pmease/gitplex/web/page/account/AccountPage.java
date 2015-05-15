@@ -16,6 +16,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.model.UserModel;
+import com.pmease.gitplex.web.page.account.notification.AccountNotificationPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.account.setting.PasswordEditPage;
@@ -57,6 +58,7 @@ public abstract class AccountPage extends MainPage {
 	protected List<PageTab> newMainTabs() {
 		List<PageTab> mainTabs = new ArrayList<>();
 		mainTabs.add(new AccountTab(Model.of("Overview"), AccountOverviewPage.class));
+		mainTabs.add(new AccountTab(Model.of("Notifications"), AccountNotificationPage.class));
 		mainTabs.add(new AccountTab(Model.of("Setting"), ProfileEditPage.class, 
 				AvatarEditPage.class, PasswordEditPage.class));
 		return mainTabs;

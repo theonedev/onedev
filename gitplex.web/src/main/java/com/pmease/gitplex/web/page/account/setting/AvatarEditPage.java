@@ -26,8 +26,7 @@ public class AvatarEditPage extends AccountSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 	
-		sidebar.add(new Label("title", "Change Avatar of " + getAccount().getDisplayName()));
-		sidebar.add(new FeedbackPanel("feedback"));
+		sidebar.add(new Label("title", "Avatar of " + getAccount().getDisplayName()));
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -36,12 +35,13 @@ public class AvatarEditPage extends AccountSettingPage {
 				super.onSubmit();
 				
 				GitPlex.getInstance(AvatarManager.class).useAvatar(getAccount(), upload);
-				Session.get().info("Avatar has been updated");
+				Session.get().success("Avatar has been changed");
 				backToPrevPage();
 			}
 			
 		};
 		sidebar.add(form);
+		sidebar.add(new FeedbackPanel("feedback", form));
 		
 		form.add(new AvatarPicker("avatarPicker", accountModel, new IModel<FileUpload>() {
 

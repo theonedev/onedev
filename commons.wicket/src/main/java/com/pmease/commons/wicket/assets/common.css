@@ -13,9 +13,36 @@
 .tooltip .tooltip-inner dl {margin-bottom: 0;}
 
 /* FEEDBACK */
-#session-feedback {position:absolute; background:#FFFFDE; max-width:75%;
-	border:1px solid #9C9E9C; border-top:none; padding: 6px; z-index:10000; 
-	border-radius:0 0 4px 4px; display: none;}
+#session-feedback {
+	position:absolute; 
+	max-width:75%;
+	padding: 6px 12px; 
+	z-index:10000; 
+	border-radius:0 0 4px 4px; 
+	border: 1px solid;
+	border-top: none;
+	display: none;
+}
+#session-feedback.success {
+	background: #DFF0D8;
+	color: #3C763D;
+	border-color: #D6E9C6;
+}
+#session-feedback.error {
+	background: #F2DEDE;
+	color: #A94442;
+	border-color: #EBCCD1;
+}
+#session-feedback.warning {
+	background: #FCF8E3;
+	color: #8A6D3B;
+	border-color: #FAEBCC;
+}
+#session-feedback.info {
+	background: #D9EDF7;
+	color: #31708F;
+	border-color: #BCE8F1;
+}
 #session-feedback ul {padding: 0; margin: 0;}
 #session-feedback li {list-style: none;}
 form>.test-feedback {margin-top: 16px;}
@@ -126,11 +153,6 @@ a.wicket_orderDown:AFTER { content: "\f063"; }
 /* Tabs */
 .tabbable>.tab-content {padding-top: 16px;}
 
-/* Wizard */
-.wizard {text-align: left;}
-.wizard .panel-heading {font-size: 16px;}
-.wizard .panel-body {padding: 24px;}
-
 /* Editor and Viewer */
 .editable table.list {margin-bottom: 0;}
 .editable table.list>tbody>tr>td, .editable table.list>tfoot>tr>td {
@@ -186,19 +208,43 @@ a.wicket_orderDown:AFTER { content: "\f063"; }
 	border-radius: 0 4px 4px 0;}
 	
 /* Ajax Loading Indicator */
-#ajax-loading-indicator {position: absolute; top: 0;
-	left: 50%; display:none;}
-#ajax-loading-indicator>div {position:relative; left:-50%;	
-	top:0; background:#FFFFDE; text-align:center; width:80px;
-	border:1px solid #9C9E9C; border-top:none; padding:6px 6px 6px 10px; 
-	z-index:10000; border-radius:0 0 4px 4px; box-shadow:2px 2px 5px #888;}	
+#ajax-loading-indicator {
+	position: absolute; 
+	top: 0;
+	left: 50%; 
+	display:none;
+}
+#ajax-loading-indicator>div {
+	position:relative; 
+	left:-50%;	
+	top:0; 
+	text-align:center; 
+	width:80px;
+	background: #FCF8E3;
+	color: #8A6D3B;
+	border: 1px solid #FAEBCC;
+	border-top:none; 
+	padding:6px 6px 6px 10px; 
+	z-index:10000; 
+	border-radius:0 0 4px 4px;
+}	
 
 /* Ajax Loading Overlay */
-#ajax-loading-overlay {z-index:1; display: none;}
-#ajax-loading-overlay>div {bottom: 0; left: 0; position: fixed;
-    right: 0; top: 0; z-index: 1000000; filter:alpha(opacity=0); /* Only applies to IE */
+#ajax-loading-overlay {
+	z-index:1; 
+	display: none;
+}
+#ajax-loading-overlay>div {
+	bottom: 0; 
+	left: 0; 
+	position: fixed;
+    right: 0; 
+    top: 0; 
+    z-index: 1000000; 
+    filter:alpha(opacity=0); /* Only applies to IE */
     background: white; /* This will be overwritten by browsers that support rgba */
-    background: rgba(255,255,255,0.0); /* IE ignores this since it's not supported */}
+    background: rgba(255,255,255,0.0); /* IE ignores this since it's not supported */
+}
     
 /* ICONS */
 span.add.icon {padding: 12px; background: url("add.png") no-repeat 50% 50%;}

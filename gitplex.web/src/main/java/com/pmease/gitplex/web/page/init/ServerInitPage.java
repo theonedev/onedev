@@ -35,7 +35,7 @@ public class ServerInitPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new Label("message", initStage.getMessage()));
+		add(new Label("title", initStage.getMessage()));
 		
 		if (!initStage.getManualConfigs().isEmpty()) {
 			List<ManualConfigStep> configSteps = new ArrayList<ManualConfigStep>();

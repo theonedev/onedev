@@ -10,7 +10,7 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyDescriptor;
-import com.pmease.commons.editable.PropertyDescriptorImpl;
+import com.pmease.commons.editable.DefaultPropertyDescriptor;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.commons.wicket.editable.NotDefinedLabel;
@@ -29,7 +29,7 @@ public class DirectoryEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getPropertyEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptorImpl(beanClass, propertyName);
+		PropertyDescriptor propertyDescriptor = new DefaultPropertyDescriptor(beanClass, propertyName);
         Method propertyGetter = propertyDescriptor.getPropertyGetter();
         if (propertyGetter.getAnnotation(DirectoryChoice.class) != null) {
         	if (List.class.isAssignableFrom(propertyGetter.getReturnType()) 

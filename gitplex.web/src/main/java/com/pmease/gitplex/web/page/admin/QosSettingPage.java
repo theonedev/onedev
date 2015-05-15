@@ -1,10 +1,7 @@
 package com.pmease.gitplex.web.page.admin;
 
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.markup.html.form.Form;
 
-import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.ConfigManager;
@@ -21,29 +18,25 @@ public class QosSettingPage extends AdministrationPage {
 		
 		final QosSetting qosSetting = GitPlex.getInstance(ConfigManager.class).getQosSetting();
 
-		Form<?> form = new Form<Void>("form"); 
-		form.setOutputMarkupId(true);
-		form.add(BeanContext.editBean("editor", qosSetting));
-		form.add(new FeedbackPanel("feedback", form));
-		form.add(new AjaxSubmitLink("update") {
+		Form<?> form = new Form<Void>("form") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit() {
+				super.onSubmit();
 
 				GitPlex.getInstance(ConfigManager.class).saveQosSetting(qosSetting);
-				success("QoS settings has been updated");
-				
-				target.add(form);
+				getSession().success("QoS settings has been updated");
 			}
-			
+
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				error("Fix errors below");
-				target.add(form);
+			protected void onError() {
+				super.onError();
+				getSession().error("Fix errors below");
 			}
 			
-		});
+		};
+		form.setOutputMarkupId(true);
+		form.add(BeanContext.editBean("editor", qosSetting));
 		
 		sidebar.add(form);
 	}

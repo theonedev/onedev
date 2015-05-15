@@ -1,13 +1,27 @@
 html, body {
-	background: #f0f2f4; 
+	background: #333;
 }
 
+.center-box { 
+	padding: 50px; 
+	width: 600px; 
+	margin: 0 auto; 
+	background: white;
+	margin-top: 100px;
+	border-radius: 4px;
+}
+
+/* COMMON STYLES */
 a {
 	cursor: pointer;
 }
 a.fa {
 	text-decoration: none; 
 	color: #666;
+}
+table.table>thead>tr>th>a {
+	color: black;
+	text-decoration: underline;
 }
 
 textarea {

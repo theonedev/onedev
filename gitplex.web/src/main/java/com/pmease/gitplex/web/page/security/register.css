@@ -1,0 +1,8 @@
+#register h1 { 
+	font-size: 32px; 
+	margin: 0 0 30px; 
+	font-weight: 300; 
+}
+#register h1 .fa {
+	font-size: 32px;
+}

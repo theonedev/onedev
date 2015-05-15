@@ -3,13 +3,13 @@ package com.pmease.gitplex.web.page.admin;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.SubmitLink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 import com.pmease.commons.wicket.behavior.testform.TestFormBehavior;
 import com.pmease.commons.wicket.behavior.testform.TestResult;
-import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.ConfigManager;
@@ -35,27 +35,34 @@ public class MailSettingPage extends AdministrationPage {
 		if (mailSetting == null)
 			mailSetting = new MailSetting();
 
-		Form<?> form = new Form<Void>("form"); 
-		form.setOutputMarkupId(true);
-		form.add(BeanContext.editBean("editor", mailSetting));
-		form.add(new FeedbackPanel("feedback", form));
-		form.add(new AjaxSubmitLink("update") {
+		Form<?> form = new Form<Void>("form") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+			protected void onSubmit() {
+				super.onSubmit();
+
 				GitPlex.getInstance(ConfigManager.class).saveMailSetting(mailSetting);
-				success("Mail setting has been updated");
-				target.add(form);
 			}
 
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				error("Fix errors below");
-				target.add(form);
+			protected void onError() {
+				super.onError();
+				getSession().error("Fix errors below");
+			}
+			
+		};
+		form.setOutputMarkupId(true);
+		form.add(BeanContext.editBean("editor", mailSetting));
+				
+		form.add(new SubmitLink("update") {
+
+			@Override
+			public void onSubmit() {
+				super.onSubmit();
+				getSession().success("Mail setting has been updated");
 			}
 			
 		});
-				
 		form.add(new AjaxSubmitLink("test") {
 
 			private TestFormBehavior testBehavior;
@@ -88,12 +95,13 @@ public class MailSettingPage extends AdministrationPage {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
+				target.add(form);
+				target.focusComponent(null);
 				testBehavior.requestTest(target);
 			}
 
 			@Override
 			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				form.error("Fix errors below");
 				target.add(form);
 			}
 

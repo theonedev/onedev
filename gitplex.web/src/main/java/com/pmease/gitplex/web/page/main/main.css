@@ -1,3 +1,6 @@
+html, body {
+	background: #f0f2f4; 
+}
 #main>.head {
 	padding: 16px;
 	background: #333;
@@ -7,16 +10,40 @@
 	font-size: 18px; 
 	margin-right: 8px;
 }
-
-#account-info a, #account-info span {
-	color: white; 
+#topnav>a.home {
+	text-decoration: none;
 }
-#account-info span {
-	color: white; 
+#topnav>a.home span:hover {
+	text-decoration: underline;
 }
-
 #topnav>.home .fa {
 	font-size: 24px;
+}
+
+#toptray a, #toptray span {
+	color: white; 
+}
+#toptray span {
+	color: white; 
+}
+#toptray a.sign-out .fa {
+	font-size: 20px;
+	vertical-align: middle;
+}
+#toptray>a, #toptray>span {
+	margin-right: 8px;
+} 
+#toptray>:last-child {
+	margin-right: 0;
+} 
+#toptray .user-link .avatar {
+	width: 32px;
+	height: 32px;
+	margin: -4px 0;
+	vertical-align: bottom;
+}
+#toptray .user-link span {
+	font-size: 16px;
 }
 
 #main>.body>.head {

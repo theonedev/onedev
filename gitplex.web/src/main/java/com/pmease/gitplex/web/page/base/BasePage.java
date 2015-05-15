@@ -7,7 +7,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
@@ -17,7 +16,9 @@ import com.pmease.commons.wicket.CommonPage;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.web.exception.AccessDeniedException;
 import com.pmease.gitplex.web.page.init.ServerInitPage;
+import com.pmease.gitplex.web.page.security.LoginPage;
 
 @SuppressWarnings("serial")
 public abstract class BasePage extends CommonPage {
@@ -26,10 +27,6 @@ public abstract class BasePage extends CommonPage {
 		checkReady();
 	}
 
-	public BasePage(IModel<?> model) {
-		super(model);
-	}
-	
 	public BasePage(PageParameters params) {
 		super(params);
 		checkReady();
@@ -52,6 +49,13 @@ public abstract class BasePage extends CommonPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		if (!isPermitted()) {
+			if (getCurrentUser() != null) 
+				throw new AccessDeniedException("Access denied");
+			else 
+				throw new RestartResponseAtInterceptPageException(LoginPage.class);
+		}
+		
 		add(new Label("pageTitle", getPageTitle()));
 
 		add(new WebMarkupContainer("pageRefresh") {

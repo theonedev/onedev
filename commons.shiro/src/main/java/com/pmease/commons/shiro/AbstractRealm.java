@@ -95,15 +95,4 @@ public abstract class AbstractRealm extends AuthorizingRealm {
 	 */
 	protected abstract @Nullable AbstractUser getUserByName(String userName);
 
-	@Override
-	protected void assertCredentialsMatch(AuthenticationToken token, AuthenticationInfo info) throws AuthenticationException {
-		/*
-		 * A null value of credentials in AuthenticationInfo means that we should not check credentials. Typically 
-		 * this is set to null when the token has already been authenticated at the time generating the 
-		 * AuthenticationInfo, for instance, when submitting the token to third party system for authentication. 
-		 */
-		if (info.getCredentials() != null)
-			super.assertCredentialsMatch(token, info);
-	}
-
 }

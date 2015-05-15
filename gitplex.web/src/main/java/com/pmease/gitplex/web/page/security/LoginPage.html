@@ -1,2 +1,31 @@
 <wicket:extend>
+	<div id="login" class="center-box">
+		<h1><i class="fa fa-ext fa-gitplex-logo"></i> GitPlex Login</h1>
+		<div wicket:id="feedback"></div>
+		<form wicket:id="form" method="post">
+			<div class="input-group username">
+				<span class="input-group-addon"><i class="fa fa-user fa-fw"></i></span>
+				<input wicket:id="userName" type="text" class="form-control input-lg focusable" placeholder="User name" />
+			</div>
+			<div class="input-group password">
+				<span class="input-group-addon"><i class="fa fa-key fa-fw"></i></span>
+				<input wicket:id="password" type="password" class="form-control input-lg" placeholder="Password" />
+			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="checkbox">
+						<label><input wicket:id="rememberMe" type="checkbox"> Remember me on this computer</label>
+					</div>				
+				</div>
+				<div class="col-sm-6">
+					<button class="btn btn-primary dirty-aware" type="submit">Sign in</button>
+				</div>
+			</div>
+		</form>
+		<hr />
+		<p class="text-right">
+			<wicket:enclosure child="forgetPassword"><a wicket:id="forgetPassword">Forgot your password?</a> -</wicket:enclosure>
+			<a wicket:id="registerAccount">Register an account</a>
+		</p>
+	</div>
 </wicket:extend>

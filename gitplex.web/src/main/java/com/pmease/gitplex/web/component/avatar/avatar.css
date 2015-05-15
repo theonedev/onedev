@@ -5,10 +5,6 @@ img.avatar {
 	height: 20px;
 	width: 20px;
 	line-height: 1.428571429;
-	background-color: #fff;
-	box-shadow: 0 1px 0 #fff;
-	-webkit-transition: all 0.2s ease-in-out;
-	transition: all 0.2s ease-in-out;
 }
 .avatar-picker>.fileupload>.fileupload-preview {
 	width: 220px; 

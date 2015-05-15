@@ -8,7 +8,7 @@ import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.editable.EditableUtils;
-import com.pmease.commons.editable.PropertyDescriptorImpl;
+import com.pmease.commons.editable.DefaultPropertyDescriptor;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.wicket.editable.PropertyContext;
 
@@ -33,7 +33,7 @@ public class EntityColumn<T extends AbstractEntity> implements IStyledColumn<T, 
 	@Override
 	public Component getHeader(String componentId) {
 		return new Label(componentId, 
-				EditableUtils.getName(new PropertyDescriptorImpl(entityType, propertyName).getPropertyGetter()));
+				EditableUtils.getName(new DefaultPropertyDescriptor(entityType, propertyName).getPropertyGetter()));
 	}
 	
 	@Override

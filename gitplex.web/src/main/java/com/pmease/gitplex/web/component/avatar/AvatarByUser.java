@@ -88,7 +88,7 @@ public class AvatarByUser extends WebComponent {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(CssHeaderItem.forReference(new CssResourceReference(AvatarByPerson.class, "avatar.css")));
+		response.render(CssHeaderItem.forReference(new CssResourceReference(AvatarPicker.class, "avatar.css")));
 	}
 	
 	@Override

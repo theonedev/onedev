@@ -9,7 +9,7 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.editable.PropertyDescriptor;
-import com.pmease.commons.editable.PropertyDescriptorImpl;
+import com.pmease.commons.editable.DefaultPropertyDescriptor;
 import com.pmease.commons.editable.annotation.ChoiceProvider;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.ClassUtils;
@@ -34,7 +34,7 @@ public class ListEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getPropertyEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptorImpl(beanClass, propertyName);
+		PropertyDescriptor propertyDescriptor = new DefaultPropertyDescriptor(beanClass, propertyName);
 		
 		if (List.class.isAssignableFrom(propertyDescriptor.getPropertyClass())) {
 			final Class<?> elementClass = EditableUtils.getElementClass(propertyDescriptor.getPropertyGetter().getGenericReturnType());

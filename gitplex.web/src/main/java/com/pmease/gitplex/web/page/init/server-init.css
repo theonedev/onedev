@@ -1,9 +1,15 @@
-.server-init {
-	text-align: center;
-	width: 50%;
-	margin: 0 auto;
+#server-init.center-box {
+	width: 900px;
 }
-
-.server-init .message {
-	margin: 40px;
+#server-init>.title {
+	font-size: 32px;
+	font-weight: bold;
+}
+#server-init>.title .fa {
+	font-size: 32px;
+}
+#server-init .wizard {
+	padding-top: 20px;
+	border-top: 1px solid #BBB;
+	margin-top: 20px;
 }
