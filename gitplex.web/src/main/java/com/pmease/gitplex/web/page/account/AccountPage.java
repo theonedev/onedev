@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
 
+import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -15,6 +16,7 @@ import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.permission.Permission;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.account.notification.AccountNotificationPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
@@ -58,9 +60,12 @@ public abstract class AccountPage extends MainPage {
 	protected List<PageTab> newMainTabs() {
 		List<PageTab> mainTabs = new ArrayList<>();
 		mainTabs.add(new AccountTab(Model.of("Overview"), AccountOverviewPage.class));
-		mainTabs.add(new AccountTab(Model.of("Notifications"), AccountNotificationPage.class));
-		mainTabs.add(new AccountTab(Model.of("Setting"), ProfileEditPage.class, 
-				AvatarEditPage.class, PasswordEditPage.class));
+		
+		if (SecurityUtils.getSubject().isPermitted(Permission.ofUserAdmin(getAccount()))) {
+			mainTabs.add(new AccountTab(Model.of("Notifications"), AccountNotificationPage.class));
+			mainTabs.add(new AccountTab(Model.of("Setting"), ProfileEditPage.class, 
+					AvatarEditPage.class, PasswordEditPage.class));
+		}
 		return mainTabs;
 	}
 

@@ -112,7 +112,7 @@ public abstract class MainPage extends BasePage {
 		
 		if (signedIn)
 			topTray.add(new UserLink("user", new UserModel(currentUser)));
-		else 
+		else  
 			topTray.add(new WebMarkupContainer("user").setVisible(false));
 	}
 	
