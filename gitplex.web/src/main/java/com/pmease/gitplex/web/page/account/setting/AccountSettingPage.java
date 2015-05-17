@@ -67,7 +67,7 @@ public class AccountSettingPage extends AccountPage {
 
 					@Override
 					protected User getAccount() {
-						return getAccount();
+						return AccountSettingPage.this.getAccount();
 					}
 					
 				}));
