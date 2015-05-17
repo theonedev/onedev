@@ -45,10 +45,18 @@ html, body {
 	float: left;
 }
 #toptray a.previous .avatar {
-	margin-right: -25px;
+	margin-right: -20px;
 }
 #toptray a.previous:hover .avatar {
 	margin-right: -7px;
+}
+.runas-tooltip {
+	background: #FCF5E4;
+	border: #FCF5E4;
+	padding: 4px 8px;
+}
+.runas-tooltip .indicator {
+	border-left-color: #FCF5E4 !important;
 }
 
 #toptray .user-link span {

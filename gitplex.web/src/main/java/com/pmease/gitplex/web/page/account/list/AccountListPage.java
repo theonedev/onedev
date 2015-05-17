@@ -199,7 +199,7 @@ public class AccountListPage extends MainPage {
 					
 				});
 				
-				item.add(new Link<Void>("becomeAccount") {
+				item.add(new Link<Void>("runAsAccount") {
 
 					@Override
 					public void onClick() {

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -14,7 +15,9 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.pmease.commons.wicket.behavior.TooltipBehavior;
+import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
+import com.pmease.commons.wicket.behavior.dropdown.DropdownMode;
+import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
@@ -39,9 +42,6 @@ import com.pmease.gitplex.web.page.repository.overview.RepoOverviewPage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 import com.pmease.gitplex.web.page.security.LogoutPage;
 import com.pmease.gitplex.web.page.security.RegisterPage;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 
 @SuppressWarnings("serial")
 public abstract class MainPage extends BasePage {
@@ -90,7 +90,7 @@ public abstract class MainPage extends BasePage {
 		}
 		topNav.add(repoLink);
 
-		User currentUser = getCurrentUser();
+		final User currentUser = getCurrentUser();
 		boolean signedIn = currentUser != null;
 
 		WebMarkupContainer topTray = new WebMarkupContainer("topTray");
@@ -128,16 +128,30 @@ public abstract class MainPage extends BasePage {
 					}
 					
 				};
-				String tooltip = prevUser.getDisplayName() + " is currently running as " 
-						+ currentUser.getDisplayName() + ", click to exit the run-as mode"; 
-				prevLink.add(new TooltipBehavior(Model.of(tooltip), new TooltipConfig().withPlacement(Placement.left)));
 				prevLink.add(new AvatarByUser("avatar", new UserModel(prevUser), false));
 				topTray.add(prevLink);
+
+				// Use dropdown panel to mimic tooltip as the bootstrap tooltip has the issue 
+				// of disappearing when we adjust margin property when hover over the link
+				DropdownPanel tooltip = new DropdownPanel("tooltip", false) {
+
+					@Override
+					protected Component newContent(String id) {
+						return new Label(id, prevUser.getDisplayName() + " is currently running as " 
+								+ currentUser.getDisplayName() + ", click to exit the run-as mode");
+					}
+					
+				};
+				topTray.add(tooltip);
+				prevLink.add(new DropdownBehavior(tooltip)
+						.mode(new DropdownMode.Hover(100))
+						.alignWithComponent(prevLink, 0, 50, 100, 50, 7, true));
 			} else {
 				WebMarkupContainer prevLink = new WebMarkupContainer("prevUser");
 				prevLink.add(new WebMarkupContainer("avatar"));
 				prevLink.setVisible(false);
 				topTray.add(prevLink);
+				topTray.add(new WebMarkupContainer("tooltip").setVisible(false));
 			}
 			topTray.add(new UserLink("user", new UserModel(currentUser)));
 		} else {  
