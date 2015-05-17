@@ -465,7 +465,7 @@ public abstract class BlobSearchPanel extends Panel {
 		}
 		
 		@Override
-		protected Component newContent(String id) {
+		protected Component newContent(String id, ModalBehavior behavior) {
 			Fragment fragment = new Fragment(id, "advancedSearchFrag", BlobSearchPanel.this);
 			Form<?> form = new Form<Void>("form");
 			form.setOutputMarkupId(true);
@@ -562,7 +562,7 @@ public abstract class BlobSearchPanel extends Panel {
 								throw new RuntimeException(e);
 							}								
 							
-							hide(target);
+							close(target);
 						}
 						
 					});
@@ -587,7 +587,7 @@ public abstract class BlobSearchPanel extends Panel {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					hide(target);
+					close(target);
 				}
 				
 			});

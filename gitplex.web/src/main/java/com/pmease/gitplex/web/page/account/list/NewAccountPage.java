@@ -15,8 +15,6 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
-import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.main.MainPage;
 
 @SuppressWarnings("serial")
@@ -53,7 +51,7 @@ public class NewAccountPage extends MainPage {
 				} else {
 					userManager.save(account);
 					Session.get().success("New account created");
-					setResponsePage(AvatarEditPage.class, AccountPage.paramsOf(account));
+					setResponsePage(AccountListPage.class);
 				}
 			}
 			

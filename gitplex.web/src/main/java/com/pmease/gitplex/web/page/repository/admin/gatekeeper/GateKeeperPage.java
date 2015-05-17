@@ -11,6 +11,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.util.ReflectionUtils;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
+import com.pmease.commons.wicket.behavior.modal.ModalBehavior;
 import com.pmease.commons.wicket.behavior.modal.ModalPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
@@ -63,17 +64,17 @@ public class GateKeeperPage extends RepositoryPage {
 					ModalPanel modalPanel = new ModalPanel("gateKeeperModal") {
 
 						@Override
-						protected Component newContent(String id) {
+						protected Component newContent(String id, ModalBehavior behavior) {
 							return new GateKeeperEditor(id, gateKeeper) {
 
 								@Override
 								protected void onCancel(AjaxRequestTarget target) {
-									hide(target);
+									close(target);
 								}
 
 								@Override
 								protected void onSave(AjaxRequestTarget target, GateKeeper gateKeeper) {
-									hide(target);
+									close(target);
 									getRepository().getGateKeepers().add(gateKeeper);
 									onGateKeeperChanged(target);
 								}

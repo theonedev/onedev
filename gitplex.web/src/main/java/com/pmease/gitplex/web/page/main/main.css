@@ -3,7 +3,7 @@ html, body {
 }
 #main>.head {
 	padding: 16px;
-	background: #444;
+	background: #333;
 }
 #topnav>a, #topnav>span {
 	color: white; 
@@ -51,12 +51,7 @@ html, body {
 	margin-right: -7px;
 }
 .runas-tooltip {
-	background: #FCF5E4;
-	border: #FCF5E4;
 	padding: 4px 8px;
-}
-.runas-tooltip .indicator {
-	border-left-color: #FCF5E4 !important;
 }
 
 #toptray .user-link span {

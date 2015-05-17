@@ -14,12 +14,11 @@ public class ModalBehavior extends AbstractDefaultAjaxBehavior {
 	
 	public ModalBehavior(ModalPanel modalPanel) {
 		this.modalPanel = modalPanel;
-		this.modalPanel.showImmediately = false;
 	}
 	
 	@Override
 	protected void respond(AjaxRequestTarget target) {
-		modalPanel.load(target);
+		modalPanel.load(target, this);
 	}
 
 	@Override

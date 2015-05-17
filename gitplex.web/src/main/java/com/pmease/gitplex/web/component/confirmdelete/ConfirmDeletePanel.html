@@ -1,0 +1,20 @@
+<wicket:panel>
+	<div class="confirm-delete">
+		<!-- Add form tag so that the default delete button can be triggered when user hits return -->
+		<form>
+			<div class="modal-header">
+				<h4 id="modal-title" class="modal-title">
+					Do you really want to delete?
+				</h4>
+			</div>
+			<div class="modal-body">
+				<div wicket:id="message" class="message"></div>
+				<input class="form-control focusable confirm"></input>
+			</div>
+			<div class="modal-footer">
+				<input wicket:id="delete" type="submit" class="btn btn-danger" disabled="disabled" value="Delete"></input>
+				<a wicket:id="cancel" class="btn btn-default">Cancel</a>
+			</div>
+		</form>
+	</div>
+</wicket:panel>

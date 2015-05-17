@@ -2,8 +2,10 @@ package com.pmease.gitplex.web.component.sidebar;
 
 import java.util.List;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.request.resource.CssResourceReference;
 
@@ -26,6 +28,11 @@ public class SidebarBorder extends Border {
 		super.onInitialize();
 		
 		addToBorder(new Tabbable("tabs", tabs));
+		addToBorder(newActions("actions"));
+	}
+	
+	protected Component newActions(String id) {
+		return new WebMarkupContainer(id);
 	}
 
 	@Override

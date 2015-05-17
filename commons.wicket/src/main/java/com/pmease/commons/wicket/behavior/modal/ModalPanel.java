@@ -1,12 +1,14 @@
 package com.pmease.commons.wicket.behavior.modal;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.head.PriorityHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
 
@@ -21,9 +23,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 @SuppressWarnings("serial")
 public abstract class ModalPanel extends Panel {
 
-	private String width;
-	
-	boolean showImmediately = true;
+	private static final String CONTENT_ID = "content";
 	
 	public ModalPanel(String id) {
 		super(id);
@@ -37,31 +37,52 @@ public abstract class ModalPanel extends Panel {
 		
 		add(AttributeAppender.append("class", "modal popup"));
 		
-		add(new WebMarkupContainer("content")
-				.add(AttributeModifier.append("class", "loading"))
-				.setOutputMarkupId(true));
+		add(newContentPlaceholder());
+		
+		add(new AbstractDefaultAjaxBehavior() {
+
+			@Override
+			protected void respond(AjaxRequestTarget target) {
+				unload(target);
+			}
+
+			@Override
+			public void renderHead(Component component, IHeaderResponse response) {
+				super.renderHead(component, response);
+
+				String script = String.format("pmease.commons.modal.setup('%s', %s);", 
+						getMarkupId(), getCallbackFunction());
+				response.render(OnDomReadyHeaderItem.forScript(script));
+			}
+			
+		});
 	}
 	
-	@Override
-	protected void onBeforeRender() {
-		if (showImmediately)
-			replace(newContent("content").add(AttributeModifier.append("class", "content")));
-		
-		super.onBeforeRender();
-	}
-
 	/**
 	 * Close this modal.
 	 *
 	 * @param target
 	 * 			Wicket ajax request target 
 	 */
-	public void hide(AjaxRequestTarget target) {
-		target.prependJavaScript(String.format("pmease.commons.modal.hide('%s');", getMarkupId()));
+	public void close(AjaxRequestTarget target) {
+		unload(target);
+		target.appendJavaScript(String.format("pmease.commons.modal.hide('%s', true);", getMarkupId()));
 	}
 	
-	void load(AjaxRequestTarget target) {
-		Component content = newContent("content");
+	private void unload(AjaxRequestTarget target) {
+		Component content = newContentPlaceholder();
+		replace(content);
+		target.add(content);
+	}
+	
+	protected Component newContentPlaceholder() {
+		return new WebMarkupContainer(CONTENT_ID)
+				.add(AttributeModifier.append("class", "loading"))
+				.setOutputMarkupId(true);
+	}
+	
+	void load(AjaxRequestTarget target, ModalBehavior behavior) {
+		Component content = newContent(CONTENT_ID, behavior);
 		content.add(AttributeModifier.append("class", " content"));
 		replace(content);
 		target.add(content);
@@ -70,33 +91,6 @@ public abstract class ModalPanel extends Panel {
 		target.appendJavaScript(script);
 	}
 	
-	public String getWidth() {
-		return width;
-	}
-
-	/**
-	 * Optionally specify width of the modal panel.  
-	 * 
-	 * @param width
-	 * 			width of the modal, for instance: 500px, 50%, etc
-	 */
-	public ModalPanel setWidth(String width) {
-		this.width = width;
-		return this;
-	}
-
-	protected abstract Component newContent(String id);
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-
-		String script;
-		if (width != null)
-			script = String.format("pmease.commons.modal.setup('%s', '%s', %s);", getMarkupId(), width, showImmediately);
-		else
-			script = String.format("pmease.commons.modal.setup('%s', undefined, %s);", getMarkupId(), showImmediately);
-		response.render(new PriorityHeaderItem(OnDomReadyHeaderItem.forScript(script)));
-	}
+	protected abstract Component newContent(String id, @Nullable ModalBehavior behavior);
 
 }

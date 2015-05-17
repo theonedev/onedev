@@ -17,6 +17,7 @@ import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.util.ReflectionUtils;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
+import com.pmease.commons.wicket.behavior.modal.ModalBehavior;
 import com.pmease.commons.wicket.behavior.modal.ModalPanel;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitplex.core.gatekeeper.AbstractGateKeeper;
@@ -63,17 +64,17 @@ public abstract class GateKeeperPanel extends Panel {
 				ModalPanel modalPanel = new ModalPanel("editor") {
 
 					@Override
-					protected Component newContent(String id) {
+					protected Component newContent(String id, ModalBehavior behavior) {
 						return new GateKeeperEditor(id, gateKeeper) {
 
 							@Override
 							protected void onCancel(AjaxRequestTarget target) {
-								hide(target);
+								close(target);
 							}
 
 							@Override
 							protected void onSave(AjaxRequestTarget target, GateKeeper gateKeeper) {
-								hide(target);
+								close(target);
 								GateKeeperPanel.this.onChange(target, gateKeeper);
 							}
 							
@@ -160,17 +161,17 @@ public abstract class GateKeeperPanel extends Panel {
 						ModalPanel childEditor = new ModalPanel("childEditor") {
 
 							@Override
-							protected Component newContent(String id) {
+							protected Component newContent(String id, ModalBehavior behavior) {
 								return new GateKeeperEditor(id, gateKeeper) {
 
 									@Override
 									protected void onCancel(AjaxRequestTarget target) {
-										hide(target);
+										close(target);
 									}
 
 									@Override
 									protected void onSave(AjaxRequestTarget target, GateKeeper gateKeeper) {
-										hide(target);
+										close(target);
 										fragment.replace(new WebMarkupContainer("childEditor").setOutputMarkupPlaceholderTag(true).setVisible(true));
 										andOrGateKeeper.getGateKeepers().add(gateKeeper);
 										GateKeeperPanel.this.onChange(target, andOrGateKeeper);
@@ -212,17 +213,17 @@ public abstract class GateKeeperPanel extends Panel {
 							ModalPanel gateKeeperEditor = new ModalPanel("gateKeeperEditor") {
 
 								@Override
-								protected Component newContent(String id) {
+								protected Component newContent(String id, ModalBehavior behavior) {
 									return new GateKeeperEditor(id, gateKeeper) {
 
 										@Override
 										protected void onCancel(AjaxRequestTarget target) {
-											hide(target);
+											close(target);
 										}
 
 										@Override
 										protected void onSave(AjaxRequestTarget target, GateKeeper gateKeeper) {
-											hide(target);
+											close(target);
 											fragment.replace(new WebMarkupContainer("gateKeeperEditor").setOutputMarkupPlaceholderTag(true).setVisible(true));
 											notGateKeeper.setGateKeeper(gateKeeper);
 											GateKeeperPanel.this.onChange(target, notGateKeeper);
@@ -286,17 +287,17 @@ public abstract class GateKeeperPanel extends Panel {
 							ModalPanel ifEditor = new ModalPanel("ifEditor") {
 
 								@Override
-								protected Component newContent(String id) {
+								protected Component newContent(String id, ModalBehavior behavior) {
 									return new GateKeeperEditor(id, gateKeeper) {
 
 										@Override
 										protected void onCancel(AjaxRequestTarget target) {
-											hide(target);
+											close(target);
 										}
 
 										@Override
 										protected void onSave(AjaxRequestTarget target, GateKeeper gateKeeper) {
-											hide(target);
+											close(target);
 											fragment.replace(new WebMarkupContainer("ifEditor").setOutputMarkupPlaceholderTag(true).setVisible(true));
 											ifThenGateKeeper.setIfGate(gateKeeper);
 											GateKeeperPanel.this.onChange(target, ifThenGateKeeper);
@@ -356,17 +357,17 @@ public abstract class GateKeeperPanel extends Panel {
 							ModalPanel thenEditor = new ModalPanel("thenEditor") {
 
 								@Override
-								protected Component newContent(String id) {
+								protected Component newContent(String id, ModalBehavior behavior) {
 									return new GateKeeperEditor(id, gateKeeper) {
 
 										@Override
 										protected void onCancel(AjaxRequestTarget target) {
-											hide(target);
+											close(target);
 										}
 
 										@Override
 										protected void onSave(AjaxRequestTarget target, GateKeeper gateKeeper) {
-											hide(target);
+											close(target);
 											fragment.replace(new WebMarkupContainer("thenEditor").setOutputMarkupPlaceholderTag(true).setVisible(true));
 											ifThenGateKeeper.setThenGate(gateKeeper);
 											GateKeeperPanel.this.onChange(target, ifThenGateKeeper);

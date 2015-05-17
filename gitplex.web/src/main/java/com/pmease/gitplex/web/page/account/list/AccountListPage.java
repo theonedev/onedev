@@ -23,7 +23,6 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.MultilineLabel;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
@@ -35,6 +34,8 @@ import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarByUser;
+import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteAccountModal;
+import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteAccountModalBehavior;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
@@ -102,6 +103,16 @@ public class AccountListPage extends MainPage {
 		accountsContainer = new WebMarkupContainer("accountsContainer");
 		accountsContainer.setOutputMarkupId(true);
 		add(accountsContainer);
+		
+		final ConfirmDeleteAccountModal confirmDeleteDlg = new ConfirmDeleteAccountModal("confirmDelete") {
+
+			@Override
+			protected void onDeleted(AjaxRequestTarget target) {
+				setResponsePage(getPage());
+			}
+			
+		};
+		add(confirmDeleteDlg);
 		
 		accountsContainer.add(accountsView = new PageableListView<User>("accounts", new LoadableDetachableModel<List<User>>() {
 
@@ -221,18 +232,20 @@ public class AccountListPage extends MainPage {
 				});
 				
 				final Long accountId = user.getId();
-				item.add(new Link<Void>("delete") {
+				item.add(new WebMarkupContainer("delete") {
 
 					@Override
 					protected void onInitialize() {
 						super.onInitialize();
-						add(new ConfirmBehavior("Do you really want to delete this account?"));				
-					}
-
-					@Override
-					public void onClick() {
-						Dao dao = GitPlex.getInstance(Dao.class);
-						GitPlex.getInstance(UserManager.class).delete(dao.load(User.class, accountId));
+						
+						add(new ConfirmDeleteAccountModalBehavior(confirmDeleteDlg) {
+							
+							@Override
+							protected User getAccount() {
+								return GitPlex.getInstance(Dao.class).load(User.class, accountId);
+							}
+							
+						});
 					}
 
 					@Override
@@ -240,10 +253,7 @@ public class AccountListPage extends MainPage {
 						super.onConfigure();
 
 						User account = item.getModelObject();
-						User currentUser = getCurrentUser();
-						setVisible(!account.isRoot() 
-								&& !account.equals(currentUser) 
-								&& SecurityUtils.canManage(account));
+						setVisible(!account.isRoot() && SecurityUtils.canManage(account));
 					}
 					
 				});
