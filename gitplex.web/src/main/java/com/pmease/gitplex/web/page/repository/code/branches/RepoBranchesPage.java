@@ -46,14 +46,14 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
-import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.BranchManager;
-import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.model.Branch;
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.BranchWatch;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.branch.BranchChoiceProvider;
 import com.pmease.gitplex.web.component.branch.BranchSingleChoice;
@@ -490,7 +490,7 @@ public class RepoBranchesPage extends RepositoryPage {
 						super.onConfigure();
 
 						Branch branch = item.getModelObject();
-						if (!branch.isDefault() && GitPlex.getInstance(AuthorizationManager.class).canModifyBranch(branch)) {
+						if (!branch.isDefault() && SecurityUtils.canModify(branch)) {
 							User currentUser = getCurrentUser();
 							if (currentUser != null) {
 								GateKeeper gateKeeper = getRepository().getGateKeeper();

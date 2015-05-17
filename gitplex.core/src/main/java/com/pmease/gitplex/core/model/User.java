@@ -32,12 +32,10 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	public static final Long ROOT_ID = 1L;
 	
-	@Column(nullable=false, unique=true)
+	@Column(nullable=false)
 	private String email;
 	
 	private String fullName;
-	
-	private boolean admin;
 	
 	private Date avatarUploadDate;
 	
@@ -113,14 +111,6 @@ public class User extends AbstractUser implements ProtectedObject {
 	@Length(min=5, message="Password length should not less than 5")
 	public String getPassword() {
 		return super.getPassword();
-	}
-
-	public boolean isAdmin() {
-		return admin;
-	}
-
-	public void setAdmin(boolean admin) {
-		this.admin = admin;
 	}
 
 	public Date getAvatarUploadDate() {

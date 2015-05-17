@@ -1,6 +1,6 @@
 <wicket:extend>
 	<section class="account-list">
-		<div class="head">All Accessible Accounts</div>
+		<div class="head">All Accounts</div>
 		<div class="body">
 			<div class="head clearfix">
 				<div class="pull-left search">
@@ -19,7 +19,6 @@
 					<tr>
 						<th class="name">Name</th>
 						<th class="description">Description</th>
-						<th class="login-allowed">Login Allowed</th>
 						<th class="actions">Actions</th>
 					</tr>
 				</thead>
@@ -29,22 +28,14 @@
 							<img wicket:id="avatar" class="avatar"></img>
 							<a wicket:id="accountLink"><span wicket:id="accountName"></span></a>
 						</td>
-						<td class="description">
-							<span wicket:id="description"></span>
-						</td>
-						<td class="login-allowed">
-							<span wicket:id="loginAllowed"></span>
-							<wicket:enclosure child="allowLogin">
-							- <a wicket:id="allowLogin">set password to allow</a>
-							</wicket:enclosure>
-							<wicket:enclosure child="disallowLogin">
-							- <a wicket:id="disallowLogin">clear password to disallow</a>
-							</wicket:enclosure>
+						<td class="full-name">
+							<span wicket:id="fullName"></span>
 						</td>
 						<td class="actions">
 							<a wicket:id="editProfile" class="fa fa-pencil" title="Edit account profile"></a>
 							<a wicket:id="changePassword" class="fa fa-key" title="Change account password"></a>
-							<a wicket:id="changeAvatar" class="fa fa-user" title="Change account avatar"></a>
+							<a wicket:id="changeAvatar" class="fa fa-photo" title="Change account avatar"></a>
+							<a wicket:id="becomeAccount" class="fa fa-user" title="Become this account"></a>
 							<a wicket:id="delete" class="fa fa-trash" title="Delete this account"></a>
 						</td>
 					</tr>

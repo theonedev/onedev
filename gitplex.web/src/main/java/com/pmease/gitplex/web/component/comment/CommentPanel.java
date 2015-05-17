@@ -35,8 +35,8 @@ import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.Comment;
 import com.pmease.gitplex.core.comment.CommentReply;
-import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.label.AgeLabel;
@@ -149,7 +149,7 @@ public class CommentPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(GitPlex.getInstance(AuthorizationManager.class).canModifyComment(getComment()));
+				setVisible(SecurityUtils.canModify(getComment()));
 			}
 
 		});
@@ -166,7 +166,7 @@ public class CommentPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(GitPlex.getInstance(AuthorizationManager.class).canModifyComment(getComment()));
+				setVisible(SecurityUtils.canModify(getComment()));
 			}
 
 		}.add(new ConfirmBehavior("Deleting this comment will also delete all its replies. Do you really want to continue?")));
@@ -187,7 +187,7 @@ public class CommentPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(GitPlex.getInstance(AuthorizationManager.class).canModifyComment(getComment()));
+				setVisible(SecurityUtils.canModify(getComment()));
 			}
 
 			@Override
@@ -212,7 +212,7 @@ public class CommentPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(getComment().isResolved() && !GitPlex.getInstance(AuthorizationManager.class).canModifyComment(getComment()));
+				setVisible(getComment().isResolved() && !SecurityUtils.canModify(getComment()));
 			}
 			
 		});
@@ -423,7 +423,7 @@ public class CommentPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(GitPlex.getInstance(AuthorizationManager.class).canModifyComment(getComment()));
+				setVisible(SecurityUtils.canModify(getComment()));
 			}
 
 		});
@@ -442,7 +442,7 @@ public class CommentPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(GitPlex.getInstance(AuthorizationManager.class).canModifyComment(getComment()));
+				setVisible(SecurityUtils.canModify(getComment()));
 			}
 
 		}.add(new ConfirmBehavior("Do you really want to delete this reply?")));

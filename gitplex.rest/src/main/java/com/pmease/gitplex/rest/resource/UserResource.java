@@ -1,7 +1,6 @@
 package com.pmease.gitplex.rest.resource;
 
 import java.util.Collection;
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -17,7 +16,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.validator.constraints.Email;
@@ -26,7 +24,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jersey.ValidQueryParams;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.Permission;
+import com.pmease.gitplex.core.security.SecurityUtils;
 
 @Path("/users")
 @Consumes(MediaType.WILDCARD)
@@ -54,29 +52,18 @@ public class UserResource {
 			criteria.add(Restrictions.eq("email", email));
 		if (fullName != null)
 			criteria.add(Restrictions.eq("fullName", fullName));
-		List<User> users = dao.query(criteria);
-		
-		for (User user: users) {
-			if (!SecurityUtils.getSubject().isPermitted(Permission.ofUserRead(user))) {
-				throw new UnauthorizedException("Unauthorized access to user " + user.getDisplayName());
-			}
-		}
-		return users;
+		return dao.query(criteria);
 	}
 	
     @GET
     @Path("/{id}")
     public User get(@PathParam("id") Long id) {
-    	User user = dao.load(User.class, id);
-    	if (!SecurityUtils.getSubject().isPermitted(Permission.ofUserRead(user)))
-    		throw new UnauthorizedException();
-    	else
-    		return user;
+    	return dao.load(User.class, id);
     }
     
     @POST
     public Long save(@NotNull @Valid User user) {
-    	if (!SecurityUtils.getSubject().isPermitted(Permission.ofUserAdmin(user)))
+    	if (!SecurityUtils.canManage(user))
     		throw new UnauthorizedException();
 
     	dao.persist(user);
@@ -88,7 +75,7 @@ public class UserResource {
     public void delete(@PathParam("id") Long id) {
     	User user = dao.load(User.class, id);
     	
-    	if (!SecurityUtils.getSubject().isPermitted(Permission.ofUserAdmin(user)))
+    	if (!SecurityUtils.canManage(user))
     		throw new UnauthorizedException();
     	
     	dao.remove(user);

@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
-public enum GeneralOperation implements PrivilegedOperation {
+public enum RepositoryOperation implements PrivilegedOperation {
 	
 	NO_ACCESS("No Access") {
 
@@ -14,19 +14,19 @@ public enum GeneralOperation implements PrivilegedOperation {
 		}
 		
 	},
-	READ("Read") {
+	PULL("Pull") {
 
 		@Override
 		public boolean can(PrivilegedOperation operation) {
-			return operation == READ || NO_ACCESS.can(operation);
+			return operation == PULL || NO_ACCESS.can(operation);
 		}
 		
 	},
-	WRITE("Write") {
+	PUSH("Push") {
 
 		@Override
 		public boolean can(PrivilegedOperation operation) {
-			return operation == WRITE || READ.can(operation);
+			return operation == PUSH || PULL.can(operation);
 		}
 		
 	},
@@ -41,7 +41,7 @@ public enum GeneralOperation implements PrivilegedOperation {
 
 	private final String displayName;
 	
-	GeneralOperation(String displayName) {
+	RepositoryOperation(String displayName) {
 		this.displayName = displayName;
 	}
 	
@@ -50,11 +50,11 @@ public enum GeneralOperation implements PrivilegedOperation {
 		return displayName;
 	}
 	
-	public static GeneralOperation mostPermissive(GeneralOperation... operations) {
-		return Collections.max(Arrays.asList(operations), new Comparator<GeneralOperation>() {
+	public static RepositoryOperation mostPermissive(RepositoryOperation... operations) {
+		return Collections.max(Arrays.asList(operations), new Comparator<RepositoryOperation>() {
 
 			@Override
-			public int compare(GeneralOperation operation1, GeneralOperation operation2) {
+			public int compare(RepositoryOperation operation1, RepositoryOperation operation2) {
 				if (operation1 == operation2)
 					return 0;
 				else if (operation1.can(operation2))

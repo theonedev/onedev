@@ -130,11 +130,13 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (qosConfig == null)
 			configManager.saveQosSetting(new QosSetting());
 
+		if (!manualConfigs.isEmpty()) {
+		}
 		return manualConfigs;
 	}
 
 	public Object writeReplace() throws ObjectStreamException {
 		return new ManagedSerializedForm(DataManager.class);
 	}	
-	
+
 }

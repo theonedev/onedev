@@ -18,7 +18,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 
@@ -26,10 +25,10 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jersey.ValidQueryParams;
-import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.model.Branch;
-import com.pmease.gitplex.core.permission.Permission;
+import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.security.SecurityUtils;
 
 @Path("/branches")
 @Consumes(MediaType.WILDCARD)
@@ -41,20 +40,17 @@ public class BranchResource {
 	
 	private final BranchManager branchManager;
 	
-	private final AuthorizationManager authorizationManager;
-	
 	@Inject
-	public BranchResource(Dao dao, BranchManager branchManager, AuthorizationManager authorizationManager) {
+	public BranchResource(Dao dao, BranchManager branchManager) {
 		this.dao = dao;
 		this.branchManager = branchManager;
-		this.authorizationManager = authorizationManager;
 	}
 	
     @GET
     @Path("/{id}")
     public Branch get(@PathParam("id") Long id) {
     	Branch branch = dao.load(Branch.class, id);
-    	if (!SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryRead(branch.getRepository())))
+    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoRead(branch.getRepository())))
     		throw new UnauthorizedException();
     	return branch;
     }
@@ -79,7 +75,7 @@ public class BranchResource {
 		List<Branch> branches = dao.query(criteria);
 		
     	for (Branch branch: branches) {
-    		if (!SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryRead(branch.getRepository()))) {
+    		if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoRead(branch.getRepository()))) {
     			throw new UnauthorizedException("Unauthorized access to branch " + branch);
     		}
     	}
@@ -92,7 +88,7 @@ public class BranchResource {
 	public void delete(@PathParam("id") Long id) {
 		Branch branch = dao.load(Branch.class, id);
 		
-    	if (!authorizationManager.canModifyBranch(branch))
+    	if (!SecurityUtils.canModify(branch))
     		throw new UnauthorizedException();
     	
     	dao.remove(branch);
@@ -100,7 +96,7 @@ public class BranchResource {
 	
     @POST
     public Long save(@NotNull @Valid Branch branch) {
-    	if (!authorizationManager.canModifyBranch(branch))
+    	if (!SecurityUtils.canModify(branch))
     		throw new UnauthorizedException();
     	
     	dao.persist(branch);

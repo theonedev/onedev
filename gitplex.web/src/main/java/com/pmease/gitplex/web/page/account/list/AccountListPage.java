@@ -6,9 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -31,10 +29,10 @@ import com.pmease.commons.wicket.component.MultilineLabel;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.commons.wicket.component.navigator.PagingNavigator;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.Permission;
+import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarByUser;
 import com.pmease.gitplex.web.page.account.AccountPage;
@@ -91,7 +89,7 @@ public class AccountListPage extends MainPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getSubject().isPermitted(Permission.ofSystemAdmin()));
+				setVisible(SecurityUtils.getSubject().isPermitted(ObjectPermission.ofSystemAdmin()));
 			}
 
 			@Override
@@ -111,11 +109,6 @@ public class AccountListPage extends MainPage {
 			protected List<User> load() {
 				Dao dao = GitPlex.getInstance(Dao.class);
 				List<User> users = dao.allOf(User.class);
-				for (Iterator<User> it = users.iterator(); it.hasNext();) {
-					User user = it.next();
-					if (!SecurityUtils.getSubject().isPermitted(Permission.ofUserRead(user)))
-						it.remove();
-				}
 				
 				searchFor = searchInput.getInput();
 				if (StringUtils.isNotBlank(searchFor)) {
@@ -150,52 +143,8 @@ public class AccountListPage extends MainPage {
 				link.add(new Label("accountName", user.getName()));
 				item.add(link);
 						
-				item.add(new MultilineLabel("description", user.getFullName()));
+				item.add(new MultilineLabel("fullName", user.getFullName()));
 				
-				if (user.getPassword() != null) {
-					item.add(new Label("loginAllowed").add(AttributeAppender.append("class", "fa fa-check")));
-					item.add(new Link<Void>("disallowLogin") {
-
-						@Override
-						protected void onConfigure() {
-							super.onConfigure();
-							
-							User account = item.getModelObject();
-							setVisible(GitPlex.getInstance(AuthorizationManager.class).canManageAccount(account));
-						}
-
-						@Override
-						public void onClick() {
-							User account = item.getModelObject();
-							account.setPassword(null);
-							GitPlex.getInstance(UserManager.class).save(account);
-						}
-						
-					});
-					item.add(new WebMarkupContainer("allowLogin").setVisible(false));
-				} else { 
-					item.add(new Label("loginAllowed").add(AttributeAppender.append("class", "fa fa-times")));
-					item.add(new Link<Void>("allowLogin") {
-
-						@Override
-						protected void onConfigure() {
-							super.onConfigure();
-							
-							User account = item.getModelObject();
-							setVisible(GitPlex.getInstance(AuthorizationManager.class).canManageAccount(account));
-						}
-
-						@Override
-						public void onClick() {
-							PageParameters params = AccountPage.paramsOf(item.getModelObject());
-							addPrevPageParam(params);
-							setResponsePage(PasswordEditPage.class, params);
-						}
-						
-					});
-					item.add(new WebMarkupContainer("disallowLogin").setVisible(false));
-				}
-
 				item.add(new Link<Void>("editProfile") {
 
 					@Override
@@ -208,7 +157,7 @@ public class AccountListPage extends MainPage {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(SecurityUtils.getSubject().isPermitted(Permission.ofUserAdmin(item.getModelObject())));
+						setVisible(SecurityUtils.canManage(item.getModelObject()));
 					}
 					
 				});
@@ -228,7 +177,7 @@ public class AccountListPage extends MainPage {
 						
 						User account = item.getModelObject();
 						setVisible(account.getPassword() != null 
-								&& SecurityUtils.getSubject().isPermitted(Permission.ofUserAdmin(account)));
+								&& SecurityUtils.canManage(account));
 					}
 					
 				});
@@ -245,7 +194,28 @@ public class AccountListPage extends MainPage {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(SecurityUtils.getSubject().isPermitted(Permission.ofUserAdmin(item.getModelObject())));
+						setVisible(SecurityUtils.canManage(item.getModelObject()));
+					}
+					
+				});
+				
+				item.add(new Link<Void>("becomeAccount") {
+
+					@Override
+					public void onClick() {
+						User account = item.getModelObject();
+						SecurityUtils.getSubject().runAs(account.getPrincipals());
+						setResponsePage(getPage().getClass(), getPageParameters());
+					}
+					
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						
+						UserManager userManager = GitPlex.getInstance(UserManager.class);
+						User account = item.getModelObject();
+						User currentUser = userManager.getCurrent();
+						setVisible(!account.equals(currentUser) && SecurityUtils.canManage(account));
 					}
 					
 				});
@@ -273,7 +243,7 @@ public class AccountListPage extends MainPage {
 						User currentUser = getCurrentUser();
 						setVisible(!account.isRoot() 
 								&& !account.equals(currentUser) 
-								&& GitPlex.getInstance(AuthorizationManager.class).canManageAccount(account));
+								&& SecurityUtils.canManage(account));
 					}
 					
 				});

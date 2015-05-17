@@ -53,7 +53,7 @@ import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.Permission;
+import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.component.branch.AffinalBranchSingleChoice;
 import com.pmease.gitplex.web.component.branch.BranchLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
@@ -141,7 +141,7 @@ public class NewRequestPage extends RepositoryPage {
 			Preconditions.checkState(!strategies.isEmpty());
 			pullRequest.setIntegrationStrategy(strategies.get(0));
 			
-			Permission writePermission = Permission.ofRepositoryWrite(getRepository());
+			ObjectPermission writePermission = ObjectPermission.ofRepoWrite(getRepository());
 			if (currentUser.asSubject().isPermitted(writePermission))
 				pullRequest.setAssignee(currentUser);
 			else

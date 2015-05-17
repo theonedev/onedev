@@ -68,7 +68,6 @@ import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
-import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.IntegrationPreview;
@@ -83,6 +82,7 @@ import com.pmease.gitplex.core.model.PullRequestVerification;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.branch.BranchLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.event.PullRequestChanged;
@@ -206,8 +206,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			protected void onConfigure() {
 				super.onConfigure();
 
-				AuthorizationManager authorizationManager = GitPlex.getInstance(AuthorizationManager.class);
-				setVisible(!editingTitle && authorizationManager.canModifyRequest(getPullRequest()));
+				setVisible(!editingTitle && SecurityUtils.canModify(getPullRequest()));
 			}
 			
 		});
@@ -601,11 +600,8 @@ public abstract class RequestDetailPage extends RepositoryPage {
 
 		Branch source = request.getSource();
 		Preconditions.checkNotNull(source);
-		if (operation != INTEGRATE 
-				|| source.isDefault() 
-				|| !GitPlex.getInstance(AuthorizationManager.class).canModifyBranch(source)) {
+		if (operation != INTEGRATE || source.isDefault() || !SecurityUtils.canModify(source)) 
 			deleteSourceCheck.setVisible(false);
-		}
 		
 		form.add(deleteSourceCheck);
 		if (operation != INTEGRATE) {

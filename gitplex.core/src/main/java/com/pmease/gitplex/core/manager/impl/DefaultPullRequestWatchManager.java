@@ -19,10 +19,13 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.eclipse.jgit.lib.PersonIdent;
+
 import com.google.common.collect.Sets;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.util.Pair;
 import com.pmease.gitplex.core.manager.MailManager;
 import com.pmease.gitplex.core.manager.PullRequestWatchManager;
 import com.pmease.gitplex.core.manager.UrlManager;
@@ -85,13 +88,17 @@ public class DefaultPullRequestWatchManager implements PullRequestWatchManager {
 			watch(update.getRequest(), update.getUser(), 
 					"You are set to watch this pull request as you updated it.");
 		}
-		Set<String> emails = new HashSet<>();
+		
+		// we use a name-email pair to filter off duplicate person as equals method of PersonIdent also takes 
+		// "when" field into account
+		Set<Pair<String, String>> nameEmailPairs = new HashSet<>();
 		for (Commit commit: update.getCommits()) {
-			emails.add(commit.getCommitter().getEmailAddress());
-			emails.add(commit.getAuthor().getEmailAddress());
+			nameEmailPairs.add(new Pair<String, String>(commit.getCommitter().getName(), commit.getCommitter().getEmailAddress()));
+			nameEmailPairs.add(new Pair<String, String>(commit.getAuthor().getName(), commit.getAuthor().getEmailAddress()));
 		}
-		for (String email: emails) {
-			User user = userManager.findByEmail(email);
+		for (Pair<String, String> pair: nameEmailPairs) {
+			PersonIdent person = new PersonIdent(pair.getFirst(), pair.getSecond());
+			User user = userManager.findByPerson(person);
 			if (user != null) 
 				watch(update.getRequest(), user, "You are set to watch this pull request as it contains your commits.");
 		}

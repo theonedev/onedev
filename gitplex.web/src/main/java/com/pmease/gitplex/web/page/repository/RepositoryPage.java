@@ -11,7 +11,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.core.permission.Permission;
+import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.model.RepositoryModel;
 import com.pmease.gitplex.web.page.account.AccountPage;
 
@@ -55,7 +55,7 @@ public abstract class RepositoryPage extends AccountPage {
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.getSubject().isPermitted(
-				Permission.ofRepositoryRead(repoModel.getObject()));
+				ObjectPermission.ofRepoRead(repoModel.getObject()));
 	}
 	
 	public Repository getRepository() {

@@ -3,11 +3,10 @@ package com.pmease.gitplex.web.page.account.setting;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.wicket.component.tabbable.PageTab;
-import com.pmease.gitplex.core.permission.Permission;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.sidebar.SidebarBorder;
 import com.pmease.gitplex.web.page.account.AccountPage;
 
@@ -22,7 +21,7 @@ public class AccountSettingPage extends AccountPage {
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.getSubject().isPermitted(Permission.ofUserAdmin(getAccount()));
+		return SecurityUtils.canManage(getAccount());
 	}
 	
 	@Override
@@ -32,7 +31,7 @@ public class AccountSettingPage extends AccountPage {
 		List<PageTab> tabs = new ArrayList<>();
 		tabs.add(new AccountSettingTab("Profile", "fa fa-pencil", ProfileEditPage.class));
 		tabs.add(new AccountSettingTab("Password", "fa fa-key", PasswordEditPage.class));
-		tabs.add(new AccountSettingTab("Avatar", "fa fa-user", AvatarEditPage.class));
+		tabs.add(new AccountSettingTab("Avatar", "fa fa-photo", AvatarEditPage.class));
 		
 		add(sidebar = new SidebarBorder("sidebar", tabs));
 	}

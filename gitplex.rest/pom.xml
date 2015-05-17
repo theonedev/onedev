@@ -31,8 +31,8 @@
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
-            <artifactId>gitplex.security</artifactId>
-            <version>1.0.0</version> 
+            <artifactId>gitplex.core</artifactId>
+            <version>1.0.31</version> 
         </dependency>
     </dependencies>  
     <repositories> 

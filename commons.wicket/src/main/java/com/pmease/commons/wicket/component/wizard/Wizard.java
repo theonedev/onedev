@@ -109,12 +109,6 @@ public abstract class Wizard extends Panel {
 			}
 			
 			@Override
-			public void onError() {
-				super.onError();
-				form.error("Fix errors below");				
-			}
-
-			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(activeStepIndex < steps.size()-1);
@@ -130,12 +124,6 @@ public abstract class Wizard extends Panel {
 				finished();
 			}
 			
-			@Override
-			public void onError() {
-				super.onError();
-				form.error("Fix errors below");
-			}
-
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();

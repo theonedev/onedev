@@ -19,7 +19,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Objects;
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.gitplex.core.permission.operation.GeneralOperation;
+import com.pmease.gitplex.core.permission.operation.RepositoryOperation;
 import com.pmease.gitplex.core.validation.TeamName;
 
 @Entity
@@ -42,7 +42,7 @@ public class Team extends AbstractEntity {
 	private String name;
 	
 	@Column(nullable=false)
-	private GeneralOperation authorizedOperation = GeneralOperation.NO_ACCESS;
+	private RepositoryOperation authorizedOperation = RepositoryOperation.NO_ACCESS;
 	
 	@OneToMany(mappedBy="team", cascade=CascadeType.REMOVE)
 	private Collection<Membership> memberships = new ArrayList<Membership>();
@@ -68,11 +68,11 @@ public class Team extends AbstractEntity {
 		this.name = name;
 	}
 
-	public GeneralOperation getAuthorizedOperation() {
+	public RepositoryOperation getAuthorizedOperation() {
 		return authorizedOperation;
 	}
 
-	public void setAuthorizedOperation(GeneralOperation authorizedOeration) {
+	public void setAuthorizedOperation(RepositoryOperation authorizedOeration) {
 		this.authorizedOperation = authorizedOeration;
 	}
 

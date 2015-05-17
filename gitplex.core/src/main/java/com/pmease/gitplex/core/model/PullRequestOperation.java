@@ -2,15 +2,13 @@ package com.pmease.gitplex.core.model;
 
 import javax.annotation.Nullable;
 
-import org.apache.shiro.SecurityUtils;
-
 import com.pmease.commons.git.Git;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.permission.Permission;
+import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.security.SecurityUtils;
 
 public enum PullRequestOperation {
 	INTEGRATE {
@@ -18,7 +16,7 @@ public enum PullRequestOperation {
 		@Override
 		public boolean canOperate(PullRequest request) {
 			if (!SecurityUtils.getSubject().isPermitted(
-					Permission.ofRepositoryWrite(request.getTarget().getRepository()))) {
+					ObjectPermission.ofRepoWrite(request.getTarget().getRepository()))) {
 				return false;
 			} else {
 				return GitPlex.getInstance(PullRequestManager.class).canIntegrate(request);
@@ -35,7 +33,7 @@ public enum PullRequestOperation {
 
 		@Override
 		public boolean canOperate(PullRequest request) {
-			if (!GitPlex.getInstance(AuthorizationManager.class).canModifyRequest(request))
+			if (!SecurityUtils.canModify(request))
 				return false;
 			else 
 				return request.isOpen();
@@ -81,10 +79,9 @@ public enum PullRequestOperation {
 
 		@Override
 		public boolean canOperate(PullRequest request) {
-			AuthorizationManager authorizationManager = GitPlex.getInstance(AuthorizationManager.class);
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
 			if (request.isOpen() 
-					|| !authorizationManager.canModifyRequest(request)
+					|| !SecurityUtils.canModify(request)
 					|| request.getSource() == null 
 					|| pullRequestManager.findOpen(request.getTarget(), request.getSource()) != null) {
 				return false;

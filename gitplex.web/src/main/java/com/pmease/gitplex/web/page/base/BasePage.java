@@ -41,7 +41,7 @@ public abstract class BasePage extends CommonPage {
 		return true;
 	}
 	
-	protected User getCurrentUser() {
+	protected final User getCurrentUser() {
 		return GitPlex.getInstance(UserManager.class).getCurrent();
 	}
 	

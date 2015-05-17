@@ -63,57 +63,6 @@
 			<version>1.4.0</version>
 		</dependency>
 
-		<!-- Google Closure need this -->
-		<dependency>
-			<groupId>org.gitective</groupId>
-			<artifactId>gitective-core</artifactId>
-			<version>0.9.9</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.eclipse.jgit</groupId>
-					<artifactId>org.eclipse.jgit</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.sun.jna</groupId>
-			<artifactId>jna</artifactId>
-			<version>3.0.9</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.eclipse.mylyn.wikitext</groupId>
-			<artifactId>core</artifactId>
-			<version>${wikitext.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.mylyn.wikitext</groupId>
-			<artifactId>markdown.core</artifactId>
-			<version>${wikitext.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.mylyn.wikitext</groupId>
-			<artifactId>confluence.core</artifactId>
-			<version>${wikitext.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.mylyn.wikitext</groupId>
-			<artifactId>textile.core</artifactId>
-			<version>${wikitext.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.mylyn.wikitext</groupId>
-			<artifactId>html.core</artifactId>
-			<version>${wikitext.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-exec</artifactId>
-			<version>1.1</version>
-		</dependency>
-		
 		<dependency>
 		   <groupId>org.ocpsoft.prettytime</groupId>
 		   <artifactId>prettytime</artifactId>

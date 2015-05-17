@@ -15,7 +15,7 @@ import com.pmease.commons.wicket.behavior.modal.ModalPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.manager.RepositoryManager;
-import com.pmease.gitplex.core.permission.Permission;
+import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
@@ -118,7 +118,7 @@ public class GateKeeperPage extends RepositoryPage {
 	@Override
 	protected boolean isPermitted() {
 		return super.isPermitted() 
-				&& SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryAdmin(getRepository()));
+				&& SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoAdmin(getRepository()));
 	}
 
 }

@@ -14,7 +14,7 @@ import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.web.WebSession;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.list.AccountListPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
@@ -22,6 +22,11 @@ import com.pmease.gitplex.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
 public class RegisterPage extends BasePage {
+	
+	public RegisterPage() {
+		if (getCurrentUser() != null)
+			throw new IllegalStateException("Can not sign up an account while signed in.");
+	}
 	
 	@Override
 	protected void onInitialize() {
@@ -33,34 +38,18 @@ public class RegisterPage extends BasePage {
 		Form<?> form = new Form<Void>("form") {
 
 			@Override
-			protected void onError() {
-				super.onError();
-			}
-
-			@Override
 			protected void onSubmit() {
 				super.onSubmit();
 				
 				UserManager userManager = GitPlex.getInstance(UserManager.class);
-				User accountWithSameEmail = userManager.findByEmail(account.getEmail());
 				User accountWithSameName = userManager.findByName(account.getName());
-				boolean hasError = false;
 				if (accountWithSameName != null) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another account.");
-					hasError = true;
-				}
-				if (accountWithSameEmail != null) {
-					editor.getErrorContext(new PathSegment.Property("email"))
-							.addError("This email has already been used by another account.");
-					hasError = true;
-				}
-				
-				if (!hasError) {
+				} else {
 					userManager.save(account);
-					Session.get().info("New account registered");
-
-					WebSession.get().runAs(account);
+					Session.get().success("New account registered");
+					SecurityUtils.getSubject().runAs(account.getPrincipals());
 					setResponsePage(AvatarEditPage.class, AccountPage.paramsOf(account));
 				}
 			}

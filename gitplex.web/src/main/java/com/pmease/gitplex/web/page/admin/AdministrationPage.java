@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.shiro.SecurityUtils;
 
 import com.pmease.commons.wicket.component.tabbable.PageTab;
-import com.pmease.gitplex.core.permission.Permission;
+import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.component.sidebar.SidebarBorder;
 import com.pmease.gitplex.web.page.main.MainPage;
 
@@ -17,7 +17,7 @@ public abstract class AdministrationPage extends MainPage {
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.getSubject().isPermitted(Permission.ofSystemAdmin());
+		return SecurityUtils.getSubject().isPermitted(ObjectPermission.ofSystemAdmin());
 	}
 	
 	@Override

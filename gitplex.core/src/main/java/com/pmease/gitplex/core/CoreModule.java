@@ -15,6 +15,7 @@ import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.loader.ImplementationProvider;
+import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.gitplex.core.extensionpoint.ConfigListener;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
@@ -59,6 +60,7 @@ import com.pmease.gitplex.core.manager.impl.DefaultTeamManager;
 import com.pmease.gitplex.core.manager.impl.DefaultUserManager;
 import com.pmease.gitplex.core.manager.impl.DefaultVerificationManager;
 import com.pmease.gitplex.core.model.ModelLocator;
+import com.pmease.gitplex.core.security.SecurityRealm;
 import com.pmease.gitplex.core.setting.SpecifiedGit;
 import com.pmease.gitplex.core.setting.SystemGit;
 import com.pmease.gitplex.core.validation.RepositoryNameReservation;
@@ -155,6 +157,8 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestWatchManager.class).to(DefaultPullRequestWatchManager.class);
 		bind(PullRequestNotificationManager.class).to(DefaultPullRequestNotificationManager.class);
 
+		bind(AbstractRealm.class).to(SecurityRealm.class);
+		
 		contribute(PullRequestListener.class, DefaultPullRequestNotificationManager.class);
 		contribute(PullRequestListener.class, DefaultPullRequestWatchManager.class);
 		contribute(ConfigListener.class, DefaultPullRequestManager.class);

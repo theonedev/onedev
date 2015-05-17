@@ -52,7 +52,7 @@ public class ForgetPage extends BasePage {
 					@Override
 					protected TestResult test() {
 						UserManager userManager = GitPlex.getInstance(UserManager.class);
-						User user = userManager.findByEmail(bean.getEmail());
+						User user = userManager.findByName(bean.getUserName());
 						if (user != null) {
 							ConfigManager configManager = GitPlex.getInstance(ConfigManager.class);
 							if (configManager.getMailSetting() != null) {
@@ -81,7 +81,7 @@ public class ForgetPage extends BasePage {
 								return new TestResult.Failed("Unable to send password reset email as smtp setting is not defined");
 							}
 						} else {
-							return new TestResult.Failed("No account found with email " + bean.getEmail());
+							return new TestResult.Failed("No account found with name " + bean.getUserName());
 						}
 					}
 					
@@ -117,16 +117,16 @@ public class ForgetPage extends BasePage {
 	@Editable
 	public static class HelperBean implements Serializable {
 		
-		private String email;
+		private String userName;
 
-		@Editable(name="Please specify email of your account")
+		@Editable(name="Please specify name of your account")
 		@NotEmpty
-		public String getEmail() {
-			return email;
+		public String getUserName() {
+			return userName;
 		}
 
-		public void setEmail(String email) {
-			this.email = email;
+		public void setUserName(String userName) {
+			this.userName = userName;
 		}
 		
 	}

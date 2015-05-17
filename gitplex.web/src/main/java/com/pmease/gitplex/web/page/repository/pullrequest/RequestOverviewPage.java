@@ -7,7 +7,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -42,7 +41,6 @@ import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
@@ -60,7 +58,8 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.Permission;
+import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarByUser;
 import com.pmease.gitplex.web.component.branch.BranchLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
@@ -463,9 +462,8 @@ public class RequestOverviewPage extends RequestDetailPage {
 
 				PullRequest request = requestModel.getObject();
 
-				AuthorizationManager authorizationManager = GitPlex.getInstance(AuthorizationManager.class);
 				if (request.getSource() != null || request.getSourceFQN() == null 
-						|| !authorizationManager.canModifyRequest(request)) {
+						|| !SecurityUtils.canModify(request)) {
 					setVisible(false);
 				} else {
 					String repositoryFQN = Branch.getRepositoryFQNByFQN(request.getSourceFQN());
@@ -476,7 +474,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 						String branchName = Branch.getNameByFQN(request.getSourceFQN());
 						Branch branch = GitPlex.getInstance(BranchManager.class).findBy(repository, branchName);
 						if (branch == null)
-							setVisible(authorizationManager.canCreateBranch(repository, branchName));
+							setVisible(SecurityUtils.canCreate(repository, branchName));
 						else
 							setVisible(true);
 					}
@@ -537,7 +535,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				Permission writePermission = Permission.ofRepositoryWrite(getRepository());
+				ObjectPermission writePermission = ObjectPermission.ofRepoWrite(getRepository());
 				setVisible(SecurityUtils.getSubject().isPermitted(writePermission) && strategies.size() > 1);						
 			}
 			
@@ -559,13 +557,13 @@ public class RequestOverviewPage extends RequestDetailPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				Permission writePermission = Permission.ofRepositoryWrite(getRepository());
+				ObjectPermission writePermission = ObjectPermission.ofRepoWrite(getRepository());
 				setVisible(!SecurityUtils.getSubject().isPermitted(writePermission) || strategies.size() == 1);						
 			}
 			
 		});
 
-		Permission writePermission = Permission.ofRepositoryWrite(getRepository());
+		ObjectPermission writePermission = ObjectPermission.ofRepoWrite(getRepository());
 
 		if (!SecurityUtils.getSubject().isPermitted(writePermission) || strategies.size() == 1) {
 			integrationStrategyContainer.add(new WebMarkupContainer("help").add(
@@ -705,7 +703,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 		User assignee = request.getAssignee();
 		boolean canChangeAssignee = request.isOpen() 
 				&& (request.getSubmitter().equals(getCurrentUser()) 
-					|| SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryAdmin(getRepository())));
+					|| SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoAdmin(getRepository())));
 		if (assignee != null) {
 			
 			if (canChangeAssignee) {
@@ -764,7 +762,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 					User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 					setVisible(request.isOpen() 
 							&& !request.getPotentialReviewers().isEmpty()
-							&& (request.getSubmitter().equals(currentUser) || SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryAdmin(request.getTarget().getRepository()))));
+							&& (request.getSubmitter().equals(currentUser) || SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoAdmin(request.getTarget().getRepository()))));
 				} else {
 					setVisible(true);
 				}

@@ -4,6 +4,8 @@ import java.util.Collection;
 
 import javax.annotation.Nullable;
 
+import org.eclipse.jgit.lib.PersonIdent;
+
 import com.pmease.gitplex.core.model.User;
 
 public interface UserManager {
@@ -31,14 +33,14 @@ public interface UserManager {
 	@Nullable User findByName(String userName);
 	
 	/**
-	 * Find user of specified email.
+	 * Find user by person
 	 * <p>
-	 * @param email
-	 * 			email of the user
+	 * @param person
+	 * 			Git person representation 
 	 * @return
 	 * 			matching user, or <tt>null</tt> if not found 
 	 */
-	@Nullable User findByEmail(String email);
+	@Nullable User findByPerson(PersonIdent person);
 	
 	/**
 	 * Get current authenticated user in Shiro context, or <tt>null</tt> if not 
@@ -48,6 +50,15 @@ public interface UserManager {
 	 *         current authenticated user, or <tt>null</tt> for anonymous access
 	 */
 	@Nullable User getCurrent();
+	
+	/**
+	 * Get previous user in case current user is a run-as user
+	 * 
+	 * @return
+	 * 			previous user if current user is a run-as user, or <tt>null</tt> 
+	 * 			if current user is not a run-as user. 
+	 */
+	@Nullable User getPrevious();
 	
 	void trim(Collection<Long> userIds);
 	

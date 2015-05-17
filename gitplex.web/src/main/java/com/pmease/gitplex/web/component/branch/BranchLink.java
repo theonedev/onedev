@@ -8,7 +8,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.model.Branch;
-import com.pmease.gitplex.core.permission.Permission;
+import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
@@ -36,7 +36,7 @@ public class BranchLink extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				setEnabled(SecurityUtils.getSubject().isPermitted(
-						Permission.ofRepositoryRead(getBranch().getRepository())));
+						ObjectPermission.ofRepoRead(getBranch().getRepository())));
 			}
 			
 		};

@@ -8,7 +8,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.gitplex.core.permission.operation.GeneralOperation;
+import com.pmease.gitplex.core.permission.operation.RepositoryOperation;
 
 @SuppressWarnings("serial")
 @Entity
@@ -25,13 +25,13 @@ public class Authorization extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private Repository repository;
 	
-	private GeneralOperation operation = GeneralOperation.READ;
+	private RepositoryOperation operation = RepositoryOperation.PULL;
 	
-	public GeneralOperation getOperation() {
+	public RepositoryOperation getOperation() {
 		return operation;
 	}
 
-	public void setOperation(GeneralOperation operation) {
+	public void setOperation(RepositoryOperation operation) {
 		this.operation = operation;
 	}
 

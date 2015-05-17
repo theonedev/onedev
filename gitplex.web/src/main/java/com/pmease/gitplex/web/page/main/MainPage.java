@@ -9,14 +9,19 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
+import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
+import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.Permission;
+import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.web.component.avatar.AvatarByUser;
 import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.account.AccountPage;
@@ -34,6 +39,9 @@ import com.pmease.gitplex.web.page.repository.overview.RepoOverviewPage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 import com.pmease.gitplex.web.page.security.LogoutPage;
 import com.pmease.gitplex.web.page.security.RegisterPage;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 
 @SuppressWarnings("serial")
 public abstract class MainPage extends BasePage {
@@ -81,10 +89,7 @@ public abstract class MainPage extends BasePage {
 			repoLink.setVisible(false);
 		}
 		topNav.add(repoLink);
-		
-		add(new Tabbable("mainTabs", newMainTabs()));
-		add(newMainActions("mainActions"));
-		
+
 		User currentUser = getCurrentUser();
 		boolean signedIn = currentUser != null;
 
@@ -110,12 +115,44 @@ public abstract class MainPage extends BasePage {
 			topTray.add(new WebMarkupContainer("notification").setVisible(false));
 		}
 		
-		if (signedIn)
+		if (signedIn) {
+			final User prevUser = GitPlex.getInstance(UserManager.class).getPrevious();
+			
+			if (prevUser != null) {
+				Link<Void> prevLink = new Link<Void>("prevUser") {
+
+					@Override
+					public void onClick() {
+						SecurityUtils.getSubject().releaseRunAs();
+						setResponsePage(getPage().getClass(), getPageParameters());
+					}
+					
+				};
+				String tooltip = prevUser.getDisplayName() + " is currently running as " 
+						+ currentUser.getDisplayName() + ", click to exit the run-as mode"; 
+				prevLink.add(new TooltipBehavior(Model.of(tooltip), new TooltipConfig().withPlacement(Placement.left)));
+				prevLink.add(new AvatarByUser("avatar", new UserModel(prevUser), false));
+				topTray.add(prevLink);
+			} else {
+				WebMarkupContainer prevLink = new WebMarkupContainer("prevUser");
+				prevLink.add(new WebMarkupContainer("avatar"));
+				prevLink.setVisible(false);
+				topTray.add(prevLink);
+			}
 			topTray.add(new UserLink("user", new UserModel(currentUser)));
-		else  
+		} else {  
+			WebMarkupContainer prevLink = new WebMarkupContainer("prevUser");
+			prevLink.add(new WebMarkupContainer("avatar"));
+			prevLink.setVisible(false);
+			topTray.add(prevLink);
+
 			topTray.add(new WebMarkupContainer("user").setVisible(false));
+		}
+		
+		add(new Tabbable("mainTabs", newMainTabs()));
+		add(newMainActions("mainActions"));
 	}
-	
+
 	protected List<PageTab> newMainTabs() {
 		List<PageTab> tabs = new ArrayList<>();
 		tabs.add(new PageTab(Model.of("Home"), HomePage.class));
@@ -124,7 +161,7 @@ public abstract class MainPage extends BasePage {
 		
 		tabs.add(new PageTab(Model.of("Repositories"), RepoListPage.class));
 		
-		if (SecurityUtils.getSubject().isPermitted(Permission.ofSystemAdmin()))
+		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofSystemAdmin()))
 			tabs.add(new PageTab(Model.of("Administration"), SystemSettingPage.class, AdministrationPage.class));
 		
 		return tabs;

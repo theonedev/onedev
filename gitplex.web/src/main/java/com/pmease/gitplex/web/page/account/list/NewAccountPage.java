@@ -14,7 +14,7 @@ import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.Permission;
+import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.main.MainPage;
@@ -30,7 +30,7 @@ public class NewAccountPage extends MainPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.getSubject().isPermitted(Permission.ofSystemAdmin());
+		return SecurityUtils.getSubject().isPermitted(ObjectPermission.ofSystemAdmin());
 	}
 
 	@Override
@@ -42,32 +42,17 @@ public class NewAccountPage extends MainPage {
 		Form<?> form = new Form<Void>("form") {
 
 			@Override
-			protected void onError() {
-				super.onError();
-			}
-
-			@Override
 			protected void onSubmit() {
 				super.onSubmit();
 				
 				UserManager userManager = GitPlex.getInstance(UserManager.class);
-				User accountWithSameEmail = userManager.findByEmail(account.getEmail());
 				User accountWithSameName = userManager.findByName(account.getName());
-				boolean hasError = false;
 				if (accountWithSameName != null) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another account.");
-					hasError = true;
-				}
-				if (accountWithSameEmail != null) {
-					editor.getErrorContext(new PathSegment.Property("email"))
-							.addError("This email has already been used by another account.");
-					hasError = true;
-				}
-				
-				if (!hasError) {
+				} else {
 					userManager.save(account);
-					Session.get().info("New account created");
+					Session.get().success("New account created");
 					setResponsePage(AvatarEditPage.class, AccountPage.paramsOf(account));
 				}
 			}

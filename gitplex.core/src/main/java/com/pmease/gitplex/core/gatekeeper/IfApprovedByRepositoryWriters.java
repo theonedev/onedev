@@ -6,15 +6,14 @@ import javax.validation.constraints.Min;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.operation.GeneralOperation;
+import com.pmease.gitplex.core.permission.operation.RepositoryOperation;
+import com.pmease.gitplex.core.security.SecurityUtils;
 
 @SuppressWarnings("serial")
 @Editable(order=50, icon="fa-group", category=GateKeeper.CATEGROY_CHECK_REVIEW, description=
@@ -36,9 +35,8 @@ public class IfApprovedByRepositoryWriters extends AbstractGateKeeper {
 
 	@Override
 	public CheckResult doCheckRequest(PullRequest request) {
-		AuthorizationManager authorizationManager = GitPlex.getInstance(AuthorizationManager.class);
-		Collection<User> authorizedUsers = authorizationManager.listAuthorizedUsers(
-				request.getTarget().getRepository(), GeneralOperation.WRITE);
+		Collection<User> authorizedUsers = SecurityUtils.findUsersCan(
+				request.getTarget().getRepository(), RepositoryOperation.PUSH);
 
         int approvals = 0;
         int pendings = 0;
@@ -66,10 +64,7 @@ public class IfApprovedByRepositoryWriters extends AbstractGateKeeper {
 	}
 	
 	private CheckResult check(User user, Repository repository) {
-		AuthorizationManager authorizationManager = GitPlex.getInstance(AuthorizationManager.class);
-
-		Collection<User> writers = authorizationManager.listAuthorizedUsers(
-				repository, GeneralOperation.WRITE);
+		Collection<User> writers = SecurityUtils.findUsersCan(repository, RepositoryOperation.PUSH);
 
         int approvals = 0;
         int pendings = writers.size();

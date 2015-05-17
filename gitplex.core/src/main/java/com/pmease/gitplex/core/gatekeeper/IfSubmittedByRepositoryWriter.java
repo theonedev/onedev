@@ -7,7 +7,7 @@ import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.Permission;
+import com.pmease.gitplex.core.permission.ObjectPermission;
 
 @SuppressWarnings("serial")
 @Editable(order=50, icon="fa-group", category=GateKeeper.CATEGROY_CHECK_SUBMITTER, description=
@@ -21,7 +21,7 @@ public class IfSubmittedByRepositoryWriter extends AbstractGateKeeper {
 	}
 	
 	private CheckResult check(User user, Repository repository) {
-		if (user.asSubject().isPermitted(Permission.ofRepositoryWrite(repository)))
+		if (user.asSubject().isPermitted(ObjectPermission.ofRepoWrite(repository)))
 			return passed(Lists.newArrayList("Submitted by repository writer"));
 		else
 			return failed(Lists.newArrayList("Not submitted by repository writer"));

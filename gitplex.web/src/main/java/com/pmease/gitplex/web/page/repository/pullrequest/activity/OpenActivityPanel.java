@@ -14,8 +14,8 @@ import org.apache.wicket.model.Model;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.user.AvatarMode;
@@ -106,8 +106,7 @@ public class OpenActivityPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(GitPlex.getInstance(AuthorizationManager.class)
-						.canModifyRequest(requestModel.getObject()));
+				setVisible(SecurityUtils.canModify(requestModel.getObject()));
 			}
 
 		});

@@ -3,7 +3,7 @@ package com.pmease.gitplex.web.page.repository.admin;
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.gitplex.core.permission.Permission;
+import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
@@ -26,7 +26,7 @@ public class GeneralSettingPage extends RepositoryPage {
 	@Override
 	protected boolean isPermitted() {
 		return super.isPermitted() 
-				&& SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryAdmin(getRepository()));
+				&& SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoAdmin(getRepository()));
 	}
 
 }

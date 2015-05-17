@@ -31,7 +31,7 @@ import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.PullRequestVerification;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
-import com.pmease.gitplex.core.permission.Permission;
+import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.component.avatar.RemoveableAvatar;
 import com.pmease.gitplex.web.component.commitlink.CommitLink;
 import com.pmease.gitplex.web.component.commitmessage.OldCommitMessagePanel;
@@ -133,7 +133,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 								
 								setEnabled(getPullRequest().isOpen() 
 										&& (item.getModelObject().getReviewer().equals(getCurrentUser()) 
-												|| SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryAdmin(getRepository()))));
+												|| SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoAdmin(getRepository()))));
 							}
 
 						});

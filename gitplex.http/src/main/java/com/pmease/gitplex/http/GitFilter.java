@@ -37,7 +37,7 @@ import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.setting.ServerConfig;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.Permission;
+import com.pmease.gitplex.core.permission.ObjectPermission;
 
 @Singleton
 public class GitFilter implements Filter {
@@ -121,12 +121,12 @@ public class GitFilter implements Filter {
 		File gitDir = storageManager.getRepoDir(repository);
 
 		if (GitSmartHttpTools.isUploadPack(request)) {
-			if (!SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryRead(repository))) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoRead(repository))) {
 				throw new UnauthorizedException("You do not have permission to pull from this repository.");
 			}
 			new UploadCommand(gitDir, environments).input(ServletUtils.getInputStream(request)).output(response.getOutputStream()).call();
 		} else {
-			if (!SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryWrite(repository))) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoWrite(repository))) {
 				throw new UnauthorizedException("You do not have permission to push to this repository.");
 			}
 			new ReceiveCommand(gitDir, environments).input(ServletUtils.getInputStream(request)).output(response.getOutputStream()).call();
@@ -154,13 +154,13 @@ public class GitFilter implements Filter {
 		File gitDir = storageManager.getRepoDir(repository);
 
 		if (service.contains("upload")) {
-			if (!SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryRead(repository))) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoRead(repository))) {
 				throw new UnauthorizedException("You do not have permission to pull from this repository.");
 			}
 			writeInitial(response, service);
 			new AdvertiseUploadRefsCommand(gitDir).output(response.getOutputStream()).call();
 		} else {
-			if (!SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryWrite(repository))) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoWrite(repository))) {
 				throw new UnauthorizedException("You do not have permission to push to this repository.");
 			}
 			writeInitial(response, service);

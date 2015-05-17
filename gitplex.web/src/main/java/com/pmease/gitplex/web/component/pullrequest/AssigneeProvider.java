@@ -15,12 +15,12 @@ import org.json.JSONWriter;
 import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.Permission;
-import com.pmease.gitplex.core.permission.operation.GeneralOperation;
+import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.permission.operation.RepositoryOperation;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.vaynberg.wicket.select2.ChoiceProvider;
@@ -39,8 +39,7 @@ public class AssigneeProvider extends ChoiceProvider<Assignee> {
 	@Override
 	public void query(String term, int page, Response<Assignee> response) {
 		List<Assignee> assignees = new ArrayList<>();
-		for (User user: GitPlex.getInstance(AuthorizationManager.class)
-				.listAuthorizedUsers(repoModel.getObject(), GeneralOperation.WRITE)) {
+		for (User user: SecurityUtils.findUsersCan(repoModel.getObject(), RepositoryOperation.PUSH)) {
 			if (StringUtils.isBlank(term) 
 					|| user.getName().startsWith(term) 
 					|| user.getDisplayName().startsWith(term)) {
@@ -57,7 +56,7 @@ public class AssigneeProvider extends ChoiceProvider<Assignee> {
 		});
 		if (StringUtils.isBlank(term)) {
 			assignees.add(0, new Assignee(repoModel.getObject().getOwner(), "Repository Owner"));
-			Permission writePermission = Permission.ofRepositoryWrite(repoModel.getObject());
+			ObjectPermission writePermission = ObjectPermission.ofRepoWrite(repoModel.getObject());
 			User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 			if (currentUser != null && currentUser.asSubject().isPermitted(writePermission))
 				assignees.add(0, new Assignee(currentUser, "Me"));

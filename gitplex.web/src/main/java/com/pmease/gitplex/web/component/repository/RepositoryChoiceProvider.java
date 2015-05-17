@@ -25,7 +25,7 @@ import com.pmease.commons.wicket.component.select2.ListChoiceProvider;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.Permission;
+import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.Constants;
 
 @SuppressWarnings("serial")
@@ -51,7 +51,7 @@ public class RepositoryChoiceProvider extends ListChoiceProvider<Repository> {
 				List<Repository> repositories = GitPlex.getInstance(Dao.class).query(criteria);
 
 				for (Iterator<Repository> it = repositories.iterator(); it.hasNext();) {
-					if (!SecurityUtils.getSubject().isPermitted(Permission.ofRepositoryRead(it.next())))
+					if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoRead(it.next())))
 						it.remove();
 				}
 				

@@ -3,7 +3,7 @@ html, body {
 }
 #main>.head {
 	padding: 16px;
-	background: #333;
+	background: #444;
 }
 #topnav>a, #topnav>span {
 	color: white; 
@@ -23,27 +23,40 @@ html, body {
 #toptray a, #toptray span {
 	color: white; 
 }
-#toptray span {
-	color: white; 
-}
-#toptray a.sign-out .fa {
-	font-size: 20px;
-	vertical-align: middle;
-}
 #toptray>a, #toptray>span {
 	margin-right: 8px;
 } 
 #toptray>:last-child {
 	margin-right: 0;
 } 
-#toptray .user-link .avatar {
+#toptray .avatar {
 	width: 32px;
 	height: 32px;
 	margin: -4px 0;
 	vertical-align: bottom;
+	box-shadow: -1px 0px 3px 0px rgba(0,0,0,1), 
+				1px 0px 3px 0px rgba(0,0,0,1), 
+				0px -1px 3px 0px rgba(0,0,0,1), 
+				0px 1px 3px 0px rgba(0,0,0,1);
 }
+#toptray a.previous {
+	text-decoration: none;
+	display: block;
+	float: left;
+}
+#toptray a.previous .avatar {
+	margin-right: -25px;
+}
+#toptray a.previous:hover .avatar {
+	margin-right: -7px;
+}
+
 #toptray .user-link span {
 	font-size: 16px;
+}
+#toptray a.sign-out .fa {
+	font-size: 20px;
+	vertical-align: middle;
 }
 
 #main>.body>.head {

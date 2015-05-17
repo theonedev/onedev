@@ -59,7 +59,7 @@ public class PersonLink extends Panel {
 	protected void onBeforeRender() {
 		PersonIdent person = getPerson();
 
-		User user = GitPlex.getInstance(UserManager.class).findByEmail(person.getEmailAddress());
+		User user = GitPlex.getInstance(UserManager.class).findByPerson(person);
 
 		WebMarkupContainer link;
 		if (user != null) {

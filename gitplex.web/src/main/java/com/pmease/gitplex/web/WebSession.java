@@ -36,14 +36,6 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 		this.displayOutline = displayOutline;
 	}
 
-	public void runAs(User user) {
-		Subject subject = SecurityUtils.getSubject();
-		subject.getSession().stop();
-		WebSession.get().replaceSession(); 
-		
-		subject.runAs(user.getPrincipals());
-	}
-	
 	public void login(String userName, String password, boolean rememberMe) {
 		Subject subject = SecurityUtils.getSubject();
 
@@ -57,5 +49,11 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 		token = new UsernamePasswordToken(userName, password, rememberMe);
 		
 		subject.login(token);
+	}
+	
+	public void logout() {
+		SecurityUtils.getSubject().logout();
+        WebSession session = WebSession.get();
+        session.replaceSession();
 	}
 }

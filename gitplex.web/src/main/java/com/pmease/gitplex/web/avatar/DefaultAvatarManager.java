@@ -92,7 +92,7 @@ public class DefaultAvatarManager implements AvatarManager {
 	
 	@Override
 	public String getAvatarUrl(PersonIdent person) {
-		User user = userManager.findByEmail(person.getEmailAddress());
+		User user = userManager.findByPerson(person);
 		if (user != null) 
 			return getAvatarUrl(user);
 		else if (configManager.getSystemSetting().isGravatarEnabled())
