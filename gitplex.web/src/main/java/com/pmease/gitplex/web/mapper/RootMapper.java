@@ -12,6 +12,7 @@ import com.pmease.gitplex.core.validation.RepositoryNameValidator;
 import com.pmease.gitplex.core.validation.UserNameValidator;
 import com.pmease.gitplex.web.page.account.list.AccountListPage;
 import com.pmease.gitplex.web.page.account.list.NewAccountPage;
+import com.pmease.gitplex.web.page.account.notification.AccountNotificationPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.account.setting.PasswordEditPage;
@@ -86,9 +87,11 @@ public class RootMapper extends CompoundRequestMapper {
 
 		});
 
-		addPage("${user}/settings/profile", ProfileEditPage.class);
-		addPage("${user}/settings/avatar", AvatarEditPage.class);
-		addPage("${user}/settings/password", PasswordEditPage.class);
+		addPage("${user}/notification", AccountNotificationPage.class);
+		
+		addPage("${user}/setting/profile", ProfileEditPage.class);
+		addPage("${user}/setting/avatar", AvatarEditPage.class);
+		addPage("${user}/setting/password", PasswordEditPage.class);
 	}
 
 	private void addRepoPages() {

@@ -61,7 +61,7 @@ public abstract class AccountPage extends MainPage {
 		mainTabs.add(new AccountTab(Model.of("Overview"), AccountOverviewPage.class));
 		
 		if (SecurityUtils.canManage(getAccount())) {
-			mainTabs.add(new AccountTab(Model.of("Notifications"), AccountNotificationPage.class));
+			mainTabs.add(new AccountTab(Model.of("Notification"), AccountNotificationPage.class));
 			mainTabs.add(new AccountTab(Model.of("Setting"), ProfileEditPage.class, 
 					AvatarEditPage.class, PasswordEditPage.class));
 		}
