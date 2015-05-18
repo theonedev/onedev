@@ -8,25 +8,23 @@
 	vertical-align: top;
 }
 .sidebar>table>tbody>tr>td.tabs {
-	padding: 20px 0 0 20px;
+	padding-top: 20px;
 	width: 200px;
 	border-right: 1px solid #BBB;
-}
-.sidebar>table>tbody>tr>td.tabs>ul {
-	position: relative;
+	background: #FBFBFB;
 }
 .sidebar>table>tbody>tr>td.tabs>ul>li>a {
-	border: 1px solid white;
+	border-left: 4px solid #FBFBFB;
 	color: #666;
 	display: block;
 	text-decoration: none;
-	padding: 6px 12px;
+	padding: 8px 16px;
 }
 .sidebar>table>tbody>tr>td.tabs>ul>li.active>a {
-	border: 1px solid #BBB;
-	border-right-color: white;
-	color: black;
-	margin-right: -1px;
+	border-left-color: #303845;
+	color: #303845;
+	background: #EEE;
+	font-weight: bold;
 }
 .sidebar>table>tbody>tr>td.tabs>div {
 	margin-top: 20px;
