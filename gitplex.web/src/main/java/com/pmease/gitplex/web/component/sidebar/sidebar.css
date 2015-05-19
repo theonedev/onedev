@@ -21,7 +21,7 @@
 	padding: 8px 16px;
 }
 .sidebar>table>tbody>tr>td.tabs>ul>li.active>a {
-	border-left-color: #303845;
+	border-left-color: #d9534f;
 	color: #303845;
 	background: #EEE;
 	font-weight: bold;
