@@ -36,7 +36,7 @@ public class BranchLink extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				setEnabled(SecurityUtils.getSubject().isPermitted(
-						ObjectPermission.ofRepoRead(getBranch().getRepository())));
+						ObjectPermission.ofRepoPull(getBranch().getRepository())));
 			}
 			
 		};

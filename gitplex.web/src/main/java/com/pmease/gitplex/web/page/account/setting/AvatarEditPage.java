@@ -4,7 +4,6 @@ import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -26,7 +25,7 @@ public class AvatarEditPage extends AccountSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 	
-		sidebar.add(new Label("title", "Avatar of " + getAccount().getDisplayName()));
+		add(new Label("title", "Avatar of " + getAccount().getDisplayName()));
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -40,8 +39,8 @@ public class AvatarEditPage extends AccountSettingPage {
 			}
 			
 		};
-		sidebar.add(form);
-		sidebar.add(new FeedbackPanel("feedback", form));
+		add(form);
+		add(new FeedbackPanel("feedback", form));
 		
 		form.add(new AvatarPicker("avatarPicker", accountModel, new IModel<FileUpload>() {
 
@@ -60,20 +59,6 @@ public class AvatarEditPage extends AccountSettingPage {
 			}
 			
 		}));
-		form.add(new Link<Void>("cancel") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(prevPageRef != null);
-			}
-
-			@Override
-			public void onClick() {
-				backToPrevPage();
-			}
-			
-		});
 	}
 
 }

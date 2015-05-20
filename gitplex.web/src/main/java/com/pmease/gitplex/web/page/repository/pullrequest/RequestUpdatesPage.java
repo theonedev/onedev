@@ -41,7 +41,7 @@ import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.PersonLink;
 import com.pmease.gitplex.web.event.PullRequestChanged;
 import com.pmease.gitplex.web.model.UserModel;
-import com.pmease.gitplex.web.page.repository.code.tree.RepoTreePage;
+import com.pmease.gitplex.web.page.repository.tree.RepoTreePage;
 
 @SuppressWarnings("serial")
 public class RequestUpdatesPage extends RequestDetailPage {

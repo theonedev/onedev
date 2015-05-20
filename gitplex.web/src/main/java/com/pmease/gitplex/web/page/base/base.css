@@ -397,7 +397,6 @@ table.verifications tr.ongoing .fa-cog {display: inline; color: #F0AD4E;}
 .conflict-resolve-instruction {padding: 8px; width: 400px;}
 
 /* GATE KEEPER SETTING PAGE */
-.gate-keeper-tip {margin: 0 20px 20px 20px;}
 .gate-keeper-add.well {font-size:16px;}
 .gate-keeper-add .fa {margin-left: 8px;}
 .gate-keeper-add:hover, .gate-keeper-add:focus {background-color: #EBEBEB; border-color: #ADADAD; cursor: pointer;}

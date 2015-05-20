@@ -1,19 +1,34 @@
 package com.pmease.gitplex.web.page.repository;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityNotFoundException;
 
-import org.apache.shiro.SecurityUtils;
+import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.Constants;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.model.RepositoryModel;
 import com.pmease.gitplex.web.page.account.AccountPage;
+import com.pmease.gitplex.web.page.repository.branches.RepoBranchesPage;
+import com.pmease.gitplex.web.page.repository.commit.RepoCommitsPage;
+import com.pmease.gitplex.web.page.repository.pullrequest.OpenRequestsPage;
+import com.pmease.gitplex.web.page.repository.setting.RepoSettingPage;
+import com.pmease.gitplex.web.page.repository.setting.gatekeeper.GateKeeperPage;
+import com.pmease.gitplex.web.page.repository.setting.general.GeneralSettingPage;
+import com.pmease.gitplex.web.page.repository.setting.integrationpolicy.IntegrationPolicyPage;
+import com.pmease.gitplex.web.page.repository.tags.RepoTagsPage;
+import com.pmease.gitplex.web.page.repository.tree.RepoTreePage;
 
 @SuppressWarnings("serial")
 public abstract class RepositoryPage extends AccountPage {
@@ -31,31 +46,45 @@ public abstract class RepositoryPage extends AccountPage {
 	public RepositoryPage(PageParameters params) {
 		super(params);
 		
-		String repositoryName = params.get(PARAM_REPO).toString();
-		Preconditions.checkNotNull(repositoryName);
+		String repoName = params.get(PARAM_REPO).toString();
+		Preconditions.checkNotNull(repoName);
 		
-		if (repositoryName.endsWith(Constants.DOT_GIT_EXT)) {
-			repositoryName = repositoryName.substring(0, 
-					repositoryName.length() - Constants.DOT_GIT_EXT.length());
-		}
+		if (repoName.endsWith(Constants.DOT_GIT_EXT))
+			repoName = repoName.substring(0, repoName.length() - Constants.DOT_GIT_EXT.length());
 		
-		Repository repository = GitPlex.getInstance(RepositoryManager.class).findBy(getAccount(), repositoryName);
+		Repository repository = GitPlex.getInstance(RepositoryManager.class).findBy(getAccount(), repoName);
 		
 		if (repository == null) 
-			throw new EntityNotFoundException("Unable to find repository " + getAccount() + "/" + repositoryName);
+			throw new EntityNotFoundException("Unable to find repository " + getAccount() + "/" + repoName);
 		
 		repoModel = new RepositoryModel(repository);
+		
+		if (!(this instanceof NoCommitsPage) 
+				&& !(this instanceof RepoSettingPage) 
+				&& !getRepository().git().hasCommits()) { 
+			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));
+		}
 	}
 	
 	@Override
-	protected void onInitialize() {
-		super.onInitialize();
+	protected List<PageTab> newMainTabs() {
+		List<PageTab> mainTabs = new ArrayList<>();
+		mainTabs.add(new RepoTab(Model.of("Files"), RepoTreePage.class));
+		mainTabs.add(new RepoTab(Model.of("Commits"), RepoCommitsPage.class));
+		mainTabs.add(new RepoTab(Model.of("Branches"), RepoBranchesPage.class));
+		mainTabs.add(new RepoTab(Model.of("Tags"), RepoTagsPage.class));
+		mainTabs.add(new RepoTab(Model.of("Pull Requests"), OpenRequestsPage.class));
+		
+		if (SecurityUtils.canManage(getRepository())) {
+			mainTabs.add(new RepoTab(Model.of("Setting"), GeneralSettingPage.class, 
+					GateKeeperPage.class, IntegrationPolicyPage.class));
+		}
+		return mainTabs;
 	}
-	
+
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.getSubject().isPermitted(
-				ObjectPermission.ofRepoRead(repoModel.getObject()));
+		return SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(repoModel.getObject()));
 	}
 	
 	public Repository getRepository() {

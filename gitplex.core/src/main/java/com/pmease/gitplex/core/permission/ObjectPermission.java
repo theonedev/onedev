@@ -57,11 +57,11 @@ public class ObjectPermission implements Permission {
 		return new ObjectPermission(repository, RepositoryOperation.ADMIN);
 	}
 
-	public static ObjectPermission ofRepoRead(Repository repository) {
+	public static ObjectPermission ofRepoPull(Repository repository) {
 		return new ObjectPermission(repository, RepositoryOperation.PULL);
 	}
 
-	public static ObjectPermission ofRepoWrite(Repository repository) {
+	public static ObjectPermission ofRepoPush(Repository repository) {
 		return new ObjectPermission(repository, RepositoryOperation.PUSH);
 	}
 

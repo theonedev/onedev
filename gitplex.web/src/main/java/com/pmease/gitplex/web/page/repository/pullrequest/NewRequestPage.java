@@ -141,7 +141,7 @@ public class NewRequestPage extends RepositoryPage {
 			Preconditions.checkState(!strategies.isEmpty());
 			pullRequest.setIntegrationStrategy(strategies.get(0));
 			
-			ObjectPermission writePermission = ObjectPermission.ofRepoWrite(getRepository());
+			ObjectPermission writePermission = ObjectPermission.ofRepoPush(getRepository());
 			if (currentUser.asSubject().isPermitted(writePermission))
 				pullRequest.setAssignee(currentUser);
 			else

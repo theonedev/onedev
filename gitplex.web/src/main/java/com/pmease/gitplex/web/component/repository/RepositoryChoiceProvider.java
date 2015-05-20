@@ -51,7 +51,7 @@ public class RepositoryChoiceProvider extends ListChoiceProvider<Repository> {
 				List<Repository> repositories = GitPlex.getInstance(Dao.class).query(criteria);
 
 				for (Iterator<Repository> it = repositories.iterator(); it.hasNext();) {
-					if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoRead(it.next())))
+					if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(it.next())))
 						it.remove();
 				}
 				

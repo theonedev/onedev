@@ -21,7 +21,7 @@ public class IfSubmittedByRepositoryWriter extends AbstractGateKeeper {
 	}
 	
 	private CheckResult check(User user, Repository repository) {
-		if (user.asSubject().isPermitted(ObjectPermission.ofRepoWrite(repository)))
+		if (user.asSubject().isPermitted(ObjectPermission.ofRepoPush(repository)))
 			return passed(Lists.newArrayList("Submitted by repository writer"));
 		else
 			return failed(Lists.newArrayList("Not submitted by repository writer"));

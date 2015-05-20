@@ -56,7 +56,7 @@ public class AssigneeProvider extends ChoiceProvider<Assignee> {
 		});
 		if (StringUtils.isBlank(term)) {
 			assignees.add(0, new Assignee(repoModel.getObject().getOwner(), "Repository Owner"));
-			ObjectPermission writePermission = ObjectPermission.ofRepoWrite(repoModel.getObject());
+			ObjectPermission writePermission = ObjectPermission.ofRepoPush(repoModel.getObject());
 			User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 			if (currentUser != null && currentUser.asSubject().isPermitted(writePermission))
 				assignees.add(0, new Assignee(currentUser, "Me"));

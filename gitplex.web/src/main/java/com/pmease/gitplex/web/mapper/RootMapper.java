@@ -10,35 +10,33 @@ import org.apache.wicket.request.mapper.CompoundRequestMapper;
 
 import com.pmease.gitplex.core.validation.RepositoryNameValidator;
 import com.pmease.gitplex.core.validation.UserNameValidator;
-import com.pmease.gitplex.web.page.account.list.AccountListPage;
-import com.pmease.gitplex.web.page.account.list.NewAccountPage;
-import com.pmease.gitplex.web.page.account.notification.AccountNotificationPage;
+import com.pmease.gitplex.web.page.account.notifications.AccountNotificationsPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
+import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
+import com.pmease.gitplex.web.page.account.repositories.NewAccountRepoPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.account.setting.PasswordEditPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
-import com.pmease.gitplex.web.page.admin.MailSettingPage;
-import com.pmease.gitplex.web.page.admin.QosSettingPage;
-import com.pmease.gitplex.web.page.admin.SystemSettingPage;
+import com.pmease.gitplex.web.page.home.accounts.AccountsPage;
+import com.pmease.gitplex.web.page.home.accounts.NewAccountPage;
+import com.pmease.gitplex.web.page.home.admin.MailSettingPage;
+import com.pmease.gitplex.web.page.home.admin.QosSettingPage;
+import com.pmease.gitplex.web.page.home.admin.SystemSettingPage;
 import com.pmease.gitplex.web.page.init.ServerInitPage;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
-import com.pmease.gitplex.web.page.repository.admin.GeneralSettingPage;
-import com.pmease.gitplex.web.page.repository.admin.gatekeeper.GateKeeperPage;
-import com.pmease.gitplex.web.page.repository.admin.integrationpolicy.IntegrationPolicyPage;
-import com.pmease.gitplex.web.page.repository.code.blob.RepoBlobPage;
-import com.pmease.gitplex.web.page.repository.code.branches.BranchComparePage;
-import com.pmease.gitplex.web.page.repository.code.branches.RepoBranchesPage;
-import com.pmease.gitplex.web.page.repository.code.tree.RepoTreePage;
+import com.pmease.gitplex.web.page.repository.branches.BranchComparePage;
+import com.pmease.gitplex.web.page.repository.branches.RepoBranchesPage;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitsPage;
-import com.pmease.gitplex.web.page.repository.list.RepoListPage;
-import com.pmease.gitplex.web.page.repository.overview.RepoOverviewPage;
-import com.pmease.gitplex.web.page.repository.pullrequest.ClosedRequestsPage;
-import com.pmease.gitplex.web.page.repository.pullrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.OpenRequestsPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestComparePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestOverviewPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestUpdatesPage;
+import com.pmease.gitplex.web.page.repository.setting.gatekeeper.GateKeeperPage;
+import com.pmease.gitplex.web.page.repository.setting.general.GeneralSettingPage;
+import com.pmease.gitplex.web.page.repository.setting.integrationpolicy.IntegrationPolicyPage;
+import com.pmease.gitplex.web.page.repository.tags.RepoTagsPage;
+import com.pmease.gitplex.web.page.repository.tree.RepoTreePage;
 import com.pmease.gitplex.web.page.security.ForgetPage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 import com.pmease.gitplex.web.page.security.LogoutPage;
@@ -64,13 +62,13 @@ public class RootMapper extends CompoundRequestMapper {
 	}
 
 	private void addAdministrationPages() {
-		addPage("administration/mail-settings", MailSettingPage.class);
-		addPage("administration/system-settings", SystemSettingPage.class);
-		addPage("administration/qos-settings", QosSettingPage.class);
+		addPage("administration/mail-setting", MailSettingPage.class);
+		addPage("administration/system-setting", SystemSettingPage.class);
+		addPage("administration/qos-setting", QosSettingPage.class);
 	}
 
 	private void addAccountPages() {
-		addPage("accounts", AccountListPage.class);
+		addPage("accounts", AccountsPage.class);
 		addPage("accounts/new", NewAccountPage.class);
 		
 		add(new MountedMapper("${user}", AccountOverviewPage.class) {
@@ -86,18 +84,18 @@ public class RootMapper extends CompoundRequestMapper {
 			}
 
 		});
-
-		addPage("${user}/notification", AccountNotificationPage.class);
 		
+		addPage("${user}/overview", AccountOverviewPage.class);
+		addPage("${user}/notification", AccountNotificationsPage.class);
+		addPage("${user}/repositories", AccountReposPage.class);
+		addPage("${user}/repositories/new", NewAccountRepoPage.class);
 		addPage("${user}/setting/profile", ProfileEditPage.class);
 		addPage("${user}/setting/avatar", AvatarEditPage.class);
 		addPage("${user}/setting/password", PasswordEditPage.class);
 	}
 
 	private void addRepoPages() {
-		addPage("repositories", RepoListPage.class);
-		
-		add(new MountedMapper("${user}/${repo}", RepoOverviewPage.class) {
+		add(new MountedMapper("${user}/${repo}", RepoTreePage.class) {
 
 			@Override
 			protected boolean urlStartsWith(Url url, String... segments) {
@@ -109,33 +107,21 @@ public class RootMapper extends CompoundRequestMapper {
 					return false;
 
 				String repositoryName = urlSegments.get(1);
-				return !RepositoryNameValidator.getReservedNames().contains(
-						repositoryName);
+				return !RepositoryNameValidator.getReservedNames().contains(repositoryName);
 			}
 
 		});
 
-		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/tree", RepoTreePage.class));
-		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/blob", RepoBlobPage.class));
-		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/commit", RepoCommitPage.class));
-		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/commits", RepoCommitsPage.class));
-		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/compare", BranchComparePage.class));
+		add(new PageParameterAwareMountedMapper("${user}/${repo}/tree", RepoTreePage.class));
+		add(new PageParameterAwareMountedMapper("${user}/${repo}/commit", RepoCommitPage.class));
+		add(new PageParameterAwareMountedMapper("${user}/${repo}/commits", RepoCommitsPage.class));
+		add(new PageParameterAwareMountedMapper("${user}/${repo}/compare", BranchComparePage.class));
 
-		add(new PageParameterAwareMountedMapper("${user}/${repo}/branches",
-				RepoBranchesPage.class));
+		add(new PageParameterAwareMountedMapper("${user}/${repo}/branches", RepoBranchesPage.class));
+		add(new PageParameterAwareMountedMapper("${user}/${repo}/tags", RepoTagsPage.class));
 
 		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/pull-requests/open", OpenRequestsPage.class));
-		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/pull-requests/closed",
-				ClosedRequestsPage.class));
-		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/pull-requests/new", NewRequestPage.class));
+				"${user}/${repo}/pull-requests", OpenRequestsPage.class));
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/pull-requests/${request}", RequestOverviewPage.class));
 		add(new PageParameterAwareMountedMapper(
@@ -145,14 +131,10 @@ public class RootMapper extends CompoundRequestMapper {
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/pull-requests/${request}/compare", RequestComparePage.class));
 
-		add(new PageParameterAwareMountedMapper("${user}/${repo}/settings",
-				GeneralSettingPage.class));
-		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/settings/gate-keepers",
-				GateKeeperPage.class));
-		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/settings/integration-setting",
-				IntegrationPolicyPage.class));
+		add(new PageParameterAwareMountedMapper("${user}/${repo}/setting", GeneralSettingPage.class));
+		add(new PageParameterAwareMountedMapper("${user}/${repo}/setting/general", GeneralSettingPage.class));
+		add(new PageParameterAwareMountedMapper("${user}/${repo}/setting/gate-keeper", GateKeeperPage.class));
+		add(new PageParameterAwareMountedMapper("${user}/${repo}/setting/integration-policy", IntegrationPolicyPage.class));
 		
 		add(new PageParameterAwareMountedMapper(
 				"${user}/${repo}/no-commits", NoCommitsPage.class));

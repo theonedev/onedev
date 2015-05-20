@@ -16,9 +16,9 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.list.AccountListPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.base.BasePage;
+import com.pmease.gitplex.web.page.home.accounts.AccountsPage;
 
 @SuppressWarnings("serial")
 public class RegisterPage extends BasePage {
@@ -62,7 +62,7 @@ public class RegisterPage extends BasePage {
 
 			@Override
 			public void onClick() {
-				setResponsePage(AccountListPage.class);
+				setResponsePage(AccountsPage.class);
 			}
 			
 		});

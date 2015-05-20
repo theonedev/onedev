@@ -47,7 +47,7 @@ public class PullRequestResource {
     public PullRequest get(@PathParam("id") Long id) {
     	PullRequest request = dao.load(PullRequest.class, id);
     	
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoRead(request.getTarget().getRepository())))
+    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(request.getTarget().getRepository())))
     		throw new UnauthorizedException();
     	
     	return request;
@@ -95,7 +95,7 @@ public class PullRequestResource {
 		List<PullRequest> requests = dao.query(criteria);
 		
 		for (PullRequest request: requests) {
-	    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoRead(request.getTarget().getRepository())))
+	    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(request.getTarget().getRepository())))
 	    		throw new UnauthorizedException("Unauthorized access to pull request " + request.getTarget() + "/" + request.getId());
 		}
 		return requests;

@@ -19,7 +19,7 @@ import org.apache.wicket.request.resource.caching.version.LastModifiedResourceVe
 import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.gitplex.web.mapper.RootMapper;
 import com.pmease.gitplex.web.page.error.BaseErrorPage;
-import com.pmease.gitplex.web.page.home.HomePage;
+import com.pmease.gitplex.web.page.home.dashboard.DashboardPage;
 
 @Singleton
 public class WicketConfig extends AbstractWicketConfig {
@@ -30,7 +30,7 @@ public class WicketConfig extends AbstractWicketConfig {
 
 	@Override
 	public Class<? extends Page> getHomePage() {
-		return HomePage.class;
+		return DashboardPage.class;
 	}
 
 	@Override

@@ -535,7 +535,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				ObjectPermission writePermission = ObjectPermission.ofRepoWrite(getRepository());
+				ObjectPermission writePermission = ObjectPermission.ofRepoPush(getRepository());
 				setVisible(SecurityUtils.getSubject().isPermitted(writePermission) && strategies.size() > 1);						
 			}
 			
@@ -557,13 +557,13 @@ public class RequestOverviewPage extends RequestDetailPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				ObjectPermission writePermission = ObjectPermission.ofRepoWrite(getRepository());
+				ObjectPermission writePermission = ObjectPermission.ofRepoPush(getRepository());
 				setVisible(!SecurityUtils.getSubject().isPermitted(writePermission) || strategies.size() == 1);						
 			}
 			
 		});
 
-		ObjectPermission writePermission = ObjectPermission.ofRepoWrite(getRepository());
+		ObjectPermission writePermission = ObjectPermission.ofRepoPush(getRepository());
 
 		if (!SecurityUtils.getSubject().isPermitted(writePermission) || strategies.size() == 1) {
 			integrationStrategyContainer.add(new WebMarkupContainer("help").add(

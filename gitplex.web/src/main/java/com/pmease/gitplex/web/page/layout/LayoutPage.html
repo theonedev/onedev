@@ -1,0 +1,45 @@
+<wicket:extend>
+	<div id="main">
+		<div class="head clearfix">
+			<div wicket:id="topNav" id="topnav" class="pull-left">
+				<a wicket:id="home" class="home"><i class="fa fa-ext fa-gitplex-logo"></i> <span>Home</span></a>
+				<wicket:enclosure child="account">
+				<span class="separator"><i class="fa fa-angle-right"></i></span>
+				<a wicket:id="account" class="account"><span wicket:id="name"></span></a>
+				</wicket:enclosure>
+				<wicket:enclosure child="repository">
+				<span class="separator"><i class="fa fa-angle-right"></i></span>
+				<a wicket:id="repository" class="repo"><span wicket:id="name"></span></a>
+				</wicket:enclosure>
+			</div>
+			<div wicket:id="topTray" id="toptray" class="pull-right">
+			  	<wicket:enclosure child="login">
+			  		<a wicket:id="login">Log in</a>
+			  		<span class="separator">|</span>
+			  		<a wicket:id="register">Sign up</a>
+				</wicket:enclosure>
+				<wicket:enclosure child="logout">
+			  		<a wicket:id="notification" class="notifications" title="You've got tasks"><i class="fa fa-circle"></i></a>
+			  		<a wicket:id="prevUser" class="previous">
+			  			<img wicket:id="avatar" class="avatar"></img>
+			  		</a>
+			  		<div wicket:id="tooltip" id="runas-tooltip"></div>
+			  		<a wicket:id="user" class="current"></a>
+			  		<a wicket:id="logout" class="sign-out" title="Sign out"><i class="fa fa-sign-out"></i></a>
+			  	</wicket:enclosure>
+			</div>
+		</div>
+		<ul wicket:id="mainTabs" class="tabs list-unstyled clearfix"></ul>
+		<div class="content">
+			<wicket:child></wicket:child>
+		</div>
+		<div class="foot clearfix">
+			<div class="pull-left">
+				<a href="http://www.pmease.com">PMEase GitPlex</a>, 1.0.0, 2013-03-05, Commercial License for Site 'PMEase Inc.'
+			</div>
+			<div class="pull-right">
+			    <a href="http://www.pmease.com/support">Support</a> | <a href="http://track.pmease.com">Report Bug or Enhancement</a> 
+			</div>
+		</div>
+	</div>
+</wicket:extend>

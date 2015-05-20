@@ -7,7 +7,6 @@ import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.SubmitLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -32,7 +31,7 @@ public class ProfileEditPage extends AccountSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		sidebar.add(new Label("title", "Profile of " + getAccount().getDisplayName()));
+		add(new Label("title", "Profile of " + getAccount().getDisplayName()));
 		
 		final ProfileDescriptor profileDesciptor = new ProfileDescriptor();
 		final BeanEditor<?> editor = new ReflectionBeanEditor("editor", profileDesciptor, new IModel<Serializable>() {
@@ -80,23 +79,9 @@ public class ProfileEditPage extends AccountSettingPage {
 			
 		};
 		form.add(editor);
-		
 		form.add(new SubmitLink("save"));
-		form.add(new Link<Void>("cancel") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(prevPageRef != null);
-			}
-
-			@Override
-			public void onClick() {
-				backToPrevPage();
-			}
-			
-		});
-		sidebar.add(form);
+		
+		add(form);
 	}
 
 	private static class ProfileDescriptor extends DefaultBeanDescriptor {

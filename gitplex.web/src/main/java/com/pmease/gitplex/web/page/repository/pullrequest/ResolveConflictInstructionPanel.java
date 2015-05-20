@@ -69,7 +69,7 @@ class ResolveConflictInstructionPanel extends Panel {
 			differentRepoContainer.setVisible(!sameRepo);
 			fragment.add(differentRepoContainer);
 		} else if (user != null 
-						&& SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoWrite(targetRepo))
+						&& SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPush(targetRepo))
 						&& targetRepo.getGateKeeper().checkCommit(user, request.getTarget(), sourceHead).allowIntegration()) {
 			fragment = new Fragment("content", "mergeInTargetFrag", this);
 			fragment.add(new Label("destRepoName", request.getTarget().getRepository()));

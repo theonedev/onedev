@@ -54,7 +54,7 @@ public class AffinalRepositoryChoiceProvider extends ListChoiceProvider<Reposito
 					affinalRepositories.add(0, getCurrentRepository().getForkedFrom());
 				affinalRepositories.add(0, getCurrentRepository());
 				for (Iterator<Repository> it = affinalRepositories.iterator(); it.hasNext();) {
-					if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoRead(it.next())))
+					if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(it.next())))
 						it.remove();
 				}
 				return affinalRepositories;

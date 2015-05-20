@@ -50,7 +50,7 @@ public class BranchResource {
     @Path("/{id}")
     public Branch get(@PathParam("id") Long id) {
     	Branch branch = dao.load(Branch.class, id);
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoRead(branch.getRepository())))
+    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(branch.getRepository())))
     		throw new UnauthorizedException();
     	return branch;
     }
@@ -75,7 +75,7 @@ public class BranchResource {
 		List<Branch> branches = dao.query(criteria);
 		
     	for (Branch branch: branches) {
-    		if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoRead(branch.getRepository()))) {
+    		if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(branch.getRepository()))) {
     			throw new UnauthorizedException("Unauthorized access to branch " + branch);
     		}
     	}

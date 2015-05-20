@@ -16,7 +16,7 @@ public enum PullRequestOperation {
 		@Override
 		public boolean canOperate(PullRequest request) {
 			if (!SecurityUtils.getSubject().isPermitted(
-					ObjectPermission.ofRepoWrite(request.getTarget().getRepository()))) {
+					ObjectPermission.ofRepoPush(request.getTarget().getRepository()))) {
 				return false;
 			} else {
 				return GitPlex.getInstance(PullRequestManager.class).canIntegrate(request);

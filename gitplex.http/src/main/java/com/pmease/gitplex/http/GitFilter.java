@@ -121,12 +121,12 @@ public class GitFilter implements Filter {
 		File gitDir = storageManager.getRepoDir(repository);
 
 		if (GitSmartHttpTools.isUploadPack(request)) {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoRead(repository))) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(repository))) {
 				throw new UnauthorizedException("You do not have permission to pull from this repository.");
 			}
 			new UploadCommand(gitDir, environments).input(ServletUtils.getInputStream(request)).output(response.getOutputStream()).call();
 		} else {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoWrite(repository))) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPush(repository))) {
 				throw new UnauthorizedException("You do not have permission to push to this repository.");
 			}
 			new ReceiveCommand(gitDir, environments).input(ServletUtils.getInputStream(request)).output(response.getOutputStream()).call();
@@ -154,13 +154,13 @@ public class GitFilter implements Filter {
 		File gitDir = storageManager.getRepoDir(repository);
 
 		if (service.contains("upload")) {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoRead(repository))) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(repository))) {
 				throw new UnauthorizedException("You do not have permission to pull from this repository.");
 			}
 			writeInitial(response, service);
 			new AdvertiseUploadRefsCommand(gitDir).output(response.getOutputStream()).call();
 		} else {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoWrite(repository))) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPush(repository))) {
 				throw new UnauthorizedException("You do not have permission to push to this repository.");
 			}
 			writeInitial(response, service);

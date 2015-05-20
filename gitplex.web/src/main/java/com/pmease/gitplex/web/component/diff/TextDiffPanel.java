@@ -136,7 +136,7 @@ public class TextDiffPanel extends Panel {
 			@Override
 			protected Boolean load() {
 				User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
-				ObjectPermission readPermission = ObjectPermission.ofRepoRead(repoModel.getObject());
+				ObjectPermission readPermission = ObjectPermission.ofRepoPull(repoModel.getObject());
 				return currentUser != null && SecurityUtils.getSubject().isPermitted(readPermission);
 			}
 			

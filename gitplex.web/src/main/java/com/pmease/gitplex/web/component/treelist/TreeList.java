@@ -58,7 +58,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.user.PersonLink;
-import com.pmease.gitplex.web.page.repository.code.blob.RepoBlobPage;
+import com.pmease.gitplex.web.page.repository.blob.RepoBlobPage;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 import com.pmease.gitplex.web.util.DateUtils;
 

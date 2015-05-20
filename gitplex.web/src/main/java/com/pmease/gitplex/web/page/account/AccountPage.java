@@ -17,15 +17,16 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.model.UserModel;
-import com.pmease.gitplex.web.page.account.notification.AccountNotificationPage;
+import com.pmease.gitplex.web.page.account.notifications.AccountNotificationsPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
+import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.account.setting.PasswordEditPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
-import com.pmease.gitplex.web.page.main.MainPage;
+import com.pmease.gitplex.web.page.layout.LayoutPage;
 
 @SuppressWarnings("serial")
-public abstract class AccountPage extends MainPage {
+public abstract class AccountPage extends LayoutPage {
 	
 	private static final String PARAM_USER = "user";
 	
@@ -59,9 +60,10 @@ public abstract class AccountPage extends MainPage {
 	protected List<PageTab> newMainTabs() {
 		List<PageTab> mainTabs = new ArrayList<>();
 		mainTabs.add(new AccountTab(Model.of("Overview"), AccountOverviewPage.class));
+		mainTabs.add(new AccountTab(Model.of("Repositories"), AccountReposPage.class));
 		
 		if (SecurityUtils.canManage(getAccount())) {
-			mainTabs.add(new AccountTab(Model.of("Notification"), AccountNotificationPage.class));
+			mainTabs.add(new AccountTab(Model.of("Notifications"), AccountNotificationsPage.class));
 			mainTabs.add(new AccountTab(Model.of("Setting"), ProfileEditPage.class, 
 					AvatarEditPage.class, PasswordEditPage.class));
 		}

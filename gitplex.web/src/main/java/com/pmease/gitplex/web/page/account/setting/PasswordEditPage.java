@@ -6,7 +6,6 @@ import java.util.Iterator;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -30,7 +29,7 @@ public class PasswordEditPage extends AccountSettingPage {
 		
 		User account = getAccount();
 		
-		sidebar.add(new Label("title", "Change Password of " + account.getDisplayName()));
+		add(new Label("title", "Change Password of " + account.getDisplayName()));
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -44,7 +43,7 @@ public class PasswordEditPage extends AccountSettingPage {
 			}
 			
 		};
-		sidebar.add(form);
+		add(form);
 		
 		final PasswordDescriptor descriptor = new PasswordDescriptor();
 		form.add(new ReflectionBeanEditor("editor", descriptor, new IModel<Serializable>() {
@@ -64,21 +63,6 @@ public class PasswordEditPage extends AccountSettingPage {
 			}
 			
 		}));
-		
-		form.add(new Link<Void>("cancel") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(prevPageRef != null);
-			}
-
-			@Override
-			public void onClick() {
-				backToPrevPage();
-			}
-			
-		});
 	}
 
 	private static class PasswordDescriptor extends DefaultBeanDescriptor {

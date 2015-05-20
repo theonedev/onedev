@@ -52,7 +52,7 @@ public class RepositoryResource {
     public Repository get(@PathParam("id") Long id) {
     	Repository repository = dao.load(Repository.class, id);
 
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoRead(repository)))
+    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(repository)))
     		throw new UnauthenticatedException();
     	else
     		return repository;
@@ -78,7 +78,7 @@ public class RepositoryResource {
 		List<Repository> repositories = dao.query(criteria);
 		
 		for (Repository repository: repositories) {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoRead(repository))) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(repository))) {
 				throw new UnauthorizedException("Unauthorized access to repository " + repository.getFQN());
 			}
 		}

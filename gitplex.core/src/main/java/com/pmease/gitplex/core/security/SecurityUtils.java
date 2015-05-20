@@ -67,7 +67,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	public static boolean canCreate(Repository repository, String branchName) {
 		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 		return currentUser != null 
-				&& currentUser.asSubject().isPermitted(ObjectPermission.ofRepoWrite(repository))	
+				&& currentUser.asSubject().isPermitted(ObjectPermission.ofRepoPush(repository))	
 				&& repository.getGateKeeper().checkRef(currentUser, repository, Git.REFS_HEADS + branchName).isPassed();
 	}
 
@@ -75,7 +75,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 		Repository repository = branch.getRepository();
 		return currentUser != null 
-				&& currentUser.asSubject().isPermitted(ObjectPermission.ofRepoWrite(repository))	
+				&& currentUser.asSubject().isPermitted(ObjectPermission.ofRepoPush(repository))	
 				&& repository.getGateKeeper().checkRef(currentUser, repository, Git.REFS_HEADS + branch.getName()).isPassed();
 	}
 
@@ -93,16 +93,19 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return false;
 	}
 	
-	public static boolean canRead(Repository repository) {
-		return getSubject().isPermitted(ObjectPermission.ofRepoRead(repository));
+	public static boolean canPull(Repository repository) {
+		return getSubject().isPermitted(ObjectPermission.ofRepoPull(repository));
 	}
 	
-	public static boolean canWrite(Repository repository) {
-		return getSubject().isPermitted(ObjectPermission.ofRepoWrite(repository));
+	public static boolean canPush(Repository repository) {
+		return getSubject().isPermitted(ObjectPermission.ofRepoPush(repository));
 	}
 	
 	public static boolean canManage(Repository repository) {
 		return getSubject().isPermitted(ObjectPermission.ofRepoAdmin(repository));
 	}
 
+	public static boolean canManageSystem() {
+		return getSubject().isPermitted(ObjectPermission.ofSystemAdmin());
+	}
 }

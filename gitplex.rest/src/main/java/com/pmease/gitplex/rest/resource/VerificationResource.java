@@ -48,7 +48,7 @@ public class VerificationResource {
     @Path("/{id}")
     public PullRequestVerification get(@PathParam("id") Long id) {
     	PullRequestVerification verification  = dao.load(PullRequestVerification.class, id);
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoRead(verification.getRequest().getTarget().getRepository())))
+    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(verification.getRequest().getTarget().getRepository())))
     		throw new UnauthorizedException();
     	return verification;
     }
@@ -71,7 +71,7 @@ public class VerificationResource {
 		
     	for (PullRequestVerification verification: verifications) {
     		if (!SecurityUtils.getSubject().isPermitted(
-    				ObjectPermission.ofRepoRead(verification.getRequest().getTarget().getRepository()))) {
+    				ObjectPermission.ofRepoPull(verification.getRequest().getTarget().getRepository()))) {
     			throw new UnauthorizedException("Unauthorized access to verification " 
     					+ verification.getRequest() + "/" + verification.getId());
     		}
@@ -84,7 +84,7 @@ public class VerificationResource {
     @Path("/{id}")
     public void delete(@PathParam("id") Long id) {
     	PullRequestVerification verification = dao.load(PullRequestVerification.class, id);
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoWrite(verification.getRequest().getTarget().getRepository())))
+    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPush(verification.getRequest().getTarget().getRepository())))
     		throw new UnauthorizedException();
     	
     	verificationManager.delete(verification);
@@ -92,7 +92,7 @@ public class VerificationResource {
 
     @POST
     public Long save(@NotNull @Valid PullRequestVerification verification) {
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoWrite(verification.getRequest().getTarget().getRepository())))
+    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPush(verification.getRequest().getTarget().getRepository())))
     		throw new UnauthorizedException();
     	
     	verificationManager.save(verification);

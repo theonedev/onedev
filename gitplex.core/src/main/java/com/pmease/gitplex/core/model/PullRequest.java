@@ -845,7 +845,7 @@ public class PullRequest extends AbstractEntity {
 			if (invitation.isPreferred())
 				alreadyInvited.add(invitation.getReviewer());
 		}
-		ObjectPermission readPerm = ObjectPermission.ofRepoRead(getTarget().getRepository());
+		ObjectPermission readPerm = ObjectPermission.ofRepoPull(getTarget().getRepository());
 		for (User user: GitPlex.getInstance(Dao.class).allOf(User.class)) {
 			if (user.asSubject().isPermitted(readPerm) && !alreadyInvited.contains(user))
 				reviewers.add(user);
