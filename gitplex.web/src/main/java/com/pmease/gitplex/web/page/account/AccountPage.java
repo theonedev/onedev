@@ -12,6 +12,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
+import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
@@ -46,6 +47,22 @@ public abstract class AccountPage extends LayoutPage {
 	}
 
 	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
+		List<PageTab> tabs = new ArrayList<>();
+		tabs.add(new AccountTab(Model.of("Overview"), AccountOverviewPage.class));
+		tabs.add(new AccountTab(Model.of("Repositories"), AccountReposPage.class));
+		
+		if (SecurityUtils.canManage(getAccount())) {
+			tabs.add(new AccountTab(Model.of("Notifications"), AccountNotificationsPage.class));
+			tabs.add(new AccountTab(Model.of("Setting"), ProfileEditPage.class, 
+					AvatarEditPage.class, PasswordEditPage.class));
+		}
+		add(new Tabbable("tabs", tabs));
+	}
+
+	@Override
 	protected void onDetach() {
 		accountModel.detach();
 		
@@ -56,20 +73,6 @@ public abstract class AccountPage extends LayoutPage {
 		return accountModel.getObject();
 	}
 	
-	@Override
-	protected List<PageTab> newMainTabs() {
-		List<PageTab> mainTabs = new ArrayList<>();
-		mainTabs.add(new AccountTab(Model.of("Overview"), AccountOverviewPage.class));
-		mainTabs.add(new AccountTab(Model.of("Repositories"), AccountReposPage.class));
-		
-		if (SecurityUtils.canManage(getAccount())) {
-			mainTabs.add(new AccountTab(Model.of("Notifications"), AccountNotificationsPage.class));
-			mainTabs.add(new AccountTab(Model.of("Setting"), ProfileEditPage.class, 
-					AvatarEditPage.class, PasswordEditPage.class));
-		}
-		return mainTabs;
-	}
-
 	public static PageParameters paramsOf(User user) {
 		PageParameters params = new PageParameters();
 		params.set(PARAM_USER, user.getName());

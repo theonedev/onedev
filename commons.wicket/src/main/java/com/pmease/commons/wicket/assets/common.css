@@ -134,22 +134,6 @@ a.wicket_orderDown:AFTER { content: "\f063"; }
 .piped .dropdown-trigger.open, .piped .dropdown-trigger.dropdown-hover:hover {background-color: #999; border-color: #999; color: #FFF;}
 .piped .dropdown-trigger.open .caret, .piped .dropdown-trigger.dropdown-hover:hover .caret {border-bottom-color: #FFF; border-top-color: #FFF; opacity: 1;}
 
-/* Menu */
-.dropdown-panel.menu .content {padding: 4px 0; min-width: 120px;}
-.dropdown-panel.menu ul {list-style: none outside none; margin:0; padding: 0;}
-.dropdown-panel.menu li.submenu>a {margin-right: 2px; margin-left: 2px; padding-left: 18px; padding-right: 18px;}
-.dropdown-panel.menu li.submenu>a:after {border-color: transparent transparent transparent #CCCCCC; border-style: solid;
-    border-width: 5px 0 5px 5px; content: " "; display: block; float: right; height: 0; margin-right: -10px; margin-top: 5px; width: 0;}
-.dropdown-panel.menu li.submenu:hover > a:after {border-left-color: #FFFFFF;}
-.dropdown-panel.menu li:hover {background-color: #f5f5f5;}
-.dropdown-panel.menu li input[type=checkbox] {margin-right: 8px; vertical-align: text-bottom;}
-.dropdown-panel.menu .divider {background-color: #E5E5E5; border-bottom: 1px solid #FFFFFF; height: 1px;
-    margin: 8px 1px; overflow: hidden;}
-.dropdown-panel.menu li.divider:hover {background-color: #E5E5E5;}
-.dropdown-panel.menu ul>li>div {padding: 6px 20px; white-space: nowrap;}
-.dropdown-panel.menu ul>li>a {color: #333333; display: block; font-weight: normal; line-height: 20px; 
-	text-decoration: none; padding: 6px 20px; white-space: nowrap;}
-
 /* Tabs */
 .tabbable>.tab-content {padding-top: 16px;}
 

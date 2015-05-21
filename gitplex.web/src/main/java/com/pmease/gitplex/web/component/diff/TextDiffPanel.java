@@ -57,7 +57,7 @@ import com.pmease.commons.wicket.behavior.AllowLeaveBehavior;
 import com.pmease.commons.wicket.behavior.ScrollBehavior;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
-import com.pmease.commons.wicket.behavior.menu.CheckMenuItem;
+import com.pmease.commons.wicket.behavior.menu.CheckItem;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
@@ -391,7 +391,7 @@ public class TextDiffPanel extends Panel {
 			protected List<MenuItem> getMenuItems() {
 				List<MenuItem> menuItems = new ArrayList<>();
 				
-				menuItems.add(new CheckMenuItem() {
+				menuItems.add(new CheckItem() {
 					
 					@Override
 					protected void onUpdate(AjaxRequestTarget target) {
@@ -430,7 +430,7 @@ public class TextDiffPanel extends Panel {
 					}
 				});
 				
-				menuItems.add(new CheckMenuItem() {
+				menuItems.add(new CheckItem() {
 					
 					@Override
 					protected void onUpdate(AjaxRequestTarget target) {
@@ -469,7 +469,7 @@ public class TextDiffPanel extends Panel {
 					}
 				});
 
-				menuItems.add(new CheckMenuItem() {
+				menuItems.add(new CheckItem() {
 					
 					@Override
 					protected void onUpdate(AjaxRequestTarget target) {

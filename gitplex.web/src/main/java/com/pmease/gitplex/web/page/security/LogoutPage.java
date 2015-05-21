@@ -1,5 +1,7 @@
 package com.pmease.gitplex.web.page.security;
 
+import org.apache.wicket.RestartResponseException;
+
 import com.pmease.gitplex.web.WebSession;
 import com.pmease.gitplex.web.page.base.BasePage;
 
@@ -11,7 +13,7 @@ public class LogoutPage extends BasePage {
 		
         getSession().info("You've been logged out");
         
-        setResponsePage(getApplication().getHomePage());
+        throw new RestartResponseException(getApplication().getHomePage());
 	}
 	
 }

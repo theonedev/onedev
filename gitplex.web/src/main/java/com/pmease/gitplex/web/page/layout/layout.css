@@ -2,101 +2,76 @@ html, body {
 	background: #f0f2f4; 
 }
 #main>.head {
-	padding: 8px 16px;
 	background: #303845;
+	padding: 8px 0;
 }
-#topnav>a, #topnav>span {
-	color: #EEE; 
-	font-size: 18px; 
-	margin-right: 8px;
-}
-#topnav>a.home {
-	text-decoration: none;
-}
-#topnav>a.home span:hover {
-	text-decoration: underline;
-}
-#topnav>.home .fa {
+#main>.head>.logo .fa {
 	font-size: 28px;
-	color: white;
-	vertical-align: middle;
-	margin-right: 10px;
-}
-#topnav>.separator .fa {
-	font-size: 20px;
-}
-#topnav .avatar {
-	width: 24px;
-	height: 24px;
-	vertical-align: bottom;
+	color: #FBC32D; 
 }
 
-#toptray a, #toptray span {
-	color: #EEE; 
+#main>.head>.nav ul {
+	margin-bottom: 0;
 }
-#toptray>a, #toptray>span {
+#main>.head>.nav li {
+	float: left;
+}
+#main>.head>.nav a {
+	display: block; 
+	text-decoration: none; 
+	color: #999; 
+	margin-right: 20px;
+	font-size: 17px;
+	border-top: 2px solid #303845;
+}
+#main>.head>.nav li.active a {
+	color: #EEE;
+	border-top-color: #FBC32D;
+}
+
+#main>.head>.status {
+	text-align: right;
+	font-size: 18px;
+}
+#main>.head>.status a, #main>.head>.status span {
+	color: #EEE; 
 	margin-right: 8px;
-} 
-#toptray>:last-child {
-	margin-right: 0;
-} 
-#toptray .avatar {
+}
+#main>.head>.status .avatar {
 	width: 32px;
 	height: 32px;
-	vertical-align: middle;
 	box-shadow: -1px 0px 3px 0px #333, 
 				1px 0px 3px 0px #333, 
 				0px -1px 3px 0px #333, 
 				0px 1px 3px 0px #333;
 }
-#toptray a.previous {
+#main>.head>.status a.previous {
 	text-decoration: none;
 	display: block;
 	float: left;
 }
-#toptray a.previous .avatar {
+#main>.head>.status a.previous .avatar {
 	margin-right: -20px;
 }
-#toptray a.previous:hover .avatar {
+#main>.head>.status a.previous:hover .avatar {
 	margin-right: -7px;
 }
 #runas-tooltip {
 	padding: 4px 8px;
 }
 
-#toptray .user-link span {
+#main>.head>.status .user-link span {
 	font-size: 16px;
 }
-#toptray a.sign-out .fa {
+#main>.head>.status a.sign-out .fa {
 	font-size: 20px;
 	vertical-align: middle;
 }
 
-#main>.tabs {
-	background: #EEE;
-	border: 1px solid #BBB;
-	border-left: none;
-	border-right: none;
-	font-size: 16px;
-	margin-bottom: 0;
-}
-#main>.tabs>li {
-	float: left;
-}
-#main>.tabs>li>a {
-	display: block; 
-	text-decoration: none; 
-	padding: 6px 0px;
-	color: #666; 
-	margin-left: 20px;
-}
-#main>.tabs>li.active>a {
-	color: #333;
-	font-weight: bold; 
-}
-#main>.content {
+#main>.body {
 	background: white;
 	border-bottom: 1px solid #BBB;
+	margin: 0 -15px;
 	padding: 20px;
 }
 
@@ -137,7 +112,7 @@ html, body {
 .sidebar>table>tbody>tr>td.nav>.tabs>li.active>a {
 	color: #303845;
 	background: #DDD;
-	border-left-color: #428bca;
+	border-left-color: #d9534f;
 	font-weight: bold;
 }
 .sidebar>table>tbody>tr>td.nav>.actions {
@@ -151,6 +126,7 @@ html, body {
 
 #main>.foot {
 	font-size: 11px;
+	margin: 0 -15px;
 	padding: 8px; 
 }
 

@@ -3,7 +3,6 @@ package com.pmease.gitplex.web.page.layout;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -18,27 +17,28 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownMode;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.commons.wicket.behavior.menu.LinkItem;
+import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
+import com.pmease.commons.wicket.behavior.menu.MenuItem;
+import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarByUser;
+import com.pmease.gitplex.web.component.user.AvatarMode;
 import com.pmease.gitplex.web.component.user.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
-import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.notifications.AccountNotificationsPage;
-import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
+import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 import com.pmease.gitplex.web.page.base.BasePage;
 import com.pmease.gitplex.web.page.home.accounts.AccountsPage;
 import com.pmease.gitplex.web.page.home.accounts.NewAccountPage;
 import com.pmease.gitplex.web.page.home.admin.AdministrationPage;
 import com.pmease.gitplex.web.page.home.admin.SystemSettingPage;
-import com.pmease.gitplex.web.page.home.dashboard.DashboardPage;
 import com.pmease.gitplex.web.page.home.repositories.RepositoriesPage;
-import com.pmease.gitplex.web.page.repository.RepositoryPage;
-import com.pmease.gitplex.web.page.repository.tree.RepoTreePage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 import com.pmease.gitplex.web.page.security.LogoutPage;
 import com.pmease.gitplex.web.page.security.RegisterPage;
@@ -57,51 +57,30 @@ public abstract class LayoutPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		WebMarkupContainer topNav = new WebMarkupContainer("topNav");
-		add(topNav);
+		WebMarkupContainer mainHead = new WebMarkupContainer("mainHead");
+		add(mainHead);
 		
-		topNav.add(new BookmarkablePageLink<Void>("home", DashboardPage.class));
-
-		WebMarkupContainer accountLink;
-		if (this instanceof AccountPage) {
-			AccountPage accountPage = (AccountPage) this;
-			accountLink = new BookmarkablePageLink<Void>("account", 
-					AccountOverviewPage.class, 
-					AccountPage.paramsOf(accountPage.getAccount()));
-			accountLink.add(new Label("name", accountPage.getAccount().getName()));
-		} else {
-			accountLink = new WebMarkupContainer("account");
-			accountLink.add(new Label("name"));
-			accountLink.setVisible(false);
-		}
-		topNav.add(accountLink);
-
-		WebMarkupContainer repoLink;
-		if (this instanceof RepositoryPage) {
-			RepositoryPage repoPage = (RepositoryPage) this;
-			repoLink = new BookmarkablePageLink<Void>("repository", 
-					RepoTreePage.class, RepositoryPage.paramsOf(repoPage.getRepository()));
-			repoLink.add(new Label("name", repoPage.getRepository().getName()));
-		} else {
-			repoLink = new WebMarkupContainer("repository");
-			repoLink.add(new Label("name"));
-			repoLink.setVisible(false);
-		}
-		topNav.add(repoLink);
-
-		final User currentUser = getCurrentUser();
-		boolean signedIn = currentUser != null;
-
-		WebMarkupContainer topTray = new WebMarkupContainer("topTray");
-		add(topTray);
+		mainHead.add(new BookmarkablePageLink<Void>("home", getApplication().getHomePage()));
 		
-		topTray.add(new BookmarkablePageLink<Void>("login", LoginPage.class).setVisible(!signedIn));
-		topTray.add(new BookmarkablePageLink<Void>("register", RegisterPage.class).setVisible(!signedIn));
-		topTray.add(new BookmarkablePageLink<Void>("logout", LogoutPage.class).setVisible(signedIn));
-		if (currentUser != null) {
-			topTray.add(new BookmarkablePageLink<Void>("notification", 
+		List<PageTab> tabs = new ArrayList<>();
+		tabs.add(new PageTab(Model.of("Accounts"), AccountsPage.class, NewAccountPage.class));
+		tabs.add(new PageTab(Model.of("Repositories"), RepositoriesPage.class));
+		
+		if (SecurityUtils.canManageSystem())
+			tabs.add(new PageTab(Model.of("Administration"), SystemSettingPage.class, AdministrationPage.class));
+			
+		mainHead.add(new Tabbable("tabs", tabs));
+
+		final User user = getCurrentUser();
+		boolean signedIn = user != null;
+
+		mainHead.add(new BookmarkablePageLink<Void>("login", LoginPage.class).setVisible(!signedIn));
+		mainHead.add(new BookmarkablePageLink<Void>("register", RegisterPage.class).setVisible(!signedIn));
+		mainHead.add(new BookmarkablePageLink<Void>("logout", LogoutPage.class).setVisible(signedIn));
+		if (user != null) {
+			mainHead.add(new BookmarkablePageLink<Void>("notification", 
 					AccountNotificationsPage.class, 
-					AccountNotificationsPage.paramsOf(currentUser)) {
+					AccountNotificationsPage.paramsOf(user)) {
 	
 				@Override
 				protected void onConfigure() {
@@ -111,7 +90,7 @@ public abstract class LayoutPage extends BasePage {
 				
 			});
 		} else {
-			topTray.add(new WebMarkupContainer("notification").setVisible(false));
+			mainHead.add(new WebMarkupContainer("notification").setVisible(false));
 		}
 		
 		if (signedIn) {
@@ -128,7 +107,7 @@ public abstract class LayoutPage extends BasePage {
 					
 				};
 				prevLink.add(new AvatarByUser("avatar", new UserModel(prevUser), false));
-				topTray.add(prevLink);
+				mainHead.add(prevLink);
 
 				// Use dropdown panel to mimic tooltip as the bootstrap tooltip has the issue 
 				// of disappearing when we adjust margin property when hover over the link
@@ -137,11 +116,11 @@ public abstract class LayoutPage extends BasePage {
 					@Override
 					protected Component newContent(String id) {
 						return new Label(id, prevUser.getDisplayName() + " is currently running as " 
-								+ currentUser.getDisplayName() + ", click to exit the run-as mode");
+								+ user.getDisplayName() + ", click to exit the run-as mode");
 					}
 					
 				};
-				topTray.add(tooltip);
+				mainHead.add(tooltip);
 				prevLink.add(new DropdownBehavior(tooltip)
 						.mode(new DropdownMode.Hover(100))
 						.alignWithComponent(prevLink, 0, 50, 100, 50, 7, true));
@@ -149,34 +128,50 @@ public abstract class LayoutPage extends BasePage {
 				WebMarkupContainer prevLink = new WebMarkupContainer("prevUser");
 				prevLink.add(new WebMarkupContainer("avatar"));
 				prevLink.setVisible(false);
-				topTray.add(prevLink);
-				topTray.add(new WebMarkupContainer("tooltip").setVisible(false));
+				mainHead.add(prevLink);
+				mainHead.add(new WebMarkupContainer("tooltip").setVisible(false));
 			}
-			topTray.add(new UserLink("user", new UserModel(currentUser)));
+			mainHead.add(new UserLink("user", new UserModel(user), AvatarMode.AVATAR));
+			WebMarkupContainer userMenuTrigger = new WebMarkupContainer("userMenuTrigger");
+			MenuPanel userMenu = new MenuPanel("userMenu") {
+
+				@Override
+				protected List<MenuItem> getMenuItems() {
+					List<MenuItem> menuItems = new ArrayList<>();
+					menuItems.add(new LinkItem("Profile") {
+
+						@Override
+						public void onClick() {
+							setResponsePage(ProfileEditPage.class, ProfileEditPage.paramsOf(user));
+						}
+						
+					});
+					menuItems.add(new LinkItem("Logout") {
+
+						@Override
+						public void onClick() {
+							setResponsePage(LogoutPage.class);
+						}
+						
+					});
+					return menuItems;
+				}
+				
+			};
+			mainHead.add(userMenu);
+			userMenuTrigger.add(new MenuBehavior(userMenu).alignWithTrigger(50, 100, 50, 0, 8, true));
+			mainHead.add(userMenuTrigger);
 		} else {  
 			WebMarkupContainer prevLink = new WebMarkupContainer("prevUser");
 			prevLink.add(new WebMarkupContainer("avatar"));
 			prevLink.setVisible(false);
-			topTray.add(prevLink);
-
-			topTray.add(new WebMarkupContainer("user").setVisible(false));
+			mainHead.add(prevLink);
+			mainHead.add(new WebMarkupContainer("user").setVisible(false));
+			mainHead.add(new WebMarkupContainer("userMenuTrigger").setVisible(false));
+			mainHead.add(new WebMarkupContainer("userMenu").setVisible(false));
 		}
-		
-		add(new Tabbable("mainTabs", newMainTabs()));
 	}
 
-	protected List<PageTab> newMainTabs() {
-		List<PageTab> tabs = new ArrayList<>();
-		tabs.add(new PageTab(Model.of("Dashboard"), DashboardPage.class));
-		tabs.add(new PageTab(Model.of("Accounts"), AccountsPage.class, NewAccountPage.class));
-		tabs.add(new PageTab(Model.of("Repositories"), RepositoriesPage.class));
-		
-		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofSystemAdmin()))
-			tabs.add(new PageTab(Model.of("Administration"), SystemSettingPage.class, AdministrationPage.class));
-		
-		return tabs;
-	}
-	
 	protected boolean isLoggedIn() {
 		return getCurrentUser() != null;
 	}

@@ -13,6 +13,7 @@ import org.eclipse.jgit.lib.Constants;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
+import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.model.Repository;
@@ -67,19 +68,22 @@ public abstract class RepositoryPage extends AccountPage {
 	}
 	
 	@Override
-	protected List<PageTab> newMainTabs() {
-		List<PageTab> mainTabs = new ArrayList<>();
-		mainTabs.add(new RepoTab(Model.of("Files"), RepoTreePage.class));
-		mainTabs.add(new RepoTab(Model.of("Commits"), RepoCommitsPage.class));
-		mainTabs.add(new RepoTab(Model.of("Branches"), RepoBranchesPage.class));
-		mainTabs.add(new RepoTab(Model.of("Tags"), RepoTagsPage.class));
-		mainTabs.add(new RepoTab(Model.of("Pull Requests"), OpenRequestsPage.class));
+	protected void onInitialize() {
+		super.onInitialize();
+		
+		List<PageTab> tabs = new ArrayList<>();
+		tabs.add(new RepoTab(Model.of("Files"), RepoTreePage.class));
+		tabs.add(new RepoTab(Model.of("Commits"), RepoCommitsPage.class));
+		tabs.add(new RepoTab(Model.of("Branches"), RepoBranchesPage.class));
+		tabs.add(new RepoTab(Model.of("Tags"), RepoTagsPage.class));
+		tabs.add(new RepoTab(Model.of("Pull Requests"), OpenRequestsPage.class));
 		
 		if (SecurityUtils.canManage(getRepository())) {
-			mainTabs.add(new RepoTab(Model.of("Setting"), GeneralSettingPage.class, 
+			tabs.add(new RepoTab(Model.of("Setting"), GeneralSettingPage.class, 
 					GateKeeperPage.class, IntegrationPolicyPage.class));
 		}
-		return mainTabs;
+		
+		add(new Tabbable("tabs", tabs));
 	}
 
 	@Override

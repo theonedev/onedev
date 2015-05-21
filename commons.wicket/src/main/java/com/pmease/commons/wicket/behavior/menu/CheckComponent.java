@@ -6,11 +6,11 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 
 @SuppressWarnings("serial")
-class CheckMenuItemComponent extends Panel {
+class CheckComponent extends Panel {
 
-	private final CheckMenuItem menuItem;
+	private final CheckItem menuItem;
 	
-	public CheckMenuItemComponent(String id, CheckMenuItem menuItem) {
+	public CheckComponent(String id, CheckItem menuItem) {
 		super(id);
 		
 		this.menuItem = menuItem;

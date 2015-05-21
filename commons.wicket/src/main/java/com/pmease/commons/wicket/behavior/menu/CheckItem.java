@@ -5,11 +5,11 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 
 @SuppressWarnings("serial")
-public abstract class CheckMenuItem extends MenuItem {
+public abstract class CheckItem extends MenuItem {
 
 	@Override
 	public Component newContent(String componentId) {
-		return new CheckMenuItemComponent(componentId, this);
+		return new CheckComponent(componentId, this);
 	}
 
 	protected abstract String getLabel();

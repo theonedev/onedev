@@ -1,36 +1,31 @@
 <wicket:extend>
-	<div id="main">
-		<div class="head clearfix">
-			<div wicket:id="topNav" id="topnav" class="pull-left">
-				<a wicket:id="home" class="home"><i class="fa fa-ext fa-gitplex-logo"></i> <span>Home</span></a>
-				<wicket:enclosure child="account">
-				<span class="separator"><i class="fa fa-angle-right"></i></span>
-				<a wicket:id="account" class="account"><span wicket:id="name"></span></a>
-				</wicket:enclosure>
-				<wicket:enclosure child="repository">
-				<span class="separator"><i class="fa fa-angle-right"></i></span>
-				<a wicket:id="repository" class="repo"><span wicket:id="name"></span></a>
-				</wicket:enclosure>
+	<div id="main" class="container-fluid">
+		<div wicket:id="mainHead" class="head row">
+			<div class="logo col-xs-1">
+				<a wicket:id="home"><i class="fa fa-ext fa-gitplex-logo"></i></a>
 			</div>
-			<div wicket:id="topTray" id="toptray" class="pull-right">
+			<div class="nav col-xs-8">
+				<ul wicket:id="tabs" class="list-unstyled clearfix"></ul>
+			</div>
+			<div class="status col-xs-3">
 			  	<wicket:enclosure child="login">
 			  		<a wicket:id="login">Log in</a>
 			  		<span class="separator">|</span>
 			  		<a wicket:id="register">Sign up</a>
 				</wicket:enclosure>
-				<wicket:enclosure child="logout">
+				<wicket:enclosure child="user">
 			  		<a wicket:id="notification" class="notifications" title="You've got tasks"><i class="fa fa-circle"></i></a>
 			  		<a wicket:id="prevUser" class="previous">
 			  			<img wicket:id="avatar" class="avatar"></img>
 			  		</a>
 			  		<div wicket:id="tooltip" id="runas-tooltip"></div>
 			  		<a wicket:id="user" class="current"></a>
-			  		<a wicket:id="logout" class="sign-out" title="Sign out"><i class="fa fa-sign-out"></i></a>
+			  		<a wicket:id="userMenuTrigger"><i class="fa fa-angle-down"></i></a>
+			  		<div wicket:id="userMenu"></div>
 			  	</wicket:enclosure>
 			</div>
 		</div>
-		<ul wicket:id="mainTabs" class="tabs list-unstyled clearfix"></ul>
-		<div class="content">
+		<div class="body">
 			<wicket:child></wicket:child>
 		</div>
 		<div class="foot clearfix">
