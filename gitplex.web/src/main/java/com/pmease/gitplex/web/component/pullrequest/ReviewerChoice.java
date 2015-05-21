@@ -18,12 +18,12 @@ import com.pmease.gitplex.core.permission.ObjectPermission;
 @SuppressWarnings("serial")
 public abstract class ReviewerChoice extends SelectToAddChoice<User> {
 
-	private static final String PLACE_HODER = "Select user to add as reviewer...";
+	private static final String PLACEHOLDER = "Select user to add as reviewer...";
 	
 	private final IModel<PullRequest> requestModel;
 	
 	public ReviewerChoice(String id, IModel<PullRequest> requestModel) {
-		super(id, new ReviewerProvider(requestModel), PLACE_HODER);
+		super(id, new ReviewerProvider(requestModel), PLACEHOLDER);
 		
 		this.requestModel = requestModel;
 	}
@@ -44,7 +44,7 @@ public abstract class ReviewerChoice extends SelectToAddChoice<User> {
 		super.onInitialize();
 		
 		// getSettings().setMinimumInputLength(1);
-		getSettings().setPlaceholder(PLACE_HODER);
+		getSettings().setPlaceholder(PLACEHOLDER);
 		getSettings().setFormatResult("gitplex.choiceFormatter.user.formatResult");
 		getSettings().setFormatSelection("gitplex.choiceFormatter.user.formatSelection");
 		getSettings().setEscapeMarkup("gitplex.choiceFormatter.user.escapeMarkup");

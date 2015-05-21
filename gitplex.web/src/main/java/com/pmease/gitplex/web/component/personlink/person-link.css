@@ -1,0 +1,9 @@
+a.person-link {
+	text-decoration: none;
+}
+a.person-link>span:hover {
+	text-decoration: underline;
+}
+a.person-link>img+span {
+	margin-left: 4px;
+}

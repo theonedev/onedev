@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.user;
+package com.pmease.gitplex.web.component.personlink;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -23,6 +23,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.avatar.AvatarByPerson;
+import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
 
@@ -117,7 +118,7 @@ public class PersonLink extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(UserLink.class, "user.css")));
+		response.render(CssHeaderItem.forReference(new CssResourceReference(PersonLink.class, "person-link.css")));
 	}
 	
 }

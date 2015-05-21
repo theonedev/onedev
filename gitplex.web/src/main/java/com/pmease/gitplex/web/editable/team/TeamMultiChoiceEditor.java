@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.pmease.gitplex.core.GitPlex;
+
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -19,8 +20,8 @@ import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitplex.core.model.Team;
-import com.pmease.gitplex.web.component.team.TeamChoiceProvider;
-import com.pmease.gitplex.web.component.team.TeamMultiChoice;
+import com.pmease.gitplex.web.component.teamchoice.TeamChoiceProvider;
+import com.pmease.gitplex.web.component.teamchoice.TeamMultiChoice;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")

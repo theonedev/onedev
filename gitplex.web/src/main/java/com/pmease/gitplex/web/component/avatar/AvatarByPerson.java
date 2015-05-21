@@ -1,7 +1,5 @@
 package com.pmease.gitplex.web.component.avatar;
 
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -15,7 +13,6 @@ import org.eclipse.jgit.lib.PersonIdent;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.web.avatar.AvatarManager;
-import com.pmease.gitplex.web.event.AvatarChanged;
 
 @SuppressWarnings("serial")
 public class AvatarByPerson extends WebComponent {
@@ -70,16 +67,6 @@ public class AvatarByPerson extends WebComponent {
 		
 		tag.setName("img");
 		tag.put("src", avatarUrlModel.getObject());
-	}
-
-	@Override
-	public void onEvent(IEvent<?> event) {
-		super.onEvent(event);
-
-		if (event.getPayload() instanceof AvatarChanged) {
-			AjaxRequestTarget target = ((AvatarChanged) event.getPayload()).getTarget();
-			target.add(this);
-		}
 	}
 
 	@Override

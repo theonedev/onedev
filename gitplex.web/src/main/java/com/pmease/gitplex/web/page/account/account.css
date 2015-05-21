@@ -1,13 +1,25 @@
+.account.sidebar>table>tbody>tr>td.nav {
+	width: 220px;
+}
 .account.sidebar>table>tbody>tr>td.nav>.head {
 	margin: -20px 0 10px 0;
 	padding: 10px;
-	border-bottom: 1px solid #BBB;
 }
-.account.sidebar>table>tbody>tr>td.nav>.head .avatar {
-	display: block;
-	height: 180px;
-	width: 180px;
+.account.sidebar>table>tbody>tr>td.nav>.head>div>.avatar {
+	height: 200px;
+	width: 200px;
 	margin-bottom: 10px;
+}
+.account.sidebar>table>tbody>tr>td.nav>.head .select2-container {
+	width: 200px;
+}
+.select2-results .account .avatar {
+	display: inline-block;
+	border-radius: 3px;
+	vertical-align: middle;
+	height: 24px;
+	width: 24px;
+	margin-right: 6px;
 }
 .account.sidebar>table>tbody>tr>td.nav>.head .name {
 	font-size: 16px;

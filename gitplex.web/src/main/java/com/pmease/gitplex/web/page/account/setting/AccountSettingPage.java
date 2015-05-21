@@ -35,7 +35,7 @@ public class AccountSettingPage extends AccountPage {
 		tabs.add(new AccountTab("Password", "", PasswordEditPage.class));
 		tabs.add(new AccountTab("Avatar", "", AvatarEditPage.class));
 		
-		add(new Tabbable("settingTabs", tabs));
+		add(new Tabbable("accountSettingTabs", tabs));
 	}
 
 	@Override

@@ -13,10 +13,10 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.branch.BranchLink;
 import com.pmease.gitplex.web.component.label.AgeLabel;
-import com.pmease.gitplex.web.component.user.AvatarMode;
-import com.pmease.gitplex.web.component.user.UserLink;
+import com.pmease.gitplex.web.component.userlink.UserLink;
 
 @SuppressWarnings("serial")
 public class RequestSummaryPanel extends Panel {

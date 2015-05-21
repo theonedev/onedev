@@ -1,29 +1,25 @@
 package com.pmease.gitplex.web.page.account;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
 
-import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
-import com.pmease.commons.wicket.behavior.menu.MenuItem;
-import com.pmease.commons.wicket.behavior.menu.MenuPanel;
+import com.pmease.commons.wicket.component.select2.Select2Choice;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
@@ -31,6 +27,7 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarByUser;
+import com.pmease.gitplex.web.component.userchoice.UserChoiceProvider;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.account.notifications.AccountNotificationsPage;
 import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
@@ -63,72 +60,33 @@ public abstract class AccountPage extends LayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new AvatarByUser("avatar", accountModel, false));
+		add(new AvatarByUser("accountAvatar", accountModel, false));
 		
-		Label nameLabel = new Label("accountName", getAccount().getDisplayName());
-		add(nameLabel);
-		
-		WebMarkupContainer accountsMenuTrigger = new WebMarkupContainer("accountsMenuTrigger");
-		
-		MenuPanel accountsMenu = new MenuPanel("accountsMenu") {
+		final IModel<User> accountModel = Model.of(getAccount());
+		Select2Choice<User> accountChoice = new Select2Choice<User>("accountName", accountModel, new UserChoiceProvider()) {
 
 			@Override
-			protected List<MenuItem> getMenuItems() {
-				List<User> accounts = new ArrayList<>();
-				for (User account: GitPlex.getInstance(Dao.class).allOf(User.class)) {
-					if (!account.equals(getAccount()))
-						accounts.add(account);
-				}
-				Collections.sort(accounts, new Comparator<User>() {
-
-					@Override
-					public int compare(User user1, User user2) {
-						return user1.getDisplayName().compareTo(user2.getDisplayName());
-					}
-					
-				});
-				List<MenuItem> menuItems = new ArrayList<>();
-				for (User account: accounts) {
-					final UserModel accountModel = new UserModel(account);
-					menuItems.add(new MenuItem() {
-
-						@Override
-						public Component newContent(String componentId) {
-							Fragment fragment = new Fragment(componentId, "accountsMenuItemFrag", AccountPage.this) {
-
-								@Override
-								protected void onDetach() {
-									accountModel.detach();
-									
-									super.onDetach();
-								}
-								
-							};
-							Link<Void> link = new Link<Void>("link") {
-
-								@Override
-								public void onClick() {
-									setResponsePage(getPage().getClass(), AccountPage.paramsOf(accountModel.getObject()));
-								}
-								
-							};
-							link.add(new AvatarByUser("avatar", accountModel, false));
-							link.add(new Label("name", accountModel.getObject().getDisplayName()));
-							fragment.add(link);
-							return fragment;
-						}
-
-					});
-				}
-				return menuItems;
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				getSettings().setPlaceholder("Typing to find an account...");
+				getSettings().setFormatResult("gitplex.account.choiceFormatter.formatResult");
+				getSettings().setFormatSelection("gitplex.account.choiceFormatter.formatSelection");
+				getSettings().setEscapeMarkup("gitplex.account.choiceFormatter.escapeMarkup");
 			}
 			
 		};
-		add(accountsMenu);
-		accountsMenuTrigger.add(new MenuBehavior(accountsMenu).alignWithComponent(nameLabel, 0, 100, 0, 0, 4, true));
-		add(accountsMenuTrigger);
+		accountChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
+			
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				setResponsePage(getPage().getClass(), paramsOf(accountModel.getObject()));
+			}
+			
+		});
+		add(accountChoice);
 		
-		add(new Link<Void>("runAs") {
+		add(new Link<Void>("runAsAccount") {
 
 			@Override
 			public void onClick() {
@@ -155,12 +113,13 @@ public abstract class AccountPage extends LayoutPage {
 			tabs.add(new AccountTab("Setting", "fa fa-fw fa-cog", ProfileEditPage.class, 
 					AvatarEditPage.class, PasswordEditPage.class));
 		}
-		add(new Tabbable("tabs", tabs));
+		add(new Tabbable("accountTabs", tabs));
 	}
 
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
+		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(AccountPage.class, "account.js")));
 		response.render(CssHeaderItem.forReference(new CssResourceReference(AccountPage.class, "account.css")));
 	}
 

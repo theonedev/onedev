@@ -8,7 +8,7 @@ import com.pmease.commons.git.GitPath;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial", "unused"})
 public class RepoBlobPage extends RepositoryPage {
 
 	private static final String PARAM_REVISION = "revision";

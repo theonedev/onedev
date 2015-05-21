@@ -5,16 +5,14 @@
 				<td class="nav">
 					<div class="head">
 						<div>
-							<img wicket:id="avatar" class="avatar"></img>
+							<img wicket:id="accountAvatar" class="avatar"></img>
 						</div>
 						<div>
-							<span wicket:id="accountName" class="name"></span> 
-							<div wicket:id="accountsMenu" class="accounts"></div>
-							<a wicket:id="accountsMenuTrigger" class="fa fa-angle-down"></a>
+							<input wicket:id="accountName" type="hidden"></input> 
 						</div>
 					</div>
-					<a wicket:id="runAs" class="run-as"><i class="fa fa-fw fa-sign-in"></i> Run as this account</a>
-					<ul wicket:id="tabs" class="tabs list-unstyled"></ul>
+					<a wicket:id="runAsAccount" class="run-as"><i class="fa fa-fw fa-sign-in"></i> Run as this account</a>
+					<ul wicket:id="accountTabs" class="tabs list-unstyled"></ul>
 				</td>
 				<td class="content">
 					<wicket:child></wicket:child>
@@ -22,7 +20,4 @@
 			</tr>
 		</table>
 	</div>
-	<wicket:fragment wicket:id="accountsMenuItemFrag">
-		<a wicket:id="link"><img wicket:id="avatar" class="avatar"></img> <span wicket:id="name"></span></a>
-	</wicket:fragment>
 </wicket:extend>

@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.team;
+package com.pmease.gitplex.web.component.teamchoice;
 
 import org.apache.wicket.model.IModel;
 

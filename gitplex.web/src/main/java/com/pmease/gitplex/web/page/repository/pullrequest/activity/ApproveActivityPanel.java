@@ -9,7 +9,7 @@ import org.apache.wicket.model.Model;
 
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.web.component.user.UserLink;
+import com.pmease.gitplex.web.component.userlink.UserLink;
 
 @SuppressWarnings("serial")
 public class ApproveActivityPanel extends Panel {

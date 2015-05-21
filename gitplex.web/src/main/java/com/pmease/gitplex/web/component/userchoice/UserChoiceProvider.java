@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.user;
+package com.pmease.gitplex.web.component.userchoice;
 
 import java.util.Collection;
 import java.util.List;
