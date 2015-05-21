@@ -16,10 +16,10 @@ import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.security.SecurityUtils;
+import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.label.AgeLabel;
-import com.pmease.gitplex.web.component.user.AvatarMode;
-import com.pmease.gitplex.web.component.user.UserLink;
+import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
 
 @SuppressWarnings("serial")

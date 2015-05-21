@@ -69,11 +69,11 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
-import com.pmease.gitplex.web.component.user.AvatarMode;
-import com.pmease.gitplex.web.component.user.UserLink;
+import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
 
 @SuppressWarnings("serial")

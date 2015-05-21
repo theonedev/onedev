@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.team;
+package com.pmease.gitplex.web.component.teamchoice;
 
 import java.util.Collection;
 

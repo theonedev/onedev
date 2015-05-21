@@ -1,17 +1,14 @@
-package com.pmease.gitplex.web.component.user;
-
-import java.util.Collection;
+package com.pmease.gitplex.web.component.userchoice;
 
 import org.apache.wicket.model.IModel;
 
-import com.pmease.commons.wicket.component.select2.Select2MultiChoice;
+import com.pmease.commons.wicket.component.select2.Select2Choice;
 import com.pmease.gitplex.core.model.User;
 
-public class UserMultiChoice extends Select2MultiChoice<User> {
+@SuppressWarnings("serial")
+public class UserSingleChoice extends Select2Choice<User> {
 
-	private static final long serialVersionUID = 1L;
-
-	public UserMultiChoice(String id, IModel<Collection<User>> model) {
+	public UserSingleChoice(String id, IModel<User> model) {
 		super(id, model, new UserChoiceProvider());
 	}
 
@@ -19,7 +16,7 @@ public class UserMultiChoice extends Select2MultiChoice<User> {
 	protected void onInitialize() {
 		super.onInitialize();
 		// getSettings().setMinimumInputLength(1);
-		getSettings().setPlaceholder("Start typing to find users ...");
+		getSettings().setPlaceholder("Typing to find an user ...");
 		getSettings().setFormatResult("gitplex.choiceFormatter.user.formatResult");
 		getSettings().setFormatSelection("gitplex.choiceFormatter.user.formatSelection");
 		getSettings().setEscapeMarkup("gitplex.choiceFormatter.user.escapeMarkup");
