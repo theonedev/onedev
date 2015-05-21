@@ -7,7 +7,7 @@ import com.pmease.commons.markdown.extensionpoint.HtmlTransformer;
 import com.pmease.gitplex.core.comment.MentionParser;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
+import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
 
 public class MentionTransformer extends MentionParser implements HtmlTransformer {
 	
@@ -21,7 +21,7 @@ public class MentionTransformer extends MentionParser implements HtmlTransformer
 	protected String toHtml(User user) {
 		if (RequestCycle.get() != null) {
 			return String.format("<a href='%s' class='mention'>@%s</a>", 
-				RequestCycle.get().urlFor(AccountOverviewPage.class, AccountPage.paramsOf(user)), user.getName());
+				RequestCycle.get().urlFor(AccountReposPage.class, AccountPage.paramsOf(user)), user.getName());
 		} else {
 			return super.toHtml(user);
 		}

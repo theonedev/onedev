@@ -1,5 +1,7 @@
 package com.pmease.gitplex.web.page.account;
 
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
@@ -23,6 +25,7 @@ public class AccountTabLink extends Panel {
 		AccountPage page = (AccountPage) getPage();
 		Link<Void> link = new BookmarkablePageLink<Void>("link", 
 				tab.getMainPageClass(), AccountPage.paramsOf(page.getAccount()));
+		link.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", tab.getIconClass())));
 		link.add(new Label("label", tab.getTitleModel()));
 		add(link);
 	}

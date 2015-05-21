@@ -7,7 +7,7 @@ html, body {
 }
 #main>.head>.logo .fa {
 	font-size: 28px;
-	color: #FBC32D; 
+	color: #69B7F7; 
 }
 
 #main>.head>.nav ul {
@@ -26,7 +26,7 @@ html, body {
 }
 #main>.head>.nav li.active a {
 	color: #EEE;
-	border-top-color: #FBC32D;
+	border-top-color: #69B7F7;
 }
 
 #main>.head>.status {
@@ -45,16 +45,11 @@ html, body {
 				0px -1px 3px 0px #333, 
 				0px 1px 3px 0px #333;
 }
-#main>.head>.status a.previous {
-	text-decoration: none;
-	display: block;
-	float: left;
-}
 #main>.head>.status a.previous .avatar {
-	margin-right: -20px;
+	margin-right: -24px;
 }
 #main>.head>.status a.previous:hover .avatar {
-	margin-right: -7px;
+	margin-right: -12px;
 }
 #runas-tooltip {
 	padding: 4px 8px;
@@ -98,7 +93,7 @@ html, body {
 	color: #666;
 	display: block;
 	text-decoration: none;
-	padding: 10px 20px;
+	padding: 10px;
 }
 .sidebar>table>tbody>tr>td.nav>.tabs>li>a .fa {
 	font-size: 16px;
@@ -112,13 +107,8 @@ html, body {
 .sidebar>table>tbody>tr>td.nav>.tabs>li.active>a {
 	color: #303845;
 	background: #DDD;
-	border-left-color: #d9534f;
+	border-left-color: #69B7F7;
 	font-weight: bold;
-}
-.sidebar>table>tbody>tr>td.nav>.actions {
-	margin-top: 20px;
-	padding: 20px 20px 0 20px;
-	border-top: 1px solid #DDD;
 }
 .sidebar>table>tbody>tr>td.content {
 	padding: 20px;

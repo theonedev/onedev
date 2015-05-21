@@ -37,7 +37,7 @@ import com.pmease.gitplex.web.component.avatar.AvatarByUser;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteAccountModal;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteAccountModalBehavior;
 import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
+import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 import com.pmease.gitplex.web.page.layout.LayoutPage;
 
@@ -148,7 +148,7 @@ public class AccountsPage extends LayoutPage {
 				User user = item.getModelObject();
 
 				item.add(new AvatarByUser("avatar", item.getModel(), false));
-				Link<Void> link = new BookmarkablePageLink<>("accountLink", AccountOverviewPage.class, AccountPage.paramsOf(user)); 
+				Link<Void> link = new BookmarkablePageLink<>("accountLink", AccountReposPage.class, AccountPage.paramsOf(user)); 
 				link.add(new Label("accountName", user.getName()));
 				item.add(link);
 						

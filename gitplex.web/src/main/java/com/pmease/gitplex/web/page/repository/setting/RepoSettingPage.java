@@ -14,7 +14,7 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteRepoModal;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteRepoModalBehavior;
 import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
+import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.setting.gatekeeper.GateKeeperPage;
 import com.pmease.gitplex.web.page.repository.setting.general.GeneralSettingPage;
@@ -47,7 +47,7 @@ public class RepoSettingPage extends RepositoryPage {
 
 			@Override
 			protected void onDeleted(AjaxRequestTarget target) {
-				setResponsePage(AccountOverviewPage.class, AccountPage.paramsOf(getAccount()));
+				setResponsePage(AccountReposPage.class, AccountPage.paramsOf(getAccount()));
 			}
 			
 		};

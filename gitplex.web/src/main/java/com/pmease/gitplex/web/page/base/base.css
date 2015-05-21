@@ -33,6 +33,9 @@ form>.actions {
 form>.actions>.btn {
 	margin-right: 8px;
 }
+form>.actions>:last-child {
+	margin-right: 0;
+}
 .actions>a {margin-right: 8px;}
 
 /* BRANCHES PAGE */

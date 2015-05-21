@@ -1,5 +1,6 @@
 package com.pmease.gitplex.web.mapper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.Page;
@@ -8,10 +9,10 @@ import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.mapper.CompoundRequestMapper;
 
+import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.validation.RepositoryNameValidator;
 import com.pmease.gitplex.core.validation.UserNameValidator;
 import com.pmease.gitplex.web.page.account.notifications.AccountNotificationsPage;
-import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
 import com.pmease.gitplex.web.page.account.repositories.NewAccountRepoPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
@@ -66,16 +67,26 @@ public class RootMapper extends CompoundRequestMapper {
 		addPage("administration/system-setting", SystemSettingPage.class);
 		addPage("administration/qos-setting", QosSettingPage.class);
 	}
+	
+	public List<String> normalize(List<String> urlSegments) {
+		List<String> normalized = new ArrayList<String>();
+		for (String each: urlSegments) {
+			each = StringUtils.remove(each, '/');
+			if (each.length() != 0)
+				normalized.add(each);
+		}
+		return normalized;
+	}
 
 	private void addAccountPages() {
 		addPage("accounts", AccountsPage.class);
 		addPage("accounts/new", NewAccountPage.class);
 		
-		add(new MountedMapper("${user}", AccountOverviewPage.class) {
+		add(new MountedMapper("${user}", AccountReposPage.class) {
 
 			@Override
 			protected boolean urlStartsWith(Url url, String... segments) {
-				List<String> urlSegments = url.getSegments();
+				List<String> urlSegments = normalize(url.getSegments());
 				if (urlSegments.size() < 1)
 					return false;
 				String userName = urlSegments.get(0);
@@ -85,10 +96,9 @@ public class RootMapper extends CompoundRequestMapper {
 
 		});
 		
-		addPage("${user}/overview", AccountOverviewPage.class);
-		addPage("${user}/notification", AccountNotificationsPage.class);
 		addPage("${user}/repositories", AccountReposPage.class);
 		addPage("${user}/repositories/new", NewAccountRepoPage.class);
+		addPage("${user}/notification", AccountNotificationsPage.class);
 		addPage("${user}/setting/profile", ProfileEditPage.class);
 		addPage("${user}/setting/avatar", AvatarEditPage.class);
 		addPage("${user}/setting/password", PasswordEditPage.class);
@@ -99,7 +109,7 @@ public class RootMapper extends CompoundRequestMapper {
 
 			@Override
 			protected boolean urlStartsWith(Url url, String... segments) {
-				List<String> urlSegments = url.getSegments();
+				List<String> urlSegments = normalize(url.getSegments());
 				if (urlSegments.size() < 2)
 					return false;
 				String userName = urlSegments.get(0);

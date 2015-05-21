@@ -1,12 +1,16 @@
-.account-list .head {
+.accounts .head {
 	margin-bottom: 20px;
 }
-.account-list .head .search {
+.accounts .head .search {
 	width: 250px;
 }
-.account-list .head>.pull-left {
+.accounts .head>.pull-left {
 	margin-right: 20px;
 }
-.account-list .pagination {
+.accounts .pagination {
 	margin: 0;
+}
+.accounts .actions .fa {
+	font-size: 18px;
+	color: #666;
 }

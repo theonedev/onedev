@@ -1,20 +1,8 @@
 <wicket:extend>
-	<div class="sidebar">
-		<table>
-			<tr>
-				<td class="nav">
-					<ul wicket:id="tabs" class="tabs list-unstyled"></ul>
-					<wicket:enclosure child="delete">
-					<div class="actions">
-						<a wicket:id="delete" class="btn btn-danger">Delete Account</a>
-						<div wicket:id="confirmDeleteDlg"></div>
-					</div>
-					</wicket:enclosure>
-				</td>
-				<td class="content">
-					<wicket:child></wicket:child>
-				</td>
-			</tr>
-		</table>
+	<div class="account-setting">
+		<ul wicket:id="settingTabs" class="nav nav-tabs"></ul>
+		<div class="content">
+			<wicket:child></wicket:child>
+		</div>
 	</div>
 </wicket:extend>

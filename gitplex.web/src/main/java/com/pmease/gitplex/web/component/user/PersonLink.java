@@ -24,7 +24,7 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.avatar.AvatarByPerson;
 import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
+import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
@@ -63,7 +63,7 @@ public class PersonLink extends Panel {
 
 		WebMarkupContainer link;
 		if (user != null) {
-			link = new BookmarkablePageLink<Void>("link", AccountOverviewPage.class, AccountPage.paramsOf(user));
+			link = new BookmarkablePageLink<Void>("link", AccountReposPage.class, AccountPage.paramsOf(user));
 		} else {
 			link = new WebMarkupContainer("link") {
 

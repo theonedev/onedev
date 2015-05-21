@@ -1,5 +1,5 @@
 <wicket:extend>
-	<section class="account-list">
+	<section class="accounts">
 		<div class="body">
 			<div class="head clearfix">
 				<div class="pull-left search">
@@ -13,7 +13,7 @@
 				</div>
 				<ul wicket:id="accountsPageNav" class="pull-right"></ul>
 			</div>
-			<table wicket:id="accountsContainer" class="accounts table table-hover table-condensed">
+			<table wicket:id="accountsContainer" class="accounts table table-hover">
 				<thead>
 					<tr>
 						<th class="name">Name</th>
@@ -32,7 +32,7 @@
 						</td>
 						<td class="actions">
 							<a wicket:id="setting" class="fa fa-cog" title="Account settings"></a>
-							<a wicket:id="runAs" class="fa fa-user" title="Run as this account"></a>
+							<a wicket:id="runAs" class="fa fa-sign-in" title="Run as this account"></a>
 							<a wicket:id="delete" class="fa fa-trash" title="Delete this account"></a>
 						</td>
 					</tr>

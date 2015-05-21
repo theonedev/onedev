@@ -21,7 +21,7 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.avatar.AvatarByUser;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
+import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
@@ -65,7 +65,7 @@ public class UserLink extends Panel {
 
 		WebMarkupContainer link;
 		if (user != null) {
-			link = new BookmarkablePageLink<Void>("link", AccountOverviewPage.class, AccountPage.paramsOf(user));
+			link = new BookmarkablePageLink<Void>("link", AccountReposPage.class, AccountPage.paramsOf(user));
 		} else {
 			link = new WebMarkupContainer("link") {
 
@@ -82,7 +82,7 @@ public class UserLink extends Panel {
 		if (user != null)
 			displayName = user.getDisplayName();
 		else
-			displayName = "GitPlex";
+			displayName = "Unknown";
 
 		if (avatarMode == AvatarMode.NAME_AND_AVATAR || avatarMode == AvatarMode.AVATAR) {
 			Component avatar = new AvatarByUser("avatar", new UserModel(user), false);

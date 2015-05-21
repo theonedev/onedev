@@ -1,0 +1,44 @@
+.account.sidebar>table>tbody>tr>td.nav>.head {
+	margin: -20px 0 10px 0;
+	padding: 10px;
+	border-bottom: 1px solid #BBB;
+}
+.account.sidebar>table>tbody>tr>td.nav>.head .avatar {
+	display: block;
+	height: 180px;
+	width: 180px;
+	margin-bottom: 10px;
+}
+.account.sidebar>table>tbody>tr>td.nav>.head .name {
+	font-size: 16px;
+}
+.account.sidebar>table>tbody>tr>td.nav>.head .dropdown-trigger {
+	font-size: 18px;
+	vertical-align: middle;
+}
+.account.sidebar>table>tbody>tr>td.nav>.head .dropdown-trigger {
+	font-size: 18px;
+	vertical-align: middle;
+}
+.account.sidebar>table>tbody>tr>td.nav>.run-as {
+	margin-bottom: 10px;
+	border-bottom: 1px solid #BBB;
+	padding: 0 10px 10px 10px;
+	color: #666;
+	display: block;
+}
+.account.sidebar>table>tbody>tr>td.nav>.run-as .fa {
+	font-size: 18px;
+}
+.accounts.menu .avatar {
+	width: 30px; 
+	height: 30px;
+}
+.accounts.menu ul>li>a {
+	padding: 6px 10px;
+}
+.accounts.menu>.content {
+	max-height: 600px;
+	min-width: 200px;
+	overflow: auto;
+}
