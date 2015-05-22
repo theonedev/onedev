@@ -1,8 +1,7 @@
-<html xmlns:wicket>
 <wicket:extend>
-	<section wicket:id="integrationPolicies" class="integration-policies">
+	<section class="integration-policy-setting">
 		<div class="head">Integration Policies</div>
-		<div class="body">
+		<div wicket:id="integrationPolicySetting" class="body">
 			<ul class="list-unstyled policies">
 				<li wicket:id="policies"><div wicket:id="policy"></div></li>
 			</ul>
@@ -30,4 +29,3 @@
 		<a wicket:id="link" class="add-new">Add Policy <i class="fa fa-plus-circle fa-lg"></i></a>
 	</wicket:fragment>
 </wicket:extend>
-</html>

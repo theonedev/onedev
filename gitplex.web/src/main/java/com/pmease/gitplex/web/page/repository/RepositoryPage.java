@@ -25,9 +25,7 @@ import com.pmease.gitplex.web.page.repository.branches.RepoBranchesPage;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitsPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.OpenRequestsPage;
 import com.pmease.gitplex.web.page.repository.setting.RepoSettingPage;
-import com.pmease.gitplex.web.page.repository.setting.gatekeeper.GateKeeperPage;
 import com.pmease.gitplex.web.page.repository.setting.general.GeneralSettingPage;
-import com.pmease.gitplex.web.page.repository.setting.integrationpolicy.IntegrationPolicyPage;
 import com.pmease.gitplex.web.page.repository.tags.RepoTagsPage;
 import com.pmease.gitplex.web.page.repository.tree.RepoTreePage;
 
@@ -72,18 +70,16 @@ public abstract class RepositoryPage extends AccountPage {
 		super.onInitialize();
 		
 		List<PageTab> tabs = new ArrayList<>();
-		tabs.add(new RepoTab(Model.of("Files"), RepoTreePage.class));
-		tabs.add(new RepoTab(Model.of("Commits"), RepoCommitsPage.class));
-		tabs.add(new RepoTab(Model.of("Branches"), RepoBranchesPage.class));
-		tabs.add(new RepoTab(Model.of("Tags"), RepoTagsPage.class));
-		tabs.add(new RepoTab(Model.of("Pull Requests"), OpenRequestsPage.class));
+		tabs.add(new RepoTab(Model.of("Files"), "fa fa-fw fa-files-o", RepoTreePage.class));
+		tabs.add(new RepoTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", RepoCommitsPage.class));
+		tabs.add(new RepoTab(Model.of("Branches"), "fa fa-fw fa-ext fa-branch", RepoBranchesPage.class));
+		tabs.add(new RepoTab(Model.of("Tags"), "fa fa-fw fa-tag", RepoTagsPage.class));
+		tabs.add(new RepoTab(Model.of("Pull Requests"), "fa fa-fw fa-branch-compare", OpenRequestsPage.class));
 		
-		if (SecurityUtils.canManage(getRepository())) {
-			tabs.add(new RepoTab(Model.of("Setting"), GeneralSettingPage.class, 
-					GateKeeperPage.class, IntegrationPolicyPage.class));
-		}
+		if (SecurityUtils.canManage(getRepository()))
+			tabs.add(new RepoTab(Model.of("Setting"), "fa fa-fw fa-cog", GeneralSettingPage.class, RepoSettingPage.class));
 		
-		add(new Tabbable("tabs", tabs));
+		add(new Tabbable("repoTabs", tabs));
 	}
 
 	@Override

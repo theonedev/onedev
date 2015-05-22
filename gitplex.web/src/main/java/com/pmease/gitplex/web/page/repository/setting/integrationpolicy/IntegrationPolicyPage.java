@@ -5,12 +5,15 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.behavior.sortable.SortBehavior;
 import com.pmease.commons.wicket.behavior.sortable.SortPosition;
@@ -18,6 +21,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.model.IntegrationPolicy;
 import com.pmease.gitplex.web.page.repository.setting.RepoSettingPage;
+import com.pmease.gitplex.web.page.repository.setting.gatekeeper.GateKeeperPage;
 
 @SuppressWarnings("serial")
 public class IntegrationPolicyPage extends RepoSettingPage {
@@ -32,7 +36,7 @@ public class IntegrationPolicyPage extends RepoSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		container = new WebMarkupContainer("integrationPolicies");
+		container = new WebMarkupContainer("integrationPolicySetting");
 		container.setOutputMarkupId(true);
 		add(container);
 		container.add(new ListView<IntegrationPolicy>("policies", new AbstractReadOnlyModel<List<IntegrationPolicy>>() {
@@ -115,6 +119,12 @@ public class IntegrationPolicyPage extends RepoSettingPage {
 		});
 		fragment.setOutputMarkupId(true);
 		return fragment;
+	}
+	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new CssResourceReference(GateKeeperPage.class, "integration-policy.css")));
 	}
 	
 	@Override

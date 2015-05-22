@@ -2,10 +2,13 @@ package com.pmease.gitplex.web.page.repository.setting.gatekeeper;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.util.ReflectionUtils;
@@ -20,12 +23,14 @@ import com.pmease.gitplex.web.page.repository.setting.RepoSettingPage;
 @SuppressWarnings("serial")
 public class GateKeeperPage extends RepoSettingPage {
 
+	private static final String CONTAINER_ID = "gateKeeperSetting";
+	
 	public GateKeeperPage(PageParameters params) {
 		super(params);
 	}
 
 	private WebMarkupContainer newContent() {
-		WebMarkupContainer content = new WebMarkupContainer("content");
+		WebMarkupContainer content = new WebMarkupContainer(CONTAINER_ID);
 		content.setOutputMarkupId(true);
 		
 		content.add(new ListView<GateKeeper>("gateKeepers", getRepository().getGateKeepers()) {
@@ -81,7 +86,7 @@ public class GateKeeperPage extends RepoSettingPage {
 						}
 						
 					};
-					((WebMarkupContainer)GateKeeperPage.this.get("content")).replace(modalPanel);
+					((WebMarkupContainer)GateKeeperPage.this.get(CONTAINER_ID)).replace(modalPanel);
 					target.add(modalPanel);
 				}
 			}
@@ -106,12 +111,18 @@ public class GateKeeperPage extends RepoSettingPage {
 	private void onGateKeeperChanged(AjaxRequestTarget target) {
 		GitPlex.getInstance(RepositoryManager.class).save(getRepository());
 		replace(newContent());
-		target.add(get("content"));
+		target.add(get(CONTAINER_ID));
 	}
 
 	@Override
 	protected String getPageTitle() {
 		return "Gate Keepers - " + getRepository();
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new CssResourceReference(GateKeeperPage.class, "gate-keeper.css")));
 	}
 
 }

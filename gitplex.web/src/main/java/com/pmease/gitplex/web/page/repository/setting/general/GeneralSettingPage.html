@@ -1,2 +1,15 @@
 <wicket:extend>
+	<section class="general-setting">
+		<div class="head">General Setting</div>
+		<div class="body">
+			<form wicket:id="form">
+				<div wicket:id="editor"></div>
+				<div class="actions">
+					<input wicket:id="save" class="btn btn-primary dirty-aware" value="Update" type="submit"></input>
+					<div wicket:id="confirmDeleteDlg"></div>
+					<a wicket:id="delete" class="btn btn-danger pull-right">Delete this Repository</a>
+				</div>
+			</form>
+		</div>
+	</section>
 </wicket:extend>

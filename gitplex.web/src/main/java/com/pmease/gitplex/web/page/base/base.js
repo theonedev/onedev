@@ -14,27 +14,6 @@ var gitplex = {
 	},
 	
 	choiceFormatter: {
-		user: {
-			formatSelection: function(user) {
-				return "<img class='avatar' src='" + user.avatar + "' /> " + user.name + (user.fullName?" (" + user.fullName + ")": "");
-			},
-			
-			formatResult: function(user) {
-				if (!user.alias) {
-					return "<div class='user-choice-row'><img class='avatar' src='" + user.avatar + "'/>" 
-						+ "<p>"+ user.name + (user.fullName?" (" + user.fullName + ")": "") + "</p>"
-						+ "<p class='text-muted'>" + user.email + "</p>"
-						+ "</div>";
-				} else {
-					return "<i>&lt;&lt;" + user.alias + "&gt;&gt;</i>";
-				}
-			},
-			
-			escapeMarkup: function(m) {
-				return m;
-			},
-		}, 
-		
 		repository: {
 			formatSelection: function(repository) {
 				return repository.name;

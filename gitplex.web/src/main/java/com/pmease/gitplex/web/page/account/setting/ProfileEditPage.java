@@ -6,7 +6,6 @@ import java.util.Iterator;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.SubmitLink;
 import org.apache.wicket.model.IModel;
@@ -34,8 +33,6 @@ public class ProfileEditPage extends AccountSettingPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		add(new Label("title", "Profile of " + getAccount().getDisplayName()));
 		
 		final ProfileDescriptor profileDesciptor = new ProfileDescriptor();
 		final BeanEditor<?> editor = new ReflectionBeanEditor("editor", profileDesciptor, new IModel<Serializable>() {

@@ -3,18 +3,16 @@ package com.pmease.gitplex.web.page.repository.setting;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
-import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteRepoModal;
-import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteRepoModalBehavior;
-import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
+import com.pmease.gitplex.web.page.repository.RepoTab;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.setting.gatekeeper.GateKeeperPage;
 import com.pmease.gitplex.web.page.repository.setting.general.GeneralSettingPage;
@@ -37,29 +35,18 @@ public class RepoSettingPage extends RepositoryPage {
 		super.onInitialize();
 		
 		List<PageTab> tabs = new ArrayList<>();
-		tabs.add(new RepoSettingTab("General Setting", "fa fa-fw fa-pencil", GeneralSettingPage.class));
-		tabs.add(new RepoSettingTab("Gate Keeper", "fa fa-ext fa-fw fa-gatekeeper", GateKeeperPage.class));
-		tabs.add(new RepoSettingTab("Integration Policy", "fa fa-fw fa-puzzle-piece", IntegrationPolicyPage.class));
+		tabs.add(new RepoTab(Model.of("General Setting"), "", GeneralSettingPage.class));
+		tabs.add(new RepoTab(Model.of("Gate Keeper"), "", GateKeeperPage.class));
+		tabs.add(new RepoTab(Model.of("Integration Policy"), "", IntegrationPolicyPage.class));
 		
-		add(new Tabbable("tabs", tabs));
-		
-		ConfirmDeleteRepoModal confirmDeleteDlg = new ConfirmDeleteRepoModal("confirmDeleteDlg") {
-
-			@Override
-			protected void onDeleted(AjaxRequestTarget target) {
-				setResponsePage(AccountReposPage.class, AccountPage.paramsOf(getAccount()));
-			}
-			
-		};
-		add(confirmDeleteDlg);
-		add(new WebMarkupContainer("delete").add(new ConfirmDeleteRepoModalBehavior(confirmDeleteDlg) {
-
-			@Override
-			protected Repository getRepository() {
-				return RepoSettingPage.this.getRepository();
-			}
-			
-		}));
+		add(new Tabbable("repoSettingTabs", tabs));
 	}
 
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		
+		response.render(CssHeaderItem.forReference(new CssResourceReference(RepoSettingPage.class, "repo-setting.css")));
+	}
+	
 }

@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.Iterator;
 
 import org.apache.wicket.Session;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -26,10 +25,6 @@ public class PasswordEditPage extends AccountSettingPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		User account = getAccount();
-		
-		add(new Label("title", "Change Password of " + account.getDisplayName()));
 		
 		Form<?> form = new Form<Void>("form") {
 

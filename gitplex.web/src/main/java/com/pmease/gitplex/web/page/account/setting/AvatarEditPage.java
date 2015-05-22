@@ -1,7 +1,6 @@
 package com.pmease.gitplex.web.page.account.setting;
 
 import org.apache.wicket.Session;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.model.IModel;
@@ -25,8 +24,6 @@ public class AvatarEditPage extends AccountSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 	
-		add(new Label("title", "Avatar of " + getAccount().getDisplayName()));
-		
 		Form<?> form = new Form<Void>("form") {
 
 			@Override
