@@ -25,8 +25,15 @@ public abstract class ModalPanel extends Panel {
 
 	private static final String CONTENT_ID = "content";
 	
+	private boolean showImmediately;
+	
 	public ModalPanel(String id) {
 		super(id);
+	}
+	
+	public ModalPanel(String id, boolean showImmediately) {
+		super(id);
+		this.showImmediately = showImmediately;
 	}
 	
 	@Override
@@ -50,12 +57,20 @@ public abstract class ModalPanel extends Panel {
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 
-				String script = String.format("pmease.commons.modal.setup('%s', %s);", 
-						getMarkupId(), getCallbackFunction());
+				String script = String.format("pmease.commons.modal.setup('%s', %s, %s);", 
+						getMarkupId(), !showImmediately?getCallbackFunction():"undefined", showImmediately);
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			
 		});
+	}
+	
+	@Override
+	protected void onBeforeRender() {
+		if (showImmediately)
+			replace(newContent(CONTENT_ID, null).add(AttributeModifier.append("class", "content")));
+		
+		super.onBeforeRender();
 	}
 	
 	/**
@@ -65,7 +80,8 @@ public abstract class ModalPanel extends Panel {
 	 * 			Wicket ajax request target 
 	 */
 	public void close(AjaxRequestTarget target) {
-		unload(target);
+		if (!showImmediately)
+			unload(target);
 		target.appendJavaScript(String.format("pmease.commons.modal.hide('%s', true);", getMarkupId()));
 	}
 	

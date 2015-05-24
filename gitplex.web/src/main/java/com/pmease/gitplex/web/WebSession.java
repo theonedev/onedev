@@ -5,16 +5,13 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
 import org.apache.wicket.request.Request;
 
-import com.google.common.base.Optional;
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.User;
-
 public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 
 	private static final long serialVersionUID = 1L;
 
-	private boolean displayOutline;
+	private boolean showOutline;
+	
+	private boolean miniSidebar;
 	
 	public WebSession(Request request) {
 		super(request);
@@ -24,16 +21,20 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 		return (WebSession) org.apache.wicket.protocol.http.WebSession.get();
 	}
 
-	public static Optional<User> getCurrentUser() {
-		return Optional.fromNullable(GitPlex.getInstance(UserManager.class).getCurrent());
-	}
-	
-	public boolean isDisplayOutline() {
-		return displayOutline;
+	public boolean isMiniSidebar() {
+		return miniSidebar;
 	}
 
-	public void setDisplayOutline(boolean displayOutline) {
-		this.displayOutline = displayOutline;
+	public void setMiniSidebar(boolean miniSidebar) {
+		this.miniSidebar = miniSidebar;
+	}
+
+	public boolean isShowOutline() {
+		return showOutline;
+	}
+
+	public void setShowOutline(boolean showOutline) {
+		this.showOutline = showOutline;
 	}
 
 	public void login(String userName, String password, boolean rememberMe) {

@@ -11,11 +11,11 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.page.account.AccountPage;
+import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountTab;
 
 @SuppressWarnings("serial")
-public class AccountSettingPage extends AccountPage {
+public class AccountSettingPage extends AccountLayoutPage {
 
 	public AccountSettingPage(PageParameters params) {
 		super(params);

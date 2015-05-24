@@ -113,7 +113,12 @@ html, body {
 .sidebar>table>tbody>tr>td.content {
 	padding: 20px;
 }
-
+.sidebar>table>tbody>tr>td.mini.nav {
+	width: 50px;
+}
+.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a>.text {
+	display: none;
+}
 #main>.foot {
 	font-size: 11px;
 	margin: 0 -15px;

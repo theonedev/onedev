@@ -64,7 +64,7 @@ public class GateKeeperPage extends RepoSettingPage {
 					getRepository().getGateKeepers().add(gateKeeper);
 					onGateKeeperChanged(target);
 				} else {
-					ModalPanel modalPanel = new ModalPanel("gateKeeperModal") {
+					ModalPanel modalPanel = new ModalPanel("gateKeeperModal", true) {
 
 						@Override
 						protected Component newContent(String id, ModalBehavior behavior) {

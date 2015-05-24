@@ -61,7 +61,7 @@ public abstract class GateKeeperPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				ModalPanel modalPanel = new ModalPanel("editor") {
+				ModalPanel modalPanel = new ModalPanel("editor", true) {
 
 					@Override
 					protected Component newContent(String id, ModalBehavior behavior) {

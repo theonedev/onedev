@@ -96,14 +96,14 @@ public abstract class SourceViewPanel extends Panel {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				if (WebSession.get().isDisplayOutline())
+				if (WebSession.get().isShowOutline())
 					add(AttributeAppender.append("class", " active"));
 			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				WebSession session = WebSession.get();
-				session.setDisplayOutline(!session.isDisplayOutline());
+				session.setShowOutline(!session.isShowOutline());
 				target.appendJavaScript(String.format("gitplex.sourceview.toggleOutline('%s');", outlinePanel.getMarkupId()));
 			}
 
@@ -120,7 +120,7 @@ public abstract class SourceViewPanel extends Panel {
 		codeContainer.setOutputMarkupId(true);
 		
 		add(outlinePanel = new OutlinePanel("outline", symbols)); 
-		if (symbols.isEmpty() || !WebSession.get().isDisplayOutline())
+		if (symbols.isEmpty() || !WebSession.get().isShowOutline())
 			outlinePanel.add(AttributeAppender.append("style", "display:none;"));
 		
 		add(symbolsContainer = new WebMarkupContainer("symbols"));

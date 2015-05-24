@@ -1,0 +1,14 @@
+.no-commits>.body>ul {
+	background: #333;
+	color: #EEE;
+	border-radius: 4px;
+	font-family: monospace;
+	margin: 4px 0 16px 0;
+}
+.no-commits>.body>ul>li:before {
+	content: "$";
+	margin-right: 8px;
+}
+.no-commits>.body>.help-block {
+	margin-top: -8px;
+}

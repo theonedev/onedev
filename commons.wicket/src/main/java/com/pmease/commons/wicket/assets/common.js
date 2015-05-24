@@ -22,7 +22,7 @@ pmease.commons = {
 			});
 		},
 
-		setup: function(modalId, contentUnloader) {
+		setup: function(modalId, contentUnloader, showImmediately) {
 			var modal = $("#" + modalId);
 			
 			// This script can still be called if CollapseBehavior is added to a 
@@ -35,6 +35,8 @@ pmease.commons = {
 			
 			modal.before("<div id='" + modalId + "-placeholder' class='hide'></div>");
 			modal.modal({backdrop: "static", keyboard: false, show: false});
+			if (showImmediately)
+				pmease.commons.modal.show(modalId, undefined);
 		},
 
 		show: function(modalId, contentLoader) {
@@ -45,7 +47,7 @@ pmease.commons = {
 
 			pmease.commons.modal.afterShow(modal);
 			
-			if (!modal.find(">.modal-dialog>.content")[0])
+			if (contentLoader && !modal.find(">.modal-dialog>.content")[0])
 				contentLoader();
 			else
 				modal.find("input[type=text], input[type=textarea]").filter(":visible:first").focus();
@@ -72,7 +74,7 @@ pmease.commons = {
 			$modal.modal("hide");
 			$("#" + modalId + "-placeholder").after($modal);
 			
-			if (callFromServerSide !== true)
+			if (callFromServerSide !== true && $modal[0].contentUnloader)
 				$modal[0].contentUnloader();
 		}
 		

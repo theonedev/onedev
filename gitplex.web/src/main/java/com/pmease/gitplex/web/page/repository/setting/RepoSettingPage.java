@@ -5,14 +5,12 @@ import java.util.List;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.page.repository.RepoTab;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.setting.gatekeeper.GateKeeperPage;
 import com.pmease.gitplex.web.page.repository.setting.general.GeneralSettingPage;
@@ -35,9 +33,9 @@ public class RepoSettingPage extends RepositoryPage {
 		super.onInitialize();
 		
 		List<PageTab> tabs = new ArrayList<>();
-		tabs.add(new RepoTab(Model.of("General Setting"), "", GeneralSettingPage.class));
-		tabs.add(new RepoTab(Model.of("Gate Keeper"), "", GateKeeperPage.class));
-		tabs.add(new RepoTab(Model.of("Integration Policy"), "", IntegrationPolicyPage.class));
+		tabs.add(new RepoSettingTab("General Setting", GeneralSettingPage.class));
+		tabs.add(new RepoSettingTab("Gate Keepers", GateKeeperPage.class));
+		tabs.add(new RepoSettingTab("Integration Policies", IntegrationPolicyPage.class));
 		
 		add(new Tabbable("repoSettingTabs", tabs));
 	}

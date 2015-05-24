@@ -34,13 +34,13 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteRepoModal;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteRepoModalBehavior;
-import com.pmease.gitplex.web.page.account.AccountPage;
+import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.setting.general.GeneralSettingPage;
 import com.pmease.gitplex.web.page.repository.tree.RepoTreePage;
 
 @SuppressWarnings("serial")
-public class AccountReposPage extends AccountPage {
+public class AccountReposPage extends AccountLayoutPage {
 
 	private PageableListView<Repository> reposView;
 	

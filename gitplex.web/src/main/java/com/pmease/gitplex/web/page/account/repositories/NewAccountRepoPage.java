@@ -14,10 +14,10 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.page.account.AccountPage;
+import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 
 @SuppressWarnings("serial")
-public class NewAccountRepoPage extends AccountPage {
+public class NewAccountRepoPage extends AccountLayoutPage {
 
 	private final Repository repository;
 	

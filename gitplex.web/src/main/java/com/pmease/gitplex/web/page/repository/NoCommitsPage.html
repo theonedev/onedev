@@ -1,26 +1,22 @@
 <wicket:extend>
-<div class="padder">
-<p class="fa fa-lg fa-info-circle"> Repository does not have any commits yet, you may:</p>
-<ul>
-	<li>
-<h4>Initialize the repository from command line</h4>
-<pre>
-touch README
-git init
-git add README
-git commit -m "first commit"
-git remote add origin <span wicket:id="url1"></span>
-git push -u origin master
-</pre>
-	</li>
-	<li>
-<h4>Push an existing repository from command line</h4>
-<pre>
-git remote add origin <span wicket:id="url2"></span> 
-<small>(In case remote <em>origin</em> already exists, use another name other than <em>origin</em> in above command, or run command <em>git remote set-url origin <span wicket:id="url3"></span></em> instead)</small> 
-git push -u origin master
-</pre>
-	</li>
-</ul>
-</div>
+	<section class="no-commits">
+		<div class="head">Repository does not have any commits yet</div>
+		<div class="body">
+			<div><i class="fa fa-hand-o-right"></i> You may initialize the repository from command line:</div>
+			<ul class="list-unstyled">
+				<li>touch README</li>
+				<li>git init</li>
+				<li>git add README</li>
+				<li>git commit -m "first commit"</li>
+				<li>git remote add origin <span wicket:id="url1"></span></li>
+				<li>git push -u origin master</li>
+			</ul>
+			<div><i class="fa fa-hand-o-right"></i> Or push an existing repository from command line:</div>
+			<ul class="list-unstyled">
+				<li>git remote add origin <span wicket:id="url2"></span></li>
+				<li>git push -u origin master</li>
+			</ul>
+			<div class="help-block"><i class="fa fa-info-circle"></i> In case remote <em>origin</em> already exists, use another name other than <em>origin</em>, or run command <em>git remote set-url origin <span wicket:id="url3"></span></em> instead</div>		
+		</div>
+	</section>
 </wicket:extend>

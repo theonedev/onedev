@@ -21,7 +21,6 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.model.IntegrationPolicy;
 import com.pmease.gitplex.web.page.repository.setting.RepoSettingPage;
-import com.pmease.gitplex.web.page.repository.setting.gatekeeper.GateKeeperPage;
 
 @SuppressWarnings("serial")
 public class IntegrationPolicyPage extends RepoSettingPage {
@@ -124,7 +123,7 @@ public class IntegrationPolicyPage extends RepoSettingPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(GateKeeperPage.class, "integration-policy.css")));
+		response.render(CssHeaderItem.forReference(new CssResourceReference(IntegrationPolicyPage.class, "integration-policy.css")));
 	}
 	
 	@Override
