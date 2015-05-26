@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.repository;
+package com.pmease.gitplex.web.component.repochoice;
 
 import java.util.ArrayList;
 import java.util.Collection;

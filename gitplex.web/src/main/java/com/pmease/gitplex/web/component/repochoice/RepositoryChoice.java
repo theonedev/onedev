@@ -1,26 +1,28 @@
-package com.pmease.gitplex.web.component.repository;
+package com.pmease.gitplex.web.component.repochoice;
+
+import javax.annotation.Nullable;
 
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.select2.Select2Choice;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-public class AffinalRepositoryChoice extends Select2Choice<Repository> {
+public class RepositoryChoice extends Select2Choice<Repository> {
 
 	/**
 	 * Constructor with model.
 	 * 
 	 * @param id
 	 * 			component id of the choice
-	 * @param currentRepositoryModel
-	 * 			model of current repository from which to calculate comparable repositories. Note that 
-	 * 			model.getObject() should never return null
-	 * @param selectedRepositoryModel
-	 * 			model of selected repository
+	 * @param repoModel
+	 * 			repository model
+	 * @param userModel
+	 * 			model of user to choose repository under, <tt>null</tt> to choose all accessible repositories
 	 */
-	public AffinalRepositoryChoice(String id, IModel<Repository> currentRepositoryModel, IModel<Repository> selectedRepositoryModel) {
-		super(id, selectedRepositoryModel, new AffinalRepositoryChoiceProvider(currentRepositoryModel));
+	public RepositoryChoice(String id, IModel<Repository> repoModel, @Nullable IModel<User> userModel) {
+		super(id, repoModel, new RepositoryChoiceProvider(userModel));
 	}
 
 	@Override

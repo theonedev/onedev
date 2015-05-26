@@ -1,0 +1,39 @@
+.repository-selector {
+	padding: 8px;
+}
+.repository-selector .search input {
+	border-radius: 0;
+}
+.repository-selector .search .account input {
+	border-right: none;
+}
+.repository-selector ul.accounts {
+	max-width: 600px;
+	max-height: 600px;
+	overflow: auto;
+	margin: 8px 0 0 0;
+}
+.repository-selector li.account>div {
+	font-size: 16px;
+	line-height: 30px;
+}
+.repository-selector li.account .avatar {
+	margin-top: -6px;
+}
+.repository-selector ul.repositories {
+	margin: 0 0 8px 24px;
+}
+.repository-selector li.repository a {
+	display: block;
+	text-decoration: none;
+	color: #333;
+	padding: 2px 5px;
+}
+.repository-selector li.repository:hover a {
+	background: #EEE;
+	color: black;
+}
+.repository-selector li.repository.active a {
+	background: #666;
+	color: white;
+}

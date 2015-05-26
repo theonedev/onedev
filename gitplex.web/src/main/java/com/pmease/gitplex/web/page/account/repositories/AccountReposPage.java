@@ -3,10 +3,8 @@ package com.pmease.gitplex.web.page.account.repositories;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -23,7 +21,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.MultilineLabel;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
@@ -35,7 +32,6 @@ import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteRepoModal;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteRepoModalBehavior;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
-import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.setting.general.GeneralSettingPage;
 import com.pmease.gitplex.web.page.repository.tree.RepoTreePage;
 
@@ -48,9 +44,7 @@ public class AccountReposPage extends AccountLayoutPage {
 	
 	private WebMarkupContainer reposContainer; 
 	
-	private TextField<String> searchInput;
-	
-	private String searchFor;
+	private String searchInput = "";
 	
 	public AccountReposPage(PageParameters params) {
 		super(params);
@@ -65,8 +59,10 @@ public class AccountReposPage extends AccountLayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(searchInput = new ClearableTextField<String>("searchRepos", Model.of("")));
-		searchInput.add(new OnSearchingBehavior() {
+		final TextField<String> searchField;
+		
+		add(searchField = new ClearableTextField<String>("searchRepos", Model.of("")));
+		searchField.add(new OnSearchingBehavior() {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
@@ -74,12 +70,12 @@ public class AccountReposPage extends AccountLayoutPage {
 				// input into search box yet. To work around this issue, we compare search string 
 				// against previous value to only update the branches table if there is an actual 
 				// change.
-				String newSearchFor = searchInput.getInput();
-				if (StringUtils.isNotBlank(newSearchFor))
-					newSearchFor = newSearchFor.trim().toLowerCase();
+				String newSearchInput = searchField.getInput();
+				if (newSearchInput != null)
+					newSearchInput = newSearchInput.toLowerCase().trim();
 				else
-					newSearchFor = null;
-				if (!ObjectUtils.equals(newSearchFor, searchFor))
+					newSearchInput = "";
+				if (!newSearchInput.equals(searchInput))
 					super.onUpdate(target);
 			}
 			
@@ -120,19 +116,19 @@ public class AccountReposPage extends AccountLayoutPage {
 
 			@Override
 			protected List<Repository> load() {
-				List<Repository> repositories = new ArrayList<Repository>(getAccount().getRepositories());
+				List<Repository> repositories = new ArrayList<>();
 				
-				searchFor = searchInput.getInput();
-				if (StringUtils.isNotBlank(searchFor)) {
-					searchFor = searchFor.trim().toLowerCase();
-					for (Iterator<Repository> it = repositories.iterator(); it.hasNext();) {
-						Repository repository = it.next();
-						if (!repository.getName().toLowerCase().contains(searchFor))
-							it.remove();
-					}
-				} else {
-					searchFor = null;
+				searchInput = searchField.getInput();
+				if (searchInput != null)
+					searchInput = searchInput.toLowerCase().trim();
+				else
+					searchInput = "";
+				
+				for (Repository repo: getAccount().getRepositories()) {
+					if (repo.getName().toLowerCase().contains(searchInput) && SecurityUtils.canPull(repo))
+						repositories.add(repo);
 				}
+				
 				Collections.sort(repositories, new Comparator<Repository>() {
 
 					@Override
@@ -150,7 +146,7 @@ public class AccountReposPage extends AccountLayoutPage {
 			protected void populateItem(final ListItem<Repository> item) {
 				Repository repository = item.getModelObject();
 
-				Link<Void> link = new BookmarkablePageLink<>("repoLink", RepoTreePage.class, RepositoryPage.paramsOf(repository)); 
+				Link<Void> link = new BookmarkablePageLink<>("repoLink", RepoTreePage.class, RepoTreePage.paramsOf(repository)); 
 				link.add(new Label("repoName", repository.getName()));
 				item.add(link);
 						
@@ -160,7 +156,7 @@ public class AccountReposPage extends AccountLayoutPage {
 
 					@Override
 					public void onClick() {
-						PageParameters params = RepositoryPage.paramsOf(item.getModelObject());
+						PageParameters params = GeneralSettingPage.paramsOf(item.getModelObject());
 						addPrevPageParam(params);
 						setResponsePage(GeneralSettingPage.class, params);
 					}

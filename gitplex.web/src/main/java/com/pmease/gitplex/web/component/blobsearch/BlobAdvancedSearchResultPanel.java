@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.search;
+package com.pmease.gitplex.web.component.blobsearch;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

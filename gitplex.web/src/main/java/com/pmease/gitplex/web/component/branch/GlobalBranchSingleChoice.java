@@ -7,7 +7,7 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.component.repository.RepositoryChoice;
+import com.pmease.gitplex.web.component.repochoice.RepositoryChoice;
 
 @SuppressWarnings("serial")
 public class GlobalBranchSingleChoice extends FormComponentPanel<Branch> {

@@ -44,7 +44,7 @@ public abstract class AccountLayoutPage extends AccountPage {
 		add(new AvatarByUser("accountAvatar", accountModel, false));
 		
 		final IModel<User> accountModel = Model.of(getAccount());
-		Select2Choice<User> accountChoice = new Select2Choice<User>("accountName", accountModel, new UserChoiceProvider()) {
+		Select2Choice<User> accountChoice = new Select2Choice<User>("accountChoice", accountModel, new UserChoiceProvider()) {
 
 			@Override
 			protected void onInitialize() {

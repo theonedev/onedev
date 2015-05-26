@@ -1,9 +1,14 @@
 <wicket:extend>
-	<div class="repository">
+	<div id="repository">
 		<div class="head clearfix">
 			<i class="fa fa-ext fa-repo"></i> 
-			<a wicket:id="accountLink"><span wicket:id="accountName"></span></a> / 
-			<a wicket:id="repoLink"><span wicket:id="repoName"></span></a>
+			<span wicket:id="accountAndRepo">
+				<a wicket:id="accountLink"><span wicket:id="accountName"></span></a> 
+				/ 
+				<a wicket:id="repoLink"><span wicket:id="repoName"></span></a>
+			</span>
+			<div wicket:id="repoChoice" class="repo-choice"></div>
+			<a wicket:id="repoChoiceTrigger"><i class="fa fa-angle-down"></i></a>
 		</div>
 		<div class="body">
 			<div class="sidebar">

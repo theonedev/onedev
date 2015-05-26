@@ -1,0 +1,25 @@
+<wicket:panel>
+	<div class="repository-selector">
+		<div class="search clearfix">
+			<div class="account pull-left">
+				<input wicket:id="searchAccount" class="form-control input-sm" placeholder="Search account"></input>
+			</div>
+			<div class="repository pull-left">
+				<input wicket:id="searchRepo" class="form-control input-sm" placeholder="Search repository"></input>
+			</div>
+		</div>
+		<ul wicket:id="data" class="accounts list-unstyled">
+			<li wicket:id="accounts" class="account">
+				<div>
+					<img wicket:id="avatar" class="avatar"></img>
+					<span wicket:id="name" class="name"></span>
+				</div>
+				<ul class="repositories list-unstyled">
+					<li wicket:id="repositories" class="repository">
+						<input wicket:id="id" type="text" class="hidden"></input><a wicket:id="link"><i class="fa fa-ext fa-repo"></i> <span wicket:id="label"></span></a>
+					</li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+</wicket:panel>

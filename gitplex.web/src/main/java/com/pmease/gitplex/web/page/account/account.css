@@ -1,17 +1,38 @@
-.account.sidebar>table>tbody>tr>td.nav {
+#account.sidebar>table>tbody>tr>td.nav {
 	width: 220px;
 }
-.account.sidebar>table>tbody>tr>td.nav>.head {
+#account.sidebar>table>tbody>tr>td.nav>.head {
 	margin: -20px 0 10px 0;
 	padding: 10px;
 }
-.account.sidebar>table>tbody>tr>td.nav>.head>div>.avatar {
+#account.sidebar>table>tbody>tr>td.nav>.head>div>.avatar {
 	height: 200px;
 	width: 200px;
 	margin-bottom: 10px;
 }
-.account.sidebar>table>tbody>tr>td.nav>.head .select2-container {
+#account.sidebar>table>tbody>tr>td.nav>.head .select2-container {
 	width: 200px;
+}
+#account.sidebar>table>tbody>tr>td.nav>.head .name {
+	font-size: 16px;
+}
+#account.sidebar>table>tbody>tr>td.nav>.head .dropdown-trigger {
+	font-size: 18px;
+	vertical-align: middle;
+}
+#account.sidebar>table>tbody>tr>td.nav>.head .dropdown-trigger {
+	font-size: 18px;
+	vertical-align: middle;
+}
+#account.sidebar>table>tbody>tr>td.nav>.run-as {
+	margin-bottom: 10px;
+	border-bottom: 1px solid #BBB;
+	padding: 0 10px 10px 10px;
+	color: #666;
+	display: block;
+}
+#account.sidebar>table>tbody>tr>td.nav>.run-as .fa {
+	font-size: 18px;
 }
 .select2-results .account .avatar {
 	display: inline-block;
@@ -20,37 +41,4 @@
 	height: 24px;
 	width: 24px;
 	margin-right: 6px;
-}
-.account.sidebar>table>tbody>tr>td.nav>.head .name {
-	font-size: 16px;
-}
-.account.sidebar>table>tbody>tr>td.nav>.head .dropdown-trigger {
-	font-size: 18px;
-	vertical-align: middle;
-}
-.account.sidebar>table>tbody>tr>td.nav>.head .dropdown-trigger {
-	font-size: 18px;
-	vertical-align: middle;
-}
-.account.sidebar>table>tbody>tr>td.nav>.run-as {
-	margin-bottom: 10px;
-	border-bottom: 1px solid #BBB;
-	padding: 0 10px 10px 10px;
-	color: #666;
-	display: block;
-}
-.account.sidebar>table>tbody>tr>td.nav>.run-as .fa {
-	font-size: 18px;
-}
-.accounts.menu .avatar {
-	width: 30px; 
-	height: 30px;
-}
-.accounts.menu ul>li>a {
-	padding: 6px 10px;
-}
-.accounts.menu>.content {
-	max-height: 600px;
-	min-width: 200px;
-	overflow: auto;
 }

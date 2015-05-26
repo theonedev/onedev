@@ -12,7 +12,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.component.repository.AffinalRepositoryChoice;
+import com.pmease.gitplex.web.component.repochoice.AffinalRepositoryChoice;
 
 @SuppressWarnings("serial")
 public class AffinalBranchMultiChoice extends FormComponentPanel<Collection<Branch>> {

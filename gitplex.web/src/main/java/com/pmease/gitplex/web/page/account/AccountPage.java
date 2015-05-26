@@ -50,10 +50,4 @@ public abstract class AccountPage extends LayoutPage {
 		return params;
 	}
 
-	public static PageParameters paramsOf(String userName) {
-		PageParameters params = new PageParameters();
-		params.set(PARAM_USER, userName);
-		return params;
-	}
-	
 }

@@ -6,8 +6,9 @@ gitplex.account = {
 		
 		formatResult: function(user) {
 			return "<div class='account'>" +
-					"<img class='avatar' src='" + user.avatar + "'/>" +
-					"<span class='name'>" + user.name + "</span>";
+					"<img class='avatar' src='" + user.avatar + "'></img>" +
+					"<span class='name'>" + user.name + "</span>" +
+					"</div>";
 		},
 		
 		escapeMarkup: function(m) {

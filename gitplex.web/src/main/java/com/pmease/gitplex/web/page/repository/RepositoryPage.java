@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.EntityNotFoundException;
 
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -23,6 +24,8 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.Constants;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
+import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
@@ -31,6 +34,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.WebSession;
+import com.pmease.gitplex.web.component.reposelector.RepositorySelector;
 import com.pmease.gitplex.web.model.RepositoryModel;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
@@ -82,13 +86,35 @@ public abstract class RepositoryPage extends AccountPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		WebMarkupContainer accountAndRepo = new WebMarkupContainer("accountAndRepo");
+		add(accountAndRepo);
 		Link<Void> accountLink = new BookmarkablePageLink<>("accountLink", AccountReposPage.class, paramsOf(getAccount()));
 		accountLink.add(new Label("accountName", getAccount().getName()));
-		add(accountLink);
+		accountAndRepo.add(accountLink);
 		
 		Link<Void> repoLink = new BookmarkablePageLink<>("repoLink", RepoTreePage.class, paramsOf(getRepository()));
 		repoLink.add(new Label("repoName", getRepository().getName()));
-		add(repoLink);
+		accountAndRepo.add(repoLink);
+		
+		DropdownPanel repoChoice = new DropdownPanel("repoChoice") {
+
+			@Override
+			protected Component newContent(String id) {
+				return new RepositorySelector(id, null) {
+
+					@Override
+					protected void onSelect(AjaxRequestTarget target, Repository repository) {
+						setResponsePage(getPage().getClass(), paramsOf(repository));
+					}
+					
+				};
+			}
+			
+		};
+		add(repoChoice);
+		WebMarkupContainer repoChoiceTrigger = new WebMarkupContainer("repoChoiceTrigger");
+		repoChoiceTrigger.add(new DropdownBehavior(repoChoice).alignWithComponent(accountAndRepo, 0, 100, 0, 0, 8, true));
+		add(repoChoiceTrigger);
 		
 		final WebMarkupContainer nav = new WebMarkupContainer("repoNav");
 		nav.add(AttributeModifier.replace("class", new AbstractReadOnlyModel<String>() {

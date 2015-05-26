@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.repository;
+package com.pmease.gitplex.web.component.repochoice;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,7 +11,6 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.hibernate.criterion.Restrictions;
@@ -25,7 +24,7 @@ import com.pmease.commons.wicket.component.select2.ListChoiceProvider;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 
 @SuppressWarnings("serial")
@@ -51,7 +50,7 @@ public class RepositoryChoiceProvider extends ListChoiceProvider<Repository> {
 				List<Repository> repositories = GitPlex.getInstance(Dao.class).query(criteria);
 
 				for (Iterator<Repository> it = repositories.iterator(); it.hasNext();) {
-					if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(it.next())))
+					if (!SecurityUtils.canPull(it.next()))
 						it.remove();
 				}
 				
@@ -79,6 +78,7 @@ public class RepositoryChoiceProvider extends ListChoiceProvider<Repository> {
 	public void toJson(Repository choice, JSONWriter writer) throws JSONException {
 		writer.key("id").value(choice.getId());
 		writer.key("name");
+		
 		if (getUser() != null)
 			writer.value(StringEscapeUtils.escapeHtml4(choice.getName()));
 		else
@@ -128,7 +128,7 @@ public class RepositoryChoiceProvider extends ListChoiceProvider<Repository> {
 		List<Repository> repositories = new ArrayList<>();
 		for (Repository repository: repositoriesModel.getObject()) {
 			if (repoName != null) {
-				if (repository.getOwner().getName().toLowerCase().equals(userName) 
+				if (repository.getOwner().getName().toLowerCase().startsWith(userName) 
 						&& repository.getName().toLowerCase().startsWith(repoName)) {
 					repositories.add(repository);
 				}
