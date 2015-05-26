@@ -14,6 +14,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -26,10 +27,12 @@ import org.eclipse.jgit.lib.Constants;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.commons.wicket.component.copyclipboard.CopyClipboard;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
+import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -116,6 +119,11 @@ public abstract class RepositoryPage extends AccountPage {
 		repoChoiceTrigger.add(new DropdownBehavior(repoChoice).alignWithComponent(accountAndRepo, 0, 100, 0, 0, 8, true));
 		add(repoChoiceTrigger);
 		
+		UrlManager urlManager = GitPlex.getInstance(UrlManager.class);
+		Model<String> cloneUrlModel = Model.of(urlManager.urlFor(getRepository()));
+		add(new TextField<String>("cloneUrl", cloneUrlModel));
+		add(new CopyClipboard("copyCloneUrlToClipboard", cloneUrlModel));
+		
 		final WebMarkupContainer nav = new WebMarkupContainer("repoNav");
 		nav.add(AttributeModifier.replace("class", new AbstractReadOnlyModel<String>() {
 
@@ -144,7 +152,7 @@ public abstract class RepositoryPage extends AccountPage {
 		});
 		
 		List<PageTab> tabs = new ArrayList<>();
-		tabs.add(new RepoTab(Model.of("Files"), "fa fa-fw fa-files-o", RepoTreePage.class));
+		tabs.add(new RepoTab(Model.of("Files"), "fa fa-fw fa-file-text-o", RepoTreePage.class));
 		tabs.add(new RepoTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", RepoCommitsPage.class));
 		tabs.add(new RepoTab(Model.of("Branches"), "fa fa-fw fa-ext fa-branch", RepoBranchesPage.class));
 		tabs.add(new RepoTab(Model.of("Tags"), "fa fa-fw fa-tag", RepoTagsPage.class));

@@ -8,6 +8,7 @@ html, body {
 #main>.head>.logo .fa {
 	font-size: 28px;
 	color: #69B7F7; 
+	margin-left: -6px;
 }
 
 #main>.head>.nav ul {

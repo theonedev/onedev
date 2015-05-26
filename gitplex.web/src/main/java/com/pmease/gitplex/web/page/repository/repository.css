@@ -2,16 +2,40 @@
 	margin: -20px;
 }
 #repository>.head {
-	padding: 8px 16px;
+	padding: 8px 10px;
 	border-bottom: 1px solid #BBB;
 	font-size: 18px;
 	color: #555;
 }
-#repository>.head>.fa-repo {
+#repository>.head>.nav .fa-repo {
 	font-size: 24px;
 	margin-right: 4px;
 	vertical-align: middle;
 }
+#repository>.head>.clone {
+	font-size: 14px;
+}
+#repository>.head>.clone>label {
+	font-weight: normal;
+}
+#repository>.head>.clone>input {
+	font-size: 12px;
+	width: 200px;
+	border: 1px dashed #BBB;
+	background: #EEE;
+	border-radius: 3px 0 0 3px;
+	padding-left: 4px;
+	padding-right: 4px;
+	height: 22px;
+}
+#repository>.head>.clone>button {
+	font-size: 12px;
+	margin-left: -5px;
+	border: 1px dashed #BBB;
+	height: 22px;
+	border-radius: 0 3px 3px 0;
+}
+
 #repository>.body {
 	padding: 20px;
 }
@@ -41,9 +65,12 @@
 #repository>.body>.sidebar>table>tbody>tr>td.mini.nav {
 	width: 40px;
 }
-#repository>.body>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a {
+#repository>.body>.sidebar>table>tbody>tr>td.nav>.tabs>li>a {
 	padding: 10px 5px;
 }
 #repository>.body>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a>.text {
 	display: none;
+}
+button.clipboard::-moz-focus-inner {
+    margin: 1px -5px;
 }
