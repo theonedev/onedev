@@ -318,7 +318,7 @@ public class DefaultRepositoryManager implements RepositoryManager {
 	@Subscribe
 	public void systemStarted(SystemStarted event) {
 		logger.info("Checking repositories...");
-		
+
 		checkSanity();
 	}
 

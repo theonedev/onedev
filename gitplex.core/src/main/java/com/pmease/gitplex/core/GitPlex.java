@@ -14,6 +14,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.util.ThreadContext;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.quartz.ScheduleBuilder;
 import org.quartz.SimpleScheduleBuilder;
@@ -24,6 +25,7 @@ import com.google.common.eventbus.EventBus;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.GitConfig;
 import com.pmease.commons.git.command.GitCommand;
+import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.loader.AppName;
@@ -40,6 +42,7 @@ import com.pmease.gitplex.core.events.SystemStarting;
 import com.pmease.gitplex.core.events.SystemStopped;
 import com.pmease.gitplex.core.events.SystemStopping;
 import com.pmease.gitplex.core.manager.DataManager;
+import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.setting.ServerConfig;
 
 public class GitPlex extends AbstractPlugin implements Serializable {
@@ -49,6 +52,8 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	private final EventBus eventBus;
 	
 	private final DataManager dataManager;
+	
+	private final UserManager userManager;
 	
 	private final ServerConfig serverConfig;
 
@@ -67,12 +72,13 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	@Inject
 	public GitPlex(EventBus eventBus, ServerConfig serverConfig, DataManager dataManager, 
             TaskScheduler taskScheduler, Provider<GitConfig> gitConfigProvider,
-            @AppName String appName) {
+            UserManager userManager, @AppName String appName) {
 		this.eventBus = eventBus;
 		this.dataManager = dataManager;
 		this.serverConfig = serverConfig;
 		this.taskScheduler = taskScheduler;
 		this.gitConfigProvider = gitConfigProvider;
+		this.userManager = userManager;
 		
 		this.appName = appName;
 		
@@ -81,6 +87,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	
 	@SuppressWarnings("serial")
 	@Override
+	@Sessional
 	public void start() {
 		List<ManualConfig> manualConfigs = dataManager.init();
 		
@@ -108,6 +115,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 			initStage.waitFor();
 		}
 
+		ThreadContext.bind(userManager.getRoot().asSubject());
 		eventBus.post(new SystemStarting());
 		
 		gitCheckTaskId = taskScheduler.schedule(new SchedulableTask() {
@@ -130,11 +138,14 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 		gitError = GitCommand.checkError(gitConfigProvider.get().getExecutable());
 	}
 	
+	@Sessional
 	@Override
 	public void postStart() {
 		initStage = null;
 		
 		eventBus.post(new SystemStarted());
+		
+		ThreadContext.unbindSubject();
 		
 		logger.info("Server is ready at " + guessServerUrl() + ".");
 	}
@@ -191,15 +202,19 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 		return AppLoader.getExtensions(extensionPoint);
 	}
 
+	@Sessional
 	@Override
 	public void preStop() {
+		ThreadContext.bind(userManager.getRoot().asSubject());
 		eventBus.post(new SystemStopping());
 	}
 
+	@Sessional
 	@Override
 	public void stop() {
 		taskScheduler.unschedule(gitCheckTaskId);
 		eventBus.post(new SystemStopped());
+		ThreadContext.unbindSubject();
 	}
 	
 	public String getGitError() {

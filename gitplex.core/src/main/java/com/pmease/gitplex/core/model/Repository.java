@@ -80,8 +80,6 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	@JoinColumn(nullable=false)
 	private User owner;
 
-	private boolean forkable = true;
-	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=true)
 	private Repository forkedFrom;
@@ -152,15 +150,6 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-
-    @Editable(order=450, description="Whether or not this repository can be forked.")
-    public boolean isForkable() {
-        return forkable;
-    }
-
-    public void setForkable(boolean forkable) {
-        this.forkable = forkable;
-    }
 
     @NotNull
 	@Valid
