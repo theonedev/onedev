@@ -71,6 +71,9 @@
 #repository>.body>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a>.text {
 	display: none;
 }
-button.clipboard::-moz-focus-inner {
-    margin: 1px -5px;
+.clip-button.zeroclipboard-is-hover {
+	background-color: #CCC; 
+}
+.clip-button.zeroclipboard-is-active { 
+	background-color: #AAA;
 }

@@ -19,6 +19,8 @@ public class CopyClipboard extends WebMarkupContainer {
 	protected void onComponentTag(ComponentTag tag) {
 		super.onComponentTag(tag);
 		tag.put("data-clipboard-text", getDefaultModelObjectAsString());
+		tag.put("title", "Click to copy");
+		tag.put("data-placement", "left");
 	}
 
 	@Override
@@ -27,8 +29,10 @@ public class CopyClipboard extends WebMarkupContainer {
 		
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(CopyClipboard.class, "ZeroClipboard.min.js")));
+		response.render(JavaScriptHeaderItem.forReference(
+				new JavaScriptResourceReference(CopyClipboard.class, "copy-clipboard.js")));
 
-		String script = String.format("new ZeroClipboard(document.getElementById('%s'));", getMarkupId(true));
+		String script = String.format("gitplex.copyClipboard('%s');", getMarkupId(true));
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	
