@@ -1,4 +1,4 @@
-package com.pmease.gitplex.core.extensionpoint;
+package com.pmease.gitplex.core.listeners;
 
 import com.pmease.commons.loader.ExtensionPoint;
 import com.pmease.gitplex.core.model.Config;

@@ -12,6 +12,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
@@ -21,8 +22,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import com.pmease.commons.git.BriefCommit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.Sessional;
@@ -32,9 +31,8 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.Pair;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.gitplex.core.events.RepositoryRemoved;
-import com.pmease.gitplex.core.events.SystemStarted;
-import com.pmease.gitplex.core.events.SystemStarting;
+import com.pmease.gitplex.core.listeners.LifecycleListener;
+import com.pmease.gitplex.core.listeners.RepositoryListener;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.manager.StorageManager;
@@ -44,13 +42,13 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 @Singleton
-public class DefaultRepositoryManager implements RepositoryManager {
+public class DefaultRepositoryManager implements RepositoryManager, LifecycleListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultRepositoryManager.class);
 	
 	private final Dao dao;
 	
-	private final EventBus eventBus;
+	private final Provider<Set<RepositoryListener>> listenersProvider;
 	
     private final BranchManager branchManager;
     
@@ -67,14 +65,14 @@ public class DefaultRepositoryManager implements RepositoryManager {
 	private final ReadWriteLock idLock = new ReentrantReadWriteLock();
     
     @Inject
-    public DefaultRepositoryManager(EventBus eventBus, Dao dao, BranchManager branchManager, 
-    		UserManager userManager, StorageManager storageManager) {
-    	this.eventBus = eventBus;
-    	eventBus.register(this);
+    public DefaultRepositoryManager(Dao dao, BranchManager branchManager, 
+    		UserManager userManager, StorageManager storageManager, 
+    		Provider<Set<RepositoryListener>> listenersProvider) {
     	this.dao = dao;
         this.branchManager = branchManager;
         this.storageManager = storageManager;
         this.userManager = userManager;
+        this.listenersProvider = listenersProvider;
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-update-hook")) {
         	Preconditions.checkNotNull(is);
@@ -142,7 +140,8 @@ public class DefaultRepositoryManager implements RepositoryManager {
 			
 		});
 		
-		eventBus.post(new RepositoryRemoved(repository));
+		for (RepositoryListener listener: listenersProvider.get())
+			listener.repositoryRemoved(repository);
     }
 
     @Sessional
@@ -308,18 +307,26 @@ public class DefaultRepositoryManager implements RepositoryManager {
 		}
 	}
 
-	@Subscribe
 	@Sessional
-	public void systemStarting(SystemStarting event) {
+	@Override
+	public void systemStarting() {
         for (Repository repository: dao.allOf(Repository.class)) 
         	nameToId.inverse().put(repository.getId(), new Pair<>(repository.getUser().getId(), repository.getName()));
 	}
 
-	@Subscribe
-	public void systemStarted(SystemStarted event) {
+	@Override
+	public void systemStarted() {
 		logger.info("Checking repositories...");
 
 		checkSanity();
+	}
+
+	@Override
+	public void systemStopping() {
+	}
+
+	@Override
+	public void systemStopped() {
 	}
 
 }

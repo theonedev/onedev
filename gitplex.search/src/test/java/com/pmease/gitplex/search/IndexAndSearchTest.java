@@ -15,7 +15,6 @@ import org.mockito.Mockito;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.eventbus.EventBus;
 import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.lang.ExtractException;
 import com.pmease.commons.lang.Extractor;
@@ -24,8 +23,6 @@ import com.pmease.commons.lang.Symbol;
 import com.pmease.commons.lang.java.JavaExtractor;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.gitplex.core.events.RepositoryRemoved;
-import com.pmease.gitplex.core.manager.IndexManager;
 import com.pmease.gitplex.core.manager.IndexResult;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.Repository;
@@ -48,8 +45,6 @@ public class IndexAndSearchTest extends AbstractGitTest {
 	private IndexManager indexManager;
 	
 	private SearchManager searchManager;
-	
-	private EventBus eventBus = new EventBus();
 	
 	@Override
 	protected void setup() {
@@ -77,8 +72,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		
 		searchManager = new DefaultSearchManager(storageManager);
 		
-		indexManager = new DefaultIndexManager(eventBus, 
-				Sets.<IndexListener>newHashSet(searchManager), storageManager, extractors);
+		indexManager = new DefaultIndexManager(Sets.<IndexListener>newHashSet(searchManager), storageManager, extractors);
 	}
 
 	@Test
@@ -282,7 +276,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 	@Override
 	protected void teardown() {
 		super.teardown();
-		eventBus.post(new RepositoryRemoved(repository));
+		indexManager.repositoryRemoved(repository);
 	}
 
 }

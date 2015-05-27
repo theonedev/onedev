@@ -19,13 +19,11 @@ import org.hibernate.ReplicationMode;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.gitplex.core.events.SystemStarting;
+import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.manager.UserManager;
@@ -37,7 +35,7 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.operation.RepositoryOperation;
 
 @Singleton
-public class DefaultUserManager implements UserManager {
+public class DefaultUserManager implements UserManager, LifecycleListener {
 
     private final Dao dao;
 
@@ -52,9 +50,8 @@ public class DefaultUserManager implements UserManager {
 	private final BiMap<String, Long> nameToId = HashBiMap.create();
 	
 	@Inject
-    public DefaultUserManager(EventBus eventBus, Dao dao, 
-    		RepositoryManager repositoryManager, PullRequestManager pullRequestManager) {
-		eventBus.register(this);
+    public DefaultUserManager(Dao dao, RepositoryManager repositoryManager, 
+    		PullRequestManager pullRequestManager) {
         this.dao = dao;
         this.repositoryManager = repositoryManager;
         this.pullRequestManager = pullRequestManager;
@@ -242,9 +239,20 @@ public class DefaultUserManager implements UserManager {
 		}
 	}
 
-	@Subscribe
+	@Override
+	public User getPrevious() {
+		Long userId = User.getPreviousId();
+		if (userId != 0L) {
+			User user = dao.get(User.class, userId);
+			if (user != null)
+				return user;
+		}
+		return null;
+	}
+
 	@Sessional
-	public void systemStarting(SystemStarting event) {
+	@Override
+	public void systemStarting() {
         for (User user: dao.allOf(User.class)) {
         	Set<Long> ids = emailToIds.get(user.getEmail());
         	if (ids == null) {
@@ -258,14 +266,15 @@ public class DefaultUserManager implements UserManager {
 	}
 
 	@Override
-	public User getPrevious() {
-		Long userId = User.getPreviousId();
-		if (userId != 0L) {
-			User user = dao.get(User.class, userId);
-			if (user != null)
-				return user;
-		}
-		return null;
+	public void systemStarted() {
+	}
+
+	@Override
+	public void systemStopping() {
+	}
+
+	@Override
+	public void systemStopped() {
 	}
 
 }

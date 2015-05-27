@@ -17,8 +17,9 @@ import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.loader.ImplementationProvider;
 import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.util.ClassUtils;
-import com.pmease.gitplex.core.extensionpoint.ConfigListener;
-import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
+import com.pmease.gitplex.core.listeners.ConfigListener;
+import com.pmease.gitplex.core.listeners.LifecycleListener;
+import com.pmease.gitplex.core.listeners.PullRequestListener;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
@@ -162,6 +163,10 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(PullRequestListener.class, DefaultPullRequestNotificationManager.class);
 		contribute(PullRequestListener.class, DefaultPullRequestWatchManager.class);
 		contribute(ConfigListener.class, DefaultPullRequestManager.class);
+		contribute(LifecycleListener.class, DefaultBranchManager.class);
+		contribute(LifecycleListener.class, DefaultPullRequestManager.class);
+		contribute(LifecycleListener.class, DefaultUserManager.class);
+		contribute(LifecycleListener.class, DefaultRepositoryManager.class);
 	}
 	
 	@Override

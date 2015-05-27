@@ -31,15 +31,14 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
-import com.google.common.eventbus.Subscribe;
-import com.pmease.gitplex.core.events.SystemStopping;
+import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 
 @Singleton
-public class DefaultSearchManager implements SearchManager, IndexListener {
+public class DefaultSearchManager implements SearchManager, IndexListener, LifecycleListener {
 
 	private final StorageManager storageManager;
 	
@@ -77,20 +76,6 @@ public class DefaultSearchManager implements SearchManager, IndexListener {
 		}
 	}
 
-	@Subscribe
-	public void systemStopping(SystemStopping event) {
-		synchronized (searcherManagers) {
-			for (SearcherManager searcherManager: searcherManagers.values()) {
-				try {
-					searcherManager.close();
-				} catch (IOException e) {
-					Throwables.propagate(e);
-				}
-			}
-			searcherManagers.clear();
-		}
-	}
-	
 	@Override
 	public List<QueryHit> search(final Repository repository, final String revision, final BlobQuery query) 
 			throws InterruptedException {
@@ -172,7 +157,7 @@ public class DefaultSearchManager implements SearchManager, IndexListener {
 	}
 
 	@Override
-	public void removingIndex(Repository repository) {
+	public void indexRemoving(Repository repository) {
 		synchronized (searcherManagers) {
 			SearcherManager searcherManager = searcherManagers.get(repository.getId());
 			if (searcherManager != null) {
@@ -184,6 +169,32 @@ public class DefaultSearchManager implements SearchManager, IndexListener {
 				searcherManagers.remove(repository.getId());
 			}
 		}
+	}
+
+	@Override
+	public void systemStarting() {
+	}
+
+	@Override
+	public void systemStarted() {
+	}
+
+	@Override
+	public void systemStopping() {
+		synchronized (searcherManagers) {
+			for (SearcherManager searcherManager: searcherManagers.values()) {
+				try {
+					searcherManager.close();
+				} catch (IOException e) {
+					Throwables.propagate(e);
+				}
+			}
+			searcherManagers.clear();
+		}
+	}
+
+	@Override
+	public void systemStopped() {
 	}
 
 }

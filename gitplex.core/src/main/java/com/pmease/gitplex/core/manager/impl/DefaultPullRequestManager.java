@@ -35,8 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.command.MergeCommand.FastForwardMode;
 import com.pmease.commons.hibernate.Sessional;
@@ -48,9 +46,8 @@ import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.MentionParser;
-import com.pmease.gitplex.core.events.SystemStarting;
-import com.pmease.gitplex.core.events.SystemStopped;
-import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
+import com.pmease.gitplex.core.listeners.LifecycleListener;
+import com.pmease.gitplex.core.listeners.PullRequestListener;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
@@ -77,7 +74,7 @@ import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
 
 @Singleton
-public class DefaultPullRequestManager implements PullRequestManager {
+public class DefaultPullRequestManager implements PullRequestManager, LifecycleListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestManager.class);
 	
@@ -118,13 +115,12 @@ public class DefaultPullRequestManager implements PullRequestManager {
 	};
 
 	@Inject
-	public DefaultPullRequestManager(EventBus eventBus, Dao dao, PullRequestUpdateManager pullRequestUpdateManager, 
+	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager, 
 			BranchManager branchManager, StorageManager storageManager, 
 			ReviewInvitationManager reviewInvitationManager, UserManager userManager,
 			PullRequestNotificationManager notificationManager, ConfigManager configManager,
 			PullRequestCommentManager pullRequestCommentManager, MarkdownManager markdownManager,
 			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners) {
-		eventBus.register(this);
 		this.dao = dao;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.branchManager = branchManager;
@@ -545,19 +541,6 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		}
 	}
 
-	@Subscribe
-	public void systemStarting(SystemStarting event) {
-		int previewWorkers = getIntegrationPreviewWorkers();
-		integrationPreviewExecutor = new ThreadPoolExecutor(previewWorkers, previewWorkers, 
-				0L, TimeUnit.MILLISECONDS, integrationPreviewQueue);
-	}
-
-	@Subscribe
-	public void systemStopped(SystemStopped event) {
-		if (integrationPreviewExecutor != null)
-			integrationPreviewExecutor.shutdown();
-	}
-
 	@Override
 	public IntegrationPreview previewIntegration(PullRequest request) {
 		IntegrationPreview preview = request.getLastIntegrationPreview();
@@ -700,6 +683,27 @@ public class DefaultPullRequestManager implements PullRequestManager {
 		} else {
 			return null;
 		}
+	}
+
+	@Override
+	public void systemStarting() {
+		int previewWorkers = getIntegrationPreviewWorkers();
+		integrationPreviewExecutor = new ThreadPoolExecutor(previewWorkers, previewWorkers, 
+				0L, TimeUnit.MILLISECONDS, integrationPreviewQueue);
+	}
+
+	@Override
+	public void systemStarted() {
+	}
+
+	@Override
+	public void systemStopping() {
+	}
+
+	@Override
+	public void systemStopped() {
+		if (integrationPreviewExecutor != null)
+			integrationPreviewExecutor.shutdown();
 	}
 
 }

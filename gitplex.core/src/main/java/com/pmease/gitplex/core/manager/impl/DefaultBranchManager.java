@@ -10,15 +10,13 @@ import javax.inject.Singleton;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.Pair;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.gitplex.core.events.SystemStarting;
+import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.RepositoryManager;
@@ -28,7 +26,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 
 @Singleton
-public class DefaultBranchManager implements BranchManager {
+public class DefaultBranchManager implements BranchManager, LifecycleListener {
 	
 	private final Dao dao;
 	
@@ -46,8 +44,7 @@ public class DefaultBranchManager implements BranchManager {
 
 	@Inject
 	public DefaultBranchManager(Dao dao, PullRequestManager pullRequestManager, UserManager userManager,
-			RepositoryManager repositoryManager, UnitOfWork unitOfWork, EventBus eventBus) {
-		eventBus.register(this);
+			RepositoryManager repositoryManager, UnitOfWork unitOfWork) {
 		this.dao = dao;
 		this.pullRequestManager = pullRequestManager;
 		this.userManager = userManager;
@@ -175,10 +172,22 @@ public class DefaultBranchManager implements BranchManager {
 	}
 
 	@Sessional
-	@Subscribe
-	public void systemStarting(SystemStarting event) {
+	@Override
+	public void systemStarting() {
         for (Branch branch: dao.allOf(Branch.class)) 
         	nameToId.inverse().put(branch.getId(), new Pair<>(branch.getRepository().getId(), branch.getName()));
+	}
+
+	@Override
+	public void systemStarted() {
+	}
+
+	@Override
+	public void systemStopping() {
+	}
+
+	@Override
+	public void systemStopped() {
 	}
 
 }

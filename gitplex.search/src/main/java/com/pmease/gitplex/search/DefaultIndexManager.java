@@ -57,8 +57,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import com.pmease.commons.lang.ExtractException;
 import com.pmease.commons.lang.Extractor;
 import com.pmease.commons.lang.Extractors;
@@ -66,8 +64,6 @@ import com.pmease.commons.lang.Symbol;
 import com.pmease.commons.util.Charsets;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.LockUtils;
-import com.pmease.gitplex.core.events.RepositoryRemoved;
-import com.pmease.gitplex.core.manager.IndexManager;
 import com.pmease.gitplex.core.manager.IndexResult;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.Repository;
@@ -86,9 +82,8 @@ public class DefaultIndexManager implements IndexManager {
 	private final Extractors extractors; 
 	
 	@Inject
-	public DefaultIndexManager(EventBus eventBus, Set<IndexListener> listeners, 
+	public DefaultIndexManager(Set<IndexListener> listeners, 
 			StorageManager storageManager, Extractors extractors) {
-		eventBus.register(this);
 		this.listeners = listeners;
 		this.storageManager = storageManager;
 		this.extractors = extractors;
@@ -334,13 +329,6 @@ public class DefaultIndexManager implements IndexManager {
 		});
 	}
 
-	@Subscribe
-	public void repositoryRemoved(RepositoryRemoved event) {
-		for (IndexListener listener: listeners)
-			listener.removingIndex(event.getRepository());
-		FileUtils.deleteDir(storageManager.getIndexDir(event.getRepository()));
-	}
-	
 	private String getCurrentCommitIndexVersion() {
 		return INDEX_VERSION + ";" + extractors.getVersion();
 	}
@@ -350,6 +338,18 @@ public class DefaultIndexManager implements IndexManager {
 			return INDEX_VERSION + ";" + extractor.getVersion();
 		else
 			return String.valueOf(INDEX_VERSION);
+	}
+
+	@Override
+	public void repositoryRemoved(Repository repository) {
+		for (IndexListener listener: listeners)
+			listener.indexRemoving(repository);
+		FileUtils.deleteDir(storageManager.getIndexDir(repository));
+	}
+
+	@Override
+	public void commitReceived(Repository repository, String commitHash) {
+		index(repository, commitHash);
 	}
 	
 }

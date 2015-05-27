@@ -4,8 +4,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -22,8 +24,8 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.gitplex.core.listeners.RepositoryListener;
 import com.pmease.gitplex.core.manager.BranchManager;
-import com.pmease.gitplex.core.manager.IndexManager;
 import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
@@ -40,17 +42,17 @@ public class GitPostReceiveCallback extends HttpServlet {
     
     private final BranchManager branchManager;
     
-    private final IndexManager indexManager;
-    
     private final UnitOfWork unitOfWork;
     
+    private final Provider<Set<RepositoryListener>> listenersProvider;
+    
     @Inject
-    public GitPostReceiveCallback(Dao dao, BranchManager branchManager, IndexManager indexManager, 
-    		UnitOfWork unitOfWork) {
+    public GitPostReceiveCallback(Dao dao, BranchManager branchManager, UnitOfWork unitOfWork, 
+    		Provider<Set<RepositoryListener>> listenersProvider) {
     	this.dao = dao;
         this.branchManager = branchManager;
-        this.indexManager = indexManager;
         this.unitOfWork = unitOfWork;
+        this.listenersProvider = listenersProvider;
     }
 
     @Override
@@ -142,7 +144,8 @@ public class GitPostReceiveCallback extends HttpServlet {
 				public void run() {			
 					Repository repository = dao.load(Repository.class, repositoryId);
 					try {
-						indexManager.index(dao.load(Repository.class, repository.getId()), newCommitHash);
+						for (RepositoryListener listener: listenersProvider.get())
+							listener.commitReceived(repository, newCommitHash);
 					} catch (Exception e) {
 						logger.error("Error indexing repository '" + repository + "'", e);
 					}

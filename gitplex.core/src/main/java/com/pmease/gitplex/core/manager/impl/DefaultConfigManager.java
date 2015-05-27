@@ -13,7 +13,7 @@ import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.gitplex.core.extensionpoint.ConfigListener;
+import com.pmease.gitplex.core.listeners.ConfigListener;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.model.Config;
 import com.pmease.gitplex.core.model.Config.Key;

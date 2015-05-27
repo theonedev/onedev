@@ -8,21 +8,13 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Singleton;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.ImmutableSet;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.SubscriberExceptionContext;
-import com.google.common.eventbus.SubscriberExceptionHandler;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
 import com.google.inject.multibindings.Multibinder;
 
 public class AppLoaderModule extends AbstractModule {
 
-	private static final Logger logger = LoggerFactory.getLogger(AppLoaderModule.class);
-	
 	@Override
 	protected void configure() {
 		bindConstant().annotatedWith(AppName.class).to("Application");
@@ -47,15 +39,6 @@ public class AppLoaderModule extends AbstractModule {
 			
 		});
 	    
-	    bind(EventBus.class).toInstance(new EventBus(new SubscriberExceptionHandler() {
-			
-			@Override
-			public void handleException(Throwable exception, SubscriberExceptionContext context) {
-				logger.error("Could not dispatch event '" + context.getSubscriber() 
-						+ "' to " + "'" + context.getSubscriberMethod() + "'", exception);
-			}
-			
-		}));
 	    bind(PluginManager.class).to(DefaultPluginManager.class);
 	    bind(ImplementationRegistry.class).to(DefaultImplementationRegistry.class);
 	    
