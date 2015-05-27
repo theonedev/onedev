@@ -11,11 +11,8 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.cycle.RequestCycle;
-
-import de.agilecoders.wicket.webjars.request.resource.WebjarsJavaScriptResourceReference;
 
 @SuppressWarnings("serial")
 public abstract class HistoryBehavior extends AbstractDefaultAjaxBehavior {
@@ -41,33 +38,20 @@ public abstract class HistoryBehavior extends AbstractDefaultAjaxBehavior {
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
 
-		response.render(JavaScriptHeaderItem.forReference(
-				new WebjarsJavaScriptResourceReference("historyjs/current/scripts/bundled/html5/jquery.history.js")));
-
-		// Use history.js instead of native history API to solve the problem that Safari 
-		// (and previous versions of Chrome) fires event "onpopstate" on initial page load 
-		// and this causes the page to reload infinitely with below code  
 		String script = String.format(""
-				+ "History.Adapter.bind(window, 'statechange', function() {"
-				+ "  if (History.getState().data.component == null)"
-				+ "    location.reload();"
-				+ "});"); 
-		response.render(JavaScriptHeaderItem.forScript(script, "reload_on_state_change"));
-
-		script = String.format(""
-				+ "History.Adapter.bind(window, 'statechange', function() {"
-				+ "  if (History.getState().data.component === '%s') {"
+				+ "$(document).on('onpopstate', function(event, component, state) {"
+				+ "  if (component === '%s') {"
 				+ "    %s"
 				+ "  }"
-				+ "});", 
+				+ "});",
 				getComponent().getPageRelativePath(), 
-				getCallbackFunctionBody(CallbackParameter.resolved("state", "History.getState().data.state"))); 
+				getCallbackFunctionBody(CallbackParameter.resolved("state", "state"))); 
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
 	public void pushState(AjaxRequestTarget target, String url, Serializable state) {
 		String encodedState = new String(Base64.encodeBase64(SerializationUtils.serialize(state)));
-		target.appendJavaScript(String.format("History.pushState({state:'%s', component:'%s'}, '', '%s');", 
+		target.appendJavaScript(String.format("history.pushState({state:'%s', component:'%s'}, '', '%s');", 
 				encodedState, getComponent().getPageRelativePath(), url));
 	}
 

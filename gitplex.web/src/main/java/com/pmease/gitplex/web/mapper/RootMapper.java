@@ -18,11 +18,11 @@ import com.pmease.gitplex.web.page.account.repositories.NewAccountRepoPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.account.setting.PasswordEditPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
-import com.pmease.gitplex.web.page.home.accounts.AccountsPage;
 import com.pmease.gitplex.web.page.home.accounts.NewAccountPage;
 import com.pmease.gitplex.web.page.home.admin.MailSettingPage;
 import com.pmease.gitplex.web.page.home.admin.QosSettingPage;
 import com.pmease.gitplex.web.page.home.admin.SystemSettingPage;
+import com.pmease.gitplex.web.page.home.repositories.RepositoriesPage;
 import com.pmease.gitplex.web.page.init.ServerInitPage;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.branches.BranchComparePage;
@@ -79,7 +79,6 @@ public class RootMapper extends CompoundRequestMapper {
 	}
 
 	private void addAccountPages() {
-		addPage("accounts", AccountsPage.class);
 		addPage("accounts/new", NewAccountPage.class);
 		
 		add(new MountedMapper("${user}", AccountReposPage.class) {
@@ -98,13 +97,15 @@ public class RootMapper extends CompoundRequestMapper {
 		
 		addPage("${user}/repositories", AccountReposPage.class);
 		addPage("${user}/repositories/new", NewAccountRepoPage.class);
-		addPage("${user}/notification", AccountNotificationsPage.class);
+		addPage("${user}/notifications", AccountNotificationsPage.class);
 		addPage("${user}/setting/profile", ProfileEditPage.class);
 		addPage("${user}/setting/avatar", AvatarEditPage.class);
 		addPage("${user}/setting/password", PasswordEditPage.class);
 	}
 
 	private void addRepoPages() {
+		addPage("repositories", RepositoriesPage.class);
+		
 		add(new MountedMapper("${user}/${repo}", RepoTreePage.class) {
 
 			@Override
@@ -146,8 +147,7 @@ public class RootMapper extends CompoundRequestMapper {
 		add(new PageParameterAwareMountedMapper("${user}/${repo}/setting/gate-keeper", GateKeeperPage.class));
 		add(new PageParameterAwareMountedMapper("${user}/${repo}/setting/integration-policy", IntegrationPolicyPage.class));
 		
-		add(new PageParameterAwareMountedMapper(
-				"${user}/${repo}/no-commits", NoCommitsPage.class));
+		add(new PageParameterAwareMountedMapper("${user}/${repo}/no-commits", NoCommitsPage.class));
 	}
 
 	private void addPage(String path, Class<? extends Page> page) {

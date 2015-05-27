@@ -48,6 +48,8 @@ import com.pmease.gitplex.core.model.Repository;
 @SuppressWarnings("serial")
 public abstract class RevisionSelector extends GenericPanel<String> {
 	
+	private final IModel<Repository> repoModel;
+	
 	private boolean branchesActive = true;
 	
 	private int activeRefIndex;
@@ -62,8 +64,10 @@ public abstract class RevisionSelector extends GenericPanel<String> {
 	
 	private String feedbackMessage;
 	
-	public RevisionSelector(String id, IModel<String> revModel) {
+	public RevisionSelector(String id, IModel<Repository> repoModel, IModel<String> revModel) {
 		super(id, revModel);
+		
+		this.repoModel = repoModel;
 	}
 
 	@Override
@@ -81,7 +85,7 @@ public abstract class RevisionSelector extends GenericPanel<String> {
 
 			@Override
 			protected String load() {
-				org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
+				org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
 				try {
 					if (jgitRepo.getRefDatabase().getRef(Git.REFS_HEADS + getModelObject()) != null)
 						return "fa fa-ext fa-branch";
@@ -121,7 +125,7 @@ public abstract class RevisionSelector extends GenericPanel<String> {
 			private List<String> findRefs() {
 				List<String> refs = new ArrayList<>();
 				
-				org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
+				org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
 				try {
 					if (branchesActive)
 						refs.addAll(jgitRepo.getRefDatabase().getRefs(Git.REFS_HEADS).keySet());
@@ -307,7 +311,7 @@ public abstract class RevisionSelector extends GenericPanel<String> {
 	
 	private void selectRevision(AjaxRequestTarget target, String revision) {
 		try {
-			if (getRepository().resolveRevision(revision) != null) {
+			if (repoModel.getObject().resolveRevision(revision) != null) {
 				setModelObject(revision);
 				target.add(revInfo);
 				feedbackMessage = null;
@@ -322,6 +326,12 @@ public abstract class RevisionSelector extends GenericPanel<String> {
 			target.add(feedback);
 		}
 	}
+
+	@Override
+	protected void onDetach() {
+		repoModel.detach();
+		
+		super.onDetach();
+	}
 	
-	protected abstract Repository getRepository();
 }

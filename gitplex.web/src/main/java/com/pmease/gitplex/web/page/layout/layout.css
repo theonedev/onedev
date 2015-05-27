@@ -84,13 +84,12 @@ html, body {
 	padding: 20px 0;
 	width: 200px;
 	border-right: 1px solid #BBB;
-	background: #FBFBFB;
 }
 .sidebar>table>tbody>tr>td.nav>.tabs {
 	margin-bottom: 0;
 }
 .sidebar>table>tbody>tr>td.nav>.tabs>li>a {
-	border-left: 4px solid #FBFBFB;
+	border-left: 4px solid white;
 	color: #666;
 	display: block;
 	text-decoration: none;

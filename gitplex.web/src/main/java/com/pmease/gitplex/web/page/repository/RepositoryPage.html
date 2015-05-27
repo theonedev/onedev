@@ -13,8 +13,8 @@
 			</div>		
 			<div class="pull-right clone">
 				<label>Clone URL:</label>
-				<input wicket:id="cloneUrl" readonly="readonly" onfocus="this.select();"></input>
-				<button wicket:id="copyCloneUrlToClipboard" class="clip-button"><i class="fa fa-clipboard"></i></button>
+				<input wicket:id="cloneUrl" readonly="readonly" onfocus="setTimeout(function(){$('#repository>.head>.clone>input').select();}, 100);"></input>
+				<button wicket:id="copyCloneUrlToClipboard" class="clip-button" onclick="$('#repository>.head>.clone>input').select();"><i class="fa fa-clipboard"></i></button>
 			</div>
 		</div>
 		<div class="body">

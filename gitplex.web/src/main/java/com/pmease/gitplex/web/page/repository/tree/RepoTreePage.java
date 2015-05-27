@@ -35,11 +35,12 @@ public class RepoTreePage extends RepositoryPage {
 	
 	private static final String PARAM_PATH = "path";
 
-	private String revision = "master";
+	private String revision;
 	
+	@Nullable
 	private String path;
 	
-	private RevisionSelector revisionSelector;
+	private RevisionSelector revSelector;
 	
 	private PathNavigator pathNavigator;
 	
@@ -54,6 +55,8 @@ public class RepoTreePage extends RepositoryPage {
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));
 		
 		revision = GitPath.normalize(params.get(PARAM_REVISION).toString());
+		if (revision == null)
+			revision = getRepository().getDefaultBranch().getName();
 		path = GitPath.normalize(params.get(PARAM_PATH).toString());
 	}
 
@@ -61,7 +64,7 @@ public class RepoTreePage extends RepositoryPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(revisionSelector = new RevisionSelector("revSelector", new IModel<String>() {
+		add(revSelector = new RevisionSelector("revSelector", repoModel, new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -78,11 +81,6 @@ public class RepoTreePage extends RepositoryPage {
 			}
 			
 		}) {
-
-			@Override
-			protected Repository getRepository() {
-				return repoModel.getObject();
-			}
 
 			@Override
 			protected void onModelChanged() {
@@ -113,6 +111,7 @@ public class RepoTreePage extends RepositoryPage {
 			}
 
 		});
+		revSelector.setOutputMarkupId(true);
 		
 		add(pathNavigator = new PathNavigator("pathSelector", repoModel, new AbstractReadOnlyModel<String>() {
 
@@ -151,6 +150,7 @@ public class RepoTreePage extends RepositoryPage {
 			}
 			
 		});
+		pathNavigator.setOutputMarkupId(true);
 		
 		add(treeList = new TreeList("treeList", repoModel, new AbstractReadOnlyModel<String>() {
 
@@ -198,7 +198,7 @@ public class RepoTreePage extends RepositoryPage {
 				revision = historyState.revision;
 				path = historyState.path;
 				
-				target.add(revisionSelector);
+				target.add(revSelector);
 				target.add(pathNavigator);
 				target.add(treeList);
 			}

@@ -21,7 +21,7 @@
 #repository>.head>.clone>input {
 	font-size: 12px;
 	width: 200px;
-	border: 1px dashed #BBB;
+	border: 1px solid #BBB;
 	background: #EEE;
 	border-radius: 3px 0 0 3px;
 	padding-left: 4px;
@@ -31,9 +31,16 @@
 #repository>.head>.clone>button {
 	font-size: 12px;
 	margin-left: -5px;
-	border: 1px dashed #BBB;
+	border: 1px solid #BBB;
+	background: #EEE;
 	height: 22px;
 	border-radius: 0 3px 3px 0;
+}
+#repository>.head>.clone>button.zeroclipboard-is-hover {
+	background-color: #CCC; 
+}
+#repository>.head>.clone>button.zeroclipboard-is-active { 
+	background-color: #AAA;
 }
 
 #repository>.body {
@@ -45,7 +52,7 @@
 	text-align: right;
 	font-size: 20px;
 	padding-right: 14px;
-	border-bottom: 1px dashed #BBB;
+	border-bottom: 1px solid #BBB;
 	text-decoration: none;
 	color: #666;
 }
@@ -70,10 +77,4 @@
 }
 #repository>.body>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a>.text {
 	display: none;
-}
-.clip-button.zeroclipboard-is-hover {
-	background-color: #CCC; 
-}
-.clip-button.zeroclipboard-is-active { 
-	background-color: #AAA;
 }
