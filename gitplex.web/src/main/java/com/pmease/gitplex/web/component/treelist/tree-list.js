@@ -1,6 +1,6 @@
 gitplex.treelist = {
 	renderLastCommits: function(containerId, lastCommits) {
-		var $table = $("#" + containerId).find("table.tree-list");
+		var $table = $("#" + containerId).find(".tree-list>table");
 		$table.find("tr.child").each(function() {
 			var $row = $(this);
 			var path = $row.find("td.path span").text();
@@ -10,7 +10,7 @@ gitplex.treelist = {
 			var lastCommit = lastCommits[path];
 			
 			var $summary = $row.children(".last-commit.summary");
-			$summary.append("<a href='" + lastCommit.url + "'>" + lastCommit.summary + "</a>");
+			$summary.empty().append("<a href='" + lastCommit.url + "'>" + lastCommit.summary + "</a>");
 			$row.children(".last-commit.age").append(lastCommit.age);
 		});
 	}

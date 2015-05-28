@@ -21,7 +21,7 @@
 #repository>.head>.clone>input {
 	font-size: 12px;
 	width: 200px;
-	border: 1px solid #BBB;
+	border: 1px solid #D8D8D8;
 	background: #EEE;
 	border-radius: 3px 0 0 3px;
 	padding-left: 4px;
@@ -31,7 +31,7 @@
 #repository>.head>.clone>button {
 	font-size: 12px;
 	margin-left: -5px;
-	border: 1px solid #BBB;
+	border: 1px solid #D8D8D8;
 	background: #EEE;
 	height: 22px;
 	border-radius: 0 3px 3px 0;

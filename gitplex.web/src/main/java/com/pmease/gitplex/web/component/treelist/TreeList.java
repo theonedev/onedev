@@ -196,6 +196,11 @@ public class TreeList extends GenericPanel<String> {
 				else
 					pathLink.add(new Label("label", pathInfo.getName()));
 				item.add(pathLink);
+				
+				if (item.getIndex() == 0)
+					item.add(new Label("lastCommitSummary", "Loading last commit info..."));
+				else
+					item.add(new Label("lastCommitSummary"));
 			}
 			
 		});
@@ -250,8 +255,11 @@ public class TreeList extends GenericPanel<String> {
 			public Component getLoadingComponent(String markupId) {
 				IRequestHandler handler = new ResourceReferenceRequestHandler(
 						AbstractDefaultAjaxBehavior.INDICATOR);
-				return new Label(markupId, "<img src=\"" +
-					RequestCycle.get().urlFor(handler) + "\"/> Loading latest commit...").setEscapeModelStrings(false);
+				return new Label(markupId, ""
+						+ "<div class='message'>"
+						+ "  <img src='" + RequestCycle.get().urlFor(handler) + "'/> Loading latest commit..."
+						+ "</div>"
+						+ "<div class='other-info'>&nbsp;</div>").setEscapeModelStrings(false);
 			}
 
 			@Override
