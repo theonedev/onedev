@@ -4,9 +4,12 @@
 		<div class="head clearfix">
 			<div wicket:id="revisionSelector" class="pull-left"></div>
 			<div wicket:id="fileNavigator" class="pull-left"></div>
+			<div wicket:id="fileSearcher" class="pull-right"></div>
 		</div>
-		<div class="body">
-			<div wicket:id="fileViewer"></div>
+		<div wicket:id="fileViewer" class="file-viewer"></div>
+		<div class="search-result">
+			<div id="search-result-resize-handle" class="ui-resizable-handle ui-resizable-n"></div>
+			<div wicket:id="searchResult"></div>
 		</div>
 	</div>
 </wicket:extend>

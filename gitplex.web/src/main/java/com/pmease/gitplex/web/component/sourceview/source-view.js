@@ -34,7 +34,9 @@ gitplex.sourceview = {
 	    }
 		
 		var $sourceView = $code.closest(".source-view");
-		$sourceView.on("resized", function() {
+		$sourceView.on("autofit", function(event, width, height) {
+			$sourceView.outerWidth(width);
+			$sourceView.outerHeight(height);
 			var $head = $sourceView.find(">.head");
 			var $body = $sourceView.find(">.body");
 			$body.outerHeight($sourceView.height()-$head.outerHeight());
@@ -48,6 +50,7 @@ gitplex.sourceview = {
 				$code.outerWidth($body.width());
 				$code.find(">.CodeMirror").outerHeight($body.height());
 			}
+			editor.refresh();
 		});
 		
 		gitplex.sourceview.gotoLine(editor, activeLine);
@@ -70,7 +73,8 @@ gitplex.sourceview = {
 			outlineToggleBtn.addClass("active");
 		else
 			outlineToggleBtn.removeClass("active");
-		$outline.closest(".source-view").trigger("resized");
+		var $sourceView = $outline.closest(".source-view");
+		$sourceView.trigger("autofit", [$sourceView.outerWidth(), $sourceView.outerHeight()]);
 	},
 	
 	gotoSymbol: function(outlineId, line) {

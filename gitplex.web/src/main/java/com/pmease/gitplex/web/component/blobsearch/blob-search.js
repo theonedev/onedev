@@ -30,17 +30,18 @@ gitplex.blobSearch = {
 			callback("return");
 		});
 		function scrollIfNecessary() {
-			var margin = 25;
-			var $content = $dropdown.find(">.content");
+			var margin = 36;
+			var $container = $dropdown.find(".instant-search-result");
 			var $active = $dropdown.find("tr.hit.active");
-			var contentTop = $content.offset().top;
+			var containerTop = $container.offset().top;
 			var activeTop = $active.offset().top;
-			if (activeTop-margin<contentTop)
-				$content.scrollTop($content.scrollTop()-(contentTop-activeTop+margin));
-			var contentBottom = contentTop + $content.height();
+			if (activeTop-margin<containerTop)
+				$container.scrollTop($container.scrollTop()-(containerTop-activeTop+margin));
+			var containerBottom = containerTop + $container.height();
 			var activeBottom = activeTop + $active.height();
-			if (activeBottom+margin>contentBottom) 
-				$content.scrollTop($content.scrollTop()+(activeBottom+margin-contentBottom));
+			
+			if (activeBottom+margin>containerBottom) 
+				$container.scrollTop($container.scrollTop()+(activeBottom+margin-containerBottom));
 		};
 		function keyup() {
 			var $active = $dropdown.find("tr.hit.active");

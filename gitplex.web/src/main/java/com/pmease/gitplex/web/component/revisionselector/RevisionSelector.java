@@ -269,7 +269,7 @@ public abstract class RevisionSelector extends Panel {
 		};
 		add(dropdown);
 		
-		button.add(new DropdownBehavior(dropdown));
+		button.add(new DropdownBehavior(dropdown).alignWithTrigger(0, 100, 0, 0, 6, true));
 		
 		setOutputMarkupId(true);
 	}

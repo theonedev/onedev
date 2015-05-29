@@ -1,6 +1,18 @@
-gitplex.treelist = {
+gitplex.filelist = {
+	init: function(containerId) {
+		var $container = $("#" + containerId);
+		var $fileList = $container.children();
+		$fileList.on("autofit", function(event, width, height) {
+			var $head = $fileList.find(">.head");
+			var $body = $fileList.find(">.body");
+			var $table = $body.children();
+			$body.outerHeight(height-$head.outerHeight());
+			if ($body.height()>$table.outerHeight())
+				$body.height($table.outerHeight());
+		});
+	},
 	renderLastCommits: function(containerId, lastCommits) {
-		var $table = $("#" + containerId).find(".file-list>table");
+		var $table = $("#" + containerId).find(".file-list>.body>table");
 		$table.find("tr.child").each(function() {
 			var $row = $(this);
 			var path = $row.find("td.path span").text();

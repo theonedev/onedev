@@ -3,15 +3,17 @@
 		<i wicket:id="icon"></i> <span wicket:id="label"></span> 
 		<i class="fa fa-caret-down"></i>
 	</button>
-	<div wicket:id="dropdown" class="revision-selector-dropdown"></div>
+	<div wicket:id="dropdown"></div>
 	<wicket:fragment wicket:id="dropdownContentFrag">
-		<input wicket:id="revision" class="form-control input-sm revision" placeholder="Input revision"></input>
-		<div wicket:id="feedback" class="feedback"></div>
-		<ul wicket:id="tabs" class="nav nav-tabs"></ul>
-		<ul wicket:id="refs" class="refs list-unstyled">
-			<li wicket:id="refs">
-				<a wicket:id="link"><span wicket:id="label"></span></a>
-			</li>			
-		</ul>
+		<div class="revision-selector">
+			<input wicket:id="revision" class="form-control input-sm revision" placeholder="Input revision"></input>
+			<div wicket:id="feedback" class="feedback"></div>
+			<ul wicket:id="tabs" class="nav nav-tabs"></ul>
+			<ul wicket:id="refs" class="refs list-unstyled">
+				<li wicket:id="refs">
+					<a wicket:id="link"><span wicket:id="label"></span></a>
+				</li>			
+			</ul>
+		</div>
 	</wicket:fragment>
 </wicket:panel>

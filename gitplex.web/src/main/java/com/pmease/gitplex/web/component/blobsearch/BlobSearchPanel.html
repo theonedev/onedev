@@ -1,67 +1,69 @@
 <wicket:panel>
 	<div class="blob-search form-inline">
 		<input wicket:id="instantSearchInput" placeholder="File names, symbols, contents" class="form-control input-sm"></input> 
-		<div class="btn btn-group">
+		<div class="btn-group">
 			<a title="Instant search" class="btn btn-default btn-sm" onclick="$(this).parent().prev().show().focus();"><i class="fa fa-search"></i></a>
 			<a wicket:id="advancedSearch" title="Advanced search" class="btn btn-default btn-sm"><i class="fa fa-binoculars"></i></a>
 		</div>
 	</div>		
-	<div wicket:id="instantSearchResult" class="blob-instant-search-result"></div>
-	<div wicket:id="advancedSearchDlg" class="blob-advanced-search"></div>
+	<div wicket:id="instantSearchDropdown"></div>
+	<div wicket:id="advancedSearchDlg"></div>
 	<wicket:fragment wicket:id="instantSearchResultFrag">
-		<div class="symbols section">
-			<div class="title">File names and symbols</div>
-			<wicket:enclosure child="symbolHits">
-			<table>
-				<tr wicket:id="symbolHits" class="hit">
-					<td class="icon"><img wicket:id="icon"></img></td>
-					<td class="content">
-						<a wicket:id="link"><span wicket:id="label"></span></a>
-						<wicket:enclosure child="scope">
-							<span class="scope">
-							-- <span wicket:id="scope"></span> 
-							</span>
-						</wicket:enclosure>
-					</td>
-				</tr>
-				<wicket:enclosure child="moreSymbolHits">
-				<tr class="hit more-matches">
-					<td class="icon"><i class="fa fa-arrow-circle-right"></i></td>
-					<td><a wicket:id="moreSymbolHits">Show more</a></td>
-				</tr>
+		<div class="instant-search-result">
+			<div class="symbols section">
+				<div class="title">File names and symbols</div>
+				<wicket:enclosure child="symbolHits">
+				<table>
+					<tr wicket:id="symbolHits" class="hit">
+						<td class="icon"><img wicket:id="icon"></img></td>
+						<td class="content">
+							<a wicket:id="link"><span wicket:id="label"></span></a>
+							<wicket:enclosure child="scope">
+								<span class="scope">
+								-- <span wicket:id="scope"></span> 
+								</span>
+							</wicket:enclosure>
+						</td>
+					</tr>
+					<wicket:enclosure child="moreSymbolHits">
+					<tr class="hit more-matches">
+						<td class="icon"><i class="fa fa-arrow-circle-right"></i></td>
+						<td><a wicket:id="moreSymbolHits">Show more</a></td>
+					</tr>
+					</wicket:enclosure>
+				</table>
 				</wicket:enclosure>
-			</table>
-			</wicket:enclosure>
-			<div wicket:id="noSymbolHits" class="no-matches"><i class="fa fa-info-circle"></i> No matches</div>
-		</div>
-		<div wicket:id="texts" class="texts section">
-			<div class="title">Text occurrences</div>
-			<wicket:enclosure child="textHits">
-			<table>
-				<tr wicket:id="textHits" class="hit">
-					<td class="icon"><img wicket:id="icon"></img></td>
-					<td class="content">
-						<a wicket:id="link"><span wicket:id="label"></span></a>
-						<wicket:enclosure child="scope">
-							<span class="scope">
-							-- <span wicket:id="scope"></span> 
-							</span>
-						</wicket:enclosure>
-					</td>
-				</tr>
-				<wicket:enclosure child="moreTextHits">
-				<tr class="hit more-matches">
-					<td class="icon"><i class="fa fa-arrow-circle-right fa-fw"></i></td>
-					<td><a wicket:id="moreTextHits">Show more</a></td>
-				</tr>
+				<div wicket:id="noSymbolHits" class="no-matches"><i class="fa fa-info-circle"></i> No matches</div>
+			</div>
+			<div wicket:id="texts" class="texts section">
+				<div class="title">Text occurrences</div>
+				<wicket:enclosure child="textHits">
+				<table>
+					<tr wicket:id="textHits" class="hit">
+						<td class="icon"><img wicket:id="icon"></img></td>
+						<td class="content">
+							<a wicket:id="link"><span wicket:id="label"></span></a>
+							<wicket:enclosure child="scope">
+								<span class="scope">
+								-- <span wicket:id="scope"></span> 
+								</span>
+							</wicket:enclosure>
+						</td>
+					</tr>
+					<wicket:enclosure child="moreTextHits">
+					<tr class="hit more-matches">
+						<td class="icon"><i class="fa fa-arrow-circle-right fa-fw"></i></td>
+						<td><a wicket:id="moreTextHits">Show more</a></td>
+					</tr>
+					</wicket:enclosure>
+				</table>
 				</wicket:enclosure>
-			</table>
-			</wicket:enclosure>
-			<div wicket:id="noTextHits" class="no-matches"><i class="fa fa-info-circle"></i> No matches</div>
+				<div wicket:id="noTextHits" class="no-matches"><i class="fa fa-info-circle"></i> No matches</div>
+			</div>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="advancedSearchFrag">
-		<form wicket:id="form">
+		<form wicket:id="form" class="advanced-search">
 			<div class="modal-header">
 				<h4 class="modal-title">Advanced Search</h4>
 			</div>

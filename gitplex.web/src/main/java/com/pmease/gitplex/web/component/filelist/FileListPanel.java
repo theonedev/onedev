@@ -307,7 +307,7 @@ public abstract class FileListPanel extends Panel {
 				} catch (JsonProcessingException e) {
 					throw new RuntimeException(e);
 				}
-				String script = String.format("gitplex.treelist.renderLastCommits('%s', %s);", 
+				String script = String.format("gitplex.filelist.renderLastCommits('%s', %s);", 
 						getMarkupId(), json);
 				target.appendJavaScript(script);
 			}
@@ -316,8 +316,13 @@ public abstract class FileListPanel extends Panel {
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 				
-				response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(FileListPanel.class, "file-list.js")));
-				response.render(CssHeaderItem.forReference(new CssResourceReference(FileListPanel.class, "file-list.css")));
+				response.render(JavaScriptHeaderItem.forReference(
+						new JavaScriptResourceReference(FileListPanel.class, "file-list.js")));
+				response.render(CssHeaderItem.forReference(
+						new CssResourceReference(FileListPanel.class, "file-list.css")));
+				
+				response.render(OnDomReadyHeaderItem.forScript(
+						String.format("gitplex.filelist.init('%s')", getMarkupId())));
 				response.render(OnDomReadyHeaderItem.forScript(getCallbackScript()));
 			}
 

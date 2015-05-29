@@ -12,6 +12,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -29,6 +30,7 @@ import com.pmease.commons.git.GitPath;
 import com.pmease.commons.wicket.behavior.HistoryBehavior;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.hit.QueryHit;
+import com.pmease.gitplex.web.component.blobsearch.BlobSearchPanel;
 import com.pmease.gitplex.web.component.filelist.FileListPanel;
 import com.pmease.gitplex.web.component.filenavigator.FileNavigator;
 import com.pmease.gitplex.web.component.revisionselector.RevisionSelector;
@@ -36,6 +38,8 @@ import com.pmease.gitplex.web.component.sourceview.Source;
 import com.pmease.gitplex.web.component.sourceview.SourceViewPanel;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
+
+import de.agilecoders.wicket.extensions.markup.html.bootstrap.jqueryui.JQueryUIResizableJavaScriptReference;
 
 @SuppressWarnings("serial")
 public class RepoFilePage extends RepositoryPage {
@@ -49,11 +53,10 @@ public class RepoFilePage extends RepositoryPage {
 	private static final String FILE_NAVIGATOR_ID = "fileNavigator";
 	
 	private static final String FILE_VIEWER_ID = "fileViewer";
-
-	private String revision;
 	
-	@Nullable
-	private GitPath file;
+	private static final String SEARCH_RESULD_ID = "searchResult";
+
+	private State state = new State();
 	
 	private Component revisionSelector;
 	
@@ -69,18 +72,18 @@ public class RepoFilePage extends RepositoryPage {
 		if (!getRepository().git().hasCommits()) 
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));
 		
-		revision = GitPath.normalize(params.get(PARAM_REVISION).toString());
-		if (revision == null)
-			revision = getRepository().getDefaultBranch().getName();
+		state.revision = GitPath.normalize(params.get(PARAM_REVISION).toString());
+		if (state.revision == null)
+			state.revision = getRepository().getDefaultBranch().getName();
 		
 		String pathName = GitPath.normalize(params.get(PARAM_PATH).toString());
 		if (pathName != null) {
 			org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
 			try {
-				ObjectId commitId = Preconditions.checkNotNull(getRepository().resolveRevision(revision));
+				ObjectId commitId = Preconditions.checkNotNull(getRepository().resolveRevision(state.revision));
 				RevTree revTree = new RevWalk(jgitRepo).parseCommit(commitId).getTree();
 				TreeWalk treeWalk = Preconditions.checkNotNull(TreeWalk.forPath(jgitRepo, pathName, revTree));
-				file = new GitPath(pathName, treeWalk.getRawMode(0));
+				state.file = new GitPath(pathName, treeWalk.getRawMode(0));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			} finally {
@@ -97,13 +100,40 @@ public class RepoFilePage extends RepositoryPage {
 		newFileNavigator(null);
 		newFileViewer(null);
 		
+		add(new BlobSearchPanel("fileSearcher", repoModel, new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return state.revision;
+			}
+			
+		}) {
+			
+			@Override
+			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
+				state.file = new GitPath(hit.getBlobPath(), FileMode.REGULAR_FILE.getBits()); 
+				state.line = hit.getLineNo();
+				
+				newFileNavigator(target);
+				newFileViewer(target);
+				
+				pushState(target);
+			}
+			
+			@Override
+			protected void renderQueryHits(AjaxRequestTarget target, List<QueryHit> hits) {
+				renderSearchResult(target, hits);
+			}
+			
+		});
+		
+		add(new WebMarkupContainer(SEARCH_RESULD_ID).setOutputMarkupId(true));
+		
 		add(historyBehavior = new HistoryBehavior() {
 
 			@Override
 			protected void onPopState(AjaxRequestTarget target, Serializable state) {
-				HistoryState historyState = (HistoryState) state;
-				revision = historyState.revision;
-				file = historyState.path;
+				RepoFilePage.this.state = (State) state;
 
 				newRevisionSelector(target);
 				newFileNavigator(target);
@@ -114,25 +144,26 @@ public class RepoFilePage extends RepositoryPage {
 	}
 
 	private void newRevisionSelector(AjaxRequestTarget target) {
-		revisionSelector = new RevisionSelector(REVISION_SELECTOR_ID, repoModel, revision) {
+		revisionSelector = new RevisionSelector(REVISION_SELECTOR_ID, repoModel, state.revision) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String revision) {
-				RepoFilePage.this.revision = revision;
-				if (file != null) {
+				state.revision = revision;
+				if (state.file != null) {
 					org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
 					try {
 						ObjectId commitId = Preconditions.checkNotNull(getRepository().resolveRevision(revision));
 						RevTree revTree = new RevWalk(jgitRepo).parseCommit(commitId).getTree();
-						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, file.getName(), revTree);
+						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, state.file.getName(), revTree);
 						if (treeWalk == null)
-							file = null;
+							state.file = null;
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					} finally {
 						jgitRepo.close();
 					}
 				}
+				state.line = 0;
 
 				newRevisionSelector(target);
 				newFileNavigator(target);
@@ -156,14 +187,15 @@ public class RepoFilePage extends RepositoryPage {
 
 			@Override
 			public String getObject() {
-				return revision;
+				return state.revision;
 			}
 			
-		}, file) {
+		}, state.file) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, GitPath file) {
-				RepoFilePage.this.file = file;
+				state.file = file;
+				state.line = 0;
 
 				newFileNavigator(target);
 				newFileViewer(target);
@@ -181,19 +213,20 @@ public class RepoFilePage extends RepositoryPage {
 	}
 	
 	private void newFileViewer(AjaxRequestTarget target) {
-		if (file == null || file.isTree()) {
+		if (state.file == null || state.file.isTree()) {
 			fileViewer = new FileListPanel(FILE_VIEWER_ID, repoModel, new AbstractReadOnlyModel<String>() {
 
 				@Override
 				public String getObject() {
-					return revision;
+					return state.revision;
 				}
 				
-			}, file) {
+			}, state.file) {
 
 				@Override
 				protected void onSelect(AjaxRequestTarget target, GitPath file) {
-					RepoFilePage.this.file = file;
+					state.file = file;
+					state.line = 0;
 					
 					newFileViewer(target);
 					newFileNavigator(target);
@@ -205,17 +238,18 @@ public class RepoFilePage extends RepositoryPage {
 		} else {
 			org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
 			try {
-				ObjectId commitId = Preconditions.checkNotNull(getRepository().resolveRevision(revision));
+				ObjectId commitId = Preconditions.checkNotNull(getRepository().resolveRevision(state.revision));
 				RevTree revTree = new RevWalk(jgitRepo).parseCommit(commitId).getTree();
-				TreeWalk treeWalk = Preconditions.checkNotNull(TreeWalk.forPath(jgitRepo, file.getName(), revTree));
+				TreeWalk treeWalk = Preconditions.checkNotNull(TreeWalk.forPath(jgitRepo, state.file.getName(), revTree));
 				ObjectLoader objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));
 				String content = new String(objectLoader.getCachedBytes());
-				Source source = new Source(revision, file.getName(), content, 0);
+				Source source = new Source(state.revision, state.file.getName(), content, state.line);
 				fileViewer = new SourceViewPanel(FILE_VIEWER_ID, repoModel, source) {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-						file = new GitPath(hit.getBlobPath(), FileMode.REGULAR_FILE.getBits()); 
+						state.file = new GitPath(hit.getBlobPath(), FileMode.REGULAR_FILE.getBits()); 
+						state.line = hit.getLineNo();
 						
 						newFileNavigator(target);
 						newFileViewer(target);
@@ -224,8 +258,8 @@ public class RepoFilePage extends RepositoryPage {
 					}
 
 					@Override
-					protected void onCompleteOccurrencesSearch(AjaxRequestTarget target, List<QueryHit> hits) {
-						
+					protected void renderQueryHits(AjaxRequestTarget target, List<QueryHit> hits) {
+						renderSearchResult(target, hits);
 					}
 					
 				};
@@ -246,10 +280,7 @@ public class RepoFilePage extends RepositoryPage {
 	}
 	
 	private void pushState(AjaxRequestTarget target) {
-		HistoryState state = new HistoryState();
-		state.revision = revision;
-		state.path = file;
-		PageParameters params = paramsOf(getRepository(), revision, file!=null?file.getName():null);
+		PageParameters params = paramsOf(getRepository(), state.revision, state.file!=null?state.file.getName():null);
 		String url = RequestCycle.get().urlFor(RepoFilePage.class, params).toString();
 		historyBehavior.pushState(target, url, state);
 	}
@@ -257,9 +288,12 @@ public class RepoFilePage extends RepositoryPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		
-		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(RepoFilePage.class, "repo-file.js")));
-		response.render(CssHeaderItem.forReference(new CssResourceReference(RepoFilePage.class, "repo-file.css")));
+
+		response.render(JQueryUIResizableJavaScriptReference.asHeaderItem());
+		response.render(JavaScriptHeaderItem.forReference(
+				new JavaScriptResourceReference(RepoFilePage.class, "repo-file.js")));
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(RepoFilePage.class, "repo-file.css")));
 	}
 
 	public static PageParameters paramsOf(Repository repository, @Nullable String revision, @Nullable String path) {
@@ -271,9 +305,41 @@ public class RepoFilePage extends RepositoryPage {
 		return params;
 	}
 	
-	private static class HistoryState implements Serializable {
+	private void renderSearchResult(AjaxRequestTarget target, List<QueryHit> hits) {
+		Component searchResult = new SearchResultPanel(SEARCH_RESULD_ID, hits) {
+				
+			@Override
+			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
+				state.file = new GitPath(hit.getBlobPath(), FileMode.REGULAR_FILE.getBits()); 
+				state.line = hit.getLineNo();
+				
+				newFileNavigator(target);
+				newFileViewer(target);
+				
+				pushState(target);
+			}
+
+			@Override
+			protected void onClose(AjaxRequestTarget target) {
+				WebMarkupContainer searchResult = new WebMarkupContainer(SEARCH_RESULD_ID);
+				searchResult.setOutputMarkupId(true);
+				getPage().replace(searchResult);
+				target.add(searchResult);
+				target.appendJavaScript("$('#repo-file>.search-result').hide(); $(window).resize();");
+			}
+			
+		};
+		replace(searchResult);
+		target.add(searchResult);
+		target.appendJavaScript("$('#repo-file>.search-result').show(); $(window).resize();");
+	}
+	
+	private static class State implements Serializable {
 		String revision;
 		
-		GitPath path;
+		@Nullable
+		GitPath file;
+		
+		int line;
 	}
 }

@@ -1,13 +1,35 @@
-.cm-identifierhighlight {background: #D0D0D0;}
-.CodeMirror-selected {background-color: #3399FF !important;}
-.CodeMirror-selectedtext {color: white !important;}
-.CodeMirror-simplescroll-horizontal {height: 16px;}
-.CodeMirror-simplescroll-vertical {width: 16px;}
+.cm-identifierhighlight {
+	background: #D0D0D0;
+}
+.CodeMirror-selected {
+	background-color: #3399FF !important;
+}
+.CodeMirror-selectedtext {
+	color: white !important;
+}
 .CodeMirror-simplescroll-horizontal div, .CodeMirror-simplescroll-vertical div {
-	background: none repeat scroll 0 0 #bbb; border: 1px solid #aaa;}
-.cm-s-eclipse .CodeMirror-matchingbracket {outline: none; color: black !important; font-weight: bold;}
-.cm-s-eclipse span.cm-meta {color: #888;}
+	background: none repeat scroll 0 0 #bbb; 
+	border: 1px solid #aaa;
+}
+.cm-s-eclipse .CodeMirror-matchingbracket {
+	outline: none; 
+	color: black !important; 
+	font-weight: bold;
+}
+.cm-s-eclipse span.cm-meta {
+	color: #888;
+}
 
-.CodeMirror-tokentooltip {background-color: infobackground; border: 1px solid black;
-	border-radius: 4px; color: infotext; font-family: monospace; font-size: 10pt; 
-	overflow: auto; padding: 4px 8px; z-index: 100; max-width: 900px; max-height: 600px;}
+.CodeMirror-tokentooltip {
+	background-color: infobackground; 
+	border: 1px solid black;
+	border-radius: 4px; 
+	color: infotext; 
+	font-family: monospace; 
+	font-size: 10pt; 
+	overflow: auto; 
+	padding: 4px 8px; 
+	z-index: 100; 
+	max-width: 900px; 
+	max-height: 600px;
+}

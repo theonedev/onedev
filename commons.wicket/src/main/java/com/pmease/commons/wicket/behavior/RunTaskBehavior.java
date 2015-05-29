@@ -8,7 +8,7 @@ public abstract class RunTaskBehavior extends AbstractDefaultAjaxBehavior {
 
 	@Override
 	protected void respond(AjaxRequestTarget target) {
-		target.appendJavaScript(String.format(""
+		target.prependJavaScript(String.format(""
 				+ "var $button = $('#%s');"
 				+ "$button.removeAttr('disabled');"
 				+ "$button.val($button[0].prevValue);"

@@ -189,7 +189,7 @@ public abstract class SourceViewPanel extends Panel {
 							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 							List<QueryHit> hits = searchManager.search(repoModel.getObject(), 
 									source.getRevision(), query);
-							onCompleteOccurrencesSearch(target, hits);
+							renderQueryHits(target, hits);
 						} catch (InterruptedException e) {
 							throw new RuntimeException(e);
 						}								
@@ -254,7 +254,7 @@ public abstract class SourceViewPanel extends Panel {
 	
 	protected abstract void onSelect(AjaxRequestTarget target, QueryHit hit);
 	
-	protected abstract void onCompleteOccurrencesSearch(AjaxRequestTarget target, List<QueryHit> hits);
+	protected abstract void renderQueryHits(AjaxRequestTarget target, List<QueryHit> hits);
 	
 	@Override
 	protected void onDetach() {
