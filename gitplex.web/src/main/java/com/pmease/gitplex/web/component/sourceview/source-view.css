@@ -1,10 +1,40 @@
-.source-view>.head {background: #F2F2F2; border-bottom: 1px solid #DDD; padding: 4px;}
-.source-view>.head .title {font-size: 16px;}
-.source-view>.body>.outline {overflow: auto; background: white; padding-left: 4px; border-left: 1px solid #DDD;}
-.source-view {height: 500px; width: 1200px;}
-.CodeMirror-tokentooltip table.declarations td {vertical-align: top; padding: 2px 4px; white-space: nowrap;}
-.CodeMirror-tokentooltip table.declarations .scope {color: #666;}
-.CodeMirror-tokentooltip>div {font-weight: bold;}
+.source-view>.head {
+	background: #F2F2F2; 
+	border-bottom: 1px solid #DDD; 
+	padding: 6px 12px;
+	border-radius: 4px 4px 0 0;
+}
+.source-view>.head .title {
+	font-size: 16px;
+}
+.source-view>.head .outline-toggle {
+	color: #555;
+}
+.source-view>.body>.outline {
+	overflow: auto; 
+	background: white; 
+	padding-left: 4px; 
+	border-left: 1px solid #DDD;
+}
+.source-view {
+	border: 1px solid #DDD;
+	border-radius: 4px 4px 0 0;
+}
+.CodeMirror-tokentooltip table.declarations td {
+	vertical-align: top; 
+	padding: 2px 4px; 
+	white-space: nowrap;
+}
+.CodeMirror-tokentooltip table.declarations .scope {
+	color: #666;
+}
+.CodeMirror-tokentooltip>div {
+	font-weight: bold;
+}
 
-.outline {font-size: 13px;}
-.outline .tree-node {line-height: 1.6;}
+.outline {
+	font-size: 13px;
+}
+.outline .tree-node {
+	line-height: 1.6;
+}

@@ -7,7 +7,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.pmease.gitplex.web.page.repository.tree.RepoTreePage;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
 public class NoCommitsPage extends RepositoryPage {
@@ -16,7 +16,7 @@ public class NoCommitsPage extends RepositoryPage {
 		super(params);
 		
 		if (getRepository().git().hasCommits())
-			throw new RestartResponseException(RepoTreePage.class, paramsOf(getRepository()));
+			throw new RestartResponseException(RepoFilePage.class, paramsOf(getRepository()));
 	}
 
 	@Override

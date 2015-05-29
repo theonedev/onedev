@@ -43,11 +43,11 @@ import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
 import com.pmease.gitplex.web.page.repository.branches.RepoBranchesPage;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitsPage;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.OpenRequestsPage;
 import com.pmease.gitplex.web.page.repository.setting.RepoSettingPage;
 import com.pmease.gitplex.web.page.repository.setting.general.GeneralSettingPage;
 import com.pmease.gitplex.web.page.repository.tags.RepoTagsPage;
-import com.pmease.gitplex.web.page.repository.tree.RepoTreePage;
 
 @SuppressWarnings("serial")
 public abstract class RepositoryPage extends AccountPage {
@@ -95,7 +95,7 @@ public abstract class RepositoryPage extends AccountPage {
 		accountLink.add(new Label("accountName", getAccount().getName()));
 		accountAndRepo.add(accountLink);
 		
-		Link<Void> repoLink = new BookmarkablePageLink<>("repoLink", RepoTreePage.class, paramsOf(getRepository()));
+		Link<Void> repoLink = new BookmarkablePageLink<>("repoLink", RepoFilePage.class, paramsOf(getRepository()));
 		repoLink.add(new Label("repoName", getRepository().getName()));
 		accountAndRepo.add(repoLink);
 		
@@ -146,13 +146,14 @@ public abstract class RepositoryPage extends AccountPage {
 				WebSession session = WebSession.get();
 				session.setMiniSidebar(!session.isMiniSidebar());
 				target.add(nav);
+				target.appendJavaScript("$(window).resize();");
 				target.focusComponent(null);
 			}
 			
 		});
 		
 		List<PageTab> tabs = new ArrayList<>();
-		tabs.add(new RepoTab(Model.of("Files"), "fa fa-fw fa-file-text-o", RepoTreePage.class));
+		tabs.add(new RepoTab(Model.of("Files"), "fa fa-fw fa-file-text-o", RepoFilePage.class));
 		tabs.add(new RepoTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", RepoCommitsPage.class));
 		tabs.add(new RepoTab(Model.of("Branches"), "fa fa-fw fa-ext fa-branch", RepoBranchesPage.class));
 		tabs.add(new RepoTab(Model.of("Tags"), "fa fa-fw fa-tag", RepoTagsPage.class));

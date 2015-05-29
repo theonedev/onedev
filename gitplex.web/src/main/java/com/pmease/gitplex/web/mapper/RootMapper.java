@@ -29,6 +29,7 @@ import com.pmease.gitplex.web.page.repository.branches.BranchComparePage;
 import com.pmease.gitplex.web.page.repository.branches.RepoBranchesPage;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitsPage;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.OpenRequestsPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestComparePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestOverviewPage;
@@ -37,7 +38,6 @@ import com.pmease.gitplex.web.page.repository.setting.gatekeeper.GateKeeperPage;
 import com.pmease.gitplex.web.page.repository.setting.general.GeneralSettingPage;
 import com.pmease.gitplex.web.page.repository.setting.integrationpolicy.IntegrationPolicyPage;
 import com.pmease.gitplex.web.page.repository.tags.RepoTagsPage;
-import com.pmease.gitplex.web.page.repository.tree.RepoTreePage;
 import com.pmease.gitplex.web.page.security.ForgetPage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 import com.pmease.gitplex.web.page.security.LogoutPage;
@@ -106,7 +106,7 @@ public class RootMapper extends CompoundRequestMapper {
 	private void addRepoPages() {
 		addPage("repositories", RepositoriesPage.class);
 		
-		add(new MountedMapper("${user}/${repo}", RepoTreePage.class) {
+		add(new MountedMapper("${user}/${repo}", RepoFilePage.class) {
 
 			@Override
 			protected boolean urlStartsWith(Url url, String... segments) {
@@ -123,7 +123,7 @@ public class RootMapper extends CompoundRequestMapper {
 
 		});
 
-		add(new PageParameterAwareMountedMapper("${user}/${repo}/tree", RepoTreePage.class));
+		add(new PageParameterAwareMountedMapper("${user}/${repo}/file", RepoFilePage.class));
 		add(new PageParameterAwareMountedMapper("${user}/${repo}/commit", RepoCommitPage.class));
 		add(new PageParameterAwareMountedMapper("${user}/${repo}/commits", RepoCommitsPage.class));
 		add(new PageParameterAwareMountedMapper("${user}/${repo}/compare", BranchComparePage.class));

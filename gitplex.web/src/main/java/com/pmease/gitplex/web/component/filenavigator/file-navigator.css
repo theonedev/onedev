@@ -1,0 +1,25 @@
+.subtree-dropdown-trigger {
+	background: url("arrow-right.png") no-repeat center top 4px; 
+	width: 20px; 
+	height: 22px; 
+	display: block;
+}
+.subtree-dropdown-trigger:hover, .subtree-dropdown-trigger.open {
+	background-image: url("arrow-down.png");
+}	
+.subtree-dropdown>.content {
+	padding: 8px 24px 8px 4px; 
+	max-width: 800px; 
+	max-height: 600px; 
+	overflow: auto;
+}
+.subtree-dropdown .tree-theme-human span.tree-content a {
+	color: #444; 
+	font-size: 13px;
+}
+.file-navigator a, .file-navigator em {
+	font-size: 16px;
+}
+.file-navigator em {
+	font-style: normal;
+}

@@ -24,8 +24,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -46,9 +45,11 @@ import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.model.Repository;
 
 @SuppressWarnings("serial")
-public abstract class RevisionSelector extends GenericPanel<String> {
+public abstract class RevisionSelector extends Panel {
 	
 	private final IModel<Repository> repoModel;
+	
+	private final String revision;
 	
 	private boolean branchesActive = true;
 	
@@ -56,18 +57,17 @@ public abstract class RevisionSelector extends GenericPanel<String> {
 	
 	private DropdownPanel dropdown;
 	
-	private WebMarkupContainer revInfo;
-	
 	private String revInput;
 	
 	private Label feedback;
 	
 	private String feedbackMessage;
 	
-	public RevisionSelector(String id, IModel<Repository> repoModel, IModel<String> revModel) {
-		super(id, revModel);
+	public RevisionSelector(String id, IModel<Repository> repoModel, String revision) {
+		super(id);
 		
 		this.repoModel = repoModel;
+		this.revision = revision;
 	}
 
 	@Override
@@ -77,19 +77,15 @@ public abstract class RevisionSelector extends GenericPanel<String> {
 		WebMarkupContainer button = new WebMarkupContainer("button");
 		add(button);
 		
-		revInfo = new WebMarkupContainer("revInfo");
-		revInfo.setOutputMarkupId(true);
-		button.add(revInfo);
-		
-		revInfo.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+		button.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
 				org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
 				try {
-					if (jgitRepo.getRefDatabase().getRef(Git.REFS_HEADS + getModelObject()) != null)
+					if (jgitRepo.getRefDatabase().getRef(Git.REFS_HEADS + revision) != null)
 						return "fa fa-ext fa-branch";
-					else if (jgitRepo.getRefDatabase().getRef(Git.REFS_TAGS + getModelObject()) != null)
+					else if (jgitRepo.getRefDatabase().getRef(Git.REFS_TAGS + revision) != null)
 						return "fa fa-tag";
 					else
 						return "fa fa-ext fa-commit";
@@ -101,14 +97,7 @@ public abstract class RevisionSelector extends GenericPanel<String> {
 			}
 			
 		})));
-		revInfo.add(new Label("label", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return getModelObject();
-			}
-			
-		}));
+		button.add(new Label("label", revision));
 		
 		dropdown = new DropdownPanel("dropdown", true) {
 
@@ -281,6 +270,8 @@ public abstract class RevisionSelector extends GenericPanel<String> {
 		add(dropdown);
 		
 		button.add(new DropdownBehavior(dropdown));
+		
+		setOutputMarkupId(true);
 	}
 	
 	private Component newRefList(final DropdownPanel dropdown, List<String> refs) {
@@ -312,11 +303,8 @@ public abstract class RevisionSelector extends GenericPanel<String> {
 	private void selectRevision(AjaxRequestTarget target, String revision) {
 		try {
 			if (repoModel.getObject().resolveRevision(revision) != null) {
-				setModelObject(revision);
-				target.add(revInfo);
-				feedbackMessage = null;
-				target.add(feedback);
 				dropdown.hide(target);
+				onSelect(target, revision);
 			} else {
 				feedbackMessage = "Can not find revision " + revision + "";
 				target.add(feedback);
@@ -326,6 +314,8 @@ public abstract class RevisionSelector extends GenericPanel<String> {
 			target.add(feedback);
 		}
 	}
+	
+	protected abstract void onSelect(AjaxRequestTarget target, String revision);
 
 	@Override
 	protected void onDetach() {

@@ -1,0 +1,47 @@
+.file-list {
+	border: 1px solid #DDD; 
+	border-radius: 4px;
+}
+.file-list>table {
+	width: 100%; 
+}
+.file-list>table>tbody>tr>td {
+	padding: 6px 8px; 
+	border-top: 1px solid #EEE; 
+	vertical-align: top;
+}
+.file-list>table>tbody>tr:first-child>td {
+	border-top: none;
+}
+.file-list>table tr.child .last-commit a, .file-list>table .last-commit {
+	color: #666;
+}
+.file-list>table tr.parent td {
+	padding: 3px 12px;
+}
+.file-list>table tr.parent td a i {
+	margin-right: 2px;
+}
+.file-list>table tr.parent td a span {
+	font-size: 18px;
+}
+.file-list>table tr.last-commit td {
+	padding: 0;
+}
+.file-list>table tr.last-commit td .message {
+	background: #F2F2F2;
+	border-radius: 4px 4px 0 0;
+	padding: 8px;
+}
+.file-list>table tr.last-commit td .other-info {
+	color: #888;
+	padding: 6px 8px;
+	height: 36px;
+}
+.file-list>table tr.last-commit td .other-info .name {
+	font-weight: bold; 
+	color: #555;
+}
+.file-list>table tr.last-commit td .other-info a {
+	color: #555;
+}

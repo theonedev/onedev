@@ -32,8 +32,8 @@ import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteRepoModal;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteRepoModalBehavior;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.setting.general.GeneralSettingPage;
-import com.pmease.gitplex.web.page.repository.tree.RepoTreePage;
 
 @SuppressWarnings("serial")
 public class AccountReposPage extends AccountLayoutPage {
@@ -146,7 +146,7 @@ public class AccountReposPage extends AccountLayoutPage {
 			protected void populateItem(final ListItem<Repository> item) {
 				Repository repository = item.getModelObject();
 
-				Link<Void> link = new BookmarkablePageLink<>("repoLink", RepoTreePage.class, RepoTreePage.paramsOf(repository)); 
+				Link<Void> link = new BookmarkablePageLink<>("repoLink", RepoFilePage.class, RepoFilePage.paramsOf(repository)); 
 				link.add(new Label("repoName", repository.getName()));
 				item.add(link);
 						

@@ -94,6 +94,7 @@ html, body {
 	display: block;
 	text-decoration: none;
 	padding: 10px;
+	white-space: nowrap;
 }
 .sidebar>table>tbody>tr>td.nav>.tabs>li>a .fa {
 	font-size: 16px;

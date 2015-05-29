@@ -16,7 +16,7 @@ import org.eclipse.jgit.lib.FileMode;
 import com.pmease.commons.git.TreeNode;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.blob.RepoBlobPage;
-import com.pmease.gitplex.web.page.repository.tree.RepoTreePage;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
 public class SymbolLink extends Panel {
@@ -67,11 +67,11 @@ public class SymbolLink extends Panel {
 			};
 			link.setEnabled(false);
 		} else if (targetNode.getMode() == FileMode.TYPE_TREE) {
-			link = new BookmarkablePageLink<Void>("link", RepoTreePage.class, 
-					RepoTreePage.paramsOf(repoModel.getObject(), revision, targetNode.getPath()));
+			link = new BookmarkablePageLink<Void>("link", RepoFilePage.class, 
+					RepoFilePage.paramsOf(repoModel.getObject(), revision, targetNode.getPath()));
 		} else if ((targetNode.getMode()&FileMode.TYPE_MASK) == FileMode.TYPE_FILE) {
 			link = new BookmarkablePageLink<Void>("link", RepoBlobPage.class, 
-					RepoTreePage.paramsOf(repoModel.getObject(), revision, targetNode.getPath()));
+					RepoFilePage.paramsOf(repoModel.getObject(), revision, targetNode.getPath()));
 		} else {
 			link = new Link<Void>("link") {
 

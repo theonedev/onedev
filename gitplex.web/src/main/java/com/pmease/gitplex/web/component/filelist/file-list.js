@@ -1,6 +1,6 @@
 gitplex.treelist = {
 	renderLastCommits: function(containerId, lastCommits) {
-		var $table = $("#" + containerId).find(".tree-list>table");
+		var $table = $("#" + containerId).find(".file-list>table");
 		$table.find("tr.child").each(function() {
 			var $row = $(this);
 			var path = $row.find("td.path span").text();

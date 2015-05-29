@@ -1,2 +1,10 @@
 <wicket:extend>
+	<div class="test" style="border: 1px solid red; margin-top: 10px; padding-top: 10px;">
+		hello world
+	</div>
+	<script type="text/javascript">
+		$(function() {
+			console.log($(".test").offset().top);
+		});
+	</script>
 </wicket:extend>

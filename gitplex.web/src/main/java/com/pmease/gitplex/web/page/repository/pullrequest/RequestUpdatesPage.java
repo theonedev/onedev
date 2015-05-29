@@ -41,7 +41,7 @@ import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
 import com.pmease.gitplex.web.event.PullRequestChanged;
 import com.pmease.gitplex.web.model.UserModel;
-import com.pmease.gitplex.web.page.repository.tree.RepoTreePage;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
 public class RequestUpdatesPage extends RequestDetailPage {
@@ -183,8 +183,8 @@ public class RequestUpdatesPage extends RequestDetailPage {
 						commitItem.add(new AgeLabel("age", Model.of(commit.getAuthor().getWhen())));
 						
 						commitItem.add(new CommitLink("hashLink", repoModel, commit.getHash()));
-						commitItem.add(new BookmarkablePageLink<Void>("treeLink", RepoTreePage.class, 
-								RepoTreePage.paramsOf(repoModel.getObject(), commit.getHash(), null)));
+						commitItem.add(new BookmarkablePageLink<Void>("treeLink", RepoFilePage.class, 
+								RepoFilePage.paramsOf(repoModel.getObject(), commit.getHash(), null)));
 						
 						commitItem.add(new VerificationStatusPanel("verification", requestModel, Model.of(commit.getHash())) {
 

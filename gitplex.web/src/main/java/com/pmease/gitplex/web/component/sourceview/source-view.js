@@ -34,22 +34,22 @@ gitplex.sourceview = {
 	    }
 		
 		var $sourceView = $code.closest(".source-view");
-		$sourceView.resize(function() {
+		$sourceView.on("resized", function() {
 			var $head = $sourceView.find(">.head");
 			var $body = $sourceView.find(">.body");
+			$body.outerHeight($sourceView.height()-$head.outerHeight());
 			var $outline = $body.find(">.outline");
 			if ($outline.is(":visible")) {
-				$code.width($body.width()/4.0*3);
-				$outline.width($body.width() - $code.width()-6);
+				$code.outerWidth($body.width()/4.0*3);
+				$outline.outerWidth($body.width() - $code.outerWidth()-1);
+				$outline.outerHeight($body.height());
+				$code.find(">.CodeMirror").outerHeight($body.height());
 			} else {
-				$code.width($body.width());
+				$code.outerWidth($body.width());
+				$code.find(">.CodeMirror").outerHeight($body.height());
 			}
-			$outline.height($sourceView.height()-$head.height());
-			$code.find(">.CodeMirror").height($outline.height());
 		});
 		
-		$sourceView.resize();
-
 		gitplex.sourceview.gotoLine(editor, activeLine);
 	}, 
 	
@@ -70,7 +70,7 @@ gitplex.sourceview = {
 			outlineToggleBtn.addClass("active");
 		else
 			outlineToggleBtn.removeClass("active");
-		$outline.closest(".source-view").resize();
+		$outline.closest(".source-view").trigger("resized");
 	},
 	
 	gotoSymbol: function(outlineId, line) {

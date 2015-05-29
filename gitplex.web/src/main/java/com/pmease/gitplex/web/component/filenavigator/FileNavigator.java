@@ -1,10 +1,12 @@
-package com.pmease.gitplex.web.component.pathnavigator;
+package com.pmease.gitplex.web.component.filenavigator;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
@@ -20,7 +22,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -41,38 +43,43 @@ import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitplex.core.model.Repository;
 
 @SuppressWarnings("serial")
-public class PathNavigator extends GenericPanel<String> {
+public abstract class FileNavigator extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
 	private final IModel<String> revModel;
 	
-	public PathNavigator(String id, IModel<Repository> repoModel, IModel<String> revModel, IModel<String> pathModel) {
-		super(id, pathModel);
+	private final GitPath file;
+	
+	public FileNavigator(String id, IModel<Repository> repoModel, IModel<String> revModel, @Nullable GitPath file) {
+		super(id);
 
 		this.repoModel = repoModel;
 		this.revModel = revModel;
+		this.file = file;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new ListView<String>("paths", new LoadableDetachableModel<List<String>>() {
+		add(new ListView<GitPath>("paths", new LoadableDetachableModel<List<GitPath>>() {
 
 			@Override
-			protected List<String> load() {
-				List<String> paths = new ArrayList<>();
-				paths.add("");
+			protected List<GitPath> load() {
+				List<GitPath> paths = new ArrayList<>();
+				paths.add(null);
 				
-				String path = PathNavigator.this.getModelObject();
-				if (path != null) {
-					for (String segment: Splitter.on('/').omitEmptyStrings().split(path)) { 
-						String parent = paths.get(paths.size()-1);
-						if (parent.length() != 0)
-							paths.add(parent + "/" + segment);
+				if (file != null) {
+					List<String> segments = Splitter.on('/').omitEmptyStrings().splitToList(file.getName());
+					
+					for (int i=0; i<segments.size(); i++) { 
+						GitPath parent = paths.get(paths.size()-1);
+						int mode = (i==segments.size()-1?file.getMode():FileMode.TREE.getBits());
+						if (parent != null)
+							paths.add(new GitPath(parent.getName() + "/" + segments.get(i), mode));
 						else
-							paths.add(segment);
+							paths.add(new GitPath(segments.get(i), mode));
 					}
 				}
 				
@@ -82,24 +89,23 @@ public class PathNavigator extends GenericPanel<String> {
 		}) {
 
 			@Override
-			protected void populateItem(final ListItem<String> item) {
-				final String path = item.getModelObject();
-				
+			protected void populateItem(final ListItem<GitPath> item) {
+				final GitPath path = item.getModelObject();
 				AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						selectPath(target, path);
+						onSelect(target, path);
 					}
 					
 				};
 				link.setEnabled(item.getIndex() != getViewSize()-1);
 				
-				if (path.length() != 0) {
-					if (path.indexOf('/') != -1)
-						link.add(new Label("label", StringUtils.substringAfterLast(path, "/")));
+				if (path != null) {
+					if (path.getName().indexOf('/') != -1)
+						link.add(new Label("label", StringUtils.substringAfterLast(path.getName(), "/")));
 					else
-						link.add(new Label("label", path));
+						link.add(new Label("label", path.getName()));
 				} else {
 					link.add(new Label("label", repoModel.getObject().getName()));
 				}
@@ -108,11 +114,11 @@ public class PathNavigator extends GenericPanel<String> {
 				
 				WebMarkupContainer subtreeDropdownTrigger = new WebMarkupContainer("subtreeDropdownTrigger");
 				
-				if (path.length() != 0 && item.getIndex() == size()-1) {
+				if (path != null && item.getIndex() == size()-1) {
 					org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
 					try {
 						RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
-						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, path, revTree);
+						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, path.getName(), revTree);
 						if (!treeWalk.isSubtree())
 							subtreeDropdownTrigger.setVisible(false);
 					} catch (IOException e) {
@@ -138,8 +144,8 @@ public class PathNavigator extends GenericPanel<String> {
 								try {
 									RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
 									TreeWalk treeWalk;
-									if (path.length() != 0) {
-										treeWalk = TreeWalk.forPath(jgitRepo, path, revTree);
+									if (path != null) {
+										treeWalk = Preconditions.checkNotNull(TreeWalk.forPath(jgitRepo, path.getName(), revTree));
 										treeWalk.enterSubtree();
 									} else {
 										treeWalk = new TreeWalk(jgitRepo);
@@ -166,7 +172,7 @@ public class PathNavigator extends GenericPanel<String> {
 
 							@Override
 							public Iterator<? extends GitPath> getChildren(GitPath path) {
-								return PathNavigator.this.getChildren(path).iterator();
+								return FileNavigator.this.getChildren(path).iterator();
 							}
 
 							@Override
@@ -194,7 +200,7 @@ public class PathNavigator extends GenericPanel<String> {
 							@Override
 							protected Component newContentComponent(String id, final IModel<GitPath> model) {
 								GitPath pathInfo = model.getObject();
-								Fragment fragment = new Fragment(id, "treeNodeFrag", PathNavigator.this);
+								Fragment fragment = new Fragment(id, "treeNodeFrag", FileNavigator.this);
 								
 								WebMarkupContainer icon = new WebMarkupContainer("icon");
 								String iconClass;
@@ -214,7 +220,7 @@ public class PathNavigator extends GenericPanel<String> {
 
 									@Override
 									public void onClick(AjaxRequestTarget target) {
-										selectPath(target, model.getObject().getName());
+										onSelect(target, model.getObject());
 										hide(target);
 									}
 									
@@ -245,20 +251,14 @@ public class PathNavigator extends GenericPanel<String> {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(PathNavigator.class, "path-navigator.css")));
+		response.render(CssHeaderItem.forReference(new CssResourceReference(FileNavigator.class, "file-navigator.css")));
 	}
 
 	private ObjectId getCommitId() {
 		return Preconditions.checkNotNull(repoModel.getObject().resolveRevision(revModel.getObject()));
 	}
 
-	private void selectPath(AjaxRequestTarget target, String path) {
-		if (path.length() == 0)
-			path = null;
-		
-		setModelObject(path);
-		target.add(this);
-	}
+	protected abstract void onSelect(AjaxRequestTarget target, GitPath file);
 	
 	private List<GitPath> getChildren(GitPath pathInfo) {
 		org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();

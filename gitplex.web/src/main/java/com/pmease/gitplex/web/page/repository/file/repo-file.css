@@ -1,0 +1,9 @@
+#repo-file>.head {
+	margin-bottom: 20px;
+}
+#repo-file>.head .revision-selector {
+	margin-right: 10px;
+}
+#repo-file>.head .file-navigator {
+	margin-top: 3px;
+}

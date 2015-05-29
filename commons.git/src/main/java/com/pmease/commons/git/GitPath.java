@@ -31,6 +31,10 @@ public class GitPath implements Serializable, Comparable<GitPath> {
 	public int getMode() {
 		return mode;
 	}
+	
+	public boolean isTree() {
+		return FileMode.TREE.equals(mode);
+	}
 
 	@Override
 	public boolean equals(Object obj) {
