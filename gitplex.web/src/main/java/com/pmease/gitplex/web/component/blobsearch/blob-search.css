@@ -1,10 +1,13 @@
 .blob-search input.form-control {
-	width: 300px; 
+	width: 200px; 
 	display: none; 
 	cursor: text;
 }
 .blob-search a {
 	color: #666;
+}
+.blob-search a.instant-search {
+	margin-right: 4px;
 }
 .instant-search-result .section {
 	margin-bottom: 8px;

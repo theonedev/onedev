@@ -1,7 +1,3 @@
-.file-list {
-	border: 1px solid #DDD; 
-	border-radius: 4px 4px 0 0;
-}
 .file-list>.body {
 	overflow: auto;
 }
@@ -33,8 +29,8 @@
 }
 .file-list>.head .message {
 	background: #F2F2F2;
-	border-radius: 4px 4px 0 0;
 	padding: 8px;
+	height: 36px;
 }
 .file-list>.head .other-info {
 	color: #888;

@@ -116,7 +116,7 @@ public abstract class RepositoryPage extends AccountPage {
 		};
 		add(repoChoice);
 		WebMarkupContainer repoChoiceTrigger = new WebMarkupContainer("repoChoiceTrigger");
-		repoChoiceTrigger.add(new DropdownBehavior(repoChoice).alignWithComponent(accountAndRepo, 0, 100, 0, 0, 8, true));
+		repoChoiceTrigger.add(new DropdownBehavior(repoChoice).alignWithComponent(accountAndRepo, 0, 100, 0, 0, 6, true));
 		add(repoChoiceTrigger);
 		
 		UrlManager urlManager = GitPlex.getInstance(UrlManager.class);

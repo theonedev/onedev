@@ -68,12 +68,8 @@ html, body {
 	background: white;
 	border-bottom: 1px solid #BBB;
 	margin: 0 -15px;
-	padding: 20px;
 }
 
-.sidebar {
-	margin: -20px;
-}
 .sidebar>table {
 	width: 100%;
 }
@@ -89,12 +85,13 @@ html, body {
 	margin-bottom: 0;
 }
 .sidebar>table>tbody>tr>td.nav>.tabs>li>a {
-	border-left: 4px solid white;
 	color: #666;
 	display: block;
 	text-decoration: none;
-	padding: 10px;
+	padding: 8px;
+	height: 36px;
 	white-space: nowrap;
+	border-left: 4px solid white;
 }
 .sidebar>table>tbody>tr>td.nav>.tabs>li>a .fa {
 	font-size: 16px;
@@ -103,16 +100,12 @@ html, body {
 .sidebar>table>tbody>tr>td.nav>.tabs>li:hover>a {
 	color: #303845;
 	background: #EEE;
-	border-left-color: #EEE;
 }
 .sidebar>table>tbody>tr>td.nav>.tabs>li.active>a {
 	color: #303845;
 	background: #DDD;
 	border-left-color: #69B7F7;
 	font-weight: bold;
-}
-.sidebar>table>tbody>tr>td.content {
-	padding: 20px;
 }
 #main>.foot {
 	font-size: 11px;

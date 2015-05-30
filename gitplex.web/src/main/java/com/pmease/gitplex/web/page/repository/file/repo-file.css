@@ -1,18 +1,33 @@
-#repo-file {
-	margin: -20px;
+#repo-file>.head {
+	border-bottom: 1px solid #BBB;
 }
 #repo-file>.head .revision-selector {
-	margin-right: 10px;
 	display: block;
-	border-right: 1px solid #DDD;
+	color: #333;
+	border-right: 1px solid #BBB;
+	text-decoration: none;
 }
-#repo-file>.head .file-navigator {
-	margin-top: 3px;
+#repo-file>.head .revision-selector:hover {
+	background: #EEE;
 }
+
+#repo-file>.head .revision-selector, #repo-file>.head .file-navigator, #repo-file>.head .blob-search {
+	padding: 5px 8px;
+}
+#repo-file>.head .blob-search input {
+	margin: -9px 4px -5px 0;
+	border-top: none;
+	border-bottom: none;
+	border-left: 1px solid #BBB;
+	border-right: 1px solid #BBB;
+	box-shadow: none;
+	border-radius: 0;
+	height: 29px;
+}
+
 #repo-file>.search-result {
 	height: 200px;
-	border: 1px solid #DDD;
-	border-radius: 0 0 4px 4px;
+	border-top: 1px solid #DDD;
 	display: none;
 }
 #repo-file>.search-result>.ui-resizable-handle {

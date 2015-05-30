@@ -1,7 +1,7 @@
 .subtree-dropdown-trigger {
-	background: url("arrow-right.png") no-repeat center top 4px; 
-	width: 20px; 
-	height: 22px; 
+	background: url("arrow-right.png") no-repeat center top 3px; 
+	width: 16px; 
+	height: 20px; 
 	display: block;
 }
 .subtree-dropdown-trigger:hover, .subtree-dropdown-trigger.open {
@@ -16,9 +16,6 @@
 .subtree-dropdown .tree-theme-human span.tree-content a {
 	color: #444; 
 	font-size: 13px;
-}
-.file-navigator a, .file-navigator em {
-	font-size: 16px;
 }
 .file-navigator em {
 	font-style: normal;

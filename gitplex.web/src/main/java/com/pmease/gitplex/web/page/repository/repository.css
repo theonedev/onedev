@@ -1,6 +1,3 @@
-#repository {
-	margin: -20px;
-}
 #repository>.head {
 	padding: 8px 10px;
 	border-bottom: 1px solid #BBB;
@@ -43,18 +40,16 @@
 	background-color: #AAA;
 }
 
-#repository>.body {
-	padding: 20px;
-}
 #repository>.body>.sidebar>table>tbody>tr>td.nav>.mini-toggle {
 	display: block;
 	margin-top: -20px;
 	text-align: right;
 	font-size: 20px;
-	padding-right: 14px;
+	padding-right: 16px;
 	border-bottom: 1px solid #BBB;
 	text-decoration: none;
 	color: #666;
+	height: 31px;
 }
 #repository>.body>.sidebar>table>tbody>tr>td.nav>.mini-toggle:hover {
 	color: #333;
@@ -71,9 +66,6 @@
 }
 #repository>.body>.sidebar>table>tbody>tr>td.mini.nav {
 	width: 40px;
-}
-#repository>.body>.sidebar>table>tbody>tr>td.nav>.tabs>li>a {
-	padding: 10px 5px;
 }
 #repository>.body>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a>.text {
 	display: none;

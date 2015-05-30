@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
@@ -28,6 +31,12 @@ public abstract class AdministrationPage extends LayoutPage {
 		tabs.add(new AdministrationTab("QoS Setting", "fa fa-fw fa-signal", QosSettingPage.class));
 		
 		add(new Tabbable("tabs", tabs));
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new CssResourceReference(AdministrationPage.class, "administration.css")));
 	}
 
 }

@@ -7,8 +7,6 @@ gitplex.filelist = {
 			var $body = $fileList.find(">.body");
 			var $table = $body.children();
 			$body.outerHeight(height-$head.outerHeight());
-			if ($body.height()>$table.outerHeight())
-				$body.height($table.outerHeight());
 		});
 	},
 	renderLastCommits: function(containerId, lastCommits) {

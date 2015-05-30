@@ -2,7 +2,7 @@
 	background: #F2F2F2; 
 	border-bottom: 1px solid #DDD; 
 	padding: 6px 12px;
-	border-radius: 4px 4px 0 0;
+	height: 36px;
 }
 .source-view>.head .title {
 	font-size: 16px;
@@ -15,10 +15,6 @@
 	background: white; 
 	padding-left: 4px; 
 	border-left: 1px solid #DDD;
-}
-.source-view {
-	border: 1px solid #DDD;
-	border-radius: 4px 4px 0 0;
 }
 .CodeMirror-tokentooltip table.declarations td {
 	vertical-align: top; 
