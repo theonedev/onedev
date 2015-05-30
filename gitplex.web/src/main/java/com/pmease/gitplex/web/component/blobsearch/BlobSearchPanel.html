@@ -1,10 +1,8 @@
 <wicket:panel>
 	<div class="blob-search form-inline">
 		<input wicket:id="instantSearchInput" placeholder="File names, symbols, contents" class="form-control input-sm"></input> 
-		<div class="btn-group">
-			<a title="Instant search" class="btn btn-default btn-sm" onclick="$(this).parent().prev().show().focus();"><i class="fa fa-search"></i></a>
-			<a wicket:id="advancedSearch" title="Advanced search" class="btn btn-default btn-sm"><i class="fa fa-binoculars"></i></a>
-		</div>
+		<a title="Instant search" onclick="$(this).prev().show().focus();"><i class="fa fa-search"></i></a>
+		<a wicket:id="advancedSearch" title="Advanced search"><i class="fa fa-binoculars"></i></a>
 	</div>		
 	<div wicket:id="instantSearchDropdown"></div>
 	<div wicket:id="advancedSearchDlg"></div>

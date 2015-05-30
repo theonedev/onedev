@@ -28,7 +28,7 @@ public class CopyClipboard extends WebMarkupContainer {
 		super.renderHead(response);
 		
 		response.render(JavaScriptHeaderItem.forReference(
-				new JavaScriptResourceReference(CopyClipboard.class, "ZeroClipboard.min.js")));
+				new JavaScriptResourceReference(CopyClipboard.class, "ZeroClipboard.js")));
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(CopyClipboard.class, "copy-clipboard.js")));
 

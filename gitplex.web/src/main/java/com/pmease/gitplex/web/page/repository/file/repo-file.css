@@ -1,8 +1,10 @@
-#repo-file>.head {
-	margin-bottom: 20px;
+#repo-file {
+	margin: -20px;
 }
 #repo-file>.head .revision-selector {
 	margin-right: 10px;
+	display: block;
+	border-right: 1px solid #DDD;
 }
 #repo-file>.head .file-navigator {
 	margin-top: 3px;
