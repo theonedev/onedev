@@ -32,7 +32,14 @@ html, body {
 
 #main>.head>.status {
 	text-align: right;
+}
+#main>.head>.status .logged-in {
 	font-size: 18px;
+	margin-right: -12px;
+}
+#main>.head>.status .logged-out {
+	font-size: 14px;
+	margin: 2px -12px 0 0;
 }
 #main>.head>.status a, #main>.head>.status span {
 	color: #EEE; 

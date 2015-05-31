@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.resource.CssResourceReference;
@@ -69,7 +70,11 @@ public class ServerInitPage extends BasePage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(ServerInitPage.class, "server-init.css")));
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(ServerInitPage.class, "server-init.css")));
+		
+		if (initStage.getManualConfigs().isEmpty())
+			response.render(OnDomReadyHeaderItem.forScript("$('#server-init').addClass('inited');"));
 	}
 
 	@Override

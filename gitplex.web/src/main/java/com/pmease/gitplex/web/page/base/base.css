@@ -1,14 +1,16 @@
 html, body {
-	background: #333;
+	background: white;
 }
 
 .center-box { 
 	padding: 50px; 
 	width: 600px; 
 	margin: 0 auto; 
-	background: white;
+	background: #F5F5F5;
+	border: 8px solid #DDD;
 	margin-top: 100px;
-	border-radius: 4px;
+	margin-bottom: 20px;
+	color: #333;
 }
 
 /* COMMON STYLES */

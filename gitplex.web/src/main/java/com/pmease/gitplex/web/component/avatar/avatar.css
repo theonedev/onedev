@@ -1,9 +1,7 @@
 img.avatar {
-	display: inline-block;
 	border-radius: 3px;
 	height: 24px;
 	width: 24px;
-	line-height: 1.428571429;
 }
 .avatar-picker>.fileupload>.fileupload-preview {
 	width: 220px; 

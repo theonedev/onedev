@@ -10,21 +10,15 @@
 	font-size: 18px; 
 	color: #666; 
 }
-#login .username .input-group-addon { 
-	border-bottom-left-radius: 0; 
-}
-#login .username input.form-control { 
-	border-bottom-right-radius: 0; 
-}
-#login .password .input-group-addon { 
-	border-top-left-radius: 0; 
-}
-#login .password input.form-control { 
-	border-top-right-radius: 0; 
-}
-#login .row { 
-	margin-top: 18px; 
+#login .username, #login .password  {
+	margin-bottom: 20px;
 }
 #login .btn { 
 	width: 100%;
+}
+#login .checkbox {
+	margin-top: 6px;
+}
+#login .register {
+	font-size: 16px;
 }

@@ -9,19 +9,23 @@
 			</div>
 			<div class="status col-xs-3">
 			  	<wicket:enclosure child="login">
-			  		<a wicket:id="login">Log in</a>
-			  		<span class="separator">|</span>
-			  		<a wicket:id="register">Sign up</a>
+			  		<div class="logged-out">
+				  		<a wicket:id="login">Log in</a>
+				  		<span class="separator">|</span>
+				  		<a wicket:id="register">Sign up</a>
+			  		</div>
 				</wicket:enclosure>
 				<wicket:enclosure child="user">
-			  		<a wicket:id="notification" class="notifications" title="You've got tasks"><i class="fa fa-circle"></i></a>
-			  		<a wicket:id="prevUser" class="previous">
-			  			<img wicket:id="avatar" class="avatar"></img>
-			  		</a>
-			  		<div wicket:id="tooltip" id="runas-tooltip"></div>
-			  		<a wicket:id="user" class="current"></a>
-			  		<a wicket:id="userMenuTrigger"><i class="fa fa-angle-down"></i></a>
-			  		<div wicket:id="userMenu"></div>
+					<div class="logged-in">
+				  		<a wicket:id="notification" class="notifications" title="You've got tasks"><i class="fa fa-circle"></i></a>
+				  		<a wicket:id="prevUser" class="previous">
+				  			<img wicket:id="avatar" class="avatar"></img>
+				  		</a>
+				  		<div wicket:id="tooltip" id="runas-tooltip"></div>
+				  		<a wicket:id="user" class="current"></a>
+				  		<a wicket:id="userMenuTrigger"><i class="fa fa-angle-down"></i></a>
+				  		<div wicket:id="userMenu"></div>
+					</div>
 			  	</wicket:enclosure>
 			</div>
 		</div>

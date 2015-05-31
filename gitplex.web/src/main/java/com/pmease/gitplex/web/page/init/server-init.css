@@ -1,6 +1,9 @@
 #server-init.center-box {
 	width: 900px;
 }
+#server-init.inited {
+	text-align: center;
+}
 #server-init>.title {
 	font-size: 32px;
 	font-weight: bold;
