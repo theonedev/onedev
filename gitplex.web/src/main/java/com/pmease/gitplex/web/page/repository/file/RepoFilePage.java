@@ -27,6 +27,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitPath;
+import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.behavior.HistoryBehavior;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -289,6 +290,7 @@ public class RepoFilePage extends RepositoryPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 
+		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
 		response.render(JQueryUIResizableJavaScriptReference.asHeaderItem());
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(RepoFilePage.class, "repo-file.js")));
@@ -315,7 +317,7 @@ public class RepoFilePage extends RepositoryPage {
 				
 				newFileNavigator(target);
 				newFileViewer(target);
-				
+
 				pushState(target);
 			}
 

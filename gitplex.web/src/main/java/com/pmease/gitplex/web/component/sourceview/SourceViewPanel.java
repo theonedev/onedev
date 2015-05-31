@@ -10,7 +10,6 @@ import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -35,6 +34,7 @@ import com.pmease.commons.lang.Extractor;
 import com.pmease.commons.lang.Extractors;
 import com.pmease.commons.lang.Symbol;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
+import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
@@ -43,7 +43,6 @@ import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
-import com.pmease.gitplex.web.WebSession;
 
 @SuppressWarnings("serial")
 public abstract class SourceViewPanel extends Panel {
@@ -90,38 +89,13 @@ public abstract class SourceViewPanel extends Panel {
 			fileName = StringUtils.substringAfterLast(fileName, "/");
 		add(new Label("title", fileName));
 		
-		add(new AjaxLink<Void>("outlineToggle") {
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				
-				if (WebSession.get().isShowOutline())
-					add(AttributeAppender.append("class", " active"));
-			}
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				WebSession session = WebSession.get();
-				session.setShowOutline(!session.isShowOutline());
-				target.appendJavaScript(String.format("gitplex.sourceview.toggleOutline('%s');", outlinePanel.getMarkupId()));
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				setVisible(!symbols.isEmpty());
-			}
-			
-		});
+		add(new WebMarkupContainer("outlineToggle").setVisible(!symbols.isEmpty()));
 		
 		add(codeContainer = new WebMarkupContainer("code"));
 		codeContainer.setOutputMarkupId(true);
 		
-		add(outlinePanel = new OutlinePanel("outline", symbols)); 
-		if (symbols.isEmpty() || !WebSession.get().isShowOutline())
-			outlinePanel.add(AttributeAppender.append("style", "display:none;"));
+		add(outlinePanel = new OutlinePanel("outline", symbols));
+		outlinePanel.setVisible(!symbols.isEmpty());
 		
 		add(symbolsContainer = new WebMarkupContainer("symbols"));
 		symbolsContainer.setOutputMarkupId(true);
@@ -229,6 +203,7 @@ public abstract class SourceViewPanel extends Panel {
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 
+				response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
 				response.render(JavaScriptHeaderItem.forReference(CodeMirrorResourceReference.INSTANCE));
 				
 				response.render(JavaScriptHeaderItem.forReference(

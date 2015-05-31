@@ -30,7 +30,8 @@
 .file-list>.head .message {
 	background: #F2F2F2;
 	padding: 8px;
-	height: 36px;
+	max-height: 600px;
+	overflow: auto;
 }
 .file-list>.head .other-info {
 	color: #888;

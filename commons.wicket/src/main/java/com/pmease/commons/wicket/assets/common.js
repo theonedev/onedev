@@ -513,7 +513,8 @@ pmease.commons = {
 				pmease.commons.dropdown.hideExcept(source);
 		});
 		
-		$(document).keypress(function(e) {
+		// use keydown as keypress does not work in chrome/safari
+		$(document).keydown(function(e) {
 			if (e.keyCode == 27) { // esc
 				if ($(".select2-drop:visible").length == 0) {
 					var topmostPopup = $("body>.popup:visible:last");

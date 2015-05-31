@@ -9,32 +9,12 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 
 	private static final long serialVersionUID = 1L;
 
-	private boolean showOutline;
-	
-	private boolean miniSidebar;
-	
 	public WebSession(Request request) {
 		super(request);
 	}
 
 	public static WebSession get() {
 		return (WebSession) org.apache.wicket.protocol.http.WebSession.get();
-	}
-
-	public boolean isMiniSidebar() {
-		return miniSidebar;
-	}
-
-	public void setMiniSidebar(boolean miniSidebar) {
-		this.miniSidebar = miniSidebar;
-	}
-
-	public boolean isShowOutline() {
-		return showOutline;
-	}
-
-	public void setShowOutline(boolean showOutline) {
-		this.showOutline = showOutline;
 	}
 
 	public void login(String userName, String password, boolean rememberMe) {

@@ -1,5 +1,5 @@
 <wicket:panel>
-	<div class="blob-search form-inline">
+	<div class="blob-search">
 		<input wicket:id="instantSearchInput" placeholder="File names, symbols, contents" class="form-control input-sm"></input> 
 		<a title="Instant search" onclick="$(this).prev().show().focus();" class="instant-search"><i class="fa fa-search"></i></a>
 		<a wicket:id="advancedSearch" title="Advanced search"><i class="fa fa-binoculars"></i></a>
@@ -68,7 +68,7 @@
 			<div class="modal-body">
 				<div wicket:id="searchFor" class="form-group">
 					<label>Search For</label>
-					<input wicket:id="input" class="form-control" type="text"></input>
+					<input wicket:id="input" name="searchFor" class="form-control" type="text"></input>
 					<div wicket:id="feedback"></div>
 				</div>
 				<div class="form-group">

@@ -7,12 +7,6 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.pmease.commons.wicket.behavior.TooltipBehavior;
-import com.pmease.gitplex.web.WebSession;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
-
 @SuppressWarnings("serial")
 public class RepoTabLink extends Panel {
 
@@ -33,8 +27,6 @@ public class RepoTabLink extends Panel {
 				tab.getMainPageClass(), RepositoryPage.paramsOf(page.getRepository()));
 		link.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", tab.getIconClass())));
 		
-		if (WebSession.get().isMiniSidebar())
-			link.add(new TooltipBehavior(tab.getTitleModel(), new TooltipConfig().withPlacement(Placement.right)));
 		link.add(new Label("text", tab.getTitleModel()));
 		add(link);
 	}

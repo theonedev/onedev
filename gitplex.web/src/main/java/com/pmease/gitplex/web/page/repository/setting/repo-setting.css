@@ -1,3 +1,6 @@
-.repo-setting>.nav {
+#repo-setting {
+	padding: 20px;
+}
+#repo-setting>.nav {
 	margin-bottom: 20px;
 }

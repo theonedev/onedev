@@ -5,26 +5,26 @@ import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.Constants;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.component.copyclipboard.CopyClipboard;
@@ -36,7 +36,6 @@ import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.WebSession;
 import com.pmease.gitplex.web.component.reposelector.RepositorySelector;
 import com.pmease.gitplex.web.model.RepositoryModel;
 import com.pmease.gitplex.web.page.account.AccountPage;
@@ -124,34 +123,6 @@ public abstract class RepositoryPage extends AccountPage {
 		add(new TextField<String>("cloneUrl", cloneUrlModel));
 		add(new CopyClipboard("copyCloneUrlToClipboard", cloneUrlModel));
 		
-		final WebMarkupContainer nav = new WebMarkupContainer("repoNav");
-		nav.add(AttributeModifier.replace("class", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				if (WebSession.get().isMiniSidebar())
-					return "mini nav";
-				else
-					return "nav";
-			}
-			
-		}));
-		nav.setOutputMarkupId(true);
-		add(nav);
-		
-		nav.add(new AjaxLink<Void>("miniToggle") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				WebSession session = WebSession.get();
-				session.setMiniSidebar(!session.isMiniSidebar());
-				target.add(nav);
-				target.appendJavaScript("$(window).resize();");
-				target.focusComponent(null);
-			}
-			
-		});
-		
 		List<PageTab> tabs = new ArrayList<>();
 		tabs.add(new RepoTab(Model.of("Files"), "fa fa-fw fa-file-text-o", RepoFilePage.class));
 		tabs.add(new RepoTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", RepoCommitsPage.class));
@@ -162,13 +133,18 @@ public abstract class RepositoryPage extends AccountPage {
 		if (SecurityUtils.canManage(getRepository()))
 			tabs.add(new RepoTab(Model.of("Setting"), "fa fa-fw fa-cog", GeneralSettingPage.class, RepoSettingPage.class));
 		
-		nav.add(new Tabbable("tabs", tabs));
+		add(new Tabbable("repoTabs", tabs));
 	}
 
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(RepositoryPage.class, "repository.css")));
+
+		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(
+				new JavaScriptResourceReference(RepositoryPage.class, "repository.js")));
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(RepositoryPage.class, "repository.css")));
 	}
 
 	@Override

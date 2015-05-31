@@ -53,6 +53,22 @@ gitplex.sourceview = {
 			editor.refresh();
 		});
 		
+		var $outlineToggle = $sourceView.find(">.head .outline-toggle");
+		var $outline = $sourceView.find(">.body>.outline");
+		var cookieKey = "sourceView.outline";
+		if ($outlineToggle.length != 0) {
+			if (Cookies.get(cookieKey) === "no")
+				$outline.hide();
+			$outlineToggle.click(function() {
+				$outline.toggle();
+				if ($outline.is(":visible"))
+					Cookies.set(cookieKey, "yes", {expires: Infinity});
+				else 
+					Cookies.set(cookieKey, "no", {expires: Infinity});
+				$sourceView.trigger("autofit", [$sourceView.outerWidth(), $sourceView.outerHeight()]);
+			});
+		}
+		
 		gitplex.sourceview.gotoLine(editor, activeLine);
 	}, 
 	
@@ -62,19 +78,6 @@ gitplex.sourceview = {
 		$tooltip.children().remove();
 		$symbols.children().appendTo($tooltip);
 		$tooltip.align();
-	},
-	
-	toggleOutline: function(outlineId) {
-		var $outline = $("#" + outlineId);
-		$outline.toggle();
-		
-		var outlineToggleBtn = $('#'+ outlineId).closest(".source-view").find(".outline-toggle");
-		if ($outline.is(":visible"))
-			outlineToggleBtn.addClass("active");
-		else
-			outlineToggleBtn.removeClass("active");
-		var $sourceView = $outline.closest(".source-view");
-		$sourceView.trigger("autofit", [$sourceView.outerWidth(), $sourceView.outerHeight()]);
 	},
 	
 	gotoSymbol: function(outlineId, line) {
