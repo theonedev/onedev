@@ -36,6 +36,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.google.common.base.Throwables;
 import com.pmease.commons.git.Git;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
@@ -97,7 +98,17 @@ public abstract class RevisionSelector extends Panel {
 			}
 			
 		})));
-		button.add(new Label("label", revision));
+		button.add(new Label("label", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				if (GitUtils.isHash(revision))
+					return GitUtils.abbreviateSHA(revision);
+				else
+					return revision;
+			}
+			
+		}));
 		
 		dropdown = new DropdownPanel("dropdown", true) {
 
