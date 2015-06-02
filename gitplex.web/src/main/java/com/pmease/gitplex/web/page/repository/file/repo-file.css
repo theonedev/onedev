@@ -22,9 +22,16 @@
 	border-right: 1px solid #BBB;
 	box-shadow: none;
 	border-radius: 0;
-	height: 29px;
+	height: 28px;
 }
 
+#repo-file>.revision-indexing {
+	padding: 8px 8px 9px 8px;
+	background: #fcf8e3;
+	border-bottom: 1px solid #DDD;
+	color: #8a6d3b;
+	font-size: 13px;
+}
 #repo-file>.search-result {
 	height: 200px;
 	border-top: 1px solid #DDD;

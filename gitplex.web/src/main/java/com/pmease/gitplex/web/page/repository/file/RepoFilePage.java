@@ -13,11 +13,14 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.apache.wicket.request.resource.PackageResourceReference;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
@@ -25,11 +28,17 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitPath;
+import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.behavior.HistoryBehavior;
+import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.search.IndexListener;
+import com.pmease.gitplex.search.IndexManager;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.web.component.blobsearch.BlobSearchPanel;
 import com.pmease.gitplex.web.component.filelist.FileListPanel;
@@ -63,9 +72,13 @@ public class RepoFilePage extends RepositoryPage {
 	
 	private Component fileNavigator;
 	
+	private Component revisionIndexing;
+	
 	private Component fileViewer;
 	
 	private HistoryBehavior historyBehavior;
+	
+	private final RevisionIndexed trait = new RevisionIndexed();
 	
 	public RepoFilePage(PageParameters params) {
 		super(params);
@@ -73,9 +86,11 @@ public class RepoFilePage extends RepositoryPage {
 		if (!getRepository().git().hasCommits()) 
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));
 		
+		trait.repoId = getRepository().getId();
 		state.revision = GitPath.normalize(params.get(PARAM_REVISION).toString());
 		if (state.revision == null)
 			state.revision = getRepository().getDefaultBranch().getName();
+		trait.revision = state.revision;
 		
 		String pathName = GitPath.normalize(params.get(PARAM_PATH).toString());
 		if (pathName != null) {
@@ -128,6 +143,65 @@ public class RepoFilePage extends RepositoryPage {
 			
 		});
 		
+		revisionIndexing = new WebMarkupContainer("revisionIndexing") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				add(new Image("icon", new PackageResourceReference(RepoFilePage.class, "indexing.gif")));
+				
+				setOutputMarkupPlaceholderTag(true);
+			}
+
+		};
+		
+		add(revisionIndexing = new WebMarkupContainer("revisionIndexing") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new Image("icon", new PackageResourceReference(RepoFilePage.class, "indexing.gif")));
+				setOutputMarkupPlaceholderTag(true);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+
+				IndexManager indexManager = GitPlex.getInstance(IndexManager.class);
+				if (!indexManager.isIndexed(getRepository(), state.revision)) {
+					GitPlex.getInstance(UnitOfWork.class).asyncCall(new Runnable() {
+
+						@Override
+						public void run() {
+							GitPlex.getInstance(IndexManager.class).index(getRepository(), state.revision);
+						}
+						
+					});
+					setVisible(true);
+				} else {
+					setVisible(false);
+				}
+			}
+			
+		});
+
+		add(new WebSocketRenderBehavior() {
+			
+			@Override
+			protected Object getTrait() {
+				return trait;
+			}
+
+			@Override
+			protected void onRender(WebSocketRequestHandler handler) {
+				handler.add(revisionIndexing);
+				handler.appendJavaScript("$(window).resize();");
+			}
+			
+		});
+		
 		add(new WebMarkupContainer(SEARCH_RESULD_ID).setOutputMarkupId(true));
 		
 		add(historyBehavior = new HistoryBehavior() {
@@ -135,7 +209,9 @@ public class RepoFilePage extends RepositoryPage {
 			@Override
 			protected void onPopState(AjaxRequestTarget target, Serializable state) {
 				RepoFilePage.this.state = (State) state;
+				trait.revision = RepoFilePage.this.state.revision;
 
+				target.add(revisionIndexing);
 				newRevisionSelector(target);
 				newFileNavigator(target);
 				newFileViewer(target);
@@ -143,13 +219,14 @@ public class RepoFilePage extends RepositoryPage {
 			
 		});
 	}
-
+	
 	private void newRevisionSelector(AjaxRequestTarget target) {
 		revisionSelector = new RevisionSelector(REVISION_SELECTOR_ID, repoModel, state.revision) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String revision) {
 				state.revision = revision;
+				trait.revision = revision;
 				if (state.file != null) {
 					org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
 					try {
@@ -166,6 +243,7 @@ public class RepoFilePage extends RepositoryPage {
 				}
 				state.line = 0;
 
+				target.add(revisionIndexing);
 				newRevisionSelector(target);
 				newFileNavigator(target);
 				newFileViewer(target);
@@ -336,12 +414,45 @@ public class RepoFilePage extends RepositoryPage {
 		target.appendJavaScript("$('#repo-file>.search-result').show(); $(window).resize();");
 	}
 	
+	private static class RevisionIndexed implements Serializable {
+
+		Long repoId;
+		
+		volatile String revision;
+		
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == null || !(obj instanceof RevisionIndexed))  
+				return false;  
+			RevisionIndexed other = (RevisionIndexed) obj;  
+		    return Objects.equal(repoId, other.repoId) && Objects.equal(revision, other.revision);
+		}
+		
+	}
+	
 	private static class State implements Serializable {
+
 		String revision;
 		
 		@Nullable
 		GitPath file;
 		
 		int line;
+	}
+	
+	public static class IndexedListener implements IndexListener {
+
+		@Override
+		public void commitIndexed(Repository repository, String revision) {
+			RevisionIndexed trait = new RevisionIndexed();
+			trait.repoId = repository.getId();
+			trait.revision = revision;
+			WebSocketRenderBehavior.requestToRender(trait);
+		}
+
+		@Override
+		public void indexRemoving(Repository repository) {
+		}
+		
 	}
 }

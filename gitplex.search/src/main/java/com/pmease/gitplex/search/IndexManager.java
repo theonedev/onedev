@@ -5,5 +5,9 @@ import com.pmease.gitplex.core.manager.IndexResult;
 import com.pmease.gitplex.core.model.Repository;
 
 public interface IndexManager extends RepositoryListener {
+	
 	IndexResult index(Repository repository, String revision);
+	
+	boolean isIndexed(Repository repository, String revision);
+	
 }

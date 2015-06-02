@@ -53,7 +53,7 @@ public abstract class RepositoryPage extends AccountPage {
 
 	private static final String PARAM_REPO = "repo";
 
-	protected IModel<Repository> repoModel;
+	protected final IModel<Repository> repoModel;
 	
 	public static PageParameters paramsOf(Repository repository) {
 		PageParameters params = paramsOf(repository.getUser());

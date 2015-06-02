@@ -277,7 +277,7 @@ public class DefaultIndexManager implements IndexManager {
 		
 		logger.info("Indexing commit '{}' of repository '{}'...", commitId.getName(), repository);
 		
-		return LockUtils.call("index:" + repository.getId(), new Callable<IndexResult>() {
+		return LockUtils.call(getLockName(repository), new Callable<IndexResult>() {
 
 			@Override
 			public IndexResult call() throws Exception {
@@ -351,5 +351,26 @@ public class DefaultIndexManager implements IndexManager {
 	public void commitReceived(Repository repository, String commitHash) {
 		index(repository, commitHash);
 	}
+
+	@Override
+	public boolean isIndexed(Repository repository, String revision) {
+		AnyObjectId commitId = Preconditions.checkNotNull(repository.resolveRevision(revision));
+		File indexDir = storageManager.getIndexDir(repository);
+		try (Directory directory = FSDirectory.open(indexDir)) {
+			if (DirectoryReader.indexExists(directory)) {
+				try (IndexReader reader = DirectoryReader.open(directory)) {
+					IndexSearcher searcher = new IndexSearcher(reader);
+					return getCurrentCommitIndexVersion().equals(getCommitIndexVersion(searcher, commitId));
+				}
+			} else {
+				return false;
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 	
+	private String getLockName(Repository repository) {
+		return "index: " + repository.getId();
+	}
 }

@@ -20,6 +20,7 @@ import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
 import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.validation.UserNameReservation;
+import com.pmease.gitplex.search.IndexListener;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.avatar.DefaultAvatarManager;
 import com.pmease.gitplex.web.component.comment.MentionTransformer;
@@ -28,6 +29,7 @@ import com.pmease.gitplex.web.extensionpoint.DiffRenderer;
 import com.pmease.gitplex.web.extensionpoint.DiffRendererProvider;
 import com.pmease.gitplex.web.extensionpoint.MediaRenderer;
 import com.pmease.gitplex.web.extensionpoint.MediaRendererProvider;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.RequestDetailPage;
 
 /**
@@ -52,6 +54,7 @@ public class WebModule extends AbstractPluginModule {
 		contributeFromPackage(EditSupport.class, EditSupportLocator.class);
 		
 		contribute(PullRequestListener.class, RequestDetailPage.Updater.class);
+		contribute(IndexListener.class, RepoFilePage.IndexedListener.class);
 		
 		contribute(MediaRendererProvider.class, new MediaRendererProvider() {
 

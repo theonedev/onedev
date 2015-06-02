@@ -185,6 +185,10 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 		}
 	}
 
+	public static void requestToRender(Object trait) {
+		requestToRender(trait, (PageId)null);
+	}
+	
 	public static void requestToRender(Object trait, Page page) {
 		requestToRender(trait, PageId.fromObj(page.getId()));
 	}

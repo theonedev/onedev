@@ -29,7 +29,8 @@
 }
 .file-list>.head .message {
 	background: #F2F2F2;
-	padding: 8px;
+	border-bottom: 1px dashed #DDD;
+	padding: 8px 8px 7px 8px;
 	max-height: 600px;
 	overflow: auto;
 }
