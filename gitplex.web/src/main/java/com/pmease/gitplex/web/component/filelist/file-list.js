@@ -3,10 +3,10 @@ gitplex.filelist = {
 		var $container = $("#" + containerId);
 		var $fileList = $container.children();
 		$fileList.on("autofit", function(event, width, height) {
+			event.stopPropagation();
 			var $head = $fileList.find(">.head");
 			var $body = $fileList.find(">.body");
-			var $table = $body.children();
-			$body.outerHeight(height-$head.outerHeight());
+			$body.outerWidth(width).outerHeight(height-$head.outerHeight());
 		});
 	},
 	renderLastCommits: function(containerId, lastCommits) {

@@ -1,16 +1,4 @@
-.source-view>.head {
-	background: #F2F2F2; 
-	border-bottom: 1px solid #DDD; 
-	padding: 6px 12px;
-	height: 36px;
-}
-.source-view>.head .title {
-	font-size: 16px;
-}
-.source-view>.head .outline-toggle {
-	color: #555;
-}
-.source-view>.body>.outline {
+.source-view>.outline {
 	overflow: auto; 
 	background: white; 
 	padding-left: 4px; 
@@ -28,9 +16,9 @@
 	font-weight: bold;
 }
 
-.outline {
+.source-view>.outline {
 	font-size: 13px;
 }
-.outline .tree-node {
+.source-view>.outline .tree-node {
 	line-height: 1.6;
 }

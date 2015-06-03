@@ -155,12 +155,12 @@ public class Change implements Comparable<Change>, Serializable {
 			return getPath();
 	}
 	
-	public BlobInfo getOldBlobInfo() {
-		return new BlobInfo(getOldRev(), getOldPath(), getOldMode());
+	public BlobIdent getOldBlobInfo() {
+		return new BlobIdent(getOldRev(), getOldPath(), getOldMode());
 	}
 	
-	public BlobInfo getNewBlobInfo() {
-		return new BlobInfo(getNewRev(), getNewPath(), getNewMode());
+	public BlobIdent getNewBlobInfo() {
+		return new BlobIdent(getNewRev(), getNewPath(), getNewMode());
 	}
 	
 }

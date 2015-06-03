@@ -1,10 +1,9 @@
-package com.pmease.gitplex.web.component.sourceview;
+package com.pmease.gitplex.web.component.blobview.source;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -19,9 +18,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -29,7 +27,10 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
+import org.eclipse.jgit.lib.FileMode;
 
+import com.google.common.base.Preconditions;
+import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.lang.Extractor;
 import com.pmease.commons.lang.Extractors;
 import com.pmease.commons.lang.Symbol;
@@ -37,23 +38,20 @@ import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
+import com.pmease.gitplex.web.component.blobview.BlobViewContext;
+import com.pmease.gitplex.web.component.blobview.BlobViewPanel;
 
 @SuppressWarnings("serial")
-public abstract class SourceViewPanel extends Panel {
+public class SourceViewPanel extends BlobViewPanel {
 
 	private static final int MAX_DECLARATION_QUERY_ENTRIES = 20;
 	
 	private static final int MAX_OCCURRENCE_QUERY_ENTRIES = 1000;
-	
-	private final IModel<Repository> repoModel;
-	
-	private final Source source;
 	
 	private Component codeContainer;
 	
@@ -67,30 +65,29 @@ public abstract class SourceViewPanel extends Panel {
 	
 	private final List<Symbol> symbols;
 	
-	public SourceViewPanel(String id, IModel<Repository> repoModel, Source source) {
-		super(id);
+	public SourceViewPanel(String id, BlobViewContext context) {
+		super(id, context);
 		
-		this.repoModel = repoModel;
-		this.source = source;
+		Preconditions.checkArgument(context.getBlob().getText() != null);
 		
-		Extractor extractor = GitPlex.getInstance(Extractors.class).getExtractor(source.getPath());
+		Extractor extractor = GitPlex.getInstance(Extractors.class).getExtractor(context.getBlobIdent().path);
 		if (extractor != null)
-			symbols = extractor.extract(source.getContent());
+			symbols = extractor.extract(context.getBlob().getText().getContent());
 		else
 			symbols = new ArrayList<>();
 	}
 	
 	@Override
+	protected WebMarkupContainer newCustomActions(String id) {
+		Fragment fragment = new Fragment(id, "actionsFrag", this);
+		fragment.setVisible(!symbols.isEmpty());
+		return fragment;
+	}
+
+	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		String fileName = source.getPath();
-		if (fileName.indexOf('/') != -1)
-			fileName = StringUtils.substringAfterLast(fileName, "/");
-		add(new Label("title", fileName));
-		
-		add(new WebMarkupContainer("outlineToggle").setVisible(!symbols.isEmpty()));
-		
 		add(codeContainer = new WebMarkupContainer("code"));
 		codeContainer.setOutputMarkupId(true);
 		
@@ -127,7 +124,11 @@ public abstract class SourceViewPanel extends Panel {
 								"$('#%s .CodeMirror')[0].CodeMirror.hideTokenHover();", 
 								codeContainer.getMarkupId());
 						target.prependJavaScript(script);
-						onSelect(target, hit);
+						BlobIdent blobIdent = new BlobIdent(
+								context.getBlobIdent().revision, 
+								hit.getBlobPath(), 
+								FileMode.REGULAR_FILE.getBits());
+						context.onSelect(target, blobIdent, hit.getLineNo());
 					}
 					
 				};
@@ -161,9 +162,9 @@ public abstract class SourceViewPanel extends Panel {
 									null, null, MAX_OCCURRENCE_QUERY_ENTRIES);
 						try {
 							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-							List<QueryHit> hits = searchManager.search(repoModel.getObject(), 
-									source.getRevision(), query);
-							renderQueryHits(target, hits);
+							List<QueryHit> hits = searchManager.search(context.getRepository(), 
+									context.getBlobIdent().revision, query);
+							context.onSearchComplete(target, hits);
 						} catch (InterruptedException e) {
 							throw new RuntimeException(e);
 						}								
@@ -189,7 +190,7 @@ public abstract class SourceViewPanel extends Panel {
 				SymbolQuery query = new SymbolQuery(symbol, false, true, true, MAX_DECLARATION_QUERY_ENTRIES);
 				try {
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-					symbolHits = searchManager.search(repoModel.getObject(), source.getRevision(), query);
+					symbolHits = searchManager.search(context.getRepository(), context.getBlobIdent().revision, query);
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
 				}								
@@ -214,9 +215,9 @@ public abstract class SourceViewPanel extends Panel {
 				ResourceReference ajaxIndicator =  new PackageResourceReference(SourceViewPanel.class, "ajax-indicator.gif");
 				String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', %s);", 
 						codeContainer.getMarkupId(), 
-						StringEscapeUtils.escapeEcmaScript(source.getContent()),
-						source.getPath(), 
-						source.getActiveLine(),
+						StringEscapeUtils.escapeEcmaScript(context.getBlob().getText().getContent()),
+						context.getBlobIdent().path, 
+						context.getLine(),
 						RequestCycle.get().urlFor(ajaxIndicator, new PageParameters()), 
 						getCallbackFunction(CallbackParameter.explicit("symbol")));
 				response.render(OnDomReadyHeaderItem.forScript(script));
@@ -227,15 +228,4 @@ public abstract class SourceViewPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
-	protected abstract void onSelect(AjaxRequestTarget target, QueryHit hit);
-	
-	protected abstract void renderQueryHits(AjaxRequestTarget target, List<QueryHit> hits);
-	
-	@Override
-	protected void onDetach() {
-		repoModel.detach();
-		
-		super.onDetach();
-	}
-
 }

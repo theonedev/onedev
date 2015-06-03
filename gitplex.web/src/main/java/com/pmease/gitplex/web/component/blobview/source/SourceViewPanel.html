@@ -1,0 +1,30 @@
+<wicket:extend>
+	<div class="source-view autofit clearfix">
+		<div wicket:id="code" class="code pull-left"></div>
+		<div wicket:id="outline" class="outline pull-right"></div>
+	</div>
+	<div wicket:id="symbols" class="hidden">
+		<wicket:enclosure child="declarations">
+		<div>Declaration occurrences of this name</div>
+		<table class="declarations">
+			<tr wicket:id="declarations">
+				<td class="icon"><img wicket:id="icon"></img></td>
+				<td class="content">
+					<a wicket:id="link"><span wicket:id="label"></span></a>
+					<wicket:enclosure child="scope">
+						<span class="scope">
+						-- <span wicket:id="scope"></span> 
+						</span>
+					</wicket:enclosure>
+				</td>
+			</tr>
+		</table>
+		</wicket:enclosure>
+		<div>
+			<a wicket:id="findOccurrences" class="find-occurrences">Find all occurrences of this name</a>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="actionsFrag">
+		<a class="btn btn-default btn-xs outline-toggle active">Outline</a>
+	</wicket:fragment>
+</wicket:extend>

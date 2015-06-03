@@ -1,6 +1,8 @@
 gitplex.sourceview = {
 	init: function(codeId, fileContent, filePath, activeLine, ajaxIndicatorUrl, symbolQuery) {
 		var $code = $("#" + codeId);
+		var $sourceView = $code.closest(".source-view");
+		$sourceView.closest(".body").css("overflow", "hidden");
 		var options = {
 			value: fileContent, 
 			readOnly: true,
@@ -32,43 +34,42 @@ gitplex.sourceview = {
 		    editor.setOption("mode", modeInfo.mime);
 			CodeMirror.autoLoadMode(editor, modeInfo.mode);
 	    }
-		
-		var $sourceView = $code.closest(".source-view");
+
 		$sourceView.on("autofit", function(event, width, height) {
+			event.stopPropagation();
 			$sourceView.outerWidth(width);
 			$sourceView.outerHeight(height);
-			var $head = $sourceView.find(">.head");
-			var $body = $sourceView.find(">.body");
-			$body.outerHeight($sourceView.height()-$head.outerHeight());
-			var $outline = $body.find(">.outline");
+			var $outline = $sourceView.find(">.outline");
 			if ($outline.is(":visible")) {
-				$code.outerWidth($body.width()/4.0*3);
-				$outline.outerWidth($body.width() - $code.outerWidth()-1);
-				$outline.outerHeight($body.height());
-				$code.find(">.CodeMirror").outerHeight($body.height());
+				$code.outerWidth($sourceView.width()/4.0*3);
+				$outline.outerWidth($sourceView.width() - $code.outerWidth()-1);
+				$outline.outerHeight($sourceView.height());
+				$code.find(">.CodeMirror").outerHeight($sourceView.height());
 			} else {
-				$code.outerWidth($body.width());
-				$code.find(">.CodeMirror").outerHeight($body.height());
+				$code.outerWidth($sourceView.width());
+				$code.find(">.CodeMirror").outerHeight($sourceView.height());
 			}
 			editor.refresh();
 		});
 		
-		var $outlineToggle = $sourceView.find(">.head .outline-toggle");
-		var $outline = $sourceView.find(">.body>.outline");
+		var $outlineToggle = $(".outline-toggle");
+		var $outline = $sourceView.find(">.outline");
 		var cookieKey = "sourceView.outline";
 		if ($outlineToggle.length != 0) {
-			if (Cookies.get(cookieKey) === "no")
+			if (Cookies.get(cookieKey) === "no") {
 				$outline.hide();
+				$outlineToggle.removeClass("active");
+			}
 			$outlineToggle.click(function() {
 				$outline.toggle();
-				if ($outline.is(":visible"))
+				$outlineToggle.toggleClass("active");
+				if ($outline.is(":visible")) 
 					Cookies.set(cookieKey, "yes", {expires: Infinity});
 				else 
 					Cookies.set(cookieKey, "no", {expires: Infinity});
 				$sourceView.trigger("autofit", [$sourceView.outerWidth(), $sourceView.outerHeight()]);
 			});
 		}
-		
 		gitplex.sourceview.gotoLine(editor, activeLine);
 	}, 
 	

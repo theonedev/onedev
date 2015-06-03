@@ -313,7 +313,7 @@ public abstract class RevisionSelector extends Panel {
 	
 	private void selectRevision(AjaxRequestTarget target, String revision) {
 		try {
-			if (repoModel.getObject().resolveRevision(revision) != null) {
+			if (repoModel.getObject().getObjectId(revision) != null) {
 				dropdown.hide(target);
 				onSelect(target, revision);
 			} else {

@@ -23,6 +23,13 @@ import com.pmease.gitplex.core.validation.UserNameReservation;
 import com.pmease.gitplex.search.IndexListener;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.avatar.DefaultAvatarManager;
+import com.pmease.gitplex.web.component.blobview.BlobRenderer;
+import com.pmease.gitplex.web.component.blobview.binary.BinaryRenderer;
+import com.pmease.gitplex.web.component.blobview.gitlink.GitLinkRenderer;
+import com.pmease.gitplex.web.component.blobview.image.ImageRenderer;
+import com.pmease.gitplex.web.component.blobview.markdown.MarkdownRenderer;
+import com.pmease.gitplex.web.component.blobview.source.SourceRenderer;
+import com.pmease.gitplex.web.component.blobview.symbollink.SymbolLinkRenderer;
 import com.pmease.gitplex.web.component.comment.MentionTransformer;
 import com.pmease.gitplex.web.editable.EditSupportLocator;
 import com.pmease.gitplex.web.extensionpoint.DiffRenderer;
@@ -82,6 +89,13 @@ public class WebModule extends AbstractPluginModule {
 			}
 
 		});
+		
+		contribute(BlobRenderer.class, SourceRenderer.class);
+		contribute(BlobRenderer.class, MarkdownRenderer.class);
+		contribute(BlobRenderer.class, ImageRenderer.class);
+		contribute(BlobRenderer.class, BinaryRenderer.class);
+		contribute(BlobRenderer.class, GitLinkRenderer.class);
+		contribute(BlobRenderer.class, SymbolLinkRenderer.class);
 		
 		contribute(MarkdownExtension.class, new MarkdownExtension() {
 			

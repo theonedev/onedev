@@ -6,8 +6,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -35,7 +33,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
-import com.pmease.commons.git.GitPath;
+import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownMode;
@@ -47,15 +45,12 @@ public abstract class FileNavigator extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
-	private final IModel<String> revModel;
+	private final BlobIdent file;
 	
-	private final GitPath file;
-	
-	public FileNavigator(String id, IModel<Repository> repoModel, IModel<String> revModel, @Nullable GitPath file) {
+	public FileNavigator(String id, IModel<Repository> repoModel, BlobIdent file) {
 		super(id);
 
 		this.repoModel = repoModel;
-		this.revModel = revModel;
 		this.file = file;
 	}
 
@@ -63,23 +58,23 @@ public abstract class FileNavigator extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new ListView<GitPath>("paths", new LoadableDetachableModel<List<GitPath>>() {
+		add(new ListView<BlobIdent>("paths", new LoadableDetachableModel<List<BlobIdent>>() {
 
 			@Override
-			protected List<GitPath> load() {
-				List<GitPath> paths = new ArrayList<>();
-				paths.add(null);
+			protected List<BlobIdent> load() {
+				List<BlobIdent> paths = new ArrayList<>();
+				paths.add(new BlobIdent(file.revision, null, FileMode.TREE.getBits()));
 				
-				if (file != null) {
-					List<String> segments = Splitter.on('/').omitEmptyStrings().splitToList(file.getName());
+				if (file.path != null) {
+					List<String> segments = Splitter.on('/').omitEmptyStrings().splitToList(file.path);
 					
 					for (int i=0; i<segments.size(); i++) { 
-						GitPath parent = paths.get(paths.size()-1);
-						int mode = (i==segments.size()-1?file.getMode():FileMode.TREE.getBits());
-						if (parent != null)
-							paths.add(new GitPath(parent.getName() + "/" + segments.get(i), mode));
+						BlobIdent parent = paths.get(paths.size()-1);
+						int mode = (i==segments.size()-1?file.mode:FileMode.TREE.getBits());
+						if (parent.path != null)
+							paths.add(new BlobIdent(file.revision, parent.path + "/" + segments.get(i), mode));
 						else
-							paths.add(new GitPath(segments.get(i), mode));
+							paths.add(new BlobIdent(file.revision, segments.get(i), mode));
 					}
 				}
 				
@@ -89,23 +84,23 @@ public abstract class FileNavigator extends Panel {
 		}) {
 
 			@Override
-			protected void populateItem(final ListItem<GitPath> item) {
-				final GitPath path = item.getModelObject();
+			protected void populateItem(final ListItem<BlobIdent> item) {
+				final BlobIdent blobIdent = item.getModelObject();
 				AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						onSelect(target, path);
+						onSelect(target, blobIdent);
 					}
 					
 				};
 				link.setEnabled(item.getIndex() != getViewSize()-1);
 				
-				if (path != null) {
-					if (path.getName().indexOf('/') != -1)
-						link.add(new Label("label", StringUtils.substringAfterLast(path.getName(), "/")));
+				if (blobIdent.path != null) {
+					if (blobIdent.path.indexOf('/') != -1)
+						link.add(new Label("label", StringUtils.substringAfterLast(blobIdent.path, "/")));
 					else
-						link.add(new Label("label", path.getName()));
+						link.add(new Label("label", blobIdent.path));
 				} else {
 					link.add(new Label("label", repoModel.getObject().getName()));
 				}
@@ -114,11 +109,11 @@ public abstract class FileNavigator extends Panel {
 				
 				WebMarkupContainer subtreeDropdownTrigger = new WebMarkupContainer("subtreeDropdownTrigger");
 				
-				if (path != null && item.getIndex() == size()-1) {
+				if (blobIdent.path != null && item.getIndex() == size()-1) {
 					org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
 					try {
 						RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
-						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, path.getName(), revTree);
+						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobIdent.path, revTree);
 						if (!treeWalk.isSubtree())
 							subtreeDropdownTrigger.setVisible(false);
 					} catch (IOException e) {
@@ -132,20 +127,20 @@ public abstract class FileNavigator extends Panel {
 
 					@Override
 					protected Component newContent(String id) {
-						return new NestedTree<GitPath>(id, new ITreeProvider<GitPath>() {
+						return new NestedTree<BlobIdent>(id, new ITreeProvider<BlobIdent>() {
 
 							@Override
 							public void detach() {
 							}
 
 							@Override
-							public Iterator<? extends GitPath> getRoots() {
+							public Iterator<? extends BlobIdent> getRoots() {
 								org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
 								try {
 									RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
 									TreeWalk treeWalk;
-									if (path != null) {
-										treeWalk = Preconditions.checkNotNull(TreeWalk.forPath(jgitRepo, path.getName(), revTree));
+									if (blobIdent.path != null) {
+										treeWalk = Preconditions.checkNotNull(TreeWalk.forPath(jgitRepo, blobIdent.path, revTree));
 										treeWalk.enterSubtree();
 									} else {
 										treeWalk = new TreeWalk(jgitRepo);
@@ -153,9 +148,9 @@ public abstract class FileNavigator extends Panel {
 									}
 									treeWalk.setRecursive(false);
 									
-									List<GitPath> roots = new ArrayList<>();
+									List<BlobIdent> roots = new ArrayList<>();
 									while (treeWalk.next()) 
-										roots.add(new GitPath(treeWalk.getPathString(), treeWalk.getRawMode(0)));
+										roots.add(new BlobIdent(file.revision, treeWalk.getPathString(), treeWalk.getRawMode(0)));
 									Collections.sort(roots);
 									return roots.iterator();
 								} catch (IOException e) {
@@ -166,18 +161,18 @@ public abstract class FileNavigator extends Panel {
 							}
 
 							@Override
-							public boolean hasChildren(GitPath path) {
-								return FileMode.TREE.equals(path.getMode());
+							public boolean hasChildren(BlobIdent blobIdent) {
+								return blobIdent.isTree();
 							}
 
 							@Override
-							public Iterator<? extends GitPath> getChildren(GitPath path) {
-								return FileNavigator.this.getChildren(path).iterator();
+							public Iterator<? extends BlobIdent> getChildren(BlobIdent blobIdent) {
+								return FileNavigator.this.getChildren(blobIdent).iterator();
 							}
 
 							@Override
-							public IModel<GitPath> model(GitPath path) {
-								return Model.of(path);
+							public IModel<BlobIdent> model(BlobIdent blobIdent) {
+								return Model.of(blobIdent);
 							}
 							
 						}) {
@@ -189,26 +184,26 @@ public abstract class FileNavigator extends Panel {
 							}
 
 							@Override
-							public void expand(GitPath pathInfo) {
-								super.expand(pathInfo);
+							public void expand(BlobIdent blobIdent) {
+								super.expand(blobIdent);
 								
-								List<GitPath> children = getChildren(pathInfo);
-								if (children.size() == 1 && FileMode.TREE.equals(children.get(0).getMode())) 
+								List<BlobIdent> children = getChildren(blobIdent);
+								if (children.size() == 1 && children.get(0).isTree()) 
 									expand(children.get(0));
 							}
 
 							@Override
-							protected Component newContentComponent(String id, final IModel<GitPath> model) {
-								GitPath pathInfo = model.getObject();
+							protected Component newContentComponent(String id, final IModel<BlobIdent> model) {
+								BlobIdent blobIdent = model.getObject();
 								Fragment fragment = new Fragment(id, "treeNodeFrag", FileNavigator.this);
 								
 								WebMarkupContainer icon = new WebMarkupContainer("icon");
 								String iconClass;
-								if (FileMode.TREE.equals(pathInfo.getMode()))
+								if (blobIdent.isTree())
 									iconClass = "fa fa-folder-o";
-								else if (FileMode.GITLINK.equals(pathInfo.getMode())) 
+								else if (blobIdent.isGitLink()) 
 									iconClass = "fa fa-ext fa-submodule-o";
-								else if (FileMode.SYMLINK.equals(pathInfo.getMode())) 
+								else if (blobIdent.isSymbolLink()) 
 									iconClass = "fa fa-ext fa-symbol-link";
 								else  
 									iconClass = "fa fa-file-text-o";
@@ -225,10 +220,10 @@ public abstract class FileNavigator extends Panel {
 									}
 									
 								};
-								if (pathInfo.getName().indexOf('/') != -1)
-									link.add(new Label("label", StringUtils.substringAfterLast(pathInfo.getName(), "/")));
+								if (blobIdent.path.indexOf('/') != -1)
+									link.add(new Label("label", StringUtils.substringAfterLast(blobIdent.path, "/")));
 								else
-									link.add(new Label("label", pathInfo.getName()));
+									link.add(new Label("label", blobIdent.path));
 								fragment.add(link);
 								
 								return fragment;
@@ -255,22 +250,22 @@ public abstract class FileNavigator extends Panel {
 	}
 
 	private ObjectId getCommitId() {
-		return Preconditions.checkNotNull(repoModel.getObject().resolveRevision(revModel.getObject()));
+		return Preconditions.checkNotNull(repoModel.getObject().getObjectId(file.revision));
 	}
 
-	protected abstract void onSelect(AjaxRequestTarget target, GitPath file);
+	protected abstract void onSelect(AjaxRequestTarget target, BlobIdent blobIdent);
 	
-	private List<GitPath> getChildren(GitPath pathInfo) {
+	private List<BlobIdent> getChildren(BlobIdent blobIdent) {
 		org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
 		try {
 			RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
-			TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, pathInfo.getName(), revTree);
+			TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobIdent.path, revTree);
 			treeWalk.setRecursive(false);
 			treeWalk.enterSubtree();
 			
-			List<GitPath> children = new ArrayList<>();
+			List<BlobIdent> children = new ArrayList<>();
 			while (treeWalk.next()) 
-				children.add(new GitPath(treeWalk.getPathString(), treeWalk.getRawMode(0)));
+				children.add(new BlobIdent(file.revision, treeWalk.getPathString(), treeWalk.getRawMode(0)));
 			Collections.sort(children);
 			return children;
 		} catch (IOException e) {
@@ -283,7 +278,6 @@ public abstract class FileNavigator extends Panel {
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
-		revModel.detach();
 		
 		super.onDetach();
 	}

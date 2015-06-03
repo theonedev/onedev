@@ -25,7 +25,7 @@ import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.eclipse.jgit.util.RawParseUtils;
 
 import com.google.common.base.Throwables;
-import com.pmease.commons.git.GitPath;
+import com.pmease.commons.git.GitUtils;
 
 /**
  * This class calculates last commits of children of a git tree.
@@ -68,7 +68,7 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 	public LastCommitsOfChildren(final Repository repo, AnyObjectId until, 
 			@Nullable String treePath, @Nullable final Cache cache) {
 		try {
-			treePath = GitPath.normalize(treePath);
+			treePath = GitUtils.normalizePath(treePath);
 			if (treePath == null) 
 				treePath = "";
 			

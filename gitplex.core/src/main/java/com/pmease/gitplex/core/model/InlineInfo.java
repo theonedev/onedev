@@ -9,7 +9,7 @@ import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.persistence.Lob;
 
-import com.pmease.commons.git.BlobInfo;
+import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.util.diff.AroundContext;
 
 @Embeddable
@@ -23,7 +23,7 @@ public class InlineInfo implements Serializable {
         @AttributeOverride(name="path", column=@Column(name="G_BLOB_PATH")),
         @AttributeOverride(name="mode", column=@Column(name="G_BLOB_MODE"))
     })
- 	private BlobInfo blobInfo;
+ 	private BlobIdent blobInfo;
 
 	@Embedded
     @AttributeOverrides({
@@ -31,7 +31,7 @@ public class InlineInfo implements Serializable {
         @AttributeOverride(name="path", column=@Column(name="G_COMPARE_PATH")),
         @AttributeOverride(name="mode", column=@Column(name="G_COMPARE_MODE"))
     })
-	private BlobInfo compareWith;
+	private BlobIdent compareWith;
 	
 	// Use Integer instead of int here in order to allow this class to be 
 	// embedded as nullable property of JPA entities 
@@ -41,19 +41,19 @@ public class InlineInfo implements Serializable {
 	@Column(length=65535)
 	private AroundContext context;
 
-	public BlobInfo getBlobInfo() {
+	public BlobIdent getBlobInfo() {
 		return blobInfo;
 	}
 
-	public void setBlobInfo(BlobInfo blobInfo) {
+	public void setBlobInfo(BlobIdent blobInfo) {
 		this.blobInfo = blobInfo;
 	}
 
-	public BlobInfo getCompareWith() {
+	public BlobIdent getCompareWith() {
 		return compareWith;
 	}
 
-	public void setCompareWith(BlobInfo compareWith) {
+	public void setCompareWith(BlobIdent compareWith) {
 		this.compareWith = compareWith;
 	}
 

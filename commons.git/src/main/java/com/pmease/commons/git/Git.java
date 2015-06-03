@@ -502,14 +502,14 @@ public class Git implements Serializable {
 		return new ShowCommand(repoDir).revision(revision).path(path).call();
 	}
 	
-	public byte[] readBlob(BlobInfo blobInfo) {
-		if (blobInfo.getMode() == FileMode.TYPE_GITLINK) {
-			String subModuleUrl = listSubModules(blobInfo.getRevision()).get(blobInfo.getPath());
+	public byte[] readBlob(BlobIdent blob) {
+		if (blob.mode == FileMode.TYPE_GITLINK) {
+			String subModuleUrl = listSubModules(blob.revision).get(blob.path);
 			Preconditions.checkNotNull(subModuleUrl);
-			List<TreeNode> result = listTree(blobInfo.getRevision(), blobInfo.getPath());
+			List<TreeNode> result = listTree(blob.revision, blob.path);
 			return (subModuleUrl + ":" + result.iterator().next().getHash()).getBytes();
 		} else {
-			return show(blobInfo.getRevision(), blobInfo.getPath());
+			return show(blob.revision, blob.path);
 		}
 	}
 

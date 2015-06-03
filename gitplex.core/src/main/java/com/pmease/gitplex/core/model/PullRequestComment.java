@@ -19,7 +19,7 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.git.BlobInfo;
+import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.Pair;
@@ -147,13 +147,13 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 	private Pair<String, String> getOldCommitAndNewCommit() {
 		if (oldCommitAndNewCommit == null) {
 			List<String> commitHashes = getRequest().getCommentables();
-			int index = commitHashes.indexOf(getBlobInfo().getRevision());
-			int compareIndex = commitHashes.indexOf(getCompareWith().getRevision());
+			int index = commitHashes.indexOf(getBlobInfo().revision);
+			int compareIndex = commitHashes.indexOf(getCompareWith().revision);
 			Preconditions.checkState(index != -1 && compareIndex != -1);
 			if (index <= compareIndex)
-				oldCommitAndNewCommit = new Pair<>(getBlobInfo().getRevision(), getCompareWith().getRevision());
+				oldCommitAndNewCommit = new Pair<>(getBlobInfo().revision, getCompareWith().revision);
 			else 
-				oldCommitAndNewCommit = new Pair<>(getCompareWith().getRevision(), getBlobInfo().getRevision());
+				oldCommitAndNewCommit = new Pair<>(getCompareWith().revision, getBlobInfo().revision);
 		}
 		return oldCommitAndNewCommit;
 	}
@@ -175,21 +175,21 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 	}
 
 	@Override
-	public BlobInfo getBlobInfo() {
+	public BlobIdent getBlobInfo() {
 		return Preconditions.checkNotNull(inlineInfo).getBlobInfo();
 	}
 	
-	public void setBlobInfo(BlobInfo blobInfo) {
+	public void setBlobInfo(BlobIdent blobInfo) {
 		if (inlineInfo == null)
 			inlineInfo = new InlineInfo();
 		inlineInfo.setBlobInfo(blobInfo);
 	}
 	
-	public BlobInfo getCompareWith() {
+	public BlobIdent getCompareWith() {
 		return Preconditions.checkNotNull(inlineInfo).getCompareWith();
 	}
 	
-	public void setCompareWith(BlobInfo compareWith) {
+	public void setCompareWith(BlobIdent compareWith) {
 		if (inlineInfo == null)
 			inlineInfo = new InlineInfo();
 		inlineInfo.setCompareWith(compareWith);

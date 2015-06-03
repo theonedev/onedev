@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.sourceview;
+package com.pmease.gitplex.web.component.blobview.source;
 
 import java.util.ArrayList;
 import java.util.Iterator;

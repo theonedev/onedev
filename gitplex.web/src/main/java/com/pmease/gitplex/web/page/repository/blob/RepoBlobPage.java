@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.commons.git.GitPath;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
@@ -22,8 +22,8 @@ public class RepoBlobPage extends RepositoryPage {
 	public RepoBlobPage(PageParameters params) {
 		super(params);
 		
-		revision = GitPath.normalize(params.get(PARAM_REVISION).toString());
-		path = GitPath.normalize(params.get(PARAM_PATH).toString());
+		revision = GitUtils.normalizePath(params.get(PARAM_REVISION).toString());
+		path = GitUtils.normalizePath(params.get(PARAM_PATH).toString());
 	}
 
 	public static PageParameters paramsOf(Repository repository, @Nullable String revision, @Nullable String path) {

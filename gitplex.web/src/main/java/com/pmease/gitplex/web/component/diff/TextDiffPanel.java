@@ -44,7 +44,7 @@ import org.apache.wicket.util.string.Strings;
 import org.apache.wicket.util.time.Duration;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.git.BlobInfo;
+import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.BlobText;
 import com.pmease.commons.git.Change;
 import com.pmease.commons.util.diff.AroundContext;
@@ -548,8 +548,8 @@ public class TextDiffPanel extends Panel {
 				super.onSubmit(target, form);
 
 				DiffLine diff = diffs.get(index);
-				BlobInfo commentAt;
-				BlobInfo compareWith;
+				BlobIdent commentAt;
+				BlobIdent compareWith;
 				int lineNo;
 				AroundContext commentContext; 
 				

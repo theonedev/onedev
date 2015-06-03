@@ -155,7 +155,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 
 			fragment.add(new UserLink("user", new UserModel(comment.getUser()), AvatarMode.NAME));
 			if (comment.getInlineInfo() != null)
-				fragment.add(new Label("activity", "added inline comment on file '" + comment.getBlobInfo().getPath() + "'"));
+				fragment.add(new Label("activity", "added inline comment on file '" + comment.getBlobInfo().path + "'"));
 			else 
 				fragment.add(new Label("activity", "commented"));
 			fragment.add(new AgeLabel("age", Model.of(comment.getDate())));

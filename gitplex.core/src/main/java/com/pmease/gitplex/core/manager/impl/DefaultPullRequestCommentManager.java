@@ -9,7 +9,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.git.BlobInfo;
+import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.BlobText;
 import com.pmease.commons.git.Change;
 import com.pmease.commons.hibernate.Transactional;
@@ -52,19 +52,19 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 		if (!comment.getNewCommitHash().equals(latestCommitHash)) {
 			List<Change> changes = comment.getRepository().getChanges(comment.getNewCommitHash(), latestCommitHash);
 			String oldCommitHash = comment.getOldCommitHash();
-			if (oldCommitHash.equals(comment.getBlobInfo().getRevision())) {
-				BlobInfo newBlobInfo = null;
-				if (comment.getCompareWith().getPath() != null) {
+			if (oldCommitHash.equals(comment.getBlobInfo().revision)) {
+				BlobIdent newBlobInfo = null;
+				if (comment.getCompareWith().path != null) {
 					for (Change change: changes) {
-						if (comment.getCompareWith().getPath().equals(change.getOldPath())) {
-							newBlobInfo = new BlobInfo(latestCommitHash, change.getNewPath(), change.getNewMode());
+						if (comment.getCompareWith().path.equals(change.getOldPath())) {
+							newBlobInfo = new BlobIdent(latestCommitHash, change.getNewPath(), change.getNewMode());
 							break;
 						}
 					}
 				} else {
 					for (Change change: changes) {
-						if (comment.getBlobInfo().getPath().equals(change.getNewPath())) {
-							newBlobInfo = new BlobInfo(latestCommitHash, change.getNewPath(), change.getNewMode());
+						if (comment.getBlobInfo().path.equals(change.getNewPath())) {
+							newBlobInfo = new BlobIdent(latestCommitHash, change.getNewPath(), change.getNewMode());
 							break;
 						}
 					}
@@ -73,7 +73,7 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 					BlobText oldText = comment.getRepository().getBlobText(comment.getBlobInfo());
 					Preconditions.checkNotNull(oldText);
 					List<String> newLines;
-					if (newBlobInfo.getPath() != null) {
+					if (newBlobInfo.path != null) {
 						BlobText newText = comment.getRepository().getBlobText(newBlobInfo);
 						if (newText != null)
 							newLines = newText.getLines();
@@ -93,13 +93,13 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 					}
 					comment.setCompareWith(newBlobInfo);
 				} else {
-					comment.getCompareWith().setRevision(latestCommitHash);
+					comment.getCompareWith().revision = latestCommitHash;
 				}
 			} else {
-				BlobInfo newBlobInfo = null;
+				BlobIdent newBlobInfo = null;
 				for (Change change: changes) {
-					if (comment.getBlobInfo().getPath().equals(change.getOldPath())) {
-						newBlobInfo = new BlobInfo(latestCommitHash, change.getNewPath(), change.getNewMode());
+					if (comment.getBlobInfo().path.equals(change.getOldPath())) {
+						newBlobInfo = new BlobIdent(latestCommitHash, change.getNewPath(), change.getNewMode());
 						break;
 					}
 				}
@@ -107,7 +107,7 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 					BlobText oldText = comment.getRepository().getBlobText(comment.getBlobInfo());
 					Preconditions.checkNotNull(oldText);
 					List<String> newLines;
-					if (newBlobInfo.getPath() != null) {
+					if (newBlobInfo.path != null) {
 						BlobText newText = comment.getRepository().getBlobText(newBlobInfo);
 						if (newText != null)
 							newLines = newText.getLines();
@@ -124,7 +124,7 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 							comment.setLine(newLineNo);
 							
 							List<String> oldLines;
-							if (comment.getCompareWith().getPath() != null) {
+							if (comment.getCompareWith().path != null) {
 								oldText = comment.getRepository().getBlobText(comment.getCompareWith());
 								if (oldText != null)
 									oldLines = oldText.getLines();
@@ -155,7 +155,7 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 						comment.setContext(null);
 					}
 				} else {
-					comment.getBlobInfo().setRevision(latestCommitHash);
+					comment.getBlobInfo().revision = latestCommitHash;
 				}
 			}
 			dao.persist(comment);

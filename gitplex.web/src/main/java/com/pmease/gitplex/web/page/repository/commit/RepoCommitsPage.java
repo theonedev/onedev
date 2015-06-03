@@ -3,7 +3,7 @@ package com.pmease.gitplex.web.page.repository.commit;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.commons.git.GitPath;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
@@ -19,7 +19,7 @@ public class RepoCommitsPage extends RepositoryPage {
 	public RepoCommitsPage(PageParameters params) {
 		super(params);
 		
-		revision = GitPath.normalize(params.get(PARAM_REVISION).toString());
+		revision = GitUtils.normalizePath(params.get(PARAM_REVISION).toString());
 	}
 
 	@Override

@@ -28,7 +28,7 @@ import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.git.BlobInfo;
+import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.GitUtils;
@@ -158,7 +158,7 @@ public class RequestComparePage extends RequestDetailPage {
 			oldCommitHash = comment.getOldCommitHash();
 			newCommitHash = comment.getNewCommitHash();
 			if (file == null)
-				file = comment.getBlobInfo().getPath();
+				file = comment.getBlobInfo().path;
 		} else {
 			if (oldCommitHash == null)
 				oldCommitHash = getPullRequest().getBaseCommitHash();
@@ -430,7 +430,7 @@ public class RequestComparePage extends RequestDetailPage {
 						}
 						
 						@Override
-						public InlineComment addComment(BlobInfo blobInfo, BlobInfo compareWith, 
+						public InlineComment addComment(BlobIdent blobInfo, BlobIdent compareWith, 
 								AroundContext commentContext, int line, String content) {
 							User user = GitPlex.getInstance(UserManager.class).getCurrent();
 							Preconditions.checkNotNull(user);

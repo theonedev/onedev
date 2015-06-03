@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import com.pmease.commons.git.BlobInfo;
+import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.util.diff.AroundContext;
 
 public interface InlineCommentSupport extends Serializable {
@@ -13,7 +13,7 @@ public interface InlineCommentSupport extends Serializable {
 	
 	Map<Integer, List<InlineComment>> getNewComments();
 
-	InlineComment addComment(BlobInfo commentAt, BlobInfo compareWith, 
+	InlineComment addComment(BlobIdent commentAt, BlobIdent compareWith, 
 			AroundContext commentContext, int line, String content);
 	
 	InlineComment getConcernedComment();

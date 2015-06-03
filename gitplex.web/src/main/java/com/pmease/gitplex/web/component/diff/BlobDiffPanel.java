@@ -47,7 +47,7 @@ public class BlobDiffPanel extends Panel {
 		if (oldBlobType == FileMode.TYPE_GITLINK || oldBlobType == FileMode.TYPE_SYMLINK) {
 			oldMediaType = MediaType.TEXT_PLAIN;
 		} else if (oldBlobType == FileMode.TYPE_FILE) {
-			byte[] oldContent = repoModel.getObject().getBlobContent(change.getOldBlobInfo());
+			byte[] oldContent = repoModel.getObject().getBlob(change.getOldBlobInfo()).getBytes();
 			oldMediaType = MediaTypes.detectFrom(oldContent, change.getOldPath());
 		} else {
 			oldMediaType = null;
@@ -56,7 +56,7 @@ public class BlobDiffPanel extends Panel {
 		if (newBlobType == FileMode.TYPE_GITLINK || newBlobType == FileMode.TYPE_SYMLINK) {
 			newMediaType = MediaType.TEXT_PLAIN;
 		} else if (newBlobType == FileMode.TYPE_FILE) {
-			byte[] newContent = repoModel.getObject().getBlobContent(change.getNewBlobInfo());
+			byte[] newContent = repoModel.getObject().getBlob(change.getNewBlobInfo()).getBytes();
 			newMediaType = MediaTypes.detectFrom(newContent, change.getNewPath());
 		} else {
 			newMediaType = null;

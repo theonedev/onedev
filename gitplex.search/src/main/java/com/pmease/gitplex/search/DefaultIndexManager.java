@@ -273,7 +273,7 @@ public class DefaultIndexManager implements IndexManager {
 	
 	@Override
 	public IndexResult index(final Repository repository, final String revision) {
-		final AnyObjectId commitId = Preconditions.checkNotNull(repository.resolveRevision(revision));
+		final AnyObjectId commitId = Preconditions.checkNotNull(repository.getObjectId(revision));
 		
 		logger.info("Indexing commit '{}' of repository '{}'...", commitId.getName(), repository);
 		
@@ -354,7 +354,7 @@ public class DefaultIndexManager implements IndexManager {
 
 	@Override
 	public boolean isIndexed(Repository repository, String revision) {
-		AnyObjectId commitId = Preconditions.checkNotNull(repository.resolveRevision(revision));
+		AnyObjectId commitId = Preconditions.checkNotNull(repository.getObjectId(revision));
 		File indexDir = storageManager.getIndexDir(repository);
 		try (Directory directory = FSDirectory.open(indexDir)) {
 			if (DirectoryReader.indexExists(directory)) {

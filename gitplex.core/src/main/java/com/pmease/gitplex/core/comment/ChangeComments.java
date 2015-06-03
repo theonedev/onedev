@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.git.BlobInfo;
+import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.BlobText;
 import com.pmease.commons.git.Change;
 import com.pmease.commons.util.diff.DiffUtils;
@@ -32,7 +32,7 @@ public class ChangeComments implements Serializable {
 			commits.add(update.getHeadCommitHash());
 		
 		Map<String, Map<String, List<InlineComment>>> comments = new HashMap<>();
-		Map<BlobInfo, List<String>> blobs = new HashMap<>();
+		Map<BlobIdent, List<String>> blobs = new HashMap<>();
 	
 		if (change.getNewPath() != null) {
 			int end = commits.indexOf(change.getNewRev());
@@ -44,7 +44,7 @@ public class ChangeComments implements Serializable {
 					List<InlineComment> commentsOnFile = commentsOnCommit.get(change.getNewPath());
 					if (commentsOnFile != null) {
 						Preconditions.checkState(!commentsOnFile.isEmpty());
-						BlobInfo blobInfo = commentsOnFile.get(0).getBlobInfo();
+						BlobIdent blobInfo = commentsOnFile.get(0).getBlobInfo();
 						List<String> fileContent = getContent(blobs, blobInfo, request.getTarget().getRepository());
 						if (!fileContent.isEmpty()) {
 							List<String> newContent = getContent(blobs, change.getNewBlobInfo(), request.getTarget().getRepository());
@@ -99,11 +99,11 @@ public class ChangeComments implements Serializable {
 			for (PullRequestComment comment: request.getComments()) {
 				if (comment.getInlineInfo() != null) {
 					GitPlex.getInstance(PullRequestCommentManager.class).updateInline(comment);
-					if (comment.getBlobInfo().getRevision().equals(commit)) {
-						List<InlineComment> commentsOnFile = commentsOnCommit.get(comment.getBlobInfo().getPath());
+					if (comment.getBlobInfo().revision.equals(commit)) {
+						List<InlineComment> commentsOnFile = commentsOnCommit.get(comment.getBlobInfo());
 						if (commentsOnFile == null) {
 							commentsOnFile = new ArrayList<>();
-							commentsOnCommit.put(comment.getBlobInfo().getPath(), commentsOnFile);
+							commentsOnCommit.put(comment.getBlobInfo().path, commentsOnFile);
 						}
 						commentsOnFile.add(comment);
 					}
@@ -122,7 +122,7 @@ public class ChangeComments implements Serializable {
 		return newComments;
 	}
 	
-	private List<String> getContent(Map<BlobInfo, List<String>> blobs, BlobInfo blobInfo, Repository repo) {
+	private List<String> getContent(Map<BlobIdent, List<String>> blobs, BlobIdent blobInfo, Repository repo) {
 		List<String> content = blobs.get(blobInfo);
 		if (content == null) {
 			BlobText blobText = repo.getBlobText(blobInfo);

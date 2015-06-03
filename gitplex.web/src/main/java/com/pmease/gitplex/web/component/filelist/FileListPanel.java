@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
@@ -54,7 +52,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import com.pmease.commons.git.GitPath;
+import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
@@ -69,15 +67,12 @@ public abstract class FileListPanel extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
-	private final IModel<String> revModel;
+	private final BlobIdent directory;
 	
-	private final GitPath directory;
-	
-	public FileListPanel(String id, IModel<Repository> repoModel, IModel<String> revModel, @Nullable GitPath directory) {
+	public FileListPanel(String id, IModel<Repository> repoModel, BlobIdent directory) {
 		super(id);
 
 		this.repoModel = repoModel;
-		this.revModel = revModel;
 		this.directory = directory;
 	}
 
@@ -108,8 +103,8 @@ public abstract class FileListPanel extends Panel {
 						try {
 							LogCommand log = git.log();
 							log.setMaxCount(1);
-							if (directory != null)
-								log.addPath(directory.getName());
+							if (directory.path != null)
+								log.addPath(directory.path);
 							log.add(getCommitId());
 							return log.call().iterator().next();
 						} catch (MissingObjectException | IncorrectObjectTypeException | GitAPIException e) {
@@ -177,7 +172,7 @@ public abstract class FileListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(directory != null);
+				setVisible(directory.path != null);
 			}
 			
 		};
@@ -185,51 +180,55 @@ public abstract class FileListPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				String dirName = directory.getName();
-				if (dirName.indexOf('/') != -1)
-					onSelect(target, new GitPath(StringUtils.substringBeforeLast(dirName, "/"), FileMode.TREE.getBits()));
-				else
-					onSelect(target, null);
+				if (directory.path.indexOf('/') != -1) {
+					onSelect(target, new BlobIdent(
+							directory.revision, 
+							StringUtils.substringBeforeLast(directory.path, "/"), 
+							FileMode.TREE.getBits()));
+				} else {
+					onSelect(target, new BlobIdent(directory.revision, null, FileMode.TREE.getBits()));
+				}
 			}
 			
 		});
 		add(parent);
 		
-		add(new ListView<GitPath>("children", new LoadableDetachableModel<List<GitPath>>() {
+		add(new ListView<BlobIdent>("children", new LoadableDetachableModel<List<BlobIdent>>() {
 
 			@Override
-			protected List<GitPath> load() {
+			protected List<BlobIdent> load() {
 				org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
 				try {
 					RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
 					TreeWalk treeWalk;
-					if (directory != null) {
-						treeWalk = Preconditions.checkNotNull(TreeWalk.forPath(jgitRepo, directory.getName(), revTree));
+					if (directory.path != null) {
+						treeWalk = Preconditions.checkNotNull(TreeWalk.forPath(jgitRepo, directory.path, revTree));
 						treeWalk.enterSubtree();
 					} else {
 						treeWalk = new TreeWalk(jgitRepo);
 						treeWalk.addTree(revTree);
 					}
-					List<GitPath> children = new ArrayList<>();
+					List<BlobIdent> children = new ArrayList<>();
 					while (treeWalk.next())
-						children.add(new GitPath(treeWalk.getPathString(), treeWalk.getRawMode(0)));
+						children.add(new BlobIdent(directory.revision, treeWalk.getPathString(), treeWalk.getRawMode(0)));
 					for (int i=0; i<children.size(); i++) {
-						GitPath childPath = children.get(i);
-						while (FileMode.TREE.equals(childPath.getMode())) {
-							treeWalk = TreeWalk.forPath(jgitRepo, childPath.getName(), revTree);
+						BlobIdent child = children.get(i);
+						while (child.isTree()) {
+							treeWalk = TreeWalk.forPath(jgitRepo, child.path, revTree);
 							Preconditions.checkNotNull(treeWalk);
 							treeWalk.enterSubtree();
 							if (treeWalk.next()) {
-								GitPath childGitPath = new GitPath(treeWalk.getPathString(), treeWalk.getRawMode(0));
+								BlobIdent grandChild = new BlobIdent(directory.revision, 
+										treeWalk.getPathString(), treeWalk.getRawMode(0));
 								if (treeWalk.next()) 
 									break;
 								else
-									childPath = childGitPath;
+									child = grandChild;
 							} else {
 								break;
 							}
 						}
-						children.set(i, childPath);
+						children.set(i, child);
 					}
 					
 					Collections.sort(children);
@@ -244,16 +243,16 @@ public abstract class FileListPanel extends Panel {
 		}) {
 
 			@Override
-			protected void populateItem(ListItem<GitPath> item) {
-				final GitPath path = item.getModelObject();
+			protected void populateItem(ListItem<BlobIdent> item) {
+				final BlobIdent blobIdent = item.getModelObject();
 				
 				WebMarkupContainer pathIcon = new WebMarkupContainer("pathIcon");
 				String iconClass;
-				if (FileMode.TREE.equals(path.getMode()))
+				if (blobIdent.isTree())
 					iconClass = "fa fa-folder-o";
-				else if (FileMode.GITLINK.equals(path.getMode())) 
+				else if (blobIdent.isGitLink()) 
 					iconClass = "fa fa-ext fa-submodule-o";
-				else if (FileMode.SYMLINK.equals(path.getMode())) 
+				else if (blobIdent.isSymbolLink()) 
 					iconClass = "fa fa-ext fa-symbol-link";
 				else  
 					iconClass = "fa fa-file-text-o";
@@ -265,15 +264,15 @@ public abstract class FileListPanel extends Panel {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						onSelect(target, path);
+						onSelect(target, blobIdent);
 					}
 					
 				}; 
 				
-				if (directory != null)
-					pathLink.add(new Label("label", path.getName().substring(directory.getName().length()+1)));
+				if (directory.path != null)
+					pathLink.add(new Label("label", blobIdent.path.substring(directory.path.length()+1)));
 				else
-					pathLink.add(new Label("label", path.getName()));
+					pathLink.add(new Label("label", blobIdent.path));
 				item.add(pathLink);
 				
 				if (item.getIndex() == 0)
@@ -289,7 +288,7 @@ public abstract class FileListPanel extends Panel {
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				LastCommitsOfChildren lastCommits = repoModel.getObject().getLastCommitsOfChildren(
-						revModel.getObject(), directory!=null?directory.getName():null);
+						directory.revision, directory.path);
 				
 				Map<String, LastCommitInfo> map = new HashMap<>();
 				for (Map.Entry<String, LastCommitsOfChildren.Value> entry: lastCommits.entrySet()) {
@@ -331,16 +330,15 @@ public abstract class FileListPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
-	protected abstract void onSelect(AjaxRequestTarget target, @Nullable GitPath file);
+	protected abstract void onSelect(AjaxRequestTarget target, BlobIdent file);
 	
 	private ObjectId getCommitId() {
-		return Preconditions.checkNotNull(repoModel.getObject().resolveRevision(revModel.getObject()));
+		return Preconditions.checkNotNull(repoModel.getObject().getObjectId(directory.revision));
 	}
 
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
-		revModel.detach();
 		
 		super.onDetach();
 	}
