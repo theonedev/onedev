@@ -1,0 +1,15 @@
+.blob-view>.body {
+	overflow: auto;
+}
+.blob-view>.head {
+	background: #F2F2F2; 
+	border-bottom: 1px solid #DDD; 
+	padding: 6px 12px;
+	height: 36px;
+}
+.blob-view>.head>.info {
+	color: #666;
+}
+.blob-view>.head>.info .separator {
+	color: #BBB;	
+}

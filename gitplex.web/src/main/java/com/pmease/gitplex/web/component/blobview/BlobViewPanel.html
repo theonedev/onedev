@@ -1,0 +1,28 @@
+<wicket:panel>
+	<div class="blob-view autofit">
+		<div class="head clearfix">
+			<div class="pull-left info">
+				<wicket:enclosure child="lines">
+				<span wicket:id="lines"></span>
+				<span class="separator">|</span>
+				<span wicket:id="charset"></span>
+				<span class="separator">|</span>
+				</wicket:enclosure>
+				<span wicket:id="size"></span>
+			</div>
+			<div class="pull-right actions">
+				<div class="btn-group">
+					<a wicket:id="raw" class="btn btn-default btn-xs">Raw</a>
+					<a wicket:id="blame" class="btn btn-default btn-xs">Blame</a>
+					<a wicket:id="history" class="btn btn-default btn-xs">History</a>
+					<wicket:container wicket:id="customActions"></wicket:container>
+					<a wicket:id="edit" class="btn btn-default btn-xs">Edit</a>
+					<a wicket:id="delete" class="btn btn-default btn-xs">Delete</a>
+				</div>
+			</div>
+		</div>
+		<div class="body">
+			<wicket:child></wicket:child>
+		</div>
+	</div>
+</wicket:panel>
