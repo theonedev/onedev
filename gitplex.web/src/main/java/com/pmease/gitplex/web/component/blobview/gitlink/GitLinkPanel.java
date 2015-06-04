@@ -30,7 +30,7 @@ public class GitLinkPanel extends BlobViewPanel {
 		ConfigManager configManager = GitPlex.getInstance(ConfigManager.class);
 		if (submodule.getUrl().startsWith(configManager.getSystemSetting().getServerUrl() + "/")) {
 			link = new WebMarkupContainer("link");
-			link.add(AttributeModifier.replace("href", submodule.getUrl() + "/file?revision=" + submodule.getCommitId()));
+			link.add(AttributeModifier.replace("href", submodule.getUrl() + "/browse?revision=" + submodule.getCommitId()));
 		} else {
 			link = new Link<Void>("link") {
 

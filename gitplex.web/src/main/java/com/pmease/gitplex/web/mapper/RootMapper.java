@@ -123,7 +123,7 @@ public class RootMapper extends CompoundRequestMapper {
 
 		});
 
-		add(new PageParameterAwareMountedMapper("${user}/${repo}/file", RepoFilePage.class));
+		add(new PageParameterAwareMountedMapper("${user}/${repo}/browse", RepoFilePage.class));
 		add(new PageParameterAwareMountedMapper("${user}/${repo}/commit", RepoCommitPage.class));
 		add(new PageParameterAwareMountedMapper("${user}/${repo}/commits", RepoCommitsPage.class));
 		add(new PageParameterAwareMountedMapper("${user}/${repo}/compare", BranchComparePage.class));
