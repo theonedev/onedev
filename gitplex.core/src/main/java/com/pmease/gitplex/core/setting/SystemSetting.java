@@ -2,17 +2,22 @@ package com.pmease.gitplex.core.setting;
 
 import java.io.Serializable;
 
+import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.GitConfig;
+import com.pmease.commons.validation.ClassValidating;
 import com.pmease.commons.validation.Directory;
+import com.pmease.commons.validation.Validatable;
 
 @Editable
-public class SystemSetting implements Serializable {
+@ClassValidating
+public class SystemSetting implements Serializable, Validatable {
 	
 	private static final long serialVersionUID = 1;
 
@@ -65,6 +70,13 @@ public class SystemSetting implements Serializable {
 
 	public void setGravatarEnabled(boolean gravatarEnabled) {
 		this.gravatarEnabled = gravatarEnabled;
+	}
+
+	@Override
+	public boolean isValid(ConstraintValidatorContext context) {
+		if (serverUrl != null)
+			serverUrl = StringUtils.stripEnd(serverUrl, "/\\");
+		return true;
 	}
 
 }

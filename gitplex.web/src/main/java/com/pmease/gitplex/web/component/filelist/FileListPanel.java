@@ -251,9 +251,9 @@ public abstract class FileListPanel extends Panel {
 				if (blobIdent.isTree())
 					iconClass = "fa fa-folder-o";
 				else if (blobIdent.isGitLink()) 
-					iconClass = "fa fa-ext fa-submodule-o";
+					iconClass = "fa fa-ext fa-folder-submodule-o";
 				else if (blobIdent.isSymbolLink()) 
-					iconClass = "fa fa-ext fa-symbol-link";
+					iconClass = "fa fa-ext fa-folder-symbol-link-o";
 				else  
 					iconClass = "fa fa-file-text-o";
 				pathIcon.add(AttributeModifier.append("class", iconClass));
