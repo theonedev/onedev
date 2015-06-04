@@ -31,6 +31,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.ObjectNotFoundException;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
@@ -94,14 +95,19 @@ public class RepoFilePage extends RepositoryPage {
 			file.revision = getRepository().getDefaultBranch().getName();
 		trait.revision = file.revision;
 		
-		String pathName = GitUtils.normalizePath(params.get(PARAM_PATH).toString());
-		if (pathName != null) {
+		file.path = GitUtils.normalizePath(params.get(PARAM_PATH).toString());
+		if (file.path != null) {
 			org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
 			try {
-				ObjectId commitId = Preconditions.checkNotNull(getRepository().getObjectId(file.revision));
+				ObjectId commitId = getRepository().getObjectId(file.revision);
+				if (commitId == null)
+					throw new ObjectNotFoundException("Unable to find revision '" + file.revision + "'");
 				RevTree revTree = new RevWalk(jgitRepo).parseCommit(commitId).getTree();
-				TreeWalk treeWalk = Preconditions.checkNotNull(TreeWalk.forPath(jgitRepo, pathName, revTree));
-				file.path = pathName;
+				TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, file.path, revTree);
+				if (treeWalk == null) {
+					throw new ObjectNotFoundException("Unable to find blob path '" + file.path
+							+ "' in revision '" + file.revision + "'");
+				}
 				file.mode = treeWalk.getRawMode(0);
 			} catch (IOException e) {
 				throw new RuntimeException(e);

@@ -58,8 +58,8 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
-import com.pmease.gitplex.web.page.repository.blob.RepoBlobPage;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")
@@ -149,7 +149,7 @@ public abstract class FileListPanel extends Panel {
 				PageParameters params = RepoCommitPage.paramsOf(
 						repoModel.getObject(), commitModel.getObject().name());
 				BookmarkablePageLink<Void> commitLink = new BookmarkablePageLink<Void>(
-						"commitLink", RepoBlobPage.class, params);
+						"commitLink", RepoFilePage.class, params);
 				commitLink.add(new Label("commitId", new AbstractReadOnlyModel<String>() {
 
 					@Override
@@ -295,7 +295,7 @@ public abstract class FileListPanel extends Panel {
 					LastCommitInfo info = new LastCommitInfo();
 					PageParameters params = RepoCommitPage.paramsOf(
 							repoModel.getObject(), entry.getValue().getId().name());
-					info.url = RequestCycle.get().urlFor(RepoBlobPage.class, params).toString();
+					info.url = RequestCycle.get().urlFor(RepoFilePage.class, params).toString();
 					info.summary = entry.getValue().getSummary();
 					info.age = DateUtils.formatAge(new Date(entry.getValue().getTimestamp()*1000L));
 					map.put(entry.getKey(), info);
