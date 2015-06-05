@@ -17,11 +17,6 @@
 	background: none repeat scroll 0 0 #bbb; 
 	border: 1px solid #aaa;
 }
-.cm-s-eclipse .CodeMirror-matchingbracket {
-	outline: none; 
-	color: black !important; 
-	font-weight: bold;
-}
 .cm-s-eclipse span.cm-meta {
 	color: #888;
 }
