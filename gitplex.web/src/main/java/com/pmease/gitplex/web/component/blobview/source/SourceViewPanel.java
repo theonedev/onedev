@@ -164,6 +164,10 @@ public class SourceViewPanel extends BlobViewPanel {
 							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 							List<QueryHit> hits = searchManager.search(context.getRepository(), 
 									context.getBlobIdent().revision, query);
+							String script = String.format(
+									"$('#%s .CodeMirror')[0].CodeMirror.hideTokenHover();", 
+									codeContainer.getMarkupId());
+							target.prependJavaScript(script);
 							context.onSearchComplete(target, hits);
 						} catch (InterruptedException e) {
 							throw new RuntimeException(e);
@@ -187,6 +191,8 @@ public class SourceViewPanel extends BlobViewPanel {
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
 				symbol = params.getParameterValue("symbol").toString();
+				if (symbol.startsWith("@"))
+					symbol = symbol.substring(1);
 				SymbolQuery query = new SymbolQuery(symbol, false, true, true, MAX_DECLARATION_QUERY_ENTRIES);
 				try {
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);

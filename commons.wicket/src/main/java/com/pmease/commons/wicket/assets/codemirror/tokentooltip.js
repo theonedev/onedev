@@ -62,7 +62,7 @@
 		var state = cm.state.tokenHover;
 		var node = e.target || e.srcElement, $node = $(node);
 		if ($node.hasClass("cm-property") || $node.hasClass("cm-variable") || $node.hasClass("cm-variable-2") 
-				|| $node.hasClass("cm-variable-3") || $node.hasClass("cm-def")) {
+				|| $node.hasClass("cm-variable-3") || $node.hasClass("cm-def") || $node.hasClass("cm-meta")) {
 			// we do not want to show token tooltip too frequently to trouble the user, so only display 
 			// it if you moves the mouse intentionally over to the element without pressing the mouse
 			// button
