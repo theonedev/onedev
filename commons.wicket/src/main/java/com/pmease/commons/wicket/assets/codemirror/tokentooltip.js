@@ -24,9 +24,18 @@
 		
 		var self = this;
 		self.mousePressed = 0;
-		this.onMouseMove = function(e) {self.mouseMoved = true;};
-		this.onMouseDown = function(e) {self.mousePressed++; self.mouseMoved=false;};
-		this.onMouseUp = function(e) {self.mousePressed--; self.mouseMoved=false;};
+		this.onMouseMove = function(e) {
+			// IE fires mouse move event after mouse click sometimes, so we check 
+			// if mouse is really moved here
+			if (e.clientX != self.clientX || e.clientY != self.clientY) {
+				self.mouseMoved = true;
+				self.clientX = e.clientX;
+				self.clientY = e.clientY;
+			}
+		};
+		// detect mouse up/down on whole document
+		document.onmousedown = function(e) {self.mousePressed=true; self.mouseMoved=false;};
+		document.onmouseup = function(e) {self.mousePressed=false; self.mouseMoved=false;};
 		this.onScroll = function(e) {self.mouseMoved = false;};
 	}
 
@@ -63,7 +72,7 @@
 		var node = e.target || e.srcElement, $node = $(node);
 		if ($node.hasClass("cm-property") || $node.hasClass("cm-variable") || $node.hasClass("cm-variable-2") 
 				|| $node.hasClass("cm-variable-3") || $node.hasClass("cm-def") || $node.hasClass("cm-meta")) {
-			// we do not want to show token tooltip too frequently to trouble the user, so only display 
+			// we do not want to show token tooltip too frequently to disturb the user, so only display 
 			// it if you moves the mouse intentionally over to the element without pressing the mouse
 			// button
 			if (!state.mousePressed && state.mouseMoved && !state.showTimeout) {

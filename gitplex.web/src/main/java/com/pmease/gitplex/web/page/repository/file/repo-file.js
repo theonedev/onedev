@@ -21,7 +21,7 @@ $(window).load(function() {
 		}
 	});
 	$(window).resize(function(e) {
-		event.stopPropagation();
+		e.stopPropagation();
 		var $fileViewer = $("#repo-file>.file-viewer");
 		var width = $(window).width()-$("#repo-file").parent().prev().outerWidth();
 		var height = $(window).height()-$fileViewer.offset().top-$("#main>.foot").outerHeight();
