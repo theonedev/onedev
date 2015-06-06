@@ -5,6 +5,10 @@ jQuery.fn.align = function(alignment) {
 	if (this[0] == undefined)
 		return this;
 	
+	// make sure position is absolute as otherwise width/height calculation
+	// below might be inaccurate
+	this.css("position", "absolute");
+	
 	if (alignment == undefined) 
 		alignment = this[0].alignment;
 	
@@ -150,6 +154,6 @@ jQuery.fn.align = function(alignment) {
 				top -= alignment.offset;
 		}
 	}
-	this.css({left:left, top:top, position: "absolute"});		
+	this.css({left:left, top:top});		
 	return this;
 };
