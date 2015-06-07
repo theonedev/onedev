@@ -131,15 +131,56 @@ var gitplex = {
 			$("#comment-diffline-" + index).closest("tr").remove();
 			$("#diffline-" + index).find("a.add-comment").show();
 		}
-	}
+	},
 	
+	spaceGreedy: {
+		mouseDown: false,
+		check: function() {
+			var $topHideable = $(".top.hideable");
+			if (gitplex.spaceGreedy.getScrollTop && !gitplex.spaceGreedy.mouseDown && !$topHideable.is(":animated")) {
+				if ($topHideable.is(":visible")) {
+					var height = 0;
+					$(".hideable").each(function() {
+						height += $(this).outerHeight();
+					});
+					if (gitplex.spaceGreedy.getScrollTop()>height+10) {
+						var completed = 0;
+						$topHideable.slideUp(200, function() {
+							completed++;
+							if (completed == $topHideable.length) {
+								$(".bottom.hideable").hide();
+								$(window).resize();
+							}
+						});
+					}
+				} else if (gitplex.spaceGreedy.getScrollTop() < 5) {
+					var completed = 0;
+					$topHideable.slideDown(200, function() {
+						completed++;
+						if (completed == $topHideable.length) {
+							$(".bottom.hideable").show();
+							$(window).resize();
+						}
+					});
+				}
+			}
+			setTimeout(gitplex.spaceGreedy.check, 100);
+		}
+	}
 };
 
 $(document).ready(function() {
-	$('#globalheader a').tooltip({placement: 'bottom'});
-	$('#main .has-tip').tooltip();
-	
 	$(window).on("beforeunload", function() {
 		$(":focus").trigger("blur");
+	});
+	
+	$(window).load(function() {
+		document.onmousedown = function() { 
+			gitplex.spaceGreedy.mouseDown = true;
+		};
+		document.onmouseup = function() {
+			gitplex.spaceGreedy.mouseDown = false;
+		};		
+		gitplex.spaceGreedy.check();
 	});
 });

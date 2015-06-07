@@ -24,7 +24,9 @@ $(window).load(function() {
 		e.stopPropagation();
 		var $fileViewer = $("#repo-file>.file-viewer");
 		var width = $(window).width()-$("#repo-file").parent().prev().outerWidth();
-		var height = $(window).height()-$fileViewer.offset().top-$("#main>.foot").outerHeight();
+		var height = $(window).height()-$fileViewer.offset().top;
+		if ($("#main>.foot").is(":visible")) 
+			height -= $("#main>.foot").outerHeight();
 		if ($searchResult.is(":visible")) {
 			height -= $searchResult.outerHeight();
 			$searchResult.find(">div>.body").outerHeight($searchResult.height()

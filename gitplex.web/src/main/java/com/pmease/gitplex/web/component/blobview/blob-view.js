@@ -1,11 +1,16 @@
 gitplex.blobView = function(containerId) {
 	var $blobView = $("#" + containerId + ">.blob-view");
+	var $head = $blobView.find(">.head");
+	var $body = $blobView.find(">.body");
+
+	gitplex.spaceGreedy.getScrollTop = function() {
+		return $body.scrollTop();
+	};
+	
 	$blobView.on("autofit", function(event, width, height) {
 		event.stopPropagation();
 		$blobView.outerWidth(width);
 		$blobView.outerHeight(height);
-		var $head = $blobView.find(">.head");
-		var $body = $blobView.find(">.body");
 		
 		height = $blobView.height()-$head.outerHeight();
 		$body.outerWidth(width).outerHeight(height);

@@ -25,6 +25,13 @@ gitplex.sourceview = {
 			});
 		}
 		
+		gitplex.spaceGreedy.getScrollTop = function() {
+			if (cm)
+				return cm.getScrollInfo().top;
+			else
+				return 0;
+		};
+		
 		$sourceView.on("autofit", function(event, width, height) {
 			event.stopPropagation();
 			$sourceView.outerWidth(width);
