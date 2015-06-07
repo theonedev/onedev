@@ -145,7 +145,7 @@ var gitplex = {
 					});
 					if (gitplex.spaceGreedy.getScrollTop()>height+10) {
 						var completed = 0;
-						$topHideable.slideUp(200, function() {
+						$topHideable.slideUp(100, function() {
 							completed++;
 							if (completed == $topHideable.length) {
 								$(".bottom.hideable").hide();
@@ -155,7 +155,7 @@ var gitplex = {
 					}
 				} else if (gitplex.spaceGreedy.getScrollTop() < 5) {
 					var completed = 0;
-					$topHideable.slideDown(200, function() {
+					$topHideable.slideDown(100, function() {
 						completed++;
 						if (completed == $topHideable.length) {
 							$(".bottom.hideable").show();
@@ -175,12 +175,14 @@ $(document).ready(function() {
 	});
 	
 	$(window).load(function() {
-		document.onmousedown = function() { 
+		$(document).mousedown(function() { 
+			console.log("down");
 			gitplex.spaceGreedy.mouseDown = true;
-		};
-		document.onmouseup = function() {
+		});
+		$(document).mouseup(function() {
+			console.log("up");
 			gitplex.spaceGreedy.mouseDown = false;
-		};		
+		});		
 		gitplex.spaceGreedy.check();
 	});
 });

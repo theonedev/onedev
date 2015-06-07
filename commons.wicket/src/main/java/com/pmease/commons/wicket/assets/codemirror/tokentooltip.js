@@ -34,8 +34,8 @@
 			}
 		};
 		// detect mouse up/down on whole document
-		document.onmousedown = function(e) {self.mousePressed=true; self.mouseMoved=false;};
-		document.onmouseup = function(e) {self.mousePressed=false; self.mouseMoved=false;};
+		$(document).mousedown(function(e) {self.mousePressed=true; self.mouseMoved=false;});
+		$(document).mouseup(function(e) {self.mousePressed=false; self.mouseMoved=false;});
 		this.onScroll = function(e) {self.mouseMoved = false;};
 	}
 
