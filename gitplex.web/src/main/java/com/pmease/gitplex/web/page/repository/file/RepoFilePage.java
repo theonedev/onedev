@@ -8,15 +8,20 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
+import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
@@ -28,7 +33,6 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.ObjectNotFoundException;
@@ -63,6 +67,8 @@ public class RepoFilePage extends RepositoryPage {
 	
 	private static final String FILE_NAVIGATOR_ID = "fileNavigator";
 	
+	private static final String LAST_COMMIT_ID = "lastCommit";
+	
 	private static final String FILE_VIEWER_ID = "fileViewer";
 	
 	private static final String SEARCH_RESULD_ID = "searchResult";
@@ -76,6 +82,8 @@ public class RepoFilePage extends RepositoryPage {
 	private Component fileNavigator;
 	
 	private Component revisionIndexing;
+	
+	private Component lastCommit;
 	
 	private Component fileViewer;
 	
@@ -99,10 +107,7 @@ public class RepoFilePage extends RepositoryPage {
 		if (file.path != null) {
 			org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
 			try {
-				ObjectId commitId = getRepository().getObjectId(file.revision);
-				if (commitId == null)
-					throw new ObjectNotFoundException("Unable to find revision '" + file.revision + "'");
-				RevTree revTree = new RevWalk(jgitRepo).parseCommit(commitId).getTree();
+				RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
 				TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, file.path, revTree);
 				if (treeWalk == null) {
 					throw new ObjectNotFoundException("Unable to find blob path '" + file.path
@@ -115,6 +120,10 @@ public class RepoFilePage extends RepositoryPage {
 				jgitRepo.close();
 			}
 		}
+	}
+	
+	private ObjectId getCommitId() {
+		return getRepository().getObjectId(file.revision, true);
 	}
 
 	@Override
@@ -152,19 +161,6 @@ public class RepoFilePage extends RepositoryPage {
 			
 		});
 		
-		revisionIndexing = new WebMarkupContainer("revisionIndexing") {
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				
-				add(new Image("icon", new PackageResourceReference(RepoFilePage.class, "indexing.gif")));
-				
-				setOutputMarkupPlaceholderTag(true);
-			}
-
-		};
-		
 		add(revisionIndexing = new WebMarkupContainer("revisionIndexing") {
 
 			@Override
@@ -195,7 +191,9 @@ public class RepoFilePage extends RepositoryPage {
 			}
 			
 		});
-
+		
+		add(new WebMarkupContainer(SEARCH_RESULD_ID).setOutputMarkupId(true));
+		
 		add(new WebSocketRenderBehavior() {
 			
 			@Override
@@ -210,8 +208,6 @@ public class RepoFilePage extends RepositoryPage {
 			}
 			
 		});
-		
-		add(new WebMarkupContainer(SEARCH_RESULD_ID).setOutputMarkupId(true));
 		
 		add(historyBehavior = new HistoryBehavior() {
 
@@ -240,8 +236,7 @@ public class RepoFilePage extends RepositoryPage {
 				if (file.path != null) {
 					org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
 					try {
-						ObjectId commitId = Preconditions.checkNotNull(getRepository().getObjectId(revision));
-						RevTree revTree = new RevWalk(jgitRepo).parseCommit(commitId).getTree();
+						RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
 						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, file.path, revTree);
 						if (treeWalk == null)
 							file.path = null;
@@ -348,12 +343,30 @@ public class RepoFilePage extends RepositoryPage {
 			}.render(FILE_VIEWER_ID);
 		}
 		
+		lastCommit = new AjaxLazyLoadPanel(LAST_COMMIT_ID) {
+			
+			@Override
+			public Component getLoadingComponent(String markupId) {
+				IRequestHandler handler = new ResourceReferenceRequestHandler(AbstractDefaultAjaxBehavior.INDICATOR);
+				String html = "<img src='" + RequestCycle.get().urlFor(handler) + "' class='loading'/> Loading latest commit...";
+				return new Label(markupId, html).setEscapeModelStrings(false);
+			}
+
+			@Override
+			public Component getLazyLoadComponent(String markupId) {
+				return new LastCommitPanel(markupId, repoModel, file);
+			}
+		};
+		
 		if (target != null) {
 			replace(fileViewer);
 			target.add(fileViewer);
+			replace(lastCommit);
+			target.add(lastCommit);
 			target.appendJavaScript("$(window).resize();");
 		} else {
 			add(fileViewer);
+			add(lastCommit);
 		}
 	}
 	

@@ -29,7 +29,6 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.manager.StorageManager;
@@ -79,7 +78,7 @@ public class DefaultSearchManager implements SearchManager, IndexListener, Lifec
 	@Override
 	public List<QueryHit> search(final Repository repository, final String revision, final BlobQuery query) 
 			throws InterruptedException {
-		final AnyObjectId commitId = Preconditions.checkNotNull(repository.getObjectId(revision));
+		final AnyObjectId commitId = repository.getObjectId(revision, true);
 		
 		final List<QueryHit> hits = new ArrayList<>();
 

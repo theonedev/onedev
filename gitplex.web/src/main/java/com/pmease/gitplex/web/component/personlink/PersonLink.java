@@ -50,13 +50,6 @@ public class PersonLink extends Panel {
 	}
 	
 	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
-		setRenderBodyOnly(true);
-	}
-
-	@Override
 	protected void onBeforeRender() {
 		PersonIdent person = getPerson();
 

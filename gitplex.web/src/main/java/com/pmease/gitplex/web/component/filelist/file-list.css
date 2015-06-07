@@ -1,48 +1,26 @@
-.file-list>.body {
+.file-list {
 	overflow: auto;
 }
-.file-list>.body>table {
+.file-list>table {
 	width: 100%; 
 }
-.file-list>.body>table>tbody>tr>td {
-	padding: 6px 10px; 
+.file-list>table>tbody>tr>td {
+	padding: 6px 12px; 
 	border-top: 1px solid #EEE; 
 	vertical-align: top;
 }
-.file-list>.body>table>tbody>tr:first-child>td {
+.file-list>table>tbody>tr>td.last-commit, .file-list>table>tbody>tr>td.last-commit a {
+	color: #444;
+}
+.file-list>table>tbody>tr:first-child>td {
 	border-top: none;
 }
-.file-list>.body>table tr.child .last-commit a, .file-list>table .last-commit {
-	color: #666;
-}
-.file-list>.body>table tr.parent td {
+.file-list>table tr.parent td {
 	padding: 3px 12px;
 }
-.file-list>.body>table tr.parent td a i {
+.file-list>table tr.parent td a i {
 	margin-right: 2px;
 }
-.file-list>.body>table tr.parent td a span {
+.file-list>table tr.parent td a span {
 	font-size: 18px;
-}
-.file-list>.head {
-	border-bottom: 1px solid #DDD;
-}
-.file-list>.head .message {
-	background: #F2F2F2;
-	border-bottom: 1px dashed #DDD;
-	padding: 8px 8px 7px 8px;
-	max-height: 600px;
-	overflow: auto;
-}
-.file-list>.head .other-info {
-	color: #888;
-	padding: 6px 8px;
-	height: 36px;
-}
-.file-list>.head .other-info .name {
-	font-weight: bold; 
-	color: #555;
-}
-.file-list>.head .other-info a {
-	color: #555;
 }

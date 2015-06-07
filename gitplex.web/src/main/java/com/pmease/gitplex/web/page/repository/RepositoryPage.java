@@ -27,7 +27,6 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
-import com.pmease.commons.wicket.component.copyclipboard.CopyClipboard;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
@@ -121,7 +120,6 @@ public abstract class RepositoryPage extends AccountPage {
 		UrlManager urlManager = GitPlex.getInstance(UrlManager.class);
 		Model<String> cloneUrlModel = Model.of(urlManager.urlFor(getRepository()));
 		add(new TextField<String>("cloneUrl", cloneUrlModel));
-		add(new CopyClipboard("copyCloneUrlToClipboard", cloneUrlModel));
 		
 		List<PageTab> tabs = new ArrayList<>();
 		tabs.add(new RepoTab(Model.of("Files"), "fa fa-fw fa-file-text-o", RepoFilePage.class));

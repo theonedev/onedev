@@ -2,8 +2,7 @@
 	overflow: auto;
 }
 .blob-view>.head {
-	background: #F2F2F2; 
-	border-bottom: 1px solid #DDD; 
+	border-bottom: 1px solid #BBB; 
 	padding: 6px 12px;
 	height: 36px;
 }

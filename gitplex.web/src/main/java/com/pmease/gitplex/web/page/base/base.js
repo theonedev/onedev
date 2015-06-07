@@ -136,32 +136,20 @@ var gitplex = {
 	spaceGreedy: {
 		mouseDown: false,
 		check: function() {
-			var $topHideable = $(".top.hideable");
-			if (gitplex.spaceGreedy.getScrollTop && !gitplex.spaceGreedy.mouseDown && !$topHideable.is(":animated")) {
-				if ($topHideable.is(":visible")) {
+			var $hideable = $(".hideable");
+			if (gitplex.spaceGreedy.getScrollTop && !gitplex.spaceGreedy.mouseDown) {
+				if ($hideable.is(":visible")) {
 					var height = 0;
-					$(".hideable").each(function() {
+					$hideable.each(function() {
 						height += $(this).outerHeight();
 					});
 					if (gitplex.spaceGreedy.getScrollTop()>height+10) {
-						var completed = 0;
-						$topHideable.slideUp(100, function() {
-							completed++;
-							if (completed == $topHideable.length) {
-								$(".bottom.hideable").hide();
-								$(window).resize();
-							}
-						});
+						$hideable.hide();
+						$(window).resize();
 					}
 				} else if (gitplex.spaceGreedy.getScrollTop() < 5) {
-					var completed = 0;
-					$topHideable.slideDown(100, function() {
-						completed++;
-						if (completed == $topHideable.length) {
-							$(".bottom.hideable").show();
-							$(window).resize();
-						}
-					});
+					$hideable.show();
+					$(window).resize();
 				}
 			}
 			setTimeout(gitplex.spaceGreedy.check, 100);

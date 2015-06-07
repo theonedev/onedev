@@ -18,7 +18,6 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import com.pmease.commons.git.ObjectNotFoundException;
 import com.pmease.gitplex.web.component.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
@@ -43,15 +42,11 @@ public class SymbolLinkPanel extends BlobViewPanel {
 		if (targetPath != null) {
 			FileRepository jgitRepo = context.getRepository().openAsJGitRepo();
 			try {
-				ObjectId commitId = context.getRepository().getObjectId(context.getBlobIdent().revision);
-				if (commitId != null) {
-					RevTree revTree = new RevWalk(jgitRepo).parseCommit(commitId).getTree();
-					TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, targetPath, revTree);
-					if (treeWalk == null)
-						targetPath = null;
-				} else {
-					throw new ObjectNotFoundException("Unable to find revision '" + context.getBlobIdent().revision + "'");
-				}
+				ObjectId commitId = context.getRepository().getObjectId(context.getBlobIdent().revision, true);
+				RevTree revTree = new RevWalk(jgitRepo).parseCommit(commitId).getTree();
+				TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, targetPath, revTree);
+				if (treeWalk == null)
+					targetPath = null;
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			} finally {

@@ -1,33 +1,19 @@
 <wicket:panel>
 	<div class="file-list autofit">
-		<div wicket:id="lastCommit" class="head"></div>
-		<div class="body">
-			<table>
-				<tr wicket:id="parent" class="parent">
-					<td colspan="3">
-						<a wicket:id="link"><i class="fa fa-level-up"></i> <span>..</span></a>
-					</td>
-				</tr>
-				<tr wicket:id="children" class="child">
-					<td class="path">
-						<i wicket:id="pathIcon"></i>
-						<a wicket:id="pathLink"><span wicket:id="label"></span></a>
-					</td>
-					<td wicket:id="lastCommitSummary" class="last-commit summary"></td>
-					<td class="last-commit age"></td>
-				</tr>
-			</table>
-		</div>
+		<table>
+			<tr wicket:id="parent" class="parent">
+				<td colspan="3">
+					<a wicket:id="link"><i class="fa fa-level-up"></i> <span>..</span></a>
+				</td>
+			</tr>
+			<tr wicket:id="children" class="child">
+				<td class="path">
+					<i wicket:id="pathIcon"></i>
+					<a wicket:id="pathLink"><span wicket:id="label"></span></a>
+				</td>
+				<td wicket:id="lastCommitSummary" class="last-commit summary"></td>
+				<td class="last-commit age"></td>
+			</tr>
+		</table>
 	</div>
-	<wicket:fragment wicket:id="lastCommitFrag">
-		<div wicket:id="message" class="message"></div>
-		<div class="other-info clearfix">
-			<span class="pull-left">
-				<span wicket:id="author"></span> authored <span wicket:id="date"></span>
-			</span>
-			<span class="pull-right">
-				latest commit <a wicket:id="commitLink"><span wicket:id="commitId"></span></a>
-			</span>
-		</div>
-	</wicket:fragment>
 </wicket:panel>

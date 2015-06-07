@@ -1,6 +1,6 @@
 <html xmlns:wicket>
 <wicket:extend>
-	<section class="branches">
+	<section id="repo-branch">
 		<div class="head">Branches</div>
 		<div class="body">
 			<div class="options clearfix">
@@ -17,7 +17,7 @@
 				</div>
 				<ul wicket:id="branchesPageNav" class="pull-right"></ul>
 			</div>
-			<table wicket:id="branchesContainer" class="branches table table-hover table-condensed">
+			<table wicket:id="branchesContainer" class="table table-hover table-condensed">
 				<tr wicket:id="branches">
 					<td class="summary">
 						<a wicket:id="branchLink"><span wicket:id="name"></span></a> <span class="label label-default" wicket:id="default">default</span>

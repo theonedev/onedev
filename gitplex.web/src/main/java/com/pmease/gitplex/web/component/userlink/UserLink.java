@@ -54,13 +54,6 @@ public class UserLink extends Panel {
 	}
 	
 	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
-		setRenderBodyOnly(true);
-	}
-
-	@Override
 	protected void onBeforeRender() {
 		User user = getUser();
 

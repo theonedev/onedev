@@ -32,6 +32,39 @@
 	color: #8a6d3b;
 	font-size: 13px;
 }
+#repo-file>.last-commit {
+	padding: 6px 12px;
+	background: #EEE;
+}
+#repo-file>.last-commit img.loading {
+	padding: 4px 0;
+}
+#repo-file>.last-commit .pull-left {
+	margin-right: 12px;
+}
+#repo-file>.last-commit .author {
+	font-weight: bold;
+}
+#repo-file>.last-commit .date {
+	color: #666;
+	font-size: 13px;
+	margin-top: 3px;
+}
+#repo-file>.last-commit .message {
+	margin-top: 2px;
+}
+#repo-file>.last-commit .hash {
+	font-size: 13px;
+	width: 62px;
+	border: none;
+	border-radius: 3px;
+	padding-left: 3px;
+	padding-right: 3px;
+	background: #CCC;
+	height: 22px;
+	font-family: monospace;
+}
+
 #repo-file>.search-result {
 	height: 200px;
 	border-top: 1px solid #DDD;

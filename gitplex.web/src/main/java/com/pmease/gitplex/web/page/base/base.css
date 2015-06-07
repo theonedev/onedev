@@ -44,32 +44,6 @@ form>.actions>:last-child {
 	color: #777;
 }
 
-/* BRANCHES PAGE */
-.branches>.body>.options {margin-bottom: 16px;}
-.branches>.body>.options>div {margin-right: 24px;}
-
-.branches>.body>.options>div.base .input-group {width: 240px;}
-.branches>.body>.options>div.search .input-group {width: 240px;}
-.branches>.body>.options .pagination {margin: 0;}
-.branches>.body>table.branches td {white-space: nowrap;}
-.branches>.body>table.branches td.summary, .branches>.body>table.branches td.actions {width: 1%;}
-.branches>.body>table.branches td.actions .fa.fa-times {color: red; margin-left: 8px;}
-.branches>.body>table.branches td.actions span.fa.fa-times {color: #888;}
-.branches>.body>table.branches td.behind {padding-right: 0;}
-.branches>.body>table.branches td.ahead {padding-left: 0;}
-.branches>.body>table.branches td.behind>div {border-right: 1px solid #333;}
-.branches>.body>table.branches td.behind-ahead div.text {margin: 0 4px;}
-.branches>.body>table.branches .bar {height: 12px;}
-.branches>.body>table.branches .ahead .bar {background: #666;}
-.branches>.body>table.branches .ahead .bar.request {background: #F1D763;}
-.branches>.body>table.branches .behind .bar {background: #ccc;}
-.branches>.body>table.branches .behind .bar.request {background: #F1D763;}
-.branches>.body>.help-block .bar.request {background: #F1D763; font-size: 10px;}
-.branches>.body>table.branches td.summary>div, table.branches td.summary>div .name a {font-size: 13px; color: #666;}
-.branches>.body>table.branches td.summary>div {margin-top: 4px;}
-
-#searching-branches {position: absolute; left: 50%; top: 250px; z-index: 100; display: none;}
-
 /* DIRECTORY CHOOSER */
 .dropdown-panel .directory-chooser {max-height: 650px; overflow: auto; padding: 12px 24px 12px 12px;}
 .dropdown-panel .directory-chooser .title {font-weight: bold; border-bottom: 1px solid #888888;}

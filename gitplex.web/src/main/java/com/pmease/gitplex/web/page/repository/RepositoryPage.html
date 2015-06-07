@@ -1,6 +1,6 @@
 <wicket:extend>
 	<div id="repository">
-		<div class="head clearfix top hideable">
+		<div class="head clearfix hideable">
 			<div class="pull-left nav">
 				<i class="fa fa-ext fa-repo"></i> 
 				<span wicket:id="accountAndRepo">
@@ -14,7 +14,6 @@
 			<div class="pull-right clone">
 				<label>Clone URL:</label>
 				<input wicket:id="cloneUrl" readonly="readonly" onfocus="setTimeout(function(){$('#repository>.head>.clone>input').select();}, 100);"></input>
-				<button wicket:id="copyCloneUrlToClipboard" class="clip-button" onclick="$('#repository>.head>.clone>input').select();"><i class="fa fa-clipboard"></i></button>
 			</div>
 		</div>
 		<div class="body">

@@ -19,25 +19,10 @@
 	font-size: 12px;
 	width: 200px;
 	border: 1px solid #D8D8D8;
-	background: #EEE;
-	border-radius: 3px 0 0 3px;
+	border-radius: 3px;
 	padding-left: 4px;
 	padding-right: 4px;
 	height: 22px;
-}
-#repository>.head>.clone>button {
-	font-size: 12px;
-	margin-left: -5px;
-	border: 1px solid #D8D8D8;
-	background: #EEE;
-	height: 22px;
-	border-radius: 0 3px 3px 0;
-}
-#repository>.head>.clone>button.zeroclipboard-is-hover {
-	background-color: #CCC; 
-}
-#repository>.head>.clone>button.zeroclipboard-is-active { 
-	background-color: #AAA;
 }
 
 #repository>.body>.sidebar>table>tbody>tr>td.nav>.mini-toggle {

@@ -55,7 +55,6 @@ import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.pmease.commons.lang.ExtractException;
 import com.pmease.commons.lang.Extractor;
@@ -273,7 +272,7 @@ public class DefaultIndexManager implements IndexManager {
 	
 	@Override
 	public IndexResult index(final Repository repository, final String revision) {
-		final AnyObjectId commitId = Preconditions.checkNotNull(repository.getObjectId(revision));
+		final AnyObjectId commitId = repository.getObjectId(revision, true);
 		
 		logger.info("Indexing commit '{}' of repository '{}'...", commitId.getName(), repository);
 		
@@ -354,7 +353,7 @@ public class DefaultIndexManager implements IndexManager {
 
 	@Override
 	public boolean isIndexed(Repository repository, String revision) {
-		AnyObjectId commitId = Preconditions.checkNotNull(repository.getObjectId(revision));
+		AnyObjectId commitId = repository.getObjectId(revision, true);
 		File indexDir = storageManager.getIndexDir(repository);
 		try (Directory directory = FSDirectory.open(indexDir)) {
 			if (DirectoryReader.indexExists(directory)) {

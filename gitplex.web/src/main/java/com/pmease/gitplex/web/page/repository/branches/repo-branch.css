@@ -1,0 +1,77 @@
+#repo-branch {
+	padding: 20px;
+}
+#repo-branch>.body>.options {
+	margin-bottom: 16px;
+}
+#repo-branch>.body>.options>div {
+	margin-right: 24px;
+}
+
+#repo-branch>.body>.options>div.base .input-group {
+	width: 240px;
+}
+#repo-branch>.body>.options>div.search .input-group {
+	width: 240px;
+}
+#repo-branch>.body>.options .pagination {
+	margin: 0;
+}
+#repo-branch>.body>table td {
+	white-space: nowrap;
+}
+#repo-branch>.body>table td.summary, #repo-branch>.body>table td.actions {
+	width: 1%;
+}
+#repo-branch>.body>table td.actions .fa.fa-times {
+	color: red; margin-left: 8px;
+}
+#repo-branch>.body>table td.actions span.fa.fa-times {
+	color: #888;
+}
+#repo-branch>.body>table td.behind {
+	padding-right: 0;
+}
+#repo-branch>.body>table td.ahead {
+	padding-left: 0;
+}
+#repo-branch>.body>table td.behind>div {
+	border-right: 1px solid #333;
+}
+#repo-branch>.body>table td.behind-ahead div.text {
+	margin: 0 4px;
+}
+#repo-branch>.body>table .bar {
+	height: 12px;
+}
+#repo-branch>.body>table .ahead .bar {
+	background: #666;
+}
+#repo-branch>.body>table .ahead .bar.request {
+	background: #F1D763;
+}
+#repo-branch>.body>table .behind .bar {
+	background: #ccc;
+}
+#repo-branch>.body>table .behind .bar.request {
+	background: #F1D763;
+}
+#repo-branch>.body>.help-block .bar.request {
+	background: #F1D763; 
+	font-size: 10px;
+}
+#repo-branch>.body>table td.summary>div, 
+#repo-branch>.body>table td.summary>div .name a {
+	font-size: 13px; 
+	color: #666;
+}
+#repo-branch>.body>table td.summary>div {
+	margin-top: 4px;
+}
+#searching-branches {
+	position: absolute; 
+	left: 50%; 
+	top: 250px; 
+	z-index: 100; 
+	display: none;
+}
