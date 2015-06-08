@@ -412,10 +412,10 @@ public class Repository extends AbstractEntity implements UserBelonging {
 							try (InputStream is = objectLoader.openStream()) {
 								byte[] bytes = new byte[MAX_READ_BLOB_SIZE];
 								is.read(bytes);
-								blob = new Blob(ident, bytes);
+								blob = new Blob(ident, bytes, blobSize);
 							}
 						} else {
-							blob = new Blob(ident, objectLoader.getCachedBytes(), blobSize);
+							blob = new Blob(ident, objectLoader.getCachedBytes());
 						}
 					}
 					blobCache.put(ident, blob);

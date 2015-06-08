@@ -1,0 +1,21 @@
+package com.pmease.gitplex.web.resource;
+
+import org.apache.wicket.request.resource.IResource;
+import org.apache.wicket.request.resource.ResourceReference;
+
+public class BlobResourceReference extends ResourceReference {
+
+	public static final String NAME = "rawblob";
+	
+	public BlobResourceReference() {
+		super(NAME);
+	}
+
+	private static final long serialVersionUID = 1L;
+
+	@Override
+	public IResource getResource() {
+		return new BlobResource();
+	}
+
+}

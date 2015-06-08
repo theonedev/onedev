@@ -58,23 +58,23 @@ import org.apache.wicket.util.IProvider;
  * @author <a href="mailto:unterstein@me.com">Johannes Unterstein</a>
  * 
  */
-public class PageParameterAwareMountedMapper extends MountedMapper {
+public class ParameterAwareMountedMapper extends MountedMapper {
 	
-	public PageParameterAwareMountedMapper(String mountPath, Class<? extends IRequestablePage> pageClass,
+	public ParameterAwareMountedMapper(String mountPath, Class<? extends IRequestablePage> pageClass,
 			IPageParametersEncoder pageParametersEncoder) {
 		super(mountPath, pageClass, pageParametersEncoder);
 	}
 
-	public PageParameterAwareMountedMapper(String mountPath, Class<? extends IRequestablePage> pageClass) {
+	public ParameterAwareMountedMapper(String mountPath, Class<? extends IRequestablePage> pageClass) {
 		super(mountPath, pageClass);
 	}
 
-	public PageParameterAwareMountedMapper(String mountPath,
+	public ParameterAwareMountedMapper(String mountPath,
 			IProvider<Class<? extends IRequestablePage>> pageClassProvider, IPageParametersEncoder pageParametersEncoder) {
 		super(mountPath, pageClassProvider, pageParametersEncoder);
 	}
 
-	public PageParameterAwareMountedMapper(String mountPath,
+	public ParameterAwareMountedMapper(String mountPath,
 			IProvider<Class<? extends IRequestablePage>> pageClassProvider) {
 		super(mountPath, pageClassProvider);
 	}

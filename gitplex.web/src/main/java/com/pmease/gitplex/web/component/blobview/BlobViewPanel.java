@@ -9,6 +9,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.resource.CssResourceReference;
@@ -16,6 +17,8 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
+import com.pmease.gitplex.web.resource.BlobResource;
+import com.pmease.gitplex.web.resource.BlobResourceReference;
 
 @SuppressWarnings("serial")
 public abstract class BlobViewPanel extends Panel {
@@ -74,13 +77,9 @@ public abstract class BlobViewPanel extends Panel {
 		
 		add(new Label("size", FileUtils.byteCountToDisplaySize(context.getBlob().getSize())));
 
-		add(new AjaxLink<Void>("raw") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-			}
-			
-		});
+		add(new ResourceLink<Void>("raw", new BlobResourceReference(), 
+				BlobResource.paramsOf(context.getRepository(), context.getBlobIdent())));
+		
 		add(new AjaxLink<Void>("blame") {
 
 			@Override

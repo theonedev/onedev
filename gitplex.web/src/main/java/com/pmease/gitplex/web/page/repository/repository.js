@@ -5,7 +5,8 @@ $(function() {
 		$nav.find("li a").each(function() {
 			$(this).tooltip({
 				title: $(this).find(".text").text(), 
-				placement: "right"
+				placement: "right",
+				delay: 300
 			});
 		});
 	}

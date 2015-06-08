@@ -35,6 +35,8 @@
 #repo-file>.last-commit {
 	padding: 6px 12px;
 	background: #EEE;
+	max-height: 600px;
+	overflow: auto;
 }
 #repo-file>.last-commit img.loading {
 	padding: 4px 0;

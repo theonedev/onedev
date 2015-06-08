@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.pmease.commons.loader.AppLoader;
+import com.pmease.gitplex.core.GitPlex;
 
 public class UserNameValidator implements ConstraintValidator<UserName, String> {
 	
@@ -38,7 +38,7 @@ public class UserNameValidator implements ConstraintValidator<UserName, String> 
 	public static synchronized Set<String> getReservedNames() {
 		if (reservedNames == null) {
 			reservedNames = new HashSet<>();
-	        for (UserNameReservation each : AppLoader.getExtensions(UserNameReservation.class)) {
+	        for (UserNameReservation each : GitPlex.getExtensions(UserNameReservation.class)) {
 	        	reservedNames.addAll(each.getReserved());
 	        }
 		}

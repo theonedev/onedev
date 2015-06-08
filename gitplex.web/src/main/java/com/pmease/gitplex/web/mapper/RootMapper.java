@@ -5,7 +5,9 @@ import java.util.List;
 
 import org.apache.wicket.Page;
 import org.apache.wicket.core.request.mapper.MountedMapper;
+import org.apache.wicket.core.request.mapper.ResourceMapper;
 import org.apache.wicket.protocol.http.WebApplication;
+import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.mapper.CompoundRequestMapper;
 
@@ -44,24 +46,41 @@ import com.pmease.gitplex.web.page.security.LogoutPage;
 import com.pmease.gitplex.web.page.security.RegisterPage;
 import com.pmease.gitplex.web.page.test.RunModePage;
 import com.pmease.gitplex.web.page.test.TestPage;
+import com.pmease.gitplex.web.resource.BlobResourceReference;
 
 public class RootMapper extends CompoundRequestMapper {
 
 	public RootMapper(WebApplication app) {
+		addPage("init", ServerInitPage.class);
 		addAdministrationPages();
 		addAccountPages();
 		addRepoPages();
+		addSecurityPages();
 		
-		addPage("init", ServerInitPage.class);
+		addPage("/test", TestPage.class);
+		addPage("run-mode", RunModePage.class);
+		
+		addResources();
+	}
+
+	private void addResources() {
+		add(new ResourceMapper("${user}/${repo}/raw", new BlobResourceReference()) {
+
+			@Override
+			public int getCompatibilityScore(Request request) {
+				return 3;
+			}
+			
+		});
+	}
+	
+	private void addSecurityPages() {
 		addPage("login", LoginPage.class);
 		addPage("logout", LogoutPage.class);
 		addPage("register", RegisterPage.class);
 		addPage("forget", ForgetPage.class);
-		
-		addPage("/test", TestPage.class);
-		addPage("run-mode", RunModePage.class);
 	}
-
+	
 	private void addAdministrationPages() {
 		addPage("administration/mail-setting", MailSettingPage.class);
 		addPage("administration/system-setting", SystemSettingPage.class);
@@ -123,31 +142,31 @@ public class RootMapper extends CompoundRequestMapper {
 
 		});
 
-		add(new PageParameterAwareMountedMapper("${user}/${repo}/browse", RepoFilePage.class));
-		add(new PageParameterAwareMountedMapper("${user}/${repo}/commit", RepoCommitPage.class));
-		add(new PageParameterAwareMountedMapper("${user}/${repo}/commits", RepoCommitsPage.class));
-		add(new PageParameterAwareMountedMapper("${user}/${repo}/compare", BranchComparePage.class));
+//		add(new ParameterAwareMountedMapper("${user}/${repo}/browse", RepoFilePage.class));
+		add(new ParameterAwareMountedMapper("${user}/${repo}/commit", RepoCommitPage.class));
+		add(new ParameterAwareMountedMapper("${user}/${repo}/commits", RepoCommitsPage.class));
+		add(new ParameterAwareMountedMapper("${user}/${repo}/compare", BranchComparePage.class));
 
-		add(new PageParameterAwareMountedMapper("${user}/${repo}/branches", RepoBranchesPage.class));
-		add(new PageParameterAwareMountedMapper("${user}/${repo}/tags", RepoTagsPage.class));
+		add(new ParameterAwareMountedMapper("${user}/${repo}/branches", RepoBranchesPage.class));
+		add(new ParameterAwareMountedMapper("${user}/${repo}/tags", RepoTagsPage.class));
 
-		add(new PageParameterAwareMountedMapper(
+		add(new ParameterAwareMountedMapper(
 				"${user}/${repo}/pull-requests", OpenRequestsPage.class));
-		add(new PageParameterAwareMountedMapper(
+		add(new ParameterAwareMountedMapper(
 				"${user}/${repo}/pull-requests/${request}", RequestOverviewPage.class));
-		add(new PageParameterAwareMountedMapper(
+		add(new ParameterAwareMountedMapper(
 				"${user}/${repo}/pull-requests/${request}/overview", RequestOverviewPage.class));
-		add(new PageParameterAwareMountedMapper(
+		add(new ParameterAwareMountedMapper(
 				"${user}/${repo}/pull-requests/${request}/updates", RequestUpdatesPage.class));
-		add(new PageParameterAwareMountedMapper(
+		add(new ParameterAwareMountedMapper(
 				"${user}/${repo}/pull-requests/${request}/compare", RequestComparePage.class));
 
-		add(new PageParameterAwareMountedMapper("${user}/${repo}/setting", GeneralSettingPage.class));
-		add(new PageParameterAwareMountedMapper("${user}/${repo}/setting/general", GeneralSettingPage.class));
-		add(new PageParameterAwareMountedMapper("${user}/${repo}/setting/gate-keeper", GateKeeperPage.class));
-		add(new PageParameterAwareMountedMapper("${user}/${repo}/setting/integration-policy", IntegrationPolicyPage.class));
+		add(new ParameterAwareMountedMapper("${user}/${repo}/setting", GeneralSettingPage.class));
+		add(new ParameterAwareMountedMapper("${user}/${repo}/setting/general", GeneralSettingPage.class));
+		add(new ParameterAwareMountedMapper("${user}/${repo}/setting/gate-keeper", GateKeeperPage.class));
+		add(new ParameterAwareMountedMapper("${user}/${repo}/setting/integration-policy", IntegrationPolicyPage.class));
 		
-		add(new PageParameterAwareMountedMapper("${user}/${repo}/no-commits", NoCommitsPage.class));
+		add(new ParameterAwareMountedMapper("${user}/${repo}/no-commits", NoCommitsPage.class));
 	}
 
 	private void addPage(String path, Class<? extends Page> page) {

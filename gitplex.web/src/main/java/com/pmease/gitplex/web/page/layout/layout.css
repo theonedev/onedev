@@ -85,7 +85,7 @@ html, body {
 }
 .sidebar>table>tbody>tr>td.nav {
 	padding: 20px 0;
-	width: 200px;
+	width: 1px;
 	border-right: 1px solid #BBB;
 }
 .sidebar>table>tbody>tr>td.nav>.tabs {
@@ -99,6 +99,7 @@ html, body {
 	height: 36px;
 	white-space: nowrap;
 	border-left: 4px solid white;
+	width: 180px;
 }
 .sidebar>table>tbody>tr>td.nav>.tabs>li>a .fa {
 	font-size: 16px;

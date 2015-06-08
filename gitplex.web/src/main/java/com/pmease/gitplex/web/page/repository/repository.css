@@ -52,6 +52,9 @@
 #repository>.body>.sidebar>table>tbody>tr>td.mini.nav {
 	width: 40px;
 }
+#repository>.body>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a {
+	width: auto;
+}
 #repository>.body>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a>.text {
 	display: none;
 }
